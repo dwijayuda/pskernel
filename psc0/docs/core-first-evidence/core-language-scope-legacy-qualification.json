@@ -1,0 +1,3280 @@
+{
+  "schema": "psc0-core-language-scope-legacy-qualification/1",
+  "repository": "dwijayuda/pskernel",
+  "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+  "tree": "031cd3cd7e4917ca29ce7c7296c24051aa07a82e",
+  "workflow": ".github/workflows/psc0-core-first-audit.yml",
+  "evidencePath": "psc0/docs/core-first-evidence/core-language-scope-legacy-qualification.json",
+  "previousQualifiedCode": "9024dd92c147ffbbafc3834021ad11540d89578a",
+  "status": "completed",
+  "scope": "Component-wise scope entry/exit and literal root namespace identity; original transitive legacy import bodies/metadata and module helper privacy, with independent selected-source admission and pinned native controls.",
+  "checkingPolicy": {
+    "fixtureBaseDeclarations": [
+      "CoreSelectedIdentity",
+      "Eq",
+      "Eq.refl",
+      "Eq.rec"
+    ],
+    "equalityOwner": "psc0/packages/environment/src/Ps/Environment/Logic.lean",
+    "equalityOwnerGitBlobSHA1": "9d04fb2dcedf7c0c39f1d07b371c0b82939df7f2",
+    "declarationKinds": [
+      "definition",
+      "inductive",
+      "constructor",
+      "recursor"
+    ],
+    "actualFixtureBaseAxioms": [],
+    "kernelTrustLevel": 0,
+    "maxHeartbeatsPerDeclaration": 2000000,
+    "maxRecDepthPerDeclaration": 20000,
+    "fixtureBaseSelectedAsCoreProfile": false,
+    "previousIdentityOnlyProjectAndRuntimeFixtureUnchanged": true,
+    "fullWrapperPolicyUnchanged": true,
+    "maximumApprovedLogicalAssumptions": [
+      "propext",
+      "Quot.sound",
+      "Classical.choice"
+    ]
+  },
+  "selectedFixtureGroups": [
+    {
+      "name": "component scopes",
+      "marker": "PSCV0_CORE_COMPONENT_SCOPES",
+      "positiveProjects": 16,
+      "ownedRefusals": 16
+    },
+    {
+      "name": "literal root scope identity",
+      "marker": "PSCV0_CORE_ROOTED_SCOPES",
+      "positiveProjects": 2,
+      "ownedRefusals": 0
+    },
+    {
+      "name": "legacy import implementation closure",
+      "marker": "PSCV0_CORE_LEGACY_IMPORT",
+      "positiveProjects": 11,
+      "ownedRefusals": 10
+    },
+    {
+      "name": "legacy local-private references",
+      "marker": "PSCV0_CORE_LEGACY_PRIVATE",
+      "positiveProjects": 2,
+      "ownedRefusals": 4
+    },
+    {
+      "name": "legacy class/instance/default metadata",
+      "marker": "PSCV0_CORE_LEGACY_METADATA",
+      "positiveProjects": 2,
+      "ownedRefusals": 2
+    },
+    {
+      "name": "module/private and legacy/public where helpers",
+      "marker": "PSCV0_CORE_LEGACY_WHERE",
+      "positiveProjects": 3,
+      "ownedRefusals": 6
+    }
+  ],
+  "nativeOracleCounts": {
+    "moduleCompileCases": 50,
+    "successfulCompilations": 28,
+    "expectedRefusals": 22,
+    "ordinaryVisibilityClassifications": 25,
+    "rootedNameAndPrivacyChecks": 15,
+    "unsupportedScopeSyntaxRefusals": 3
+  },
+  "remaining": [
+    "Complete selected Core rule/capability/fixture/owner/phase mapping and foundational/profile obligations",
+    "Complete native proof-abstraction and elaboration correspondence",
+    "Complete Core data/elimination/recursion/deriving, control flow, runtime and assurance gates",
+    "M5 real artifact consumers, cold/warm/incremental correspondence and reconstruction",
+    "Selfhost after M1-M5 acceptance"
+  ],
+  "completeM2Qualified": false,
+  "completeCoreProfileQualified": false,
+  "completeCoreBackendExecutionQualified": false,
+  "nativeElaborationParityQualified": false,
+  "wholeCompilerSelfhostQualified": false,
+  "documentationIsLoadableAuthority": false,
+  "mergeOrPublicationAuthorized": false,
+  "workflowRun": 39255930001,
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001",
+  "languageAuthority": {
+    "reference": "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md",
+    "referenceGitBlobSHA1": "694115223777599ba28ee175e14bb642b7b6aa4b",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "nativeSources": [
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/Elab/Declaration.lean",
+        "gitBlobSHA1": "2b85bccd611a741d99f7cb886c531b832aa7447f",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/Elab/MutualDef.lean",
+        "gitBlobSHA1": "81f3d84a62a9cfc1ef4502eb8c2e6b69618d9b2f",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/Environment.lean",
+        "gitBlobSHA1": "ee36b8e4fc921db8f1b3e4cfb5045f49fb008c07",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/AddDecl.lean",
+        "gitBlobSHA1": "512ba0ff2cdf52843b9f5425ec636e94d15ab92b",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "tests/pkg/module/Module/PrivateImported.lean",
+        "gitBlobSHA1": "bf3dc98184345ebdfa52fb5e7facefabbe9a331c",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/Elab/BuiltinCommand.lean",
+        "gitBlobSHA1": "a99631315f574c3b131e51590af06dc157cf3431",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/ResolveName.lean",
+        "gitBlobSHA1": "b687cc6b3cb76fc6a2f6f726d494f46ea541614b",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/Exception.lean",
+        "gitBlobSHA1": "9747fbf4de19df5cbf0991b1bf3cfd3aaf3bf00a",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/Elab/LetRec.lean",
+        "gitBlobSHA1": "5e2c45dbbb76a33e2d41e4a5e0a4faf1a926ee23",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/Meta/Closure.lean",
+        "gitBlobSHA1": "d5c6d4bf86de09eb83908509cbc19b387f8cdc38",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      {
+        "repository": "leanprover/lean4",
+        "path": "src/Lean/Elab/App.lean",
+        "gitBlobSHA1": "15c643b7f86f4ca6d6ec6e3b545989e520d7902f",
+        "ref": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      }
+    ],
+    "authorityUse": "Pinned native source informs component scopes, name identity, legacy imports and generated-helper visibility; the executed native fixtures qualify only those bounded behaviors."
+  },
+  "executionPlan": {
+    "priority": "core-language-M1-M5-then-selfhost",
+    "targetedMilestones": [
+      "M2"
+    ],
+    "targetedConformanceRows": [
+      "CL04",
+      "CL05"
+    ],
+    "completedCoreMilestones": [],
+    "completedSelfhostStages": [],
+    "completeFixtureMappingQualified": false,
+    "originalM1AndBoundedM2AcceptancePreserved": true,
+    "next": "Preserve the completed scope and legacy obligations, finish the full Core capability/rule/fixture/owner/phase and profile mapping, then continue the reviewed minimal computed/let elimination-target adapter and induction index guard."
+  },
+  "documentationFollowup": {
+    "onlyPaths": [
+      "psc0/AI_WORK_STATE.md",
+      "psc0/AI_CONTINUE_PROMPT.md",
+      "psc0/docs/PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md",
+      "psc0/docs/PSC0_CORE_QUALIFICATION_LEDGER.md",
+      "psc0/docs/PSC0_CORE_STANDARD_MANIFEST.json",
+      "psc0/docs/PSC0_CORE_FIRST_ARCHITECTURE.md",
+      "psc0/docs/core-first-evidence/core-language-scope-legacy-qualification.json"
+    ],
+    "qualificationRemainsThisExecutableHead": true,
+    "preserveEveryExecutableTestAssetAndWorkflowBlob": true,
+    "historicalRawReceiptsRetainTheirOwnCodeAndRunAttribution": true
+  },
+  "boundaries": [
+    "The explicit absolute declaration head is exercised by Lean; ProofScript's selected declaration heads are unqualified and declare the paired identity after closing the namespace. Both source kinds exercise literal root namespaces and explicit absolute term references.",
+    "The 36 new positive projects are independently admitted over the existing four-declaration Eq context; that context is not a selected complete Core profile.",
+    "The 38 owned refusals preserve actual module opacity, true source opaque definitions and private source-name restrictions.",
+    "Legacy metadata proof exercises ordinary instance synthesis; default-instance identity, priority and deduplication are inspected directly without claiming fallback execution.",
+    "Rooted ordinary mutual source declarations receive fresh admission; this fixture does not freshly qualify explicit partial-mutual/P0 behavior.",
+    "Registered abbrev-with-where retains the existing selected predefinition-registration refusal.",
+    "Native compilation, selected-source admission, retained Full-compatibility application runtime and complete native elaboration remain distinct.",
+    "Receipts are not persistent artifact/cache authentication or release selection."
+  ],
+  "review": {
+    "candidate": "15a4bf6c2a31ca651f5a63213150c1d0f2318fd4",
+    "finalReservedBinderCorrection": "31e01c0a45a7ae00d297cb81b3383600bbf5fa73",
+    "exactReview": [
+      "scope_owner_review: pass after reserved binder rename",
+      "module_scope_tests: pass exact CoreProject blob d51baeeaf72163796b2c1609a06957719d284c27",
+      "native_visibility: pass exact Python/Lean oracle blobs"
+    ],
+    "rootedCanonicalAndHelperOwnersReviewed": true,
+    "finalExecutable": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+    "finalFixtureCorrectionsReviewed": true,
+    "exactEvidenceReviews": [
+      {
+        "reviewer": "module_scope_tests",
+        "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+        "job": 118072260854,
+        "result": "pass",
+        "scope": "Exact current CoreProject blob 721c9593afd26b126ae682f60c69ca713f56f46a; six groups 36 positive/38 owned refusals, overall CoreProject PASS and unchanged Foundation source qualification."
+      },
+      {
+        "reviewer": "native_visibility",
+        "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+        "job": 118072260854,
+        "result": "pass",
+        "scope": "All 50 distinct native cases, exact source revision/Lean pin, exit statuses, error ownership/cardinality/semantic fragments, successful olean outputs and absent refusal outputs; 40 name/privacy observations and three syntax refusals."
+      },
+      {
+        "reviewer": "native_visibility",
+        "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+        "job": 118072260820,
+        "result": "pass",
+        "scope": "Independently reviewed exact Full declarations/classes/instances, fingerprint and payload hash; native checks; 1,069 runtime observations on TypeScript/direct JavaScript/Rust with actual versions; Bootstrap comparison 42 exact/31 present-different/3 absent with inclusion flags false."
+      }
+    ]
+  },
+  "precedingAttempts": [
+    {
+      "head": "31e01c0a45a7ae00d297cb81b3383600bbf5fa73",
+      "tree": "74fefa16cb42c5089a8f967bc4a75b78c97542d6",
+      "run": 39253923410,
+      "failedJob": 118064582202,
+      "diagnostic": "PSCV0-NULLARY-DECLARATION-NOT-YET-SUPPORTED",
+      "lastPassingMarker": "PSCV0_CORE_COMPONENT_SCOPES",
+      "codeCompiled": true,
+      "logsStored": [
+        "m2ScopeLegacyLog:native-seams",
+        "m2ScopeLegacyLog:bootstrap-closure",
+        "m2ScopeLegacyLog:source-inventory"
+      ],
+      "diagnosis": "The new ProofScript fixture used a qualified declaration head, but its selected declared-name reader consumes one identifier. The remaining dot caused the existing function-without-explicit-binders refusal.",
+      "correction": "Keep Lean's absolute declaration inside the literal-root namespace. In ProofScript, close that namespace and then declare the same absolute identity with its selected unqualified head. Declaration order, bodies, paired canonical admission and all positive/private/family controls are unchanged.",
+      "jobs": [
+        {
+          "id": 118064581542,
+          "name": "candidate-authoring",
+          "head": "31e01c0a45a7ae00d297cb81b3383600bbf5fa73",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-19T12:41:35Z",
+          "completedAt": "2026-10-19T12:49:15Z",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/39253923410/job/118064581542"
+        },
+        {
+          "id": 118064581896,
+          "name": "source-inventory",
+          "head": "31e01c0a45a7ae00d297cb81b3383600bbf5fa73",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-19T12:41:35Z",
+          "completedAt": "2026-10-19T12:42:25Z",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/39253923410/job/118064581896"
+        },
+        {
+          "id": 118064582034,
+          "name": "bootstrap-closure",
+          "head": "31e01c0a45a7ae00d297cb81b3383600bbf5fa73",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-19T12:41:36Z",
+          "completedAt": "2026-10-19T12:42:19Z",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/39253923410/job/118064582034"
+        },
+        {
+          "id": 118064582202,
+          "name": "native-seams",
+          "head": "31e01c0a45a7ae00d297cb81b3383600bbf5fa73",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-19T12:41:35Z",
+          "completedAt": "2026-10-19T12:43:00Z",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/39253923410/job/118064582202"
+        }
+      ],
+      "completedAt": "2026-10-19T12:49:15Z"
+    },
+    {
+      "head": "c823f9564edaa481f2e75d74fdc694007ca8af78",
+      "tree": "677ffbb4505a4bd810fe0a38393a5ad314d41247",
+      "run": 39254947000,
+      "failedJob": 118068771653,
+      "diagnostic": "PSCV0-ARGUMENT: positional argument after named argument (in coreLegacyEchoRfl)",
+      "lastPassingMarker": "PSCV0_CORE_LEGACY_PRIVATE",
+      "codeCompiled": true,
+      "passedNewGroups": [
+        "component scopes",
+        "rooted scopes",
+        "legacy imports",
+        "legacy local-private"
+      ],
+      "diagnosis": "The new metadata proof used native positional-after-named application order, which the selected reader deliberately rejects.",
+      "correction": "Move x before named A in the selected metadata theorem and matching native fixture. The application owner still supplies A before dictionary synthesis; all bodies, type/class/default/reducibility checks, ordinary synthesis, positive admission and negative controls remain.",
+      "jobs": [
+        {
+          "id": 118068770888,
+          "name": "bootstrap-closure",
+          "head": "c823f9564edaa481f2e75d74fdc694007ca8af78",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-19T12:50:52Z",
+          "completedAt": "2026-10-19T12:51:31Z",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/39254947000/job/118068770888"
+        },
+        {
+          "id": 118068771244,
+          "name": "candidate-authoring",
+          "head": "c823f9564edaa481f2e75d74fdc694007ca8af78",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-19T12:50:52Z",
+          "completedAt": "2026-10-19T12:58:40Z",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/39254947000/job/118068771244"
+        },
+        {
+          "id": 118068771501,
+          "name": "source-inventory",
+          "head": "c823f9564edaa481f2e75d74fdc694007ca8af78",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-19T12:50:52Z",
+          "completedAt": "2026-10-19T12:51:35Z",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/39254947000/job/118068771501"
+        },
+        {
+          "id": 118068771653,
+          "name": "native-seams",
+          "head": "c823f9564edaa481f2e75d74fdc694007ca8af78",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-19T12:50:52Z",
+          "completedAt": "2026-10-19T12:51:51Z",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/39254947000/job/118068771653"
+        }
+      ],
+      "completedAt": "2026-10-19T12:58:40Z"
+    }
+  ],
+  "changedInputsComparedWith": "f570fbfd3f39688f3b386e6ac9b5d6ba7c06219e",
+  "changedExecutableInputs": [
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Pscv0ModuleEngine.lean",
+      "gitBlobSHA1": "de3f9028a735137adf95cd8414d09b2f9c54c92f",
+      "status": "modified",
+      "additions": 40,
+      "deletions": 23
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Command.lean",
+      "gitBlobSHA1": "5b7ddcba70e7896f131a1ccdb218ac863a255c39",
+      "status": "modified",
+      "additions": 51,
+      "deletions": 18
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Mutual.lean",
+      "gitBlobSHA1": "8c49e790dc6c199c8c2c5c16a19697d61d77388c",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 2
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Scope.lean",
+      "gitBlobSHA1": "285648f17dc215cd955a214f97db04442739e353",
+      "status": "modified",
+      "additions": 8,
+      "deletions": 0
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Where.lean",
+      "gitBlobSHA1": "f047bb3b79444268d443caba9eb79debdce5bbf1",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/WhereScope.lean",
+      "gitBlobSHA1": "ae37c71c7d066280e9668e3e32382d9f64b45dac",
+      "status": "modified",
+      "additions": 16,
+      "deletions": 4
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Lean/Program.lean",
+      "gitBlobSHA1": "ab656d5234c1bfd26cb20cec23a35519ecdf8d4a",
+      "status": "modified",
+      "additions": 13,
+      "deletions": 6
+    },
+    {
+      "path": "psc0/scripts/core-first-module-native-oracle.py",
+      "gitBlobSHA1": "729ae28d51350e543d6a29daf96133c28de66aae",
+      "status": "modified",
+      "additions": 214,
+      "deletions": 9
+    },
+    {
+      "path": "psc0/test/Pscv0CoreProject.lean",
+      "gitBlobSHA1": "721c9593afd26b126ae682f60c69ca713f56f46a",
+      "status": "modified",
+      "additions": 559,
+      "deletions": 3
+    },
+    {
+      "path": "psc0/test/Pscv0CoreVisibilityOracle.lean",
+      "gitBlobSHA1": "ed8c64b3dbd3d0c4ff4681fd152d81d430675186",
+      "status": "modified",
+      "additions": 127,
+      "deletions": 2
+    }
+  ],
+  "unchangedWorkflowInput": {
+    "path": ".github/workflows/psc0-core-first-audit.yml",
+    "gitBlobSHA1": "ffc473fc62b32dcb0a3310c227567297f6e647de"
+  },
+  "seamMarkers": [
+    {
+      "observedAt": "2026-10-19T12:59:16.7941664Z",
+      "marker": "PSCV0_CORE_SEAMS: isolated fingerprint and trust-zero replay passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:19.4678634Z",
+      "marker": "PSCV0_CORE_ENGINE: paired source, retained context, canonical kernel admission, runtime selector and no-fallback controls passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:22.0092209Z",
+      "marker": "PSCV0_CORE_SELECTED: paired selected source and independent canonical admission passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9242689Z",
+      "marker": "PSCV0_CORE_MODULE_HEADER: paired re-export, default privacy, explicit public and ten owned refusal controls passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9244550Z",
+      "marker": "PSCV0_CORE_VISIBILITY_SCOPES: paired nested scopes, mutual privacy, overrides, restoration, EOF equality, exact interfaces, six source-private declarations, two private equation helpers and end controls passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9246114Z",
+      "marker": "PSCV0_CORE_MODULE_KIND: native 2x2 matrix, mixed source directions, public imports and import-only refusals passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9247443Z",
+      "marker": "PSCV0_CORE_IMPORTED_BODY: paired exposed abbreviation and exported theorem proofs, ordinary definition opacity and owned rfl refusal passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9250027Z",
+      "marker": "PSCV0_CORE_IMPORT_VISIBILITY: 13 positive projects, eight owned refusals, paired canonical admission, retained type/body/proof dependencies, public diamonds, opaque bridges and legacy exemption passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9252871Z",
+      "marker": "PSCV0_CORE_COMPONENT_SCOPES: 16 positive projects, 16 owned refusals, paired canonical admission, component namespace/section closure, variable restoration and sequential public defaults passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9255904Z",
+      "marker": "PSCV0_CORE_ROOTED_SCOPES: two paired admitted projects, literal root namespaces, absolute declarations/references, direct/registered/inferred/where/mutual names, family ownership, private helper provenance and private aliases passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9259179Z",
+      "marker": "PSCV0_CORE_LEGACY_IMPORT: 11 positive projects, 10 owned refusals, independent canonical admission, ordinary/private body closure, genuine opacity, transitive imports, diamond deduplication and reachable isolation passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9261998Z",
+      "marker": "PSCV0_CORE_LEGACY_PRIVATE: two admitted local-private type/body projects, four module-mode refusals and retained checked dependencies passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9264591Z",
+      "marker": "PSCV0_CORE_LEGACY_METADATA: two paired admitted projects, two private-instance name refusals, actual legacy synthesis, ordinary/default registry identity and priority, reducibility and diamond installation passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9267085Z",
+      "marker": "PSCV0_CORE_LEGACY_WHERE: three admitted projects, six owned refusals, paired canonical admission, private module helper closure, provider-local alias retention, legacy public helper and checked provenance passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:30.9268299Z",
+      "marker": "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:31.8794689Z",
+      "marker": "PSCV0_CORE_VISIBILITY_NATIVE: 25 native declaration classifications, 15 rooted name/classification checks, and three unsupported scope syntax refusals passed"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:42.7248725Z",
+      "marker": "PSCV0_CORE_MODULE_NATIVE_ORACLE: 50 cases passed (28 successful compilations, 22 expected refusals)"
+    },
+    {
+      "observedAt": "2026-10-19T12:59:48.4165818Z",
+      "marker": "PSCV0_CORE_COMPILER_SOURCE: PASS complete two-file Lean/ProofScript source, exact seed inclusion and independent canonical admission"
+    }
+  ],
+  "pinnedNativeOracles": {
+    "visibility": {
+      "source": "psc0/test/Pscv0CoreVisibilityOracle.lean",
+      "nativeDeclarations": 40,
+      "ordinaryClassifications": 25,
+      "rootedNameAndPrivacyChecks": 15,
+      "public": 32,
+      "private": 8,
+      "invalidScopeSyntaxRefusals": 3,
+      "hostOnly": true,
+      "marker": {
+        "observedAt": "2026-10-19T12:59:31.8794689Z",
+        "marker": "PSCV0_CORE_VISIBILITY_NATIVE: 25 native declaration classifications, 15 rooted name/classification checks, and three unsupported scope syntax refusals passed"
+      }
+    },
+    "module": {
+      "driver": "psc0/scripts/core-first-module-native-oracle.py",
+      "hostOnly": true,
+      "actualCompilations": 50,
+      "acceptances": 28,
+      "semanticRefusals": 22,
+      "refusalChecks": [
+        "exit status 1",
+        "empty stderr",
+        "exactly one JSON error from the intended source and diagnostic substrings",
+        "no olean output"
+      ],
+      "acceptanceChecks": [
+        "exit status 0",
+        "no error or hole diagnostic",
+        "nonempty olean output"
+      ],
+      "nativeVersionAndCommitChecked": true,
+      "freshFixtureDirectory": true,
+      "perCommandTimeoutSeconds": 45,
+      "result": {
+        "observedAt": "2026-10-19T12:59:42.7145917Z",
+        "prefix": "PSCV0_CORE_MODULE_NATIVE_RESULT",
+        "data": {
+          "cases": [
+            {
+              "command_tag": "LegacyProvider",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyProvider",
+              "olean_artifacts": [
+                "LegacyProvider.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyProvider.lean",
+              "source_sha256": "da0068a378997d4976aaa0097c01ca18a1ac8d7a8c7e1836bac5b83fb9cb55ae",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleProvider",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ModuleProvider",
+              "olean_artifacts": [
+                "ModuleProvider.olean",
+                "ModuleProvider.olean.private",
+                "ModuleProvider.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ModuleProvider.lean",
+              "source_sha256": "9c3589a9d0904b3238f8c8ea2c1ad613932528587af1e1286a5374119ae4d85e",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleToModule",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ModuleToModule",
+              "olean_artifacts": [
+                "ModuleToModule.olean",
+                "ModuleToModule.olean.private",
+                "ModuleToModule.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ModuleToModule.lean",
+              "source_sha256": "3b48a0292d7fa1d642bb713f07122b8989651f35c7fd9d134db466104175c4ed",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleToLegacy",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "cannot import non-`module` LegacyProvider from `module`",
+                  "endPos": null,
+                  "fileName": "ModuleToLegacy.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 1
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "cannot import non-`module` LegacyProvider from `module`"
+              ],
+              "name": "ModuleToLegacy",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ModuleToLegacy.lean",
+              "source_sha256": "e00667873c7f99f3028239c90bf7283e8828e79665da32c83d7214c534bce944",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyToModule",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyToModule",
+              "olean_artifacts": [
+                "LegacyToModule.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyToModule.lean",
+              "source_sha256": "6349629f92d80eb9ef6d3eb6852f68cb89ec7155f2c440e9fdf9c14c00bd37b5",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyToLegacy",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyToLegacy",
+              "olean_artifacts": [
+                "LegacyToLegacy.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyToLegacy.lean",
+              "source_sha256": "576795eb41efa09c4b02b3fd95eae1376870a99a314c2431316558efa29272c9",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "PublicModuleToModule",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "PublicModuleToModule",
+              "olean_artifacts": [
+                "PublicModuleToModule.olean",
+                "PublicModuleToModule.olean.private",
+                "PublicModuleToModule.olean.server"
+              ],
+              "returncode": 0,
+              "source": "PublicModuleToModule.lean",
+              "source_sha256": "424869655d046e340066aea111bdb6ca51c6a830fc669a3d610d743a768124a8",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "PublicModuleToLegacy",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "cannot import non-`module` LegacyProvider from `module`",
+                  "endPos": null,
+                  "fileName": "PublicModuleToLegacy.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 1
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "cannot import non-`module` LegacyProvider from `module`"
+              ],
+              "name": "PublicModuleToLegacy",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "PublicModuleToLegacy.lean",
+              "source_sha256": "501379df944986a448c4c7af50c8a0b0386b93fe621127142fae0bf626cc1b16",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleImportOnlyLegacy",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "cannot import non-`module` LegacyProvider from `module`",
+                  "endPos": null,
+                  "fileName": "ModuleImportOnlyLegacy.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 1
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "cannot import non-`module` LegacyProvider from `module`"
+              ],
+              "name": "ModuleImportOnlyLegacy",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ModuleImportOnlyLegacy.lean",
+              "source_sha256": "384e6f6f60361bd7ad234d2a20cb83c58f852135c8f36d18d511a908858de84e",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "BodyProvider",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "BodyProvider",
+              "olean_artifacts": [
+                "BodyProvider.olean",
+                "BodyProvider.olean.private",
+                "BodyProvider.olean.server"
+              ],
+              "returncode": 0,
+              "source": "BodyProvider.lean",
+              "source_sha256": "8c3e42a035ce235332302c00f690065f356cf26899a2866b4dbf3951fb2aab4f",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "BodyClientGood",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "BodyClientGood",
+              "olean_artifacts": [
+                "BodyClientGood.olean",
+                "BodyClientGood.olean.private",
+                "BodyClientGood.olean.server"
+              ],
+              "returncode": 0,
+              "source": "BodyClientGood.lean",
+              "source_sha256": "9235625d5932bb99ce2636feb30e3d24108af5fbdcc4a4b1a183db92f886eb91",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "BodyClientHiddenRfl",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Tactic `rfl` failed: The left-hand side\n  coreBodyOpaque A x\nis not definitionally equal to the right-hand side\n  x\n\nA : Type\nx : A\n⊢ coreBodyOpaque A x = x",
+                  "endPos": {
+                    "column": 5,
+                    "line": 6
+                  },
+                  "fileName": "BodyClientHiddenRfl.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 2,
+                    "line": 6
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Tactic `rfl` failed",
+                "not definitionally equal",
+                "coreBodyOpaque"
+              ],
+              "name": "BodyClientHiddenRfl",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "BodyClientHiddenRfl.lean",
+              "source_sha256": "dbb13ecfb9c7676a2cceba3a8d7dbd4dfcf4c7dcddf135a3520dea851e5343d2",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityProvider",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ImportVisibilityProvider",
+              "olean_artifacts": [
+                "ImportVisibilityProvider.olean",
+                "ImportVisibilityProvider.olean.private",
+                "ImportVisibilityProvider.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ImportVisibilityProvider.lean",
+              "source_sha256": "85fe1752cbf90e2a6f03b96c6771f028d69b635aa27f1d677f1fa905fb3a09d0",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityFacade",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ImportVisibilityFacade",
+              "olean_artifacts": [
+                "ImportVisibilityFacade.olean",
+                "ImportVisibilityFacade.olean.private",
+                "ImportVisibilityFacade.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ImportVisibilityFacade.lean",
+              "source_sha256": "7687af829c479ea9f2cf45e602cda3df6ffa56ff803fe6ca99098f722a2355b9",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityOrdinarySignature",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unknown identifier `coreImportType`\n\nNote: A public declaration `coreImportType` exists but is imported privately; consider adding `public import ImportVisibilityProvider`.",
+                  "endPos": {
+                    "column": 34,
+                    "line": 5
+                  },
+                  "fileName": "ImportVisibilityOrdinarySignature.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "lean.unknownIdentifier._namedError",
+                  "pos": {
+                    "column": 20,
+                    "line": 5
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unknown identifier `coreImportType`",
+                "A public declaration `coreImportType` exists but is imported privately",
+                "public import ImportVisibilityProvider"
+              ],
+              "name": "ImportVisibilityOrdinarySignature",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ImportVisibilityOrdinarySignature.lean",
+              "source_sha256": "fc9866c146fd4878a8ca83d7b939f7a2c4e4d1d9bbee7da76b66ec4998fca173",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityOrdinaryExposed",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unknown identifier `coreImportValue`\n\nNote: A public declaration `coreImportValue` exists but is imported privately; consider adding `public import ImportVisibilityProvider`.",
+                  "endPos": {
+                    "column": 45,
+                    "line": 5
+                  },
+                  "fileName": "ImportVisibilityOrdinaryExposed.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "lean.unknownIdentifier._namedError",
+                  "pos": {
+                    "column": 30,
+                    "line": 5
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unknown identifier `coreImportValue`",
+                "A public declaration `coreImportValue` exists but is imported privately",
+                "public import ImportVisibilityProvider"
+              ],
+              "name": "ImportVisibilityOrdinaryExposed",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ImportVisibilityOrdinaryExposed.lean",
+              "source_sha256": "bbe8a3e20a900385fd18c4cc8d87141cc7e2b767eb6bf7bffa1ff77b89e58f76",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityPublic",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Variable name `x` is not explicitly referenced.\n\nHint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n  [apply] _x\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`",
+                  "endPos": {
+                    "column": 17,
+                    "line": 5
+                  },
+                  "fileName": "ImportVisibilityPublic.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "linter.unusedVariables",
+                  "pos": {
+                    "column": 16,
+                    "line": 5
+                  },
+                  "severity": "warning"
+                }
+              ],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ImportVisibilityPublic",
+              "olean_artifacts": [
+                "ImportVisibilityPublic.olean",
+                "ImportVisibilityPublic.olean.private",
+                "ImportVisibilityPublic.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ImportVisibilityPublic.lean",
+              "source_sha256": "9a4c6710d742ee5b823dbaad8a998459878515ce85ad438b6f9f87766a5b2208",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityBridgeClient",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ImportVisibilityBridgeClient",
+              "olean_artifacts": [
+                "ImportVisibilityBridgeClient.olean",
+                "ImportVisibilityBridgeClient.olean.private",
+                "ImportVisibilityBridgeClient.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ImportVisibilityBridgeClient.lean",
+              "source_sha256": "c405302daefd1ced01cc7bb68af816046bf1b6af08a6f196725b8150659c2be3",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityHiddenClient",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unknown identifier `coreImportValue`",
+                  "endPos": {
+                    "column": 17,
+                    "line": 5
+                  },
+                  "fileName": "ImportVisibilityHiddenClient.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "lean.unknownIdentifier._namedError",
+                  "pos": {
+                    "column": 2,
+                    "line": 5
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unknown identifier `coreImportValue`"
+              ],
+              "name": "ImportVisibilityHiddenClient",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ImportVisibilityHiddenClient.lean",
+              "source_sha256": "938df97625a8d7898cf6168c33f8fbff7d0f773de8664bcea004bfeb9fe30852",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityLeft",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ImportVisibilityLeft",
+              "olean_artifacts": [
+                "ImportVisibilityLeft.olean",
+                "ImportVisibilityLeft.olean.private",
+                "ImportVisibilityLeft.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ImportVisibilityLeft.lean",
+              "source_sha256": "194d37465e49aa0e5918d86395666406f6d5d7ee31f7c7f9825a07dd4a1d3378",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityRight",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ImportVisibilityRight",
+              "olean_artifacts": [
+                "ImportVisibilityRight.olean",
+                "ImportVisibilityRight.olean.private",
+                "ImportVisibilityRight.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ImportVisibilityRight.lean",
+              "source_sha256": "194d37465e49aa0e5918d86395666406f6d5d7ee31f7c7f9825a07dd4a1d3378",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityPrivateTransitiveSignature",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unknown identifier `coreImportType`\n\nNote: A public declaration `coreImportType` exists but is imported privately; consider adding `public import ImportVisibilityProvider`.",
+                  "endPos": {
+                    "column": 34,
+                    "line": 5
+                  },
+                  "fileName": "ImportVisibilityPrivateTransitiveSignature.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "lean.unknownIdentifier._namedError",
+                  "pos": {
+                    "column": 20,
+                    "line": 5
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unknown identifier `coreImportType`",
+                "A public declaration `coreImportType` exists but is imported privately",
+                "public import ImportVisibilityProvider"
+              ],
+              "name": "ImportVisibilityPrivateTransitiveSignature",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ImportVisibilityPrivateTransitiveSignature.lean",
+              "source_sha256": "7168d2b61f303029f9f6d8c1a37ee188f8bcc631b248a7523e111761994ab376",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityDiamondPrivateFirst",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Variable name `x` is not explicitly referenced.\n\nHint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n  [apply] _x\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`",
+                  "endPos": {
+                    "column": 17,
+                    "line": 6
+                  },
+                  "fileName": "ImportVisibilityDiamondPrivateFirst.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "linter.unusedVariables",
+                  "pos": {
+                    "column": 16,
+                    "line": 6
+                  },
+                  "severity": "warning"
+                }
+              ],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ImportVisibilityDiamondPrivateFirst",
+              "olean_artifacts": [
+                "ImportVisibilityDiamondPrivateFirst.olean",
+                "ImportVisibilityDiamondPrivateFirst.olean.private",
+                "ImportVisibilityDiamondPrivateFirst.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ImportVisibilityDiamondPrivateFirst.lean",
+              "source_sha256": "d01c0fb485b9cfc46ca6a62204201fde4fec916288677cebe9ac214baf1e36e7",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityDiamondPublicFirst",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Variable name `x` is not explicitly referenced.\n\nHint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n  [apply] _x\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`",
+                  "endPos": {
+                    "column": 17,
+                    "line": 6
+                  },
+                  "fileName": "ImportVisibilityDiamondPublicFirst.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "linter.unusedVariables",
+                  "pos": {
+                    "column": 16,
+                    "line": 6
+                  },
+                  "severity": "warning"
+                }
+              ],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ImportVisibilityDiamondPublicFirst",
+              "olean_artifacts": [
+                "ImportVisibilityDiamondPublicFirst.olean",
+                "ImportVisibilityDiamondPublicFirst.olean.private",
+                "ImportVisibilityDiamondPublicFirst.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ImportVisibilityDiamondPublicFirst.lean",
+              "source_sha256": "bb32b73237a259e43a57a85dc6b9721560cf1c5c41efb36524b237d8edef7bf2",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ImportVisibilityLegacy",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Variable name `x` is not explicitly referenced.\n\nHint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n  [apply] _x\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`",
+                  "endPos": {
+                    "column": 17,
+                    "line": 4
+                  },
+                  "fileName": "ImportVisibilityLegacy.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "linter.unusedVariables",
+                  "pos": {
+                    "column": 16,
+                    "line": 4
+                  },
+                  "severity": "warning"
+                }
+              ],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ImportVisibilityLegacy",
+              "olean_artifacts": [
+                "ImportVisibilityLegacy.olean"
+              ],
+              "returncode": 0,
+              "source": "ImportVisibilityLegacy.lean",
+              "source_sha256": "2cf0374597aac7cdd9c4212896d5f6c18942f09eae00f8f00f1030e71fb74b6f",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyLibrary",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyLibrary",
+              "olean_artifacts": [
+                "LegacyLibrary.olean",
+                "LegacyLibrary.olean.private",
+                "LegacyLibrary.olean.server"
+              ],
+              "returncode": 0,
+              "source": "LegacyLibrary.lean",
+              "source_sha256": "06808e7475b3d535690422d5d50a86c924f74968d8068cc4ca981e4621d8745e",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyDirectBody",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyDirectBody",
+              "olean_artifacts": [
+                "LegacyDirectBody.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyDirectBody.lean",
+              "source_sha256": "4d888783329509c9f940bed1eb2b9a9f45c2985c924c992d7b146f629cdac5df",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyPrivateBody",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyPrivateBody",
+              "olean_artifacts": [
+                "LegacyPrivateBody.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyPrivateBody.lean",
+              "source_sha256": "fecfc222c981126a72adeec6cb9e4d03c81ee8e77fc96fb66338f573cc8a6cd1",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyOpaqueBody",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Tactic `rfl` failed: The left-hand side\n  coreLegacyOpaque A x\nis not definitionally equal to the right-hand side\n  x\n\nA : Type\nx : A\n⊢ coreLegacyOpaque A x = x",
+                  "endPos": {
+                    "column": 5,
+                    "line": 4
+                  },
+                  "fileName": "LegacyOpaqueBody.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 2,
+                    "line": 4
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Tactic `rfl` failed",
+                "not definitionally equal",
+                "coreLegacyOpaque"
+              ],
+              "name": "LegacyOpaqueBody",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "LegacyOpaqueBody.lean",
+              "source_sha256": "1d2a8cf0093a670a0e53979fe039bbd7420578b21db887479b9b051227f20eee",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyPrivateSourceName",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unknown identifier `coreLegacyHelper`",
+                  "endPos": {
+                    "column": 18,
+                    "line": 3
+                  },
+                  "fileName": "LegacyPrivateSourceName.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "lean.unknownIdentifier._namedError",
+                  "pos": {
+                    "column": 2,
+                    "line": 3
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unknown identifier `coreLegacyHelper`"
+              ],
+              "name": "LegacyPrivateSourceName",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "LegacyPrivateSourceName.lean",
+              "source_sha256": "fd1d1ba6b008be5195f0d0b6dd7341218a58e46be0a507b87f527aa860d82f06",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyFacade",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyFacade",
+              "olean_artifacts": [
+                "LegacyFacade.olean",
+                "LegacyFacade.olean.private",
+                "LegacyFacade.olean.server"
+              ],
+              "returncode": 0,
+              "source": "LegacyFacade.lean",
+              "source_sha256": "e4c6a4767cadeb21896d774c7fc7696a0772a2ef0600e59cff243098a18dd769",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyTransitiveBody",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyTransitiveBody",
+              "olean_artifacts": [
+                "LegacyTransitiveBody.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyTransitiveBody.lean",
+              "source_sha256": "7b70c4b9aaf898eb2e0dd9b27497224675419eb0e89edebabb1df3de4c4be559",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyLocalPrivate",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Variable name `x` is not explicitly referenced.\n\nHint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n  [apply] _x\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`",
+                  "endPos": {
+                    "column": 17,
+                    "line": 4
+                  },
+                  "fileName": "LegacyLocalPrivate.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "linter.unusedVariables",
+                  "pos": {
+                    "column": 16,
+                    "line": 4
+                  },
+                  "severity": "warning"
+                }
+              ],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyLocalPrivate",
+              "olean_artifacts": [
+                "LegacyLocalPrivate.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyLocalPrivate.lean",
+              "source_sha256": "868c21922f4c16cafc93943c271bd39b490ccbe0aad6a388da8045e97fd44103",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleLocalPrivateSignature",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unknown identifier `coreLegacyType`\n\nNote: A private declaration `coreLegacyType` (from the current module) exists but would need to be public to access here.",
+                  "endPos": {
+                    "column": 34,
+                    "line": 4
+                  },
+                  "fileName": "ModuleLocalPrivateSignature.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "lean.unknownIdentifier._namedError",
+                  "pos": {
+                    "column": 20,
+                    "line": 4
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unknown identifier `coreLegacyType`",
+                "A private declaration `coreLegacyType` (from the current module)",
+                "would need to be public to access here"
+              ],
+              "name": "ModuleLocalPrivateSignature",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ModuleLocalPrivateSignature.lean",
+              "source_sha256": "292d740ccb2edb44564327a860181d52398a9e1774e988c79e74e7c0c7dad35c",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleLocalPrivateExposed",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unknown identifier `coreLegacyHelper`\n\nNote: A private declaration `coreLegacyHelper` (from the current module) exists but would need to be public to access here.",
+                  "endPos": {
+                    "column": 18,
+                    "line": 4
+                  },
+                  "fileName": "ModuleLocalPrivateExposed.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "lean.unknownIdentifier._namedError",
+                  "pos": {
+                    "column": 2,
+                    "line": 4
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unknown identifier `coreLegacyHelper`",
+                "A private declaration `coreLegacyHelper` (from the current module)",
+                "would need to be public to access here"
+              ],
+              "name": "ModuleLocalPrivateExposed",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ModuleLocalPrivateExposed.lean",
+              "source_sha256": "38fa2216579809cfdb24b991505083e158e840d48eae8e7c65c8f3050996e620",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyPrivateInstanceMetadata",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyPrivateInstanceMetadata",
+              "olean_artifacts": [
+                "LegacyPrivateInstanceMetadata.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyPrivateInstanceMetadata.lean",
+              "source_sha256": "218a89265edc1ccdcff7c66cdb8e5097a211ead93759d1c3fa4b1b2e6ecb043f",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ScopeBareNamespaceEnd",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Missing name after `end`: Expected the current scope name `A`\n\nHint: To end the current scope `A`, specify its name:\n  end ̲A̲",
+                  "endPos": {
+                    "column": 3,
+                    "line": 3
+                  },
+                  "fileName": "ScopeBareNamespaceEnd.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 3
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Missing name after `end`",
+                "Expected the current scope name `A`"
+              ],
+              "name": "ScopeBareNamespaceEnd",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ScopeBareNamespaceEnd.lean",
+              "source_sha256": "a877aae8d208f2415a802f017e87ecef8fbb111b10e9cbf36a34f3f0481621e5",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ScopeBareSectionEnd",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Missing name after `end`: Expected the current scope name `A`\n\nHint: To end the current scope `A`, specify its name:\n  end ̲A̲",
+                  "endPos": {
+                    "column": 3,
+                    "line": 3
+                  },
+                  "fileName": "ScopeBareSectionEnd.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 3
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Missing name after `end`",
+                "Expected the current scope name `A`"
+              ],
+              "name": "ScopeBareSectionEnd",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ScopeBareSectionEnd.lean",
+              "source_sha256": "6a9bea1dcf815e6d4a32d83090ba9c4c3c0918aa6fbd2af6bc1796d46c47591d",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ScopeOuterNameWithoutInner",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Invalid name after `end`: Expected `B`, but found `A`\n\nHint: If you meant to end the outer scope(s) `A`, you must end all the intervening scopes `A.B`:\n  end A.̲B̲",
+                  "endPos": {
+                    "column": 5,
+                    "line": 4
+                  },
+                  "fileName": "ScopeOuterNameWithoutInner.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 4
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Invalid name after `end`",
+                "Expected `B`, but found `A`"
+              ],
+              "name": "ScopeOuterNameWithoutInner",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ScopeOuterNameWithoutInner.lean",
+              "source_sha256": "1aaa5b693495b8a69d724df7ff7a93bec011cacaa398e4a29ecdc248d67b0f26",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ScopeReversedDottedEnd",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Invalid name after `end`: Expected `A.B`, but found `B.A`",
+                  "endPos": {
+                    "column": 7,
+                    "line": 3
+                  },
+                  "fileName": "ScopeReversedDottedEnd.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 3
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Invalid name after `end`",
+                "Expected `A.B`, but found `B.A`"
+              ],
+              "name": "ScopeReversedDottedEnd",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ScopeReversedDottedEnd.lean",
+              "source_sha256": "6b1d83d869881a3d752b45aff4df99fdfda6962513f70f49cf258fbdbadb06b7",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ScopeAcrossUnnamedBarrier",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Invalid name after `end`: Expected `B`, but found `A.B`",
+                  "endPos": {
+                    "column": 7,
+                    "line": 5
+                  },
+                  "fileName": "ScopeAcrossUnnamedBarrier.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 5
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Invalid name after `end`",
+                "Expected `B`, but found `A.B`"
+              ],
+              "name": "ScopeAcrossUnnamedBarrier",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ScopeAcrossUnnamedBarrier.lean",
+              "source_sha256": "46053cae4a70d387cfed2672dc854f20eeeeac3eaf48f83846c98e606356c7a9",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ScopeNamedEndOnUnnamed",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unexpected name `A` after `end`: The current section is unnamed\n\nHint: Delete the name `A` to end the current unnamed scope; outer named scopes can then be closed using additional `end` command(s):\n  end ̵A̵",
+                  "endPos": {
+                    "column": 5,
+                    "line": 3
+                  },
+                  "fileName": "ScopeNamedEndOnUnnamed.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 3
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unexpected name `A` after `end`",
+                "The current section is unnamed"
+              ],
+              "name": "ScopeNamedEndOnUnnamed",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ScopeNamedEndOnUnnamed.lean",
+              "source_sha256": "e49d8e9d9c59dde0657e34fb16fbd9da7b75ef6443b1c52aa7321413843347d7",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ScopeTooManyEndComponents",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Invalid name after `end`: `X.A` contains too many components\n\nHint: Use current scope name `A`:\n  end X̵.̵A",
+                  "endPos": {
+                    "column": 7,
+                    "line": 3
+                  },
+                  "fileName": "ScopeTooManyEndComponents.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 3
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Invalid name after `end`",
+                "`X.A` contains too many components"
+              ],
+              "name": "ScopeTooManyEndComponents",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ScopeTooManyEndComponents.lean",
+              "source_sha256": "37c2cd03bc02d1805dd36038186f44d3a017e137793d9b851427537fd2de9725",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ScopeEndWithoutScope",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Invalid `end`: There is no current scope to end\n\nNote: Scopes are introduced using `namespace` and `section`",
+                  "endPos": {
+                    "column": 3,
+                    "line": 2
+                  },
+                  "fileName": "ScopeEndWithoutScope.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 2
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Invalid `end`",
+                "There is no current scope to end"
+              ],
+              "name": "ScopeEndWithoutScope",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ScopeEndWithoutScope.lean",
+              "source_sha256": "28bef21ca575bc1690f08261220460544004832979fd1fd45b414128bbdd7c08",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleWhereLibrary",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ModuleWhereLibrary",
+              "olean_artifacts": [
+                "ModuleWhereLibrary.olean",
+                "ModuleWhereLibrary.olean.private",
+                "ModuleWhereLibrary.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ModuleWhereLibrary.lean",
+              "source_sha256": "7d00ee2421e0090e24279732138afce00b6e803d3b0e0e04a3f287f2f0f8013c",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleWhereLegacyRfl",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ModuleWhereLegacyRfl",
+              "olean_artifacts": [
+                "ModuleWhereLegacyRfl.olean"
+              ],
+              "returncode": 0,
+              "source": "ModuleWhereLegacyRfl.lean",
+              "source_sha256": "d93c11434faab2844d31e41824776c0ab630f47f809bb57d4aa81adea5af16f4",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleWhereLegacyName",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unknown constant `coreLegacyWhere.helper`",
+                  "endPos": {
+                    "column": 24,
+                    "line": 4
+                  },
+                  "fileName": "ModuleWhereLegacyName.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "lean.unknownIdentifier._namedError",
+                  "pos": {
+                    "column": 2,
+                    "line": 4
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unknown constant `coreLegacyWhere.helper`"
+              ],
+              "name": "ModuleWhereLegacyName",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ModuleWhereLegacyName.lean",
+              "source_sha256": "febbaed90e9d12f4123f03eebe9958527c6c84bb3685e93e6a52b8c2766fd82b",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyWhereLibrary",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyWhereLibrary",
+              "olean_artifacts": [
+                "LegacyWhereLibrary.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyWhereLibrary.lean",
+              "source_sha256": "9a3095288d62c8e9cc3a10df53c2577a596d8fc91753918cdae4cb158d63f0b7",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyWhereHelper",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyWhereHelper",
+              "olean_artifacts": [
+                "LegacyWhereHelper.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyWhereHelper.lean",
+              "source_sha256": "7acf724ed3a4295adc451b991b77a7f9bcc9ee4ae3fd003942fd7fc586fcbf36",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleWhereModuleName",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Unknown constant `coreLegacyWhere.helper`",
+                  "endPos": {
+                    "column": 24,
+                    "line": 6
+                  },
+                  "fileName": "ModuleWhereModuleName.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "lean.unknownIdentifier._namedError",
+                  "pos": {
+                    "column": 2,
+                    "line": 6
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Unknown constant `coreLegacyWhere.helper`"
+              ],
+              "name": "ModuleWhereModuleName",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ModuleWhereModuleName.lean",
+              "source_sha256": "74787fc918e1b199de2898188716cc4d39f0be5ed86e66a7666afd993af2af30",
+              "status": "PASS"
+            }
+          ],
+          "expected_refusals": 22,
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "schema": "psc0-core-module-native-result/1",
+          "source_revision": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+          "status": "PASS",
+          "successful_compilations": 28,
+          "version": "4.35.0"
+        }
+      },
+      "newCompileCases": 25,
+      "proofHoleDiagnosticGuard": "hasSorry diagnostic kind or actual backtick spelling",
+      "caseGrowthComparedWith": {
+        "head": "9024dd92c147ffbbafc3834021ad11540d89578a",
+        "run": 39245007181,
+        "existingCases": 25,
+        "preservedCaseNames": [
+          "LegacyProvider",
+          "ModuleProvider",
+          "ModuleToModule",
+          "ModuleToLegacy",
+          "LegacyToModule",
+          "LegacyToLegacy",
+          "PublicModuleToModule",
+          "PublicModuleToLegacy",
+          "ModuleImportOnlyLegacy",
+          "BodyProvider",
+          "BodyClientGood",
+          "BodyClientHiddenRfl",
+          "ImportVisibilityProvider",
+          "ImportVisibilityFacade",
+          "ImportVisibilityOrdinarySignature",
+          "ImportVisibilityOrdinaryExposed",
+          "ImportVisibilityPublic",
+          "ImportVisibilityBridgeClient",
+          "ImportVisibilityHiddenClient",
+          "ImportVisibilityLeft",
+          "ImportVisibilityRight",
+          "ImportVisibilityPrivateTransitiveSignature",
+          "ImportVisibilityDiamondPrivateFirst",
+          "ImportVisibilityDiamondPublicFirst",
+          "ImportVisibilityLegacy"
+        ],
+        "addedCaseNames": [
+          "LegacyLibrary",
+          "LegacyDirectBody",
+          "LegacyPrivateBody",
+          "LegacyOpaqueBody",
+          "LegacyPrivateSourceName",
+          "LegacyFacade",
+          "LegacyTransitiveBody",
+          "LegacyLocalPrivate",
+          "ModuleLocalPrivateSignature",
+          "ModuleLocalPrivateExposed",
+          "LegacyPrivateInstanceMetadata",
+          "ScopeBareNamespaceEnd",
+          "ScopeBareSectionEnd",
+          "ScopeOuterNameWithoutInner",
+          "ScopeReversedDottedEnd",
+          "ScopeAcrossUnnamedBarrier",
+          "ScopeNamedEndOnUnnamed",
+          "ScopeTooManyEndComponents",
+          "ScopeEndWithoutScope",
+          "ModuleWhereLibrary",
+          "ModuleWhereLegacyRfl",
+          "ModuleWhereLegacyName",
+          "LegacyWhereLibrary",
+          "LegacyWhereHelper",
+          "ModuleWhereModuleName"
+        ],
+        "removedCaseNames": []
+      }
+    }
+  },
+  "retainedRegression": {
+    "bootstrapReplay": {
+      "observedAt": "2026-10-19T12:59:19.2562412Z",
+      "prefix": "",
+      "data": {
+        "axioms": [],
+        "canonicalPayloadBytes": 49889,
+        "canonicalPayloadFNV64": "15218654452277382292",
+        "canonicalPayloadSHA256": "8b89d77e562378015e70d95560735e5727994016615255c84842eab190dae041",
+        "compilerDefaultSelected": false,
+        "coreCompletenessClaimed": false,
+        "declarations": 76,
+        "emptyBoundary": true,
+        "kernelTrustLevel": 0,
+        "maxHeartbeatsPerDeclaration": 2000000,
+        "maxRecDepthPerDeclaration": 20000,
+        "names": [
+          "And",
+          "Bool",
+          "Decidable",
+          "Empty",
+          "Eq",
+          "Except",
+          "Exists",
+          "False",
+          "HEq",
+          "List",
+          "Nat",
+          "Nonempty",
+          "Not",
+          "Option",
+          "Or",
+          "PEmpty",
+          "PProd",
+          "PUnit",
+          "Prod",
+          "Sum",
+          "True",
+          "Unit",
+          "dite",
+          "id",
+          "ite",
+          "optParam",
+          "outParam",
+          "And.intro",
+          "And.rec",
+          "Bool.Reflects",
+          "Bool.casesOn",
+          "Bool.false",
+          "Bool.rec",
+          "Bool.true",
+          "Decidable.decide",
+          "Decidable.intro",
+          "Decidable.rec",
+          "Decidable.reflects_decide",
+          "Empty.rec",
+          "Eq.rec",
+          "Eq.refl",
+          "Except.error",
+          "Except.ok",
+          "Except.rec",
+          "Exists.intro",
+          "Exists.rec",
+          "False.rec",
+          "HEq.rec",
+          "HEq.refl",
+          "List.cons",
+          "List.nil",
+          "List.rec",
+          "Nat.rec",
+          "Nat.succ",
+          "Nat.zero",
+          "Nonempty.intro",
+          "Nonempty.rec",
+          "Option.none",
+          "Option.rec",
+          "Option.some",
+          "Or.inl",
+          "Or.inr",
+          "Or.rec",
+          "PEmpty.rec",
+          "PProd.mk",
+          "PProd.rec",
+          "PUnit.rec",
+          "PUnit.unit",
+          "Prod.mk",
+          "Prod.rec",
+          "Sum.inl",
+          "Sum.inr",
+          "Sum.rec",
+          "True.intro",
+          "True.rec",
+          "Bool.Reflects.match_1"
+        ],
+        "nativeCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "reducibilityEntries": 11,
+        "regeneratedRecursorRules": 24,
+        "schema": "pscv0-bootstrap-replay/1",
+        "sourceBytes": 118573,
+        "sourceRegistriesSelected": false,
+        "sourceSHA256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54"
+      }
+    },
+    "completeFoundationSource": {
+      "observedAt": "2026-10-19T12:59:48.4153925Z",
+      "prefix": "",
+      "data": {
+        "backendExecutionQualified": false,
+        "candidateClasses": [
+          "OfNat"
+        ],
+        "candidateDeclarations": 92,
+        "candidateNoncomputableNames": [
+          "Bool.not"
+        ],
+        "candidatePayloadBytes": 74737,
+        "candidatePayloadFNV64Decimal": "15094505996536324673",
+        "candidatePayloadSHA256": "fe197609ef42c9940b646407fc1a35a8579c945896b4a677ed1219883cd07781",
+        "candidateSourceSHA256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9",
+        "canonicalAdmissionsBytes": 53310,
+        "canonicalAdmissionsSHA256": "6c7603e8cd49e830a61fca136153117630097052cd8e93bfd3f87f248d2b27a1",
+        "canonicalPairEqual": true,
+        "compilerSelfhostQualified": false,
+        "completePairedSourceAccepted": true,
+        "kernelTrustLevel": 0,
+        "maxHeartbeatsPerDeclaration": 2000000,
+        "maxRecDepthPerDeclaration": 20000,
+        "nativeCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "nativeElaborationParityQualified": false,
+        "preparedDeclarations": 25,
+        "preparedNames": [
+          "PsSourcePos",
+          "PsSourcePos.mk",
+          "PsSourcePos.rec",
+          "PsSourcePos.byteOffset",
+          "PsSourcePos.line",
+          "PsSourcePos.column",
+          "PsSourceSpan",
+          "PsSourceSpan.mk",
+          "PsSourceSpan.rec",
+          "PsSourceSpan.start",
+          "PsSourceSpan.stop",
+          "psListLength",
+          "psListIsEmpty",
+          "psListAny",
+          "psListReverseAcc.$psc0SH.0",
+          "psListReverseAcc",
+          "psListReverse",
+          "psListAppend",
+          "psListMap",
+          "psListMapExcept",
+          "psListTake.$psc0SH.0",
+          "psListTake",
+          "psListZip.$psc0SH.0",
+          "psListZip",
+          "psCompilerSourceMeasure"
+        ],
+        "recursorWorkerGroups": 0,
+        "retainedBootstrapDeclarations": 76,
+        "schema": "pscv0-core-compiler-source-qualification/1",
+        "scope": "complete Ps.Foundation.Source and Ps.Foundation.List plus an importing entry",
+        "sourceDeclarationsPerSyntax": 12,
+        "sourceFilesPerSyntax": 2,
+        "sourceNoncomputableNames": [],
+        "sourcePairs": [
+          [
+            {
+              "bytes": 153,
+              "module": "CompilerWorkload",
+              "path": "selected/CompilerWorkload.lean",
+              "sha256": "a3237b3e6e5a392f902c14d0ba7cd5f0f0165a1c6cd16adaf3adf2cdadbd45f7",
+              "sourceKind": "lean"
+            },
+            {
+              "bytes": 148,
+              "module": "Ps.Foundation.Source",
+              "path": "packages/foundation/src/Ps/Foundation/Source.lean",
+              "sha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736",
+              "sourceKind": "lean"
+            },
+            {
+              "bytes": 2386,
+              "module": "Ps.Foundation.List",
+              "path": "packages/foundation/src/Ps/Foundation/List.lean",
+              "sha256": "0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680",
+              "sourceKind": "lean"
+            }
+          ],
+          [
+            {
+              "bytes": 162,
+              "module": "CompilerWorkload",
+              "path": "selected/CompilerWorkload.ps",
+              "sha256": "a5d322514cd218b367152cdcd362e3f250ab344c41f92db5c05e42a570547ba1",
+              "sourceKind": "proofScript"
+            },
+            {
+              "bytes": 151,
+              "module": "Ps.Foundation.Source",
+              "path": "selfhost/core-v7/Ps/Foundation/Source.ps",
+              "sha256": "fc810c943a3ef9d32a1e045ac499c70dcba92359e7ce747ecf54b7086af6f059",
+              "sourceKind": "proofScript"
+            },
+            {
+              "bytes": 2538,
+              "module": "Ps.Foundation.List",
+              "path": "selfhost/core-v7/Ps/Foundation/List.ps",
+              "sha256": "b7f4a010829295e169fe3803e50f4fe59d703465e51db75b1a3e72e0e475cec8",
+              "sourceKind": "proofScript"
+            }
+          ]
+        ]
+      }
+    },
+    "sourceInventory": {
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "run": 39255930001,
+      "job": 118072260814,
+      "evidence": "psc0/docs/core-first-evidence/core-language-scope-legacy-qualification.json",
+      "fullModules": 322,
+      "fullSourceBytes": 26411239,
+      "independentProjectModules": 224,
+      "independentProjectSourceBytes": 2794173,
+      "compilerSourceCandidateModules": 11,
+      "compilerSourceCandidateSourceBytes": 211778,
+      "observations": [
+        {
+          "observedAt": "2026-10-19T12:59:28.7837910Z",
+          "prefix": "PSC0_CORE_SOURCE_AUDIT",
+          "data": {
+            "environmentBytes": 23654904,
+            "externalImports": [],
+            "fullCompositionImports": [
+              "Ps.Environment.SelfHostProd",
+              "Ps.Environment.StandardSnapshot"
+            ],
+            "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+            "label": "candidate",
+            "moduleCount": 322,
+            "sourceBytes": 26411239,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7839511Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 11,
+            "root": "Ps.Environment.Bootstrap",
+            "sourceBytes": 151539,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7840754Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 11,
+            "root": "Ps.Environment.CompilerSourceCandidate",
+            "sourceBytes": 211778,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7842011Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 10,
+            "root": "Ps.Environment.Fingerprint",
+            "sourceBytes": 46242,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7843186Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [
+              "Lean"
+            ],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 12,
+            "root": "PsKernelLean.Replay",
+            "sourceBytes": 50030,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7844311Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 113,
+            "root": "Ps.Compiler.Engine",
+            "sourceBytes": 1706075,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7845683Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 159,
+            "root": "Ps.Compiler.Pscv0Engine",
+            "sourceBytes": 2219598,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7846876Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 160,
+            "root": "Ps.Compiler.Pscv0ModuleEngine",
+            "sourceBytes": 2240186,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7848099Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 13,
+            "root": "Ps.Environment.InhabitedExpr",
+            "sourceBytes": 48768,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7849288Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 15,
+            "root": "Ps.Environment.ReprExpr",
+            "sourceBytes": 69467,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7850582Z",
+          "prefix": "PSC0_CORE_INDEPENDENT_COMPILER_IMPORTS",
+          "data": {
+            "environmentBytes": 49489,
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 223,
+            "sourceBytes": 2773585,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T12:59:28.7852393Z",
+          "prefix": "PSC0_CORE_INDEPENDENT_PROJECT_IMPORTS",
+          "data": {
+            "environmentBytes": 49489,
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 224,
+            "roots": [
+              "Ps.Compiler.Pscv0ModuleEngine",
+              "Ps.BackendTs.Readable",
+              "Ps.BackendRust.Module",
+              "Ps.BackendWasm.Module",
+              "Ps.CompilerIr.Checked",
+              "Ps.Codegen.Api",
+              "Ps.Codegen.Provenance"
+            ],
+            "sourceBytes": 2794173,
+            "unresolvedProjectImports": []
+          }
+        }
+      ]
+    },
+    "foundationAuthoring": {
+      "observedAt": "2026-10-19T13:04:47.5903960Z",
+      "data": {
+        "declarations": 92,
+        "importedAssumptions": [],
+        "kernelChecked": true,
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "recursorRulesCompared": 25,
+        "roots": [
+          "Nat",
+          "Bool",
+          "PUnit",
+          "Unit",
+          "Empty",
+          "PEmpty",
+          "True",
+          "False",
+          "Eq",
+          "HEq",
+          "And",
+          "Or",
+          "Exists",
+          "Nonempty",
+          "Prod",
+          "PProd",
+          "Sum",
+          "Option",
+          "List",
+          "Except",
+          "Decidable",
+          "id",
+          "ite",
+          "dite",
+          "optParam",
+          "outParam",
+          "OfNat",
+          "OfNat.ofNat",
+          "instOfNatNat",
+          "Bool.decEq"
+        ],
+        "schema": "pscv0-standard-core-export/1",
+        "sharedSourceNodes": 1071,
+        "sourceBytes": 174266
+      }
+    },
+    "foundationNativeMetadata": {
+      "observedAt": "2026-10-19T13:04:44.1408601Z",
+      "nativeClosureDeclarations": 92,
+      "ordinaryOfNatPriority": 1000,
+      "defaultOfNatPriority": 100,
+      "nativeNoncomputableNames": [
+        "Bool.not"
+      ],
+      "portableProfileSelectedByThisObservation": false
+    },
+    "nativeAuthoredSources": [
+      {
+        "bytes": 118573,
+        "file": "CoreBootstrapCandidate.lean",
+        "sha256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54"
+      },
+      {
+        "bytes": 16111994,
+        "file": "CoreByteWordCandidate.lean",
+        "sha256": "7d61ebb72eb891ab7a39cee3e780411f26219b2fcfa57570effa7d4f127ed17a"
+      },
+      {
+        "bytes": 174266,
+        "file": "CoreFoundationCandidate.lean",
+        "sha256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9"
+      }
+    ],
+    "committedBootstrapAndFoundationSourcesReproducedByCIByteComparison": true,
+    "committedAssetObservations": [
+      {
+        "observedAt": "2026-10-19T13:04:40.6512372Z",
+        "prefix": "PSC0_CORE_BOOTSTRAP_ASSET",
+        "data": {
+          "bytes": 118573,
+          "gitBlobSHA1": "39c8e193ef2e48869c4757b6526a22c4adc82b12",
+          "sha256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54"
+        }
+      },
+      {
+        "observedAt": "2026-10-19T13:04:47.6179739Z",
+        "prefix": "PSC0_CORE_FOUNDATION_ASSET",
+        "data": {
+          "bytes": 174266,
+          "gitBlobSHA1": "9072e3215a7820090e704ad727bc8831c27084cd",
+          "sha256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9"
+        }
+      }
+    ],
+    "full": {
+      "declarations": 3757,
+      "classes": 44,
+      "instances": 371,
+      "fingerprint": "fnv1a64:3071911941504503432",
+      "payloadSHA256": "364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1",
+      "nativeChecksPassed": true,
+      "markers": [
+        {
+          "observedAt": "2026-10-19T13:02:59.7638618Z",
+          "marker": "PSCV0_NATIVE_STANDARD_SHA256_CANDIDATE: sha256:364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1"
+        },
+        {
+          "observedAt": "2026-10-19T13:02:59.7645495Z",
+          "marker": "PSCV0_NATIVE_STANDARD_SNAPSHOT: declarations=3757 classes=44 instances=371 fingerprint=fnv1a64:3071911941504503432"
+        },
+        {
+          "observedAt": "2026-10-19T13:03:42.7959558Z",
+          "marker": "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"
+        }
+      ]
+    },
+    "bootstrapFullComparison": {
+      "observedAt": "2026-10-19T13:04:37.3861160Z",
+      "exact": 42,
+      "different": 31,
+      "absent": 3,
+      "literalInclusionQualified": false
+    },
+    "nativeWorkload": {
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "run": 39255930001,
+      "job": 118072260820,
+      "evidence": "psc0/docs/core-first-evidence/core-language-scope-legacy-qualification.json",
+      "summary": {
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "closureDeclarations": 5690,
+        "externalRoots": 458,
+        "partial": [],
+        "schema": "pscv0-core-native-closure-summary/1",
+        "sourceDeclarations": 191658,
+        "sourceModules": 322,
+        "unsafe": []
+      },
+      "summaryObservedAt": "2026-10-19T12:59:47.6542930Z",
+      "roster": {
+        "candidateKernelAdmitted": false,
+        "nativeClosureDeclarations": 5690,
+        "nativeClosureSHA256": "554120ccb575646d972140d718da57c785a63c45258b3348bfc45562089c78cc",
+        "sourceHead": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+        "sourceModules": 322,
+        "sourceParityClaim": false
+      },
+      "rosterObservedAt": "2026-10-19T13:00:05.6658188Z",
+      "assumptionPaths": {
+        "observedAt": "2026-10-19T13:00:05.6565256Z",
+        "sourceHead": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+        "nativeCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "nativeClosureSHA256": "554120ccb575646d972140d718da57c785a63c45258b3348bfc45562089c78cc",
+        "sourceMarker": "PSC0_CORE_NATIVE_ASSUMPTION_PATHS",
+        "scope": "Raw type, value and family edges; bounded shortest path samples",
+        "assumptions": [
+          {
+            "name": "propext",
+            "affectedExternalRoots": 66,
+            "sampleLimit": 8,
+            "observedSamples": 8
+          },
+          {
+            "name": "Classical.choice",
+            "affectedExternalRoots": 24,
+            "sampleLimit": 8,
+            "observedSamples": 8
+          },
+          {
+            "name": "Quot.sound",
+            "affectedExternalRoots": 41,
+            "sampleLimit": 8,
+            "observedSamples": 8
+          }
+        ],
+        "rawStructuredNamesAndPaths": "candidate-authoring job log and the exact authoring archive recorded below",
+        "candidateKernelAdmitted": false,
+        "runtimeChoiceQualified": false
+      },
+      "candidateKernelAdmitted": false,
+      "sourceParityQualified": false
+    },
+    "candidatePolicyObservations": [
+      {
+        "observedAt": "2026-10-19T13:04:40.6218533Z",
+        "prefix": "",
+        "data": {
+          "axioms": [],
+          "declarations": 76,
+          "quotientPrimitives": [],
+          "replacedDefinitionAxioms": [],
+          "schema": "pscv0-standard-candidate-policy/1"
+        }
+      },
+      {
+        "observedAt": "2026-10-19T13:04:47.5901382Z",
+        "prefix": "",
+        "data": {
+          "axioms": [],
+          "declarations": 92,
+          "quotientPrimitives": [],
+          "replacedDefinitionAxioms": [],
+          "schema": "pscv0-standard-candidate-policy/1"
+        }
+      },
+      {
+        "observedAt": "2026-10-19T13:04:57.9240357Z",
+        "prefix": "",
+        "data": {
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ],
+          "declarations": 1945,
+          "quotientPrimitives": [
+            "Quot",
+            "Quot.ind",
+            "Quot.lift",
+            "Quot.mk"
+          ],
+          "replacedDefinitionAxioms": [],
+          "schema": "pscv0-standard-candidate-policy/1"
+        }
+      }
+    ],
+    "candidateAuthoringObservations": [
+      {
+        "observedAt": "2026-10-19T13:04:40.6220779Z",
+        "prefix": "",
+        "data": {
+          "declarations": 76,
+          "importedAssumptions": [],
+          "kernelChecked": true,
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "recursorRulesCompared": 24,
+          "roots": [
+            "Nat",
+            "Bool",
+            "PUnit",
+            "Unit",
+            "Empty",
+            "PEmpty",
+            "True",
+            "False",
+            "Eq",
+            "HEq",
+            "And",
+            "Or",
+            "Exists",
+            "Nonempty",
+            "Prod",
+            "PProd",
+            "Sum",
+            "Option",
+            "List",
+            "Except",
+            "Decidable",
+            "id",
+            "ite",
+            "dite",
+            "optParam",
+            "outParam"
+          ],
+          "schema": "pscv0-standard-core-export/1",
+          "sharedSourceNodes": 721,
+          "sourceBytes": 118573
+        }
+      },
+      {
+        "observedAt": "2026-10-19T13:04:47.5903960Z",
+        "prefix": "",
+        "data": {
+          "declarations": 92,
+          "importedAssumptions": [],
+          "kernelChecked": true,
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "recursorRulesCompared": 25,
+          "roots": [
+            "Nat",
+            "Bool",
+            "PUnit",
+            "Unit",
+            "Empty",
+            "PEmpty",
+            "True",
+            "False",
+            "Eq",
+            "HEq",
+            "And",
+            "Or",
+            "Exists",
+            "Nonempty",
+            "Prod",
+            "PProd",
+            "Sum",
+            "Option",
+            "List",
+            "Except",
+            "Decidable",
+            "id",
+            "ite",
+            "dite",
+            "optParam",
+            "outParam",
+            "OfNat",
+            "OfNat.ofNat",
+            "instOfNatNat",
+            "Bool.decEq"
+          ],
+          "schema": "pscv0-standard-core-export/1",
+          "sharedSourceNodes": 1071,
+          "sourceBytes": 174266
+        }
+      },
+      {
+        "observedAt": "2026-10-19T13:04:57.9244463Z",
+        "prefix": "",
+        "data": {
+          "declarations": 1945,
+          "importedAssumptions": [
+            "propext",
+            "Quot.sound"
+          ],
+          "kernelChecked": true,
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "recursorRulesCompared": 113,
+          "roots": [
+            "Nat",
+            "Bool",
+            "PUnit",
+            "Unit",
+            "Empty",
+            "PEmpty",
+            "True",
+            "False",
+            "Eq",
+            "HEq",
+            "And",
+            "Or",
+            "Exists",
+            "Nonempty",
+            "Prod",
+            "PProd",
+            "Sum",
+            "Option",
+            "List",
+            "Except",
+            "Decidable",
+            "id",
+            "ite",
+            "dite",
+            "optParam",
+            "outParam",
+            "UInt8.ofNat",
+            "UInt8.toUInt32",
+            "UInt8.toUInt64",
+            "UInt32.ofNat",
+            "UInt32.toNat",
+            "UInt32.add",
+            "UInt32.sub",
+            "UInt32.land",
+            "UInt32.lor",
+            "UInt32.xor",
+            "UInt32.complement",
+            "UInt32.shiftLeft",
+            "UInt32.shiftRight",
+            "UInt64.ofNat",
+            "UInt64.toNat",
+            "UInt64.toUInt8",
+            "UInt64.mul",
+            "UInt64.xor",
+            "UInt64.shiftRight",
+            "ByteArray",
+            "ByteArray.mk",
+            "ByteArray.size",
+            "ByteArray.push",
+            "ByteArray.foldl",
+            "String.toUTF8"
+          ],
+          "schema": "pscv0-standard-core-export/1",
+          "sharedSourceNodes": 113683,
+          "sourceBytes": 16111994
+        }
+      }
+    ],
+    "retentionComparison": {
+      "previousHead": "9024dd92c147ffbbafc3834021ad11540d89578a",
+      "previousRun": 39245007181,
+      "bootstrapReplayDataExact": true,
+      "foundationSourceQualificationDataExact": true,
+      "foundationExportDataExact": true,
+      "nativeAuthoredSourceBytesAndHashesExact": true,
+      "committedAssetDataExact": true,
+      "fullLogicalIdentityExact": true,
+      "bootstrapFullComparisonCountsExact": true,
+      "nativeWorkloadRosterIsFreshCurrentObservation": true
+    }
+  },
+  "resources": {
+    "native-seams": {
+      "observedAt": "2026-10-19T12:59:48.5646982Z",
+      "generatedSources": [],
+      "resources": [
+        {
+          "file": "build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_seams\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:02.12",
+            "Exit status": "0",
+            "File system inputs": "8",
+            "File system outputs": "231904",
+            "Involuntary context switches": "133",
+            "Major (requiring I/O) page faults": "428",
+            "Maximum resident set size (kbytes)": "1619952",
+            "Minor (reclaiming a frame) page faults": "170606",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "124%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.98",
+            "User time (seconds)": "1.66",
+            "Voluntary context switches": "655"
+          }
+        },
+        {
+          "file": "compiler-source-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_compiler_source\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:05.41",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "261832",
+            "Involuntary context switches": "1807",
+            "Major (requiring I/O) page faults": "459",
+            "Maximum resident set size (kbytes)": "1716064",
+            "Minor (reclaiming a frame) page faults": "222929",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "158%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "1.55",
+            "User time (seconds)": "7.05",
+            "Voluntary context switches": "25652"
+          }
+        },
+        {
+          "file": "compiler-source-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_compiler_source ../packages/foundation/src/Ps/Foundation/Source.lean ../packages/foundation/src/Ps/Foundation/List.lean ../selfhost/core-v7/Ps/Foundation/Source.ps ../selfhost/core-v7/Ps/Foundation/List.ps ../packages/environment/src/Ps/Environment/CompilerSourceCandidateData.lean ../dist/core-first/seams/compiler-source-qualification.json\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.13",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "8",
+            "Involuntary context switches": "2",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "82168",
+            "Minor (reclaiming a frame) page faults": "1871",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "98%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.01",
+            "User time (seconds)": "0.11",
+            "Voluntary context switches": "385"
+          }
+        },
+        {
+          "file": "engine-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_engine_seams\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:02.49",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "241944",
+            "Involuntary context switches": "226",
+            "Major (requiring I/O) page faults": "451",
+            "Maximum resident set size (kbytes)": "1688792",
+            "Minor (reclaiming a frame) page faults": "179250",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "131%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.98",
+            "User time (seconds)": "2.28",
+            "Voluntary context switches": "1946"
+          }
+        },
+        {
+          "file": "project-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_project\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:08.48",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "261680",
+            "Involuntary context switches": "507",
+            "Major (requiring I/O) page faults": "466",
+            "Maximum resident set size (kbytes)": "1772260",
+            "Minor (reclaiming a frame) page faults": "194624",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "119%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "1.09",
+            "User time (seconds)": "9.04",
+            "Voluntary context switches": "3863"
+          }
+        },
+        {
+          "file": "selected-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_selected\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:02.48",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "244336",
+            "Involuntary context switches": "248",
+            "Major (requiring I/O) page faults": "450",
+            "Maximum resident set size (kbytes)": "1700912",
+            "Minor (reclaiming a frame) page faults": "179186",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "130%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "1.01",
+            "User time (seconds)": "2.22",
+            "Voluntary context switches": "2083"
+          }
+        }
+      ],
+      "schema": "psc0-core-ci-resource-observations/1",
+      "scope": "actual commands; not a complete Core release or performance claim"
+    },
+    "bootstrap-closure": {
+      "observedAt": "2026-10-19T12:59:19.5300779Z",
+      "generatedSources": [],
+      "resources": [
+        {
+          "file": "build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_bootstrap_replay\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:10.33",
+            "Exit status": "0",
+            "File system inputs": "8",
+            "File system outputs": "480504",
+            "Involuntary context switches": "20698",
+            "Major (requiring I/O) page faults": "853",
+            "Maximum resident set size (kbytes)": "1644012",
+            "Minor (reclaiming a frame) page faults": "515875",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "221%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "4.67",
+            "User time (seconds)": "18.23",
+            "Voluntary context switches": "29349"
+          }
+        },
+        {
+          "file": "replay-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake env .lake/build/bin/pscv0_bootstrap_replay ../packages/environment/src/Ps/Environment/BootstrapData.lean ../dist/core-first/bootstrap/bootstrap-manifest.json\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.57",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "8",
+            "Involuntary context switches": "30",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "843924",
+            "Minor (reclaiming a frame) page faults": "30051",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.26",
+            "User time (seconds)": "0.30",
+            "Voluntary context switches": "213"
+          }
+        }
+      ],
+      "schema": "psc0-core-ci-resource-observations/1",
+      "scope": "actual commands; not a complete Core release or performance claim"
+    },
+    "candidate-authoring": {
+      "observedAt": "2026-10-19T13:04:57.9940352Z",
+      "generatedSources": [
+        {
+          "bytes": 118573,
+          "file": "CoreBootstrapCandidate.lean",
+          "sha256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54"
+        },
+        {
+          "bytes": 16111994,
+          "file": "CoreByteWordCandidate.lean",
+          "sha256": "7d61ebb72eb891ab7a39cee3e780411f26219b2fcfa57570effa7d4f127ed17a"
+        },
+        {
+          "bytes": 174266,
+          "file": "CoreFoundationCandidate.lean",
+          "sha256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9"
+        }
+      ],
+      "resources": [
+        {
+          "file": "bootstrap-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_environment_export bootstrap ../dist/core-first/authoring/CoreBootstrapCandidate.lean\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:03.16",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "232",
+            "Involuntary context switches": "32",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "485612",
+            "Minor (reclaiming a frame) page faults": "17786",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.10",
+            "User time (seconds)": "3.05",
+            "Voluntary context switches": "215"
+          }
+        },
+        {
+          "file": "build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_native pscv0_native_checks pscv0_core_environment_export pscv0_core_native_closure pscv0_core_native_seed_checks pscv0_bootstrap_compatibility\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.61",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "0",
+            "Involuntary context switches": "235",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "886852",
+            "Minor (reclaiming a frame) page faults": "19815",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "98%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.15",
+            "User time (seconds)": "0.44",
+            "Voluntary context switches": "3020"
+          }
+        },
+        {
+          "file": "byte-word-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_environment_export byte-word ../dist/core-first/authoring/CoreByteWordCandidate.lean\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:10.17",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "31472",
+            "Involuntary context switches": "70",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "934796",
+            "Minor (reclaiming a frame) page faults": "35437",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "98%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.36",
+            "User time (seconds)": "9.69",
+            "Voluntary context switches": "27288"
+          }
+        },
+        {
+          "file": "foundation-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_environment_export foundation ../dist/core-first/authoring/CoreFoundationCandidate.lean\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:03.19",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "344",
+            "Involuntary context switches": "31",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "488424",
+            "Minor (reclaiming a frame) page faults": "17762",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.11",
+            "User time (seconds)": "3.08",
+            "Voluntary context switches": "311"
+          }
+        },
+        {
+          "file": "native-closure-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake env .lake/build/bin/pscv0_core_native_closure ../dist/core-first/authoring/native-closure.json\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:09.86",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "40544",
+            "Involuntary context switches": "95",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "855484",
+            "Minor (reclaiming a frame) page faults": "36859",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.22",
+            "User time (seconds)": "9.63",
+            "Voluntary context switches": "39"
+          }
+        }
+      ],
+      "schema": "psc0-core-ci-resource-observations/1",
+      "scope": "actual commands; not a complete Core release or performance claim"
+    }
+  },
+  "efficiency": {
+    "existingSharedOwnersReused": true,
+    "requiredIntegratedRegressionCompleted": true,
+    "atMostOneActiveAndOnePendingCoreRun": true,
+    "healthyRunsCancelled": false,
+    "existingLakeCacheRestored": true,
+    "seamBuildCommands": 5,
+    "seamBuildWallSecondsSum": 20.98,
+    "controlledSpeedupClaimed": false,
+    "performanceNote": "Actual cache-assisted command observations; the sum is not CI elapsed time or a controlled compiler speedup.",
+    "noAdditionalOptionalRunsNeededAfterSuccess": true
+  },
+  "conclusion": "success",
+  "completedAt": "2026-10-19T13:05:10Z",
+  "startedAt": "2026-10-19T12:56:01Z",
+  "jobs": [
+    {
+      "id": 118072260568,
+      "name": "bootstrap-closure",
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-19T12:58:43Z",
+      "completedAt": "2026-10-19T12:59:22Z",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260568"
+    },
+    {
+      "id": 118072260814,
+      "name": "source-inventory",
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-19T12:58:43Z",
+      "completedAt": "2026-10-19T12:59:32Z",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260814"
+    },
+    {
+      "id": 118072260820,
+      "name": "candidate-authoring",
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-19T12:58:43Z",
+      "completedAt": "2026-10-19T13:05:10Z",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260820"
+    },
+    {
+      "id": 118072260854,
+      "name": "native-seams",
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-19T12:58:43Z",
+      "completedAt": "2026-10-19T12:59:51Z",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260854"
+    }
+  ],
+  "jobHeadVerification": "Each raw GitHub run-job record reports the exact qualified executable head.",
+  "observedAtUTC": "2026-10-19T13:08:36Z",
+  "developmentBaselineRuntime": {
+    "context": "Existing Full compatibility context and shared checked application corpus, including optional capabilities present in that corpus",
+    "compilerEntry": "pscv0_native --emit-all",
+    "profile": "pscv0-v7-native-bounded/73",
+    "compilerExecutionSHA": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+    "qualified": true,
+    "targets": [
+      {
+        "target": "typescript",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T13:04:05.2095469Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (typescript)"
+      },
+      {
+        "target": "directjs",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T13:04:05.3955842Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (directjs)"
+      },
+      {
+        "target": "rust",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T13:04:32.0475346Z",
+        "logMarker": "PSCV0_NATIVE_RUST_RUNTIME: PASS 1069 shared runtime observations"
+      }
+    ],
+    "typescriptVersion": "7.0.2",
+    "rustVersion": "1.98.1",
+    "harnesses": [
+      "psc0/scripts/pscv0-native-runtime.mjs",
+      "psc0/scripts/pscv0-native-rust.mjs"
+    ],
+    "artifactName": "psc0-core-language-baseline-da1116dc28b282dfcf0c8e178c52a69f11477708",
+    "artifactManifest": "psc0/dist/core-first/language-baseline/application.sha256",
+    "perEmittedFileHashesReadByReviewer": false,
+    "artifactHashNote": "CI saved application hashes and emitted products in the named artifact. The archive digest was retrieved; individual saved application hashes were not separately downloaded.",
+    "wasmExecutionIncluded": false,
+    "completeCoreRuntimeProfileQualified": false,
+    "formalTargetRefinementQualified": false,
+    "versionMarkers": [
+      {
+        "observedAt": "2026-10-19T13:04:04.4800218Z",
+        "marker": "Version 7.0.2"
+      },
+      {
+        "observedAt": "2026-10-19T13:04:04.4815845Z",
+        "marker": "Version 7.0.2"
+      },
+      {
+        "observedAt": "2026-10-19T13:04:13.4870936Z",
+        "marker": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      {
+        "observedAt": "2026-10-19T12:58:50.3818940Z",
+        "marker": "node: v22.23.3"
+      }
+    ],
+    "checkedApplication": {
+      "observedAt": "2026-10-19T13:04:02.8244875Z",
+      "prefix": "",
+      "data": {
+        "accepted": true,
+        "assurance": "ordinary-checked",
+        "declarations": 1538,
+        "diagnostics": [],
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "leanVersion": "4.35.0",
+        "profile": "pscv0-v7-native-bounded/73",
+        "provider": "lean4-cpp",
+        "source": "../dist/pscv0-native/application.ps",
+        "targetWordSize": null,
+        "timings": {
+          "elaborateMs": 2487,
+          "emitMs": 979,
+          "eraseMs": 1978,
+          "kernelMs": 321,
+          "parseMs": 916,
+          "prepareMs": 719
+        }
+      }
+    },
+    "nodeVersion": "22.23.3"
+  },
+  "artifacts": [
+    {
+      "id": 12187859181,
+      "name": "psc0-core-first-authoring-da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "bytes": 3152173,
+      "archiveSHA256": "sha256:d3a6cbb84e0ffcef58ece328121289eeab9ff082a4c87de409066367636c8491",
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001/artifacts/12187859181",
+      "createdAt": "2026-10-19T13:05:07Z",
+      "expiresAt": "2026-11-18T13:05:05Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    },
+    {
+      "id": 12187859086,
+      "name": "psc0-core-language-baseline-da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "bytes": 729501,
+      "archiveSHA256": "sha256:361c405a1182f8df1af85f0e8846586edabe6bc5af87acf41bfce9bf317697a9",
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001/artifacts/12187859086",
+      "createdAt": "2026-10-19T13:04:33Z",
+      "expiresAt": "2026-11-18T13:04:32Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    },
+    {
+      "id": 12187384044,
+      "name": "psc0-core-first-source-audit-da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "bytes": 114394,
+      "archiveSHA256": "sha256:e72d902e147c05bc208bedef05d1194a2969e66bd06e0ca45c2fb69f765beaa6",
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001/artifacts/12187384044",
+      "createdAt": "2026-10-19T12:59:29Z",
+      "expiresAt": "2026-11-18T12:59:29Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    },
+    {
+      "id": 12187108446,
+      "name": "psc0-core-first-seams-da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "bytes": 214019,
+      "archiveSHA256": "sha256:2fab8a592f0eb418eae3e372c2f9c9f13aa8e9ba66cdb894ad5384f6328eb5dd",
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001/artifacts/12187108446",
+      "createdAt": "2026-10-19T12:59:49Z",
+      "expiresAt": "2026-11-18T12:59:48Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    },
+    {
+      "id": 12186629033,
+      "name": "psc0-core-bootstrap-da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "bytes": 5341,
+      "archiveSHA256": "sha256:627280b3e20133e3abc1fa2cadba7a0197633ce9f95ed0d0056d75a733c8eb3b",
+      "head": "da1116dc28b282dfcf0c8e178c52a69f11477708",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39255930001/artifacts/12186629033",
+      "createdAt": "2026-10-19T12:59:20Z",
+      "expiresAt": "2026-11-18T12:59:19Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    }
+  ]
+}

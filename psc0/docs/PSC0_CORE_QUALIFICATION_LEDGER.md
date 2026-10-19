@@ -8,7 +8,58 @@ Core language/compiler delivery requires its conformance, profile, runtime, arti
 
 Compiler-sufficient Bootstrap and implementation-source conversion are final selfhost preparation. The checked 76- and 92-declaration components and complete Source/List gate remain retained regressions.
 
-## Latest import-visibility qualification
+## Latest scope and legacy-import qualification
+
+Qualified executable commit: `da1116dc28b282dfcf0c8e178c52a69f11477708`, tree `031cd3cd7e4917ca29ce7c7296c24051aa07a82e`. [Core Linux run 39255930001](https://github.com/dwijayuda/pskernel/actions/runs/39255930001) completed successfully at 2026-10-19T13:05:10Z: all four jobs passed.
+
+| Job | Exact job ID | Result |
+| --- | --- | --- |
+| candidate-authoring | [118072260820](https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260820) | Success |
+| source-inventory | [118072260814](https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260814) | Success |
+| native-seams | [118072260854](https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260854) | Success |
+| bootstrap-closure | [118072260568](https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260568) | Success |
+
+Named namespaces and sections now introduce one frame per component. Named ends close the matching innermost components; unnamed-section barriers, bare-end restrictions, variable restoration and sequential public-section defaults are checked. Literal `_root_` components in scope headers retain their canonical identity. The paired rooted fixtures cover direct, registered, inferred, where, ordinary mutual and structure-family names. Lean exercises its absolute declaration-head syntax; ProofScript uses its selected unqualified declaration head after closing the namespace. Both readers exercise absolute term references.
+
+Headerless legacy clients receive original elaboration declarations and metadata through every transitive import edge, before preparation or runtime lowering. Ordinary checked definition bodies and their private implementation dependencies remain available; genuine source opaque declarations remain opaque. Module clients keep the separate public interface and signature/exposed-body visibility checks. Legacy local-private signatures and exposed bodies are checked separately.
+
+Ordinary module where helpers now have private checked identities. Provider-local aliases allow later commands in that provider to use the source helper name; importers cannot resolve that spelling. Headerless providers retain public helper names. The fixtures check the real helper dependencies, generated equation ownership and source provenance.
+
+| New selected-source group | Independently admitted projects | Owned refusals |
+| --- | ---: | ---: |
+| component scopes | 16 | 16 |
+| literal root scope identity | 2 | 0 |
+| legacy import implementation closure | 11 | 10 |
+| legacy local-private references | 2 | 4 |
+| legacy class/instance/default metadata | 2 | 2 |
+| module/private and legacy/public where helpers | 3 | 6 |
+| **Total** | **36** | **38** |
+
+The native module oracle passes 50 actual compilations: 28 successes and 22 semantic refusals. The visibility oracle passes 25 ordinary classifications, 15 rooted name/privacy checks and three unsupported-scope syntax refusals. Native version/full commit, error ownership/cardinality, exact refusal fragments, output artifacts and proof-hole diagnostics are checked.
+
+Every new positive project uses the separately checked four-declaration base `CoreSelectedIdentity`, `Eq`, `Eq.refl` and `Eq.rec`, with no axioms. Independent checking retains empty trust0 and 2,000,000 heartbeats / 20,000 recursion depth per declaration. The separate Full wrapper policy is unchanged.
+
+Legacy metadata proofs execute ordinary instance synthesis. Default-instance identity, priority 700 and deduplication are inspected directly; fallback execution and complete rollback/default ordering are not claimed. Registered `abbrev ... where` retains the existing `PSCV0-PREDEFINITION-REGISTRATION` refusal. The rooted ordinary mutual fixture makes no new explicit partial-mutual/P0 admission claim.
+
+The complete Foundation.Source/List regression still retains 25 prepared declarations and the exact 53,310-byte canonical payload, SHA-256 `6c7603e8cd49e830a61fca136153117630097052cd8e93bfd3f87f248d2b27a1`. The original source files, their ProofScript counterparts, 92-declaration Foundation candidate, 76-declaration Bootstrap seed and Full logical identity are unchanged.
+
+The retained `pscv0-v7-native-bounded/73` Full compatibility application passes 1,069 observations on each of TypeScript 7.0.2, direct JavaScript and Rust 1.98.1. These application results remain separately attributed from the new scope/import preparation, admission and native controls. Complete Core runtime/profile and formal target refinement remain open.
+
+Preceding attempt 1: [run 39253923410](https://github.com/dwijayuda/pskernel/actions/runs/39253923410) at `31e01c0a45a7ae00d297cb81b3383600bbf5fa73`. The new ProofScript fixture used a qualified declaration head, but its selected declared-name reader consumes one identifier. The remaining dot caused the existing function-without-explicit-binders refusal. Keep Lean's absolute declaration inside the literal-root namespace. In ProofScript, close that namespace and then declare the same absolute identity with its selected unqualified head. Declaration order, bodies, paired canonical admission and all positive/private/family controls are unchanged.
+
+Preceding attempt 2: [run 39254947000](https://github.com/dwijayuda/pskernel/actions/runs/39254947000) at `c823f9564edaa481f2e75d74fdc694007ca8af78`. The new metadata proof used native positional-after-named application order, which the selected reader deliberately rejects. Move x before named A in the selected metadata theorem and matching native fixture. The application owner still supplies A before dictionary synthesis; all bodies, type/class/default/reducibility checks, ordinary synthesis, positive admission and negative controls remain.
+
+Each failed run keeps its own code/job attribution. The final qualification belongs only to the successful executable above.
+
+[The exact qualification](core-first-evidence/core-language-scope-legacy-qualification.json) records the final code/test blobs, unchanged workflow, successful jobs, semantic markers, native case records, archive digests, resource observations and retained identities. The 5 cache-assisted seam build commands totaled 20.98 seconds; this is a command observation, not a controlled speedup.
+
+The requested component/end/root and legacy-body/private/metadata/where obligations are closed at this recorded scope. Complete CL04/CL05 and M2 remain open: the complete selected rule/form/interaction-to-fixture mapping, native proof abstraction inside exposed definitions, full native elaboration/module correspondence and complete Core profile obligations need their own evidence. Core M1–M5 remain the priority; selfhost follows their acceptance.
+
+A documentation-only descendant may be newer than the qualified executable. Preserve every executable/test/asset/workflow blob. Documentation is not a new CI run or loadable profile authority.
+
+The following import-visibility and older blocks are historical receipts; their remaining boundaries describe the state at those exact commits.
+
+## Previous import-visibility qualification
 
 Qualified executable commit: `9024dd92c147ffbbafc3834021ad11540d89578a`, tree `4e8e37fc8ff48423b8aa994a4639b0842f4b33fe`. [Core Linux run 39245007181](https://github.com/dwijayuda/pskernel/actions/runs/39245007181) completed successfully at 2026-10-19T11:36:40Z: all four jobs passed.
 

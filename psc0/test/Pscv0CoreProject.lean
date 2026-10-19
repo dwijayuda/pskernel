@@ -1647,10 +1647,37 @@ private def checkAttributeSimpRoster (entries : List PsSimpEntry) : IO Unit := d
         entry.kind == expected.snd && entry.priority == 1000))
     "selected simp source identity, kind, priority or order changed"
 
+private theorem coreNativeEtaForward (A B : Type) (f : A → B) :
+    (fun x => f x) = f := by rfl
+private theorem coreNativeEtaReverse (A B : Type) (f : A → B) :
+    f = (fun x => f x) := by rfl
+private theorem coreNativeEtaNested (A B : Type) (f : A → A → B) :
+    (fun x => fun y => f x y) = f := by rfl
+private theorem coreNativeEtaLet (A B : Type) (f : A → B) :
+    (fun x => let y := x; f y) = f := by rfl
+
+private def functionEtaPieces : List (String × String) := [
+  ("public theorem coreEtaForward (A B : Type) (f : A -> B) : (fun (x : A) => f x) = f := by rfl\n",
+   "theorem coreEtaForward(A: Type, B: Type, f: A -> B): (fun (x: A) => f(x)) = f := by { rfl }\n"),
+  ("public theorem coreEtaReverse (A B : Type) (f : A -> B) : f = (fun (x : A) => f x) := by rfl\n",
+   "theorem coreEtaReverse(A: Type, B: Type, f: A -> B): f = (fun (x: A) => f(x)) := by { rfl }\n"),
+  ("public theorem coreEtaNested (A B : Type) (f : A -> A -> B) : (fun (x : A) => fun (y : A) => f x y) = f := by rfl\n",
+   "theorem coreEtaNested(A: Type, B: Type, f: A -> A -> B): (fun (x: A) => fun (y: A) => f(x, y)) = f := by { rfl }\n"),
+  ("public theorem coreEtaLet (A B : Type) (f : A -> B) : (fun (x : A) => let y := x; f y) = f := by rfl\n",
+   "theorem coreEtaLet(A: Type, B: Type, f: A -> B): (fun (x: A) => let y := x; f(y)) = f := by { rfl }\n")]
+
 private def checkSourceAttributes : IO Unit := do
   let (seed, profile) ← scopeContext
   let mut paired : List String := []
+  let mut etaAdmissions : List String := []
   for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let eta ← prepare profile "Eta" [importVisibilityInput kind "Eta" "" functionEtaPieces]
+    let _ ← admit seed eta.admissions
+    etaAdmissions := etaAdmissions ++ [eta.admissions]
+    refuse profile "Eta" [importVisibilityInput kind "Eta" "" [
+      ("public theorem coreEtaCaptured (A B : Type) (f : A -> A -> B) (a b : A) : (fun (x : A) => f x a) = (fun (x : A) => f x b) := by rfl\n",
+       "theorem coreEtaCaptured(A: Type, B: Type, f: A -> A -> B, a: A, b: A): (fun (x: A) => f(x, a)) = (fun (x: A) => f(x, b)) := by { rfl }\n")]]
+      true "PSCV0-PROOF: rfl requires definitionally equal sides"
     let library := importVisibilityInput kind "Library" "" attributeLibraryPieces
     let client := importVisibilityInput kind "Entry" "public import Library\n" attributeClientPieces
     let output ← prepare profile "Entry" [client, library]
@@ -1751,6 +1778,9 @@ private def checkSourceAttributes : IO Unit := do
       match psCompilerParsePscv0Program kind source.source with
       | .error _ => pure ()
       | .ok _ => fail ("unselected attribute syntax accepted: " ++ attributes)
+  let [etaLean, etaPs] := etaAdmissions | fail "eta reader pair missing"
+  ensure (etaLean == etaPs) "function eta canonical declarations differ between readers"
+  IO.println "PSCV0_CORE_FUNCTION_ETA: PASS four pinned native theorems, four paired admitted forward/reverse/nested/let programs and two captured-argument refusals"
   let [leanAdmissions, psAdmissions] := paired | fail "attribute reader pair missing"
   ensure (leanAdmissions == psAdmissions) "source attribute paired admissions differ"
   IO.println "PSCV0_CORE_SOURCE_ATTRIBUTES: paired kernel admissions, selected lists and mutual/where/inferred owners, checked simp identity, public/private and diamond metadata, ordinary/default ordering, source-kind preservation and sixteen owned semantic refusals passed"

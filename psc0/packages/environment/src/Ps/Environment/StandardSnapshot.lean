@@ -122,8 +122,11 @@ import Ps.Environment.Fingerprint
 -- preparation39079996655 at abfc20d3; declarations and assumptions unchanged.
 -- Exact five-declaration PSum extension measured independently at9b5cc7c7,
 -- preparation39095995956; no class, instance or assumption additions.
+-- Measured at ac197fade7afa36165055870a3367eeb109051f9, Linux run
+-- 39304161419: unique final Fin runtime/instance identities, then all six
+-- selected Fin declarations freshly replayed at trust0 / 2M / 20k.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:3071911941504503432"
+  "fnv1a64:13221859302266006722"
 
 
 -- SHA-256 was initially qualified at 2a75d31c; this reviewed selected-roster
@@ -176,7 +179,7 @@ def psStandardSnapshotExpected : String :=
 -- run 39069995046, commit 0093a0ae; frozen pre-Order export boundary retained.
 -- Same independently measured bridge-registration payload; no unchecked pin.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1"
+  "sha256:2ccf405d01d9fa0d4e26212fe64c04c172a2b67c431b12c199624fedc31c49e5"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

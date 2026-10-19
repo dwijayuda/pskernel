@@ -306,12 +306,15 @@ private def elaborateGroup (text : String) :
     | _ => throw "nested fixture expected native inductive members"
   let first :: _ := sources | throw "nested fixture has no group source"
   let result ← (psElabInductiveGroup psSelfHostProdPreludeEnvironment chunks [psRootName "u"]).mapError
-    psCompilerPscv0ElabError
+    (fun error => "nested group " ++
+      psNameToString ((psSyntaxNameToName (psElabOriginSource first).fst).getD .anonymous) ++
+      ": " ++ psCompilerPscv0ElabError error)
   let origin := psElabBatchOriginAt 0 first (psElabStableMemberOrigins result.declarations 0) none
   return (result, origin)
 
 private def add (environment : PsEnvironment) (declarations : List PsDeclaration) : IO PsEnvironment :=
-  fromExcept ((psAddDeclarationList environment declarations).mapError psCompilerPscv0ElabError)
+  fromExcept ((psAddDeclarationList environment declarations).mapError
+    (fun error => "nested checked insertion: " ++ psCompilerPscv0ElabError error))
 
 private def selectedOrigin (origin : PsElabBatchOrigin) (name : PsName) : PsElabBatchOrigin :=
   {
@@ -733,12 +736,17 @@ def main (args : List String) : IO Unit := do
   let origins := [shapeOrigin,
     selectedOrigin mutualOrigin (psRootName "M3NestedLeft"),
     selectedOrigin mutualOrigin (psRootName "M3NestedRight"), indexedOrigin]
-  let folds ← fromExcept ((origins.mapM (fold input)).mapError psCompilerPscv0ElabError)
+  let folds ← fromExcept (origins.mapM fun origin =>
+    (fold input origin).mapError (fun error => "nested fold " ++
+      psNameToString ((psSyntaxNameToName origin.sourceName).getD .anonymous) ++
+      ": " ++ psCompilerPscv0ElabError error))
   -- All handlers see the same pre-instance environment. Recursive children
   -- therefore cannot obtain a dictionary for a partially generated instance.
-  let derived ← fromExcept (([shapeOrigin, mutualOrigin, indexedOrigin].mapM fun origin =>
-    psElabDeriveGroupHandler input origin { segments := ["Hashable"], span := origin.span }).mapError
-      psCompilerPscv0ElabError)
+  let derived ← fromExcept ([shapeOrigin, mutualOrigin, indexedOrigin].mapM fun origin =>
+    (psElabDeriveGroupHandler input origin { segments := ["Hashable"], span := origin.span }).mapError
+      (fun error => "nested Hashable " ++
+        psNameToString ((psSyntaxNameToName origin.sourceName).getD .anonymous) ++
+        ": " ++ psCompilerPscv0ElabError error))
   let instances := derived.flatten
   ensure (folds.length == 4 && instances.length == 4) "nested group did not generate each selected method"
   let methods ← add input (folds ++ instances)

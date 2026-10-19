@@ -207,6 +207,17 @@ def psDefEqReadOnlyWithTransparencyProofs (transparency : PsTransparency)
           let pushed := psLocalPushBinding localContext name domain binder
           smaller pushed.context (psExprInstantiate1 body (.fvar pushed.id))
             (psExprInstantiate1 otherBody (.fvar pushed.id))
+      -- Conversion compares well-typed expressions. Opening one lambda and
+      -- applying the other side is function eta; beta/let/iota still use this
+      -- same decreasing conversion walker. No structure eta is inferred.
+      | .lam name domain body binder, other =>
+        let pushed := psLocalPushBinding localContext name domain binder
+        let value := PsExpr.fvar pushed.id
+        smaller pushed.context (psExprInstantiate1 body value) (.app other value)
+      | other, .lam name domain body binder =>
+        let pushed := psLocalPushBinding localContext name domain binder
+        let value := PsExpr.fvar pushed.id
+        smaller pushed.context (.app other value) (psExprInstantiate1 body value)
       | .proj owner index value, .proj otherOwner otherIndex otherValue =>
         psNameEq owner otherOwner && index == otherIndex && smaller localContext value otherValue
       | _, _ => false

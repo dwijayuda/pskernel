@@ -316,7 +316,7 @@ private def checkWellFoundedIdentity : IO Unit := do
       (some wrongFunctionWellFounded) with
   | .ok _ => throw (IO.userError "a checked zero function replaced the retained recursive function body")
   | .error error =>
-    ensure (refusal error == "PSCV0-PREDEFINITION-WF-EQUATION: checked constructor cases do not prove the actual RHS equals the retained source RHS")
+    ensure (refusal error == "PSCV0-PREDEFINITION-WF-EQUATION: checked extensionality and constructor cases do not prove the actual RHS equals the retained source RHS")
       ("wrong function body did not reach the checked case-proof refusal: " ++ refusal error)
 
 private def checkInheritedStrategy : IO Unit := do

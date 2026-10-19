@@ -622,6 +622,29 @@ def psKernelExprHasLooseAt
   | _ =>
       fun (_offset : Nat) => false
 
+
+/-- The native immutable bound is extensionally identical to the original
+    recursive syntactic loose-variable scan for *every* binder offset. -/
+theorem psKernelC0LooseBVarBound_source (expr : PsKernelExpr) (offset : Nat) :
+    decide (offset < expr.psKernelC0LooseBVarBound) =
+      psKernelExprHasLooseAt expr offset := by
+  induction expr generalizing offset <;>
+    simp [PsKernelExpr.psKernelC0LooseBVarBound,
+      psKernelExprHasLooseAt, Nat.lt_max_iff,
+      Nat.lt_succ_iff, Nat.lt_sub_iff_add_lt, *]
+
+/-- Metadata accelerates a syntactic question only; no theorem/type/DefEq
+    judgment or resource exhaustion verdict can result from this cache. -/
+def psKernelC0HasLooseBVarFast
+    (expr : PsKernelExpr) (offset : Nat) : Bool :=
+  decide (offset < expr.psKernelC0LooseBVarBound)
+
+theorem psKernelC0HasLooseBVarFast_source
+    (expr : PsKernelExpr) (offset : Nat) :
+    psKernelC0HasLooseBVarFast expr offset =
+      psKernelExprHasLooseAt expr offset :=
+  psKernelC0LooseBVarBound_source expr offset
+
 def psKernelExprHasLooseBVar
     (expr : PsKernelExpr) : Bool :=
   psKernelExprHasLooseAt expr 0

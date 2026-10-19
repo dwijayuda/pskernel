@@ -482,11 +482,14 @@ private def checkVisibilityScopes : IO Unit := do
     for hidden in
         ["CoreVisibility.before", "CoreVisibility.Nested.overridden",
          "CoreVisibility.mutualPrivate", "CoreVisibility.afterPublic",
-         "rootAfter", "afterAnonymous", "CoreVisibility.mutualPublic.eq_def",
-         "CoreVisibility.mutualPrivate.eq_def"] do
+         "rootAfter", "afterAnonymous", "CoreVisibility.mutualPrivate.eq_def"] do
       refuse profile "Entry"
         [library, input kind "Entry" (scopeClientSource kind hidden)] true
         ("PSCV0-SCOPE: unknown name " ++ hidden)
+    refuse profile "Entry"
+      [library, input kind "Entry"
+        (scopeClientSource kind "CoreVisibility.mutualPublic.eq_def")]
+      true "PSCV0-UNKNOWN-NAME: CoreVisibility.mutualPublic.eq_def"
     let publicSection := match kind with
       | .lean => "module\npublic section"
       | .proofScript => "section"

@@ -9,6 +9,7 @@ on:
       - psc1/test/PsKernelCoreRegression.lean
       - psc1/kernel-lakefile.lean
       - psc1/check-psc1-source.mjs
+      - psc1/scripts/pskernel-generated-smoke.mjs
       - .github/workflows/psc1-pskernel-core-correctness.yml
 
 permissions:
@@ -108,11 +109,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          mkdir -p /tmp/psc1-kernel-ts7
+          printf '%s\\n' '{"name":"psc1-kernel-ts7-isolated","private":true,"version":"0.0.0"}' > /tmp/psc1-kernel-ts7/package.json
+          npm install --prefix /tmp/psc1-kernel-ts7 --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          export PSC0_TSC=/tmp/psc1-kernel-ts7/node_modules/typescript/bin/tsc
+          test -f "$PSC0_TSC"
+          node "$PSC0_TSC" --version
           lake exe psc1 build \
             dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
             --out dist/pskernel-selfhost/pskernel-core.js
           test -s dist/pskernel-selfhost/pskernel-core.js
           test -s dist/pskernel-selfhost/pskernel-core.d.ts
           node --check dist/pskernel-selfhost/pskernel-core.js
+          node scripts/pskernel-generated-smoke.mjs dist/pskernel-selfhost/pskernel-core.js
           echo 'PSC1_GENERATED_JS_KERNEL: PASS'

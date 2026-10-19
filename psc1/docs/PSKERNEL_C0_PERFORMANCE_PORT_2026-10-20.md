@@ -86,3 +86,45 @@ The complete [CI run](https://github.com/dwijayuda/pskernel/actions/runs/3933173
 ### Next measured candidates
 
 Investigate C0's source-substitution/lifting traversal once whole-operation native and JS costs are profiled, especially closed-application regressions and deep binder workloads. Avoid importing experimental indexed DAG interners, session-wide caches or reductions without independent context/fuel/resource evidence and complete portability checks. Always compare against the exact previous native and generated-JS kernel under the same fixture and runner before calling something a net speedup.
+
+
+## Third qualified C0 optimization: direct multi-variable substitution
+
+**Implementation:** `Core/Substitution/Instantiate.lean` — `psKernelC0ExprInstantiateAtChanged` traverses its expression structurally, avoiding the full node-count prepass before simultaneous capture-avoiding de Bruijn substitution. The original `psKernelExprInstantiateAtChangedWithFuel` remains as a differential reference. No change was made to the semantic cache policy, checker resource/fuel admission rules, axioms or Lean pin.
+
+**Qualification:** [GitHub Actions run 39339554386](https://github.com/dwijayuda/pskernel/actions/runs/39339554386) — success on source commit `c9c70d127c8ad1b5bf4dd3405ef2261db2e2c00e`. Native differential tests compare both resulting expressions **and changed flags** for multiple binders, offsets, `let`, projections and metadata; the full 79-source closure passes PSC1 `.lean`, generated `.ps`, TypeScript 7.0.2, generated JS and the multi-substitution JS smoke test.
+
+**Same-run original-vs-C0 native microbenchmarks** from [initial native run 39338352110](https://github.com/dwijayuda/pskernel/actions/runs/39338352110) (that complete run failed only due to a malformed JS *test fixture*, corrected in the successful run):
+
+| Workload | Original | C0 direct | Speedup |
+| --- | ---: | ---: | ---: |
+| 25,000 open multi-substitutions, depth 12 | 22 ms | 17 ms | 1.29x |
+| 25,000 open multi-substitutions, depth 32 | 62 ms | 50 ms | 1.24x |
+
+This is a microbenchmark, not a complete-checker, JavaScript or memory benchmark.
+
+## Fourth qualified C0 optimization: structural binder-aware lifting
+
+**Implementation:** `Core/Substitution/Lift.lean` — the original bounded `psKernelExprLiftLooseBVarsChangedWithFuel` remains the reference. The optimized source worker `psKernelC0LiftNonzeroChanged` structurally recurses over immediate expression subterms, preserving binder-specific cutoffs, unchanged subtrees and all original de Bruijn semantics. The thin `psKernelC0LiftChanged` wrapper returns unchanged for zero amount. This split is important: PSC1 cannot resolve direct recursion under an outer zero-amount conditional; separating the worker resolves the portable frontend issue. Neither the kernel's admission fuel policy nor cache safety is changed.
+
+**Qualification:** [GitHub Actions run 39343105786](https://github.com/dwijayuda/pskernel/actions/runs/39343105786) — success on implementation commit `d329a70fc07a9ac042ccfdac242f380d77878da1`.
+
+- Native Lean 4.34.0 build: **175** jobs; focused native regressions: **61 passed** (including 13 new lift parity cases for zero shift, cutoffs, binders, `let`, projection, metadata, closed terms).
+- PSC1 all-portable source profile: **94 modules**, containing the full 79-module kernel.
+- PSC1 check of original `.lean` and canonical generated `.ps` closure: **991 declarations each**, all **79** kernel source files verified.
+- Generated JS, `.d.ts`, syntax check, and Node runtime smoke: **passed**, including de Bruijn shifts, cutoff preservation and zero-shift identity.
+
+**Same-run native lifting microbenchmark** on the qualified commit (25,000 operations each):
+
+| Workload | Original | Direct structural lifting | Interpretation |
+| --- | ---: | ---: | --- |
+| Depth 12 | 18 ms | 19 ms | Small regression on this one run |
+| Depth 32 | 44 ms | 36 ms | 1.22x improvement on this run |
+
+Do not hide the depth-12 regression or claim a general speedup. The previous native run of the first lift shape (which PSC1 could not elaborate) showed 19 vs 16 ms at depth 12 and 47 vs 43 ms at depth 32, illustrating the sensitivity of these small timings. Do not compare between-run totals as if from the same runner. Before making lifting the permanent default in an integrated production branch, collect repeated order-balanced complete-operation and generated-JS benchmarks and check memory.
+
+### Trust and self-hosting boundary after four scoped optimizations
+
+All four optimizations are isolated to `fix/psc1-pskernel-core-cross-branch-20261020`, and all source-level PSC1, generated `.ps`, native and JavaScript smoke gates for the exact qualified lifting implementation passed. No merging into another PSC1 development head, full repeated compiler/kernel fixed-point proof, Arena 193/193 result, whole-Mathlib parity, independent metatheory soundness or complete backend preservation proof is claimed. The experimental C0 indexed DAG kernel, session-owned handles and unchecked reductions were **not** imported.
+
+The next priority should be a same-run *whole checked operation* benchmark suite (WHNF, DefEq, checked app, ordinary/mutual/nested admission, malformed rejection), memory and generated-JS performance. A further microscopic substitution gain alone does not establish a production performance win.

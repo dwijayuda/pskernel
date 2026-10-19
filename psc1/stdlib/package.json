@@ -1,23 +1,17 @@
 {
-  "name": "@proofscript/stdlib",
-  "version": "0.1.0-psc0.1",
+  "name": "@proofscript/stdlib-source",
+  "version": "0.1.0-psc1.1",
   "private": true,
   "type": "module",
+  "description": "PSC1 portable standard-library source workspace, distinct from the staged @proofscript/stdlib package",
   "proofscript": {
     "bootstrap": false,
-    "sourceRoots": [
-      "."
-    ],
-    "testRoots": [
-      "test"
-    ],
+    "sourceRoots": ["."],
+    "testRoots": ["test"],
     "outDir": "dist",
     "role": "portable-stdlib",
     "portable": true,
-    "npmStagedAs": "psc0/packages/stdlib",
-    "sourceVariants": [
-      "ps",
-      "lean"
-    ]
+    "npmStagedAs": "psc1/packages/stdlib",
+    "sourceVariants": ["ps", "lean"]
   }
 }

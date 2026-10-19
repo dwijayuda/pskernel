@@ -325,8 +325,35 @@ def psTestGenericSpecialization : Bool :=
             && psIrSpecNoGenericDeclaration module.declarations
       | _, _, _, _ => false
 
+-- Deliberately forged 'validated' wrappers must not grant typing
+-- authority to either specialization entry point.
+def psIrSpecRejectsForgedValidation : Bool :=
+  let invalid : PsVerifiedIrModule :=
+    PsVerifiedIrModule.mk [] [] []
+      [PsVerifiedIrDeclaration.mk "bad" [] []
+        (.primitive .nat) (.literal (.bool true))]
+  match psIrSpecializeValidatedModule { raw := invalid },
+        psIrSpecializeUniformValidatedModule { raw := invalid } with
+  | .error .inputValidationFailed, .error .inputValidationFailed => true
+  | _, _ => false
+
+def psIrSpecAcceptsCheckedClosedInput : Bool :=
+  let good : PsVerifiedIrModule :=
+    PsVerifiedIrModule.mk [] [] []
+      [PsVerifiedIrDeclaration.mk "identity" []
+        [PsVerifiedIrParameter.mk "x" (.primitive .bool)]
+        (.primitive .bool) (.var "x")]
+  match psIrSpecializeValidatedModule { raw := good },
+        psIrSpecializeUniformValidatedModule { raw := good } with
+  | .ok specialized, .ok uniform =>
+      (psCheckVerifiedIrModule psIrCheckDefaultOptions specialized.raw).accepted
+        && (psCheckVerifiedIrModule psIrCheckDefaultOptions uniform.raw).accepted
+  | _, _ => false
+
 def main : IO Unit := do
-  if psTestGenericSpecialization then
+  if psTestGenericSpecialization
+      && psIrSpecRejectsForgedValidation
+      && psIrSpecAcceptsCheckedClosedInput then
     IO.println "PSC1_IR_SPECIALIZE_TESTS: PASS"
   else
     throw (IO.userError "PSC1_IR_SPECIALIZE_TESTS: FAIL")

@@ -1,0 +1,16 @@
+{
+  "name": "@proofscript/psc1-host-tools",
+  "version": "0.1.0-psc1.1",
+  "private": true,
+  "type": "module",
+  "description": "Formatting, source-map observation and transactional publication; never a proof checker",
+  "engines": { "node": ">=22" },
+  "dependencies": {
+    "@babel/parser": "7.28.0",
+    "prettier": "3.6.2"
+  },
+  "devDependencies": {
+    "@jridgewell/trace-mapping": "0.3.25"
+  },
+  "scripts": { "test": "node test-artifacts.mjs" }
+}

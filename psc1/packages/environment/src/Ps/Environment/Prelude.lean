@@ -820,8 +820,23 @@ def psPreludeEnvText11 : PsEnvironment :=
     (PsDeclaration.axiomDecl
       psStringPosRawByteIdxName [] psPreludeNatUnaryType)
 
-def psPreludeEnvList0 : PsEnvironment :=
+def psPreludeEnvText12 : PsEnvironment :=
   psPreludeAdd psPreludeEnvText11
+    (PsDeclaration.axiomDecl
+      psStringPosRawNextName [] psPreludeStringPositionType)
+
+def psPreludeEnvText13 : PsEnvironment :=
+  psPreludeAdd psPreludeEnvText12
+    (PsDeclaration.axiomDecl
+      psStringPosRawAtEndName [] psPreludeStringAtEndType)
+
+def psPreludeEnvText14 : PsEnvironment :=
+  psPreludeAdd psPreludeEnvText13
+    (PsDeclaration.axiomDecl
+      psStringModernAppendName [] psPreludeStringBinaryType)
+
+def psPreludeEnvList0 : PsEnvironment :=
+  psPreludeAdd psPreludeEnvText14
     (PsDeclaration.axiomDecl
       psListName [] psPreludeUnaryTypeConstructorType)
 

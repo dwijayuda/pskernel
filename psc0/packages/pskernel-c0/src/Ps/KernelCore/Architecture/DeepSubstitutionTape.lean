@@ -23,8 +23,11 @@ structure PsKernelC0DeepSubstOperation where
 def psKernelC0DeepSubstApply
     (source : PsKernelExpr)
     (operation : PsKernelC0DeepSubstOperation) : PsKernelExpr :=
-  (psKernelC0ExprInstantiateOneChanged
-    source operation.replacement operation.binderOffset).1
+  if operation.binderOffset == 0 then
+    psKernelExprInstantiate1 source operation.replacement
+  else
+    (psKernelC0ExprInstantiateOneChanged
+      source operation.replacement operation.binderOffset).1
 
 /-- The newest pending operation is stored at the *head*: appending a
     dependent substitution is O(1) and preserves all previous operations. -/
@@ -71,5 +74,16 @@ theorem psKernelC0DeepSubstForceOne
       (psKernelC0DeepSubstPush (psKernelC0DeepSubstPure expr)
         ⟨replacement, offset⟩) =
       (psKernelC0ExprInstantiateOneChanged expr replacement offset).1 := by
+  simp [psKernelC0DeepSubstForcePush,
+    psKernelC0DeepSubstForcePure, psKernelC0DeepSubstApply]
+
+/-- Offset zero is exactly the public source capture-avoiding instantiator,
+    including its binder-headed loose-variable shortcut. -/
+theorem psKernelC0DeepSubstForceOneSource
+    (expr replacement : PsKernelExpr) :
+    psKernelC0DeepSubstForce
+      (psKernelC0DeepSubstPush (psKernelC0DeepSubstPure expr)
+        ⟨replacement, 0⟩) =
+      psKernelExprInstantiate1 expr replacement := by
   simp [psKernelC0DeepSubstForcePush,
     psKernelC0DeepSubstForcePure, psKernelC0DeepSubstApply]

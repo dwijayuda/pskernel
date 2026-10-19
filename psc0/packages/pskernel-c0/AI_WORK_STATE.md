@@ -1,5 +1,24 @@
 # AI_WORK_STATE — PSKernel-C0 live checkpoint
 
+## 20 October 2026 — authoritative Core-first pivot (active PR #152)
+
+**Instruction:** prioritize a usable independent kernel for PSC0's **real selected Core compiler**, not 193/193 Arena/Full Lean. Production C0 `perf/pskernel-c0-v7-rust-20261012` stays at original base `41322875539de66acf9eb9b01ddf73df82a61bf2`; original default recursive fuel remains **4096**, no new logical axiom or unchecked admission. Experimental deep-inference PR #161 was **closed UNMERGED** with its research branch/history intact. Do not restart speculative hash/memo/fuel optimization without an independently measured Core failure.
+
+**K0 source inventory, VERIFIED:** native selected audit at `4e7ecea126c1f18977c86ce66e4fddb7df144aab`, [run39193886098](https://github.com/dwijayuda/pskernel/actions/runs/39193886098), distinguished selected `Ps.Compiler.Pscv0ModuleEngine` from Full `Ps.Compiler.Pscv0Modules` while retaining TS/Rust/Wasm/IR/codegen imports: selected 224 source modules, 21,513 source-owned declarations, 418 external typed roots and 5,619 external Lean declarations; Full 322/191,633/458/5,690. Source size is much smaller; **external checking workload is only ~1.25% smaller**, so Core C0 can still be slow.
+
+**K0 canonical integrity, VERIFIED:** [run39294571158](https://github.com/dwijayuda/pskernel/actions/runs/39294571158) qualifies `test/C0CoreSelectedRoots.py` against the immutable selected audit artifact. Complete typed dependency graph, root witnesses, approved three axioms, empty boundary, canonical name uniqueness, no unsafe/partial, and 5 adversarial corruptions denied. Selected raw JSON SHA256 `352d9d469dc2ffebf26d0bcf411dd6c5d582d0628cdf2e1600ca92071fd1c1c9`. **Not C0 admission.**
+
+**Source-derived diagnostic frontier, VERIFIED:** [run39295457368](https://github.com/dwijayuda/pskernel/actions/runs/39295457368) passes `C0CoreSelectedFrontier.py`, four disjoint exact root sets with transitive closure measured from the same graph: (99 roots/4,632 closure), (3/4,679), (163/4,634), (153/4,631); source union 418/5,619, zero omissions. A three-root case already reaches >83% of external declarations. Shards are a **diagnostic, not a checker/Core qualification**.
+
+**K1 whole external replay, OPEN:** [run39294895812](https://github.com/dwijayuda/pskernel/actions/runs/39294895812) corrected an initial workflow-only toolchain-cwd failure in run39294727262; C0 and official exporter built, exact all 418 root source exported, **official pinned Lean accepted same immutable bytes**. The strict C0 check with fuel4096 was in progress at the last checkpoint. It must end in `C0ExportVerdict.accepted` with bounded wall/RSS; a timeout/host crash/resource verdict FAILS.
+
+**K1 bottleneck localization, OPEN:** [run39295729394](https://github.com/dwijayuda/pskernel/actions/runs/39295729394) independently reconstructs the same graph, prints the exact 3 heavy roots, official-checks their exported source and runs native C0 `--require-accepted --trace-declarations` at source fuel4096 with a 180s host limit to record the exact active proof if it fails. No equivalence or acceptance claim for a subset.
+
+**Remaining actual Core release critical path:** K1 strict entire external 5,619 declaration graph; K2 check all 21,513 compiler-owned declarations (not included in K1), with real inductive/recursor/rule dependencies and original approved assumptions; K3 independent same-byte official oracle, negative corpus and peak RSS/latency; K4 selected non-default provider only AFTER proofs plus Stage1/2/3 source fixed point. Re-audit the final frozen PSC0 compiler SHA because current native audit is pinned to the earlier 4e7ece source. Keep current official Lean as Stage0 checker; do not block ongoing compiler work.
+
+**Files/links:** `C0_CORE_FIRST_QUALIFICATION_2026-10-19.md`, [draft PR #152](https://github.com/dwijayuda/pskernel/pull/152), `C0CoreSelectedRoots.py`, `C0CoreSelectedFrontier.py`, workflows `pskernel-c0-selected-core-{inventory,replay,frontier-heavy}.yml`.
+
+
 ## 19 October 2026 — Source-authenticated shard-0 worker root and existing certified fast kernel control
 
 - **All 8 external-root shards:** [run 39193023883](https://github.com/dwijayuda/pskernel/actions/runs/39193023883), exact 458-root union (eight 57/58-root partitions), independently accepted by official Lean 4.35, **all eight C0 strict replay jobs timed out** at host limit 600s, source fuel still 4096. No false acceptance/rejection inference; this is a serious unqualified native full-checker performance problem.

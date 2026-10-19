@@ -28,7 +28,7 @@ def main : IO Unit := do
     .bvar 0, .fvar a, .mvar b, .sort .zero,
     bare, uA, uB, .const a [.zero, .param b],
     .app bare bare, .app uA uB, .app uB uA,
-    .lam a uA bare .explicit,
+    .lam a uA bare .default,
     .forallE a bare uB .default,
     .letE a bare uA bare false,
     .mdata 7 uB, .proj a 0 bare, .lit (.nat 9)]

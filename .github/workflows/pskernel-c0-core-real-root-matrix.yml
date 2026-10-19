@@ -1,0 +1,119 @@
+name: PSKernel-C0 strict real compiler external roots
+on:
+  push:
+    branches: [feature/pskernel-c0-core-qualification-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-core-real-root-matrix.yml'
+      - 'psc0/packages/pskernel-c0/test/C0CoreRealRootWitness.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-import-real-roots:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - root: ByteArray.toList
+            source: psSourceMapUrl
+            module: Ps.Codegen.SourceMap
+          - root: Char.toLower
+            source: PsWasm.hexDigit
+            module: Ps.BackendWasm.Wat
+          - root: Int.repr
+            source: psCheckedAdmissionNatToString
+            module: Ps.Bridge.CheckedAdmissions
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: c0
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 53c28cfe3abd9e8fae93e7935357dbc4402c4b09
+          path: compiler-witness
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/docs/core-first-evidence/native-assumption-paths.json
+      - name: Verify identity and authentic compiler source root
+        shell: bash
+        env:
+          ROOT: ${{ matrix.root }}
+          SOURCE: ${{ matrix.source }}
+          MODULE: ${{ matrix.module }}
+        run: |
+          set -euo pipefail
+          test "$(git -C compiler-witness rev-parse HEAD)" = 53c28cfe3abd9e8fae93e7935357dbc4402c4b09
+          python3 c0/psc0/packages/pskernel-c0/test/C0CoreRealRootWitness.py \
+            compiler-witness/psc0/docs/core-first-evidence/native-assumption-paths.json \
+            "$ROOT" "$SOURCE" "$MODULE"
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: c0/psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Build independent native C0 and official Lean 4.35 exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat c0/psc0/packages/pskernel-c0/lean-toolchain)" = leanprover/lean4:v4.35.0
+          (cd c0/psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+      - name: Generate and independently check genuine complete source dependency
+        shell: bash
+        env:
+          ROOT: ${{ matrix.root }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf '%s\n' "$ROOT" > evidence/root.txt
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env .lake/build/bin/lean4export Init -- "$ROOT") > evidence/export.ndjson
+          test -s evidence/export.ndjson
+          sha256sum evidence/export.ndjson > evidence/SHA256SUMS
+          wc -lc evidence/export.ndjson | tee evidence/size.txt
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env leanchecker --from-export "$GITHUB_WORKSPACE/evidence/export.ndjson") > evidence/official-verdict.txt 2>&1
+          grep -Fq 'Lean default kernel accepts the solution' evidence/official-verdict.txt
+          echo "C0_ROOT_OFFICIAL=$ROOT accepted=true"
+      - name: Strict C0 same-bytes full declaration replay
+        shell: bash
+        env:
+          ROOT: ${{ matrix.root }}
+        run: |
+          set -euo pipefail
+          set +e
+          (cd c0/psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/evidence/c0-resources.txt" \
+              timeout 300s .lake/build/bin/c0OfficialReplay --require-accepted \
+                "$GITHUB_WORKSPACE/evidence/export.ndjson" 4096) > evidence/c0-verdict.txt 2>&1
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > evidence/exit.txt
+          grep -F 'C0_REAL_EXPORT replay_outcome=' evidence/c0-verdict.txt | tail -n 1 || true
+          if [ "$rc" -ne 0 ]; then
+            tail -n 55 evidence/c0-verdict.txt
+            echo "C0_REAL_ROOT_NOT_QUALIFIED root=$ROOT exit=$rc" >&2
+            exit 1
+          fi
+          grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' evidence/c0-verdict.txt
+          echo "C0_REAL_ROOT_QUALIFIED root=$ROOT checked=true fuel=4096"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: c0-real-root-${{ matrix.root }}
+          path: evidence/
+          retention-days: 21
+          if-no-files-found: warn

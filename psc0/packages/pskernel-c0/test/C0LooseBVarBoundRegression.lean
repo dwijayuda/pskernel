@@ -53,11 +53,38 @@ private theorem c0_bound_decide_pred (o a : Nat) :
 theorem c0LooseBVarBound_source (expr : PsKernelExpr) (offset : Nat) :
     psKernelC0HasLooseBVarFast expr offset =
       psKernelExprHasLooseAt expr offset := by
-  induction expr generalizing offset <;>
-    simp_all [psKernelC0HasLooseBVarFast,
-      PsKernelExpr.psKernelC0LooseBVarBound,
-      psKernelExprHasLooseAt, c0_bound_decide_max, c0_bound_decide_pred,
-      c0_bound_lt_succ, c0_bound_decide_ble]
+  induction expr generalizing offset with
+  | app fn arg ihf iha =>
+      simp only [psKernelC0HasLooseBVarFast,
+        PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
+      rw [c0_bound_decide_max, ihf offset, iha offset]
+  | lam name ty body bi iht ihb =>
+      simp only [psKernelC0HasLooseBVarFast,
+        PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
+      rw [c0_bound_decide_max, c0_bound_decide_pred,
+        iht offset, ihb (offset + 1)]
+  | forallE name ty body bi iht ihb =>
+      simp only [psKernelC0HasLooseBVarFast,
+        PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
+      rw [c0_bound_decide_max, c0_bound_decide_pred,
+        iht offset, ihb (offset + 1)]
+  | letE name ty value body nondep iht ihv ihb =>
+      simp only [psKernelC0HasLooseBVarFast,
+        PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
+      rw [c0_bound_decide_max, c0_bound_decide_max, c0_bound_decide_pred,
+        iht offset, ihv offset, ihb (offset + 1)]
+  | mdata _ body ih =>
+      simpa [psKernelC0HasLooseBVarFast,
+        PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
+        using ih offset
+  | proj _ _ body ih =>
+      simpa [psKernelC0HasLooseBVarFast,
+        PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
+        using ih offset
+  | _ =>
+      simp [psKernelC0HasLooseBVarFast,
+        PsKernelExpr.psKernelC0LooseBVarBound,
+        psKernelExprHasLooseAt, c0_bound_lt_succ, c0_bound_decide_ble]
 
 
 /-!

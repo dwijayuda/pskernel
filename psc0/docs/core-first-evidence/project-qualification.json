@@ -1,0 +1,107 @@
+{
+  "schema": "pscv0-core-project-qualification/1",
+  "head": "d444e33d4f076d56ce141745c7ac0c7787dbd9f3",
+  "tree": "974b074ff2844725c3210da19941da59d00c3876",
+  "run": 39189228561,
+  "job": 117858124373,
+  "owner": "Ps.Compiler.Pscv0ModuleEngine",
+  "fullWrapper": "Ps.Compiler.Pscv0Modules",
+  "pairedSourceKinds": [
+    "lean",
+    "proofScript"
+  ],
+  "actualDependenciesRetained": true,
+  "inputOrderInvariant": true,
+  "originalCallerProfileRetained": true,
+  "moduleImportedEnvironmentsRetained": true,
+  "canonicalPairEqual": true,
+  "finiteIndependentAdmission": true,
+  "graphScopeAndMetadataRefusals": true,
+  "runtimeWidths": [
+    null,
+    32,
+    64
+  ],
+  "typedIrValidated": true,
+  "publicImportPositiveKinds": [
+    "proofScript"
+  ],
+  "nativeModuleGrammarComplete": false,
+  "persistentArtifactAuthentication": false,
+  "emittedBackendExecutionQualified": false,
+  "actualCompilerFilesQualifiedByThisProbe": false,
+  "independentSourceGraph": {
+    "environmentBytes": 49489,
+    "externalImports": [],
+    "fullCompositionImports": [],
+    "label": "candidate",
+    "moduleCount": 224,
+    "roots": [
+      "Ps.Compiler.Pscv0ModuleEngine",
+      "Ps.BackendTs.Readable",
+      "Ps.BackendRust.Module",
+      "Ps.BackendWasm.Module",
+      "Ps.CompilerIr.Checked",
+      "Ps.Codegen.Api",
+      "Ps.Codegen.Provenance"
+    ],
+    "sourceBytes": 2783218,
+    "unresolvedProjectImports": []
+  },
+  "allFourJobsPassed": true,
+  "jobs": [
+    {
+      "id": 117858124373,
+      "name": "native-seams",
+      "conclusion": "success"
+    },
+    {
+      "id": 117858124646,
+      "name": "candidate-authoring",
+      "conclusion": "success"
+    },
+    {
+      "id": 117858124680,
+      "name": "source-inventory",
+      "conclusion": "success"
+    },
+    {
+      "id": 117858124783,
+      "name": "bootstrap-closure",
+      "conclusion": "success"
+    }
+  ],
+  "runURL": "https://github.com/dwijayuda/pskernel/actions/runs/39189228561",
+  "completedAt": "2026-10-19T02:24:06Z",
+  "nativeWorkload": {
+    "qualificationHead": "d444e33d4f076d56ce141745c7ac0c7787dbd9f3",
+    "qualificationRun": 39189228561,
+    "qualificationJob": 117858124646,
+    "summary": {
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "closureDeclarations": 5690,
+      "externalRoots": 458,
+      "partial": [],
+      "schema": "pscv0-core-native-closure-summary/1",
+      "sourceDeclarations": 191633,
+      "sourceModules": 322,
+      "unsafe": []
+    },
+    "rosterMatch": {
+      "candidateKernelAdmitted": false,
+      "nativeClosureDeclarations": 5690,
+      "nativeClosureSHA256": "68954ac16965b562c5a5a25ae864f6f1cd6fcdc57c14fdc58c329c17a8d8c319",
+      "sourceHead": "d444e33d4f076d56ce141745c7ac0c7787dbd9f3",
+      "sourceModules": 322,
+      "sourceParityClaim": false
+    },
+    "scope": "322-module existing Full portable route, measured after generic project extraction; raw native reachability only",
+    "importedCoreCandidateAdmitted": false,
+    "sourceParityQualified": false,
+    "backendExecutionQualified": false
+  }
+}

@@ -1,7 +1,7 @@
 {
   "schema": "psc0-core-first-environment-ledger/1",
   "purpose": "Design and evidence ledger only; not a loadable or authenticated profile",
-  "status": "checked-bootstrap-seed-and-selected-frontend-slice",
+  "status": "core-first-fresh-project-and-complete-foundation-source-slice-qualified; whole profiles remain unqualified",
   "authority": {
     "reference": "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md",
     "referenceGitBlobSHA1": "694115223777599ba28ee175e14bb642b7b6aa4b",
@@ -150,7 +150,7 @@
       "assumptionPolicyStatus": "Whole-compiler policy and actual closure remain unqualified within the global approved maximum; the checked seed uses an empty allowlist and no axioms."
     },
     "Core": {
-      "status": "native-workload-reachability-measured; selected Standard/source/runtime qualification open",
+      "status": "native-workload-measured; complete Foundation source subset qualified; whole Standard/source/runtime profile remains open",
       "selected": false,
       "rootOwner": "native declaration/module ownership plus explicit reviewed bootstrap seeds",
       "emptyBoundaryRequired": true,
@@ -233,18 +233,26 @@
           "nativeOutputLevels": [],
           "nativeOutputParameters": []
         }
-      ]
+      ],
+      "classificationReport": "psc0/docs/core-first-evidence/bootstrap-full-difference-classification.json",
+      "classificationScope": "34 literal difference/missing cells; source inspection only, no equivalence or migration",
+      "latestReproducedHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88"
     }
   },
   "identityBinding": {
     "logicalSerializerOwner": "Ps.Environment.Fingerprint",
     "kernelReplayOwner": "PsKernelLean.Replay",
     "completeProfileIdentity": "not-yet-qualified",
-    "externalPreparedModuleCacheAuthentication": "open",
+    "externalPreparedModuleCacheAuthentication": "no selected persistent-cache consumer exists; future consumer qualification open",
     "profileLabelIsAuthority": false,
     "compilerContextOwner": "Ps.Compiler.Engine",
     "selectedSingleSourceOwner": "Ps.Compiler.Pscv0Engine",
-    "existingProjectCompositionRemainsFull": true
+    "selectedProjectOwner": "Ps.Compiler.Pscv0ModuleEngine",
+    "fullProjectCompatibilityOwner": "Ps.Compiler.Pscv0Modules",
+    "existingHostCompatibilitySelection": "Full",
+    "freshProjectContextPropagation": "qualified in synthetic project and complete Foundation source probes",
+    "freshReceiptsAuthenticateExternalArtifacts": false,
+    "genericProjectPreparationRequiresFull": false
   },
   "measured": {
     "sourceImportsAndBlobBytes": true,
@@ -255,13 +263,18 @@
     "exactCommittedBootstrapReplayAndReproduction": true,
     "literalSeedFullComparison": true,
     "buildCommandResources": true,
-    "installedNpmSize": false
+    "installedNpmSize": false,
+    "selectedPairedFreshProjectAdmission": true,
+    "completeFoundationCompilerSourceAdmission": true,
+    "foundationCandidateNativeReproductionAndMetadata": true,
+    "originalSeedLiteralAndEffectiveReducibilityInFoundationCandidate": true,
+    "seedFullDifferenceSourceClassification": true
   },
   "notYetQualified": [
-    "dependency-complete selected Core Standard",
+    "dependency-complete selected Core Standard and whole compiler-sufficient Bootstrap",
     "literal Bootstrap/Core/Full inclusion",
-    "actual selected compiler source conversion",
-    "same-profile project/module/cache authentication",
+    "entire authoritative compiler selected source conversion and admission",
+    "independently authorized host/profile and persisted-artifact binding",
     "Core runtime and backend correspondence",
     "independent npm payloads and installed bytes",
     "Stage1",
@@ -426,21 +439,30 @@
     "draft": true,
     "baseBranch": "psc0/pscv0-v7-native-lean-v1",
     "baseHead": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
-    "promotionApproved": false
+    "promotionApproved": false,
+    "lastQualifiedCodeHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "lastQualifiedCodeRun": 39191534560,
+    "checkedAtUTC": "2026-10-19 02:59:38",
+    "headAtCheck": "1995a478af7aeb83032749fbdb9a2cfa96d28a88"
   },
   "sourceInventory": {
     "file": "psc0/docs/PSC0_CORE_SOURCE_AUDIT.json",
     "stage0Head": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
-    "candidateHead": "9f06af4cad58fd10c4224a52cd89e38a2a753b51",
-    "candidateFullModules": 321,
-    "candidateFullSourceBytes": 26398392,
+    "candidateHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "candidateFullModules": 322,
+    "candidateFullSourceBytes": 26400284,
     "independentSelectedCandidateModules": 223,
-    "independentSelectedCandidateSourceBytes": 2765757,
-    "independentCandidateIncludesExistingProjectLoader": false,
+    "independentSelectedCandidateSourceBytes": 2765743,
+    "independentSelectedEngineIncludesProjectPreparation": false,
+    "independentProjectModules": 224,
+    "independentProjectSourceBytes": 2783218,
+    "independentProjectIncludesFreshPreparation": true,
+    "compilerSourceEnvironmentModules": 11,
+    "compilerSourceEnvironmentBytes": 211778,
     "sourceParityQualified": false,
     "installedSizeMeasured": false,
-    "latestReproducedHead": "e059098683d3388fc9f893ec12027b4998eafd52",
-    "latestSourceJob": 117840891994
+    "latestReproducedHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "latestSourceJob": 117865812405
   },
   "initialEnvironmentSliceQualification": {
     "head": "93107eab14b7347f9605b1396c7a79f2b628ba61",
@@ -497,50 +519,289 @@
     "sameNativeGraphAsPriorQualification": true
   },
   "nextCriticalPath": [
-    "Qualify required class/instance/alias/source registrations; loaded native Decidable/Nonempty rows are measured, but the seed installs no registries",
-    "Resolve literal seed/Full declaration compatibility through a checked migration",
-    "Bind exact environment/runtime identity through Pscv0Modules, host admission and caches",
-    "Freeze and compile an actual selected compiler-source subset, then retain the entire compiler denominator",
-    "Qualify mutual-data representations, bounded while conversion, runtime/backends and Stage1–3",
-    "Separate npm package payloads and measure fixed clean installations"
+    "Preserve the complete Source/List gate, then independently measure an additive String-root candidate for the complete Syntax.Token module",
+    "Qualify every Token source declaration and its Source import through both selected routes; inspect exact String.Internal boundaries before Cursor/Name",
+    "Qualify actual compiler mutual-data representations, fuel recursion, deriving and bounded while conversion",
+    "Qualify measured word/string proof dependencies, noncomputable runtime replacements and actual backend execution",
+    "Establish compiler-sufficient Bootstrap and Core policy/identity, then separately reviewed compatible Full composition",
+    "Implement and qualify any real external artifact consumer against independently authorized inputs; no selected cache currently exists",
+    "Complete the entire frozen compiler Stage1–3, reconstruction and independent package payload measurements"
   ],
   "documentationIsLoadableAuthority": false,
   "latestCodeQualification": {
-    "head": "e059098683d3388fc9f893ec12027b4998eafd52",
-    "tree": "bc0cffc2ab7ad51bb133bc8943602c10b6afd29f",
-    "run": 39183454255,
+    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "tree": "cfe1b484dc6d879e3fea20693d09c2c821b88652",
+    "run": 39191534560,
     "conclusion": "success",
     "jobs": [
       {
-        "id": 117840891809,
+        "id": 117865812255,
         "name": "bootstrap-closure",
         "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39183454255/job/117840891809"
+        "conclusion": "success"
       },
       {
-        "id": 117840891940,
-        "name": "native-seams",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39183454255/job/117840891940"
-      },
-      {
-        "id": 117840891994,
+        "id": 117865812405,
         "name": "source-inventory",
         "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39183454255/job/117840891994"
+        "conclusion": "success"
       },
       {
-        "id": 117840892112,
+        "id": 117865812512,
         "name": "candidate-authoring",
         "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39183454255/job/117840892112"
+        "conclusion": "success"
+      },
+      {
+        "id": 117865812678,
+        "name": "native-seams",
+        "status": "completed",
+        "conclusion": "success"
       }
     ],
-    "evidence": "psc0/docs/core-first-evidence/e059-qualification.json",
-    "scope": "Checked Bootstrap seed and selected single-source compiler slice; no whole-compiler profile, runtime/backend, package or selfhost qualification"
+    "evidence": "psc0/docs/core-first-evidence/1995-qualification.json",
+    "scope": "Fresh selected project context plus complete Foundation.Source/List paired source and independent admission; unchanged Bootstrap and Full regressions retained"
+  },
+  "components": {
+    "compilerSourceFoundationCandidate": {
+      "owner": "Ps.Environment.CompilerSourceCandidate",
+      "dataOwner": "Ps.Environment.CompilerSourceCandidateData",
+      "asset": {
+        "bytes": 174266,
+        "gitBlobSHA1": "9072e3215a7820090e704ad727bc8831c27084cd",
+        "sha256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9"
+      },
+      "authoringHead": "d444e33d4f076d56ce141745c7ac0c7787dbd9f3",
+      "authoringRun": 39189228561,
+      "authoringJob": 117858124646,
+      "authoringReceipt": "psc0/docs/core-first-evidence/foundation-native-authoring.json",
+      "nativeMetadataReceipt": "psc0/docs/core-first-evidence/foundation-native-metadata.json",
+      "declarations": 92,
+      "boundary": [],
+      "allowedAssumptions": [],
+      "actualAssumptions": [],
+      "recursorRulesCompared": 25,
+      "reducibilityEntries": 23,
+      "classes": [
+        {
+          "name": "OfNat",
+          "outputLevels": [],
+          "outputParameters": []
+        }
+      ],
+      "ordinaryInstances": [
+        {
+          "className": "OfNat",
+          "levelParameters": [],
+          "name": "instOfNatNat",
+          "priority": 1000,
+          "type": "forall{13:name{2:n01:n}33:const{15:name{2:n03:Nat}6:list{}}107:apply{84:apply{38:const{17:name{2:n05:OfNat}9:list{1:z}}33:const{15:name{2:n03:Nat}6:list{}}}10:bound{1:0}}8:explicit}",
+          "valueDeclaration": "instOfNatNat"
+        }
+      ],
+      "defaultInstances": [
+        {
+          "className": "OfNat",
+          "levelParameters": [],
+          "name": "instOfNatNat",
+          "priority": 100,
+          "type": "forall{13:name{2:n01:n}33:const{15:name{2:n03:Nat}6:list{}}107:apply{84:apply{38:const{17:name{2:n05:OfNat}9:list{1:z}}33:const{15:name{2:n03:Nat}6:list{}}}10:bound{1:0}}8:explicit}",
+          "valueDeclaration": "instOfNatNat"
+        }
+      ],
+      "nativeNoncomputableNames": [
+        "Bool.not"
+      ],
+      "runtimePolicyQualified": false,
+      "completeCompilerSufficient": false,
+      "wholeProfileSelected": false,
+      "installationCommit": "9a3a2577131bd801f191951276ac36cec85af55a",
+      "completeSourceQualification": {
+        "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+        "run": 39191534560,
+        "job": 117865812678,
+        "report": "psc0/docs/core-first-evidence/compiler-source-qualification.json",
+        "sourceFilesPerSyntax": 2,
+        "sourceDeclarationsPerSyntax": 12,
+        "preparedDeclarations": 25,
+        "canonicalPairEqual": true,
+        "canonicalAdmissionsSHA256": "6c7603e8cd49e830a61fca136153117630097052cd8e93bfd3f87f248d2b27a1",
+        "canonicalAdmissionsBytes": 53310,
+        "completePairedSourceAccepted": true,
+        "kernelTrustLevel": 0,
+        "maxHeartbeatsPerDeclaration": 2000000,
+        "maxRecDepthPerDeclaration": 20000,
+        "backendExecutionQualified": false,
+        "nativeElaborationParityQualified": false,
+        "compilerSelfhostQualified": false
+      },
+      "seedInclusionQualification": {
+        "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+        "run": 39191534560,
+        "job": 117865812678,
+        "declarationsCompared": 76,
+        "literalDeclarationEquality": true,
+        "effectiveReducibilityEquality": true,
+        "sparseMetadataProvenanceEqualityClaimed": false,
+        "wholeProfileInclusionClaimed": false
+      },
+      "logicalPayload": {
+        "bytes": 74737,
+        "sha256": "fe197609ef42c9940b646407fc1a35a8579c945896b4a677ed1219883cd07781",
+        "fnv64Decimal": "15094505996536324673",
+        "sourceMetadataOmittedBySerializer": [
+          "noncomputable names"
+        ],
+        "completeProfileIdentity": false
+      },
+      "sourceImports": {
+        "modules": 11,
+        "bytes": 211778,
+        "fullImports": [],
+        "externalImports": [],
+        "unresolvedProjectImports": [],
+        "sourceAuditHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+        "run": 39191534560,
+        "job": 117865812405
+      }
+    }
+  },
+  "projectContextQualification": {
+    "head": "d444e33d4f076d56ce141745c7ac0c7787dbd9f3",
+    "tree": "974b074ff2844725c3210da19941da59d00c3876",
+    "run": 39189228561,
+    "job": 117858124373,
+    "owner": "Ps.Compiler.Pscv0ModuleEngine",
+    "fullWrapper": "Ps.Compiler.Pscv0Modules",
+    "pairedSourceKinds": [
+      "lean",
+      "proofScript"
+    ],
+    "actualDependenciesRetained": true,
+    "inputOrderInvariant": true,
+    "originalCallerProfileRetained": true,
+    "moduleImportedEnvironmentsRetained": true,
+    "canonicalPairEqual": true,
+    "finiteIndependentAdmission": true,
+    "graphScopeAndMetadataRefusals": true,
+    "runtimeWidths": [
+      null,
+      32,
+      64
+    ],
+    "typedIrValidated": true,
+    "publicImportPositiveKinds": [
+      "proofScript"
+    ],
+    "nativeModuleGrammarComplete": false,
+    "persistentArtifactAuthentication": false,
+    "emittedBackendExecutionQualified": false,
+    "actualCompilerFilesQualifiedByThisProbe": false,
+    "independentSourceGraph": {
+      "environmentBytes": 49489,
+      "externalImports": [],
+      "fullCompositionImports": [],
+      "label": "candidate",
+      "moduleCount": 224,
+      "roots": [
+        "Ps.Compiler.Pscv0ModuleEngine",
+        "Ps.BackendTs.Readable",
+        "Ps.BackendRust.Module",
+        "Ps.BackendWasm.Module",
+        "Ps.CompilerIr.Checked",
+        "Ps.Codegen.Api",
+        "Ps.Codegen.Provenance"
+      ],
+      "sourceBytes": 2783218,
+      "unresolvedProjectImports": []
+    }
+  },
+  "projectNativeWorkloadObservation": {
+    "qualificationHead": "d444e33d4f076d56ce141745c7ac0c7787dbd9f3",
+    "qualificationRun": 39189228561,
+    "qualificationJob": 117858124646,
+    "summary": {
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "closureDeclarations": 5690,
+      "externalRoots": 458,
+      "partial": [],
+      "schema": "pscv0-core-native-closure-summary/1",
+      "sourceDeclarations": 191633,
+      "sourceModules": 322,
+      "unsafe": []
+    },
+    "rosterMatch": {
+      "candidateKernelAdmitted": false,
+      "nativeClosureDeclarations": 5690,
+      "nativeClosureSHA256": "68954ac16965b562c5a5a25ae864f6f1cd6fcdc57c14fdc58c329c17a8d8c319",
+      "sourceHead": "d444e33d4f076d56ce141745c7ac0c7787dbd9f3",
+      "sourceModules": 322,
+      "sourceParityClaim": false
+    },
+    "scope": "322-module existing Full portable route, measured after generic project extraction; raw native reachability only",
+    "importedCoreCandidateAdmitted": false,
+    "sourceParityQualified": false,
+    "backendExecutionQualified": false
+  },
+  "nextCompilerSourceInspection": "psc0/docs/core-first-evidence/next-compiler-source-workload.json",
+  "currentSourceInventory": {
+    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "run": 39191534560,
+    "job": 117865812405,
+    "path": "psc0/docs/PSC0_CORE_SOURCE_AUDIT.json",
+    "fullModules": 322,
+    "fullSourceBytes": 26400284,
+    "independentProjectModules": 224,
+    "independentProjectSourceBytes": 2783218,
+    "compilerSourceCandidateModules": 11,
+    "compilerSourceCandidateSourceBytes": 211778
+  },
+  "currentNativeWorkloadObservation": {
+    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "run": 39191534560,
+    "job": 117865812512,
+    "summary": {
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "closureDeclarations": 5690,
+      "externalRoots": 458,
+      "partial": [],
+      "schema": "pscv0-core-native-closure-summary/1",
+      "sourceDeclarations": 191633,
+      "sourceModules": 322,
+      "unsafe": []
+    },
+    "roster": {
+      "candidateKernelAdmitted": false,
+      "nativeClosureDeclarations": 5690,
+      "nativeClosureSHA256": "68954ac16965b562c5a5a25ae864f6f1cd6fcdc57c14fdc58c329c17a8d8c319",
+      "sourceHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+      "sourceModules": 322,
+      "sourceParityClaim": false
+    },
+    "assumptionPaths": "psc0/docs/core-first-evidence/native-project-assumption-paths.json",
+    "candidateKernelAdmitted": false,
+    "sourceParityQualified": false
+  },
+  "historicalSourceInventory": {
+    "file": "psc0/docs/PSC0_CORE_SOURCE_AUDIT.json",
+    "stage0Head": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
+    "candidateHead": "9f06af4cad58fd10c4224a52cd89e38a2a753b51",
+    "candidateFullModules": 321,
+    "candidateFullSourceBytes": 26398392,
+    "independentSelectedCandidateModules": 223,
+    "independentSelectedCandidateSourceBytes": 2765757,
+    "independentCandidateIncludesExistingProjectLoader": false,
+    "sourceParityQualified": false,
+    "installedSizeMeasured": false,
+    "latestReproducedHead": "e059098683d3388fc9f893ec12027b4998eafd52",
+    "latestSourceJob": 117840891994
   }
 }

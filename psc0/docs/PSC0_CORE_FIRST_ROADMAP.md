@@ -47,7 +47,23 @@ Full effects, contracts, advanced proof automation, complete selected library cl
 
 1. Source/typed closure inventory and independently checked Bootstrap candidates.
 2. Generic fingerprint/replay/Engine and deriving helper seams, with Full preservation.
-3. Exact Core declarations, registration/primitive/runtime identity and selected project threading.
-4. Actual compiler source conversion and a small real selected-source subset.
+3. Preserve the qualified fresh selected project context owner. Qualify the compiler-sufficient declaration, source-registration and primitive/runtime composition, then bind any external artifact consumer to independently authorized inputs.
+4. Preserve the complete Source/List selected-source gate and expand to the next complete authoritative modules.
 5. Whole compiler Stage1, Stage2/3, backend correspondence and cold/incremental reconstruction.
 6. Real package isolation and release-default selection after qualification; optional Full modules retain separate gates.
+
+## Contribution of the complete Foundation source slice
+
+The candidate targets the actual Foundation.Source and Foundation.List files and their faithful selected ProofScript counterparts. Authoring, metadata and complete-source receipts remain separate. A result contributes only the checks that ran on its recorded commit.
+
+| Milestone / workstream | Bounded contribution qualified | Exit that remains open |
+| --- | --- | --- |
+| M1 / A, D | Independently authored 92-declaration base, explicit metadata, original-seed literal/effective-reducibility checks and admission | Compiler-sufficient Bootstrap and the complete checked dependency/interface closure |
+| M2 / A, E | Actual literals, implicit parameters, Boolean conditions and fresh project preparation through both readers | Every form, scope, constraint, instance and refusal boundary in the entire authoritative compiler |
+| M3 / B | Both structures and ten List functions, including Nat/List/Except/Prod matching and structural calls | All compiler representations, explicit mutual-data decisions, higher-order/fuel recursion and deriving |
+| M4 / C, D | Retained noncomputability policy and independently checked logical outputs | Execution, errors, evaluation order, applicable targets and runtime/assurance correspondence |
+| M5 / E | Reproducible complete-file inputs for a selected project gate | Whole-compiler Stage1–3, complete artifact identity, incrementality, backends and reconstruction |
+
+No Core milestone or workstream closes from this slice alone. Original M1 and M2+A acceptance retains its original workload and meaning. Reached byte/word, well-founded and other proof dependencies remain in the full compiler denominator. A small Foundation workload does not make them optional. The gate runs under the Lean-backed implementation; success for this subset does not mean the compiler has recompiled itself or completed a whole selfhost stage.
+
+The actual complete-source gate passed at `1995a478af7aeb83032749fbdb9a2cfa96d28a88`, [run 39191534560](https://github.com/dwijayuda/pskernel/actions/runs/39191534560). Its [receipt](core-first-evidence/compiler-source-qualification.json) is limited to the full two-file Foundation workload and importing driver. All milestone and workstream exits above retain their complete compiler denominators.

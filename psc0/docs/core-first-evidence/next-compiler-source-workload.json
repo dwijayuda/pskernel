@@ -1,0 +1,96 @@
+{
+  "schema": "pscv0-next-compiler-source-workload-inspection/1",
+  "sourceHead": "d2e7e611d349eeeb8cbfe21994dc56f0959856d2",
+  "sourceInventoryRun": 39190781950,
+  "sourceInventoryJob": 117864214647,
+  "sourceModules": [
+    {
+      "bytes": 3984,
+      "gitBlobSHA1": "b907616cb4cbf65089ba0c9a8e13f57b220008cf",
+      "imports": [],
+      "module": "Ps.Foundation.Name",
+      "path": "psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+      "sha256": "9f8c895567542c90ac9088b3ce25ccda6f374e016069faa4068feca0e28b7092",
+      "sourceDeclarations": 11
+    },
+    {
+      "bytes": 2808,
+      "gitBlobSHA1": "cde16d84dc7a088bf7b9f74c65303b22b991fe85",
+      "imports": [
+        "Ps.Foundation.Source"
+      ],
+      "module": "Ps.Syntax.Cursor",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Cursor.lean",
+      "sha256": "eb80cd45e1df4072cac276d16d26c07ef6e37ae1ddb8769ff534e0a5b54f6c2e",
+      "sourceDeclarations": 11
+    },
+    {
+      "bytes": 1085,
+      "gitBlobSHA1": "88e50a71591ec7ce2227c9f72575d6a69b7769d5",
+      "imports": [
+        "Ps.Foundation.Source"
+      ],
+      "module": "Ps.Syntax.Token",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Token.lean",
+      "sha256": "00ce10731e3a4b3c76299107e4c736284dd8cf36fb5d1d733970caa068aa9ac9",
+      "sourceDeclarations": 3
+    }
+  ],
+  "recommendation": [
+    "Ps.Syntax.Token",
+    "Ps.Syntax.Cursor",
+    "Ps.Foundation.Name"
+  ],
+  "qualification": false,
+  "token": {
+    "declarationNames": [
+      "PsTokenKind",
+      "psTokenKindEq",
+      "PsToken"
+    ],
+    "enumConstructors": [
+      "identifier",
+      "natural",
+      "scientific",
+      "string",
+      "character",
+      "symbol",
+      "endOfInput"
+    ],
+    "addedDirectNativeRequirement": "String",
+    "stringOperationsInSource": false,
+    "nextGate": "Measure an additive native closure from existing foundation roots plus String; inspect actual kinds, bodies, assumptions, reducibility and noncomputability; independently admit it before qualifying all three Token source declarations and their faithful PS counterpart."
+  },
+  "nativeStringRepresentation": {
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "sourceOwner": "src/Init/Prelude.lean",
+    "sourceBlob": "58a4c37053f30d37b824190b934e759c16e53d7a",
+    "fields": [
+      "ByteArray",
+      "ByteArray.IsValidUTF8"
+    ],
+    "reachedPredicateEncodingOwner": "List.utf8Encode",
+    "encodingSourceNoncomputable": true,
+    "measuredClosureCount": null,
+    "measuredAssumptions": null,
+    "admitted": false,
+    "runtimeCorrespondenceQualified": false
+  },
+  "nativeStringInternalBoundary": {
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "sourceOwner": "src/Init/Data/String/Bootstrap.lean",
+    "sourceBlob": "54c88fab830bd902fa147fc487eb0798fcaef08e",
+    "names": [
+      "String.Internal.atEnd",
+      "String.Internal.get",
+      "String.Internal.next",
+      "String.Internal.length",
+      "String.Internal.append"
+    ],
+    "sourceForm": "opaque declarations with extern bindings and no explicit source body",
+    "nativeExportedKindsBodiesAndAssumptionsMeasured": false,
+    "checkedReplacementOrRuntimeCorrespondenceQualified": false,
+    "obligation": "Inspect the exact imported native declarations and runtime contracts. Retargeting compiler calls to later checked String operations is an explicit source conversion, not a transparent name substitution."
+  },
+  "scope": "Source inspection and next-work sequencing only; no candidate, selected-source, kernel or execution acceptance for these modules is claimed."
+}

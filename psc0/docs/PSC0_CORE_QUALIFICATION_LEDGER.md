@@ -2,7 +2,7 @@
 
 ## Qualified baseline and preserved candidate
 
-Stage0 is `33676076bcda7b0de5ec1f9803f49b8b1d28a058` on `psc0/pscv0-v7-native-lean-v1`, tree `87b8b0af6c72f5e8b28af97f9f990e28f73ac56e`. Fresh ref and PR checks at 2026-10-19 01:19 UTC found PR #109 open, draft and unmerged, with this same head.
+Stage0 is `33676076bcda7b0de5ec1f9803f49b8b1d28a058` on `psc0/pscv0-v7-native-lean-v1`, tree `87b8b0af6c72f5e8b28af97f9f990e28f73ac56e`. Fresh ref and PR checks at 2026-10-19 02:59 UTC found PR #109 open, draft and unmerged, with this same head.
 
 | Existing Stage0 gate | Run | Result |
 | --- | --- | --- |
@@ -59,7 +59,7 @@ The native class query at `93107e` had imported Init without loading its environ
 
 The corrected report contains exactly two native classes, `Decidable` and `Nonempty`. Both have empty native output-parameter and output-level lists; both are registered in Full and absent from the Bootstrap registries. Full has no explicit class-parameter record for `Decidable` and has an explicit empty record for `Nonempty`. Native `Nonempty` remains an inductive, not a structure. The only changed report fields are the class rows and the new `nativeClassMetadataExtensionsLoaded: true` flag; all 76 declaration-comparison rows are identical.
 
-Bootstrap source remains 118,573 bytes with SHA-256 `05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54`; the complete raw manifest, 49,889-byte payload and both logical hashes are unchanged. The byte/word source and raw native closure hashes are also unchanged. This is the latest code qualification; a documentation/evidence-only descendant is not a new same-SHA CI receipt.
+Bootstrap source remains 118,573 bytes with SHA-256 `05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54`; the complete raw manifest, 49,889-byte payload and both logical hashes are unchanged. The byte/word source and raw native closure hashes were unchanged at that receipt. Later executable changes require their own qualification; a documentation/evidence-only descendant is not a new same-SHA CI receipt.
 
 ## Independently authored candidate results
 
@@ -84,7 +84,7 @@ Engine, selected Pscv0Engine and all 24 unchanged deriving expression builders a
 | Native Replay seam at `851faf84` | 12 repository modules; 50,030 bytes; explicit Lean import | Host replay, not portable kernel selfhost |
 | Engine at `9f06af4c` / `93107e` | 113 modules; 1,705,386 bytes | Actual isolated source graph |
 | Selected Pscv0Engine | 159 modules; 2,211,770 bytes | Actual selected single-source graph |
-| Selected engine plus actual backend/IR roots | 223 modules; 2,765,757 bytes | Excludes existing project loader; not complete compiler size |
+| Selected engine plus actual backend/IR roots | 223 modules; 2,765,757 bytes | Historical `9f06af4c`/`93107e` graph; excludes project preparation |
 | Bootstrap root | 11 modules; 151,539 bytes | Includes exact seed asset; no Full import |
 | Bootstrap cold native build at `93107e` | 10.34s; max RSS 1,643,232 KiB; 35 Lake jobs | GNU time of lake build; excludes toolchain installation |
 | Bootstrap replay at `93107e` | 0.56s; max RSS 844,992 KiB | Command also imports native Init metadata; not a kernel-only or application benchmark |
@@ -107,11 +107,11 @@ The full native compiler audit reaches 5,690 external declarations from 458 real
 
 | Gate | Required next evidence | Current blocker / safeguard |
 | --- | --- | --- |
-| Bootstrap closure | Checked 76-declaration seed is complete at its recorded scope; next measure the compiler-sufficient closure and source registrations | Seed qualification is not whole-compiler sufficiency |
-| Core Standard | Typed graph is measured; next qualify selected declarations, all proof/type dependencies, inclusion and registration/runtime identity | Byte/word source is 16.1 MB; 34 seed declarations do not match Full literally; native assumption/opaque implementation paths need classification |
-| Core frontend/elaboration | Isolated selected single-source seam is qualified; next actual compiler-source admission and exact project/profile threading | Existing project composition remains Full; two native mutual-data groups require selected representations |
+| Bootstrap closure | Checked 76-declaration seed and 92-declaration Foundation source candidate are complete at their recorded scopes; next measure the compiler-sufficient closure | Seed qualification is not whole-compiler sufficiency |
+| Core Standard | Typed graph is measured; next qualify selected declarations, all proof/type dependencies, inclusion and registration/runtime identity | Byte/word source is 16.1 MB; 34 seed/Full cells are classified; compatible migration and native assumption/opaque implementation review remain open |
+| Core frontend/elaboration | Selected single-source and fresh project context owners are qualified at their recorded scopes; extend complete compiler-source admission | Complete compiler metadata/runtime qualification and two native mutual-data representations remain open |
 | Core execution/backend | Compiler control/closure/error observations, exact primitive and typed erasure/IR, applicable target execution | Word/UTF8/ABI details and runtime selector identity remain explicit |
-| Interface/cache | Authorized complete profile identity bound to consumed source, prepared results and module/cache artifacts | A profile record or claimed digest is not authority; reject cross-profile reuse |
+| External interfaces/cache | Qualify a real consuming host or persisted-artifact loader against independently authorized source/profile/runtime inputs | Fresh interfaces are descriptive; no selected persistent-cache integration exists, and claimant-supplied hashes cannot authenticate reuse |
 | Selfhost | Entire authoritative Stage1–3 source manifest and deterministic/runtime comparison | Historical selfhost or native builds cannot substitute |
 | Optional Full modules | Exact optional closure/inclusion, Full regression and installation absence/presence tests | Heavy data remain preserved; no runtime filtering or dependency metadata shortcut |
 | Release integration | Applicable Core gates on the exact reviewed candidate and preserved Full regression receipts | No default/release promotion while profile or stage obligations remain open |
@@ -125,3 +125,41 @@ GitHub connectors and cloud Linux only for repository work. Refresh refs before 
 Update both handoff files with the current Core head, exact code/test receipts and next failing owned boundary. Record a negative or unavailable result precisely instead of inventing a pin, size reduction or completion claim.
 
 Documentation and evidence ledgers are not loadable profile inputs and do not trigger native rebuilds. Executable source, generated assets, workflow changes, toolchain and consumed reference identity inputs remain gated. A final evidence-only commit must identify its qualified code ancestor and preserve every executable/test/workflow blob; do not call it a new same-SHA CI run.
+
+## Fresh selected project qualification
+
+All four jobs of [run 39189228561](https://github.com/dwijayuda/pskernel/actions/runs/39189228561) passed at `d444e33d4f076d56ce141745c7ac0c7787dbd9f3`, tree `974b074ff2844725c3210da19941da59d00c3876`:
+
+| Job | Result and actual scope |
+| --- | --- |
+| native-seams 117858124373 | Existing generic/single-source controls and the new complete synthetic two-module project probe passed |
+| source-inventory 117858124680 | Current Full and independent project import graphs measured; isolation guards passed |
+| bootstrap-closure 117858124783 | Exact unchanged 76-declaration empty-kernel replay passed |
+| candidate-authoring 117858124646 | Full regression checks and existing authoring passed; new 92-declaration foundation candidate and native metadata measured |
+
+The paired project probe checks actual dependency invocation, reversed input manifest order, original caller profile retention, imported source receipts, canonical equality and finite independent admission. Negative controls cover graph, ordinary import, private visibility and metadata-dependent lookup. Decoded output under the wrong empty base must report exactly the missing base constant. None/32/64 runtime selections reach actual typed IR validation. The public re-export positive is specific to ProofScript; the selected Lean reader does not implement native Lean's `module` header required by native `public import`.
+
+The independent project and backend/IR graph contains 224 modules / 2,783,218 source bytes, of which 49,489 are environment source. It has no Full or external import and no unresolved project import. The project owner alone reaches 160 modules / 2,229,231 bytes. These are source composition measurements, not installed size, a complete selfhost compiler or a runtime benchmark. Existing host Full compatibility selection remains explicit; no selected persistent-cache loader exists.
+
+The earlier `fbed3a50` project probe also passed, but its run 39188841335 failed candidate-authoring compilation. It is a partial receipt. The succeeding `d444` run is the complete four-job project/authoring receipt. Subsequent candidate installation and actual-source acceptance require their own code receipts.
+
+## Complete Foundation source qualification
+
+At `1995a478af7aeb83032749fbdb9a2cfa96d28a88`, [run 39191534560](https://github.com/dwijayuda/pskernel/actions/runs/39191534560) passed all four Core-first Linux jobs. PSC0 accepted both complete original Foundation.Source and Foundation.List files and their ProofScript counterparts through the explicit-context project engine, produced identical canonical admissions, and independently admitted both results over the measured 92-declaration candidate. It retained every original seed declaration/effective reducibility and the measured source metadata. Native elaboration parity, emitted backend execution and whole-compiler selfhost remain unqualified.
+
+| Job | ID | Result |
+| --- | --- | --- |
+| native-seams, including actual complete source | 117865812678 | Success |
+| candidate-authoring, including exact reproduction | 117865812512 | Success |
+| source-inventory | 117865812405 | Success |
+| bootstrap-closure | 117865812255 | Success |
+
+[The retained full receipt](core-first-evidence/1995-qualification.json) names code/tree, jobs, artifacts, resources, reproduction and limits. [The raw source report](core-first-evidence/compiler-source-qualification.json) records all actual source inputs and generated names. Two complete originals total 2,534 bytes; the two counterparts total 2,689, with an additional importing driver per syntax. Twelve original source headers become 25 prepared declarations, including three structural helpers. Both canonical strings are exactly 53,310 bytes / SHA-256 `6c7603e8cd49e830a61fca136153117630097052cd8e93bfd3f87f248d2b27a1`.
+
+The source candidate is replayed independently from an empty trust-zero kernel, with exact roster checks and the existing finite per-declaration limits. Both source outputs are independently decoded and admitted over that same immutable checked base. Each original seed declaration and its effective reducibility must match; each retained base noncomputability bit is compared separately from the logical fingerprint. OfNat source metadata and Bool.not's native tag are explicit. Source tag roster `[]` is not a portable runtime permission.
+
+Observed incremental native target build was 5.93 seconds / maximum RSS 1,713,628 KiB; the complete two-syntax check command was 0.13 seconds / maximum RSS 82,284 KiB. The build follows other targets and cache restoration. These command observations are not cold whole-compiler, installed-size or application performance claims.
+
+The installation attempts retain their actual failures: run 39190312928 (`9a3a2577`) failed the new environment owner on comment syntax and a helper outside its minimal imports; run 39190400995 (`10cc9271`) retained the helper error after the comment correction; run 39190781950 (`d2e7e611`) built the candidate but failed the harness's reserved `prefix` identifier. All three passed source inventory, Bootstrap replay and candidate authoring. The final `1995` harness rename exposes the first actual selected-source run, which passed without altering either original file, removing functions, adding assumptions or changing admission policy.
+
+The new current Full/native ownership observation covers 322 source modules and 191,633 owned declarations, with 458 external roots and a 5,690-declaration raw closure reaching the three approved assumptions. This remains native reachability, not admission of a whole Core profile. [The next-source inspection](core-first-evidence/next-compiler-source-workload.json) identifies Token's actual String carrier and the later Cursor/Name extern boundary.

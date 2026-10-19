@@ -1,0 +1,342 @@
+{
+  "schema": "pscv0-bootstrap-full-difference-classification/1",
+  "evidence": {
+    "commit": "53c28cfe3abd9e8fae93e7935357dbc4402c4b09",
+    "comparison": {
+      "path": "psc0/docs/core-first-evidence/bootstrap-full-compatibility.json",
+      "blob": "f6f2009b8ffc755986e0d9ea9bb3594754c70a39"
+    },
+    "nativeCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "method": "Frozen comparison report plus read-only inspection of all 34 non-identical or absent Bootstrap records and their Full owners. No declaration was normalized, replaced or removed."
+  },
+  "counts": {
+    "bootstrapDeclarations": 76,
+    "presentInFull": 73,
+    "literalExact": 42,
+    "presentDifferent": 31,
+    "absentFromFull": 3,
+    "classifiedCells": 34
+  },
+  "claims": {
+    "kernelEquivalenceClaimed": false,
+    "sourceNamedArgumentParityClaimed": false,
+    "bootstrapInclusionInFullClaimed": false,
+    "nestedProfileConstructionClaimed": false,
+    "runtimeCorrespondenceClaimed": false,
+    "compilerSufficientBootstrapClaimed": false,
+    "newQualificationReceiptClaimed": false
+  },
+  "categories": {
+    "alphaPresentation": {
+      "count": 18,
+      "description": "Inspected differences are term-binder spellings and/or consistently renamed bound universe parameters. This records inspection, not an equivalence certificate; literal identity and source named-argument policy remain separate."
+    },
+    "universeExpression": {
+      "count": 2,
+      "description": "Literal universe expressions differ; no normalization or fresh kernel equivalence check is asserted."
+    },
+    "universeArity": {
+      "count": 4,
+      "description": "Universe-parameter arity and element-domain generality differ. Except.rec also changes motive binder policy."
+    },
+    "motiveBinderPolicy": {
+      "count": 3,
+      "description": "Explicit versus implicit motive differs."
+    },
+    "projectionBinderPolicy": {
+      "count": 1,
+      "description": "Explicit versus implicit proposition parameter differs."
+    },
+    "kindAndProjectionPolicy": {
+      "count": 1,
+      "description": "Declaration kind, proposition binder policy and result-type projection syntax differ."
+    },
+    "implementationShape": {
+      "count": 2,
+      "description": "Core body shape and dependencies differ; no definitional-equivalence claim is made."
+    },
+    "absent": {
+      "count": 3,
+      "description": "No declaration with this structural name exists in the frozen Full environment."
+    }
+  },
+  "owners": {
+    "bootstrap": {
+      "path": "psc0/packages/environment/src/Ps/Environment/BootstrapData.lean",
+      "blob": "39c8e193ef2e48869c4757b6526a22c4adc82b12"
+    },
+    "fullSelection": {
+      "path": "psc0/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+      "blob": "420e3868f3505a58936e56124862a51e80cd8c6c"
+    },
+    "logic": {
+      "path": "psc0/packages/environment/src/Ps/Environment/Logic.lean",
+      "blob": "9d04fb2dcedf7c0c39f1d07b371c0b82939df7f2"
+    },
+    "connectives": {
+      "path": "psc0/packages/environment/src/Ps/Environment/Connectives.lean",
+      "blob": "21f7cfcf25bc09a7cd6e543f4a0ca9a27f273cb7"
+    },
+    "decision": {
+      "path": "psc0/packages/environment/src/Ps/Environment/Decision.lean",
+      "blob": "c0d0efc0da0943b628446f1f955ef05be5b21c19"
+    },
+    "selfHost": {
+      "path": "psc0/packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+      "blob": "e1d8d5cdcf6b36702142d40e32db6247a545f7b8"
+    },
+    "nat": {
+      "path": "psc0/packages/environment/src/Ps/Environment/Prelude.lean",
+      "blob": "eb423f3855040275c713e12c360690553ee52892"
+    },
+    "prod": {
+      "path": "psc0/packages/environment/src/Ps/Environment/StandardProduct.lean",
+      "blob": "65fe047bc7a49f81837601d391c18ecdb5c3ccbe"
+    },
+    "sum": {
+      "path": "psc0/packages/environment/src/Ps/Environment/StandardSum.lean",
+      "blob": "a3987f216ebf2385149eb0c20346f3e812be4ddb"
+    }
+  },
+  "defaultNativeOwner": "bootstrap",
+  "cells": [
+    {
+      "name": "Eq",
+      "category": "alphaPresentation",
+      "fullOwner": "logic",
+      "detail": "Universe u_1 versus u; term binder spellings."
+    },
+    {
+      "name": "Except",
+      "category": "universeArity",
+      "fullOwner": "selfHost",
+      "detail": "Native levels [u,v] and independently polymorphic element domains; Full levels [] and both domains Type0."
+    },
+    {
+      "name": "Exists",
+      "category": "alphaPresentation",
+      "fullOwner": "connectives",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "Not",
+      "category": "alphaPresentation",
+      "fullOwner": "connectives",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "PEmpty",
+      "category": "absent",
+      "fullOwner": null,
+      "detail": "Absent from Full; explicit root of the native 26-root authorer."
+    },
+    {
+      "name": "Prod",
+      "category": "universeExpression",
+      "fullOwner": "prod",
+      "detail": "Result level max(succ u,succ v) versus succ(max u v)."
+    },
+    {
+      "name": "Sum",
+      "category": "universeExpression",
+      "fullOwner": "sum",
+      "detail": "Result level max(succ u,succ v) versus succ(max u v)."
+    },
+    {
+      "name": "dite",
+      "category": "implementationShape",
+      "fullOwner": "decision",
+      "detail": "Native body uses Bool.casesOn; Full uses Bool.rec with a different application shape; arrow/lambda binder spellings also differ."
+    },
+    {
+      "name": "ite",
+      "category": "alphaPresentation",
+      "fullOwner": "decision",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "And.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "connectives",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "Bool.Reflects",
+      "category": "implementationShape",
+      "fullOwner": "decision",
+      "detail": "Native body calls Bool.Reflects.match_1; Full body directly applies Bool.rec; type/lambda binder spellings also differ."
+    },
+    {
+      "name": "Bool.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "logic",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "Decidable.decide",
+      "category": "projectionBinderPolicy",
+      "fullOwner": "decision",
+      "detail": "Native proposition parameter p explicit versus Full implicit, in type and lambda."
+    },
+    {
+      "name": "Decidable.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "decision",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "Decidable.reflects_decide",
+      "category": "kindAndProjectionPolicy",
+      "fullOwner": "decision",
+      "detail": "Native theorem versus Full definition; native p explicit versus Full implicit; native result type uses Decidable.decide, Full uses its projection."
+    },
+    {
+      "name": "Empty.rec",
+      "category": "motiveBinderPolicy",
+      "fullOwner": "logic",
+      "detail": "Native motive explicit versus Full implicit; term binder spellings also differ."
+    },
+    {
+      "name": "Eq.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "logic",
+      "detail": "Universe roles [motive,element] preserved: [u,u_1] versus [v,u]; term binder spellings."
+    },
+    {
+      "name": "Eq.refl",
+      "category": "alphaPresentation",
+      "fullOwner": "logic",
+      "detail": "Universe u_1 versus u."
+    },
+    {
+      "name": "Except.error",
+      "category": "universeArity",
+      "fullOwner": "selfHost",
+      "detail": "Native levels [u,v]; Full levels [] and both parameter domains Type0; term binder spellings also differ."
+    },
+    {
+      "name": "Except.ok",
+      "category": "universeArity",
+      "fullOwner": "selfHost",
+      "detail": "Native levels [u,v]; Full levels [] and both parameter domains Type0; term binder spellings also differ."
+    },
+    {
+      "name": "Except.rec",
+      "category": "universeArity",
+      "fullOwner": "selfHost",
+      "detail": "Native levels [u_1,u,v] versus Full [u]; native motive implicit versus Full explicit; binder spellings also differ."
+    },
+    {
+      "name": "Exists.intro",
+      "category": "alphaPresentation",
+      "fullOwner": "connectives",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "Exists.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "connectives",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "False.rec",
+      "category": "motiveBinderPolicy",
+      "fullOwner": "logic",
+      "detail": "Native motive explicit versus Full implicit; term binder spellings also differ."
+    },
+    {
+      "name": "List.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "selfHost",
+      "detail": "Universe roles [motive,element] preserved: [u_1,u] versus [v,u]; term binder spellings."
+    },
+    {
+      "name": "Nat.rec",
+      "category": "motiveBinderPolicy",
+      "fullOwner": "nat",
+      "detail": "Native motive implicit versus Full explicit; public/minor binder spellings also differ."
+    },
+    {
+      "name": "Option.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "selfHost",
+      "detail": "Universe roles [motive,element] preserved: [u_1,u] versus [v,u]; term binder spellings."
+    },
+    {
+      "name": "Option.some",
+      "category": "alphaPresentation",
+      "fullOwner": "selfHost",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "Or.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "connectives",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "PEmpty.rec",
+      "category": "absent",
+      "fullOwner": null,
+      "detail": "Absent from Full; reached by the PEmpty inductive-family closure."
+    },
+    {
+      "name": "Prod.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "prod",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "Sum.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "sum",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "True.rec",
+      "category": "alphaPresentation",
+      "fullOwner": "logic",
+      "detail": "Term binder spellings differ."
+    },
+    {
+      "name": "Bool.Reflects.match_1",
+      "category": "absent",
+      "fullOwner": null,
+      "detail": "Absent from Full; reached by native Bool.Reflects body, whose Full implementation does not use this helper."
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "preserve_identities",
+      "action": "Keep the independently authored native76 component and qualified Full identities unchanged. Renaming binders or deleting the three absent names does not resolve the full difference set."
+    },
+    {
+      "id": "complete_source_denominator",
+      "action": "Retain both complete compiler-source modules Ps.Foundation.Source and Ps.Foundation.List: two structures and ten functions, including numeral 0 and Boolean if. Native76 lacks the required OfNat source-literal declarations/registrations and Bool.decEq; do not rewrite or remove those uses."
+    },
+    {
+      "id": "additive_native_foundation",
+      "action": "Author a separate unselected candidate from coreBootstrapCandidateRoots plus OfNat, OfNat.ofNat, instOfNatNat and Bool.decEq, with empty boundary/base and no allowed assumptions. Preserve every reached dependency. Recover and independently authenticate its generated source before selection."
+    },
+    {
+      "id": "source_metadata",
+      "action": "Measure and restore OfNat class output metadata, ordinary instOfNatNat priority 1000 and default-instance priority 100 as distinct registrations, actual declaration type/levels, reducibility and every reached native noncomputable tag. Source-derived expectations must be confirmed by the native receipt; they do not establish portable execution policy."
+    },
+    {
+      "id": "literal_nested_alternative",
+      "action": "If literal Bootstrap/Core/Full nesting over unchanged Full is required, consider a separately generated unselected closed subset of exact frozen Full records, rooted in the complete measured workload and explicit registry needs. This is an alternative candidate mechanism, not an approved or qualified profile."
+    },
+    {
+      "id": "full_subset_gates",
+      "action": "A Full-subset candidate must retain exact declaration records and all reached type/body/proof, whole-family and recursor-rule dependencies; preserve required class/instance/default/alias/reducibility/noncomputable metadata; pass finite fresh admission, regenerated descriptor/rule checks and literal Full membership. Do not implement it by runtime filtering Full or assuming the native76 root list minus absent names is sufficient."
+    },
+    {
+      "id": "native_migration_boundary",
+      "action": "Native76 cannot be inserted into the existing Full profile by a naming-only adjustment. Where actual workload requirements conflict with frozen Full identities, record the blocker and separately review either a checked source representation change or a versioned Full migration. This classification authorizes neither."
+    },
+    {
+      "id": "qualification_boundary",
+      "action": "Require whole-source paired conversion, independent canonical admission and applicable execution checks on exact candidate commits. No successful example, source scan or declaration-only authoring result closes a Core milestone or a selfhost stage."
+    }
+  ]
+}

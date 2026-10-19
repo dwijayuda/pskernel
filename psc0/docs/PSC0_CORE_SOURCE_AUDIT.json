@@ -1,11 +1,11 @@
 {
   "schema": "psc0-core-source-inventory-observation/1",
   "repository": "dwijayuda/pskernel",
-  "workflowRun": 39180799552,
-  "workflowJob": 117832921752,
+  "workflowRun": 39191534560,
+  "workflowJob": 117865812405,
   "sourceParityQualified": false,
   "compilerSelfhostQualified": false,
-  "scope": "Exact explicit source import graphs. Native-generated and external declaration dependencies are a separate audit. The independent candidate omits the existing project loader and has not become the authoritative whole compiler.",
+  "scope": "Exact explicit source import graphs at the qualified code commit. The independent project composition includes fresh project preparation and existing IR/backend roots. The full compiler source/runtime profile and native declaration dependencies remain separate obligations.",
   "stage0": {
     "head": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
     "roots": [
@@ -3514,7 +3514,7 @@
     ]
   },
   "candidate": {
-    "head": "9f06af4cad58fd10c4224a52cd89e38a2a753b51",
+    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
     "roots": [
       "Ps.Compiler.Pscv0Modules",
       "Ps.BackendTs.Readable",
@@ -4251,8 +4251,8 @@
         "sha256": "af987e48dd39d76d80db63d759fbdf681448fe2dd6983a004787c88e0758e391"
       },
       {
-        "bytes": 5834,
-        "gitBlobSHA1": "f6b9d6c3308ffded59fa4e6c0543f6cbc37ea720",
+        "bytes": 5820,
+        "gitBlobSHA1": "17a30a428c7b5dc43f2422669b5827b5281a79ee",
         "imports": [
           "Ps.Compiler.Engine",
           "Ps.Syntax.Lean.Program",
@@ -4261,17 +4261,28 @@
         ],
         "module": "Ps.Compiler.Pscv0Engine",
         "path": "psc0/packages/compiler/src/Ps/Compiler/Pscv0Engine.lean",
-        "sha256": "e59d2a8f7b49b4cf5a486d62ab0aa4e329cba4ff669008edb02aa18d1abe624b"
+        "sha256": "0d703ddd52b9cea2480bd682436ab1a860487dcb6376ea0e47c99f581908d8b2"
       },
       {
-        "bytes": 16567,
-        "gitBlobSHA1": "9df395d270fc1d50e18477f1e8bb20611b49eaf0",
+        "bytes": 17475,
+        "gitBlobSHA1": "7b19ea65565e9a2d0617e687f742b84052395300",
         "imports": [
-          "Ps.Compiler.Pscv0"
+          "Ps.Compiler.Pscv0Engine"
+        ],
+        "module": "Ps.Compiler.Pscv0ModuleEngine",
+        "path": "psc0/packages/compiler/src/Ps/Compiler/Pscv0ModuleEngine.lean",
+        "sha256": "f2deb3722b32d96e9e2575938fd649bde904c0c1ed2d0fe2ec05c73b5a33e199"
+      },
+      {
+        "bytes": 998,
+        "gitBlobSHA1": "2a31303e33abec0ed9b741a5f465b01706b197db",
+        "imports": [
+          "Ps.Compiler.Pscv0",
+          "Ps.Compiler.Pscv0ModuleEngine"
         ],
         "module": "Ps.Compiler.Pscv0Modules",
         "path": "psc0/packages/compiler/src/Ps/Compiler/Pscv0Modules.lean",
-        "sha256": "169eae0d2cb9d5b85fdb5658b5832d936e2491300144a4bbd62888a498caf00f"
+        "sha256": "7d19426c1b4a3238445d66a2c6387002a232fb61a83fe5b4e5c7878f2cb22b56"
       },
       {
         "bytes": 14590,
@@ -7082,7 +7093,7 @@
     ]
   },
   "independentCandidate": {
-    "head": "9f06af4cad58fd10c4224a52cd89e38a2a753b51",
+    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
     "roots": [
       "Ps.Compiler.Pscv0Engine",
       "Ps.BackendTs.Readable",
@@ -7318,8 +7329,379 @@
       "Ps.Syntax.Translate"
     ],
     "moduleCount": 223,
-    "sourceBytes": 2765757,
-    "projectModuleLoaderQualified": false
+    "sourceBytes": 2765743,
+    "scope": "Selected single-source engine plus existing IR/backend roots; historical graph contract retained"
+  },
+  "independentProjectCandidate": {
+    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "roots": [
+      "Ps.Compiler.Pscv0ModuleEngine",
+      "Ps.BackendTs.Readable",
+      "Ps.BackendRust.Module",
+      "Ps.BackendWasm.Module",
+      "Ps.CompilerIr.Checked",
+      "Ps.Codegen.Api",
+      "Ps.Codegen.Provenance"
+    ],
+    "modules": [
+      "Ps.BackendEcma.Hash",
+      "Ps.BackendEcma.Intrinsic",
+      "Ps.BackendEcma.Lower",
+      "Ps.BackendEcma.Module",
+      "Ps.BackendEcma.Runtime",
+      "Ps.BackendEcma.Sync",
+      "Ps.BackendEcma.Syntax",
+      "Ps.BackendEcma.Utf8",
+      "Ps.BackendRust.Captures",
+      "Ps.BackendRust.Expr",
+      "Ps.BackendRust.Identifier",
+      "Ps.BackendRust.Intrinsic",
+      "Ps.BackendRust.Layout",
+      "Ps.BackendRust.Module",
+      "Ps.BackendRust.Runtime",
+      "Ps.BackendRust.Tail",
+      "Ps.BackendRust.TailAlias",
+      "Ps.BackendRust.Type",
+      "Ps.BackendTs.Analysis",
+      "Ps.BackendTs.Readable",
+      "Ps.BackendTs.Type",
+      "Ps.BackendWasm.AbiComponent",
+      "Ps.BackendWasm.AbiMarshal",
+      "Ps.BackendWasm.AbiPlan",
+      "Ps.BackendWasm.AbiRuntime",
+      "Ps.BackendWasm.AbiSchema",
+      "Ps.BackendWasm.Array",
+      "Ps.BackendWasm.Binary",
+      "Ps.BackendWasm.Component",
+      "Ps.BackendWasm.Float",
+      "Ps.BackendWasm.Hash",
+      "Ps.BackendWasm.IntUtil",
+      "Ps.BackendWasm.Integer",
+      "Ps.BackendWasm.Intrinsic",
+      "Ps.BackendWasm.Layout",
+      "Ps.BackendWasm.Lower",
+      "Ps.BackendWasm.LowerFloat",
+      "Ps.BackendWasm.LowerInt",
+      "Ps.BackendWasm.LowerState",
+      "Ps.BackendWasm.Model",
+      "Ps.BackendWasm.Module",
+      "Ps.BackendWasm.Names",
+      "Ps.BackendWasm.Natural",
+      "Ps.BackendWasm.RuntimeBuilder",
+      "Ps.BackendWasm.String",
+      "Ps.BackendWasm.TailCalls",
+      "Ps.BackendWasm.Type",
+      "Ps.BackendWasm.Utf8",
+      "Ps.BackendWasm.ValidateIr",
+      "Ps.BackendWasm.ValidateStructure",
+      "Ps.BackendWasm.ValidateTyping",
+      "Ps.BackendWasm.Value",
+      "Ps.BackendWasm.Wat",
+      "Ps.BackendWasm.Word",
+      "Ps.Bridge.CheckedAdmissions",
+      "Ps.Bridge.Json",
+      "Ps.Codegen.Api",
+      "Ps.Codegen.Artifact",
+      "Ps.Codegen.Captures",
+      "Ps.Codegen.Doc",
+      "Ps.Codegen.Names",
+      "Ps.Codegen.Provenance",
+      "Ps.Codegen.SourceMap",
+      "Ps.Compiler.Engine",
+      "Ps.Compiler.Pscv0Engine",
+      "Ps.Compiler.Pscv0ModuleEngine",
+      "Ps.Compiler.RecursorLift",
+      "Ps.Compiler.RuntimeOwnership",
+      "Ps.Compiler.WellFoundedRuntime",
+      "Ps.CompilerIr.Check",
+      "Ps.CompilerIr.CheckSize",
+      "Ps.CompilerIr.CheckTypes",
+      "Ps.CompilerIr.Checked",
+      "Ps.CompilerIr.Model",
+      "Ps.Core.Abstract",
+      "Ps.Core.Builtin",
+      "Ps.Core.Declaration",
+      "Ps.Core.Equality",
+      "Ps.Core.Expr",
+      "Ps.Core.InductiveGroup",
+      "Ps.Core.Level",
+      "Ps.Core.LevelNormalize",
+      "Ps.Core.LevelSubst",
+      "Ps.Core.Nested",
+      "Ps.Core.Subst",
+      "Ps.Elab.Abstraction",
+      "Ps.Elab.Application",
+      "Ps.Elab.Basic",
+      "Ps.Elab.Binders",
+      "Ps.Elab.Class",
+      "Ps.Elab.Command",
+      "Ps.Elab.Conditional",
+      "Ps.Elab.Context",
+      "Ps.Elab.Data",
+      "Ps.Elab.Declaration",
+      "Ps.Elab.Deriving",
+      "Ps.Elab.DerivingBEq",
+      "Ps.Elab.DerivingContext",
+      "Ps.Elab.DerivingDecEq",
+      "Ps.Elab.DerivingHashable",
+      "Ps.Elab.DerivingInhabited",
+      "Ps.Elab.DerivingRepr",
+      "Ps.Elab.Do",
+      "Ps.Elab.Elimination",
+      "Ps.Elab.Equality",
+      "Ps.Elab.FixedParameters",
+      "Ps.Elab.GoalSource",
+      "Ps.Elab.Goals",
+      "Ps.Elab.GroupElimination",
+      "Ps.Elab.Info",
+      "Ps.Elab.Literal",
+      "Ps.Elab.Match",
+      "Ps.Elab.Monotonicity",
+      "Ps.Elab.Mutual",
+      "Ps.Elab.MutualStructural",
+      "Ps.Elab.Operator",
+      "Ps.Elab.PartialFixpoint",
+      "Ps.Elab.PatternMatrix",
+      "Ps.Elab.Postponed",
+      "Ps.Elab.PreDefinition",
+      "Ps.Elab.PreDefinition.Basic",
+      "Ps.Elab.PreDefinition.Header",
+      "Ps.Elab.Proof",
+      "Ps.Elab.Record",
+      "Ps.Elab.Recursion",
+      "Ps.Elab.RecursionParameters",
+      "Ps.Elab.RecursorEquation",
+      "Ps.Elab.Refinement",
+      "Ps.Elab.Scope",
+      "Ps.Elab.Term",
+      "Ps.Elab.Universe",
+      "Ps.Elab.WellFounded",
+      "Ps.Elab.WellFoundedRuntime",
+      "Ps.Elab.Where",
+      "Ps.Elab.WhereMutualWellFounded",
+      "Ps.Elab.WhereScope",
+      "Ps.Elab.WhereWellFounded",
+      "Ps.Environment.Basic",
+      "Ps.Environment.Connectives",
+      "Ps.Environment.Decision",
+      "Ps.Environment.InhabitedExpr",
+      "Ps.Environment.Instances",
+      "Ps.Environment.LocalContext",
+      "Ps.Environment.Logic",
+      "Ps.Environment.ReprExpr",
+      "Ps.Environment.Resolve",
+      "Ps.Erasure.Array",
+      "Ps.Erasure.Basic",
+      "Ps.Erasure.Definition",
+      "Ps.Erasure.Entry",
+      "Ps.Erasure.Expr",
+      "Ps.Erasure.Float",
+      "Ps.Erasure.FloatRuntime",
+      "Ps.Erasure.Inductive",
+      "Ps.Erasure.Platform",
+      "Ps.Erasure.Recursion",
+      "Ps.Erasure.Structure",
+      "Ps.Erasure.StructureRecursor",
+      "Ps.Erasure.Unsigned",
+      "Ps.Erasure.Utf8",
+      "Ps.Erasure.WellFounded",
+      "Ps.Foundation.Diagnostic",
+      "Ps.Foundation.Index",
+      "Ps.Foundation.List",
+      "Ps.Foundation.Name",
+      "Ps.Foundation.Source",
+      "Ps.Meta.Abstract",
+      "Ps.Meta.Context",
+      "Ps.Meta.Inductive",
+      "Ps.Meta.Infer",
+      "Ps.Meta.InstanceCandidate",
+      "Ps.Meta.InstanceKey",
+      "Ps.Meta.InstanceSearch",
+      "Ps.Meta.InstanceTarget",
+      "Ps.Meta.Iota",
+      "Ps.Meta.LevelContext",
+      "Ps.Meta.LevelNormalize",
+      "Ps.Meta.MutualPacking",
+      "Ps.Meta.MutualWellFounded",
+      "Ps.Meta.NatReduce",
+      "Ps.Meta.Recursor",
+      "Ps.Meta.Reduce",
+      "Ps.Meta.SynthInstance",
+      "Ps.Meta.Synthetic",
+      "Ps.Meta.TypeView",
+      "Ps.Meta.Unify",
+      "Ps.Meta.WellFounded",
+      "Ps.Syntax.Ast",
+      "Ps.Syntax.Cursor",
+      "Ps.Syntax.Lean.Binders",
+      "Ps.Syntax.Lean.Control",
+      "Ps.Syntax.Lean.Data",
+      "Ps.Syntax.Lean.Declarations",
+      "Ps.Syntax.Lean.Program",
+      "Ps.Syntax.Lean.Term",
+      "Ps.Syntax.Lexer",
+      "Ps.Syntax.ParseCommon",
+      "Ps.Syntax.ParseLean",
+      "Ps.Syntax.ParseProofScript",
+      "Ps.Syntax.ParserState",
+      "Ps.Syntax.PrintCommon",
+      "Ps.Syntax.PrintLean",
+      "Ps.Syntax.PrintProofScript",
+      "Ps.Syntax.Pscv0.Binders",
+      "Ps.Syntax.Pscv0.Commands",
+      "Ps.Syntax.Pscv0.Data",
+      "Ps.Syntax.Pscv0.DoRead",
+      "Ps.Syntax.Pscv0.Instances",
+      "Ps.Syntax.Pscv0.Interpolation",
+      "Ps.Syntax.Pscv0.LocalRead",
+      "Ps.Syntax.Pscv0.Module",
+      "Ps.Syntax.Pscv0.Operators",
+      "Ps.Syntax.Pscv0.PatternRead",
+      "Ps.Syntax.Pscv0.ProgramRead",
+      "Ps.Syntax.Pscv0.ProofRead",
+      "Ps.Syntax.Pscv0.QuantifierRead",
+      "Ps.Syntax.Pscv0.Read",
+      "Ps.Syntax.Pscv0.Surface",
+      "Ps.Syntax.Pscv0.TermParts",
+      "Ps.Syntax.Pscv0.TermRead",
+      "Ps.Syntax.Pscv0.TypePrint",
+      "Ps.Syntax.Pscv0.Universe",
+      "Ps.Syntax.Token",
+      "Ps.Syntax.Translate"
+    ],
+    "moduleCount": 224,
+    "sourceBytes": 2783218,
+    "environmentBytes": 49489,
+    "fullCompositionImports": [],
+    "externalImports": [],
+    "unresolvedProjectImports": [],
+    "freshProjectProbeQualified": true,
+    "compilerSelfhostQualified": false
+  },
+  "compilerSourceFoundationCandidate": {
+    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "root": "Ps.Environment.CompilerSourceCandidate",
+    "modules": [
+      {
+        "bytes": 2063,
+        "gitBlobSHA1": "4a1deb1a5bbcc289d410fc83848605a84c0621dc",
+        "imports": [
+          "Ps.Core.Expr"
+        ],
+        "module": "Ps.Core.Declaration",
+        "path": "psc0/packages/core/src/Ps/Core/Declaration.lean",
+        "sha256": "8c9c4b8b2dd97df9ff9e8efbf2e6f4cf45c2f01e4fb1f05ebea462574a0ffc32"
+      },
+      {
+        "bytes": 1081,
+        "gitBlobSHA1": "9aa19bdd88c18d7ebb60d947e4323294bf3ad8af",
+        "imports": [
+          "Ps.Foundation.Name",
+          "Ps.Core.Level"
+        ],
+        "module": "Ps.Core.Expr",
+        "path": "psc0/packages/core/src/Ps/Core/Expr.lean",
+        "sha256": "5235ec9ba5457bf32af21197c2b72c8ac9ee032561743094627b8a9bdc030d12"
+      },
+      {
+        "bytes": 286,
+        "gitBlobSHA1": "2607a00d69cb0299de20aecb6b94a00adc7852a2",
+        "imports": [
+          "Ps.Foundation.Name"
+        ],
+        "module": "Ps.Core.Level",
+        "path": "psc0/packages/core/src/Ps/Core/Level.lean",
+        "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4"
+      },
+      {
+        "bytes": 5297,
+        "gitBlobSHA1": "c8439e444e38b642043f2d18561a77a2bdd420a2",
+        "imports": [
+          "Ps.Core.Expr"
+        ],
+        "module": "Ps.Core.Subst",
+        "path": "psc0/packages/core/src/Ps/Core/Subst.lean",
+        "sha256": "e1924d10d70f71fc191130ec45fa22e5866691a5422f59edb5897cd2cc52f38f"
+      },
+      {
+        "bytes": 13429,
+        "gitBlobSHA1": "a714e9a0c2aaec053830f1fbff019bf501ce21dd",
+        "imports": [
+          "Ps.Foundation.Name",
+          "Ps.Foundation.Index",
+          "Ps.Core.Declaration",
+          "Ps.Core.Subst",
+          "Ps.Environment.Instances"
+        ],
+        "module": "Ps.Environment.Basic",
+        "path": "psc0/packages/environment/src/Ps/Environment/Basic.lean",
+        "sha256": "4abc4834e8a46f243e9e154b9de9143f948efc4ad62d2e7e1df56248b2c00541"
+      },
+      {
+        "module": "Ps.Environment.CompilerSourceCandidate",
+        "path": "psc0/packages/environment/src/Ps/Environment/CompilerSourceCandidate.lean",
+        "bytes": 5114,
+        "imports": [
+          "Ps.Environment.CompilerSourceCandidateData"
+        ],
+        "gitBlobSHA1": "555249543fc40fc9846cef678f502613c3d9e396",
+        "sha256": "7ab635fe05dafd2fe2adf8cdee14ff731dcbf11bbf377d122622b586ca1b62dc"
+      },
+      {
+        "module": "Ps.Environment.CompilerSourceCandidateData",
+        "path": "psc0/packages/environment/src/Ps/Environment/CompilerSourceCandidateData.lean",
+        "bytes": 174266,
+        "imports": [
+          "Ps.Environment.Basic"
+        ],
+        "gitBlobSHA1": "9072e3215a7820090e704ad727bc8831c27084cd",
+        "sha256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9"
+      },
+      {
+        "bytes": 2499,
+        "gitBlobSHA1": "ab30e40e0c56e84d2f309c1895b573997be2dfcc",
+        "imports": [
+          "Ps.Core.Expr",
+          "Ps.Environment.LocalContext"
+        ],
+        "module": "Ps.Environment.Instances",
+        "path": "psc0/packages/environment/src/Ps/Environment/Instances.lean",
+        "sha256": "e5f9d66bfc03cf17c7b27e2fdedaddd8de7917a38a5f888694015a698c7b5e16"
+      },
+      {
+        "bytes": 2690,
+        "gitBlobSHA1": "fcd057e60367c2fa3f9ffcdf7cf5c40a7c5d49a6",
+        "imports": [
+          "Ps.Foundation.Name",
+          "Ps.Core.Expr"
+        ],
+        "module": "Ps.Environment.LocalContext",
+        "path": "psc0/packages/environment/src/Ps/Environment/LocalContext.lean",
+        "sha256": "06c5a03d73c26083ec313017120bb509df33e80e5c51d887ffca13942382bdb9"
+      },
+      {
+        "bytes": 1069,
+        "gitBlobSHA1": "c33638e130c02063a7db71e3a951bb6754c35c53",
+        "imports": [],
+        "module": "Ps.Foundation.Index",
+        "path": "psc0/packages/foundation/src/Ps/Foundation/Index.lean",
+        "sha256": "dba480e987956bb22bc5661e9d3df882e8dd01e138459cef6eda98c8056a29c5"
+      },
+      {
+        "bytes": 3984,
+        "gitBlobSHA1": "b907616cb4cbf65089ba0c9a8e13f57b220008cf",
+        "imports": [],
+        "module": "Ps.Foundation.Name",
+        "path": "psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+        "sha256": "9f8c895567542c90ac9088b3ce25ccda6f374e016069faa4068feca0e28b7092"
+      }
+    ],
+    "moduleCount": 11,
+    "sourceBytes": 211778,
+    "fullCompositionImports": [],
+    "externalImports": [],
+    "unresolvedProjectImports": [],
+    "sourceGateReport": "core-first-evidence/compiler-source-qualification.json"
   },
   "measurements": [
     {
@@ -7336,6 +7718,34 @@
         "moduleCount": 316,
         "sourceBytes": 26384235,
         "unresolvedProjectImports": []
+      }
+    },
+    {
+      "tag": "PSC0_CORE_SEAM_IMPORTS",
+      "data": {
+        "externalImports": [],
+        "fullCompositionImports": [],
+        "label": "stage0",
+        "moduleCount": 0,
+        "root": "Ps.Environment.Bootstrap",
+        "sourceBytes": 0,
+        "unresolvedProjectImports": [
+          "Ps.Environment.Bootstrap"
+        ]
+      }
+    },
+    {
+      "tag": "PSC0_CORE_SEAM_IMPORTS",
+      "data": {
+        "externalImports": [],
+        "fullCompositionImports": [],
+        "label": "stage0",
+        "moduleCount": 0,
+        "root": "Ps.Environment.CompilerSourceCandidate",
+        "sourceBytes": 0,
+        "unresolvedProjectImports": [
+          "Ps.Environment.CompilerSourceCandidate"
+        ]
       }
     },
     {
@@ -7401,6 +7811,20 @@
         "fullCompositionImports": [],
         "label": "stage0",
         "moduleCount": 0,
+        "root": "Ps.Compiler.Pscv0ModuleEngine",
+        "sourceBytes": 0,
+        "unresolvedProjectImports": [
+          "Ps.Compiler.Pscv0ModuleEngine"
+        ]
+      }
+    },
+    {
+      "tag": "PSC0_CORE_SEAM_IMPORTS",
+      "data": {
+        "externalImports": [],
+        "fullCompositionImports": [],
+        "label": "stage0",
+        "moduleCount": 0,
         "root": "Ps.Environment.InhabitedExpr",
         "sourceBytes": 0,
         "unresolvedProjectImports": [
@@ -7433,6 +7857,29 @@
         "sourceBytes": 637310,
         "unresolvedProjectImports": [
           "Ps.Compiler.Pscv0Engine"
+        ]
+      }
+    },
+    {
+      "tag": "PSC0_CORE_INDEPENDENT_PROJECT_IMPORTS",
+      "data": {
+        "environmentBytes": 0,
+        "externalImports": [],
+        "fullCompositionImports": [],
+        "label": "stage0",
+        "moduleCount": 70,
+        "roots": [
+          "Ps.Compiler.Pscv0ModuleEngine",
+          "Ps.BackendTs.Readable",
+          "Ps.BackendRust.Module",
+          "Ps.BackendWasm.Module",
+          "Ps.CompilerIr.Checked",
+          "Ps.Codegen.Api",
+          "Ps.Codegen.Provenance"
+        ],
+        "sourceBytes": 637310,
+        "unresolvedProjectImports": [
+          "Ps.Compiler.Pscv0ModuleEngine"
         ]
       }
     },
@@ -7531,10 +7978,34 @@
           "Ps.Environment.SelfHostProd",
           "Ps.Environment.StandardSnapshot"
         ],
-        "head": "9f06af4cad58fd10c4224a52cd89e38a2a753b51",
+        "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
         "label": "candidate",
-        "moduleCount": 321,
-        "sourceBytes": 26398392,
+        "moduleCount": 322,
+        "sourceBytes": 26400284,
+        "unresolvedProjectImports": []
+      }
+    },
+    {
+      "tag": "PSC0_CORE_SEAM_IMPORTS",
+      "data": {
+        "externalImports": [],
+        "fullCompositionImports": [],
+        "label": "candidate",
+        "moduleCount": 11,
+        "root": "Ps.Environment.Bootstrap",
+        "sourceBytes": 151539,
+        "unresolvedProjectImports": []
+      }
+    },
+    {
+      "tag": "PSC0_CORE_SEAM_IMPORTS",
+      "data": {
+        "externalImports": [],
+        "fullCompositionImports": [],
+        "label": "candidate",
+        "moduleCount": 11,
+        "root": "Ps.Environment.CompilerSourceCandidate",
+        "sourceBytes": 211778,
         "unresolvedProjectImports": []
       }
     },
@@ -7584,7 +8055,19 @@
         "label": "candidate",
         "moduleCount": 159,
         "root": "Ps.Compiler.Pscv0Engine",
-        "sourceBytes": 2211770,
+        "sourceBytes": 2211756,
+        "unresolvedProjectImports": []
+      }
+    },
+    {
+      "tag": "PSC0_CORE_SEAM_IMPORTS",
+      "data": {
+        "externalImports": [],
+        "fullCompositionImports": [],
+        "label": "candidate",
+        "moduleCount": 160,
+        "root": "Ps.Compiler.Pscv0ModuleEngine",
+        "sourceBytes": 2229231,
         "unresolvedProjectImports": []
       }
     },
@@ -7620,7 +8103,28 @@
         "fullCompositionImports": [],
         "label": "candidate",
         "moduleCount": 223,
-        "sourceBytes": 2765757,
+        "sourceBytes": 2765743,
+        "unresolvedProjectImports": []
+      }
+    },
+    {
+      "tag": "PSC0_CORE_INDEPENDENT_PROJECT_IMPORTS",
+      "data": {
+        "environmentBytes": 49489,
+        "externalImports": [],
+        "fullCompositionImports": [],
+        "label": "candidate",
+        "moduleCount": 224,
+        "roots": [
+          "Ps.Compiler.Pscv0ModuleEngine",
+          "Ps.BackendTs.Readable",
+          "Ps.BackendRust.Module",
+          "Ps.BackendWasm.Module",
+          "Ps.CompilerIr.Checked",
+          "Ps.Codegen.Api",
+          "Ps.Codegen.Provenance"
+        ],
+        "sourceBytes": 2783218,
         "unresolvedProjectImports": []
       }
     },
@@ -7632,7 +8136,7 @@
           "axiom_declarations": 0,
           "class_declarations": 0,
           "deriving_clauses": 12,
-          "do_tokens": 1500,
+          "do_tokens": 1501,
           "fixedpoint_suffixes": 0,
           "for_tokens": 188,
           "inductive_declarations": 118,
@@ -7641,11 +8145,11 @@
           "mutual_blocks": 9,
           "opaque_declarations": 0,
           "partial_definitions": 0,
-          "structure_declarations": 347,
+          "structure_declarations": 348,
           "tactic_values": 0,
           "termination_suffixes": 0,
           "theorem_declarations": 0,
-          "where_tokens": 465,
+          "where_tokens": 466,
           "while_tokens": 1
         }
       }

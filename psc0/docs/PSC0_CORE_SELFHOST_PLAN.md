@@ -28,9 +28,9 @@ Reject a missing/additional module, source-kind substitution, import cycle, sour
 
 ## Incremental implementation
 
-First isolate fingerprint/serialization, host kernel replay and an explicit-context Engine while preserving Full wrappers. Check their import closure and real preparation/refusal behavior; this is not Stage1.
+Fingerprint/Replay extraction, explicit-context Engine, selected readers, deriving-helper separation and fresh portable project threading are implemented at their recorded probe scopes. Preserve their Full compatibility wrappers. These results establish reusable preparation and checking boundaries; they do not establish Stage1.
 
-Next compile a real selected-source subset such as Foundation.Source, Foundation.List and Syntax.Token against an independently checked Core seed. Use both selected source routes and retain the output comparison contract. Include missing-source, wrong-environment, malformed-source and invalid-recursion controls. Add Foundation.Name and Syntax.Cursor only with exact UTF8/string dependencies or a checked conversion.
+The first complete compiler-source workload is Foundation.Source plus Foundation.List, with every original source declaration and its ProofScript counterpart retained. An importing entry makes both real modules reachable. Complete selected preparation and canonical independent admission are qualified against the measured candidate, retaining exact source paths, bytes, hashes, generated declarations and metadata. Expand to Syntax.Token, Foundation.Name and Syntax.Cursor only with measured source, deriving and UTF8/string dependencies or an explicitly qualified conversion.
 
 The mutual Syntax and ECMA data groups require a faithful selected representation. One candidate is an indexed family over a closed role tag with unchanged constructor telescopes, checked eliminators and API/runtime correspondence. Do not use an untyped representation or enable native-only syntax silently.
 
@@ -41,3 +41,19 @@ Expand to an actual parser worker, checked elaboration worker and finally the wh
 `selfhost-source-workspace.mjs` supplies useful consumed-file and dependency-order mechanics. `sh1-qualify.mjs` supplies stage and artifact comparison mechanics. The Linux five-source bridge supplies source-selection and recipient-owned AST transport techniques. Reuse these mechanisms after changing their historical grammar/API/closure identities and adding current checking gates; do not relabel old receipts.
 
 The old selfhost seed and package scripts belong to earlier compiler/kernel/toolchain identities. The successful historical 20-module/five-source bridge was not the complete v7.2 compiler fixed point. Native Lean compilation of current files also remains distinct from compiling those files through PSC0's selected input contract.
+
+## Next complete module after Foundation.Source/List
+
+The [source inspection](core-first-evidence/next-compiler-source-workload.json) recommends `Ps.Syntax.Token`: 1,085 source bytes, exactly three source declarations and an import of Foundation.Source. It defines the seven-case token kind, exhaustive Boolean equality and a token record. The record's `text : String` is its first added native requirement; the module performs no string operation.
+
+Pinned native String contains ByteArray and a ByteArray.IsValidUTF8 proof. The predicate reaches noncomputable List.utf8Encode and its actual character/word dependencies. Measure a separate additive closure from the existing foundation roots plus String; inspect exact native kinds, bodies, assumptions and metadata, then admit the full closure. Do not remove the text field or infer closure size/policy from its type-only use. Retain all three Token declarations and its Source import in the selected paired-source gate.
+
+Cursor (2,808 bytes, eleven explicit source declarations) is a useful later step before Name (3,984 bytes, eleven declarations). Both use `String.Internal` extern declarations whose source has no explicit body. Those names differ from later checked String operations; their exact imported values, assumption closure and runtime contracts still require inspection. Any replacement must be an explicit, qualified source conversion. Cursor also tests strict-child recursive results returned as functions and actual UTF8 byte/line/column behavior. Name adds decimal rendering and its implementation correspondence.
+
+These are inspected future workloads, with no selected-source or runtime acceptance assigned yet.
+
+## Current completed source step
+
+At `1995a478af7aeb83032749fbdb9a2cfa96d28a88`, [run 39191534560](https://github.com/dwijayuda/pskernel/actions/runs/39191534560) passed all four Core-first Linux jobs. PSC0 accepted both complete original Foundation.Source and Foundation.List files and their ProofScript counterparts through the explicit-context project engine, produced identical canonical admissions, and independently admitted both results over the measured 92-declaration candidate. It retained every original seed declaration/effective reducibility and the measured source metadata. Native elaboration parity, emitted backend execution and whole-compiler selfhost remain unqualified.
+
+The next action is the additive String closure measurement described above, followed by the complete Token module gate. Preserve the passing Source/List source pins and candidate assets while extending coverage. Do not re-run extraction work or omit a function to make a larger source manifest pass.

@@ -148,3 +148,102 @@ def psKernelC0DeepLambdaSourceReceipt
       context state name domain body binderInfo false ranges with
   | .error message => .error message
   | .ok result => .ok ⟨result, h⟩
+
+/-!
+Second-stage research substrate: source-equivalent *deferred* lambda opening.
+The original prepare/close interface above remains an independent eager
+oracle. This new preparation validates the checked domain and constructs a
+fresh scoped environment but defers the actual O(size-of-body) substitution.
+The continuation cannot observe its body without explicitly forcing it.
+-/
+
+structure PsKernelC0DeepDeferredLambdaFrame where
+  name : PsKernelName
+  domain : PsKernelExpr
+  originalBody : PsKernelExpr
+  binderInfo : PsKernelBinderInfo
+  fresh : PsKernelName
+  sourceFreshState : PsKernelCheckerState
+  scopedContext : PsKernelCheckerContext
+  delayedOpening : PsKernelC0DeepSubstTape
+  remainingRanges : List Nat
+
+/-- A *real* deferred binder-opening operation. Unlike the eager source
+    prepare, its successful path never traverses the original lambda body
+    to apply a substitution before returning its continuation. -/
+def psKernelC0DeepLambdaPrepareDeferred
+    (smaller : PsKernelC0BinderSmaller)
+    (whnf : PsKernelC0BinderWhnf)
+    (defeq : PsKernelC0BinderDefEq)
+    (nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (domain body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (currentBinderRanges : List Nat) :
+    Except String PsKernelC0DeepDeferredLambdaFrame :=
+  match smaller [] [] whnf defeq nextContext state domain false with
+  | .error error => .error error
+  | .ok domainResult =>
+    match psKernelEnsureSortWith whnf nextContext
+        domainResult.2 domainResult.1 with
+    | .error error => .error error
+    | .ok sortResult =>
+      let freshResult := psKernelCheckerStateFreshName sortResult.2 name
+      let fresh := freshResult.1
+      let state1 := freshResult.2
+      let childLocal :=
+        psKernelLocalContextAddLocal nextContext.localContext
+          fresh name domain binderInfo
+      let child := psKernelCheckerContextWithLocalContext nextContext childLocal
+      let (opening, restRanges) :=
+        psKernelC0DeepDeferBinderOpening body fresh currentBinderRanges
+      .ok {
+        name := name
+        domain := domain
+        originalBody := body
+        binderInfo := binderInfo
+        fresh := fresh
+        sourceFreshState := state1
+        scopedContext := child
+        delayedOpening := opening
+        remainingRanges := restRanges
+      }
+
+/-- Force only at a genuine source typing observation boundary, exactly
+    through the source capture-avoiding instantiator. -/
+def psKernelC0DeepLambdaForceFrame
+    (frame : PsKernelC0DeepDeferredLambdaFrame) :
+    PsKernelC0DeepLambdaFrame :=
+  {
+    name := frame.name
+    domain := frame.domain
+    originalBody := frame.originalBody
+    binderInfo := frame.binderInfo
+    fresh := frame.fresh
+    sourceFreshState := frame.sourceFreshState
+    scopedContext := frame.scopedContext
+    openedBody := psKernelC0DeepSubstForce frame.delayedOpening
+    remainingRanges := frame.remainingRanges
+  }
+
+/-- Research comparison to the eager oracle, still calls source checked
+    child inference at precisely the source continuation boundary. -/
+def psKernelC0DeepLambdaDeferredChecked
+    (smaller : PsKernelC0BinderSmaller)
+    (whnf : PsKernelC0BinderWhnf)
+    (defeq : PsKernelC0BinderDefEq)
+    (nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (domain body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (currentBinderRanges : List Nat) :
+    Except String (PsKernelExpr × PsKernelCheckerState) := do
+  let deferred ← psKernelC0DeepLambdaPrepareDeferred smaller whnf defeq
+    nextContext state name domain body binderInfo currentBinderRanges
+  let frame := psKernelC0DeepLambdaForceFrame deferred
+  let (bodyType, bodyState) ← smaller [] frame.remainingRanges
+    whnf defeq frame.scopedContext frame.sourceFreshState
+    frame.openedBody false
+  pure (psKernelC0DeepLambdaClose frame bodyType bodyState)

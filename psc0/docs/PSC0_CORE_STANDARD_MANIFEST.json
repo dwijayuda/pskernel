@@ -1,7 +1,7 @@
 {
   "schema": "psc0-core-first-environment-ledger/1",
   "purpose": "Design and evidence ledger only; not a loadable or authenticated profile",
-  "status": "core-language-public-scope-module-kind-and-imported-body-cells-qualified; whole Core milestones/profiles remain open; selfhost is final",
+  "status": "core-language-public-import-signature-and-exposed-body-cells-qualified; whole Core milestones/profiles remain open; selfhost is final",
   "authority": {
     "reference": "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md",
     "referenceGitBlobSHA1": "694115223777599ba28ee175e14bb642b7b6aa4b",
@@ -278,9 +278,9 @@
     "pinnedNativeScopeAndModuleOracles": true
   },
   "notYetQualified": [
-    "Public signatures and exported bodies must respect ordinary/private versus public imported-name visibility.",
-    "Existing named-end and dotted namespace/section closure differences from pinned native Lean remain outside this checkpoint.",
-    "Legacy Lean import-body transparency and complete native elaboration/module correspondence remain unqualified.",
+    "Complete named-end and dotted namespace/section closure correspondence.",
+    "Legacy local-private references, imported-body transparency and transitive implementation closure.",
+    "Complete native proof abstraction and elaboration/module correspondence.",
     "dependency-complete selected Core Standard and complete Core language/source/runtime profile",
     "whole compiler-sufficient Bootstrap, retained for final selfhost preparation",
     "literal Bootstrap/Core/Full inclusion",
@@ -451,10 +451,10 @@
     "baseBranch": "psc0/pscv0-v7-native-lean-v1",
     "baseHead": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
     "promotionApproved": false,
-    "lastQualifiedCodeHead": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
-    "lastQualifiedCodeRun": 39236888998,
-    "checkedAtUTC": "2026-10-19 10:42:44 UTC",
-    "headAtCheck": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+    "lastQualifiedCodeHead": "9024dd92c147ffbbafc3834021ad11540d89578a",
+    "lastQualifiedCodeRun": 39245007181,
+    "checkedAtUTC": "2026-10-19 11:41:12 UTC",
+    "headAtCheck": "9024dd92c147ffbbafc3834021ad11540d89578a",
     "documentationDescendantMayBeNewer": true
   },
   "sourceInventory": {
@@ -531,49 +531,49 @@
     "sameNativeGraphAsPriorQualification": true
   },
   "nextCriticalPath": [
-    "Preserve qualified public-section/EOF, module-kind and imported-body cells; correct ordinary/private-import name visibility in public signatures and exposed bodies through the shared project owner",
-    "Close named-end/dotted-scope and legacy-body correspondence gaps; complete the Core capability/rule/fixture/owner/phase mapping while preserving original accepted M1 and bounded M2+A evidence",
+    "Preserve the qualified public-section/EOF, module-kind, body and public import-visibility cells; correct component-wise named-end/dotted-scope behavior in the shared elaborator and Lean visibility adapter",
+    "Separately qualify legacy local-private and dependency-complete legacy import views, keeping real opaque declarations and private source-name restrictions; finish the selected Core capability/rule/fixture/owner/phase mapping",
     "Continue the reviewed minimal computed/let elimination-target adapter and induction distinct-variable-index guard, then remaining selected Core data/matching/recursion/deriving",
-    "Complete required Core Standard logical/runtime closure, control flow, primitives, applicable targets and assurance boundaries; keep existing Full-compatibility TS/JS/Rust runtime observations separately attributed",
+    "Complete Core Standard logical/runtime closure, control flow, primitives, applicable targets and assurance; keep the Full compatibility TS/JS/Rust baseline separately attributed",
     "Qualify M5 actual artifact consumers, cold/warm/incremental correspondence, deterministic reconstruction and tooling",
-    "After M1-M5 acceptance, complete authoritative compiler-source conversions and compiler-sufficient Bootstrap, then exact Stage1-3 under the retained full manifest",
+    "After M1-M5 acceptance, complete authoritative compiler-source conversions and compiler-sufficient Bootstrap, then exact Stage1-3",
     "Preserve separately gated package installation, compatible Full composition and release selection"
   ],
   "documentationIsLoadableAuthority": false,
   "latestCodeQualification": {
-    "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
-    "tree": "15bccd57b7765a05485e27f5f65fc2aae96f6d10",
-    "run": 39236888998,
+    "head": "9024dd92c147ffbbafc3834021ad11540d89578a",
+    "tree": "4e8e37fc8ff48423b8aa994a4639b0842f4b33fe",
+    "run": 39245007181,
     "conclusion": "success",
-    "completedAt": "2026-10-19T10:35:04Z",
+    "completedAt": "2026-10-19T11:36:40Z",
     "jobs": [
       {
-        "id": 118010303744,
+        "id": 118034755140,
         "name": "candidate-authoring",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 118010303771,
-        "name": "source-inventory",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 118010303809,
+        "id": 118034755163,
         "name": "native-seams",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 118010303816,
+        "id": 118034755272,
         "name": "bootstrap-closure",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 118034755277,
+        "name": "source-inventory",
         "status": "completed",
         "conclusion": "success"
       }
     ],
-    "evidence": "psc0/docs/core-first-evidence/core-language-scope-module-qualification.json",
-    "scope": "Public-section inheritance and EOF scope closure are implemented through the existing syntax/elaboration owners. The selected readers preserve actual module kind and the shared project parser rejects module clients importing legacy Lean files. Paired independent checks and separate pinned-native oracles cover declaration visibility, import kinds, exposed abbreviations and exported specifications versus hidden ordinary bodies. The existing Full compatibility application still passes 1,069 observations per TS/JS/Rust target. No whole Core milestone, complete Core profile or selfhost stage is qualified."
+    "evidence": "psc0/docs/core-first-evidence/core-language-import-visibility-qualification.json",
+    "scope": "Shared exported signature and exposed-definition import visibility; paired selected-source preparation and independent admission; bounded pinned-native import behavior; required retained Core and Full-compatibility runtime regressions."
   },
   "components": {
     "compilerSourceFoundationCandidate": {
@@ -762,22 +762,22 @@
   },
   "nextCompilerSourceInspection": "psc0/docs/core-first-evidence/next-compiler-source-workload.json",
   "currentSourceInventory": {
-    "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
-    "run": 39236888998,
-    "job": 118010303771,
-    "path": "psc0/docs/core-first-evidence/core-language-scope-module-qualification.json",
+    "head": "9024dd92c147ffbbafc3834021ad11540d89578a",
+    "run": 39245007181,
+    "job": 118034755277,
     "fullModules": 322,
-    "fullSourceBytes": 26405676,
+    "fullSourceBytes": 26406895,
     "independentProjectModules": 224,
-    "independentProjectSourceBytes": 2788610,
+    "independentProjectSourceBytes": 2789829,
     "compilerSourceCandidateModules": 11,
     "compilerSourceCandidateSourceBytes": 211778,
+    "path": "psc0/docs/core-first-evidence/core-language-import-visibility-qualification.json",
     "historicalRawSourceAuditFileRetainsPreviousAttribution": true
   },
   "currentNativeWorkloadObservation": {
-    "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
-    "run": 39236888998,
-    "job": 118010303744,
+    "head": "9024dd92c147ffbbafc3834021ad11540d89578a",
+    "run": 39245007181,
+    "job": 118034755140,
     "summary": {
       "axioms": [
         "propext",
@@ -796,11 +796,11 @@
       "candidateKernelAdmitted": false,
       "nativeClosureDeclarations": 5690,
       "nativeClosureSHA256": "cf71be4386f6c5068e842b8e47f9a046c85494a651d52c97c840e6a1cc56450d",
-      "sourceHead": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "sourceHead": "9024dd92c147ffbbafc3834021ad11540d89578a",
       "sourceModules": 322,
       "sourceParityClaim": false
     },
-    "assumptionPaths": "psc0/docs/core-first-evidence/core-language-scope-module-qualification.json",
+    "assumptionPaths": "psc0/docs/core-first-evidence/core-language-import-visibility-qualification.json",
     "assumptionPathsScope": "Fresh bounded path summary in retainedRegression.nativeWorkload.assumptionPaths; full structured paths remain in the exact candidate-authoring log/archive.",
     "candidateKernelAdmitted": false,
     "sourceParityQualified": false,
@@ -821,7 +821,7 @@
     "latestSourceJob": 117840891994
   },
   "executionPlan": {
-    "revision": 3,
+    "revision": 4,
     "userDirectiveAt": "2026-10-19T10:21:03+07:00",
     "priority": "core-language-M1-M5-then-selfhost",
     "coreCompletionDenominator": "Selected-v7.2 Core capability and conformance manifest; existing Full deferrals retained",
@@ -840,10 +840,11 @@
       "existing-Full-compatibility-application-TS-JS-Rust-runtime-baseline",
       "selected-Lean-public-section-and-shared-EOF-scope-cells",
       "actual-source-module-kind-project-validation-cells",
-      "paired-imported-body-and-pinned-native-oracle-cells"
+      "paired-imported-body-and-pinned-native-oracle-cells",
+      "public-import-availability-for-exported-signatures-and-exposed-definitions"
     ],
     "historicalAcceptance": "Original M1 and bounded M2+A remain accepted for their original workload; completedCoreMilestones refers only to the complete Core exits in the revised roadmap.",
-    "latestBoundedQualification": "psc0/docs/core-first-evidence/core-language-scope-module-qualification.json"
+    "latestBoundedQualification": "psc0/docs/core-first-evidence/core-language-import-visibility-qualification.json"
   },
   "nextCompilerSourceInspectionPhase": "retained-selfhost-preparation-backlog",
   "foundationSourceCodeQualification": {
@@ -1125,5 +1126,311 @@
       "persistentArtifactConsumerQualified": false,
       "selfhostQualified": false
     }
+  },
+  "languageImportVisibilityQualification": {
+    "head": "9024dd92c147ffbbafc3834021ad11540d89578a",
+    "tree": "4e8e37fc8ff48423b8aa994a4639b0842f4b33fe",
+    "run": 39245007181,
+    "conclusion": "success",
+    "completedAt": "2026-10-19T11:36:40Z",
+    "jobs": [
+      {
+        "id": 118034755140,
+        "name": "candidate-authoring",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 118034755163,
+        "name": "native-seams",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 118034755272,
+        "name": "bootstrap-closure",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 118034755277,
+        "name": "source-inventory",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "evidence": "psc0/docs/core-first-evidence/core-language-import-visibility-qualification.json",
+    "scope": "Shared exported signature and exposed-definition import visibility; paired selected-source preparation and independent admission; bounded pinned-native import behavior; required retained Core and Full-compatibility runtime regressions.",
+    "importVisibilityFixture": {
+      "owner": "Ps.Compiler.Pscv0ModuleEngine.psCompilerEnginePreparePscv0Project",
+      "constantReferenceWalker": "Ps.Compiler.Pscv0ModuleEngine.psPscv0ExprConstants",
+      "availability": "Original caller profile base plus own public declarations and the fully merged transitive public-import interface.",
+      "moduleModeOnly": true,
+      "legacyImportedNameExemption": true,
+      "preservesExistingLocalPrivateRefusals": true,
+      "ordinaryDefinitionImportedAs": "opaqueDecl",
+      "exposedAbbreviationImportedAs": "definitionDecl",
+      "theoremProofsAreExemptFromExposedDefinitionBodyCheck": true,
+      "projectionStructureOwnerCountedAsReference": true,
+      "familyMetadataBlanketVisibilityRestrictionAdded": false,
+      "dataKindsOrProofAuthorityChanged": false,
+      "counts": {
+        "providerDeclarations": 3,
+        "checkingBaseDeclarations": 4,
+        "positiveProjects": 13,
+        "positiveProjectsPerSelectedKind": 6,
+        "additionalLegacyProjects": 1,
+        "refusals": 8,
+        "refusalsPerKind": 4,
+        "publicCanonicalEqualProjects": 9,
+        "ordinaryCanonicalEqualProjects": 2,
+        "bridgeCanonicalEqualProjects": 2,
+        "sourceKinds": [
+          "lean",
+          "proofScript"
+        ]
+      },
+      "positiveCasesPerSelectedKind": [
+        "ordinary import: ordinary implementation and theorem proof retain provider dependencies without reexporting provider names",
+        "direct public import: public signature, exposed definition, ordinary definition and theorem proof",
+        "transitive public facade: same public uses and exact interface",
+        "diamond: private Left followed by public Right, both publicly import Library",
+        "diamond: public Right followed by private Left",
+        "opaque bridge through public facade: exposed client calls public bridge without seeing its private provider"
+      ],
+      "additionalLegacyCase": "Headerless Lean directly imports Library and admits the same four public-use declaration bodies; import-name visibility only.",
+      "refusalCasesPerSelectedKind": [
+        {
+          "case": "ordinary direct import used by public signature",
+          "diagnostic": "PSCV0-MODULE: public signature references private import in coreImportSignature"
+        },
+        {
+          "case": "ordinary direct import used by exposed definition body",
+          "diagnostic": "PSCV0-MODULE: exposed body references private import in coreImportExposed"
+        },
+        {
+          "case": "ordinary import of public facade does not make its provider public",
+          "diagnostic": "PSCV0-MODULE: public signature references private import in coreImportSignature"
+        },
+        {
+          "case": "public bridge facade does not reveal its privately imported provider",
+          "diagnostic": "PSCV0-SCOPE: unknown name coreImportValue"
+        }
+      ],
+      "positiveChecks": [
+        "independent finite kernel admission of each successful project",
+        "strict canonical equality across matching source kinds and public routes",
+        "exact own-first public interface ordering",
+        "provider names occur exactly once through diamonds",
+        "actual prepared signature, exposed body, ordinary implementation and theorem proof retain the intended constants",
+        "ordinary bridge stays opaque in exported interface while checked implementation retains private dependency"
+      ],
+      "firstReviewCorrection": {
+        "phase": "before any branch update or CI run",
+        "change": "Expected bridge interface order corrected to own declaration before reexport."
+      },
+      "foundationDriverCorrection": {
+        "path": "psc0/test/Pscv0CoreCompilerSource.lean",
+        "change": "Only the ProofScript importing driver's Source import becomes public because PsSourceSpan appears in its exported signature; List remains ordinary.",
+        "leanDriverBytes": 153,
+        "proofScriptDriverBytes": 162,
+        "originalSourceAndListFilesChanged": false,
+        "originalCandidateChanged": false,
+        "checkingOrRefusalPolicyWeakened": false,
+        "proofScriptDriverSHA256": "a5d322514cd218b367152cdcd362e3f250ab344c41f92db5c05e42a570547ba1",
+        "leanDriverSHA256": "a3237b3e6e5a392f902c14d0ba7cd5f0f0165a1c6cd16adaf3adf2cdadbd45f7"
+      },
+      "integratedFixtureCorrections": [
+        {
+          "fixture": "DerivedClient",
+          "publicImports": [
+            "LeftExport",
+            "RightExport"
+          ],
+          "reason": "The exported chosen signature contains Palette.Shade; preserve two public derived-instance reexport paths."
+        },
+        {
+          "fixture": "abbreviationClient",
+          "publicImports": [
+            "Aliases"
+          ],
+          "reason": "The public theorem type contains Aliases.six; preserve abbreviation unfolding positive."
+        },
+        {
+          "fixture": "abbreviationOpacity",
+          "publicImports": [
+            "Aliases"
+          ],
+          "reason": "The public theorem type is visible before the intended ordinary-definition rfl refusal."
+        },
+        {
+          "fixture": "opacityClient",
+          "publicImports": [
+            "Library"
+          ],
+          "reason": "The public theorem type is visible before the intended ordinary-definition rfl refusal."
+        },
+        {
+          "fixture": "transparencyBoundaries request 3",
+          "publicImports": [
+            "Types"
+          ],
+          "reason": "Both public signatures retain imported Clear; preserve instance/numeral transparency positive."
+        }
+      ]
+    },
+    "pinnedNativeOracleCounts": {
+      "visibilityClassifications": 17,
+      "visibilityPublic": 11,
+      "visibilityPrivate": 6,
+      "invalidScopeForms": 3,
+      "moduleCompileCases": 25,
+      "moduleCompileAcceptances": 17,
+      "moduleCompileRefusals": 8,
+      "newModuleCompileCases": 13,
+      "newModuleCompileAcceptances": 9,
+      "newModuleCompileRefusals": 4
+    },
+    "checkingPolicy": {
+      "fixtureBaseDeclarations": [
+        "CoreSelectedIdentity",
+        "Eq",
+        "Eq.refl",
+        "Eq.rec"
+      ],
+      "equalityOwner": "psc0/packages/environment/src/Ps/Environment/Logic.lean",
+      "equalityOwnerGitBlobSHA1": "9d04fb2dcedf7c0c39f1d07b371c0b82939df7f2",
+      "declarationKinds": [
+        "definition",
+        "inductive",
+        "constructor",
+        "recursor"
+      ],
+      "actualFixtureBaseAxioms": [],
+      "kernelTrustLevel": 0,
+      "maxHeartbeatsPerDeclaration": 2000000,
+      "maxRecDepthPerDeclaration": 20000,
+      "fixtureBaseSelectedAsCoreProfile": false,
+      "previousIdentityOnlyProjectAndRuntimeFixtureUnchanged": true,
+      "fullWrapperPolicyUnchanged": true,
+      "maximumApprovedLogicalAssumptions": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+      ]
+    },
+    "boundaries": {
+      "sharedImportVisibilityCorrected": true,
+      "completeNativeModuleParityQualified": false,
+      "legacyImportedNameFixtureQualifiesBodyTransparency": false,
+      "fullProofAbstractionParityQualified": false,
+      "completeCoreProfileQualified": false,
+      "completeCoreBackendExecutionQualified": false,
+      "formalTargetRefinementQualified": false,
+      "persistentArtifactConsumerQualified": false,
+      "selfhostQualified": false
+    }
+  },
+  "previousScopeModuleSourceInventory": {
+    "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+    "run": 39236888998,
+    "job": 118010303771,
+    "path": "psc0/docs/core-first-evidence/core-language-scope-module-qualification.json",
+    "fullModules": 322,
+    "fullSourceBytes": 26405676,
+    "independentProjectModules": 224,
+    "independentProjectSourceBytes": 2788610,
+    "compilerSourceCandidateModules": 11,
+    "compilerSourceCandidateSourceBytes": 211778,
+    "historicalRawSourceAuditFileRetainsPreviousAttribution": true
+  },
+  "previousScopeModuleNativeWorkloadObservation": {
+    "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+    "run": 39236888998,
+    "job": 118010303744,
+    "summary": {
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "closureDeclarations": 5690,
+      "externalRoots": 458,
+      "partial": [],
+      "schema": "pscv0-core-native-closure-summary/1",
+      "sourceDeclarations": 191647,
+      "sourceModules": 322,
+      "unsafe": []
+    },
+    "roster": {
+      "candidateKernelAdmitted": false,
+      "nativeClosureDeclarations": 5690,
+      "nativeClosureSHA256": "cf71be4386f6c5068e842b8e47f9a046c85494a651d52c97c840e6a1cc56450d",
+      "sourceHead": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "sourceModules": 322,
+      "sourceParityClaim": false
+    },
+    "assumptionPaths": "psc0/docs/core-first-evidence/core-language-scope-module-qualification.json",
+    "assumptionPathsScope": "Fresh bounded path summary in retainedRegression.nativeWorkload.assumptionPaths; full structured paths remain in the exact candidate-authoring log/archive.",
+    "candidateKernelAdmitted": false,
+    "sourceParityQualified": false,
+    "historicalRawAssumptionPathFileRetainsPreviousAttribution": true
+  },
+  "currentDevelopmentBaselineRuntimeObservation": {
+    "context": "Existing Full compatibility context and shared checked application corpus, including optional capabilities present in that corpus",
+    "compilerEntry": "pscv0_native --emit-all",
+    "profile": "pscv0-v7-native-bounded/73",
+    "compilerExecutionSHA": "9024dd92c147ffbbafc3834021ad11540d89578a",
+    "qualified": true,
+    "targets": [
+      {
+        "target": "typescript",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T11:35:34.1259814Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (typescript)"
+      },
+      {
+        "target": "directjs",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T11:35:34.3255365Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (directjs)"
+      },
+      {
+        "target": "rust",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T11:35:58.0517347Z",
+        "logMarker": "PSCV0_NATIVE_RUST_RUNTIME: PASS 1069 shared runtime observations"
+      }
+    ],
+    "typescriptVersion": "7.0.2",
+    "rustVersion": "1.98.1",
+    "harnesses": [
+      "psc0/scripts/pscv0-native-runtime.mjs",
+      "psc0/scripts/pscv0-native-rust.mjs"
+    ],
+    "artifactName": "psc0-core-language-baseline-9024dd92c147ffbbafc3834021ad11540d89578a",
+    "artifactManifest": "psc0/dist/core-first/language-baseline/application.sha256",
+    "perEmittedFileHashesReadByReviewer": false,
+    "artifactHashNote": "CI saved application hashes and emitted products in the named artifact. The archive digest was retrieved; individual saved application hashes were not separately downloaded.",
+    "wasmExecutionIncluded": false,
+    "completeCoreRuntimeProfileQualified": false,
+    "formalTargetRefinementQualified": false,
+    "versionMarkers": [
+      {
+        "observedAt": "2026-10-19T11:35:33.3232992Z",
+        "marker": "Version 7.0.2"
+      },
+      {
+        "observedAt": "2026-10-19T11:35:33.3251989Z",
+        "marker": "Version 7.0.2"
+      },
+      {
+        "observedAt": "2026-10-19T11:35:40.9902197Z",
+        "marker": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      }
+    ]
   }
 }

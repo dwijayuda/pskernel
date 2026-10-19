@@ -8,7 +8,42 @@ Core language/compiler delivery requires its conformance, profile, runtime, arti
 
 Compiler-sufficient Bootstrap and implementation-source conversion are final selfhost preparation. The checked 76- and 92-declaration components and complete Source/List gate remain retained regressions.
 
-## Latest scope and module qualification
+## Latest import-visibility qualification
+
+Qualified executable commit: `9024dd92c147ffbbafc3834021ad11540d89578a`, tree `4e8e37fc8ff48423b8aa994a4639b0842f4b33fe`. [Core Linux run 39245007181](https://github.com/dwijayuda/pskernel/actions/runs/39245007181) completed successfully at 2026-10-19T11:36:40Z: all four jobs passed.
+
+[The machine receipt](core-first-evidence/core-language-import-visibility-qualification.json) records the five changed executable/test inputs, unchanged workflow, all exact job and artifact identities, the two earlier failed attempts and their fixture-only corrections.
+
+| Job | Exact job ID | Result |
+| --- | --- | --- |
+| candidate-authoring | [118034755140](https://github.com/dwijayuda/pskernel/actions/runs/39245007181/job/118034755140) | Success |
+| source-inventory | [118034755277](https://github.com/dwijayuda/pskernel/actions/runs/39245007181/job/118034755277) | Success |
+| native-seams | [118034755163](https://github.com/dwijayuda/pskernel/actions/runs/39245007181/job/118034755163) | Success |
+| bootstrap-closure | [118034755272](https://github.com/dwijayuda/pskernel/actions/runs/39245007181/job/118034755272) | Success |
+
+| Qualified cell | Actual observation | Boundary |
+| --- | --- | --- |
+| Public imported-name availability | 13 positive projects and 8 owned refusals across selected Lean/PS plus a headerless Lean case | Public signatures and data-valued exposed definitions; complete native elaboration remains open |
+| Private implementation dependencies | Ordinary definitions and theorem proofs retain their actual imported constants; an exposed client can call a public opaque bridge | No recursive ban on hidden implementation/proof dependencies |
+| Public reexports and diamonds | Direct/facade routes and both private/public arm orders have exact interfaces and identical canonical declarations | Provider names appear exactly once; entry ownership remains local |
+| Pinned native import oracle | 25 actual compilations: 17 successes and eight semantic refusals; 13 cases added in this batch | Native version/commit, error ownership/cardinality, output and proof-hole diagnostics checked |
+| Retained scope controls | 17 native name classifications, three invalid scope forms, paired public-section/EOF and module-kind controls pass | Named-end/dotted-scope and legacy behavior remain separately open |
+| Foundation source regression | Original four Source/List files and candidate remain exact; 25 declarations / 53,310 canonical bytes retained | Only the PS driver's Source import changed, to expose its public parameter type |
+| Retained application runtime | 1,069 observations per TypeScript 7.0.2, direct JavaScript and Rust 1.98.1 target | Existing Full compatibility application; no complete small Core or formal refinement claim |
+
+The new fixture reuses the separately checked four-declaration base `CoreSelectedIdentity`, `Eq`, `Eq.refl` and `Eq.rec`, with no axioms. Independent checking retains empty trust0 and 2,000,000 heartbeats / 20,000 recursion depth per declaration. The separate Full wrapper policy is unchanged.
+
+The first integrated attempt exposed existing positive fixtures with ordinary imports in exported types. The ProofScript Foundation driver now publicly imports the owner of PsSourceSpan; its headerless Lean counterpart is unchanged. Five integrated fixture strings now give public paths to exported derived-type, abbreviation and transparency names. The two ordinary-definition opacity controls keep their existing reflexivity refusals. All declaration bodies, original Source/List inputs, candidate assets, assertion policies and checking limits remain unchanged.
+
+The current source audit records 322 Full-root modules / 26406895 bytes and 224 independent project/backend modules / 2789829 bytes. The independent graph has no Full/external/unresolved import. Native ownership is 191647 declarations across 322 modules, with 458 external roots and 5690 raw closure declarations. That raw closure reaches only the three approved assumptions and is not a newly admitted Core profile.
+
+The five cache-assisted seam build commands totaled 15.67 seconds. Existing caches and finite gates were retained; no healthy run was cancelled and no optional qualification run was added after success. Command sums are not CI elapsed time or a controlled speedup.
+
+Named-end/dotted-scope behavior, legacy local-private and imported-body behavior, complete native proof-abstraction/elaboration correspondence, complete Core profiles and the full selected capability/fixture mapping remain open. M1–M5 remain the priority; selfhost follows their acceptance.
+
+The following scope/module block is its historical receipt at 36f30bc, including the boundaries open at that time.
+
+## Previous scope and module qualification
 
 At `36f30bc4e0887d1bb60ae67660046cc441ed0c39` (tree `15bccd57b7765a05485e27f5f65fc2aae96f6d10`), [run 39236888998](https://github.com/dwijayuda/pskernel/actions/runs/39236888998) completed successfully at 10:35:04 UTC on 19 October 2026. The [machine receipt](core-first-evidence/core-language-scope-module-qualification.json) records the eleven changed code/test/workflow inputs, all four jobs, exact semantic markers, native module results, five archive digests, retained identities and actual resource observations.
 

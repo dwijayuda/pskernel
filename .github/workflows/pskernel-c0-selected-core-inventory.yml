@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/pskernel-c0-selected-core-inventory.yml'
       - 'psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py'
+      - 'psc0/packages/pskernel-c0/test/C0CoreSelectedFrontier.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,6 +22,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py
+            /psc0/packages/pskernel-c0/test/C0CoreSelectedFrontier.py
       - name: Download exact previously qualified PSC0 Core selected native closure
         uses: actions/download-artifact@v4
         with:
@@ -42,6 +44,10 @@ jobs:
             --roots output/selected-roots.txt \
             --manifest output/selected-manifest.json
           test "$(wc -l < output/selected-roots.txt)" -eq 418
+          python3 psc0/packages/pskernel-c0/test/C0CoreSelectedFrontier.py \
+            --selected input/selected-engine.json \
+            --comparison input/comparison.json \
+            --out-dir output
           python3 - <<'PY'
           import importlib.util, json, pathlib
           script=pathlib.Path('psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py')
@@ -69,6 +75,7 @@ jobs:
           PY
           sha256sum input/selected-engine.json input/comparison.json \
             output/selected-roots.txt output/selected-manifest.json \
+            output/selected-frontier.json output/roots-*.txt \
             > output/SHA256SUMS
           echo 'C0_SELECTED_CORE=SOURCE_CLOSURE_AUTHENTICATED_NOT_C0_CHECKED'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

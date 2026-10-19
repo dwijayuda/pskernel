@@ -61,7 +61,8 @@ expect("C0 closed app retained",
 
 const multi = requireExport("psKernelExprInstantiateAtChanged");
 const psList = requireExport("List");
-const subs = psList.cons(expr.bvar(3n), psList.cons(sort0, psList.nil));
+const nil = typeof psList.nil === "function" ? psList.nil() : psList.nil;
+const subs = psList.cons(expr.bvar(3n), psList.cons(sort0, nil));
 const multiResult = multi(expr.app(expr.bvar(0n), expr.bvar(2n)), 0n, subs, 0n);
 expect("C0 multi substitution generated JS",
   eq(multiResult.fst, expr.app(expr.bvar(3n), expr.bvar(0n))));

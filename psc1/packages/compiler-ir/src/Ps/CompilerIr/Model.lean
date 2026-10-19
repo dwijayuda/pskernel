@@ -252,3 +252,18 @@ def psVerifiedIrModuleEmpty : PsVerifiedIrModule :=
     inductives := []
     declarations := []
   }
+
+-- PSC1 experimental multi-backend transport: construction IR is not validation.
+-- Validation occurs only via psValidateErasedIrModule in CompilerIr.Validate.
+structure PsErasedIrModule where
+  raw : PsVerifiedIrModule
+
+structure PsValidatedIrModule where
+  raw : PsVerifiedIrModule
+
+-- Specialization is a transformation, not a separate proof of semantic preservation.
+structure PsSpecializedIrModule where
+  raw : PsVerifiedIrModule
+
+structure PsUniformSpecializedIrModule where
+  raw : PsVerifiedIrModule

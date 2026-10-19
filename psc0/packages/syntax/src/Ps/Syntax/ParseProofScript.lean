@@ -146,7 +146,7 @@ def psProofScriptTermWithSpan
   | .call fn args _ => .call fn args span
   | .operatorE kind name spelling args _ => .operatorE kind name spelling args span
   | .reference name =>
-      PsSyntaxTerm.reference { segments := name.segments, span := span }
+      PsSyntaxTerm.reference { name with span := span }
   | .scientific value _ => PsSyntaxTerm.scientific value span
   | .natural value _ => PsSyntaxTerm.natural value span
   | .sortE isType level _ => PsSyntaxTerm.sortE isType level span
@@ -240,10 +240,7 @@ def psParseProofScriptRecordFieldsWithFuel
                   match parseTerm afterAssign.cursor with
                   | Except.error error => Except.error error
                   | Except.ok value =>
-                      let fieldName : PsSyntaxName := {
-                        segments := [name.token.text]
-                        span := name.token.span
-                      };
+                      let fieldName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                       let nextFields := List.cons (Prod.mk fieldName value.value) fieldsRev;
                       if psTokenCursorAtText value.cursor "," then
                         match psTokenCursorAdvance value.cursor with
@@ -658,7 +655,7 @@ def psParseProofScriptNestedBinderType
                     match psParseBinderClosing opening type.cursor with
                     | Except.error error => Except.error error
                     | Except.ok closing =>
-                        let binderName := PsSyntaxName.mk (List.cons name.token.text List.nil) name.token.span;
+                        let binderName := (psSyntaxNameFromToken name.token);
                         let binder := PsSyntaxBinderHead.mk binderName opening.kind closing.value;
                         psParseProofScriptDependentArrowTail parseType
                           (PsParseResult.mk (Prod.mk binder type.value) closing.cursor)
@@ -709,10 +706,7 @@ def psParseProofScriptBinder
                   match psParseBinderClosing opening type.cursor with
                   | Except.error error => Except.error error
                   | Except.ok closing =>
-                      let binderName : PsSyntaxName := {
-                        segments := [name.token.text]
-                        span := name.token.span
-                      };
+                      let binderName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                       let binder : PsSyntaxBinderHead := {
                         name := binderName
                         kind := opening.kind
@@ -818,10 +812,7 @@ def psParseProofScriptExplicitEntriesWithFuel
                   match psParseProofScriptBinderType afterColon.cursor with
                   | Except.error error => Except.error error
                   | Except.ok type =>
-                      let binderName : PsSyntaxName := {
-                        segments := [name.token.text]
-                        span := name.token.span
-                      };
+                      let binderName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                       let head : PsSyntaxBinderHead := {
                         name := binderName
                         kind := PsSyntaxBinderKind.explicit
@@ -1094,10 +1085,7 @@ def psParseProofScriptTermWithFuel
                 PsTokenKind.identifier with
             | Except.error error => Except.error error
             | Except.ok name =>
-                let sourceName : PsSyntaxName := {
-                  segments := [name.token.text]
-                  span := name.token.span
-                };
+                let sourceName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                 if psTokenCursorAtText name.cursor ":" then
                   match psTokenCursorAdvance name.cursor with
                   | Option.none =>
@@ -1314,10 +1302,7 @@ def psParseProofScriptInductiveConstructorsWithFuel
                       if psProofScriptBoolOr
                           (psTokenCursorAtText fields.cursor "|")
                           (psTokenCursorAtText fields.cursor "}") then
-                        let sourceName : PsSyntaxName := {
-                          segments := [name.token.text]
-                          span := name.token.span
-                        };
+                        let sourceName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                         let constructor : PsSyntaxInductiveConstructor := {
                           name := sourceName
                           fields := fields.value
@@ -1348,10 +1333,7 @@ def psParseProofScriptStructureField
               match psParseProofScriptTerm afterColon.cursor with
               | Except.error error => Except.error error
               | Except.ok type =>
-                  let fieldName : PsSyntaxName := {
-                    segments := [name.token.text]
-                    span := name.token.span
-                  };
+                  let fieldName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                   let head : PsSyntaxBinderHead := {
                     name := fieldName
                     kind := PsSyntaxBinderKind.explicit
@@ -1421,7 +1403,7 @@ def psParseProofScriptDeclaredName
   | Except.error error => Except.error error
   | Except.ok name =>
       Except.ok {
-        value := { segments := [name.token.text], span := name.token.span }
+        value := (psSyntaxNameFromToken name.token)
         cursor := name.cursor
       }
 

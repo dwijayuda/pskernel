@@ -49,7 +49,7 @@ def psPscv0ReadLevel (fuel : Nat) (offsets : Bool) (cursor : PsTokenCursor) :
       else if psTokenKindEq token.kind .natural then
         pure { value := PsSyntaxLevel.number (← psPscv0LevelNumber token), cursor := next.cursor }
       else if psTokenKindEq token.kind .identifier && psPscv0LevelStart cursor then
-        pure { value := PsSyntaxLevel.name token.text, cursor := next.cursor }
+        pure { value := PsSyntaxLevel.name (psTokenIdentifierText token), cursor := next.cursor }
       else throw (psProofScriptExpectedError "universe level" cursor)
     if offsets then
       for _ in [:fuel] do

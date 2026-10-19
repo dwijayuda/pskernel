@@ -297,8 +297,29 @@ def psElabWhereInfoSpan (info : PsElabInfo) : Option PsSourceSpan :=
   | .binderGroup head _ _ => some head.span
   | .instanceSelection span _ _ | .insertedArgument span _ _ _ _ _ => span
 
-def psElabWhereSourceInfo (context : PsElabContext) (header : PsElabWhereHeader) : PsElabSourceInfo :=
+-- Lifted members keep only proof boundaries created by the checked source
+-- execution and still occurring in this member's actual closed type or body.
+-- A rendered name or another member's unrelated proof cannot supply provenance.
+def psElabWhereHasProofBoundary (boundary : PsName) : PsExpr → Bool
+  | .letE name type value body =>
+    psNameEq name boundary ||
+      psElabWhereHasProofBoundary boundary type ||
+      psElabWhereHasProofBoundary boundary value ||
+      psElabWhereHasProofBoundary boundary body
+  | .app function argument =>
+    psElabWhereHasProofBoundary boundary function ||
+      psElabWhereHasProofBoundary boundary argument
+  | .lam _ type body _ | .forallE _ type body _ =>
+    psElabWhereHasProofBoundary boundary type ||
+      psElabWhereHasProofBoundary boundary body
+  | .proj _ _ value => psElabWhereHasProofBoundary boundary value
+  | _ => false
+
+def psElabWhereSourceInfo (context : PsElabContext) (header : PsElabWhereHeader)
+    (type value : PsExpr) : PsElabSourceInfo :=
   { owner := header.name, metaContext := context.metaContext
+    proofBoundaries := context.proofBoundariesRev.reverse.filter fun boundary =>
+      psElabWhereHasProofBoundary boundary type || psElabWhereHasProofBoundary boundary value
     entries := context.infoRev.reverse.filter fun entry =>
       match psElabWhereInfoSpan entry.info with
       | none => false
@@ -357,7 +378,7 @@ def psElabWhereLift (shared : PsElabContext) (availableLevels : List PsName)
       sourceIndex := input.header.sourceIndex
       isPrivate := input.header.isPrivate
       registration := input.header.registration
-      sourceInfo := psElabWhereSourceInfo shared input.header } : PsElabPreDefinition)
+      sourceInfo := psElabWhereSourceInfo shared input.header type checked.term } : PsElabPreDefinition)
   let levelNames := psElabDeclarationLevels availableLevels
     (members.flatMap fun member => [member.type, member.value])
   return { context := { context with levelNames }, levelNames, members, span }

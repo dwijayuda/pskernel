@@ -46,6 +46,7 @@ structure PsCompilerPreparationState where
   sourceKind : PsCompilerSourceKind
   environment : PsEnvironment
   declarationsRev : List PsDeclaration
+  commandDiagnostics : List PsDiagnostic := []
 
 -- These are retained results, not authority tokens. The source-owned entry
 -- point establishes their provenance by constructing and consuming them itself.
@@ -54,6 +55,7 @@ structure PsCompilerPreparationOutput where
   environment : PsEnvironment
   admissions : String
   originParents : List (PsName × PsName) := []
+  commandDiagnostics : List PsDiagnostic := []
 
 structure PsCompilerPreparationStepWithOriginsResult where
   state : PsCompilerPreparationState
@@ -74,6 +76,7 @@ structure PsCompilerEngineElaborated where
   environment : PsEnvironment
   declarations : List PsDeclaration
   profile : PsCompilerProfileContext
+  commandDiagnostics : List PsDiagnostic := []
 
 structure PsCompilerEnginePrepared where
   declarations : List PsDeclaration
@@ -86,12 +89,14 @@ structure PsCompilerEnginePreparationState where
   environment : PsEnvironment
   declarationsRev : List PsDeclaration
   profile : PsCompilerProfileContext
+  commandDiagnostics : List PsDiagnostic := []
 
 structure PsCompilerEnginePreparationOutput where
   prepared : PsCompilerEnginePrepared
   environment : PsEnvironment
   admissions : String
   originParents : List (PsName × PsName) := []
+  commandDiagnostics : List PsDiagnostic := []
 
 structure PsCompilerEnginePreparationStepWithOriginsResult where
   state : PsCompilerEnginePreparationState
@@ -159,7 +164,7 @@ def psCompilerEngineElaborateModule
       Except.error (PsCompilerError.elaboration error)
   | Except.ok elaborated =>
       Except.ok (PsCompilerEngineElaborated.mk
-        elaborated.environment elaborated.declarations profile)
+        elaborated.environment elaborated.declarations profile elaborated.commandDiagnostics)
 
 def psCompilerEngineElaborateSource
     (profile : PsCompilerProfileContext)
@@ -176,6 +181,7 @@ def psCompilerEnginePrepareElaboratedWithOutput
     (elaborated : PsCompilerEngineElaborated) :
     Except PsCompilerError PsCompilerEnginePreparationOutput := do
   let profile := elaborated.profile
+  let commandDiagnostics := elaborated.commandDiagnostics
   let lifted ← (psRecursorLiftDeclarationsWithOrigins elaborated.environment
     elaborated.declarations).mapError PsCompilerError.normalization
   let elaborated := lifted.result
@@ -195,7 +201,8 @@ def psCompilerEnginePrepareElaboratedWithOutput
 
       let admissions : String := String.Internal.append canonicalAdmissions "\n";
       Except.ok
-        (PsCompilerEnginePreparationOutput.mk prepared elaborated.environment admissions lifted.parents)
+        (PsCompilerEnginePreparationOutput.mk prepared elaborated.environment admissions
+          lifted.parents commandDiagnostics)
 
 def psCompilerEnginePrepareElaborated
     (elaborated : PsCompilerEngineElaborated) :
@@ -226,7 +233,7 @@ def psCompilerEnginePreparationStart
     (profile : PsCompilerProfileContext)
     (sourceKind : PsCompilerSourceKind) : PsCompilerEnginePreparationState :=
   PsCompilerEnginePreparationState.mk
-    sourceKind profile.baseEnvironment List.nil profile
+    sourceKind profile.baseEnvironment List.nil profile []
 
 -- One actual elaboration supplies both the next state and source-local origins.
 -- The surrounding source-owned caller attaches module identity to these records.
@@ -241,7 +248,8 @@ def psCompilerEnginePreparationStepParsedWithOrigins
         PsCompilerEnginePreparationState.mk
           state.sourceKind elaborated.result.environment
           (psListAppend
-            (psListReverse elaborated.result.declarations) state.declarationsRev) state.profile;
+            (psListReverse elaborated.result.declarations) state.declarationsRev) state.profile
+          (state.commandDiagnostics ++ elaborated.result.commandDiagnostics);
       Except.ok
         (PsCompilerEnginePreparationStepWithOriginsResult.mk nextState elaborated.origins)
 
@@ -265,6 +273,7 @@ def psCompilerEnginePreparationStep
 def psCompilerEnginePreparationElaborated
     (state : PsCompilerEnginePreparationState) : PsCompilerEngineElaborated :=
   PsCompilerEngineElaborated.mk state.environment (psListReverse state.declarationsRev) state.profile
+    state.commandDiagnostics
 
 def psCompilerEnginePreparationFinishWithOutput
     (state : PsCompilerEnginePreparationState) :
@@ -297,7 +306,7 @@ def psCompilerEngineElaborateSourcesWorker
   fun (environment : PsEnvironment) (declarationsRev : List PsDeclaration) =>
     match
         psCompilerEnginePreparationSourcesWorker sources
-          (PsCompilerEnginePreparationState.mk sourceKind environment declarationsRev profile) with
+          (PsCompilerEnginePreparationState.mk sourceKind environment declarationsRev profile []) with
     | Except.error error => Except.error error
     | Except.ok state => Except.ok (psCompilerEnginePreparationElaborated state)
 

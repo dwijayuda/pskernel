@@ -127,7 +127,7 @@ def psElabWherePrepareWellFounded (prepared : PsElabWherePrepared)
   -- The decreasing clause belongs to the original header, before helpers
   -- enter. Restore its captured lookup names through the exact renamed IDs.
   let proofAliases := renames.map fun (_, shortName, hidden) =>
-    (shortName, (psNameToString hidden).splitOn ".")
+    (shortName, psNameToSegments hidden)
   let decreasing := termination.decreasing.map fun source =>
     match source with
     | .byE tactics scope span => .byE tactics

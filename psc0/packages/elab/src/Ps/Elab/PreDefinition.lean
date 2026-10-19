@@ -413,7 +413,8 @@ def psElabPreDefinitionNonrecursive (environment : PsEnvironment)
       !psExprFVarsInContext psLocalEmpty closed.fst || !psExprFVarsInContext psLocalEmpty closed.snd then
     throw (psElabPreDefinitionError "EQUATION" "ordinary source equation did not close against its original header")
   let checkedProof ← psElabResolvedTerm (psElabContextEmpty staged levels) closed.fst (some closed.snd)
-  let equation := PsDeclaration.theoremDecl equationName levels closed.snd checkedProof.term
+  let equation ← psElabSourceEquationPointwiseDeclaration staged levels equationName
+    (psElabPreDefinitionHeaderCount member) member.value closed.snd checkedProof.term
   let _ ← psAddDeclarationList staged [equation]
   let batch : PsElabDeclarationBatchResult := {
     declarations := [declaration, equation]
@@ -574,8 +575,8 @@ def psElabPreDefinitionWellFoundedEquation (staged : PsEnvironment)
   if psExprHasUnresolvedMeta exactProof || !psExprFVarsInContext psLocalEmpty exactProof then
     throw (psElabPreDefinitionError "WF-CLOSURE" "exact source-equation proof retained a provisional local or metavariable")
   let checkedProof ← psElabResolvedTerm stagedContext exactProof (some expectedType)
-  let equation := PsDeclaration.theoremDecl equationName levels expectedType checkedProof.term
-  return equation
+  psElabSourceEquationPointwiseDeclaration staged levels equationName
+    (psElabPreDefinitionHeaderCount member) sourceValue expectedType checkedProof.term
 
 def psElabPreDefinitionWellFoundedResults (environment : PsEnvironment)
     (levels : List PsName) (members : List PsElabPreDefinition)

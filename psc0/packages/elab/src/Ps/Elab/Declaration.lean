@@ -2,6 +2,7 @@ import Ps.Core.Declaration
 import Ps.Core.Equality
 import Ps.Elab.Recursion
 import Ps.Elab.Data
+import Ps.Elab.SourceNames
 
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
@@ -11,6 +12,7 @@ structure PsElabDeclarationResult where
 structure PsElabModuleResult where
   environment : PsEnvironment
   declarations : List PsDeclaration
+  commandDiagnostics : List PsDiagnostic := []
 
 -- Origins attach to the actual output batch of one source declaration.
 -- Source and member indices are local; module identity is attached by the caller.
@@ -543,6 +545,15 @@ def psPrependBatchReverse
     (psElabReverseDeclarations declarations)
     declarationsRev
 
+-- Internal scoped batches use psElabDeclarationBatchWithOrigins above.
+-- The legacy public source-list/module entry points validate original syntax.
+def psElabSourceDeclarationBatchWithOrigins (environment : PsEnvironment)
+    (sourceIndex : Nat) (source : PsSyntaxDeclaration) :
+    Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult := do
+  (psElabSourceDeclarationNames 4096 source).mapError
+    (psElabOriginErrorAt sourceIndex source .stableDeclaration)
+  psElabDeclarationBatchWithOrigins environment sourceIndex source
+
 def psElabDeclarationsWithOriginsWorker
     (sources : List PsSyntaxDeclaration)
     (environment : PsEnvironment)
@@ -559,7 +570,7 @@ def psElabDeclarationsWithOriginsWorker
             (psElabReverseDeclarations declarationsRev))
           (psListReverse originsRev) [] [])
   | List.cons source rest =>
-      match psElabDeclarationBatchWithOrigins environment sourceIndex source with
+      match psElabSourceDeclarationBatchWithOrigins environment sourceIndex source with
       | Except.error error => Except.error error
       | Except.ok batch =>
           match
@@ -606,7 +617,10 @@ def psElabDeclarations
 def psElabModuleWithOrigins
     (environment : PsEnvironment)
     (sourceModule : PsSyntaxModule) :
-    Except PsElabOriginError PsElabModuleWithOriginsResult :=
+    Except PsElabOriginError PsElabModuleWithOriginsResult := do
+  for entry in sourceModule.imports do
+    (psElabSourceName entry.moduleName).mapError fun error =>
+      PsElabOriginError.mk error 0 entry.moduleName entry.span .stableDeclaration
   psElabDeclarationsWithOriginsWorker
     sourceModule.declarations environment List.nil List.nil 0
 

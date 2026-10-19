@@ -329,12 +329,12 @@ def psElabDeriveReprInductive (plan : PsElabDeriveContext)
         psElabDeriveReprContainerBranch plan atomic context slotIndex slot entry fields hypotheses)
     diagnose
 
-def psElabDeriveRepr (environment : PsEnvironment)
-    (origin : PsElabBatchOrigin)
+def psElabDeriveReprForFamily (environment : PsEnvironment)
+    (name : PsName)
     (diagnose : PsElabRecursorArgumentDiagnostic := fun _ error => error) :
     Except PsElabError PsDeclaration := do
-  let plan ← psElabDerivePrepare environment origin { groups := true, indices := true, nested := true }
-  let plan := psElabDeriveRequirements plan (psRootName "Repr")
+  let plan ← psElabDerivePrepareFamily environment name { groups := true, indices := true, nested := true }
+  let plan ← psElabDeriveRequirements plan (psRootName "Repr")
   let type ← psElabDeriveClassType plan.context (psRootName "Repr") plan.family
   let .app (.constE _ levels) _ := type | throw .typeMismatch
   let method ← if plan.info.isStructure then do
@@ -350,3 +350,9 @@ def psElabDeriveRepr (environment : PsEnvironment)
   let value := psExprApplyMany (.constE (psDecisionName "Repr.mk") levels) [plan.family, method]
   psElabDeriveFinish plan "instRepr" type value
 
+
+def psElabDeriveRepr (environment : PsEnvironment)
+    (origin : PsElabBatchOrigin)
+    (diagnose : PsElabRecursorArgumentDiagnostic := fun _ error => error) :
+    Except PsElabError PsDeclaration := do
+  psElabDeriveReprForFamily environment (← psElabDeriveSourceFamily origin) diagnose

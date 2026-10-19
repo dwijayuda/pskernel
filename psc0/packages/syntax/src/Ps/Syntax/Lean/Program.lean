@@ -16,6 +16,9 @@ def psLeanFinishCommand (command : PsSyntaxCommand) (stop : PsSourcePos)
 def psLeanProgramUnattributedCommand (cursor : PsTokenCursor) (mutualMember : Bool) (defaultPrivate : Bool := false) :
     Except String (PsParseResult PsSyntaxCommand) := do
   if !mutualMember then
+    if let some parsed ← psPscv0ReadInspectionCommand
+        (psLeanReadTerm false) psLeanFinishCommand false cursor then return parsed
+  if !mutualMember then
     if let some scopeCommand ← psPscv0ReadScopeCommand psLeanProgramBinders cursor then
       return scopeCommand
   let some first := psTokenCursorPeek cursor | throw "PSCV0-LEAN-COMMAND"

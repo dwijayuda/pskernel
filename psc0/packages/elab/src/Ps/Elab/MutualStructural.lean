@@ -2128,7 +2128,11 @@ def psElabMutualStructuralEquation (environment : PsEnvironment)
       !psExprFVarsInContext psLocalEmpty closed.fst || !psExprFVarsInContext psLocalEmpty closed.snd then
     throw (psElabMutualStructuralError "EQUATION" "equation did not close against its original header")
   let checked ← psElabResolvedTerm (psElabContextEmpty environment levels) closed.fst (some closed.snd)
-  return .theoremDecl (psNameAppendStr header.name "eq_def") levels closed.snd checked.term
+  let sourceValue := psCloseElabLambdaBinders checked.context.metaContext
+    header.bindersRev source
+  psElabSourceEquationPointwiseDeclaration environment levels
+    (psNameAppendStr header.name "eq_def") header.bindersRev.length
+    sourceValue closed.snd checked.term
 
 def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List PsName)
     (captured : PsElabTypedBindersResult) (inputs : List PsElabMutualStructuralInput)

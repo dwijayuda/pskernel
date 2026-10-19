@@ -195,6 +195,14 @@ jobs:
           lake env python3 ../scripts/core-first-module-native-oracle.py 2>&1 | tee ../dist/core-first/seams/module-native-oracle.log
           sha256sum .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable.sha256
           stat -c '%s' .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable-bytes.txt
+      - name: Check inspection commands, unchanged admissions and native diagnostics
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/core-first/seams/inspection
+          /usr/bin/time -v -o ../dist/core-first/seams/inspection-build-resource.txt lake build pscv0_core_inspection 2>&1 | tee ../dist/core-first/seams/inspection-build.log
+          .lake/build/bin/pscv0_core_inspection ../dist/core-first/seams/inspection 2>&1 | tee ../dist/core-first/seams/inspection-check.log
+          lake env python3 ../scripts/core-first-inspection-native-oracle.py ../dist/core-first/seams/inspection/native-fixtures.json 2>&1 | tee ../dist/core-first/seams/inspection-native-oracle.log
+          sha256sum .lake/build/bin/pscv0_core_inspection > ../dist/core-first/seams/inspection-executable.sha256
       - name: Check computed and let elimination targets against pinned native rules
         run: |
           set -euo pipefail

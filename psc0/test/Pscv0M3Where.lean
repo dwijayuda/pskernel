@@ -404,9 +404,7 @@ private def fromExcept (result : Except String α) : IO α :=
   | .error error => throw (IO.userError error)
 
 private def moduleHelperName (moduleIdentity : String) (parent : PsName) (helper : String) : PsName :=
-  psSyntaxNameAppendSegments
-    (["$psc0Private"] ++ moduleIdentity.splitOn "." ++ (psNameToString parent).splitOn "." ++ [helper])
-    .anonymous
+  psElabPrivateName ([moduleIdentity] ++ psNameToSegments parent ++ [helper])
 
 private def captureSource : String :=
   "function wcapture(bias: Nat, n: Nat): Nat := first(n)\n" ++
@@ -847,7 +845,7 @@ private def checkUnusedHints : IO Unit := do
       (["uhTypeHinted"], ["n"]), (["uhTypeHinted", "helper"], ["_k"])] do
     let sourceName := psSyntaxNameAppendSegments segments .anonymous
     let name := if segments.length > 1 then
-      psSyntaxNameAppendSegments (["$psc0Private", "UnusedHints"] ++ segments) .anonymous
+      psElabPrivateName ("UnusedHints" :: segments)
       else sourceName
     if segments.length > 1 then
       ensure (compiled.privateNames.any (psNameEq name) &&
@@ -996,7 +994,7 @@ private def checkSectionInstances : IO Unit := do
   let compiled ← fromExcept ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed
     "SectionBody").mapError psCompilerPscv0ElabError)
   let environment := compiled.result.environment
-  let privateName := psSyntaxNameAppendSegments ["$psc0Private", "SectionBody", "sectionPrivate"] .anonymous
+  let privateName := psElabPrivateName ["SectionBody", "sectionPrivate"]
   for (name, parameters) in [
       (psRootName "sectionPlain", ["tag", "d", "n"]),
       (psRootName "sectionHinted", ["tag", "d", "n"]),
@@ -1225,7 +1223,7 @@ private def checkConstruction : IO Unit := do
     ensure (binderNames type == ["A", "dictionary", "fallback", "h", "k"] &&
       levels.map psNameToString == ["u"])
       "helper clique lost transitive type/instance/value/proof captures or its shared universe"
-  let parentName := psSyntaxNameAppendSegments ["$psc0Private", "WhereFixture", "WScope", "shadow"] .anonymous
+  let parentName := psElabPrivateName ["WhereFixture", "WScope", "shadow"]
   let helperName := psNameAppendStr parentName "helper"
   for name in [parentName, helperName, psNameAppendStr parentName "eq_def", psNameAppendStr helperName "eq_def"] do
     ensure ((psEnvironmentFind environment name).isSome && compiled.privateNames.any (psNameEq name))

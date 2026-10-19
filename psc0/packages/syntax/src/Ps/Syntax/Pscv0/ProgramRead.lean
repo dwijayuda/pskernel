@@ -68,9 +68,49 @@ def psPscv0ReadScopeCommand
     return some { value := .variableCmd binders.value { start := token.span.start, stop }, cursor := next }
   return none
 
+def psPscv0ReadInspectionCommand
+    (readTerm : PsTokenCursor → Except PsParseError (PsParseResult PsSyntaxTerm))
+    (finish : PsSyntaxCommand → PsSourcePos → PsTokenCursor →
+      Except String (PsParseResult PsSyntaxCommand))
+    (proofScript : Bool) (cursor : PsTokenCursor) :
+    Except String (Option (PsParseResult PsSyntaxCommand)) := do
+  if !psTokenCursorAtText cursor "#" then return none
+  let marker ← psPscv0Expect cursor "#"
+  let some head := psTokenCursorAdvance marker.cursor
+    | throw "PSCV0-INSPECTION-COMMAND"
+  if marker.token.span.stop.byteOffset != head.token.span.start.byteOffset ||
+      !["check", "print", "reduce", "eval"].contains head.token.text then
+    throw "PSCV0-INSPECTION-COMMAND: selected #check, #print, #reduce or #eval required"
+  if let some next := psTokenCursorPeek head.cursor then
+    if next.text == "!" && next.span.start.byteOffset == head.token.span.stop.byteOffset then
+      throw "PSCV0-INSPECTION-COMMAND: #eval! is outside the closed command grammar"
+  if head.token.text == "print" then
+    let axioms := psTokenCursorAtText head.cursor "axioms"
+    let input ← if axioms then pure (← psPscv0Expect head.cursor "axioms").cursor
+      else pure head.cursor
+    if psTokenCursorAtText input "commands" then
+      throw "PSCV0-INSPECTION-COMMAND: #print commands is outside the closed grammar"
+    let name ← (psParseSyntaxName input).mapError psPscv0ParseError
+    let span := psSyntaxSpanJoin marker.token.span name.value.span
+    return some (← finish (.inspectionCmd (.printDeclaration name.value axioms) span)
+      span.stop name.cursor)
+  let term ← (readTerm head.cursor).mapError psPscv0ParseError
+  if proofScript then psPscv0ValidateTermWithFuel head.cursor.remaining 4096 term.value
+  let command : PsSyntaxInspection := match head.token.text with
+    | "check" => .checkTerm term.value
+    | "reduce" => .reduceTerm term.value
+    | _ => .evalTerm term.value
+  let span := psSyntaxSpanJoin marker.token.span (psSyntaxTermSpan term.value)
+  return some (← finish (.inspectionCmd command span) span.stop term.cursor)
+
 def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor)
     (mutualMember : Bool := false) :
     Except String (PsParseResult PsSyntaxCommand) := do
+  if !mutualMember then
+    if let some parsed ← psPscv0ReadInspectionCommand (psPscv0ParseTerm false)
+        (fun command stop cursor => do
+          let next ← (psParseProofScriptCommandSeparator stop cursor).mapError psPscv0ParseError
+          return { value := command, cursor := next }) true cursor then return parsed
   let some first := psTokenCursorPeek cursor | throw "PSCV0-COMMAND-MISSING"
   let isPrivate := first.text == "private"
   let cursor ← if isPrivate then

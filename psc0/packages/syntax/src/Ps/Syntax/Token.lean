@@ -46,3 +46,14 @@ structure PsToken where
   kind : PsTokenKind
   text : String
   span : PsSourceSpan
+
+-- Keep raw spelling on tokens so an escaped keyword is never classified as
+-- grammar punctuation. Decode only at the identifier-to-syntax boundary.
+def psTokenIdentifierEscaped (token : PsToken) : Bool :=
+  psTokenKindEq token.kind .identifier &&
+    token.text.startsWith "«" && token.text.endsWith "»"
+
+def psTokenIdentifierText (token : PsToken) : String :=
+  if psTokenIdentifierEscaped token then
+    String.ofList ((token.text.toList.drop 1).dropLast)
+  else token.text

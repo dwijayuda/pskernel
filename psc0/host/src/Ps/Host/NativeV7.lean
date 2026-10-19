@@ -279,9 +279,20 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
       match elaborated with
       | some value => value.origins.map (fun batch => (request.sourceName, batch))
       | none => []
-  let diagnostics := originBatches.flatMap fun (sourceName, batch) =>
-    batch.diagnostics.map fun diagnostic =>
-      ({ sourceName, diagnostic } : SourceDiagnostic)
+  -- Command diagnostics retain their actual file even when that file owns no
+  -- declarations. Merge only within each source, preserving byte-order spans.
+  let orderedDiagnostics := fun (sourceName : String) (messages : List PsDiagnostic) =>
+    (messages.mergeSort fun left right =>
+      left.span.start.byteOffset <= right.span.start.byteOffset).map fun diagnostic =>
+        ({ sourceName, diagnostic } : SourceDiagnostic)
+  let diagnostics := match project with
+    | some value => value.origins.flatMap fun file =>
+      let sourceName := if file.moduleName == request.moduleName then
+        request.sourceName else file.sourceName
+      orderedDiagnostics sourceName
+        (file.batches.flatMap (·.diagnostics) ++ file.commandDiagnostics)
+    | none => orderedDiagnostics request.sourceName
+      ((originBatches.flatMap (fun entry => entry.2.diagnostics)) ++ output.commandDiagnostics)
   if request.targets.isEmpty then
     return {
       diagnostics

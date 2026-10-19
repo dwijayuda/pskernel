@@ -222,3 +222,8 @@ lean_exe pscv0_core_patterns where
 lean_exe pscv0_core_matches where
   srcDir := "../test"
   root := `Pscv0CoreMatches
+
+-- Read-only source commands, native message oracle and host provenance.
+lean_exe pscv0_core_inspection where
+  srcDir := "../test"
+  root := `Pscv0CoreInspection

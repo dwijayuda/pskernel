@@ -227,7 +227,7 @@ def psElabDeriveBEq (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
   let plan ← psElabDerivePrepare environment origin { groups := true, indices := true, nested := true }
   let className := psRootName "BEq"
-  let plan := psElabDeriveRequirements plan className
+  let plan ← psElabDeriveRequirements plan className
   let type ← psElabDeriveClassType plan.context className plan.family
   let .app (.constE _ levels) _ := type | throw .typeMismatch
   let ordered ← psElabDeriveNeedsOrderedComparison plan

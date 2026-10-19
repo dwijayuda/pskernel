@@ -53,7 +53,7 @@ def psPscv0IntroNames (fuel line : Nat) (cursor : PsTokenCursor) :
     let name ← psTokenCursorExpectKind cursor .identifier
     let rest ← psPscv0IntroNames fuel line name.cursor
     return {
-      value := PsSyntaxName.mk [name.token.text] name.token.span :: rest.value
+      value := (psSyntaxNameFromToken name.token) :: rest.value
       cursor := rest.cursor }
 
 def psPscv0CaseNames (fuel : Nat) (cursor : PsTokenCursor) :
@@ -65,7 +65,7 @@ def psPscv0CaseNames (fuel : Nat) (cursor : PsTokenCursor) :
     let name ← psTokenCursorExpectKind cursor .identifier
     let rest ← psPscv0CaseNames fuel name.cursor
     return {
-      value := PsSyntaxName.mk [name.token.text] name.token.span :: rest.value
+      value := (psSyntaxNameFromToken name.token) :: rest.value
       cursor := rest.cursor }
 
 def psPscv0ReadTacticsFor (nativeLayout : Bool) (read readType : PsPscv0TermReader) (fuel : Nat)
@@ -101,7 +101,7 @@ def psPscv0ReadTacticsFor (nativeLayout : Bool) (read readType : PsPscv0TermRead
       | .caseE tagged => do
         let (tag, cursor) ← if !tagged then pure (none, head.cursor) else do
           let name ← psParseSyntaxName head.cursor
-          pure (if name.value.segments == ["_"] then none else some name.value, name.cursor)
+          pure (if psSyntaxNameIsAnonymous name.value then none else some name.value, name.cursor)
         let names ← psPscv0CaseNames fuel cursor
         let arrow ← psTokenCursorExpectText names.cursor "=>"
         let body ← psPscv0ReadTacticsFor nativeLayout read readType fuel (some token.span.start) arrow.cursor

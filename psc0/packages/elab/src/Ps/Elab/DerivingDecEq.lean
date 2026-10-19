@@ -194,7 +194,7 @@ def psElabDeriveDecEqRightCases (plan : PsElabDeriveContext)
 def psElabDeriveDecEq (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
   let initial ← psElabDerivePrepare environment origin { groups := true, indices := true }
-  let plan := psElabDeriveRequirements initial (psRootName "DecidableEq")
+  let plan ← psElabDeriveRequirements initial (psRootName "DecidableEq")
   let type ← psElabDeriveClassType plan.context (psRootName "DecidableEq") plan.family
   if ← psElabDeriveNeedsOrderedComparison plan then
     let method ← psElabDeriveIndexedDecEqMethod plan

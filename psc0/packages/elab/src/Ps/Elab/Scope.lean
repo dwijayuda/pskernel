@@ -24,8 +24,10 @@ structure PsScopeResolver where
   selfName : Option (List String) := none
   selfArguments : List PsSyntaxTerm := []
   deferProofNames : Bool := false
+  -- Enabled only when the command owner revisits already scoped syntax.
+  allowResolvedNames : Bool := false
   -- Source-visible qualified private name to stable module-local kernel name.
-  privateAliases : List (List String × List String) := []
+  privateAliases : List (List String × PsName) := []
   -- Joint headers are scope identities, never temporary environment axioms.
   mutualNames : List (List String) := []
   -- A body sees typed local lets applying each real opaque to common captures.
@@ -59,14 +61,14 @@ def psScopeHasGlobal (resolver : PsScopeResolver) (segments : List String) : Boo
     psEnvironmentContains resolver.environment (psSyntaxNameAppendSegments segments .anonymous)
 
 def psScopeExportedRewrite (resolver : PsScopeResolver)
-    (segments : List String) : Option (List String) := do
-  let requested := psSyntaxNameAppendSegments segments .anonymous
-  -- A real declaration in the nearest namespace shadows an exported alias.
-  if psScopeHasGlobal resolver segments then none
-  else
-    let alias ← resolver.environment.exportedAliases.find? (fun entry =>
-      psNameEq entry.fst requested)
-    return (psNameToString alias.snd).splitOn "."
+    (segments : List String) : Option PsName := do
+  let prefix ← (psScopePrefixes segments).find? fun candidate =>
+    !psScopeHasGlobal resolver candidate &&
+      resolver.environment.exportedAliases.any (fun entry =>
+        psNameEq entry.fst (psSyntaxNameAppendSegments candidate .anonymous))
+  let alias ← resolver.environment.exportedAliases.find? (fun entry =>
+    psNameEq entry.fst (psSyntaxNameAppendSegments prefix .anonymous))
+  return psSyntaxNameAppendSegments (segments.drop prefix.length) alias.snd
 
 -- A qualified global may be followed by projections. Match the longest namePrefix
 -- through the environment index, using the same rule as term elaboration.
@@ -78,11 +80,11 @@ def psScopeGlobalBase (resolver : PsScopeResolver) (segments : List String) : Bo
 -- Resolve the longest private prefix first. This also preserves projection
 -- suffixes on a private structure and recursive references to its members.
 def psScopePrivateRewrite (resolver : PsScopeResolver)
-    (segments : List String) : Option (List String) := do
+    (segments : List String) : Option PsName := do
   let matchPrefix ← (psScopePrefixes segments).find? (fun candidate =>
     resolver.privateAliases.any (fun entry => entry.fst == candidate))
   let alias ← resolver.privateAliases.find? (fun entry => entry.fst == matchPrefix)
-  return alias.snd ++ segments.drop matchPrefix.length
+  return psSyntaxNameAppendSegments (segments.drop matchPrefix.length) alias.snd
 
 -- Keep these references local, including qualified peer projections. The
 -- aliases cannot be written by ordinary source and are checked local lets.
@@ -93,8 +95,15 @@ def psScopeMutualRewrite (resolver : PsScopeResolver)
   let alias ← resolver.mutualAliases.find? (fun entry => entry.fst == matchPrefix)
   return alias.snd ++ segments.drop matchPrefix.length
 
+def psScopeCheckSourceName (resolver : PsScopeResolver) (name : PsSyntaxName) :
+    Except PsElabError Unit := do
+  if name.resolvedName.isSome && !resolver.allowResolvedNames then
+    throw (.scope "source syntax contains an internal resolved name")
+
 def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
     (name : PsSyntaxName) : Except PsElabError (Prod PsSyntaxName (List String)) := do
+  psScopeCheckSourceName resolver name
+  if name.resolvedName.isSome then return (name, [])
   let segments := psSyntaxNameRootSegments name.segments
   let some first := segments.head? | throw .emptyName
   let rooted := name.segments.head? == some "_root_"
@@ -105,19 +114,19 @@ def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
     if psScopeHasVariable resolver.scope first then
       return (name, [first])
   if resolver.deferProofNames then return (name, [])
-  if segments == ["Type"] || segments == ["Prop"] then
+  if !name.escaped && (segments == ["Type"] || segments == ["Prop"]) then
     return ({ name with segments := ["_root_"] ++ segments }, [])
   let candidates := if rooted then [segments]
     else (psScopePrefixes resolver.scope.namePrefix).map (· ++ segments)
   let available := fun (key : List String) =>
     (psScopePrivateRewrite resolver key).isSome || psScopeGlobalBase resolver key
-  let canonical := fun key =>
-    (psScopePrivateRewrite resolver key).getD
-      ((psScopeExportedRewrite resolver key).getD key)
   let reference := fun key =>
-    let resolved := canonical key
-    { name with
-      segments := (psScopeMutualRewrite resolver resolved).getD ("_root_" :: resolved) }
+    let actual := (psScopePrivateRewrite resolver key).orElse fun _ =>
+      psScopeExportedRewrite resolver key
+    let resolved := actual.map psNameToSegments |>.getD key
+    match psScopeMutualRewrite resolver resolved with
+    | some localName => { name with segments := localName, resolvedName := none }
+    | none => { name with segments := "_root_" :: resolved, resolvedName := actual }
   match candidates.find? available with
   | some full =>
     return (reference full, [])
@@ -152,6 +161,8 @@ def psScopeBinderNames (visit : PsScopeVisitor) (bound : List String)
   match names with
   | [] => return { binders := [], bound, used := [] }
   | name :: rest =>
+    if name.resolvedName.isSome then
+      throw (.scope "source binder contains an internal resolved name")
     let annotation ← visit bound type
     let next ← psScopeBinderNames visit (psScopeKey name :: bound) head type rest
     let origin := head.origin.getD {
@@ -196,6 +207,7 @@ def psScopePattern (fuel : Nat) (resolver : PsScopeResolver)
   | 0 => throw .fuelExhausted
   | fuel + 1 => match pattern with
     | .variable name =>
+      psScopeCheckSourceName resolver name
       match psScopeResolve resolver [] name with
       | .ok (resolved, _) =>
         match psSyntaxNameToName resolved with
@@ -215,7 +227,10 @@ def psScopePattern (fuel : Nat) (resolver : PsScopeResolver)
       let fields ← psElabPatternMarkParameters resolver.environment resolved fields
       return .ctor resolved (← fields.mapM (psScopePattern fuel resolver)) span
     | .dotCtor name fields span =>
+      psScopeCheckSourceName resolver name
       return .dotCtor name (← fields.mapM (psScopePattern fuel resolver)) span
+    | .inaccessible value =>
+      return .inaccessible (← psScopePattern fuel resolver value)
     | _ => return pattern
 
 -- Only resolved constructor parameter positions are ordinary term scopes.
@@ -228,11 +243,15 @@ def psScopePatternParameterValues (fuel : Nat) (resolver : PsScopeResolver)
   | fuel + 1 =>
     match pattern with
     | .variable name =>
-      if name.segments == ["_"] then return (pattern, [])
-      let result ← visit bound (.reference name)
+      if psSyntaxNameIsAnonymous name then return (pattern, [])
+      let result ← if name.resolvedName.isSome then
+        pure ({ term := .reference name } : PsScopeTermResult)
+        else visit bound (.reference name)
       return (← psElabPatternFromTerm fuel result.term, result.used)
     | .ctor name arguments span =>
-      let head ← visit bound (.reference name)
+      let head ← if name.resolvedName.isSome then
+        pure ({ term := .reference name } : PsScopeTermResult)
+        else visit bound (.reference name)
       let fixed ← psScopeSelfArguments resolver bound head.term
       let headUsed := head.used
       let head ← psElabPatternFromTerm fuel head.term
@@ -338,6 +357,7 @@ def psScopeDo (fuel : Nat) (resolver : PsScopeResolver) (visit : PsScopeVisitor)
             | _ => PsSyntaxDoItem.returnValue value.term span
           pure (item, value.used, bound)
         | .conditional name condition yes no span => do
+          for name in name.toList do psScopeCheckSourceName resolver name
           let condition ← visit bound condition
           let branchBound := name.toList.map psScopeKey ++ bound
           let yes ← psScopeDo fuel resolver visit branchBound yes
@@ -405,6 +425,7 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       let fn ← visit bound fn
       let fixed ← psScopeSelfArguments resolver bound fn.term
       let args ← args.mapM fun (label, value) => do
+        for name in label.toList do psScopeCheckSourceName resolver name
         let value ← visit bound value
         return (label, value)
       return {
@@ -420,6 +441,7 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
         used := args.foldl (fun acc arg => psScopeUnion acc arg.used) fn.used }
     | .record fields span =>
       let fields ← fields.mapM fun (name, value) => do
+        psScopeCheckSourceName resolver name
         let value ← visit bound value
         return (name, value)
       return {
@@ -428,6 +450,7 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
     | .recordUpdate source fields span =>
       let source ← visit bound source
       let fields ← fields.mapM fun (name, value) => do
+        psScopeCheckSourceName resolver name
         let value ← visit bound value
         return (name, value)
       return {
@@ -441,6 +464,7 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
         | _ => PsSyntaxTerm.forallE binders.binders body.term span
       return { term, used := psScopeUnion binders.used body.used }
     | .letE name type value body span | .haveE name type value body span =>
+      psScopeCheckSourceName resolver name
       let type ← type.mapM (visit bound)
       let value ← visit bound value
       let body ← visit (psScopeKey name :: bound) body
@@ -451,6 +475,7 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
         term
         used := psScopeUnion (type.map (·.used) |>.getD []) (psScopeUnion value.used body.used) }
     | .ifE name condition yes no span =>
+      for name in name.toList do psScopeCheckSourceName resolver name
       let condition ← visit bound condition
       let branchBound := name.toList.map psScopeKey ++ bound
       let yes ← visit branchBound yes
@@ -461,6 +486,7 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
     | .matchMany discriminants alternatives generalizing? span =>
       let equationKeys := (psSyntaxMatchEquationNames discriminants).map psScopeKey
       let discriminants ← discriminants.mapM fun discriminant => do
+        for name in discriminant.equationName?.toList do psScopeCheckSourceName resolver name
         let term ← visit bound discriminant.term
         return (discriminant, term)
       let alternatives ← alternatives.mapM fun (patterns, body, bodySpan) => do
@@ -486,8 +512,18 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
     | _ => return { term := source }
 
 def psScopeQualified (scope : PsCommandScope) (name : PsSyntaxName) : PsSyntaxName :=
-  { name with segments := if name.segments.head? == some "_root_" then
-      psSyntaxNameRootSegments name.segments else scope.namePrefix ++ name.segments }
+  { name with
+    segments := if name.segments.head? == some "_root_" then
+      psSyntaxNameRootSegments name.segments else scope.namePrefix ++ name.segments
+    resolvedName := none }
+
+def psScopeDeclarationName (resolver : PsScopeResolver) (sourceName : PsSyntaxName) :
+    PsSyntaxName :=
+  let qualified := psScopeQualified resolver.scope sourceName
+  match psScopePrivateRewrite resolver qualified.segments with
+  | some actual =>
+    { qualified with segments := psNameToSegments actual, resolvedName := some actual }
+  | none => qualified
 
 -- Canonical declaration names may begin with a literal _root_ namespace.
 -- Protect that component when returning to syntax, where one leading marker

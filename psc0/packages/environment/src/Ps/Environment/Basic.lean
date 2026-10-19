@@ -163,6 +163,11 @@ def psTransparencyAllows (mode : PsTransparency) (status : PsReducibility) : Boo
   | .«default», .semireducible => true
   | _, _ => false
 
+-- Produced by the checked project owner for inspection only.
+structure PsInspectionDeclaration where
+  declaration : PsDeclaration
+  noncomputable : Bool := false
+
 structure PsEnvironment where
   declarations : List PsDeclaration
   index : PsEnvironmentIndex
@@ -176,6 +181,8 @@ structure PsEnvironment where
   reducibility : PsBucketIndex (PsName × PsReducibility) := .empty
   -- Lean NoncomputableAttr-style execution policy; invisible to kernel typing.
   noncomputableIndex : PsBucketIndex PsName := .empty
+  -- Actual internal implementations; never a source lookup or admission input.
+  inspectionDeclarations : List PsInspectionDeclaration := []
 
 def psEnvironmentIsNoncomputable (environment : PsEnvironment) (name : PsName) : Bool :=
   (psBucketFind 16 environment.noncomputableIndex (psEnvironmentNameHash name)).any (psNameEq name)

@@ -1,4 +1,5 @@
 import Ps.Syntax.Ast
+import Ps.Syntax.Lexer
 
 inductive PsSourcePrintError where
   | fuelExhausted
@@ -30,11 +31,14 @@ def psPrintJoin
             (psPrintJoin separator rest)
 
 def psPrintSyntaxName (name : PsSyntaxName) :
-    Except PsSourcePrintError String :=
-  let segments := name.segments;
-  match segments with
-  | List.nil => Except.error PsSourcePrintError.emptyName
-  | List.cons _ _ => Except.ok (psPrintJoin "." segments)
+    Except PsSourcePrintError String := do
+  if name.resolvedName.isSome then
+    throw (.unsupportedSourceForm "an internal resolved name has no source spelling")
+  if name.segments.isEmpty then throw .emptyName
+  if name.segments.any (fun part => part.toList.contains '»') then
+    throw (.unsupportedSourceForm "identifier contains a closing guillemet")
+  return psPrintJoin "." (name.segments.map fun part =>
+    psLexIdentifierSpelling part name.escaped)
 
 def psPrintSyntaxNames
     (names : List PsSyntaxName) :
@@ -124,7 +128,8 @@ def psPrintArrowChain
 -- Parenthesize composite levels independently of the surrounding term printer.
 def psPrintSyntaxLevel : PsSyntaxLevel → String
   | .number n => toString n
-  | .name name => name
+  | .name name => psLexIdentifierSpelling name
+      (psLexReservedIdentifier name || (["max", "imax"] : List String).contains name)
   | .hole => "_"
   | .offset base n => "(" ++ psPrintSyntaxLevel base ++ " + " ++ toString n ++ ")"
   | .max left right => "(max " ++ psPrintSyntaxLevel left ++ " " ++ psPrintSyntaxLevel right ++ ")"

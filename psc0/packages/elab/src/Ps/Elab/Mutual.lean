@@ -113,9 +113,7 @@ def psScopeMutualMember (resolver : PsScopeResolver)
     | .definition name binders type value span =>
       pure (name, binders, type, value, span, false)
     | _ => throw (.data "PSCV0-MUTUAL-STRATEGY: selected mutual batch requires partial def/function members")
-  let qualified := psScopeQualified resolver.scope sourceName
-  let name := { qualified with
-    segments := (psScopePrivateRewrite resolver qualified.segments).getD qualified.segments }
+  let name := psScopeDeclarationName resolver sourceName
   -- Headers may resolve peer identities for diagnostics but cannot borrow a
   -- value or inhabitant from a peer whose checked header does not yet exist.
   let headerResolver := { resolver with mutualAliases := [] }

@@ -150,7 +150,7 @@ def psPscv0CallArguments (read : PsPscv0TermReader) (fuel : Nat)
       if psTokenCursorStartsNamedAssignment cursor then do
         let name ← psTokenCursorExpectKind cursor .identifier
         let assign ← psTokenCursorExpectText name.cursor ":="
-        pure (some (PsSyntaxName.mk [name.token.text] name.token.span), assign.cursor)
+        pure (some ((psSyntaxNameFromToken name.token)), assign.cursor)
       else if named then
         throw (psProofScriptExpectedError "named argument after named argument" cursor)
       else pure (none, cursor)
@@ -228,7 +228,8 @@ def psPscv0PostfixFor (commaCalls : Bool) (read : PsPscv0TermReader) (fuel : Nat
         toString dot.token.span.start.byteOffset
       let binder := PsSyntaxName.mk [binderText] dot.token.span
       let projected := PsSyntaxTerm.reference
-        (PsSyntaxName.mk [binderText, field.token.text] span)
+        { segments := [binderText, psTokenIdentifierText field.token]
+          span, escaped := psTokenIdentifierEscaped field.token }
       let result := PsSyntaxTerm.letE binder none current projected span
       return ← psPscv0PostfixFor commaCalls read fuel result field.cursor
     if !commaCalls || !(psTokenCursorAtText cursor "(" && psProofScriptCallAdjacent current cursor) then

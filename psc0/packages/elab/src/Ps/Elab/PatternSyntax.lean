@@ -50,7 +50,7 @@ def psElabPatternTerm (fuel : Nat) (pattern : PsSyntaxPattern) :
   | fuel + 1 =>
     match pattern with
     | .variable name =>
-      if name.segments == ["_"] then return .hole name.span
+      if psSyntaxNameIsAnonymous name then return .hole name.span
       return .reference name
     | .wildcard span => return .hole span
     | .natural value span => return .natural (toString value) span

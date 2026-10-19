@@ -94,7 +94,7 @@ def psPscv0ReadDoBinding (proofScript : Bool) (span : PsSourceSpan)
   | Except.ok nameToken =>
       if psStringEq nameToken.token.text "mut" then Except.error "PSCV0-DO-MUTATION-NOT-YET-SUPPORTED"
       else
-        let name := PsSyntaxName.mk [nameToken.token.text] nameToken.token.span;
+        let name := (psSyntaxNameFromToken nameToken.token);
         if psTokenCursorAtText nameToken.cursor ":" then
           match psPscv0Expect nameToken.cursor ":" with
           | Except.error error => Except.error error

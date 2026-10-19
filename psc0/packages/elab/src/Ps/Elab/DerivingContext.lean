@@ -27,10 +27,9 @@ def psElabDeriveSourceFamily (origin : PsElabBatchOrigin) : Except PsElabError P
     | throw (.data "deriving requires an inductive/structure declaration")
   return member.name
 
-def psElabDerivePrepare (environment : PsEnvironment)
-    (origin : PsElabBatchOrigin) (capabilities : PsElabDeriveCapabilities := {}) :
+def psElabDerivePrepareFamily (environment : PsEnvironment)
+    (name : PsName) (capabilities : PsElabDeriveCapabilities := {}) :
     Except PsElabError PsElabDeriveContext := do
-  let name ← psElabDeriveSourceFamily origin
   let some info := psEnvironmentFindInductive environment name
     | throw (.data "derived family is not an inductive")
   let some group := psInductiveGroupIdentityFor
@@ -60,6 +59,11 @@ def psElabDerivePrepare (environment : PsEnvironment)
     parametersRev := parameters.bindersRev.map fun binder => { binder with binder := .implicit }
     indicesRev := indices.bindersRev.map fun binder => { binder with binder := .implicit }
     family }
+
+def psElabDerivePrepare (environment : PsEnvironment)
+    (origin : PsElabBatchOrigin) (capabilities : PsElabDeriveCapabilities := {}) :
+    Except PsElabError PsElabDeriveContext := do
+  psElabDerivePrepareFamily environment (← psElabDeriveSourceFamily origin) capabilities
 
 def psElabDeriveConstructorNames (plan : PsElabDeriveContext) : List PsName :=
   plan.group.members.flatMap (·.constructors)
@@ -93,21 +97,24 @@ def psElabDeriveClassType (context : PsElabContext) (className : PsName)
   return target
 
 def psElabDeriveRequirements (plan : PsElabDeriveContext) (className : PsName) :
-    PsElabDeriveContext :=
-  plan.parametersRev.reverse.foldl (fun plan parameter =>
+    Except PsElabError PsElabDeriveContext :=
+  plan.parametersRev.reverse.foldlM (fun plan parameter => do
     match psElabDeriveClassType plan.context className (.fvar parameter.id) with
-    | .error _ => plan
+    | .error error =>
+      if psElabErrorIsResource error then throw error else return plan
     | .ok type =>
       let name := psNameAppendStr parameter.name "inst"
       let pushed := psLocalPushBinding plan.context.localContext name type .instanceImplicit
-      { plan with
+      return { plan with
         context := psElabContextWithLocal plan.context pushed.context
         requirementsRev := .mk pushed.id name type .instanceImplicit :: plan.requirementsRev }) plan
 
 def psElabDeriveInstance (context : PsElabContext) (target : PsExpr) :
     Except PsElabError PsExpr := do
-  let result := psSynthInstance context.environment context.localContext context.instances
-    context.metaContext target
+  let search := psSynthInstanceWithLimits context.environment context.localContext context.instances
+    context.metaContext 64 {} target
+  if search.table.resourceExceeded then throw .fuelExhausted
+  let result := search.result
   let some value := result.value | throw (.data "deriving field has no checked instance")
   let value := psMetaInstantiate result.context value
   if psExprHasUnresolvedMeta value then throw .unresolvedMetavariable

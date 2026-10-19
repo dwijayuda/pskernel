@@ -35,6 +35,11 @@ def psParseListAppend {α : Type}
       fun (ys : List α) =>
         List.cons head (smaller ys)
 
+def psSyntaxNameFromToken (token : PsToken) : PsSyntaxName :=
+  { segments := [psTokenIdentifierText token]
+    span := token.span
+    escaped := psTokenIdentifierEscaped token }
+
 def psSyntaxSyntheticName
     (text : String)
     (span : PsSourceSpan) : PsSyntaxName :=
@@ -127,7 +132,7 @@ def psParseSyntaxNameTailWithFuel
                     if adjacent && next.span.start.byteOffset != dot.span.stop.byteOffset then
                       Except.error (PsParseError.unexpectedEnd "adjacent qualified-name component")
                     else smaller
-                      (List.cons next.text segmentsRev)
+                      (List.cons (psTokenIdentifierText next) segmentsRev)
                       start
                       next.span.stop
                       after
@@ -166,9 +171,13 @@ def psParseSyntaxNameWith (adjacent : Bool)
   match cursor.remaining with
   | [] => Except.error (PsParseError.unexpectedEnd "identifier")
   | token :: rest =>
-    if psTokenKindEq token.kind PsTokenKind.identifier then
-      psParseSyntaxNameTailWithFuel (rest.length + 1) adjacent
-        [token.text] token.span.start token.span.stop rest
+    if psTokenKindEq token.kind PsTokenKind.identifier then do
+      let parsed ← psParseSyntaxNameTailWithFuel (rest.length + 1) adjacent
+        [psTokenIdentifierText token] token.span.start token.span.stop rest
+      let escaped := cursor.remaining.any fun item =>
+        item.span.start.byteOffset < parsed.value.span.stop.byteOffset &&
+          psTokenIdentifierEscaped item
+      return { parsed with value := { parsed.value with escaped } }
     else .error (.expectedKind .identifier token.kind token.span)
 
 def psParseSyntaxName (cursor : PsTokenCursor) :
@@ -555,10 +564,7 @@ def psParsePatternBindersWithFuel
                       cursor := cursor
                     }
                 | some read =>
-                    let binder : PsSyntaxName := {
-                      segments := List.cons token.text List.nil
-                      span := token.span
-                    };
+                    let binder : PsSyntaxName := (psSyntaxNameFromToken token);
                     smaller
                       read.cursor
                       (List.cons binder bindersRev)
@@ -631,8 +637,7 @@ def psParseBasicPattern
             match psParseSyntaxName dot.cursor with
             | Except.error error => Except.error error
             | Except.ok constructorName =>
-                let shorthandName : PsSyntaxName := {
-                  segments := constructorName.value.segments
+                let shorthandName : PsSyntaxName := { constructorName.value with
                   span := {
                     start := token.span.start
                     stop := constructorName.value.span.stop

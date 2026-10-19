@@ -317,29 +317,14 @@ def psPrintProofScriptTermWithFuel
                               " := "
                               (psPrintProofScriptGroupedTerm value printedValue)
                               (psPrintProofScriptConcat2 "\n" printedBody))
-      | .ifE proofName condition thenBranch elseBranch _ =>
-          match
-              smaller condition with
-          | Except.error error => Except.error error
-          | Except.ok printedCondition =>
-              match
-                  smaller thenBranch with
-              | Except.error error => Except.error error
-              | Except.ok printedThen =>
-                  match
-                      smaller elseBranch with
-                  | Except.error error => Except.error error
-                  | Except.ok printedElse =>
-                      Except.ok
-                        (psPrintProofScriptConcat6
-                          "if ("
-                          ((match proofName with
-                            | none => ""
-                            | some name => String.intercalate "." name.segments ++ " : ") ++ printedCondition)
-                          ") { "
-                          printedThen
-                          " } else { "
-                          (psPrintProofScriptConcat2 printedElse " }"))
+      | .ifE proofName condition thenBranch elseBranch _ => do
+          let printedCondition ← smaller condition
+          let printedThen ← smaller thenBranch
+          let printedElse ← smaller elseBranch
+          let prefix ← match proofName with
+            | none => pure ""
+            | some name => return (← psPrintSyntaxName name) ++ " : "
+          return "if (" ++ prefix ++ printedCondition ++ ") { " ++ printedThen ++ " } else { " ++ printedElse ++ " }"
       | .matchMany discriminants alternatives generalizing? _ => do
           let plain := generalizing?.isNone &&
             discriminants.all (fun discriminant => discriminant.equationName?.isNone)

@@ -13,4 +13,4 @@ def psCompilerElaboratePscv0 (program : PsSyntaxProgram) :
     Except PsCompilerError PsElabModuleResult := do
   (psCompilerValidatePscv0Standard).mapError PsCompilerError.normalization
   let result ← psCompilerEngineElaboratePscv0 psCompilerFullProfileContext program
-  pure (PsElabModuleResult.mk result.environment result.declarations)
+  pure (PsElabModuleResult.mk result.environment result.declarations result.commandDiagnostics)

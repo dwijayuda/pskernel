@@ -1,6 +1,7 @@
 import Ps.Elab.ExposedProofs
 import Ps.Elab.Attributes
 import Ps.Elab.Scope
+import Ps.Elab.Inspection
 import Ps.Elab.Deriving
 import Ps.Elab.Mutual
 import Ps.Elab.MutualStructural
@@ -18,16 +19,16 @@ structure PsCommandState where
   exposedNames : List PsName := []
   moduleIdentity : String := ""
   isModule : Bool := false
-  privateAliases : List (List String × List String) := []
+  privateAliases : List (List String × PsName) := []
+  commandDiagnosticsRev : List PsDiagnostic := []
 
 def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaration)
     (exposedBody : Bool := false) :
     Except PsElabError PsSyntaxDeclaration := do
   let sourceName := (psElabOriginSource source).fst
-  let sourceQualified := psScopeQualified resolver.scope sourceName
-  let resolved := (psScopePrivateRewrite resolver sourceQualified.segments).getD sourceQualified.segments
-  let name := psScopeCanonicalNameSyntax { sourceQualified with segments := resolved }
-  let resolver := { resolver with selfName := some resolved }
+  let qualified := psScopeDeclarationName resolver sourceName
+  let name := psScopeCanonicalNameSyntax qualified
+  let resolver := { resolver with selfName := some qualified.segments }
   let visit := psScopeTerm 4096 resolver
   let bodyResolver := { resolver with
     abstractProofs := resolver.abstractProofs && exposedBody }
@@ -71,7 +72,7 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
         (fun binder => (psSyntaxBinderNames binder.fst).map PsSyntaxTerm.reference)
     let value ←
       if selfArguments.isEmpty then pure value
-      else psScopeTerm 4096 { bodyResolver with selfArguments } binders.bound value.term
+      else psScopeTerm 4096 { bodyResolver with selfArguments, allowResolvedNames := true } binders.bound value.term
     if isPartial then
       return .partialDefinition name (captured ++ binders.binders) type.term value.term span
     if isFixedpoint then
@@ -90,6 +91,7 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
     let params ← psScopeBinders visit [] params
     let result ← result.mapM (visit params.bound)
     let constructors ← constructors.mapM fun constructor => do
+      psScopeCheckSourceName resolver constructor.name
       let fields ← psScopeBinders visit params.bound constructor.fields
       let result ← constructor.resultType.mapM (visit fields.bound)
       return ({ constructor with fields := fields.binders, resultType := result.map (·.term) },
@@ -131,7 +133,7 @@ def psScopeVariables (state : PsCommandState) (entries : List PsScopeBinder) :
     let names := psSyntaxBinderNames entry.fst
     (names.zipIdx).foldlM (fun scope (name, index) => do
       let key := psScopeKey name
-      if name.segments.length != 1 || key == "_" then
+      if name.segments.length != 1 || psSyntaxNameIsAnonymous name then
         throw (.scope "section variable requires a name")
       if psScopeHasVariable scope key then
         throw (.scope ("duplicate active section variable " ++ key))
@@ -412,14 +414,14 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   let aliases := (members.zip qualified).foldl (fun aliases entry =>
     if entry.fst.isPrivate && !state.moduleIdentity.isEmpty then
       (entry.snd.segments,
-        ["$psc0Private"] ++ state.moduleIdentity.splitOn "." ++ entry.snd.segments) :: aliases
+        psElabPrivateName ([state.moduleIdentity] ++ entry.snd.segments)) :: aliases
     else aliases) state.privateAliases
   let resolver : PsScopeResolver := {
     environment := state.environment
     scope := state.scope
     privateAliases := aliases }
   let names := qualified.map fun name =>
-    (psScopePrivateRewrite resolver name.segments).getD name.segments
+    (psScopePrivateRewrite resolver name.segments).map psNameToSegments |>.getD name.segments
   let peerAliases := names.zipIdx.map fun (name, index) =>
     (name, ["$psc0Mutual", psNatToString index])
   let resolver := { resolver with mutualNames := names, mutualAliases := peerAliases }
@@ -431,7 +433,7 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   let inheritedPartial := psElabPreDefinitionHasPartialMain mainSources
   let privateAuxiliaryPrefix :=
     if state.isModule && !state.moduleIdentity.isEmpty then
-      ["$psc0Private"] ++ state.moduleIdentity.splitOn "."
+      [state.moduleIdentity]
     else []
   let scopedMembers ← (members.zip peerAliases).mapM fun (member, alias) =>
     psScopePreDefinition
@@ -524,11 +526,11 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   -- Helpers of an ordinary module definition have private checked identities.
   -- Their source aliases remain usable by later commands in this provider only.
   let privateAliases := (qualified.zip scopedMembers).foldl
-    (fun (aliases : List (List String × List String)) (sourceName, member) =>
+    (fun (aliases : List (List String × PsName)) (sourceName, member) =>
       member.locals.foldl (fun aliases localDefinition =>
         if localDefinition.isPrivate then
           (sourceName.segments ++ localDefinition.source.name.segments,
-            (psNameToString localDefinition.name).splitOn ".") :: aliases
+            localDefinition.name) :: aliases
         else aliases) aliases) aliases
   return { state with
     environment, namespaces
@@ -569,7 +571,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
   -- elaboration retains its existing standalone naming contract.
   let aliases := if isPrivate && !state.moduleIdentity.isEmpty then
     (qualified.segments,
-      ["$psc0Private"] ++ state.moduleIdentity.splitOn "." ++ qualified.segments)
+      psElabPrivateName ([state.moduleIdentity] ++ qualified.segments))
       :: state.privateAliases
     else state.privateAliases
   let source ← psScopeDeclaration {
@@ -687,12 +689,12 @@ def psElabCommandPartialMutual (state : PsCommandState) (members : List PsSyntax
   let aliases := (members.zip qualified).foldl (fun aliases entry =>
     if entry.fst.isPrivate && !state.moduleIdentity.isEmpty then
       (entry.snd.segments,
-        ["$psc0Private"] ++ state.moduleIdentity.splitOn "." ++ entry.snd.segments) :: aliases
+        psElabPrivateName ([state.moduleIdentity] ++ entry.snd.segments)) :: aliases
     else aliases) state.privateAliases
   let resolver : PsScopeResolver := {
     environment := state.environment, scope := state.scope, privateAliases := aliases }
   let names := qualified.map fun sourceName =>
-    (psScopePrivateRewrite resolver sourceName.segments).getD sourceName.segments
+    (psScopePrivateRewrite resolver sourceName.segments).map psNameToSegments |>.getD sourceName.segments
   let localAliases := (names.zipIdx).map fun entry =>
     (entry.fst, ["$psc0Mutual", psNatToString entry.snd])
   let resolver := { resolver with mutualNames := names, mutualAliases := localAliases }
@@ -802,9 +804,8 @@ def psElabCommandAttributes (state : PsCommandState)
           | .instanceAttribute | .defaultInstanceAttribute _ => true
           | _ => false) then
       throw (.data "PSCV0-TERM-02-HEAD: partial cannot register a total declaration")
-    let qualified := psScopeQualified state.scope (psElabOriginSource member.declaration).fst
-    let segments := (psScopePrivateRewrite resolver qualified.segments).getD qualified.segments
-    let some name := psSyntaxNameToName (psScopeCanonicalNameSyntax { qualified with segments })
+    let qualified := psScopeDeclarationName resolver (psElabOriginSource member.declaration).fst
+    let some name := psSyntaxNameToName (psScopeCanonicalNameSyntax qualified)
       | throw .emptyName
     (psElabApplySourceAttributes environment name member.attributes).mapError
       (.atDeclaration name)) state.environment
@@ -812,11 +813,15 @@ def psElabCommandAttributes (state : PsCommandState)
 
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     Except PsElabError PsCommandState := do
+  psElabSourceCommandNames command
   match command with
+  | .inspectionCmd command span => do
+    let diagnostic ← psElabInspection state.environment state.scope state.privateAliases command span
+    return { state with commandDiagnosticsRev := diagnostic :: state.commandDiagnosticsRev }
   | .universeCmd names _ =>
     let levelNames ← names.foldlM (fun levels name => do
       let [key] := name.segments | throw (.scope "universe requires an unqualified name")
-      if key == "_" || levels.contains key then
+      if psSyntaxNameIsAnonymous name || levels.contains key then
         throw (.scope ("duplicate or invalid universe " ++ key))
       return levels ++ [key]) state.scope.levelNames
     return { state with scope := { state.scope with levelNames } }
@@ -888,6 +893,7 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
 def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxProgram)
     (moduleIdentity : String := "") :
     Except PsElabError PsElabModuleWithOriginsResult := do
+  for entry in program.imports do psElabSourceName entry.moduleName
   if !program.imports.isEmpty then throw (.scope "module imports are not available in this entry point")
   let namespaces := environment.declarations.foldl (fun acc decl =>
     ((psScopeNamePrefixes (psDeclarationName decl)).drop 1).foldl psScopeRemember acc) []
@@ -897,7 +903,8 @@ def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxPr
   -- Only declarations and their metadata leave this program owner; scope frames
   -- and local resolution settings cannot escape into the next module.
   let result : PsElabModuleWithOriginsResult := {
-    result := { environment := state.environment, declarations := state.declarationsRev.reverse }
+    result := { environment := state.environment, declarations := state.declarationsRev.reverse
+      commandDiagnostics := state.commandDiagnosticsRev.reverse }
     origins := state.originsRev.reverse
     privateNames := state.privateNames
     exposedNames := state.exposedNames }

@@ -202,8 +202,8 @@ jobs:
           for matches_kind in lean ps; do
             matches_dir=../dist/m3-core-matches/"$matches_kind"
             "$TSC" --ignoreConfig "$matches_dir/corematches.ts" --outDir "$matches_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData | tee "$matches_dir/js.log"
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData "$matches_dir/ts/corematches.js" | tee "$matches_dir/ts.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData,m3dependentFin | tee "$matches_dir/js.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData,m3dependentFin "$matches_dir/ts/corematches.js" | tee "$matches_dir/ts.log"
           done
           "$TSC" --ignoreConfig ../dist/m3-recursive-deriving/hashing.ts --outDir ../dist/m3-recursive-deriving/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-recursive-deriving.mjs ecma ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/js.log
@@ -279,7 +279,7 @@ jobs:
           done
           for matches_kind in lean ps; do
             matches_dir=../dist/m3-core-matches/"$matches_kind"
-            node ../scripts/pscv0-m3-runtime.mjs rust "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData
+            node ../scripts/pscv0-m3-runtime.mjs rust "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData,m3dependentFin
             rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$matches_dir/rust.log"
           done
           node ../scripts/pscv0-m3-recursive-deriving.mjs rust ../dist/m3-recursive-deriving
@@ -340,7 +340,7 @@ jobs:
           cd "$GITHUB_WORKSPACE/psc0/v7-native"
           for matches_kind in lean ps; do
             matches_dir=../dist/m3-core-matches/"$matches_kind"
-            node ../scripts/pscv0-m3-runtime.mjs wasm "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData | tee "$matches_dir/wasm.log"
+            node ../scripts/pscv0-m3-runtime.mjs wasm "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData,m3dependentFin | tee "$matches_dir/wasm.log"
           done
           node ../scripts/pscv0-m3-recursive-deriving.mjs wasm ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright | tee ../dist/m3-inductive-runtime/wasm.log

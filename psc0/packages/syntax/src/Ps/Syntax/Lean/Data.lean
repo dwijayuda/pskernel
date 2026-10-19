@@ -97,7 +97,7 @@ def psLeanInstanceFieldBinders (fuel : Nat) (cursor : PsTokenCursor)
       if !psTokenKindEq token.kind .identifier || psPscv0ReservedArgument token.text then
         return { value := accRev.reverse, cursor }
       let name ← psTokenCursorExpectKind cursor .identifier
-      let head := PsSyntaxBinderHead.mk (PsSyntaxName.mk [name.token.text] name.token.span)
+      let head := PsSyntaxBinderHead.mk ((psSyntaxNameFromToken name.token))
         .explicit name.token.span
       psLeanInstanceFieldBinders fuel name.cursor ((head, .hole name.token.span) :: accRev)
 

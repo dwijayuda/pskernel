@@ -27,7 +27,7 @@ def psCompilerEngineElaboratePscv0 (profile : PsCompilerProfileContext)
     (program : PsSyntaxProgram) : Except PsCompilerError PsCompilerEngineElaborated := do
   let result ← (psElabProgram profile.baseEnvironment program).mapError
     PsCompilerError.elaboration
-  pure (PsCompilerEngineElaborated.mk result.environment result.declarations profile)
+  pure (PsCompilerEngineElaborated.mk result.environment result.declarations profile result.commandDiagnostics)
 
 -- Use the selected source reader and command elaborator before the shared
 -- preparation engine. Imports keep the bounded entry's existing refusal.

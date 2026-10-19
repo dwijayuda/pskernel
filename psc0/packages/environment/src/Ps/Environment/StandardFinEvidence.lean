@@ -146,8 +146,9 @@ def psStandardFinEvidenceAudit (environment : PsEnvironment) : Except String Uni
   for name in ["Nat.beq_refl", "Nat.eq_of_beq_eq_true"] do
     let some declaration := psEnvironmentFind environment (psDecisionName name)
       | throw ("PSCV0-STANDARD: missing checked Fin equality dependency " ++ name)
-    if (psDeclarationValue declaration).isNone then
-      throw ("PSCV0-STANDARD: Fin equality dependency has no checked value " ++ name)
+    match declaration with
+    | .theoremDecl _ _ _ _ => pure ()
+    | _ => throw ("PSCV0-STANDARD: Fin equality dependency is not a checked theorem " ++ name)
   for expected in psStandardFinEvidenceDeclarations do
     let name := psDeclarationName expected
     let some (.definitionDecl _ levels type value) := psEnvironmentFind environment name

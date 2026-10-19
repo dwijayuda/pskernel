@@ -13,7 +13,7 @@ inductive Captured : Nat → Type where
 
 def capturedTag (value : Captured 2) : Nat :=
   match value with
-  | .branch _ => 0
+  | .branch _ _ => 0
 
 example : capturedTag (Captured.branch 2 []) = 0 := rfl
 
@@ -34,6 +34,8 @@ private def expectNativeNestedLocalRefusal (command : Lean.Syntax) :
       { state with messages := Lean.MessageLog.empty, snapshotTasks := #[] }
     let messages ← Lean.Elab.Tactic.GuardMsgs.runAndCollectMessages command
     let errors := messages.toList.filter fun message => message.severity == .error
+    unless errors.length == 1 do
+      throwError "native nested refusal expected one semantic error, got {errors.length}"
     let mut owned := false
     for message in errors do
       let content ← message.data.toString
@@ -42,6 +44,8 @@ private def expectNativeNestedLocalRefusal (command : Lean.Syntax) :
         throwError "native nested refusal exhausted resources: {content}"
       if (content.splitOn "nested inductive datatypes parameters cannot contain local variables").length > 1 then
         owned := true
+      else
+        throwError "native nested refusal reached the wrong owner: {content}"
     pure owned
   finally
     set saved
@@ -49,10 +53,11 @@ private def expectNativeNestedLocalRefusal (command : Lean.Syntax) :
     throwError "native nested family did not refuse its constructor-local specialization"
 
 run_cmd do
-  let command ← `(command|
-    inductive CapturedLocal : Nat → Type where
-      | zero : CapturedLocal 0
-      | branch (n : Nat) (children : List (CapturedLocal n)) : CapturedLocal n)
+  let source := "inductive CapturedLocal : Nat → Type where\n  | zero : CapturedLocal 0\n  | branch (n : Nat) (children : List (CapturedLocal n)) : CapturedLocal n\n"
+  let command ← match Lean.Parser.runParserCategory (← Lean.getEnv) `command source
+      "CapturedLocalNative.lean" with
+    | .ok command => pure command
+    | .error error => throwError "native nested refusal source did not parse: {error}"
   expectNativeNestedLocalRefusal command
 
 inductive M3FunctionNested where
@@ -552,7 +557,7 @@ private def remove (environment : PsEnvironment) (name : PsName) : PsEnvironment
       (psEnvironmentRemoveName name bucket) }
 
 private def capturedSource : String :=
-  "inductive Captured: Nat -> Type where { | branch(n: Nat, children: List(Captured(n))): Captured(n) }\nfunction capturedTag(value: Captured(2)): Nat := match value with { | Captured.branch _ => 0 }\ntheorem capturedTagEquation: capturedTag(Captured.branch(2, List.nil)) = 0 := by { rfl }\n"
+  "inductive Captured: Nat -> Type where { | branch(n: Nat, children: List(Captured(n))): Captured(n) }\nfunction capturedTag(value: Captured(2)): Nat := match value with { | Captured.branch _ _ => 0 }\ntheorem capturedTagEquation: capturedTag(Captured.branch(2, List.nil)) = 0 := by { rfl }\n"
 
 private def checkRefusals (environment : PsEnvironment) (shape : PsElabDeclarationBatchResult)
     (origin : PsElabBatchOrigin) (probe : PsExpr) : IO Unit := do

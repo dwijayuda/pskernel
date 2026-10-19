@@ -1,4 +1,5 @@
 import Ps.Compiler.Pscv0Engine
+import Ps.Syntax.ParseCommon
 
 -- A project consists of named, in-memory v7.2 sources. The graph is
 -- discovered before elaboration: imports are never ignored or converted into
@@ -18,11 +19,25 @@ structure PsPscv0ParsedModule where
   sourceName : String
   program : PsSyntaxProgram
 
+-- Module identities use a canonical source spelling of structural components.
+-- A dot inside an escaped component is never a module path separator.
+def psPscv0ModuleKey (segments : List String) : String :=
+  String.intercalate "." (segments.map fun part =>
+    psLexIdentifierSpelling part (psLexReservedIdentifier part))
+
 def psPscv0ImportKey (entry : PsSyntaxImport) : String :=
-  String.intercalate "." (psSyntaxNameRootSegments entry.moduleName.segments)
+  psPscv0ModuleKey (psSyntaxNameRootSegments entry.moduleName.segments)
 
 def psPscv0ValidModuleKey (name : String) : Bool :=
-  !name.isEmpty && (name.splitOn ".").all (fun segment => !segment.isEmpty)
+  match psLex name with
+  | .error _ => false
+  | .ok tokens =>
+    match psParseSyntaxNameWith true { remaining := tokens } with
+    | .error _ => false
+    | .ok parsed =>
+      let segments := psSyntaxNameRootSegments parsed.value.segments
+      !segments.isEmpty && psTokenCursorDone parsed.cursor &&
+        psPscv0ModuleKey segments == name
 
 def psPscv0ProjectParse (sources : List PsPscv0ModuleSource) :
     Except String (List PsPscv0ParsedModule) := do
@@ -235,6 +250,7 @@ structure PsPscv0BuiltModule where
   interface : PsPscv0ModuleInterface
   legacyInterface : PsPscv0ModuleInterface
   ownNames : List PsName
+  inspectionDeclarations : List PsInspectionDeclaration := []
 
 structure PsPscv0ProjectOrigin where
   moduleName : String
@@ -242,6 +258,7 @@ structure PsPscv0ProjectOrigin where
   source : String
   batches : List PsElabBatchOrigin
   parents : List (PsName × PsName)
+  commandDiagnostics : List PsDiagnostic := []
 
 -- Retain the actual import/export decision at its owner. This receipt is
 -- descriptive metadata; admission and runtime semantics remain separate.
@@ -303,8 +320,9 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
       let some linked := built.find? (fun module =>
         module.name == psPscv0ImportKey imp)
         | throw "PSCV0-MODULE: unresolved topological dependency"
-      psPscv0InstallInterface env
-        (if item.program.isModule then linked.interface else linked.legacyInterface))
+      let installed ← psPscv0InstallInterface env
+        (if item.program.isModule then linked.interface else linked.legacyInterface)
+      psInspectionAttach installed linked.inspectionDeclarations)
       profile.baseEnvironment
     let program := { item.program with imports := [] }
     let elaborated ← (psElabProgramWithOrigins importEnvironment program item.name).mapError
@@ -314,7 +332,8 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
     let moduleElaborated : PsCompilerEngineElaborated := {
       environment := elaborated.result.environment
       declarations := elaborated.result.declarations
-      profile := moduleProfile }
+      profile := moduleProfile
+      commandDiagnostics := elaborated.result.commandDiagnostics }
     let output ← (psCompilerEnginePrepareElaboratedWithOutput moduleElaborated).mapError
       psCompilerPscv0Error
     let own := output.prepared.declarations
@@ -375,13 +394,17 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
       name := item.name, sourceName := item.sourceName, source := item.source
       imports := item.program.imports.map (fun imp => (psPscv0ImportKey imp, imp.isPublic))
       ownNames, privateNames := hidden, exposedNames := elaborated.exposedNames, interface }]
-    built := built ++ [{ name := item.name, interface, legacyInterface, ownNames }]
+    let inspectionDeclarations ← psInspectionCapture elaborated.result.environment
+      elaborated.result.declarations
+    built := built ++ [{
+      name := item.name, interface, legacyInterface, ownNames, inspectionDeclarations }]
     declarations := declarations ++ own
     recursorWorkerGroups := recursorWorkerGroups ++ output.prepared.recursorWorkerGroups
     noncomputableNames := noncomputableNames ++ output.prepared.noncomputableNames
     origins := origins ++ [{
       moduleName := item.name, sourceName := item.sourceName, source := item.source,
-      batches := elaborated.origins, parents := output.originParents }]
+      batches := elaborated.origins, parents := output.originParents
+      commandDiagnostics := elaborated.result.commandDiagnostics }]
     if item.name == entryName then
       mainNames := ownPublic.declarations.map psDeclarationName
   let prepared : PsCompilerEnginePrepared := {

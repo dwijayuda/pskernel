@@ -73,9 +73,7 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
     Except PsElabError PsScopedPreDefinition := do
   let (base, locals, whereSpan) ← psWhereSourceParts member.declaration
   let (sourceName, sourceBinders, sourceType, sourceValue) ← psWhereValueParts base
-  let qualified := psScopeQualified resolver.scope sourceName
-  let name := { qualified with
-    segments := (psScopePrivateRewrite resolver qualified.segments).getD qualified.segments }
+  let name := psScopeDeclarationName resolver sourceName
   let some coreName := psSyntaxNameToName (psScopeCanonicalNameSyntax name) | throw .emptyName
   let exposesBody := match member.registration with
     | some .abbrevDecl => true
@@ -86,13 +84,14 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
     | _ => false
   let privateHelpers := !privateAuxiliaryPrefix.isEmpty && !exposesBody
   let helperParentName :=
-    if privateHelpers && name.segments.head? != some "$psc0Private" then
-      psSyntaxNameAppendSegments (privateAuxiliaryPrefix ++ name.segments) .anonymous
+    if privateHelpers && name.resolvedName.isNone then
+      psElabPrivateName (privateAuxiliaryPrefix ++ name.segments)
     else coreName
   let headerResolver := { resolver with mutualAliases := [], localAliases := [] }
   let binders ← psScopeBinders (psScopeTerm 4096 headerResolver) [] sourceBinders
   let type ← psScopeTerm 4096 headerResolver binders.bound sourceType
   let helperNames ← locals.mapM fun localDefinition => do
+    psScopeCheckSourceName resolver localDefinition.name
     if localDefinition.name.segments.length != 1 then
       throw (.scope "PSCV0-D-WHERE-01: local name must be one identifier")
     let some shortName := localDefinition.name.segments.head? | throw .emptyName

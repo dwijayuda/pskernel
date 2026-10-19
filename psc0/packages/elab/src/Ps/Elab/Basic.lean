@@ -157,9 +157,18 @@ def psSyntaxNameRootSegments (segments : List String) : List String :=
   | _ => segments
 
 def psSyntaxNameToName (name : PsSyntaxName) : Option PsName :=
-  match psSyntaxNameRootSegments name.segments with
-  | [] => none
-  | first :: rest => some (psSyntaxNameAppendSegments rest (psRootName first))
+  match name.resolvedName with
+  | some resolved => some resolved
+  | none =>
+    match psSyntaxNameRootSegments name.segments with
+    | [] => none
+    | first :: rest => some (psSyntaxNameAppendSegments rest (psRootName first))
+
+-- Source names contain string components only. The numeric owner boundary
+-- cannot be spelled by Lean.ident, including escaped identifier components.
+-- A canonical module key occupies one component and cannot lose dotted identity.
+def psElabPrivateName (segments : List String) : PsName :=
+  psSyntaxNameAppendSegments segments (PsName.num (psRootName "$psc0Private") 0)
 
 def psElabResultWithMeta
     (result : PsElabTermResult)
@@ -588,12 +597,29 @@ def psElabReferencePrefix (fuel : Nat) (localContext : PsLocalContext)
       | some last => psElabReferencePrefix fuel localContext environment rooted
           namePrefix.dropLast (last :: suffix)
 
+-- A scope-owned alias keeps its exact name through projection lookup.
+-- Never interpret a numeric internal owner component as a source projection.
+def psElabResolvedReferencePrefix (fuel : Nat) (environment : PsEnvironment)
+    (name : PsName) (suffix : List String) :
+    Option (Prod PsResolvedName (List String)) :=
+  match fuel with
+  | 0 => none
+  | fuel + 1 =>
+    if (psEnvironmentFind environment name).isSome then some (.global name, suffix)
+    else match name with
+      | .str parent field =>
+        psElabResolvedReferencePrefix fuel environment parent (field :: suffix)
+      | _ => none
+
 def psElabResolveReferenceBase (localContext : PsLocalContext)
     (environment : PsEnvironment) (sourceName : PsSyntaxName) :
     Option (Prod PsResolvedName (List String)) :=
-  let rooted := sourceName.segments.head? == some "_root_"
-  let segments := psSyntaxNameRootSegments sourceName.segments
-  psElabReferencePrefix (segments.length + 1) localContext environment rooted segments []
+  match sourceName.resolvedName with
+  | some name => psElabResolvedReferencePrefix (psNameDepth name + 1) environment name []
+  | none =>
+    let rooted := sourceName.segments.head? == some "_root_"
+    let segments := psSyntaxNameRootSegments sourceName.segments
+    psElabReferencePrefix (segments.length + 1) localContext environment rooted segments []
 
 -- Global constants instantiate declared universe parameters at every use.
 -- Keep the fresh constraints in the ordinary elaboration context so arguments
@@ -659,7 +685,9 @@ def psElabReference
     (sourceName : PsSyntaxName)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  match psSyntaxNameRootSegments sourceName.segments with
+  if sourceName.escaped || sourceName.resolvedName.isSome then
+    psElabNamedReference context sourceName expected
+  else match psSyntaxNameRootSegments sourceName.segments with
   | List.nil =>
       psElabNamedReference context sourceName expected
   | List.cons segment rest =>

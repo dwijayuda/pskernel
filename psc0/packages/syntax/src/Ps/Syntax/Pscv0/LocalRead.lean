@@ -15,7 +15,7 @@ def psPscv0ReadLocal (read readType : PsPscv0TermReader) (cursor : PsTokenCursor
       pure (PsParseResult.mk (PsSyntaxName.mk ["this"] keyword.token.span) keyword.cursor)
     else do
       let name ← psTokenCursorExpectKind keyword.cursor .identifier
-      pure (PsParseResult.mk (PsSyntaxName.mk [name.token.text] name.token.span) name.cursor)
+      pure (PsParseResult.mk ((psSyntaxNameFromToken name.token)) name.cursor)
   let type ← if psTokenCursorAtText named.cursor ":" then do
       let colon ← psTokenCursorExpectText named.cursor ":"
       let type ← readType colon.cursor

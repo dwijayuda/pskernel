@@ -30,7 +30,7 @@ def psPscv0PrintLeanTypeWithFuel (fuel : Nat) :
                 let head := binder.fst
                 let typeText ← smaller binder.snd
                 let anonymous := match head.kind with
-                  | .explicit => head.name.segments == ["_"] && head.moreNames.isEmpty
+                  | .explicit => psSyntaxNameIsAnonymous head.name && head.moreNames.isEmpty
                   | _ => false
                 if anonymous then return psPscv0ArrowDomain binder.snd typeText
                 psPrintTypedBinder head typeText;

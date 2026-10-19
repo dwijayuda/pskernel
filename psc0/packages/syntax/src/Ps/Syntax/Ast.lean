@@ -1,8 +1,21 @@
 import Ps.Foundation.Source
+import Ps.Foundation.Name
 
 structure PsSyntaxName where
+  name ::
   segments : List String
   span : PsSourceSpan
+  -- Lexical quoting determines whether a keyword/underscore is an identifier.
+  escaped : Bool := false
+  -- Only the scope owner supplies an actual checked internal alias identity.
+  -- Source readers never construct this field.
+  resolvedName : Option PsName := none
+
+def PsSyntaxName.mk (segments : List String) (span : PsSourceSpan) : PsSyntaxName :=
+  .name segments span false none
+
+def psSyntaxNameIsAnonymous (name : PsSyntaxName) : Bool :=
+  !name.escaped && name.segments == ["_"]
 
 inductive PsSyntaxBinderKind where
   | explicit
@@ -46,7 +59,7 @@ def psSyntaxBinderSelectNames (head : PsSyntaxBinderHead)
 
 def psSyntaxAnonymousInstanceBinder (head : PsSyntaxBinderHead) : Bool :=
   match head.kind, head.name.segments with
-  | .instanceImplicit, [name] => head.moreNames.isEmpty && name.startsWith "$psc0Inst"
+  | .instanceImplicit, [name] => !head.name.escaped && head.moreNames.isEmpty && name.startsWith "$psc0Inst"
   | _, _ => false
 
 inductive PsSyntaxPattern where
@@ -66,7 +79,7 @@ inductive PsSyntaxPattern where
 def PsSyntaxPattern.constructor (name : PsSyntaxName) (binders : List PsSyntaxName)
     (span : PsSourceSpan) : PsSyntaxPattern :=
   .ctor name (binders.map fun name =>
-    if name.segments == ["_"] then .wildcard name.span else .variable name) span
+    if psSyntaxNameIsAnonymous name then .wildcard name.span else .variable name) span
 
 def psSyntaxPatternNames (fuel : Nat) (pattern : PsSyntaxPattern) : List PsSyntaxName :=
   match fuel with
@@ -92,7 +105,7 @@ structure PsSyntaxProofScope where
   opened : List (List String) := []
   -- Module-owned private names are resolved within tactic terms, never
   -- serialized as public names or made visible to external importers.
-  privateAliases : List (List String × List String) := []
+  privateAliases : List (List String × PsName) := []
   -- Delayed proof terms resolve a mutual peer to its checked local alias,
   -- which already supplies the common captured telescope with all binder kinds.
   mutualAliases : List (List String × List String) := []
@@ -113,7 +126,7 @@ structure PsSyntaxMatchDiscriminant (α : Type) where
 def psSyntaxMatchEquationNames {α : Type}
     (discriminants : List (PsSyntaxMatchDiscriminant α)) : List PsSyntaxName :=
   discriminants.filterMap fun discriminant =>
-    discriminant.equationName?.filter fun name => name.segments != ["_"]
+    discriminant.equationName?.filter fun name => !psSyntaxNameIsAnonymous name
 
 mutual
 inductive PsSyntaxTerm where
@@ -395,7 +408,14 @@ structure PsSyntaxMutualMember where
   registration : Option PsSyntaxRegistration := none
   attributes : List PsSyntaxAttribute := []
 
+inductive PsSyntaxInspection where
+  | checkTerm (term : PsSyntaxTerm)
+  | printDeclaration (name : PsSyntaxName) (axioms : Bool)
+  | reduceTerm (term : PsSyntaxTerm)
+  | evalTerm (term : PsSyntaxTerm)
+
 inductive PsSyntaxCommand where
+  | inspectionCmd (command : PsSyntaxInspection) (span : PsSourceSpan)
   | universeCmd (names : List PsSyntaxName) (span : PsSourceSpan)
   | registeredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
   | declaration (value : PsSyntaxDeclaration)

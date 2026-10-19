@@ -23,7 +23,7 @@ def psPscv0BinderNames (fuel : Nat) (cursor : PsTokenCursor)
       if psTokenKindEq token.kind .identifier && !psPscv0ReservedArgument token.text then
         let name ← psTokenCursorExpectKind cursor .identifier
         psPscv0BinderNames fuel name.cursor
-          (PsSyntaxName.mk [name.token.text] name.token.span :: accRev)
+          ((psSyntaxNameFromToken name.token) :: accRev)
       else return { value := accRev.reverse, cursor }
     | none => return { value := accRev.reverse, cursor }
 
@@ -55,7 +55,7 @@ def psPscv0BinderEntry (readType readValue : PsPscv0TermReader) (fuel : Nat)
         value.cursor)
     else pure type
   let head := PsSyntaxBinderHead.group
-    (PsSyntaxName.mk [name.token.text] name.token.span) kind
+    ((psSyntaxNameFromToken name.token)) kind
     (psSyntaxSpanJoin name.token.span (psSyntaxTermSpan annotation.value)) names.value none
   return { value := (head, annotation.value), cursor := annotation.cursor }
 
@@ -159,7 +159,7 @@ def psPscv0TermBinders (read : PsPscv0TermReader) (quantified : Bool)
         else do
           let name ← psTokenCursorExpectKind cursor .identifier
           let head := PsSyntaxBinderHead.mk
-            (PsSyntaxName.mk [name.token.text] name.token.span) .explicit name.token.span
+            ((psSyntaxNameFromToken name.token)) .explicit name.token.span
           pure (PsParseResult.mk (head, PsSyntaxTerm.hole name.token.span) name.cursor)
       if quantified && !psTokenCursorAtText entry.cursor "," then
         throw (psProofScriptExpectedError "comma after quantified binder group" entry.cursor)

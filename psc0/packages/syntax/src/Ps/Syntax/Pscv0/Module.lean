@@ -35,23 +35,23 @@ def psPscv0FindBlock (blocks : List PsPscv0DoBlock) (offset : Nat) : Option PsPs
 def psPscv0BodyBlock (blocks : List PsPscv0DoBlock) (value : PsSyntaxTerm) : Option PsPscv0DoBlock :=
   match value with
   | .reference name =>
-      if psStringEq (psPscv0NameText name) psPscv0DoSlot then psPscv0FindBlock blocks name.span.start.byteOffset
+      if name.segments == [psPscv0DoSlot] then psPscv0FindBlock blocks name.span.start.byteOffset
       else Option.none
   | _ => Option.none
 
 def psPscv0ExceptType (type : PsSyntaxTerm) : Bool :=
   match type with
   | .call (.reference name) args _ =>
-      psStringEq (psPscv0NameText name) "Except" && args.length == 2 && args.all (fun a => a.fst.isNone)
+      name.segments == ["Except"] && args.length == 2 && args.all (fun a => a.fst.isNone)
   | .app fn args _ =>
       match fn with
       | .reference name =>
-          if psStringEq (psPscv0NameText name) "Except" then Nat.beq (psListLength args) 2 else false
+          if name.segments == ["Except"] then Nat.beq (psListLength args) 2 else false
       | _ => false
   | _ => false
 
 def psPscv0BinderShadowsExcept (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : Bool :=
-  (psSyntaxBinderNames binder.fst).any (fun name => psStringEq (psPscv0NameText name) "Except")
+  (psSyntaxBinderNames binder.fst).any (fun name => name.segments == ["Except"])
 def psPscv0BinderType (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : PsSyntaxTerm := binder.snd
 
 def psPscv0ConstructorTerms (constructor : PsSyntaxInductiveConstructor) : List PsSyntaxTerm :=

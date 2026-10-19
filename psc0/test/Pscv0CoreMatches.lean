@@ -292,11 +292,11 @@ def m3structural (flag : Bool) : UInt64 :=
     1000 * namedComputed (fun (_ : Nat) => Nat) amount (List.cons amount List.nil) +
     10000 * namedTree Nat tree)
 theorem namedResultObserved : namedResult 3 5 = 8 := by rfl
-theorem namedResultSource (n : Nat) :
-    namedResult n = (fun (bias : Nat) => match (generalizing := false) h : n with
+theorem namedResultSource (n bias : Nat) :
+    namedResult n bias = (match (generalizing := false) h : n with
       | 0 => bias
       | Nat.succ k => namedResult k (Nat.succ bias)) :=
-  by exact namedResult.eq_def n
+  by exact namedResult.eq_def n bias
 
 def constCount : Nat → Nat := fun n =>
   match n with
@@ -305,10 +305,10 @@ def constCount : Nat → Nat := fun n =>
 
 theorem constCountObserved : constCount 3 = 3 := Eq.refl 3
 
-theorem constCountSourceEquation :
-    constCount = (fun n => match n with
+theorem constCountSourceEquation (n : Nat) :
+    constCount n = (match n with
       | 0 => 0
-      | Nat.succ k => Nat.succ (constCount k)) := constCount.eq_def
+      | Nat.succ k => Nat.succ (constCount k)) := constCount.eq_def n
 
 def ConstCountType : Type := Nat → Nat
 
@@ -319,10 +319,10 @@ def constAliasCount : ConstCountType := fun n =>
 
 theorem constAliasCountObserved : constAliasCount 3 = 3 := Eq.refl 3
 
-theorem constAliasCountSourceEquation :
-    constAliasCount = (fun n => match n with
+theorem constAliasCountSourceEquation (n : Nat) :
+    constAliasCount n = (match n with
       | 0 => 0
-      | Nat.succ k => Nat.succ (constAliasCount k)) := constAliasCount.eq_def
+      | Nat.succ k => Nat.succ (constAliasCount k)) := constAliasCount.eq_def n
 
 def m3const (flag : Bool) : UInt64 :=
   let n := if flag then 3 else 5
@@ -873,6 +873,152 @@ def m3promotionData (flag : Bool) : UInt64 :=
 #guard m3promotionData false == 15
 #guard m3promotionData true == 15
 
+structure CoreDependentFin where
+  n : Nat
+  value : Fin n
+  deriving BEq, DecidableEq, Repr, Hashable
+
+structure CoreDependentNatProof where
+  value : Nat
+  proof : value = value
+  deriving BEq, DecidableEq, Repr, Hashable
+
+structure CoreDependentFinProof where
+  value : Fin 2
+  proof : value = value
+  deriving BEq, DecidableEq, Repr, Hashable
+
+structure CoreFinDefault (n : Nat) [dictionary : Inhabited (Fin n)] where
+  value : Fin n
+  deriving Inhabited
+
+inductive CoreUnlawfulAtom where
+  | atom (value : Bool)
+instance coreUnlawfulBEq : BEq CoreUnlawfulAtom where
+  beq (_left : CoreUnlawfulAtom) (_right : CoreUnlawfulAtom) : Bool := false
+
+structure CoreIndependentProof (A : Type) (P : Prop) where
+  value : A
+  proof : P
+  deriving BEq
+
+def coreFinZero : Fin 2 := Fin.mk 0 (Nat.le.step Nat.le.refl)
+def coreFinOne : Fin 2 := Fin.mk 1 Nat.le.refl
+def coreFinOneThree : Fin 3 := Fin.mk 1 (Nat.le.step Nat.le.refl)
+instance coreFinTwoDefault : Inhabited (Fin 2) where
+  default := coreFinOne
+
+def coreDependentLeft : CoreDependentFin := CoreDependentFin.mk 2 coreFinOne
+def coreDependentField : CoreDependentFin := CoreDependentFin.mk 2 coreFinZero
+def coreDependentBound : CoreDependentFin := CoreDependentFin.mk 3 coreFinOneThree
+def coreNatProof : CoreDependentNatProof := CoreDependentNatProof.mk 7 (Eq.refl 7)
+def coreFinProof : CoreDependentFinProof := CoreDependentFinProof.mk coreFinOne (Eq.refl coreFinOne)
+def coreIndependent : CoreIndependentProof CoreUnlawfulAtom True :=
+  CoreIndependentProof.mk (CoreUnlawfulAtom.atom true) True.intro
+def coreFinDefault : CoreFinDefault 2 := Inhabited.default
+
+theorem coreFinBEqSame : (coreFinOne == coreFinOne) = true := by rfl
+theorem coreFinBEqDifferent : (coreFinOne == coreFinZero) = false := by rfl
+theorem coreFinBEqProofIrrelevance (first second : Nat.lt 1 2) :
+    ((Fin.mk 1 first : Fin 2) == Fin.mk 1 second) = true := by rfl
+theorem coreFinDecEqProofIrrelevance (first second : Nat.lt 1 2) :
+    Decidable.decide (self := decEq (Fin.mk 1 first : Fin 2) (Fin.mk 1 second)) = true := by rfl
+theorem coreFinBEqSound (n : Nat) (left right : Fin n)
+    (same : (left == right) = true) : left = right := LawfulBEq.eq_of_beq same
+
+theorem coreDependentBEqSame : (coreDependentLeft == coreDependentLeft) = true := by rfl
+theorem coreDependentBEqField : (coreDependentLeft == coreDependentField) = false := by rfl
+theorem coreDependentBEqBound : (coreDependentLeft == coreDependentBound) = false := by rfl
+theorem coreDependentDecEqSame :
+    Decidable.decide (self := decEq coreDependentLeft coreDependentLeft) = true := by rfl
+theorem coreDependentDecEqField :
+    Decidable.decide (self := decEq coreDependentLeft coreDependentField) = false := by rfl
+theorem coreDependentDecEqBound :
+    Decidable.decide (self := decEq coreDependentLeft coreDependentBound) = false := by rfl
+theorem coreNatProofBEq : (coreNatProof == coreNatProof) = true := by rfl
+theorem coreFinProofBEq : (coreFinProof == coreFinProof) = true := by rfl
+theorem coreFinProofDecEq :
+    Decidable.decide (self := decEq coreFinProof coreFinProof) = true := by rfl
+theorem coreIndependentUsesActualBEq : (coreIndependent == coreIndependent) = false := by rfl
+theorem coreFinDefaultUsesDictionary : Fin.val (CoreFinDefault.value coreFinDefault) = 1 := by rfl
+theorem coreFinRepr : reprStr coreFinOne = "1" := by rfl
+theorem coreDependentRepr : reprStr coreDependentLeft = "{ n := 2, value := 1 }" := by rfl
+theorem coreNatProofRepr : reprStr coreNatProof = "{ value := 7, proof := _ }" := by rfl
+theorem coreDependentHash :
+    hash coreDependentLeft = mixHash (mixHash 0 (hash (2 : Nat))) (hash coreFinOne) := by rfl
+theorem coreNatProofHash :
+    hash coreNatProof = mixHash (mixHash 0 (hash (7 : Nat))) 0 := by rfl
+
+def m3dependentFin (flag : Bool) : UInt64 :=
+  let chosen := if flag then coreFinOne else coreFinZero
+  let current := CoreDependentFin.mk 2 chosen
+  let proofCurrent := CoreDependentFinProof.mk chosen (Eq.refl chosen)
+  UInt64.ofNat (
+    (if coreFinOne == chosen then 1 else 0) +
+    (if Decidable.decide (self := decEq coreFinOne chosen) then 2 else 0) +
+    (if coreDependentLeft == current then 4 else 0) +
+    (if Decidable.decide (self := decEq coreDependentLeft current) then 8 else 0) +
+    (if coreDependentLeft == coreDependentBound then 16 else 0) +
+    (if Decidable.decide (self := decEq coreDependentLeft coreDependentBound) then 32 else 0) +
+    (if coreNatProof == coreNatProof then 64 else 0) +
+    (if coreFinProof == proofCurrent then 128 else 0) +
+    (if Decidable.decide (self := decEq coreFinProof proofCurrent) then 256 else 0) +
+    (if coreIndependent == coreIndependent then 512 else 0) +
+    (if reprStr coreDependentLeft == "{ n := 2, value := 1 }" then 1024 else 0) +
+    (if hash current == mixHash (mixHash 0 (hash (2 : Nat))) (hash chosen) then 2048 else 0) +
+    (if Fin.val (CoreFinDefault.value coreFinDefault) == 1 then 4096 else 0) +
+    (if reprStr chosen == (if flag then "1" else "0") then 8192 else 0) +
+    (if reprStr coreNatProof == "{ value := 7, proof := _ }" then 16384 else 0) +
+    (if hash coreNatProof == mixHash (mixHash 0 (hash (7 : Nat))) 0 then 32768 else 0))
+
+run_cmd do
+  for name in [``CoreDependentFin, ``CoreDependentNatProof, ``CoreDependentFinProof] do
+    let info ← Lean.getConstInfoInduct name
+    unless info.numParams == 0 && info.numIndices == 0 do
+      throwError "dependent structure unexpectedly acquired parameters or indices: {name}"
+
+private def expectNativeDerivingRequirementRefusal (marker : String) (command : Lean.Syntax) :
+    Lean.Elab.Command.CommandElabM Unit := do
+  let saved ← get
+  let targeted ← try
+    modify fun (state : Lean.Elab.Command.State) =>
+      { state with messages := Lean.MessageLog.empty, snapshotTasks := #[] }
+    let messages ← Lean.Elab.Tactic.GuardMsgs.runAndCollectMessages command
+    let errors := messages.toList.filter fun message => message.severity == .error
+    let mut found := false
+    for message in errors do
+      let content ← message.data.toString
+      if ["heartbeat", "recursion depth", "maximum recursion", "timeout"].any
+          (fun word => (content.splitOn word).length > 1) then
+        throwError "native deriving requirement check exhausted resources: {content}"
+      if (content.splitOn marker).length > 1 then
+        found := true
+    pure found
+  finally
+    set saved
+  unless targeted do
+    throwError "native deriving did not retain the expected {marker} requirement"
+
+run_cmd do
+  let command ← `(command| structure CoreMissingGenericProofLaw (A : Type) where
+    value : A
+    proof : value = value
+    deriving BEq)
+  expectNativeDerivingRequirementRefusal "LawfulBEq" command
+
+run_cmd do
+  let command ← `(command| structure CoreMissingConcreteProofLaw where
+    value : CoreUnlawfulAtom
+    proof : value = value
+    deriving BEq)
+  expectNativeDerivingRequirementRefusal "LawfulBEq" command
+
+run_cmd do
+  let command ← `(command| structure CoreMissingFinDefault where
+    value : Fin 0
+    deriving Inhabited)
+  expectNativeDerivingRequirementRefusal "Inhabited" command
+
 end CoreM3MatchOracle
 
 namespace CoreM3Matches
@@ -901,10 +1047,10 @@ private def matchIndexedPsSource : String :=
   "inductive MatchIndexed: Bool -> Type where {\n  | yes(value: Nat): MatchIndexed(true)\n  | no(value: Nat): MatchIndexed(false)\n}\n\nfunction matchIndexMake(a: Bool): MatchIndexed(a) :=\n  match a with {\n  | true => MatchIndexed.yes(53)\n  | false => MatchIndexed.no(59)\n  }\n\nfunction matchIndexBoolEqMark(a: Bool, b: Bool, proof: a = b): Nat := 0\n\nfunction matchIndexEqMark(a: Bool, original: MatchIndexed(a), current: MatchIndexed(a), proof: original = current): Nat := 0\n\nfunction matchIndexHEqMark(a: Bool, original: MatchIndexed(a), b: Bool, current: MatchIndexed(b), proof: HEq(original, current)): Nat := 0\n\nfunction matchComputedLaterFalse(a: Bool): Nat :=\n  match (generalizing := false) ha: a, hv: matchIndexMake(a) with {\n  | true, MatchIndexed.yes n =>\n    n + matchIndexBoolEqMark(a, true, ha) +\n      matchIndexHEqMark(a, matchIndexMake(a), true, MatchIndexed.yes(n), hv)\n  | false, MatchIndexed.no n =>\n    n + matchIndexBoolEqMark(a, false, ha) +\n      matchIndexHEqMark(a, matchIndexMake(a), false, MatchIndexed.no(n), hv)\n  }\n\ntheorem matchComputedLaterFalseTrue: matchComputedLaterFalse(true) = 53 := Eq.refl(53)\ntheorem matchComputedLaterFalseFalse: matchComputedLaterFalse(false) = 59 := Eq.refl(59)\n\nfunction matchIndexedNamed(a: Bool, value: MatchIndexed(a)): Nat :=\n  match (generalizing := false) h: value with {\n  | MatchIndexed.yes n =>\n    n + matchIndexHEqMark(a, value, true, MatchIndexed.yes(n), h)\n  | MatchIndexed.no n =>\n    n + matchIndexHEqMark(a, value, false, MatchIndexed.no(n), h)\n  }\n\ntheorem matchIndexedNamedTrue:\n  matchIndexedNamed(true, MatchIndexed.yes(61)) = 61 := Eq.refl(61)\ntheorem matchIndexedNamedFalse:\n  matchIndexedNamed(false, MatchIndexed.no(67)) = 67 := Eq.refl(67)\n\nfunction matchIndexedNamedEq(value: MatchIndexed(true)): Nat :=\n  match h: value with {\n  | MatchIndexed.yes n => n + matchIndexEqMark(true, value, MatchIndexed.yes(n), h)\n  }\n\ntheorem matchIndexedNamedEqObserved:\n  matchIndexedNamedEq(MatchIndexed.yes(71)) = 71 := Eq.refl(71)\n\nfunction matchNestedIndexed(a: Bool, value: MatchIndexed(a), handle: value = value -> Nat): Nat :=\n  match a with {\n  | true =>\n    match value with {\n    | MatchIndexed.yes n => handle(Eq.refl(MatchIndexed.yes(n)))\n    }\n  | false =>\n    match value with {\n    | MatchIndexed.no n => handle(Eq.refl(MatchIndexed.no(n)))\n    }\n  }\n\ntheorem matchNestedIndexedTrue:\n  matchNestedIndexed(true, MatchIndexed.yes(2),\n    fun (_: MatchIndexed.yes(2) = MatchIndexed.yes(2)) => 73) = 73 := Eq.refl(73)\ntheorem matchNestedIndexedFalse:\n  matchNestedIndexed(false, MatchIndexed.no(3),\n    fun (_: MatchIndexed.no(3) = MatchIndexed.no(3)) => 79) = 79 := Eq.refl(79)\n\ninductive MatchRowPack where {\n  | pack(index: Bool, value: MatchIndexed(index))\n}\n\nfunction matchRowDependent(packed: MatchRowPack): Nat :=\n  match packed with {\n  | MatchRowPack.pack _ value =>\n    let same: value = value := Eq.refl(value)\n    83\n  }\n\nfunction matchRowNested(packed: Option(MatchRowPack)): Nat :=\n  match packed with {\n  | Option.none => 0\n  | Option.some (MatchRowPack.pack _ value) =>\n    let same: value = value := Eq.refl(value)\n    89\n  }\n\ntheorem matchRowDependentObserved:\n    matchRowDependent(MatchRowPack.pack(true, MatchIndexed.yes(2))) = 83 := Eq.refl(83)\ntheorem matchRowNestedObserved:\n    matchRowNested(Option.some(MatchRowPack.pack(false, MatchIndexed.no(3)))) = 89 := Eq.refl(89)\n"
 
 private def structuralLeanSource : String :=
-  "def namedCount (n : Nat) : Nat :=\n  match h : n with\n  | 0 => let witness : n = 0 := h; 0\n  | Nat.succ k => let witness : n = Nat.succ k := h; Nat.succ (namedCount k)\ndef namedResult (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) => match (generalizing := false) h : n with\n    | 0 => bias\n    | Nat.succ k => namedResult k (Nat.succ bias)\ndef namedRows (A : Type) (rows : List (List A)) : Nat :=\n  match h : rows with\n  | .nil => 0\n  | .cons row rest => Nat.succ (namedRows A rest)\ndef namedComputed (F : Nat → Type) (i : Nat) (values : List (F i)) : Nat :=\n  match (generalizing := true) h : values with\n  | .nil => 0\n  | .cons value rest => Nat.succ (namedComputed F i rest)\ninductive NamedNest (A : Type) where\n  | leaf (value : A)\n  | direct (child : NamedNest A)\n  | many (children : List (NamedNest A))\n  | deep (children : List (List (NamedNest A)))\nmutual\ndef namedTree (A : Type) (tree : NamedNest A) : Nat :=\n  match h : tree with\n  | .leaf value => 1\n  | .direct child => Nat.succ (namedTree A child)\n  | .many children => Nat.succ (namedForest A children)\n  | .deep children => Nat.succ (namedDeep A children)\ndef namedForest (A : Type) (children : List (NamedNest A)) : Nat :=\n  match h : children with\n  | .nil => 0\n  | .cons child rest => namedTree A child + namedForest A rest\ndef namedDeep (A : Type) (children : List (List (NamedNest A))) : Nat :=\n  match h : children with\n  | .nil => 0\n  | .cons row rest => namedForest A row + namedDeep A rest\nend\ndef m3structural (flag : Bool) : UInt64 :=\n  let amount := if flag then 3 else 5\n  let rows := List.cons (List.cons amount List.nil) (List.cons List.nil List.nil)\n  let leaf := NamedNest.leaf amount\n  let trees := List.cons leaf (List.cons (NamedNest.direct leaf) List.nil)\n  let tree := if flag then\n    NamedNest.deep (List.cons trees (List.cons (List.cons (NamedNest.direct leaf) List.nil) List.nil))\n    else NamedNest.many (List.cons (NamedNest.deep (List.cons trees List.nil)) (List.cons (NamedNest.direct leaf) List.nil))\n  UInt64.ofNat (namedCount amount + 10 * namedResult amount 4 +\n    100 * namedRows Nat rows +\n    1000 * namedComputed (fun (_ : Nat) => Nat) amount (List.cons amount List.nil) +\n    10000 * namedTree Nat tree)\ntheorem namedResultObserved : namedResult 3 5 = 8 := by rfl\ntheorem namedResultSource (n : Nat) :\n    namedResult n = (fun (bias : Nat) => match (generalizing := false) h : n with\n      | 0 => bias\n      | Nat.succ k => namedResult k (Nat.succ bias)) :=\n  by exact namedResult.eq_def n\n\ndef constCount : Nat → Nat := fun n =>\n  match n with\n  | 0 => 0\n  | Nat.succ k => Nat.succ (constCount k)\n\ntheorem constCountObserved : constCount 3 = 3 := Eq.refl 3\n\ntheorem constCountSourceEquation :\n    constCount = (fun n => match n with\n      | 0 => 0\n      | Nat.succ k => Nat.succ (constCount k)) := constCount.eq_def\n\ndef ConstCountType : Type := Nat → Nat\n\ndef constAliasCount : ConstCountType := fun n =>\n  match n with\n  | 0 => 0\n  | Nat.succ k => Nat.succ (constAliasCount k)\n\ntheorem constAliasCountObserved : constAliasCount 3 = 3 := Eq.refl 3\n\ntheorem constAliasCountSourceEquation :\n    constAliasCount = (fun n => match n with\n      | 0 => 0\n      | Nat.succ k => Nat.succ (constAliasCount k)) := constAliasCount.eq_def\n\ndef m3const (flag : Bool) : UInt64 :=\n  let n := if flag then 3 else 5\n  UInt64.ofNat (constCount n + 10 * constAliasCount (Nat.succ n))\n"
+  "def namedCount (n : Nat) : Nat :=\n  match h : n with\n  | 0 => let witness : n = 0 := h; 0\n  | Nat.succ k => let witness : n = Nat.succ k := h; Nat.succ (namedCount k)\ndef namedResult (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) => match (generalizing := false) h : n with\n    | 0 => bias\n    | Nat.succ k => namedResult k (Nat.succ bias)\ndef namedRows (A : Type) (rows : List (List A)) : Nat :=\n  match h : rows with\n  | .nil => 0\n  | .cons row rest => Nat.succ (namedRows A rest)\ndef namedComputed (F : Nat → Type) (i : Nat) (values : List (F i)) : Nat :=\n  match (generalizing := true) h : values with\n  | .nil => 0\n  | .cons value rest => Nat.succ (namedComputed F i rest)\ninductive NamedNest (A : Type) where\n  | leaf (value : A)\n  | direct (child : NamedNest A)\n  | many (children : List (NamedNest A))\n  | deep (children : List (List (NamedNest A)))\nmutual\ndef namedTree (A : Type) (tree : NamedNest A) : Nat :=\n  match h : tree with\n  | .leaf value => 1\n  | .direct child => Nat.succ (namedTree A child)\n  | .many children => Nat.succ (namedForest A children)\n  | .deep children => Nat.succ (namedDeep A children)\ndef namedForest (A : Type) (children : List (NamedNest A)) : Nat :=\n  match h : children with\n  | .nil => 0\n  | .cons child rest => namedTree A child + namedForest A rest\ndef namedDeep (A : Type) (children : List (List (NamedNest A))) : Nat :=\n  match h : children with\n  | .nil => 0\n  | .cons row rest => namedForest A row + namedDeep A rest\nend\ndef m3structural (flag : Bool) : UInt64 :=\n  let amount := if flag then 3 else 5\n  let rows := List.cons (List.cons amount List.nil) (List.cons List.nil List.nil)\n  let leaf := NamedNest.leaf amount\n  let trees := List.cons leaf (List.cons (NamedNest.direct leaf) List.nil)\n  let tree := if flag then\n    NamedNest.deep (List.cons trees (List.cons (List.cons (NamedNest.direct leaf) List.nil) List.nil))\n    else NamedNest.many (List.cons (NamedNest.deep (List.cons trees List.nil)) (List.cons (NamedNest.direct leaf) List.nil))\n  UInt64.ofNat (namedCount amount + 10 * namedResult amount 4 +\n    100 * namedRows Nat rows +\n    1000 * namedComputed (fun (_ : Nat) => Nat) amount (List.cons amount List.nil) +\n    10000 * namedTree Nat tree)\ntheorem namedResultObserved : namedResult 3 5 = 8 := by rfl\ntheorem namedResultSource (n bias : Nat) :\n    namedResult n bias = (match (generalizing := false) h : n with\n      | 0 => bias\n      | Nat.succ k => namedResult k (Nat.succ bias)) :=\n  by exact namedResult.eq_def n bias\n\ndef constCount : Nat → Nat := fun n =>\n  match n with\n  | 0 => 0\n  | Nat.succ k => Nat.succ (constCount k)\n\ntheorem constCountObserved : constCount 3 = 3 := Eq.refl 3\n\ntheorem constCountSourceEquation (n : Nat) :\n    constCount n = (match n with\n      | 0 => 0\n      | Nat.succ k => Nat.succ (constCount k)) := constCount.eq_def n\n\ndef ConstCountType : Type := Nat → Nat\n\ndef constAliasCount : ConstCountType := fun n =>\n  match n with\n  | 0 => 0\n  | Nat.succ k => Nat.succ (constAliasCount k)\n\ntheorem constAliasCountObserved : constAliasCount 3 = 3 := Eq.refl 3\n\ntheorem constAliasCountSourceEquation (n : Nat) :\n    constAliasCount n = (match n with\n      | 0 => 0\n      | Nat.succ k => Nat.succ (constAliasCount k)) := constAliasCount.eq_def n\n\ndef m3const (flag : Bool) : UInt64 :=\n  let n := if flag then 3 else 5\n  UInt64.ofNat (constCount n + 10 * constAliasCount (Nat.succ n))\n"
 
 private def structuralPsSource : String :=
-  "function namedCount(n: Nat): Nat := match h : n with {\n  | 0 => let witness: n = 0 := h\n    0\n  | Nat.succ k => let witness: n = Nat.succ(k) := h\n    Nat.succ(namedCount(k))\n}\nfunction namedResult(n: Nat): Nat -> Nat := fun (bias: Nat) => match (generalizing := false) h : n with {\n  | 0 => bias\n  | Nat.succ k => namedResult(k, Nat.succ(bias))\n}\nfunction namedRows(A: Type, rows: List(List(A))): Nat := match h : rows with {\n  | .nil => 0\n  | .cons row rest => Nat.succ(namedRows(A, rest))\n}\nfunction namedComputed(F: Nat -> Type, i: Nat, values: List(F(i))): Nat := match (generalizing := true) h : values with {\n  | .nil => 0\n  | .cons value rest => Nat.succ(namedComputed(F, i, rest))\n}\ninductive NamedNest(A: Type) where {\n  | leaf(value: A)\n  | direct(child: NamedNest(A))\n  | many(children: List(NamedNest(A)))\n  | deep(children: List(List(NamedNest(A))))\n}\nmutual\nfunction namedTree(A: Type, tree: NamedNest(A)): Nat := match h : tree with {\n  | .leaf value => 1\n  | .direct child => Nat.succ(namedTree(A, child))\n  | .many children => Nat.succ(namedForest(A, children))\n  | .deep children => Nat.succ(namedDeep(A, children))\n}\nfunction namedForest(A: Type, children: List(NamedNest(A))): Nat := match h : children with {\n  | .nil => 0\n  | .cons child rest => namedTree(A, child) + namedForest(A, rest)\n}\nfunction namedDeep(A: Type, children: List(List(NamedNest(A)))): Nat := match h : children with {\n  | .nil => 0\n  | .cons row rest => namedForest(A, row) + namedDeep(A, rest)\n}\nend\nfunction m3structural(flag: Bool): UInt64 :=\n  let amount := if (flag) { 3 } else { 5 }\n  let rows := List.cons(List.cons(amount, List.nil), List.cons(List.nil, List.nil))\n  let leaf := NamedNest.leaf(amount)\n  let trees := List.cons(leaf, List.cons(NamedNest.direct(leaf), List.nil))\n  let tree := if (flag) {\n    NamedNest.deep(List.cons(trees, List.cons(List.cons(NamedNest.direct(leaf), List.nil), List.nil)))\n  } else {\n    NamedNest.many(List.cons(NamedNest.deep(List.cons(trees, List.nil)), List.cons(NamedNest.direct(leaf), List.nil)))\n  }\n  UInt64.ofNat(namedCount(amount) + 10 * namedResult(amount, 4) +\n    100 * namedRows(Nat, rows) +\n    1000 * namedComputed(fun (_: Nat) => Nat, amount, List.cons(amount, List.nil)) +\n    10000 * namedTree(Nat, tree))\ntheorem namedResultObserved: namedResult(3, 5) = 8 := by { rfl }\ntheorem namedResultSource(n: Nat):\n    namedResult(n) = (fun (bias: Nat) => match (generalizing := false) h : n with {\n      | 0 => bias\n      | Nat.succ k => namedResult(k, Nat.succ(bias))\n    }) := by { exact namedResult.eq_def(n) }\n\nconst constCount: Nat -> Nat := fun (n: Nat) =>\n  match n with {\n  | 0 => 0\n  | Nat.succ k => Nat.succ(constCount(k))\n  }\n\ntheorem constCountObserved: constCount(3) = 3 := Eq.refl(3)\n\ntheorem constCountSourceEquation:\n    constCount = (fun (n: Nat) => match n with {\n      | 0 => 0\n      | Nat.succ k => Nat.succ(constCount(k))\n    }) := constCount.eq_def\n\nconst ConstCountType: Type := Nat -> Nat\n\nconst constAliasCount: ConstCountType := fun (n: Nat) =>\n  match n with {\n  | 0 => 0\n  | Nat.succ k => Nat.succ(constAliasCount(k))\n  }\n\ntheorem constAliasCountObserved: constAliasCount(3) = 3 := Eq.refl(3)\n\ntheorem constAliasCountSourceEquation:\n    constAliasCount = (fun (n: Nat) => match n with {\n      | 0 => 0\n      | Nat.succ k => Nat.succ(constAliasCount(k))\n    }) := constAliasCount.eq_def\n\nfunction m3const(flag: Bool): UInt64 :=\n  let n := if (flag) { 3 } else { 5 }\n  UInt64.ofNat(constCount(n) + 10 * constAliasCount(Nat.succ(n)))\n"
+  "function namedCount(n: Nat): Nat := match h : n with {\n  | 0 => let witness: n = 0 := h\n    0\n  | Nat.succ k => let witness: n = Nat.succ(k) := h\n    Nat.succ(namedCount(k))\n}\nfunction namedResult(n: Nat): Nat -> Nat := fun (bias: Nat) => match (generalizing := false) h : n with {\n  | 0 => bias\n  | Nat.succ k => namedResult(k, Nat.succ(bias))\n}\nfunction namedRows(A: Type, rows: List(List(A))): Nat := match h : rows with {\n  | .nil => 0\n  | .cons row rest => Nat.succ(namedRows(A, rest))\n}\nfunction namedComputed(F: Nat -> Type, i: Nat, values: List(F(i))): Nat := match (generalizing := true) h : values with {\n  | .nil => 0\n  | .cons value rest => Nat.succ(namedComputed(F, i, rest))\n}\ninductive NamedNest(A: Type) where {\n  | leaf(value: A)\n  | direct(child: NamedNest(A))\n  | many(children: List(NamedNest(A)))\n  | deep(children: List(List(NamedNest(A))))\n}\nmutual\nfunction namedTree(A: Type, tree: NamedNest(A)): Nat := match h : tree with {\n  | .leaf value => 1\n  | .direct child => Nat.succ(namedTree(A, child))\n  | .many children => Nat.succ(namedForest(A, children))\n  | .deep children => Nat.succ(namedDeep(A, children))\n}\nfunction namedForest(A: Type, children: List(NamedNest(A))): Nat := match h : children with {\n  | .nil => 0\n  | .cons child rest => namedTree(A, child) + namedForest(A, rest)\n}\nfunction namedDeep(A: Type, children: List(List(NamedNest(A)))): Nat := match h : children with {\n  | .nil => 0\n  | .cons row rest => namedForest(A, row) + namedDeep(A, rest)\n}\nend\nfunction m3structural(flag: Bool): UInt64 :=\n  let amount := if (flag) { 3 } else { 5 }\n  let rows := List.cons(List.cons(amount, List.nil), List.cons(List.nil, List.nil))\n  let leaf := NamedNest.leaf(amount)\n  let trees := List.cons(leaf, List.cons(NamedNest.direct(leaf), List.nil))\n  let tree := if (flag) {\n    NamedNest.deep(List.cons(trees, List.cons(List.cons(NamedNest.direct(leaf), List.nil), List.nil)))\n  } else {\n    NamedNest.many(List.cons(NamedNest.deep(List.cons(trees, List.nil)), List.cons(NamedNest.direct(leaf), List.nil)))\n  }\n  UInt64.ofNat(namedCount(amount) + 10 * namedResult(amount, 4) +\n    100 * namedRows(Nat, rows) +\n    1000 * namedComputed(fun (_: Nat) => Nat, amount, List.cons(amount, List.nil)) +\n    10000 * namedTree(Nat, tree))\ntheorem namedResultObserved: namedResult(3, 5) = 8 := by { rfl }\ntheorem namedResultSource(n: Nat, bias: Nat):\n    namedResult(n, bias) = (match (generalizing := false) h : n with {\n      | 0 => bias\n      | Nat.succ k => namedResult(k, Nat.succ(bias))\n    }) := by { exact namedResult.eq_def(n, bias) }\n\nconst constCount: Nat -> Nat := fun (n: Nat) =>\n  match n with {\n  | 0 => 0\n  | Nat.succ k => Nat.succ(constCount(k))\n  }\n\ntheorem constCountObserved: constCount(3) = 3 := Eq.refl(3)\n\ntheorem constCountSourceEquation(n: Nat):\n    constCount(n) = (match n with {\n      | 0 => 0\n      | Nat.succ k => Nat.succ(constCount(k))\n    }) := constCount.eq_def(n)\n\nconst ConstCountType: Type := Nat -> Nat\n\nconst constAliasCount: ConstCountType := fun (n: Nat) =>\n  match n with {\n  | 0 => 0\n  | Nat.succ k => Nat.succ(constAliasCount(k))\n  }\n\ntheorem constAliasCountObserved: constAliasCount(3) = 3 := Eq.refl(3)\n\ntheorem constAliasCountSourceEquation(n: Nat):\n    constAliasCount(n) = (match n with {\n      | 0 => 0\n      | Nat.succ k => Nat.succ(constAliasCount(k))\n    }) := constAliasCount.eq_def(n)\n\nfunction m3const(flag: Bool): UInt64 :=\n  let n := if (flag) { 3 } else { 5 }\n  UInt64.ofNat(constCount(n) + 10 * constAliasCount(Nat.succ(n)))\n"
 
 private def inlineLeanSource : String :=
   "inductive InlineTree where\n  | node (children : List InlineTree)\ndef inlinePlain (tree : InlineTree) : Bool :=\n  match tree with\n  | .node [] => true\n  | .node [t] => inlinePlain t\n  | .node _ => false\ndef inlineNamed (tree : InlineTree) : Bool :=\n  match h : tree with\n  | .node [] => let witness : tree = InlineTree.node [] := h; true\n  | .node [t] => let witness : tree = InlineTree.node [t] := h; inlineNamed t\n  | .node _ => false\ndef inlineDeep (tree : InlineTree) : Nat :=\n  match h : tree with\n  | .node [.node [t]] => Nat.succ (inlineDeep t)\n  | .node _ => 0\ndef inlineResult (tree : InlineTree) : Nat → Nat :=\n  fun (bias : Nat) => match (generalizing := false) h : tree with\n    | .node [] => bias\n    | .node [t] => inlineResult t (Nat.succ bias)\n    | .node _ => bias + 10\nmutual\ndef inlineEven (tree : InlineTree) : Bool :=\n  match h : tree with\n  | .node [] => true\n  | .node [t] => inlineOdd t\n  | .node _ => false\ndef inlineOdd (tree : InlineTree) : Bool :=\n  match h : tree with\n  | .node [] => false\n  | .node [t] => inlineEven t\n  | .node _ => false\nend\ninductive InlineBranch where\n  | node (children : Bool → List InlineBranch)\nmutual\ndef inlineBranch (tree : InlineBranch) : Nat :=\n  match h : tree with\n  | .node children => inlineBranchChildren (children true)\ndef inlineBranchChildren (trees : List InlineBranch) : Nat :=\n  match hc : trees with\n  | [] => 0\n  | [t] => Nat.succ (inlineBranch t)\n  | _ => 0\nend\ninductive InlineIndexed : Nat → Type where\n  | node (children : List (InlineIndexed 0)) : InlineIndexed 0\ndef inlineIndexed (n : Nat) (tree : InlineIndexed n) : Nat :=\n  match h : tree with\n  | .node [] => 0\n  | .node [t] => Nat.succ (inlineIndexed 0 t)\n  | .node _ => 0\ndef m3inline (flag : Bool) : UInt64 :=\n  let leaf := InlineTree.node []\n  let link := InlineTree.node [leaf]\n  let chain := InlineTree.node [link]\n  let wide := InlineTree.node [leaf, leaf]\n  let tree := if flag then chain else wide\n  let branchEmpty := InlineBranch.node (fun (_ : Bool) => [])\n  let branchLink := InlineBranch.node (fun (_ : Bool) => [branchEmpty])\n  let branchChain := InlineBranch.node (fun (_ : Bool) => [branchLink])\n  let branchInput := if flag then branchLink else branchChain\n  let ix0 := InlineIndexed.node []\n  let ix1 := InlineIndexed.node [ix0]\n  let ix2 := InlineIndexed.node [ix1]\n  let indexInput := if flag then ix1 else ix2\n  let mutualInput := if flag then chain else link\n  UInt64.ofNat (\n    (if inlinePlain tree then 1 else 0) +\n    10 * (if inlineNamed tree then 1 else 0) +\n    100 * inlineResult tree 4 +\n    10000 * inlineDeep tree +\n    100000 * inlineBranch branchInput +\n    1000000 * inlineIndexed 0 indexInput +\n    10000000 * (if inlineEven mutualInput then 1 else 0) +\n    100000000 * (if inlineOdd mutualInput then 1 else 0))\ntheorem inlineResultObserved :\n    inlineResult (InlineTree.node [InlineTree.node []]) 5 = 6 := by rfl\n"
@@ -1177,6 +1323,13 @@ private def checkPair (label leanText psText : String) :
   if label == "universes" then
     checkUniverseMetadata left.environment
     checkUniverseMetadata right.environment
+  if label == "dependentFin" then
+    for result in [left, right] do
+      for name in ["CoreDependentFin", "CoreDependentNatProof", "CoreDependentFinProof"] do
+        let some info := psEnvironmentFindInductive result.environment (psRootName name)
+          | throw (IO.userError ("CORE-MATCHES: missing dependent structure " ++ name))
+        ensure (info.numParams == 0 && info.numIndices == 0)
+          ("CORE-MATCHES: dependency handling incorrectly required a family index: " ++ name)
   elaborated.mapM fun value => do
     let output ← fromExcept ((psCompilerEnginePrepareElaboratedWithOutput value).mapError psCompilerPscv0Error)
     let _ ← fromExcept ((← PsKernelLean.admitCanonicalAdmissions output.admissions).mapError (·.message))
@@ -1273,12 +1426,143 @@ private def checkRefusals : IO Unit := do
 private def indexedDerivingLeanSource : String :=
   "universe indexedU\n\ninductive IndexedPayload (A : Type indexedU) : Nat → Type indexedU where\n  | left (index : Nat) (value : A) : IndexedPayload A index\n  | right (index : Nat) (value : A) : IndexedPayload A index\n  | next (index : Nat) (value : A) (child : IndexedPayload A index) :\n      IndexedPayload A (Nat.succ index)\n  deriving BEq, DecidableEq\n\ndef indexedOriginal : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 true (IndexedPayload.left 0 false)\ndef indexedFieldChanged : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 false (IndexedPayload.left 0 false)\ndef indexedChildChanged : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 true (IndexedPayload.left 0 true)\ndef indexedCtorChanged : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 true (IndexedPayload.right 0 false)\ndef indexedMajorChanged : IndexedPayload Bool 1 := IndexedPayload.right 1 true\n\ntheorem indexedBEqSame : (indexedOriginal == indexedOriginal) = true := by rfl\ntheorem indexedBEqField : (indexedOriginal == indexedFieldChanged) = false := by rfl\ntheorem indexedBEqChild : (indexedOriginal == indexedChildChanged) = false := by rfl\ntheorem indexedBEqCtor : (indexedOriginal == indexedCtorChanged) = false := by rfl\ntheorem indexedBEqMajor : (indexedOriginal == indexedMajorChanged) = false := by rfl\ntheorem indexedDecEqSame :\n    Decidable.decide (self := decEq indexedOriginal indexedOriginal) = true := by rfl\ntheorem indexedDecEqField :\n    Decidable.decide (self := decEq indexedOriginal indexedFieldChanged) = false := by rfl\ntheorem indexedDecEqChild :\n    Decidable.decide (self := decEq indexedOriginal indexedChildChanged) = false := by rfl\ntheorem indexedDecEqCtor :\n    Decidable.decide (self := decEq indexedOriginal indexedCtorChanged) = false := by rfl\ntheorem indexedDecEqMajor :\n    Decidable.decide (self := decEq indexedOriginal indexedMajorChanged) = false := by rfl\n\ninductive IndexedAtom where\n  | atom (value : Bool)\ninstance indexedAtomBEq : BEq IndexedAtom where\n  beq (_left : IndexedAtom) (_right : IndexedAtom) : Bool := false\ntheorem indexedBEqUsesActualDictionary :\n    (IndexedPayload.left 0 (IndexedAtom.atom true) ==\n      IndexedPayload.left 0 (IndexedAtom.atom true)) = false := by rfl\n\ninductive IndexedErasedDependency : Nat → Type where\n  | intro (value : Nat) :\n      IndexedErasedDependency ((fun (_ : Nat) => 0) value)\n  deriving BEq, DecidableEq\ntheorem indexedBetaFieldBEq :\n    (IndexedErasedDependency.intro 1 == IndexedErasedDependency.intro 2) = false := by rfl\ntheorem indexedBetaFieldDecEq :\n    Decidable.decide (self := decEq (IndexedErasedDependency.intro 1)\n      (IndexedErasedDependency.intro 2)) = false := by rfl\n\ninductive IndexedDependent : Nat → Type where\n  | wrap (index : Nat) (child : IndexedPayload Bool index) : IndexedDependent 0\n  deriving DecidableEq\ntheorem indexedDependentSame :\n    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)\n      (IndexedDependent.wrap 1 indexedOriginal)) = true := by rfl\ntheorem indexedDependentChild :\n    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)\n      (IndexedDependent.wrap 1 indexedChildChanged)) = false := by rfl\ntheorem indexedDependentIndex :\n    Decidable.decide (self := decEq\n      (IndexedDependent.wrap 0 (IndexedPayload.left 0 true))\n      (IndexedDependent.wrap 1 indexedOriginal)) = false := by rfl\n\ndef m3indexedDeriving (flag : Bool) : UInt64 :=\n  let chosen := if flag then indexedOriginal else indexedFieldChanged\n  UInt64.ofNat (\n    (if indexedOriginal == chosen then 1 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal chosen) then 2 else 0) +\n    (if indexedOriginal == indexedChildChanged then 4 else 0) +\n    (if indexedOriginal == indexedCtorChanged then 8 else 0) +\n    (if indexedOriginal == indexedMajorChanged then 16 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal indexedChildChanged) then 32 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal indexedCtorChanged) then 64 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal indexedMajorChanged) then 128 else 0) +\n    (if IndexedPayload.left 0 (IndexedAtom.atom true) == IndexedPayload.left 0 (IndexedAtom.atom true) then 256 else 0) +\n    (if IndexedErasedDependency.intro 1 == IndexedErasedDependency.intro 2 then 512 else 0) +\n    (if Decidable.decide (self := decEq (IndexedErasedDependency.intro 1) (IndexedErasedDependency.intro 2)) then 1024 else 0) +\n    (if Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal) (IndexedDependent.wrap 1 indexedOriginal)) then 2048 else 0) +\n    (if Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal) (IndexedDependent.wrap 1 indexedChildChanged)) then 4096 else 0) +\n    (if Decidable.decide (self := decEq (IndexedDependent.wrap 0 (IndexedPayload.left 0 true)) (IndexedDependent.wrap 1 indexedOriginal)) then 8192 else 0) +\n    (if indexedOriginal == indexedOriginal then 16384 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal indexedOriginal) then 32768 else 0))\n"
 private def indexedDerivingPsSource : String :=
-  "universe indexedU\n\ninductive IndexedPayload(A: Type indexedU): Nat -> Type indexedU where {\n  | left(index: Nat, value: A): IndexedPayload(A, index)\n  | right(index: Nat, value: A): IndexedPayload(A, index)\n  | next(index: Nat, value: A, child: IndexedPayload(A, index)):\n      IndexedPayload(A, Nat.succ(index))\n} deriving BEq, DecidableEq\n\nconst indexedOriginal: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, false))\nconst indexedFieldChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, false, IndexedPayload.left(0, false))\nconst indexedChildChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, true))\nconst indexedCtorChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.right(0, false))\nconst indexedMajorChanged: IndexedPayload(Bool, 1) := IndexedPayload.right(1, true)\n\ntheorem indexedBEqSame: (indexedOriginal == indexedOriginal) = true := by { rfl }\ntheorem indexedBEqField: (indexedOriginal == indexedFieldChanged) = false := by { rfl }\ntheorem indexedBEqChild: (indexedOriginal == indexedChildChanged) = false := by { rfl }\ntheorem indexedBEqCtor: (indexedOriginal == indexedCtorChanged) = false := by { rfl }\ntheorem indexedBEqMajor: (indexedOriginal == indexedMajorChanged) = false := by { rfl }\ntheorem indexedDecEqSame:\n  Decidable.decide(self := decEq(indexedOriginal, indexedOriginal)) = true := by { rfl }\ntheorem indexedDecEqField:\n  Decidable.decide(self := decEq(indexedOriginal, indexedFieldChanged)) = false := by { rfl }\ntheorem indexedDecEqChild:\n  Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged)) = false := by { rfl }\ntheorem indexedDecEqCtor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged)) = false := by { rfl }\ntheorem indexedDecEqMajor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged)) = false := by { rfl }\n\ninductive IndexedAtom where { | atom(value: Bool) }\ninstance indexedAtomBEq: BEq IndexedAtom where {\n  beq(_left: IndexedAtom, _right: IndexedAtom): Bool := false\n}\ntheorem indexedBEqUsesActualDictionary:\n  (IndexedPayload.left(0, IndexedAtom.atom(true)) ==\n    IndexedPayload.left(0, IndexedAtom.atom(true))) = false := by { rfl }\n\ninductive IndexedErasedDependency: Nat -> Type where {\n  | intro(value: Nat): IndexedErasedDependency((fun (_: Nat) => 0)(value))\n} deriving BEq, DecidableEq\ntheorem indexedBetaFieldBEq:\n  (IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2)) = false := by { rfl }\ntheorem indexedBetaFieldDecEq:\n  Decidable.decide(self := decEq(IndexedErasedDependency.intro(1),\n    IndexedErasedDependency.intro(2))) = false := by { rfl }\n\ninductive IndexedDependent: Nat -> Type where {\n  | wrap(index: Nat, child: IndexedPayload(Bool, index)): IndexedDependent(0)\n} deriving DecidableEq\ntheorem indexedDependentSame:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedOriginal))) = true := by { rfl }\ntheorem indexedDependentChild:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedChildChanged))) = false := by { rfl }\ntheorem indexedDependentIndex:\n  Decidable.decide(self := decEq(\n    IndexedDependent.wrap(0, IndexedPayload.left(0, true)),\n    IndexedDependent.wrap(1, indexedOriginal))) = false := by { rfl }\n\nfunction m3indexedDeriving(flag: Bool): UInt64 := {\n  let chosen := if flag then { indexedOriginal } else { indexedFieldChanged }\n  UInt64.ofNat(\n    (if indexedOriginal == chosen then { 1 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, chosen)) then { 2 } else { 0 }) +\n    (if indexedOriginal == indexedChildChanged then { 4 } else { 0 }) +\n    (if indexedOriginal == indexedCtorChanged then { 8 } else { 0 }) +\n    (if indexedOriginal == indexedMajorChanged then { 16 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged)) then { 32 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged)) then { 64 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged)) then { 128 } else { 0 }) +\n    (if IndexedPayload.left(0, IndexedAtom.atom(true)) == IndexedPayload.left(0, IndexedAtom.atom(true)) then { 256 } else { 0 }) +\n    (if IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2) then { 512 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedErasedDependency.intro(1), IndexedErasedDependency.intro(2))) then { 1024 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal), IndexedDependent.wrap(1, indexedOriginal))) then { 2048 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal), IndexedDependent.wrap(1, indexedChildChanged))) then { 4096 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDependent.wrap(0, IndexedPayload.left(0, true)), IndexedDependent.wrap(1, indexedOriginal))) then { 8192 } else { 0 }) +\n    (if indexedOriginal == indexedOriginal then { 16384 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedOriginal)) then { 32768 } else { 0 }))\n}\n"
+  "universe indexedU\n\ninductive IndexedPayload(A: Type indexedU): Nat -> Type indexedU where {\n  | left(index: Nat, value: A): IndexedPayload(A, index)\n  | right(index: Nat, value: A): IndexedPayload(A, index)\n  | next(index: Nat, value: A, child: IndexedPayload(A, index)):\n      IndexedPayload(A, Nat.succ(index))\n} deriving BEq, DecidableEq\n\nconst indexedOriginal: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, false))\nconst indexedFieldChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, false, IndexedPayload.left(0, false))\nconst indexedChildChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, true))\nconst indexedCtorChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.right(0, false))\nconst indexedMajorChanged: IndexedPayload(Bool, 1) := IndexedPayload.right(1, true)\n\ntheorem indexedBEqSame: (indexedOriginal == indexedOriginal) = true := by { rfl }\ntheorem indexedBEqField: (indexedOriginal == indexedFieldChanged) = false := by { rfl }\ntheorem indexedBEqChild: (indexedOriginal == indexedChildChanged) = false := by { rfl }\ntheorem indexedBEqCtor: (indexedOriginal == indexedCtorChanged) = false := by { rfl }\ntheorem indexedBEqMajor: (indexedOriginal == indexedMajorChanged) = false := by { rfl }\ntheorem indexedDecEqSame:\n  Decidable.decide(self := decEq(indexedOriginal, indexedOriginal)) = true := by { rfl }\ntheorem indexedDecEqField:\n  Decidable.decide(self := decEq(indexedOriginal, indexedFieldChanged)) = false := by { rfl }\ntheorem indexedDecEqChild:\n  Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged)) = false := by { rfl }\ntheorem indexedDecEqCtor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged)) = false := by { rfl }\ntheorem indexedDecEqMajor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged)) = false := by { rfl }\n\ninductive IndexedAtom where { | atom(value: Bool) }\ninstance indexedAtomBEq: BEq IndexedAtom where {\n  beq(_left: IndexedAtom, _right: IndexedAtom): Bool := false\n}\ntheorem indexedBEqUsesActualDictionary:\n  (IndexedPayload.left(0, IndexedAtom.atom(true)) ==\n    IndexedPayload.left(0, IndexedAtom.atom(true))) = false := by { rfl }\n\ninductive IndexedErasedDependency: Nat -> Type where {\n  | intro(value: Nat): IndexedErasedDependency((fun (_: Nat) => 0)(value))\n} deriving BEq, DecidableEq\ntheorem indexedBetaFieldBEq:\n  (IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2)) = false := by { rfl }\ntheorem indexedBetaFieldDecEq:\n  Decidable.decide(self := decEq(IndexedErasedDependency.intro(1),\n    IndexedErasedDependency.intro(2))) = false := by { rfl }\n\ninductive IndexedDependent: Nat -> Type where {\n  | wrap(index: Nat, child: IndexedPayload(Bool, index)): IndexedDependent(0)\n} deriving DecidableEq\ntheorem indexedDependentSame:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedOriginal))) = true := by { rfl }\ntheorem indexedDependentChild:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedChildChanged))) = false := by { rfl }\ntheorem indexedDependentIndex:\n  Decidable.decide(self := decEq(\n    IndexedDependent.wrap(0, IndexedPayload.left(0, true)),\n    IndexedDependent.wrap(1, indexedOriginal))) = false := by { rfl }\n\nfunction m3indexedDeriving(flag: Bool): UInt64 := {\n  let chosen := if (flag) { indexedOriginal } else { indexedFieldChanged }\n  UInt64.ofNat(\n    (if (indexedOriginal == chosen) { 1 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(indexedOriginal, chosen))) { 2 } else { 0 }) +\n    (if (indexedOriginal == indexedChildChanged) { 4 } else { 0 }) +\n    (if (indexedOriginal == indexedCtorChanged) { 8 } else { 0 }) +\n    (if (indexedOriginal == indexedMajorChanged) { 16 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged))) { 32 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged))) { 64 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged))) { 128 } else { 0 }) +\n    (if (IndexedPayload.left(0, IndexedAtom.atom(true)) == IndexedPayload.left(0, IndexedAtom.atom(true))) { 256 } else { 0 }) +\n    (if (IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2)) { 512 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(IndexedErasedDependency.intro(1), IndexedErasedDependency.intro(2)))) { 1024 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal), IndexedDependent.wrap(1, indexedOriginal)))) { 2048 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal), IndexedDependent.wrap(1, indexedChildChanged)))) { 4096 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(IndexedDependent.wrap(0, IndexedPayload.left(0, true)), IndexedDependent.wrap(1, indexedOriginal)))) { 8192 } else { 0 }) +\n    (if (indexedOriginal == indexedOriginal) { 16384 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(indexedOriginal, indexedOriginal))) { 32768 } else { 0 }))\n}\n"
 
 private def promotionDerivingLeanSource : String :=
   "inductive IndexedHash : Nat → Type where\n  | intro (n : Nat) (value : Fin n) : IndexedHash n\n  deriving Hashable\ninductive IndexedRepr : Nat → Type where\n  | intro (n : Nat) (value : Fin n) : IndexedRepr n\n  deriving Repr\ninductive IndexedBEq : Nat → Type where\n  | stop : IndexedBEq 0\n  | next (n : Nat) (child : IndexedBEq n) : IndexedBEq (Nat.succ n)\n  deriving BEq\ninductive IndexedDecEq : Nat → Type where\n  | intro (n : Nat) : IndexedDecEq n\n  deriving DecidableEq\ntheorem corePromotedHashEquation (n : Nat) (value : Fin n) :\n    Hashable.hash (IndexedHash.intro n value) =\n      mixHash (UInt64.ofNat 0) (Hashable.hash value) := by rfl\n\ndef m3promotionData (flag : Bool) : UInt64 :=\n  let text := if flag then reprStr (IndexedRepr.intro 3 (Fin.mk 2 (Nat.lt_succ_self 2)))\n    else reprStr (IndexedRepr.intro 1 (Fin.mk 0 (Nat.lt_succ_self 0)))\n  let expected := if flag then \"IndexedRepr.intro 3 2\" else \"IndexedRepr.intro 1 0\"\n  let index := if flag then 7 else 2\n  let hashValue := Hashable.hash (IndexedHash.intro (Nat.succ index)\n    (Fin.mk index (Nat.lt_succ_self index)))\n  let expectedHash := mixHash (UInt64.ofNat 0) (Hashable.hash\n    (Fin.mk index (Nat.lt_succ_self index)))\n  UInt64.ofNat ((if text == expected then 1 else 0) +\n    (if IndexedBEq.next 0 IndexedBEq.stop == IndexedBEq.next 0 IndexedBEq.stop then 2 else 0) +\n    (if Decidable.decide (self := decEq (IndexedDecEq.intro index)\n      (IndexedDecEq.intro index)) then 4 else 0) +\n    (if hashValue == expectedHash then 8 else 0))\n"
 private def promotionDerivingPsSource : String :=
-  "inductive IndexedHash: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedHash(n) } deriving Hashable\ninductive IndexedRepr: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedRepr(n) } deriving Repr\ninductive IndexedBEq: Nat -> Type where { | stop: IndexedBEq(0) | next(n: Nat, child: IndexedBEq(n)): IndexedBEq(Nat.succ(n)) } deriving BEq\ninductive IndexedDecEq: Nat -> Type where { | intro(n: Nat): IndexedDecEq n } deriving DecidableEq\ntheorem corePromotedHashEquation(n: Nat, value: Fin(n)):\n    Hashable.hash(IndexedHash.intro(n, value)) =\n      mixHash(UInt64.ofNat(0), Hashable.hash(value)) := by { rfl }\n\nfunction m3promotionData(flag: Bool): UInt64 := {\n  let text := if flag then { reprStr(IndexedRepr.intro(3, Fin.mk(2, Nat.lt_succ_self(2)))) }\n    else { reprStr(IndexedRepr.intro(1, Fin.mk(0, Nat.lt_succ_self(0)))) }\n  let expected := if flag then { \"IndexedRepr.intro 3 2\" } else { \"IndexedRepr.intro 1 0\" }\n  let index := if flag then { 7 } else { 2 }\n  let hashValue := Hashable.hash(IndexedHash.intro(Nat.succ(index),\n    Fin.mk(index, Nat.lt_succ_self(index))))\n  let expectedHash := mixHash(UInt64.ofNat(0),\n    Hashable.hash(Fin.mk(index, Nat.lt_succ_self(index))))\n  UInt64.ofNat((if text == expected then { 1 } else { 0 }) +\n    (if IndexedBEq.next(0, IndexedBEq.stop) == IndexedBEq.next(0, IndexedBEq.stop) then { 2 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDecEq.intro(index),\n      IndexedDecEq.intro(index))) then { 4 } else { 0 }) +\n    (if hashValue == expectedHash then { 8 } else { 0 }))\n}\n"
+  "inductive IndexedHash: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedHash(n) } deriving Hashable\ninductive IndexedRepr: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedRepr(n) } deriving Repr\ninductive IndexedBEq: Nat -> Type where { | stop: IndexedBEq(0) | next(n: Nat, child: IndexedBEq(n)): IndexedBEq(Nat.succ(n)) } deriving BEq\ninductive IndexedDecEq: Nat -> Type where { | intro(n: Nat): IndexedDecEq n } deriving DecidableEq\ntheorem corePromotedHashEquation(n: Nat, value: Fin(n)):\n    Hashable.hash(IndexedHash.intro(n, value)) =\n      mixHash(UInt64.ofNat(0), Hashable.hash(value)) := by { rfl }\n\nfunction m3promotionData(flag: Bool): UInt64 := {\n  let text := if (flag) { reprStr(IndexedRepr.intro(3, Fin.mk(2, Nat.lt_succ_self(2)))) }\n    else { reprStr(IndexedRepr.intro(1, Fin.mk(0, Nat.lt_succ_self(0)))) }\n  let expected := if (flag) { \"IndexedRepr.intro 3 2\" } else { \"IndexedRepr.intro 1 0\" }\n  let index := if (flag) { 7 } else { 2 }\n  let hashValue := Hashable.hash(IndexedHash.intro(Nat.succ(index),\n    Fin.mk(index, Nat.lt_succ_self(index))))\n  let expectedHash := mixHash(UInt64.ofNat(0),\n    Hashable.hash(Fin.mk(index, Nat.lt_succ_self(index))))\n  UInt64.ofNat((if (text == expected) { 1 } else { 0 }) +\n    (if (IndexedBEq.next(0, IndexedBEq.stop) == IndexedBEq.next(0, IndexedBEq.stop)) { 2 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(IndexedDecEq.intro(index),\n      IndexedDecEq.intro(index)))) { 4 } else { 0 }) +\n    (if (hashValue == expectedHash) { 8 } else { 0 }))\n}\n"
+
+private def checkFinEvidenceFinite : IO Unit := do
+  let environment := psSelfHostProdPreludeEnvironment
+  let selected := psStandardFinReprDeclarations ++ psStandardFinBEqDeclarations ++
+    psStandardFinEvidenceDeclarations
+  ensure (selected.length == 6) "CORE-MATCHES: Fin evidence selection changed"
+  let _ ← fromExcept (psStandardFinEvidenceAudit environment)
+  let baseline := environment.declarations.filter fun declaration =>
+    !selected.any (fun expected =>
+      psNameEq (psDeclarationName declaration) (psDeclarationName expected))
+  let initial ← fromExcept ((← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations
+    baseline 0 0).mapError (fun error => error.kind.code ++ ": " ++ error.message))
+  for declaration in selected do
+    ensure ((initial.find? (PsKernelLean.toLeanName (psDeclarationName declaration))).isNone)
+      "CORE-MATCHES: a Fin candidate was already present before finite qualification"
+  let result ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    PsKernelLean.replayPreludeDeclarations environment.declarations selected initial 2000000 20000
+  let checked ← fromExcept (result.mapError (fun error => error.kind.code ++ ": " ++ error.message))
+  for declaration in selected do
+    ensure ((checked.find? (PsKernelLean.toLeanName (psDeclarationName declaration))).isSome)
+      "CORE-MATCHES: finite Fin evidence replay omitted a selected declaration"
+  IO.println "CORE-MATCHES: all six Fin additions freshly kernel checked at trust0/2M/20k"
+
+private def lawfulRequirementFailure (owned : Bool) : PsElabError → Bool
+  | .atDeclaration _ cause => lawfulRequirementFailure owned cause
+  | .atContext label cause =>
+      lawfulRequirementFailure (owned || label == "indexed BEq lawful dictionary") cause
+  | .data message => owned && message == "deriving field has no checked instance"
+  | _ => false
+
+private def inhabitedRequirementFailure : PsElabError → Bool
+  | .atDeclaration _ cause => inhabitedRequirementFailure cause
+  | .atContext _ cause => inhabitedRequirementFailure cause
+  | .data message => message == "Inhabited deriving requires a constructor with inhabitable fields"
+  | _ => false
+
+private def checkDependentDerivingRefusals : IO Unit := do
+  for (label, rule, leanText, psText) in [
+      ("dependent proof needs a lawful generic dictionary", "lawful", "structure CoreMissingGenericProofLaw (A : Type) where\n  value : A\n  proof : value = value\n  deriving BEq\n", "structure CoreMissingGenericProofLaw(A: Type) where {\n  value: A\n  proof: value = value\n} deriving BEq\n"),
+      ("dependent proof rejects an unlawful concrete dictionary", "lawful", "inductive CoreFalseAtom where\n  | atom (value : Bool)\ninstance coreFalseBEq : BEq CoreFalseAtom where\n  beq (_left : CoreFalseAtom) (_right : CoreFalseAtom) : Bool := false\nstructure CoreMissingConcreteProofLaw where\n  value : CoreFalseAtom\n  proof : value = value\n  deriving BEq\n", "inductive CoreFalseAtom where { | atom(value: Bool) }\ninstance coreFalseBEq: BEq CoreFalseAtom where {\n  beq(_left: CoreFalseAtom, _right: CoreFalseAtom): Bool := false\n}\nstructure CoreMissingConcreteProofLaw where {\n  value: CoreFalseAtom\n  proof: value = value\n} deriving BEq\n"),
+      ("Fin zero has no supplied inhabitant", "inhabited", "structure CoreMissingFinDefault where\n  value : Fin 0\n  deriving Inhabited\n", "structure CoreMissingFinDefault where {\n  value: Fin(0)\n} deriving Inhabited\n")] do
+    for (kind, source) in [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)] do
+      let program ← fromExcept (psCompilerParsePscv0 source kind)
+      match psCompilerEngineElaboratePscv0 psCompilerFullProfileContext program with
+      | .error (.elaboration cause) =>
+        let expected := if rule == "lawful" then lawfulRequirementFailure false cause
+          else inhabitedRequirementFailure cause
+        ensure expected (label ++ " failed at the wrong rule: " ++ psCompilerPscv0ElabError cause)
+      | .error error =>
+        throw (IO.userError (label ++ " failed outside elaboration: " ++ psCompilerPscv0Error error))
+      | .ok _ => throw (IO.userError (label ++ " was unexpectedly accepted"))
+
+private def dependentFinLeanSource : String :=
+  "structure CoreDependentFin where\n  n : Nat\n  value : Fin n\n  deriving BEq, DecidableEq, Repr, Hashable\n\nstructure CoreDependentNatProof where\n  value : Nat\n  proof : value = value\n  deriving BEq, DecidableEq, Repr, Hashable\n\nstructure CoreDependentFinProof where\n  value : Fin 2\n  proof : value = value\n  deriving BEq, DecidableEq, Repr, Hashable\n\nstructure CoreFinDefault (n : Nat) [dictionary : Inhabited (Fin n)] where\n  value : Fin n\n  deriving Inhabited\n\ninductive CoreUnlawfulAtom where\n  | atom (value : Bool)\ninstance coreUnlawfulBEq : BEq CoreUnlawfulAtom where\n  beq (_left : CoreUnlawfulAtom) (_right : CoreUnlawfulAtom) : Bool := false\n\nstructure CoreIndependentProof (A : Type) (P : Prop) where\n  value : A\n  proof : P\n  deriving BEq\n\ndef coreFinZero : Fin 2 := Fin.mk 0 (Nat.le.step Nat.le.refl)\ndef coreFinOne : Fin 2 := Fin.mk 1 Nat.le.refl\ndef coreFinOneThree : Fin 3 := Fin.mk 1 (Nat.le.step Nat.le.refl)\ninstance coreFinTwoDefault : Inhabited (Fin 2) where\n  default := coreFinOne\n\ndef coreDependentLeft : CoreDependentFin := CoreDependentFin.mk 2 coreFinOne\ndef coreDependentField : CoreDependentFin := CoreDependentFin.mk 2 coreFinZero\ndef coreDependentBound : CoreDependentFin := CoreDependentFin.mk 3 coreFinOneThree\ndef coreNatProof : CoreDependentNatProof := CoreDependentNatProof.mk 7 (Eq.refl 7)\ndef coreFinProof : CoreDependentFinProof := CoreDependentFinProof.mk coreFinOne (Eq.refl coreFinOne)\ndef coreIndependent : CoreIndependentProof CoreUnlawfulAtom True :=\n  CoreIndependentProof.mk (CoreUnlawfulAtom.atom true) True.intro\ndef coreFinDefault : CoreFinDefault 2 := Inhabited.default\n\ntheorem coreFinBEqSame : (coreFinOne == coreFinOne) = true := by rfl\ntheorem coreFinBEqDifferent : (coreFinOne == coreFinZero) = false := by rfl\ntheorem coreFinBEqProofIrrelevance (first second : Nat.lt 1 2) :\n    ((Fin.mk 1 first : Fin 2) == Fin.mk 1 second) = true := by rfl\ntheorem coreFinDecEqProofIrrelevance (first second : Nat.lt 1 2) :\n    Decidable.decide (self := decEq (Fin.mk 1 first : Fin 2) (Fin.mk 1 second)) = true := by rfl\ntheorem coreFinBEqSound (n : Nat) (left right : Fin n)\n    (same : (left == right) = true) : left = right := LawfulBEq.eq_of_beq same\n\ntheorem coreDependentBEqSame : (coreDependentLeft == coreDependentLeft) = true := by rfl\ntheorem coreDependentBEqField : (coreDependentLeft == coreDependentField) = false := by rfl\ntheorem coreDependentBEqBound : (coreDependentLeft == coreDependentBound) = false := by rfl\ntheorem coreDependentDecEqSame :\n    Decidable.decide (self := decEq coreDependentLeft coreDependentLeft) = true := by rfl\ntheorem coreDependentDecEqField :\n    Decidable.decide (self := decEq coreDependentLeft coreDependentField) = false := by rfl\ntheorem coreDependentDecEqBound :\n    Decidable.decide (self := decEq coreDependentLeft coreDependentBound) = false := by rfl\ntheorem coreNatProofBEq : (coreNatProof == coreNatProof) = true := by rfl\ntheorem coreFinProofBEq : (coreFinProof == coreFinProof) = true := by rfl\ntheorem coreFinProofDecEq :\n    Decidable.decide (self := decEq coreFinProof coreFinProof) = true := by rfl\ntheorem coreIndependentUsesActualBEq : (coreIndependent == coreIndependent) = false := by rfl\ntheorem coreFinDefaultUsesDictionary : Fin.val (CoreFinDefault.value coreFinDefault) = 1 := by rfl\ntheorem coreFinRepr : reprStr coreFinOne = \"1\" := by rfl\ntheorem coreDependentRepr : reprStr coreDependentLeft = \"{ n := 2, value := 1 }\" := by rfl\ntheorem coreNatProofRepr : reprStr coreNatProof = \"{ value := 7, proof := _ }\" := by rfl\ntheorem coreDependentHash :\n    hash coreDependentLeft = mixHash (mixHash 0 (hash (2 : Nat))) (hash coreFinOne) := by rfl\ntheorem coreNatProofHash :\n    hash coreNatProof = mixHash (mixHash 0 (hash (7 : Nat))) 0 := by rfl\n\ndef m3dependentFin (flag : Bool) : UInt64 :=\n  let chosen := if flag then coreFinOne else coreFinZero\n  let current := CoreDependentFin.mk 2 chosen\n  let proofCurrent := CoreDependentFinProof.mk chosen (Eq.refl chosen)\n  UInt64.ofNat (\n    (if coreFinOne == chosen then 1 else 0) +\n    (if Decidable.decide (self := decEq coreFinOne chosen) then 2 else 0) +\n    (if coreDependentLeft == current then 4 else 0) +\n    (if Decidable.decide (self := decEq coreDependentLeft current) then 8 else 0) +\n    (if coreDependentLeft == coreDependentBound then 16 else 0) +\n    (if Decidable.decide (self := decEq coreDependentLeft coreDependentBound) then 32 else 0) +\n    (if coreNatProof == coreNatProof then 64 else 0) +\n    (if coreFinProof == proofCurrent then 128 else 0) +\n    (if Decidable.decide (self := decEq coreFinProof proofCurrent) then 256 else 0) +\n    (if coreIndependent == coreIndependent then 512 else 0) +\n    (if reprStr coreDependentLeft == \"{ n := 2, value := 1 }\" then 1024 else 0) +\n    (if hash current == mixHash (mixHash 0 (hash (2 : Nat))) (hash chosen) then 2048 else 0) +\n    (if Fin.val (CoreFinDefault.value coreFinDefault) == 1 then 4096 else 0) +\n    (if reprStr chosen == (if flag then \"1\" else \"0\") then 8192 else 0) +\n    (if reprStr coreNatProof == \"{ value := 7, proof := _ }\" then 16384 else 0) +\n    (if hash coreNatProof == mixHash (mixHash 0 (hash (7 : Nat))) 0 then 32768 else 0))\n"
+
+private def dependentFinPsSource : String :=
+  "structure CoreDependentFin where {\n  n: Nat\n  value: Fin(n)\n} deriving BEq, DecidableEq, Repr, Hashable\n\nstructure CoreDependentNatProof where {\n  value: Nat\n  proof: value = value\n} deriving BEq, DecidableEq, Repr, Hashable\n\nstructure CoreDependentFinProof where {\n  value: Fin(2)\n  proof: value = value\n} deriving BEq, DecidableEq, Repr, Hashable\n\nstructure CoreFinDefault(n: Nat) [dictionary: Inhabited(Fin(n))] where {\n  value: Fin(n)\n} deriving Inhabited\n\ninductive CoreUnlawfulAtom where { | atom(value: Bool) }\ninstance coreUnlawfulBEq: BEq CoreUnlawfulAtom where {\n  beq(_left: CoreUnlawfulAtom, _right: CoreUnlawfulAtom): Bool := false\n}\n\nstructure CoreIndependentProof(A: Type, P: Prop) where {\n  value: A\n  proof: P\n} deriving BEq\n\nconst coreFinZero: Fin(2) := Fin.mk(0, Nat.le.step(Nat.le.refl))\nconst coreFinOne: Fin(2) := Fin.mk(1, Nat.le.refl)\nconst coreFinOneThree: Fin(3) := Fin.mk(1, Nat.le.step(Nat.le.refl))\ninstance coreFinTwoDefault: Inhabited(Fin(2)) where {\n  default: Fin(2) := coreFinOne\n}\n\nconst coreDependentLeft: CoreDependentFin := CoreDependentFin.mk(2, coreFinOne)\nconst coreDependentField: CoreDependentFin := CoreDependentFin.mk(2, coreFinZero)\nconst coreDependentBound: CoreDependentFin := CoreDependentFin.mk(3, coreFinOneThree)\nconst coreNatProof: CoreDependentNatProof := CoreDependentNatProof.mk(7, Eq.refl(7))\nconst coreFinProof: CoreDependentFinProof := CoreDependentFinProof.mk(coreFinOne, Eq.refl(coreFinOne))\nconst coreIndependent: CoreIndependentProof(CoreUnlawfulAtom, True) :=\n  CoreIndependentProof.mk(CoreUnlawfulAtom.atom(true), True.intro)\nconst coreFinDefault: CoreFinDefault(2) := Inhabited.default\n\ntheorem coreFinBEqSame: (coreFinOne == coreFinOne) = true := by { rfl }\ntheorem coreFinBEqDifferent: (coreFinOne == coreFinZero) = false := by { rfl }\ntheorem coreFinBEqProofIrrelevance(first: Nat.lt(1, 2), second: Nat.lt(1, 2)):\n  ((Fin.mk(1, first): Fin(2)) == Fin.mk(1, second)) = true := by { rfl }\ntheorem coreFinDecEqProofIrrelevance(first: Nat.lt(1, 2), second: Nat.lt(1, 2)):\n  Decidable.decide(self := decEq((Fin.mk(1, first): Fin(2)), Fin.mk(1, second))) = true := by { rfl }\ntheorem coreFinBEqSound(n: Nat, left: Fin(n), right: Fin(n), same: (left == right) = true):\n  left = right := LawfulBEq.eq_of_beq(same)\n\ntheorem coreDependentBEqSame: (coreDependentLeft == coreDependentLeft) = true := by { rfl }\ntheorem coreDependentBEqField: (coreDependentLeft == coreDependentField) = false := by { rfl }\ntheorem coreDependentBEqBound: (coreDependentLeft == coreDependentBound) = false := by { rfl }\ntheorem coreDependentDecEqSame:\n  Decidable.decide(self := decEq(coreDependentLeft, coreDependentLeft)) = true := by { rfl }\ntheorem coreDependentDecEqField:\n  Decidable.decide(self := decEq(coreDependentLeft, coreDependentField)) = false := by { rfl }\ntheorem coreDependentDecEqBound:\n  Decidable.decide(self := decEq(coreDependentLeft, coreDependentBound)) = false := by { rfl }\ntheorem coreNatProofBEq: (coreNatProof == coreNatProof) = true := by { rfl }\ntheorem coreFinProofBEq: (coreFinProof == coreFinProof) = true := by { rfl }\ntheorem coreFinProofDecEq:\n  Decidable.decide(self := decEq(coreFinProof, coreFinProof)) = true := by { rfl }\ntheorem coreIndependentUsesActualBEq: (coreIndependent == coreIndependent) = false := by { rfl }\ntheorem coreFinDefaultUsesDictionary: Fin.val(CoreFinDefault.value(coreFinDefault)) = 1 := by { rfl }\ntheorem coreFinRepr: reprStr(coreFinOne) = \"1\" := by { rfl }\ntheorem coreDependentRepr: reprStr(coreDependentLeft) = \"{ n := 2, value := 1 }\" := by { rfl }\ntheorem coreNatProofRepr: reprStr(coreNatProof) = \"{ value := 7, proof := _ }\" := by { rfl }\ntheorem coreDependentHash:\n  hash(coreDependentLeft) = mixHash(mixHash(0, hash((2: Nat))), hash(coreFinOne)) := by { rfl }\ntheorem coreNatProofHash:\n  hash(coreNatProof) = mixHash(mixHash(0, hash((7: Nat))), 0) := by { rfl }\n\nfunction m3dependentFin(flag: Bool): UInt64 := {\n  let chosen := if (flag) { coreFinOne } else { coreFinZero }\n  let current := CoreDependentFin.mk(2, chosen)\n  let proofCurrent := CoreDependentFinProof.mk(chosen, Eq.refl(chosen))\n  UInt64.ofNat(\n    (if (coreFinOne == chosen) { 1 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(coreFinOne, chosen))) { 2 } else { 0 }) +\n    (if (coreDependentLeft == current) { 4 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(coreDependentLeft, current))) { 8 } else { 0 }) +\n    (if (coreDependentLeft == coreDependentBound) { 16 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(coreDependentLeft, coreDependentBound))) { 32 } else { 0 }) +\n    (if (coreNatProof == coreNatProof) { 64 } else { 0 }) +\n    (if (coreFinProof == proofCurrent) { 128 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(coreFinProof, proofCurrent))) { 256 } else { 0 }) +\n    (if (coreIndependent == coreIndependent) { 512 } else { 0 }) +\n    (if (reprStr(coreDependentLeft) == \"{ n := 2, value := 1 }\") { 1024 } else { 0 }) +\n    (if (hash(current) == mixHash(mixHash(0, hash((2: Nat))), hash(chosen))) { 2048 } else { 0 }) +\n    (if (Fin.val(CoreFinDefault.value(coreFinDefault)) == 1) { 4096 } else { 0 }) +\n    (if (reprStr(chosen) == (if (flag) { \"1\" } else { \"0\" })) { 8192 } else { 0 }) +\n    (if (reprStr(coreNatProof) == \"{ value := 7, proof := _ }\") { 16384 } else { 0 }) +\n    (if (hash(coreNatProof) == mixHash(mixHash(0, hash((7: Nat))), 0)) { 32768 } else { 0 }))\n}\n"
+
+private def expectDerivingResource {α : Type} (label : String)
+    (result : Except PsElabError α) : IO Unit := do
+  match result with
+  | .ok _ => throw (IO.userError ("CORE-MATCHES: resource exhaustion was accepted by " ++ label))
+  | .error error =>
+    ensure (psElabErrorIsResource error)
+      ("CORE-MATCHES: resource exhaustion became an ordinary refusal in " ++ label ++
+        ": " ++ psCompilerPscv0ElabError error)
+
+private def checkDerivingResourcePropagation : IO Unit := do
+  let source :=
+    "inductive CoreResourcePayload: Type where { | mk }\n" ++
+    "inductive CoreResourceChoice: Type where {\n" ++
+    "  | difficult(value: CoreResourcePayload)\n  | fallback\n}\n" ++
+    "inductive CoreResourceParam(A: Type): Type where { | mk(value: A) }\n"
+  let program ← fromExcept (psCompilerParsePscv0 source .proofScript)
+  let moduleResult ← fromExcept ((psElabProgramWithOrigins
+    psSelfHostProdPreludeEnvironment program).mapError psCompilerPscv0ElabError)
+  let environment := moduleResult.result.environment
+  let some choiceOrigin := moduleResult.origins.find?
+      (fun origin => origin.sourceName.segments == ["CoreResourceChoice"])
+    | throw (IO.userError "CORE-MATCHES: missing resource choice origin")
+  let some paramOrigin := moduleResult.origins.find?
+      (fun origin => origin.sourceName.segments == ["CoreResourceParam"])
+    | throw (IO.userError "CORE-MATCHES: missing resource parameter origin")
+  let payload := PsExpr.constE (psRootName "CoreResourcePayload") []
+  let payloadTarget := psStandardInhabitedType payload
+  -- Keep the healthy fallbacks: a missing dictionary may select a later
+  -- constructor, and a type parameter may acquire its actual class requirement.
+  match psElabDeriveInstance (psElabContextEmpty environment) payloadTarget with
+  | .error (.data "deriving field has no checked instance") => pure ()
+  | .error error =>
+    throw (IO.userError ("CORE-MATCHES: wrong ordinary missing-instance result: " ++
+      psCompilerPscv0ElabError error))
+  | .ok _ => throw (IO.userError "CORE-MATCHES: resource payload unexpectedly has an instance")
+  let choiceDefault ← fromExcept ((psElabDeriveInhabited environment choiceOrigin).mapError
+    psCompilerPscv0ElabError)
+  let paramDefault ← fromExcept ((psElabDeriveInhabited environment paramOrigin).mapError
+    psCompilerPscv0ElabError)
+  let healthy ← fromExcept ((psAddDeclarationList environment
+    [choiceDefault, paramDefault]).mapError psCompilerPscv0ElabError)
+  let admissions ← fromExcept ((psEncodeCheckedAdmissionsCanonicalIn healthy
+    (moduleResult.result.declarations ++ [choiceDefault, paramDefault])).mapError
+      (fun _ => "CORE-MATCHES: could not encode healthy deriving fallbacks"))
+  let _ ← fromExcept ((← PsKernelLean.admitCanonicalAdmissions admissions).mapError
+    (fun error => error.kind.code ++ ": " ++ error.message))
+  let some value := psDeclarationValue choiceDefault
+    | throw (IO.userError "CORE-MATCHES: healthy constructor fallback has no checked value")
+  let choice := PsExpr.constE (psRootName "CoreResourceChoice") []
+  let fallback := PsExpr.constE (psNameAppendStr (psRootName "CoreResourceChoice") "fallback") []
+  ensure (psExprAlphaEq value (psStandardInhabitedValue choice fallback))
+    "CORE-MATCHES: healthy deriving did not select the later inhabitable constructor"
+  let natTarget := psStandardInhabitedType (.constE psNatName [])
+  let some entry := environment.instances.entries.find?
+      (fun entry => psExprAlphaEq entry.type natTarget)
+    | throw (IO.userError "CORE-MATCHES: no existing checked Nat Inhabited dictionary")
+  -- Repeating a real registered dictionary exercises the real candidate limit.
+  -- Every candidate is checked evidence; none can inhabit the distinct payload.
+  let crowded := { environment with
+    instances := { entries := List.replicate (psInstanceMaxCandidateChecks + 1) entry } }
+  let search := psSynthInstanceWithLimits crowded psLocalEmpty crowded.instances
+    psMetaEmpty 64 {} payloadTarget
+  ensure (search.table.resourceExceeded &&
+    search.table.candidateChecks == psInstanceMaxCandidateChecks && search.result.value.isNone)
+    "CORE-MATCHES: real instance search did not exhaust its unchanged candidate budget"
+  expectDerivingResource "derived field instance search"
+    (psElabDeriveInstance (psElabContextEmpty crowded) payloadTarget)
+  let plan ← fromExcept ((psElabDerivePrepare crowded choiceOrigin
+    { groups := true, indices := true, nested := true }).mapError psCompilerPscv0ElabError)
+  expectDerivingResource "constructor fallback" (psElabDeriveInhabitedValue plan)
+  expectDerivingResource "parameter-requirement fallback"
+    (psElabDeriveInhabited crowded paramOrigin)
+  IO.println "CORE-MATCHES: real deriving search exhaustion remains a resource; healthy fallbacks freshly kernel checked"
 
 private def sourcePairs : List (String × String × String) := [
   ("match", matchLeanSource, matchPsSource),
@@ -1291,7 +1575,8 @@ private def sourcePairs : List (String × String × String) := [
   ("promotion", promotionLeanSource, promotionPsSource),
   ("universes", universeLeanSource, universePsSource),
   ("indexedDeriving", indexedDerivingLeanSource, indexedDerivingPsSource),
-  ("promotionDeriving", promotionDerivingLeanSource, promotionDerivingPsSource)]
+  ("promotionDeriving", promotionDerivingLeanSource, promotionDerivingPsSource),
+  ("dependentFin", dependentFinLeanSource, dependentFinPsSource)]
 
 private def checkRuntime (root : System.FilePath) : IO Unit := do
   let native := sourcePairs.foldl (fun acc (_, leanText, _) => acc ++ leanText ++ "\n") ""
@@ -1301,7 +1586,7 @@ private def checkRuntime (root : System.FilePath) : IO Unit := do
   let requests := sources.map fun (kind, source, stem) => ({
     sourceKind := kind, source, sourceName := "corematches" ++ psCompilerSourceKindExtension kind
     outputStem := "corematches"
-    exports := .selected ["m3matches", "m3structural", "m3const", "m3inline", "m3wfboundaries", "m3indexedDeriving", "m3promotionData"]
+    exports := .selected ["m3matches", "m3structural", "m3const", "m3inline", "m3wfboundaries", "m3indexedDeriving", "m3promotionData", "m3dependentFin"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let batch ← match ← PsV7Native.runBatch requests.toArray with
     | .ok result => pure result
@@ -1329,7 +1614,8 @@ private def checkRuntime (root : System.FilePath) : IO Unit := do
       ("m3inline", Lean.toJson (toString (CoreM3MatchOracle.m3inline flag).toNat)),
       ("m3wfboundaries", Lean.toJson (toString (CoreM3MatchOracle.m3wfboundaries flag).toNat)),
       ("m3indexedDeriving", Lean.toJson (toString (CoreM3MatchOracle.m3indexedDeriving flag).toNat)),
-      ("m3promotionData", Lean.toJson (toString (CoreM3MatchOracle.m3promotionData flag).toNat))]
+      ("m3promotionData", Lean.toJson (toString (CoreM3MatchOracle.m3promotionData flag).toNat)),
+      ("m3dependentFin", Lean.toJson (toString (CoreM3MatchOracle.m3dependentFin flag).toNat))]
     IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
     IO.println ("CORE-MATCHES native observations " ++ stem ++ ": " ++
       (Lean.Json.arr rows.toArray).compress)
@@ -1341,6 +1627,10 @@ def main (args : List String) : IO Unit := do
   let root := System.FilePath.mk directory
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "CORE-MATCHES: expected pinned Lean 4.35.0"
+  checkFinEvidenceFinite
+  ensure (CoreM3MatchOracle.m3dependentFin false == UInt64.ofNat 64576 &&
+    CoreM3MatchOracle.m3dependentFin true == UInt64.ofNat 64975)
+    "CORE-MATCHES: native dependent Fin observation changed"
   let _ ← fromExcept psCompilerValidatePscv0Standard
   ensure (psCompilerFullProfileContext.baseEnvironment.classes.any
       (psNameEq (psRootName "LawfulBEq")) &&
@@ -1349,6 +1639,7 @@ def main (args : List String) : IO Unit := do
       | .constE name _ => psNameEq name (psNameAppendStr (psRootName "Nat") "instLawfulBEq")
       | _ => false)) "CORE-MATCHES: missing checked Nat LawfulBEq registration"
   checkCoreBoundaryControls
+  checkDerivingResourcePropagation
   for (label, leanText, psText) in sourcePairs do
     let outputs ← checkPair label leanText psText
     for (output, stem) in outputs.zip ["lean", "ps"] do
@@ -1358,5 +1649,6 @@ def main (args : List String) : IO Unit := do
     IO.println ("CORE-MATCHES: checked pair " ++ label)
   checkRefusals
   checkUniverseRefusals
+  checkDependentDerivingRefusals
   checkRuntime root
-  IO.println "PSCV0_CORE_MATCHES: PASS 11 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 46 owned portable refusals; five-target paired emission; native runtime comparison follows"
+  IO.println "PSCV0_CORE_MATCHES: PASS 12 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 52 owned portable refusals; five-target paired emission; native runtime comparison follows"

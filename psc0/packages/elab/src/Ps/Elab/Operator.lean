@@ -98,7 +98,11 @@ def psElabOperatorAnalysisFor (context : PsElabContext) (tree : PsElabOperatorTr
 
 def psElabOperatorClass (name : PsSyntaxName) : Option PsSyntaxName := do
   if name.segments.length < 2 then none else
-    some { name with segments := name.segments.take (name.segments.length - 1) }
+    let resolvedName := name.resolvedName.bind fun actual =>
+      match actual with | .str parent _ => some parent | _ => none
+    some { name with
+      segments := name.segments.take (name.segments.length - 1)
+      resolvedName }
 
 def psElabOperatorHomogeneous (context : PsElabContext) (name : PsSyntaxName)
     (maximum : PsExpr) : Except PsElabError Bool := do

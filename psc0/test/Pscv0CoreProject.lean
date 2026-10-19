@@ -438,7 +438,7 @@ private def scopeContext :
   return (seed, profile)
 
 private def scopePrivateNames : List PsName :=
-  let library := psNameAppendStr (psRootName "$psc0Private") "Library"
+  let library := psNameAppendStr (PsName.num (psRootName "$psc0Private") 0) "Library"
   let visibility := psNameAppendStr library "CoreVisibility"
   [psNameAppendStr visibility "before",
    psNameAppendStr (psNameAppendStr visibility "Nested") "overridden",
@@ -925,7 +925,7 @@ private def checkComponentScopes : IO Unit := do
           "component scope did not restore and recapture the variable telescope"
       if expectedNames.contains "componentSectionFinal" then
         let privateName := psNameAppendStr
-          (psNameAppendStr (psRootName "$psc0Private") "Entry") "componentSectionAfter"
+          (psNameAppendStr (PsName.num (psRootName "$psc0Private") 0) "Entry") "componentSectionAfter"
         let some receipt := output.moduleProfiles.find? (fun item => item.name == "Entry")
           | fail "component public-section receipt missing"
         ensure (sameNames receipt.privateNames [privateName])
@@ -986,7 +986,7 @@ private def legacyClientBody : String :=
 private def checkLegacyImports : IO Unit := do
   let (seed, profile) ← scopeContext
   let helperName := psNameAppendStr
-    (psNameAppendStr (psRootName "$psc0Private") "Library") "coreLegacyHelper"
+    (psNameAppendStr (PsName.num (psRootName "$psc0Private") 0) "Library") "coreLegacyHelper"
   let providerNames := [psRootName "coreLegacyDirect", helperName,
     psRootName "coreLegacyViaPrivate", psRootName "coreLegacyAlias",
     psRootName "coreLegacyOpaque", psRootName "coreLegacySpec"]
@@ -1082,7 +1082,7 @@ private def checkLegacyLocalPrivate : IO Unit := do
     let output ← prepare profile "Entry" [input .lean "Entry" body]
     let _ ← admit seed output.admissions
     let hiddenName := psNameAppendStr
-      (psNameAppendStr (psRootName "$psc0Private") "Entry") hidden
+      (psNameAppendStr (PsName.num (psRootName "$psc0Private") 0) "Entry") hidden
     let name := psRootName name
     ensure (sameNames (output.prepared.declarations.map psDeclarationName) [hiddenName, name] &&
         sameNames output.mainNames [name])
@@ -1123,7 +1123,7 @@ private def legacyMetadataPieces : List (String × String) := [
 
 private def legacyMetadataEntry (priority : Nat) (entry : PsInstanceEntry) : Bool :=
   let hidden := psNameAppendStr
-    (psNameAppendStr (psRootName "$psc0Private") "Library") "coreLegacyEcho"
+    (psNameAppendStr (PsName.num (psRootName "$psc0Private") 0) "Library") "coreLegacyEcho"
   entry.priority == priority && entry.levelParams.isEmpty &&
     (match entry.value with
      | .constE name levels => psNameEq name hidden && levels.isEmpty
@@ -1173,7 +1173,7 @@ private def checkLegacyMetadata : IO Unit := do
         imported.instances.defaults.all (legacyMetadataEntry 700))
       "legacy diamond changed ordinary/default instance identity, priority or multiplicity"
     let hidden := psNameAppendStr
-      (psNameAppendStr (psRootName "$psc0Private") "Library") "coreLegacyEcho"
+      (psNameAppendStr (PsName.num (psRootName "$psc0Private") 0) "Library") "coreLegacyEcho"
     ensure ((match psEnvironmentReducibility imported hidden with
         | .instanceReducible => true | _ => false) &&
       (match psEnvironmentReducibility imported (psRootName "coreLegacyEchoAlias") with
@@ -1245,7 +1245,7 @@ private def checkRootedScopes : IO Unit := do
   let box := psNameAppendStr literalRoot "RootBox"
   let hidden := psNameAppendStr
     (psNameAppendStr (psNameAppendStr (psNameAppendStr
-      (psRootName "$psc0Private") "Entry") "_root_") "Inner") "privateIdentity"
+      (PsName.num (psRootName "$psc0Private") 0) "Entry") "_root_") "Inner") "privateIdentity"
   let mut paired : List String := []
   for kind in [PsCompilerSourceKind.lean, .proofScript] do
     let output ← prepare profile "Entry" [input kind "Entry" (rootedScopeSource kind)]
@@ -1280,8 +1280,7 @@ private def checkRootedScopes : IO Unit := do
       "literal root private implementation entered the public interface"
     let whereName := psNameAppendStr literalRoot "whereIdentity"
     let whereHelper := psNameAppendStr
-      (psSyntaxNameAppendSegments ["$psc0Private", "Entry", "_root_", "Inner", "whereIdentity"]
-        .anonymous) "helper"
+      (psElabPrivateName ["Entry", "_root_", "Inner", "whereIdentity"]) "helper"
     let some (.definitionDecl ..) := find whereHelper
       | fail "literal root where helper lost its private checked name"
     let some (.definitionDecl _ _ _ whereBody) := find whereName
@@ -1338,7 +1337,7 @@ private def checkLegacyWhere : IO Unit := do
     let _ ← admit seed output.admissions
     let helperName := if isModule then
       psNameAppendStr (psNameAppendStr
-        (psNameAppendStr (psRootName "$psc0Private") "Library") "coreLegacyWhere") "helper"
+        (psNameAppendStr (PsName.num (psRootName "$psc0Private") 0) "Library") "coreLegacyWhere") "helper"
       else sourceHelper
     let helperEq := psNameAppendStr helperName "eq_def"
     let expectedEntries := entryNames ++
@@ -1645,7 +1644,7 @@ private def checkSourceAttributes : IO Unit := do
       | fail "attribute library receipt missing"
     checkAttributeSimpRoster receipt.interface.simpEntries
     let hidden := psNameAppendStr
-      (psNameAppendStr (psRootName "$psc0Private") "Library") "coreAttrPrivateEq"
+      (psNameAppendStr (PsName.num (psRootName "$psc0Private") 0) "Library") "coreAttrPrivateEq"
     ensure (receipt.privateNames.any (psNameEq hidden) &&
         !receipt.interface.simpEntries.any (fun entry => psNameEq entry.name hidden) &&
         output.prepared.declarations.any (fun declaration =>
@@ -1849,7 +1848,7 @@ private def checkExposedProofArtifacts (output : PsCompilerEngineProjectOutput)
 private def checkExposedProofs : IO Unit := do
   let (seed, profile) ← scopeContext
   let privateProof :=
-    psNameAppendStr (psNameAppendStr (psRootName "$psc0Private") "Library") "coreSecretEq"
+    psNameAppendStr (psNameAppendStr (PsName.num (psRootName "$psc0Private") 0) "Library") "coreSecretEq"
   let mut localPairs : List String := []
   let mut importedPairs : List String := []
   for kind in [PsCompilerSourceKind.lean, .proofScript] do
@@ -1930,6 +1929,407 @@ private def checkExposedProofs : IO Unit := do
   | .ok _ => fail "counterfeit proof marker was accepted without checked source provenance"
   IO.println "PSCV0_CORE_EXPOSED_PROOFS: four paired admitted projects, ten source refusals, closed checked private proofs, typed let expansion, exact dependencies, public header proofs, private import closure, source provenance and independent missing-proof kernel refusals passed"
 
+private def escapedProviderPieces : List (String × String) := [
+  ("namespace CoreEscaped\n",
+   "namespace CoreEscaped\n"),
+  ("public def «if» (A : Type) («_» : A) : A := «_»\n",
+   "function «if»(A: Type, «_»: A): A := «_»\n"),
+  ("public def «Type» (A : Type) (x : A) : A := «if» A x\n",
+   "function «Type»(A: Type, x: A): A := «if»(A, x)\n"),
+  ("public def «Prop» (A : Type) (x : A) : A := «Type» A x\n",
+   "function «Prop»(A: Type, x: A): A := «Type»(A, x)\n"),
+  ("public def «a.b» (A : Type) (x : A) : A := x\n",
+   "function «a.b»(A: Type, x: A): A := x\n"),
+  ("namespace a\npublic def b (A : Type) (x : A) : A := x\nend a\n",
+   "namespace a\nfunction b(A: Type, x: A): A := x\nend a\n"),
+  ("public def «_root_.value» (A : Type) (x : A) : A := x\n",
+   "function «_root_.value»(A: Type, x: A): A := x\n"),
+  ("public def «unicode λ name» (A : Type) («two words» : A) : A := «two words»\n",
+   "function «unicode λ name»(A: Type, «two words»: A): A := «two words»\n"),
+  ("public def «» (A : Type) (x : A) : A := x\n",
+   "function «»(A: Type, x: A): A := x\n"),
+  ("public def rooted (A : Type) (x : A) : A := «_root_».CoreEscaped.«Type» A x\n",
+   "function rooted(A: Type, x: A): A := «_root_».CoreEscaped.«Type»(A, x)\n"),
+  ("public structure «box.type» (A : Type) where\n  «value.dot» : A\n",
+   "structure «box.type»(A: Type) {\n  «value.dot»: A\n}\n"),
+  ("public def boxed (A : Type) (x : A) : «box.type» A := { «value.dot» := x }\n",
+   "function boxed(A: Type, x: A): «box.type»(A) := { «value.dot» := x }\n"),
+  ("public def projected (A : Type) (box : «box.type» A) : A := box.«value.dot»\n",
+   "function projected(A: Type, box: «box.type»(A)): A := box.«value.dot»\n"),
+  ("private theorem «hidden proof» (A : Type) (x : A) : x = x := by rfl\n",
+   "private theorem «hidden proof»(A: Type, x: A): x = x := by { rfl }\n"),
+  ("public theorem «visible.proof» (A : Type) (x : A) : x = x := «hidden proof» A x\n",
+   "theorem «visible.proof»(A: Type, x: A): x = x := «hidden proof»(A, x)\n"),
+  ("public def «with.local» (A : Type) (x : A) : A := «helper.dot» x\nwhere\n  «helper.dot» (y : A) : A := y\n",
+   "function «with.local»(A: Type, x: A): A := «helper.dot»(x)\nwhere {\n  def «helper.dot»(y: A): A := y\n}\n"),
+  ("universe «u.level»\npublic def universeIdentity (A : Type «u.level») (x : A) : A := x\nend CoreEscaped\n",
+   "universe «u.level»\nfunction universeIdentity(A: Type «u.level», x: A): A := x\nend CoreEscaped\n")]
+
+private def escapedClientPieces : List (String × String) := [
+  ("public def coreEscapedClient (A : Type) (x : A) : A := CoreEscaped.«Type» A (CoreEscaped.a.b A (CoreEscaped.«a.b» A x))\n",
+   "function coreEscapedClient(A: Type, x: A): A := CoreEscaped.«Type»(A, CoreEscaped.a.b(A, CoreEscaped.«a.b»(A, x)))\n"),
+  ("public theorem coreEscapedClientProof (A : Type) (x : A) : x = x := CoreEscaped.«visible.proof» A x\n",
+   "theorem coreEscapedClientProof(A: Type, x: A): x = x := CoreEscaped.«visible.proof»(A, x)\n"),
+  ("public def coreEscapedClientField (A : Type) (x : A) : A := CoreEscaped.projected A (CoreEscaped.boxed A x)\n",
+   "function coreEscapedClientField(A: Type, x: A): A := CoreEscaped.projected(A, CoreEscaped.boxed(A, x))\n"),
+  ("public def coreEscapedClientEmpty (A : Type) (x : A) : A := CoreEscaped.«» A x\n",
+   "function coreEscapedClientEmpty(A: Type, x: A): A := CoreEscaped.«»(A, x)\n")]
+
+private def escapedMarkerPieces : List (String × String) := [
+  ("public def «$psc0Private» (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := y\n",
+   "function «$psc0Private»(A: Type, x: A): A := helper(x)\nwhere {\n  def helper(y: A): A := y\n}\n"),
+  ("public def coreEscapedPublicMarker (A : Type) (x : A) : A := «$psc0Private» A x\n",
+   "function coreEscapedPublicMarker(A: Type, x: A): A := «$psc0Private»(A, x)\n")]
+
+private def escapedSingleModulePieces : List (String × String) := [
+  ("private def coreEscapedModuleSecret (A : Type) (x : A) : A := x\n",
+   "private function coreEscapedModuleSecret(A: Type, x: A): A := x\n"),
+  ("public def coreEscapedSingle (A : Type) (x : A) : A := coreEscapedModuleSecret A x\n",
+   "function coreEscapedSingle(A: Type, x: A): A := coreEscapedModuleSecret(A, x)\n")]
+
+private def escapedSeparateModulePieces : List (String × String) := [
+  ("private def coreEscapedModuleSecret (A : Type) (x : A) : A := x\n",
+   "private function coreEscapedModuleSecret(A: Type, x: A): A := x\n"),
+  ("public def coreEscapedSeparate (A : Type) (x : A) : A := coreEscapedModuleSecret A x\n",
+   "function coreEscapedSeparate(A: Type, x: A): A := coreEscapedModuleSecret(A, x)\n")]
+
+private def escapedKeywordModulePieces : List (String × String) := [
+  ("private def coreEscapedModuleSecret (A : Type) (x : A) : A := x\n",
+   "private function coreEscapedModuleSecret(A: Type, x: A): A := x\n"),
+  ("public def coreEscapedKeyword (A : Type) (x : A) : A := coreEscapedModuleSecret A x\n",
+   "function coreEscapedKeyword(A: Type, x: A): A := coreEscapedModuleSecret(A, x)\n")]
+
+private def escapedTypeModulePieces : List (String × String) := [
+  ("private def coreEscapedModuleSecret (A : Type) (x : A) : A := x\n",
+   "private function coreEscapedModuleSecret(A: Type, x: A): A := x\n"),
+  ("public def coreEscapedTypeModule (A : Type) (x : A) : A := coreEscapedModuleSecret A x\n",
+   "function coreEscapedTypeModule(A: Type, x: A): A := coreEscapedModuleSecret(A, x)\n")]
+
+private def escapedModuleClientPieces : List (String × String) := [
+  ("public def coreEscapedModuleClient (A : Type) (x : A) : A := coreEscapedSeparate A (coreEscapedSingle A (coreEscapedKeyword A (coreEscapedTypeModule A x)))\n",
+   "function coreEscapedModuleClient(A: Type, x: A): A := coreEscapedSeparate(A, coreEscapedSingle(A, coreEscapedKeyword(A, coreEscapedTypeModule(A, x))))\n")]
+
+private def escapedExposureRefusalPieces : List (String × String) := [
+  ("private def «hidden.value» (A : Type) (x : A) : A := x\npublic abbrev coreEscapedExposed (A : Type) (x : A) : A := «hidden.value» A x\n",
+   "private function «hidden.value»(A: Type, x: A): A := x\nabbrev coreEscapedExposed(A: Type, x: A): A := «hidden.value»(A, x)\n")]
+
+private def escapedSignatureRefusalPieces : List (String × String) := [
+  ("private def «hidden.type» (A : Type) : Type := A\npublic def coreEscapedSignature (A : Type) (x : «hidden.type» A) (y : A) : A := y\n",
+   "private function «hidden.type»(A: Type): Type := A\nfunction coreEscapedSignature(A: Type, x: «hidden.type»(A), y: A): A := y\n")]
+
+private def escapedPrivateAlias : String × String :=
+  ("public theorem coreEscapedLeak (A : Type) (x : A) : x = x := CoreEscaped.«hidden proof» A x\n",
+   "theorem coreEscapedLeak(A: Type, x: A): x = x := CoreEscaped.«hidden proof»(A, x)\n")
+
+private def escapedCanonicalGuess : String × String :=
+  ("public theorem coreEscapedGuess (A : Type) (x : A) : x = x := «$psc0Private».«0».EscapedNamesProvider.CoreEscaped.«hidden proof» A x\n",
+   "theorem coreEscapedGuess(A: Type, x: A): x = x := «$psc0Private».«0».EscapedNamesProvider.CoreEscaped.«hidden proof»(A, x)\n")
+
+private def escapedReadName (source : String) : IO PsSyntaxName := do
+  let tokens ← match psLex source with
+    | .ok tokens => pure tokens
+    | .error _ => fail ("escaped name did not lex: " ++ source)
+  let parsed ← match psParseSyntaxNameWith true { remaining := tokens } with
+    | .ok parsed => pure parsed
+    | .error _ => fail ("escaped name did not parse: " ++ source)
+  ensure (psTokenCursorDone parsed.cursor) "escaped name left trailing tokens"
+  pure parsed.value
+
+private def escapedScopeRefusal {α : Type} (result : Except PsElabError α)
+    (label : String) (expected : String := "source syntax contains an internal resolved name") :
+    IO Unit := do
+  match result with
+  | .error (.scope message) =>
+      ensure (message == expected) (label ++ ": wrong source boundary refusal: " ++ message)
+  | .error _ => fail (label ++ ": source boundary reached an unrelated refusal")
+  | .ok _ => fail (label ++ ": internal source metadata was accepted")
+
+private def checkEscapedLexicalNames : IO Unit := do
+  let samples : List (String × List String) := [
+    ("«Type»", ["Type"]), ("«_»", ["_"]), ("«»", [""]),
+    ("CoreEscaped.«a.b»", ["CoreEscaped", "a.b"]),
+    ("«_root_».CoreEscaped.«Type»", ["_root_", "CoreEscaped", "Type"]),
+    ("«unicode λ name»", ["unicode λ name"]),
+    ("«line\nbreak»", ["line\nbreak"])]
+  for (source, segments) in samples do
+    let name ← escapedReadName source
+    ensure (name.segments == segments && name.escaped && name.resolvedName.isNone &&
+        name.span.start.byteOffset == 0 &&
+        name.span.stop.byteOffset == source.utf8ByteSize)
+      "escaped name lost structural components, source spelling or byte span"
+    let printed ← match psPrintSyntaxName name with
+      | .ok printed => pure printed
+      | .error _ => fail "escaped source name was not printable"
+    let reparsed ← escapedReadName printed
+    ensure (reparsed.segments == segments && reparsed.escaped &&
+        reparsed.resolvedName.isNone)
+      "escaped source name printing changed its identity"
+  let underscore ← escapedReadName "«_»"
+  ensure (!psSyntaxNameIsAnonymous underscore &&
+      psSyntaxNameIsAnonymous (PsSyntaxName.mk ["_"] underscore.span))
+    "quoted underscore was treated as an anonymous binder"
+  for lexer in [psLex, psLexProofScript] do
+    match lexer "«unfinished" with
+    | .error (.invalidSource message _) =>
+        ensure (message == "unterminated identifier escape")
+          "unterminated identifier escape reached the wrong lexical refusal"
+    | .error _ => fail "unterminated identifier escape returned an unrelated refusal"
+    | .ok _ => fail "unterminated identifier escape was accepted"
+  let marker ← escapedReadName "«$psc0ProofBoundary».«0»"
+  let some markerName := psSyntaxNameToName marker | fail "escaped proof marker name is empty"
+  ensure (!psElabExposedProofIsBoundaryName markerName)
+    "escaped source spelling forged a numeric proof boundary"
+
+private def checkEscapedAstBoundary (environment : PsEnvironment) (hidden : PsName) :
+    IO Unit := do
+  ensure (psEnvironmentContains environment hidden)
+    "source boundary test did not retain its actual checked private dependency"
+  let program ← match psCompilerParsePscv0Program .lean
+      "theorem coreEscapedBoundary (A : Type) (x : A) : x = x := by rfl\n" with
+    | .ok program => pure program
+    | .error message => fail ("source boundary control parse: " ++ message)
+  let [.declaration (.theoremDecl name binders type value span)] := program.commands
+    | fail "source boundary control command shape changed"
+  let original := PsSyntaxDeclaration.theoremDecl name binders type value span
+  let forged : PsSyntaxName := {
+    segments := ["forged"]
+    span := span
+    resolvedName := some hidden }
+  let a := PsSyntaxTerm.reference (PsSyntaxName.mk ["A"] span)
+  let x := PsSyntaxTerm.reference (PsSyntaxName.mk ["x"] span)
+  let badValue := PsSyntaxTerm.app (.reference forged) [a, x] span
+  let badBody := PsSyntaxDeclaration.theoremDecl name binders type badValue span
+  let badHead := PsSyntaxDeclaration.theoremDecl forged binders type value span
+  let forgedBinder : PsSyntaxBinderHead := .mk forged .explicit span
+  let forgedOrigin : PsSyntaxBinderHead := {
+    name := PsSyntaxName.mk ["y"] span
+    kind := .explicit
+    span := span
+    origin := some { names := [forged], index := 0 } }
+  let sources := [badBody, badHead,
+    .theoremDecl name [(forgedBinder, a)] type value span,
+    .theoremDecl name [(forgedOrigin, a)] type value span,
+    .whereDeclaration original [{
+      name := forged, binders := [], type := some a, value := x,
+      recursion := none, span := span }] span,
+    .inductiveDecl name [] none [{
+      name := forged, fields := [], span := span }] span]
+  for source in sources do
+    escapedScopeRefusal
+      (psElabProgramWithOrigins environment { program with commands := [.declaration source] })
+      "program source"
+    escapedScopeRefusal (psElabDeclarations environment [source] []) "legacy declaration source"
+    escapedScopeRefusal (psElabModule environment { imports := [], declarations := [source] })
+      "legacy module source"
+  let terms : List PsSyntaxTerm := [
+    .record [(forged, x)] span,
+    .recordUpdate x [(forged, x)] span,
+    .call x [(some forged, x)] span,
+    .letE forged none x x span,
+    .haveE forged none x x span,
+    .ifE (some forged) x x x span,
+    .matchMany [{ term := x, equationName? := some forged }] [] none span,
+    .matchMany [{ term := x }] [([.inaccessible (.ctor forged [] span)], x, span)] none span,
+    .doE [.conditional (some forged) x [] [] span] span,
+    .doE [.binding (.variable forged) none x false span] span,
+    .byE [.intro [forged] span] {} span,
+    .byE [.caseE (some forged) [] [] span] {} span]
+  for term in terms do
+    escapedScopeRefusal
+      (psElabCommand { environment := environment }
+        (.declaration (.theoremDecl name binders type term span)))
+      "nested source name"
+  let commands : List PsSyntaxCommand := [
+    .namespaceCmd forged span, .sectionCmd (some forged) span,
+    .endCmd (some forged) span, .universeCmd [forged] span,
+    .openCmd [forged] span, .includeCmd [forged] span, .omitCmd [forged] span,
+    .variableCmd [(forgedBinder, a)] span,
+    .attributedDeclaration badHead none false [.simpAttribute],
+    .derivingDeclaration original [forged] false,
+    .attributedDerivingDeclaration original [forged] false [.simpAttribute],
+    .mutualDeclarations [{ declaration := badHead }] span,
+    .inspectionCmd (.checkTerm badValue) span,
+    .inspectionCmd (.printDeclaration forged false) span,
+    .inspectionCmd (.printDeclaration forged true) span,
+    .inspectionCmd (.reduceTerm badValue) span,
+    .inspectionCmd (.evalTerm badValue) span]
+  for command in commands do
+    escapedScopeRefusal (psElabCommand { environment := environment } command)
+      "source command target"
+  let internalProof := PsSyntaxTerm.byE []
+    { privateAliases := [(["stolen"], hidden)] } span
+  escapedScopeRefusal
+    (psElabCommand { environment := environment }
+      (.declaration (.theoremDecl name binders type internalProof span)))
+    "source proof scope" "source syntax contains an internal proof scope"
+  let forgedImport : PsSyntaxImport := { moduleName := forged, span := span }
+  escapedScopeRefusal
+    (psElabProgramWithOrigins environment { program with imports := [forgedImport] })
+    "program import identity"
+  escapedScopeRefusal
+    (psElabModule environment { imports := [forgedImport], declarations := [] })
+    "legacy import identity"
+  match psElabProgramWithOrigins environment program with
+  | .ok _ => pure ()
+  | .error _ => fail "source boundary rejected its unmodified parsed theorem control"
+
+private def checkEscapedAlias (profile : PsCompilerProfileContext) : IO Unit := do
+  let actual := psNameAppendStr (psRootName "External") "a.b"
+  let declaration := PsDeclaration.definitionDecl actual [] idType idValue
+  let some environment := psEnvironmentAdd profile.baseEnvironment declaration
+    | fail "escaped exported-alias base declaration collided"
+  let aliasProfile := { profile with baseEnvironment := {
+    environment with exportedAliases := [(psRootName "EscapedAlias", actual)] } }
+  let seed ← match (← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations
+      (profile.baseEnvironment.declarations.reverse ++ [declaration])) with
+    | .ok seed => pure seed
+    | .error error => fail ("escaped alias base kernel: " ++ error.message)
+  let mut pairs : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let source := importVisibilityInput kind "EscapedAliasClient" "" [
+      ("public def coreEscapedAlias (A : Type) (x : A) : A := EscapedAlias A x\n",
+       "function coreEscapedAlias(A: Type, x: A): A := EscapedAlias(A, x)\n")]
+    let output ← prepare aliasProfile "EscapedAliasClient" [source]
+    let _ ← admit seed output.admissions
+    let some result := output.prepared.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) (psRootName "coreEscapedAlias"))
+      | fail "escaped exported-alias client missing"
+    let some body := psDeclarationValue result | fail "escaped alias body missing"
+    ensure ((psPscv0ExprConstants body).any (psNameEq actual) &&
+        !(psPscv0ExprConstants body).any
+          (psNameEq (psNameAppendStr (psNameAppendStr (psRootName "External") "a") "b")))
+      "exported alias identity was recovered through rendered string splitting"
+    pairs := pairs ++ [output.admissions]
+  let [left, right] := pairs | fail "escaped alias reader pair missing"
+  ensure (left == right) "escaped exported alias differs between readers"
+
+private def checkEscapedIdentifiers : IO Unit := do
+  checkEscapedLexicalNames
+  let (seed, profile) ← scopeContext
+  checkEscapedAlias profile
+  let hidden := psElabPrivateName ["EscapedNamesProvider", "CoreEscaped", "hidden proof"]
+  let helper := psElabPrivateName
+    ["EscapedNamesProvider", "CoreEscaped", "with.local", "helper.dot"]
+  let literalDot := psNameAppendStr (psRootName "CoreEscaped") "a.b"
+  let separateDot := psNameAppendStr (psNameAppendStr (psRootName "CoreEscaped") "a") "b"
+  ensure (!psNameEq literalDot separateDot) "quoted dot lost structural name identity"
+  let keys := ["«EscapeModules.Dot»", "EscapeModules.Dot", "«if»", "«Type»"]
+  ensure (keys.all psPscv0ValidModuleKey &&
+      psPscv0ModuleKey ["EscapeModules.Dot"] == "«EscapeModules.Dot»" &&
+      psPscv0ModuleKey ["EscapeModules", "Dot"] == "EscapeModules.Dot" &&
+      psPscv0ModuleKey ["if"] == "«if»" &&
+      psPscv0ModuleKey ["Type"] == "«Type»")
+    "canonical module keys lost escaped dot or reserved keyword components"
+  ensure ((["EscapeModules..Dot", "EscapeModules. Dot", "if", "Type", "«Library»"] :
+      List String).all (fun key => !psPscv0ValidModuleKey key))
+    "noncanonical external module key was accepted"
+  let mut providerPairs : List String := []
+  let mut markerPairs : List String := []
+  let mut modulePairs : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let provider := importVisibilityInput kind "EscapedNamesProvider" "" escapedProviderPieces
+    let client := importVisibilityInput kind "EscapedNamesClient"
+      "public import EscapedNamesProvider\n" escapedClientPieces
+    let output ← prepare profile "EscapedNamesClient" [client, provider]
+    let _ ← admit seed output.admissions
+    providerPairs := providerPairs ++ [output.admissions]
+    let some receipt := output.moduleProfiles.find?
+        (fun receipt => receipt.name == "EscapedNamesProvider")
+      | fail "escaped provider receipt missing"
+    let environment ← takeCompiler (psCompilerEngineEnvironmentFromPrepared output.prepared)
+    for name in [hidden, helper] do
+      ensure (psEnvironmentContains environment name &&
+          receipt.privateNames.any (psNameEq name) &&
+          !receipt.interface.declarations.any
+            (fun declaration => psNameEq (psDeclarationName declaration) name))
+        "escaped private dependency was dropped or exposed as a source declaration"
+    let publicNames := [literalDot, separateDot,
+      psNameAppendStr (psRootName "CoreEscaped") "Type",
+      psNameAppendStr (psRootName "CoreEscaped") "Prop",
+      psNameAppendStr (psRootName "CoreEscaped") "_root_.value",
+      psNameAppendStr (psRootName "CoreEscaped") "",
+      psNameAppendStr (psRootName "CoreEscaped") "unicode λ name",
+      psNameAppendStr (psNameAppendStr (psRootName "CoreEscaped") "box.type") "value.dot"]
+    ensure (publicNames.all fun name =>
+        receipt.interface.declarations.any
+          (fun declaration => psNameEq (psDeclarationName declaration) name))
+      "escaped public names or field projection lost a structural component"
+    let proofName := psNameAppendStr (psRootName "CoreEscaped") "visible.proof"
+    let some (.theoremDecl _ _ _ proof) := psEnvironmentFind environment proofName
+      | fail "escaped visible proof changed its checked declaration kind"
+    ensure ((psPscv0ExprConstants proof).any (psNameEq hidden))
+      "escaped public theorem lost its checked private proof dependency"
+    checkEscapedAstBoundary environment hidden
+    for bad in [escapedPrivateAlias, escapedCanonicalGuess] do
+      refuse profile "EscapedLeak"
+        [provider, importVisibilityInput kind "EscapedLeak"
+          "public import EscapedNamesProvider\n" [bad]] true
+        "PSCV0-SCOPE: unknown name"
+      let legacy := input .lean "EscapedLegacyLeak"
+        ("import EscapedNamesProvider\n" ++ bad.fst)
+      refuse profile "EscapedLegacyLeak" [provider, legacy] true
+        "PSCV0-SCOPE: unknown name"
+    refuse profile "EscapedExposure"
+      [importVisibilityInput kind "EscapedExposure" "" escapedExposureRefusalPieces] true
+      "PSCV0-MODULE: exposed body references private name in coreEscapedExposed"
+    refuse profile "EscapedSignature"
+      [importVisibilityInput kind "EscapedSignature" "" escapedSignatureRefusalPieces] true
+      "PSCV0-MODULE: public signature references private name in coreEscapedSignature"
+    let markerSource := importVisibilityInput kind "Marker" "" escapedMarkerPieces
+    let marker ← prepare profile "Marker" [markerSource]
+    let _ ← admit seed marker.admissions
+    markerPairs := markerPairs ++ [marker.admissions]
+    let some markerReceipt := marker.moduleProfiles.find? (fun receipt => receipt.name == "Marker")
+      | fail "escaped public marker receipt missing"
+    let markerHelper := psElabPrivateName ["Marker", "$psc0Private", "helper"]
+    let publicMarker := psRootName "$psc0Private"
+    ensure (markerReceipt.interface.declarations.any
+        (fun declaration => psNameEq (psDeclarationName declaration) publicMarker) &&
+        !markerReceipt.privateNames.any (psNameEq publicMarker) &&
+        markerReceipt.privateNames.any (psNameEq markerHelper) &&
+        !markerReceipt.interface.declarations.any
+          (fun declaration => psNameEq (psDeclarationName declaration) markerHelper))
+      "legitimate escaped public marker acquired private-name authority"
+    let single := importVisibilityInput kind "«EscapeModules.Dot»" "" escapedSingleModulePieces
+    let separate := importVisibilityInput kind "EscapeModules.Dot" "" escapedSeparateModulePieces
+    let keyword := importVisibilityInput kind "«if»" "" escapedKeywordModulePieces
+    let typeModule := importVisibilityInput kind "«Type»" "" escapedTypeModulePieces
+    let moduleClient := importVisibilityInput kind "EscapedModuleClient"
+      ("public import «EscapeModules.Dot»\npublic import EscapeModules.Dot\n" ++
+        "public import «if»\npublic import «Type»\n") escapedModuleClientPieces
+    let modules ← prepare profile "EscapedModuleClient"
+      [moduleClient, single, separate, keyword, typeModule]
+    let _ ← admit seed modules.admissions
+    modulePairs := modulePairs ++ [modules.admissions]
+    let secrets := keys.map fun key => psElabPrivateName [key, "coreEscapedModuleSecret"]
+    ensure ((secrets.zipIdx).all fun (name, index) =>
+        (secrets.drop (index + 1)).all (fun other => !psNameEq name other))
+      "distinct escaped module identities minted the same private declaration"
+    for (key, secret) in keys.zip secrets do
+      let some moduleReceipt := modules.moduleProfiles.find? (fun receipt => receipt.name == key)
+        | fail "canonical escaped module receipt missing"
+      ensure (moduleReceipt.privateNames.any (psNameEq secret) &&
+          modules.prepared.declarations.any
+            (fun declaration => psNameEq (psDeclarationName declaration) secret) &&
+          !moduleReceipt.interface.declarations.any
+            (fun declaration => psNameEq (psDeclarationName declaration) secret))
+        "escaped module private identity was collapsed or exposed"
+    let some clientReceipt := modules.moduleProfiles.find?
+        (fun receipt => receipt.name == "EscapedModuleClient")
+      | fail "escaped module client receipt missing"
+    ensure (clientReceipt.imports == keys.map (fun key => (key, true)))
+      "escaped module import receipt flattened a quoted component"
+    refuse profile "EscapedMissing"
+      [single, importVisibilityInput kind "EscapedMissing" "import EscapeModules.Dot\n" []]
+      false "PSCV0-MODULE: missing module EscapeModules.Dot imported by EscapedMissing"
+    refuse profile "EscapedMissing"
+      [separate, importVisibilityInput kind "EscapedMissing" "import «EscapeModules.Dot»\n" []]
+      false "PSCV0-MODULE: missing module «EscapeModules.Dot» imported by EscapedMissing"
+  for pair in [providerPairs, markerPairs, modulePairs] do
+    let [left, right] := pair | fail "escaped identifier paired reader result missing"
+    ensure (left == right) "escaped names changed canonical admissions between readers"
+  IO.println "PSCV0_CORE_ESCAPED_IDENTIFIERS: paired checked modules, quoted keywords and underscores, structural dots and fields, Unicode and empty identifiers, private numeric identities, public marker names, module-key collisions, source AST provenance, exported aliases and owned visibility/graph refusals passed"
+
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
   let seed ← match result with
@@ -1999,4 +2399,5 @@ def main : IO Unit := do
   checkSourceAttributes
   checkConnectiveAttributes
   checkExposedProofs
+  checkEscapedIdentifiers
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

@@ -61,14 +61,15 @@ def psPscv0TokenTextAt (tokens : List PsToken) (offset : Nat) : String :=
   | none => ""
   | some token => token.text
 
-def psPscv0NameText (name : PsSyntaxName) : String := psPrintJoin "." name.segments
+def psPscv0NameText (name : PsSyntaxName) : String :=
+  psPrintJoin "." (name.segments.map fun part => psLexIdentifierSpelling part name.escaped)
 
 def psPscv0TokenNamesContain (tokens : List PsToken) (name : String) : Bool :=
   match tokens with
   | [] => false
   | token :: rest =>
       if psTokenKindEq token.kind PsTokenKind.identifier then
-        if psStringEq token.text name then true
+        if psStringEq (psTokenIdentifierText token) name then true
         else psPscv0TokenNamesContain rest name
       else psPscv0TokenNamesContain rest name
 
@@ -317,15 +318,15 @@ def psPscv0LowerDoItems (errorName discardName : PsSyntaxName)
               | Except.error error => Except.error error
               | Except.ok continuation => Except.ok (psPscv0BindMatch value discardName errorName continuation span)
       | .bind name action span =>
-          if psStringEq (psPscv0NameText name) "Except" then Except.error "PSCV0-DO-EFFECT-SHADOW-UNSUPPORTED"
+          if name.segments == ["Except"] then Except.error "PSCV0-DO-EFFECT-SHADOW-UNSUPPORTED"
           else
             match psPscv0LowerDoItems errorName discardName rest with
             | Except.error error => Except.error error
             | Except.ok continuation =>
-                let actual := if psStringEq (psPscv0NameText name) "_" then discardName else name;
+                let actual := if psSyntaxNameIsAnonymous name then discardName else name;
                 Except.ok (psPscv0BindMatch action actual errorName continuation span)
       | .letValue name type value span =>
-          if psStringEq (psPscv0NameText name) "Except" then Except.error "PSCV0-DO-EFFECT-SHADOW-UNSUPPORTED"
+          if name.segments == ["Except"] then Except.error "PSCV0-DO-EFFECT-SHADOW-UNSUPPORTED"
           else
             match psPscv0LowerDoItems errorName discardName rest with
             | Except.error error => Except.error error

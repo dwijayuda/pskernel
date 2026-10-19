@@ -92,7 +92,7 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases() + escaped_identifier_cases()
 
 
 def visibility_cases():
@@ -446,6 +446,25 @@ def connective_attribute_cases():
         ("AttributeAndNestedReflexive", "module\n@[simp] public theorem coreAttrBadAndNested (A : Type) (x : A) (P Q : Prop) (hp : P) (hq : Q) : And P (And Q (x = x)) := And.intro hp (And.intro hq (Eq.refl x))\n", ("Invalid simp theorem:",)),
     ]
 
+def escaped_identifier_cases():
+    return [
+        ("EscapedNamesProvider", "module\nnamespace CoreEscaped\npublic def «if» (A : Type) («_» : A) : A := «_»\npublic def «Type» (A : Type) (x : A) : A := «if» A x\npublic def «Prop» (A : Type) (x : A) : A := «Type» A x\npublic def «a.b» (A : Type) (x : A) : A := x\nnamespace a\npublic def b (A : Type) (x : A) : A := x\nend a\npublic def «_root_.value» (A : Type) (x : A) : A := x\npublic def «unicode λ name» (A : Type) («two words» : A) : A := «two words»\npublic def «» (A : Type) (x : A) : A := x\npublic def rooted (A : Type) (x : A) : A := «_root_».CoreEscaped.«Type» A x\npublic structure «box.type» (A : Type) where\n  «value.dot» : A\npublic def boxed (A : Type) (x : A) : «box.type» A := { «value.dot» := x }\npublic def projected (A : Type) (box : «box.type» A) : A := box.«value.dot»\nprivate theorem «hidden proof» (A : Type) (x : A) : x = x := by rfl\npublic theorem «visible.proof» (A : Type) (x : A) : x = x := «hidden proof» A x\npublic def «with.local» (A : Type) (x : A) : A := «helper.dot» x\nwhere\n  «helper.dot» (y : A) : A := y\nuniverse «u.level»\npublic def universeIdentity (A : Type «u.level») (x : A) : A := x\nend CoreEscaped\n", ()),
+        ("EscapedNamesClient", "module\npublic import EscapedNamesProvider\npublic def coreEscapedClient (A : Type) (x : A) : A := CoreEscaped.«Type» A (CoreEscaped.a.b A (CoreEscaped.«a.b» A x))\npublic theorem coreEscapedClientProof (A : Type) (x : A) : x = x := CoreEscaped.«visible.proof» A x\npublic def coreEscapedClientField (A : Type) (x : A) : A := CoreEscaped.projected A (CoreEscaped.boxed A x)\npublic def coreEscapedClientEmpty (A : Type) (x : A) : A := CoreEscaped.«» A x\n", ()),
+        ("EscapedMarker", "module\npublic def «$psc0Private» (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := y\npublic def coreEscapedPublicMarker (A : Type) (x : A) : A := «$psc0Private» A x\n", ()),
+        ("EscapeModules.Dot", "module\nprivate def coreEscapedModuleSecret (A : Type) (x : A) : A := x\npublic def coreEscapedSingle (A : Type) (x : A) : A := coreEscapedModuleSecret A x\n", ()),
+        ("EscapeModules/Dot", "module\nprivate def coreEscapedModuleSecret (A : Type) (x : A) : A := x\npublic def coreEscapedSeparate (A : Type) (x : A) : A := coreEscapedModuleSecret A x\n", ()),
+        ("if", "module\nprivate def coreEscapedModuleSecret (A : Type) (x : A) : A := x\npublic def coreEscapedKeyword (A : Type) (x : A) : A := coreEscapedModuleSecret A x\n", ()),
+        ("Type", "module\nprivate def coreEscapedModuleSecret (A : Type) (x : A) : A := x\npublic def coreEscapedTypeModule (A : Type) (x : A) : A := coreEscapedModuleSecret A x\n", ()),
+        ("EscapedModuleClient", "module\npublic import «EscapeModules.Dot»\npublic import EscapeModules.Dot\npublic import «if»\npublic import «Type»\npublic def coreEscapedModuleClient (A : Type) (x : A) : A := coreEscapedSeparate A (coreEscapedSingle A (coreEscapedKeyword A (coreEscapedTypeModule A x)))\n", ()),
+        ("EscapedPrivateAlias", "module\npublic import EscapedNamesProvider\npublic theorem coreEscapedLeak (A : Type) (x : A) : x = x := CoreEscaped.«hidden proof» A x\n", ("Unknown", "hidden proof",)),
+        ("EscapedCanonicalGuess", "module\npublic import EscapedNamesProvider\npublic theorem coreEscapedGuess (A : Type) (x : A) : x = x := «_private».EscapedNamesProvider.«0».CoreEscaped.«hidden proof» A x\n", ("Unknown", "_private",)),
+        ("EscapedLegacyPrivateAlias", "import EscapedNamesProvider\npublic theorem coreEscapedLeak (A : Type) (x : A) : x = x := CoreEscaped.«hidden proof» A x\n", ("Unknown", "hidden proof",)),
+        ("EscapedLegacyCanonicalGuess", "import EscapedNamesProvider\npublic theorem coreEscapedGuess (A : Type) (x : A) : x = x := «_private».EscapedNamesProvider.«0».CoreEscaped.«hidden proof» A x\n", ("Unknown", "_private",)),
+        ("EscapedPrivateExposure", "module\nprivate def «hidden.value» (A : Type) (x : A) : A := x\npublic abbrev coreEscapedExposed (A : Type) (x : A) : A := «hidden.value» A x\n", ("hidden.value", "private declaration",)),
+        ("EscapedPrivateSignature", "module\nprivate def «hidden.type» (A : Type) : Type := A\npublic def coreEscapedSignature (A : Type) (x : «hidden.type» A) (y : A) : A := y\n", ("hidden.type", "private declaration",)),
+    ]
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     run_dir = Path(tempfile.mkdtemp(prefix="run-", dir=OUTPUT))
@@ -472,8 +491,8 @@ def main():
             "tag": tag,
             "argv": [str(arg) for arg in argv],
             "cwd": str(cwd),
-            "stdout": stdout_path.name,
-            "stderr": stderr_path.name,
+            "stdout": str(stdout_path.relative_to(run_dir)),
+            "stderr": str(stderr_path.relative_to(run_dir)),
             "returncode": None,
             "timed_out": False,
         }
@@ -536,19 +555,20 @@ def main():
         require(version == PIN_VERSION, f"wrong Lean version: {version!r}")
         require(githash == PIN_GITHASH, f"wrong Lean commit: {githash!r}")
         fixtures = cases()
-        require(len(fixtures) == 77, "oracle must contain 77 compile cases")
-        require(sum(not expected for _, _, expected in fixtures) == 40,
-                "oracle must contain 40 expected successful compilations")
+        require(len(fixtures) == 96, "oracle must contain 96 compile cases")
+        require(sum(not expected for _, _, expected in fixtures) == 49,
+                "oracle must contain 49 expected successful compilations")
 
         for name, contents, expected_errors in fixtures:
             input_path = run_dir / f"{name}.lean"
             output_path = run_dir / f"{name}.olean"
+            input_path.parent.mkdir(parents=True, exist_ok=True)
             input_path.write_text(contents, encoding="utf-8")
             case = {
                 "name": name,
                 "expectation": "refusal" if expected_errors else "acceptance",
                 "expected_error_substrings": list(expected_errors),
-                "source": input_path.name,
+                "source": str(input_path.relative_to(run_dir)),
                 "source_sha256": sha256(input_path),
                 "command_tag": name,
                 "status": "FAIL",
@@ -556,11 +576,12 @@ def main():
             report["cases"].append(case)
             completed = invoke(
                 name, [lean, "--json", f"--root={run_dir}", "-o",
-                       output_path.name, input_path.name], run_dir, env,
+                       str(output_path.relative_to(run_dir)),
+                       str(input_path.relative_to(run_dir))], run_dir, env,
             )
             case["returncode"] = completed.returncode
             case["olean_artifacts"] = sorted(
-                path.name for path in run_dir.glob(f"{name}.olean*")
+                str(path.relative_to(run_dir)) for path in run_dir.glob(f"{name}.olean*")
             )
             require(completed.stderr == b"", f"{name}: unexpected stderr")
             diagnostics = []
@@ -602,8 +623,8 @@ def main():
             print(f"PASS {name}: {case['expectation']}", flush=True)
 
         report["status"] = "PASS"
-        report["successful_compilations"] = 40
-        report["expected_refusals"] = 37
+        report["successful_compilations"] = 49
+        report["expected_refusals"] = 47
     except Exception as exc:
         report["status"] = "FAIL"
         report["failure"] = f"{type(exc).__name__}: {exc}"
@@ -632,8 +653,8 @@ def main():
         "expected_refusals": report["expected_refusals"],
         "cases": report["cases"],
     }, sort_keys=True), flush=True)
-    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 77 cases passed "
-          "(40 successful compilations, 37 expected refusals)", flush=True)
+    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 96 cases passed "
+          "(49 successful compilations, 47 expected refusals)", flush=True)
     return 0
 
 

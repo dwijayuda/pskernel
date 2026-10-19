@@ -15,11 +15,11 @@ def psCompilerFullProfileContext : PsCompilerProfileContext := {
 private def psCompilerFullBindElaborated (elaborated : PsElabModuleResult) :
     PsCompilerEngineElaborated :=
   PsCompilerEngineElaborated.mk elaborated.environment elaborated.declarations
-    psCompilerFullProfileContext
+    psCompilerFullProfileContext elaborated.commandDiagnostics
 
 private def psCompilerFullElaboratedResult (elaborated : PsCompilerEngineElaborated) :
     PsElabModuleResult :=
-  PsElabModuleResult.mk elaborated.environment elaborated.declarations
+  PsElabModuleResult.mk elaborated.environment elaborated.declarations elaborated.commandDiagnostics
 
 private def psCompilerFullBindPrepared (prepared : PsCompilerAdmissionReadyModule) :
     PsCompilerEnginePrepared :=
@@ -34,16 +34,17 @@ private def psCompilerFullPreparedResult (prepared : PsCompilerEnginePrepared) :
 private def psCompilerFullBindState (state : PsCompilerPreparationState) :
     PsCompilerEnginePreparationState :=
   PsCompilerEnginePreparationState.mk state.sourceKind state.environment
-    state.declarationsRev psCompilerFullProfileContext
+    state.declarationsRev psCompilerFullProfileContext state.commandDiagnostics
 
 private def psCompilerFullStateResult (state : PsCompilerEnginePreparationState) :
     PsCompilerPreparationState :=
   PsCompilerPreparationState.mk state.sourceKind state.environment state.declarationsRev
+    state.commandDiagnostics
 
 private def psCompilerFullOutputResult (output : PsCompilerEnginePreparationOutput) :
     PsCompilerPreparationOutput :=
   PsCompilerPreparationOutput.mk (psCompilerFullPreparedResult output.prepared)
-    output.environment output.admissions output.originParents
+    output.environment output.admissions output.originParents output.commandDiagnostics
 
 private def psCompilerFullStepResult
     (result : PsCompilerEnginePreparationStepWithOriginsResult) :

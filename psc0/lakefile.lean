@@ -73,6 +73,7 @@ lean_lib PsEnvironment where
   srcDir := "packages/environment/src"
   roots := #[
     `Ps.Environment.Basic,
+    `Ps.Environment.Inspection,
     `Ps.Environment.BootstrapData,
     `Ps.Environment.Bootstrap,
     `Ps.Environment.CompilerSourceCandidateData,
@@ -317,6 +318,13 @@ lean_lib PsElab where
     `Ps.Elab.Declaration,
     `Ps.Elab.ExposedProofs,
     `Ps.Elab.Class,
+    `Ps.Elab.SourceNames,
+    `Ps.Elab.InspectionScalar,
+    `Ps.Elab.InspectionReduce,
+    `Ps.Elab.InspectionDependencies,
+    `Ps.Elab.InspectionPrint,
+    `Ps.Elab.InspectionEval,
+    `Ps.Elab.Inspection,
     `Ps.Elab.Attributes,
     `Ps.Elab.DerivingContext,
     `Ps.Elab.DerivingIndexed,

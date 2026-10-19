@@ -37,7 +37,7 @@ def psPscv0InstanceField
     (readType readBody : PsPscv0TermReader) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (PsSyntaxName × PsSyntaxTerm)) := do
   let name ← psTokenCursorExpectKind cursor .identifier
-  let fieldName := PsSyntaxName.mk [name.token.text] name.token.span
+  let fieldName := (psSyntaxNameFromToken name.token)
   let binders ← readBinders name.cursor
   let annotation ←
     if psTokenCursorAtText binders.cursor ":" then do

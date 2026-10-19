@@ -110,6 +110,30 @@ with
     | .proj _ _ body => body.psKernelC0FVarFlag
     | _ => false
 
+
+  /-- Maximum syntactically *loose* de Bruijn index, plus one (zero means
+      none), relative to this node's local binder context. Traversal of the
+      immutable child graph occurs at construction, not during checker
+      substitution or inference. This is an exact syntactic bound; no proof,
+      typing, DefEq or admission result is inferred from it. -/
+  @[computed_field] psKernelC0LooseBVarBound : PsKernelExpr → Nat
+    | .bvar index => index + 1
+    | .app fn arg =>
+        Nat.max fn.psKernelC0LooseBVarBound arg.psKernelC0LooseBVarBound
+    | .lam _ ty body _ =>
+        Nat.max ty.psKernelC0LooseBVarBound
+          (body.psKernelC0LooseBVarBound - 1)
+    | .forallE _ ty body _ =>
+        Nat.max ty.psKernelC0LooseBVarBound
+          (body.psKernelC0LooseBVarBound - 1)
+    | .letE _ ty value body _ =>
+        Nat.max ty.psKernelC0LooseBVarBound
+          (Nat.max value.psKernelC0LooseBVarBound
+            (body.psKernelC0LooseBVarBound - 1))
+    | .mdata _ body => body.psKernelC0LooseBVarBound
+    | .proj _ _ body => body.psKernelC0LooseBVarBound
+    | _ => 0
+
 def psKernelBoolEq
     (left : Bool)
     (right : Bool) : Bool :=

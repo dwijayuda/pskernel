@@ -1,0 +1,39 @@
+name: PSC1 direct backend qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - psc1/direct-multibackend-v1
+    paths:
+      - psc1/**
+      - .github/workflows/psc1-direct-backends.yml
+
+permissions:
+  contents: read
+
+jobs:
+  lean-backend-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install repository-pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build PSC1 independent backend libraries
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          lake build PsCompilerIr PsBackendJs PsBackendRust PsBackendWasm
+      - name: Build existing PSC1 CLI
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build psc1

@@ -26,3 +26,11 @@ def psStrictValidateModule
     (module : PsVerifiedIrModule) :
     Except PsVerifiedIrValidationError PsValidatedIrModule :=
   psValidateErasedIrModule { raw := module }
+
+-- Exact name lookup for the bounded Wasm direct-call lowering path.
+def psStrictFindDeclaration :
+    List PsVerifiedIrDeclaration → String → Option PsVerifiedIrDeclaration
+  | [], _ => none
+  | declaration :: rest, name =>
+      if declaration.name == name then some declaration
+      else psStrictFindDeclaration rest name

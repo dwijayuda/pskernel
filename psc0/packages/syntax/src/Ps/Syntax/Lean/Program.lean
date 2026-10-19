@@ -26,7 +26,7 @@ def psLeanProgramUnattributedCommand (cursor : PsTokenCursor) (mutualMember : Bo
   if ["private", "public"].contains token.text then
     throw "PSCV0-LEAN-VISIBILITY-MODIFIER"
   if hasVisibility && ["section", "namespace"].contains token.text then
-    throw "PSCV0-LEAN-VISIBILITY-SCOPE-PENDING"
+    throw "PSCV0-LEAN-VISIBILITY-SCOPE-UNSUPPORTED"
   if mutualMember && !["def", "partial", "noncomputable"].contains token.text then
     throw "PSCV0-MUTUAL-HEAD: selected function-like native declaration required"
   let parsed ← if token.text == "instance" then do
@@ -86,8 +86,24 @@ def psLeanProgramMutual (fuel : Nat) (cursor : PsTokenCursor)
       | _ => throw "PSCV0-MUTUAL-HEAD"
     psLeanProgramMutual fuel parsed.cursor (member :: membersRev) defaultPrivate
 
+-- Native public-section syntax lowers to the existing scope command and final
+-- declaration modifiers. Names, binders and end validation remain in the shared
+-- scope owner; this adapter only expands Lean's inherited visibility default.
+def psLeanProgramPublicSection (cursor : PsTokenCursor) :
+    Except String (Option (PsParseResult PsSyntaxCommand)) := do
+  if !psTokenCursorAtText cursor "public" then return none
+  let marker ← psPscv0Expect cursor "public"
+  if !psTokenCursorAtText marker.cursor "section" then return none
+  let some parsed ← psPscv0ReadScopeCommand psLeanProgramBinders marker.cursor
+    | throw "PSCV0-LEAN-PUBLIC-SECTION"
+  let .sectionCmd name span := parsed.value
+    | throw "PSCV0-LEAN-PUBLIC-SECTION"
+  return some { parsed with
+    value := .sectionCmd name { span with start := marker.token.span.start } }
+
 def psLeanProgramCommands (fuel : Nat) (cursor : PsTokenCursor)
-    (commandsRev : List PsSyntaxCommand) (defaultPrivate : Bool := false) :
+    (commandsRev : List PsSyntaxCommand) (defaultPrivate : Bool := false)
+    (visibilityDefaults : List Bool := []) :
     Except String (List PsSyntaxCommand) := do
   match fuel with
   | 0 => throw "PSCV0-LEAN-COMMAND-BUDGET"
@@ -101,13 +117,26 @@ def psLeanProgramCommands (fuel : Nat) (cursor : PsTokenCursor)
       let marker ← psPscv0Expect cursor "public"
       if psTokenCursorAtText marker.cursor "import" then
         throw "PSCV0-LEAN-IMPORT-ORDER: imports must precede commands"
-    let parsed ← if psTokenCursorAtText cursor "mutual" then do
-      let opening ← psPscv0Expect cursor "mutual"
-      let members ← psLeanProgramMutual 4096 opening.cursor [] defaultPrivate
-      pure (PsParseResult.mk (.mutualDeclarations members.value.1
-        { start := opening.token.span.start, stop := members.value.2.stop }) members.cursor)
-    else psLeanProgramOrdinaryCommand cursor false defaultPrivate
-    psLeanProgramCommands fuel parsed.cursor (parsed.value :: commandsRev) defaultPrivate
+    let publicSection ← psLeanProgramPublicSection cursor
+    let parsed ← match publicSection with
+      | some parsed => pure parsed
+      | none =>
+        if psTokenCursorAtText cursor "mutual" then do
+          let opening ← psPscv0Expect cursor "mutual"
+          let members ← psLeanProgramMutual 4096 opening.cursor [] defaultPrivate
+          pure (PsParseResult.mk (.mutualDeclarations members.value.1
+            { start := opening.token.span.start, stop := members.value.2.stop }) members.cursor)
+        else psLeanProgramOrdinaryCommand cursor false defaultPrivate
+    let (nextPrivate, nextDefaults) := match parsed.value with
+      | .sectionCmd _ _ =>
+          (defaultPrivate && publicSection.isNone, defaultPrivate :: visibilityDefaults)
+      | .namespaceCmd _ _ => (defaultPrivate, defaultPrivate :: visibilityDefaults)
+      | .endCmd _ _ => match visibilityDefaults with
+        | saved :: rest => (saved, rest)
+        | [] => (defaultPrivate, [])
+      | _ => (defaultPrivate, visibilityDefaults)
+    psLeanProgramCommands fuel parsed.cursor (parsed.value :: commandsRev)
+      nextPrivate nextDefaults
 
 -- Selected native headers follow pinned Parser.Module.Syntax and parseHeader.
 -- Public imports require module mode. The existing no-header input route keeps

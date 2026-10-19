@@ -1634,7 +1634,7 @@ private def semanticCases : IO Unit := do
     { source := "section\nvariable (P: Prop) (proof: P)\ntheorem bad: P := proof\nend\n" },
     { source := "function bad(value: Nat := true): Nat := value\n" },
     { source := "function need(value: Nat := 1, required: Nat): Nat := required\nconst bad: Nat := need()\n" },
-    { source := "section\nvariable (value: Nat)\nconst good: Nat := value\n" },
+    { source := "section\nvariable (value: Nat)\nconst good: Nat := value\nend\nend\n" },
     { source := "const bad: Nat -> Nat -> Nat := fun (x: Nat, y: Nat) => x\n" },
     { source := "const bad: Unit -> Nat := fun() => 0\n" },
     { source := "const bad: forall (A: Type) A -> A := fun (A: Type) x => x\n" },
@@ -1729,7 +1729,7 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
-    "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
+    "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: end without",
     "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-PARSE", "PSCV0-SCOPE: unknown name", "PSCV0-SCOPE: duplicate active section variable",
     "PSCV0-PARSE: PSCV0-BIND-02", "PSCV0-PARSE: nonempty binder group",

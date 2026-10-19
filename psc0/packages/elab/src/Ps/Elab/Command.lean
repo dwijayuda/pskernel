@@ -525,7 +525,9 @@ def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxPr
     ((psScopeNamePrefixes (psDeclarationName decl)).drop 1).foldl psScopeRemember acc) []
   let state ← program.commands.foldlM psElabCommand {
     environment, namespaces, moduleIdentity }
-  if !state.frames.isEmpty then throw (.scope "unclosed namespace or section")
+  -- Pinned Lean closes remaining namespace/section scopes at end of file.
+  -- Only declarations and their metadata leave this program owner; scope frames
+  -- and local resolution settings cannot escape into the next module.
   return {
     result := { environment := state.environment, declarations := state.declarationsRev.reverse }
     origins := state.originsRev.reverse

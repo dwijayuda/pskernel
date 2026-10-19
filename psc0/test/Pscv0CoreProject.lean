@@ -308,7 +308,9 @@ private def checkModuleHeaders (seed : Lean.Kernel.Environment)
     (definition ++ "import Library\n", "PSCV0-LEAN-IMPORT-ORDER"),
     ("module\npublic " ++ definition ++ "public import Library\n", "PSCV0-LEAN-IMPORT-ORDER"),
     ("module\npublic private " ++ definition, "PSCV0-LEAN-VISIBILITY-MODIFIER"),
-    ("module\npublic section\n" ++ definition, "PSCV0-LEAN-VISIBILITY-SCOPE-PENDING")]
+    ("module\nprivate section\n" ++ definition, "PSCV0-LEAN-VISIBILITY-SCOPE-UNSUPPORTED"),
+    ("module\npublic namespace Rejected\n" ++ definition, "PSCV0-LEAN-VISIBILITY-SCOPE-UNSUPPORTED"),
+    ("module\nprivate namespace Rejected\n" ++ definition, "PSCV0-LEAN-VISIBILITY-SCOPE-UNSUPPORTED")]
   for (text, expected) in negatives do
     match psLex text with
     | .error _ => fail "module refusal fixture failed lexing"
@@ -317,7 +319,147 @@ private def checkModuleHeaders (seed : Lean.Kernel.Environment)
     | .ok _ => fail ("module refusal disappeared: " ++ expected)
     | .error message =>
       ensure (message.startsWith expected) ("module refusal phase changed: " ++ message)
-  IO.println "PSCV0_CORE_MODULE_HEADER: paired re-export, default privacy, explicit public and eight owned refusal controls passed"
+  IO.println "PSCV0_CORE_MODULE_HEADER: paired re-export, default privacy, explicit public and ten owned refusal controls passed"
+
+private def scopeIdentity (kind : PsCompilerSourceKind)
+    (visibility name callee : String) : String :=
+  visibility ++ match kind with
+  | .lean =>
+      "def " ++ name ++ " (A : Type) (x : A) : A := " ++ callee ++ " A x\n"
+  | .proofScript =>
+      "function " ++ name ++ "(A: Type, x: A): A := " ++ callee ++ "(A, x)\n"
+
+private def scopeLibrarySource (kind : PsCompilerSourceKind) : String :=
+  let header := match kind with
+    | .lean => "module\n"
+    | .proofScript => ""
+  let publicSection := match kind with
+    | .lean => "public section"
+    | .proofScript => "section"
+  let restoredPrivate := match kind with
+    | .lean => ""
+    | .proofScript => "private "
+  let explicitPublic := match kind with
+    | .lean => "public "
+    | .proofScript => ""
+  let decl := scopeIdentity kind
+  header ++
+    "namespace CoreVisibility\n" ++
+    decl restoredPrivate "before" "CoreSelectedIdentity" ++
+    publicSection ++ " Visible\n" ++
+    decl "" "first" "before" ++
+    "section Nested\n" ++
+    decl "" "innerSection" "first" ++
+    "end Nested\n" ++
+    "namespace Nested\n" ++
+    decl "" "innerNamespace" "innerSection" ++
+    decl "private " "overridden" "before" ++
+    decl "" "throughPrivate" "overridden" ++
+    "end Nested\n" ++
+    "mutual\n" ++
+    decl "" "mutualPublic" "mutualPrivate" ++
+    decl "private " "mutualPrivate" "Nested.throughPrivate" ++
+    "end\n" ++
+    decl "" "afterNamespace" "mutualPublic" ++
+    "end Visible\n" ++
+    decl restoredPrivate "afterPublic" "afterNamespace" ++
+    decl explicitPublic "finalValue" "afterPublic" ++
+    "end CoreVisibility\n" ++
+    decl restoredPrivate "rootAfter" "CoreVisibility.finalValue" ++
+    publicSection ++ "\n" ++
+    decl "" "anonymousPublic" "CoreVisibility.finalValue" ++
+    publicSection ++ " NestedPublic\n" ++
+    decl "" "nestedPublic" "anonymousPublic" ++
+    "end NestedPublic\n" ++
+    decl "" "afterNestedPublic" "nestedPublic" ++
+    "end\n" ++
+    decl restoredPrivate "afterAnonymous" "afterNestedPublic" ++
+    publicSection ++ "\n" ++
+    "namespace AtEof\n" ++
+    decl "" "value" "afterAnonymous"
+
+private def scopeClientSource (kind : PsCompilerSourceKind)
+    (callee : String := "AtEof.value") : String :=
+  (match kind with
+    | .lean => "module\nimport Library\npublic "
+    | .proofScript => "import Library\n") ++
+  scopeIdentity kind "" "coreVisibilityClient" callee
+
+private def scopePublicNames : List PsName :=
+  [psNameAppendStr (psRootName "CoreVisibility") "first",
+   psNameAppendStr (psRootName "CoreVisibility") "innerSection",
+   psNameAppendStr
+     (psNameAppendStr (psRootName "CoreVisibility") "Nested") "innerNamespace",
+   psNameAppendStr
+     (psNameAppendStr (psRootName "CoreVisibility") "Nested") "throughPrivate",
+   psNameAppendStr (psRootName "CoreVisibility") "mutualPublic",
+   psNameAppendStr (psRootName "CoreVisibility") "afterNamespace",
+   psNameAppendStr (psRootName "CoreVisibility") "finalValue",
+   psRootName "anonymousPublic",
+   psRootName "nestedPublic",
+   psRootName "afterNestedPublic",
+   psNameAppendStr (psRootName "AtEof") "value"]
+
+private def checkVisibilityScopes (seed : Lean.Kernel.Environment)
+    (profile : PsCompilerProfileContext) : IO Unit := do
+  let mut paired : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let library := input kind "Library" (scopeLibrarySource kind)
+    let entry := input kind "Entry" (scopeClientSource kind)
+    let output ← prepare profile "Entry" [entry, library]
+    let _ ← admit seed output.admissions
+    let explicitlyClosed := { library with source := library.source ++ "end AtEof\nend\n" }
+    let closed ← prepare profile "Entry" [entry, explicitlyClosed]
+    ensure (closed.admissions == output.admissions)
+      "EOF closure differs from explicit matching ends"
+    let _ ← admit seed closed.admissions
+    let some receipt := output.moduleProfiles.find?
+        (fun item => item.name == "Library")
+      | fail "visibility-scope module receipt missing"
+    ensure (receipt.source == library.source &&
+        receipt.sourceName == library.sourceName && receipt.imports.isEmpty)
+      "visibility-scope source receipt changed"
+    ensure (sameNames
+        (receipt.interface.declarations.map psDeclarationName) scopePublicNames)
+      "visibility-scope public roster changed"
+    ensure (receipt.privateNames.length == 6 &&
+        receipt.privateNames.all (fun name =>
+          !receipt.interface.declarations.any
+            (fun declaration => psNameEq (psDeclarationName declaration) name)))
+      "visibility-scope private roster leaked"
+    ensure (sameNames output.mainNames [psRootName "coreVisibilityClient"])
+      "visibility-scope entry ownership changed"
+    for hidden in
+        ["CoreVisibility.before", "CoreVisibility.Nested.overridden",
+         "CoreVisibility.mutualPrivate", "CoreVisibility.afterPublic",
+         "rootAfter", "afterAnonymous"] do
+      refuse profile "Entry"
+        [library, input kind "Entry" (scopeClientSource kind hidden)] true
+        ("PSCV0-SCOPE: unknown name " ++ hidden)
+    let publicSection := match kind with
+      | .lean => "module\npublic section"
+      | .proofScript => "section"
+    let definition := identitySource kind "scopeEndControl"
+    refuse profile "Entry"
+      [input kind "Entry"
+        (publicSection ++ " Open\n" ++ definition ++ "end Open\nend\n")]
+      true "PSCV0-SCOPE: end without an open scope"
+    refuse profile "Entry"
+      [input kind "Entry"
+        (publicSection ++ " Open\n" ++ definition ++ "end Wrong\n")]
+      true "PSCV0-SCOPE: end name does not match the innermost scope"
+    paired := paired ++ [output.admissions]
+  let [leanAdmissions, psAdmissions] := paired
+    | fail "visibility-scope paired source count changed"
+  ensure (leanAdmissions == psAdmissions)
+    "Lean and PS visibility-scope admissions differ"
+  let headerless ← prepare profile "Entry"
+    [input .lean "Entry"
+      ("public section\n" ++ identitySource .lean "coreVisibilityHeaderless")]
+  let _ ← admit seed headerless.admissions
+  ensure (sameNames headerless.mainNames [psRootName "coreVisibilityHeaderless"])
+    "headerless public section changed visibility"
+  IO.println "PSCV0_CORE_VISIBILITY_SCOPES: paired nested scopes, mutual privacy, overrides, restoration, EOF equality, exact interfaces, six private leakage refusals and end controls passed"
 
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
@@ -374,4 +516,5 @@ def main : IO Unit := do
     | fail "paired re-export source count changed"
   ensure (leanExports == psExports) "Lean and PS re-export admissions differ"
   checkModuleHeaders seed profile
+  checkVisibilityScopes seed profile
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

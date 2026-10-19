@@ -170,6 +170,31 @@ jobs:
           console.log('PSC1_DIRECT_SOURCE_MAP_ACTUAL_ORIGIN: PASS');
           NODE
 
+          # Unicode block comment changes the source UTF-16 column by one
+          # extra code unit; mapped spans must not fall back to empty.
+          cat >/tmp/psc1-unicode-map.lean <<'EOF'
+          /- 🌍 -/ def answer : Bool := true
+          EOF
+          lake exe psc1 build /tmp/psc1-unicode-map.lean --target js --out /tmp/psc1-unicode-map.js
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const map=JSON.parse(readFileSync('/tmp/psc1-unicode-map.js.map','utf8'));
+          if(!map.mappings || !map.sourcesContent[0].includes('🌍')) throw new Error('PSC1_UNICODE_MAP_EMPTY');
+          const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+          const segment=map.mappings.split(';').filter(Boolean)[0].split(',')[0];
+          let accumulator=0, shift=0; const parts=[];
+          for (const c of segment) {
+            const digit=chars.indexOf(c);
+            if(digit<0)throw new Error('PSC1_UNICODE_MAP_INVALID_VLQ');
+            accumulator |= (digit & 31) << shift;
+            if(digit & 32) shift += 5;
+            else {parts.push((accumulator&1)?-(accumulator>>>1):(accumulator>>>1)); accumulator=0;shift=0;}
+          }
+          if(parts.length!==4 || parts[2]!==0 || parts[3]!==9)
+            throw new Error('PSC1_UNICODE_MAP_COLUMN_MISMATCH:' + JSON.stringify(parts));
+          console.log('PSC1_UNICODE_SOURCE_MAP_UTF16: PASS');
+          NODE
+
           # Execute a scalar Wasm ABI export, separately from reference-valued Nat.
           cat >/tmp/psc1-wasm-scalar.lean <<'EOF'
           def answer : Bool := true

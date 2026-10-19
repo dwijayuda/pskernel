@@ -14,11 +14,18 @@ def psDirectSourceOrigins (module : PsSyntaxModule) : List PsDirectSourceOrigin 
     { name := psHostSyntaxDeclarationName declaration
       position := original.2.start }
 
--- A partial source map is preferable to fictitious coordinates. The older
--- lexer measures source columns in code points, not UTF-16; ASCII is the
--- precisely supported correspondence until origin coordinates are normalized.
-def psDirectMapSourceCoordinatesSupported (source : String) : Bool :=
-  source.toList.all fun c => c.toNat < 128
+-- The PSC1 source lexer reports 1-based Unicode scalar columns; ECMA-426
+-- requires zero-based UTF-16 columns. Convert from the *actual source text*,
+-- preserving surrogate-pair width instead of suppressing every Unicode map.
+def psDirectSourceUtf16Column
+    (source : String) (position : PsSourcePos) : Option Nat := do
+  let line ← (source.splitOn "\n").get? (position.line - 1)
+  let prefixSize := position.column - 1
+  if prefixSize > line.toList.length then
+    none
+  else
+    some ((line.toList.take prefixSize).foldl
+      (fun n c => n + (if c.toNat > 65535 then 2 else 1)) 0)
 
 def psDirectBase64Digit (n : Nat) : String :=
   String.singleton ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toList[n % 64]!)
@@ -41,42 +48,42 @@ structure PsDirectMapState where
   hasSegmentOnLine : Bool := false
 
 def psDirectMapSegments
-    (origins : List PsDirectSourceOrigin) :
+    (sourceText : String) (origins : List PsDirectSourceOrigin) :
     List PsJsGeneratedDeclarationSpan → PsDirectMapState → String
   | [], _ => ""
   | span :: rest, state =>
     match origins.find? (fun origin => origin.name == span.name) with
-    | none => psDirectMapSegments origins rest state
+    | none => psDirectMapSegments sourceText origins rest state
     | some origin =>
-      let sourceLine := origin.position.line - 1
-      let sourceColumn := origin.position.column - 1
-      let generatedLine := span.start.line
-      let nextLine := generatedLine > state.generatedLine
-      let semicolons :=
-        String.join (List.replicate (generatedLine - state.generatedLine) ";")
-      let columnBase := if nextLine then 0 else state.generatedColumn
-      let comma := if !nextLine && state.hasSegmentOnLine then "," else ""
-      let entry :=
-        psDirectVLQ (Int.ofNat span.start.column - Int.ofNat columnBase) ++
-        psDirectVLQ 0 ++
-        psDirectVLQ (Int.ofNat sourceLine - Int.ofNat state.sourceLine) ++
-        psDirectVLQ (Int.ofNat sourceColumn - Int.ofNat state.sourceColumn)
-      let updated : PsDirectMapState := {
-        generatedLine := generatedLine
-        generatedColumn := span.start.column
-        sourceLine := sourceLine
-        sourceColumn := sourceColumn
-        hasSegmentOnLine := true }
-      semicolons ++ comma ++ entry ++ psDirectMapSegments origins rest updated
+      match psDirectSourceUtf16Column sourceText origin.position with
+      | none => psDirectMapSegments sourceText origins rest state
+      | some sourceColumn =>
+        let sourceLine := origin.position.line - 1
+        let generatedLine := span.start.line
+        let nextLine := generatedLine > state.generatedLine
+        let semicolons :=
+          String.join (List.replicate (generatedLine - state.generatedLine) ";")
+        let columnBase := if nextLine then 0 else state.generatedColumn
+        let comma := if !nextLine && state.hasSegmentOnLine then "," else ""
+        let entry :=
+          psDirectVLQ (Int.ofNat span.start.column - Int.ofNat columnBase) ++
+          psDirectVLQ 0 ++
+          psDirectVLQ (Int.ofNat sourceLine - Int.ofNat state.sourceLine) ++
+          psDirectVLQ (Int.ofNat sourceColumn - Int.ofNat state.sourceColumn)
+        let updated : PsDirectMapState := {
+          generatedLine := generatedLine
+          generatedColumn := span.start.column
+          sourceLine := sourceLine
+          sourceColumn := sourceColumn
+          hasSegmentOnLine := true }
+        semicolons ++ comma ++ entry ++ psDirectMapSegments origins rest updated
 
 def psDirectSourceMap
     (sourcePath sourceText outputName : String)
     (parsed : PsSyntaxModule)
     (printed : PsJsPrintedModule) : String :=
   let mapping :=
-    if psDirectMapSourceCoordinatesSupported sourceText then
-      psDirectMapSegments (psDirectSourceOrigins parsed) printed.spans {}
-    else ""
+    psDirectMapSegments sourceText (psDirectSourceOrigins parsed) printed.spans {}
   "{\"version\":3,\"file\":" ++ psJsonQuote outputName ++
     ",\"sources\":[" ++ psJsonQuote sourcePath ++
     "],\"sourcesContent\":[" ++ psJsonQuote sourceText ++

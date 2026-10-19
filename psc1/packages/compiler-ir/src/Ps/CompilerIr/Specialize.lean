@@ -1712,3 +1712,18 @@ def psIrSpecializeModule
                         inductives := final.inductives
                         declarations := final.declarations
                       }
+
+-- The validated entry points are deliberate wrappers around this source's
+-- existing specialization algorithm. No target is allowed to treat the wrapper
+-- as an independent proof of runtime equivalence.
+def psIrSpecializeValidatedModule
+    (validated : PsValidatedIrModule) :
+    Except PsIrSpecializeError PsSpecializedIrModule := do
+  let raw ← psIrSpecializeModule validated.raw
+  pure { raw := raw }
+
+def psIrSpecializeUniformValidatedModule
+    (validated : PsValidatedIrModule) :
+    Except PsIrSpecializeError PsUniformSpecializedIrModule := do
+  let raw ← psIrSpecializeModule validated.raw
+  pure { raw := raw }

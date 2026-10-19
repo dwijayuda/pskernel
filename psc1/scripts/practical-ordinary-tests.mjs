@@ -141,6 +141,7 @@ try {
     const output = build(entry, 'rust', 'rust/module.rs');
     const crate = path.join(work, 'rust-test');
     fs.cpSync(fs.realpathSync(output.replace(/\.rs$/, '.cargo')), crate, { recursive: true });
+    fs.chmodSync(path.join(crate, 'src/lib.rs'), 0o644);
     fs.appendFileSync(path.join(crate, 'src/lib.rs'),
       '\n#[cfg(test)] mod ordinary_tests { use super::*; #[test] fn exact_body() { assert!(answer(false)); assert!(answer(true)); } }\n');
     run('cargo', ['test', '--locked', '--manifest-path', path.join(crate, 'Cargo.toml')], {

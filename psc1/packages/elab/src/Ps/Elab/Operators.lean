@@ -26,19 +26,19 @@ def psElabOperatorOperands
       !psOperatorIsNatural right then
     let r ← elaborate context right none
     let l ← elaborate r.context left (some r.type)
-    let meta := l.context.metaContext
+    let metaContext := l.context.metaContext
     return { context := l.context
-             left := psMetaInstantiate meta l.term
-             right := psMetaInstantiate meta r.term
-             type := psMetaInstantiate meta l.type }
+             left := psMetaInstantiate metaContext l.term
+             right := psMetaInstantiate metaContext r.term
+             type := psMetaInstantiate metaContext l.type }
   else
     let l ← elaborate context left expectedOperand
     let r ← elaborate l.context right (some l.type)
-    let meta := r.context.metaContext
+    let metaContext := r.context.metaContext
     return { context := r.context
-             left := psMetaInstantiate meta l.term
-             right := psMetaInstantiate meta r.term
-             type := psMetaInstantiate meta r.type }
+             left := psMetaInstantiate metaContext l.term
+             right := psMetaInstantiate metaContext r.term
+             type := psMetaInstantiate metaContext r.type }
 
 def psOperatorApply (name : PsName) (left right : PsExpr) : PsExpr :=
   .app (.app (.constE name []) left) right
@@ -90,7 +90,7 @@ def psElabBinaryOperator
     (operator : String) (left right : PsSyntaxTerm) (span : PsSourceSpan)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
   if operator == "&&" || operator == "||" then
-    let conditional :=
+    let conditional : PsSyntaxTerm :=
       if operator == "&&" then .ifE left right (.bool false span) span
       else .ifE left (.bool true span) right span
     let result ← elaborate context conditional (some (.constE psBoolName []))

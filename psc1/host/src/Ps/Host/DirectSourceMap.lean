@@ -2,29 +2,24 @@ import Ps.BackendJs.Print
 import Ps.Host.ProjectCompiler
 import Ps.Bridge.Json
 
--- Coordinates are attached only to actual source declarations with names that
--- match emitted JSIR declarations. Generated helper code is deliberately unmapped.
 structure PsDirectSourceOrigin where
   name : String
   position : PsSourcePos
 
 def psDirectSourceOrigins (module : PsSyntaxModule) : List PsDirectSourceOrigin :=
   module.declarations.map fun declaration =>
-    let original := psElabOriginSource declaration
     { name := psHostSyntaxDeclarationName declaration
-      position := original.2.start }
+      position := (psElabOriginSource declaration).2.start }
 
--- The PSC1 source lexer reports 1-based Unicode scalar columns; ECMA-426
--- requires zero-based UTF-16 columns. Convert from the *actual source text*,
--- preserving surrogate-pair width instead of suppressing every Unicode map.
+-- Parser columns are 1-based Unicode scalar positions; maps require zero-based
+-- UTF-16 columns. Never saturate invalid zero coordinates into a valid origin.
 def psDirectSourceUtf16Column
     (source : String) (position : PsSourcePos) : Option Nat := do
-  let line ← (source.splitOn "\n")[position.line - 1]?
-  let prefixSize := position.column - 1
-  if prefixSize > line.toList.length then
-    none
-  else
-    some ((line.toList.take prefixSize).foldl
+  if position.line == 0 || position.column == 0 then none else do
+    let line ← (source.splitOn "\n")[position.line - 1]?
+    let prefixSize := position.column - 1
+    if prefixSize > line.toList.length then none
+    else some ((line.toList.take prefixSize).foldl
       (fun n c => n + (if c.toNat > 65535 then 2 else 1)) 0)
 
 def psDirectBase64Digit (n : Nat) : String :=
@@ -37,8 +32,10 @@ partial def psDirectVLQDigits (n : Nat) : String :=
     (if remaining == 0 then "" else psDirectVLQDigits remaining)
 
 def psDirectVLQ (value : Int) : String :=
-  let magnitude := value.natAbs
-  psDirectVLQDigits (if value < 0 then magnitude * 2 - 1 else magnitude * 2)
+  -- ECMA-426: a negative value sets the low sign bit; it does NOT subtract one
+  -- from the doubled magnitude. Signed -2^31 has the specification's code 1.
+  psDirectVLQDigits (if value == -2147483648 then 1
+    else if value < 0 then value.natAbs * 2 + 1 else value.natAbs * 2)
 
 structure PsDirectMapState where
   generatedLine : Nat := 0
@@ -47,24 +44,17 @@ structure PsDirectMapState where
   sourceColumn : Nat := 0
   hasSegmentOnLine : Bool := false
 
--- A generated-only declaration must start an explicit one-field segment.
--- Otherwise consumers can accidentally keep the preceding source attribution
--- across generated code on the same line (ECMA-426 section on mappings).
 def psDirectMapUnmapped
     (span : PsJsGeneratedDeclarationSpan)
     (state : PsDirectMapState) : String × PsDirectMapState :=
   let generatedLine := span.start.line
   let nextLine := generatedLine > state.generatedLine
-  let semicolons :=
-    String.join (List.replicate (generatedLine - state.generatedLine) ";")
+  let semicolons := String.join (List.replicate (generatedLine - state.generatedLine) ";")
   let columnBase := if nextLine then 0 else state.generatedColumn
   let comma := if !nextLine && state.hasSegmentOnLine then "," else ""
-  let entry :=
-    psDirectVLQ (Int.ofNat span.start.column - Int.ofNat columnBase)
+  let entry := psDirectVLQ (Int.ofNat span.start.column - Int.ofNat columnBase)
   let updated : PsDirectMapState := {
-    state with
-    generatedLine := generatedLine
-    generatedColumn := span.start.column
+    state with generatedLine := generatedLine, generatedColumn := span.start.column,
     hasSegmentOnLine := true }
   (semicolons ++ comma ++ entry, updated)
 
@@ -86,8 +76,7 @@ def psDirectMapSegments
         let sourceLine := origin.position.line - 1
         let generatedLine := span.start.line
         let nextLine := generatedLine > state.generatedLine
-        let semicolons :=
-          String.join (List.replicate (generatedLine - state.generatedLine) ";")
+        let semicolons := String.join (List.replicate (generatedLine - state.generatedLine) ";")
         let columnBase := if nextLine then 0 else state.generatedColumn
         let comma := if !nextLine && state.hasSegmentOnLine then "," else ""
         let entry :=
@@ -96,19 +85,16 @@ def psDirectMapSegments
           psDirectVLQ (Int.ofNat sourceLine - Int.ofNat state.sourceLine) ++
           psDirectVLQ (Int.ofNat sourceColumn - Int.ofNat state.sourceColumn)
         let updated : PsDirectMapState := {
-          generatedLine := generatedLine
-          generatedColumn := span.start.column
-          sourceLine := sourceLine
-          sourceColumn := sourceColumn
-          hasSegmentOnLine := true }
+          generatedLine := generatedLine, generatedColumn := span.start.column,
+          sourceLine := sourceLine, sourceColumn := sourceColumn, hasSegmentOnLine := true }
         semicolons ++ comma ++ entry ++ psDirectMapSegments sourceText origins rest updated
 
+-- Compatibility mapping API. Current DirectJS/TS production maps observe the
+-- final formatted AST and the complete captured source closure in host-tools.
 def psDirectSourceMap
     (sourcePath sourceText outputName : String)
-    (parsed : PsSyntaxModule)
-    (printed : PsJsPrintedModule) : String :=
-  let mapping :=
-    psDirectMapSegments sourceText (psDirectSourceOrigins parsed) printed.spans {}
+    (parsed : PsSyntaxModule) (printed : PsJsPrintedModule) : String :=
+  let mapping := psDirectMapSegments sourceText (psDirectSourceOrigins parsed) printed.spans {}
   "{\"version\":3,\"file\":" ++ psJsonQuote outputName ++
     ",\"sources\":[" ++ psJsonQuote sourcePath ++
     "],\"sourcesContent\":[" ++ psJsonQuote sourceText ++

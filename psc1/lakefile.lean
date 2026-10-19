@@ -89,11 +89,7 @@ lean_lib PsErasure where
 
 lean_lib PsCompiler where
   srcDir := "packages/compiler/src"
-  roots := #[
-    `Ps.Compiler,
-    `Ps.Compiler.Api,
-    `Ps.Compiler.Sh1
-  ]
+  roots := #[`Ps.Compiler, `Ps.Compiler.Api, `Ps.Compiler.Sh1]
 
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
@@ -107,8 +103,7 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Compiler
   ]
 
--- Optional backend libraries are built independently of the 55-module
--- self-host bootstrap root. Loading one must not add an unchecked proof path.
+-- Target libraries remain outside the portable bootstrap import closure.
 lean_lib PsBackendJs where
   srcDir := "packages/backend-js/src"
   roots := #[
@@ -134,8 +129,6 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.Module
   ]
 
--- Build the internal core backend without the historical component adapter
--- until its missing InterfaceIr dependency is ported and independently gated.
 lean_lib PsBackendWasm where
   srcDir := "packages/backend-wasm/src"
   roots := #[
@@ -154,8 +147,8 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Binary
   ]
 
--- Host-only independent admission provider. This library is deliberately
--- outside the portable compiler bootstrap/import closure.
+-- Independent admission is host-only; logical checking is never delegated to
+-- formatters, transport code, the elaborator or an unvalidated raw IR wrapper.
 lean_lib PsKernelLean where
   srcDir := "packages/pskernel-lean/provider"
   roots := #[`PsKernelLean.Error, `PsKernelLean.Convert, `PsKernelLean.Protocol,
@@ -170,6 +163,8 @@ lean_lib PsHost where
   roots := #[
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
+    `Ps.Host.SourceSnapshot,
+    `Ps.Host.ArtifactBundle,
     `Ps.Host.CompilerDriver,
     `Ps.Host.LeanChecked,
     `Ps.Host.DirectSourceMap,
@@ -177,8 +172,8 @@ lean_lib PsHost where
     `Ps.Host.WasmComponent
   ]
 
--- Regression-only extension; compiler fixed-point closure never imports Ps.Project.
--- Source is preserved in legacy while BootstrapTests still exercises it.
+-- Preserve existing regression and historical bootstrap targets. The scoped
+-- correctness workflow deliberately does not run full self-host qualification.
 lean_lib PsProject where
   srcDir := "legacy/packages/project/src"
   roots := #[`Ps.Project.ModuleGraph]
@@ -241,6 +236,14 @@ lean_exe psc1_lean_kernel_provider_tests where
   srcDir := "packages/pskernel-lean/provider-test"
   root := `PsKernelLeanTests
 
+lean_exe psc1_scoped_tests where
+  srcDir := "test"
+  root := `ScopedCorrectnessTests
+
+lean_exe psc1_snapshot_tests where
+  srcDir := "test"
+  root := `SourceSnapshotTests
+
 lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests
@@ -253,7 +256,6 @@ lean_exe psc2_prod_match_selfhost_tests where
   srcDir := "test"
   root := `ProdMatchSelfHostTests
 
--- Host-only diagnostics; this executable is not a portable bootstrap module.
 lean_exe psc2_joint_closure_inventory where
   srcDir := "scripts"
   root := `JointClosureInventory
@@ -262,7 +264,6 @@ lean_exe psc2_selfhost_replay_audit where
   srcDir := "scripts"
   root := `SelfhostReplayAudit
 
--- Native IO adapter for the portable source-owned SH/1 enforcement boundary.
 lean_exe psc1_sh1_compile where
   srcDir := "scripts"
   root := `StrictSourceCompile

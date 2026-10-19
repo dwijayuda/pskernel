@@ -1,0 +1,16 @@
+{
+  "schema": "psc1-native-profile/1",
+  "implementation": "Lean-native PSC1",
+  "version": "0.1.0-psc1.1",
+  "leanToolchain": "leanprover/lean4:v4.34.0",
+  "sourceProfile": "existing PSC1 bounded source subset; no v7.2 expansion",
+  "admissionProvider": "independent official Lean 4.34.0 kernel",
+  "ownedKernel": "corrected PSKernel-Core source integrated and separately regression-tested; not the current default direct-output provider",
+  "targets": ["js", "ts", "rust", "wasm-core", "wasm-component"],
+  "artifactProfile": "psc1-checked-direct/1",
+  "publicationPlatforms": ["linux"],
+  "publicApi": "runtime declarations authored in the entry module; dependencies linked privately",
+  "readability": "format before final source-map observation; no minification",
+  "npmDistribution": "private workspace launcher; native binary packaging/publication not qualified",
+  "selfHosting": "not part of this qualification"
+}

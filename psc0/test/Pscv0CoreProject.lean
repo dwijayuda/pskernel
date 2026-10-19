@@ -204,7 +204,7 @@ private def checkRuntime (prepared : PsCompilerEnginePrepared)
     "runtime ownership changed"
 
 private def visibility (seed : Lean.Kernel.Environment)
-    (profile : PsCompilerProfileContext) (kind : PsCompilerSourceKind) : IO Unit := do
+    (profile : PsCompilerProfileContext) (kind : PsCompilerSourceKind) : IO String := do
   let library := input kind "Library" (librarySource kind)
   let ordinary := input kind "Entry" (entrySource kind)
   refuse profile "Entry" [library, input kind "Entry" (entrySource kind "")] true
@@ -222,20 +222,24 @@ private def visibility (seed : Lean.Kernel.Environment)
       (entrySource kind "import Library\n" "ProjectLib.hidden")] true
     "PSCV0-SCOPE: unknown name ProjectLib.hidden"
   let client := input kind "Entry" (entrySource kind "import Facade\n")
-  match kind with
-  | .lean => pure ()
-  | .proofScript => do
-      let facade := input kind "Facade"
-        ("public import Library\n" ++ identitySource kind "coreProjectFacade")
-      let exported ← prepare profile "Entry" [client, facade, library]
-      let _ ← admit seed exported.admissions
-      ensure (sameNames exported.mainNames [mainName] &&
-          exported.libraryNames.any (psNameEq libName))
-        "re-export ownership changed"
+  let facade := input kind "Facade" (match kind with
+    | .lean => "module\npublic import Library\npublic " ++ identitySource kind "coreProjectFacade"
+    | .proofScript => "public import Library\n" ++ identitySource kind "coreProjectFacade")
+  let exported ← prepare profile "Entry" [client, facade, library]
+  let _ ← admit seed exported.admissions
+  ensure (sameNames exported.mainNames [mainName] &&
+      exported.libraryNames.any (psNameEq libName))
+    "re-export ownership changed"
+  let some facadeReceipt := exported.moduleProfiles.find? (fun item => item.name == "Facade")
+    | fail "public import receipt missing"
+  ensure (facadeReceipt.source == facade.source &&
+      facadeReceipt.imports == [("Library", true)])
+    "public import receipt changed"
   let ordinaryFacade := input kind "Facade"
     ("import Library\n" ++ identitySource kind "coreProjectFacade")
   refuse profile "Entry" [client, ordinaryFacade, library] true
     "PSCV0-SCOPE: unknown name ProjectLib.copy"
+  pure exported.admissions
 
 private def graph (profile : PsCompilerProfileContext)
     (kind : PsCompilerSourceKind) : IO Unit := do
@@ -250,6 +254,60 @@ private def graph (profile : PsCompilerProfileContext)
     [input kind "A" ("import B\n" ++ a.source), input kind "B" ("import A\n" ++ b.source)]
     true "PSCV0-MODULE: circular import dependency"
 
+private def checkModuleHeaders (seed : Lean.Kernel.Environment)
+    (profile : PsCompilerProfileContext) : IO Unit := do
+  let library := input .lean "Library"
+    ("module\nnamespace ProjectLib\n" ++
+      "def hidden (A : Type) (x : A) : A := CoreSelectedIdentity A x\n" ++
+      "public def copy (A : Type) (x : A) : A := hidden A x\nend ProjectLib\n")
+  let entry := input .lean "Entry"
+    ("module\nimport Library\nnamespace ProjectEntry\n" ++
+      "public def twice (A : Type) (f : A -> A) (x : A) : A := ProjectLib.copy A (f (f x))\n" ++
+      "end ProjectEntry\n")
+  let nativeSurface ← prepare profile "Entry" [entry, library]
+  let paired ← prepare profile "Entry"
+    [input .proofScript "Library" (privateSource .proofScript),
+      input .proofScript "Entry" (entrySource .proofScript)]
+  let _ ← admit seed nativeSurface.admissions
+  let _ ← admit seed paired.admissions
+  ensure (nativeSurface.admissions == paired.admissions)
+    "module default privacy changed paired admissions"
+  let some receipt := nativeSurface.moduleProfiles.find? (fun item => item.name == "Library")
+    | fail "module library receipt missing"
+  ensure (!receipt.privateNames.isEmpty && receipt.source == library.source &&
+      receipt.privateNames.all (fun name =>
+        !receipt.interface.declarations.any (fun decl => psNameEq (psDeclarationName decl) name)))
+    "module default-private declaration leaked"
+  refuse profile "Entry" [library, input .lean "Entry"
+    ("module\nimport Library\n" ++
+      "public def hiddenUse (A : Type) (x : A) : A := ProjectLib.hidden A x\n")] true
+    "PSCV0-SCOPE: unknown name ProjectLib.hidden"
+  -- Explicit public is harmless without a module header in pinned native Lean.
+  let publicWithoutHeader ← prepare profile "Entry"
+    [input .lean "Entry" ("public " ++ identitySource .lean "coreProjectPublic")]
+  let _ ← admit seed publicWithoutHeader.admissions
+  ensure (publicWithoutHeader.mainNames.any (psNameEq (psRootName "coreProjectPublic")))
+    "explicit public lost its name"
+  let definition := identitySource .lean "coreHeaderValue"
+  let negatives : List (String × String) := [
+    ("public import Library\n" ++ definition, "PSCV0-LEAN-MODULE-REQUIRED"),
+    ("module\nmodule\n" ++ definition, "PSCV0-LEAN-MODULE-HEADER"),
+    ("import Library\nmodule\n" ++ definition, "PSCV0-LEAN-MODULE-HEADER"),
+    (definition ++ "module\n", "PSCV0-LEAN-MODULE-HEADER"),
+    (definition ++ "import Library\n", "PSCV0-LEAN-IMPORT-ORDER"),
+    ("module\npublic " ++ definition ++ "public import Library\n", "PSCV0-LEAN-IMPORT-ORDER"),
+    ("module\npublic private " ++ definition, "PSCV0-LEAN-VISIBILITY-MODIFIER"),
+    ("module\npublic section\n" ++ definition, "PSCV0-LEAN-VISIBILITY-SCOPE-PENDING")]
+  for (text, expected) in negatives do
+    match psLex text with
+    | .error _ => fail "module refusal fixture failed lexing"
+    | .ok _ => pure ()
+    match psCompilerParsePscv0Program .lean text with
+    | .ok _ => fail ("module refusal disappeared: " ++ expected)
+    | .error message =>
+      ensure (message.startsWith expected) ("module refusal phase changed: " ++ message)
+  IO.println "PSCV0_CORE_MODULE_HEADER: paired re-export, default privacy, explicit public and eight owned refusal controls passed"
+
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
   let seed ← match result with
@@ -263,6 +321,7 @@ def main : IO Unit := do
     runtimePrelude := fun _ _ => [] }
   let profile := profileFor environment none
   let mut paired : List String := []
+  let mut pairedExports : List String := []
   for kind in [PsCompilerSourceKind.lean, .proofScript] do
     let library := input kind "Library" (librarySource kind)
     let entry := input kind "Entry" (entrySource kind)
@@ -293,10 +352,15 @@ def main : IO Unit := do
       ensure (runtimeOutput.admissions == output.admissions)
         "runtime changed admissions"
       checkRuntime runtimeOutput.prepared width
-    visibility seed profile kind
+    let exported ← visibility seed profile kind
+    pairedExports := pairedExports ++ [exported]
     graph profile kind
     paired := paired ++ [output.admissions]
   let [leanAdmissions, psAdmissions] := paired
     | fail "paired source count changed"
   ensure (leanAdmissions == psAdmissions) "Lean and PS module admissions differ"
+  let [leanExports, psExports] := pairedExports
+    | fail "paired re-export source count changed"
+  ensure (leanExports == psExports) "Lean and PS re-export admissions differ"
+  checkModuleHeaders seed profile
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

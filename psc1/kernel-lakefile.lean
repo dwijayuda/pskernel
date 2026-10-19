@@ -1,146 +1,108 @@
-name: PSC1 PSKernel-Core correctness
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - fix/psc1-pskernel-core-cross-branch-20261020
-    paths:
-      - psc1/packages/pskernel-core/**
-      - psc1/test/PsKernelCoreRegression.lean
-      - psc1/test/PsKernelInstantiatePerformance.lean
-      - psc1/test/PsKernelMultiInstantiatePerformance.lean
-      - psc1/test/PsKernelCorePerformance.lean
-      - psc1/kernel-lakefile.lean
-      - psc1/check-psc1-source.mjs
-      - psc1/scripts/pskernel-generated-smoke.mjs
-      - .github/workflows/psc1-pskernel-core-correctness.yml
+import Lake
+open Lake DSL
 
-permissions:
-  contents: read
+package proofscriptSelfhost
 
-jobs:
-  native-kernel:
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install pinned Lean via elan
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Verify toolchain and compile the independent kernel
-        shell: bash
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          lean --version
-          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression psc1_kernel_perf psc1_kernel_instantiate_perf psc1_kernel_multi_perf
-      - name: Run native safety and semantics regression
-        shell: bash
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          lake -f kernel-lakefile.lean exe psc1_kernel_regression
-      - name: Run same-process old-versus-C0 beta-spine performance comparison
-        shell: bash
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          lake -f kernel-lakefile.lean exe psc1_kernel_perf
-      - name: Run native C0 single-substitution parity and performance comparison
-        shell: bash
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          lake -f kernel-lakefile.lean exe psc1_kernel_instantiate_perf
-      - name: Run same-run C0 multi-variable substitution performance comparison
-        shell: bash
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          lake -f kernel-lakefile.lean exe psc1_kernel_multi_perf
+-- Isolated kernel qualifier: explicitly enumerate native dependencies so
+-- Lake compiles this portable source tree independently of compiler targets.
+lean_lib PsKernelCore where
+  srcDir := "packages/pskernel-core/src"
+  roots := #[
+    `Ps.KernelCore.API.Kernel,
+    `Ps.KernelCore.API.KernelContractV1,
+    `Ps.KernelCore.API.Outcome,
+    `Ps.KernelCore.API.Provider,
+    `Ps.KernelCore.API.Session,
+    `Ps.KernelCore.Admission.Declaration.Admission,
+    `Ps.KernelCore.Admission.Declaration.Validation,
+    `Ps.KernelCore.Admission.Inductive.Common.Elimination,
+    `Ps.KernelCore.Admission.Inductive.Common.Occurrence,
+    `Ps.KernelCore.Admission.Inductive.Common.Parameters,
+    `Ps.KernelCore.Admission.Inductive.Common.RecursorValidation,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Admission,
+    `Ps.KernelCore.Admission.Inductive.Mutual.AdmissionLoops,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Analysis,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Header,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Nested.Admission,
+    `Ps.KernelCore.Admission.Inductive.Nested.Commit,
+    `Ps.KernelCore.Admission.Inductive.Nested.Discover,
+    `Ps.KernelCore.Admission.Inductive.Nested.Flatten,
+    `Ps.KernelCore.Admission.Inductive.Nested.Rebase,
+    `Ps.KernelCore.Admission.Inductive.Nested.ReservedNames,
+    `Ps.KernelCore.Admission.Inductive.Nested.Restore,
+    `Ps.KernelCore.Admission.Inductive.Nested.RestoreExpr,
+    `Ps.KernelCore.Admission.Inductive.Nested.Types,
+    `Ps.KernelCore.Admission.Inductive.Nested.Validation,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Admission,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Constructor,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.ConstructorAdmission,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Types,
+    `Ps.KernelCore.Admission.Quot.Admission,
+    `Ps.KernelCore.Admission.Quot.Bootstrap,
+    `Ps.KernelCore.Checker.Context,
+    `Ps.KernelCore.Checker.DefEq.BinderSpines,
+    `Ps.KernelCore.Checker.DefEq.DeltaStep,
+    `Ps.KernelCore.Checker.DefEq.FinalRules,
+    `Ps.KernelCore.Checker.DefEq.FullShape,
+    `Ps.KernelCore.Checker.DefEq.LazyDelta,
+    `Ps.KernelCore.Checker.DefEq.Quick,
+    `Ps.KernelCore.Checker.DefEq.Shortcuts,
+    `Ps.KernelCore.Checker.DefEq.Support,
+    `Ps.KernelCore.Checker.Inference,
+    `Ps.KernelCore.Checker.Inference.Core,
+    `Ps.KernelCore.Checker.Inference.Helpers,
+    `Ps.KernelCore.Checker.Knot,
+    `Ps.KernelCore.Checker.Ops,
+    `Ps.KernelCore.Checker.Projection,
+    `Ps.KernelCore.Checker.Recursor.Analysis,
+    `Ps.KernelCore.Checker.Recursor.Reduction,
+    `Ps.KernelCore.Checker.Reduction.KernelReductions,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveData,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveNat,
+    `Ps.KernelCore.Checker.Reduction.Primitives,
+    `Ps.KernelCore.Checker.Reduction.Whnf,
+    `Ps.KernelCore.Checker.Reduction.WhnfCore,
+    `Ps.KernelCore.Checker.ResourcePolicy,
+    `Ps.KernelCore.Checker.Session,
+    `Ps.KernelCore.Checker.State,
+    `Ps.KernelCore.Core.Declaration,
+    `Ps.KernelCore.Core.Expr,
+    `Ps.KernelCore.Core.Level,
+    `Ps.KernelCore.Core.LocalContext,
+    `Ps.KernelCore.Core.Name,
+    `Ps.KernelCore.Core.Substitution.Abstract,
+    `Ps.KernelCore.Core.Substitution.Beta,
+    `Ps.KernelCore.Core.Substitution.Instantiate,
+    `Ps.KernelCore.Core.Substitution.Lift,
+    `Ps.KernelCore.Core.Substitution.ListOps,
+    `Ps.KernelCore.Environment.Environment,
+    `Ps.KernelCore.Environment.Lookup,
+    `Ps.KernelCore.Environment.Operations,
+    `Ps.KernelCore.Environment.Semantic,
+    `Ps.KernelCore.Runtime.Acceleration.Cache,
+    `Ps.KernelCore.Runtime.Acceleration.CachePolicy,
+    `Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex,
+    `Ps.KernelCore.Runtime.Capability.Lean434NativeReduction,
+    `Ps.KernelCore.Runtime.Capability.Types,
+    `Ps.KernelCore.SelfHost
+  ]
 
-  psc1-portability:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install pinned Lean via elan
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Check all 79 kernel modules are in portable source profile
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          node check-psc1-source.mjs --all-portable
-      - name: Build real PSC1 compiler
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          lake build psc1
-      - name: Translate first kernel source through PSC1
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          lake exe psc1 translate packages/pskernel-core/src/Ps/KernelCore/Core/Name.lean --to ps --out /tmp/psc1-pskernel-name.ps
-          test -s /tmp/psc1-pskernel-name.ps
-      - name: Check complete 79-module kernel using PSC1
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+lean_exe psc1_kernel_regression where
+  srcDir := "test"
+  root := `PsKernelCoreRegression
 
-      - name: Reconstruct all kernel sources in canonical .ps
-        working-directory: psc1
-        shell: bash
-        run: |
-          set -euo pipefail
-          node scripts/bootstrap-project.mjs \
-            packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
-            dist/pskernel-selfhost/workspace
-          node --input-type=module <<'NODE'
-          import { readFileSync } from 'node:fs';
-          import { assertBootstrapWorkspaceManifest } from './scripts/bootstrap-manifest.mjs';
-          const workspace='dist/pskernel-selfhost/workspace';
-          const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
-          if(manifest.sourceCount!==79 || manifest.generated.length!==79)
-            throw Error('PSKERNEL_PORTABLE_FULL_CLOSURE_REQUIRED_79');
-          if(!manifest.generated.every(p=>p.startsWith('packages/pskernel-core/src/Ps/KernelCore/')))
-            throw Error('PSKERNEL_CLOSURE_HAS_UNEXPECTED_MODULES');
-          await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
-          console.log('PSKERNEL_CANONICAL_79_PS_SOURCES: PASS');
-          NODE
-      - name: PSC1 checks generated ProofScript kernel
-        working-directory: psc1
-        shell: bash
-        run: |
-          set -euo pipefail
-          lake exe psc1 check dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
-      - name: Install pinned TypeScript 7 for generated portable kernel
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Generate independent JS kernel from the .ps closure
-        working-directory: psc1
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/psc1-kernel-ts7
-          echo '{"name":"psc1-kernel-ts7-isolated","private":true,"version":"0.0.0"}' > /tmp/psc1-kernel-ts7/package.json
-          npm install --prefix /tmp/psc1-kernel-ts7 --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
-          export PSC0_TSC=/tmp/psc1-kernel-ts7/node_modules/typescript/bin/tsc
-          test -f "$PSC0_TSC"
-          node "$PSC0_TSC" --version
-          lake exe psc1 build \
-            dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
-            --out dist/pskernel-selfhost/pskernel-core.js
-          test -s dist/pskernel-selfhost/pskernel-core.js
-          test -s dist/pskernel-selfhost/pskernel-core.d.ts
-          node --check dist/pskernel-selfhost/pskernel-core.js
-          node scripts/pskernel-generated-smoke.mjs dist/pskernel-selfhost/pskernel-core.js
-          echo 'PSC1_GENERATED_JS_KERNEL: PASS'
+-- Optional same-run performance comparison; assertions check semantics,
+-- timings are observations and do not override correctness qualification.
+lean_exe psc1_kernel_perf where
+  srcDir := "test"
+  root := `PsKernelCorePerformance
+
+lean_exe psc1_kernel_instantiate_perf where
+  srcDir := "test"
+  root := `PsKernelInstantiatePerformance
+
+lean_exe psc1_kernel_multi_perf where
+  srcDir := "test"
+  root := `PsKernelMultiInstantiatePerformance

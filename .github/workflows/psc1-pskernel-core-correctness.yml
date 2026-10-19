@@ -1,68 +1,146 @@
-import { pathToFileURL } from "node:url";
-import path from "node:path";
+name: PSC1 PSKernel-Core correctness
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/psc1-pskernel-core-cross-branch-20261020
+    paths:
+      - psc1/packages/pskernel-core/**
+      - psc1/test/PsKernelCoreRegression.lean
+      - psc1/test/PsKernelInstantiatePerformance.lean
+      - psc1/test/PsKernelMultiInstantiatePerformance.lean
+      - psc1/test/PsKernelCorePerformance.lean
+      - psc1/kernel-lakefile.lean
+      - psc1/check-psc1-source.mjs
+      - psc1/scripts/pskernel-generated-smoke.mjs
+      - .github/workflows/psc1-pskernel-core-correctness.yml
 
-if (process.argv.length !== 3) {
-  throw new Error("PSKERNEL_GENERATED_SMOKE_USAGE: node scripts/pskernel-generated-smoke.mjs <generated-kernel.js>");
-}
+permissions:
+  contents: read
 
-const url = pathToFileURL(path.resolve(process.argv[2])).href;
-const kernel = await import(url);
+jobs:
+  native-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean via elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify toolchain and compile the independent kernel
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lean --version
+          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression psc1_kernel_perf psc1_kernel_instantiate_perf psc1_kernel_multi_perf
+      - name: Run native safety and semantics regression
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean exe psc1_kernel_regression
+      - name: Run same-process old-versus-C0 beta-spine performance comparison
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean exe psc1_kernel_perf
+      - name: Run native C0 single-substitution parity and performance comparison
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean exe psc1_kernel_instantiate_perf
+      - name: Run same-run C0 multi-variable substitution performance comparison
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean exe psc1_kernel_multi_perf
 
-function requireExport(name) {
-  if (!(name in kernel)) {
-    throw new Error(`PSKERNEL_GENERATED_EXPORT_MISSING: ${name}`);
-  }
-  return kernel[name];
-}
+  psc1-portability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean via elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check all 79 kernel modules are in portable source profile
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node check-psc1-source.mjs --all-portable
+      - name: Build real PSC1 compiler
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake build psc1
+      - name: Translate first kernel source through PSC1
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 translate packages/pskernel-core/src/Ps/KernelCore/Core/Name.lean --to ps --out /tmp/psc1-pskernel-name.ps
+          test -s /tmp/psc1-pskernel-name.ps
+      - name: Check complete 79-module kernel using PSC1
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
 
-function expect(name, condition) {
-  if (!condition) throw new Error(`PSKERNEL_GENERATED_SMOKE_FAILED: ${name}`);
-  console.log(`PSKERNEL_GENERATED_SMOKE PASS: ${name}`);
-}
-
-const semanticRoot = requireExport("psKernelCoreSemanticRoot");
-expect("semantic root exports true", semanticRoot === true);
-
-const max = requireExport("psKernelStateNatMax");
-expect("freshness maximum larger right", max(3n, 14n) === 14n);
-expect("freshness maximum larger left", max(19n, 7n) === 19n);
-expect("freshness maximum equality", max(7n, 7n) === 7n);
-
-const stringEq = requireExport("psKernelStringEq");
-expect("UTF8 byte iteration equal", stringEq("hé", "hé") === true);
-expect("UTF8 byte iteration distinct", stringEq("hé", "he") === false);
-expect("empty strings equal", stringEq("", "") === true);
-expect("length mismatch rejected", stringEq("x", "") === false);
-
-const natLt = requireExport("psKernelNatLt");
-expect("strict nat ordering", natLt(2n, 3n) === true && natLt(3n, 2n) === false);
-
-const cacheEligible = requireExport("psKernelSemanticCacheEligible");
-const names = requireExport("PsKernelName");
-const expr = requireExport("PsKernelExpr");
-const levels = requireExport("PsKernelLevel");
-if (!names || !expr || !levels || typeof expr.fvar !== "function") {
-  throw new Error("PSKERNEL_GENERATED_CONSTRUCTOR_EXPORTS_MISSING");
-}
-expect("closed sort eligible", cacheEligible(expr.sort(levels.zero)) === true);
-expect("free variable never cached", cacheEligible(expr.fvar(names.anonymous)) === false);
-
-const inst1 = requireExport("psKernelExprInstantiate1");
-const eq = requireExport("psKernelExprEq");
-const sort0 = expr.sort(levels.zero);
-expect("C0 one-variable beta substitution", eq(inst1(expr.bvar(0n), sort0), sort0));
-expect("C0 outer de Bruijn decrement", eq(inst1(expr.bvar(2n), sort0), expr.bvar(1n)));
-const openApp = expr.app(expr.bvar(0n), expr.bvar(2n));
-const expectedApp = expr.app(sort0, expr.bvar(1n));
-expect("C0 app substitution in generated JS",
-  eq(inst1(openApp, sort0), expectedApp));
-expect("C0 closed app retained",
-  eq(inst1(expr.app(sort0, sort0), sort0), expr.app(sort0, sort0)));
-
-const multi = requireExport("psKernelExprInstantiateAtChanged");
-const psList = requireExport("List");
-const subs = psList.cons(expr.bvar(3n), psList.cons(sort0, psList.nil));
-const multiResult = multi(expr.app(expr.bvar(0n), expr.bvar(2n)), 0n, subs, 0n);
-expect("C0 multi substitution generated JS",
-  eq(multiResult.fst, expr.app(expr.bvar(3n), expr.bvar(0n))));
-console.log("PSKERNEL_GENERATED_SMOKE: PASS");
+      - name: Reconstruct all kernel sources in canonical .ps
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/bootstrap-project.mjs \
+            packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            dist/pskernel-selfhost/workspace
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { assertBootstrapWorkspaceManifest } from './scripts/bootstrap-manifest.mjs';
+          const workspace='dist/pskernel-selfhost/workspace';
+          const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
+          if(manifest.sourceCount!==79 || manifest.generated.length!==79)
+            throw Error('PSKERNEL_PORTABLE_FULL_CLOSURE_REQUIRED_79');
+          if(!manifest.generated.every(p=>p.startsWith('packages/pskernel-core/src/Ps/KernelCore/')))
+            throw Error('PSKERNEL_CLOSURE_HAS_UNEXPECTED_MODULES');
+          await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
+          console.log('PSKERNEL_CANONICAL_79_PS_SOURCES: PASS');
+          NODE
+      - name: PSC1 checks generated ProofScript kernel
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake exe psc1 check dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
+      - name: Install pinned TypeScript 7 for generated portable kernel
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate independent JS kernel from the .ps closure
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/psc1-kernel-ts7
+          echo '{"name":"psc1-kernel-ts7-isolated","private":true,"version":"0.0.0"}' > /tmp/psc1-kernel-ts7/package.json
+          npm install --prefix /tmp/psc1-kernel-ts7 --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          export PSC0_TSC=/tmp/psc1-kernel-ts7/node_modules/typescript/bin/tsc
+          test -f "$PSC0_TSC"
+          node "$PSC0_TSC" --version
+          lake exe psc1 build \
+            dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+            --out dist/pskernel-selfhost/pskernel-core.js
+          test -s dist/pskernel-selfhost/pskernel-core.js
+          test -s dist/pskernel-selfhost/pskernel-core.d.ts
+          node --check dist/pskernel-selfhost/pskernel-core.js
+          node scripts/pskernel-generated-smoke.mjs dist/pskernel-selfhost/pskernel-core.js
+          echo 'PSC1_GENERATED_JS_KERNEL: PASS'

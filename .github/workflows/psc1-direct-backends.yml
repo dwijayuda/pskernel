@@ -198,6 +198,25 @@ jobs:
           grep -q 'true' /tmp/psc1-bool-component-runtime.txt
           echo "PSC1_COMPONENT_RUNTIME_TRUE: PASS"
           grep -q 'answer: func() -> bool;' /tmp/psc1-bool-component.wit
+          # Exercise a real component parameter via WAVE, not just a
+          # zero-argument exported constant. Input here uses the .ps grammar.
+          cat >/tmp/psc1-bool-identity.ps <<'EOF'
+          def idbool(b : Bool) : Bool := b
+          EOF
+          lake exe psc1 build /tmp/psc1-bool-identity.ps --target wasm-component --export idbool --out /tmp/psc1-bool-identity.wasm
+          test -s /tmp/psc1-bool-identity.wit
+          grep -q 'idbool: func(b: bool) -> bool;' /tmp/psc1-bool-identity.wit
+          wasm-tools validate /tmp/psc1-bool-identity.wasm
+          wasmtime run --invoke 'idbool(true)' /tmp/psc1-bool-identity.wasm | tee /tmp/psc1-idbool-true.txt
+          grep -q 'true' /tmp/psc1-idbool-true.txt
+          wasmtime run --invoke 'idbool(false)' /tmp/psc1-bool-identity.wasm | tee /tmp/psc1-idbool-false.txt
+          grep -q 'false' /tmp/psc1-idbool-false.txt
+          echo "PSC1_COMPONENT_BOOL_ARGUMENT_PARITY: PASS"
+          if lake exe psc1 build /tmp/psc1-bool-identity.ps --target wasm-component --export unknown --out /tmp/psc1-bool-unknown.wasm; then
+            echo "Unknown WIT export unexpectedly accepted" >&2
+            exit 1
+          fi
+          test ! -e /tmp/psc1-bool-unknown.wasm
           cat >/tmp/psc1-wasm-invalid-abi.lean <<'EOF'
           def count : Nat := 42
           EOF

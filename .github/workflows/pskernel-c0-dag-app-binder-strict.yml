@@ -1,0 +1,91 @@
+name: PSKernel-C0 genuine dag_app_binder fuel-4096 strict acceptance
+on:
+  push:
+    branches: [research/pskernel-c0-explicit-inference-frames-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-dag-app-binder-strict.yml'
+      - 'psc0/packages/pskernel-c0/src/**'
+      - 'psc0/packages/pskernel-c0/test/C0DeepFrameSourceProof.lean'
+  pull_request:
+    branches: [perf/pskernel-c0-v7-rust-20261012]
+    paths:
+      - '.github/workflows/pskernel-c0-dag-app-binder-strict.yml'
+      - 'psc0/packages/pskernel-c0/src/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-full-proof-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build full native C0, exact source proof guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0OfficialReplay
+          lake env lean -R src test/C0DeepFrameProof.lean
+          lake env lean -R src test/C0DeepFrameSourceProof.lean
+      - name: Verify official positive and immutable historical proof body
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/arena-2026-09.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo '98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  '"$RUNNER_TEMP"'/arena-2026-09.tar.gz' | sha256sum -c -
+          python3 - <<'PY'
+          import os, sys
+          from pathlib import Path
+          sys.path.insert(0, 'psc0/packages/pskernel-c0/test')
+          from arena_conformance import check_archive
+          from arena_lean435_compat import adapt_legacy_envelope, official_reference
+          tests = check_archive(Path(os.environ['RUNNER_TEMP']) / 'arena-2026-09.tar.gz')
+          matches = [(t, raw) for t, name, raw in tests if name == 'perf/app-lam.ndjson']
+          assert len(matches) == 1 and matches[0][0] == 'good'
+          compatible, ident = adapt_legacy_envelope(matches[0][1])
+          assert ident['body_bytes_identical']
+          assert ident['original_sha256'] == '3f7b7a595dc29b0e289c9031c4edaef42d0e12b8aee3cbb48cf15cb715adc09a'
+          path = Path(os.environ['RUNNER_TEMP']) / 'dag-app-binder.ndjson'
+          path.write_bytes(compatible)
+          official = official_reference(Path('psc0/packages/pskernel-c0'), path.resolve(), 120)
+          assert official['verdict'] == 'accepted', official
+          print('C0_DAG_AUTH original_body_exact=true envelope_header_only=true official_lean435=accepted')
+          PY
+      - name: Require actual COMPLETE C0 acceptance at unchanged fuel 4096
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          set +e
+          /usr/bin/time -v -o "$RUNNER_TEMP/c0-dag-resources.txt" \
+            timeout 180s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+            --require-accepted "$RUNNER_TEMP/dag-app-binder.ndjson" 4096 \
+            > "$RUNNER_TEMP/c0-dag-verdict.txt" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/c0-dag-verdict.txt" | tail -n 35
+          echo "C0_DAG_FULL_CHECK_EXIT=$rc original_source_fuel=4096"
+          grep -F 'C0_REAL_EXPORT replay_outcome=' "$RUNNER_TEMP/c0-dag-verdict.txt" | tail -n 1 || true
+          test "$rc" -eq 0
+          grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/c0-dag-verdict.txt"
+          echo 'C0_DAG_APP_BINDER=AUTHENTIC_COMPLETE_ACCEPTED'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: c0-dag-app-binder-strict-fuel4096
+          path: |
+            ${{ runner.temp }}/c0-dag-resources.txt
+            ${{ runner.temp }}/c0-dag-verdict.txt
+          if-no-files-found: warn
+          retention-days: 30

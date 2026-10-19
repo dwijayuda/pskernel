@@ -1730,14 +1730,18 @@ def auditCoreCandidateAgainstFull (label : String)
     exactDeclaration declaration &&
       (psEnvironmentReducibility? candidate name).map psReducibilityName ==
         (psEnvironmentReducibility? full name).map psReducibilityName
-  let nativeClasses := names.filter (Lean.isClass native)
+  -- Class extensions need initialized aggregate metadata. This environment is
+  -- used only for reporting; declaration authentication and replay stay separate.
+  unsafe Lean.enableInitializersExecution
+  let nativeMetadata ← Lean.importModules #[{ module := `Init }] {} (loadExts := true)
+  let nativeClasses := names.filter (Lean.isClass nativeMetadata)
   let classRows := nativeClasses.map fun name =>
     let portable := exportName name
     Lean.Json.mkObj [
       ("name", Lean.toJson (toString name)),
       ("nameKey", Lean.toJson (psStandardSnapshotName portable)),
-      ("nativeOutputParameters", Lean.toJson (Lean.getOutParamPositions? native name)),
-      ("nativeOutputLevels", Lean.toJson (Lean.getOutLevelParamPositions? native name)),
+      ("nativeOutputParameters", Lean.toJson (Lean.getOutParamPositions? nativeMetadata name)),
+      ("nativeOutputLevels", Lean.toJson (Lean.getOutLevelParamPositions? nativeMetadata name)),
       ("candidateRegistered", Lean.toJson (candidate.classes.any (psNameEq portable))),
       ("fullRegistered", Lean.toJson (full.classes.any (psNameEq portable))),
       ("fullParameterRecords", Lean.toJson
@@ -1765,6 +1769,7 @@ def auditCoreCandidateAgainstFull (label : String)
       Lean.toJson (declarations.all exactExplicit)),
     ("sourceRegistryInclusionClaimed", Lean.toJson false),
     ("candidatePayloadSHA256", Lean.toJson (psStandardSnapshotSHA256 payload)),
+    ("nativeClassMetadataExtensionsLoaded", Lean.toJson true),
     ("nativeClassesAmongCandidateDeclarations", .arr classRows.toArray),
     ("comparisons", .arr ((declarations.map (coreCandidateComparison candidate full)).toArray))]
   IO.FS.writeFile output (report.compress ++ "\n")

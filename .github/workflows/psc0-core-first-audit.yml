@@ -15,7 +15,11 @@ on:
       - 'psc0/scripts/Pscv0Core*.lean'
       - 'psc0/test/Pscv0Core*.lean'
       - 'psc0/test/Pscv0Bootstrap*.lean'
-      - 'psc0/docs/PSC0_CORE_STANDARD_MANIFEST.json'
+      - 'psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md'
+      - 'psc0/docs/PSCV0_REFERENCE_ADOPTION.json'
+      - 'psc0/scripts/pscv0-native-profile.mjs'
+      - 'psc0/scripts/pscv0-reference-identity.mjs'
+      # Core design/evidence ledgers are not loadable profile inputs.
       - '.github/workflows/psc0-core-first-audit.yml'
   workflow_dispatch:
 

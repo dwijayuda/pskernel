@@ -1,7 +1,7 @@
 {
   "schema": "psc0-core-first-environment-ledger/1",
   "purpose": "Design and evidence ledger only; not a loadable or authenticated profile",
-  "status": "initial-audit-and-isolated-seams",
+  "status": "checked-bootstrap-seed-and-selected-frontend-slice",
   "authority": {
     "reference": "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md",
     "referenceGitBlobSHA1": "694115223777599ba28ee175e14bb642b7b6aa4b",
@@ -11,7 +11,8 @@
       "propext",
       "Quot.sound",
       "Classical.choice"
-    ]
+    ],
+    "profileNestingIsAnUnfinishedGoal": true
   },
   "baseline": {
     "branch": "psc0/pscv0-v7-native-lean-v1",
@@ -94,22 +95,62 @@
   },
   "profiles": {
     "Bootstrap": {
-      "status": "independent-native-export-checked; composition-and-identity-pending",
+      "status": "independently-checked-seed; whole-compiler sufficiency and complete profile pending",
       "selected": false,
-      "rootOwner": "PsV7Native.coreBootstrapCandidateRoots",
+      "rootOwner": "Ps.Environment.Bootstrap",
       "emptyBoundary": true,
-      "allowedLogicalAssumptions": [],
+      "allowedLogicalAssumptions": null,
       "actualDeclarationManifest": null,
-      "actualAssumptions": [],
+      "actualAssumptions": null,
       "logicalIdentity": null,
       "surfaceIdentity": null,
       "runtimeIdentity": null,
       "checkedDeclarations": 76,
       "comparedRecursorRules": 24,
-      "generatedSourceBytes": 118573
+      "generatedSourceBytes": 118573,
+      "target": "Smallest measured dependency-complete environment capable of compiling the entire authoritative compiler",
+      "compilerWorkloadComplete": false,
+      "seed": {
+        "assetPath": "psc0/packages/environment/src/Ps/Environment/BootstrapData.lean",
+        "assetGitBlobSHA1": "39c8e193ef2e48869c4757b6526a22c4adc82b12",
+        "assetBytes": 118573,
+        "assetSHA256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54",
+        "manifestPath": "psc0/docs/PSC0_BOOTSTRAP_SEED_MANIFEST.json",
+        "logicalPayloadBytes": 49889,
+        "logicalSHA256": "8b89d77e562378015e70d95560735e5727994016615255c84842eab190dae041",
+        "logicalFNV64": "15218654452277382292",
+        "declKinds": {
+          "inductives": 20,
+          "constructors": 24,
+          "recursors": 20,
+          "definitions": 11,
+          "theorems": 1
+        },
+        "declarations": 76,
+        "reducibilityEntries": 11,
+        "regeneratedRecursorRules": 24,
+        "axioms": [],
+        "kernelTrustLevel": 0,
+        "maxHeartbeatsPerDeclaration": 2000000,
+        "maxRecDepthPerDeclaration": 20000,
+        "sourceRegistriesSelected": false,
+        "sourceImportModules": 11,
+        "sourceImportBytes": 151539,
+        "completeCompilerProfile": false,
+        "allowedLogicalAssumptions": [],
+        "qualificationHead": "e059098683d3388fc9f893ec12027b4998eafd52",
+        "qualificationRun": 39183454255,
+        "nativeClassMetadataExtensionsLoaded": true,
+        "nativeClassNames": [
+          "Decidable",
+          "Nonempty"
+        ],
+        "installedClassNames": []
+      },
+      "assumptionPolicyStatus": "Whole-compiler policy and actual closure remain unqualified within the global approved maximum; the checked seed uses an empty allowlist and no axioms."
     },
     "Core": {
-      "status": "typed-workload-audit-required",
+      "status": "native-workload-reachability-measured; selected Standard/source/runtime qualification open",
       "selected": false,
       "rootOwner": "native declaration/module ownership plus explicit reviewed bootstrap seeds",
       "emptyBoundaryRequired": true,
@@ -117,14 +158,15 @@
       "actualAssumptions": null,
       "logicalIdentity": null,
       "surfaceIdentity": null,
-      "runtimeIdentity": null
+      "runtimeIdentity": null,
+      "target": "Bootstrap plus the explicit essential general-purpose application contract"
     },
     "Full": {
       "status": "existing-qualified-identity-preserved",
       "selectedOnQualifiedStage0": true,
       "compositionOwner": "Ps.Environment.SelfHostProd",
       "snapshotOwner": "Ps.Environment.StandardSnapshot",
-      "inclusionOfNewCandidates": "not-established"
+      "inclusionOfNewCandidates": "current seed literal inclusion fails; separately qualified migration required"
     }
   },
   "inclusion": {
@@ -132,7 +174,7 @@
       "Bootstrap subset of Core",
       "Core subset of Full"
     ],
-    "status": "unproven",
+    "status": "current-seed-to-current-Full-literal-inclusion-fails; Bootstrap/Core/Full goal remains open",
     "requiredEquality": [
       "declaration kind",
       "universe parameters",
@@ -144,19 +186,76 @@
       "class parameters",
       "instance names and priorities",
       "primitive/runtime contract"
-    ]
+    ],
+    "observedSeedFull": {
+      "candidateDeclarations": 76,
+      "namesPresentInFull": 73,
+      "exactDeclarations": 42,
+      "exactDeclarationAndEffectiveReducibility": 42,
+      "exactDeclarationAndExplicitReducibility": 42,
+      "presentNamesWithMatchingFamilyMetadata": 73,
+      "presentNamesWithMatchingEffectiveReducibility": 73,
+      "presentNamesWithMatchingExplicitReducibility": 73,
+      "presentNamesWithMatchingNoncomputableFlags": 73,
+      "missingNames": [
+        "PEmpty",
+        "PEmpty.rec",
+        "Bool.Reflects.match_1"
+      ],
+      "presentNamesWithDeclarationDifferences": 31,
+      "kindDifference": {
+        "name": "Decidable.reflects_decide",
+        "seed": "theorem",
+        "full": "definition"
+      },
+      "semanticEquivalenceDecided": false,
+      "report": "psc0/docs/core-first-evidence/bootstrap-full-compatibility.json",
+      "qualificationHead": "e059098683d3388fc9f893ec12027b4998eafd52",
+      "nativeClassMetadataExtensionsLoaded": true,
+      "nativeClassesAmongCandidateDeclarations": [
+        {
+          "candidateRegistered": false,
+          "fullParameterRecords": [],
+          "fullRegistered": true,
+          "name": "Decidable",
+          "nameKey": "name{2:n09:Decidable}",
+          "nativeOutputLevels": [],
+          "nativeOutputParameters": []
+        },
+        {
+          "candidateRegistered": false,
+          "fullParameterRecords": [
+            "classParameters{20:name{2:n08:Nonempty}6:list{}6:list{}}"
+          ],
+          "fullRegistered": true,
+          "name": "Nonempty",
+          "nameKey": "name{2:n08:Nonempty}",
+          "nativeOutputLevels": [],
+          "nativeOutputParameters": []
+        }
+      ]
+    }
   },
   "identityBinding": {
     "logicalSerializerOwner": "Ps.Environment.Fingerprint",
     "kernelReplayOwner": "PsKernelLean.Replay",
     "completeProfileIdentity": "not-yet-qualified",
     "externalPreparedModuleCacheAuthentication": "open",
-    "profileLabelIsAuthority": false
+    "profileLabelIsAuthority": false,
+    "compilerContextOwner": "Ps.Compiler.Engine",
+    "selectedSingleSourceOwner": "Ps.Compiler.Pscv0Engine",
+    "existingProjectCompositionRemainsFull": true
   },
   "measured": {
     "sourceImportsAndBlobBytes": true,
     "seamNativeReplayAndRefusal": true,
-    "emptyBoundaryBootstrapAndByteWordReplay": true
+    "emptyBoundaryBootstrapAndByteWordReplay": true,
+    "typedNativeSourceOwnershipAndClosure": true,
+    "selectedPairedSingleSourceAdmission": true,
+    "exactCommittedBootstrapReplayAndReproduction": true,
+    "literalSeedFullComparison": true,
+    "buildCommandResources": true,
+    "installedNpmSize": false
   },
   "notYetQualified": [
     "dependency-complete selected Core Standard",
@@ -321,11 +420,127 @@
       "sourceBytes": 16111994
     }
   ],
-  "nextCandidate": {
-    "status": "CI-pending",
-    "engine": "Ps.Compiler.Engine",
-    "selectedFrontend": "Ps.Compiler.Pscv0Engine",
-    "movedDerivingBuilders": 24,
-    "nativeOwnershipAudit": "raw checked types/bodies/family/rule dependencies; independent source-roster comparison"
+  "review": {
+    "pullRequest": 151,
+    "url": "https://github.com/dwijayuda/pskernel/pull/151",
+    "draft": true,
+    "baseBranch": "psc0/pscv0-v7-native-lean-v1",
+    "baseHead": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
+    "promotionApproved": false
+  },
+  "sourceInventory": {
+    "file": "psc0/docs/PSC0_CORE_SOURCE_AUDIT.json",
+    "stage0Head": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
+    "candidateHead": "9f06af4cad58fd10c4224a52cd89e38a2a753b51",
+    "candidateFullModules": 321,
+    "candidateFullSourceBytes": 26398392,
+    "independentSelectedCandidateModules": 223,
+    "independentSelectedCandidateSourceBytes": 2765757,
+    "independentCandidateIncludesExistingProjectLoader": false,
+    "sourceParityQualified": false,
+    "installedSizeMeasured": false,
+    "latestReproducedHead": "e059098683d3388fc9f893ec12027b4998eafd52",
+    "latestSourceJob": 117840891994
+  },
+  "initialEnvironmentSliceQualification": {
+    "head": "93107eab14b7347f9605b1396c7a79f2b628ba61",
+    "run": 39181815014,
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "source-inventory",
+        "id": 117835978775,
+        "conclusion": "success"
+      },
+      {
+        "name": "native-seams",
+        "id": 117835978577,
+        "conclusion": "success"
+      },
+      {
+        "name": "bootstrap-closure",
+        "id": 117835978751,
+        "conclusion": "success"
+      },
+      {
+        "name": "candidate-authoring",
+        "id": 117835978684,
+        "conclusion": "success"
+      }
+    ],
+    "scope": "independent seed, explicit compiler context, paired selected single-source probe, native reachability, Full native compatibility and literal comparison; no whole Core or selfhost"
+  },
+  "nativeWorkloadObservation": {
+    "head": "e059098683d3388fc9f893ec12027b4998eafd52",
+    "run": 39183454255,
+    "job": 117840892112,
+    "sourceModules": 321,
+    "sourceOwnedDeclarations": 191611,
+    "externalRoots": 458,
+    "closureDeclarations": 5690,
+    "actualAxioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "unsafe": [],
+    "partial": [],
+    "nativeClosureSHA256": "4fbd45b30ffbbb1c98f0da415d09d7b32abeea65ac37d62e2bea181096aeb02c",
+    "assumptionPathReport": "psc0/docs/core-first-evidence/native-assumption-paths.json",
+    "candidateKernelAdmitted": false,
+    "runtimeChoiceQualified": false,
+    "compilerExporterAutoRun": false,
+    "compilerExporterAllowedAxioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "sameNativeGraphAsPriorQualification": true
+  },
+  "nextCriticalPath": [
+    "Qualify required class/instance/alias/source registrations; loaded native Decidable/Nonempty rows are measured, but the seed installs no registries",
+    "Resolve literal seed/Full declaration compatibility through a checked migration",
+    "Bind exact environment/runtime identity through Pscv0Modules, host admission and caches",
+    "Freeze and compile an actual selected compiler-source subset, then retain the entire compiler denominator",
+    "Qualify mutual-data representations, bounded while conversion, runtime/backends and Stage1–3",
+    "Separate npm package payloads and measure fixed clean installations"
+  ],
+  "documentationIsLoadableAuthority": false,
+  "latestCodeQualification": {
+    "head": "e059098683d3388fc9f893ec12027b4998eafd52",
+    "tree": "bc0cffc2ab7ad51bb133bc8943602c10b6afd29f",
+    "run": 39183454255,
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 117840891809,
+        "name": "bootstrap-closure",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39183454255/job/117840891809"
+      },
+      {
+        "id": 117840891940,
+        "name": "native-seams",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39183454255/job/117840891940"
+      },
+      {
+        "id": 117840891994,
+        "name": "source-inventory",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39183454255/job/117840891994"
+      },
+      {
+        "id": 117840892112,
+        "name": "candidate-authoring",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39183454255/job/117840892112"
+      }
+    ],
+    "evidence": "psc0/docs/core-first-evidence/e059-qualification.json",
+    "scope": "Checked Bootstrap seed and selected single-source compiler slice; no whole-compiler profile, runtime/backend, package or selfhost qualification"
   }
 }

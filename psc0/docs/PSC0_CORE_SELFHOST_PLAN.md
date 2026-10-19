@@ -30,7 +30,7 @@ Reject a missing/additional module, source-kind substitution, import cycle, sour
 
 First isolate fingerprint/serialization, host kernel replay and an explicit-context Engine while preserving Full wrappers. Check their import closure and real preparation/refusal behavior; this is not Stage1.
 
-Next compile a real selected-source subset such as Foundation.Source, Foundation.List and Syntax.Token against a independently checked Core seed. Use both selected source routes and retain the output comparison contract. Include missing-source, wrong-environment, malformed-source and invalid-recursion controls. Add Foundation.Name and Syntax.Cursor only with exact UTF8/string dependencies or a checked conversion.
+Next compile a real selected-source subset such as Foundation.Source, Foundation.List and Syntax.Token against an independently checked Core seed. Use both selected source routes and retain the output comparison contract. Include missing-source, wrong-environment, malformed-source and invalid-recursion controls. Add Foundation.Name and Syntax.Cursor only with exact UTF8/string dependencies or a checked conversion.
 
 The mutual Syntax and ECMA data groups require a faithful selected representation. One candidate is an indexed family over a closed role tag with unchanged constructor telescopes, checked eliminators and API/runtime correspondence. Do not use an untyped representation or enable native-only syntax silently.
 

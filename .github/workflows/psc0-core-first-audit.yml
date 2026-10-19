@@ -14,6 +14,7 @@ on:
       - 'psc0/scripts/core-first-*.py'
       - 'psc0/scripts/Pscv0Core*.lean'
       - 'psc0/test/Pscv0Core*.lean'
+      - 'psc0/test/Pscv0Bootstrap*.lean'
       - 'psc0/docs/PSC0_CORE_STANDARD_MANIFEST.json'
       - '.github/workflows/psc0-core-first-audit.yml'
   workflow_dispatch:
@@ -155,6 +156,88 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  bootstrap-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/lakefile.lean
+            /psc0/lake-manifest.json
+            /psc0/lean-toolchain
+            /psc0/package.json
+            /psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md
+            /psc0/docs/PSCV0_REFERENCE_ADOPTION.json
+            /psc0/packages/foundation/src/
+            /psc0/packages/syntax/src/
+            /psc0/packages/core/src/
+            /psc0/packages/environment/src/
+            /psc0/packages/meta/src/
+            /psc0/packages/elab/src/
+            /psc0/packages/bridge/src/
+            /psc0/packages/compiler-ir/src/
+            /psc0/packages/erasure/src/
+            /psc0/packages/compiler/src/
+            /psc0/packages/codegen/src/
+            /psc0/packages/backend-rust/src/
+            /psc0/packages/backend-ts/src/
+            /psc0/packages/backend-ecma/src/
+            /psc0/packages/backend-wasm/src/
+            /psc0/packages/pskernel-lean/provider/
+            /psc0/host/src/
+            /psc0/test/
+            /psc0/scripts/
+            /psc0/v7-native/
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Guard native-only closure and v7.2 identity
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test ! -d ../packages/pskernel-core
+          node ../scripts/pscv0-native-profile.mjs
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Build the independent Bootstrap replay
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/core-first/bootstrap
+          lean --version | tee ../dist/core-first/bootstrap/toolchain.txt
+          grep -F '4.35.0' ../dist/core-first/bootstrap/toolchain.txt
+          grep -F 'eb6cafb' ../dist/core-first/bootstrap/toolchain.txt
+          /usr/bin/time -v -o ../dist/core-first/bootstrap/build-resource.txt lake build pscv0_bootstrap_replay 2>&1 | tee ../dist/core-first/bootstrap/build.log
+      - name: Replay the exact Bootstrap asset in an empty kernel
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o ../dist/core-first/bootstrap/replay-resource.txt lake env .lake/build/bin/pscv0_bootstrap_replay ../packages/environment/src/Ps/Environment/BootstrapData.lean ../dist/core-first/bootstrap/bootstrap-manifest.json 2>&1 | tee ../dist/core-first/bootstrap/check.log
+          sha256sum ../packages/environment/src/Ps/Environment/BootstrapData.lean .lake/build/bin/pscv0_bootstrap_replay > ../dist/core-first/bootstrap/SHA256SUMS
+          stat -c '%s' .lake/build/bin/pscv0_bootstrap_replay > ../dist/core-first/bootstrap/executable-bytes.txt
+      - name: Summarize Bootstrap resource observations
+        if: always()
+        run: |
+          python3 ../scripts/core-first-ci-evidence.py resources ../dist/core-first/bootstrap
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: psc0-core-bootstrap-${{ github.sha }}
+          path: psc0/dist/core-first/bootstrap/
+          if-no-files-found: error
+          retention-days: 30
+
   candidate-authoring:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -229,7 +312,7 @@ jobs:
           lean --version | tee ../dist/core-first/authoring/toolchain.txt
           grep -F '4.35.0' ../dist/core-first/authoring/toolchain.txt
           grep -F 'eb6cafb' ../dist/core-first/authoring/toolchain.txt
-          /usr/bin/time -v -o ../dist/core-first/authoring/build-resource.txt lake build pscv0_native pscv0_native_checks pscv0_core_environment_export pscv0_core_native_closure pscv0_core_native_seed_checks 2>&1 | tee ../dist/core-first/authoring/build.log
+          /usr/bin/time -v -o ../dist/core-first/authoring/build-resource.txt lake build pscv0_native pscv0_native_checks pscv0_core_environment_export pscv0_core_native_closure pscv0_core_native_seed_checks pscv0_bootstrap_compatibility 2>&1 | tee ../dist/core-first/authoring/build.log
       - name: Check native seed APIs and exact empty-boundary mutation controls
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
@@ -249,11 +332,18 @@ jobs:
           .lake/build/bin/pscv0_native --audit-standard-closure > ../dist/core-first/authoring/full-closure.json
           .lake/build/bin/pscv0_native --audit-standard-surface > ../dist/core-first/authoring/full-surface.json
           .lake/build/bin/pscv0_native_checks 2>&1 | tee ../dist/core-first/authoring/full-native-checks.log
+      - name: Compare the actual Bootstrap asset literally with Full
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake env .lake/build/bin/pscv0_bootstrap_compatibility ../dist/core-first/authoring/bootstrap-full-compatibility.json 2>&1 | tee ../dist/core-first/authoring/bootstrap-full-compatibility.log
+          python3 ../scripts/core-first-ci-evidence.py bootstrap-compatibility ../dist/core-first/authoring/bootstrap-full-compatibility.json
       - name: Author and check the standalone bootstrap candidate
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
           /usr/bin/time -v -o ../dist/core-first/authoring/bootstrap-resource.txt .lake/build/bin/pscv0_core_environment_export bootstrap ../dist/core-first/authoring/CoreBootstrapCandidate.lean 2>&1 | tee ../dist/core-first/authoring/bootstrap-export.log | sed '/^PSCV0_STANDARD_SOURCE /d'
+          cmp ../dist/core-first/authoring/CoreBootstrapCandidate.lean ../packages/environment/src/Ps/Environment/BootstrapData.lean
           sha256sum ../dist/core-first/authoring/CoreBootstrapCandidate.lean > ../dist/core-first/authoring/bootstrap.sha256
           python3 ../scripts/core-first-ci-evidence.py bootstrap-source ../dist/core-first/authoring/CoreBootstrapCandidate.lean
       - name: Author and check the standalone compiler byte-word candidate

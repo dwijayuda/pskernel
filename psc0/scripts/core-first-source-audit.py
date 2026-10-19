@@ -23,7 +23,7 @@ OTHER_ROOTS = [
     "Ps.Compiler.Pscv0Engine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
 ]
 ISOLATED_ROOTS = [
-    "Ps.Environment.Fingerprint", "PsKernelLean.Replay", "Ps.Compiler.Engine",
+    "Ps.Environment.Bootstrap", "Ps.Environment.Fingerprint", "PsKernelLean.Replay", "Ps.Compiler.Engine",
     "Ps.Compiler.Pscv0Engine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
 ]
 INDEPENDENT_COMPILER_ROOTS = ["Ps.Compiler.Pscv0Engine"] + PORTABLE_ROOTS[1:]

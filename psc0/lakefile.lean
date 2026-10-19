@@ -73,6 +73,8 @@ lean_lib PsEnvironment where
   srcDir := "packages/environment/src"
   roots := #[
     `Ps.Environment.Basic,
+    `Ps.Environment.BootstrapData,
+    `Ps.Environment.Bootstrap,
     `Ps.Environment.LocalContext,
     `Ps.Environment.Instances,
     `Ps.Environment.Resolve,

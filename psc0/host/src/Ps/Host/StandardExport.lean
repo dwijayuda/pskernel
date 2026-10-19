@@ -1585,4 +1585,196 @@ def checkCoreExportControls : IO Unit := do
   IO.println
     "PSCV0_CORE_EXPORT_CONTROLS: PASS empty kernel, checked positive proof, typed false-proof refusal, regenerated-signature refusal, exact assumption policy"
 
+private def coreCandidateKind : PsDeclaration → String
+  | .quotientDecl .. => "quotient"
+  | .axiomDecl .. => "axiom"
+  | .definitionDecl .. => "definition"
+  | .theoremDecl .. => "theorem"
+  | .partialDecl .. => "partial"
+  | .opaqueDecl .. => "opaque"
+  | .inductiveDecl _ => "inductive"
+  | .constructorDecl _ => "constructor"
+  | .recursorDecl _ => "recursor"
+
+private def coreCandidateBody : PsDeclaration → Option String
+  | .definitionDecl _ _ _ value | .theoremDecl _ _ _ value
+  | .partialDecl _ _ _ value | .opaqueDecl _ _ _ value =>
+      some (psStandardSnapshotExpr value)
+  | _ => none
+
+private def coreCandidateFamily : PsDeclaration → String
+  | .quotientDecl _ _ _ kind => psQuotientKindTag kind
+  | .inductiveDecl info => psStandardSnapshotNode "inductiveMetadata" [
+      toString info.numParams, toString info.numIndices,
+      psStandardSnapshotList psStandardSnapshotName info.constructors,
+      psStandardSnapshotBool info.isStructure]
+  | .constructorDecl info => psStandardSnapshotNode "constructorMetadata" [
+      psStandardSnapshotName info.inductiveName, toString info.constructorIndex,
+      toString info.numParams, toString info.numFields,
+      psStandardSnapshotList toString info.recursiveFields]
+  | .recursorDecl info => psStandardSnapshotNode "recursorMetadata" [
+      psStandardSnapshotList psStandardSnapshotName info.inductiveNames,
+      toString info.numParams, toString info.numIndices,
+      toString info.numMotives, toString info.numMinors]
+  | _ => "none"
+
+private def coreCandidateNativeReducibility (native : Lean.Environment)
+    (name : Lean.Name) : PsReducibility :=
+  match Lean.getReducibilityStatusCore native name with
+  | .reducible => .reducible
+  | .semireducible => .semireducible
+  | .irreducible => .irreducible
+  | .instanceReducible => .instanceReducible
+  | .implicitReducible => .implicitReducible
+
+private def coreCandidateComparison (candidate full : PsEnvironment)
+    (declaration : PsDeclaration) : Lean.Json :=
+  let name := psDeclarationName declaration
+  let found := psEnvironmentFind full name
+  let exact := found.any fun existing =>
+    psStandardSnapshotDeclaration declaration == psStandardSnapshotDeclaration existing
+  let effectiveStatus := psReducibilityName (psEnvironmentReducibility candidate name)
+  let fullStatus := psReducibilityName (psEnvironmentReducibility full name)
+  let explicitStatus := (psEnvironmentReducibility? candidate name).map psReducibilityName
+  let fullExplicitStatus := (psEnvironmentReducibility? full name).map psReducibilityName
+  Lean.Json.mkObj [
+    ("name", Lean.toJson (psNameToString name)),
+    ("nameKey", Lean.toJson (psStandardSnapshotName name)),
+    ("presentInFull", Lean.toJson found.isSome),
+    ("candidateKind", Lean.toJson (coreCandidateKind declaration)),
+    ("fullKind", Lean.toJson (found.map coreCandidateKind)),
+    ("kindExact", Lean.toJson (found.any fun existing =>
+      coreCandidateKind declaration == coreCandidateKind existing)),
+    ("levelParametersExact", Lean.toJson (found.any fun existing =>
+      psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams declaration) ==
+        psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams existing))),
+    ("typeExact", Lean.toJson (found.any fun existing =>
+      psStandardSnapshotExpr (psDeclarationType declaration) ==
+        psStandardSnapshotExpr (psDeclarationType existing))),
+    ("bodyOrProofExact", Lean.toJson (found.any fun existing =>
+      coreCandidateBody declaration == coreCandidateBody existing)),
+    ("familyMetadataExact", Lean.toJson (found.any fun existing =>
+      coreCandidateFamily declaration == coreCandidateFamily existing)),
+    ("declarationExact", Lean.toJson exact),
+    ("candidateReducibility", Lean.toJson effectiveStatus),
+    ("fullReducibility", Lean.toJson (if found.isSome then some fullStatus else none)),
+    ("effectiveReducibilityExact", Lean.toJson (found.isSome && effectiveStatus == fullStatus)),
+    ("candidateExplicitReducibility", Lean.toJson explicitStatus),
+    ("fullExplicitReducibility", Lean.toJson fullExplicitStatus),
+    ("explicitReducibilityMetadataExact",
+      Lean.toJson (found.isSome && explicitStatus == fullExplicitStatus)),
+    ("candidateNoncomputable", Lean.toJson (psEnvironmentIsNoncomputable candidate name)),
+    ("fullNoncomputable", Lean.toJson (psEnvironmentIsNoncomputable full name)),
+    ("noncomputableMetadataExact", Lean.toJson (found.isSome &&
+      psEnvironmentIsNoncomputable candidate name == psEnvironmentIsNoncomputable full name)),
+    ("candidateDeclarationSHA256",
+      Lean.toJson (psStandardSnapshotSHA256 (psStandardSnapshotDeclaration declaration))),
+    ("fullDeclarationSHA256", Lean.toJson (found.map fun existing =>
+      psStandardSnapshotSHA256 (psStandardSnapshotDeclaration existing)))]
+
+-- The inputs are the actual compiled generated lists. This report performs
+-- literal structural comparisons; it never equates different declarations
+-- through reduction, proof irrelevance, annotation erasure or name matching.
+-- Optional autoParam policy is used only to authenticate the source asset
+-- against its independently checked native authoring profile.
+def auditCoreCandidateAgainstFull (label : String)
+    (declarations : List PsDeclaration)
+    (statuses : List (PsName × PsReducibility))
+    (output : System.FilePath)
+    (eraseAutoParams : Bool := false)
+    (allowedAssumptions : List Lean.Name := []) : IO Unit := do
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Core compatibility audit requires the pinned Lean commit")
+  let names := declarations.map (PsKernelLean.toLeanName ∘ psDeclarationName)
+  unless names.eraseDups.length == names.length do
+    throw (IO.userError "Core compatibility candidate has duplicate declarations")
+  let statusNames := statuses.map (PsKernelLean.toLeanName ∘ Prod.fst)
+  let definitionNames := declarations.filterMap fun declaration =>
+    match declaration with
+    | .definitionDecl name .. => some (PsKernelLean.toLeanName name)
+    | _ => none
+  unless statusNames.eraseDups.length == statusNames.length &&
+      statusNames.length == definitionNames.length &&
+      statusNames.all definitionNames.contains do
+    throw (IO.userError "Core compatibility reducibility roster differs from definitions")
+  Lean.initSearchPath (← Lean.findSysroot)
+  let native ← Lean.importModules #[{ module := `Init }] {}
+  for declaration in declarations do
+    let name := PsKernelLean.toLeanName (psDeclarationName declaration)
+    let some original := native.checked.get.find? name
+      | throw (IO.userError ("Core candidate has no native declaration: " ++ toString name))
+    if eraseAutoParams then checkAutoParamSignature native original
+    let expected ← match exportDeclaration native allowedAssumptions original eraseAutoParams with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+    unless psStandardSnapshotDeclaration declaration == psStandardSnapshotDeclaration expected do
+      throw (IO.userError ("rendered Core candidate differs from native authoring: " ++ toString name))
+  for (name, status) in statuses do
+    unless psReducibilityName status ==
+        psReducibilityName (coreCandidateNativeReducibility native (PsKernelLean.toLeanName name)) do
+      throw (IO.userError ("rendered Core reducibility differs from native: " ++ psNameToString name))
+  let initial := declarations.foldl psEnvironmentInsert psEnvironmentEmpty
+  let candidate := statuses.foldl
+    (fun current entry => psEnvironmentSetReducibility current entry.fst entry.snd) initial
+  let full := psSelfHostProdPreludeEnvironment
+  let exactDeclaration := fun declaration =>
+    (psEnvironmentFind full (psDeclarationName declaration)).any fun existing =>
+      psStandardSnapshotDeclaration declaration == psStandardSnapshotDeclaration existing
+  let exactEffective := fun declaration =>
+    let name := psDeclarationName declaration
+    exactDeclaration declaration &&
+      psReducibilityName (psEnvironmentReducibility candidate name) ==
+        psReducibilityName (psEnvironmentReducibility full name)
+  let exactExplicit := fun declaration =>
+    let name := psDeclarationName declaration
+    exactDeclaration declaration &&
+      (psEnvironmentReducibility? candidate name).map psReducibilityName ==
+        (psEnvironmentReducibility? full name).map psReducibilityName
+  let nativeClasses := names.filter (Lean.isClass native)
+  let classRows := nativeClasses.map fun name =>
+    let portable := exportName name
+    Lean.Json.mkObj [
+      ("name", Lean.toJson (toString name)),
+      ("nameKey", Lean.toJson (psStandardSnapshotName portable)),
+      ("nativeOutputParameters", Lean.toJson (Lean.getOutParamPositions? native name)),
+      ("nativeOutputLevels", Lean.toJson (Lean.getOutLevelParamPositions? native name)),
+      ("candidateRegistered", Lean.toJson (candidate.classes.any (psNameEq portable))),
+      ("fullRegistered", Lean.toJson (full.classes.any (psNameEq portable))),
+      ("fullParameterRecords", Lean.toJson
+        ((full.classParameters.filter (fun entry => psNameEq entry.fst portable)).map
+          psStandardSnapshotClassParameters))]
+  let payload := psStandardSnapshotPayload candidate
+  let report := Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-core-full-compatibility/1" : String)),
+    ("candidate", Lean.toJson label),
+    ("nativeCommit", Lean.toJson Lean.githash),
+    ("candidateDeclarations", Lean.toJson declarations.length),
+    ("fullDeclarations", Lean.toJson full.declarations.length),
+    ("fullClasses", Lean.toJson full.classes.length),
+    ("fullInstances", Lean.toJson full.instances.entries.length),
+    ("nativeDeclarationAndReducibilityAuthentication", Lean.toJson true),
+    ("exactDeclarations", Lean.toJson ((declarations.filter exactDeclaration).length)),
+    ("exactDeclarationsAndEffectiveReducibility",
+      Lean.toJson ((declarations.filter exactEffective).length)),
+    ("exactDeclarationsAndExplicitReducibilityMetadata",
+      Lean.toJson ((declarations.filter exactExplicit).length)),
+    ("declarationInclusionExact", Lean.toJson (declarations.all exactDeclaration)),
+    ("declarationAndEffectiveReducibilityInclusionExact",
+      Lean.toJson (declarations.all exactEffective)),
+    ("declarationAndExplicitReducibilityMetadataInclusionExact",
+      Lean.toJson (declarations.all exactExplicit)),
+    ("sourceRegistryInclusionClaimed", Lean.toJson false),
+    ("candidatePayloadSHA256", Lean.toJson (psStandardSnapshotSHA256 payload)),
+    ("nativeClassesAmongCandidateDeclarations", .arr classRows.toArray),
+    ("comparisons", .arr ((declarations.map (coreCandidateComparison candidate full)).toArray))]
+  IO.FS.writeFile output (report.compress ++ "\n")
+  IO.println (Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-core-full-compatibility-summary/1" : String)),
+    ("candidate", Lean.toJson label),
+    ("declarations", Lean.toJson declarations.length),
+    ("exactDeclarations", Lean.toJson ((declarations.filter exactDeclaration).length)),
+    ("exactDeclarationsAndEffectiveReducibility",
+      Lean.toJson ((declarations.filter exactEffective).length)),
+    ("fullDeclarations", Lean.toJson full.declarations.length)]).compress
+
 end PsV7Native

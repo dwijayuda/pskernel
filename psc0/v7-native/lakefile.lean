@@ -185,3 +185,15 @@ lean_exe pscv0_core_native_seed_checks where
   srcDir := "../scripts"
   root := `Pscv0CoreNativeSeedChecks
   supportInterpreter := true
+
+-- The replay target has no Full environment or authoring dependency.
+lean_exe pscv0_bootstrap_replay where
+  srcDir := "../test"
+  root := `Pscv0BootstrapReplay
+  supportInterpreter := true
+
+-- Literal Full comparison remains a separate host audit.
+lean_exe pscv0_bootstrap_compatibility where
+  srcDir := "../test"
+  root := `Pscv0BootstrapCompatibility
+  supportInterpreter := true

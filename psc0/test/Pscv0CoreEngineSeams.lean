@@ -83,6 +83,33 @@ private def checkAdmissions (seed : Lean.Kernel.Environment)
   | .ok _ => pure ()
   | .error error => throw (IO.userError ("CORE-ENGINE: " ++ error))
 
+-- The exact canonical dependency must survive preparation and serialization.
+-- An internal environment rebuild only inserts declarations; admission occurs
+-- in the official kernel under the actual supplied base.
+private def checkMissingBaseAdmission (admissions : String) : IO Unit := do
+  let declarations ← match PsKernelLean.decodeCanonicalAdmissions admissions with
+    | .ok declarations => pure declarations
+    | .error error => throw (IO.userError ("CORE-ENGINE: " ++ error.message))
+  let [.defnDecl info] := declarations.toList
+    | throw (IO.userError "CORE-ENGINE: unexpected canonical source declaration")
+  let retainsBase := info.value.foldConsts false fun name seen =>
+    seen || name == PsKernelLean.toLeanName baseName
+  requireEngine (info.name == PsKernelLean.toLeanName sourceName && retainsBase)
+    "canonical source lost its explicit base dependency"
+  let emptyKernel := (← Lean.mkEmptyEnvironment 0).toKernelEnv
+  let result ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    emptyKernel.addDeclCore 2000000 20000
+      (PsKernelLean.psKernelWithDefinitionHeight emptyKernel (.defnDecl info)) none
+  match result with
+  | .error (.unknownConstant _ missing) =>
+      requireEngine (missing == PsKernelLean.toLeanName baseName)
+        "empty-base admission refused a different dependency"
+  | .error error => throw (IO.userError
+      ("CORE-ENGINE: unexpected empty-base refusal: " ++
+        PsKernelLean.kernelExceptionSummary error))
+  | .ok _ => throw (IO.userError
+      "CORE-ENGINE: the official empty kernel admitted a missing base dependency")
+
 private def checkRuntime (prepared : PsCompilerEnginePrepared)
     (wordSize : Option PsVerifiedIrWordSize) (marker : Option String) : IO Unit := do
   let ir ← takeEngine "typed erasure"
@@ -137,13 +164,16 @@ private def checkSource (seed : Lean.Kernel.Environment)
   match psCompilerEnginePrepareSource emptyProfile kind natSource with
   | .error (.elaboration _) => pure ()
   | _ => throw (IO.userError "CORE-ENGINE: Nat silently inherited a selected prelude")
-  -- This tests real dependency checking, not authentication of a forged record.
-  -- A future artifact/cache loader must additionally bind the exact authorized
-  -- context and manifest; a matching name or caller-claimed digest is insufficient.
+  -- Serialization and environment insertion do not authenticate a record.
+  -- Require the same retained wire graph to fail at actual kernel admission
+  -- without its base; a future artifact loader must also bind its authorized
+  -- context and manifest, independently of a caller-claimed name or digest.
   let detached := { prepared with profile := emptyProfile }
-  match psCompilerEngineEnvironmentFromPrepared detached with
-  | .error _ => pure ()
-  | .ok _ => throw (IO.userError "CORE-ENGINE: detached dependency was admitted")
+  let detachedAdmissions ← takeEngine "detached admissions"
+    (psCompilerEngineAdmissionsFromPrepared detached)
+  requireEngine (detachedAdmissions == admissions)
+    "detaching the base changed the canonical source graph"
+  checkMissingBaseAdmission detachedAdmissions
 
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations baseDeclarations

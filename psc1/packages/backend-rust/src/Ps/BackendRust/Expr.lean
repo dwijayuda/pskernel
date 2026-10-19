@@ -442,16 +442,6 @@ def psRustEmitIntrinsicFromPrinted
               "))")
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
-  | PsVerifiedIrIntrinsic.uint8OfNat =>
-      match psRustExactOneArgument arguments with
-      | Option.some value =>
-          Except.ok
-            (psRustConcat3
-              "__ps_uint8_of_nat(&("
-              value
-              "))")
-      | Option.none =>
-          Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intRepr =>
       match psRustExactOneArgument arguments with
       | Option.some value =>

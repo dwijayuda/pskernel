@@ -1,0 +1,364 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-shared-semantic-relations-doc-candidate",
+  "repository": "dwijayuda/pskernel",
+  "reviewedSourceCommit": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+  "status": "documentation-candidate-interaction-budget-correction-bounded-peer-review-clear-awaiting-root-review",
+  "scope": "One new documentation file. No production source, proof files, existing theory, refs, or workflow changes.",
+  "files": [
+    {
+      "path": "psc0/docs/selfhost-language/strict/SEMANTIC_RELATIONS.md",
+      "baseBlob": null,
+      "mustBeAbsent": true,
+      "candidateBlob": "40e540b325186ee514ff3af9e39a22126d29a167",
+      "sha256": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+      "bytes": 76548,
+      "mode": "100644",
+      "operation": "add",
+      "absenceVerifiedAt": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+      "absenceEvidence": "GitHub contents endpoint returned NOT_FOUND at integrationBaseObserved; the earlier review-commit directory listing also contains no SEMANTIC_RELATIONS.md.",
+      "applyGuard": "Add only if the target path is absent; use this exact immutable candidate blob.",
+      "rollback": {
+        "operation": "delete",
+        "guardBlob": "40e540b325186ee514ff3af9e39a22126d29a167",
+        "guardSha256": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+        "statement": "Remove only this new file, and only while its contents still match the candidate blob/hash. No overwrite of a later edit is authorized."
+      },
+      "forwardAndReverseExact": true
+    }
+  ],
+  "assurance": {
+    "definitions": [
+      "type-indexed Core/original-IR/runtime values",
+      "lexical environments and actual map precedence",
+      "grouped calls with one shared residual interaction budget and three distinct eta mechanisms",
+      "abort-only runtime error relation with separate data/compiler/resource outcomes",
+      "all eleven original-IR evaluation forms",
+      "mode-indexed actual erasure-scope reachability and semantic strengthening"
+    ],
+    "sourceCaseFactIds": [
+      "SC-1",
+      "SC-2",
+      "SC-3",
+      "SC-4",
+      "SC-5",
+      "SC-6",
+      "SC-7",
+      "SC-8",
+      "SC-9"
+    ],
+    "sourceCaseLimit": "These establish the explicitly stated structural facts and name their imported premises. They are not general source/runtime preservation or a row discharge.",
+    "openInterfaces": [
+      "O-SUB",
+      "O-GHOST",
+      "O-SCOPE",
+      "O-LAYOUT",
+      "O-NORMALIZE",
+      "O-CORE-DEMAND",
+      "O-GROUP",
+      "O-IR-JS",
+      "O-OPT",
+      "O-INIT/HOST"
+    ],
+    "serializedCoreIrWitnessRequiredByThisDocument": false,
+    "newNormativeMusts": false,
+    "conditionalLemmaClosesRow": false,
+    "finiteTestsAreGeneralProof": false,
+    "typingIsSemanticPreservation": false,
+    "fixedPointIsSemanticPreservation": false,
+    "providerAdmissionIsRuntimePreservation": false,
+    "interactionBudget": {
+      "residualReturnedAndThreaded": true,
+      "terminalValueIndex": "remaining budget r, not initial budget n",
+      "cutoffBeforeUnlicensedInvocation": true,
+      "indexZeroNoSubsequentInvocationResultClaim": true,
+      "callbacksAndReentryNeverResetBudget": true,
+      "oneChargePerMatchedSemanticApplication": true,
+      "wrappersRegistryAndIifesAdministrative": true,
+      "optimizedLoopsCountMatchedLogicalIrCalls": true,
+      "allIndicesDoNotAloneExcludeInfiniteSilentStuttering": true
+    }
+  },
+  "sourcePins": [
+    {
+      "reference": "S01",
+      "path": "psc0/docs/selfhost-language/SPEC.md",
+      "blob": "61f0f36ffe7880144f60845084e8be6a61b91eed"
+    },
+    {
+      "reference": "S02",
+      "path": "psc0/docs/selfhost-language/strict/CORRESPONDENCE.md",
+      "blob": "7f09dfedbe68e885aaeca5a91f7ce4197f7aa10c"
+    },
+    {
+      "reference": "S03",
+      "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+      "blob": "54a707b68c51369b50e5e36e1572cbe7e2acf313"
+    },
+    {
+      "reference": "S04",
+      "path": "psc0/docs/selfhost-language/strict/obligations.json",
+      "blob": "733ea716f458d36cfe665f0e5d8a9d8e6a69ea2d"
+    },
+    {
+      "reference": "S05",
+      "path": "psc0/docs/selfhost-language/strict/enabled-runtime-contract.json",
+      "blob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b"
+    },
+    {
+      "reference": "S06a",
+      "path": "psc0/docs/selfhost-language/strict/RUNTIME_LAW_REVIEW.md",
+      "blob": "682250126807cf520fb4c354ad0b52577a04d8b0"
+    },
+    {
+      "reference": "S06b",
+      "path": "psc0/docs/selfhost-language/strict/BACKEND_RULE_ARGUMENTS.md",
+      "blob": "af3d887349bf27d46140ac2bababfafcbd25c84e"
+    },
+    {
+      "reference": "S07",
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "blob": "f31d88f0172122d4cf62d62f35f372fe89581c18"
+    },
+    {
+      "reference": "S08",
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "blob": "c403bd879e439b7b6e88303df430890352a14115"
+    },
+    {
+      "reference": "S09",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "blob": "ff632f3a40b069bfead799b408af009ec9931261"
+    },
+    {
+      "reference": "S10a",
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "blob": "a947a4058e3d91a02d4f8120a3d86556100c8555"
+    },
+    {
+      "reference": "S10b",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "blob": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53"
+    },
+    {
+      "reference": "S11",
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "blob": "a58fa183103817b9b65db45cc9e9798e6abcf4d3"
+    },
+    {
+      "reference": "S12",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "blob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0"
+    },
+    {
+      "reference": "S13",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "blob": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8"
+    },
+    {
+      "reference": "S14",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+    },
+    {
+      "reference": "S15",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "blob": "857b9926a14be9e30ad2ed2ccdcd26643624d9ed"
+    },
+    {
+      "reference": "S16",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "blob": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75"
+    },
+    {
+      "reference": "S17",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "blob": "66b20621288b76153fa78db6c923f0c7b0c5d9ab"
+    },
+    {
+      "reference": "S18a",
+      "path": "psc0/packages/core/src/Ps/Core/Expr.lean",
+      "blob": "eac8f1a8f883f87af78cc68317644c843ba40fd2"
+    },
+    {
+      "reference": "S18b",
+      "path": "psc0/packages/environment/src/Ps/Environment/LocalContext.lean",
+      "blob": "fcd057e60367c2fa3f9ffcdf7cf5c40a7c5d49a6"
+    },
+    {
+      "reference": "S19",
+      "path": "psc0/packages/core/src/Ps/Core/Subst.lean",
+      "blob": "c8439e444e38b642043f2d18561a77a2bdd420a2"
+    },
+    {
+      "reference": "S20",
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "blob": "ac527384033181014417579e39f93a1595d4cf72"
+    },
+    {
+      "reference": "S21",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+      "blob": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139"
+    },
+    {
+      "reference": "S22",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+    },
+    {
+      "reference": "S23",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87"
+    },
+    {
+      "reference": "S24",
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "blob": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112"
+    },
+    {
+      "reference": "S25",
+      "path": "psc0/packages/core/src/Ps/Core/Abstract.lean",
+      "blob": "8ac0f21d92538502ee14fc6932eb0f48fda48a85"
+    },
+    {
+      "reference": "S26",
+      "path": "psc0/packages/meta/src/Ps/Meta/Context.lean",
+      "blob": "94f1920fc7e62bbe53f7e70d8d4466d78a0d5755"
+    }
+  ],
+  "targetIdentityReconciliation": {
+    "actualSourceBlob": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139",
+    "olderLedgerCandidateBlob": "1c5f03cd8d21288f2e1dcb9dbd72191af5f091e5",
+    "comparison": "Both files contain the weighted lambda/eta depth implementation. After normalizing PsSh1TargetTask/PsSh1TargetNameRole constructor qualification in both and removing only the hasParameters : Bool annotation, the texts are exactly equal.",
+    "exactNormalizedTextMatch": true,
+    "sourceChangeRequired": false
+  },
+  "preservedPins": {
+    "sourceAuthority": ".lean",
+    "grammar": "ps-0.9-r3/new-only",
+    "selectedSeed": "R",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "node": "22.23.3",
+    "typescript": "7.0.2"
+  },
+  "verification": {
+    "method": "GitHub MCP reads/writes of unattached immutable blobs plus pure in-memory text/JSON/SHA-256 transforms",
+    "documentReadbackExact": true,
+    "sourcePathPinsReadBackAtReviewCommit": 29,
+    "allSourcePathPinsMatch": true,
+    "newFileForwardAndGuardedReverseExact": true,
+    "repositoryCodeExecuted": false,
+    "compilerExecuted": false,
+    "testsExecuted": false,
+    "localFilesUsed": false,
+    "shellUsed": false,
+    "browserUsed": false,
+    "refsChanged": false,
+    "workflowRunByThisTask": false
+  },
+  "reviews": [
+    {
+      "reviewer": "artifact_inspection_review",
+      "scope": "Sections4–5, actual reachable-scope source-case facts and binder/substitution paths",
+      "status": "bounded-clear",
+      "finding": "No actual scope, map-role, reservation-count, local-search, initializer-order, Nat-major, empty-result, or Core open/close overclaim. All scope writes/pushes in Basic/Definition/Expr/Inductive/Structure and relevant normalizer/elaboration/structure-recursor paths checked. SC4 remains conditional on ordinary Nat/String laws; global semantic rows remain open.",
+      "reviewedBlob": "a2fd6faac80bef104a588d8c075f846d4cf95aad",
+      "finalScopeConfirmation": "Sections4–5 are byte-identical between reviewed initial a2fd6f, superseded 8f43ad and this budget-corrected candidate.",
+      "finalBlob": "40e540b325186ee514ff3af9e39a22126d29a167"
+    },
+    {
+      "reviewer": "runtime_comparison_finish",
+      "scope": "Sections1–3/6 and backend binder classes: value/environment/grouped-call/error relation, Core adequacy, eta/callback/reentry premises",
+      "status": "superseded-clear-limited-to-capture-well-foundedness-and-original-domain-scan",
+      "reviewedBlob": "8f43adcee13638c21806684cfead0199cea4e4cb",
+      "initialFinding": "Environment relatedness had no explicit observation index and could create V^n→E^n→V^n through captures.",
+      "resolution": "Explicit E^n pointwise V^n; structural-only W/index0 captures; behavioral captured environments at strictly smaller indices. Exact suggested paragraph and indices were read back in the final blob.",
+      "finalFinding": "The previous review established the lower-index capture dependency and retained domain distinctions. Subsequent higher-order composition review exposed that exact V^0 terminal results after an unlicensed V^0 call were too strong. The present candidate supersedes that computation clause and requires a new bounded budget review."
+    },
+    {
+      "reviewer": "runtime_comparison_finish",
+      "scope": "Interaction-budget correction in Sections1.3,2.2,3 and3.1",
+      "status": "bounded-clear",
+      "reviewedBlob": "40e540b325186ee514ff3af9e39a22126d29a167",
+      "finding": "The corrected C relation threads one residual through callee/arguments, initializer/body, branches, callback sequences and nested runner reentry. Terminal V^r uses that residual; index0 invocation cuts off before any unlicensed body result. V^(n+1) enters C^j after the same single charge, so H(g)=g(Unit) no longer invalidates the schema. Capture edges stay lower-index, W stays structural, and downward closure is consistent with earlier cutoff. Logical optimizer calls are charged; helper/IIFE/registry work is administrative. Complete matching/progress/divergence adequacy remains open.",
+      "sections4and5ByteIdentical": true
+    }
+  ],
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "formalPreservationProven": false,
+  "kernelChanged": false,
+  "providerChanged": false,
+  "defeqChanged": false,
+  "cacheChanged": false,
+  "theoryChanged": false,
+  "correspondenceRowsClosed": [],
+  "integrationBaseObserved": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+  "reviewDelta": {
+    "baseBlob": "8f43adcee13638c21806684cfead0199cea4e4cb",
+    "candidateBlob": "40e540b325186ee514ff3af9e39a22126d29a167",
+    "edits": [
+      {
+        "before": "### 1.3 A non-circular call relation\n\nThe function clause must be shared by ER-04, EV-04/05, Array.map/foldl, and TS-04. Define it using finite observation indices n, with function application consuming an index:\n\n- At index 0, a function must have the right group, actual structural capture edges/world identities, and permitted callable form; no semantic relatedness of captured values or future application-result claim is made.\n- At index n+1, for every j ≤ n and every tuple of arguments related at the ordered parameter types at index j, invoking the related functions must produce related computations at index j, with the same declared operand-demand and error behavior.\n- A returned function is related at its **result function type**, and is tested by a subsequent application. A group of two parameters and a group of one parameter returning another function are different judgments.\n- Data relations at each index use finite structural recursion over the actual data. The computation relation and the function clause must be interpreted together; one may not assume “all calls preserve semantics” in order to prove that the closures making those calls preserve semantics.\n\nWrite E^n for pointwise V^n relatedness of the associated environment entries. W and the index-0 function clause record actual identities, callable forms and capture edges only; they do not assume semantic relatedness of captured or global values. For V^(n+1), every captured environment required by its executable association is related at each E^j with j ≤ n. Thus E^n → V^n → E^j/C^j decreases the index on a function edge, including recursive/global closure edges; finite data edges use structural recursion. C^n is specified over independently defined operational computations and observations, with terminating results in V^n; callback applications obey the same index-consuming application clause.\n\nLet C^n relate computations by related terminating results at V^n, corresponding permitted aborts, and corresponding finite observations of demanded runtime computations and callbacks. The general claim requires every n, together with divergence preservation/reflection or a separate sufficient termination argument for the admitted domain. Finite-index observations alone do not establish absence of infinite silent implementation stuttering. This is a concrete interface for a simulation proof, not a claimed completed construction of that proof.\n\nThe interaction index is a proof device. It is not a V8 instruction count or a promise that an optimized loop takes as many steps as its recursive source. Administrative moves, pure eliminated bookkeeping, private helper lookup, and continuation scheduling may be silent. Order obligations concern the identified runtime operands, selected branches, and related callback invocations; optimizer arguments must explain which internal steps are silent and which demands are retained. [S02–S06]\n\nOn the Core side, C^n_CI requires a separately justified source/Core evaluation interpretation. Core β/ι equations and native primitive meanings are useful premises, but kernel definitional equality and bounded meta reduction do not by themselves fix a runtime demand schedule. In particular, a recursor's induction-hypothesis demand cannot be defined to match the lowerer and then used as its proof. That adequacy obligation remains explicit in §6.\n\n",
+        "after": "### 1.3 A non-circular call relation with a shared interaction budget\n\nThe function clause is shared by ER-04, EV-04/05, Array.map/foldl, and TS-04. Use a finite natural-number **interaction budget** n. The independently defined Core, IR and host computations are observed through that budget; the budget does not alter their operational meaning or measure physical execution time.\n\nA matched semantic function application consumes one unit immediately before entering the related bodies. In C_CI, this is the source/Core application group whose alignment with the retained IR group must be justified by Π. In C_IJ, this is an original-IR application, including an operation's prescribed callback invocation. The application rule is available only when the current remaining budget r is positive, and its bodies start with r−1. Callee and operand evaluation have already carried forward any budget they consumed. If r is zero at the next invocation boundary, the observation **cuts off before that invocation**: its already-observed demand prefix remains relevant, but no subsequent result, abort, callback or termination claim is imposed. A computation that terminates without reaching another invocation still has a value obligation at its current index, including index 0.\n\nWrite C^n for the relation between such computations started with budget n. It carries the remaining budget as part of the observation, rather than giving each subcomputation a new copy of n:\n\n- If an observation terminates in a value after k matched applications, where k ≤ n, its residual budget is r = n−k and its results satisfy V^r at the declared result type.\n- If a permitted abort is observed before cutoff, its declared category and specified payload are related at that observation, and the pending continuation is abandoned. Resource failures and out-of-domain diagnostic probes retain the separate treatment in §2.3.\n- If the next related invocation is reached with residual 0, the relation compares the observed prefix and the corresponding invocation boundary. It makes no claim about what happens after that cutoff.\n- Operands, initializer/body sequences, selected branches and callback sequences share one residual budget. After a subcomputation returns with r, its continuation starts with r. Returning from a callback or nested runner invocation returns that residual to the suspended outer computation; it never resets the allowance.\n- Previously obtained values and environments may be weakened from their earlier index to the current smaller one. This requires the downward-closure property of the V/E/C definitions; it is not permission to regenerate observation budget.\n\nThe value and environment indices use that computation relation:\n\n- At index 0, a function must have the right group, actual structural capture edges/world identities, and permitted callable form; no semantic relatedness of captured values or future application-result claim is made.\n- At index n+1, for every j ≤ n and every tuple of arguments related at the ordered parameter types at index j, the related function bodies, after the invocation's one unit has been consumed, satisfy C^j. The arguments and captures use that same residual index. Entering C^j is the consequence of the invocation's charge, not a second charge or a fresh allowance for each nested call.\n- A returned function is related at its **result function type** at the residual result index, and a subsequent application consumes from that residual. A group of two parameters and a group of one parameter returning another function are different judgments.\n- Data relations at each index use finite structural recursion over the actual data. The computation relation and the function clause must be interpreted together; one may not assume “all calls preserve semantics” in order to prove that the closures making those calls preserve semantics.\n\nWrite E^n for pointwise V^n relatedness of the associated environment entries. W and the index-0 function clause record actual identities, callable forms and capture edges only; they do not assume semantic relatedness of captured or global values. For V^(n+1), every captured environment required by its executable association is related at each E^j with j ≤ n. Thus E^n → V^n → E^j/C^j decreases the index on a function edge, including recursive/global closure edges; finite data edges use structural recursion. C^n is defined over independently given operational computations and budgeted observations, with terminal results in V^r at the **remaining** budget r. V^n can require only lower-index function behavior, even though C^n can return a value at V^n when no interaction is consumed. Downward closure follows by induction on the index and the finite data structure: lowering the initial budget either retains a shorter licensed observation with correspondingly weakened results or reaches cutoff earlier. This is an algebraic property of these definitions, not an implementation-preservation theorem.\n\nFor example, a higher-order body `g(Unit)` observed with budget 0 stops before applying g. It need not return equal Booleans merely because its two g values satisfy the structural function clause V^0. At a larger budget, the call consumes one unit and uses g's lower-index behavioral clause. Requiring an exact result after that unlicensed index-0 invocation would invalidate the intended compositional argument.\n\nThe general claim requires C^n for every n, together with divergence preservation/reflection or a separate sufficient termination argument for the admitted domain. For a terminating computation with finitely many logical applications, an arbitrarily larger initial budget can leave any desired result index after those applications. Finite-budget observations alone do not establish absence of infinite silent implementation stuttering. Construction of the complete simulation, its progress/cutoff correspondence, and that adequacy obligation remain open.\n\nThe interaction index is a proof device. One invocation's wrapper, `__ps$invoke`, registry dispatch, generator entry and any inner `__ps$run` are administrative realizations of that same semantic application, not separate charges. Constructor factories and let/match IIFEs introduce no new IR application event. Conversely, a count/tail loop iteration that implements an original-IR recursive application must account for that logical application even when JavaScript makes no physical call. Private helper lookup, eliminated bookkeeping and continuation scheduling may be silent. Order obligations concern the identified runtime operands, selected branches and related callback invocations; optimizer arguments must establish the matching and explain which internal steps are silent. This definition neither equates V8 instruction counts nor assumes that an optimizer's matching has already been proved. [S02–S06]\n\nOn the Core side, C^n_CI requires a separately justified source/Core evaluation interpretation and Π. Core β/ι equations and native primitive meanings are useful premises, but kernel definitional equality and bounded meta reduction do not by themselves fix a runtime demand schedule or validate regrouping. In particular, a recursor's induction-hypothesis demand cannot be defined to match the lowerer and then used as its proof. That adequacy obligation remains explicit in §6.\n\n"
+      },
+      {
+        "before": "At the IR level, `call fn typeArguments [a₁,…,aₖ]` demands fn once, then the arguments from left to right, and then applies exactly that group. Type arguments instantiate type indices. There is no implicit JavaScript currying rule in the IR semantics. Exact group typing and scope checking are established separately from semantic correspondence. [S11, S14, S20]",
+        "after": "At the IR level, `call fn typeArguments [a₁,…,aₖ]` demands fn once, then the arguments from left to right, and then applies exactly that group. Each demanded subcomputation passes its residual interaction budget to the next; the final invocation consumes one unit from the budget that remains, as in §1.3. Type arguments instantiate type indices. There is no implicit JavaScript currying rule in the IR semantics. Exact group typing and scope checking are established separately from semantic correspondence. [S11, S14, S20]"
+      },
+      {
+        "before": "For a strict operand sequence, evaluate from left to right in the current environment, retaining the values already obtained. An abort/divergence of an operand prevents evaluation of later operands. Lambda bodies and unselected alternatives are not evaluated while constructing a closure or selecting another branch.",
+        "after": "For a strict operand sequence, evaluate from left to right in the current environment, retaining the values already obtained. In the budgeted observation, each operand receives the preceding operand's residual budget; earlier values and environment entries are weakened to that current index. An abort/divergence of an operand prevents evaluation of later operands, and a cutoff imposes no claim about their subsequent evaluation. Lambda bodies and unselected alternatives are not evaluated while constructing a closure or selecting another branch. The same residual threading applies to every sequential context below, including let initializer/body and intrinsic callbacks."
+      },
+      {
+        "before": "For the general emitted path, relate a generator-machine state to an IR evaluation state with its pending continuation stack. A request contains a callee and argument values already obtained in IR order. A registered callee pushes the corresponding generator implementation; an unregistered permitted direct callable is invoked directly. Returning supplies the result to the pending continuation. Intermediate WeakMap operations and generator bookkeeping are silent.",
+        "after": "For the general emitted path, relate a generator-machine state to an IR evaluation state with its pending continuation stack and current residual interaction budget. A request contains a callee and argument values already obtained in IR order. Its semantic application consumes one unit; a registered callee pushes the corresponding generator implementation, while an unregistered permitted direct callable is invoked directly. Returning supplies the result and residual budget to the pending continuation. Intermediate WeakMap operations, wrapper entry and generator bookkeeping are silent and do not charge that application again."
+      },
+      {
+        "before": "Array.map/foldl can call public generated wrappers synchronously; such a callback may enter the runner while another runner invocation is suspended in the intrinsic. The simulation must compose those invocations with the related callback's captured environment and element/accumulator order. A theorem for a single flat runner stack does not automatically cover this reentry.",
+        "after": "Array.map/foldl can call public generated wrappers synchronously; such a callback may enter the runner while another runner invocation is suspended in the intrinsic. The simulation must compose those invocations with the related callback's captured environment and element/accumulator order. Every callback consumes from the outer computation's residual budget and returns its residue; the wrapper and nested runner do not create a new allowance. A theorem for a single flat runner stack does not automatically cover this reentry."
+      }
+    ],
+    "forwardAndReverseExact": true,
+    "sections4and5ByteIdentical": true,
+    "rationale": "Repair higher-order compositionality: exact-result C^0 after invoking a merely structural V^0 function is too strong. The observation stops before an unlicensed call; licensed sequential calls/callbacks/reentry share and return one residual budget, with values related at the remaining index."
+  },
+  "priorUnattachedCandidates": [
+    {
+      "blob": "a2fd6faac80bef104a588d8c075f846d4cf95aad",
+      "status": "superseded-by-indexed-capture-correction"
+    },
+    {
+      "blob": "8f43adcee13638c21806684cfead0199cea4e4cb",
+      "manifest": "27907996440257d98e513fa3e9b0f15d0655df9c",
+      "status": "superseded-by-shared-interaction-budget-correction"
+    }
+  ],
+  "priorCaptureCorrection": {
+    "initialBlob": "a2fd6faac80bef104a588d8c075f846d4cf95aad",
+    "finalBlob": "8f43adcee13638c21806684cfead0199cea4e4cb",
+    "edits": [
+      {
+        "before": "- At index 0, a function must have the right group, capture/world association, and permitted callable form; no future application-result claim is made.",
+        "after": "- At index 0, a function must have the right group, actual structural capture edges/world identities, and permitted callable form; no semantic relatedness of captured values or future application-result claim is made."
+      },
+      {
+        "before": "Let C^n relate computations by related terminating results at V^n, corresponding permitted aborts, and corresponding finite observations of demanded runtime computations and callbacks.",
+        "after": "Write E^n for pointwise V^n relatedness of the associated environment entries. W and the index-0 function clause record actual identities, callable forms and capture edges only; they do not assume semantic relatedness of captured or global values. For V^(n+1), every captured environment required by its executable association is related at each E^j with j ≤ n. Thus E^n → V^n → E^j/C^j decreases the index on a function edge, including recursive/global closure edges; finite data edges use structural recursion. C^n is specified over independently defined operational computations and observations, with terminating results in V^n; callback applications obey the same index-consuming application clause.\n\nLet C^n relate computations by related terminating results at V^n, corresponding permitted aborts, and corresponding finite observations of demanded runtime computations and callbacks."
+      },
+      {
+        "before": "Let ρC, ρI, and ρJ be Core, IR and host environments. Environment relatedness is lexical and type-indexed.",
+        "after": "Let ρC, ρI, and ρJ be Core, IR and host environments. E^n_CI and E^n_IJ are lexical, type-indexed environment relations at observation index n."
+      },
+      {
+        "before": "and the values obtained from ρC(id), ρI(x), and ρJ(x) satisfy the value relations.",
+        "after": "and the values obtained from ρC(id), ρI(x), and ρJ(x) satisfy the corresponding value relations V^n_CI and V^n_IJ."
+      }
+    ],
+    "forwardAndReverseExact": true,
+    "sections4and5ByteIdentical": true,
+    "rationale": "Remove potential same-index value/environment capture circularity: W and index0 are structural only; function capture behavior uses strictly smaller indices; E^n is pointwise V^n."
+  }
+}

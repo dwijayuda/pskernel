@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-canonical-recursion-evidence-binding",
+  "status": "independently-reviewed-source-candidates-for-enclosing-integration",
+  "expectedParent": "796f2fd8feebc96dfcdd79002e6a53aeb7b4ad90",
+  "files": [
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "baseBlob": "e987f2834e74c8acded0fa628e245ef823dcc17a",
+      "baseSha256": "dee0d9e75de2f6a0bf869c763106eb745c498563cf470d6d3f2bbd4b08fba23a",
+      "candidateBlob": "c28507666a3c46892c6fc155c66e1842a8954150",
+      "candidateSha256": "b4219497ec2eb9549535241580a22f74c1f03f6d6a5db8e7fad598cf839e9cd0",
+      "candidateBytes": 31384,
+      "edits": [
+        {
+          "before": "function sourceCases() {\n",
+          "after": "// These cases must reach the structural elaborator. A parser/erasure refusal\n// is not accepted as evidence for the intended root-IH/telescope boundary.\nfunction structuralRecursionRefusalCases() {\n  return [\n  {\n    \"id\": \"nested-major-alias-lean\",\n    \"kind\": \"lean\",\n    \"boundary\": \"structural-recursion-provenance\",\n    \"inputs\": [\n      {\n        \"moduleName\": [\n          \"Ps\",\n          \"Compiler\",\n          \"StrictCase\"\n        ],\n        \"source\": \"def sh1NestedMajorAlias (n : Nat) : Nat :=\\n  match n with\\n  | Nat.zero => 0\\n  | Nat.succ k =>\\n      match n with\\n      | Nat.zero => 100\\n      | Nat.succ j => Nat.add (sh1NestedMajorAlias j) 1\\n\"\n      }\n    ],\n    \"code\": \"source-elaboration\",\n    \"expectedOwner\": \"sh1NestedMajorAlias\",\n    \"expectedDetail\": \"structuralRecursionNotDecreasing\"\n  },\n  {\n    \"id\": \"nested-major-alias-ps\",\n    \"kind\": \"ps\",\n    \"boundary\": \"structural-recursion-provenance\",\n    \"inputs\": [\n      {\n        \"moduleName\": [\n          \"Ps\",\n          \"Compiler\",\n          \"StrictCase\"\n        ],\n        \"source\": \"def sh1NestedMajorAlias(n : Nat) : Nat :=\\n  match n with {\\n  | Nat.zero => 0\\n  | Nat.succ k =>\\n      match n with {\\n      | Nat.zero => 100\\n      | Nat.succ j => Nat.add(sh1NestedMajorAlias(j), 1)\\n      }\\n  }\\n\"\n      }\n    ],\n    \"code\": \"source-elaboration\",\n    \"expectedOwner\": \"sh1NestedMajorAlias\",\n    \"expectedDetail\": \"structuralRecursionNotDecreasing\"\n  },\n  {\n    \"id\": \"nested-descendant-lean\",\n    \"kind\": \"lean\",\n    \"boundary\": \"structural-recursion-provenance\",\n    \"inputs\": [\n      {\n        \"moduleName\": [\n          \"Ps\",\n          \"Compiler\",\n          \"StrictCase\"\n        ],\n        \"source\": \"def sh1NestedDescendant (n : Nat) : Nat :=\\n  match n with\\n  | Nat.zero => 0\\n  | Nat.succ k =>\\n      match k with\\n      | Nat.zero => 1\\n      | Nat.succ j => Nat.add (sh1NestedDescendant j) 1\\n\"\n      }\n    ],\n    \"code\": \"source-elaboration\",\n    \"expectedOwner\": \"sh1NestedDescendant\",\n    \"expectedDetail\": \"structuralRecursionNotDecreasing\"\n  },\n  {\n    \"id\": \"nested-descendant-ps\",\n    \"kind\": \"ps\",\n    \"boundary\": \"structural-recursion-provenance\",\n    \"inputs\": [\n      {\n        \"moduleName\": [\n          \"Ps\",\n          \"Compiler\",\n          \"StrictCase\"\n        ],\n        \"source\": \"def sh1NestedDescendant(n : Nat) : Nat :=\\n  match n with {\\n  | Nat.zero => 0\\n  | Nat.succ k =>\\n      match k with {\\n      | Nat.zero => 1\\n      | Nat.succ j => Nat.add(sh1NestedDescendant(j), 1)\\n      }\\n  }\\n\"\n      }\n    ],\n    \"code\": \"source-elaboration\",\n    \"expectedOwner\": \"sh1NestedDescendant\",\n    \"expectedDetail\": \"structuralRecursionNotDecreasing\"\n  },\n  {\n    \"id\": \"implicit-major-dependent-proof\",\n    \"kind\": \"lean\",\n    \"boundary\": \"structural-recursion-original-telescope\",\n    \"inputs\": [\n      {\n        \"moduleName\": [\n          \"Ps\",\n          \"Compiler\",\n          \"StrictCase\"\n        ],\n        \"source\": \"def sh1ImplicitMajorProof {P : Nat -> Prop} (n : Nat) {h : P n} : Nat :=\\n  match n with\\n  | Nat.zero => 0\\n  | Nat.succ k => sh1ImplicitMajorProof k\\n\"\n      }\n    ],\n    \"code\": \"source-elaboration\",\n    \"expectedOwner\": \"sh1ImplicitMajorProof\",\n    \"expectedDetail\": \"structuralRecursionDependentParameter\"\n  }\n];\n}\n\nfunction sourceCases() {\n",
+          "purpose": "Add five exact source cases for proven root provenance and full original telescope boundaries."
+        },
+        {
+          "before": "    ...reservedRuntimeNameCases(),\n",
+          "after": "    ...reservedRuntimeNameCases(),\n    ...structuralRecursionRefusalCases(),\n",
+          "purpose": "Append five cases while preserving the complete original 33-case prefix and old two positives."
+        },
+        {
+          "before": "    if (test.exactName) {\n",
+          "after": "    if (test.expectedDetail) {\n      assert.equal(failure.compilerStage, 'elaboration', 'PSC0_SH1_RECURSION_REFUSAL_STAGE: ' + test.id);\n      assert.equal(failure.detail, test.expectedDetail, 'PSC0_SH1_RECURSION_REFUSAL_DETAIL: ' + test.id);\n      assert.equal(failure.owner, test.expectedOwner, 'PSC0_SH1_RECURSION_REFUSAL_OWNER: ' + test.id);\n    }\n    if (test.exactName) {\n",
+          "purpose": "Require exact source-elaboration kind, error tag and owner so parser/type/IR fallback refusals cannot pass these probes."
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "baseBlob": "b816395c6727b2319040523548ef0b3a43056d66",
+      "baseSha256": "79845667be575aee634a6ad7f452b34031ed50b1cc4f6e120669c98a5359e450",
+      "candidateBlob": "b18475cd8f1e019c7372a1df64cd3464a62c210a",
+      "candidateSha256": "1def5e42cc86de1aacf4eed80d47462b9bede92f55b81f0449cf897ee88a11d9",
+      "candidateBytes": 80994,
+      "edits": [
+        {
+          "id": "bind-actual-core-and-refusal-evidence",
+          "before": "async function bindGenericFunctionValues(outDir, directory, compilerSha256, source, requireNative) {",
+          "after": "\nfunction structuralRecursionObservations() {\n  return [\n    ['major-capture-two', 'sh1CoreMajorCapture', '2', '3'],\n    ['major-capture-three', 'sh1CoreMajorCapture', '3', '6'],\n    ['nested-outer-two', 'sh1CoreNestedOuter', '2', '3'],\n    ['nested-outer-three', 'sh1CoreNestedOuter', '3', '6'],\n  ].map(([id, declaration, input, value]) => ({ id, declaration, input, value, status: 'pass' }));\n}\n\nasync function bindPreparedCoreRecursion(outDir, folder, source, value) {\n  const reference = value.recursion.reference;\n  const expected = structuralRecursionObservations();\n  const behavior = { observations: expected, observationCount: 4, status: 'pass',\n    exhaustiveForAllInputs: false };\n  assert.deepEqual(value.recursion.behavior, behavior);\n  assert.equal(reference.policy, 'prepared-core-nat-reference/1');\n  assert.equal(reference.preparedObject, 'same PsCompilerAdmissionReadyModule used for original IR');\n  assert.equal(reference.artifact.path, 'recursion-core.json');\n  const core = await jsonFile(outDir, folder + '/recursion-core.json');\n  assert.equal(core.file.sha256, reference.artifact.sha256);\n  assert.equal(core.file.bytes, reference.artifact.bytes);\n  assert.equal(core.value.schemaVersion, 1);\n  assert.equal(core.value.evidence, 'actual-prepared-core-nat-recursion');\n  assert.equal(core.value.sourceSha256, source.sha256);\n  assert.equal(core.value.declarations.length, 2);\n  assert.deepEqual(core.value.declarations.map((declaration) => declaration.name),\n    ['sh1CoreMajorCapture', 'sh1CoreNestedOuter']);\n  for (const declaration of core.value.declarations) {\n    assert.equal(declaration.type.tag, 'forallE');\n    assert.equal(declaration.type.binder, 'explicit');\n    assert.equal(declaration.value.tag, 'lam');\n    assert.equal(declaration.value.binder, 'explicit');\n    for (const type of [declaration.type.type, declaration.type.body, declaration.value.type]) {\n      assert.deepEqual(type, { tag: 'constE', name: [['str', 'Nat']], levels: [] });\n    }\n  }\n  assert.deepEqual(reference.declarations, core.value.declarations.map((declaration) => ({\n    name: declaration.name, sourceRuntimeArity: 1, coreSha256: hash(JSON.stringify(declaration)),\n  })));\n  assert.equal(reference.observationCount, 4);\n  assert.equal(reference.observations.length, 4);\n  let totalSteps = 0;\n  for (let index = 0; index < 4; index++) {\n    const { steps, recursorApplications, ...observation } = reference.observations[index];\n    assert.deepEqual(observation, expected[index]);\n    assert(Number.isSafeInteger(steps) && steps > 0 && steps <= 20000);\n    assert(Number.isSafeInteger(recursorApplications) && recursorApplications > 0 &&\n      recursorApplications <= steps);\n    totalSteps += steps;\n  }\n  assert(totalSteps <= 20000);\n  assert.deepEqual(reference.budget, { limit: 20000, used: totalSteps, remaining: 20000 - totalSteps,\n    scope: 'shared across all four reference observations' });\n  assert(Number.isSafeInteger(reference.snapshot.nodes) &&\n    reference.snapshot.nodes > 0 && reference.snapshot.nodes <= 8192);\n  assert.equal(reference.snapshot.nodeLimit, 8192);\n  assert.equal(reference.snapshot.depthLimit, 128);\n  assert.deepEqual(reference.supportedExecutableForms,\n    ['bvar', 'lam', 'app', 'letE', 'lit.natural', 'constE']);\n  assert.deepEqual(reference.runtimeConstants,\n    ['Nat.zero', 'Nat.succ', 'Nat.add', 'Nat.rec', 'sh1CoreMajorCapture', 'sh1CoreNestedOuter']);\n  assert.equal(reference.suppliedNatRecMinorClosures, true);\n  for (const key of ['additionalPreparations', 'additionalTypeScriptCompilations',\n    'additionalNativeExecutions']) assert.equal(reference[key], 0);\n  assert.equal(reference.status, 'pass');\n  assert.equal(reference.exhaustiveForAllInputs, false);\n  assert.equal(reference.generalRecursorDemandAdequacy, false);\n  if (value.native) assert.deepEqual(value.native.recursionBehavior, behavior);\n  return { artifact: core.file, sourceSha256: source.sha256,\n    declarations: reference.declarations, referenceObservationCount: 4,\n    emittedObservationCount: 4, nativeObservationCount: value.native ? 4 : 0,\n    observationsSha256: hash(JSON.stringify(expected)),\n    referenceObservationsSha256: hash(JSON.stringify(reference.observations)),\n    budget: reference.budget, snapshot: reference.snapshot,\n    finiteEvidenceOnly: true, generalRecursorDemandAdequacy: false };\n}\n\nasync function bindStructuralRecursionRefusals(outDir, directory, conformance) {\n  const expected = [\n    {\n      \"id\": \"nested-major-alias-lean\",\n      \"sourceKind\": \"lean\",\n      \"inputSha256\": \"f79fbfdbb2d0f19d74242f7c7f8395c95cf8646cf233d9588e9226a3273c6eb8\",\n      \"code\": \"source-elaboration\",\n      \"detail\": \"structuralRecursionNotDecreasing\",\n      \"owner\": \"sh1NestedMajorAlias\",\n      \"boundary\": \"structural-recursion-provenance\"\n    },\n    {\n      \"id\": \"nested-major-alias-ps\",\n      \"sourceKind\": \"ps\",\n      \"inputSha256\": \"a69c438a49e2dfb519744a018d514f71270a60f3703d3fe49a286ba9a3ee5bda\",\n      \"code\": \"source-elaboration\",\n      \"detail\": \"structuralRecursionNotDecreasing\",\n      \"owner\": \"sh1NestedMajorAlias\",\n      \"boundary\": \"structural-recursion-provenance\"\n    },\n    {\n      \"id\": \"nested-descendant-lean\",\n      \"sourceKind\": \"lean\",\n      \"inputSha256\": \"9a26a9d572d348f8380d547ac73779d2c85deb1aefb33cd71e654e3a51697bf8\",\n      \"code\": \"source-elaboration\",\n      \"detail\": \"structuralRecursionNotDecreasing\",\n      \"owner\": \"sh1NestedDescendant\",\n      \"boundary\": \"structural-recursion-provenance\"\n    },\n    {\n      \"id\": \"nested-descendant-ps\",\n      \"sourceKind\": \"ps\",\n      \"inputSha256\": \"6e312e78fc3f13fa359ca715947ea175ddbe38e544ad2660dddd3730547fb8f4\",\n      \"code\": \"source-elaboration\",\n      \"detail\": \"structuralRecursionNotDecreasing\",\n      \"owner\": \"sh1NestedDescendant\",\n      \"boundary\": \"structural-recursion-provenance\"\n    },\n    {\n      \"id\": \"implicit-major-dependent-proof\",\n      \"sourceKind\": \"lean\",\n      \"inputSha256\": \"8cb1ca86bca4886e47a11eba364c77790a49bb3cc2bdb1644aabe021c1e0948c\",\n      \"code\": \"source-elaboration\",\n      \"detail\": \"structuralRecursionDependentParameter\",\n      \"owner\": \"sh1ImplicitMajorProof\",\n      \"boundary\": \"structural-recursion-original-telescope\"\n    }\n  ];\n  const cases = await jsonFile(outDir, directory + '/strict-source/source-cases.json');\n  assert.equal(cases.value.length, 38);\n  assert.equal(conformance.refused.length, 38);\n  assert.equal(new Set(cases.value.map((item) => item.id)).size, 38);\n  assert.deepEqual(conformance.refused.map((item) => item.id), cases.value.map((item) => item.id));\n  const observations = [];\n  for (let index = 0; index < expected.length; index++) {\n    const wanted = expected[index], test = cases.value[index + 33];\n    assert.deepEqual({\n      id: test.id, sourceKind: test.kind ?? 'lean', inputSha256: hash(JSON.stringify(test.inputs)),\n      code: test.code, detail: test.expectedDetail, owner: test.expectedOwner, boundary: test.boundary,\n    }, wanted);\n    assert.deepEqual(test.limits ?? {}, {});\n    const item = conformance.refused[index + 33];\n    assert.deepEqual({\n      id: item.id, sourceKind: item.sourceKind, inputSha256: item.inputSha256,\n      code: item.failure.code, detail: item.failure.detail, owner: item.failure.owner,\n      boundary: item.boundary,\n    }, wanted);\n    assert.equal(item.failure.stage, 'source');\n    assert.equal(item.failure.compilerStage, 'elaboration');\n    assert.deepEqual(item.limits, {});\n    observations.push(wanted);\n  }\n  return { cases: cases.file, observations, observationCount: 5,\n    observationBoundary: 'owned frontend structural elaboration',\n    oldSourceRefusalCount: 33, totalSourceRefusalCount: 38,\n    finiteEvidenceOnly: true, generalRecursorDemandAdequacy: false };\n}\n\nasync function bindGenericFunctionValues(outDir, directory, compilerSha256, source, requireNative) {"
+        },
+        {
+          "id": "bind-recursion-with-existing-products",
+          "before": "  assert.deepEqual(group.behavior, genericFunctionObservations());\n  assert.deepEqual(value.provider, { status: 'not-attempted', kernelChecked: false });",
+          "after": "  assert.deepEqual(group.behavior, genericFunctionObservations());\n  const recursion = await bindPreparedCoreRecursion(outDir, folder, source, value);\n  assert.deepEqual(value.provider, { status: 'not-attempted', kernelChecked: false });"
+        },
+        {
+          "id": "include-core-recursion-binding",
+          "before": "  return { receipt: receipt.file, source, artifacts: products, native,\n    originalIr: original, policy: group.ir.policy,",
+          "after": "  return { receipt: receipt.file, source, artifacts: products, native, recursion,\n    originalIr: original, policy: group.ir.policy,"
+        },
+        {
+          "id": "source-refusal-total",
+          "before": "    assert.equal(source.value.refused.length, 33);",
+          "after": "    assert.equal(source.value.refused.length, 38);"
+        },
+        {
+          "id": "bind-structural-refusals-each-generation",
+          "before": "    assert(source.value.refused.every((item) => typeof item.failure.code === 'string'));\n    assert(source.value.carrierRefusals.every((item) => item.refused === true));",
+          "after": "    assert(source.value.refused.every((item) => typeof item.failure.code === 'string'));\n    const structuralRecursionRefusals = await bindStructuralRecursionRefusals(outDir, directory, source.value);\n    assert(source.value.carrierRefusals.every((item) => item.refused === true));"
+        },
+        {
+          "id": "generation-summary",
+          "before": "      genericFunctionValues,\n      operationCount: 45, observationCount: 186, sourceRefusals: 33, targetRefusals: 20 });",
+          "after": "      genericFunctionValues, structuralRecursionRefusals,\n      operationCount: 45, observationCount: 186, sourceRefusals: 38, targetRefusals: 20 });"
+        }
+      ]
+    }
+  ],
+  "sourceGate": {
+    "oldPortableRefusals": 33,
+    "totalPortableRefusals": 38,
+    "accepted": 2,
+    "carrierRefusals": 2,
+    "oldCasesAndAssertionsPreserved": true,
+    "addedCases": [
+      {
+        "id": "nested-major-alias-lean",
+        "sourceKind": "lean",
+        "inputSha256": "f79fbfdbb2d0f19d74242f7c7f8395c95cf8646cf233d9588e9226a3273c6eb8",
+        "code": "source-elaboration",
+        "detail": "structuralRecursionNotDecreasing",
+        "owner": "sh1NestedMajorAlias",
+        "boundary": "structural-recursion-provenance"
+      },
+      {
+        "id": "nested-major-alias-ps",
+        "sourceKind": "ps",
+        "inputSha256": "a69c438a49e2dfb519744a018d514f71270a60f3703d3fe49a286ba9a3ee5bda",
+        "code": "source-elaboration",
+        "detail": "structuralRecursionNotDecreasing",
+        "owner": "sh1NestedMajorAlias",
+        "boundary": "structural-recursion-provenance"
+      },
+      {
+        "id": "nested-descendant-lean",
+        "sourceKind": "lean",
+        "inputSha256": "9a26a9d572d348f8380d547ac73779d2c85deb1aefb33cd71e654e3a51697bf8",
+        "code": "source-elaboration",
+        "detail": "structuralRecursionNotDecreasing",
+        "owner": "sh1NestedDescendant",
+        "boundary": "structural-recursion-provenance"
+      },
+      {
+        "id": "nested-descendant-ps",
+        "sourceKind": "ps",
+        "inputSha256": "6e312e78fc3f13fa359ca715947ea175ddbe38e544ad2660dddd3730547fb8f4",
+        "code": "source-elaboration",
+        "detail": "structuralRecursionNotDecreasing",
+        "owner": "sh1NestedDescendant",
+        "boundary": "structural-recursion-provenance"
+      },
+      {
+        "id": "implicit-major-dependent-proof",
+        "sourceKind": "lean",
+        "inputSha256": "8cb1ca86bca4886e47a11eba364c77790a49bb3cc2bdb1644aabe021c1e0948c",
+        "code": "source-elaboration",
+        "detail": "structuralRecursionDependentParameter",
+        "owner": "sh1ImplicitMajorProof",
+        "boundary": "structural-recursion-original-telescope"
+      }
+    ],
+    "requiredCompilerStage": "elaboration",
+    "requiredFailureStage": "source",
+    "parserOrErasureRefusalDoesNotSatisfyNewCases": true
+  },
+  "actualCoreEvidence": {
+    "fixtureBlob": "aee5fd7bf96dbfec9ee1c3b4c2698178c55a10e3",
+    "gateBlob": "59aa5df7a650f4e3134a41c34377eac9aa75dc1d",
+    "manifestBlob": "17225938686b8eed9654daab3c75c926f86d0def",
+    "samePreparedObject": true,
+    "typedSnapshotArtifact": "recursion-core.json",
+    "coreDeclarations": 2,
+    "fixedEquations": 4,
+    "sharedReferenceStepBudget": 20000,
+    "actualCoreValueReference": true,
+    "generalRecursorDemandAdequacy": false,
+    "independentNativeLeanEvaluationAdded": false,
+    "nativeMeaning": "Existing native-PSC compiler invocation produces TypeScript; its already compiled module executes the four equations. The independent third view is the actual prepared-Core minor/closure value evaluator."
+  },
+  "binder": {
+    "generations": [
+      "N1",
+      "C1",
+      "C2",
+      "C3"
+    ],
+    "coreArtifactHashBytesAndSourceBound": true,
+    "actualCoreDeclarationHashesBound": true,
+    "coreObservationAndSharedBudgetBound": true,
+    "generatedObservationCount": 4,
+    "nativeObservationCountWhenPresent": 4,
+    "nativeRequiredFor": "N1",
+    "sourceCaseArtifactBound": true,
+    "sourceInputsAndPreciseRefusalsBound": true,
+    "existingGenericObservations": 19,
+    "canonicalObservations": 19,
+    "additionalCompilerExecutions": 0
+  },
+  "reviews": {
+    "root": "Exact forward/reverse, immutable readback and SHA256 verified for all nine guards. All original existing checks remain.",
+    "sourceGate": "artifact_inspection_review CLEAR; new-only PS grammar, actual error reachability, full implicit/proof telescope and all five input hashes independently verified.",
+    "binder": "runtime_comparison_finish CLEAR; exactly six reversible guards, actual gate schema, artifacts, counts, equations, shared budget, independent five input hash checks, existing N1 native-required boundary verified."
+  },
+  "execution": {
+    "compilerExecutionsForReview": 0,
+    "localExecutions": 0,
+    "next": "One full [sh1-qualify] source commit. No native-only checkpoint and no cold recipe repeat."
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "providerChecked": false,
+  "generalPreservationProven": false
+}

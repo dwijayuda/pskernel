@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-ev-rule-arguments-review",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "expectedParent": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+  "manifestPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/ev-rule-arguments.json",
+  "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
+  "files": [
+    {
+      "path": "psc0/docs/selfhost-language/strict/EV_RULE_ARGUMENTS.md",
+      "expectedBaseBlob": null,
+      "candidateBlob": "7e90465301005a395a871a0563b19c164dcda750",
+      "sha256": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+      "characters": 52755,
+      "utf8Bytes": 52851
+    }
+  ],
+  "sourcePins": [
+    {
+      "id": "E01",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+    },
+    {
+      "id": "E02",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "blob": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79"
+    },
+    {
+      "id": "E03",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "blob": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+    },
+    {
+      "id": "E04",
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "blob": "a58fa183103817b9b65db45cc9e9798e6abcf4d3"
+    },
+    {
+      "id": "E05",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+      "blob": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139"
+    },
+    {
+      "id": "E06",
+      "path": "psc0/docs/selfhost-language/strict/SEMANTIC_RELATIONS.md",
+      "blob": "40e540b325186ee514ff3af9e39a22126d29a167"
+    },
+    {
+      "id": "E07",
+      "path": "psc0/docs/selfhost-language/SPEC.md",
+      "blob": "61f0f36ffe7880144f60845084e8be6a61b91eed"
+    },
+    {
+      "id": "E08",
+      "path": "psc0/docs/selfhost-language/strict/enabled-runtime-contract.json",
+      "blob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b"
+    },
+    {
+      "id": "E09",
+      "path": "psc0/packages/foundation/src/Ps/Foundation/List.lean",
+      "blob": "29e4e59c271c1a26604cc738a8794f9bb70a2e83"
+    },
+    {
+      "id": "E10",
+      "path": "psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+      "blob": "9c896076032762543b57d88c0010f90ad0a066d5"
+    },
+    {
+      "id": "E11",
+      "path": "psc0/packages/bridge/src/Ps/Bridge/Json.lean",
+      "blob": "4ddfec62f2edd54be87091812dcb6add6304e3ed"
+    },
+    {
+      "id": "E12",
+      "path": "psc0/docs/selfhost-language/strict/RUNTIME_LAW_REVIEW.md",
+      "blob": "682250126807cf520fb4c354ad0b52577a04d8b0"
+    },
+    {
+      "id": "E13",
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "blob": "178ecf89498be6502be5f747f0c0d62eb1133420"
+    },
+    {
+      "id": "E14",
+      "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+      "blob": "9ae363efcb6faab4ffd6c10af0e498ece6004649"
+    },
+    {
+      "id": "E15",
+      "path": "psc0/docs/selfhost-language/strict/post-review-source-completion.json",
+      "blob": "639e78ffeba7d64f29ef02eadff9b37951073832"
+    }
+  ],
+  "sourcePinsIndependentlyMatch": true,
+  "coveredRows": [
+    "EV-01",
+    "EV-02",
+    "EV-03",
+    "EV-04",
+    "EV-05",
+    "EV-06",
+    "EV-07",
+    "EV-08",
+    "EV-09",
+    "EV-10",
+    "EV-11"
+  ],
+  "scope": "All eleven original-IR expression cases over successful emission under the shared residual value/environment/computation relations and explicit actual source naming/layout/call/module/host/primitive premises.",
+  "substantiveResults": [
+    "Complete enabled literal and string-escaping partition, UTF-8 byte-bound fuel argument and variable scope.",
+    "All 45 intrinsic templates reuse the exact runtime-law function text; map prefix and fold range/accumulator induction thread actual residuals through callbacks and runner reentry.",
+    "Exact-group call and closure relations, old-scope let initializer and explicit/implicit namespace provenance, Boolean selected demand.",
+    "Ordered runtime records, inhabited zero-field records, one-evaluation projection, owner-qualified constructor factory and generic-nullary behavior.",
+    "Nonempty match binding/layout and empty-scrutinee demand, typed never route and actual optional optimizer fallback.",
+    "Mutual composition with finite generator administrative progress under source/Core and host adequacy premises."
+  ],
+  "reviews": [
+    {
+      "reviewer": "/root/artifact_inspection_review",
+      "sections": [
+        "2",
+        "3"
+      ],
+      "verdict": "bounded CLEAR",
+      "reviewedBlob": "d8b714af88210e8a2852aa88abfc5cc4478149b6",
+      "scopeUnchangedInFinal": true
+    },
+    {
+      "reviewer": "/root/runtime_comparison_finish",
+      "sections": [
+        "1",
+        "4",
+        "5",
+        "6",
+        "13"
+      ],
+      "verdict": "bounded CLEAR",
+      "reviewedBlob": "d8b714af88210e8a2852aa88abfc5cc4478149b6",
+      "scopeUnchangedInFinal": true
+    },
+    {
+      "reviewer": "/root/empty_evidence_finish",
+      "sections": [
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "verdict": "bounded CLEAR",
+      "reviewedBlob": "7e90465301005a395a871a0563b19c164dcda750",
+      "finalSha256Matched": true,
+      "corrections": "Actual runtime-only field admission and omitted generic type parameters; ER-05 projection; ER-07 empty motive; distinguish erasure result eta and backend EtaBind."
+    },
+    {
+      "reviewer": "/root",
+      "sections": "whole document",
+      "verdict": "bounded CLEAR under explicit source/host composition premises",
+      "exactReadback": true,
+      "exactFiveEditsForwardReverse": true
+    }
+  ],
+  "supersededDraft": {
+    "blob": "d8b714af88210e8a2852aa88abfc5cc4478149b6",
+    "sha256": "c8a497f85df67fe67d19ccd79e6effde3ea961f1c8c96fbde619b3916d30396a",
+    "edits": [
+      {
+        "before": "ordinary erasure-selected local names avoid output owners; backend eta-binding initializers are variable expressions; and constructor occurrences under added eta parameters receive the target's lexical owner-capture check.",
+        "after": "ordinary erasure-selected local names avoid output owners; backend EtaBind introduces only variable initializers; and erasure-generated result-eta parameters receive the target's lexical owner-capture check at constructor occurrences in their bodies."
+      },
+      {
+        "before": "Correctly omitting Core proof/type fields and associating source projection indices with the retained properties belongs to ER-05/06; the current record expression type alone does not reconstruct it.",
+        "after": "Associating the source's ordered retained runtime fields and projection indices with these properties belongs to ER-05/06, including omission of generic type parameters. The current constructor-field admission refuses proof/type fields; this argument does not claim they are silently omitted. The current record expression type alone does not reconstruct the source association."
+      },
+      {
+        "before": "ER-06 supplies the actual source projection's owner and index association;",
+        "after": "ER-05 supplies the actual source projection's owner and index association;"
+      },
+      {
+        "before": "Source type/proof fields omitted earlier are accounted for by ER-07, not by allocating extra runtime fields here.",
+        "after": "Generic type parameters contribute no runtime fields. ER-05/06 accounts for the source's ordered runtime-field association; the current constructor-field admission refuses proof/type fields, so no proof/type-field omission is claimed here."
+      },
+      {
+        "before": "Its source motive correspondence remains ER-08.",
+        "after": "Its source motive correspondence remains ER-07."
+      }
+    ]
+  },
+  "remainingDependencies": [
+    "Actual source/Core operational and value adequacy",
+    "Actual ER name/index/opening/layout and retained call-group associations",
+    "General runtime operation/host-domain laws and successful resource assumptions",
+    "All-index composition and the already-identified independent administrative progress premises",
+    "Exact source/toolchain compiler/runtime/provider qualification"
+  ],
+  "assurance": {
+    "correspondenceRowsClosed": [],
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "generalPreservationProven": false,
+    "formalPreservationProven": false,
+    "compilerExecuted": false,
+    "testsExecuted": false,
+    "finiteCasesAreGeneralProof": false
+  },
+  "unchanged": {
+    "sourceAndTests": true,
+    "grammarAndToolchain": true,
+    "selectedSeed": "R",
+    "sourceAuthority": ".lean",
+    "kernelProviderDefeqCacheExistingTheory": true
+  },
+  "method": "GitHub MCP immutable reads and pure in-memory text/JSON/hash; no local files, shell, browser, compiler or tests; root owns guarded integration."
+}

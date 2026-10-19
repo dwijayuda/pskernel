@@ -1,0 +1,43 @@
+{
+  "name": "@proofscript/stdlib",
+  "version": "0.1.0-psc0.1",
+  "description": "Optional ProofScript PSC0 standard-library source modules",
+  "type": "module",
+  "private": false,
+  "license": "UNLICENSED",
+  "main": "./dist/index.mjs",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "README.md",
+    "SOURCE_CONVERSION.json"
+  ],
+  "engines": {
+    "node": ">=22.23.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwijayuda/pskernel.git",
+    "directory": "psc0/packages/stdlib"
+  },
+  "proofscript": {
+    "library": {
+      "schemaVersion": 1,
+      "modulePrefix": "ProofScript",
+      "sourceRoot": "src"
+    },
+    "sourceVariants": [
+      "ps",
+      "lean"
+    ],
+    "status": "experimental; opt-in",
+    "standardLibrarySourceRoot": "psc0/stdlib/ProofScript"
+  }
+}

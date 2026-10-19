@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-runtime-comparison-correction",
+  "baseRef": "d6b7044258efaa272dcf396ce08b0c10496edcd2",
+  "motivatingFailure": {
+    "sourceRef": "d6b7044258efaa272dcf396ce08b0c10496edcd2",
+    "runId": 37967710379,
+    "diagnostic": "TS2367",
+    "stage": "N1 enabled runtime TypeScript fixture",
+    "evidenceOwner": "root qualification-attempt ledger"
+  },
+  "status": "source-reviewed-cloud-qualification-pending",
+  "purpose": "Allow the six primitive equality/inequality templates to express valid disjoint literal comparisons under TypeScript 7.0.2 without altering their JavaScript evaluation.",
+  "files": [
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "baseBlobSha": "2007afe360b9c6fde141c2c3ce5a72ef757d1b19",
+      "blobSha": "9628e3c9def09c487abb5b8859a79c7be735acf9",
+      "baseSha256": "0511938d892a5f5b46d0e43e2d819d01fc10e8b7c844354b3f780f810c77ea3d",
+      "sha256": "ad3315ec4e54cf7a1cb80b100202000f34e7f69cef2d7b99fb73b459bcb96766",
+      "bytes": 35020,
+      "edits": [
+        {
+          "operation": "natEq",
+          "before": "  | .natEq =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(\", left, \" === \", right, \")\"]);\n      psTsPrinted2 emit arguments\n",
+          "after": "  | .natEq =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(((\", left, \") as bigint) === ((\", right, \") as bigint))\"]);\n      psTsPrinted2 emit arguments\n"
+        },
+        {
+          "operation": "natNe",
+          "before": "  | .natNe =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(\", left, \" !== \", right, \")\"]);\n      psTsPrinted2 emit arguments\n",
+          "after": "  | .natNe =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(((\", left, \") as bigint) !== ((\", right, \") as bigint))\"]);\n      psTsPrinted2 emit arguments\n"
+        },
+        {
+          "operation": "intEq",
+          "before": "  | .intEq =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(\", left, \" === \", right, \")\"]);\n      psTsPrinted2 emit arguments\n",
+          "after": "  | .intEq =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(((\", left, \") as bigint) === ((\", right, \") as bigint))\"]);\n      psTsPrinted2 emit arguments\n"
+        },
+        {
+          "operation": "boolEq",
+          "before": "  | .boolEq =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(\", left, \" === \", right, \")\"]);\n      psTsPrinted2 emit arguments\n",
+          "after": "  | .boolEq =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(((\", left, \") as boolean) === ((\", right, \") as boolean))\"]);\n      psTsPrinted2 emit arguments\n"
+        },
+        {
+          "operation": "boolNe",
+          "before": "  | .boolNe =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(\", left, \" !== \", right, \")\"]);\n      psTsPrinted2 emit arguments\n",
+          "after": "  | .boolNe =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(((\", left, \") as boolean) !== ((\", right, \") as boolean))\"]);\n      psTsPrinted2 emit arguments\n"
+        },
+        {
+          "operation": "stringEq",
+          "before": "  | .stringEq =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(\", left, \" === \", right, \")\"]);\n      psTsPrinted2 emit arguments\n",
+          "after": "  | .stringEq =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (left : String) (right : String) =>\n          Except.ok (psTsJoin \"\" [\"(((\", left, \") as string) === ((\", right, \") as string))\"]);\n      psTsPrinted2 emit arguments\n"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-runtime-conformance.mjs",
+      "baseBlobSha": "df152b4e2bea23b9e9257285c862c7b70b75459d",
+      "blobSha": "8838155fb80ef28f7bf5c3916c207c6c94451634",
+      "baseSha256": "b8da2a54dec5e23d7a8a042ebc1ee8560c8a4b3aa41b10986c6eaef35c87d38b",
+      "sha256": "48b40d39cbae53c438fe4755fb784cb9b966bbb07e66bcf2435b4a50d430f7db",
+      "bytes": 28831,
+      "edits": [
+        {
+          "before": "import { compileTypeScript, sha256, unwrap, valueTag } from './sh1-capabilities.mjs';\n",
+          "after": "import { compileTypeScript, sha256, unwrap, valueTag } from './sh1-capabilities.mjs';\nimport { compileStrictSources } from './sh1-strict-source.mjs';\n"
+        },
+        {
+          "before": "// This proves finite executable correspondence and defensive refusals.\n",
+          "after": "// A source-level regression for the installed Nat.beq primitive. The other\n// equality operations remain covered by the unchanged original-IR fixture.\n// These independent fixed expectations do not use the emitted compiler as an oracle.\nasync function sourceEqualityRegression({ compiler, compilerSha256, root, outDir, tsc }) {\n  const relativeDirectory = 'source-equality';\n  const directory = path.join(outDir, relativeDirectory);\n  await mkdir(directory, { recursive: true });\n  const moduleName = ['Ps', 'Compiler', 'StrictRuntimeEquality'];\n  const rawSources = {\n    lean: [\n      'def strictSourceNatEqEqual : Bool := Nat.beq 7 7',\n      'def strictSourceNatEqDisjoint : Bool := Nat.beq 1 2',\n      'def strictSourceNatEqReversed : Bool := Nat.beq 2 1',\n      'def strictSourceNatEqZero : Bool := Nat.beq 0 0',\n      'def strictSourceNatEqLarge : Bool := Nat.beq 900719925474099312345678901234567890 900719925474099312345678901234567891',\n      'def strictSourceNatEqComputed : Bool := Nat.beq (Nat.add 2 3) 5',\n    ].join('\\n') + '\\n',\n    ps: [\n      'def strictSourceNatEqEqual : Bool := Nat.beq(7, 7)',\n      'def strictSourceNatEqDisjoint : Bool := Nat.beq(1, 2)',\n      'def strictSourceNatEqReversed : Bool := Nat.beq(2, 1)',\n      'def strictSourceNatEqZero : Bool := Nat.beq(0, 0)',\n      'def strictSourceNatEqLarge : Bool := Nat.beq(900719925474099312345678901234567890, 900719925474099312345678901234567891)',\n      'def strictSourceNatEqComputed : Bool := Nat.beq(Nat.add(2, 3), 5)',\n    ].join('\\n') + '\\n',\n  };\n  const expected = [\n    { id: 'equal', declaration: 'strictSourceNatEqEqual', expected: true },\n    { id: 'disjoint', declaration: 'strictSourceNatEqDisjoint', expected: false },\n    { id: 'reversed', declaration: 'strictSourceNatEqReversed', expected: false },\n    { id: 'zero', declaration: 'strictSourceNatEqZero', expected: true },\n    { id: 'large', declaration: 'strictSourceNatEqLarge', expected: false },\n    { id: 'computed', declaration: 'strictSourceNatEqComputed', expected: true },\n  ];\n  const sources = [], compiled = {};\n  for (const sourceKind of ['lean', 'ps']) {\n    const source = rawSources[sourceKind];\n    const sourcePath = relativeDirectory + '/source.' + sourceKind;\n    await writeFile(path.join(outDir, sourcePath), source, 'utf8');\n    const result = compileStrictSources(compiler, [{ moduleName, source }],\n      { compilerSha256, sourceKind });\n    assert.equal(result.evidence.sourcePolicy.moduleCount, 1);\n    assert.equal(result.evidence.sourcePolicy.stats.declarationCount, expected.length);\n    assert.equal(result.evidence.sourcePolicy.importCount, 0);\n    const sourceSha256 = sha256(source), sourceBytes = Buffer.byteLength(source);\n    assert.deepEqual(result.evidence.sourceInputs, [{ moduleName, sourceSha256, sourceBytes }]);\n    assert.equal(result.evidence.preparationCount, 1);\n    assert.equal(result.evidence.portableIrCheckCount, 1);\n    const evidenceText = JSON.stringify(result.evidence, null, 2) + '\\n';\n    const evidencePath = relativeDirectory + '/' + sourceKind + '-source-receipt.json';\n    await writeFile(path.join(outDir, evidencePath), evidenceText, 'utf8');\n    sources.push({ sourceKind, path: sourcePath, sha256: sourceSha256, bytes: sourceBytes,\n      evidencePath, evidenceSha256: sha256(evidenceText), evidence: result.evidence });\n    compiled[sourceKind] = result;\n  }\n  assert.equal(compiled.lean.typeScript, compiled.ps.typeScript,\n    'PSC0_STRICT_SOURCE_EQUALITY_TYPESCRIPT_BYTES');\n  assert.equal(compiled.lean.admissions, compiled.ps.admissions,\n    'PSC0_STRICT_SOURCE_EQUALITY_ADMISSIONS_BYTES');\n  const typeScript = compiled.lean.typeScript, admissions = compiled.lean.admissions;\n  const admissionsPath = relativeDirectory + '/admissions.jsonl';\n  await writeFile(path.join(outDir, admissionsPath), admissions, 'utf8');\n  // Compile this single shared module separately: concatenating complete emitted\n  // modules would duplicate their private runtime helpers.\n  const generated = await compileTypeScript(typeScript, path.join(directory, 'runtime'), tsc, root, '7.0.2');\n  const javascript = await readFile(generated, 'utf8');\n  const runtime = await import(pathToFileURL(generated).href + '?sha256=' + sha256(javascript));\n  const observations = expected.map((entry) => {\n    const value = runtime[entry.declaration];\n    assert.equal(typeof value, 'boolean', 'PSC0_STRICT_SOURCE_EQUALITY_RESULT_TYPE: ' + entry.id);\n    assert.equal(value, entry.expected, 'PSC0_STRICT_SOURCE_EQUALITY_RESULT: ' + entry.id);\n    return { ...entry, value };\n  });\n  return {\n    schemaVersion: 1, kind: 'psc0-source-nat-equality-conformance', status: 'pass',\n    compilerSha256, sourceOperation: 'Nat.beq', irOperation: 'natEq',\n    declarationCount: expected.length, sources,\n    byteAgreement: { typescript: true, admissions: true },\n    artifacts: {\n      typescript: { path: relativeDirectory + '/runtime/index.ts', sha256: sha256(typeScript) },\n      javascript: { path: relativeDirectory + '/runtime/index.js', sha256: sha256(javascript) },\n      admissions: { path: admissionsPath, sha256: sha256(admissions) },\n    },\n    expectedValuesOrigin: 'independent-fixed-results',\n    observations, observationsSha256: sha256(JSON.stringify(observations)),\n    rawSourceCompilationCount: 2, portableIrCheckCount: 2, typescriptCompilationCount: 1,\n    strictSh1Qualified: false, semanticContractQualified: false,\n    formalPreservationProven: false, sourceProofProvenanceReconstructed: false,\n    provider: { status: 'not-attempted', kernelChecked: false },\n  };\n}\n\n// This proves finite executable correspondence and defensive refusals.\n"
+        },
+        {
+          "before": "  const positions = textPositions(compiler, contract);\n  const receipt = {\n",
+          "after": "  const positions = textPositions(compiler, contract);\n  const sourceEquality = await sourceEqualityRegression({ compiler, compilerSha256, root, outDir, tsc });\n  const receipt = {\n"
+        },
+        {
+          "before": "    defensiveBounds: bounds, operandEvaluation: evaluation, carrier, textPositions: positions,\n",
+          "after": "    defensiveBounds: bounds, operandEvaluation: evaluation, carrier, textPositions: positions,\n    sourceEqualityRegression: sourceEquality,\n"
+        },
+        {
+          "before": "      booleanDemand: 'Value truth tables only; general short-circuit lowering proof is a separate obligation.',\n",
+          "after": "      booleanDemand: 'Value truth tables only; general short-circuit lowering proof is a separate obligation.',\n      sourceEquality: 'Six Nat.beq declarations in raw Lean and new-only PS share exact TS/admission bytes and independent fixed Bool results.',\n"
+        },
+        {
+          "before": "    strictSh1Qualified: false, formalPreservationProven: false,\n",
+          "after": "    strictSh1Qualified: false, semanticContractQualified: false, formalPreservationProven: false,\n"
+        }
+      ]
+    }
+  ],
+  "sourceReview": {
+    "mode": "independent immutable-source review; no compiler or test execution",
+    "productionEditClass": "Six template string lines only: bigint natEq/natNe/intEq, boolean boolEq/boolNe, string stringEq.",
+    "evaluationArgument": "Type assertions erase at TypeScript emission. Both original operand expressions occur exactly once in their original left-to-right ===/!== expression; the correction adds no JavaScript work or demand.",
+    "exactReversibility": true,
+    "peerReview": "runtime_comparison_finish/regression_review: clear",
+    "checkedSourceBlobs": {
+      "proofScriptParser": "e91415c66fec9115a281c93c9459189bb919f121",
+      "elaborationPrelude": "d862ba8c806595fbf11237724089bd2282af9866",
+      "erasureExpression": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+      "atomicSourceHost": "6fb4e25238d99ad6e408726831454e2b14235092",
+      "typeScriptCompilationHost": "dd23adb72d33c0df14a88ec846ab6c705d5813b2"
+    }
+  },
+  "preservedCoverage": {
+    "operations": 45,
+    "nativeObservations": 186,
+    "defensiveBounds": 8,
+    "operandEvaluation": 9,
+    "malformedCarriers": 5,
+    "textPositionFamilies": 2,
+    "originalIrFixtureDeclarations": 192,
+    "originalIrFixturePortableCheckCount": 1
+  },
+  "rawSourceRegression": {
+    "receiptField": "sourceEqualityRegression",
+    "kind": "psc0-source-nat-equality-conformance",
+    "sourceKinds": [
+      "lean",
+      "ps"
+    ],
+    "moduleName": [
+      "Ps",
+      "Compiler",
+      "StrictRuntimeEquality"
+    ],
+    "sourceOperation": "Nat.beq",
+    "irOperation": "natEq",
+    "declarations": 6,
+    "caseIds": [
+      "equal",
+      "disjoint",
+      "reversed",
+      "zero",
+      "large",
+      "computed"
+    ],
+    "independentlySpecifiedExpectedValues": [
+      true,
+      false,
+      false,
+      true,
+      false,
+      true
+    ],
+    "expectedValuesOrigin": "independent-fixed-results",
+    "byteAgreement": [
+      "typescript",
+      "admissions"
+    ],
+    "rawSourceCompilationCount": 2,
+    "portableIrCheckCount": 2,
+    "typescriptCompilationCount": 1,
+    "compilerVersion": "7.0.2",
+    "sources": [
+      {
+        "sourceKind": "lean",
+        "path": "source-equality/source.lean",
+        "evidencePath": "source-equality/lean-source-receipt.json"
+      },
+      {
+        "sourceKind": "ps",
+        "path": "source-equality/source.ps",
+        "evidencePath": "source-equality/ps-source-receipt.json"
+      }
+    ],
+    "artifacts": {
+      "typescript": "source-equality/runtime/index.ts",
+      "javascript": "source-equality/runtime/index.js",
+      "admissions": "source-equality/admissions.jsonl"
+    },
+    "pathsRelativeTo": "current compiler runtime conformance output directory",
+    "evidence": "Each source descriptor records actual raw bytes/hash and its own complete atomic source evidence with the exact evidence-file hash. Shared artifact hashes bind byte-identical TS/admissions after both portable calls. Observed Bool values are checked independently and hashed in order.",
+    "semanticLimit": "These six source cases cover only installed Nat.beq. The other five corrected comparison intrinsics retain their original direct-IR/native reference coverage; no uninstalled source operations or syntax are invented."
+  },
+  "rootIntegrationRequirements": [
+    "Verify both expected file blobs on the current branch before any commit; preserve concurrent edits and update refs without force under an exact head lease.",
+    "Retain the exact runtime gate source SHA-256 in the correction/source manifest; the qualification binder imports runtime contract constants and has no standalone runtime gate hash constant.",
+    "Bind the new sourceEqualityRegression receipt field to actual raw source, actual atomic source receipt, shared TS/JS/admission files, expected counts, compiler identities and false strict/semantic/provider flags.",
+    "Retain the failed TS2367 attempt and update AI_WORK_STATE.md before dispatching one coherent exact-source cloud qualification.",
+    "Keep the origin-retention and Nat recursor demand candidates separate from this correction."
+  ],
+  "invariants": {
+    "runtimeContractChanged": false,
+    "nativeReferenceChanged": false,
+    "comparisonOperandsDuplicated": false,
+    "existingCountsReduced": false,
+    "untypedEmissionFallbackAdded": false,
+    "grammarCompatibilityAdded": false,
+    "typeScript5Restored": false,
+    "selectedSeedChanged": false,
+    "providerChanged": false,
+    "kernelOrCacheOrMetatheoryAlgorithmsChanged": false
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "formalPreservationProven": false,
+  "sourceProofProvenanceReconstructed": false,
+  "providerChecked": false,
+  "rootOwnedBinderReview": {
+    "path": "psc0/scripts/sh1-strict-evidence.mjs",
+    "baseBlobSha": "de83f067f202ef4679dfcc08132616c9d00d501a",
+    "candidateBlobSha": "8c8a781012871b1f0f748ed46921287efab8e046",
+    "baseSha256": "853fe1cbbcee1a1a75439a235cabbc5a95e47a997e66e34ac8a464846a13ae4f",
+    "sha256": "5b5f9de6ab616bd0698a4935c74e9256e1c03074617211bdfcc40e116aa3f44a",
+    "sourceReview": "Author plus independent peer: clear. Removing only the added helper, invocation and bound evidence field restores the exact base bytes.",
+    "exactReversibility": true,
+    "binding": "For every N1/C1/C2/C3 runtime receipt, authenticate both actual raw source files, both actual atomic receipt files and their embedded records, module/raw-input identities, accepted source/target/IR evidence, own compiler hashes, shared TS/JS/admission files, independent six Bool observations, 2/2/1 counters, and false qualification claims.",
+    "executed": false
+  },
+  "integration": {
+    "repository": "dwijayuda/pskernel",
+    "branch": "psc0/strict-sh1-v1",
+    "baseSourceRef": "d6b7044258efaa272dcf396ce08b0c10496edcd2",
+    "sourceReviewComplete": true,
+    "rootBinder": {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "baseBlobSha": "de83f067f202ef4679dfcc08132616c9d00d501a",
+      "blobSha": "8c8a781012871b1f0f748ed46921287efab8e046",
+      "sha256": "5b5f9de6ab616bd0698a4935c74e9256e1c03074617211bdfcc40e116aa3f44a",
+      "independentReview": "runtime_comparison_finish and regression_review: clear; every existing gate preserved"
+    },
+    "attempts": "qualification-attempts.json",
+    "nativeSourceReceipt": "attempts/d6b7044258efaa272dcf396ce08b0c10496edcd2/native-source.json",
+    "cloudStatus": "awaiting-exact-followup-source-qualification",
+    "mainAtLastVerified": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+    "selectedSeed": "R",
+    "originAndNatDraftsIncluded": false
+  }
+}

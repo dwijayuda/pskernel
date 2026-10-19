@@ -1,0 +1,321 @@
+{
+  "schemaVersion": 1,
+  "kind": "guarded-read-only-final-disposition-mapping",
+  "repository": "dwijayuda/pskernel",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/final-disposition-map-review.json",
+  "status": "unattached-current-mapping; final source transport and execution disposition pending",
+  "mapping": {
+    "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/final-disposition-map.json",
+    "blob": "697c94b2722a6191537b714f71f629713637b30a",
+    "sha256": "474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07",
+    "utf8Bytes": 191711,
+    "immutableReadbackIdentical": true
+  },
+  "expectedCurrentSourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+  "baseLedgers": [
+    {
+      "id": "correspondence",
+      "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+      "blob": "8a33f7d27760aea546041cf8df3907532b458696",
+      "sha256": "babb23499e668fa572f327b0d47e125be09d3afb7543be46ed701ed7cee7e7e7",
+      "rowArrayJsonSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55",
+      "rowArrayHashEncoding": "UTF-8 JSON.stringify(rows), no final newline"
+    },
+    {
+      "id": "stage",
+      "path": "psc0/docs/selfhost-language/strict/obligations.json",
+      "blob": "de7867dd7bdb299c402bf336ec9d2b488a57df8b",
+      "sha256": "0a8447be8091bb70fcc97f765710431b4ae805263230e6d30f5f92207bc167fd",
+      "rowArrayJsonSha256": "9bab4ee9cdf1dc7305402ebe09d3b1e0375d0992227ebae4999e79820922eea5",
+      "rowArrayHashEncoding": "UTF-8 JSON.stringify(rows), no final newline"
+    }
+  ],
+  "identityGuards": {
+    "correspondence": [
+      {
+        "jsonPointer": "/rows/0/id",
+        "expected": "ER-01"
+      },
+      {
+        "jsonPointer": "/rows/1/id",
+        "expected": "ER-02"
+      },
+      {
+        "jsonPointer": "/rows/2/id",
+        "expected": "ER-03"
+      },
+      {
+        "jsonPointer": "/rows/3/id",
+        "expected": "ER-04"
+      },
+      {
+        "jsonPointer": "/rows/4/id",
+        "expected": "ER-05"
+      },
+      {
+        "jsonPointer": "/rows/5/id",
+        "expected": "ER-06"
+      },
+      {
+        "jsonPointer": "/rows/6/id",
+        "expected": "ER-07"
+      },
+      {
+        "jsonPointer": "/rows/7/id",
+        "expected": "ER-08"
+      },
+      {
+        "jsonPointer": "/rows/8/id",
+        "expected": "ER-09"
+      },
+      {
+        "jsonPointer": "/rows/9/id",
+        "expected": "N-01"
+      },
+      {
+        "jsonPointer": "/rows/10/id",
+        "expected": "N-02"
+      },
+      {
+        "jsonPointer": "/rows/11/id",
+        "expected": "N-03"
+      },
+      {
+        "jsonPointer": "/rows/12/id",
+        "expected": "N-04"
+      },
+      {
+        "jsonPointer": "/rows/13/id",
+        "expected": "EV-01"
+      },
+      {
+        "jsonPointer": "/rows/14/id",
+        "expected": "EV-02"
+      },
+      {
+        "jsonPointer": "/rows/15/id",
+        "expected": "EV-03"
+      },
+      {
+        "jsonPointer": "/rows/16/id",
+        "expected": "EV-04"
+      },
+      {
+        "jsonPointer": "/rows/17/id",
+        "expected": "EV-05"
+      },
+      {
+        "jsonPointer": "/rows/18/id",
+        "expected": "EV-06"
+      },
+      {
+        "jsonPointer": "/rows/19/id",
+        "expected": "EV-07"
+      },
+      {
+        "jsonPointer": "/rows/20/id",
+        "expected": "EV-08"
+      },
+      {
+        "jsonPointer": "/rows/21/id",
+        "expected": "EV-09"
+      },
+      {
+        "jsonPointer": "/rows/22/id",
+        "expected": "EV-10"
+      },
+      {
+        "jsonPointer": "/rows/23/id",
+        "expected": "EV-11"
+      },
+      {
+        "jsonPointer": "/rows/24/id",
+        "expected": "TS-01"
+      },
+      {
+        "jsonPointer": "/rows/25/id",
+        "expected": "TS-02"
+      },
+      {
+        "jsonPointer": "/rows/26/id",
+        "expected": "TS-03"
+      },
+      {
+        "jsonPointer": "/rows/27/id",
+        "expected": "TS-04"
+      },
+      {
+        "jsonPointer": "/rows/28/id",
+        "expected": "TS-05"
+      },
+      {
+        "jsonPointer": "/rows/29/id",
+        "expected": "TS-06"
+      },
+      {
+        "jsonPointer": "/rows/30/id",
+        "expected": "TS-07"
+      },
+      {
+        "jsonPointer": "/rows/31/id",
+        "expected": "TS-08"
+      },
+      {
+        "jsonPointer": "/rows/32/id",
+        "expected": "TS-09"
+      }
+    ],
+    "stage": [
+      {
+        "jsonPointer": "/rows/0/id",
+        "expected": "S0.enabled"
+      },
+      {
+        "jsonPointer": "/rows/1/id",
+        "expected": "S1.imports"
+      },
+      {
+        "jsonPointer": "/rows/2/id",
+        "expected": "S1.syntax"
+      },
+      {
+        "jsonPointer": "/rows/3/id",
+        "expected": "S1.do"
+      },
+      {
+        "jsonPointer": "/rows/4/id",
+        "expected": "S1.resource"
+      },
+      {
+        "jsonPointer": "/rows/5/id",
+        "expected": "S1.atomic"
+      },
+      {
+        "jsonPointer": "/rows/6/id",
+        "expected": "S1.host"
+      },
+      {
+        "jsonPointer": "/rows/7/id",
+        "expected": "S2.carrier"
+      },
+      {
+        "jsonPointer": "/rows/8/id",
+        "expected": "S2.operations"
+      },
+      {
+        "jsonPointer": "/rows/9/id",
+        "expected": "S2.bounds"
+      },
+      {
+        "jsonPointer": "/rows/10/id",
+        "expected": "S2.text"
+      },
+      {
+        "jsonPointer": "/rows/11/id",
+        "expected": "S3.origin"
+      },
+      {
+        "jsonPointer": "/rows/12/id",
+        "expected": "S3.binders"
+      },
+      {
+        "jsonPointer": "/rows/13/id",
+        "expected": "S3.layout"
+      },
+      {
+        "jsonPointer": "/rows/14/id",
+        "expected": "S3.abi"
+      },
+      {
+        "jsonPointer": "/rows/15/id",
+        "expected": "S4.normalization"
+      },
+      {
+        "jsonPointer": "/rows/16/id",
+        "expected": "S4.ir"
+      },
+      {
+        "jsonPointer": "/rows/17/id",
+        "expected": "S4.errors"
+      },
+      {
+        "jsonPointer": "/rows/18/id",
+        "expected": "S4.capture"
+      },
+      {
+        "jsonPointer": "/rows/19/id",
+        "expected": "S5.initialization"
+      },
+      {
+        "jsonPointer": "/rows/20/id",
+        "expected": "S5.names"
+      },
+      {
+        "jsonPointer": "/rows/21/id",
+        "expected": "S5.generator"
+      },
+      {
+        "jsonPointer": "/rows/22/id",
+        "expected": "S5.eta"
+      },
+      {
+        "jsonPointer": "/rows/23/id",
+        "expected": "S5.loops"
+      },
+      {
+        "jsonPointer": "/rows/24/id",
+        "expected": "S6.qualification"
+      },
+      {
+        "jsonPointer": "/rows/25/id",
+        "expected": "S6.provider"
+      },
+      {
+        "jsonPointer": "/rows/26/id",
+        "expected": "S6.activation"
+      }
+    ]
+  },
+  "scope": {
+    "correspondenceRows": 33,
+    "stageObligations": 27,
+    "reviewedPapers": 8,
+    "receiptGroups": 25,
+    "sourceBlobGuards": 49,
+    "definitionListGuards": 3,
+    "sourceAdditions": 6,
+    "ledgerUpdatesPerformed": 0,
+    "sourceEditsPerformed": 0,
+    "executions": 0,
+    "refsChanged": 0,
+    "rowsClosed": 0
+  },
+  "sourceTransport": {
+    "observedExpr": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+    "proposedFinalExpr": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+    "finalManifest": null,
+    "rootSemanticReview": "CLEAR",
+    "remaining": "Attach final bounded peer/guard manifest before root records this source as integrated or qualified. The map stages that pin without execution or a new semantic argument."
+  },
+  "reviewChecks": [
+    "All33stable correspondence IDs and27stage IDs match the exact current row ordering.",
+    "Both parsed row arrays are exactly JSON-equal to the preceding4e2d/3399 checkpoints; only surrounding metadata advanced.",
+    "Every sourceBlobUpdates/expected value resolves at its exact current ledger JSON pointer; all three definition-list before guards match.",
+    "All eight paper identities were read and hashed; row/stage packet and receipt references resolve to the included catalogues.",
+    "Current pipeline/gate source establishes actual receipt paths, exact binder generations output key, current observed counts and separate provider-stream scope.",
+    "The retired FinishApplication helper is absent; arbitrary psErasureEtaFunction remains defined with zero call sites in the inspected current source.",
+    "Final map readback exactly matches its created text and SHA256.",
+    "No ledger Boolean, per-compilation receipt flag, source, contract, seed, workflow or ref was altered."
+  ],
+  "rootUse": "This is an advisory mapping, not a JSON Patch to execute wholesale. Guard the listed stable row IDs and before values. Root may update current argument/source metadata from the proposals after its review, retaining historical review pins, immutable nonclaim receipts and the hashed enabled contract. Final strict/general/execution/provider row disposition requires the exact final source transport and actual complete receipts; no success or row closure is asserted here.",
+  "qualification": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "formalPreservationProven": false,
+    "providerChecked": false,
+    "latestReportedRun": 38004581681,
+    "latestReportedSource": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "latestReportedStatus": "failed-step24-owned-parser-fold-pattern-before-N1-result",
+    "sourceOfStatus": "root report with completed log35de2a9c845a4af0d445319fede4ee3556b6610a; retained earlier45d failure remains historical"
+  }
+}

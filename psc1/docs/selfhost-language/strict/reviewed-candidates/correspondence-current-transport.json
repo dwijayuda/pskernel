@@ -1,0 +1,4040 @@
+{
+  "schemaVersion": 1,
+  "kind": "strict-sh1-correspondence-current-source-transport-and-deferred-final-dispositions",
+  "status": "current-source-transport-reviewed; pending-exact-full-qualification-and-provider",
+  "repository": "dwijayuda/pskernel",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-current-transport.json",
+  "scope": "Reuse the completed 33-row mapping and review; associate only the subsequent two Expr spelling transports and two host evidence-consumer updates. No new general argument review, language capability or proof scope. The pattern/callback/host transports are already published; the reused final common conditions' source-integration portion is satisfied by those exact pins, while all actual qualification/provider references are still deferred.",
+  "base": {
+    "commit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "rootTree": "c7903f7b30b45f08f7c311869681b4ca1a9908c9",
+    "psc0Tree": "3cb88a6ee17b429cfde8215819fb789c3c2910ca",
+    "psc0Blobs": 1410,
+    "treeTruncated": false,
+    "ledger": {
+      "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+      "blob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+      "sha256": "88699d32fc09e0350d79f36bc9d005a3dfd5dedfd52f22c60da8cb4d4ec2fafb",
+      "bytes": 136640,
+      "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
+    },
+    "previousSourceBase": {
+      "commit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+      "rootTree": "21592550b9016a8e5e7627d59dcdf261df72d2ad",
+      "psc0Tree": "d99e085157331fcf5db74e7ab207f848ee724a13",
+      "psc0Blobs": 1398,
+      "treeTruncated": false,
+      "ledger": {
+        "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+        "blob": "4cadf1fbcceecce23b1e37cf093b6269c61026be",
+        "sha256": "2565bef23301869688d28fa7556b2bf2bb81d32a89680066870f64c28eca628b",
+        "bytes": 128452,
+        "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
+      }
+    },
+    "currentBindingStatus": "published-source-commit-tree-and-current-ledger-verified"
+  },
+  "reviewReuse": {
+    "map": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/final-disposition-map.json",
+      "blob": "697c94b2722a6191537b714f71f629713637b30a",
+      "sha256": "474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07"
+    },
+    "correspondenceReview": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-disposition-map-review.json",
+      "blob": "20f0116df23d4304e3b7e8f9da5ff39599eaf037",
+      "sha256": "580a9f11ec273ea8a9bebfb396932ecb19fac3a94df663b4979ce949df50f61e"
+    }
+  },
+  "frozenPaperPins": [
+    {
+      "id": "COMMON",
+      "path": "psc0/docs/selfhost-language/strict/SEMANTIC_RELATIONS.md",
+      "blob": "40e540b325186ee514ff3af9e39a22126d29a167",
+      "sha256": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+      "presentUnchanged": true
+    },
+    {
+      "id": "N",
+      "path": "psc0/docs/selfhost-language/strict/NORMALIZATION_ARGUMENTS.md",
+      "blob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+      "sha256": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+      "presentUnchanged": true
+    },
+    {
+      "id": "EV",
+      "path": "psc0/docs/selfhost-language/strict/EV_RULE_ARGUMENTS.md",
+      "blob": "7e90465301005a395a871a0563b19c164dcda750",
+      "sha256": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+      "presentUnchanged": true
+    },
+    {
+      "id": "TS",
+      "path": "psc0/docs/selfhost-language/strict/TS_RULE_ARGUMENTS.md",
+      "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+      "sha256": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+      "presentUnchanged": true
+    },
+    {
+      "id": "GROUP",
+      "path": "psc0/docs/selfhost-language/strict/CANONICAL_FUNCTION_ARGUMENTS.md",
+      "blob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+      "sha256": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+      "presentUnchanged": true
+    },
+    {
+      "id": "ER",
+      "path": "psc0/docs/selfhost-language/strict/ERASURE_ARGUMENTS.md",
+      "blob": "71f5f50f4586fcf11b74f02b7904b775f56cd4de",
+      "sha256": "b0d3b1e3815fe127ecd8f02abce5462d76c2dba341e513888a63eea1b7ce04e3",
+      "presentUnchanged": true
+    },
+    {
+      "id": "CROSS",
+      "path": "psc0/docs/selfhost-language/strict/CROSS_FAMILY_INTERFACE_REVIEW.md",
+      "blob": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "sha256": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+      "presentUnchanged": true
+    },
+    {
+      "id": "SOURCE_RUNTIME",
+      "path": "psc0/docs/selfhost-language/strict/SOURCE_RUNTIME_INTERFACE_REVIEW.md",
+      "blob": "06b5a893e03940ccc24db0b2036dc5bc7e4b60fe",
+      "sha256": "b543637385dc044f837ef36411d8c44b4c5612bacb691ef7bc20cbe882ec6407",
+      "presentUnchanged": true
+    }
+  ],
+  "transports": {
+    "manifests": [
+      {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/foldl-flat-pattern-repair.json",
+        "blob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+        "sha256": "a133929cb5d6de03dfb17a9750edeb12180113b0c91da279f22b2c71ff289d88",
+        "bytes": 48534
+      },
+      {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/worker-self-call-prefix-repair.json",
+        "blob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
+        "sha256": "d964cfc99eda53cd9fefaa833a0ffbded9f3d5f907c06f21ffe63bf33b467fab",
+        "bytes": 48828
+      },
+      {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/empty-source-return-boundary.json",
+        "blob": "a89fb7324afb820b2df077a26608d71cc11d644c",
+        "sha256": "0836d42bdfaf55fd11c433bb7ac8c6056636296b36805f1b3188cc8111112c49",
+        "bytes": 24846
+      },
+      {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-repair.json",
+        "blob": "f71b09c33a574e6868b193afac946355008b4d61",
+        "sha256": "6131cefd6461284b35560dd1fa21e267cadb10f77785e2f3b90fb61b1a9936bf",
+        "bytes": 63632
+      },
+      {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-independent-review.json",
+        "blob": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
+        "sha256": "4f2e24e8add150073d2070d1e7a9ab0526c6d4ce5d882dcc0adf1015309281c1",
+        "bytes": 13986
+      }
+    ],
+    "expression": [
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "baseBlob": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+        "baseSha256": "10306c15e992fd75d4762a6ff4c017cda56dde72e0382a18d5c646f40be9f419",
+        "baseBytes": 137412,
+        "currentBlob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+        "currentSha256": "e2d86d14b112a16f6fc5ff77fc60968e8dac2adbf466c1f761b2087e7f3a1662",
+        "currentBytes": 138060,
+        "manifestBlob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+        "semanticScope": "Exhaustive equivalent flat List pattern; sole length-two success body retained."
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "baseBlob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+        "baseSha256": "e2d86d14b112a16f6fc5ff77fc60968e8dac2adbf466c1f761b2087e7f3a1662",
+        "baseBytes": 138060,
+        "currentBlob": "b4af2687c1b94e85014e323e5325385f139d4015",
+        "currentSha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15",
+        "currentBytes": 138189,
+        "manifestBlob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
+        "semanticScope": "Actual two-argument recursive entry is separated inside the unchanged callback; no work crosses a lambda or is shared between activations."
+      }
+    ],
+    "host": [
+      {
+        "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+        "baseBlob": "c28507666a3c46892c6fc155c66e1842a8954150",
+        "baseSha256": "b4219497ec2eb9549535241580a22f74c1f03f6d6a5db8e7fad598cf839e9cd0",
+        "baseBytes": 31384,
+        "currentBlob": "fec9c43e4bd792aef81983d1dbf100a5b6b2beaa",
+        "currentSha256": "03a252f699f4bd72a2b40ddf3558eee1aa9c9e4ee69ef9cc570fb8231754b089",
+        "currentBytes": 31555,
+        "manifestBlob": "a89fb7324afb820b2df077a26608d71cc11d644c"
+      },
+      {
+        "path": "psc0/scripts/sh1-strict-evidence.mjs",
+        "baseBlob": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+        "baseSha256": "c522c41263e7931b83777242d77c2e7f355ce82832e72f152879645f96f31326",
+        "baseBytes": 91968,
+        "currentBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "currentSha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+        "currentBytes": 91970,
+        "manifestBlob": "a89fb7324afb820b2df077a26608d71cc11d644c"
+      }
+    ],
+    "historicalAdvisoryTreatment": "Frozen map697c94 retains observed e3ed and proposed a4d; its pending-manifest fields are historical. Active current rows and the ER-08 added source use b4af. Frozen paper/source proof anchors are not rewritten. Frozen ac274 retains its cad2 Infer source addition; this pending transport records the separately reviewed cad2 -> 160a delta without rewriting old evidence.",
+    "inference": [
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+        "baseBlob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+        "currentBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+        "sha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
+        "bytes": 21458,
+        "manifestBlob": "f71b09c33a574e6868b193afac946355008b4d61",
+        "independentReviewBlob": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
+        "semanticScope": "Only newly constructed closed sort-successor and Pi-imax levels are canonicalized, preserving ground universe denotation and zero classification. Any param/mvar preserves the original entire input level. Finite proper input/allocation and unchanged expression-fuel limits are those stated in the exact reviewed manifest. Symbolic universe algorithms, kernel/provider, defeq/cache, fixtures, runtime and erasure are unchanged."
+      }
+    ]
+  },
+  "sourcePatch": {
+    "format": "RFC6902",
+    "precondition": "Authenticate the complete base ledger blob/SHA256 before applying this in-memory patch; every operation below is a proposal, not a repository mutation.",
+    "operations": [
+      {
+        "op": "test",
+        "path": "/rows/0/id",
+        "value": "ER-01"
+      },
+      {
+        "op": "test",
+        "path": "/rows/1/id",
+        "value": "ER-02"
+      },
+      {
+        "op": "test",
+        "path": "/rows/2/id",
+        "value": "ER-03"
+      },
+      {
+        "op": "test",
+        "path": "/rows/3/id",
+        "value": "ER-04"
+      },
+      {
+        "op": "test",
+        "path": "/rows/4/id",
+        "value": "ER-05"
+      },
+      {
+        "op": "test",
+        "path": "/rows/5/id",
+        "value": "ER-06"
+      },
+      {
+        "op": "test",
+        "path": "/rows/6/id",
+        "value": "ER-07"
+      },
+      {
+        "op": "test",
+        "path": "/rows/7/id",
+        "value": "ER-08"
+      },
+      {
+        "op": "test",
+        "path": "/rows/8/id",
+        "value": "ER-09"
+      },
+      {
+        "op": "test",
+        "path": "/rows/9/id",
+        "value": "N-01"
+      },
+      {
+        "op": "test",
+        "path": "/rows/10/id",
+        "value": "N-02"
+      },
+      {
+        "op": "test",
+        "path": "/rows/11/id",
+        "value": "N-03"
+      },
+      {
+        "op": "test",
+        "path": "/rows/12/id",
+        "value": "N-04"
+      },
+      {
+        "op": "test",
+        "path": "/rows/13/id",
+        "value": "EV-01"
+      },
+      {
+        "op": "test",
+        "path": "/rows/14/id",
+        "value": "EV-02"
+      },
+      {
+        "op": "test",
+        "path": "/rows/15/id",
+        "value": "EV-03"
+      },
+      {
+        "op": "test",
+        "path": "/rows/16/id",
+        "value": "EV-04"
+      },
+      {
+        "op": "test",
+        "path": "/rows/17/id",
+        "value": "EV-05"
+      },
+      {
+        "op": "test",
+        "path": "/rows/18/id",
+        "value": "EV-06"
+      },
+      {
+        "op": "test",
+        "path": "/rows/19/id",
+        "value": "EV-07"
+      },
+      {
+        "op": "test",
+        "path": "/rows/20/id",
+        "value": "EV-08"
+      },
+      {
+        "op": "test",
+        "path": "/rows/21/id",
+        "value": "EV-09"
+      },
+      {
+        "op": "test",
+        "path": "/rows/22/id",
+        "value": "EV-10"
+      },
+      {
+        "op": "test",
+        "path": "/rows/23/id",
+        "value": "EV-11"
+      },
+      {
+        "op": "test",
+        "path": "/rows/24/id",
+        "value": "TS-01"
+      },
+      {
+        "op": "test",
+        "path": "/rows/25/id",
+        "value": "TS-02"
+      },
+      {
+        "op": "test",
+        "path": "/rows/26/id",
+        "value": "TS-03"
+      },
+      {
+        "op": "test",
+        "path": "/rows/27/id",
+        "value": "TS-04"
+      },
+      {
+        "op": "test",
+        "path": "/rows/28/id",
+        "value": "TS-05"
+      },
+      {
+        "op": "test",
+        "path": "/rows/29/id",
+        "value": "TS-06"
+      },
+      {
+        "op": "test",
+        "path": "/rows/30/id",
+        "value": "TS-07"
+      },
+      {
+        "op": "test",
+        "path": "/rows/31/id",
+        "value": "TS-08"
+      },
+      {
+        "op": "test",
+        "path": "/rows/32/id",
+        "value": "TS-09"
+      },
+      {
+        "op": "test",
+        "path": "/rows/0/sources/1/blob",
+        "value": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/0/sources/1/blob",
+        "value": "4c9d3878c01751239022e755e2860c6d49ddf301"
+      },
+      {
+        "op": "test",
+        "path": "/rows/1/sources/0/blob",
+        "value": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/1/sources/0/blob",
+        "value": "0132390f1ddb3133c9c14737b558e9b55bee33c9"
+      },
+      {
+        "op": "test",
+        "path": "/rows/2/sources/0/blob",
+        "value": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/2/sources/0/blob",
+        "value": "0132390f1ddb3133c9c14737b558e9b55bee33c9"
+      },
+      {
+        "op": "test",
+        "path": "/rows/2/sources/1/blob",
+        "value": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/2/sources/1/blob",
+        "value": "4c9d3878c01751239022e755e2860c6d49ddf301"
+      },
+      {
+        "op": "test",
+        "path": "/rows/2/sources/2/blob",
+        "value": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/2/sources/2/blob",
+        "value": "b4af2687c1b94e85014e323e5325385f139d4015"
+      },
+      {
+        "op": "test",
+        "path": "/rows/3/sources/0/blob",
+        "value": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/3/sources/0/blob",
+        "value": "b4af2687c1b94e85014e323e5325385f139d4015"
+      },
+      {
+        "op": "test",
+        "path": "/rows/3/sources/1/blob",
+        "value": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/3/sources/1/blob",
+        "value": "4c9d3878c01751239022e755e2860c6d49ddf301"
+      },
+      {
+        "op": "test",
+        "path": "/rows/4/sources/1/blob",
+        "value": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/4/sources/1/blob",
+        "value": "b4af2687c1b94e85014e323e5325385f139d4015"
+      },
+      {
+        "op": "test",
+        "path": "/rows/5/sources/0/blob",
+        "value": "857b9926a14be9e30ad2ed2ccdcd26643624d9ed"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/5/sources/0/blob",
+        "value": "afd981e10d609d38db9ce4698fb4a6152bb50c7f"
+      },
+      {
+        "op": "test",
+        "path": "/rows/5/sources/1/blob",
+        "value": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/5/sources/1/blob",
+        "value": "b4af2687c1b94e85014e323e5325385f139d4015"
+      },
+      {
+        "op": "test",
+        "path": "/rows/6/sources/0/blob",
+        "value": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/6/sources/0/blob",
+        "value": "b4af2687c1b94e85014e323e5325385f139d4015"
+      },
+      {
+        "op": "test",
+        "path": "/rows/7/sources/0/blob",
+        "value": "66b20621288b76153fa78db6c923f0c7b0c5d9ab"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/7/sources/0/blob",
+        "value": "57e76a17858b3f4333a44ed880326ac33695351e"
+      },
+      {
+        "op": "test",
+        "path": "/rows/8/sources/0/blob",
+        "value": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/8/sources/0/blob",
+        "value": "0132390f1ddb3133c9c14737b558e9b55bee33c9"
+      },
+      {
+        "op": "test",
+        "path": "/rows/8/sources/1/blob",
+        "value": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/8/sources/1/blob",
+        "value": "b4af2687c1b94e85014e323e5325385f139d4015"
+      },
+      {
+        "op": "test",
+        "path": "/rows/8/sources/2/blob",
+        "value": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/8/sources/2/blob",
+        "value": "4c9d3878c01751239022e755e2860c6d49ddf301"
+      },
+      {
+        "op": "test",
+        "path": "/rows/9/sources/0/blob",
+        "value": "ea8518afd0982e64d6fcfcd2320501d89e0385ec"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/9/sources/0/blob",
+        "value": "8b1c409244b9669224fc3caff796aea69eac1401"
+      },
+      {
+        "op": "test",
+        "path": "/rows/9/sources/1/blob",
+        "value": "ff632f3a40b069bfead799b408af009ec9931261"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/9/sources/1/blob",
+        "value": "d191857ece760f307359d576dca2cef906dea8ec"
+      },
+      {
+        "op": "test",
+        "path": "/rows/10/sources/0/blob",
+        "value": "ea8518afd0982e64d6fcfcd2320501d89e0385ec"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/10/sources/0/blob",
+        "value": "8b1c409244b9669224fc3caff796aea69eac1401"
+      },
+      {
+        "op": "test",
+        "path": "/rows/10/sources/1/blob",
+        "value": "ff632f3a40b069bfead799b408af009ec9931261"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/10/sources/1/blob",
+        "value": "d191857ece760f307359d576dca2cef906dea8ec"
+      },
+      {
+        "op": "test",
+        "path": "/rows/11/sources/0/blob",
+        "value": "ea8518afd0982e64d6fcfcd2320501d89e0385ec"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/11/sources/0/blob",
+        "value": "8b1c409244b9669224fc3caff796aea69eac1401"
+      },
+      {
+        "op": "test",
+        "path": "/rows/12/sources/0/blob",
+        "value": "ff632f3a40b069bfead799b408af009ec9931261"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/12/sources/0/blob",
+        "value": "d191857ece760f307359d576dca2cef906dea8ec"
+      },
+      {
+        "op": "test",
+        "path": "/rows/12/sources/1/blob",
+        "value": "ea8518afd0982e64d6fcfcd2320501d89e0385ec"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/12/sources/1/blob",
+        "value": "8b1c409244b9669224fc3caff796aea69eac1401"
+      },
+      {
+        "op": "test",
+        "path": "/rows/13/sources/0/blob",
+        "value": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/13/sources/0/blob",
+        "value": "074bf2b838994d2af375a20ef1600941d21e956c"
+      },
+      {
+        "op": "test",
+        "path": "/rows/14/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/14/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/15/sources/0/blob",
+        "value": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/15/sources/0/blob",
+        "value": "b4af2687c1b94e85014e323e5325385f139d4015"
+      },
+      {
+        "op": "test",
+        "path": "/rows/15/sources/1/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/15/sources/1/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/16/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/16/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/17/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/17/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/18/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/18/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/19/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/19/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/20/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/20/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/21/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/21/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/22/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/22/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/23/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/23/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/24/sources/0/blob",
+        "value": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/24/sources/0/blob",
+        "value": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+      },
+      {
+        "op": "test",
+        "path": "/rows/24/sources/1/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/24/sources/1/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/25/sources/0/blob",
+        "value": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/25/sources/0/blob",
+        "value": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+      },
+      {
+        "op": "test",
+        "path": "/rows/25/sources/1/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/25/sources/1/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/26/sources/0/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/26/sources/0/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/27/sources/0/blob",
+        "value": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/27/sources/0/blob",
+        "value": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+      },
+      {
+        "op": "test",
+        "path": "/rows/27/sources/1/blob",
+        "value": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/27/sources/1/blob",
+        "value": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+      },
+      {
+        "op": "test",
+        "path": "/rows/28/sources/0/blob",
+        "value": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/28/sources/0/blob",
+        "value": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+      },
+      {
+        "op": "test",
+        "path": "/rows/29/sources/0/blob",
+        "value": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/29/sources/0/blob",
+        "value": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+      },
+      {
+        "op": "test",
+        "path": "/rows/30/sources/0/blob",
+        "value": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/30/sources/0/blob",
+        "value": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+      },
+      {
+        "op": "test",
+        "path": "/rows/31/sources/0/blob",
+        "value": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/31/sources/0/blob",
+        "value": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+      },
+      {
+        "op": "test",
+        "path": "/rows/31/sources/1/blob",
+        "value": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/31/sources/1/blob",
+        "value": "4c9d3878c01751239022e755e2860c6d49ddf301"
+      },
+      {
+        "op": "test",
+        "path": "/rows/31/sources/2/blob",
+        "value": "ff632f3a40b069bfead799b408af009ec9931261"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/31/sources/2/blob",
+        "value": "d191857ece760f307359d576dca2cef906dea8ec"
+      },
+      {
+        "op": "test",
+        "path": "/rows/32/sources/0/blob",
+        "value": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/32/sources/0/blob",
+        "value": "074bf2b838994d2af375a20ef1600941d21e956c"
+      },
+      {
+        "op": "test",
+        "path": "/rows/32/sources/1/blob",
+        "value": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/32/sources/1/blob",
+        "value": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+      },
+      {
+        "op": "test",
+        "path": "/rows/2/sources/2/definitions",
+        "value": [
+          "psEraseApplicationArgumentsWorker",
+          "psEraseRuntimeExprWithFuelWorker"
+        ]
+      },
+      {
+        "op": "replace",
+        "path": "/rows/2/sources/2/definitions",
+        "value": [
+          "psEraseKnownEntryApplication",
+          "psEraseCanonicalArguments",
+          "psEraseSpecialBoundary",
+          "psEraseRuntimeExprWithFuelWorker"
+        ]
+      },
+      {
+        "op": "test",
+        "path": "/rows/3/sources/0/definitions",
+        "value": [
+          "psEraseApplicationArgumentsWorker",
+          "psEraseFinishApplicationWithFuelWorker",
+          "psErasureEtaFunction"
+        ]
+      },
+      {
+        "op": "replace",
+        "path": "/rows/3/sources/0/definitions",
+        "value": [
+          "psErasureApplyCoreType",
+          "psErasureCheckedTypeViewWithFuel",
+          "psEraseCanonicalArguments",
+          "psErasureEntryCall",
+          "psEraseFinishEntryWithFuel",
+          "psEraseKnownEntryApplication",
+          "psErasureCurryParameters",
+          "psEraseSpecialBoundary",
+          "psEraseCanonicalApplication",
+          "psErasureResolveEntry",
+          "psEraseArrayFoldl"
+        ]
+      },
+      {
+        "op": "test",
+        "path": "/rows/3/sources/1/definitions",
+        "value": [
+          "psEraseOpenDefinitionWithFuel"
+        ]
+      },
+      {
+        "op": "replace",
+        "path": "/rows/3/sources/1/definitions",
+        "value": [
+          "psEraseOpenDefinitionWithFuel",
+          "psErasureEnsureDefinitionEntry",
+          "psEraseCoreModuleWithRuntimePrelude"
+        ]
+      },
+      {
+        "op": "test",
+        "path": "/rows/1/sources",
+        "value": [
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+            "blob": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+            "definitions": [
+              "psErasureClassifyBinder",
+              "psEraseRuntimeTypeWithFuelWorker"
+            ]
+          },
+          {
+            "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+            "blob": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+            "definitions": []
+          },
+          {
+            "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+            "blob": "178ecf89498be6502be5f747f0c0d62eb1133420",
+            "definitions": []
+          }
+        ]
+      },
+      {
+        "op": "add",
+        "path": "/rows/1/sources/3",
+        "value": {
+          "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+          "blob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+          "definitions": [
+            "psInferType",
+            "psInferProjectionType",
+            "psInferTypeWithFuelWorker",
+            "psInferClosedLevelValue",
+            "psInferLevelFromNat",
+            "psInferNormalizeClosedLevel"
+          ]
+        }
+      },
+      {
+        "op": "test",
+        "path": "/rows/3/sources",
+        "value": [
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+            "blob": "b4af2687c1b94e85014e323e5325385f139d4015",
+            "definitions": [
+              "psErasureApplyCoreType",
+              "psErasureCheckedTypeViewWithFuel",
+              "psEraseCanonicalArguments",
+              "psErasureEntryCall",
+              "psEraseFinishEntryWithFuel",
+              "psEraseKnownEntryApplication",
+              "psErasureCurryParameters",
+              "psEraseSpecialBoundary",
+              "psEraseCanonicalApplication",
+              "psErasureResolveEntry",
+              "psEraseArrayFoldl"
+            ]
+          },
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+            "blob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+            "definitions": [
+              "psEraseOpenDefinitionWithFuel",
+              "psErasureEnsureDefinitionEntry",
+              "psEraseCoreModuleWithRuntimePrelude"
+            ]
+          }
+        ]
+      },
+      {
+        "op": "add",
+        "path": "/rows/3/sources/2",
+        "value": {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+          "blob": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+          "definitions": [
+            "psErasureEntryInfoWithFuel",
+            "psErasurePrepareDeclarationEntries",
+            "psErasureLookupEntry"
+          ]
+        }
+      },
+      {
+        "op": "test",
+        "path": "/rows/6/sources",
+        "value": [
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+            "blob": "b4af2687c1b94e85014e323e5325385f139d4015",
+            "definitions": [
+              "psOpenMatchMinorHypotheses",
+              "psEraseMatchMinor",
+              "psEraseMatchAlternativesWorker",
+              "psEraseNatRecursorAlternatives",
+              "psEraseRuntimeRecursorApplication"
+            ]
+          }
+        ]
+      },
+      {
+        "op": "add",
+        "path": "/rows/6/sources/1",
+        "value": {
+          "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+          "blob": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31",
+          "definitions": [
+            "psElabContextAfterStructuralFields"
+          ]
+        }
+      },
+      {
+        "op": "test",
+        "path": "/rows/6/sources",
+        "value": [
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+            "blob": "b4af2687c1b94e85014e323e5325385f139d4015",
+            "definitions": [
+              "psOpenMatchMinorHypotheses",
+              "psEraseMatchMinor",
+              "psEraseMatchAlternativesWorker",
+              "psEraseNatRecursorAlternatives",
+              "psEraseRuntimeRecursorApplication"
+            ]
+          },
+          {
+            "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+            "blob": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31",
+            "definitions": [
+              "psElabContextAfterStructuralFields"
+            ]
+          }
+        ]
+      },
+      {
+        "op": "add",
+        "path": "/rows/6/sources/2",
+        "value": {
+          "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+          "blob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+          "definitions": [
+            "psElabCheckStructuralTelescope",
+            "psElabRefineStructuralMatch",
+            "psElabMatchConstructorMinor",
+            "psTryElabStructuralSelfCall"
+          ]
+        }
+      },
+      {
+        "op": "test",
+        "path": "/rows/6/sources",
+        "value": [
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+            "blob": "b4af2687c1b94e85014e323e5325385f139d4015",
+            "definitions": [
+              "psOpenMatchMinorHypotheses",
+              "psEraseMatchMinor",
+              "psEraseMatchAlternativesWorker",
+              "psEraseNatRecursorAlternatives",
+              "psEraseRuntimeRecursorApplication"
+            ]
+          },
+          {
+            "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+            "blob": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31",
+            "definitions": [
+              "psElabContextAfterStructuralFields"
+            ]
+          },
+          {
+            "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+            "blob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+            "definitions": [
+              "psElabCheckStructuralTelescope",
+              "psElabRefineStructuralMatch",
+              "psElabMatchConstructorMinor",
+              "psTryElabStructuralSelfCall"
+            ]
+          }
+        ]
+      },
+      {
+        "op": "add",
+        "path": "/rows/6/sources/3",
+        "value": {
+          "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+          "blob": "d191857ece760f307359d576dca2cef906dea8ec",
+          "definitions": [
+            "psElabStructuralRecursionFromSource"
+          ]
+        }
+      },
+      {
+        "op": "test",
+        "path": "/rows/7/sources",
+        "value": [
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+            "blob": "57e76a17858b3f4333a44ed880326ac33695351e",
+            "definitions": [
+              "psTryLowerStructureRecursorApplication",
+              "psLowerStructureRecursorsWithFuel"
+            ]
+          }
+        ]
+      },
+      {
+        "op": "add",
+        "path": "/rows/7/sources/1",
+        "value": {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "b4af2687c1b94e85014e323e5325385f139d4015",
+          "definitions": [
+            "psErasureLookupStructureRecursor",
+            "psErasureStructureRecursorFields",
+            "psEraseStructureRecursorMinor",
+            "psEraseRuntimeStructureRecursorApplication",
+            "psEraseSpecialBoundary"
+          ]
+        }
+      },
+      {
+        "op": "test",
+        "path": "/rows/5/domain/1",
+        "value": "The current checked lane refuses empty layouts and unsupported recursor shapes; these refusals remain explicit coverage obligations under the normative profile."
+      },
+      {
+        "op": "replace",
+        "path": "/rows/5/domain/1",
+        "value": "Zero-constructor inductive layouts are admitted under the checked empty-elimination rules; unsupported family and recursor shapes still refuse. Inhabited zero-field structures are covered separately."
+      }
+    ],
+    "operationCount": 151,
+    "testCount": 92,
+    "sourceBlobReplacements": 49,
+    "definitionListReplacements": 3,
+    "sourceAdditions": 6,
+    "domainReplacements": 1,
+    "preparedRowsSha256": "aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c",
+    "all33RowSourcePinsMatchCurrentTree": true,
+    "activeFlagsUnchanged": true,
+    "currentTreeVerification": "verified-against-published-PSC-tree-3cb88a6ee17b429cfde8215819fb789c3c2910ca"
+  },
+  "requiredMetadataCorrection": {
+    "document": "correspondence",
+    "jsonPointer": "/rows/5/domain/1",
+    "expected": "The current checked lane refuses empty layouts and unsupported recursor shapes; these refusals remain explicit coverage obligations under the normative profile.",
+    "proposed": "Zero-constructor inductive layouts are admitted under the checked empty-elimination rules; unsupported family and recursor shapes still refuse. Inhabited zero-field structures are covered separately.",
+    "reason": "ER-06's mapping correctly requires empty coverage and notes stale text, but its explicit staleText pointer list omits this contradictory current-domain sentence. Update it as part of root's final guarded ledger refresh."
+  },
+  "criticalPreservation": {
+    "ER04": {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "blob": "b4af2687c1b94e85014e323e5325385f139d4015",
+      "sha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15",
+      "etaDefinitions": 1,
+      "etaTokenOccurrencesInExpr": 1,
+      "etaCallSitesInExpr": 0,
+      "retiredFinishTokenOccurrences": 0,
+      "globalUnusedClaim": "Preserved from review20f011 through exact one-guard Expr transport4c5 and host-only a89; not a newly repeated global source audit. The closed-universe repair f71 changes only Meta.Infer and preserves Expr bytes."
+    },
+    "ER08": "Retain both the nonrecursive Core projection rewrite and the exact p+3 recursive-record Expr route; current Expr is b4af. Uninhabited-parameter declarations still require compilation.",
+    "TS07": "Retain direct-self one-logical-call and captured-alias two-logical-call accounting with intermediate cutoff. Positive flat original-IR tail evidence remains required; returned-function replay entries may use the general route.",
+    "emptyCallee": "Current source-empty fixtures return their typed elimination directly. The separate explicitly authored eliminateEmptyTypedCall in IR gate521d1d2fdd6d22edeb1d9e521386d3a90ab954d7 remains genuine callee-position coverage.",
+    "closedUniverse": "Only newly constructed closed sort-successor and Pi-imax levels are canonicalized, preserving ground universe denotation and zero classification. Any param/mvar preserves the original entire input level. Finite proper input/allocation and unchanged expression-fuel limits are those stated in the exact reviewed manifest. Symbolic universe algorithms, kernel/provider, defeq/cache, fixtures, runtime and erasure are unchanged."
+  },
+  "receiptPathConvention": "Receipt/artifact paths are relative to psc0/dist/sh1 from the full qualification artifact unless explicitly marked otherwise. N1 is development/N1; generation indices in the binder are0=N1,1=C1,2=C2,3=C3. The actual output key is generations, not the local variable generationEvidence.",
+  "receiptCatalogBase": {
+    "blob": "697c94b2722a6191537b714f71f629713637b30a",
+    "jsonPointer": "/receiptCatalog",
+    "groupCount": 25
+  },
+  "receiptCatalogDelta": [
+    {
+      "id": "strict-binder",
+      "baseCatalogPointer": "/receiptCatalog/1",
+      "baseValueSha256": "0694e37efb5c4cfd221873e1babed1dd564f20a299110aee3aeac928fa2930e8",
+      "changes": {
+        "sourceBlob": {
+          "expected": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+          "proposed": "b0b080eea2c353640f12d744e599737d71f9c4f6"
+        },
+        "historicalSourceBlob": {
+          "expectedAbsent": true,
+          "proposed": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5"
+        },
+        "transportManifest": {
+          "expectedAbsent": true,
+          "proposed": "a89fb7324afb820b2df077a26608d71cc11d644c"
+        }
+      }
+    },
+    {
+      "id": "source-empty",
+      "baseCatalogPointer": "/receiptCatalog/5",
+      "baseValueSha256": "45f78e419042131128618bdb0713965b6de3b90f40e8c0616cd3fbb0af6ea078",
+      "changes": {
+        "required": {
+          "expected": "Both raw Lean/PS empty source files and emitted TS files, their exact recorded paths/bytes/hashes and atomic receipts; each accepted bundle3modules/11 source/16 Core/1 import/0normalizations; empty subset5 source/6 Core/1 layout/4 typed eliminations, separate zero-field subset2 source/4 Core/1 zero-field constructor/actual record value.",
+          "proposed": "Both raw Lean/PS empty source files and emitted TS files, their exact recorded paths/bytes/hashes and atomic receipts; each accepted bundle3modules/11 source/16 Core/1 import/0normalizations; empty subset5 source/6 Core/1 layout/4 typed eliminations, separate zero-field subset2 source/4 Core/1 zero-field constructor/actual record value. In every one of the four empty-source declarations, declarationResultType equals resultType and bodyIsTypedEmptyResult is true, proved by object identity in the original checked graph; runtimeParameters are exactly ['value'] except sh1EmptyFresh ['value','emptyResult']. The explicit typed-empty callee fixture remains separately covered by ir-empty."
+        },
+        "sourceTransports": {
+          "expectedAbsent": true,
+          "proposed": [
+            "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+            "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
+            "a89fb7324afb820b2df077a26608d71cc11d644c"
+          ]
+        },
+        "currentBoundarySelectors": {
+          "expectedAbsent": true,
+          "proposed": [
+            {
+              "file": "development/N1/strict-source/receipt.json",
+              "jsonPointers": [
+                "/emptyElimination/observations/0/sourceKind",
+                "/emptyElimination/observations/0/eliminations"
+              ],
+              "expectedSourceKind": "lean",
+              "binderFile": "strict-enforcement-evidence.json",
+              "binderSha256Pointer": "/generations/0/emptySource/observations/0/eliminationsSha256",
+              "hashInputPointer": "/emptyElimination/observations/0/eliminations",
+              "hashInputEncoding": "SHA256(JSON.stringify(exact parsed eliminations array))",
+              "expectedRowNames": [
+                "sh1EmptyNat",
+                "sh1EmptyFunction",
+                "sh1EmptyGeneric",
+                "sh1EmptyFresh"
+              ],
+              "requiredRowFields": [
+                "name",
+                "resultType",
+                "declarationResultType",
+                "resultName",
+                "runtimeParameters",
+                "bodyIsTypedEmptyResult",
+                "alternatives",
+                "typeArgumentCount",
+                "freshResultName"
+              ]
+            },
+            {
+              "file": "development/N1/strict-source/receipt.json",
+              "jsonPointers": [
+                "/emptyElimination/observations/1/sourceKind",
+                "/emptyElimination/observations/1/eliminations"
+              ],
+              "expectedSourceKind": "ps",
+              "binderFile": "strict-enforcement-evidence.json",
+              "binderSha256Pointer": "/generations/0/emptySource/observations/1/eliminationsSha256",
+              "hashInputPointer": "/emptyElimination/observations/1/eliminations",
+              "hashInputEncoding": "SHA256(JSON.stringify(exact parsed eliminations array))",
+              "expectedRowNames": [
+                "sh1EmptyNat",
+                "sh1EmptyFunction",
+                "sh1EmptyGeneric",
+                "sh1EmptyFresh"
+              ],
+              "requiredRowFields": [
+                "name",
+                "resultType",
+                "declarationResultType",
+                "resultName",
+                "runtimeParameters",
+                "bodyIsTypedEmptyResult",
+                "alternatives",
+                "typeArgumentCount",
+                "freshResultName"
+              ]
+            },
+            {
+              "file": "C1/strict-source/receipt.json",
+              "jsonPointers": [
+                "/emptyElimination/observations/0/sourceKind",
+                "/emptyElimination/observations/0/eliminations"
+              ],
+              "expectedSourceKind": "lean",
+              "binderFile": "strict-enforcement-evidence.json",
+              "binderSha256Pointer": "/generations/1/emptySource/observations/0/eliminationsSha256",
+              "hashInputPointer": "/emptyElimination/observations/0/eliminations",
+              "hashInputEncoding": "SHA256(JSON.stringify(exact parsed eliminations array))",
+              "expectedRowNames": [
+                "sh1EmptyNat",
+                "sh1EmptyFunction",
+                "sh1EmptyGeneric",
+                "sh1EmptyFresh"
+              ],
+              "requiredRowFields": [
+                "name",
+                "resultType",
+                "declarationResultType",
+                "resultName",
+                "runtimeParameters",
+                "bodyIsTypedEmptyResult",
+                "alternatives",
+                "typeArgumentCount",
+                "freshResultName"
+              ]
+            },
+            {
+              "file": "C1/strict-source/receipt.json",
+              "jsonPointers": [
+                "/emptyElimination/observations/1/sourceKind",
+                "/emptyElimination/observations/1/eliminations"
+              ],
+              "expectedSourceKind": "ps",
+              "binderFile": "strict-enforcement-evidence.json",
+              "binderSha256Pointer": "/generations/1/emptySource/observations/1/eliminationsSha256",
+              "hashInputPointer": "/emptyElimination/observations/1/eliminations",
+              "hashInputEncoding": "SHA256(JSON.stringify(exact parsed eliminations array))",
+              "expectedRowNames": [
+                "sh1EmptyNat",
+                "sh1EmptyFunction",
+                "sh1EmptyGeneric",
+                "sh1EmptyFresh"
+              ],
+              "requiredRowFields": [
+                "name",
+                "resultType",
+                "declarationResultType",
+                "resultName",
+                "runtimeParameters",
+                "bodyIsTypedEmptyResult",
+                "alternatives",
+                "typeArgumentCount",
+                "freshResultName"
+              ]
+            },
+            {
+              "file": "C2/strict-source/receipt.json",
+              "jsonPointers": [
+                "/emptyElimination/observations/0/sourceKind",
+                "/emptyElimination/observations/0/eliminations"
+              ],
+              "expectedSourceKind": "lean",
+              "binderFile": "strict-enforcement-evidence.json",
+              "binderSha256Pointer": "/generations/2/emptySource/observations/0/eliminationsSha256",
+              "hashInputPointer": "/emptyElimination/observations/0/eliminations",
+              "hashInputEncoding": "SHA256(JSON.stringify(exact parsed eliminations array))",
+              "expectedRowNames": [
+                "sh1EmptyNat",
+                "sh1EmptyFunction",
+                "sh1EmptyGeneric",
+                "sh1EmptyFresh"
+              ],
+              "requiredRowFields": [
+                "name",
+                "resultType",
+                "declarationResultType",
+                "resultName",
+                "runtimeParameters",
+                "bodyIsTypedEmptyResult",
+                "alternatives",
+                "typeArgumentCount",
+                "freshResultName"
+              ]
+            },
+            {
+              "file": "C2/strict-source/receipt.json",
+              "jsonPointers": [
+                "/emptyElimination/observations/1/sourceKind",
+                "/emptyElimination/observations/1/eliminations"
+              ],
+              "expectedSourceKind": "ps",
+              "binderFile": "strict-enforcement-evidence.json",
+              "binderSha256Pointer": "/generations/2/emptySource/observations/1/eliminationsSha256",
+              "hashInputPointer": "/emptyElimination/observations/1/eliminations",
+              "hashInputEncoding": "SHA256(JSON.stringify(exact parsed eliminations array))",
+              "expectedRowNames": [
+                "sh1EmptyNat",
+                "sh1EmptyFunction",
+                "sh1EmptyGeneric",
+                "sh1EmptyFresh"
+              ],
+              "requiredRowFields": [
+                "name",
+                "resultType",
+                "declarationResultType",
+                "resultName",
+                "runtimeParameters",
+                "bodyIsTypedEmptyResult",
+                "alternatives",
+                "typeArgumentCount",
+                "freshResultName"
+              ]
+            },
+            {
+              "file": "C3/strict-source/receipt.json",
+              "jsonPointers": [
+                "/emptyElimination/observations/0/sourceKind",
+                "/emptyElimination/observations/0/eliminations"
+              ],
+              "expectedSourceKind": "lean",
+              "binderFile": "strict-enforcement-evidence.json",
+              "binderSha256Pointer": "/generations/3/emptySource/observations/0/eliminationsSha256",
+              "hashInputPointer": "/emptyElimination/observations/0/eliminations",
+              "hashInputEncoding": "SHA256(JSON.stringify(exact parsed eliminations array))",
+              "expectedRowNames": [
+                "sh1EmptyNat",
+                "sh1EmptyFunction",
+                "sh1EmptyGeneric",
+                "sh1EmptyFresh"
+              ],
+              "requiredRowFields": [
+                "name",
+                "resultType",
+                "declarationResultType",
+                "resultName",
+                "runtimeParameters",
+                "bodyIsTypedEmptyResult",
+                "alternatives",
+                "typeArgumentCount",
+                "freshResultName"
+              ]
+            },
+            {
+              "file": "C3/strict-source/receipt.json",
+              "jsonPointers": [
+                "/emptyElimination/observations/1/sourceKind",
+                "/emptyElimination/observations/1/eliminations"
+              ],
+              "expectedSourceKind": "ps",
+              "binderFile": "strict-enforcement-evidence.json",
+              "binderSha256Pointer": "/generations/3/emptySource/observations/1/eliminationsSha256",
+              "hashInputPointer": "/emptyElimination/observations/1/eliminations",
+              "hashInputEncoding": "SHA256(JSON.stringify(exact parsed eliminations array))",
+              "expectedRowNames": [
+                "sh1EmptyNat",
+                "sh1EmptyFunction",
+                "sh1EmptyGeneric",
+                "sh1EmptyFresh"
+              ],
+              "requiredRowFields": [
+                "name",
+                "resultType",
+                "declarationResultType",
+                "resultName",
+                "runtimeParameters",
+                "bodyIsTypedEmptyResult",
+                "alternatives",
+                "typeArgumentCount",
+                "freshResultName"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "grammar",
+      "baseCatalogPointer": "/receiptCatalog/19",
+      "baseValueSha256": "2b8482b51f83625d5aed8ba9cd3dfe00d0d88aaedc6e4d4ef36612b792b5ddb7",
+      "changes": {
+        "limit": {
+          "expected": "Native-compatible identifier restrictions and owned-parser overacceptance are not upgraded to general syntax equivalence; latest fold pattern source-shape failure must be corrected and this gate rerun.",
+          "proposed": "Native-compatible identifier restrictions and owned-parser overacceptance are not upgraded to general syntax equivalence. The fold pattern source-shape repair is integrated through e91fcaca and the callback-prefix transport4c5; final current-source execution remains required."
+        },
+        "historicalLimit": {
+          "expectedAbsent": true,
+          "proposed": "Native-compatible identifier restrictions and owned-parser overacceptance are not upgraded to general syntax equivalence; latest fold pattern source-shape failure must be corrected and this gate rerun."
+        }
+      }
+    },
+    {
+      "id": "host-boundary",
+      "baseCatalogPointer": "/receiptCatalog/20",
+      "baseValueSha256": "11543027386f00d9913b15450dd5d5251dbd073d1e7b9b4a1fabb951c6fd995a",
+      "changes": {
+        "required": {
+          "expected": "Exact current unary/flat-source-prefix host invocations and original expected values/arity checks, selected-R foundation/helper option only at two authenticated reference call sites, replay/native CLI success and index slice success in the full Actions job log. Retain actual receipt paths where the gate writes no separate file.",
+          "proposed": "Exact current unary/flat-source-prefix host invocations and original expected values/arity checks, selected-R foundation/helper option only at two authenticated reference call sites, replay/native CLI success and index slice success in the full Actions job log. Retain actual receipt paths where the gate writes no separate file. The current empty-source return-boundary observation uses source gate fec9c43e4bd792aef81983d1dbf100a5b6b2beaa and binder b0b080eea2c353640f12d744e599737d71f9c4f6; its exact direct body, actual entry prefix and declaration result fields are bound in each empty-source observation."
+        },
+        "sourceManifests": {
+          "expected": [
+            "d806212a2f6125a863bd0abe658e416e0b090cba",
+            "320a3e3b02b444158db0688e4a7f590877bcb98a",
+            "2d0a961d675206b07f14ac71fe88a21e00655bea"
+          ],
+          "proposed": [
+            "d806212a2f6125a863bd0abe658e416e0b090cba",
+            "320a3e3b02b444158db0688e4a7f590877bcb98a",
+            "2d0a961d675206b07f14ac71fe88a21e00655bea",
+            "a89fb7324afb820b2df077a26608d71cc11d644c"
+          ]
+        }
+      }
+    }
+  ],
+  "receiptSelectors": [
+    {
+      "id": "generations",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/0",
+      "selectors": [
+        {
+          "file": "qualification.json",
+          "jsonPointers": [
+            "/sourceRef",
+            "/sourceClosureSha256",
+            "/authoringSeed",
+            "/artifacts",
+            "/c1CompilerSha256",
+            "/c2CompilerSha256",
+            "/c3CompilerSha256",
+            "/nativeCanonicalSourceCorrespondence",
+            "/originalIrCheckedBuilds"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/0/files"
+      }
+    },
+    {
+      "id": "strict-binder",
+      "catalogSource": "this-packet/receiptCatalogDelta",
+      "frozenMapPointer": "/receiptCatalog/1",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/atomicBuilds",
+            "/generations",
+            "/artifacts",
+            "/nativeEmptyIr",
+            "/sourceOrigins",
+            "/sourceEvaluationReference"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/1/files"
+      }
+    },
+    {
+      "id": "atomic",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/2",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/atomicBuilds/0",
+            "/atomicBuilds/1",
+            "/atomicBuilds/2",
+            "/sourceInputsSha256"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/2/files"
+      }
+    },
+    {
+      "id": "origins",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/3",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/sourceOrigins",
+            "/atomicBuilds/0/originsSha256",
+            "/atomicBuilds/1/originsSha256",
+            "/atomicBuilds/2/originsSha256"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/capabilityOrigins",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/capabilityOrigins",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/capabilityOrigins",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/capabilityOrigins",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/3/files"
+      }
+    },
+    {
+      "id": "source",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/4",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/source",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/source",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/source",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/source",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/4/files"
+      }
+    },
+    {
+      "id": "source-empty",
+      "catalogSource": "this-packet/receiptCatalogDelta",
+      "frozenMapPointer": "/receiptCatalog/5",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/emptySource",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/emptySource",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/emptySource",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/emptySource",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/zeroFieldSource",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/zeroFieldSource",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/zeroFieldSource",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/zeroFieldSource",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/5/files"
+      },
+      "additionalCurrentBoundarySelectorsSource": "/receiptCatalogDelta/1/changes/currentBoundarySelectors/proposed"
+    },
+    {
+      "id": "source-recursion",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/6",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/structuralRecursionRefusals",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/structuralRecursionRefusals",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/structuralRecursionRefusals",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/structuralRecursionRefusals",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/6/files"
+      }
+    },
+    {
+      "id": "target",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/7",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/target",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/target",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/target",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/target",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/7/files"
+      }
+    },
+    {
+      "id": "ir",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/8",
+      "selectors": [
+        {
+          "file": "development/N1/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/acceptedFixture",
+            "/artifacts",
+            "/behavior",
+            "/rejected",
+            "/exhausted",
+            "/directTypeOperations",
+            "/carrierRejections",
+            "/checkedPreparedEntry"
+          ]
+        },
+        {
+          "file": "C1/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/acceptedFixture",
+            "/artifacts",
+            "/behavior",
+            "/rejected",
+            "/exhausted",
+            "/directTypeOperations",
+            "/carrierRejections",
+            "/checkedPreparedEntry"
+          ]
+        },
+        {
+          "file": "C2/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/acceptedFixture",
+            "/artifacts",
+            "/behavior",
+            "/rejected",
+            "/exhausted",
+            "/directTypeOperations",
+            "/carrierRejections",
+            "/checkedPreparedEntry"
+          ]
+        },
+        {
+          "file": "C3/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/acceptedFixture",
+            "/artifacts",
+            "/behavior",
+            "/rejected",
+            "/exhausted",
+            "/directTypeOperations",
+            "/carrierRejections",
+            "/checkedPreparedEntry"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/8/files"
+      }
+    },
+    {
+      "id": "ir-empty",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/9",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/emptyIr",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/emptyIr",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/emptyIr",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/emptyIr",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/9/files"
+      }
+    },
+    {
+      "id": "native-ir",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/10",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/nativeEmptyIr"
+          ]
+        },
+        {
+          "file": "development/N1/receipt.json",
+          "jsonPointers": [
+            "/runtimeIrTyping/nativeCurrentSource"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/10/files"
+      }
+    },
+    {
+      "id": "generic",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/11",
+      "selectors": [
+        {
+          "file": "development/N1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/sourceSha256",
+            "/originalIr",
+            "/functionValues",
+            "/artifacts"
+          ]
+        },
+        {
+          "file": "C1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/sourceSha256",
+            "/originalIr",
+            "/functionValues",
+            "/artifacts"
+          ]
+        },
+        {
+          "file": "C2/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/sourceSha256",
+            "/originalIr",
+            "/functionValues",
+            "/artifacts"
+          ]
+        },
+        {
+          "file": "C3/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/sourceSha256",
+            "/originalIr",
+            "/functionValues",
+            "/artifacts"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/genericFunctionValues",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/genericFunctionValues",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/genericFunctionValues",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/genericFunctionValues",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/11/files"
+      }
+    },
+    {
+      "id": "generic-recursion",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/12",
+      "selectors": [
+        {
+          "file": "development/N1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursion/reference",
+            "/recursion/behavior"
+          ]
+        },
+        {
+          "file": "C1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursion/reference",
+            "/recursion/behavior"
+          ]
+        },
+        {
+          "file": "C2/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursion/reference",
+            "/recursion/behavior"
+          ]
+        },
+        {
+          "file": "C3/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursion/reference",
+            "/recursion/behavior"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/genericFunctionValues/recursion"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/genericFunctionValues/recursion"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/genericFunctionValues/recursion"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/genericFunctionValues/recursion"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/12/files"
+      }
+    },
+    {
+      "id": "generic-structures",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/13",
+      "selectors": [
+        {
+          "file": "development/N1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursiveStructures"
+          ]
+        },
+        {
+          "file": "C1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursiveStructures"
+          ]
+        },
+        {
+          "file": "C2/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursiveStructures"
+          ]
+        },
+        {
+          "file": "C3/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursiveStructures"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/genericFunctionValues/recursiveStructures"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/genericFunctionValues/recursiveStructures"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/genericFunctionValues/recursiveStructures"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/genericFunctionValues/recursiveStructures"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/13/files"
+      }
+    },
+    {
+      "id": "runtime",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/14",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/reference",
+            "/contractSha256",
+            "/referenceSourceSha256",
+            "/leanGitHash"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/runtime",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/runtime",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/runtime",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/runtime",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/14/files"
+      }
+    },
+    {
+      "id": "runtime-evaluation",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/15",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/sourceEvaluationReference"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/sourceEvaluation",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/sourceEvaluation",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/sourceEvaluation",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/sourceEvaluation",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/sourceEquality",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/sourceEquality",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/sourceEquality",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/sourceEquality",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/15/files"
+      }
+    },
+    {
+      "id": "capabilities",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/16",
+      "selectors": [
+        {
+          "file": "development/N1/capabilities/receipt.json",
+          "jsonPointers": [
+            "/sourceKinds",
+            "/negativeCases",
+            "/projectionResolution",
+            "/grammar",
+            "/workerMigration"
+          ]
+        },
+        {
+          "file": "C1/capabilities/receipt.json",
+          "jsonPointers": [
+            "/sourceKinds",
+            "/negativeCases",
+            "/projectionResolution",
+            "/grammar",
+            "/workerMigration"
+          ]
+        },
+        {
+          "file": "C2/capabilities/receipt.json",
+          "jsonPointers": [
+            "/sourceKinds",
+            "/negativeCases",
+            "/projectionResolution",
+            "/grammar",
+            "/workerMigration"
+          ]
+        },
+        {
+          "file": "C3/capabilities/receipt.json",
+          "jsonPointers": [
+            "/sourceKinds",
+            "/negativeCases",
+            "/projectionResolution",
+            "/grammar",
+            "/workerMigration"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/16/files"
+      }
+    },
+    {
+      "id": "migration",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/17",
+      "selectors": [
+        {
+          "file": "qualification.json",
+          "jsonPointers": [
+            "/workerMigration"
+          ]
+        },
+        {
+          "file": "C1/receipt.json",
+          "jsonPointers": [
+            "/migrationWorkerAbi"
+          ]
+        },
+        {
+          "file": "C2/receipt.json",
+          "jsonPointers": [
+            "/migrationWorkerAbi"
+          ]
+        },
+        {
+          "file": "C3/receipt.json",
+          "jsonPointers": [
+            "/migrationWorkerAbi"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/17/files"
+      }
+    },
+    {
+      "id": "optimized-tail",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/18",
+      "selectors": [
+        {
+          "file": "development/N1/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/optimizedTail"
+          ]
+        },
+        {
+          "file": "C1/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/optimizedTail"
+          ]
+        },
+        {
+          "file": "C2/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/optimizedTail"
+          ]
+        },
+        {
+          "file": "C3/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/optimizedTail"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/emptyIr/optimizedTail"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/emptyIr/optimizedTail"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/emptyIr/optimizedTail"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/emptyIr/optimizedTail"
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/18/files"
+      }
+    },
+    {
+      "id": "grammar",
+      "catalogSource": "this-packet/receiptCatalogDelta",
+      "frozenMapPointer": "/receiptCatalog/19",
+      "selectors": [
+        {
+          "file": "qualification.json",
+          "jsonPointers": [
+            "/nativeCanonicalSourceCorrespondence",
+            "/sourceGrammar"
+          ]
+        },
+        {
+          "file": "development/N1/capabilities/receipt.json",
+          "jsonPointers": [
+            "/grammar"
+          ]
+        },
+        {
+          "file": "C1/capabilities/receipt.json",
+          "jsonPointers": [
+            "/grammar"
+          ]
+        },
+        {
+          "file": "C2/capabilities/receipt.json",
+          "jsonPointers": [
+            "/grammar"
+          ]
+        },
+        {
+          "file": "C3/capabilities/receipt.json",
+          "jsonPointers": [
+            "/grammar"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/19/files"
+      }
+    },
+    {
+      "id": "host-boundary",
+      "catalogSource": "this-packet/receiptCatalogDelta",
+      "frozenMapPointer": "/receiptCatalog/20",
+      "selectors": [],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/20/files"
+      }
+    },
+    {
+      "id": "name-index",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/21",
+      "selectors": [],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/21/files"
+      }
+    },
+    {
+      "id": "resource",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/22",
+      "selectors": [
+        {
+          "file": "C1/receipt.json",
+          "jsonPointers": [
+            "/resourceObservation",
+            "/resourcePolicy"
+          ]
+        },
+        {
+          "file": "C2/receipt.json",
+          "jsonPointers": [
+            "/resourceObservation",
+            "/resourcePolicy"
+          ]
+        },
+        {
+          "file": "C3/receipt.json",
+          "jsonPointers": [
+            "/resourceObservation",
+            "/resourcePolicy"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/22/files"
+      }
+    },
+    {
+      "id": "toolchain",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/23",
+      "selectors": [
+        {
+          "file": "development/N1/receipt.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile",
+            "/recipe"
+          ]
+        },
+        {
+          "file": "C1/receipt.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile",
+            "/recipe"
+          ]
+        },
+        {
+          "file": "C2/receipt.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile",
+            "/recipe"
+          ]
+        },
+        {
+          "file": "C3/receipt.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile",
+            "/recipe"
+          ]
+        },
+        {
+          "file": "qualification.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/23/files"
+      }
+    },
+    {
+      "id": "provider",
+      "catalogSource": "frozen-map697c94",
+      "frozenMapPointer": "/receiptCatalog/24",
+      "selectors": [
+        {
+          "file": "kernel-admissions.json",
+          "jsonPointers": [
+            "/sourceRef",
+            "/sourceClosureSha256",
+            "/compilerSha256",
+            "/provider",
+            "/streams",
+            "/accepted",
+            "/emissionWasGatedByThisCheck"
+          ]
+        }
+      ],
+      "actualReferences": [],
+      "resolutionStatus": "deferred",
+      "requiredFilesSource": {
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "jsonPointer": "/receiptCatalog/24/files"
+      }
+    }
+  ],
+  "correspondenceRowCount": 33,
+  "proposedRowDispositions": [
+    {
+      "id": "ER-01",
+      "jsonPointer": "/rows/0",
+      "currentRowSha256": "e7e7e73bc42890dad30b4e5df5a8099eda112869c7a8bfb60a772e9e2140b3f4",
+      "sourcePreparedRowSha256": "7246edf4e61776cdae15d9f96e043e0ac79f537c41a9f35cf98f2fb17ab90fb3",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/0",
+        "reviewRowPointer": "/rows/0",
+        "requiredRelationPointer": "/correspondenceRows/0/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/0/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/0/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/0/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/0/sources",
+        "preparedValueSha256": "a429e391bc84472435c896d05d07c86711cd9ce3d0cdd58024aa49f0e0249120"
+      },
+      "domain": {
+        "jsonPointer": "/rows/0/domain",
+        "currentValueSha256": "181e315900bd0f4776b45f506f869b219c4c1f38bb39ba9f6ad515dcfa0f3c7d",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/0/perCompilation/notEstablished",
+        "sha256": "893e68d46a6a02ed68a43259681b94f5c3ba80ac8224b1d40bcfdbeee33b8e59"
+      },
+      "requiredReceiptGroups": [
+        "atomic",
+        "origins",
+        "generations"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "ER-02",
+      "jsonPointer": "/rows/1",
+      "currentRowSha256": "b40d8de6f60639ca1f957674d7ce7eae1e8d11d7f4ed6db0d6abab95a202d5cc",
+      "sourcePreparedRowSha256": "75d4d4a6710c8d0a61414a9c4fcf78b71f67c8dbffb1078643bab8a9804b914f",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/1",
+        "reviewRowPointer": "/rows/1",
+        "requiredRelationPointer": "/correspondenceRows/1/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/1/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/1/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/1/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/1/sources",
+        "preparedValueSha256": "48d3a0093e016dc5abaa4a143a71bc052ab8312c21d5871627ba52ec3521bef3"
+      },
+      "domain": {
+        "jsonPointer": "/rows/1/domain",
+        "currentValueSha256": "9d8cca32da83e378371f1265f36a9a88ff7566aeffd8b7c507689df250007dca",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/1/perCompilation/notEstablished",
+        "sha256": "68b9bcc0434146ef1d986a4c9263a86ef471732e3b9ac5ca2779c3318b4c5813"
+      },
+      "requiredReceiptGroups": [
+        "generic",
+        "ir",
+        "atomic"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "ER-03",
+      "jsonPointer": "/rows/2",
+      "currentRowSha256": "fe56a4af52da7d086b9845dfd4f43be538d0f95ad2cee4d6bdb4be78206ad207",
+      "sourcePreparedRowSha256": "20e4492888e41eddbfe8776f95c66d7eedc3702c4614b173ba6eda06ed2369df",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/2",
+        "reviewRowPointer": "/rows/2",
+        "requiredRelationPointer": "/correspondenceRows/2/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/2/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/2/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/2/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/2/sources",
+        "preparedValueSha256": "3429b90dfb07508670de0a4b6a55d5acbc50045bc8674f2514dd6b2db7da1639"
+      },
+      "domain": {
+        "jsonPointer": "/rows/2/domain",
+        "currentValueSha256": "d6f24a9bfcf15e9b5da8bca7fb6269013852c98723c95189b228070d01ee7533",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/2/perCompilation/notEstablished",
+        "sha256": "6af1cdeda9b848731c7caa4552d09692cd3c302119654d90c1daecd357b64a9f"
+      },
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime",
+        "source"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "ER-04",
+      "jsonPointer": "/rows/3",
+      "currentRowSha256": "f6c03d13d4cfdd3ac37e9c7f3a38f61e1419530e629ce1fbeeec32d2d2f04ac7",
+      "sourcePreparedRowSha256": "edf76173a68388d2e6000a38bec81e70e65ce2361af719b59eb36a12cf1f452c",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/3",
+        "reviewRowPointer": "/rows/3",
+        "requiredRelationPointer": "/correspondenceRows/3/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/3/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/3/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/3/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/3/sources",
+        "preparedValueSha256": "41f125c1bfcecd8ce4ec86b477be7c8e06a180104a691b473598148da6476a7d"
+      },
+      "domain": {
+        "jsonPointer": "/rows/3/domain",
+        "currentValueSha256": "9df0df19e6047922cd44ee71ea61addbd69174266e1517da7144dde3f7a9fd86",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/3/perCompilation/notEstablished",
+        "sha256": "8ff4764fdad44de69cc94076d82c9a25986e37638de9030b26c315eb06f0342c"
+      },
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "migration",
+        "host-boundary",
+        "generations"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "ER-05",
+      "jsonPointer": "/rows/4",
+      "currentRowSha256": "dcecba63696690c3689ff68f9af7cbc9b7f01048c653b0caa618903fe37d8834",
+      "sourcePreparedRowSha256": "109e3fba91668ec853d94d1ec91699eabdc26568c112638ac0e1e4c712fa563a",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/4",
+        "reviewRowPointer": "/rows/4",
+        "requiredRelationPointer": "/correspondenceRows/4/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/4/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/4/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/4/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/4/sources",
+        "preparedValueSha256": "704cacc95d5263638f4fe423695d1c72964b9667fe9e4e4e6685b82d6efc4434"
+      },
+      "domain": {
+        "jsonPointer": "/rows/4/domain",
+        "currentValueSha256": "c2192e02c46ed6e78e32f0b20871f2765b5f37c6d0d028852c97ac9c26988a7c",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/4/perCompilation/notEstablished",
+        "sha256": "f9c3bea2e4adbd8880fa0a8c06de410379183b9e16af5c8ba3247965172cdda2"
+      },
+      "requiredReceiptGroups": [
+        "generic",
+        "source-empty",
+        "ir-empty",
+        "capabilities"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "ER-06",
+      "jsonPointer": "/rows/5",
+      "currentRowSha256": "6f77c74447bd75f2926782f8b18228d1d6a3659fdcbe491c61d563d723ef5edd",
+      "sourcePreparedRowSha256": "af11ad9e0829bd4c99663bedc3bf997476c1d60fdf11e66ff9d54670323c3421",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/5",
+        "reviewRowPointer": "/rows/5",
+        "requiredRelationPointer": "/correspondenceRows/5/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/5/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/5/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/5/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/5/sources",
+        "preparedValueSha256": "ca5f9a10e9a0bfe4f1da4bfd1b9ea45ef47c163aac5ced24e2da657c4036d33a"
+      },
+      "domain": {
+        "jsonPointer": "/rows/5/domain",
+        "currentValueSha256": "12ca1790380f9f90113964fec2012e6bf433d3d5e1522ee9f69f4f554478c08b",
+        "correctionApplied": "/requiredMetadataCorrection"
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/5/perCompilation/notEstablished",
+        "sha256": "ff485c73af24432684c5c9e9e0b3c328e77f2295ca825d45b95c350f93655767"
+      },
+      "requiredReceiptGroups": [
+        "generic",
+        "source-empty",
+        "ir-empty",
+        "native-ir"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "ER-07",
+      "jsonPointer": "/rows/6",
+      "currentRowSha256": "909f16192f55e0365f77e732f2618bfc48d45a2c47851299716c4a71bff4a87f",
+      "sourcePreparedRowSha256": "f33079359d574c00c884daa98c7323b0587f6f480dc91b272a9f11b2835570e7",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/6",
+        "reviewRowPointer": "/rows/6",
+        "requiredRelationPointer": "/correspondenceRows/6/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/6/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/6/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/6/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/6/sources",
+        "preparedValueSha256": "75c38b02ce5f2aa4b8543238dc8e852b8c6d8ac305086a3393e9f46cb348d3c4"
+      },
+      "domain": {
+        "jsonPointer": "/rows/6/domain",
+        "currentValueSha256": "69431897e16aecd8413a99e640c4c54f73a31e47d13ad6e60d5967de95504524",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/6/perCompilation/notEstablished",
+        "sha256": "70c82d8e17e88f3426c4496fa68209e19c98aa6b2e69b2c35472e20a19892ecb"
+      },
+      "requiredReceiptGroups": [
+        "generic-recursion",
+        "source-recursion",
+        "runtime-evaluation",
+        "source-empty",
+        "native-ir",
+        "origins"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "ER-08",
+      "jsonPointer": "/rows/7",
+      "currentRowSha256": "a7b02a77df07a3b7f9cb1a6ddedcd69deb6d41f8eb78ac5e5f26087e1d6bfdc2",
+      "sourcePreparedRowSha256": "19687cec29a423a9374e70ad511c5b9634176f875280322f0cf87712e6659d03",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/7",
+        "reviewRowPointer": "/rows/7",
+        "requiredRelationPointer": "/correspondenceRows/7/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/7/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/7/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/7/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/7/sources",
+        "preparedValueSha256": "4c71f06a58566cba3637a551c39274c428b0757fd2a9cfd356df933318f8eba7"
+      },
+      "domain": {
+        "jsonPointer": "/rows/7/domain",
+        "currentValueSha256": "b765a48add1a8dba3a3ca432cad2a59cc29d677bb0c1ba6b9f520406398a031d",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/7/perCompilation/notEstablished",
+        "sha256": "58633ccee1ab163f9037440c2ca1489da454f592122631b0c9284eb03f4b81cb"
+      },
+      "requiredReceiptGroups": [
+        "generic-structures",
+        "generic",
+        "source-empty"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "ER-09",
+      "jsonPointer": "/rows/8",
+      "currentRowSha256": "56a82c9dc93a62feb31974c4130cb3151a9fe14f0f3cfd8cc054038a41c436ca",
+      "sourcePreparedRowSha256": "3dbad611784298e1f7a80b5a6029d224628c60a6905dbce95f1b9381dacee027",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/8",
+        "reviewRowPointer": "/rows/8",
+        "requiredRelationPointer": "/correspondenceRows/8/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/8/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/8/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/8/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/8/sources",
+        "preparedValueSha256": "60f35c14b2e7cc1fb401803f1f6f8e70e90792c7605bea0640732c7d55b440e0"
+      },
+      "domain": {
+        "jsonPointer": "/rows/8/domain",
+        "currentValueSha256": "37bd91b0dad5525188084fead388d3359c211a15ce8a1c81b6dc585b8846dfea",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/8/perCompilation/notEstablished",
+        "sha256": "714c2c8f6d89e524d5a88f101a4a861922c1b7869c9d4c1a029b4c461a30ee96"
+      },
+      "requiredReceiptGroups": [
+        "atomic",
+        "origins",
+        "generic",
+        "target",
+        "name-index"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "N-01",
+      "jsonPointer": "/rows/9",
+      "currentRowSha256": "2445a1456f6464910256bfb3b026f50385ed68fe7523366ea53278b764669b6c",
+      "sourcePreparedRowSha256": "d6f890251b3595e240302fd17c6fc22fa11983dd61471674313871b956b19501",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/9",
+        "reviewRowPointer": "/rows/9",
+        "requiredRelationPointer": "/correspondenceRows/9/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/9/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/9/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/9/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/9/sources",
+        "preparedValueSha256": "d29191c2902d65115d5262b6fb0c95be9997b89eb35a9ef579cf0fbbb5739844"
+      },
+      "domain": {
+        "jsonPointer": "/rows/9/domain",
+        "currentValueSha256": "7c894d0753054b32b5b1c334de1ab5f0d78910ce19fa42ad52b61264d3cc9310",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/9/perCompilation/notEstablished",
+        "sha256": "86045fc91b28680bda56e488ba45c6b5e9e4fdd9ec5b06082d9b172aa9ff75fa"
+      },
+      "requiredReceiptGroups": [
+        "origins",
+        "capabilities",
+        "migration"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "N-02",
+      "jsonPointer": "/rows/10",
+      "currentRowSha256": "8ec770ccbd73e0e3589f02f20e2d7146eefd58de73eb5b933af1f59de44434f3",
+      "sourcePreparedRowSha256": "b1f72f38ad9d759b5167719bbcb3f5bf29d8170e507e47bfb2e822ee496de47b",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/10",
+        "reviewRowPointer": "/rows/10",
+        "requiredRelationPointer": "/correspondenceRows/10/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/10/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/10/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/10/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/10/sources",
+        "preparedValueSha256": "2f448d8e8f37cc01d2ce399d38a60364ed7bff2e26311c2cb35151b619d09682"
+      },
+      "domain": {
+        "jsonPointer": "/rows/10/domain",
+        "currentValueSha256": "e55e9da783e0cacf54beecf2070f6df5e51c52bf0b7303a63c330776d2900891",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/10/perCompilation/notEstablished",
+        "sha256": "09316d495ccc35ecd60dc58bbbadf271fbebbebf476001d09656583ec715973a"
+      },
+      "requiredReceiptGroups": [
+        "source-recursion",
+        "capabilities",
+        "origins",
+        "migration"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "N-03",
+      "jsonPointer": "/rows/11",
+      "currentRowSha256": "fed95495415f5fdee09fc10df73f713fce4d3c8d2db93abd65266bb575bc037b",
+      "sourcePreparedRowSha256": "2671dd95521f19d3382f5fe8c7de7780fd0aa059fbb84bacbaf19e1099e1e72c",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/11",
+        "reviewRowPointer": "/rows/11",
+        "requiredRelationPointer": "/correspondenceRows/11/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/11/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/11/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/11/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/11/sources",
+        "preparedValueSha256": "701afbdffbed8f20465a53a4f23b8a8317d6a964fdf9ba8c029021a3b52a3288"
+      },
+      "domain": {
+        "jsonPointer": "/rows/11/domain",
+        "currentValueSha256": "530f5bc3cd79dfdabe8eb03f23dc981985df28cb4f8ad7bac02b923f8bb6f4d8",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/11/perCompilation/notEstablished",
+        "sha256": "ddddf6cee1d81e0dee75c3eb348cb5ae8688394061d7103558b0f4cda9a7ef88"
+      },
+      "requiredReceiptGroups": [
+        "capabilities",
+        "generic-recursion",
+        "migration",
+        "runtime-evaluation"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "N-04",
+      "jsonPointer": "/rows/12",
+      "currentRowSha256": "8d60ef67e2175ea84f0ade1c8cf416d23a507651b25d8eb36410e1157c63de8e",
+      "sourcePreparedRowSha256": "a787b04da2ac558a4b0a560a93912f0b9e920ab87da389b9b959f682f110c0a1",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/12",
+        "reviewRowPointer": "/rows/12",
+        "requiredRelationPointer": "/correspondenceRows/12/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/12/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/12/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/12/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/12/sources",
+        "preparedValueSha256": "f87405aaf3d270d5aace95be235d9aefda06b4e815f8085359cdbb2de181e1be"
+      },
+      "domain": {
+        "jsonPointer": "/rows/12/domain",
+        "currentValueSha256": "f76bc216f4be1097a5f7e1284c916f66749230d18cb382925276b4ee2afad6bb",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/12/perCompilation/notEstablished",
+        "sha256": "5d1486cb2b4fc4dd518a5e2fb0cd5b916270f22c04fa8d0fa1b772d7d0842de9"
+      },
+      "requiredReceiptGroups": [
+        "migration",
+        "capabilities",
+        "generic",
+        "generations"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-01",
+      "jsonPointer": "/rows/13",
+      "currentRowSha256": "c8c0416ee02e7c702950764c0fb946250bc2a5cb4f5d89fbeef703744cd4397d",
+      "sourcePreparedRowSha256": "6b9f9d94deb2a6a6dd6718a30b5c9f94d0644d0b1ef04e83a59e9656db87802a",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/13",
+        "reviewRowPointer": "/rows/13",
+        "requiredRelationPointer": "/correspondenceRows/13/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/13/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/13/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/13/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/13/sources",
+        "preparedValueSha256": "b96abb1c763678e2223d777f5717b837b6a2f703a3b2e3086e0cfee19e6203e3"
+      },
+      "domain": {
+        "jsonPointer": "/rows/13/domain",
+        "currentValueSha256": "00196f537e1a7dd2404145abb1d61fbfb80a530a4e2c4e7b3e6e49a7af1bd675",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/13/perCompilation/notEstablished",
+        "sha256": "e26aaad7463ea15fc33488fc0a754671b45adc42791e88bea606ebc13c595d59"
+      },
+      "requiredReceiptGroups": [
+        "ir",
+        "runtime"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-02",
+      "jsonPointer": "/rows/14",
+      "currentRowSha256": "ddc4d347ae4a9257abed956a8c0479c10a4bd14b507a3c274275e11dbf7edc14",
+      "sourcePreparedRowSha256": "72145a243f924d14ef1d3d8ece354c1a52f99f5d73a5e3754f2873837c434e1e",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/14",
+        "reviewRowPointer": "/rows/14",
+        "requiredRelationPointer": "/correspondenceRows/14/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/14/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/14/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/14/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/14/sources",
+        "preparedValueSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04"
+      },
+      "domain": {
+        "jsonPointer": "/rows/14/domain",
+        "currentValueSha256": "63e4d7b5754a710beac25a15dd05be0268685a7ec36c7a79173784a4a0fc152d",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/14/perCompilation/notEstablished",
+        "sha256": "0466456ae84736f2d7a9d2ec44171bc9ab7439536098207558abc91c6e8b5675"
+      },
+      "requiredReceiptGroups": [
+        "atomic",
+        "target",
+        "origins"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-03",
+      "jsonPointer": "/rows/15",
+      "currentRowSha256": "aec2b43c70dc4d64374c3afa7510641814d0b5bf27f94ef8fbed32247b9af811",
+      "sourcePreparedRowSha256": "b21cbeada04dbd42ea21521faeb348ba826623e0258ce3fd69cc1e999064327b",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/15",
+        "reviewRowPointer": "/rows/15",
+        "requiredRelationPointer": "/correspondenceRows/15/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/15/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/15/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/15/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/15/sources",
+        "preparedValueSha256": "70d67d640a61d032d28065d5f7250695579e228241f48c85322c3702b654fddc"
+      },
+      "domain": {
+        "jsonPointer": "/rows/15/domain",
+        "currentValueSha256": "f29e7dc93f459c57a35857db83d8c00a1d707bca9fc9612ef74f8c0e7151327b",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/15/perCompilation/notEstablished",
+        "sha256": "01504ffa2eb0ac40911a2824b1450507275750dbb331287c230988e79330fcee"
+      },
+      "requiredReceiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "generic"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-04",
+      "jsonPointer": "/rows/16",
+      "currentRowSha256": "85e09c6383b9de18b8c1d620fb0dec67fd6b778660f19015701e07c24e9418d2",
+      "sourcePreparedRowSha256": "30cab711fd3db05e6f53d2f0ef125b13931a2d33f2271926743fd3f7303ae0b0",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/16",
+        "reviewRowPointer": "/rows/16",
+        "requiredRelationPointer": "/correspondenceRows/16/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/16/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/16/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/16/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/16/sources",
+        "preparedValueSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04"
+      },
+      "domain": {
+        "jsonPointer": "/rows/16/domain",
+        "currentValueSha256": "6c893407dd4ee3b7e35835af2225ead685958403a7a9ead4dc3ea6bdd4e1041c",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/16/perCompilation/notEstablished",
+        "sha256": "79b4ea216ec198ca95c581129f54da839fdf3ead924ff8c6d39b362dc3149138"
+      },
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "ir"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-05",
+      "jsonPointer": "/rows/17",
+      "currentRowSha256": "2ea29bbe92a6ffb7ee02c9a62a2e483e0a259208ef4dcc90fab0af25eaf60c9d",
+      "sourcePreparedRowSha256": "8627b08d84948ed1c309b9f57a4bcd1b127b28fcbe1b6692e0f20e7858cda760",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/17",
+        "reviewRowPointer": "/rows/17",
+        "requiredRelationPointer": "/correspondenceRows/17/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/17/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/17/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/17/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/17/sources",
+        "preparedValueSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04"
+      },
+      "domain": {
+        "jsonPointer": "/rows/17/domain",
+        "currentValueSha256": "d42d79e6f73989d815f0f7eadec9eef3f1ac6082726218e2d865564a58f6f941",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/17/perCompilation/notEstablished",
+        "sha256": "52f1e19565076f348ec235256cb69d0530f3f04738796716be566936e5a707c1"
+      },
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "ir",
+        "host-boundary"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-06",
+      "jsonPointer": "/rows/18",
+      "currentRowSha256": "1a17a37b82732c628e4bc264d7be8924acc7ffd42fe92eed34ef38732ce9b571",
+      "sourcePreparedRowSha256": "cf8db7af0ae428124cb6b79bf4439f8f27d9575cba9d35775be2095be2cbdfa9",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/18",
+        "reviewRowPointer": "/rows/18",
+        "requiredRelationPointer": "/correspondenceRows/18/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/18/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/18/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/18/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/18/sources",
+        "preparedValueSha256": "882fbcb4112e2027f192c43ee46929863a09d1394d6e950f00e8a346b42853a9"
+      },
+      "domain": {
+        "jsonPointer": "/rows/18/domain",
+        "currentValueSha256": "7e526505b3c7dafd814aeceb93b769e332976bf95693fd0bf5fb6da59632977b",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/18/perCompilation/notEstablished",
+        "sha256": "f4f6274142fd7457cb677e3e8d8410c134dc11b9e90abc2bb4c6d851ce7b0708"
+      },
+      "requiredReceiptGroups": [
+        "runtime-evaluation",
+        "ir",
+        "target",
+        "generic"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-07",
+      "jsonPointer": "/rows/19",
+      "currentRowSha256": "ce395bd33560fed939f73f7567fc3cefa321b15996ab3be25fbe5c1aea0247ff",
+      "sourcePreparedRowSha256": "ca7297b4cd46f039fd854404cd158562192950172659310ce4352d9146da2271",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/19",
+        "reviewRowPointer": "/rows/19",
+        "requiredRelationPointer": "/correspondenceRows/19/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/19/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/19/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/19/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/19/sources",
+        "preparedValueSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04"
+      },
+      "domain": {
+        "jsonPointer": "/rows/19/domain",
+        "currentValueSha256": "0236e8173b015ad06e8ff9504d7add44e7dbafa4c3124b80d7ce4edbc5666cb1",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/19/perCompilation/notEstablished",
+        "sha256": "12c90871ca1b2a1f945ce6c672331ff6a8bdc6a85722d1fc346a6ed6599d5bec"
+      },
+      "requiredReceiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "ir"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-08",
+      "jsonPointer": "/rows/20",
+      "currentRowSha256": "d098083d2811102a4bec21477e89d228f4428a8cbad6fbe8f35fe8a38e04d0ec",
+      "sourcePreparedRowSha256": "285f0ab70c9aeb545f980cb0b69a637df1e304d0c0ed7fbd06af269948f562a0",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/20",
+        "reviewRowPointer": "/rows/20",
+        "requiredRelationPointer": "/correspondenceRows/20/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/20/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/20/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/20/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/20/sources",
+        "preparedValueSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04"
+      },
+      "domain": {
+        "jsonPointer": "/rows/20/domain",
+        "currentValueSha256": "02405f2430654f57a901e043b193efff64c694c58725c883d230633d03254d83",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/20/perCompilation/notEstablished",
+        "sha256": "0f684d9a06f605704aaa130204122723c9134a89c56bfa9b19b23b399ee132c0"
+      },
+      "requiredReceiptGroups": [
+        "generic-structures",
+        "source-empty",
+        "ir-empty",
+        "generic"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-09",
+      "jsonPointer": "/rows/21",
+      "currentRowSha256": "66b97219f375b57e31023f30feabadfc43084ebcd11378bc3c4bac32b83fe1fc",
+      "sourcePreparedRowSha256": "19a8379ed6f682a60f1b23a8eec5be1fc8f913a119bfca91eaa65544ff2f9f89",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/21",
+        "reviewRowPointer": "/rows/21",
+        "requiredRelationPointer": "/correspondenceRows/21/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/21/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/21/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/21/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/21/sources",
+        "preparedValueSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04"
+      },
+      "domain": {
+        "jsonPointer": "/rows/21/domain",
+        "currentValueSha256": "39b1a81cd9a4310607fece40373f2aab8a48542c00a6f5baf78b2d8d41ea524b",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/21/perCompilation/notEstablished",
+        "sha256": "a289c4f36f7ee0e41c9455a84ea110271f16270f425bd0aacdfbf0ebf8c8fb1d"
+      },
+      "requiredReceiptGroups": [
+        "generic",
+        "generic-structures",
+        "capabilities",
+        "ir"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-10",
+      "jsonPointer": "/rows/22",
+      "currentRowSha256": "aab3f3b9dacc278616bbb5680c8884c13714c223f05a7b4defd508c834635c01",
+      "sourcePreparedRowSha256": "580d54f74debe707abb7e6a54a0994076e9a2138eddb1207014f5a22ebfc41ef",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/22",
+        "reviewRowPointer": "/rows/22",
+        "requiredRelationPointer": "/correspondenceRows/22/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/22/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/22/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/22/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/22/sources",
+        "preparedValueSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04"
+      },
+      "domain": {
+        "jsonPointer": "/rows/22/domain",
+        "currentValueSha256": "8e0c4013073125d2c07b68782bf59c6f5c5707e746b9cabf46889d9f30f1899d",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/22/perCompilation/notEstablished",
+        "sha256": "53298d650e65dc50ba09cd4cc4fa2e4cfef0f7e08f3bc778e2e84b7a8176caba"
+      },
+      "requiredReceiptGroups": [
+        "generic",
+        "ir",
+        "source-empty"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "EV-11",
+      "jsonPointer": "/rows/23",
+      "currentRowSha256": "ec4309eb957102cef9ac7e4e18b332515fc15787eb8e95fc128958e2f91a0c2a",
+      "sourcePreparedRowSha256": "3af292d342348b82ac8cbd16846278648d7d0e034f4fc30fa3a51daf5f8859bd",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/23",
+        "reviewRowPointer": "/rows/23",
+        "requiredRelationPointer": "/correspondenceRows/23/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/23/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/23/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/23/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/23/sources",
+        "preparedValueSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04"
+      },
+      "domain": {
+        "jsonPointer": "/rows/23/domain",
+        "currentValueSha256": "ebb145b2c671eab01f3473a5334bc85497d96d6602467267682563422f948a50",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/23/perCompilation/notEstablished",
+        "sha256": "a70407581c8a4bcfc96f4de8749d0ea7ce3e9ed991227e401b884c0fcd5aa5a8"
+      },
+      "requiredReceiptGroups": [
+        "ir-empty",
+        "source-empty",
+        "native-ir",
+        "generic-recursion",
+        "generic-structures"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "TS-01",
+      "jsonPointer": "/rows/24",
+      "currentRowSha256": "bf5fb41d09ed15272b36afbbd12022f67ac2c24bd423eb7c70e8402db9c1af64",
+      "sourcePreparedRowSha256": "a1b7854f2c2dbb3baccc142446612262631a539b5c7948d3d1398c3e536eb8c9",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/24",
+        "reviewRowPointer": "/rows/24",
+        "requiredRelationPointer": "/correspondenceRows/24/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/24/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/24/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/24/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/24/sources",
+        "preparedValueSha256": "3ac5df9e3fed005a634f8a65205fb3a56ab114e12a0b22ea0ba3167dd9e23570"
+      },
+      "domain": {
+        "jsonPointer": "/rows/24/domain",
+        "currentValueSha256": "3ae0c3abb9d890a13c76aafa4a1b785e25c0d8b752ddc0f6f748695bc7f3c11d",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/24/perCompilation/notEstablished",
+        "sha256": "65a6346571be50544fcce5a5ad1cbb938039d8fe9395ead22bde7fb25a382aa5"
+      },
+      "requiredReceiptGroups": [
+        "target",
+        "name-index",
+        "ir",
+        "atomic"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "TS-02",
+      "jsonPointer": "/rows/25",
+      "currentRowSha256": "6db149ee56c62da44bc8df3a03f7edf956525730ab3d31b2cfd51ceef5e20e5b",
+      "sourcePreparedRowSha256": "5fd6b7d758fd541540b2f45f8837d704565af31f67d7401889690d8ed6565bc0",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/25",
+        "reviewRowPointer": "/rows/25",
+        "requiredRelationPointer": "/correspondenceRows/25/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/25/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/25/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/25/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/25/sources",
+        "preparedValueSha256": "b057d6882bc8839dfcbe11f68a715a9483eea9ec971150806fa6f0f9c6dd6cac"
+      },
+      "domain": {
+        "jsonPointer": "/rows/25/domain",
+        "currentValueSha256": "372af450ff7f10d339bca9189dca7c85853ad4a37adff66b2078d09022668ce9",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/25/perCompilation/notEstablished",
+        "sha256": "d2c29c1a06d5b01a3babf62bd66736d7cd697a183cc9c08d27499bb764baf467"
+      },
+      "requiredReceiptGroups": [
+        "ir-empty",
+        "generic-structures",
+        "generic",
+        "source-empty"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "TS-03",
+      "jsonPointer": "/rows/26",
+      "currentRowSha256": "0fa8409d85dc6289e75cfa343aa30fe1af64cfee85d72e11e09c8f82eab7ad9a",
+      "sourcePreparedRowSha256": "67bdea3422811439134a82868ebd65d1dd603d283fb4738486940682184092eb",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/26",
+        "reviewRowPointer": "/rows/26",
+        "requiredRelationPointer": "/correspondenceRows/26/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/26/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/26/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/26/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/26/sources",
+        "preparedValueSha256": "f615ad514a8b4e7cb074f9d1014f4e8c04e5cc3a4b016dc462fd409edb536f41"
+      },
+      "domain": {
+        "jsonPointer": "/rows/26/domain",
+        "currentValueSha256": "e875492a84a59885fc5d36910d1ce9084fc94fa44bc4d98f543028febde64341",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/26/perCompilation/notEstablished",
+        "sha256": "21aff455d0af64350caad8c4adf7d0ab9d7044c36b78924fcdb1817343ac1679"
+      },
+      "requiredReceiptGroups": [
+        "ir",
+        "runtime",
+        "runtime-evaluation"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "TS-04",
+      "jsonPointer": "/rows/27",
+      "currentRowSha256": "0d7ee39c58af8879ddd43b86cb106dc7a7f35756f3bf60681404ec72fcc2d980",
+      "sourcePreparedRowSha256": "70ff744d72555cb03e40cfcd824e6caec2c77f3412b76b4524e8ffd4e6a2277b",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/27",
+        "reviewRowPointer": "/rows/27",
+        "requiredRelationPointer": "/correspondenceRows/27/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/27/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/27/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/27/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/27/sources",
+        "preparedValueSha256": "ec9fc53c6a41b564b2ab74ab256a427889a519b694037a984158746bd6c8f87f"
+      },
+      "domain": {
+        "jsonPointer": "/rows/27/domain",
+        "currentValueSha256": "db55dec498ccd7cb47471c316799ae78056a37e7cb54faece391e8a8f6736eba",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/27/perCompilation/notEstablished",
+        "sha256": "0c96e52fc9cb9c102630efdb4ef0c4b7351ef3a28f3f6442130abc82373a8b3d"
+      },
+      "requiredReceiptGroups": [
+        "runtime-evaluation",
+        "generic",
+        "ir",
+        "generations"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "TS-05",
+      "jsonPointer": "/rows/28",
+      "currentRowSha256": "aa1da52c5bcb0123f6d3f6e1ef61f17535e8d695377ab3556cbe37e59a1266fd",
+      "sourcePreparedRowSha256": "bf4d2a056811aae4e41376ddcb31706749494c528256ee7f2ba818a0e51b4bfe",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/28",
+        "reviewRowPointer": "/rows/28",
+        "requiredRelationPointer": "/correspondenceRows/28/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/28/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/28/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/28/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/28/sources",
+        "preparedValueSha256": "e95ef74854ddfcd85b3b4e7bc4d9ee8e6f5cb7ccbd9b9d2ec400602ae283f0bd"
+      },
+      "domain": {
+        "jsonPointer": "/rows/28/domain",
+        "currentValueSha256": "1ea74c012a4d555d7906d136e9086fd8d9744e53141f23035c1d2bf067647ff4",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/28/perCompilation/notEstablished",
+        "sha256": "ad25ed5806e16e7f6b001533e4ad84aed1580c0d5066631c02b7c69acef26ca8"
+      },
+      "requiredReceiptGroups": [
+        "ir",
+        "target",
+        "generic",
+        "runtime-evaluation"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "TS-06",
+      "jsonPointer": "/rows/29",
+      "currentRowSha256": "e93317427cbdcb9c80a18d94407085c55048e452474a9ddd271136c21739890d",
+      "sourcePreparedRowSha256": "c047490d87ae57e70cd66f8c6219cc02f51082dc6776ec521c84c6ffc1f15d87",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/29",
+        "reviewRowPointer": "/rows/29",
+        "requiredRelationPointer": "/correspondenceRows/29/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/29/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/29/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/29/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/29/sources",
+        "preparedValueSha256": "02d4653dcebff94c2dd97fd1246310f5278bbd689926daf09fa7bc355cef8f5f"
+      },
+      "domain": {
+        "jsonPointer": "/rows/29/domain",
+        "currentValueSha256": "cd25d6c3c4981317b8c071edd291ac5db8b4b740b93e6887c24ce8e9415979f9",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/29/perCompilation/notEstablished",
+        "sha256": "6cace3a96148f8a7cf546a89c1af9c62ef22b609cc708e76597fb1f200eae770"
+      },
+      "requiredReceiptGroups": [
+        "ir",
+        "capabilities",
+        "runtime-evaluation"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "TS-07",
+      "jsonPointer": "/rows/30",
+      "currentRowSha256": "d6c29856e2d3a04c50e54152b17f247dad30d8fa2108a81020f8a42584535f54",
+      "sourcePreparedRowSha256": "5d4c052a2dd39822d701a8a7666a5cc63c060407a754364831884c1d0aafc725",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/30",
+        "reviewRowPointer": "/rows/30",
+        "requiredRelationPointer": "/correspondenceRows/30/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/30/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/30/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/30/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/30/sources",
+        "preparedValueSha256": "89f550b02cbb8ac789879cd006cf4d2340c255bda88bceb37e4e1bddb9815365"
+      },
+      "domain": {
+        "jsonPointer": "/rows/30/domain",
+        "currentValueSha256": "322a2779784eb9ac10905ecf7ceeee01057f64e5f689496bd52bc2f08664ba36",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/30/perCompilation/notEstablished",
+        "sha256": "de67917f6929506662d3fcfb03e28302626aae1874bc8dafb4b30f2134e438e6"
+      },
+      "requiredReceiptGroups": [
+        "optimized-tail",
+        "ir",
+        "runtime-evaluation",
+        "target"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "TS-08",
+      "jsonPointer": "/rows/31",
+      "currentRowSha256": "be714cd9829a5af3f135880f53a7eb03affc38c1543b0bad6c5bd2867a18ebda",
+      "sourcePreparedRowSha256": "cb4b475a90540e2c9b5866d79fda918d3bf02adb1400f16d52329eca41184337",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/31",
+        "reviewRowPointer": "/rows/31",
+        "requiredRelationPointer": "/correspondenceRows/31/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/31/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/31/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/31/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/31/sources",
+        "preparedValueSha256": "03c6f5c37a45e051a80d5198480c772fc12391438f9854dce1791cfe49c35ab8"
+      },
+      "domain": {
+        "jsonPointer": "/rows/31/domain",
+        "currentValueSha256": "894e80c16563dac1f2ec244bfde40808566c06847067c4d9d857a2067da6ec02",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/31/perCompilation/notEstablished",
+        "sha256": "5d3bb9fc99e109c097cdb6d7618acab3c020e0ae3962c23d5774bf786b20b967"
+      },
+      "requiredReceiptGroups": [
+        "target",
+        "atomic",
+        "generic",
+        "generations"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    },
+    {
+      "id": "TS-09",
+      "jsonPointer": "/rows/32",
+      "currentRowSha256": "f0924f99993a5b81ac9d186e349642899363e8b6c14eee3140e84c3ec1422bc7",
+      "sourcePreparedRowSha256": "07a6207ac537a33e6d64d3b7b26ed3d87e4d12dd6212649959e004f93ee2e459",
+      "frozenDisposition": {
+        "mapRowPointer": "/correspondenceRows/32",
+        "reviewRowPointer": "/rows/32",
+        "requiredRelationPointer": "/correspondenceRows/32/relationUpdate/proposed",
+        "argumentPointer": "/correspondenceRows/32/argumentUpdate/proposed",
+        "paperEvidencePointer": "/correspondenceRows/32/paperEvidence",
+        "staleProseRefreshPointer": "/correspondenceRows/32/staleText",
+        "generalArgumentReopened": false
+      },
+      "sourcePins": {
+        "jsonPointer": "/rows/32/sources",
+        "preparedValueSha256": "ec0902d18ebcae6fc4d019408b28cee4c8036b155492d430b30afeb6859de96d"
+      },
+      "domain": {
+        "jsonPointer": "/rows/32/domain",
+        "currentValueSha256": "7e90babb3ef579a538f78e139e20e65928dea1b480b39a9f2117aae0f7ac7327",
+        "correctionApplied": null
+      },
+      "priorNotEstablished": {
+        "jsonPointer": "/rows/32/perCompilation/notEstablished",
+        "sha256": "70ee4e768a56ff0447bb135604759c4281b8a3fddca6c3e02c0b173ee7bf6104"
+      },
+      "requiredReceiptGroups": [
+        "toolchain",
+        "generations",
+        "runtime",
+        "provider"
+      ],
+      "evidenceBindings": "deferred; inherit commonRowDisposition.evidenceBindingTemplate",
+      "finalFlagAssignmentsPrepared": false
+    }
+  ],
+  "finalBindingConditions": [
+    "Bind the actual integrated source commit containing every reviewed repair, including the closed-universe Meta.Infer correction, its complete raw source closure, recipe/profile/toolchain identity and every relevant product, with any later documentation-only transport stated explicitly.",
+    "Observe the complete current-source Actions compiler job succeed, including N1 native source/target/original-IR path, R-derived C1, current C2/C3, N1=C2 TypeScript/JavaScript and full compared C2=C3 artifacts. No failed or partial historical run substitutes for this result.",
+    "Authenticate the exact qualification.json and strict-enforcement-evidence.json plus the mapped subreceipt/artifact digests and compiler identities. Retain actual output-file bytes or correctly hash-bound reconstruction provenance; passing log markers alone must not be relabeled as uninspected artifact contents.",
+    "Require every mapped current conformance group, including empty and zero-field coverage, recursive-record compilation, corrected recursion reference, canonical function values, strict source refusals, runtime laws/diagnostics, optimizer cases and original-IR/target typing. Their finite evidence supplements the scoped paper arguments.",
+    "Require the separate frozen-provider job and all actual deduplicated stream decisions to pass on this exact qualified source/compiler/product chain. Preserve emissionWasGatedByThisCheck=false.",
+    "Apply guarded row source/definition additions and the ER-06 domain correction, refresh stale open-proof prose with mapped completed arguments and retain valid host/domain/resource limitations. Preserve all historical proof/source/execution anchors and connect them through explicit transports.",
+    "Root must write an explicit external release/current-ledger disposition for all 33 correspondence rows and all 27 stage obligations. Individual general/strict flags may only describe the stated reviewed domain; no machine-checked compiler-wide proof is claimed.",
+    "Preserve false strict/semantic/provider/formal/proof-reconstruction/exhaustiveness flags in produced narrow per-compilation receipts and immutable argument-era artifacts. Do not modify the hashed runtime contract or psconfig solely to announce qualification.",
+    "Keep selected R, authoritative .lean, new-only ps-0.9-r3 and pinned Lean4.34.0/Node22.23.3/TypeScript7.0.2. Strict enforcement availability is the explicit strict API/current qualification path; selectedByPsconfig remains false unless a separately authorized, qualified configuration change is made."
+  ],
+  "protectedState": {
+    "selectedSeed": "R",
+    "authoritativeSource": ".lean",
+    "proofScriptEdition": "ps-0.9-r3",
+    "sourceMode": "new-only",
+    "selectedByPsconfig": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "correspondenceRowsClosed": 0,
+    "stageObligationsClosed": 0,
+    "producedPerCompilationFlags": "Keep the produced false strict/semantic/provider/formal/proof-reconstruction/exhaustiveness fields exact; only the separate explicit final release disposition can describe completed qualification.",
+    "runtimeContract": "Keep exact frozen bytes and SHA25621a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89.",
+    "machineCheckedCompilerWideTheoremClaimed": false
+  },
+  "execution": {
+    "compilerInvocations": 0,
+    "testsRun": 0,
+    "sourceMutations": 0,
+    "commitsCreated": 0,
+    "refsUpdated": 0,
+    "actualEvidenceFieldsDeferred": true
+  },
+  "finalFlagAssignments": "No final flag assignments are prepared or applied in this packet. Every row stays false until root's explicit final disposition binds successful exact evidence on the reviewed source domain.",
+  "commonRowDisposition": {
+    "status": "proposed-final-disposition-awaiting-exact-run-and-provider-bindings",
+    "proofAndRelationSource": "For each row, copy exactly the relationUpdate.proposed, argumentUpdate.proposed and paperEvidence from its immutable final-disposition-map row; this transport changes none of those reviewed arguments.",
+    "commonReceiptPrerequisites": [
+      "generations",
+      "strict-binder",
+      "grammar",
+      "resource",
+      "toolchain",
+      "provider"
+    ],
+    "perCompilationLimit": "Finite per-compilation checks bind exact products and observations but do not alone establish the general row relation. Retain all required receipt groups' stated limits and the reviewed source domain.",
+    "activeFlags": {
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false
+    },
+    "evidenceBindingTemplate": {
+      "status": "deferred-until-actual-artifacts-return-for-bound-source-commit",
+      "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "sourceClosureSha256": null,
+      "qualificationReference": null,
+      "strictBinderReference": null,
+      "providerReference": null,
+      "groupReferences": []
+    }
+  },
+  "validation": {
+    "baseSourceGuardsMatch": true,
+    "all49MappedSourcesAnd6AddedSourcesMatchPublishedTree": true,
+    "independentRfc6902SimulationMatchesPreparedDocument": true,
+    "guardedSourcePatchSha256": "ab6db5609bd2567f195ca152f9ceb356c35fdc329337bfcfe5ff89a51997d6f0",
+    "preparedRowArraySha256": "aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c",
+    "all33ProposedDispositionRowsResolved": true,
+    "all25ReceiptGroupsResolved": true,
+    "newEmptyBoundarySelectors": 8,
+    "expectedEmptyEntryRows": [
+      {
+        "name": "sh1EmptyNat",
+        "runtimeParameters": [
+          "value"
+        ],
+        "resultType": {
+          "kind": "primitive",
+          "name": "nat"
+        }
+      },
+      {
+        "name": "sh1EmptyFunction",
+        "runtimeParameters": [
+          "value"
+        ],
+        "resultType": {
+          "kind": "function",
+          "parameters": [
+            {
+              "kind": "primitive",
+              "name": "nat"
+            }
+          ],
+          "result": {
+            "kind": "primitive",
+            "name": "nat"
+          }
+        }
+      },
+      {
+        "name": "sh1EmptyGeneric",
+        "runtimeParameters": [
+          "value"
+        ],
+        "resultType": {
+          "kind": "typeParameter",
+          "name": "T0"
+        }
+      },
+      {
+        "name": "sh1EmptyFresh",
+        "runtimeParameters": [
+          "value",
+          "emptyResult"
+        ],
+        "resultType": {
+          "kind": "primitive",
+          "name": "nat"
+        }
+      }
+    ],
+    "allActiveFlagsRemainFalse": true,
+    "noNewQualificationEvidenceClaimed": true,
+    "currentTreeVerification": "verified-against-published-PSC-tree-3cb88a6ee17b429cfde8215819fb789c3c2910ca",
+    "currentSourceDefinitionAudit": {
+      "sourceReferences": 72,
+      "uniqueSourcePins": 19,
+      "uniqueSourceDefinitionPairs": 111,
+      "everyReferencedDefinitionExistsExactlyOnce": true,
+      "allPreparedRowFlagsRemainFalse": true,
+      "baseAndCandidateContentAuditOnly": true,
+      "currentPublishedTreeVerificationPending": false,
+      "currentPublishedTreeVerified": true
+    },
+    "composedOldPatchPlusSixOpOverlayMatchesDirect151OperationPatch": true,
+    "onlyPreparedRowSourceChangeFromAc274": "ER-02",
+    "all33FrozenDispositionMappingsUnchanged": true,
+    "er06DomainReplacementUnchanged": true,
+    "currentActiveRowArrayIdenticalToAc274Base": true,
+    "publishedRepairAndIndependentReviewPinsMatch": true,
+    "all8FrozenPaperPinsUnchanged": true,
+    "frozenMapAndReviewPinsUnchanged": true,
+    "finalPendingPacketAudit": {
+      "frozenMapRows": 33,
+      "rowSourceReferenceCount": 72,
+      "uniqueSourcePins": 19,
+      "resolvedSourceDefinitionPairs": 111,
+      "unchangedFrozenMappings": true,
+      "unchangedReceiptSelectors": true,
+      "unchangedER06DomainCorrection": true,
+      "allPreparedRowHashesVerified": true,
+      "allPreparedSourceHashesVerified": true,
+      "publishedTreeAndLedgerBound": true,
+      "actualQualificationArtifactStillPending": true,
+      "actualProviderArtifactStillPending": true,
+      "noClosureAssignment": true
+    }
+  },
+  "latestQualificationNotice": {
+    "previousFailedQualification": {
+      "runId": 38008721677,
+      "sourceCommit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+      "status": "failed",
+      "step": 24
+    },
+    "retainedOriginDiagnostic": {
+      "runId": 38010024282,
+      "sourceCommit": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+      "status": "successfully-localized-existing-error",
+      "evidenceManifestBlob": "5adcaabbff7c607490ffdb51cfa02f2bee3b0281",
+      "reportBlob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666",
+      "sourceIndex": 6,
+      "name": "sh1GroupLet",
+      "phase": "stableDeclaration",
+      "error": "infer/applicationTypeMismatch",
+      "notQualification": true
+    },
+    "nextQualification": {
+      "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "runId": null,
+      "status": "requested-pending-actual-run-and-artifact-bindings",
+      "qualificationArtifactReference": null,
+      "providerArtifactReference": null
+    }
+  },
+  "previousPendingDraft": {
+    "blob": "ac2741ebe7dd4065dcfc08d01a3be445671c4e05",
+    "sha256": "8fa14635cc18c6fe59b597ce96cfa9f4a2c9e28f7702d13ca0b0c96d6f58a337",
+    "bytes": 141189,
+    "unchanged": true
+  },
+  "supplementalClosedUniverseTransport": {
+    "status": "review-clear-published-source-bound; actual-qualification-pending",
+    "repairManifest": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-repair.json",
+      "blob": "f71b09c33a574e6868b193afac946355008b4d61",
+      "sha256": "6131cefd6461284b35560dd1fa21e267cadb10f77785e2f3b90fb61b1a9936bf",
+      "bytes": 63632
+    },
+    "independentReview": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-independent-review.json",
+      "blob": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
+      "sha256": "4f2e24e8add150073d2070d1e7a9ab0526c6d4ce5d882dcc0adf1015309281c1",
+      "bytes": 13986
+    },
+    "source": {
+      "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+      "baseBlob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+      "currentBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+      "sha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
+      "bytes": 21458
+    },
+    "previousDraftComposition": {
+      "operations": [
+        {
+          "op": "test",
+          "path": "/rows/1/id",
+          "value": "ER-02"
+        },
+        {
+          "op": "test",
+          "path": "/rows/1/sources/3/path",
+          "value": "psc0/packages/meta/src/Ps/Meta/Infer.lean"
+        },
+        {
+          "op": "test",
+          "path": "/rows/1/sources/3/blob",
+          "value": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3"
+        },
+        {
+          "op": "replace",
+          "path": "/rows/1/sources/3/blob",
+          "value": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889"
+        },
+        {
+          "op": "test",
+          "path": "/rows/1/sources/3/definitions",
+          "value": [
+            "psInferType",
+            "psInferProjectionType"
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/rows/1/sources/3/definitions",
+          "value": [
+            "psInferType",
+            "psInferProjectionType",
+            "psInferTypeWithFuelWorker",
+            "psInferClosedLevelValue",
+            "psInferLevelFromNat",
+            "psInferNormalizeClosedLevel"
+          ]
+        }
+      ],
+      "operationCount": 6,
+      "sha256": "b321c5d48c8180efb33ee8cd8ddf0c0c2d2116ce53a2525d3f9f93fafda23933",
+      "equivalentDirectPatchChange": {
+        "operationIndex": 138,
+        "path": "/rows/1/sources/3",
+        "before": {
+          "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+          "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+          "definitions": [
+            "psInferType",
+            "psInferProjectionType"
+          ]
+        },
+        "after": {
+          "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+          "blob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+          "definitions": [
+            "psInferType",
+            "psInferProjectionType",
+            "psInferTypeWithFuelWorker",
+            "psInferClosedLevelValue",
+            "psInferLevelFromNat",
+            "psInferNormalizeClosedLevel"
+          ]
+        }
+      },
+      "verifiedComposedAndDirectDocumentsEqual": true
+    },
+    "argument": "Only newly constructed closed sort-successor and Pi-imax levels are canonicalized, preserving ground universe denotation and zero classification. Any param/mvar preserves the original entire input level. Finite proper input/allocation and unchanged expression-fuel limits are those stated in the exact reviewed manifest. Symbolic universe algorithms, kernel/provider, defeq/cache, fixtures, runtime and erasure are unchanged.",
+    "preparedSourceRow": "ER-02",
+    "previousPreparedRowsSha256": "4e4cf1bdd0a2f021adc84b7c95dfc545c66f6feead6e5a403d0095fe8793a2e5",
+    "preparedRowsSha256": "aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c",
+    "changedSourcePreparedRows": [
+      {
+        "index": 1,
+        "id": "ER-02"
+      }
+    ],
+    "all33FrozenDispositionMappingsUnchanged": true,
+    "newReceiptGroupsRequired": false,
+    "activeFlagsChanged": 0,
+    "stageFlagsChanged": 0
+  },
+  "proofTransportApplication": {
+    "currentSourceHead": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "currentLedgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+    "scope": "Use this pending source patch and immutable frozen disposition references only when root performs the explicitly scoped final current-ledger disposition after the actual exact-source qualification and provider receipts return.",
+    "closedUniverseSupplement": "f71b09c33a574e6868b193afac946355008b4d61",
+    "independentSupplement": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
+    "alteredPreparedRow": "ER-02",
+    "historicalRowsAndFlags": "No active row or produced receipt was changed by this preparation."
+  }
+}

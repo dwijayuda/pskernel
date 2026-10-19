@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+  "files": [
+    {
+      "path": "dist/typescript7-root/package-lock.json",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592
+    },
+    {
+      "path": "dist/typescript7-root/installed-typescript-package.json",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087
+    },
+    {
+      "path": "dist/typescript7-root/installed-profile.json",
+      "sha256": "630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe",
+      "bytes": 4644
+    },
+    {
+      "path": "dist/typescript7-root/qualification.json",
+      "sha256": "a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a",
+      "bytes": 3485
+    }
+  ]
+}

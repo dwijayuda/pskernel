@@ -1,0 +1,498 @@
+{
+  "schemaVersion": 1,
+  "feature": "existing-original-ir-positive-tail-loop-execution-coverage",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/optimized-tail-coverage.json",
+  "repository": "dwijayuda/pskernel",
+  "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+  "status": "reviewed-unattached-candidate-no-execution",
+  "scope": {
+    "hostGateFiles": 2,
+    "compilerSourceChanges": 0,
+    "leanFixtureChanges": 0,
+    "purpose": "Retain positive flat-tail optimizer coverage in the already-enabled original-IR conformance gate while the separate replay host correction correctly calls canonical returned-function entries.",
+    "boundary": "Append three typed declarations and one TailList layout to the exact existing positive IR object. Reuse its existing inventory, checked/raw emission, TypeScript compilation, JavaScript import and declaration artifact. Preserve the original behavior counter and all old negative/resource/carrier/native paths.",
+    "additionalPreparations": 0,
+    "additionalPortableIrChecks": 0,
+    "additionalEmissions": 0,
+    "additionalTypeScriptCompilations": 0,
+    "additionalNativeExecutions": 0,
+    "observationsAreFinite": true,
+    "exhaustiveForAllInputs": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "files": [
+    {
+      "path": "psc0/scripts/sh1-ir-checker-conformance.mjs",
+      "operation": "replace",
+      "baseBlob": "dd53f2067046a201cda96fe5ede40f500ece5b20",
+      "baseSha256": "7a5fbc6698dbac16c169dbe71517307e8fb2fbfb81cac3af4abe132bdd2eaf32",
+      "baseBytes": 31007,
+      "candidateBlob": "521d1d2fdd6d22edeb1d9e521386d3a90ab954d7",
+      "candidateSha256": "c7bc6fff33decea880595023367a5e6d73249226d5002b9810e56bae876ad1f9",
+      "candidateBytes": 40509,
+      "guards": [
+        {
+          "id": "append-flat-tail-ir-declarations",
+          "expectedOccurrences": 1,
+          "before": "  const positive = module([...base,\n",
+          "after": "  // Deliberately flat original-IR entries exercise the positive tail recognizer.\n  // They share the existing accepted module, checker and TypeScript compilation.\n  const tailList = named('TailList');\n  const tailLayout = inductive('TailList', [\n    ['nil', []], ['cons', [['head', nat], ['tail', tailList]]],\n  ]);\n  const optimizedTailDeclarations = [\n    declaration('optimizedTailSwap', nat,\n      E.ifE(intrinsic('natEq', [variable('fuel'), natural(0)]), variable('left'),\n        E.letE('nextFuel', nat, intrinsic('natSub', [variable('fuel'), natural(1)]),\n          call('optimizedTailSwap', [variable('nextFuel'), variable('right'), variable('left')]))),\n      [['fuel', nat], ['left', nat], ['right', nat]]),\n    declaration('optimizedTailFuel', nat,\n      E.ifE(intrinsic('natEq', [variable('fuel'), natural(0)]), variable('accumulator'),\n        E.letE('nextFuel', nat, intrinsic('natSub', [variable('fuel'), natural(1)]),\n          E.letE('again', fnNat,\n            lambda([['nextAccumulator', nat]], nat,\n              call('optimizedTailFuel', [variable('nextFuel'), variable('nextAccumulator')])),\n            call('again', [intrinsic('natAdd', [variable('accumulator'), natural(1)])])))),\n      [['fuel', nat], ['accumulator', nat]]),\n    declaration('optimizedTailReverse', tailList,\n      E.matchE('TailList', list([]), variable('items'), list([\n        alternative('nil', [], variable('accumulator')),\n        alternative('cons', [binding('head', 'headValue', nat), binding('tail', 'tailValue', tailList)],\n          call('optimizedTailReverse', [variable('tailValue'),\n            constructor('TailList', 'cons', [['head', variable('headValue')], ['tail', variable('accumulator')]])])),\n      ])), [['items', tailList], ['accumulator', tailList]]),\n  ];\n  const positive = module([...base,\n",
+          "beforeSha256": "7a061f5fdad44a5ac410bdaab59ac540a1aaa5490d880e47731a05941f038082",
+          "afterSha256": "1f850c080e4d809daaecf94a9306a75ae6bbe34f4bc55894c73ef90257c7152d"
+        },
+        {
+          "id": "include-tail-declarations-layout-in-existing-positive-module",
+          "expectedOccurrences": 1,
+          "before": "    declaration('zeroFieldRecordValue', named('RecordUnit'), record('RecordUnit', [])),\n  ], [...layouts, structure('RecordUnit', [])], [...choices, ...emptyLayouts]);",
+          "after": "    declaration('zeroFieldRecordValue', named('RecordUnit'), record('RecordUnit', [])),\n    ...optimizedTailDeclarations,\n  ], [...layouts, structure('RecordUnit', [])], [...choices, ...emptyLayouts, tailLayout]);",
+          "beforeSha256": "a407ca2b93fd0cc9dd7463e0e29b7d9c669fa755682a5e50c883ade1430fc7ff",
+          "afterSha256": "0ad013cfa1c23bd713b22bcb6d5ffcfcde373881abed61c72bb501b3cd6952e4"
+        },
+        {
+          "id": "add-tail-observation-helper",
+          "expectedOccurrences": 1,
+          "before": "function observeEmptyAbi(typeScript, declarations) {\n",
+          "after": "// Positive optimizer observations on the exact accepted module and its one JS product.\n// These do not contribute to the preserved behavior.observations counter.\nfunction observeOptimizedTail(originalIr, runtime, typeScript, declarationText, javascriptSha256) {\n  const items = (value) => {\n    const values = [], seen = new Set();\n    while (valueTag(value) === 'cons') {\n      assert(!seen.has(value) && values.length < 1024, 'PSC0_SH1_TAIL_OWNED_LIST');\n      seen.add(value); values.push(value.head); value = value.tail;\n    }\n    assert.equal(valueTag(value), 'nil', 'PSC0_SH1_TAIL_OWNED_LIST_END');\n    return values;\n  };\n  const typeName = (type) => {\n    if (valueTag(type) === 'primitive') {\n      assert.equal(valueTag(type.name), 'nat'); return 'nat';\n    }\n    assert.equal(valueTag(type), 'named');\n    assert.equal(type.name, 'TailList');\n    assert.equal(items(type.arguments).length, 0);\n    return type.name;\n  };\n  const layouts = items(originalIr.inductives).filter((item) => item.name === 'TailList');\n  assert.equal(layouts.length, 1);\n  const layout = { name: layouts[0].name, typeParameters: items(layouts[0].typeParameters).length,\n    constructors: items(layouts[0].constructors).map((ctor) => ({ name: ctor.name,\n      fields: items(ctor.fields).map((field) => ({ name: field.name, type: typeName(field.type) })) })) };\n  assert.deepEqual(layout, { name: 'TailList', typeParameters: 0, constructors: [\n    { name: 'nil', fields: [] },\n    { name: 'cons', fields: [{ name: 'head', type: 'nat' }, { name: 'tail', type: 'TailList' }] },\n  ] });\n  const specifications = [\n    { name: 'optimizedTailSwap', parameters: [['fuel', 'nat'], ['left', 'nat'], ['right', 'nat']], result: 'nat',\n      signature: 'export declare function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint;',\n      exportPrefix: 'export function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint { while (true) { ',\n      transitions: ['[fuel, left, right] = [nextFuel, right, left]; continue;'], capturedAlias: false },\n    { name: 'optimizedTailFuel', parameters: [['fuel', 'nat'], ['accumulator', 'nat']], result: 'nat',\n      signature: 'export declare function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint;',\n      exportPrefix: 'export function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint { while (true) { ',\n      transitions: ['[fuel, accumulator] = [nextFuel, (accumulator + 1n)]; continue;'], capturedAlias: true },\n    { name: 'optimizedTailReverse', parameters: [['items', 'TailList'], ['accumulator', 'TailList']], result: 'TailList',\n      signature: 'export declare function optimizedTailReverse(items: TailList, accumulator: TailList): TailList;',\n      exportPrefix: 'export function optimizedTailReverse(items: TailList, accumulator: TailList): TailList { while (true) { ',\n      transitions: ['[items, accumulator] = [tailValue, TailList[\"cons\"](headValue, accumulator)]; continue;'],\n      capturedAlias: false },\n  ];\n  const originalDeclarations = items(originalIr.declarations);\n  const entries = specifications.map((expected) => {\n    const found = originalDeclarations.filter((item) => item.name === expected.name);\n    assert.equal(found.length, 1, expected.name);\n    const declaration = found[0];\n    assert.equal(items(declaration.typeParameters).length, 0);\n    const parameters = items(declaration.parameters).map((item) => [item.name, typeName(item.type)]);\n    assert.deepEqual(parameters, expected.parameters);\n    assert.equal(typeName(declaration.resultType), expected.result);\n    const exports = typeScript.split(/\\r?\\n/u).filter((line) => line.startsWith('export function ' + expected.name + '('));\n    assert.equal(exports.length, 1);\n    assert(exports[0].startsWith(expected.exportPrefix), 'PSC0_SH1_TAIL_ROUTE: ' + expected.name);\n    for (const transition of expected.transitions) assert(exports[0].includes(transition),\n      'PSC0_SH1_TAIL_TRANSITION: ' + expected.name);\n    assert(!typeScript.includes('__ps$impl$' + expected.name), 'PSC0_SH1_TAIL_NO_FALLBACK: ' + expected.name);\n    if (expected.capturedAlias) assert(!/\\bagain\\b/u.test(exports[0]), 'PSC0_SH1_TAIL_ALIAS_ELIDED');\n    const signatures = declarationText.split(/\\r?\\n/u)\n      .filter((line) => line.startsWith('export declare function ' + expected.name + '('));\n    assert.deepEqual(signatures, [expected.signature]);\n    assert.equal(typeof runtime[expected.name], 'function');\n    assert.equal(runtime[expected.name].length, parameters.length, 'PSC0_SH1_TAIL_RUNTIME_ARITY');\n    return { ...expected, runtimeArity: parameters.length, route: 'tail-loop',\n      implementationAbsent: true, exportSha256: sha256(exports[0]) };\n  });\n  const observations = [];\n  for (const fuel of [0n, 1n, 2n, 31n, 20000n]) {\n    const swapped = runtime.optimizedTailSwap(fuel, 7n, 11n);\n    assert.equal(swapped, fuel % 2n === 0n ? 7n : 11n, 'PSC0_SH1_TAIL_SWAP');\n    observations.push({ id: 'swap-' + fuel, fuel: fuel.toString(), value: swapped.toString() });\n    const advanced = runtime.optimizedTailFuel(fuel, 11n);\n    assert.equal(advanced, fuel + 11n, 'PSC0_SH1_TAIL_CAPTURED_ALIAS');\n    observations.push({ id: 'fuel-' + fuel, fuel: fuel.toString(), value: advanced.toString() });\n  }\n  const nil = runtime.TailList.nil;\n  const symbols = Object.getOwnPropertySymbols(nil);\n  assert.equal(symbols.length, 1);\n  const tag = symbols[0];\n  assert.equal(nil[tag], 'nil');\n  let input = nil;\n  for (let index = 0; index < 20000; index++) input = runtime.TailList.cons(BigInt(index), input);\n  let reversed = runtime.optimizedTailReverse(input, nil);\n  const elements = [];\n  while (reversed[tag] === 'cons') {\n    assert(elements.length < 20000, 'PSC0_SH1_TAIL_REVERSE_LENGTH');\n    assert.equal(reversed.head, BigInt(elements.length), 'PSC0_SH1_TAIL_REVERSE_ELEMENT');\n    elements.push(reversed.head.toString()); reversed = reversed.tail;\n  }\n  assert.equal(reversed[tag], 'nil');\n  assert.equal(elements.length, 20000);\n  observations.push({ id: 'reverse-20000', length: elements.length, first: elements[0],\n    last: elements[elements.length - 1], sequenceSha256: sha256(elements.join(',')), checkedElements: elements.length });\n  let invalid;\n  try { runtime.optimizedTailReverse({ [tag]: 'invalid' }, nil); } catch (error) { invalid = error; }\n  assert(invalid instanceof Error, 'PSC0_SH1_TAIL_INVALID_TAG_ERROR');\n  assert.equal(invalid.message, 'invalid ProofScript constructor tag');\n  observations.push({ id: 'reverse-invalid-tag', error: invalid.name, message: invalid.message });\n  assert.equal(observations.length, 12);\n  return { schemaVersion: 1, feature: 'flat-original-ir-optimized-tail-loops', status: 'pass',\n    originalIrBoundary: 'same-existing-accepted-fixture', layout, entries, observations,\n    observationCount: observations.length, valueObservations: 11, faultObservations: 1,\n    swapInputs: ['7', '11'], fuelInitialAccumulator: '11', reverseInput: 'descending-19999-through-0',\n    artifacts: { typescript: 'accepted/index.ts', javascript: 'accepted/index.js', declarations: 'accepted/index.d.ts',\n      typescriptSha256: sha256(typeScript), javascriptSha256, declarationsSha256: sha256(declarationText) },\n    additionalPreparations: 0, additionalPortableIrChecks: 0, additionalEmissions: 0,\n    additionalTypeScriptCompilations: 0, additionalNativeExecutions: 0,\n    exhaustiveForAllInputs: false, strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false };\n}\n\nfunction observeEmptyAbi(typeScript, declarations) {\n",
+          "beforeSha256": "68c0763b24adce55584e8d7b0d737093a9bc90a130ce8a62d3bed1b83737e336",
+          "afterSha256": "bc4f8c89d3e8c4a0238b49e0dd4dbef32f065c86ac6d9190f093f0b5c3b57621"
+        },
+        {
+          "id": "reuse-existing-runtime-and-artifacts-for-tail-observations",
+          "expectedOccurrences": 1,
+          "before": "  const behavior = assertBehavior(await import(pathToFileURL(generated).href));\n  const declarations = await readFile(path.join(outDir, 'accepted', 'index.d.ts'), 'utf8');",
+          "after": "  const runtime = await import(pathToFileURL(generated).href);\n  const behavior = assertBehavior(runtime);\n  const declarations = await readFile(path.join(outDir, 'accepted', 'index.d.ts'), 'utf8');\n  const javascriptSha256 = sha256(await readFile(generated));\n  const optimizedTail = observeOptimizedTail(fixture.positive, runtime, typeScript, declarations, javascriptSha256);",
+          "beforeSha256": "241e0bfd85cb67322904d6fc4c4de67a06c7cbe3903b360228d099393f2ddbd5",
+          "afterSha256": "aa6c1d5e7ebe8703e4fc045228833afd02e7404e538bdfcec5104c3a74bbf603"
+        },
+        {
+          "id": "reuse-same-javascript-digest-in-receipt",
+          "expectedOccurrences": 1,
+          "before": "    artifacts: { typescriptSha256: sha256(typeScript), javascriptSha256: sha256(await readFile(generated)) },",
+          "after": "    artifacts: { typescriptSha256: sha256(typeScript), javascriptSha256 },",
+          "beforeSha256": "cea68d9a6049b6347b24c42e7ab8a9487e65d92871278ac88898797341b2abad",
+          "afterSha256": "6321ada7c65fa74292c745175e3bd298e775eabdc916b784d5c31916116a2a82"
+        },
+        {
+          "id": "retain-separate-tail-receipt",
+          "expectedOccurrences": 1,
+          "before": "    behavior, rejected, exhausted, directTypeOperations, carrierRejections, emptyElimination, zeroFieldRecords,",
+          "after": "    behavior, rejected, exhausted, directTypeOperations, carrierRejections, emptyElimination, zeroFieldRecords, optimizedTail,",
+          "beforeSha256": "0ec5b29c3255ffd122303d15d8912b76c28614bd6bb07506aa503a77381ff565",
+          "afterSha256": "bc53a18759108af0e51857f4cadf3f2d98e0c97f14502779b2b068e4a9628f5f"
+        }
+      ],
+      "verification": {
+        "completeForwardReconstruction": true,
+        "completeReverseReconstruction": true,
+        "immutableCandidateReadback": true
+      }
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "operation": "replace",
+      "baseBlob": "4242eb6e4944ef0be2bfe8a9ae02b0c1123fde54",
+      "baseSha256": "e6417102ab7101b04f475a888e9eb6d9c7e1e544f079c6ba8a58874995753d4b",
+      "baseBytes": 85963,
+      "candidateBlob": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+      "candidateSha256": "c522c41263e7931b83777242d77c2e7f355ce82832e72f152879645f96f31326",
+      "candidateBytes": 91968,
+      "guards": [
+        {
+          "id": "bind-optimized-tail-evidence",
+          "expectedOccurrences": 1,
+          "before": "async function bindEmptyIr({ outDir, directory, compilerSha256 }) {\n",
+          "after": "function bindOptimizedTailIr(value, positive, typeScript, declarationText, artifacts) {\n  assert.equal(value.schemaVersion, 1);\n  assert.equal(value.feature, 'flat-original-ir-optimized-tail-loops');\n  assert.equal(value.status, 'pass');\n  assert.equal(value.originalIrBoundary, 'same-existing-accepted-fixture');\n  assert.equal(value.observationCount, 12);\n  assert.equal(value.valueObservations, 11);\n  assert.equal(value.faultObservations, 1);\n  assert.equal(value.exhaustiveForAllInputs, false);\n  assert.equal(value.semanticContractQualified, false);\n  assert.equal(value.providerChecked, false);\n  noStrictClaim(value, 'optimized tail IR evidence');\n  for (const key of ['additionalPreparations', 'additionalPortableIrChecks', 'additionalEmissions',\n    'additionalTypeScriptCompilations', 'additionalNativeExecutions']) assert.equal(value[key], 0);\n  assert.deepEqual(value.swapInputs, ['7', '11']);\n  assert.equal(value.fuelInitialAccumulator, '11');\n  assert.equal(value.reverseInput, 'descending-19999-through-0');\n  assert.deepEqual(value.layout, { name: 'TailList', typeParameters: 0, constructors: [\n    { name: 'nil', fields: [] },\n    { name: 'cons', fields: [{ name: 'head', type: 'nat' }, { name: 'tail', type: 'TailList' }] },\n  ] });\n  const specifications = [\n    { name: 'optimizedTailSwap', parameters: [['fuel', 'nat'], ['left', 'nat'], ['right', 'nat']], result: 'nat',\n      signature: 'export declare function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint;',\n      exportPrefix: 'export function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint { while (true) { ',\n      transitions: ['[fuel, left, right] = [nextFuel, right, left]; continue;'], capturedAlias: false },\n    { name: 'optimizedTailFuel', parameters: [['fuel', 'nat'], ['accumulator', 'nat']], result: 'nat',\n      signature: 'export declare function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint;',\n      exportPrefix: 'export function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint { while (true) { ',\n      transitions: ['[fuel, accumulator] = [nextFuel, (accumulator + 1n)]; continue;'], capturedAlias: true },\n    { name: 'optimizedTailReverse', parameters: [['items', 'TailList'], ['accumulator', 'TailList']], result: 'TailList',\n      signature: 'export declare function optimizedTailReverse(items: TailList, accumulator: TailList): TailList;',\n      exportPrefix: 'export function optimizedTailReverse(items: TailList, accumulator: TailList): TailList { while (true) { ',\n      transitions: ['[items, accumulator] = [tailValue, TailList[\"cons\"](headValue, accumulator)]; continue;'],\n      capturedAlias: false },\n  ];\n  assert.equal(value.entries.length, specifications.length);\n  for (const [index, expected] of specifications.entries()) {\n    const { exportSha256, ...metadata } = value.entries[index];\n    assert.deepEqual(metadata, { ...expected, runtimeArity: expected.parameters.length,\n      route: 'tail-loop', implementationAbsent: true });\n    const exports = typeScript.split(/\\r?\\n/u)\n      .filter((line) => line.startsWith('export function ' + expected.name + '('));\n    assert.equal(exports.length, 1);\n    assert(exports[0].startsWith(expected.exportPrefix));\n    assert.equal(exportSha256, hash(exports[0]));\n    for (const transition of expected.transitions) assert(exports[0].includes(transition));\n    assert(!typeScript.includes('__ps$impl$' + expected.name));\n    if (expected.capturedAlias) assert(!/\\bagain\\b/u.test(exports[0]));\n    const signatures = declarationText.split(/\\r?\\n/u)\n      .filter((line) => line.startsWith('export declare function ' + expected.name + '('));\n    assert.deepEqual(signatures, [expected.signature]);\n  }\n  const expectedObservations = [\n    {\n      \"id\": \"swap-0\",\n      \"fuel\": \"0\",\n      \"value\": \"7\"\n    },\n    {\n      \"id\": \"fuel-0\",\n      \"fuel\": \"0\",\n      \"value\": \"11\"\n    },\n    {\n      \"id\": \"swap-1\",\n      \"fuel\": \"1\",\n      \"value\": \"11\"\n    },\n    {\n      \"id\": \"fuel-1\",\n      \"fuel\": \"1\",\n      \"value\": \"12\"\n    },\n    {\n      \"id\": \"swap-2\",\n      \"fuel\": \"2\",\n      \"value\": \"7\"\n    },\n    {\n      \"id\": \"fuel-2\",\n      \"fuel\": \"2\",\n      \"value\": \"13\"\n    },\n    {\n      \"id\": \"swap-31\",\n      \"fuel\": \"31\",\n      \"value\": \"11\"\n    },\n    {\n      \"id\": \"fuel-31\",\n      \"fuel\": \"31\",\n      \"value\": \"42\"\n    },\n    {\n      \"id\": \"swap-20000\",\n      \"fuel\": \"20000\",\n      \"value\": \"7\"\n    },\n    {\n      \"id\": \"fuel-20000\",\n      \"fuel\": \"20000\",\n      \"value\": \"20011\"\n    },\n    {\n      \"id\": \"reverse-20000\",\n      \"length\": 20000,\n      \"first\": \"0\",\n      \"last\": \"19999\",\n      \"sequenceSha256\": \"300d3defc1ca97bc79059e953e46726b7be58c3e3ee69f838eb19350b234f627\",\n      \"checkedElements\": 20000\n    },\n    {\n      \"id\": \"reverse-invalid-tag\",\n      \"error\": \"Error\",\n      \"message\": \"invalid ProofScript constructor tag\"\n    }\n  ];\n  assert.deepEqual(value.observations, expectedObservations);\n  assert.deepEqual(value.artifacts, {\n    typescript: 'accepted/index.ts', javascript: 'accepted/index.js', declarations: 'accepted/index.d.ts',\n    typescriptSha256: artifacts.typescript.sha256, javascriptSha256: artifacts.javascript.sha256,\n    declarationsSha256: artifacts.declarations.sha256,\n  });\n  return { receiptField: 'optimizedTail', observationCount: 12, valueObservations: 11, faultObservations: 1,\n    entriesSha256: hash(JSON.stringify(value.entries)), layoutSha256: hash(JSON.stringify(value.layout)),\n    observationsSha256: hash(JSON.stringify(expectedObservations)),\n    acceptedFixtureSha256: hash(JSON.stringify(positive)), sameAcceptedArtifacts: true, artifacts,\n    additionalPreparations: 0, additionalPortableIrChecks: 0, additionalEmissions: 0,\n    additionalTypeScriptCompilations: 0, additionalNativeExecutions: 0 };\n}\n\nasync function bindEmptyIr({ outDir, directory, compilerSha256 }) {\n",
+          "beforeSha256": "e1cdbcf3f3ad27932fe41b21d18db7c52ecd8b942af3057383c4785dc3a7f725",
+          "afterSha256": "1a04b4db0aa13a6fe5bee4ae8fb078c6007d5e4f007f8d63a2806cb772f98006"
+        },
+        {
+          "id": "bind-to-existing-accepted-ir-artifacts",
+          "expectedOccurrences": 1,
+          "before": "  const typeScript = typescript.bytes.toString('utf8'), declarationText = declarations.bytes.toString('utf8');\n  for (const text of [typeScript, declarationText]) {",
+          "after": "  const typeScript = typescript.bytes.toString('utf8'), declarationText = declarations.bytes.toString('utf8');\n  const optimizedTail = bindOptimizedTailIr(value.optimizedTail, positive, typeScript, declarationText,\n    { typescript: typescript.file, javascript, declarations: declarations.file });\n  for (const text of [typeScript, declarationText]) {",
+          "beforeSha256": "d41bfa207137b076f6920756041b9219f92af487161c4b6d57553289cb4da41e",
+          "afterSha256": "471a66e6039ae3cf0c3b71185a1272bb559cd12f15a8c7fe45e55b79d501dba1"
+        },
+        {
+          "id": "retain-optimized-tail-binding",
+          "expectedOccurrences": 1,
+          "before": "    behaviorObservations: 61, behaviorSha256: hash(JSON.stringify(value.behavior)),",
+          "after": "    behaviorObservations: 61, behaviorSha256: hash(JSON.stringify(value.behavior)),\n    optimizedTail,",
+          "beforeSha256": "d6b96011beaf3c242940eba491e2cfa2dcfc59937e6116ec9c5b67429f9d1b24",
+          "afterSha256": "5d11d4b83edc0a52499eda992f316d329a90aa184ea5d652dfe5f8d1ec0888a8"
+        }
+      ],
+      "verification": {
+        "completeForwardReconstruction": true,
+        "completeReverseReconstruction": true,
+        "immutableCandidateReadback": true
+      }
+    }
+  ],
+  "applicationRule": "Require the exact parent and both full base blob/hash pairs. Apply each file's guards in array order, requiring one complete before occurrence; use literal replacement. Require the candidate's complete hash/bytes. Reverse guards in reverse order and require the exact complete base. This manifest creates no commit, ref, workflow or execution.",
+  "sourcePins": [
+    {
+      "id": "MODEL",
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "blob": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+      "role": "Actual module/declaration/layout/parameter/match-binding/constructor/call/lambda shapes."
+    },
+    {
+      "id": "IR-FACTORIES",
+      "blob": "154cc013b692a449a6a47e6e4270957856d5bc0b",
+      "role": "Actual psIrCheckMake* neutral record factories preserve current compiler brands; no hand-made source schema."
+    },
+    {
+      "id": "CHECK",
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "blob": "178ecf89498be6502be5f747f0c0d62eb1133420",
+      "role": "Existing complete original-IR validation remains unchanged and checks the same enlarged positive object."
+    },
+    {
+      "id": "MODULE",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "blob": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "role": "Count-loop/tail-loop dispatcher, alias recognition, purity, simultaneous state transition, constructor ABI and invalid-tag route."
+    },
+    {
+      "id": "EXPR",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "blob": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "role": "Exact pure expression text, including TailList[\"cons\"] constructor factory call."
+    },
+    {
+      "id": "TS-RULES",
+      "path": "psc0/docs/selfhost-language/strict/TS_RULE_ARGUMENTS.md",
+      "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+      "role": "Existing tail-loop purity, alias capture and simultaneous old-environment update argument; no general proof replaced by the new finite observations."
+    }
+  ],
+  "originalIrFixtures": [
+    {
+      "name": "optimizedTailSwap",
+      "typeParameters": 0,
+      "parameters": [
+        [
+          "fuel",
+          "nat"
+        ],
+        [
+          "left",
+          "nat"
+        ],
+        [
+          "right",
+          "nat"
+        ]
+      ],
+      "result": "nat",
+      "equations": [
+        "S(0,a,b)=a",
+        "S(n+1,a,b)=S(n,b,a)"
+      ],
+      "expected": "Left input on even fuel; right input on odd fuel."
+    },
+    {
+      "name": "optimizedTailFuel",
+      "typeParameters": 0,
+      "parameters": [
+        [
+          "fuel",
+          "nat"
+        ],
+        [
+          "accumulator",
+          "nat"
+        ]
+      ],
+      "result": "nat",
+      "equations": [
+        "F(0,a)=a",
+        "F(n+1,a)=F(n,a+1)"
+      ],
+      "alias": "again = lambda(nextAccumulator:Nat).self(nextFuel,nextAccumulator); the one-argument call to again supplies accumulator+1.",
+      "expected": "Initial accumulator plus fuel."
+    },
+    {
+      "name": "optimizedTailReverse",
+      "typeParameters": 0,
+      "parameters": [
+        [
+          "items",
+          "TailList"
+        ],
+        [
+          "accumulator",
+          "TailList"
+        ]
+      ],
+      "result": "TailList",
+      "equations": [
+        "R(nil,a)=a",
+        "R(cons(h,t),a)=R(t,cons(h,a))"
+      ],
+      "expected": "Reverses the descending 19999..0 input to 0..19999."
+    }
+  ],
+  "sourceEligibilityArgument": [
+    {
+      "id": "entry-route",
+      "sources": [
+        "MODULE:psTsEmitCountLoop",
+        "MODULE:psTsInlineEtaApplication",
+        "MODULE:psTsEmitTailLoop",
+        "MODULE:psTsEmitDeclaration"
+      ],
+      "argument": "All three declarations are nongeneric and have nonempty physical parameter vectors. Count-loop recognition fails for the Nat functions because their parameter vectors have more than one member, and for reverse because its result is named TailList. Their root if/match expressions are unchanged by root eta inlining. The tail-loop branch therefore handles these bodies, and successful tail recognition produces the exact public while(true) export; the general implementation route is not selected."
+    },
+    {
+      "id": "swap-transition",
+      "sources": [
+        "MODULE:psTsTailPureWithFuel",
+        "MODULE:psTsTailBindingSafe",
+        "MODULE:psTsTailCallArguments",
+        "MODULE:psTsTailEmitWithFuel"
+      ],
+      "argument": "fuel==0, fuel-1 and all tuple operands are pure accepted intrinsic/variable/literal forms. The local nextFuel is distinct from self and all parameters. The fully supplied self call has empty type arguments and arity three. Emission evaluates the old-environment RHS [nextFuel,right,left] before the simultaneous [fuel,left,right] update, so the two state values are exchanged without sequential overwrite."
+    },
+    {
+      "id": "one-missing-slot-alias",
+      "sources": [
+        "MODULE:psTsTailAliasValue",
+        "MODULE:psTsTailAliasPrefix",
+        "MODULE:psTsTailParametersMatch",
+        "MODULE:psTsTailBindingSafe",
+        "MODULE:psTsTailCallArguments"
+      ],
+      "argument": "again has exactly one lambda parameter, nextAccumulator, with a direct self-call body and empty type arguments. Its call vector is [nextFuel,nextAccumulator]. Alias-prefix recognition accepts nextFuel as a variable not shadowed by the lambda; the remaining variable exactly matches its sole lambda parameter. nextFuel and again are distinct from declaration parameters, self, alias names and captured names. The one supplied actual accumulator+1 completes the recorded captured prefix to exactly the physical arity two. Thus the alias is elided and the update uses [nextFuel,(accumulator+1n)]. This does not assert recognition of a nested unary two-missing-slot alias."
+    },
+    {
+      "id": "recursive-list-route",
+      "sources": [
+        "MODEL",
+        "MODULE:psTsBuildTagMap",
+        "MODULE:psTsTailEmitWithFuel",
+        "MODULE:psTsTailPrintPure",
+        "EXPR:constructor emission"
+      ],
+      "argument": "TailList has no type parameters, with nil and cons(head:Nat,tail:TailList) in that order. The reverse body has exactly these two alternatives, ordered field bindings headValue/tailValue, and distinct safe binding names. The nil branch returns accumulator. The cons branch calls self with tailValue and the pure constructor expression TailList.cons(headValue,accumulator), giving exactly two arguments. The emitted transition therefore uses TailList[\"cons\"](headValue, accumulator); no residual self call or runner implementation is necessary. The existing invalid-tag fallback remains the same Error."
+    },
+    {
+      "id": "constructor-abi",
+      "sources": [
+        "MODULE:psTsEmitInductive",
+        "EXPR:constructor emission"
+      ],
+      "argument": "The monomorphic nullary TailList.nil is the emitted value, so the host reads runtime.TailList.nil without invoking it. The two-field cons is a factory, so the host constructs each input cell with runtime.TailList.cons. These are the actual reviewed emitter conventions, not the generic List.nil factory convention."
+    },
+    {
+      "id": "typing-and-evaluation",
+      "sources": [
+        "MODEL",
+        "IR-FACTORIES",
+        "CHECK",
+        "MODULE",
+        "TS-RULES"
+      ],
+      "argument": "The new IR uses the existing compiler-owned constructors/factories and the exact Model fields. The existing original-IR checker sees the same object whose declarations/layout are then inspected, emitted twice for checked/raw parity, compiled once and observed. Each new body has the declared type by its Nat operations, exact recursive signatures, exact constructor fields and exhaustive two-constructor match. The fixture equations are an ordinary induction on natural fuel or finite list length and have pure RHS computations. Only their twelve stated finite host observations are added; this is not a claim about arbitrary callbacks, all malformed carriers, allocation failures or universal source preservation."
+    }
+  ],
+  "preserved": {
+    "behaviorObservations": 61,
+    "negativeFixtureCount": 38,
+    "originalBlocks": [
+      {
+        "id": "assertBehavior",
+        "sha256": "34c6f4fe2c7b994d94d7b0f3d684af701683b46292397a31fca6df0fa1c16f24",
+        "bytes": 2559,
+        "byteIdentical": true
+      },
+      {
+        "id": "observeEmptyAbi",
+        "sha256": "ab778f65093ea88ee1d1220ecf3ff3e047692ac60ed58838a3d06b202159c4a3",
+        "bytes": 1601,
+        "byteIdentical": true
+      },
+      {
+        "id": "negativeFixtureArray",
+        "sha256": "3888f0f916b6598a0f39bfdab771e248496d72f13de2872c3497fd37c94b7972",
+        "bytes": 4950,
+        "byteIdentical": true
+      },
+      {
+        "id": "nativeEntryAndRemainder",
+        "sha256": "4c062ac54c5ba6fdac662edea207d861ff66eee1d8c7bea70fe112d0ccf76363",
+        "bytes": 3931,
+        "byteIdentical": true
+      }
+    ],
+    "blockHashConvention": "UTF-8 exact slices. Function hashes include the final newline after the closing brace; the native slice runs from its export declaration through end of file.",
+    "originalPositiveDeclarationsAndLayouts": "All existing positive declaration and layout bytes are retained; the exact first two gate guards insert the new helper values and append the three declarations plus TailList only to the existing positive module.",
+    "existingCompilerCallsites": [
+      {
+        "symbol": "inventoryOriginalIr(",
+        "baseCount": 5,
+        "candidateCount": 5
+      },
+      {
+        "symbol": "compiler.psTsEmitCheckedModule(",
+        "baseCount": 2,
+        "candidateCount": 2
+      },
+      {
+        "symbol": "compiler.psTsEmitModule(",
+        "baseCount": 1,
+        "candidateCount": 1
+      },
+      {
+        "symbol": "compileTypeScript(",
+        "baseCount": 1,
+        "candidateCount": 1
+      },
+      {
+        "symbol": "compiler.psCompilerPrepareSource(",
+        "baseCount": 1,
+        "candidateCount": 1
+      },
+      {
+        "symbol": "compiler.psCompilerCheckedTypeScriptFromPrepared(",
+        "baseCount": 1,
+        "candidateCount": 1
+      },
+      {
+        "symbol": "compiler.psCompilerTypeScriptFromPrepared(",
+        "baseCount": 1,
+        "candidateCount": 1
+      },
+      {
+        "symbol": "spawnSync(",
+        "baseCount": 1,
+        "candidateCount": 1
+      },
+      {
+        "symbol": "loadGeneratedCompiler(",
+        "baseCount": 1,
+        "candidateCount": 1
+      },
+      {
+        "symbol": "await import(",
+        "baseCount": 1,
+        "candidateCount": 1
+      }
+    ],
+    "callsiteMeaning": "Static literal call-site counts, not execution evidence. None of the two new observation/binding helpers calls a compiler, preparation, checker, emitter, TypeScript compiler or native executable.",
+    "nativeEntryByteIdentical": true,
+    "originalBinderChecksRetained": true
+  },
+  "receipt": {
+    "field": "optimizedTail",
+    "schemaVersion": 1,
+    "feature": "flat-original-ir-optimized-tail-loops",
+    "originalIrBoundary": "same-existing-accepted-fixture",
+    "observationCount": 12,
+    "valueObservations": 11,
+    "faultObservations": 1,
+    "expectedObservations": [
+      {
+        "id": "swap-0",
+        "fuel": "0",
+        "value": "7"
+      },
+      {
+        "id": "fuel-0",
+        "fuel": "0",
+        "value": "11"
+      },
+      {
+        "id": "swap-1",
+        "fuel": "1",
+        "value": "11"
+      },
+      {
+        "id": "fuel-1",
+        "fuel": "1",
+        "value": "12"
+      },
+      {
+        "id": "swap-2",
+        "fuel": "2",
+        "value": "7"
+      },
+      {
+        "id": "fuel-2",
+        "fuel": "2",
+        "value": "13"
+      },
+      {
+        "id": "swap-31",
+        "fuel": "31",
+        "value": "11"
+      },
+      {
+        "id": "fuel-31",
+        "fuel": "31",
+        "value": "42"
+      },
+      {
+        "id": "swap-20000",
+        "fuel": "20000",
+        "value": "7"
+      },
+      {
+        "id": "fuel-20000",
+        "fuel": "20000",
+        "value": "20011"
+      },
+      {
+        "id": "reverse-20000",
+        "length": 20000,
+        "first": "0",
+        "last": "19999",
+        "sequenceSha256": "300d3defc1ca97bc79059e953e46726b7be58c3e3ee69f838eb19350b234f627",
+        "checkedElements": 20000
+      },
+      {
+        "id": "reverse-invalid-tag",
+        "error": "Error",
+        "message": "invalid ProofScript constructor tag"
+      }
+    ],
+    "reverseSequenceEncoding": "Decimal 0 through 19999 joined by a comma with no trailing comma or newline.",
+    "reverseSequenceSha256": "300d3defc1ca97bc79059e953e46726b7be58c3e3ee69f838eb19350b234f627",
+    "actualSourceRoute": "Each entry records and binds the actual complete public export-line SHA256, required while(true) prefix, exact simultaneous transition, declaration signature, JS arity, absent __ps$impl$ fallback and tail-loop route. The fuel entry also requires elision of again.",
+    "artifacts": {
+      "typescript": "accepted/index.ts",
+      "javascript": "accepted/index.js",
+      "declarations": "accepted/index.d.ts"
+    },
+    "binding": "The binder reads no new artifacts. It authenticates the new block against the same existing compiler-specific positive report and already-read accepted TS/JS/d.ts hashes, exact layout/signatures, all twelve exact observation objects, exact entry route strings and false qualification/provider flags. This runs for each existing generation through bindEmptyIr.",
+    "separateFromBehaviorCounter": true,
+    "flags": {
+      "exhaustiveForAllInputs": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    }
+  },
+  "review": {
+    "author": "artifact_inspection_review",
+    "authorExactVerification": "All six gate and three binder guards uniquely reconstruct and reverse both complete files. Candidate hash, UTF-8 bytes and immutable GitHub readback match.",
+    "independentReviewer": "runtime_comparison_finish",
+    "independentSemanticVerdict": "CLEAR for final gate521d1d2 and binder55b3d5c; actual model/constructor/alias/purity/route/arity and all twelve expected observations reviewed. Independently reproduced the reverse sequence hash and completely reversed the three binder insertions.",
+    "resolvedReviewCorrections": [
+      "Use the monomorphic nullary TailList.nil value rather than calling it.",
+      "Pin the actual TailList[\"cons\"] constructor call in the reverse transition in both gate and binder."
+    ],
+    "execution": "No source, gate, compiler, test, TypeScript or native process was executed during this review. Pure in-memory text/JSON/hash processing and GitHub reads/unattached blobs only."
+  },
+  "qualification": {
+    "status": "pending-exact-source-full-run",
+    "latestRun": 38002284953,
+    "latestSource": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "latestResult": "Runtime CLI host call failed before N1; native build/regression/checked-seed and grammar steps passed. This packet claims no run success and closes no flags.",
+    "failureEvidenceBlob": "57fe49c8a9421dd859ce15b5e50b7fe02e7f7c56",
+    "failureLogBlob": "adb2fb82490eb126064cfa83fadf3dfb2c39cb9c",
+    "nextStep": "Root may integrate the reviewed host-only completion and request the one exact-source full qualification run; this packet performs neither operation."
+  }
+}

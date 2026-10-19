@@ -1,0 +1,1097 @@
+{
+  "schemaVersion": 1,
+  "kind": "qualified-F-and-TypeScript7-documentation-evidence-publication",
+  "repository": "dwijayuda/pskernel",
+  "baseCommit": "8d922c3f47f59a8d7285bfdf998791f042b483b9",
+  "baseTree": "72d828a2d8b8af5023a9e66c493090cc052a65f0",
+  "targetBranch": "psc0/typescript-7-only-v1",
+  "scope": "Documentation and evidence publication after all three independent qualification scopes passed; no executable changes and no new qualification run.",
+  "qualifiedSources": {
+    "psc0": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "root": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+    "selectedR": "fe2560aba0f347b1caf8d000d371464642d44f23"
+  },
+  "runs": {
+    "psc0CompilerAndProvider": 37947341800,
+    "nativeColdRecovery": 37947341899,
+    "rootTypeScript7": 37951869293
+  },
+  "selectedSeedManifestBlob": "44a05964c49000478c282afc013c84fca8c2de65",
+  "selectedSeedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+  "fileCountIncludingThisCatalog": 121,
+  "files": [
+    {
+      "path": "psc0/docs/selfhost-language/evidence-logs/worker-migration-compiler.log",
+      "newBlob": "5ab3fc932628afac4ff099727663ce45a25b8af8",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "0029eccaf74c06b1fef9c3f06987cb0dc82003c649912bb1959bf3f13068e931",
+      "bytes": 757271
+    },
+    {
+      "path": "psc0/docs/selfhost-language/evidence-logs/worker-migration-provider.log",
+      "newBlob": "41f4e3a7546f9b05f5b27981d247a34a699aed49",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "99e3e9d913d9322f042d69f0981358bee36fa478849ee249062f6f59c07e80fd",
+      "bytes": 62929
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/artifacts.api.json",
+      "newBlob": "96fb1a1b1887314d7541de4c775c874b00bdaa93",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "d1502ffe2c0f2ccb2fee95c95fd3fb70d0b4e038cfb751bf41fae6ad5f6cdb62",
+      "bytes": 1533
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/capabilities.logged.json",
+      "newBlob": "2efa0db11731bb1d7206c0b9bf800740a69f8a7e",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "d884b62584366d741765377ab6ac1806d5420a96f475c79cc31c394fecc72f3e",
+      "bytes": 83212
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/generation.logged.json",
+      "newBlob": "5f8d41d8badce9dc62fcf36b669664d3242137bc",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "f41ac0c623f60d6082033f80a62dbe33d6dff07dd0f1bb7fdd10a9782f94fa01",
+      "bytes": 30613
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/generic-erasure.logged.json",
+      "newBlob": "36f33653b01bcdd822e1d2045d9f935e0df11dd1",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "c26909c2810cd6e1c41a4efe55055166118aec4b148e05494e61ab2280ed0e38",
+      "bytes": 2219
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/helper-runtime.logged.json",
+      "newBlob": "1aa844458ccf6710e52743eb8cd9d1e5b6f7ae5b",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "2c3c4c856ff8cacade4cd0e1c04e60d17e515c60d87d3a012465e27fb092f037",
+      "bytes": 539
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/ir-checker-conformance.logged.json",
+      "newBlob": "962b20686e3bab584a5426f9286bd63381076962",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "1d6bd160d23a8e6391e658c4d01a27ae4f51590f69180cf13ac0e861fc723ffb",
+      "bytes": 11228
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/capabilities.logged.json",
+      "newBlob": "0ba05a061016bfd7ad54ff4edca0cec352fa6818",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "2d5b65f8d1cc272efdbe0be5550091522553bfa488d6d6521395477413d591d6",
+      "bytes": 82596
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/generation.logged.json",
+      "newBlob": "63c0e758f93e66a77422654dc3183359cf015849",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "b5502e9fc60a71ae617e5d52e52a35e12ae65d09230f8dfd8d9008aa479d6439",
+      "bytes": 28982
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/generic-erasure.logged.json",
+      "newBlob": "0203bd64e474688ced84fd98e2d644eec818bef8",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "67681a0edb7ca8a0af1e8b9c28cccc27226ba9c6114776f7cca98ca11eb5d6c7",
+      "bytes": 2044
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/helper-runtime.logged.json",
+      "newBlob": "1aa844458ccf6710e52743eb8cd9d1e5b6f7ae5b",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "2c3c4c856ff8cacade4cd0e1c04e60d17e515c60d87d3a012465e27fb092f037",
+      "bytes": 539
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/ir-checker-conformance.logged.json",
+      "newBlob": "962b20686e3bab584a5426f9286bd63381076962",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "1d6bd160d23a8e6391e658c4d01a27ae4f51590f69180cf13ac0e861fc723ffb",
+      "bytes": 11228
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/capabilities.logged.json",
+      "newBlob": "0ba05a061016bfd7ad54ff4edca0cec352fa6818",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "2d5b65f8d1cc272efdbe0be5550091522553bfa488d6d6521395477413d591d6",
+      "bytes": 82596
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/generation.logged.json",
+      "newBlob": "1dd47488193cb80d063c85e25e22b79d4863bfe2",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "b3b13475c122865bf686efd5944721cc875a8b73c01cf8640106af1decdbc282",
+      "bytes": 28996
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/generic-erasure.logged.json",
+      "newBlob": "0203bd64e474688ced84fd98e2d644eec818bef8",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "67681a0edb7ca8a0af1e8b9c28cccc27226ba9c6114776f7cca98ca11eb5d6c7",
+      "bytes": 2044
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/helper-runtime.logged.json",
+      "newBlob": "1aa844458ccf6710e52743eb8cd9d1e5b6f7ae5b",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "2c3c4c856ff8cacade4cd0e1c04e60d17e515c60d87d3a012465e27fb092f037",
+      "bytes": 539
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/ir-checker-conformance.logged.json",
+      "newBlob": "962b20686e3bab584a5426f9286bd63381076962",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "1d6bd160d23a8e6391e658c4d01a27ae4f51590f69180cf13ac0e861fc723ffb",
+      "bytes": 11228
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/compiler-review.json",
+      "newBlob": "a570b81992c5ac9dc2ff62984c67511d9fbed7c1",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "57494781e9c6ac62fcd069ca5eaf609750b84134561c86d50109cd12cbf703d9",
+      "bytes": 570328
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/evidence-review-contract.json",
+      "newBlob": "31293d61303666b1b6f82071c0bfc1f20316254b",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "4718520a680139a5945d98d495e9b47d0ebb7e7bf108535f1fd7c10a59cdfd17",
+      "bytes": 9085
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/evidence-review.factory.txt",
+      "newBlob": "490cc9d968bddd92da1ad67e39b3880a35349580",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "f3ca1f6717ebe45f66735601f5f5731d59c78f69ead524b5cab274d88d38c487",
+      "bytes": 59165
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/foundation-conformance-01.logged.json",
+      "newBlob": "c582ce48554b2827f3d238205a20aea804b1a0cc",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "dcfdf3db3038737433aacc547f8f82bce5e964c671186ab60f6b5587f4d1d7a2",
+      "bytes": 1805
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/foundation-conformance-02.logged.json",
+      "newBlob": "e254bf8374658b2853e6a1e97290327fdeaa89d5",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "5c940a589ebe32ff3128356dfb55a99d48701e332ac6dee3bf881406a9b6e8d7",
+      "bytes": 1809
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/helper-conformance-01.logged.json",
+      "newBlob": "0dd67426b85f4cf97668de4627eeaa4e0566e5e6",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "bd3191c4d9595efe3dc45b81f3c7e62297c82ad142389d36af9d0f9d60b13a11",
+      "bytes": 3083
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/helper-conformance-02.logged.json",
+      "newBlob": "e5e075619a5a590a6b8b29b0f8315994b574f1df",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "a35f1610bccbd6310ab86191671e9079606c4c0b67273cce40c72adade9d5109",
+      "bytes": 3087
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/jobs.api.json",
+      "newBlob": "d5ddb153f69cff15422036c2e9609164eea58749",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "eee48c097877e2b41b0b9db4575be04c247cd1e78988e7a82c11167a70a23c62",
+      "bytes": 10556
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/capabilities.logged.json",
+      "newBlob": "2efa0db11731bb1d7206c0b9bf800740a69f8a7e",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "d884b62584366d741765377ab6ac1806d5420a96f475c79cc31c394fecc72f3e",
+      "bytes": 83212
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/generic-erasure.logged.json",
+      "newBlob": "36f33653b01bcdd822e1d2045d9f935e0df11dd1",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "c26909c2810cd6e1c41a4efe55055166118aec4b148e05494e61ab2280ed0e38",
+      "bytes": 2219
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/grammar-closure-summary.logged.json",
+      "newBlob": "d229a931f8e592a5f2debbe62c71533b136960ce",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "8df1a07ab68ccabdeb28d30146255f252921b6d67b5927703e6351f961282def",
+      "bytes": 317
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/helper-runtime.logged.json",
+      "newBlob": "1aa844458ccf6710e52743eb8cd9d1e5b6f7ae5b",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "2c3c4c856ff8cacade4cd0e1c04e60d17e515c60d87d3a012465e27fb092f037",
+      "bytes": 539
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/ir-checker-conformance.logged.json",
+      "newBlob": "962b20686e3bab584a5426f9286bd63381076962",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "1d6bd160d23a8e6391e658c4d01a27ae4f51590f69180cf13ac0e861fc723ffb",
+      "bytes": 11228
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/native-full-ir.logged.json",
+      "newBlob": "6abdb58fb945e2cc3ecf89450f87b7d870409e9e",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "c7ff1033296aae569020c047b527332ba31fae79fc7b214302b764db18452e97",
+      "bytes": 380
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/native-ir-evidence.logged.json",
+      "newBlob": "ba10dfcf13fc5cbd37af3f569474187085b6147d",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "b7bed9229beda63a76a603a0282ab9d5bd0d7f83efbbcc3bd52832b9dab81f63",
+      "bytes": 1272
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/native-ir-fixtures.logged.json",
+      "newBlob": "19807c7bf5c9e22100f4126768047797db645888",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "440bd8ac01540409239640a5d65147be6592783131de18604f626239615a397a",
+      "bytes": 111
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/receipt.logged.json",
+      "newBlob": "bba03932b0dadb5e8ae7a54fdf3ea1b2b15d5bce",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "618507b0de937854af2605b61bbe5b4bf904346cf58ba1b2f3e42998b28d71fb",
+      "bytes": 7355
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/provider-review.json",
+      "newBlob": "697e9be08d34c7ef5e2695bb134e921b05b76c47",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "3f595efba7092909a3e6ce7399647473f4bd3b2977634348257e8cacadaf4e46",
+      "bytes": 9646
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/provider/receipt-file-envelope.logged.json",
+      "newBlob": "9dc32cbc77e15658fb830477fb3d15dfba83b4ce",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "8d8d3df67bb1e9cc0f6cb2865c2de158334046d63fce202f5d4b7777015a8a92",
+      "bytes": 3997
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/provider/receipt.logged.json",
+      "newBlob": "15fe0133df0c66d7b86f81f7a1626314b1440048",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "a19a93509c056e53614681f11e588b000e5d35c3fb79b3cb3f5e7ba1cd986a14",
+      "bytes": 2823
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/review-inputs.json",
+      "newBlob": "1d954036df534d8755bb0b9f97e979064a5cc85d",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "436a9eddacf32d00da6eadcd29702dd2a2b7bd60f89b63e7d0f8e75a2df5f899",
+      "bytes": 3579
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/run.api.json",
+      "newBlob": "68cb8f5316b6a28e8702bbe7c98336db81b663a2",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "f1aeb453745eab734c1df521cfb13d1099f73f4eabd5f617240d2be131c0d5f4",
+      "bytes": 12766
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/sha256-utf8.factory.txt",
+      "newBlob": "e916f13aad289319c225fae91649e6315a3d8d78",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "7bb18f96dfd4a5e711dbbbbe05618745007979345167d553b2914193c13ea07d",
+      "bytes": 2741
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/typescript-profile-summary.logged.json",
+      "newBlob": "b6fb0c38a40b24b7ff68810a41e13eaceda74781",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "1ae5a14375fb40d04db36a9d0056485ffdec53e79cc43421b373f0fd1f4b3b43",
+      "bytes": 247
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/worker-harness-reference.logged.json",
+      "newBlob": "72726e7596795a2fc561c9b59b97ec26687a1407",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "1da3df2abe07e4f8426bad4d6ab75451c24f0b024a12db36ce86d3687b376749",
+      "bytes": 68663
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/worker-migration-correspondence.logged.json",
+      "newBlob": "dd8f13694c6690adface3a2c83c02ad354946bed",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "df09d6e9c4b8e4db097b20fa0919bff4d2bc58e3fe9c14b86f4438f2965bcf54",
+      "bytes": 782
+    },
+    {
+      "path": "psc0/docs/selfhost-language/worker-migration-evidence.json",
+      "newBlob": "b2ca50c9e353b91220a5280e90ff7cd45b6b9a7e",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "7eb162e121ce97f4a9836daa44a85d0c03b30ac1aaa2b90cf43a1a3d69d9d069",
+      "bytes": 44891
+    },
+    {
+      "path": "psc0/docs/selfhost-language/worker-migration-provider.json",
+      "newBlob": "87ec0c66613ff6c5936d79b56e8e9f000a49bb8c",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913",
+      "bytes": 3532
+    },
+    {
+      "path": "psc0/docs/selfhost-language/worker-migration-qualification.json",
+      "newBlob": "1820e4519018365abbe520ab3dc362b535fdbd45",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence",
+      "sha256": "a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3",
+      "bytes": 5284
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/evidence-manifest.json",
+      "newBlob": "5ed0a4f6cff3d48672df34076b7ac8801c9299a4",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "F evidence catalog"
+    },
+    {
+      "path": "docs/TYPESCRIPT7.md",
+      "newBlob": "5f36452b237599396b54365deb356cbb8b90b14a",
+      "baseBlob": "d8b0e3c8b4c12d087d3c01211cceee419ca61344",
+      "operation": "update",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "c44dd51cdc43d971075a8702c1f8da3554770c88e4ce4168c5a57dfdd859743a",
+      "bytes": 11528
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/package-lock.json",
+      "newBlob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/installed-typescript-package.json",
+      "newBlob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/installed-profile.json",
+      "newBlob": "68ab7c2309f8722988d71d05f05743693f794851",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe",
+      "bytes": 4644
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/qualification.json",
+      "newBlob": "31ec99a5260603659e38ad24c33028c510b46e93",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a",
+      "bytes": 3485
+    },
+    {
+      "path": "psc0/docs/selfhost-language/root-typescript7-qualification.json",
+      "newBlob": "31ec99a5260603659e38ad24c33028c510b46e93",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a",
+      "bytes": 3485
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/evidence-index.json",
+      "newBlob": "c77c051646afea76427cb175cb14f85c80b0a8cd",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "209cd0b9a0bce52405579a1f7c2dc9878b8beb4f890a2bda15e6dd4dcf6a82b4",
+      "bytes": 820
+    },
+    {
+      "path": "psc0/docs/selfhost-language/evidence-logs/root-typescript7-qualification.log",
+      "newBlob": "f59f0590c714205f93826c9512c1c0c438a41418",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "5836caa0146f2002bec6954ce285ab7789e7ac1758ede4da80248448cdc79e86",
+      "bytes": 84888
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/run.json",
+      "newBlob": "493c0273d0e2483626adabb148c5b8e1c8aa8fd4",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "dc969060c34f967a0d4038964aefb3079c580b30c20fe686328d7cb02bc03c87",
+      "bytes": 12759
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/jobs.json",
+      "newBlob": "42fea60aa87b64b9ae61b811b24d576f24669e6c",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "9d6429d2736f698edb23c0629706d41ec5cc1fa5adc32cd121340205883d73d7",
+      "bytes": 2310
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/artifacts.json",
+      "newBlob": "4c6aa3041a9d2378a1280960fa90f07dd92ba77e",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "af0f484579b8c89526c5b8d6f5542eed25222a7530c6f059e4a51a8e179494cb",
+      "bytes": 773
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/source-inheritance.json",
+      "newBlob": "f36f5676d05e9f502156ff931e02aaba0cf7c36a",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "0b10684d8b69425e171b80ca171c8ecfb3b585e233d0887f7aae332021530641",
+      "bytes": 59231
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/primary-api-and-source-evidence.json",
+      "newBlob": "45b848ea37dacd4f9aba554b8d90fd794c7cfdb6",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "c99b2d6ac30b098c5416b64488d304659a0bb87f58fcfde6726cb3319b94c077",
+      "bytes": 105556
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/authenticated-report.json",
+      "newBlob": "83977c047ba4a382d0512ec9294ba1bbcf30d29e",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "9dee40129b4cdf99d6fcc65d563a447842a78dbd1cbd8cb1c41d16504120e84e",
+      "bytes": 112657
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/review-index.json",
+      "newBlob": "87dc087ead86d551a6b2e48f0594dd858e7b1b83",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "ae647cb439505f45b59842b0a04a710eb6d4742266c686204d5ac6d5191370b1",
+      "bytes": 5665
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/prior-attempts-index.json",
+      "newBlob": "6af0fe016b904d74635bf3a12ceed5b8621d376a",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "cef18d42eec3b71a599dfb876acc6416c750b315d56d7e6cde7e63ecb63c8346",
+      "bytes": 16602
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/evidence-reader-source.txt",
+      "newBlob": "fe3478ead5638f8647e67a5ef2a2f2de4e2eb896",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "b10d16ea5157f93a8e0fc7a484aab2a8f80b3e2046a752240415705ad67f6d6a",
+      "bytes": 20968
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/qualification.log",
+      "newBlob": "e024d2405e77359b8ab16ef592124b6e1e44bd18",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "7aec216ae8c07352d91c034c9c7263af6a3a8ab2e6bed464b3168f98c5a8e6cc",
+      "bytes": 77919
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/package-lock.json",
+      "newBlob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/installed-typescript-package.json",
+      "newBlob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/installed-profile.json",
+      "newBlob": "1f7d0ec7b84b25aae111de72821b6e76e7d51ee6",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "78b015ca6df3fcd12d16023269c253f82632a2ffea3bd609693d5a54e5fdbdc7",
+      "bytes": 4643
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/qualification.json",
+      "newBlob": "f9d9651f016ff79f7c6c358415b47c7b9ce61aac",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "819a0523eacb1b02c23fbeab288a71329948f8e6810e4c06eea3f0cd33a3b1f9",
+      "bytes": 2396
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/evidence-index.json",
+      "newBlob": "9020b7825b9e735e601973e3ad9dea2b4adb3431",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "8becd1cbf52289487b3d1eb61afbbacad315493d7cc09f3cd7376c32aedde4c9",
+      "bytes": 820
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/run.json",
+      "newBlob": "44878bbd946cefc50f1d9370fd52e3f5b2394ea5",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "d89f12bbc5d1748e101271477e039c10f11c5ce07999ee5b994d236fa74003c8",
+      "bytes": 12492
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/jobs.json",
+      "newBlob": "a86c24e239884422b99432882f7bfb414c847855",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "c2ea5bf5e4be40a55779aa0726a994397efa92d9f2c1ca72651f1d2153d379e1",
+      "bytes": 2310
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/artifacts.json",
+      "newBlob": "60da488d826b0d5d891a4f582ed894c4c3a1abc0",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "a044f15a5d82bf529739a6cd989f208e52e09a1ba88f3d72b5075c282060fc62",
+      "bytes": 773
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/authenticated-failure-report.json",
+      "newBlob": "5812e398cce8f8c32f0661d79d71894c768b8b5e",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "935306e6ecf991cffdf4a9151694d52e0f342226c362bf152b103303fe7ec850",
+      "bytes": 108365
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/qualification.log",
+      "newBlob": "2304e3d1cdb7040f851196e7a7b3e7f99411755a",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "2baa34f1d9e6f13dd367ff17686c5258bac2ba005a6a1cc97028e0136e280ebd",
+      "bytes": 84632
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/package-lock.json",
+      "newBlob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/installed-typescript-package.json",
+      "newBlob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/installed-profile.json",
+      "newBlob": "6a445dc2e3eca77042635ab351cb66b8daa670c6",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "5cff347f0380141ce6947775dffbc0776036e69c9a46050df06c02be883700c4",
+      "bytes": 4644
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/qualification.json",
+      "newBlob": "64ebc858d8821f98cd8d544e648c1cce517120fe",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "dfaae28f2b7fc8dd296a6d0becc64ede620bb8c298ae59afe0279d5ccbb661d3",
+      "bytes": 2804
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/evidence-index.json",
+      "newBlob": "f721e376291000315f3d895de7c5a3e664e8b9da",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "1d6cdd5aebaef8b18a312f3df69771e652a09d2c46f630e21c66ebd6b34b397b",
+      "bytes": 820
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/run.json",
+      "newBlob": "89027ae432a28ddfe39d4f156e77882e88c3ce8b",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "aadf12cebc45fa190175febd68fd4b25972c4ca1032f435c683e7fb4cd4166ca",
+      "bytes": 12602
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/jobs.json",
+      "newBlob": "8cc32dce8d77c6b460e24783138312d1090b48fa",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "6bdf37c59afa2d66e80ab18ddf85c8366936593a73b9c22189cb7a3a59fd3475",
+      "bytes": 2310
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/artifacts.json",
+      "newBlob": "19e7b397647097eb523e1744947f9e54cae6da2c",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "0bbee649e42355efe5792edd356e7d0979c5469c4ba6cfaf27757386a443d705",
+      "bytes": 773
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/authenticated-failure-report.json",
+      "newBlob": "8180ed4f3fde8e1a48276b8cb9f3f4367afb7432",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "4834e97fa6304f74f6dd6b33416bde4a9ef648069367e18e8ae9ccae0dba7581",
+      "bytes": 110353
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/qualification.log",
+      "newBlob": "6ae6a31caf429b3063e77c99916aa6149b53a317",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "f4a2faa5f90aed700e7bb4ec6445c9514a591532197b29201f1fee631692622b",
+      "bytes": 85951
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/package-lock.json",
+      "newBlob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/installed-typescript-package.json",
+      "newBlob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/installed-profile.json",
+      "newBlob": "a33442fa942dbc64d3a1fcc80344715c93f28a57",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "6704cdcaa52d8601a25db687fda00805ad89b4012c9dc8a7fc7aad3bb8d0a5bd",
+      "bytes": 4644
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/qualification.json",
+      "newBlob": "6156a43d4f05e1071c2046b75ac84f702d3a6a30",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "6eee4c15020b32f724cf150f847f5671ee0ee8975b1d752122a4495a851b47c3",
+      "bytes": 3574
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/evidence-index.json",
+      "newBlob": "8c31bb76e540a4d1b26ec88a50e57c6c1f71b4be",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "8217fa5af55fc78f447aea60972fffc51c6957ba6663849a6543487a27f24f66",
+      "bytes": 820
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/run.json",
+      "newBlob": "edb02d46bebe5197614d228bcda09c58ca0a1fe8",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "64fb3e73f4d86d86fb670f4034df795d56cff86718e4ebabff71067439e2a8ff",
+      "bytes": 12577
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/jobs.json",
+      "newBlob": "b022e9d1e46fa6a8920000c1e5ec582361acb69e",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "84b982776a4756f1ece964b613a1f7d3412ee2f13c5cab986181870d226187d2",
+      "bytes": 2310
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/artifacts.json",
+      "newBlob": "8a6e13e2abc95c6ddbde1c7f9bda45af9e9cb25b",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "e57f49dab036ba91cb205bb935d743f548e1262e39e9905fe905dd23b736716a",
+      "bytes": 773
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/authenticated-failure-report.json",
+      "newBlob": "c916480451e5b06500ce4dc807cb3c059152609b",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "658e83af2c974c2ba8c82fbefb09d44aefc7ea894dc0f75f297a035e4914949d",
+      "bytes": 112948
+    },
+    {
+      "path": "psc0/docs/selfhost-language/root-typescript7-evidence.json",
+      "newBlob": "d3fff5466d2f6775959aa8510fd192eb29152398",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence or guide",
+      "sha256": "4e934e28621833e7e7fd484153d13a19d6f70a01809706157379f4530c0e2fdf",
+      "bytes": 70251
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/retention-manifest.json",
+      "newBlob": "c3b0275e848fa93f3f33528a8fe239766486a115",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Root TS7 evidence catalog"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/typescript7-native-recovery.json",
+      "newBlob": "c495ddf6e7d5075e204e4b0c5957c8c0d3d6a24b",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Native TS7 cold evidence",
+      "sha256": "0d5606c25e634082da39d80ffa5974b3c390d2765ded71bcf1abaf442b7e3919",
+      "bytes": 64164
+    },
+    {
+      "path": "psc0/docs/selfhost-language/evidence-logs/typescript7-native-recovery.log",
+      "newBlob": "d5ae70f7459ad82ba2aa3a23043e374921fb2316",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Native TS7 cold evidence",
+      "sha256": "6f47360b88446d7a06f12561772e8d9e317b1f3bfb6d34d610791436f99b3957",
+      "bytes": 101635
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/native-ts7-cold-run.json",
+      "newBlob": "fbe7b5b822e931f984c011076780baaeca07f89d",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Native TS7 cold evidence",
+      "sha256": "a39f26ff5f92066b583f92862cd49e1f58fb91084ccfea1f9bf50dfff8a7e5c8",
+      "bytes": 12790
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/native-ts7-cold-jobs.json",
+      "newBlob": "4e8ce6d40000a47991f38ed0bd025ad6cabf36a1",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Native TS7 cold evidence",
+      "sha256": "cf74bd95f5bb08f7859203af067c470e03690d58df7d9773440346d785d941e9",
+      "bytes": 3367
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/native-ts7-cold-artifact.json",
+      "newBlob": "f22f733ac640308e605c320bf10bb3901929222d",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Native TS7 cold evidence",
+      "sha256": "494b751ef00778bc715ca9751e0cab6630c627d6b65861c35fcce52cecad430b",
+      "bytes": 891
+    },
+    {
+      "path": "psc0/docs/selfhost-language/typescript7-native-recovery-evidence.json",
+      "newBlob": "dd600ce1b24a4e7090ba9d5fa47012b875174d82",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Native TS7 cold provenance"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/README.md",
+      "baseBlob": "bbbf7a07c2b7be0731bf845f957457f9377a486b",
+      "newBlob": "a189ebafeff40fd758c85b41e6abeacea5c516e3",
+      "sha256": "f19ebb1106beacd7e0a6671aedb5754b92d708060bfe072a3fa63391b8a35123",
+      "bytes": 32555,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/IMPLEMENTATION.md",
+      "baseBlob": "457792e29a18393434c86aef43a4ea0eeab4a024",
+      "newBlob": "89581975c5b1ea04eaaaf5f8231c7685c02ba84d",
+      "sha256": "da5f15fff9e0e09ca549d72113d8fee8e3f779e4704397cc6b6efcfaeff526da",
+      "bytes": 56556,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/MIGRATION.md",
+      "baseBlob": "18bf1fb8317964cda2352bb7e98828863ccce6c1",
+      "newBlob": "1708592ebf923a173c25ac9846e7034d58107610",
+      "sha256": "e3832b643f2b4fb6d78cd87f024735edd62600c7f4da3f889de898e0c6168dbf",
+      "bytes": 49662,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/SPEC.md",
+      "baseBlob": "d5e550809b60552050169bcc52c01175f4a33827",
+      "newBlob": "61f0f36ffe7880144f60845084e8be6a61b91eed",
+      "sha256": "6338e00a4bed1c35aef59ee71326d4bf38e5af952800422579284ae74077ebc6",
+      "bytes": 40699,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "baseBlob": "f73489ab63ebd474276f2aac4aa7ef2298b833f3",
+      "newBlob": "3f2bcf9aec687a3395a49042aab7732e34a110e0",
+      "sha256": "438a6501b374aed18a6bf2de3af2c81f09d894c0768242966c2ea98ec99cbc56",
+      "bytes": 82099,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "baseBlob": "615b76512ef894fac42b94b730fd424c11338f14",
+      "newBlob": "0fcb21d58650f00365bcc9cec46ced10bb0628de",
+      "sha256": "58aa1e6d67dab8303e12f3936e3ff3d5e4236a891fd992076b76b8d5aff35808",
+      "bytes": 97108,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/MIGRATION_BACKLOG.md",
+      "baseBlob": "7c1ad6a0dcf253bfd395866ad772a09fee88a642",
+      "newBlob": "15c9c8a4eae8a3dfd1e110f3424085b33ab63d4c",
+      "sha256": "c88481fc69718af64ea01d3cbee6fda69b50f306b292af476b5b9b7f7447bf12",
+      "bytes": 34681,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/CURRENT.md",
+      "baseBlob": "90a482894c01111f62349b8455ca86756806c7be",
+      "newBlob": "d7de8eeaa78c4eecc0b7cd44a51e23922cb0e26b",
+      "sha256": "9fc38d5953f20d68989901da77e833f3b0fe80334c944f2f4d222b4a5feccf52",
+      "bytes": 11116,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/README.md",
+      "baseBlob": "ef15e197cdcf10b9ed6d8cbc3028551f16090e89",
+      "newBlob": "83551e48807c94a63192d1bbb4b8c97cfc84515c",
+      "sha256": "22ea11f72d1463d797edbe61c4287683a3d6bd580da9f423605243f91c3c2f0c",
+      "bytes": 4705,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/PS_GRAMMAR_ADOPTION.md",
+      "baseBlob": "e3c072536d021f4172afb8736a716bd9c6255d0e",
+      "newBlob": "43b3eac98c5485f91ede7f494c9ddee37599b1aa",
+      "sha256": "f2d7c7b41beaa8a88ee984253db97434f3234aab2598c6d6a9dee8c145fb5446",
+      "bytes": 20011,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/TYPESCRIPT7.md",
+      "baseBlob": "7462e111a12b2f73adc8359469deec644d0dfc2f",
+      "newBlob": "87fd400e9d9abf75b4f72e8c36084e6cdaadbf9c",
+      "sha256": "df6259e3b82c6c24f4959fa775c917ae79e1ef165498f6087f7153e28fef12dd",
+      "bytes": 12889,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/qualification-evidence.json",
+      "baseBlob": "cc3433b28bd0e2902a7090d271d1fa03e4a1a15b",
+      "newBlob": "9efa5cb3f82f03fb49cfc5b847aeae49ab272759",
+      "operation": "update",
+      "scope": "documentation",
+      "characters": 207699
+    },
+    {
+      "path": "psc0/docs/selfhost-language/worker-migration-candidate.json",
+      "baseBlob": "f8026323c4dc5ea328256e2cc644f41b21a1ecaf",
+      "newBlob": "0a9decf3c75c45898697a4284d3877eb6bb5d732",
+      "operation": "update",
+      "scope": "documentation",
+      "characters": 65601
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/documentation-inputs.json",
+      "newBlob": "b2a8a19c506f52316ed30f4ec88682d69e794b87",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Document reconciliation provenance"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/documentation-final-review.json",
+      "newBlob": "0dcff689d07bc590d78332b70bcfb7f340c88e33",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Final guide review and guarded corrections"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/completion-docs-manifest.json",
+      "newBlob": "a609ae5dceef9b20fecab5d4b68413d8e9ed954f",
+      "baseBlob": null,
+      "operation": "add",
+      "scope": "Final guide catalog"
+    },
+    {
+      "path": "psc0/AI_WORK_STATE.md",
+      "baseBlob": "9131d580f1da79bc34171148b512a3a605de52fa",
+      "newBlob": "b62fd076e82be390859bbf9f6fb669ae0791cb2c",
+      "operation": "update",
+      "scope": "Detailed current AI handoff"
+    }
+  ],
+  "catalogPath": "psc0/docs/selfhost-language/completion-publication.json",
+  "catalogSemantics": "Snapshot of the initial final-evidence publication. A subsequent documentation-only handoff/integration closeout may update AI_WORK_STATE and qualification-evidence; source qualification remains bound to the immutable sources above.",
+  "historyPreserved": true,
+  "allOriginalBaseAndNewPathGuardsPassed": true,
+  "seedSelectionChanged": false,
+  "mainChanged": false,
+  "strictSh1Qualified": false,
+  "fullStandardConformance": false,
+  "fullPscvConformance": false
+}

@@ -1,0 +1,581 @@
+{
+  "schemaVersion": 1,
+  "unknownDiagnostic": "internalError",
+  "diagnostics": [
+    {
+      "message": "already declared",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "application type mismatch",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "declaration has free variables",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "declaration has metavariables",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "deep recursion detected, use maxRecDepth to increase the limit",
+      "category": "resourceExhausted",
+      "resource": "recursionDepth"
+    },
+    {
+      "message": "definition type mismatch",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "duplicate inductive, constructor, or recursor name",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "duplicate mutual inductive, constructor, or recursor name",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "duplicate universe parameter",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "empty mutual inductive declaration",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "empty nested inductive declaration",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "expected function type",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "expected sort",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "failed to initialize quot module, Eq has an unexpected type",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "failed to initialize quot module, environment does not have Eq type",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "failed to initialize quot module, missing Eq constructor",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "failed to initialize quot module, quotient name is already declared",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "failed to initialize quot module, unexpected number of constructors for Eq type",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "failed to initialize quot module, unexpected number of universe params at Eq type",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "failed to initialize quot module, unexpected type for Eq constructor",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "failed to initialize quot module, unexpected universe params at Eq constructor",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "failed to restore nested inductive parameters",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "generated mutual recursor rule is not type preserving",
+      "category": "internalError"
+    },
+    {
+      "message": "generated simple recursor rule count mismatch",
+      "category": "internalError"
+    },
+    {
+      "message": "generated simple recursor rule is not type preserving",
+      "category": "internalError"
+    },
+    {
+      "message": "ill-formed nested inductive parameter instantiation",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "incorrect number of universe levels",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "inductive declaration name is already declared",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "internal lazy-delta request for non-definition",
+      "category": "internalError"
+    },
+    {
+      "message": "invalid empty mutual definition",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid mutual definition, declaration is not tagged as unsafe/partial",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid mutual definition, declarations must have the same safety annotation",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid mutual definition, declarations must have the same universe level parameters",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid mutual definition, duplicate declaration name",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid outer mutual inductive metadata",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection index",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: constructor metadata missing",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: constructor parameter is not a forall",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: inductive must have exactly one constructor",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: inductive type is not fully applied",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: missing structure parameter",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: projected expression type is not an inductive application",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: proof structure depends on data field",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: proof structure field is not a proposition",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: structure name is not inductive",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid projection: structure type mismatch",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "invalid reference to undefined universe level parameter",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "kernel defeq argument budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel defeq argument-list budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel defeq forall-spine budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel defeq lambda-spine budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel definitional equality budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel inference budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel lazy-delta budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel lazy-projection budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel projection field budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel projection parameter budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel recursor budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel reduction budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel structure eta budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "kernel type checker does not support metavariables",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "let value type mismatch",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "loose bound variable in type checker",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "mutual constructor field budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "mutual constructor has invalid return type",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "mutual constructor returns the wrong datatype",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "mutual inductive admission requires at least two datatypes",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "mutual inductive constructor field universe is too large",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "mutual inductive field has a non-positive recursive occurrence",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "mutual inductive result must be a sort",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "mutual minor index is out of bounds",
+      "category": "internalError"
+    },
+    {
+      "message": "mutual motive index is out of bounds",
+      "category": "internalError"
+    },
+    {
+      "message": "mutual recursive-argument budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "mutual recursive-call target is out of bounds",
+      "category": "internalError"
+    },
+    {
+      "message": "mutual recursor motive target is out of bounds",
+      "category": "internalError"
+    },
+    {
+      "message": "mutual recursor rule count mismatch",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "mutually inductive types must live in the same universe",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "nested auxiliary recursor metadata is missing",
+      "category": "internalError"
+    },
+    {
+      "message": "nested auxiliary recursor rename collides with an existing declaration",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "nested auxiliary recursor rename is missing",
+      "category": "internalError"
+    },
+    {
+      "message": "nested auxiliary recursor rename missing during validation",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "nested auxiliary-name budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "nested constructor parameter budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "nested expression mapping budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "nested family head is not a constant",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "nested family head is not an inductive datatype",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "nested family selection failed",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "nested or invalid mutual inductive occurrence is not supported",
+      "category": "declinedUnsupported"
+    },
+    {
+      "message": "nested outer constructor metadata is missing",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "nested outer constructor name is outside its inductive namespace",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "nested preprocessing constructor parameter mismatch",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "nested preprocessing queue budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "nested restoration parameter budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "nested rule comparison budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "nested template does not contain exactly the fixed outer parameters",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "opaque value type mismatch",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "outer mutual inductive parameters are inconsistent",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "recursive argument index contains a recursive occurrence",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "recursive function argument contains a negative recursive occurrence",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "reserved prefix '_nested' occurs in nested inductive constructor",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "reserved prefix '_nested' occurs in nested inductive declaration",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "restored constructor missing during validation",
+      "category": "internalError"
+    },
+    {
+      "message": "restored inductive missing during validation",
+      "category": "internalError"
+    },
+    {
+      "message": "restored nested auxiliary recursor missing",
+      "category": "internalError"
+    },
+    {
+      "message": "restored nested binders mix forall and lambda",
+      "category": "internalError"
+    },
+    {
+      "message": "restored nested constructor metadata is missing",
+      "category": "internalError"
+    },
+    {
+      "message": "restored nested inductive metadata is missing",
+      "category": "internalError"
+    },
+    {
+      "message": "restored nested recursor metadata is missing",
+      "category": "internalError"
+    },
+    {
+      "message": "restored nested recursor rule count mismatch",
+      "category": "internalError"
+    },
+    {
+      "message": "restored nested recursor rule is not type preserving",
+      "category": "internalError"
+    },
+    {
+      "message": "restored recursor missing during validation",
+      "category": "internalError"
+    },
+    {
+      "message": "safe declaration uses partial constant",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "safe declaration uses unsafe constant",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "simple inductive admission does not yet support nested recursive occurrences",
+      "category": "declinedUnsupported"
+    },
+    {
+      "message": "simple inductive constructor admission budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "simple inductive constructor field universe is too large",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "simple inductive constructor has fewer parameters than the datatype",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "simple inductive constructor must return the declared datatype with matching parameters and index arity",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "simple inductive constructor parameter budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "simple inductive constructor parameter does not match the datatype parameter",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "simple inductive constructor return index contains a recursive occurrence",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "simple inductive declaration has fewer parameters than declared",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "simple inductive elimination budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "simple inductive field budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "simple inductive index budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "simple inductive recursive-argument budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "simple inductive result must be a sort",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "simple inductive uniform-occurrence budget exhausted",
+      "category": "resourceExhausted",
+      "resource": "fuel"
+    },
+    {
+      "message": "the kernel refused a Nat numeral because its size exceeds the maximum",
+      "category": "resourceExhausted",
+      "resource": "natSize"
+    },
+    {
+      "message": "the kernel refused to evaluate Nat.pow because the result would exceed the maximum numeral size",
+      "category": "resourceExhausted",
+      "resource": "natSize"
+    },
+    {
+      "message": "theorem proof type mismatch",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "theorem type is not a proposition",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "transformed nested auxiliary recursor missing",
+      "category": "internalError"
+    },
+    {
+      "message": "unknown constant",
+      "category": "rejectedInvalid"
+    },
+    {
+      "message": "unknown free variable",
+      "category": "rejectedInvalid"
+    }
+  ]
+}

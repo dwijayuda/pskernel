@@ -1,0 +1,622 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-evidence-finish-terminal-metadata",
+  "repository": "dwijayuda/pskernel",
+  "observedAt": "2026-10-10T05:32:16.113Z",
+  "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+  "orchestrationHeadSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+  "workflow": {
+    "id": 380282667,
+    "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+    "blob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+    "sha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+    "bytes": 55773
+  },
+  "run": {
+    "id": 38027413274,
+    "name": "PSC0 retained-generation SH1 evidence finish",
+    "node_id": "WFR_kwLOUlmxxc8AAAAI2pxHGg",
+    "head_branch": "psc0/strict-sh1-v1",
+    "head_sha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+    "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+    "display_title": "Fix strict evidence marker binding and finish retained qualification",
+    "run_number": 1,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 380282667,
+    "check_suite_id": 103037560760,
+    "check_suite_node_id": "CS_kwDOUlmxxc8AAAAX_YRnuA",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38027413274",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/38027413274",
+    "pull_requests": [],
+    "created_at": "2026-10-10T05:24:47Z",
+    "updated_at": "2026-10-10T05:27:17Z",
+    "actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-10T05:24:47Z",
+    "triggering_actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38027413274/jobs",
+    "logs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38027413274/logs",
+    "check_suite_url": "https://api.github.com/repos/dwijayuda/pskernel/check-suites/103037560760",
+    "artifacts_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38027413274/artifacts",
+    "cancel_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38027413274/cancel",
+    "rerun_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38027413274/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/380282667",
+    "head_commit": {
+      "id": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+      "tree_id": "7ca068e774a92b6bff5aafaf7b50b82e70ec4823",
+      "message": "Fix strict evidence marker binding and finish retained qualification",
+      "timestamp": "2026-10-10T05:24:36Z",
+      "author": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      },
+      "committer": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    },
+    "head_repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    }
+  },
+  "jobs": {
+    "total_count": 2,
+    "jobs": [
+      {
+        "id": 114141103218,
+        "run_id": 38027413274,
+        "workflow_name": "PSC0 retained-generation SH1 evidence finish",
+        "head_branch": "psc0/strict-sh1-v1",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38027413274",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAak1cEcg",
+        "head_sha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/114141103218",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/38027413274/job/114141103218",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-10T05:24:47Z",
+        "started_at": "2026-10-10T05:24:50Z",
+        "completed_at": "2026-10-10T05:25:45Z",
+        "name": "compiler",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-10T05:24:50Z",
+            "completed_at": "2026-10-10T05:24:52Z"
+          },
+          {
+            "name": "Check out the exact previously compiled source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-10T05:24:52Z",
+            "completed_at": "2026-10-10T05:25:10Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-10T05:25:10Z",
+            "completed_at": "2026-10-10T05:25:12Z"
+          },
+          {
+            "name": "Run leanprover/lean-action@v1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-10T05:25:12Z",
+            "completed_at": "2026-10-10T05:25:28Z"
+          },
+          {
+            "name": "Authenticate completed generations and install the reviewed evidence producers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-10T05:25:28Z",
+            "completed_at": "2026-10-10T05:25:35Z"
+          },
+          {
+            "name": "Install the pinned current TypeScript 7 profile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-10T05:25:35Z",
+            "completed_at": "2026-10-10T05:25:36Z"
+          },
+          {
+            "name": "Verify the actual TypeScript 7 evidence-finishing runtime",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-10T05:25:36Z",
+            "completed_at": "2026-10-10T05:25:37Z"
+          },
+          {
+            "name": "Complete binding from the authenticated retained generations",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-10T05:25:37Z",
+            "completed_at": "2026-10-10T05:25:40Z"
+          },
+          {
+            "name": "Retain exact evidence and any remaining failure context",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-10T05:25:40Z",
+            "completed_at": "2026-10-10T05:25:41Z"
+          },
+          {
+            "name": "Retain completed evidence and all authenticated original inputs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-10T05:25:41Z",
+            "completed_at": "2026-10-10T05:25:43Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-10-10T05:25:43Z",
+            "completed_at": "2026-10-10T05:25:44Z"
+          },
+          {
+            "name": "Post Check out the exact previously compiled source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-10T05:25:44Z",
+            "completed_at": "2026-10-10T05:25:44Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-10T05:25:44Z",
+            "completed_at": "2026-10-10T05:25:44Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/114141103218",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000016805,
+        "runner_name": "GitHub Actions 1000016805",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 114141265302,
+        "run_id": 38027413274,
+        "workflow_name": "PSC0 retained-generation SH1 evidence finish",
+        "head_branch": "psc0/strict-sh1-v1",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38027413274",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAak1l9lg",
+        "head_sha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/114141265302",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/38027413274/job/114141265302",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-10T05:25:45Z",
+        "started_at": "2026-10-10T05:25:48Z",
+        "completed_at": "2026-10-10T05:27:16Z",
+        "name": "kernel-admissions",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-10T05:25:48Z",
+            "completed_at": "2026-10-10T05:25:50Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-10T05:25:50Z",
+            "completed_at": "2026-10-10T05:26:11Z"
+          },
+          {
+            "name": "Read the independently qualified native provider at its exact source revision",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-10T05:26:11Z",
+            "completed_at": "2026-10-10T05:26:19Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-10T05:26:19Z",
+            "completed_at": "2026-10-10T05:26:21Z"
+          },
+          {
+            "name": "Run leanprover/lean-action@v1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-10T05:26:21Z",
+            "completed_at": "2026-10-10T05:26:33Z"
+          },
+          {
+            "name": "Restore pinned native provider build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-10T05:26:33Z",
+            "completed_at": "2026-10-10T05:26:33Z"
+          },
+          {
+            "name": "Build the existing provider target without editing its implementation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-10T05:26:33Z",
+            "completed_at": "2026-10-10T05:27:09Z"
+          },
+          {
+            "name": "Retain the pinned provider build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-10T05:27:09Z",
+            "completed_at": "2026-10-10T05:27:10Z"
+          },
+          {
+            "name": "Read exact compiler qualification artifacts from this run",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-10T05:27:10Z",
+            "completed_at": "2026-10-10T05:27:11Z"
+          },
+          {
+            "name": "Obtain actual provider decisions for the qualified admission streams",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-10T05:27:11Z",
+            "completed_at": "2026-10-10T05:27:13Z"
+          },
+          {
+            "name": "Retain provider acceptance or the exact rejection evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-10T05:27:13Z",
+            "completed_at": "2026-10-10T05:27:14Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-10T05:27:14Z",
+            "completed_at": "2026-10-10T05:27:14Z"
+          },
+          {
+            "name": "Post Read the independently qualified native provider at its exact source revision",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-10T05:27:14Z",
+            "completed_at": "2026-10-10T05:27:14Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-10-10T05:27:14Z",
+            "completed_at": "2026-10-10T05:27:15Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-10-10T05:27:15Z",
+            "completed_at": "2026-10-10T05:27:15Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/114141265302",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000016807,
+        "runner_name": "GitHub Actions 1000016807",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  },
+  "artifacts": {
+    "total_count": 2,
+    "artifacts": [
+      {
+        "id": 11661425347,
+        "node_id": "MDg6QXJ0aWZhY3QxMTY2MTQyNTM0Nw==",
+        "name": "psc0-sh1-evidence-finish-kernel-ts7.0.2-38027413274",
+        "size_in_bytes": 1277,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11661425347",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11661425347/zip",
+        "expired": false,
+        "digest": "sha256:35485c9e47e3041fd20236eb671c4532c83028f078028b01364b44b0f5ad20c7",
+        "created_at": "2026-10-10T05:27:14Z",
+        "updated_at": "2026-10-10T05:27:14Z",
+        "expires_at": "2026-11-09T05:27:14Z",
+        "workflow_run": {
+          "id": 38027413274,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/strict-sh1-v1",
+          "head_sha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a"
+        }
+      },
+      {
+        "id": 11661180683,
+        "node_id": "MDg6QXJ0aWZhY3QxMTY2MTE4MDY4Mw==",
+        "name": "psc0-sh1-evidence-finish-ts7.0.2-38027413274",
+        "size_in_bytes": 23593626,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11661180683",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11661180683/zip",
+        "expired": false,
+        "digest": "sha256:e4f18a13063265126dc2c08dd710dae94bfff3ac7ad780a4a360b66976cac08c",
+        "created_at": "2026-10-10T05:25:43Z",
+        "updated_at": "2026-10-10T05:25:43Z",
+        "expires_at": "2026-11-09T05:25:41Z",
+        "workflow_run": {
+          "id": 38027413274,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/strict-sh1-v1",
+          "head_sha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a"
+        }
+      }
+    ]
+  },
+  "uploadStatements": {
+    "compiler": [
+      {
+        "line": 853,
+        "text": "2026-10-10T05:25:41.6150756Z Multiple search paths detected. Calculating the least common ancestor of all paths"
+      },
+      {
+        "line": 854,
+        "text": "2026-10-10T05:25:41.6153893Z The least common ancestor is /home/runner/work/pskernel/pskernel/psc0. This will be the root directory of the artifact"
+      },
+      {
+        "line": 855,
+        "text": "2026-10-10T05:25:41.6154880Z With the provided path, there will be 486 files uploaded"
+      },
+      {
+        "line": 864,
+        "text": "2026-10-10T05:25:43.7086020Z SHA256 digest of uploaded artifact zip is e4f18a13063265126dc2c08dd710dae94bfff3ac7ad780a4a360b66976cac08c"
+      },
+      {
+        "line": 867,
+        "text": "2026-10-10T05:25:43.9676361Z Artifact psc0-sh1-evidence-finish-ts7.0.2-38027413274 has been successfully uploaded! Final size is 23593626 bytes. Artifact ID is 11661180683"
+      }
+    ],
+    "provider": [
+      {
+        "line": 895,
+        "text": "2026-10-10T05:27:14.2919355Z SHA256 digest of uploaded artifact zip is 35485c9e47e3041fd20236eb671c4532c83028f078028b01364b44b0f5ad20c7"
+      },
+      {
+        "line": 898,
+        "text": "2026-10-10T05:27:14.5085614Z Artifact psc0-sh1-evidence-finish-kernel-ts7.0.2-38027413274 has been successfully uploaded! Final size is 1277 bytes. Artifact ID is 11661425347"
+      }
+    ]
+  },
+  "archiveDigestProvenance": "Current finish artifact digests and sizes agree between GitHub artifact API and actual upload log statements. This agent did not download either ZIP. Predecessor raw archive verification is returned by the successful workflow inputs.",
+  "retrieval": {
+    "compilerJobLogRequests": 1,
+    "providerJobLogRequests": 1,
+    "activeJobLogRequests": 0,
+    "archiveDownloads": 0,
+    "dispatches": 0,
+    "reruns": 0,
+    "refChanges": 0
+  },
+  "normalWorkflow": {
+    "runId": 38027413267,
+    "workflowId": 378853677,
+    "compilerJobId": 114141103207,
+    "observedStatus": "in_progress",
+    "observedConclusion": null,
+    "separateFromRetainedGenerationRecipe": true,
+    "finalEvidence": "pending its actual terminal result"
+  }
+}

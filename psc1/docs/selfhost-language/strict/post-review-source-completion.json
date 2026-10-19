@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-reviewed-source-completion",
+  "expectedParent": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+  "status": "three-source-files-independently-reviewed-awaiting-one-exact-source-qualification",
+  "files": [
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "expectedBaseBlob": "ac527384033181014417579e39f93a1595d4cf72",
+      "candidateBlob": "178ecf89498be6502be5f747f0c0d62eb1133420",
+      "packet": "match-initializer-annotation-completion.json",
+      "packetBlob": "c3b524d00153400005985f12ce579006df1720c0"
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "expectedBaseBlob": "c403bd879e439b7b6e88303df430890352a14115",
+      "candidateBlob": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+      "packet": "reviewed-candidates/normalizer-domain-hygiene.json",
+      "packetBlob": "fabe10858976ba2fc0d892ef8c0ab20ef227beb6"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expectedBaseBlob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
+      "candidateBlob": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "packet": "reviewed-candidates/empty-tail-dispatch.json",
+      "packetBlob": "a3db2591e9e0d7f7dcbef45ad4cc241980d92095"
+    }
+  ],
+  "causes": [
+    {
+      "kind": "observed-current-source-refusal",
+      "source": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+      "runId": 37983663904,
+      "correction": "Explicit PsIrCheckState on the match-valued checker initializer; full15-Lean-file changed-span annotation audit completed."
+    },
+    {
+      "kind": "pre-execution-emission-dispatch-finding",
+      "correction": "Optional tail optimizer declines empty alternatives so the actual typed empty generator is used; existing four-generator assertion and every other fixture remain unchanged."
+    },
+    {
+      "kind": "source-derived-hygiene-finding",
+      "correction": "Reserve all original parameter IDs before syntax-only domain walking; expose only preceding declarations. The two-expression repair prevents dummy IDs from aliasing a current/future parameter. No accepted miscompilation or new minimum-grammar claim."
+    }
+  ],
+  "review": {
+    "independentAllThreeClear": true,
+    "rootExactForwardAndReverseClear": true,
+    "nonemptyTailBranchPreservedModuloIndentation": true,
+    "normalizerVisibleOriginalBindingsUnchanged": true,
+    "newControlBranchesExpectedTypesReviewed": true,
+    "knownNearbySourceGuardsUnchanged": true
+  },
+  "sharedFoundation": {
+    "document": "SEMANTIC_RELATIONS.md",
+    "candidateBlob": "40e540b325186ee514ff3af9e39a22126d29a167",
+    "manifest": "reviewed-candidates/semantic-relations.json",
+    "manifestBlob": "09c621ccba856c8906f24dcba5c9104fdfd08014",
+    "rootAndTwoBoundedPeers": "CLEAR within explicit definitions/source-facts/open-interfaces scope",
+    "sourceAnchor": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+    "semanticRowsClosed": 0,
+    "interactionBudget": "Shared residual call/callback budget; C^0 cuts off before unlicensed invocation, results use remaining index, no callback/reentry reset; definitions reviewed, full adequacy open."
+  },
+  "preserved": {
+    "recoveryRecipeSha256": "d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d",
+    "coldQualifiedRunId": 37983663908,
+    "selectedSeed": "R",
+    "sourceAuthority": ".lean",
+    "grammar": "ps-0.9-r3/new-only",
+    "typescript": "7.0.2",
+    "node": "22.23.3",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "runtimeOperations": 45,
+    "fixtureAssertions": true,
+    "compilerInvocations": true,
+    "kernelProviderDefeqCacheAndExistingTheory": true
+  },
+  "requiredExecution": {
+    "commitTag": "[sh1-qualify]",
+    "oneFullExactSourceRun": true,
+    "repeatUnchangedColdRecovery": false,
+    "providerSeparateAfterCompilerSuccess": true
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "formalPreservationProven": false
+}

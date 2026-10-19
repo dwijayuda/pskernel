@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-guarded-host-resource-policy-candidate",
+  "repository": "dwijayuda/pskernel",
+  "reviewedSourceCommit": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+  "status": "independently-source-reviewed-unattached-candidate-awaiting-exact-cloud-qualification",
+  "scope": "Host qualification resource preflight and boundary observations only. No compiler algorithm, source language, cache, GC, provider, kernel, or correspondence-ledger change.",
+  "observation": {
+    "failedRunId": 37971952859,
+    "sourceRef": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+    "phase": "first C2 build in a fresh fixed-point Node process",
+    "exitCode": 134,
+    "reason": "V8 heap exhaustion near the approximately 4 GiB default limit",
+    "nativeDevelopmentPassed": true,
+    "candidatePassed": true,
+    "c2GenerationReceiptObserved": false,
+    "c2ArchiveFiles": 0,
+    "retainedArtifactId": 11639377985,
+    "artifactSha256": "2efaf91d57973103e53288140b2adeca3f13c53267138b228c25079d82dc287e",
+    "actualCompilerSha256": "ccdfb5f1c226dce25776b817a391a09c783a71e695ea30ca3702df198bd1d23b",
+    "inspectionEvidenceBlob": "77c6e9ae9dbf0a2c6f47cb7b0d415437bf056f0e",
+    "exactInternalFailingPhaseKnown": false
+  },
+  "files": [
+    {
+      "path": "psc0/scripts/sh1-resource-policy.mjs",
+      "baseBlob": null,
+      "mustBeAbsent": true,
+      "candidateBlob": "7e3066c513a91a6e0717aac9465a879097c0dd82",
+      "sha256": "76647884ed3f451ebd429c89c480113e88f88c60a673f8d5456b9418fd4fb998",
+      "bytes": 12011,
+      "operation": "add",
+      "rootExceptionCorrection": {
+        "baseCandidateBlob": "e4438a94222629541772a8e1914266da496b0042",
+        "before": "        const absent = names.limits.every((name) => {",
+        "after": "        // These interfaces exist on every real non-root cgroup, including a\n        // namespace root, even when that cgroup has no memory controller files.\n        const absent = [...names.limits, 'cgroup.type', 'cgroup.events'].every((name) => {"
+      },
+      "environmentQuoteCorrection": {
+        "baseCandidateBlob": "ed62d6bde42d2b6c14d892526b283f691489db10",
+        "before": "  const environmentOptions = (process.env.NODE_OPTIONS ?? '').replaceAll('_', '-');\n  const resourceFlag =",
+        "after": "  const environmentOptions = (process.env.NODE_OPTIONS ?? '').replaceAll('_', '-');\n  // The qualification environment intentionally accepts only unquoted options.\n  // Node removes double quotes before parsing, which could hide a heap override.\n  assert(!/[\"'\\\\]/u.test(environmentOptions), failure('NODE_OPTIONS_QUOTING'));\n  const resourceFlag ="
+      }
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "baseBlob": "b4dff9ac3b0ba551d0358b61f2ea7cd1dd3597a4",
+      "baseSha256": "09da29c4b0c932bfabf35ff50569dc235fe11eba13ceb43819c6709991bbe591",
+      "candidateBlob": "1945f97a202f2ebeb7ca9ac10f9482d07394c2d9",
+      "sha256": "92e1054c4f9fd89a1d2019e1acaa1f1ef9745e19e3b3b032525457c8551d952d",
+      "bytes": 73413,
+      "operation": "guarded-replace",
+      "edits": [
+        {
+          "label": "resource helper import",
+          "before": "import { performance } from 'node:perf_hooks';",
+          "after": "import { performance } from 'node:perf_hooks';\nimport { enforceQualificationResourcePolicy, createQualificationResourceTrace } from './sh1-resource-policy.mjs';"
+        },
+        {
+          "label": "resource helper recipe identity",
+          "before": "    'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs',",
+          "after": "    'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs', 'scripts/sh1-resource-policy.mjs',"
+        },
+        {
+          "label": "frozen empty fixtures recipe identity",
+          "before": "    'test/fixtures/selfhost-sh1-accumulators.lean', 'test/fixtures/selfhost-sh1-accumulators.ps',",
+          "after": "    'test/fixtures/selfhost-sh1-accumulators.lean', 'test/fixtures/selfhost-sh1-accumulators.ps',\n    'test/fixtures/selfhost-sh1-empty.lean', 'test/fixtures/selfhost-sh1-empty.ps',"
+        },
+        {
+          "label": "build and load checkpoints",
+          "before": "  const start = performance.now();\n  const loaded = await loadCompiler(compilerPath, { expectedSha256 });\n  const { compiler, compilerSha256 } = loaded;",
+          "after": "  const start = performance.now();\n  const resources = createQualificationResourceTrace(outDir, {\n    command, generation: path.basename(outDir), sourceClosureSha256: closure.sha256,\n    executingCompilerSha256: expectedSha256 ?? null,\n  });\n  resources.checkpoint('generation-start');\n  resources.checkpoint('compiler-load-start');\n  const loaded = await loadCompiler(compilerPath, { expectedSha256 });\n  const { compiler, compilerSha256 } = loaded;\n  resources.checkpoint('compiler-load-complete', { executingCompilerSha256: compilerSha256 });"
+        },
+        {
+          "label": "atomic wrapper checkpoints",
+          "before": "  if (typeof compiler.psCompilerSh1TypeScriptSources === 'function') {\n    strict = compileStrictSources(compiler, strictSourceInputsFromClosure(closure), { compilerSha256 });",
+          "after": "  if (typeof compiler.psCompilerSh1TypeScriptSources === 'function') {\n    resources.checkpoint('atomic-source-wrapper-start', {\n      scope: 'ingress-portable-atomic-compilation-and-post-emission-host-readback',\n    });\n    strict = compileStrictSources(compiler, strictSourceInputsFromClosure(closure), { compilerSha256 });\n    resources.checkpoint('atomic-source-wrapper-complete');"
+        },
+        {
+          "label": "selected R preparation start",
+          "before": "    const session = createGeneratedPreparationSession(compiler, { compilerSha256 });\n    const result = session.prepare('lean', inputs);",
+          "after": "    resources.checkpoint('selected-R-preparation-start');\n    const session = createGeneratedPreparationSession(compiler, { compilerSha256 });\n    const result = session.prepare('lean', inputs);"
+        },
+        {
+          "label": "selected R preparation complete",
+          "before": "      strictSh1Qualified: false };\n  }\n  const prepareDone = performance.now();",
+          "after": "      strictSh1Qualified: false };\n    resources.checkpoint('selected-R-preparation-complete');\n  }\n  const prepareDone = performance.now();"
+        },
+        {
+          "label": "admission and canonical start checkpoints",
+          "before": "  const admissions = strict ? strict.admissions : admissionText(compiler, prepared);\n  const admissionDone = performance.now();\n  const canonical = [];",
+          "after": "  resources.checkpoint('admissions-start', { mode: strict ? 'reuse-atomic-output' : 'encode-selected-R-prepared' });\n  const admissions = strict ? strict.admissions : admissionText(compiler, prepared);\n  resources.checkpoint('admissions-complete');\n  const admissionDone = performance.now();\n  resources.checkpoint('canonical-surface-start');\n  const canonical = [];"
+        },
+        {
+          "label": "canonical and IR checkpoints",
+          "before": "  const canonicalDone = performance.now();\n  const ir = strict ? strict.originalIr : unwrap(compiler.psCompilerVerifiedIrFromPrepared(prepared), 'ERASE');",
+          "after": "  const canonicalDone = performance.now();\n  resources.checkpoint('canonical-surface-complete');\n  resources.checkpoint('original-ir-start', { mode: strict ? 'reuse-atomic-output' : 'erase-selected-R-prepared' });\n  const ir = strict ? strict.originalIr : unwrap(compiler.psCompilerVerifiedIrFromPrepared(prepared), 'ERASE');\n  resources.checkpoint('original-ir-complete');"
+        },
+        {
+          "label": "ABI checkpoints",
+          "before": "  const migrationWorkerAbi = runMigrationWorkerAbi(compiler, prepared, ir, valueTag);",
+          "after": "  resources.checkpoint('migration-abi-start');\n  const migrationWorkerAbi = runMigrationWorkerAbi(compiler, prepared, ir, valueTag);\n  resources.checkpoint('migration-abi-complete');"
+        },
+        {
+          "label": "IR inventory checkpoint",
+          "before": "  const legacyBoundary = irInventory.portableChecker.status === 'unavailable-at-explicit-seed-boundary';",
+          "after": "  resources.checkpoint('original-ir-inventory-complete');\n  const legacyBoundary = irInventory.portableChecker.status === 'unavailable-at-explicit-seed-boundary';"
+        },
+        {
+          "label": "emission TS and write checkpoints",
+          "before": "  const typeScript = strict ? strict.typeScript : unwrap(compiler.psTsEmitModule(ir), 'EMIT');\n  const emitDone = performance.now();\n  const outputJs = await compileTypeScript(typeScript, outDir, tsc, root, typescriptVersion);\n  const javascript = await readFile(outputJs);",
+          "after": "  resources.checkpoint('emission-start', { mode: strict ? 'reuse-atomic-output' : 'emit-selected-R-ir' });\n  const typeScript = strict ? strict.typeScript : unwrap(compiler.psTsEmitModule(ir), 'EMIT');\n  resources.checkpoint('emission-complete');\n  const emitDone = performance.now();\n  resources.checkpoint('typescript-child-start', { scope: 'write-typescript-and-run-separate-ts7-child' });\n  const outputJs = await compileTypeScript(typeScript, outDir, tsc, root, typescriptVersion);\n  resources.checkpoint('typescript-child-complete');\n  resources.checkpoint('artifact-write-start');\n  const javascript = await readFile(outputJs);"
+        },
+        {
+          "label": "artifact write complete",
+          "before": "  await writeJson(path.join(outDir, 'source-closure.json'), closure.manifest);\n  const receipt = {",
+          "after": "  await writeJson(path.join(outDir, 'source-closure.json'), closure.manifest);\n  resources.checkpoint('artifact-write-complete');\n  const receipt = {"
+        },
+        {
+          "label": "trace and policy receipt binding",
+          "before": "  await writeJson(path.join(outDir, 'receipt.json'), receipt);\n  process.stdout.write('PSC0_SH1_GENERATION: ' + JSON.stringify(receipt) + '\\n');",
+          "after": "  resources.checkpoint('generation-end-before-receipt-write');\n  receipt.resourceObservation = resources.reference();\n  receipt.resourcePolicy = resourcePolicyReceipt ? { ...resourcePolicyReceipt,\n    report: path.relative(outDir, resourcePolicyFile).split(path.sep).join('/'),\n  } : null;\n  await writeJson(path.join(outDir, 'receipt.json'), receipt);\n  process.stdout.write('PSC0_SH1_GENERATION: ' + JSON.stringify(receipt) + '\\n');"
+        },
+        {
+          "label": "one process entry preflight",
+          "before": "const outDir = path.resolve(root, option(args, '--out', 'dist/sh1'));\nif (command === 'native-candidate') {",
+          "after": "const outDir = path.resolve(root, option(args, '--out', 'dist/sh1'));\nconst resourcePolicyFile = path.join(outDir, 'resource-policy-' + command + '.json');\nconst resourcePolicyReceipt = ['candidate', 'fixed-point'].includes(command)\n  ? enforceQualificationResourcePolicy({ command, receiptPath: resourcePolicyFile }) : null;\nif (command === 'native-candidate') {"
+        }
+      ],
+      "forwardAndReverseExact": true
+    },
+    {
+      "path": ".github/workflows/psc0-sh1.yml",
+      "baseBlob": "6f55548d24a91cbb305ec6448bd30e465b9ee69d",
+      "baseSha256": "2b8067b7849441264a738fb86a6a78e1c03a305f45bfaa463633416873cb3b31",
+      "candidateBlob": "cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8",
+      "sha256": "d40e8fda2a7beee1457352edef58e5b5f90f85b2dbdc8c25d1fa039c3d34c758",
+      "bytes": 23472,
+      "operation": "guarded-replace",
+      "edits": [
+        {
+          "label": "early full-only memory preflight",
+          "before": "          node-version: ${{ steps.seed-selection.outputs.node-version }}\n      - uses: leanprover/lean-action@v1",
+          "after": "          node-version: ${{ steps.seed-selection.outputs.node-version }}\n      - name: Check the actual full-qualification runner memory before expensive work\n        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}\n        run: node --max-old-space-size=8192 scripts/sh1-resource-policy.mjs --preflight dist/sh1/resource-policy-preflight.json\n      - uses: leanprover/lean-action@v1"
+        },
+        {
+          "label": "resource helper syntax gate",
+          "before": "          node --check scripts/sh1-qualify.mjs",
+          "after": "          node --check scripts/sh1-resource-policy.mjs\n          node --check scripts/sh1-qualify.mjs"
+        },
+        {
+          "label": "bounded candidate old space",
+          "before": "run: node scripts/sh1-qualify.mjs candidate --seed",
+          "after": "run: node --max-old-space-size=8192 scripts/sh1-qualify.mjs candidate --seed"
+        },
+        {
+          "label": "bounded fixed point old space",
+          "before": "run: node scripts/sh1-qualify.mjs fixed-point --out dist/sh1",
+          "after": "run: node --max-old-space-size=8192 scripts/sh1-qualify.mjs fixed-point --out dist/sh1"
+        }
+      ],
+      "forwardAndReverseExact": true
+    }
+  ],
+  "recipeDependencies": [
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-empty.lean",
+      "blob": "295b7dc991bf37e9de8e3d49b7db3692f0c4cf53",
+      "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-empty.ps",
+      "blob": "cada46d9d1f10d95bcd6053fff6078262b600b6c",
+      "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390"
+    }
+  ],
+  "policy": {
+    "id": "psc0-sh1-generated-qualification-resources/1",
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "explicitOldSpaceMiB": 8192,
+    "minimumEntryAvailableBytes": 12884901888,
+    "observedHeapBandBytes": [
+      8589934592,
+      8858370048
+    ],
+    "entryCommands": [
+      "workflow-preflight",
+      "candidate",
+      "fixed-point"
+    ],
+    "workflowPreflightPosition": "after setup-node and before Lean setup, TypeScript install, cache restoration, or native compilation; full qualification only",
+    "effectiveAvailable": "minimum of physical MemAvailable, process.availableMemory(), effective capacity, and each resolvable visible cgroup ancestor limit minus current usage",
+    "cgroup": "Resolve membership against the broadest matching visible cgroup2/memory-controller mount and visit every directory through its mount root; include v2 max/high or v1 hard/soft limits; keep raw 64-bit counter strings and clamp numeric observations to physical capacity.",
+    "cgroupVisibilityLimit": "Only visible hierarchy ancestors are observable. A visible root mapping with no memory.current, neither memory.max nor memory.high, and neither non-root interface cgroup.type nor cgroup.events is the explicit global-root exception. Other absent/unsupported mappings refuse with a receipt.",
+    "noSilentFallback": true,
+    "noHeapInheritanceIntoTsChild": true,
+    "noGlobalNodeOptionsMutation": true,
+    "oldSpaceIsNotRssLimit": true,
+    "minimumHeadroomIsPreflightNotPeakGuarantee": true,
+    "nodeOptionsSyntax": "Any quote or backslash in NODE_OPTIONS refuses before resource-flag scanning. This narrow qualification environment does not implement Node's quoted-option tokenizer; the workflow supplies no NODE_OPTIONS."
+  },
+  "traces": {
+    "file": "<generation>/resource-usage.jsonl",
+    "writeMode": "synchronous append and synchronous stdout marker",
+    "data": "primitive context fields, phase, sequence, elapsed time, process memoryUsage fields, actual V8 heap limit and process high-water RSS in bytes",
+    "boundaries": [
+      "generation start",
+      "compiler load",
+      "strict source host wrapper start/complete, or selected-R preparation",
+      "admissions reuse/encoding",
+      "canonical surface translation",
+      "original IR reuse/erasure",
+      "migration ABI",
+      "IR inventory",
+      "emission reuse/emission",
+      "separate TypeScript child and input write",
+      "artifact writes",
+      "generation end before receipt write"
+    ],
+    "scope": "The strict wrapper includes ingress, the portable atomic operation and post-emission host carrier/origin readback. Its internal phases remain opaque.",
+    "generationReceiptFields": [
+      "resourceObservation.report",
+      "resourceObservation.sha256",
+      "resourceObservation.checkpoints",
+      "resourcePolicy.report",
+      "resourcePolicy.sha256"
+    ],
+    "traceFinalBoundary": "before generation receipt write to avoid a cyclic digest",
+    "sameThreadTimersAdded": false,
+    "callbacksAdded": false,
+    "ffiAdded": false,
+    "garbageCollectionAdded": false,
+    "primitiveOnly": true,
+    "compilerOrIrObjectsRetainedByTrace": false,
+    "transientV8PeakClaimed": false
+  },
+  "sourceAudit": {
+    "actualC1WrappersMatchSource": true,
+    "currentAtomicEncodings": 3,
+    "reviewedReuseAtomicEncodings": 1,
+    "currentEnvironmentReconstructions": 1,
+    "reviewedReuseEnvironmentReconstructions": 0,
+    "reuseGuaranteedPeakReduction": false,
+    "returnedGenerationValue": "compiler namespace, digest, output JS path and receipt; no prepared/parsed/Core/IR graph",
+    "withinGenerationRetention": "strict output retains prepared declarations, parsed AST, original IR and strings through canonical translation, ABI readback and TS compilation",
+    "retainedRuntimeCaches": "two UTF-8 views, each one text and a Uint32Array with UTF-8-byte-length+1 entries; implementation associations use a WeakMap",
+    "nonStreamingEncoding": "canonical encoder builds encoded strings, child/field lists and a whole admission string list; optional nested normalization rebuilds composite definition/theorem expressions while original declarations remain reachable",
+    "generators": "unoptimized recursive calls keep suspended generator continuations; this is not an identified unbounded cache leak",
+    "processIsolationConclusion": "C2 was already the first generation in a fresh process; isolating C2 from C3 cannot explain this first failure",
+    "semanticDefectOrSpecificOomCauseProved": false
+  },
+  "primarySources": [
+    {
+      "repository": "nodejs/node",
+      "ref": "v22.23.3",
+      "path": "doc/api/process.md",
+      "blob": "532789bb389e54dc072fc838b093fcb455704080"
+    },
+    {
+      "repository": "nodejs/node",
+      "ref": "v22.23.3",
+      "path": "doc/api/cli.md",
+      "blob": "0dfbe4b4fe0e4113e5e6c0cbe8a5d3ec4ff97e5a"
+    },
+    {
+      "repository": "nodejs/node",
+      "ref": "v22.23.3",
+      "path": "doc/api/v8.md",
+      "blob": "bc821caf66a552785f96323b6f215f4bf6757204"
+    },
+    {
+      "repository": "nodejs/node",
+      "ref": "v22.23.3",
+      "path": "src/node_process_methods.cc",
+      "blob": "9dcca7509f37f239b8442201b086df428415dcd1"
+    },
+    {
+      "repository": "nodejs/node",
+      "ref": "v22.23.3",
+      "path": "deps/uv/src/unix/linux.c",
+      "blob": "ea3e2de0384b2c42afdecc5d51af46af25eff203"
+    },
+    {
+      "repository": "dwijayuda/pskernel",
+      "ref": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "blob": "63be15cf691cd4689e566ccd1bcab771215e7700"
+    },
+    {
+      "repository": "dwijayuda/pskernel",
+      "ref": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "blob": "13614bc6eb279c93d4cbcbd8815b671beae38199"
+    },
+    {
+      "repository": "dwijayuda/pskernel",
+      "ref": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b"
+    },
+    {
+      "repository": "dwijayuda/pskernel",
+      "ref": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+      "path": "psc0/scripts/sh1-source-snapshot.mjs",
+      "blob": "1083a3765a55540f83b2376c40a97bc1f1362ce0"
+    },
+    {
+      "repository": "torvalds/linux",
+      "ref": "v6.8",
+      "path": "kernel/cgroup/cgroup.c",
+      "blob": "a66c088c851cfb87036ccc93317f7357769cb268",
+      "sourceFinding": "cgroup.type and cgroup.events use CFTYPE_NOT_ON_ROOT; cgroup_addrm_files tests the real cgroup_parent, not the visible namespace root"
+    },
+    {
+      "repository": "nodejs/node",
+      "ref": "v22.23.3",
+      "path": "src/node_options.cc",
+      "blob": "5b74045886e91a27e766a7f0a8f2dddfacaa1d46",
+      "sourceFinding": "ParseNodeOptionsEnvVar removes/toggles double quotes and processes quoted backslash escapes before option parsing"
+    }
+  ],
+  "documentationForMaintainer": [
+    "The preceding run exhausted the default V8 heap during the first C2 build. The retained archive contains no C2 files, so no C2 receipt or fixed point is claimed.",
+    "The next full qualification has an explicit 8192 MiB old-space budget. It starts only when the actual runner reports at least 12 GiB available after physical and visible cgroup constraints. Failure records the policy, observations and refusal; there is no dynamic heap fallback.",
+    "This is a bounded execution policy, not a proved memory fix. Reviewed admission reuse removes two whole encodings and one environment reconstruction, but one non-streaming encoding still retains substantial graphs and strings. Origins also retain additional evidence.",
+    "Each generation writes small synchronous resource checkpoints and binds the trace hash in its receipt. The last successful phase survives a fatal abort. No callback or timer changes the source-owned atomic operation, and boundary measurements do not identify its internal peak.",
+    "TypeScript 7 retains its separate existing child process and receives no new inherited heap option. No cache algorithm, provider, kernel, source grammar or conformance claim is changed.",
+    "Run the existing node --check gates and the one exact-source coherent cloud qualification after independent review. Do not add speculative reruns, GC tuning, broad tests or silently reduced resource limits."
+  ],
+  "verification": {
+    "pureTextGuardChecks": true,
+    "guardedQualifyEdits": 15,
+    "guardedWorkflowEdits": 4,
+    "syntaxGateAdded": "node --check scripts/sh1-resource-policy.mjs",
+    "repositoryCodeExecuted": false,
+    "compilerExecuted": false,
+    "testsExecuted": false,
+    "workflowExecutedByThisAgent": false,
+    "refsChanged": false,
+    "independentReview": {
+      "status": "CLEAR",
+      "scope": "Final helper 7e3066c513a91a6e0717aac9465a879097c0dd82, qualify 1945f97a202f2ebeb7ca9ac10f9482d07394c2d9, workflow cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8",
+      "reviewer": "/root/artifact_inspection_review",
+      "rootReview": "Root cleared the resource design, qualify/workflow and authorized both narrow fail-closed helper refinements.",
+      "findingsResolved": [
+        "Distinguish a real cgroup root from a namespace root using both CFTYPE_NOT_ON_ROOT interfaces.",
+        "Refuse quote/backslash NODE_OPTIONS forms before scanning inherited heap flags."
+      ],
+      "reviewMethod": "Pinned source inspection and exact text delta readback; no compiler, shell, local filesystem, tests or workflow execution."
+    }
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "providerChecked": false,
+  "correspondenceRowsClosed": 0,
+  "supersedesManifest": "7d38d267e223ea139d80d457315d9bd432cede99"
+}

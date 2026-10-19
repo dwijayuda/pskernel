@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "evidence": "scoped-recursive-generic-erasure",
+  "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+  "sourceKind": "raw-authoritative-lean",
+  "sourceSha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de",
+  "originalIr": {
+    "checks": [
+      "one, two, and three declaration generics in exact declaration order",
+      "interleaved type, erased proposition/proof, and runtime binders",
+      "recursive calls retain the complete runtime argument count",
+      "monomorphic recursive calls retain zero type arguments"
+    ],
+    "observations": [
+      {
+        "declaration": "sh1GenericCopy",
+        "declarationTypeParameters": [
+          "T0"
+        ],
+        "runtimeParameters": [
+          "values"
+        ],
+        "calls": [
+          {
+            "at": "declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+            "typeArguments": [
+              "T0"
+            ],
+            "runtimeArity": 1
+          }
+        ]
+      },
+      {
+        "declaration": "sh1GenericMap",
+        "declarationTypeParameters": [
+          "T0",
+          "T1"
+        ],
+        "runtimeParameters": [
+          "convert",
+          "values"
+        ],
+        "calls": [
+          {
+            "at": "declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+            "typeArguments": [
+              "T0",
+              "T1"
+            ],
+            "runtimeArity": 2
+          }
+        ]
+      },
+      {
+        "declaration": "sh1GenericTriple",
+        "declarationTypeParameters": [
+          "T0",
+          "T1",
+          "T2"
+        ],
+        "runtimeParameters": [
+          "first",
+          "second",
+          "third",
+          "fuel"
+        ],
+        "calls": [
+          {
+            "at": "declaration:sh1GenericTriple/body/elseBranch/body",
+            "typeArguments": [
+              "T0",
+              "T1",
+              "T2"
+            ],
+            "runtimeArity": 4
+          }
+        ]
+      },
+      {
+        "declaration": "sh1GenericMono",
+        "declarationTypeParameters": [],
+        "runtimeParameters": [
+          "fuel",
+          "value"
+        ],
+        "calls": [
+          {
+            "at": "declaration:sh1GenericMono/body/elseBranch/body",
+            "typeArguments": [],
+            "runtimeArity": 2
+          }
+        ]
+      }
+    ],
+    "emittedIr": "The exact original IR inspected above is passed to psTsEmitModule.",
+    "strictSh1Qualified": false
+  },
+  "artifacts": {
+    "admissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+    "typescriptSha256": "86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e",
+    "javascriptSha256": "d8906673be1069b9710f2a1b850d31bbc4b47d9e0c6de8185c7c757d525edd75"
+  },
+  "behavior": {
+    "observations": 19,
+    "status": "pass",
+    "exhaustiveForAllInputs": false
+  },
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  }
+}

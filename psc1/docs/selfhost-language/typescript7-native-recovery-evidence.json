@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "evidence": "independently-reviewed-native-ts7-cold-recovery",
+  "status": "passed",
+  "scope": "PSC0 recovery of the existing selected R seed through the separately pinned native Lean plus TypeScript 7 route. F worker qualification and the root TypeScript compiler workspace migration are separate.",
+  "run": {
+    "id": 37947341899,
+    "attempt": 1,
+    "event": "push",
+    "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "branch": "psc0/sh1-projection-grammar-v1",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/37947341899",
+    "conclusion": "success"
+  },
+  "job": {
+    "id": 113876930974,
+    "name": "native-cold-recovery",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/37947341899/job/113876930974",
+    "startedAt": "2026-10-09T14:51:45Z",
+    "completedAt": "2026-10-09T14:54:23Z",
+    "conclusion": "success",
+    "elapsedSeconds": 158
+  },
+  "recovery": {
+    "cold": true,
+    "passed": true,
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+    "sourceKind": "raw-authoritative-lean",
+    "moduleCount": 61,
+    "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "selectedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+    "runnerSourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "recipeSha256": "4ed186c2604bcfaee756881686e70f14569720d72fcd799d9997d2d92217b82a",
+    "policySha256": "0cf0480524ba713e0bcdbeb3cfa3d345e37508743ee5e169b83ba8ee0de160fc",
+    "originalSelectedManifestChanged": false,
+    "artifacts": {
+      "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+      "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+      "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+      "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+    },
+    "toolchain": {
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+      "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+      "typescript": "Version 7.0.2"
+    },
+    "originalIr": {
+      "report": "products/index.ts.ir-report.json",
+      "reportSha256": "e16eefe370f1d0b3c6de87965724e96a6c36941c64afa2c4cb2dc7a3687e79b1",
+      "accepted": true,
+      "traversalComplete": true,
+      "expressionCount": 56391,
+      "visitedSteps": 725484,
+      "findingCount": 0,
+      "sameOriginalIrCheckedBeforeEmission": true
+    },
+    "nativeBinaries": {
+      "compilerSha256": "9f6516dad78d17435cac214d88d79d3c8a254bb3cd3bca279220bff000dfa484",
+      "originalIrCheckerSha256": "0f40ccfae56e0b20e65e54b30e6468c5ff40e2b9ac61c6b1485e605e849d8afd"
+    },
+    "elapsedMs": 86496.79896300001,
+    "completedCommands": 75,
+    "nativeTranslationCommands": 61,
+    "allCommandExitStatusesZero": true,
+    "generatedCompilerExecuted": false,
+    "historicalParentCompilerExecuted": false,
+    "historicalTypeScriptExecuted": false,
+    "trackedSourceCleanBeforeAndAfter": true,
+    "sourceClosureUnchanged": true,
+    "cacheVerified": true
+  },
+  "coldBoundary": {
+    "workflowPath": ".github/workflows/psc0-sh1-ts7-recovery.yml",
+    "workflowBlobSha": "4512b46247642f2ab6043a5d81ba8d2a62fd703f",
+    "runnerPath": "psc0/scripts/sh1-native-seed-recovery.mjs",
+    "runnerBlobSha": "4e2fe462ba5c8160ff5c08f70ce52152173b0d6f",
+    "policyPath": "psc0/selfhost-seed-recovery.json",
+    "policyBlobSha": "fd75854159544e431497bc7dee8482bea727b5e4",
+    "previousCompilerArtifactDownloaded": false,
+    "seedCacheRestored": false,
+    "nativeBuildCacheRestored": false,
+    "preexistingNativeBuildCacheRefused": true,
+    "preexistingDestinationSeedCacheRefused": true,
+    "typescriptInstallation": "Only typescript@7.0.2 is installed by the executed workflow. Both recorded Node subprocesses invoke that installed launcher.",
+    "reviewMethod": "Immutable workflow and runner source inspected; actual successful job steps and complete command receipt checked against the exact policy and selected manifest."
+  },
+  "receiptIdentity": {
+    "blobSha": "c495ddf6e7d5075e204e4b0c5957c8c0d3d6a24b",
+    "sha256": "0d5606c25e634082da39d80ffa5974b3c390d2765ded71bcf1abaf442b7e3919",
+    "bytes": 64164,
+    "exactByteRecovery": "The complete receipt object is in the decoded Actions job log. JSON.stringify(object,null,2)+'\\n' reproduces the actual receiptFileSha256 emitted by the runner.",
+    "markers": [
+      "PSC0_SH1_NATIVE_COLD_POLICY: ",
+      "PSC0_SH1_NATIVE_SEED_RECEIPT: ",
+      "PSC0_SH1_NATIVE_SEED_RECOVERY: "
+    ]
+  },
+  "artifact": {
+    "id": 11624048503,
+    "name": "psc0-sh1-native-ts7-cold-fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "sizeInBytes": 2219295,
+    "digest": "sha256:967adc94a58d02e4e166e24601252f177a372dc5e6fd50ba01a7125cec9dfae5",
+    "expired": false,
+    "createdAt": "2026-10-09T14:54:20Z",
+    "expiresAt": "2026-11-08T14:54:19Z",
+    "apiUrl": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11624048503",
+    "archiveDownloadUrl": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11624048503/zip",
+    "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "archiveBytesDownloadedByReviewer": false
+  },
+  "retainedFiles": [
+    {
+      "kind": "exact-recovery-receipt",
+      "blobSha": "c495ddf6e7d5075e204e4b0c5957c8c0d3d6a24b",
+      "sha256": "0d5606c25e634082da39d80ffa5974b3c390d2765ded71bcf1abaf442b7e3919",
+      "bytes": 64164,
+      "representation": "Exact UTF-8 pretty receipt bytes reconstructed from the complete logged object and independently matched to the runner's actual receiptFileSha256.",
+      "path": "psc0/docs/selfhost-language/typescript7-native-recovery.json"
+    },
+    {
+      "kind": "decoded-complete-job-log",
+      "blobSha": "d5ae70f7459ad82ba2aa3a23043e374921fb2316",
+      "sha256": "6f47360b88446d7a06f12561772e8d9e317b1f3bfb6d34d610791436f99b3957",
+      "bytes": 101635,
+      "representation": "Complete decoded job log returned by the GitHub connector, retained without trimming or newline normalization.",
+      "path": "psc0/docs/selfhost-language/evidence-logs/typescript7-native-recovery.log"
+    },
+    {
+      "kind": "completed-run-api-response",
+      "blobSha": "fbe7b5b822e931f984c011076780baaeca07f89d",
+      "sha256": "a39f26ff5f92066b583f92862cd49e1f58fb91084ccfea1f9bf50dfff8a7e5c8",
+      "bytes": 12790,
+      "representation": "Exact UTF-8 response text returned by the GitHub fetch connector for the completed run.",
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/native-ts7-cold-run.json"
+    },
+    {
+      "kind": "completed-jobs-api-response",
+      "blobSha": "4e8ce6d40000a47991f38ed0bd025ad6cabf36a1",
+      "sha256": "cf74bd95f5bb08f7859203af067c470e03690d58df7d9773440346d785d941e9",
+      "bytes": 3367,
+      "representation": "Exact UTF-8 response text returned by the GitHub fetch connector for the completed run's jobs collection.",
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/native-ts7-cold-jobs.json"
+    },
+    {
+      "kind": "artifact-metadata",
+      "blobSha": "f22f733ac640308e605c320bf10bb3901929222d",
+      "sha256": "494b751ef00778bc715ca9751e0cab6630c627d6b65861c35fcce52cecad430b",
+      "bytes": 891,
+      "representation": "Pretty JSON serialization of the connector's structured artifact listing. Its ZIP digest is GitHub's artifact digest, not this metadata file's SHA256.",
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/native-ts7-cold-artifact.json"
+    }
+  ],
+  "claims": {
+    "identityPreserved": true,
+    "ts7OnlyNativeColdRecoveryProven": true,
+    "providerCheckedByThisRecovery": false,
+    "strictSh1Qualified": false,
+    "fullStandardConformance": false,
+    "fullPscvConformance": false,
+    "fWorkerQualificationEstablishedByThisEvidence": false
+  },
+  "review": {
+    "performedOn": "2026-10-09",
+    "execution": "Only the GitHub job executed the recovery. Reviewer operations read GitHub evidence and performed pure in-memory hashing/field comparison; no repository code was executed locally.",
+    "sourceOrRefsChanged": false,
+    "workflowRetried": false,
+    "gatesWeakened": false
+  },
+  "retention": {
+    "evidencePath": "psc0/docs/selfhost-language/typescript7-native-recovery-evidence.json",
+    "sourceReviewManifestBlob": "310c41f7a9b4d7a4052d9ab3c5a81795bd606ab3",
+    "exactExistingBlobsReused": true,
+    "selectedSeedChanged": false,
+    "rootIndependentReviewCompleted": true,
+    "recordedRunAndJobAreOriginalProof": true,
+    "archiveDigestsAreNotReceiptFileDigests": true
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-evidence-finish-workflow-independent-review",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/evidence-finish-workflow-independent-review.json",
+  "repository": "dwijayuda/pskernel",
+  "status": "bounded-source-review-clear",
+  "scope": "Static review of authentication, artifact layout, evidence-producer contract, collector completeness, and provider handoff. No compiler or conformance execution and no semantic-row disposition.",
+  "reviewedWorkflow": {
+    "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+    "blob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+    "sha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+    "bytes": 55773
+  },
+  "previousWorkflow": {
+    "blob": "e3bb16a479346fcb8214c6be59bc1aa54935d409",
+    "sha256": "3f03aab373c10e9f30a03023c38883f1e33125e16a89869dc2c14327bc7dc56a",
+    "bytes": 55564
+  },
+  "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+  "evidenceProducerPins": {
+    "finisher": {
+      "sourcePath": "psc0/scripts/sh1-finish-evidence.mjs",
+      "path": "scripts/sh1-finish-evidence.mjs",
+      "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+      "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+      "bytes": 38509
+    },
+    "correctedBinder": {
+      "sourcePath": "psc0/scripts/sh1-strict-evidence.mjs",
+      "path": "scripts/sh1-strict-evidence-finish.mjs",
+      "blob": "7700fef35acd06789b94f72078869fdef489214f",
+      "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+      "bytes": 91977
+    },
+    "originalGenerationBinder": {
+      "path": "scripts/sh1-strict-evidence.mjs",
+      "blob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+      "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+      "bytes": 91970
+    },
+    "originalQualifier": {
+      "path": "scripts/sh1-qualify.mjs",
+      "blob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+      "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+      "bytes": 73618
+    }
+  },
+  "reviewedEvidence": {
+    "priorInputReport": {
+      "blob": "8731e55592d0bcb57b977c4cc98fcfe91a64b7a9",
+      "sha256": "de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638",
+      "bytes": 161276
+    },
+    "terminalMetadata": {
+      "blob": "227e846d233c501a14600f0ebbe63f0118331273",
+      "sha256": "0039ae74b0f23a29dd216f6b9f77328cad718e8c50ea837e7a806f73c743d477",
+      "bytes": 94892
+    },
+    "catalog": {
+      "blob": "e8023de73e4956c0217de5044950404705fedcea",
+      "selector": "/artifactBindings/files",
+      "totalFiles": 136,
+      "compilerFiles": 135,
+      "separateProviderFile": "kernel-admissions.json"
+    },
+    "priorWorkflow": {
+      "blob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+      "sha256": "506d13b419f00bb1d5361e945f1f70ce02bb4ff6c79d384317432f534c2b2df7",
+      "bytes": 34742
+    }
+  },
+  "findings": [
+    {
+      "id": "WF-01",
+      "status": "corrected",
+      "scope": "Failure-only diagnostic JSON serialization",
+      "finding": "The prior workflow unconditionally labeled the compact native source receipt as pretty JSON + LF.",
+      "correction": "The revised workflow labels pretty or compact serialization only after exact equality with raw text; otherwise it emits serialization:null and content:raw. Raw digest, byte count and parsed value remain.",
+      "exactDelta": {
+        "uniqueClosedRegion": true,
+        "forwardReconstructsWholeFile": true,
+        "reverseReconstructsWholeFile": true,
+        "otherBytesUnchanged": true,
+        "before": {
+          "sha256": "4aa38c55badebc00b94368522f6387c18054eae1be8a5157162cbf8608737ac8",
+          "bytes": 631
+        },
+        "after": {
+          "sha256": "40b40d6a56c6b458266df8e5c5fe8d39938845d25277b73df849ce0097a60db3",
+          "bytes": 840
+        }
+      }
+    },
+    {
+      "id": "WF-02",
+      "status": "clear",
+      "scope": "Archive/run/job authentication",
+      "reason": "Actual retained run, job, step, artifact identity and digest fields agree with the immutable metadata. The workflow rehashes the current archive and nested predecessor archive, checks actual 444/344 non-directory file counts and safe paths, and preserves the original 277 imported file envelopes."
+    },
+    {
+      "id": "WF-03",
+      "status": "clear",
+      "scope": "Generation and source identity",
+      "reason": "The two expected-data constants are identical and their predecessor object exactly equals the retained predecessor input report. Raw N1/C1/C2/C3 receipt pins, product tuple, source closure and unchanged 48-file generation recipe remain distinct from the new evidence producer."
+    },
+    {
+      "id": "WF-04",
+      "status": "clear",
+      "scope": "Finisher contract",
+      "reason": "The workflow supplies the required five-field evidenceProducer object and exact sidecar paths/blob/hash/bytes. Both sidecars and workflow provenance are read from the same orchestration HEAD while the checkout remains the compiled source. All 444 archive files plus the raw current archive and source job log supply the finisher's 446-envelope requirement. The finisher authenticates the two actual completed eight-marker generation/gate groups before binding."
+    },
+    {
+      "id": "WF-05",
+      "status": "clear",
+      "scope": "Collector and retained inputs",
+      "reason": "The 135 compiler paths match the catalog in exact order, excluding the separate provider file. The collector returns 24 JSON values and supplemental profile, import and completion evidence. New profile directories preserve inherited files. Complete status requires successful finishing, complete catalog/JSON/provenance checks and unchanged imported evidence; partial failure never qualifies."
+    },
+    {
+      "id": "WF-06",
+      "status": "clear",
+      "scope": "Provider handoff",
+      "reason": "The provider block is byte-identical to the prior workflow after only the two artifact-name substitutions. Upload roots preserve dist/sh1 under the artifact root, matching the existing provider's artifacts argument. The provider remains separately gated after compiler completion."
+    }
+  ],
+  "protections": {
+    "selectedAuthoringSeedUnchanged": true,
+    "original48GenerationRecipeFilesUnchanged": true,
+    "originalGenerationBinderUnchangedInCompiledCheckout": true,
+    "originalGenerationReceiptBytesPreserved": true,
+    "generationOwnershipPreserved": {
+      "N1": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774
+      },
+      "C1": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774
+      },
+      "C2": {
+        "runId": 38021634599,
+        "compilerJobId": 114123691566
+      },
+      "C3": {
+        "runId": 38021634599,
+        "compilerJobId": 114123691566
+      }
+    },
+    "priorRunConclusionsPreserved": true,
+    "producedStrictSh1QualifiedRemainsFalse": true,
+    "producedSemanticContractQualifiedRemainsFalse": true,
+    "producedProviderStatusRemainsNotAttemptedUntilSeparateProvider": true,
+    "closesNoCorrespondenceOrStageRows": true
+  },
+  "reviewActions": {
+    "githubImmutableReads": true,
+    "pureInMemoryComparisonsAndHashes": true,
+    "compilerExecuted": false,
+    "testsExecuted": false,
+    "typeScriptCompilationExecuted": false,
+    "workflowDispatched": false,
+    "archiveDownloaded": false,
+    "actionsLogsFetched": false,
+    "refsChanged": false
+  },
+  "conclusion": "CLEAR for the exact revised workflow and the stated bounded static scope. Execution success and provider acceptance remain pending actual Actions evidence."
+}

@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-observed-generic-preparation-origin-evidence",
+  "proposedPath": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-evidence.json",
+  "repository": "dwijayuda/pskernel",
+  "diagnostic": {
+    "commit": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+    "rootTree": "a5b13a703ed5c3dc93ed09779df4c286aa81a84e",
+    "psc0Tree": "94a17353940d2c1516ef6869400486849baf0ef7",
+    "workflowId": 380146660,
+    "workflowPath": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
+    "workflowBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
+    "workflowSha256": "d3bf915fc479c5d6b1b57410e62643a6e7a5b8826f303b830e27e62d3997200c",
+    "workflowUtf8Bytes": 9306,
+    "runId": 38010024282,
+    "runAttempt": 1,
+    "event": "push",
+    "branch": "psc0/strict-sh1-v1",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38010024282",
+    "runStatus": "completed",
+    "runConclusion": "success",
+    "createdAt": "2026-10-10T00:40:03Z",
+    "updatedAt": "2026-10-10T00:40:36Z",
+    "jobId": 114087631048,
+    "jobName": "diagnose",
+    "jobStatus": "completed",
+    "jobConclusion": "success",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Locate the exact first generic preparation error using retained N1",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4
+      },
+      {
+        "name": "Retain the bounded origin diagnostic",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11
+      }
+    ]
+  },
+  "inputs": {
+    "sourceCommit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "sourceRootTree": "21592550b9016a8e5e7627d59dcdf261df72d2ad",
+    "sourcePsc0Tree": "d99e085157331fcf5db74e7ab207f848ee724a13",
+    "qualificationRunId": 38008721677,
+    "artifact": {
+      "id": 11652692106,
+      "name": "psc0-sh1-ts7.0.2-b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+      "archiveBytes": 1841093,
+      "archiveSha256": "a90181c130536359774816775acc74ebcae1a2c773e735fd3d55bd7ada273b8f",
+      "metadataAndDownloadedArchiveVerifiedByDiagnostic": true
+    },
+    "compiler": {
+      "pathInArtifact": "dist/sh1/development/N1/index.js",
+      "bytes": 3137707,
+      "sha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+      "digestVerifiedByDiagnostic": true,
+      "changed": false
+    },
+    "fixture": {
+      "path": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
+      "blob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+      "bytes": 6340,
+      "sha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+      "digestVerifiedByDiagnostic": true,
+      "changed": false
+    }
+  },
+  "observed": {
+    "outcome": "successful localization of the reproduced preparation error",
+    "sourceIndex": 6,
+    "sourceName": "sh1GroupLet",
+    "phase": "stableDeclaration",
+    "errorProjection": {
+      "tag": "elaboration",
+      "error": {
+        "tag": "infer",
+        "error": {
+          "tag": "applicationTypeMismatch"
+        }
+      }
+    },
+    "origin": {
+      "error": {
+        "tag": "infer",
+        "error": {
+          "tag": "applicationTypeMismatch"
+        }
+      },
+      "sourceIndex": "6",
+      "sourceName": {
+        "segments": {
+          "tag": "cons",
+          "head": "sh1GroupLet",
+          "tail": {
+            "tag": "nil"
+          }
+        },
+        "span": {
+          "start": {
+            "byteOffset": "1615",
+            "line": "37",
+            "column": "5"
+          },
+          "stop": {
+            "byteOffset": "1626",
+            "line": "37",
+            "column": "16"
+          }
+        }
+      },
+      "span": {
+        "start": {
+          "byteOffset": "1611",
+          "line": "37",
+          "column": "1"
+        },
+        "stop": {
+          "byteOffset": "1708",
+          "line": "39",
+          "column": "9"
+        }
+      },
+      "phase": {
+        "tag": "stableDeclaration"
+      }
+    },
+    "declaration": {
+      "startByte": 1611,
+      "stopByte": 1708,
+      "sha256": "dc8a8a71fc5268303448b80ac69cb0555e8b6e81c8cbfb4659541b0ac6c419b3",
+      "bytes": 97,
+      "text": "def sh1GroupLet (f : Nat -> Nat) : Nat :=\n  let next : Nat -> Nat := sh1GroupIdentity f;\n  next 7"
+    },
+    "exactDeclarationSliceIndependentlyMatchedToFixture": true,
+    "parseCalls": 1,
+    "originPreservingPreparationCalls": 1,
+    "nativeBuilds": 0,
+    "typeScriptCompilations": 0,
+    "erasureCalls": 0,
+    "compilerEmissions": 0
+  },
+  "retained": {
+    "report": {
+      "blob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666",
+      "sha256": "46a60edd579402eca2ebf1a42aace7635d245b16a6472c4d3e00523c2054ef0b",
+      "utf8Bytes": 2756,
+      "encoding": "JSON.stringify(completeReportedValue, null, 2) + '\\n'",
+      "matchesLoggedReportSha256": true,
+      "exactBlobReadbackVerified": true
+    },
+    "completeJobLog": {
+      "blob": "a5df35ba3795f9823fcb5b0c787a57f1baa19db8",
+      "sha256": "fe14d35b49b421b7cf11b337f78d23a80238f309037870e3068711081e04afcf",
+      "utf8Bytes": 36865,
+      "fetchedCompletedJobLogOnce": true,
+      "unchangedDecodedContents": true,
+      "exactBlobReadbackVerified": true
+    },
+    "uploadedArtifact": {
+      "id": 11652477993,
+      "name": "psc0-generic-preparation-origin-216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+      "archiveBytes": 1256,
+      "digest": "sha256:00e5d16ca56af33d536ca18065447812663f2ff92e63fe43181b0a1aefe62552",
+      "expired": false,
+      "createdAt": "2026-10-10T00:40:33Z",
+      "expiresAt": "2026-11-09T00:40:32Z",
+      "workflowRun": {
+        "id": 38010024282,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/strict-sh1-v1",
+        "head_sha": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d"
+      },
+      "archiveDownloadedByThisReview": false,
+      "metadataMeaning": "GitHub metadata for the uploaded diagnostic report; report bytes are separately authenticated against the logged report SHA256 and exact retained blob."
+    }
+  },
+  "sourceAnalysisSeparation": {
+    "observedErrorDoesNotIncludeExpectedOrActualUniverseExpressions": true,
+    "staticHypothesis": "Two prior source reviews predicted sh1GroupLet and a comparison involving unreduced imax(1,1) versus 1.",
+    "observedSupport": "The executed diagnostic independently identifies source index 6, sh1GroupLet, stableDeclaration, and the same applicationTypeMismatch error.",
+    "limit": "This diagnostic does not itself prove the universe-expression explanation, a repair, semantic preservation, or qualification. Source analysis and any repair require their own reviewed evidence."
+  },
+  "qualification": {
+    "N1Complete": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "executionScope": {
+    "fullQualificationRunTriggered": false,
+    "coldRecoveryRun": {
+      "id": 38010024192,
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    "exactHeadRunCollectionContainedOnlyDiagnosticAndSkippedCold": true,
+    "additionalExecutionByThisReview": false,
+    "commitsOrRefChangesByThisReview": false
+  }
+}

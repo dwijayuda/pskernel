@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 1,
+  "evidence": "exact-current-source-qualification-failure",
+  "repository": "dwijayuda/pskernel",
+  "source": {
+    "commit": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+    "rootTree": "b93eaa340ff8955596ddc0376835386dd7f7c0d0",
+    "psc0Tree": "30758899192080d3f6ffc5182f53a2c65a6d1c8a",
+    "erasureExprBlob": "b4af2687c1b94e85014e323e5325385f139d4015",
+    "repairManifestBlob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
+    "nestedSourcePinsProvenance": "Published source metadata supplied by the integrating root; workflow source SHA and root tree are independently matched against GitHub run metadata."
+  },
+  "workflow": {
+    "id": 38007714076,
+    "workflowId": 378853677,
+    "name": "PSC0 SH1 language qualification",
+    "path": ".github/workflows/psc0-sh1.yml",
+    "runAttempt": 1,
+    "event": "push",
+    "branch": "psc0/strict-sh1-v1",
+    "status": "completed",
+    "conclusion": "failure",
+    "createdAt": "2026-10-10T00:08:10Z",
+    "startedAt": "2026-10-10T00:08:10Z",
+    "updatedAt": "2026-10-10T00:09:55Z",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38007714076"
+  },
+  "compiler": {
+    "jobId": 114080256053,
+    "status": "completed",
+    "conclusion": "failure",
+    "failingStep": {
+      "number": 24,
+      "name": "Run the bounded native development gate before qualification"
+    },
+    "failure": {
+      "kind": "host-conformance-assertion",
+      "code": "ERR_ASSERTION",
+      "actual": "letE",
+      "expected": "call",
+      "operator": "strictEqual",
+      "owner": "observeEmptySource",
+      "script": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "line": 94,
+      "column": 14,
+      "nodeVersion": "22.23.3",
+      "exitCode": 1,
+      "excerpt": "2026-10-10T00:09:49.0557375Z AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n2026-10-10T00:09:49.0557891Z \n2026-10-10T00:09:49.0558153Z 'letE' !== 'call'\n2026-10-10T00:09:49.0558405Z \n2026-10-10T00:09:49.0558976Z     at file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-source-conformance.mjs:94:14\n2026-10-10T00:09:49.0559697Z     at Array.map (<anonymous>)\n2026-10-10T00:09:49.0560911Z     at observeEmptySource (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-source-conformance.mjs:67:33)\n2026-10-10T00:09:49.0562372Z     at runStrictSourceConformance (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-source-conformance.mjs:535:28)\n2026-10-10T00:09:49.0563675Z     at async nativeCandidate (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:936:3)\n2026-10-10T00:09:49.0564810Z     at async file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1058:3 {\n2026-10-10T00:09:49.0565470Z   generatedMessage: true,\n2026-10-10T00:09:49.0565832Z   code: 'ERR_ASSERTION',\n2026-10-10T00:09:49.0566155Z   actual: 'letE',\n2026-10-10T00:09:49.0566468Z   expected: 'call',\n2026-10-10T00:09:49.0566783Z   operator: 'strictEqual',\n2026-10-10T00:09:49.0567112Z   diff: 'simple'\n2026-10-10T00:09:49.0567396Z }\n2026-10-10T00:09:49.0567576Z \n2026-10-10T00:09:49.0567687Z Node.js v22.23.3\n2026-10-10T00:09:49.0687574Z ##[error]Process completed with exit code 1.\n"
+    },
+    "nativeSourceEvidenceBeforeFailure": {
+      "marker": "PSC0_SH1_STRICT_SOURCE_NATIVE",
+      "evidence": "native-atomic-source-and-target-enforcement",
+      "sourceKind": "lean",
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "lean",
+        "accepted": true,
+        "traversalComplete": true,
+        "moduleCount": 64,
+        "sourceBytes": 1266025,
+        "inputBytes": 1267104,
+        "importCount": 149,
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "stats": {
+          "visitedSteps": 148646,
+          "typeSteps": 17937,
+          "termSteps": 58252,
+          "declarationCount": 1705,
+          "theoremCount": 0
+        }
+      },
+      "targetPolicy": {
+        "policy": "psc0-sh1-ts-target/1",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 1663720
+      },
+      "originalIr": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 828190,
+        "expressionCount": 64829,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "strictSh1Qualified": false
+      },
+      "sourceOrigins": {
+        "policy": "psc0-declaration-origins/1",
+        "actualParsedModulesRetained": 64,
+        "moduleCount": 64,
+        "sourceDeclarationCount": 1705,
+        "coreDeclarationCount": 2568,
+        "normalizationCount": 50,
+        "semanticCorrespondenceDischarged": false
+      },
+      "preparationCount": 1,
+      "canonicalAdmissionEncodingCount": 1,
+      "environmentReconstructionCount": 0,
+      "portableIrCheckCount": 1,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    "nativeIrPassMessages": [
+      "PSC0_SH1_IR_NATIVE_PASS: function-valued let has compositional type",
+      "PSC0_SH1_IR_NATIVE_PASS: checked emitter accepts the same valid IR",
+      "PSC0_SH1_IR_NATIVE_PASS: false let annotation is rejected",
+      "PSC0_SH1_IR_NATIVE_PASS: checked emitter refuses invalid IR",
+      "PSC0_SH1_IR_NATIVE_PASS: function parameter grouping is preserved",
+      "PSC0_SH1_IR_NATIVE_PASS: expression fuel exhaustion is explicit",
+      "PSC0_SH1_IR_NATIVE_PASS: type fuel exhaustion is explicit",
+      "PSC0_SH1_IR_NATIVE_PASS: diagnostic cap preserves finding count",
+      "PSC0_SH1_IR_NATIVE_PASS: empty layouts and typed empty results are accepted",
+      "PSC0_SH1_IR_NATIVE_PASS: empty layouts emit never and typed empty generators",
+      "PSC0_SH1_IR_NATIVE_PASS: empty match without an expected result is rejected",
+      "PSC0_SH1_IR_NATIVE_PASS: empty match still checks its scrutinee",
+      "PSC0_SH1_IR_NATIVE_PASS: empty match still checks layout type arity",
+      "PSC0_SH1_IR_NATIVE_PASS: empty alternatives still refuse an inhabited datatype",
+      "PSC0_SH1_IR_NATIVE_PASS: zero-field source record has its nullary inhabitant"
+    ],
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Authenticate the selected R seed and TS7-only recovery policy",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4
+      },
+      {
+        "name": "Check the actual full-qualification runner memory before expensive work",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "Run leanprover/lean-action@v1",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6
+      },
+      {
+        "name": "Install the pinned current TypeScript 7 profile",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7
+      },
+      {
+        "name": "Verify the installed TypeScript 7 profile before compiler generation",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8
+      },
+      {
+        "name": "Verify host syntax and bootstrap source restrictions",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9
+      },
+      {
+        "name": "Verify successor seed descriptor and cache contracts",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10
+      },
+      {
+        "name": "Restore the selected qualified compiler bytes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11
+      },
+      {
+        "name": "Verify the restored selected compiler bytes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 12
+      },
+      {
+        "name": "Check out pinned R source for a missing selected seed cache",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 13
+      },
+      {
+        "name": "Recover all four selected R products with native Lean and TypeScript 7",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 14
+      },
+      {
+        "name": "Verify selected authoring cache and execution runtime before current generation",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15
+      },
+      {
+        "name": "Retain the verified qualified authoring seed",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 16
+      },
+      {
+        "name": "Restore incremental current compiler build",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17
+      },
+      {
+        "name": "Build current native compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 18
+      },
+      {
+        "name": "Run native parser, translation, and erasure regression targets",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19
+      },
+      {
+        "name": "Build the actual native checked seed for source and import tests",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 20
+      },
+      {
+        "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 21
+      },
+      {
+        "name": "Verify native and generated TypeScript CLI boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 22
+      },
+      {
+        "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 23
+      },
+      {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 24
+      },
+      {
+        "name": "Build the selected-seed candidate before full qualification",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 25
+      },
+      {
+        "name": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 26
+      },
+      {
+        "name": "Retain the newly qualified seed without activating a source migration",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 27
+      },
+      {
+        "name": "Retain incremental native outputs",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 28
+      },
+      {
+        "name": "Retain compiler evidence and exact generated artifacts",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 29
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 57
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 58
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 59
+      }
+    ]
+  },
+  "provider": {
+    "jobId": 114080662313,
+    "status": "completed",
+    "conclusion": "skipped"
+  },
+  "coldRecovery": {
+    "runId": 38007714034,
+    "status": "completed",
+    "conclusion": "skipped"
+  },
+  "artifacts": {
+    "metadata": [
+      {
+        "id": 11652425108,
+        "name": "psc0-sh1-ts7.0.2-fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+        "size_in_bytes": 1752868,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11652425108",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11652425108/zip",
+        "expired": false,
+        "created_at": "2026-10-10T00:09:51Z",
+        "expires_at": "2026-11-09T00:09:50Z",
+        "updated_at": "2026-10-10T00:09:51Z",
+        "digest": "sha256:35060aaceff9dd6366d961bd6f92737cffe0d5366ab8fce3140e63aba3bc6224",
+        "workflow_run": {
+          "id": 38007714076,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/strict-sh1-v1",
+          "head_sha": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc"
+        }
+      }
+    ],
+    "contentsInspected": false,
+    "archiveBytesDownloaded": false,
+    "digestMeaning": "GitHub artifact metadata; the archive was not downloaded or independently hashed in this monitoring task."
+  },
+  "log": {
+    "proposedPath": "psc0/docs/selfhost-language/strict/attempts/fb8f8076df3ed8708f927f88aa2d32febbfa89dc/compiler-job.log",
+    "blob": "0239d0ea507f23f560afd3ca84ec8dda3108c935",
+    "sha256": "a2344d5a49a849f5795998ce04fa265e4ebc3800d0dc834feeeffc1fc51da9af",
+    "utf8Bytes": 893300,
+    "fetchedCompletedJobLogOnce": true,
+    "contents": "Complete decoded compiler-job log returned by GitHub MCP, retained without editing, including its initial BOM."
+  },
+  "disposition": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "nativeDevelopmentGateComplete": false,
+    "c1QualificationComplete": false,
+    "c2QualificationComplete": false,
+    "c3QualificationComplete": false,
+    "allCorrespondenceRowsRemainOpen": true,
+    "allStageRowsRemainOpen": true,
+    "explanation": "The current run advanced through full-compiler native source, target, and original-IR acceptance and native IR checks, then failed the bounded source-conformance assertion. Steps 25–27 and the provider were skipped. This evidence neither diagnoses the IR tag difference as harmless nor proves a compiler semantic defect. It records no N1 completion, C1/C2/C3 qualification, provider acceptance, rerun, dispatch, or cold execution."
+  },
+  "retention": {
+    "kind": "unattached-git-blobs",
+    "commitsOrRefChangesPerformed": false
+  }
+}

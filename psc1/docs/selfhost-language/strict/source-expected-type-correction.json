@@ -1,0 +1,490 @@
+{
+  "kind": "psc0-strict-target-match-initializer-annotation-correction",
+  "schemaVersion": 1,
+  "repository": "dwijayuda/pskernel",
+  "baseSourceRef": "ce3c4f55f99fd11c7a61d5449e67bc49d58658db",
+  "file": {
+    "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+    "baseBlob": "1c26ef5d6cd4e374ea64cd0b4345600302d40ad3",
+    "newBlob": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139",
+    "baseUtf8Bytes": 30070,
+    "newUtf8Bytes": 30077,
+    "changedLine": 410,
+    "exactReplacement": {
+      "old": "          let hasParameters := match item.parameters with",
+      "new": "          let hasParameters : Bool := match item.parameters with",
+      "line": 410
+    }
+  },
+  "observedFailure": {
+    "workflowRunId": 37966777236,
+    "jobId": 113942981936,
+    "runAttempt": 1,
+    "workflowConclusion": "failure",
+    "evidence": "native-atomic-source-refusal",
+    "stage": "source",
+    "code": "source-compiler",
+    "moduleName": "Ps.BackendTs.Sh1Target",
+    "detail": "matchExpectedType",
+    "currentN1Qualified": false,
+    "strictSh1Qualified": false
+  },
+  "causalEvidence": [
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "blob": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112",
+      "function": "psElabLet",
+      "lines": "905-907",
+      "fact": "An unannotated initializer is elaborated with Option.none."
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "blob": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112",
+      "function": "psElabMatch",
+      "lines": "1994-1995",
+      "fact": "Option.none is the sole source of matchExpectedType."
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "blob": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112",
+      "function": "psElabLet",
+      "lines": "918-933",
+      "fact": "The explicit Bool annotation provides Option.some typeResult.term for this exact match initializer."
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "blob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+      "function": "psElabDeclarationParts",
+      "lines": "165-169",
+      "fact": "Every typed definition body receives its declared expected type."
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "blob": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112",
+      "function": "match-alternative elaboration",
+      "lines": "1766,1805",
+      "fact": "Match branches receive the enclosing expected result type."
+    }
+  ],
+  "classReview": {
+    "sourceOnly": true,
+    "definitions": 30,
+    "matchExpressions": 41,
+    "letBindings": 21,
+    "unsupportedUnannotatedMatchInitializers": 1,
+    "corrected": "psSh1TargetStep, hasParameters, line410",
+    "otherMatches": 40,
+    "otherMatchesHaveExpectedType": "Definition results and recursive branch/let-body propagation supply the expected type; no match-valued scrutinee, condition, lambda body, application argument or other inference-only position occurs in this module.",
+    "otherInitializers": {
+      "typedFunctionOrConstructorApplication": 17,
+      "inferableIf": 2,
+      "explicitlyTypedTaskList": 1
+    },
+    "publicFunctionTypesConstructorsArgumentsTaskOrderPoliciesErrorsAndBudgetsUnchanged": true,
+    "noParserOrGateModification": true,
+    "allOutsideBytesUnchanged": true,
+    "previous116ConstructorQualificationsPreserved": true,
+    "additionalActionableSourceFormViolationsFound": []
+  },
+  "declarationInventory": [
+    {
+      "name": "psSh1TargetPolicy",
+      "line": 11,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetEmptyNames",
+      "line": 99,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetHasName",
+      "line": 102,
+      "matchCount": 1,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetIsGlobalType",
+      "line": 108,
+      "matchCount": 1,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetInsertName",
+      "line": 114,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetRootScope",
+      "line": 118,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetAt",
+      "line": 121,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetAtIndex",
+      "line": 126,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetWithLocal",
+      "line": 130,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetSchedule",
+      "line": 135,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetErrorAt",
+      "line": 140,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetStringIn",
+      "line": 145,
+      "matchCount": 1,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetKeyword",
+      "line": 151,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetTypeKeyword",
+      "line": 161,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetExpressionGlobal",
+      "line": 169,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetModuleGlobal",
+      "line": 173,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetRuntimeName",
+      "line": 178,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetRoleIsGlobal",
+      "line": 186,
+      "matchCount": 1,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetRoleIsType",
+      "line": 193,
+      "matchCount": 1,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetRoleIsBinding",
+      "line": 200,
+      "matchCount": 1,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetRoleUsesExpressionGlobals",
+      "line": 207,
+      "matchCount": 1,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetAsciiBetween",
+      "line": 214,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetIdentifierStart",
+      "line": 217,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetIdentifierRest",
+      "line": 223,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetTypeCapture",
+      "line": 227,
+      "matchCount": 1,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetCheckName",
+      "line": 235,
+      "matchCount": 1,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetStep",
+      "line": 267,
+      "matchCount": 28,
+      "letCount": 19,
+      "matchInitializers": [
+        "          let hasParameters := match item.parameters with"
+      ]
+    },
+    {
+      "name": "psSh1TargetFinished",
+      "line": 567,
+      "matchCount": 0,
+      "letCount": 0,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1TargetRun",
+      "line": 570,
+      "matchCount": 4,
+      "letCount": 1,
+      "matchInitializers": []
+    },
+    {
+      "name": "psSh1CheckTarget",
+      "line": 589,
+      "matchCount": 0,
+      "letCount": 1,
+      "matchInitializers": []
+    }
+  ],
+  "initializerInventory": [
+    {
+      "line": 281,
+      "declaration": "psSh1TargetStep",
+      "name": "scope",
+      "annotation": "",
+      "initializer": "psSh1TargetRootScope item.name;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 289,
+      "declaration": "psSh1TargetStep",
+      "name": "scope",
+      "annotation": "",
+      "initializer": "psSh1TargetRootScope item.name;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 297,
+      "declaration": "psSh1TargetStep",
+      "name": "scope",
+      "annotation": "",
+      "initializer": "psSh1TargetRootScope item.name;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 348,
+      "declaration": "psSh1TargetStep",
+      "name": "char",
+      "annotation": "",
+      "initializer": "String.Internal.get value (String.Pos.Raw.mk position);",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 349,
+      "declaration": "psSh1TargetStep",
+      "name": "valid",
+      "annotation": "",
+      "initializer": "if first then psSh1TargetIdentifierStart char else psSh1TargetIdentifierRest char;",
+      "classification": "if-with-inferable-then-branch"
+    },
+    {
+      "line": 351,
+      "declaration": "psSh1TargetStep",
+      "name": "next",
+      "annotation": "",
+      "initializer": "String.Pos.Raw.byteIdx (String.Internal.next value (String.Pos.Raw.mk position));",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 359,
+      "declaration": "psSh1TargetStep",
+      "name": "scope",
+      "annotation": "",
+      "initializer": "psSh1TargetRootScope item.name;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 367,
+      "declaration": "psSh1TargetStep",
+      "name": "scope",
+      "annotation": "",
+      "initializer": "psSh1TargetRootScope item.name;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 375,
+      "declaration": "psSh1TargetStep",
+      "name": "atField",
+      "annotation": "",
+      "initializer": "psSh1TargetAtIndex scope \"field\" index;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 384,
+      "declaration": "psSh1TargetStep",
+      "name": "atCtor",
+      "annotation": "",
+      "initializer": "psSh1TargetAtIndex scope \"constructor\" index;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 393,
+      "declaration": "psSh1TargetStep",
+      "name": "atField",
+      "annotation": "",
+      "initializer": "psSh1TargetAtIndex scope \"field\" index;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 402,
+      "declaration": "psSh1TargetStep",
+      "name": "atType",
+      "annotation": "",
+      "initializer": "psSh1TargetAtIndex scope \"typeParameter\" index;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 410,
+      "declaration": "psSh1TargetStep",
+      "name": "hasParameters",
+      "annotation": "",
+      "initializer": "match item.parameters with",
+      "classification": "unannotated-match"
+    },
+    {
+      "line": 413,
+      "declaration": "psSh1TargetStep",
+      "name": "scope",
+      "annotation": "",
+      "initializer": "PsSh1TargetScope.mk item.name \"body\" earlier",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 431,
+      "declaration": "psSh1TargetStep",
+      "name": "nextDepth",
+      "annotation": "",
+      "initializer": "if weighted then remaining else depth;",
+      "classification": "if-with-inferable-then-branch"
+    },
+    {
+      "line": 432,
+      "declaration": "psSh1TargetStep",
+      "name": "atParameter",
+      "annotation": "",
+      "initializer": "psSh1TargetAtIndex scope \"parameter\" index;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 541,
+      "declaration": "psSh1TargetStep",
+      "name": "atField",
+      "annotation": "",
+      "initializer": "psSh1TargetAtIndex scope \"field\" index;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 550,
+      "declaration": "psSh1TargetStep",
+      "name": "atAlternative",
+      "annotation": "",
+      "initializer": "psSh1TargetAtIndex scope \"alternative\" index;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 559,
+      "declaration": "psSh1TargetStep",
+      "name": "atBinding",
+      "annotation": "",
+      "initializer": "psSh1TargetAtIndex scope \"binding\" index;",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 583,
+      "declaration": "psSh1TargetRun",
+      "name": "current",
+      "annotation": "",
+      "initializer": "PsSh1TargetState.mk rest state.globals state.privateNames",
+      "classification": "typed-function-or-constructor-application"
+    },
+    {
+      "line": 591,
+      "declaration": "psSh1CheckTarget",
+      "name": "tasks",
+      "annotation": ": List PsSh1TargetTask",
+      "initializer": "",
+      "classification": "explicitly-typed"
+    }
+  ],
+  "execution": {
+    "repositoryCodeExecuted": false,
+    "testsRun": false,
+    "workflowsLaunched": false,
+    "refsChanged": false
+  },
+  "rootIndependentReview": {
+    "exactReplacementReconstructed": true,
+    "actualElabLetAndMatchRead": true,
+    "elaboratorBlob": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112",
+    "sourceGrammarGuideAlreadyRequiresMatchLetAnnotation": true,
+    "previousRuntimeAndSourceGatesUnchanged": true
+  },
+  "status": "source-reviewed-followup-awaiting-exact-source-cloud-qualification",
+  "qualificationAttempts": "qualification-attempts.json",
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false
+}

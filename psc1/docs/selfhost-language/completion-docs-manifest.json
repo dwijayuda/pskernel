@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "kind": "qualified-F-current-guide-reconciliation",
+  "sourceBaseRef": "8d922c3f47f59a8d7285bfdf998791f042b483b9",
+  "qualifyingFSourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+  "qualifiedRootSourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+  "actualEvidenceInputBundleBlob": "b2a8a19c506f52316ed30f4ec88682d69e794b87",
+  "finalPeerReviewAndCorrectionsBlob": "0dcff689d07bc590d78332b70bcfb7f340c88e33",
+  "supersedesGuideManifest": "d4c9cc45dbf539f4bf85e1bca0bca1085a3ec947",
+  "files": [
+    {
+      "path": "psc0/docs/selfhost-language/README.md",
+      "baseBlob": "bbbf7a07c2b7be0731bf845f957457f9377a486b",
+      "newBlob": "a189ebafeff40fd758c85b41e6abeacea5c516e3",
+      "sha256": "f19ebb1106beacd7e0a6671aedb5754b92d708060bfe072a3fa63391b8a35123",
+      "bytes": 32555,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/IMPLEMENTATION.md",
+      "baseBlob": "457792e29a18393434c86aef43a4ea0eeab4a024",
+      "newBlob": "89581975c5b1ea04eaaaf5f8231c7685c02ba84d",
+      "sha256": "da5f15fff9e0e09ca549d72113d8fee8e3f779e4704397cc6b6efcfaeff526da",
+      "bytes": 56556,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/MIGRATION.md",
+      "baseBlob": "18bf1fb8317964cda2352bb7e98828863ccce6c1",
+      "newBlob": "1708592ebf923a173c25ac9846e7034d58107610",
+      "sha256": "e3832b643f2b4fb6d78cd87f024735edd62600c7f4da3f889de898e0c6168dbf",
+      "bytes": 49662,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/SPEC.md",
+      "baseBlob": "d5e550809b60552050169bcc52c01175f4a33827",
+      "newBlob": "61f0f36ffe7880144f60845084e8be6a61b91eed",
+      "sha256": "6338e00a4bed1c35aef59ee71326d4bf38e5af952800422579284ae74077ebc6",
+      "bytes": 40699,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "baseBlob": "f73489ab63ebd474276f2aac4aa7ef2298b833f3",
+      "newBlob": "3f2bcf9aec687a3395a49042aab7732e34a110e0",
+      "sha256": "438a6501b374aed18a6bf2de3af2c81f09d894c0768242966c2ea98ec99cbc56",
+      "bytes": 82099,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "baseBlob": "615b76512ef894fac42b94b730fd424c11338f14",
+      "newBlob": "0fcb21d58650f00365bcc9cec46ced10bb0628de",
+      "sha256": "58aa1e6d67dab8303e12f3936e3ff3d5e4236a891fd992076b76b8d5aff35808",
+      "bytes": 97108,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/MIGRATION_BACKLOG.md",
+      "baseBlob": "7c1ad6a0dcf253bfd395866ad772a09fee88a642",
+      "newBlob": "15c9c8a4eae8a3dfd1e110f3424085b33ab63d4c",
+      "sha256": "c88481fc69718af64ea01d3cbee6fda69b50f306b292af476b5b9b7f7447bf12",
+      "bytes": 34681,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/CURRENT.md",
+      "baseBlob": "90a482894c01111f62349b8455ca86756806c7be",
+      "newBlob": "d7de8eeaa78c4eecc0b7cd44a51e23922cb0e26b",
+      "sha256": "9fc38d5953f20d68989901da77e833f3b0fe80334c944f2f4d222b4a5feccf52",
+      "bytes": 11116,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/README.md",
+      "baseBlob": "ef15e197cdcf10b9ed6d8cbc3028551f16090e89",
+      "newBlob": "83551e48807c94a63192d1bbb4b8c97cfc84515c",
+      "sha256": "22ea11f72d1463d797edbe61c4287683a3d6bd580da9f423605243f91c3c2f0c",
+      "bytes": 4705,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/PS_GRAMMAR_ADOPTION.md",
+      "baseBlob": "e3c072536d021f4172afb8736a716bd9c6255d0e",
+      "newBlob": "43b3eac98c5485f91ede7f494c9ddee37599b1aa",
+      "sha256": "f2d7c7b41beaa8a88ee984253db97434f3234aab2598c6d6a9dee8c145fb5446",
+      "bytes": 20011,
+      "operation": "update",
+      "scope": "documentation"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/TYPESCRIPT7.md",
+      "baseBlob": "7462e111a12b2f73adc8359469deec644d0dfc2f",
+      "newBlob": "87fd400e9d9abf75b4f72e8c36084e6cdaadbf9c",
+      "sha256": "df6259e3b82c6c24f4959fa775c917ae79e1ef165498f6087f7153e28fef12dd",
+      "bytes": 12889,
+      "operation": "update",
+      "scope": "documentation"
+    }
+  ],
+  "counts": {
+    "files": 11,
+    "originalTemplateOperations": 108,
+    "typeScriptPostOperations": 24,
+    "currentProseOperations": 10,
+    "clarifications": 6,
+    "finalStatusCorrections": 3,
+    "immutableLocatorHashesPreserved": 7,
+    "globalGuardsPreserved": 9
+  },
+  "sourceChanges": false,
+  "gatesWeakened": false,
+  "seedSelectionChanged": false,
+  "fullStandardConformance": false,
+  "fullPscvConformance": false,
+  "strictSh1Qualified": false
+}

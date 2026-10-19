@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "evidence": "reviewed-F-selected-provider-post-emission-acceptance",
+  "passed": true,
+  "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+  "runId": "37947341800",
+  "providerJobId": "113896228512",
+  "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+  "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+  "job": {
+    "name": "kernel-admissions",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-10-09T15:36:21Z",
+    "completedAt": "2026-10-09T15:37:18Z"
+  },
+  "selectedProvider": {
+    "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "sourceTree": "38c8c55bd2b214753e56c58c15c4901c32c01b86",
+    "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+    "metadata": {
+      "protocol": "pskernel-core/1",
+      "provider": "pskernel-core-native",
+      "leanVersion": "4.34.0",
+      "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+      "profile": "lean4.34-core",
+      "status": "ready"
+    },
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "node": "v22.23.3",
+    "command": [
+      "psc_kernel_core_provider",
+      "--check"
+    ],
+    "resourcePolicy": "Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.",
+    "timeoutMs": 60000
+  },
+  "sameProviderBinaryAsQualifiedR": true,
+  "distinctAdmissionStreams": 4,
+  "artifactRoles": 8,
+  "streams": [
+    {
+      "canonicalAdmissionsSha256": "9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5",
+      "artifacts": [
+        "C2 compiler source",
+        "C3 compiler source"
+      ],
+      "durationMs": 1555.7454980000002,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      }
+    },
+    {
+      "canonicalAdmissionsSha256": "372371596fba560eca5ba52d29e20d91780d5c3321e4353a7a4c1a009167e10f",
+      "artifacts": [
+        "C2 raw lean capability source",
+        "C3 raw lean capability source"
+      ],
+      "durationMs": 14.807432000000063,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      }
+    },
+    {
+      "canonicalAdmissionsSha256": "bb84332515024d4145b7cedb636fb6095d3cbe20a4fc3043dc37905f7574a900",
+      "artifacts": [
+        "C2 raw ps capability source",
+        "C3 raw ps capability source"
+      ],
+      "durationMs": 16.380443000000014,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      }
+    },
+    {
+      "canonicalAdmissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+      "artifacts": [
+        "C2 raw recursive-generic fixture source",
+        "C3 raw recursive-generic fixture source"
+      ],
+      "durationMs": 7.705719000000045,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      }
+    }
+  ],
+  "exactProviderFile": {
+    "path": "kernel-admissions.json",
+    "sha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913",
+    "bytes": 3532,
+    "content": "{\n  \"schemaVersion\": 1,\n  \"evidence\": \"selected-provider-acceptance-for-qualified-compiler-admissions\",\n  \"sourceRef\": \"fcd875c8f38db4b0524090bd10c7c2fd5024053d\",\n  \"sourceClosureSha256\": \"6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7\",\n  \"compilerSha256\": \"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\n  \"provider\": {\n    \"sourceRef\": \"963030dc2d154008fccc82e7c8ed29331f138799\",\n    \"sourceTree\": \"38c8c55bd2b214753e56c58c15c4901c32c01b86\",\n    \"binarySha256\": \"88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec\",\n    \"metadata\": {\n      \"protocol\": \"pskernel-core/1\",\n      \"provider\": \"pskernel-core-native\",\n      \"leanVersion\": \"4.34.0\",\n      \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n      \"profile\": \"lean4.34-core\",\n      \"status\": \"ready\"\n    },\n    \"lean\": \"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\n    \"node\": \"v22.23.3\",\n    \"command\": [\n      \"psc_kernel_core_provider\",\n      \"--check\"\n    ],\n    \"resourcePolicy\": \"Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.\",\n    \"timeoutMs\": 60000\n  },\n  \"streams\": [\n    {\n      \"canonicalAdmissionsSha256\": \"9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5\",\n      \"artifacts\": [\n        \"C2 compiler source\",\n        \"C3 compiler source\"\n      ],\n      \"durationMs\": 1555.7454980000002,\n      \"result\": {\n        \"protocol\": \"pskernel-core/1\",\n        \"provider\": \"pskernel-core-native\",\n        \"leanVersion\": \"4.34.0\",\n        \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n        \"profile\": \"lean4.34-core\",\n        \"accepted\": true\n      }\n    },\n    {\n      \"canonicalAdmissionsSha256\": \"372371596fba560eca5ba52d29e20d91780d5c3321e4353a7a4c1a009167e10f\",\n      \"artifacts\": [\n        \"C2 raw lean capability source\",\n        \"C3 raw lean capability source\"\n      ],\n      \"durationMs\": 14.807432000000063,\n      \"result\": {\n        \"protocol\": \"pskernel-core/1\",\n        \"provider\": \"pskernel-core-native\",\n        \"leanVersion\": \"4.34.0\",\n        \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n        \"profile\": \"lean4.34-core\",\n        \"accepted\": true\n      }\n    },\n    {\n      \"canonicalAdmissionsSha256\": \"bb84332515024d4145b7cedb636fb6095d3cbe20a4fc3043dc37905f7574a900\",\n      \"artifacts\": [\n        \"C2 raw ps capability source\",\n        \"C3 raw ps capability source\"\n      ],\n      \"durationMs\": 16.380443000000014,\n      \"result\": {\n        \"protocol\": \"pskernel-core/1\",\n        \"provider\": \"pskernel-core-native\",\n        \"leanVersion\": \"4.34.0\",\n        \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n        \"profile\": \"lean4.34-core\",\n        \"accepted\": true\n      }\n    },\n    {\n      \"canonicalAdmissionsSha256\": \"11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8\",\n      \"artifacts\": [\n        \"C2 raw recursive-generic fixture source\",\n        \"C3 raw recursive-generic fixture source\"\n      ],\n      \"durationMs\": 7.705719000000045,\n      \"result\": {\n        \"protocol\": \"pskernel-core/1\",\n        \"provider\": \"pskernel-core-native\",\n        \"leanVersion\": \"4.34.0\",\n        \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n        \"profile\": \"lean4.34-core\",\n        \"accepted\": true\n      }\n    }\n  ],\n  \"accepted\": true,\n  \"emissionWasGatedByThisCheck\": false,\n  \"qualificationBoundary\": \"Compiler-only artifacts were generated first; promotion may use this additional exact-stream provider acceptance.\"\n}\n"
+  },
+  "compactLogRecord": {
+    "label": "PROVIDER_ADMISSIONS",
+    "logLine": 652,
+    "timestamp": "2026-10-09T15:37:12.5560532Z",
+    "rawJsonSha256": "cfc245128ce09b14f52ff126d2a8b3a9bd56f00891f30dfca2c992d81197d0cb",
+    "retainedCompactTextSha256": "a19a93509c056e53614681f11e588b000e5d35c3fb79b3cb3f5e7ba1cd986a14",
+    "exactLoggedLineSha256": "6e0549a05e83a24c88b6f86bd21ae8fb495d59c2ad069293769c0dbc4a225db2",
+    "serialization": "Raw compact JSON substring from the decoded GitHub job log, followed by LF for retention; not a digest of unavailable original artifact file bytes."
+  },
+  "exactFileEnvelopeLogRecord": {
+    "label": "PROVIDER_ADMISSIONS_FILE",
+    "logLine": 653,
+    "timestamp": "2026-10-09T15:37:12.5607721Z",
+    "rawJsonSha256": "f65c0cf24f9b528c9a9dabf1b6874da132c6ff77d2dcfe98a6f288504def2635",
+    "retainedCompactTextSha256": "8d8d3df67bb1e9cc0f6cb2865c2de158334046d63fce202f5d4b7777015a8a92",
+    "exactLoggedLineSha256": "80724292bcacebc990b8c742b32b9427c171dfe90b2af50cebdc75f2c629cfff",
+    "serialization": "Raw compact JSON substring from the decoded GitHub job log, followed by LF for retention; not a digest of unavailable original artifact file bytes."
+  },
+  "emissionWasGatedByThisCheck": false,
+  "selectedSeed": {
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "promotedToF": false
+  },
+  "strictSh1Qualified": false,
+  "fullStandardConformance": false,
+  "fullPscvConformance": false,
+  "scope": "Actual unchanged selected-provider acceptance of the distinct admission streams derived from eight exact C2/C3 role hashes, after compiler-only emission. This adds no strict profile, backend-semantic proof, F recovery/promotion, or separate root-workspace result."
+}

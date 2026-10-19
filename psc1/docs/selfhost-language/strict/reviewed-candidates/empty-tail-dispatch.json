@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-empty-tail-dispatch-change",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "reviewSourceRef": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+  "status": "independently-source-reviewed-candidate",
+  "problem": "The tail-loop match branch accepted zero alternatives and bypassed the general typed empty generator. Source inspection predicts that two direct empty-match declarations in the existing native IR fixture use the tag-switch path, contradicting its retained four-empty-generator assertion. This is a pre-execution source finding, not a reported test result.",
+  "files": [
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expectedBaseBlob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
+      "expectedBaseSha256": "ab5f82c253265f3bd1b5be93f1532f47998c43f4c0d1643478bb6c7aa741fb7b",
+      "candidateBlob": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "candidateSha256": "8c3cdadebb41f7ee8d2c3bad82c54c077e5e51e920351f5af2608f8b765c4c75",
+      "edits": [
+        {
+          "oldText": "        | PsVerifiedIrExpr.matchE name _ scrutinee alternatives =>\n            match psTsLookup tags name with\n            | Option.none => Option.none\n            | Option.some tag =>\n                match emitPure scrutinee with\n                | Option.none => Option.none\n                | Option.some printedScrutinee =>\n                    let temporary := psTsFreshMatchTemp declaration.body;\n                    let printBinding : PsVerifiedIrMatchBinding -> Option String := fun (binding : PsVerifiedIrMatchBinding) =>\n                      if psTsTailBindingSafe declaration aliases binding.name then\n                        match psTsEmitType binding.type with\n                        | Except.error _ => Option.none\n                        | Except.ok type => Option.some (psTsJoin \"\" [\"const \", binding.name, \": \", type, \" = \", temporary, \".\", binding.field, \";\"])\n                      else Option.none;\n                    let printAlternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Option String :=\n                      fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>\n                        match psTsTailMap printBinding (Prod.fst (Prod.snd alternative)) with\n                        | Option.none => Option.none\n                        | Option.some bindings =>\n                            match smaller aliases (Prod.snd (Prod.snd alternative)) with\n                            | Option.none => Option.none\n                            | Option.some body => Option.some (psTsJoin \"\" [\"case \", psJsonQuote (Prod.fst alternative), \": { \",\n                                psTsJoin \" \" bindings, \" \", body, \" }\"]);\n                    if psTsTailBindingSafe declaration aliases temporary then\n                      match psTsTailMap printAlternative alternatives with\n                      | Option.none => Option.none\n                      | Option.some cases => Option.some (psTsJoin \"\" [\"{ const \", temporary, \" = \", printedScrutinee,\n                          \"; switch (\", temporary, \"[\", tag, \"]) { \", psTsJoin \" \" cases,\n                          \" } throw new Error(\\\"invalid ProofScript constructor tag\\\"); }\"])\n                    else Option.none\n",
+          "newText": "        | PsVerifiedIrExpr.matchE name _ scrutinee alternatives =>\n            if psListIsEmpty alternatives then Option.none\n            else\n              match psTsLookup tags name with\n              | Option.none => Option.none\n              | Option.some tag =>\n                  match emitPure scrutinee with\n                  | Option.none => Option.none\n                  | Option.some printedScrutinee =>\n                      let temporary := psTsFreshMatchTemp declaration.body;\n                      let printBinding : PsVerifiedIrMatchBinding -> Option String := fun (binding : PsVerifiedIrMatchBinding) =>\n                        if psTsTailBindingSafe declaration aliases binding.name then\n                          match psTsEmitType binding.type with\n                          | Except.error _ => Option.none\n                          | Except.ok type => Option.some (psTsJoin \"\" [\"const \", binding.name, \": \", type, \" = \", temporary, \".\", binding.field, \";\"])\n                        else Option.none;\n                      let printAlternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Option String :=\n                        fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>\n                          match psTsTailMap printBinding (Prod.fst (Prod.snd alternative)) with\n                          | Option.none => Option.none\n                          | Option.some bindings =>\n                              match smaller aliases (Prod.snd (Prod.snd alternative)) with\n                              | Option.none => Option.none\n                              | Option.some body => Option.some (psTsJoin \"\" [\"case \", psJsonQuote (Prod.fst alternative), \": { \",\n                                  psTsJoin \" \" bindings, \" \", body, \" }\"]);\n                      if psTsTailBindingSafe declaration aliases temporary then\n                        match psTsTailMap printAlternative alternatives with\n                        | Option.none => Option.none\n                        | Option.some cases => Option.some (psTsJoin \"\" [\"{ const \", temporary, \" = \", printedScrutinee,\n                            \"; switch (\", temporary, \"[\", tag, \"]) { \", psTsJoin \" \" cases,\n                            \" } throw new Error(\\\"invalid ProofScript constructor tag\\\"); }\"])\n                      else Option.none\n",
+          "expectedOccurrences": 1,
+          "reason": "Decline empty alternatives in the optional tail recognizer. The existing general emitter evaluates the scrutinee once with void and then performs its defensive unreachable throw without observing a constructor tag."
+        }
+      ]
+    }
+  ],
+  "sourceArgument": {
+    "dispatcher": "psTsEmitDeclaration tries count, then tail, then general. Count requires exactly two alternatives. The new tail guard returns Option.none for zero alternatives. All existing nonempty tail branches are unchanged apart from indentation.",
+    "fallback": "psTsEmitDeclarationGeneral reaches psTsEmitExprWithFuel's existing empty-match branch. The scrutinee is evaluated once in a generator; no constructor tag is read.",
+    "routes": [
+      {
+        "declaration": "nativeEmptyNat",
+        "before": "tail empty switch",
+        "after": "general typed empty generator"
+      },
+      {
+        "declaration": "nativeEmptyFunction",
+        "before": "tail empty switch",
+        "after": "general typed empty generator"
+      },
+      {
+        "declaration": "nativeEmptyGeneric",
+        "before": "general typed empty generator",
+        "after": "unchanged"
+      },
+      {
+        "declaration": "nativeEmptyTypedCall",
+        "before": "general typed empty generator in the typed callee let",
+        "after": "unchanged"
+      }
+    ],
+    "expectedExistingNativeAssertion": "Four __ps$Computation<never> occurrences, so splitOn length 5; no assertion is changed.",
+    "annotationClass": "The added if is the existing typed function-result branch (Option String). It adds no untyped let initializer or untyped lambda binder.",
+    "nonemptyGuardCheck": "Removing the added if/else lines and exactly two leading spaces from the existing branch reconstructs the old branch byte for byte."
+  },
+  "unchanged": {
+    "expressionEmitterBlob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+    "nativeIrFixtureBlob": "2f507fdaef96411dfa5833016c94655549b99938",
+    "sourceFixtures": true,
+    "gateAssertions": true,
+    "compilerInvocations": true,
+    "runtime45OperationContract": true,
+    "resourcePolicy": true,
+    "selectedSeedIdentity": true,
+    "kernelProviderDefeqCacheMetatheory": true
+  },
+  "review": {
+    "independentReviewer": "/root/empty_evidence_finish",
+    "status": "clear",
+    "method": "GitHub MCP immutable source readback and in-memory exact-text comparison only",
+    "findings": [
+      "Exact single empty-alternatives guard; all prior nonempty branch bytes preserved after indentation normalization.",
+      "Count requires two alternatives; tail Option.none reaches general emission.",
+      "Direct empty Nat/function, generic, and typed-call routes reach the existing typed never generator.",
+      "Tail pure classification excludes matches, lets and lambdas; an empty nested tail branch propagates Option.none.",
+      "Existing native four-generator assertion is supported by source-path analysis; no execution or fixture adjustment."
+    ]
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "formalPreservationProven": false,
+  "correspondenceRowsClosed": 0,
+  "executedAtWrite": false
+}

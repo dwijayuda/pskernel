@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "evidence": "native-portable-checker-current-source",
+  "nativeCheckerSha256": "bb29e45d8863a008dc3983564614f9987361a7a497c9225171aaae8e768fe296",
+  "sourceClosureSha256": "cab802359ef476568979cb0b063e1a3f6f8b7e1f364b8ddfd98cb3255d132544",
+  "sourceAggregateSha256": "0ef092ce1738c22fa6a10ae0eca9e8ea713aa826d7d56ff134b67451d3cd5b6b",
+  "moduleCount": 61,
+  "recipe": "Ordered raw closure with imports stripped, aggregate native preparation, original IR check, same-IR emission.",
+  "fixtures": {
+    "schemaVersion": 1,
+    "status": "pass",
+    "cases": 8,
+    "checkedEmitterRejectsInvalidIr": true,
+    "strictSh1Qualified": false
+  },
+  "fullCompilerIr": {
+    "schemaVersion": 1,
+    "kind": "psc0-native-original-ir-check",
+    "accepted": true,
+    "traversalComplete": true,
+    "visitedSteps": 707366,
+    "expressionCount": 54843,
+    "findingCount": 0,
+    "retainedFindingCount": 0,
+    "omittedFindingDetails": 0,
+    "strictSh1Qualified": false,
+    "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+  },
+  "typescriptSha256": "c03177d298ee370b756c74a6897bdd78142c202e28d0bbe1fa44524d7f20832d",
+  "parity": "Checked native emission equals the native-generated N1 compiler TypeScript byte for byte.",
+  "strictSh1Qualified": false,
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  }
+}

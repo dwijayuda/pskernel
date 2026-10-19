@@ -1,0 +1,710 @@
+﻿2026-10-09T15:36:22.2465460Z Current runner version: '2.337.0'
+2026-10-09T15:36:22.2492316Z ##[group]Runner Image Provisioner
+2026-10-09T15:36:22.2493355Z Hosted Compute Agent
+2026-10-09T15:36:22.2493994Z Version: 20261002.596
+2026-10-09T15:36:22.2495076Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-09T15:36:22.2495853Z Build Date: 2026-10-02T22:28:27Z
+2026-10-09T15:36:22.2496536Z Worker ID: {4727d13e-fd0b-4510-8981-3082ea06768d}
+2026-10-09T15:36:22.2497307Z Region: westus2
+2026-10-09T15:36:22.2497863Z Cloud: Azure
+2026-10-09T15:36:22.2498677Z ##[endgroup]
+2026-10-09T15:36:22.2500439Z ##[group]Operating System
+2026-10-09T15:36:22.2501092Z Ubuntu
+2026-10-09T15:36:22.2501697Z 24.04.5
+2026-10-09T15:36:22.2502247Z LTS
+2026-10-09T15:36:22.2502802Z ##[endgroup]
+2026-10-09T15:36:22.2503406Z ##[group]Runner Image
+2026-10-09T15:36:22.2504021Z Image: ubuntu-24.04
+2026-10-09T15:36:22.2504763Z Version: 20261004.327.1
+2026-10-09T15:36:22.2506078Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-09T15:36:22.2507759Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-09T15:36:22.2509007Z ##[endgroup]
+2026-10-09T15:36:22.2510300Z ##[group]GITHUB_TOKEN Permissions
+2026-10-09T15:36:22.2512665Z Actions: read
+2026-10-09T15:36:22.2513398Z Contents: read
+2026-10-09T15:36:22.2513969Z Metadata: read
+2026-10-09T15:36:22.2514531Z ##[endgroup]
+2026-10-09T15:36:22.2516802Z Secret source: Actions
+2026-10-09T15:36:22.2517777Z Cache mode: write
+2026-10-09T15:36:22.2519173Z Prepare workflow directory
+2026-10-09T15:36:22.2881658Z Prepare all required actions
+2026-10-09T15:36:22.2932189Z Getting action download info
+2026-10-09T15:36:22.7581955Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-09T15:36:22.8613183Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-09T15:36:22.9542291Z Download action repository 'leanprover/lean-action@v1' (SHA:f061402b660e0c34644504b324e830f2991d4865)
+2026-10-09T15:36:23.1843443Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2026-10-09T15:36:23.2898059Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-09T15:36:23.5556105Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-09T15:36:23.8560849Z Getting action download info
+2026-10-09T15:36:23.9984712Z Download action repository 'actions/cache@caa296126883cff596d87d8935842f9db880ef25' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-10-09T15:36:24.1870555Z Complete job name: kernel-admissions
+2026-10-09T15:36:24.2779463Z ##[group]Run actions/checkout@v4
+2026-10-09T15:36:24.2780763Z with:
+2026-10-09T15:36:24.2781581Z   repository: dwijayuda/pskernel
+2026-10-09T15:36:24.2785249Z   token: ***
+2026-10-09T15:36:24.2786056Z   ssh-strict: true
+2026-10-09T15:36:24.2786865Z   ssh-user: git
+2026-10-09T15:36:24.2787695Z   persist-credentials: true
+2026-10-09T15:36:24.2788750Z   clean: true
+2026-10-09T15:36:24.2789587Z   sparse-checkout-cone-mode: true
+2026-10-09T15:36:24.2790445Z   fetch-depth: 1
+2026-10-09T15:36:24.2791227Z   fetch-tags: false
+2026-10-09T15:36:24.2792020Z   show-progress: true
+2026-10-09T15:36:24.2792792Z   lfs: false
+2026-10-09T15:36:24.2793549Z   submodules: false
+2026-10-09T15:36:24.2794346Z   set-safe-directory: true
+2026-10-09T15:36:24.2795194Z   allow-unsafe-pr-checkout: false
+2026-10-09T15:36:24.2796330Z ##[endgroup]
+2026-10-09T15:36:24.3881800Z Syncing repository: dwijayuda/pskernel
+2026-10-09T15:36:24.3885293Z ##[group]Getting Git version info
+2026-10-09T15:36:24.3887039Z Working directory is '/home/runner/work/pskernel/pskernel'
+2026-10-09T15:36:24.3889808Z [command]/usr/bin/git version
+2026-10-09T15:36:24.3957429Z git version 2.55.0
+2026-10-09T15:36:24.3991953Z ##[endgroup]
+2026-10-09T15:36:24.4001844Z Temporarily overriding HOME='/home/runner/work/_temp/9ff9a431-e93b-44da-a99f-e60b982ad8ca' before making global git config changes
+2026-10-09T15:36:24.4005021Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T15:36:24.4007568Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-09T15:36:24.4066262Z Deleting the contents of '/home/runner/work/pskernel/pskernel'
+2026-10-09T15:36:24.4071055Z ##[group]Initializing the repository
+2026-10-09T15:36:24.4076757Z [command]/usr/bin/git init /home/runner/work/pskernel/pskernel
+2026-10-09T15:36:24.4217672Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-09T15:36:24.4220074Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-09T15:36:24.4222256Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-09T15:36:24.4223396Z hint: call:
+2026-10-09T15:36:24.4224159Z hint:
+2026-10-09T15:36:24.4225057Z hint: 	git config --global init.defaultBranch <name>
+2026-10-09T15:36:24.4226016Z hint:
+2026-10-09T15:36:24.4226943Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-09T15:36:24.4228836Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-09T15:36:24.4230554Z hint:
+2026-10-09T15:36:24.4231765Z hint: 	git branch -m <name>
+2026-10-09T15:36:24.4233024Z hint:
+2026-10-09T15:36:24.4234140Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-09T15:36:24.4235391Z Initialized empty Git repository in /home/runner/work/pskernel/pskernel/.git/
+2026-10-09T15:36:24.4239960Z [command]/usr/bin/git remote add origin https://github.com/dwijayuda/pskernel
+2026-10-09T15:36:24.4294313Z ##[endgroup]
+2026-10-09T15:36:24.4296530Z ##[group]Disabling automatic garbage collection
+2026-10-09T15:36:24.4298210Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-09T15:36:24.4336179Z ##[endgroup]
+2026-10-09T15:36:24.4338739Z ##[group]Setting up auth
+2026-10-09T15:36:24.4351697Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T15:36:24.4391936Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T15:36:24.4811085Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T15:36:24.4849137Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T15:36:24.5081901Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T15:36:24.5120600Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T15:36:24.5359850Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-09T15:36:24.5404530Z ##[endgroup]
+2026-10-09T15:36:24.5406661Z ##[group]Fetching the repository
+2026-10-09T15:36:24.5414665Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fcd875c8f38db4b0524090bd10c7c2fd5024053d:refs/remotes/origin/psc0/sh1-projection-grammar-v1
+2026-10-09T15:36:34.7356792Z From https://github.com/dwijayuda/pskernel
+2026-10-09T15:36:34.7358043Z  * [new ref]           fcd875c8f38db4b0524090bd10c7c2fd5024053d -> origin/psc0/sh1-projection-grammar-v1
+2026-10-09T15:36:34.7372164Z ##[endgroup]
+2026-10-09T15:36:34.7373292Z ##[group]Determining the checkout info
+2026-10-09T15:36:34.7374406Z ##[endgroup]
+2026-10-09T15:36:34.7375165Z [command]/usr/bin/git sparse-checkout disable
+2026-10-09T15:36:34.7460011Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-09T15:36:34.7481124Z ##[group]Checking out the ref
+2026-10-09T15:36:34.7483972Z [command]/usr/bin/git checkout --progress --force -B psc0/sh1-projection-grammar-v1 refs/remotes/origin/psc0/sh1-projection-grammar-v1
+2026-10-09T15:36:36.5083191Z Updating files:   6% (1291/20574)
+2026-10-09T15:36:36.5193727Z Updating files:   7% (1441/20574)
+2026-10-09T15:36:36.5407310Z Updating files:   8% (1646/20574)
+2026-10-09T15:36:36.5599076Z Updating files:   9% (1852/20574)
+2026-10-09T15:36:36.5919775Z Updating files:  10% (2058/20574)
+2026-10-09T15:36:36.6049542Z Updating files:  11% (2264/20574)
+2026-10-09T15:36:36.9178077Z Updating files:  12% (2469/20574)
+2026-10-09T15:36:37.8524097Z Updating files:  12% (2625/20574)
+2026-10-09T15:36:38.1525351Z Updating files:  12% (2628/20574)
+2026-10-09T15:36:38.1647676Z Updating files:  13% (2675/20574)
+2026-10-09T15:36:38.1736049Z Updating files:  14% (2881/20574)
+2026-10-09T15:36:38.1853585Z Updating files:  15% (3087/20574)
+2026-10-09T15:36:38.2019644Z Updating files:  16% (3292/20574)
+2026-10-09T15:36:38.2150014Z Updating files:  17% (3498/20574)
+2026-10-09T15:36:38.2291580Z Updating files:  18% (3704/20574)
+2026-10-09T15:36:38.2603771Z Updating files:  19% (3910/20574)
+2026-10-09T15:36:38.2855925Z Updating files:  20% (4115/20574)
+2026-10-09T15:36:38.2976739Z Updating files:  21% (4321/20574)
+2026-10-09T15:36:38.9330821Z Updating files:  22% (4527/20574)
+2026-10-09T15:36:39.8550536Z Updating files:  22% (4696/20574)
+2026-10-09T15:36:39.8568022Z Updating files:  22% (4699/20574)
+2026-10-09T15:36:39.8687664Z Updating files:  23% (4733/20574)
+2026-10-09T15:36:39.8776826Z Updating files:  24% (4938/20574)
+2026-10-09T15:36:39.8889714Z Updating files:  25% (5144/20574)
+2026-10-09T15:36:39.9006555Z Updating files:  26% (5350/20574)
+2026-10-09T15:36:39.9115334Z Updating files:  27% (5555/20574)
+2026-10-09T15:36:39.9839030Z Updating files:  28% (5761/20574)
+2026-10-09T15:36:40.0094734Z Updating files:  29% (5967/20574)
+2026-10-09T15:36:40.0235878Z Updating files:  30% (6173/20574)
+2026-10-09T15:36:40.0406274Z Updating files:  31% (6378/20574)
+2026-10-09T15:36:40.0577209Z Updating files:  32% (6584/20574)
+2026-10-09T15:36:40.0742197Z Updating files:  33% (6790/20574)
+2026-10-09T15:36:40.0890083Z Updating files:  34% (6996/20574)
+2026-10-09T15:36:40.1053677Z Updating files:  35% (7201/20574)
+2026-10-09T15:36:40.1216045Z Updating files:  36% (7407/20574)
+2026-10-09T15:36:40.1348955Z Updating files:  37% (7613/20574)
+2026-10-09T15:36:40.1492798Z Updating files:  38% (7819/20574)
+2026-10-09T15:36:40.1676132Z Updating files:  39% (8024/20574)
+2026-10-09T15:36:40.1876407Z Updating files:  40% (8230/20574)
+2026-10-09T15:36:40.2013114Z Updating files:  41% (8436/20574)
+2026-10-09T15:36:40.2148409Z Updating files:  42% (8642/20574)
+2026-10-09T15:36:40.2254381Z Updating files:  43% (8847/20574)
+2026-10-09T15:36:40.2385230Z Updating files:  44% (9053/20574)
+2026-10-09T15:36:40.3640362Z Updating files:  45% (9259/20574)
+2026-10-09T15:36:40.4119464Z Updating files:  46% (9465/20574)
+2026-10-09T15:36:40.4922529Z Updating files:  47% (9670/20574)
+2026-10-09T15:36:40.6399519Z Updating files:  48% (9876/20574)
+2026-10-09T15:36:40.7743852Z Updating files:  49% (10082/20574)
+2026-10-09T15:36:40.8404220Z Updating files:  49% (10221/20574)
+2026-10-09T15:36:41.1663918Z Updating files:  50% (10287/20574)
+2026-10-09T15:36:41.3788054Z Updating files:  51% (10493/20574)
+2026-10-09T15:36:41.6217178Z Updating files:  52% (10699/20574)
+2026-10-09T15:36:41.7733409Z Updating files:  53% (10905/20574)
+2026-10-09T15:36:41.8534950Z Updating files:  53% (11047/20574)
+2026-10-09T15:36:42.1568804Z Updating files:  54% (11110/20574)
+2026-10-09T15:36:42.2539275Z Updating files:  55% (11316/20574)
+2026-10-09T15:36:42.3484770Z Updating files:  56% (11522/20574)
+2026-10-09T15:36:42.3844153Z Updating files:  57% (11728/20574)
+2026-10-09T15:36:42.3919281Z Updating files:  58% (11933/20574)
+2026-10-09T15:36:42.3994489Z Updating files:  59% (12139/20574)
+2026-10-09T15:36:42.4073281Z Updating files:  60% (12345/20574)
+2026-10-09T15:36:42.4151218Z Updating files:  61% (12551/20574)
+2026-10-09T15:36:42.4240798Z Updating files:  62% (12756/20574)
+2026-10-09T15:36:42.4334346Z Updating files:  63% (12962/20574)
+2026-10-09T15:36:42.4430106Z Updating files:  64% (13168/20574)
+2026-10-09T15:36:42.4535645Z Updating files:  65% (13374/20574)
+2026-10-09T15:36:42.4635090Z Updating files:  66% (13579/20574)
+2026-10-09T15:36:42.4730778Z Updating files:  67% (13785/20574)
+2026-10-09T15:36:42.4823465Z Updating files:  68% (13991/20574)
+2026-10-09T15:36:42.4916453Z Updating files:  69% (14197/20574)
+2026-10-09T15:36:42.5010673Z Updating files:  70% (14402/20574)
+2026-10-09T15:36:42.5107597Z Updating files:  71% (14608/20574)
+2026-10-09T15:36:42.5199954Z Updating files:  72% (14814/20574)
+2026-10-09T15:36:42.5292319Z Updating files:  73% (15020/20574)
+2026-10-09T15:36:42.5411645Z Updating files:  74% (15225/20574)
+2026-10-09T15:36:42.5504250Z Updating files:  75% (15431/20574)
+2026-10-09T15:36:42.5594051Z Updating files:  76% (15637/20574)
+2026-10-09T15:36:42.5686296Z Updating files:  77% (15842/20574)
+2026-10-09T15:36:42.5785295Z Updating files:  78% (16048/20574)
+2026-10-09T15:36:42.5879420Z Updating files:  79% (16254/20574)
+2026-10-09T15:36:42.6005474Z Updating files:  80% (16460/20574)
+2026-10-09T15:36:42.6080651Z Updating files:  81% (16665/20574)
+2026-10-09T15:36:42.6164843Z Updating files:  82% (16871/20574)
+2026-10-09T15:36:42.6248074Z Updating files:  83% (17077/20574)
+2026-10-09T15:36:42.6335106Z Updating files:  84% (17283/20574)
+2026-10-09T15:36:42.6418117Z Updating files:  85% (17488/20574)
+2026-10-09T15:36:42.6501513Z Updating files:  86% (17694/20574)
+2026-10-09T15:36:42.6559554Z Updating files:  87% (17900/20574)
+2026-10-09T15:36:42.6638282Z Updating files:  88% (18106/20574)
+2026-10-09T15:36:42.6716909Z Updating files:  89% (18311/20574)
+2026-10-09T15:36:42.7047992Z Updating files:  90% (18517/20574)
+2026-10-09T15:36:42.7154570Z Updating files:  91% (18723/20574)
+2026-10-09T15:36:42.7243033Z Updating files:  92% (18929/20574)
+2026-10-09T15:36:42.7330568Z Updating files:  93% (19134/20574)
+2026-10-09T15:36:42.7869696Z Updating files:  94% (19340/20574)
+2026-10-09T15:36:42.8781091Z Updating files:  94% (19465/20574)
+2026-10-09T15:36:42.9632826Z Updating files:  95% (19546/20574)
+2026-10-09T15:36:43.0195605Z Updating files:  96% (19752/20574)
+2026-10-09T15:36:43.0488781Z Updating files:  97% (19957/20574)
+2026-10-09T15:36:43.1108034Z Updating files:  98% (20163/20574)
+2026-10-09T15:36:43.1554641Z Updating files:  99% (20369/20574)
+2026-10-09T15:36:43.1555135Z Updating files: 100% (20574/20574)
+2026-10-09T15:36:43.1555531Z Updating files: 100% (20574/20574), done.
+2026-10-09T15:36:43.2067274Z Switched to a new branch 'psc0/sh1-projection-grammar-v1'
+2026-10-09T15:36:43.2069898Z branch 'psc0/sh1-projection-grammar-v1' set up to track 'origin/psc0/sh1-projection-grammar-v1'.
+2026-10-09T15:36:43.2181098Z ##[endgroup]
+2026-10-09T15:36:43.2234875Z [command]/usr/bin/git log -1 --format=%H
+2026-10-09T15:36:43.2268586Z fcd875c8f38db4b0524090bd10c7c2fd5024053d
+2026-10-09T15:36:43.2587761Z ##[group]Run actions/checkout@v4
+2026-10-09T15:36:43.2588040Z with:
+2026-10-09T15:36:43.2588280Z   ref: 963030dc2d154008fccc82e7c8ed29331f138799
+2026-10-09T15:36:43.2588785Z   path: provider-source
+2026-10-09T15:36:43.2589048Z   sparse-checkout: psc0
+2026-10-09T15:36:43.2589300Z   repository: dwijayuda/pskernel
+2026-10-09T15:36:43.2591896Z   token: ***
+2026-10-09T15:36:43.2592102Z   ssh-strict: true
+2026-10-09T15:36:43.2592303Z   ssh-user: git
+2026-10-09T15:36:43.2592512Z   persist-credentials: true
+2026-10-09T15:36:43.2592743Z   clean: true
+2026-10-09T15:36:43.2592960Z   sparse-checkout-cone-mode: true
+2026-10-09T15:36:43.2593212Z   fetch-depth: 1
+2026-10-09T15:36:43.2593408Z   fetch-tags: false
+2026-10-09T15:36:43.2593607Z   show-progress: true
+2026-10-09T15:36:43.2593811Z   lfs: false
+2026-10-09T15:36:43.2593995Z   submodules: false
+2026-10-09T15:36:43.2594202Z   set-safe-directory: true
+2026-10-09T15:36:43.2594446Z   allow-unsafe-pr-checkout: false
+2026-10-09T15:36:43.2594747Z ##[endgroup]
+2026-10-09T15:36:43.3494637Z Syncing repository: dwijayuda/pskernel
+2026-10-09T15:36:43.3500438Z ##[group]Getting Git version info
+2026-10-09T15:36:43.3501389Z Working directory is '/home/runner/work/pskernel/pskernel/provider-source'
+2026-10-09T15:36:43.3552603Z [command]/usr/bin/git version
+2026-10-09T15:36:43.3603188Z git version 2.55.0
+2026-10-09T15:36:43.3625896Z ##[endgroup]
+2026-10-09T15:36:43.3642734Z Temporarily overriding HOME='/home/runner/work/_temp/e01ee1cc-7ed3-40c2-963a-f5c3eec95ae2' before making global git config changes
+2026-10-09T15:36:43.3644115Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T15:36:43.3650147Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel/provider-source
+2026-10-09T15:36:43.3696046Z ##[group]Initializing the repository
+2026-10-09T15:36:43.3700751Z [command]/usr/bin/git init /home/runner/work/pskernel/pskernel/provider-source
+2026-10-09T15:36:43.3746874Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-09T15:36:43.3748021Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-09T15:36:43.3749418Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-09T15:36:43.3750269Z hint: call:
+2026-10-09T15:36:43.3750727Z hint:
+2026-10-09T15:36:43.3751351Z hint: 	git config --global init.defaultBranch <name>
+2026-10-09T15:36:43.3752411Z hint:
+2026-10-09T15:36:43.3753467Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-09T15:36:43.3754783Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-09T15:36:43.3755687Z hint:
+2026-10-09T15:36:43.3756247Z hint: 	git branch -m <name>
+2026-10-09T15:36:43.3756864Z hint:
+2026-10-09T15:36:43.3757640Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-09T15:36:43.3759157Z Initialized empty Git repository in /home/runner/work/pskernel/pskernel/provider-source/.git/
+2026-10-09T15:36:43.3763014Z [command]/usr/bin/git remote add origin https://github.com/dwijayuda/pskernel
+2026-10-09T15:36:43.3805911Z ##[endgroup]
+2026-10-09T15:36:43.3806646Z ##[group]Disabling automatic garbage collection
+2026-10-09T15:36:43.3811862Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-09T15:36:43.3847027Z ##[endgroup]
+2026-10-09T15:36:43.3847652Z ##[group]Setting up auth
+2026-10-09T15:36:43.3855470Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T15:36:43.3893548Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T15:36:43.4161711Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T15:36:43.4200897Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T15:36:43.4466004Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T15:36:43.4508641Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T15:36:43.4756208Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-09T15:36:43.4799824Z ##[endgroup]
+2026-10-09T15:36:43.4800397Z ##[group]Fetching the repository
+2026-10-09T15:36:43.4810577Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin 963030dc2d154008fccc82e7c8ed29331f138799
+2026-10-09T15:36:43.8635243Z From https://github.com/dwijayuda/pskernel
+2026-10-09T15:36:43.8636211Z  * branch            963030dc2d154008fccc82e7c8ed29331f138799 -> FETCH_HEAD
+2026-10-09T15:36:43.8642025Z ##[endgroup]
+2026-10-09T15:36:43.8642840Z ##[group]Determining the checkout info
+2026-10-09T15:36:43.8645922Z ##[endgroup]
+2026-10-09T15:36:43.8646833Z ##[group]Setting up sparse checkout
+2026-10-09T15:36:43.8655141Z [command]/usr/bin/git sparse-checkout set psc0
+2026-10-09T15:36:43.8703145Z ##[endgroup]
+2026-10-09T15:36:43.8703995Z ##[group]Checking out the ref
+2026-10-09T15:36:43.8712359Z [command]/usr/bin/git checkout --progress --force 963030dc2d154008fccc82e7c8ed29331f138799
+2026-10-09T15:36:48.4207745Z Updating files:   0% (1/1082)
+2026-10-09T15:36:48.4215947Z Updating files:   1% (11/1082)
+2026-10-09T15:36:48.4223346Z Updating files:   2% (22/1082)
+2026-10-09T15:36:48.4278690Z Updating files:   3% (33/1082)
+2026-10-09T15:36:48.4285650Z Updating files:   4% (44/1082)
+2026-10-09T15:36:48.4292200Z Updating files:   5% (55/1082)
+2026-10-09T15:36:48.4299554Z Updating files:   6% (65/1082)
+2026-10-09T15:36:48.4368232Z Updating files:   7% (76/1082)
+2026-10-09T15:36:48.4393061Z Updating files:   8% (87/1082)
+2026-10-09T15:36:48.4422388Z Updating files:   9% (98/1082)
+2026-10-09T15:36:48.4444284Z Updating files:  10% (109/1082)
+2026-10-09T15:36:48.4460397Z Updating files:  11% (120/1082)
+2026-10-09T15:36:48.4469886Z Updating files:  12% (130/1082)
+2026-10-09T15:36:48.4570778Z Updating files:  13% (141/1082)
+2026-10-09T15:36:48.4666965Z Updating files:  14% (152/1082)
+2026-10-09T15:36:48.4671414Z Updating files:  15% (163/1082)
+2026-10-09T15:36:48.4676580Z Updating files:  16% (174/1082)
+2026-10-09T15:36:48.4684151Z Updating files:  17% (184/1082)
+2026-10-09T15:36:48.4691787Z Updating files:  18% (195/1082)
+2026-10-09T15:36:48.4699008Z Updating files:  19% (206/1082)
+2026-10-09T15:36:48.4706491Z Updating files:  20% (217/1082)
+2026-10-09T15:36:48.4715082Z Updating files:  21% (228/1082)
+2026-10-09T15:36:48.4727431Z Updating files:  22% (239/1082)
+2026-10-09T15:36:48.4731193Z Updating files:  23% (249/1082)
+2026-10-09T15:36:48.4736583Z Updating files:  24% (260/1082)
+2026-10-09T15:36:48.4743357Z Updating files:  25% (271/1082)
+2026-10-09T15:36:48.4752565Z Updating files:  26% (282/1082)
+2026-10-09T15:36:48.4761193Z Updating files:  27% (293/1082)
+2026-10-09T15:36:48.4769021Z Updating files:  28% (303/1082)
+2026-10-09T15:36:48.4781169Z Updating files:  29% (314/1082)
+2026-10-09T15:36:48.4786875Z Updating files:  30% (325/1082)
+2026-10-09T15:36:48.4795024Z Updating files:  31% (336/1082)
+2026-10-09T15:36:48.4806429Z Updating files:  32% (347/1082)
+2026-10-09T15:36:48.4814724Z Updating files:  33% (358/1082)
+2026-10-09T15:36:48.4825996Z Updating files:  34% (368/1082)
+2026-10-09T15:36:48.4833393Z Updating files:  35% (379/1082)
+2026-10-09T15:36:48.4844679Z Updating files:  36% (390/1082)
+2026-10-09T15:36:48.4855153Z Updating files:  37% (401/1082)
+2026-10-09T15:36:48.4862760Z Updating files:  38% (412/1082)
+2026-10-09T15:36:48.4874711Z Updating files:  39% (422/1082)
+2026-10-09T15:36:48.4885416Z Updating files:  40% (433/1082)
+2026-10-09T15:36:48.4894481Z Updating files:  41% (444/1082)
+2026-10-09T15:36:48.4903921Z Updating files:  42% (455/1082)
+2026-10-09T15:36:48.4913918Z Updating files:  43% (466/1082)
+2026-10-09T15:36:48.4923865Z Updating files:  44% (477/1082)
+2026-10-09T15:36:48.4934706Z Updating files:  45% (487/1082)
+2026-10-09T15:36:48.4942242Z Updating files:  46% (498/1082)
+2026-10-09T15:36:48.4953568Z Updating files:  47% (509/1082)
+2026-10-09T15:36:48.4961532Z Updating files:  48% (520/1082)
+2026-10-09T15:36:48.4969057Z Updating files:  49% (531/1082)
+2026-10-09T15:36:48.4976857Z Updating files:  50% (541/1082)
+2026-10-09T15:36:48.4984027Z Updating files:  51% (552/1082)
+2026-10-09T15:36:48.4990673Z Updating files:  52% (563/1082)
+2026-10-09T15:36:48.4998830Z Updating files:  53% (574/1082)
+2026-10-09T15:36:48.5007025Z Updating files:  54% (585/1082)
+2026-10-09T15:36:48.5013492Z Updating files:  55% (596/1082)
+2026-10-09T15:36:48.5023156Z Updating files:  56% (606/1082)
+2026-10-09T15:36:48.5030702Z Updating files:  57% (617/1082)
+2026-10-09T15:36:48.5040139Z Updating files:  58% (628/1082)
+2026-10-09T15:36:48.5048445Z Updating files:  59% (639/1082)
+2026-10-09T15:36:48.5059017Z Updating files:  60% (650/1082)
+2026-10-09T15:36:48.5124686Z Updating files:  61% (661/1082)
+2026-10-09T15:36:48.5131427Z Updating files:  62% (671/1082)
+2026-10-09T15:36:48.5136980Z Updating files:  63% (682/1082)
+2026-10-09T15:36:48.5145258Z Updating files:  64% (693/1082)
+2026-10-09T15:36:49.1209553Z Updating files:  65% (704/1082)
+2026-10-09T15:36:50.0449851Z Updating files:  66% (715/1082)
+2026-10-09T15:36:50.0453641Z Updating files:  66% (718/1082)
+2026-10-09T15:36:50.0460970Z Updating files:  67% (725/1082)
+2026-10-09T15:36:50.0466597Z Updating files:  68% (736/1082)
+2026-10-09T15:36:50.0474343Z Updating files:  69% (747/1082)
+2026-10-09T15:36:50.0483528Z Updating files:  70% (758/1082)
+2026-10-09T15:36:50.0490234Z Updating files:  71% (769/1082)
+2026-10-09T15:36:50.0496159Z Updating files:  72% (780/1082)
+2026-10-09T15:36:50.0503299Z Updating files:  73% (790/1082)
+2026-10-09T15:36:50.0509936Z Updating files:  74% (801/1082)
+2026-10-09T15:36:50.0514343Z Updating files:  75% (812/1082)
+2026-10-09T15:36:50.0520412Z Updating files:  76% (823/1082)
+2026-10-09T15:36:50.0524886Z Updating files:  77% (834/1082)
+2026-10-09T15:36:50.0533255Z Updating files:  78% (844/1082)
+2026-10-09T15:36:50.0543228Z Updating files:  79% (855/1082)
+2026-10-09T15:36:50.0549912Z Updating files:  80% (866/1082)
+2026-10-09T15:36:50.0554961Z Updating files:  81% (877/1082)
+2026-10-09T15:36:50.0559876Z Updating files:  82% (888/1082)
+2026-10-09T15:36:50.0564406Z Updating files:  83% (899/1082)
+2026-10-09T15:36:50.0569511Z Updating files:  84% (909/1082)
+2026-10-09T15:36:50.0575326Z Updating files:  85% (920/1082)
+2026-10-09T15:36:50.0582960Z Updating files:  86% (931/1082)
+2026-10-09T15:36:50.0586328Z Updating files:  87% (942/1082)
+2026-10-09T15:36:50.0592070Z Updating files:  88% (953/1082)
+2026-10-09T15:36:50.0596852Z Updating files:  89% (963/1082)
+2026-10-09T15:36:50.0602208Z Updating files:  90% (974/1082)
+2026-10-09T15:36:50.0608337Z Updating files:  91% (985/1082)
+2026-10-09T15:36:50.0614865Z Updating files:  92% (996/1082)
+2026-10-09T15:36:50.0621835Z Updating files:  93% (1007/1082)
+2026-10-09T15:36:50.0626738Z Updating files:  94% (1018/1082)
+2026-10-09T15:36:50.0632484Z Updating files:  95% (1028/1082)
+2026-10-09T15:36:50.0639226Z Updating files:  96% (1039/1082)
+2026-10-09T15:36:50.0644821Z Updating files:  97% (1050/1082)
+2026-10-09T15:36:50.0654099Z Updating files:  98% (1061/1082)
+2026-10-09T15:36:50.0662396Z Updating files:  99% (1072/1082)
+2026-10-09T15:36:50.0662945Z Updating files: 100% (1082/1082)
+2026-10-09T15:36:50.0663549Z Updating files: 100% (1082/1082), done.
+2026-10-09T15:36:50.0842245Z Note: switching to '963030dc2d154008fccc82e7c8ed29331f138799'.
+2026-10-09T15:36:50.0842967Z 
+2026-10-09T15:36:50.0843425Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-09T15:36:50.0844448Z changes and commit them, and you can discard any commits you make in this
+2026-10-09T15:36:50.0845662Z state without impacting any branches by switching back to a branch.
+2026-10-09T15:36:50.0846145Z 
+2026-10-09T15:36:50.0846460Z If you want to create a new branch to retain commits you create, you may
+2026-10-09T15:36:50.0847215Z do so (now or later) by using -c with the switch command. Example:
+2026-10-09T15:36:50.0847791Z 
+2026-10-09T15:36:50.0848041Z   git switch -c <new-branch-name>
+2026-10-09T15:36:50.0848748Z 
+2026-10-09T15:36:50.0848987Z Or undo this operation with:
+2026-10-09T15:36:50.0849339Z 
+2026-10-09T15:36:50.0849479Z   git switch -
+2026-10-09T15:36:50.0849689Z 
+2026-10-09T15:36:50.0850060Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-09T15:36:50.0850505Z 
+2026-10-09T15:36:50.0850926Z HEAD is now at 963030d sync(psc0): replace kernel runtime implementation with latest proof-lane source
+2026-10-09T15:36:50.0879798Z ##[endgroup]
+2026-10-09T15:36:50.0933470Z [command]/usr/bin/git log -1 --format=%H
+2026-10-09T15:36:50.0963275Z 963030dc2d154008fccc82e7c8ed29331f138799
+2026-10-09T15:36:50.1146745Z ##[group]Run actions/setup-node@v4
+2026-10-09T15:36:50.1147048Z with:
+2026-10-09T15:36:50.1147244Z   node-version: 22.23.3
+2026-10-09T15:36:50.1147648Z   always-auth: false
+2026-10-09T15:36:50.1147868Z   check-latest: false
+2026-10-09T15:36:50.1150753Z   token: ***
+2026-10-09T15:36:50.1150969Z ##[endgroup]
+2026-10-09T15:36:50.2653319Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-09T15:36:50.2658781Z (node:2435) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T15:36:50.2659991Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T15:36:50.2662123Z ##[group]Environment details
+2026-10-09T15:36:50.7117705Z node: v22.23.3
+2026-10-09T15:36:50.7118844Z npm: 10.9.9
+2026-10-09T15:36:50.7119386Z yarn: 1.22.22
+2026-10-09T15:36:50.7120419Z ##[endgroup]
+2026-10-09T15:36:50.7466263Z ##[group]Run leanprover/lean-action@v1
+2026-10-09T15:36:50.7466593Z with:
+2026-10-09T15:36:50.7466846Z   lake-package-directory: provider-source/psc0
+2026-10-09T15:36:50.7467151Z   auto-config: false
+2026-10-09T15:36:50.7467365Z   build: false
+2026-10-09T15:36:50.7467574Z   test: false
+2026-10-09T15:36:50.7467769Z   use-github-cache: false
+2026-10-09T15:36:50.7467996Z   use-mathlib-cache: false
+2026-10-09T15:36:50.7468219Z   lint: default
+2026-10-09T15:36:50.7468647Z   mk_all-check: false
+2026-10-09T15:36:50.7468887Z   check-reservoir-eligibility: false
+2026-10-09T15:36:50.7469147Z   leanchecker: false
+2026-10-09T15:36:50.7469363Z   lean4checker: false
+2026-10-09T15:36:50.7469564Z   nanoda: false
+2026-10-09T15:36:50.7469764Z   nanoda-allow-sorry: true
+2026-10-09T15:36:50.7469988Z   axiom-audit: false
+2026-10-09T15:36:50.7470263Z   axiom-audit-allow: propext,Classical.choice,Quot.sound
+2026-10-09T15:36:50.7470612Z   reinstall-transient-toolchain: false
+2026-10-09T15:36:50.7470918Z ##[endgroup]
+2026-10-09T15:36:50.7556165Z ##[start-action display=install elan;id=__leanprover_lean-action.__run]
+2026-10-09T15:36:50.7595276Z ##[group]Run : Install Elan
+2026-10-09T15:36:50.7595600Z [36;1m: Install Elan[0m
+2026-10-09T15:36:50.7595893Z [36;1m${GITHUB_ACTION_PATH}/scripts/install_elan.sh[0m
+2026-10-09T15:36:50.7877867Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T15:36:50.7878594Z ##[endgroup]
+2026-10-09T15:36:50.8019473Z ##[group]Elan Installation Output
+2026-10-09T15:36:50.8552729Z info: downloading installer
+2026-10-09T15:36:52.6599180Z info: downloading https://releases.lean-lang.org/lean4/v4.34.0/lean-4.34.0-linux.tar.zst
+2026-10-09T15:36:56.3150305Z info: installing /home/runner/.elan/toolchains/leanprover--lean4---v4.34.0
+2026-10-09T15:37:03.7156879Z Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)
+2026-10-09T15:37:03.7636538Z Lake version 5.0.0-src+293d5d0 (Lean version 4.34.0)
+2026-10-09T15:37:03.7641985Z ##[endgroup]
+2026-10-09T15:37:03.7642229Z 
+2026-10-09T15:37:03.7667422Z ##[end-action id=__leanprover_lean-action.__run;outcome=success;conclusion=success;duration_ms=13011]
+2026-10-09T15:37:03.7676459Z ##[start-action display=configure `lean-action`;id=__leanprover_lean-action.config]
+2026-10-09T15:37:03.7698237Z ##[group]Run : Configure Lean Action
+2026-10-09T15:37:03.7698972Z [36;1m: Configure Lean Action[0m
+2026-10-09T15:37:03.7699276Z [36;1m${GITHUB_ACTION_PATH}/scripts/config.sh[0m
+2026-10-09T15:37:03.7764217Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T15:37:03.7764609Z env:
+2026-10-09T15:37:03.7764826Z   AUTO_CONFIG: false
+2026-10-09T15:37:03.7765078Z   BUILD: false
+2026-10-09T15:37:03.7765301Z   TEST: false
+2026-10-09T15:37:03.7765511Z   LINT: default
+2026-10-09T15:37:03.7765725Z ##[endgroup]
+2026-10-09T15:37:03.7879669Z ##[group]Configure lean-action
+2026-10-09T15:37:03.7934464Z ##[end-action id=__leanprover_lean-action.config;outcome=success;conclusion=success;duration_ms=25]
+2026-10-09T15:37:03.7939654Z ##[start-action display=reinstall transient toolchain;id=__leanprover_lean-action.__run_2]
+2026-10-09T15:37:03.7945619Z ##[end-action id=__leanprover_lean-action.__run_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.7948793Z ##[start-action display=ensure all files are imported;id=__leanprover_lean-action.mk_all]
+2026-10-09T15:37:03.7952613Z ##[end-action id=__leanprover_lean-action.mk_all;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.7954697Z ##[start-action display=Run actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25;id=__leanprover_lean-action.__actions_cache]
+2026-10-09T15:37:03.7958256Z ##[end-action id=__leanprover_lean-action.__actions_cache;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.7960606Z ##[start-action display=detect mathlib;id=__leanprover_lean-action.detect-mathlib]
+2026-10-09T15:37:03.7964347Z ##[end-action id=__leanprover_lean-action.detect-mathlib;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.7966148Z ##[start-action display=get mathlib cache;id=__leanprover_lean-action.__run_3]
+2026-10-09T15:37:03.7982547Z ##[end-action id=__leanprover_lean-action.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.8011631Z ##[start-action display=build dwijayuda/pskernel;id=__leanprover_lean-action.build]
+2026-10-09T15:37:03.8016007Z ##[end-action id=__leanprover_lean-action.build;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.8018107Z ##[start-action display=Run actions/cache/save@caa296126883cff596d87d8935842f9db880ef25;id=__leanprover_lean-action.__actions_cache_2]
+2026-10-09T15:37:03.8022103Z ##[end-action id=__leanprover_lean-action.__actions_cache_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.8025735Z ##[start-action display=test dwijayuda/pskernel;id=__leanprover_lean-action.test]
+2026-10-09T15:37:03.8030180Z ##[end-action id=__leanprover_lean-action.test;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.8033180Z ##[start-action display=lint dwijayuda/pskernel;id=__leanprover_lean-action.lint]
+2026-10-09T15:37:03.8037197Z ##[end-action id=__leanprover_lean-action.lint;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.8039378Z ##[start-action display=check reservoir eligibility;id=__leanprover_lean-action.__run_4]
+2026-10-09T15:37:03.8042852Z ##[end-action id=__leanprover_lean-action.__run_4;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.8045441Z ##[start-action display=check environment with leanchecker;id=__leanprover_lean-action.__run_5]
+2026-10-09T15:37:03.8050377Z ##[end-action id=__leanprover_lean-action.__run_5;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.8052734Z ##[start-action display=check environment with nanoda;id=__leanprover_lean-action.nanoda]
+2026-10-09T15:37:03.8055940Z ##[end-action id=__leanprover_lean-action.nanoda;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.8058588Z ##[start-action display=audit axioms with axiom-audit;id=__leanprover_lean-action.axiom-audit]
+2026-10-09T15:37:03.8062051Z ##[end-action id=__leanprover_lean-action.axiom-audit;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T15:37:03.8133410Z ##[group]Run actions/cache/restore@v4
+2026-10-09T15:37:03.8133706Z with:
+2026-10-09T15:37:03.8133933Z   path: provider-source/psc0/.lake/build
+2026-10-09T15:37:03.8134354Z   key: psc0-sh1-provider-v1-Linux-X64-963030dc2d154008fccc82e7c8ed29331f138799
+2026-10-09T15:37:03.8134784Z   enableCrossOsArchive: false
+2026-10-09T15:37:03.8135032Z   fail-on-cache-miss: false
+2026-10-09T15:37:03.8135262Z   lookup-only: false
+2026-10-09T15:37:03.8135467Z ##[endgroup]
+2026-10-09T15:37:03.9395960Z (node:2512) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T15:37:03.9396790Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T15:37:04.2237922Z Cache hit for: psc0-sh1-provider-v1-Linux-X64-963030dc2d154008fccc82e7c8ed29331f138799
+2026-10-09T15:37:04.2348232Z (node:2512) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T15:37:05.5282840Z Received 748325 of 9136933 (8.2%), 0.7 MBs/sec
+2026-10-09T15:37:05.9287215Z Received 9136933 of 9136933 (100.0%), 6.2 MBs/sec
+2026-10-09T15:37:05.9288104Z Cache Size: ~9 MB (9136933 B)
+2026-10-09T15:37:05.9323148Z [command]/usr/bin/tar -xf /home/runner/work/_temp/9da8add3-2514-4460-ab0d-c2642787a2d4/cache.tzst -P -C /home/runner/work/pskernel/pskernel --use-compress-program unzstd
+2026-10-09T15:37:06.0532144Z Cache restored successfully
+2026-10-09T15:37:06.0617261Z Cache restored from key: psc0-sh1-provider-v1-Linux-X64-963030dc2d154008fccc82e7c8ed29331f138799
+2026-10-09T15:37:06.0736436Z ##[group]Run lake build psc_kernel_core_provider
+2026-10-09T15:37:06.0737145Z [36;1mlake build psc_kernel_core_provider[0m
+2026-10-09T15:37:06.0806823Z shell: /usr/bin/bash -e {0}
+2026-10-09T15:37:06.0807111Z ##[endgroup]
+2026-10-09T15:37:07.7359349Z ⚠ [7/204] Replayed Ps.Core.Abstract
+2026-10-09T15:37:07.7360680Z warning: packages/core/src/Ps/Core/Abstract.lean:8:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7361308Z 
+2026-10-09T15:37:07.7362182Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7362963Z   [apply] _depth
+2026-10-09T15:37:07.7363119Z 
+2026-10-09T15:37:07.7363523Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7364479Z warning: packages/core/src/Ps/Core/Abstract.lean:16:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7364990Z 
+2026-10-09T15:37:07.7365770Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7366514Z   [apply] _depth
+2026-10-09T15:37:07.7366667Z 
+2026-10-09T15:37:07.7367037Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7367970Z warning: packages/core/src/Ps/Core/Abstract.lean:18:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7368792Z 
+2026-10-09T15:37:07.7369507Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7370249Z   [apply] _depth
+2026-10-09T15:37:07.7370396Z 
+2026-10-09T15:37:07.7370770Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7371680Z warning: packages/core/src/Ps/Core/Abstract.lean:20:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7372199Z 
+2026-10-09T15:37:07.7372809Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7373493Z   [apply] _depth
+2026-10-09T15:37:07.7373622Z 
+2026-10-09T15:37:07.7373930Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7374679Z warning: packages/core/src/Ps/Core/Abstract.lean:66:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7375081Z 
+2026-10-09T15:37:07.7375637Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7376223Z   [apply] _depth
+2026-10-09T15:37:07.7376340Z 
+2026-10-09T15:37:07.7376637Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7377198Z ⚠ [8/204] Replayed Ps.Core.Subst
+2026-10-09T15:37:07.7377813Z warning: packages/core/src/Ps/Core/Subst.lean:14:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T15:37:07.7378208Z 
+2026-10-09T15:37:07.7378932Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7379536Z   [apply] _cutoff
+2026-10-09T15:37:07.7380078Z 
+2026-10-09T15:37:07.7380392Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7381119Z warning: packages/core/src/Ps/Core/Subst.lean:16:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T15:37:07.7381512Z 
+2026-10-09T15:37:07.7382078Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7382688Z   [apply] _cutoff
+2026-10-09T15:37:07.7382814Z 
+2026-10-09T15:37:07.7383123Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7384091Z warning: packages/core/src/Ps/Core/Subst.lean:18:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T15:37:07.7384511Z 
+2026-10-09T15:37:07.7385070Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7385657Z   [apply] _cutoff
+2026-10-09T15:37:07.7385791Z 
+2026-10-09T15:37:07.7386093Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7386814Z warning: packages/core/src/Ps/Core/Subst.lean:20:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T15:37:07.7387210Z 
+2026-10-09T15:37:07.7387761Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7388557Z   [apply] _cutoff
+2026-10-09T15:37:07.7388681Z 
+2026-10-09T15:37:07.7388988Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7389703Z warning: packages/core/src/Ps/Core/Subst.lean:66:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T15:37:07.7390096Z 
+2026-10-09T15:37:07.7390646Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7391232Z   [apply] _cutoff
+2026-10-09T15:37:07.7391354Z 
+2026-10-09T15:37:07.7391654Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7392371Z warning: packages/core/src/Ps/Core/Subst.lean:94:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7392766Z 
+2026-10-09T15:37:07.7393310Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7393899Z   [apply] _depth
+2026-10-09T15:37:07.7394019Z 
+2026-10-09T15:37:07.7394325Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7395031Z warning: packages/core/src/Ps/Core/Subst.lean:96:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7395425Z 
+2026-10-09T15:37:07.7395978Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7396568Z   [apply] _depth
+2026-10-09T15:37:07.7396690Z 
+2026-10-09T15:37:07.7396988Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7397693Z warning: packages/core/src/Ps/Core/Subst.lean:98:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7398085Z 
+2026-10-09T15:37:07.7398759Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7399351Z   [apply] _depth
+2026-10-09T15:37:07.7399470Z 
+2026-10-09T15:37:07.7399775Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7400483Z warning: packages/core/src/Ps/Core/Subst.lean:100:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7400876Z 
+2026-10-09T15:37:07.7401428Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7402203Z   [apply] _depth
+2026-10-09T15:37:07.7402325Z 
+2026-10-09T15:37:07.7402618Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7403335Z warning: packages/core/src/Ps/Core/Subst.lean:146:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T15:37:07.7403727Z 
+2026-10-09T15:37:07.7404274Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7404859Z   [apply] _depth
+2026-10-09T15:37:07.7404974Z 
+2026-10-09T15:37:07.7405444Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7406111Z ⚠ [62/204] Replayed Ps.KernelCore.Admission.Quot.Bootstrap
+2026-10-09T15:37:07.7406966Z warning: packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Bootstrap.lean:231:6: Variable name `relation` is not explicitly referenced.
+2026-10-09T15:37:07.7407510Z 
+2026-10-09T15:37:07.7408065Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7408996Z   [apply] _relation
+2026-10-09T15:37:07.7409136Z 
+2026-10-09T15:37:07.7409445Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7410332Z warning: packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Bootstrap.lean:280:6: Variable name `value` is not explicitly referenced.
+2026-10-09T15:37:07.7410870Z 
+2026-10-09T15:37:07.7411431Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T15:37:07.7412019Z   [apply] _value
+2026-10-09T15:37:07.7412145Z 
+2026-10-09T15:37:07.7412443Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T15:37:07.7569530Z Build completed successfully (204 jobs).
+2026-10-09T15:37:07.7997329Z ##[group]Run actions/download-artifact@v4
+2026-10-09T15:37:07.7997754Z with:
+2026-10-09T15:37:07.7998241Z   name: psc0-sh1-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d
+2026-10-09T15:37:07.7999106Z   path: qualification-artifacts
+2026-10-09T15:37:07.7999460Z   merge-multiple: false
+2026-10-09T15:37:07.7999878Z   repository: dwijayuda/pskernel
+2026-10-09T15:37:07.8000271Z   run-id: 37947341800
+2026-10-09T15:37:07.8000637Z ##[endgroup]
+2026-10-09T15:37:07.9532581Z Downloading single artifact
+2026-10-09T15:37:07.9693251Z (node:2540) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T15:37:07.9694826Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T15:37:08.2519854Z Preparing to download the following artifacts:
+2026-10-09T15:37:08.2522373Z - psc0-sh1-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d (ID: 11627040677, Size: 5336678, Expected Digest: sha256:a05e427bb580fea603c1cad9946977910ab85e044caf605fe5b4b5f6f271e728)
+2026-10-09T15:37:08.5100617Z Redirecting to blob download url: https://productionresultssa10.blob.core.windows.net/actions-results/5dfdc68b-e354-8841-a7c9-55f687f4a8f8/workflow-job-run-4143bb1d-8c9d-504b-bb8e-e83c9d758dd7/artifacts/25327c8f0899885e36a73e8a69dec747a534f6a4598bbe8e38b3b6ba17858f2a.zip
+2026-10-09T15:37:08.5103367Z Starting download of artifact to: /home/runner/work/pskernel/pskernel/qualification-artifacts
+2026-10-09T15:37:08.8297700Z (node:2540) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-09T15:37:09.9344540Z SHA256 digest of downloaded artifact is a05e427bb580fea603c1cad9946977910ab85e044caf605fe5b4b5f6f271e728
+2026-10-09T15:37:09.9345544Z Artifact download completed successfully.
+2026-10-09T15:37:09.9346061Z Total of 1 artifact(s) downloaded
+2026-10-09T15:37:09.9353616Z Download artifact has finished successfully
+2026-10-09T15:37:09.9499939Z ##[group]Run node scripts/sh1-check-admissions.mjs --provider-root ../provider-source/psc0 --artifacts ../qualification-artifacts/dist/sh1
+2026-10-09T15:37:09.9501210Z [36;1mnode scripts/sh1-check-admissions.mjs --provider-root ../provider-source/psc0 --artifacts ../qualification-artifacts/dist/sh1[0m
+2026-10-09T15:37:09.9565772Z shell: /usr/bin/bash -e {0}
+2026-10-09T15:37:09.9566318Z ##[endgroup]
+2026-10-09T15:37:12.5560532Z PSC0_SH1_PROVIDER_ADMISSIONS: {"schemaVersion":1,"evidence":"selected-provider-acceptance-for-qualified-compiler-admissions","sourceRef":"fcd875c8f38db4b0524090bd10c7c2fd5024053d","sourceClosureSha256":"6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7","compilerSha256":"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15","provider":{"sourceRef":"963030dc2d154008fccc82e7c8ed29331f138799","sourceTree":"38c8c55bd2b214753e56c58c15c4901c32c01b86","binarySha256":"88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec","metadata":{"protocol":"pskernel-core/1","provider":"pskernel-core-native","leanVersion":"4.34.0","leanCommit":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","profile":"lean4.34-core","status":"ready"},"lean":"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)","node":"v22.23.3","command":["psc_kernel_core_provider","--check"],"resourcePolicy":"Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.","timeoutMs":60000},"streams":[{"canonicalAdmissionsSha256":"9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5","artifacts":["C2 compiler source","C3 compiler source"],"durationMs":1555.7454980000002,"result":{"protocol":"pskernel-core/1","provider":"pskernel-core-native","leanVersion":"4.34.0","leanCommit":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","profile":"lean4.34-core","accepted":true}},{"canonicalAdmissionsSha256":"372371596fba560eca5ba52d29e20d91780d5c3321e4353a7a4c1a009167e10f","artifacts":["C2 raw lean capability source","C3 raw lean capability source"],"durationMs":14.807432000000063,"result":{"protocol":"pskernel-core/1","provider":"pskernel-core-native","leanVersion":"4.34.0","leanCommit":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","profile":"lean4.34-core","accepted":true}},{"canonicalAdmissionsSha256":"bb84332515024d4145b7cedb636fb6095d3cbe20a4fc3043dc37905f7574a900","artifacts":["C2 raw ps capability source","C3 raw ps capability source"],"durationMs":16.380443000000014,"result":{"protocol":"pskernel-core/1","provider":"pskernel-core-native","leanVersion":"4.34.0","leanCommit":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","profile":"lean4.34-core","accepted":true}},{"canonicalAdmissionsSha256":"11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8","artifacts":["C2 raw recursive-generic fixture source","C3 raw recursive-generic fixture source"],"durationMs":7.705719000000045,"result":{"protocol":"pskernel-core/1","provider":"pskernel-core-native","leanVersion":"4.34.0","leanCommit":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","profile":"lean4.34-core","accepted":true}}],"accepted":true,"emissionWasGatedByThisCheck":false,"qualificationBoundary":"Compiler-only artifacts were generated first; promotion may use this additional exact-stream provider acceptance."}
+2026-10-09T15:37:12.5607721Z PSC0_SH1_PROVIDER_ADMISSIONS_FILE: {"path":"kernel-admissions.json","sha256":"5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913","bytes":3532,"content":"{\n  \"schemaVersion\": 1,\n  \"evidence\": \"selected-provider-acceptance-for-qualified-compiler-admissions\",\n  \"sourceRef\": \"fcd875c8f38db4b0524090bd10c7c2fd5024053d\",\n  \"sourceClosureSha256\": \"6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7\",\n  \"compilerSha256\": \"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\n  \"provider\": {\n    \"sourceRef\": \"963030dc2d154008fccc82e7c8ed29331f138799\",\n    \"sourceTree\": \"38c8c55bd2b214753e56c58c15c4901c32c01b86\",\n    \"binarySha256\": \"88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec\",\n    \"metadata\": {\n      \"protocol\": \"pskernel-core/1\",\n      \"provider\": \"pskernel-core-native\",\n      \"leanVersion\": \"4.34.0\",\n      \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n      \"profile\": \"lean4.34-core\",\n      \"status\": \"ready\"\n    },\n    \"lean\": \"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\n    \"node\": \"v22.23.3\",\n    \"command\": [\n      \"psc_kernel_core_provider\",\n      \"--check\"\n    ],\n    \"resourcePolicy\": \"Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.\",\n    \"timeoutMs\": 60000\n  },\n  \"streams\": [\n    {\n      \"canonicalAdmissionsSha256\": \"9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5\",\n      \"artifacts\": [\n        \"C2 compiler source\",\n        \"C3 compiler source\"\n      ],\n      \"durationMs\": 1555.7454980000002,\n      \"result\": {\n        \"protocol\": \"pskernel-core/1\",\n        \"provider\": \"pskernel-core-native\",\n        \"leanVersion\": \"4.34.0\",\n        \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n        \"profile\": \"lean4.34-core\",\n        \"accepted\": true\n      }\n    },\n    {\n      \"canonicalAdmissionsSha256\": \"372371596fba560eca5ba52d29e20d91780d5c3321e4353a7a4c1a009167e10f\",\n      \"artifacts\": [\n        \"C2 raw lean capability source\",\n        \"C3 raw lean capability source\"\n      ],\n      \"durationMs\": 14.807432000000063,\n      \"result\": {\n        \"protocol\": \"pskernel-core/1\",\n        \"provider\": \"pskernel-core-native\",\n        \"leanVersion\": \"4.34.0\",\n        \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n        \"profile\": \"lean4.34-core\",\n        \"accepted\": true\n      }\n    },\n    {\n      \"canonicalAdmissionsSha256\": \"bb84332515024d4145b7cedb636fb6095d3cbe20a4fc3043dc37905f7574a900\",\n      \"artifacts\": [\n        \"C2 raw ps capability source\",\n        \"C3 raw ps capability source\"\n      ],\n      \"durationMs\": 16.380443000000014,\n      \"result\": {\n        \"protocol\": \"pskernel-core/1\",\n        \"provider\": \"pskernel-core-native\",\n        \"leanVersion\": \"4.34.0\",\n        \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n        \"profile\": \"lean4.34-core\",\n        \"accepted\": true\n      }\n    },\n    {\n      \"canonicalAdmissionsSha256\": \"11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8\",\n      \"artifacts\": [\n        \"C2 raw recursive-generic fixture source\",\n        \"C3 raw recursive-generic fixture source\"\n      ],\n      \"durationMs\": 7.705719000000045,\n      \"result\": {\n        \"protocol\": \"pskernel-core/1\",\n        \"provider\": \"pskernel-core-native\",\n        \"leanVersion\": \"4.34.0\",\n        \"leanCommit\": \"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\n        \"profile\": \"lean4.34-core\",\n        \"accepted\": true\n      }\n    }\n  ],\n  \"accepted\": true,\n  \"emissionWasGatedByThisCheck\": false,\n  \"qualificationBoundary\": \"Compiler-only artifacts were generated first; promotion may use this additional exact-stream provider acceptance.\"\n}\n"}
+2026-10-09T15:37:12.7152964Z ##[group]Run actions/upload-artifact@v4
+2026-10-09T15:37:12.7153466Z with:
+2026-10-09T15:37:12.7154023Z   name: psc0-sh1-kernel-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d
+2026-10-09T15:37:12.7154857Z   path: qualification-artifacts/dist/sh1/kernel-admissions.json
+2026-10-09T15:37:12.7155469Z   if-no-files-found: ignore
+2026-10-09T15:37:12.7155889Z   retention-days: 30
+2026-10-09T15:37:12.7156279Z   compression-level: 6
+2026-10-09T15:37:12.7156681Z   overwrite: false
+2026-10-09T15:37:12.7157070Z   include-hidden-files: false
+2026-10-09T15:37:12.7157500Z ##[endgroup]
+2026-10-09T15:37:12.8931941Z (node:2613) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T15:37:12.8933844Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T15:37:12.8998962Z With the provided path, there will be 1 file uploaded
+2026-10-09T15:37:12.9000823Z Artifact name is valid!
+2026-10-09T15:37:12.9002201Z Root directory input is valid!
+2026-10-09T15:37:13.2823976Z Beginning upload of artifact content to blob storage
+2026-10-09T15:37:13.3017621Z (node:2613) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T15:37:13.5750032Z Uploaded bytes 1284
+2026-10-09T15:37:13.6574080Z Finished uploading artifact content to blob storage!
+2026-10-09T15:37:13.6575473Z SHA256 digest of uploaded artifact zip is 2466b46c77d4122a553a3a5a3fccdbf3d142062fadf0bcbb920f0521aa476ae8
+2026-10-09T15:37:13.6576561Z Finalizing artifact upload
+2026-10-09T15:37:13.9715454Z Artifact psc0-sh1-kernel-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d.zip successfully finalized. Artifact ID 11626368937
+2026-10-09T15:37:13.9717585Z Artifact psc0-sh1-kernel-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d has been successfully uploaded! Final size is 1284 bytes. Artifact ID is 11626368937
+2026-10-09T15:37:13.9724719Z Artifact download URL: https://github.com/dwijayuda/pskernel/actions/runs/37947341800/artifacts/11626368937
+2026-10-09T15:37:14.1122028Z Post job cleanup.
+2026-10-09T15:37:14.2449839Z (node:2625) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T15:37:14.2451792Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T15:37:14.2687924Z Post job cleanup.
+2026-10-09T15:37:14.3604033Z [command]/usr/bin/git version
+2026-10-09T15:37:14.3651700Z git version 2.55.0
+2026-10-09T15:37:14.3706552Z Temporarily overriding HOME='/home/runner/work/_temp/950afef5-bbee-4059-9533-bd0b44958135' before making global git config changes
+2026-10-09T15:37:14.3708068Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T15:37:14.3712231Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel/provider-source
+2026-10-09T15:37:14.3769592Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T15:37:14.3797191Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T15:37:14.4078878Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T15:37:14.4107898Z http.https://github.com/.extraheader
+2026-10-09T15:37:14.4120470Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-09T15:37:14.4189743Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T15:37:14.4495588Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T15:37:14.4538676Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T15:37:14.5024462Z Post job cleanup.
+2026-10-09T15:37:14.5911089Z [command]/usr/bin/git version
+2026-10-09T15:37:14.5957339Z git version 2.55.0
+2026-10-09T15:37:14.6004485Z Temporarily overriding HOME='/home/runner/work/_temp/a6d0e825-be40-40fb-a1b3-010db730004e' before making global git config changes
+2026-10-09T15:37:14.6006352Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T15:37:14.6011738Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-09T15:37:14.6058235Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T15:37:14.6098047Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T15:37:14.6375583Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T15:37:14.6404209Z http.https://github.com/.extraheader
+2026-10-09T15:37:14.6416414Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-09T15:37:14.6474219Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T15:37:14.6775984Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T15:37:14.6823815Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T15:37:14.7300649Z Cleaning up orphan processes
+2026-10-09T15:37:14.7602684Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache/restore@v4, actions/checkout@v4, actions/download-artifact@v4, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,1859 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-reviewed-migration-worker-observation-schema-repair",
+  "status": "reviewed repair candidate; actual qualification pending",
+  "repository": "dwijayuda/pskernel",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/worker-migration-observation-schema-repair.json",
+  "sourceBase": {
+    "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "rootTree": "c7903f7b30b45f08f7c311869681b4ca1a9908c9",
+    "psc0Tree": "3cb88a6ee17b429cfde8215819fb789c3c2910ca",
+    "githubTree": "91df3190ffaa9ebc4fd8ffc7bcbc46c0020919be",
+    "psc0Blobs": 1410,
+    "treesNonTruncated": true,
+    "selectedRSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "selectedRCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225"
+  },
+  "scope": {
+    "problem": "The F2 worker observer serialized complete unprepared erasure scopes across selected R and current source. Current PsErasureDeclarationNames has a real declaration-entry ABI metadata index absent from R's record schema; its empty value was the only two observed data additions.",
+    "correction": "One typed unprepared-scope observation boundary, defaulting to the exact current four-field declaration-name schema. Only two already-authenticated selected-R callers explicitly select its historical three-field schema, completed with the source-proven empty entry index in a fresh plain observation.",
+    "nonemptyMetadata": "Real entry metadata is not ignorable. Current missing, nonempty, malformed or extra declaration-name fields refuse; explicit historical mode requires exactly the historical fields and therefore refuses an existing entries field.",
+    "efficiency": "A new full-qualification-only workflow step compares already-produced normalized R and completed N1 worker reports before the expensive C1 build. It performs JSON reads, provenance/count checks and exact data comparison only.",
+    "actualCompilerCallsAdded": 0,
+    "fixturesAddedOrChanged": 0,
+    "semanticCasesBefore": 87,
+    "semanticCasesAfter": 87,
+    "productionLeanFilesChanged": 0,
+    "grammarModesAdded": 0,
+    "selectedRChanged": false,
+    "kernelDefeqCacheAlgorithmsChanged": false
+  },
+  "observedFailure": {
+    "runId": 38011068208,
+    "runAttempt": 1,
+    "compilerJobId": 114090942895,
+    "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "failedOriginalStep": 25,
+    "error": "PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE",
+    "sourceSite": {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "gitBlob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+      "line": 1115
+    },
+    "markerArchive": {
+      "path": "psc0/docs/selfhost-language/strict/attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/markers.json",
+      "gitBlob": "b3a7d3283137369315c7801a287f02a9080a4410",
+      "sha256": "1d3227b2a36f621d2303bf1613681932d5d8a0a6bd1796c527d0d9c511b25821",
+      "utf8Bytes": 1399405,
+      "events": 68,
+      "complete": true
+    },
+    "selectors": {
+      "R": {
+        "marker": "PSC0_SH1_WORKER_HARNESS_REFERENCE",
+        "occurrence": 1,
+        "payloadPointer": "/report"
+      },
+      "N1": {
+        "marker": "PSC0_SH1_CAPABILITIES",
+        "occurrence": 1,
+        "payloadPointer": "/workerMigration"
+      },
+      "C1": {
+        "marker": "PSC0_SH1_CAPABILITIES",
+        "occurrence": 2,
+        "payloadPointer": "/workerMigration"
+      }
+    },
+    "compilerIdentities": {
+      "R": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "N1": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+      "C1": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"
+    },
+    "completeDifference": [
+      {
+        "path": "/families/1/observationSha256",
+        "before": "8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59",
+        "after": "f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2"
+      },
+      {
+        "path": "/families/1/observations/23/result/scope/declarationNames/entries",
+        "operation": "add",
+        "after": {
+          "tag": "empty"
+        }
+      },
+      {
+        "path": "/families/1/observations/27/result/scope/declarationNames/entries",
+        "operation": "add",
+        "after": {
+          "tag": "empty"
+        }
+      },
+      {
+        "path": "/observationSha256",
+        "before": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+        "after": "a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8"
+      }
+    ],
+    "n1AndC1ReportsJsonByteIdentical": true,
+    "passedObserved": "N1 completed. C1 generation completed, followed by strict source/target/runtime/IR/helper/generic/capability markers; the subsequent R/C1 worker-report comparison failed.",
+    "notObserved": [
+      "C2 execution",
+      "C3 execution",
+      "fixed-point qualification",
+      "strict-enforcement binder",
+      "provider admission"
+    ],
+    "provider": {
+      "jobId": 114096798112,
+      "status": "skipped",
+      "passed": false
+    }
+  },
+  "candidateFiles": [
+    {
+      "path": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+      "base": {
+        "gitBlob": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+        "sha256": "3e43c4ee676c3aea2f5f68b24799a991a72fa608ef65b6371833fafcfe7dc808",
+        "utf8Bytes": 39884
+      },
+      "candidate": {
+        "gitBlob": "d08d8c622f68314db32ef38d03539a8130abf3f6",
+        "sha256": "7c34c498b505158f45dbe5f11f367038e9dd03cb297d2b83dea7c79b13e05472",
+        "utf8Bytes": 41494,
+        "exactReadback": true
+      },
+      "changes": [
+        {
+          "label": "thread-schema-private-worker",
+          "before": "function runF2Cases(compiler, valueTag) {",
+          "after": "function runF2Cases(compiler, valueTag, declarationNamesSchema) {",
+          "beforeSha256": "20890a0adb577db6fa6db7568dc1ec3aa54ccab238077d6f8c3d13cb3a6c496e",
+          "afterSha256": "255f30804345cb2d809eae427392b62f769d7e35cd26c9421f8c501780ba13a4",
+          "beforeBytes": 41,
+          "afterBytes": 65,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        },
+        {
+          "label": "typed-unprepared-scope-observation",
+          "before": "  const namedIr = (text) => compiler.PsVerifiedIrType.named(text, nil);\n",
+          "after": "  // These nil-input metadata workers preserve the unprepared seeded scope.\n  // Current name indexes carry an empty declaration-entry ABI index; selected R\n  // predates that field. Complete only the explicit historical observation.\n  // Same-compiler scope equality remains exact, and populated entries refuse.\n  const unpreparedScopeObservation = (value) => {\n    const observation = plain(value);\n    const names = observation.declarationNames;\n    const current = declarationNamesSchema === 'entry-metadata/1';\n    assert.deepEqual(Object.keys(names),\n      current ? ['byCore', 'byOutput', 'count', 'entries'] : ['byCore', 'byOutput', 'count'],\n      fail('UNPREPARED_SCOPE_DECLARATION_NAMES_SCHEMA'));\n    if (current) {\n      assert.deepEqual(names.entries, { tag: 'empty' },\n        fail('UNPREPARED_SCOPE_DECLARATION_ENTRIES_EMPTY'));\n    } else {\n      names.entries = { tag: 'empty' };\n    }\n    return observation;\n  };\n  const namedIr = (text) => compiler.PsVerifiedIrType.named(text, nil);\n",
+          "beforeSha256": "c86b08eb4b7f7113ad34f39d454ec9ba697e23edf8d1b4879b275ca95619b015",
+          "afterSha256": "42356c70d27aad248165e14e0318d0bf10aa03f55a10d0e19ecb83b7bbc59905",
+          "beforeBytes": 72,
+          "afterBytes": 1005,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        },
+        {
+          "label": "structures-empty-scope-observation",
+          "before": "    same(result.ir, list([keptRecordA, keptRecordB]), 'STRUCTURES_EMPTY_REVERSE');\n    return { ir: plain(result.ir), scope: plain(result.scope) };",
+          "after": "    same(result.ir, list([keptRecordA, keptRecordB]), 'STRUCTURES_EMPTY_REVERSE');\n    return { ir: plain(result.ir), scope: unpreparedScopeObservation(result.scope) };",
+          "beforeSha256": "07ec68c54cc58fdf6c574734e7c824fb1c359601bdeb9ec2003e31f55cd73e55",
+          "afterSha256": "04cacd6c1bab59a7a51a0d3a24e00bdf5e283f404147fbb05b7d82c2148af4c7",
+          "beforeBytes": 147,
+          "afterBytes": 168,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        },
+        {
+          "label": "inductives-empty-scope-observation",
+          "before": "    same(result.ir, list([keptChoiceA, keptChoiceB]), 'INDUCTIVES_EMPTY_REVERSE');\n    return { ir: plain(result.ir), scope: plain(result.scope) };",
+          "after": "    same(result.ir, list([keptChoiceA, keptChoiceB]), 'INDUCTIVES_EMPTY_REVERSE');\n    return { ir: plain(result.ir), scope: unpreparedScopeObservation(result.scope) };",
+          "beforeSha256": "10b90f6e1376f18d6a37f277bdf7e62be53edb9c596cff588688bcd592b15947",
+          "afterSha256": "d207de33c8c5077feec5a25d1bea95095bd7bc39d312aceacb4318f5c1255b46",
+          "beforeBytes": 147,
+          "afterBytes": 168,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        },
+        {
+          "label": "default-current-explicit-schema",
+          "before": "export function runMigrationWorkerConformance(compiler, valueTag) {\n  assert.equal(typeof valueTag, 'function', 'PSC0_SH1_MIGRATION_TAG_READER');",
+          "after": "export function runMigrationWorkerConformance(compiler, valueTag, {\n  declarationNamesSchema = 'entry-metadata/1',\n} = {}) {\n  assert(['entry-metadata/1', 'selected-r-names-only/1'].includes(declarationNamesSchema),\n    'PSC0_SH1_MIGRATION_DECLARATION_NAMES_SCHEMA');\n  assert.equal(typeof valueTag, 'function', 'PSC0_SH1_MIGRATION_TAG_READER');",
+          "beforeSha256": "40352f7706bf4973a6127a583e15e8b71925baaa89a6c9f5534e22e75ae3dbd0",
+          "afterSha256": "503b09f98661dc7b15e337848993a7d9ee2fc3f6f41afc6dca8485dbca1c9a1b",
+          "beforeBytes": 145,
+          "afterBytes": 345,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        },
+        {
+          "label": "pass-validated-schema",
+          "before": "  const f2 = runF2Cases(compiler, valueTag);",
+          "after": "  const f2 = runF2Cases(compiler, valueTag, declarationNamesSchema);",
+          "beforeSha256": "ab6ab2d544f7a7b86fb3479b13edbbfbfbe88edc686fef2d210e8d39ecaf0b43",
+          "afterSha256": "217f55f02908faa17b34ba3da4f000499b0fdb76c1c166986262c7b4a151b619",
+          "beforeBytes": 44,
+          "afterBytes": 68,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        },
+        {
+          "label": "record-common-observation-policy",
+          "before": "      copiedRecordsRetainOwningCompilerBrands: true,\n      hostStructuralFixtureRecords:",
+          "after": "      copiedRecordsRetainOwningCompilerBrands: true,\n      declarationNamesObservation: 'unprepared-empty-entry-index/1; explicit selected-R completion only',\n      hostStructuralFixtureRecords:",
+          "beforeSha256": "f9429ad54c32df476fa6db4e5da534bd05f2872b6eaf90503273e94f36b9c759",
+          "afterSha256": "8b0762bfaf6cae9dda2f7370e6762a71a75ed9edbeed41c8d22c8c62ed8ee238",
+          "beforeBytes": 88,
+          "afterBytes": 194,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        },
+        {
+          "label": "public-comparison-explicit-before-schema",
+          "before": "// compared here contain no values owned by either generated compiler.\nexport function compareMigrationWorkerConformance({\n  before, after, beforeCompilerSha256, afterCompilerSha256, valueTag,\n}) {",
+          "after": "// compared here contain no values owned by either generated compiler. The caller\n// may select the names-only schema only for its authenticated historical R;\n// both sides otherwise require the current schema, and after always does.\nexport function compareMigrationWorkerConformance({\n  before, after, beforeCompilerSha256, afterCompilerSha256, valueTag,\n  beforeDeclarationNamesSchema = 'entry-metadata/1',\n}) {",
+          "beforeSha256": "bcb0b8c3d16d9450595073fab6df799889cfb94797fd1786f80375ea65de0035",
+          "afterSha256": "6b4557ed7c88b78b9237bddd9a201826a05d5abf001fffd3bf3239a6464280ef",
+          "beforeBytes": 197,
+          "afterBytes": 413,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        },
+        {
+          "label": "pass-explicit-before-schema",
+          "before": "  const beforeReport = runMigrationWorkerConformance(before, valueTag);",
+          "after": "  const beforeReport = runMigrationWorkerConformance(before, valueTag, {\n    declarationNamesSchema: beforeDeclarationNamesSchema,\n  });",
+          "beforeSha256": "2c14e28ef26e65799df965cd14175982d1a56070b85a7add1fb424e198702c01",
+          "afterSha256": "fbf8bc6b125f6043eb00e1e32ea1a03662131599273c349d7eb149d9ca0b5420",
+          "beforeBytes": 71,
+          "afterBytes": 136,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        }
+      ],
+      "completeForwardReconstruction": true,
+      "completeReverseReconstruction": true,
+      "allOtherBytesUnchanged": true
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "base": {
+        "gitBlob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+        "sha256": "fc7eb46a8f0d1b8fa4db6ef39a09d14cd3d771b9741fae74cd44b197fd1cf193",
+        "utf8Bytes": 73556
+      },
+      "candidate": {
+        "gitBlob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+        "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+        "utf8Bytes": 73618,
+        "exactReadback": true
+      },
+      "changes": [
+        {
+          "label": "authenticated-selected-R-reference-schema",
+          "before": "  const referenceWorkerReport = runMigrationWorkerConformance(libraryCompiler.compiler, valueTag);",
+          "after": "  const referenceWorkerReport = runMigrationWorkerConformance(libraryCompiler.compiler, valueTag, {\n    declarationNamesSchema: 'selected-r-names-only/1',\n  });",
+          "beforeSha256": "a8cc63c241b58c17bc8625cab03173e4a492c26db8f3ecf9d9c2f451e2e9fe29",
+          "afterSha256": "9ccda255b6e95c5e4ebb808ce2094074450474d32c4d90dd1d0314641f361117",
+          "beforeBytes": 98,
+          "afterBytes": 160,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        }
+      ],
+      "completeForwardReconstruction": true,
+      "completeReverseReconstruction": true,
+      "allOtherBytesUnchanged": true
+    },
+    {
+      "path": ".github/workflows/psc0-sh1.yml",
+      "base": {
+        "gitBlob": "cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8",
+        "sha256": "d40e8fda2a7beee1457352edef58e5b5f90f85b2dbdc8c25d1fa039c3d34c758",
+        "utf8Bytes": 23472
+      },
+      "candidate": {
+        "gitBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+        "sha256": "2bed091157fce89dea162719a4fe0d7d23deb4be90910aae344f7cb29d405cd5",
+        "utf8Bytes": 25735,
+        "exactReadback": true
+      },
+      "changes": [
+        {
+          "label": "authenticated-selected-R-preflight-schema",
+          "before": "          const report = runMigrationWorkerConformance(loaded.compiler, valueTag);",
+          "after": "          const report = runMigrationWorkerConformance(loaded.compiler, valueTag, {\n            declarationNamesSchema: 'selected-r-names-only/1',\n          });",
+          "beforeSha256": "bb0b3ba37a67f93c92229a4c0fe385e85742f2320296b731ea8dbeecc2031c3f",
+          "afterSha256": "e2054964865ff0dae41ebcc95672e738a4728dd35f6575f2828e846c8c726fec",
+          "beforeBytes": 82,
+          "afterBytes": 160,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        },
+        {
+          "label": "data-only-native-worker-preflight-before-C1",
+          "before": "      - name: Build the selected-seed candidate before full qualification\n",
+          "after": "      - name: Compare native worker observations before candidate generation\n        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}\n        run: |\n          node --input-type=module <<'NODE'\n          import assert from 'node:assert/strict';\n          import { readFile } from 'node:fs/promises';\n          import { readSelectedAuthoringSeed } from './scripts/sh1-successor-seed.mjs';\n          const readJson = async (file) => JSON.parse(await readFile(file, 'utf8'));\n          const selected = await readSelectedAuthoringSeed();\n          assert.equal(selected.mode, 'qualified');\n          assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed');\n          const reference = await readJson('dist/sh1/worker-harness-reference.json');\n          const native = await readJson('dist/sh1/development/N1/receipt.json');\n          const capabilities = await readJson('dist/sh1/development/N1/capabilities/receipt.json');\n          assert.equal(reference.evidence, 'migration-fixture-authenticated-reference-preflight');\n          assert.equal(reference.passed, true);\n          assert.equal(reference.recipeSourceRef, process.env.GITHUB_SHA);\n          assert.equal(reference.referenceSourceRef, selected.sourceRef);\n          assert.equal(reference.referenceCompilerSha256, selected.manifest.expectedArtifacts.javascriptSha256);\n          assert.equal(reference.selectedSeedIdentitySha256, selected.identitySha256);\n          assert.equal(native.evidence, 'native-seeded-generated-compiler-candidate');\n          assert.equal(native.sourceRef, process.env.GITHUB_SHA);\n          assert.equal(capabilities.evidence, 'raw-source-generated-execution');\n          assert.equal(capabilities.compilerSha256, native.artifacts.javascriptSha256);\n          assert.equal(reference.report.cases, 87);\n          assert.equal(capabilities.workerMigration.cases, 87);\n          assert.deepEqual(capabilities.workerMigration, reference.report,\n            'PSC0_SH1_NATIVE_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE');\n          console.log('PSC0_SH1_NATIVE_WORKER_REFERENCE: PASS (authenticated R and completed N1; 87 cases; no compiler execution)');\n          NODE\n      - name: Build the selected-seed candidate before full qualification\n",
+          "beforeSha256": "0d0369b48e56b7b71c2a6cbfa9b502711741cccf929cb58c9e7e7e93315e5eee",
+          "afterSha256": "f7a86cfab3980f4b185c2534e04b26fb10a2654c4ace71d9da58ce02886a5ec2",
+          "beforeBytes": 74,
+          "afterBytes": 2259,
+          "beforeOccurrences": 1,
+          "afterOccurrencesInOrderedReverse": 1
+        }
+      ],
+      "completeForwardReconstruction": true,
+      "completeReverseReconstruction": true,
+      "allOtherBytesUnchanged": true
+    }
+  ],
+  "sourceProof": {
+    "currentSources": [
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "gitBlob": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+        "sha256": "3cfcea753582afd703f7f48c6c247f708fe2d197dedffcd708eb128d7f177c5d",
+        "utf8Bytes": 29672
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+        "gitBlob": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75",
+        "sha256": "6de88d9b5e41e6e87fd03e55adfe8e218d8c55ba7d9086716c1c75cd6e9212af",
+        "utf8Bytes": 6731
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+        "gitBlob": "afd981e10d609d38db9ce4698fb4a6152bb50c7f",
+        "sha256": "06f584ff2d4bae2c16d70e899d255a16155df3cf774830ebc99ecd24ac574af6",
+        "utf8Bytes": 17652
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+        "gitBlob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+        "sha256": "a55cb381a686ab9081587380793b1b3d8fe485c86b88770fbce4a3e2250516a7",
+        "utf8Bytes": 22534
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "gitBlob": "b4af2687c1b94e85014e323e5325385f139d4015",
+        "sha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15",
+        "utf8Bytes": 138189
+      }
+    ],
+    "selectedRSources": [
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "gitBlob": "c41474cdbd008999368dfaf368be988e9982042b",
+        "sha256": "1d2408504ea7cd2d30f972c46d4a961332dd99c05f895b6d45500a075627d825",
+        "utf8Bytes": 24687
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+        "gitBlob": "864cf3a59c51537aca59e0bb7691a66f0dce777c",
+        "sha256": "19aa54eb52b8b43603493d6468614a514e8aeb718e0068eacbdc053c551f1479",
+        "utf8Bytes": 6762
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+        "gitBlob": "4098822ae5ca1a1c3d3d476be5b592daad7d2110",
+        "sha256": "37c8270367c2c8b57b3fb652d58a3314ae900e7e225141dc91fee06591ee6509",
+        "utf8Bytes": 17667
+      }
+    ],
+    "owner": "PsErasureDeclarationNames in Ps.Erasure.Basic; entries : PsErasureNameIndex PsErasureEntryInfo, with binder kinds, runtime arity and type arity.",
+    "actualMetadataMeaning": [
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "definitions": [
+          "PsErasureEntryInfo",
+          "PsErasureDeclarationNames",
+          "psErasureAddDeclarationEntry",
+          "psErasureDeclarationEntryIndex",
+          "psErasurePrepareDeclarationEntries"
+        ],
+        "argument": "Preparing declarations can populate the entry index; the metadata determines the real declaration call boundary."
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+        "definitions": [
+          "psErasureEnsureDefinitionEntry"
+        ],
+        "argument": "Direct single-definition erasure can insert a missing actual declaration entry."
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "definitions": [
+          "psErasureResolveEntry",
+          "psEraseGeneralApplication"
+        ],
+        "argument": "Expression erasure consumes entry metadata for binder/group/arity behavior; nonempty metadata cannot be discarded as a generic cache."
+      }
+    ],
+    "emptyConstructorInvariant": {
+      "definition": "psErasureDeclarationNameIndex",
+      "domain": "Every finite proper list of owned core-name/output-string pairs accepted by the constructor.",
+      "base": "Current nil case builds byCore=empty, byOutput=empty, count=0 and entries=empty.",
+      "step": "The cons case updates only byCore, byOutput and count, and copies tail.entries unchanged.",
+      "conclusion": "By structural induction, entries is empty for every such naming list; the old R constructor produces the identical three naming fields without an entries field.",
+      "scopeConstructor": "psErasureScopeEmpty delegates declarationNames to that constructor."
+    },
+    "fixturePreservation": {
+      "workerFile": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+      "baseBlob": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+      "scopeConstructionBaseLines": [
+        484,
+        505
+      ],
+      "source": "scopeNames has four pairs; seededScope spreads the owning compiler's psErasureScopeEmpty result and changes only localContext, runtimeLocals, runtimeExpressions and currentDefinition.",
+      "declarationNamesOverridden": false,
+      "entryPreparationInvoked": false,
+      "nilWorkers": [
+        {
+          "definition": "psPrepareRuntimeStructures",
+          "currentLines": [
+            106,
+            115
+          ],
+          "selectedRLines": [
+            106,
+            112
+          ],
+          "observationIndex": 23,
+          "observationName": "structures-empty-reverse-accumulator",
+          "sameCompilerAssertionBaseLine": 573
+        },
+        {
+          "definition": "psPrepareRuntimeInductives",
+          "currentLines": [
+            367,
+            376
+          ],
+          "selectedRLines": [
+            367,
+            373
+          ],
+          "observationIndex": 27,
+          "observationName": "inductives-empty-reverse-accumulator",
+          "sameCompilerAssertionBaseLine": 648
+        }
+      ],
+      "nilEquation": "Each worker returns the supplied scope unchanged and reverses its existing IR accumulator.",
+      "sameCompilerAssertions": "The existing same(result.scope, seededScope, ...) compares the complete plain owning-compiler scopes, including all present entry metadata; these statements remain byte-identical. All expectScopeBase checks remain byte-identical.",
+      "runtimeArgumentOrder": "All original compiler calls, argument construction, source inputs, error expectations and count/order checks remain unchanged."
+    },
+    "projectionArgument": {
+      "domain": "Only the two typed nil-input unprepared-scope results whose declarationNames comes from the proven constructor and is preserved by the owning worker.",
+      "currentSchema": "entry-metadata/1 requires exactly byCore, byOutput, count, entries in plain's sorted key order and exact entries={tag:'empty'}. It returns the complete current plain scope without replacing or deleting any field.",
+      "selectedRSchema": "selected-r-names-only/1 requires exactly byCore, byOutput, count, then appends exactly entries={tag:'empty'} to a fresh plain observation.",
+      "notInferredFromMissingField": true,
+      "compilerOwnedInputsMutated": false,
+      "unknownFieldsDropped": false,
+      "nonemptyEntriesProjected": false,
+      "injectivity": "Within either permitted schema, different original observation data remain different. Historical completion has a left inverse removing only the freshly added constant field; cross-schema equality identifies only the source-proven absent-versus-empty distinction in this domain.",
+      "reportMetadata": "The same declarationNamesObservation policy string is included in both reports, so the historical completion is explicit without making current and R reports incomparable.",
+      "limits": "This is a finite migration-observation transport plus a source invariant for the constructor/nil-return class, not an equivalence for arbitrary prepared scopes or a universal compiler theorem. Host plain-observation depth/list bounds are unchanged."
+    }
+  },
+  "callSitePolicy": {
+    "default": "Every ordinary runMigrationWorkerConformance call uses current entry-metadata/1. Missing entries in N1/C1/C2/C3 cannot silently activate historical completion.",
+    "authenticatedSelectedRCallers": [
+      {
+        "path": ".github/workflows/psc0-sh1.yml",
+        "baseLine": 321,
+        "authentication": "readSelectedAuthoringSeed validates the selected successor manifest; loadGeneratedCompiler verifies the exact selected JavaScript hash before this call."
+      },
+      {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "baseLine": 1065,
+        "authentication": "selectedAuthoringSeed resolves the selected descriptor and loadCompiler verifies expectedSha256 before this call."
+      }
+    ],
+    "publicComparator": "compareMigrationWorkerConformance adds an explicit beforeDeclarationNamesSchema option defaulting to current. Only a caller that already authenticated historical R may select its schema; after always remains current. No in-tree caller was found.",
+    "unchangedCallers": [
+      {
+        "path": "psc0/scripts/sh1-capabilities.mjs",
+        "baseLine": 351,
+        "role": "N1/C1/C2/C3 current reports"
+      }
+    ],
+    "defaultMissingFieldRefuses": true,
+    "currentNonemptyOrMalformedRefuses": true,
+    "currentExtraKeyRefuses": true,
+    "historicalUnexpectedEntriesRefuses": true,
+    "unknownSchemaRefusesBeforeCorpus": true
+  },
+  "preC1DataGate": {
+    "workflowCandidate": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+    "placement": "Immediately after the completed native-gate step and before Build the selected-seed candidate before full qualification.",
+    "condition": "steps.seed-selection.outputs.full-qualification == 'true'",
+    "inputs": [
+      "dist/sh1/worker-harness-reference.json",
+      "dist/sh1/development/N1/receipt.json",
+      "dist/sh1/development/N1/capabilities/receipt.json",
+      "the validated current selected-authoring-seed descriptor"
+    ],
+    "identityChecks": [
+      "reference evidence and passed=true",
+      "reference recipeSourceRef equals GITHUB_SHA",
+      "reference source/hash/selected identity equal the selected descriptor",
+      "N1 receipt evidence and sourceRef equals GITHUB_SHA",
+      "capabilities evidence and compilerSha256 equal the completed N1 artifact hash"
+    ],
+    "comparison": "Exactly all 87 worker cases and the complete common report object; existing R/C1, R/C2, R/C3 comparisons and receipt hashes remain unchanged.",
+    "sideEffects": "Read-only JSON/descriptor processing and one log PASS marker; no compiler import/call, source preparation, fixture runtime execution, report write, cache mutation or provider call.",
+    "noC1Replacement": true,
+    "noQualificationClaim": true
+  },
+  "wholeClassAudit": {
+    "method": "Read-only complete source-text audit of all current SH1 conformance, capability, session, iteration and qualification entry points plus their local static import closure and related project/checked-session hosts; inspect all observer/serializer/cross-generation comparison sites. All 17 current workflows were read for inline callers.",
+    "hostFiles": 51,
+    "workflowFiles": 17,
+    "totalFiles": 68,
+    "totalUtf8Bytes": 971542,
+    "hostVectorSha256": "b6391f28eaee4061068c790ec03e002b1af435fac8d50c4dabb0c3aaceae350e",
+    "workflowVectorSha256": "31345d97ee0447a74aa8c9949bfd4feef7cf4031d1cfe5700d76d09869b2bf7d",
+    "hostVector": [
+      {
+        "path": "psc0/scripts/sh1-capabilities.mjs",
+        "gitBlob": "14c581f57a28b5f9edcd372e10fea1a1e575c217",
+        "sha256": "171316bbe186ff91ac055a1171e27e86f5e605d2082d5d7ffcf90de6a68749eb",
+        "utf8Bytes": 25989
+      },
+      {
+        "path": "psc0/scripts/sh1-check-admissions.mjs",
+        "gitBlob": "750fe59f317056bfe76b2c77ffd7d09a82aac342",
+        "sha256": "608dd25cc513d9160df05424218c99d02f0c0d681a6b3f137b645e6893fabde6",
+        "utf8Bytes": 6891
+      },
+      {
+        "path": "psc0/scripts/sh1-foundation-conformance.mjs",
+        "gitBlob": "9e3e167c38fa56d09ba02d07535bb65008929653",
+        "sha256": "d0c139a4a907ef5e35908379b04d8983ee889218791c8ac7f2361fc080d46f9a",
+        "utf8Bytes": 8348
+      },
+      {
+        "path": "psc0/scripts/sh1-fresh-name-conformance.mjs",
+        "gitBlob": "9eaa7b1cbdb50dec79aca57150d825cbdd51f8d7",
+        "sha256": "330e3c53401d3912f092ecf9f6457c67db6852f73b4cf715eb3a92364459d7d5",
+        "utf8Bytes": 16581
+      },
+      {
+        "path": "psc0/scripts/sh1-function-entry.mjs",
+        "gitBlob": "ceb4a39851e421e1d95f009cbf31d500e6ff1bb1",
+        "sha256": "b38c4ef844068aae4cb0373785dc5401f72d59e0016dd3e0f3e343ac96348bc4",
+        "utf8Bytes": 1701
+      },
+      {
+        "path": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+        "gitBlob": "076d058b965bad45b64e81c7a0ae8c1ac02f88db",
+        "sha256": "a1e48e2386effb23425ea16f4c1d966a59bf7bc6e3d09f8c50e412651bae1332",
+        "utf8Bytes": 37975
+      },
+      {
+        "path": "psc0/scripts/sh1-grammar-conformance.mjs",
+        "gitBlob": "2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141",
+        "sha256": "4daafb21cc121532bb0bb549305babc8987b9ca8554e5864a8bdc59b5ceadc58",
+        "utf8Bytes": 37358
+      },
+      {
+        "path": "psc0/scripts/sh1-grammar-profile.mjs",
+        "gitBlob": "26836a8e487d77c94a73485e2d11e3575b932edf",
+        "sha256": "8107c4b1f3f5dc8a74b2c999443659a43242c5e0879e8d6921571805f89e71ae",
+        "utf8Bytes": 438
+      },
+      {
+        "path": "psc0/scripts/sh1-helper-conformance.mjs",
+        "gitBlob": "686a1a1ab4c74d838639e2044b5403cc0e9ed0e8",
+        "sha256": "412b79ebffc1b65f6d06d5a15b277207cc21df1e1a28e1a8a857c06ee4b1682b",
+        "utf8Bytes": 13050
+      },
+      {
+        "path": "psc0/scripts/sh1-ir-checker-conformance.mjs",
+        "gitBlob": "521d1d2fdd6d22edeb1d9e521386d3a90ab954d7",
+        "sha256": "c7bc6fff33decea880595023367a5e6d73249226d5002b9810e56bae876ad1f9",
+        "utf8Bytes": 40509
+      },
+      {
+        "path": "psc0/scripts/sh1-iterate.mjs",
+        "gitBlob": "185d0fa4b65529e56bb560e6a22a7af9519dd887",
+        "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8",
+        "utf8Bytes": 6972
+      },
+      {
+        "path": "psc0/scripts/sh1-iteration-conformance.mjs",
+        "gitBlob": "ef7ceca2ee8fdaf6cbc16dddce7c988d7090a4fa",
+        "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4",
+        "utf8Bytes": 5118
+      },
+      {
+        "path": "psc0/scripts/sh1-migration-worker-abi.mjs",
+        "gitBlob": "4a24f22050cdbe9660501b58bc1eeed9c8005319",
+        "sha256": "f520b3d033462e41a87d1aac3db6ed2f75290c05b4f106451919886234352cc7",
+        "utf8Bytes": 18393
+      },
+      {
+        "path": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+        "gitBlob": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+        "sha256": "3e43c4ee676c3aea2f5f68b24799a991a72fa608ef65b6371833fafcfe7dc808",
+        "utf8Bytes": 39884
+      },
+      {
+        "path": "psc0/scripts/sh1-native-seed-recovery.mjs",
+        "gitBlob": "c1b5673079b2faae56e9c778b62e70087e639fbe",
+        "sha256": "45b5223fa549358da586e5f211261084cfdb153b1334d5feaff6a8349c464715",
+        "utf8Bytes": 23134
+      },
+      {
+        "path": "psc0/scripts/sh1-projection-conformance.mjs",
+        "gitBlob": "1c69c032f260eac8d868173b7f8b5b06e90a4a29",
+        "sha256": "64f60f538a01fe288153d3df7a12725854a7dbf9e10a308fe1e3dab2d342fa64",
+        "utf8Bytes": 11727
+      },
+      {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "gitBlob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+        "sha256": "fc7eb46a8f0d1b8fa4db6ef39a09d14cd3d771b9741fae74cd44b197fd1cf193",
+        "utf8Bytes": 73556
+      },
+      {
+        "path": "psc0/scripts/sh1-resource-policy.mjs",
+        "gitBlob": "7e3066c513a91a6e0717aac9465a879097c0dd82",
+        "sha256": "76647884ed3f451ebd429c89c480113e88f88c60a673f8d5456b9418fd4fb998",
+        "utf8Bytes": 12011
+      },
+      {
+        "path": "psc0/scripts/sh1-seed-manifest.mjs",
+        "gitBlob": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7",
+        "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f",
+        "utf8Bytes": 10641
+      },
+      {
+        "path": "psc0/scripts/sh1-source-snapshot.mjs",
+        "gitBlob": "1083a3765a55540f83b2376c40a97bc1f1362ce0",
+        "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8",
+        "utf8Bytes": 3705
+      },
+      {
+        "path": "psc0/scripts/sh1-strict-evidence.mjs",
+        "gitBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+        "utf8Bytes": 91970
+      },
+      {
+        "path": "psc0/scripts/sh1-strict-runtime-conformance.mjs",
+        "gitBlob": "c38e6b50806481c270db9dfbd9d75e3a4a8f3b29",
+        "sha256": "a6ff98ba27c458d26761b65dc2ea6ae9ea8042d390981a63a8ec22522ec4647c",
+        "utf8Bytes": 81705
+      },
+      {
+        "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+        "gitBlob": "fec9c43e4bd792aef81983d1dbf100a5b6b2beaa",
+        "sha256": "03a252f699f4bd72a2b40ddf3558eee1aa9c9e4ee69ef9cc570fb8231754b089",
+        "utf8Bytes": 31555
+      },
+      {
+        "path": "psc0/scripts/sh1-strict-source.mjs",
+        "gitBlob": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+        "sha256": "b993d66ef955fb4359f6f472667a0ddc572afcb51501283a4ddcd8ba38d97519",
+        "utf8Bytes": 25351
+      },
+      {
+        "path": "psc0/scripts/sh1-strict-target-conformance.mjs",
+        "gitBlob": "0bee0e6f67e080dda87fd10c75d2437bb14c3cd1",
+        "sha256": "a87af12e769804db86f53b38ec5d105f140e74999a84e7d55eecf385418377fc",
+        "utf8Bytes": 8864
+      },
+      {
+        "path": "psc0/scripts/sh1-successor-seed.mjs",
+        "gitBlob": "3514a7797e739e7a47af33c91ab58e912584d0c7",
+        "sha256": "00b5dbfae38715df2888d3b3577897010fe98e65fc4268302d7253397e0067e2",
+        "utf8Bytes": 22728
+      },
+      {
+        "path": "psc0/scripts/sh1-successor-seed.test.mjs",
+        "gitBlob": "5c93b338a20d090039b00d77e8eee8f7054eea5d",
+        "sha256": "506a66ae046b1557c2ac52de46c249e129b04a147a615ce120e440bf6d81e56a",
+        "utf8Bytes": 14023
+      },
+      {
+        "path": "psc0/scripts/checked-prepared-session.mjs",
+        "gitBlob": "83ba92db02c6e289e59f2d1a32011d581fbe2993",
+        "sha256": "e2bd9896e8eae4a9f6e545bb0db14169d8f00c019cd7a1c94eaf9b6e0c2fb9b4",
+        "utf8Bytes": 5521
+      },
+      {
+        "path": "psc0/scripts/checked-seed-session.mjs",
+        "gitBlob": "7964b675f1d78fdb8e1bef4e032e44deb58fe6fd",
+        "sha256": "ea698e18ed16c6ad01f0e922fa16bcc4f7c68d61050c8437732a9e21caa31aad",
+        "utf8Bytes": 4285
+      },
+      {
+        "path": "psc0/scripts/generated-preparation-session.mjs",
+        "gitBlob": "3d1edcd9e03ed53c926fbc38e3b1fb81f2e50fc7",
+        "sha256": "44ab11ab36862d229c3b74bdd84b58d8cd1eb20b30ac245ade3eb21c09c0a926",
+        "utf8Bytes": 11441
+      },
+      {
+        "path": "psc0/scripts/typescript-cli.mjs",
+        "gitBlob": "9d6607a6f4284b0afba8023566f6e1d75c30a64a",
+        "sha256": "7aac5da80abb8a407efce3e72f3ffb88f1fc60a64d1dd5a78b6ec16f37b3dec1",
+        "utf8Bytes": 3888
+      },
+      {
+        "path": "psc0/scripts/proofscript-source.mjs",
+        "gitBlob": "411b5dc5851a04d3fe9308515b7c4c756d95d4cd",
+        "sha256": "98474e8d1d1629b93aec608ef7263e5c959f02703ca23a55a46327d1f43d9608",
+        "utf8Bytes": 4746
+      },
+      {
+        "path": "psc0/scripts/original-ir-inventory.mjs",
+        "gitBlob": "d4cf667033cfcd903b4179f8af01fa77f56102bf",
+        "sha256": "190a1d216b89c775b7195433ff7caed1407a382b25175f74e7525ee3a7e345a0",
+        "utf8Bytes": 34170
+      },
+      {
+        "path": "psc0/scripts/workspace-layout.mjs",
+        "gitBlob": "eb7c2c07f147a812f9998904a60123b3719e5539",
+        "sha256": "f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1",
+        "utf8Bytes": 995
+      },
+      {
+        "path": "psc0/scripts/original-ir-carrier.mjs",
+        "gitBlob": "a2c20c50ada6d5dc13746bc3b9e748088464e70c",
+        "sha256": "5e153c67c5a08ac475962da0a14ea04fe5f996449f81bf071787e11af33515c2",
+        "utf8Bytes": 11388
+      },
+      {
+        "path": "psc0/scripts/checked-kernel-identity.mjs",
+        "gitBlob": "ca5eaec2614aeae75eba9dcd0d55b341206ef0be",
+        "sha256": "8b14e7994e97b583a4faae8a72799b2943af4ff75f82b7cec2e3b5822877d154",
+        "utf8Bytes": 1002
+      },
+      {
+        "path": "psc0/scripts/checked-prepared-session.test.mjs",
+        "gitBlob": "70f50956bced5f987a0304d414bc6a115018dfac",
+        "sha256": "38dfcaae61e3a088c1c12aca02dca73e7a4d6514d9dd1d9d563e7b17571ddd13",
+        "utf8Bytes": 6762
+      },
+      {
+        "path": "psc0/scripts/checked-seed-session.test.mjs",
+        "gitBlob": "50d2985c41d5ee677943427998628fa3b515dccd",
+        "sha256": "ecc7007e81ddb500e37d58c4c09367d6cb185ee5d783def07ca9b5ac881df87d",
+        "utf8Bytes": 1952
+      },
+      {
+        "path": "psc0/scripts/selfhost-generation.mjs",
+        "gitBlob": "d59063200c07ea10fe09df1d19079ba47c6ba002",
+        "sha256": "2c42244e21a3ea1527ed71de79a04e06a7aabe78501551be53645a5beea61296",
+        "utf8Bytes": 3418
+      },
+      {
+        "path": "psc0/scripts/checked-selfhost.mjs",
+        "gitBlob": "30dfb91f9d0395ae229c44ac73197343f6e8d7a7",
+        "sha256": "fff38e99f8f3de9deff14436a3542a0541b23a7115486bff8c891a93b5a21157",
+        "utf8Bytes": 7164
+      },
+      {
+        "path": "psc0/scripts/compare-selfhost.mjs",
+        "gitBlob": "154a5044425fc66468c38e4b7c7cb2209f081960",
+        "sha256": "35bd68f02ae3c0c12fce4db2814b6e30f74d598cb65dcc5befbf09fe961b2d7e",
+        "utf8Bytes": 1093
+      },
+      {
+        "path": "psc0/scripts/compare-source-workspaces.mjs",
+        "gitBlob": "ec8e59783b7c3138b7f3f8a2c10aaa673cbb806b",
+        "sha256": "f3db47e6f013999bbe34d8099d1aac72bb525b1f7d48d45b55bb4057c03eac1e",
+        "utf8Bytes": 2076
+      },
+      {
+        "path": "psc0/scripts/compile-with-generated.mjs",
+        "gitBlob": "6d39b75d8c2daeea90e7a568d8d61fd551f58706",
+        "sha256": "48d280a70dac553e8dc351f94d711b2ef643ed88ce1981e86d9bbfbd9a4c59ec",
+        "utf8Bytes": 8633
+      },
+      {
+        "path": "psc0/scripts/emit-project-with-generated.mjs",
+        "gitBlob": "474a3d8e4134829a603163131bcd32e635d4c053",
+        "sha256": "4824df6abbd2858cc58f9b3fba753c8269bd73ed875181b06792829f99b30806",
+        "utf8Bytes": 10531
+      },
+      {
+        "path": "psc0/scripts/reemit-project-with-generated.mjs",
+        "gitBlob": "5f318c7633d41e8a717079e129b018035a65042a",
+        "sha256": "13fbaa78e328acda1d8e37b24e855a2a89e5147602ace2e2928f20984b10da00",
+        "utf8Bytes": 4606
+      },
+      {
+        "path": "psc0/scripts/translate-with-generated.mjs",
+        "gitBlob": "459f6bcb03747ea5aaae8361f8701c68efdcc4ce",
+        "sha256": "b9f0481e41503af094e30d8009e031606b584fa459a81e3c131142f169b5f059",
+        "utf8Bytes": 3179
+      },
+      {
+        "path": "psc0/scripts/checked-kernel-provider.mjs",
+        "gitBlob": "78631e05e72f4a27c7447af16e2dccbccb085831",
+        "sha256": "45b102255279a3a8f9a634113b2b7d7a10d008385e3ed858a80638c884559ded",
+        "utf8Bytes": 3573
+      },
+      {
+        "path": "psc0/scripts/checked-build.mjs",
+        "gitBlob": "4ce6e464fa24aa9a15f50d410abff7f25404f188",
+        "sha256": "e7914719deddd668b9ecacecfc551f269df219b86e345d046533394001044c28",
+        "utf8Bytes": 7479
+      },
+      {
+        "path": "psc0/scripts/bootstrap-manifest.mjs",
+        "gitBlob": "ceb965192e6ba70046d7fe7769c9917063a4fb4e",
+        "sha256": "0288d91fe560822051095efe20f8dacdebfcdbba5869d4e3d5d3a65f96bf73ef",
+        "utf8Bytes": 4810
+      },
+      {
+        "path": "psc0/scripts/selfhost-source-workspace.mjs",
+        "gitBlob": "f7c0449eb0463ffea519b040620df0b3632f44d5",
+        "sha256": "ec6707a4b12fa605cdcf7cdf1db829f281990fbb8c9b2dc5b9638d37e6fbb1f8",
+        "utf8Bytes": 5534
+      },
+      {
+        "path": "psc0/scripts/checked-source-snapshot.mjs",
+        "gitBlob": "ce11c780ed74dd6a08ef8ae24ba77c6004bea9f8",
+        "sha256": "1082b5e817a973a1eae0731543f7f6b419dfa13c574d051b845c11659be7134c",
+        "utf8Bytes": 3941
+      }
+    ],
+    "workflowVector": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "gitBlob": "d772f9dc41761799a5398dfad752e2065896e115",
+        "sha256": "5e680e1e56cb260aed40fe9fce669a2d912f72b588b7cbe443d7367c82163cdc",
+        "utf8Bytes": 1012
+      },
+      {
+        "path": ".github/workflows/full-std-batch.yml",
+        "gitBlob": "80337c86aba5f4cd74c21d7bafb6ee32ff09b3e6",
+        "sha256": "9617d7f36267b692e542034d29cc9c7534f38a63f425679d4c600174ca2c38f5",
+        "utf8Bytes": 5864
+      },
+      {
+        "path": ".github/workflows/full-std-canonical.yml",
+        "gitBlob": "b9194372e02bbb7e8ac60dc2a417e54b7a0d0e4f",
+        "sha256": "482744373015b76ebccaa2a40f777c2bc0d2c8f86553f1475a358f98334802b4",
+        "utf8Bytes": 2736
+      },
+      {
+        "path": ".github/workflows/psc0-evidence-inspect.yml",
+        "gitBlob": "ddab8f4985fdc7ee9661792c205678404a67296f",
+        "sha256": "a1f13ed7a0973ee3813a12338d4ab1850ae98a4cd2ef7f684ec2baaaf99976fd",
+        "utf8Bytes": 6917
+      },
+      {
+        "path": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
+        "gitBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
+        "sha256": "d3bf915fc479c5d6b1b57410e62643a6e7a5b8826f303b830e27e62d3997200c",
+        "utf8Bytes": 9306
+      },
+      {
+        "path": ".github/workflows/psc0-sh1-seed-evidence.yml",
+        "gitBlob": "a62ea8c8799a945f7aba694ec35b897408b34c44",
+        "sha256": "7a795132a80f527be6c3f3555f076472ef9c0f789a4149da8fa02e1ae2295752",
+        "utf8Bytes": 37447
+      },
+      {
+        "path": ".github/workflows/psc0-sh1-ts7-recovery.yml",
+        "gitBlob": "499763e3ee1bcb7a3d62e56c543d9232b0630591",
+        "sha256": "0e4e0adb3bd04b24d42b704c51979f206d210889f13ba932934ceba63e37cd62",
+        "utf8Bytes": 5001
+      },
+      {
+        "path": ".github/workflows/psc0-sh1.yml",
+        "gitBlob": "cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8",
+        "sha256": "d40e8fda2a7beee1457352edef58e5b5f90f85b2dbdc8c25d1fa039c3d34c758",
+        "utf8Bytes": 23472
+      },
+      {
+        "path": ".github/workflows/psc0-typescript7-availability.yml",
+        "gitBlob": "879c58074fc43ff7bcac693a9e4720c952dbf424",
+        "sha256": "c00400e26bf1972c1fa7c2a7c0fca2b855d713cb76cc330ab0b4f348262cec7d",
+        "utf8Bytes": 4505
+      },
+      {
+        "path": ".github/workflows/psc1-lean-bootstrap.yml",
+        "gitBlob": "e8f137ea0a8aaaf8c5e0312c73ff51fbcfbe170c",
+        "sha256": "1f78879699d5844ebcf3bdaaf6144c2f9283ca0f2ceaa4a6cdfd2138c87aa752",
+        "utf8Bytes": 30610
+      },
+      {
+        "path": ".github/workflows/psc15selfhost-cloud.yml",
+        "gitBlob": "aa1ecc507aa826f9f49ab847da08a86e16ac1a07",
+        "sha256": "81499aaf2f8f596de13a1f6120408ef5338c21c97ae8c5a6b6f25be6704f1f48",
+        "utf8Bytes": 2492
+      },
+      {
+        "path": ".github/workflows/pscvl.yml",
+        "gitBlob": "e08f9a2ae16fc4f75e4c9f2d30ad6489101679b2",
+        "sha256": "b956dd941ab333726f4aafe092ad908c5ca5aa3adf89a2435d90312140ba51ec",
+        "utf8Bytes": 6070
+      },
+      {
+        "path": ".github/workflows/regenerate-oracle-fixtures.yml",
+        "gitBlob": "337107dda2b924949f86b880ebdf84ed02666232",
+        "sha256": "839f8a7befa0bb49e614fb59367500fc6a414602e675f8be6534c53703fa8e52",
+        "utf8Bytes": 2406
+      },
+      {
+        "path": ".github/workflows/root-typescript7-qualify.yml",
+        "gitBlob": "348ab35eaf3210b5a96ac53c08d7c5b201c29c1e",
+        "sha256": "d02ca4fdd83144f4e6790ab5e4124d5cee0d1f1b557cfe3f4181df70ded75a91",
+        "utf8Bytes": 1371
+      },
+      {
+        "path": ".github/workflows/selfhost-foundation-fixture.yml",
+        "gitBlob": "7a4f45043bfe01409b1f9a7684d50f3b6572f868",
+        "sha256": "09b121ef984af8716703c2a7d79a6cc014802afb1ff337dac8a223fb398d5625",
+        "utf8Bytes": 2838
+      },
+      {
+        "path": ".github/workflows/text-foundation-fixture.yml",
+        "gitBlob": "c36e9aff063fe95dc3bb798ba2f816af5fa4a33a",
+        "sha256": "92a6ddfa83db9bb250efb15145cb6e951a99ca00152c484a936195d1bc54688a",
+        "utf8Bytes": 2767
+      },
+      {
+        "path": ".github/workflows/wasm3-backend.yml",
+        "gitBlob": "773dc0ae404179082afd3b7fcf2d55d152f0926e",
+        "sha256": "822fdd1966ebd0d4fa1b698b1d2c15b97c11bbbdff2818f8b24db1792c5636a7",
+        "utf8Bytes": 4364
+      }
+    ],
+    "staticLocalImportClosureComplete": true,
+    "observations": {
+      "F1": {
+        "cases": 51,
+        "workers": 44,
+        "wrappers": 7,
+        "source": "psc0/scripts/sh1-fresh-name-conformance.mjs",
+        "resultDomain": "Strings, decimal index strings, tagged success/error string pairs and arrays of those; no serialized scope/context.",
+        "caseAudit": [
+          {
+            "index": 0,
+            "name": "local-zero-fresh",
+            "resultSha256": "b7a80a8882a3020f62fbf36e54c63fe0b008cb868c32f82fa0375f8de5a6aa08",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 1,
+            "name": "local-zero-colliding",
+            "resultSha256": "8e31740cb062e6e10008d9c89fbf8473d4aa491902aa631edfa8bfc4cd5c6a3e",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 2,
+            "name": "local-first-free",
+            "resultSha256": "8e31740cb062e6e10008d9c89fbf8473d4aa491902aa631edfa8bfc4cd5c6a3e",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 3,
+            "name": "local-exhaustion-can-collide",
+            "resultSha256": "1a5882b954db1b5d63560f1252d8b49660fb1e6b537098dc1796cf56eff4c13d",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 4,
+            "name": "local-global-collision-chain",
+            "resultSha256": "b2225194cc8a8c243873999846e723ed60db1f0e3922705264a034d35db6a3fb",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 5,
+            "name": "local-global-only-collision",
+            "resultSha256": "3a8de97dd522d3dba879baff4c0a044864879aed954652d6759b7487878161aa",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 6,
+            "name": "local-duplicates-consume-one-candidate",
+            "resultSha256": "cd2fa5ab4982c00f89b996a85d7f9e247d155565c2eb4bba5706b7fc4ac81f40",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 7,
+            "name": "local-future-collision-does-not-skip-free",
+            "resultSha256": "8e31740cb062e6e10008d9c89fbf8473d4aa491902aa631edfa8bfc4cd5c6a3e",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 8,
+            "name": "local-arbitrary-base",
+            "resultSha256": "7046c6a5a3acd50d4965bb90f5446e49bda1447e4811611a6ae2ef07f9b28cf0",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 9,
+            "name": "local-large-nat-index",
+            "resultSha256": "bee76cb9a72d4071dc8f484664d594e090235666c13602017733f4e8d85a951e",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 10,
+            "name": "eta-zero",
+            "resultSha256": "4a3228b46107e16b383c777663685c0972cb6b446a9a872bad4d0888be07002f",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 11,
+            "name": "eta-first-free",
+            "resultSha256": "53fa732890375f3c03207abda972e59d720d7b2382a5d93eb08e22564f1ec354",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 12,
+            "name": "eta-used-exhausts",
+            "resultSha256": "4a3228b46107e16b383c777663685c0972cb6b446a9a872bad4d0888be07002f",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 13,
+            "name": "eta-used-collision",
+            "resultSha256": "6039fa145e3f18cd2672db33d4791824a3570c4ec2ec968046eaf3171a78faae",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 14,
+            "name": "eta-body-collision",
+            "resultSha256": "6039fa145e3f18cd2672db33d4791824a3570c4ec2ec968046eaf3171a78faae",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 15,
+            "name": "eta-used-and-body-chain",
+            "resultSha256": "2c8910c9dbb40e08c2edc77eef24719de9e242534a5d69f75654f11694729e2f",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 16,
+            "name": "eta-lambda-binder-counts",
+            "resultSha256": "6039fa145e3f18cd2672db33d4791824a3570c4ec2ec968046eaf3171a78faae",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 17,
+            "name": "eta-let-binder-counts",
+            "resultSha256": "6039fa145e3f18cd2672db33d4791824a3570c4ec2ec968046eaf3171a78faae",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 18,
+            "name": "eta-record-label-does-not-count",
+            "resultSha256": "53fa732890375f3c03207abda972e59d720d7b2382a5d93eb08e22564f1ec354",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 19,
+            "name": "eta-last-inspected-depth",
+            "resultSha256": "53fa732890375f3c03207abda972e59d720d7b2382a5d93eb08e22564f1ec354",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 20,
+            "name": "eta-conservative-depth-exhaustion",
+            "resultSha256": "4a3228b46107e16b383c777663685c0972cb6b446a9a872bad4d0888be07002f",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 21,
+            "name": "eta-zero-with-deep-body",
+            "resultSha256": "4a3228b46107e16b383c777663685c0972cb6b446a9a872bad4d0888be07002f",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 22,
+            "name": "eta-large-nat-index",
+            "resultSha256": "f7e5b63991e9b56c24c047ccb0702873b0cfd225b2ef0d99cd978c4a2004229f",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 23,
+            "name": "match-zero",
+            "resultSha256": "493538e92338095fda89d4aaa82b4bbc90f5356e5f18aea35dd6a0b458b77d43",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 24,
+            "name": "match-zero-colliding-overflow",
+            "resultSha256": "493538e92338095fda89d4aaa82b4bbc90f5356e5f18aea35dd6a0b458b77d43",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 25,
+            "name": "match-first-free",
+            "resultSha256": "99e957294188084dbff6fc8a7dbf78257d108f79acee1ba4c1a34edb754c0fff",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 26,
+            "name": "match-collision-exhausts",
+            "resultSha256": "493538e92338095fda89d4aaa82b4bbc90f5356e5f18aea35dd6a0b458b77d43",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 27,
+            "name": "match-collision-chain",
+            "resultSha256": "6a76f593650a4125174650b7f989aa5eab0a0f365f77b5b65328703b50e1c371",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 28,
+            "name": "match-lambda-binder-counts",
+            "resultSha256": "887b90168c36e4b810760aec0b1b9f33db5c4e0aeac522065cb11acc80a3363d",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 29,
+            "name": "match-record-label-does-not-count",
+            "resultSha256": "99e957294188084dbff6fc8a7dbf78257d108f79acee1ba4c1a34edb754c0fff",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 30,
+            "name": "match-last-inspected-depth",
+            "resultSha256": "99e957294188084dbff6fc8a7dbf78257d108f79acee1ba4c1a34edb754c0fff",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 31,
+            "name": "match-conservative-depth-exhaustion",
+            "resultSha256": "493538e92338095fda89d4aaa82b4bbc90f5356e5f18aea35dd6a0b458b77d43",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 32,
+            "name": "match-large-nat-index",
+            "resultSha256": "8dbb1b4ccc6ba21c8c4c27a81fca403bf9135865b58b6451722b0512a992f73f",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 33,
+            "name": "internal-zero",
+            "resultSha256": "6ee31faa22d7529c9b044950c9f35f5b12b0818d493f980dcfe0dfe10161c9ef",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 34,
+            "name": "internal-zero-colliding-overflow",
+            "resultSha256": "6ee31faa22d7529c9b044950c9f35f5b12b0818d493f980dcfe0dfe10161c9ef",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 35,
+            "name": "internal-first-free",
+            "resultSha256": "ed4d56caf720ded1250ef1b5adb87df56c82657ddebaafade1bb62d9e8cbacc5",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 36,
+            "name": "internal-one-collision-exhausts",
+            "resultSha256": "cb7e58658383a75163c9f8cb1d7ace498c378713b988c15010c578fbe3293c76",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 37,
+            "name": "internal-all-collisions-exhaust",
+            "resultSha256": "eee0e85a3235c0365b76dd30343e449f4b5be001c35c7a513276da5192f389be",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 38,
+            "name": "internal-first-free-after-chain",
+            "resultSha256": "f2dba90d958c7a9081444e1c099d3367581f1b1906927c19879dac253fdbb8f8",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 39,
+            "name": "internal-duplicate-used-names",
+            "resultSha256": "9be9c5616c50ad61636cd503c2a252b8e8fbc5b08b6700be244058c42f490008",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 40,
+            "name": "internal-future-collision-does-not-skip-free",
+            "resultSha256": "ed4d56caf720ded1250ef1b5adb87df56c82657ddebaafade1bb62d9e8cbacc5",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 41,
+            "name": "internal-empty-prefix",
+            "resultSha256": "3e86359fd1425354844c60f68c7249d2619ae32cfbf07f03f813244c9dc63e2d",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 42,
+            "name": "internal-arbitrary-prefix",
+            "resultSha256": "a89dbb93a6bb90d88c0c8b28c3f48698f756a3fc189cf4b70272f227f12644a5",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 43,
+            "name": "internal-large-nat-index",
+            "resultSha256": "4708f0a2be5f862184ce799a566fae28a58a49565f1c17b86dfbc73529e5b2d4",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 44,
+            "name": "wrapper-reserved-arguments",
+            "resultSha256": "a9857fed0c89c87be09a6b6826410ab3d765084e78d0882e1efb41da7a743cfb",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 45,
+            "name": "wrapper-reserved-eval-collision",
+            "resultSha256": "1da3cf6edf256b87ff588fd36623f57d0c0d86110c61a9a63e90606ed4835b8e",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 46,
+            "name": "wrapper-underscore-fallback",
+            "resultSha256": "55785e4d24dce1a3bc6f517296720952a46b62f74e71015a4c0b2961db5266ba",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 47,
+            "name": "wrapper-sanitized-global-collision",
+            "resultSha256": "9fcd1a5e8a430945fe5f970812b1679193f6d6faad37cf0d5ec6ab977de480d2",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 48,
+            "name": "wrapper-match-argument-order",
+            "resultSha256": "887b90168c36e4b810760aec0b1b9f33db5c4e0aeac522065cb11acc80a3363d",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 49,
+            "name": "wrapper-internal-argument-order",
+            "resultSha256": "f2dba90d958c7a9081444e1c099d3367581f1b1906927c19879dac253fdbb8f8",
+            "rawAllThreeEqual": true
+          },
+          {
+            "index": 50,
+            "name": "wrapper-eta-parameter-order",
+            "resultSha256": "4a11586be7c0571caace1444a176dd480f23be91f356e17aa29dadc98763d8b7",
+            "rawAllThreeEqual": true
+          }
+        ]
+      },
+      "F2": {
+        "cases": 36,
+        "classes": {
+          "preparation": {
+            "indices": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "kind": "preparationSnapshotsOrFirstDiagnostic",
+            "observed": "source kind, reverse declarations and environment declaration count/order/lookup values, or complete first diagnostic"
+          },
+          "add": {
+            "indices": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "kind": "environmentSnapshotsOrDuplicateDiagnostic",
+            "observed": "declaration count, exact newest-first order, declaration values and lookups; duplicate-first or owned-bootstrap replacement diagnostics"
+          },
+          "elab": {
+            "indices": [
+              10,
+              11,
+              12,
+              13
+            ],
+            "kind": "elaboratedDeclarationsOrFirstDiagnostic",
+            "observed": "ordered elaborated declarations, environment snapshot/lookup, or first unknown/duplicate name"
+          },
+          "names": {
+            "indices": [
+              14,
+              15,
+              16,
+              17
+            ],
+            "kind": "nameWorkerState",
+            "observed": "used output strings and reverse core-name/output pairs, including whitelist, collision/sanitizing and fallback"
+          },
+          "erase": {
+            "indices": [
+              18,
+              19,
+              20,
+              21,
+              22
+            ],
+            "kind": "erasedIrDeclarationsOrFirstDiagnostic",
+            "observed": "complete plain IR declaration list/reverse order or first unknown-local diagnostic; no returned scope"
+          },
+          "structures": {
+            "indices": [
+              23,
+              24,
+              25,
+              26
+            ],
+            "kind": "structureMetadata",
+            "observed": "plain IR lists; index23 full unchanged unprepared scope; indices24/25 checked structure lookup metadata with same-compiler preserved-scope assertions; index26 first diagnostic"
+          },
+          "inductives": {
+            "indices": [
+              27,
+              28,
+              29,
+              30
+            ],
+            "kind": "inductiveMetadata",
+            "observed": "plain IR lists; index27 full unchanged unprepared scope; indices28/29 checked constructor/recursor lookup metadata with same-compiler preserved-scope assertions; index30 first diagnostic"
+          },
+          "symbols": {
+            "indices": [
+              31,
+              32,
+              33,
+              34,
+              35
+            ],
+            "kind": "symbolMap",
+            "observed": "used strings, decimal next index, reverse pair strings or brand/tag wrapper map"
+          }
+        },
+        "caseAudit": [
+          {
+            "index": 0,
+            "name": "preparation-empty-state",
+            "class": "preparation",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "c761a149bda6b1d2fed0e605c7beb2325e3b3501c992124cb06af51139da8afe",
+            "rawN1ResultSha256": "c761a149bda6b1d2fed0e605c7beb2325e3b3501c992124cb06af51139da8afe",
+            "rawC1ResultSha256": "c761a149bda6b1d2fed0e605c7beb2325e3b3501c992124cb06af51139da8afe",
+            "projectedResultSha256": "c761a149bda6b1d2fed0e605c7beb2325e3b3501c992124cb06af51139da8afe"
+          },
+          {
+            "index": 1,
+            "name": "preparation-ordered-dependencies",
+            "class": "preparation",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "3a5385b1fb1476ffcb6de90ad1017c30a298a0d49ec6788f7366e7faf8dc156f",
+            "rawN1ResultSha256": "3a5385b1fb1476ffcb6de90ad1017c30a298a0d49ec6788f7366e7faf8dc156f",
+            "rawC1ResultSha256": "3a5385b1fb1476ffcb6de90ad1017c30a298a0d49ec6788f7366e7faf8dc156f",
+            "projectedResultSha256": "3a5385b1fb1476ffcb6de90ad1017c30a298a0d49ec6788f7366e7faf8dc156f"
+          },
+          {
+            "index": 2,
+            "name": "preparation-first-parse-error",
+            "class": "preparation",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "84d6bd105acdff85ec1a7b514d8d1f62e4ff62a7420f5807b541b81ea113b460",
+            "rawN1ResultSha256": "84d6bd105acdff85ec1a7b514d8d1f62e4ff62a7420f5807b541b81ea113b460",
+            "rawC1ResultSha256": "84d6bd105acdff85ec1a7b514d8d1f62e4ff62a7420f5807b541b81ea113b460",
+            "projectedResultSha256": "84d6bd105acdff85ec1a7b514d8d1f62e4ff62a7420f5807b541b81ea113b460"
+          },
+          {
+            "index": 3,
+            "name": "preparation-middle-elaboration-error",
+            "class": "preparation",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "087c57340c9fefb731b59ef7c881ec57a54c3b66eddd4e04c733e83cbaf4f096",
+            "rawN1ResultSha256": "087c57340c9fefb731b59ef7c881ec57a54c3b66eddd4e04c733e83cbaf4f096",
+            "rawC1ResultSha256": "087c57340c9fefb731b59ef7c881ec57a54c3b66eddd4e04c733e83cbaf4f096",
+            "projectedResultSha256": "087c57340c9fefb731b59ef7c881ec57a54c3b66eddd4e04c733e83cbaf4f096"
+          },
+          {
+            "index": 4,
+            "name": "preparation-parsed-step-correspondence",
+            "class": "preparation",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "3a5385b1fb1476ffcb6de90ad1017c30a298a0d49ec6788f7366e7faf8dc156f",
+            "rawN1ResultSha256": "3a5385b1fb1476ffcb6de90ad1017c30a298a0d49ec6788f7366e7faf8dc156f",
+            "rawC1ResultSha256": "3a5385b1fb1476ffcb6de90ad1017c30a298a0d49ec6788f7366e7faf8dc156f",
+            "projectedResultSha256": "3a5385b1fb1476ffcb6de90ad1017c30a298a0d49ec6788f7366e7faf8dc156f"
+          },
+          {
+            "index": 5,
+            "name": "add-empty-environment",
+            "class": "add",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "dd7b0669447dc8481c1d88db970d5c9893bd41663ec4a3a43c22a39d0614a00a",
+            "rawN1ResultSha256": "dd7b0669447dc8481c1d88db970d5c9893bd41663ec4a3a43c22a39d0614a00a",
+            "rawC1ResultSha256": "dd7b0669447dc8481c1d88db970d5c9893bd41663ec4a3a43c22a39d0614a00a",
+            "projectedResultSha256": "dd7b0669447dc8481c1d88db970d5c9893bd41663ec4a3a43c22a39d0614a00a"
+          },
+          {
+            "index": 6,
+            "name": "add-ordered-declarations",
+            "class": "add",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "8535012c56ff41deb9745d20d57c6cea996e3bf3ae1fc7cfd78f1617fbbf5734",
+            "rawN1ResultSha256": "8535012c56ff41deb9745d20d57c6cea996e3bf3ae1fc7cfd78f1617fbbf5734",
+            "rawC1ResultSha256": "8535012c56ff41deb9745d20d57c6cea996e3bf3ae1fc7cfd78f1617fbbf5734",
+            "projectedResultSha256": "8535012c56ff41deb9745d20d57c6cea996e3bf3ae1fc7cfd78f1617fbbf5734"
+          },
+          {
+            "index": 7,
+            "name": "add-duplicate-initial",
+            "class": "add",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "ed774a61038d9db60d722ab76395682c75a3eca8e36aea25ddc629a43b4c9ecb",
+            "rawN1ResultSha256": "ed774a61038d9db60d722ab76395682c75a3eca8e36aea25ddc629a43b4c9ecb",
+            "rawC1ResultSha256": "ed774a61038d9db60d722ab76395682c75a3eca8e36aea25ddc629a43b4c9ecb",
+            "projectedResultSha256": "ed774a61038d9db60d722ab76395682c75a3eca8e36aea25ddc629a43b4c9ecb"
+          },
+          {
+            "index": 8,
+            "name": "add-duplicate-earlier-input",
+            "class": "add",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "4269e74e523ac128430d9aad279aad3334dbd571cf1a1a0bfebe3eb9f54061bd",
+            "rawN1ResultSha256": "4269e74e523ac128430d9aad279aad3334dbd571cf1a1a0bfebe3eb9f54061bd",
+            "rawC1ResultSha256": "4269e74e523ac128430d9aad279aad3334dbd571cf1a1a0bfebe3eb9f54061bd",
+            "projectedResultSha256": "4269e74e523ac128430d9aad279aad3334dbd571cf1a1a0bfebe3eb9f54061bd"
+          },
+          {
+            "index": 9,
+            "name": "add-owned-bootstrap-replacement",
+            "class": "add",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "107e785d8c2b60ddd441120a32bdf4e3d96ee7b51bd9937331bb2ddbcff1de8a",
+            "rawN1ResultSha256": "107e785d8c2b60ddd441120a32bdf4e3d96ee7b51bd9937331bb2ddbcff1de8a",
+            "rawC1ResultSha256": "107e785d8c2b60ddd441120a32bdf4e3d96ee7b51bd9937331bb2ddbcff1de8a",
+            "projectedResultSha256": "107e785d8c2b60ddd441120a32bdf4e3d96ee7b51bd9937331bb2ddbcff1de8a"
+          },
+          {
+            "index": 10,
+            "name": "elab-empty-reverse-accumulator",
+            "class": "elab",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "c867537b194aee809b3156b8cdb86e65f84074cbdb8ef4553920a11c30ffbacb",
+            "rawN1ResultSha256": "c867537b194aee809b3156b8cdb86e65f84074cbdb8ef4553920a11c30ffbacb",
+            "rawC1ResultSha256": "c867537b194aee809b3156b8cdb86e65f84074cbdb8ef4553920a11c30ffbacb",
+            "projectedResultSha256": "c867537b194aee809b3156b8cdb86e65f84074cbdb8ef4553920a11c30ffbacb"
+          },
+          {
+            "index": 11,
+            "name": "elab-ordered-batches",
+            "class": "elab",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "411cb58b1c34b941fd28dba9a23b0bb2992ed36a4b902ca45d50e435f8bee6dc",
+            "rawN1ResultSha256": "411cb58b1c34b941fd28dba9a23b0bb2992ed36a4b902ca45d50e435f8bee6dc",
+            "rawC1ResultSha256": "411cb58b1c34b941fd28dba9a23b0bb2992ed36a4b902ca45d50e435f8bee6dc",
+            "projectedResultSha256": "411cb58b1c34b941fd28dba9a23b0bb2992ed36a4b902ca45d50e435f8bee6dc"
+          },
+          {
+            "index": 12,
+            "name": "elab-first-failure",
+            "class": "elab",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "7e792b5c15a744cdb3aa14f483c19e716516db611137e0bb552a43dcc46e1530",
+            "rawN1ResultSha256": "7e792b5c15a744cdb3aa14f483c19e716516db611137e0bb552a43dcc46e1530",
+            "rawC1ResultSha256": "7e792b5c15a744cdb3aa14f483c19e716516db611137e0bb552a43dcc46e1530",
+            "projectedResultSha256": "7e792b5c15a744cdb3aa14f483c19e716516db611137e0bb552a43dcc46e1530"
+          },
+          {
+            "index": 13,
+            "name": "elab-duplicate-before-tail-failure",
+            "class": "elab",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "ed774a61038d9db60d722ab76395682c75a3eca8e36aea25ddc629a43b4c9ecb",
+            "rawN1ResultSha256": "ed774a61038d9db60d722ab76395682c75a3eca8e36aea25ddc629a43b4c9ecb",
+            "rawC1ResultSha256": "ed774a61038d9db60d722ab76395682c75a3eca8e36aea25ddc629a43b4c9ecb",
+            "projectedResultSha256": "ed774a61038d9db60d722ab76395682c75a3eca8e36aea25ddc629a43b4c9ecb"
+          },
+          {
+            "index": 14,
+            "name": "names-empty-state",
+            "class": "names",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "418cec7f4407320cdafc3f2912708db6367636b04d6f27d79f307df26a021185",
+            "rawN1ResultSha256": "418cec7f4407320cdafc3f2912708db6367636b04d6f27d79f307df26a021185",
+            "rawC1ResultSha256": "418cec7f4407320cdafc3f2912708db6367636b04d6f27d79f307df26a021185",
+            "projectedResultSha256": "418cec7f4407320cdafc3f2912708db6367636b04d6f27d79f307df26a021185"
+          },
+          {
+            "index": 15,
+            "name": "names-kind-whitelist",
+            "class": "names",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "2fb6b7d8cc00f439a315a7b03d322e3acb8381ca6af55adec4e68347e4c66d69",
+            "rawN1ResultSha256": "2fb6b7d8cc00f439a315a7b03d322e3acb8381ca6af55adec4e68347e4c66d69",
+            "rawC1ResultSha256": "2fb6b7d8cc00f439a315a7b03d322e3acb8381ca6af55adec4e68347e4c66d69",
+            "projectedResultSha256": "2fb6b7d8cc00f439a315a7b03d322e3acb8381ca6af55adec4e68347e4c66d69"
+          },
+          {
+            "index": 16,
+            "name": "names-sanitizing-collisions",
+            "class": "names",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "e05877a234491074c93104584bf10a6aa932c01315313ca76b882ed9e389544a",
+            "rawN1ResultSha256": "e05877a234491074c93104584bf10a6aa932c01315313ca76b882ed9e389544a",
+            "rawC1ResultSha256": "e05877a234491074c93104584bf10a6aa932c01315313ca76b882ed9e389544a",
+            "projectedResultSha256": "e05877a234491074c93104584bf10a6aa932c01315313ca76b882ed9e389544a"
+          },
+          {
+            "index": 17,
+            "name": "names-prefix-and-fallback",
+            "class": "names",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "3ac48903b4022c8c57019d9a95ad946ae33b7c24549c39af8dc58184d25d6097",
+            "rawN1ResultSha256": "3ac48903b4022c8c57019d9a95ad946ae33b7c24549c39af8dc58184d25d6097",
+            "rawC1ResultSha256": "3ac48903b4022c8c57019d9a95ad946ae33b7c24549c39af8dc58184d25d6097",
+            "projectedResultSha256": "3ac48903b4022c8c57019d9a95ad946ae33b7c24549c39af8dc58184d25d6097"
+          },
+          {
+            "index": 18,
+            "name": "erase-empty-reverse-accumulator",
+            "class": "erase",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "466689996ea8124df6d40806873fdee553004041c79290abce71a759e1554419",
+            "rawN1ResultSha256": "466689996ea8124df6d40806873fdee553004041c79290abce71a759e1554419",
+            "rawC1ResultSha256": "466689996ea8124df6d40806873fdee553004041c79290abce71a759e1554419",
+            "projectedResultSha256": "466689996ea8124df6d40806873fdee553004041c79290abce71a759e1554419"
+          },
+          {
+            "index": 19,
+            "name": "erase-definition-and-partial",
+            "class": "erase",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "3f8cf4cdbd5d0ceb6ff924813ae7a0bf0b29e336bd47437efb1a5c1b3fcdf99e",
+            "rawN1ResultSha256": "3f8cf4cdbd5d0ceb6ff924813ae7a0bf0b29e336bd47437efb1a5c1b3fcdf99e",
+            "rawC1ResultSha256": "3f8cf4cdbd5d0ceb6ff924813ae7a0bf0b29e336bd47437efb1a5c1b3fcdf99e",
+            "projectedResultSha256": "3f8cf4cdbd5d0ceb6ff924813ae7a0bf0b29e336bd47437efb1a5c1b3fcdf99e"
+          },
+          {
+            "index": 20,
+            "name": "erase-proof-omission",
+            "class": "erase",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "d03a621daf854f159dc85a681e78a63ce3ba57b7ae8f7ce2d1cd2fca5906a00c",
+            "rawN1ResultSha256": "d03a621daf854f159dc85a681e78a63ce3ba57b7ae8f7ce2d1cd2fca5906a00c",
+            "rawC1ResultSha256": "d03a621daf854f159dc85a681e78a63ce3ba57b7ae8f7ce2d1cd2fca5906a00c",
+            "projectedResultSha256": "d03a621daf854f159dc85a681e78a63ce3ba57b7ae8f7ce2d1cd2fca5906a00c"
+          },
+          {
+            "index": 21,
+            "name": "erase-skipped-variants",
+            "class": "erase",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "9fb5a92355a3c0b07526ef0555077d1d3026a3810fa4d9c9852356a6328088bc",
+            "rawN1ResultSha256": "9fb5a92355a3c0b07526ef0555077d1d3026a3810fa4d9c9852356a6328088bc",
+            "rawC1ResultSha256": "9fb5a92355a3c0b07526ef0555077d1d3026a3810fa4d9c9852356a6328088bc",
+            "projectedResultSha256": "9fb5a92355a3c0b07526ef0555077d1d3026a3810fa4d9c9852356a6328088bc"
+          },
+          {
+            "index": 22,
+            "name": "erase-first-refusal",
+            "class": "erase",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "44810d7c19d123d22630d78bdfedce886f844f60062d9a5472e3f6f1ca147838",
+            "rawN1ResultSha256": "44810d7c19d123d22630d78bdfedce886f844f60062d9a5472e3f6f1ca147838",
+            "rawC1ResultSha256": "44810d7c19d123d22630d78bdfedce886f844f60062d9a5472e3f6f1ca147838",
+            "projectedResultSha256": "44810d7c19d123d22630d78bdfedce886f844f60062d9a5472e3f6f1ca147838"
+          },
+          {
+            "index": 23,
+            "name": "structures-empty-reverse-accumulator",
+            "class": "structures",
+            "schemaBoundary": "typed-unprepared-scope-return",
+            "rawRResultSha256": "666347afe9673a903e46f16e49286aaefd065b7829b8c032d8b9340b0a793685",
+            "rawN1ResultSha256": "046d2372ad8619e90dcbdf0de13649f09f7b22e913bef22fb1222ad5fe5700e2",
+            "rawC1ResultSha256": "046d2372ad8619e90dcbdf0de13649f09f7b22e913bef22fb1222ad5fe5700e2",
+            "projectedResultSha256": "046d2372ad8619e90dcbdf0de13649f09f7b22e913bef22fb1222ad5fe5700e2"
+          },
+          {
+            "index": 24,
+            "name": "structures-mixed-stream",
+            "class": "structures",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "be4b6cbee15b0ea2656b9b301e8f2d076b3fbac69176d07a28e836e3d3055225",
+            "rawN1ResultSha256": "be4b6cbee15b0ea2656b9b301e8f2d076b3fbac69176d07a28e836e3d3055225",
+            "rawC1ResultSha256": "be4b6cbee15b0ea2656b9b301e8f2d076b3fbac69176d07a28e836e3d3055225",
+            "projectedResultSha256": "be4b6cbee15b0ea2656b9b301e8f2d076b3fbac69176d07a28e836e3d3055225"
+          },
+          {
+            "index": 25,
+            "name": "structures-threaded-scope",
+            "class": "structures",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "75dab77ae68166263f37528369f27d3cb0a4749353d1d1990421944049f30652",
+            "rawN1ResultSha256": "75dab77ae68166263f37528369f27d3cb0a4749353d1d1990421944049f30652",
+            "rawC1ResultSha256": "75dab77ae68166263f37528369f27d3cb0a4749353d1d1990421944049f30652",
+            "projectedResultSha256": "75dab77ae68166263f37528369f27d3cb0a4749353d1d1990421944049f30652"
+          },
+          {
+            "index": 26,
+            "name": "structures-first-refusal",
+            "class": "structures",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "10e55b0f2c55425fb7c9165ef2f1e500c2e819ac68bc1777c13c8c863949d5d9",
+            "rawN1ResultSha256": "10e55b0f2c55425fb7c9165ef2f1e500c2e819ac68bc1777c13c8c863949d5d9",
+            "rawC1ResultSha256": "10e55b0f2c55425fb7c9165ef2f1e500c2e819ac68bc1777c13c8c863949d5d9",
+            "projectedResultSha256": "10e55b0f2c55425fb7c9165ef2f1e500c2e819ac68bc1777c13c8c863949d5d9"
+          },
+          {
+            "index": 27,
+            "name": "inductives-empty-reverse-accumulator",
+            "class": "inductives",
+            "schemaBoundary": "typed-unprepared-scope-return",
+            "rawRResultSha256": "f0901a084054b7a37a495bbb4bcaf4b1de1a47217a028dda259073326f9c7988",
+            "rawN1ResultSha256": "686136e3f12c152632729c9ab07b25ba6b42b70c97b98cf3ccc625fcc74855b2",
+            "rawC1ResultSha256": "686136e3f12c152632729c9ab07b25ba6b42b70c97b98cf3ccc625fcc74855b2",
+            "projectedResultSha256": "686136e3f12c152632729c9ab07b25ba6b42b70c97b98cf3ccc625fcc74855b2"
+          },
+          {
+            "index": 28,
+            "name": "inductives-mixed-stream",
+            "class": "inductives",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "3f44b9baab594471e6a1da19909924e5b5371a444055cd6aef81aac6bc5ad0bc",
+            "rawN1ResultSha256": "3f44b9baab594471e6a1da19909924e5b5371a444055cd6aef81aac6bc5ad0bc",
+            "rawC1ResultSha256": "3f44b9baab594471e6a1da19909924e5b5371a444055cd6aef81aac6bc5ad0bc",
+            "projectedResultSha256": "3f44b9baab594471e6a1da19909924e5b5371a444055cd6aef81aac6bc5ad0bc"
+          },
+          {
+            "index": 29,
+            "name": "inductives-threaded-scope",
+            "class": "inductives",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "7cfe8c4d7e393b19ac755d3d1476bfaee04350e0384251997666a72afcb90218",
+            "rawN1ResultSha256": "7cfe8c4d7e393b19ac755d3d1476bfaee04350e0384251997666a72afcb90218",
+            "rawC1ResultSha256": "7cfe8c4d7e393b19ac755d3d1476bfaee04350e0384251997666a72afcb90218",
+            "projectedResultSha256": "7cfe8c4d7e393b19ac755d3d1476bfaee04350e0384251997666a72afcb90218"
+          },
+          {
+            "index": 30,
+            "name": "inductives-first-refusal",
+            "class": "inductives",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "f8d85d1e204d0672ed3812df7c8a428c76b3613d0c5f82dd684c76b704402f0c",
+            "rawN1ResultSha256": "f8d85d1e204d0672ed3812df7c8a428c76b3613d0c5f82dd684c76b704402f0c",
+            "rawC1ResultSha256": "f8d85d1e204d0672ed3812df7c8a428c76b3613d0c5f82dd684c76b704402f0c",
+            "projectedResultSha256": "f8d85d1e204d0672ed3812df7c8a428c76b3613d0c5f82dd684c76b704402f0c"
+          },
+          {
+            "index": 31,
+            "name": "symbols-empty-state",
+            "class": "symbols",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "e4f578c09e712147c86488788921d220a9742f5077faab9b1cca7b06161264d1",
+            "rawN1ResultSha256": "e4f578c09e712147c86488788921d220a9742f5077faab9b1cca7b06161264d1",
+            "rawC1ResultSha256": "e4f578c09e712147c86488788921d220a9742f5077faab9b1cca7b06161264d1",
+            "projectedResultSha256": "e4f578c09e712147c86488788921d220a9742f5077faab9b1cca7b06161264d1"
+          },
+          {
+            "index": 32,
+            "name": "symbols-collision-and-index",
+            "class": "symbols",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "ff1b86aef95450a297bd0112a1a2b4c72a563518dfa737f33a245f4f74f3a460",
+            "rawN1ResultSha256": "ff1b86aef95450a297bd0112a1a2b4c72a563518dfa737f33a245f4f74f3a460",
+            "rawC1ResultSha256": "ff1b86aef95450a297bd0112a1a2b4c72a563518dfa737f33a245f4f74f3a460",
+            "projectedResultSha256": "ff1b86aef95450a297bd0112a1a2b4c72a563518dfa737f33a245f4f74f3a460"
+          },
+          {
+            "index": 33,
+            "name": "symbols-duplicate-source-names",
+            "class": "symbols",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "11b710e7ed6237fa8445d576ba30d21dd3d1d079fdd60e3c2c6350db867e0fa4",
+            "rawN1ResultSha256": "11b710e7ed6237fa8445d576ba30d21dd3d1d079fdd60e3c2c6350db867e0fa4",
+            "rawC1ResultSha256": "11b710e7ed6237fa8445d576ba30d21dd3d1d079fdd60e3c2c6350db867e0fa4",
+            "projectedResultSha256": "11b710e7ed6237fa8445d576ba30d21dd3d1d079fdd60e3c2c6350db867e0fa4"
+          },
+          {
+            "index": 34,
+            "name": "symbols-brand-wrapper",
+            "class": "symbols",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "e8a6c71121f47b1df3e8e0d02cfdecfe8f6ca7dd8a63049ec93429994bf63829",
+            "rawN1ResultSha256": "e8a6c71121f47b1df3e8e0d02cfdecfe8f6ca7dd8a63049ec93429994bf63829",
+            "rawC1ResultSha256": "e8a6c71121f47b1df3e8e0d02cfdecfe8f6ca7dd8a63049ec93429994bf63829",
+            "projectedResultSha256": "e8a6c71121f47b1df3e8e0d02cfdecfe8f6ca7dd8a63049ec93429994bf63829"
+          },
+          {
+            "index": 35,
+            "name": "symbols-tag-wrapper",
+            "class": "symbols",
+            "schemaBoundary": "unchanged",
+            "rawRResultSha256": "81da4b201ac0b9128165b06cff98f930a45be2f82a98b68768f2a6301ffc54d5",
+            "rawN1ResultSha256": "81da4b201ac0b9128165b06cff98f930a45be2f82a98b68768f2a6301ffc54d5",
+            "rawC1ResultSha256": "81da4b201ac0b9128165b06cff98f930a45be2f82a98b68768f2a6301ffc54d5",
+            "projectedResultSha256": "81da4b201ac0b9128165b06cff98f930a45be2f82a98b68768f2a6301ffc54d5"
+          }
+        ]
+      }
+    },
+    "otherBoundaries": [
+      {
+        "paths": [
+          "psc0/scripts/sh1-qualify.mjs",
+          "psc0/scripts/generated-preparation-session.mjs"
+        ],
+        "result": "Session cross-generation comparison uses canonical admission text. Opaque compiler preparation values remain deeply frozen and compiler-local; only counts/timings/hashes escape. The warm prepared-object identity and parse-error identity checks are same-compiler. No raw erasure scope comparison to R."
+      },
+      {
+        "paths": [
+          "psc0/scripts/sh1-iterate.mjs",
+          "psc0/scripts/sh1-iteration-conformance.mjs"
+        ],
+        "result": "Resident CLI checks compare same-compiler admissions/TypeScript bytes, closure manifests and cache receipt counters. No cross-generation raw context/name index is serialized."
+      },
+      {
+        "paths": [
+          "psc0/scripts/checked-prepared-session.mjs",
+          "psc0/scripts/checked-seed-session.mjs"
+        ],
+        "result": "Full data graphs stay internal/frozen or are represented by immutable admission/TypeScript text and provider identity handles. No R/current declaration-name schema comparison."
+      },
+      {
+        "paths": [
+          "psc0/scripts/sh1-helper-conformance.mjs",
+          "psc0/scripts/sh1-foundation-conformance.mjs",
+          "psc0/scripts/sh1-migration-worker-abi.mjs"
+        ],
+        "result": "Helpers compare Core public types using the owning compiler's alpha equality and finite runtime primitive values; ABI checks project Core/IR function signatures. No returned erasure-scope record is a compared observation."
+      },
+      {
+        "paths": [
+          "psc0/scripts/sh1-grammar-conformance.mjs",
+          "psc0/scripts/sh1-projection-conformance.mjs",
+          "psc0/scripts/sh1-generic-erasure-conformance.mjs"
+        ],
+        "result": "Syntax/name spans, original IR layouts/types, bounded Core expression snapshots and explicit runtime observations are the boundaries; declarationNames metadata does not occur in those result schemas."
+      },
+      {
+        "paths": [
+          "psc0/scripts/sh1-strict-source-conformance.mjs",
+          "psc0/scripts/sh1-strict-target-conformance.mjs",
+          "psc0/scripts/sh1-strict-runtime-conformance.mjs",
+          "psc0/scripts/sh1-ir-checker-conformance.mjs",
+          "psc0/scripts/sh1-strict-evidence.mjs"
+        ],
+        "result": "Current strict source/IR/carrier/runtime and receipt/hash bindings do not compare selected-R raw erasure scopes. Existing strict binder requirements remain unchanged."
+      },
+      {
+        "paths": [
+          "psc0/scripts/sh1-qualify.mjs"
+        ],
+        "baseLines": [
+          1115,
+          1181,
+          1217,
+          1245
+        ],
+        "result": "All post-C1, authenticated receipt, C2 and C3 worker-report comparisons remain exact. Fresh reports from the common revised observer feed the same consumers."
+      }
+    ],
+    "concreteAdditionalSameClassBlockers": []
+  },
+  "pureRetainedReportReplay": {
+    "method": "Pure data projection of complete retained report JSON, not repository code execution or a new compiler/test run",
+    "original": {
+      "R": "934cefe080497004fc4db8eb4295b41039c39886d166bb16ff37ddd1665729d3",
+      "N1": "04ce079872785181d5257495f57b56becc79ad50baaa5fb03d12529c1aca92ae",
+      "C1": "04ce079872785181d5257495f57b56becc79ad50baaa5fb03d12529c1aca92ae"
+    },
+    "projectedReportSha256": "2850f574fee1141fe3e96eee88be8010179e46108a23677d568e1fff701071c8",
+    "projectedReportBytes": 51437,
+    "projectedF2Sha256": "f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2",
+    "projectedAggregateSha256": "a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8",
+    "rawReportsMutated": false,
+    "completeReportEqual": true,
+    "cases": 87,
+    "F1": 51,
+    "F2": 36,
+    "originalReportDigestsPreserved": true,
+    "derivedPredictionOnly": true,
+    "candidateCompilerExecuted": false,
+    "candidateWorkflowExecuted": false,
+    "candidateReceiptProduced": false,
+    "meaning": "Apply only the reviewed empty-field completion to the two known report positions, retain every other original observation and case order, recalculate the existing F2/aggregate hashes and add the common explicit observation policy. R/N1/C1 become identical under this pure data procedure. This does not substitute for an actual candidate run.",
+    "rawReportsRemainPinned": true,
+    "originalFamilyAndAggregateHashesVerified": true,
+    "rawReportValidation": [
+      {
+        "name": "R",
+        "counts": [
+          51,
+          36
+        ],
+        "familyHashValuesVerified": true,
+        "aggregateHashValueVerified": true
+      },
+      {
+        "name": "N1",
+        "counts": [
+          51,
+          36
+        ],
+        "familyHashValuesVerified": true,
+        "aggregateHashValueVerified": true
+      },
+      {
+        "name": "C1",
+        "counts": [
+          51,
+          36
+        ],
+        "familyHashValuesVerified": true,
+        "aggregateHashValueVerified": true
+      }
+    ]
+  },
+  "verification": {
+    "gitMcpOnly": true,
+    "localShellOrFilesystemUsed": false,
+    "browserUsed": false,
+    "compilerOrTestRuns": 0,
+    "liveRefsOrCommitsWritten": 0,
+    "completeCandidateForwardReverseReadback": true,
+    "totalClosedGuards": 12,
+    "independentReview": {
+      "status": "CLEAR",
+      "reviewer": "stage_activation_review",
+      "scope": "Independent complete candidate byte hashes and forward/reverse reconstruction; old/current owner invariant; strict known-empty current schema and explicit R opt-ins; unchanged same-generation/post-C1 assertions; retained whole87 report projection and preflight receipt/path bindings.",
+      "reviewArtifact": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/migration-worker-metadata-independent-review.json",
+        "gitBlob": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+        "sha256": "98614a819fee257bfd8546d06f053017d2f289aad8b4ed0f66e11cf747991f33",
+        "utf8Bytes": 27661,
+        "exactReadback": true
+      }
+    },
+    "rootReview": {
+      "status": "CLEAR",
+      "scope": "Root independently read all three candidate blobs, confirmed default-current exact keys/empty metadata, both explicit authenticated R callers, unchanged post-C1 comparison, and early-gate selectors/evidence strings against retained N1/capability receipts."
+    }
+  },
+  "remainingGate": {
+    "strictSh1Qualified": false,
+    "strictSh1Discharged": false,
+    "generalPreservationProven": false,
+    "providerPassed": false,
+    "correspondenceRowsClosed": 0,
+    "stageRowsClosed": 0,
+    "frozenPendingPlans": [
+      "c5a831829da7d6cd2be56fcde2033891b3264fff",
+      "1e590688c1d6c87970caa4e22388310a2664b234",
+      "f38f814fdba7af53c147e0f1d68cafcd8e0b74b3",
+      "b8c498a5035b9d8f4d7db77c74643f1d2b5a7e4a"
+    ],
+    "closureCondition": "Root publishes exact reviewed source/host/metadata under guarded parent, then requires one authentic full current-source N1/C1/C2/C3 qualification and provider PASS. Final source/recipe/evidence pins must bind that later actual run; this repair and pure replay close no disposition."
+  },
+  "expectedNextRecipe": {
+    "fileCount": 48,
+    "sha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+    "provenance": "Root-computed prediction from the reviewed two host-file replacements, not an actual qualification receipt.",
+    "changedRecipeFiles": [
+      "scripts/sh1-migration-worker-conformance.mjs",
+      "scripts/sh1-qualify.mjs"
+    ],
+    "workflowTrackedSeparately": true
+  }
+}

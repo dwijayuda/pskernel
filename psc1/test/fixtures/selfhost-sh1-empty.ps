@@ -1,0 +1,5 @@
+inductive Sh1Empty(alpha : Type) where {}
+def sh1EmptyNat(value : Sh1Empty(Nat)) : Nat := match value with {}
+def sh1EmptyFunction(value : Sh1Empty(Nat)) : Nat -> Nat := match value with {}
+def sh1EmptyGeneric(alpha : Type, value : Sh1Empty(alpha)) : alpha := match value with {}
+def sh1EmptyFresh(value : Sh1Empty(Nat), emptyResult : Nat) : Nat := match value with {}

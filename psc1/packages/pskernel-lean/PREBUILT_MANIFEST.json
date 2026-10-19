@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "package": "@proofscript/pskernel-lean",
+  "packageVersion": "4.34.0",
+  "protocol": "pskernel-lean/1",
+  "provider": "lean4-cpp",
+  "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "profile": "lean4.34-core",
+  "sourceCommit": "9075c0c7ad2713b9321947c7f1c0a47e10ba8c05",
+  "targets": {
+    "linux-x64": {
+      "path": "prebuilt/linux-x64/psc2_lean_kernel_provider",
+      "sha256": "b434d0045a606fb966f73a7942541e6c39a10ab9e6899925038f1542472b09c8",
+      "size": 82330592,
+      "sourceCommit": "9075c0c7ad2713b9321947c7f1c0a47e10ba8c05"
+    },
+    "linux-arm64": {
+      "path": "prebuilt/linux-arm64/psc2_lean_kernel_provider",
+      "sha256": "b54478549fe1da92275e1e951666ab437d1535ff42397bc96b2273688c514503",
+      "size": 86053296,
+      "sourceCommit": "9075c0c7ad2713b9321947c7f1c0a47e10ba8c05"
+    },
+    "darwin-x64": {
+      "path": "prebuilt/darwin-x64/psc2_lean_kernel_provider",
+      "sha256": "74fab3d550bd20be375d51159edde6535b09b50036f92e86768247b7b0fa9473",
+      "size": 83802528,
+      "sourceCommit": "9075c0c7ad2713b9321947c7f1c0a47e10ba8c05"
+    },
+    "darwin-arm64": {
+      "path": "prebuilt/darwin-arm64/psc2_lean_kernel_provider",
+      "sha256": "9ae769df15225c9d1050891ea22a698a08ec6b4bd20ca64f5a86fb05a4444b00",
+      "size": 84057432,
+      "sourceCommit": "9075c0c7ad2713b9321947c7f1c0a47e10ba8c05"
+    },
+    "win32-x64": {
+      "path": "prebuilt/win32-x64/psc2_lean_kernel_provider.exe",
+      "sha256": "1d5734deceaac00dc687031476ba831c8e9a84fc3414580f0cec12ec26075f69",
+      "size": 76361216,
+      "sourceCommit": "9075c0c7ad2713b9321947c7f1c0a47e10ba8c05"
+    }
+  }
+}

@@ -1,0 +1,657 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-final-F-primary-evidence-path-manifest",
+  "status": "actual compiler and selected-provider jobs completed successfully; both strict pure-data reviews passed",
+  "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+  "runId": "37947341800",
+  "runAttempt": 1,
+  "workflowId": 378853677,
+  "compilerJobId": "113876931430",
+  "providerJobId": "113896228512",
+  "collectionCompletedAtUtc": "2026-10-09 15:47:41 UTC",
+  "manifestTargetPath": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/evidence-manifest.json",
+  "fileCount": 47,
+  "mode": "100644",
+  "mutationScope": "Unattached Git blobs only; root integrates the reviewed paths. No refs, source, workflows, retry or qualification runs were changed by this collector.",
+  "reviewToolkitBlob": "490cc9d968bddd92da1ad67e39b3880a35349580",
+  "hashFactoryBlob": "e916f13aad289319c225fae91649e6315a3d8d78",
+  "proof": {
+    "compilerReviewPassed": true,
+    "providerReviewPassed": true,
+    "independentRootFreshFetchAndReviewPassed": true,
+    "compilerReceiptRecords": 32,
+    "providerReceiptRecords": 2,
+    "completeWorkerObservationArraysPreserved": true,
+    "completeTwelvePublicCoreAndIrAbiObservationsPreserved": true,
+    "completeGenericCapabilityAndProbeRecordsPreserved": true,
+    "compilerLogSha256": "0029eccaf74c06b1fef9c3f06987cb0dc82003c649912bb1959bf3f13068e931",
+    "providerLogSha256": "99e3e9d913d9322f042d69f0981358bee36fa478849ee249062f6f59c07e80fd",
+    "qualificationCompactRepresentationSha256": "a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3",
+    "exactProviderFileSha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913",
+    "actualDerivedProviderDistinctStreams": 4,
+    "exactProviderArtifactRoles": 8,
+    "providerBinaryUnchanged": true,
+    "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+    "selectedSeedRemainsR": true,
+    "fSeedPromoted": false,
+    "strictSh1Qualified": false,
+    "fullStandardConformance": false,
+    "fullPscvConformance": false
+  },
+  "representations": [
+    "Both .log files preserve the complete decoded UTF8 job log returned by the GitHub connector, including BOM, all original lines and timestamp text. Their byte counts differ slightly from JavaScript character counts.",
+    "Each *.logged.json and worker-migration-qualification.json is the exact compact JSON substring of an actual logged marker plus LF. Its labelled digest is not passed off as the original unavailable pretty compiler artifact file digest.",
+    "worker-migration-provider.json is the exact original provider file content from the existing PROVIDER_ADMISSIONS_FILE read-back envelope; original bytes, byte count, SHA256 and parsed object were checked.",
+    "The final *.api.json files preserve exact returned API JSON text. Artifact ZIP metadata is retained; no ZIP download is asserted.",
+    "*-review.json, review-inputs.json and worker-migration-evidence.json are derived audits/provenance, explicitly separate from primary runner receipts.",
+    "Reviewer/hash sources are inactive .factory.txt files under evidence. They have no imports or IO and are not active repository JavaScript modules.",
+    "This manifest intentionally omits its own file entry to avoid a self-referential digest. Root can commit it at manifestTargetPath with the listed file blobs."
+  ],
+  "files": [
+    {
+      "path": "psc0/docs/selfhost-language/evidence-logs/worker-migration-compiler.log",
+      "blob": "5ab3fc932628afac4ff099727663ce45a25b8af8",
+      "sha256": "0029eccaf74c06b1fef9c3f06987cb0dc82003c649912bb1959bf3f13068e931",
+      "bytes": 757271,
+      "characters": 757089,
+      "representation": "Complete decoded UTF8 GitHub job log returned by the connector, including original BOM and timestamped lines.",
+      "source": {
+        "jobId": "113876931430"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/evidence-logs/worker-migration-provider.log",
+      "blob": "41f4e3a7546f9b05f5b27981d247a34a699aed49",
+      "sha256": "99e3e9d913d9322f042d69f0981358bee36fa478849ee249062f6f59c07e80fd",
+      "bytes": 62929,
+      "characters": 62921,
+      "representation": "Complete decoded UTF8 GitHub job log returned by the connector, including original BOM and timestamped lines.",
+      "source": {
+        "jobId": "113896228512"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/artifacts.api.json",
+      "blob": "96fb1a1b1887314d7541de4c775c874b00bdaa93",
+      "sha256": "d1502ffe2c0f2ccb2fee95c95fd3fb70d0b4e038cfb751bf41fae6ad5f6cdb62",
+      "bytes": 1533,
+      "characters": 1533,
+      "representation": "Exact UTF8 JSON response text returned by GitHub API connector.",
+      "source": {
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37947341800/artifacts"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/capabilities.logged.json",
+      "blob": "2efa0db11731bb1d7206c0b9bf800740a69f8a7e",
+      "sha256": "d884b62584366d741765377ab6ac1806d5420a96f475c79cc31c394fecc72f3e",
+      "bytes": 83212,
+      "characters": 83210,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "CAPABILITIES",
+        "line": 2199,
+        "timestamp": "2026-10-09T15:10:04.7912814Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/generation.logged.json",
+      "blob": "5f8d41d8badce9dc62fcf36b669664d3242137bc",
+      "sha256": "f41ac0c623f60d6082033f80a62dbe33d6dff07dd0f1bb7fdd10a9782f94fa01",
+      "bytes": 30613,
+      "characters": 30613,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "GENERATION",
+        "line": 2194,
+        "timestamp": "2026-10-09T15:09:51.6453431Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/generic-erasure.logged.json",
+      "blob": "36f33653b01bcdd822e1d2045d9f935e0df11dd1",
+      "sha256": "c26909c2810cd6e1c41a4efe55055166118aec4b148e05494e61ab2280ed0e38",
+      "bytes": 2219,
+      "characters": 2219,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "GENERIC_ERASURE",
+        "line": 2198,
+        "timestamp": "2026-10-09T15:09:54.1034498Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/helper-runtime.logged.json",
+      "blob": "1aa844458ccf6710e52743eb8cd9d1e5b6f7ae5b",
+      "sha256": "2c3c4c856ff8cacade4cd0e1c04e60d17e515c60d87d3a012465e27fb092f037",
+      "bytes": 539,
+      "characters": 539,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "HELPER_RUNTIME",
+        "line": 2197,
+        "timestamp": "2026-10-09T15:09:53.5949679Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/ir-checker-conformance.logged.json",
+      "blob": "962b20686e3bab584a5426f9286bd63381076962",
+      "sha256": "1d6bd160d23a8e6391e658c4d01a27ae4f51590f69180cf13ac0e861fc723ffb",
+      "bytes": 11228,
+      "characters": 11228,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "IR_CHECKER",
+        "line": 2196,
+        "timestamp": "2026-10-09T15:09:53.5539282Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/capabilities.logged.json",
+      "blob": "0ba05a061016bfd7ad54ff4edca0cec352fa6818",
+      "sha256": "2d5b65f8d1cc272efdbe0be5550091522553bfa488d6d6521395477413d591d6",
+      "bytes": 82596,
+      "characters": 82594,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "CAPABILITIES",
+        "line": 2212,
+        "timestamp": "2026-10-09T15:22:52.6210260Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/generation.logged.json",
+      "blob": "63c0e758f93e66a77422654dc3183359cf015849",
+      "sha256": "b5502e9fc60a71ae617e5d52e52a35e12ae65d09230f8dfd8d9008aa479d6439",
+      "bytes": 28982,
+      "characters": 28982,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "GENERATION",
+        "line": 2210,
+        "timestamp": "2026-10-09T15:22:43.5724859Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/generic-erasure.logged.json",
+      "blob": "0203bd64e474688ced84fd98e2d644eec818bef8",
+      "sha256": "67681a0edb7ca8a0af1e8b9c28cccc27226ba9c6114776f7cca98ca11eb5d6c7",
+      "bytes": 2044,
+      "characters": 2044,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "GENERIC_ERASURE",
+        "line": 2214,
+        "timestamp": "2026-10-09T15:22:53.0010776Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/helper-runtime.logged.json",
+      "blob": "1aa844458ccf6710e52743eb8cd9d1e5b6f7ae5b",
+      "sha256": "2c3c4c856ff8cacade4cd0e1c04e60d17e515c60d87d3a012465e27fb092f037",
+      "bytes": 539,
+      "characters": 539,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "HELPER_RUNTIME",
+        "line": 2213,
+        "timestamp": "2026-10-09T15:22:52.6430539Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/ir-checker-conformance.logged.json",
+      "blob": "962b20686e3bab584a5426f9286bd63381076962",
+      "sha256": "1d6bd160d23a8e6391e658c4d01a27ae4f51590f69180cf13ac0e861fc723ffb",
+      "bytes": 11228,
+      "characters": 11228,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "IR_CHECKER",
+        "line": 2211,
+        "timestamp": "2026-10-09T15:22:44.8320770Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/capabilities.logged.json",
+      "blob": "0ba05a061016bfd7ad54ff4edca0cec352fa6818",
+      "sha256": "2d5b65f8d1cc272efdbe0be5550091522553bfa488d6d6521395477413d591d6",
+      "bytes": 82596,
+      "characters": 82594,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "CAPABILITIES",
+        "line": 2217,
+        "timestamp": "2026-10-09T15:36:11.2239453Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/generation.logged.json",
+      "blob": "1dd47488193cb80d063c85e25e22b79d4863bfe2",
+      "sha256": "b3b13475c122865bf686efd5944721cc875a8b73c01cf8640106af1decdbc282",
+      "bytes": 28996,
+      "characters": 28996,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "GENERATION",
+        "line": 2215,
+        "timestamp": "2026-10-09T15:36:00.6121043Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/generic-erasure.logged.json",
+      "blob": "0203bd64e474688ced84fd98e2d644eec818bef8",
+      "sha256": "67681a0edb7ca8a0af1e8b9c28cccc27226ba9c6114776f7cca98ca11eb5d6c7",
+      "bytes": 2044,
+      "characters": 2044,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "GENERIC_ERASURE",
+        "line": 2219,
+        "timestamp": "2026-10-09T15:36:11.6150761Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/helper-runtime.logged.json",
+      "blob": "1aa844458ccf6710e52743eb8cd9d1e5b6f7ae5b",
+      "sha256": "2c3c4c856ff8cacade4cd0e1c04e60d17e515c60d87d3a012465e27fb092f037",
+      "bytes": 539,
+      "characters": 539,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "HELPER_RUNTIME",
+        "line": 2218,
+        "timestamp": "2026-10-09T15:36:11.2426279Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/ir-checker-conformance.logged.json",
+      "blob": "962b20686e3bab584a5426f9286bd63381076962",
+      "sha256": "1d6bd160d23a8e6391e658c4d01a27ae4f51590f69180cf13ac0e861fc723ffb",
+      "bytes": 11228,
+      "characters": 11228,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "IR_CHECKER",
+        "line": 2216,
+        "timestamp": "2026-10-09T15:36:01.9268004Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/compiler-review.json",
+      "blob": "a570b81992c5ac9dc2ff62984c67511d9fbed7c1",
+      "sha256": "57494781e9c6ac62fcd069ca5eaf609750b84134561c86d50109cd12cbf703d9",
+      "bytes": 570328,
+      "characters": 570326,
+      "representation": "Derived pure-data review of actual complete primary inputs; not a compiler/provider runner receipt.",
+      "source": {
+        "utilityBlob": "490cc9d968bddd92da1ad67e39b3880a35349580"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/evidence-review-contract.json",
+      "blob": "31293d61303666b1b6f82071c0bfc1f20316254b",
+      "sha256": "4718520a680139a5945d98d495e9b47d0ebb7e7bf108535f1fd7c10a59cdfd17",
+      "bytes": 9085,
+      "characters": 9085,
+      "representation": "Prepared immutable input contract/static audit; its preparation status is historical. Actual successful application is recorded separately."
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/evidence-review.factory.txt",
+      "blob": "490cc9d968bddd92da1ad67e39b3880a35349580",
+      "sha256": "f3ca1f6717ebe45f66735601f5f5731d59c78f69ead524b5cab274d88d38c487",
+      "bytes": 59165,
+      "characters": 59165,
+      "representation": "Exact pure-data evidence-review factory used for the completed primary-input review; no repository compiler code execution."
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/foundation-conformance-01.logged.json",
+      "blob": "c582ce48554b2827f3d238205a20aea804b1a0cc",
+      "sha256": "dcfdf3db3038737433aacc547f8f82bce5e964c671186ab60f6b5587f4d1d7a2",
+      "bytes": 1805,
+      "characters": 1805,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "FOUNDATION_CONFORMANCE",
+        "line": 2182,
+        "timestamp": "2026-10-09T14:56:54.2619751Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/foundation-conformance-02.logged.json",
+      "blob": "e254bf8374658b2853e6a1e97290327fdeaa89d5",
+      "sha256": "5c940a589ebe32ff3128356dfb55a99d48701e332ac6dee3bf881406a9b6e8d7",
+      "bytes": 1809,
+      "characters": 1809,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "FOUNDATION_CONFORMANCE",
+        "line": 2192,
+        "timestamp": "2026-10-09T14:57:02.3024114Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/helper-conformance-01.logged.json",
+      "blob": "0dd67426b85f4cf97668de4627eeaa4e0566e5e6",
+      "sha256": "bd3191c4d9595efe3dc45b81f3c7e62297c82ad142389d36af9d0f9d60b13a11",
+      "bytes": 3083,
+      "characters": 3083,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "HELPER_CONFORMANCE",
+        "line": 2183,
+        "timestamp": "2026-10-09T14:56:58.8537684Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/helper-conformance-02.logged.json",
+      "blob": "e5e075619a5a590a6b8b29b0f8315994b574f1df",
+      "sha256": "a35f1610bccbd6310ab86191671e9079606c4c0b67273cce40c72adade9d5109",
+      "bytes": 3087,
+      "characters": 3087,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "HELPER_CONFORMANCE",
+        "line": 2193,
+        "timestamp": "2026-10-09T14:57:06.9011375Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/jobs.api.json",
+      "blob": "d5ddb153f69cff15422036c2e9609164eea58749",
+      "sha256": "eee48c097877e2b41b0b9db4575be04c247cd1e78988e7a82c11167a70a23c62",
+      "bytes": 10556,
+      "characters": 10556,
+      "representation": "Exact UTF8 JSON response text returned by GitHub API connector.",
+      "source": {
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37947341800/jobs"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/capabilities.logged.json",
+      "blob": "2efa0db11731bb1d7206c0b9bf800740a69f8a7e",
+      "sha256": "d884b62584366d741765377ab6ac1806d5420a96f475c79cc31c394fecc72f3e",
+      "bytes": 83212,
+      "characters": 83210,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "CAPABILITIES",
+        "line": 2180,
+        "timestamp": "2026-10-09T14:56:51.3755018Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/generic-erasure.logged.json",
+      "blob": "36f33653b01bcdd822e1d2045d9f935e0df11dd1",
+      "sha256": "c26909c2810cd6e1c41a4efe55055166118aec4b148e05494e61ab2280ed0e38",
+      "bytes": 2219,
+      "characters": 2219,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "GENERIC_ERASURE",
+        "line": 2178,
+        "timestamp": "2026-10-09T14:56:40.5212033Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/grammar-closure-summary.logged.json",
+      "blob": "d229a931f8e592a5f2debbe62c71533b136960ce",
+      "sha256": "8df1a07ab68ccabdeb28d30146255f252921b6d67b5927703e6351f961282def",
+      "bytes": 317,
+      "characters": 317,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "GRAMMAR_CLOSURE",
+        "line": 2175,
+        "timestamp": "2026-10-09T14:56:38.9877606Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/helper-runtime.logged.json",
+      "blob": "1aa844458ccf6710e52743eb8cd9d1e5b6f7ae5b",
+      "sha256": "2c3c4c856ff8cacade4cd0e1c04e60d17e515c60d87d3a012465e27fb092f037",
+      "bytes": 539,
+      "characters": 539,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "HELPER_RUNTIME",
+        "line": 2177,
+        "timestamp": "2026-10-09T14:56:40.0839464Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/ir-checker-conformance.logged.json",
+      "blob": "962b20686e3bab584a5426f9286bd63381076962",
+      "sha256": "1d6bd160d23a8e6391e658c4d01a27ae4f51590f69180cf13ac0e861fc723ffb",
+      "bytes": 11228,
+      "characters": 11228,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "IR_CHECKER",
+        "line": 2176,
+        "timestamp": "2026-10-09T14:56:40.0174638Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/native-full-ir.logged.json",
+      "blob": "6abdb58fb945e2cc3ecf89450f87b7d870409e9e",
+      "sha256": "c7ff1033296aae569020c047b527332ba31fae79fc7b214302b764db18452e97",
+      "bytes": 380,
+      "characters": 380,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "IR_NATIVE_FULL",
+        "line": 2173,
+        "timestamp": "2026-10-09T14:54:48.2785220Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/native-ir-evidence.logged.json",
+      "blob": "ba10dfcf13fc5cbd37af3f569474187085b6147d",
+      "sha256": "b7bed9229beda63a76a603a0282ab9d5bd0d7f83efbbcc3bd52832b9dab81f63",
+      "bytes": 1272,
+      "characters": 1272,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "IR_NATIVE_EVIDENCE",
+        "line": 2174,
+        "timestamp": "2026-10-09T14:54:48.2965546Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/native-ir-fixtures.logged.json",
+      "blob": "19807c7bf5c9e22100f4126768047797db645888",
+      "sha256": "440bd8ac01540409239640a5d65147be6592783131de18604f626239615a397a",
+      "bytes": 111,
+      "characters": 111,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "IR_NATIVE",
+        "line": 2172,
+        "timestamp": "2026-10-09T14:54:48.2783711Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/receipt.logged.json",
+      "blob": "bba03932b0dadb5e8ae7a54fdf3ea1b2b15d5bce",
+      "sha256": "618507b0de937854af2605b61bbe5b4bf904346cf58ba1b2f3e42998b28d71fb",
+      "bytes": 7355,
+      "characters": 7355,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "NATIVE_CANDIDATE",
+        "line": 2184,
+        "timestamp": "2026-10-09T14:56:58.9851377Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/provider-review.json",
+      "blob": "697e9be08d34c7ef5e2695bb134e921b05b76c47",
+      "sha256": "3f595efba7092909a3e6ce7399647473f4bd3b2977634348257e8cacadaf4e46",
+      "bytes": 9646,
+      "characters": 9646,
+      "representation": "Derived pure-data review of actual complete primary inputs; not a compiler/provider runner receipt.",
+      "source": {
+        "utilityBlob": "490cc9d968bddd92da1ad67e39b3880a35349580"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/provider/receipt-file-envelope.logged.json",
+      "blob": "9dc32cbc77e15658fb830477fb3d15dfba83b4ce",
+      "sha256": "8d8d3df67bb1e9cc0f6cb2865c2de158334046d63fce202f5d4b7777015a8a92",
+      "bytes": 3997,
+      "characters": 3997,
+      "representation": "Complete compact JSON substring from actual provider log plus LF; the explicit file envelope contains original artifact bytes.",
+      "source": {
+        "jobId": "113896228512",
+        "label": "PROVIDER_ADMISSIONS_FILE",
+        "line": 653,
+        "timestamp": "2026-10-09T15:37:12.5607721Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/provider/receipt.logged.json",
+      "blob": "15fe0133df0c66d7b86f81f7a1626314b1440048",
+      "sha256": "a19a93509c056e53614681f11e588b000e5d35c3fb79b3cb3f5e7ba1cd986a14",
+      "bytes": 2823,
+      "characters": 2823,
+      "representation": "Complete compact JSON substring from actual provider log plus LF; the explicit file envelope contains original artifact bytes.",
+      "source": {
+        "jobId": "113896228512",
+        "label": "PROVIDER_ADMISSIONS",
+        "line": 652,
+        "timestamp": "2026-10-09T15:37:12.5560532Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/review-inputs.json",
+      "blob": "1d954036df534d8755bb0b9f97e979064a5cc85d",
+      "sha256": "436a9eddacf32d00da6eadcd29702dd2a2b7bd60f89b63e7d0f8e75a2df5f899",
+      "bytes": 3579,
+      "characters": 3579,
+      "representation": "Pure-data mapping to the exact completed primary inputs and independently reproducible reviewer invocation."
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/run.api.json",
+      "blob": "68cb8f5316b6a28e8702bbe7c98336db81b663a2",
+      "sha256": "f1aeb453745eab734c1df521cfb13d1099f73f4eabd5f617240d2be131c0d5f4",
+      "bytes": 12766,
+      "characters": 12764,
+      "representation": "Exact UTF8 JSON response text returned by GitHub API connector.",
+      "source": {
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37947341800"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/sha256-utf8.factory.txt",
+      "blob": "e916f13aad289319c225fae91649e6315a3d8d78",
+      "sha256": "7bb18f96dfd4a5e711dbbbbe05618745007979345167d553b2914193c13ea07d",
+      "bytes": 2741,
+      "characters": 2741,
+      "representation": "Exact pure-data UTF8 SHA256 callback used for this review; root independently recomputed the primary evidence hashes."
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/typescript-profile-summary.logged.json",
+      "blob": "b6fb0c38a40b24b7ff68810a41e13eaceda74781",
+      "sha256": "1ae5a14375fb40d04db36a9d0056485ffdec53e79cc43421b373f0fd1f4b3b43",
+      "bytes": 247,
+      "characters": 247,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "TYPESCRIPT_PROFILE",
+        "line": 380,
+        "timestamp": "2026-10-09T14:52:27.2557651Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/worker-harness-reference.logged.json",
+      "blob": "72726e7596795a2fc561c9b59b97ec26687a1407",
+      "sha256": "1da3df2abe07e4f8426bad4d6ab75451c24f0b024a12db36ce86d3687b376749",
+      "bytes": 68663,
+      "characters": 68661,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "WORKER_HARNESS_REFERENCE",
+        "line": 2152,
+        "timestamp": "2026-10-09T14:52:48.0564636Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/worker-migration-correspondence.logged.json",
+      "blob": "dd8f13694c6690adface3a2c83c02ad354946bed",
+      "sha256": "df09d6e9c4b8e4db097b20fa0919bff4d2bc58e3fe9c14b86f4438f2965bcf54",
+      "bytes": 782,
+      "characters": 782,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted.",
+      "source": {
+        "jobId": "113876931430",
+        "label": "MIGRATION_CORRESPONDENCE",
+        "line": 2200,
+        "timestamp": "2026-10-09T15:10:04.8041890Z"
+      }
+    },
+    {
+      "path": "psc0/docs/selfhost-language/worker-migration-evidence.json",
+      "blob": "b2ca50c9e353b91220a5280e90ff7cd45b6b9a7e",
+      "sha256": "7eb162e121ce97f4a9836daa44a85d0c03b30ac1aaa2b90cf43a1a3d69d9d069",
+      "bytes": 44891,
+      "characters": 44891,
+      "representation": "Derived evidence/provenance summary after successful strict reviews of actual completed compiler/provider jobs. Primary receipts and exact input representations are linked explicitly."
+    },
+    {
+      "path": "psc0/docs/selfhost-language/worker-migration-provider.json",
+      "blob": "87ec0c66613ff6c5936d79b56e8e9f000a49bb8c",
+      "sha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913",
+      "characters": 3532,
+      "representation": "Exact actual provider artifact UTF8 bytes from the existing provider runner's read-back file envelope.",
+      "log": {
+        "jobId": "113896228512",
+        "label": "PROVIDER_ADMISSIONS_FILE"
+      },
+      "bytes": 3532
+    },
+    {
+      "path": "psc0/docs/selfhost-language/worker-migration-qualification.json",
+      "blob": "1820e4519018365abbe520ab3dc362b535fdbd45",
+      "sha256": "a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3",
+      "characters": 5284,
+      "representation": "Exact compact FIXED_POINT JSON substring from decoded compiler job log plus LF; not the unavailable original pretty qualification artifact file.",
+      "log": {
+        "jobId": "113876931430",
+        "label": "FIXED_POINT",
+        "line": 2220,
+        "timestamp": "2026-10-09T15:36:11.7721001Z"
+      },
+      "bytes": 5284
+    }
+  ]
+}

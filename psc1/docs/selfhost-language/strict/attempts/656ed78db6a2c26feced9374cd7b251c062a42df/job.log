@@ -1,0 +1,969 @@
+﻿2026-10-09T22:49:43.0359132Z Current runner version: '2.337.0'
+2026-10-09T22:49:43.0377283Z ##[group]Runner Image Provisioner
+2026-10-09T22:49:43.0377814Z Hosted Compute Agent
+2026-10-09T22:49:43.0378283Z Version: 20261002.596
+2026-10-09T22:49:43.0378708Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-09T22:49:43.0379225Z Build Date: 2026-10-02T22:28:27Z
+2026-10-09T22:49:43.0379644Z Worker ID: {150c0a7b-4e47-4891-9061-3acd160fabf2}
+2026-10-09T22:49:43.0380065Z Region: westus3
+2026-10-09T22:49:43.0380454Z Cloud: Azure
+2026-10-09T22:49:43.0380827Z ##[endgroup]
+2026-10-09T22:49:43.0381801Z ##[group]Operating System
+2026-10-09T22:49:43.0382187Z Ubuntu
+2026-10-09T22:49:43.0382514Z 24.04.5
+2026-10-09T22:49:43.0382871Z LTS
+2026-10-09T22:49:43.0383225Z ##[endgroup]
+2026-10-09T22:49:43.0383557Z ##[group]Runner Image
+2026-10-09T22:49:43.0384005Z Image: ubuntu-24.04
+2026-10-09T22:49:43.0384354Z Version: 20261004.327.1
+2026-10-09T22:49:43.0385182Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-09T22:49:43.0386114Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-09T22:49:43.0386710Z ##[endgroup]
+2026-10-09T22:49:43.0387393Z ##[group]GITHUB_TOKEN Permissions
+2026-10-09T22:49:43.0388657Z Actions: read
+2026-10-09T22:49:43.0389004Z Contents: read
+2026-10-09T22:49:43.0389401Z Metadata: read
+2026-10-09T22:49:43.0389744Z ##[endgroup]
+2026-10-09T22:49:43.0391014Z Secret source: Actions
+2026-10-09T22:49:43.0391780Z Cache mode: write
+2026-10-09T22:49:43.0392188Z Prepare workflow directory
+2026-10-09T22:49:43.0640354Z Prepare all required actions
+2026-10-09T22:49:43.0672295Z Getting action download info
+2026-10-09T22:49:43.3737619Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-09T22:49:43.4454657Z Download action repository 'actions/github-script@v7' (SHA:f28e40c7f34bde8b3046d885e986cb6290c5673b)
+2026-10-09T22:49:43.9928280Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-09T22:49:44.1103825Z Download action repository 'leanprover/lean-action@v1' (SHA:f061402b660e0c34644504b324e830f2991d4865)
+2026-10-09T22:49:44.4008886Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2026-10-09T22:49:44.5180339Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-09T22:49:44.7419636Z Getting action download info
+2026-10-09T22:49:44.8598161Z Download action repository 'actions/cache@caa296126883cff596d87d8935842f9db880ef25' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-10-09T22:49:45.0727350Z Complete job name: compiler
+2026-10-09T22:49:45.1402105Z ##[group]Run actions/checkout@v4
+2026-10-09T22:49:45.1402877Z with:
+2026-10-09T22:49:45.1403360Z   repository: dwijayuda/pskernel
+2026-10-09T22:49:45.1407822Z   token: ***
+2026-10-09T22:49:45.1408293Z   ssh-strict: true
+2026-10-09T22:49:45.1408779Z   ssh-user: git
+2026-10-09T22:49:45.1409297Z   persist-credentials: true
+2026-10-09T22:49:45.1409828Z   clean: true
+2026-10-09T22:49:45.1410336Z   sparse-checkout-cone-mode: true
+2026-10-09T22:49:45.1410905Z   fetch-depth: 1
+2026-10-09T22:49:45.1411375Z   fetch-tags: false
+2026-10-09T22:49:45.1411944Z   show-progress: true
+2026-10-09T22:49:45.1412434Z   lfs: false
+2026-10-09T22:49:45.1412884Z   submodules: false
+2026-10-09T22:49:45.1413379Z   set-safe-directory: true
+2026-10-09T22:49:45.1413942Z   allow-unsafe-pr-checkout: false
+2026-10-09T22:49:45.1414578Z ##[endgroup]
+2026-10-09T22:49:45.2100632Z Syncing repository: dwijayuda/pskernel
+2026-10-09T22:49:45.2103029Z ##[group]Getting Git version info
+2026-10-09T22:49:45.2104286Z Working directory is '/home/runner/work/pskernel/pskernel'
+2026-10-09T22:49:45.2106035Z [command]/usr/bin/git version
+2026-10-09T22:49:45.2129743Z git version 2.55.0
+2026-10-09T22:49:45.2143621Z ##[endgroup]
+2026-10-09T22:49:45.2159553Z Temporarily overriding HOME='/home/runner/work/_temp/9e5ea238-e6c2-49c5-9a53-751759a26698' before making global git config changes
+2026-10-09T22:49:45.2162023Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T22:49:45.2167865Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-09T22:49:45.2206327Z Deleting the contents of '/home/runner/work/pskernel/pskernel'
+2026-10-09T22:49:45.2214487Z ##[group]Initializing the repository
+2026-10-09T22:49:45.2215910Z [command]/usr/bin/git init /home/runner/work/pskernel/pskernel
+2026-10-09T22:49:45.2302393Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-09T22:49:45.2303544Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-09T22:49:45.2304542Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-09T22:49:45.2305697Z hint: call:
+2026-10-09T22:49:45.2306150Z hint:
+2026-10-09T22:49:45.2306750Z hint: 	git config --global init.defaultBranch <name>
+2026-10-09T22:49:45.2307429Z hint:
+2026-10-09T22:49:45.2308071Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-09T22:49:45.2309064Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-09T22:49:45.2309846Z hint:
+2026-10-09T22:49:45.2310313Z hint: 	git branch -m <name>
+2026-10-09T22:49:45.2310835Z hint:
+2026-10-09T22:49:45.2311525Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-09T22:49:45.2317002Z Initialized empty Git repository in /home/runner/work/pskernel/pskernel/.git/
+2026-10-09T22:49:45.2367129Z [command]/usr/bin/git remote add origin https://github.com/dwijayuda/pskernel
+2026-10-09T22:49:45.2370726Z ##[endgroup]
+2026-10-09T22:49:45.2372354Z ##[group]Disabling automatic garbage collection
+2026-10-09T22:49:45.2373844Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-09T22:49:45.2408564Z ##[endgroup]
+2026-10-09T22:49:45.2409751Z ##[group]Setting up auth
+2026-10-09T22:49:45.2410958Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T22:49:45.2438135Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T22:49:45.2732872Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T22:49:45.2764224Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T22:49:45.2944393Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T22:49:45.2975831Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T22:49:45.3156224Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-09T22:49:45.3191104Z ##[endgroup]
+2026-10-09T22:49:45.3192527Z ##[group]Fetching the repository
+2026-10-09T22:49:45.3199325Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +656ed78db6a2c26feced9374cd7b251c062a42df:refs/remotes/origin/psc0/strict-sh1-v1
+2026-10-09T22:49:55.3953903Z From https://github.com/dwijayuda/pskernel
+2026-10-09T22:49:55.3954427Z  * [new ref]           656ed78db6a2c26feced9374cd7b251c062a42df -> origin/psc0/strict-sh1-v1
+2026-10-09T22:49:55.3957108Z ##[endgroup]
+2026-10-09T22:49:55.3957533Z ##[group]Determining the checkout info
+2026-10-09T22:49:55.3959346Z ##[endgroup]
+2026-10-09T22:49:55.3965737Z [command]/usr/bin/git sparse-checkout disable
+2026-10-09T22:49:55.4016178Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-09T22:49:55.4046432Z ##[group]Checking out the ref
+2026-10-09T22:49:55.4062617Z [command]/usr/bin/git checkout --progress --force -B psc0/strict-sh1-v1 refs/remotes/origin/psc0/strict-sh1-v1
+2026-10-09T22:49:56.8259206Z Updating files:   7% (1490/20785)
+2026-10-09T22:49:56.8350137Z Updating files:   8% (1663/20785)
+2026-10-09T22:49:56.8531195Z Updating files:   9% (1871/20785)
+2026-10-09T22:49:56.8653854Z Updating files:  10% (2079/20785)
+2026-10-09T22:49:56.8886733Z Updating files:  11% (2287/20785)
+2026-10-09T22:49:56.8975069Z Updating files:  12% (2495/20785)
+2026-10-09T22:49:57.6421424Z Updating files:  13% (2703/20785)
+2026-10-09T22:49:58.1679370Z Updating files:  13% (2837/20785)
+2026-10-09T22:49:58.1766207Z Updating files:  14% (2910/20785)
+2026-10-09T22:49:58.1833802Z Updating files:  15% (3118/20785)
+2026-10-09T22:49:58.1923527Z Updating files:  16% (3326/20785)
+2026-10-09T22:49:58.2044080Z Updating files:  17% (3534/20785)
+2026-10-09T22:49:58.2134044Z Updating files:  18% (3742/20785)
+2026-10-09T22:49:58.2288200Z Updating files:  19% (3950/20785)
+2026-10-09T22:49:58.2470756Z Updating files:  20% (4157/20785)
+2026-10-09T22:49:58.2644411Z Updating files:  21% (4365/20785)
+2026-10-09T22:49:58.2731222Z Updating files:  22% (4573/20785)
+2026-10-09T22:49:58.5167231Z Updating files:  23% (4781/20785)
+2026-10-09T22:49:59.5256012Z Updating files:  23% (4905/20785)
+2026-10-09T22:49:59.5289201Z Updating files:  23% (4909/20785)
+2026-10-09T22:49:59.5377035Z Updating files:  24% (4989/20785)
+2026-10-09T22:49:59.5442094Z Updating files:  25% (5197/20785)
+2026-10-09T22:49:59.5528783Z Updating files:  26% (5405/20785)
+2026-10-09T22:49:59.5609584Z Updating files:  27% (5612/20785)
+2026-10-09T22:49:59.5792860Z Updating files:  28% (5820/20785)
+2026-10-09T22:49:59.6372051Z Updating files:  29% (6028/20785)
+2026-10-09T22:49:59.6495157Z Updating files:  30% (6236/20785)
+2026-10-09T22:49:59.6608791Z Updating files:  31% (6444/20785)
+2026-10-09T22:49:59.6732610Z Updating files:  32% (6652/20785)
+2026-10-09T22:49:59.6858890Z Updating files:  33% (6860/20785)
+2026-10-09T22:49:59.6975872Z Updating files:  34% (7067/20785)
+2026-10-09T22:49:59.7090811Z Updating files:  35% (7275/20785)
+2026-10-09T22:49:59.7209592Z Updating files:  36% (7483/20785)
+2026-10-09T22:49:59.7322524Z Updating files:  37% (7691/20785)
+2026-10-09T22:49:59.7433520Z Updating files:  38% (7899/20785)
+2026-10-09T22:49:59.7561244Z Updating files:  39% (8107/20785)
+2026-10-09T22:49:59.7803047Z Updating files:  40% (8314/20785)
+2026-10-09T22:49:59.8061386Z Updating files:  41% (8522/20785)
+2026-10-09T22:49:59.8199521Z Updating files:  42% (8730/20785)
+2026-10-09T22:49:59.8295104Z Updating files:  43% (8938/20785)
+2026-10-09T22:49:59.8381979Z Updating files:  44% (9146/20785)
+2026-10-09T22:49:59.8880205Z Updating files:  45% (9354/20785)
+2026-10-09T22:49:59.9609262Z Updating files:  46% (9562/20785)
+2026-10-09T22:50:00.0132603Z Updating files:  47% (9769/20785)
+2026-10-09T22:50:00.0831991Z Updating files:  48% (9977/20785)
+2026-10-09T22:50:00.2284228Z Updating files:  49% (10185/20785)
+2026-10-09T22:50:00.4238915Z Updating files:  50% (10393/20785)
+2026-10-09T22:50:00.4338098Z Updating files:  50% (10593/20785)
+2026-10-09T22:50:00.6612345Z Updating files:  51% (10601/20785)
+2026-10-09T22:50:00.8460536Z Updating files:  52% (10809/20785)
+2026-10-09T22:50:01.0370132Z Updating files:  53% (11017/20785)
+2026-10-09T22:50:01.2587759Z Updating files:  54% (11224/20785)
+2026-10-09T22:50:01.4035295Z Updating files:  55% (11432/20785)
+2026-10-09T22:50:01.4208535Z Updating files:  56% (11640/20785)
+2026-10-09T22:50:01.4631888Z Updating files:  56% (11731/20785)
+2026-10-09T22:50:01.5217514Z Updating files:  57% (11848/20785)
+2026-10-09T22:50:01.5276609Z Updating files:  58% (12056/20785)
+2026-10-09T22:50:01.5331033Z Updating files:  59% (12264/20785)
+2026-10-09T22:50:01.5386929Z Updating files:  60% (12471/20785)
+2026-10-09T22:50:01.5441984Z Updating files:  61% (12679/20785)
+2026-10-09T22:50:01.5504579Z Updating files:  62% (12887/20785)
+2026-10-09T22:50:01.5573940Z Updating files:  63% (13095/20785)
+2026-10-09T22:50:01.5643663Z Updating files:  64% (13303/20785)
+2026-10-09T22:50:01.5713364Z Updating files:  65% (13511/20785)
+2026-10-09T22:50:01.5790347Z Updating files:  66% (13719/20785)
+2026-10-09T22:50:01.5860943Z Updating files:  67% (13926/20785)
+2026-10-09T22:50:01.5931496Z Updating files:  68% (14134/20785)
+2026-10-09T22:50:01.6003894Z Updating files:  69% (14342/20785)
+2026-10-09T22:50:01.6071387Z Updating files:  70% (14550/20785)
+2026-10-09T22:50:01.6146916Z Updating files:  71% (14758/20785)
+2026-10-09T22:50:01.6217757Z Updating files:  72% (14966/20785)
+2026-10-09T22:50:01.6283661Z Updating files:  73% (15174/20785)
+2026-10-09T22:50:01.6377216Z Updating files:  74% (15381/20785)
+2026-10-09T22:50:01.7177643Z Updating files:  75% (15589/20785)
+2026-10-09T22:50:01.7246829Z Updating files:  76% (15797/20785)
+2026-10-09T22:50:01.7315228Z Updating files:  77% (16005/20785)
+2026-10-09T22:50:01.7386524Z Updating files:  78% (16213/20785)
+2026-10-09T22:50:01.7457688Z Updating files:  79% (16421/20785)
+2026-10-09T22:50:01.7547166Z Updating files:  80% (16628/20785)
+2026-10-09T22:50:01.7610178Z Updating files:  81% (16836/20785)
+2026-10-09T22:50:01.7670851Z Updating files:  82% (17044/20785)
+2026-10-09T22:50:01.7733037Z Updating files:  83% (17252/20785)
+2026-10-09T22:50:01.7795811Z Updating files:  84% (17460/20785)
+2026-10-09T22:50:01.7857586Z Updating files:  85% (17668/20785)
+2026-10-09T22:50:01.7921072Z Updating files:  86% (17876/20785)
+2026-10-09T22:50:01.7964303Z Updating files:  87% (18083/20785)
+2026-10-09T22:50:01.8009924Z Updating files:  88% (18291/20785)
+2026-10-09T22:50:01.8062897Z Updating files:  89% (18499/20785)
+2026-10-09T22:50:01.8246823Z Updating files:  90% (18707/20785)
+2026-10-09T22:50:01.8400189Z Updating files:  91% (18915/20785)
+2026-10-09T22:50:01.8467349Z Updating files:  92% (19123/20785)
+2026-10-09T22:50:01.8530940Z Updating files:  93% (19331/20785)
+2026-10-09T22:50:01.9644829Z Updating files:  94% (19538/20785)
+2026-10-09T22:50:02.0312242Z Updating files:  95% (19746/20785)
+2026-10-09T22:50:02.0779869Z Updating files:  96% (19954/20785)
+2026-10-09T22:50:02.0978476Z Updating files:  97% (20162/20785)
+2026-10-09T22:50:02.1471063Z Updating files:  98% (20370/20785)
+2026-10-09T22:50:02.1799041Z Updating files:  99% (20578/20785)
+2026-10-09T22:50:02.1799417Z Updating files: 100% (20785/20785)
+2026-10-09T22:50:02.1799694Z Updating files: 100% (20785/20785), done.
+2026-10-09T22:50:02.2376797Z Switched to a new branch 'psc0/strict-sh1-v1'
+2026-10-09T22:50:02.2377104Z branch 'psc0/strict-sh1-v1' set up to track 'origin/psc0/strict-sh1-v1'.
+2026-10-09T22:50:02.2474486Z ##[endgroup]
+2026-10-09T22:50:02.2520097Z [command]/usr/bin/git log -1 --format=%H
+2026-10-09T22:50:02.2547285Z 656ed78db6a2c26feced9374cd7b251c062a42df
+2026-10-09T22:50:02.3597358Z ##[group]Run actions/github-script@v7
+2026-10-09T22:50:02.3597532Z with:
+2026-10-09T22:50:02.3600060Z   script: const { mkdir, writeFile } = await import('node:fs/promises');
+const path = await import('node:path');
+const root = process.env.GITHUB_WORKSPACE + '/psc0';
+const recovery = await import(root + '/scripts/sh1-native-seed-recovery.mjs');
+const { selected, policySha256, recipeSha256 } = await recovery.readNativeSeedRecoveryPolicy({ root });
+const directory = path.join(root, 'dist/sh1-seed-selection');
+await mkdir(directory, { recursive: true });
+await writeFile(path.join(directory, 'selected-native-recovery.json'), JSON.stringify({
+  sourceRef: selected.sourceRef, identitySha256: selected.identitySha256,
+  policySha256, recipeSha256, recipe: recovery.nativeSeedRecoveryRecipe,
+  parentMetadataRetained: Boolean(selected.parent),
+  parentExecutionRequired: false, typescriptVersion: '7.0.2',
+}, null, 2) + '\n');
+for (const [name, value] of Object.entries({
+  mode: selected.mode,
+  'full-qualification': process.env.PSC0_SH1_FULL_QUALIFICATION === 'true',
+  'node-version': selected.nodeVersion,
+  'source-ref': selected.sourceRef,
+  'compiler-path': selected.compilerPath,
+  'cache-key': selected.cacheKey,
+  'cache-directory': selected.cacheDirectory,
+  'artifact-run-id': selected.artifactRunId,
+  'artifact-name': selected.artifactName,
+  'recovery-typescript-version': '7.0.2',
+  'has-parent': Boolean(selected.parent),
+})) core.setOutput(name, value);
+
+2026-10-09T22:50:02.3604230Z   github-token: ***
+2026-10-09T22:50:02.3604355Z   debug: false
+2026-10-09T22:50:02.3604483Z   user-agent: actions/github-script
+2026-10-09T22:50:02.3604640Z   result-encoding: json
+2026-10-09T22:50:02.3604764Z   retries: 0
+2026-10-09T22:50:02.3604899Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-10-09T22:50:02.3605069Z env:
+2026-10-09T22:50:02.3605187Z   PSC0_SH1_FULL_QUALIFICATION: true
+2026-10-09T22:50:02.3605337Z ##[endgroup]
+2026-10-09T22:50:02.4787769Z ##[group]Run actions/setup-node@v4
+2026-10-09T22:50:02.4787931Z with:
+2026-10-09T22:50:02.4788050Z   node-version: 22.23.3
+2026-10-09T22:50:02.4788179Z   always-auth: false
+2026-10-09T22:50:02.4788301Z   check-latest: false
+2026-10-09T22:50:02.4789664Z   token: ***
+2026-10-09T22:50:02.4789782Z ##[endgroup]
+2026-10-09T22:50:02.5705265Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-09T22:50:02.5708597Z (node:2119) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T22:50:02.5709037Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T22:50:02.5710923Z ##[group]Environment details
+2026-10-09T22:50:02.8789680Z node: v22.23.3
+2026-10-09T22:50:02.8790262Z npm: 10.9.9
+2026-10-09T22:50:02.8790644Z yarn: 1.22.22
+2026-10-09T22:50:02.8791425Z ##[endgroup]
+2026-10-09T22:50:02.9140076Z ##[group]Run node --max-old-space-size=8192 scripts/sh1-resource-policy.mjs --preflight dist/sh1/resource-policy-preflight.json
+2026-10-09T22:50:02.9140622Z [36;1mnode --max-old-space-size=8192 scripts/sh1-resource-policy.mjs --preflight dist/sh1/resource-policy-preflight.json[0m
+2026-10-09T22:50:02.9459258Z shell: /usr/bin/bash -e {0}
+2026-10-09T22:50:02.9459474Z ##[endgroup]
+2026-10-09T22:50:03.0099166Z PSC0_SH1_RESOURCE_POLICY: {"schemaVersion":1,"evidence":"generated-qualification-resource-preflight","command":"workflow-preflight","policy":{"id":"psc0-sh1-generated-qualification-resources/1","node":"v22.23.3","platform":"linux","architecture":"x64","oldSpaceMiB":8192,"minimumAvailableBytes":12884901888,"minimumHeapLimitBytes":8589934592,"maximumHeapLimitBytes":8858370048,"checkBoundary":"process-entry-before-generated-compiler-loading","automaticFallback":false,"semanticContractQualified":false},"node":"v22.23.3","platform":"linux","architecture":"x64","pid":2152,"passed":true,"strictSh1Qualified":false,"semanticContractQualified":false,"heap":{"explicitOldSpaceMiB":8192,"observedHeapLimitBytes":8640266240,"inheritedHeapOverride":false},"physical":{"totalBytes":16766414848,"availableBytes":15279034368},"nodeMemory":{"availableBytes":15279034368,"constrainedBytes":"18446744073709552000","bindingConstraintBytes":null},"cgroup":{"version":2,"membership":"/system.slice/hosted-compute-agent.service","mountRoot":"/","mountPoint":"/sys/fs/cgroup","visibility":"current-and-visible-ancestor-cgroups","observations":[{"directory":"/sys/fs/cgroup/system.slice/hosted-compute-agent.service","limitFile":"memory.max","limitBytes":"max","currentBytes":"3361382400","capacityBytes":16766414848,"availableBytes":16766414848},{"directory":"/sys/fs/cgroup/system.slice/hosted-compute-agent.service","limitFile":"memory.high","limitBytes":"max","currentBytes":"3361382400","capacityBytes":16766414848,"availableBytes":16766414848},{"directory":"/sys/fs/cgroup/system.slice","limitFile":"memory.max","limitBytes":"max","currentBytes":"5922856960","capacityBytes":16766414848,"availableBytes":16766414848},{"directory":"/sys/fs/cgroup/system.slice","limitFile":"memory.high","limitBytes":"max","currentBytes":"5922856960","capacityBytes":16766414848,"availableBytes":16766414848},{"directory":"/sys/fs/cgroup","globalRootWithoutMemoryController":true}]},"effectiveCapacityBytes":16766414848,"effectiveAvailableBytes":15279034368}
+2026-10-09T22:50:03.0921557Z ##[group]Run leanprover/lean-action@v1
+2026-10-09T22:50:03.0921906Z with:
+2026-10-09T22:50:03.0922034Z   lake-package-directory: psc0
+2026-10-09T22:50:03.0922333Z   auto-config: false
+2026-10-09T22:50:03.0922454Z   build: false
+2026-10-09T22:50:03.0922562Z   test: false
+2026-10-09T22:50:03.0922678Z   use-github-cache: false
+2026-10-09T22:50:03.0922813Z   use-mathlib-cache: false
+2026-10-09T22:50:03.0922939Z   lint: default
+2026-10-09T22:50:03.0923051Z   mk_all-check: false
+2026-10-09T22:50:03.0923192Z   check-reservoir-eligibility: false
+2026-10-09T22:50:03.0923344Z   leanchecker: false
+2026-10-09T22:50:03.0923464Z   lean4checker: false
+2026-10-09T22:50:03.0923578Z   nanoda: false
+2026-10-09T22:50:03.0923695Z   nanoda-allow-sorry: true
+2026-10-09T22:50:03.0923823Z   axiom-audit: false
+2026-10-09T22:50:03.0923983Z   axiom-audit-allow: propext,Classical.choice,Quot.sound
+2026-10-09T22:50:03.0924183Z   reinstall-transient-toolchain: false
+2026-10-09T22:50:03.0924339Z ##[endgroup]
+2026-10-09T22:50:03.0970747Z ##[start-action display=install elan;id=__leanprover_lean-action.__run]
+2026-10-09T22:50:03.1523297Z ##[group]Run : Install Elan
+2026-10-09T22:50:03.1523512Z [36;1m: Install Elan[0m
+2026-10-09T22:50:03.1523682Z [36;1m${GITHUB_ACTION_PATH}/scripts/install_elan.sh[0m
+2026-10-09T22:50:03.1580009Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T22:50:03.1580210Z ##[endgroup]
+2026-10-09T22:50:03.2747403Z ##[group]Elan Installation Output
+2026-10-09T22:50:03.3299178Z info: downloading installer
+2026-10-09T22:50:04.7199131Z info: downloading https://releases.lean-lang.org/lean4/v4.34.0/lean-4.34.0-linux.tar.zst
+2026-10-09T22:50:10.3915955Z info: installing /home/runner/.elan/toolchains/leanprover--lean4---v4.34.0
+2026-10-09T22:50:19.7697191Z Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)
+2026-10-09T22:50:19.8079352Z Lake version 5.0.0-src+293d5d0 (Lean version 4.34.0)
+2026-10-09T22:50:19.8116297Z ##[endgroup]
+2026-10-09T22:50:19.8116457Z 
+2026-10-09T22:50:19.8130530Z ##[end-action id=__leanprover_lean-action.__run;outcome=success;conclusion=success;duration_ms=16715]
+2026-10-09T22:50:19.8134200Z ##[start-action display=configure `lean-action`;id=__leanprover_lean-action.config]
+2026-10-09T22:50:19.8587312Z ##[group]Run : Configure Lean Action
+2026-10-09T22:50:19.8587609Z [36;1m: Configure Lean Action[0m
+2026-10-09T22:50:19.8587854Z [36;1m${GITHUB_ACTION_PATH}/scripts/config.sh[0m
+2026-10-09T22:50:19.8649285Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T22:50:19.8649480Z env:
+2026-10-09T22:50:19.8649599Z   AUTO_CONFIG: false
+2026-10-09T22:50:19.8649718Z   BUILD: false
+2026-10-09T22:50:19.8649827Z   TEST: false
+2026-10-09T22:50:19.8649938Z   LINT: default
+2026-10-09T22:50:19.8650050Z ##[endgroup]
+2026-10-09T22:50:19.9823367Z ##[group]Configure lean-action
+2026-10-09T22:50:19.9851723Z ##[end-action id=__leanprover_lean-action.config;outcome=success;conclusion=success;duration_ms=171]
+2026-10-09T22:50:19.9853499Z ##[start-action display=reinstall transient toolchain;id=__leanprover_lean-action.__run_2]
+2026-10-09T22:50:19.9857759Z ##[end-action id=__leanprover_lean-action.__run_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9859270Z ##[start-action display=ensure all files are imported;id=__leanprover_lean-action.mk_all]
+2026-10-09T22:50:19.9861131Z ##[end-action id=__leanprover_lean-action.mk_all;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9862478Z ##[start-action display=Run actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25;id=__leanprover_lean-action.__actions_cache]
+2026-10-09T22:50:19.9864318Z ##[end-action id=__leanprover_lean-action.__actions_cache;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9865252Z ##[start-action display=detect mathlib;id=__leanprover_lean-action.detect-mathlib]
+2026-10-09T22:50:19.9867155Z ##[end-action id=__leanprover_lean-action.detect-mathlib;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9868155Z ##[start-action display=get mathlib cache;id=__leanprover_lean-action.__run_3]
+2026-10-09T22:50:19.9875508Z ##[end-action id=__leanprover_lean-action.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9896824Z ##[start-action display=build dwijayuda/pskernel;id=__leanprover_lean-action.build]
+2026-10-09T22:50:19.9899351Z ##[end-action id=__leanprover_lean-action.build;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9900519Z ##[start-action display=Run actions/cache/save@caa296126883cff596d87d8935842f9db880ef25;id=__leanprover_lean-action.__actions_cache_2]
+2026-10-09T22:50:19.9902556Z ##[end-action id=__leanprover_lean-action.__actions_cache_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9904105Z ##[start-action display=test dwijayuda/pskernel;id=__leanprover_lean-action.test]
+2026-10-09T22:50:19.9906337Z ##[end-action id=__leanprover_lean-action.test;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9907557Z ##[start-action display=lint dwijayuda/pskernel;id=__leanprover_lean-action.lint]
+2026-10-09T22:50:19.9909595Z ##[end-action id=__leanprover_lean-action.lint;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9910522Z ##[start-action display=check reservoir eligibility;id=__leanprover_lean-action.__run_4]
+2026-10-09T22:50:19.9912455Z ##[end-action id=__leanprover_lean-action.__run_4;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9913669Z ##[start-action display=check environment with leanchecker;id=__leanprover_lean-action.__run_5]
+2026-10-09T22:50:19.9915997Z ##[end-action id=__leanprover_lean-action.__run_5;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9917041Z ##[start-action display=check environment with nanoda;id=__leanprover_lean-action.nanoda]
+2026-10-09T22:50:19.9918680Z ##[end-action id=__leanprover_lean-action.nanoda;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:19.9919803Z ##[start-action display=audit axioms with axiom-audit;id=__leanprover_lean-action.axiom-audit]
+2026-10-09T22:50:19.9921410Z ##[end-action id=__leanprover_lean-action.axiom-audit;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T22:50:20.0183571Z ##[group]Run npm install --prefix "$RUNNER_TEMP/psc0-typescript-7.0.2" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+2026-10-09T22:50:20.0184420Z [36;1mnpm install --prefix "$RUNNER_TEMP/psc0-typescript-7.0.2" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2[0m
+2026-10-09T22:50:20.0184937Z [36;1mnode --input-type=module <<'NODE'[0m
+2026-10-09T22:50:20.0185203Z [36;1mimport assert from 'node:assert/strict';[0m
+2026-10-09T22:50:20.0185652Z [36;1mimport { appendFileSync, copyFileSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';[0m
+2026-10-09T22:50:20.0186079Z [36;1mimport path from 'node:path';[0m
+2026-10-09T22:50:20.0186345Z [36;1mimport { createRequire } from 'node:module';[0m
+2026-10-09T22:50:20.0186646Z [36;1mimport { spawnSync } from 'node:child_process';[0m
+2026-10-09T22:50:20.0186958Z [36;1mconst require = createRequire(import.meta.url);[0m
+2026-10-09T22:50:20.0187386Z [36;1mconst directory = path.resolve('dist/typescript-profile/install');[0m
+2026-10-09T22:50:20.0187748Z [36;1mmkdirSync(directory, { recursive: true });[0m
+2026-10-09T22:50:20.0187918Z [36;1mconst version = '7.0.2';[0m
+2026-10-09T22:50:20.0188145Z [36;1mconst prefix = path.join(process.env.RUNNER_TEMP, 'psc0-typescript-' + version);[0m
+2026-10-09T22:50:20.0188497Z [36;1mconst manifestPath = require.resolve('typescript/package.json', { paths: [prefix] });[0m
+2026-10-09T22:50:20.0188794Z [36;1mconst manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));[0m
+2026-10-09T22:50:20.0189022Z [36;1massert.equal(manifest.name, 'typescript');[0m
+2026-10-09T22:50:20.0189205Z [36;1massert.equal(manifest.version, version);[0m
+2026-10-09T22:50:20.0189444Z [36;1mconst bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.tsc;[0m
+2026-10-09T22:50:20.0189729Z [36;1massert.equal(typeof bin, 'string', 'PSC0_TYPESCRIPT_BIN_METADATA');[0m
+2026-10-09T22:50:20.0190145Z [36;1mconst launcher = realpathSync(path.resolve(path.dirname(manifestPath), bin));[0m
+2026-10-09T22:50:20.0190467Z [36;1mconst result = spawnSync(process.execPath, [launcher, '--version'], { encoding: 'utf8' });[0m
+2026-10-09T22:50:20.0190739Z [36;1massert.equal(result.status, 0, result.stderr);[0m
+2026-10-09T22:50:20.0190957Z [36;1massert.equal(result.stdout.trim(), 'Version ' + version);[0m
+2026-10-09T22:50:20.0191226Z [36;1mappendFileSync(process.env.GITHUB_OUTPUT, 'current-cli=' + launcher + '\n');[0m
+2026-10-09T22:50:20.0191663Z [36;1mcopyFileSync(path.join(prefix, 'package-lock.json'), path.join(directory, 'current-package-lock.json'));[0m
+2026-10-09T22:50:20.0192010Z [36;1mcopyFileSync(manifestPath, path.join(directory, 'current-package.json'));[0m
+2026-10-09T22:50:20.0192364Z [36;1mappendFileSync(process.env.GITHUB_ENV, 'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=' + version + '\n');[0m
+2026-10-09T22:50:20.0192634Z [36;1mNODE[0m
+2026-10-09T22:50:20.0246202Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T22:50:20.0246407Z ##[endgroup]
+2026-10-09T22:50:21.4762235Z 
+2026-10-09T22:50:21.4762969Z added 2 packages in 1s
+2026-10-09T22:50:21.6154408Z ##[group]Run node scripts/check-typescript-profile.mjs --out dist/typescript-profile/contract
+2026-10-09T22:50:21.6154874Z [36;1mnode scripts/check-typescript-profile.mjs --out dist/typescript-profile/contract[0m
+2026-10-09T22:50:21.6208041Z shell: /usr/bin/bash -e {0}
+2026-10-09T22:50:21.6208194Z env:
+2026-10-09T22:50:21.6208403Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:21.6208644Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:21.6208785Z ##[endgroup]
+2026-10-09T22:50:21.9878305Z PSC0_TYPESCRIPT_PROFILE: PASS {"mode":"installed-profile-contract","report":"/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json","timings":[{"phase":"positional-source-with-unrelated-config","version":"7.0.2","elapsedMs":50.80332099999998}]}
+2026-10-09T22:50:22.0316057Z ##[group]Run node --check scripts/typescript-cli.mjs
+2026-10-09T22:50:22.0316376Z [36;1mnode --check scripts/typescript-cli.mjs[0m
+2026-10-09T22:50:22.0316588Z [36;1mnode --check scripts/check-typescript-profile.mjs[0m
+2026-10-09T22:50:22.0316810Z [36;1mnode --check scripts/native-typescript-cli.test.mjs[0m
+2026-10-09T22:50:22.0317034Z [36;1mnode scripts/check-native-replay-host-source.mjs[0m
+2026-10-09T22:50:22.0317244Z [36;1mnode --check scripts/sh1-resource-policy.mjs[0m
+2026-10-09T22:50:22.0317432Z [36;1mnode --check scripts/sh1-qualify.mjs[0m
+2026-10-09T22:50:22.0317618Z [36;1mnode --check scripts/sh1-capabilities.mjs[0m
+2026-10-09T22:50:22.0317814Z [36;1mnode --check scripts/sh1-check-admissions.mjs[0m
+2026-10-09T22:50:22.0318037Z [36;1mnode --check scripts/generated-preparation-session.mjs[0m
+2026-10-09T22:50:22.0318255Z [36;1mnode --check scripts/original-ir-inventory.mjs[0m
+2026-10-09T22:50:22.0318471Z [36;1mnode --check scripts/original-ir-carrier.mjs[0m
+2026-10-09T22:50:22.0318687Z [36;1mnode --check scripts/sh1-ir-checker-conformance.mjs[0m
+2026-10-09T22:50:22.0318889Z [36;1mnode --check scripts/sh1-strict-source.mjs[0m
+2026-10-09T22:50:22.0319093Z [36;1mnode --check scripts/sh1-strict-source-conformance.mjs[0m
+2026-10-09T22:50:22.0319324Z [36;1mnode --check scripts/sh1-strict-target-conformance.mjs[0m
+2026-10-09T22:50:22.0319529Z [36;1mnode --check scripts/sh1-strict-evidence.mjs[0m
+2026-10-09T22:50:22.0319740Z [36;1mnode --check scripts/sh1-strict-runtime-conformance.mjs[0m
+2026-10-09T22:50:22.0320188Z [36;1mnode --check scripts/sh1-source-snapshot.mjs[0m
+2026-10-09T22:50:22.0320448Z [36;1mnode --check scripts/sh1-seed-manifest.mjs[0m
+2026-10-09T22:50:22.0320707Z [36;1mnode --check scripts/sh1-grammar-conformance.mjs[0m
+2026-10-09T22:50:22.0321040Z [36;1mnode --check scripts/sh1-fresh-name-conformance.mjs[0m
+2026-10-09T22:50:22.0321377Z [36;1mnode --check scripts/sh1-migration-worker-conformance.mjs[0m
+2026-10-09T22:50:22.0322108Z [36;1mnode --check scripts/sh1-migration-worker-abi.mjs[0m
+2026-10-09T22:50:22.0322410Z [36;1mnode --check scripts/sh1-projection-conformance.mjs[0m
+2026-10-09T22:50:22.0322701Z [36;1mnode --check scripts/sh1-successor-seed.mjs[0m
+2026-10-09T22:50:22.0323017Z [36;1mnode --check scripts/sh1-native-seed-recovery.mjs[0m
+2026-10-09T22:50:22.0323332Z [36;1mnode --check scripts/sh1-successor-seed.test.mjs[0m
+2026-10-09T22:50:22.0323629Z [36;1mnode --check scripts/proofscript-source.mjs[0m
+2026-10-09T22:50:22.0323914Z [36;1mnode --check scripts/proofscript-source.test.mjs[0m
+2026-10-09T22:50:22.0324282Z [36;1mnode --check scripts/checked-source-snapshot.mjs[0m
+2026-10-09T22:50:22.0324769Z [36;1mnode --check scripts/checked-source-snapshot.test.mjs[0m
+2026-10-09T22:50:22.0325279Z [36;1mnode --check scripts/checked-seed-session.test.mjs[0m
+2026-10-09T22:50:22.0325715Z [36;1mnode --check scripts/checked-build.mjs[0m
+2026-10-09T22:50:22.0326122Z [36;1mnode --check scripts/checked-build.test.mjs[0m
+2026-10-09T22:50:22.0326555Z [36;1mnode --check scripts/checked-algebraic-build.test.mjs[0m
+2026-10-09T22:50:22.0327045Z [36;1mnode --check scripts/checked-enum-build.test.mjs[0m
+2026-10-09T22:50:22.0327539Z [36;1mnode --check scripts/checked-projection-build.test.mjs[0m
+2026-10-09T22:50:22.0327976Z [36;1mnode --check scripts/checked-sum-build.test.mjs[0m
+2026-10-09T22:50:22.0328511Z [36;1mnode --check scripts/checked-text-build.test.mjs[0m
+2026-10-09T22:50:22.0328981Z [36;1mnode --check scripts/selfhost-source-workspace.mjs[0m
+2026-10-09T22:50:22.0329446Z [36;1mnode --check scripts/selfhost-source-isolation-tests.mjs[0m
+2026-10-09T22:50:22.0329946Z [36;1mnode --check scripts/native-workspace-isolation.test.mjs[0m
+2026-10-09T22:50:22.0330427Z [36;1mnode --check scripts/compile-with-generated.mjs[0m
+2026-10-09T22:50:22.0331042Z [36;1mnode --check scripts/emit-project-with-generated.mjs[0m
+2026-10-09T22:50:22.0331518Z [36;1mnode --check scripts/reemit-project-with-generated.mjs[0m
+2026-10-09T22:50:22.0332403Z [36;1mnode --check scripts/translate-with-generated.mjs[0m
+2026-10-09T22:50:22.0332950Z [36;1mnode --check scripts/check-elab-term-selfhost-source-syntax.mjs[0m
+2026-10-09T22:50:22.0333485Z [36;1mnode --check scripts/check-proofscript-binder-replay-source.mjs[0m
+2026-10-09T22:50:22.0333986Z [36;1mnode scripts/check-elab-term-selfhost-source-syntax.mjs[0m
+2026-10-09T22:50:22.0334548Z [36;1mnode scripts/check-proofscript-binder-replay-source.mjs[0m
+2026-10-09T22:50:22.0335058Z [36;1mnode --check scripts/sh1-iterate.mjs[0m
+2026-10-09T22:50:22.0335508Z [36;1mnode --check scripts/sh1-iteration-conformance.mjs[0m
+2026-10-09T22:50:22.0335950Z [36;1mnode --check scripts/sh1-foundation-conformance.mjs[0m
+2026-10-09T22:50:22.0336363Z [36;1mnode --check scripts/sh1-helper-conformance.mjs[0m
+2026-10-09T22:50:22.0336880Z [36;1mnode --check scripts/sh1-generic-erasure-conformance.mjs[0m
+2026-10-09T22:50:22.0337331Z [36;1mnode check-psc1-source.mjs[0m
+2026-10-09T22:50:22.0337786Z [36;1mnode scripts/bootstrap-root-minimality-tests.mjs[0m
+2026-10-09T22:50:22.0338264Z [36;1mnode scripts/check-modular-preparation-source.mjs[0m
+2026-10-09T22:50:22.0409014Z shell: /usr/bin/bash -e {0}
+2026-10-09T22:50:22.0409382Z env:
+2026-10-09T22:50:22.0409889Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:22.0410393Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:22.0410696Z ##[endgroup]
+2026-10-09T22:50:22.1575275Z PSC2_NATIVE_REPLAY_HOST_SOURCE: PASS (installed TypeScript 7 profile, exact payload transport and emission integrity)
+2026-10-09T22:50:22.9062346Z PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection, typed-binder accumulation and typed-binder closing recursion, typed projection-reference match, explicit projection-reference expectation, explicit character conversion, explicit typed-binder expectation, local list length, and explicit Option constructors)
+2026-10-09T22:50:22.9281331Z PSC2_PROOFSCRIPT_BINDER_REPLAY_SOURCE: PASS (decreasing type parser, nested binders and generated workspace boundary)
+2026-10-09T22:50:23.0913823Z PSC1_SOURCE_PROFILE: PASS (bootstrap; 69 portable modules across 12 source roots)
+2026-10-09T22:50:23.1420976Z PSC2_BOOTSTRAP_ROOT_MINIMALITY: PASS (1 direct imports; 64 ordered closure modules; compiler-only=64)
+2026-10-09T22:50:23.1696065Z PSC2_MODULAR_PREPARATION_SOURCE: PASS (ordered shared environment, origin companions, retained admission output and unchanged raw prepared/kernel gates)
+2026-10-09T22:50:23.2170725Z ##[group]Run node --test scripts/sh1-successor-seed.test.mjs
+2026-10-09T22:50:23.2171269Z [36;1mnode --test scripts/sh1-successor-seed.test.mjs[0m
+2026-10-09T22:50:23.2223118Z shell: /usr/bin/bash -e {0}
+2026-10-09T22:50:23.2223320Z env:
+2026-10-09T22:50:23.2223663Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:23.2224009Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:23.2224243Z ##[endgroup]
+2026-10-09T22:50:23.3309437Z TAP version 13
+2026-10-09T22:50:23.6147506Z # PSC0_SH1_SUCCESSOR_CONTRACT: PASS (14 descriptor refusals, generation ancestry, evidence-stable identity, gated selection, cache authentication, unchanged v1 routing)
+2026-10-09T22:50:23.6189909Z # Subtest: scripts/sh1-successor-seed.test.mjs
+2026-10-09T22:50:23.6199703Z ok 1 - scripts/sh1-successor-seed.test.mjs
+2026-10-09T22:50:23.6200535Z   ---
+2026-10-09T22:50:23.6200719Z   duration_ms: 290.130374
+2026-10-09T22:50:23.6200921Z   type: 'test'
+2026-10-09T22:50:23.6202529Z   ...
+2026-10-09T22:50:23.6202691Z 1..1
+2026-10-09T22:50:23.6202842Z # tests 1
+2026-10-09T22:50:23.6204317Z # suites 0
+2026-10-09T22:50:23.6205651Z # pass 1
+2026-10-09T22:50:23.6206819Z # fail 0
+2026-10-09T22:50:23.6207046Z # cancelled 0
+2026-10-09T22:50:23.6207315Z # skipped 0
+2026-10-09T22:50:23.6207561Z # todo 0
+2026-10-09T22:50:23.6208091Z # duration_ms 295.187843
+2026-10-09T22:50:23.6764627Z ##[group]Run actions/cache/restore@v4
+2026-10-09T22:50:23.6764806Z with:
+2026-10-09T22:50:23.6765044Z   path: psc0/.selfhost-seeds/successors/47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225
+2026-10-09T22:50:23.6765420Z   key: psc0-sh1-successor-v1-47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225
+2026-10-09T22:50:23.6765686Z   enableCrossOsArchive: false
+2026-10-09T22:50:23.6765830Z   fail-on-cache-miss: false
+2026-10-09T22:50:23.6765962Z   lookup-only: false
+2026-10-09T22:50:23.6766077Z env:
+2026-10-09T22:50:23.6766274Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:23.6766512Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:23.6766652Z ##[endgroup]
+2026-10-09T22:50:23.7477762Z (node:2784) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T22:50:23.7478285Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T22:50:23.9853963Z Cache hit for: psc0-sh1-successor-v1-47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225
+2026-10-09T22:50:23.9919779Z (node:2784) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T22:50:24.6221229Z Received 487319 of 487319 (100.0%), 1.2 MBs/sec
+2026-10-09T22:50:24.6221518Z Cache Size: ~0 MB (487319 B)
+2026-10-09T22:50:24.6239407Z [command]/usr/bin/tar -xf /home/runner/work/_temp/59775891-a0ee-44b4-b078-346bfaa0d7d5/cache.tzst -P -C /home/runner/work/pskernel/pskernel --use-compress-program unzstd
+2026-10-09T22:50:24.6394518Z Cache restored successfully
+2026-10-09T22:50:24.6444713Z Cache restored from key: psc0-sh1-successor-v1-47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225
+2026-10-09T22:50:24.7143790Z ##[group]Run actions/github-script@v7
+2026-10-09T22:50:24.7143970Z with:
+2026-10-09T22:50:24.7144676Z   script: const root = process.env.GITHUB_WORKSPACE + '/psc0';
+const seeds = await import(root + '/scripts/sh1-successor-seed.mjs');
+const selected = await seeds.readSelectedAuthoringSeed();
+const valid = selected.mode === 'qualified' && await seeds.verifyAuthoringSeedCache(
+  root + '/' + selected.cacheDirectory, selected.manifest);
+core.setOutput('qualified-valid', valid);
+
+2026-10-09T22:50:24.7146757Z   github-token: ***
+2026-10-09T22:50:24.7146878Z   debug: false
+2026-10-09T22:50:24.7147001Z   user-agent: actions/github-script
+2026-10-09T22:50:24.7147156Z   result-encoding: json
+2026-10-09T22:50:24.7147279Z   retries: 0
+2026-10-09T22:50:24.7147410Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-10-09T22:50:24.7147579Z env:
+2026-10-09T22:50:24.7147783Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:24.7148053Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:24.7148197Z ##[endgroup]
+2026-10-09T22:50:24.8439734Z ##[group]Run node --input-type=module <<'NODE'
+2026-10-09T22:50:24.8440087Z [36;1mnode --input-type=module <<'NODE'[0m
+2026-10-09T22:50:24.8440379Z [36;1mimport assert from 'node:assert/strict';[0m
+2026-10-09T22:50:24.8440657Z [36;1mimport path from 'node:path';[0m
+2026-10-09T22:50:24.8440939Z [36;1mimport { spawnSync } from 'node:child_process';[0m
+2026-10-09T22:50:24.8441449Z [36;1mimport { readSelectedAuthoringSeed, verifyAuthoringSeedCache } from './scripts/sh1-successor-seed.mjs';[0m
+2026-10-09T22:50:24.8442138Z [36;1mconst selected = await readSelectedAuthoringSeed();[0m
+2026-10-09T22:50:24.8442647Z [36;1massert(await verifyAuthoringSeedCache(path.resolve(selected.cacheDirectory), selected.manifest),[0m
+2026-10-09T22:50:24.8443114Z [36;1m  'PSC0_SH1_SELECTED_CACHE_REQUIRED');[0m
+2026-10-09T22:50:24.8443373Z [36;1mconst capture = args => {[0m
+2026-10-09T22:50:24.8443677Z [36;1m  const result = spawnSync('lean', args, { encoding: 'utf8' });[0m
+2026-10-09T22:50:24.8444072Z [36;1m  assert.equal(result.status, 0, result.stderr);[0m
+2026-10-09T22:50:24.8444360Z [36;1m  return result.stdout.trim();[0m
+2026-10-09T22:50:24.8444595Z [36;1m};[0m
+2026-10-09T22:50:24.8444881Z [36;1mconst { typescript, ...expectedRuntime } = selected.manifest.toolchain;[0m
+2026-10-09T22:50:24.8445361Z [36;1massert.equal(typescript, 'Version ' + selected.recoveryTypeScriptVersion);[0m
+2026-10-09T22:50:24.8445734Z [36;1massert.deepEqual({[0m
+2026-10-09T22:50:24.8446088Z [36;1m  node: process.version, platform: process.platform, architecture: process.arch,[0m
+2026-10-09T22:50:24.8446535Z [36;1m  lean: capture(['--version']), leanGitHash: capture(['--githash']),[0m
+2026-10-09T22:50:24.8446927Z [36;1m}, expectedRuntime, 'PSC0_SH1_SELECTED_EXECUTION_RUNTIME');[0m
+2026-10-09T22:50:24.8447225Z [36;1mNODE[0m
+2026-10-09T22:50:24.8504275Z shell: /usr/bin/bash -e {0}
+2026-10-09T22:50:24.8504435Z env:
+2026-10-09T22:50:24.8504651Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:24.8504897Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:24.8505048Z ##[endgroup]
+2026-10-09T22:50:25.1918338Z ##[group]Run actions/cache/restore@v4
+2026-10-09T22:50:25.1918505Z with:
+2026-10-09T22:50:25.1918621Z   path: psc0/.lake/build
+2026-10-09T22:50:25.1919008Z   key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df
+2026-10-09T22:50:25.1919566Z   restore-keys: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-
+
+2026-10-09T22:50:25.1919879Z   enableCrossOsArchive: false
+2026-10-09T22:50:25.1920027Z   fail-on-cache-miss: false
+2026-10-09T22:50:25.1920164Z   lookup-only: false
+2026-10-09T22:50:25.1920308Z env:
+2026-10-09T22:50:25.1920511Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:25.1920760Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:25.1920901Z ##[endgroup]
+2026-10-09T22:50:25.2630137Z (node:2870) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T22:50:25.2630835Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T22:50:25.4690483Z Cache hit for restore-key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504
+2026-10-09T22:50:25.4762893Z (node:2870) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T22:50:26.5702367Z Received 23670334 of 23670334 (100.0%), 26.0 MBs/sec
+2026-10-09T22:50:26.5702671Z Cache Size: ~23 MB (23670334 B)
+2026-10-09T22:50:26.5718766Z [command]/usr/bin/tar -xf /home/runner/work/_temp/282653a2-3d56-4ae7-8bf9-5771169d4504/cache.tzst -P -C /home/runner/work/pskernel/pskernel --use-compress-program unzstd
+2026-10-09T22:50:26.6945834Z Cache restored successfully
+2026-10-09T22:50:26.7039465Z Cache restored from key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504
+2026-10-09T22:50:26.7887531Z ##[group]Run lake build psc1 psc1_sh1_compile psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests
+2026-10-09T22:50:26.7888020Z [36;1mlake build psc1 psc1_sh1_compile psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests[0m
+2026-10-09T22:50:26.7941277Z shell: /usr/bin/bash -e {0}
+2026-10-09T22:50:26.7941441Z env:
+2026-10-09T22:50:26.7941739Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:26.7941992Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:26.7942143Z ##[endgroup]
+2026-10-09T22:50:28.3052040Z ⚠ [5/16] Built Ps.Syntax.Cursor (494ms)
+2026-10-09T22:50:28.3083666Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:14: Variable name `head` is not explicitly referenced.
+2026-10-09T22:50:28.3102642Z 
+2026-10-09T22:50:28.3203407Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:28.3204410Z   [apply] _head
+2026-10-09T22:50:28.3232198Z 
+2026-10-09T22:50:28.3242977Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:28.3243992Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:19: Variable name `tail` is not explicitly referenced.
+2026-10-09T22:50:28.3244573Z 
+2026-10-09T22:50:28.3245214Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:28.3245867Z   [apply] _tail
+2026-10-09T22:50:28.3246106Z 
+2026-10-09T22:50:28.3246503Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:28.3247326Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:56:19: Variable name `rest` is not explicitly referenced.
+2026-10-09T22:50:28.3247841Z 
+2026-10-09T22:50:28.3248459Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:28.3249099Z   [apply] _rest
+2026-10-09T22:50:28.3249325Z 
+2026-10-09T22:50:28.3249713Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:28.3250767Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:89:14: Variable name `first` is not explicitly referenced.
+2026-10-09T22:50:28.3251260Z 
+2026-10-09T22:50:28.3252105Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:28.3252746Z   [apply] _first
+2026-10-09T22:50:28.3252967Z 
+2026-10-09T22:50:28.3253360Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:28.3254324Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:92:25: Variable name `tail` is not explicitly referenced.
+2026-10-09T22:50:28.3255251Z 
+2026-10-09T22:50:28.3255859Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:28.3256481Z   [apply] _tail
+2026-10-09T22:50:28.3256729Z 
+2026-10-09T22:50:28.3257121Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:28.3257970Z ✔ [6/16] Built Ps.Foundation.Name (476ms)
+2026-10-09T22:50:28.7053835Z ✔ [7/20] Built Ps.Syntax.PrintLean (801ms)
+2026-10-09T22:50:28.7055306Z ✔ [8/20] Built Ps.Syntax.PrintProofScript (886ms)
+2026-10-09T22:50:28.8063247Z ⚠ [9/22] Built Ps.Syntax.ParserState (500ms)
+2026-10-09T22:50:28.8072721Z warning: packages/syntax/src/Ps/Syntax/ParserState.lean:30:20: Variable name `rest` is not explicitly referenced.
+2026-10-09T22:50:28.8108017Z 
+2026-10-09T22:50:28.8144709Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:28.8145543Z   [apply] _rest
+2026-10-09T22:50:28.8145799Z 
+2026-10-09T22:50:28.8146592Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:29.4083379Z ✔ [10/29] Built Ps.Bridge.Json (1.0s)
+2026-10-09T22:50:29.4103545Z ✔ [11/29] Built Ps.Core.Level (641ms)
+2026-10-09T22:50:29.5113692Z ✔ [13/44] Built Ps.Syntax.ParseCommon (670ms)
+2026-10-09T22:50:29.6096756Z ⚠ [14/44] Built Ps.Syntax.Lexer (966ms)
+2026-10-09T22:50:29.6113385Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:29.6142274Z 
+2026-10-09T22:50:29.6172869Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:29.6202142Z   [apply] _depth
+2026-10-09T22:50:29.6202915Z 
+2026-10-09T22:50:29.6232590Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:29.6262449Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:25: Variable name `remaining` is not explicitly referenced.
+2026-10-09T22:50:29.6287184Z 
+2026-10-09T22:50:29.6290871Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:29.6291557Z   [apply] _remaining
+2026-10-09T22:50:29.6291944Z 
+2026-10-09T22:50:29.6292338Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:29.6293141Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:11: Variable name `remaining` is not explicitly referenced.
+2026-10-09T22:50:29.6293641Z 
+2026-10-09T22:50:29.6294244Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:29.6294883Z   [apply] _remaining
+2026-10-09T22:50:29.6295115Z 
+2026-10-09T22:50:29.6295490Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:29.6296287Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:82: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T22:50:29.6296766Z 
+2026-10-09T22:50:29.6297363Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:29.6297991Z   [apply] _charsRev
+2026-10-09T22:50:29.6298212Z 
+2026-10-09T22:50:29.6298588Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:29.8098266Z ✔ [15/47] Built Ps.Core.Expr (441ms)
+2026-10-09T22:50:29.8122942Z ✔ [16/47] Built Ps.Core.Builtin (407ms)
+2026-10-09T22:50:30.0173426Z ⚠ [17/47] Built Ps.Elab.Literal (548ms)
+2026-10-09T22:50:30.0232977Z warning: packages/elab/src/Ps/Elab/Literal.lean:166:11: Variable name `chars` is not explicitly referenced.
+2026-10-09T22:50:30.0253779Z 
+2026-10-09T22:50:30.0314707Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:30.0352435Z   [apply] _chars
+2026-10-09T22:50:30.0381961Z 
+2026-10-09T22:50:30.0442804Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:30.0473113Z warning: packages/elab/src/Ps/Elab/Literal.lean:167:13: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T22:50:30.0502098Z 
+2026-10-09T22:50:30.0517249Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:30.0552440Z   [apply] _charsRev
+2026-10-09T22:50:30.0552618Z 
+2026-10-09T22:50:30.0552931Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:30.3188144Z ⚠ [18/47] Built Ps.Core.LevelSubst (444ms)
+2026-10-09T22:50:30.3198044Z warning: packages/core/src/Ps/Core/LevelSubst.lean:8:11: Variable name `arguments` is not explicitly referenced.
+2026-10-09T22:50:30.3198630Z 
+2026-10-09T22:50:30.3199795Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:30.3200573Z   [apply] _arguments
+2026-10-09T22:50:30.3200835Z 
+2026-10-09T22:50:30.3201250Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:30.3202189Z warning: packages/core/src/Ps/Core/LevelSubst.lean:9:13: Variable name `target` is not explicitly referenced.
+2026-10-09T22:50:30.3202695Z 
+2026-10-09T22:50:30.3203314Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:30.3203964Z   [apply] _target
+2026-10-09T22:50:30.3204215Z 
+2026-10-09T22:50:30.3204623Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:30.6175427Z ✔ [19/47] Built Ps.Environment.LocalContext (551ms)
+2026-10-09T22:50:30.8223324Z ✔ [20/47] Built Ps.Core.Equality (500ms)
+2026-10-09T22:50:30.9243460Z ✔ [21/47] Built Ps.Syntax.ParseProofScript (1.3s)
+2026-10-09T22:50:31.0263658Z ⚠ [22/48] Built Ps.Core.Subst (433ms)
+2026-10-09T22:50:31.0293229Z warning: packages/core/src/Ps/Core/Subst.lean:14:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T22:50:31.0312970Z 
+2026-10-09T22:50:31.0373621Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.0403408Z   [apply] _cutoff
+2026-10-09T22:50:31.0467123Z 
+2026-10-09T22:50:31.0473256Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.0538721Z warning: packages/core/src/Ps/Core/Subst.lean:16:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T22:50:31.0578668Z 
+2026-10-09T22:50:31.0643212Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.0679412Z   [apply] _cutoff
+2026-10-09T22:50:31.0700513Z 
+2026-10-09T22:50:31.0773020Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.0803052Z warning: packages/core/src/Ps/Core/Subst.lean:18:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T22:50:31.0862406Z 
+2026-10-09T22:50:31.0913176Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.0933585Z   [apply] _cutoff
+2026-10-09T22:50:31.1012069Z 
+2026-10-09T22:50:31.1025936Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.1033538Z warning: packages/core/src/Ps/Core/Subst.lean:20:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T22:50:31.1079639Z 
+2026-10-09T22:50:31.1112883Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.1114510Z   [apply] _cutoff
+2026-10-09T22:50:31.1131899Z 
+2026-10-09T22:50:31.1153977Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.1172545Z warning: packages/core/src/Ps/Core/Subst.lean:66:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T22:50:31.1201848Z 
+2026-10-09T22:50:31.1233643Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.1262510Z   [apply] _cutoff
+2026-10-09T22:50:31.1262873Z 
+2026-10-09T22:50:31.1292310Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.1322332Z warning: packages/core/src/Ps/Core/Subst.lean:94:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.1351969Z 
+2026-10-09T22:50:31.1352987Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.1402432Z   [apply] _depth
+2026-10-09T22:50:31.1432310Z 
+2026-10-09T22:50:31.1442335Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.1462263Z warning: packages/core/src/Ps/Core/Subst.lean:96:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.1491729Z 
+2026-10-09T22:50:31.1522387Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.1528979Z   [apply] _depth
+2026-10-09T22:50:31.1551946Z 
+2026-10-09T22:50:31.1562443Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.1592249Z warning: packages/core/src/Ps/Core/Subst.lean:98:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.1636899Z 
+2026-10-09T22:50:31.1643043Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.1662037Z   [apply] _depth
+2026-10-09T22:50:31.1691835Z 
+2026-10-09T22:50:31.1692188Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.1692837Z warning: packages/core/src/Ps/Core/Subst.lean:100:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.1693184Z 
+2026-10-09T22:50:31.1693668Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.1694169Z   [apply] _depth
+2026-10-09T22:50:31.1694291Z 
+2026-10-09T22:50:31.1694556Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.1695147Z warning: packages/core/src/Ps/Core/Subst.lean:146:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.1695468Z 
+2026-10-09T22:50:31.1695936Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.1696445Z   [apply] _depth
+2026-10-09T22:50:31.1696556Z 
+2026-10-09T22:50:31.1696845Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.2283393Z ⚠ [24/48] Built Ps.Core.Abstract (430ms)
+2026-10-09T22:50:31.2292754Z warning: packages/core/src/Ps/Core/Abstract.lean:8:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.2319967Z 
+2026-10-09T22:50:31.2322695Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.2392650Z   [apply] _depth
+2026-10-09T22:50:31.2431917Z 
+2026-10-09T22:50:31.2462779Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.2492537Z warning: packages/core/src/Ps/Core/Abstract.lean:16:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.2522087Z 
+2026-10-09T22:50:31.2556139Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.2584338Z   [apply] _depth
+2026-10-09T22:50:31.2612239Z 
+2026-10-09T22:50:31.2612739Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.2613436Z warning: packages/core/src/Ps/Core/Abstract.lean:18:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.2613880Z 
+2026-10-09T22:50:31.2614521Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.2615062Z   [apply] _depth
+2026-10-09T22:50:31.2615180Z 
+2026-10-09T22:50:31.2615451Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.2616105Z warning: packages/core/src/Ps/Core/Abstract.lean:20:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.2616503Z 
+2026-10-09T22:50:31.2617485Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.2618053Z   [apply] _depth
+2026-10-09T22:50:31.2618168Z 
+2026-10-09T22:50:31.2618447Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.2619146Z warning: packages/core/src/Ps/Core/Abstract.lean:66:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T22:50:31.2619527Z 
+2026-10-09T22:50:31.2620027Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.2620544Z   [apply] _depth
+2026-10-09T22:50:31.2620658Z 
+2026-10-09T22:50:31.2620932Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.4377161Z ✔ [25/55] Built Ps.Core.Declaration (457ms)
+2026-10-09T22:50:31.4402594Z ✔ [26/55] Built Ps.Environment.Instances (430ms)
+2026-10-09T22:50:31.5414728Z ✔ [27/56] Built Ps.Syntax.ParseLean (1.8s)
+2026-10-09T22:50:31.7373942Z ⚠ [28/58] Built Ps.Meta.LevelContext (480ms)
+2026-10-09T22:50:31.7402973Z warning: packages/meta/src/Ps/Meta/LevelContext.lean:59:4: Variable name `assignment` is not explicitly referenced.
+2026-10-09T22:50:31.7414939Z 
+2026-10-09T22:50:31.7423119Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:31.7423866Z   [apply] _assignment
+2026-10-09T22:50:31.7424174Z 
+2026-10-09T22:50:31.7424632Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:31.9400981Z ✔ [29/60] Built Ps.Environment.Basic (534ms)
+2026-10-09T22:50:31.9470282Z ✔ [30/60] Built Ps.BackendTs.Type (431ms)
+2026-10-09T22:50:32.0418919Z ✔ [31/60] Built Ps.Syntax.Translate (444ms)
+2026-10-09T22:50:32.4443345Z ✔ [33/60] Built Ps.Meta.Context (508ms)
+2026-10-09T22:50:32.4443998Z ✔ [34/60] Built Ps.CompilerIr.CheckTypes (784ms)
+2026-10-09T22:50:32.8429762Z ✔ [35/64] Built Ps.Environment.Resolve (375ms)
+2026-10-09T22:50:32.8452878Z ⚠ [36/64] Built Ps.BackendTs.Expr (913ms)
+2026-10-09T22:50:32.8512981Z warning: packages/backend-ts/src/Ps/BackendTs/Expr.lean:631:32: Variable name `fieldName` is not explicitly referenced.
+2026-10-09T22:50:32.8542031Z 
+2026-10-09T22:50:32.8563109Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:32.8563989Z   [apply] _fieldName
+2026-10-09T22:50:32.8574016Z 
+2026-10-09T22:50:32.8574716Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:32.9450439Z ✔ [37/64] Built Ps.Environment.Prelude (526ms)
+2026-10-09T22:50:33.2447458Z ✔ [38/136] Built Ps.Bridge.CheckedAdmissions (1.3s)
+2026-10-09T22:50:33.2474716Z ✔ [39/136] Built Ps.Elab.Context (431ms)
+2026-10-09T22:50:33.4453453Z ✔ [40/136] Built Ps.Meta.Reduce (525ms)
+2026-10-09T22:50:33.6503607Z ✔ [49/136] Built Ps.CompilerIr.CheckSize (750ms)
+2026-10-09T22:50:33.8506081Z ✔ [50/136] Built Ps.Environment.SelfHostPrelude (544ms)
+2026-10-09T22:50:34.3507787Z ✔ [52/136] Built Ps.BackendTs.Module (1.1s)
+2026-10-09T22:50:34.4513350Z ✔ [55/136] Built Ps.Syntax.PrintLean:c.o (638ms)
+2026-10-09T22:50:35.2553363Z ✔ [64/136] Built Ps.Bridge.Json:c.o (917ms)
+2026-10-09T22:50:35.3553221Z ✔ [73/136] Built Ps.Elab.Context:c.o (104ms)
+2026-10-09T22:50:35.4563242Z ✔ [77/136] Built Ps.Syntax.ParseLean:c.o (2.1s)
+2026-10-09T22:50:35.5550975Z ✔ [80/139] Built Ps.Syntax.ParseProofScript:c.o (1.8s)
+2026-10-09T22:50:35.6565720Z ✔ [84/139] Built Ps.Bridge.CheckedAdmissions:c.o (1.2s)
+2026-10-09T22:50:36.1583342Z ✔ [85/142] Built Ps.Meta.Infer (619ms)
+2026-10-09T22:50:36.1612865Z ⚠ [86/142] Built Ps.Meta.Unify (466ms)
+2026-10-09T22:50:36.1642863Z warning: packages/meta/src/Ps/Meta/Unify.lean:90:11: Variable name `environment` is not explicitly referenced.
+2026-10-09T22:50:36.1643502Z 
+2026-10-09T22:50:36.1673367Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:36.1702494Z   [apply] _environment
+2026-10-09T22:50:36.1732299Z 
+2026-10-09T22:50:36.1733107Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:36.1753108Z warning: packages/meta/src/Ps/Meta/Unify.lean:91:11: Variable name `localContext` is not explicitly referenced.
+2026-10-09T22:50:36.1753664Z 
+2026-10-09T22:50:36.1754286Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:36.1754951Z   [apply] _localContext
+2026-10-09T22:50:36.1755175Z 
+2026-10-09T22:50:36.1755555Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:36.1756374Z warning: packages/meta/src/Ps/Meta/Unify.lean:93:11: Variable name `left` is not explicitly referenced.
+2026-10-09T22:50:36.1756816Z 
+2026-10-09T22:50:36.1757436Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:36.1758062Z   [apply] _left
+2026-10-09T22:50:36.1758250Z 
+2026-10-09T22:50:36.1758581Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:36.1759315Z warning: packages/meta/src/Ps/Meta/Unify.lean:94:11: Variable name `right` is not explicitly referenced.
+2026-10-09T22:50:36.1759733Z 
+2026-10-09T22:50:36.1760276Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:36.1760854Z   [apply] _right
+2026-10-09T22:50:36.1761039Z 
+2026-10-09T22:50:36.1761380Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:36.1762289Z warning: packages/meta/src/Ps/Meta/Unify.lean:178:17: Variable name `leftName` is not explicitly referenced.
+2026-10-09T22:50:36.1762727Z 
+2026-10-09T22:50:36.1763290Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:36.1763901Z   [apply] _leftName
+2026-10-09T22:50:36.1764098Z 
+2026-10-09T22:50:36.1764444Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:36.1765183Z warning: packages/meta/src/Ps/Meta/Unify.lean:207:21: Variable name `leftName` is not explicitly referenced.
+2026-10-09T22:50:36.1765621Z 
+2026-10-09T22:50:36.1766189Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:36.1766785Z   [apply] _leftName
+2026-10-09T22:50:36.1766974Z 
+2026-10-09T22:50:36.1767323Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:36.1768647Z ✔ [87/142] Built Ps.BackendTs.Expr:c.o (794ms)
+2026-10-09T22:50:36.5597995Z ✔ [88/142] Built Ps.Environment.SelfHostProd (419ms)
+2026-10-09T22:50:36.6589840Z ✔ [91/142] Built Ps.BackendTs.Module:c.o (1.1s)
+2026-10-09T22:50:36.8605011Z ⚠ [92/142] Built Ps.Host.TypeScriptCompiler (654ms)
+2026-10-09T22:50:36.8663841Z warning: host/src/Ps/Host/TypeScriptCompiler.lean:15:10: `String.dropRight` has been deprecated: Use `String.dropEnd` instead
+2026-10-09T22:50:36.8722277Z 
+2026-10-09T22:50:36.8742782Z Note: The updated constant has a different type:
+2026-10-09T22:50:36.8790389Z   String → Nat → String.Slice
+2026-10-09T22:50:36.8843064Z instead of
+2026-10-09T22:50:36.8872542Z   String → Nat → String
+2026-10-09T22:50:37.0643759Z ✔ [93/150] Built Ps.Meta.Unify:c.o (482ms)
+2026-10-09T22:50:37.1624070Z ✔ [96/153] Built Ps.Meta.SynthInstance (498ms)
+2026-10-09T22:50:37.2633295Z ⚠ [98/153] Built Ps.CompilerIr.Check (1.2s)
+2026-10-09T22:50:37.2634405Z warning: packages/compiler-ir/src/Ps/CompilerIr/Check.lean:690:27: Variable name `scope` is not explicitly referenced.
+2026-10-09T22:50:37.2662081Z 
+2026-10-09T22:50:37.2693432Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:37.2694246Z   [apply] _scope
+2026-10-09T22:50:37.2742082Z 
+2026-10-09T22:50:37.2753440Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:37.4620071Z ✔ [100/153] Built Ps.Project.ModuleGraph (465ms)
+2026-10-09T22:50:37.6635139Z ✖ [102/153] Building Ps.Erasure.Basic (845ms)
+2026-10-09T22:50:37.6655360Z trace: .> LEAN_PATH=/home/runner/work/pskernel/pskernel/psc0/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.34.0/bin/lean /home/runner/work/pskernel/pskernel/psc0/packages/erasure/src/Ps/Erasure/Basic.lean -o /home/runner/work/pskernel/pskernel/psc0/.lake/build/lib/lean/Ps/Erasure/Basic.olean -i /home/runner/work/pskernel/pskernel/psc0/.lake/build/lib/lean/Ps/Erasure/Basic.ilean -c /home/runner/work/pskernel/pskernel/psc0/.lake/build/ir/Ps/Erasure/Basic.c --setup /home/runner/work/pskernel/pskernel/psc0/.lake/build/ir/Ps/Erasure/Basic.setup.json --json
+2026-10-09T22:50:37.6658137Z error: packages/erasure/src/Ps/Erasure/Basic.lean:326:19: unexpected token 'variable'; expected '(', ':=', 'rec', '|' or term
+2026-10-09T22:50:37.6659537Z error: packages/erasure/src/Ps/Erasure/Basic.lean:326:28: unexpected token ':='; expected '(', '[', '{' or '⦃'
+2026-10-09T22:50:37.6660462Z error: packages/erasure/src/Ps/Erasure/Basic.lean:331:57: unexpected token ')'; expected '(', '[', '{' or '⦃'
+2026-10-09T22:50:37.6661064Z ✔ [116/153] Built TranslationTests (468ms)
+2026-10-09T22:50:37.8638144Z ✔ [118/153] Built psc1_translation_tests:exe (210ms)
+2026-10-09T22:50:38.4643913Z ⚠ [119/153] Built Ps.Elab.Term (1.1s)
+2026-10-09T22:50:38.4644851Z warning: packages/elab/src/Ps/Elab/Term.lean:2890:11: Variable name `context` is not explicitly referenced.
+2026-10-09T22:50:38.4645504Z 
+2026-10-09T22:50:38.4646152Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:38.4646835Z   [apply] _context
+2026-10-09T22:50:38.4647102Z 
+2026-10-09T22:50:38.4647739Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:38.4648544Z warning: packages/elab/src/Ps/Elab/Term.lean:2891:13: Variable name `recursion` is not explicitly referenced.
+2026-10-09T22:50:38.4648921Z 
+2026-10-09T22:50:38.4649438Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:38.4649998Z   [apply] _recursion
+2026-10-09T22:50:38.4650138Z 
+2026-10-09T22:50:38.4650441Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:38.4651142Z warning: packages/elab/src/Ps/Elab/Term.lean:2892:15: Variable name `index` is not explicitly referenced.
+2026-10-09T22:50:38.4652135Z 
+2026-10-09T22:50:38.4652673Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:38.4653216Z   [apply] _index
+2026-10-09T22:50:38.4653344Z 
+2026-10-09T22:50:38.4653643Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:38.9658264Z ✔ [120/153] Built Ps.Elab.Recursion (540ms)
+2026-10-09T22:50:39.6695453Z ✔ [122/153] Built Ps.Elab.Declaration (667ms)
+2026-10-09T22:50:40.1741464Z ✔ [133/153] Built Ps.Elab.Term:c.o (1.7s)
+2026-10-09T22:50:40.2743461Z ✔ [136/153] Built Ps.Host.ProjectCompiler (635ms)
+2026-10-09T22:50:40.6743539Z ✔ [146/153] Built Ps.Elab.Declaration:c.o (1.0s)
+2026-10-09T22:50:40.8745828Z ⚠ [151/153] Built BootstrapTests (1.3s)
+2026-10-09T22:50:40.8746275Z warning: test/BootstrapTests.lean:335:10: Variable name `id` is not explicitly referenced.
+2026-10-09T22:50:40.8746527Z 
+2026-10-09T22:50:40.8747096Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T22:50:40.8747436Z   [apply] _id
+2026-10-09T22:50:40.8747511Z 
+2026-10-09T22:50:40.8747691Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T22:50:41.0754660Z ✔ [153/153] Built psc1_tests:exe (165ms)
+2026-10-09T22:50:41.0755057Z Some required targets logged failures:
+2026-10-09T22:50:41.0755324Z - Ps.Erasure.Basic
+2026-10-09T22:50:41.0863738Z error: build failed
+2026-10-09T22:50:41.1318444Z ##[error]Process completed with exit code 1.
+2026-10-09T22:50:41.1386341Z ##[group]Run actions/cache/save@v4
+2026-10-09T22:50:41.1386496Z with:
+2026-10-09T22:50:41.1386617Z   path: psc0/.lake/build
+2026-10-09T22:50:41.1387001Z   key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df
+2026-10-09T22:50:41.1387424Z   enableCrossOsArchive: false
+2026-10-09T22:50:41.1387569Z env:
+2026-10-09T22:50:41.1387772Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:41.1388021Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:41.1388166Z ##[endgroup]
+2026-10-09T22:50:41.2087877Z (node:3408) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T22:50:41.2088609Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T22:50:41.2184406Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/pskernel/pskernel --files-from manifest.txt --use-compress-program zstdmt
+2026-10-09T22:50:41.5840655Z (node:3408) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T22:50:42.5792795Z Sent 23417544 of 23417544 (100.0%), 22.3 MBs/sec
+2026-10-09T22:50:42.8080632Z Cache saved with key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df
+2026-10-09T22:50:42.8178626Z ##[group]Run actions/upload-artifact@v4
+2026-10-09T22:50:42.8178797Z with:
+2026-10-09T22:50:42.8178971Z   name: psc0-sh1-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df
+2026-10-09T22:50:42.8179388Z   path: psc0/dist/sh1
+psc0/.selfhost-seeds
+psc0/dist/sh1-native-seed-recovery
+psc0/dist/sh1-seed-selection
+psc0/dist/typescript-profile
+
+2026-10-09T22:50:42.8179730Z   include-hidden-files: true
+2026-10-09T22:50:42.8179877Z   if-no-files-found: ignore
+2026-10-09T22:50:42.8180019Z   retention-days: 30
+2026-10-09T22:50:42.8180148Z   compression-level: 6
+2026-10-09T22:50:42.8180280Z   overwrite: false
+2026-10-09T22:50:42.8180399Z env:
+2026-10-09T22:50:42.8180616Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T22:50:42.8180995Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T22:50:42.8181143Z ##[endgroup]
+2026-10-09T22:50:42.9251833Z (node:3428) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T22:50:42.9252319Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T22:50:42.9379282Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-09T22:50:42.9380810Z The least common ancestor is /home/runner/work/pskernel/pskernel/psc0. This will be the root directory of the artifact
+2026-10-09T22:50:42.9381480Z With the provided path, there will be 39 files uploaded
+2026-10-09T22:50:42.9382399Z Artifact name is valid!
+2026-10-09T22:50:42.9385352Z Root directory input is valid!
+2026-10-09T22:50:43.2868740Z Beginning upload of artifact content to blob storage
+2026-10-09T22:50:43.3729040Z (node:3428) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T22:50:43.8907468Z Uploaded bytes 447714
+2026-10-09T22:50:43.9537879Z Finished uploading artifact content to blob storage!
+2026-10-09T22:50:43.9538337Z SHA256 digest of uploaded artifact zip is ded80948cd3fe16db7408eb900a39bef44fb2153cbe88ab700a5bab1ed2cf3e9
+2026-10-09T22:50:43.9539320Z Finalizing artifact upload
+2026-10-09T22:50:44.2131093Z Artifact psc0-sh1-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df.zip successfully finalized. Artifact ID 11649037453
+2026-10-09T22:50:44.2132356Z Artifact psc0-sh1-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df has been successfully uploaded! Final size is 447714 bytes. Artifact ID is 11649037453
+2026-10-09T22:50:44.2135892Z Artifact download URL: https://github.com/dwijayuda/pskernel/actions/runs/38001282875/artifacts/11649037453
+2026-10-09T22:50:44.2292812Z Post job cleanup.
+2026-10-09T22:50:44.2871268Z [command]/usr/bin/git version
+2026-10-09T22:50:44.2902559Z git version 2.55.0
+2026-10-09T22:50:44.2924834Z Temporarily overriding HOME='/home/runner/work/_temp/42089ed7-9254-4680-8575-5cc133485492' before making global git config changes
+2026-10-09T22:50:44.2925664Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T22:50:44.2928486Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-09T22:50:44.2958030Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T22:50:44.2988984Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T22:50:44.3204149Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T22:50:44.3224719Z http.https://github.com/.extraheader
+2026-10-09T22:50:44.3236451Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-09T22:50:44.3271364Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T22:50:44.3478103Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T22:50:44.3507717Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T22:50:44.3814645Z Evaluate and set job outputs
+2026-10-09T22:50:44.3818588Z Set output 'qualified'
+2026-10-09T22:50:44.3819912Z Set output 'node-version'
+2026-10-09T22:50:44.3820478Z Cleaning up orphan processes
+2026-10-09T22:50:44.4025017Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache/restore@v4, actions/cache/save@v4, actions/checkout@v4, actions/github-script@v7, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

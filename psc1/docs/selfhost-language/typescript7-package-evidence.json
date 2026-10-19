@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-typescript7-package-evidence",
+  "sourceRef": "cb0a9d012c66e3e02e2391562243912a0e8700d4",
+  "workflowRunId": 37907973917,
+  "jobId": 113745951457,
+  "conclusion": "success",
+  "firstExecution": true,
+  "receipt": {
+    "schemaVersion": 1,
+    "evidence": "installed-typescript-7-package-and-cli",
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "packageVersion": "7.0.2",
+    "packageBin": {
+      "tsc": "./bin/tsc"
+    },
+    "launcher": "/home/runner/work/_temp/psc0-typescript7-tools/node_modules/typescript/bin/tsc",
+    "reportedVersion": "Version 7.0.2",
+    "optionalDependencies": {
+      "@typescript/typescript-win32-x64": "7.0.2",
+      "@typescript/typescript-win32-arm64": "7.0.2",
+      "@typescript/typescript-linux-x64": "7.0.2",
+      "@typescript/typescript-linux-arm": "7.0.2",
+      "@typescript/typescript-linux-arm64": "7.0.2",
+      "@typescript/typescript-darwin-x64": "7.0.2",
+      "@typescript/typescript-darwin-arm64": "7.0.2",
+      "@typescript/typescript-aix-ppc64": "7.0.2",
+      "@typescript/typescript-freebsd-arm64": "7.0.2",
+      "@typescript/typescript-freebsd-x64": "7.0.2",
+      "@typescript/typescript-linux-loong64": "7.0.2",
+      "@typescript/typescript-linux-mips64el": "7.0.2",
+      "@typescript/typescript-linux-ppc64": "7.0.2",
+      "@typescript/typescript-linux-riscv64": "7.0.2",
+      "@typescript/typescript-linux-s390x": "7.0.2",
+      "@typescript/typescript-netbsd-arm64": "7.0.2",
+      "@typescript/typescript-netbsd-x64": "7.0.2",
+      "@typescript/typescript-openbsd-arm64": "7.0.2",
+      "@typescript/typescript-openbsd-x64": "7.0.2",
+      "@typescript/typescript-sunos-x64": "7.0.2"
+    },
+    "compile": {
+      "exitCode": 0,
+      "target": "ES2022",
+      "module": "ES2022",
+      "moduleResolution": "bundler",
+      "strict": true,
+      "declaration": true,
+      "sourceMap": true,
+      "ignoreUnrelatedConfig": true
+    },
+    "fullPsc0Qualification": false
+  },
+  "artifact": {
+    "id": 11605107291,
+    "name": "psc0-typescript7-availability-cb0a9d012c66e3e02e2391562243912a0e8700d4",
+    "size_in_bytes": 5806,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11605107291",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11605107291/zip",
+    "expired": false,
+    "created_at": "2026-10-09T08:55:36Z",
+    "expires_at": "2026-11-08T08:55:35Z",
+    "updated_at": "2026-10-09T08:55:36Z",
+    "digest": "sha256:fd11534d02b32805f13cfcb5e0cf21a76dc0e94823afa63dc03ec03d916480f2",
+    "workflow_run": {
+      "id": 37907973917,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "psc0/typescript-7-v1",
+      "head_sha": "cb0a9d012c66e3e02e2391562243912a0e8700d4"
+    }
+  },
+  "scope": "Exact published package and positional CLI fixture. Full PSC0 native/generated/fixed-point/provider compatibility is a separate qualification."
+}

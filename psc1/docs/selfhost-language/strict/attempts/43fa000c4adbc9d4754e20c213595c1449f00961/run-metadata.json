@@ -1,0 +1,2788 @@
+{
+  "schemaVersion": 1,
+  "kind": "terminal-github-actions-metadata",
+  "observedAt": "2026-10-10T04:57:21.087Z",
+  "expected": {
+    "repository": "dwijayuda/pskernel",
+    "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+    "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "runId": 38021634599,
+    "workflowId": 380237977,
+    "attempt": 1,
+    "compilerJobId": 114123691566,
+    "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+    "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+    "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba"
+  },
+  "documentationCheckpoint": {
+    "head": "7453e27ee4da58563976347e21df06dadbcd6ac1",
+    "parent": "43fa000c4adbc9d4754e20c213595c1449f00961",
+    "documentationOnly": true,
+    "compiledSourceUnchanged": true,
+    "recipe48Unchanged": true,
+    "workflowUnchanged": true,
+    "aiWorkStateBlob": "de60892fbce6fb0319fdde8e8af8432463b1aab4",
+    "retainedToolsBlob": "2143d746f59ee49e8c2d2d7e4d815dae6cd62814",
+    "provenance": "root published and read back; not used as current workflow or compiled head"
+  },
+  "run": {
+    "id": 38021634599,
+    "name": "PSC0 exact-source SH1 continuation",
+    "node_id": "WFR_kwLOUlmxxc8AAAAI2kQaJw",
+    "head_branch": "psc0/strict-sh1-v1",
+    "head_sha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+    "path": ".github/workflows/psc0-sh1-continue.yml",
+    "display_title": "psc0: continue exact fixed point from authenticated N1 and C1 evidence",
+    "run_number": 1,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "failure",
+    "workflow_id": 380237977,
+    "check_suite_id": 103022209635,
+    "check_suite_node_id": "CS_kwDOUlmxxc8AAAAX_JoqYw",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38021634599",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/38021634599",
+    "pull_requests": [],
+    "created_at": "2026-10-10T03:44:42Z",
+    "updated_at": "2026-10-10T04:56:41Z",
+    "actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-10T03:44:42Z",
+    "triggering_actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38021634599/jobs",
+    "logs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38021634599/logs",
+    "check_suite_url": "https://api.github.com/repos/dwijayuda/pskernel/check-suites/103022209635",
+    "artifacts_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38021634599/artifacts",
+    "cancel_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38021634599/cancel",
+    "rerun_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38021634599/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/380237977",
+    "head_commit": {
+      "id": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "tree_id": "044be19b0f128eda642233213d677528b1524ecc",
+      "message": "psc0: continue exact fixed point from authenticated N1 and C1 evidence\n\nRetain the cancelled 1fa run and its completed N1/C1/C2 receipts. Add a pinned-source continuation of the existing fixed-point command with a longer job budget, authenticate the full carried archive and recipe, and keep provider admission mandatory. Update AI work state and preserve all open strict disposition flags.",
+      "timestamp": "2026-10-10T03:44:29Z",
+      "author": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      },
+      "committer": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    },
+    "head_repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    }
+  },
+  "jobs": {
+    "total_count": 2,
+    "jobs": [
+      {
+        "id": 114123691566,
+        "run_id": 38021634599,
+        "workflow_name": "PSC0 exact-source SH1 continuation",
+        "head_branch": "psc0/strict-sh1-v1",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38021634599",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAakk1WLg",
+        "head_sha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/114123691566",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/38021634599/job/114123691566",
+        "status": "completed",
+        "conclusion": "failure",
+        "created_at": "2026-10-10T03:44:43Z",
+        "started_at": "2026-10-10T03:44:45Z",
+        "completed_at": "2026-10-10T04:56:41Z",
+        "name": "compiler",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-10T03:44:46Z",
+            "completed_at": "2026-10-10T03:44:47Z"
+          },
+          {
+            "name": "Check out the exact previously compiled source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-10T03:44:47Z",
+            "completed_at": "2026-10-10T03:45:07Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-10T03:45:07Z",
+            "completed_at": "2026-10-10T03:45:08Z"
+          },
+          {
+            "name": "Run leanprover/lean-action@v1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-10T03:45:08Z",
+            "completed_at": "2026-10-10T03:45:27Z"
+          },
+          {
+            "name": "Authenticate the cancelled run and restore its completed N1 and C1 evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-10T03:45:27Z",
+            "completed_at": "2026-10-10T03:45:30Z"
+          },
+          {
+            "name": "Install the pinned current TypeScript 7 profile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-10T03:45:30Z",
+            "completed_at": "2026-10-10T03:45:32Z"
+          },
+          {
+            "name": "Verify the actual TypeScript 7 continuation runtime",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-10T03:45:32Z",
+            "completed_at": "2026-10-10T03:45:32Z"
+          },
+          {
+            "name": "Run the existing exact-source fixed-point command",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 8,
+            "started_at": "2026-10-10T03:45:32Z",
+            "completed_at": "2026-10-10T04:56:36Z"
+          },
+          {
+            "name": "Retain complete file envelopes and exact returned JSON for final disposition",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 9,
+            "started_at": "2026-10-10T04:56:36Z",
+            "completed_at": "2026-10-10T04:56:36Z"
+          },
+          {
+            "name": "Retain continuation evidence and original authenticated inputs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-10T04:56:36Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 19,
+            "started_at": "2026-10-10T04:56:39Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          },
+          {
+            "name": "Post Check out the exact previously compiled source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-10T04:56:39Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-10T04:56:39Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/114123691566",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000016781,
+        "runner_name": "GitHub Actions 1000016781",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 114136283916,
+        "run_id": 38021634599,
+        "workflow_name": "PSC0 exact-source SH1 continuation",
+        "head_branch": "psc0/strict-sh1-v1",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/38021634599",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAakw17DA",
+        "head_sha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/114136283916",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/38021634599/job/114136283916",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-10-10T04:56:41Z",
+        "started_at": "2026-10-10T04:56:41Z",
+        "completed_at": "2026-10-10T04:56:41Z",
+        "name": "kernel-admissions",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/114136283916",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 11659939542,
+      "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+      "size_in_bytes": 11739089,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542/zip",
+      "expired": false,
+      "created_at": "2026-10-10T04:56:39Z",
+      "expires_at": "2026-11-09T04:56:36Z",
+      "updated_at": "2026-10-10T04:56:39Z",
+      "digest": "sha256:599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+      "workflow_run": {
+        "id": 38021634599,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/strict-sh1-v1",
+        "head_sha": "43fa000c4adbc9d4754e20c213595c1449f00961"
+      }
+    }
+  ],
+  "configuredCompilerTimeout": {
+    "source": "workflow 8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+    "timeoutMinutes": 300,
+    "startedAt": "2026-10-10T03:44:45Z",
+    "nominalTimeoutAt": "2026-10-10T08:44:45.000Z",
+    "note": "Configured workflow timeout; not a completion forecast or an observed failure."
+  },
+  "observations": [
+    {
+      "observedAt": "2026-10-10T03:49:50.621Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 258
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:50:41.187Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 309
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:51:31.849Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 359
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:52:22.394Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 410
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:53:12.976Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 460
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:54:03.507Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 511
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:54:54.059Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 562
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:55:44.679Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 612
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:56:35.760Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 663
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:57:26.312Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 714
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:58:17.275Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 765
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:59:07.846Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 815
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T03:59:58.394Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 866
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:00:49.006Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 917
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:01:39.621Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 967
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:02:30.162Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1018
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:03:20.720Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1068
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:04:11.284Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1119
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:05:01.838Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1169
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:05:52.826Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1220
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:06:43.352Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1271
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:07:33.919Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1321
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:08:24.531Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1372
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:09:15.153Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1423
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:10:05.690Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1473
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:10:56.524Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1524
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:11:47.095Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1575
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:12:37.736Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1625
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:13:28.284Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1676
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:14:18.828Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1726
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:15:09.291Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1777
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:15:59.862Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1827
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:16:50.389Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1878
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:17:41.258Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1929
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:18:31.774Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 1979
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:19:22.330Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2030
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:20:12.887Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2080
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:21:03.422Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2131
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:21:54.062Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2182
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:22:44.688Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2232
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:23:35.246Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2283
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:24:25.840Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:25:16.728Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2384
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:26:07.248Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2435
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:26:57.785Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2485
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:27:48.296Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2536
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:28:39.173Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2587
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:29:29.874Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2637
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:30:20.478Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2688
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:31:11.024Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2739
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:32:01.906Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2789
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:32:52.488Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2840
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:33:43.079Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2891
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:34:33.889Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2941
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:35:24.796Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 2992
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:36:15.370Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3043
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:37:05.911Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3093
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:37:56.621Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3144
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:38:47.206Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3195
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:39:37.730Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3245
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:40:28.281Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3296
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:41:19.471Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3347
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:42:10.042Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3398
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:43:00.974Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3448
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:43:51.595Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3499
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:44:42.114Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3550
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:45:32.687Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3600
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:46:23.205Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3651
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:47:13.794Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3701
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:48:04.360Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3752
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:48:55.236Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3803
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:49:46.061Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3854
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:50:36.631Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3904
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:51:27.183Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 3955
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:52:17.700Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 4005
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:53:08.236Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 4056
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:53:58.840Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 4106
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:54:49.370Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 4157
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:55:39.886Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 4207
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:56:30.562Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "in_progress",
+      "runConclusion": null,
+      "runUpdatedAt": "2026-10-10T03:44:46Z",
+      "changes": [],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Run the existing exact-source fixed-point command",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 8,
+              "started_at": "2026-10-10T03:45:32Z",
+              "completed_at": null,
+              "elapsedSeconds": 4258
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "observedAt": "2026-10-10T04:57:21.087Z",
+      "orchestrationHead": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "compiledSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runStatus": "completed",
+      "runConclusion": "failure",
+      "runUpdatedAt": "2026-10-10T04:56:41Z",
+      "changes": [
+        {
+          "job": 114123691566,
+          "name": "compiler",
+          "status": "completed",
+          "conclusion": "failure",
+          "started_at": "2026-10-10T03:44:45Z",
+          "completed_at": "2026-10-10T04:56:41Z"
+        },
+        {
+          "job": 114123691566,
+          "step": 8,
+          "name": "Run the existing exact-source fixed-point command",
+          "status": "completed",
+          "conclusion": "failure",
+          "started_at": "2026-10-10T03:45:32Z",
+          "completed_at": "2026-10-10T04:56:36Z"
+        },
+        {
+          "job": 114123691566,
+          "step": 9,
+          "name": "Retain complete file envelopes and exact returned JSON for final disposition",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-10T04:56:36Z",
+          "completed_at": "2026-10-10T04:56:36Z"
+        },
+        {
+          "job": 114123691566,
+          "step": 10,
+          "name": "Retain continuation evidence and original authenticated inputs",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-10T04:56:36Z",
+          "completed_at": "2026-10-10T04:56:39Z"
+        },
+        {
+          "job": 114123691566,
+          "step": 19,
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-10T04:56:39Z",
+          "completed_at": "2026-10-10T04:56:39Z"
+        },
+        {
+          "job": 114123691566,
+          "step": 20,
+          "name": "Post Check out the exact previously compiled source",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-10T04:56:39Z",
+          "completed_at": "2026-10-10T04:56:39Z"
+        },
+        {
+          "job": 114123691566,
+          "step": 21,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-10T04:56:39Z",
+          "completed_at": "2026-10-10T04:56:39Z"
+        },
+        {
+          "job": 114136283916,
+          "name": "kernel-admissions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-10T04:56:41Z",
+          "completed_at": "2026-10-10T04:56:41Z"
+        }
+      ],
+      "active": [
+        {
+          "id": 114123691566,
+          "name": "compiler",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": []
+        },
+        {
+          "id": 114136283916,
+          "name": "kernel-admissions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "steps": []
+        }
+      ]
+    }
+  ],
+  "retrieval": {
+    "compilerLogRequests": 1,
+    "providerLogRequests": 0,
+    "artifactArchiveDownloads": 0,
+    "reasonProviderLogNotRequested": "Actual provider job completed with conclusion skipped."
+  }
+}

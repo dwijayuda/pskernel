@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "kind": "guarded-ABI-probe-repair",
+  "sourceRef": "f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f",
+  "baseBlob": "3e7b1c1559770f738448126c331008a73a54119a",
+  "correctedBlob": "4870981ef906729cb9d2538c20d0c40b18db5069",
+  "failure": {
+    "runId": 37941485695,
+    "jobId": 113856701970,
+    "stage": "C1 isolated signature probe",
+    "tag": "leanFrontend",
+    "mechanism": "The owned Lean declaration dispatcher does not accept axiom. The original probe began with19Type axioms and later12signature axioms.",
+    "parserBlob": "969eb9ec1b18e9ab42a1bfdf4d385e39a7fc56a3"
+  },
+  "correction": {
+    "abstractTypes": 19,
+    "form": "inductive Name : Type where; one zero-field mk constructor (newlines in real source)",
+    "independentSignatureTypeAnnotations": 12,
+    "typedGenericPartialWrappers": 12,
+    "referenceType": "first explicit forallE.type of the already declared worker parameter",
+    "compilerWorkerSpecificationsChanged": false,
+    "currentPreparedCoreAndOrderedIrChecksPreserved": true,
+    "isolatedPreflightBeforeN1": true,
+    "earlyCheckQualifiesCurrentF": false,
+    "probeInvoked": false
+  },
+  "edits": [
+    {
+      "oldText": "function signatureSource() {\n  const names = new Set();",
+      "newText": "function abstractTypeNames() {\n  const names = new Set();",
+      "purpose": "separate the finite set of mock Type names",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "oldText": "  // These axioms model the unchanged monomorphic Type names only. The exact\n  // actual worker types, including universe arguments, are compared below.\n  const lines = [...names].sort().map((name) => 'axiom ' + name + ' : Type');\n  workers.forEach((worker, index) => {\n    lines.push('axiom sh1MigrationExpected' + index + ' : ' + fullTypeSource(worker));\n  });",
+      "newText": "  return [...names].sort();\n}\n\nconst abstractTypes = abstractTypeNames();\n\nfunction signatureSource() {\n  // The owned Lean frontend accepts these monomorphic inductives. Each mock\n  // has one zero-field constructor; constructorless inductives and axioms are\n  // not supported. Only the unchanged type names/universes enter comparison.\n  const lines = abstractTypes.map((name) =>\n    'inductive ' + name + ' : Type where\\n  | mk');",
+      "purpose": "use supported monomorphic inductives and preserve independent wrapper annotations",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "oldText": "const isolatedSource = signatureSource();",
+      "newText": "const isolatedSource = signatureSource();\nexport const migrationWorkerAbiProbeSource = isolatedSource;",
+      "purpose": "expose the exact deterministic probe for early artifact retention",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "oldText": "  throw new Error('PSC0_SH1_MIGRATION_ABI_' + operation + ': ' + String(valueTag(value.error)));",
+      "newText": "  throw new Error('PSC0_SH1_MIGRATION_ABI_' + operation + ': ' +\n    String(valueTag(value.error)) + ' ' + JSON.stringify(alphaData(value.error, valueTag)));",
+      "purpose": "retain the nested parser or elaboration diagnostic",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "oldText": "export function runMigrationWorkerAbi(compiler, prepared, ir, valueTag) {\n  assert.equal(typeof valueTag, 'function', 'PSC0_SH1_MIGRATION_ABI_TAG_READER');\n  for (const name of ['psCompilerPrepareSource', 'psExprAlphaEq', 'psDeclarationName',\n    'psDeclarationType', 'psNameToString', 'psNameEq', 'psRootName']) {\n    assert.equal(typeof compiler[name], 'function', 'PSC0_SH1_MIGRATION_ABI_EXPORT: ' + name);\n  }\n  const probe = unwrap(compiler.psCompilerPrepareSource(\n    compiler.PsCompilerSourceKind.lean, isolatedSource), valueTag, 'ISOLATED_SIGNATURE_PROBE');\n  const names = workers.map((worker) => worker.name);\n  const references = workers.map((_, index) => 'sh1MigrationExpected' + index);\n  const partials = workers.map((_, index) => 'sh1MigrationPartial' + index);\n  const actual = selectedCoreDeclarations(compiler, prepared.declarations, names, valueTag);\n  const isolated = selectedCoreDeclarations(compiler, probe.declarations,\n    references.concat(partials), valueTag);\n  const runtime = selectedIrDeclarations(ir, valueTag);",
+      "newText": "function prepareMigrationWorkerAbiProbe(compiler, valueTag) {\n  assert.equal(typeof valueTag, 'function', 'PSC0_SH1_MIGRATION_ABI_TAG_READER');\n  const required = ['psCompilerPrepareSource', 'psExprAlphaEq', 'psDeclarationName',\n    'psDeclarationType', 'psNameToString', 'psNameEq', 'psRootName'];\n  const missing = required.filter((name) => typeof compiler[name] !== 'function');\n  assert.deepEqual(missing, [], 'PSC0_SH1_MIGRATION_ABI_MISSING_EXPORTS');\n  assert.equal(valueTag(compiler.PsCompilerSourceKind?.lean), 'lean',\n    'PSC0_SH1_MIGRATION_ABI_LEAN_SOURCE_KIND');\n  const probe = unwrap(compiler.psCompilerPrepareSource(\n    compiler.PsCompilerSourceKind.lean, isolatedSource), valueTag, 'ISOLATED_SIGNATURE_PROBE');\n  const partials = workers.map((_, index) => 'sh1MigrationPartial' + index);\n  const declarations = selectedCoreDeclarations(compiler, probe.declarations, partials, valueTag);\n  const referenceTypes = workers.map((worker, index) => {\n    const partial = declarations.get(partials[index]);\n    assert.equal(valueTag(partial), 'definitionDecl',\n      'PSC0_SH1_MIGRATION_PARTIAL_DECL_KIND: ' + worker.name);\n    assert.equal(array(partial.levelParams, valueTag).length, 0,\n      'PSC0_SH1_MIGRATION_PARTIAL_UNIVERSE_PARAMETERS: ' + worker.name);\n    const wrapperType = compiler.psDeclarationType(partial);\n    assert.equal(valueTag(wrapperType), 'forallE',\n      'PSC0_SH1_MIGRATION_PARTIAL_WORKER_BINDER: ' + worker.name);\n    assert.equal(valueTag(wrapperType.binder), 'explicit',\n      'PSC0_SH1_MIGRATION_PARTIAL_WORKER_BINDER_KIND: ' + worker.name);\n    const result = dropBinders(wrapperType, worker.parameters.length + 1, valueTag, worker.name);\n    assert.notEqual(valueTag(result), 'forallE',\n      'PSC0_SH1_MIGRATION_PARTIAL_WRAPPER_ARITY: ' + worker.name);\n    const referenceType = wrapperType.type;\n    const referenceResult = dropBinders(referenceType, worker.parameters.length, valueTag, worker.name);\n    assert.notEqual(valueTag(referenceResult), 'forallE',\n      'PSC0_SH1_MIGRATION_REFERENCE_FUNCTION_RESULT: ' + worker.name);\n    return {\n      name: worker.name,\n      completePublicType: fullTypeSource(worker),\n      coreType: alphaData(referenceType, valueTag),\n      originalOuterArguments: worker.outerArguments,\n      partialApplicationType: fullTypeSource(worker, worker.outerArguments),\n      genericPartialWrapperElaborated: true,\n    };\n  });\n  return {\n    declarations,\n    report: {\n      schemaVersion: 1,\n      evidence: 'isolated-migration-signature-and-partial-probe',\n      sourceSha256: sha256(isolatedSource),\n      sourceKind: 'lean',\n      abstractTypeDeclarations: abstractTypes.length,\n      abstractTypeNames: abstractTypes,\n      signatureTypeAnnotations: workers.length,\n      typedGenericPartialWrappers: workers.length,\n      declarationCount: array(probe.declarations, valueTag).length,\n      referenceTypes,\n      referenceTypeSha256: sha256(JSON.stringify(referenceTypes)),\n      phase: 'elaboration-and-admission-encoding',\n      mergedIntoAuthoritativeClosure: false,\n      erasedOrEmitted: false,\n      runtimeExecuted: false,\n      currentSourceCoreOrIrCompared: false,\n      fullBaselineClosurePreparedAgain: false,\n    },\n  };\n}\n\nexport function runMigrationWorkerAbiProbe(compiler, valueTag) {\n  return prepareMigrationWorkerAbiProbe(compiler, valueTag).report;\n}\n\nexport function runMigrationWorkerAbi(compiler, prepared, ir, valueTag) {\n  const probe = prepareMigrationWorkerAbiProbe(compiler, valueTag);\n  const names = workers.map((worker) => worker.name);\n  const partials = workers.map((_, index) => 'sh1MigrationPartial' + index);\n  const actual = selectedCoreDeclarations(compiler, prepared.declarations, names, valueTag);\n  const isolated = probe.declarations;\n  const runtime = selectedIrDeclarations(ir, valueTag);",
+      "purpose": "prepare and validate all isolated signatures early without preparing the compiler closure",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "oldText": "    const reference = isolated.get(references[index]);\n",
+      "newText": "",
+      "purpose": "derive references from the independently annotated wrapper domain",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "oldText": "    assert.equal(valueTag(reference), 'axiomDecl',\n      'PSC0_SH1_MIGRATION_REFERENCE_DECL_KIND: ' + worker.name);\n",
+      "newText": "",
+      "purpose": "remove the unsupported axiom declaration assertion",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "oldText": "    const referenceType = compiler.psDeclarationType(reference);",
+      "newText": "    const referenceType = compiler.psDeclarationType(partial).type;",
+      "purpose": "compare the exact complete current type against the wrapper's first binder domain",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "oldText": "      signatureAxioms: workers.length,\n      typedGenericPartialWrappers: workers.length,",
+      "newText": "      abstractTypeDeclarations: abstractTypes.length,\n      signatureTypeAnnotations: workers.length,\n      typedGenericPartialWrappers: workers.length,\n      referenceTypeSha256: probe.report.referenceTypeSha256,",
+      "purpose": "record actual supported isolated probe construction",
+      "expectedOccurrenceCount": 1
+    }
+  ],
+  "workflowPreflightEdit": {
+    "oldText": "      - name: Verify migration fixture APIs and expectations on the authenticated R compiler\n        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.has-parent == 'true' }}\n        run: |\n          node --input-type=module <<'NODE'\n          import assert from 'node:assert/strict';\n          import { mkdir, writeFile } from 'node:fs/promises';\n          import path from 'node:path';\n          import { readSelectedAuthoringSeed } from './scripts/sh1-successor-seed.mjs';\n          import { loadGeneratedCompiler } from './scripts/sh1-source-snapshot.mjs';\n          import { valueTag } from './scripts/sh1-capabilities.mjs';\n          import { runMigrationWorkerConformance } from './scripts/sh1-migration-worker-conformance.mjs';\n          const selected = await readSelectedAuthoringSeed();\n          assert.equal(selected.mode, 'qualified');\n          assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed');\n          const loaded = await loadGeneratedCompiler(path.resolve(selected.compilerPath), {\n            expectedSha256: selected.manifest.expectedArtifacts.javascriptSha256,\n          });\n          const started = performance.now();\n          const report = runMigrationWorkerConformance(loaded.compiler, valueTag);\n          assert.equal(report.cases, 87);\n          const receipt = {\n            schemaVersion: 1, evidence: 'migration-fixture-authenticated-reference-preflight',\n            recipeSourceRef: process.env.GITHUB_SHA, referenceSourceRef: selected.sourceRef,\n            referenceCompilerSha256: loaded.compilerSha256,\n            selectedSeedIdentitySha256: selected.identitySha256,\n            elapsedMs: performance.now() - started, report, passed: true,\n            compilerBuilt: false, currentSourceQualifiedByThisCheck: false,\n          };\n          await mkdir('dist/sh1', { recursive: true });\n          await writeFile('dist/sh1/worker-harness-reference.json',\n            JSON.stringify(receipt, null, 2) + '\\n', 'utf8');\n          console.log('PSC0_SH1_WORKER_HARNESS_REFERENCE: ' + JSON.stringify(receipt));\n          NODE\n",
+    "newText": "      - name: Verify migration behavior and isolated ABI probe on the authenticated R compiler\n        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.has-parent == 'true' }}\n        run: |\n          node --input-type=module <<'NODE'\n          import assert from 'node:assert/strict';\n          import { mkdir, writeFile } from 'node:fs/promises';\n          import path from 'node:path';\n          import { readSelectedAuthoringSeed } from './scripts/sh1-successor-seed.mjs';\n          import { loadGeneratedCompiler } from './scripts/sh1-source-snapshot.mjs';\n          import { valueTag } from './scripts/sh1-capabilities.mjs';\n          import { runMigrationWorkerConformance } from './scripts/sh1-migration-worker-conformance.mjs';\n          import { migrationWorkerAbiProbeSource, runMigrationWorkerAbiProbe } from './scripts/sh1-migration-worker-abi.mjs';\n          const selected = await readSelectedAuthoringSeed();\n          assert.equal(selected.mode, 'qualified');\n          assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed');\n          const loaded = await loadGeneratedCompiler(path.resolve(selected.compilerPath), {\n            expectedSha256: selected.manifest.expectedArtifacts.javascriptSha256,\n          });\n          await mkdir('dist/sh1', { recursive: true });\n          await writeFile('dist/sh1/worker-abi-probe.lean', migrationWorkerAbiProbeSource, 'utf8');\n          const started = performance.now();\n          const report = runMigrationWorkerConformance(loaded.compiler, valueTag);\n          assert.equal(report.cases, 87);\n          const abiProbe = runMigrationWorkerAbiProbe(loaded.compiler, valueTag);\n          assert.equal(abiProbe.signatureTypeAnnotations, 12);\n          assert.equal(abiProbe.typedGenericPartialWrappers, 12);\n          assert.equal(abiProbe.currentSourceCoreOrIrCompared, false);\n          const receipt = {\n            schemaVersion: 1, evidence: 'migration-fixture-authenticated-reference-preflight',\n            recipeSourceRef: process.env.GITHUB_SHA, referenceSourceRef: selected.sourceRef,\n            referenceCompilerSha256: loaded.compilerSha256,\n            selectedSeedIdentitySha256: selected.identitySha256,\n            elapsedMs: performance.now() - started, report, abiProbe, passed: true,\n            compilerBuilt: false, currentSourceQualifiedByThisCheck: false,\n          };\n          await writeFile('dist/sh1/worker-harness-reference.json',\n            JSON.stringify(receipt, null, 2) + '\\n', 'utf8');\n          console.log('PSC0_SH1_WORKER_HARNESS_REFERENCE: ' + JSON.stringify(receipt));\n          NODE\n",
+    "expectedOccurrenceCount": 1,
+    "purpose": "Check the complete supported isolated ABI probe together with the87behavior cases on authenticated R before N1"
+  },
+  "status": "applied-awaiting-cloud-qualification",
+  "rootReview": {
+    "actualBaseFetched": true,
+    "allNineGuardedEditsForwardReplayed": true,
+    "workerSpecsAndOrderedIrBlockPreserved": true,
+    "independentPeerReviewed": true,
+    "probeExecutedByThisReview": false
+  }
+}

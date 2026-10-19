@@ -1,0 +1,335 @@
+function sha256(text) {
+  const bytes = [];
+  for (let index = 0; index < text.length; index++) {
+    let code = text.charCodeAt(index);
+    if (code >= 0xd800 && code <= 0xdbff && index + 1 < text.length) {
+      const low = text.charCodeAt(index + 1);
+      if (low >= 0xdc00 && low <= 0xdfff) {
+        code = 0x10000 + ((code - 0xd800) << 10) + low - 0xdc00;
+        index++;
+      } else code = 0xfffd;
+    } else if (code >= 0xd800 && code <= 0xdfff) code = 0xfffd;
+    if (code < 0x80) bytes.push(code);
+    else if (code < 0x800) bytes.push(0xc0 | (code >>> 6), 0x80 | (code & 63));
+    else if (code < 0x10000) bytes.push(0xe0 | (code >>> 12), 0x80 | ((code >>> 6) & 63), 0x80 | (code & 63));
+    else bytes.push(0xf0 | (code >>> 18), 0x80 | ((code >>> 12) & 63), 0x80 | ((code >>> 6) & 63), 0x80 | (code & 63));
+  }
+  const bitLength = bytes.length * 8;
+  bytes.push(0x80);
+  while (bytes.length % 64 !== 56) bytes.push(0);
+  const high = Math.floor(bitLength / 0x100000000), low = bitLength >>> 0;
+  for (let n = 24; n >= 0; n -= 8) bytes.push((high >>> n) & 255);
+  for (let n = 24; n >= 0; n -= 8) bytes.push((low >>> n) & 255);
+  const constants = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const state = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const rotr = (n, by) => (n >>> by) | (n << (32 - by));
+  for (let offset = 0; offset < bytes.length; offset += 64) {
+    const words = new Array(64);
+    for (let j = 0; j < 16; j++) {
+      const p = offset + j * 4;
+      words[j] = (bytes[p] << 24) | (bytes[p + 1] << 16) | (bytes[p + 2] << 8) | bytes[p + 3];
+    }
+    for (let j = 16; j < 64; j++) {
+      const a = words[j - 15], b = words[j - 2];
+      words[j] = (words[j - 16] + (rotr(a,7)^rotr(a,18)^(a>>>3)) + words[j - 7] + (rotr(b,17)^rotr(b,19)^(b>>>10))) | 0;
+    }
+    let [a,b,c,d,e,f,g,h] = state;
+    for (let j = 0; j < 64; j++) {
+      const t1 = (h + (rotr(e,6)^rotr(e,11)^rotr(e,25)) + ((e & f)^((~e)&g)) + constants[j] + words[j]) | 0;
+      const t2 = ((rotr(a,2)^rotr(a,13)^rotr(a,22)) + ((a & b)^(a & c)^(b & c))) | 0;
+      h=g; g=f; f=e; e=(d+t1)|0; d=c; c=b; b=a; a=(t1+t2)|0;
+    }
+    for (const [i,v] of [a,b,c,d,e,f,g,h].entries()) state[i] = (state[i] + v) | 0;
+  }
+  return state.map(n=>(n>>>0).toString(16).padStart(8,"0")).join("");
+}
+
+// Pure data review only: no imports, filesystem, network, subprocesses, or compiler execution.
+// Caller supplies exact GitHub log/API objects and exact manifest text from expected.sourceRef.
+function requireTrue(condition,message) {
+  if(!condition)throw new Error('ROOT_TS7_EVIDENCE: '+message);
+}
+function record(value,label) {
+  requireTrue(value!==null&&typeof value==='object'&&!Array.isArray(value),label+' must be an object');
+  return value;
+}
+function same(left,right,label) {
+  requireTrue(JSON.stringify(left)===JSON.stringify(right),label);
+}
+function utf8Length(text) {
+  requireTrue(typeof text==='string','expected text');
+  let count=0;
+  for(let index=0;index<text.length;index++) {
+    const code=text.charCodeAt(index);
+    if(code<0x80)count++;
+    else if(code<0x800)count+=2;
+    else if(code>=0xd800&&code<=0xdbff) {
+      const low=text.charCodeAt(++index);
+      requireTrue(low>=0xdc00&&low<=0xdfff,'unpaired UTF-16 high surrogate');
+      count+=4;
+    } else {
+      requireTrue(code<0xdc00||code>0xdfff,'unpaired UTF-16 low surrogate');
+      count+=3;
+    }
+  }
+  return count;
+}
+function hash(value,label) {
+  requireTrue(typeof value==='string'&&/^[a-f0-9]{64}$/.test(value),label+' SHA256');
+}
+function natural(value,label) {
+  requireTrue(Number.isSafeInteger(value)&&value>=0,label+' must be a safe natural number');
+}
+function exactKeys(value,keys,label) {
+  same(Object.keys(value).sort(),keys.slice().sort(),label+' keys');
+}
+const packageDirectories=[
+  'backend-ts','browser','checked-core','cli','compiler-ir','compiler','conformance','elab',
+  'environment','erasure','language-service','lean4export','lsp','meta','module','pretty',
+  'project','runtime','syntax','tactic',
+];
+const manifestPaths=['package.json',...packageDirectories.map((name)=>'packages/'+name+'/package.json')];
+const evidencePaths=[
+  'dist/typescript7-root/package-lock.json',
+  'dist/typescript7-root/installed-typescript-package.json',
+  'dist/typescript7-root/installed-profile.json',
+  'dist/typescript7-root/qualification.json',
+  'dist/typescript7-root/evidence-index.json',
+];
+const obligations=[
+  'virtual-source-and-existing-products','logical-map-name','config-independent-positional',
+  'relative-typescript-import','package-export-import','root-output-selection',
+  'logical-diagnostic-position','self-reference-refusal','declaration-input-refusal',
+  'missing-directory-refusal','stage-cleanup',
+];
+
+function inspectRootTypeScript7Log(input,strictQualification) {
+  record(input,'input');
+  const {logText,expected,run,jobs,manifestSources}=input;
+  record(expected,'expected');record(run,'GitHub run');record(manifestSources,'manifestSources');
+  requireTrue(typeof logText==='string'&&logText.length>0,'full log text required');
+  requireTrue(!/\[output truncated\]|Warning: truncated output|Output truncated due to/i.test(logText),'truncated tool output');
+  requireTrue(/^[a-f0-9]{40}$/.test(expected.sourceRef??''),'expected source SHA');
+  for(const key of ['runId','workflowId','jobId','runAttempt']) {
+    natural(expected[key],key);requireTrue(expected[key]>0,key+' must be positive');
+  }
+  requireTrue(typeof expected.lockGenerated==='boolean','expected lock-generation state required');
+  requireTrue(run.id===expected.runId&&run.workflow_id===expected.workflowId&&
+    run.run_attempt===expected.runAttempt,'run identity');
+  requireTrue(run.head_sha===expected.sourceRef&&run.head_branch==='psc0/typescript-7-only-v1','run source/branch');
+  const conclusions=strictQualification?['success']:['success','failure'];
+  requireTrue(run.status==='completed'&&conclusions.includes(run.conclusion),'observed completed run conclusion');
+  requireTrue(run.path==='.github/workflows/root-typescript7-qualify.yml','workflow path');
+  requireTrue(run.repository?.full_name==='dwijayuda/pskernel','repository');
+  requireTrue(run.event==='push'||run.event==='workflow_dispatch','workflow trigger');
+  requireTrue(Array.isArray(jobs)&&jobs.length===1,'exact root-only job set');
+  const job=record(jobs[0],'job');
+  requireTrue(job.id===expected.jobId&&job.run_id===expected.runId&&job.run_attempt===expected.runAttempt,
+    'job identity');
+  requireTrue(job.head_sha===expected.sourceRef&&job.name==='qualify','job source/name');
+  requireTrue(job.status==='completed'&&conclusions.includes(job.conclusion)&&job.conclusion===run.conclusion,'job conclusion');
+  requireTrue(Array.isArray(job.steps),'job steps');
+  for(const name of ['Resolve the exact lock and run the root compiler gates once',
+    'Preserve exact lock, receipts, and gate output']) {
+    const steps=job.steps.filter((step)=>step.name===name);
+    const allowed=name.startsWith('Preserve ')?['success']:conclusions;
+    requireTrue(steps.length===1&&steps[0].status==='completed'&&allowed.includes(steps[0].conclusion),
+      'required completed step '+name);
+  }
+
+  const pending=new Map();
+  let contract;
+  let contractLine;
+  let envelopeCount=0;
+  const bareLines=logText.split(/\r?\n/);
+  for(let lineIndex=0;lineIndex<bareLines.length;lineIndex++) {
+    const line=bareLines[lineIndex].replace(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z /,'');
+    const matched=/^(PS_ROOT_TS7_EVIDENCE_FILE(?:_MANIFEST|_CHUNK)?|PS_ROOT_TYPESCRIPT7_CONTRACT) (.*)$/.exec(line);
+    if(matched===null) {
+      requireTrue(!line.startsWith('PS_ROOT_TS7_EVIDENCE_')&&
+        !line.startsWith('PS_ROOT_TYPESCRIPT7_CONTRACT'),'malformed evidence framing at line '+(lineIndex+1));
+      continue;
+    }
+    let value;
+    try { value=record(JSON.parse(matched[2]),'log record'); }
+    catch(error) { throw new Error('ROOT_TS7_EVIDENCE: invalid JSON at line '+(lineIndex+1),{cause:error}); }
+    const label=matched[1];
+    if(label==='PS_ROOT_TYPESCRIPT7_CONTRACT') {
+      requireTrue(contract===undefined,'duplicate compact contract record');
+      contract=value;contractLine=lineIndex+1;continue;
+    }
+    envelopeCount++;
+    const common=['path','sha256','bytes'];
+    requireTrue(evidencePaths.includes(value.path),'unexpected evidence path '+value.path);
+    hash(value.sha256,value.path);natural(value.bytes,value.path+' bytes');
+    const metadata={path:value.path,sha256:value.sha256,bytes:value.bytes};
+    if(label==='PS_ROOT_TS7_EVIDENCE_FILE') {
+      exactKeys(value,[...common,'content'],label);
+      requireTrue(!pending.has(value.path),'duplicate whole/chunk file '+value.path);
+      requireTrue(typeof value.content==='string','whole-file content');
+      requireTrue(utf8Length(line)<=8192,'whole-file envelope exceeds bound');
+      pending.set(value.path,{...metadata,mode:'whole',content:value.content,firstLine:lineIndex+1});
+    } else if(label==='PS_ROOT_TS7_EVIDENCE_FILE_MANIFEST') {
+      exactKeys(value,[...common,'chunkCount'],label);
+      requireTrue(!pending.has(value.path),'duplicate file manifest '+value.path);
+      natural(value.chunkCount,'chunkCount');requireTrue(value.chunkCount>0,'empty chunk sequence');
+      pending.set(value.path,{...metadata,mode:'chunks',chunkCount:value.chunkCount,chunks:[],
+        firstLine:lineIndex+1});
+    } else {
+      exactKeys(value,[...common,'chunkIndex','chunkCount','content'],label);
+      const item=pending.get(value.path);
+      requireTrue(item?.mode==='chunks','chunk without its unique prior manifest');
+      same(metadata,{path:item.path,sha256:item.sha256,bytes:item.bytes},'chunk metadata binding');
+      requireTrue(value.chunkCount===item.chunkCount,'chunkCount drift');
+      natural(value.chunkIndex,'chunkIndex');
+      requireTrue(value.chunkIndex===item.chunks.length&&value.chunkIndex<item.chunkCount,
+        'duplicate, missing, or reordered chunk');
+      requireTrue(typeof value.content==='string'&&value.content.length>0,'nonempty chunk content');
+      utf8Length(value.content);
+      requireTrue(utf8Length(line)<=8192,'chunk envelope exceeds bound');
+      item.chunks.push(value.content);
+    }
+  }
+  requireTrue(pending.size===evidencePaths.length,'missing exact file evidence');
+  if(strictQualification)requireTrue(contract!==undefined,'missing compact adapter contract record');
+  const files={};
+  for(const name of evidencePaths) {
+    const item=pending.get(name);
+    requireTrue(item!==undefined,'missing '+name);
+    if(item.mode==='chunks')requireTrue(item.chunks.length===item.chunkCount,'truncated chunks for '+name);
+    const content=item.mode==='whole'?item.content:item.chunks.join('');
+    requireTrue(utf8Length(content)===item.bytes,'file byte length mismatch '+name);
+    requireTrue(sha256(content)===item.sha256,'file SHA256 mismatch '+name);
+    let parsed;
+    try { parsed=JSON.parse(content); }
+    catch(error) { throw new Error('ROOT_TS7_EVIDENCE: invalid actual file JSON '+name,{cause:error}); }
+    files[name]={path:name,sha256:item.sha256,bytes:item.bytes,content,parsed,
+      framing:item.mode,firstLogLine:item.firstLine};
+  }
+  for(let index=1;index<evidencePaths.length;index++) {
+    requireTrue(files[evidencePaths[index-1]].firstLogLine<files[evidencePaths[index]].firstLogLine,
+      'exact file evidence order');
+  }
+  if(contract!==undefined)requireTrue(contractLine>files[evidencePaths[2]].firstLogLine&&
+    contractLine<files[evidencePaths[3]].firstLogLine,'adapter execution record phase');
+  const lockFile=files[evidencePaths[0]],installedFile=files[evidencePaths[1]];
+  const profileFile=files[evidencePaths[2]],receiptFile=files[evidencePaths[3]],indexFile=files[evidencePaths[4]];
+  const lock=record(lockFile.parsed,'lock'),installed=record(installedFile.parsed,'installed package');
+  const profile=record(profileFile.parsed,'installed profile'),receipt=record(receiptFile.parsed,'receipt');
+  const index=record(indexFile.parsed,'index');
+  requireTrue(index.schemaVersion===1&&index.sourceRef===expected.sourceRef,'index source');
+  same(index.files,evidencePaths.slice(0,4).map((name)=>({
+    path:name,sha256:files[name].sha256,bytes:files[name].bytes,
+  })),'index exact file bindings/order');
+  requireTrue(lock.lockfileVersion===3&&lock.name==='lean-ts-kernel','root npm lock kind');
+  record(lock.packages,'lock packages');
+  same(Object.keys(manifestSources).sort(),manifestPaths.slice().sort(),'all21 source manifests required');
+  const orderedObject=(value={})=>Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)));
+  const manifestDigests=[];
+  for(const name of manifestPaths) {
+    const text=manifestSources[name];
+    utf8Length(text);
+    const manifest=record(JSON.parse(text),'source manifest '+name);
+    requireTrue((manifest.dependencies?.typescript??manifest.devDependencies?.typescript)==='7.0.2',
+      'source manifest current compiler '+name);
+    const key=name==='package.json'?'':name.slice(0,-'/package.json'.length);
+    const entry=record(lock.packages[key],'lock entry '+key);
+    same(orderedObject(entry.dependencies),orderedObject(manifest.dependencies),'locked runtime dependencies '+name);
+    same(orderedObject(entry.devDependencies),orderedObject(manifest.devDependencies),'locked dev dependencies '+name);
+    manifestDigests.push({path:name,sha256:sha256(text)});
+  }
+  for(const [name,entry] of Object.entries(lock.packages)) {
+    if(name.endsWith('/typescript'))requireTrue(entry.version==='7.0.2','retired compiler in lock');
+    requireTrue(!name.includes('/@typescript/typescript5')&&!name.includes('/@typescript/typescript6'),
+      'retired compiler API alias');
+  }
+  requireTrue(lock.packages['node_modules/typescript']?.version==='7.0.2','installed compiler lock pin');
+  requireTrue(installed.name==='typescript'&&installed.version==='7.0.2'&&typeof installed.bin?.tsc==='string',
+    'actual installed package');
+  record(installed.optionalDependencies,'installed optional platform packages');
+  requireTrue(Object.values(installed.optionalDependencies).every((value)=>value==='7.0.2'),
+    'native package pins');
+  requireTrue(profile.schemaVersion===1&&profile.kind==='root-typescript7-installed-profile','profile kind');
+  for(const value of [profile,receipt]) {
+    requireTrue(value.sourceRef===expected.sourceRef&&value.workflowRunId===expected.runId&&
+      value.workflowRunAttempt===expected.runAttempt,'receipt/run source binding');
+    requireTrue(value.node==='v22.23.3'&&value.typescript==='7.0.2','actual current toolchain');
+    requireTrue(value.lockGenerated===expected.lockGenerated,'lock generation fact');
+    requireTrue(value.packageLockSha256===lockFile.sha256,'exact lock hash binding');
+    requireTrue(value.retiredCompilerRuntimeUsed===false,'no retired compiler execution');
+  }
+  requireTrue(profile.reportedVersion==='Version 7.0.2','actual CLI version');
+  hash(profile.launcherSha256,'launcher');
+  requireTrue(typeof profile.platform==='string'&&typeof profile.architecture==='string','platform identity');
+  requireTrue(installed.optionalDependencies['@typescript/typescript-'+profile.platform+'-'+profile.architecture]==='7.0.2',
+    'installed native platform identity');
+  same(profile.optionalDependencies,installed.optionalDependencies,'installed/profile native pins');
+  same(profile.manifests,manifestDigests,'source manifest file hashes');
+  requireTrue(receipt.schemaVersion===1&&receipt.kind==='root-typescript7-qualification'&&typeof receipt.passed==='boolean',
+    'actual root qualification receipt');
+  if(strictQualification)requireTrue(receipt.passed===true,'complete passing root qualification');
+  requireTrue(receipt.installedProfileSha256===profileFile.sha256,'actual profile hash binding');
+  requireTrue(receipt.psc0Qualification===false&&receipt.kernelOracleOrCorpusExecuted===false&&
+    receipt.seedSelectionChanged===false,'bounded root-only scope');
+  if(receipt.passed)requireTrue(!Object.hasOwn(receipt,'failure'),'passing receipt cannot contain failure');
+  else requireTrue(typeof receipt.failure==='string'&&receipt.failure.length>0,'actual failure description');
+  const expectedCommands=[
+    ...(expected.lockGenerated?[['resolve-lock',['install','--package-lock-only','--ignore-scripts','--no-audit','--no-fund']]]:[]),
+    ['install',['ci','--ignore-scripts','--no-audit','--no-fund']],
+    ['root-build',['run','build']],['package-tests',['run','test:packages']],
+    ['conformance-build',['run','build','--workspace','@proofscript/conformance']],
+    ['lean4export-build',['run','build','--workspace','@proofscript/lean4export']],
+    ['package-integration',['run','test:package-integration']],['package-boundaries',['run','check:packages']],
+  ];
+  requireTrue(Array.isArray(receipt.commands)&&receipt.commands.length>0&&receipt.commands.length<=expectedCommands.length,
+    'bounded actual command prefix');
+  if(receipt.passed)requireTrue(receipt.commands.length===expectedCommands.length,'complete command sequence');
+  for(let position=0;position<receipt.commands.length;position++) {
+    const [name,args]=expectedCommands[position],command=record(receipt.commands[position],'command');
+    requireTrue(command.name===name,'command order');
+    same(command.command,['npm',...args],'exact compiler/gate command');
+    if(receipt.passed||position<receipt.commands.length-1) {
+      requireTrue(command.exitCode===0&&command.signal===null&&!Object.hasOwn(command,'executionError'),
+        name+' successful prefix');
+    } else {
+      requireTrue(command.exitCode===null||Number.isSafeInteger(command.exitCode),'actual exit status');
+      requireTrue(command.signal===null||typeof command.signal==='string','actual process signal');
+      requireTrue(!Object.hasOwn(command,'executionError')||typeof command.executionError==='string','actual execution error');
+    }
+    natural(command.elapsedMs,'elapsedMs');hash(command.stdoutSha256,'stdout');hash(command.stderrSha256,'stderr');
+  }
+  if(contract!==undefined) {
+    exactKeys(contract,['schema','typescript','passed','cases'],'compact contract');
+    requireTrue(contract.schema==='psc-root-typescript7-contract-v1'&&contract.typescript==='7.0.2'&&contract.passed===true,
+      'passing actual adapter contract');
+    same(contract.cases,obligations,'bounded adapter obligations');
+  }
+  return {
+    schemaVersion:1,kind:strictQualification?'authenticated-root-typescript7-evidence':'authenticated-root-typescript7-file-evidence',
+    sourceRef:expected.sourceRef,workflowConclusion:run.conclusion,qualifiedByThisReview:strictQualification,
+    workflowRunId:expected.runId,workflowRunAttempt:expected.runAttempt,jobId:expected.jobId,
+    fullLogSha256:sha256(logText),fullLogUtf8Bytes:utf8Length(logText),envelopeCount,
+    files,packageLockSource:lockFile.content,packageLockSha256:lockFile.sha256,
+    installedProfile:profile,qualification:receipt,
+    contract:contract===undefined?null:{evidenceKind:'compact JSON stdout record, not a separate receipt file',line:contractLine,value:contract},
+    summary:{passed:receipt.passed,qualifiedByThisReview:strictQualification,packagePins:21,typescript:'7.0.2',node:'v22.23.3',
+      lockGenerated:expected.lockGenerated,
+      lockResolution:expected.lockGenerated?'metadata-only --package-lock-only, then separate npm ci':'existing lock, npm ci only',
+      currentCompilerInstalled:true,commands:receipt.commands.length,completeCommandSequence:receipt.commands.length===expectedCommands.length,
+      adapterContractCompleted:contract!==undefined,adapterObligations:contract===undefined?null:obligations.length,
+      psc0Qualification:false,coldFQualification:false,seedSelectionChanged:false},
+  };
+}
+
+
+// Both entry points require the complete installed-phase exact file evidence
+// (lock/package/profile/receipt/index). A failed receipt remains failed.
+export function extractRootTypeScript7LogEvidence(input) {
+  return inspectRootTypeScript7Log(input,false);
+}
+
+// This additionally requires successful actual run/job/steps, the complete
+// successful command sequence, and the completed compact adapter contract.
+export function authenticateRootTypeScript7Log(input) {
+  return inspectRootTypeScript7Log(input,true);
+}

@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-recovery-grammar-profile-isolation",
+  "sourceBase": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+  "branch": "psc0/strict-sh1-v1",
+  "status": "independently-reviewed-awaiting-full-and-cold-cloud-execution",
+  "files": [
+    {
+      "path": "psc0/scripts/sh1-grammar-profile.mjs",
+      "expectedBaseBlob": null,
+      "candidateBlob": "26836a8e487d77c94a73485e2d11e3575b932edf",
+      "sha256": "8107c4b1f3f5dc8a74b2c999443659a43242c5e0879e8d6921571805f89e71ae",
+      "characters": 438,
+      "edits": []
+    },
+    {
+      "path": "psc0/scripts/sh1-grammar-conformance.mjs",
+      "expectedBaseBlob": "77dcbec4a94f7ba27b0727a0888b4098d77f05fc",
+      "candidateBlob": "2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141",
+      "sha256": "4daafb21cc121532bb0bb549305babc8987b9ca8554e5864a8bdc59b5ceadc58",
+      "characters": 37351,
+      "edits": [
+        {
+          "before": "import { createHash } from 'node:crypto';",
+          "after": "import { createHash } from 'node:crypto';\nimport { sh1GrammarProfile } from './sh1-grammar-profile.mjs';"
+        },
+        {
+          "before": "export const sh1GrammarProfile = Object.freeze({\n  edition: 'ps-0.9-r3',\n  mode: 'new-only',\n  support: 'bounded-selfhost-subset',\n  referenceSha256: '4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71',\n  fullStandardConformance: false,\n  fullPscvConformance: false,\n});",
+          "after": "export { sh1GrammarProfile };"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-successor-seed.mjs",
+      "expectedBaseBlob": "ddd54197ee3f7831d0643431c05f435b1fdfe53f",
+      "candidateBlob": "3514a7797e739e7a47af33c91ab58e912584d0c7",
+      "sha256": "00b5dbfae38715df2888d3b3577897010fe98e65fc4268302d7253397e0067e2",
+      "characters": 22728,
+      "edits": [
+        {
+          "before": "import { sh1GrammarProfile } from './sh1-grammar-conformance.mjs';",
+          "after": "import { sh1GrammarProfile } from './sh1-grammar-profile.mjs';"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-native-seed-recovery.mjs",
+      "expectedBaseBlob": "4e2fe462ba5c8160ff5c08f70ce52152173b0d6f",
+      "candidateBlob": "c1b5673079b2faae56e9c778b62e70087e639fbe",
+      "sha256": "45b5223fa549358da586e5f211261084cfdb153b1334d5feaff6a8349c464715",
+      "characters": 23134,
+      "edits": [
+        {
+          "before": "  'scripts/sh1-grammar-conformance.mjs',",
+          "after": "  'scripts/sh1-grammar-profile.mjs',"
+        }
+      ]
+    },
+    {
+      "path": "psc0/selfhost-seed-recovery.json",
+      "expectedBaseBlob": "fd75854159544e431497bc7dee8482bea727b5e4",
+      "candidateBlob": "6e4e90f8fe67a47e280721fd64a72a4410025fca",
+      "sha256": "70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30",
+      "characters": 2045
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "expectedBaseBlob": "1945f97a202f2ebeb7ca9ac10f9482d07394c2d9",
+      "candidateBlob": "eedce11a6d99dee010c3de4352a716e5385eb156",
+      "sha256": "7228a5f99bc06f05282de4ef709f77210644bc4f0dd4a02553ea8b2d0d9518c8",
+      "characters": 73448,
+      "edits": [
+        {
+          "before": "    'scripts/sh1-grammar-conformance.mjs', 'scripts/sh1-projection-conformance.mjs',",
+          "after": "    'scripts/sh1-grammar-conformance.mjs', 'scripts/sh1-grammar-profile.mjs', 'scripts/sh1-projection-conformance.mjs',"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/psc0-sh1-ts7-recovery.yml",
+      "expectedBaseBlob": "4512b46247642f2ab6043a5d81ba8d2a62fd703f",
+      "candidateBlob": "499763e3ee1bcb7a3d62e56c543d9232b0630591",
+      "sha256": "0e4e0adb3bd04b24d42b704c51979f206d210889f13ba932934ceba63e37cd62",
+      "characters": 5001,
+      "edits": [
+        {
+          "before": "    branches: ['psc0/sh1-projection-grammar-v1']",
+          "after": "    branches: ['psc0/sh1-projection-grammar-v1', 'psc0/strict-sh1-v1']"
+        }
+      ]
+    }
+  ],
+  "observedSetupFailure": {
+    "runId": 37982287451,
+    "compilerJobId": 113995538185,
+    "providerJobId": 113995716773,
+    "phase": "seed-recipe-file-pin-before-compiler-or-memory-preflight",
+    "file": "scripts/sh1-grammar-conformance.mjs",
+    "expectedBlob": "48efa9b0c90e7904a1df49f43253395841bff90c",
+    "actualBlob": "77dcbec4a94f7ba27b0727a0888b4098d77f05fc",
+    "failureEvidenceBlob": "fb79c27029ec3b87ebc465546aebc65157549f24",
+    "logBlob": "4a86c2878cd576768532f780da0e3e71bc7050d5",
+    "logSha256": "70068f4f4f838620d1971b520d615a3d9377852153008074d46cbdde21e38316",
+    "artifacts": [],
+    "compilerExecuted": false
+  },
+  "dataEquivalence": {
+    "profileBlockByteIdenticalAcrossFormerCurrentAndExtracted": true,
+    "fieldCount": 6,
+    "propertyOrderPreserved": true,
+    "existingConformanceExportPreserved": true,
+    "requiredHistoricalRecipeMetadataUnchanged": true,
+    "selectedManifestAndIdentityUnchanged": true,
+    "sourceToolchainAndQualificationBoundaryUnchanged": true,
+    "allFourExpectedProductsUnchanged": true
+  },
+  "runnerRecipe": {
+    "previousRecipe": {
+      "id": "native-lean-original-ir-four-products-ts7/1",
+      "files": [
+        {
+          "path": "scripts/sh1-native-seed-recovery.mjs",
+          "gitBlobSha1": "4e2fe462ba5c8160ff5c08f70ce52152173b0d6f"
+        },
+        {
+          "path": "scripts/sh1-successor-seed.mjs",
+          "gitBlobSha1": "ddd54197ee3f7831d0643431c05f435b1fdfe53f"
+        },
+        {
+          "path": "scripts/sh1-seed-manifest.mjs",
+          "gitBlobSha1": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7"
+        },
+        {
+          "path": "scripts/sh1-grammar-conformance.mjs",
+          "gitBlobSha1": "48efa9b0c90e7904a1df49f43253395841bff90c"
+        },
+        {
+          "path": "scripts/sh1-source-snapshot.mjs",
+          "gitBlobSha1": "1083a3765a55540f83b2376c40a97bc1f1362ce0"
+        },
+        {
+          "path": "scripts/workspace-layout.mjs",
+          "gitBlobSha1": "eb7c2c07f147a812f9998904a60123b3719e5539"
+        },
+        {
+          "path": "scripts/typescript-cli.mjs",
+          "gitBlobSha1": "9d6607a6f4284b0afba8023566f6e1d75c30a64a"
+        }
+      ]
+    },
+    "currentRecipe": {
+      "id": "native-lean-original-ir-four-products-ts7/1",
+      "files": [
+        {
+          "path": "scripts/sh1-native-seed-recovery.mjs",
+          "gitBlobSha1": "c1b5673079b2faae56e9c778b62e70087e639fbe"
+        },
+        {
+          "path": "scripts/sh1-successor-seed.mjs",
+          "gitBlobSha1": "3514a7797e739e7a47af33c91ab58e912584d0c7"
+        },
+        {
+          "path": "scripts/sh1-seed-manifest.mjs",
+          "gitBlobSha1": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7"
+        },
+        {
+          "path": "scripts/sh1-grammar-profile.mjs",
+          "gitBlobSha1": "26836a8e487d77c94a73485e2d11e3575b932edf"
+        },
+        {
+          "path": "scripts/sh1-source-snapshot.mjs",
+          "gitBlobSha1": "1083a3765a55540f83b2376c40a97bc1f1362ce0"
+        },
+        {
+          "path": "scripts/workspace-layout.mjs",
+          "gitBlobSha1": "eb7c2c07f147a812f9998904a60123b3719e5539"
+        },
+        {
+          "path": "scripts/typescript-cli.mjs",
+          "gitBlobSha1": "9d6607a6f4284b0afba8023566f6e1d75c30a64a"
+        }
+      ]
+    },
+    "previousPolicySha256": "0cf0480524ba713e0bcdbeb3cfa3d345e37508743ee5e169b83ba8ee0de160fc",
+    "currentPolicySha256": "70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30",
+    "previousRecipeSha256": "4ed186c2604bcfaee756881686e70f14569720d72fcd799d9997d2d92217b82a",
+    "currentRecipeSha256": "d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d"
+  },
+  "recoveryImports": [
+    [
+      "sh1-native-seed-recovery.mjs",
+      [
+        "sh1-successor-seed.mjs",
+        "sh1-source-snapshot.mjs",
+        "typescript-cli.mjs"
+      ]
+    ],
+    [
+      "sh1-successor-seed.mjs",
+      [
+        "sh1-seed-manifest.mjs",
+        "sh1-grammar-profile.mjs"
+      ]
+    ],
+    [
+      "sh1-source-snapshot.mjs",
+      [
+        "workspace-layout.mjs"
+      ]
+    ],
+    [
+      "sh1-seed-manifest.mjs",
+      []
+    ],
+    [
+      "sh1-grammar-profile.mjs",
+      []
+    ],
+    [
+      "workspace-layout.mjs",
+      []
+    ],
+    [
+      "typescript-cli.mjs",
+      []
+    ]
+  ],
+  "review": {
+    "reviewer": "/root/runtime_comparison_finish",
+    "status": "CLEAR",
+    "completeRecipePinSetChecked": 7,
+    "implementationBatchFilesChecked": 29,
+    "onlyOriginalOverlap": "scripts/sh1-grammar-conformance.mjs",
+    "allSevenCandidateEditsReviewed": true,
+    "selectedSeedMetadataAndProductChecksPreserved": true,
+    "noCompilerOrTestExecutionDuringReview": true
+  },
+  "requiredEvidence": {
+    "commitTags": [
+      "[sh1-qualify]",
+      "[sh1-ts7-cold]"
+    ],
+    "parallelIndependentWorkflows": true,
+    "coldRestoreBuildOrSeedCache": false,
+    "coldDownloadCompilerArtifact": false,
+    "previousColdReceiptQualifiesNewRecipe": false,
+    "newRecipeQualified": false,
+    "currentCompilerQualified": false,
+    "providerDecisionSeparate": true
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "correspondenceRowsClosed": 0,
+  "cacheAlgorithmChanged": false,
+  "sourceLanguageEditionChanged": false,
+  "legacyCompilerIntroduced": false
+}

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual closed monomorphic term judgments; bounded differential evidence, not full compatibility or a soundness proof",
+  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
+  "harnessSha256": "54c368e2f2e5cb32e734f065c41455d45de761b80f70b310150264368e624022",
+  "provider": {
+    "protocol": "pskernel-lean/1",
+    "provider": "lean4-cpp",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core",
+    "status": "version"
+  },
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "comparableCases": 559,
+  "matched": 559,
+  "accepted": 156,
+  "rejected": 403,
+  "knownCompletenessGaps": [
+    "proof-irrelevance",
+    "function-eta"
+  ],
+  "excluded": [
+    {
+      "name": "internal-free-variable",
+      "reason": "not representable in native closed-core wire fragment"
+    },
+    {
+      "name": "huge-bound-index-not-rounded",
+      "reason": "not representable in native closed-core wire fragment"
+    },
+    {
+      "name": "universe-parameter-not-declared",
+      "reason": "explicitly unsupported feature"
+    },
+    {
+      "name": "unknown-polymorphic-constant",
+      "reason": "explicitly unsupported feature"
+    },
+    {
+      "name": "natural-primitive-not-admitted",
+      "reason": "Requires a checked Nat prelude; this corpus starts empty. See LITERAL_DIFFERENTIAL.json."
+    },
+    {
+      "name": "projection-not-admitted",
+      "reason": "explicitly unsupported feature"
+    },
+    {
+      "name": "unknown-level-in-discarded-domain",
+      "reason": "explicitly unsupported feature"
+    }
+  ],
+  "recordsPath": "dist/evidence/checker-differential-records.json",
+  "recordsSha256": "8d86d50b67d343e5de62733d69c71e22c49bfeaadf111b72d5b8f84f49362fc6"
+}

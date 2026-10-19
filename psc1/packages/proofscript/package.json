@@ -1,0 +1,94 @@
+{
+  "name": "proofscript",
+  "version": "0.1.0-psc0.1",
+  "description": "ProofScript PSC0 CLI, qualified self-host compiler closure and JS checker",
+  "private": false,
+  "type": "module",
+  "license": "UNLICENSED",
+  "bin": {
+    "psc": "./bin/psc.js"
+  },
+  "engines": {
+    "node": ">=22.23.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwijayuda/pskernel.git",
+    "directory": "psc0/packages/proofscript"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "MANIFEST.json"
+  ],
+  "dependencies": {
+    "@proofscript/foundation": "0.1.0-psc0.1",
+    "@proofscript/syntax": "0.1.0-psc0.1",
+    "@proofscript/core": "0.1.0-psc0.1",
+    "@proofscript/environment": "0.1.0-psc0.1",
+    "@proofscript/meta": "0.1.0-psc0.1",
+    "@proofscript/elab": "0.1.0-psc0.1",
+    "@proofscript/bridge": "0.1.0-psc0.1",
+    "@proofscript/compiler-ir": "0.1.0-psc0.1",
+    "@proofscript/erasure": "0.1.0-psc0.1",
+    "@proofscript/compiler": "0.1.0-psc0.1",
+    "@proofscript/backend-ts": "0.1.0-psc0.1",
+    "@proofscript/bootstrap": "0.1.0-psc0.1",
+    "@proofscript/pskernel-core": "0.1.0-psc0.1",
+    "typescript": "7.0.2"
+  },
+  "bundledDependencies": [
+    "@proofscript/foundation",
+    "@proofscript/syntax",
+    "@proofscript/core",
+    "@proofscript/environment",
+    "@proofscript/meta",
+    "@proofscript/elab",
+    "@proofscript/bridge",
+    "@proofscript/compiler-ir",
+    "@proofscript/erasure",
+    "@proofscript/compiler",
+    "@proofscript/backend-ts",
+    "@proofscript/bootstrap",
+    "@proofscript/pskernel-core"
+  ],
+  "proofscript": {
+    "distribution": "psc0/minimal-compiler/2",
+    "corePackages": [
+      "@proofscript/foundation",
+      "@proofscript/syntax",
+      "@proofscript/core",
+      "@proofscript/environment",
+      "@proofscript/meta",
+      "@proofscript/elab",
+      "@proofscript/bridge",
+      "@proofscript/compiler-ir",
+      "@proofscript/erasure",
+      "@proofscript/compiler",
+      "@proofscript/backend-ts",
+      "@proofscript/bootstrap",
+      "@proofscript/pskernel-core"
+    ],
+    "optionalPackages": [
+      "@proofscript/backend-js",
+      "@proofscript/backend-rust",
+      "@proofscript/backend-wasm",
+      "@proofscript/cli",
+      "@proofscript/pskernel-lean",
+      "@proofscript/pskernel-lean-wasm",
+      "@proofscript/stdlib"
+    ],
+    "checkerProvider": "@proofscript/pskernel-core/check",
+    "checkerExecution": "generated-js",
+    "sourceVariants": [
+      "ps",
+      "lean"
+    ],
+    "typescriptInstaller": "platform-specific npm optional dependency",
+    "kernelAssurance": "finite comparison; not formal proof",
+    "publishingRequiresQualification": true
+  }
+}

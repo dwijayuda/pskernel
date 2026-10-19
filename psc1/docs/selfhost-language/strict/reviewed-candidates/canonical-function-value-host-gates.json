@@ -1,0 +1,445 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-reviewed-canonical-function-value-host-gates",
+  "repository": "dwijayuda/pskernel",
+  "expectedParent": "715a17ba725cf3bdcc9ae6c95278ca9ca240fa46",
+  "sourceBase": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "status": "Exact candidates independently source-reviewed and root forward/reverse/readback checked; integration manifest records publication; no execution is claimed.",
+  "files": [
+    {
+      "path": "psc0/scripts/sh1-migration-worker-abi.mjs",
+      "baseBlob": "4870981ef906729cb9d2538c20d0c40b18db5069",
+      "baseSha256": "5e676632362f11714104dfbdb9fcc3f191c2abacbe7b577546016f955a28dd14",
+      "candidateBlob": "4a24f22050cdbe9660501b58bc1eeed9c8005319",
+      "candidateSha256": "f520b3d033462e41a87d1aac3db6ed2f75290c05b4f106451919886234352cc7",
+      "candidateBytes": 18393,
+      "edits": [
+        {
+          "before": "import assert from 'node:assert/strict';",
+          "after": "import assert from 'node:assert/strict';\nimport { invokeCompilerValueEntry } from './sh1-function-entry.mjs';",
+          "purpose": "Import the narrow producer-ABI bridge"
+        },
+        {
+          "before": "compiler.psNameEq(compiler.psDeclarationName(declaration),\n      compiler.psRootName(name))",
+          "after": "invokeCompilerValueEntry(compiler, 'psNameEq', [compiler.psDeclarationName(declaration),\n      compiler.psRootName(name)])",
+          "purpose": "Preserve exact Core name comparison across R/C1 and current producer entry groups"
+        },
+        {
+          "before": "compiler.psExprAlphaEq(actualType, referenceType)",
+          "after": "invokeCompilerValueEntry(compiler, 'psExprAlphaEq', [actualType, referenceType])",
+          "purpose": "Preserve complete public alpha equality"
+        },
+        {
+          "before": "compiler.psExprAlphaEq(remainingType, expectedRemaining)",
+          "after": "invokeCompilerValueEntry(compiler, 'psExprAlphaEq', [remainingType, expectedRemaining])",
+          "purpose": "Preserve partial public alpha equality"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-foundation-conformance.mjs",
+      "baseBlob": "5b8e6d571629551436dcf0403035e15a5bb8115b",
+      "baseSha256": "4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383",
+      "candidateBlob": "2b740f5caf1348e81706f2dfb683f61c43651f2d",
+      "candidateSha256": "4b357dee6dfc536bc0a99cf754bc18b702a800bdf82b763c8c24a2c2656f8a91",
+      "candidateBytes": 8051,
+      "edits": [
+        {
+          "before": "import assert from 'node:assert/strict';",
+          "after": "import assert from 'node:assert/strict';\nimport { invokeCompilerValueEntry } from './sh1-function-entry.mjs';",
+          "purpose": "Import the narrow producer-ABI bridge"
+        },
+        {
+          "before": "compiler.psNameEq(compiler.psDeclarationName(declaration), target)",
+          "after": "invokeCompilerValueEntry(compiler, 'psNameEq', [compiler.psDeclarationName(declaration), target])",
+          "purpose": "Use the same named source equality operation under its producer ABI"
+        },
+        {
+          "before": "compiler.psExprAlphaEq(\n          publicType(compiler, referencePrepared, name),\n          publicType(compiler, prepared, name))",
+          "after": "invokeCompilerValueEntry(compiler, 'psExprAlphaEq', [\n          publicType(compiler, referencePrepared, name),\n          publicType(compiler, prepared, name)])",
+          "purpose": "Preserve alpha-equality expected true"
+        },
+        {
+          "before": "function checkLibrary(runtime) {",
+          "after": "function checkLibrary(runtime, sourceLabel) {\n  assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_LIBRARY_SOURCE_LABEL');\n  // The immutable reference definitions return a closure after their first\n  // structural argument. The migrated definitions put both values in headers.\n  const returnedClosure = sourceLabel === 'reference';\n  for (const name of ['psListReverseAcc', 'psListAppend', 'psListTake', 'psListZip']) {\n    assert.equal(runtime[name].length, returnedClosure ? 1 : 2,\n      'PSC0_SH1_LIBRARY_SOURCE_ENTRY_ARITY: ' + name);\n  }\n  const reverseAcc = returnedClosure ? (values, acc) => runtime.psListReverseAcc(values)(acc) :\n    runtime.psListReverseAcc;\n  const append = returnedClosure ? (left, right) => runtime.psListAppend(left)(right) :\n    runtime.psListAppend;\n  const take = returnedClosure ? (count, values) => runtime.psListTake(count)(values) :\n    runtime.psListTake;\n  const zip = returnedClosure ? (left, right) => runtime.psListZip(left)(right) :\n    runtime.psListZip;",
+          "purpose": "Derive reference/current entry groups from unchanged raw source headers, with exact arity assertions"
+        },
+        {
+          "before": "arrayFromList(runtime.psListTake(BigInt(count), a))",
+          "after": "arrayFromList(take(BigInt(count), a))",
+          "purpose": "Use derived source-entry invocation without changing expected sequence values/counts"
+        },
+        {
+          "before": "arrayFromList(runtime.psListReverseAcc(a, b))",
+          "after": "arrayFromList(reverseAcc(a, b))",
+          "purpose": "Use derived source-entry invocation without changing expected sequence values/counts"
+        },
+        {
+          "before": "arrayFromList(runtime.psListAppend(a, b))",
+          "after": "arrayFromList(append(a, b))",
+          "purpose": "Use derived source-entry invocation without changing expected sequence values/counts"
+        },
+        {
+          "before": "[runtime.psListZip(a, b), runtime.sh1ZipCurried(a, b)]",
+          "after": "[zip(a, b), runtime.sh1ZipCurried(a, b)]",
+          "purpose": "Use derived source-entry invocation without changing expected sequence values/counts"
+        },
+        {
+          "before": "checkLibrary(await import(pathToFileURL(outputJs).href))",
+          "after": "checkLibrary(await import(pathToFileURL(outputJs).href), label)",
+          "purpose": "Use derived source-entry invocation without changing expected sequence values/counts"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-helper-conformance.mjs",
+      "baseBlob": "dccef2f8dcf0845c2d047996a3a98eaa6929f65c",
+      "baseSha256": "b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d",
+      "candidateBlob": "99a32b8bbc457a3026c70a1f6fa6747a64b33ca4",
+      "candidateSha256": "0abf84dccfd2466792bc35e2c624f0840c8907bf113b54927730caa57cf66ed4",
+      "candidateBytes": 12745,
+      "edits": [
+        {
+          "before": "import assert from 'node:assert/strict';",
+          "after": "import assert from 'node:assert/strict';\nimport { invokeCompilerValueEntry } from './sh1-function-entry.mjs';",
+          "purpose": "Import the narrow producer-ABI bridge"
+        },
+        {
+          "before": "compiler.psNameEq(compiler.psDeclarationName(declaration), target)",
+          "after": "invokeCompilerValueEntry(compiler, 'psNameEq', [compiler.psDeclarationName(declaration), target])",
+          "purpose": "Use the same named source equality operation under its producer ABI"
+        },
+        {
+          "before": "compiler.psExprAlphaEq(publicType(compiler, referencePrepared, name),\n        publicType(compiler, prepared, name))",
+          "after": "invokeCompilerValueEntry(compiler, 'psExprAlphaEq', [publicType(compiler, referencePrepared, name),\n        publicType(compiler, prepared, name)])",
+          "purpose": "Preserve helper type equality expected true"
+        },
+        {
+          "before": "function checkHelpers(runtime, withProbes) {",
+          "after": "function checkHelpers(runtime, withProbes, sourceLabel = 'current') {\n  assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_HELPER_SOURCE_LABEL');\n  const returnedClosure = sourceLabel === 'reference';\n  // Source prefixes: reference workers stop before a match and return the last\n  // argument as a closure; the migrated workers have explicit full headers.\n  for (const [name, referenceArity, currentArity] of [\n    ['psExprApplyManyWorker', 1, 2],\n    ['psExprAppViewAccWorker', 1, 2],\n    ['psErasureAddUniqueStringWorker', 2, 3],\n  ]) assert.equal(runtime[name].length, returnedClosure ? referenceArity : currentArity,\n    'PSC0_SH1_HELPER_SOURCE_ENTRY_ARITY: ' + name);\n  const applyManyWorker = returnedClosure ? (args, fn) => runtime.psExprApplyManyWorker(args)(fn) :\n    runtime.psExprApplyManyWorker;\n  const appViewWorker = returnedClosure ? (expr, args) => runtime.psExprAppViewAccWorker(expr)(args) :\n    runtime.psExprAppViewAccWorker;\n  const uniqueWorker = returnedClosure ?\n    (used, attempts, base) => runtime.psErasureAddUniqueStringWorker(used, attempts)(base) :\n    runtime.psErasureAddUniqueStringWorker;",
+          "purpose": "Derive helper reference/current callable groups from exact source prefixes"
+        },
+        {
+          "before": "runtime.psExprApplyManyWorker(args, initial)",
+          "after": "applyManyWorker(args, initial)",
+          "purpose": "Preserve helper result/count expectations while invoking its actual source boundary"
+        },
+        {
+          "before": "runtime.psExprAppViewAccWorker(expected, values)",
+          "after": "appViewWorker(expected, values)",
+          "purpose": "Preserve helper result/count expectations while invoking its actual source boundary"
+        },
+        {
+          "before": "runtime.psErasureAddUniqueStringWorker(values, BigInt(attempts), base)",
+          "after": "uniqueWorker(values, BigInt(attempts), base)",
+          "purpose": "Preserve helper result/count expectations while invoking its actual source boundary"
+        },
+        {
+          "before": "checkHelpers(await import(pathToFileURL(outputJs).href), true)",
+          "after": "checkHelpers(await import(pathToFileURL(outputJs).href), true, label)",
+          "purpose": "Preserve helper result/count expectations while invoking its actual source boundary"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-projection-conformance.mjs",
+      "baseBlob": "69f282165d2b46460f244d51cb9aedfe5b8f2f13",
+      "baseSha256": "44a9baad9f18a231e681b71dc696373ca15a4cdd8b252c31656f5f9b8404051f",
+      "candidateBlob": "1c69c032f260eac8d868173b7f8b5b06e90a4a29",
+      "candidateSha256": "64f60f538a01fe288153d3df7a12725854a7dbf9e10a308fe1e3dab2d342fa64",
+      "candidateBytes": 11727,
+      "edits": [
+        {
+          "before": "import assert from 'node:assert/strict';",
+          "after": "import assert from 'node:assert/strict';\nimport { invokeCompilerValueEntry } from './sh1-function-entry.mjs';",
+          "purpose": "Import the narrow producer-ABI bridge"
+        },
+        {
+          "before": "compiler.psNameEq(base.name, name(expected.segments))",
+          "after": "invokeCompilerValueEntry(compiler, 'psNameEq', [base.name, name(expected.segments)])",
+          "purpose": "Preserve actual projection base name comparison"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-fresh-name-conformance.mjs",
+      "baseBlob": "240727d033a1eb2d630826560c350ea76dd4d4d4",
+      "baseSha256": "fb6db052ed213f5286ea6c0cfdeeebb52b358ecf02845ed04f67424676740d97",
+      "candidateBlob": "9eaa7b1cbdb50dec79aca57150d825cbdd51f8d7",
+      "candidateSha256": "330e3c53401d3912f092ecf9f6457c67db6852f73b4cf715eb3a92364459d7d5",
+      "candidateBytes": 16581,
+      "edits": [
+        {
+          "before": "import assert from 'node:assert/strict';",
+          "after": "import assert from 'node:assert/strict';\nimport { invokeCompilerValueEntry } from './sh1-function-entry.mjs';",
+          "purpose": "Import the narrow producer-ABI bridge"
+        },
+        {
+          "before": "runtime.psErasureEtaParameters(body(['literal']),\n    list(runtime, [natType(runtime), natType(runtime)]),\n    list(runtime, [parameter(runtime, '__ps_eta_0')]), 0n)",
+          "after": "invokeCompilerValueEntry(runtime, 'psErasureEtaParameters', [body(['literal']),\n    list(runtime, [natType(runtime), natType(runtime)]),\n    list(runtime, [parameter(runtime, '__ps_eta_0')]), 0n])",
+          "purpose": "Preserve eta-name parameter observation over flat historical/current grouped entry"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-capabilities.mjs",
+      "baseBlob": "8d87080352509dc936614d560aa68ded14fc36e8",
+      "baseSha256": "a0cadab3c5fa3c89153ce0339509b7aa7df0337b4671f5b2c454cbf47dd71fa8",
+      "candidateBlob": "14c581f57a28b5f9edcd372e10fea1a1e575c217",
+      "candidateSha256": "171316bbe186ff91ac055a1171e27e86f5e605d2082d5d7ffcf90de6a68749eb",
+      "candidateBytes": 25989,
+      "edits": [
+        {
+          "before": "function assertBehavior(runtime, label) {",
+          "after": "function assertBehavior(runtime, label) {\n  // These unchanged raw declarations return computed functions after the\n  // explicit source prefix; a result arrow is not an extra entry parameter.\n  assert.equal(runtime.sh1FunctionResult.length, 2, label + ': function-result entry');\n  assert.equal(runtime.sh1WorkerReference.length, 1, label + ': worker-reference entry');",
+          "purpose": "Assert the authored computed function-result entry boundary"
+        },
+        {
+          "before": "runtime.sh1WorkerReference(fuel, 11n, 23n)",
+          "after": "runtime.sh1WorkerReference(fuel)(11n)(23n)",
+          "purpose": "Invoke the two canonical returned values, preserving all expected swap values"
+        },
+        {
+          "before": "runtime.sh1FunctionResult(fuel, 7n, 13n)",
+          "after": "runtime.sh1FunctionResult(fuel, 7n)(13n)",
+          "purpose": "Invoke the canonical returned function, preserving all expected function-result values"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-runtime-conformance.mjs",
+      "baseBlob": "df55eb56e9ce5c7f26a134b48de5114feeaaaad6",
+      "baseSha256": "612068d19691c8ccca5d41461d8d1cb4184d515753a0b72a432b96d72850dddc",
+      "candidateBlob": "c38e6b50806481c270db9dfbd9d75e3a4a8f3b29",
+      "candidateSha256": "a6ff98ba27c458d26761b65dc2ea6ae9ea8042d390981a63a8ec22522ec4647c",
+      "candidateBytes": 81705,
+      "edits": [
+        {
+          "before": "return (a, b, c) => 100n * a + 10n * b + c;",
+          "after": "return (a) => (b) => (c) => 100n * a + 10n * b + c;",
+          "purpose": "Construct the diagnostic record's canonical ternary function value; getter/fault traces unchanged"
+        },
+        {
+          "before": "const holder = { apply: (a, b, c) => 100n * a + 10n * b + c };",
+          "after": "const holder = { apply: (a) => (b) => (c) => 100n * a + 10n * b + c };",
+          "purpose": "Construct the related pure canonical function field; raw source/native reference/all 24 values unchanged"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "baseBlob": "eedce11a6d99dee010c3de4352a716e5385eb156",
+      "baseSha256": "7228a5f99bc06f05282de4ef709f77210644bc4f0dd4a02553ea8b2d0d9518c8",
+      "candidateBlob": "e6fe221b92cc25c0473c140cfc469559fcf8c029",
+      "candidateSha256": "aab775f7cbe9c1fd0e2af3f783b213946e9ca4bfb18b8d974ccf8493ddf09685",
+      "candidateBytes": 73486,
+      "edits": [
+        {
+          "before": "    'scripts/sh1-fresh-name-conformance.mjs',",
+          "after": "    'scripts/sh1-function-entry.mjs',\n    'scripts/sh1-fresh-name-conformance.mjs',",
+          "purpose": "Bind the new host-only bridge in the exact full qualification recipe"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-function-entry.mjs",
+      "baseBlob": null,
+      "baseSha256": null,
+      "candidateBlob": "ceb4a39851e421e1d95f009cbf31d500e6ff1bb1",
+      "candidateSha256": "b38c4ef844068aae4cb0373785dc5401f72d59e0016dd3e0f3e343ac96348bc4",
+      "candidateBytes": 1701,
+      "edits": [],
+      "newFileContent": "import assert from 'node:assert/strict';\n\n// Bootstrap tooling only. R and the C1 compiler it produces retain R's flat\n// function-value convention. N1/C2/C3 use canonical unary returned values.\n// These three existing APIs have the exact source prefixes below. Source\n// parsing/emission has one current convention; this is not a language mode.\n// Each public declaration has fixed named JavaScript parameters; generated\n// returned closures use __ps$wrap and are invoked with the stated unary group.\nconst currentGroups = Object.freeze({\n  psNameEq: Object.freeze([1, 1]),\n  psExprAlphaEq: Object.freeze([1, 1]),\n  psErasureEtaParameters: Object.freeze([2, 1, 1]),\n});\n\nexport function invokeCompilerValueEntry(compiler, name, arguments_) {\n  assert(Object.hasOwn(currentGroups, name), 'PSC0_SH1_COMPILER_ENTRY_NAME: ' + name);\n  const groups = currentGroups[name];\n  const total = groups.reduce((sum, count) => sum + count, 0);\n  assert(Array.isArray(arguments_) && arguments_.length === total,\n    'PSC0_SH1_COMPILER_ENTRY_ARGUMENTS: ' + name);\n  const entry = compiler[name];\n  assert.equal(typeof entry, 'function', 'PSC0_SH1_COMPILER_ENTRY_MISSING: ' + name);\n  // Exactly the retained producer ABI; no catch/retry or result-based fallback.\n  if (entry.length === total) return Reflect.apply(entry, undefined, arguments_);\n  assert.equal(entry.length, groups[0], 'PSC0_SH1_COMPILER_ENTRY_ARITY: ' + name);\n  let value = entry;\n  let offset = 0;\n  for (const count of groups) {\n    assert.equal(typeof value, 'function', 'PSC0_SH1_COMPILER_ENTRY_RESULT: ' + name);\n    value = Reflect.apply(value, undefined, arguments_.slice(offset, offset + count));\n    offset += count;\n  }\n  return value;\n}\n"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
+      "baseBlob": "284d971fe1944bd1d63b3eb41f9ff0d9a049dd84",
+      "baseSha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de",
+      "candidateBlob": "e903fb4762f9638655a8be2d4b99421c5b5ebdd3",
+      "candidateSha256": "dbc006e4de8284e3d36f60b531166652114879daf4ca2e6042a6b593f8e83bd3",
+      "candidateBytes": 4667,
+      "edits": [
+        {
+          "purpose": "Preserve the original four recursive declarations exactly and append twenty-two source declarations",
+          "before": "-- The generated compiler consumes this source before inspecting its original IR.\n-- These cases distinguish declaration generic order from local-context order.\ndef sh1GenericCopy {alpha : Type} (values : List alpha) : List alpha :=\n  match values with\n  | List.nil => List.nil\n  | List.cons value rest => List.cons value (sh1GenericCopy rest)\n\ndef sh1GenericMap {alpha beta : Type}\n    (convert : alpha -> beta) (values : List alpha) : List beta :=\n  match values with\n  | List.nil => List.nil\n  | List.cons value rest => List.cons (convert value) (sh1GenericMap convert rest)\n\n-- Type binders are interleaved with an erased proposition, erased proof, and\n-- runtime values. Their call arguments must still be T0, T1, T2 in that order.\ndef sh1GenericTriple (alpha : Type) {p : Prop} (h : p)\n    (first : alpha) (beta : Type) (second : beta)\n    (gamma : Type) (third : gamma) (fuel : Nat) : Prod alpha (Prod beta gamma) :=\n  match fuel with\n  | Nat.zero => Prod.mk first (Prod.mk second third)\n  | Nat.succ remaining =>\n      sh1GenericTriple alpha h first beta second gamma third remaining\n\ndef sh1GenericMono (fuel : Nat) (value : Nat) : Nat :=\n  match fuel with\n  | Nat.zero => value\n  | Nat.succ remaining => sh1GenericMono remaining value\n",
+          "after": "-- The generated compiler consumes this source before inspecting its original IR.\n-- These cases distinguish declaration generic order from local-context order.\ndef sh1GenericCopy {alpha : Type} (values : List alpha) : List alpha :=\n  match values with\n  | List.nil => List.nil\n  | List.cons value rest => List.cons value (sh1GenericCopy rest)\n\ndef sh1GenericMap {alpha beta : Type}\n    (convert : alpha -> beta) (values : List alpha) : List beta :=\n  match values with\n  | List.nil => List.nil\n  | List.cons value rest => List.cons (convert value) (sh1GenericMap convert rest)\n\n-- Type binders are interleaved with an erased proposition, erased proof, and\n-- runtime values. Their call arguments must still be T0, T1, T2 in that order.\ndef sh1GenericTriple (alpha : Type) {p : Prop} (h : p)\n    (first : alpha) (beta : Type) (second : beta)\n    (gamma : Type) (third : gamma) (fuel : Nat) : Prod alpha (Prod beta gamma) :=\n  match fuel with\n  | Nat.zero => Prod.mk first (Prod.mk second third)\n  | Nat.succ remaining =>\n      sh1GenericTriple alpha h first beta second gamma third remaining\n\ndef sh1GenericMono (fuel : Nat) (value : Nat) : Nat :=\n  match fuel with\n  | Nat.zero => value\n  | Nat.succ remaining => sh1GenericMono remaining value\n\n-- Canonical function values must commute with rank-1 type substitution.\n-- These unchanged source-language forms previously lost the generic result\n-- saturation boundary or disagreed with function types inside regular data.\ndef sh1GroupIdentity {alpha : Type} (value : alpha) : alpha := value\n\ndef sh1GroupDirect (f : Nat -> Nat) : Nat :=\n  sh1GroupIdentity f 7\n\ndef sh1GroupLet (f : Nat -> Nat) : Nat :=\n  let next : Nat -> Nat := sh1GroupIdentity f;\n  next 7\n\ndef sh1GroupApply {alpha : Type} (f : Nat -> alpha) (value : Nat) : alpha :=\n  f value\n\ndef sh1GroupHigher (f : Nat -> Nat -> Nat) : Nat :=\n  sh1GroupApply f 3 7\n\ndef sh1GroupWeighted (first : Nat) (second : Nat) : Nat :=\n  Nat.add (Nat.mul first 10) second\n\ndef sh1GroupKnown : Nat :=\n  sh1GroupIdentity sh1GroupWeighted 3 7\n\nstructure Sh1GroupRecord (alpha : Type) where\n  run : Nat -> alpha\n\ndef sh1GroupRecordUse (f : Nat -> Nat -> Nat) : Nat :=\n  let holder := Sh1GroupRecord.mk f;\n  let next : Nat -> Nat -> Nat := holder.run;\n  next 3 7\n\ninductive Sh1GroupBox (alpha : Type) where\n  | hold (run : Nat -> alpha)\n\ndef sh1GroupBoxUse (f : Nat -> Nat -> Nat) : Nat :=\n  let holder := Sh1GroupBox.hold f;\n  match holder with\n  | Sh1GroupBox.hold run => run 3 7\n\ndef sh1GroupArrayUse (f : Nat -> Nat -> Nat) : Nat :=\n  let values := Array.push (Array.emptyWithCapacity 0) f;\n  let passed := sh1GroupIdentity values;\n  let next : Nat -> Nat -> Nat := Array.getD passed 0 f;\n  next 3 7\n\ndef sh1GroupArrayMap (fallback : Nat -> Nat) : Nat :=\n  let values := Array.push (Array.emptyWithCapacity 0) 3;\n  let functions := Array.map sh1GroupWeighted values;\n  let next : Nat -> Nat := Array.getD functions 0 fallback;\n  next 7\n\ndef sh1GroupArrayFold : Nat :=\n  let values := Array.push (Array.push (Array.emptyWithCapacity 0) 3) 5;\n  let combine : Nat -> Nat -> Nat :=\n    fun (acc : Nat) (value : Nat) => Nat.add acc value;\n  Array.foldl combine 7 values 0 (Array.size values)\n\n-- The entry ends before this computed returned closure. Demanding make belongs\n-- to this call, even when the returned function is saved, reused or discarded.\ndef sh1GroupComputed (make : Unit -> Nat) (offset : Nat) : Nat -> Nat :=\n  let captured : Nat := make Unit.unit;\n  fun (value : Nat) => Nat.add captured (Nat.add offset value)\n\n// Type-only generic prefixes activate their computed body at instantiation.\n// Their internal Unit entry adapter is absent from the source telescope.\ndef sh1GroupTypeOnly {alpha : Type} : alpha -> alpha :=\n  let identity : alpha -> alpha := fun (value : alpha) => value;\n  identity\n\ndef sh1GroupTypeOnlyUse (value : Nat) : Nat :=\n  sh1GroupTypeOnly value\n\ndef sh1GroupTypeOnlyHigher (f : Nat -> Nat) : Nat :=\n  sh1GroupTypeOnly f 7\n\ndef sh1GroupTypeProofOnly {alpha : Type} {premise : Prop} (proof : premise) : alpha -> alpha :=\n  let identity : alpha -> alpha := fun (value : alpha) => value;\n  identity\n\ndef sh1GroupTypeProofOnlyUse {premise : Prop} (proof : premise) (value : Nat) : Nat :=\n  sh1GroupTypeProofOnly proof value\n\n-- Result annotations follow the checked Core spine, including function-valued\n-- type arguments inside a lambda body and through an ordinary local projection.\ndef sh1GroupLambda (f : Nat -> Nat) : Nat :=\n  let run : Nat -> Nat := fun (value : Nat) => sh1GroupIdentity f value;\n  run 7\n\ndef sh1GroupProjection (f : Nat -> Nat -> Nat) : Nat :=\n  let holder := sh1GroupIdentity (Sh1GroupRecord.mk f);\n  holder.run 3 7\n"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+      "baseBlob": "91a18f1cd26eeec36d720a8acbca6a79a3a9b1ab",
+      "baseSha256": "7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca",
+      "candidateBlob": "0a9775e708b70980bdb887cd240f7fbc04d082c9",
+      "candidateSha256": "5472ac55fbf3741902bed9ef5495b36ff7755b0b002d4da1d12301ea1433e619",
+      "candidateBytes": 16977,
+      "edits": [
+        {
+          "before": "export async function runGenericErasureConformance({",
+          "after": "\n// Assertions come from the unchanged source types and the new fixture's raw\n// declaration prefixes, not from erasure's entry cache or its inferred names.\nfunction checkFunctionValueIr(compiler, ir) {\n  const report = compiler.psCheckVerifiedIrModule(compiler.psIrCheckDefaultOptions, ir);\n  assert.equal(report.accepted, true, 'PSC0_SH1_GROUP_ORIGINAL_IR_ACCEPTED');\n  assert.equal(report.traversalComplete, true, 'PSC0_SH1_GROUP_ORIGINAL_IR_COMPLETE');\n  assert.equal(report.findingCount, 0n, 'PSC0_SH1_GROUP_ORIGINAL_IR_FINDINGS');\n  const declarations = new Map(list(ir.declarations, 'group declarations').map((item) => [item.name, item]));\n  const sourceEntries = [\n    ['sh1GroupIdentity', 1], ['sh1GroupDirect', 1], ['sh1GroupLet', 1],\n    ['sh1GroupApply', 2], ['sh1GroupHigher', 1], ['sh1GroupWeighted', 2],\n    ['sh1GroupKnown', 0], ['sh1GroupRecordUse', 1], ['sh1GroupBoxUse', 1],\n    ['sh1GroupArrayUse', 1], ['sh1GroupArrayMap', 1], ['sh1GroupArrayFold', 0],\n    ['sh1GroupComputed', 2],\n  ];\n  const entries = sourceEntries.map(([name, arity]) => {\n    const declaration = declarations.get(name);\n    assert(declaration, 'PSC0_SH1_GROUP_DECLARATION: ' + name);\n    assert.equal(list(declaration.parameters, name).length, arity,\n      'PSC0_SH1_GROUP_ENTRY_ARITY: ' + name);\n    return { name, runtimeArity: arity };\n  });\n  const pending = [];\n  for (const declaration of declarations.values()) {\n    pending.push(declaration.resultType);\n    for (const parameter of list(declaration.parameters, declaration.name)) pending.push(parameter.type);\n  }\n  for (const layout of list(ir.structures, 'structures'))\n    for (const field of list(layout.fields, layout.name)) pending.push(field.type);\n  for (const layout of list(ir.inductives, 'inductives'))\n    for (const constructor of list(layout.constructors, layout.name))\n      for (const field of list(constructor.fields, constructor.name)) pending.push(field.type);\n  let typeNodes = 0, unaryFunctionNodes = 0;\n  const seen = new Set();\n  while (pending.length) {\n    const type = pending.pop();\n    if (seen.has(type)) continue;\n    seen.add(type);\n    assert(++typeNodes <= 10000, 'PSC0_SH1_GROUP_TYPE_BOUND');\n    const tag = valueTag(type);\n    if (tag === 'function') {\n      const parameters = list(type.parameters, 'canonical function');\n      assert.equal(parameters.length, 1, 'PSC0_SH1_GROUP_CANONICAL_UNARY_VALUE_TYPE');\n      pending.push(parameters[0], type.result);\n      unaryFunctionNodes++;\n    } else if (tag === 'named') pending.push(...list(type.arguments, type.name));\n    else assert(tag === 'primitive' || tag === 'typeParameter',\n      'PSC0_SH1_GROUP_VALUE_TYPE_FORM: ' + String(tag));\n  }\n  assert(unaryFunctionNodes > 0, 'PSC0_SH1_GROUP_FUNCTION_TYPES_PRESENT');\n  for (const owner of ['sh1GroupDirect', 'sh1GroupLet', 'sh1GroupKnown']) {\n    const calls = recursiveCalls(declarations.get(owner).body, 'sh1GroupIdentity');\n    assert.equal(calls.length, 1, 'PSC0_SH1_GROUP_IDENTITY_CALL: ' + owner);\n    assert.equal(list(calls[0].expression.arguments, owner).length, 1,\n      'PSC0_SH1_GROUP_IDENTITY_SATURATION: ' + owner);\n    assert.equal(list(calls[0].expression.typeArguments, owner).length, 1,\n      'PSC0_SH1_GROUP_IDENTITY_TYPE_ARGUMENT: ' + owner);\n  }\n  return {\n    policy: 'canonical-unary-values-flat-aligned-entries/1',\n    sourceEntries: entries, typeNodes, unaryFunctionNodes,\n    originalIr: {\n      accepted: report.accepted, traversalComplete: report.traversalComplete,\n      findingCount: report.findingCount.toString(),\n      expressionCount: report.expressionCount.toString(),\n      visitedSteps: report.visitedSteps.toString(),\n      checkedObjectIsEmittedObject: true,\n    },\n    additionalPreparations: 0, additionalTypeScriptCompilations: 0,\n    additionalNativeExecutions: 0,\n  };\n}\n\nfunction checkFunctionValueBehavior(runtime, label) {\n  const observations = [];\n  const unary = (value) => value + 100n;\n  const binary = (first) => (second) => 10n * first + second;\n  const values = [\n    ['generic-return-direct', () => runtime.sh1GroupDirect(unary), 107n],\n    ['generic-return-let', () => runtime.sh1GroupLet(unary), 107n],\n    ['generic-higher-order-parameter', () => runtime.sh1GroupHigher(binary), 37n],\n    ['known-flat-entry-as-value', () => runtime.sh1GroupKnown, 37n],\n    ['generic-record-field', () => runtime.sh1GroupRecordUse(binary), 37n],\n    ['generic-inductive-field', () => runtime.sh1GroupBoxUse(binary), 37n],\n    ['array-of-function-values', () => runtime.sh1GroupArrayUse(binary), 37n],\n    ['array-map-function-result', () => runtime.sh1GroupArrayMap(unary), 37n],\n    ['array-fold-binary-bridge', () => runtime.sh1GroupArrayFold, 15n],\n  ];\n  for (const [id, invoke, expected] of values) {\n    const actual = invoke();\n    assert.equal(actual, expected, label + ': ' + id);\n    observations.push({ id, value: actual.toString(), status: 'pass' });\n  }\n\n  // Host traces/faults diagnose the mechanism; they do not add effects or FFI\n  // to the source language. The original source callback type remains Unit->Nat.\n  assert.equal(runtime.sh1GroupComputed.length, 2, label + ': computed closure entry');\n  const trace = [];\n  const make = (unit) => {\n    assert.equal(unit, undefined);\n    trace.push('make');\n    return 23n;\n  };\n  const saved = runtime.sh1GroupComputed(make, 5n);\n  assert.equal(typeof saved, 'function');\n  assert.deepEqual(trace, ['make'], label + ': body demanded before closure return');\n  for (const [id, input, expected] of [\n    ['computed-closure-first', 7n, 35n],\n    ['computed-closure-second', 15n, 43n],\n    ['computed-closure-reuse', 7n, 35n],\n  ]) {\n    const actual = saved(input);\n    assert.equal(actual, expected, label + ': ' + id);\n    assert.deepEqual(trace, ['make'], label + ': captured value not recomputed');\n    observations.push({ id, value: actual.toString(), status: 'pass',\n      diagnosticDomain: 'host-callback-demand' });\n  }\n  const discarded = runtime.sh1GroupComputed(make, 11n);\n  assert.equal(typeof discarded, 'function');\n  assert.deepEqual(trace, ['make', 'make'], label + ': discarded closure body demanded');\n  observations.push({ id: 'computed-closure-discarded', trace: [...trace], status: 'pass',\n    diagnosticDomain: 'host-callback-demand' });\n  const fault = { code: 'PSC0_SH1_GROUP_COMPUTED_FAULT' };\n  assert.throws(() => runtime.sh1GroupComputed((unit) => {\n    assert.equal(unit, undefined);\n    trace.push('make-failure');\n    throw fault;\n  }, 5n), (error) => error === fault, label + ': original body fault before closure');\n  assert.deepEqual(trace, ['make', 'make', 'make-failure']);\n  observations.push({ id: 'computed-closure-original-fault', trace: [...trace], status: 'pass',\n    diagnosticDomain: 'host-callback-demand' });\n  assert.equal(observations.length, 14, 'PSC0_SH1_GROUP_BEHAVIOR_COUNT');\n  return {\n    observations, observationCount: observations.length, status: 'pass',\n    pureValueCases: 9, callbackDemandDiagnostics: 5,\n    exhaustiveForAllInputs: false, sourceEffectCapabilityAdded: false,\n  };\n}\n\nexport async function runGenericErasureConformance({",
+          "purpose": "Add precise source-group, canonical-type, original-IR and finite behavioral coverage"
+        },
+        {
+          "before": "  const observations = checkOriginalIr(ir);",
+          "after": "  const observations = checkOriginalIr(ir);\n  const functionValueIr = checkFunctionValueIr(compiler, ir);",
+          "purpose": "Check same original fixture IR exactly once before emission"
+        },
+        {
+          "before": "  const behavior = checkBehavior(await import(pathToFileURL(outputJs).href), 'generated PSC');",
+          "after": "  const runtime = await import(pathToFileURL(outputJs).href);\n  const behavior = checkBehavior(runtime, 'generated PSC');\n  const functionValueBehavior = checkFunctionValueBehavior(runtime, 'generated PSC');",
+          "purpose": "Reuse same generated module and TS invocation for new coverage"
+        },
+        {
+          "before": "    behavior,\n    provider:",
+          "after": "    behavior,\n    functionValues: { ir: functionValueIr, behavior: functionValueBehavior },\n    provider:",
+          "purpose": "Keep original 19 observations intact and record separate 14-case class coverage"
+        },
+        {
+          "before": "    receipt.native = {\n      typescriptSha256: sha256(native.stdout),\n      behavior: checkBehavior(await import(pathToFileURL(nativeJs).href), 'native PSC'),\n    };",
+          "after": "    const nativeRuntime = await import(pathToFileURL(nativeJs).href);\n    receipt.native = {\n      typescriptSha256: sha256(native.stdout),\n      behavior: checkBehavior(nativeRuntime, 'native PSC'),\n      functionValueBehavior: checkFunctionValueBehavior(nativeRuntime, 'native PSC'),\n    };",
+          "purpose": "Reuse existing native PSC/TS invocations and preserve byte parity and old behavior"
+        },
+        {
+          "before": "    ['sh1GroupComputed', 2],\n",
+          "after": "    ['sh1GroupComputed', 2],\n    ['sh1GroupTypeOnlyUse', 1], ['sh1GroupTypeOnlyHigher', 1],\n    ['sh1GroupTypeProofOnlyUse', 1],\n",
+          "purpose": "Retain all13 prior entry expectations and add3ordinary source entries"
+        },
+        {
+          "before": "  const pending = [];\n  for (const declaration of declarations.values()) {",
+          "after": "  const typeActivationEntries = ['sh1GroupTypeOnly', 'sh1GroupTypeProofOnly'].map((name) => {\n    const declaration = declarations.get(name);\n    assert(declaration, 'PSC0_SH1_GROUP_TYPE_ACTIVATION_DECLARATION: ' + name);\n    const parameters = list(declaration.parameters, name);\n    assert.equal(parameters.length, 1, 'PSC0_SH1_GROUP_TYPE_ACTIVATION_PHYSICAL_ARITY: ' + name);\n    assert.equal(valueTag(parameters[0].type), 'primitive');\n    assert.equal(valueTag(parameters[0].type.name), 'unit');\n    assert.equal(list(declaration.typeParameters, name).length, 1,\n      'PSC0_SH1_GROUP_TYPE_ACTIVATION_GENERIC_ARITY: ' + name);\n    return { name, sourceRuntimeArity: 0, physicalRuntimeArity: 1,\n      internalActivation: 'fresh-ignored-unit', typeArity: 1 };\n  });\n  for (const [owner, target] of [\n    ['sh1GroupTypeOnlyUse', 'sh1GroupTypeOnly'],\n    ['sh1GroupTypeOnlyHigher', 'sh1GroupTypeOnly'],\n    ['sh1GroupTypeProofOnlyUse', 'sh1GroupTypeProofOnly'],\n  ]) {\n    const calls = recursiveCalls(declarations.get(owner).body, target);\n    assert.equal(calls.length, 1, 'PSC0_SH1_GROUP_TYPE_ACTIVATION_CALL: ' + owner);\n    const arguments_ = list(calls[0].expression.arguments, owner);\n    assert.equal(arguments_.length, 1, 'PSC0_SH1_GROUP_TYPE_ACTIVATION_ARGUMENTS: ' + owner);\n    assert.equal(valueTag(arguments_[0]), 'literal');\n    assert.equal(valueTag(arguments_[0].value), 'unit');\n    assert.equal(list(calls[0].expression.typeArguments, owner).length, 1,\n      'PSC0_SH1_GROUP_TYPE_ACTIVATION_TYPE_ARGUMENT: ' + owner);\n  }\n  const pending = [];\n  for (const declaration of declarations.values()) {",
+          "purpose": "Distinguish zero source runtime binders from typed Unit physical activation without changing checker"
+        },
+        {
+          "before": "    sourceEntries: entries, typeNodes, unaryFunctionNodes,\n",
+          "after": "    sourceEntries: entries, typeActivationEntries, typeNodes, unaryFunctionNodes,\n",
+          "purpose": "Record exact synthetic activation mapping"
+        },
+        {
+          "before": "    ['array-fold-binary-bridge', () => runtime.sh1GroupArrayFold, 15n],\n",
+          "after": "    ['array-fold-binary-bridge', () => runtime.sh1GroupArrayFold, 15n],\n    ['type-only-computed-value', () => runtime.sh1GroupTypeOnlyUse(29n), 29n],\n    ['type-only-function-instantiation', () => runtime.sh1GroupTypeOnlyHigher(unary), 107n],\n    ['type-and-proof-only-activation', () => runtime.sh1GroupTypeProofOnlyUse(53n), 53n],\n",
+          "purpose": "Cover concrete/function-valued generic activation and erased proof slot"
+        },
+        {
+          "before": "  assert.equal(observations.length, 14, 'PSC0_SH1_GROUP_BEHAVIOR_COUNT');\n",
+          "after": "  assert.equal(observations.length, 17, 'PSC0_SH1_GROUP_BEHAVIOR_COUNT');\n",
+          "purpose": "Add3cases, preserving all14previous observations"
+        },
+        {
+          "before": "    pureValueCases: 9, callbackDemandDiagnostics: 5,\n",
+          "after": "    pureValueCases: 12, callbackDemandDiagnostics: 5,\n",
+          "purpose": "Maintain pure/host-diagnostic scope distinction"
+        },
+        {
+          "before": "      typescriptSha256: sha256(native.stdout),\n      behavior: checkBehavior(nativeRuntime, 'native PSC'),",
+          "after": "      typescriptSha256: sha256(native.stdout),\n      javascriptSha256: sha256(await readFile(nativeJs)),\n      behavior: checkBehavior(nativeRuntime, 'native PSC'),",
+          "purpose": "Record the already compiled native JavaScript bytes for exact finite-evidence binding"
+        },
+        {
+          "before": "    ['sh1GroupTypeProofOnlyUse', 1],\n",
+          "after": "    ['sh1GroupTypeProofOnlyUse', 1],\n    ['sh1GroupLambda', 1], ['sh1GroupProjection', 1],\n",
+          "purpose": "Cover the two checked-Core result-view source entries"
+        },
+        {
+          "before": "    ['type-and-proof-only-activation', () => runtime.sh1GroupTypeProofOnlyUse(53n), 53n],\n",
+          "after": "    ['type-and-proof-only-activation', () => runtime.sh1GroupTypeProofOnlyUse(53n), 53n],\n    ['generic-lambda-body-result', () => runtime.sh1GroupLambda(unary), 107n],\n    ['generic-projection-computed-head', () => runtime.sh1GroupProjection(binary), 37n],\n",
+          "purpose": "Exercise generic application result recovery through typed lambda and local projection"
+        },
+        {
+          "before": "  assert.equal(observations.length, 17, 'PSC0_SH1_GROUP_BEHAVIOR_COUNT');",
+          "after": "  assert.equal(observations.length, 19, 'PSC0_SH1_GROUP_BEHAVIOR_COUNT');",
+          "purpose": "Add2purecases without removing previous17"
+        },
+        {
+          "before": "    pureValueCases: 12, callbackDemandDiagnostics: 5,",
+          "after": "    pureValueCases: 14, callbackDemandDiagnostics: 5,",
+          "purpose": "Preserve explicit diagnostic scope"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "baseBlob": "bb02be336824c078f118be130128aa38c15615bf",
+      "baseSha256": "24b1f1786a2b8c5b782c0d2553d026bb350981d411fa7fec316b2ef8736f019c",
+      "candidateBlob": "b816395c6727b2319040523548ef0b3a43056d66",
+      "candidateSha256": "79845667be575aee634a6ad7f452b34031ed50b1cc4f6e120669c98a5359e450",
+      "candidateBytes": 73039,
+      "edits": [
+        {
+          "before": "// Authenticate the actual existing receipt bytes. This never prepares source,\n",
+          "after": "\nfunction genericFunctionObservations() {\n  const pure = [\n    ['generic-return-direct', '107'], ['generic-return-let', '107'],\n    ['generic-higher-order-parameter', '37'], ['known-flat-entry-as-value', '37'],\n    ['generic-record-field', '37'], ['generic-inductive-field', '37'],\n    ['array-of-function-values', '37'], ['array-map-function-result', '37'],\n    ['array-fold-binary-bridge', '15'], ['type-only-computed-value', '29'],\n    ['type-only-function-instantiation', '107'], ['type-and-proof-only-activation', '53'],\n  ].map(([id, value]) => ({ id, value, status: 'pass' }));\n  const demand = [\n    ...[['computed-closure-first', '35'], ['computed-closure-second', '43'],\n      ['computed-closure-reuse', '35']].map(([id, value]) => ({ id, value, status: 'pass',\n        diagnosticDomain: 'host-callback-demand' })),\n    { id: 'computed-closure-discarded', trace: ['make', 'make'], status: 'pass',\n      diagnosticDomain: 'host-callback-demand' },\n    { id: 'computed-closure-original-fault', trace: ['make', 'make', 'make-failure'],\n      status: 'pass', diagnosticDomain: 'host-callback-demand' },\n  ];\n  return { observations: [...pure, ...demand], observationCount: 17, status: 'pass',\n    pureValueCases: 12, callbackDemandDiagnostics: 5,\n    exhaustiveForAllInputs: false, sourceEffectCapabilityAdded: false };\n}\n\nasync function bindGenericFunctionValues(outDir, directory, compilerSha256, source, requireNative) {\n  const folder = directory + '/generic-erasure';\n  const receipt = await jsonFile(outDir, folder + '/receipt.json');\n  const value = receipt.value;\n  assert.equal(value.schemaVersion, 1);\n  assert.equal(value.evidence, 'scoped-recursive-generic-erasure');\n  assert.equal(value.compilerSha256, compilerSha256);\n  assert.equal(value.sourceKind, 'raw-authoritative-lean');\n  assert.equal(value.sourceSha256, source.sha256);\n  noStrictClaim(value.originalIr, 'generic original IR');\n  assert.deepEqual(value.behavior,\n    { observations: 19, status: 'pass', exhaustiveForAllInputs: false });\n  const group = value.functionValues;\n  assert.equal(group.ir.policy, 'canonical-unary-values-flat-aligned-entries/1');\n  assert.deepEqual(group.ir.sourceEntries, [\n    ['sh1GroupIdentity', 1], ['sh1GroupDirect', 1], ['sh1GroupLet', 1],\n    ['sh1GroupApply', 2], ['sh1GroupHigher', 1], ['sh1GroupWeighted', 2],\n    ['sh1GroupKnown', 0], ['sh1GroupRecordUse', 1], ['sh1GroupBoxUse', 1],\n    ['sh1GroupArrayUse', 1], ['sh1GroupArrayMap', 1], ['sh1GroupArrayFold', 0],\n    ['sh1GroupComputed', 2], ['sh1GroupTypeOnlyUse', 1],\n    ['sh1GroupTypeOnlyHigher', 1], ['sh1GroupTypeProofOnlyUse', 1],\n  ].map(([name, runtimeArity]) => ({ name, runtimeArity })));\n  assert.deepEqual(group.ir.typeActivationEntries,\n    ['sh1GroupTypeOnly', 'sh1GroupTypeProofOnly'].map((name) => ({\n      name, sourceRuntimeArity: 0, physicalRuntimeArity: 1,\n      internalActivation: 'fresh-ignored-unit', typeArity: 1,\n    })));\n  assert(Number.isSafeInteger(group.ir.typeNodes) && group.ir.typeNodes > 0 &&\n    group.ir.typeNodes <= 10000);\n  assert(Number.isSafeInteger(group.ir.unaryFunctionNodes) && group.ir.unaryFunctionNodes > 0 &&\n    group.ir.unaryFunctionNodes <= group.ir.typeNodes);\n  const original = group.ir.originalIr;\n  assert.equal(original.accepted, true);\n  assert.equal(original.traversalComplete, true);\n  assert.equal(original.findingCount, '0');\n  assert.equal(original.checkedObjectIsEmittedObject, true);\n  for (const key of ['expressionCount', 'visitedSteps']) {\n    assert.equal(typeof original[key], 'string');\n    assert(/^[1-9][0-9]*$/.test(original[key]));\n  }\n  for (const key of ['additionalPreparations', 'additionalTypeScriptCompilations',\n    'additionalNativeExecutions']) assert.equal(group.ir[key], 0);\n  assert.deepEqual(group.behavior, genericFunctionObservations());\n  assert.deepEqual(value.provider, { status: 'not-attempted', kernelChecked: false });\n  const products = {\n    admissions: await artifact(outDir, folder + '/admissions.json', value.artifacts.admissionsSha256),\n    typescript: await artifact(outDir, folder + '/generated/index.ts', value.artifacts.typescriptSha256),\n    javascript: await artifact(outDir, folder + '/generated/index.js', value.artifacts.javascriptSha256),\n  };\n  let native = null;\n  if (requireNative) assert(value.native, 'PSC0_SH1_GENERIC_NATIVE_REFERENCE_REQUIRED');\n  if (value.native) {\n    assert.equal(value.native.typescriptSha256, value.artifacts.typescriptSha256);\n    assert.deepEqual(value.native.behavior, value.behavior);\n    assert.deepEqual(value.native.functionValueBehavior, group.behavior);\n    native = {\n      typescript: await artifact(outDir, folder + '/native/index.ts', value.native.typescriptSha256),\n      javascript: await artifact(outDir, folder + '/native/index.js', value.native.javascriptSha256),\n      oldRecursiveObservationCount: 19, pureValueCount: 12, hostDemandDiagnosticCount: 5,\n    };\n  }\n  return { receipt: receipt.file, source, artifacts: products, native,\n    originalIr: original, policy: group.ir.policy,\n    sourceEntries: group.ir.sourceEntries, typeActivationEntries: group.ir.typeActivationEntries,\n    oldRecursiveObservationCount: 19, pureValueCount: 12, hostDemandDiagnosticCount: 5,\n    observationsSha256: hash(JSON.stringify(group.behavior.observations)),\n    finiteEvidenceOnly: true, sourceEffectCapabilityAdded: false };\n}\n\n// Authenticate the actual existing receipt bytes. This never prepares source,\n",
+          "purpose": "Bind actual generic fixture receipts, existing products and exact finite expectations"
+        },
+        {
+          "before": "  const generationEvidence = [];\n",
+          "after": "  const genericBytes = await readFile(new URL('../test/fixtures/selfhost-sh1-generic-erasure.lean', import.meta.url));\n  const genericSource = { path: 'test/fixtures/selfhost-sh1-generic-erasure.lean',\n    sha256: hash(genericBytes), bytes: genericBytes.length };\n  const generationEvidence = [];\n",
+          "purpose": "Pin the actual checkout fixture already bound by the full qualification recipe"
+        },
+        {
+          "before": "    const capabilityOrigins = await bindCapabilityOrigins(outDir, directory, compilerSha256);\n",
+          "after": "    const capabilityOrigins = await bindCapabilityOrigins(outDir, directory, compilerSha256);\n    const genericFunctionValues = await bindGenericFunctionValues(outDir, directory,\n      compilerSha256, genericSource, name === 'N1');\n",
+          "purpose": "Require the finite generic evidence for all4generation compilers and native reference atN1"
+        },
+        {
+          "before": "      sourceEquality, sourceEvaluation, capabilityOrigins, ingressSnapshots, emptySource, zeroFieldSource, emptyIr,\n",
+          "after": "      sourceEquality, sourceEvaluation, capabilityOrigins, ingressSnapshots, emptySource, zeroFieldSource, emptyIr,\n      genericFunctionValues,\n",
+          "purpose": "Retain exact generic source/product/receipt provenance in final evidence"
+        },
+        {
+          "before": "    enabledRuntimeFiniteConformanceQualified: true,\n",
+          "after": "    enabledRuntimeFiniteConformanceQualified: true,\n    genericFunctionValueFiniteConformanceQualified: true,\n",
+          "purpose": "Label only the new finite coverage; all global strict/semantic/provider flags stayfalse"
+        },
+        {
+          "before": "    ['type-only-function-instantiation', '107'], ['type-and-proof-only-activation', '53'],\n",
+          "after": "    ['type-only-function-instantiation', '107'], ['type-and-proof-only-activation', '53'],\n    ['generic-lambda-body-result', '107'], ['generic-projection-computed-head', '37'],\n",
+          "purpose": "Authenticate exact two new pure observations"
+        },
+        {
+          "before": "  return { observations: [...pure, ...demand], observationCount: 17, status: 'pass',\n    pureValueCases: 12, callbackDemandDiagnostics: 5,",
+          "after": "  return { observations: [...pure, ...demand], observationCount: 19, status: 'pass',\n    pureValueCases: 14, callbackDemandDiagnostics: 5,",
+          "purpose": "Bind new14pure+5diagnostic count"
+        },
+        {
+          "before": "    ['sh1GroupTypeOnlyHigher', 1], ['sh1GroupTypeProofOnlyUse', 1],\n",
+          "after": "    ['sh1GroupTypeOnlyHigher', 1], ['sh1GroupTypeProofOnlyUse', 1],\n    ['sh1GroupLambda', 1], ['sh1GroupProjection', 1],\n",
+          "purpose": "Bind unchanged actual prefix of the two source witnesses"
+        },
+        {
+          "before": "oldRecursiveObservationCount: 19, pureValueCount: 12, hostDemandDiagnosticCount: 5",
+          "after": "oldRecursiveObservationCount: 19, pureValueCount: 14, hostDemandDiagnosticCount: 5",
+          "purpose": "Record the additive pure coverage in both existing native/generated product summaries",
+          "count": 2
+        }
+      ]
+    }
+  ],
+  "review": {
+    "root": "All 12 exact candidate blobs read back; eight existing host files, fixture append, cumulative gate and binder edits reconstruct and reverse exactly; new helper path absent at base.",
+    "independent": "artifact_inspection_review: eight host edits and final fixture/gate/binder CLEAR. runtime_comparison_finish: new host helper and exact three source entry groups CLEAR.",
+    "noLocalExecution": true
+  },
+  "boundary": {
+    "oldRecursiveValues": 19,
+    "addedSourceDeclarations": 22,
+    "addedDefinitions": 20,
+    "totalSourceDeclarations": 26,
+    "totalDefinitions": 24,
+    "ordinarySourceEntryChecks": 18,
+    "unitActivationEntryChecks": 2,
+    "newFunctionValueObservations": 19,
+    "pureValueObservations": 14,
+    "hostDemandDiagnostics": 5,
+    "additionalPreparations": 0,
+    "additionalNativeCompilations": 0,
+    "additionalTypeScriptCompilations": 0,
+    "originalFixtureIrChecks": 1,
+    "oldAssertionsPreserved": true,
+    "sourceCompatibilityModeAdded": false
+  },
+  "qualification": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "generalCorrespondenceRowsClosed": 0,
+    "newColdRecoveryRequired": false
+  }
+}

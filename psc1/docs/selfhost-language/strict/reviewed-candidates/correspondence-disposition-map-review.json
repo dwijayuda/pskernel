@@ -1,0 +1,1462 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-correspondence-disposition-map-review",
+  "repository": "dwijayuda/pskernel",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-disposition-map-review.json",
+  "reviewedAtUtc": "2026-10-09 23:54:43 UTC",
+  "reviewer": "correspondence_disposition_review",
+  "verdict": "CLEAR for the proposed final mapping after the explicit metadata and source-transport maintenance below; actual full qualification, provider acceptance and root disposition remain prerequisites.",
+  "scope": {
+    "correspondenceRows": 33,
+    "stageObligationsIndependentlyReviewed": 0,
+    "purpose": "Check every correspondence mapping against current ledger identities, domains, required relations, proposed actual-source argument, current/proposed source pins and final evidence groups. Already completed paper proofs are accepted as reviewed inputs, not reproved or promoted to mechanized proofs here.",
+    "executions": 0,
+    "sourceEdits": 0,
+    "ledgerEdits": 0,
+    "refsChanged": 0,
+    "rowsClosed": 0
+  },
+  "inputs": {
+    "mapping": {
+      "blob": "697c94b2722a6191537b714f71f629713637b30a",
+      "sha256": "474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07",
+      "utf8Bytes": 191711
+    },
+    "manifest": {
+      "blob": "419564764abc492816833a643af40b027b0fd897",
+      "sha256": "b2e001be62f5e0ef38ff006c0040b1257b003e54cbb5cfcb483305d8e88dcc5f"
+    },
+    "currentCorrespondence": {
+      "blob": "8a33f7d27760aea546041cf8df3907532b458696",
+      "sha256": "babb23499e668fa572f327b0d47e125be09d3afb7543be46ed701ed7cee7e7e7",
+      "rowsJsonSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
+    },
+    "currentSourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "currentPsc0Tree": "cde2d33e3cc0d8d4d985d2e68a27e7eb3c796bb0",
+    "currentTreeBlobs": 1382,
+    "currentTreeTruncated": false,
+    "proposedExpr": {
+      "blob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+      "sha256": "e2d86d14b112a16f6fc5ff77fc60968e8dac2adbf466c1f761b2087e7f3a1662",
+      "bytes": 138060
+    },
+    "patternManifest": {
+      "blob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "sha256": "a133929cb5d6de03dfb17a9750edeb12180113b0c91da279f22b2c71ff289d88"
+    },
+    "currentBinder": {
+      "blob": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+      "sha256": "c522c41263e7931b83777242d77c2e7f355ce82832e72f152879645f96f31326"
+    },
+    "currentQualifier": {
+      "blob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+      "sha256": "fc7eb46a8f0d1b8fa4db6ef39a09d14cd3d771b9741fae74cd44b197fd1cf193"
+    }
+  },
+  "guardVerification": {
+    "errors": [],
+    "rowCount": 33,
+    "sourceGuardCount": 49,
+    "definitionGuards": 3,
+    "additions": 6,
+    "rowHash": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55",
+    "sourceAdditionSlotsAllAbsent": true,
+    "sourcePathsAtGuardPointersMatch": true,
+    "uniqueProposedSourceFiles": 19,
+    "referencedDefinitionsPresent": 107,
+    "allProposedSourceFilesEqualCurrentTreeExceptExplicitExprCandidate": true,
+    "retiredFinishApplicationDefinitionAbsent": true,
+    "arbitraryEtaStillDefined": true,
+    "arbitraryEtaCallsites": 0
+  },
+  "sourceReadbacks": [
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "blob": "f31d88f0172122d4cf62d62f35f372fe89581c18",
+      "sha256": "5d28f057f52ea735f48d3dd6067c582dcb7fe112d4b7fb50ca1c19b204c6e53f",
+      "bytes": 12189,
+      "definitionsChecked": 3,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "blob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "sha256": "a55cb381a686ab9081587380793b1b3d8fe485c86b88770fbce4a3e2250516a7",
+      "bytes": 22534,
+      "definitionsChecked": 6,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "blob": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+      "sha256": "3cfcea753582afd703f7f48c6c247f708fe2d197dedffcd708eb128d7f177c5d",
+      "bytes": 29672,
+      "definitionsChecked": 9,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "blob": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+      "sha256": "01927c6c6bb88c4a77bd5fb623e9426eb3edb4ea1b0e62447915afe27da5b70a",
+      "bytes": 5378,
+      "definitionsChecked": 0,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "blob": "178ecf89498be6502be5f747f0c0d62eb1133420",
+      "sha256": "22eac288f3c48d57a5856e35ec9bcd072cde5fc1fabd674703f5a20bd02e5bef",
+      "bytes": 46479,
+      "definitionsChecked": 0,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+      "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+      "sha256": "1180f6d8392837fbcc2694478e2747026dfbd56cca5a3d765aeecb086c0ed9df",
+      "bytes": 19480,
+      "definitionsChecked": 2,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "blob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+      "sha256": "e2d86d14b112a16f6fc5ff77fc60968e8dac2adbf466c1f761b2087e7f3a1662",
+      "bytes": 138060,
+      "definitionsChecked": 28,
+      "missing": [],
+      "retiredFinishCount": 0,
+      "etaDefinitionMentions": 1,
+      "etaDefined": true
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "blob": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75",
+      "sha256": "6de88d9b5e41e6e87fd03e55adfe8e218d8c55ba7d9086716c1c75cd6e9212af",
+      "bytes": 6731,
+      "definitionsChecked": 1,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "blob": "afd981e10d609d38db9ce4698fb4a6152bb50c7f",
+      "sha256": "06f584ff2d4bae2c16d70e899d255a16155df3cf774830ebc99ecd24ac574af6",
+      "bytes": 17652,
+      "definitionsChecked": 4,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+      "blob": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31",
+      "sha256": "0b17fd57d07b25b60ed656ec290903ad2f8a829c9107900805707ef805d06e27",
+      "bytes": 2763,
+      "definitionsChecked": 1,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "blob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+      "sha256": "c6b1c1d9c444a34824a25f7e04df4d5ffc6b1466d7ccbe11a5b900204db93a6a",
+      "bytes": 109738,
+      "definitionsChecked": 4,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "blob": "d191857ece760f307359d576dca2cef906dea8ec",
+      "sha256": "600da64269038375ab62fdc0d0fab572bfa028b60bc6caec730f5dff1dd3f1bf",
+      "bytes": 60290,
+      "definitionsChecked": 3,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "blob": "57e76a17858b3f4333a44ed880326ac33695351e",
+      "sha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b",
+      "bytes": 10378,
+      "definitionsChecked": 2,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "blob": "8b1c409244b9669224fc3caff796aea69eac1401",
+      "sha256": "e93aed0fe805385ff6dfcaf6ac190894254a34746f4c60002e33fbb561f80efe",
+      "bytes": 35801,
+      "definitionsChecked": 13,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Ast.lean",
+      "blob": "4a9daaf4179ca7fa74e9183e542891ec110fd5d7",
+      "sha256": "c22fa56b6a76b10d4d0b271f03bb4cd6612779b647f85f5088264fc95e949011",
+      "bytes": 3088,
+      "definitionsChecked": 0,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Expr.lean",
+      "blob": "eac8f1a8f883f87af78cc68317644c843ba40fd2",
+      "sha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6",
+      "bytes": 753,
+      "definitionsChecked": 0,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "blob": "074bf2b838994d2af375a20ef1600941d21e956c",
+      "sha256": "c231a737470c0d6ef2451f642089e22cebea97da55527500beff82bb610f99cf",
+      "bytes": 4202,
+      "definitionsChecked": 1,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "blob": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "sha256": "b488587a271702fe336ccacc8e5bda976f835b59be9b0419e697850cead9e46e",
+      "bytes": 35639,
+      "definitionsChecked": 5,
+      "missing": []
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "blob": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "sha256": "efbf0a1365f27da7d1fd05a67e21e50b8d8aaf852d0f22132c1ff6ad518331e3",
+      "bytes": 40409,
+      "definitionsChecked": 25,
+      "missing": []
+    }
+  ],
+  "paperReadbacks": [
+    {
+      "id": "COMMON",
+      "blob": "40e540b325186ee514ff3af9e39a22126d29a167",
+      "expected": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+      "actual": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+      "hashMatch": true,
+      "bytes": 76548
+    },
+    {
+      "id": "N",
+      "blob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+      "expected": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+      "actual": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+      "hashMatch": true,
+      "bytes": 61414
+    },
+    {
+      "id": "EV",
+      "blob": "7e90465301005a395a871a0563b19c164dcda750",
+      "expected": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+      "actual": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+      "hashMatch": true,
+      "bytes": 52851
+    },
+    {
+      "id": "TS",
+      "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+      "expected": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+      "actual": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+      "hashMatch": true,
+      "bytes": 88251
+    },
+    {
+      "id": "GROUP",
+      "blob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+      "expected": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+      "actual": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+      "hashMatch": true,
+      "bytes": 48633
+    },
+    {
+      "id": "ER",
+      "blob": "71f5f50f4586fcf11b74f02b7904b775f56cd4de",
+      "expected": "b0d3b1e3815fe127ecd8f02abce5462d76c2dba341e513888a63eea1b7ce04e3",
+      "actual": "b0d3b1e3815fe127ecd8f02abce5462d76c2dba341e513888a63eea1b7ce04e3",
+      "hashMatch": true,
+      "bytes": 128919
+    },
+    {
+      "id": "CROSS",
+      "blob": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "expected": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+      "actual": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+      "hashMatch": true,
+      "bytes": 27461
+    },
+    {
+      "id": "SOURCE_RUNTIME",
+      "blob": "06b5a893e03940ccc24db0b2036dc5bc7e4b60fe",
+      "expected": "b543637385dc044f837ef36411d8c44b4c5612bacb691ef7bc20cbe882ec6407",
+      "actual": "b543637385dc044f837ef36411d8c44b4c5612bacb691ef7bc20cbe882ec6407",
+      "hashMatch": true,
+      "bytes": 22429
+    }
+  ],
+  "patternVerification": {
+    "manifestSha256": "a133929cb5d6de03dfb17a9750edeb12180113b0c91da279f22b2c71ff289d88",
+    "baseSha256": "10306c15e992fd75d4762a6ff4c017cda56dde72e0382a18d5c646f40be9f419",
+    "candidateSha256": "e2d86d14b112a16f6fc5ff77fc60968e8dac2adbf466c1f761b2087e7f3a1662",
+    "guardBeforeSha256": "51d7f9cfa7338baec1a64759743c222112efc7309a6ad5ae3202609a60bb1785",
+    "guardAfterSha256": "67030ea0218e7bca7376acb173f7bfc2d18f5dcf9e0c9d60ab456591abc1ae51",
+    "baseBytes": 137412,
+    "candidateBytes": 138060,
+    "forwardCount": 1,
+    "reverseCount": 1,
+    "completeForward": true,
+    "completeReverse": true,
+    "freshness": [
+      {
+        "name": "foldTypeTail",
+        "baseTokens": 0,
+        "candidateTokens": 2
+      },
+      {
+        "name": "foldAfterAccumulator",
+        "baseTokens": 0,
+        "candidateTokens": 2
+      }
+    ],
+    "sameProofAnchors": true
+  },
+  "rows": [
+    {
+      "id": "ER-01",
+      "jsonPointer": "/rows/0",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§4,13",
+          "exports": "MODULE-IDENTITY"
+        },
+        {
+          "packet": "TS",
+          "section": "§9,§11.1",
+          "exports": "TS-INIT"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-INIT/HOST"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "atomic",
+        "origins",
+        "generations"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "ER-02",
+      "jsonPointer": "/rows/1",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§2.3,5,13",
+          "exports": "TYPE-CARRIER; TYPE-SUBST-BOUND"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§3,§10,§13",
+          "exports": "U-SUBST"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-SUB/O-GHOST"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "ir",
+        "atomic"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 1
+    },
+    {
+      "id": "ER-03",
+      "jsonPointer": "/rows/2",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§5–6,13",
+          "exports": "TYPE-CARRIER; GHOST-READ"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§7–9",
+          "exports": "GHOST-UNIT; SPECIAL-BOUNDARY; FOLD-BRIDGE"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S2.bounds"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime",
+        "source"
+      ],
+      "sourceBlobGuardCount": 3,
+      "definitionListGuardCount": 1,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "ER-04",
+      "jsonPointer": "/rows/3",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§7,§13",
+          "exports": "actual telescope/order/capture association"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§3–10,13",
+          "exports": "U-SUBST; ENTRY-PREFIX; ENTRY-CALL; LAMBDA-ADMIN; GHOST-UNIT; SPECIAL-BOUNDARY; FOLD-BRIDGE; ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§1 O-GROUP,3"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "migration",
+        "host-boundary",
+        "generations"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 2,
+      "sourceAdditionCount": 1
+    },
+    {
+      "id": "ER-05",
+      "jsonPointer": "/rows/4",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§8,§13",
+          "exports": "STRUCTURE-MAP"
+        },
+        {
+          "packet": "EV",
+          "section": "§§9–10",
+          "exports": "record/projection rules"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "source-empty",
+        "ir-empty",
+        "capabilities"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "ER-06",
+      "jsonPointer": "/rows/5",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§9,§13",
+          "exports": "DATA-MAP"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§3",
+          "exports": "U-SUBST"
+        },
+        {
+          "packet": "EV",
+          "section": "§§11–12",
+          "exports": "constructor/match rules"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "source-empty",
+        "ir-empty",
+        "native-ir"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "ER-07",
+      "jsonPointer": "/rows/6",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§10,§13",
+          "exports": "GENERATED-ORIGIN; ROOT-PRODUCER; MAJOR-REFINEMENT; IH-RECURRENCE; ROOT-ERASURE; CLOSED-EMPTY"
+        },
+        {
+          "packet": "N",
+          "section": "§6",
+          "exports": "worker readiness"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§6.3–6.4",
+          "exports": "ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§1 O-CORE-DEMAND,3–4"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic-recursion",
+        "source-recursion",
+        "runtime-evaluation",
+        "source-empty",
+        "native-ir",
+        "origins"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 3
+    },
+    {
+      "id": "ER-08",
+      "jsonPointer": "/rows/7",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§11,§13",
+          "exports": "STRUCTURE-REC; STRUCTURE-MAP; IH-RECURRENCE"
+        },
+        {
+          "packet": "EV",
+          "section": "§§7,9–10",
+          "exports": "let/record/projection rules"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-LAYOUT"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic-structures",
+        "generic",
+        "source-empty"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 1
+    },
+    {
+      "id": "ER-09",
+      "jsonPointer": "/rows/8",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§2–3,12–13",
+          "exports": "INDEX; FRESH; SUBST; EXEC-SCOPE; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "TS",
+          "section": "§§2,6.3",
+          "exports": "TS-NAMES"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-SUB/O-SCOPE"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "atomic",
+        "origins",
+        "generic",
+        "target",
+        "name-index"
+      ],
+      "sourceBlobGuardCount": 3,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "N-01",
+      "jsonPointer": "/rows/9",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "N",
+          "section": "§§3–4,8",
+          "exports": "ordinary alpha/origin argument"
+        },
+        {
+          "packet": "ER",
+          "section": "§§2,4,10.2,12",
+          "exports": "SUBST; MODULE-IDENTITY; GENERATED-ORIGIN"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§1 O-NORMALIZE,5",
+          "exports": "reserved-sort boundary"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "origins",
+        "capabilities",
+        "migration"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "N-02",
+      "jsonPointer": "/rows/10",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "N",
+          "section": "§5,§8",
+          "exports": "G/order/free-variable/legal-telescope argument"
+        },
+        {
+          "packet": "ER",
+          "section": "§§2,5–6,10.2–10.3",
+          "exports": "SUBST; TYPE-CARRIER; ROOT-PRODUCER; MAJOR-REFINEMENT"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-NORMALIZE"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "source-recursion",
+        "capabilities",
+        "origins",
+        "migration"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "N-03",
+      "jsonPointer": "/rows/11",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "N",
+          "section": "§6,§8",
+          "exports": "worker equation; finite readiness; simultaneous state"
+        },
+        {
+          "packet": "ER",
+          "section": "§§10–11,13.2",
+          "exports": "IH-RECURRENCE; ROOT-ERASURE"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§6.3–6.4",
+          "exports": "ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§3",
+          "exports": "cofinal composition"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "capabilities",
+        "generic-recursion",
+        "migration",
+        "runtime-evaluation"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "N-04",
+      "jsonPointer": "/rows/12",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "N",
+          "section": "§7,§8",
+          "exports": "public wrapper argument"
+        },
+        {
+          "packet": "ER",
+          "section": "§§4,7",
+          "exports": "MODULE-IDENTITY; actual entry association"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§4–7",
+          "exports": "ENTRY-PREFIX; ENTRY-CALL; ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§3"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "migration",
+        "capabilities",
+        "generic",
+        "generations"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-01",
+      "jsonPointer": "/rows/13",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§2",
+          "exports": "literal rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§5",
+          "exports": "TYPE-CARRIER"
+        },
+        {
+          "packet": "TS",
+          "section": "§10",
+          "exports": "TS-HOST"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "ir",
+        "runtime"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-02",
+      "jsonPointer": "/rows/14",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§3",
+          "exports": "variable rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§§3,12",
+          "exports": "EXEC-SCOPE; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "TS",
+          "section": "§§2,9",
+          "exports": "TS-NAMES; TS-INIT"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "atomic",
+        "target",
+        "origins"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-03",
+      "jsonPointer": "/rows/15",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§4",
+          "exports": "45 operation and map/fold cases"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§§1 S2.operations/S2.bounds/S2.text,3",
+          "exports": "runtime-law completion and exact template transport"
+        },
+        {
+          "packet": "ER",
+          "section": "§§6–7",
+          "exports": "GHOST-READ; primitive slots"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§9",
+          "exports": "FOLD-BRIDGE"
+        },
+        {
+          "packet": "TS",
+          "section": "§5",
+          "exports": "TS-RUNNER"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "generic"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-04",
+      "jsonPointer": "/rows/16",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§5",
+          "exports": "lambda rule"
+        },
+        {
+          "packet": "COMMON",
+          "section": "§§1.3,2.1",
+          "exports": "lower-index value/environment relation"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§4–6",
+          "exports": "LAMBDA-ADMIN; ENTRY-PI"
+        },
+        {
+          "packet": "TS",
+          "section": "§5",
+          "exports": "TS-RUNNER"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "ir"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-05",
+      "jsonPointer": "/rows/17",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§6",
+          "exports": "call rule"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§5–6",
+          "exports": "ENTRY-CALL; ENTRY-PI"
+        },
+        {
+          "packet": "TS",
+          "section": "§5",
+          "exports": "TS-RUNNER"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§2–3"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "ir",
+        "host-boundary"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-06",
+      "jsonPointer": "/rows/18",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§7",
+          "exports": "let rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§12",
+          "exports": "EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "TS",
+          "section": "§§2,6,8",
+          "exports": "TS-NAMES; TS-ETA; TS-TAIL"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "runtime-evaluation",
+        "ir",
+        "target",
+        "generic"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-07",
+      "jsonPointer": "/rows/19",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§8",
+          "exports": "conditional rule"
+        },
+        {
+          "packet": "TS",
+          "section": "§4",
+          "exports": "TS-TEMPLATES"
+        },
+        {
+          "packet": "ER",
+          "section": "§6",
+          "exports": "operation-specific demand"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "ir"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-08",
+      "jsonPointer": "/rows/20",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§9",
+          "exports": "record rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§8",
+          "exports": "STRUCTURE-MAP"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic-structures",
+        "source-empty",
+        "ir-empty",
+        "generic"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-09",
+      "jsonPointer": "/rows/21",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§10",
+          "exports": "projection rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§§5.4,8,11",
+          "exports": "TYPE-CARRIER; STRUCTURE-MAP; STRUCTURE-REC"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "generic-structures",
+        "capabilities",
+        "ir"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-10",
+      "jsonPointer": "/rows/22",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§11",
+          "exports": "constructor rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§9",
+          "exports": "DATA-MAP"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "ir",
+        "source-empty"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "EV-11",
+      "jsonPointer": "/rows/23",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§12",
+          "exports": "match/empty rules"
+        },
+        {
+          "packet": "ER",
+          "section": "§§9–11",
+          "exports": "DATA-MAP; IH-RECURRENCE; CLOSED-EMPTY; STRUCTURE-REC"
+        },
+        {
+          "packet": "TS",
+          "section": "§§3–4,12",
+          "exports": "TS-LAYOUT; TS-TEMPLATES"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "ir-empty",
+        "source-empty",
+        "native-ir",
+        "generic-recursion",
+        "generic-structures"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "TS-01",
+      "jsonPointer": "/rows/24",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§2,§6.3,§11.1",
+          "exports": "TS-NAMES"
+        },
+        {
+          "packet": "ER",
+          "section": "§§2,12",
+          "exports": "INDEX; FRESH; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-SCOPE"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "target",
+        "name-index",
+        "ir",
+        "atomic"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "TS-02",
+      "jsonPointer": "/rows/25",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§3,§11.1",
+          "exports": "TS-LAYOUT"
+        },
+        {
+          "packet": "ER",
+          "section": "§§8–11",
+          "exports": "STRUCTURE-MAP; DATA-MAP; STRUCTURE-REC"
+        },
+        {
+          "packet": "EV",
+          "section": "§§9–12"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "ir-empty",
+        "generic-structures",
+        "generic",
+        "source-empty"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "TS-03",
+      "jsonPointer": "/rows/26",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§4,§11.1",
+          "exports": "TS-TEMPLATES"
+        },
+        {
+          "packet": "EV",
+          "section": "§§2–13",
+          "exports": "all eleven constructors"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§§1,3",
+          "exports": "45 laws and current template transport"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "ir",
+        "runtime",
+        "runtime-evaluation"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "TS-04",
+      "jsonPointer": "/rows/27",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§5,§11.1",
+          "exports": "TS-RUNNER"
+        },
+        {
+          "packet": "EV",
+          "section": "§§5–6,13",
+          "exports": "lambda/call/machine composition"
+        },
+        {
+          "packet": "COMMON",
+          "section": "§§1.3,3",
+          "exports": "interaction budget"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§2–3"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "runtime-evaluation",
+        "generic",
+        "ir",
+        "generations"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "TS-05",
+      "jsonPointer": "/rows/28",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§6,§11.1",
+          "exports": "TS-ETA"
+        },
+        {
+          "packet": "ER",
+          "section": "§12",
+          "exports": "EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§6",
+          "exports": "ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-GROUP/O-OPT"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "ir",
+        "target",
+        "generic",
+        "runtime-evaluation"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "TS-06",
+      "jsonPointer": "/rows/29",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§7,§11.1",
+          "exports": "TS-COUNT"
+        },
+        {
+          "packet": "ER",
+          "section": "§§9,12",
+          "exports": "DATA-MAP; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-OPT"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "ir",
+        "capabilities",
+        "runtime-evaluation"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "TS-07",
+      "jsonPointer": "/rows/30",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§8,§11.1",
+          "exports": "TS-TAIL"
+        },
+        {
+          "packet": "EV",
+          "section": "§7",
+          "exports": "old-environment let rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§12",
+          "exports": "EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§1 O-OPT,3"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "optimized-tail",
+        "ir",
+        "runtime-evaluation",
+        "target"
+      ],
+      "sourceBlobGuardCount": 1,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "TS-08",
+      "jsonPointer": "/rows/31",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§9,§11.1",
+          "exports": "TS-INIT"
+        },
+        {
+          "packet": "ER",
+          "section": "§4,§7",
+          "exports": "MODULE-IDENTITY; actual Unit entry"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§7",
+          "exports": "GHOST-UNIT"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-INIT/HOST"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "target",
+        "atomic",
+        "generic",
+        "generations"
+      ],
+      "sourceBlobGuardCount": 3,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    },
+    {
+      "id": "TS-09",
+      "jsonPointer": "/rows/32",
+      "verdict": "CLEAR subject to final common conditions",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§10,§11.1",
+          "exports": "TS-HOST"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§§2–3",
+          "exports": "declared host/resource and exact runtime slices"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§3–4,7",
+          "exports": "trusted boundary and limits"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "toolchain",
+        "generations",
+        "runtime",
+        "provider"
+      ],
+      "sourceBlobGuardCount": 2,
+      "definitionListGuardCount": 0,
+      "sourceAdditionCount": 0
+    }
+  ],
+  "requiredMetadataMaintenance": [
+    {
+      "document": "correspondence",
+      "jsonPointer": "/rows/5/domain/1",
+      "expected": "The current checked lane refuses empty layouts and unsupported recursor shapes; these refusals remain explicit coverage obligations under the normative profile.",
+      "proposed": "Zero-constructor inductive layouts are admitted under the checked empty-elimination rules; unsupported family and recursor shapes still refuse. Inhabited zero-field structures are covered separately.",
+      "reason": "ER-06's mapping correctly requires empty coverage and notes stale text, but its explicit staleText pointer list omits this contradictory current-domain sentence. Update it as part of root's final guarded ledger refresh."
+    },
+    {
+      "document": "mapping-and-final-disposition",
+      "fields": [
+        "inputs.pendingSourceTransport.manifestBlob",
+        "sourceTransport.finalManifest"
+      ],
+      "proposedBlob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "reason": "The advisory map and manifest deliberately stage a4d and leave the final transport null. Attach this exact completed manifest in the active final disposition; preserve the immutable original advisory blobs and distinguish the actual next integrated commit from observed 00e/e3ed."
+    }
+  ],
+  "criticalFindings": [
+    "ER-04 correctly replaces the retired FinishApplication and application-argument helper evidence with actual entry/canonical helpers, including Array.foldl. The arbitrary eta helper is still defined once with no call sites. Current canonical returned-function groups and authenticated selected-R historical groups remain distinct.",
+    "ER-07 retains generated source origin, complete original telescope, final-meta major refinement, whole-entry root permission, one major evaluation and nonmemoizing delayed IH. Native empty adequacy remains the independently established closed source/generated-function result; no raw-Core or arbitrary foreign Empty theorem is introduced.",
+    "ER-08 correctly adds the actual recursive-record Expr p+3 route beside the nonrecursive Core projection rewrite. Complete field/IH minors, one captured major, ordered projection lets, root/outer IH association and returned canonical function boundary are retained. Uninhabited recursive-record parameters do not waive compilation.",
+    "TS-07 corrects one-call wording: direct self transitions account for one logical IR invocation; captured aliases account for alias then self with intermediate cutoff and shared residue. Required optimized-tail receipts bind the new positive flat-IR cases while three match-before-returned-lambda replay entries legitimately use the general route.",
+    "All-index cofinal composition, lower-index capture/function edges, one shared residual and finite administrative progress are explicit. No same-finite-index transitivity, budget reset, inferred effects or resource-schedule equality is introduced.",
+    "All 33 row mappings resolve to the eight frozen paper identities and defined receipt groups. The strict-binder, grammar and resource groups not individually listed on a correspondence row are explicitly mandatory through the separately reviewed stage obligations; they remain final release prerequisites."
+  ],
+  "receiptChecks": {
+    "method": "Read all 25 catalog groups and all 33 required-group references; inspect current qualifier and binder source for actual artifact names, generation indexing, parser/source/target/original-IR counts, the positive tail block, canonical source relation and nonclaim assertions. This is a review of planned evidence requirements, not evidence that a run passed.",
+    "generationIndex": {
+      "0": "N1",
+      "1": "C1",
+      "2": "C2",
+      "3": "C3"
+    },
+    "positiveTailSelector": "/generations/{0,1,2,3}/emptyIr/optimizedTail",
+    "sourceRefusals": 38,
+    "targetAccepted": 9,
+    "targetRefused": 20,
+    "baselineIrBehavior": 61,
+    "irNegativeCases": 38,
+    "nativeRuntimeOperationCount": 45,
+    "nativeRuntimeObservationCount": 186,
+    "sourceEvaluationNativeValues": 24,
+    "sourceEvaluationDiagnosticHostProbes": 21,
+    "genericFunctionValues": {
+      "observations": 19,
+      "pureValues": 14,
+      "diagnosticHostProbes": 5
+    },
+    "genericRecursiveRecordEvidence": {
+      "layouts": 2,
+      "declarations": 4,
+      "projectionLets": 6,
+      "usedIhs": 2,
+      "unusedIhs": 2,
+      "runtimeInvocations": 0
+    },
+    "nativeCandidateResourcePolicyFile": "not produced; do not require resource-policy-native-candidate.json",
+    "nameIndexAndReplayEvidence": "Actual successful full Actions step/log; no fabricated standalone receipt.",
+    "provider": "Independent acceptance of the actual deduplicated C2/C3 compiler-source, Lean/PS capability and generic-fixture admission streams, with exact source/compiler/provider hashes. Do not assume a fixed deduplicated count or claim provider acceptance for all tests."
+  },
+  "finalCommonConditions": [
+    "Integrate exactly the reviewed source pattern candidate and final manifest; bind the actual integrated commit, complete raw source closure, recipe/profile/toolchain identity and every relevant product, with any later documentation-only transport stated explicitly.",
+    "Observe the complete current-source Actions compiler job succeed, including N1 native source/target/original-IR path, R-derived C1, current C2/C3, N1=C2 TypeScript/JavaScript and full compared C2=C3 artifacts. No failed or partial historical run substitutes for this result.",
+    "Authenticate the exact qualification.json and strict-enforcement-evidence.json plus the mapped subreceipt/artifact digests and compiler identities. Retain actual output-file bytes or correctly hash-bound reconstruction provenance; passing log markers alone must not be relabeled as uninspected artifact contents.",
+    "Require every mapped current conformance group, including empty and zero-field coverage, recursive-record compilation, corrected recursion reference, canonical function values, strict source refusals, runtime laws/diagnostics, optimizer cases and original-IR/target typing. Their finite evidence supplements the scoped paper arguments.",
+    "Require the separate frozen-provider job and all actual deduplicated stream decisions to pass on this exact qualified source/compiler/product chain. Preserve emissionWasGatedByThisCheck=false.",
+    "Apply guarded row source/definition additions and the ER-06 domain correction, refresh stale open-proof prose with mapped completed arguments and retain valid host/domain/resource limitations. Preserve all historical proof/source/execution anchors and connect them through explicit transports.",
+    "Root must write an explicit external release/current-ledger disposition for all 33 correspondence rows and all 27 stage obligations. Individual general/strict flags may only describe the stated reviewed domain; no machine-checked compiler-wide proof is claimed.",
+    "Preserve false strict/semantic/provider/formal/proof-reconstruction/exhaustiveness flags in produced narrow per-compilation receipts and immutable argument-era artifacts. Do not modify the hashed runtime contract or psconfig solely to announce qualification.",
+    "Keep selected R, authoritative .lean, new-only ps-0.9-r3 and pinned Lean4.34.0/Node22.23.3/TypeScript7.0.2. Strict enforcement availability is the explicit strict API/current qualification path; selectedByPsconfig remains false unless a separately authorized, qualified configuration change is made."
+  ],
+  "outcome": {
+    "semanticOrSourceBlockersFound": [],
+    "metadataCorrectionsRequired": 1,
+    "missingTransportAttachmentRequired": 1,
+    "actualFinalReceiptsReviewed": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "formalPreservationProven": false
+  }
+}

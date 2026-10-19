@@ -1,0 +1,1545 @@
+{
+  "schemaVersion": 1,
+  "evidence": "github-actions-finite-worker-first-attempt-failure",
+  "repository": "dwijayuda/pskernel",
+  "runId": 37939061854,
+  "runAttempt": 1,
+  "sourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+  "sourceTree": "6ca49fe720cba8f70f31f67d42ff9a60b22bcc3a",
+  "jobId": 113848451492,
+  "selectedSeedSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+  "collectedAt": "2026-10-09 13:52:45 UTC",
+  "runStatus": "completed",
+  "runConclusion": "failure",
+  "fullLog": {
+    "gitBlob": "8410a9d8650b4783c732577be886d9ae3324d2b2",
+    "characters": 206536,
+    "lines": 2332
+  },
+  "failure": {
+    "step": 37,
+    "name": "Run the bounded native development gate before qualification",
+    "error": "TypeError: Cannot read properties of undefined (reading 'mk')",
+    "location": "scripts/sh1-fresh-name-conformance.mjs:45",
+    "expression": "runtime.PsErasureScope.mk",
+    "stage": "First F1 local-name fixture scope construction in the worker conformance gate",
+    "exactLines": [
+      {
+        "line": 2240,
+        "text": "2026-10-09T13:50:16.3386706Z file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-fresh-name-conformance.mjs:45"
+      },
+      {
+        "line": 2241,
+        "text": "2026-10-09T13:50:16.3388948Z   return runtime.PsErasureScope.mk("
+      },
+      {
+        "line": 2242,
+        "text": "2026-10-09T13:50:16.3389570Z                                 ^"
+      },
+      {
+        "line": 2243,
+        "text": "2026-10-09T13:50:16.3389879Z "
+      },
+      {
+        "line": 2244,
+        "text": "2026-10-09T13:50:16.3390258Z TypeError: Cannot read properties of undefined (reading 'mk')"
+      },
+      {
+        "line": 2245,
+        "text": "2026-10-09T13:50:16.3391181Z     at scope (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-fresh-name-conformance.mjs:45:33)"
+      },
+      {
+        "line": 2246,
+        "text": "2026-10-09T13:50:16.3392342Z     at inspectRuntime (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-fresh-name-conformance.mjs:182:7)"
+      },
+      {
+        "line": 2247,
+        "text": "2026-10-09T13:50:16.3393596Z     at runSh1FreshNameCases (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-fresh-name-conformance.mjs:221:24)"
+      },
+      {
+        "line": 2248,
+        "text": "2026-10-09T13:50:16.3394936Z     at runMigrationWorkerConformance (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-migration-worker-conformance.mjs:696:14)"
+      },
+      {
+        "line": 2249,
+        "text": "2026-10-09T13:50:16.3396390Z     at runSh1Capabilities (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-capabilities.mjs:228:27)"
+      },
+      {
+        "line": 2250,
+        "text": "2026-10-09T13:50:16.3397276Z     at nativeCandidate (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:925:9)"
+      },
+      {
+        "line": 2251,
+        "text": "2026-10-09T13:50:16.3397919Z     at async file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1013:3"
+      },
+      {
+        "line": 2252,
+        "text": "2026-10-09T13:50:16.3398237Z "
+      },
+      {
+        "line": 2253,
+        "text": "2026-10-09T13:50:16.3398351Z Node.js v22.23.3"
+      },
+      {
+        "line": 2254,
+        "text": "2026-10-09T13:50:16.4001940Z ##[error]Process completed with exit code 1."
+      }
+    ],
+    "scope": "The observed failure is a missing runtime namespace at the fixture constructor call. It is not a completed worker behavior assertion or an ABI result."
+  },
+  "passed": {
+    "nativeCases": {
+      "core": 75,
+      "translation": 10,
+      "erasure": 16
+    },
+    "focusedSourceSnapshotSession": {
+      "tests": 27,
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0
+    },
+    "focusedActualPsImportBuild": {
+      "tests": 4,
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "successorCache": "warm selected R cache hit and verified; no reconstruction",
+    "nativeFullCompilerIr": {
+      "schemaVersion": 1,
+      "kind": "psc0-native-original-ir-check",
+      "accepted": true,
+      "traversalComplete": true,
+      "visitedSteps": 728064,
+      "expressionCount": 56602,
+      "findingCount": 0,
+      "retainedFindingCount": 0,
+      "omittedFindingDetails": 0,
+      "strictSh1Qualified": false,
+      "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+    },
+    "fullClosureGrammar": {
+      "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+      "closureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+      "moduleCount": 61,
+      "proofScriptBytes": 902538,
+      "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent"
+    },
+    "realPreparationSessionConformance": true,
+    "sameSourceTypeScriptComparison": {
+      "mode": "same-source-comparison",
+      "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/full-compiler/report.json",
+      "sourceSha256": "0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a",
+      "timings": [
+        {
+          "phase": "compile-historical",
+          "version": "5.8.3",
+          "elapsedMs": 7604.513178
+        },
+        {
+          "phase": "compile-current",
+          "version": "7.0.2",
+          "elapsedMs": 2443.4186649999992
+        }
+      ]
+    }
+  },
+  "unreached": [
+    "Completed N1 worker87-case receipt",
+    "Selected-R paired worker reference",
+    "C1 original prepared-Core/IR 12-worker ABI receipt",
+    "C1 candidate qualification",
+    "C2/C3 fixed point",
+    "Independent F provider decisions"
+  ],
+  "records": [
+    {
+      "line": 398,
+      "label": "PSC0_TYPESCRIPT_PROFILE",
+      "statusPrefix": "PASS",
+      "exactLoggedLine": "2026-10-09T13:45:50.5192705Z PSC0_TYPESCRIPT_PROFILE: PASS {\"mode\":\"installed-profile-contract\",\"report\":\"/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json\",\"timings\":[{\"phase\":\"positional-source-with-unrelated-config\",\"version\":\"7.0.2\",\"elapsedMs\":72.75244000000004}]}",
+      "rawJson": "{\"mode\":\"installed-profile-contract\",\"report\":\"/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json\",\"timings\":[{\"phase\":\"positional-source-with-unrelated-config\",\"version\":\"7.0.2\",\"elapsedMs\":72.75244000000004}]}",
+      "parsed": {
+        "mode": "installed-profile-contract",
+        "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json",
+        "timings": [
+          {
+            "phase": "positional-source-with-unrelated-config",
+            "version": "7.0.2",
+            "elapsedMs": 72.75244000000004
+          }
+        ]
+      }
+    },
+    {
+      "line": 2232,
+      "label": "PSC0_SH1_IR_NATIVE",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:47:58.4324940Z PSC0_SH1_IR_NATIVE: {\"schemaVersion\":1,\"status\":\"pass\",\"cases\":8,\"checkedEmitterRejectsInvalidIr\":true,\"strictSh1Qualified\":false}",
+      "rawJson": "{\"schemaVersion\":1,\"status\":\"pass\",\"cases\":8,\"checkedEmitterRejectsInvalidIr\":true,\"strictSh1Qualified\":false}",
+      "parsed": {
+        "schemaVersion": 1,
+        "status": "pass",
+        "cases": 8,
+        "checkedEmitterRejectsInvalidIr": true,
+        "strictSh1Qualified": false
+      }
+    },
+    {
+      "line": 2233,
+      "label": "PSC0_SH1_IR_NATIVE_FULL",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:47:58.4327172Z PSC0_SH1_IR_NATIVE_FULL: {\"schemaVersion\":1,\"kind\":\"psc0-native-original-ir-check\",\"accepted\":true,\"traversalComplete\":true,\"visitedSteps\":728064,\"expressionCount\":56602,\"findingCount\":0,\"retainedFindingCount\":0,\"omittedFindingDetails\":0,\"strictSh1Qualified\":false,\"reportPath\":\"/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json\"}",
+      "rawJson": "{\"schemaVersion\":1,\"kind\":\"psc0-native-original-ir-check\",\"accepted\":true,\"traversalComplete\":true,\"visitedSteps\":728064,\"expressionCount\":56602,\"findingCount\":0,\"retainedFindingCount\":0,\"omittedFindingDetails\":0,\"strictSh1Qualified\":false,\"reportPath\":\"/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json\"}",
+      "parsed": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 728064,
+        "expressionCount": 56602,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "strictSh1Qualified": false,
+        "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+      }
+    },
+    {
+      "line": 2234,
+      "label": "PSC0_SH1_IR_NATIVE_EVIDENCE",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:47:58.4629853Z PSC0_SH1_IR_NATIVE_EVIDENCE: {\"schemaVersion\":1,\"evidence\":\"native-portable-checker-current-source\",\"nativeCheckerSha256\":\"f33252d737183feb86c696d37be0a23fa078f66c23fa1fdf94b375ad6bc51ff0\",\"sourceClosureSha256\":\"6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7\",\"sourceAggregateSha256\":\"3b0ee3315e47f691d7df170eb980ce9194f3ba1c213661f948b449e3bb80f142\",\"moduleCount\":61,\"recipe\":\"Ordered raw closure with imports stripped, aggregate native preparation, original IR check, same-IR emission.\",\"fixtures\":{\"schemaVersion\":1,\"status\":\"pass\",\"cases\":8,\"checkedEmitterRejectsInvalidIr\":true,\"strictSh1Qualified\":false},\"fullCompilerIr\":{\"schemaVersion\":1,\"kind\":\"psc0-native-original-ir-check\",\"accepted\":true,\"traversalComplete\":true,\"visitedSteps\":728064,\"expressionCount\":56602,\"findingCount\":0,\"retainedFindingCount\":0,\"omittedFindingDetails\":0,\"strictSh1Qualified\":false,\"reportPath\":\"/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json\"},\"typescriptSha256\":\"0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a\",\"parity\":\"Checked native emission equals the native-generated N1 compiler TypeScript byte for byte.\",\"strictSh1Qualified\":false,\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false}}",
+      "rawJson": "{\"schemaVersion\":1,\"evidence\":\"native-portable-checker-current-source\",\"nativeCheckerSha256\":\"f33252d737183feb86c696d37be0a23fa078f66c23fa1fdf94b375ad6bc51ff0\",\"sourceClosureSha256\":\"6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7\",\"sourceAggregateSha256\":\"3b0ee3315e47f691d7df170eb980ce9194f3ba1c213661f948b449e3bb80f142\",\"moduleCount\":61,\"recipe\":\"Ordered raw closure with imports stripped, aggregate native preparation, original IR check, same-IR emission.\",\"fixtures\":{\"schemaVersion\":1,\"status\":\"pass\",\"cases\":8,\"checkedEmitterRejectsInvalidIr\":true,\"strictSh1Qualified\":false},\"fullCompilerIr\":{\"schemaVersion\":1,\"kind\":\"psc0-native-original-ir-check\",\"accepted\":true,\"traversalComplete\":true,\"visitedSteps\":728064,\"expressionCount\":56602,\"findingCount\":0,\"retainedFindingCount\":0,\"omittedFindingDetails\":0,\"strictSh1Qualified\":false,\"reportPath\":\"/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json\"},\"typescriptSha256\":\"0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a\",\"parity\":\"Checked native emission equals the native-generated N1 compiler TypeScript byte for byte.\",\"strictSh1Qualified\":false,\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false}}",
+      "parsed": {
+        "schemaVersion": 1,
+        "evidence": "native-portable-checker-current-source",
+        "nativeCheckerSha256": "f33252d737183feb86c696d37be0a23fa078f66c23fa1fdf94b375ad6bc51ff0",
+        "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+        "sourceAggregateSha256": "3b0ee3315e47f691d7df170eb980ce9194f3ba1c213661f948b449e3bb80f142",
+        "moduleCount": 61,
+        "recipe": "Ordered raw closure with imports stripped, aggregate native preparation, original IR check, same-IR emission.",
+        "fixtures": {
+          "schemaVersion": 1,
+          "status": "pass",
+          "cases": 8,
+          "checkedEmitterRejectsInvalidIr": true,
+          "strictSh1Qualified": false
+        },
+        "fullCompilerIr": {
+          "schemaVersion": 1,
+          "kind": "psc0-native-original-ir-check",
+          "accepted": true,
+          "traversalComplete": true,
+          "visitedSteps": 728064,
+          "expressionCount": 56602,
+          "findingCount": 0,
+          "retainedFindingCount": 0,
+          "omittedFindingDetails": 0,
+          "strictSh1Qualified": false,
+          "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+        },
+        "typescriptSha256": "0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a",
+        "parity": "Checked native emission equals the native-generated N1 compiler TypeScript byte for byte.",
+        "strictSh1Qualified": false,
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "line": 2235,
+      "label": "PSC0_SH1_GRAMMAR_CLOSURE",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:50:12.9675898Z PSC0_SH1_GRAMMAR_CLOSURE: {\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"closureSha256\":\"6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7\",\"moduleCount\":61,\"proofScriptBytes\":902538,\"comparison\":\"Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent\"}",
+      "rawJson": "{\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"closureSha256\":\"6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7\",\"moduleCount\":61,\"proofScriptBytes\":902538,\"comparison\":\"Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent\"}",
+      "parsed": {
+        "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+        "closureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+        "moduleCount": 61,
+        "proofScriptBytes": 902538,
+        "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent"
+      }
+    },
+    {
+      "line": 2236,
+      "label": "PSC0_SH1_IR_CHECKER",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:50:14.3498186Z PSC0_SH1_IR_CHECKER: {\"schemaVersion\":1,\"evidence\":\"portable-original-ir-checker-conformance\",\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"acceptedFixture\":{\"schemaVersion\":2,\"kind\":\"psc0-original-ir-inventory\",\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"status\":\"runtime-ir-types-accepted\",\"strictSh1Qualified\":false,\"runtimeIrTypingAccepted\":true,\"traversalComplete\":true,\"visitedNodes\":1898,\"carrier\":{\"accepted\":true,\"traversalComplete\":true,\"visitedNodes\":910},\"counts\":{\"expressions\":163},\"findingCount\":0,\"findingCounts\":{},\"findingCountsCoverage\":\"all-findings\",\"findings\":[],\"omittedFindingDetails\":0,\"portableChecker\":{\"status\":\"accepted\",\"implementation\":\"Ps.CompilerIr.Check.psCheckVerifiedIrModule\",\"options\":{\"maxSteps\":5000000,\"maxTypeSteps\":65536,\"maxFindings\":1000}},\"coverage\":[\"Canonical own-namespace JS carriers before portable code\",\"Portable module signatures, scoped type substitution and compositional expression typing\",\"The host report serializes portable diagnostics without a second semantic checker\"],\"unqualifiedObligations\":[\"Enabled primitive laws, text positions and bounds semantics beyond runtime typing\",\"Erasure preservation, evaluation order and backend semantic correspondence\",\"Import ABI qualification for unsupported external imports\",\"Strict SH/1 profile activation and provider decisions remain separate\"],\"notes\":[\"A capped diagnostics list does not cap the portable finding count.\",\"Findings count failed checking obligations; a type operation reports its first failure, not every malformed descendant.\",\"visitedNodes combines portable input preflight and dispatcher steps, each with its own maxSteps allowance.\",\"Structural IR paths identify owners and expressions; they are not original source line numbers.\",\"Runtime IR typing acceptance does not establish Core provider acceptance or strict SH/1.\"]},\"artifacts\":{\"typescriptSha256\":\"15e78fc7c00dbabab8affd291cf541233c4a374c1fec319e92fa3360835e33b1\",\"javascriptSha256\":\"894b55a8d96db8ca4013b6668c936f9663b250469458021fccffbc540dbbc0ba\"},\"behavior\":{\"status\":\"pass\",\"observations\":59,\"exhaustiveForAllInputs\":false,\"letScopeCases\":[{\"name\":\"shadowOldScope\",\"observations\":8},{\"name\":\"shadowWrappedCall\",\"observations\":8},{\"name\":\"shadowClosure\",\"observations\":8},{\"name\":\"shadowNestedTail\",\"observations\":5}]},\"rejected\":[{\"name\":\"false-let-annotation\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"false-lambda-result\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"false-declaration-result\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"incompatible-if-branches\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"non-boolean-condition\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"flattened-function-grouping\",\"expectedCode\":\"call-runtime-arity\",\"findingCount\":2,\"findingCounts\":{\"call-runtime-arity\":1,\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"false-function-group-annotation\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"global-literal-is-not-zero-argument-function\",\"expectedCode\":\"non-function-callee\",\"findingCount\":1,\"findingCounts\":{\"non-function-callee\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"generic-arguments-missing\",\"expectedCode\":\"call-type-arity\",\"findingCount\":1,\"findingCounts\":{\"call-type-arity\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"monomorphic-value-with-type-arguments\",\"expectedCode\":\"call-type-arity\",\"findingCount\":1,\"findingCounts\":{\"call-type-arity\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"generic-scheme-escape\",\"expectedCode\":\"generic-value-reference\",\"findingCount\":1,\"findingCounts\":{\"generic-value-reference\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"zero-runtime-generic-value\",\"expectedCode\":\"generic-value-unsupported\",\"findingCount\":1,\"findingCounts\":{\"generic-value-unsupported\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"unknown-runtime-type\",\"expectedCode\":\"unknown-type\",\"findingCount\":2,\"findingCounts\":{\"unknown-type\":2},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"unscoped-type-parameter\",\"expectedCode\":\"unbound-type-parameter\",\"findingCount\":2,\"findingCounts\":{\"unbound-type-parameter\":1,\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"named-type-arity\",\"expectedCode\":\"named-type-arity\",\"findingCount\":1,\"findingCounts\":{\"named-type-arity\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"unresolved-variable\",\"expectedCode\":\"unresolved-value-name\",\"findingCount\":1,\"findingCounts\":{\"unresolved-value-name\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"duplicate-runtime-binder\",\"expectedCode\":\"duplicate-binder\",\"findingCount\":1,\"findingCounts\":{\"duplicate-binder\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"duplicate-type-binder\",\"expectedCode\":\"duplicate-type-parameter\",\"findingCount\":1,\"findingCounts\":{\"duplicate-type-parameter\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"duplicate-global-name\",\"expectedCode\":\"duplicate-value-name\",\"findingCount\":1,\"findingCounts\":{\"duplicate-value-name\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"Nat-and-Int-are-distinct\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"Char-and-String-are-distinct\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"intrinsic-type-arity\",\"expectedCode\":\"intrinsic-type-arity\",\"findingCount\":1,\"findingCounts\":{\"intrinsic-type-arity\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"constructor-positional-field-order\",\"expectedCode\":\"constructor-field-order\",\"findingCount\":1,\"findingCounts\":{\"constructor-field-order\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"record-missing-field\",\"expectedCode\":\"missing-field\",\"findingCount\":1,\"findingCounts\":{\"missing-field\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"record-duplicate-field\",\"expectedCode\":\"duplicate-field\",\"findingCount\":1,\"findingCounts\":{\"duplicate-field\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"record-extra-field\",\"expectedCode\":\"unexpected-field\",\"findingCount\":1,\"findingCounts\":{\"unexpected-field\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"projection-owner-mismatch\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"projection-instantiation-mismatch\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"match-binding-type-mismatch\",\"expectedCode\":\"type-mismatch\",\"findingCount\":3,\"findingCounts\":{\"type-mismatch\":2,\"non-function-callee\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"match-missing-alternative\",\"expectedCode\":\"match-coverage\",\"findingCount\":1,\"findingCounts\":{\"match-coverage\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"match-duplicate-alternative\",\"expectedCode\":\"duplicate-match-alternative\",\"findingCount\":1,\"findingCounts\":{\"duplicate-match-alternative\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"optional-scalar-capability\",\"expectedCode\":\"scalar-capability-unqualified\",\"findingCount\":3,\"findingCounts\":{\"scalar-capability-unqualified\":3},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"external-import-ABI\",\"expectedCode\":\"external-import-abi-unqualified\",\"findingCount\":1,\"findingCounts\":{\"external-import-abi-unqualified\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"empty-layout\",\"expectedCode\":\"empty-layout-unsupported\",\"findingCount\":1,\"findingCounts\":{\"empty-layout-unsupported\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"empty-match\",\"expectedCode\":\"empty-match-unsupported\",\"findingCount\":2,\"findingCounts\":{\"empty-layout-unsupported\":1,\"empty-match-unsupported\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"runtime-layout-name-collision\",\"expectedCode\":\"duplicate-layout-name\",\"findingCount\":1,\"findingCounts\":{\"duplicate-layout-name\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"}],\"exhausted\":[{\"name\":\"input-preflight-budget\",\"findingCounts\":{\"checker-input-resource-limit\":1},\"traversalComplete\":false},{\"name\":\"type-work-budget\",\"findingCounts\":{\"type-resource-limit\":224},\"traversalComplete\":false}],\"directTypeOperations\":[{\"name\":\"simultaneous-nested-generic-swap\",\"status\":\"pass\"},{\"name\":\"substitution-budget\",\"code\":\"type-resource-limit\",\"detail\":\"substitution\"},{\"name\":\"equality-budget\",\"code\":\"type-resource-limit\",\"detail\":\"equality\"}],\"carrierRejections\":[{\"name\":\"negative-natural-carrier\",\"findingCounts\":{\"invalid-ir-scalar-carrier\":1},\"portableChecker\":\"not-run-invalid-carrier\"},{\"name\":\"number-natural-carrier\",\"findingCounts\":{\"invalid-ir-scalar-carrier\":1},\"portableChecker\":\"not-run-invalid-carrier\"},{\"name\":\"string-boolean-carrier\",\"findingCounts\":{\"invalid-ir-scalar-carrier\":1},\"portableChecker\":\"not-run-invalid-carrier\"},{\"name\":\"cyclic-list-carrier\",\"findingCounts\":{\"cyclic-ir-carrier\":1},\"portableChecker\":\"not-run-invalid-carrier\"},{\"name\":\"foreign-compiler-brand\",\"findingCounts\":{\"malformed-or-foreign-constructor\":1},\"portableChecker\":\"not-run-invalid-carrier\"}],\"diagnosticsCap\":{\"limit\":0,\"findingCount\":1,\"omittedFindingDetails\":1},\"checkedPreparedEntry\":{\"sourceSha256\":\"b05ec9c46f150c05b7249ee48bc3b1bdfcb2f60d851b4af81ff7298df49b5626\",\"typescriptSha256\":\"027735f4d196d1c92d0868320d9313d4cabe9841a90566f433e2ff71d4350a36\",\"status\":\"pass\"},\"instanceOwnership\":\"All IR constructors and neutral record factories belong to the checked compiler namespace.\",\"strictSh1Qualified\":false,\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false}}",
+      "rawJson": "{\"schemaVersion\":1,\"evidence\":\"portable-original-ir-checker-conformance\",\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"acceptedFixture\":{\"schemaVersion\":2,\"kind\":\"psc0-original-ir-inventory\",\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"status\":\"runtime-ir-types-accepted\",\"strictSh1Qualified\":false,\"runtimeIrTypingAccepted\":true,\"traversalComplete\":true,\"visitedNodes\":1898,\"carrier\":{\"accepted\":true,\"traversalComplete\":true,\"visitedNodes\":910},\"counts\":{\"expressions\":163},\"findingCount\":0,\"findingCounts\":{},\"findingCountsCoverage\":\"all-findings\",\"findings\":[],\"omittedFindingDetails\":0,\"portableChecker\":{\"status\":\"accepted\",\"implementation\":\"Ps.CompilerIr.Check.psCheckVerifiedIrModule\",\"options\":{\"maxSteps\":5000000,\"maxTypeSteps\":65536,\"maxFindings\":1000}},\"coverage\":[\"Canonical own-namespace JS carriers before portable code\",\"Portable module signatures, scoped type substitution and compositional expression typing\",\"The host report serializes portable diagnostics without a second semantic checker\"],\"unqualifiedObligations\":[\"Enabled primitive laws, text positions and bounds semantics beyond runtime typing\",\"Erasure preservation, evaluation order and backend semantic correspondence\",\"Import ABI qualification for unsupported external imports\",\"Strict SH/1 profile activation and provider decisions remain separate\"],\"notes\":[\"A capped diagnostics list does not cap the portable finding count.\",\"Findings count failed checking obligations; a type operation reports its first failure, not every malformed descendant.\",\"visitedNodes combines portable input preflight and dispatcher steps, each with its own maxSteps allowance.\",\"Structural IR paths identify owners and expressions; they are not original source line numbers.\",\"Runtime IR typing acceptance does not establish Core provider acceptance or strict SH/1.\"]},\"artifacts\":{\"typescriptSha256\":\"15e78fc7c00dbabab8affd291cf541233c4a374c1fec319e92fa3360835e33b1\",\"javascriptSha256\":\"894b55a8d96db8ca4013b6668c936f9663b250469458021fccffbc540dbbc0ba\"},\"behavior\":{\"status\":\"pass\",\"observations\":59,\"exhaustiveForAllInputs\":false,\"letScopeCases\":[{\"name\":\"shadowOldScope\",\"observations\":8},{\"name\":\"shadowWrappedCall\",\"observations\":8},{\"name\":\"shadowClosure\",\"observations\":8},{\"name\":\"shadowNestedTail\",\"observations\":5}]},\"rejected\":[{\"name\":\"false-let-annotation\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"false-lambda-result\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"false-declaration-result\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"incompatible-if-branches\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"non-boolean-condition\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"flattened-function-grouping\",\"expectedCode\":\"call-runtime-arity\",\"findingCount\":2,\"findingCounts\":{\"call-runtime-arity\":1,\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"false-function-group-annotation\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"global-literal-is-not-zero-argument-function\",\"expectedCode\":\"non-function-callee\",\"findingCount\":1,\"findingCounts\":{\"non-function-callee\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"generic-arguments-missing\",\"expectedCode\":\"call-type-arity\",\"findingCount\":1,\"findingCounts\":{\"call-type-arity\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"monomorphic-value-with-type-arguments\",\"expectedCode\":\"call-type-arity\",\"findingCount\":1,\"findingCounts\":{\"call-type-arity\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"generic-scheme-escape\",\"expectedCode\":\"generic-value-reference\",\"findingCount\":1,\"findingCounts\":{\"generic-value-reference\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"zero-runtime-generic-value\",\"expectedCode\":\"generic-value-unsupported\",\"findingCount\":1,\"findingCounts\":{\"generic-value-unsupported\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"unknown-runtime-type\",\"expectedCode\":\"unknown-type\",\"findingCount\":2,\"findingCounts\":{\"unknown-type\":2},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"unscoped-type-parameter\",\"expectedCode\":\"unbound-type-parameter\",\"findingCount\":2,\"findingCounts\":{\"unbound-type-parameter\":1,\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"named-type-arity\",\"expectedCode\":\"named-type-arity\",\"findingCount\":1,\"findingCounts\":{\"named-type-arity\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"unresolved-variable\",\"expectedCode\":\"unresolved-value-name\",\"findingCount\":1,\"findingCounts\":{\"unresolved-value-name\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"duplicate-runtime-binder\",\"expectedCode\":\"duplicate-binder\",\"findingCount\":1,\"findingCounts\":{\"duplicate-binder\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"duplicate-type-binder\",\"expectedCode\":\"duplicate-type-parameter\",\"findingCount\":1,\"findingCounts\":{\"duplicate-type-parameter\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"duplicate-global-name\",\"expectedCode\":\"duplicate-value-name\",\"findingCount\":1,\"findingCounts\":{\"duplicate-value-name\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"Nat-and-Int-are-distinct\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"Char-and-String-are-distinct\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"intrinsic-type-arity\",\"expectedCode\":\"intrinsic-type-arity\",\"findingCount\":1,\"findingCounts\":{\"intrinsic-type-arity\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"constructor-positional-field-order\",\"expectedCode\":\"constructor-field-order\",\"findingCount\":1,\"findingCounts\":{\"constructor-field-order\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"record-missing-field\",\"expectedCode\":\"missing-field\",\"findingCount\":1,\"findingCounts\":{\"missing-field\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"record-duplicate-field\",\"expectedCode\":\"duplicate-field\",\"findingCount\":1,\"findingCounts\":{\"duplicate-field\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"record-extra-field\",\"expectedCode\":\"unexpected-field\",\"findingCount\":1,\"findingCounts\":{\"unexpected-field\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"projection-owner-mismatch\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"projection-instantiation-mismatch\",\"expectedCode\":\"type-mismatch\",\"findingCount\":1,\"findingCounts\":{\"type-mismatch\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"match-binding-type-mismatch\",\"expectedCode\":\"type-mismatch\",\"findingCount\":3,\"findingCounts\":{\"type-mismatch\":2,\"non-function-callee\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"match-missing-alternative\",\"expectedCode\":\"match-coverage\",\"findingCount\":1,\"findingCounts\":{\"match-coverage\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"match-duplicate-alternative\",\"expectedCode\":\"duplicate-match-alternative\",\"findingCount\":1,\"findingCounts\":{\"duplicate-match-alternative\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"optional-scalar-capability\",\"expectedCode\":\"scalar-capability-unqualified\",\"findingCount\":3,\"findingCounts\":{\"scalar-capability-unqualified\":3},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"external-import-ABI\",\"expectedCode\":\"external-import-abi-unqualified\",\"findingCount\":1,\"findingCounts\":{\"external-import-abi-unqualified\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"empty-layout\",\"expectedCode\":\"empty-layout-unsupported\",\"findingCount\":1,\"findingCounts\":{\"empty-layout-unsupported\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"empty-match\",\"expectedCode\":\"empty-match-unsupported\",\"findingCount\":2,\"findingCounts\":{\"empty-layout-unsupported\":1,\"empty-match-unsupported\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"},{\"name\":\"runtime-layout-name-collision\",\"expectedCode\":\"duplicate-layout-name\",\"findingCount\":1,\"findingCounts\":{\"duplicate-layout-name\":1},\"traversalComplete\":true,\"checkedEmitter\":\"rejected-before-emission\"}],\"exhausted\":[{\"name\":\"input-preflight-budget\",\"findingCounts\":{\"checker-input-resource-limit\":1},\"traversalComplete\":false},{\"name\":\"type-work-budget\",\"findingCounts\":{\"type-resource-limit\":224},\"traversalComplete\":false}],\"directTypeOperations\":[{\"name\":\"simultaneous-nested-generic-swap\",\"status\":\"pass\"},{\"name\":\"substitution-budget\",\"code\":\"type-resource-limit\",\"detail\":\"substitution\"},{\"name\":\"equality-budget\",\"code\":\"type-resource-limit\",\"detail\":\"equality\"}],\"carrierRejections\":[{\"name\":\"negative-natural-carrier\",\"findingCounts\":{\"invalid-ir-scalar-carrier\":1},\"portableChecker\":\"not-run-invalid-carrier\"},{\"name\":\"number-natural-carrier\",\"findingCounts\":{\"invalid-ir-scalar-carrier\":1},\"portableChecker\":\"not-run-invalid-carrier\"},{\"name\":\"string-boolean-carrier\",\"findingCounts\":{\"invalid-ir-scalar-carrier\":1},\"portableChecker\":\"not-run-invalid-carrier\"},{\"name\":\"cyclic-list-carrier\",\"findingCounts\":{\"cyclic-ir-carrier\":1},\"portableChecker\":\"not-run-invalid-carrier\"},{\"name\":\"foreign-compiler-brand\",\"findingCounts\":{\"malformed-or-foreign-constructor\":1},\"portableChecker\":\"not-run-invalid-carrier\"}],\"diagnosticsCap\":{\"limit\":0,\"findingCount\":1,\"omittedFindingDetails\":1},\"checkedPreparedEntry\":{\"sourceSha256\":\"b05ec9c46f150c05b7249ee48bc3b1bdfcb2f60d851b4af81ff7298df49b5626\",\"typescriptSha256\":\"027735f4d196d1c92d0868320d9313d4cabe9841a90566f433e2ff71d4350a36\",\"status\":\"pass\"},\"instanceOwnership\":\"All IR constructors and neutral record factories belong to the checked compiler namespace.\",\"strictSh1Qualified\":false,\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false}}",
+      "parsed": {
+        "schemaVersion": 1,
+        "evidence": "portable-original-ir-checker-conformance",
+        "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+        "acceptedFixture": {
+          "schemaVersion": 2,
+          "kind": "psc0-original-ir-inventory",
+          "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+          "status": "runtime-ir-types-accepted",
+          "strictSh1Qualified": false,
+          "runtimeIrTypingAccepted": true,
+          "traversalComplete": true,
+          "visitedNodes": 1898,
+          "carrier": {
+            "accepted": true,
+            "traversalComplete": true,
+            "visitedNodes": 910
+          },
+          "counts": {
+            "expressions": 163
+          },
+          "findingCount": 0,
+          "findingCounts": {},
+          "findingCountsCoverage": "all-findings",
+          "findings": [],
+          "omittedFindingDetails": 0,
+          "portableChecker": {
+            "status": "accepted",
+            "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+            "options": {
+              "maxSteps": 5000000,
+              "maxTypeSteps": 65536,
+              "maxFindings": 1000
+            }
+          },
+          "coverage": [
+            "Canonical own-namespace JS carriers before portable code",
+            "Portable module signatures, scoped type substitution and compositional expression typing",
+            "The host report serializes portable diagnostics without a second semantic checker"
+          ],
+          "unqualifiedObligations": [
+            "Enabled primitive laws, text positions and bounds semantics beyond runtime typing",
+            "Erasure preservation, evaluation order and backend semantic correspondence",
+            "Import ABI qualification for unsupported external imports",
+            "Strict SH/1 profile activation and provider decisions remain separate"
+          ],
+          "notes": [
+            "A capped diagnostics list does not cap the portable finding count.",
+            "Findings count failed checking obligations; a type operation reports its first failure, not every malformed descendant.",
+            "visitedNodes combines portable input preflight and dispatcher steps, each with its own maxSteps allowance.",
+            "Structural IR paths identify owners and expressions; they are not original source line numbers.",
+            "Runtime IR typing acceptance does not establish Core provider acceptance or strict SH/1."
+          ]
+        },
+        "artifacts": {
+          "typescriptSha256": "15e78fc7c00dbabab8affd291cf541233c4a374c1fec319e92fa3360835e33b1",
+          "javascriptSha256": "894b55a8d96db8ca4013b6668c936f9663b250469458021fccffbc540dbbc0ba"
+        },
+        "behavior": {
+          "status": "pass",
+          "observations": 59,
+          "exhaustiveForAllInputs": false,
+          "letScopeCases": [
+            {
+              "name": "shadowOldScope",
+              "observations": 8
+            },
+            {
+              "name": "shadowWrappedCall",
+              "observations": 8
+            },
+            {
+              "name": "shadowClosure",
+              "observations": 8
+            },
+            {
+              "name": "shadowNestedTail",
+              "observations": 5
+            }
+          ]
+        },
+        "rejected": [
+          {
+            "name": "false-let-annotation",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "false-lambda-result",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "false-declaration-result",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "incompatible-if-branches",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "non-boolean-condition",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "flattened-function-grouping",
+            "expectedCode": "call-runtime-arity",
+            "findingCount": 2,
+            "findingCounts": {
+              "call-runtime-arity": 1,
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "false-function-group-annotation",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "global-literal-is-not-zero-argument-function",
+            "expectedCode": "non-function-callee",
+            "findingCount": 1,
+            "findingCounts": {
+              "non-function-callee": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "generic-arguments-missing",
+            "expectedCode": "call-type-arity",
+            "findingCount": 1,
+            "findingCounts": {
+              "call-type-arity": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "monomorphic-value-with-type-arguments",
+            "expectedCode": "call-type-arity",
+            "findingCount": 1,
+            "findingCounts": {
+              "call-type-arity": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "generic-scheme-escape",
+            "expectedCode": "generic-value-reference",
+            "findingCount": 1,
+            "findingCounts": {
+              "generic-value-reference": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "zero-runtime-generic-value",
+            "expectedCode": "generic-value-unsupported",
+            "findingCount": 1,
+            "findingCounts": {
+              "generic-value-unsupported": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "unknown-runtime-type",
+            "expectedCode": "unknown-type",
+            "findingCount": 2,
+            "findingCounts": {
+              "unknown-type": 2
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "unscoped-type-parameter",
+            "expectedCode": "unbound-type-parameter",
+            "findingCount": 2,
+            "findingCounts": {
+              "unbound-type-parameter": 1,
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "named-type-arity",
+            "expectedCode": "named-type-arity",
+            "findingCount": 1,
+            "findingCounts": {
+              "named-type-arity": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "unresolved-variable",
+            "expectedCode": "unresolved-value-name",
+            "findingCount": 1,
+            "findingCounts": {
+              "unresolved-value-name": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "duplicate-runtime-binder",
+            "expectedCode": "duplicate-binder",
+            "findingCount": 1,
+            "findingCounts": {
+              "duplicate-binder": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "duplicate-type-binder",
+            "expectedCode": "duplicate-type-parameter",
+            "findingCount": 1,
+            "findingCounts": {
+              "duplicate-type-parameter": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "duplicate-global-name",
+            "expectedCode": "duplicate-value-name",
+            "findingCount": 1,
+            "findingCounts": {
+              "duplicate-value-name": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "Nat-and-Int-are-distinct",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "Char-and-String-are-distinct",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "intrinsic-type-arity",
+            "expectedCode": "intrinsic-type-arity",
+            "findingCount": 1,
+            "findingCounts": {
+              "intrinsic-type-arity": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "constructor-positional-field-order",
+            "expectedCode": "constructor-field-order",
+            "findingCount": 1,
+            "findingCounts": {
+              "constructor-field-order": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "record-missing-field",
+            "expectedCode": "missing-field",
+            "findingCount": 1,
+            "findingCounts": {
+              "missing-field": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "record-duplicate-field",
+            "expectedCode": "duplicate-field",
+            "findingCount": 1,
+            "findingCounts": {
+              "duplicate-field": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "record-extra-field",
+            "expectedCode": "unexpected-field",
+            "findingCount": 1,
+            "findingCounts": {
+              "unexpected-field": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "projection-owner-mismatch",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "projection-instantiation-mismatch",
+            "expectedCode": "type-mismatch",
+            "findingCount": 1,
+            "findingCounts": {
+              "type-mismatch": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "match-binding-type-mismatch",
+            "expectedCode": "type-mismatch",
+            "findingCount": 3,
+            "findingCounts": {
+              "type-mismatch": 2,
+              "non-function-callee": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "match-missing-alternative",
+            "expectedCode": "match-coverage",
+            "findingCount": 1,
+            "findingCounts": {
+              "match-coverage": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "match-duplicate-alternative",
+            "expectedCode": "duplicate-match-alternative",
+            "findingCount": 1,
+            "findingCounts": {
+              "duplicate-match-alternative": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "optional-scalar-capability",
+            "expectedCode": "scalar-capability-unqualified",
+            "findingCount": 3,
+            "findingCounts": {
+              "scalar-capability-unqualified": 3
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "external-import-ABI",
+            "expectedCode": "external-import-abi-unqualified",
+            "findingCount": 1,
+            "findingCounts": {
+              "external-import-abi-unqualified": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "empty-layout",
+            "expectedCode": "empty-layout-unsupported",
+            "findingCount": 1,
+            "findingCounts": {
+              "empty-layout-unsupported": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "empty-match",
+            "expectedCode": "empty-match-unsupported",
+            "findingCount": 2,
+            "findingCounts": {
+              "empty-layout-unsupported": 1,
+              "empty-match-unsupported": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          },
+          {
+            "name": "runtime-layout-name-collision",
+            "expectedCode": "duplicate-layout-name",
+            "findingCount": 1,
+            "findingCounts": {
+              "duplicate-layout-name": 1
+            },
+            "traversalComplete": true,
+            "checkedEmitter": "rejected-before-emission"
+          }
+        ],
+        "exhausted": [
+          {
+            "name": "input-preflight-budget",
+            "findingCounts": {
+              "checker-input-resource-limit": 1
+            },
+            "traversalComplete": false
+          },
+          {
+            "name": "type-work-budget",
+            "findingCounts": {
+              "type-resource-limit": 224
+            },
+            "traversalComplete": false
+          }
+        ],
+        "directTypeOperations": [
+          {
+            "name": "simultaneous-nested-generic-swap",
+            "status": "pass"
+          },
+          {
+            "name": "substitution-budget",
+            "code": "type-resource-limit",
+            "detail": "substitution"
+          },
+          {
+            "name": "equality-budget",
+            "code": "type-resource-limit",
+            "detail": "equality"
+          }
+        ],
+        "carrierRejections": [
+          {
+            "name": "negative-natural-carrier",
+            "findingCounts": {
+              "invalid-ir-scalar-carrier": 1
+            },
+            "portableChecker": "not-run-invalid-carrier"
+          },
+          {
+            "name": "number-natural-carrier",
+            "findingCounts": {
+              "invalid-ir-scalar-carrier": 1
+            },
+            "portableChecker": "not-run-invalid-carrier"
+          },
+          {
+            "name": "string-boolean-carrier",
+            "findingCounts": {
+              "invalid-ir-scalar-carrier": 1
+            },
+            "portableChecker": "not-run-invalid-carrier"
+          },
+          {
+            "name": "cyclic-list-carrier",
+            "findingCounts": {
+              "cyclic-ir-carrier": 1
+            },
+            "portableChecker": "not-run-invalid-carrier"
+          },
+          {
+            "name": "foreign-compiler-brand",
+            "findingCounts": {
+              "malformed-or-foreign-constructor": 1
+            },
+            "portableChecker": "not-run-invalid-carrier"
+          }
+        ],
+        "diagnosticsCap": {
+          "limit": 0,
+          "findingCount": 1,
+          "omittedFindingDetails": 1
+        },
+        "checkedPreparedEntry": {
+          "sourceSha256": "b05ec9c46f150c05b7249ee48bc3b1bdfcb2f60d851b4af81ff7298df49b5626",
+          "typescriptSha256": "027735f4d196d1c92d0868320d9313d4cabe9841a90566f433e2ff71d4350a36",
+          "status": "pass"
+        },
+        "instanceOwnership": "All IR constructors and neutral record factories belong to the checked compiler namespace.",
+        "strictSh1Qualified": false,
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "line": 2237,
+      "label": "PSC0_SH1_HELPER_RUNTIME",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:50:14.4142071Z PSC0_SH1_HELPER_RUNTIME: {\"schemaVersion\":1,\"evidence\":\"generated-compiler-exported-helper-behavior\",\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"coverage\":{\"nonApplicationHeads\":11,\"argumentLists\":7,\"prefixes\":2,\"suffixes\":2,\"nameBases\":3,\"usedNameListsPerBase\":7,\"attempts\":[0,7],\"typedPartialApplications\":false,\"expressionObservations\":1232,\"stringObservations\":336,\"observations\":1568},\"behavior\":\"independent application-spine and finite unique-name expectations\",\"kernelChecked\":false,\"exhaustiveForAllInputs\":false}",
+      "rawJson": "{\"schemaVersion\":1,\"evidence\":\"generated-compiler-exported-helper-behavior\",\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"coverage\":{\"nonApplicationHeads\":11,\"argumentLists\":7,\"prefixes\":2,\"suffixes\":2,\"nameBases\":3,\"usedNameListsPerBase\":7,\"attempts\":[0,7],\"typedPartialApplications\":false,\"expressionObservations\":1232,\"stringObservations\":336,\"observations\":1568},\"behavior\":\"independent application-spine and finite unique-name expectations\",\"kernelChecked\":false,\"exhaustiveForAllInputs\":false}",
+      "parsed": {
+        "schemaVersion": 1,
+        "evidence": "generated-compiler-exported-helper-behavior",
+        "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+        "coverage": {
+          "nonApplicationHeads": 11,
+          "argumentLists": 7,
+          "prefixes": 2,
+          "suffixes": 2,
+          "nameBases": 3,
+          "usedNameListsPerBase": 7,
+          "attempts": [
+            0,
+            7
+          ],
+          "typedPartialApplications": false,
+          "expressionObservations": 1232,
+          "stringObservations": 336,
+          "observations": 1568
+        },
+        "behavior": "independent application-spine and finite unique-name expectations",
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      }
+    },
+    {
+      "line": 2238,
+      "label": "PSC0_SH1_GENERIC_ERASURE",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:50:14.9798310Z PSC0_SH1_GENERIC_ERASURE: {\"schemaVersion\":1,\"evidence\":\"scoped-recursive-generic-erasure\",\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"sourceKind\":\"raw-authoritative-lean\",\"sourceSha256\":\"574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de\",\"originalIr\":{\"checks\":[\"one, two, and three declaration generics in exact declaration order\",\"interleaved type, erased proposition/proof, and runtime binders\",\"recursive calls retain the complete runtime argument count\",\"monomorphic recursive calls retain zero type arguments\"],\"observations\":[{\"declaration\":\"sh1GenericCopy\",\"declarationTypeParameters\":[\"T0\"],\"runtimeParameters\":[\"values\"],\"calls\":[{\"at\":\"declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd\",\"typeArguments\":[\"T0\"],\"runtimeArity\":1}]},{\"declaration\":\"sh1GenericMap\",\"declarationTypeParameters\":[\"T0\",\"T1\"],\"runtimeParameters\":[\"convert\",\"values\"],\"calls\":[{\"at\":\"declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd\",\"typeArguments\":[\"T0\",\"T1\"],\"runtimeArity\":2}]},{\"declaration\":\"sh1GenericTriple\",\"declarationTypeParameters\":[\"T0\",\"T1\",\"T2\"],\"runtimeParameters\":[\"first\",\"second\",\"third\",\"fuel\"],\"calls\":[{\"at\":\"declaration:sh1GenericTriple/body/elseBranch/body\",\"typeArguments\":[\"T0\",\"T1\",\"T2\"],\"runtimeArity\":4}]},{\"declaration\":\"sh1GenericMono\",\"declarationTypeParameters\":[],\"runtimeParameters\":[\"fuel\",\"value\"],\"calls\":[{\"at\":\"declaration:sh1GenericMono/body/elseBranch/body\",\"typeArguments\":[],\"runtimeArity\":2}]}],\"emittedIr\":\"The exact original IR inspected above is passed to psTsEmitModule.\",\"strictSh1Qualified\":false},\"artifacts\":{\"admissionsSha256\":\"11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8\",\"typescriptSha256\":\"86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e\",\"javascriptSha256\":\"ec1784595f07802909464d3f21980a471e166f2d82b49fece1e22dd14ea9b118\"},\"behavior\":{\"observations\":19,\"status\":\"pass\",\"exhaustiveForAllInputs\":false},\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false},\"native\":{\"typescriptSha256\":\"86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e\",\"behavior\":{\"observations\":19,\"status\":\"pass\",\"exhaustiveForAllInputs\":false}}}",
+      "rawJson": "{\"schemaVersion\":1,\"evidence\":\"scoped-recursive-generic-erasure\",\"compilerSha256\":\"5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15\",\"sourceKind\":\"raw-authoritative-lean\",\"sourceSha256\":\"574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de\",\"originalIr\":{\"checks\":[\"one, two, and three declaration generics in exact declaration order\",\"interleaved type, erased proposition/proof, and runtime binders\",\"recursive calls retain the complete runtime argument count\",\"monomorphic recursive calls retain zero type arguments\"],\"observations\":[{\"declaration\":\"sh1GenericCopy\",\"declarationTypeParameters\":[\"T0\"],\"runtimeParameters\":[\"values\"],\"calls\":[{\"at\":\"declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd\",\"typeArguments\":[\"T0\"],\"runtimeArity\":1}]},{\"declaration\":\"sh1GenericMap\",\"declarationTypeParameters\":[\"T0\",\"T1\"],\"runtimeParameters\":[\"convert\",\"values\"],\"calls\":[{\"at\":\"declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd\",\"typeArguments\":[\"T0\",\"T1\"],\"runtimeArity\":2}]},{\"declaration\":\"sh1GenericTriple\",\"declarationTypeParameters\":[\"T0\",\"T1\",\"T2\"],\"runtimeParameters\":[\"first\",\"second\",\"third\",\"fuel\"],\"calls\":[{\"at\":\"declaration:sh1GenericTriple/body/elseBranch/body\",\"typeArguments\":[\"T0\",\"T1\",\"T2\"],\"runtimeArity\":4}]},{\"declaration\":\"sh1GenericMono\",\"declarationTypeParameters\":[],\"runtimeParameters\":[\"fuel\",\"value\"],\"calls\":[{\"at\":\"declaration:sh1GenericMono/body/elseBranch/body\",\"typeArguments\":[],\"runtimeArity\":2}]}],\"emittedIr\":\"The exact original IR inspected above is passed to psTsEmitModule.\",\"strictSh1Qualified\":false},\"artifacts\":{\"admissionsSha256\":\"11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8\",\"typescriptSha256\":\"86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e\",\"javascriptSha256\":\"ec1784595f07802909464d3f21980a471e166f2d82b49fece1e22dd14ea9b118\"},\"behavior\":{\"observations\":19,\"status\":\"pass\",\"exhaustiveForAllInputs\":false},\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false},\"native\":{\"typescriptSha256\":\"86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e\",\"behavior\":{\"observations\":19,\"status\":\"pass\",\"exhaustiveForAllInputs\":false}}}",
+      "parsed": {
+        "schemaVersion": 1,
+        "evidence": "scoped-recursive-generic-erasure",
+        "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceSha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de",
+        "originalIr": {
+          "checks": [
+            "one, two, and three declaration generics in exact declaration order",
+            "interleaved type, erased proposition/proof, and runtime binders",
+            "recursive calls retain the complete runtime argument count",
+            "monomorphic recursive calls retain zero type arguments"
+          ],
+          "observations": [
+            {
+              "declaration": "sh1GenericCopy",
+              "declarationTypeParameters": [
+                "T0"
+              ],
+              "runtimeParameters": [
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0"
+                  ],
+                  "runtimeArity": 1
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMap",
+              "declarationTypeParameters": [
+                "T0",
+                "T1"
+              ],
+              "runtimeParameters": [
+                "convert",
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0",
+                    "T1"
+                  ],
+                  "runtimeArity": 2
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericTriple",
+              "declarationTypeParameters": [
+                "T0",
+                "T1",
+                "T2"
+              ],
+              "runtimeParameters": [
+                "first",
+                "second",
+                "third",
+                "fuel"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericTriple/body/elseBranch/body",
+                  "typeArguments": [
+                    "T0",
+                    "T1",
+                    "T2"
+                  ],
+                  "runtimeArity": 4
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMono",
+              "declarationTypeParameters": [],
+              "runtimeParameters": [
+                "fuel",
+                "value"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMono/body/elseBranch/body",
+                  "typeArguments": [],
+                  "runtimeArity": 2
+                }
+              ]
+            }
+          ],
+          "emittedIr": "The exact original IR inspected above is passed to psTsEmitModule.",
+          "strictSh1Qualified": false
+        },
+        "artifacts": {
+          "admissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+          "typescriptSha256": "86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e",
+          "javascriptSha256": "ec1784595f07802909464d3f21980a471e166f2d82b49fece1e22dd14ea9b118"
+        },
+        "behavior": {
+          "observations": 19,
+          "status": "pass",
+          "exhaustiveForAllInputs": false
+        },
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        },
+        "native": {
+          "typescriptSha256": "86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e",
+          "behavior": {
+            "observations": 19,
+            "status": "pass",
+            "exhaustiveForAllInputs": false
+          }
+        }
+      }
+    },
+    {
+      "line": 2262,
+      "label": "PSC0_TYPESCRIPT_PROFILE",
+      "statusPrefix": "PASS",
+      "exactLoggedLine": "2026-10-09T13:50:26.6917189Z PSC0_TYPESCRIPT_PROFILE: PASS {\"mode\":\"same-source-comparison\",\"report\":\"/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/full-compiler/report.json\",\"sourceSha256\":\"0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a\",\"timings\":[{\"phase\":\"compile-historical\",\"version\":\"5.8.3\",\"elapsedMs\":7604.513178},{\"phase\":\"compile-current\",\"version\":\"7.0.2\",\"elapsedMs\":2443.4186649999992}]}",
+      "rawJson": "{\"mode\":\"same-source-comparison\",\"report\":\"/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/full-compiler/report.json\",\"sourceSha256\":\"0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a\",\"timings\":[{\"phase\":\"compile-historical\",\"version\":\"5.8.3\",\"elapsedMs\":7604.513178},{\"phase\":\"compile-current\",\"version\":\"7.0.2\",\"elapsedMs\":2443.4186649999992}]}",
+      "parsed": {
+        "mode": "same-source-comparison",
+        "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/full-compiler/report.json",
+        "sourceSha256": "0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a",
+        "timings": [
+          {
+            "phase": "compile-historical",
+            "version": "5.8.3",
+            "elapsedMs": 7604.513178
+          },
+          {
+            "phase": "compile-current",
+            "version": "7.0.2",
+            "elapsedMs": 2443.4186649999992
+          }
+        ]
+      }
+    }
+  ],
+  "finalJobs": {
+    "jobs": [
+      {
+        "id": 113848451492,
+        "name": "compiler",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 37939061854,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Select the historical, v1, or qualified successor authoring seed",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run leanprover/lean-action@v1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install separate pinned current and historical TypeScript profiles",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Verify the installed TypeScript 7 profile before compiler generation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Verify host syntax and bootstrap source restrictions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Verify successor seed descriptor and cache contracts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Restore the selected qualified compiler bytes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Verify the restored selected compiler bytes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Restore the immutable v1 parent when a successor cache misses",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Route only the recovery edges whose exact cache is missing",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Preserve an immutable historical source checkout when recovery needs it",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Restore historical native build",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 15
+          },
+          {
+            "name": "Identify the pinned recovery recipe and toolchain",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 16
+          },
+          {
+            "name": "Restore exact historical seed",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 17
+          },
+          {
+            "name": "Verify seed digests or recover once from the preserved source",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 18
+          },
+          {
+            "name": "Retain historical native outputs before testing changed source",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 19
+          },
+          {
+            "name": "Retain verified seed before testing changed source",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 20
+          },
+          {
+            "name": "Retrieve the immutable v1 parent artifact if it is still retained",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 21
+          },
+          {
+            "name": "Read the immutable v1 source only when its bytes need recovery",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 22
+          },
+          {
+            "name": "Verify or recover the v1 seed with its original TypeScript replay",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 23
+          },
+          {
+            "name": "Retain recovered immutable parent bytes before successor recovery",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 24
+          },
+          {
+            "name": "Read the selected successor's pinned recovery runner and source",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 25
+          },
+          {
+            "name": "Retrieve the selected successor artifact when retained",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 26
+          },
+          {
+            "name": "Recover a missing successor with its own pinned runner under TypeScript 7",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 27
+          },
+          {
+            "name": "Verify selected authoring cache and execution runtime before current generation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28
+          },
+          {
+            "name": "Report retained seed IR type-argument findings",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29
+          },
+          {
+            "name": "Retain the verified qualified authoring seed",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 30
+          },
+          {
+            "name": "Restore incremental current compiler build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 31
+          },
+          {
+            "name": "Build current native compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 32
+          },
+          {
+            "name": "Run native parser, translation, and erasure regression targets",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 33
+          },
+          {
+            "name": "Build the actual native checked seed for source and import tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 34
+          },
+          {
+            "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          },
+          {
+            "name": "Verify native and generated TypeScript CLI boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 36
+          },
+          {
+            "name": "Run the bounded native development gate before qualification",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 37
+          },
+          {
+            "name": "Compare TypeScript 5 and 7 on the same complete emitted compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 38
+          },
+          {
+            "name": "Build the selected-seed candidate before full qualification",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 39
+          },
+          {
+            "name": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 40
+          },
+          {
+            "name": "Retain the newly qualified seed without activating a source migration",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 41
+          },
+          {
+            "name": "Retain incremental native outputs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 42
+          },
+          {
+            "name": "Retain compiler evidence and exact generated artifacts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 43
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 85
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 86
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 87
+          }
+        ]
+      },
+      {
+        "id": 113850787786,
+        "name": "successor-recovery",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 37939061854,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 113850788795,
+        "name": "kernel-admissions",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 37939061854,
+        "logs_url": null,
+        "steps": null
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 11621556102,
+      "name": "psc0-sh1-ts7.0.2-9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+      "size_in_bytes": 2761800,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11621556102",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11621556102/zip",
+      "expired": false,
+      "created_at": "2026-10-09T13:50:30Z",
+      "expires_at": "2026-11-08T13:50:28Z",
+      "updated_at": "2026-10-09T13:50:30Z",
+      "digest": "sha256:47ac36e9282cef6063dd69f13b643c00b4a9dc1b811a07b151155651729e8dde",
+      "workflow_run": {
+        "id": 37939061854,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/sh1-projection-grammar-v1",
+        "head_sha": "9ee0b1fd38dd1456a187d4675f9027440a989f2d"
+      }
+    }
+  ],
+  "run": {
+    "id": 37939061854,
+    "name": "PSC0 SH1 language qualification",
+    "node_id": "WFR_kwLOUlmxxc8AAAAI1VgkXg",
+    "head_branch": "psc0/sh1-projection-grammar-v1",
+    "head_sha": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+    "path": ".github/workflows/psc0-sh1.yml",
+    "display_title": "refactor(psc0): migrate finite worker families under selected R [sh1-…",
+    "run_number": 18,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "failure",
+    "workflow_id": 378853677,
+    "check_suite_id": 102793101169,
+    "check_suite_node_id": "CS_kwDOUlmxxc8AAAAX7vI_cQ",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37939061854",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/37939061854",
+    "pull_requests": [],
+    "created_at": "2026-10-09T13:44:55Z",
+    "updated_at": "2026-10-09T13:50:33Z",
+    "actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-09T13:44:55Z",
+    "triggering_actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37939061854/jobs",
+    "logs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37939061854/logs",
+    "check_suite_url": "https://api.github.com/repos/dwijayuda/pskernel/check-suites/102793101169",
+    "artifacts_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37939061854/artifacts",
+    "cancel_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37939061854/cancel",
+    "rerun_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37939061854/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/378853677",
+    "head_commit": {
+      "id": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+      "tree_id": "6ca49fe720cba8f70f31f67d42ff9a60b22bcc3a",
+      "message": "refactor(psc0): migrate finite worker families under selected R [sh1-qualify]\n\nReplace twelve selected higher-order worker adapters with ordinary state parameters and remove three scoped projection aliases. Preserve public curried types, parameter order, structural recursion, fuel and error behavior.\n\nCheck independent and paired R/F behavior, actual public Core types and ordered IR signatures in the existing qualification. Enforce the new-only PS grammar in reusable preparation sessions and retain exact provider receipt bytes. Keep R selected and qualify F without another successor promotion.",
+      "timestamp": "2026-10-09T13:44:36Z",
+      "author": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      },
+      "committer": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    },
+    "head_repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    }
+  },
+  "selectedSeedChanged": false,
+  "sourceOrRefMutatedByMonitor": false
+}

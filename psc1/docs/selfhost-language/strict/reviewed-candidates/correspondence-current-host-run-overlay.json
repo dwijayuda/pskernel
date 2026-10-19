@@ -1,0 +1,678 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-correspondence-current-host-run-metadata-overlay",
+  "status": "metadata projection only; actual complete qualification and provider evidence pending",
+  "repository": "dwijayuda/pskernel",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-current-host-run-overlay.json",
+  "scope": "Apply only current source, tree, ledger, run and reviewed host-transport metadata to the attached immutable c5a831 source-transport draft and 1e590688 final33 procedure. Reuse their entire source patch, 33 disposition plans, arguments, receipt selectors and retained limits. Record the complete final receipt-group and prepared-row binding rules without changing frozen source or proof rows.",
+  "baseArtifacts": {
+    "transport": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-current-transport.json",
+      "blob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+      "sha256": "593af3fbe36132afa5e3e6b733c811946d3aed3f4b4a4b8e575e516026b41619",
+      "utf8Bytes": 151758
+    },
+    "procedure": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-final-assembly-procedure.json",
+      "blob": "1e590688c1d6c87970caa4e22388310a2664b234",
+      "sha256": "fb0439106ef5b6e6afc39e9e63bb29e888260fd2ecd3ca6ff83c387126f0a9c1",
+      "utf8Bytes": 148777
+    },
+    "historicalSource": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "historicalLedger": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+    "historicalLedgerRole": "Retain every rowPlans historicalNotEstablished pointer and assurance source citation to this exact ledger. Its row contents are byte-equivalent under canonical JSON to the current active array."
+  },
+  "currentBinding": {
+    "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "rootTree": "600c031e9235d20baa8bf074aba8c550509f50a4",
+    "psc0Tree": "54b05a1c135ad5c7aff0902658465159a223757c",
+    "psc0Blobs": 1423,
+    "githubTree": "d99de06d8d56b5702b2ec2dff61a24e36c99615b",
+    "ledger": {
+      "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+      "blob": "df1d39c6067b5233af770c798bca6e3247f7f813",
+      "sha256": "6af29f4bffe9bc0f1ad9c0a5ac2c855080b1bcbef5b75f606f0dc7490cc53478",
+      "bytes": 143472,
+      "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
+    },
+    "runIdentity": {
+      "runId": 38015134511,
+      "runAttempt": 1,
+      "workflowId": 378853677,
+      "compilerJobId": 114103608774,
+      "createdAt": "2026-10-10T01:57:04Z",
+      "sourceCommit": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "provenance": "Root-reported newly created full run; artifact agent owns live monitoring. No terminal result or actual qualification/provider artifact is asserted by this overlay."
+    },
+    "expectedQualificationInputs": {
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "recipeFileCount": 48,
+      "status": "published expected inputs; actual run receipt verification pending",
+      "source": "current active ledger /currentQualificationRequest"
+    },
+    "executableHostPins": [
+      {
+        "path": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+        "blob": "d08d8c622f68314db32ef38d03539a8130abf3f6",
+        "sha256": "7c34c498b505158f45dbe5f11f367038e9dd03cb297d2b83dea7c79b13e05472",
+        "utf8Bytes": 41494
+      },
+      {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "blob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+        "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+        "utf8Bytes": 73618
+      },
+      {
+        "path": ".github/workflows/psc0-sh1.yml",
+        "blob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+        "sha256": "2bed091157fce89dea162719a4fe0d7d23deb4be90910aae344f7cb29d405cd5",
+        "utf8Bytes": 25735
+      }
+    ],
+    "hostTransport": {
+      "kind": "reviewed-host-observation-schema-transport-only",
+      "repair": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/worker-migration-observation-schema-repair.json",
+        "blob": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+        "sha256": "7604f87bf95b202663619d47efedb9114bbf91873534e8725bcca5409c601244",
+        "bytes": 90952
+      },
+      "independentReview": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/migration-worker-metadata-independent-review.json",
+        "blob": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+        "sha256": "98614a819fee257bfd8546d06f053017d2f289aad8b4ed0f66e11cf747991f33",
+        "bytes": 27661
+      },
+      "sourceArgumentPointer": "/sourceProof/projectionArgument",
+      "scope": "Only the source-proven empty unprepared-scope observation is completed for explicit authenticated R callers. Current metadata remains required, all87 cases and exact same-generation/post-C1 comparisons remain; the early R/N1 gate reuses existing receipts without compiler execution.",
+      "productionSourceEdits": 0,
+      "preparedSourceRowEdits": 0,
+      "newReceiptGroups": 0,
+      "strictDischarges": 0
+    }
+  },
+  "projections": {
+    "format": "RFC6902 subset: exact test, replace, and add. Apply sequentially to independent JSON clones of the corresponding authenticated base document. Before add, require the target property absent; never replace an existing property implicitly.",
+    "transport": {
+      "baseArtifact": "/baseArtifacts/transport",
+      "operations": [
+        {
+          "op": "test",
+          "path": "/scope",
+          "value": "Reuse the completed 33-row mapping and review; associate only the subsequent two Expr spelling transports and two host evidence-consumer updates. No new general argument review, language capability or proof scope. The pattern/callback/host transports are already published; the reused final common conditions' source-integration portion is satisfied by those exact pins, while all actual qualification/provider references are still deferred."
+        },
+        {
+          "op": "replace",
+          "path": "/scope",
+          "value": "Reuse the frozen33-row map, reviewed source arguments and prior producer transports, including the closed-universe inference repair. This current metadata projection additionally binds the reviewed host observation schema correction and its data-only early gate. Production source/proof rows and limits are unchanged; actual complete qualification and provider evidence remain pending."
+        },
+        {
+          "op": "test",
+          "path": "/base/commit",
+          "value": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91"
+        },
+        {
+          "op": "replace",
+          "path": "/base/commit",
+          "value": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+        },
+        {
+          "op": "test",
+          "path": "/base/rootTree",
+          "value": "c7903f7b30b45f08f7c311869681b4ca1a9908c9"
+        },
+        {
+          "op": "replace",
+          "path": "/base/rootTree",
+          "value": "600c031e9235d20baa8bf074aba8c550509f50a4"
+        },
+        {
+          "op": "test",
+          "path": "/base/psc0Tree",
+          "value": "3cb88a6ee17b429cfde8215819fb789c3c2910ca"
+        },
+        {
+          "op": "replace",
+          "path": "/base/psc0Tree",
+          "value": "54b05a1c135ad5c7aff0902658465159a223757c"
+        },
+        {
+          "op": "test",
+          "path": "/base/psc0Blobs",
+          "value": 1410
+        },
+        {
+          "op": "replace",
+          "path": "/base/psc0Blobs",
+          "value": 1423
+        },
+        {
+          "op": "test",
+          "path": "/base/ledger",
+          "value": {
+            "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+            "blob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+            "sha256": "88699d32fc09e0350d79f36bc9d005a3dfd5dedfd52f22c60da8cb4d4ec2fafb",
+            "bytes": 136640,
+            "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/base/ledger",
+          "value": {
+            "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+            "blob": "df1d39c6067b5233af770c798bca6e3247f7f813",
+            "sha256": "6af29f4bffe9bc0f1ad9c0a5ac2c855080b1bcbef5b75f606f0dc7490cc53478",
+            "bytes": 143472,
+            "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
+          }
+        },
+        {
+          "op": "test",
+          "path": "/sourcePatch/currentTreeVerification",
+          "value": "verified-against-published-PSC-tree-3cb88a6ee17b429cfde8215819fb789c3c2910ca"
+        },
+        {
+          "op": "replace",
+          "path": "/sourcePatch/currentTreeVerification",
+          "value": "source-pins-transported-unchanged-to-published-PSC-tree-54b05a1c135ad5c7aff0902658465159a223757c"
+        },
+        {
+          "op": "test",
+          "path": "/validation/currentTreeVerification",
+          "value": "verified-against-published-PSC-tree-3cb88a6ee17b429cfde8215819fb789c3c2910ca"
+        },
+        {
+          "op": "replace",
+          "path": "/validation/currentTreeVerification",
+          "value": "source-pins-transported-unchanged-to-published-PSC-tree-54b05a1c135ad5c7aff0902658465159a223757c"
+        },
+        {
+          "op": "test",
+          "path": "/commonRowDisposition/evidenceBindingTemplate/sourceCommit",
+          "value": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91"
+        },
+        {
+          "op": "replace",
+          "path": "/commonRowDisposition/evidenceBindingTemplate/sourceCommit",
+          "value": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+        },
+        {
+          "op": "test",
+          "path": "/proofTransportApplication/currentSourceHead",
+          "value": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91"
+        },
+        {
+          "op": "replace",
+          "path": "/proofTransportApplication/currentSourceHead",
+          "value": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+        },
+        {
+          "op": "test",
+          "path": "/proofTransportApplication/currentLedgerBlob",
+          "value": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a"
+        },
+        {
+          "op": "replace",
+          "path": "/proofTransportApplication/currentLedgerBlob",
+          "value": "df1d39c6067b5233af770c798bca6e3247f7f813"
+        },
+        {
+          "op": "test",
+          "path": "/latestQualificationNotice/nextQualification",
+          "value": {
+            "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+            "runId": null,
+            "status": "requested-pending-actual-run-and-artifact-bindings",
+            "qualificationArtifactReference": null,
+            "providerArtifactReference": null
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/latestQualificationNotice/nextQualification",
+          "value": {
+            "runId": 38015134511,
+            "runAttempt": 1,
+            "workflowId": 378853677,
+            "compilerJobId": 114103608774,
+            "createdAt": "2026-10-10T01:57:04Z",
+            "sourceCommit": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+            "provenance": "Root-reported newly created full run; artifact agent owns live monitoring. No terminal result or actual qualification/provider artifact is asserted by this overlay.",
+            "status": "pending-authentic-full-qualification-and-provider",
+            "qualificationArtifactReference": null,
+            "providerArtifactReference": null,
+            "expectedInputs": {
+              "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+              "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+              "recipeFileCount": 48,
+              "status": "published expected inputs; actual run receipt verification pending",
+              "source": "current active ledger /currentQualificationRequest"
+            }
+          }
+        },
+        {
+          "op": "add",
+          "path": "/transports/workerObservation",
+          "value": {
+            "kind": "reviewed-host-observation-schema-transport-only",
+            "repair": {
+              "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/worker-migration-observation-schema-repair.json",
+              "blob": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+              "sha256": "7604f87bf95b202663619d47efedb9114bbf91873534e8725bcca5409c601244",
+              "bytes": 90952
+            },
+            "independentReview": {
+              "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/migration-worker-metadata-independent-review.json",
+              "blob": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+              "sha256": "98614a819fee257bfd8546d06f053017d2f289aad8b4ed0f66e11cf747991f33",
+              "bytes": 27661
+            },
+            "sourceArgumentPointer": "/sourceProof/projectionArgument",
+            "scope": "Only the source-proven empty unprepared-scope observation is completed for explicit authenticated R callers. Current metadata remains required, all87 cases and exact same-generation/post-C1 comparisons remain; the early R/N1 gate reuses existing receipts without compiler execution.",
+            "productionSourceEdits": 0,
+            "preparedSourceRowEdits": 0,
+            "newReceiptGroups": 0,
+            "strictDischarges": 0
+          }
+        },
+        {
+          "op": "add",
+          "path": "/proofTransportApplication/hostObservationSupplement",
+          "value": {
+            "repair": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+            "independentReview": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+            "scope": "Required host/receipt transport; no production source-row or general argument change."
+          }
+        }
+      ],
+      "operationCount": 26,
+      "testCount": 12,
+      "metadataMutationCount": 14,
+      "operationsSha256": "9e4f88edbd150c3e8ef13830afc68c796895d6ef2ccbe46f73c67575c3661166",
+      "projectedSha256": "224c11b5e10e1e91f3aca45efe73190c0f5ff8317217e51dfc6e6af669f33c0f",
+      "projectedUtf8Bytes": 154003,
+      "protectedJsonValues": [
+        {
+          "jsonPointer": "/sourcePatch/operations",
+          "sha256": "ab6db5609bd2567f195ca152f9ceb356c35fdc329337bfcfe5ff89a51997d6f0"
+        },
+        {
+          "jsonPointer": "/proposedRowDispositions",
+          "sha256": "56a93f107d41c11a2fca7ff47f3311ad84e54bb760ba9887c1645ba8f5bd40db"
+        },
+        {
+          "jsonPointer": "/receiptSelectors",
+          "sha256": "15209e1baa5df3cc78e65c4e4caecd3ea1346477ec1a6a4ccfa63fae174529da"
+        },
+        {
+          "jsonPointer": "/reviewReuse",
+          "sha256": "bc24afc1274cb1a62493f52df01278c6bbbcae90c8add6d1b4dd9d1e8792f19b"
+        },
+        {
+          "jsonPointer": "/frozenPaperPins",
+          "sha256": "3feb90bccf6039a8b57876101bd2012673f3a2cbe8f2914526b7c9a3aecd1990"
+        },
+        {
+          "jsonPointer": "/requiredMetadataCorrection",
+          "sha256": "94e9f04a07f95158d4be18c4277d5c81a6d4b9d8a06ea276fa7a5628c23fd759"
+        },
+        {
+          "jsonPointer": "/criticalPreservation",
+          "sha256": "a68f7eee8d81dcea726a42c23e615dd93703cb2a93b54ecf832b02bcffe14607"
+        },
+        {
+          "jsonPointer": "/supplementalClosedUniverseTransport",
+          "sha256": "17826e8328379da876945a3aecaa796ee6bcb727694a1ffdf19e8187f24ec13e"
+        },
+        {
+          "jsonPointer": "/protectedState",
+          "sha256": "15e82edca9a3f5eb2e705153a6e694c46980c09860de2bed56030b8f443a4d03"
+        }
+      ]
+    },
+    "procedure": {
+      "baseArtifact": "/baseArtifacts/procedure",
+      "operations": [
+        {
+          "op": "test",
+          "path": "/currentInput/sourceCommit",
+          "value": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91"
+        },
+        {
+          "op": "replace",
+          "path": "/currentInput/sourceCommit",
+          "value": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+        },
+        {
+          "op": "test",
+          "path": "/currentInput/sourceRootTree",
+          "value": "c7903f7b30b45f08f7c311869681b4ca1a9908c9"
+        },
+        {
+          "op": "replace",
+          "path": "/currentInput/sourceRootTree",
+          "value": "600c031e9235d20baa8bf074aba8c550509f50a4"
+        },
+        {
+          "op": "test",
+          "path": "/currentInput/psc0Tree",
+          "value": "3cb88a6ee17b429cfde8215819fb789c3c2910ca"
+        },
+        {
+          "op": "replace",
+          "path": "/currentInput/psc0Tree",
+          "value": "54b05a1c135ad5c7aff0902658465159a223757c"
+        },
+        {
+          "op": "test",
+          "path": "/currentInput/ledger",
+          "value": {
+            "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+            "blob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+            "sha256": "88699d32fc09e0350d79f36bc9d005a3dfd5dedfd52f22c60da8cb4d4ec2fafb",
+            "bytes": 136640,
+            "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/currentInput/ledger",
+          "value": {
+            "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+            "blob": "df1d39c6067b5233af770c798bca6e3247f7f813",
+            "sha256": "6af29f4bffe9bc0f1ad9c0a5ac2c855080b1bcbef5b75f606f0dc7490cc53478",
+            "bytes": 143472,
+            "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
+          }
+        },
+        {
+          "op": "test",
+          "path": "/currentInput/qualificationIdentity",
+          "value": {
+            "runId": 38011068208,
+            "compilerJobId": 114090942895,
+            "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+            "provenance": "root-reported active run identity; this preparation makes no terminal success claim"
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/currentInput/qualificationIdentity",
+          "value": {
+            "runId": 38015134511,
+            "runAttempt": 1,
+            "workflowId": 378853677,
+            "compilerJobId": 114103608774,
+            "createdAt": "2026-10-10T01:57:04Z",
+            "sourceCommit": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+            "provenance": "Root-reported newly created full run; artifact agent owns live monitoring. No terminal result or actual qualification/provider artifact is asserted by this overlay."
+          }
+        },
+        {
+          "op": "test",
+          "path": "/fieldMaintenance/generalArgumentReviewTemplate/currentSourceTransport/sourceCommit",
+          "value": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91"
+        },
+        {
+          "op": "replace",
+          "path": "/fieldMaintenance/generalArgumentReviewTemplate/currentSourceTransport/sourceCommit",
+          "value": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+        },
+        {
+          "op": "test",
+          "path": "/fieldMaintenance/dischargeEvidenceTemplate/qualificationSourceCommit",
+          "value": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91"
+        },
+        {
+          "op": "replace",
+          "path": "/fieldMaintenance/dischargeEvidenceTemplate/qualificationSourceCommit",
+          "value": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+        },
+        {
+          "op": "test",
+          "path": "/procedure/0/action",
+          "value": "Read/hash the exact current correspondence ledger cdaf9, current source transport c5a, frozen map697c94, independent map review20f, all referenced paper/repair/review artifacts, and the independently assembled actual final release record and artifact inspections. Refuse stale/missing hashes, pointers or source identities; do not silently rebase."
+        },
+        {
+          "op": "replace",
+          "path": "/procedure/0/action",
+          "value": "Read/hash the exact current correspondence ledger identified by currentInput.ledger, immutable c5a source transport plus this guarded current metadata overlay, frozen map697c94, independent map review20f, all referenced paper/repair/review artifacts, and the independently assembled actual final release record and artifact inspections. Refuse stale/missing hashes, pointers or source identities; do not silently rebase."
+        },
+        {
+          "op": "add",
+          "path": "/currentInput/hostObservationTransport",
+          "value": {
+            "kind": "reviewed-host-observation-schema-transport-only",
+            "repair": {
+              "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/worker-migration-observation-schema-repair.json",
+              "blob": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+              "sha256": "7604f87bf95b202663619d47efedb9114bbf91873534e8725bcca5409c601244",
+              "bytes": 90952
+            },
+            "independentReview": {
+              "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/migration-worker-metadata-independent-review.json",
+              "blob": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+              "sha256": "98614a819fee257bfd8546d06f053017d2f289aad8b4ed0f66e11cf747991f33",
+              "bytes": 27661
+            },
+            "sourceArgumentPointer": "/sourceProof/projectionArgument",
+            "scope": "Only the source-proven empty unprepared-scope observation is completed for explicit authenticated R callers. Current metadata remains required, all87 cases and exact same-generation/post-C1 comparisons remain; the early R/N1 gate reuses existing receipts without compiler execution.",
+            "productionSourceEdits": 0,
+            "preparedSourceRowEdits": 0,
+            "newReceiptGroups": 0,
+            "strictDischarges": 0
+          }
+        },
+        {
+          "op": "add",
+          "path": "/currentInput/expectedQualificationInputs",
+          "value": {
+            "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+            "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+            "recipeFileCount": 48,
+            "status": "published expected inputs; actual run receipt verification pending",
+            "source": "current active ledger /currentQualificationRequest"
+          }
+        },
+        {
+          "op": "add",
+          "path": "/fieldMaintenance/generalArgumentReviewTemplate/hostObservationTransport",
+          "value": {
+            "repair": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+            "independentReview": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+            "sourceArgumentPointer": "/sourceProof/projectionArgument",
+            "scope": "Record reviewed finite host observation transport separately from the unchanged production/general source arguments."
+          }
+        }
+      ],
+      "operationCount": 19,
+      "testCount": 8,
+      "metadataMutationCount": 11,
+      "operationsSha256": "2c2278fdcc7c362ba8a2a3ca412a0b59e67e5cbbcdd4a76f21ecf017ba2ea719",
+      "projectedSha256": "c24f4b12f463211d30db0bb1d934735677acd52b182402a152b9ba8640372dac",
+      "projectedUtf8Bytes": 151075,
+      "protectedJsonValues": [
+        {
+          "jsonPointer": "/rowPlans",
+          "sha256": "71c2fdfe7fa46468207d2f852399264a449d9220e3ec45301e1bc3229ad8f4ca"
+        },
+        {
+          "jsonPointer": "/fixedMappings",
+          "sha256": "adb9dc8327e4e1e5ee0a848fcacfddbca41e37fd0a099c850c34289b5bb98667"
+        },
+        {
+          "jsonPointer": "/assuranceInterpretation",
+          "sha256": "9fce10dd4b49322d626695a6d2af7feb641942df66b8d31230089acc82b9a8c5"
+        },
+        {
+          "jsonPointer": "/criticalPreservation",
+          "sha256": "db7f77cdb5982d9f03722d4c0eb64a148e56cf6983be7697d914b047f3b42c66"
+        },
+        {
+          "jsonPointer": "/completionPrerequisites",
+          "sha256": "c82f7c76620263e2af1a3604700fb11cb50a31d9db49e7433b7708e868a44692"
+        },
+        {
+          "jsonPointer": "/fieldMaintenance/commonPerCompilationLimits",
+          "sha256": "068c82cae4fc7337d01009f0df79c7ccc7d69fa87ddc2f193ffd7bd311c72f9d"
+        },
+        {
+          "jsonPointer": "/fieldMaintenance/sourceAndDomainChanges",
+          "sha256": "265f11c875698f2573dfa60b17e4eb6fec85909501c4b377cf1702969fcc501f"
+        },
+        {
+          "jsonPointer": "/preparationChecks",
+          "sha256": "73f55fc8b33c29fdc97a6b9daf6839ab5a412485edd6fae1281bf6490c117c37"
+        },
+        {
+          "jsonPointer": "/procedure/1",
+          "sha256": "46b5865c6a215b52876831dc5706ddf6dd3e3a1e62b6be14d8d20256ee73bae1"
+        },
+        {
+          "jsonPointer": "/procedure/2",
+          "sha256": "839fe29ea74ed8c7182c921332ffd11224d2dbc960f8c72d68192dc2d3d6cb37"
+        },
+        {
+          "jsonPointer": "/procedure/3",
+          "sha256": "c9bde015af8e9a74ac142ff724c928ffe0fe15d33784a80884e4ebd1fc6e3590"
+        },
+        {
+          "jsonPointer": "/procedure/4",
+          "sha256": "cbc02ef1fc38a04145ed7714579726c0d324088336e31e5c52a73ed859b8075f"
+        },
+        {
+          "jsonPointer": "/procedure/5",
+          "sha256": "93daa990a5411d528461af9e9db56b494489147f5569916fc6b095875a9686ba"
+        },
+        {
+          "jsonPointer": "/procedure/6",
+          "sha256": "a673bd2184f466b5ea63bedd0fc02a3f6a392b7c4611aa0e12e4744f863a5e21"
+        },
+        {
+          "jsonPointer": "/procedure/7",
+          "sha256": "49853cfa3f6b56aab564c89cbf026e3e391b5396085751efd5f6f71c82a4f4a8"
+        },
+        {
+          "jsonPointer": "/procedure/8",
+          "sha256": "31c980ede745a92d38369e6fe713250a998888772461c78fbbffaf660703cb2e"
+        },
+        {
+          "jsonPointer": "/procedure/9",
+          "sha256": "99faa8751cb203702566137305dca7b0bafbcb2a8aa23acdc95965aef5fa9694"
+        },
+        {
+          "jsonPointer": "/procedure/10",
+          "sha256": "8f615960cb2ab4ebf6549f8ebb24ea27e0e05c90d09990b62773423284384d0c"
+        }
+      ]
+    },
+    "projectedDocumentSerialization": "JSON.stringify(projected,null,2) plus one LF; JSON value hashes use compact JSON.stringify(value) without LF.",
+    "projectedDocumentsAreNotNewBlobs": true
+  },
+  "unchangedSourceRowBinding": {
+    "currentActiveRowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55",
+    "sourcePatch": {
+      "baseBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+      "jsonPointer": "/sourcePatch/operations",
+      "sha256": "ab6db5609bd2567f195ca152f9ceb356c35fdc329337bfcfe5ff89a51997d6f0",
+      "operations": 151,
+      "tests": 92
+    },
+    "preparedRowsSha256": "aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c",
+    "preparedCurrentLedgerSha256": "219ac9a7bd825f4ece3aa270404d89ee0a01c1545d204f71d6a462a84e808108",
+    "preparedCurrentLedgerSerialization": "JSON.stringify(result,null,2) plus LF after applying the unchanged151 operations to currentBinding.ledger.",
+    "pureReplay": {
+      "operations": 151,
+      "tests": 92,
+      "operationsSha256": "ab6db5609bd2567f195ca152f9ceb356c35fdc329337bfcfe5ff89a51997d6f0",
+      "activeRowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55",
+      "preparedRowsSha256": "aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c",
+      "preparedLedgerSha256": "219ac9a7bd825f4ece3aa270404d89ee0a01c1545d204f71d6a462a84e808108",
+      "allFlagsFalse": true,
+      "rowProofReviewRepeated": false
+    },
+    "treeOnlyTransport": {
+      "count": 224,
+      "oldTree": "3cb88a6ee17b429cfde8215819fb789c3c2910ca",
+      "newTree": "54b05a1c135ad5c7aff0902658465159a223757c",
+      "vectorSha256": "36ac89b7acfa75bcf448487ae7e347e8dc8557aff0257ad60cf47ec1cb8638f4",
+      "unchanged": true,
+      "method": "Compare only published tree path/gitBlob/size vectors; no source proof or compiler execution repeated.",
+      "countMeaning": "All .lean file entries under packages/ in both published PSC trees; this contains the complete production source set. Only path/blob/size vectors were compared.",
+      "referencedRowSources": 72,
+      "uniqueReferencedSourcePins": 19,
+      "frozenPaperPins": 8
+    },
+    "rowPlanCount": 33,
+    "sourceOrRowProofsReopened": 0,
+    "sourceOrDefinitionEdits": 0,
+    "domainEditsBeyondExistingC5Patch": 0,
+    "perCompilation": "All33 procedure rowPlans and every historical perCompilation pointer/hash/index/string-construction plan remain exactly unchanged. The37 retained original strings and resulting limit hashes remain mandatory.",
+    "preservedCriticalConditions": "Existing ER-06 exact domain replacement; ER-04 helper defined but unused; both ER-08 routes; TS-07 one/two logical-call accounting; closed-universe finite/symbolic limits; runtime contract, R selection, TS7, new-only grammar and all produced nonclaims remain the frozen requirements."
+  },
+  "releaseAssemblyCoordination": {
+    "frozenReleaseBase": {
+      "blob": "e8023de73e4956c0217de5044950404705fedcea",
+      "sha256": "92dc055ffcdb2b3709164532d9a991437b401803d484c55f932ddd241ab285d3"
+    },
+    "frozenReleaseSourceOverlay": {
+      "blob": "f38f814fdba7af53c147e0f1d68cafcd8e0b74b3",
+      "sha256": "6389403a228f204dbfdcc0107318e2bff47906a9c03b57ca55461eb80afc1196"
+    },
+    "requiredCurrentReleaseStageOverlayPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/release-stage-current-host-overlay.json",
+    "coordination": "The stage agent's current overlay will bind this overlay's exact blob/hash and the same current source/run. It is an external final-assembly prerequisite; this packet keeps no reciprocal blob pointer, avoiding a hash cycle.",
+    "finalReleasePath": "psc0/docs/selfhost-language/strict/release-qualification.json",
+    "correspondenceRowPointerPattern": "/correspondenceDispositions/{i}",
+    "stageRowPointerPattern": "/stageDispositions/{i}",
+    "qualificationArtifactReference": null,
+    "strictBinderArtifactReference": null,
+    "providerArtifactReference": null,
+    "finalReleaseBlob": null,
+    "finalCorrespondenceBinding": {
+      "status": "Deferred integration rule; no final release or ledger is created by this overlay.",
+      "procedureBlob": "1e590688c1d6c87970caa4e22388310a2664b234",
+      "projectedProcedurePointer": "/projections/procedure",
+      "rowIdentityPointerPattern": "/rowPlans/{i}/id",
+      "completeOrderedReceiptGroupsPointerPattern": "/rowPlans/{i}/requiredReceiptGroups",
+      "receiptRule": "For each matching index and id, use the exact ordered requiredReceiptGroups list from the unchanged final33 row plan. It already includes the common generations, strict-binder, grammar, resource, toolchain and provider prerequisites plus the distinct row-specific groups. Bind every required group to its actual current-run receipt references and retain its scope and limits. The frozen map's shorter row-specific list remains historical provenance and is not sufficient by itself for release qualification.",
+      "activeSourceRowGuardPointerPattern": "/rowPlans/{i}/guards/activeRowSha256",
+      "preparedSourceRowGuardPointerPattern": "/rowPlans/{i}/guards/sourcePreparedRowSha256",
+      "releaseRowPointerPattern": "/correspondenceDispositions/{i}",
+      "sourceRowSha256Rule": "Preserve sourceRowSha256 as the exact pre-transport active-row guard.",
+      "sourcePreparedRowSha256Rule": "Add sourcePreparedRowSha256 as the exact prepared-row guard after applying the unchanged c5 source patch to the current ledger.",
+      "er01PreparedRowSha256": "7246edf4e61776cdae15d9f96e043e0ac79f537c41a9f35cf98f2fb17ab90fb3",
+      "frozenMapOrRowPlanChanges": 0
+    }
+  },
+  "useAfterAuthenticPass": [
+    "Authenticate the frozen base documents, current published source/tree/ledger, this overlay and the separately pinned current release/stage overlay. Require identical current source/run bindings; stale or missing metadata refuses.",
+    "Apply only these 45 metadata operations to in-memory base-document clones and check both projected hashes and protected values. Frozen files and their historical pins remain untouched; the projected current source refers to the reviewed transport to 1fa5559, without claiming that the frozen artifacts were authored there.",
+    "Require actual full qualification, strict-binder and separate selected-provider acceptance on currentBinding.sourceRef. Compare actual source closure/48-file recipe identities to the published expected inputs; predicted values are not execution receipts.",
+    "Apply the unchanged c5 source operations to the authenticated current active ledger and require active rows SHA 39e543 and prepared rows SHA aa3ba3 plus every original row guard. Do not alter source, proof or limit fields beyond the already reviewed procedure.",
+    "Finalize and hash the actual combined release record first. Its correspondence records must bind the complete ordered receipt groups and both active and prepared row guards specified by releaseAssemblyCoordination.finalCorrespondenceBinding. Then execute the unchanged 33-row disposition logic using the projected current metadata and corresponding /correspondenceDispositions/i references. Preserve generalPreservationProven=false conservatively, as the frozen procedure specifies.",
+    "Aggregate activation additionally requires the stage agent's 27 compatible final dispositions. A later documentation-only publication must preserve the actual qualified compiler-source identity and state its metadata transport."
+  ],
+  "boundaries": {
+    "strictSh1Qualified": false,
+    "strictSh1Discharged": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "finalLedgerCreated": false,
+    "activeRowsChanged": 0,
+    "stageRowsChanged": 0,
+    "compilerExecutions": 0,
+    "testsRun": 0,
+    "sourceChanges": 0,
+    "refOrCommitWrites": 0,
+    "activeRunMonitoredHere": false,
+    "activeLogsRead": 0,
+    "generalProofReviewRepeated": false,
+    "legacyFalseBooleanRedefinedAsMachineCheckedOnly": false,
+    "oldActualReceiptsPromotedToNewRun": false,
+    "expectedRecipePromotedToActualReceipt": false
+  }
+}

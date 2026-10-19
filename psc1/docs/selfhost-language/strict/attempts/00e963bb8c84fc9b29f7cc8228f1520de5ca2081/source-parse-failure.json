@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "kind": "strict-sh1-exact-source-failed-attempt",
+  "status": "failed-evidence-retained",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "sourceCommit": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+  "run": {
+    "id": 38004581681,
+    "attempt": 1,
+    "workflowId": 378853677,
+    "status": "completed",
+    "conclusion": "failure",
+    "createdAt": "2026-10-09T23:28:21Z",
+    "completedByUpdatedAt": "2026-10-09T23:29:37Z",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38004581681"
+  },
+  "jobs": {
+    "compiler": {
+      "id": 114070320734,
+      "status": "completed",
+      "conclusion": "failure",
+      "failedStep": {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 24
+      }
+    },
+    "provider": {
+      "id": 114070642522,
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  },
+  "failure": {
+    "timestamp": "2026-10-09T23:29:32.5344343Z",
+    "logLine": 2184,
+    "marker": "PSC0_SH1_STRICT_SOURCE_NATIVE_REJECTED",
+    "rawPayload": "{\"schemaVersion\":1,\"evidence\":\"native-atomic-source-refusal\",\"strictSh1Qualified\":false,\"semanticContractQualified\":false,\"providerChecked\":false,\"stage\":\"source\",\"code\":\"source-compiler\",\"moduleName\":\"Ps.Erasure.Expr\",\"detail\":\"641:31: expected '=>', got '('\"}",
+    "receipt": {
+      "schemaVersion": 1,
+      "evidence": "native-atomic-source-refusal",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false,
+      "stage": "source",
+      "code": "source-compiler",
+      "moduleName": "Ps.Erasure.Expr",
+      "detail": "641:31: expected '=>', got '('"
+    },
+    "followingException": "uncaught exception: PSC0_SH1_STRICT_SOURCE_NATIVE_REJECTED",
+    "assertion": {
+      "code": "ERR_ASSERTION",
+      "message": "PSC0_SH1_STRICT_NATIVE_EXECUTION",
+      "actual": 1,
+      "expected": 0,
+      "operator": "strictEqual",
+      "site": "psc0/scripts/sh1-qualify.mjs:918:10"
+    },
+    "processExitCode": 1
+  },
+  "sourceInspection": {
+    "module": "Ps.Erasure.Expr",
+    "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+    "blob": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+    "line": 641,
+    "source": "      | List.cons elementType (List.cons accumulatorType List.nil) =>",
+    "function": "psEraseArrayFoldl",
+    "classification": "The owned source parser refused a nested constructor pattern after the current native Lean build had passed. This identifies a source-syntax boundary; no compiler correction or rerun is part of this evidence."
+  },
+  "stageStatus": {
+    "nativeCompilerBuild": "passed-step18",
+    "nativeParserTranslationErasureRegression": "passed-step19",
+    "nativeCheckedSeed": "passed-step20",
+    "newGrammarImportsAndWorkspaceBoundaries": "passed-step21",
+    "nativeAndGeneratedTypeScriptCliReplay": "passed-step22",
+    "authenticatedRMigrationAndIsolatedAbiProbe": "passed-step23",
+    "N1": "failed-step24-during-owned-source-parse",
+    "N1SuccessReceiptObserved": false,
+    "C1": "skipped-step25",
+    "C2_C3": "skipped-step26",
+    "qualifiedSeedRetention": "skipped-step27",
+    "provider": "skipped",
+    "optimizedTailNewIrEvidence": "not-reached-in-native-development",
+    "artifactRetention": "passed-steps28-and29"
+  },
+  "passedEvidence": {
+    "replay": {
+      "timestamp": "2026-10-09T23:29:26.0754843Z",
+      "marker": "PSC2_SELFHOST_REPLAY_RUNTIME",
+      "text": "PASS (strict TypeScript; 20000-step recursion, function results, name collisions, generic lists and exact UTF-8 positions)",
+      "scriptBlob": "10df1f5c075bad31e6ddf076250bedd5f26b7c53",
+      "scope": "All six existing replay fixtures, including 20000-step behavior and malformed-tag assertions; source fixture bytes unchanged."
+    },
+    "authenticatedReference": {
+      "timestamp": "2026-10-09T23:29:29.3522531Z",
+      "recipeSourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+      "referenceSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "referenceCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+      "cases": 87,
+      "signatureTypeAnnotations": 12,
+      "typedGenericPartialWrappers": 12,
+      "passed": true,
+      "currentSourceQualifiedByThisCheck": false,
+      "fullPayloadLocation": "Exact JSON is preserved at the PSC0_SH1_WORKER_HARNESS_REFERENCE line in the complete log."
+    }
+  },
+  "log": {
+    "blob": "35de2a9c845a4af0d445319fede4ee3556b6610a",
+    "sha256": "51a88936c40e534dcdeae67d473860322a5c29826fec5bf9c5561799562fd515",
+    "utf8Bytes": 256537,
+    "characters": 256357,
+    "lines": 2274,
+    "decodedUtf8TextPreserved": true,
+    "immutableReadbackVerified": true,
+    "leadingBomPreserved": true
+  },
+  "preflight": {
+    "resource": {
+      "timestamp": "2026-10-09T23:28:48.3739082Z",
+      "passed": true,
+      "policyId": "psc0-sh1-generated-qualification-resources/1",
+      "node": "v22.23.3",
+      "oldSpaceMiB": 8192,
+      "observedHeapLimitBytes": 8640266240,
+      "effectiveAvailableBytes": 15313190912,
+      "minimumAvailableBytes": 12884901888
+    },
+    "typescriptVersion": "7.0.2",
+    "typescriptProfile": "passed-step8",
+    "selectedRPolicy": "passed-step3",
+    "hostSyntaxAndBootstrapSourceRestrictions": "passed-step9"
+  },
+  "retainedArtifacts": [
+    {
+      "id": 11651005983,
+      "name": "psc0-sh1-ts7.0.2-00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+      "bytes": 463965,
+      "digest": "sha256:2045862d164cad3c781e3c5a21440bc1ae588398044b096e37437c89e28ae693",
+      "createdAt": "2026-10-09T23:29:34Z",
+      "expiresAt": "2026-11-08T23:29:33Z",
+      "sourceCommit": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+      "runId": 38004581681,
+      "uploadFileCountFromLog": 44,
+      "archiveInspected": false
+    }
+  ],
+  "interpretation": [
+    "The prior replay host grouping failure is resolved in this exact run: its PASS marker and step22 success are present.",
+    "The next observed blocker is the current compiler closure's nested list pattern at Expr641, rejected during native atomic source preparation.",
+    "No successful N1 generation/conformance receipt, C1, C2, C3 or provider result is established by this run. The new positive flat-tail IR observation block was not reached.",
+    "The resource and TypeScript preflight passed. The observed failure was a parser refusal, not a heap failure. No automatic retry was performed."
+  ],
+  "qualification": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "finiteLogEvidenceOnly": true
+  },
+  "agentActions": {
+    "monitoredOnlyRun": 38004581681,
+    "fullCompilerLogsFetchedOnceAfterJobCompletion": true,
+    "unattachedEvidenceBlobsOnly": true,
+    "sourceEdits": 0,
+    "refMutations": 0,
+    "workflowDispatches": 0,
+    "compilerExecutionsOutsideExistingRun": 0,
+    "reruns": 0
+  }
+}

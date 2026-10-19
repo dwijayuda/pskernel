@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-typescript7-qualification",
+  "sourceRef": "a02f03b97bb3385b66ad670dabf7f13d334fc79f",
+  "workflowRunId": 37949490366,
+  "workflowRunAttempt": 1,
+  "startedAt": "2026-10-09T15:09:04.060Z",
+  "completedAt": "2026-10-09T15:09:13.477Z",
+  "passed": false,
+  "node": "v22.23.3",
+  "typescript": "7.0.2",
+  "lockGenerated": true,
+  "packageLockSha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+  "installedProfileSha256": "78b015ca6df3fcd12d16023269c253f82632a2ffea3bd609693d5a54e5fdbdc7",
+  "commands": [
+    {
+      "name": "resolve-lock",
+      "command": [
+        "npm",
+        "install",
+        "--package-lock-only",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 2444,
+      "stdoutSha256": "ce7bf91f54adc7390cff6bf1c2572fd00ce9cfbd0611637e273059c4710a80c9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "install",
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 864,
+      "stdoutSha256": "7100a2f63a7cdd3632b7356dd4d7a15e4fd2474f8f1a87bb0abb6b444b2bbb0c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "root-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 346,
+      "stdoutSha256": "0ad5fa5e957471919af121f63e7be285285f8dfd9a8e7c2a4e40fe58db00d963",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "package-tests",
+      "command": [
+        "npm",
+        "run",
+        "test:packages"
+      ],
+      "exitCode": 1,
+      "signal": null,
+      "elapsedMs": 5700,
+      "stdoutSha256": "8da7461c7eea50c64bffabb2faf296084f534a24cd3dd07395200e92949f6233",
+      "stderrSha256": "23da6b593ead00cafba8e6061cec402df2f51f74cfda9040e38721dba1117621"
+    }
+  ],
+  "retiredCompilerRuntimeUsed": false,
+  "psc0Qualification": false,
+  "kernelOracleOrCorpusExecuted": false,
+  "seedSelectionChanged": false,
+  "failure": "AssertionError [ERR_ASSERTION]: package-tests failed\n\n1 !== 0\n"
+}

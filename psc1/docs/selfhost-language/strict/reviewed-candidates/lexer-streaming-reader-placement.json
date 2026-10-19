@@ -1,0 +1,104 @@
+{
+  "format": "PSC0-reviewed-source-placement/1",
+  "status": "Unattached source candidate; independent review pending; no execution or qualification authority.",
+  "repository": "dwijayuda/pskernel",
+  "sourceCommit": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "overlays": {
+    "natPlacementManifest": "1530f2bec9a7b66bddd317ff94409297c39adaca",
+    "originalLexerBlob": "335a78cad3eda53c9dd8687064002c9313901964"
+  },
+  "scope": "Exactly three streaming-prefix list readers. No other list/tree placement changes.",
+  "files": [
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Lexer.lean",
+      "baseBlob": "0bee57ae5cfc0c83b9c9855edd88500dfa8d53b6",
+      "baseSha256": "0ed9ad3683379a2ce283d68866854936fa8a5d7fa19dad41fdd30b3b947c7e26",
+      "candidateBlob": "598b8d75d0d1bf1b6ea7ec05a62814343e33599a",
+      "candidateSha256": "adab283e1881058bfed285a62478f1f4d55bce73b8373a4017353529e479d372",
+      "candidateBytes": 36625,
+      "edits": [
+        {
+          "name": "psLexSkipLineComment",
+          "before": "      let smaller : PsSourcePos -> PsLexCursor :=\n        psLexSkipLineComment rest;\n      fun (position : PsSourcePos) =>\n",
+          "after": "      fun (position : PsSourcePos) =>\n        let smaller : PsSourcePos -> PsLexCursor :=\n          psLexSkipLineComment rest;\n",
+          "stateBinders": [
+            "position"
+          ],
+          "selfOperands": [
+            "rest"
+          ]
+        },
+        {
+          "name": "psLexReadIdentifier",
+          "before": "      let smaller : PsSourcePos -> List Char -> PsLexRead :=\n        psLexReadIdentifier rest;\n      fun (position : PsSourcePos) (charsRev : List Char) =>\n",
+          "after": "      fun (position : PsSourcePos) (charsRev : List Char) =>\n        let smaller : PsSourcePos -> List Char -> PsLexRead :=\n          psLexReadIdentifier rest;\n",
+          "stateBinders": [
+            "position",
+            "charsRev"
+          ],
+          "selfOperands": [
+            "rest"
+          ]
+        },
+        {
+          "name": "psLexReadNatural",
+          "before": "      let smaller : PsSourcePos -> List Char -> PsLexRead :=\n        psLexReadNatural rest;\n      fun (position : PsSourcePos) (charsRev : List Char) =>\n",
+          "after": "      fun (position : PsSourcePos) (charsRev : List Char) =>\n        let smaller : PsSourcePos -> List Char -> PsLexRead :=\n          psLexReadNatural rest;\n",
+          "stateBinders": [
+            "position",
+            "charsRev"
+          ],
+          "selfOperands": [
+            "rest"
+          ]
+        }
+      ]
+    }
+  ],
+  "sourceArgument": {
+    "construction": "For a proper finite character list, the old nil branch returns the same state lambda. Every old cons construction recursively constructs only the tail reader and then returns the same lambda; by strict List-tail descent, this prefix is finite, pure closure construction, with no character predicate, position update, accumulator work, delimiter action, callback or error demanded before the lambda. The relocated binding constructs the same tail reader after the same state parameters arrive.",
+    "capture": "The only RHS is the same self name applied to the same tail variable rest. Its typed annotation does not mention position or charsRev. The moved name smaller occurs in no crossed parameter type and is not a crossed parameter name. Actual nil branch and the activated suffix following each moved binding are byte-identical.",
+    "behavior": "Predicate, newline test, source-position advance, accumulator cons, recursive call operands, returned cursor and delimiter retention are unchanged. No fuel or input bound exists in these three list-recursive declarations; no literal-reader budgets or global lexer bounds are modified.",
+    "sourceCost": "Previously each reader constructs one returned closure stage per character of the entire remaining source before testing the first delimiter. psLexReadToken invokes the identifier/natural readers on each token's remaining suffix; psLexSkipTriviaWithFuel and psLexSkipProofScriptTriviaWithFuel invoke the line-comment reader after each '--' prefix. A family of repeated bounded-size tokens/comments has a quadratic sum of suffix lengths in preconstruction. After relocation the tail reader itself returns without constructing its tail; construction occurs only once per activated reader step, including at most the boundary step. This is a source-level allocation count, not a measured byte/time/heap claim.",
+    "frontend": "Same typed let grammar below an existing lambda; same structural self-call head, fixed inputs and strict tail ID. Both capture directions hold, so Lambda/Let context extension preserves the structural-call validator's fixed/child IDs and IH choice up to fresh local renaming. Root and independent peer already checked this rule on the Nat packet.",
+    "resourceDomain": "Proper finite compiler-owned lists, immutable values, successful host allocation. No exception-to-success or resource-exhaustion equivalence is claimed."
+  },
+  "callers": [
+    {
+      "name": "psLexReadToken",
+      "originalLine": 740,
+      "details": "Both non-singleton identifier and natural branches pass List.cons second tail to the reader, i.e. the whole unconsumed character suffix."
+    },
+    {
+      "name": "psLexAllWorker",
+      "originalLine": 895,
+      "details": "Repeatedly reads one token and advances to its returned cursor; the original global input bound and token loop are retained."
+    },
+    {
+      "name": "psLexSkipTriviaWithFuel",
+      "originalLine": 169,
+      "details": "After a '--' prefix, invokes psLexSkipLineComment on the remainder, then resumes trivia at the returned cursor."
+    },
+    {
+      "name": "psLexSkipProofScriptTriviaWithFuel",
+      "originalLine": 959,
+      "details": "The new-only PS trivia path shares the same line-comment reader and retains its whitespace/error rules."
+    }
+  ],
+  "adjacentDisposition": {
+    "fuelReaders": "Block comments, string bodies and trivia dispatch use the separately reviewed Nat placement; character literal readers inspect bounded immediate list prefixes with all state parameters already supplied. No additional pre-lambda whole-suffix reader was found in this immediate lexer path.",
+    "existingLengthScans": "psLexReadStringBody and psLexSkipBlockComment compute psLexListLength remaining for their existing Nat bound. These are ordinary existing list-length traversals, not canonical-representation closure factories. Their exact budgets and algorithms remain unchanged; this packet does not claim total lexer linearity.",
+    "otherListTreeInventory": "The original 172 occurrences in 131 functions include these three. The other 169 occurrences in 128 functions remain unmodified. Full-list/tree transformations have O(input-size) construction as well as demanded structural work; short-circuit equality/search helpers may construct beyond the successful prefix, but no additional shared whole-source streaming factory was established as required in this bounded correction. No claim that those helpers are optimal or uniformly O(visited-prefix) is made.",
+    "json": "psJsonTakeDigits is another syntactic list-prefix reader in the generic JSON parser, outside this immediate raw-source lexer path. It remains inventoried and unchanged. No evidence here establishes that it dominates the selected atomic preparation path; generic JSON parsing/encoding and cache algorithms are not broadened in this packet."
+  },
+  "validation": {
+    "forwardGuardUnique": true,
+    "reverseRestoresBase": true,
+    "candidateReadbackExact": true,
+    "sourceCompilerExecuted": false,
+    "fixtureOrOracleChanged": false
+  },
+  "strictQualified": false,
+  "semanticProofComplete": false,
+  "generalObligationsClosed": 0
+}

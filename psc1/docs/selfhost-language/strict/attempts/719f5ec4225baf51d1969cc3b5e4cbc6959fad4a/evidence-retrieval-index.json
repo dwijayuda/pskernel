@@ -1,0 +1,454 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-evidence-finish-retrieval-index",
+  "proposedDirectory": "psc0/docs/selfhost-language/strict/attempts/719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+  "repository": "dwijayuda/pskernel",
+  "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+  "orchestrationHeadSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+  "finish": {
+    "runId": 38027413274,
+    "workflowId": 380282667,
+    "runAttempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "compilerJobId": 114141103218,
+    "providerJobId": 114141265302
+  },
+  "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+  "generationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+  "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+  "generationOwnership": {
+    "N1": {
+      "runId": 38015134511,
+      "compilerJobId": 114103608774
+    },
+    "C1": {
+      "runId": 38015134511,
+      "compilerJobId": 114103608774
+    },
+    "C2": {
+      "runId": 38021634599,
+      "compilerJobId": 114123691566
+    },
+    "C3": {
+      "runId": 38021634599,
+      "compilerJobId": 114123691566
+    }
+  },
+  "metadata": {
+    "blob": "76b220b996b08821c3e5a410eb19e3f6ead4394d",
+    "sha256": "171cbf2cefb774df9bf5f584ae0ab339cf0047b0f830c66a8d2890fdb1433219",
+    "bytes": 29091
+  },
+  "compilerLog": {
+    "blob": "57de287608f465a4749704302311e9351a6285b3",
+    "sha256": "203c63d40cb6f3cd1f7d5ae8231e40ae0e3e8f92a319893261d46f0274da6723",
+    "bytes": 1659322
+  },
+  "providerLog": {
+    "blob": "a7b739b3197c0d9baf520e0f8333034d894ead92",
+    "sha256": "d8210e0c935c70db7f65da8804378fa525a11f1f7cca94564bace7669cb58d35",
+    "bytes": 83472
+  },
+  "compilerMarkers": {
+    "blob": "890935f2e81794a6cfab700a774ddd2907bfe07b",
+    "sha256": "8b17f4222318a087bda79d2d2dd21ce28300c521f5f491733505f208fef025bc",
+    "bytes": 1744692,
+    "markerCount": 37,
+    "jsonPayloads": 28,
+    "otherPayloads": "Eight printed environment values and one PASS-prefixed TypeScript profile report; raw text retained verbatim."
+  },
+  "providerMarkers": {
+    "blob": "4a2a64cbb053086f7e20bd59b32a072cdebdc96a",
+    "sha256": "5d9d29e36d4b890e8348f2f1c94731944ef6889b13f800a561b62246f2824766",
+    "bytes": 8391,
+    "markerCount": 2
+  },
+  "returnedFiles": [
+    {
+      "path": "dist/sh1-evidence-finish-inputs/inputs.json",
+      "sha256": "6244a785d54b0acdcb31ae93784f1985bbff5e49912042b7a93e97746f91ae22",
+      "bytes": 330480,
+      "blob": "f922f1865b8d83f97c6e8ff5bf0720d2e2776ce0",
+      "marker": "PSC0_SH1_EVIDENCE_FINISH_INPUTS",
+      "line": 588,
+      "timestamp": "2026-10-10T05:25:35.2254111Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "dist/sh1/evidence-completion.json",
+      "sha256": "b846dfbd8447334ec80e897b39c2271adb87e77599897392c60e4a9109004227",
+      "bytes": 17685,
+      "blob": "62baf773b1da5516c148a21db9682633ecc71c63",
+      "marker": "PSC0_SH1_EVIDENCE_COMPLETION",
+      "line": 636,
+      "timestamp": "2026-10-10T05:25:40.2033386Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "dist/sh1-evidence-finish-inputs/evidence-inventory.json",
+      "sha256": "addfaa6074bbc5afa8ffd91c5065fee565cfc33aac42ddfed8911e2560de3559",
+      "bytes": 74318,
+      "blob": "b45fb963d72b72426be5135b9b4612eb150e2c16",
+      "marker": "PSC0_SH1_EVIDENCE_FINISH_INVENTORY",
+      "line": 806,
+      "timestamp": "2026-10-10T05:25:40.6626077Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "qualification.json",
+      "sha256": "093b7c3a3016399b1000c05fb01a3cddb2e45ea415fdbc0bdef2009f9c5c25d3",
+      "bytes": 164959,
+      "blob": "96be5e6ed93773353a4e084ad7f525af78cd21ad",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 807,
+      "timestamp": "2026-10-10T05:25:40.7107491Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "strict-enforcement-evidence.json",
+      "sha256": "44ec24605d9f1b8d98eb7b64df04a63e693ac1054f74cac4f4cda7a1ae52bcba",
+      "bytes": 149717,
+      "blob": "d120d6820fd1cc7d4ee2682b103991d8c7e62fb0",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 808,
+      "timestamp": "2026-10-10T05:25:40.7679562Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "development/N1/strict-source/receipt.json",
+      "sha256": "497b393a03842827f27ced6e187827461525b2a40bfe9ebd231f62d5a1060c34",
+      "bytes": 71655,
+      "blob": "278850d8e83f99978fc40b16f38deb9694ae28b7",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 809,
+      "timestamp": "2026-10-10T05:25:40.8037722Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C1/strict-source/receipt.json",
+      "sha256": "629b64b90b301b7316848e78e315ce8a6bfc96e156394f3ddb2d06ddf8122c2b",
+      "bytes": 71655,
+      "blob": "47931dd80511c363ace79bc17a025cc4335fad76",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 810,
+      "timestamp": "2026-10-10T05:25:40.8252599Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C2/strict-source/receipt.json",
+      "sha256": "497b393a03842827f27ced6e187827461525b2a40bfe9ebd231f62d5a1060c34",
+      "bytes": 71655,
+      "blob": "278850d8e83f99978fc40b16f38deb9694ae28b7",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 811,
+      "timestamp": "2026-10-10T05:25:40.8462861Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C3/strict-source/receipt.json",
+      "sha256": "497b393a03842827f27ced6e187827461525b2a40bfe9ebd231f62d5a1060c34",
+      "bytes": 71655,
+      "blob": "278850d8e83f99978fc40b16f38deb9694ae28b7",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 812,
+      "timestamp": "2026-10-10T05:25:40.8674347Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "development/N1/ir-checker/receipt.json",
+      "sha256": "e86b250f85692b086e21b0295b9c11e590184fac61b5a0515d5383d15112e2f6",
+      "bytes": 23004,
+      "blob": "620ad2f02e2b447adb1903054224cce6008eba7d",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 813,
+      "timestamp": "2026-10-10T05:25:40.8833081Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C1/ir-checker/receipt.json",
+      "sha256": "1fbcd173fca5967cec4a9d84eb83924327cd432b824638f6b40326619d590ead",
+      "bytes": 23004,
+      "blob": "3894cb6f4b8a7a5061f3db311fcff4545a7cf9da",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 814,
+      "timestamp": "2026-10-10T05:25:40.8931722Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C2/ir-checker/receipt.json",
+      "sha256": "e86b250f85692b086e21b0295b9c11e590184fac61b5a0515d5383d15112e2f6",
+      "bytes": 23004,
+      "blob": "620ad2f02e2b447adb1903054224cce6008eba7d",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 815,
+      "timestamp": "2026-10-10T05:25:40.9038344Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C3/ir-checker/receipt.json",
+      "sha256": "e86b250f85692b086e21b0295b9c11e590184fac61b5a0515d5383d15112e2f6",
+      "bytes": 23004,
+      "blob": "620ad2f02e2b447adb1903054224cce6008eba7d",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 816,
+      "timestamp": "2026-10-10T05:25:40.9137321Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "development/N1/receipt.json",
+      "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+      "bytes": 15827,
+      "blob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 817,
+      "timestamp": "2026-10-10T05:25:40.9224526Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "development/N1/generic-erasure/receipt.json",
+      "sha256": "0fe40de634ef3cfe6a7f717f1bdb43791659cfe72cb96c7e22bd70b2de41ac72",
+      "bytes": 24888,
+      "blob": "1d65fe0bdd9005cbec7ebc48508c512bca9327e6",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 818,
+      "timestamp": "2026-10-10T05:25:40.9304571Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C1/generic-erasure/receipt.json",
+      "sha256": "f4c3f76d3d08b2714c4665f32659e23bf5adcfdff9c482c58dafc260856c92c2",
+      "bytes": 24888,
+      "blob": "2c89c37dec5919d3a14970c6fd7cecd46b1fc1cc",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 819,
+      "timestamp": "2026-10-10T05:25:40.9385929Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C2/generic-erasure/receipt.json",
+      "sha256": "94d408d27177691d2d66a51fd5a1aee28a0f9397493898ad415cdc0c83b7a548",
+      "bytes": 20777,
+      "blob": "8415522f653bab6e829cecd59078e13fb57cbec1",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 820,
+      "timestamp": "2026-10-10T05:25:40.9459806Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C3/generic-erasure/receipt.json",
+      "sha256": "94d408d27177691d2d66a51fd5a1aee28a0f9397493898ad415cdc0c83b7a548",
+      "bytes": 20777,
+      "blob": "8415522f653bab6e829cecd59078e13fb57cbec1",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 821,
+      "timestamp": "2026-10-10T05:25:40.9527839Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "development/N1/capabilities/receipt.json",
+      "sha256": "5b1b2b855c764b265595fa031a6c26dc21b4373dde34746119d62dacfcf37acb",
+      "bytes": 404461,
+      "blob": "8e036824521e71a7d809948717b7151713c09b16",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 822,
+      "timestamp": "2026-10-10T05:25:41.0030811Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C1/capabilities/receipt.json",
+      "sha256": "2013fc1f7d0f52711cee5702d9d00e31e2f3bde02dd2aa5a19a365561854231f",
+      "bytes": 404461,
+      "blob": "20e22e42a5f410da64dbd27e99b1beabd3f183d6",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 823,
+      "timestamp": "2026-10-10T05:25:41.0793379Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C2/capabilities/receipt.json",
+      "sha256": "7be2ffe8a876fd5bdba709f6235013a4513582d8250a2ad42b3a25212a464c19",
+      "bytes": 403613,
+      "blob": "3466fd7040025961b86cba85cfbbaab4f5de7cc1",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 824,
+      "timestamp": "2026-10-10T05:25:41.1550523Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C3/capabilities/receipt.json",
+      "sha256": "7be2ffe8a876fd5bdba709f6235013a4513582d8250a2ad42b3a25212a464c19",
+      "bytes": 403613,
+      "blob": "3466fd7040025961b86cba85cfbbaab4f5de7cc1",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 825,
+      "timestamp": "2026-10-10T05:25:41.2312698Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C1/receipt.json",
+      "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+      "bytes": 169531,
+      "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 826,
+      "timestamp": "2026-10-10T05:25:41.2716141Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C2/receipt.json",
+      "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+      "bytes": 166707,
+      "blob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 827,
+      "timestamp": "2026-10-10T05:25:41.2888559Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C3/receipt.json",
+      "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+      "bytes": 166709,
+      "blob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 828,
+      "timestamp": "2026-10-10T05:25:41.3051279Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "C1/source-closure.json",
+      "sha256": "78ace9dff7cde0d62698584af4d652f20b092c1c51d47927e13b9191da91d263",
+      "bytes": 9669,
+      "blob": "9f87dace025ce787b4675e3bee42a2697b83545e",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 829,
+      "timestamp": "2026-10-10T05:25:41.3149294Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "development/N1/grammar-closure.json",
+      "sha256": "677c1d1f261e6540a64c1a58ab5316c5623ed92f8947a812c2b185c26d396a58",
+      "bytes": 26069,
+      "blob": "daf0c3eb39e5c7da335821124c717cfda9743668",
+      "marker": "PSC0_SH1_RETURNED_JSON",
+      "line": 830,
+      "timestamp": "2026-10-10T05:25:41.3251150Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    },
+    {
+      "path": "kernel-admissions.json",
+      "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+      "bytes": 3526,
+      "blob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+      "marker": "PSC0_SH1_PROVIDER_ADMISSIONS_FILE",
+      "line": 875,
+      "timestamp": "2026-10-10T05:27:13.8212686Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF"
+    }
+  ],
+  "actualInventory": {
+    "status": "complete",
+    "complete": true,
+    "catalogFiles": 135,
+    "supplementalFiles": 104,
+    "returnedCatalogJSONFiles": 24,
+    "missingFiles": [],
+    "validationErrors": [],
+    "importedEvidenceUnchanged": true
+  },
+  "bindingChecks": {
+    "all28ReturnedFileDigestsAndBytesVerified": true,
+    "all22DistinctRawFileReadbacksExact": true,
+    "all24JSONEnvelopesMatchActualCatalog": true,
+    "exactFixedPointMarkerEqualsQualification": true,
+    "qualificationEmbeddedBinderEqualsRawBinder": true,
+    "embeddedBinderSha256MatchesRawBinder": true
+  },
+  "provider": {
+    "accepted": true,
+    "deduplicatedStreams": 4,
+    "coveredArtifactLabels": 8,
+    "allActualStreamDecisionsAccepted": true,
+    "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+    "receiptFile": "kernel-admissions.json",
+    "emissionWasGatedByThisCheck": false,
+    "qualificationFileHashClaimedByProvider": false
+  },
+  "artifactDigestProvenance": {
+    "compiler": {
+      "id": 11661180683,
+      "name": "psc0-sh1-evidence-finish-ts7.0.2-38027413274",
+      "bytes": 23593626,
+      "sha256": "e4f18a13063265126dc2c08dd710dae94bfff3ac7ad780a4a360b66976cac08c",
+      "uploadDeclaredFiles": 486
+    },
+    "provider": {
+      "id": 11661425347,
+      "name": "psc0-sh1-evidence-finish-kernel-ts7.0.2-38027413274",
+      "bytes": 1277,
+      "sha256": "35485c9e47e3041fd20236eb671c4532c83028f078028b01364b44b0f5ad20c7"
+    },
+    "scope": "API metadata and actual upload statements; current archive ZIPs were not downloaded by the reviewing agent."
+  },
+  "preservedClaims": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "qualificationProvider": {
+      "status": "not-attempted",
+      "kernelChecked": false
+    },
+    "providerAcceptanceSeparate": true,
+    "priorExecutionConclusionsUnchanged": true,
+    "noCorrespondenceOrStageRowsClosedByThisPacket": true
+  },
+  "retrieval": {
+    "compilerTerminalLogRequests": 1,
+    "providerTerminalLogRequests": 1,
+    "normalJobLogRequests": 0,
+    "activeLogRequests": 0,
+    "archiveDownloads": 0,
+    "compilerExecutionsByAgent": 0,
+    "dispatches": 0,
+    "reruns": 0,
+    "refChanges": 0
+  },
+  "separateNormalWorkflow": {
+    "runId": 38027413267,
+    "workflowId": 378853677,
+    "compilerJobId": 114141103207,
+    "providerJobId": 114142374674,
+    "status": "completed",
+    "conclusion": "success",
+    "compilerConclusion": "success",
+    "providerConclusion": "skipped",
+    "nativeDevelopmentStep": 24,
+    "nativeDevelopmentStepConclusion": "success",
+    "nativeDevelopmentStartedAt": "2026-10-10T05:25:52Z",
+    "nativeDevelopmentCompletedAt": "2026-10-10T05:32:14Z",
+    "completedAt": "2026-10-10T05:32:19Z",
+    "fullGenerationStepsSkipped": [
+      25,
+      26,
+      27
+    ],
+    "separateFromRetainedGenerationRecipe": true,
+    "normalNativeReceiptAndRecipeNotRead": true,
+    "terminalMetadata": {
+      "blob": "db6dc36dd59e5992bfc741bc56e90060b9177285",
+      "sha256": "e4f35bdc0ff784c7d16f59796ed80a3a709b24e5f9c8ec52c4d55178a4215b74",
+      "bytes": 44310
+    },
+    "coldRun": {
+      "runId": 38027413234,
+      "workflowId": 379723916,
+      "conclusion": "skipped"
+    }
+  },
+  "supersedes": {
+    "blob": "2bc3d2331523335d27ba178c094c540164b9ebda",
+    "sha256": "b9ebb952cc89cb5d0722d3ac8f847ada33fafcaeb66c8cfae4390e9b53f5ea0d",
+    "bytes": 16153,
+    "reason": "Replace the separately observed in-progress normal-workflow summary with its actual terminal metadata; finish evidence, raw files and all generation identities remain unchanged."
+  }
+}

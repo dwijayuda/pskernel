@@ -1,0 +1,61 @@
+{
+  "format": "psc0-sh1-guarded-source-candidate/1",
+  "sourceCommit": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+  "baseBlob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+  "baseSha256": "64f596f4df5d219164b1c23b3a72c396139b0516a0806c0fae22fcdf4dd98b63",
+  "candidateBlob": "2c7c0ed567804f189d1facfd3987b6a13f9504f9",
+  "candidateSha256": "7c00bf246372f477d81362ce57b392a3225b4c8fca3105e9d35ca244ad9055b7",
+  "candidateBytes": 29642,
+  "status": "unattached-source-candidate-not-executed",
+  "purpose": "Canonical unary runtime function-value types plus a cached catalogue of actual flat declaration entry prefixes before type instantiation.",
+  "requiredCompanionChanges": [
+    "Expr canonical value lambdas and calls, known-entry saturation/currying, primitive/constructor boundaries and Array.foldl callback bridge",
+    "Definition prepare the catalogue before layouts, preserve entries in copied name records, and retain the actual opened parameter prefix without result-arrow eta exposure"
+  ],
+  "invariants": [
+    "Kernel, provider, IR checker equality, intrinsic signatures, target runtime helpers and source grammar unchanged",
+    "Original declaration slot kinds and runtime/type counts discovered before actual generic substitution",
+    "Raw aligned value lambda spine only; type-body instantiation and opened context match Definition; no repeated whole-body traversal",
+    "First declaration entry takes precedence in collision buckets, matching the existing declaration-name index",
+    "Monomorphic zero-runtime-arity declarations remain initialized values; logical type-only generic entries use the separately reviewed Unit transport in Expr/Definition.",
+    "No finite execution evidence or semantic closure claim",
+    "The smaller prefix worker is constructed only inside a used aligned-lambda branch, avoiding eager construction of the complete 4096-fuel closure chain."
+  ],
+  "strictQualified": false,
+  "semanticCorrespondenceQualified": false,
+  "changes": [
+    {
+      "label": "entry metadata and empty index",
+      "before": "structure PsErasureDeclarationNames where\n  byCore : PsErasureNameIndex String\n  byOutput : PsErasureNameIndex Bool\n  count : Nat\n\ndef psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=\n  match entries with\n  | List.nil => PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0\n  | List.cons entry rest =>\n      let tail := psErasureDeclarationNameIndex rest;\n      match entry with\n      | Prod.mk name value => PsErasureDeclarationNames.mk\n          (psErasureIndexInsert String tail.byCore name value)\n          (psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true)\n          (Nat.succ tail.count)\n\n\ninductive PsErasedBinderKind where\n  | type\n  | proof\n  | runtime\n",
+      "after": "inductive PsErasedBinderKind where\n  | type\n  | proof\n  | runtime\n\n-- Flat declaration entries are distinct from canonical unary function values.\n-- These slots describe the checked declaration before call-site substitution.\nstructure PsErasureEntryInfo where\n  binders : List PsErasedBinderKind\n  runtimeArity : Nat\n  typeArity : Nat\n\nstructure PsErasureDeclarationNames where\n  byCore : PsErasureNameIndex String\n  byOutput : PsErasureNameIndex Bool\n  count : Nat\n  entries : PsErasureNameIndex PsErasureEntryInfo\n\ndef psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=\n  match entries with\n  | List.nil => PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0 PsErasureNameIndex.empty\n  | List.cons entry rest =>\n      let tail := psErasureDeclarationNameIndex rest;\n      match entry with\n      | Prod.mk name value => PsErasureDeclarationNames.mk\n          (psErasureIndexInsert String tail.byCore name value)\n          (psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true)\n          (Nat.succ tail.count)\n          tail.entries\n"
+    },
+    {
+      "label": "entry lookup",
+      "before": "def psErasureLookupName (entries : PsErasureDeclarationNames) (name : PsName) : Option String :=\n  psErasureIndexFind String entries.byCore name\n\n",
+      "after": "def psErasureLookupName (entries : PsErasureDeclarationNames) (name : PsName) : Option String :=\n  psErasureIndexFind String entries.byCore name\n\ndef psErasureLookupEntry (entries : PsErasureDeclarationNames) (name : PsName) : Option PsErasureEntryInfo :=\n  psErasureIndexFind PsErasureEntryInfo entries.entries name\n\n"
+    },
+    {
+      "label": "aligned declaration-entry catalogue",
+      "before": "def psErasureNatBetween (lower : Nat) (value : Nat) (upper : Nat) : Bool :=\n",
+      "after": "-- Mirror psEraseOpenDefinition's aligned raw forall/lambda prefix. In particular,\n-- do not weak-head normalize the value or turn an instantiated result arrow into\n-- another declaration parameter. Structure-recursor lowering preserves this prefix.\ndef psErasureEntryInfoWithFuel\n    (environment : PsEnvironment) (fuel : Nat) :\n    PsLocalContext -> PsExpr -> PsExpr -> Except PsErasureError PsErasureEntryInfo :=\n  match fuel with\n  | Nat.zero =>\n      fun (_context : PsLocalContext) (_type : PsExpr) (_value : PsExpr) =>\n        Except.error PsErasureError.fuelExhausted\n  | Nat.succ remaining =>\n      fun (context : PsLocalContext) (type : PsExpr) (value : PsExpr) =>\n        match type with\n        | PsExpr.forallE name domain typeBody binder =>\n            match value with\n            | PsExpr.lam _ _ valueBody _ =>\n                -- Construct the smaller worker only when this prefix step is used.\n                let smaller : PsLocalContext -> PsExpr -> PsExpr -> Except PsErasureError PsErasureEntryInfo :=\n                  psErasureEntryInfoWithFuel environment remaining;\n                let kind := psErasureClassifyBinder environment context domain;\n                let pushed := psLocalPushBinding context name domain binder;\n                let variable := PsExpr.fvar pushed.id;\n                -- Only the value's lambda spine is inspected. Replacing bound\n                -- variables by fresh free variables cannot create or remove a lambda,\n                -- so do not traverse the entire value body again for metadata.\n                match smaller pushed.context\n                    (psExprInstantiate1 typeBody variable)\n                    valueBody with\n                | Except.error error => Except.error error\n                | Except.ok tail =>\n                    let runtimeArity : Nat :=\n                      match kind with\n                      | PsErasedBinderKind.runtime => Nat.succ tail.runtimeArity\n                      | _ => tail.runtimeArity;\n                    let typeArity : Nat :=\n                      match kind with\n                      | PsErasedBinderKind.type => Nat.succ tail.typeArity\n                      | _ => tail.typeArity;\n                    Except.ok\n                      (PsErasureEntryInfo.mk\n                        (List.cons kind tail.binders) runtimeArity typeArity)\n            | _ => Except.ok (PsErasureEntryInfo.mk List.nil 0 0)\n        | _ => Except.ok (PsErasureEntryInfo.mk List.nil 0 0)\n\ndef psErasureAddDeclarationEntry\n    (environment : PsEnvironment) (name : PsName) (type value : PsExpr)\n    (entries : PsErasureNameIndex PsErasureEntryInfo) :\n    Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo) :=\n  -- The emitted declaration loop drops these definitions before opening binders.\n  if psErasureIsProp environment psLocalEmpty type then Except.ok entries\n  else\n    match psErasureEntryInfoWithFuel environment 4096 psLocalEmpty type value with\n    | Except.error error => Except.error error\n    | Except.ok info =>\n        Except.ok (psErasureIndexInsert PsErasureEntryInfo entries name info)\n\ndef psErasureDeclarationEntryIndex\n    (environment : PsEnvironment) (declarations : List PsDeclaration) :\n    Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo) :=\n  match declarations with\n  | List.nil => Except.ok PsErasureNameIndex.empty\n  | List.cons declaration rest =>\n      match psErasureDeclarationEntryIndex environment rest with\n      | Except.error error => Except.error error\n      | Except.ok tail =>\n          match declaration with\n          | PsDeclaration.definitionDecl name _ type value =>\n              psErasureAddDeclarationEntry environment name type value tail\n          | PsDeclaration.partialDecl name _ type value =>\n              psErasureAddDeclarationEntry environment name type value tail\n          | _ => Except.ok tail\n\ndef psErasurePrepareDeclarationEntries\n    (environment : PsEnvironment) (declarations : List PsDeclaration)\n    (scope : PsErasureScope) : Except PsErasureError PsErasureScope :=\n  match psErasureDeclarationEntryIndex environment declarations with\n  | Except.error error => Except.error error\n  | Except.ok entries =>\n      let names := PsErasureDeclarationNames.mk\n        scope.declarationNames.byCore scope.declarationNames.byOutput\n        scope.declarationNames.count entries;\n      Except.ok\n        (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals\n          scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors\n          scope.runtimeStructures scope.runtimeStructureConstructors\n          scope.runtimeExpressions scope.currentDefinition)\n\ndef psErasureNatBetween (lower : Nat) (value : Nat) (upper : Nat) : Bool :=\n"
+    },
+    {
+      "label": "canonical unary runtime function-value type",
+      "before": "                    | Except.ok result =>\n                        match result with\n                        | .function parameters finalResult =>\n                            Except.ok\n                              (PsVerifiedIrType.function\n                                (List.cons parameter parameters)\n                                finalResult)\n                        | _ =>\n                            Except.ok\n                              (PsVerifiedIrType.function\n                                [parameter]\n                                result)\n",
+      "after": "                    | Except.ok result =>\n                        -- Function values use unary groups, including beneath named\n                        -- type arguments. This shape commutes with type substitution.\n                        Except.ok\n                          (PsVerifiedIrType.function\n                            [parameter]\n                            result)\n"
+    }
+  ],
+  "supersedesManifest": "dd9deac952f59d2856f9e6d121a6d429ada3ad55",
+  "previousCandidate": "ac62e1da317a18300b8669bf68f9b6414159156e",
+  "deltaFromPrevious": [
+    {
+      "before": "  | Nat.succ remaining =>\n      let smaller : PsLocalContext -> PsExpr -> PsExpr -> Except PsErasureError PsErasureEntryInfo :=\n        psErasureEntryInfoWithFuel environment remaining;\n      fun (context : PsLocalContext) (type : PsExpr) (value : PsExpr) =>",
+      "after": "  | Nat.succ remaining =>\n      fun (context : PsLocalContext) (type : PsExpr) (value : PsExpr) =>"
+    },
+    {
+      "before": "            | PsExpr.lam _ _ valueBody _ =>\n                let kind := psErasureClassifyBinder environment context domain;",
+      "after": "            | PsExpr.lam _ _ valueBody _ =>\n                -- Construct the smaller worker only when this prefix step is used.\n                let smaller : PsLocalContext -> PsExpr -> PsExpr -> Except PsErasureError PsErasureEntryInfo :=\n                  psErasureEntryInfoWithFuel environment remaining;\n                let kind := psErasureClassifyBinder environment context domain;"
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "kind": "prepared-pure-data-F-evidence-review-toolkit",
+  "status": "prepared; final F evidence has not been reviewed by this utility",
+  "utility": {
+    "blob": "490cc9d968bddd92da1ad67e39b3880a35349580",
+    "characters": 59165,
+    "format": "JavaScript factory body; no imports or IO",
+    "syntaxParsed": true,
+    "repositoryCodeExecuted": false
+  },
+  "checkpoint": {
+    "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "runId": "37947341800",
+    "compilerJobId": "113876931430"
+  },
+  "primaryContracts": [
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "blob": "0cbc8354046ce71a17efc588180864fabcbf5dba",
+      "sections": "recipe 106-134; generation 325-440; N1 832-923; selected-R correspondence 936-1012; C2/C3 and qualification 1013-1177"
+    },
+    {
+      "path": "psc0/scripts/sh1-migration-worker-abi.mjs",
+      "blob": "4870981ef906729cb9d2538c20d0c40b18db5069",
+      "sections": "independent public type/order table 19-87; supported probe source 119-145; alpha-data 196-220; reference probe 246-310; existing current Core/IR 313-end"
+    },
+    {
+      "path": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+      "blob": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+      "sections": "F2 36 cases; combined 87-case report 750-787"
+    },
+    {
+      "path": "psc0/scripts/sh1-fresh-name-conformance.mjs",
+      "blob": "240727d033a1eb2d630826560c350ea76dd4d4d4",
+      "sections": "44 direct and 7 wrapper cases; owning-compiler IR factories and copied scope"
+    },
+    {
+      "path": ".github/workflows/psc0-sh1.yml",
+      "blob": "add8e9a3249ab35497b85ad91c207fe97142e5d9",
+      "sections": "authenticated selected-R preflight 291-329; N1/C1/C2/C3 routing 330-339; conditional seed retention 340-345; separate provider job 367-421"
+    },
+    {
+      "path": "psc0/scripts/sh1-check-admissions.mjs",
+      "blob": "750fe59f317056bfe76b2c77ffd7d09a82aac342",
+      "sections": "eight admission roles 44-76; actual selected-provider decisions and exact file read-back 77-128"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/grammar-migration-provider.json",
+      "blob": "61fd209bf140c8c4cda07b7f27178675eb3ba154",
+      "sections": "prior qualified-R provider source tree/protocol/profile/resource policy and exact required unchanged binary SHA256"
+    }
+  ],
+  "invocation": {
+    "factory": "const api = new Function(utilityBlobContent)();",
+    "parser": "const parsed = api.parseFWorkflowLog(actualDecodedGitHubJobLog);",
+    "compiler": "api.reviewFCompilerEvidence({run,jobs,compilerJobId:113876931430,sourceRef:'fcd875c8f38db4b0524090bd10c7c2fd5024053d',parsed,selected,grammar,sha256})",
+    "provider": "api.reviewFProviderEvidence({run,jobs,providerJobId,sourceRef:'fcd875c8f38db4b0524090bd10c7c2fd5024053d',parsed:actualProviderParsedLog,compilerReview,sha256})"
+  },
+  "inputs": {
+    "run": "Actual GitHub run JSON object with id/head_sha/status/conclusion; compiler-only review may be used while the provider job is still running.",
+    "jobs": "Actual jobs array, or {jobs:[...]}, containing step numbers/names/status/conclusion. Compiler job must be complete and successful. Required steps [3,6,7,8,9,11,14,17,18,19,20,21,22,23,24,25,28] must succeed; step 26 must be skipped.",
+    "parsed": "Use the included exact-line parser. Receipt entries retain {label,statusPrefix,parsed,rawJson,exactLoggedLine,logLine,timestamp}; parsed data must equal reparsing the retained exact line. malformedJson must be empty.",
+    "selected": {
+      "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225"
+    },
+    "grammar": {
+      "edition": "ps-0.9-r3",
+      "mode": "new-only",
+      "support": "bounded-selfhost-subset",
+      "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+      "fullStandardConformance": false,
+      "fullPscvConformance": false
+    },
+    "sha256": "Trusted synchronous callback from exact UTF8 string to lowercase 64-hex SHA256. No host filesystem callback is needed.",
+    "optionalGrammarClosureArtifact": "{content,sha256}; only if exact full N1 grammar file bytes are actually available. Omission is explicitly recorded rather than filled with synthesized bytes.",
+    "providerJobId": "Actual completed kernel-admissions job ID from this run, not the independent TS7-native cold recovery job."
+  },
+  "validation": {
+    "workerArities": [
+      4,
+      4,
+      3,
+      4,
+      2,
+      2,
+      3,
+      2,
+      4,
+      5,
+      5,
+      3
+    ],
+    "workers": 12,
+    "families": {
+      "F1": 4,
+      "F2": 8
+    },
+    "removedTypedIdentityAliases": 3,
+    "behaviorCases": {
+      "direct": 44,
+      "wrappers": 7,
+      "state": 36,
+      "total": 87
+    },
+    "behaviorStages": [
+      "R",
+      "N1",
+      "C1",
+      "C2",
+      "C3"
+    ],
+    "behaviorSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+    "isolatedProbe": {
+      "abstractInductiveTypes": 19,
+      "signatureAnnotations": 12,
+      "typedGenericPartialWrappers": 12,
+      "independentSourceSha256Recomputed": true,
+      "currentSourceCoreOrIrCompared": false,
+      "erasedOrEmitted": false,
+      "runtimeExecuted": false
+    },
+    "actualAbiStages": [
+      "C1",
+      "C2",
+      "C3"
+    ],
+    "actualAbiChecks": [
+      "all complete alpha Core types equal the selected-R reference probe",
+      "all complete public/partial textual types match the independent manifest table",
+      "ordered runtime arities/signatures match the same table",
+      "same complete ABI observation arrays and recomputed digest across all three builds",
+      "no generated runtime parameter display name equality"
+    ],
+    "productChecks": [
+      "C2 and C3 all four hashes identical",
+      "N1 TypeScript and JavaScript hashes equal final C2/C3",
+      "same raw closure and 61 modules through N1/C1/C2/C3",
+      "one N1 full grammar relation, linked exact report digests and final canonical products"
+    ],
+    "originalIr": "Native accepted/complete/zero findings; each existing generation original IR accepted/complete/zero findings and synchronously emitted unchanged after its check.",
+    "provider": "Separate completed provider job; exact logged read-back UTF8 content/byte count/SHA/object verified. The required distinct digest set and each digest's exact role group are derived from all eight actual C2/C3 admission-role hashes. Every role must occur exactly once in an accepted stream; no distinct-count assumption is made. Provider source tree, protocol/profile/resource policy and exact qualified-R binary must remain pinned.",
+    "claimsExcluded": [
+      "strict SH/1",
+      "full Standard conformance",
+      "full PSCV conformance",
+      "exhaustive semantic or metatheory proof",
+      "F seed selection or recovery",
+      "separate root TypeScript compiler-API workspace result"
+    ],
+    "requiredProviderBinarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec"
+  },
+  "limitations": [
+    "This is a pure-data consistency reviewer, not an independent compiler, provider or GitHub authenticity oracle. Root independently authenticates the supplied API responses and decoded logs.",
+    "Recipe files are checked for exact ordered paths, self-hash and equality across the source-pinned run. Primary source blob identities are retained for external source authentication.",
+    "N1's logged grammar marker is a summary. Without the optional original artifact, the reviewer checks the report digest linkage and the pinned qualifier's C2/C3 canonical-product relation, not unavailable full artifact bytes.",
+    "Logged compact JSON plus LF has its own explicitly labelled retention digest. It is not passed off as the unavailable original pretty artifact file digest.",
+    "Three referenced file digests can additionally be reproduced from exact source-defined JSON serialization and complete logged objects; these are labelled deterministic reconstructions.",
+    "The provider file is different: its existing runner prints actual read-back content, original byte count and SHA256, so exact file-byte verification is available.",
+    "TS7 cold recovery run 37947341899 is already a separate selected-R proof; this toolkit never treats it as an F job or as F qualification."
+  ],
+  "supersedes": {
+    "utilityBlob": "6f1278311cdaa160a0cb076d431c728a98ebcadf",
+    "auditBlob": "bf1342a34e1791812ab086523b7b410edbc92f34"
+  },
+  "reviewCorrections": [
+    "Distinct provider stream count is derived from the compiler receipt's eight actual admission-role hashes, rather than assumed to be four.",
+    "Each actual stream's role set must exactly equal the complete expected group for its digest; group size is derived rather than assumed to be two.",
+    "Unchanged-provider qualification now refuses a provider binary SHA256 that differs from qualified R."
+  ]
+}

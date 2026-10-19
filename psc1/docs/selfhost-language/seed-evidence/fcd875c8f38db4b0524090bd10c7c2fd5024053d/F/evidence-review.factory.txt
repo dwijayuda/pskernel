@@ -1,0 +1,704 @@
+/* Pure-data reviewer for the exact F checkpoint at fcd875c8.
+ * Evaluate this factory body with new Function(content)() to obtain the API.
+ * It imports nothing, executes no compiler/repository code, reads no files,
+ * mutates no supplied values, and does not promote a seed.
+ * A successful review is only as authentic as the supplied GitHub API/log data.
+ */
+"use strict";
+const F = Object.freeze({
+  sourceRef: "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+  runId: "37947341800", compilerJobId: "113876931430",
+  referenceSourceRef: "fe2560aba0f347b1caf8d000d371464642d44f23",
+  referenceCompilerSha256: "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+  referenceIdentitySha256: "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+  behaviorSha256: "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+  originalPublicTypeRef: "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+  providerRef: "963030dc2d154008fccc82e7c8ed29331f138799"
+});
+const GRAMMAR = Object.freeze({
+  edition: "ps-0.9-r3", mode: "new-only", support: "bounded-selfhost-subset",
+  referenceSha256: "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+  fullStandardConformance: false, fullPscvConformance: false
+});
+const TOOLCHAIN = Object.freeze({
+  node: "v22.23.3", platform: "linux", architecture: "x64",
+  lean: "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+  leanGitHash: "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  typescript: "Version 7.0.2"
+});
+const PROFILE = Object.freeze({version: "7.0.2", purpose: "current-emission", arguments: ["--ignoreConfig"]});
+const MANIFESTS = Object.freeze({
+  F1: "fbb5cabc6d48f16a0e91c1c4a92c6849791968b7",
+  F2: "ce035d30d64341e3214f241d682c61dac4922649"
+});
+const CONTRACT_BLOBS = Object.freeze({
+  "psc0/scripts/sh1-qualify.mjs": "0cbc8354046ce71a17efc588180864fabcbf5dba",
+  "psc0/scripts/sh1-migration-worker-abi.mjs": "4870981ef906729cb9d2538c20d0c40b18db5069",
+  "psc0/scripts/sh1-migration-worker-conformance.mjs": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+  "psc0/scripts/sh1-fresh-name-conformance.mjs": "240727d033a1eb2d630826560c350ea76dd4d4d4",
+  "psc0/scripts/sh1-capabilities.mjs": "d7afde97fc05f37612febcccb6529de9190aae7c",
+  "psc0/scripts/sh1-grammar-conformance.mjs": "48efa9b0c90e7904a1df49f43253395841bff90c",
+  "psc0/scripts/sh1-generic-erasure-conformance.mjs": "91a18f1cd26eeec36d720a8acbca6a79a3a9b1ab",
+  "psc0/scripts/sh1-ir-checker-conformance.mjs": "b3b71e56f701478dfd12a373b94c75469e74161e",
+  "psc0/scripts/original-ir-inventory.mjs": "cd4dd0c4e9d6709d7de1652382b9cee7a8b39c25",
+  "psc0/test/IrCheckerTests.lean": "5c675cf9d9a8befdd7f6f427d6c737fef304d2e7",
+  "psc0/scripts/check-typescript-profile.mjs": "8dd225dea1dd7cbc8688a22bb514bea6bdfd5ba0",
+  "psc0/scripts/typescript-cli.mjs": "9d6607a6f4284b0afba8023566f6e1d75c30a64a",
+  "psc0/scripts/sh1-check-admissions.mjs": "750fe59f317056bfe76b2c77ffd7d09a82aac342",
+  ".github/workflows/psc0-sh1.yml": "add8e9a3249ab35497b85ad91c207fe97142e5d9"
+});
+const RECIPE_PATHS = [
+  "scripts/sh1-qualify.mjs", "scripts/sh1-capabilities.mjs",
+  "scripts/sh1-grammar-conformance.mjs", "scripts/sh1-projection-conformance.mjs",
+  "scripts/sh1-successor-seed.mjs", "psconfig.json",
+  "scripts/sh1-fresh-name-conformance.mjs", "scripts/sh1-migration-worker-conformance.mjs",
+  "scripts/sh1-migration-worker-abi.mjs",
+  "test/fixtures/selfhost-sh1-accumulators.lean", "test/fixtures/selfhost-sh1-accumulators.ps",
+  "scripts/proofscript-source.mjs", "scripts/checked-source-snapshot.mjs",
+  "scripts/selfhost-source-workspace.mjs", "scripts/LeanCheckedSeed.lean",
+  "scripts/typescript-cli.mjs", "scripts/check-typescript-profile.mjs", "scripts/workspace-layout.mjs",
+  "scripts/generated-preparation-session.mjs", "scripts/original-ir-inventory.mjs",
+  "scripts/original-ir-carrier.mjs", "scripts/sh1-ir-checker-conformance.mjs",
+  "test/IrCheckerTests.lean", "scripts/sh1-source-snapshot.mjs", "scripts/sh1-seed-manifest.mjs",
+  "scripts/sh1-iterate.mjs", "scripts/sh1-iteration-conformance.mjs",
+  "scripts/sh1-foundation-conformance.mjs", "test/fixtures/selfhost-sh1-foundation-reference.lean",
+  "test/fixtures/selfhost-sh1-foundation-probe.lean", "scripts/sh1-helper-conformance.mjs",
+  "test/fixtures/selfhost-sh1-helpers-reference.lean", "test/fixtures/selfhost-sh1-helpers-probe.lean",
+  "scripts/sh1-generic-erasure-conformance.mjs", "test/fixtures/selfhost-sh1-generic-erasure.lean"
+];
+// Declarative complete types and order, independently transcribed from the
+// original scope manifests; no generated parameter display names are compared.
+const WORKERS = [
+ {family:"F1",name:"psErasureLocalNameWithFuel",outer:3,parameters:[["scope","PsErasureScope"],["base","String"],["fuel","Nat"],["index","Nat"]],result:"String"},
+ {family:"F1",name:"psErasureEtaNameWithFuel",outer:3,parameters:[["body","PsVerifiedIrExpr"],["used",["List","PsVerifiedIrParameter"]],["fuel","Nat"],["index","Nat"]],result:["Except","PsErasureError","String"]},
+ {family:"F1",name:"psTsFreshMatchTempWorker",outer:2,parameters:[["expr","PsVerifiedIrExpr"],["attempts","Nat"],["index","Nat"]],result:"String"},
+ {family:"F1",name:"psTsFreshInternalWorker",outer:3,parameters:[["used",["List","String"]],["namePrefix","String"],["attempts","Nat"],["index","Nat"]],result:"PsTsFreshNameResult"},
+ {family:"F2",name:"psCompilerPreparationSourcesWorker",outer:1,parameters:[["sources",["List","String"]],["state","PsCompilerPreparationState"]],result:["Except","PsCompilerError","PsCompilerPreparationState"]},
+ {family:"F2",name:"psAddDeclarationListWorker",outer:1,parameters:[["declarations",["List","PsDeclaration"]],["environment","PsEnvironment"]],result:["Except","PsElabError","PsEnvironment"]},
+ {family:"F2",name:"psElabDeclarationsWorker",outer:1,parameters:[["sources",["List","PsSyntaxDeclaration"]],["environment","PsEnvironment"],["declarationsRev",["List","PsDeclaration"]]],result:["Except","PsElabError","PsElabModuleResult"]},
+ {family:"F2",name:"psBuildErasureDeclarationNamesWorker",outer:1,parameters:[["declarations",["List","PsDeclaration"]],["state","PsErasureNameState"]],result:"PsErasureNameState"},
+ {family:"F2",name:"psEraseDefinitionsLoopWorker",outer:3,parameters:[["environment","PsEnvironment"],["scope","PsErasureScope"],["declarations",["List","PsDeclaration"]],["declarationsRev",["List","PsVerifiedIrDeclaration"]]],result:["Except","PsErasureError",["List","PsVerifiedIrDeclaration"]]},
+ {family:"F2",name:"psPrepareRuntimeStructures",outer:3,parameters:[["environment","PsEnvironment"],["declarations",["List","PsDeclaration"]],["inputs",["List","PsDeclaration"]],["scope","PsErasureScope"],["structuresRev",["List","PsVerifiedIrStructure"]]],result:["Except","PsErasureError","PsPreparedStructuresResult"]},
+ {family:"F2",name:"psPrepareRuntimeInductives",outer:3,parameters:[["environment","PsEnvironment"],["declarations",["List","PsDeclaration"]],["inputs",["List","PsDeclaration"]],["scope","PsErasureScope"],["irRev",["List","PsVerifiedIrInductive"]]],result:["Except","PsErasureError","PsPreparedInductivesResult"]},
+ {family:"F2",name:"psTsBuildSymbolMap",outer:2,parameters:[["namePrefix","String"],["names",["List","String"]],["state","PsTsSymbolMapState"]],result:"PsTsSymbolMapState"}
+];
+const PRODUCT_KEYS = ["canonicalSurfaceSourceSha256","normalizedCanonicalAdmissionsSha256","typescriptSha256","javascriptSha256"];
+function fail(label) { throw new Error("F_EVIDENCE_REVIEW: " + label); }
+function need(condition, label) { if (!condition) fail(label); }
+function clone(value) { return JSON.parse(JSON.stringify(value)); }
+function stable(value) {
+  if (value === null || typeof value === "string" || typeof value === "boolean") return JSON.stringify(value);
+  if (typeof value === "number") { need(Number.isFinite(value), "non-finite JSON number"); return JSON.stringify(value); }
+  if (Array.isArray(value)) return "[" + value.map(stable).join(",") + "]";
+  need(value && typeof value === "object", "non-JSON value");
+  return "{" + Object.keys(value).sort().map(k=>JSON.stringify(k)+":"+stable(value[k])).join(",") + "}";
+}
+function eq(actual, expected, label) { need(stable(actual) === stable(expected), label); }
+function object(value, label) { need(value !== null && typeof value === "object" && !Array.isArray(value), label); return value; }
+function array(value, length, label) { need(Array.isArray(value), label); if(length !== undefined) need(value.length === length, label+" count"); return value; }
+function natural(value, label, positive=false) { need(Number.isSafeInteger(value) && value >= (positive?1:0),label); return value; }
+function hex(value, label, length=64) { need(typeof value === "string" && new RegExp("^[a-f0-9]{"+length+"}$","u").test(value),label); return value; }
+function digest(text, sha256, label) {
+  need(typeof text === "string" && typeof sha256 === "function", label+" digest inputs");
+  return hex(sha256(text),label+" digest result");
+}
+function checkDigest(value, text, sha256, label) { eq(hex(value,label),digest(text,sha256,label),label+" SHA256"); }
+function noProvider(value,label) { eq(value,{status:"not-attempted",kernelChecked:false},label+" separate provider"); }
+function typeSource(type) {
+  return typeof type === "string" ? type :
+    type[0]+" "+type.slice(1).map(t=>Array.isArray(t)?"("+typeSource(t)+")":typeSource(t)).join(" ");
+}
+function fullType(worker,start=0) { return worker.parameters.slice(start).map(([,t])=>typeSource(t)).concat(typeSource(worker.result)).join(" -> "); }
+function irType(type) {
+  if (type === "Nat" || type === "String") return ["primitive",type==="Nat"?"nat":"string"];
+  return typeof type === "string" ? ["named",type,[]] : ["named",type[0],type.slice(1).map(irType)];
+}
+function abstractNames() {
+  const set = new Set();
+  function collect(type) { if(typeof type === "string") {if(type!=="Nat"&&type!=="String") set.add(type);} else type.slice(1).forEach(collect); }
+  for(const worker of WORKERS) {worker.parameters.forEach(([,t])=>collect(t));collect(worker.result);}
+  return [...set].sort();
+}
+function probeSource() {
+  const lines=abstractNames().map(name=>"inductive "+name+" : Type where\n  | mk");
+  WORKERS.forEach((w,i)=>lines.push(
+    "def sh1MigrationPartial"+i, "    (worker : "+fullType(w)+")",
+    ...w.parameters.map(([name,t])=>"    ("+name+" : "+typeSource(t)+")"),
+    "    : "+typeSource(w.result)+" :=",
+    "  let next : "+fullType(w,w.outer)+" := worker "+w.parameters.slice(0,w.outer).map(([n])=>n).join(" ")+";",
+    "  next "+w.parameters.slice(w.outer).map(([n])=>n).join(" ")));
+  return lines.join("\n")+"\n";
+}
+function byteLength(text) {
+  let bytes=0;
+  for(let i=0;i<text.length;i++) {
+    const c=text.charCodeAt(i);
+    if(c<0x80) bytes++; else if(c<0x800) bytes+=2;
+    else if(c>=0xd800 && c<=0xdbff && i+1<text.length && text.charCodeAt(i+1)>=0xdc00 && text.charCodeAt(i+1)<=0xdfff) {bytes+=4;i++;}
+    else bytes+=3;
+  }
+  return bytes;
+}
+function normalizeLabel(label) {
+  need(typeof label==="string","marker label");
+  return label.startsWith("PSC0_SH1_")?label.slice(9):label.startsWith("PSC0_")?label.slice(5):label;
+}
+function parsedLine(exactLoggedLine, logLine) {
+  let body=exactLoggedLine, timestamp=null;
+  const timed=/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)\s+(.*)$/u.exec(body);
+  if(timed) {timestamp=timed[1];body=timed[2];}
+  const marked=/^(PSC0_[A-Z0-9_]+):(?:\s(.*))?$/u.exec(body);
+  if(!marked) return null;
+  let payload=marked[2]??"", statusPrefix=null;
+  const status=/^(PASS|FAIL|ERROR|SUCCESS)(?:\s+|$)/u.exec(payload);
+  if(status) {statusPrefix=status[1];payload=payload.slice(status[0].length);}
+  const result={label:normalizeLabel(marked[1]),marker:marked[1],statusPrefix,exactLoggedLine,logLine,timestamp};
+  if(payload.startsWith("{") || payload.startsWith("[")) {
+    try { return {...result,rawJson:payload,parsed:JSON.parse(payload)}; }
+    catch(error) { return {...result,rawJson:payload,malformed:true,error:String(error.message)}; }
+  }
+  return {...result,text:payload};
+}
+function parseFWorkflowLog(log) {
+  need(typeof log==="string","workflow log text");
+  const receipts=[],markers=[],malformedJson=[];
+  log.split(/\r?\n/u).forEach((line,i)=>{
+    const entry=parsedLine(line,i+1); if(!entry) return;
+    if(entry.malformed) malformedJson.push(entry);
+    else if(Object.hasOwn(entry,"parsed")) receipts.push(entry);
+    else markers.push(entry);
+  });
+  return {receipts,markers,malformedJson};
+}
+function checkedParsed(parsed) {
+  object(parsed,"parsed log"); array(parsed.receipts,undefined,"receipts");array(parsed.markers,undefined,"markers");
+  array(parsed.malformedJson,0,"malformed marker JSON");
+  let previous=0;
+  for(const item of parsed.receipts) {
+    natural(item.logLine,"receipt log line",true); need(item.logLine>previous,"receipt line order");previous=item.logLine;
+    need(typeof item.exactLoggedLine==="string" && typeof item.rawJson==="string","receipt exact text");
+    const reparsed=parsedLine(item.exactLoggedLine,item.logLine);
+    need(reparsed && Object.hasOwn(reparsed,"parsed"),"receipt exact line parses");
+    eq(reparsed.label,normalizeLabel(item.label),"receipt label");
+    eq(reparsed.rawJson,item.rawJson,"receipt raw JSON retention");
+    eq(reparsed.parsed,item.parsed,"receipt parsed data retention");
+    eq(reparsed.statusPrefix,item.statusPrefix??null,"receipt status retention");
+    if(item.timestamp!==undefined) eq(reparsed.timestamp,item.timestamp,"receipt timestamp retention");
+  }
+  for(const item of parsed.markers) {
+    natural(item.logLine,"marker log line",true);need(typeof item.exactLoggedLine==="string","marker exact line");
+    const reparsed=parsedLine(item.exactLoggedLine,item.logLine);
+    need(reparsed && !Object.hasOwn(reparsed,"parsed") && !reparsed.malformed,"non-JSON marker parses");
+    eq(normalizeLabel(item.label),reparsed.label,"non-JSON marker label");
+  }
+  return parsed;
+}
+function records(parsed,label,count) {
+  const result=parsed.receipts.filter(r=>normalizeLabel(r.label)===label);
+  if(count!==undefined) array(result,count,label);
+  return result;
+}
+function single(parsed,label) {return records(parsed,label,1)[0];}
+function proofObject(record) {return object(record.parsed,record.label+" object");}
+function recordEvidence(record,sha256) {
+  return {label:normalizeLabel(record.label),logLine:record.logLine,timestamp:record.timestamp??null,
+    rawJsonSha256:digest(record.rawJson,sha256,"logged JSON"),
+    retainedCompactTextSha256:digest(record.rawJson+"\n",sha256,"retained compact JSON"),
+    exactLoggedLineSha256:digest(record.exactLoggedLine,sha256,"exact logged line"),
+    serialization:"Raw compact JSON substring from the decoded GitHub job log, followed by LF for retention; not a digest of unavailable original artifact file bytes."};
+}
+function jobList(jobs) { return array(Array.isArray(jobs)?jobs:jobs.jobs,undefined,"jobs"); }
+function commonWorkflow({run,jobs,sourceRef}) {
+  object(run,"run"); eq(sourceRef,F.sourceRef,"requested F source");eq(run.head_sha,F.sourceRef,"run source");
+  eq(String(run.id),F.runId,"run ID");
+  const all=jobList(jobs);
+  need(!all.some(j=>/successor.*recovery|cold.*recovery|typescript.*recovery|recover.*successor/iu.test(j.name??"")),"retired/separate recovery job absent from F");
+  return all;
+}
+function completedJob(all,id,name) {
+  const found=all.filter(j=>String(j.id)===String(id));array(found,1,name+" job");
+  const job=found[0];eq(job.name,name,name+" job name");eq(job.status,"completed",name+" job completed");eq(job.conclusion,"success",name+" job successful");
+  if(job.run_id!==undefined) eq(String(job.run_id),F.runId,name+" job run");
+  if(job.head_sha!==undefined) eq(job.head_sha,F.sourceRef,name+" job source");
+  return job;
+}
+function step(job,number,conclusion) {
+  const found=array(job.steps,undefined,"job steps").filter(s=>s.number===number);array(found,1,"step "+number);
+  eq(found[0].status,"completed","step "+number+" completed");eq(found[0].conclusion,conclusion,"step "+number+" "+conclusion);
+}
+function recipe(value,sha256) {
+  object(value,"recipe");eq(array(value.files,RECIPE_PATHS.length,"recipe files").map(x=>x.path),RECIPE_PATHS,"recipe path order");
+  value.files.forEach(x=>hex(x.sha256,"recipe file "+x.path));
+  checkDigest(value.sha256,JSON.stringify(value.files),sha256,"recipe");
+}
+function publicType(value,w,label) {
+  eq(value.name,w.name,label+" worker name");eq(value.completePublicType,fullType(w),label+" complete public type");
+  eq(value.originalOuterArguments,w.outer,label+" partial boundary");
+  eq(value.partialApplicationType,fullType(w,w.outer),label+" complete partial type");
+  eq(value.genericPartialWrapperElaborated,true,label+" typed generic wrapper");
+  array(value.coreType,2,label+" alpha Core type");
+  let node=value.coreType, count=0;
+  while(Array.isArray(node)&&node[0]==="forallE") {
+    need(Array.isArray(node[1]),label+" forall fields");
+    const binder=node[1].filter(x=>Array.isArray(x)&&x[0]==="binder");
+    const body=node[1].filter(x=>Array.isArray(x)&&x[0]==="body");
+    array(binder,1,label+" binder field");array(body,1,label+" body field");
+    eq(binder[0][1],["explicit",[]],label+" explicit binder");
+    node=body[0][1];count++; need(count<=w.parameters.length,label+" no extra function result");
+  }
+  eq(count,w.parameters.length,label+" complete Core arrow arity");
+}
+function referenceProbe(value,sha256) {
+  object(value,"reference ABI probe");eq(value.schemaVersion,1,"probe schema");
+  eq(value.evidence,"isolated-migration-signature-and-partial-probe","probe evidence");
+  eq(value.sourceKind,"lean","probe source kind");eq(value.abstractTypeDeclarations,19,"probe abstract type count");
+  eq(value.abstractTypeNames,abstractNames(),"probe abstract type names");
+  eq(value.signatureTypeAnnotations,12,"probe signatures");eq(value.typedGenericPartialWrappers,12,"probe typed wrappers");
+  natural(value.declarationCount,"probe actual declaration count",true);
+  checkDigest(value.sourceSha256,probeSource(),sha256,"independent isolated probe source");
+  eq(value.phase,"elaboration-and-admission-encoding","probe phase");
+  for(const key of ["mergedIntoAuthoritativeClosure","erasedOrEmitted","runtimeExecuted","currentSourceCoreOrIrCompared","fullBaselineClosurePreparedAgain"]) eq(value[key],false,"probe "+key);
+  array(value.referenceTypes,12,"reference types").forEach((v,i)=>publicType(v,WORKERS[i],"reference "+i));
+  checkDigest(value.referenceTypeSha256,JSON.stringify(value.referenceTypes),sha256,"reference types");
+}
+function workerBehavior(value,sha256,label) {
+  object(value,label+" worker report");eq(value.schemaVersion,1,label+" schema");
+  eq(value.evidence,"finite-migration-worker-generated-export-conformance",label+" evidence");eq(value.cases,87,label+" total cases");
+  const families=array(value.families,2,label+" families"),f1=families[0],f2=families[1];
+  eq(f1.family,"F1",label+" first family");eq(f2.family,"F2",label+" second family");
+  eq(f1.workerCases,44,label+" direct fresh cases");eq(f1.wrapperCases,7,label+" wrappers");eq(f2.cases,36,label+" state cases");
+  for(const [family,count] of [[f1,51],[f2,36]]) {
+    const values=array(family.observations,count,label+" "+family.family+" observations");
+    const names=values.map(v=>{need(typeof v.name==="string"&&Object.hasOwn(v,"result"),label+" case shape");return v.name;});
+    eq(new Set(names).size,count,label+" distinct case names");
+    checkDigest(family.observationSha256,JSON.stringify(values),sha256,label+" "+family.family);
+  }
+  checkDigest(value.observationSha256,JSON.stringify({F1:f1.observations,F2:f2.observations}),sha256,label+" combined observations");
+  eq(value.observationSha256,F.behaviorSha256,label+" independently expected 87-case digest");
+  const scope=object(value.scope,label+" scope");
+  for(const key of ["eachCompilerOwnsAllTaggedInputs","irRecordsUseExistingCompilerFactories","copiedRecordsRetainOwningCompilerBrands","independentExplicitExpectations","saturatedPublicArgumentOrderChecked"]) eq(scope[key],true,label+" "+key);
+  eq(scope.hostStructuralFixtureRecords,["PsErasureNameState","PsTsSymbolMapState","PsErasureCurrentDefinition"],label+" explicit host records");
+  need(typeof scope.hostStructuralFixtureBoundary==="string"&&scope.hostStructuralFixtureBoundary.includes("unbranded non-IR")&&scope.hostStructuralFixtureBoundary.includes("not compiler-created"),label+" host fixture ownership wording");
+  for(const key of ["performanceImprovementClaimed","exhaustiveForAllInputs","kernelChecked"]) eq(scope[key],false,label+" bounded "+key);
+}
+function abi(value,probe,sha256,label) {
+  object(value,label+" ABI");eq(value.schemaVersion,1,label+" ABI schema");
+  eq(value.evidence,"actual-public-core-types-and-existing-original-ir-signatures",label+" ABI evidence");
+  eq(value.referenceRef,F.originalPublicTypeRef,label+" original type ref");eq(value.manifests,MANIFESTS,label+" manifests");
+  eq(value.workerCount,12,label+" workers");eq(value.families,{F1:4,F2:8},label+" families");
+  const p=value.isolatedProbe;
+  for(const key of ["sourceSha256","sourceKind","abstractTypeDeclarations","signatureTypeAnnotations","typedGenericPartialWrappers","referenceTypeSha256","phase","mergedIntoAuthoritativeClosure","erasedOrEmitted","runtimeExecuted"]) eq(p?.[key],probe[key],label+" isolated "+key);
+  for(const key of ["existingPreparedObjectReadOnly","existingIrObjectReadOnly"]) eq(value[key],true,label+" "+key);
+  for(const key of ["runtimeParameterDisplayNamesCompared","fullBaselineClosurePreparedAgain","separateCompiledPartialApplicationProbe","kernelChecked"]) eq(value[key],false,label+" "+key);
+  eq(value.partialApplicationRuntimeEvidence,"existing-SH1-runtime-capability-gate",label+" partial runtime evidence boundary");
+  array(value.observations,12,label+" ABI observations").forEach((v,i)=>{
+    const w=WORKERS[i];publicType(v,w,label+" actual "+i);eq(v.coreType,probe.referenceTypes[i].coreType,label+" exact alpha Core type "+w.name);
+    eq(v.family,w.family,label+" family "+w.name);eq(v.remainingArgumentCount,w.parameters.length-w.outer,label+" remaining arity "+w.name);
+    eq(v.runtimeArity,w.parameters.length,label+" runtime arity "+w.name);
+    eq(v.runtimeSignature,{typeParameterCount:0,parameters:w.parameters.map(([,t])=>irType(t)),result:irType(w.result)},label+" ordered runtime signature "+w.name);
+  });
+  checkDigest(value.observationSha256,JSON.stringify(value.observations),sha256,label+" ABI observations");
+}
+
+function products(value,label,keys=PRODUCT_KEYS) {
+  object(value,label+" products");eq(Object.keys(value).sort(),[...keys].sort(),label+" exact product set");
+  keys.forEach(key=>hex(value[key],label+" "+key));
+}
+function authoringSeed(value,label) {
+  object(value,label+" authoring seed");eq(value.kind,"previous-qualified-authoring-seed",label+" selected successor kind");
+  eq(value.sourceRef,F.referenceSourceRef,label+" R source");eq(value.compilerSha256,F.referenceCompilerSha256,label+" R compiler");
+  eq(value.identitySha256,F.referenceIdentitySha256,label+" R identity");
+  eq(value.sourceClosureSha256,"f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",label+" R closure");
+  eq(value.independentAlgorithm,false,label+" no independent algorithm claim");
+  eq(value.producerToolchain,TOOLCHAIN,label+" selected R producer");
+  const runtime=clone(TOOLCHAIN);delete runtime.typescript;
+  eq(value.executionRuntime,runtime,label+" selected R execution runtime");
+  object(value.priorQualification,label+" prior R qualification metadata");
+}
+function generation(value,index,previousCompiler,fixed,probe,sha256) {
+  const label="C"+(index+1);
+  object(value,label);eq(value.schemaVersion,1,label+" schema");eq(value.evidence,"candidate-build",label+" evidence");
+  eq(value.executingCompilerSha256,previousCompiler,label+" executing compiler chain");
+  eq(value.sourceRef,F.sourceRef,label+" source");eq(value.sourceClosureSha256,fixed.sourceClosureSha256,label+" closure");
+  eq(value.moduleCount,61,label+" module count");natural(value.sourceBytes,label+" source bytes",true);
+  eq(value.sourceKind,"raw-authoritative-lean",label+" source authority");
+  eq(value.language?.implementation,"PSC1",label+" implementation language");
+  eq(value.language?.canonicalSourceGrammar,GRAMMAR,label+" active source grammar");
+  recipe(value.recipe,sha256);eq(value.toolchain,TOOLCHAIN,label+" toolchain");eq(value.typescriptProfile,PROFILE,label+" TS7 profile");
+  products(value.artifacts,label);abi(value.migrationWorkerAbi,probe,sha256,label);
+  const inventory=object(value.originalIrInventory,label+" original IR");
+  eq(inventory.report,"original-ir-inventory.json",label+" original IR file");
+  eq(inventory.traversalComplete,true,label+" original IR complete");
+  eq(inventory.findingCount,0,label+" original IR zero findings");
+  eq(inventory.findingCounts,{},label+" original IR empty findings");
+  eq(inventory.findingCountsCoverage,"all-findings",label+" original IR finding coverage");
+  eq(inventory.portableChecker?.status,"accepted",label+" portable original IR accepted");
+  eq(inventory.portableChecker?.implementation,"Ps.CompilerIr.Check.psCheckVerifiedIrModule",label+" portable checker identity");
+  eq(inventory.runtimeIrTypingAccepted,true,label+" original IR typing");
+  eq(inventory.sameOriginalIrCheckedBeforeEmission,true,label+" same original IR emitted");
+  eq(inventory.strictSh1Qualified,false,label+" no strict SH/1");
+  noProvider(value.provider,label);
+  object(value.preparation,label+" preparation receipt");
+  eq(value.preparation.warmNoChange?.cache?.preparedModules,0,label+" warm modules");
+  eq(value.preparation.warmNoChange?.cache?.finishHit,true,label+" warm finish");
+  object(value.timingsMs,label+" timings");
+  for(const duration of Object.values(value.timingsMs)) need(typeof duration==="number"&&Number.isFinite(duration)&&duration>=0,label+" measured duration");
+  if(index===0) authoringSeed(value.authoringSeed,label);
+}
+function grammarApi(value,compilerSha256) {
+  object(value,"small grammar report");eq(value.evidence,"generated-compiler-source-grammar-api","grammar evidence");
+  eq(value.compilerSha256,compilerSha256,"grammar executing compiler");eq(value.sourceGrammar,GRAMMAR,"grammar identity");
+  hex(value.corpusSha256,"grammar corpus");
+  const c=object(value.counts,"grammar counts");
+  eq(c.applicationBoundaries,18,"18 application ownership cases");
+  array(value.applications,c.applicationBoundaries,"grammar applications");
+  array(value.supported,c.supportedSyntax,"grammar supported");
+  array(value.refusals,c.parseRefusals,"grammar parse refusals");
+  eq(c.canonicalRoundTrips,c.applicationBoundaries+c.supportedSyntax,"canonical grammar count");
+  array(value.lexical?.positions,c.lexicalPositionCases,"lexical position cases");
+  array(value.lexical?.refusals,c.lexicalRefusals,"lexical refusals");
+  array(value.emptyCallMeaning?.refusals,c.emptyCallRefusals,"empty-call refusals");
+  eq(c.printerRefusals,1,"printer refusal count");
+  eq(value.scope?.finiteCorpus,true,"finite grammar corpus");
+  eq(value.scope?.smallGrammarCasesUseProofScriptRoundTrips,true,"PS grammar round trips");
+  for(const key of ["fullStandardConformance","fullPscvConformance","kernelChecked"]) eq(value.scope?.[key],false,"grammar no "+key);
+}
+function capabilities(value,compilerSha256,reference,sha256,label) {
+  object(value,label+" capabilities");eq(value.evidence,"raw-source-generated-execution",label+" capability evidence");
+  eq(value.compilerSha256,compilerSha256,label+" capability compiler");
+  const kinds=array(value.sourceKinds,2,label+" capability kinds");
+  eq(kinds.map(x=>x.sourceKind),["lean","ps"],label+" raw source kinds");
+  for(const item of kinds) {
+    for(const key of ["sourceSha256","admissionsSha256","typescriptSha256","javascriptSha256"]) hex(item[key],label+" "+item.sourceKind+" "+key);
+    eq(item.behavior,"pass",label+" raw source behavior");eq(item.generatedCompilerConsumedRawSource,true,label+" raw source consumed");
+    eq(item.projectionBehavior?.behavior,"pass",label+" projection runtime behavior");
+    eq(item.grammarBehavior?.behavior,"pass",label+" grammar runtime behavior");
+    eq(item.grammarBehavior?.edition,GRAMMAR.edition,label+" runtime edition");eq(item.grammarBehavior?.mode,GRAMMAR.mode,label+" runtime grammar mode");
+    natural(item.projectionBehavior.observations,label+" runtime projection observations",true);
+    natural(item.grammarBehavior.observations,label+" runtime grammar observations",true);
+    if(item.nativePscBehavior!==undefined) {
+      eq(item.nativePscBehavior,"pass",label+" native fixture behavior");
+      eq(item.nativeProjectionBehavior?.behavior,"pass",label+" native projection behavior");
+      eq(item.nativeGrammarBehavior?.behavior,"pass",label+" native grammar behavior");
+    }
+  }
+  need(array(value.negativeCases,undefined,label+" structural refusals").length>0,label+" structural refusal corpus");
+  object(value.projectionResolution,label+" projection resolution report");
+  grammarApi(value.grammar,compilerSha256);
+  workerBehavior(value.workerMigration,sha256,label);eq(value.workerMigration,reference,label+" complete R/F behavior report equality");
+  noProvider(value.provider,label);
+}
+function generic(value,compilerSha256,label) {
+  object(value,label+" generic report");eq(value.evidence,"scoped-recursive-generic-erasure",label+" generic evidence");
+  eq(value.compilerSha256,compilerSha256,label+" generic compiler");
+  eq(value.sourceKind,"raw-authoritative-lean",label+" generic raw source");
+  hex(value.sourceSha256,label+" generic source");
+  products(value.artifacts,label+" generic",["admissionsSha256","typescriptSha256","javascriptSha256"]);
+  eq(value.behavior?.status,"pass",label+" generic runtime");
+  eq(value.behavior?.exhaustiveForAllInputs,false,label+" generic finite scope");
+  natural(value.behavior.observations,label+" generic runtime observations",true);
+  eq(value.originalIr?.strictSh1Qualified,false,label+" generic no strict SH/1");
+  need(array(value.originalIr?.observations,undefined,label+" generic IR observations").length>0,label+" generic original IR observed");
+  if(value.native!==undefined) {
+    eq(value.native.typescriptSha256,value.artifacts.typescriptSha256,label+" native generic TS parity");
+    eq(value.native.behavior?.status,"pass",label+" native generic behavior");
+  }
+  noProvider(value.provider,label);
+}
+function nativeIr(value,label) {
+  object(value,label);eq(value.schemaVersion,1,label+" schema");eq(value.kind,"psc0-native-original-ir-check",label+" kind");
+  eq(value.accepted,true,label+" accepted");eq(value.traversalComplete,true,label+" complete");
+  for(const key of ["findingCount","retainedFindingCount","omittedFindingDetails"]) eq(value[key],0,label+" "+key);
+  natural(value.expressionCount,label+" expression count",true);natural(value.visitedSteps,label+" visited steps",true);
+  eq(value.strictSh1Qualified,false,label+" no strict SH/1");
+}
+function compactComparableGrammar(value) { const copy=clone(value);delete copy.compilerSha256;return copy; }
+function reviewFCompilerEvidence(input) {
+  const {run,jobs,compilerJobId,sourceRef,selected,grammar,sha256,grammarClosureArtifact}=input;
+  eq(String(compilerJobId),F.compilerJobId,"compiler job identity");
+  eq(grammar,GRAMMAR,"requested grammar");
+  for(const [key,expected] of Object.entries({sourceRef:F.referenceSourceRef,compilerSha256:F.referenceCompilerSha256,identitySha256:F.referenceIdentitySha256})) eq(selected?.[key],expected,"selected R "+key);
+  const all=commonWorkflow({run,jobs,sourceRef}), job=completedJob(all,compilerJobId,"compiler");
+  [3,6,7,8,9,11,14,17,18,19,20,21,22,23,24,25,28].forEach(n=>step(job,n,"success"));
+  step(job,26,"skipped");
+  const parsed=checkedParsed(input.parsed);
+  const fixedRecord=single(parsed,"FIXED_POINT"),nativeRecord=single(parsed,"NATIVE_CANDIDATE"),
+    correspondenceRecord=single(parsed,"MIGRATION_CORRESPONDENCE"),referenceRecord=single(parsed,"WORKER_HARNESS_REFERENCE"),
+    irRecord=single(parsed,"IR_NATIVE_FULL"),grammarRecord=single(parsed,"GRAMMAR_CLOSURE"),
+    nativeIrRecord=single(parsed,"IR_NATIVE_EVIDENCE");
+  const generationRecords=records(parsed,"GENERATION",3),capabilityRecords=records(parsed,"CAPABILITIES",4),
+    genericRecords=records(parsed,"GENERIC_ERASURE",4),irCheckerRecords=records(parsed,"IR_CHECKER",4);
+  const fixed=proofObject(fixedRecord),native=proofObject(nativeRecord),correspondence=proofObject(correspondenceRecord),
+    reference=proofObject(referenceRecord),fullIr=proofObject(irRecord),closureSummary=proofObject(grammarRecord),
+    nativeIrEvidence=proofObject(nativeIrRecord);
+  need(!parsed.receipts.some(r=>/REJECTED|FAILURE|FINDING$/u.test(normalizeLabel(r.label))),"no rejection or IR finding receipts");
+  const profileRecord=single(parsed,"TYPESCRIPT_PROFILE");
+  eq(profileRecord.statusPrefix,"PASS","installed TS7 profile PASS");eq(profileRecord.parsed?.mode,"installed-profile-contract","installed profile mode");
+  const timings=array(profileRecord.parsed.timings,undefined,"installed profile measured probes");
+  need(timings.length>0,"installed profile timings present");
+  timings.forEach(x=>{eq(x.version,"7.0.2","installed profile version");need(Number.isFinite(x.elapsedMs)&&x.elapsedMs>=0,"installed profile measured time");});
+  need(!parsed.receipts.some(r=>r.parsed?.mode==="same-source-comparison"),"retired TS5 comparison absent");
+  const sessions=parsed.markers.filter(x=>normalizeLabel(x.label)==="SESSION_CONFORMANCE"&&parsedLine(x.exactLoggedLine,x.logLine)?.statusPrefix==="PASS");
+  need(sessions.length>=2,"native and selected-seed preparation sessions passed");
+  eq(reference.schemaVersion,1,"reference preflight schema");eq(reference.evidence,"migration-fixture-authenticated-reference-preflight","reference preflight evidence");
+  eq(reference.recipeSourceRef,F.sourceRef,"reference recipe source");eq(reference.referenceSourceRef,F.referenceSourceRef,"reference R source");
+  eq(reference.referenceCompilerSha256,F.referenceCompilerSha256,"reference R compiler");eq(reference.selectedSeedIdentitySha256,F.referenceIdentitySha256,"reference R identity");
+  eq(reference.passed,true,"reference preflight pass");eq(reference.compilerBuilt,false,"reference preflight no compiler build");
+  eq(reference.currentSourceQualifiedByThisCheck,false,"reference preflight scope");
+  workerBehavior(reference.report,sha256,"R");referenceProbe(reference.abiProbe,sha256);
+  eq(fixed.schemaVersion,1,"fixed-point schema");eq(fixed.evidence,"compiler-qualified-current-source-fixed-point","fixed-point evidence");
+  eq(fixed.sourceRef,F.sourceRef,"fixed-point source");hex(fixed.sourceClosureSha256,"F raw closure");eq(fixed.moduleCount,61,"61-module F closure");
+  eq(fixed.rawAuthoringSourceConsumedEveryGeneration,true,"raw source every generation");
+  eq(fixed.toolchain,TOOLCHAIN,"fixed-point toolchain");eq(fixed.typescriptProfile,PROFILE,"fixed-point current profile");
+  eq(fixed.sourceGrammar,GRAMMAR,"fixed-point grammar");authoringSeed(fixed.authoringSeed,"fixed point");products(fixed.artifacts,"fixed point");
+  const stages=["C1","C2","C3"];
+  for(const key of ["helperRuntimeGenerations","recursiveGenericErasureGenerations","grammarGenerations","projectionResolutionGenerations","portableIrCheckerGenerations"]) eq(fixed[key],stages,"fixed-point "+key);
+  eq(fixed.rawCapabilityKinds,["lean","proofScript"],"fixed-point source kinds");
+  eq(fixed.originalIrCheckedBuilds,["C2","C3"],"current-generated original IR builds");
+  eq(fixed.runtimeIrTypingEnforced,true,"runtime IR enforced");eq(fixed.runtimeIrStrictQualification,"not-claimed","no strict runtime qualification");noProvider(fixed.provider,"fixed point");
+  const wm=fixed.workerMigration;
+  eq(wm?.workers,12,"F worker count");eq(wm?.families,{F1:4,F2:8},"F families");eq(wm?.removedTypedIdentityAliases,3,"three typed aliases");
+  eq(wm?.runtimeGenerations,stages,"worker runtime stages");eq(wm?.completePublicTypeAndOriginalIrBuilds,stages,"worker ABI stages");
+  eq(wm?.casesPerCompiler,87,"worker case count");eq(wm?.observationSha256,F.behaviorSha256,"fixed behavior digest");
+  eq(wm?.referenceSourceRef,F.referenceSourceRef,"worker reference source");eq(wm?.referenceCompilerSha256,F.referenceCompilerSha256,"worker reference compiler");
+  eq(wm?.fullBaselineClosurePreparedAgain,false,"no second full baseline preparation");
+  const generations=generationRecords.map(proofObject), hashes=[F.referenceCompilerSha256,...generations.map(x=>x.artifacts?.javascriptSha256)];
+  generations.forEach((value,i)=>generation(value,i,hashes[i],fixed,reference.abiProbe,sha256));
+  for(let i=1;i<3;i++) {
+    eq(generations[i].recipe,generations[0].recipe,"same F recipe C"+(i+1));
+    eq(generations[i].sourceBytes,generations[0].sourceBytes,"same source bytes");
+    eq(generations[i].migrationWorkerAbi,generations[0].migrationWorkerAbi,"complete public Core/IR ABI correspondence");
+  }
+  eq(generations[0].authoringSeed,fixed.authoringSeed,"C1 fixed-point R authoring seed linkage");
+  eq(fixed.immutableSeedBoundary,generations[0].originalIrInventory.portableChecker,"selected R has portable original IR check");
+  eq(generations[1].artifacts,generations[2].artifacts,"all four C2/C3 products identical");
+  eq(fixed.artifacts,generations[1].artifacts,"fixed products equal C2");
+  eq([fixed.c1CompilerSha256,fixed.c2CompilerSha256,fixed.c3CompilerSha256],hashes.slice(1),"fixed compiler chain");
+  eq(wm.abiObservationSha256,generations[0].migrationWorkerAbi.observationSha256,"fixed ABI digest");
+  eq(native.schemaVersion,1,"N1 schema");eq(native.evidence,"native-seeded-generated-compiler-candidate","N1 evidence");
+  eq(native.sourceRef,F.sourceRef,"N1 source");eq(native.sourceClosureSha256,fixed.sourceClosureSha256,"N1 full raw closure");
+  eq(native.moduleCount,61,"N1 modules");eq(native.sourceKind,"raw-authoritative-lean","N1 source authority");
+  eq(native.sourceGrammar,GRAMMAR,"N1 grammar");eq(native.toolchain,TOOLCHAIN,"N1 toolchain");eq(native.typescriptProfile,PROFILE,"N1 TS7");
+  eq(native.recipe,generations[0].recipe,"N1 recipe equals F recipe");
+  products(native.artifacts,"N1",["javascriptSha256","typescriptSha256"]);
+  for(const key of ["javascriptSha256","typescriptSha256"]) eq(native.artifacts[key],fixed.artifacts[key],"N1/final "+key+" parity");
+  eq(native.selectedSeedBootstrapProven,false,"N1 alone no selected bootstrap proof");eq(native.currentSourceFixedPointProven,false,"N1 alone no fixed-point proof");noProvider(native.provider,"N1");
+  eq(native.runtimeIrTyping?.generatedFullCompilerIrChecked,false,"N1 scope");
+  eq(native.runtimeIrTyping?.strictSh1Qualified,false,"N1 no strict SH/1");
+  nativeIr(fullIr,"native full original IR");eq(nativeIrEvidence.fullCompilerIr,fullIr,"native full summary in native receipt");
+  eq(nativeIrEvidence.evidence,"native-portable-checker-current-source","native IR evidence");
+  eq(nativeIrEvidence.sourceClosureSha256,fixed.sourceClosureSha256,"native checked aggregate closure");
+  eq(nativeIrEvidence.moduleCount,61,"native checked aggregate module count");
+  eq(nativeIrEvidence.typescriptSha256,native.artifacts.typescriptSha256,"native checked same-IR TS/N1 parity");
+  hex(nativeIrEvidence.sourceAggregateSha256,"native aggregate SHA");hex(nativeIrEvidence.nativeCheckerSha256,"native checker binary SHA");
+  eq(nativeIrEvidence.strictSh1Qualified,false,"native IR no strict SH/1");noProvider(nativeIrEvidence.provider,"native IR");
+  for(const [key,value] of Object.entries(fullIr)) eq(native.runtimeIrTyping.nativeCurrentSource[key],value,"N1 native IR "+key);
+  eq(closureSummary.compilerSha256,native.artifacts.javascriptSha256,"N1 grammar compiler");
+  eq(closureSummary.closureSha256,fixed.sourceClosureSha256,"N1 grammar source closure");eq(closureSummary.moduleCount,61,"N1 full grammar modules");
+  natural(closureSummary.proofScriptBytes,"N1 actual generated PS bytes",true);
+  eq(closureSummary.comparison,"Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent","full grammar relation");
+  const nativeGrammar=native.canonicalSourceCorrespondence, finalGrammar=fixed.nativeCanonicalSourceCorrespondence;
+  eq(nativeGrammar?.moduleCount,61,"N1 grammar artifact module count");hex(nativeGrammar?.reportSha256,"N1 grammar artifact digest");
+  eq(finalGrammar?.reportSha256,nativeGrammar.reportSha256,"N1/final full grammar artifact digest linkage");
+  eq(finalGrammar?.compilerSha256,native.artifacts.javascriptSha256,"fixed full grammar N1 compiler");eq(finalGrammar?.moduleCount,61,"fixed full grammar modules");
+  let closureArtifactReview={status:"logged-summary-and-qualified-run-linkage",originalArtifactFileBytesAvailable:false,
+    reportSha256:nativeGrammar.reportSha256,canonicalSurfaceSourceSha256:fixed.artifacts.canonicalSurfaceSourceSha256,
+    boundary:"The full artifact digest is a logged observation. The pinned qualifier checks its exact file digest and binds its canonical surface digest to C2/C3. Its original bytes were not supplied to this pure reviewer."};
+  if(grammarClosureArtifact!==undefined && grammarClosureArtifact!==null) {
+    object(grammarClosureArtifact,"optional full grammar artifact");
+    checkDigest(grammarClosureArtifact.sha256,grammarClosureArtifact.content,sha256,"full grammar artifact bytes");
+    eq(grammarClosureArtifact.sha256,nativeGrammar.reportSha256,"full grammar artifact logged digest");
+    const full=JSON.parse(grammarClosureArtifact.content);
+    eq(full.sourceGrammar,GRAMMAR,"full grammar artifact grammar");eq(full.closureSha256,fixed.sourceClosureSha256,"full grammar artifact closure");
+    eq(full.compilerSha256,native.artifacts.javascriptSha256,"full grammar artifact compiler");eq(full.moduleCount,61,"full grammar artifact modules");
+    eq(full.canonicalSurfaceSourceSha256,fixed.artifacts.canonicalSurfaceSourceSha256,"full grammar artifact final product binding");
+    array(full.modules,61,"full grammar artifact module records");
+    for(const key of ["fullStandardConformance","fullPscvConformance","kernelChecked"]) eq(full[key],false,"full grammar artifact no "+key);
+    closureArtifactReview={status:"exact-supplied-artifact-bytes-and-full-records",originalArtifactFileBytesAvailable:true,
+      reportSha256:grammarClosureArtifact.sha256,canonicalSurfaceSourceSha256:full.canonicalSurfaceSourceSha256};
+  }
+  eq(correspondence.schemaVersion,1,"paired correspondence schema");eq(correspondence.evidence,"finite-migration-worker-R-F-correspondence","paired correspondence evidence");
+  eq(correspondence.beforeSourceRef,F.referenceSourceRef,"paired R source");eq(correspondence.beforeCompilerSha256,F.referenceCompilerSha256,"paired R compiler");
+  eq(correspondence.afterSourceRef,F.sourceRef,"paired F source");eq(correspondence.afterCompilerSha256,hashes[1],"paired F C1 compiler");
+  eq(correspondence.casesPerCompiler,87,"paired case count");eq(correspondence.observationSha256,F.behaviorSha256,"paired digest");eq(correspondence.passed,true,"paired pass");
+  checkDigest(wm.correspondenceSha256,JSON.stringify(correspondence,null,2)+"\n",sha256,"deterministically reconstructed correspondence file");
+  const referenceWorkerFile={schemaVersion:1,evidence:"selected-successor-migration-worker-reference",
+    sourceRef:F.referenceSourceRef,compilerSha256:F.referenceCompilerSha256,seedIdentitySha256:F.referenceIdentitySha256,report:reference.report};
+  checkDigest(correspondence.referenceReportSha256,JSON.stringify(referenceWorkerFile,null,2)+"\n",sha256,"deterministically reconstructed R worker reference file");
+  const caps=capabilityRecords.map(proofObject), generics=genericRecords.map(proofObject),checks=irCheckerRecords.map(proofObject);
+  const stageNames=["N1","C1","C2","C3"], stageHashes=[native.artifacts.javascriptSha256,...hashes.slice(1)];
+  for(let i=0;i<4;i++) {
+    capabilities(caps[i],stageHashes[i],reference.report,sha256,stageNames[i]);
+    generic(generics[i],stageHashes[i],stageNames[i]);
+    eq(checks[i].compilerSha256,stageHashes[i],stageNames[i]+" IR conformance compiler");
+    eq(checks[i].evidence,"portable-original-ir-checker-conformance",stageNames[i]+" IR conformance evidence");
+    eq(checks[i].strictSh1Qualified,false,stageNames[i]+" IR no strict SH/1");noProvider(checks[i].provider,stageNames[i]+" IR conformance");
+    eq(checks[i].acceptedFixture?.runtimeIrTypingAccepted,true,stageNames[i]+" positive original IR fixture");
+    eq(checks[i].acceptedFixture?.traversalComplete,true,stageNames[i]+" positive original IR fixture complete");
+    need(array(checks[i].rejected,undefined,stageNames[i]+" IR refusals").length>0,stageNames[i]+" IR refusal cases");
+    if(i>0) {
+      eq(compactComparableGrammar(caps[i].grammar),compactComparableGrammar(caps[0].grammar),"complete grammar observations "+stageNames[i]);
+      eq(caps[i].projectionResolution,caps[0].projectionResolution,"projection API correspondence "+stageNames[i]);
+      eq(generics[i].sourceSha256,generics[0].sourceSha256,"same generic raw fixture");
+      eq(generics[i].originalIr,generics[0].originalIr,"same recursive generic IR observations");
+      eq(generics[i].behavior,generics[0].behavior,"same recursive generic runtime observations");
+    }
+    const lower=i===0?referenceRecord.logLine:generationRecords[i-1].logLine;
+    const upper=i===0?nativeRecord.logLine:i===3?fixedRecord.logLine:generationRecords[i].logLine;
+    for(const record of [capabilityRecords[i],genericRecords[i],irCheckerRecords[i]]) need(record.logLine>lower&&record.logLine<upper,"stage-local receipt order "+stageNames[i]);
+  }
+  checkDigest(correspondence.candidateReportSha256,JSON.stringify(caps[1],null,2)+"\n",sha256,"deterministically reconstructed C1 capability file");
+  need(referenceRecord.logLine<irRecord.logLine&&irRecord.logLine<grammarRecord.logLine&&grammarRecord.logLine<nativeRecord.logLine,"native proof ordering");
+  need(nativeRecord.logLine<generationRecords[0].logLine&&generationRecords[0].logLine<correspondenceRecord.logLine&&correspondenceRecord.logLine<generationRecords[1].logLine&&generationRecords[1].logLine<generationRecords[2].logLine&&generationRecords[2].logLine<fixedRecord.logLine,"C1/C2/C3 proof ordering");
+  const providerExpectedRoles=[];
+  for(const index of [2,3]) {
+    const generationName="C"+index,gen=generations[index-1],cap=caps[index],genFixture=generics[index];
+    providerExpectedRoles.push({role:generationName+" compiler source",admissionsSha256:gen.artifacts.normalizedCanonicalAdmissionsSha256});
+    cap.sourceKinds.forEach(x=>providerExpectedRoles.push({role:generationName+" raw "+x.sourceKind+" capability source",admissionsSha256:x.admissionsSha256}));
+    providerExpectedRoles.push({role:generationName+" raw recursive-generic fixture source",admissionsSha256:genFixture.artifacts.admissionsSha256});
+  }
+  array(providerExpectedRoles,8,"provider role count");
+  const observed=[referenceRecord,irRecord,nativeIrRecord,grammarRecord,nativeRecord,...generationRecords,...capabilityRecords,...genericRecords,...irCheckerRecords,correspondenceRecord,fixedRecord,profileRecord].sort((a,b)=>a.logLine-b.logLine);
+  return {
+    schemaVersion:1,evidence:"reviewed-compiler-only-F-fixed-point",passed:true,
+    sourceRef:F.sourceRef,runId:F.runId,compilerJobId:F.compilerJobId,
+    workflowRunStatus:run.status,workflowRunConclusion:run.conclusion??null,
+    job:{name:job.name,status:job.status,conclusion:job.conclusion,startedAt:job.started_at??null,completedAt:job.completed_at??null},
+    selectedSeed:{sourceRef:F.referenceSourceRef,compilerSha256:F.referenceCompilerSha256,identitySha256:F.referenceIdentitySha256,promotedToF:false,retentionStep26:"skipped"},
+    moduleCount:61,sourceClosureSha256:fixed.sourceClosureSha256,sourceBytes:generations[0].sourceBytes,
+    artifacts:clone(fixed.artifacts),generationCompilerSha256:{N1:stageHashes[0],C1:stageHashes[1],C2:stageHashes[2],C3:stageHashes[3]},
+    fixedPointProductsCompared:clone(PRODUCT_KEYS),nativeFinalParityProducts:["typescriptSha256","javascriptSha256"],
+    grammar:clone(GRAMMAR),grammarClosure:{...clone(closureSummary),artifactReview:closureArtifactReview},
+    toolchain:clone(TOOLCHAIN),typescriptProfile:clone(PROFILE),installedProfile:clone(profileRecord.parsed),sessionPassMarkers:sessions.length,
+    recipe:clone(generations[0].recipe),
+    workerMigration:{workers:12,families:{F1:4,F2:8},removedTypedIdentityAliases:3,casesPerCompiler:87,directCases:44,wrapperCases:7,stateCases:36,
+      stagesCompared:["R","N1","C1","C2","C3"],completeObservationArraysCompared:true,observationSha256:F.behaviorSha256,
+      referenceProbe:clone(reference.abiProbe),actualAbi:clone(generations[0].migrationWorkerAbi),actualAbiStages:["C1","C2","C3"],
+      arities:WORKERS.map(w=>w.parameters.length),runtimeParameterDisplayNamesCompared:false,
+      behaviorReport:clone(reference.report),pairedCorrespondence:clone(correspondence)},
+    originalIr:{native:clone(fullIr),nativeChecker:clone(nativeIrEvidence),
+      builds:generations.map((g,i)=>({generation:stages[i],executingCompilerSha256:g.executingCompilerSha256,...clone(g.originalIrInventory)})),
+      sameOriginalIrCheckedBeforeEmission:true,runtimeIrTypingEnforced:true},
+    stageTimings:generations.map((g,i)=>({generation:stages[i],timingsMs:clone(g.timingsMs)})),
+    grammarCaseCounts:clone(caps[0].grammar.counts),
+    genericErasure:{stages:stageNames,sourceSha256:generics[0].sourceSha256,originalIr:clone(generics[0].originalIr),behavior:clone(generics[0].behavior)},
+    providerExpectedRoles,provider:{status:"separate-provider-job-not-reviewed-here",kernelCheckedByThisCompilerReview:false,emissionGatedByProvider:false},
+    ts7NativeRecovery:{status:"separate-prior-proof",runId:"37947341899",provesSelectedRRecoveryOnly:true,notAnFJob:true},
+    strictSh1Qualified:false,fullStandardConformance:false,fullPscvConformance:false,
+    boundedScope:"Finite worker and syntax/runtime evidence; authoritative sources remain Lean. No exhaustive semantic/metatheory proof, F seed promotion, or root TypeScript workspace result is asserted.",
+    contractSourceBlobs:clone(CONTRACT_BLOBS),logRecords:observed.map(r=>recordEvidence(r,sha256))
+  };
+}
+
+function reviewFProviderEvidence({run,jobs,providerJobId,sourceRef,parsed,compilerReview,sha256}) {
+  const all=commonWorkflow({run,jobs,sourceRef});
+  object(compilerReview,"compiler review");
+  eq(compilerReview.evidence,"reviewed-compiler-only-F-fixed-point","prior compiler review scope");
+  eq(compilerReview.passed,true,"prior compiler review pass");eq(compilerReview.sourceRef,F.sourceRef,"prior compiler review source");
+  eq(compilerReview.runId,F.runId,"prior compiler review run");
+  eq(compilerReview.selectedSeed?.sourceRef,F.referenceSourceRef,"provider no F seed selection");
+  const compilerJob=completedJob(all,F.compilerJobId,"compiler"),job=completedJob(all,providerJobId,"kernel-admissions");
+  const requiredNames=[
+    "Read the independently qualified native provider at its exact source revision",
+    "Build the existing provider target without editing its implementation",
+    "Read exact compiler qualification artifacts from this run",
+    "Obtain actual provider decisions for the qualified admission streams",
+    "Retain provider acceptance or the exact rejection evidence"
+  ];
+  for(const name of requiredNames) {
+    const matches=array(job.steps,undefined,"provider steps").filter(x=>x.name===name);
+    array(matches,1,"provider step "+name);eq(matches[0].status,"completed","provider completed "+name);eq(matches[0].conclusion,"success","provider succeeded "+name);
+  }
+  if(compilerJob.completed_at!==undefined && job.started_at!==undefined) {
+    const before=Date.parse(compilerJob.completed_at),after=Date.parse(job.started_at);
+    need(Number.isFinite(before)&&Number.isFinite(after)&&after>=before,"provider executes after compiler");
+  }
+  const checked=checkedParsed(parsed),record=single(checked,"PROVIDER_ADMISSIONS"),fileRecord=single(checked,"PROVIDER_ADMISSIONS_FILE");
+  const value=proofObject(record),file=proofObject(fileRecord);
+  need(fileRecord.logLine>record.logLine,"provider exact file record after compact receipt");
+  eq(file.path,"kernel-admissions.json","provider actual artifact filename");
+  need(typeof file.content==="string"&&file.content.endsWith("\n"),"provider exact UTF8 content and LF");
+  eq(byteLength(file.content),natural(file.bytes,"provider exact byte count",true),"provider UTF8 byte count");
+  checkDigest(file.sha256,file.content,sha256,"provider exact read-back file");
+  eq(JSON.parse(file.content),value,"provider exact file object equals compact observed object");
+  eq(value.schemaVersion,1,"provider receipt schema");
+  eq(value.evidence,"selected-provider-acceptance-for-qualified-compiler-admissions","provider evidence");
+  eq(value.sourceRef,F.sourceRef,"provider F source");
+  eq(value.sourceClosureSha256,compilerReview.sourceClosureSha256,"provider F closure");
+  eq(value.compilerSha256,compilerReview.artifacts.javascriptSha256,"provider final F compiler");
+  eq(value.accepted,true,"all actual provider streams accepted");
+  eq(value.emissionWasGatedByThisCheck,false,"provider is post-emission");
+  eq(value.qualificationBoundary,"Compiler-only artifacts were generated first; promotion may use this additional exact-stream provider acceptance.","provider qualification boundary");
+  const provider=object(value.provider,"selected provider");
+  eq(provider.sourceRef,F.providerRef,"unchanged selected provider source");
+  eq(provider.sourceTree,"38c8c55bd2b214753e56c58c15c4901c32c01b86","unchanged selected provider source tree");
+  eq(provider.binarySha256,"88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec","unchanged qualified-R provider binary");
+  const metadata={protocol:"pskernel-core/1",provider:"pskernel-core-native",leanVersion:"4.34.0",
+    leanCommit:TOOLCHAIN.leanGitHash,profile:"lean4.34-core",status:"ready"};
+  eq(provider.metadata,metadata,"unchanged provider protocol/profile metadata");
+  eq(provider.lean,TOOLCHAIN.lean,"provider Lean pin");eq(provider.node,TOOLCHAIN.node,"provider Node pin");
+  eq(provider.command,["psc_kernel_core_provider","--check"],"provider native check command");
+  eq(provider.timeoutMs,60000,"unchanged provider timeout");
+  eq(provider.resourcePolicy,"Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.","unchanged provider resource policy");
+  const expected=array(compilerReview.providerExpectedRoles,8,"expected provider roles");
+  const byRole=new Map(expected.map(x=>[x.role,x.admissionsSha256]));
+  eq(byRole.size,8,"distinct provider roles");
+  const rolesByDigest=new Map();
+  for(const {role,admissionsSha256} of expected) {
+    hex(admissionsSha256,"expected provider role digest");
+    const group=rolesByDigest.get(admissionsSha256)??[];group.push(role);rolesByDigest.set(admissionsSha256,group);
+  }
+  const expectedDistinct=rolesByDigest.size;
+  const observedRoles=[],observedHashes=[];
+  const decision={protocol:"pskernel-core/1",provider:"pskernel-core-native",leanVersion:"4.34.0",
+    leanCommit:TOOLCHAIN.leanGitHash,profile:"lean4.34-core",accepted:true};
+  array(value.streams,expectedDistinct,"actual provider stream count derived from eight role digests").forEach(stream=>{
+    hex(stream.canonicalAdmissionsSha256,"provider stream digest");
+    observedHashes.push(stream.canonicalAdmissionsSha256);
+    need(Number.isFinite(stream.durationMs)&&stream.durationMs>=0,"actual provider stream duration");
+    for(const [key,expectedValue] of Object.entries(decision)) eq(stream.result?.[key],expectedValue,"actual provider decision "+key);
+    const expectedRoles=rolesByDigest.get(stream.canonicalAdmissionsSha256);
+    need(expectedRoles!==undefined,"known expected provider stream digest");
+    const roles=array(stream.artifacts,expectedRoles.length,"exact grouped artifact roles");
+    eq(roles.slice().sort(),expectedRoles.slice().sort(),"exact role set for provider stream digest");
+    for(const role of roles) {
+      need(byRole.has(role),"known exact admission role");
+      eq(stream.canonicalAdmissionsSha256,byRole.get(role),"actual admission digest for "+role);
+      observedRoles.push(role);
+    }
+  });
+  eq(new Set(observedHashes).size,expectedDistinct,"provider distinct actual streams");
+  eq(observedHashes.slice().sort(),[...rolesByDigest.keys()].sort(),"exact actual stream digest set");
+  eq(observedRoles.slice().sort(),expected.map(x=>x.role).sort(),"all eight exact provider roles once");
+  return {
+    schemaVersion:1,evidence:"reviewed-F-selected-provider-post-emission-acceptance",passed:true,
+    sourceRef:F.sourceRef,runId:F.runId,providerJobId:String(providerJobId),
+    compilerSha256:value.compilerSha256,sourceClosureSha256:value.sourceClosureSha256,
+    job:{name:job.name,status:job.status,conclusion:job.conclusion,startedAt:job.started_at??null,completedAt:job.completed_at??null},
+    selectedProvider:clone(provider),
+    sameProviderBinaryAsQualifiedR:true,
+    distinctAdmissionStreams:expectedDistinct,artifactRoles:8,streams:clone(value.streams),
+    exactProviderFile:clone(file),
+    compactLogRecord:recordEvidence(record,sha256),exactFileEnvelopeLogRecord:recordEvidence(fileRecord,sha256),
+    emissionWasGatedByThisCheck:false,
+    selectedSeed:{sourceRef:F.referenceSourceRef,compilerSha256:F.referenceCompilerSha256,identitySha256:F.referenceIdentitySha256,promotedToF:false},
+    strictSh1Qualified:false,fullStandardConformance:false,fullPscvConformance:false,
+    scope:"Actual unchanged selected-provider acceptance of the distinct admission streams derived from eight exact C2/C3 role hashes, after compiler-only emission. This adds no strict profile, backend-semantic proof, F recovery/promotion, or separate root-workspace result."
+  };
+}
+return Object.freeze({
+  schemaVersion:1,
+  parseFWorkflowLog,
+  reviewFCompilerEvidence,
+  reviewFProviderEvidence,
+  contract:clone({fixedCheckpoint:F,grammar:GRAMMAR,toolchain:TOOLCHAIN,typescriptProfile:PROFILE,
+    contractSourceBlobs:CONTRACT_BLOBS,
+    compilerRequiredSteps:[3,6,7,8,9,11,14,17,18,19,20,21,22,23,24,25,28],
+    compilerSkippedStep:26,
+    workerArities:WORKERS.map(w=>w.parameters.length),
+    inputBoundary:"Only parsed JSON data, exact decoded log lines, and a synchronous UTF8 SHA256(text)->lowercaseHex callback; no repository modules are invoked.",
+    invocation:"const api = new Function(blobContent)(); const parsed = api.parseFWorkflowLog(actualDecodedLog); const result = api.reviewFCompilerEvidence({run,jobs,compilerJobId,sourceRef,parsed,selected,grammar,sha256}); Provider review is a separate call after its actual job succeeds.",
+    optionalCompilerInput:"grammarClosureArtifact:{content,sha256} verifies actual full N1 grammar file bytes if supplied; omission is recorded as a limitation.",
+    unclaimed:["strict SH/1","full Standard","full PSCV","exhaustive semantics","F seed promotion","root TypeScript workspace qualification"]
+  })
+});

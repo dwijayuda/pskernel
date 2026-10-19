@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-typescript7-installed-profile",
+  "sourceRef": "5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+  "workflowRunId": 37950522687,
+  "workflowRunAttempt": 1,
+  "node": "v22.23.3",
+  "platform": "linux",
+  "architecture": "x64",
+  "typescript": "7.0.2",
+  "reportedVersion": "Version 7.0.2",
+  "launcherSha256": "2219f428a7e55aaf1f7ad85b9b0f0cf5078aeb76ccc9a7c6036c92d48f492ffd",
+  "lockGenerated": false,
+  "packageLockSha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+  "manifests": [
+    {
+      "path": "package.json",
+      "sha256": "7134c3f84b92442c0ea20117d9d68e5fe327b630b2d06200fc4fe84c3485c6bb"
+    },
+    {
+      "path": "packages/backend-ts/package.json",
+      "sha256": "01ce17eac169bf3a9b52c79a2df383e696554bbb2a8d87d3578afe57f17e012d"
+    },
+    {
+      "path": "packages/browser/package.json",
+      "sha256": "0b547866087820f9a2b69c5a6b3a9ec4269d499542503057a58b13df5fe65331"
+    },
+    {
+      "path": "packages/checked-core/package.json",
+      "sha256": "509507a75506587e9d4d5674dc2b9f9abad5d215a64db027d4f10617cbceb609"
+    },
+    {
+      "path": "packages/cli/package.json",
+      "sha256": "978fba06b269d508cb1b8a46a1d467553d0db3f37108d0f9db927d0993a7bb36"
+    },
+    {
+      "path": "packages/compiler-ir/package.json",
+      "sha256": "e840be27225f47bb6ae07b28dc5da046d473583cd0f92f2e9f0af5f75e4033b8"
+    },
+    {
+      "path": "packages/compiler/package.json",
+      "sha256": "0700268a945c6d8421ce0adb310228ba7c8dccb540a510831e50449b5b4242c2"
+    },
+    {
+      "path": "packages/conformance/package.json",
+      "sha256": "22563d0c6935e2a2def621e8809e66ae4d4814d67b1cf9bbe9709a68f3662518"
+    },
+    {
+      "path": "packages/elab/package.json",
+      "sha256": "d6655712683f75a986e462f1e2a983c29ac75b3be728cb3067f6c4ac0e238bef"
+    },
+    {
+      "path": "packages/environment/package.json",
+      "sha256": "dcf7cb7b3a451768f97290c2c85d024e82a3ec152b80f39b9e6e627d5770bf99"
+    },
+    {
+      "path": "packages/erasure/package.json",
+      "sha256": "6b589740a1f5c854454078506fdda9a3542c65294867084ac9069113a21c51b0"
+    },
+    {
+      "path": "packages/language-service/package.json",
+      "sha256": "7d3353f0da775c603694a9af9c231ba4e5eac74651799f8b3cfed8fb9da6043b"
+    },
+    {
+      "path": "packages/lean4export/package.json",
+      "sha256": "75a88451ba54d25478e668d5f71842bd205c06bef2a543cfa1330f9ab1330948"
+    },
+    {
+      "path": "packages/lsp/package.json",
+      "sha256": "d3213eb0b2961b095c69e375dfbcdd36ee69e18e0711325d379d21524655f555"
+    },
+    {
+      "path": "packages/meta/package.json",
+      "sha256": "8e9ce16be33e2fef9f140bc80a66c121e1ecb6eadd418cb39ca744f6cd3af9f1"
+    },
+    {
+      "path": "packages/module/package.json",
+      "sha256": "ab02c38611e688f3143e3f71da888fc3de8e54c762b31f597b19d8a9447b7117"
+    },
+    {
+      "path": "packages/pretty/package.json",
+      "sha256": "1876a58f8349e25fcccae9ae40d8507d831ea7e435614c6c10ab32e31cdcbe9c"
+    },
+    {
+      "path": "packages/project/package.json",
+      "sha256": "81b57ea3bb383b7d3ad2a29be4ec5de11bac12034659654aa2f64005f775e591"
+    },
+    {
+      "path": "packages/runtime/package.json",
+      "sha256": "c7ecdb938467bac410a5719c270ce7a408315544d938d1e1ad159c7c05dcbfe4"
+    },
+    {
+      "path": "packages/syntax/package.json",
+      "sha256": "bf69bbeb3e87f6ab9425cee1eca99db6fab76f4f449dde03dff9d3fb4c196606"
+    },
+    {
+      "path": "packages/tactic/package.json",
+      "sha256": "e4f5f12a47dee0c279bfb0c69dda93729254f8b6fd8362607d1c0d355ffe5ed7"
+    }
+  ],
+  "optionalDependencies": {
+    "@typescript/typescript-win32-x64": "7.0.2",
+    "@typescript/typescript-win32-arm64": "7.0.2",
+    "@typescript/typescript-linux-x64": "7.0.2",
+    "@typescript/typescript-linux-arm": "7.0.2",
+    "@typescript/typescript-linux-arm64": "7.0.2",
+    "@typescript/typescript-darwin-x64": "7.0.2",
+    "@typescript/typescript-darwin-arm64": "7.0.2",
+    "@typescript/typescript-aix-ppc64": "7.0.2",
+    "@typescript/typescript-freebsd-arm64": "7.0.2",
+    "@typescript/typescript-freebsd-x64": "7.0.2",
+    "@typescript/typescript-linux-loong64": "7.0.2",
+    "@typescript/typescript-linux-mips64el": "7.0.2",
+    "@typescript/typescript-linux-ppc64": "7.0.2",
+    "@typescript/typescript-linux-riscv64": "7.0.2",
+    "@typescript/typescript-linux-s390x": "7.0.2",
+    "@typescript/typescript-netbsd-arm64": "7.0.2",
+    "@typescript/typescript-netbsd-x64": "7.0.2",
+    "@typescript/typescript-openbsd-arm64": "7.0.2",
+    "@typescript/typescript-openbsd-x64": "7.0.2",
+    "@typescript/typescript-sunos-x64": "7.0.2"
+  },
+  "retiredCompilerRuntimeUsed": false
+}

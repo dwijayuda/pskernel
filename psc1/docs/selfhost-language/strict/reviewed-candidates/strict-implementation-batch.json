@@ -1,0 +1,482 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-reviewed-implementation-batch",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "expectedParent": "5becf0cf22a8deec760e0da68b706e95ca72f902",
+  "status": "reviewed-integration-awaiting-exact-source-cloud-qualification",
+  "files": [
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "expectedBaseBlob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+      "candidate": "c403bd879e439b7b6e88303df430890352a14115",
+      "reviewedSequence": [
+        {
+          "origin": "b65d43687f3eecae05749078d5c26b96f7f065bd",
+          "candidate": "c403bd879e439b7b6e88303df430890352a14115"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "expectedBaseBlob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+      "candidate": "ff632f3a40b069bfead799b408af009ec9931261",
+      "reviewedSequence": [
+        {
+          "origin": "b65d43687f3eecae05749078d5c26b96f7f065bd",
+          "candidate": "a388d013dbf6c9270ffa91997512f672da6aabff"
+        },
+        {
+          "origin": "06ca2937bb073583b4a0f02cc12219253172228c",
+          "candidate": "ff632f3a40b069bfead799b408af009ec9931261",
+          "deltaBase": "a388d013dbf6c9270ffa91997512f672da6aabff"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source.mjs",
+      "expectedBaseBlob": "6fb4e25238d99ad6e408726831454e2b14235092",
+      "candidate": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+      "reviewedSequence": [
+        {
+          "origin": "6dc338dd19c2a14c088a4a7e9f06fd3246cfdfd6",
+          "candidate": "d01714cc7b8aad63199904fb7944dde51af2ff83"
+        },
+        {
+          "origin": "4020771505138199353795f9709fb79c065e09f0",
+          "candidate": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+          "deltaBase": "d01714cc7b8aad63199904fb7944dde51af2ff83"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/StrictSourceCompile.lean",
+      "expectedBaseBlob": "6f3b14e0110548f530a2ec6139105efbeb2e203d",
+      "candidate": "c741759094060bcccdbeb67d24bfb30dfe864b0e",
+      "reviewedSequence": [
+        {
+          "origin": "6dc338dd19c2a14c088a4a7e9f06fd3246cfdfd6",
+          "candidate": "c741759094060bcccdbeb67d24bfb30dfe864b0e"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-capabilities.mjs",
+      "expectedBaseBlob": "dd23adb72d33c0df14a88ec846ab6c705d5813b2",
+      "candidate": "8d87080352509dc936614d560aa68ded14fc36e8",
+      "reviewedSequence": [
+        {
+          "origin": "6dc338dd19c2a14c088a4a7e9f06fd3246cfdfd6",
+          "candidate": "8d87080352509dc936614d560aa68ded14fc36e8"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "expectedBaseBlob": "13614bc6eb279c93d4cbcbd8815b671beae38199",
+      "candidate": "f31d88f0172122d4cf62d62f35f372fe89581c18",
+      "reviewedSequence": [
+        {
+          "origin": "root-source-owned-reuse-review",
+          "candidate": "f31d88f0172122d4cf62d62f35f372fe89581c18"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "expectedBaseBlob": "9aaa3a72bbfe03ed3fc4918527e2ca200537d61f",
+      "candidate": "a947a4058e3d91a02d4f8120a3d86556100c8555",
+      "reviewedSequence": [
+        {
+          "origin": "root-source-owned-reuse-review",
+          "candidate": "a947a4058e3d91a02d4f8120a3d86556100c8555"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "expectedBaseBlob": "63be15cf691cd4689e566ccd1bcab771215e7700",
+      "candidate": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53",
+      "reviewedSequence": [
+        {
+          "origin": "root-source-owned-reuse-review",
+          "candidate": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/check-elab-declarations-selfhost-source-syntax.mjs",
+      "expectedBaseBlob": "68d229c41684f40011b9687217c41730f2d8806b",
+      "candidate": "3957a932618c1b61ffc45d9d8924b32c90c7b5e4",
+      "reviewedSequence": [
+        {
+          "origin": "root-source-owned-reuse-review",
+          "candidate": "3957a932618c1b61ffc45d9d8924b32c90c7b5e4"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/check-modular-preparation-source.mjs",
+      "expectedBaseBlob": "e1b31140b366c90c5a4443502723644051e332a3",
+      "candidate": "495012a236a1bb3a5626a826e22a4ff1dab99efc",
+      "reviewedSequence": [
+        {
+          "origin": "root-source-owned-reuse-review",
+          "candidate": "495012a236a1bb3a5626a826e22a4ff1dab99efc"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "expectedBaseBlob": "7e70f4ec75a156c87dc5f1023c451f77b132bc39",
+      "candidate": "e987f2834e74c8acded0fa628e245ef823dcc17a",
+      "reviewedSequence": [
+        {
+          "origin": "4020771505138199353795f9709fb79c065e09f0",
+          "candidate": "ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f"
+        },
+        {
+          "origin": "c822a05b23225b39c306c3ac4ba0898b25876e49",
+          "candidate": "e987f2834e74c8acded0fa628e245ef823dcc17a",
+          "deltaBase": "ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "expectedBaseBlob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+      "candidate": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "reviewedSequence": [
+        {
+          "origin": "64717ffed1cc1bc46a66ba9d928bd71144b87c7d",
+          "candidate": "3e11222a620cd044c9a5d48243c9b33421b5d5dc"
+        },
+        {
+          "origin": "5360abde1e14fe714a7d1105b28c5131f79d355d",
+          "candidate": "ecc7284e34b476e18c8936fade65dc9e6eaccb4a",
+          "deltaBase": "3e11222a620cd044c9a5d48243c9b33421b5d5dc"
+        },
+        {
+          "origin": "06ca2937bb073583b4a0f02cc12219253172228c",
+          "candidate": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+          "deltaBase": "ecc7284e34b476e18c8936fade65dc9e6eaccb4a"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expectedBaseBlob": "9628e3c9def09c487abb5b8859a79c7be735acf9",
+      "candidate": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "reviewedSequence": [
+        {
+          "origin": "64717ffed1cc1bc46a66ba9d928bd71144b87c7d",
+          "candidate": "dfd58154826c892d18b97b84303abbce6a622d7b"
+        },
+        {
+          "origin": "5360abde1e14fe714a7d1105b28c5131f79d355d",
+          "candidate": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+          "deltaBase": "dfd58154826c892d18b97b84303abbce6a622d7b"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-runtime-conformance.mjs",
+      "expectedBaseBlob": "8838155fb80ef28f7bf5c3916c207c6c94451634",
+      "candidate": "df55eb56e9ce5c7f26a134b48de5114feeaaaad6",
+      "reviewedSequence": [
+        {
+          "origin": "64717ffed1cc1bc46a66ba9d928bd71144b87c7d",
+          "candidate": "df55eb56e9ce5c7f26a134b48de5114feeaaaad6"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/check-erasure-finish-application-sequencing-selfhost-source-syntax.mjs",
+      "expectedBaseBlob": "a8c352d39fbfccc3b477e7d693407cf9513c8a8f",
+      "candidate": "852240e14ed49ce01b1f835133492fd117db4327",
+      "reviewedSequence": [
+        {
+          "origin": "64717ffed1cc1bc46a66ba9d928bd71144b87c7d",
+          "candidate": "852240e14ed49ce01b1f835133492fd117db4327"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "expectedBaseBlob": "969eb9ec1b18e9ab42a1bfdf4d385e39a7fc56a3",
+      "candidate": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd",
+      "reviewedSequence": [
+        {
+          "origin": "5360abde1e14fe714a7d1105b28c5131f79d355d",
+          "candidate": "760b0ee96b33e31e37eee2f8e7049b4d72cd8fff",
+          "deltaBase": "969eb9ec1b18e9ab42a1bfdf4d385e39a7fc56a3"
+        },
+        {
+          "origin": "06ca2937bb073583b4a0f02cc12219253172228c",
+          "candidate": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd",
+          "deltaBase": "760b0ee96b33e31e37eee2f8e7049b4d72cd8fff"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+      "expectedBaseBlob": "e91415c66fec9115a281c93c9459189bb919f121",
+      "candidate": "e8d6ebda842dfbfcf3132f832e7630703080fa8a",
+      "reviewedSequence": [
+        {
+          "origin": "5360abde1e14fe714a7d1105b28c5131f79d355d",
+          "candidate": "48a734bb12c3bf9a8314a20dfb0dff87541bc9ff",
+          "deltaBase": "e91415c66fec9115a281c93c9459189bb919f121"
+        },
+        {
+          "origin": "06ca2937bb073583b4a0f02cc12219253172228c",
+          "candidate": "e8d6ebda842dfbfcf3132f832e7630703080fa8a",
+          "deltaBase": "48a734bb12c3bf9a8314a20dfb0dff87541bc9ff"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+      "expectedBaseBlob": "7bc3c98cbba77e51b521d19492f3c1ec5bd2ef7c",
+      "candidate": "519e2ca622ea5ea7e31dba193237b2db871e6bb7",
+      "reviewedSequence": [
+        {
+          "origin": "5360abde1e14fe714a7d1105b28c5131f79d355d",
+          "candidate": "519e2ca622ea5ea7e31dba193237b2db871e6bb7",
+          "deltaBase": "7bc3c98cbba77e51b521d19492f3c1ec5bd2ef7c"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "expectedBaseBlob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+      "candidate": "ac527384033181014417579e39f93a1595d4cf72",
+      "reviewedSequence": [
+        {
+          "origin": "5360abde1e14fe714a7d1105b28c5131f79d355d",
+          "candidate": "ac527384033181014417579e39f93a1595d4cf72",
+          "deltaBase": "94b80cd7fe617e62c9a95446ff019e088d57b0b3"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expectedBaseBlob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+      "candidate": "98bac2823502c641c9b386f0ee1328cd7a688e87",
+      "reviewedSequence": [
+        {
+          "origin": "5360abde1e14fe714a7d1105b28c5131f79d355d",
+          "candidate": "98bac2823502c641c9b386f0ee1328cd7a688e87",
+          "deltaBase": "fa6491f4861ddc59caba51c03a29790fc6e8653b"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-grammar-conformance.mjs",
+      "expectedBaseBlob": "48efa9b0c90e7904a1df49f43253395841bff90c",
+      "candidate": "77dcbec4a94f7ba27b0727a0888b4098d77f05fc",
+      "reviewedSequence": [
+        {
+          "origin": "c822a05b23225b39c306c3ac4ba0898b25876e49",
+          "candidate": "77dcbec4a94f7ba27b0727a0888b4098d77f05fc",
+          "deltaBase": "48efa9b0c90e7904a1df49f43253395841bff90c"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-ir-checker-conformance.mjs",
+      "expectedBaseBlob": "a5dfb43838615e91288f4d853829618f615dc661",
+      "candidate": "dd53f2067046a201cda96fe5ede40f500ece5b20",
+      "reviewedSequence": [
+        {
+          "origin": "c822a05b23225b39c306c3ac4ba0898b25876e49",
+          "candidate": "dd53f2067046a201cda96fe5ede40f500ece5b20",
+          "deltaBase": "a5dfb43838615e91288f4d853829618f615dc661"
+        }
+      ]
+    },
+    {
+      "path": "psc0/test/IrCheckerTests.lean",
+      "expectedBaseBlob": "5c675cf9d9a8befdd7f6f427d6c737fef304d2e7",
+      "candidate": "2f507fdaef96411dfa5833016c94655549b99938",
+      "reviewedSequence": [
+        {
+          "origin": "c822a05b23225b39c306c3ac4ba0898b25876e49",
+          "candidate": "2f507fdaef96411dfa5833016c94655549b99938",
+          "deltaBase": "5c675cf9d9a8befdd7f6f427d6c737fef304d2e7"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "expectedBaseBlob": "8c8a781012871b1f0f748ed46921287efab8e046",
+      "candidate": "bb02be336824c078f118be130128aa38c15615bf",
+      "reviewedSequence": [
+        {
+          "origin": "a1786b4e0ad9660ac3e904347749d294c4b71865",
+          "candidate": "bb02be336824c078f118be130128aa38c15615bf"
+        }
+      ]
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-empty.lean",
+      "expectedBaseBlob": null,
+      "candidate": "295b7dc991bf37e9de8e3d49b7db3692f0c4cf53",
+      "reviewedSequence": [
+        {
+          "origin": "c822a05b23225b39c306c3ac4ba0898b25876e49",
+          "candidate": "295b7dc991bf37e9de8e3d49b7db3692f0c4cf53"
+        }
+      ]
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-empty.ps",
+      "expectedBaseBlob": null,
+      "candidate": "cada46d9d1f10d95bcd6053fff6078262b600b6c",
+      "reviewedSequence": [
+        {
+          "origin": "c822a05b23225b39c306c3ac4ba0898b25876e49",
+          "candidate": "cada46d9d1f10d95bcd6053fff6078262b600b6c"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-resource-policy.mjs",
+      "expectedBaseBlob": null,
+      "candidate": "7e3066c513a91a6e0717aac9465a879097c0dd82",
+      "reviewedSequence": [
+        {
+          "origin": "5a71a7f7c6074aea8a4380d3d200756fa02c3878",
+          "candidate": "7e3066c513a91a6e0717aac9465a879097c0dd82"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "expectedBaseBlob": "b4dff9ac3b0ba551d0358b61f2ea7cd1dd3597a4",
+      "candidate": "1945f97a202f2ebeb7ca9ac10f9482d07394c2d9",
+      "reviewedSequence": [
+        {
+          "origin": "5a71a7f7c6074aea8a4380d3d200756fa02c3878",
+          "candidate": "1945f97a202f2ebeb7ca9ac10f9482d07394c2d9"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/psc0-sh1.yml",
+      "expectedBaseBlob": "6f55548d24a91cbb305ec6448bd30e465b9ee69d",
+      "candidate": "cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8",
+      "reviewedSequence": [
+        {
+          "origin": "5a71a7f7c6074aea8a4380d3d200756fa02c3878",
+          "candidate": "cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8"
+        }
+      ]
+    }
+  ],
+  "compositionPolicy": "Apply the final blob for each file to its exact committed base. reviewedSequence records cumulative overlaps; never overwrite a final empty/record or ingress repair with an earlier semantic/origin draft.",
+  "reviewManifests": {
+    "origins": "b65d43687f3eecae05749078d5c26b96f7f065bd",
+    "sourceOwnedReuse": "6dc338dd19c2a14c088a4a7e9f06fd3246cfdfd6",
+    "hostIngress": "4020771505138199353795f9709fb79c065e09f0",
+    "sourceEvaluation": "64717ffed1cc1bc46a66ba9d928bd71144b87c7d",
+    "runtimeLawReview": "a91a81a762943d30fcf15f7026016f7c8d4e9481",
+    "emptyImplementation": "5360abde1e14fe714a7d1105b28c5131f79d355d",
+    "zeroFieldImplementation": "06ca2937bb073583b4a0f02cc12219253172228c",
+    "emptyEvidence": "c822a05b23225b39c306c3ac4ba0898b25876e49",
+    "evidenceBinder": "a1786b4e0ad9660ac3e904347749d294c4b71865",
+    "resources": "5a71a7f7c6074aea8a4380d3d200756fa02c3878"
+  },
+  "completedInspection": {
+    "runId": 37980548050,
+    "jobId": 113989649430,
+    "evidenceBlob": "77c6e9ae9dbf0a2c6f47cb7b0d415437bf056f0e",
+    "sha256": "8dd073faaf235c9c5bffed661d7335ec5a4bdc8dd4225d77ad3e1603aef2496c",
+    "sourceRef": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+    "c2RetainedFiles": 0,
+    "compilerExecuted": false
+  },
+  "plannedEvidence": {
+    "sourceCases": {
+      "accepted": 2,
+      "refused": 33,
+      "carrierRefused": 2
+    },
+    "sourcePositivePerKind": {
+      "modules": 3,
+      "sourceDeclarations": 11,
+      "coreDeclarations": 16,
+      "imports": 1,
+      "normalizations": 0
+    },
+    "runtime": {
+      "operations": 45,
+      "originalObservations": 186,
+      "rawNatEqualities": 6,
+      "sourceEvaluationDeclarations": 12,
+      "sourceEvaluationNativeObservations": 24,
+      "sourceEvaluationHostProbes": 21
+    },
+    "ir": {
+      "refusals": 38,
+      "behaviorObservations": 61
+    },
+    "nativeCheckerCases": 15,
+    "capabilityOrigins": {
+      "sourceDeclarations": 35,
+      "coreDeclarations": 55,
+      "normalizationPlans": 16
+    },
+    "resourcePolicy": {
+      "id": "psc0-sh1-generated-qualification-resources/1",
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "explicitOldSpaceMiB": 8192,
+      "minimumEntryAvailableBytes": 12884901888,
+      "observedHeapBandBytes": [
+        8589934592,
+        8858370048
+      ],
+      "entryCommands": [
+        "workflow-preflight",
+        "candidate",
+        "fixed-point"
+      ],
+      "workflowPreflightPosition": "after setup-node and before Lean setup, TypeScript install, cache restoration, or native compilation; full qualification only",
+      "effectiveAvailable": "minimum of physical MemAvailable, process.availableMemory(), effective capacity, and each resolvable visible cgroup ancestor limit minus current usage",
+      "cgroup": "Resolve membership against the broadest matching visible cgroup2/memory-controller mount and visit every directory through its mount root; include v2 max/high or v1 hard/soft limits; keep raw 64-bit counter strings and clamp numeric observations to physical capacity.",
+      "cgroupVisibilityLimit": "Only visible hierarchy ancestors are observable. A visible root mapping with no memory.current, neither memory.max nor memory.high, and neither non-root interface cgroup.type nor cgroup.events is the explicit global-root exception. Other absent/unsupported mappings refuse with a receipt.",
+      "noSilentFallback": true,
+      "noHeapInheritanceIntoTsChild": true,
+      "noGlobalNodeOptionsMutation": true,
+      "oldSpaceIsNotRssLimit": true,
+      "minimumHeadroomIsPreflightNotPeakGuarantee": true,
+      "nodeOptionsSyntax": "Any quote or backslash in NODE_OPTIONS refuses before resource-flag scanning. This narrow qualification environment does not implement Node's quoted-option tokenizer; the workflow supplies no NODE_OPTIONS."
+    }
+  },
+  "unchanged": {
+    "selectedSeed": "R",
+    "main": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+    "sourceAuthority": ".lean",
+    "sourceGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+    "lean": "4.34.0",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "node": "22.23.3",
+    "typescript": "7.0.2",
+    "kernelProviderDefeqCacheAlgorithmsAndExistingMetatheoryChanged": false,
+    "legacyGrammarEnabled": false
+  },
+  "review": {
+    "sourceAndBinderIndependentReview": "CLEAR",
+    "resourceIndependentReview": "CLEAR after actual-root cgroup and inherited quoted-option corrections",
+    "currentBasesChecked": true,
+    "resourceEditsForwardAndReverseExact": true,
+    "sourceOwnedRootCompanions": "Root-reviewed typed preparation output, environment/admission reuse, portable API composition and exact source guards; final identities listed above."
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "providerChecked": false,
+  "correspondenceRowsClosed": 0,
+  "executedAtWrite": false
+}

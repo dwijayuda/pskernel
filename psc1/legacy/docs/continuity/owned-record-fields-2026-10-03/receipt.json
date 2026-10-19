@@ -1,0 +1,1266 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-02T22:15:34.190Z",
+  "recordedBeforeRemotePush": true,
+  "branch": "psc2/selfhost-lean-kernel",
+  "baseCommit": "4734acb9ef2a618040beb572c13433ff7cd92ce8",
+  "semanticCommit": "7c45a3ca51ed002e5bb4302c190e8f82cce67a6e",
+  "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+  "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+  "ownedJointSelfHosted": false,
+  "releaseReady": false,
+  "authoritative": false,
+  "scope": "closed monomorphic nonrecursive Type-valued record fields; not projections or record iota",
+  "initialCheckpoint": {
+    "zipSha256": "2bf158aab22d2035f99a7fb78cf5b712ff2311257d1eb6b19b072dc0db6eaf20",
+    "manifestEntriesVerified": 1083
+  },
+  "build": {
+    "schemaVersion": 1,
+    "packageVersion": "0.1.0-checker.9",
+    "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+    "seedSha256": "a0673677219da539df555961129385ae4cf5099f303f0c883dd3a26f726449ff",
+    "seedSourceCommit": "cc79e84014ed1d49b0c31971e0a8ceb99b32472c",
+    "typescriptVersion": "5.8.3",
+    "nodeVersion": "v26.7.0",
+    "leanCheck": "PSC2_CHECK: PASS (625 declarations)",
+    "psCheck": "PSC2_CHECK: PASS (625 declarations)",
+    "canonicalPsEmissionParity": true,
+    "generatedOutputEdited": false,
+    "canCheckProofs": false,
+    "outputs": [
+      {
+        "path": "dist/foundation.d.ts",
+        "sha256": "b0060247c83ddf7bcc8a8424bd04f3980e0d2c398545b958a289d023d4ef6478"
+      },
+      {
+        "path": "dist/foundation.js",
+        "sha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391"
+      },
+      {
+        "path": "dist/foundation.lean",
+        "sha256": "ecd6ed72f5cde719854b3d7883997b22ec26695665eb3a6362f82ada7234b67a"
+      },
+      {
+        "path": "dist/foundation.ps",
+        "sha256": "31b5a95d7f65a1fc95e082c77ffd811c009fa968ba93744949f1111e76375e38"
+      },
+      {
+        "path": "dist/foundation.ts",
+        "sha256": "bea67a46614a8b72efafc71f2e98ba797b2ab6a19f60b1245e116d87f08710c5"
+      }
+    ]
+  },
+  "buildCommands": [
+    {
+      "label": "source",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts/source.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost\\packages\\pskernel-core",
+      "started": "2026-10-02T21:37:06.692Z",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\evidence\\source-attempt-3.log",
+      "finished": "2026-10-02T21:37:06.891Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "25dc2fe561d9f88771e36a17a8d9bd1f168fc9af0b2705944e7132fd5aeb2ed7"
+    },
+    {
+      "label": "build",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts/build.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost\\packages\\pskernel-core",
+      "started": "2026-10-02T21:37:06.896Z",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\evidence\\build-attempt-3.log",
+      "finished": "2026-10-02T21:37:25.847Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "aa6348397dff869d447b81ef3b6976133219af72cf4dd033bd1450c6eb50e3a5"
+    },
+    {
+      "label": "native",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\check-owned-candidate-native.cjs",
+        "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost\\packages\\pskernel-core",
+        "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\native-attempt-3"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost\\packages\\pskernel-core",
+      "started": "2026-10-02T21:37:25.849Z",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\evidence\\native-attempt-3.log",
+      "finished": "2026-10-02T21:38:18.517Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "1af655456ff031706322bb7ab15e937471ebf3b43b19ad530f7cb82babc4d8bd"
+    }
+  ],
+  "tests": [
+    {
+      "mode": "linux-kernel",
+      "command": [
+        "wsl.exe",
+        "--exec",
+        "/bin/sh",
+        "/mnt/c/Users/user/Documents/Codex/2026-10-02/referenced-chatgpt-conversation-this-is-an/work/owned-record-4734acb9/evidence/final-linux-kernel.sh"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost",
+      "started": "2026-10-02T21:48:41.841Z",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\evidence\\final-linux-kernel.log",
+      "finished": "2026-10-02T21:50:03.522Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "10126f9bcb85723b9ce553c63499f7f3ce493c6b6a77cecb123c9b56358272f9",
+      "counts": {
+        "tests": 459,
+        "pass": 459,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "mode": "windows",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "--test-reporter=tap",
+        "scripts/checked-build.test.mjs",
+        "scripts/checked-owned-kernel.test.mjs",
+        "scripts/checked-owned-unit.test.mjs",
+        "scripts/checked-owned-nat.test.mjs",
+        "scripts/checked-owned-literal.test.mjs",
+        "scripts/checked-owned-record.test.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost",
+      "started": "2026-10-02T21:53:07.610Z",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\evidence\\retry1-windows.log",
+      "finished": "2026-10-02T21:53:46.978Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "303ebb67cb8c45bea98ba58baa7655ed5fd96145d8935e1ae04a5062944472a4",
+      "counts": {
+        "tests": 84,
+        "pass": 84,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "mode": "linux-integration",
+      "command": [
+        "wsl.exe",
+        "--exec",
+        "/bin/sh",
+        "/mnt/c/Users/user/Documents/Codex/2026-10-02/referenced-chatgpt-conversation-this-is-an/work/owned-record-4734acb9/evidence/final-linux-integration.sh"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost",
+      "started": "2026-10-02T21:53:15.147Z",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\evidence\\final-linux-integration.log",
+      "finished": "2026-10-02T21:55:38.597Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "9781703deb1aad556893c71d471b8eaa5dfc0d6b862202cc8b0cdfd090cd3eaa",
+      "counts": {
+        "tests": 74,
+        "pass": 74,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "codeCommit": "7c45a3ca51ed002e5bb4302c190e8f82cce67a6e",
+      "candidateClosureSha256": "28abff62b3116035b59d3938d658b780dcb559bbf0e84e79e54b7851c95b6140",
+      "integratedClosureSha256": "36bd14c9f0dfd6291562295e4562bda8dc03af5bccc894634b3774101b2026f4",
+      "sourceCount": 76,
+      "preparedSourcesSha256": "9351264a828b69bf275b187ddfc7a4eade3b13788ead31370eb9c655979360e1",
+      "preparedSourceBytesIdentical": true,
+      "admissionsSha256": "9c53bc3498ca18c8b82c1e6933c6a5c75e61fd702e60d1dd438c6176b5e63202",
+      "ownedResult": {
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.9",
+          "profile": "owned-closed-record-fields/6",
+          "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+          "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+          "accepted": false,
+          "errorKind": "unsupported-expression:proj",
+          "admissionIndex": 9
+        },
+        "descriptor": {
+          "selector": "pskernel-core",
+          "package": "@proofscript/pskernel-core",
+          "execution": "psc-generated-js",
+          "version": "0.1.0-checker.9",
+          "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+          "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f"
+        }
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "--test-reporter=tap",
+        "scripts/checked-owned-record.test.mjs",
+        "scripts/checked-build.test.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-integration-4734acb9\\psc15selfhost",
+      "started": "2026-10-02T22:05:42.315Z",
+      "finished": "2026-10-02T22:06:07.200Z",
+      "exitCode": 0,
+      "error": null,
+      "logSha256": "4fca0008c399857ed0022af501b6e7bfbed53949608d6537ea8346d751217737",
+      "ownedJointSelfHosted": false,
+      "counts": {
+        "tests": 23,
+        "pass": 23,
+        "fail": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "guards": [
+    {
+      "name": "verify-evidence",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts/verify-evidence.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost\\packages\\pskernel-core",
+      "started": "2026-10-02T21:58:11.055Z",
+      "finished": "2026-10-02T21:58:11.327Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "6ca95d619e206123e3cbbcbb72670c525803709e0ab46082a0941f66856ee0e6"
+    },
+    {
+      "name": "receipt",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts/check-owned-kernel-receipt.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost",
+      "started": "2026-10-02T21:58:11.331Z",
+      "finished": "2026-10-02T21:58:11.630Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "12d8e6760927217bc3abc5f4c541f23cb51322034b5afa3a48f03870991466b2"
+    },
+    {
+      "name": "release-reject",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts/release-check.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-record-4734acb9\\psc15selfhost\\packages\\pskernel-core",
+      "started": "2026-10-02T21:58:11.631Z",
+      "finished": "2026-10-02T21:58:11.756Z",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "logSha256": "b1569bde49d37dd82abe92c9e2ed87a1d680a09f198f9a7d6dbd4e77fce29b3f"
+    }
+  ],
+  "preservedProbes": {
+    "source": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\full-owned-literal-bb0f7117\\admissions.json",
+    "sourceSha256": "20715347d21c3151b02207cb0b17e4827fa098c1c97861c6438df79b2863a722",
+    "results": [
+      {
+        "prefixCount": 1,
+        "started": "2026-10-02T21:53:02.082Z",
+        "finished": "2026-10-02T21:53:02.608Z",
+        "inputSha256": "34f8f9c6ef5b7faa8dca2232bf410c3af6b6afe405e5ba25983f091104efd24d",
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.9",
+          "profile": "owned-closed-record-fields/6",
+          "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+          "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+          "accepted": true,
+          "admissionCount": 1,
+          "steps": 3287
+        }
+      },
+      {
+        "prefixCount": 2,
+        "started": "2026-10-02T21:53:02.643Z",
+        "finished": "2026-10-02T21:53:03.498Z",
+        "inputSha256": "12f6dd1f7e4f40954557f517cb08e3e5f72048e7e9d00fede82867cce8de2aa2",
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.9",
+          "profile": "owned-closed-record-fields/6",
+          "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+          "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+          "accepted": true,
+          "admissionCount": 2,
+          "steps": 6665
+        }
+      },
+      {
+        "prefixCount": 3,
+        "started": "2026-10-02T21:53:03.532Z",
+        "finished": "2026-10-02T21:53:04.985Z",
+        "inputSha256": "a29cbd4e84a49b344c662dbdd41b029c6a316067457728802c66887a5befbd73",
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.9",
+          "profile": "owned-closed-record-fields/6",
+          "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+          "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+          "accepted": true,
+          "admissionCount": 3,
+          "steps": 11293
+        }
+      },
+      {
+        "prefixCount": 4,
+        "started": "2026-10-02T21:53:05.024Z",
+        "finished": "2026-10-02T21:53:06.445Z",
+        "inputSha256": "4e1b0cb16bdc57b55d70b28729ae9e0fb1886bc1b3716150cb71a33b77d23767",
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.9",
+          "profile": "owned-closed-record-fields/6",
+          "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+          "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+          "accepted": false,
+          "errorKind": "unknownConstant",
+          "admissionIndex": 3,
+          "steps": 11499
+        }
+      },
+      {
+        "prefixCount": 1556,
+        "started": "2026-10-02T21:53:06.488Z",
+        "finished": "2026-10-02T21:53:06.790Z",
+        "inputSha256": "20715347d21c3151b02207cb0b17e4827fa098c1c97861c6438df79b2863a722",
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.9",
+          "profile": "owned-closed-record-fields/6",
+          "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+          "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+          "accepted": false,
+          "errorKind": "unsupported-expression:proj",
+          "admissionIndex": 9
+        }
+      }
+    ]
+  },
+  "current76": {
+    "baseCommit": "4734acb9ef2a618040beb572c13433ff7cd92ce8",
+    "candidateChanges": true,
+    "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+    "sourceClosureSha256": "28abff62b3116035b59d3938d658b780dcb559bbf0e84e79e54b7851c95b6140",
+    "sourceCount": 76,
+    "seedSha256": "3d9663ed5870d1961f42808f4480e32dbf82d0862f3757f5d4c5d7ad7b21a9b2",
+    "ownedJointSelfHosted": false,
+    "admissionsSha256": "9c53bc3498ca18c8b82c1e6933c6a5c75e61fd702e60d1dd438c6176b5e63202",
+    "admissionCount": 1568,
+    "result": {
+      "protocol": "pskernel-core/1",
+      "provider": "psc-generated-owned",
+      "version": "0.1.0-checker.9",
+      "profile": "owned-closed-record-fields/6",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+      "accepted": false,
+      "errorKind": "unsupported-expression:proj",
+      "admissionIndex": 9
+    },
+    "descriptor": {
+      "selector": "pskernel-core",
+      "package": "@proofscript/pskernel-core",
+      "execution": "psc-generated-js",
+      "version": "0.1.0-checker.9",
+      "generatedKernelSha256": "5c99fca09b45506155d59f23d21071b891e7d2d064ab91570c189c932e9f6391",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f"
+    }
+  },
+  "inventory": {
+    "sourceCommit": "7c45a3ca51ed002e5bb4302c190e8f82cce67a6e",
+    "counts": {
+      "compiler": 1916,
+      "kernel": 625,
+      "prelude": 81
+    },
+    "declarationCount": 2622,
+    "requiredPrelude": [
+      "Prod.rec",
+      "Prod.mk",
+      "Prod",
+      "Except.rec",
+      "Except.ok",
+      "Except.error",
+      "Except",
+      "Option.rec",
+      "Option.some",
+      "Option.none",
+      "Option",
+      "List.rec",
+      "List.cons",
+      "List.nil",
+      "List",
+      "ite",
+      "Bool.decEq",
+      "Decidable",
+      "Eq",
+      "Prod.snd",
+      "Prod.fst",
+      "String.Pos.Raw.byteIdx",
+      "String.Pos.Raw.mk",
+      "String.Internal.atEnd",
+      "String.Internal.get",
+      "String.Internal.next",
+      "String.utf8ByteSize",
+      "String.Internal.append",
+      "String.Internal.length",
+      "String.singleton",
+      "String.push",
+      "Char.toNat",
+      "Char.ofNat",
+      "Char",
+      "Unit.unit",
+      "Unit",
+      "Bool.false",
+      "Bool.true",
+      "Bool",
+      "String",
+      "Int.repr",
+      "Int.ofNat",
+      "Int",
+      "Nat.blt",
+      "Nat.ble",
+      "Nat.beq",
+      "Nat.mod",
+      "Nat.div",
+      "Nat.mul",
+      "Nat.sub",
+      "Nat.add",
+      "Nat.rec",
+      "Nat.succ",
+      "Nat.zero",
+      "Nat"
+    ],
+    "requiredAssumptions": [
+      {
+        "owner": "prelude",
+        "name": "ite",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Bool.decEq",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Decidable",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Eq",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Prod.snd",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Prod.fst",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Pos.Raw.byteIdx",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Pos.Raw.mk",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.atEnd",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.get",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.next",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.utf8ByteSize",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.append",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.length",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.singleton",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.push",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Char.toNat",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Char.ofNat",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Char",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Unit.unit",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Unit",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Bool.false",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Bool.true",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Bool",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Int.repr",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Int.ofNat",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Int",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.blt",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.ble",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.beq",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.mod",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.div",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.mul",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.sub",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.add",
+        "kind": "axiom"
+      }
+    ],
+    "unresolvedDependencies": [],
+    "kernelAdmissionBlockers": [],
+    "rawInventorySha256": "17030913573d5bb8b1f9a3cde5704777b18d6596226cde3e32f88c2c25538bf9"
+  },
+  "evidenceManifests": {
+    "ORACLE": {
+      "sha256": "7214a206c4a387def3f35f6978c36cffa777d08542c47455dc571a244551b110",
+      "schemaVersion": 1,
+      "scope": "ground computation cases for foundation; not full kernel equivalence or general correctness",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+      "fixturesSha256": "8638fdfba36489d1ba5579197311c43cad74c2c87db89586bbe2db9029540b22",
+      "oracleHarnessSha256": "1b9e6a7e9d82728001d30b9a3b80aa539feafc18d7075d19e8e2c0f819e7950b",
+      "positiveCases": 47,
+      "positiveRequestSha256": "041969ab87cdf491f1b82a2e3115ca9e588f70417c8e765034df466c5426acbc",
+      "positive": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      },
+      "negativeControls": 1,
+      "negativeRequestSha256": "ee66b40b3a152919ee710442c3eb3a1b1c58dae48564158071eadfebc5055232",
+      "negative": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": false,
+        "errorKind": "kernel-rejection",
+        "declarationIndex": 212,
+        "message": "Lean 4.34 kernel rejected declaration 212 (declaration-type-mismatch)"
+      }
+    },
+    "SEMANTIC_ORACLE": {
+      "sha256": "9bdd9662e359ec94ba23c74ed712bc0f6fd5395629b874e55b4374179a9b7d09",
+      "schemaVersion": 1,
+      "scope": "Bounded ground computations, not general correctness, full compatibility or independent proof checking",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "harnessSha256": "b7f728489174f301f7af6baf8b30b7aa90efd74fb52dd5c66b70f38843b40cc7",
+      "fixtureSha256": {
+        "binding": "221290504b7f1852c982eb0e77be0b85fe227f70777dc355c3b26794b9a864fa",
+        "universes": "a594e52c27cfb97d45dceaea53156afbd85d299ab7583c60e94161ef66fbe254"
+      },
+      "positiveCases": 100,
+      "positiveRequestSha256": "166c8f605edc6e631cda2c13b4a08eaca8146366f1703f4c843d3f7cfec6bc64",
+      "positive": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      },
+      "negativeControls": [
+        {
+          "label": "universe-substitution-must-be-simultaneous",
+          "requestSha256": "4829fa5001c789461a0e42f532874ea9d86e575897c09533f444da2f53ea3b14",
+          "result": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": false,
+            "errorKind": "kernel-rejection",
+            "declarationIndex": 222,
+            "message": "Lean 4.34 kernel rejected declaration 222 (declaration-type-mismatch)"
+          }
+        },
+        {
+          "label": "universe-arity-mismatch-cannot-accept",
+          "requestSha256": "de8a311ed7470e22085a1c12fb3c5e2c481dd323d114e77a6537604560af760c",
+          "result": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": false,
+            "errorKind": "kernel-rejection",
+            "declarationIndex": 222,
+            "message": "Lean 4.34 kernel rejected declaration 222 (declaration-type-mismatch)"
+          }
+        },
+        {
+          "label": "constant-universe-order-must-be-preserved",
+          "requestSha256": "aad242916272ddded0e39f08ea6f6dc2e8e41cf4251fb1c72486890486fe76d8",
+          "result": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": false,
+            "errorKind": "kernel-rejection",
+            "declarationIndex": 222,
+            "message": "Lean 4.34 kernel rejected declaration 222 (declaration-type-mismatch)"
+          }
+        },
+        {
+          "label": "capture-avoidance",
+          "requestSha256": "cd64394fad778e3cdfd83d7c255b89b2e2b9ff0786a017d986ac2510e996262e",
+          "result": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": false,
+            "errorKind": "kernel-rejection",
+            "declarationIndex": 222,
+            "message": "Lean 4.34 kernel rejected declaration 222 (declaration-type-mismatch)"
+          }
+        },
+        {
+          "label": "imax-right-zero",
+          "requestSha256": "20314dc6fafcf7660e0b92eff86f50bd3ad479c749d8a3b747a69c9bfa19e1d7",
+          "result": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": false,
+            "errorKind": "kernel-rejection",
+            "declarationIndex": 222,
+            "message": "Lean 4.34 kernel rejected declaration 222 (declaration-type-mismatch)"
+          }
+        },
+        {
+          "label": "rounded-natural",
+          "requestSha256": "fa32af54fa14f0c2fa34180506014bbb6eab757e99c9d0f47b076798c8b47ca5",
+          "result": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": false,
+            "errorKind": "kernel-rejection",
+            "declarationIndex": 222,
+            "message": "Lean 4.34 kernel rejected declaration 222 (declaration-type-mismatch)"
+          }
+        }
+      ]
+    },
+    "CHECKER_ORACLE": {
+      "sha256": "2864cc6b4d997bce7fa2ddf98932b1c12fadeb24eaee8e0ace618b0d0edae0a2",
+      "schemaVersion": 1,
+      "scope": "Bounded source-computation theorems over the owned checker; reference provider is external and not a runtime authority of this package; not a general soundness proof",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "fixtureSha256": "a87e4d433d564ededbc600ffbd42b742e230ef08284c7b8af61a45f0c3c5fb48",
+      "harnessSha256": "d75228abef13822ea437746776ab33b9dec0323f4fef8687ba6468a01ab57235",
+      "sharedHarnessSha256": "4202c9806d6678366b9d10a6eae9f2181861f2b3bdd1ac0d3fcdcdc2ada2b6ff",
+      "sourceAdmissionCount": 211,
+      "positiveCases": 68,
+      "positiveLabels": [
+        "sort-successor-0",
+        "identity-universe-0",
+        "sort-successor-1",
+        "identity-universe-1",
+        "sort-successor-2",
+        "identity-universe-2",
+        "sort-successor-3",
+        "identity-universe-3",
+        "sort-successor-4",
+        "identity-universe-4",
+        "type-function-identity",
+        "identity-application-to-Prop",
+        "identity-applied-to-proof",
+        "impredicative-proposition",
+        "dependent-predicate-identity",
+        "higher-order-composition",
+        "alpha-binder-info",
+        "beta-in-binder-type",
+        "let-reduces-type-alias",
+        "let-reduces-proof-alias",
+        "let-in-expected-type",
+        "capture-avoiding-beta-under-binder",
+        "delta-type-alias",
+        "delta-proof-reference",
+        "delta-in-application",
+        "ground-max-universe",
+        "ground-imax-zero-universe",
+        "ground-imax-positive-universe",
+        "no-Type-in-Type",
+        "no-sort-cumulativity",
+        "loose-value-variable",
+        "loose-expected-variable",
+        "internal-free-variable",
+        "unknown-value-constant",
+        "unknown-type-constant",
+        "proposition-is-not-its-proof",
+        "nonfunction-application",
+        "self-application-not-a-function",
+        "lambda-domain-must-be-type",
+        "pi-body-must-be-type",
+        "unused-let-value-still-checked",
+        "unused-let-free-variable",
+        "invalid-let-in-expected-type",
+        "discarded-beta-argument-still-checked",
+        "out-of-scope-under-binders",
+        "wrong-dependent-codomain",
+        "expected-is-a-value-not-type",
+        "huge-bound-index-not-rounded",
+        "earlier-proof-not-type",
+        "universe-parameter-not-declared",
+        "unknown-polymorphic-constant",
+        "natural-primitive-not-admitted",
+        "projection-not-admitted",
+        "unknown-level-in-discarded-domain",
+        "empty-batch",
+        "identity-admission",
+        "sequential-admission",
+        "duplicate-admission",
+        "forward-reference",
+        "bad-second-definition",
+        "bad-type-in-type",
+        "beta-normal-form",
+        "zeta-normal-form",
+        "beta-conversion",
+        "unequal-sorts",
+        "type-shared-budget-zero",
+        "admission-shared-budget-zero",
+        "conversion-shared-budget-zero"
+      ],
+      "positive": {
+        "requestSha256": "a75673af3aa37878c07614a64646d2b3b9caf9d3d1d9aa7c7272c733ffb7e652",
+        "result": {
+          "protocol": "pskernel-lean/1",
+          "provider": "lean4-cpp",
+          "leanVersion": "4.34.0",
+          "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "profile": "lean4.34-core",
+          "accepted": true
+        }
+      },
+      "negativeControls": [
+        {
+          "label": "false-claim-Type-in-Type-accepted",
+          "requestSha256": "b0c8427aa1bc5ab599dd86f2e00157f7a22c730c50aea9b0d6a7df5ac1dc1733",
+          "result": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": false,
+            "errorKind": "kernel-rejection",
+            "declarationIndex": 217,
+            "message": "Lean 4.34 kernel rejected declaration 217 (declaration-type-mismatch)"
+          }
+        },
+        {
+          "label": "false-claim-illtyped-definition-admitted",
+          "requestSha256": "edf2e28b05c7c25f96da7af5a63be82261014350afac95d9187fa7dbf123e3d4",
+          "result": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": false,
+            "errorKind": "kernel-rejection",
+            "declarationIndex": 217,
+            "message": "Lean 4.34 kernel rejected declaration 217 (declaration-type-mismatch)"
+          }
+        },
+        {
+          "label": "false-claim-nonconvertible-sorts-equal",
+          "requestSha256": "fdb5698ee5717bea80b6034242f79eb6f38b8ca8041063e939499e04a489574a",
+          "result": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": false,
+            "errorKind": "kernel-rejection",
+            "declarationIndex": 217,
+            "message": "Lean 4.34 kernel rejected declaration 217 (declaration-type-mismatch)"
+          }
+        }
+      ]
+    },
+    "LEVEL_DIFFERENTIAL": {
+      "sha256": "06ab0f3c373de09159d36ff83aa393a3af2a551a83c71f9c5d13aa87eaaec537",
+      "schemaVersion": 1,
+      "scope": "Bounded direct kernel conversion probes on the recorded provider prelude; not full Lean compatibility",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "harnessSha256": "bdc15bb543fc7d22709563df20222496316005c79f7ee83cc18370c7fa6f2e4b",
+      "cases": 671,
+      "matched": 671,
+      "mismatches": [],
+      "recordsPath": "dist/evidence/level-differential-records.json",
+      "recordsSha256": "8ed5587eb9629d5134981359cd689f9b041c0cbd778c58077d17142e0ee62fec"
+    },
+    "CHECKER_DIFFERENTIAL": {
+      "sha256": "e7ebf5e2d7be278712c57b205d8956b7e9da38f0242fef87d6692cb71d2ed636",
+      "schemaVersion": 1,
+      "scope": "Actual closed monomorphic term judgments; bounded differential evidence, not full compatibility or a soundness proof",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "harnessSha256": "54c368e2f2e5cb32e734f065c41455d45de761b80f70b310150264368e624022",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+      "comparableCases": 559,
+      "matched": 559,
+      "accepted": 156,
+      "rejected": 403,
+      "knownCompletenessGaps": [
+        "proof-irrelevance",
+        "function-eta"
+      ],
+      "excluded": [
+        {
+          "name": "internal-free-variable",
+          "reason": "not representable in native closed-core wire fragment"
+        },
+        {
+          "name": "huge-bound-index-not-rounded",
+          "reason": "not representable in native closed-core wire fragment"
+        },
+        {
+          "name": "universe-parameter-not-declared",
+          "reason": "explicitly unsupported feature"
+        },
+        {
+          "name": "unknown-polymorphic-constant",
+          "reason": "explicitly unsupported feature"
+        },
+        {
+          "name": "natural-primitive-not-admitted",
+          "reason": "Requires a checked Nat prelude; this corpus starts empty. See LITERAL_DIFFERENTIAL.json."
+        },
+        {
+          "name": "projection-not-admitted",
+          "reason": "explicitly unsupported feature"
+        },
+        {
+          "name": "unknown-level-in-discarded-domain",
+          "reason": "explicitly unsupported feature"
+        }
+      ],
+      "recordsPath": "dist/evidence/checker-differential-records.json",
+      "recordsSha256": "ee6dbc5b82e3fbf9bee6600fed638fc5306354145a4412f01c61cd18047fcb58"
+    },
+    "POLYMORPHIC_DIFFERENTIAL": {
+      "sha256": "7e0677267946d6691642177e8fa0fb3fcd87c97228f19e6ba4df75cceb563a3a",
+      "schemaVersion": 1,
+      "scope": "Bounded actual polymorphic transparent-definition judgments; not full kernel compatibility",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "harnessSha256": "4196bc420bb64efe98a414a6a0053fc7ac94685a83f987e2745ab38eb8bdf180",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+      "cases": 138,
+      "matched": 138,
+      "accepted": 67,
+      "rejected": 71,
+      "recordsPath": "dist/evidence/polymorphic-differential-records.json",
+      "recordsSha256": "ab1f5a6feb7b6af494206150f34493afb75f3227d60765debef51d1ea3330b42"
+    },
+    "UNIT_DIFFERENTIAL": {
+      "sha256": "870da6dd4a0ef995d3b53beaad1f54100f26812d2a345ab698b5c712f80f5aef",
+      "schemaVersion": 1,
+      "scope": "Zero-term-parameter singleton unit inductives and derived recursors; not general inductive completeness",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "harnessSha256": "8e1ce4839f0099990b163f4d258acd66c6efa0850e5a6e116c853c2f8f4fd402",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+      "cases": 109,
+      "matched": 109,
+      "accepted": 51,
+      "rejected": 58,
+      "recordsPath": "dist/evidence/unit-differential-records.json",
+      "recordsSha256": "fe7fed065d66a6cbca75dfadfe3111fac59ef52c05f7bc959c366432c21fdcfd"
+    },
+    "NAT_DIFFERENTIAL": {
+      "sha256": "8f886fa556704b266e64addaaa72be7094b4d7842b10cd8a2051410af91029d6",
+      "schemaVersion": 1,
+      "scope": "Monomorphic zero/successor strictly positive unary recursive family in Type, derived dependent recursor and owned checked Nat initialization; not general inductive completeness",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "harnessSha256": "0623e2155d2285a4f8dd3d528f26a63e40d377e4fa3d232fd868de3a89a9e4ac",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+      "cases": 201,
+      "matched": 201,
+      "accepted": 123,
+      "rejected": 78,
+      "deliberatelyUnsupported": [
+        "Prop or higher-sort families",
+        "term parameters and indices",
+        "additional/nonrecursive/higher-order fields",
+        "mutual and nested recursion"
+      ],
+      "recordsPath": "dist/evidence/nat-differential-records.json",
+      "recordsSha256": "1c140c9e30b6afcb503fc1fb9dae6953963e6a0922b58b2509012303b7791000"
+    },
+    "LITERAL_DIFFERENTIAL": {
+      "sha256": "264eba5972d327bc5658313e7c6d4800466b7f9b77a42bd3a99eee8836d3d778",
+      "schemaVersion": 1,
+      "scope": "Natural literals after owned Nat initialization; exact typing, constructor conversion and dependent recursor iota; not arithmetic primitive completeness",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "harnessSha256": "c3ff60a40a93939e4804270534c73bebdc57cc6176032e5b172c98ba983ffacc",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+      "cases": 122,
+      "matched": 122,
+      "accepted": 70,
+      "rejected": 52,
+      "deliberatelyUnsupported": [
+        "Nat arithmetic primitives",
+        "String and other literal kinds",
+        "unbounded evaluation"
+      ],
+      "recordsPath": "dist/evidence/literal-differential-records.json",
+      "recordsSha256": "a0ca588308b26dc9f9888854c8c63b611233e183802a52b050ae9f1336b5d2e9"
+    },
+    "RECORD_DIFFERENTIAL": {
+      "sha256": "8b17a9152d16b271bf9a0ccff1ce3b8abf27f2d3641e5eec4bccf575db895518",
+      "schemaVersion": 1,
+      "scope": "Closed monomorphic Type-valued record fields, constructor applications and derived dependent eliminator typing; not record iota, projection or general inductive completeness",
+      "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "harnessSha256": "f73b9a45b5d979c2b7dab84744c941e83bdb73bcb489dea4a9dec0813e5c20f4",
+      "provider": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "version"
+      },
+      "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+      "cases": 102,
+      "matched": 102,
+      "accepted": 42,
+      "rejected": 60,
+      "deliberatelyUnsupported": [
+        "dependent constructor fields",
+        "parameters and indices",
+        "recursive records",
+        "Prop or higher-universe families",
+        "record iota and projections"
+      ],
+      "recordsPath": "dist/evidence/record-differential-records.json",
+      "recordsSha256": "6a76cc5654f90600f3b3174306a0067da6272db98bfdd1b23e1a5ccd25c66f90"
+    }
+  },
+  "background": {
+    "reference72": {
+      "originSourceClosureSha256": "38fec582939f5b0e02a15d6f479efbae6d5d5e90f44faa9b294ce29586f29ac3",
+      "canonicalSourceArraySha256": "a2771043428bccb8d91df49c3d43591cfd636eb60b30325d1ff3bf8d08224378",
+      "sourceCount": 72,
+      "parentJavaScriptSha256": "7fef852ddb121af7867809118743015f88564d9a3a5e991b55660352536e705d",
+      "typeScriptSha256": "bb79d8a39be9a879ba18d3ede2f567dd32f3c17fd056974a368058063bafed93",
+      "canonicalAdmissionsSha256": "b995916150ae010f36af0c13d4aafaf590fb4eddcf6b512cf9c80920863faed4",
+      "typeScriptParity": true,
+      "admissionsParity": true,
+      "elapsedMs": 4611089,
+      "ownedJointSelfHosted": false,
+      "referenceKernel": "lean434-wasm",
+      "observerSha256": "9379dac801638c41b79101bee05a4c423802d6b2a1aed442017bb1819a3d85eb"
+    },
+    "reference75": {
+      "originSourceClosureSha256": "6905d97ae41dc4d62eff1c80fe3bafe6e77586c77d3a56ae6249eb31b7280fe2",
+      "canonicalSourceArraySha256": "8250351b882efe1f6e9b0dc30feb8d9cb80cbefb84dd1833d969bfe15954d4f0",
+      "sourceCount": 75,
+      "parentJavaScriptSha256": "c3dbb4e05ee5f830f836cc19f46ca4943f76506e65e87209b0f7818fb4624195",
+      "typeScriptSha256": "c93f5b9f20540175ffc4fdaccfa1d49dd3315ed0ccf67c6e7381a4b76b009c1c",
+      "canonicalAdmissionsSha256": "20715347d21c3151b02207cb0b17e4827fa098c1c97861c6438df79b2863a722",
+      "typeScriptParity": true,
+      "admissionsParity": true,
+      "elapsedMs": 2421549,
+      "ownedJointSelfHosted": false,
+      "referenceKernel": "lean434-wasm",
+      "observerSha256": "4337ef5fa8bde1d251d64c6ff968ca59dc727860f476e6ebd5a7acb90521f28c"
+    },
+    "reference75JavaScriptParityLog": "REFERENCE_GENERATION2_JS_PARITY {\"originSourceClosureSha256\":\"6905d97ae41dc4d62eff1c80fe3bafe6e77586c77d3a56ae6249eb31b7280fe2\",\"canonicalSourceArraySha256\":\"8250351b882efe1f6e9b0dc30feb8d9cb80cbefb84dd1833d969bfe15954d4f0\",\"sourceCount\":75,\"parentJavaScriptSha256\":\"c3dbb4e05ee5f830f836cc19f46ca4943f76506e65e87209b0f7818fb4624195\",\"typeScriptSha256\":\"c93f5b9f20540175ffc4fdaccfa1d49dd3315ed0ccf67c6e7381a4b76b009c1c\",\"canonicalAdmissionsSha256\":\"20715347d21c3151b02207cb0b17e4827fa098c1c97861c6438df79b2863a722\",\"typeScriptParity\":true,\"admissionsParity\":true,\"elapsedMs\":2421549,\"ownedJointSelfHosted\":false,\"referenceKernel\":\"lean434-wasm\",\"observerSha256\":\"4337ef5fa8bde1d251d64c6ff968ca59dc727860f476e6ebd5a7acb90521f28c\",\"javaScriptParity\":true,\"javaScriptSha256\":\"c3dbb4e05ee5f830f836cc19f46ca4943f76506e65e87209b0f7818fb4624195\",\"typeScriptVersion\":\"5.8.3\",\"fullDocumentedFixedPoint\":false,\"remaining\":[\"full documented workspace fixed-point regression command\",\"owned kernel admission of complete compiler/kernel/prelude closure\"]}\n",
+    "baseCi": {
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37055804543",
+      "runId": "37055804543",
+      "pid": 67188,
+      "checked": "2026-10-02T20:11:12.1066084Z",
+      "conclusion": "failure",
+      "commit": "4734acb9ef2a618040beb572c13433ff7cd92ce8",
+      "status": "completed"
+    },
+    "originalCollector": {
+      "archive": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\outputs\\psc2-offline-results-4734acb9-2026-10-02T21-22-46-196Z.zip",
+      "sha256": "ff182be503a65f083119b8ed12b8a2b86d8286c510777e7107f39580f0b468a7",
+      "ownedJointSelfHosted": false,
+      "collected": "2026-10-02T21:22:48.9808486Z"
+    }
+  },
+  "archives": [
+    {
+      "path": "current76-snapshot.json.gz",
+      "origin": "current76/snapshot.json",
+      "sha256": "c9493d72e07f878a3dbd1ebf4a81502b0cb97d6d4036cffd339670639783f8c6",
+      "bytes": 406770,
+      "uncompressedSha256": "982cb4632636bb618c7cfc337d2c7bafaebbe648d55e15041025603af9d3fbe7",
+      "uncompressedBytes": 3550632
+    },
+    {
+      "path": "integrated76-snapshot.json.gz",
+      "origin": "current76/integrated-snapshot.json",
+      "sha256": "e1e7f4815833642856915497a7cc34255ebef712fd1155756d3bb295ac9e5701",
+      "bytes": 408569,
+      "uncompressedSha256": "42ef0e2c46bf31bda00b8a2b386760288a3c24fb2fbfe1efd285f147b5b48a39",
+      "uncompressedBytes": 3602542
+    },
+    {
+      "path": "current76-admissions.json.gz",
+      "origin": "current76/admissions.json",
+      "sha256": "a0bac390ee03b761997f2bec58b7eb2e987fe4bc1cec06a5251e3c145437f073",
+      "bytes": 308200,
+      "uncompressedSha256": "9c53bc3498ca18c8b82c1e6933c6a5c75e61fd702e60d1dd438c6176b5e63202",
+      "uncompressedBytes": 11618846
+    },
+    {
+      "path": "current76-declarations.json.gz",
+      "origin": "current76/declarations.json",
+      "sha256": "e184ebbdc8f78e0b0f836fff2984656773700560873eda1d179caf0a3dfd48ba",
+      "bytes": 339797,
+      "uncompressedSha256": "17030913573d5bb8b1f9a3cde5704777b18d6596226cde3e32f88c2c25538bf9",
+      "uncompressedBytes": 12161516
+    },
+    {
+      "path": "current76-summary.json.gz",
+      "origin": "current76/summary.json",
+      "sha256": "feca6b10d716de17815f574b0165cddc6f560c6ec468a0f6ead6d8286eb53de5",
+      "bytes": 177844,
+      "uncompressedSha256": "9a245fbceb1b3e0310421ae53d0daccef65b6f5f714e876c0b4c757d58b942d9",
+      "uncompressedBytes": 1898868
+    },
+    {
+      "path": "preserved75-admissions.json.gz",
+      "origin": "original preserved 75-module input",
+      "sha256": "d5b3791a413f5084c20c9a0bfc387e7a23cd756f995e8424e5518cc79ae4692c",
+      "bytes": 304203,
+      "uncompressedSha256": "20715347d21c3151b02207cb0b17e4827fa098c1c97861c6438df79b2863a722",
+      "uncompressedBytes": 11452362
+    },
+    {
+      "path": "run-artifacts.json.gz",
+      "origin": "this continuation only; original replay directories untouched",
+      "sha256": "6c63488a2812e0efe1a228377e30f6ff5830ca1fbf2c41cd7fea6ae3cf147068",
+      "bytes": 72428,
+      "uncompressedSha256": "d2793d79defdc553f4e505d9028a0ea47da7c3ca131b310a56a96d95858ab15b",
+      "uncompressedBytes": 472710
+    }
+  ]
+}

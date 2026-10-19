@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-evidence-completion-root-assembly-independent-review",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/evidence-completion-root-assembly-independent-review.json",
+  "status": "CLEAR-for-bounded-metadata-assembly-source-integration",
+  "repository": "dwijayuda/pskernel",
+  "reviewed": {
+    "blob": "3e6e1744820fdd46afdf719fdfdeb0069ff1c8f3",
+    "sha256": "904a91d535932149581331883118b72f1b62581a67e71dee4625e6cfa2765d1b",
+    "bytes": 86359,
+    "kind": "psc0-root-final-evidence-completion-assembly-amendments"
+  },
+  "sharedExecution": {
+    "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/evidence-completion-execution.json",
+    "blob": "99f79ea5628b658333a2053ffb75c90f0c063102",
+    "sha256": "380a520c205c5dac63fed95f04b2c05a7abe04d2cd49f81c0f9318527cbae897",
+    "bytes": 32054,
+    "canonicalValueSha256": "dc1160884fefd63426a3f2e440eee7fd49fa05d14fdf36ee975149d93b1d0968",
+    "producerSha256": "a6620681d9c3513b594a1aea7e2d5e8d26ff051b4679cd1804bd93b39203933f",
+    "producerRepairSha256": "9b447d97cb6de9291fab99afe8dd12df80882e730728f3aa6e945cee6e9ce994"
+  },
+  "scope": "Review only the listed metadata assembly changes: bind the separate corrected evidence producer and actual finish input/completion/inventory evidence, then advance the active summary from success attempt16 planning to actual success attempt17 with all16 earlier attempts preserved. This is not a new source-rule or compiler preservation proof and does not itself execute any assembler, compiler or test.",
+  "sourceInputs": [
+    {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/continuation-assembly-tools.json",
+      "blob": "2143d746f59ee49e8c2d2d7e4d815dae6cd62814",
+      "sha256": "1d353a38426de9ce4b191c15545e3885104ae0404c18647dc25e7e14472adcbc",
+      "bytes": 130606,
+      "role": "Exact previously reviewed root assembly function sources"
+    },
+    {
+      "blob": "faf198f9a2e00ac51683168deba96e0d1ae60ac1",
+      "sha256": "a59abbe688be516203afde55526a74c015b7b0708227f8fb60062f8c525ed1c7",
+      "bytes": 22310,
+      "role": "Exact shared evidence-completion validation statements"
+    },
+    {
+      "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+      "blob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+      "sha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+      "bytes": 55773,
+      "role": "Exact source of actual input/completion/inventory serialization; success schema unchanged by final diagnostic-only revision"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-evidence-completion-overlay.json",
+      "blob": "a9bf3a735f34334a23bdf24cf8db31cdd228231f",
+      "sha256": "15da41da727b5897e748516d15220b4b39c87dca44395a0f59a09576ce471da0",
+      "bytes": 216572,
+      "role": "Final correspondence input projections over the same shared execution"
+    },
+    {
+      "blob": "b1e4063de29fb7e7fae5ea4bee46f3ed9d2c0197",
+      "sha256": "10a217c00c2231443f1144560c9c707a954d31a18996fb58ad3e3f81263be5f5",
+      "bytes": 46583,
+      "role": "Final33 implementation using the same fixed identities and validation statements"
+    }
+  ],
+  "releaseBindingReview": {
+    "base": {
+      "sha256": "9efb251904cd6e78976a5b72b46b05ddd39b89133efbc1f15757e7504bb1716a",
+      "bytes": 15360
+    },
+    "candidate": {
+      "sha256": "d20282e2754a3716a35974c72d70b5743adec6f096d206ba2c539e404d237d48",
+      "bytes": 37801
+    },
+    "listedEdits": 2,
+    "uniqueGuardedForwardReplayExact": true,
+    "uniqueCompleteReverseRestoresBase": true,
+    "unlistedRemainderSha256": "bc7e36856e5a45730e2a050214f42170c2d666dae02c8c690cbd14630c7064bd",
+    "verbatimValidationBlocks": {
+      "executionBlock": {
+        "sha256": "c55c28fa20164e89300dc72f8bb2304a52413c669fd53e61da7b2c590b913389",
+        "bytes": 3721
+      },
+      "evidenceFilesBlock": {
+        "sha256": "5fc84fa1803bb12b6b8e7801b6e474095ee60acbdfa288ac71f531c400681354",
+        "bytes": 9507
+      },
+      "inventoryBlock": {
+        "sha256": "f9fe354158bf26e3d3f919ed64d3592141943b3e180287d0c46870ac768c2395",
+        "bytes": 3846
+      }
+    },
+    "originalEnvelopeCheckerExact": true,
+    "sourceConstantsMatchFinal33Fields": 15,
+    "currentProviderJobExplicitlyPinned": 114141265302,
+    "producerReference": {
+      "insertedOnlyForGroup": "strict-binder",
+      "insertedBeforeGroupAuthentication": true,
+      "existingStaticCatalogAndHistoricalSourceFieldsPreserved": true,
+      "currentProducerAndRepairHashesMatchSharedExecution": true,
+      "finalSharedValidationRunsBeforeReturn": true
+    },
+    "contextRequirements": [
+      "correspondenceTransport",
+      "correspondenceProcedure",
+      "actualEvidence"
+    ],
+    "preservedBoundaries": [
+      "136 exact catalog slots, original mapped selectors, source-empty boundaries, source/recipe/toolchain/product identities and frozen provider acceptance conditions remain unchanged.",
+      "Original step22 host-boundary/name-index evidence still belongs to cancelled run38015134511; the new producer is not assigned those historical gates.",
+      "Original a631 generation recipe and b0b recipe binder remain exact. New binder7700/finisher793/workflow3bba are a separately hashed evidence producer.",
+      "The input/completion/inventory checks retain cancelled/failed historical job conclusions, four original generation owners, all exact receipt bytes and all produced narrow false claims.",
+      "Pure mutation remains confined to the returned clone. Failure of the appended validation prevents a returned bound release."
+    ]
+  },
+  "activeSummaryReview": {
+    "base": {
+      "sha256": "7a3176fc94ab3fda130752a1a957a0d5459ebc13412cdfe5a000ab2a7d7ff4a1",
+      "bytes": 12547
+    },
+    "candidate": {
+      "sha256": "c18da4aa8afafcd79eb399a44cb7f202fc129de1233c0099f9ed2c5a16434388",
+      "bytes": 14745
+    },
+    "listedEdits": 6,
+    "uniqueGuardedForwardReplayExact": true,
+    "uniqueCompleteReverseRestoresBase": true,
+    "unlistedRemainderSha256": "9e3975b37d5cb4170d2e4e011538fb08c6e760f72eb7b44348ba3ca53e8afa32",
+    "expectedActualAttempt": 17,
+    "currentHistory": {
+      "blob": "f6a9005b7914b3f9d102f45535df8e3813f9c579",
+      "rawSha256": "9f9d535dae8eca1d3c28a57053cd56fe2ccbf5e1fd2b36426892d1505289c68b",
+      "bytes": 140876,
+      "count": 16,
+      "compactAttemptsSha256": "557a694fb4e41826e9b11a6ca69b7e8131aec91090436ff8262fa0b70552c8a2",
+      "lastAttempt": {
+        "attempt": 16,
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "runId": 38021634599,
+        "status": "failure"
+      },
+      "first15ExactlyEqualPriorHistory": true,
+      "priorHistoryBlob": "4753c805cf84b7e627f51344e7091ed465e32685",
+      "prior15CompactAttemptsSha256": "561074de6df43b4550bc848f8f1c45d714692205f820179a3cb718f8cbee81af"
+    },
+    "preservedBoundaries": [
+      "Strict summary still requires an already completed external release plus all33 discharged correspondence rows and, outside correspondenceOnly mode, all27 completed stage rows.",
+      "All source-rule/row/argument/dependency guards and existing declared-scope limitations outside the six listed edits remain byte-identical.",
+      "Both the failed C2/C3-producing run and the successful evidence-only finish are copied explicitly alongside the original cancelled N1/C1 producer.",
+      "Attempt17 is appended without replacing any of the sixteen prior attempt objects.",
+      "Selected R, authoritative .lean, new-only grammar, TypeScript7.0.2, selectedByPsconfig=false and general/formal preservation nonclaims remain unchanged."
+    ]
+  },
+  "receiptGroupResolver": {
+    "unchanged": true,
+    "sha256": "baf933f165bc7f1b7e0d71bb1d726d9a01513f8dd55f1d9ccc83c978c85ff2fd",
+    "bytes": 1790
+  },
+  "verification": {
+    "exactBlobReadbacks": true,
+    "reviewedCodeDifferencesBoundedToListedEdits": true,
+    "sharedExecutionAndSourceConstantsCoherent": true,
+    "functionsLoadedAsPureDeclarationsOnly": true,
+    "actualAssemblyInvocations": 0,
+    "compilerInvocations": 0,
+    "testsRun": 0,
+    "sourceMutations": 0,
+    "commitsCreated": 0,
+    "refsUpdated": 0
+  },
+  "nonClaims": {
+    "actualCurrentFinishArtifactsAuthenticatedByThisReview": false,
+    "rootMustAuthenticateCurrentReturnedArtifactsBeforeAssembly": true,
+    "thisReviewQualifiesCompiler": false,
+    "thisReviewClosesRows": false,
+    "sourceRuleArgumentsReopened": false,
+    "compilerWideFormalPreservationEstablished": false
+  }
+}

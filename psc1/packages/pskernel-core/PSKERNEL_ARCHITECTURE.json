@@ -1,0 +1,483 @@
+{
+  "schemaVersion": 1,
+  "reference": "PSKERNEL_REFERENCE.md",
+  "target": {
+    "product": "Lean",
+    "version": "4.34.0",
+    "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "semanticRootModule": "Ps.KernelCore.SelfHost",
+  "semanticRootPath": "packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+  "semanticModulePrefix": "Ps.KernelCore.",
+  "migration": {
+    "phase": "B-complete",
+    "finalArchitectureAdopted": true,
+    "finalArchitectureImplemented": true,
+    "compatibilityShimsAllowedDuringMigration": false,
+    "compatibilityShimsAllowedInSemanticRoot": false,
+    "migrationShims": [],
+    "completionScope": "Phase B production architecture; long-term Assurance Plane and provider promotion remain separate",
+    "compatibilityShimsRetired": true
+  },
+  "semanticRoles": [
+    "logical-rule",
+    "semantic-preserving-acceleration",
+    "trusted-capability",
+    "adapter-protocol",
+    "assurance-only"
+  ],
+  "trustStatuses": [
+    "verified",
+    "consensus-checked",
+    "trusted",
+    "derived",
+    "untrusted"
+  ],
+  "currentRoleFiles": [
+    {
+      "path": "Runtime/Acceleration/Cache.lean",
+      "role": "semantic-preserving-acceleration"
+    },
+    {
+      "path": "Runtime/Acceleration/EnvironmentIndex.lean",
+      "role": "semantic-preserving-acceleration"
+    },
+    {
+      "path": "Runtime/Capability/Lean434NativeReduction.lean",
+      "role": "trusted-capability"
+    },
+    {
+      "path": "Runtime/Acceleration/CachePolicy.lean",
+      "role": "semantic-preserving-acceleration"
+    }
+  ],
+  "targetLayers": [
+    "Core",
+    "Runtime/Acceleration",
+    "Runtime/Capability",
+    "Environment",
+    "Checker",
+    "Admission",
+    "API",
+    "SelfHost"
+  ],
+  "invariants": {
+    "oneProductionSemanticSource": true,
+    "noReferenceKernelInSemanticRoot": true,
+    "noCompatInSemanticRoot": true,
+    "noTestOrBenchmarkInSemanticRoot": true,
+    "failClosed": true,
+    "generatedJavaScriptSemanticPatchingForbidden": true
+  },
+  "forbiddenSemanticImportPrefixes": [
+    "PSC1Kernel.",
+    "Ps.KernelCore.Compat.",
+    "KernelCore.Foundation.",
+    "KernelCore.Bench."
+  ],
+  "tcbManifest": "PSKERNEL_TCB.json",
+  "canonicalOwners": [
+    {
+      "area": "checker-state",
+      "module": "Ps.KernelCore.Checker.State"
+    },
+    {
+      "area": "lean434-native-reduction",
+      "module": "Ps.KernelCore.Runtime.Capability.Lean434NativeReduction"
+    },
+    {
+      "area": "checker-session",
+      "module": "Ps.KernelCore.Checker.Session"
+    },
+    {
+      "area": "cache",
+      "module": "Ps.KernelCore.Runtime.Acceleration.Cache"
+    },
+    {
+      "area": "environment-index",
+      "module": "Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex"
+    },
+    {
+      "area": "cache-policy",
+      "module": "Ps.KernelCore.Runtime.Acceleration.CachePolicy"
+    },
+    {
+      "area": "checker-context",
+      "module": "Ps.KernelCore.Checker.Context"
+    },
+    {
+      "area": "checker-reduction-primitives",
+      "module": "Ps.KernelCore.Checker.Reduction.Primitives"
+    },
+    {
+      "area": "checker-reduction-whnf",
+      "module": "Ps.KernelCore.Checker.Reduction.Whnf"
+    },
+    {
+      "area": "checker-projection",
+      "module": "Ps.KernelCore.Checker.Projection"
+    },
+    {
+      "area": "checker-inference",
+      "module": "Ps.KernelCore.Checker.Inference"
+    },
+    {
+      "area": "checker-defeq-support",
+      "module": "Ps.KernelCore.Checker.DefEq.Support"
+    },
+    {
+      "area": "checker-reduction-kernelreductions",
+      "module": "Ps.KernelCore.Checker.Reduction.KernelReductions"
+    },
+    {
+      "area": "checker-reduction-primitivedata",
+      "module": "Ps.KernelCore.Checker.Reduction.PrimitiveData"
+    },
+    {
+      "area": "checker-reduction-primitivenat",
+      "module": "Ps.KernelCore.Checker.Reduction.PrimitiveNat"
+    },
+    {
+      "area": "checker-reduction-whnfcore",
+      "module": "Ps.KernelCore.Checker.Reduction.WhnfCore"
+    },
+    {
+      "area": "checker-inference-core",
+      "module": "Ps.KernelCore.Checker.Inference.Core"
+    },
+    {
+      "area": "checker-inference-helpers",
+      "module": "Ps.KernelCore.Checker.Inference.Helpers"
+    },
+    {
+      "area": "checker-recursor-analysis",
+      "module": "Ps.KernelCore.Checker.Recursor.Analysis"
+    },
+    {
+      "area": "checker-recursor-reduction",
+      "module": "Ps.KernelCore.Checker.Recursor.Reduction"
+    },
+    {
+      "area": "checker-defeq-binderspines",
+      "module": "Ps.KernelCore.Checker.DefEq.BinderSpines"
+    },
+    {
+      "area": "checker-defeq-deltastep",
+      "module": "Ps.KernelCore.Checker.DefEq.DeltaStep"
+    },
+    {
+      "area": "checker-defeq-finalrules",
+      "module": "Ps.KernelCore.Checker.DefEq.FinalRules"
+    },
+    {
+      "area": "checker-defeq-fullshape",
+      "module": "Ps.KernelCore.Checker.DefEq.FullShape"
+    },
+    {
+      "area": "checker-defeq-lazydelta",
+      "module": "Ps.KernelCore.Checker.DefEq.LazyDelta"
+    },
+    {
+      "area": "checker-defeq-quick",
+      "module": "Ps.KernelCore.Checker.DefEq.Quick"
+    },
+    {
+      "area": "checker-defeq-shortcuts",
+      "module": "Ps.KernelCore.Checker.DefEq.Shortcuts"
+    },
+    {
+      "area": "checker-ops",
+      "module": "Ps.KernelCore.Checker.Ops"
+    },
+    {
+      "area": "checker-knot",
+      "module": "Ps.KernelCore.Checker.Knot"
+    },
+    {
+      "area": "admission-declaration-validation",
+      "module": "Ps.KernelCore.Admission.Declaration.Validation"
+    },
+    {
+      "area": "admission-declaration-admission",
+      "module": "Ps.KernelCore.Admission.Declaration.Admission"
+    },
+    {
+      "area": "admission-quot-bootstrap",
+      "module": "Ps.KernelCore.Admission.Quot.Bootstrap"
+    },
+    {
+      "area": "admission-quot-admission",
+      "module": "Ps.KernelCore.Admission.Quot.Admission"
+    },
+    {
+      "area": "admission-inductive-common-parameters",
+      "module": "Ps.KernelCore.Admission.Inductive.Common.Parameters"
+    },
+    {
+      "area": "admission-inductive-ordinary-admission",
+      "module": "Ps.KernelCore.Admission.Inductive.Ordinary.Admission"
+    },
+    {
+      "area": "admission-inductive-common-elimination",
+      "module": "Ps.KernelCore.Admission.Inductive.Common.Elimination"
+    },
+    {
+      "area": "admission-inductive-ordinary-constructor",
+      "module": "Ps.KernelCore.Admission.Inductive.Ordinary.Constructor"
+    },
+    {
+      "area": "admission-inductive-ordinary-constructoradmission",
+      "module": "Ps.KernelCore.Admission.Inductive.Ordinary.ConstructorAdmission"
+    },
+    {
+      "area": "admission-inductive-ordinary-recursor",
+      "module": "Ps.KernelCore.Admission.Inductive.Ordinary.Recursor"
+    },
+    {
+      "area": "admission-inductive-mutual-admission",
+      "module": "Ps.KernelCore.Admission.Inductive.Mutual.Admission"
+    },
+    {
+      "area": "admission-inductive-mutual-admissionloops",
+      "module": "Ps.KernelCore.Admission.Inductive.Mutual.AdmissionLoops"
+    },
+    {
+      "area": "admission-inductive-mutual-analysis",
+      "module": "Ps.KernelCore.Admission.Inductive.Mutual.Analysis"
+    },
+    {
+      "area": "admission-inductive-mutual-header",
+      "module": "Ps.KernelCore.Admission.Inductive.Mutual.Header"
+    },
+    {
+      "area": "admission-inductive-mutual-recursor",
+      "module": "Ps.KernelCore.Admission.Inductive.Mutual.Recursor"
+    },
+    {
+      "area": "admission-inductive-nested-admission",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.Admission"
+    },
+    {
+      "area": "admission-inductive-nested-commit",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.Commit"
+    },
+    {
+      "area": "admission-inductive-nested-discover",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.Discover"
+    },
+    {
+      "area": "admission-inductive-nested-flatten",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.Flatten"
+    },
+    {
+      "area": "admission-inductive-nested-rebase",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.Rebase"
+    },
+    {
+      "area": "admission-inductive-nested-reservednames",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.ReservedNames"
+    },
+    {
+      "area": "admission-inductive-nested-restore",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.Restore"
+    },
+    {
+      "area": "admission-inductive-nested-restoreexpr",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.RestoreExpr"
+    },
+    {
+      "area": "admission-inductive-nested-types",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.Types"
+    },
+    {
+      "area": "admission-inductive-nested-validation",
+      "module": "Ps.KernelCore.Admission.Inductive.Nested.Validation"
+    },
+    {
+      "area": "admission-inductive-types",
+      "module": "Ps.KernelCore.Admission.Inductive.Types"
+    },
+    {
+      "area": "admission-inductive-common-occurrence",
+      "module": "Ps.KernelCore.Admission.Inductive.Common.Occurrence"
+    },
+    {
+      "area": "admission-inductive-common-recursorvalidation",
+      "module": "Ps.KernelCore.Admission.Inductive.Common.RecursorValidation"
+    },
+    {
+      "area": "core-name",
+      "module": "Ps.KernelCore.Core.Name"
+    },
+    {
+      "area": "core-level",
+      "module": "Ps.KernelCore.Core.Level"
+    },
+    {
+      "area": "core-expr",
+      "module": "Ps.KernelCore.Core.Expr"
+    },
+    {
+      "area": "core-declaration",
+      "module": "Ps.KernelCore.Core.Declaration"
+    },
+    {
+      "area": "core-localcontext",
+      "module": "Ps.KernelCore.Core.LocalContext"
+    },
+    {
+      "area": "core-substitution-listops",
+      "module": "Ps.KernelCore.Core.Substitution.ListOps"
+    },
+    {
+      "area": "core-substitution-lift",
+      "module": "Ps.KernelCore.Core.Substitution.Lift"
+    },
+    {
+      "area": "core-substitution-instantiate",
+      "module": "Ps.KernelCore.Core.Substitution.Instantiate"
+    },
+    {
+      "area": "core-substitution-beta",
+      "module": "Ps.KernelCore.Core.Substitution.Beta"
+    },
+    {
+      "area": "core-substitution-abstract",
+      "module": "Ps.KernelCore.Core.Substitution.Abstract"
+    },
+    {
+      "area": "environment-operations",
+      "module": "Ps.KernelCore.Environment.Operations"
+    },
+    {
+      "area": "environment-semantic",
+      "module": "Ps.KernelCore.Environment.Semantic"
+    },
+    {
+      "area": "environment-environment",
+      "module": "Ps.KernelCore.Environment.Environment"
+    },
+    {
+      "area": "environment-lookup",
+      "module": "Ps.KernelCore.Environment.Lookup"
+    },
+    {
+      "area": "runtime-capability-types",
+      "module": "Ps.KernelCore.Runtime.Capability.Types"
+    },
+    {
+      "area": "checker-resourcepolicy",
+      "module": "Ps.KernelCore.Checker.ResourcePolicy"
+    },
+    {
+      "area": "api-outcome",
+      "module": "Ps.KernelCore.API.Outcome"
+    },
+    {
+      "area": "api-kernelcontractv1",
+      "module": "Ps.KernelCore.API.KernelContractV1"
+    },
+    {
+      "area": "api-provider",
+      "module": "Ps.KernelCore.API.Provider"
+    },
+    {
+      "area": "api-session",
+      "module": "Ps.KernelCore.API.Session"
+    },
+    {
+      "area": "api-kernel",
+      "module": "Ps.KernelCore.API.Kernel"
+    },
+    {
+      "area": "selfhost",
+      "module": "Ps.KernelCore.SelfHost"
+    }
+  ],
+  "recursiveWiring": {
+    "module": "Ps.KernelCore.Checker.Knot",
+    "symbols": [
+      "psKernelReduceRecursorBoundedWithFuel",
+      "psKernelWhnfWithRecursorFuel",
+      "psKernelWhnfCoreWithRecursorFuel",
+      "psKernelInferWithRecursorFuel",
+      "psKernelDefEqProjectionShortcut",
+      "psKernelIsDefEqWithFuel",
+      "psKernelIsDefEq",
+      "psKernelCheckerOpsWithFuel",
+      "psKernelCheckerWhnf",
+      "psKernelCheckerInfer",
+      "psKernelCheckerCheck"
+    ]
+  },
+  "importFences": [
+    {
+      "from": [
+        "Ps.KernelCore.Checker."
+      ],
+      "forbidden": [
+        "Ps.KernelCore.Admission.",
+        "Ps.KernelCore.API."
+      ]
+    },
+    {
+      "from": [
+        "Ps.KernelCore.Checker.Reduction.",
+        "Ps.KernelCore.Checker.Inference",
+        "Ps.KernelCore.Checker.Inference.",
+        "Ps.KernelCore.Checker.Recursor.",
+        "Ps.KernelCore.Checker.DefEq.",
+        "Ps.KernelCore.Checker.Projection",
+        "Ps.KernelCore.Checker.Ops"
+      ],
+      "forbidden": [
+        "Ps.KernelCore.Checker.Knot",
+        "Ps.KernelCore.Checker.Session"
+      ]
+    },
+    {
+      "from": [
+        "Ps.KernelCore.Admission."
+      ],
+      "forbidden": [
+        "Ps.KernelCore.API."
+      ]
+    },
+    {
+      "from": [
+        "Ps.KernelCore.Core."
+      ],
+      "forbidden": [
+        "Ps.KernelCore.Runtime.",
+        "Ps.KernelCore.Environment.",
+        "Ps.KernelCore.Checker.",
+        "Ps.KernelCore.Admission.",
+        "Ps.KernelCore.API."
+      ]
+    },
+    {
+      "from": [
+        "Ps.KernelCore.Runtime."
+      ],
+      "forbidden": [
+        "Ps.KernelCore.Environment.",
+        "Ps.KernelCore.Checker.",
+        "Ps.KernelCore.Admission.",
+        "Ps.KernelCore.API."
+      ]
+    },
+    {
+      "from": [
+        "Ps.KernelCore.Environment."
+      ],
+      "forbidden": [
+        "Ps.KernelCore.Checker.",
+        "Ps.KernelCore.Admission.",
+        "Ps.KernelCore.API."
+      ]
+    }
+  ],
+  "lakeLibrary": "PsKernelCore",
+  "ruleInventory": "LEAN_4_34_KERNEL_RULES.json",
+  "diagnosticInventory": "KERNEL_DIAGNOSTICS.json"
+}

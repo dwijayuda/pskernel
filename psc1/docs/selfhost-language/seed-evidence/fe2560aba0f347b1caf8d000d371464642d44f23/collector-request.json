@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-seed-evidence-request",
+  "repository": "dwijayuda/pskernel",
+  "runId": 37925722635,
+  "runAttempt": 1,
+  "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "sourceBranch": "psc0/sh1-projection-grammar-v1",
+  "workflowId": 378853677,
+  "workflowPath": ".github/workflows/psc0-sh1.yml",
+  "requiredJobs": [
+    "compiler",
+    "successor-recovery",
+    "kernel-admissions"
+  ],
+  "purpose": "Collect authenticated file evidence and a proposed selection; never activate the seed."
+}

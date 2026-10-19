@@ -1,0 +1,420 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-authenticated-retained-fixed-point-finish-source-review",
+  "status": "reviewed-source-candidate-awaiting-root-review-and-authenticated-Actions-execution",
+  "repository": "dwijayuda/pskernel",
+  "reason": "Actual C2 and C3 generation and each seven-gate group completed; the subsequent binder failed solely because native PASS marker parsing used String.slice(pass) instead of String.slice(pass.length). Rebinding retained bytes avoids regenerating those immutable products.",
+  "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+  "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+  "generationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+  "generationRecipeFiles": 48,
+  "priorExecutions": [
+    {
+      "role": "native-and-first-candidate-origin",
+      "runId": 38015134511,
+      "compilerJobId": 114103608774,
+      "conclusion": "cancelled",
+      "retainedGenerations": [
+        "N1",
+        "C1"
+      ],
+      "qualified": false
+    },
+    {
+      "role": "second-and-third-generation-origin",
+      "runId": 38021634599,
+      "compilerJobId": 114123691566,
+      "providerJobId": 114136283916,
+      "conclusion": "failure",
+      "providerConclusion": "skipped",
+      "orchestrationHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "retainedGenerations": [
+        "C2",
+        "C3"
+      ],
+      "eachGenerationGateGroupsCompleted": true,
+      "qualified": false
+    }
+  ],
+  "candidate": {
+    "path": "psc0/scripts/sh1-finish-evidence.mjs",
+    "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+    "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+    "bytes": 38509,
+    "readbackExact": true,
+    "moduleExecuted": false
+  },
+  "originalQualifier": {
+    "path": "psc0/scripts/sh1-qualify.mjs",
+    "blob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+    "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+    "bytes": 73618
+  },
+  "originalBinder": {
+    "path": "psc0/scripts/sh1-strict-evidence.mjs",
+    "blob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+    "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+    "bytes": 91970
+  },
+  "correctedBinder": {
+    "generationSidecarPath": "psc0/scripts/sh1-strict-evidence-finish.mjs",
+    "futureCanonicalPath": "psc0/scripts/sh1-strict-evidence.mjs",
+    "blob": "7700fef35acd06789b94f72078869fdef489214f",
+    "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+    "bytes": 91977,
+    "exactReplacement": {
+      "before": ".map((line) => line.slice(pass))",
+      "after": ".map((line) => line.slice(pass.length))",
+      "matches": 1
+    },
+    "repairReviewBlob": "7c7ae4343cb94989df72b284dc9bd67c76794872"
+  },
+  "identitySeparation": {
+    "compiledSource": "Every retained N1/C1/C2/C3 generation receipt keeps sourceRef1fa and the complete original48-file recipe a631 unchanged.",
+    "orchestration": "The new finishing workflow and sidecars belong to a different immutable commit; that actual commit/run/job is recorded in evidenceProducer.",
+    "sourceLayout": "Actions checks out1fa at the original absolute PSC0 root and places two additional unlisted siblings under scripts; every original48-file recipe input remains byte-identical.",
+    "bindingProducer": "The corrected binder’s relative imports and fixture reads resolve to the authenticated1fa modules and source fixtures.",
+    "futureDevelopment": "The same one-line correction may be committed to the canonical binder path on the development branch; its future recipe is distinct and must not rewrite historical generation receipts.",
+    "selection": "Original retainPromotableSeed writes only dist/sh1/seed-selection.json describing existing R retention; selected R configuration/manifest is not promoted or changed."
+  },
+  "command": [
+    "node",
+    "scripts/sh1-finish-evidence.mjs",
+    "--inputs",
+    "dist/sh1-evidence-finish-inputs/inputs.json",
+    "--inputs-sha256",
+    "<actual-raw-input-manifest-sha256>",
+    "--out",
+    "dist/sh1"
+  ],
+  "requiredManifest": {
+    "schemaVersion": 1,
+    "kind": "psc0-authenticated-retained-fixed-point-finish-inputs",
+    "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "sourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
+    "outputRoot": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1",
+    "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+    "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+    "recipeFiles": "Exact ordered48 {path,sha256} entries from original generation receipt, independently checked against original source files.",
+    "evidenceProducer": {
+      "sourceRef": "<actual-new-workflow-and-sidecar-source-commit>",
+      "workflow": {
+        "path": ".github/workflows/<actual-workflow>.yml",
+        "blob": "<actual40hex>",
+        "sha256": "<actual64hex>",
+        "bytes": "<actualpositiveinteger>"
+      },
+      "finisher": {
+        "path": "scripts/sh1-finish-evidence.mjs",
+        "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+        "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+        "bytes": 38509
+      },
+      "binder": {
+        "path": "scripts/sh1-strict-evidence-finish.mjs",
+        "blob": "7700fef35acd06789b94f72078869fdef489214f",
+        "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+        "bytes": 91977
+      },
+      "currentExecution": {
+        "runId": "<actualinteger>",
+        "workflowId": "<actualinteger>",
+        "runAttempt": "<actualinteger>",
+        "compilerJobId": "<actualinteger>",
+        "headSha": "<same actual sourceRef>"
+      }
+    },
+    "generationOwnership": {
+      "N1": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774
+      },
+      "C1": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774
+      },
+      "C2": {
+        "runId": 38021634599,
+        "compilerJobId": 114123691566
+      },
+      "C3": {
+        "runId": 38021634599,
+        "compilerJobId": 114123691566
+      }
+    },
+    "authenticatedArchives": [
+      {
+        "runId": 38015134511,
+        "artifactId": 11658430459,
+        "name": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sha256": "6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+        "bytes": 5147944,
+        "fileCount": 344,
+        "rawArchivePath": "dist/sh1-continuation-inputs/predecessor-verified.zip"
+      },
+      {
+        "runId": 38021634599,
+        "artifactId": 11659939542,
+        "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+        "sha256": "599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+        "bytes": 11739089,
+        "fileCount": 444,
+        "rawArchivePath": "dist/sh1-evidence-finish-inputs/predecessor-verified.zip"
+      }
+    ],
+    "generationLog": {
+      "path": "dist/sh1-evidence-finish-inputs/source-generation-job.log",
+      "blob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+      "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+      "bytes": 875228
+    },
+    "importedFiles": "Unique PSC0-root-relative {path,sha256,bytes} for all444 current archive entries plus raw current ZIP and exact source generation job log; supplemental authenticated files are allowed under output roots. The input manifest itself is excluded to avoid self-reference."
+  },
+  "workflowPrerequisites": [
+    "Authenticate actual prior run/job/steps/provider-skipped metadata from GitHub API; do not reinterpret failed or cancelled conclusions as success.",
+    "Authenticate artifact API identities and raw ZIP hashes/lengths/file counts before safe unique-name extraction; retain both exact raw ZIPs.",
+    "Authenticate old continuation import report and original N1/C1 bindings; do not regenerate or rewrite any retained generation receipt.",
+    "Fetch the exact source job log from the existing immutable blob rather than requesting Actions logs again.",
+    "Authenticate source workflow and the two sidecars from the same immutable current orchestration commit; write only the two additional unlisted files under scripts.",
+    "Install and authenticate current Node22.23.3/TypeScript7.0.2/Lean4.34.0 pins; do not build native or generated PSC compilers again.",
+    "Run data-only output inventory and retain available exact JSON even on finisher failure; release qualification still requires actual finisher success plus complete evidence and independent provider success."
+  ],
+  "verbatimSections": [
+    {
+      "name": "capture",
+      "start": 79,
+      "end": 83,
+      "source": "function capture(command, args, cwd = root) {\n  return runCommand(command, args, {\n    cwd, encoding: 'utf8', stdio: 'pipe', timeout: 30000,\n  }).stdout.trim();\n}",
+      "scope": "helper-definition",
+      "sha256": "314fa8ab1f01e77a1f4b451e67003770f4441b3fdcdde5e2f522ce2e7c473a4a",
+      "bytes": 162,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "writeJson",
+      "start": 88,
+      "end": 91,
+      "source": "async function writeJson(file, value) {\n  await mkdir(path.dirname(file), { recursive: true });\n  await writeFile(file, JSON.stringify(value, null, 2) + '\\n');\n}",
+      "scope": "helper-definition",
+      "sha256": "30a7385e95d5d660cbee12634004e53eef0b82f32c6f66fa97c8d04f34242e4f",
+      "bytes": 161,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "toolchainIdentity",
+      "start": 101,
+      "end": 110,
+      "source": "async function toolchainIdentity() {\n  return {\n    node: process.version,\n    platform: process.platform,\n    architecture: process.arch,\n    lean: capture('lean', ['--version']),\n    leanGitHash: capture('lean', ['--githash']),\n    typescript: capture(process.execPath, [tsc, '--version']),\n  };\n}",
+      "scope": "helper-definition",
+      "sha256": "6408b5e628b9bfd5937571db5e26cc2db7845984366fc96b380a50166d3c9b7d",
+      "bytes": 299,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "recipeIdentity",
+      "start": 112,
+      "end": 147,
+      "source": "async function recipeIdentity() {\n  const files = [\n    'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs', 'scripts/sh1-resource-policy.mjs',\n    'scripts/sh1-grammar-conformance.mjs', 'scripts/sh1-grammar-profile.mjs', 'scripts/sh1-projection-conformance.mjs',\n    'scripts/sh1-successor-seed.mjs', 'psconfig.json',\n    'scripts/sh1-function-entry.mjs',\n    'scripts/sh1-fresh-name-conformance.mjs', 'scripts/sh1-migration-worker-conformance.mjs',\n    'scripts/sh1-migration-worker-abi.mjs',\n    'test/fixtures/selfhost-sh1-accumulators.lean', 'test/fixtures/selfhost-sh1-accumulators.ps',\n    'test/fixtures/selfhost-sh1-empty.lean', 'test/fixtures/selfhost-sh1-empty.ps',\n    'scripts/proofscript-source.mjs', 'scripts/checked-source-snapshot.mjs',\n    'scripts/selfhost-source-workspace.mjs', 'scripts/LeanCheckedSeed.lean',\n    'scripts/typescript-cli.mjs', 'scripts/check-typescript-profile.mjs', 'scripts/workspace-layout.mjs',\n    'scripts/generated-preparation-session.mjs', 'scripts/original-ir-inventory.mjs',\n    'scripts/original-ir-carrier.mjs', 'scripts/sh1-ir-checker-conformance.mjs',\n    'test/IrCheckerTests.lean',\n    'scripts/sh1-strict-source.mjs', 'scripts/sh1-strict-source-conformance.mjs',\n    'scripts/sh1-strict-target-conformance.mjs', 'scripts/sh1-strict-evidence.mjs',\n    'scripts/sh1-strict-runtime-conformance.mjs', 'scripts/StrictSourceCompile.lean',\n    'test/StrictRuntimeReference.lean',\n    'docs/selfhost-language/strict/enabled-runtime-contract.json',\n    'scripts/sh1-source-snapshot.mjs', 'scripts/sh1-seed-manifest.mjs',\n    'scripts/sh1-iterate.mjs', 'scripts/sh1-iteration-conformance.mjs',\n    'scripts/sh1-foundation-conformance.mjs',\n    'test/fixtures/selfhost-sh1-foundation-reference.lean',\n    'test/fixtures/selfhost-sh1-foundation-probe.lean',\n    'scripts/sh1-helper-conformance.mjs',\n    'test/fixtures/selfhost-sh1-helpers-reference.lean',\n    'test/fixtures/selfhost-sh1-helpers-probe.lean',\n    'scripts/sh1-generic-erasure-conformance.mjs',\n    'test/fixtures/selfhost-sh1-generic-erasure.lean',\n  ];\n  const contents = [];\n  for (const file of files) contents.push({ path: file, sha256: sha256(await readFile(path.join(root, file))) });\n  return { files: contents, sha256: sha256(JSON.stringify(contents)) };\n}",
+      "scope": "helper-definition",
+      "sha256": "f790fda77e7364ec30fd1c998053c947d51f82f1f375d20f6bd2b730828fc8c7",
+      "bytes": 2280,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "executionRuntime",
+      "start": 149,
+      "end": 152,
+      "source": "function executionRuntime(toolchain) {\n  const { typescript, ...runtime } = toolchain;\n  return runtime;\n}",
+      "scope": "helper-definition",
+      "sha256": "1cf58dfe53fbe67e3d937e11bfe60fc3b598ee9fde79846985f01f23b49a9c08",
+      "bytes": 106,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "verifySeedExecutionRuntime",
+      "start": 154,
+      "end": 160,
+      "source": "async function verifySeedExecutionRuntime(producerToolchain, producerVersion = '5.8.3') {\n  assert(['5.8.3', '7.0.2'].includes(producerVersion), 'PSC0_SH1_SEED_PRODUCER_PROFILE');\n  assert.equal(producerToolchain?.typescript, 'Version ' + producerVersion,\n    'PSC0_SH1_SEED_PRODUCER_TYPESCRIPT_PIN');\n  assert.deepEqual(executionRuntime(await toolchainIdentity()), executionRuntime(producerToolchain),\n    'PSC0_SH1_SELECTED_SEED_EXECUTION_RUNTIME');\n}",
+      "scope": "helper-definition",
+      "sha256": "a97c2f3be86036bc195d65dd861de7a6d0b677b995a027b1a302c2eb5087c6aa",
+      "bytes": 453,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "selectedAuthoringSeed",
+      "start": 310,
+      "end": 336,
+      "source": "async function selectedAuthoringSeed(compilerOverride) {\n  const selected = await readSelectedSeed();\n  assert.equal(selected.mode, 'qualified', 'PSC0_SH1_MIGRATION_QUALIFIED_SEED_REQUIRED');\n  assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed',\n    'PSC0_SH1_MIGRATION_PROJECTION_SUCCESSOR_REQUIRED');\n  // The dispatch reader requires both authentic cold-recovery and provider\n  // evidence. Historical S0/A recipes are archived at their original revisions.\n  await verifySeedExecutionRuntime(selected.manifest.toolchain, selected.recoveryTypeScriptVersion);\n  const compilerPath = path.resolve(root, compilerOverride ?? selected.compilerPath);\n  const expectedSha256 = selected.manifest.expectedArtifacts.javascriptSha256;\n  assert.equal(sha256(await readFile(compilerPath)), expectedSha256,\n    'PSC0_SH1_SELECTED_SEED_DIGEST');\n  return {\n    compilerPath, expectedSha256, mode: selected.mode,\n    provenance: {\n      kind: 'previous-qualified-authoring-seed',\n      sourceRef: selected.sourceRef,\n      sourceClosureSha256: selected.manifest.sourceClosureSha256,\n      compilerSha256: expectedSha256,\n      identitySha256: selected.identitySha256,\n      independentAlgorithm: false,\n      priorQualification: selected.manifest.qualification,\n      producerToolchain: selected.manifest.toolchain,\n      executionRuntime: executionRuntime(await toolchainIdentity()),\n    },\n  };\n}",
+      "scope": "helper-definition",
+      "sha256": "9f16b252b73ecae9847e7a5d790dffacffabde2fe8d9a0511f5da8f24cb7baa9",
+      "bytes": 1402,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "retainPromotableSeed",
+      "start": 884,
+      "end": 897,
+      "source": "async function retainPromotableSeed(qualification, firstReceipt, secondReceipt, thirdReceipt, outDir) {\n  const selected = await readSelectedSeed();\n  assert.equal(selected.mode, 'qualified', 'PSC0_SH1_CURRENT_QUALIFIED_SEED_REQUIRED');\n  assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed',\n    'PSC0_SH1_CURRENT_SUCCESSOR_REQUIRED');\n  // Current migrations retain the already qualified successor. A new promotion\n  // requires its own qualified recovery contract and explicit selection.\n  await writeJson(path.join(outDir, 'seed-selection.json'), {\n    status: 'existing-qualified-authoring-seed-retained',\n    sourceRef: selected.sourceRef,\n    compilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,\n    futurePromotion: 'A later language capability promotion needs an explicit TypeScript 7 recovery plan.',\n  });\n}",
+      "scope": "helper-definition",
+      "sha256": "1cdea075361e80c5288aec1f2d6cefbc491d3262d8e364d8f7ce6bfde16dd9ba",
+      "bytes": 851,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-fixed-point-preflight",
+      "start": 1142,
+      "end": 1198,
+      "source": "  const authoring = await selectedAuthoringSeed();\n  const closure = await sourceClosure(root);\n  const firstDir = path.join(outDir, 'C1');\n  const firstReceipt = JSON.parse(await readFile(path.join(firstDir, 'receipt.json')));\n  assert.equal(firstReceipt.evidence, 'candidate-build', 'PSC0_SH1_CANDIDATE_KIND');\n  assert.equal(firstReceipt.sourceRef, capture('git', ['rev-parse', 'HEAD']));\n  assert.equal(firstReceipt.executingCompilerSha256, authoring.expectedSha256);\n  assert.deepEqual(firstReceipt.authoringSeed, authoring.provenance, 'PSC0_SH1_CANDIDATE_SEED_PROVENANCE');\n  assert.equal(firstReceipt.sourceClosureSha256, closure.sha256, 'PSC0_SH1_STALE_CANDIDATE_SOURCE');\n  assert.equal(firstReceipt.artifacts.javascriptSha256, sha256(await readFile(path.join(firstDir, 'index.js'))),\n    'PSC0_SH1_CANDIDATE_DIGEST');\n  assert.deepEqual(firstReceipt.recipe, await recipeIdentity(), 'PSC0_SH1_CANDIDATE_RECIPE');\n  assert.deepEqual(firstReceipt.toolchain, await toolchainIdentity(), 'PSC0_SH1_CANDIDATE_TOOLCHAIN');\n  const irCheckerReceipt = JSON.parse(await readFile(path.join(firstDir, 'ir-checker/receipt.json')));\n  assert.equal(irCheckerReceipt.evidence, 'portable-original-ir-checker-conformance');\n  assert.equal(irCheckerReceipt.compilerSha256, firstReceipt.artifacts.javascriptSha256);\n  assert.equal(irCheckerReceipt.acceptedFixture.runtimeIrTypingAccepted, true);\n  const capabilityReceipt = JSON.parse(await readFile(path.join(firstDir, 'capabilities/receipt.json')));\n  assert.equal(capabilityReceipt.compilerSha256, firstReceipt.artifacts.javascriptSha256);\n  assert.deepEqual(capabilityReceipt.sourceKinds.map((item) => item.sourceKind).sort(), ['lean', 'ps']);\n  assert.equal(capabilityReceipt.grammar.evidence, 'generated-compiler-source-grammar-api');\n  assert.equal(capabilityReceipt.grammar.compilerSha256, firstReceipt.artifacts.javascriptSha256);\n  assert.deepEqual(capabilityReceipt.grammar.sourceGrammar, sh1GrammarProfile);\n  assert.equal(firstReceipt.migrationWorkerAbi.workerCount, 12, 'PSC0_SH1_C1_WORKER_ABI');\n  const migrationReferencePath = path.join(outDir, 'worker-migration-reference.json');\n  const migrationReference = JSON.parse(await readFile(migrationReferencePath, 'utf8'));\n  const migrationCorrespondencePath = path.join(outDir, 'worker-migration-correspondence.json');\n  const migrationCorrespondence = JSON.parse(await readFile(migrationCorrespondencePath, 'utf8'));\n  assert.equal(migrationReference.evidence, 'selected-successor-migration-worker-reference');\n  assert.equal(migrationReference.sourceRef, authoring.provenance.sourceRef);\n  assert.equal(migrationReference.compilerSha256, authoring.expectedSha256);\n  assert.equal(migrationReference.seedIdentitySha256, authoring.provenance.identitySha256);\n  assert.equal(migrationCorrespondence.evidence, 'finite-migration-worker-R-F-correspondence');\n  assert.equal(migrationCorrespondence.passed, true);\n  assert.equal(migrationCorrespondence.beforeCompilerSha256, authoring.expectedSha256);\n  assert.equal(migrationCorrespondence.afterCompilerSha256, firstReceipt.artifacts.javascriptSha256);\n  assert.equal(migrationCorrespondence.afterSourceRef, firstReceipt.sourceRef);\n  assert.equal(migrationCorrespondence.referenceReportSha256, sha256(await readFile(migrationReferencePath)));\n  assert.equal(migrationCorrespondence.candidateReportSha256,\n    sha256(await readFile(path.join(firstDir, 'capabilities/receipt.json'))));\n  assert.equal(migrationReference.report.cases, 87);\n  assert.deepEqual(capabilityReceipt.workerMigration, migrationReference.report);\n  const nativeGrammarFile = path.join(outDir, 'development/N1/grammar-closure.json');\n  const nativeGrammar = JSON.parse(await readFile(nativeGrammarFile, 'utf8'));\n  const nativeReceipt = JSON.parse(await readFile(path.join(outDir, 'development/N1/receipt.json'), 'utf8'));\n  assert.equal(nativeReceipt.sourceRef, capture('git', ['rev-parse', 'HEAD']));\n  assert.equal(nativeGrammar.compilerSha256, nativeReceipt.artifacts.javascriptSha256);\n  assert.equal(nativeGrammar.closureSha256, closure.sha256);\n  assert.equal(nativeGrammar.moduleCount, closure.moduleCount);\n  assert.deepEqual(nativeGrammar.sourceGrammar, sh1GrammarProfile);\n  assert.equal(nativeReceipt.canonicalSourceCorrespondence.reportSha256, sha256(await readFile(nativeGrammarFile)));\n  for (const capability of capabilityReceipt.sourceKinds) {\n    assert(['lean', 'ps'].includes(capability.sourceKind));\n    assert.equal(capability.sourceSha256, sha256(await readFile(path.join(root,\n      'test/fixtures/selfhost-sh1-accumulators.' + capability.sourceKind))));\n    assert.equal(capability.behavior, 'pass');\n  }",
+      "scope": "preflight",
+      "sha256": "df106f2295a627811fcf758fb1393307bd3dc2351a9d10089cabde36e69585cf",
+      "bytes": 4651,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-read-only-generation-guard-1",
+      "start": 1206,
+      "end": 1210,
+      "source": "  assert.equal(second.receipt.artifacts.canonicalSurfaceSourceSha256,\n    nativeGrammar.canonicalSurfaceSourceSha256, 'PSC0_SH1_C2_SURFACE_MATCHES_ROUND_TRIPPED_SOURCE');\n  assert.equal(second.receipt.originalIrInventory.runtimeIrTypingAccepted, true,\n    'PSC0_SH1_C2_PORTABLE_IR_CHECK_REQUIRED');\n  assert.equal(second.receipt.originalIrInventory.sameOriginalIrCheckedBeforeEmission, true);",
+      "scope": "retained-generation-assertion",
+      "sha256": "0828b742329a7e0f43ab13d46397ece23635889218a51c01bb34b1080863dea4",
+      "bytes": 392,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-read-only-generation-guard-2",
+      "start": 1214,
+      "end": 1215,
+      "source": "  assert.deepEqual(second.receipt.migrationWorkerAbi, firstReceipt.migrationWorkerAbi,\n    'PSC0_SH1_C2_WORKER_PUBLIC_TYPES_AND_IR_SIGNATURES');",
+      "scope": "retained-generation-assertion",
+      "sha256": "9f6f55309421dbe683333d5301bcb3821e52e11438d7024cb015a8bd0517d79e",
+      "bytes": 144,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-read-only-generation-guard-3",
+      "start": 1219,
+      "end": 1220,
+      "source": "  assert.deepEqual(secondCapabilities.workerMigration, migrationReference.report,\n    'PSC0_SH1_C2_WORKER_REFERENCE_CORRESPONDENCE');",
+      "scope": "retained-generation-assertion",
+      "sha256": "c00c491c0b64897c339da705c0c7d28a026d7eaa43701e322e38f0175e1fc6cb",
+      "bytes": 133,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-read-only-generation-guard-4",
+      "start": 1228,
+      "end": 1231,
+      "source": "  assert.deepEqual(second.receipt.artifacts, third.receipt.artifacts,\n    'PSC0_SH1_C2_C3_ARTIFACT_MISMATCH');\n  assert.equal(third.receipt.artifacts.canonicalSurfaceSourceSha256,\n    nativeGrammar.canonicalSurfaceSourceSha256, 'PSC0_SH1_C3_SURFACE_MATCHES_ROUND_TRIPPED_SOURCE');",
+      "scope": "retained-generation-assertion",
+      "sha256": "9fecb8c0d38c2ac691cf2eb1ac542bd96c1d980521df7b9ccf8c1053c42190ea",
+      "bytes": 280,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-read-only-generation-guard-5",
+      "start": 1236,
+      "end": 1238,
+      "source": "  assert.equal(third.receipt.originalIrInventory.runtimeIrTypingAccepted, true,\n    'PSC0_SH1_C3_PORTABLE_IR_CHECK_REQUIRED');\n  assert.equal(third.receipt.originalIrInventory.sameOriginalIrCheckedBeforeEmission, true);",
+      "scope": "retained-generation-assertion",
+      "sha256": "017c5b41f7d6a084a74097131456ed292f69ecf56431f24c360e9ff2b84a7505",
+      "bytes": 219,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-read-only-generation-guard-6",
+      "start": 1242,
+      "end": 1243,
+      "source": "  assert.deepEqual(third.receipt.migrationWorkerAbi, firstReceipt.migrationWorkerAbi,\n    'PSC0_SH1_C3_WORKER_PUBLIC_TYPES_AND_IR_SIGNATURES');",
+      "scope": "retained-generation-assertion",
+      "sha256": "95b8612d797b4abdc93ba88155a5209bc92f4d2116476a49d0a6c16df5d5c236",
+      "bytes": 143,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-read-only-generation-guard-7",
+      "start": 1247,
+      "end": 1248,
+      "source": "  assert.deepEqual(thirdCapabilities.workerMigration, migrationReference.report,\n    'PSC0_SH1_C3_WORKER_REFERENCE_CORRESPONDENCE');",
+      "scope": "retained-generation-assertion",
+      "sha256": "38192e9a99de370a173846db9377d2142184f23944120b576c56e8ed0da80492",
+      "bytes": 132,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-binding-qualification-and-seed-retention",
+      "start": 1253,
+      "end": 1323,
+      "source": "  assert.equal((await sourceClosure(root)).sha256, closure.sha256, 'PSC0_SH1_SOURCE_CHANGED_DURING_RUN');\n  const strictEvidence = await bindStrictQualificationEvidence({\n    outDir, closure, nativeReceipt, firstReceipt, secondReceipt: second.receipt, thirdReceipt: third.receipt,\n  });\n  await writeJson(path.join(outDir, 'strict-enforcement-evidence.json'), strictEvidence);\n  const receipt = {\n    schemaVersion: 1,\n    sourceRef: capture('git', ['rev-parse', 'HEAD']),\n    sourceClosureSha256: closure.sha256,\n    moduleCount: closure.moduleCount,\n    evidence: 'compiler-qualified-current-source-fixed-point',\n    equation: authoring.mode === 'historical'\n      ? 'C1=S0(A); C2=C1(A); C3=C2(A); compare C2 and C3 products'\n      : 'Q is the pinned qualified compiler from A; C1=Q(B); C2=C1(B); C3=C2(B); compare C2 and C3 products',\n    authoringSeed: authoring.provenance,\n    toolchain: await toolchainIdentity(),\n    typescriptProfile,\n    rawAuthoringSourceConsumedEveryGeneration: true,\n    artifacts: second.receipt.artifacts,\n    c1CompilerSha256: firstReceipt.artifacts.javascriptSha256,\n    c2CompilerSha256: second.receipt.artifacts.javascriptSha256,\n    c3CompilerSha256: third.receipt.artifacts.javascriptSha256,\n    rawCapabilityKinds: ['lean', 'proofScript'],\n    helperSourceCorrespondence: 'helpers/receipt.json',\n    helperRuntimeGenerations: ['C1', 'C2', 'C3'],\n    recursiveGenericErasureGenerations: ['C1', 'C2', 'C3'],\n    sourceGrammar: sh1GrammarProfile,\n    grammarGenerations: ['C1', 'C2', 'C3'],\n    projectionResolutionGenerations: ['C1', 'C2', 'C3'],\n    canonicalSourceContract: 'C2/C3 emit and consume the bounded new-only ps-0.9-r3 grammar. The pinned parent may emit its historical canonical form as the C1 build artifact; it is not a current parser mode.',\n    nativeCanonicalSourceCorrespondence: {\n      report: 'development/N1/grammar-closure.json',\n      reportSha256: sha256(await readFile(nativeGrammarFile)),\n      compilerSha256: nativeGrammar.compilerSha256,\n      moduleCount: nativeGrammar.moduleCount,\n    },\n    workerMigration: {\n      workers: 12, families: { F1: 4, F2: 8 }, removedTypedIdentityAliases: 3,\n      runtimeGenerations: ['C1', 'C2', 'C3'], casesPerCompiler: migrationReference.report.cases,\n      observationSha256: migrationReference.report.observationSha256,\n      completePublicTypeAndOriginalIrBuilds: ['C1', 'C2', 'C3'],\n      abiObservationSha256: firstReceipt.migrationWorkerAbi.observationSha256,\n      referenceSourceRef: authoring.provenance.sourceRef,\n      referenceCompilerSha256: authoring.expectedSha256,\n      correspondence: 'worker-migration-correspondence.json',\n      correspondenceSha256: sha256(await readFile(migrationCorrespondencePath)),\n      fullBaselineClosurePreparedAgain: false,\n    },\n    strictSourceAndRuntimeConformanceGenerations: ['N1', 'C1', 'C2', 'C3'],\n    atomicRawSourceBuilds: ['native N1', 'C1 produces C2', 'C2 produces C3'],\n    strictEnforcementEvidence: { report: 'strict-enforcement-evidence.json',\n      sha256: sha256(await readFile(path.join(outDir, 'strict-enforcement-evidence.json'))),\n      ...strictEvidence },\n    strictSourceEnforced: true,\n    strictTargetAdmissionEnforced: true,\n    strictSh1Qualified: false,\n    semanticContractQualified: false,\n    enabledRuntimeConformance: { operations: 45, reference: 'development/N1/strict-runtime-reference/reference.json',\n      reports: ['development/N1/strict-runtime/receipt.json', 'C1/strict-runtime/receipt.json',\n        'C2/strict-runtime/receipt.json', 'C3/strict-runtime/receipt.json'],\n      scope: 'Finite pinned-native/generated observations; general semantic preservation is not inferred.' },\n    portableIrCheckerGenerations: ['C1', 'C2', 'C3'],\n    originalIrCheckedBuilds: ['C2', 'C3'],\n    originalIrChecking: 'C1 checks the exact current-source IR emitted as C2; C2 checks the exact IR emitted as C3.',\n    immutableSeedBoundary: firstReceipt.originalIrInventory.portableChecker,\n    runtimeIrTypingEnforced: true,\n    runtimeIrStrictQualification: 'not-claimed',\n    provider: { status: 'not-attempted', kernelChecked: false },\n  };\n  await writeJson(path.join(outDir, 'qualification.json'), receipt);\n  await retainPromotableSeed(receipt, firstReceipt, second.receipt, third.receipt, outDir);",
+      "scope": "finalization",
+      "sha256": "ce80fe8f3dca3c823d920d0a426e5dab7648b8718fedf297e8f615dc54281592",
+      "bytes": 4284,
+      "presentVerbatimInCandidate": true
+    },
+    {
+      "name": "original-fixed-point-marker",
+      "start": 1324,
+      "end": 1324,
+      "source": "  process.stdout.write('PSC0_SH1_FIXED_POINT: ' + JSON.stringify(receipt) + '\\n');",
+      "scope": "marker-moved-after-preservation-check",
+      "sha256": "2b7018799f5b686c2bf1dbf872745922fb7825ddfcadede78f97c2e5cb40d6fe",
+      "bytes": 82,
+      "presentVerbatimInCandidate": true
+    }
+  ],
+  "executionSubstitution": {
+    "removed": "Original C2/C3 buildGeneration, compiler loading and conformance execution calls; their exact completed outputs and logs are immutable authenticated inputs.",
+    "retained": "All original preflight assertions; all read-only equality/ABI/IR/capability assertions surrounding the generation calls; entire binding/qualification/seed-retention tail.",
+    "added": "Explicit raw archive/receipt/source/recipe/producer identity checks, actual ordered gate-log-to-file comparison, and before/after imported-file preservation.",
+    "moved": "Original FIXED_POINT marker executes only after final input/source immutability checks and new evidence-completion companion output.",
+    "notInvoked": [
+      "buildGeneration",
+      "loadCompiler",
+      "runCurrentStrictConformance",
+      "runIrCheckerConformance",
+      "runSh1Capabilities",
+      "runHelperRuntimeConformance",
+      "runGenericErasureConformance",
+      "enforceQualificationResourcePolicy"
+    ],
+    "resourcePolicy": "The previously produced resource-policy-fixed-point.json and C2/C3 resource traces remain unchanged and retain their original execution ownership."
+  },
+  "actualSourceConsistency": {
+    "readbackExact": true,
+    "logSha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+    "logBytes": 875228,
+    "records": 67,
+    "completedGenerationGateGroups": 2,
+    "gateCount": 16,
+    "priorCompletionAbsent": true,
+    "rawArchiveDownloaded": false,
+    "moduleExecuted": false
+  },
+  "newOutputs": [
+    "dist/sh1/strict-enforcement-evidence.json",
+    "dist/sh1/qualification.json",
+    "dist/sh1/seed-selection.json",
+    "dist/sh1/evidence-completion.json"
+  ],
+  "producerLimitPreservation": {
+    "qualificationJsonStrictSh1Qualified": false,
+    "qualificationJsonSemanticContractQualified": false,
+    "binderStrictSh1Qualified": false,
+    "binderSemanticContractQualified": false,
+    "binderProviderChecked": false,
+    "newEvidenceCompletionStrictSh1Qualified": false,
+    "newEvidenceCompletionSemanticContractQualified": false,
+    "independentProviderStillRequired": true,
+    "all33And27DispositionsStillPending": true,
+    "generalPreservationTheoremClaimed": false,
+    "legacyGrammarAdded": false,
+    "typeScript5CompilerUsed": false
+  },
+  "remainingActualValidation": "The corrected binder must still execute on the authenticated retained archive in Actions; post-marker native/atomic binding checks have not yet returned. No source-only review fabricates their outcome or provider acceptance.",
+  "nonClaims": [
+    "This packet is a source/provenance review, not successful execution evidence.",
+    "No compiler-wide formal preservation theorem is asserted.",
+    "The new evidence-producing commit is not relabeled as the source compiled by the earlier generations.",
+    "No earlier cancelled or failed execution is relabeled successful.",
+    "No kernel/provider, theory, unification, defeq, cache algorithm, language grammar, compiler source closure or selected seed changes are made by this sidecar."
+  ]
+}

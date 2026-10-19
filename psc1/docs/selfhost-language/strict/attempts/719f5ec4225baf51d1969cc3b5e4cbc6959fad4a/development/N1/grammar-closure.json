@@ -1,0 +1,472 @@
+{
+  "schemaVersion": 1,
+  "evidence": "full-authored-closure-canonical-source-correspondence",
+  "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+  "sourceGrammar": {
+    "edition": "ps-0.9-r3",
+    "mode": "new-only",
+    "support": "bounded-selfhost-subset",
+    "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "fullStandardConformance": false,
+    "fullPscvConformance": false
+  },
+  "closureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+  "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+  "moduleCount": 64,
+  "rawSourceBytes": 1268003,
+  "proofScriptBytes": 1034241,
+  "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent",
+  "modules": [
+    {
+      "path": "packages/foundation/src/Ps/Foundation/Source.lean",
+      "rawSourceSha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736",
+      "proofScriptSha256": "190c8c4e3dfc27ce344d5c6aea7fabdbc11f780cdf43771d15a7d0e2dc06ddd8",
+      "canonicalLeanSha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736",
+      "proofScriptBytes": 156
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/Cursor.lean",
+      "rawSourceSha256": "eb80cd45e1df4072cac276d16d26c07ef6e37ae1ddb8769ff534e0a5b54f6c2e",
+      "proofScriptSha256": "e6730e0f2feafda62c889effb7e8f0c475f99de3181df1f9c61a47d78d30dab5",
+      "canonicalLeanSha256": "3ebef09becba9e3c0d0b6f7746711b2502db4c603a555270d92dc05df1deb04d",
+      "proofScriptBytes": 2535
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/Token.lean",
+      "rawSourceSha256": "a690a4bc7c7138f732346155cd985bd5412d9e60e1d04d67c2fd3f46d42c77df",
+      "proofScriptSha256": "ed8ce1e58371b2e831bfd0b9ae6bdf0be4a0ff45cb4f6a9e8b0dea18b05f1f13",
+      "canonicalLeanSha256": "83cebe964c42c71ea2ae4ecc6a09c9356f701f79bbd3da4221df8a7613943279",
+      "proofScriptBytes": 899
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/Lexer.lean",
+      "rawSourceSha256": "adab283e1881058bfed285a62478f1f4d55bce73b8373a4017353529e479d372",
+      "proofScriptSha256": "081c3c0246b44b9092139e9acf6ba1237292cf7ede842b22a5c80f8f4fc76b21",
+      "canonicalLeanSha256": "970ac1b3522d6d360085d6923ac68bedf1dd6e8f940c0eca3f5d8498c492de75",
+      "proofScriptBytes": 26799
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/Ast.lean",
+      "rawSourceSha256": "c22fa56b6a76b10d4d0b271f03bb4cd6612779b647f85f5088264fc95e949011",
+      "proofScriptSha256": "89de3dcb90a0b809c4da70e586f1fb55a56dfc1d38458ac2bed5f723aec7ff26",
+      "canonicalLeanSha256": "a7d776b67e5a1a908ba27701acf229676fa336ebf0b64072ce4ec468faffe27f",
+      "proofScriptBytes": 2822
+    },
+    {
+      "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+      "rawSourceSha256": "9f8c895567542c90ac9088b3ce25ccda6f374e016069faa4068feca0e28b7092",
+      "proofScriptSha256": "f80fb18283f95bd14e51e536d756d2bd9e4e4a56c46a05c203eabd4ce3490ae5",
+      "canonicalLeanSha256": "d2eadb157ad6e51bfdb21d5393f4da741c5f4bc8abd24647bad2948b53bf314f",
+      "proofScriptBytes": 3579
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/ParserState.lean",
+      "rawSourceSha256": "c7027009e9ac372690f62a9c33dfbb613e98f4dc48e4cfa516af5b41ab5d3617",
+      "proofScriptSha256": "5303cc56fa752d51d24c741d35d961c509e806ccf8be0d80faf3e1ef9625b9f7",
+      "canonicalLeanSha256": "3a85dad1d5378faae519f02f1bfd683ea8bf44b3181471d5a68ff2e9ff1ccbef",
+      "proofScriptBytes": 2448
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+      "rawSourceSha256": "d12d8b22c2ea21180ea575f0cde3393a6d3409e6e92552585490904b46ce58e8",
+      "proofScriptSha256": "ca942da7c3280047b3e5a37ee74c1e98d59438aed690effb069320ffa521301c",
+      "canonicalLeanSha256": "4e8a438209f7a1e58f86ea704586dc62c4ab8916f0b2626f65df5b548f1b9203",
+      "proofScriptBytes": 17633
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "rawSourceSha256": "601ea280e3f6aafad69abf150afde89fbdade582b796ce1b4de49ffd43baad41",
+      "proofScriptSha256": "8e729857a2742fa74aa5cf7f8e1c19724f2eb8703e4f4c1ae7f38d35815ddb20",
+      "canonicalLeanSha256": "777f6493114132189fa505c8e7ca945bd1773047f31731315a9c65db766fc3df",
+      "proofScriptBytes": 73824
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+      "rawSourceSha256": "9a69a130171bc9fcefc6a040bde659da77f050ebdf65ed56fd879c1781c1c5fd",
+      "proofScriptSha256": "88d814d8855a651215849ad7b95014ddda43b2bfeb09f21ca42ebe8e05e81a5a",
+      "canonicalLeanSha256": "134c92c7f7c1ed192a1a6021ef376589370b17bb87fc45bb50e583af560345c1",
+      "proofScriptBytes": 58626
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+      "rawSourceSha256": "717344d3f97937fb2daa93aa8a7ecf15c44d6be83b013656baa317231fb906d0",
+      "proofScriptSha256": "b3887750bfdb8321ff9e0a6c0229899118493a49b881837bc8b6dbf6c1cc2399",
+      "canonicalLeanSha256": "ba1ff8246190d20e6ff3a8cc5d4ca113efacb1864cf7e3bfb00aa61f30115c02",
+      "proofScriptBytes": 3042
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/PrintLean.lean",
+      "rawSourceSha256": "b039b4b5b91f43fa3653a75c8f861f734e9a2cafa74affcb6e032a4baad38c19",
+      "proofScriptSha256": "a93db969ad5c7e5f3a43b48507bdab72eda30adc91d882ae047042a57a4afe81",
+      "canonicalLeanSha256": "a7315d0f8141e44dcbf7c89954899fc9413358ffd53297d9ae9e76570761e6f3",
+      "proofScriptBytes": 21896
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+      "rawSourceSha256": "c9fa8c42789c1cc6b5b9611580cacfe0a63158eccbd552bce0f64c76326d24c7",
+      "proofScriptSha256": "e5ef3e13ce91df4c9ff7d2b29050aa76ab5e62da8e04ac04f531316435c8ce32",
+      "canonicalLeanSha256": "5bf1349880a7fdab86abd87c0dd5578e26f16c9975b0efb75b8ed7a06851fb10",
+      "proofScriptBytes": 24039
+    },
+    {
+      "path": "packages/syntax/src/Ps/Syntax/Translate.lean",
+      "rawSourceSha256": "c73ef5027b5108bc81b555fc4fcf2f0547e32a7a03aa8db0f136b155099a0c9c",
+      "proofScriptSha256": "0ec2e714edc02a69045114124d25e014d155c30f8d7644e1c30129355573120d",
+      "canonicalLeanSha256": "11cf2649af8e4756e102e6e47d934b4cb7990202bfe2cc8a1e1d097e4618ad98",
+      "proofScriptBytes": 1939
+    },
+    {
+      "path": "packages/bridge/src/Ps/Bridge/Json.lean",
+      "rawSourceSha256": "bea85555e39544b1768f660a72595447c8fda088b4eff1c0731a5b37da446e1e",
+      "proofScriptSha256": "b0cb3dd4daed37c892bbef88efd14aa23ce6e8f639ea8f25b86f09220e43cb4c",
+      "canonicalLeanSha256": "c2fd3668c97f768dbc7a4d9d4839de8bcecb59b2161de05b74fd2f8974d247b9",
+      "proofScriptBytes": 29228
+    },
+    {
+      "path": "packages/core/src/Ps/Core/Level.lean",
+      "rawSourceSha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4",
+      "proofScriptSha256": "da652d658d9e2560b9b2a297508ff4169129c04cfa88b5aa0393b31c935470fe",
+      "canonicalLeanSha256": "e33fd288bc3f8e6ee828fdff9c556a1424f143cd9e7a88302a0cc261e1a02b96",
+      "proofScriptBytes": 281
+    },
+    {
+      "path": "packages/core/src/Ps/Core/Expr.lean",
+      "rawSourceSha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6",
+      "proofScriptSha256": "636e9cd00ef2c3ca1aa5e2dae49ba5576fd4b8a6f15d66439649cd6670aa7783",
+      "canonicalLeanSha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6",
+      "proofScriptBytes": 740
+    },
+    {
+      "path": "packages/core/src/Ps/Core/Declaration.lean",
+      "rawSourceSha256": "1e08932d0251abc18ee8f3b1175fbbe5acd5a1d1db158204ba4dfa285609b3c6",
+      "proofScriptSha256": "336d770fcc3adaa486964c5fa652ced8073ff9ef7422521daf83a18dc81b0216",
+      "canonicalLeanSha256": "272039be5885678b552fb9264f3863bab45addab0f2dc81d5c9d95ede00324ab",
+      "proofScriptBytes": 1222
+    },
+    {
+      "path": "packages/core/src/Ps/Core/Abstract.lean",
+      "rawSourceSha256": "3f439e71312493714010cfe09feb9ecd14cfc7b5f611162a3ae4dfa5c5507095",
+      "proofScriptSha256": "3f79337b3bde47fd80ed2cd5afb796e414efc4843bab5af7f218a5abf070e479",
+      "canonicalLeanSha256": "bde82858e2abfb10f3ad1f565622d17dee0df44cfcbcd2689d88ec99e367d5f7",
+      "proofScriptBytes": 2304
+    },
+    {
+      "path": "packages/core/src/Ps/Core/Subst.lean",
+      "rawSourceSha256": "e1924d10d70f71fc191130ec45fa22e5866691a5422f59edb5897cd2cc52f38f",
+      "proofScriptSha256": "5f70d640f0e1e3b3c6fac200ede9c693d2414ae0b257f7239f212360f86a233a",
+      "canonicalLeanSha256": "40463547d0f4c6e4808924d9c12b888485112cae405639b11067a03955f86d0f",
+      "proofScriptBytes": 4666
+    },
+    {
+      "path": "packages/core/src/Ps/Core/Equality.lean",
+      "rawSourceSha256": "4e60e5eb112538fdc9021fca11cb879725b385c267937bb1b569c27189684226",
+      "proofScriptSha256": "236f21decc804baad9e94cdd52fd8ee6970e2eb4055706070ae0efd7ce478de9",
+      "canonicalLeanSha256": "c69ceef1f6dfd19e6af40215ca51d45a8d89b15fa3a12d2fa4b3925c08bed08d",
+      "proofScriptBytes": 5333
+    },
+    {
+      "path": "packages/foundation/src/Ps/Foundation/List.lean",
+      "rawSourceSha256": "0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680",
+      "proofScriptSha256": "4a3f579b2f5337a41857214813c62bbfdf74c9d990e6b34a2532bde064b88c38",
+      "canonicalLeanSha256": "b2c38e172e47e76e4e3b703fe81164374197082f0af18113f64740624db3f929",
+      "proofScriptBytes": 2425
+    },
+    {
+      "path": "packages/environment/src/Ps/Environment/Basic.lean",
+      "rawSourceSha256": "6290401a7cdb3111b0b4557532e6eabde1848d39608d1415659e631cf165493b",
+      "proofScriptSha256": "a699df71fe4c15ba2a2af356ddf4e846c7d8506ec2fe51ce942ec715687e88d1",
+      "canonicalLeanSha256": "8afd8ea4335f346111dbb20931921c904424b7c99e7b80ed91183c1dc9a036d7",
+      "proofScriptBytes": 9076
+    },
+    {
+      "path": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+      "rawSourceSha256": "fc8976ef9821753f1c575062c7fee0c2abc8cf28e422088691678f49fae7bbab",
+      "proofScriptSha256": "1d2202afaeab270514ba806de21fee5de756d6cfc7eb4efbdc905a32b8d7ae89",
+      "canonicalLeanSha256": "1f3e68df0bcc247277485511bae55f3e981d214e9e48228dd317ad4e26634699",
+      "proofScriptBytes": 42361
+    },
+    {
+      "path": "packages/core/src/Ps/Core/Builtin.lean",
+      "rawSourceSha256": "a5af06f7b4ee8b0e76a04b72df863c691382c45a830c49598ed691b2525c7e06",
+      "proofScriptSha256": "561ede24f6f56cabe9f8f389da810e986f59d52050a774d8f45325682f55d17f",
+      "canonicalLeanSha256": "1c59dbc89c51d91eccd8e5bd7a73c879d4bfbcf7b8c17128f585fc1310551504",
+      "proofScriptBytes": 4923
+    },
+    {
+      "path": "packages/environment/src/Ps/Environment/Prelude.lean",
+      "rawSourceSha256": "7335bd4df435c626ec3c6e32cd91472e0cce9b217cca42e3e961148445841146",
+      "proofScriptSha256": "0ef9ec60fc1a13903146734271307fea075c4b52426a00fd3e7127155cacab21",
+      "canonicalLeanSha256": "315572a51f276c4ccec9f2f395281a235cb4f72bd61ad4664fa24354bb44490f",
+      "proofScriptBytes": 22496
+    },
+    {
+      "path": "packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+      "rawSourceSha256": "02353953cc05213b346ecf5e27075ee52219f86d280d8b82e9b0f68de5fdc156",
+      "proofScriptSha256": "f9d00bcef28e893b4943078477829bd0c2fc3fdfd973de0e4b9ecab4ee219f49",
+      "canonicalLeanSha256": "c0da00615f67a84d587a2c734546b95ce5aeb35589faa3be29fb4bab3f253ab6",
+      "proofScriptBytes": 12554
+    },
+    {
+      "path": "packages/environment/src/Ps/Environment/SelfHostProd.lean",
+      "rawSourceSha256": "a064a50d684fb1fd5e0f3316b7cac3e3a363e22acf5c2a2bd2b7cde6fa0899ba",
+      "proofScriptSha256": "725306f3001867098f328bc1b669ea50d810233688ebd92191fa183a508c4757",
+      "canonicalLeanSha256": "f287b1bbf8efdfcde9622395337ebd43acfcc7a7091c41981e6d0849862fad99",
+      "proofScriptBytes": 3398
+    },
+    {
+      "path": "packages/environment/src/Ps/Environment/LocalContext.lean",
+      "rawSourceSha256": "06c5a03d73c26083ec313017120bb509df33e80e5c51d887ffca13942382bdb9",
+      "proofScriptSha256": "0b11fb657905f54f5b56e3465728061574744cd2f973a08d1cb760ca977ed5e1",
+      "canonicalLeanSha256": "0568a392280a9c8d00cd8e898614dcc7641e69447093806feea7a26e8b0f29b8",
+      "proofScriptBytes": 2711
+    },
+    {
+      "path": "packages/environment/src/Ps/Environment/Resolve.lean",
+      "rawSourceSha256": "b93898d7b5d8744ae0c78f319831c48a3117a061e421f2146869524843f1ae16",
+      "proofScriptSha256": "d19b66ca970fa7d207c8e3af9ccca68373c3e94f2079f65c482d1ff82bc11163",
+      "canonicalLeanSha256": "bc07ce077e295847f35df0cfe1abcc37a1de25173b56a2686dd57beb28375d9f",
+      "proofScriptBytes": 585
+    },
+    {
+      "path": "packages/core/src/Ps/Core/LevelSubst.lean",
+      "rawSourceSha256": "1393726ff7b45bb3adfcfb5e12ab79c3e344803e44777c9c67c4560af5373698",
+      "proofScriptSha256": "637b2d834fc583668b2425da3b6414a6d19329cb4c84bce6631a65f2a92f60d1",
+      "canonicalLeanSha256": "1838e7cc10001c2139fe9ebf8112e1944ab3d347626ccf47759637b3d27913d8",
+      "proofScriptBytes": 3307
+    },
+    {
+      "path": "packages/meta/src/Ps/Meta/LevelContext.lean",
+      "rawSourceSha256": "9d8cf3cd5bb840d1b2a979df7b784b2eea632964ac7882266ef72340420a7718",
+      "proofScriptSha256": "5fd5f3a9d8f164ac4b5aaedb44556e7677ea14fe857fb34c3eabf1002f8e9bbc",
+      "canonicalLeanSha256": "ba43df4ed68b7d838139bea21566ad10d603755f813afcf7abeb07538a44e4d0",
+      "proofScriptBytes": 7631
+    },
+    {
+      "path": "packages/meta/src/Ps/Meta/Context.lean",
+      "rawSourceSha256": "2121f70e32299107ffdd3a91e4d73943db6d2be3388a982d539e433bcbe690b9",
+      "proofScriptSha256": "24dcfdc6f0f52af42879e2da1453bfc281f8060c5ec17ec05f1d81104573ae14",
+      "canonicalLeanSha256": "3320641293f872660a54bad9b2ddc3cc075a565645b8cee5922e856baa525f34",
+      "proofScriptBytes": 8306
+    },
+    {
+      "path": "packages/meta/src/Ps/Meta/Reduce.lean",
+      "rawSourceSha256": "c3ae3055299a13d9ac409450c1682ae202a97ec6a7b6a4e0c12e4a384d2ca51e",
+      "proofScriptSha256": "0509a2d60fd94bc61bbfc66397e9e7f57dd8002ec92dc0f4265663cead391904",
+      "canonicalLeanSha256": "bf249afdfd15215bc92ce481985b1207b17b3ab2c8cdaffc20d29df2a5c1705d",
+      "proofScriptBytes": 5057
+    },
+    {
+      "path": "packages/meta/src/Ps/Meta/Infer.lean",
+      "rawSourceSha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
+      "proofScriptSha256": "80f6fc3902245256fa7237d28ced0d5b736b65cbb5c3b149917a25679846002e",
+      "canonicalLeanSha256": "a5aafc37368eee0389cc7fc76dbab9d7dee314be820076ad90fb2dbc3e85eea4",
+      "proofScriptBytes": 14928
+    },
+    {
+      "path": "packages/environment/src/Ps/Environment/Instances.lean",
+      "rawSourceSha256": "63a0fabc0e88e90b647074379e62d4ff2ebd7252676e3703ed06a9cfaefad2bc",
+      "proofScriptSha256": "3d1a5106b2cb7e2e8247e7d3890265693e6fea27cd55b3af8b63c09e9b4ab21b",
+      "canonicalLeanSha256": "f87c59558695ec81fe2ebdde0a1c34003d3582e5fb06f5e3e4c33610178ca7ab",
+      "proofScriptBytes": 1520
+    },
+    {
+      "path": "packages/meta/src/Ps/Meta/Unify.lean",
+      "rawSourceSha256": "79562973eaad71b335f2c6104f1beea911ed1056618bc9adba9541a3a7238396",
+      "proofScriptSha256": "92e89a4fc8c6395f97a0d46b9468ddc341f9f9635387a0eedd83fffc80d319f0",
+      "canonicalLeanSha256": "159330134ff8f0f62d3d106a328198446b4bd25ab1b90876fd19728dc380efdd",
+      "proofScriptBytes": 7851
+    },
+    {
+      "path": "packages/meta/src/Ps/Meta/SynthInstance.lean",
+      "rawSourceSha256": "ea73668c788e16d4fb65b41b1b97ae58dc585027234d5185514e8194baf166b6",
+      "proofScriptSha256": "dd4f37013ad0ecd35e92ba46909b10d0aa57ad7c94ed785ec6dc0286c8c06601",
+      "canonicalLeanSha256": "bd4446ccd533ce53713f4bca3dc6b91d73c03d49032670ba7874d7977e123e57",
+      "proofScriptBytes": 10069
+    },
+    {
+      "path": "packages/elab/src/Ps/Elab/Context.lean",
+      "rawSourceSha256": "0b17fd57d07b25b60ed656ec290903ad2f8a829c9107900805707ef805d06e27",
+      "proofScriptSha256": "326a5fd71f260c0b4e4c206322f72fb54adb9eb02e4f38ce4f7fe7bd01f03acf",
+      "canonicalLeanSha256": "95eea4b9f3d9770b9dc0c5a4da9687b26731deb2f26bd34ea6d7422e99fc7da1",
+      "proofScriptBytes": 2471
+    },
+    {
+      "path": "packages/elab/src/Ps/Elab/Literal.lean",
+      "rawSourceSha256": "0369cd23303d3133b92b40aaf7ece65df86e864596adb85556d994e846258b71",
+      "proofScriptSha256": "918fa50a65bb0157a34390c826f65a8fb4d0cf5a60b45dc6acae643efa14184a",
+      "canonicalLeanSha256": "eb603722216f16fef6857bcd94ff38a270696a7a974298fecfbfbb46e7ff3dce",
+      "proofScriptBytes": 8489
+    },
+    {
+      "path": "packages/elab/src/Ps/Elab/Term.lean",
+      "rawSourceSha256": "c6b1c1d9c444a34824a25f7e04df4d5ffc6b1466d7ccbe11a5b900204db93a6a",
+      "proofScriptSha256": "bea7406d7ba7c9ef3d869a350949e48a1126905c3a5d26d678cdedbcd51aef9c",
+      "canonicalLeanSha256": "c674c58b88068d2b5b64c0474a91639ad417316883321f5fb404d7eb6399230f",
+      "proofScriptBytes": 82969
+    },
+    {
+      "path": "packages/elab/src/Ps/Elab/Recursion.lean",
+      "rawSourceSha256": "e93aed0fe805385ff6dfcaf6ac190894254a34746f4c60002e33fbb561f80efe",
+      "proofScriptSha256": "2d4df42ed61e8169eab8e525c78b348eb641d25cc664d056bcf85a57a0c4ef00",
+      "canonicalLeanSha256": "2b09787b6eb670d84246f4260f24794eb6b1c17d2ca30c28d076b27ba099082f",
+      "proofScriptBytes": 30201
+    },
+    {
+      "path": "packages/elab/src/Ps/Elab/Declaration.lean",
+      "rawSourceSha256": "600da64269038375ab62fdc0d0fab572bfa028b60bc6caec730f5dff1dd3f1bf",
+      "proofScriptSha256": "49ac0a1877bda649e3673dc386ae6fbaf55797e8ed5a456a8c1950583b674b10",
+      "canonicalLeanSha256": "9452567d417628647190a4e3ace1d1e8a5dca0d8bd26f2ad0547fab2e2f2d303",
+      "proofScriptBytes": 44295
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "rawSourceSha256": "01927c6c6bb88c4a77bd5fb623e9426eb3edb4ea1b0e62447915afe27da5b70a",
+      "proofScriptSha256": "30bead0e91e0bf47eab0f0614a05e1bd34153fb1442b3714ce74f9d5f118c4b0",
+      "canonicalLeanSha256": "f1fd9a3dbeaf5724772f231c773f3b225282878e1bebd4dc32748ac9c4879c6a",
+      "proofScriptBytes": 5154
+    },
+    {
+      "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+      "rawSourceSha256": "3cfcea753582afd703f7f48c6c247f708fe2d197dedffcd708eb128d7f177c5d",
+      "proofScriptSha256": "32d65c6f4b459078c0e8523c00f49e9951e928fd99ec9524224a35d73506668c",
+      "canonicalLeanSha256": "91606b042ed1cfe42c333750210ca2cd12bf0244cca19f242002a68c9c70741a",
+      "proofScriptBytes": 26034
+    },
+    {
+      "path": "packages/erasure/src/Ps/Erasure/Expr.lean",
+      "rawSourceSha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15",
+      "proofScriptSha256": "967d79419fd1b181ed804c840eff58271679ef1474c5f17575c76cc93b5fb3e8",
+      "canonicalLeanSha256": "2b00fc15d989763e7226fa7526bd5981f40accd90b269db2bb68a75d761d1309",
+      "proofScriptBytes": 104708
+    },
+    {
+      "path": "packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "rawSourceSha256": "06f584ff2d4bae2c16d70e899d255a16155df3cf774830ebc99ecd24ac574af6",
+      "proofScriptSha256": "1f2d2afde09b2ca9e94a8dd35dc5ecc4a210f68d061ed667a2943fc2fe2bfc4e",
+      "canonicalLeanSha256": "8544e566992d740bf05128e64e1f62fcd328db5337b916062493939536765fa2",
+      "proofScriptBytes": 13568
+    },
+    {
+      "path": "packages/erasure/src/Ps/Erasure/Structure.lean",
+      "rawSourceSha256": "6de88d9b5e41e6e87fd03e55adfe8e218d8c55ba7d9086716c1c75cd6e9212af",
+      "proofScriptSha256": "0cc60dee5737d2b00fe16f0222bda2124f4f402c06bf4e7f1a9ae76e90a57f08",
+      "canonicalLeanSha256": "840249922c71371c9ba65e26983ec559ce0b45ee9434b18224f8a780e16e311b",
+      "proofScriptBytes": 4340
+    },
+    {
+      "path": "packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "rawSourceSha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b",
+      "proofScriptSha256": "131a7e03c9477dd39667333f4f4e8976a5895218987c89347876a891f5f22b85",
+      "canonicalLeanSha256": "8d16d55db6ad19e12c0ba1b96ac0b40b9c5438c8c5ad41ec46207d493c9f907e",
+      "proofScriptBytes": 6397
+    },
+    {
+      "path": "packages/erasure/src/Ps/Erasure/Definition.lean",
+      "rawSourceSha256": "a55cb381a686ab9081587380793b1b3d8fe485c86b88770fbce4a3e2250516a7",
+      "proofScriptSha256": "983899adf45d353e3c5b71686832fd02e26965a9015696755d881c58241ed47f",
+      "canonicalLeanSha256": "8c017066ff9da6370e1e9bbd65772f0bd45bb77b8d8369e65ddf53fbd35e2c6c",
+      "proofScriptBytes": 16859
+    },
+    {
+      "path": "packages/compiler/src/Ps/Compiler/Api.lean",
+      "rawSourceSha256": "5d28f057f52ea735f48d3dd6067c582dcb7fe112d4b7fb50ca1c19b204c6e53f",
+      "proofScriptSha256": "8375f7e9db202f44c3b12854d719ac82f80bc3c3f57079b6c153d4c3fc76e4da",
+      "canonicalLeanSha256": "b816d309202c737c353965a255fbc326ad6991637ef6b0b9734f1d786bc08e84",
+      "proofScriptBytes": 10980
+    },
+    {
+      "path": "packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "rawSourceSha256": "c231a737470c0d6ef2451f642089e22cebea97da55527500beff82bb610f99cf",
+      "proofScriptSha256": "4b658928821ff9464689d8a538fa3c901167decc49925a597f582f5137bdc964",
+      "canonicalLeanSha256": "b4448d1d7046846f2f22753a1c1a01d5c09497bdf0deaf199ca8f711c86f7f3b",
+      "proofScriptBytes": 4140
+    },
+    {
+      "path": "packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "rawSourceSha256": "b488587a271702fe336ccacc8e5bda976f835b59be9b0419e697850cead9e46e",
+      "proofScriptSha256": "0e573a4e77717875157c3de8e09dc38004f3414ef42852d34dbee54b9be49b97",
+      "canonicalLeanSha256": "4a134efa5868284c4d57979793d2c2cd07c7fa22565fb7683daf07502bbb4f6a",
+      "proofScriptBytes": 39639
+    },
+    {
+      "path": "packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "rawSourceSha256": "efbf0a1365f27da7d1fd05a67e21e50b8d8aaf852d0f22132c1ff6ad518331e3",
+      "proofScriptSha256": "2ad1c89bc3abacab9f12b62c298988fdca77e64594144cf4e225d4472e5fc8f1",
+      "canonicalLeanSha256": "80bd0af5d1431415f0d07cb44aa6c506b9a081313e5da294adb60bb7a3d6a58f",
+      "proofScriptBytes": 39384
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+      "rawSourceSha256": "3ccce22596959fa12d084bb25279c686a4d534ec627a2067c4c9da13e29f9cad",
+      "proofScriptSha256": "04922aaa3a8bdff2a4a701aa7aa343f2c62f902ffd1ad69e09ff1345fd3b2b06",
+      "canonicalLeanSha256": "b3affafbb4943cb65f65137fef0173ec197f7107127e03196da787d5162df9b8",
+      "proofScriptBytes": 22647
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+      "rawSourceSha256": "50c24e57441c028ca0768fac83c966cb5d8b534a68f2f55ca8384983b32fae7d",
+      "proofScriptSha256": "f756d396c77a7dd82f64a58e99cb67a448e4d600e2eca9525f0188a67368abb5",
+      "canonicalLeanSha256": "d348e33d83021995b488bf39b3f3e5b690a90157e056ceb15b1ef337e6e84412",
+      "proofScriptBytes": 15450
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "rawSourceSha256": "22eac288f3c48d57a5856e35ec9bcd072cde5fc1fabd674703f5a20bd02e5bef",
+      "proofScriptSha256": "a40bb64cf2f3eb9f083687b578ecaa3f386bd5f9827c93ef8a2099d25e00d692",
+      "canonicalLeanSha256": "8ae2ae1586a00244d39c996fc46f99147febc604f640ddb2004cb8b8d7b4280c",
+      "proofScriptBytes": 45451
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+      "rawSourceSha256": "c268a4095bf4b98491c4fbc2d3ed43fb57a47ee99cda3cff802115f11b6c00c1",
+      "proofScriptSha256": "3e27ed9004fa996852867db079c9d014c313fbd6fc8ca827ad0dcd401e066a28",
+      "canonicalLeanSha256": "b6a64a2462ebfcbb4e3dacfc3d8df1923d672de200882ce4f65b8fd549e1cf62",
+      "proofScriptBytes": 2281
+    },
+    {
+      "path": "packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+      "rawSourceSha256": "87a9d0a89871644a1a3cf4fa3629d7326077b227e49d0c8f0777c4379f314bd8",
+      "proofScriptSha256": "8899d7c6438656e33fddf5d3e11d417255e0029f472a4fc24debfe4542977c1d",
+      "canonicalLeanSha256": "d064cf4fdf2d5ea24bdcff0b8955d0f43686fa97cf2e658d29bd332926b1ebef",
+      "proofScriptBytes": 2103
+    },
+    {
+      "path": "packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "rawSourceSha256": "3ad94c5c6a57819f7c744591a074482e00bb5309b931d6e87356adc191552843",
+      "proofScriptSha256": "4737aae21172e4186254cd450fb527c17758809aae1cf7542dfcb67982e7510b",
+      "canonicalLeanSha256": "162ffd3063b2284ce802ac6f2a1febfb1e59b9c499c5ca8c054c7cea856cf771",
+      "proofScriptBytes": 29714
+    },
+    {
+      "path": "packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+      "rawSourceSha256": "36387a384b31a22a3bcbeb3766a1c725c8c4afac4964b76f4d1d51a234cc3abc",
+      "proofScriptSha256": "298daa840f8d86ed83c6b600a797daa8af3d726f7be7efa75ad7549b18eac10c",
+      "canonicalLeanSha256": "2c7a7d3676317d28baf2f9c921b7b07058c624411abca66c88159133ef309008",
+      "proofScriptBytes": 30042
+    },
+    {
+      "path": "packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "rawSourceSha256": "4c35232a7b70a4addb60111300d2266a410759d63c6eb7ca825ab24cafc24e29",
+      "proofScriptSha256": "bf880b3219d8619f1b1c3c005af513090fdd6ade50d9247698e09a00bfc24a99",
+      "canonicalLeanSha256": "3f672714e6658357671bfbd161f9519946c95119e1b98fc51ebfe8cfa343a26c",
+      "proofScriptBytes": 2343
+    },
+    {
+      "path": "packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+      "rawSourceSha256": "853731d4c15e6cf894548a841186ae1dfe6bc67ca28141c2b0b3b71336719db7",
+      "proofScriptSha256": "4a056db74d9c1430c41fb9dd215cd81665faf28ef2c03b30e31fdf893a15077e",
+      "canonicalLeanSha256": "985a0c9e6c8fffb17900abc1c05d5b1d248b7fd5f82a77caaae29dfd300c98bc",
+      "proofScriptBytes": 1344
+    },
+    {
+      "path": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+      "rawSourceSha256": "1ff1e99ef3f2a53faadc995e27515721800e1ec8739003341287a072316f4ba9",
+      "proofScriptSha256": "c108b7716fbbf275c2202b11ac58d903bb162604d75e3790ee92a22bdea97202",
+      "canonicalLeanSha256": "c108b7716fbbf275c2202b11ac58d903bb162604d75e3790ee92a22bdea97202",
+      "proofScriptBytes": 29
+    }
+  ],
+  "fullStandardConformance": false,
+  "fullPscvConformance": false,
+  "kernelChecked": false
+}

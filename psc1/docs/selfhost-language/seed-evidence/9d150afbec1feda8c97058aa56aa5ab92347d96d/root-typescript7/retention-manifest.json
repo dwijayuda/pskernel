@@ -1,0 +1,804 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-typescript7-final-documentation-and-evidence",
+  "repository": "dwijayuda/pskernel",
+  "intendedBranch": "psc0/typescript-7-only-v1",
+  "guardSourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+  "guardSourceTree": "c97468df9855bb7379b49e0771ed5e373e39c8b2",
+  "checkedPsc0Subtree": {
+    "gitBlob": "68a2eb52106d39ef87a60d0a0d7a6229b67712d4",
+    "recursive": true,
+    "truncated": false,
+    "entries": 1350
+  },
+  "qualifiedSourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+  "currentParentNote": "Root reports subsequent commit8d922c3f47f59a8d7285bfdf998791f042b483b9 changes only psc0/AI_WORK_STATE.md. Recheck these per-file guards at publication; this manifest does not alter refs.",
+  "rows": [
+    {
+      "path": "docs/TYPESCRIPT7.md",
+      "blob": "5f36452b237599396b54365deb356cbb8b90b14a",
+      "sha256": "c44dd51cdc43d971075a8702c1f8da3554770c88e4ce4168c5a57dfdd859743a",
+      "bytes": 11528,
+      "evidenceKind": "documentation",
+      "baseBlob": "d8b0e3c8b4c12d087d3c01211cceee419ca61344",
+      "operation": "update"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/package-lock.json",
+      "blob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/installed-typescript-package.json",
+      "blob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/installed-profile.json",
+      "blob": "68ab7c2309f8722988d71d05f05743693f794851",
+      "sha256": "630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe",
+      "bytes": 4644,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/qualification.json",
+      "blob": "31ec99a5260603659e38ad24c33028c510b46e93",
+      "sha256": "a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a",
+      "bytes": 3485,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/root-typescript7-qualification.json",
+      "blob": "31ec99a5260603659e38ad24c33028c510b46e93",
+      "sha256": "a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a",
+      "bytes": 3485,
+      "evidenceKind": "exact actual passing qualification receipt",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/evidence-index.json",
+      "blob": "c77c051646afea76427cb175cb14f85c80b0a8cd",
+      "sha256": "209cd0b9a0bce52405579a1f7c2dc9878b8beb4f890a2bda15e6dd4dcf6a82b4",
+      "bytes": 820,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/evidence-logs/root-typescript7-qualification.log",
+      "blob": "f59f0590c714205f93826c9512c1c0c438a41418",
+      "sha256": "5836caa0146f2002bec6954ce285ab7789e7ac1758ede4da80248448cdc79e86",
+      "bytes": 84888,
+      "evidenceKind": "exact decoded primary GitHub job log",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/run.json",
+      "blob": "493c0273d0e2483626adabb148c5b8e1c8aa8fd4",
+      "sha256": "dc969060c34f967a0d4038964aefb3079c580b30c20fe686328d7cb02bc03c87",
+      "bytes": 12759,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/jobs.json",
+      "blob": "42fea60aa87b64b9ae61b811b24d576f24669e6c",
+      "sha256": "9d6429d2736f698edb23c0629706d41ec5cc1fa5adc32cd121340205883d73d7",
+      "bytes": 2310,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/artifacts.json",
+      "blob": "4c6aa3041a9d2378a1280960fa90f07dd92ba77e",
+      "sha256": "af0f484579b8c89526c5b8d6f5542eed25222a7530c6f059e4a51a8e179494cb",
+      "bytes": 773,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/source-inheritance.json",
+      "blob": "f36f5676d05e9f502156ff931e02aaba0cf7c36a",
+      "sha256": "0b10684d8b69425e171b80ca171c8ecfb3b585e233d0887f7aae332021530641",
+      "bytes": 59231,
+      "evidenceKind": "exact GitHub compare API response across all corrective commits",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/primary-api-and-source-evidence.json",
+      "blob": "45b848ea37dacd4f9aba554b8d90fd794c7cfdb6",
+      "sha256": "c99b2d6ac30b098c5416b64488d304659a0bb87f58fcfde6726cb3319b94c077",
+      "bytes": 105556,
+      "evidenceKind": "retained review/provenance JSON",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/authenticated-report.json",
+      "blob": "83977c047ba4a382d0512ec9294ba1bbcf30d29e",
+      "sha256": "9dee40129b4cdf99d6fcc65d563a447842a78dbd1cbd8cb1c41d16504120e84e",
+      "bytes": 112657,
+      "evidenceKind": "retained review/provenance JSON",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/review-index.json",
+      "blob": "87dc087ead86d551a6b2e48f0594dd858e7b1b83",
+      "sha256": "ae647cb439505f45b59842b0a04a710eb6d4742266c686204d5ac6d5191370b1",
+      "bytes": 5665,
+      "evidenceKind": "retained review/provenance JSON",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/prior-attempts-index.json",
+      "blob": "6af0fe016b904d74635bf3a12ceed5b8621d376a",
+      "sha256": "cef18d42eec3b71a599dfb876acc6416c750b315d56d7e6cde7e63ecb63c8346",
+      "bytes": 16602,
+      "evidenceKind": "retained review/provenance JSON",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/evidence-reader-source.txt",
+      "blob": "fe3478ead5638f8647e67a5ef2a2f2de4e2eb896",
+      "sha256": "b10d16ea5157f93a8e0fc7a484aab2a8f80b3e2046a752240415705ad67f6d6a",
+      "bytes": 20968,
+      "evidenceKind": "archived pure-data reader source text; not an active executable",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/qualification.log",
+      "blob": "e024d2405e77359b8ab16ef592124b6e1e44bd18",
+      "sha256": "7aec216ae8c07352d91c034c9c7263af6a3a8ab2e6bed464b3168f98c5a8e6cc",
+      "bytes": 77919,
+      "evidenceKind": "exact decoded primary GitHub job log",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/package-lock.json",
+      "blob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/installed-typescript-package.json",
+      "blob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/installed-profile.json",
+      "blob": "1f7d0ec7b84b25aae111de72821b6e76e7d51ee6",
+      "sha256": "78b015ca6df3fcd12d16023269c253f82632a2ffea3bd609693d5a54e5fdbdc7",
+      "bytes": 4643,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/qualification.json",
+      "blob": "f9d9651f016ff79f7c6c358415b47c7b9ce61aac",
+      "sha256": "819a0523eacb1b02c23fbeab288a71329948f8e6810e4c06eea3f0cd33a3b1f9",
+      "bytes": 2396,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/evidence-index.json",
+      "blob": "9020b7825b9e735e601973e3ad9dea2b4adb3431",
+      "sha256": "8becd1cbf52289487b3d1eb61afbbacad315493d7cc09f3cd7376c32aedde4c9",
+      "bytes": 820,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/run.json",
+      "blob": "44878bbd946cefc50f1d9370fd52e3f5b2394ea5",
+      "sha256": "d89f12bbc5d1748e101271477e039c10f11c5ce07999ee5b994d236fa74003c8",
+      "bytes": 12492,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/jobs.json",
+      "blob": "a86c24e239884422b99432882f7bfb414c847855",
+      "sha256": "c2ea5bf5e4be40a55779aa0726a994397efa92d9f2c1ca72651f1d2153d379e1",
+      "bytes": 2310,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/artifacts.json",
+      "blob": "60da488d826b0d5d891a4f582ed894c4c3a1abc0",
+      "sha256": "a044f15a5d82bf529739a6cd989f208e52e09a1ba88f3d72b5075c282060fc62",
+      "bytes": 773,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/authenticated-failure-report.json",
+      "blob": "5812e398cce8f8c32f0661d79d71894c768b8b5e",
+      "sha256": "935306e6ecf991cffdf4a9151694d52e0f342226c362bf152b103303fe7ec850",
+      "bytes": 108365,
+      "evidenceKind": "pure-data exact-file authentication result; qualification remains false",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/qualification.log",
+      "blob": "2304e3d1cdb7040f851196e7a7b3e7f99411755a",
+      "sha256": "2baa34f1d9e6f13dd367ff17686c5258bac2ba005a6a1cc97028e0136e280ebd",
+      "bytes": 84632,
+      "evidenceKind": "exact decoded primary GitHub job log",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/package-lock.json",
+      "blob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/installed-typescript-package.json",
+      "blob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/installed-profile.json",
+      "blob": "6a445dc2e3eca77042635ab351cb66b8daa670c6",
+      "sha256": "5cff347f0380141ce6947775dffbc0776036e69c9a46050df06c02be883700c4",
+      "bytes": 4644,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/qualification.json",
+      "blob": "64ebc858d8821f98cd8d544e648c1cce517120fe",
+      "sha256": "dfaae28f2b7fc8dd296a6d0becc64ede620bb8c298ae59afe0279d5ccbb661d3",
+      "bytes": 2804,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/evidence-index.json",
+      "blob": "f721e376291000315f3d895de7c5a3e664e8b9da",
+      "sha256": "1d6cdd5aebaef8b18a312f3df69771e652a09d2c46f630e21c66ebd6b34b397b",
+      "bytes": 820,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/run.json",
+      "blob": "89027ae432a28ddfe39d4f156e77882e88c3ce8b",
+      "sha256": "aadf12cebc45fa190175febd68fd4b25972c4ca1032f435c683e7fb4cd4166ca",
+      "bytes": 12602,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/jobs.json",
+      "blob": "8cc32dce8d77c6b460e24783138312d1090b48fa",
+      "sha256": "6bdf37c59afa2d66e80ab18ddf85c8366936593a73b9c22189cb7a3a59fd3475",
+      "bytes": 2310,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/artifacts.json",
+      "blob": "19e7b397647097eb523e1744947f9e54cae6da2c",
+      "sha256": "0bbee649e42355efe5792edd356e7d0979c5469c4ba6cfaf27757386a443d705",
+      "bytes": 773,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/authenticated-failure-report.json",
+      "blob": "8180ed4f3fde8e1a48276b8cb9f3f4367afb7432",
+      "sha256": "4834e97fa6304f74f6dd6b33416bde4a9ef648069367e18e8ae9ccae0dba7581",
+      "bytes": 110353,
+      "evidenceKind": "pure-data exact-file authentication result; qualification remains false",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/qualification.log",
+      "blob": "6ae6a31caf429b3063e77c99916aa6149b53a317",
+      "sha256": "f4a2faa5f90aed700e7bb4ec6445c9514a591532197b29201f1fee631692622b",
+      "bytes": 85951,
+      "evidenceKind": "exact decoded primary GitHub job log",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/package-lock.json",
+      "blob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/installed-typescript-package.json",
+      "blob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/installed-profile.json",
+      "blob": "a33442fa942dbc64d3a1fcc80344715c93f28a57",
+      "sha256": "6704cdcaa52d8601a25db687fda00805ad89b4012c9dc8a7fc7aad3bb8d0a5bd",
+      "bytes": 4644,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/qualification.json",
+      "blob": "6156a43d4f05e1071c2046b75ac84f702d3a6a30",
+      "sha256": "6eee4c15020b32f724cf150f847f5671ee0ee8975b1d752122a4495a851b47c3",
+      "bytes": 3574,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/evidence-index.json",
+      "blob": "8c31bb76e540a4d1b26ec88a50e57c6c1f71b4be",
+      "sha256": "8217fa5af55fc78f447aea60972fffc51c6957ba6663849a6543487a27f24f66",
+      "bytes": 820,
+      "evidenceKind": "exact actual UTF-8 artifact file",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/run.json",
+      "blob": "edb02d46bebe5197614d228bcda09c58ca0a1fe8",
+      "sha256": "64fb3e73f4d86d86fb670f4034df795d56cff86718e4ebabff71067439e2a8ff",
+      "bytes": 12577,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/jobs.json",
+      "blob": "b022e9d1e46fa6a8920000c1e5ec582361acb69e",
+      "sha256": "84b982776a4756f1ece964b613a1f7d3412ee2f13c5cab986181870d226187d2",
+      "bytes": 2310,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/artifacts.json",
+      "blob": "8a6e13e2abc95c6ddbde1c7f9bda45af9e9cb25b",
+      "sha256": "e57f49dab036ba91cb205bb935d743f548e1262e39e9905fe905dd23b736716a",
+      "bytes": 773,
+      "evidenceKind": "exact GitHub API response JSON text",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/authenticated-failure-report.json",
+      "blob": "c916480451e5b06500ce4dc807cb3c059152609b",
+      "sha256": "658e83af2c974c2ba8c82fbefb09d44aefc7ea894dc0f75f297a035e4914949d",
+      "bytes": 112948,
+      "evidenceKind": "pure-data exact-file authentication result; qualification remains false",
+      "baseBlob": null,
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/root-typescript7-evidence.json",
+      "blob": "d3fff5466d2f6775959aa8510fd192eb29152398",
+      "sha256": "4e934e28621833e7e7fd484153d13a19d6f70a01809706157379f4530c0e2fdf",
+      "bytes": 70251,
+      "evidenceKind": "final root qualification provenance and immutable failed-attempt history",
+      "baseBlob": null,
+      "operation": "add"
+    }
+  ],
+  "changes": [
+    {
+      "path": "docs/TYPESCRIPT7.md",
+      "baseBlob": "d8b0e3c8b4c12d087d3c01211cceee419ca61344",
+      "newBlob": "5f36452b237599396b54365deb356cbb8b90b14a",
+      "operation": "update"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/package-lock.json",
+      "baseBlob": null,
+      "newBlob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/installed-typescript-package.json",
+      "baseBlob": null,
+      "newBlob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/installed-profile.json",
+      "baseBlob": null,
+      "newBlob": "68ab7c2309f8722988d71d05f05743693f794851",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/qualification.json",
+      "baseBlob": null,
+      "newBlob": "31ec99a5260603659e38ad24c33028c510b46e93",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/root-typescript7-qualification.json",
+      "baseBlob": null,
+      "newBlob": "31ec99a5260603659e38ad24c33028c510b46e93",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/evidence-index.json",
+      "baseBlob": null,
+      "newBlob": "c77c051646afea76427cb175cb14f85c80b0a8cd",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/evidence-logs/root-typescript7-qualification.log",
+      "baseBlob": null,
+      "newBlob": "f59f0590c714205f93826c9512c1c0c438a41418",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/run.json",
+      "baseBlob": null,
+      "newBlob": "493c0273d0e2483626adabb148c5b8e1c8aa8fd4",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/jobs.json",
+      "baseBlob": null,
+      "newBlob": "42fea60aa87b64b9ae61b811b24d576f24669e6c",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/artifacts.json",
+      "baseBlob": null,
+      "newBlob": "4c6aa3041a9d2378a1280960fa90f07dd92ba77e",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/source-inheritance.json",
+      "baseBlob": null,
+      "newBlob": "f36f5676d05e9f502156ff931e02aaba0cf7c36a",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/primary-api-and-source-evidence.json",
+      "baseBlob": null,
+      "newBlob": "45b848ea37dacd4f9aba554b8d90fd794c7cfdb6",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/authenticated-report.json",
+      "baseBlob": null,
+      "newBlob": "83977c047ba4a382d0512ec9294ba1bbcf30d29e",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/review-index.json",
+      "baseBlob": null,
+      "newBlob": "87dc087ead86d551a6b2e48f0594dd858e7b1b83",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/prior-attempts-index.json",
+      "baseBlob": null,
+      "newBlob": "6af0fe016b904d74635bf3a12ceed5b8621d376a",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/evidence-reader-source.txt",
+      "baseBlob": null,
+      "newBlob": "fe3478ead5638f8647e67a5ef2a2f2de4e2eb896",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/qualification.log",
+      "baseBlob": null,
+      "newBlob": "e024d2405e77359b8ab16ef592124b6e1e44bd18",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/package-lock.json",
+      "baseBlob": null,
+      "newBlob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/installed-typescript-package.json",
+      "baseBlob": null,
+      "newBlob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/installed-profile.json",
+      "baseBlob": null,
+      "newBlob": "1f7d0ec7b84b25aae111de72821b6e76e7d51ee6",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/qualification.json",
+      "baseBlob": null,
+      "newBlob": "f9d9651f016ff79f7c6c358415b47c7b9ce61aac",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/evidence-index.json",
+      "baseBlob": null,
+      "newBlob": "9020b7825b9e735e601973e3ad9dea2b4adb3431",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/run.json",
+      "baseBlob": null,
+      "newBlob": "44878bbd946cefc50f1d9370fd52e3f5b2394ea5",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/jobs.json",
+      "baseBlob": null,
+      "newBlob": "a86c24e239884422b99432882f7bfb414c847855",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/artifacts.json",
+      "baseBlob": null,
+      "newBlob": "60da488d826b0d5d891a4f582ed894c4c3a1abc0",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/1-a02f03b97bb3385b66ad670dabf7f13d334fc79f/authenticated-failure-report.json",
+      "baseBlob": null,
+      "newBlob": "5812e398cce8f8c32f0661d79d71894c768b8b5e",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/qualification.log",
+      "baseBlob": null,
+      "newBlob": "2304e3d1cdb7040f851196e7a7b3e7f99411755a",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/package-lock.json",
+      "baseBlob": null,
+      "newBlob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/installed-typescript-package.json",
+      "baseBlob": null,
+      "newBlob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/installed-profile.json",
+      "baseBlob": null,
+      "newBlob": "6a445dc2e3eca77042635ab351cb66b8daa670c6",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/qualification.json",
+      "baseBlob": null,
+      "newBlob": "64ebc858d8821f98cd8d544e648c1cce517120fe",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/evidence-index.json",
+      "baseBlob": null,
+      "newBlob": "f721e376291000315f3d895de7c5a3e664e8b9da",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/run.json",
+      "baseBlob": null,
+      "newBlob": "89027ae432a28ddfe39d4f156e77882e88c3ce8b",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/jobs.json",
+      "baseBlob": null,
+      "newBlob": "8cc32dce8d77c6b460e24783138312d1090b48fa",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/artifacts.json",
+      "baseBlob": null,
+      "newBlob": "19e7b397647097eb523e1744947f9e54cae6da2c",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/2-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab/authenticated-failure-report.json",
+      "baseBlob": null,
+      "newBlob": "8180ed4f3fde8e1a48276b8cb9f3f4367afb7432",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/qualification.log",
+      "baseBlob": null,
+      "newBlob": "6ae6a31caf429b3063e77c99916aa6149b53a317",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/package-lock.json",
+      "baseBlob": null,
+      "newBlob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/installed-typescript-package.json",
+      "baseBlob": null,
+      "newBlob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/installed-profile.json",
+      "baseBlob": null,
+      "newBlob": "a33442fa942dbc64d3a1fcc80344715c93f28a57",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/qualification.json",
+      "baseBlob": null,
+      "newBlob": "6156a43d4f05e1071c2046b75ac84f702d3a6a30",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/evidence-index.json",
+      "baseBlob": null,
+      "newBlob": "8c31bb76e540a4d1b26ec88a50e57c6c1f71b4be",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/run.json",
+      "baseBlob": null,
+      "newBlob": "edb02d46bebe5197614d228bcda09c58ca0a1fe8",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/jobs.json",
+      "baseBlob": null,
+      "newBlob": "b022e9d1e46fa6a8920000c1e5ec582361acb69e",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/artifacts.json",
+      "baseBlob": null,
+      "newBlob": "8a6e13e2abc95c6ddbde1c7f9bda45af9e9cb25b",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/attempts/3-5d3cbc82cb8759b909d1a957d6a22d542509d8c5/authenticated-failure-report.json",
+      "baseBlob": null,
+      "newBlob": "c916480451e5b06500ce4dc807cb3c059152609b",
+      "operation": "add"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/root-typescript7-evidence.json",
+      "baseBlob": null,
+      "newBlob": "d3fff5466d2f6775959aa8510fd192eb29152398",
+      "operation": "add"
+    }
+  ],
+  "fileCount": 48,
+  "existingFileUpdates": 1,
+  "newEvidenceFiles": 47,
+  "documentation": {
+    "path": "docs/TYPESCRIPT7.md",
+    "baseBlob": "d8b0e3c8b4c12d087d3c01211cceee419ca61344",
+    "newBlob": "5f36452b237599396b54365deb356cbb8b90b14a",
+    "edits": [
+      {
+        "oldText": "The root workspace is separate from the PSC0 self-hosted compiler. PSC0's selected seed, bounded source language and current qualification status are recorded in [PSC0 CURRENT](../psc0/docs/selfhost-language/CURRENT.md). A successful root compiler gate does not qualify or promote a PSC0 seed.\n",
+        "newText": "The root workspace is separate from the PSC0 self-hosted compiler. PSC0's selected seed, bounded source language and current qualification status are recorded in [PSC0 CURRENT](../psc0/docs/selfhost-language/CURRENT.md). A successful root compiler gate does not qualify or promote a PSC0 seed.\n\n## Qualified root checkpoint\n\nThe root TypeScript 7 migration passed on **9 October 2026** at source [`9d150afbec1feda8c97058aa56aa5ab92347d96d`](https://github.com/dwijayuda/pskernel/commit/9d150afbec1feda8c97058aa56aa5ab92347d96d), on branch `psc0/typescript-7-only-v1`. [Workflow run 37951869293](https://github.com/dwijayuda/pskernel/actions/runs/37951869293), job `113892421469`, completed successfully. The evidence is bound to that exact source revision.\n\nThe final run authenticated the actual installed **TypeScript 7.0.2** launcher and **Node v22.23.3**, all **21** source/lock compiler pins, and the committed npm lock. It used `npm ci` directly: `lockGenerated=false` and `retiredCompilerRuntimeUsed=false`.\n\n| Required phase | Final result |\n| --- | --- |\n| Clean dependency installation | Passed |\n| Root TypeScript build | Passed |\n| Existing ordered package tests, including the new adapter contract | Passed |\n| Conformance package build | Passed |\n| Lean exporter package TypeScript build | Passed |\n| Package integration | Passed |\n| Package map, source shape, VS Code shape/smoke, and architecture checks | Passed |\n\nAll seven recorded commands exited with code `0`. The focused adapter contract completed all **11 obligations**: supplied virtual source and existing-product preservation, logical map naming, config-independent positional compilation, relative TypeScript imports, package-export imports, root-output selection, logical diagnostic positions, self-reference refusal, declaration-input refusal, missing-directory refusal, and cleanup.\n\nThe [actual qualification receipt](../psc0/docs/selfhost-language/root-typescript7-qualification.json), [evidence provenance](../psc0/docs/selfhost-language/root-typescript7-evidence.json), and [complete primary log](../psc0/docs/selfhost-language/evidence-logs/root-typescript7-qualification.log) are retained in the repository. The receipt is **3,485 UTF-8 bytes** with SHA-256 `a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a`. The committed lock is **21,592 bytes** with SHA-256 `69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1`.\n\nThe qualification covers the root host adapter, package builds/tests, integration, and repository boundaries. It does not establish a PSC0 fixed point, provider acceptance, cold F recovery, native Lean bootstrap qualification, or a seed promotion.\n"
+      },
+      {
+        "oldText": "The separate `selfhost/` host and generated-compiler CLI also require 7.0.2 before positional compilation and pass `--ignoreConfig`. Historical PSC0 replay recipes remain at their original revisions; current PSC0 recovery uses its independently qualified native TypeScript 7 route.\n",
+        "newText": "The separate `selfhost/` host and generated-compiler CLI also require 7.0.2 before positional compilation and pass `--ignoreConfig`. Historical PSC0 replay recipes remain at their original revisions; current PSC0 recovery uses its independently qualified native TypeScript 7 route.\n\nThe compiler package retains its existing `typescript+lean+proofscript-bootstrap` inventory and paired `src/ProofScript/Compiler/Data.lean` / `Data.ps` sources. The package map now agrees with that manifest, and the map guard requires exact nonempty source-language agreement for all 20 outer packages. Its dependency, trust, status, cycle, and authored-source checks remain in place. The historical native bootstrap target is unchanged and was not exercised by this root gate.\n"
+      },
+      {
+        "oldText": "After the exact generated lock is committed, install and use the current workspace normally:",
+        "newText": "The exact npm-generated lock is committed and verified. Install and use the current workspace normally:"
+      },
+      {
+        "oldText": "A passing receipt is required before claiming this root migration verified. Source drafts and the workflow's existence are not execution evidence.\n",
+        "newText": "The final receipt's file bytes, hashes, source/run identity, exact command sequence, and installed profile were independently checked from the complete primary log and actual GitHub API responses. The adapter contract is a compact stdout record; its 11 obligations are identified separately from the actual JSON receipt files. Artifact `11626670229` contains **13,228 bytes**; its archive SHA-256 is `a424a5c9bacbc31caf51160c471266401d0d4c520b87bce7cb3100c60d552cf6`. The archive digest and individual receipt-file hashes identify different byte sequences.\n\n### Earlier attempts and corrections\n\nThe evidence provenance retains the exact logs, actual receipts, run/job/artifact API responses, and file-authentication reports for all three earlier attempts. Each earlier qualification receipt remains `passed=false`.\n\n| Attempt | Exact source | Result and correction |\n| --- | --- | --- |\n| [37949490366](https://github.com/dwijayuda/pskernel/actions/runs/37949490366) | [`a02f03b9`](https://github.com/dwijayuda/pskernel/commit/a02f03b97bb3385b66ad670dabf7f13d334fc79f) | Failed during package tests because the new footer assertion required a final newline. The assertion was corrected to accept the adapter's documented LF, CRLF, or end-of-file spelling. Adapter behavior was unchanged. This attempt generated the exact new lock through the metadata-only command before installing the current compiler. |\n| [37950075083](https://github.com/dwijayuda/pskernel/actions/runs/37950075083) | [`3fce771a`](https://github.com/dwijayuda/pskernel/commit/3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab) | Package tests, all 11 adapter obligations, and the conformance build passed. The exporter build exposed its existing subprocess type mismatch. A type-only correction describes the actual ignored stdin and piped stdout/stderr; executable behavior is unchanged. |\n| [37950522687](https://github.com/dwijayuda/pskernel/actions/runs/37950522687) | [`5d3cbc82`](https://github.com/dwijayuda/pskernel/commit/5d3cbc82cb8759b909d1a957d6a22d542509d8c5) | All preceding builds, package tests, and package integration passed. Package boundaries found the compiler's mixed-source inventory mismatch. The package map was aligned with the existing manifest, and exact language equality was enforced for all outer packages. |\n| [37951869293](https://github.com/dwijayuda/pskernel/actions/runs/37951869293) | [`9d150afb`](https://github.com/dwijayuda/pskernel/commit/9d150afbec1feda8c97058aa56aa5ab92347d96d) | Passed the complete unchanged seven-phase root gate. |\n\nBefore the final run, the complete remaining boundary surface was reviewed together: all 178 TypeScript sources in the 12 guarded directories, all 10 editor inputs, the complete package graph and manifests, the 19 erasure source modules, the compiler module, and the explicit verified pipeline/emitter boundaries. That static review found no additional required correction. The final run then executed the existing boundary gates successfully.\n"
+      }
+    ],
+    "reverseSubstitutionsRestoreAllOtherBytes": true
+  },
+  "entryPoints": {
+    "documentation": "docs/TYPESCRIPT7.md",
+    "qualification": "psc0/docs/selfhost-language/root-typescript7-qualification.json",
+    "provenance": "psc0/docs/selfhost-language/root-typescript7-evidence.json",
+    "primaryLog": "psc0/docs/selfhost-language/evidence-logs/root-typescript7-qualification.log",
+    "exactEvidenceRoot": "psc0/docs/selfhost-language/seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7"
+  },
+  "actualReceiptBytesPreserved": true,
+  "priorFailuresPreserved": true,
+  "priorFailedAttempts": 3,
+  "summary": {
+    "passed": true,
+    "qualifiedByThisReview": true,
+    "packagePins": 21,
+    "typescript": "7.0.2",
+    "node": "v22.23.3",
+    "lockGenerated": false,
+    "lockResolution": "existing lock, npm ci only",
+    "currentCompilerInstalled": true,
+    "commands": 7,
+    "completeCommandSequence": true,
+    "adapterContractCompleted": true,
+    "adapterObligations": 11,
+    "psc0Qualification": false,
+    "coldFQualification": false,
+    "seedSelectionChanged": false
+  },
+  "protectedScope": {
+    "executableChanges": false,
+    "activeCompilerHelperChanges": false,
+    "workflowChanges": false,
+    "seedSelectionChanges": false,
+    "providerKernelOrDefeqImplementationChanges": false,
+    "refWrites": false
+  },
+  "archivedCodeNote": "One .txt evidence file archives the reviewed pure-data log reader. It is not imported or executed by repository tooling.",
+  "verificationPerformed": "Read-only GitHub source/API/log retrieval, pure-data receipt authentication, immutable blob creation, and guarded documentation drafting only. No builds, tests, retries, or ref writes."
+}

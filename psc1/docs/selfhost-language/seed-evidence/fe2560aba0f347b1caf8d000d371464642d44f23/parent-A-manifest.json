@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-qualified-source-seed",
+  "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+  "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+  "bootstrap": {
+    "sourceRef": "37f63c39d4a07189938046c64152bba25d789450",
+    "compilerSha256": "74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76"
+  },
+  "expectedArtifacts": {
+    "canonicalSurfaceSourceSha256": "bb7fd97996339bdde40c3a92280d69a05d57f01f51626226a10a85aa548ebf41",
+    "normalizedCanonicalAdmissionsSha256": "15c85c7b8b6102472ff261c96c6901d4eb133c5a9443e06323a7d4b012ae6397",
+    "typescriptSha256": "b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1",
+    "javascriptSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096"
+  },
+  "authoring": {
+    "family": "PSC0-SH/1",
+    "capabilities": [
+      {
+        "id": "recursion.varying-parameters",
+        "status": "compiler-qualified",
+        "scope": "Root constructor descent with ordinary nondependent changing value parameters."
+      }
+    ],
+    "normalizerVersion": "psc0-structural-state-generalization/1",
+    "strictSh1Qualified": false
+  },
+  "target": "original-ts-to-js",
+  "implementationBinding": {
+    "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+    "generatedCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+    "scope": "The exact source closure and generated JS bind the normalizer, prelude and runtime implementations."
+  },
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 5.8.3"
+  },
+  "qualification": {
+    "evidence": "compiler-qualified-current-source-fixed-point",
+    "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+    "runId": 37831951758,
+    "artifactName": "psc0-sh1-e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "claim": "Compiler-qualified seed; selected-provider acceptance is a separate receipt."
+  },
+  "recovery": {
+    "recipe": "historical-seed(A); first-generation(A); compare-pinned-products/1",
+    "sourceAuthority": "Pinned raw A source, which was accepted by the historical generated seed.",
+    "promotion": "Copy this file to psc0/selfhost-seed.json only after reviewing qualification evidence."
+  },
+  "providerEvidence": {
+    "providerSourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "receiptSha256": "fd2866f56edc157ec7cba6dec2d76b7453059d0775ffd2755f4f37b33f30d85a",
+    "reference": "docs/selfhost-language/seed-a-provider.json"
+  }
+}

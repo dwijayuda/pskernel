@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-closed-universe-inference-independent-review",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-independent-review.json",
+  "repository": "dwijayuda/pskernel",
+  "reviewer": "stage_activation_review",
+  "verdict": "CLEAR",
+  "scope": "Independent exact-text, source-admissibility and finite closed-level semantics review of one Infer.lean candidate. No compiler/test invocation, source edit, commit/ref action, new paper scope or claim of completed qualification.",
+  "currentParentSourceRef": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+  "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+  "base": {
+    "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+    "sha256": "1180f6d8392837fbcc2694478e2747026dfbd56cca5a3d765aeecb086c0ed9df",
+    "utf8Bytes": 19480
+  },
+  "candidate": {
+    "blob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+    "sha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
+    "utf8Bytes": 21458
+  },
+  "confirmedCause": {
+    "originDiagnosticBasis": "Root reports the retained-N1 owned diagnostic confirmed sourceIndex6, sh1GroupLet, stableDeclaration, infer/applicationTypeMismatch.",
+    "sourceIndex": 6,
+    "sourceName": "sh1GroupLet",
+    "phase": "stableDeclaration",
+    "error": "infer/applicationTypeMismatch",
+    "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+    "application": "sh1GroupIdentity (Nat -> Nat) f",
+    "expectedArgumentType": "Sort(succ(zero))",
+    "beforeInferredArgumentType": "Sort(imax(succ(zero),succ(zero)))",
+    "boundary": "The assembled typed-let re-inference reaches the generic type argument. Existing structural level equality rejects its unnormalized closed syntax; earlier direct declaration closure does not perform that same whole-let re-inference.",
+    "correction": "Canonicalize closed arithmetic where Infer produces successor and Pi-universe result levels; retain all existing checking."
+  },
+  "exactness": {
+    "changedFileCount": 1,
+    "guardCount": 3,
+    "deltaUtf8Bytes": 1978,
+    "guards": [
+      {
+        "id": "helper definitions",
+        "before": "def psInferEnsureSort\n",
+        "after": "-- Canonicalize only closed universe arithmetic produced by inference.\n-- Any parameter or metavariable preserves the original whole level.\ndef psInferClosedLevelValue\n    (level : PsLevel) : Option Nat :=\n  match level with\n  | PsLevel.zero =>\n      Option.some 0\n  | PsLevel.succ inner =>\n      match psInferClosedLevelValue inner with\n      | Option.none => Option.none\n      | Option.some value => Option.some (Nat.succ value)\n  | PsLevel.max left right =>\n      match psInferClosedLevelValue left with\n      | Option.none => Option.none\n      | Option.some leftValue =>\n          match psInferClosedLevelValue right with\n          | Option.none => Option.none\n          | Option.some rightValue =>\n              if Nat.ble leftValue rightValue then\n                Option.some rightValue\n              else\n                Option.some leftValue\n  | PsLevel.imax left right =>\n      match psInferClosedLevelValue left with\n      | Option.none => Option.none\n      | Option.some leftValue =>\n          match psInferClosedLevelValue right with\n          | Option.none => Option.none\n          | Option.some rightValue =>\n              if Nat.beq rightValue 0 then\n                Option.some 0\n              else if Nat.ble leftValue rightValue then\n                Option.some rightValue\n              else\n                Option.some leftValue\n  | PsLevel.param _ =>\n      Option.none\n  | PsLevel.mvar _ =>\n      Option.none\n\ndef psInferLevelFromNat\n    (value : Nat) : PsLevel :=\n  match value with\n  | Nat.zero => PsLevel.zero\n  | Nat.succ remaining =>\n      PsLevel.succ (psInferLevelFromNat remaining)\n\ndef psInferNormalizeClosedLevel\n    (level : PsLevel) : PsLevel :=\n  match psInferClosedLevelValue level with\n  | Option.none => level\n  | Option.some value => psInferLevelFromNat value\n\ndef psInferEnsureSort\n",
+        "beforeUtf8Bytes": 22,
+        "afterUtf8Bytes": 1820,
+        "beforeSha256": "ffadfa7bfb0eca1ca7656eb3b43456724b34bb608cf1749621e86fb59a117331",
+        "afterSha256": "954e2209b90dd159bd4cb3c6e8dd4b9d218b214dcbb1506471121e9bb7807963",
+        "beforeOccurrences": 1,
+        "afterOccurrences": 1
+      },
+      {
+        "id": "sort successor construction",
+        "before": "                  Except.ok (PsExpr.sortE (PsLevel.succ level))",
+        "after": "                  Except.ok\n                    (PsExpr.sortE\n                      (psInferNormalizeClosedLevel (PsLevel.succ level)))",
+        "beforeUtf8Bytes": 63,
+        "afterUtf8Bytes": 135,
+        "beforeSha256": "327949d41a3ab949b52b5cd6337896e917fb84fc8b669a120558b3349e90779f",
+        "afterSha256": "bc62b02f5db84a7901f6db5c2ca9d6e99d1e6e2b2f9b1b0ed41923936d057cd8",
+        "beforeOccurrences": 1,
+        "afterOccurrences": 1
+      },
+      {
+        "id": "Pi universe construction",
+        "before": "                                    (PsExpr.sortE (PsLevel.imax domainLevel bodyLevel))",
+        "after": "                                    (PsExpr.sortE\n                                      (psInferNormalizeClosedLevel\n                                        (PsLevel.imax domainLevel bodyLevel)))",
+        "beforeUtf8Bytes": 87,
+        "afterUtf8Bytes": 195,
+        "beforeSha256": "28d9a498aae8618198ed7ecdd90e69e2b20360b6bdb80d5d0ebaee33319946ce",
+        "afterSha256": "f0dca8d8666c010507c9ad863f6962598c843a0175cdef4540422a371b9b186c",
+        "beforeOccurrences": 1,
+        "afterOccurrences": 1
+      }
+    ],
+    "helperInsertion": {
+      "utf8Bytes": 1798,
+      "sha256": "5c8fa6848e87164a0e637e83a876084ce421ec1bae6c1d6e2013f19a532ce811"
+    },
+    "completeForwardReconstruction": true,
+    "completeReverseReconstruction": true,
+    "allOtherBytesUnchanged": true,
+    "importsUnchanged": true,
+    "allExistingDefinitionHeadersUnchanged": true,
+    "addedDefinitions": [
+      "psInferClosedLevelValue",
+      "psInferLevelFromNat",
+      "psInferNormalizeClosedLevel"
+    ],
+    "productionCallSites": [
+      "psInferTypeWithFuelWorker: sortE result",
+      "psInferTypeWithFuelWorker: forallE result"
+    ]
+  },
+  "levelSemantics": {
+    "domain": "Finite acyclic PsLevel constructor values. Closed means no param or mvar anywhere in the input tree.",
+    "valueCases": [
+      {
+        "constructor": "zero",
+        "result": "Some 0"
+      },
+      {
+        "constructor": "succ inner",
+        "result": "Some(succ n) if inner returns Some n; otherwise None"
+      },
+      {
+        "constructor": "max left right",
+        "result": "Both children must return Some; Nat.ble selects their numeric maximum"
+      },
+      {
+        "constructor": "imax left right",
+        "result": "Both children must return Some; a zero right result yields zero, otherwise select their numeric maximum"
+      },
+      {
+        "constructor": "param",
+        "result": "None"
+      },
+      {
+        "constructor": "mvar",
+        "result": "None"
+      }
+    ],
+    "proof": "Structural induction on PsLevel: the evaluator returns the standard natural denotation exactly for closed trees. Induction on Nat shows psInferLevelFromNat reconstructs that denotation as a canonical zero/succ chain. Their composition preserves all closed denotations, including nested max/imax/succ and right-zero imax, rather than only imax(1,1).",
+    "symbolicFallback": "Any param/mvar occurrence forces None. psInferNormalizeClosedLevel then returns its original whole argument level, without partially normalizing closed subtrees, substituting parameters, assigning metas or reconstructing symbolic syntax.",
+    "symbolicExamplesPreserved": [
+      "imax(param p,zero)",
+      "imax(zero,mvar k)",
+      "max(succ zero,param p)",
+      "succ(max(param p,zero))"
+    ],
+    "scopeLimit": "No complete symbolic universe equivalence, cumulative-sort conversion, new polymorphic source grammar or global Core normalization is implemented.",
+    "universeArithmeticAssumption": "The existing standard universe interpretation: imax(a,b)=0 when b=0 and max(a,b) otherwise."
+  },
+  "frontendAdmissibility": {
+    "allNewPatternsAreFlatConstructorPatterns": true,
+    "actualHeaderParameters": {
+      "psInferClosedLevelValue": [
+        "level"
+      ],
+      "psInferLevelFromNat": [
+        "value"
+      ],
+      "psInferNormalizeClosedLevel": [
+        "level"
+      ]
+    },
+    "selfCalls": [
+      {
+        "definition": "psInferClosedLevelValue",
+        "line": 66,
+        "argument": "inner",
+        "arity": 1,
+        "decreasing": "Direct recursive field of the declaration's root PsLevel constructor match; right remains an established root child inside nested Option matches."
+      },
+      {
+        "definition": "psInferClosedLevelValue",
+        "line": 70,
+        "argument": "left",
+        "arity": 1,
+        "decreasing": "Direct recursive field of the declaration's root PsLevel constructor match; right remains an established root child inside nested Option matches."
+      },
+      {
+        "definition": "psInferClosedLevelValue",
+        "line": 73,
+        "argument": "right",
+        "arity": 1,
+        "decreasing": "Direct recursive field of the declaration's root PsLevel constructor match; right remains an established root child inside nested Option matches."
+      },
+      {
+        "definition": "psInferClosedLevelValue",
+        "line": 81,
+        "argument": "left",
+        "arity": 1,
+        "decreasing": "Direct recursive field of the declaration's root PsLevel constructor match; right remains an established root child inside nested Option matches."
+      },
+      {
+        "definition": "psInferClosedLevelValue",
+        "line": 84,
+        "argument": "right",
+        "arity": 1,
+        "decreasing": "Direct recursive field of the declaration's root PsLevel constructor match; right remains an established root child inside nested Option matches."
+      },
+      {
+        "definition": "psInferLevelFromNat",
+        "line": 103,
+        "argument": "remaining",
+        "arity": 1,
+        "decreasing": "Direct Nat.succ predecessor of the declaration's root Nat match."
+      }
+    ],
+    "noChangingStateGeneralization": true,
+    "noBareOrUndersaturatedSelfReference": true,
+    "noLambdaBoundaryMovement": true,
+    "noNewSourceSyntax": true,
+    "definitionOrder": "Evaluator precedes reifier; both precede the nonrecursive normalizer; all three precede both production uses.",
+    "permittedPrimitives": [
+      "Nat.succ",
+      "Nat.beq",
+      "Nat.ble",
+      "Option.none",
+      "Option.some",
+      "PsLevel constructors"
+    ],
+    "recursionBasis": "Current Term root-match logic registers direct recursive fields and retains their IDs through nested Option matches. Every evaluator self-call supplies exactly its one declared explicit parameter. The reifier call supplies the direct Nat predecessor."
+  },
+  "terminationAndResources": {
+    "termination": "Each evaluator recursive edge visits a direct PsLevel child. Reification decreases its Nat argument. Both terminate on the declared finite input domain.",
+    "evaluationWork": "Bounded by the visited structural occurrences of the level tree; symbolic failure can stop traversal early. No memoization or hidden reuse is introduced.",
+    "resultSize": "For a closed input, its natural denotation is at most the number of successor nodes in its structural tree. Reification creates that many successors plus zero; output size cannot exceed this structural bound.",
+    "allocationPremise": "The ordinary successful-allocation and representable finite-value premises of the existing source/runtime arguments continue to apply.",
+    "inferFuel": "Existing expression-fuel branches, decrements, default and fuelExhausted behavior are unchanged. The new helpers add explicit finite structural level work; they do not reset or alter inference fuel, retry a failure, or add an exception fallback.",
+    "noPerformanceClaim": "This source proof is not a wall-time, stack-use, memory-headroom or benchmark guarantee. Arithmetic/comparison implementation costs and resource failures retain the existing limits.",
+    "noForeignInputClaim": "Cyclic/malformed host objects and unrepresentable allocations are outside the canonical source-generated input domain."
+  },
+  "preservedBoundaries": {
+    "coreLevelRepresentationUnchanged": true,
+    "coreStructuralEqualityUnchanged": true,
+    "metaDefeqAndReductionUnchanged": true,
+    "metaUnificationAndAssignmentsUnchanged": true,
+    "providerUnchanged": true,
+    "kernelUnchanged": true,
+    "cacheAlgorithmsUnchanged": true,
+    "theoryUnchanged": true,
+    "existingTypedLetReinferenceRetained": true,
+    "existingErrorChecksRetained": true,
+    "noFixtureChange": true,
+    "noHostOrWorkflowChange": true,
+    "RRemainsSelected": true,
+    "authoritativeSource": ".lean",
+    "sourceGrammar": "ps-0.9-r3/new-only",
+    "currentTypeScript": "7.0.2"
+  },
+  "qualification": {
+    "status": "reviewed-candidate; publication and actual full qualification pending",
+    "sourceRef": null,
+    "runId": null,
+    "compilerQualified": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "formalPreservationProven": false,
+    "correspondenceRowsClosed": 0,
+    "stageObligationsClosed": 0,
+    "additionalCompilerInvocations": 0,
+    "additionalTests": 0,
+    "followup": "After root publishes the reviewed candidate, bind the exact new source and recipe in a pending release-draft overlay. Keep all33/27 dispositions pending until actual complete qualification and exact provider evidence."
+  },
+  "reviewMethod": "GitHub blob readback and pure in-memory exact-text/hash reasoning only. No source evaluator or compiler code was executed."
+}

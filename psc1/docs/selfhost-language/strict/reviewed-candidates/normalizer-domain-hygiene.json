@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-normalizer-domain-shadow-id-hygiene",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "expectedParent": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+  "status": "independently-reviewed-source-correction-awaiting-root-integration-and-exact-source-qualification",
+  "files": [
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "expectedBaseBlob": "c403bd879e439b7b6e88303df430890352a14115",
+      "candidate": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+      "sha256": "487deb18c577a22ed10885238b78b5ea31f4e212e738fff13cee3c4f8d259549",
+      "edits": [
+        {
+          "before": "                let next := PsLocalContext.mk (Nat.succ binder.id)\n",
+          "after": "                -- Keep every original parameter ID reserved for this syntax walk.\n                -- Only preceding declarations are visible; dummy locals use fresh IDs.\n                let next := PsLocalContext.mk context.nextId\n"
+        },
+        {
+          "before": "            plan typeResult.context.environment typed binders psLocalEmpty with\n",
+          "after": "            plan typeResult.context.environment typed binders\n            (PsLocalContext.mk binderResult.context.localContext.nextId List.nil) with\n"
+        }
+      ]
+    }
+  ],
+  "sourceArgument": [
+    "Actual psElabTypedBinders starts at psElabContextEmpty/psLocalEmpty, pushes original binders in source order and returns a local nextId above every original parameter ID. Its temporary elaboration scopes are restored; name/type/kind associations remain in the returned original binder list.",
+    "BuildNormalizationWithOrigin is the sole non-recursive code caller of RenameParameters in the reviewed path. It now begins the syntax-only parameter-domain walk with the full original binderResult.localContext.nextId but an empty declaration list.",
+    "Each recursive RenameParameters step prepends the identical actual original binder ID/name/type/kind in identical order, while preserving that reserved nextId. Only preceding original declarations are visible to each domain.",
+    "psElabRecursionPushName allocates dummy syntax-shadow IDs at or above the reserved high-water mark. Thus none belongs to plan.parameterIds. Nesting increments locally; temporary sibling contexts may reuse dummy IDs harmlessly because each is discarded.",
+    "Exact full-name, first-segment and proper-local-prefix resolution examine the same declaration names in the same order and the same environment. Original parameter IDs do not change. Ordinary local-domain reference selection therefore does not change, and a dummy ID can no longer be mistaken for a current or future parameter ID.",
+    "Domains with no local syntax binder, including no-generic constant Nat domains, produce identical rewritten syntax. Existing type-parameter references preserve their original IDs. Body/result traversal keeps its original complete local context. Fixed/state selection, runtime/domain checks, worker/public construction and origins are unchanged.",
+    "The helper's strengthened precondition is for the actual caller; arbitrary external calls supplying psLocalEmpty with unrelated nonempty typed/plan inputs are not covered."
+  ],
+  "finding": {
+    "classification": "source-derived hygiene/refusal risk",
+    "notAnAcceptedMiscompilation": true,
+    "notExecuted": true,
+    "minimumCoverageClaim": false,
+    "example": "def f (n : Nat) (x : (fun (T : Type) => T) Nat) : Nat :=\n  match n with\n  | Nat.zero => x\n  | Nat.succ k => f k (Nat.add x 1)",
+    "oldPath": "n=0,x=1; walking x's domain under prefix n starts dummy T at ID1; reference T is wrongly renamed as $psc0SH.1 while its binder remains T; predicted worker-domain refusal.",
+    "scope": "The example identifies an existing syntax-walk association error. It is not evidence that every general type-expression form is mandatory under SPEC or that an incorrect program was accepted."
+  },
+  "validation": {
+    "method": "GitHub MCP reads and pure in-memory text/hash operations",
+    "forwardAndReverseEditsExact": true,
+    "guardBaseReadbackExact": true,
+    "candidateReadbackExact": true,
+    "independentReviewer": "/root/empty_evidence_finish",
+    "independentReview": "CLEAR on actual BuildNormalization path; visible prefix order unchanged and dummy IDs disjoint from complete parameter IDs",
+    "compilerOrTestsExecuted": false,
+    "refsOrCommitsChanged": false
+  },
+  "unchanged": {
+    "grammar": true,
+    "admissionGates": true,
+    "kernel": true,
+    "provider": true,
+    "defeq": true,
+    "caches": true,
+    "existingTheory": true,
+    "selectedSeed": "R",
+    "sourceAuthority": ".lean",
+    "generatedPs": "ps-0.9-r3/new-only",
+    "typescript": "7.0.2"
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "formalPreservationProven": false,
+  "correspondenceRowsClosed": 0
+}

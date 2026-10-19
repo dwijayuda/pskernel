@@ -1,0 +1,258 @@
+[
+  {
+    "path": "packages/foundation/src/Ps/Foundation/Source.lean",
+    "sha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/Cursor.lean",
+    "sha256": "eb80cd45e1df4072cac276d16d26c07ef6e37ae1ddb8769ff534e0a5b54f6c2e"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/Token.lean",
+    "sha256": "a690a4bc7c7138f732346155cd985bd5412d9e60e1d04d67c2fd3f46d42c77df"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/Lexer.lean",
+    "sha256": "adab283e1881058bfed285a62478f1f4d55bce73b8373a4017353529e479d372"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/Ast.lean",
+    "sha256": "c22fa56b6a76b10d4d0b271f03bb4cd6612779b647f85f5088264fc95e949011"
+  },
+  {
+    "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+    "sha256": "9f8c895567542c90ac9088b3ce25ccda6f374e016069faa4068feca0e28b7092"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/ParserState.lean",
+    "sha256": "c7027009e9ac372690f62a9c33dfbb613e98f4dc48e4cfa516af5b41ab5d3617"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+    "sha256": "d12d8b22c2ea21180ea575f0cde3393a6d3409e6e92552585490904b46ce58e8"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/ParseLean.lean",
+    "sha256": "601ea280e3f6aafad69abf150afde89fbdade582b796ce1b4de49ffd43baad41"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+    "sha256": "9a69a130171bc9fcefc6a040bde659da77f050ebdf65ed56fd879c1781c1c5fd"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+    "sha256": "717344d3f97937fb2daa93aa8a7ecf15c44d6be83b013656baa317231fb906d0"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/PrintLean.lean",
+    "sha256": "b039b4b5b91f43fa3653a75c8f861f734e9a2cafa74affcb6e032a4baad38c19"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+    "sha256": "c9fa8c42789c1cc6b5b9611580cacfe0a63158eccbd552bce0f64c76326d24c7"
+  },
+  {
+    "path": "packages/syntax/src/Ps/Syntax/Translate.lean",
+    "sha256": "c73ef5027b5108bc81b555fc4fcf2f0547e32a7a03aa8db0f136b155099a0c9c"
+  },
+  {
+    "path": "packages/bridge/src/Ps/Bridge/Json.lean",
+    "sha256": "bea85555e39544b1768f660a72595447c8fda088b4eff1c0731a5b37da446e1e"
+  },
+  {
+    "path": "packages/core/src/Ps/Core/Level.lean",
+    "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4"
+  },
+  {
+    "path": "packages/core/src/Ps/Core/Expr.lean",
+    "sha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6"
+  },
+  {
+    "path": "packages/core/src/Ps/Core/Declaration.lean",
+    "sha256": "1e08932d0251abc18ee8f3b1175fbbe5acd5a1d1db158204ba4dfa285609b3c6"
+  },
+  {
+    "path": "packages/core/src/Ps/Core/Abstract.lean",
+    "sha256": "3f439e71312493714010cfe09feb9ecd14cfc7b5f611162a3ae4dfa5c5507095"
+  },
+  {
+    "path": "packages/core/src/Ps/Core/Subst.lean",
+    "sha256": "e1924d10d70f71fc191130ec45fa22e5866691a5422f59edb5897cd2cc52f38f"
+  },
+  {
+    "path": "packages/core/src/Ps/Core/Equality.lean",
+    "sha256": "4e60e5eb112538fdc9021fca11cb879725b385c267937bb1b569c27189684226"
+  },
+  {
+    "path": "packages/foundation/src/Ps/Foundation/List.lean",
+    "sha256": "0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680"
+  },
+  {
+    "path": "packages/environment/src/Ps/Environment/Basic.lean",
+    "sha256": "6290401a7cdb3111b0b4557532e6eabde1848d39608d1415659e631cf165493b"
+  },
+  {
+    "path": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+    "sha256": "fc8976ef9821753f1c575062c7fee0c2abc8cf28e422088691678f49fae7bbab"
+  },
+  {
+    "path": "packages/core/src/Ps/Core/Builtin.lean",
+    "sha256": "a5af06f7b4ee8b0e76a04b72df863c691382c45a830c49598ed691b2525c7e06"
+  },
+  {
+    "path": "packages/environment/src/Ps/Environment/Prelude.lean",
+    "sha256": "7335bd4df435c626ec3c6e32cd91472e0cce9b217cca42e3e961148445841146"
+  },
+  {
+    "path": "packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+    "sha256": "02353953cc05213b346ecf5e27075ee52219f86d280d8b82e9b0f68de5fdc156"
+  },
+  {
+    "path": "packages/environment/src/Ps/Environment/SelfHostProd.lean",
+    "sha256": "a064a50d684fb1fd5e0f3316b7cac3e3a363e22acf5c2a2bd2b7cde6fa0899ba"
+  },
+  {
+    "path": "packages/environment/src/Ps/Environment/LocalContext.lean",
+    "sha256": "06c5a03d73c26083ec313017120bb509df33e80e5c51d887ffca13942382bdb9"
+  },
+  {
+    "path": "packages/environment/src/Ps/Environment/Resolve.lean",
+    "sha256": "b93898d7b5d8744ae0c78f319831c48a3117a061e421f2146869524843f1ae16"
+  },
+  {
+    "path": "packages/core/src/Ps/Core/LevelSubst.lean",
+    "sha256": "1393726ff7b45bb3adfcfb5e12ab79c3e344803e44777c9c67c4560af5373698"
+  },
+  {
+    "path": "packages/meta/src/Ps/Meta/LevelContext.lean",
+    "sha256": "9d8cf3cd5bb840d1b2a979df7b784b2eea632964ac7882266ef72340420a7718"
+  },
+  {
+    "path": "packages/meta/src/Ps/Meta/Context.lean",
+    "sha256": "2121f70e32299107ffdd3a91e4d73943db6d2be3388a982d539e433bcbe690b9"
+  },
+  {
+    "path": "packages/meta/src/Ps/Meta/Reduce.lean",
+    "sha256": "c3ae3055299a13d9ac409450c1682ae202a97ec6a7b6a4e0c12e4a384d2ca51e"
+  },
+  {
+    "path": "packages/meta/src/Ps/Meta/Infer.lean",
+    "sha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6"
+  },
+  {
+    "path": "packages/environment/src/Ps/Environment/Instances.lean",
+    "sha256": "63a0fabc0e88e90b647074379e62d4ff2ebd7252676e3703ed06a9cfaefad2bc"
+  },
+  {
+    "path": "packages/meta/src/Ps/Meta/Unify.lean",
+    "sha256": "79562973eaad71b335f2c6104f1beea911ed1056618bc9adba9541a3a7238396"
+  },
+  {
+    "path": "packages/meta/src/Ps/Meta/SynthInstance.lean",
+    "sha256": "ea73668c788e16d4fb65b41b1b97ae58dc585027234d5185514e8194baf166b6"
+  },
+  {
+    "path": "packages/elab/src/Ps/Elab/Context.lean",
+    "sha256": "0b17fd57d07b25b60ed656ec290903ad2f8a829c9107900805707ef805d06e27"
+  },
+  {
+    "path": "packages/elab/src/Ps/Elab/Literal.lean",
+    "sha256": "0369cd23303d3133b92b40aaf7ece65df86e864596adb85556d994e846258b71"
+  },
+  {
+    "path": "packages/elab/src/Ps/Elab/Term.lean",
+    "sha256": "c6b1c1d9c444a34824a25f7e04df4d5ffc6b1466d7ccbe11a5b900204db93a6a"
+  },
+  {
+    "path": "packages/elab/src/Ps/Elab/Recursion.lean",
+    "sha256": "e93aed0fe805385ff6dfcaf6ac190894254a34746f4c60002e33fbb561f80efe"
+  },
+  {
+    "path": "packages/elab/src/Ps/Elab/Declaration.lean",
+    "sha256": "600da64269038375ab62fdc0d0fab572bfa028b60bc6caec730f5dff1dd3f1bf"
+  },
+  {
+    "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+    "sha256": "01927c6c6bb88c4a77bd5fb623e9426eb3edb4ea1b0e62447915afe27da5b70a"
+  },
+  {
+    "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+    "sha256": "3cfcea753582afd703f7f48c6c247f708fe2d197dedffcd708eb128d7f177c5d"
+  },
+  {
+    "path": "packages/erasure/src/Ps/Erasure/Expr.lean",
+    "sha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15"
+  },
+  {
+    "path": "packages/erasure/src/Ps/Erasure/Inductive.lean",
+    "sha256": "06f584ff2d4bae2c16d70e899d255a16155df3cf774830ebc99ecd24ac574af6"
+  },
+  {
+    "path": "packages/erasure/src/Ps/Erasure/Structure.lean",
+    "sha256": "6de88d9b5e41e6e87fd03e55adfe8e218d8c55ba7d9086716c1c75cd6e9212af"
+  },
+  {
+    "path": "packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+    "sha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b"
+  },
+  {
+    "path": "packages/erasure/src/Ps/Erasure/Definition.lean",
+    "sha256": "a55cb381a686ab9081587380793b1b3d8fe485c86b88770fbce4a3e2250516a7"
+  },
+  {
+    "path": "packages/compiler/src/Ps/Compiler/Api.lean",
+    "sha256": "5d28f057f52ea735f48d3dd6067c582dcb7fe112d4b7fb50ca1c19b204c6e53f"
+  },
+  {
+    "path": "packages/backend-ts/src/Ps/BackendTs/Type.lean",
+    "sha256": "c231a737470c0d6ef2451f642089e22cebea97da55527500beff82bb610f99cf"
+  },
+  {
+    "path": "packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+    "sha256": "b488587a271702fe336ccacc8e5bda976f835b59be9b0419e697850cead9e46e"
+  },
+  {
+    "path": "packages/backend-ts/src/Ps/BackendTs/Module.lean",
+    "sha256": "efbf0a1365f27da7d1fd05a67e21e50b8d8aaf852d0f22132c1ff6ad518331e3"
+  },
+  {
+    "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+    "sha256": "3ccce22596959fa12d084bb25279c686a4d534ec627a2067c4c9da13e29f9cad"
+  },
+  {
+    "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+    "sha256": "50c24e57441c028ca0768fac83c966cb5d8b534a68f2f55ca8384983b32fae7d"
+  },
+  {
+    "path": "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+    "sha256": "22eac288f3c48d57a5856e35ec9bcd072cde5fc1fabd674703f5a20bd02e5bef"
+  },
+  {
+    "path": "packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+    "sha256": "c268a4095bf4b98491c4fbc2d3ed43fb57a47ee99cda3cff802115f11b6c00c1"
+  },
+  {
+    "path": "packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+    "sha256": "87a9d0a89871644a1a3cf4fa3629d7326077b227e49d0c8f0777c4379f314bd8"
+  },
+  {
+    "path": "packages/compiler/src/Ps/Compiler/Sh1.lean",
+    "sha256": "3ad94c5c6a57819f7c744591a074482e00bb5309b931d6e87356adc191552843"
+  },
+  {
+    "path": "packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+    "sha256": "36387a384b31a22a3bcbeb3766a1c725c8c4afac4964b76f4d1d51a234cc3abc"
+  },
+  {
+    "path": "packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+    "sha256": "4c35232a7b70a4addb60111300d2266a410759d63c6eb7ca825ab24cafc24e29"
+  },
+  {
+    "path": "packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+    "sha256": "853731d4c15e6cf894548a841186ae1dfe6bc67ca28141c2b0b3b71336719db7"
+  },
+  {
+    "path": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+    "sha256": "1ff1e99ef3f2a53faadc995e27515721800e1ec8739003341287a072316f4ba9"
+  }
+]

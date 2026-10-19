@@ -1,0 +1,224 @@
+{
+  "kind": "psc0-strict-origin-retention-candidate",
+  "schemaVersion": 1,
+  "repository": "dwijayuda/pskernel",
+  "baseSourceRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
+  "status": "source-reviewed-candidate-not-executed",
+  "ownership": "Only Elab/Recursion.lean, Elab/Declaration.lean and the new origin contract; no ref writes.",
+  "files": [
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "baseBlob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+      "newBlob": "c403bd879e439b7b6e88303df430890352a14115",
+      "baseUtf8Bytes": 33159,
+      "newUtf8Bytes": 35561,
+      "lineCount": 723,
+      "operations": [
+        {
+          "label": "Add compact normalization origin and companion result",
+          "oldText": "  workerArguments : List PsExpr\n\n",
+          "newText": "  workerArguments : List PsExpr\n\n-- This record retains the actual successful plan and constructed worker syntax.\n-- It deliberately contains no elaboration context or environment snapshot.\nstructure PsElabNormalizationOrigin where\n  plan : PsElabRecursionPlan\n  span : PsSourceSpan\n  workerName : PsName\n  workerBinders : List (Prod PsSyntaxBinderHead PsSyntaxTerm)\n  workerType : PsSyntaxTerm\n  workerValue : PsSyntaxTerm\n\nstructure PsElabStructuralNormalizationWithOrigin where\n  normalization : PsElabStructuralNormalization\n  origin : PsElabNormalizationOrigin\n\n"
+        },
+        {
+          "label": "Move existing normalization build into richer companion",
+          "oldText": "def psElabRecursionBuildNormalization\n",
+          "newText": "def psElabRecursionBuildNormalizationWithOrigin\n"
+        },
+        {
+          "label": "Richer builder result type",
+          "oldText": "    Except PsElabError PsElabStructuralNormalization :=\n",
+          "newText": "    Except PsElabError PsElabStructuralNormalizationWithOrigin :=\n"
+        },
+        {
+          "label": "Retain actual worker syntax without rebuilding it",
+          "oldText": "                        Except.ok (PsElabStructuralNormalization.mk\n                          plan.functionName workerName fixed\n                          (PsSyntaxTerm.forallE state renamedType.term span)\n                          (PsSyntaxTerm.matchE major\n                            (psElabRecursionWrapAlternatives state alternatives) matchSpan)\n                          typeResult.context binderResult.bindersRev publicType\n                          (psListAppend fixedValues stateValues))",
+          "newText": "                        let workerType : PsSyntaxTerm :=\n                          PsSyntaxTerm.forallE state renamedType.term span;\n                        let workerValue : PsSyntaxTerm :=\n                          PsSyntaxTerm.matchE major\n                            (psElabRecursionWrapAlternatives state alternatives) matchSpan;\n                        let normalization : PsElabStructuralNormalization :=\n                          PsElabStructuralNormalization.mk\n                            plan.functionName workerName fixed workerType workerValue\n                            typeResult.context binderResult.bindersRev publicType\n                            (psListAppend fixedValues stateValues);\n                        let origin : PsElabNormalizationOrigin :=\n                          PsElabNormalizationOrigin.mk\n                            plan span workerName fixed workerType workerValue;\n                        Except.ok\n                          (PsElabStructuralNormalizationWithOrigin.mk normalization origin)"
+        },
+        {
+          "label": "Project old builder API unchanged",
+          "oldText": "def psElabRecursionTermCallback\n",
+          "newText": "def psElabRecursionBuildNormalization\n    (plan : PsElabRecursionPlan)\n    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))\n    (typeSyntax valueSyntax : PsSyntaxTerm)\n    (span : PsSourceSpan)\n    (binderResult : PsElabTypedBindersResult)\n    (typeResult : PsElabTermResult) :\n    Except PsElabError PsElabStructuralNormalization :=\n  match psElabRecursionBuildNormalizationWithOrigin\n      plan binders typeSyntax valueSyntax span binderResult typeResult with\n  | Except.error error => Except.error error\n  | Except.ok result => Except.ok result.normalization\n\ndef psElabRecursionTermCallback\n"
+        },
+        {
+          "label": "Move existing planner into richer companion",
+          "oldText": "def psElabPlanStructuralNormalization\n",
+          "newText": "def psElabPlanStructuralNormalizationWithOrigin\n"
+        },
+        {
+          "label": "Richer planner result type",
+          "oldText": "    Except PsElabError (Option PsElabStructuralNormalization) :=\n",
+          "newText": "    Except PsElabError (Option PsElabStructuralNormalizationWithOrigin) :=\n"
+        },
+        {
+          "label": "Planner consumes richer single-execution builder",
+          "oldText": "                                  match psElabRecursionBuildNormalization generalized\n",
+          "newText": "                                  match psElabRecursionBuildNormalizationWithOrigin generalized\n"
+        },
+        {
+          "label": "Project old planner API unchanged",
+          "append": "\n-- Existing callers receive the same plan result and errors by projection.\ndef psElabPlanStructuralNormalization\n    (environment : PsEnvironment) (nameSyntax : PsSyntaxName)\n    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))\n    (typeSyntax valueSyntax : PsSyntaxTerm) (span : PsSourceSpan) :\n    Except PsElabError (Option PsElabStructuralNormalization) :=\n  match psElabPlanStructuralNormalizationWithOrigin\n      environment nameSyntax binders typeSyntax valueSyntax span with\n  | Except.error error => Except.error error\n  | Except.ok result =>\n      match result with\n      | Option.none => Except.ok Option.none\n      | Option.some normalized => Except.ok (Option.some normalized.normalization)\n"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "baseBlob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+      "newBlob": "a388d013dbf6c9270ffa91997512f672da6aabff",
+      "baseUtf8Bytes": 51686,
+      "newUtf8Bytes": 60308,
+      "lineCount": 1685,
+      "operations": [
+        {
+          "label": "Add exact batch, member, phase and attributed-error result types",
+          "oldText": "structure PsElabModuleResult where\n  environment : PsEnvironment\n  declarations : List PsDeclaration\n\n",
+          "newText": "structure PsElabModuleResult where\n  environment : PsEnvironment\n  declarations : List PsDeclaration\n\n-- Origins attach to the actual output batch of one source declaration.\n-- Source and member indices are local; module identity is attached by the caller.\ninductive PsElabOriginRole where\n  | sourceDeclaration\n  | inductiveType\n  | structureType\n  | constructor\n  | recursor\n  | normalizedWorker\n  | publicWrapper\n\ninductive PsElabOriginPhase where\n  | stableDeclaration\n  | normalizationPlanning\n  | normalizedWorker\n  | publicWrapper\n  | declarationInsertion\n\nstructure PsElabMemberOrigin where\n  index : Nat\n  name : PsName\n  role : PsElabOriginRole\n\nstructure PsElabBatchOrigin where\n  sourceIndex : Nat\n  sourceName : PsSyntaxName\n  span : PsSourceSpan\n  members : List PsElabMemberOrigin\n  normalization : Option PsElabNormalizationOrigin\n\nstructure PsElabOriginError where\n  error : PsElabError\n  sourceIndex : Nat\n  sourceName : PsSyntaxName\n  span : PsSourceSpan\n  phase : PsElabOriginPhase\n\nstructure PsElabDeclarationBatchWithOriginsResult where\n  result : PsElabDeclarationBatchResult\n  origin : PsElabBatchOrigin\n\nstructure PsElabModuleWithOriginsResult where\n  result : PsElabModuleResult\n  origins : List PsElabBatchOrigin\n\n-- These two internal results attribute only phases known at the call boundary.\nstructure PsElabOriginPhaseError where\n  error : PsElabError\n  phase : PsElabOriginPhase\n\nstructure PsElabNormalizedDefinitionResult where\n  worker : PsDeclaration\n  publicDeclaration : PsDeclaration\n\ndef psElabOriginSource\n    (source : PsSyntaxDeclaration) : Prod PsSyntaxName PsSourceSpan :=\n  match source with\n  | PsSyntaxDeclaration.definition name _ _ _ span => Prod.mk name span\n  | PsSyntaxDeclaration.partialDefinition name _ _ _ span => Prod.mk name span\n  | PsSyntaxDeclaration.theoremDecl name _ _ _ span => Prod.mk name span\n  | PsSyntaxDeclaration.inductiveDecl name _ _ _ span => Prod.mk name span\n  | PsSyntaxDeclaration.structureDecl name _ _ span => Prod.mk name span\n\ndef psElabOriginErrorAt\n    (sourceIndex : Nat) (source : PsSyntaxDeclaration)\n    (phase : PsElabOriginPhase) (error : PsElabError) : PsElabOriginError :=\n  let sourceOrigin : Prod PsSyntaxName PsSourceSpan := psElabOriginSource source;\n  PsElabOriginError.mk error sourceIndex\n    (Prod.fst sourceOrigin) (Prod.snd sourceOrigin) phase\n\ndef psElabBatchOriginAt\n    (sourceIndex : Nat) (source : PsSyntaxDeclaration)\n    (members : List PsElabMemberOrigin)\n    (normalization : Option PsElabNormalizationOrigin) : PsElabBatchOrigin :=\n  let sourceOrigin : Prod PsSyntaxName PsSourceSpan := psElabOriginSource source;\n  PsElabBatchOrigin.mk sourceIndex\n    (Prod.fst sourceOrigin) (Prod.snd sourceOrigin) members normalization\n\ndef psElabStableMemberRole (declaration : PsDeclaration) : PsElabOriginRole :=\n  match declaration with\n  | PsDeclaration.inductiveDecl info =>\n      if info.isStructure then PsElabOriginRole.structureType\n      else PsElabOriginRole.inductiveType\n  | PsDeclaration.constructorDecl _ => PsElabOriginRole.constructor\n  | PsDeclaration.recursorDecl _ => PsElabOriginRole.recursor\n  | _ => PsElabOriginRole.sourceDeclaration\n\ndef psElabStableMemberOrigins\n    (declarations : List PsDeclaration) (index : Nat) : List PsElabMemberOrigin :=\n  match declarations with\n  | List.nil => List.nil\n  | List.cons declaration rest =>\n      List.cons\n        (PsElabMemberOrigin.mk index (psDeclarationName declaration)\n          (psElabStableMemberRole declaration))\n        (psElabStableMemberOrigins rest (Nat.succ index))\n\n"
+        },
+        {
+          "label": "Retain actual normalized declarations and phase; project old normalized API",
+          "oldText": "-- Elaborate the canonical worker with the original source self name, then give\n-- its closed core declaration an internal numeric name. Recursive core terms are\n-- recursors, so this rename cannot leave an unresolved self constant behind.\ndef psElabNormalizedDefinition\n    (environment : PsEnvironment) (sourceName : PsSyntaxName)\n    (normalized : PsElabStructuralNormalization) :\n    Except PsElabError PsElabDeclarationBatchResult :=\n  match psElabDeclarationParts environment sourceName\n      normalized.workerBinders normalized.workerType normalized.workerValue false with\n  | Except.error error => Except.error error\n  | Except.ok workerResult =>\n      match workerResult.declaration with\n      | PsDeclaration.definitionDecl _ levels workerType workerValue =>\n          let worker := PsDeclaration.definitionDecl\n            normalized.workerName levels workerType workerValue;\n          match psEnvironmentAdd environment worker with\n          | Option.none =>\n              Except.error (PsElabError.duplicateDeclaration normalized.workerName)\n          | Option.some workerEnvironment =>\n              let context := psElabContextWithEnvironment\n                normalized.publicContext workerEnvironment;\n              let application := psExprApplyMany\n                (PsExpr.constE normalized.workerName List.nil)\n                normalized.workerArguments;\n              match psElabResolvedTerm context application\n                  (Option.some normalized.publicType) with\n              | Except.error error => Except.error error\n              | Except.ok checked =>\n                  let metaContext := checked.context.metaContext;\n                  let closed := psCloseElabTypedBinders metaContext\n                    normalized.publicBindersRev\n                    (psMetaInstantiate metaContext checked.term)\n                    (psMetaInstantiate metaContext normalized.publicType);\n                  if psExprHasUnresolvedMeta (Prod.fst closed) then\n                    Except.error PsElabError.unresolvedMetavariable\n                  else if psExprHasUnresolvedMeta (Prod.snd closed) then\n                    Except.error PsElabError.unresolvedMetavariable\n                  else\n                    let publicDeclaration := PsDeclaration.definitionDecl\n                      normalized.publicName List.nil (Prod.snd closed) (Prod.fst closed);\n                    Except.ok (PsElabDeclarationBatchResult.mk\n                      (List.cons worker (List.cons publicDeclaration List.nil)))\n      | _ => Except.error PsElabError.structuralRecursionInternal\n\n",
+          "newText": "-- Elaborate the canonical worker with the original source self name, then give\n-- its closed core declaration an internal numeric name. Recursive core terms are\n-- recursors, so this rename cannot leave an unresolved self constant behind.\n-- The richer result keeps the two actual declarations and the known error phase.\ndef psElabNormalizedDefinitionWithPhase\n    (environment : PsEnvironment) (sourceName : PsSyntaxName)\n    (normalized : PsElabStructuralNormalization) :\n    Except PsElabOriginPhaseError PsElabNormalizedDefinitionResult :=\n  match psElabDeclarationParts environment sourceName\n      normalized.workerBinders normalized.workerType normalized.workerValue false with\n  | Except.error error =>\n      Except.error\n        (PsElabOriginPhaseError.mk error PsElabOriginPhase.normalizedWorker)\n  | Except.ok workerResult =>\n      match workerResult.declaration with\n      | PsDeclaration.definitionDecl _ levels workerType workerValue =>\n          let worker : PsDeclaration := PsDeclaration.definitionDecl\n            normalized.workerName levels workerType workerValue;\n          match psEnvironmentAdd environment worker with\n          | Option.none =>\n              Except.error\n                (PsElabOriginPhaseError.mk\n                  (PsElabError.duplicateDeclaration normalized.workerName)\n                  PsElabOriginPhase.normalizedWorker)\n          | Option.some workerEnvironment =>\n              let context : PsElabContext := psElabContextWithEnvironment\n                normalized.publicContext workerEnvironment;\n              let application : PsExpr := psExprApplyMany\n                (PsExpr.constE normalized.workerName List.nil)\n                normalized.workerArguments;\n              match psElabResolvedTerm context application\n                  (Option.some normalized.publicType) with\n              | Except.error error =>\n                  Except.error\n                    (PsElabOriginPhaseError.mk error PsElabOriginPhase.publicWrapper)\n              | Except.ok checked =>\n                  let metaContext : PsMetaContext := checked.context.metaContext;\n                  let closed : Prod PsExpr PsExpr := psCloseElabTypedBinders metaContext\n                    normalized.publicBindersRev\n                    (psMetaInstantiate metaContext checked.term)\n                    (psMetaInstantiate metaContext normalized.publicType);\n                  if psExprHasUnresolvedMeta (Prod.fst closed) then\n                    Except.error\n                      (PsElabOriginPhaseError.mk PsElabError.unresolvedMetavariable\n                        PsElabOriginPhase.publicWrapper)\n                  else if psExprHasUnresolvedMeta (Prod.snd closed) then\n                    Except.error\n                      (PsElabOriginPhaseError.mk PsElabError.unresolvedMetavariable\n                        PsElabOriginPhase.publicWrapper)\n                  else\n                    let publicDeclaration : PsDeclaration := PsDeclaration.definitionDecl\n                      normalized.publicName List.nil (Prod.snd closed) (Prod.fst closed);\n                    Except.ok\n                      (PsElabNormalizedDefinitionResult.mk worker publicDeclaration)\n      | _ =>\n          Except.error\n            (PsElabOriginPhaseError.mk PsElabError.structuralRecursionInternal\n              PsElabOriginPhase.normalizedWorker)\n\ndef psElabNormalizedDefinitionBatch\n    (result : PsElabNormalizedDefinitionResult) : PsElabDeclarationBatchResult :=\n  PsElabDeclarationBatchResult.mk\n    (List.cons result.worker (List.cons result.publicDeclaration List.nil))\n\ndef psElabNormalizedDefinition\n    (environment : PsEnvironment) (sourceName : PsSyntaxName)\n    (normalized : PsElabStructuralNormalization) :\n    Except PsElabError PsElabDeclarationBatchResult :=\n  match psElabNormalizedDefinitionWithPhase environment sourceName normalized with\n  | Except.error failure => Except.error failure.error\n  | Except.ok result => Except.ok (psElabNormalizedDefinitionBatch result)\n\n"
+        },
+        {
+          "label": "Attach origins at the actual stable or normalized declaration batch boundary",
+          "oldText": "-- Historical callers can request the stable single/batch elaborator explicitly.\n-- The ordinary module path adds exactly one typed normalization attempt for the\n-- one capability refusal it implements. All other errors propagate unchanged.\ndef psElabDeclarationBatch\n    (environment : PsEnvironment) (source : PsSyntaxDeclaration) :\n    Except PsElabError PsElabDeclarationBatchResult :=\n  match psElabDeclarationBatchStable environment source with\n  | Except.ok result => Except.ok result\n  | Except.error error =>\n      match error with\n      | PsElabError.structuralRecursionInvariantArgument =>\n          match source with\n          | PsSyntaxDeclaration.definition name binders type value span =>\n              match psElabPlanStructuralNormalization\n                  environment name binders type value span with\n              | Except.error failure => Except.error failure\n              | Except.ok plan =>\n                  match plan with\n                  | Option.none => Except.error error\n                  | Option.some normalized =>\n                      psElabNormalizedDefinition environment name normalized\n          | _ => Except.error error\n      | _ => Except.error error\n\n",
+          "newText": "-- Historical callers can request the unchanged stable elaborator explicitly.\n-- The ordinary path keeps its one typed normalization attempt for the same\n-- capability refusal. Origins are recorded from that execution, not a replay.\ndef psElabDeclarationBatchWithOrigins\n    (environment : PsEnvironment) (sourceIndex : Nat)\n    (source : PsSyntaxDeclaration) :\n    Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult :=\n  match psElabDeclarationBatchStable environment source with\n  | Except.ok result =>\n      let members : List PsElabMemberOrigin :=\n        psElabStableMemberOrigins result.declarations 0;\n      Except.ok\n        (PsElabDeclarationBatchWithOriginsResult.mk result\n          (psElabBatchOriginAt sourceIndex source members Option.none))\n  | Except.error error =>\n      match error with\n      | PsElabError.structuralRecursionInvariantArgument =>\n          match source with\n          | PsSyntaxDeclaration.definition name binders type value span =>\n              match psElabPlanStructuralNormalizationWithOrigin\n                  environment name binders type value span with\n              | Except.error failure =>\n                  Except.error\n                    (psElabOriginErrorAt sourceIndex source\n                      PsElabOriginPhase.normalizationPlanning failure)\n              | Except.ok plan =>\n                  match plan with\n                  | Option.none =>\n                      Except.error\n                        (psElabOriginErrorAt sourceIndex source\n                          PsElabOriginPhase.stableDeclaration error)\n                  | Option.some normalized =>\n                      match psElabNormalizedDefinitionWithPhase\n                          environment name normalized.normalization with\n                      | Except.error failure =>\n                          Except.error\n                            (psElabOriginErrorAt sourceIndex source\n                              failure.phase failure.error)\n                      | Except.ok result =>\n                          let members : List PsElabMemberOrigin :=\n                            List.cons\n                              (PsElabMemberOrigin.mk 0 (psDeclarationName result.worker)\n                                PsElabOriginRole.normalizedWorker)\n                              (List.cons\n                                (PsElabMemberOrigin.mk 1\n                                  (psDeclarationName result.publicDeclaration)\n                                  PsElabOriginRole.publicWrapper)\n                                List.nil);\n                          Except.ok\n                            (PsElabDeclarationBatchWithOriginsResult.mk\n                              (psElabNormalizedDefinitionBatch result)\n                              (psElabBatchOriginAt sourceIndex source members\n                                (Option.some normalized.origin)))\n          | _ =>\n              Except.error\n                (psElabOriginErrorAt sourceIndex source\n                  PsElabOriginPhase.stableDeclaration error)\n      | _ =>\n          Except.error\n            (psElabOriginErrorAt sourceIndex source\n              PsElabOriginPhase.stableDeclaration error)\n\ndef psElabDeclarationBatch\n    (environment : PsEnvironment) (source : PsSyntaxDeclaration) :\n    Except PsElabError PsElabDeclarationBatchResult :=\n  match psElabDeclarationBatchWithOrigins environment 0 source with\n  | Except.error failure => Except.error failure.error\n  | Except.ok result => Except.ok result.result\n\n"
+        },
+        {
+          "label": "Retain per-source origins during the actual module fold; project raw module APIs",
+          "oldText": "def psElabDeclarationsWorker\n    (sources : List PsSyntaxDeclaration)\n    (environment : PsEnvironment)\n    (declarationsRev : List PsDeclaration) :\n    Except PsElabError PsElabModuleResult :=\n  match sources with\n  | List.nil =>\n      Except.ok\n        (PsElabModuleResult.mk\n          environment\n          (psElabReverseDeclarations declarationsRev))\n  | List.cons source rest =>\n      match psElabDeclarationBatch environment source with\n      | Except.error error => Except.error error\n      | Except.ok result =>\n          match\n              psAddDeclarationList\n                environment\n                result.declarations with\n          | Except.error error => Except.error error\n          | Except.ok nextEnvironment =>\n              psElabDeclarationsWorker\n                rest\n                nextEnvironment\n                (psPrependBatchReverse\n                  result.declarations\n                  declarationsRev)\n\ndef psElabDeclarations\n    (environment : PsEnvironment)\n    (sources : List PsSyntaxDeclaration)\n    (declarationsRev : List PsDeclaration) :\n    Except PsElabError PsElabModuleResult :=\n  psElabDeclarationsWorker\n    sources\n    environment\n    declarationsRev\n\ndef psElabModule\n    (environment : PsEnvironment)\n    (module : PsSyntaxModule) :\n    Except PsElabError PsElabModuleResult :=\n  psElabDeclarations environment module.declarations []",
+          "newText": "def psElabDeclarationsWithOriginsWorker\n    (sources : List PsSyntaxDeclaration)\n    (environment : PsEnvironment)\n    (declarationsRev : List PsDeclaration)\n    (originsRev : List PsElabBatchOrigin)\n    (sourceIndex : Nat) :\n    Except PsElabOriginError PsElabModuleWithOriginsResult :=\n  match sources with\n  | List.nil =>\n      Except.ok\n        (PsElabModuleWithOriginsResult.mk\n          (PsElabModuleResult.mk\n            environment\n            (psElabReverseDeclarations declarationsRev))\n          (psListReverse originsRev))\n  | List.cons source rest =>\n      match psElabDeclarationBatchWithOrigins environment sourceIndex source with\n      | Except.error error => Except.error error\n      | Except.ok batch =>\n          match\n              psAddDeclarationList\n                environment\n                batch.result.declarations with\n          | Except.error error =>\n              Except.error\n                (PsElabOriginError.mk error batch.origin.sourceIndex\n                  batch.origin.sourceName batch.origin.span\n                  PsElabOriginPhase.declarationInsertion)\n          | Except.ok nextEnvironment =>\n              psElabDeclarationsWithOriginsWorker\n                rest\n                nextEnvironment\n                (psPrependBatchReverse\n                  batch.result.declarations\n                  declarationsRev)\n                (List.cons batch.origin originsRev)\n                (Nat.succ sourceIndex)\n\n-- Existing raw APIs project the same actual declarations, environment and error.\n-- A raw worker's incoming declaration prefix receives no invented origins.\ndef psElabDeclarationsWorker\n    (sources : List PsSyntaxDeclaration)\n    (environment : PsEnvironment)\n    (declarationsRev : List PsDeclaration) :\n    Except PsElabError PsElabModuleResult :=\n  match psElabDeclarationsWithOriginsWorker\n      sources environment declarationsRev List.nil 0 with\n  | Except.error failure => Except.error failure.error\n  | Except.ok result => Except.ok result.result\n\ndef psElabDeclarations\n    (environment : PsEnvironment)\n    (sources : List PsSyntaxDeclaration)\n    (declarationsRev : List PsDeclaration) :\n    Except PsElabError PsElabModuleResult :=\n  psElabDeclarationsWorker\n    sources\n    environment\n    declarationsRev\n\ndef psElabModuleWithOrigins\n    (environment : PsEnvironment)\n    (sourceModule : PsSyntaxModule) :\n    Except PsElabOriginError PsElabModuleWithOriginsResult :=\n  psElabDeclarationsWithOriginsWorker\n    sourceModule.declarations environment List.nil List.nil 0\n\ndef psElabModule\n    (environment : PsEnvironment)\n    (module : PsSyntaxModule) :\n    Except PsElabError PsElabModuleResult :=\n  match psElabModuleWithOrigins environment module with\n  | Except.error failure => Except.error failure.error\n  | Except.ok result => Except.ok result.result\n"
+        }
+      ]
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/ORIGIN_RETENTION.md",
+      "baseBlob": null,
+      "baseExpectedAbsent": true,
+      "newBlob": "124c5155e445bf2f1800b8a32a47b4504bf64020",
+      "newUtf8Bytes": 16850,
+      "lineCount": 177
+    }
+  ],
+  "semantics": {
+    "actualPlanRetained": true,
+    "actualConstructedWorkerSyntaxRetained": true,
+    "actualCoreMemberNamesRetained": true,
+    "sourceIndex": "Zero-based local module source-declaration ordinal",
+    "memberIndex": "Zero-based ordinal within actual returned batch",
+    "moduleIdentity": "Attached by source-owned Compiler.Sh1 caller; not reconstructed here",
+    "sourceSpanPrecision": "Original containing declaration span; no claim of expression precision",
+    "originEnvironmentSnapshots": false,
+    "originPublicContextSnapshots": false,
+    "printedNameWitnessReconstruction": false,
+    "parserOrNormalizerCapabilityExpansion": false,
+    "secondFullPreparation": false,
+    "originalLanguageErrorsProjected": true,
+    "rawSignatures": [
+      {
+        "name": "psElabRecursionBuildNormalization",
+        "equal": true
+      },
+      {
+        "name": "psElabPlanStructuralNormalization",
+        "equal": true
+      },
+      {
+        "name": "psElabNormalizedDefinition",
+        "equal": true
+      },
+      {
+        "name": "psElabDeclarationBatchStable",
+        "equal": true
+      },
+      {
+        "name": "psElabDeclarationBatch",
+        "equal": true
+      },
+      {
+        "name": "psElabDeclarationsWorker",
+        "equal": true
+      },
+      {
+        "name": "psElabDeclarations",
+        "equal": true
+      },
+      {
+        "name": "psElabModule",
+        "equal": true
+      }
+    ],
+    "algorithmByteChecks": {
+      "stableByteIdentical": true,
+      "originalElaboratorAlgorithmPrefixUnchanged": true,
+      "newLeadingDotNonPatternLines": []
+    },
+    "generalPreservationProven": false,
+    "semanticContractQualified": false,
+    "strictSh1Qualified": false,
+    "providerChecked": false
+  },
+  "errorPhases": [
+    "stableDeclaration",
+    "normalizationPlanning",
+    "normalizedWorker",
+    "publicWrapper",
+    "declarationInsertion"
+  ],
+  "memberRoles": [
+    "sourceDeclaration",
+    "inductiveType",
+    "structureType",
+    "constructor",
+    "recursor",
+    "normalizedWorker",
+    "publicWrapper"
+  ],
+  "dependentIntegration": {
+    "owner": "root",
+    "modules": [
+      "Compiler/Api.lean",
+      "Compiler/Sh1.lean",
+      "BackendTs/Sh1.lean",
+      "host consumers"
+    ],
+    "currentSourceGuard": {
+      "path": "psc0/scripts/check-elab-declarations-selfhost-source-syntax.mjs",
+      "baseBlob": "68d229c41684f40011b9687217c41730f2d8806b",
+      "needed": "Move recursive body/order/insertion/explicit-result assertions to psElabDeclarationsWithOriginsWorker and retain the original psElabDeclarationsWorker signature/projection plus psElabDeclarations forwarding assertions; preserve all forbidden forms.",
+      "editedInThisCandidate": false
+    },
+    "finishReuse": "Source-owned finish may retain the actual final preparation environment and the successful canonical admission encoding once. Existing arbitrary external prepared APIs retain validation/rebuild behavior; no cache or kernel change."
+  },
+  "verification": {
+    "method": "Pure in-memory source review and exact guarded text reconstruction; no repository source or tests executed.",
+    "sourceEditsReverseToExactBase": true,
+    "noRemovedDeclarations": true,
+    "noDuplicateNewDeclarations": true,
+    "noNewShorthandConstructorTerms": true,
+    "unchangedStableAlgorithm": true,
+    "unrelatedElaboratorAlgorithmBytesPreserved": true,
+    "independentReview": {
+      "reviewer": "projection_repair",
+      "disposition": "No correction requested after bounded source-only review.",
+      "reviewedSourceBlobs": [
+        "c403bd879e439b7b6e88303df430890352a14115",
+        "a388d013dbf6c9270ffa91997512f672da6aabff"
+      ],
+      "checks": [
+        "Actual Core declaration constructors, isStructure, imports, and new result constructor arities/fields.",
+        "No new shorthand constructor term in changed blocks.",
+        "Planner algorithm byte-equivalent after companion-name/result-type substitutions.",
+        "Constructed worker syntax retained once and shared with origin.",
+        "Stable-to-specific-fallback decision and raw error values preserved.",
+        "Actual Core member order/names, module-local source indices, and reversed accumulators.",
+        "Known worker/wrapper/final-insertion error phases, without finer location claims.",
+        "No full context/environment field in any retained origin record."
+      ],
+      "repositoryExecution": false
+    },
+    "executedBuilds": 0,
+    "executedTests": 0,
+    "refWrites": 0
+  },
+  "supersedesManifest": "11338d0476a2044b3c24ffc550b4cf0299b9d556"
+}

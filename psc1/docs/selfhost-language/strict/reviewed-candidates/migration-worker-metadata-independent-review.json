@@ -1,0 +1,553 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-migration-worker-metadata-independent-review",
+  "status": "CLEAR",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/migration-worker-metadata-independent-review.json",
+  "decision": "The three exact host-only candidates are clear for publication and the existing qualification run. The legacy completion is restricted to the two explicit names-only scopes whose entry indexes are empty by construction. No production, frontend, fixture, kernel, defeq or cache algorithm changes are part of this correction.",
+  "scope": {
+    "method": "Independent GitHub blob/source reads and pure in-memory text, JSON, structural-difference and SHA256 review. No compiler execution, tests, workflow rerun, active log read, source commit or ref update.",
+    "currentSourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "currentRootTree": "c7903f7b30b45f08f7c311869681b4ca1a9908c9",
+    "currentPscTree": "3cb88a6ee17b429cfde8215819fb789c3c2910ca",
+    "selectedRSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "selectedRRootTree": "68a744ebc21330d06fbfbddfaac0130625860d16",
+    "selectedRPscTree": "e0705508010fb8ec700e0d7db1e3684b351f364c",
+    "actualExecutionOfCandidates": false,
+    "sourceGeneralPreservationReopened": false
+  },
+  "exactCandidates": [
+    {
+      "path": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+      "baseGitBlob": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+      "candidateGitBlob": "d08d8c622f68314db32ef38d03539a8130abf3f6",
+      "id": "worker",
+      "baseSha256": "3e43c4ee676c3aea2f5f68b24799a991a72fa608ef65b6371833fafcfe7dc808",
+      "baseBytes": 39884,
+      "candidateSha256": "7c34c498b505158f45dbe5f11f367038e9dd03cb297d2b83dea7c79b13e05472",
+      "candidateBytes": 41494,
+      "exactForwardAndReverse": true,
+      "guards": [
+        {
+          "oldStart": 169,
+          "newStart": 169,
+          "oldLineCount": 1,
+          "newLineCount": 1,
+          "beforeSha256": "20890a0adb577db6fa6db7568dc1ec3aa54ccab238077d6f8c3d13cb3a6c496e",
+          "afterSha256": "255f30804345cb2d809eae427392b62f769d7e35cd26c9421f8c501780ba13a4"
+        },
+        {
+          "oldStart": 506,
+          "newStart": 506,
+          "oldLineCount": 0,
+          "newLineCount": 19,
+          "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "afterSha256": "4d3fb0caca0e45104317739d25757e10a19f567bfb9e448c8568ebce35f03419"
+        },
+        {
+          "oldStart": 575,
+          "newStart": 594,
+          "oldLineCount": 1,
+          "newLineCount": 1,
+          "beforeSha256": "e6332ddad20f67d4e74290e531a56f2941937b630c6eb80c4d66bca41e2ab1d7",
+          "afterSha256": "623060455fb4efffcf322757607f7e4fc2f28c4ecc731668c5b1759ea21f5f35"
+        },
+        {
+          "oldStart": 650,
+          "newStart": 669,
+          "oldLineCount": 1,
+          "newLineCount": 1,
+          "beforeSha256": "e6332ddad20f67d4e74290e531a56f2941937b630c6eb80c4d66bca41e2ab1d7",
+          "afterSha256": "623060455fb4efffcf322757607f7e4fc2f28c4ecc731668c5b1759ea21f5f35"
+        },
+        {
+          "oldStart": 752,
+          "newStart": 771,
+          "oldLineCount": 1,
+          "newLineCount": 5,
+          "beforeSha256": "bede084517a8aab4308ac5559ee798e066c7b352a989e63ea13616621e211037",
+          "afterSha256": "79d112fac128053553bbbeba454d1ed87dddd653164e296d0d583161cb110b50"
+        },
+        {
+          "oldStart": 756,
+          "newStart": 779,
+          "oldLineCount": 1,
+          "newLineCount": 1,
+          "beforeSha256": "ab6ab2d544f7a7b86fb3479b13edbbfbfbe88edc686fef2d210e8d39ecaf0b43",
+          "afterSha256": "217f55f02908faa17b34ba3da4f000499b0fdb76c1c166986262c7b4a151b619"
+        },
+        {
+          "oldStart": 772,
+          "newStart": 795,
+          "oldLineCount": 0,
+          "newLineCount": 1,
+          "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "afterSha256": "a1599980fa1c09372fa5af7034b76e8b5ae22cbb52f58f9153ee51054c186173"
+        },
+        {
+          "oldStart": 791,
+          "newStart": 815,
+          "oldLineCount": 1,
+          "newLineCount": 3,
+          "beforeSha256": "9a571f0a1e2552b675b9001392034846a609be03fbf34b84491bba52d6fa4b7a",
+          "afterSha256": "d05e3d0c09a37f5740b5acef6cd5d8a560e97cc0f63e330b088f7f2127a0cd86"
+        },
+        {
+          "oldStart": 794,
+          "newStart": 820,
+          "oldLineCount": 0,
+          "newLineCount": 1,
+          "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "afterSha256": "d6007f58531b1fb2717045d0b4299525df2f1f6534ef0058f42ff9512a336016"
+        },
+        {
+          "oldStart": 799,
+          "newStart": 826,
+          "oldLineCount": 1,
+          "newLineCount": 3,
+          "beforeSha256": "2c14e28ef26e65799df965cd14175982d1a56070b85a7add1fb424e198702c01",
+          "afterSha256": "fbf8bc6b125f6043eb00e1e32ea1a03662131599273c349d7eb149d9ca0b5420"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "baseGitBlob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+      "candidateGitBlob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+      "id": "qualifier",
+      "baseSha256": "fc7eb46a8f0d1b8fa4db6ef39a09d14cd3d771b9741fae74cd44b197fd1cf193",
+      "baseBytes": 73556,
+      "candidateSha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+      "candidateBytes": 73618,
+      "exactForwardAndReverse": true,
+      "guards": [
+        {
+          "oldStart": 1065,
+          "newStart": 1065,
+          "oldLineCount": 1,
+          "newLineCount": 3,
+          "beforeSha256": "a8cc63c241b58c17bc8625cab03173e4a492c26db8f3ecf9d9c2f451e2e9fe29",
+          "afterSha256": "9ccda255b6e95c5e4ebb808ce2094074450474d32c4d90dd1d0314641f361117"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/psc0-sh1.yml",
+      "baseGitBlob": "cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8",
+      "candidateGitBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+      "id": "workflow",
+      "baseSha256": "d40e8fda2a7beee1457352edef58e5b5f90f85b2dbdc8c25d1fa039c3d34c758",
+      "baseBytes": 23472,
+      "candidateSha256": "2bed091157fce89dea162719a4fe0d7d23deb4be90910aae344f7cb29d405cd5",
+      "candidateBytes": 25735,
+      "exactForwardAndReverse": true,
+      "guards": [
+        {
+          "oldStart": 321,
+          "newStart": 321,
+          "oldLineCount": 1,
+          "newLineCount": 3,
+          "beforeSha256": "bb0b3ba37a67f93c92229a4c0fe385e85742f2320296b731ea8dbeecc2031c3f",
+          "afterSha256": "e2054964865ff0dae41ebcc95672e738a4728dd35f6575f2828e846c8c726fec"
+        },
+        {
+          "oldStart": 342,
+          "newStart": 344,
+          "oldLineCount": 0,
+          "newLineCount": 30,
+          "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "afterSha256": "12ffcbcee22137e8df092a0262267add3033fe6e26e8a4e480da379914cbcce9"
+        }
+      ]
+    }
+  ],
+  "textGuardConvention": "Independently computed minimal line-LCS hunks. beforeSha256/afterSha256 hash each hunk's LF-joined line array, without an added trailing LF. Empty insertion guards hash the empty string. Ten worker hunks, one qualifier hunk and two workflow hunks are a line-diff representation, distinct from the primary packet's edit-block grouping. Whole-file SHA256 and exact forward/reverse reconstruction bind every byte.",
+  "sourceOwners": [
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "selectedR": {
+        "gitBlob": "c41474cdbd008999368dfaf368be988e9982042b",
+        "sha256": "1d2408504ea7cd2d30f972c46d4a961332dd99c05f895b6d45500a075627d825",
+        "bytes": 24687
+      },
+      "current": {
+        "gitBlob": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+        "sha256": "3cfcea753582afd703f7f48c6c247f708fe2d197dedffcd708eb128d7f177c5d",
+        "bytes": 29672
+      }
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "selectedR": {
+        "gitBlob": "864cf3a59c51537aca59e0bb7691a66f0dce777c",
+        "sha256": "19aa54eb52b8b43603493d6468614a514e8aeb718e0068eacbdc053c551f1479",
+        "bytes": 6762
+      },
+      "current": {
+        "gitBlob": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75",
+        "sha256": "6de88d9b5e41e6e87fd03e55adfe8e218d8c55ba7d9086716c1c75cd6e9212af",
+        "bytes": 6731
+      }
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "selectedR": {
+        "gitBlob": "4098822ae5ca1a1c3d3d476be5b592daad7d2110",
+        "sha256": "37c8270367c2c8b57b3fb652d58a3314ae900e7e225141dc91fee06591ee6509",
+        "bytes": 17667
+      },
+      "current": {
+        "gitBlob": "afd981e10d609d38db9ce4698fb4a6152bb50c7f",
+        "sha256": "06f584ff2d4bae2c16d70e899d255a16155df3cf774830ebc99ecd24ac574af6",
+        "bytes": 17652
+      }
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "current": {
+        "gitBlob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+        "sha256": "a55cb381a686ab9081587380793b1b3d8fe485c86b88770fbce4a3e2250516a7",
+        "bytes": 22534
+      }
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "current": {
+        "gitBlob": "b4af2687c1b94e85014e323e5325385f139d4015",
+        "sha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15",
+        "bytes": 138189
+      }
+    }
+  ],
+  "ownedDataDeclarationComparison": [
+    {
+      "owner": "Basic",
+      "oldDataTypes": 12,
+      "currentDataTypes": 13,
+      "differences": [
+        {
+          "name": "PsErasureDeclarationNames",
+          "old": {
+            "kind": "structure",
+            "line": 76,
+            "source": "structure PsErasureDeclarationNames where\n  byCore : PsErasureNameIndex String\n  byOutput : PsErasureNameIndex Bool\n  count : Nat"
+          },
+          "current": {
+            "kind": "structure",
+            "line": 88,
+            "source": "structure PsErasureDeclarationNames where\n  byCore : PsErasureNameIndex String\n  byOutput : PsErasureNameIndex Bool\n  count : Nat\n  entries : PsErasureNameIndex PsErasureEntryInfo"
+          }
+        },
+        {
+          "name": "PsErasureEntryInfo",
+          "old": null,
+          "current": {
+            "kind": "structure",
+            "line": 83,
+            "source": "structure PsErasureEntryInfo where\n  binders : List PsErasedBinderKind\n  runtimeArity : Nat\n  typeArity : Nat"
+          }
+        }
+      ]
+    },
+    {
+      "owner": "Structure",
+      "oldDataTypes": 2,
+      "currentDataTypes": 2,
+      "differences": []
+    },
+    {
+      "owner": "Inductive",
+      "oldDataTypes": 4,
+      "currentDataTypes": 4,
+      "differences": []
+    }
+  ],
+  "semanticMetadataBoundary": {
+    "actualOwner": "PsErasureScope.declarationNames is PsErasureDeclarationNames, defined in Erasure.Basic; this field is not owned by the elaborator or environment.",
+    "entryRole": "PsErasureEntryInfo stores the aligned raw forall/lambda declaration-entry binder sequence and runtime/type arities. It distinguishes declaration parameters from returned function arrows. Basic.psErasureEntryInfoWithFuel and psErasurePrepareDeclarationEntries produce it; Definition.psErasureEnsureDefinitionEntry may populate it, and Expr.psErasureResolveEntry plus psEraseKnownEntryApplication consume it for argument partition, arity checks, erased type transport and remaining application grouping.",
+    "nonemptyDisposition": "Nonempty entry metadata is semantically relevant and must not be discarded, projected away, treated as an unknown field or silently replaced. The proposed typed observer rejects nonempty entries. This review authorizes no general compatibility adapter.",
+    "finiteConstructorArgument": "In current Basic.psErasureDeclarationNameIndex, the List.nil result sets entries to PsErasureNameIndex.empty, and the List.cons result copies tail.entries unchanged. Structural induction gives an empty entries index for every finite naming-pair list. The fixture's four naming pairs therefore have an empty entry index even though the name maps are nonempty.",
+    "fixtureConstruction": "The fixed scopeNames list is passed to psErasureScopeEmpty. The fixture's seededScope spreads that result and changes only localContext, runtimeLocals, runtimeExpressions and currentDefinition. It does not call entry preparation or insert an entry.",
+    "nilWorkerArgument": "Both old-R and current psPrepareRuntimeStructures and psPrepareRuntimeInductives return the supplied scope unchanged for inputs=List.nil, together with the reversed supplied IR accumulator. The old bodies return this result through a scope/accumulator lambda; the current bodies take those parameters directly. The unchanged host invokes the saturated public argument order and checks exact same-generation scope equality before serializing these results.",
+    "nonemptyModuleBoundary": "The actual module-erasure path prepares declaration entries before structure/inductive processing, and general application consumes that metadata. Those populated scopes are outside unpreparedScopeObservation's domain and receive no completion or omission.",
+    "boundedSchemaCompleteness": "Across the Basic/Structure/Inductive data declarations, only the existing declaration-name record adds entries and the new EntryInfo record is introduced. Existing structure/inductive result schemas are unchanged. The complete retained 87-case raw report comparison independently finds only the two entry-field additions plus their derived hashes."
+  },
+  "observerReview": {
+    "defaultSchema": "entry-metadata/1",
+    "explicitLegacySchema": "selected-r-names-only/1",
+    "allowedSchemasExactly": [
+      "entry-metadata/1",
+      "selected-r-names-only/1"
+    ],
+    "acceptedCurrentDeclarationNamesKeys": [
+      "byCore",
+      "byOutput",
+      "count",
+      "entries"
+    ],
+    "acceptedLegacyDeclarationNamesKeys": [
+      "byCore",
+      "byOutput",
+      "count"
+    ],
+    "emptyEntryValue": {
+      "tag": "empty"
+    },
+    "keyOrderArgument": "The unchanged plain observer recursively allocates fresh arrays/objects and inserts ordinary object keys in sorted order. Thus Object.keys(names) has the asserted exact order. Appending entries to the fresh legacy observation produces the same order as the sorted current observation. The compiler-owned scope is not mutated.",
+    "rejectionBoundary": "Current absence, additional declaration-name fields, any nonempty entries value, or additional fields on the empty entry observation reject. Legacy mode rejects a current four-field record; schema mode is never inferred from a missing field.",
+    "completedPositions": [
+      {
+        "family": "F2",
+        "observationIndex": 23,
+        "case": "structures-empty-reverse-accumulator",
+        "pointer": "/families/1/observations/23/result/scope/declarationNames/entries"
+      },
+      {
+        "family": "F2",
+        "observationIndex": 27,
+        "case": "inductives-empty-reverse-accumulator",
+        "pointer": "/families/1/observations/27/result/scope/declarationNames/entries"
+      }
+    ],
+    "unchangedSameGenerationAssertions": [
+      "STRUCTURES_EMPTY_SCOPE",
+      "INDUCTIVES_EMPTY_SCOPE",
+      "STRUCTURES_EMPTY_REVERSE",
+      "INDUCTIVES_EMPTY_REVERSE",
+      "expectScopeBase retains declarationNames in commonScopeFields"
+    ],
+    "authenticatedLegacyOptIns": [
+      {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "site": "candidate selectedAuthoringSeed -> loadCompiler(expectedSha256) -> referenceWorkerReport",
+        "authentication": "Selected qualified successor manifest, cold-recovery/provider requirements from the selected reader, selected compiler byte digest and expected loader digest. Current selected manifest is the pinned historical R."
+      },
+      {
+        "path": ".github/workflows/psc0-sh1.yml",
+        "site": "authenticated-R migration/ABI preflight -> runMigrationWorkerConformance",
+        "authentication": "Selected qualified successor manifest and selected compiler expected JavaScript SHA256; existing seed-selection/native-recovery policy authenticates the selected R. Only this reference caller opts in."
+      }
+    ],
+    "publicComparator": "The optional beforeDeclarationNamesSchema defaults to current; the after call always uses the current default. Its documented historical option is caller-authenticated and is not an automatic missing-field fallback. No additional active legacy caller is introduced.",
+    "currentCapabilityCaller": "The unchanged runSh1Capabilities call passes no schema override, so N1/C1/C2/C3 require the current schema.",
+    "caseCount": 87,
+    "allFixtureAndCompilerCallsUnchanged": true,
+    "postC1WholeReportDeepEqualUnchanged": true,
+    "reportPolicy": "unprepared-empty-entry-index/1; explicit selected-R completion only",
+    "languageCompatibilityModeAdded": false
+  },
+  "earlyDataGate": {
+    "placement": "A full-qualification-only step directly after the successful native development step and before C1 generation. Its ordinary success dependency prevents use after a failed N1 step. Development-only runs skip it. The selected successor has parent metadata, so the preceding authenticated-R reference preflight executes on this full lane.",
+    "operation": "Read and compare three completed JSON receipts plus selected manifest metadata. No compiler is imported, constructed, called or rebuilt in this added step. The readSelectedAuthoringSeed selected-successor path reads/validates manifest data and computes identity.",
+    "producerPaths": "Workflow writes reference to dist/sh1/worker-harness-reference.json. The full workflow passes --out dist/sh1/development; nativeCandidate appends N1 and runs capabilities at N1/capabilities. Both producers write receipt.json before emitting the retained matching marker.",
+    "guards": [
+      {
+        "selector": "reference /evidence",
+        "actual": "migration-fixture-authenticated-reference-preflight",
+        "expected": "migration-fixture-authenticated-reference-preflight",
+        "matches": true
+      },
+      {
+        "selector": "reference /passed",
+        "actual": true,
+        "expected": true,
+        "matches": true
+      },
+      {
+        "selector": "reference /recipeSourceRef",
+        "actual": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+        "expected": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+        "matches": true
+      },
+      {
+        "selector": "reference /referenceSourceRef",
+        "actual": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "expected": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "matches": true
+      },
+      {
+        "selector": "reference /referenceCompilerSha256",
+        "actual": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+        "expected": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+        "matches": true
+      },
+      {
+        "selector": "reference /selectedSeedIdentitySha256",
+        "actual": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+        "expected": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+        "matches": true
+      },
+      {
+        "selector": "native /evidence",
+        "actual": "native-seeded-generated-compiler-candidate",
+        "expected": "native-seeded-generated-compiler-candidate",
+        "matches": true
+      },
+      {
+        "selector": "native /sourceRef",
+        "actual": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+        "expected": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+        "matches": true
+      },
+      {
+        "selector": "capabilities /evidence",
+        "actual": "raw-source-generated-execution",
+        "expected": "raw-source-generated-execution",
+        "matches": true
+      },
+      {
+        "selector": "capabilities /compilerSha256",
+        "actual": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+        "expected": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+        "matches": true
+      },
+      {
+        "selector": "reference /report/cases",
+        "actual": 87,
+        "expected": 87,
+        "matches": true
+      },
+      {
+        "selector": "capabilities /workerMigration/cases",
+        "actual": 87,
+        "expected": 87,
+        "matches": true
+      }
+    ],
+    "receipts": [
+      {
+        "id": "reference",
+        "marker": "PSC0_SH1_WORKER_HARNESS_REFERENCE",
+        "occurrence": 1,
+        "eventSequence": 3,
+        "archivePayloadPointer": "/events/2/payload",
+        "logLine": 2197,
+        "path": "dist/sh1/worker-harness-reference.json",
+        "rawLoggedPayloadSha256": "6578f09b775dc08c09bf39b3ab4228ea1b0ca8d4265ad37de3902f49128fd851",
+        "reconstructedReceiptSha256": "3ee1b87cd247de87f392ef6756a1ab1e3c7bd40f440466724a669a83e1aaabc7",
+        "reconstructedReceiptBytes": 353067,
+        "reconstruction": "JSON.stringify(payload, null, 2) plus LF; producer source verified. This is retained logged-payload reconstruction, not an independently downloaded artifact."
+      },
+      {
+        "id": "native",
+        "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+        "occurrence": 1,
+        "eventSequence": 35,
+        "archivePayloadPointer": "/events/34/payload",
+        "logLine": 2236,
+        "path": "dist/sh1/development/N1/receipt.json",
+        "rawLoggedPayloadSha256": "de020246a8f161b44d1c866a642def237c9c714d0ed56f8effd148a6ce394ceb",
+        "reconstructedReceiptSha256": "f87ebe4b4ac7c5200e1f876e6cf84df09a8df73731a0a521f9987b81ef7592d0",
+        "reconstructedReceiptBytes": 15832,
+        "reconstruction": "JSON.stringify(payload, null, 2) plus LF; producer source verified. This is retained logged-payload reconstruction, not an independently downloaded artifact."
+      },
+      {
+        "id": "capabilities",
+        "marker": "PSC0_SH1_CAPABILITIES",
+        "occurrence": 1,
+        "eventSequence": 31,
+        "archivePayloadPointer": "/events/30/payload",
+        "logLine": 2232,
+        "path": "dist/sh1/development/N1/capabilities/receipt.json",
+        "rawLoggedPayloadSha256": "46b0bc5c2086a8ae68d3b52bde2e9bd34cbee70747bd0509cea5275a30f6b19b",
+        "reconstructedReceiptSha256": "ad77cceaa6169d5ffb9815127fa33c6e86a19b01382b5ac87b1e90fa8ba18ec6",
+        "reconstructedReceiptBytes": 404353,
+        "reconstruction": "JSON.stringify(payload, null, 2) plus LF; producer source verified. This is retained logged-payload reconstruction, not an independently downloaded artifact."
+      }
+    ],
+    "completeReportComparison": "assert.deepEqual(capabilities.workerMigration, reference.report), with both cases fields required to equal 87. No case, field, diagnostic, IR output, same-generation assertion or later C1 correspondence comparison is removed.",
+    "currentRunBinding": "GITHUB_SHA binds reference.recipeSourceRef and native.sourceRef; reference source/compiler/seed identity match the selected manifest; capabilities.compilerSha256 matches native.artifacts.javascriptSha256.",
+    "actualSelectorVerification": "Every added evidence literal and data selector resolves in the actual attempt14 completed markers. The marker values authenticate paths and identities, not execution of the new step. Attempt14 predates these candidates and its raw R/current reports fail the old equality as retained.",
+    "selectedManifest": {
+      "path": "psc0/selfhost-seed.json",
+      "gitBlob": "44a05964c49000478c282afc013c84fca8c2de65",
+      "sha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+      "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+      "identityProjectionIndependentlyRecomputed": true
+    },
+    "dataReader": {
+      "path": "psc0/scripts/sh1-successor-seed.mjs",
+      "gitBlob": "3514a7797e739e7a47af33c91ab58e912584d0c7",
+      "sha256": "00b5dbfae38715df2888d3b3577897010fe98e65fc4268302d7253397e0067e2",
+      "bytes": 22728
+    },
+    "capabilityReceiptProducer": {
+      "path": "psc0/scripts/sh1-capabilities.mjs",
+      "gitBlob": "14c581f57a28b5f9edcd372e10fea1a1e575c217",
+      "sha256": "171316bbe186ff91ac055a1171e27e86f5e605d2082d5d7ffcf90de6a68749eb",
+      "bytes": 25989
+    }
+  },
+  "retainedDataReview": {
+    "archive": {
+      "gitBlob": "b3a7d3283137369315c7801a287f02a9080a4410",
+      "sha256": "1d3227b2a36f621d2303bf1613681932d5d8a0a6bd1796c527d0d9c511b25821",
+      "bytes": 1399405,
+      "markers": 68
+    },
+    "actualRun": {
+      "runId": 38011068208,
+      "runAttempt": 1,
+      "compilerJobId": 114090942895,
+      "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "nativeCandidateCompleted": true,
+      "c1BuildCompleted": true,
+      "candidateStepPassed": false,
+      "c2Started": false,
+      "c3Started": false,
+      "providerJobConclusion": "skipped"
+    },
+    "replay": {
+      "rawDifferencePaths": [
+        {
+          "path": "/families/1/observations/23/result/scope/declarationNames/entries",
+          "after": {
+            "tag": "empty"
+          }
+        },
+        {
+          "path": "/families/1/observations/27/result/scope/declarationNames/entries",
+          "after": {
+            "tag": "empty"
+          }
+        },
+        {
+          "path": "/families/1/observationSha256",
+          "before": "8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59",
+          "after": "f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2"
+        },
+        {
+          "path": "/observationSha256",
+          "before": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+          "after": "a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8"
+        }
+      ],
+      "all87ObservationCounts": {
+        "R": 87,
+        "N1": 87,
+        "C1": 87
+      },
+      "rawN1C1ExactlyEqual": true,
+      "completedWholeReportsExactlyEqual": true,
+      "completedF2Sha256": "f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2",
+      "completedObservationSha256": "a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8",
+      "compactFullReportSha256": "2850f574fee1141fe3e96eee88be8010179e46108a23677d568e1fff701071c8",
+      "compactFullReportBytes": 51437
+    },
+    "interpretation": "This pure structural replay changes only the two explicitly known-empty legacy observation fields and their derived report hashes, then adds the shared descriptive observation policy to every report. It does not execute compiler code or the candidate hosts, edit the retained raw evidence, or substitute a replay for future actual qualification receipts."
+  },
+  "qualificationBoundary": {
+    "actualNewCandidateRunPassed": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerAccepted": false,
+    "correspondenceRowsRemainPending": 33,
+    "stageObligationsRemainPending": 27,
+    "allActiveDispositionsUnchanged": true,
+    "immutableRuntimeContractAndPsconfigUnchanged": true,
+    "selectedByPsconfig": false,
+    "selectedRUnchanged": true,
+    "releaseAndSpecStatusDraftsRemainPending": true,
+    "performanceImprovementProven": false,
+    "permittedNextAction": "Publish only the reviewed host correction with its review/evidence records and run the existing full qualification lane. Final source/recipe identities and complete terminal compiler/provider receipts are still required before any final discharge or release claim."
+  }
+}

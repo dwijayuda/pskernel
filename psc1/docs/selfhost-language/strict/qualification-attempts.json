@@ -1,0 +1,3694 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-sh1-qualification-attempts",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "sourceRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
+      "runId": 37964798240,
+      "workflowId": 378853677,
+      "runAttempt": 1,
+      "compilerJobId": 113936354535,
+      "providerJobId": 113938374217,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37964798240",
+      "startedAt": "2026-10-09T17:14:00Z",
+      "completedAt": "2026-10-09T17:19:06Z",
+      "status": "failure",
+      "failedStep": {
+        "number": 23,
+        "name": "Run the bounded native development gate before qualification"
+      },
+      "actualRefusal": {
+        "schemaVersion": 1,
+        "evidence": "native-atomic-source-refusal",
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.BackendTs.Sh1Target",
+        "detail": "283:14: expected 'term', got '.'"
+      },
+      "successfulSteps": [
+        {
+          "number": 1,
+          "name": "Set up job"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4"
+        },
+        {
+          "number": 3,
+          "name": "Authenticate the selected R seed and TS7-only recovery policy"
+        },
+        {
+          "number": 4,
+          "name": "Run actions/setup-node@v4"
+        },
+        {
+          "number": 5,
+          "name": "Run leanprover/lean-action@v1"
+        },
+        {
+          "number": 6,
+          "name": "Install the pinned current TypeScript 7 profile"
+        },
+        {
+          "number": 7,
+          "name": "Verify the installed TypeScript 7 profile before compiler generation"
+        },
+        {
+          "number": 8,
+          "name": "Verify host syntax and bootstrap source restrictions"
+        },
+        {
+          "number": 9,
+          "name": "Verify successor seed descriptor and cache contracts"
+        },
+        {
+          "number": 10,
+          "name": "Restore the selected qualified compiler bytes"
+        },
+        {
+          "number": 11,
+          "name": "Verify the restored selected compiler bytes"
+        },
+        {
+          "number": 12,
+          "name": "Check out pinned R source for a missing selected seed cache"
+        },
+        {
+          "number": 13,
+          "name": "Recover all four selected R products with native Lean and TypeScript 7"
+        },
+        {
+          "number": 14,
+          "name": "Verify selected authoring cache and execution runtime before current generation"
+        },
+        {
+          "number": 15,
+          "name": "Retain the verified qualified authoring seed"
+        },
+        {
+          "number": 16,
+          "name": "Restore incremental current compiler build"
+        },
+        {
+          "number": 17,
+          "name": "Build current native compiler"
+        },
+        {
+          "number": 18,
+          "name": "Run native parser, translation, and erasure regression targets"
+        },
+        {
+          "number": 19,
+          "name": "Build the actual native checked seed for source and import tests"
+        },
+        {
+          "number": 20,
+          "name": "Verify new grammar source loading, imports, and native workspace boundaries"
+        },
+        {
+          "number": 21,
+          "name": "Verify native and generated TypeScript CLI boundaries"
+        },
+        {
+          "number": 22,
+          "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler"
+        },
+        {
+          "number": 27,
+          "name": "Retain incremental native outputs"
+        },
+        {
+          "number": 28,
+          "name": "Retain compiler evidence and exact generated artifacts"
+        },
+        {
+          "number": 54,
+          "name": "Post Check out pinned R source for a missing selected seed cache"
+        },
+        {
+          "number": 56,
+          "name": "Post Run actions/checkout@v4"
+        },
+        {
+          "number": 57,
+          "name": "Complete job"
+        }
+      ],
+      "providerStatus": "skipped",
+      "currentGenerationQualification": "not-reached",
+      "strictRuntimeReference": "not-reached",
+      "strictSourceAndTargetConformance": "not-reached",
+      "log": {
+        "retrieval": "GitHub Actions job-log API decoded text",
+        "sha256": "22db4770599e603db8c6321ddde00644f0571678aea7460c289296ee7aac4edf",
+        "characters": 333586
+      },
+      "artifacts": [
+        {
+          "id": 11632639657,
+          "name": "psc0-sh1-ts7.0.2-cf35b6b2a3328a065721ef48cf633a44e6122362",
+          "size_in_bytes": 2246306,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11632639657",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11632639657/zip",
+          "expired": false,
+          "created_at": "2026-10-09T17:19:02Z",
+          "expires_at": "2026-11-08T17:19:00Z",
+          "updated_at": "2026-10-09T17:19:02Z",
+          "digest": "sha256:f7a8a453ba4d8455ed4b74c26df4e4d7b3d045e861210f40dbeaf920d59a4856",
+          "workflow_run": {
+            "id": 37964798240,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "cf35b6b2a3328a065721ef48cf633a44e6122362"
+          }
+        }
+      ],
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "scopeOfFailure": "Authored target-policy source used constructor term shorthand unsupported by the existing owned Lean frontend. Native Lean accepted that syntax; the strict source entry refused before elaborating this module."
+    },
+    {
+      "attempt": 2,
+      "sourceRef": "ce3c4f55f99fd11c7a61d5449e67bc49d58658db",
+      "runId": 37966777236,
+      "workflowId": 378853677,
+      "runAttempt": 1,
+      "compilerJobId": 113942981936,
+      "providerJobId": 113943536721,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37966777236",
+      "startedAt": "2026-10-09T17:30:37Z",
+      "completedAt": "2026-10-09T17:32:00Z",
+      "status": "failure",
+      "failedStep": {
+        "number": 23,
+        "name": "Run the bounded native development gate before qualification"
+      },
+      "actualRefusal": {
+        "schemaVersion": 1,
+        "evidence": "native-atomic-source-refusal",
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.BackendTs.Sh1Target",
+        "detail": "matchExpectedType"
+      },
+      "successfulSteps": [
+        {
+          "number": 1,
+          "name": "Set up job"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4"
+        },
+        {
+          "number": 3,
+          "name": "Authenticate the selected R seed and TS7-only recovery policy"
+        },
+        {
+          "number": 4,
+          "name": "Run actions/setup-node@v4"
+        },
+        {
+          "number": 5,
+          "name": "Run leanprover/lean-action@v1"
+        },
+        {
+          "number": 6,
+          "name": "Install the pinned current TypeScript 7 profile"
+        },
+        {
+          "number": 7,
+          "name": "Verify the installed TypeScript 7 profile before compiler generation"
+        },
+        {
+          "number": 8,
+          "name": "Verify host syntax and bootstrap source restrictions"
+        },
+        {
+          "number": 9,
+          "name": "Verify successor seed descriptor and cache contracts"
+        },
+        {
+          "number": 10,
+          "name": "Restore the selected qualified compiler bytes"
+        },
+        {
+          "number": 11,
+          "name": "Verify the restored selected compiler bytes"
+        },
+        {
+          "number": 14,
+          "name": "Verify selected authoring cache and execution runtime before current generation"
+        },
+        {
+          "number": 16,
+          "name": "Restore incremental current compiler build"
+        },
+        {
+          "number": 17,
+          "name": "Build current native compiler"
+        },
+        {
+          "number": 18,
+          "name": "Run native parser, translation, and erasure regression targets"
+        },
+        {
+          "number": 19,
+          "name": "Build the actual native checked seed for source and import tests"
+        },
+        {
+          "number": 20,
+          "name": "Verify new grammar source loading, imports, and native workspace boundaries"
+        },
+        {
+          "number": 21,
+          "name": "Verify native and generated TypeScript CLI boundaries"
+        },
+        {
+          "number": 22,
+          "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler"
+        },
+        {
+          "number": 27,
+          "name": "Retain incremental native outputs"
+        },
+        {
+          "number": 28,
+          "name": "Retain compiler evidence and exact generated artifacts"
+        },
+        {
+          "number": 56,
+          "name": "Post Run actions/checkout@v4"
+        },
+        {
+          "number": 57,
+          "name": "Complete job"
+        }
+      ],
+      "providerStatus": "skipped",
+      "currentGenerationQualification": "not-reached",
+      "strictRuntimeReference": "not-reached",
+      "strictSourceAndTargetConformance": "not-reached",
+      "log": {
+        "retrieval": "GitHub Actions job-log API decoded text",
+        "sha256": "0c0b3eec6e86d86a27ca17bcc1b3f81c76a64ff0a542f7a32df4013f6c5ee154",
+        "characters": 253714
+      },
+      "artifacts": [
+        {
+          "id": 11633887132,
+          "name": "psc0-sh1-ts7.0.2-ce3c4f55f99fd11c7a61d5449e67bc49d58658db",
+          "size_in_bytes": 462998,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11633887132",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11633887132/zip",
+          "expired": false,
+          "created_at": "2026-10-09T17:31:56Z",
+          "expires_at": "2026-11-08T17:31:55Z",
+          "updated_at": "2026-10-09T17:31:56Z",
+          "digest": "sha256:1ff5d7436936b87407658f26994eb90bf42ef12469b45f6a4766e24753f6cd20",
+          "workflow_run": {
+            "id": 37966777236,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "ce3c4f55f99fd11c7a61d5449e67bc49d58658db"
+          }
+        }
+      ],
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "scopeOfFailure": "The first correction made Sh1Target parse. The owned elaborator then refused matchExpectedType while preparing the same module; native Lean and earlier native/source regression gates passed. No generated compiler or current strict conformance was qualified."
+    },
+    {
+      "attempt": 3,
+      "sourceRef": "d6b7044258efaa272dcf396ce08b0c10496edcd2",
+      "runId": 37967710379,
+      "workflowId": 378853677,
+      "runAttempt": 1,
+      "compilerJobId": 113946142567,
+      "providerJobId": 113946865443,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37967710379",
+      "startedAt": "2026-10-09T17:38:32Z",
+      "completedAt": "2026-10-09T17:40:23Z",
+      "status": "failure",
+      "failedStep": {
+        "number": 23,
+        "name": "Run the bounded native development gate before qualification"
+      },
+      "actualRefusal": {
+        "stage": "typescript-compilation",
+        "code": "TS2367",
+        "diagnosticCount": 11,
+        "diagnostics": [
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(74,99): error TS2367: This comparison appears to be unintentional because the types '3n' and '5n' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(75,99): error TS2367: This comparison appears to be unintentional because the types '5n' and '3n' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(77,99): error TS2367: This comparison appears to be unintentional because the types '3n' and '5n' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(78,99): error TS2367: This comparison appears to be unintentional because the types '5n' and '3n' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(96,99): error TS2367: This comparison appears to be unintentional because the types '-7n' and '3n' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(97,99): error TS2367: This comparison appears to be unintentional because the types '3n' and '-7n' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(115,99): error TS2367: This comparison appears to be unintentional because the types 'false' and 'true' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(116,99): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(119,99): error TS2367: This comparison appears to be unintentional because the types 'false' and 'true' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(120,99): error TS2367: This comparison appears to be unintentional because the types 'true' and 'false' have no overlap.",
+          "dist/sh1/development/N1/strict-runtime/runtime/index.ts(151,99): error TS2367: This comparison appears to be unintentional because the types '\"é\"' and '\"é\"' have no overlap."
+        ],
+        "fixture": "dist/sh1/development/N1/strict-runtime/runtime/index.ts"
+      },
+      "successfulSteps": [
+        {
+          "number": 1,
+          "name": "Set up job"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4"
+        },
+        {
+          "number": 3,
+          "name": "Authenticate the selected R seed and TS7-only recovery policy"
+        },
+        {
+          "number": 4,
+          "name": "Run actions/setup-node@v4"
+        },
+        {
+          "number": 5,
+          "name": "Run leanprover/lean-action@v1"
+        },
+        {
+          "number": 6,
+          "name": "Install the pinned current TypeScript 7 profile"
+        },
+        {
+          "number": 7,
+          "name": "Verify the installed TypeScript 7 profile before compiler generation"
+        },
+        {
+          "number": 8,
+          "name": "Verify host syntax and bootstrap source restrictions"
+        },
+        {
+          "number": 9,
+          "name": "Verify successor seed descriptor and cache contracts"
+        },
+        {
+          "number": 10,
+          "name": "Restore the selected qualified compiler bytes"
+        },
+        {
+          "number": 11,
+          "name": "Verify the restored selected compiler bytes"
+        },
+        {
+          "number": 14,
+          "name": "Verify selected authoring cache and execution runtime before current generation"
+        },
+        {
+          "number": 16,
+          "name": "Restore incremental current compiler build"
+        },
+        {
+          "number": 17,
+          "name": "Build current native compiler"
+        },
+        {
+          "number": 18,
+          "name": "Run native parser, translation, and erasure regression targets"
+        },
+        {
+          "number": 19,
+          "name": "Build the actual native checked seed for source and import tests"
+        },
+        {
+          "number": 20,
+          "name": "Verify new grammar source loading, imports, and native workspace boundaries"
+        },
+        {
+          "number": 21,
+          "name": "Verify native and generated TypeScript CLI boundaries"
+        },
+        {
+          "number": 22,
+          "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler"
+        },
+        {
+          "number": 27,
+          "name": "Retain incremental native outputs"
+        },
+        {
+          "number": 28,
+          "name": "Retain compiler evidence and exact generated artifacts"
+        },
+        {
+          "number": 56,
+          "name": "Post Run actions/checkout@v4"
+        },
+        {
+          "number": 57,
+          "name": "Complete job"
+        }
+      ],
+      "successfulSubgates": {
+        "nativeAtomicSource": {
+          "schemaVersion": 1,
+          "evidence": "native-atomic-source-and-target-enforcement",
+          "sourceKind": "lean",
+          "sourcePolicy": {
+            "profile": "PSC0-SH/1",
+            "enforcementVersion": 1,
+            "sourceKind": "lean",
+            "accepted": true,
+            "traversalComplete": true,
+            "moduleCount": 64,
+            "sourceBytes": 1178731,
+            "inputBytes": 1179810,
+            "importCount": 149,
+            "options": {
+              "maxModules": 1024,
+              "maxInputBytes": 16777216,
+              "maxSyntaxSteps": 5000000,
+              "maxTypeSteps": 1000000,
+              "maxTermSteps": 5000000
+            },
+            "stats": {
+              "visitedSteps": 140192,
+              "typeSteps": 17058,
+              "termSteps": 54775,
+              "declarationCount": 1623,
+              "theoremCount": 0
+            }
+          },
+          "targetPolicy": {
+            "policy": "psc0-sh1-ts-target/1",
+            "accepted": true,
+            "traversalComplete": true,
+            "visitedSteps": 1572007
+          },
+          "originalIr": {
+            "schemaVersion": 1,
+            "kind": "psc0-native-original-ir-check",
+            "accepted": true,
+            "traversalComplete": true,
+            "visitedSteps": 777667,
+            "expressionCount": 60937,
+            "findingCount": 0,
+            "retainedFindingCount": 0,
+            "omittedFindingDetails": 0,
+            "sameOriginalIrCheckedBeforeEmission": true,
+            "strictSh1Qualified": false
+          },
+          "sourceOrigins": {
+            "actualParsedModulesRetained": 64,
+            "semanticCorrespondenceDischarged": false
+          },
+          "preparationCount": 1,
+          "portableIrCheckCount": 1,
+          "strictSh1Qualified": false,
+          "semanticContractQualified": false,
+          "providerChecked": false
+        },
+        "nativeOriginalIrFixtures": {
+          "schemaVersion": 1,
+          "status": "pass",
+          "cases": 8,
+          "checkedEmitterRejectsInvalidIr": true,
+          "strictSh1Qualified": false
+        },
+        "sourceConformance": {
+          "compilerSha256": "e9a6d05339b353f5331df7323f35bcc2eba5b554c0f766e0682db9f05da8884e",
+          "accepted": 2,
+          "refused": 33,
+          "hostCarrierRefusals": 2
+        },
+        "targetConformance": {
+          "compilerSha256": "e9a6d05339b353f5331df7323f35bcc2eba5b554c0f766e0682db9f05da8884e",
+          "accepted": 9,
+          "refused": 20
+        },
+        "runtimeReference": {
+          "sourceSha256": "3a4ada94e66ce4bc8a18bf0417c2a9660c06e326b4de312c8ee83ba831bda008",
+          "contractSha256": "21a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89",
+          "observationCount": 186,
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+        }
+      },
+      "nativeSourceReceipt": {
+        "path": "attempts/d6b7044258efaa272dcf396ce08b0c10496edcd2/native-source.json",
+        "blob": "b2cc2580e82b9f43c2f96f70cd6abc2a3741624f",
+        "sha256": "4002227af1aa5667d75006cb72407cead865195e16583d8be47b00eff906ccbf",
+        "byteIdentity": "Exact native JSON marker plus its writer's newline; independently matches nativeSourceReceiptSha256 in the actual native IR evidence."
+      },
+      "providerStatus": "skipped",
+      "currentGenerationQualification": "not-reached",
+      "strictRuntimeReference": "native-reference-produced",
+      "strictRuntimeGeneratedComparison": "not-reached-typescript-fixture-refused",
+      "log": {
+        "retrieval": "GitHub Actions job-log API decoded text",
+        "sha256": "a29f53b59ad41bb4621ea63d0711333e5e7dbf86777d90905dbbcebafeecef6e",
+        "characters": 334689
+      },
+      "artifacts": [
+        {
+          "id": 11634467384,
+          "name": "psc0-sh1-ts7.0.2-d6b7044258efaa272dcf396ce08b0c10496edcd2",
+          "size_in_bytes": 1548325,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11634467384",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11634467384/zip",
+          "expired": false,
+          "created_at": "2026-10-09T17:40:19Z",
+          "expires_at": "2026-11-08T17:40:17Z",
+          "updated_at": "2026-10-09T17:40:19Z",
+          "digest": "sha256:09c421c7b7899bee5001ef2fd0b5bc42735478bb0ccc30743d18d8c323fa2118",
+          "workflow_run": {
+            "id": 37967710379,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "d6b7044258efaa272dcf396ce08b0c10496edcd2"
+          }
+        }
+      ],
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "scopeOfFailure": "The unchanged 186-case runtime fixture reached TypeScript 7 after native source, source conformance, target conformance and native reference production passed. Six direct equality/inequality templates preserve disjoint literal types and cause TS2367. Correct the emitted static operand types without weakening the checks or substituting fixture values."
+    },
+    {
+      "attempt": 4,
+      "sourceRef": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+      "runId": 37971952859,
+      "workflowId": 378853677,
+      "runAttempt": 1,
+      "compilerJobId": 113960540944,
+      "providerJobId": 113979513794,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37971952859",
+      "startedAt": "2026-10-09T18:15:01Z",
+      "completedAt": "2026-10-09T19:03:06Z",
+      "status": "failure",
+      "failedStep": {
+        "number": 25,
+        "name": "Qualify exact current-source C2/C3 at a promotion checkpoint"
+      },
+      "actualRefusal": {
+        "stage": "fixed-point",
+        "code": "javascript-heap-out-of-memory",
+        "exitCode": 134,
+        "fatalAt": "2026-10-09T19:02:29Z",
+        "processEndedAt": "2026-10-09T19:02:59Z",
+        "diagnostic": "FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory",
+        "lastGc": {
+          "usedMb": 3680.6,
+          "totalMb": 4123.7,
+          "averageMutatorUtilization": 0.135,
+          "currentMutatorUtilization": 0.084
+        },
+        "firstUncompletedGeneration": "C2",
+        "internalPhase": "Not determined: existing buildGeneration has no internal phase markers. No C2 generation receipt was logged and subsequent authenticated archive inspection found no C2 files."
+      },
+      "successfulSteps": [
+        {
+          "number": 1,
+          "name": "Set up job"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4"
+        },
+        {
+          "number": 3,
+          "name": "Authenticate the selected R seed and TS7-only recovery policy"
+        },
+        {
+          "number": 4,
+          "name": "Run actions/setup-node@v4"
+        },
+        {
+          "number": 5,
+          "name": "Run leanprover/lean-action@v1"
+        },
+        {
+          "number": 6,
+          "name": "Install the pinned current TypeScript 7 profile"
+        },
+        {
+          "number": 7,
+          "name": "Verify the installed TypeScript 7 profile before compiler generation"
+        },
+        {
+          "number": 8,
+          "name": "Verify host syntax and bootstrap source restrictions"
+        },
+        {
+          "number": 9,
+          "name": "Verify successor seed descriptor and cache contracts"
+        },
+        {
+          "number": 10,
+          "name": "Restore the selected qualified compiler bytes"
+        },
+        {
+          "number": 11,
+          "name": "Verify the restored selected compiler bytes"
+        },
+        {
+          "number": 14,
+          "name": "Verify selected authoring cache and execution runtime before current generation"
+        },
+        {
+          "number": 16,
+          "name": "Restore incremental current compiler build"
+        },
+        {
+          "number": 17,
+          "name": "Build current native compiler"
+        },
+        {
+          "number": 18,
+          "name": "Run native parser, translation, and erasure regression targets"
+        },
+        {
+          "number": 19,
+          "name": "Build the actual native checked seed for source and import tests"
+        },
+        {
+          "number": 20,
+          "name": "Verify new grammar source loading, imports, and native workspace boundaries"
+        },
+        {
+          "number": 21,
+          "name": "Verify native and generated TypeScript CLI boundaries"
+        },
+        {
+          "number": 22,
+          "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler"
+        },
+        {
+          "number": 23,
+          "name": "Run the bounded native development gate before qualification"
+        },
+        {
+          "number": 24,
+          "name": "Build the selected-seed candidate before full qualification"
+        },
+        {
+          "number": 27,
+          "name": "Retain incremental native outputs"
+        },
+        {
+          "number": 28,
+          "name": "Retain compiler evidence and exact generated artifacts"
+        },
+        {
+          "number": 56,
+          "name": "Post Run actions/checkout@v4"
+        },
+        {
+          "number": 57,
+          "name": "Complete job"
+        }
+      ],
+      "successfulSubgates": {
+        "nativeSource": {
+          "moduleCount": 64,
+          "sourceBytes": 1178903,
+          "importCount": 149,
+          "sourceDeclarations": 1623,
+          "originalIrExpressions": 60937,
+          "originalIrVisitedSteps": 777667,
+          "originalIrFindings": 0,
+          "traversalComplete": true
+        },
+        "nativeAndC1": {
+          "sourceAccepted": 2,
+          "sourceRefused": 33,
+          "sourceCarrierRefused": 2,
+          "targetAccepted": 9,
+          "targetRefused": 20,
+          "enabledRuntimeOperations": 45,
+          "nativeAndGeneratedObservations": 186,
+          "rawSourceNatEqualityObservations": 6,
+          "defensiveBoundsCases": 8,
+          "operandCases": 9,
+          "carrierCases": 5,
+          "textPositionFamilies": 2
+        },
+        "selectedRToC1": {
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "6b487b9b62cc749cc08b9a1e5f03686178fb8e9e4f31f0330aa0396146c5ebad",
+            "normalizedCanonicalAdmissionsSha256": "c8d1da127a519c8e8b4ecd73730d362b48aeb573fcba3dd820298d3347e1cd16",
+            "typescriptSha256": "2235b3cab6dd9bc034cbe5c84ea16d4a1c6c265aa9dde4451741a85c320b8c50",
+            "javascriptSha256": "ccdfb5f1c226dce25776b817a391a09c783a71e695ea30ca3702df198bd1d23b"
+          },
+          "workerObservations": 87,
+          "publicWorkerSignatures": 12,
+          "candidatePassed": true
+        },
+        "nativeArtifacts": {
+          "javascriptSha256": "4cc5c2561937ccafa440a3c2eb698b3b359e0a58eada682cc846eb31bc8858b7",
+          "typescriptSha256": "112a36d2e94c97f34cfe7be07f1ac90dac53a541455d55ab573c60c883f66db2"
+        }
+      },
+      "nativeSourceReceipt": {
+        "path": "attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/native-source.json",
+        "blob": "49db2db65f5ca25cf7624b98659ab3e3cf30a96c",
+        "sha256": "a69f300947b32fbb908085fde7798f19f6c03f9185c2646c9dbb691f760626ee",
+        "byteIdentity": "Exact native JSON marker plus writer newline; independently matches nativeSourceReceiptSha256 in actual native IR evidence."
+      },
+      "logDerivedEvidence": {
+        "path": "attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/log-derived-evidence.json",
+        "blob": "6ad2813cdefeb3b726498da2598c386ae487cea0",
+        "sha256": "daf8ee081c5da9cf40bfcee9398eccdb2631ff26352d3ef15ed562793708e401",
+        "markerCount": 16,
+        "meaning": "Actual successful marker payloads retained as data; not a substitute for a complete qualification receipt."
+      },
+      "providerStatus": "skipped",
+      "currentGenerationQualification": "C1-passed-no-retained-C2-products-C3-not-reached",
+      "strictRuntimeReference": "native-reference-produced-and-compared-at-N1-and-C1",
+      "strictRuntimeGeneratedComparison": "N1-and-C1-passed-45-operations-186-observations-plus-six-raw-source-equalities",
+      "log": {
+        "retrieval": "GitHub Actions job-log API decoded text",
+        "sha256": "ba246485c1297ee3631ffbf30547f6801ef665587eae9867b0646dee93f330ed",
+        "characters": 719267
+      },
+      "artifacts": [
+        {
+          "id": 11639377985,
+          "name": "psc0-sh1-ts7.0.2-05f37fc04e52bfaed70389291a0fcdeda819f71f",
+          "size_in_bytes": 3182763,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11639377985",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11639377985/zip",
+          "expired": false,
+          "created_at": "2026-10-09T19:03:02Z",
+          "expires_at": "2026-11-08T19:03:00Z",
+          "updated_at": "2026-10-09T19:03:02Z",
+          "digest": "sha256:2efaf91d57973103e53288140b2adeca3f13c53267138b228c25079d82dc287e",
+          "workflow_run": {
+            "id": 37971952859,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "05f37fc04e52bfaed70389291a0fcdeda819f71f"
+          }
+        }
+      ],
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "scopeOfFailure": "Native development and the selected-R C1 candidate passed, including the equality correction. A fresh fixed-point process exhausted its approximately 4 GiB default JavaScript heap before the first C2 generation receipt. The exact internal allocation phase is not logged. The separately reviewed reuse/semantic/empty-data candidates were not executed in this source; do not claim they already fix this peak.",
+      "nextInvestigation": "Integrate the independently reviewed one-encoding/zero-reconstruction implementation with explicit 8192 MiB old-space budget, measured runner headroom checks and host phase/resource evidence. Qualify the full coherent reviewed source; do not infer that lower work alone repairs peak memory.",
+      "retainedArtifactInspection": {
+        "runId": 37980548050,
+        "jobId": 113989649430,
+        "workflowId": 379962074,
+        "sourceRef": "5becf0cf22a8deec760e0da68b706e95ca72f902",
+        "workflowBlob": "ddab8f4985fdc7ee9661792c205678404a67296f",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/37980548050",
+        "result": "success",
+        "path": "attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/retained-artifact-inspection.json",
+        "blob": "77c6e9ae9dbf0a2c6f47cb7b0d415437bf056f0e",
+        "sha256": "8dd073faaf235c9c5bffed661d7335ec5a4bdc8dd4225d77ad3e1603aef2496c",
+        "decodedLogSha256": "5a38a503dd0ff24b169cf13f1944e6c0c7bc54c5b77b6c4d1f6b47c2b9e8fd01",
+        "decodedLogCharacters": 29180,
+        "archiveEntries": 241,
+        "archiveFiles": 241,
+        "c2Files": [],
+        "c2Products": [],
+        "compilerSha256": "ccdfb5f1c226dce25776b817a391a09c783a71e695ea30ca3702df198bd1d23b",
+        "compilerBytes": 3109387,
+        "actualC1ReceiptSha256": "b1f907a79cc97e0b6ee440d8147f0b1bbdf2372a2268ad3cf26fe339064f2a3f",
+        "actualC1ReceiptBytes": 168198,
+        "completeCompilerFunctionExcerpts": 8,
+        "compilerExecuted": false,
+        "testsExecuted": false,
+        "scope": "Read-only exact archive and compiler text inspection. No C2 files were retained in the archive. This narrows the failure to before the first TypeScript product write under the unchanged full dist/sh1 upload; it does not identify an internal synchronous phase or prove a memory fix."
+      }
+    },
+    {
+      "attempt": 5,
+      "sourceRef": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+      "runId": 37982287451,
+      "workflowId": 378853677,
+      "runAttempt": 1,
+      "compilerJobId": 113995538185,
+      "providerJobId": 113995716773,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37982287451",
+      "startedAt": "2026-10-09T19:44:35Z",
+      "diagnosticAt": "2026-10-09T19:45:02.0533397Z",
+      "status": "failure",
+      "failedStep": {
+        "number": 3,
+        "name": "Authenticate the selected R seed and TS7-only recovery policy"
+      },
+      "actualRefusal": {
+        "stage": "seed-recovery-runner-recipe-authentication",
+        "code": "PSC0_SH1_NATIVE_SEED_RECIPE_FILE_PIN",
+        "path": "scripts/sh1-grammar-conformance.mjs",
+        "expectedBlob": "48efa9b0c90e7904a1df49f43253395841bff90c",
+        "actualBlob": "77dcbec4a94f7ba27b0727a0888b4098d77f05fc"
+      },
+      "compilerExecuted": false,
+      "resourcePreflightExecuted": false,
+      "providerStatus": "skipped",
+      "currentGenerationQualification": "not-started",
+      "strictRuntimeReference": "not-started",
+      "artifacts": [],
+      "failureEvidence": {
+        "path": "attempts/2b5a4c903ed8a069cde8f08265b28042bcaf5766/setup-failure.json",
+        "blob": "fb79c27029ec3b87ebc465546aebc65157549f24"
+      },
+      "log": {
+        "path": "attempts/2b5a4c903ed8a069cde8f08265b28042bcaf5766/job.log",
+        "blob": "4a86c2878cd576768532f780da0e3e71bc7050d5",
+        "sha256": "70068f4f4f838620d1971b520d615a3d9377852153008074d46cbdde21e38316",
+        "characters": 22551
+      },
+      "scopeOfFailure": "Setup-only refusal on one exact recipe dependency. No native/generated compiler, runtime/grammar fixture, memory preflight or provider ran. All six grammar-profile fields are byte-identical; the evolving conformance module was coupled to frozen recovery solely through its profile export.",
+      "reviewedCorrection": {
+        "manifest": "recovery-profile-isolation.json",
+        "blob": "a930b0bcc8e17cf474014d359e0fe7897bb16ae3",
+        "files": 7,
+        "oneChangingConformanceDependencyIsolated": true,
+        "selectedRManifestIdentityAndProductsUnchanged": true,
+        "allSevenRuntimeImportsAndPinsReviewed": true,
+        "newIsolatedColdReceiptRequired": true
+      },
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    },
+    {
+      "attempt": 6,
+      "sourceRef": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+      "runId": 37983663904,
+      "workflowId": 378853677,
+      "compilerJobId": 114000150722,
+      "providerJobId": 114000685482,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37983663904",
+      "status": "failure",
+      "diagnosticAt": "2026-10-09T19:58:12.0312428Z",
+      "failedStep": {
+        "number": 24,
+        "name": "Run the bounded native development gate before qualification"
+      },
+      "actualRefusal": {
+        "schemaVersion": 1,
+        "evidence": "native-atomic-source-refusal",
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false,
+        "stage": "source",
+        "code": "source-elaboration",
+        "moduleName": "Ps.CompilerIr.Check",
+        "compilerStage": "elaboration",
+        "detail": "matchExpectedType",
+        "owner": "psIrCheckMatch",
+        "sourceIndex": 50,
+        "phase": "stableDeclaration",
+        "span": {
+          "start": {
+            "byteOffset": 24764,
+            "line": 500,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 27236,
+            "line": 539,
+            "column": 76
+          }
+        }
+      },
+      "recoveryAuthenticationPassed": true,
+      "resourcePreflight": {
+        "passed": true,
+        "effectiveAvailableBytes": 15235063808,
+        "minimumAvailableBytes": 12884901888,
+        "oldSpaceMiB": 8192,
+        "observedHeapLimitBytes": 8640266240,
+        "receipt": "resource-policy-preflight.log-derived.json",
+        "provenance": "Exact JSON payload observed in decoded job log, not independently retrieved artifact file bytes"
+      },
+      "nativeCompilerBuilt": true,
+      "sourceReplay": "current-authoritative-closure-rejected-before-N1-conformance",
+      "currentGenerationCandidate": "not-started",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/047a29f17392fea41ac5d59e7f8cbfc172b20313/source-refusal.json",
+        "blob": "9f3caa4f2350c4b399b5836640c8740afffc4e34"
+      },
+      "log": {
+        "path": "attempts/047a29f17392fea41ac5d59e7f8cbfc172b20313/job.log",
+        "blob": "7840feed77dfe66ca02cdbe7b0ea346531e4727b",
+        "sha256": "30ec8705c04aeb0e945ef3d2312da493a0032c6cd4c78f58ddeb4119c55849a4",
+        "characters": 259363
+      },
+      "artifacts": [
+        {
+          "id": 11642526368,
+          "name": "psc0-sh1-ts7.0.2-047a29f17392fea41ac5d59e7f8cbfc172b20313",
+          "size_in_bytes": 464146,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642526368",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642526368/zip",
+          "expired": false,
+          "created_at": "2026-10-09T19:58:14Z",
+          "expires_at": "2026-11-08T19:58:13Z",
+          "updated_at": "2026-10-09T19:58:14Z",
+          "digest": "sha256:6aa2642d8658dbc95a03d0231f32a662c013df73763b2958c6a9fb1b0978b792",
+          "workflow_run": {
+            "id": 37983663904,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "047a29f17392fea41ac5d59e7f8cbfc172b20313"
+          }
+        }
+      ],
+      "reviewedCorrection": {
+        "manifest": "match-initializer-annotation-completion.json",
+        "blob": "c3b524d00153400005985f12ce579006df1720c0",
+        "candidateBlob": "178ecf89498be6502be5f747f0c0d62eb1133420",
+        "implementationFilesReviewed": 29,
+        "leanFilesReviewed": 15,
+        "requiredSourceEdits": 1
+      },
+      "separateColdRecovery": {
+        "runId": 37983663908,
+        "result": "success",
+        "evidence": "recovery-profile-cold-evidence.json",
+        "scope": "Revised recipe only; it does not qualify this compiler source"
+      },
+      "scopeOfFailure": "Native compiler build and preceding bounded gates passed. The actual PSC0 frontend rejected the current compiler source before N1 output/conformance, C1, C2/C3 or provider acceptance. This is not a memory exhaustion or seed authentication failure.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "nextReviewedSourceCompletion": {
+        "manifest": "post-review-source-completion.json",
+        "blob": "639e78ffeba7d64f29ef02eadff9b37951073832",
+        "expectedParent": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+        "status": "three-source-files-independently-reviewed-awaiting-one-exact-source-qualification",
+        "sourceFiles": 3,
+        "fixturesAndInvocationCountsUnchanged": true,
+        "newColdRunRequired": false,
+        "sharedGeneralRowsClosed": 0
+      }
+    },
+    {
+      "attempt": 7,
+      "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "runId": 37986002380,
+      "workflowId": 378853677,
+      "compilerJobId": 114008036763,
+      "providerJobId": 114009942633,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37986002380",
+      "status": "failure",
+      "diagnosticAt": "2026-10-09T20:22:37.6258849Z",
+      "failedStep": {
+        "number": 24,
+        "name": "Run the bounded native development gate before qualification",
+        "timestamp": "2026-10-09T20:22:37.6258849Z",
+        "exitCode": 1,
+        "error": "AssertionError [ERR_ASSERTION]: grouped-empty-argument: common AST",
+        "script": "psc0/scripts/sh1-grammar-conformance.mjs",
+        "line": 543,
+        "comparison": "Lean parenthesized nomatch value parsed as app(reference nomatch,[reference value]); expected the shared empty matchE(value,[]) AST",
+        "sourceCodeCorrection": "Final independently reviewed parser expression-entry correction is integrated by the enclosing commit; see reviewed-candidates/nomatch-application-entry.json. No assertion or fixture weakened."
+      },
+      "sourceReplay": "current-authoritative-closure-admitted-N1-built-partial-native-conformance-passed",
+      "nativeSourceReceipt": {
+        "path": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/strict-source-native.json",
+        "blob": "bca25c3e02c234ece65d257b29e94bd893697d25",
+        "sha256": "dbe4957462d35bf7beb1895f5ef39135afe064aed26a5d0c7cd9f14eec3e5381",
+        "characters": 589363,
+        "fileHashIndependentlyMatched": true
+      },
+      "nativeOriginalIr": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 792484,
+        "expressionCount": 62169,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "strictSh1Qualified": false
+      },
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "lean",
+        "accepted": true,
+        "traversalComplete": true,
+        "moduleCount": 64,
+        "sourceBytes": 1209116,
+        "inputBytes": 1210195,
+        "importCount": 149,
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "stats": {
+          "visitedSteps": 142830,
+          "typeSteps": 17482,
+          "termSteps": 55698,
+          "declarationCount": 1664,
+          "theoremCount": 0
+        }
+      },
+      "sourceOriginsSummary": {
+        "policy": "psc0-declaration-origins/1",
+        "actualParsedModulesRetained": 64,
+        "moduleCount": 64,
+        "sourceDeclarationCount": 1664,
+        "coreDeclarationCount": 2510,
+        "normalizationCount": 39,
+        "semanticCorrespondenceDischarged": false
+      },
+      "partialConformance": {
+        "nativeCheckerCases": 15,
+        "sourceAccepted": 2,
+        "sourceRefused": 33,
+        "carrierRefusals": 2,
+        "targetAccepted": 9,
+        "targetRefused": 20,
+        "runtimeOperations": 45,
+        "nativeRuntimeObservations": 186,
+        "sourceEvaluationObservations": 24,
+        "sourceEvaluationHostProbes": 21,
+        "irBehaviorObservations": 61,
+        "irRefusals": 38,
+        "grammarClosure": {
+          "compilerSha256": "914211c326068981686413f53021bb16773d59293332f8d1dc017ec6ab0b750b",
+          "closureSha256": "baa67e4ed50d0a25d9d97999a10a20d3b436c8bd54304c220dc79cfab386a699",
+          "moduleCount": 64,
+          "proofScriptBytes": 988207,
+          "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent"
+        }
+      },
+      "currentGenerationCandidate": "not-started",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/grammar-failure.json",
+        "blob": "8faa56832c7db88ba3cf109ffe58c63c4ad8e1e8"
+      },
+      "log": {
+        "path": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/job.log",
+        "blob": "00fbc9633180a6aa86d54e312f6166bf0a3e2cbc",
+        "sha256": "158daa528895baff99f9c136fb6a75e4c96ed0d81176a135b34c10891f823b28",
+        "characters": 1031393
+      },
+      "artifacts": [
+        {
+          "id": 11642987189,
+          "name": "psc0-sh1-ts7.0.2-3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+          "size_in_bytes": 1803936,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642987189",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642987189/zip",
+          "expired": false,
+          "created_at": "2026-10-09T20:22:41Z",
+          "expires_at": "2026-11-08T20:22:39Z",
+          "updated_at": "2026-10-09T20:22:41Z",
+          "digest": "sha256:6e9f4f2b85e7ed3c1a5dd919f826a5466fa8eab6116aa3695f64a888ff15018d",
+          "workflow_run": {
+            "id": 37986002380,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc"
+          }
+        }
+      ],
+      "coldRecovery": {
+        "runId": 37986002167,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "The complete N1 grammar/capability gate did not finish. Successful partial checks are exact-source finite evidence only; current C1/C2/C3 and provider qualification were not reached.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    },
+    {
+      "attempt": 8,
+      "sourceRef": "656ed78db6a2c26feced9374cd7b251c062a42df",
+      "runId": 38001282875,
+      "workflowId": 378853677,
+      "compilerJobId": 114059689529,
+      "providerJobId": 114060007620,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38001282875",
+      "status": "failure",
+      "failedStep": {
+        "number": 18,
+        "name": "Build current native compiler",
+        "timestamp": "2026-10-09T22:50:37.6658137Z",
+        "exitCode": 1,
+        "error": "native Lean reserved-keyword local binder variable",
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "line": 326,
+        "diagnostics": [
+          {
+            "timestamp": "2026-10-09T22:50:37.6658137Z",
+            "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+            "line": 326,
+            "column": 19,
+            "message": "unexpected token 'variable'; expected '(', ':=', 'rec', '|' or term"
+          },
+          {
+            "timestamp": "2026-10-09T22:50:37.6659537Z",
+            "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+            "line": 326,
+            "column": 28,
+            "message": "unexpected token ':='; expected '(', '[', '{' or '⦃'"
+          },
+          {
+            "timestamp": "2026-10-09T22:50:37.6660462Z",
+            "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+            "line": 331,
+            "column": 57,
+            "message": "unexpected token ')'; expected '(', '[', '{' or '⦃'"
+          }
+        ]
+      },
+      "nativeCompilerBuilt": false,
+      "sourceReplay": "not-started",
+      "currentGenerationCandidate": "not-started",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/656ed78db6a2c26feced9374cd7b251c062a42df/native-build-failure.json",
+        "blob": "1d49d362273bed341efe25e205f0d37fb86436cc",
+        "sha256": "c8372f7a6d8d17d8f47c132ec6d9e4a717d73c68d4702ca05e298a29ffd8944f"
+      },
+      "log": {
+        "path": "attempts/656ed78db6a2c26feced9374cd7b251c062a42df/job.log",
+        "blob": "c9ad38a7d8d333f547ca4202fe4e261aa38faf05",
+        "sha256": "6c87ac80d11390d49d41c6cbf52232ac832df158efa754168e6f561cf9a2e69f",
+        "bytes": 82321
+      },
+      "artifacts": [
+        {
+          "id": 11649037453,
+          "name": "psc0-sh1-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df",
+          "sizeBytes": 447714,
+          "digest": "sha256:ded80948cd3fe16db7408eb900a39bef44fb2153cbe88ab700a5bab1ed2cf3e9",
+          "expired": false,
+          "sourceCommit": "656ed78db6a2c26feced9374cd7b251c062a42df",
+          "runId": 38001282875
+        }
+      ],
+      "resourcePreflight": {
+        "evidence": "generated-qualification-resource-preflight",
+        "command": "workflow-preflight",
+        "policy": "psc0-sh1-generated-qualification-resources/1",
+        "passed": true,
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "oldSpaceMiB": 8192,
+        "minimumAvailableBytes": 12884901888,
+        "observedHeapLimitBytes": 8640266240,
+        "inheritedHeapOverride": false,
+        "physicalTotalBytes": 16766414848,
+        "effectiveAvailableBytes": 15279034368,
+        "semanticContractQualified": false
+      },
+      "typescriptProfile": {
+        "mode": "installed-profile-contract",
+        "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json",
+        "timings": [
+          {
+            "phase": "positional-source-with-unrelated-config",
+            "version": "7.0.2",
+            "elapsedMs": 50.80332099999998
+          }
+        ]
+      },
+      "coldRecovery": {
+        "runId": 38001282913,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "Native compiler parse failure before any N1/C1/C2/C3 or provider qualification. The complete semantic fixtures and source replay did not run.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    },
+    {
+      "attempt": 9,
+      "sourceRef": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+      "runId": 38002284953,
+      "workflowId": 378853677,
+      "compilerJobId": 114062934819,
+      "providerJobId": 114063308633,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38002284953",
+      "status": "failure",
+      "failedStep": {
+        "number": 22,
+        "name": "Verify native and generated TypeScript CLI boundaries",
+        "compilerJobId": 114062934819,
+        "stepNumber": 22,
+        "path": "scripts/selfhost-replay-runtime.test.mjs",
+        "line": 103,
+        "column": 16,
+        "timestamp": "2026-10-09T23:02:23.8784042Z",
+        "assertion": "assert.equal(compiled.replayReturnedFunction(n, 11n), n === 0n ? 18n : n + 10n)",
+        "error": "AssertionError [ERR_ASSERTION]",
+        "actual": "[Function: fn]",
+        "expected": "18n",
+        "operator": "strictEqual",
+        "exitCode": 1,
+        "classification": "existing-host-call-result-arity-assertion"
+      },
+      "nativeCompilerBuilt": true,
+      "nativeRegressionsPassed": true,
+      "nativeCheckedSeedBuilt": true,
+      "sourceGrammarImportsAndWorkspacePassed": true,
+      "sourceReplay": "not-started",
+      "currentGenerationCandidate": "not-started",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/45d314b970d9d76fce9387f6bc8108fb9fab611c/runtime-cli-failure.json",
+        "blob": "57fe49c8a9421dd859ce15b5e50b7fe02e7f7c56",
+        "sha256": "9272322a204507cda4b336beebb37b9a9861d4ad4c245181a76596cffad5e6c3"
+      },
+      "log": {
+        "path": "attempts/45d314b970d9d76fce9387f6bc8108fb9fab611c/job.log",
+        "blob": "adb2fb82490eb126064cfa83fadf3dfb2c39cb9c",
+        "sha256": "8eebcf46d04d4a8c5d72dfa895609b70220b47ea515ebafc78f790481383ed42",
+        "bytes": 183576
+      },
+      "artifacts": [
+        {
+          "id": 11649673654,
+          "name": "psc0-sh1-ts7.0.2-45d314b970d9d76fce9387f6bc8108fb9fab611c",
+          "sizeBytes": 447724,
+          "digest": "sha256:18b26297bd37c23e4f762a093b2a09c595bc5676f314f7419060028cb6f75e2f",
+          "expired": false,
+          "sourceCommit": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+          "runId": 38002284953
+        }
+      ],
+      "resourcePreflight": {
+        "policy": "psc0-sh1-generated-qualification-resources/1",
+        "passed": true,
+        "node": "v22.23.3",
+        "oldSpaceMiB": 8192,
+        "minimumAvailableBytes": 12884901888,
+        "observedHeapLimitBytes": 8640266240,
+        "effectiveAvailableBytes": 15228989440,
+        "inheritedHeapOverride": false
+      },
+      "typescriptProfile": {
+        "mode": "installed-profile-contract",
+        "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json",
+        "timings": [
+          {
+            "phase": "positional-source-with-unrelated-config",
+            "version": "7.0.2",
+            "elapsedMs": 94.56032399999998
+          }
+        ]
+      },
+      "coldRecovery": {
+        "runId": 38002284959,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "The native keyword repair passed compilation and regressions. An existing host test still passed returned-function operands in one flat call. Actual returned function vs expected18n is preserved. N1/C1/C2/C3 and provider did not run. This is a caller-convention correction, not an observed compiler semantic or memory failure.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    },
+    {
+      "attempt": 10,
+      "sourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+      "runId": 38004581681,
+      "workflowId": 378853677,
+      "compilerJobId": 114070320734,
+      "providerJobId": 114070642522,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38004581681",
+      "status": "failure",
+      "failedStep": {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 24,
+        "timestamp": "2026-10-09T23:29:32.5344343Z",
+        "moduleName": "Ps.Erasure.Expr",
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "line": 641,
+        "column": 31,
+        "diagnostic": "Ps.Erasure.Expr:641:31: expected '=>', got '('",
+        "classification": "owned-source-parser-nested-constructor-pattern-refusal",
+        "exitCode": 1
+      },
+      "nativeCompilerBuilt": true,
+      "nativeRegressionsPassed": true,
+      "nativeCheckedSeedBuilt": true,
+      "sourceGrammarImportsAndWorkspacePassed": true,
+      "replayCliPassed": true,
+      "authenticatedRMigrationPreflightPassed": true,
+      "sourceReplay": "not-started",
+      "currentGenerationCandidate": "native-owned-source-preparation-refused",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "positiveFlatTailExecution": "not-reached-before-owned-source-parse-refusal",
+      "failureEvidence": {
+        "path": "attempts/00e963bb8c84fc9b29f7cc8228f1520de5ca2081/source-parse-failure.json",
+        "blob": "fb9c40b2c5c8fbceed61302624e27fdac223fad4",
+        "sha256": "1cadc932791b1e6b1c8812e7832c2e96b84fb62914e74b65d408c8160ccbc154",
+        "bytes": 7121
+      },
+      "log": {
+        "path": "attempts/00e963bb8c84fc9b29f7cc8228f1520de5ca2081/job.log",
+        "blob": "35de2a9c845a4af0d445319fede4ee3556b6610a",
+        "sha256": "51a88936c40e534dcdeae67d473860322a5c29826fec5bf9c5561799562fd515",
+        "bytes": 256537
+      },
+      "artifacts": [
+        {
+          "id": 11651005983,
+          "name": "psc0-sh1-ts7.0.2-00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+          "bytes": 463965,
+          "digest": "sha256:2045862d164cad3c781e3c5a21440bc1ae588398044b096e37437c89e28ae693",
+          "createdAt": "2026-10-09T23:29:34Z",
+          "expiresAt": "2026-11-08T23:29:33Z",
+          "sourceCommit": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+          "runId": 38004581681,
+          "uploadFileCountFromLog": 44,
+          "archiveInspected": false
+        }
+      ],
+      "resourcePreflight": {
+        "timestamp": "2026-10-09T23:28:48.3739082Z",
+        "passed": true,
+        "policyId": "psc0-sh1-generated-qualification-resources/1",
+        "node": "v22.23.3",
+        "oldSpaceMiB": 8192,
+        "observedHeapLimitBytes": 8640266240,
+        "effectiveAvailableBytes": 15313190912,
+        "minimumAvailableBytes": 12884901888
+      },
+      "typescriptProfile": {
+        "version": "7.0.2",
+        "status": "passed-step8"
+      },
+      "passedEvidence": {
+        "replay": {
+          "timestamp": "2026-10-09T23:29:26.0754843Z",
+          "marker": "PSC2_SELFHOST_REPLAY_RUNTIME",
+          "text": "PASS (strict TypeScript; 20000-step recursion, function results, name collisions, generic lists and exact UTF-8 positions)",
+          "scriptBlob": "10df1f5c075bad31e6ddf076250bedd5f26b7c53",
+          "scope": "All six existing replay fixtures, including 20000-step behavior and malformed-tag assertions; source fixture bytes unchanged."
+        },
+        "authenticatedReference": {
+          "timestamp": "2026-10-09T23:29:29.3522531Z",
+          "recipeSourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+          "referenceSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+          "referenceCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+          "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+          "cases": 87,
+          "signatureTypeAnnotations": 12,
+          "typedGenericPartialWrappers": 12,
+          "passed": true,
+          "currentSourceQualifiedByThisCheck": false,
+          "fullPayloadLocation": "Exact JSON is preserved at the PSC0_SH1_WORKER_HARNESS_REFERENCE line in the complete log."
+        }
+      },
+      "coldRecovery": {
+        "runId": 38004581696,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "The seven host changes passed replay and authenticated R migration. The next failure is one nested List pattern accepted by native Lean but refused by the owned source parser. N1 was not generated; C1/C2/C3 and provider did not run. This is not a heap failure. No automatic retry.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    {
+      "attempt": 11,
+      "sourceRef": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "runId": 38006688264,
+      "workflowId": 378853677,
+      "compilerJobId": 114076987396,
+      "providerJobId": 114077308038,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38006688264",
+      "status": "failure",
+      "failedStep": {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 24,
+        "started_at": "2026-10-09T23:55:56Z",
+        "completed_at": "2026-10-09T23:55:58Z",
+        "timestamp": "2026-10-09T23:55:58.5812764Z",
+        "moduleName": "Ps.Erasure.Expr",
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "owner": "psEraseRuntimeExprWithFuelWorker",
+        "detail": "structuralRecursionArity",
+        "sourceIndex": 76,
+        "phase": "stableDeclaration",
+        "span": {
+          "start": {
+            "byteOffset": 116469,
+            "line": 2311,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 137615,
+            "line": 2710,
+            "column": 41
+          }
+        },
+        "classification": "owned-source-recursive-call-spine-exceeds-explicit-declaration-prefix",
+        "exitCode": 1
+      },
+      "nativeCompilerBuilt": true,
+      "nativeRegressionsPassed": true,
+      "nativeCheckedSeedBuilt": true,
+      "sourceGrammarImportsAndWorkspacePassed": true,
+      "replayCliPassed": true,
+      "authenticatedRMigrationPreflightPassed": true,
+      "priorNestedPatternRefusalCleared": true,
+      "sourceReplay": "not-started",
+      "currentGenerationCandidate": "native-owned-source-elaboration-refused",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "positiveFlatTailExecution": "not-reached-before-owned-source-elaboration-refusal",
+      "failureEvidence": {
+        "path": "attempts/9640e4ba5c89ebfb3dd0adf6783530212ae27409/source-elaboration-failure.json",
+        "blob": "315c45511a8272a08a8c5aceacc834d313336767",
+        "sha256": "6f8baff27517a4f018767e28a58ba114d1b31bc23c1375e680eccb72042ccef8",
+        "bytes": 14964
+      },
+      "log": {
+        "path": "attempts/9640e4ba5c89ebfb3dd0adf6783530212ae27409/job.log",
+        "blob": "b3001bbf41d8d846f4e77a3bd764494b994c9557",
+        "sha256": "8da67cd469d51d3666580f485ea60c2c0c9c5797eeda5505b269453c56b9fe0c",
+        "bytes": 257687
+      },
+      "artifacts": [
+        {
+          "id": 11651676864,
+          "name": "psc0-sh1-ts7.0.2-9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+          "bytes": 464191,
+          "digest": "sha256:3c138eb9b66f63d9b8825abbb8e5c6c9bdfb38fe6fa5a28e523fcebe05c53969",
+          "createdAt": "2026-10-09T23:56:01Z",
+          "expiresAt": "2026-11-08T23:56:00Z",
+          "sourceCommit": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+          "runId": 38006688264,
+          "uploadFileCountFromLog": 44,
+          "archiveInspected": false
+        }
+      ],
+      "resourcePreflight": {
+        "timestamp": "2026-10-09T23:55:07.8959315Z",
+        "logLine": 273,
+        "passed": true,
+        "policyId": "psc0-sh1-generated-qualification-resources/1",
+        "node": "v22.23.3",
+        "oldSpaceMiB": 8192,
+        "observedHeapLimitBytes": 8640266240,
+        "effectiveAvailableBytes": 15351889920,
+        "minimumAvailableBytes": 12884901888
+      },
+      "typescriptProfile": {
+        "version": "7.0.2",
+        "status": "passed-step8"
+      },
+      "passedEvidence": {
+        "replay": {
+          "timestamp": "2026-10-09T23:55:53.7209889Z",
+          "logLine": 2129,
+          "marker": "PSC2_SELFHOST_REPLAY_RUNTIME",
+          "text": "PASS (strict TypeScript; 20000-step recursion, function results, name collisions, generic lists and exact UTF-8 positions)",
+          "scriptBlob": "10df1f5c075bad31e6ddf076250bedd5f26b7c53",
+          "scope": "Existing six-fixture replay runtime gate passed at this source, including the recorded 20000-step behavior; this is separate from N1 and full current-source qualification."
+        },
+        "authenticatedReference": {
+          "timestamp": "2026-10-09T23:55:56.1837484Z",
+          "logLine": 2188,
+          "recipeSourceRef": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+          "referenceSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+          "referenceCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+          "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+          "cases": 87,
+          "signatureTypeAnnotations": 12,
+          "typedGenericPartialWrappers": 12,
+          "passed": true,
+          "currentSourceQualifiedByThisCheck": false,
+          "fullPayloadLocation": "Exact JSON is preserved at the PSC0_SH1_WORKER_HARNESS_REFERENCE line in the complete log."
+        }
+      },
+      "coldRecovery": {
+        "runId": 38006688280,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "The flat-pattern parser refusal is cleared. The worker's four flattened self arguments exceed its two explicit header parameters. The observed refusal happens in source elaboration, before N1 generation or conformance; C1/C2/C3/provider are skipped. No memory failure or automatic retry.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    {
+      "attempt": 12,
+      "sourceRef": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+      "runId": 38007714076,
+      "workflowId": 378853677,
+      "compilerJobId": 114080256053,
+      "providerJobId": 114080662313,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38007714076",
+      "status": "failure",
+      "failedStep": {
+        "number": 24,
+        "name": "Run the bounded native development gate before qualification",
+        "kind": "host-conformance-assertion",
+        "code": "ERR_ASSERTION",
+        "actual": "letE",
+        "expected": "call",
+        "operator": "strictEqual",
+        "owner": "observeEmptySource",
+        "script": "psc0/scripts/sh1-strict-source-conformance.mjs",
+        "line": 94,
+        "column": 14,
+        "nodeVersion": "22.23.3",
+        "exitCode": 1,
+        "excerpt": "2026-10-10T00:09:49.0557375Z AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n2026-10-10T00:09:49.0557891Z \n2026-10-10T00:09:49.0558153Z 'letE' !== 'call'\n2026-10-10T00:09:49.0558405Z \n2026-10-10T00:09:49.0558976Z     at file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-source-conformance.mjs:94:14\n2026-10-10T00:09:49.0559697Z     at Array.map (<anonymous>)\n2026-10-10T00:09:49.0560911Z     at observeEmptySource (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-source-conformance.mjs:67:33)\n2026-10-10T00:09:49.0562372Z     at runStrictSourceConformance (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-source-conformance.mjs:535:28)\n2026-10-10T00:09:49.0563675Z     at async nativeCandidate (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:936:3)\n2026-10-10T00:09:49.0564810Z     at async file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1058:3 {\n2026-10-10T00:09:49.0565470Z   generatedMessage: true,\n2026-10-10T00:09:49.0565832Z   code: 'ERR_ASSERTION',\n2026-10-10T00:09:49.0566155Z   actual: 'letE',\n2026-10-10T00:09:49.0566468Z   expected: 'call',\n2026-10-10T00:09:49.0566783Z   operator: 'strictEqual',\n2026-10-10T00:09:49.0567112Z   diff: 'simple'\n2026-10-10T00:09:49.0567396Z }\n2026-10-10T00:09:49.0567576Z \n2026-10-10T00:09:49.0567687Z Node.js v22.23.3\n2026-10-10T00:09:49.0687574Z ##[error]Process completed with exit code 1.\n"
+      },
+      "nativeCompilerBuilt": true,
+      "nativeRegressionsPassed": true,
+      "nativeCheckedSeedBuilt": true,
+      "sourceGrammarImportsAndWorkspacePassed": true,
+      "replayCliPassed": true,
+      "authenticatedRMigrationPreflightPassed": true,
+      "priorWorkerArityRefusalCleared": true,
+      "nativeSourceEvidenceBeforeFailure": {
+        "marker": "PSC0_SH1_STRICT_SOURCE_NATIVE",
+        "evidence": "native-atomic-source-and-target-enforcement",
+        "sourceKind": "lean",
+        "sourcePolicy": {
+          "profile": "PSC0-SH/1",
+          "enforcementVersion": 1,
+          "sourceKind": "lean",
+          "accepted": true,
+          "traversalComplete": true,
+          "moduleCount": 64,
+          "sourceBytes": 1266025,
+          "inputBytes": 1267104,
+          "importCount": 149,
+          "options": {
+            "maxModules": 1024,
+            "maxInputBytes": 16777216,
+            "maxSyntaxSteps": 5000000,
+            "maxTypeSteps": 1000000,
+            "maxTermSteps": 5000000
+          },
+          "stats": {
+            "visitedSteps": 148646,
+            "typeSteps": 17937,
+            "termSteps": 58252,
+            "declarationCount": 1705,
+            "theoremCount": 0
+          }
+        },
+        "targetPolicy": {
+          "policy": "psc0-sh1-ts-target/1",
+          "accepted": true,
+          "traversalComplete": true,
+          "visitedSteps": 1663720
+        },
+        "originalIr": {
+          "schemaVersion": 1,
+          "kind": "psc0-native-original-ir-check",
+          "accepted": true,
+          "traversalComplete": true,
+          "visitedSteps": 828190,
+          "expressionCount": 64829,
+          "findingCount": 0,
+          "retainedFindingCount": 0,
+          "omittedFindingDetails": 0,
+          "sameOriginalIrCheckedBeforeEmission": true,
+          "strictSh1Qualified": false
+        },
+        "sourceOrigins": {
+          "policy": "psc0-declaration-origins/1",
+          "actualParsedModulesRetained": 64,
+          "moduleCount": 64,
+          "sourceDeclarationCount": 1705,
+          "coreDeclarationCount": 2568,
+          "normalizationCount": 50,
+          "semanticCorrespondenceDischarged": false
+        },
+        "preparationCount": 1,
+        "canonicalAdmissionEncodingCount": 1,
+        "environmentReconstructionCount": 0,
+        "portableIrCheckCount": 1,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false
+      },
+      "nativeIrPassMessages": [
+        "PSC0_SH1_IR_NATIVE_PASS: function-valued let has compositional type",
+        "PSC0_SH1_IR_NATIVE_PASS: checked emitter accepts the same valid IR",
+        "PSC0_SH1_IR_NATIVE_PASS: false let annotation is rejected",
+        "PSC0_SH1_IR_NATIVE_PASS: checked emitter refuses invalid IR",
+        "PSC0_SH1_IR_NATIVE_PASS: function parameter grouping is preserved",
+        "PSC0_SH1_IR_NATIVE_PASS: expression fuel exhaustion is explicit",
+        "PSC0_SH1_IR_NATIVE_PASS: type fuel exhaustion is explicit",
+        "PSC0_SH1_IR_NATIVE_PASS: diagnostic cap preserves finding count",
+        "PSC0_SH1_IR_NATIVE_PASS: empty layouts and typed empty results are accepted",
+        "PSC0_SH1_IR_NATIVE_PASS: empty layouts emit never and typed empty generators",
+        "PSC0_SH1_IR_NATIVE_PASS: empty match without an expected result is rejected",
+        "PSC0_SH1_IR_NATIVE_PASS: empty match still checks its scrutinee",
+        "PSC0_SH1_IR_NATIVE_PASS: empty match still checks layout type arity",
+        "PSC0_SH1_IR_NATIVE_PASS: empty alternatives still refuse an inhabited datatype",
+        "PSC0_SH1_IR_NATIVE_PASS: zero-field source record has its nullary inhabitant"
+      ],
+      "N1": {
+        "typeScriptGenerated": true,
+        "typeScript7CompilationCompleted": true,
+        "generatedCompilerLoaded": true,
+        "conformanceCompleted": false,
+        "successReceiptProduced": false,
+        "basis": "The exact stack reaches nativeCandidate line936 only after compileTypeScript at924 and loadCompiler at932 in sh1-qualify.mjs blob562f8c0e60a599fadde581f4a6deca502e9202b5. The final N1 receipt is constructed after the uncompleted conformance calls."
+      },
+      "currentGenerationCandidate": "native-generated-N1-host-conformance-incomplete",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "positiveFlatTailExecution": "not-reached-before-source-conformance-assertion",
+      "failureEvidence": {
+        "path": "attempts/fb8f8076df3ed8708f927f88aa2d32febbfa89dc/development-gate-failure.json",
+        "blob": "ff69f080d6fa1421e36e7db99a60ea4276d3e701",
+        "sha256": "09af088183bef10081851fcb1b498aab51a5d58507629e19b11413fe71b67ce2",
+        "bytes": 14727
+      },
+      "log": {
+        "path": "attempts/fb8f8076df3ed8708f927f88aa2d32febbfa89dc/compiler-job.log",
+        "blob": "0239d0ea507f23f560afd3ca84ec8dda3108c935",
+        "sha256": "a2344d5a49a849f5795998ce04fa265e4ebc3800d0dc834feeeffc1fc51da9af",
+        "bytes": 893300
+      },
+      "artifacts": [
+        {
+          "id": 11652425108,
+          "name": "psc0-sh1-ts7.0.2-fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+          "bytes": 1752868,
+          "digest": "sha256:35060aaceff9dd6366d961bd6f92737cffe0d5366ab8fce3140e63aba3bc6224",
+          "createdAt": "2026-10-10T00:09:51Z",
+          "expiresAt": "2026-11-09T00:09:50Z",
+          "sourceCommit": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+          "runId": 38007714076,
+          "archiveInspected": false
+        }
+      ],
+      "coldRecovery": {
+        "runId": 38007714034,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "typescriptProfile": {
+        "version": "7.0.2",
+        "status": "passed-step8"
+      },
+      "scopeOfFailure": "The full native compiler source/target/original-IR checks pass and N1 is generated, TS7-compiled and loaded. Its bounded source conformance rejects the obsolete empty-function outer-call expectation. No completed N1 receipt or C1/C2/C3/provider result exists.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    {
+      "attempt": 13,
+      "sourceRef": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+      "runId": 38008721677,
+      "workflowId": 378853677,
+      "compilerJobId": 114083480442,
+      "providerJobId": 114084996315,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38008721677",
+      "status": "failure",
+      "failedStep": {
+        "number": 24,
+        "name": "Run the bounded native development gate before qualification",
+        "stage": "PSC0_SH1_GENERIC_ERASURE_PREPARE",
+        "diagnostic": {
+          "tag": "elaboration",
+          "error": {
+            "tag": "infer",
+            "error": {
+              "tag": "applicationTypeMismatch"
+            }
+          }
+        },
+        "owner": "runGenericErasureConformance",
+        "script": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+        "line": 667,
+        "column": 20,
+        "nodeVersion": "22.23.3",
+        "exitCode": 1,
+        "excerpt": "2026-10-10T00:28:20.2914606Z Error: PSC0_SH1_GENERIC_ERASURE_PREPARE: {\"tag\":\"elaboration\",\"error\":{\"tag\":\"infer\",\"error\":{\"tag\":\"applicationTypeMismatch\"}}}\n2026-10-10T00:28:20.2916564Z     at unwrap (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-capabilities.mjs:44:11)\n2026-10-10T00:28:20.2918522Z     at runGenericErasureConformance (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-generic-erasure-conformance.mjs:667:20)\n2026-10-10T00:28:20.2919846Z     at async nativeCandidate (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:950:3)\n2026-10-10T00:28:20.2921016Z     at async file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1058:3\n2026-10-10T00:28:20.2921433Z \n2026-10-10T00:28:20.2921539Z Node.js v22.23.3\n2026-10-10T00:28:20.4167071Z ##[error]Process completed with exit code 1.\n"
+      },
+      "stageSummaryBeforeFailure": {
+        "n1CompilerSha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+        "n1CompilerHashMarkers": [
+          "PSC0_SH1_STRICT_SOURCE",
+          "PSC0_SH1_STRICT_TARGET",
+          "PSC0_SH1_STRICT_RUNTIME",
+          "PSC0_SH1_GRAMMAR_CLOSURE",
+          "PSC0_SH1_IR_CHECKER",
+          "PSC0_SH1_HELPER_RUNTIME"
+        ],
+        "n1CompilerHashMeaning": "The same N1 compiler hash is recorded by six completed stage markers; the complete N1 development gate did not pass.",
+        "nativeFullSource": {
+          "moduleCount": 64,
+          "sourceDeclarationCount": 1705,
+          "normalizationCount": 50,
+          "originalIr": {
+            "schemaVersion": 1,
+            "kind": "psc0-native-original-ir-check",
+            "accepted": true,
+            "traversalComplete": true,
+            "visitedSteps": 828190,
+            "expressionCount": 64829,
+            "findingCount": 0,
+            "retainedFindingCount": 0,
+            "omittedFindingDetails": 0,
+            "sameOriginalIrCheckedBeforeEmission": true,
+            "strictSh1Qualified": false
+          }
+        },
+        "sourceConformance": {
+          "marker": "PSC0_SH1_STRICT_SOURCE",
+          "acceptedRoutes": 2,
+          "refusedCases": 38,
+          "fullPayloadRetained": true
+        },
+        "targetConformance": {
+          "marker": "PSC0_SH1_STRICT_TARGET",
+          "fullPayloadRetained": true
+        },
+        "runtimeConformance": {
+          "marker": "PSC0_SH1_STRICT_RUNTIME",
+          "status": "pass",
+          "observations": 186
+        },
+        "grammarClosure": {
+          "marker": "PSC0_SH1_GRAMMAR_CLOSURE",
+          "fullPayloadRetained": true
+        },
+        "irChecker": {
+          "marker": "PSC0_SH1_IR_CHECKER",
+          "behavior": {
+            "status": "pass",
+            "observations": 61,
+            "exhaustiveForAllInputs": false,
+            "zeroFieldRecord": {
+              "ownStringFields": 0,
+              "ownBrandSymbols": 1,
+              "inhabited": true
+            },
+            "emptyScrutinee": {
+              "callbackCalls": 1,
+              "propagatedOriginalFailure": true,
+              "noEmptyInhabitantConstructed": true
+            },
+            "letScopeCases": [
+              {
+                "name": "shadowOldScope",
+                "observations": 8
+              },
+              {
+                "name": "shadowWrappedCall",
+                "observations": 8
+              },
+              {
+                "name": "shadowClosure",
+                "observations": 8
+              },
+              {
+                "name": "shadowNestedTail",
+                "observations": 5
+              }
+            ]
+          },
+          "optimizedTail": {
+            "status": "pass",
+            "observations": 12,
+            "valueObservations": 11,
+            "faultObservations": 1,
+            "entries": [
+              {
+                "name": "optimizedTailSwap",
+                "runtimeArity": 3,
+                "route": "tail-loop",
+                "implementationAbsent": true
+              },
+              {
+                "name": "optimizedTailFuel",
+                "runtimeArity": 2,
+                "route": "tail-loop",
+                "implementationAbsent": true
+              },
+              {
+                "name": "optimizedTailReverse",
+                "runtimeArity": 2,
+                "route": "tail-loop",
+                "implementationAbsent": true
+              }
+            ]
+          }
+        },
+        "helperRuntime": {
+          "marker": "PSC0_SH1_HELPER_RUNTIME",
+          "fullPayloadRetained": true
+        }
+      },
+      "N1": "generated-TS7-compiled-loaded-conformance-incomplete-no-final-receipt",
+      "currentGenerationCandidate": "native-generated-N1-generic-fixture-preparation-refused",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/development-gate-failure.json",
+        "blob": "8cc02b87983f44339fb4e8156ee791f6d33ee4e9",
+        "sha256": "cf7bb02e138d2a797d0790cef0855db6ca8207765d84f9ea4188bf90586fd2d0",
+        "bytes": 18498
+      },
+      "log": {
+        "path": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/compiler-job.log",
+        "blob": "763be222e38ed9d5510345dbecd4e722388a17b7",
+        "sha256": "3cf01e99dd7de4ce6305e379333e889577006a399314a3f2ecff411443b5cb44",
+        "bytes": 1046842
+      },
+      "stageMarkers": {
+        "path": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/stage-markers.json",
+        "blob": "1e8c4b673586f1ff2422de7b0ab14b1dfec286b6",
+        "sha256": "ce2050c6988b3c40b7951472a585852fec336b3b6cbc4642d6220d58f5a052c7",
+        "bytes": 2937671,
+        "completePayloads": 12,
+        "encoding": "Complete emitted marker payloads. Native source file uses compact JSON plus newline; other pretty hashes in this archive are explicitly transport hashes, not blanket file-byte claims."
+      },
+      "artifacts": [
+        {
+          "id": 11652692106,
+          "name": "psc0-sh1-ts7.0.2-b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+          "bytes": 1841093,
+          "digest": "sha256:a90181c130536359774816775acc74ebcae1a2c773e735fd3d55bd7ada273b8f",
+          "runId": 38008721677,
+          "sourceCommit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+          "archiveInspected": false
+        }
+      ],
+      "coldRecovery": {
+        "runId": 38008721636,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "Existing source-result correction passed; all six recorded N1 stage markers share one compiler hash. Generic fixture preparation returned infer/applicationTypeMismatch without the owner retained by the underlying origin API. No final N1/C1/C2/C3/binder/provider success.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    {
+      "attempt": 14,
+      "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "runId": 38011068208,
+      "workflowId": 378853677,
+      "compilerJobId": 114090942895,
+      "providerJobId": 114096798112,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38011068208",
+      "status": "failure",
+      "failedStep": {
+        "number": 25,
+        "name": "Build the selected-seed candidate before full qualification",
+        "stage": "PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE",
+        "diagnostic": {
+          "kind": "AssertionError",
+          "code": "ERR_ASSERTION"
+        },
+        "owner": "selected-seed candidate migration-worker comparison",
+        "script": "psc0/scripts/sh1-qualify.mjs",
+        "line": 1115,
+        "column": 10,
+        "nodeVersion": "22.23.3",
+        "exitCode": 1,
+        "after": "Complete N1 development gate, C1 generation, and the listed C1 conformance stages.",
+        "excerpt": "2026-10-10T01:22:28.0070824Z AssertionError [ERR_ASSERTION]: PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE\n2026-10-10T01:22:28.0082557Z     at file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1115:10 {\n2026-10-10T01:22:28.3137549Z ##[error]Process completed with exit code 1.\n"
+      },
+      "stageSummaryBeforeFailure": {
+        "nativeFullSource": {
+          "moduleCount": 64,
+          "sourceDeclarationCount": 1708,
+          "coreDeclarationCount": 2571,
+          "normalizationCount": 50,
+          "normalizationCountProvenance": {
+            "marker": "PSC0_SH1_STRICT_SOURCE_NATIVE",
+            "pointer": "/sourceOrigins/normalizationCount",
+            "independentlyCountedNonNullNormalizationRecords": 50,
+            "moduleRecordsVisited": 64
+          },
+          "originalIr": {
+            "schemaVersion": 1,
+            "kind": "psc0-native-original-ir-check",
+            "accepted": true,
+            "traversalComplete": true,
+            "visitedSteps": 829139,
+            "expressionCount": 64911,
+            "findingCount": 0,
+            "retainedFindingCount": 0,
+            "omittedFindingDetails": 0,
+            "sameOriginalIrCheckedBeforeEmission": true,
+            "strictSh1Qualified": false
+          }
+        },
+        "N1": {
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "sourceConformance": {
+            "status": "pass",
+            "acceptedRoutes": 2,
+            "refusedCases": 38
+          },
+          "targetConformance": {
+            "status": "pass",
+            "fullPayloadRetained": true
+          },
+          "runtimeConformance": {
+            "status": "pass",
+            "observations": 186
+          },
+          "irChecker": {
+            "status": "pass",
+            "behaviorObservations": 61,
+            "optimizedTailObservations": 12,
+            "optimizedTailStatus": "pass"
+          },
+          "helperRuntime": {
+            "status": "pass",
+            "observations": 1568
+          },
+          "genericErasure": {
+            "status": "pass",
+            "originalBehaviorObservations": 19,
+            "functionValueObservations": 19,
+            "pureFunctionValueCases": 14,
+            "hostCallbackDiagnostics": 5,
+            "preparedCoreRecursionObservations": 4,
+            "recursiveStructures": {
+              "compileOnly": true,
+              "structures": 2,
+              "declarations": 4,
+              "projections": 6,
+              "usedHypotheses": 2,
+              "unusedHypotheses": 2
+            }
+          },
+          "sessionConformance": {
+            "status": "pass"
+          },
+          "capabilities": {
+            "status": "pass",
+            "workerMigrationCases": 87
+          },
+          "fullMarkerPayloadsRetained": true,
+          "grammarClosure": {
+            "status": "pass",
+            "moduleCount": 64
+          },
+          "iterationConformance": {
+            "status": "pass"
+          },
+          "foundationConformance": {
+            "status": "pass"
+          },
+          "helperSourceConformance": {
+            "status": "pass"
+          },
+          "finalNativeCandidateReceipt": {
+            "status": "emitted",
+            "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+            "logLine": 2236
+          }
+        },
+        "C1": {
+          "compilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "sourceConformance": {
+            "status": "pass",
+            "acceptedRoutes": 2,
+            "refusedCases": 38
+          },
+          "targetConformance": {
+            "status": "pass",
+            "fullPayloadRetained": true
+          },
+          "runtimeConformance": {
+            "status": "pass",
+            "observations": 186
+          },
+          "irChecker": {
+            "status": "pass",
+            "behaviorObservations": 61,
+            "optimizedTailObservations": 12,
+            "optimizedTailStatus": "pass"
+          },
+          "helperRuntime": {
+            "status": "pass",
+            "observations": 1568
+          },
+          "genericErasure": {
+            "status": "pass",
+            "originalBehaviorObservations": 19,
+            "functionValueObservations": 19,
+            "pureFunctionValueCases": 14,
+            "hostCallbackDiagnostics": 5,
+            "preparedCoreRecursionObservations": 4,
+            "recursiveStructures": {
+              "compileOnly": true,
+              "structures": 2,
+              "declarations": 4,
+              "projections": 6,
+              "usedHypotheses": 2,
+              "unusedHypotheses": 2
+            }
+          },
+          "sessionConformance": {
+            "status": "pass"
+          },
+          "capabilities": {
+            "status": "pass",
+            "workerMigrationCases": 87
+          },
+          "fullMarkerPayloadsRetained": true,
+          "generationReceipt": {
+            "status": "emitted",
+            "marker": "PSC0_SH1_GENERATION",
+            "logLine": 2268
+          },
+          "migrationWorkerCorrespondence": {
+            "status": "failed"
+          },
+          "iterationConformance": {
+            "status": "not-run",
+            "reason": "The R/C1 report equality assertion precedes runIterationConformance in the candidate command."
+          },
+          "finalCandidatePassMarker": {
+            "status": "not-emitted"
+          }
+        }
+      },
+      "sourceAndRecipe": {
+        "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "moduleCount": 64,
+        "c1SourceBytes": 1268003,
+        "n1RecipeSha256": "b768d8285df2cfa015e11f014116d1fe5fbdbb6a1b0b514f7fdf9522e0a183e1",
+        "c1RecipeSha256": "b768d8285df2cfa015e11f014116d1fe5fbdbb6a1b0b514f7fdf9522e0a183e1",
+        "recipeFileCount": 48,
+        "completeRecipeFilesRetainedInBothReceipts": true,
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 7.0.2"
+        }
+      },
+      "generatedProducts": {
+        "N1": {
+          "nativeCompilerBinarySha256": "be28aed5164ffa0661369e424dd8d315278de396fec4c22ce3d73ff567e81012",
+          "artifacts": {
+            "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+            "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"
+          },
+          "totalMs": 324962.12823699997
+        },
+        "C1": {
+          "executingCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+          "selectedAuthoringSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+          "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+            "normalizedCanonicalAdmissionsSha256": "24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52",
+            "typescriptSha256": "1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba",
+            "javascriptSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"
+          },
+          "timingMode": "selected-R staged preparation and emission",
+          "timingsMs": {
+            "loadAndPrepare": 661103.464022,
+            "admissions": 113865.20337200002,
+            "canonicalSurface": 46189.708675,
+            "emit": 378334.42475799995,
+            "tscAndWrite": 3171.6653810001444,
+            "total": 1202664.468491
+          }
+        }
+      },
+      "workerReportComparison": {
+        "referenceCases": 87,
+        "nativeCases": 87,
+        "c1Cases": 87,
+        "nativeAndC1CompleteReportsEqual": true,
+        "referenceToC1Changes": [
+          {
+            "pointer": "/families/1/observations/23/result/scope/declarationNames/entries",
+            "referenceAbsent": true,
+            "current": {
+              "tag": "empty"
+            }
+          },
+          {
+            "pointer": "/families/1/observations/27/result/scope/declarationNames/entries",
+            "referenceAbsent": true,
+            "current": {
+              "tag": "empty"
+            }
+          },
+          {
+            "pointer": "/families/1/observationSha256",
+            "reference": "8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59",
+            "current": "f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2"
+          },
+          {
+            "pointer": "/observationSha256",
+            "reference": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+            "current": "a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8"
+          }
+        ],
+        "observationLabels": [
+          {
+            "family": "F2",
+            "zeroBasedObservationIndex": 23,
+            "name": "structures-empty-reverse-accumulator"
+          },
+          {
+            "family": "F2",
+            "zeroBasedObservationIndex": 27,
+            "name": "inductives-empty-reverse-accumulator"
+          }
+        ],
+        "scope": "Exact structural comparison of the complete logged JSON report objects only. No claim about the semantic permissibility of a comparison projection.",
+        "completeReports": "All three reports remain intact in the compact marker archive; no historical receipt or hash was resealed."
+      },
+      "N1": "pass-complete-native-development-receipt",
+      "currentGenerationCandidate": "c1-generated-and-listed-conformance-passed-final-candidate-comparison-failed",
+      "C1Iteration": "not-run",
+      "C2": "not-started",
+      "C3": "not-started",
+      "fixedPoint": "not-started",
+      "strictEvidenceBinder": "not-run",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/migration-worker-correspondence-failure.json",
+        "blob": "d5b2c58713ddc50f128f885f9457275e7397cb98",
+        "sha256": "aab18c1d5745c92aa1c8b9c4cd8cea2a9c166b6e686c88720d467fad806c7dbb",
+        "bytes": 48973
+      },
+      "log": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/job.log",
+        "blob": "04e02ab7269388aeb114b918e0c8ddca0e2c9958",
+        "sha256": "7910b7597ffc2ec735d95a199c101c4a49f86c4680bcaeabb0a45e07558d1714",
+        "bytes": 1599026
+      },
+      "stageMarkers": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/markers.json",
+        "blob": "b3a7d3283137369315c7801a287f02a9080a4410",
+        "sha256": "1d3227b2a36f621d2303bf1613681932d5d8a0a6bd1796c527d0d9c511b25821",
+        "bytes": 1399405,
+        "markerEvents": 68,
+        "duplicateNamesPreserved": true,
+        "encoding": "Compact lossless JSON archive; exact logged JSON payload reconstruction checked for all JSON events."
+      },
+      "runMetadata": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/run-metadata.json",
+        "blob": "aaef7b60abbe2ceb99de3c0e1d975798cb1bf8d5",
+        "sha256": "159bf3d8bd7e918f0449359b582336062e8b17963f3e87a2aa308fc5576b2df9",
+        "bytes": 29217
+      },
+      "nativeCandidateReceipt": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/native-candidate-receipt.json",
+        "blob": "7eae1470ff67697f67bf20074acd2837d21c1e14",
+        "sha256": "f87ebe4b4ac7c5200e1f876e6cf84df09a8df73731a0a521f9987b81ef7592d0",
+        "bytes": 15832,
+        "serialization": "JSON.stringify(payload, null, 2) + LF, as written by sh1-qualify.mjs writeJson."
+      },
+      "c1GenerationReceipt": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/c1-receipt.json",
+        "blob": "07da15195e0fa8ebcb6d3ec8db1260fb98c44743",
+        "sha256": "a7122ebca525fc37ca245161ebdb8e8d78fae3fa17139e1de5e166e384dafe7d",
+        "bytes": 169538,
+        "serialization": "JSON.stringify(payload, null, 2) + LF, as written by sh1-qualify.mjs writeJson."
+      },
+      "artifacts": [
+        {
+          "id": 11654446484,
+          "name": "psc0-sh1-ts7.0.2-138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+          "bytes": 3599676,
+          "digest": "sha256:ebd0118a78f6713073823f225f3353a7257d1df2d575dfbf5a12c5d2fc4b40f9",
+          "runId": 38011068208,
+          "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+          "archiveInspected": false
+        }
+      ],
+      "coldRecovery": {
+        "runId": 38011068114,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "Native N1 and generated C1 report the same 87 migration-worker cases. R/current differ only by two empty entries metadata fields and the resulting F2/aggregate hashes. C1 iteration, C2/C3, fixed-point binding and provider admission were not executed. The run remains failed; evidence does not classify entry metadata as disposable.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    {
+      "attempt": 15,
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runId": 38015134511,
+      "runAttempt": 1,
+      "workflowId": 378853677,
+      "compilerJobId": 114103608774,
+      "providerJobId": 114120597914,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38015134511",
+      "status": "cancelled",
+      "execution": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sourceRootTree": "600c031e9235d20baa8bf074aba8c550509f50a4",
+        "psc0Tree": "54b05a1c135ad5c7aff0902658465159a223757c",
+        "workflowId": 378853677,
+        "workflowPath": ".github/workflows/psc0-sh1.yml",
+        "runId": 38015134511,
+        "runAttempt": 1,
+        "runConclusion": "cancelled",
+        "compilerJobId": 114103608774,
+        "compilerJobStartedAt": "2026-10-10T01:57:08Z",
+        "compilerJobCompletedAt": "2026-10-10T03:27:29Z",
+        "compilerJobConclusion": "cancelled",
+        "providerJobId": 114120597914,
+        "providerJobConclusion": "skipped"
+      },
+      "termination": {
+        "step": 27,
+        "stepName": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+        "stepStartedAt": "2026-10-10T02:23:55Z",
+        "stepCompletedAt": "2026-10-10T03:27:21Z",
+        "apiConclusion": "cancelled",
+        "exactLogLine": "2026-10-10T03:27:21.0690769Z ##[error]The operation was canceled.",
+        "logLine": 2335,
+        "explicitCompilerAssertionAtTermination": false,
+        "explicitOutOfMemoryMarkerAtTermination": false,
+        "causeScope": "The returned log explicitly records cancellation. A workflow deadline or external cancellation attribution requires separate workflow/API evidence; no cause is inferred from elapsed time alone.",
+        "compilerElapsedMs": 5421000
+      },
+      "completed": {
+        "N1": "passed-complete-native-development-gate",
+        "earlyRNativeReferenceComparison": "passed-exact-complete87-report-equality",
+        "C1": "passed-full-candidate-step-including-migration-and-iteration",
+        "C2": "generation-and-all-configured-conformance-markers-complete"
+      },
+      "C3": {
+        "status": "incomplete",
+        "lastPhase": "atomic-source-wrapper-start",
+        "lastPhaseAt": "2026-10-10T02:42:13.3037499Z",
+        "resourceCheckpoints": 4,
+        "generationReceiptProduced": false
+      },
+      "fixedPoint": "not-produced",
+      "strictEvidenceBinder": "not-run",
+      "providerStatus": "skipped",
+      "sourceAndRecipe": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "moduleCount": 64,
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 7.0.2"
+        }
+      },
+      "generatedProducts": {
+        "N1": {
+          "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"
+        },
+        "C1": {
+          "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+          "normalizedCanonicalAdmissionsSha256": "24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52",
+          "typescriptSha256": "1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba",
+          "javascriptSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"
+        },
+        "C2": {
+          "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+          "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+        },
+        "C3": null
+      },
+      "timings": {
+        "N1": {
+          "total": 322716.780849
+        },
+        "C1": {
+          "loadAndPrepare": 657332.101536,
+          "admissions": 111020.54231699998,
+          "canonicalSurface": 47339.713931999984,
+          "emit": 358131.0270860001,
+          "tscAndWrite": 3091.758210999891,
+          "total": 1176915.145596
+        },
+        "C2": {
+          "loadAndPrepare": 1005408.06429,
+          "admissions": 0.20195800007786602,
+          "canonicalSurface": 45793.650664999965,
+          "emit": 939.952045999933,
+          "tscAndWrite": 2789.8532180001494,
+          "total": 1054931.723118
+        },
+        "C3CompletedDuration": null
+      },
+      "nativeSourceOrigins": {
+        "moduleCount": 64,
+        "sourceDeclarationCount": 1708,
+        "coreDeclarationCount": 2571,
+        "normalizationCount": 50,
+        "independentlyCountedNonNullNormalizations": 50
+      },
+      "evidence": {
+        "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/qualification-cancellation.json",
+        "blob": "7b47d247c5e7712c3823511924eced7c126fe452",
+        "sha256": "6e8f4bc35d7729d8d3645e99c2554b44857fe28534c880fa13184b4dc2223720",
+        "bytes": 27767
+      },
+      "log": {
+        "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/job.log",
+        "blob": "67147f3e76511cf3a918923dcfed8743636cc86b",
+        "sha256": "be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d",
+        "bytes": 1917726
+      },
+      "runMetadata": {
+        "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/run-metadata.json",
+        "blob": "e94bbd61407e7f30211c3350726a6014a2e619b8",
+        "sha256": "5c7bb0997ad6219eb767c97e952e1463aee27596c77642986046d77de78e906a",
+        "bytes": 28490
+      },
+      "markerIndex": {
+        "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/markers-index.json",
+        "blob": "495516acab02a1d636109b9af60fe330c9b15acf",
+        "sha256": "356634e7acefb07d8ecfc942f3738f9fe40fa9d2408305980335488838ac0b12",
+        "bytes": 8528
+      },
+      "markerChunks": [
+        {
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/markers-01.json",
+          "blob": "f46d7be3119fa4da530cff06a56a1f6b46b49b6e",
+          "sha256": "c55fb773867b23cebe9e9bfcc37a73640cfe1fa56b8fa136cf15185628b834ea",
+          "bytes": 1007894
+        },
+        {
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/markers-02.json",
+          "blob": "74163d5834c4ddabadb39783a164509da423a189",
+          "sha256": "d8af9160bdc7da6c311a4223ca5a5af725056524596199760c2971591752a4b8",
+          "bytes": 963169
+        }
+      ],
+      "completeReceipts": [
+        {
+          "generation": "N1",
+          "sourceArtifactPath": "development/N1/receipt.json",
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/native-candidate-receipt.json",
+          "blob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+          "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+          "bytes": 15827,
+          "serialization": "JSON.stringify(value,null,2)+'\\n'"
+        },
+        {
+          "generation": "C1",
+          "sourceArtifactPath": "C1/receipt.json",
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/c1-receipt.json",
+          "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+          "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+          "bytes": 169531,
+          "serialization": "JSON.stringify(value,null,2)+'\\n'"
+        },
+        {
+          "generation": "C2",
+          "sourceArtifactPath": "C2/receipt.json",
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/c2-receipt.json",
+          "blob": "6b661745d9c033809e3dbd83551ebf65bea027f6",
+          "sha256": "a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894",
+          "bytes": 166700,
+          "serialization": "JSON.stringify(value,null,2)+'\\n'"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 11658430459,
+          "name": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "bytes": 5147944,
+          "digest": "sha256:6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+          "runId": 38015134511,
+          "sourceCommit": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "archiveInspectedByThisRecord": false
+        }
+      ],
+      "scopeOfCancellation": "The actual run conclusion is cancelled. The original workflow allowed90 minutes and the job was cancelled during C3's synchronous atomic compilation. Completed N1/C1/C2 results are retained; no assertion or out-of-memory failure was logged at termination. Partial C3 boundary observations do not establish progress within the atomic call or a remaining-time estimate.",
+      "supportedContinuation": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "command": [
+          "node",
+          "--max-old-space-size=8192",
+          "scripts/sh1-qualify.mjs",
+          "fixed-point",
+          "--out",
+          "dist/sh1"
+        ],
+        "reusedGenerations": [
+          "N1",
+          "C1"
+        ],
+        "rebuiltGenerations": [
+          "C2",
+          "C3"
+        ],
+        "requiresAuthenticatedFullArchive": true,
+        "sourceAndRecipeUnchanged": true,
+        "qualifierEdited": false,
+        "nativeExecutableRequired": false,
+        "exactOutputDirectory": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1",
+        "jobTimeoutMinutes": 300,
+        "timeoutIsNotCompletionEstimate": true,
+        "providerRequired": true,
+        "oldRunRemainsCancelled": true
+      },
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    {
+      "attempt": 16,
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "orchestrationHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "runId": 38021634599,
+      "runAttempt": 1,
+      "workflowId": 380237977,
+      "compilerJobId": 114123691566,
+      "providerJobId": 114136283916,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38021634599",
+      "status": "failure",
+      "execution": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "orchestrationHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+        "workflowId": 380237977,
+        "workflowPath": ".github/workflows/psc0-sh1-continue.yml",
+        "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+        "workflowSha256": "506d13b419f00bb1d5361e945f1f70ce02bb4ff6c79d384317432f534c2b2df7",
+        "runId": 38021634599,
+        "runAttempt": 1,
+        "runConclusion": "failure",
+        "compilerJobId": 114123691566,
+        "compilerJobStartedAt": "2026-10-10T03:44:45Z",
+        "compilerJobCompletedAt": "2026-10-10T04:56:41Z",
+        "compilerJobConclusion": "failure",
+        "providerJobId": 114136283916,
+        "providerJobConclusion": "skipped"
+      },
+      "failedStep": {
+        "name": "Run the existing exact-source fixed-point command",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 8,
+        "started_at": "2026-10-10T03:45:32Z",
+        "completed_at": "2026-10-10T04:56:36Z"
+      },
+      "failure": {
+        "scope": "Evidence binding after both generation builds and their conformance reports",
+        "firstException": {
+          "line": 594,
+          "timestamp": "2026-10-10T04:56:36.3507522Z",
+          "name": "AssertionError",
+          "code": "ERR_ASSERTION",
+          "operator": "deepStrictEqual",
+          "message": "Expected values to be strictly deep-equal"
+        },
+        "stack": [
+          "bindNativeEmptyIr (scripts/sh1-strict-evidence.mjs:969:10)",
+          "bindStrictQualificationEvidence (scripts/sh1-strict-evidence.mjs:1740:25)",
+          "scripts/sh1-qualify.mjs:1254:26"
+        ],
+        "processExit": {
+          "code": 1,
+          "line": 674,
+          "timestamp": "2026-10-10T04:56:36.4827985Z",
+          "text": "##[error]Process completed with exit code 1."
+        },
+        "cause": "The native IR pass-marker prefix string was used as String.slice's numeric start index, retaining the prefix in all15actual names. The exact expected fixture names and all other guards remain unchanged.",
+        "sourcePath": "psc0/scripts/sh1-strict-evidence.mjs",
+        "sourceBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "line": 969,
+        "originalExpression": ".map((line) => line.slice(pass))",
+        "reviewedCorrection": ".map((line) => line.slice(pass.length))",
+        "laterBinderAssertionsReached": false
+      },
+      "nativeAndCandidatePredecessor": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774,
+        "conclusion": "cancelled",
+        "reusedGenerations": [
+          "N1",
+          "C1"
+        ],
+        "import": {
+          "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/continuation-inputs.json",
+          "blob": "8731e55592d0bcb57b977c4cc98fcfe91a64b7a9",
+          "sha256": "de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638",
+          "bytes": 161276
+        },
+        "originalArchiveRawSha256VerifiedByImport": true
+      },
+      "completed": {
+        "C2": "generation-and-all-seven-conformance-report-kinds-complete",
+        "C3": "generation-and-all-seven-conformance-report-kinds-complete",
+        "fourArtifactHashesExactlyEqual": true,
+        "complete48FileRecipeObjectsExactlyEqual": true
+      },
+      "generationEvidence": [
+        {
+          "generation": "C2",
+          "receiptFile": {
+            "id": "c2_receipt",
+            "filename": "c2-receipt.json",
+            "originalPath": "C2/receipt.json",
+            "blob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+            "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+            "bytes": 166707,
+            "readbackExact": true
+          },
+          "marker": {
+            "name": "PSC0_SH1_GENERATION",
+            "line": 553,
+            "timestamp": "2026-10-10T04:02:20.7441118Z"
+          },
+          "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "timingsMs": {
+            "loadAndPrepare": 961865.6151259999,
+            "admissions": 0.11947800009511411,
+            "canonicalSurface": 41696.7286129999,
+            "emit": 853.7180330000119,
+            "tscAndWrite": 2823.3567960000364,
+            "total": 1007239.5388819999
+          },
+          "conformanceReportsReturned": [
+            {
+              "marker": "PSC0_SH1_STRICT_SOURCE",
+              "line": 554,
+              "timestamp": "2026-10-10T04:02:22.8110318Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "c4e6f455802f74ff8f0b989f5f88fd4c30ded5fe834d9c80d9d640c2fd6f4c32",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_STRICT_TARGET",
+              "line": 555,
+              "timestamp": "2026-10-10T04:02:28.1519329Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "b61a076b035a0110cc5c4bfa5808262d01134b670468642b6da281bc866b8d69",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_STRICT_RUNTIME",
+              "line": 556,
+              "timestamp": "2026-10-10T04:02:33.7368696Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "e17fdb087642b00644b15766330e066ebfb26884a7a2bf7c850406fa3fc56a17",
+              "status": "pass"
+            },
+            {
+              "marker": "PSC0_SH1_IR_CHECKER",
+              "line": 557,
+              "timestamp": "2026-10-10T04:02:36.0146242Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "71c19d58a1d595aedf8dc24265aa463492d8002f2dba89d904ffaae52a88635b",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_CAPABILITIES",
+              "line": 558,
+              "timestamp": "2026-10-10T04:02:53.0837634Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "761cb4ec805fbc9947716ac2d2755ba5f6223d702a912e3cf79c4060eba23838",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_HELPER_RUNTIME",
+              "line": 559,
+              "timestamp": "2026-10-10T04:02:53.1180643Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "78b6773111518b543eb190068262648a06ed5a18f5ebc109f39456fb7826ab63",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_GENERIC_ERASURE",
+              "line": 560,
+              "timestamp": "2026-10-10T04:02:58.2067729Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "e746a6bc853f3ce337c917094fc0d901d9ef163fd0d7579540d92e3df8fd01f2",
+              "status": null
+            }
+          ],
+          "reportScope": "The seven producer reports were emitted after their assertions returned and before the binder exception; this is not a completed strict qualification.",
+          "resourceTrace": {
+            "generation": "C2",
+            "count": 21,
+            "sha256": "4e647a23218a92c020309547fba1dad5a2db0e20fcdfe34d9eb32a5d11ccbfcb",
+            "bytes": 11414,
+            "expected": {
+              "report": "resource-usage.jsonl",
+              "sha256": "4e647a23218a92c020309547fba1dad5a2db0e20fcdfe34d9eb32a5d11ccbfcb",
+              "checkpoints": 21,
+              "measurement": "host-process-boundaries-with-process-rss-high-water-mark",
+              "atomicInternalsObserved": false,
+              "semanticContractQualified": false
+            },
+            "first": {
+              "schemaVersion": 1,
+              "evidence": "host-resource-boundary-observation",
+              "command": "fixed-point",
+              "generation": "C2",
+              "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+              "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+              "sequence": 1,
+              "phase": "generation-start",
+              "pid": 2663,
+              "elapsedMs": 0.15118699999999308,
+              "rss": 69971968,
+              "heapTotal": 18046976,
+              "heapUsed": 11262624,
+              "external": 4278879,
+              "arrayBuffers": 1994963,
+              "heapLimitBytes": 8640266240,
+              "maxRssBytes": 71086080
+            },
+            "last": {
+              "schemaVersion": 1,
+              "evidence": "host-resource-boundary-observation",
+              "command": "fixed-point",
+              "generation": "C2",
+              "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+              "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+              "sequence": 21,
+              "phase": "generation-end-before-receipt-write",
+              "pid": 2663,
+              "elapsedMs": 1007239.379644,
+              "rss": 9308319744,
+              "heapTotal": 1735704576,
+              "heapUsed": 1261794080,
+              "external": 26100236,
+              "arrayBuffers": 23820914,
+              "heapLimitBytes": 8640266240,
+              "maxRssBytes": 9454018560
+            }
+          }
+        },
+        {
+          "generation": "C3",
+          "receiptFile": {
+            "id": "c3_receipt",
+            "filename": "c3-receipt.json",
+            "originalPath": "C3/receipt.json",
+            "blob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+            "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+            "bytes": 166709,
+            "readbackExact": true
+          },
+          "marker": {
+            "name": "PSC0_SH1_GENERATION",
+            "line": 582,
+            "timestamp": "2026-10-10T04:55:57.2340924Z"
+          },
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "timingsMs": {
+            "loadAndPrepare": 3104078.9196840003,
+            "admissions": 0.0831709997728467,
+            "canonicalSurface": 69473.70608499972,
+            "emit": 2744.4626630004495,
+            "tscAndWrite": 2722.6593709997833,
+            "total": 3179019.8319689995
+          },
+          "conformanceReportsReturned": [
+            {
+              "marker": "PSC0_SH1_STRICT_SOURCE",
+              "line": 583,
+              "timestamp": "2026-10-10T04:55:59.2223679Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "c4e6f455802f74ff8f0b989f5f88fd4c30ded5fe834d9c80d9d640c2fd6f4c32",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_STRICT_TARGET",
+              "line": 584,
+              "timestamp": "2026-10-10T04:56:04.9246532Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "b61a076b035a0110cc5c4bfa5808262d01134b670468642b6da281bc866b8d69",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_STRICT_RUNTIME",
+              "line": 585,
+              "timestamp": "2026-10-10T04:56:10.7294746Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "e17fdb087642b00644b15766330e066ebfb26884a7a2bf7c850406fa3fc56a17",
+              "status": "pass"
+            },
+            {
+              "marker": "PSC0_SH1_IR_CHECKER",
+              "line": 586,
+              "timestamp": "2026-10-10T04:56:12.9024913Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "71c19d58a1d595aedf8dc24265aa463492d8002f2dba89d904ffaae52a88635b",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_CAPABILITIES",
+              "line": 587,
+              "timestamp": "2026-10-10T04:56:30.7047965Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "761cb4ec805fbc9947716ac2d2755ba5f6223d702a912e3cf79c4060eba23838",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_HELPER_RUNTIME",
+              "line": 588,
+              "timestamp": "2026-10-10T04:56:30.7345585Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "78b6773111518b543eb190068262648a06ed5a18f5ebc109f39456fb7826ab63",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_GENERIC_ERASURE",
+              "line": 589,
+              "timestamp": "2026-10-10T04:56:36.2332968Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "e746a6bc853f3ce337c917094fc0d901d9ef163fd0d7579540d92e3df8fd01f2",
+              "status": null
+            }
+          ],
+          "reportScope": "The seven producer reports were emitted after their assertions returned and before the binder exception; this is not a completed strict qualification.",
+          "resourceTrace": {
+            "generation": "C3",
+            "count": 21,
+            "sha256": "efae3e52146d5fc678576b0c6abceb176212a0dc97eb2151874bedea63cb7af0",
+            "bytes": 11442,
+            "expected": {
+              "report": "resource-usage.jsonl",
+              "sha256": "efae3e52146d5fc678576b0c6abceb176212a0dc97eb2151874bedea63cb7af0",
+              "checkpoints": 21,
+              "measurement": "host-process-boundaries-with-process-rss-high-water-mark",
+              "atomicInternalsObserved": false,
+              "semanticContractQualified": false
+            },
+            "first": {
+              "schemaVersion": 1,
+              "evidence": "host-resource-boundary-observation",
+              "command": "fixed-point",
+              "generation": "C3",
+              "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+              "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "sequence": 1,
+              "phase": "generation-start",
+              "pid": 2663,
+              "elapsedMs": 0.0718929999275133,
+              "rss": 9337356288,
+              "heapTotal": 1146040320,
+              "heapUsed": 1002376112,
+              "external": 2458552,
+              "arrayBuffers": 179230,
+              "heapLimitBytes": 8640266240,
+              "maxRssBytes": 9454018560
+            },
+            "last": {
+              "schemaVersion": 1,
+              "evidence": "host-resource-boundary-observation",
+              "command": "fixed-point",
+              "generation": "C3",
+              "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+              "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "sequence": 21,
+              "phase": "generation-end-before-receipt-write",
+              "pid": 2663,
+              "elapsedMs": 3179019.580572,
+              "rss": 3703828480,
+              "heapTotal": 2575568896,
+              "heapUsed": 1170422232,
+              "external": 25848236,
+              "arrayBuffers": 23568914,
+              "heapLimitBytes": 8640266240,
+              "maxRssBytes": 9644593152
+            }
+          }
+        }
+      ],
+      "generatedProducts": {
+        "C2": {
+          "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+          "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+        },
+        "C3": {
+          "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+          "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+        }
+      },
+      "sourceAndRecipe": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "moduleCount": 64,
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 7.0.2"
+        }
+      },
+      "timings": {
+        "C2": {
+          "loadAndPrepare": 961865.6151259999,
+          "admissions": 0.11947800009511411,
+          "canonicalSurface": 41696.7286129999,
+          "emit": 853.7180330000119,
+          "tscAndWrite": 2823.3567960000364,
+          "total": 1007239.5388819999
+        },
+        "C3": {
+          "loadAndPrepare": 3104078.9196840003,
+          "admissions": 0.0831709997728467,
+          "canonicalSurface": 69473.70608499972,
+          "emit": 2744.4626630004495,
+          "tscAndWrite": 2722.6593709997833,
+          "total": 3179019.8319689995
+        }
+      },
+      "fixedPoint": "four-product-equality-observed-but-final-qualification-not-produced",
+      "strictEvidenceBinder": "failed-before-binder-result-and-qualification-writes",
+      "collectorStatus": "skipped",
+      "providerStatus": "skipped",
+      "evidence": {
+        "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/qualification-failure.json",
+        "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+        "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+        "bytes": 43125
+      },
+      "log": {
+        "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/job.log",
+        "blob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+        "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+        "bytes": 875228
+      },
+      "runMetadata": {
+        "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/run-metadata.json",
+        "blob": "227e846d233c501a14600f0ebbe63f0118331273",
+        "sha256": "0039ae74b0f23a29dd216f6b9f77328cad718e8c50ea837e7a806f73c743d477",
+        "bytes": 94892
+      },
+      "markers": {
+        "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/markers.compact.json",
+        "blob": "a8b515f0be02a944054aec2446e54d2623e5dd63",
+        "sha256": "5465a52a4b21b81e074ecdec0c2c3bc54904dada3072dec65529c275b14d6657",
+        "bytes": 914322
+      },
+      "completeReceipts": [
+        {
+          "generation": "C2",
+          "sourceArtifactPath": "C2/receipt.json",
+          "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/c2-receipt.json",
+          "blob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+          "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+          "bytes": 166707
+        },
+        {
+          "generation": "C3",
+          "sourceArtifactPath": "C3/receipt.json",
+          "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/c3-receipt.json",
+          "blob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+          "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+          "bytes": 166709
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 11659939542,
+          "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+          "size_in_bytes": 11739089,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542/zip",
+          "expired": false,
+          "created_at": "2026-10-10T04:56:39Z",
+          "expires_at": "2026-11-09T04:56:36Z",
+          "updated_at": "2026-10-10T04:56:39Z",
+          "digest": "sha256:599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+          "workflow_run": {
+            "id": 38021634599,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "43fa000c4adbc9d4754e20c213595c1449f00961"
+          },
+          "digestProvenance": [
+            "GitHub Actions artifacts API digest field",
+            "Matching actions/upload-artifact log digest"
+          ],
+          "archiveInspectedByThisRecord": false,
+          "uploadFileCountDeclaration": {
+            "timestamp": "2026-10-10T04:56:36.7380553Z",
+            "text": "With the provided path, there will be 444 files uploaded",
+            "count": 444,
+            "scope": "Upload-log declaration, not an inspected current archive inventory."
+          }
+        }
+      ],
+      "reviewedRepair": {
+        "path": "reviewed-candidates/native-ir-marker-binding-repair.json",
+        "blob": "7c7ae4343cb94989df72b284dc9bd67c76794872",
+        "sha256": "65de6d37b9c4b75a1dc40999cf7ada6f2be59dfc0c1d23d63edef23b33a62b39",
+        "bytes": 33943,
+        "correctedBinder": {
+          "blob": "7700fef35acd06789b94f72078869fdef489214f",
+          "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+          "bytes": 91977
+        },
+        "compilerSourceChanged": false,
+        "fixtureChanged": false,
+        "executionPending": true
+      },
+      "supportedCompletion": {
+        "mode": "authenticated-retained-fixed-point-evidence-only",
+        "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "originalGenerationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "reusedGenerations": [
+          "N1",
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "generationsToRebuild": [],
+        "conformanceExecutionsToRepeat": [],
+        "remaining": [
+          "authenticate complete archive and all actual generation/gate receipts",
+          "execute corrected binder and original qualification finalization",
+          "retain135-file catalog and24returnedJSONvalues",
+          "obtain independent provider acceptance"
+        ],
+        "correctedEvidenceProducerIsSeparateFromGenerationRecipe": true,
+        "oldExecutionConclusionsRemainExact": true
+      },
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    {
+      "attempt": 17,
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "orchestrationHeadSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+      "runId": 38027413274,
+      "runAttempt": 1,
+      "workflowId": 380282667,
+      "compilerJobId": 114141103218,
+      "providerJobId": 114141265302,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38027413274",
+      "status": "success",
+      "execution": {
+        "runStatus": "completed",
+        "runConclusion": "success",
+        "runStartedAt": "2026-10-10T05:24:47Z",
+        "runUpdatedAt": "2026-10-10T05:27:17Z",
+        "compilerStartedAt": "2026-10-10T05:24:50Z",
+        "compilerCompletedAt": "2026-10-10T05:25:45Z",
+        "compilerConclusion": "success",
+        "providerStartedAt": "2026-10-10T05:25:48Z",
+        "providerCompletedAt": "2026-10-10T05:27:16Z",
+        "providerConclusion": "success",
+        "compiledCheckoutRemains": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "orchestrationSource": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+        "mode": "authenticated-retained-generation-evidence-only-completion"
+      },
+      "generationOwnership": [
+        {
+          "generation": "N1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "development/N1/receipt.json"
+        },
+        {
+          "generation": "C1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "C1/receipt.json"
+        },
+        {
+          "generation": "C2",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C2/receipt.json"
+        },
+        {
+          "generation": "C3",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C3/receipt.json"
+        }
+      ],
+      "evidenceProducer": {
+        "sourceRef": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+        "finisher": {
+          "sourcePath": "psc0/scripts/sh1-finish-evidence.mjs",
+          "path": "scripts/sh1-finish-evidence.mjs",
+          "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+          "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+          "bytes": 38509
+        },
+        "binder": {
+          "sourcePath": "psc0/scripts/sh1-strict-evidence.mjs",
+          "path": "scripts/sh1-strict-evidence-finish.mjs",
+          "blob": "7700fef35acd06789b94f72078869fdef489214f",
+          "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+          "bytes": 91977
+        },
+        "workflow": {
+          "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+          "blob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+          "sha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+          "bytes": 55773
+        },
+        "currentExecution": {
+          "runId": 38027413274,
+          "workflowId": 380282667,
+          "runAttempt": 1,
+          "compilerJobId": 114141103218,
+          "headSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a"
+        }
+      },
+      "historicalExecutions": {
+        "nativeAndCandidate": {
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "compilerConclusion": "cancelled",
+          "providerJobId": 114120597914,
+          "providerConclusion": "skipped"
+        },
+        "secondAndThird": {
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "compilerConclusion": "failure",
+          "providerJobId": 114136283916,
+          "providerConclusion": "skipped"
+        }
+      },
+      "preservedHistoricalAttempts": {
+        "count": 16,
+        "compactArraySha256": "557a694fb4e41826e9b11a6ca69b7e8131aec91090436ff8262fa0b70552c8a2"
+      },
+      "completed": {
+        "authenticatedArchives": true,
+        "all446ImportedFilesPreserved": true,
+        "correctedStrictEvidenceBinder": true,
+        "originalQualificationFinalization": true,
+        "complete135FileCompilerInventory": true,
+        "all24ReturnedJsonValuesAuthenticated": true,
+        "independentProviderAccepted": true
+      },
+      "generationsRebuiltByThisExecution": [],
+      "conformanceExecutionsRepeatedByThisExecution": [],
+      "sourceAndRecipe": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "allOriginalGenerationRecipeInputsPreserved": true,
+        "generationRecipesNotRelabeledAsEvidenceProducer": true,
+        "canonicalBinderChangedForFutureRuns": true
+      },
+      "generatedProducts": {
+        "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+        "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+        "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+        "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      },
+      "fixedPoint": {
+        "status": "all-four-C2-C3-products-identical",
+        "nativeParity": "N1-C2-C3-TypeScript-and-JavaScript-identical",
+        "sourceOfGenerationReceipts": "Authenticated retained original N1/C1 and later C2/C3 receipts; evidence finish did not regenerate them."
+      },
+      "strictEvidenceBinder": {
+        "status": "completed",
+        "report": {
+          "path": "strict-enforcement-evidence.json",
+          "blob": "d120d6820fd1cc7d4ee2682b103991d8c7e62fb0",
+          "sha256": "44ec24605d9f1b8d98eb7b64df04a63e693ac1054f74cac4f4cda7a1ae52bcba",
+          "bytes": 149717
+        },
+        "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+        "sourceEnforcementQualified": true,
+        "targetAdmissionQualified": true,
+        "enabledRuntimeFiniteConformanceQualified": true,
+        "genericFunctionValueFiniteConformanceQualified": true,
+        "producedStrictSh1Qualified": false,
+        "producedSemanticContractQualified": false,
+        "producedProviderChecked": false
+      },
+      "provider": {
+        "status": "accepted",
+        "accepted": true,
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "uniqueStreams": 4,
+        "labeledInputs": 8,
+        "allStreamsAccepted": true,
+        "scope": "Exact eight labeled C2/C3 admission inputs only; not N1, all examples or a whole-compiler preservation theorem.",
+        "emissionWasGatedByThisCheck": false,
+        "receipt": {
+          "path": "kernel-admissions.json",
+          "blob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+          "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+          "bytes": 3526
+        }
+      },
+      "rawEvidence": {
+        "qualification": {
+          "path": "qualification.json",
+          "blob": "96be5e6ed93773353a4e084ad7f525af78cd21ad",
+          "sha256": "093b7c3a3016399b1000c05fb01a3cddb2e45ea415fdbc0bdef2009f9c5c25d3",
+          "bytes": 164959
+        },
+        "strictBinder": {
+          "path": "strict-enforcement-evidence.json",
+          "blob": "d120d6820fd1cc7d4ee2682b103991d8c7e62fb0",
+          "sha256": "44ec24605d9f1b8d98eb7b64df04a63e693ac1054f74cac4f4cda7a1ae52bcba",
+          "bytes": 149717
+        },
+        "inputs": {
+          "path": "dist/sh1-evidence-finish-inputs/inputs.json",
+          "blob": "f922f1865b8d83f97c6e8ff5bf0720d2e2776ce0",
+          "sha256": "6244a785d54b0acdcb31ae93784f1985bbff5e49912042b7a93e97746f91ae22",
+          "bytes": 330480
+        },
+        "inventory": {
+          "path": "dist/sh1-evidence-finish-inputs/evidence-inventory.json",
+          "blob": "b45fb963d72b72426be5135b9b4612eb150e2c16",
+          "sha256": "addfaa6074bbc5afa8ffd91c5065fee565cfc33aac42ddfed8911e2560de3559",
+          "bytes": 74318
+        },
+        "completion": {
+          "path": "dist/sh1/evidence-completion.json",
+          "blob": "62baf773b1da5516c148a21db9682633ecc71c63",
+          "sha256": "b846dfbd8447334ec80e897b39c2271adb87e77599897392c60e4a9109004227",
+          "bytes": 17685
+        },
+        "provider": {
+          "path": "kernel-admissions.json",
+          "blob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+          "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+          "bytes": 3526
+        }
+      },
+      "configuredCompilerGateOutcomes": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-10T05:24:50Z",
+          "completed_at": "2026-10-10T05:24:52Z"
+        },
+        {
+          "name": "Check out the exact previously compiled source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-10T05:24:52Z",
+          "completed_at": "2026-10-10T05:25:10Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-10T05:25:10Z",
+          "completed_at": "2026-10-10T05:25:12Z"
+        },
+        {
+          "name": "Run leanprover/lean-action@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-10T05:25:12Z",
+          "completed_at": "2026-10-10T05:25:28Z"
+        },
+        {
+          "name": "Authenticate completed generations and install the reviewed evidence producers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-10T05:25:28Z",
+          "completed_at": "2026-10-10T05:25:35Z"
+        },
+        {
+          "name": "Install the pinned current TypeScript 7 profile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-10T05:25:35Z",
+          "completed_at": "2026-10-10T05:25:36Z"
+        },
+        {
+          "name": "Verify the actual TypeScript 7 evidence-finishing runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-10T05:25:36Z",
+          "completed_at": "2026-10-10T05:25:37Z"
+        },
+        {
+          "name": "Complete binding from the authenticated retained generations",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-10T05:25:37Z",
+          "completed_at": "2026-10-10T05:25:40Z"
+        },
+        {
+          "name": "Retain exact evidence and any remaining failure context",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-10T05:25:40Z",
+          "completed_at": "2026-10-10T05:25:41Z"
+        },
+        {
+          "name": "Retain completed evidence and all authenticated original inputs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-10T05:25:41Z",
+          "completed_at": "2026-10-10T05:25:43Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-10T05:25:43Z",
+          "completed_at": "2026-10-10T05:25:44Z"
+        },
+        {
+          "name": "Post Check out the exact previously compiled source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-10T05:25:44Z",
+          "completed_at": "2026-10-10T05:25:44Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-10T05:25:44Z",
+          "completed_at": "2026-10-10T05:25:44Z"
+        }
+      ],
+      "configuredProviderGateOutcomes": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-10T05:25:48Z",
+          "completed_at": "2026-10-10T05:25:50Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-10T05:25:50Z",
+          "completed_at": "2026-10-10T05:26:11Z"
+        },
+        {
+          "name": "Read the independently qualified native provider at its exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-10T05:26:11Z",
+          "completed_at": "2026-10-10T05:26:19Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-10T05:26:19Z",
+          "completed_at": "2026-10-10T05:26:21Z"
+        },
+        {
+          "name": "Run leanprover/lean-action@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-10T05:26:21Z",
+          "completed_at": "2026-10-10T05:26:33Z"
+        },
+        {
+          "name": "Restore pinned native provider build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-10T05:26:33Z",
+          "completed_at": "2026-10-10T05:26:33Z"
+        },
+        {
+          "name": "Build the existing provider target without editing its implementation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-10T05:26:33Z",
+          "completed_at": "2026-10-10T05:27:09Z"
+        },
+        {
+          "name": "Retain the pinned provider build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-10T05:27:09Z",
+          "completed_at": "2026-10-10T05:27:10Z"
+        },
+        {
+          "name": "Read exact compiler qualification artifacts from this run",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-10T05:27:10Z",
+          "completed_at": "2026-10-10T05:27:11Z"
+        },
+        {
+          "name": "Obtain actual provider decisions for the qualified admission streams",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-10T05:27:11Z",
+          "completed_at": "2026-10-10T05:27:13Z"
+        },
+        {
+          "name": "Retain provider acceptance or the exact rejection evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-10T05:27:13Z",
+          "completed_at": "2026-10-10T05:27:14Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-10T05:27:14Z",
+          "completed_at": "2026-10-10T05:27:14Z"
+        },
+        {
+          "name": "Post Read the independently qualified native provider at its exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-10T05:27:14Z",
+          "completed_at": "2026-10-10T05:27:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-10T05:27:14Z",
+          "completed_at": "2026-10-10T05:27:15Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-10T05:27:15Z",
+          "completed_at": "2026-10-10T05:27:15Z"
+        }
+      ],
+      "compilerSourceChanged": false,
+      "fixtureChanged": false,
+      "selectedSeedChanged": false,
+      "generalPreservationProven": false,
+      "strictSh1Qualified": true,
+      "semanticContractQualified": true,
+      "providerChecked": true,
+      "finalDispositionPending": false,
+      "finalDisposition": {
+        "status": "qualified-for-declared-strict-entry-and-lane",
+        "correspondenceRows": 33,
+        "stageObligations": 27,
+        "releaseRecordReference": {
+          "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+          "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+          "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+          "bytes": 1858477
+        },
+        "generalPreservationProven": false
+      },
+      "finalEvidenceIndex": {
+        "blob": "b42f79e53715f47c3ee6b4d429527c5636b65c3e",
+        "sha256": "c708a697c85ff3d3f83a669664b77bbacd18e846ea218bb4ae5af08fd0fe1cbb",
+        "bytes": 17239
+      },
+      "metadata": {
+        "blob": "76b220b996b08821c3e5a410eb19e3f6ead4394d",
+        "sha256": "171cbf2cefb774df9bf5f584ae0ab339cf0047b0f830c66a8d2890fdb1433219",
+        "bytes": 29091
+      },
+      "logs": {
+        "compiler": {
+          "blob": "57de287608f465a4749704302311e9351a6285b3",
+          "sha256": "203c63d40cb6f3cd1f7d5ae8231e40ae0e3e8f92a319893261d46f0274da6723",
+          "bytes": 1659322
+        },
+        "provider": {
+          "blob": "a7b739b3197c0d9baf520e0f8333034d894ead92",
+          "sha256": "d8210e0c935c70db7f65da8804378fa525a11f1f7cca94564bace7669cb58d35",
+          "bytes": 83472
+        }
+      },
+      "separateNormalNativeDevelopment": {
+        "runId": 38027413267,
+        "workflowId": 378853677,
+        "compilerJobId": 114141103207,
+        "providerJobId": 114142374674,
+        "status": "completed",
+        "conclusion": "success",
+        "compilerConclusion": "success",
+        "providerConclusion": "skipped",
+        "nativeDevelopmentStep": 24,
+        "nativeDevelopmentStepConclusion": "success",
+        "nativeDevelopmentStartedAt": "2026-10-10T05:25:52Z",
+        "nativeDevelopmentCompletedAt": "2026-10-10T05:32:14Z",
+        "completedAt": "2026-10-10T05:32:19Z",
+        "fullGenerationStepsSkipped": [
+          25,
+          26,
+          27
+        ],
+        "separateFromRetainedGenerationRecipe": true,
+        "normalNativeReceiptAndRecipeNotRead": true,
+        "terminalMetadata": {
+          "blob": "db6dc36dd59e5992bfc741bc56e90060b9177285",
+          "sha256": "e4f35bdc0ff784c7d16f59796ed80a3a709b24e5f9c8ec52c4d55178a4215b74",
+          "bytes": 44310
+        },
+        "coldRun": {
+          "runId": 38027413234,
+          "workflowId": 379723916,
+          "conclusion": "skipped"
+        }
+      }
+    }
+  ],
+  "selectedSeedChanged": false,
+  "mainAtLastVerified": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+  "strictSh1Qualified": true,
+  "semanticContractQualified": true,
+  "nextQualification": {
+    "status": "none-required-for-this-qualified-source-checkpoint",
+    "qualifiedSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "releaseRecordReference": {
+      "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+      "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+      "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+      "bytes": 1858477
+    },
+    "futurePolicy": "Use the development and resident iteration paths for ordinary edits. Run complete exact-source qualification at a deliberate promotion checkpoint after source or recipe changes."
+  },
+  "nativeCheckpoints": [
+    {
+      "sourceRef": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+      "runId": 37988707250,
+      "compilerJobId": 114017088870,
+      "providerJobId": 114019030861,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37988707250",
+      "status": "success",
+      "fullQualificationRequested": false,
+      "scope": "native-development-only; selected-R candidate, C2/C3 and provider skipped",
+      "evidence": {
+        "path": "attempts/fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504/native-checkpoint.json",
+        "blob": "53eac1c981b15e4c9d2eaa4eef8399a9030e3925",
+        "sha256": "3b59dc0c47d603361b1b718fc2ca69b34eb12b4b03bbf08b8d9303d1567ce041"
+      },
+      "log": {
+        "path": "job.log",
+        "blob": "8c8f01abbeecb3a6d666fe017708bdf048cd09b1",
+        "sha256": "45489f8482ac035d35a81538c1eb7beb9abd0268261ebb85cc23251af753cde3",
+        "characters": 1094678,
+        "source": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+        "runId": 37988707250,
+        "jobId": 114017088870,
+        "retrieval": "GitHub Actions job-log API decoded text"
+      },
+      "nativeSourceReceipt": {
+        "path": "strict-source-native.json",
+        "blob": "4fb3222220b56345871a170230aed525def5f18a",
+        "sha256": "e59bd0ceff69c039c90b448c82df19569f1458f52fe6312087125b35f87ea6a3",
+        "characters": 590639,
+        "hashMatchesActualReceipt": true,
+        "byteIdentity": "Complete compact native marker plus writer newline independently matches the actual native receipt file hash."
+      },
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    }
+  ],
+  "updatedAtUtc": "2026-10-10T05:45:24Z",
+  "completedDiagnostics": [
+    {
+      "status": "completed-localization-only",
+      "sourceRef": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+      "diagnosticSourceRef": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+      "runId": 38010024282,
+      "jobId": 114087631048,
+      "workflowId": 380146660,
+      "workflow": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
+      "workflowBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
+      "evidence": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-evidence.json",
+        "blob": "5adcaabbff7c607490ffdb51cfa02f2bee3b0281",
+        "sha256": "ec252008d9cdffc61895f137e9021a07af3dea62a48ff0c2aed7f81f012870fc",
+        "bytes": 8051
+      },
+      "report": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin.json",
+        "blob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666",
+        "sha256": "46a60edd579402eca2ebf1a42aace7635d245b16a6472c4d3e00523c2054ef0b",
+        "bytes": 2756
+      },
+      "log": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-job.log",
+        "blob": "a5df35ba3795f9823fcb5b0c787a57f1baa19db8",
+        "sha256": "fe14d35b49b421b7cf11b337f78d23a80238f309037870e3068711081e04afcf",
+        "bytes": 36865
+      },
+      "sourceIndex": 6,
+      "sourceName": "sh1GroupLet",
+      "phase": "stableDeclaration",
+      "span": {
+        "start": {
+          "byteOffset": "1611",
+          "line": "37",
+          "column": "1"
+        },
+        "stop": {
+          "byteOffset": "1708",
+          "line": "39",
+          "column": "9"
+        }
+      },
+      "error": {
+        "tag": "elaboration",
+        "error": {
+          "tag": "infer",
+          "error": {
+            "tag": "applicationTypeMismatch"
+          }
+        }
+      },
+      "compilerSha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+      "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+      "fixtureSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+      "parseCalls": 1,
+      "originPreservingPreparationCalls": 1,
+      "nativeBuilds": 0,
+      "typeScriptCompilations": 0,
+      "erasureCalls": 0,
+      "compilerEmissions": 0,
+      "observedExpectedAndActualUniverseExpressions": false,
+      "qualificationMeaning": "The execution locates the existing error; the universe mismatch explanation comes from the separately reviewed source trace.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    }
+  ],
+  "previousQualificationRequestReference": {
+    "path": "psc0/docs/selfhost-language/strict/qualification-attempts.json",
+    "blob": "f6a9005b7914b3f9d102f45535df8e3813f9c579",
+    "sha256": "9f9d535dae8eca1d3c28a57053cd56fe2ccbf5e1fd2b36426892d1505289c68b",
+    "bytes": 140876,
+    "jsonPointer": "/nextQualification"
+  },
+  "currentStrictReleaseRecordReference": {
+    "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+    "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+    "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+    "bytes": 1858477
+  }
+}

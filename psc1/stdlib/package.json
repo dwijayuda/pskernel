@@ -1,0 +1,23 @@
+{
+  "name": "@proofscript/stdlib",
+  "version": "0.1.0-psc0.1",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": false,
+    "sourceRoots": [
+      "."
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "portable-stdlib",
+    "portable": true,
+    "npmStagedAs": "psc0/packages/stdlib",
+    "sourceVariants": [
+      "ps",
+      "lean"
+    ]
+  }
+}

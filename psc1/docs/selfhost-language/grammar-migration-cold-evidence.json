@@ -1,0 +1,1412 @@
+{
+  "schemaVersion": 1,
+  "evidence": "github-actions-completed-cold-successor-recovery-logged-receipts",
+  "repository": "dwijayuda/pskernel",
+  "runId": 37925722635,
+  "runAttempt": 1,
+  "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "jobId": 113827137018,
+  "collectedAt": "2026-10-09 13:38:05 UTC",
+  "runStatus": "completed",
+  "runConclusion": "success",
+  "log": {
+    "gitBlob": "2343b6ca7e5bfadb030c56ca5cb4f05de4010983",
+    "characters": 59649,
+    "lines": 525
+  },
+  "records": [
+    {
+      "line": 428,
+      "label": "PSC0_SH1_GENERATION",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:13:22.6861061Z PSC0_SH1_GENERATION: {\"schemaVersion\":1,\"executingCompilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"sourceRef\":\"fe2560aba0f347b1caf8d000d371464642d44f23\",\"sourceClosureSha256\":\"f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226\",\"moduleCount\":61,\"sourceBytes\":1113918,\"sourceKind\":\"raw-authoritative-lean\",\"language\":{\"implementation\":\"PSC1\",\"candidateCapability\":\"PSC0-SH/1 structural state generalization and parameter projections\",\"canonicalSourceGrammar\":{\"mode\":\"immutable-authoring-seed-output\",\"executingSourceRef\":\"e91b9558d665879871b8bf0893915ae64b27c7fe\"}},\"recipe\":{\"files\":[{\"path\":\"scripts/sh1-qualify.mjs\",\"sha256\":\"37b3a9bca3c5dc599f13c61a1d7cb5219004d775e34bb240b5e17f58ad66d41a\"},{\"path\":\"scripts/sh1-capabilities.mjs\",\"sha256\":\"29a45533419aee1b3e1ac4c0417ce690885748fa66620a158be924caeec01684\"},{\"path\":\"scripts/sh1-grammar-conformance.mjs\",\"sha256\":\"65c4f90ff8f8b4d7436f623517a06839c18d70a7b1dfd62d60162ce86f21477e\"},{\"path\":\"scripts/sh1-projection-conformance.mjs\",\"sha256\":\"44a9baad9f18a231e681b71dc696373ca15a4cdd8b252c31656f5f9b8404051f\"},{\"path\":\"scripts/sh1-successor-seed.mjs\",\"sha256\":\"c65be03a65e0da19c99707319d41c4836f97f1addcb082bc4959946d1fa7e9f8\"},{\"path\":\"psconfig.json\",\"sha256\":\"2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984\"},{\"path\":\"test/fixtures/selfhost-sh1-accumulators.lean\",\"sha256\":\"45d7948c21431670d89762f97a6679a371b37defbfcc9d15138639c5f926d9e6\"},{\"path\":\"test/fixtures/selfhost-sh1-accumulators.ps\",\"sha256\":\"e0619554ac2384922ebe1739fa208114b08229118c6a995b7ee7ab2da9a28e65\"},{\"path\":\"scripts/proofscript-source.mjs\",\"sha256\":\"98474e8d1d1629b93aec608ef7263e5c959f02703ca23a55a46327d1f43d9608\"},{\"path\":\"scripts/checked-source-snapshot.mjs\",\"sha256\":\"1082b5e817a973a1eae0731543f7f6b419dfa13c574d051b845c11659be7134c\"},{\"path\":\"scripts/selfhost-source-workspace.mjs\",\"sha256\":\"ec6707a4b12fa605cdcf7cdf1db829f281990fbb8c9b2dc5b9638d37e6fbb1f8\"},{\"path\":\"scripts/LeanCheckedSeed.lean\",\"sha256\":\"f5af4cb73002682ab0e43f78a22d79c6d1006f5f4a0fd8b980c0a7bb3ac91ad1\"},{\"path\":\"scripts/typescript-cli.mjs\",\"sha256\":\"6e25698d6bd0d1793f1eb77d5f66a127d46039a8ec773a67960d116e26e7a64a\"},{\"path\":\"scripts/check-typescript-profile.mjs\",\"sha256\":\"a96dfd40691da9e9f3343f2a90af31406796449ff68a61f4dd5956a4edc44c17\"},{\"path\":\"scripts/workspace-layout.mjs\",\"sha256\":\"f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1\"},{\"path\":\"scripts/generated-preparation-session.mjs\",\"sha256\":\"96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad\"},{\"path\":\"scripts/original-ir-inventory.mjs\",\"sha256\":\"bb11bea9a2c9a242fbbd0234078773b7a91a1c99697292e581cc56870000f47f\"},{\"path\":\"scripts/original-ir-carrier.mjs\",\"sha256\":\"745f5920e4d6459e00af883bafeaf2ab169a1d3a3a5ebe60fe97d46b80ef9ed2\"},{\"path\":\"scripts/sh1-ir-checker-conformance.mjs\",\"sha256\":\"fc6f436f430ada8d0caec75efe217c19db77289ab9d7a528142296ed2772936b\"},{\"path\":\"test/IrCheckerTests.lean\",\"sha256\":\"36790248f17f147fe5958256c7cb9ed26f767c410c1319aeadf590d480e69f9d\"},{\"path\":\"scripts/sh1-source-snapshot.mjs\",\"sha256\":\"b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8\"},{\"path\":\"scripts/sh1-seed-manifest.mjs\",\"sha256\":\"53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f\"},{\"path\":\"scripts/sh1-iterate.mjs\",\"sha256\":\"9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8\"},{\"path\":\"scripts/sh1-iteration-conformance.mjs\",\"sha256\":\"bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4\"},{\"path\":\"scripts/sh1-foundation-conformance.mjs\",\"sha256\":\"4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383\"},{\"path\":\"test/fixtures/selfhost-sh1-foundation-reference.lean\",\"sha256\":\"e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9\"},{\"path\":\"test/fixtures/selfhost-sh1-foundation-probe.lean\",\"sha256\":\"633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819\"},{\"path\":\"scripts/sh1-helper-conformance.mjs\",\"sha256\":\"b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d\"},{\"path\":\"test/fixtures/selfhost-sh1-helpers-reference.lean\",\"sha256\":\"1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909\"},{\"path\":\"test/fixtures/selfhost-sh1-helpers-probe.lean\",\"sha256\":\"072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9\"},{\"path\":\"scripts/sh1-generic-erasure-conformance.mjs\",\"sha256\":\"7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca\"},{\"path\":\"test/fixtures/selfhost-sh1-generic-erasure.lean\",\"sha256\":\"574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de\"}],\"sha256\":\"5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb\"},\"toolchain\":{\"node\":\"v22.23.3\",\"platform\":\"linux\",\"architecture\":\"x64\",\"lean\":\"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\"leanGitHash\":\"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\"typescript\":\"Version 7.0.2\"},\"typescriptProfile\":{\"version\":\"7.0.2\",\"purpose\":\"current-emission\",\"arguments\":[\"--ignoreConfig\"]},\"artifacts\":{\"canonicalSurfaceSourceSha256\":\"a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"preparation\":{\"schemaVersion\":1,\"kind\":\"psc0-preparation-session\",\"evidence\":\"admission-ready\",\"compilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"sourceKind\":\"lean\",\"closureSha256\":\"07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538\",\"moduleCount\":61,\"cache\":{\"prefixModules\":0,\"parseHits\":0,\"parseMisses\":61,\"parseEvictions\":0,\"parseUncachedModules\":0,\"preparedModules\":61,\"finishHit\":false,\"retainedParsedEntries\":61,\"retainedParsedSourceBytes\":1110100,\"retainedPrefixModules\":61,\"retainedPrefixSourceBytes\":1110100,\"maxParsedEntries\":128,\"maxParsedSourceBytes\":8388608},\"timingsMs\":{\"input\":2.620256000000154,\"parse\":49301.0955020001,\"prepare\":643426.4874810004,\"finish\":128103.25962999999,\"freeze\":396.34628099994734,\"total\":821234.7896339999},\"warmNoChange\":{\"schemaVersion\":1,\"kind\":\"psc0-preparation-session\",\"evidence\":\"admission-ready\",\"compilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"sourceKind\":\"lean\",\"closureSha256\":\"07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538\",\"moduleCount\":61,\"cache\":{\"prefixModules\":61,\"parseHits\":0,\"parseMisses\":0,\"parseEvictions\":0,\"parseUncachedModules\":0,\"preparedModules\":0,\"finishHit\":true,\"retainedParsedEntries\":61,\"retainedParsedSourceBytes\":1110100,\"retainedPrefixModules\":61,\"retainedPrefixSourceBytes\":1110100,\"maxParsedEntries\":128,\"maxParsedSourceBytes\":8388608},\"timingsMs\":{\"input\":1.9964860000181943,\"parse\":0,\"prepare\":0,\"finish\":0,\"freeze\":0,\"total\":2.0287140000145882}}},\"originalIrInventory\":{\"report\":\"original-ir-inventory.json\",\"traversalComplete\":true,\"findingCounts\":{\"call-arity-needs-expression-typing\":262,\"call-type-arity\":19},\"findingCount\":null,\"findingCountsCoverage\":\"legacy-inventory\",\"portableChecker\":{\"status\":\"unavailable-at-explicit-seed-boundary\",\"boundary\":{\"kind\":\"selected-authoring-seed\",\"executingSourceRef\":\"e91b9558d665879871b8bf0893915ae64b27c7fe\",\"executingCompilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"reason\":\"The exact embedded v1 parent produces the first successor generation from raw source.\"}},\"runtimeIrTypingAccepted\":false,\"sameOriginalIrCheckedBeforeEmission\":false,\"strictSh1Qualified\":false},\"timingsMs\":{\"loadAndPrepare\":821405.986658,\"admissions\":132428.21317699994,\"canonicalSurface\":52758.07496,\"emit\":295998.37733300007,\"tscAndWrite\":3459.033386999974,\"total\":1306049.6883},\"normalizationEvidence\":\"Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.\",\"evidence\":\"candidate-build\",\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false}}",
+      "rawJson": "{\"schemaVersion\":1,\"executingCompilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"sourceRef\":\"fe2560aba0f347b1caf8d000d371464642d44f23\",\"sourceClosureSha256\":\"f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226\",\"moduleCount\":61,\"sourceBytes\":1113918,\"sourceKind\":\"raw-authoritative-lean\",\"language\":{\"implementation\":\"PSC1\",\"candidateCapability\":\"PSC0-SH/1 structural state generalization and parameter projections\",\"canonicalSourceGrammar\":{\"mode\":\"immutable-authoring-seed-output\",\"executingSourceRef\":\"e91b9558d665879871b8bf0893915ae64b27c7fe\"}},\"recipe\":{\"files\":[{\"path\":\"scripts/sh1-qualify.mjs\",\"sha256\":\"37b3a9bca3c5dc599f13c61a1d7cb5219004d775e34bb240b5e17f58ad66d41a\"},{\"path\":\"scripts/sh1-capabilities.mjs\",\"sha256\":\"29a45533419aee1b3e1ac4c0417ce690885748fa66620a158be924caeec01684\"},{\"path\":\"scripts/sh1-grammar-conformance.mjs\",\"sha256\":\"65c4f90ff8f8b4d7436f623517a06839c18d70a7b1dfd62d60162ce86f21477e\"},{\"path\":\"scripts/sh1-projection-conformance.mjs\",\"sha256\":\"44a9baad9f18a231e681b71dc696373ca15a4cdd8b252c31656f5f9b8404051f\"},{\"path\":\"scripts/sh1-successor-seed.mjs\",\"sha256\":\"c65be03a65e0da19c99707319d41c4836f97f1addcb082bc4959946d1fa7e9f8\"},{\"path\":\"psconfig.json\",\"sha256\":\"2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984\"},{\"path\":\"test/fixtures/selfhost-sh1-accumulators.lean\",\"sha256\":\"45d7948c21431670d89762f97a6679a371b37defbfcc9d15138639c5f926d9e6\"},{\"path\":\"test/fixtures/selfhost-sh1-accumulators.ps\",\"sha256\":\"e0619554ac2384922ebe1739fa208114b08229118c6a995b7ee7ab2da9a28e65\"},{\"path\":\"scripts/proofscript-source.mjs\",\"sha256\":\"98474e8d1d1629b93aec608ef7263e5c959f02703ca23a55a46327d1f43d9608\"},{\"path\":\"scripts/checked-source-snapshot.mjs\",\"sha256\":\"1082b5e817a973a1eae0731543f7f6b419dfa13c574d051b845c11659be7134c\"},{\"path\":\"scripts/selfhost-source-workspace.mjs\",\"sha256\":\"ec6707a4b12fa605cdcf7cdf1db829f281990fbb8c9b2dc5b9638d37e6fbb1f8\"},{\"path\":\"scripts/LeanCheckedSeed.lean\",\"sha256\":\"f5af4cb73002682ab0e43f78a22d79c6d1006f5f4a0fd8b980c0a7bb3ac91ad1\"},{\"path\":\"scripts/typescript-cli.mjs\",\"sha256\":\"6e25698d6bd0d1793f1eb77d5f66a127d46039a8ec773a67960d116e26e7a64a\"},{\"path\":\"scripts/check-typescript-profile.mjs\",\"sha256\":\"a96dfd40691da9e9f3343f2a90af31406796449ff68a61f4dd5956a4edc44c17\"},{\"path\":\"scripts/workspace-layout.mjs\",\"sha256\":\"f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1\"},{\"path\":\"scripts/generated-preparation-session.mjs\",\"sha256\":\"96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad\"},{\"path\":\"scripts/original-ir-inventory.mjs\",\"sha256\":\"bb11bea9a2c9a242fbbd0234078773b7a91a1c99697292e581cc56870000f47f\"},{\"path\":\"scripts/original-ir-carrier.mjs\",\"sha256\":\"745f5920e4d6459e00af883bafeaf2ab169a1d3a3a5ebe60fe97d46b80ef9ed2\"},{\"path\":\"scripts/sh1-ir-checker-conformance.mjs\",\"sha256\":\"fc6f436f430ada8d0caec75efe217c19db77289ab9d7a528142296ed2772936b\"},{\"path\":\"test/IrCheckerTests.lean\",\"sha256\":\"36790248f17f147fe5958256c7cb9ed26f767c410c1319aeadf590d480e69f9d\"},{\"path\":\"scripts/sh1-source-snapshot.mjs\",\"sha256\":\"b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8\"},{\"path\":\"scripts/sh1-seed-manifest.mjs\",\"sha256\":\"53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f\"},{\"path\":\"scripts/sh1-iterate.mjs\",\"sha256\":\"9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8\"},{\"path\":\"scripts/sh1-iteration-conformance.mjs\",\"sha256\":\"bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4\"},{\"path\":\"scripts/sh1-foundation-conformance.mjs\",\"sha256\":\"4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383\"},{\"path\":\"test/fixtures/selfhost-sh1-foundation-reference.lean\",\"sha256\":\"e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9\"},{\"path\":\"test/fixtures/selfhost-sh1-foundation-probe.lean\",\"sha256\":\"633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819\"},{\"path\":\"scripts/sh1-helper-conformance.mjs\",\"sha256\":\"b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d\"},{\"path\":\"test/fixtures/selfhost-sh1-helpers-reference.lean\",\"sha256\":\"1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909\"},{\"path\":\"test/fixtures/selfhost-sh1-helpers-probe.lean\",\"sha256\":\"072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9\"},{\"path\":\"scripts/sh1-generic-erasure-conformance.mjs\",\"sha256\":\"7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca\"},{\"path\":\"test/fixtures/selfhost-sh1-generic-erasure.lean\",\"sha256\":\"574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de\"}],\"sha256\":\"5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb\"},\"toolchain\":{\"node\":\"v22.23.3\",\"platform\":\"linux\",\"architecture\":\"x64\",\"lean\":\"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\"leanGitHash\":\"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\"typescript\":\"Version 7.0.2\"},\"typescriptProfile\":{\"version\":\"7.0.2\",\"purpose\":\"current-emission\",\"arguments\":[\"--ignoreConfig\"]},\"artifacts\":{\"canonicalSurfaceSourceSha256\":\"a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"preparation\":{\"schemaVersion\":1,\"kind\":\"psc0-preparation-session\",\"evidence\":\"admission-ready\",\"compilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"sourceKind\":\"lean\",\"closureSha256\":\"07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538\",\"moduleCount\":61,\"cache\":{\"prefixModules\":0,\"parseHits\":0,\"parseMisses\":61,\"parseEvictions\":0,\"parseUncachedModules\":0,\"preparedModules\":61,\"finishHit\":false,\"retainedParsedEntries\":61,\"retainedParsedSourceBytes\":1110100,\"retainedPrefixModules\":61,\"retainedPrefixSourceBytes\":1110100,\"maxParsedEntries\":128,\"maxParsedSourceBytes\":8388608},\"timingsMs\":{\"input\":2.620256000000154,\"parse\":49301.0955020001,\"prepare\":643426.4874810004,\"finish\":128103.25962999999,\"freeze\":396.34628099994734,\"total\":821234.7896339999},\"warmNoChange\":{\"schemaVersion\":1,\"kind\":\"psc0-preparation-session\",\"evidence\":\"admission-ready\",\"compilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"sourceKind\":\"lean\",\"closureSha256\":\"07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538\",\"moduleCount\":61,\"cache\":{\"prefixModules\":61,\"parseHits\":0,\"parseMisses\":0,\"parseEvictions\":0,\"parseUncachedModules\":0,\"preparedModules\":0,\"finishHit\":true,\"retainedParsedEntries\":61,\"retainedParsedSourceBytes\":1110100,\"retainedPrefixModules\":61,\"retainedPrefixSourceBytes\":1110100,\"maxParsedEntries\":128,\"maxParsedSourceBytes\":8388608},\"timingsMs\":{\"input\":1.9964860000181943,\"parse\":0,\"prepare\":0,\"finish\":0,\"freeze\":0,\"total\":2.0287140000145882}}},\"originalIrInventory\":{\"report\":\"original-ir-inventory.json\",\"traversalComplete\":true,\"findingCounts\":{\"call-arity-needs-expression-typing\":262,\"call-type-arity\":19},\"findingCount\":null,\"findingCountsCoverage\":\"legacy-inventory\",\"portableChecker\":{\"status\":\"unavailable-at-explicit-seed-boundary\",\"boundary\":{\"kind\":\"selected-authoring-seed\",\"executingSourceRef\":\"e91b9558d665879871b8bf0893915ae64b27c7fe\",\"executingCompilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"reason\":\"The exact embedded v1 parent produces the first successor generation from raw source.\"}},\"runtimeIrTypingAccepted\":false,\"sameOriginalIrCheckedBeforeEmission\":false,\"strictSh1Qualified\":false},\"timingsMs\":{\"loadAndPrepare\":821405.986658,\"admissions\":132428.21317699994,\"canonicalSurface\":52758.07496,\"emit\":295998.37733300007,\"tscAndWrite\":3459.033386999974,\"total\":1306049.6883},\"normalizationEvidence\":\"Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.\",\"evidence\":\"candidate-build\",\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false}}",
+      "parsed": {
+        "schemaVersion": 1,
+        "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+        "moduleCount": 61,
+        "sourceBytes": 1113918,
+        "sourceKind": "raw-authoritative-lean",
+        "language": {
+          "implementation": "PSC1",
+          "candidateCapability": "PSC0-SH/1 structural state generalization and parameter projections",
+          "canonicalSourceGrammar": {
+            "mode": "immutable-authoring-seed-output",
+            "executingSourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe"
+          }
+        },
+        "recipe": {
+          "files": [
+            {
+              "path": "scripts/sh1-qualify.mjs",
+              "sha256": "37b3a9bca3c5dc599f13c61a1d7cb5219004d775e34bb240b5e17f58ad66d41a"
+            },
+            {
+              "path": "scripts/sh1-capabilities.mjs",
+              "sha256": "29a45533419aee1b3e1ac4c0417ce690885748fa66620a158be924caeec01684"
+            },
+            {
+              "path": "scripts/sh1-grammar-conformance.mjs",
+              "sha256": "65c4f90ff8f8b4d7436f623517a06839c18d70a7b1dfd62d60162ce86f21477e"
+            },
+            {
+              "path": "scripts/sh1-projection-conformance.mjs",
+              "sha256": "44a9baad9f18a231e681b71dc696373ca15a4cdd8b252c31656f5f9b8404051f"
+            },
+            {
+              "path": "scripts/sh1-successor-seed.mjs",
+              "sha256": "c65be03a65e0da19c99707319d41c4836f97f1addcb082bc4959946d1fa7e9f8"
+            },
+            {
+              "path": "psconfig.json",
+              "sha256": "2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-accumulators.lean",
+              "sha256": "45d7948c21431670d89762f97a6679a371b37defbfcc9d15138639c5f926d9e6"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-accumulators.ps",
+              "sha256": "e0619554ac2384922ebe1739fa208114b08229118c6a995b7ee7ab2da9a28e65"
+            },
+            {
+              "path": "scripts/proofscript-source.mjs",
+              "sha256": "98474e8d1d1629b93aec608ef7263e5c959f02703ca23a55a46327d1f43d9608"
+            },
+            {
+              "path": "scripts/checked-source-snapshot.mjs",
+              "sha256": "1082b5e817a973a1eae0731543f7f6b419dfa13c574d051b845c11659be7134c"
+            },
+            {
+              "path": "scripts/selfhost-source-workspace.mjs",
+              "sha256": "ec6707a4b12fa605cdcf7cdf1db829f281990fbb8c9b2dc5b9638d37e6fbb1f8"
+            },
+            {
+              "path": "scripts/LeanCheckedSeed.lean",
+              "sha256": "f5af4cb73002682ab0e43f78a22d79c6d1006f5f4a0fd8b980c0a7bb3ac91ad1"
+            },
+            {
+              "path": "scripts/typescript-cli.mjs",
+              "sha256": "6e25698d6bd0d1793f1eb77d5f66a127d46039a8ec773a67960d116e26e7a64a"
+            },
+            {
+              "path": "scripts/check-typescript-profile.mjs",
+              "sha256": "a96dfd40691da9e9f3343f2a90af31406796449ff68a61f4dd5956a4edc44c17"
+            },
+            {
+              "path": "scripts/workspace-layout.mjs",
+              "sha256": "f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1"
+            },
+            {
+              "path": "scripts/generated-preparation-session.mjs",
+              "sha256": "96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad"
+            },
+            {
+              "path": "scripts/original-ir-inventory.mjs",
+              "sha256": "bb11bea9a2c9a242fbbd0234078773b7a91a1c99697292e581cc56870000f47f"
+            },
+            {
+              "path": "scripts/original-ir-carrier.mjs",
+              "sha256": "745f5920e4d6459e00af883bafeaf2ab169a1d3a3a5ebe60fe97d46b80ef9ed2"
+            },
+            {
+              "path": "scripts/sh1-ir-checker-conformance.mjs",
+              "sha256": "fc6f436f430ada8d0caec75efe217c19db77289ab9d7a528142296ed2772936b"
+            },
+            {
+              "path": "test/IrCheckerTests.lean",
+              "sha256": "36790248f17f147fe5958256c7cb9ed26f767c410c1319aeadf590d480e69f9d"
+            },
+            {
+              "path": "scripts/sh1-source-snapshot.mjs",
+              "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8"
+            },
+            {
+              "path": "scripts/sh1-seed-manifest.mjs",
+              "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f"
+            },
+            {
+              "path": "scripts/sh1-iterate.mjs",
+              "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8"
+            },
+            {
+              "path": "scripts/sh1-iteration-conformance.mjs",
+              "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4"
+            },
+            {
+              "path": "scripts/sh1-foundation-conformance.mjs",
+              "sha256": "4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-reference.lean",
+              "sha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-probe.lean",
+              "sha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819"
+            },
+            {
+              "path": "scripts/sh1-helper-conformance.mjs",
+              "sha256": "b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-reference.lean",
+              "sha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-probe.lean",
+              "sha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9"
+            },
+            {
+              "path": "scripts/sh1-generic-erasure-conformance.mjs",
+              "sha256": "7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+              "sha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de"
+            }
+          ],
+          "sha256": "5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb"
+        },
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 7.0.2"
+        },
+        "typescriptProfile": {
+          "version": "7.0.2",
+          "purpose": "current-emission",
+          "arguments": [
+            "--ignoreConfig"
+          ]
+        },
+        "artifacts": {
+          "canonicalSurfaceSourceSha256": "a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2",
+          "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+          "typescriptSha256": "6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954",
+          "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+        },
+        "preparation": {
+          "schemaVersion": 1,
+          "kind": "psc0-preparation-session",
+          "evidence": "admission-ready",
+          "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+          "sourceKind": "lean",
+          "closureSha256": "07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538",
+          "moduleCount": 61,
+          "cache": {
+            "prefixModules": 0,
+            "parseHits": 0,
+            "parseMisses": 61,
+            "parseEvictions": 0,
+            "parseUncachedModules": 0,
+            "preparedModules": 61,
+            "finishHit": false,
+            "retainedParsedEntries": 61,
+            "retainedParsedSourceBytes": 1110100,
+            "retainedPrefixModules": 61,
+            "retainedPrefixSourceBytes": 1110100,
+            "maxParsedEntries": 128,
+            "maxParsedSourceBytes": 8388608
+          },
+          "timingsMs": {
+            "input": 2.620256000000154,
+            "parse": 49301.0955020001,
+            "prepare": 643426.4874810004,
+            "finish": 128103.25962999999,
+            "freeze": 396.34628099994734,
+            "total": 821234.7896339999
+          },
+          "warmNoChange": {
+            "schemaVersion": 1,
+            "kind": "psc0-preparation-session",
+            "evidence": "admission-ready",
+            "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+            "sourceKind": "lean",
+            "closureSha256": "07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538",
+            "moduleCount": 61,
+            "cache": {
+              "prefixModules": 61,
+              "parseHits": 0,
+              "parseMisses": 0,
+              "parseEvictions": 0,
+              "parseUncachedModules": 0,
+              "preparedModules": 0,
+              "finishHit": true,
+              "retainedParsedEntries": 61,
+              "retainedParsedSourceBytes": 1110100,
+              "retainedPrefixModules": 61,
+              "retainedPrefixSourceBytes": 1110100,
+              "maxParsedEntries": 128,
+              "maxParsedSourceBytes": 8388608
+            },
+            "timingsMs": {
+              "input": 1.9964860000181943,
+              "parse": 0,
+              "prepare": 0,
+              "finish": 0,
+              "freeze": 0,
+              "total": 2.0287140000145882
+            }
+          }
+        },
+        "originalIrInventory": {
+          "report": "original-ir-inventory.json",
+          "traversalComplete": true,
+          "findingCounts": {
+            "call-arity-needs-expression-typing": 262,
+            "call-type-arity": 19
+          },
+          "findingCount": null,
+          "findingCountsCoverage": "legacy-inventory",
+          "portableChecker": {
+            "status": "unavailable-at-explicit-seed-boundary",
+            "boundary": {
+              "kind": "selected-authoring-seed",
+              "executingSourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+              "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+              "reason": "The exact embedded v1 parent produces the first successor generation from raw source."
+            }
+          },
+          "runtimeIrTypingAccepted": false,
+          "sameOriginalIrCheckedBeforeEmission": false,
+          "strictSh1Qualified": false
+        },
+        "timingsMs": {
+          "loadAndPrepare": 821405.986658,
+          "admissions": 132428.21317699994,
+          "canonicalSurface": 52758.07496,
+          "emit": 295998.37733300007,
+          "tscAndWrite": 3459.033386999974,
+          "total": 1306049.6883
+        },
+        "normalizationEvidence": "Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.",
+        "evidence": "candidate-build",
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "line": 429,
+      "label": "PSC0_SH1_GENERATION",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:37:05.0896696Z PSC0_SH1_GENERATION: {\"schemaVersion\":1,\"executingCompilerSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\",\"sourceRef\":\"fe2560aba0f347b1caf8d000d371464642d44f23\",\"sourceClosureSha256\":\"f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226\",\"moduleCount\":61,\"sourceBytes\":1113918,\"sourceKind\":\"raw-authoritative-lean\",\"language\":{\"implementation\":\"PSC1\",\"candidateCapability\":\"PSC0-SH/1 structural state generalization and parameter projections\",\"canonicalSourceGrammar\":{\"edition\":\"ps-0.9-r3\",\"mode\":\"new-only\",\"support\":\"bounded-selfhost-subset\",\"referenceSha256\":\"4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71\",\"fullStandardConformance\":false,\"fullPscvConformance\":false}},\"recipe\":{\"files\":[{\"path\":\"scripts/sh1-qualify.mjs\",\"sha256\":\"37b3a9bca3c5dc599f13c61a1d7cb5219004d775e34bb240b5e17f58ad66d41a\"},{\"path\":\"scripts/sh1-capabilities.mjs\",\"sha256\":\"29a45533419aee1b3e1ac4c0417ce690885748fa66620a158be924caeec01684\"},{\"path\":\"scripts/sh1-grammar-conformance.mjs\",\"sha256\":\"65c4f90ff8f8b4d7436f623517a06839c18d70a7b1dfd62d60162ce86f21477e\"},{\"path\":\"scripts/sh1-projection-conformance.mjs\",\"sha256\":\"44a9baad9f18a231e681b71dc696373ca15a4cdd8b252c31656f5f9b8404051f\"},{\"path\":\"scripts/sh1-successor-seed.mjs\",\"sha256\":\"c65be03a65e0da19c99707319d41c4836f97f1addcb082bc4959946d1fa7e9f8\"},{\"path\":\"psconfig.json\",\"sha256\":\"2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984\"},{\"path\":\"test/fixtures/selfhost-sh1-accumulators.lean\",\"sha256\":\"45d7948c21431670d89762f97a6679a371b37defbfcc9d15138639c5f926d9e6\"},{\"path\":\"test/fixtures/selfhost-sh1-accumulators.ps\",\"sha256\":\"e0619554ac2384922ebe1739fa208114b08229118c6a995b7ee7ab2da9a28e65\"},{\"path\":\"scripts/proofscript-source.mjs\",\"sha256\":\"98474e8d1d1629b93aec608ef7263e5c959f02703ca23a55a46327d1f43d9608\"},{\"path\":\"scripts/checked-source-snapshot.mjs\",\"sha256\":\"1082b5e817a973a1eae0731543f7f6b419dfa13c574d051b845c11659be7134c\"},{\"path\":\"scripts/selfhost-source-workspace.mjs\",\"sha256\":\"ec6707a4b12fa605cdcf7cdf1db829f281990fbb8c9b2dc5b9638d37e6fbb1f8\"},{\"path\":\"scripts/LeanCheckedSeed.lean\",\"sha256\":\"f5af4cb73002682ab0e43f78a22d79c6d1006f5f4a0fd8b980c0a7bb3ac91ad1\"},{\"path\":\"scripts/typescript-cli.mjs\",\"sha256\":\"6e25698d6bd0d1793f1eb77d5f66a127d46039a8ec773a67960d116e26e7a64a\"},{\"path\":\"scripts/check-typescript-profile.mjs\",\"sha256\":\"a96dfd40691da9e9f3343f2a90af31406796449ff68a61f4dd5956a4edc44c17\"},{\"path\":\"scripts/workspace-layout.mjs\",\"sha256\":\"f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1\"},{\"path\":\"scripts/generated-preparation-session.mjs\",\"sha256\":\"96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad\"},{\"path\":\"scripts/original-ir-inventory.mjs\",\"sha256\":\"bb11bea9a2c9a242fbbd0234078773b7a91a1c99697292e581cc56870000f47f\"},{\"path\":\"scripts/original-ir-carrier.mjs\",\"sha256\":\"745f5920e4d6459e00af883bafeaf2ab169a1d3a3a5ebe60fe97d46b80ef9ed2\"},{\"path\":\"scripts/sh1-ir-checker-conformance.mjs\",\"sha256\":\"fc6f436f430ada8d0caec75efe217c19db77289ab9d7a528142296ed2772936b\"},{\"path\":\"test/IrCheckerTests.lean\",\"sha256\":\"36790248f17f147fe5958256c7cb9ed26f767c410c1319aeadf590d480e69f9d\"},{\"path\":\"scripts/sh1-source-snapshot.mjs\",\"sha256\":\"b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8\"},{\"path\":\"scripts/sh1-seed-manifest.mjs\",\"sha256\":\"53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f\"},{\"path\":\"scripts/sh1-iterate.mjs\",\"sha256\":\"9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8\"},{\"path\":\"scripts/sh1-iteration-conformance.mjs\",\"sha256\":\"bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4\"},{\"path\":\"scripts/sh1-foundation-conformance.mjs\",\"sha256\":\"4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383\"},{\"path\":\"test/fixtures/selfhost-sh1-foundation-reference.lean\",\"sha256\":\"e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9\"},{\"path\":\"test/fixtures/selfhost-sh1-foundation-probe.lean\",\"sha256\":\"633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819\"},{\"path\":\"scripts/sh1-helper-conformance.mjs\",\"sha256\":\"b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d\"},{\"path\":\"test/fixtures/selfhost-sh1-helpers-reference.lean\",\"sha256\":\"1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909\"},{\"path\":\"test/fixtures/selfhost-sh1-helpers-probe.lean\",\"sha256\":\"072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9\"},{\"path\":\"scripts/sh1-generic-erasure-conformance.mjs\",\"sha256\":\"7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca\"},{\"path\":\"test/fixtures/selfhost-sh1-generic-erasure.lean\",\"sha256\":\"574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de\"}],\"sha256\":\"5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb\"},\"toolchain\":{\"node\":\"v22.23.3\",\"platform\":\"linux\",\"architecture\":\"x64\",\"lean\":\"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\"leanGitHash\":\"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\"typescript\":\"Version 7.0.2\"},\"typescriptProfile\":{\"version\":\"7.0.2\",\"purpose\":\"current-emission\",\"arguments\":[\"--ignoreConfig\"]},\"artifacts\":{\"canonicalSurfaceSourceSha256\":\"985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"preparation\":{\"schemaVersion\":1,\"kind\":\"psc0-preparation-session\",\"evidence\":\"admission-ready\",\"compilerSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\",\"sourceKind\":\"lean\",\"closureSha256\":\"07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538\",\"moduleCount\":61,\"cache\":{\"prefixModules\":0,\"parseHits\":0,\"parseMisses\":61,\"parseEvictions\":0,\"parseUncachedModules\":0,\"preparedModules\":61,\"finishHit\":false,\"retainedParsedEntries\":61,\"retainedParsedSourceBytes\":1110100,\"retainedPrefixModules\":61,\"retainedPrefixSourceBytes\":1110100,\"maxParsedEntries\":128,\"maxParsedSourceBytes\":8388608},\"timingsMs\":{\"input\":1.9542209999635816,\"parse\":47531.74139100034,\"prepare\":618992.2570630005,\"finish\":139317.3703670001,\"freeze\":453.44641699967906,\"total\":806299.6862859998},\"warmNoChange\":{\"schemaVersion\":1,\"kind\":\"psc0-preparation-session\",\"evidence\":\"admission-ready\",\"compilerSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\",\"sourceKind\":\"lean\",\"closureSha256\":\"07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538\",\"moduleCount\":61,\"cache\":{\"prefixModules\":61,\"parseHits\":0,\"parseMisses\":0,\"parseEvictions\":0,\"parseUncachedModules\":0,\"preparedModules\":0,\"finishHit\":true,\"retainedParsedEntries\":61,\"retainedParsedSourceBytes\":1110100,\"retainedPrefixModules\":61,\"retainedPrefixSourceBytes\":1110100,\"maxParsedEntries\":128,\"maxParsedSourceBytes\":8388608},\"timingsMs\":{\"input\":2.106701999902725,\"parse\":0,\"prepare\":0,\"finish\":0,\"freeze\":0,\"total\":2.1341530000790954}}},\"originalIrInventory\":{\"report\":\"original-ir-inventory.json\",\"traversalComplete\":true,\"findingCounts\":{},\"findingCount\":0,\"findingCountsCoverage\":\"all-findings\",\"portableChecker\":{\"status\":\"accepted\",\"implementation\":\"Ps.CompilerIr.Check.psCheckVerifiedIrModule\",\"options\":{\"maxSteps\":5000000,\"maxTypeSteps\":65536,\"maxFindings\":1000}},\"runtimeIrTypingAccepted\":true,\"sameOriginalIrCheckedBeforeEmission\":true,\"strictSh1Qualified\":false},\"timingsMs\":{\"loadAndPrepare\":806468.0448079999,\"admissions\":135968.5611089999,\"canonicalSurface\":56062.23030500021,\"emit\":420119.90059199976,\"tscAndWrite\":3782.7875330001116,\"total\":1422401.525769},\"normalizationEvidence\":\"Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.\",\"evidence\":\"candidate-build\",\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false}}",
+      "rawJson": "{\"schemaVersion\":1,\"executingCompilerSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\",\"sourceRef\":\"fe2560aba0f347b1caf8d000d371464642d44f23\",\"sourceClosureSha256\":\"f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226\",\"moduleCount\":61,\"sourceBytes\":1113918,\"sourceKind\":\"raw-authoritative-lean\",\"language\":{\"implementation\":\"PSC1\",\"candidateCapability\":\"PSC0-SH/1 structural state generalization and parameter projections\",\"canonicalSourceGrammar\":{\"edition\":\"ps-0.9-r3\",\"mode\":\"new-only\",\"support\":\"bounded-selfhost-subset\",\"referenceSha256\":\"4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71\",\"fullStandardConformance\":false,\"fullPscvConformance\":false}},\"recipe\":{\"files\":[{\"path\":\"scripts/sh1-qualify.mjs\",\"sha256\":\"37b3a9bca3c5dc599f13c61a1d7cb5219004d775e34bb240b5e17f58ad66d41a\"},{\"path\":\"scripts/sh1-capabilities.mjs\",\"sha256\":\"29a45533419aee1b3e1ac4c0417ce690885748fa66620a158be924caeec01684\"},{\"path\":\"scripts/sh1-grammar-conformance.mjs\",\"sha256\":\"65c4f90ff8f8b4d7436f623517a06839c18d70a7b1dfd62d60162ce86f21477e\"},{\"path\":\"scripts/sh1-projection-conformance.mjs\",\"sha256\":\"44a9baad9f18a231e681b71dc696373ca15a4cdd8b252c31656f5f9b8404051f\"},{\"path\":\"scripts/sh1-successor-seed.mjs\",\"sha256\":\"c65be03a65e0da19c99707319d41c4836f97f1addcb082bc4959946d1fa7e9f8\"},{\"path\":\"psconfig.json\",\"sha256\":\"2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984\"},{\"path\":\"test/fixtures/selfhost-sh1-accumulators.lean\",\"sha256\":\"45d7948c21431670d89762f97a6679a371b37defbfcc9d15138639c5f926d9e6\"},{\"path\":\"test/fixtures/selfhost-sh1-accumulators.ps\",\"sha256\":\"e0619554ac2384922ebe1739fa208114b08229118c6a995b7ee7ab2da9a28e65\"},{\"path\":\"scripts/proofscript-source.mjs\",\"sha256\":\"98474e8d1d1629b93aec608ef7263e5c959f02703ca23a55a46327d1f43d9608\"},{\"path\":\"scripts/checked-source-snapshot.mjs\",\"sha256\":\"1082b5e817a973a1eae0731543f7f6b419dfa13c574d051b845c11659be7134c\"},{\"path\":\"scripts/selfhost-source-workspace.mjs\",\"sha256\":\"ec6707a4b12fa605cdcf7cdf1db829f281990fbb8c9b2dc5b9638d37e6fbb1f8\"},{\"path\":\"scripts/LeanCheckedSeed.lean\",\"sha256\":\"f5af4cb73002682ab0e43f78a22d79c6d1006f5f4a0fd8b980c0a7bb3ac91ad1\"},{\"path\":\"scripts/typescript-cli.mjs\",\"sha256\":\"6e25698d6bd0d1793f1eb77d5f66a127d46039a8ec773a67960d116e26e7a64a\"},{\"path\":\"scripts/check-typescript-profile.mjs\",\"sha256\":\"a96dfd40691da9e9f3343f2a90af31406796449ff68a61f4dd5956a4edc44c17\"},{\"path\":\"scripts/workspace-layout.mjs\",\"sha256\":\"f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1\"},{\"path\":\"scripts/generated-preparation-session.mjs\",\"sha256\":\"96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad\"},{\"path\":\"scripts/original-ir-inventory.mjs\",\"sha256\":\"bb11bea9a2c9a242fbbd0234078773b7a91a1c99697292e581cc56870000f47f\"},{\"path\":\"scripts/original-ir-carrier.mjs\",\"sha256\":\"745f5920e4d6459e00af883bafeaf2ab169a1d3a3a5ebe60fe97d46b80ef9ed2\"},{\"path\":\"scripts/sh1-ir-checker-conformance.mjs\",\"sha256\":\"fc6f436f430ada8d0caec75efe217c19db77289ab9d7a528142296ed2772936b\"},{\"path\":\"test/IrCheckerTests.lean\",\"sha256\":\"36790248f17f147fe5958256c7cb9ed26f767c410c1319aeadf590d480e69f9d\"},{\"path\":\"scripts/sh1-source-snapshot.mjs\",\"sha256\":\"b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8\"},{\"path\":\"scripts/sh1-seed-manifest.mjs\",\"sha256\":\"53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f\"},{\"path\":\"scripts/sh1-iterate.mjs\",\"sha256\":\"9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8\"},{\"path\":\"scripts/sh1-iteration-conformance.mjs\",\"sha256\":\"bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4\"},{\"path\":\"scripts/sh1-foundation-conformance.mjs\",\"sha256\":\"4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383\"},{\"path\":\"test/fixtures/selfhost-sh1-foundation-reference.lean\",\"sha256\":\"e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9\"},{\"path\":\"test/fixtures/selfhost-sh1-foundation-probe.lean\",\"sha256\":\"633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819\"},{\"path\":\"scripts/sh1-helper-conformance.mjs\",\"sha256\":\"b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d\"},{\"path\":\"test/fixtures/selfhost-sh1-helpers-reference.lean\",\"sha256\":\"1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909\"},{\"path\":\"test/fixtures/selfhost-sh1-helpers-probe.lean\",\"sha256\":\"072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9\"},{\"path\":\"scripts/sh1-generic-erasure-conformance.mjs\",\"sha256\":\"7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca\"},{\"path\":\"test/fixtures/selfhost-sh1-generic-erasure.lean\",\"sha256\":\"574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de\"}],\"sha256\":\"5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb\"},\"toolchain\":{\"node\":\"v22.23.3\",\"platform\":\"linux\",\"architecture\":\"x64\",\"lean\":\"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\"leanGitHash\":\"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\"typescript\":\"Version 7.0.2\"},\"typescriptProfile\":{\"version\":\"7.0.2\",\"purpose\":\"current-emission\",\"arguments\":[\"--ignoreConfig\"]},\"artifacts\":{\"canonicalSurfaceSourceSha256\":\"985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"preparation\":{\"schemaVersion\":1,\"kind\":\"psc0-preparation-session\",\"evidence\":\"admission-ready\",\"compilerSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\",\"sourceKind\":\"lean\",\"closureSha256\":\"07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538\",\"moduleCount\":61,\"cache\":{\"prefixModules\":0,\"parseHits\":0,\"parseMisses\":61,\"parseEvictions\":0,\"parseUncachedModules\":0,\"preparedModules\":61,\"finishHit\":false,\"retainedParsedEntries\":61,\"retainedParsedSourceBytes\":1110100,\"retainedPrefixModules\":61,\"retainedPrefixSourceBytes\":1110100,\"maxParsedEntries\":128,\"maxParsedSourceBytes\":8388608},\"timingsMs\":{\"input\":1.9542209999635816,\"parse\":47531.74139100034,\"prepare\":618992.2570630005,\"finish\":139317.3703670001,\"freeze\":453.44641699967906,\"total\":806299.6862859998},\"warmNoChange\":{\"schemaVersion\":1,\"kind\":\"psc0-preparation-session\",\"evidence\":\"admission-ready\",\"compilerSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\",\"sourceKind\":\"lean\",\"closureSha256\":\"07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538\",\"moduleCount\":61,\"cache\":{\"prefixModules\":61,\"parseHits\":0,\"parseMisses\":0,\"parseEvictions\":0,\"parseUncachedModules\":0,\"preparedModules\":0,\"finishHit\":true,\"retainedParsedEntries\":61,\"retainedParsedSourceBytes\":1110100,\"retainedPrefixModules\":61,\"retainedPrefixSourceBytes\":1110100,\"maxParsedEntries\":128,\"maxParsedSourceBytes\":8388608},\"timingsMs\":{\"input\":2.106701999902725,\"parse\":0,\"prepare\":0,\"finish\":0,\"freeze\":0,\"total\":2.1341530000790954}}},\"originalIrInventory\":{\"report\":\"original-ir-inventory.json\",\"traversalComplete\":true,\"findingCounts\":{},\"findingCount\":0,\"findingCountsCoverage\":\"all-findings\",\"portableChecker\":{\"status\":\"accepted\",\"implementation\":\"Ps.CompilerIr.Check.psCheckVerifiedIrModule\",\"options\":{\"maxSteps\":5000000,\"maxTypeSteps\":65536,\"maxFindings\":1000}},\"runtimeIrTypingAccepted\":true,\"sameOriginalIrCheckedBeforeEmission\":true,\"strictSh1Qualified\":false},\"timingsMs\":{\"loadAndPrepare\":806468.0448079999,\"admissions\":135968.5611089999,\"canonicalSurface\":56062.23030500021,\"emit\":420119.90059199976,\"tscAndWrite\":3782.7875330001116,\"total\":1422401.525769},\"normalizationEvidence\":\"Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.\",\"evidence\":\"candidate-build\",\"provider\":{\"status\":\"not-attempted\",\"kernelChecked\":false}}",
+      "parsed": {
+        "schemaVersion": 1,
+        "executingCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+        "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+        "moduleCount": 61,
+        "sourceBytes": 1113918,
+        "sourceKind": "raw-authoritative-lean",
+        "language": {
+          "implementation": "PSC1",
+          "candidateCapability": "PSC0-SH/1 structural state generalization and parameter projections",
+          "canonicalSourceGrammar": {
+            "edition": "ps-0.9-r3",
+            "mode": "new-only",
+            "support": "bounded-selfhost-subset",
+            "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+            "fullStandardConformance": false,
+            "fullPscvConformance": false
+          }
+        },
+        "recipe": {
+          "files": [
+            {
+              "path": "scripts/sh1-qualify.mjs",
+              "sha256": "37b3a9bca3c5dc599f13c61a1d7cb5219004d775e34bb240b5e17f58ad66d41a"
+            },
+            {
+              "path": "scripts/sh1-capabilities.mjs",
+              "sha256": "29a45533419aee1b3e1ac4c0417ce690885748fa66620a158be924caeec01684"
+            },
+            {
+              "path": "scripts/sh1-grammar-conformance.mjs",
+              "sha256": "65c4f90ff8f8b4d7436f623517a06839c18d70a7b1dfd62d60162ce86f21477e"
+            },
+            {
+              "path": "scripts/sh1-projection-conformance.mjs",
+              "sha256": "44a9baad9f18a231e681b71dc696373ca15a4cdd8b252c31656f5f9b8404051f"
+            },
+            {
+              "path": "scripts/sh1-successor-seed.mjs",
+              "sha256": "c65be03a65e0da19c99707319d41c4836f97f1addcb082bc4959946d1fa7e9f8"
+            },
+            {
+              "path": "psconfig.json",
+              "sha256": "2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-accumulators.lean",
+              "sha256": "45d7948c21431670d89762f97a6679a371b37defbfcc9d15138639c5f926d9e6"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-accumulators.ps",
+              "sha256": "e0619554ac2384922ebe1739fa208114b08229118c6a995b7ee7ab2da9a28e65"
+            },
+            {
+              "path": "scripts/proofscript-source.mjs",
+              "sha256": "98474e8d1d1629b93aec608ef7263e5c959f02703ca23a55a46327d1f43d9608"
+            },
+            {
+              "path": "scripts/checked-source-snapshot.mjs",
+              "sha256": "1082b5e817a973a1eae0731543f7f6b419dfa13c574d051b845c11659be7134c"
+            },
+            {
+              "path": "scripts/selfhost-source-workspace.mjs",
+              "sha256": "ec6707a4b12fa605cdcf7cdf1db829f281990fbb8c9b2dc5b9638d37e6fbb1f8"
+            },
+            {
+              "path": "scripts/LeanCheckedSeed.lean",
+              "sha256": "f5af4cb73002682ab0e43f78a22d79c6d1006f5f4a0fd8b980c0a7bb3ac91ad1"
+            },
+            {
+              "path": "scripts/typescript-cli.mjs",
+              "sha256": "6e25698d6bd0d1793f1eb77d5f66a127d46039a8ec773a67960d116e26e7a64a"
+            },
+            {
+              "path": "scripts/check-typescript-profile.mjs",
+              "sha256": "a96dfd40691da9e9f3343f2a90af31406796449ff68a61f4dd5956a4edc44c17"
+            },
+            {
+              "path": "scripts/workspace-layout.mjs",
+              "sha256": "f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1"
+            },
+            {
+              "path": "scripts/generated-preparation-session.mjs",
+              "sha256": "96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad"
+            },
+            {
+              "path": "scripts/original-ir-inventory.mjs",
+              "sha256": "bb11bea9a2c9a242fbbd0234078773b7a91a1c99697292e581cc56870000f47f"
+            },
+            {
+              "path": "scripts/original-ir-carrier.mjs",
+              "sha256": "745f5920e4d6459e00af883bafeaf2ab169a1d3a3a5ebe60fe97d46b80ef9ed2"
+            },
+            {
+              "path": "scripts/sh1-ir-checker-conformance.mjs",
+              "sha256": "fc6f436f430ada8d0caec75efe217c19db77289ab9d7a528142296ed2772936b"
+            },
+            {
+              "path": "test/IrCheckerTests.lean",
+              "sha256": "36790248f17f147fe5958256c7cb9ed26f767c410c1319aeadf590d480e69f9d"
+            },
+            {
+              "path": "scripts/sh1-source-snapshot.mjs",
+              "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8"
+            },
+            {
+              "path": "scripts/sh1-seed-manifest.mjs",
+              "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f"
+            },
+            {
+              "path": "scripts/sh1-iterate.mjs",
+              "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8"
+            },
+            {
+              "path": "scripts/sh1-iteration-conformance.mjs",
+              "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4"
+            },
+            {
+              "path": "scripts/sh1-foundation-conformance.mjs",
+              "sha256": "4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-reference.lean",
+              "sha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-probe.lean",
+              "sha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819"
+            },
+            {
+              "path": "scripts/sh1-helper-conformance.mjs",
+              "sha256": "b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-reference.lean",
+              "sha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-probe.lean",
+              "sha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9"
+            },
+            {
+              "path": "scripts/sh1-generic-erasure-conformance.mjs",
+              "sha256": "7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+              "sha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de"
+            }
+          ],
+          "sha256": "5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb"
+        },
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 7.0.2"
+        },
+        "typescriptProfile": {
+          "version": "7.0.2",
+          "purpose": "current-emission",
+          "arguments": [
+            "--ignoreConfig"
+          ]
+        },
+        "artifacts": {
+          "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+          "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+          "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+          "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+        },
+        "preparation": {
+          "schemaVersion": 1,
+          "kind": "psc0-preparation-session",
+          "evidence": "admission-ready",
+          "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+          "sourceKind": "lean",
+          "closureSha256": "07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538",
+          "moduleCount": 61,
+          "cache": {
+            "prefixModules": 0,
+            "parseHits": 0,
+            "parseMisses": 61,
+            "parseEvictions": 0,
+            "parseUncachedModules": 0,
+            "preparedModules": 61,
+            "finishHit": false,
+            "retainedParsedEntries": 61,
+            "retainedParsedSourceBytes": 1110100,
+            "retainedPrefixModules": 61,
+            "retainedPrefixSourceBytes": 1110100,
+            "maxParsedEntries": 128,
+            "maxParsedSourceBytes": 8388608
+          },
+          "timingsMs": {
+            "input": 1.9542209999635816,
+            "parse": 47531.74139100034,
+            "prepare": 618992.2570630005,
+            "finish": 139317.3703670001,
+            "freeze": 453.44641699967906,
+            "total": 806299.6862859998
+          },
+          "warmNoChange": {
+            "schemaVersion": 1,
+            "kind": "psc0-preparation-session",
+            "evidence": "admission-ready",
+            "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+            "sourceKind": "lean",
+            "closureSha256": "07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538",
+            "moduleCount": 61,
+            "cache": {
+              "prefixModules": 61,
+              "parseHits": 0,
+              "parseMisses": 0,
+              "parseEvictions": 0,
+              "parseUncachedModules": 0,
+              "preparedModules": 0,
+              "finishHit": true,
+              "retainedParsedEntries": 61,
+              "retainedParsedSourceBytes": 1110100,
+              "retainedPrefixModules": 61,
+              "retainedPrefixSourceBytes": 1110100,
+              "maxParsedEntries": 128,
+              "maxParsedSourceBytes": 8388608
+            },
+            "timingsMs": {
+              "input": 2.106701999902725,
+              "parse": 0,
+              "prepare": 0,
+              "finish": 0,
+              "freeze": 0,
+              "total": 2.1341530000790954
+            }
+          }
+        },
+        "originalIrInventory": {
+          "report": "original-ir-inventory.json",
+          "traversalComplete": true,
+          "findingCounts": {},
+          "findingCount": 0,
+          "findingCountsCoverage": "all-findings",
+          "portableChecker": {
+            "status": "accepted",
+            "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+            "options": {
+              "maxSteps": 5000000,
+              "maxTypeSteps": 65536,
+              "maxFindings": 1000
+            }
+          },
+          "runtimeIrTypingAccepted": true,
+          "sameOriginalIrCheckedBeforeEmission": true,
+          "strictSh1Qualified": false
+        },
+        "timingsMs": {
+          "loadAndPrepare": 806468.0448079999,
+          "admissions": 135968.5611089999,
+          "canonicalSurface": 56062.23030500021,
+          "emit": 420119.90059199976,
+          "tscAndWrite": 3782.7875330001116,
+          "total": 1422401.525769
+        },
+        "normalizationEvidence": "Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.",
+        "evidence": "candidate-build",
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "line": 430,
+      "label": "PSC0_SH1_SUCCESSOR_RECOVERY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T13:37:05.1560751Z PSC0_SH1_SUCCESSOR_RECOVERY: {\"schemaVersion\":1,\"evidence\":\"qualified-successor-cold-recovery\",\"sourceRef\":\"fe2560aba0f347b1caf8d000d371464642d44f23\",\"sourceClosureSha256\":\"f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226\",\"parentIdentitySha256\":\"0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9\",\"parentCompilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"compilerSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\",\"successorIdentitySha256\":\"47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225\",\"runnerSourceRef\":\"fe2560aba0f347b1caf8d000d371464642d44f23\",\"runnerRecipeSha256\":\"5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb\",\"toolchain\":{\"node\":\"v22.23.3\",\"platform\":\"linux\",\"architecture\":\"x64\",\"lean\":\"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\"leanGitHash\":\"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\"typescript\":\"Version 7.0.2\"},\"expectedFirstGenerationArtifacts\":{\"canonicalSurfaceSourceSha256\":\"a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"expectedArtifacts\":{\"canonicalSurfaceSourceSha256\":\"985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"coldSuccessorRecovery\":true,\"passed\":true,\"selectedSeedChanged\":false,\"strictSh1Qualified\":false,\"fullPscvConformance\":false,\"method\":\"pinned-parent-two-new-raw-source-generations\",\"actualFirstGenerationArtifacts\":{\"canonicalSurfaceSourceSha256\":\"a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"actualArtifacts\":{\"canonicalSurfaceSourceSha256\":\"985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"originalIrCheckedBeforeEmission\":true,\"parentCacheVerified\":true,\"elapsedMs\":2728786.866427,\"receiptSha256\":\"2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d\"}",
+      "rawJson": "{\"schemaVersion\":1,\"evidence\":\"qualified-successor-cold-recovery\",\"sourceRef\":\"fe2560aba0f347b1caf8d000d371464642d44f23\",\"sourceClosureSha256\":\"f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226\",\"parentIdentitySha256\":\"0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9\",\"parentCompilerSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"compilerSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\",\"successorIdentitySha256\":\"47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225\",\"runnerSourceRef\":\"fe2560aba0f347b1caf8d000d371464642d44f23\",\"runnerRecipeSha256\":\"5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb\",\"toolchain\":{\"node\":\"v22.23.3\",\"platform\":\"linux\",\"architecture\":\"x64\",\"lean\":\"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\"leanGitHash\":\"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\"typescript\":\"Version 7.0.2\"},\"expectedFirstGenerationArtifacts\":{\"canonicalSurfaceSourceSha256\":\"a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"expectedArtifacts\":{\"canonicalSurfaceSourceSha256\":\"985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"coldSuccessorRecovery\":true,\"passed\":true,\"selectedSeedChanged\":false,\"strictSh1Qualified\":false,\"fullPscvConformance\":false,\"method\":\"pinned-parent-two-new-raw-source-generations\",\"actualFirstGenerationArtifacts\":{\"canonicalSurfaceSourceSha256\":\"a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"actualArtifacts\":{\"canonicalSurfaceSourceSha256\":\"985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07\",\"normalizedCanonicalAdmissionsSha256\":\"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0\",\"typescriptSha256\":\"38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935\",\"javascriptSha256\":\"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061\"},\"originalIrCheckedBeforeEmission\":true,\"parentCacheVerified\":true,\"elapsedMs\":2728786.866427,\"receiptSha256\":\"2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d\"}",
+      "parsed": {
+        "schemaVersion": 1,
+        "evidence": "qualified-successor-cold-recovery",
+        "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+        "parentIdentitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+        "parentCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+        "successorIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+        "runnerSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "runnerRecipeSha256": "5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb",
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 7.0.2"
+        },
+        "expectedFirstGenerationArtifacts": {
+          "canonicalSurfaceSourceSha256": "a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2",
+          "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+          "typescriptSha256": "6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954",
+          "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+        },
+        "expectedArtifacts": {
+          "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+          "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+          "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+          "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+        },
+        "coldSuccessorRecovery": true,
+        "passed": true,
+        "selectedSeedChanged": false,
+        "strictSh1Qualified": false,
+        "fullPscvConformance": false,
+        "method": "pinned-parent-two-new-raw-source-generations",
+        "actualFirstGenerationArtifacts": {
+          "canonicalSurfaceSourceSha256": "a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2",
+          "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+          "typescriptSha256": "6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954",
+          "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+        },
+        "actualArtifacts": {
+          "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+          "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+          "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+          "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+        },
+        "originalIrCheckedBeforeEmission": true,
+        "parentCacheVerified": true,
+        "elapsedMs": 2728786.866427,
+        "receiptSha256": "2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d"
+      }
+    }
+  ],
+  "receiptChecks": {
+    "source": true,
+    "closure": true,
+    "parent": true,
+    "runner": true,
+    "recipe": true,
+    "first": true,
+    "final": true,
+    "seedUnchanged": true,
+    "cold": true,
+    "passed": true
+  },
+  "finalJobs": {
+    "jobs": [
+      {
+        "id": 113804052074,
+        "name": "compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 37925722635,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Select the historical, v1, or qualified successor authoring seed",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run leanprover/lean-action@v1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install separate pinned current and historical TypeScript profiles",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Verify the installed TypeScript 7 profile before compiler generation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Verify host syntax and bootstrap source restrictions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Verify successor seed descriptor and cache contracts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Restore the selected qualified compiler bytes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Verify the restored selected compiler bytes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Restore the immutable v1 parent when a successor cache misses",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Route only the recovery edges whose exact cache is missing",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Preserve an immutable historical source checkout when recovery needs it",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Restore historical native build",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 15
+          },
+          {
+            "name": "Identify the pinned recovery recipe and toolchain",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 16
+          },
+          {
+            "name": "Restore exact historical seed",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 17
+          },
+          {
+            "name": "Verify seed digests or recover once from the preserved source",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 18
+          },
+          {
+            "name": "Retain historical native outputs before testing changed source",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 19
+          },
+          {
+            "name": "Retain verified seed before testing changed source",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 20
+          },
+          {
+            "name": "Retrieve the immutable v1 parent artifact if it is still retained",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 21
+          },
+          {
+            "name": "Read the immutable v1 source only when its bytes need recovery",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 22
+          },
+          {
+            "name": "Verify or recover the v1 seed with its original TypeScript replay",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23
+          },
+          {
+            "name": "Retain recovered immutable parent bytes before successor recovery",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 24
+          },
+          {
+            "name": "Read the selected successor's pinned recovery runner and source",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 25
+          },
+          {
+            "name": "Retrieve the selected successor artifact when retained",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 26
+          },
+          {
+            "name": "Recover a missing successor with its own pinned runner under TypeScript 7",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 27
+          },
+          {
+            "name": "Verify selected authoring cache and execution runtime before current generation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28
+          },
+          {
+            "name": "Report retained seed IR type-argument findings",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29
+          },
+          {
+            "name": "Retain the verified qualified authoring seed",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 30
+          },
+          {
+            "name": "Restore incremental current compiler build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 31
+          },
+          {
+            "name": "Build current native compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 32
+          },
+          {
+            "name": "Run native parser, translation, and erasure regression targets",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 33
+          },
+          {
+            "name": "Build the actual native checked seed for source and import tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 34
+          },
+          {
+            "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          },
+          {
+            "name": "Verify native and generated TypeScript CLI boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 36
+          },
+          {
+            "name": "Run the bounded native development gate before qualification",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 37
+          },
+          {
+            "name": "Compare TypeScript 5 and 7 on the same complete emitted compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 38
+          },
+          {
+            "name": "Build the selected-seed candidate before full qualification",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 39
+          },
+          {
+            "name": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 40
+          },
+          {
+            "name": "Retain the newly qualified seed without activating a source migration",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 41
+          },
+          {
+            "name": "Retain incremental native outputs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 42
+          },
+          {
+            "name": "Retain compiler evidence and exact generated artifacts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 43
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 85
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 86
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 87
+          }
+        ]
+      },
+      {
+        "id": 113827136830,
+        "name": "kernel-admissions",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 37925722635,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Read the independently qualified native provider at its exact source revision",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run leanprover/lean-action@v1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Restore pinned native provider build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Build the existing provider target without editing its implementation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Retain the pinned provider build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Read exact compiler qualification artifacts from this run",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Obtain actual provider decisions for the qualified admission streams",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Retain provider acceptance or the exact rejection evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Post Read the independently qualified native provider at its exact source revision",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23
+          }
+        ]
+      },
+      {
+        "id": 113827137018,
+        "name": "successor-recovery",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 37925722635,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Read the exact qualified successor revision and its recovery runner",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run leanprover/lean-action@v1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install the pinned TypeScript 7 recovery compiler in isolation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Read the candidate descriptor and its immutable parent bytes from this run",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Select the provisional successor without activating it",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Rebuild the successor from its parent into fresh output and cache directories",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Authenticate the cold recovery receipt and the rebuilt successor bytes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Retain the independent recovery receipt, exact products, and rebuilt cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Read the exact qualified successor revision and its recovery runner",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 11618882773,
+      "name": "psc0-sh1-successor-recovery-ts7.0.2-fe2560aba0f347b1caf8d000d371464642d44f23",
+      "size_in_bytes": 2670771,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11618882773",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11618882773/zip",
+      "expired": false,
+      "created_at": "2026-10-09T13:37:06Z",
+      "expires_at": "2026-11-08T13:37:05Z",
+      "updated_at": "2026-10-09T13:37:06Z",
+      "digest": "sha256:00bb3be4fc777340cb05a8cd7c145ada2a7fd6e3b827ab5bfe8ef46246dacd04",
+      "workflow_run": {
+        "id": 37925722635,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/sh1-projection-grammar-v1",
+        "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23"
+      }
+    },
+    {
+      "id": 11617460205,
+      "name": "psc0-sh1-ts7.0.2-fe2560aba0f347b1caf8d000d371464642d44f23",
+      "size_in_bytes": 7477193,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11617460205",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11617460205/zip",
+      "expired": false,
+      "created_at": "2026-10-09T12:50:41Z",
+      "expires_at": "2026-11-08T12:50:38Z",
+      "updated_at": "2026-10-09T12:50:41Z",
+      "digest": "sha256:28d65fad4a77f96676fad530e786761e6955444690e3707e2ae8b8181041bc0a",
+      "workflow_run": {
+        "id": 37925722635,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/sh1-projection-grammar-v1",
+        "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23"
+      }
+    },
+    {
+      "id": 11616189342,
+      "name": "psc0-sh1-kernel-ts7.0.2-fe2560aba0f347b1caf8d000d371464642d44f23",
+      "size_in_bytes": 1283,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11616189342",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11616189342/zip",
+      "expired": false,
+      "created_at": "2026-10-09T12:52:08Z",
+      "expires_at": "2026-11-08T12:52:08Z",
+      "updated_at": "2026-10-09T12:52:08Z",
+      "digest": "sha256:26c0dfc6b2315de0785341015281b445c07e842102079ef19c5b2586f321df59",
+      "workflow_run": {
+        "id": 37925722635,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/sh1-projection-grammar-v1",
+        "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23"
+      }
+    }
+  ],
+  "fullRun": {
+    "id": 37925722635,
+    "name": "PSC0 SH1 language qualification",
+    "node_id": "WFR_kwLOUlmxxc8AAAAI1IyaCw",
+    "head_branch": "psc0/sh1-projection-grammar-v1",
+    "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "path": ".github/workflows/psc0-sh1.yml",
+    "display_title": "fix(psc0): correct native grammar build blockers and collect regressi…",
+    "run_number": 17,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 378853677,
+    "check_suite_id": 102755520806,
+    "check_suite_node_id": "CS_kwDOUlmxxc8AAAAX7LTRJg",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/37925722635",
+    "pull_requests": [],
+    "created_at": "2026-10-09T11:45:41Z",
+    "updated_at": "2026-10-09T13:37:09Z",
+    "actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-09T11:45:41Z",
+    "triggering_actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/jobs",
+    "logs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/logs",
+    "check_suite_url": "https://api.github.com/repos/dwijayuda/pskernel/check-suites/102755520806",
+    "artifacts_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/artifacts",
+    "cancel_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/cancel",
+    "rerun_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/378853677",
+    "head_commit": {
+      "id": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "tree_id": "68a744ebc21330d06fbfbddfaac0130625860d16",
+      "message": "fix(psc0): correct native grammar build blockers and collect regression outcomes [sh1-qualify]\n\nRename the reserved postfix local without losing the compiled grammar identity.\nUse a direct List constructor match for empty-call refusal in Term, preserving\nthe nonempty application branch and avoiding a new dependency. Collect all three\nexisting native suite outcomes before failing the regression step.\n\nRetain the exact first cloud attempt and its skipped qualification status.\nThe selected seed, provider, fuel checks and grammar acceptance policy are unchanged.",
+      "timestamp": "2026-10-09T11:45:32Z",
+      "author": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      },
+      "committer": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    },
+    "head_repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    }
+  },
+  "selectedSeedChanged": false,
+  "scope": "Exact timestamped compact log records plus parsed analysis objects. The recovery runner separately reports receiptSha256 computed from the original receipt file before adding that digest to its log record. This bundle does not claim to contain the artifact's original receipt-file bytes; the collector must preserve and independently hash those bytes."
+}

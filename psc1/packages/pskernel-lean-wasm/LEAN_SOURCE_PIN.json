@@ -1,0 +1,7 @@
+{
+  "protocol": "pskernel-lean/1",
+  "provider": "lean4-cpp",
+  "profile": "lean4.34-core",
+  "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+}

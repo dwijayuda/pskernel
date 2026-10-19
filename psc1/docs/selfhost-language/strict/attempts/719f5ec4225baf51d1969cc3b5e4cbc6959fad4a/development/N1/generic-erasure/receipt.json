@@ -1,0 +1,973 @@
+{
+  "schemaVersion": 1,
+  "evidence": "scoped-recursive-generic-erasure",
+  "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+  "sourceKind": "raw-authoritative-lean",
+  "sourceSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+  "originalIr": {
+    "checks": [
+      "one, two, and three declaration generics in exact declaration order",
+      "interleaved type, erased proposition/proof, and runtime binders",
+      "recursive calls retain the complete runtime argument count",
+      "monomorphic recursive calls retain zero type arguments"
+    ],
+    "observations": [
+      {
+        "declaration": "sh1GenericCopy",
+        "declarationTypeParameters": [
+          "T0"
+        ],
+        "runtimeParameters": [
+          "values"
+        ],
+        "calls": [
+          {
+            "at": "declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+            "typeArguments": [
+              "T0"
+            ],
+            "runtimeArity": 1
+          }
+        ]
+      },
+      {
+        "declaration": "sh1GenericMap",
+        "declarationTypeParameters": [
+          "T0",
+          "T1"
+        ],
+        "runtimeParameters": [
+          "convert",
+          "values"
+        ],
+        "calls": [
+          {
+            "at": "declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+            "typeArguments": [
+              "T0",
+              "T1"
+            ],
+            "runtimeArity": 2
+          }
+        ]
+      },
+      {
+        "declaration": "sh1GenericTriple",
+        "declarationTypeParameters": [
+          "T0",
+          "T1",
+          "T2"
+        ],
+        "runtimeParameters": [
+          "first",
+          "second",
+          "third",
+          "fuel"
+        ],
+        "calls": [
+          {
+            "at": "declaration:sh1GenericTriple/body/elseBranch/body",
+            "typeArguments": [
+              "T0",
+              "T1",
+              "T2"
+            ],
+            "runtimeArity": 4
+          }
+        ]
+      },
+      {
+        "declaration": "sh1GenericMono",
+        "declarationTypeParameters": [],
+        "runtimeParameters": [
+          "fuel",
+          "value"
+        ],
+        "calls": [
+          {
+            "at": "declaration:sh1GenericMono/body/elseBranch/body",
+            "typeArguments": [],
+            "runtimeArity": 2
+          }
+        ]
+      }
+    ],
+    "emittedIr": "The exact original IR inspected above is passed to psTsEmitModule.",
+    "strictSh1Qualified": false
+  },
+  "artifacts": {
+    "admissionsSha256": "6c97944c3ef08ae3c3b7b6c51a6f79b859cde986434250cf2c7e651b6b83b2de",
+    "typescriptSha256": "5eac47888b911259650e427655111e95dd7a30b1f7bec66a9b2bd454e1aac5e2",
+    "javascriptSha256": "2d89191fbf8bccd5b726107f7be055fa73ada6bd613aae29a7190b3029c54506"
+  },
+  "behavior": {
+    "observations": 19,
+    "status": "pass",
+    "exhaustiveForAllInputs": false
+  },
+  "functionValues": {
+    "ir": {
+      "policy": "canonical-unary-values-flat-aligned-entries/1",
+      "sourceEntries": [
+        {
+          "name": "sh1GroupIdentity",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupDirect",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupLet",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupApply",
+          "runtimeArity": 2
+        },
+        {
+          "name": "sh1GroupHigher",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupWeighted",
+          "runtimeArity": 2
+        },
+        {
+          "name": "sh1GroupKnown",
+          "runtimeArity": 0
+        },
+        {
+          "name": "sh1GroupRecordUse",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupBoxUse",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupArrayUse",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupArrayMap",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupArrayFold",
+          "runtimeArity": 0
+        },
+        {
+          "name": "sh1GroupComputed",
+          "runtimeArity": 2
+        },
+        {
+          "name": "sh1GroupTypeOnlyUse",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupTypeOnlyHigher",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupTypeProofOnlyUse",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupLambda",
+          "runtimeArity": 1
+        },
+        {
+          "name": "sh1GroupProjection",
+          "runtimeArity": 1
+        }
+      ],
+      "typeActivationEntries": [
+        {
+          "name": "sh1GroupTypeOnly",
+          "sourceRuntimeArity": 0,
+          "physicalRuntimeArity": 1,
+          "internalActivation": "fresh-ignored-unit",
+          "typeArity": 1
+        },
+        {
+          "name": "sh1GroupTypeProofOnly",
+          "sourceRuntimeArity": 0,
+          "physicalRuntimeArity": 1,
+          "internalActivation": "fresh-ignored-unit",
+          "typeArity": 1
+        }
+      ],
+      "typeNodes": 136,
+      "unaryFunctionNodes": 23,
+      "originalIr": {
+        "accepted": true,
+        "traversalComplete": true,
+        "findingCount": "0",
+        "expressionCount": "316",
+        "visitedSteps": "3817",
+        "checkedObjectIsEmittedObject": true
+      },
+      "additionalPreparations": 0,
+      "additionalTypeScriptCompilations": 0,
+      "additionalNativeExecutions": 0
+    },
+    "behavior": {
+      "observations": [
+        {
+          "id": "generic-return-direct",
+          "value": "107",
+          "status": "pass"
+        },
+        {
+          "id": "generic-return-let",
+          "value": "107",
+          "status": "pass"
+        },
+        {
+          "id": "generic-higher-order-parameter",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "known-flat-entry-as-value",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "generic-record-field",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "generic-inductive-field",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "array-of-function-values",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "array-map-function-result",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "array-fold-binary-bridge",
+          "value": "15",
+          "status": "pass"
+        },
+        {
+          "id": "type-only-computed-value",
+          "value": "29",
+          "status": "pass"
+        },
+        {
+          "id": "type-only-function-instantiation",
+          "value": "107",
+          "status": "pass"
+        },
+        {
+          "id": "type-and-proof-only-activation",
+          "value": "53",
+          "status": "pass"
+        },
+        {
+          "id": "generic-lambda-body-result",
+          "value": "107",
+          "status": "pass"
+        },
+        {
+          "id": "generic-projection-computed-head",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "computed-closure-first",
+          "value": "35",
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        },
+        {
+          "id": "computed-closure-second",
+          "value": "43",
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        },
+        {
+          "id": "computed-closure-reuse",
+          "value": "35",
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        },
+        {
+          "id": "computed-closure-discarded",
+          "trace": [
+            "make",
+            "make"
+          ],
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        },
+        {
+          "id": "computed-closure-original-fault",
+          "trace": [
+            "make",
+            "make",
+            "make-failure"
+          ],
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        }
+      ],
+      "observationCount": 19,
+      "status": "pass",
+      "pureValueCases": 14,
+      "callbackDemandDiagnostics": 5,
+      "exhaustiveForAllInputs": false,
+      "sourceEffectCapabilityAdded": false
+    }
+  },
+  "recursion": {
+    "reference": {
+      "policy": "prepared-core-nat-reference/1",
+      "preparedObject": "same PsCompilerAdmissionReadyModule used for original IR",
+      "artifact": {
+        "path": "recursion-core.json",
+        "sha256": "c6fb71d4fd112b51a48fc33634596f37e2c1b3f9550cee588f6396d052aa7869",
+        "bytes": 16301
+      },
+      "declarations": [
+        {
+          "name": "sh1CoreMajorCapture",
+          "sourceRuntimeArity": 1,
+          "coreSha256": "d542280104cf9fe4bfbd41f4e8ea6da7594549a9b801e78c43e53456906bcb70"
+        },
+        {
+          "name": "sh1CoreNestedOuter",
+          "sourceRuntimeArity": 1,
+          "coreSha256": "920b724e71e5e2f899ac76f66c2b087bd0b5e219ca3ba95bbdc2baf11da2be30"
+        }
+      ],
+      "observations": [
+        {
+          "id": "major-capture-two",
+          "declaration": "sh1CoreMajorCapture",
+          "input": "2",
+          "value": "3",
+          "steps": 43,
+          "recursorApplications": 1,
+          "status": "pass"
+        },
+        {
+          "id": "major-capture-three",
+          "declaration": "sh1CoreMajorCapture",
+          "input": "3",
+          "value": "6",
+          "steps": 57,
+          "recursorApplications": 1,
+          "status": "pass"
+        },
+        {
+          "id": "nested-outer-two",
+          "declaration": "sh1CoreNestedOuter",
+          "input": "2",
+          "value": "3",
+          "steps": 81,
+          "recursorApplications": 3,
+          "status": "pass"
+        },
+        {
+          "id": "nested-outer-three",
+          "declaration": "sh1CoreNestedOuter",
+          "input": "3",
+          "value": "6",
+          "steps": 135,
+          "recursorApplications": 4,
+          "status": "pass"
+        }
+      ],
+      "observationCount": 4,
+      "budget": {
+        "limit": 20000,
+        "used": 316,
+        "remaining": 19684,
+        "scope": "shared across all four reference observations"
+      },
+      "snapshot": {
+        "nodes": 78,
+        "nodeLimit": 8192,
+        "depthLimit": 128
+      },
+      "supportedExecutableForms": [
+        "bvar",
+        "lam",
+        "app",
+        "letE",
+        "lit.natural",
+        "constE"
+      ],
+      "runtimeConstants": [
+        "Nat.zero",
+        "Nat.succ",
+        "Nat.add",
+        "Nat.rec",
+        "sh1CoreMajorCapture",
+        "sh1CoreNestedOuter"
+      ],
+      "suppliedNatRecMinorClosures": true,
+      "additionalPreparations": 0,
+      "additionalTypeScriptCompilations": 0,
+      "additionalNativeExecutions": 0,
+      "status": "pass",
+      "exhaustiveForAllInputs": false,
+      "generalRecursorDemandAdequacy": false
+    },
+    "behavior": {
+      "observations": [
+        {
+          "id": "major-capture-two",
+          "declaration": "sh1CoreMajorCapture",
+          "input": "2",
+          "value": "3",
+          "status": "pass"
+        },
+        {
+          "id": "major-capture-three",
+          "declaration": "sh1CoreMajorCapture",
+          "input": "3",
+          "value": "6",
+          "status": "pass"
+        },
+        {
+          "id": "nested-outer-two",
+          "declaration": "sh1CoreNestedOuter",
+          "input": "2",
+          "value": "3",
+          "status": "pass"
+        },
+        {
+          "id": "nested-outer-three",
+          "declaration": "sh1CoreNestedOuter",
+          "input": "3",
+          "value": "6",
+          "status": "pass"
+        }
+      ],
+      "observationCount": 4,
+      "status": "pass",
+      "exhaustiveForAllInputs": false
+    }
+  },
+  "recursiveStructures": {
+    "policy": "recursive-structure-fields-and-root-hypotheses/1",
+    "compileOnly": true,
+    "layouts": [
+      {
+        "name": "Sh1RecursiveRecord",
+        "typeParameters": [],
+        "recursiveFieldIndex": 0,
+        "fields": [
+          {
+            "name": "next",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveRecord",
+              "arguments": []
+            }
+          }
+        ]
+      },
+      {
+        "name": "Sh1RecursiveGenericRecord",
+        "typeParameters": [
+          "T0"
+        ],
+        "recursiveFieldIndex": 1,
+        "fields": [
+          {
+            "name": "item",
+            "type": {
+              "kind": "typeParameter",
+              "name": "T0"
+            }
+          },
+          {
+            "name": "next",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveGenericRecord",
+              "arguments": [
+                {
+                  "kind": "typeParameter",
+                  "name": "T0"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "declarations": [
+      {
+        "name": "sh1RecursiveRecordObserve",
+        "structure": "Sh1RecursiveRecord",
+        "typeParameters": [],
+        "parameters": [
+          {
+            "name": "value",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveRecord",
+              "arguments": []
+            }
+          }
+        ],
+        "resultType": {
+          "kind": "primitive",
+          "name": "nat"
+        },
+        "major": {
+          "name": "_psStructureMajor",
+          "sourceParameter": "value",
+          "type": {
+            "kind": "named",
+            "name": "Sh1RecursiveRecord",
+            "arguments": []
+          },
+          "evaluations": 1,
+          "fresh": true
+        },
+        "projections": [
+          {
+            "index": 0,
+            "field": "next",
+            "binding": "next",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveRecord",
+              "arguments": []
+            },
+            "target": "_psStructureMajor"
+          }
+        ],
+        "recursiveFieldIndex": 0,
+        "body": {
+          "kind": "natural",
+          "value": "0"
+        },
+        "freshNamesDistinct": true,
+        "remainingHypothesisLambdas": 0
+      },
+      {
+        "name": "sh1RecursiveRecordStep",
+        "structure": "Sh1RecursiveRecord",
+        "typeParameters": [],
+        "parameters": [
+          {
+            "name": "value",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveRecord",
+              "arguments": []
+            }
+          }
+        ],
+        "resultType": {
+          "kind": "primitive",
+          "name": "nat"
+        },
+        "major": {
+          "name": "_psStructureMajor",
+          "sourceParameter": "value",
+          "type": {
+            "kind": "named",
+            "name": "Sh1RecursiveRecord",
+            "arguments": []
+          },
+          "evaluations": 1,
+          "fresh": true
+        },
+        "projections": [
+          {
+            "index": 0,
+            "field": "next",
+            "binding": "next",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveRecord",
+              "arguments": []
+            },
+            "target": "_psStructureMajor"
+          }
+        ],
+        "recursiveFieldIndex": 0,
+        "body": {
+          "kind": "recursive-call",
+          "declaration": "sh1RecursiveRecordStep",
+          "typeArguments": [],
+          "arguments": [
+            "next"
+          ],
+          "runtimeArity": 1
+        },
+        "freshNamesDistinct": true,
+        "remainingHypothesisLambdas": 0
+      },
+      {
+        "name": "sh1RecursiveGenericObserve",
+        "structure": "Sh1RecursiveGenericRecord",
+        "typeParameters": [
+          "T0"
+        ],
+        "parameters": [
+          {
+            "name": "value",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveGenericRecord",
+              "arguments": [
+                {
+                  "kind": "typeParameter",
+                  "name": "T0"
+                }
+              ]
+            }
+          }
+        ],
+        "resultType": {
+          "kind": "typeParameter",
+          "name": "T0"
+        },
+        "major": {
+          "name": "_psStructureMajor",
+          "sourceParameter": "value",
+          "type": {
+            "kind": "named",
+            "name": "Sh1RecursiveGenericRecord",
+            "arguments": [
+              {
+                "kind": "typeParameter",
+                "name": "T0"
+              }
+            ]
+          },
+          "evaluations": 1,
+          "fresh": true
+        },
+        "projections": [
+          {
+            "index": 0,
+            "field": "item",
+            "binding": "item",
+            "type": {
+              "kind": "typeParameter",
+              "name": "T0"
+            },
+            "target": "_psStructureMajor"
+          },
+          {
+            "index": 1,
+            "field": "next",
+            "binding": "next",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveGenericRecord",
+              "arguments": [
+                {
+                  "kind": "typeParameter",
+                  "name": "T0"
+                }
+              ]
+            },
+            "target": "_psStructureMajor"
+          }
+        ],
+        "recursiveFieldIndex": 1,
+        "body": {
+          "kind": "field",
+          "field": "item",
+          "binding": "item"
+        },
+        "freshNamesDistinct": true,
+        "remainingHypothesisLambdas": 0
+      },
+      {
+        "name": "sh1RecursiveGenericStep",
+        "structure": "Sh1RecursiveGenericRecord",
+        "typeParameters": [
+          "T0"
+        ],
+        "parameters": [
+          {
+            "name": "value",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveGenericRecord",
+              "arguments": [
+                {
+                  "kind": "typeParameter",
+                  "name": "T0"
+                }
+              ]
+            }
+          }
+        ],
+        "resultType": {
+          "kind": "typeParameter",
+          "name": "T0"
+        },
+        "major": {
+          "name": "_psStructureMajor",
+          "sourceParameter": "value",
+          "type": {
+            "kind": "named",
+            "name": "Sh1RecursiveGenericRecord",
+            "arguments": [
+              {
+                "kind": "typeParameter",
+                "name": "T0"
+              }
+            ]
+          },
+          "evaluations": 1,
+          "fresh": true
+        },
+        "projections": [
+          {
+            "index": 0,
+            "field": "item",
+            "binding": "item",
+            "type": {
+              "kind": "typeParameter",
+              "name": "T0"
+            },
+            "target": "_psStructureMajor"
+          },
+          {
+            "index": 1,
+            "field": "next",
+            "binding": "next",
+            "type": {
+              "kind": "named",
+              "name": "Sh1RecursiveGenericRecord",
+              "arguments": [
+                {
+                  "kind": "typeParameter",
+                  "name": "T0"
+                }
+              ]
+            },
+            "target": "_psStructureMajor"
+          }
+        ],
+        "recursiveFieldIndex": 1,
+        "body": {
+          "kind": "recursive-call",
+          "declaration": "sh1RecursiveGenericStep",
+          "typeArguments": [
+            {
+              "kind": "typeParameter",
+              "name": "T0"
+            }
+          ],
+          "arguments": [
+            "next"
+          ],
+          "runtimeArity": 1
+        },
+        "freshNamesDistinct": true,
+        "remainingHypothesisLambdas": 0
+      }
+    ],
+    "structureCount": 2,
+    "declarationCount": 4,
+    "projectionCount": 6,
+    "usedHypothesisCount": 2,
+    "unusedHypothesisCount": 2,
+    "originalIr": {
+      "accepted": true,
+      "traversalComplete": true,
+      "findingCount": "0",
+      "expressionCount": "316",
+      "visitedSteps": "3817",
+      "checkedObjectIsEmittedObject": true,
+      "reusedExistingCheck": true
+    },
+    "runtimeInvocations": 0,
+    "constructedRuntimeRecords": 0,
+    "additionalPreparations": 0,
+    "additionalIrChecks": 0,
+    "additionalTypeScriptCompilations": 0,
+    "additionalNativeExecutions": 0,
+    "generalRecursorDemandAdequacyProven": false,
+    "semanticPreservationProven": false
+  },
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  },
+  "native": {
+    "typescriptSha256": "5eac47888b911259650e427655111e95dd7a30b1f7bec66a9b2bd454e1aac5e2",
+    "javascriptSha256": "2d89191fbf8bccd5b726107f7be055fa73ada6bd613aae29a7190b3029c54506",
+    "behavior": {
+      "observations": 19,
+      "status": "pass",
+      "exhaustiveForAllInputs": false
+    },
+    "functionValueBehavior": {
+      "observations": [
+        {
+          "id": "generic-return-direct",
+          "value": "107",
+          "status": "pass"
+        },
+        {
+          "id": "generic-return-let",
+          "value": "107",
+          "status": "pass"
+        },
+        {
+          "id": "generic-higher-order-parameter",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "known-flat-entry-as-value",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "generic-record-field",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "generic-inductive-field",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "array-of-function-values",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "array-map-function-result",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "array-fold-binary-bridge",
+          "value": "15",
+          "status": "pass"
+        },
+        {
+          "id": "type-only-computed-value",
+          "value": "29",
+          "status": "pass"
+        },
+        {
+          "id": "type-only-function-instantiation",
+          "value": "107",
+          "status": "pass"
+        },
+        {
+          "id": "type-and-proof-only-activation",
+          "value": "53",
+          "status": "pass"
+        },
+        {
+          "id": "generic-lambda-body-result",
+          "value": "107",
+          "status": "pass"
+        },
+        {
+          "id": "generic-projection-computed-head",
+          "value": "37",
+          "status": "pass"
+        },
+        {
+          "id": "computed-closure-first",
+          "value": "35",
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        },
+        {
+          "id": "computed-closure-second",
+          "value": "43",
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        },
+        {
+          "id": "computed-closure-reuse",
+          "value": "35",
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        },
+        {
+          "id": "computed-closure-discarded",
+          "trace": [
+            "make",
+            "make"
+          ],
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        },
+        {
+          "id": "computed-closure-original-fault",
+          "trace": [
+            "make",
+            "make",
+            "make-failure"
+          ],
+          "status": "pass",
+          "diagnosticDomain": "host-callback-demand"
+        }
+      ],
+      "observationCount": 19,
+      "status": "pass",
+      "pureValueCases": 14,
+      "callbackDemandDiagnostics": 5,
+      "exhaustiveForAllInputs": false,
+      "sourceEffectCapabilityAdded": false
+    },
+    "recursionBehavior": {
+      "observations": [
+        {
+          "id": "major-capture-two",
+          "declaration": "sh1CoreMajorCapture",
+          "input": "2",
+          "value": "3",
+          "status": "pass"
+        },
+        {
+          "id": "major-capture-three",
+          "declaration": "sh1CoreMajorCapture",
+          "input": "3",
+          "value": "6",
+          "status": "pass"
+        },
+        {
+          "id": "nested-outer-two",
+          "declaration": "sh1CoreNestedOuter",
+          "input": "2",
+          "value": "3",
+          "status": "pass"
+        },
+        {
+          "id": "nested-outer-three",
+          "declaration": "sh1CoreNestedOuter",
+          "input": "3",
+          "value": "6",
+          "status": "pass"
+        }
+      ],
+      "observationCount": 4,
+      "status": "pass",
+      "exhaustiveForAllInputs": false
+    }
+  }
+}

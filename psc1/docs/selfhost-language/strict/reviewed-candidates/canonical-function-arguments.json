@@ -1,0 +1,144 @@
+{
+  "format": "psc0-canonical-function-arguments/1",
+  "status": "independently-reviewed-unattached-document",
+  "sourceRef": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "documentationCheckpoint": "796f2fd8feebc96dfcdd79002e6a53aeb7b4ad90",
+  "files": [
+    {
+      "path": "psc0/docs/selfhost-language/strict/CANONICAL_FUNCTION_ARGUMENTS.md",
+      "baseBlob": null,
+      "baseGuard": "Path absent at documentationCheckpoint (GitHub contents NOT_FOUND); root must retain its ordinary expected-ref/tree guard at publication.",
+      "candidateBlob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+      "candidateSha256": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+      "candidateBytes": 48633,
+      "exactReadback": true
+    }
+  ],
+  "supersedesUnattached": "b2270f6991752022367230ff8df05b08bb4331a6",
+  "guardedRevisionChain": [
+    {
+      "baseBlob": "b2270f6991752022367230ff8df05b08bb4331a6",
+      "candidateBlob": "f73672328632718d9168b816f33ac641aef57796",
+      "candidateSha256": "1e3d55de2fe2d5cca74f18403c1ea6dfa760ab7bf783f741d26a19cdad7d8f24",
+      "candidateBytes": 47154,
+      "edits": [
+        {
+          "before": "No claim that CI and IJ use the **same number** for every finite observation is needed or generally correct.",
+          "after": "For the function clause at index n+1, the outer matched application has already decreased to a residual j <= n before an internal completion-to-entry transfer. Apply the expression/body preservation statement for the actual declaration body at that lower index j, with the established opened environment. Do not invoke an opaque global-function hypothesis a second time and silently spend another charge. This is the same mutual index/body induction used for authored closures: the transfer's code identity is supplied by ENTRY-PREFIX; ordinary calls inside the body still decrease the index. An arbitrary computed callee has no such administrative shortcut.\n\nNo claim that CI and IJ use the **same number** for every finite observation is needed or generally correct."
+        },
+        {
+          "before": "The all-indices CI and IJ statements then cover that same common IR prefix with their respective budgets.",
+          "after": "For the whole-program composition, the starting environments and supplied canonical value families are related at all required indices, as established by the value/environment part of the mutual compiler argument; a single finite-index input hypothesis is insufficient. The all-indices CI and IJ statements then cover that same common IR prefix with their respective budgets."
+        }
+      ]
+    },
+    {
+      "baseBlob": "f73672328632718d9168b816f33ac641aef57796",
+      "candidateBlob": "a1112bb65678ebf9a91a1f5b546c95647a80284c",
+      "candidateSha256": "cf6303a784f05b8b86e93acbd871b0dfc45e881b2d57abb79548f70f88960d07",
+      "candidateBytes": 48265,
+      "edits": [
+        {
+          "before": "The partial-entry row does not require a physical IR call merely to make a function value. Its completion-value construction has a logical boundary after the supplied operand captures and before returning the related residual closure. This is where a matched partial-prefix application can be charged in the CI observation. An already returned partial value has the remaining canonical unary type; its next call is observed by the ordinary unary clause. Thus a cutoff during a partial application is not skipped: before the next logical invocation, both machines retain the same already-obtained values and the corresponding residual-entry/completion state.",
+          "after": "The proper-partial row uses the same per-supplied-slot refinement as a saturated direct entry. After each original operand returns, align its immediate Core beta boundary before demanding the next supplied operand. This applies equally to an operand represented by a capture let and to a total variable or literal lookup whose capture let is elided. For example, in a prefix d x (g Unit) of an entry with at least three retained parameters, the d/x boundary precedes evaluation of g Unit; the refinement cannot move that boundary after all captures. If the allowance ends there, both sides retain that prefix value and suspend before the later operand. After the last supplied slot, return the related residual-entry/completion closure at the actual remaining index. There is no second collective partial-prefix charge. An already returned partial value has the remaining canonical unary type; its next supplied runtime slot is charged by the ordinary unary clause."
+        },
+        {
+          "before": "Use one residual budget within each relation. Operand evaluation consumes from the current remainder; the aligned logical boundary consumes its one matched charge only after those operands. A completion, direct-entry transfer, Unit transfer, fold bridge, callback or nested runner never supplies a fresh allowance.",
+          "after": "Use one residual budget within each relation. For each retained Core application stage, evaluation of its operand consumes from the current remainder, and that stage's aligned logical boundary consumes one matched charge after that operand and before a later stage's operand. A flat-entry argument vector or partial-capture sequence is refined at each supplied slot as described above. Erased ghost-control steps are governed by the separate ghost-independence premise; their silence never silences an activated body. A completion, direct-entry transfer, Unit transfer, fold bridge, callback or nested runner never supplies a fresh allowance."
+        },
+        {
+          "before": "A cutoff can occur in an operand, before a logical partial-prefix completion, before a later unary invocation, or inside the matched body. In the first case the operand induction supplies the matching prefix and suspended outer state. In the next two cases the alignment table supplies the corresponding residual closure/argument vector without entering the next body. In the last case the body induction carries the current remainder. Previously obtained captures are weakened to that remainder; they are not re-evaluated. Returned functions use their returned canonical type at the actual residual index.",
+          "after": "A cutoff can occur in an operand, before any next supplied-slot beta boundary, before a later unary invocation, or inside the matched body. In the first case the operand induction supplies the matching prefix and suspended outer state. In the next two cases the alignment table supplies the corresponding residual closure/argument vector without evaluating a later operand or entering the next body. In the last case the body induction carries the current remainder. Previously obtained captures are weakened to that remainder; they are not re-evaluated. Returned functions use their returned canonical type at the actual residual index."
+        },
+        {
+          "before": "| Erasure/Expr.lean | f16cb31b41b890e9c5d4d2d7540d44d1a5f06e12 |",
+          "after": "| Erasure/Expr.lean | f1ecc9458fe0c606b0a34c321517069cd27280e4 |"
+        },
+        {
+          "before": "[E]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/f16cb31b41b890e9c5d4d2d7540d44d1a5f06e12",
+          "after": "[E]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/f1ecc9458fe0c606b0a34c321517069cd27280e4"
+        },
+        {
+          "before": "The shared relation remains the budget-threaded relation",
+          "after": "The Expr pin includes the independently reviewed two-edit root-IH eligibility overlay on f16cb31b41b890e9c5d4d2d7540d44d1a5f06e12. It preserves the canonical application/type/bridge constructions discussed here. Its recursor provenance rule and the complementary Core constructor-refinement producer correction remain the ER argument's responsibility; this document does not assume that a same-typed nested IH denotes the current declaration.\n\nThe shared relation remains the budget-threaded relation"
+        }
+      ]
+    },
+    {
+      "baseBlob": "a1112bb65678ebf9a91a1f5b546c95647a80284c",
+      "candidateBlob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+      "candidateSha256": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+      "candidateBytes": 48633,
+      "edits": [
+        {
+          "before": "The Core operational computation used here is the independent environment-and-closure call-by-value computation: an application evaluates its callee and operand, beta application extends that closure's environment, and a returned closure is a value. The rules are not defined by calling the eraser. A multi-operand source spine is the ordinary ordered series of those Core applications; original syntax grouping and explicit-empty-call refusal remain properties of the source AST and its actual elaboration.",
+          "after": "For ordinary function application, the Core operational computation used here is the independent environment-and-closure call-by-value computation: it evaluates its callee and operand, beta application extends that closure's environment, and a returned closure is a value. This clause does not assign a demand rule to a designated Core eliminator, conditional or special head merely because it is encoded with application nodes. Those heads use their separately justified operation-specific rules; the selected-branch rule for a conditional and the demand for a recursor's hypotheses remain ER/runtime obligations. The rules are not defined by calling the eraser. An ordinary multi-operand function spine is the ordered series of those Core applications; original syntax grouping and explicit-empty-call refusal remain properties of the source AST and its actual elaboration."
+        }
+      ]
+    }
+  ],
+  "revisionValidation": "All9 exact text edits from b227 through f736, a111 and51ed reconstruct and reverse each complete intermediate document. The initial ee6f→b227 drafting history is not represented as a guarded patch in this manifest.",
+  "implementationPins": {
+    "erasureBasic": "7de707103e0b88e6a5ab206ee242d72a131ca3b7",
+    "erasureExpr": "f1ecc9458fe0c606b0a34c321517069cd27280e4",
+    "erasureDefinition": "4c9d3878c01751239022e755e2860c6d49ddf301",
+    "syntaxLexer": "598b8d75d0d1bf1b6ea7ec05a62814343e33599a",
+    "natPlacementManifest": "1530f2bec9a7b66bddd317ff94409297c39adaca",
+    "streamingPlacementManifest": "b6407ad9b00b69dbe9f9db99f557793657a96bd1",
+    "foundation": "40e540b325186ee514ff3af9e39a22126d29a167"
+  },
+  "separateComplementaryProducer": {
+    "manifest": "2d406d0d8a95ee56ee92b7054f7586c5461b4d4c",
+    "context": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31",
+    "term": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+    "declaration": "d191857ece760f307359d576dca2cef906dea8ec",
+    "note": "The source constructor-refinement and one-shot IH theorem are ER obligations; this grouping document does not derive their validity from type equality or finite values."
+  },
+  "exportedLocalArguments": [
+    "U-SUBST: unary runtime function-value erasure commutes with admitted rank-1 simultaneous substitution, including nominal arguments.",
+    "ENTRY-PREFIX: catalogue/fallback match the actual aligned raw Core type/value prefix and stop before a computed result.",
+    "ENTRY-CALL: complete/partial/overapplied entries respect that boundary and capture provided computations once in order.",
+    "LAMBDA-ADMIN: contracting an immediate lambda-only prefix moves no authored computation.",
+    "GHOST-UNIT: only logical type-only generic entries receive the fresh ignored Unit transport; body activation is retained.",
+    "SPECIAL-BOUNDARY: installed primitive/prepared-constructor partial and saturated cases retain exact typed fixed boundaries.",
+    "FOLD-BRIDGE: the typed binary intrinsic adapter preserves the captured canonical callback and its two stages.",
+    "FINITE-PLACEMENT: the reviewed102 Nat and3 lexical List-tail source movements commute finite pure construction only.",
+    "ENTRY-PI: actual residual-entry refinement, per-supplied-slot cutoff states and finite administrative progress support cofinal CI/IJ transport without equal physical call counts."
+  ],
+  "exactBudgetConditions": [
+    "Proper partial entries charge each original supplied runtime slot before a later operand, including variable/literal slots with elided capture lets; no second collective prefix charge.",
+    "Completion-to-flat transfer applies the actual body preservation statement at the already decreased index; it does not spend a hidden second opaque function-hypothesis charge.",
+    "One residual allowance passes through operands, returned closures, callbacks and nested runner work; no reset is introduced.",
+    "Cofinal whole-program composition uses value/environment families available at all required indices; a single fixed-index input relation is insufficient.",
+    "Ordinary function applications use the independent CBV rule. Designated Core eliminators/conditionals/special heads require their separately justified operation-specific demand rules.",
+    "Only proved finite administrative control and closure construction may be silent. Activated authored bodies, callback work, errors and divergence are not erased by that classification."
+  ],
+  "independentReview": {
+    "reviewer": "artifact_inspection_review",
+    "localScope": "Canonical type/entry and finite placement arguments plus final §§6.3–6.4 residual-budget/event-projection interface.",
+    "finalBlob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+    "result": "CLEAR within the stated conditional source-level rule scope",
+    "precisionCorrections": [
+      "per-supplied-slot proper-partial cutoffs",
+      "explicit ordinary-application vs operation-specific demand scope"
+    ]
+  },
+  "remainingCompositionObligations": [
+    "actual source-to-prepared-Core adequacy",
+    "ghost/proof independence and actual binder classification",
+    "actual constructor/field/layout/binder association and hygiene",
+    "the corrected structural recursor/IH producer rule and independently justified native/runtime demand",
+    "existing canonical primitive/collection, module initialization and runner laws",
+    "current-source generation, original-IR admission, TS7/runtime, fixed-point and independent provider receipts"
+  ],
+  "execution": {
+    "compiler": false,
+    "tests": false,
+    "sourceRefMutation": false,
+    "workflow": false
+  },
+  "strictQualified": false,
+  "semanticCorrespondenceQualified": false,
+  "globalQualified": false,
+  "correspondenceRowsClosed": 0
+}

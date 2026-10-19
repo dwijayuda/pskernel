@@ -1,0 +1,896 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-host-fixture-producer-repair/1",
+  "status": "unattached-reviewed-source-candidate-awaiting-root-integration",
+  "repository": "dwijayuda/pskernel",
+  "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+  "basePsc0Tree": "b45e8d0af4785d8fd1b443b58e9a228dd82161e9",
+  "authorization": "Parent requested bounded host-call audit and exact host-only corrections after run38002284953, then explicitly included the proven erasure-index slice repair. No local execution or source/ref mutation by this agent.",
+  "files": [
+    {
+      "path": "psc0/scripts/sh1-foundation-conformance.mjs",
+      "baseBlob": "2b740f5caf1348e81706f2dfb683f61c43651f2d",
+      "baseSha256": "4b357dee6dfc536bc0a99cf754bc18b702a800bdf82b763c8c24a2c2656f8a91",
+      "candidateBlob": "9e3e167c38fa56d09ba02d07535bb65008929653",
+      "candidateSha256": "d0c139a4a907ef5e35908379b04d8983ee889218791c8ac7f2361fc080d46f9a",
+      "candidateBytes": 8348,
+      "edits": [
+        {
+          "old": "function checkLibrary(runtime, sourceLabel) {\n  assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_LIBRARY_SOURCE_LABEL');\n  // The immutable reference definitions return a closure after their first\n  // structural argument. The migrated definitions put both values in headers.\n  const returnedClosure = sourceLabel === 'reference';",
+          "new": "function checkLibrary(runtime, sourceLabel, fixtureProducer) {\n  assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_LIBRARY_SOURCE_LABEL');\n  assert(['current', 'selected-R'].includes(fixtureProducer), 'PSC0_SH1_LIBRARY_FIXTURE_PRODUCER');\n  // Current producers retain the reference source's returned unary closure.\n  // Authenticated selected R emits that same reference with its flat result ABI.\n  // The migrated source has both values in its header under either producer.\n  const returnedClosure = sourceLabel === 'reference' && fixtureProducer === 'current';"
+        },
+        {
+          "old": "  compiler, compilerSha256, executingCompiler, root, outDir, tsc,\n}) {",
+          "new": "  compiler, compilerSha256, executingCompiler, root, outDir, tsc,\n  fixtureProducer = 'current',\n}) {"
+        },
+        {
+          "old": "    const coverage = checkLibrary(await import(pathToFileURL(outputJs).href), label);",
+          "new": "    const coverage = checkLibrary(await import(pathToFileURL(outputJs).href), label, fixtureProducer);"
+        },
+        {
+          "old": "    executingCompiler,\n    referenceSourceRef:",
+          "new": "    executingCompiler, fixtureProducer,\n    referenceSourceRef:"
+        }
+      ],
+      "baseBytes": 8051
+    },
+    {
+      "path": "psc0/scripts/sh1-helper-conformance.mjs",
+      "baseBlob": "99a32b8bbc457a3026c70a1f6fa6747a64b33ca4",
+      "baseSha256": "0abf84dccfd2466792bc35e2c624f0840c8907bf113b54927730caa57cf66ed4",
+      "candidateBlob": "686a1a1ab4c74d838639e2044b5403cc0e9ed0e8",
+      "candidateSha256": "412b79ebffc1b65f6d06d5a15b277207cc21df1e1a28e1a8a857c06ee4b1682b",
+      "candidateBytes": 13050,
+      "edits": [
+        {
+          "old": "function checkHelpers(runtime, withProbes, sourceLabel = 'current') {\n  assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_HELPER_SOURCE_LABEL');\n  const returnedClosure = sourceLabel === 'reference';\n  // Source prefixes: reference workers stop before a match and return the last\n  // argument as a closure; the migrated workers have explicit full headers.",
+          "new": "function checkHelpers(runtime, withProbes, sourceLabel = 'current', fixtureProducer = 'current') {\n  assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_HELPER_SOURCE_LABEL');\n  assert(['current', 'selected-R'].includes(fixtureProducer), 'PSC0_SH1_HELPER_FIXTURE_PRODUCER');\n  const returnedClosure = sourceLabel === 'reference' && fixtureProducer === 'current';\n  // Current producers keep each reference worker's computed result as a unary\n  // closure; authenticated selected R emits those same results in a flat entry.\n  // The migrated workers have explicit full headers under either producer."
+        },
+        {
+          "old": "  compiler, compilerSha256, executingCompiler, root, outDir, tsc,\n}) {",
+          "new": "  compiler, compilerSha256, executingCompiler, root, outDir, tsc,\n  fixtureProducer = 'current',\n}) {"
+        },
+        {
+          "old": "    const coverage = checkHelpers(await import(pathToFileURL(outputJs).href), true, label);",
+          "new": "    const coverage = checkHelpers(await import(pathToFileURL(outputJs).href), true, label, fixtureProducer);"
+        },
+        {
+          "old": "    compilerSha256, executingCompiler, referenceSourceRef: referenceRef,",
+          "new": "    compilerSha256, executingCompiler, fixtureProducer, referenceSourceRef: referenceRef,"
+        }
+      ],
+      "baseBytes": 12745
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "baseBlob": "e6fe221b92cc25c0473c140cfc469559fcf8c029",
+      "baseSha256": "aab775f7cbe9c1fd0e2af3f783b213946e9ca4bfb18b8d974ccf8493ddf09685",
+      "candidateBlob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+      "candidateSha256": "fc7eb46a8f0d1b8fa4db6ef39a09d14cd3d771b9741fae74cd44b197fd1cf193",
+      "candidateBytes": 73556,
+      "edits": [
+        {
+          "old": "  await runFoundationConformance({\n    ...libraryCompiler,\n    executingCompiler: 'Same verified selected authoring seed consumes both raw library sources.',",
+          "new": "  await runFoundationConformance({\n    ...libraryCompiler,\n    fixtureProducer: 'selected-R',\n    executingCompiler: 'Same verified selected authoring seed consumes both raw library sources.',"
+        },
+        {
+          "old": "  await runHelperConformance({\n    ...libraryCompiler,\n    executingCompiler: 'Same verified selected authoring seed consumes both raw helper source slices.',",
+          "new": "  await runHelperConformance({\n    ...libraryCompiler,\n    fixtureProducer: 'selected-R',\n    executingCompiler: 'Same verified selected authoring seed consumes both raw helper source slices.',"
+        }
+      ],
+      "baseBytes": 73486
+    },
+    {
+      "path": "psc0/scripts/checked-erasure-name-index.test.mjs",
+      "baseBlob": "31a5ae02dab60998a088980ffd6cecc50f219897",
+      "baseSha256": "144e9a3ac5282b166f33f7d1bd5cbbca2f174585abf025b00a6b16431b20b8e1",
+      "candidateBlob": "50e91efbdf4d368a713b307aadae5ce2bd9a752a",
+      "candidateSha256": "fd3dad8abcf510b03e3efd84ecebc5d4e8bad828c482e1de138c1a456330118f",
+      "candidateBytes": 4592,
+      "edits": [
+        {
+          "old": "      basic.slice(basic.indexOf('-- Persistent collision buckets'),basic.indexOf('inductive PsErasedBinderKind'))+",
+          "new": "      basic.slice(basic.indexOf('-- Persistent collision buckets'),basic.indexOf('inductive PsErasureError'))+"
+        }
+      ],
+      "baseBytes": 4596
+    }
+  ],
+  "producerContract": {
+    "selectedSeedDescriptor": {
+      "path": "psc0/selfhost-seed.json",
+      "blob": "44a05964c49000478c282afc013c84fca8c2de65",
+      "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+    },
+    "selectedRDefinition": {
+      "blob": "d288a83320f509fd229139303e06aadcdb7ab39d",
+      "function": "psEraseDefinition",
+      "argument": "After opening the declaration it unconditionally passes parameters/result/body to psErasureEtaFunction."
+    },
+    "selectedRExpr": {
+      "blob": "0d5e687086dec44e8157a15757bc29350f6f447c",
+      "function": "psErasureEtaFunction",
+      "argument": "For a nonempty parameter list and function result, append the result's fresh parameters to the original entry group and call the returned body with those variables."
+    },
+    "currentDefinition": {
+      "blob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "argument": "The actual aligned raw lambda prefix determines the entry; computed returned function values remain canonical unary values."
+    },
+    "groups": [
+      {
+        "names": [
+          "psListReverseAcc",
+          "psListAppend",
+          "psListTake",
+          "psListZip"
+        ],
+        "referenceSourceBlob": "faf906bd6e2f872887c87eb43c4ad90957da91fc",
+        "currentSourceBlob": "29e4e59c271c1a26604cc738a8794f9bb70a2e83",
+        "referenceByCurrent": [
+          1,
+          1
+        ],
+        "referenceBySelectedR": [
+          2
+        ],
+        "currentByEither": [
+          2
+        ],
+        "argument": "Each reference body matches its first runtime argument before returning its last-argument lambda. Each current declaration puts both runtime parameters in its explicit header."
+      },
+      {
+        "names": [
+          "psExprApplyManyWorker",
+          "psExprAppViewAccWorker"
+        ],
+        "referenceSourceBlob": "8b00617b9798b65696f03b3613b90888c97a07ba",
+        "currentSourceBlob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+        "referenceByCurrent": [
+          1,
+          1
+        ],
+        "referenceBySelectedR": [
+          2
+        ],
+        "currentByEither": [
+          2
+        ],
+        "argument": "Each preserved reference worker stops at a match before its last argument; the migrated Term source puts that argument in the entry header."
+      },
+      {
+        "names": [
+          "psErasureAddUniqueStringWorker"
+        ],
+        "referenceSourceBlob": "8b00617b9798b65696f03b3613b90888c97a07ba",
+        "currentSourceBlob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+        "referenceByCurrent": [
+          2,
+          1
+        ],
+        "referenceBySelectedR": [
+          3
+        ],
+        "currentByEither": [
+          3
+        ],
+        "argument": "The reference takes used and attempts, matches attempts, and returns the base lambda. The current declaration has used/attempts/base in its header."
+      }
+    ],
+    "authentication": "The existing selectedAuthoringSeed/expectedSha256 load path in sh1-qualify authenticates exactly the selected R bytes before either opt-in. No new seed selection, language compatibility mode, output-dependent retry, exception fallback or broad fn.length interpretation is introduced. Each original named-entry arity assertion still requires the one source/producer group documented here."
+  },
+  "audit": {
+    "scope": "Host invocations exercised by the current PSC0 SH1 workflow before and during full qualification, plus their transitive host helpers. The replay six-fixture script and new positive IR tail cases have separate owners and are not changed here.",
+    "workflow": {
+      "path": ".github/workflows/psc0-sh1.yml",
+      "blob": "cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8"
+    },
+    "routes": [
+      {
+        "route": "Native/checked source and CLI preflight",
+        "finding": "Native CLI tests inspect emitted answer bytes and protocol/source boundaries; they do not flatten a generated returned-function call. The generated erasure-index test makes ordinary explicit-header calls, but its Basic source slice omitted psErasureDeclarationNameIndex after the binder-kind move; repaired here. Replay itself is delegated to its existing owner."
+      },
+      {
+        "route": "N1 native-candidate",
+        "finding": "Current native source emits N1. N1 emits both foundation/helper reference and current slices. The default fixtureProducer=current retains the source-derived returned reference closures and exact original arity/value assertions. All other N1 source/target/runtime/IR/generic/capability/grammar/iteration/session calls were traced."
+      },
+      {
+        "route": "Selected R migration preflight and candidate source comparisons",
+        "finding": "selectedAuthoringSeed checks the selected qualified descriptor, exact toolchain and JavaScript digest; loadGeneratedCompiler imports bytes matching that digest. Only the two foundation/helper comparison calls using this authenticated libraryCompiler receive fixtureProducer=selected-R. Its preserved eta producer emits reference result arguments in the flat entry. The current raw slices already have full headers and remain flat under either producer."
+      },
+      {
+        "route": "R creates C1; C1/C2/C3 execute current compiler source",
+        "finding": "Current compiler exported helper checks use the migrated explicit-header entries, so no source-label exception is needed. The existing three-symbol invokeCompilerValueEntry adapter distinguishes the fixed R/C1 physical export ABI from N1/C2/C3; it is unchanged. C1/C2/C3-generated fixture outputs use current erasure semantics and retain the current grouped calls already present in capability/generic/runtime gates."
+      },
+      {
+        "route": "Original IR fixtures",
+        "finding": "These host calls use the exact PsVerifiedIrDeclaration parameters supplied by each fixture. The canonical source function-value change does not alter an explicitly constructed original-IR entry group. Existing value, demand, callback and failure expectations remain untouched."
+      },
+      {
+        "route": "Provider, seed/cache and source-inspection helpers",
+        "finding": "The native provider/checked transport/prebuilt verification paths use protocols or source/file data, not returned-function exports from the current PSC compiler. The seven frozen native seed recipe files are read only and disjoint from this patch."
+      }
+    ],
+    "otherReturnedExports": [
+      {
+        "script": "scripts/sh1-capabilities.mjs",
+        "blob": "14c581f57a28b5f9edcd372e10fea1a1e575c217",
+        "sourceBlob": "dd45dbca35d8ec0373f3f814c6338aecf654ea50",
+        "finding": "Already correct: sh1FunctionResult(fuel, offset)(value) uses 2 then 1; sh1WorkerReference(fuel)(left)(right) uses 1 then 1 then 1. Initialized sh1Partial and sh1ProjectionPartial are unary values, and their host calls use one argument."
+      },
+      {
+        "script": "scripts/sh1-generic-erasure-conformance.mjs",
+        "blob": "076d058b965bad45b64e81c7a0ae8c1ac02f88db",
+        "sourceBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+        "finding": "Already correct: sh1GroupComputed(make, offset) has entry two and returns a saved unary function; all direct/let/layout/array/type-only cases call their explicit wrapper entries. Host higher-order values use unary chains. Compile-only recursive records are not invoked."
+      },
+      {
+        "script": "scripts/sh1-strict-runtime-conformance.mjs",
+        "blob": "c38e6b50806481c270db9dfbd9d75e3a4a8f3b29",
+        "finding": "The source evaluation exports have explicit runtime headers and scalar/data results. The StrictPartialFn.apply diagnostic and pure holder fields are already unary a=>b=>c chains; callbacks otherwise have their exact unary domains. Direct original-IR fixture callbacks retain their separately declared IR groups."
+      },
+      {
+        "script": "scripts/sh1-function-entry.mjs",
+        "blob": "ceb4a39851e421e1d95f009cbf31d500e6ff1bb1",
+        "finding": "The unchanged explicit catalogue is psNameEq=[1,1], psExprAlphaEq=[1,1], psErasureEtaParameters=[2,1,1] for current physical entries. All direct host references to these exports in the read current route use this helper; no general retry or arbitrary arity algorithm is added."
+      }
+    ],
+    "compilerEntryReview": {
+      "sources": [
+        {
+          "p": "packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+          "sha": "b9b073b7ec341be105895817a6ddda441020e351"
+        },
+        {
+          "p": "packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+          "sha": "9b6f62bc9b55f1d1ad2ea06a129df11d7e554e44"
+        },
+        {
+          "p": "packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "sha": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+        },
+        {
+          "p": "packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "sha": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+        },
+        {
+          "p": "packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+          "sha": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53"
+        },
+        {
+          "p": "packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+          "sha": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139"
+        },
+        {
+          "p": "packages/backend-ts/src/Ps/BackendTs/Type.lean",
+          "sha": "074bf2b838994d2af375a20ef1600941d21e956c"
+        },
+        {
+          "p": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+          "sha": "c88f449644e3caf966c19f01e9534345bbb8c831"
+        },
+        {
+          "p": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+          "sha": "a9b2c3f4184a5c20b46c97354f2a44c04b978851"
+        },
+        {
+          "p": "packages/bridge/src/Ps/Bridge/Codec.lean",
+          "sha": "6143b486196ecd596d5a52df5cfe7e263df1e818"
+        },
+        {
+          "p": "packages/bridge/src/Ps/Bridge/Json.lean",
+          "sha": "1b4ff4efcf78be15221514f8eea0dd47fe43be0e"
+        },
+        {
+          "p": "packages/bridge/src/Ps/Bridge/Protocol.lean",
+          "sha": "a7e914a1394af43f156c2e7664c1366ad9ded4f5"
+        },
+        {
+          "p": "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "sha": "178ecf89498be6502be5f747f0c0d62eb1133420"
+        },
+        {
+          "p": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+          "sha": "49f267282ea27f978eaa522e6038d8787676994e"
+        },
+        {
+          "p": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+          "sha": "71a4231fe23c7049c0930976c383fbc60cc5c24f"
+        },
+        {
+          "p": "packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+          "sha": "154cc013b692a449a6a47e6e4270957856d5bc0b"
+        },
+        {
+          "p": "packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+          "sha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3"
+        },
+        {
+          "p": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+          "sha": "fa3708007a21442c3b864f1e3c3feb8304ed0c43"
+        },
+        {
+          "p": "packages/compiler/src/Ps/Compiler.lean",
+          "sha": "cd70a1f23af11022cb19b1b6e01f82de8391f5cd"
+        },
+        {
+          "p": "packages/compiler/src/Ps/Compiler/Api.lean",
+          "sha": "f31d88f0172122d4cf62d62f35f372fe89581c18"
+        },
+        {
+          "p": "packages/compiler/src/Ps/Compiler/Sh1.lean",
+          "sha": "a947a4058e3d91a02d4f8120a3d86556100c8555"
+        },
+        {
+          "p": "packages/core/src/Ps/Core/Abstract.lean",
+          "sha": "8ac0f21d92538502ee14fc6932eb0f48fda48a85"
+        },
+        {
+          "p": "packages/core/src/Ps/Core/Builtin.lean",
+          "sha": "c64025ddc515c47a4d661076d779e0bccada5046"
+        },
+        {
+          "p": "packages/core/src/Ps/Core/Declaration.lean",
+          "sha": "c34c280b1c42f23138cfec79f4e448db17071952"
+        },
+        {
+          "p": "packages/core/src/Ps/Core/Equality.lean",
+          "sha": "0762bd4fee3540083eb7dab3aeb70dff8d02b6c4"
+        },
+        {
+          "p": "packages/core/src/Ps/Core/Expr.lean",
+          "sha": "eac8f1a8f883f87af78cc68317644c843ba40fd2"
+        },
+        {
+          "p": "packages/core/src/Ps/Core/Level.lean",
+          "sha": "2607a00d69cb0299de20aecb6b94a00adc7852a2"
+        },
+        {
+          "p": "packages/core/src/Ps/Core/LevelSubst.lean",
+          "sha": "48f0d7b821fe0c09e14de126cbf4df40cba7559a"
+        },
+        {
+          "p": "packages/core/src/Ps/Core/Subst.lean",
+          "sha": "c8439e444e38b642043f2d18561a77a2bdd420a2"
+        },
+        {
+          "p": "packages/elab/src/Ps/Elab/Context.lean",
+          "sha": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31"
+        },
+        {
+          "p": "packages/elab/src/Ps/Elab/Declaration.lean",
+          "sha": "d191857ece760f307359d576dca2cef906dea8ec"
+        },
+        {
+          "p": "packages/elab/src/Ps/Elab/Literal.lean",
+          "sha": "dae4980c822dae5c9170638ee51ef8525635ce01"
+        },
+        {
+          "p": "packages/elab/src/Ps/Elab/Recursion.lean",
+          "sha": "8b1c409244b9669224fc3caff796aea69eac1401"
+        },
+        {
+          "p": "packages/elab/src/Ps/Elab/Term.lean",
+          "sha": "f611218a3623bb413f94c9550b7d98ab7b406e9a"
+        },
+        {
+          "p": "packages/environment/src/Ps/Environment/Basic.lean",
+          "sha": "26016c3e4a460358fa34d34a3b4e2966744912a7"
+        },
+        {
+          "p": "packages/environment/src/Ps/Environment/Instances.lean",
+          "sha": "75b0d66c402b2807149cd2c832207a2d311c2db3"
+        },
+        {
+          "p": "packages/environment/src/Ps/Environment/LocalContext.lean",
+          "sha": "fcd057e60367c2fa3f9ffcdf7cf5c40a7c5d49a6"
+        },
+        {
+          "p": "packages/environment/src/Ps/Environment/Prelude.lean",
+          "sha": "d862ba8c806595fbf11237724089bd2282af9866"
+        },
+        {
+          "p": "packages/environment/src/Ps/Environment/Resolve.lean",
+          "sha": "4dcad8f12689b21d640fe192ff81191fe506fe10"
+        },
+        {
+          "p": "packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+          "sha": "b9127717d5685ae0de6e10251ba1d8d02b6e647d"
+        },
+        {
+          "p": "packages/environment/src/Ps/Environment/SelfHostProd.lean",
+          "sha": "38485851a30f024d973392c6c8e1d86916e31466"
+        },
+        {
+          "p": "packages/erasure/src/Ps/Erasure/Basic.lean",
+          "sha": "0132390f1ddb3133c9c14737b558e9b55bee33c9"
+        },
+        {
+          "p": "packages/erasure/src/Ps/Erasure/Definition.lean",
+          "sha": "4c9d3878c01751239022e755e2860c6d49ddf301"
+        },
+        {
+          "p": "packages/erasure/src/Ps/Erasure/Expr.lean",
+          "sha": "e3ed96f9cf9329882b204da83b3f2925a70e5c73"
+        },
+        {
+          "p": "packages/erasure/src/Ps/Erasure/Inductive.lean",
+          "sha": "afd981e10d609d38db9ce4698fb4a6152bb50c7f"
+        },
+        {
+          "p": "packages/erasure/src/Ps/Erasure/Structure.lean",
+          "sha": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75"
+        },
+        {
+          "p": "packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+          "sha": "57e76a17858b3f4333a44ed880326ac33695351e"
+        },
+        {
+          "p": "packages/foundation/src/Ps/Foundation/Diagnostic.lean",
+          "sha": "eba5727643e6e3c553e6fa23d7d037c5bcba977e"
+        },
+        {
+          "p": "packages/foundation/src/Ps/Foundation/List.lean",
+          "sha": "29e4e59c271c1a26604cc738a8794f9bb70a2e83"
+        },
+        {
+          "p": "packages/foundation/src/Ps/Foundation/Name.lean",
+          "sha": "b907616cb4cbf65089ba0c9a8e13f57b220008cf"
+        },
+        {
+          "p": "packages/foundation/src/Ps/Foundation/Source.lean",
+          "sha": "1451dabae049d324b7aeb2d1b89b7bf56dea32fd"
+        },
+        {
+          "p": "packages/meta/src/Ps/Meta/Context.lean",
+          "sha": "dd69906bb92ffbae9a4f8541d9941c10eb239771"
+        },
+        {
+          "p": "packages/meta/src/Ps/Meta/Infer.lean",
+          "sha": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3"
+        },
+        {
+          "p": "packages/meta/src/Ps/Meta/LevelContext.lean",
+          "sha": "b0fcde267d2a9dd07f7de9fc12f57ca5b3a38882"
+        },
+        {
+          "p": "packages/meta/src/Ps/Meta/Reduce.lean",
+          "sha": "1a547f20911ac23a1f0a9368839593383f9c31e0"
+        },
+        {
+          "p": "packages/meta/src/Ps/Meta/SynthInstance.lean",
+          "sha": "9d64e65a7e3ca2a9d55b575bbdfa7003c4686f55"
+        },
+        {
+          "p": "packages/meta/src/Ps/Meta/Unify.lean",
+          "sha": "18f904b9d2d06fbe9b5330fc2d30e04a4dba1848"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/Ast.lean",
+          "sha": "4a9daaf4179ca7fa74e9183e542891ec110fd5d7"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/Cursor.lean",
+          "sha": "cde16d84dc7a088bf7b9f74c65303b22b991fe85"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/Lexer.lean",
+          "sha": "598b8d75d0d1bf1b6ea7ec05a62814343e33599a"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+          "sha": "717882ba07d3fc463d08259bf1d3035d484917ef"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/ParseLean.lean",
+          "sha": "6c9056bb03424fb73667e9c74d59432e05cf0a71"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+          "sha": "b569a73ef70e8cf2bfb81b7737c990e8e3b2374a"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/ParserState.lean",
+          "sha": "e784c5836a37e522a21f67db0d52653d5ab12a57"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+          "sha": "03f7f576375a72e2ff6c3beaa04363f5839b7bd6"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/PrintLean.lean",
+          "sha": "2a98cf0d24b73343defff9824a991b57270b9723"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+          "sha": "01c006d2c243676f47e29cd14949f4019e002d59"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/Token.lean",
+          "sha": "5bc9895dbe7a9ba9157b00f6e184da6d16af738f"
+        },
+        {
+          "p": "packages/syntax/src/Ps/Syntax/Translate.lean",
+          "sha": "eafd7159b14a251fe11ffdbfb1e2482bcc773c9b"
+        }
+      ],
+      "finding": "Checked host API names against current declaration headers/result bodies and dynamic finite export lists. The remaining arrow-result names in source-slice/guard strings are not direct host calls. psDeclarationName/psDeclarationType and psElabSyntaxLocalId use equation clauses; ParseLean.psLeanLowerEquationValue creates their leading argument lambdas before the generated match, so their existing one-/two-argument calls are aligned entries.",
+      "equationParserBlob": "6c9056bb03424fb73667e9c74d59432e05cf0a71",
+      "ordinaryExamples": [
+        "psCompilerPrepareSource",
+        "psCompilerPrepareSources",
+        "psCompilerAdmissionsFromPrepared",
+        "psCompilerTypeScriptFromPrepared",
+        "psCompilerSh1TypeScriptSources",
+        "psTsEmitModule",
+        "psIrCheckSubstitute",
+        "psCheckVerifiedIrModule",
+        "psErasureIndexFind",
+        "psErasureIndexInsert",
+        "psTsFreshMatchTempWorker",
+        "psTsFreshInternalWorker"
+      ],
+      "hostFiles": [
+        {
+          "p": "check-psc1-source.mjs",
+          "sha": "3b0f1d87c7d993ea176cda375a76500288542451"
+        },
+        {
+          "p": "packages/pskernel-lean-wasm/host/prebuilt.mjs",
+          "sha": "212fa5b698a603c6b5a2beecfee1a5aa2d87607d"
+        },
+        {
+          "p": "packages/pskernel-lean-wasm/host/verify-prebuilt.mjs",
+          "sha": "7a66cf36c1a124b705d0f0aadc122181c09df57a"
+        },
+        {
+          "p": "packages/pskernel-lean-wasm/index.mjs",
+          "sha": "90e3c308befc2f317bcacaa2ec66d25f000d2d07"
+        },
+        {
+          "p": "packages/pskernel-lean/host/node-provider.mjs",
+          "sha": "09417c392f38c350765df5110decb106768be5a5"
+        },
+        {
+          "p": "packages/pskernel-lean/host/prebuilt.mjs",
+          "sha": "def4c6a08a857c9bb6e5c2beae9a2fc4d9e3b60b"
+        },
+        {
+          "p": "packages/pskernel-lean/index.mjs",
+          "sha": "036d9136bff711003d72f730c1750a882aaef074"
+        },
+        {
+          "p": "scripts/bootstrap-manifest.mjs",
+          "sha": "ceb965192e6ba70046d7fe7769c9917063a4fb4e"
+        },
+        {
+          "p": "scripts/bootstrap-root-minimality-tests.mjs",
+          "sha": "225d201a1ec0fd275a067e70f32e51daecd95dfb"
+        },
+        {
+          "p": "scripts/check-elab-term-selfhost-source-syntax.mjs",
+          "sha": "5306449ce8dbc35874531fd70c2145d3990fe62f"
+        },
+        {
+          "p": "scripts/check-modular-preparation-source.mjs",
+          "sha": "495012a236a1bb3a5626a826e22a4ff1dab99efc"
+        },
+        {
+          "p": "scripts/check-native-replay-host-source.mjs",
+          "sha": "abf24a228b587464a470fb636c9d10be17aebd60"
+        },
+        {
+          "p": "scripts/check-proofscript-binder-replay-source.mjs",
+          "sha": "13eaf55233c997509dd3afb3ac8a7aa0afb9027d"
+        },
+        {
+          "p": "scripts/check-typescript-profile.mjs",
+          "sha": "8dd225dea1dd7cbc8688a22bb514bea6bdfd5ba0"
+        },
+        {
+          "p": "scripts/checked-build.mjs",
+          "sha": "4ce6e464fa24aa9a15f50d410abff7f25404f188"
+        },
+        {
+          "p": "scripts/checked-build.test.mjs",
+          "sha": "a2d7014e5c9cf5f2569f94a8590f42e232cfc2da"
+        },
+        {
+          "p": "scripts/checked-erasure-name-index.test.mjs",
+          "sha": "31a5ae02dab60998a088980ffd6cecc50f219897"
+        },
+        {
+          "p": "scripts/checked-kernel-identity.mjs",
+          "sha": "ca5eaec2614aeae75eba9dcd0d55b341206ef0be"
+        },
+        {
+          "p": "scripts/checked-kernel-provider.mjs",
+          "sha": "78631e05e72f4a27c7447af16e2dccbccb085831"
+        },
+        {
+          "p": "scripts/checked-owned-kernel.mjs",
+          "sha": "d904517a6a2a48dac8be8c5c6ab2bfb56cc711e5"
+        },
+        {
+          "p": "scripts/checked-prepared-session.mjs",
+          "sha": "83ba92db02c6e289e59f2d1a32011d581fbe2993"
+        },
+        {
+          "p": "scripts/checked-seed-session.mjs",
+          "sha": "7964b675f1d78fdb8e1bef4e032e44deb58fe6fd"
+        },
+        {
+          "p": "scripts/checked-seed-session.test.mjs",
+          "sha": "50d2985c41d5ee677943427998628fa3b515dccd"
+        },
+        {
+          "p": "scripts/checked-source-snapshot.mjs",
+          "sha": "ce11c780ed74dd6a08ef8ae24ba77c6004bea9f8"
+        },
+        {
+          "p": "scripts/checked-source-snapshot.test.mjs",
+          "sha": "19d86f6b56685a03cfce7e952046a14537c967c9"
+        },
+        {
+          "p": "scripts/compile-with-generated.mjs",
+          "sha": "6d39b75d8c2daeea90e7a568d8d61fd551f58706"
+        },
+        {
+          "p": "scripts/emit-project-with-generated.mjs",
+          "sha": "474a3d8e4134829a603163131bcd32e635d4c053"
+        },
+        {
+          "p": "scripts/generated-preparation-session.mjs",
+          "sha": "3d1edcd9e03ed53c926fbc38e3b1fb81f2e50fc7"
+        },
+        {
+          "p": "scripts/native-typescript-cli.test.mjs",
+          "sha": "969619b1769f7683407881106526b8928c302bcb"
+        },
+        {
+          "p": "scripts/native-workspace-isolation.test.mjs",
+          "sha": "f68dc7f0bd2045cbd4479c68fea56df9afb5df8d"
+        },
+        {
+          "p": "scripts/original-ir-carrier.mjs",
+          "sha": "a2c20c50ada6d5dc13746bc3b9e748088464e70c"
+        },
+        {
+          "p": "scripts/original-ir-inventory.mjs",
+          "sha": "d4cf667033cfcd903b4179f8af01fa77f56102bf"
+        },
+        {
+          "p": "scripts/proofscript-source.mjs",
+          "sha": "411b5dc5851a04d3fe9308515b7c4c756d95d4cd"
+        },
+        {
+          "p": "scripts/proofscript-source.test.mjs",
+          "sha": "0e1f9d15a6c37a62a9c904d5e81d1bd1e9a3cc2c"
+        },
+        {
+          "p": "scripts/selfhost-replay-runtime.test.mjs",
+          "sha": "516aaf641917f233757fb4badb1a6bb39774645f"
+        },
+        {
+          "p": "scripts/selfhost-source-isolation-tests.mjs",
+          "sha": "db10f0babfe926327060d7e8c38fa18a872ceb91"
+        },
+        {
+          "p": "scripts/selfhost-source-workspace.mjs",
+          "sha": "f7c0449eb0463ffea519b040620df0b3632f44d5"
+        },
+        {
+          "p": "scripts/sh1-capabilities.mjs",
+          "sha": "14c581f57a28b5f9edcd372e10fea1a1e575c217"
+        },
+        {
+          "p": "scripts/sh1-check-admissions.mjs",
+          "sha": "750fe59f317056bfe76b2c77ffd7d09a82aac342"
+        },
+        {
+          "p": "scripts/sh1-foundation-conformance.mjs",
+          "sha": "2b740f5caf1348e81706f2dfb683f61c43651f2d"
+        },
+        {
+          "p": "scripts/sh1-fresh-name-conformance.mjs",
+          "sha": "9eaa7b1cbdb50dec79aca57150d825cbdd51f8d7"
+        },
+        {
+          "p": "scripts/sh1-function-entry.mjs",
+          "sha": "ceb4a39851e421e1d95f009cbf31d500e6ff1bb1"
+        },
+        {
+          "p": "scripts/sh1-generic-erasure-conformance.mjs",
+          "sha": "076d058b965bad45b64e81c7a0ae8c1ac02f88db"
+        },
+        {
+          "p": "scripts/sh1-grammar-conformance.mjs",
+          "sha": "2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141"
+        },
+        {
+          "p": "scripts/sh1-grammar-profile.mjs",
+          "sha": "26836a8e487d77c94a73485e2d11e3575b932edf"
+        },
+        {
+          "p": "scripts/sh1-helper-conformance.mjs",
+          "sha": "99a32b8bbc457a3026c70a1f6fa6747a64b33ca4"
+        },
+        {
+          "p": "scripts/sh1-ir-checker-conformance.mjs",
+          "sha": "dd53f2067046a201cda96fe5ede40f500ece5b20"
+        },
+        {
+          "p": "scripts/sh1-iterate.mjs",
+          "sha": "185d0fa4b65529e56bb560e6a22a7af9519dd887"
+        },
+        {
+          "p": "scripts/sh1-iteration-conformance.mjs",
+          "sha": "ef7ceca2ee8fdaf6cbc16dddce7c988d7090a4fa"
+        },
+        {
+          "p": "scripts/sh1-migration-worker-abi.mjs",
+          "sha": "4a24f22050cdbe9660501b58bc1eeed9c8005319"
+        },
+        {
+          "p": "scripts/sh1-migration-worker-conformance.mjs",
+          "sha": "796263a6a5724f3971530b435f13eb7ce1438eb8"
+        },
+        {
+          "p": "scripts/sh1-native-seed-recovery.mjs",
+          "sha": "c1b5673079b2faae56e9c778b62e70087e639fbe"
+        },
+        {
+          "p": "scripts/sh1-projection-conformance.mjs",
+          "sha": "1c69c032f260eac8d868173b7f8b5b06e90a4a29"
+        },
+        {
+          "p": "scripts/sh1-qualify.mjs",
+          "sha": "e6fe221b92cc25c0473c140cfc469559fcf8c029"
+        },
+        {
+          "p": "scripts/sh1-resource-policy.mjs",
+          "sha": "7e3066c513a91a6e0717aac9465a879097c0dd82"
+        },
+        {
+          "p": "scripts/sh1-seed-manifest.mjs",
+          "sha": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7"
+        },
+        {
+          "p": "scripts/sh1-source-snapshot.mjs",
+          "sha": "1083a3765a55540f83b2376c40a97bc1f1362ce0"
+        },
+        {
+          "p": "scripts/sh1-strict-evidence.mjs",
+          "sha": "4242eb6e4944ef0be2bfe8a9ae02b0c1123fde54"
+        },
+        {
+          "p": "scripts/sh1-strict-runtime-conformance.mjs",
+          "sha": "c38e6b50806481c270db9dfbd9d75e3a4a8f3b29"
+        },
+        {
+          "p": "scripts/sh1-strict-source-conformance.mjs",
+          "sha": "c28507666a3c46892c6fc155c66e1842a8954150"
+        },
+        {
+          "p": "scripts/sh1-strict-source.mjs",
+          "sha": "77a85340d94313b7bfebb604ec9f61c53c28c544"
+        },
+        {
+          "p": "scripts/sh1-strict-target-conformance.mjs",
+          "sha": "0bee0e6f67e080dda87fd10c75d2437bb14c3cd1"
+        },
+        {
+          "p": "scripts/sh1-successor-seed.mjs",
+          "sha": "3514a7797e739e7a47af33c91ab58e912584d0c7"
+        },
+        {
+          "p": "scripts/sh1-successor-seed.test.mjs",
+          "sha": "5c93b338a20d090039b00d77e8eee8f7054eea5d"
+        },
+        {
+          "p": "scripts/typescript-cli.mjs",
+          "sha": "9d6607a6f4284b0afba8023566f6e1d75c30a64a"
+        },
+        {
+          "p": "scripts/workspace-layout.mjs",
+          "sha": "eb7c2c07f147a812f9998904a60123b3719e5539"
+        }
+      ]
+    },
+    "sourceSliceReview": [
+      {
+        "path": "scripts/checked-erasure-name-index.test.mjs",
+        "start": "-- Persistent collision buckets",
+        "oldEnd": "inductive PsErasedBinderKind",
+        "newEnd": "inductive PsErasureError",
+        "sourceBlob": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+        "finding": "Both markers are unique. The new slice includes binder-kind, entry-info, declaration-name record and psErasureDeclarationNameIndex dependencies before the unrelated erasure-error/scope model. Existing constructed index collisions, structured names, first-entry precedence, output reservations and 1500-entry observations are byte-identical."
+      },
+      {
+        "path": "scripts/checked-erasure-name-index.test.mjs",
+        "start": "def psEnvironmentHashStringWorker",
+        "end": "def psEnvironmentIndexFindWorker",
+        "sourceBlob": "26016c3e4a460358fa34d34a3b4e2966744912a7",
+        "finding": "Unique unchanged environment span includes the hash worker and psEnvironmentNameHash, precisely the dependencies needed by the index fixture."
+      },
+      {
+        "path": "scripts/sh1-helper-conformance.mjs",
+        "start": "def psExprApplyManyWorker\\n",
+        "end": "def psElabIf\\n",
+        "sourceBlob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+        "finding": "Unique unchanged span contains psExprApplyManyWorker and psExprApplyMany."
+      },
+      {
+        "path": "scripts/sh1-helper-conformance.mjs",
+        "start": "structure PsExprAppView where\\n",
+        "end": "def psExprHasConst\\n",
+        "sourceBlob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+        "finding": "Unique unchanged span contains the view record, psExprAppViewAccWorker, psExprAppViewAcc and psExprAppView."
+      },
+      {
+        "path": "scripts/sh1-helper-conformance.mjs",
+        "start": "def psErasureStringInList ",
+        "end": "structure PsErasureNameState where\\n",
+        "sourceBlob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+        "finding": "Unique unchanged span contains the string membership/unique-name helpers and excludes later entry catalogue state. New Expr code is not sliced by these active fixture assemblers."
+      },
+      {
+        "path": "scripts/check-proofscript-binder-replay-source.mjs",
+        "blob": "13eaf55233c997509dd3afb3ac8a7aa0afb9027d",
+        "finding": "Its separate ParseProofScript worker span, native replay transport spans and modular preparation record scans do not use Basic/Expr's moved binder boundary. No additional same-class slice omission was found."
+      }
+    ],
+    "conclusion": "Bounded source review found the two producer/source pairing errors and the moved Basic slice boundary repaired by these exact four host candidates. No additional concrete same-class returned-function host caller was found in the enumerated current workflow routes. Replay and the separately assigned IR tail evidence remain separate pending packets. This is a static audit, not a claim that qualification or execution passed."
+  },
+  "unchangedColdRecipe": [
+    {
+      "path": "psc0/scripts/sh1-native-seed-recovery.mjs",
+      "blob": "c1b5673079b2faae56e9c778b62e70087e639fbe"
+    },
+    {
+      "path": "psc0/scripts/sh1-successor-seed.mjs",
+      "blob": "3514a7797e739e7a47af33c91ab58e912584d0c7"
+    },
+    {
+      "path": "psc0/scripts/sh1-seed-manifest.mjs",
+      "blob": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7"
+    },
+    {
+      "path": "psc0/scripts/sh1-grammar-profile.mjs",
+      "blob": "26836a8e487d77c94a73485e2d11e3575b932edf"
+    },
+    {
+      "path": "psc0/scripts/sh1-source-snapshot.mjs",
+      "blob": "1083a3765a55540f83b2376c40a97bc1f1362ce0"
+    },
+    {
+      "path": "psc0/scripts/workspace-layout.mjs",
+      "blob": "eb7c2c07f147a812f9998904a60123b3719e5539"
+    },
+    {
+      "path": "psc0/scripts/typescript-cli.mjs",
+      "blob": "9d6607a6f4284b0afba8023566f6e1d75c30a64a"
+    }
+  ],
+  "verification": {
+    "forwardExact": true,
+    "reverseExact": true,
+    "uniqueGuards": true,
+    "guardCount": 11,
+    "immutableCandidateReadback": true,
+    "coldRecipeDisjoint": true,
+    "allExistingExpectedValuesAndCountsUnchanged": true,
+    "allExistingArityAssertionsRetained": true,
+    "repositoryCodeExecuted": false,
+    "compilerOrTestsRun": false,
+    "refsMutated": false,
+    "peerReview": "Root independently read all four candidates and confirmed producer/source pairing and slice dependencies; Artifact bounded review pending."
+  },
+  "claims": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "formalPreservationProven": false,
+    "newExecutionEvidence": false,
+    "kernelChecked": false
+  }
+}

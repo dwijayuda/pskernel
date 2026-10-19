@@ -1,0 +1,1314 @@
+{
+  "schemaVersion": 1,
+  "evidence": "qualified-finite-worker-migration-with-separate-provider-acceptance",
+  "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+  "branch": "psc0/sh1-projection-grammar-v1",
+  "workflow": {
+    "id": 378853677,
+    "path": ".github/workflows/psc0-sh1.yml",
+    "name": "PSC0 SH1 language qualification"
+  },
+  "run": {
+    "id": "37947341800",
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/37947341800",
+    "createdAt": "2026-10-09T14:51:42Z",
+    "startedAt": "2026-10-09T14:51:42Z",
+    "updatedAt": "2026-10-09T15:37:19Z"
+  },
+  "compilerJob": {
+    "id": "113876931430",
+    "name": "compiler",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-10-09T14:51:45Z",
+    "completedAt": "2026-10-09T15:36:17Z"
+  },
+  "providerJob": {
+    "id": "113896228512",
+    "name": "kernel-admissions",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-10-09T15:36:21Z",
+    "completedAt": "2026-10-09T15:37:18Z"
+  },
+  "statuses": {
+    "compilerCurrentSourceQualified": true,
+    "exactAdmissionStreamsProviderAccepted": true,
+    "selectedAuthoringSeedRemainsR": true,
+    "fSeedPromoted": false,
+    "strictSh1Qualified": false,
+    "fullStandardConformance": false,
+    "fullPscvConformance": false,
+    "rootTypeScriptWorkspaceQualifiedByThisRun": false
+  },
+  "selectedAuthoringSeed": {
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "promotedToF": false,
+    "retentionStep26": "skipped"
+  },
+  "compiler": {
+    "moduleCount": 61,
+    "sourceKind": "raw-authoritative-lean",
+    "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+    "sourceBytes": 1112320,
+    "toolchain": {
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+      "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+      "typescript": "Version 7.0.2"
+    },
+    "typescriptProfile": {
+      "version": "7.0.2",
+      "purpose": "current-emission",
+      "arguments": [
+        "--ignoreConfig"
+      ]
+    },
+    "sourceGrammar": {
+      "edition": "ps-0.9-r3",
+      "mode": "new-only",
+      "support": "bounded-selfhost-subset",
+      "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+      "fullStandardConformance": false,
+      "fullPscvConformance": false
+    },
+    "recipeSha256": "90a5fc6131e151a7ed24c8a1e5f2d424c8b14e7eda813b34b5b301f37623a0b1"
+  },
+  "fixedPoint": {
+    "qualification": {
+      "path": "psc0/docs/selfhost-language/worker-migration-qualification.json",
+      "sha256": "a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3",
+      "bytes": 5284,
+      "representation": "Exact compact FIXED_POINT JSON substring from decoded compiler job log plus LF; not the unavailable original pretty qualification artifact file."
+    },
+    "artifacts": {
+      "canonicalSurfaceSourceSha256": "8b060f40c279f81abb9f81ab5903457e295e431fc67c945ccd312663cd76e3c3",
+      "normalizedCanonicalAdmissionsSha256": "9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5",
+      "typescriptSha256": "0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a",
+      "javascriptSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15"
+    },
+    "compilerSha256ByGeneration": {
+      "N1": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+      "C1": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+      "C2": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+      "C3": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15"
+    },
+    "allFourC2C3ProductsIdentical": true,
+    "nativeN1MatchesFinalProducts": [
+      "typescriptSha256",
+      "javascriptSha256"
+    ]
+  },
+  "workerMigration": {
+    "publicWorkers": 12,
+    "families": {
+      "F1": 4,
+      "F2": 8
+    },
+    "removedTypedIdentityAliases": 3,
+    "finiteBehavior": {
+      "casesPerCompiler": 87,
+      "directFreshNameCases": 44,
+      "publicWrapperCases": 7,
+      "stateWorkerCases": 36,
+      "stages": [
+        "R",
+        "N1",
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "completeObservationArraysCompared": true,
+      "observationSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be"
+    },
+    "abi": {
+      "stages": [
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "completeActualPublicCoreTypesCompared": true,
+      "existingOriginalIrSignaturesCompared": true,
+      "runtimeArityAndArgumentOrderPreserved": true,
+      "runtimeParameterDisplayNamesCompared": false,
+      "observationSha256": "b23c28c75aa3f7955ecbe54fa4580b4278f62c2ed77f1e7ff2a2dbbea6999b49",
+      "referenceTypeSha256": "a65845d1f9f30b55f1b8b3599c264ae39e4c35fe7c84367575ea6b504644ab82"
+    },
+    "isolatedReferenceProbe": {
+      "sourceKind": "lean",
+      "sourceSha256": "b8a51317306f4803aaba1a7553999aa41599861d5d0677a2d8f8686f69a3f41b",
+      "abstractTypeDeclarations": 19,
+      "signatureTypeAnnotations": 12,
+      "typedGenericPartialWrappers": 12,
+      "actualPreparedDeclarationCount": 69,
+      "phase": "elaboration-and-admission-encoding",
+      "mergedIntoAuthoritativeClosure": false,
+      "erasedOrEmitted": false,
+      "runtimeExecuted": false,
+      "currentSourceCoreOrIrCompared": false,
+      "fullBaselineClosurePreparedAgain": false
+    },
+    "workers": [
+      {
+        "family": "F1",
+        "name": "psErasureLocalNameWithFuel",
+        "completePublicType": "PsErasureScope -> String -> Nat -> Nat -> String",
+        "originalOuterArguments": 3,
+        "partialApplicationType": "Nat -> String",
+        "runtimeArity": 4,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "PsErasureScope",
+              []
+            ],
+            [
+              "primitive",
+              "string"
+            ],
+            [
+              "primitive",
+              "nat"
+            ],
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          "result": [
+            "primitive",
+            "string"
+          ]
+        }
+      },
+      {
+        "family": "F1",
+        "name": "psErasureEtaNameWithFuel",
+        "completePublicType": "PsVerifiedIrExpr -> List PsVerifiedIrParameter -> Nat -> Nat -> Except PsErasureError String",
+        "originalOuterArguments": 3,
+        "partialApplicationType": "Nat -> Except PsErasureError String",
+        "runtimeArity": 4,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "PsVerifiedIrExpr",
+              []
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsVerifiedIrParameter",
+                  []
+                ]
+              ]
+            ],
+            [
+              "primitive",
+              "nat"
+            ],
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          "result": [
+            "named",
+            "Except",
+            [
+              [
+                "named",
+                "PsErasureError",
+                []
+              ],
+              [
+                "primitive",
+                "string"
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "family": "F1",
+        "name": "psTsFreshMatchTempWorker",
+        "completePublicType": "PsVerifiedIrExpr -> Nat -> Nat -> String",
+        "originalOuterArguments": 2,
+        "partialApplicationType": "Nat -> String",
+        "runtimeArity": 3,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "PsVerifiedIrExpr",
+              []
+            ],
+            [
+              "primitive",
+              "nat"
+            ],
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          "result": [
+            "primitive",
+            "string"
+          ]
+        }
+      },
+      {
+        "family": "F1",
+        "name": "psTsFreshInternalWorker",
+        "completePublicType": "List String -> String -> Nat -> Nat -> PsTsFreshNameResult",
+        "originalOuterArguments": 3,
+        "partialApplicationType": "Nat -> PsTsFreshNameResult",
+        "runtimeArity": 4,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "List",
+              [
+                [
+                  "primitive",
+                  "string"
+                ]
+              ]
+            ],
+            [
+              "primitive",
+              "string"
+            ],
+            [
+              "primitive",
+              "nat"
+            ],
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          "result": [
+            "named",
+            "PsTsFreshNameResult",
+            []
+          ]
+        }
+      },
+      {
+        "family": "F2",
+        "name": "psCompilerPreparationSourcesWorker",
+        "completePublicType": "List String -> PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState",
+        "originalOuterArguments": 1,
+        "partialApplicationType": "PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState",
+        "runtimeArity": 2,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "List",
+              [
+                [
+                  "primitive",
+                  "string"
+                ]
+              ]
+            ],
+            [
+              "named",
+              "PsCompilerPreparationState",
+              []
+            ]
+          ],
+          "result": [
+            "named",
+            "Except",
+            [
+              [
+                "named",
+                "PsCompilerError",
+                []
+              ],
+              [
+                "named",
+                "PsCompilerPreparationState",
+                []
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "family": "F2",
+        "name": "psAddDeclarationListWorker",
+        "completePublicType": "List PsDeclaration -> PsEnvironment -> Except PsElabError PsEnvironment",
+        "originalOuterArguments": 1,
+        "partialApplicationType": "PsEnvironment -> Except PsElabError PsEnvironment",
+        "runtimeArity": 2,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsDeclaration",
+                  []
+                ]
+              ]
+            ],
+            [
+              "named",
+              "PsEnvironment",
+              []
+            ]
+          ],
+          "result": [
+            "named",
+            "Except",
+            [
+              [
+                "named",
+                "PsElabError",
+                []
+              ],
+              [
+                "named",
+                "PsEnvironment",
+                []
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "family": "F2",
+        "name": "psElabDeclarationsWorker",
+        "completePublicType": "List PsSyntaxDeclaration -> PsEnvironment -> List PsDeclaration -> Except PsElabError PsElabModuleResult",
+        "originalOuterArguments": 1,
+        "partialApplicationType": "PsEnvironment -> List PsDeclaration -> Except PsElabError PsElabModuleResult",
+        "runtimeArity": 3,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsSyntaxDeclaration",
+                  []
+                ]
+              ]
+            ],
+            [
+              "named",
+              "PsEnvironment",
+              []
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsDeclaration",
+                  []
+                ]
+              ]
+            ]
+          ],
+          "result": [
+            "named",
+            "Except",
+            [
+              [
+                "named",
+                "PsElabError",
+                []
+              ],
+              [
+                "named",
+                "PsElabModuleResult",
+                []
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "family": "F2",
+        "name": "psBuildErasureDeclarationNamesWorker",
+        "completePublicType": "List PsDeclaration -> PsErasureNameState -> PsErasureNameState",
+        "originalOuterArguments": 1,
+        "partialApplicationType": "PsErasureNameState -> PsErasureNameState",
+        "runtimeArity": 2,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsDeclaration",
+                  []
+                ]
+              ]
+            ],
+            [
+              "named",
+              "PsErasureNameState",
+              []
+            ]
+          ],
+          "result": [
+            "named",
+            "PsErasureNameState",
+            []
+          ]
+        }
+      },
+      {
+        "family": "F2",
+        "name": "psEraseDefinitionsLoopWorker",
+        "completePublicType": "PsEnvironment -> PsErasureScope -> List PsDeclaration -> List PsVerifiedIrDeclaration -> Except PsErasureError (List PsVerifiedIrDeclaration)",
+        "originalOuterArguments": 3,
+        "partialApplicationType": "List PsVerifiedIrDeclaration -> Except PsErasureError (List PsVerifiedIrDeclaration)",
+        "runtimeArity": 4,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "PsEnvironment",
+              []
+            ],
+            [
+              "named",
+              "PsErasureScope",
+              []
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsDeclaration",
+                  []
+                ]
+              ]
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsVerifiedIrDeclaration",
+                  []
+                ]
+              ]
+            ]
+          ],
+          "result": [
+            "named",
+            "Except",
+            [
+              [
+                "named",
+                "PsErasureError",
+                []
+              ],
+              [
+                "named",
+                "List",
+                [
+                  [
+                    "named",
+                    "PsVerifiedIrDeclaration",
+                    []
+                  ]
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "family": "F2",
+        "name": "psPrepareRuntimeStructures",
+        "completePublicType": "PsEnvironment -> List PsDeclaration -> List PsDeclaration -> PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult",
+        "originalOuterArguments": 3,
+        "partialApplicationType": "PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult",
+        "runtimeArity": 5,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "PsEnvironment",
+              []
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsDeclaration",
+                  []
+                ]
+              ]
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsDeclaration",
+                  []
+                ]
+              ]
+            ],
+            [
+              "named",
+              "PsErasureScope",
+              []
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsVerifiedIrStructure",
+                  []
+                ]
+              ]
+            ]
+          ],
+          "result": [
+            "named",
+            "Except",
+            [
+              [
+                "named",
+                "PsErasureError",
+                []
+              ],
+              [
+                "named",
+                "PsPreparedStructuresResult",
+                []
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "family": "F2",
+        "name": "psPrepareRuntimeInductives",
+        "completePublicType": "PsEnvironment -> List PsDeclaration -> List PsDeclaration -> PsErasureScope -> List PsVerifiedIrInductive -> Except PsErasureError PsPreparedInductivesResult",
+        "originalOuterArguments": 3,
+        "partialApplicationType": "PsErasureScope -> List PsVerifiedIrInductive -> Except PsErasureError PsPreparedInductivesResult",
+        "runtimeArity": 5,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "named",
+              "PsEnvironment",
+              []
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsDeclaration",
+                  []
+                ]
+              ]
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsDeclaration",
+                  []
+                ]
+              ]
+            ],
+            [
+              "named",
+              "PsErasureScope",
+              []
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "named",
+                  "PsVerifiedIrInductive",
+                  []
+                ]
+              ]
+            ]
+          ],
+          "result": [
+            "named",
+            "Except",
+            [
+              [
+                "named",
+                "PsErasureError",
+                []
+              ],
+              [
+                "named",
+                "PsPreparedInductivesResult",
+                []
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "family": "F2",
+        "name": "psTsBuildSymbolMap",
+        "completePublicType": "String -> List String -> PsTsSymbolMapState -> PsTsSymbolMapState",
+        "originalOuterArguments": 2,
+        "partialApplicationType": "PsTsSymbolMapState -> PsTsSymbolMapState",
+        "runtimeArity": 3,
+        "runtimeSignature": {
+          "typeParameterCount": 0,
+          "parameters": [
+            [
+              "primitive",
+              "string"
+            ],
+            [
+              "named",
+              "List",
+              [
+                [
+                  "primitive",
+                  "string"
+                ]
+              ]
+            ],
+            [
+              "named",
+              "PsTsSymbolMapState",
+              []
+            ]
+          ],
+          "result": [
+            "named",
+            "PsTsSymbolMapState",
+            []
+          ]
+        }
+      }
+    ],
+    "fixtureOwnership": {
+      "eachCompilerOwnsAllTaggedInputs": true,
+      "irRecordsUseExistingCompilerFactories": true,
+      "copiedRecordsRetainOwningCompilerBrands": true,
+      "hostStructuralFixtureRecords": [
+        "PsErasureNameState",
+        "PsTsSymbolMapState",
+        "PsErasureCurrentDefinition"
+      ],
+      "hostStructuralFixtureBoundary": "Explicit unbranded non-IR host records with owning-compiler tagged children; their exercised paths project fields or reset the marker, and do not inspect brands. They are not compiler-created branded records and never enter original-IR carrier checking.",
+      "exhaustiveForAllInputs": false,
+      "performanceImprovementClaimed": false
+    },
+    "completeReferenceAndProbe": {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/worker-harness-reference.logged.json",
+      "sha256": "1da3df2abe07e4f8426bad4d6ab75451c24f0b024a12db36ce86d3687b376749",
+      "bytes": 68663,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+    },
+    "completeCurrentSourceAbiReceipts": [
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/generation.logged.json",
+        "sha256": "f41ac0c623f60d6082033f80a62dbe33d6dff07dd0f1bb7fdd10a9782f94fa01",
+        "bytes": 30613,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      },
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/generation.logged.json",
+        "sha256": "b5502e9fc60a71ae617e5d52e52a35e12ae65d09230f8dfd8d9008aa479d6439",
+        "bytes": 28982,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      },
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/generation.logged.json",
+        "sha256": "b3b13475c122865bf686efd5944721cc875a8b73c01cf8640106af1decdbc282",
+        "bytes": 28996,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      }
+    ],
+    "completeBehaviorAndGrammarReceipts": [
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/capabilities.logged.json",
+        "sha256": "d884b62584366d741765377ab6ac1806d5420a96f475c79cc31c394fecc72f3e",
+        "bytes": 83212,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      },
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/capabilities.logged.json",
+        "sha256": "d884b62584366d741765377ab6ac1806d5420a96f475c79cc31c394fecc72f3e",
+        "bytes": 83212,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      },
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/capabilities.logged.json",
+        "sha256": "2d5b65f8d1cc272efdbe0be5550091522553bfa488d6d6521395477413d591d6",
+        "bytes": 82596,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      },
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/capabilities.logged.json",
+        "sha256": "2d5b65f8d1cc272efdbe0be5550091522553bfa488d6d6521395477413d591d6",
+        "bytes": 82596,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      }
+    ]
+  },
+  "originalIr": {
+    "native": {
+      "accepted": true,
+      "traversalComplete": true,
+      "expressionCount": 56602,
+      "visitedSteps": 728064,
+      "findingCount": 0,
+      "retainedFindingCount": 0,
+      "omittedFindingDetails": 0
+    },
+    "currentSourceBuilds": [
+      {
+        "generation": "C1",
+        "executingCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+        "report": "original-ir-inventory.json",
+        "traversalComplete": true,
+        "findingCounts": {},
+        "findingCount": 0,
+        "findingCountsCoverage": "all-findings",
+        "portableChecker": {
+          "status": "accepted",
+          "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+          "options": {
+            "maxSteps": 5000000,
+            "maxTypeSteps": 65536,
+            "maxFindings": 1000
+          }
+        },
+        "runtimeIrTypingAccepted": true,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "strictSh1Qualified": false
+      },
+      {
+        "generation": "C2",
+        "executingCompilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+        "report": "original-ir-inventory.json",
+        "traversalComplete": true,
+        "findingCounts": {},
+        "findingCount": 0,
+        "findingCountsCoverage": "all-findings",
+        "portableChecker": {
+          "status": "accepted",
+          "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+          "options": {
+            "maxSteps": 5000000,
+            "maxTypeSteps": 65536,
+            "maxFindings": 1000
+          }
+        },
+        "runtimeIrTypingAccepted": true,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "strictSh1Qualified": false
+      },
+      {
+        "generation": "C3",
+        "executingCompilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+        "report": "original-ir-inventory.json",
+        "traversalComplete": true,
+        "findingCounts": {},
+        "findingCount": 0,
+        "findingCountsCoverage": "all-findings",
+        "portableChecker": {
+          "status": "accepted",
+          "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+          "options": {
+            "maxSteps": 5000000,
+            "maxTypeSteps": 65536,
+            "maxFindings": 1000
+          }
+        },
+        "runtimeIrTypingAccepted": true,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "strictSh1Qualified": false
+      }
+    ],
+    "exactOriginalIrCheckedBeforeEmission": true,
+    "runtimeIrTypingEnforced": true,
+    "strictQualification": "not claimed",
+    "nativeEvidence": {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/native-ir-evidence.logged.json",
+      "sha256": "b7bed9229beda63a76a603a0282ab9d5bd0d7f83efbbcc3bd52832b9dab81f63",
+      "bytes": 1272,
+      "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+    }
+  },
+  "newOnlyGrammar": {
+    "sourceGrammar": {
+      "edition": "ps-0.9-r3",
+      "mode": "new-only",
+      "support": "bounded-selfhost-subset",
+      "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+      "fullStandardConformance": false,
+      "fullPscvConformance": false
+    },
+    "authoritativeSourceKind": "lean",
+    "legacyCurrentParserMode": false,
+    "fullN1CanonicalClosure": {
+      "moduleCount": 61,
+      "proofScriptBytes": 902538,
+      "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent",
+      "reportArtifactObservation": {
+        "status": "logged-summary-and-qualified-run-linkage",
+        "originalArtifactFileBytesAvailable": false,
+        "reportSha256": "6d6bdb15cb1c4dacebee92104dd11538058118b072637575f1f39f7e4bb8878c",
+        "canonicalSurfaceSourceSha256": "8b060f40c279f81abb9f81ab5903457e295e431fc67c945ccd312663cd76e3c3",
+        "boundary": "The full artifact digest is a logged observation. The pinned qualifier checks its exact file digest and binds its canonical surface digest to C2/C3. Its original bytes were not supplied to this pure reviewer."
+      }
+    },
+    "finiteApiCounts": {
+      "applicationBoundaries": 18,
+      "supportedSyntax": 22,
+      "canonicalRoundTrips": 40,
+      "parseRefusals": 35,
+      "lexicalPositionCases": 2,
+      "lexicalRefusals": 5,
+      "emptyCallRefusals": 3,
+      "printerRefusals": 1
+    },
+    "apiGenerations": [
+      "N1",
+      "C1",
+      "C2",
+      "C3"
+    ],
+    "sessionPassMarkers": 2,
+    "scope": "Bounded ps-0.9-r3 subset with explicit refusals. This is not full Standard/PSCV or a change of the Lean/provider profile."
+  },
+  "recursiveGenericErasure": {
+    "stages": [
+      "N1",
+      "C1",
+      "C2",
+      "C3"
+    ],
+    "sourceSha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de",
+    "originalIrObservations": {
+      "checks": [
+        "one, two, and three declaration generics in exact declaration order",
+        "interleaved type, erased proposition/proof, and runtime binders",
+        "recursive calls retain the complete runtime argument count",
+        "monomorphic recursive calls retain zero type arguments"
+      ],
+      "observations": [
+        {
+          "declaration": "sh1GenericCopy",
+          "declarationTypeParameters": [
+            "T0"
+          ],
+          "runtimeParameters": [
+            "values"
+          ],
+          "calls": [
+            {
+              "at": "declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+              "typeArguments": [
+                "T0"
+              ],
+              "runtimeArity": 1
+            }
+          ]
+        },
+        {
+          "declaration": "sh1GenericMap",
+          "declarationTypeParameters": [
+            "T0",
+            "T1"
+          ],
+          "runtimeParameters": [
+            "convert",
+            "values"
+          ],
+          "calls": [
+            {
+              "at": "declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+              "typeArguments": [
+                "T0",
+                "T1"
+              ],
+              "runtimeArity": 2
+            }
+          ]
+        },
+        {
+          "declaration": "sh1GenericTriple",
+          "declarationTypeParameters": [
+            "T0",
+            "T1",
+            "T2"
+          ],
+          "runtimeParameters": [
+            "first",
+            "second",
+            "third",
+            "fuel"
+          ],
+          "calls": [
+            {
+              "at": "declaration:sh1GenericTriple/body/elseBranch/body",
+              "typeArguments": [
+                "T0",
+                "T1",
+                "T2"
+              ],
+              "runtimeArity": 4
+            }
+          ]
+        },
+        {
+          "declaration": "sh1GenericMono",
+          "declarationTypeParameters": [],
+          "runtimeParameters": [
+            "fuel",
+            "value"
+          ],
+          "calls": [
+            {
+              "at": "declaration:sh1GenericMono/body/elseBranch/body",
+              "typeArguments": [],
+              "runtimeArity": 2
+            }
+          ]
+        }
+      ],
+      "emittedIr": "The exact original IR inspected above is passed to psTsEmitModule.",
+      "strictSh1Qualified": false
+    },
+    "behavior": {
+      "observations": 19,
+      "status": "pass",
+      "exhaustiveForAllInputs": false
+    },
+    "completeReceipts": [
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/N1/generic-erasure.logged.json",
+        "sha256": "c26909c2810cd6e1c41a4efe55055166118aec4b148e05494e61ab2280ed0e38",
+        "bytes": 2219,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      },
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C1/generic-erasure.logged.json",
+        "sha256": "c26909c2810cd6e1c41a4efe55055166118aec4b148e05494e61ab2280ed0e38",
+        "bytes": 2219,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      },
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C2/generic-erasure.logged.json",
+        "sha256": "67681a0edb7ca8a0af1e8b9c28cccc27226ba9c6114776f7cca98ca11eb5d6c7",
+        "bytes": 2044,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      },
+      {
+        "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/C3/generic-erasure.logged.json",
+        "sha256": "67681a0edb7ca8a0af1e8b9c28cccc27226ba9c6114776f7cca98ca11eb5d6c7",
+        "bytes": 2044,
+        "representation": "Complete compact JSON substring from actual compiler log plus LF; original pretty artifact bytes are not asserted."
+      }
+    ]
+  },
+  "selectedProvider": {
+    "receipt": {
+      "path": "psc0/docs/selfhost-language/worker-migration-provider.json",
+      "sha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913",
+      "bytes": 3532,
+      "representation": "Exact actual provider artifact UTF8 bytes from the existing provider runner's read-back file envelope."
+    },
+    "provider": {
+      "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+      "sourceTree": "38c8c55bd2b214753e56c58c15c4901c32c01b86",
+      "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+      "metadata": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "ready"
+      },
+      "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+      "node": "v22.23.3",
+      "command": [
+        "psc_kernel_core_provider",
+        "--check"
+      ],
+      "resourcePolicy": "Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.",
+      "timeoutMs": 60000
+    },
+    "sameBinaryAsQualifiedR": true,
+    "distinctAcceptedStreams": 4,
+    "artifactRoles": 8,
+    "streams": [
+      {
+        "canonicalAdmissionsSha256": "9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5",
+        "artifacts": [
+          "C2 compiler source",
+          "C3 compiler source"
+        ],
+        "durationMs": 1555.7454980000002,
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "pskernel-core-native",
+          "leanVersion": "4.34.0",
+          "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "profile": "lean4.34-core",
+          "accepted": true
+        }
+      },
+      {
+        "canonicalAdmissionsSha256": "372371596fba560eca5ba52d29e20d91780d5c3321e4353a7a4c1a009167e10f",
+        "artifacts": [
+          "C2 raw lean capability source",
+          "C3 raw lean capability source"
+        ],
+        "durationMs": 14.807432000000063,
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "pskernel-core-native",
+          "leanVersion": "4.34.0",
+          "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "profile": "lean4.34-core",
+          "accepted": true
+        }
+      },
+      {
+        "canonicalAdmissionsSha256": "bb84332515024d4145b7cedb636fb6095d3cbe20a4fc3043dc37905f7574a900",
+        "artifacts": [
+          "C2 raw ps capability source",
+          "C3 raw ps capability source"
+        ],
+        "durationMs": 16.380443000000014,
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "pskernel-core-native",
+          "leanVersion": "4.34.0",
+          "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "profile": "lean4.34-core",
+          "accepted": true
+        }
+      },
+      {
+        "canonicalAdmissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+        "artifacts": [
+          "C2 raw recursive-generic fixture source",
+          "C3 raw recursive-generic fixture source"
+        ],
+        "durationMs": 7.705719000000045,
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "pskernel-core-native",
+          "leanVersion": "4.34.0",
+          "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "profile": "lean4.34-core",
+          "accepted": true
+        }
+      }
+    ],
+    "emissionWasGatedByThisCheck": false,
+    "boundary": "Provider acceptance occurred after compiler-only artifact emission. Every one of the eight C2/C3 roles is bound to the exact digest verified by the provider runner; unique stream count is derived from those role hashes."
+  },
+  "separateTs7NativeRecovery": {
+    "runId": "37947341899",
+    "compilerSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "receiptPath": "psc0/docs/selfhost-language/typescript7-native-recovery.json",
+    "receiptSha256": "0d5606c25e634082da39d80ffa5974b3c390d2765ded71bcf1abaf442b7e3919",
+    "scope": "Separately proved selected-R native recovery with Lean 4.34.0 and TypeScript 7.0.2, without executing historical TS5 compilers. It is not an F recovery or promotion job.",
+    "recipeSourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d"
+  },
+  "measuredGenerationTimings": [
+    {
+      "generation": "C1",
+      "timingsMs": {
+        "loadAndPrepare": 443632.106685,
+        "admissions": 68347.82936899998,
+        "canonicalSurface": 29689.096754000057,
+        "emit": 220753.63028199994,
+        "tscAndWrite": 2313.8129470000276,
+        "total": 764736.4778499999
+      }
+    },
+    {
+      "generation": "C2",
+      "timingsMs": {
+        "loadAndPrepare": 431712.690163,
+        "admissions": 68785.87110299995,
+        "canonicalSurface": 30986.021360000013,
+        "emit": 224087.46464999998,
+        "tscAndWrite": 2249.477016000077,
+        "total": 757821.525143
+      }
+    },
+    {
+      "generation": "C3",
+      "timingsMs": {
+        "loadAndPrepare": 449624.265688,
+        "admissions": 73278.31332800002,
+        "canonicalSurface": 31033.935261999955,
+        "emit": 231256.73305799998,
+        "tscAndWrite": 2410.36417299998,
+        "total": 787603.6123599999
+      }
+    }
+  ],
+  "retainedEvidence": {
+    "compilerLog": {
+      "path": "psc0/docs/selfhost-language/evidence-logs/worker-migration-compiler.log",
+      "sha256": "0029eccaf74c06b1fef9c3f06987cb0dc82003c649912bb1959bf3f13068e931",
+      "bytes": 757271,
+      "representation": "Complete decoded UTF8 GitHub job log returned by the connector, including original BOM and timestamped lines."
+    },
+    "providerLog": {
+      "path": "psc0/docs/selfhost-language/evidence-logs/worker-migration-provider.log",
+      "sha256": "99e3e9d913d9322f042d69f0981358bee36fa478849ee249062f6f59c07e80fd",
+      "bytes": 62929,
+      "representation": "Complete decoded UTF8 GitHub job log returned by the connector, including original BOM and timestamped lines."
+    },
+    "runApi": {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/run.api.json",
+      "sha256": "f1aeb453745eab734c1df521cfb13d1099f73f4eabd5f617240d2be131c0d5f4",
+      "bytes": 12766,
+      "representation": "Exact UTF8 JSON response text returned by GitHub API connector."
+    },
+    "jobsApi": {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/jobs.api.json",
+      "sha256": "eee48c097877e2b41b0b9db4575be04c247cd1e78988e7a82c11167a70a23c62",
+      "bytes": 10556,
+      "representation": "Exact UTF8 JSON response text returned by GitHub API connector."
+    },
+    "artifactsApi": {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/artifacts.api.json",
+      "sha256": "d1502ffe2c0f2ccb2fee95c95fd3fb70d0b4e038cfb751bf41fae6ad5f6cdb62",
+      "bytes": 1533,
+      "representation": "Exact UTF8 JSON response text returned by GitHub API connector."
+    },
+    "compilerReview": {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/compiler-review.json",
+      "sha256": "57494781e9c6ac62fcd069ca5eaf609750b84134561c86d50109cd12cbf703d9",
+      "bytes": 570328,
+      "representation": "Derived pure-data review of actual complete primary inputs; not a compiler/provider runner receipt."
+    },
+    "providerReview": {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/provider-review.json",
+      "sha256": "3f595efba7092909a3e6ce7399647473f4bd3b2977634348257e8cacadaf4e46",
+      "bytes": 9646,
+      "representation": "Derived pure-data review of actual complete primary inputs; not a compiler/provider runner receipt."
+    },
+    "reviewInputs": {
+      "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/review-inputs.json",
+      "sha256": "436a9eddacf32d00da6eadcd29702dd2a2b7bd60f89b63e7d0f8e75a2df5f899",
+      "bytes": 3579,
+      "representation": "Pure-data mapping to the exact completed primary inputs and independently reproducible reviewer invocation."
+    },
+    "compilerReceiptRecords": 32,
+    "providerReceiptRecords": 2,
+    "artifacts": [
+      {
+        "id": "11627040677",
+        "name": "psc0-sh1-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+        "sizeInBytes": 5336678,
+        "digest": "sha256:a05e427bb580fea603c1cad9946977910ab85e044caf605fe5b4b5f6f271e728",
+        "createdAt": "2026-10-09T15:36:15Z",
+        "expiresAt": "2026-11-08T15:36:13Z",
+        "expired": false,
+        "workflowRun": {
+          "id": 37947341800,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/sh1-projection-grammar-v1",
+          "head_sha": "fcd875c8f38db4b0524090bd10c7c2fd5024053d"
+        }
+      },
+      {
+        "id": "11626368937",
+        "name": "psc0-sh1-kernel-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+        "sizeInBytes": 1284,
+        "digest": "sha256:2466b46c77d4122a553a3a5a3fccdbf3d142062fadf0bcbb920f0521aa476ae8",
+        "createdAt": "2026-10-09T15:37:13Z",
+        "expiresAt": "2026-11-08T15:37:12Z",
+        "expired": false,
+        "workflowRun": {
+          "id": 37947341800,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/sh1-projection-grammar-v1",
+          "head_sha": "fcd875c8f38db4b0524090bd10c7c2fd5024053d"
+        }
+      }
+    ],
+    "zipArchivesDownloadedByThisCollector": false,
+    "preservation": "Both complete decoded logs, all complete logged receipt objects, final API response text and both full pure-data reviews are retained. The original provider artifact bytes are retained exactly. Compact compiler JSON+LF is explicitly labelled and never misrepresented as unavailable original pretty artifact bytes."
+  },
+  "review": {
+    "utilityBlob": "490cc9d968bddd92da1ad67e39b3880a35349580",
+    "compilerReviewPassed": true,
+    "providerReviewPassed": true,
+    "independentRootPrimaryFetchAndSameReaderPassed": true,
+    "noNewWorkflowOrQualificationAttempt": true,
+    "noCompilerProviderOrSourceChangeByCollector": true
+  },
+  "remainingLimits": [
+    "R remains the explicitly selected authoring seed. F has no new seed identity, recovery proof or promotion in this checkpoint.",
+    "Current source grammar is new-only ps-0.9-r3 within the bounded implemented subset; unsupported grammar and semantic features still refuse.",
+    "Authoritative compiler sources remain .lean. The full new .ps canonical correspondence does not make generated .ps authoritative.",
+    "Strict SH/1, full Standard/PSCV, erasure/backend semantic preservation, general recursion, unsupported dependent-state/generic cases and exhaustive behavior are not established by these finite gates.",
+    "The separate root TypeScript compiler-API workspace retirement is outside this PSC0 run."
+  ]
+}

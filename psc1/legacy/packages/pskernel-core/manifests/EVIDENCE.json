@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 2,
+  "date": "2026-10-02",
+  "package": "@proofscript/pskernel-core",
+  "version": "0.1.0-checker.0",
+  "status": "experimental-term-checker",
+  "repositoryBaseCommit": "12b6c0f9d63b606eae893e759093b9ab9e008b68",
+  "repositoryBasePackageTree": "2d4a1bda028b527267eda4744bcf6baa2d96b57e",
+  "observedIntegrationCommit": "f51a2c01c0bf09f1a509e170b38af9ac31cf3be3",
+  "delivery": "Complete tested local patch and tarball. Seven source blobs were staged in unreferenced Git trees, but no commit or branch ref was updated.",
+  "canCheckProofs": false,
+  "authoritative": false,
+  "selfHosted": false,
+  "experimentalInternalTermChecking": true,
+  "sourceFiles": 13,
+  "newSemanticModulesThisContinuation": [
+    "Environment",
+    "Reduction",
+    "Conversion",
+    "TypeCheck",
+    "Admission"
+  ],
+  "pscReportedDeclarationsPerSourceForm": 376,
+  "sourceAndCanonicalPsTypeScriptParity": true,
+  "generatedOutputEdited": false,
+  "repeatedGeneratedBuildIdentity": true,
+  "unitTests": {
+    "tests": 264,
+    "pass": 264,
+    "fail": 0,
+    "skipped": 0
+  },
+  "previousTarballReproduction": {
+    "version": "0.1.0-foundation.1",
+    "tests": 181,
+    "pass": 180,
+    "fail": 1,
+    "oracleHarnessReproducibleBeforeRepairs": false,
+    "details": "See CHECKER.md for missing helper exports, wrong pin/schema fields, opaque Bool/ite lowering and recursive wildcard scrutinee defect."
+  },
+  "referenceChecks": {
+    "structuralComputationTheorems": 47,
+    "structuralWrongControlsRejected": 1,
+    "bindingUniverseArithmeticTheorems": 88,
+    "semanticWrongControlsRejected": 3,
+    "checkerComputationTheorems": 68,
+    "checkerWrongAcceptanceControlsRejected": 3,
+    "directLevelEqualityProbes": 671,
+    "directLevelEqualityMatches": 671,
+    "directTermJudgments": 559,
+    "directTermJudgmentMatches": 559,
+    "acceptedTermJudgments": 156,
+    "rejectedTermJudgments": 403,
+    "additionalKnownCompletenessGaps": [
+      "proof-irrelevance",
+      "function-eta"
+    ],
+    "excludedFromDirectTermComparison": [
+      {
+        "name": "internal-free-variable",
+        "reason": "not representable in native closed-core wire fragment"
+      },
+      {
+        "name": "huge-bound-index-not-rounded",
+        "reason": "not representable in native closed-core wire fragment"
+      },
+      {
+        "name": "universe-parameter-not-declared",
+        "reason": "explicitly unsupported feature"
+      },
+      {
+        "name": "polymorphic-constant-not-supported",
+        "reason": "explicitly unsupported feature"
+      },
+      {
+        "name": "natural-primitive-not-admitted",
+        "reason": "explicitly unsupported feature"
+      },
+      {
+        "name": "projection-not-admitted",
+        "reason": "explicitly unsupported feature"
+      },
+      {
+        "name": "unknown-level-in-discarded-domain",
+        "reason": "explicitly unsupported feature"
+      }
+    ],
+    "nativeRejectionsAtIntendedSubmittedDeclaration": true,
+    "groundComputationsCheckedBy": "external pinned Lean provider, not the new checker",
+    "nativeLeanFrontendExecuted": false,
+    "generalSoundnessProved": false
+  },
+  "releasePreflight": {
+    "exitCode": 1,
+    "releaseReady": false,
+    "expectedFailure": true
+  },
+  "sourceMutationScope": [
+    "psc15selfhost/packages/pskernel-core/"
+  ],
+  "legacyKernelChanged": false,
+  "compilerSourceOrDefaultChanged": false,
+  "fullWorkspaceCiExecuted": false,
+  "latestCombinedTreeMergeTested": false,
+  "fullLeanCompatibilityVerified": false,
+  "kernelFixedPointExecuted": false,
+  "npmPublished": false,
+  "licenseResolved": false,
+  "externalSeed": {
+    "schemaVersion": 1,
+    "repository": "dwijayuda/pskernel",
+    "seedSourceCommit": "c680b2016ff8e23bdae2bc102128b1308fb5a324",
+    "artifactId": 11198192443,
+    "artifactSha256": "bde07a8a560d36bb7caacdfdd69aa6ca1d9ccff68eb31bd1d264f4189ab79012",
+    "psc1Sha256": "eeb3f49197d142a7412cf3658c6138d2d56ec8e721338a804111a7e61ab68a99",
+    "leanProviderSha256": "98929458d0b29e6a5bc477f748219252b2d8d71861c8a1973869ed1711992ce0",
+    "typescriptVersion": "5.8.3",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "note": "Historical CI artifact used as an explicit build/oracle seed, not a runtime dependency or a claim that the complete integration workflow passed. No automatic download.",
+    "artifactExpires": "2026-10-08",
+    "completeHistoricalWorkflowPassed": false
+  },
+  "localReproductionCommands": [
+    "PSC1=<pinned> npm run build",
+    "npm test",
+    "npm run verify:build",
+    "PSC1=<pinned> LEAN_PROVIDER=<pinned> npm run test:oracle",
+    "PSC1=<pinned> LEAN_PROVIDER=<pinned> npm run test:semantic-oracle",
+    "PSC1=<pinned> LEAN_PROVIDER=<pinned> npm run test:checker-oracle",
+    "LEAN_PROVIDER=<pinned> npm run test:level-differential",
+    "LEAN_PROVIDER=<pinned> npm run test:checker-differential",
+    "npm run release:check # expected exit 1"
+  ],
+  "manifestsSha256": {
+    "BUILD.json": "ea1e577d476641f9c887af06f4a2ad2e7b691d53556dd55dfdea933d64cc50cf",
+    "SOURCE.json": "809a99620fe2875c1932c2a0351424b987721af5c280a0df7f66afa78c5f7c2f",
+    "TOOLCHAIN.json": "0521a7cd0a90ec149787e14807bec7df39fcc74a2fe7667b24b59fcc229161e7",
+    "CAPABILITIES.json": "cdb2770fb9bfc4f7d07c52a500cf7d321170de24ea9de5693019a943da445831",
+    "ORACLE.json": "3b074d79c27eba231e17ed580f4a50c89943986ce52f0cbf12b0c19b3d7b8f4b",
+    "SEMANTIC_ORACLE.json": "cd134f6146f44c8344410fb2ef2dedfd006d1483681625078dd74c25b62be30b",
+    "CHECKER_ORACLE.json": "9ed7e2561cef4b713ebb4ac96988dd5c73615498d96b821aa347661ef84169d8",
+    "LEVEL_DIFFERENTIAL.json": "0c7e4374d7545b528a6a4e823e110e6c4a7514a7d54925e67092a5524a2c395c",
+    "CHECKER_DIFFERENTIAL.json": "ec5d14bf9a07f3d38e8980402fb70a5bd6449e09c2cc7659c0be40c2090e2e2a"
+  },
+  "note": "Internal raw environments and mutable machine states are not public checked handles. Transition fuel is not a complete hostile-input resource boundary. See CHECKER.md for exact fragment and limitations. Distribution test results and artifact hashes are recorded separately to avoid self-referential package hashes.",
+  "githubSourcePushed": false,
+  "merged": false
+}

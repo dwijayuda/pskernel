@@ -1,0 +1,209 @@
+{
+  "format": "psc0.sh1.structural-root-core-repair.review.v1",
+  "status": "independently-reviewed-unattached-source-candidates-ready-for-root-integration",
+  "sourceRef": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "documentationCheckpoint": "796f2fd8feebc96dfcdd79002e6a53aeb7b4ad90",
+  "priorAllocationManifest": "1530f2bec9a7b66bddd317ff94409297c39adaca",
+  "decision": "Preserve the specified direct structural minimum, retain nested control and existing outer-child calls, refine the root major, and refuse unsupported new IH aliases from nested recurrences. Retract the earlier unqualified descendant-IH capability claim in documentation. No general dependent matching or arbitrary raw-Core recursion claim.",
+  "counts": {
+    "files": 3,
+    "guardedEdits": 11,
+    "contextEdits": 2,
+    "termEdits": 8,
+    "declarationEdits": 1
+  },
+  "complementaryErasure": {
+    "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+    "candidateBlob": "f1ecc9458fe0c606b0a34c321517069cd27280e4",
+    "baseBlob": "f16cb31b41b890e9c5d4d2d7540d44d1a5f06e12",
+    "sha256": "0119067649f78605eac5c1339a92ab9171b7c06180932d5db1d606ff074b530b",
+    "scope": "Separately owned two-edit candidate: keep currentDefinition only on the whole entry body; every child callback clears it while preserving established runtimeExpressions. Independent bounded CLEAR already sent; not duplicated in this manifest's patches."
+  },
+  "files": [
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+      "baseBlob": "d9501b06f0e56df2101ca950cfd518d31dd5e26e",
+      "baseSha256": "3d1884b79b48b0d02a649509c301866dd1914e96f36e096c8174033d9b2f3e4c",
+      "candidateBlob": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31",
+      "candidateSha256": "0b17fd57d07b25b60ed656ec290903ad2f8a829c9107900805707ef805d06e27",
+      "candidateBytes": 2763,
+      "exactForward": true,
+      "exactReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "id": "complete-original-parameter-identities",
+          "before": "  functionName : PsName\n  explicitParameterIds : List Nat\n",
+          "after": "  functionName : PsName\n  parameterIds : List Nat\n  explicitParameterIds : List Nat\n"
+        },
+        {
+          "id": "consume-root-collection-after-fields",
+          "before": "    structuralRecursion := structuralRecursion\n  }\n",
+          "after": "    structuralRecursion := structuralRecursion\n  }\n\n-- Root fields keep their established call map in every nested body. Only the\n-- whole declaration match may create that map; a nested fold has another IH.\ndef psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext :=\n  match context.structuralRecursion with\n  | Option.none => context\n  | Option.some recursion =>\n      psElabContextWithStructuralRecursion context\n        (Option.some (PsElabStructuralRecursion.mk\n          recursion.functionName recursion.parameterIds recursion.explicitParameterIds\n          recursion.recursiveParameterIndex recursion.calls recursion.resultType false))\n"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "baseBlob": "dc7b325b8b18770ae8ebfddec14b768d5a7d461f",
+      "baseSha256": "1cc03a761f56c02f7b47bee87d02d6b576a981b8cf228278e5cec4fbc57a2b06",
+      "candidateBlob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+      "candidateSha256": "c6b1c1d9c444a34824a25f7e04df4d5ffc6b1466d7ccbe11a5b900204db93a6a",
+      "candidateBytes": 109738,
+      "exactForward": true,
+      "exactReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "id": "move-original-major-selector-and-add-telescope-guard",
+          "before": "def psElabNatNe (left right : Nat) : Bool :=\n",
+          "after": "def psElabStructuralParameterAt\n    (ids : List Nat) : Nat -> Option Nat :=\n  match ids with\n  | List.nil => fun (_index : Nat) => Option.none\n  | List.cons id rest =>\n      let smaller : Nat -> Option Nat := psElabStructuralParameterAt rest;\n      fun (index : Nat) =>\n        match index with\n        | Nat.zero => Option.some id\n        | Nat.succ next => smaller next\n\n-- Abstraction changes exactly the selected free ID. Equality with the original\n-- instantiated type therefore checks its absence without a printed-name test.\ndef psElabCheckStructuralType\n    (context : PsElabContext) (majorId : Nat) (type : PsExpr) :\n    Except PsElabError Unit :=\n  let instantiated := psMetaInstantiate context.metaContext type;\n  if psExprHasUnresolvedMeta instantiated then\n    Except.error PsElabError.unresolvedMetavariable\n  else if psExprAlphaEq instantiated (psExprAbstractFVar majorId instantiated) then\n    Except.ok Unit.unit\n  else Except.error PsElabError.structuralRecursionDependentParameter\n\ndef psElabCheckStructuralParameters\n    (context : PsElabContext) (majorId : Nat) (parameterIds : List Nat) :\n    Except PsElabError Unit :=\n  match parameterIds with\n  | List.nil => Except.ok Unit.unit\n  | List.cons id rest =>\n      match psLocalFindById context.localContext id with\n      | Option.none => Except.error PsElabError.structuralRecursionInternal\n      | Option.some declaration =>\n          match psElabCheckStructuralType context majorId (psLocalDeclType declaration) with\n          | Except.error error => Except.error error\n          | Except.ok _ => psElabCheckStructuralParameters context majorId rest\n\ndef psElabCheckStructuralTelescope\n    (context : PsElabContext) (recursion : PsElabStructuralRecursion) :\n    Except PsElabError Nat :=\n  match psElabStructuralParameterAt\n      recursion.explicitParameterIds recursion.recursiveParameterIndex with\n  | Option.none => Except.error PsElabError.structuralRecursionInternal\n  | Option.some majorId =>\n      match psElabCheckStructuralType context majorId recursion.resultType with\n      | Except.error error => Except.error error\n      | Except.ok _ =>\n          match psElabCheckStructuralParameters context majorId recursion.parameterIds with\n          | Except.error error => Except.error error\n          | Except.ok _ => Except.ok majorId\n\ndef psElabNatNe (left right : Nat) : Bool :=\n"
+        },
+        {
+          "id": "copy-complete-original-parameter-identities",
+          "before": "                      functionName := recursion.functionName\n                      explicitParameterIds := recursion.explicitParameterIds\n",
+          "after": "                      functionName := recursion.functionName\n                      parameterIds := recursion.parameterIds\n                      explicitParameterIds := recursion.explicitParameterIds\n"
+        },
+        {
+          "id": "consume-root-creation-before-minor-body",
+          "before": "                    match elaborate\n                        hypotheses.context\n                        body\n",
+          "after": "                    match elaborate\n                        (psElabContextAfterStructuralFields hypotheses.context)\n                        body\n"
+        },
+        {
+          "id": "add-final-context-constructor-refinement",
+          "before": "def psElabMatchMinors\n",
+          "after": "-- Refine only the whole structural match, after every minor has contributed\n-- its meta solutions. Reopen exactly the constructor fields, replace the major\n-- through the remaining term (including IH lambdas), and close the same IDs.\ndef psElabRefineStructuralMinor\n    (majorId fieldCount : Nat) (context : PsLocalContext)\n    (constructorValue minor : PsExpr) : Except PsElabError PsExpr :=\n  match fieldCount with\n  | Nat.zero =>\n      Except.ok (psExprInstantiate1 (psExprAbstractFVar majorId minor) constructorValue)\n  | Nat.succ remaining =>\n      match minor with\n      | PsExpr.lam name domain body binder =>\n          let pushed := psLocalPushBinding context name domain binder;\n          match psElabRefineStructuralMinor majorId remaining pushed.context\n              (PsExpr.app constructorValue (PsExpr.fvar pushed.id))\n              (psExprInstantiate1 body (PsExpr.fvar pushed.id)) with\n          | Except.error error => Except.error error\n          | Except.ok refined =>\n              Except.ok (PsExpr.lam name domain\n                (psExprAbstractFVar pushed.id refined) binder)\n      | _ => Except.error PsElabError.structuralRecursionInternal\n\ndef psElabRefineStructuralMinors\n    (context : PsElabContext) (majorId : Nat)\n    (inductiveLevels : List PsLevel) (parameterArgs : List PsExpr)\n    (constructorNames : List PsName) (minors : List PsExpr) :\n    Except PsElabError (List PsExpr) :=\n  match constructorNames with\n  | List.nil =>\n      match minors with\n      | List.nil => Except.ok List.nil\n      | _ => Except.error PsElabError.structuralRecursionInternal\n  | List.cons constructorName rest =>\n      match minors with\n      | List.nil => Except.error PsElabError.structuralRecursionInternal\n      | List.cons minor tail =>\n          match psEnvironmentFindConstructor context.environment constructorName with\n          | Option.none => Except.error PsElabError.structuralRecursionInternal\n          | Option.some constructorInfo =>\n              let constructorValue := psMetaInstantiate context.metaContext\n                (psExprApplyMany (PsExpr.constE constructorName inductiveLevels) parameterArgs);\n              match psElabRefineStructuralMinor majorId constructorInfo.numFields\n                  context.localContext constructorValue (psMetaInstantiate context.metaContext minor) with\n              | Except.error error => Except.error error\n              | Except.ok refined =>\n                  match psElabRefineStructuralMinors context majorId\n                      inductiveLevels parameterArgs rest tail with\n                  | Except.error error => Except.error error\n                  | Except.ok refinedTail => Except.ok (List.cons refined refinedTail)\n\ndef psElabRefineStructuralMatch\n    (inductiveLevels : List PsLevel) (parameterArgs : List PsExpr)\n    (constructorNames : List PsName) (result : PsElabMatchMinorsResult) :\n    Except PsElabError PsElabMatchMinorsResult :=\n  match result.context.structuralRecursion with\n  | Option.none => Except.ok result\n  | Option.some recursion =>\n      if recursion.collectCalls then\n        match psElabCheckStructuralTelescope result.context recursion with\n        -- An actual recursive call refuses these errors before returning its IH.\n        -- Nonrecursive dependent/Prop matches retain their constant motive.\n        | Except.error _ => Except.ok result\n        | Except.ok majorId =>\n            match psElabRefineStructuralMinors result.context majorId\n                inductiveLevels parameterArgs constructorNames result.minors with\n            | Except.error error => Except.error error\n            | Except.ok minors =>\n                Except.ok (PsElabMatchMinorsResult.mk result.context minors)\n      else Except.ok result\n\ndef psElabMatchMinors\n"
+        },
+        {
+          "id": "refine-complete-minor-list",
+          "before": "  psElabMatchMinorsWorker\n    elaborate\n    inductiveInfo\n    inductiveLevels\n    parameterArgs\n    expectedType\n    alternatives\n    constructorNames\n    context\n\n",
+          "after": "  match psElabMatchMinorsWorker\n      elaborate\n      inductiveInfo\n      inductiveLevels\n      parameterArgs\n      expectedType\n      alternatives\n      constructorNames\n      context with\n  | Except.error error => Except.error error\n  | Except.ok result =>\n      psElabRefineStructuralMatch inductiveLevels parameterArgs constructorNames result\n\n"
+        },
+        {
+          "id": "remove-moved-selector-and-false-nested-IH-comment",
+          "before": "-- Only matches on the structural major or a tracked child may register new\n-- decreasing arguments. An unrelated nested match retains outer hypotheses but\n-- cannot manufacture decrease evidence for its own fields. A narrower nested\n-- result telescope also cannot supply the whole worker's induction hypothesis.\ndef psElabStructuralParameterAt\n    (ids : List Nat) : Nat -> Option Nat :=\n  match ids with\n  | List.nil => fun (_index : Nat) => Option.none\n  | List.cons id rest =>\n      let smaller : Nat -> Option Nat := psElabStructuralParameterAt rest;\n      fun (index : Nat) =>\n        match index with\n        | Nat.zero => Option.some id\n        | Nat.succ next => smaller next\n\n",
+          "after": "-- The declaration's root match has one permission to establish its IH map.\n-- Nested matches retain existing root-child identities but cannot create aliases\n-- from a different recurrence, even when the result types happen to agree.\n"
+        },
+        {
+          "id": "one-shot-exact-root-match-context",
+          "before": "def psElabStructuralMatchContext\n    (context : PsElabContext) (scrutinee expectedType : PsExpr) : PsElabContext :=\n  match context.structuralRecursion with\n  | Option.none => context\n  | Option.some recursion =>\n      let sameResult := psExprAlphaEq\n        (psMetaInstantiate context.metaContext expectedType)\n        (psMetaInstantiate context.metaContext recursion.resultType);\n      let permitted : Bool :=\n        if sameResult then\n          match scrutinee with\n          | PsExpr.fvar id =>\n              match psElabStructuralParameterAt\n                  recursion.explicitParameterIds recursion.recursiveParameterIndex with\n              | Option.none => false\n              | Option.some majorId =>\n                  if Nat.beq id majorId then true\n                  else\n                    match psElabStructuralRecursionFindCall recursion.calls id with\n                    | Option.none => false\n                    | Option.some _ => true\n          | _ => false\n        else false;\n      psElabContextWithStructuralRecursion context\n        (Option.some (PsElabStructuralRecursion.mk\n          recursion.functionName recursion.explicitParameterIds\n          recursion.recursiveParameterIndex recursion.calls recursion.resultType permitted))\n\n",
+          "after": "def psElabStructuralMatchContext\n    (context : PsElabContext) (scrutinee expectedType : PsExpr) : PsElabContext :=\n  match context.structuralRecursion with\n  | Option.none => context\n  | Option.some recursion =>\n      let sameResult := psExprAlphaEq\n        (psMetaInstantiate context.metaContext expectedType)\n        (psMetaInstantiate context.metaContext recursion.resultType);\n      let permitted : Bool :=\n        if recursion.collectCalls then\n          if sameResult then\n            match scrutinee with\n            | PsExpr.fvar id =>\n                match psElabStructuralParameterAt\n                    recursion.explicitParameterIds recursion.recursiveParameterIndex with\n                | Option.none => false\n                | Option.some majorId => Nat.beq id majorId\n            | _ => false\n          else false\n        else false;\n      psElabContextWithStructuralRecursion context\n        (Option.some (PsElabStructuralRecursion.mk\n          recursion.functionName recursion.parameterIds recursion.explicitParameterIds\n          recursion.recursiveParameterIndex recursion.calls recursion.resultType permitted))\n\n"
+        },
+        {
+          "id": "validate-telescope-at-actual-self-call",
+          "before": "                | Except.ok hypothesisId =>\n                    match\n                        psElabResolvedTerm\n                          context\n                          (PsExpr.fvar hypothesisId)\n                          expected with\n                    | Except.error error => Except.error error\n                    | Except.ok result => Except.ok (Option.some result)\n",
+          "after": "                | Except.ok hypothesisId =>\n                    match psElabCheckStructuralTelescope context recursion with\n                    | Except.error error => Except.error error\n                    | Except.ok _ =>\n                        match\n                            psElabResolvedTerm\n                              context\n                              (PsExpr.fvar hypothesisId)\n                              expected with\n                        | Except.error error => Except.error error\n                        | Except.ok result => Except.ok (Option.some result)\n"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "baseBlob": "3525a93bc88da5cdd8e190819aa4b39f2ec011ba",
+      "baseSha256": "aad96ce6052819ccedbe7e357dd63a8edc610611c7743e9e97d7ec0d3a41ed71",
+      "candidateBlob": "d191857ece760f307359d576dca2cef906dea8ec",
+      "candidateSha256": "600da64269038375ab62fdc0d0fab572bfa028b60bc6caec730f5dff1dd3f1bf",
+      "candidateBytes": 60290,
+      "exactForward": true,
+      "exactReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "id": "seed-complete-original-parameter-identities",
+          "before": "                            (PsElabStructuralRecursion.mk\n                              functionName\n                              explicitParameterIds\n",
+          "after": "                            (PsElabStructuralRecursion.mk\n                              functionName\n                              (psElabRecursionParameterIds\n                                (psElabTypedBinderListReverse bindersRev))\n                              explicitParameterIds\n"
+        }
+      ]
+    }
+  ],
+  "mechanism": {
+    "originalTelescope": "PsElabStructuralRecursion.parameterIds stores source-order IDs of all original typed binders, including implicit and proof binders; explicitParameterIds is unchanged and remains the self-call vector. The seed uses the existing full psElabRecursionParameterIds over the same reversed binderResult list. Every existing recursion-context copy retains this new field.",
+    "oneShot": "The seed has collectCalls=true. MatchContext requires incoming permission, alpha-equal instantiated result and the original major ID. Constructor-minor elaboration opens the root fields and IHs, then clears collectCalls before body elaboration without dropping calls. Nested constructor minors cannot add or replace aliases; valid outer-child references remain. Boolean literal alternatives have no fields or recursive hypotheses and cannot introduce an IH map.",
+    "refusal": "After existing self-call name/arity/argument/provenance validation succeeds, the call checks the original result and every original parameter domain under the current meta assignment. Missing originals refuse structuralRecursionInternal; unresolved term or level metas refuse unresolvedMetavariable; occurrence of the major refuses structuralRecursionDependentParameter. Existing earlier self-call errors remain ordered before this new check.",
+    "absence": "For an instantiated expression without unresolved metas, psExprAlphaEq(t, psExprAbstractFVar(majorId,t)) is true exactly when that free ID is absent: abstraction preserves all other constructors/IDs, changes each selected fvar to a bvar at its depth, and structural alpha equality compares those constructors distinctly. No printed-name, defeq or proof-irrelevance approximation is used.",
+    "finalMeta": "All root minors are first elaborated with the one-shot body scope. Constructor-minor restoration retains the original root context and final meta assignment; the minors worker threads those assignments. Only afterward does refinement check the original telescope again and instantiate each complete minor. A successful actual self-call already proved meta-complete independence, which later assignments cannot invalidate. Waiting until all minors avoids leaving an earlier branch unrefined when a later branch solves a type metavariable.",
+    "refinement": "For each already validated constructor in actual order, instantiate its original parameters/levels with the final metas, reopen exactly ctorInfo.numFields minor lambdas using fresh IDs from the original local-context high-water mark, and append those field variables to the constructor. At the end of that finite field prefix, use abstractFVar followed by instantiate1 to replace the original major throughout the remaining term, including the IH lambda prefix, local types and values. Reclose the same field variables in reverse nesting. Prior parameter/result independence and the previously checked constructor type make this ordinary typed capture-avoiding substitution.",
+    "nonrecursive": "If the final independence guard refuses, the unchanged result is retained only as the ordinary nonrecursive/dependent constant-motive path. Any actual otherwise-valid structural self call had to pass the same guard before an IH was returned, so this fallback cannot admit a dependent recursive equation. The source has no newly accepted dependent recursion.",
+    "limits": "The new traversals recurse over finite original parameter lists, finite constructor lists and each declared field count. No new arbitrary success cutoff, normalization engine, meta solver or fuel policy is added. Existing bounded operations still refuse as before; unresolved meta instantiation is explicitly detected for actual self calls."
+  },
+  "sourceEquations": [
+    {
+      "name": "root-major-capture",
+      "source": "def f (n : Nat) : Nat := match n with | Nat.zero => 0 | Nat.succ k => Nat.add n (f k)",
+      "beforeCore": "fun n => Nat.rec 0 (fun k ih => Nat.add n ih) n",
+      "beforeCoreAt2": 4,
+      "nativeSourceAt2": 3,
+      "beforeIRAt2": 3,
+      "afterCore": "fun n => Nat.rec 0 (fun k ih => Nat.add (Nat.succ k) ih) n",
+      "afterCoreAt2": 3,
+      "kind": "Static source-case equation; no execution claimed."
+    },
+    {
+      "name": "nested-major-alias",
+      "source": "def f (n : Nat) : Nat := match n with | Nat.zero => 0 | Nat.succ k => match n with | Nat.zero => 100 | Nat.succ j => Nat.add (f j) 1",
+      "beforeCore": "fun n => Nat.rec 0 (fun k outerIH => Nat.rec 100 (fun j innerIH => Nat.add innerIH 1) n) n",
+      "beforeCoreAt1": 101,
+      "nativeSourceAt1": 1,
+      "beforeIRAt1": 1,
+      "after": "The inner j has no root child mapping; the existing structural call validator refuses its self call. Nested matches using the already mapped k remain accepted.",
+      "kind": "Static source-case counterexample and documented capability correction; no execution claimed."
+    }
+  ],
+  "reachability": [
+    "The authoritative source frontend seeds this context only for a definition whose body is a root match on an explicit original parameter. The theorem path does not seed it.",
+    "Term/context local and meta updates preserve the established recursion fields; branches restore the original context after closing fields/IHs. The added post-field context changes only collectCalls.",
+    "The strict source frontend cannot author an arbitrary instantiation of the supported recursor schemas: ordinary recursor reference elaboration constructs constE with no level arguments and fails its required level arity; generated match elaboration supplies the actual result universe.",
+    "A raw API caller supplying arbitrary Core or a fabricated PsElabStructuralRecursion remains outside this source-owned argument; the new helpers do not certify it.",
+    "The exact 64-module source inventory found no actual source self call whose decrease depends on a newly nested descendant. Existing nested branch calls target their original root child/predecessor."
+  ],
+  "constructorInventory": {
+    "originalSourceWrites": [
+      "Context.PsElabStructuralRecursion",
+      "Declaration.psElabStructuralRecursionFromSource",
+      "Term.psElabPushRecursiveHypothesesWorker",
+      "Term.psElabStructuralMatchContext"
+    ],
+    "addedSourceWrite": "Context.psElabContextAfterStructuralFields",
+    "checkedHostSyntaxPaths": [
+      "psc0/scripts/check-elab-context-selfhost-source-syntax.mjs",
+      "psc0/scripts/check-elab-validate-structural-call-selfhost-source-syntax.mjs",
+      "psc0/scripts/check-elab-match-fields-selfhost-source-syntax.mjs",
+      "psc0/scripts/check-elab-structural-recursion-source-selfhost-source-syntax.mjs",
+      "psc0/scripts/check-elab-declaration-structural-recursion-selfhost-source-syntax.mjs",
+      "psc0/scripts/check-elab-try-structural-self-call-selfhost-source-syntax.mjs"
+    ],
+    "activeHostCompatibility": "Read-only text review; no script execution. Structure guard names PsElabContext, which is unchanged. Typed withRecursion, validator and resolvedTerm markers remain present. Worker wrappers unchanged. Historical mutation templates are inactive when the existing workers are present."
+  },
+  "bootstrapArgument": [
+    "All new local match/if initializers with expected-type sensitivity are either explicitly typed or wrapped by a known-return helper application. No untyped lambda binders or new grammar forms are introduced.",
+    "psElabRefineStructuralMinor descends on fieldCount; the nested minor-lambda match retains that root predecessor. psElabRefineStructuralMinors descends on the original constructorNames tail, with the corresponding minors tail as ordinary state. psElabCheckStructuralParameters descends on its root parameterIds tail.",
+    "All new recursive helper operands are bound in source headers before matching. The only moved existing selector remains byte-identical; no new eager fuel-prefix construction is introduced.",
+    "Original source guards for Context, structural-call worker, match fields/IH worker, recursion seed and self-call wrapper were read as text and remain compatible; no scripts were executed."
+  ],
+  "validation": {
+    "method": "GitHub MCP blob reads/writes and pure in-memory text/JSON/SHA256 only",
+    "compilerExecuted": false,
+    "testExecuted": false,
+    "workflowRequested": false,
+    "refsChanged": false,
+    "forwardReverseExact": true,
+    "readbacksExact": true,
+    "independentReview": "Bounded CLEAR from empty_evidence_finish for constructor refinement/telescope/final-meta semantics and runtime_comparison_finish for propagation/constructor inventory/bootstrap, on exact manifest 2d406d0d8a95ee56ee92b7054f7586c5461b4d4c. No source changes after their reviews."
+  },
+  "strictQualified": false,
+  "semanticCorrespondenceQualified": false,
+  "globalQualified": false,
+  "providerAcceptanceQualified": false,
+  "reviewedManifest": "2d406d0d8a95ee56ee92b7054f7586c5461b4d4c",
+  "reviews": [
+    {
+      "reviewer": "empty_evidence_finish",
+      "verdict": "CLEAR",
+      "scope": "Exact 2+8+1 reconstruction/hash/readback; actual-field reopen/major substitution/reclose, final-meta timing and complete original-telescope guard; preserved outer-child fixtures."
+    },
+    {
+      "reviewer": "runtime_comparison_finish",
+      "verdict": "CLEAR",
+      "scope": "Exact 2+8+1 reconstruction/hash/bytes; every production record writer, source-order all-parameter IDs, one-shot permission propagation/context restoration, inert Bool case, supported source/bootstrap recursion shapes."
+    }
+  ]
+}

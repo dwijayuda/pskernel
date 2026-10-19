@@ -1,0 +1,265 @@
+import PSC1Kernel.Quot
+import PSC1Kernel.CheckerSession
+
+namespace PSC1Kernel
+
+namespace Kernel
+
+def safetyEq : DefinitionSafety → DefinitionSafety → Bool
+  | .unsafeDef, .unsafeDef => true
+  | .safe, .safe => true
+  | .partialDef, .partialDef => true
+  | _, _ => false
+
+def namesEq : List Name → List Name → Bool
+  | [], [] => true
+  | a :: as, b :: bs => Name.eq a b && namesEq as bs
+  | _, _ => false
+
+def nameMember (target : Name) : List Name → Bool
+  | [] => false
+  | x :: xs => Name.eq target x || nameMember target xs
+
+partial def findUndefLevelParam (u : Level) (allowed : List Name) : Option Name :=
+  match u with
+  | .zero | .mvar _ => none
+  | .param n => if nameMember n allowed then none else some n
+  | .succ a => findUndefLevelParam a allowed
+  | .max a b | .imax a b =>
+      match findUndefLevelParam a allowed with
+      | some n => some n
+      | none => findUndefLevelParam b allowed
+
+def findUndefInLevels (levels : List Level) (allowed : List Name) : Option Name :=
+  match levels with
+  | [] => none
+  | u :: us =>
+      match findUndefLevelParam u allowed with
+      | some n => some n
+      | none => findUndefInLevels us allowed
+
+partial def findUndefExprLevelParam (e : Expr) (allowed : List Name) : Option Name :=
+  match e with
+  | .bvar _ | .fvar _ | .mvar _ | .lit _ => none
+  | .sort u => findUndefLevelParam u allowed
+  | .const _ levels => findUndefInLevels levels allowed
+  | .app f a =>
+      match findUndefExprLevelParam f allowed with
+      | some n => some n
+      | none => findUndefExprLevelParam a allowed
+  | .lam _ type body _ | .forallE _ type body _ =>
+      match findUndefExprLevelParam type allowed with
+      | some n => some n
+      | none => findUndefExprLevelParam body allowed
+  | .letE _ type value body _ =>
+      match findUndefExprLevelParam type allowed with
+      | some n => some n
+      | none =>
+          match findUndefExprLevelParam value allowed with
+          | some n => some n
+          | none => findUndefExprLevelParam body allowed
+  | .mdata _ body | .proj _ _ body => findUndefExprLevelParam body allowed
+
+partial def levelHasMVar : Level → Bool
+  | .mvar _ => true
+  | .succ level => levelHasMVar level
+  | .max left right | .imax left right =>
+      levelHasMVar left || levelHasMVar right
+  | .zero | .param _ => false
+
+def levelsHaveMVar : List Level → Bool
+  | [] => false
+  | level :: rest => levelHasMVar level || levelsHaveMVar rest
+
+partial def hasMVar : Expr → Bool
+  | .mvar _ => true
+  | .sort level => levelHasMVar level
+  | .const _ levels => levelsHaveMVar levels
+  | .app f a => hasMVar f || hasMVar a
+  | .lam _ type body _ | .forallE _ type body _ => hasMVar type || hasMVar body
+  | .letE _ type value body _ => hasMVar type || hasMVar value || hasMVar body
+  | .mdata _ body | .proj _ _ body => hasMVar body
+  | .bvar _ | .fvar _ | .lit _ => false
+
+def checkNoMVarNoFVar (e : Expr) : Except String Unit :=
+  if hasMVar e then
+    .error "declaration has metavariables"
+  else if e.hasFVar then
+    .error "declaration has free variables"
+  else
+    .ok ()
+
+def checkLevelParams (e : Expr) (allowed : List Name) : Except String Unit :=
+  match findUndefExprLevelParam e allowed with
+  | some _ => .error "invalid reference to undefined universe level parameter"
+  | none => .ok ()
+
+def mkChecker
+    (env : Environment)
+    (levelParams : List Name)
+    (safety : DefinitionSafety)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : CheckerContext :=
+  (mkCheckerSession env levelParams safety maxRecDepth maxNatSize nativeEvaluator).context
+
+private def checkConstantBaseWithSession
+    (session : CheckerSession)
+    (base : ConstantBase) : Except String CheckerSession := do
+  if session.context.env.contains base.name then
+    throw "already declared"
+  if Name.hasDuplicates base.levelParams then
+    throw "duplicate universe parameter"
+  checkNoMVarNoFVar base.type
+  checkLevelParams base.type base.levelParams
+  let (typeType, session1) ← session.checkStateful base.type
+  let (_, session2) ← session1.ensureSortStateful typeType
+  pure session2
+
+def checkConstantBase
+    (env : Environment)
+    (base : ConstantBase)
+    (safety : DefinitionSafety)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Unit := do
+  let session :=
+    mkCheckerSession env base.levelParams safety maxRecDepth maxNatSize nativeEvaluator
+  let _ ← checkConstantBaseWithSession session base
+  pure ()
+
+private def checkDefinitionBodyWithSession
+    (session : CheckerSession)
+    (value : DefinitionInfo) : Except String CheckerSession := do
+  checkNoMVarNoFVar value.value
+  checkLevelParams value.value value.base.levelParams
+  let (valueType, session1) ← session.checkStateful value.value
+  let (ok, session2) ← session1.isDefEqStateful valueType value.base.type
+  unless ok do
+    throw "definition type mismatch"
+  pure session2
+
+def checkDefinitionBody
+    (env : Environment)
+    (value : DefinitionInfo)
+    (safety : DefinitionSafety)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Unit := do
+  let session :=
+    mkCheckerSession env value.base.levelParams safety maxRecDepth maxNatSize nativeEvaluator
+  let _ ← checkDefinitionBodyWithSession session value
+  pure ()
+
+def addAxiom
+    (env : Environment)
+    (value : AxiomInfo)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
+  let safety := if value.isUnsafe then DefinitionSafety.unsafeDef else DefinitionSafety.safe
+  checkConstantBase env value.base safety maxRecDepth maxNatSize nativeEvaluator
+  env.add (.axiomInfo value)
+
+def addDefinition
+    (env : Environment)
+    (value : DefinitionInfo)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
+  match value.safety with
+  | .unsafeDef =>
+      -- Final Lean 4.34 adds the *full definition* before checking the body,
+      -- so recursive unsafe code may unfold itself while being checked.
+      let headerSession :=
+        mkCheckerSession env value.base.levelParams .unsafeDef maxRecDepth maxNatSize nativeEvaluator
+      let _ ← checkConstantBaseWithSession headerSession value.base
+      let work ← env.add (.defnInfo value)
+      -- The environment changed. A checker session must never cross this
+      -- boundary; the recursive body gets a fresh session bound to `work`.
+      let bodySession :=
+        mkCheckerSession work value.base.levelParams .unsafeDef maxRecDepth maxNatSize nativeEvaluator
+      let _ ← checkDefinitionBodyWithSession bodySession value
+      pure work
+  | .safe | .partialDef =>
+      let session0 :=
+        mkCheckerSession env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
+      let session1 ← checkConstantBaseWithSession session0 value.base
+      let _ ← checkDefinitionBodyWithSession session1 value
+      env.add (.defnInfo value)
+
+def addTheorem
+    (env : Environment)
+    (value : TheoremInfo)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
+  let session0 :=
+    mkCheckerSession env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
+  let session1 ← checkConstantBaseWithSession session0 value.base
+  let (isProp, session2) ← session1.isPropStateful value.base.type
+  unless isProp do
+    throw "theorem type is not a proposition"
+  checkNoMVarNoFVar value.value
+  checkLevelParams value.value value.base.levelParams
+  let (valueType, session3) ← session2.checkStateful value.value
+  let (ok, _) ← session3.isDefEqStateful valueType value.base.type
+  unless ok do
+    throw "theorem proof type mismatch"
+  env.add (.thmInfo value)
+
+def addOpaque
+    (env : Environment)
+    (value : OpaqueInfo)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
+  -- Matches final Lean 4.34 environment.cpp: opaque bodies are checked by the
+  -- ordinary safe checker even though ConstantInfo retains an isUnsafe bit.
+  let session0 :=
+    mkCheckerSession env value.base.levelParams .safe maxRecDepth maxNatSize nativeEvaluator
+  let session1 ← checkConstantBaseWithSession session0 value.base
+  checkNoMVarNoFVar value.value
+  checkLevelParams value.value value.base.levelParams
+  let (valueType, session2) ← session1.checkStateful value.value
+  let (ok, _) ← session2.isDefEqStateful valueType value.base.type
+  unless ok do
+    throw "opaque value type mismatch"
+  env.add (.opaqueInfo value)
+
+def addMutualDefinitions
+    (env : Environment)
+    (values : List DefinitionInfo)
+    (maxRecDepth : Nat := 0)
+    (maxNatSize : Nat := leanNatMaxSizeDefault)
+    (nativeEvaluator : Option NativeEvaluator := none) : Except String Environment := do
+  let first :: _ := values
+    | throw "invalid empty mutual definition"
+  if first.safety.isSafe then
+    throw "invalid mutual definition, declaration is not tagged as unsafe/partial"
+
+  let rec checkHeaders (seen : List Name) : List DefinitionInfo → Except String Unit
+    | [] => pure ()
+    | value :: rest => do
+        unless safetyEq value.safety first.safety do
+          throw "invalid mutual definition, declarations must have the same safety annotation"
+        unless namesEq value.base.levelParams first.base.levelParams do
+          throw "invalid mutual definition, declarations must have the same universe level parameters"
+        if nameMember value.base.name seen then
+          throw "invalid mutual definition, duplicate declaration name"
+        checkConstantBase env value.base first.safety maxRecDepth maxNatSize nativeEvaluator
+        checkHeaders (value.base.name :: seen) rest
+  checkHeaders [] values
+
+  let work := values.foldl (fun current value => current.addUnchecked (.defnInfo value)) env
+  let rec checkBodies : List DefinitionInfo → Except String Unit
+    | [] => pure ()
+    | value :: rest => do
+        checkDefinitionBody work value first.safety maxRecDepth maxNatSize nativeEvaluator
+        checkBodies rest
+  checkBodies values
+  pure work
+
+end Kernel
+
+end PSC1Kernel

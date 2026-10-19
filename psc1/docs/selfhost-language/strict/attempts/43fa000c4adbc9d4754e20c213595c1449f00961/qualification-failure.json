@@ -1,0 +1,916 @@
+{
+  "schemaVersion": 1,
+  "kind": "observed-continuation-evidence-binding-failure",
+  "repository": "dwijayuda/pskernel",
+  "proposedEvidenceDirectory": "psc0/docs/selfhost-language/strict/attempts/43fa000c4adbc9d4754e20c213595c1449f00961",
+  "identities": {
+    "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "orchestrationHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+    "workflowId": 380237977,
+    "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+    "workflowSha256": "506d13b419f00bb1d5361e945f1f70ce02bb4ff6c79d384317432f534c2b2df7",
+    "runId": 38021634599,
+    "runAttempt": 1,
+    "compilerJobId": 114123691566,
+    "providerJobId": 114136283916,
+    "predecessorRunId": 38015134511,
+    "predecessorSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "documentationOnlyCheckpoint": "7453e27ee4da58563976347e21df06dadbcd6ac1"
+  },
+  "observedTerminal": {
+    "runStatus": "completed",
+    "runConclusion": "failure",
+    "compiler": {
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-10T03:44:45Z",
+      "completed_at": "2026-10-10T04:56:41Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-10T03:44:46Z",
+          "completed_at": "2026-10-10T03:44:47Z"
+        },
+        {
+          "name": "Check out the exact previously compiled source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-10T03:44:47Z",
+          "completed_at": "2026-10-10T03:45:07Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-10T03:45:07Z",
+          "completed_at": "2026-10-10T03:45:08Z"
+        },
+        {
+          "name": "Run leanprover/lean-action@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-10T03:45:08Z",
+          "completed_at": "2026-10-10T03:45:27Z"
+        },
+        {
+          "name": "Authenticate the cancelled run and restore its completed N1 and C1 evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-10T03:45:27Z",
+          "completed_at": "2026-10-10T03:45:30Z"
+        },
+        {
+          "name": "Install the pinned current TypeScript 7 profile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-10T03:45:30Z",
+          "completed_at": "2026-10-10T03:45:32Z"
+        },
+        {
+          "name": "Verify the actual TypeScript 7 continuation runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-10T03:45:32Z",
+          "completed_at": "2026-10-10T03:45:32Z"
+        },
+        {
+          "name": "Run the existing exact-source fixed-point command",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 8,
+          "started_at": "2026-10-10T03:45:32Z",
+          "completed_at": "2026-10-10T04:56:36Z"
+        },
+        {
+          "name": "Retain complete file envelopes and exact returned JSON for final disposition",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-10T04:56:36Z",
+          "completed_at": "2026-10-10T04:56:36Z"
+        },
+        {
+          "name": "Retain continuation evidence and original authenticated inputs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-10T04:56:36Z",
+          "completed_at": "2026-10-10T04:56:39Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 19,
+          "started_at": "2026-10-10T04:56:39Z",
+          "completed_at": "2026-10-10T04:56:39Z"
+        },
+        {
+          "name": "Post Check out the exact previously compiled source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-10T04:56:39Z",
+          "completed_at": "2026-10-10T04:56:39Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-10T04:56:39Z",
+          "completed_at": "2026-10-10T04:56:39Z"
+        }
+      ]
+    },
+    "provider": {
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-10T04:56:41Z",
+      "completed_at": "2026-10-10T04:56:41Z",
+      "steps": []
+    },
+    "finalObservationAt": "2026-10-10T04:57:21.087Z"
+  },
+  "failure": {
+    "scope": "Evidence binding after both generation builds and their conformance reports",
+    "firstException": {
+      "line": 594,
+      "timestamp": "2026-10-10T04:56:36.3507522Z",
+      "name": "AssertionError",
+      "code": "ERR_ASSERTION",
+      "operator": "deepStrictEqual",
+      "message": "Expected values to be strictly deep-equal"
+    },
+    "stack": [
+      "bindNativeEmptyIr (scripts/sh1-strict-evidence.mjs:969:10)",
+      "bindStrictQualificationEvidence (scripts/sh1-strict-evidence.mjs:1740:25)",
+      "scripts/sh1-qualify.mjs:1254:26"
+    ],
+    "processExit": {
+      "code": 1,
+      "line": 674,
+      "timestamp": "2026-10-10T04:56:36.4827985Z",
+      "text": "##[error]Process completed with exit code 1."
+    },
+    "actual": [
+      "PSC0_SH1_IR_NATIVE_PASS: function-valued let has compositional type",
+      "PSC0_SH1_IR_NATIVE_PASS: checked emitter accepts the same valid IR",
+      "PSC0_SH1_IR_NATIVE_PASS: false let annotation is rejected",
+      "PSC0_SH1_IR_NATIVE_PASS: checked emitter refuses invalid IR",
+      "PSC0_SH1_IR_NATIVE_PASS: function parameter grouping is preserved",
+      "PSC0_SH1_IR_NATIVE_PASS: expression fuel exhaustion is explicit",
+      "PSC0_SH1_IR_NATIVE_PASS: type fuel exhaustion is explicit",
+      "PSC0_SH1_IR_NATIVE_PASS: diagnostic cap preserves finding count",
+      "PSC0_SH1_IR_NATIVE_PASS: empty layouts and typed empty results are accepted",
+      "PSC0_SH1_IR_NATIVE_PASS: empty layouts emit never and typed empty generators",
+      "PSC0_SH1_IR_NATIVE_PASS: empty match without an expected result is rejected",
+      "PSC0_SH1_IR_NATIVE_PASS: empty match still checks its scrutinee",
+      "PSC0_SH1_IR_NATIVE_PASS: empty match still checks layout type arity",
+      "PSC0_SH1_IR_NATIVE_PASS: empty alternatives still refuse an inhabited datatype",
+      "PSC0_SH1_IR_NATIVE_PASS: zero-field source record has its nullary inhabitant"
+    ],
+    "expected": [
+      "function-valued let has compositional type",
+      "checked emitter accepts the same valid IR",
+      "false let annotation is rejected",
+      "checked emitter refuses invalid IR",
+      "function parameter grouping is preserved",
+      "expression fuel exhaustion is explicit",
+      "type fuel exhaustion is explicit",
+      "diagnostic cap preserves finding count",
+      "empty layouts and typed empty results are accepted",
+      "empty layouts emit never and typed empty generators",
+      "empty match without an expected result is rejected",
+      "empty match still checks its scrutinee",
+      "empty match still checks layout type arity",
+      "empty alternatives still refuse an inhabited datatype",
+      "zero-field source record has its nullary inhabitant"
+    ],
+    "commonUnexpectedPrefix": "PSC0_SH1_IR_NATIVE_PASS: ",
+    "prefixRemovalMakesArraysExactlyEqual": true,
+    "rawLogExcerpt": {
+      "firstLine": 590,
+      "lastLine": 674,
+      "text": "2026-10-10T04:56:36.3506416Z node:internal/modules/run_main:123\n2026-10-10T04:56:36.3506871Z     triggerUncaughtException(\n2026-10-10T04:56:36.3507150Z     ^\n2026-10-10T04:56:36.3507251Z \n2026-10-10T04:56:36.3507522Z AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n2026-10-10T04:56:36.3508000Z + actual - expected\n2026-10-10T04:56:36.3508186Z \n2026-10-10T04:56:36.3508284Z   [\n2026-10-10T04:56:36.3508698Z +   'PSC0_SH1_IR_NATIVE_PASS: function-valued let has compositional type',\n2026-10-10T04:56:36.3509330Z +   'PSC0_SH1_IR_NATIVE_PASS: checked emitter accepts the same valid IR',\n2026-10-10T04:56:36.3509900Z +   'PSC0_SH1_IR_NATIVE_PASS: false let annotation is rejected',\n2026-10-10T04:56:36.3510431Z +   'PSC0_SH1_IR_NATIVE_PASS: checked emitter refuses invalid IR',\n2026-10-10T04:56:36.3511017Z +   'PSC0_SH1_IR_NATIVE_PASS: function parameter grouping is preserved',\n2026-10-10T04:56:36.3511595Z +   'PSC0_SH1_IR_NATIVE_PASS: expression fuel exhaustion is explicit',\n2026-10-10T04:56:36.3512167Z +   'PSC0_SH1_IR_NATIVE_PASS: type fuel exhaustion is explicit',\n2026-10-10T04:56:36.3513022Z +   'PSC0_SH1_IR_NATIVE_PASS: diagnostic cap preserves finding count',\n2026-10-10T04:56:36.3513518Z +   'PSC0_SH1_IR_NATIVE_PASS: empty layouts and typed empty results are accepted',\n2026-10-10T04:56:36.3514079Z +   'PSC0_SH1_IR_NATIVE_PASS: empty layouts emit never and typed empty generators',\n2026-10-10T04:56:36.3514533Z +   'PSC0_SH1_IR_NATIVE_PASS: empty match without an expected result is rejected',\n2026-10-10T04:56:36.3515185Z +   'PSC0_SH1_IR_NATIVE_PASS: empty match still checks its scrutinee',\n2026-10-10T04:56:36.3515639Z +   'PSC0_SH1_IR_NATIVE_PASS: empty match still checks layout type arity',\n2026-10-10T04:56:36.3516098Z +   'PSC0_SH1_IR_NATIVE_PASS: empty alternatives still refuse an inhabited datatype',\n2026-10-10T04:56:36.3516560Z +   'PSC0_SH1_IR_NATIVE_PASS: zero-field source record has its nullary inhabitant'\n2026-10-10T04:56:36.3516942Z -   'function-valued let has compositional type',\n2026-10-10T04:56:36.3517248Z -   'checked emitter accepts the same valid IR',\n2026-10-10T04:56:36.3517544Z -   'false let annotation is rejected',\n2026-10-10T04:56:36.3517812Z -   'checked emitter refuses invalid IR',\n2026-10-10T04:56:36.3518096Z -   'function parameter grouping is preserved',\n2026-10-10T04:56:36.3518389Z -   'expression fuel exhaustion is explicit',\n2026-10-10T04:56:36.3518658Z -   'type fuel exhaustion is explicit',\n2026-10-10T04:56:36.3518933Z -   'diagnostic cap preserves finding count',\n2026-10-10T04:56:36.3519311Z -   'empty layouts and typed empty results are accepted',\n2026-10-10T04:56:36.3519651Z -   'empty layouts emit never and typed empty generators',\n2026-10-10T04:56:36.3519996Z -   'empty match without an expected result is rejected',\n2026-10-10T04:56:36.3520407Z -   'empty match still checks its scrutinee',\n2026-10-10T04:56:36.3520696Z -   'empty match still checks layout type arity',\n2026-10-10T04:56:36.3521028Z -   'empty alternatives still refuse an inhabited datatype',\n2026-10-10T04:56:36.3521380Z -   'zero-field source record has its nullary inhabitant'\n2026-10-10T04:56:36.3521631Z   ]\n2026-10-10T04:56:36.3521716Z \n2026-10-10T04:56:36.3522047Z     at bindNativeEmptyIr (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-evidence.mjs:969:10)\n2026-10-10T04:56:36.3522748Z     at async bindStrictQualificationEvidence (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-evidence.mjs:1740:25)\n2026-10-10T04:56:36.3523374Z     at async file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1254:26 {\n2026-10-10T04:56:36.3523729Z   generatedMessage: true,\n2026-10-10T04:56:36.3523932Z   code: 'ERR_ASSERTION',\n2026-10-10T04:56:36.3524123Z   actual: [\n2026-10-10T04:56:36.3524402Z     'PSC0_SH1_IR_NATIVE_PASS: function-valued let has compositional type',\n2026-10-10T04:56:36.3524948Z     'PSC0_SH1_IR_NATIVE_PASS: checked emitter accepts the same valid IR',\n2026-10-10T04:56:36.3525321Z     'PSC0_SH1_IR_NATIVE_PASS: false let annotation is rejected',\n2026-10-10T04:56:36.3525672Z     'PSC0_SH1_IR_NATIVE_PASS: checked emitter refuses invalid IR',\n2026-10-10T04:56:36.3526053Z     'PSC0_SH1_IR_NATIVE_PASS: function parameter grouping is preserved',\n2026-10-10T04:56:36.3526433Z     'PSC0_SH1_IR_NATIVE_PASS: expression fuel exhaustion is explicit',\n2026-10-10T04:56:36.3526785Z     'PSC0_SH1_IR_NATIVE_PASS: type fuel exhaustion is explicit',\n2026-10-10T04:56:36.3527140Z     'PSC0_SH1_IR_NATIVE_PASS: diagnostic cap preserves finding count',\n2026-10-10T04:56:36.3527532Z     'PSC0_SH1_IR_NATIVE_PASS: empty layouts and typed empty results are accepted',\n2026-10-10T04:56:36.3527964Z     'PSC0_SH1_IR_NATIVE_PASS: empty layouts emit never and typed empty generators',\n2026-10-10T04:56:36.3528386Z     'PSC0_SH1_IR_NATIVE_PASS: empty match without an expected result is rejected',\n2026-10-10T04:56:36.3528772Z     'PSC0_SH1_IR_NATIVE_PASS: empty match still checks its scrutinee',\n2026-10-10T04:56:36.3529137Z     'PSC0_SH1_IR_NATIVE_PASS: empty match still checks layout type arity',\n2026-10-10T04:56:36.3529606Z     'PSC0_SH1_IR_NATIVE_PASS: empty alternatives still refuse an inhabited datatype',\n2026-10-10T04:56:36.3530123Z     'PSC0_SH1_IR_NATIVE_PASS: zero-field source record has its nullary inhabitant'\n2026-10-10T04:56:36.3530418Z   ],\n2026-10-10T04:56:36.3530577Z   expected: [\n2026-10-10T04:56:36.3530803Z     'function-valued let has compositional type',\n2026-10-10T04:56:36.3531093Z     'checked emitter accepts the same valid IR',\n2026-10-10T04:56:36.3531366Z     'false let annotation is rejected',\n2026-10-10T04:56:36.3531617Z     'checked emitter refuses invalid IR',\n2026-10-10T04:56:36.3531884Z     'function parameter grouping is preserved',\n2026-10-10T04:56:36.3532158Z     'expression fuel exhaustion is explicit',\n2026-10-10T04:56:36.3532408Z     'type fuel exhaustion is explicit',\n2026-10-10T04:56:36.3532666Z     'diagnostic cap preserves finding count',\n2026-10-10T04:56:36.3532958Z     'empty layouts and typed empty results are accepted',\n2026-10-10T04:56:36.3533271Z     'empty layouts emit never and typed empty generators',\n2026-10-10T04:56:36.3533588Z     'empty match without an expected result is rejected',\n2026-10-10T04:56:36.3533874Z     'empty match still checks its scrutinee',\n2026-10-10T04:56:36.3534147Z     'empty match still checks layout type arity',\n2026-10-10T04:56:36.3534461Z     'empty alternatives still refuse an inhabited datatype',\n2026-10-10T04:56:36.3535002Z     'zero-field source record has its nullary inhabitant'\n2026-10-10T04:56:36.3535246Z   ],\n2026-10-10T04:56:36.3535440Z   operator: 'deepStrictEqual',\n2026-10-10T04:56:36.3535652Z   diff: 'simple'\n2026-10-10T04:56:36.3535834Z }\n2026-10-10T04:56:36.3535922Z \n2026-10-10T04:56:36.3536006Z Node.js v22.23.3\n2026-10-10T04:56:36.4827985Z ##[error]Process completed with exit code 1."
+    },
+    "sourceAnalysis": {
+      "classification": "String prefix removal in the evidence binder",
+      "binderBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+      "binderSha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+      "expression": "lines.filter((line) => line.startsWith(pass)).map((line) => line.slice(pass))",
+      "comparison": "nativeIrFixtureNames",
+      "note": "This source explanation is separate from observed compiler and conformance results. The failure packet does not claim that later binder assertions passed."
+    }
+  },
+  "importedEvidence": {
+    "reportFile": {
+      "id": "inputs",
+      "filename": "continuation-inputs.json",
+      "originalPath": null,
+      "blob": "8731e55592d0bcb57b977c4cc98fcfe91a64b7a9",
+      "sha256": "de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638",
+      "bytes": 161276,
+      "readbackExact": true
+    },
+    "reportMarker": {
+      "path": "dist/sh1-continuation-inputs/inputs.json",
+      "sha256": "de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638",
+      "bytes": 161276,
+      "marker": "PSC0_SH1_CONTINUATION_INPUTS",
+      "line": 483,
+      "timestamp": "2026-10-10T03:45:30.4170873Z",
+      "serialization": "JSON.stringify(value, null, 2) + LF",
+      "verified": true
+    },
+    "predecessor": {
+      "runId": 38015134511,
+      "runConclusion": "cancelled",
+      "compilerJobId": 114103608774,
+      "compilerConclusion": "cancelled",
+      "providerJobId": 114120597914,
+      "providerConclusion": "skipped"
+    },
+    "artifact": {
+      "id": 11658430459,
+      "node_id": "MDg6QXJ0aWZhY3QxMTY1ODQzMDQ1OQ==",
+      "name": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "size_in_bytes": 5147944,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11658430459",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11658430459/zip",
+      "expired": false,
+      "digest": "sha256:6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+      "created_at": "2026-10-10T03:27:26Z",
+      "updated_at": "2026-10-10T03:27:26Z",
+      "expires_at": "2026-11-09T03:27:23Z",
+      "workflow_run": {
+        "id": 38015134511,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/strict-sh1-v1",
+        "head_sha": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+      }
+    },
+    "archiveDigestVerifiedByActualImport": true,
+    "archiveEntryCount": 344,
+    "archiveFileCount": 344,
+    "importedFileCount": 277,
+    "omittedFileCount": 67,
+    "reusedGenerations": [
+      "N1",
+      "C1"
+    ],
+    "regeneratedGenerations": [
+      "C2",
+      "C3"
+    ],
+    "reusedNativeAndCandidateSteps": [
+      {
+        "name": "Build current native compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 18,
+        "started_at": "2026-10-10T01:58:00Z",
+        "completed_at": "2026-10-10T01:58:02Z"
+      },
+      {
+        "name": "Run native parser, translation, and erasure regression targets",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19,
+        "started_at": "2026-10-10T01:58:02Z",
+        "completed_at": "2026-10-10T01:58:03Z"
+      },
+      {
+        "name": "Build the actual native checked seed for source and import tests",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 20,
+        "started_at": "2026-10-10T01:58:03Z",
+        "completed_at": "2026-10-10T01:58:11Z"
+      },
+      {
+        "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 21,
+        "started_at": "2026-10-10T01:58:11Z",
+        "completed_at": "2026-10-10T01:58:14Z"
+      },
+      {
+        "name": "Verify native and generated TypeScript CLI boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 22,
+        "started_at": "2026-10-10T01:58:14Z",
+        "completed_at": "2026-10-10T01:58:17Z"
+      },
+      {
+        "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 23,
+        "started_at": "2026-10-10T01:58:17Z",
+        "completed_at": "2026-10-10T01:58:19Z"
+      },
+      {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 24,
+        "started_at": "2026-10-10T01:58:19Z",
+        "completed_at": "2026-10-10T02:03:42Z"
+      },
+      {
+        "name": "Compare native worker observations before candidate generation",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 25,
+        "started_at": "2026-10-10T02:03:42Z",
+        "completed_at": "2026-10-10T02:03:42Z"
+      },
+      {
+        "name": "Build the selected-seed candidate before full qualification",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 26,
+        "started_at": "2026-10-10T02:03:42Z",
+        "completed_at": "2026-10-10T02:23:55Z"
+      }
+    ],
+    "selectedFileEnvelopes": [
+      {
+        "path": "dist/sh1/C1/receipt.json",
+        "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+        "bytes": 169531
+      },
+      {
+        "path": "dist/sh1/C1/source-closure.json",
+        "sha256": "78ace9dff7cde0d62698584af4d652f20b092c1c51d47927e13b9191da91d263",
+        "bytes": 9669
+      },
+      {
+        "path": "dist/sh1/development/N1/ir-checker-native/execution-inputs.json",
+        "sha256": "0d4e30111844d96ed0f9e53ae8515074f1af194ac480f27d9d6b7127fe73ae27",
+        "bytes": 510
+      },
+      {
+        "path": "dist/sh1/development/N1/ir-checker-native/receipt.json",
+        "sha256": "15eda34d7f530cfb2a3dd1bda6afa30884d4a028b87b11b387a3cb75c1be1395",
+        "bytes": 2760
+      },
+      {
+        "path": "dist/sh1/development/N1/receipt.json",
+        "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+        "bytes": 15827
+      },
+      {
+        "path": "dist/sh1/development/N1/strict-source-native.json",
+        "sha256": "9c217dbcb66c2480194062da8307478083b9462cac8af0670b9bc4a71f6f0bb0",
+        "bytes": 608846
+      }
+    ],
+    "absentFromEnumeratedPredecessorArchive": [
+      "dist/sh1/qualification.json",
+      "dist/sh1/strict-enforcement-evidence.json",
+      "dist/sh1/seed-selection.json"
+    ],
+    "currentSourceAndAll48RecipeInputsUnchanged": true,
+    "preservedAbsoluteSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
+    "provenance": "The actual continuation import downloaded and hashed the predecessor ZIP and every enumerated file. The assistant verified the returned report's exact producer serialization and recorded digest."
+  },
+  "generations": [
+    {
+      "generation": "C2",
+      "receiptFile": {
+        "id": "c2_receipt",
+        "filename": "c2-receipt.json",
+        "originalPath": "C2/receipt.json",
+        "blob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+        "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+        "bytes": 166707,
+        "readbackExact": true
+      },
+      "marker": {
+        "name": "PSC0_SH1_GENERATION",
+        "line": 553,
+        "timestamp": "2026-10-10T04:02:20.7441118Z"
+      },
+      "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+      "timingsMs": {
+        "loadAndPrepare": 961865.6151259999,
+        "admissions": 0.11947800009511411,
+        "canonicalSurface": 41696.7286129999,
+        "emit": 853.7180330000119,
+        "tscAndWrite": 2823.3567960000364,
+        "total": 1007239.5388819999
+      },
+      "conformanceReportsReturned": [
+        {
+          "marker": "PSC0_SH1_STRICT_SOURCE",
+          "line": 554,
+          "timestamp": "2026-10-10T04:02:22.8110318Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "c4e6f455802f74ff8f0b989f5f88fd4c30ded5fe834d9c80d9d640c2fd6f4c32",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_STRICT_TARGET",
+          "line": 555,
+          "timestamp": "2026-10-10T04:02:28.1519329Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "b61a076b035a0110cc5c4bfa5808262d01134b670468642b6da281bc866b8d69",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_STRICT_RUNTIME",
+          "line": 556,
+          "timestamp": "2026-10-10T04:02:33.7368696Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "e17fdb087642b00644b15766330e066ebfb26884a7a2bf7c850406fa3fc56a17",
+          "status": "pass"
+        },
+        {
+          "marker": "PSC0_SH1_IR_CHECKER",
+          "line": 557,
+          "timestamp": "2026-10-10T04:02:36.0146242Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "71c19d58a1d595aedf8dc24265aa463492d8002f2dba89d904ffaae52a88635b",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_CAPABILITIES",
+          "line": 558,
+          "timestamp": "2026-10-10T04:02:53.0837634Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "761cb4ec805fbc9947716ac2d2755ba5f6223d702a912e3cf79c4060eba23838",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_HELPER_RUNTIME",
+          "line": 559,
+          "timestamp": "2026-10-10T04:02:53.1180643Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "78b6773111518b543eb190068262648a06ed5a18f5ebc109f39456fb7826ab63",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_GENERIC_ERASURE",
+          "line": 560,
+          "timestamp": "2026-10-10T04:02:58.2067729Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "e746a6bc853f3ce337c917094fc0d901d9ef163fd0d7579540d92e3df8fd01f2",
+          "status": null
+        }
+      ],
+      "reportScope": "The seven producer reports were emitted after their assertions returned and before the binder exception; this is not a completed strict qualification.",
+      "resourceTrace": {
+        "generation": "C2",
+        "count": 21,
+        "sha256": "4e647a23218a92c020309547fba1dad5a2db0e20fcdfe34d9eb32a5d11ccbfcb",
+        "bytes": 11414,
+        "expected": {
+          "report": "resource-usage.jsonl",
+          "sha256": "4e647a23218a92c020309547fba1dad5a2db0e20fcdfe34d9eb32a5d11ccbfcb",
+          "checkpoints": 21,
+          "measurement": "host-process-boundaries-with-process-rss-high-water-mark",
+          "atomicInternalsObserved": false,
+          "semanticContractQualified": false
+        },
+        "first": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C2",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "sequence": 1,
+          "phase": "generation-start",
+          "pid": 2663,
+          "elapsedMs": 0.15118699999999308,
+          "rss": 69971968,
+          "heapTotal": 18046976,
+          "heapUsed": 11262624,
+          "external": 4278879,
+          "arrayBuffers": 1994963,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 71086080
+        },
+        "last": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C2",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "sequence": 21,
+          "phase": "generation-end-before-receipt-write",
+          "pid": 2663,
+          "elapsedMs": 1007239.379644,
+          "rss": 9308319744,
+          "heapTotal": 1735704576,
+          "heapUsed": 1261794080,
+          "external": 26100236,
+          "arrayBuffers": 23820914,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 9454018560
+        }
+      }
+    },
+    {
+      "generation": "C3",
+      "receiptFile": {
+        "id": "c3_receipt",
+        "filename": "c3-receipt.json",
+        "originalPath": "C3/receipt.json",
+        "blob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+        "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+        "bytes": 166709,
+        "readbackExact": true
+      },
+      "marker": {
+        "name": "PSC0_SH1_GENERATION",
+        "line": 582,
+        "timestamp": "2026-10-10T04:55:57.2340924Z"
+      },
+      "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+      "timingsMs": {
+        "loadAndPrepare": 3104078.9196840003,
+        "admissions": 0.0831709997728467,
+        "canonicalSurface": 69473.70608499972,
+        "emit": 2744.4626630004495,
+        "tscAndWrite": 2722.6593709997833,
+        "total": 3179019.8319689995
+      },
+      "conformanceReportsReturned": [
+        {
+          "marker": "PSC0_SH1_STRICT_SOURCE",
+          "line": 583,
+          "timestamp": "2026-10-10T04:55:59.2223679Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "c4e6f455802f74ff8f0b989f5f88fd4c30ded5fe834d9c80d9d640c2fd6f4c32",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_STRICT_TARGET",
+          "line": 584,
+          "timestamp": "2026-10-10T04:56:04.9246532Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "b61a076b035a0110cc5c4bfa5808262d01134b670468642b6da281bc866b8d69",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_STRICT_RUNTIME",
+          "line": 585,
+          "timestamp": "2026-10-10T04:56:10.7294746Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "e17fdb087642b00644b15766330e066ebfb26884a7a2bf7c850406fa3fc56a17",
+          "status": "pass"
+        },
+        {
+          "marker": "PSC0_SH1_IR_CHECKER",
+          "line": 586,
+          "timestamp": "2026-10-10T04:56:12.9024913Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "71c19d58a1d595aedf8dc24265aa463492d8002f2dba89d904ffaae52a88635b",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_CAPABILITIES",
+          "line": 587,
+          "timestamp": "2026-10-10T04:56:30.7047965Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "761cb4ec805fbc9947716ac2d2755ba5f6223d702a912e3cf79c4060eba23838",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_HELPER_RUNTIME",
+          "line": 588,
+          "timestamp": "2026-10-10T04:56:30.7345585Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "78b6773111518b543eb190068262648a06ed5a18f5ebc109f39456fb7826ab63",
+          "status": null
+        },
+        {
+          "marker": "PSC0_SH1_GENERIC_ERASURE",
+          "line": 589,
+          "timestamp": "2026-10-10T04:56:36.2332968Z",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "payloadJsonSha256": "e746a6bc853f3ce337c917094fc0d901d9ef163fd0d7579540d92e3df8fd01f2",
+          "status": null
+        }
+      ],
+      "reportScope": "The seven producer reports were emitted after their assertions returned and before the binder exception; this is not a completed strict qualification.",
+      "resourceTrace": {
+        "generation": "C3",
+        "count": 21,
+        "sha256": "efae3e52146d5fc678576b0c6abceb176212a0dc97eb2151874bedea63cb7af0",
+        "bytes": 11442,
+        "expected": {
+          "report": "resource-usage.jsonl",
+          "sha256": "efae3e52146d5fc678576b0c6abceb176212a0dc97eb2151874bedea63cb7af0",
+          "checkpoints": 21,
+          "measurement": "host-process-boundaries-with-process-rss-high-water-mark",
+          "atomicInternalsObserved": false,
+          "semanticContractQualified": false
+        },
+        "first": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C3",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "sequence": 1,
+          "phase": "generation-start",
+          "pid": 2663,
+          "elapsedMs": 0.0718929999275133,
+          "rss": 9337356288,
+          "heapTotal": 1146040320,
+          "heapUsed": 1002376112,
+          "external": 2458552,
+          "arrayBuffers": 179230,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 9454018560
+        },
+        "last": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C3",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "sequence": 21,
+          "phase": "generation-end-before-receipt-write",
+          "pid": 2663,
+          "elapsedMs": 3179019.580572,
+          "rss": 3703828480,
+          "heapTotal": 2575568896,
+          "heapUsed": 1170422232,
+          "external": 25848236,
+          "arrayBuffers": 23568914,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 9644593152
+        }
+      }
+    }
+  ],
+  "sourceAndProductComparisons": {
+    "sourceRefsEqual": true,
+    "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "sourceClosureEqual": true,
+    "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+    "moduleCount": [
+      64,
+      64
+    ],
+    "sourceBytes": [
+      1268003,
+      1268003
+    ],
+    "artifactTupleExactEqual": true,
+    "artifactTuple": {
+      "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+      "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+      "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+      "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+    },
+    "recipeObjectExactEqual": true,
+    "recipeFileCount": 48,
+    "recipeRecordedSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+    "recipeCompactFilesSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+    "currentExpectedRecipe": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba"
+  },
+  "resourcePolicy": {
+    "line": 531,
+    "timestamp": "2026-10-10T03:45:33.1137422Z",
+    "value": {
+      "schemaVersion": 1,
+      "evidence": "generated-qualification-resource-preflight",
+      "command": "fixed-point",
+      "policy": {
+        "id": "psc0-sh1-generated-qualification-resources/1",
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "oldSpaceMiB": 8192,
+        "minimumAvailableBytes": 12884901888,
+        "minimumHeapLimitBytes": 8589934592,
+        "maximumHeapLimitBytes": 8858370048,
+        "checkBoundary": "process-entry-before-generated-compiler-loading",
+        "automaticFallback": false,
+        "semanticContractQualified": false
+      },
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "pid": 2663,
+      "passed": true,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "heap": {
+        "explicitOldSpaceMiB": 8192,
+        "observedHeapLimitBytes": 8640266240,
+        "inheritedHeapOverride": false
+      },
+      "physical": {
+        "totalBytes": 16765374464,
+        "availableBytes": 15192825856
+      },
+      "nodeMemory": {
+        "availableBytes": 15192825856,
+        "constrainedBytes": "18446744073709552000",
+        "bindingConstraintBytes": null
+      },
+      "cgroup": {
+        "version": 2,
+        "membership": "/system.slice/hosted-compute-agent.service",
+        "mountRoot": "/",
+        "mountPoint": "/sys/fs/cgroup",
+        "visibility": "current-and-visible-ancestor-cgroups",
+        "observations": [
+          {
+            "directory": "/sys/fs/cgroup/system.slice/hosted-compute-agent.service",
+            "limitFile": "memory.max",
+            "limitBytes": "max",
+            "currentBytes": "6821658624",
+            "capacityBytes": 16765374464,
+            "availableBytes": 16765374464
+          },
+          {
+            "directory": "/sys/fs/cgroup/system.slice/hosted-compute-agent.service",
+            "limitFile": "memory.high",
+            "limitBytes": "max",
+            "currentBytes": "6821658624",
+            "capacityBytes": 16765374464,
+            "availableBytes": 16765374464
+          },
+          {
+            "directory": "/sys/fs/cgroup/system.slice",
+            "limitFile": "memory.max",
+            "limitBytes": "max",
+            "currentBytes": "9375956992",
+            "capacityBytes": 16765374464,
+            "availableBytes": 16765374464
+          },
+          {
+            "directory": "/sys/fs/cgroup/system.slice",
+            "limitFile": "memory.high",
+            "limitBytes": "max",
+            "currentBytes": "9375956992",
+            "capacityBytes": 16765374464,
+            "availableBytes": 16765374464
+          },
+          {
+            "directory": "/sys/fs/cgroup",
+            "globalRootWithoutMemoryController": true
+          }
+        ]
+      },
+      "effectiveCapacityBytes": 16765374464,
+      "effectiveAvailableBytes": 15192825856
+    },
+    "scope": "Actual process-entry preflight and boundary observations only. maxRssBytes is process-lifetime high-water RSS, not a separately measured per-generation peak."
+  },
+  "currentArtifact": {
+    "metadata": {
+      "id": 11659939542,
+      "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+      "size_in_bytes": 11739089,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542/zip",
+      "expired": false,
+      "created_at": "2026-10-10T04:56:39Z",
+      "expires_at": "2026-11-09T04:56:36Z",
+      "updated_at": "2026-10-10T04:56:39Z",
+      "digest": "sha256:599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+      "workflow_run": {
+        "id": 38021634599,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/strict-sh1-v1",
+        "head_sha": "43fa000c4adbc9d4754e20c213595c1449f00961"
+      }
+    },
+    "digestProvenance": [
+      "GitHub Actions artifacts API digest field",
+      "Matching actions/upload-artifact log digest"
+    ],
+    "directZipDownloadOrRehashByAssistant": false,
+    "uploadFileCountDeclaration": {
+      "timestamp": "2026-10-10T04:56:36.7380553Z",
+      "text": "With the provided path, there will be 444 files uploaded",
+      "count": 444,
+      "scope": "Upload-log declaration, not an inspected current archive inventory."
+    },
+    "uploadRootDeclaration": {
+      "timestamp": "2026-10-10T04:56:36.7379651Z",
+      "path": "/home/runner/work/pskernel/pskernel/psc0"
+    },
+    "actualCurrentInnerFileInventory": null
+  },
+  "incompleteEvidence": {
+    "markerCounts": {
+      "PSC0_SH1_FIXED_POINT": 0,
+      "PSC0_SH1_CONTINUATION_EVIDENCE": 0,
+      "PSC0_SH1_RETURNED_JSON": 0,
+      "PSC0_SH1_PROVIDER_ADMISSIONS": 0,
+      "PSC0_SH1_PROVIDER_ADMISSIONS_FILE": 0
+    },
+    "collectorStep": "skipped",
+    "returnedJsonValues": 0,
+    "completeFileEnvelopeCollectorReturned": false,
+    "providerAcceptance": false,
+    "binderResultNotReturned": true,
+    "qualificationNotReturned": true,
+    "writeOrderSource": {
+      "qualifierSha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+      "awaitBinderLine": 1254,
+      "writeBinderLine": 1257,
+      "inference": "The binder await threw before its result and the subsequent binder/qualification writes. No qualification, binder or seed-selection file was imported from the predecessor. Current archive absence has not been inspected directly."
+    },
+    "remaining": "The final binder result, qualification receipt, 135-file collector output, 24 returned JSON values and independent provider acceptance are not established by this failed run."
+  },
+  "flags": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "correspondenceRowsClosed": false,
+    "stageObligationsClosed": false
+  },
+  "retention": {
+    "files": [
+      {
+        "id": "log",
+        "filename": "job.log",
+        "originalPath": null,
+        "blob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+        "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+        "bytes": 875228,
+        "readbackExact": true
+      },
+      {
+        "id": "markers",
+        "filename": "markers.compact.json",
+        "originalPath": null,
+        "blob": "a8b515f0be02a944054aec2446e54d2623e5dd63",
+        "sha256": "5465a52a4b21b81e074ecdec0c2c3bc54904dada3072dec65529c275b14d6657",
+        "bytes": 914322,
+        "readbackExact": true
+      },
+      {
+        "id": "inputs",
+        "filename": "continuation-inputs.json",
+        "originalPath": null,
+        "blob": "8731e55592d0bcb57b977c4cc98fcfe91a64b7a9",
+        "sha256": "de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638",
+        "bytes": 161276,
+        "readbackExact": true
+      },
+      {
+        "id": "c2_receipt",
+        "filename": "c2-receipt.json",
+        "originalPath": "C2/receipt.json",
+        "blob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+        "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+        "bytes": 166707,
+        "readbackExact": true
+      },
+      {
+        "id": "c3_receipt",
+        "filename": "c3-receipt.json",
+        "originalPath": "C3/receipt.json",
+        "blob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+        "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+        "bytes": 166709,
+        "readbackExact": true
+      },
+      {
+        "id": "metadata",
+        "filename": "run-metadata.json",
+        "originalPath": null,
+        "blob": "227e846d233c501a14600f0ebbe63f0118331273",
+        "sha256": "0039ae74b0f23a29dd216f6b9f77328cad718e8c50ea837e7a806f73c743d477",
+        "bytes": 94892,
+        "readbackExact": true
+      }
+    ],
+    "completeRawLog": true,
+    "completeMarkerCount": 67,
+    "markerPayloadParseErrors": 0,
+    "receiptSerialization": "JSON.stringify(receipt, null, 2) + LF, as written by the pinned qualifier. Import report serialization additionally verified against its emitted SHA256 and byte length.",
+    "compilerLogRequests": 1,
+    "providerLogRequests": 0,
+    "artifactArchiveDownloadsByAssistant": 0,
+    "fullImmutableReadbacksExact": true
+  }
+}

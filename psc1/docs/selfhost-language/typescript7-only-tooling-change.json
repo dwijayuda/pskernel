@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-current-typescript5-retirement-draft",
+  "repository": "dwijayuda/pskernel",
+  "baseRef": "f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f",
+  "status": "applied-awaiting-cloud-qualification",
+  "authorization": "User explicitly retired TypeScript5 from future development; root owns branch integration and cloud qualification.",
+  "contract": {
+    "currentTypeScriptVersion": "7.0.2",
+    "currentPositionalArgs": [
+      "--ignoreConfig"
+    ],
+    "routineTypeScript5Installation": false,
+    "routineTypeScript5Comparison": false,
+    "currentTypeScript5Fallback": false,
+    "historicalCommitsAndReceiptsUnchanged": true,
+    "historicalV1ManifestHelperUnchanged": true,
+    "selectedCompilerIdentityUnchanged": true,
+    "seedSelectionWritten": false,
+    "authoritative61ModuleCompilerClosureChanged": false,
+    "nativeHostOutsideCompilerClosureChanged": true,
+    "kernelProviderMetatheoryDefeqChanged": false,
+    "recoveryIntegration": "Requires the separately reviewed native TS7 selected-R recovery runner/policy and grammar owner's workflow routing fragments.",
+    "rootWorkspace": "Separate adapter migration required; not included in these PSC0 drafts."
+  },
+  "mergeRules": [
+    "Require every full-file base blob before replacing it.",
+    "For q and workflow, apply each exact oldText once, in order; preserve all bytes outside those fragments.",
+    "Do not replace the workflow with this partial draft: grammar owns recovery routing and root owns the early ABI/reference preflight.",
+    "The q review blob is only a preview; root may already have disjoint q edits.",
+    "Do not advertise native-only selected-seed recovery as proved before its independent cold gate supplies actual evidence."
+  ],
+  "files": [
+    {
+      "path": "psc0/scripts/typescript-cli.mjs",
+      "baseBlob": "f9cda7f8d3d819407f8e4ebcc427ab3b3d84d9f6",
+      "newBlob": "9d6607a6f4284b0afba8023566f6e1d75c30a64a",
+      "replacementMode": "whole-file-guarded",
+      "edits": [
+        {
+          "oldText": "  if (version !== '7.0.2' && version !== '5.8.3') {\n    throw new Error('PSC0_TYPESCRIPT_VERSION: expected 7.0.2 or historical 5.8.3, received ' + JSON.stringify(version));",
+          "newText": "  if (version !== '7.0.2') {\n    throw new Error('PSC0_TYPESCRIPT_VERSION: expected current TypeScript 7.0.2, received ' + JSON.stringify(version));",
+          "reason": "Reject retired TS5 and every unpinned version before launcher selection."
+        },
+        {
+          "oldText": "// Positional source files must ignore unrelated project configuration in TS7.\n// Historical recovery keeps the exact TS5 argument list and artifact recipe.\nexport function typeScriptProfileArgs(args, version = expectedTypeScriptVersion()) {\n  return checkedVersion(version) === '7.0.2' ? ['--ignoreConfig', ...args] : [...args];\n}",
+          "newText": "// Current positional compilation uses only TS7 and ignores unrelated project configuration.\n// Historical producer recipes remain available at their immutable source revisions.\nexport function typeScriptProfileArgs(args, version = expectedTypeScriptVersion()) {\n  checkedVersion(version);\n  return ['--ignoreConfig', ...args];\n}",
+          "reason": "Keep current invocation shape; remove the TS5 argument fallback."
+        },
+        {
+          "oldText": "// Both pinned releases provide a JavaScript bin.tsc launcher. Invoke that file\n// through Node on every host; never invoke a shell shim or the native binary.",
+          "newText": "// The pinned TS7 package provides a JavaScript bin.tsc launcher. Invoke that file\n// through Node on every host; never invoke a shell shim or the native binary.",
+          "reason": "Describe the single supported current profile."
+        }
+      ]
+    },
+    {
+      "path": "psc0/host/src/Ps/Host/TypeScriptCompiler.lean",
+      "baseBlob": "babdd2d634540358c6f18d410b04bec5a2d03f6b",
+      "newBlob": "e57a2ff57b0223839a27b6be515d7f4f65449fae",
+      "replacementMode": "whole-file-guarded",
+      "edits": [
+        {
+          "oldText": "-- Current compilation and historical recovery have separate, exact profiles.",
+          "newText": "-- Current compilation accepts only the pinned TS7 profile. Historical recipes\n-- remain at their immutable source revisions.",
+          "reason": "Current host does not expose historical compilation."
+        },
+        {
+          "oldText": "  if version == \"7.0.2\" || version == \"5.8.3\" then",
+          "newText": "  if version == \"7.0.2\" then",
+          "reason": "Reject retired and unsupported explicit versions."
+        },
+        {
+          "oldText": "(\"PSC0_TYPESCRIPT_VERSION: expected 7.0.2 or historical 5.8.3, received \" ++ version)",
+          "newText": "(\"PSC0_TYPESCRIPT_VERSION: expected current TypeScript 7.0.2, received \" ++ version)",
+          "reason": "Report current-only version contract."
+        },
+        {
+          "oldText": "def psTypeScriptProfileArgs (version : String) (args : Array String) : Array String :=\n  if version == \"7.0.2\" then #[\"--ignoreConfig\"] ++ args else args",
+          "newText": "def psTypeScriptProfileArgs (args : Array String) : Array String :=\n  #[\"--ignoreConfig\"] ++ args",
+          "reason": "One positional profile; remove the unused historical selector from this host-local helper."
+        },
+        {
+          "oldText": "let arguments := psTypeScriptProfileArgs version #[",
+          "newText": "let arguments := psTypeScriptProfileArgs #[",
+          "reason": "Update the only caller, retaining the verified version for the result receipt."
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/check-native-replay-host-source.mjs",
+      "baseBlob": "29c0405aad7459b5c06151487bfc19de9e292871",
+      "newBlob": "abf24a228b587464a470fb636c9d10be17aebd60",
+      "replacementMode": "whole-file-guarded",
+      "edits": [
+        {
+          "oldText": "  'if version == \"7.0.2\" then #[\"--ignoreConfig\"] ++ args else args',",
+          "newText": "  'if version == \"7.0.2\" then',\n  'def psTypeScriptProfileArgs (args : Array String) : Array String :=',\n  '#[\"--ignoreConfig\"] ++ args',",
+          "reason": "Keep source guard aligned with the single current profile."
+        },
+        {
+          "oldText": "assert(!host.includes('endsWith \"/typescript/bin/tsc\"'), 'installed package metadata must select the launcher');",
+          "newText": "assert(!host.includes('version == \"5.8.3\"'), 'current native compilation must not accept the retired profile');\nassert(!host.includes('else args'), 'current positional arguments must not retain a historical fallback');\nassert(!host.includes('endsWith \"/typescript/bin/tsc\"'), 'installed package metadata must select the launcher');",
+          "reason": "Retain retired-profile/no-fallback assertions without changing transport guards."
+        },
+        {
+          "oldText": "PASS (installed TypeScript profiles, exact payload transport and emission integrity)",
+          "newText": "PASS (installed TypeScript 7 profile, exact payload transport and emission integrity)",
+          "reason": "Current status wording."
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/native-typescript-cli.test.mjs",
+      "baseBlob": "50652f18d5c2ec1fdca0c6753ed0ed04ab9a8d53",
+      "newBlob": "969619b1769f7683407881106526b8928c302bcb",
+      "replacementMode": "whole-file-guarded",
+      "edits": [
+        {
+          "oldText": "import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';",
+          "newText": "import { mkdir, mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';",
+          "reason": "Create a tiny wrong-version launcher fixture without installing another compiler."
+        },
+        {
+          "oldText": "  // A valid installed launcher with the wrong allowed profile must fail before tsc compilation.\n  const mismatchOutput = path.join(directory, 'wrong-profile.js');\n  const mismatch = spawnSync(compiler, ['build', source, '--out', mismatchOutput], {\n    cwd: directory, env: { ...selectedEnv,\n      PSC0_TYPESCRIPT_VERSION: expected === '7.0.2' ? '5.8.3' : '7.0.2' },\n    encoding: 'utf8', timeout: 30000,\n  });\n  assert.notEqual(mismatch.status, 0);\n  assert.match(mismatch.stderr, /PSC1_TSC_VERSION_MISMATCH/);\n  assert(!existsSync(mismatchOutput), 'a version mismatch must not emit JavaScript');\n",
+          "newText": "  // The retired TS5 profile must fail before launcher selection or compilation.\n  const retiredOutput = path.join(directory, 'retired-profile.js');\n  const retired = spawnSync(compiler, ['build', source, '--out', retiredOutput], {\n    cwd: directory, env: { ...selectedEnv, PSC0_TYPESCRIPT_VERSION: '5.8.3' },\n    encoding: 'utf8', timeout: 30000,\n  });\n  assert.notEqual(retired.status, 0);\n  assert.match(retired.stderr, /PSC0_TYPESCRIPT_VERSION/);\n  assert(!existsSync(retiredOutput), 'a retired profile must not emit JavaScript');\n\n  // This package-shaped fixture reports a wrong version; it is not a TS compiler.\n  // It preserves the native version-mismatch check without installing TS5.\n  const mismatchPackage = path.join(directory, 'wrong-version-package');\n  const mismatchCli = path.join(mismatchPackage, 'bin', 'tsc');\n  await mkdir(path.dirname(mismatchCli), { recursive: true });\n  await writeFile(path.join(mismatchPackage, 'package.json'), JSON.stringify({\n    name: 'typescript', version: '7.0.1', bin: { tsc: 'bin/tsc' },\n  }));\n  await writeFile(mismatchCli, 'process.stdout.write(\"Version 7.0.1\");');\n  const mismatchOutput = path.join(directory, 'wrong-version.js');\n  const mismatch = spawnSync(compiler, ['build', source, '--out', mismatchOutput], {\n    cwd: directory, env: { ...selectedEnv, PSC0_TSC: mismatchCli },\n    encoding: 'utf8', timeout: 30000,\n  });\n  assert.notEqual(mismatch.status, 0);\n  assert.match(mismatch.stderr, /PSC1_TSC_VERSION_MISMATCH/);\n  assert(!existsSync(mismatchOutput), 'a version mismatch must not emit JavaScript');\n",
+          "reason": "Preserve actual-version verification and add retired-profile refusal; no old compiler installation/execution."
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/selfhost-replay-runtime.test.mjs",
+      "baseBlob": "6c06c38905c26313d5eb1bc55aef4c2e021bfa8e",
+      "newBlob": "516aaf641917f233757fb4badb1a6bb39774645f",
+      "replacementMode": "whole-file-guarded",
+      "edits": [
+        {
+          "oldText": "    // TS7 permits CommonJS with bundler resolution; keep TS5 recovery arguments unchanged.",
+          "newText": "    // The current TS7 CommonJS fixture uses explicit bundler resolution.",
+          "reason": "Remove obsolete recovery wording."
+        },
+        {
+          "oldText": "...(expectedVersion === '7.0.2' ? ['--moduleResolution', 'bundler'] : [])",
+          "newText": "'--moduleResolution', 'bundler'",
+          "reason": "Remove the historical argument fallback from current fixture compilation."
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/checked-erasure-name-index.test.mjs",
+      "baseBlob": "b052ade8e67dbe4531abbf8b1971a443de650169",
+      "newBlob": "31a5ae02dab60998a088980ffd6cecc50f219897",
+      "replacementMode": "whole-file-guarded",
+      "edits": [
+        {
+          "oldText": "...(expectedVersion==='7.0.2'?['--moduleResolution','bundler']:[])",
+          "newText": "'--moduleResolution','bundler'",
+          "reason": "Remove the historical argument fallback from current fixture compilation."
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/check-typescript-profile.mjs",
+      "baseBlob": "74a208d54f69cd50feadb140b6a11cbe4d150ed0",
+      "newBlob": "8dd225dea1dd7cbc8688a22bb514bea6bdfd5ba0",
+      "replacementMode": "whole-file-guarded",
+      "edits": [
+        {
+          "oldText": "  const key = { '--out': 'out', '--source': 'source', '--historical-tsc': 'historicalTsc' }[flag];",
+          "newText": "  const key = { '--out': 'out' }[flag];",
+          "reason": "Retain only the installed current-profile gate; no comparison CLI."
+        },
+        {
+          "oldText": "if (Boolean(options.source) !== Boolean(options.historicalTsc)) {\n  throw new Error('PSC0_TYPESCRIPT_PROFILE_ARGUMENT: --source and --historical-tsc must be supplied together');\n}\n",
+          "newText": "",
+          "reason": "Retire the two-profile comparison option contract."
+        },
+        {
+          "oldText": "  mode: options.source ? 'same-source-comparison' : 'installed-profile-contract',",
+          "newText": "  mode: 'installed-profile-contract',",
+          "reason": "Current-only receipt mode."
+        },
+        {
+          "oldText": "  if (options.source) {\n    // Reuse the emitted compiler source. No PSC preparation or contract-fixture\n    // rerun belongs in this comparison, and neither profile edits the input.\n    const inputPath = path.resolve(root, options.source);\n    const input = await readFile(inputPath);\n    report.source = { path: inputPath, bytes: input.length, sha256: hash(input) };\n    report.measurement = 'One sequential wall-clock observation per compiler, including its CLI launcher; no cross-version artifact equality';\n    await saveReport();\n    for (const profile of [\n      { label: 'historical', version: '5.8.3', cli: options.historicalTsc },\n      { label: 'current', version: '7.0.2', cli: process.env.PSC0_TSC },\n    ]) {\n      await phase('compile-' + profile.label, async entry => {\n        const env = { ...process.env, PSC0_TYPESCRIPT_VERSION: profile.version };\n        if (profile.cli !== undefined) env.PSC0_TSC = profile.cli;\n        else delete env.PSC0_TSC;\n        entry.version = profile.version;\n        entry.versionCheck = await probe(profile.label + '-version', env);\n        requireSuccess(entry.versionCheck);\n        const selected = JSON.parse(await readFile(entry.versionCheck.stdout, 'utf8'));\n        entry.cli = selected.cli;\n        entry.outputDirectory = await mkdtemp(path.join(directory, profile.label + '-'));\n        const copiedInput = path.join(entry.outputDirectory, 'index.ts');\n        await writeFile(copiedInput, input);\n        entry.sourceSha256 = hash(await readFile(copiedInput));\n        assert.equal(entry.sourceSha256, report.source.sha256);\n        entry.compile = await capture(profile.label + '-compile', process.execPath,\n          [selected.cli, ...compileArgs(copiedInput, profile.version)],\n          { cwd: entry.outputDirectory, env, timeout: 10 * 60 * 1000 });\n        entry.artifacts = await artifacts(entry.outputDirectory);\n        requireSuccess(entry.compile);\n        requireArtifacts(entry.artifacts);\n      });\n    }\n  } else {\n    const installed = await phase('installed-current-profile', async entry => {\n      const cli = resolveTypeScriptCli();\n      entry.cli = cli;\n      const owned = await packageForLauncher(cli);\n      assert.equal(owned.metadata.name, 'typescript');\n      assert.equal(owned.metadata.version, '7.0.2');\n      assert.equal(typeof owned.metadata.bin?.tsc, 'string');\n      assert.equal(realpathSync(path.resolve(owned.directory, owned.metadata.bin.tsc)), realpathSync(cli));\n      const nativePackageName = '@typescript/typescript-' + process.platform + '-' + process.arch;\n      assert.equal(owned.metadata.optionalDependencies?.[nativePackageName], '7.0.2');\n      const nativeJson = createRequire(owned.file).resolve(nativePackageName + '/package.json');\n      const nativeBytes = await readFile(nativeJson);\n      const nativeMetadata = JSON.parse(nativeBytes.toString('utf8'));\n      assert.equal(nativeMetadata.name, nativePackageName);\n      assert.equal(nativeMetadata.version, '7.0.2');\n      const nativeExecutable = path.join(path.dirname(nativeJson), 'lib', process.platform === 'win32' ? 'tsc.exe' : 'tsc');\n      assert(statSync(nativeExecutable).isFile(), 'the selected native platform binary must actually be installed');\n      entry.package = {\n        path: owned.file, name: owned.metadata.name, version: owned.metadata.version,\n        bin: owned.metadata.bin.tsc, sha256: hash(owned.bytes),\n        launcherSha256: hash(await readFile(cli)),\n      };\n      entry.platformPackage = {\n        path: nativeJson, name: nativeMetadata.name, version: nativeMetadata.version,\n        sha256: hash(nativeBytes), executable: nativeExecutable,\n        executableSha256: hash(await readFile(nativeExecutable)),\n      };\n      entry.versionCheck = await probe('current-version', { ...process.env, PSC0_TSC: cli, PSC0_TYPESCRIPT_VERSION: '7.0.2' });\n      requireSuccess(entry.versionCheck);\n      const selected = JSON.parse(await readFile(entry.versionCheck.stdout, 'utf8'));\n      assert.deepEqual(selected.args, ['--ignoreConfig', 'input.ts']);\n      assert.deepEqual(typeScriptProfileArgs(['input.ts'], '5.8.3'), ['input.ts']);\n      return cli;\n    });\n    if (!installed.passed) throw new Error('PSC0_TYPESCRIPT_PROFILE_INSTALLATION_FAILED');\n    const cli = installed.value;\n    await phase('authoritative-profile-rejections', async entry => {\n      const unrelated = path.join(directory, 'unowned-launcher.mjs');\n      await writeFile(unrelated, 'throw new Error(\"unowned launcher must not run\");\\n');\n      const cases = [\n        { name: 'wrong-supported-pin', values: { PSC0_TYPESCRIPT_VERSION: '5.8.3' }, code: 'PSC0_TYPESCRIPT_PROFILE_PIN' },\n        { name: 'unsupported-pin', values: { PSC0_TYPESCRIPT_VERSION: '7.0.1' }, code: 'PSC0_TYPESCRIPT_VERSION' },\n        { name: 'empty-override', values: { PSC0_TSC: '' }, code: 'PSC0_TYPESCRIPT_CLI_OVERRIDE' },\n        { name: 'relative-override', values: { PSC0_TSC: 'relative/tsc' }, code: 'PSC0_TYPESCRIPT_CLI_OVERRIDE' },\n        { name: 'missing-override', values: { PSC0_TSC: path.join(directory, 'not-installed', 'tsc') }, code: 'PSC0_TYPESCRIPT_CLI_OVERRIDE' },\n        { name: 'unowned-override', values: { PSC0_TSC: unrelated }, code: 'PSC0_TYPESCRIPT_CLI_OVERRIDE' },\n      ];\n      entry.cases = [];\n      for (const item of cases) {\n        const receipt = await probe(item.name, {\n          ...process.env, PSC0_TSC: cli, PSC0_TYPESCRIPT_VERSION: '7.0.2', ...item.values,\n        });\n        const diagnostic = await readFile(receipt.stderr, 'utf8');\n        const passed = receipt.error === null && typeof receipt.status === 'number' &&\n          receipt.status !== 0 && diagnostic.includes(item.code);\n        entry.cases.push({ name: item.name, expectedCode: item.code, passed, command: receipt });\n      }\n      assert(entry.cases.every(item => item.passed), 'every invalid explicit selection must fail without discovery fallback');\n    });\n    await phase('positional-source-with-unrelated-config', async entry => {\n      const fixture = await mkdtemp(path.join(directory, 'positional-'));\n      const configDirectory = path.join(fixture, 'unrelated-project');\n      await mkdir(configDirectory);\n      await writeFile(path.join(configDirectory, 'tsconfig.json'), JSON.stringify({\n        compilerOptions: { noEmit: true, types: ['psc0-intentionally-missing-types'] },\n        files: ['unrelated-missing-source.ts'],\n      }));\n      await writeFile(path.join(fixture, 'package.json'), '{\"type\":\"module\"}\\n');\n      const input = path.join(fixture, 'index.ts');\n      await writeFile(input, 'export const answer: bigint = 42n;\\n');\n      entry.compile = await capture('positional-compile', process.execPath,\n        [cli, ...compileArgs(input, '7.0.2')], { cwd: configDirectory });\n      entry.artifacts = await artifacts(fixture);\n      requireSuccess(entry.compile);\n      requireArtifacts(entry.artifacts);\n      const runtime = await import(pathToFileURL(path.join(fixture, 'index.js')).href);\n      assert.equal(runtime.answer, 42n);\n      entry.answer = '42';\n    });\n  }\n",
+          "newText": "  const installed = await phase('installed-current-profile', async entry => {\n    const cli = resolveTypeScriptCli();\n    entry.cli = cli;\n    const owned = await packageForLauncher(cli);\n    assert.equal(owned.metadata.name, 'typescript');\n    assert.equal(owned.metadata.version, '7.0.2');\n    assert.equal(typeof owned.metadata.bin?.tsc, 'string');\n    assert.equal(realpathSync(path.resolve(owned.directory, owned.metadata.bin.tsc)), realpathSync(cli));\n    const nativePackageName = '@typescript/typescript-' + process.platform + '-' + process.arch;\n    assert.equal(owned.metadata.optionalDependencies?.[nativePackageName], '7.0.2');\n    const nativeJson = createRequire(owned.file).resolve(nativePackageName + '/package.json');\n    const nativeBytes = await readFile(nativeJson);\n    const nativeMetadata = JSON.parse(nativeBytes.toString('utf8'));\n    assert.equal(nativeMetadata.name, nativePackageName);\n    assert.equal(nativeMetadata.version, '7.0.2');\n    const nativeExecutable = path.join(path.dirname(nativeJson), 'lib', process.platform === 'win32' ? 'tsc.exe' : 'tsc');\n    assert(statSync(nativeExecutable).isFile(), 'the selected native platform binary must actually be installed');\n    entry.package = {\n      path: owned.file, name: owned.metadata.name, version: owned.metadata.version,\n      bin: owned.metadata.bin.tsc, sha256: hash(owned.bytes),\n      launcherSha256: hash(await readFile(cli)),\n    };\n    entry.platformPackage = {\n      path: nativeJson, name: nativeMetadata.name, version: nativeMetadata.version,\n      sha256: hash(nativeBytes), executable: nativeExecutable,\n      executableSha256: hash(await readFile(nativeExecutable)),\n    };\n    entry.versionCheck = await probe('current-version', { ...process.env, PSC0_TSC: cli, PSC0_TYPESCRIPT_VERSION: '7.0.2' });\n    requireSuccess(entry.versionCheck);\n    const selected = JSON.parse(await readFile(entry.versionCheck.stdout, 'utf8'));\n    assert.deepEqual(selected.args, ['--ignoreConfig', 'input.ts']);\n    assert.deepEqual(typeScriptProfileArgs(['input.ts'], '5.8.3'), ['input.ts']);\n    return cli;\n  });\n  if (!installed.passed) throw new Error('PSC0_TYPESCRIPT_PROFILE_INSTALLATION_FAILED');\n  const cli = installed.value;\n  await phase('authoritative-profile-rejections', async entry => {\n    const unrelated = path.join(directory, 'unowned-launcher.mjs');\n    await writeFile(unrelated, 'throw new Error(\"unowned launcher must not run\");\\n');\n    const cases = [\n      { name: 'wrong-supported-pin', values: { PSC0_TYPESCRIPT_VERSION: '5.8.3' }, code: 'PSC0_TYPESCRIPT_PROFILE_PIN' },\n      { name: 'unsupported-pin', values: { PSC0_TYPESCRIPT_VERSION: '7.0.1' }, code: 'PSC0_TYPESCRIPT_VERSION' },\n      { name: 'empty-override', values: { PSC0_TSC: '' }, code: 'PSC0_TYPESCRIPT_CLI_OVERRIDE' },\n      { name: 'relative-override', values: { PSC0_TSC: 'relative/tsc' }, code: 'PSC0_TYPESCRIPT_CLI_OVERRIDE' },\n      { name: 'missing-override', values: { PSC0_TSC: path.join(directory, 'not-installed', 'tsc') }, code: 'PSC0_TYPESCRIPT_CLI_OVERRIDE' },\n      { name: 'unowned-override', values: { PSC0_TSC: unrelated }, code: 'PSC0_TYPESCRIPT_CLI_OVERRIDE' },\n    ];\n    entry.cases = [];\n    for (const item of cases) {\n      const receipt = await probe(item.name, {\n        ...process.env, PSC0_TSC: cli, PSC0_TYPESCRIPT_VERSION: '7.0.2', ...item.values,\n      });\n      const diagnostic = await readFile(receipt.stderr, 'utf8');\n      const passed = receipt.error === null && typeof receipt.status === 'number' &&\n        receipt.status !== 0 && diagnostic.includes(item.code);\n      entry.cases.push({ name: item.name, expectedCode: item.code, passed, command: receipt });\n    }\n    assert(entry.cases.every(item => item.passed), 'every invalid explicit selection must fail without discovery fallback');\n  });\n  await phase('positional-source-with-unrelated-config', async entry => {\n    const fixture = await mkdtemp(path.join(directory, 'positional-'));\n    const configDirectory = path.join(fixture, 'unrelated-project');\n    await mkdir(configDirectory);\n    await writeFile(path.join(configDirectory, 'tsconfig.json'), JSON.stringify({\n      compilerOptions: { noEmit: true, types: ['psc0-intentionally-missing-types'] },\n      files: ['unrelated-missing-source.ts'],\n    }));\n    await writeFile(path.join(fixture, 'package.json'), '{\"type\":\"module\"}\\n');\n    const input = path.join(fixture, 'index.ts');\n    await writeFile(input, 'export const answer: bigint = 42n;\\n');\n    entry.compile = await capture('positional-compile', process.execPath,\n      [cli, ...compileArgs(input, '7.0.2')], { cwd: configDirectory });\n    entry.artifacts = await artifacts(fixture);\n    requireSuccess(entry.compile);\n    requireArtifacts(entry.artifacts);\n    const runtime = await import(pathToFileURL(path.join(fixture, 'index.js')).href);\n    assert.equal(runtime.answer, 42n);\n    entry.answer = '42';\n  });\n",
+          "reason": "Remove full-source TS5/TS7 recompilation; keep installation/platform/launcher/rejection/positional-config gates."
+        },
+        {
+          "oldText": "    assert.deepEqual(typeScriptProfileArgs(['input.ts'], '5.8.3'), ['input.ts']);",
+          "newText": "    assert.throws(() => typeScriptProfileArgs(['input.ts'], '5.8.3'), /PSC0_TYPESCRIPT_VERSION/);",
+          "reason": "The retired argument profile is now a refusal."
+        },
+        {
+          "oldText": "{ name: 'wrong-supported-pin', values: { PSC0_TYPESCRIPT_VERSION: '5.8.3' }, code: 'PSC0_TYPESCRIPT_PROFILE_PIN' }",
+          "newText": "{ name: 'retired-pin', values: { PSC0_TYPESCRIPT_VERSION: '5.8.3' }, code: 'PSC0_TYPESCRIPT_VERSION' }",
+          "reason": "Assert preselection refusal rather than support for a second profile."
+        },
+        {
+          "oldText": "mode: report.mode, report: reportPath, sourceSha256: report.source?.sha256, timings,",
+          "newText": "mode: report.mode, report: reportPath, timings,",
+          "reason": "Remove the obsolete comparison-source summary field."
+        }
+      ]
+    }
+  ],
+  "fragmentFiles": [
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "baseBlob": "0df4d4e7ec9f2e42bdba121582ad175527b15c1b",
+      "reviewBlob": "532827e112c49fa7c130db82201669f46fa6e876",
+      "replacementMode": "exact-fragments-only",
+      "edits": [
+        {
+          "oldText": "const historicalCommands = new Set(['seed-identity', 'recover-seed', 'recover-qualified-seed']);\nconst typescriptVersion = expectedTypeScriptVersion();\nassert.equal(typescriptVersion, historicalCommands.has(command) ? '5.8.3' : '7.0.2',\n  'PSC0_SH1_TYPESCRIPT_PROFILE: recovery requires 5.8.3; current qualification requires 7.0.2');",
+          "newText": "const historicalCommands = new Set([\n  'seed-identity', 'recover-seed', 'recover-qualified-seed', 'recover-successor-seed',\n]);\nif (historicalCommands.has(command)) {\n  throw new Error('PSC0_SH1_LEGACY_RECOVERY_RETIRED: current development uses TypeScript 7 only; ' +\n    'use scripts/sh1-native-seed-recovery.mjs for the selected seed. Historical recipes remain at their immutable source revisions.');\n}\nconst typescriptVersion = expectedTypeScriptVersion();\nassert.equal(typescriptVersion, '7.0.2',\n  'PSC0_SH1_TYPESCRIPT_PROFILE: current qualification requires TypeScript 7.0.2');",
+          "reason": "Reject old recovery entry points before resolving/running any TypeScript CLI; only TS7 is current."
+        },
+        {
+          "oldText": "  purpose: historicalCommands.has(command) ? 'historical-seed-recovery' : 'current-emission',",
+          "newText": "  purpose: 'current-emission',",
+          "reason": "Current qualification has one compiler profile."
+        },
+        {
+          "oldText": "  // evidence. Immutable S0/A reconstruction still uses its separate commands.",
+          "newText": "  // evidence. Historical S0/A recipes are archived at their original revisions.",
+          "reason": "Do not advertise retired current commands."
+        },
+        {
+          "oldText": "if (command === 'seed-identity') {\n  const sourceRoot = path.resolve(root, option(args, '--source', '../historical-source/psc0'));\n  const { identitySha256 } = await historicalIdentity(sourceRoot);\n  if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, 'identity=' + identitySha256 + '\\n');\n  process.stdout.write('PSC0_SH1_SEED_IDENTITY: ' + identitySha256 + '\\n');\n} else if (command === 'recover-seed') {\n  const sourceRoot = path.resolve(root, option(args, '--source', '../historical-source/psc0'));\n  await recoverSeed(sourceRoot, outDir);\n} else if (command === 'recover-qualified-seed') {\n  await recoverQualifiedSeed({\n    sourceRoot: path.resolve(root, option(args, '--source', '../qualified-source/psc0')),\n    bootstrapCompiler: path.resolve(root, option(args, '--bootstrap', '.selfhost-seeds/' + historicalRef + '/index.js')),\n    artifactDirectory: path.resolve(root, option(args, '--artifact', '../qualified-artifact/dist/sh1')),\n    outDir,\n    manifestPath: option(args, '--manifest', undefined),\n  });\n} else if (command === 'recover-successor-seed') {\n  await recoverSuccessorSeed({\n    manifestPath: option(args, '--manifest', undefined),\n    parentCompiler: option(args, '--parent', undefined),\n    cacheDirectory: option(args, '--cache-directory', undefined),\n    artifactDirectory: option(args, '--artifact', undefined),\n    outDir, cold: args.includes('--cold'),\n  });\n} else ",
+          "newText": "",
+          "reason": "Remove all four historical/parent-based recovery dispatcher branches from current q."
+        },
+        {
+          "oldText": "async function retainPromotableSeed(qualification, firstReceipt, secondReceipt, thirdReceipt, outDir) {\n  const selected = await readSelectedSeed();\n  if (selected.mode === 'qualified' && selected.manifest.kind === 'psc0-qualified-source-seed' &&\n      typescriptVersion === '7.0.2') {\n    const manifest = makeSuccessorSeedManifest({\n      qualification, firstReceipt, secondReceipt, thirdReceipt,\n      parentManifest: selected.manifest, runId: process.env.GITHUB_RUN_ID,\n      syntaxReferenceSha256: sh1GrammarProfile.referenceSha256,\n    });\n    const successor = successorSeedSelection(manifest);\n    await materializeSuccessorSeed({\n      generationDirectory: path.join(outDir, 'C2'),\n      cacheDirectory: path.join(root, successor.cacheDirectory), manifest,\n      origin: 'Fresh compiler-qualified successor candidate; A stays selected until cold recovery and provider acceptance.',\n    });\n    await writeJson(path.join(outDir, 'seed-promotion.json'), manifest);\n    await writeJson(path.join(outDir, 'seed-selection.json'), {\n      status: 'successor-candidate-retained-not-selected',\n      selectedSourceRef: selected.sourceRef,\n      selectedCompilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,\n      candidateSourceRef: manifest.sourceRef,\n      candidateCompilerSha256: manifest.expectedArtifacts.javascriptSha256,\n      candidateIdentitySha256: successor.identitySha256,\n      remaining: ['cold-successor-recovery', 'exact-stream-provider-acceptance', 'explicit-selected-manifest-update'],\n    });\n    if (process.env.GITHUB_OUTPUT) {\n      await appendFile(process.env.GITHUB_OUTPUT,\n        'successor-candidate=true\\n' +\n        'promoted-seed-cache-key=' + successor.cacheKey + '\\n' +\n        'promoted-seed-cache-directory=psc0/' + successor.cacheDirectory + '\\n');\n    }\n    process.stdout.write('PSC0_SH1_SEED_PROMOTION: ' + JSON.stringify(manifest) + '\\n');\n    return;\n  }\n  if (selected.mode === 'qualified') {\n    // The selected recoverable successor remains sufficient for this migration.\n    // Further promotion requires its own explicit and qualified recovery path.\n    await writeJson(path.join(outDir, 'seed-selection.json'), {\n      status: 'existing-qualified-authoring-seed-retained',\n      sourceRef: selected.sourceRef,\n      compilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,\n      futurePromotion: 'A later language capability promotion needs an explicit parent-seed recovery plan.',\n    });\n    return;\n  }\n  if (typescriptVersion !== '5.8.3') {\n    await writeJson(path.join(outDir, 'seed-selection.json'), {\n      status: 'historical-authoring-seed-retained',\n      sourceRef: selected.sourceRef,\n      reason: 'A TypeScript 7 product needs an explicit new seed manifest and parent-seed recovery recipe.',\n    });\n    return;\n  }\n  const manifest = makeQualifiedSeedManifest({\n    qualification, firstReceipt, secondReceipt, runId: process.env.GITHUB_RUN_ID,\n  });\n  const identity = qualifiedSeedIdentity(manifest);\n  const relativeDirectory = '.selfhost-seeds/qualified/' + identity;\n  await materializeQualifiedSeed({\n    generationDirectory: path.join(outDir, 'C2'),\n    cacheDirectory: path.join(root, relativeDirectory),\n    manifest,\n    origin: 'Fresh C2/C3 current-source qualification; root seed selection remains unchanged.',\n  });\n  await writeJson(path.join(outDir, 'seed-promotion.json'), manifest);\n  if (process.env.GITHUB_OUTPUT) {\n    await appendFile(process.env.GITHUB_OUTPUT,\n      'promoted-seed-cache-key=psc0-sh1-qualified-v1-' + identity + '\\n' +\n      'promoted-seed-cache-directory=psc0/' + relativeDirectory + '\\n');\n  }\n  process.stdout.write('PSC0_SH1_SEED_PROMOTION: ' + JSON.stringify(manifest) + '\\n');\n}\n",
+          "newText": "async function retainPromotableSeed(qualification, firstReceipt, secondReceipt, thirdReceipt, outDir) {\n  const selected = await readSelectedSeed();\n  assert.equal(selected.mode, 'qualified', 'PSC0_SH1_CURRENT_QUALIFIED_SEED_REQUIRED');\n  assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed',\n    'PSC0_SH1_CURRENT_SUCCESSOR_REQUIRED');\n  // Current migrations retain the already qualified successor. A new promotion\n  // requires its own qualified recovery contract and explicit selection.\n  await writeJson(path.join(outDir, 'seed-selection.json'), {\n    status: 'existing-qualified-authoring-seed-retained',\n    sourceRef: selected.sourceRef,\n    compilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,\n    futurePromotion: 'A later language capability promotion needs an explicit TypeScript 7 recovery plan.',\n  });\n}\n",
+          "reason": "Remove obsolete A/historical promotion fallbacks; preserve current R retention output without selecting anything."
+        },
+        {
+          "oldText": "usage: node scripts/sh1-qualify.mjs seed-identity|recover-seed|recover-qualified-seed|recover-successor-seed|native-candidate|candidate|fixed-point [--out directory] [--source historical-psc0] [--seed compiler.js] [--native native-psc1]",
+          "newText": "usage: node scripts/sh1-qualify.mjs native-candidate|candidate|fixed-point [--out directory] [--seed compiler.js] [--native native-psc1]",
+          "reason": "Advertise only active TS7 qualification commands."
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/psc0-sh1.yml",
+      "baseBlob": "9542565b1f2ea45b49d1bc25c8649708b81da2cd",
+      "replacementMode": "exact-fragments-only",
+      "edits": [
+        {
+          "oldText": "      - name: Install separate pinned current and historical TypeScript profiles\n        id: typescript\n        shell: bash\n        run: |\n          npm install --prefix \"$RUNNER_TEMP/psc0-typescript-7.0.2\" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2\n          npm install --prefix \"$RUNNER_TEMP/psc0-typescript-5.8.3\" --ignore-scripts --save-exact --no-audit --no-fund typescript@5.8.3\n          node --input-type=module <<'NODE'\n          import assert from 'node:assert/strict';\n          import { appendFileSync, copyFileSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';\n          import path from 'node:path';\n          import { createRequire } from 'node:module';\n          import { spawnSync } from 'node:child_process';\n          const require = createRequire(import.meta.url);\n          const directory = path.resolve('dist/typescript-profile/install');\n          mkdirSync(directory, { recursive: true });\n          for (const [profile, version] of [['current', '7.0.2'], ['historical', '5.8.3']]) {\n            const prefix = path.join(process.env.RUNNER_TEMP, 'psc0-typescript-' + version);\n            const manifestPath = require.resolve('typescript/package.json', { paths: [prefix] });\n            const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));\n            assert.equal(manifest.name, 'typescript');\n            assert.equal(manifest.version, version);\n            const bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.tsc;\n            assert.equal(typeof bin, 'string', 'PSC0_TYPESCRIPT_BIN_METADATA');\n            const launcher = realpathSync(path.resolve(path.dirname(manifestPath), bin));\n            const result = spawnSync(process.execPath, [launcher, '--version'], { encoding: 'utf8' });\n            assert.equal(result.status, 0, result.stderr);\n            assert.equal(result.stdout.trim(), 'Version ' + version);\n            appendFileSync(process.env.GITHUB_OUTPUT, profile + '-cli=' + launcher + '\\n');\n            copyFileSync(path.join(prefix, 'package-lock.json'), path.join(directory, profile + '-package-lock.json'));\n            copyFileSync(manifestPath, path.join(directory, profile + '-package.json'));\n            if (profile === 'current') {\n              appendFileSync(process.env.GITHUB_ENV, 'PSC0_TSC=' + launcher + '\\nPSC0_TYPESCRIPT_VERSION=' + version + '\\n');\n            } else {\n              appendFileSync(process.env.GITHUB_OUTPUT, 'historical-path=' + path.join(prefix, 'node_modules/.bin') + path.delimiter + process.env.PATH + '\\n');\n            }\n          }\n          NODE\n",
+          "newText": "      - name: Install the pinned current TypeScript 7 profile\n        id: typescript\n        shell: bash\n        run: |\n          npm install --prefix \"$RUNNER_TEMP/psc0-typescript-7.0.2\" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2\n          node --input-type=module <<'NODE'\n          import assert from 'node:assert/strict';\n          import { appendFileSync, copyFileSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';\n          import path from 'node:path';\n          import { createRequire } from 'node:module';\n          import { spawnSync } from 'node:child_process';\n          const require = createRequire(import.meta.url);\n          const directory = path.resolve('dist/typescript-profile/install');\n          mkdirSync(directory, { recursive: true });\n          const version = '7.0.2';\n          const prefix = path.join(process.env.RUNNER_TEMP, 'psc0-typescript-' + version);\n          const manifestPath = require.resolve('typescript/package.json', { paths: [prefix] });\n          const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));\n          assert.equal(manifest.name, 'typescript');\n          assert.equal(manifest.version, version);\n          const bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.tsc;\n          assert.equal(typeof bin, 'string', 'PSC0_TYPESCRIPT_BIN_METADATA');\n          const launcher = realpathSync(path.resolve(path.dirname(manifestPath), bin));\n          const result = spawnSync(process.execPath, [launcher, '--version'], { encoding: 'utf8' });\n          assert.equal(result.status, 0, result.stderr);\n          assert.equal(result.stdout.trim(), 'Version ' + version);\n          appendFileSync(process.env.GITHUB_OUTPUT, 'current-cli=' + launcher + '\\n');\n          copyFileSync(path.join(prefix, 'package-lock.json'), path.join(directory, 'current-package-lock.json'));\n          copyFileSync(manifestPath, path.join(directory, 'current-package.json'));\n          appendFileSync(process.env.GITHUB_ENV, 'PSC0_TSC=' + launcher + '\\nPSC0_TYPESCRIPT_VERSION=' + version + '\\n');\n          NODE\n",
+          "reason": "Install only the exact TS7 current launcher; preserve current-cli/env and package evidence paths."
+        },
+        {
+          "oldText": "      - name: Compare TypeScript 5 and 7 on the same complete emitted compiler\n        if: ${{ !cancelled() && steps.native-gate.outcome != 'skipped' }}\n        run: node scripts/check-typescript-profile.mjs --out dist/typescript-profile/full-compiler --source ${{ steps.seed-selection.outputs.full-qualification == 'true' && 'dist/sh1/development/N1/index.ts' || 'dist/sh1/N1/index.ts' }} --historical-tsc ${{ steps.typescript.outputs.historical-cli }}\n",
+          "newText": "",
+          "reason": "Remove routine two-profile re-emission; N1 already compiles this same emitted source with the required TS7 flags."
+        }
+      ]
+    }
+  ],
+  "staticReview": {
+    "javascriptSyntaxParsedNotInvoked": [
+      "psc0/scripts/typescript-cli.mjs",
+      "psc0/scripts/check-native-replay-host-source.mjs",
+      "psc0/scripts/native-typescript-cli.test.mjs",
+      "psc0/scripts/selfhost-replay-runtime.test.mjs",
+      "psc0/scripts/checked-erasure-name-index.test.mjs",
+      "psc0/scripts/check-typescript-profile.mjs",
+      "psc0/scripts/sh1-qualify.mjs"
+    ],
+    "forwardEditGuards": true,
+    "repositoryCodeExecuted": false,
+    "compilerBuilds": false,
+    "testsRun": false
+  },
+  "minimumVerification": [
+    "In the next coherent PSC0 checkpoint, use only installed7.0.2 and run the existing installed-profile contract once.",
+    "Build the already-required native host and run existing native CLI/replay/erasure-index gates; retired-profile refusal requires no TS5 package.",
+    "The tiny wrong-version native fixture is only a package-shaped version reporter, not a TS5 compiler; preserve the actual-version mismatch assertion.",
+    "Run the existing R helper/ABI preflight before N1, then the existing F native/current-source C1-C3/provider gates once; no repeated5/7 comparison.",
+    "Independently run the new native-TS7 cold R recovery gate with no restored R compiler or A/S0 compiler bytes before declaring that replacement recovery path qualified."
+  ],
+  "rootReview": {
+    "baseBlobsIndependentlyVerified": true,
+    "allGuardedEditsForwardReplayed": true,
+    "fullDraftContentsRead": true,
+    "independentPeerReviewed": true,
+    "compilerTestsExecutedByThisAudit": false
+  },
+  "additionalRootFragments": [
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "edits": [
+        {
+          "oldText": "  // Observe the existing current-source objects before their original-IR check.\n  // Historical TS5 reconstruction retains its exact established boundary.\n  const migrationWorkerAbi = historicalCommands.has(command) ? undefined\n    : runMigrationWorkerAbi(compiler, prepared, ir, valueTag);",
+          "newText": "  // Observe the existing current-source objects before their original-IR check.\n  const migrationWorkerAbi = runMigrationWorkerAbi(compiler, prepared, ir, valueTag);",
+          "reason": "All active qualification commands use the current ABI gate; retired commands reject before launcher resolution."
+        }
+      ]
+    }
+  ],
+  "recoveryIntegration": {
+    "runner": "scripts/sh1-native-seed-recovery.mjs",
+    "policy": "selfhost-seed-recovery.json",
+    "proofRequired": "Independent TS7-only native cold run compares all four selected-R products; no old compiler or generated bootstrap is executed."
+  }
+}

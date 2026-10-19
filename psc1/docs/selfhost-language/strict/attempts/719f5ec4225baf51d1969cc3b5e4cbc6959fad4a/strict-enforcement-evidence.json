@@ -1,0 +1,4085 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-enforcement-qualified-evidence",
+  "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+  "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+  "reference": {
+    "path": "development/N1/strict-runtime-reference/reference.json",
+    "sha256": "64d98671914617b7b90c71e428f20128aaa666a1d6cfa86b2f0171ceaa9811c2",
+    "bytes": 37553
+  },
+  "contractSha256": "21a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89",
+  "referenceSourceSha256": "3a4ada94e66ce4bc8a18bf0417c2a9660c06e326b4de312c8ee83ba831bda008",
+  "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "atomicBuilds": [
+    {
+      "name": "native produces N1",
+      "source": {
+        "path": "development/N1/strict-source-native.json",
+        "sha256": "9c217dbcb66c2480194062da8307478083b9462cac8af0670b9bc4a71f6f0bb0",
+        "bytes": 608846
+      },
+      "compilerBinarySha256": "be28aed5164ffa0661369e424dd8d315278de396fec4c22ce3d73ff567e81012",
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "lean",
+        "accepted": true,
+        "traversalComplete": true,
+        "moduleCount": 64,
+        "sourceBytes": 1268003,
+        "inputBytes": 1269082,
+        "importCount": 149,
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "stats": {
+          "visitedSteps": 148830,
+          "typeSteps": 17945,
+          "termSteps": 58339,
+          "declarationCount": 1708,
+          "theoremCount": 0
+        }
+      },
+      "targetPolicy": {
+        "policy": "psc0-sh1-ts-target/1",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 1665015
+      },
+      "originsSha256": "50186ef0f4374b81133c9b5bd4bb7598a88419e696207ac6834f323e7563eb40"
+    },
+    {
+      "name": "C1 produces C2",
+      "source": {
+        "path": "C2/strict-source.json",
+        "sha256": "595698ee7c5ed387a561be0a5ab2b023206a7ec5bb76a55387cde23393fc4185",
+        "bytes": 1769418
+      },
+      "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+      "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "lean",
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "moduleCount": 64,
+        "sourceBytes": 1268003,
+        "inputBytes": 1269082,
+        "importCount": 149,
+        "stats": {
+          "visitedSteps": 148830,
+          "typeSteps": 17945,
+          "termSteps": 58339,
+          "declarationCount": 1708,
+          "theoremCount": 0
+        },
+        "accepted": true,
+        "traversalComplete": true,
+        "strictSh1Qualified": false
+      },
+      "targetPolicy": {
+        "policy": "psc0-sh1-ts-target/1",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 1665015
+      },
+      "originsSha256": "50186ef0f4374b81133c9b5bd4bb7598a88419e696207ac6834f323e7563eb40"
+    },
+    {
+      "name": "C2 produces C3",
+      "source": {
+        "path": "C3/strict-source.json",
+        "sha256": "884a73a8e096776453bf3b0031c47c4208f2c69587226775d0127a33d9a1ea3d",
+        "bytes": 1769418
+      },
+      "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+      "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "lean",
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "moduleCount": 64,
+        "sourceBytes": 1268003,
+        "inputBytes": 1269082,
+        "importCount": 149,
+        "stats": {
+          "visitedSteps": 148830,
+          "typeSteps": 17945,
+          "termSteps": 58339,
+          "declarationCount": 1708,
+          "theoremCount": 0
+        },
+        "accepted": true,
+        "traversalComplete": true,
+        "strictSh1Qualified": false
+      },
+      "targetPolicy": {
+        "policy": "psc0-sh1-ts-target/1",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 1665015
+      },
+      "originsSha256": "50186ef0f4374b81133c9b5bd4bb7598a88419e696207ac6834f323e7563eb40"
+    }
+  ],
+  "generations": [
+    {
+      "name": "N1",
+      "compiler": {
+        "path": "development/N1/index.js",
+        "sha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+        "bytes": 3142142
+      },
+      "source": {
+        "path": "development/N1/strict-source/receipt.json",
+        "sha256": "497b393a03842827f27ced6e187827461525b2a40bfe9ebd231f62d5a1060c34",
+        "bytes": 71655
+      },
+      "target": {
+        "path": "development/N1/strict-target/receipt.json",
+        "sha256": "43890410db810eccd173e25122b7d7a03d74c95f56396e73f1f902df8ad26a9d",
+        "bytes": 42110
+      },
+      "runtime": {
+        "path": "development/N1/strict-runtime/receipt.json",
+        "sha256": "eb0151322a963a576aa3e153422d17082624a4ff6a4a6add2f301f29792c3523",
+        "bytes": 113977
+      },
+      "sourceEquality": {
+        "sources": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "development/N1/strict-runtime/source-equality/source.lean",
+              "sha256": "204bcc93f52f7c94906e90c32b88b43c34f2451b826bf529da67e79a4478eafd",
+              "bytes": 384
+            },
+            "receipt": {
+              "path": "development/N1/strict-runtime/source-equality/lean-source-receipt.json",
+              "sha256": "e8e1c4d48e4a4187754fc4575f5ccd434a466b53fe7b608438df66aa7c646b1c",
+              "bytes": 7694
+            },
+            "originsSha256": "01641e44e352c86de811ea5f540e931ab324a491721b6fc8ca65ce4d3e1ef7f7"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "development/N1/strict-runtime/source-equality/source.ps",
+              "sha256": "375cad953640b6ffa67907dd44aa8ca866f4e94ad46c8ef91c0ea5529410c6fb",
+              "bytes": 396
+            },
+            "receipt": {
+              "path": "development/N1/strict-runtime/source-equality/ps-source-receipt.json",
+              "sha256": "a0b0d7697d9f98c36b55ca86839620d9b22122e670ab698a9dadc396ba042834",
+              "bytes": 7690
+            },
+            "originsSha256": "29474768ba644d1743cf87c2e9b8cb9e9644b7acd2475d60b64366e080ad7348"
+          }
+        ],
+        "artifacts": {
+          "typescript": {
+            "path": "development/N1/strict-runtime/source-equality/runtime/index.ts",
+            "sha256": "40d9d49e9cb75e8cfa04647b0ad317c76ff12a0c6da49529484986d31e469923",
+            "bytes": 5344
+          },
+          "javascript": {
+            "path": "development/N1/strict-runtime/source-equality/runtime/index.js",
+            "sha256": "079644faa65f8071704b4a8b97b130f4d85e8097e4cc23a7ce586e44fb0ba80f",
+            "bytes": 3764
+          },
+          "admissions": {
+            "path": "development/N1/strict-runtime/source-equality/admissions.jsonl",
+            "sha256": "11d84ba55d9e11ad71ef1bbef35b64b372e046cb3aa6583f16d1e13bbc54cc7b",
+            "bytes": 2633
+          }
+        },
+        "observationCount": 6,
+        "observationsSha256": "b4dabf2437d90a5e14aaffc8bd81f790d67d13206580369acfa26fbc0314a216"
+      },
+      "sourceEvaluation": {
+        "sources": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "development/N1/strict-runtime/source-evaluation/source.lean",
+              "sha256": "aa068f731e363494a42127e33fc8fc292de66de62075593f5c29ffb2af45748e",
+              "bytes": 2380
+            },
+            "receipt": {
+              "path": "development/N1/strict-runtime/source-evaluation/lean-source-receipt.json",
+              "sha256": "c06fc09866b3637e3f6bfbb6e37b691200441a10802935c11c040476af42324d",
+              "bytes": 13100
+            },
+            "originsSha256": "422ee14f019f72cb1eee80678aad3c412a1ee4a46aa42137f76779edbfe5ab94"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "development/N1/strict-runtime/source-evaluation/source.ps",
+              "sha256": "27d9877bdd05f2189735047edf33b509ae6adab028fb7ebb128509e96b6cab1e",
+              "bytes": 2416
+            },
+            "receipt": {
+              "path": "development/N1/strict-runtime/source-evaluation/ps-source-receipt.json",
+              "sha256": "261eab3c66ca63cf754273e2208d4c89b3e63d63fe0930156798398338eaba24",
+              "bytes": 13090
+            },
+            "originsSha256": "fcbd61c87f95f0115e7dd1b3e26f02f8434e8c560cc960b032ed7c082f5e5aa6"
+          }
+        ],
+        "artifacts": {
+          "typescript": {
+            "path": "development/N1/strict-runtime/source-evaluation/runtime/index.ts",
+            "sha256": "ab068597b0677d5e02dbea64c46fbaf09d35efeda5504e13fba234d734b1d72d",
+            "bytes": 11693
+          },
+          "javascript": {
+            "path": "development/N1/strict-runtime/source-evaluation/runtime/index.js",
+            "sha256": "3bc7a55998c3cba4d1b9559a7b8850585086062d5812e787aaa1dcef5ad4e7c4",
+            "bytes": 9315
+          },
+          "admissions": {
+            "path": "development/N1/strict-runtime/source-evaluation/admissions.jsonl",
+            "sha256": "bafafb8154f1fa11a267ac99be0262dc831e0b629d5af42659eda80091cfbd88",
+            "bytes": 27093
+          }
+        },
+        "nativeReference": {
+          "path": "development/N1/strict-runtime-reference/native-source-evaluation/receipt.json",
+          "sha256": "18a60cd84fa8876de58a3c7d0ee7ad26fea431d9096183b335254c0bc3020917",
+          "bytes": 8226
+        },
+        "observationCount": 24,
+        "observationsSha256": "9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f",
+        "hostProbeCount": 21,
+        "hostProbesSha256": "76dba00fb02adff5cc8bd76d52f178b95cd6b9886542e8b5cf5e0efc314aae91"
+      },
+      "capabilityOrigins": {
+        "receipt": {
+          "path": "development/N1/capabilities/receipt.json",
+          "sha256": "5b1b2b855c764b265595fa031a6c26dc21b4373dde34746119d62dacfcf37acb",
+          "bytes": 404461
+        },
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "observationsSha256": "cb3cdcbd45eb87c25d8d2cf4f95ed3266c0081306a96355313536f53c85d3d1d"
+          },
+          {
+            "sourceKind": "ps",
+            "observationsSha256": "7f2134c8e79cb91ad31f3dcbdc29ed9cca07d40494726af3ff772671aa1a76e9"
+          }
+        ],
+        "emptyGrammar": {
+          "receiptField": "grammar",
+          "observationsSha256": "e220e094f0ae386418d920130fd427fb4fdf37a4c88e8de7dc8039d9f57f0019",
+          "corpusSha256": "ab6d9abf0de2f0e705ecde686566f27cdc5ad24b9ae2a811e06406044910f30c",
+          "emptyElimination": {
+            "receiptField": "grammar.emptyElimination",
+            "pairs": 5,
+            "refusals": 6,
+            "observationsSha256": "64a6ae2412150352c88e008c8f4ec1dcf587fb17e237cb8c89e8f6c6b15cf026"
+          },
+          "zeroFieldRecords": {
+            "receiptField": "grammar.zeroFieldRecords",
+            "pairs": 1,
+            "refusals": 2,
+            "observationsSha256": "a75f957141cfa202685891d2cd5cd09689d18e870a8894defe01fa0257a166ff"
+          },
+          "additionalPreparations": 0
+        },
+        "sourceDeclarationsPerKind": 35,
+        "coreDeclarationsPerKind": 55,
+        "normalizationPlansPerKind": 16,
+        "originRefusals": 6
+      },
+      "ingressSnapshots": {
+        "malformedOptionCases": 14,
+        "snapshotProbes": 1,
+        "emittedSourceKinds": 2,
+        "additionalPreparations": 0,
+        "observationsSha256": "d009013b662a0f93c6f246c66eae48e24cbe9577d0857342944e7ac6282394d3"
+      },
+      "emptySource": {
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "development/N1/strict-source/empty.lean",
+              "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+              "bytes": 345
+            },
+            "typescript": {
+              "path": "development/N1/strict-source/accepted-lean.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "originsSha256": "ae4af46bb826137c357f7820e3720248b2b401af178cb321a20aad520a96ddb5",
+            "eliminationsSha256": "c51015411975a19335173393f011c9373437919c1004d7981b3a8b2a2fb8aa70"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "development/N1/strict-source/empty.ps",
+              "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390",
+              "bytes": 369
+            },
+            "typescript": {
+              "path": "development/N1/strict-source/accepted-ps.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "originsSha256": "caf683b2831a68ee44f34837af9e265f271a20c09ede67a661ac85d61d0ea0e0",
+            "eliminationsSha256": "c51015411975a19335173393f011c9373437919c1004d7981b3a8b2a2fb8aa70"
+          }
+        ],
+        "sourceKinds": 2,
+        "emptyLayoutsPerKind": 1,
+        "typedEliminationsPerKind": 4,
+        "emittedTypeScriptEqual": true,
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "nativeValueOracle": false,
+        "observationsSha256": "28a6627fa41068c9110ee94320747121a1ea23efa240eaacc9dde115a7c4fa45"
+      },
+      "zeroFieldSource": {
+        "receiptField": "zeroFieldRecords",
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "sourceInput": {
+              "moduleName": [
+                "Ps",
+                "Compiler",
+                "StrictLibrary"
+              ],
+              "sourceSha256": "f05f697f9defd99c1db8288659008a6d7b14bb19b1b973b73e1d85b36661d795",
+              "sourceBytes": 364
+            },
+            "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "originsSha256": "ae4af46bb826137c357f7820e3720248b2b401af178cb321a20aad520a96ddb5",
+            "originBatchesSha256": "3f55ab17df99dbe03bab3dc6ce5323be025076c49988bf2dad4df5471725ad8d",
+            "typescript": {
+              "path": "development/N1/strict-source/accepted-lean.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "observationsSha256": "83f05b4f27b5c85d1aef2e73bcc0fa3d574240f8e9bb277b0a130802aa19be12"
+          },
+          {
+            "sourceKind": "ps",
+            "sourceInput": {
+              "moduleName": [
+                "Ps",
+                "Compiler",
+                "StrictLibrary"
+              ],
+              "sourceSha256": "e1bb231c6e8c9aa5cfb7077567e490d5853d16509665ee2fed27abadfce3d9d8",
+              "sourceBytes": 368
+            },
+            "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "originsSha256": "caf683b2831a68ee44f34837af9e265f271a20c09ede67a661ac85d61d0ea0e0",
+            "originBatchesSha256": "b1e53ad20d3a9eee456f1d1e990d16d44518e004388d4ff7942c0d3b3aaa8151",
+            "typescript": {
+              "path": "development/N1/strict-source/accepted-ps.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "observationsSha256": "e42c7e58a2aed3ac0086adc0117b2b086739eca4117c1edc74017d51b4ce28b7"
+          }
+        ],
+        "sourceKinds": 2,
+        "sourceDeclarationsPerKind": 2,
+        "coreDeclarationsPerKind": 4,
+        "constructorsPerKind": 1,
+        "fieldsPerKind": 0,
+        "actualRecordValueRetained": true,
+        "inhabited": true,
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "observationsSha256": "5e958b8541590cd110421802a1a0503f293120739a156be33c752bdd15fba1e0"
+      },
+      "emptyIr": {
+        "receipt": {
+          "path": "development/N1/ir-checker/receipt.json",
+          "sha256": "e86b250f85692b086e21b0295b9c11e590184fac61b5a0515d5383d15112e2f6",
+          "bytes": 23004
+        },
+        "artifacts": {
+          "typescript": {
+            "path": "development/N1/ir-checker/accepted/index.ts",
+            "sha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+            "bytes": 17088
+          },
+          "javascript": {
+            "path": "development/N1/ir-checker/accepted/index.js",
+            "sha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633",
+            "bytes": 13158
+          },
+          "declarations": {
+            "path": "development/N1/ir-checker/accepted/index.d.ts",
+            "sha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+            "bytes": 3763
+          }
+        },
+        "acceptedFixtureSha256": "a60b99aa759e547dcc13c854ac44dcc5485d9883b20e6c18eacb82c1b1b98f3d",
+        "rejectedCases": 38,
+        "rejectionsSha256": "06504b059fe2330cbf042fc2e29745f8f8b43d5c159dd8bb190abcb40d141b7f",
+        "behaviorObservations": 61,
+        "behaviorSha256": "6d20ed4181b1e8efbadc2b9265cdc11c68e92ec31d4a942c1f12e499d69ad19c",
+        "optimizedTail": {
+          "receiptField": "optimizedTail",
+          "observationCount": 12,
+          "valueObservations": 11,
+          "faultObservations": 1,
+          "entriesSha256": "dd67f2ac069552de9f4c9e8a4c30573606de53682ae7a0071246a6db0715bddc",
+          "layoutSha256": "3b4a16610a52c78099e8b680e08730da692bff77e9b221e738801a91f3c262d2",
+          "observationsSha256": "1ed33c52978fa93847435b1f3bd06e78bf811a2d13b1f26ff5bb3571faab97aa",
+          "acceptedFixtureSha256": "a60b99aa759e547dcc13c854ac44dcc5485d9883b20e6c18eacb82c1b1b98f3d",
+          "sameAcceptedArtifacts": true,
+          "artifacts": {
+            "typescript": {
+              "path": "development/N1/ir-checker/accepted/index.ts",
+              "sha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+              "bytes": 17088
+            },
+            "javascript": {
+              "path": "development/N1/ir-checker/accepted/index.js",
+              "sha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633",
+              "bytes": 13158
+            },
+            "declarations": {
+              "path": "development/N1/ir-checker/accepted/index.d.ts",
+              "sha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+              "bytes": 3763
+            }
+          },
+          "additionalPreparations": 0,
+          "additionalPortableIrChecks": 0,
+          "additionalEmissions": 0,
+          "additionalTypeScriptCompilations": 0,
+          "additionalNativeExecutions": 0
+        },
+        "emptyElimination": {
+          "receiptField": "emptyElimination",
+          "emptyLayouts": 2,
+          "emptyEliminations": 5,
+          "signaturesSha256": "e3fa3b63bf0c084ffbac021994354c1fcb89a99a1e0a8b43e42bdc591eddbb66",
+          "observationsSha256": "bd40a53027a30edff4fe5501d6d8ee0325dddb0364ec45f245c48876e7e31e80",
+          "scrutinee": {
+            "callbackCalls": 1,
+            "propagatedOriginalFailure": true,
+            "noEmptyInhabitantConstructed": true
+          },
+          "nativeValueOracle": false
+        },
+        "zeroFieldRecords": {
+          "receiptField": "zeroFieldRecords",
+          "structures": 1,
+          "fields": 0,
+          "values": 1,
+          "observationsSha256": "e8cb5505a0ecc91c63c518690f205b74cd27c9b5ce05addc94032774b24d777d",
+          "runtime": {
+            "ownStringFields": 0,
+            "ownBrandSymbols": 1,
+            "inhabited": true
+          }
+        },
+        "additionalTypeScriptCompilations": 0
+      },
+      "genericFunctionValues": {
+        "receipt": {
+          "path": "development/N1/generic-erasure/receipt.json",
+          "sha256": "0fe40de634ef3cfe6a7f717f1bdb43791659cfe72cb96c7e22bd70b2de41ac72",
+          "bytes": 24888
+        },
+        "source": {
+          "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+          "sha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+          "bytes": 6340
+        },
+        "artifacts": {
+          "admissions": {
+            "path": "development/N1/generic-erasure/admissions.json",
+            "sha256": "6c97944c3ef08ae3c3b7b6c51a6f79b859cde986434250cf2c7e651b6b83b2de",
+            "bytes": 56770
+          },
+          "typescript": {
+            "path": "development/N1/generic-erasure/generated/index.ts",
+            "sha256": "5eac47888b911259650e427655111e95dd7a30b1f7bec66a9b2bd454e1aac5e2",
+            "bytes": 22169
+          },
+          "javascript": {
+            "path": "development/N1/generic-erasure/generated/index.js",
+            "sha256": "2d89191fbf8bccd5b726107f7be055fa73ada6bd613aae29a7190b3029c54506",
+            "bytes": 16583
+          }
+        },
+        "native": {
+          "typescript": {
+            "path": "development/N1/generic-erasure/native/index.ts",
+            "sha256": "5eac47888b911259650e427655111e95dd7a30b1f7bec66a9b2bd454e1aac5e2",
+            "bytes": 22169
+          },
+          "javascript": {
+            "path": "development/N1/generic-erasure/native/index.js",
+            "sha256": "2d89191fbf8bccd5b726107f7be055fa73ada6bd613aae29a7190b3029c54506",
+            "bytes": 16583
+          },
+          "oldRecursiveObservationCount": 19,
+          "pureValueCount": 14,
+          "hostDemandDiagnosticCount": 5
+        },
+        "recursion": {
+          "artifact": {
+            "path": "development/N1/generic-erasure/recursion-core.json",
+            "sha256": "c6fb71d4fd112b51a48fc33634596f37e2c1b3f9550cee588f6396d052aa7869",
+            "bytes": 16301
+          },
+          "sourceSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+          "declarations": [
+            {
+              "name": "sh1CoreMajorCapture",
+              "sourceRuntimeArity": 1,
+              "coreSha256": "d542280104cf9fe4bfbd41f4e8ea6da7594549a9b801e78c43e53456906bcb70"
+            },
+            {
+              "name": "sh1CoreNestedOuter",
+              "sourceRuntimeArity": 1,
+              "coreSha256": "920b724e71e5e2f899ac76f66c2b087bd0b5e219ca3ba95bbdc2baf11da2be30"
+            }
+          ],
+          "referenceObservationCount": 4,
+          "emittedObservationCount": 4,
+          "nativeObservationCount": 4,
+          "observationsSha256": "2175961ce66dd9c672fef02a134259614e8363f67073b7673d28c9eac5f36fdd",
+          "referenceObservationsSha256": "02944c08b237a9e0d04d31ce1164c2dcb738a69b950fc528b79baa14d55765fb",
+          "budget": {
+            "limit": 20000,
+            "used": 316,
+            "remaining": 19684,
+            "scope": "shared across all four reference observations"
+          },
+          "snapshot": {
+            "nodes": 78,
+            "nodeLimit": 8192,
+            "depthLimit": 128
+          },
+          "finiteEvidenceOnly": true,
+          "generalRecursorDemandAdequacy": false
+        },
+        "recursiveStructures": {
+          "policy": "recursive-structure-fields-and-root-hypotheses/1",
+          "compileOnly": true,
+          "structureCount": 2,
+          "declarationCount": 4,
+          "projectionCount": 6,
+          "usedHypothesisCount": 2,
+          "unusedHypothesisCount": 2,
+          "layouts": [
+            {
+              "name": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "recursiveFieldIndex": 0,
+              "fields": [
+                {
+                  "name": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "recursiveFieldIndex": 1,
+              "fields": [
+                {
+                  "name": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  }
+                },
+                {
+                  "name": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "declarations": [
+            {
+              "name": "sh1RecursiveRecordObserve",
+              "structure": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "primitive",
+                "name": "nat"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveRecord",
+                  "arguments": []
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 0,
+              "body": {
+                "kind": "natural",
+                "value": "0"
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveRecordStep",
+              "structure": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "primitive",
+                "name": "nat"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveRecord",
+                  "arguments": []
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 0,
+              "body": {
+                "kind": "recursive-call",
+                "declaration": "sh1RecursiveRecordStep",
+                "typeArguments": [],
+                "arguments": [
+                  "next"
+                ],
+                "runtimeArity": 1
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveGenericObserve",
+              "structure": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "typeParameter",
+                "name": "T0"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveGenericRecord",
+                  "arguments": [
+                    {
+                      "kind": "typeParameter",
+                      "name": "T0"
+                    }
+                  ]
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "item",
+                  "binding": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  },
+                  "target": "_psStructureMajor"
+                },
+                {
+                  "index": 1,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 1,
+              "body": {
+                "kind": "field",
+                "field": "item",
+                "binding": "item"
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveGenericStep",
+              "structure": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "typeParameter",
+                "name": "T0"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveGenericRecord",
+                  "arguments": [
+                    {
+                      "kind": "typeParameter",
+                      "name": "T0"
+                    }
+                  ]
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "item",
+                  "binding": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  },
+                  "target": "_psStructureMajor"
+                },
+                {
+                  "index": 1,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 1,
+              "body": {
+                "kind": "recursive-call",
+                "declaration": "sh1RecursiveGenericStep",
+                "typeArguments": [
+                  {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  }
+                ],
+                "arguments": [
+                  "next"
+                ],
+                "runtimeArity": 1
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            }
+          ],
+          "layoutsSha256": "93748a074080b08c97d5a5458c9cfaa01a066de3648a6b4d7361e9ad8d29a3e6",
+          "declarationsSha256": "851a91292d14db040cbf5b0a218f6382a5a9d06199530e1d54d025e2c15aeed8",
+          "originalIr": {
+            "accepted": true,
+            "traversalComplete": true,
+            "findingCount": "0",
+            "expressionCount": "316",
+            "visitedSteps": "3817",
+            "checkedObjectIsEmittedObject": true,
+            "reusedExistingCheck": true
+          },
+          "runtimeInvocations": 0,
+          "constructedRuntimeRecords": 0,
+          "additionalPreparations": 0,
+          "additionalIrChecks": 0,
+          "additionalTypeScriptCompilations": 0,
+          "additionalNativeExecutions": 0,
+          "finiteEvidenceOnly": true,
+          "generalRecursorDemandAdequacyProven": false,
+          "semanticPreservationProven": false
+        },
+        "originalIr": {
+          "accepted": true,
+          "traversalComplete": true,
+          "findingCount": "0",
+          "expressionCount": "316",
+          "visitedSteps": "3817",
+          "checkedObjectIsEmittedObject": true
+        },
+        "policy": "canonical-unary-values-flat-aligned-entries/1",
+        "sourceEntries": [
+          {
+            "name": "sh1GroupIdentity",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupDirect",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupLet",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupApply",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupHigher",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupWeighted",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupKnown",
+            "runtimeArity": 0
+          },
+          {
+            "name": "sh1GroupRecordUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupBoxUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayMap",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayFold",
+            "runtimeArity": 0
+          },
+          {
+            "name": "sh1GroupComputed",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupTypeOnlyUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeOnlyHigher",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeProofOnlyUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupLambda",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupProjection",
+            "runtimeArity": 1
+          }
+        ],
+        "typeActivationEntries": [
+          {
+            "name": "sh1GroupTypeOnly",
+            "sourceRuntimeArity": 0,
+            "physicalRuntimeArity": 1,
+            "internalActivation": "fresh-ignored-unit",
+            "typeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeProofOnly",
+            "sourceRuntimeArity": 0,
+            "physicalRuntimeArity": 1,
+            "internalActivation": "fresh-ignored-unit",
+            "typeArity": 1
+          }
+        ],
+        "oldRecursiveObservationCount": 19,
+        "pureValueCount": 14,
+        "hostDemandDiagnosticCount": 5,
+        "observationsSha256": "056d3d60bd6017df424e49bc2f05fe1fd3aab1f681e618c2deb20817c0f27542",
+        "finiteEvidenceOnly": true,
+        "sourceEffectCapabilityAdded": false
+      },
+      "structuralRecursionRefusals": {
+        "cases": {
+          "path": "development/N1/strict-source/source-cases.json",
+          "sha256": "4091eed1667c3a393c891aaee2b7dbf53efcf9790dd28d7b0efe64971618d77a",
+          "bytes": 13969
+        },
+        "observations": [
+          {
+            "id": "nested-major-alias-lean",
+            "sourceKind": "lean",
+            "inputSha256": "f79fbfdbb2d0f19d74242f7c7f8395c95cf8646cf233d9588e9226a3273c6eb8",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedMajorAlias",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-major-alias-ps",
+            "sourceKind": "ps",
+            "inputSha256": "a69c438a49e2dfb519744a018d514f71270a60f3703d3fe49a286ba9a3ee5bda",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedMajorAlias",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-descendant-lean",
+            "sourceKind": "lean",
+            "inputSha256": "9a26a9d572d348f8380d547ac73779d2c85deb1aefb33cd71e654e3a51697bf8",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedDescendant",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-descendant-ps",
+            "sourceKind": "ps",
+            "inputSha256": "6e312e78fc3f13fa359ca715947ea175ddbe38e544ad2660dddd3730547fb8f4",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedDescendant",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "implicit-major-dependent-proof",
+            "sourceKind": "lean",
+            "inputSha256": "8cb1ca86bca4886e47a11eba364c77790a49bb3cc2bdb1644aabe021c1e0948c",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionDependentParameter",
+            "owner": "sh1ImplicitMajorProof",
+            "boundary": "structural-recursion-original-telescope"
+          }
+        ],
+        "observationCount": 5,
+        "observationBoundary": "owned frontend structural elaboration",
+        "oldSourceRefusalCount": 33,
+        "totalSourceRefusalCount": 38,
+        "finiteEvidenceOnly": true,
+        "generalRecursorDemandAdequacy": false
+      },
+      "operationCount": 45,
+      "observationCount": 186,
+      "sourceRefusals": 38,
+      "targetRefusals": 20
+    },
+    {
+      "name": "C1",
+      "compiler": {
+        "path": "C1/index.js",
+        "sha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+        "bytes": 3295597
+      },
+      "source": {
+        "path": "C1/strict-source/receipt.json",
+        "sha256": "629b64b90b301b7316848e78e315ce8a6bfc96e156394f3ddb2d06ddf8122c2b",
+        "bytes": 71655
+      },
+      "target": {
+        "path": "C1/strict-target/receipt.json",
+        "sha256": "5ebbc3f123dd8c4def3235560b9eaf9fc96cf00dd7650d0aecbfda245275700f",
+        "bytes": 42110
+      },
+      "runtime": {
+        "path": "C1/strict-runtime/receipt.json",
+        "sha256": "0bd5639fe0287030d7ef9f1f2c154d0aa9cad2ece033b94abf16f7e2dd3e8caf",
+        "bytes": 113977
+      },
+      "sourceEquality": {
+        "sources": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "C1/strict-runtime/source-equality/source.lean",
+              "sha256": "204bcc93f52f7c94906e90c32b88b43c34f2451b826bf529da67e79a4478eafd",
+              "bytes": 384
+            },
+            "receipt": {
+              "path": "C1/strict-runtime/source-equality/lean-source-receipt.json",
+              "sha256": "4906741032c0c7cc74ce7f6cbc10ddc70bc744a113f3a2e89646cefac2f49c0b",
+              "bytes": 7694
+            },
+            "originsSha256": "01641e44e352c86de811ea5f540e931ab324a491721b6fc8ca65ce4d3e1ef7f7"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "C1/strict-runtime/source-equality/source.ps",
+              "sha256": "375cad953640b6ffa67907dd44aa8ca866f4e94ad46c8ef91c0ea5529410c6fb",
+              "bytes": 396
+            },
+            "receipt": {
+              "path": "C1/strict-runtime/source-equality/ps-source-receipt.json",
+              "sha256": "ba9f63e57fc90c991022ca267f8942fe61248f1c46a6f124b76b8724cf92ae07",
+              "bytes": 7690
+            },
+            "originsSha256": "29474768ba644d1743cf87c2e9b8cb9e9644b7acd2475d60b64366e080ad7348"
+          }
+        ],
+        "artifacts": {
+          "typescript": {
+            "path": "C1/strict-runtime/source-equality/runtime/index.ts",
+            "sha256": "40d9d49e9cb75e8cfa04647b0ad317c76ff12a0c6da49529484986d31e469923",
+            "bytes": 5344
+          },
+          "javascript": {
+            "path": "C1/strict-runtime/source-equality/runtime/index.js",
+            "sha256": "079644faa65f8071704b4a8b97b130f4d85e8097e4cc23a7ce586e44fb0ba80f",
+            "bytes": 3764
+          },
+          "admissions": {
+            "path": "C1/strict-runtime/source-equality/admissions.jsonl",
+            "sha256": "11d84ba55d9e11ad71ef1bbef35b64b372e046cb3aa6583f16d1e13bbc54cc7b",
+            "bytes": 2633
+          }
+        },
+        "observationCount": 6,
+        "observationsSha256": "b4dabf2437d90a5e14aaffc8bd81f790d67d13206580369acfa26fbc0314a216"
+      },
+      "sourceEvaluation": {
+        "sources": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "C1/strict-runtime/source-evaluation/source.lean",
+              "sha256": "aa068f731e363494a42127e33fc8fc292de66de62075593f5c29ffb2af45748e",
+              "bytes": 2380
+            },
+            "receipt": {
+              "path": "C1/strict-runtime/source-evaluation/lean-source-receipt.json",
+              "sha256": "9180f7ba3946da0959494329ee360f405a4f8caf53f2e51a40bf1f810b04c5e8",
+              "bytes": 13100
+            },
+            "originsSha256": "422ee14f019f72cb1eee80678aad3c412a1ee4a46aa42137f76779edbfe5ab94"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "C1/strict-runtime/source-evaluation/source.ps",
+              "sha256": "27d9877bdd05f2189735047edf33b509ae6adab028fb7ebb128509e96b6cab1e",
+              "bytes": 2416
+            },
+            "receipt": {
+              "path": "C1/strict-runtime/source-evaluation/ps-source-receipt.json",
+              "sha256": "f7346e7371fa33533c2e72f56fd2dc8625040996f7815888cce852afcb115fda",
+              "bytes": 13090
+            },
+            "originsSha256": "fcbd61c87f95f0115e7dd1b3e26f02f8434e8c560cc960b032ed7c082f5e5aa6"
+          }
+        ],
+        "artifacts": {
+          "typescript": {
+            "path": "C1/strict-runtime/source-evaluation/runtime/index.ts",
+            "sha256": "ab068597b0677d5e02dbea64c46fbaf09d35efeda5504e13fba234d734b1d72d",
+            "bytes": 11693
+          },
+          "javascript": {
+            "path": "C1/strict-runtime/source-evaluation/runtime/index.js",
+            "sha256": "3bc7a55998c3cba4d1b9559a7b8850585086062d5812e787aaa1dcef5ad4e7c4",
+            "bytes": 9315
+          },
+          "admissions": {
+            "path": "C1/strict-runtime/source-evaluation/admissions.jsonl",
+            "sha256": "bafafb8154f1fa11a267ac99be0262dc831e0b629d5af42659eda80091cfbd88",
+            "bytes": 27093
+          }
+        },
+        "nativeReference": {
+          "path": "development/N1/strict-runtime-reference/native-source-evaluation/receipt.json",
+          "sha256": "18a60cd84fa8876de58a3c7d0ee7ad26fea431d9096183b335254c0bc3020917",
+          "bytes": 8226
+        },
+        "observationCount": 24,
+        "observationsSha256": "9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f",
+        "hostProbeCount": 21,
+        "hostProbesSha256": "76dba00fb02adff5cc8bd76d52f178b95cd6b9886542e8b5cf5e0efc314aae91"
+      },
+      "capabilityOrigins": {
+        "receipt": {
+          "path": "C1/capabilities/receipt.json",
+          "sha256": "2013fc1f7d0f52711cee5702d9d00e31e2f3bde02dd2aa5a19a365561854231f",
+          "bytes": 404461
+        },
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "observationsSha256": "cb3cdcbd45eb87c25d8d2cf4f95ed3266c0081306a96355313536f53c85d3d1d"
+          },
+          {
+            "sourceKind": "ps",
+            "observationsSha256": "7f2134c8e79cb91ad31f3dcbdc29ed9cca07d40494726af3ff772671aa1a76e9"
+          }
+        ],
+        "emptyGrammar": {
+          "receiptField": "grammar",
+          "observationsSha256": "82b8dbb5464be253b179bc65e310d4f70d0c6d5324873d1b43131e9f202aa668",
+          "corpusSha256": "ab6d9abf0de2f0e705ecde686566f27cdc5ad24b9ae2a811e06406044910f30c",
+          "emptyElimination": {
+            "receiptField": "grammar.emptyElimination",
+            "pairs": 5,
+            "refusals": 6,
+            "observationsSha256": "64a6ae2412150352c88e008c8f4ec1dcf587fb17e237cb8c89e8f6c6b15cf026"
+          },
+          "zeroFieldRecords": {
+            "receiptField": "grammar.zeroFieldRecords",
+            "pairs": 1,
+            "refusals": 2,
+            "observationsSha256": "a75f957141cfa202685891d2cd5cd09689d18e870a8894defe01fa0257a166ff"
+          },
+          "additionalPreparations": 0
+        },
+        "sourceDeclarationsPerKind": 35,
+        "coreDeclarationsPerKind": 55,
+        "normalizationPlansPerKind": 16,
+        "originRefusals": 6
+      },
+      "ingressSnapshots": {
+        "malformedOptionCases": 14,
+        "snapshotProbes": 1,
+        "emittedSourceKinds": 2,
+        "additionalPreparations": 0,
+        "observationsSha256": "d009013b662a0f93c6f246c66eae48e24cbe9577d0857342944e7ac6282394d3"
+      },
+      "emptySource": {
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "C1/strict-source/empty.lean",
+              "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+              "bytes": 345
+            },
+            "typescript": {
+              "path": "C1/strict-source/accepted-lean.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "originsSha256": "ae4af46bb826137c357f7820e3720248b2b401af178cb321a20aad520a96ddb5",
+            "eliminationsSha256": "c51015411975a19335173393f011c9373437919c1004d7981b3a8b2a2fb8aa70"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "C1/strict-source/empty.ps",
+              "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390",
+              "bytes": 369
+            },
+            "typescript": {
+              "path": "C1/strict-source/accepted-ps.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "originsSha256": "caf683b2831a68ee44f34837af9e265f271a20c09ede67a661ac85d61d0ea0e0",
+            "eliminationsSha256": "c51015411975a19335173393f011c9373437919c1004d7981b3a8b2a2fb8aa70"
+          }
+        ],
+        "sourceKinds": 2,
+        "emptyLayoutsPerKind": 1,
+        "typedEliminationsPerKind": 4,
+        "emittedTypeScriptEqual": true,
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "nativeValueOracle": false,
+        "observationsSha256": "28a6627fa41068c9110ee94320747121a1ea23efa240eaacc9dde115a7c4fa45"
+      },
+      "zeroFieldSource": {
+        "receiptField": "zeroFieldRecords",
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "sourceInput": {
+              "moduleName": [
+                "Ps",
+                "Compiler",
+                "StrictLibrary"
+              ],
+              "sourceSha256": "f05f697f9defd99c1db8288659008a6d7b14bb19b1b973b73e1d85b36661d795",
+              "sourceBytes": 364
+            },
+            "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "originsSha256": "ae4af46bb826137c357f7820e3720248b2b401af178cb321a20aad520a96ddb5",
+            "originBatchesSha256": "3f55ab17df99dbe03bab3dc6ce5323be025076c49988bf2dad4df5471725ad8d",
+            "typescript": {
+              "path": "C1/strict-source/accepted-lean.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "observationsSha256": "83f05b4f27b5c85d1aef2e73bcc0fa3d574240f8e9bb277b0a130802aa19be12"
+          },
+          {
+            "sourceKind": "ps",
+            "sourceInput": {
+              "moduleName": [
+                "Ps",
+                "Compiler",
+                "StrictLibrary"
+              ],
+              "sourceSha256": "e1bb231c6e8c9aa5cfb7077567e490d5853d16509665ee2fed27abadfce3d9d8",
+              "sourceBytes": 368
+            },
+            "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "originsSha256": "caf683b2831a68ee44f34837af9e265f271a20c09ede67a661ac85d61d0ea0e0",
+            "originBatchesSha256": "b1e53ad20d3a9eee456f1d1e990d16d44518e004388d4ff7942c0d3b3aaa8151",
+            "typescript": {
+              "path": "C1/strict-source/accepted-ps.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "observationsSha256": "e42c7e58a2aed3ac0086adc0117b2b086739eca4117c1edc74017d51b4ce28b7"
+          }
+        ],
+        "sourceKinds": 2,
+        "sourceDeclarationsPerKind": 2,
+        "coreDeclarationsPerKind": 4,
+        "constructorsPerKind": 1,
+        "fieldsPerKind": 0,
+        "actualRecordValueRetained": true,
+        "inhabited": true,
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "observationsSha256": "5e958b8541590cd110421802a1a0503f293120739a156be33c752bdd15fba1e0"
+      },
+      "emptyIr": {
+        "receipt": {
+          "path": "C1/ir-checker/receipt.json",
+          "sha256": "1fbcd173fca5967cec4a9d84eb83924327cd432b824638f6b40326619d590ead",
+          "bytes": 23004
+        },
+        "artifacts": {
+          "typescript": {
+            "path": "C1/ir-checker/accepted/index.ts",
+            "sha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+            "bytes": 17088
+          },
+          "javascript": {
+            "path": "C1/ir-checker/accepted/index.js",
+            "sha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633",
+            "bytes": 13158
+          },
+          "declarations": {
+            "path": "C1/ir-checker/accepted/index.d.ts",
+            "sha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+            "bytes": 3763
+          }
+        },
+        "acceptedFixtureSha256": "f98020b336db1074a66f86878c63343d3517dd5d2c5a1cf6ce360f71688ccf8f",
+        "rejectedCases": 38,
+        "rejectionsSha256": "06504b059fe2330cbf042fc2e29745f8f8b43d5c159dd8bb190abcb40d141b7f",
+        "behaviorObservations": 61,
+        "behaviorSha256": "6d20ed4181b1e8efbadc2b9265cdc11c68e92ec31d4a942c1f12e499d69ad19c",
+        "optimizedTail": {
+          "receiptField": "optimizedTail",
+          "observationCount": 12,
+          "valueObservations": 11,
+          "faultObservations": 1,
+          "entriesSha256": "dd67f2ac069552de9f4c9e8a4c30573606de53682ae7a0071246a6db0715bddc",
+          "layoutSha256": "3b4a16610a52c78099e8b680e08730da692bff77e9b221e738801a91f3c262d2",
+          "observationsSha256": "1ed33c52978fa93847435b1f3bd06e78bf811a2d13b1f26ff5bb3571faab97aa",
+          "acceptedFixtureSha256": "f98020b336db1074a66f86878c63343d3517dd5d2c5a1cf6ce360f71688ccf8f",
+          "sameAcceptedArtifacts": true,
+          "artifacts": {
+            "typescript": {
+              "path": "C1/ir-checker/accepted/index.ts",
+              "sha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+              "bytes": 17088
+            },
+            "javascript": {
+              "path": "C1/ir-checker/accepted/index.js",
+              "sha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633",
+              "bytes": 13158
+            },
+            "declarations": {
+              "path": "C1/ir-checker/accepted/index.d.ts",
+              "sha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+              "bytes": 3763
+            }
+          },
+          "additionalPreparations": 0,
+          "additionalPortableIrChecks": 0,
+          "additionalEmissions": 0,
+          "additionalTypeScriptCompilations": 0,
+          "additionalNativeExecutions": 0
+        },
+        "emptyElimination": {
+          "receiptField": "emptyElimination",
+          "emptyLayouts": 2,
+          "emptyEliminations": 5,
+          "signaturesSha256": "e3fa3b63bf0c084ffbac021994354c1fcb89a99a1e0a8b43e42bdc591eddbb66",
+          "observationsSha256": "bd40a53027a30edff4fe5501d6d8ee0325dddb0364ec45f245c48876e7e31e80",
+          "scrutinee": {
+            "callbackCalls": 1,
+            "propagatedOriginalFailure": true,
+            "noEmptyInhabitantConstructed": true
+          },
+          "nativeValueOracle": false
+        },
+        "zeroFieldRecords": {
+          "receiptField": "zeroFieldRecords",
+          "structures": 1,
+          "fields": 0,
+          "values": 1,
+          "observationsSha256": "e8cb5505a0ecc91c63c518690f205b74cd27c9b5ce05addc94032774b24d777d",
+          "runtime": {
+            "ownStringFields": 0,
+            "ownBrandSymbols": 1,
+            "inhabited": true
+          }
+        },
+        "additionalTypeScriptCompilations": 0
+      },
+      "genericFunctionValues": {
+        "receipt": {
+          "path": "C1/generic-erasure/receipt.json",
+          "sha256": "f4c3f76d3d08b2714c4665f32659e23bf5adcfdff9c482c58dafc260856c92c2",
+          "bytes": 24888
+        },
+        "source": {
+          "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+          "sha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+          "bytes": 6340
+        },
+        "artifacts": {
+          "admissions": {
+            "path": "C1/generic-erasure/admissions.json",
+            "sha256": "6c97944c3ef08ae3c3b7b6c51a6f79b859cde986434250cf2c7e651b6b83b2de",
+            "bytes": 56770
+          },
+          "typescript": {
+            "path": "C1/generic-erasure/generated/index.ts",
+            "sha256": "5eac47888b911259650e427655111e95dd7a30b1f7bec66a9b2bd454e1aac5e2",
+            "bytes": 22169
+          },
+          "javascript": {
+            "path": "C1/generic-erasure/generated/index.js",
+            "sha256": "2d89191fbf8bccd5b726107f7be055fa73ada6bd613aae29a7190b3029c54506",
+            "bytes": 16583
+          }
+        },
+        "native": {
+          "typescript": {
+            "path": "C1/generic-erasure/native/index.ts",
+            "sha256": "5eac47888b911259650e427655111e95dd7a30b1f7bec66a9b2bd454e1aac5e2",
+            "bytes": 22169
+          },
+          "javascript": {
+            "path": "C1/generic-erasure/native/index.js",
+            "sha256": "2d89191fbf8bccd5b726107f7be055fa73ada6bd613aae29a7190b3029c54506",
+            "bytes": 16583
+          },
+          "oldRecursiveObservationCount": 19,
+          "pureValueCount": 14,
+          "hostDemandDiagnosticCount": 5
+        },
+        "recursion": {
+          "artifact": {
+            "path": "C1/generic-erasure/recursion-core.json",
+            "sha256": "c6fb71d4fd112b51a48fc33634596f37e2c1b3f9550cee588f6396d052aa7869",
+            "bytes": 16301
+          },
+          "sourceSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+          "declarations": [
+            {
+              "name": "sh1CoreMajorCapture",
+              "sourceRuntimeArity": 1,
+              "coreSha256": "d542280104cf9fe4bfbd41f4e8ea6da7594549a9b801e78c43e53456906bcb70"
+            },
+            {
+              "name": "sh1CoreNestedOuter",
+              "sourceRuntimeArity": 1,
+              "coreSha256": "920b724e71e5e2f899ac76f66c2b087bd0b5e219ca3ba95bbdc2baf11da2be30"
+            }
+          ],
+          "referenceObservationCount": 4,
+          "emittedObservationCount": 4,
+          "nativeObservationCount": 4,
+          "observationsSha256": "2175961ce66dd9c672fef02a134259614e8363f67073b7673d28c9eac5f36fdd",
+          "referenceObservationsSha256": "02944c08b237a9e0d04d31ce1164c2dcb738a69b950fc528b79baa14d55765fb",
+          "budget": {
+            "limit": 20000,
+            "used": 316,
+            "remaining": 19684,
+            "scope": "shared across all four reference observations"
+          },
+          "snapshot": {
+            "nodes": 78,
+            "nodeLimit": 8192,
+            "depthLimit": 128
+          },
+          "finiteEvidenceOnly": true,
+          "generalRecursorDemandAdequacy": false
+        },
+        "recursiveStructures": {
+          "policy": "recursive-structure-fields-and-root-hypotheses/1",
+          "compileOnly": true,
+          "structureCount": 2,
+          "declarationCount": 4,
+          "projectionCount": 6,
+          "usedHypothesisCount": 2,
+          "unusedHypothesisCount": 2,
+          "layouts": [
+            {
+              "name": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "recursiveFieldIndex": 0,
+              "fields": [
+                {
+                  "name": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "recursiveFieldIndex": 1,
+              "fields": [
+                {
+                  "name": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  }
+                },
+                {
+                  "name": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "declarations": [
+            {
+              "name": "sh1RecursiveRecordObserve",
+              "structure": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "primitive",
+                "name": "nat"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveRecord",
+                  "arguments": []
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 0,
+              "body": {
+                "kind": "natural",
+                "value": "0"
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveRecordStep",
+              "structure": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "primitive",
+                "name": "nat"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveRecord",
+                  "arguments": []
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 0,
+              "body": {
+                "kind": "recursive-call",
+                "declaration": "sh1RecursiveRecordStep",
+                "typeArguments": [],
+                "arguments": [
+                  "next"
+                ],
+                "runtimeArity": 1
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveGenericObserve",
+              "structure": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "typeParameter",
+                "name": "T0"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveGenericRecord",
+                  "arguments": [
+                    {
+                      "kind": "typeParameter",
+                      "name": "T0"
+                    }
+                  ]
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "item",
+                  "binding": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  },
+                  "target": "_psStructureMajor"
+                },
+                {
+                  "index": 1,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 1,
+              "body": {
+                "kind": "field",
+                "field": "item",
+                "binding": "item"
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveGenericStep",
+              "structure": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "typeParameter",
+                "name": "T0"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveGenericRecord",
+                  "arguments": [
+                    {
+                      "kind": "typeParameter",
+                      "name": "T0"
+                    }
+                  ]
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "item",
+                  "binding": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  },
+                  "target": "_psStructureMajor"
+                },
+                {
+                  "index": 1,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 1,
+              "body": {
+                "kind": "recursive-call",
+                "declaration": "sh1RecursiveGenericStep",
+                "typeArguments": [
+                  {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  }
+                ],
+                "arguments": [
+                  "next"
+                ],
+                "runtimeArity": 1
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            }
+          ],
+          "layoutsSha256": "93748a074080b08c97d5a5458c9cfaa01a066de3648a6b4d7361e9ad8d29a3e6",
+          "declarationsSha256": "851a91292d14db040cbf5b0a218f6382a5a9d06199530e1d54d025e2c15aeed8",
+          "originalIr": {
+            "accepted": true,
+            "traversalComplete": true,
+            "findingCount": "0",
+            "expressionCount": "316",
+            "visitedSteps": "3817",
+            "checkedObjectIsEmittedObject": true,
+            "reusedExistingCheck": true
+          },
+          "runtimeInvocations": 0,
+          "constructedRuntimeRecords": 0,
+          "additionalPreparations": 0,
+          "additionalIrChecks": 0,
+          "additionalTypeScriptCompilations": 0,
+          "additionalNativeExecutions": 0,
+          "finiteEvidenceOnly": true,
+          "generalRecursorDemandAdequacyProven": false,
+          "semanticPreservationProven": false
+        },
+        "originalIr": {
+          "accepted": true,
+          "traversalComplete": true,
+          "findingCount": "0",
+          "expressionCount": "316",
+          "visitedSteps": "3817",
+          "checkedObjectIsEmittedObject": true
+        },
+        "policy": "canonical-unary-values-flat-aligned-entries/1",
+        "sourceEntries": [
+          {
+            "name": "sh1GroupIdentity",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupDirect",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupLet",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupApply",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupHigher",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupWeighted",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupKnown",
+            "runtimeArity": 0
+          },
+          {
+            "name": "sh1GroupRecordUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupBoxUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayMap",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayFold",
+            "runtimeArity": 0
+          },
+          {
+            "name": "sh1GroupComputed",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupTypeOnlyUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeOnlyHigher",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeProofOnlyUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupLambda",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupProjection",
+            "runtimeArity": 1
+          }
+        ],
+        "typeActivationEntries": [
+          {
+            "name": "sh1GroupTypeOnly",
+            "sourceRuntimeArity": 0,
+            "physicalRuntimeArity": 1,
+            "internalActivation": "fresh-ignored-unit",
+            "typeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeProofOnly",
+            "sourceRuntimeArity": 0,
+            "physicalRuntimeArity": 1,
+            "internalActivation": "fresh-ignored-unit",
+            "typeArity": 1
+          }
+        ],
+        "oldRecursiveObservationCount": 19,
+        "pureValueCount": 14,
+        "hostDemandDiagnosticCount": 5,
+        "observationsSha256": "056d3d60bd6017df424e49bc2f05fe1fd3aab1f681e618c2deb20817c0f27542",
+        "finiteEvidenceOnly": true,
+        "sourceEffectCapabilityAdded": false
+      },
+      "structuralRecursionRefusals": {
+        "cases": {
+          "path": "C1/strict-source/source-cases.json",
+          "sha256": "4091eed1667c3a393c891aaee2b7dbf53efcf9790dd28d7b0efe64971618d77a",
+          "bytes": 13969
+        },
+        "observations": [
+          {
+            "id": "nested-major-alias-lean",
+            "sourceKind": "lean",
+            "inputSha256": "f79fbfdbb2d0f19d74242f7c7f8395c95cf8646cf233d9588e9226a3273c6eb8",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedMajorAlias",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-major-alias-ps",
+            "sourceKind": "ps",
+            "inputSha256": "a69c438a49e2dfb519744a018d514f71270a60f3703d3fe49a286ba9a3ee5bda",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedMajorAlias",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-descendant-lean",
+            "sourceKind": "lean",
+            "inputSha256": "9a26a9d572d348f8380d547ac73779d2c85deb1aefb33cd71e654e3a51697bf8",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedDescendant",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-descendant-ps",
+            "sourceKind": "ps",
+            "inputSha256": "6e312e78fc3f13fa359ca715947ea175ddbe38e544ad2660dddd3730547fb8f4",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedDescendant",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "implicit-major-dependent-proof",
+            "sourceKind": "lean",
+            "inputSha256": "8cb1ca86bca4886e47a11eba364c77790a49bb3cc2bdb1644aabe021c1e0948c",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionDependentParameter",
+            "owner": "sh1ImplicitMajorProof",
+            "boundary": "structural-recursion-original-telescope"
+          }
+        ],
+        "observationCount": 5,
+        "observationBoundary": "owned frontend structural elaboration",
+        "oldSourceRefusalCount": 33,
+        "totalSourceRefusalCount": 38,
+        "finiteEvidenceOnly": true,
+        "generalRecursorDemandAdequacy": false
+      },
+      "operationCount": 45,
+      "observationCount": 186,
+      "sourceRefusals": 38,
+      "targetRefusals": 20
+    },
+    {
+      "name": "C2",
+      "compiler": {
+        "path": "C2/index.js",
+        "sha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+        "bytes": 3142142
+      },
+      "source": {
+        "path": "C2/strict-source/receipt.json",
+        "sha256": "497b393a03842827f27ced6e187827461525b2a40bfe9ebd231f62d5a1060c34",
+        "bytes": 71655
+      },
+      "target": {
+        "path": "C2/strict-target/receipt.json",
+        "sha256": "43890410db810eccd173e25122b7d7a03d74c95f56396e73f1f902df8ad26a9d",
+        "bytes": 42110
+      },
+      "runtime": {
+        "path": "C2/strict-runtime/receipt.json",
+        "sha256": "eb0151322a963a576aa3e153422d17082624a4ff6a4a6add2f301f29792c3523",
+        "bytes": 113977
+      },
+      "sourceEquality": {
+        "sources": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "C2/strict-runtime/source-equality/source.lean",
+              "sha256": "204bcc93f52f7c94906e90c32b88b43c34f2451b826bf529da67e79a4478eafd",
+              "bytes": 384
+            },
+            "receipt": {
+              "path": "C2/strict-runtime/source-equality/lean-source-receipt.json",
+              "sha256": "e8e1c4d48e4a4187754fc4575f5ccd434a466b53fe7b608438df66aa7c646b1c",
+              "bytes": 7694
+            },
+            "originsSha256": "01641e44e352c86de811ea5f540e931ab324a491721b6fc8ca65ce4d3e1ef7f7"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "C2/strict-runtime/source-equality/source.ps",
+              "sha256": "375cad953640b6ffa67907dd44aa8ca866f4e94ad46c8ef91c0ea5529410c6fb",
+              "bytes": 396
+            },
+            "receipt": {
+              "path": "C2/strict-runtime/source-equality/ps-source-receipt.json",
+              "sha256": "a0b0d7697d9f98c36b55ca86839620d9b22122e670ab698a9dadc396ba042834",
+              "bytes": 7690
+            },
+            "originsSha256": "29474768ba644d1743cf87c2e9b8cb9e9644b7acd2475d60b64366e080ad7348"
+          }
+        ],
+        "artifacts": {
+          "typescript": {
+            "path": "C2/strict-runtime/source-equality/runtime/index.ts",
+            "sha256": "40d9d49e9cb75e8cfa04647b0ad317c76ff12a0c6da49529484986d31e469923",
+            "bytes": 5344
+          },
+          "javascript": {
+            "path": "C2/strict-runtime/source-equality/runtime/index.js",
+            "sha256": "079644faa65f8071704b4a8b97b130f4d85e8097e4cc23a7ce586e44fb0ba80f",
+            "bytes": 3764
+          },
+          "admissions": {
+            "path": "C2/strict-runtime/source-equality/admissions.jsonl",
+            "sha256": "11d84ba55d9e11ad71ef1bbef35b64b372e046cb3aa6583f16d1e13bbc54cc7b",
+            "bytes": 2633
+          }
+        },
+        "observationCount": 6,
+        "observationsSha256": "b4dabf2437d90a5e14aaffc8bd81f790d67d13206580369acfa26fbc0314a216"
+      },
+      "sourceEvaluation": {
+        "sources": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "C2/strict-runtime/source-evaluation/source.lean",
+              "sha256": "aa068f731e363494a42127e33fc8fc292de66de62075593f5c29ffb2af45748e",
+              "bytes": 2380
+            },
+            "receipt": {
+              "path": "C2/strict-runtime/source-evaluation/lean-source-receipt.json",
+              "sha256": "c06fc09866b3637e3f6bfbb6e37b691200441a10802935c11c040476af42324d",
+              "bytes": 13100
+            },
+            "originsSha256": "422ee14f019f72cb1eee80678aad3c412a1ee4a46aa42137f76779edbfe5ab94"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "C2/strict-runtime/source-evaluation/source.ps",
+              "sha256": "27d9877bdd05f2189735047edf33b509ae6adab028fb7ebb128509e96b6cab1e",
+              "bytes": 2416
+            },
+            "receipt": {
+              "path": "C2/strict-runtime/source-evaluation/ps-source-receipt.json",
+              "sha256": "261eab3c66ca63cf754273e2208d4c89b3e63d63fe0930156798398338eaba24",
+              "bytes": 13090
+            },
+            "originsSha256": "fcbd61c87f95f0115e7dd1b3e26f02f8434e8c560cc960b032ed7c082f5e5aa6"
+          }
+        ],
+        "artifacts": {
+          "typescript": {
+            "path": "C2/strict-runtime/source-evaluation/runtime/index.ts",
+            "sha256": "ab068597b0677d5e02dbea64c46fbaf09d35efeda5504e13fba234d734b1d72d",
+            "bytes": 11693
+          },
+          "javascript": {
+            "path": "C2/strict-runtime/source-evaluation/runtime/index.js",
+            "sha256": "3bc7a55998c3cba4d1b9559a7b8850585086062d5812e787aaa1dcef5ad4e7c4",
+            "bytes": 9315
+          },
+          "admissions": {
+            "path": "C2/strict-runtime/source-evaluation/admissions.jsonl",
+            "sha256": "bafafb8154f1fa11a267ac99be0262dc831e0b629d5af42659eda80091cfbd88",
+            "bytes": 27093
+          }
+        },
+        "nativeReference": {
+          "path": "development/N1/strict-runtime-reference/native-source-evaluation/receipt.json",
+          "sha256": "18a60cd84fa8876de58a3c7d0ee7ad26fea431d9096183b335254c0bc3020917",
+          "bytes": 8226
+        },
+        "observationCount": 24,
+        "observationsSha256": "9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f",
+        "hostProbeCount": 21,
+        "hostProbesSha256": "76dba00fb02adff5cc8bd76d52f178b95cd6b9886542e8b5cf5e0efc314aae91"
+      },
+      "capabilityOrigins": {
+        "receipt": {
+          "path": "C2/capabilities/receipt.json",
+          "sha256": "7be2ffe8a876fd5bdba709f6235013a4513582d8250a2ad42b3a25212a464c19",
+          "bytes": 403613
+        },
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "observationsSha256": "cb3cdcbd45eb87c25d8d2cf4f95ed3266c0081306a96355313536f53c85d3d1d"
+          },
+          {
+            "sourceKind": "ps",
+            "observationsSha256": "7f2134c8e79cb91ad31f3dcbdc29ed9cca07d40494726af3ff772671aa1a76e9"
+          }
+        ],
+        "emptyGrammar": {
+          "receiptField": "grammar",
+          "observationsSha256": "e220e094f0ae386418d920130fd427fb4fdf37a4c88e8de7dc8039d9f57f0019",
+          "corpusSha256": "ab6d9abf0de2f0e705ecde686566f27cdc5ad24b9ae2a811e06406044910f30c",
+          "emptyElimination": {
+            "receiptField": "grammar.emptyElimination",
+            "pairs": 5,
+            "refusals": 6,
+            "observationsSha256": "64a6ae2412150352c88e008c8f4ec1dcf587fb17e237cb8c89e8f6c6b15cf026"
+          },
+          "zeroFieldRecords": {
+            "receiptField": "grammar.zeroFieldRecords",
+            "pairs": 1,
+            "refusals": 2,
+            "observationsSha256": "a75f957141cfa202685891d2cd5cd09689d18e870a8894defe01fa0257a166ff"
+          },
+          "additionalPreparations": 0
+        },
+        "sourceDeclarationsPerKind": 35,
+        "coreDeclarationsPerKind": 55,
+        "normalizationPlansPerKind": 16,
+        "originRefusals": 6
+      },
+      "ingressSnapshots": {
+        "malformedOptionCases": 14,
+        "snapshotProbes": 1,
+        "emittedSourceKinds": 2,
+        "additionalPreparations": 0,
+        "observationsSha256": "d009013b662a0f93c6f246c66eae48e24cbe9577d0857342944e7ac6282394d3"
+      },
+      "emptySource": {
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "C2/strict-source/empty.lean",
+              "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+              "bytes": 345
+            },
+            "typescript": {
+              "path": "C2/strict-source/accepted-lean.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "originsSha256": "ae4af46bb826137c357f7820e3720248b2b401af178cb321a20aad520a96ddb5",
+            "eliminationsSha256": "c51015411975a19335173393f011c9373437919c1004d7981b3a8b2a2fb8aa70"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "C2/strict-source/empty.ps",
+              "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390",
+              "bytes": 369
+            },
+            "typescript": {
+              "path": "C2/strict-source/accepted-ps.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "originsSha256": "caf683b2831a68ee44f34837af9e265f271a20c09ede67a661ac85d61d0ea0e0",
+            "eliminationsSha256": "c51015411975a19335173393f011c9373437919c1004d7981b3a8b2a2fb8aa70"
+          }
+        ],
+        "sourceKinds": 2,
+        "emptyLayoutsPerKind": 1,
+        "typedEliminationsPerKind": 4,
+        "emittedTypeScriptEqual": true,
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "nativeValueOracle": false,
+        "observationsSha256": "28a6627fa41068c9110ee94320747121a1ea23efa240eaacc9dde115a7c4fa45"
+      },
+      "zeroFieldSource": {
+        "receiptField": "zeroFieldRecords",
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "sourceInput": {
+              "moduleName": [
+                "Ps",
+                "Compiler",
+                "StrictLibrary"
+              ],
+              "sourceSha256": "f05f697f9defd99c1db8288659008a6d7b14bb19b1b973b73e1d85b36661d795",
+              "sourceBytes": 364
+            },
+            "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "originsSha256": "ae4af46bb826137c357f7820e3720248b2b401af178cb321a20aad520a96ddb5",
+            "originBatchesSha256": "3f55ab17df99dbe03bab3dc6ce5323be025076c49988bf2dad4df5471725ad8d",
+            "typescript": {
+              "path": "C2/strict-source/accepted-lean.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "observationsSha256": "83f05b4f27b5c85d1aef2e73bcc0fa3d574240f8e9bb277b0a130802aa19be12"
+          },
+          {
+            "sourceKind": "ps",
+            "sourceInput": {
+              "moduleName": [
+                "Ps",
+                "Compiler",
+                "StrictLibrary"
+              ],
+              "sourceSha256": "e1bb231c6e8c9aa5cfb7077567e490d5853d16509665ee2fed27abadfce3d9d8",
+              "sourceBytes": 368
+            },
+            "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "originsSha256": "caf683b2831a68ee44f34837af9e265f271a20c09ede67a661ac85d61d0ea0e0",
+            "originBatchesSha256": "b1e53ad20d3a9eee456f1d1e990d16d44518e004388d4ff7942c0d3b3aaa8151",
+            "typescript": {
+              "path": "C2/strict-source/accepted-ps.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "observationsSha256": "e42c7e58a2aed3ac0086adc0117b2b086739eca4117c1edc74017d51b4ce28b7"
+          }
+        ],
+        "sourceKinds": 2,
+        "sourceDeclarationsPerKind": 2,
+        "coreDeclarationsPerKind": 4,
+        "constructorsPerKind": 1,
+        "fieldsPerKind": 0,
+        "actualRecordValueRetained": true,
+        "inhabited": true,
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "observationsSha256": "5e958b8541590cd110421802a1a0503f293120739a156be33c752bdd15fba1e0"
+      },
+      "emptyIr": {
+        "receipt": {
+          "path": "C2/ir-checker/receipt.json",
+          "sha256": "e86b250f85692b086e21b0295b9c11e590184fac61b5a0515d5383d15112e2f6",
+          "bytes": 23004
+        },
+        "artifacts": {
+          "typescript": {
+            "path": "C2/ir-checker/accepted/index.ts",
+            "sha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+            "bytes": 17088
+          },
+          "javascript": {
+            "path": "C2/ir-checker/accepted/index.js",
+            "sha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633",
+            "bytes": 13158
+          },
+          "declarations": {
+            "path": "C2/ir-checker/accepted/index.d.ts",
+            "sha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+            "bytes": 3763
+          }
+        },
+        "acceptedFixtureSha256": "a60b99aa759e547dcc13c854ac44dcc5485d9883b20e6c18eacb82c1b1b98f3d",
+        "rejectedCases": 38,
+        "rejectionsSha256": "06504b059fe2330cbf042fc2e29745f8f8b43d5c159dd8bb190abcb40d141b7f",
+        "behaviorObservations": 61,
+        "behaviorSha256": "6d20ed4181b1e8efbadc2b9265cdc11c68e92ec31d4a942c1f12e499d69ad19c",
+        "optimizedTail": {
+          "receiptField": "optimizedTail",
+          "observationCount": 12,
+          "valueObservations": 11,
+          "faultObservations": 1,
+          "entriesSha256": "dd67f2ac069552de9f4c9e8a4c30573606de53682ae7a0071246a6db0715bddc",
+          "layoutSha256": "3b4a16610a52c78099e8b680e08730da692bff77e9b221e738801a91f3c262d2",
+          "observationsSha256": "1ed33c52978fa93847435b1f3bd06e78bf811a2d13b1f26ff5bb3571faab97aa",
+          "acceptedFixtureSha256": "a60b99aa759e547dcc13c854ac44dcc5485d9883b20e6c18eacb82c1b1b98f3d",
+          "sameAcceptedArtifacts": true,
+          "artifacts": {
+            "typescript": {
+              "path": "C2/ir-checker/accepted/index.ts",
+              "sha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+              "bytes": 17088
+            },
+            "javascript": {
+              "path": "C2/ir-checker/accepted/index.js",
+              "sha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633",
+              "bytes": 13158
+            },
+            "declarations": {
+              "path": "C2/ir-checker/accepted/index.d.ts",
+              "sha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+              "bytes": 3763
+            }
+          },
+          "additionalPreparations": 0,
+          "additionalPortableIrChecks": 0,
+          "additionalEmissions": 0,
+          "additionalTypeScriptCompilations": 0,
+          "additionalNativeExecutions": 0
+        },
+        "emptyElimination": {
+          "receiptField": "emptyElimination",
+          "emptyLayouts": 2,
+          "emptyEliminations": 5,
+          "signaturesSha256": "e3fa3b63bf0c084ffbac021994354c1fcb89a99a1e0a8b43e42bdc591eddbb66",
+          "observationsSha256": "bd40a53027a30edff4fe5501d6d8ee0325dddb0364ec45f245c48876e7e31e80",
+          "scrutinee": {
+            "callbackCalls": 1,
+            "propagatedOriginalFailure": true,
+            "noEmptyInhabitantConstructed": true
+          },
+          "nativeValueOracle": false
+        },
+        "zeroFieldRecords": {
+          "receiptField": "zeroFieldRecords",
+          "structures": 1,
+          "fields": 0,
+          "values": 1,
+          "observationsSha256": "e8cb5505a0ecc91c63c518690f205b74cd27c9b5ce05addc94032774b24d777d",
+          "runtime": {
+            "ownStringFields": 0,
+            "ownBrandSymbols": 1,
+            "inhabited": true
+          }
+        },
+        "additionalTypeScriptCompilations": 0
+      },
+      "genericFunctionValues": {
+        "receipt": {
+          "path": "C2/generic-erasure/receipt.json",
+          "sha256": "94d408d27177691d2d66a51fd5a1aee28a0f9397493898ad415cdc0c83b7a548",
+          "bytes": 20777
+        },
+        "source": {
+          "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+          "sha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+          "bytes": 6340
+        },
+        "artifacts": {
+          "admissions": {
+            "path": "C2/generic-erasure/admissions.json",
+            "sha256": "6c97944c3ef08ae3c3b7b6c51a6f79b859cde986434250cf2c7e651b6b83b2de",
+            "bytes": 56770
+          },
+          "typescript": {
+            "path": "C2/generic-erasure/generated/index.ts",
+            "sha256": "5eac47888b911259650e427655111e95dd7a30b1f7bec66a9b2bd454e1aac5e2",
+            "bytes": 22169
+          },
+          "javascript": {
+            "path": "C2/generic-erasure/generated/index.js",
+            "sha256": "2d89191fbf8bccd5b726107f7be055fa73ada6bd613aae29a7190b3029c54506",
+            "bytes": 16583
+          }
+        },
+        "native": null,
+        "recursion": {
+          "artifact": {
+            "path": "C2/generic-erasure/recursion-core.json",
+            "sha256": "c6fb71d4fd112b51a48fc33634596f37e2c1b3f9550cee588f6396d052aa7869",
+            "bytes": 16301
+          },
+          "sourceSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+          "declarations": [
+            {
+              "name": "sh1CoreMajorCapture",
+              "sourceRuntimeArity": 1,
+              "coreSha256": "d542280104cf9fe4bfbd41f4e8ea6da7594549a9b801e78c43e53456906bcb70"
+            },
+            {
+              "name": "sh1CoreNestedOuter",
+              "sourceRuntimeArity": 1,
+              "coreSha256": "920b724e71e5e2f899ac76f66c2b087bd0b5e219ca3ba95bbdc2baf11da2be30"
+            }
+          ],
+          "referenceObservationCount": 4,
+          "emittedObservationCount": 4,
+          "nativeObservationCount": 0,
+          "observationsSha256": "2175961ce66dd9c672fef02a134259614e8363f67073b7673d28c9eac5f36fdd",
+          "referenceObservationsSha256": "02944c08b237a9e0d04d31ce1164c2dcb738a69b950fc528b79baa14d55765fb",
+          "budget": {
+            "limit": 20000,
+            "used": 316,
+            "remaining": 19684,
+            "scope": "shared across all four reference observations"
+          },
+          "snapshot": {
+            "nodes": 78,
+            "nodeLimit": 8192,
+            "depthLimit": 128
+          },
+          "finiteEvidenceOnly": true,
+          "generalRecursorDemandAdequacy": false
+        },
+        "recursiveStructures": {
+          "policy": "recursive-structure-fields-and-root-hypotheses/1",
+          "compileOnly": true,
+          "structureCount": 2,
+          "declarationCount": 4,
+          "projectionCount": 6,
+          "usedHypothesisCount": 2,
+          "unusedHypothesisCount": 2,
+          "layouts": [
+            {
+              "name": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "recursiveFieldIndex": 0,
+              "fields": [
+                {
+                  "name": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "recursiveFieldIndex": 1,
+              "fields": [
+                {
+                  "name": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  }
+                },
+                {
+                  "name": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "declarations": [
+            {
+              "name": "sh1RecursiveRecordObserve",
+              "structure": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "primitive",
+                "name": "nat"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveRecord",
+                  "arguments": []
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 0,
+              "body": {
+                "kind": "natural",
+                "value": "0"
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveRecordStep",
+              "structure": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "primitive",
+                "name": "nat"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveRecord",
+                  "arguments": []
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 0,
+              "body": {
+                "kind": "recursive-call",
+                "declaration": "sh1RecursiveRecordStep",
+                "typeArguments": [],
+                "arguments": [
+                  "next"
+                ],
+                "runtimeArity": 1
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveGenericObserve",
+              "structure": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "typeParameter",
+                "name": "T0"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveGenericRecord",
+                  "arguments": [
+                    {
+                      "kind": "typeParameter",
+                      "name": "T0"
+                    }
+                  ]
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "item",
+                  "binding": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  },
+                  "target": "_psStructureMajor"
+                },
+                {
+                  "index": 1,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 1,
+              "body": {
+                "kind": "field",
+                "field": "item",
+                "binding": "item"
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveGenericStep",
+              "structure": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "typeParameter",
+                "name": "T0"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveGenericRecord",
+                  "arguments": [
+                    {
+                      "kind": "typeParameter",
+                      "name": "T0"
+                    }
+                  ]
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "item",
+                  "binding": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  },
+                  "target": "_psStructureMajor"
+                },
+                {
+                  "index": 1,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 1,
+              "body": {
+                "kind": "recursive-call",
+                "declaration": "sh1RecursiveGenericStep",
+                "typeArguments": [
+                  {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  }
+                ],
+                "arguments": [
+                  "next"
+                ],
+                "runtimeArity": 1
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            }
+          ],
+          "layoutsSha256": "93748a074080b08c97d5a5458c9cfaa01a066de3648a6b4d7361e9ad8d29a3e6",
+          "declarationsSha256": "851a91292d14db040cbf5b0a218f6382a5a9d06199530e1d54d025e2c15aeed8",
+          "originalIr": {
+            "accepted": true,
+            "traversalComplete": true,
+            "findingCount": "0",
+            "expressionCount": "316",
+            "visitedSteps": "3817",
+            "checkedObjectIsEmittedObject": true,
+            "reusedExistingCheck": true
+          },
+          "runtimeInvocations": 0,
+          "constructedRuntimeRecords": 0,
+          "additionalPreparations": 0,
+          "additionalIrChecks": 0,
+          "additionalTypeScriptCompilations": 0,
+          "additionalNativeExecutions": 0,
+          "finiteEvidenceOnly": true,
+          "generalRecursorDemandAdequacyProven": false,
+          "semanticPreservationProven": false
+        },
+        "originalIr": {
+          "accepted": true,
+          "traversalComplete": true,
+          "findingCount": "0",
+          "expressionCount": "316",
+          "visitedSteps": "3817",
+          "checkedObjectIsEmittedObject": true
+        },
+        "policy": "canonical-unary-values-flat-aligned-entries/1",
+        "sourceEntries": [
+          {
+            "name": "sh1GroupIdentity",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupDirect",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupLet",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupApply",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupHigher",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupWeighted",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupKnown",
+            "runtimeArity": 0
+          },
+          {
+            "name": "sh1GroupRecordUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupBoxUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayMap",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayFold",
+            "runtimeArity": 0
+          },
+          {
+            "name": "sh1GroupComputed",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupTypeOnlyUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeOnlyHigher",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeProofOnlyUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupLambda",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupProjection",
+            "runtimeArity": 1
+          }
+        ],
+        "typeActivationEntries": [
+          {
+            "name": "sh1GroupTypeOnly",
+            "sourceRuntimeArity": 0,
+            "physicalRuntimeArity": 1,
+            "internalActivation": "fresh-ignored-unit",
+            "typeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeProofOnly",
+            "sourceRuntimeArity": 0,
+            "physicalRuntimeArity": 1,
+            "internalActivation": "fresh-ignored-unit",
+            "typeArity": 1
+          }
+        ],
+        "oldRecursiveObservationCount": 19,
+        "pureValueCount": 14,
+        "hostDemandDiagnosticCount": 5,
+        "observationsSha256": "056d3d60bd6017df424e49bc2f05fe1fd3aab1f681e618c2deb20817c0f27542",
+        "finiteEvidenceOnly": true,
+        "sourceEffectCapabilityAdded": false
+      },
+      "structuralRecursionRefusals": {
+        "cases": {
+          "path": "C2/strict-source/source-cases.json",
+          "sha256": "4091eed1667c3a393c891aaee2b7dbf53efcf9790dd28d7b0efe64971618d77a",
+          "bytes": 13969
+        },
+        "observations": [
+          {
+            "id": "nested-major-alias-lean",
+            "sourceKind": "lean",
+            "inputSha256": "f79fbfdbb2d0f19d74242f7c7f8395c95cf8646cf233d9588e9226a3273c6eb8",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedMajorAlias",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-major-alias-ps",
+            "sourceKind": "ps",
+            "inputSha256": "a69c438a49e2dfb519744a018d514f71270a60f3703d3fe49a286ba9a3ee5bda",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedMajorAlias",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-descendant-lean",
+            "sourceKind": "lean",
+            "inputSha256": "9a26a9d572d348f8380d547ac73779d2c85deb1aefb33cd71e654e3a51697bf8",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedDescendant",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-descendant-ps",
+            "sourceKind": "ps",
+            "inputSha256": "6e312e78fc3f13fa359ca715947ea175ddbe38e544ad2660dddd3730547fb8f4",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedDescendant",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "implicit-major-dependent-proof",
+            "sourceKind": "lean",
+            "inputSha256": "8cb1ca86bca4886e47a11eba364c77790a49bb3cc2bdb1644aabe021c1e0948c",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionDependentParameter",
+            "owner": "sh1ImplicitMajorProof",
+            "boundary": "structural-recursion-original-telescope"
+          }
+        ],
+        "observationCount": 5,
+        "observationBoundary": "owned frontend structural elaboration",
+        "oldSourceRefusalCount": 33,
+        "totalSourceRefusalCount": 38,
+        "finiteEvidenceOnly": true,
+        "generalRecursorDemandAdequacy": false
+      },
+      "operationCount": 45,
+      "observationCount": 186,
+      "sourceRefusals": 38,
+      "targetRefusals": 20
+    },
+    {
+      "name": "C3",
+      "compiler": {
+        "path": "C3/index.js",
+        "sha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+        "bytes": 3142142
+      },
+      "source": {
+        "path": "C3/strict-source/receipt.json",
+        "sha256": "497b393a03842827f27ced6e187827461525b2a40bfe9ebd231f62d5a1060c34",
+        "bytes": 71655
+      },
+      "target": {
+        "path": "C3/strict-target/receipt.json",
+        "sha256": "43890410db810eccd173e25122b7d7a03d74c95f56396e73f1f902df8ad26a9d",
+        "bytes": 42110
+      },
+      "runtime": {
+        "path": "C3/strict-runtime/receipt.json",
+        "sha256": "eb0151322a963a576aa3e153422d17082624a4ff6a4a6add2f301f29792c3523",
+        "bytes": 113977
+      },
+      "sourceEquality": {
+        "sources": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "C3/strict-runtime/source-equality/source.lean",
+              "sha256": "204bcc93f52f7c94906e90c32b88b43c34f2451b826bf529da67e79a4478eafd",
+              "bytes": 384
+            },
+            "receipt": {
+              "path": "C3/strict-runtime/source-equality/lean-source-receipt.json",
+              "sha256": "e8e1c4d48e4a4187754fc4575f5ccd434a466b53fe7b608438df66aa7c646b1c",
+              "bytes": 7694
+            },
+            "originsSha256": "01641e44e352c86de811ea5f540e931ab324a491721b6fc8ca65ce4d3e1ef7f7"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "C3/strict-runtime/source-equality/source.ps",
+              "sha256": "375cad953640b6ffa67907dd44aa8ca866f4e94ad46c8ef91c0ea5529410c6fb",
+              "bytes": 396
+            },
+            "receipt": {
+              "path": "C3/strict-runtime/source-equality/ps-source-receipt.json",
+              "sha256": "a0b0d7697d9f98c36b55ca86839620d9b22122e670ab698a9dadc396ba042834",
+              "bytes": 7690
+            },
+            "originsSha256": "29474768ba644d1743cf87c2e9b8cb9e9644b7acd2475d60b64366e080ad7348"
+          }
+        ],
+        "artifacts": {
+          "typescript": {
+            "path": "C3/strict-runtime/source-equality/runtime/index.ts",
+            "sha256": "40d9d49e9cb75e8cfa04647b0ad317c76ff12a0c6da49529484986d31e469923",
+            "bytes": 5344
+          },
+          "javascript": {
+            "path": "C3/strict-runtime/source-equality/runtime/index.js",
+            "sha256": "079644faa65f8071704b4a8b97b130f4d85e8097e4cc23a7ce586e44fb0ba80f",
+            "bytes": 3764
+          },
+          "admissions": {
+            "path": "C3/strict-runtime/source-equality/admissions.jsonl",
+            "sha256": "11d84ba55d9e11ad71ef1bbef35b64b372e046cb3aa6583f16d1e13bbc54cc7b",
+            "bytes": 2633
+          }
+        },
+        "observationCount": 6,
+        "observationsSha256": "b4dabf2437d90a5e14aaffc8bd81f790d67d13206580369acfa26fbc0314a216"
+      },
+      "sourceEvaluation": {
+        "sources": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "C3/strict-runtime/source-evaluation/source.lean",
+              "sha256": "aa068f731e363494a42127e33fc8fc292de66de62075593f5c29ffb2af45748e",
+              "bytes": 2380
+            },
+            "receipt": {
+              "path": "C3/strict-runtime/source-evaluation/lean-source-receipt.json",
+              "sha256": "c06fc09866b3637e3f6bfbb6e37b691200441a10802935c11c040476af42324d",
+              "bytes": 13100
+            },
+            "originsSha256": "422ee14f019f72cb1eee80678aad3c412a1ee4a46aa42137f76779edbfe5ab94"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "C3/strict-runtime/source-evaluation/source.ps",
+              "sha256": "27d9877bdd05f2189735047edf33b509ae6adab028fb7ebb128509e96b6cab1e",
+              "bytes": 2416
+            },
+            "receipt": {
+              "path": "C3/strict-runtime/source-evaluation/ps-source-receipt.json",
+              "sha256": "261eab3c66ca63cf754273e2208d4c89b3e63d63fe0930156798398338eaba24",
+              "bytes": 13090
+            },
+            "originsSha256": "fcbd61c87f95f0115e7dd1b3e26f02f8434e8c560cc960b032ed7c082f5e5aa6"
+          }
+        ],
+        "artifacts": {
+          "typescript": {
+            "path": "C3/strict-runtime/source-evaluation/runtime/index.ts",
+            "sha256": "ab068597b0677d5e02dbea64c46fbaf09d35efeda5504e13fba234d734b1d72d",
+            "bytes": 11693
+          },
+          "javascript": {
+            "path": "C3/strict-runtime/source-evaluation/runtime/index.js",
+            "sha256": "3bc7a55998c3cba4d1b9559a7b8850585086062d5812e787aaa1dcef5ad4e7c4",
+            "bytes": 9315
+          },
+          "admissions": {
+            "path": "C3/strict-runtime/source-evaluation/admissions.jsonl",
+            "sha256": "bafafb8154f1fa11a267ac99be0262dc831e0b629d5af42659eda80091cfbd88",
+            "bytes": 27093
+          }
+        },
+        "nativeReference": {
+          "path": "development/N1/strict-runtime-reference/native-source-evaluation/receipt.json",
+          "sha256": "18a60cd84fa8876de58a3c7d0ee7ad26fea431d9096183b335254c0bc3020917",
+          "bytes": 8226
+        },
+        "observationCount": 24,
+        "observationsSha256": "9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f",
+        "hostProbeCount": 21,
+        "hostProbesSha256": "76dba00fb02adff5cc8bd76d52f178b95cd6b9886542e8b5cf5e0efc314aae91"
+      },
+      "capabilityOrigins": {
+        "receipt": {
+          "path": "C3/capabilities/receipt.json",
+          "sha256": "7be2ffe8a876fd5bdba709f6235013a4513582d8250a2ad42b3a25212a464c19",
+          "bytes": 403613
+        },
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "observationsSha256": "cb3cdcbd45eb87c25d8d2cf4f95ed3266c0081306a96355313536f53c85d3d1d"
+          },
+          {
+            "sourceKind": "ps",
+            "observationsSha256": "7f2134c8e79cb91ad31f3dcbdc29ed9cca07d40494726af3ff772671aa1a76e9"
+          }
+        ],
+        "emptyGrammar": {
+          "receiptField": "grammar",
+          "observationsSha256": "e220e094f0ae386418d920130fd427fb4fdf37a4c88e8de7dc8039d9f57f0019",
+          "corpusSha256": "ab6d9abf0de2f0e705ecde686566f27cdc5ad24b9ae2a811e06406044910f30c",
+          "emptyElimination": {
+            "receiptField": "grammar.emptyElimination",
+            "pairs": 5,
+            "refusals": 6,
+            "observationsSha256": "64a6ae2412150352c88e008c8f4ec1dcf587fb17e237cb8c89e8f6c6b15cf026"
+          },
+          "zeroFieldRecords": {
+            "receiptField": "grammar.zeroFieldRecords",
+            "pairs": 1,
+            "refusals": 2,
+            "observationsSha256": "a75f957141cfa202685891d2cd5cd09689d18e870a8894defe01fa0257a166ff"
+          },
+          "additionalPreparations": 0
+        },
+        "sourceDeclarationsPerKind": 35,
+        "coreDeclarationsPerKind": 55,
+        "normalizationPlansPerKind": 16,
+        "originRefusals": 6
+      },
+      "ingressSnapshots": {
+        "malformedOptionCases": 14,
+        "snapshotProbes": 1,
+        "emittedSourceKinds": 2,
+        "additionalPreparations": 0,
+        "observationsSha256": "d009013b662a0f93c6f246c66eae48e24cbe9577d0857342944e7ac6282394d3"
+      },
+      "emptySource": {
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "raw": {
+              "path": "C3/strict-source/empty.lean",
+              "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+              "bytes": 345
+            },
+            "typescript": {
+              "path": "C3/strict-source/accepted-lean.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "originsSha256": "ae4af46bb826137c357f7820e3720248b2b401af178cb321a20aad520a96ddb5",
+            "eliminationsSha256": "c51015411975a19335173393f011c9373437919c1004d7981b3a8b2a2fb8aa70"
+          },
+          {
+            "sourceKind": "ps",
+            "raw": {
+              "path": "C3/strict-source/empty.ps",
+              "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390",
+              "bytes": 369
+            },
+            "typescript": {
+              "path": "C3/strict-source/accepted-ps.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "originsSha256": "caf683b2831a68ee44f34837af9e265f271a20c09ede67a661ac85d61d0ea0e0",
+            "eliminationsSha256": "c51015411975a19335173393f011c9373437919c1004d7981b3a8b2a2fb8aa70"
+          }
+        ],
+        "sourceKinds": 2,
+        "emptyLayoutsPerKind": 1,
+        "typedEliminationsPerKind": 4,
+        "emittedTypeScriptEqual": true,
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "nativeValueOracle": false,
+        "observationsSha256": "28a6627fa41068c9110ee94320747121a1ea23efa240eaacc9dde115a7c4fa45"
+      },
+      "zeroFieldSource": {
+        "receiptField": "zeroFieldRecords",
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "sourceInput": {
+              "moduleName": [
+                "Ps",
+                "Compiler",
+                "StrictLibrary"
+              ],
+              "sourceSha256": "f05f697f9defd99c1db8288659008a6d7b14bb19b1b973b73e1d85b36661d795",
+              "sourceBytes": 364
+            },
+            "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "originsSha256": "ae4af46bb826137c357f7820e3720248b2b401af178cb321a20aad520a96ddb5",
+            "originBatchesSha256": "3f55ab17df99dbe03bab3dc6ce5323be025076c49988bf2dad4df5471725ad8d",
+            "typescript": {
+              "path": "C3/strict-source/accepted-lean.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "observationsSha256": "83f05b4f27b5c85d1aef2e73bcc0fa3d574240f8e9bb277b0a130802aa19be12"
+          },
+          {
+            "sourceKind": "ps",
+            "sourceInput": {
+              "moduleName": [
+                "Ps",
+                "Compiler",
+                "StrictLibrary"
+              ],
+              "sourceSha256": "e1bb231c6e8c9aa5cfb7077567e490d5853d16509665ee2fed27abadfce3d9d8",
+              "sourceBytes": 368
+            },
+            "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "originsSha256": "caf683b2831a68ee44f34837af9e265f271a20c09ede67a661ac85d61d0ea0e0",
+            "originBatchesSha256": "b1e53ad20d3a9eee456f1d1e990d16d44518e004388d4ff7942c0d3b3aaa8151",
+            "typescript": {
+              "path": "C3/strict-source/accepted-ps.ts",
+              "sha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+              "bytes": 7781
+            },
+            "observationsSha256": "e42c7e58a2aed3ac0086adc0117b2b086739eca4117c1edc74017d51b4ce28b7"
+          }
+        ],
+        "sourceKinds": 2,
+        "sourceDeclarationsPerKind": 2,
+        "coreDeclarationsPerKind": 4,
+        "constructorsPerKind": 1,
+        "fieldsPerKind": 0,
+        "actualRecordValueRetained": true,
+        "inhabited": true,
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "observationsSha256": "5e958b8541590cd110421802a1a0503f293120739a156be33c752bdd15fba1e0"
+      },
+      "emptyIr": {
+        "receipt": {
+          "path": "C3/ir-checker/receipt.json",
+          "sha256": "e86b250f85692b086e21b0295b9c11e590184fac61b5a0515d5383d15112e2f6",
+          "bytes": 23004
+        },
+        "artifacts": {
+          "typescript": {
+            "path": "C3/ir-checker/accepted/index.ts",
+            "sha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+            "bytes": 17088
+          },
+          "javascript": {
+            "path": "C3/ir-checker/accepted/index.js",
+            "sha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633",
+            "bytes": 13158
+          },
+          "declarations": {
+            "path": "C3/ir-checker/accepted/index.d.ts",
+            "sha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+            "bytes": 3763
+          }
+        },
+        "acceptedFixtureSha256": "a60b99aa759e547dcc13c854ac44dcc5485d9883b20e6c18eacb82c1b1b98f3d",
+        "rejectedCases": 38,
+        "rejectionsSha256": "06504b059fe2330cbf042fc2e29745f8f8b43d5c159dd8bb190abcb40d141b7f",
+        "behaviorObservations": 61,
+        "behaviorSha256": "6d20ed4181b1e8efbadc2b9265cdc11c68e92ec31d4a942c1f12e499d69ad19c",
+        "optimizedTail": {
+          "receiptField": "optimizedTail",
+          "observationCount": 12,
+          "valueObservations": 11,
+          "faultObservations": 1,
+          "entriesSha256": "dd67f2ac069552de9f4c9e8a4c30573606de53682ae7a0071246a6db0715bddc",
+          "layoutSha256": "3b4a16610a52c78099e8b680e08730da692bff77e9b221e738801a91f3c262d2",
+          "observationsSha256": "1ed33c52978fa93847435b1f3bd06e78bf811a2d13b1f26ff5bb3571faab97aa",
+          "acceptedFixtureSha256": "a60b99aa759e547dcc13c854ac44dcc5485d9883b20e6c18eacb82c1b1b98f3d",
+          "sameAcceptedArtifacts": true,
+          "artifacts": {
+            "typescript": {
+              "path": "C3/ir-checker/accepted/index.ts",
+              "sha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+              "bytes": 17088
+            },
+            "javascript": {
+              "path": "C3/ir-checker/accepted/index.js",
+              "sha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633",
+              "bytes": 13158
+            },
+            "declarations": {
+              "path": "C3/ir-checker/accepted/index.d.ts",
+              "sha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+              "bytes": 3763
+            }
+          },
+          "additionalPreparations": 0,
+          "additionalPortableIrChecks": 0,
+          "additionalEmissions": 0,
+          "additionalTypeScriptCompilations": 0,
+          "additionalNativeExecutions": 0
+        },
+        "emptyElimination": {
+          "receiptField": "emptyElimination",
+          "emptyLayouts": 2,
+          "emptyEliminations": 5,
+          "signaturesSha256": "e3fa3b63bf0c084ffbac021994354c1fcb89a99a1e0a8b43e42bdc591eddbb66",
+          "observationsSha256": "bd40a53027a30edff4fe5501d6d8ee0325dddb0364ec45f245c48876e7e31e80",
+          "scrutinee": {
+            "callbackCalls": 1,
+            "propagatedOriginalFailure": true,
+            "noEmptyInhabitantConstructed": true
+          },
+          "nativeValueOracle": false
+        },
+        "zeroFieldRecords": {
+          "receiptField": "zeroFieldRecords",
+          "structures": 1,
+          "fields": 0,
+          "values": 1,
+          "observationsSha256": "e8cb5505a0ecc91c63c518690f205b74cd27c9b5ce05addc94032774b24d777d",
+          "runtime": {
+            "ownStringFields": 0,
+            "ownBrandSymbols": 1,
+            "inhabited": true
+          }
+        },
+        "additionalTypeScriptCompilations": 0
+      },
+      "genericFunctionValues": {
+        "receipt": {
+          "path": "C3/generic-erasure/receipt.json",
+          "sha256": "94d408d27177691d2d66a51fd5a1aee28a0f9397493898ad415cdc0c83b7a548",
+          "bytes": 20777
+        },
+        "source": {
+          "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+          "sha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+          "bytes": 6340
+        },
+        "artifacts": {
+          "admissions": {
+            "path": "C3/generic-erasure/admissions.json",
+            "sha256": "6c97944c3ef08ae3c3b7b6c51a6f79b859cde986434250cf2c7e651b6b83b2de",
+            "bytes": 56770
+          },
+          "typescript": {
+            "path": "C3/generic-erasure/generated/index.ts",
+            "sha256": "5eac47888b911259650e427655111e95dd7a30b1f7bec66a9b2bd454e1aac5e2",
+            "bytes": 22169
+          },
+          "javascript": {
+            "path": "C3/generic-erasure/generated/index.js",
+            "sha256": "2d89191fbf8bccd5b726107f7be055fa73ada6bd613aae29a7190b3029c54506",
+            "bytes": 16583
+          }
+        },
+        "native": null,
+        "recursion": {
+          "artifact": {
+            "path": "C3/generic-erasure/recursion-core.json",
+            "sha256": "c6fb71d4fd112b51a48fc33634596f37e2c1b3f9550cee588f6396d052aa7869",
+            "bytes": 16301
+          },
+          "sourceSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+          "declarations": [
+            {
+              "name": "sh1CoreMajorCapture",
+              "sourceRuntimeArity": 1,
+              "coreSha256": "d542280104cf9fe4bfbd41f4e8ea6da7594549a9b801e78c43e53456906bcb70"
+            },
+            {
+              "name": "sh1CoreNestedOuter",
+              "sourceRuntimeArity": 1,
+              "coreSha256": "920b724e71e5e2f899ac76f66c2b087bd0b5e219ca3ba95bbdc2baf11da2be30"
+            }
+          ],
+          "referenceObservationCount": 4,
+          "emittedObservationCount": 4,
+          "nativeObservationCount": 0,
+          "observationsSha256": "2175961ce66dd9c672fef02a134259614e8363f67073b7673d28c9eac5f36fdd",
+          "referenceObservationsSha256": "02944c08b237a9e0d04d31ce1164c2dcb738a69b950fc528b79baa14d55765fb",
+          "budget": {
+            "limit": 20000,
+            "used": 316,
+            "remaining": 19684,
+            "scope": "shared across all four reference observations"
+          },
+          "snapshot": {
+            "nodes": 78,
+            "nodeLimit": 8192,
+            "depthLimit": 128
+          },
+          "finiteEvidenceOnly": true,
+          "generalRecursorDemandAdequacy": false
+        },
+        "recursiveStructures": {
+          "policy": "recursive-structure-fields-and-root-hypotheses/1",
+          "compileOnly": true,
+          "structureCount": 2,
+          "declarationCount": 4,
+          "projectionCount": 6,
+          "usedHypothesisCount": 2,
+          "unusedHypothesisCount": 2,
+          "layouts": [
+            {
+              "name": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "recursiveFieldIndex": 0,
+              "fields": [
+                {
+                  "name": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "recursiveFieldIndex": 1,
+              "fields": [
+                {
+                  "name": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  }
+                },
+                {
+                  "name": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "declarations": [
+            {
+              "name": "sh1RecursiveRecordObserve",
+              "structure": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "primitive",
+                "name": "nat"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveRecord",
+                  "arguments": []
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 0,
+              "body": {
+                "kind": "natural",
+                "value": "0"
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveRecordStep",
+              "structure": "Sh1RecursiveRecord",
+              "typeParameters": [],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "primitive",
+                "name": "nat"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveRecord",
+                  "arguments": []
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveRecord",
+                    "arguments": []
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 0,
+              "body": {
+                "kind": "recursive-call",
+                "declaration": "sh1RecursiveRecordStep",
+                "typeArguments": [],
+                "arguments": [
+                  "next"
+                ],
+                "runtimeArity": 1
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveGenericObserve",
+              "structure": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "typeParameter",
+                "name": "T0"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveGenericRecord",
+                  "arguments": [
+                    {
+                      "kind": "typeParameter",
+                      "name": "T0"
+                    }
+                  ]
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "item",
+                  "binding": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  },
+                  "target": "_psStructureMajor"
+                },
+                {
+                  "index": 1,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 1,
+              "body": {
+                "kind": "field",
+                "field": "item",
+                "binding": "item"
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            },
+            {
+              "name": "sh1RecursiveGenericStep",
+              "structure": "Sh1RecursiveGenericRecord",
+              "typeParameters": [
+                "T0"
+              ],
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "resultType": {
+                "kind": "typeParameter",
+                "name": "T0"
+              },
+              "major": {
+                "name": "_psStructureMajor",
+                "sourceParameter": "value",
+                "type": {
+                  "kind": "named",
+                  "name": "Sh1RecursiveGenericRecord",
+                  "arguments": [
+                    {
+                      "kind": "typeParameter",
+                      "name": "T0"
+                    }
+                  ]
+                },
+                "evaluations": 1,
+                "fresh": true
+              },
+              "projections": [
+                {
+                  "index": 0,
+                  "field": "item",
+                  "binding": "item",
+                  "type": {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  },
+                  "target": "_psStructureMajor"
+                },
+                {
+                  "index": 1,
+                  "field": "next",
+                  "binding": "next",
+                  "type": {
+                    "kind": "named",
+                    "name": "Sh1RecursiveGenericRecord",
+                    "arguments": [
+                      {
+                        "kind": "typeParameter",
+                        "name": "T0"
+                      }
+                    ]
+                  },
+                  "target": "_psStructureMajor"
+                }
+              ],
+              "recursiveFieldIndex": 1,
+              "body": {
+                "kind": "recursive-call",
+                "declaration": "sh1RecursiveGenericStep",
+                "typeArguments": [
+                  {
+                    "kind": "typeParameter",
+                    "name": "T0"
+                  }
+                ],
+                "arguments": [
+                  "next"
+                ],
+                "runtimeArity": 1
+              },
+              "freshNamesDistinct": true,
+              "remainingHypothesisLambdas": 0
+            }
+          ],
+          "layoutsSha256": "93748a074080b08c97d5a5458c9cfaa01a066de3648a6b4d7361e9ad8d29a3e6",
+          "declarationsSha256": "851a91292d14db040cbf5b0a218f6382a5a9d06199530e1d54d025e2c15aeed8",
+          "originalIr": {
+            "accepted": true,
+            "traversalComplete": true,
+            "findingCount": "0",
+            "expressionCount": "316",
+            "visitedSteps": "3817",
+            "checkedObjectIsEmittedObject": true,
+            "reusedExistingCheck": true
+          },
+          "runtimeInvocations": 0,
+          "constructedRuntimeRecords": 0,
+          "additionalPreparations": 0,
+          "additionalIrChecks": 0,
+          "additionalTypeScriptCompilations": 0,
+          "additionalNativeExecutions": 0,
+          "finiteEvidenceOnly": true,
+          "generalRecursorDemandAdequacyProven": false,
+          "semanticPreservationProven": false
+        },
+        "originalIr": {
+          "accepted": true,
+          "traversalComplete": true,
+          "findingCount": "0",
+          "expressionCount": "316",
+          "visitedSteps": "3817",
+          "checkedObjectIsEmittedObject": true
+        },
+        "policy": "canonical-unary-values-flat-aligned-entries/1",
+        "sourceEntries": [
+          {
+            "name": "sh1GroupIdentity",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupDirect",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupLet",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupApply",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupHigher",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupWeighted",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupKnown",
+            "runtimeArity": 0
+          },
+          {
+            "name": "sh1GroupRecordUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupBoxUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayMap",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupArrayFold",
+            "runtimeArity": 0
+          },
+          {
+            "name": "sh1GroupComputed",
+            "runtimeArity": 2
+          },
+          {
+            "name": "sh1GroupTypeOnlyUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeOnlyHigher",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeProofOnlyUse",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupLambda",
+            "runtimeArity": 1
+          },
+          {
+            "name": "sh1GroupProjection",
+            "runtimeArity": 1
+          }
+        ],
+        "typeActivationEntries": [
+          {
+            "name": "sh1GroupTypeOnly",
+            "sourceRuntimeArity": 0,
+            "physicalRuntimeArity": 1,
+            "internalActivation": "fresh-ignored-unit",
+            "typeArity": 1
+          },
+          {
+            "name": "sh1GroupTypeProofOnly",
+            "sourceRuntimeArity": 0,
+            "physicalRuntimeArity": 1,
+            "internalActivation": "fresh-ignored-unit",
+            "typeArity": 1
+          }
+        ],
+        "oldRecursiveObservationCount": 19,
+        "pureValueCount": 14,
+        "hostDemandDiagnosticCount": 5,
+        "observationsSha256": "056d3d60bd6017df424e49bc2f05fe1fd3aab1f681e618c2deb20817c0f27542",
+        "finiteEvidenceOnly": true,
+        "sourceEffectCapabilityAdded": false
+      },
+      "structuralRecursionRefusals": {
+        "cases": {
+          "path": "C3/strict-source/source-cases.json",
+          "sha256": "4091eed1667c3a393c891aaee2b7dbf53efcf9790dd28d7b0efe64971618d77a",
+          "bytes": 13969
+        },
+        "observations": [
+          {
+            "id": "nested-major-alias-lean",
+            "sourceKind": "lean",
+            "inputSha256": "f79fbfdbb2d0f19d74242f7c7f8395c95cf8646cf233d9588e9226a3273c6eb8",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedMajorAlias",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-major-alias-ps",
+            "sourceKind": "ps",
+            "inputSha256": "a69c438a49e2dfb519744a018d514f71270a60f3703d3fe49a286ba9a3ee5bda",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedMajorAlias",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-descendant-lean",
+            "sourceKind": "lean",
+            "inputSha256": "9a26a9d572d348f8380d547ac73779d2c85deb1aefb33cd71e654e3a51697bf8",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedDescendant",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "nested-descendant-ps",
+            "sourceKind": "ps",
+            "inputSha256": "6e312e78fc3f13fa359ca715947ea175ddbe38e544ad2660dddd3730547fb8f4",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionNotDecreasing",
+            "owner": "sh1NestedDescendant",
+            "boundary": "structural-recursion-provenance"
+          },
+          {
+            "id": "implicit-major-dependent-proof",
+            "sourceKind": "lean",
+            "inputSha256": "8cb1ca86bca4886e47a11eba364c77790a49bb3cc2bdb1644aabe021c1e0948c",
+            "code": "source-elaboration",
+            "detail": "structuralRecursionDependentParameter",
+            "owner": "sh1ImplicitMajorProof",
+            "boundary": "structural-recursion-original-telescope"
+          }
+        ],
+        "observationCount": 5,
+        "observationBoundary": "owned frontend structural elaboration",
+        "oldSourceRefusalCount": 33,
+        "totalSourceRefusalCount": 38,
+        "finiteEvidenceOnly": true,
+        "generalRecursorDemandAdequacy": false
+      },
+      "operationCount": 45,
+      "observationCount": 186,
+      "sourceRefusals": 38,
+      "targetRefusals": 20
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "development/N1/index.ts",
+      "sha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+      "bytes": 3182474
+    },
+    {
+      "path": "C2/index.ts",
+      "sha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+      "bytes": 3182474
+    },
+    {
+      "path": "C3/index.ts",
+      "sha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+      "bytes": 3182474
+    }
+  ],
+  "nativeEmptyIr": {
+    "receipt": {
+      "path": "development/N1/ir-checker-native/receipt.json",
+      "sha256": "15eda34d7f530cfb2a3dd1bda6afa30884d4a028b87b11b387a3cb75c1be1395",
+      "bytes": 2760
+    },
+    "executionInputs": {
+      "path": "development/N1/ir-checker-native/execution-inputs.json",
+      "sha256": "0d4e30111844d96ed0f9e53ae8515074f1af194ac480f27d9d6b7127fe73ae27",
+      "bytes": 510
+    },
+    "stdout": {
+      "path": "development/N1/ir-checker-native/native.stdout.log",
+      "sha256": "04af70e229be1e916cb8431deed5607c522e5b716353c3cfbb27bdced341a55d",
+      "bytes": 1529
+    },
+    "stderr": {
+      "path": "development/N1/ir-checker-native/native.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "nativeSourceReceipt": {
+      "path": "development/N1/strict-source-native.json",
+      "sha256": "9c217dbcb66c2480194062da8307478083b9462cac8af0670b9bc4a71f6f0bb0",
+      "bytes": 608846
+    },
+    "nativeCheckerSha256": "907fbf53ab77de70c1ab016fdc2a84988baed6c21fdc09c875487f1cee249207",
+    "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+    "fixtureCases": 15,
+    "fixturesSha256": "8baaa87bc9694c42a1b6c5e980610ad8c5daf8d949df51afa14a39648afcd3b5",
+    "emptyElimination": {
+      "nativeSourceFixturePath": "test/fixtures/selfhost-sh1-empty.lean",
+      "nativeSourceFixtureSha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+      "nativeSourceDeclarations": 5,
+      "emptyLayouts": 2,
+      "emptyEliminations": 4,
+      "nativeValueOracle": false
+    },
+    "zeroFieldRecords": {
+      "structureCount": 1,
+      "fieldCount": 0,
+      "inhabited": true,
+      "nullaryValueMatched": true
+    },
+    "fullSourcePreparedAgain": false
+  },
+  "sourceOrigins": {
+    "policy": "psc0-declaration-origins/1",
+    "observationsSha256": "50186ef0f4374b81133c9b5bd4bb7598a88419e696207ac6834f323e7563eb40",
+    "moduleCount": 64,
+    "sourceDeclarationCount": 1708,
+    "coreDeclarationCount": 2571,
+    "normalizationCount": 50,
+    "semanticCorrespondenceDischarged": false
+  },
+  "sourceEvaluationReference": {
+    "receipt": {
+      "path": "development/N1/strict-runtime-reference/native-source-evaluation/receipt.json",
+      "sha256": "18a60cd84fa8876de58a3c7d0ee7ad26fea431d9096183b335254c0bc3020917",
+      "bytes": 8226
+    },
+    "source": {
+      "path": "development/N1/strict-runtime-reference/native-source-evaluation/reference.lean",
+      "sha256": "75486abeb314702a573b84c473e8fc8c4659b29ae8793f0ee7f89539e4c4a131",
+      "bytes": 9628
+    },
+    "rawSource": {
+      "path": "development/N1/strict-runtime-reference/native-source-evaluation/fixture.lean",
+      "sha256": "aa068f731e363494a42127e33fc8fc292de66de62075593f5c29ffb2af45748e",
+      "bytes": 2380
+    },
+    "stdout": {
+      "path": "development/N1/strict-runtime-reference/native-source-evaluation/stdout.log",
+      "sha256": "262794fd22b3d227a53c92da88d598ef2d538841f192ecf7052f4283fb7f0d7c",
+      "bytes": 3779
+    },
+    "stderr": {
+      "path": "development/N1/strict-runtime-reference/native-source-evaluation/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "observationCount": 24,
+    "observationsSha256": "9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f"
+  },
+  "sourceEnforcementQualified": true,
+  "targetAdmissionQualified": true,
+  "enabledRuntimeFiniteConformanceQualified": true,
+  "genericFunctionValueFiniteConformanceQualified": true,
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "providerChecked": false
+}

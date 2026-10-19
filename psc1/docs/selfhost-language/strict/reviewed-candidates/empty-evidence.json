@@ -1,0 +1,416 @@
+{
+  "schema": "psc0-unattached-guarded-delta/1",
+  "feature": "regular-empty-data-and-zero-field-record-evidence",
+  "implementationManifests": [
+    "5360abde1e14fe714a7d1105b28c5131f79d355d",
+    "06ca2937bb073583b4a0f02cc12219253172228c"
+  ],
+  "files": [
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "expectedBaseBlob": "7e70f4ec75a156c87dc5f1023c451f77b132bc39",
+      "deltaBaseBlob": "ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f",
+      "candidateBlob": "e987f2834e74c8acded0fa628e245ef823dcc17a",
+      "edits": [
+        {
+          "before": "import { mkdir, writeFile } from 'node:fs/promises';",
+          "after": "import { mkdir, readFile, writeFile } from 'node:fs/promises';"
+        },
+        {
+          "before": "function reservedRuntimeNameCases() {",
+          "after": "\nexport const sh1EmptySourceFixtures = Object.freeze({\n  \"lean\": {\n    \"path\": \"test/fixtures/selfhost-sh1-empty.lean\",\n    \"sha256\": \"243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5\",\n    \"bytes\": 345\n  },\n  \"ps\": {\n    \"path\": \"test/fixtures/selfhost-sh1-empty.ps\",\n    \"sha256\": \"71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390\",\n    \"bytes\": 369\n  }\n});\n\nfunction emptyTag(value) {\n  if (value === null || typeof value !== 'object') return undefined;\n  for (const symbol of Object.getOwnPropertySymbols(value)) {\n    if (typeof value[symbol] === 'string') return value[symbol];\n  }\n  return undefined;\n}\n\nfunction emptyItems(value) {\n  const items = [], seen = new Set();\n  while (emptyTag(value) === 'cons') {\n    assert(!seen.has(value), 'PSC0_SH1_EMPTY_OWNED_LIST_CYCLE');\n    seen.add(value); items.push(value.head); value = value.tail;\n  }\n  assert.equal(emptyTag(value), 'nil', 'PSC0_SH1_EMPTY_OWNED_LIST');\n  return items;\n}\n\nfunction emptyResultType(type) {\n  switch (emptyTag(type)) {\n    case 'primitive': return { kind: 'primitive', name: emptyTag(type.name) };\n    case 'typeParameter': return { kind: 'typeParameter', name: type.name };\n    case 'function': return { kind: 'function',\n      parameters: emptyItems(type.parameters).map(emptyResultType), result: emptyResultType(type.result) };\n    default: throw new Error('PSC0_SH1_EMPTY_RESULT_TYPE: ' + emptyTag(type));\n  }\n}\n\nfunction observeEmptySource(result, sourceKind, fixture) {\n  const layout = emptyItems(result.originalIr.inductives).filter((item) => item.name === 'Sh1Empty');\n  assert.equal(layout.length, 1);\n  assert.equal(emptyItems(layout[0].constructors).length, 0);\n  assert.deepEqual(emptyItems(layout[0].typeParameters).map((item) => item.name), ['T0']);\n  const nat = { kind: 'primitive', name: 'nat' };\n  const expected = [\n    ['sh1EmptyNat', nat], ['sh1EmptyFunction', { kind: 'function', parameters: [nat], result: nat }],\n    ['sh1EmptyGeneric', { kind: 'typeParameter', name: 'T0' }], ['sh1EmptyFresh', nat],\n  ];\n  const declarations = emptyItems(result.originalIr.declarations);\n  const eliminations = expected.map(([name, type]) => {\n    const matches = declarations.filter((item) => item.name === name);\n    assert.equal(matches.length, 1, name);\n    const declaration = matches[0], retained = [], pending = [declaration.body], seen = new Set();\n    // Observe the compiler-owned, already checked graph after atomic emission.\n    // Aliases are visited once; no new caller graph or compiler work is admitted.\n    while (pending.length) {\n      const value = pending.pop();\n      if (value === null || typeof value !== 'object' || seen.has(value)) continue;\n      seen.add(value);\n      if (emptyTag(value) === 'letE' && emptyTag(value.value) === 'matchE' &&\n          value.value.inductiveName === 'Sh1Empty') retained.push(value);\n      pending.push(...Object.values(value));\n    }\n    assert.equal(retained.length, 1, name + ': typed empty result');\n    const local = retained[0], matched = local.value;\n    assert.deepEqual(emptyResultType(local.type), type, name + ': result annotation');\n    assert.equal(emptyItems(matched.alternatives).length, 0);\n    assert.equal(emptyItems(matched.typeArguments).length, 1);\n    assert.equal(emptyTag(matched.scrutinee), 'var');\n    assert.equal(matched.scrutinee.name, 'value');\n    assert.equal(emptyTag(local.body), 'var');\n    assert.equal(local.body.name, local.name);\n    const runtimeParameters = emptyItems(declaration.parameters).map((item) => item.name);\n    assert(!runtimeParameters.includes(local.name), name + ': fresh result binding');\n    if (name === 'sh1EmptyFresh') assert(runtimeParameters.includes('emptyResult'));\n    if (name === 'sh1EmptyFunction') {\n      assert.equal(emptyTag(declaration.body), 'call');\n      assert.equal(declaration.body.fn, local, 'typed empty result is retained in a callee position');\n    }\n    return { name, resultType: type, resultName: local.name,\n      runtimeParameters, alternatives: 0, typeArgumentCount: 1, freshResultName: true };\n  });\n  const origin = result.evidence.sourceOrigins.modules[1];\n  assert.deepEqual(origin.moduleName, ['Ps', 'Compiler', 'StrictEmpty']);\n  assert.deepEqual(origin.batches.map((batch) => batch.sourceName), [\n    ['Sh1Empty'], ...expected.map(([name]) => [name]),\n  ]);\n  assert.deepEqual(origin.batches.map((batch) => batch.members.map((member) => member.role)),\n    [['inductiveType', 'recursor'], ...expected.map(() => ['sourceDeclaration'])]);\n  assert(origin.batches.every((batch) => batch.normalization === null));\n  assert.match(result.typeScript, /export type Sh1Empty<T0> = never;/u);\n  assert.equal(result.typeScript.split('__ps$Computation<never>').length - 1, 4);\n  return { sourceKind, ...sh1EmptySourceFixtures[sourceKind],\n    sourceArtifact: 'empty.' + (sourceKind === 'lean' ? 'lean' : 'ps'),\n    typeScriptArtifact: 'accepted-' + sourceKind + '.ts',\n    typeScriptSha256: sha256(result.typeScript),\n    atomicAcceptedId: sourceKind + '-raw-imports-and-ordinary-do-spellings',\n    atomicSourceInputsSha256: result.evidence.sourceInputsSha256,\n    moduleName: origin.moduleName, sourceDeclarationCount: 5, coreDeclarationCount: 6,\n    originMemberCounts: origin.batches.map((batch) => batch.members.length),\n    emptyLayoutCount: layout.length, emptyEliminationCount: eliminations.length,\n    typedResultCount: eliminations.length, eliminations,\n    capturedFixtureSha256: sha256(fixture) };\n}\n\nfunction reservedRuntimeNameCases() {"
+        },
+        {
+          "before": "  const accepted = [];\n  const libraries = {",
+          "after": "  const accepted = [], emptyObservations = [], emittedBundles = [];\n  const emptySources = {};\n  for (const kind of ['lean', 'ps']) {\n    const pin = sh1EmptySourceFixtures[kind];\n    const source = await readFile(new URL('../' + pin.path, import.meta.url), 'utf8');\n    assert.equal(sha256(source), pin.sha256, 'PSC0_SH1_EMPTY_FIXTURE_HASH: ' + kind);\n    assert.equal(Buffer.byteLength(source), pin.bytes, 'PSC0_SH1_EMPTY_FIXTURE_BYTES: ' + kind);\n    emptySources[kind] = source;\n  }\n  const libraries = {"
+        },
+        {
+          "before": "    const captures = [library, entry].map(watchedSourceInput);",
+          "after": "    const captures = [library, input(emptySources[kind], 'StrictEmpty'), entry].map(watchedSourceInput);"
+        },
+        {
+          "before": "    assert.equal(result.evidence.sourcePolicy.stats.declarationCount, 4);\n    assert.equal(result.evidence.sourcePolicy.moduleCount, 2);\n    accepted.push({ id: kind + '-raw-imports-and-ordinary-do-spellings', ...result.evidence });",
+          "after": "    assert.equal(result.evidence.sourcePolicy.stats.declarationCount, 9);\n    assert.equal(result.evidence.sourcePolicy.moduleCount, 3);\n    assert.equal(result.evidence.sourceOrigins.sourceDeclarationCount, 9);\n    assert.equal(result.evidence.sourceOrigins.coreDeclarationCount, 12);\n    assert.equal(result.evidence.sourceOrigins.normalizationCount, 0);\n    emptyObservations.push(observeEmptySource(result, kind, emptySources[kind]));\n    emittedBundles.push(result.typeScript);\n    accepted.push({ id: kind + '-raw-imports-and-ordinary-do-spellings', ...result.evidence });"
+        },
+        {
+          "before": "  const refused = [];\n  for (const test of sourceCases()) {",
+          "after": "  assert.equal(emittedBundles[0], emittedBundles[1], 'PSC0_SH1_EMPTY_LEAN_PS_EMISSION_PARITY');\n  const emptyElimination = {\n    feature: 'regular-empty-data-and-single-scrutinee-elimination',\n    sourceEdition: 'ps-0.9-r3', sourceMode: 'new-only', observations: emptyObservations,\n    emittedTypeScriptEqual: true, typeScriptSha256: sha256(emittedBundles[0]),\n    additionalPreparations: 0, additionalPortableIrChecks: 0,\n    nativeValueOracle: false, strictSh1Qualified: false,\n    semanticContractQualified: false, providerChecked: false,\n  };\n  const refused = [];\n  for (const test of sourceCases()) {"
+        },
+        {
+          "before": "    accepted, refused, carrierRefusals, ingressSnapshots,",
+          "after": "    accepted, refused, carrierRefusals, ingressSnapshots, emptyElimination,"
+        },
+        {
+          "before": "  await mkdir(outDir, { recursive: true });\n  await writeFile(path.join(outDir, 'source-cases.json')",
+          "after": "  await mkdir(outDir, { recursive: true });\n  for (const [index, kind] of ['lean', 'ps'].entries()) {\n    const observation = emptyObservations[index];\n    await writeFile(path.join(outDir, observation.sourceArtifact), emptySources[kind]);\n    await writeFile(path.join(outDir, observation.typeScriptArtifact), emittedBundles[index]);\n  }\n  await writeFile(path.join(outDir, 'source-cases.json')"
+        },
+        {
+          "before": "function reservedRuntimeNameCases() {",
+          "after": "\nfunction observeZeroFieldRecord(result, sourceKind) {\n  const layouts = emptyItems(result.originalIr.structures).filter((item) => item.name === 'Sh1EmptyRecord');\n  assert.equal(layouts.length, 1);\n  assert.equal(emptyItems(layouts[0].fields).length, 0);\n  assert.equal(emptyItems(layouts[0].typeParameters).length, 0);\n  const values = emptyItems(result.originalIr.declarations)\n    .filter((item) => item.name === 'sh1EmptyRecordValue');\n  assert.equal(values.length, 1);\n  const value = values[0];\n  assert.equal(emptyItems(value.parameters).length, 0);\n  assert.equal(emptyItems(value.typeParameters).length, 0);\n  assert.equal(emptyTag(value.resultType), 'named');\n  assert.equal(value.resultType.name, 'Sh1EmptyRecord');\n  assert.equal(emptyTag(value.body), 'record');\n  assert.equal(value.body.structureName, 'Sh1EmptyRecord');\n  assert.equal(emptyItems(value.body.typeArguments).length, 0);\n  assert.equal(emptyItems(value.body.fields).length, 0);\n  const origin = result.evidence.sourceOrigins.modules[0];\n  const batches = origin.batches.filter((batch) =>\n    batch.sourceName.length === 1 && ['Sh1EmptyRecord', 'sh1EmptyRecordValue'].includes(batch.sourceName[0]));\n  assert.deepEqual(batches.map((batch) => batch.sourceName), [['Sh1EmptyRecord'], ['sh1EmptyRecordValue']]);\n  assert.deepEqual(batches.map((batch) => batch.members.map((member) => member.role)),\n    [['structureType', 'constructor', 'recursor'], ['sourceDeclaration']]);\n  assert(batches.every((batch) => batch.normalization === null));\n  return { sourceKind, structureName: layouts[0].name, valueName: value.name,\n    moduleName: origin.moduleName, sourceDeclarationCount: 2, coreDeclarationCount: 4,\n    constructorCount: 1, fieldCount: 0, recordFieldCount: 0,\n    actualRecordValueRetained: true, inhabited: true,\n    atomicAcceptedId: sourceKind + '-raw-imports-and-ordinary-do-spellings',\n    atomicSourceInputsSha256: result.evidence.sourceInputsSha256,\n    typeScriptArtifact: 'accepted-' + sourceKind + '.ts', typeScriptSha256: sha256(result.typeScript) };\n}\n\nfunction reservedRuntimeNameCases() {"
+        },
+        {
+          "before": "  const accepted = [], emptyObservations = [], emittedBundles = [];",
+          "after": "  const accepted = [], emptyObservations = [], zeroFieldObservations = [], emittedBundles = [];"
+        },
+        {
+          "before": "      'def sh1OriginWords : String := \"do compilerPure compilerBind\"\\n',\n    ps:",
+          "after": "      'def sh1OriginWords : String := \"do compilerPure compilerBind\"\\n' +\n      'structure Sh1EmptyRecord where\\n' +\n      'def sh1EmptyRecordValue : Sh1EmptyRecord := {}\\n',\n    ps:"
+        },
+        {
+          "before": "      'def sh1OriginWords : String := \"do compilerPure compilerBind\"\\n',\n  };",
+          "after": "      'def sh1OriginWords : String := \"do compilerPure compilerBind\"\\n' +\n      'structure Sh1EmptyRecord where {}\\n' +\n      'def sh1EmptyRecordValue : Sh1EmptyRecord := {}\\n',\n  };"
+        },
+        {
+          "before": "    assert.equal(result.evidence.sourcePolicy.stats.declarationCount, 9);",
+          "after": "    assert.equal(result.evidence.sourcePolicy.stats.declarationCount, 11);"
+        },
+        {
+          "before": "    assert.equal(result.evidence.sourceOrigins.sourceDeclarationCount, 9);",
+          "after": "    assert.equal(result.evidence.sourceOrigins.sourceDeclarationCount, 11);"
+        },
+        {
+          "before": "    assert.equal(result.evidence.sourceOrigins.coreDeclarationCount, 12);",
+          "after": "    assert.equal(result.evidence.sourceOrigins.coreDeclarationCount, 16);"
+        },
+        {
+          "before": "    emptyObservations.push(observeEmptySource(result, kind, emptySources[kind]));",
+          "after": "    emptyObservations.push(observeEmptySource(result, kind, emptySources[kind]));\n    zeroFieldObservations.push(observeZeroFieldRecord(result, kind));"
+        },
+        {
+          "before": "  const refused = [];\n  for (const test of sourceCases()) {",
+          "after": "  const zeroFieldRecords = {\n    feature: 'inhabited-zero-field-structures', observations: zeroFieldObservations,\n    emittedTypeScriptEqual: true, typeScriptSha256: sha256(emittedBundles[0]),\n    observationBoundary: 'actual-original-ir-after-atomic-emission',\n    additionalPreparations: 0, additionalPortableIrChecks: 0,\n    strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false,\n  };\n  const refused = [];\n  for (const test of sourceCases()) {"
+        },
+        {
+          "before": "    accepted, refused, carrierRefusals, ingressSnapshots, emptyElimination,",
+          "after": "    accepted, refused, carrierRefusals, ingressSnapshots, emptyElimination, zeroFieldRecords,"
+        }
+      ],
+      "reversible": true
+    },
+    {
+      "path": "psc0/scripts/sh1-grammar-conformance.mjs",
+      "expectedBaseBlob": "48efa9b0c90e7904a1df49f43253395841bff90c",
+      "deltaBaseBlob": "48efa9b0c90e7904a1df49f43253395841bff90c",
+      "candidateBlob": "77dcbec4a94f7ba27b0727a0888b4098d77f05fc",
+      "edits": [
+        {
+          "before": "export function runSh1GrammarConformance({ compiler, compilerSha256 }) {",
+          "after": "\nconst emptySyntaxCases = [\n  { name: 'empty-type-command-boundary',\n    lean: 'inductive Empty(alpha : Type) where\\ndef following : Nat := 7\\n',\n    ps: 'inductive Empty(alpha : Type) where {}\\ndef following : Nat := 7\\n',\n    shape: 'empty-type' },\n  { name: 'empty-elimination',\n    lean: 'def probe(value : Empty) : Nat := nomatch value\\n',\n    ps: 'def probe(value : Empty) : Nat := match value with {}\\n',\n    shape: 'direct', leanTerm: 'nomatch value', psTerm: 'match value with {}' },\n  { name: 'grouped-empty-scrutinee-consumed-span',\n    lean: '-- é\\ndef probe(value : Empty) : Nat := nomatch (get value)\\n',\n    ps: '-- é\\ndef probe(value : Empty) : Nat := match (get(value)) with {}\\n',\n    shape: 'computed', leanTerm: 'nomatch (get value)', psTerm: 'match (get(value)) with {}' },\n  { name: 'nested-empty-keeps-outer-alternatives',\n    lean: 'def probe(choice : Choice) (empty : Empty) : Nat := match choice with\\n' +\n      '  | Choice.first => nomatch empty\\n  | Choice.second => 7\\n',\n    ps: 'def probe(choice : Choice, empty : Empty) : Nat := match choice with {\\n' +\n      '  | Choice.first => match empty with {}\\n  | Choice.second => 7\\n}\\n',\n    shape: 'outer', leanTerm: 'nomatch empty', psTerm: 'match empty with {}' },\n  { name: 'grouped-empty-argument',\n    lean: 'def probe(value : Empty) : Nat := use (nomatch value)\\n',\n    ps: 'def probe(value : Empty) : Nat := use(match value with {})\\n',\n    shape: 'argument', leanTerm: 'nomatch value', psTerm: 'match value with {}' },\n];\n\nconst emptySyntaxRefusals = [\n  ['bare-lean-empty-match', 'lean', 'def probe(value : Empty) : Nat := match value with\\n'],\n  ['lean-nomatch-missing-scrutinee', 'lean', 'def probe(value : Empty) : Nat := nomatch\\n'],\n  ['lean-multiple-nomatch-scrutinees', 'lean',\n    'def probe(left : Empty) (right : Empty) : Nat := nomatch left, right\\n'],\n  ['ps-empty-match-missing-close', 'ps', 'def probe(value : Empty) : Nat := match value with {\\n'],\n  ['ps-empty-type-missing-close', 'ps', 'inductive Empty where {\\n'],\n  ['ps-empty-match-orphan-bar', 'ps', 'def probe(value : Empty) : Nat := match value with { | }\\n'],\n];\n\nfunction emptyPosition(source, offset) {\n  const prefix = source.slice(0, offset), lines = prefix.split('\\n');\n  return { byteOffset: BigInt(Buffer.byteLength(prefix)), line: BigInt(lines.length),\n    column: BigInt([...lines.at(-1)].length + 1) };\n}\n\nfunction checkEmptySyntaxShape(parsed, test, kind) {\n  const source = test[kind], declarations = array(parsed.declarations);\n  if (test.shape === 'empty-type') {\n    assert.equal(declarations.length, 2, test.name);\n    assert.equal(tag(declarations[0]), 'inductiveDecl');\n    assert.equal(array(declarations[0].constructors).length, 0);\n    assert.equal(nameText(declarations[1].name), 'following');\n    const stop = kind === 'lean' ? source.indexOf('where') + 'where'.length : source.indexOf('}') + 1;\n    assert.deepEqual(positionData(declarations[0].span.stop), emptyPosition(source, stop));\n    return diagnostic(declarations[0].span);\n  }\n  assert.equal(declarations.length, 1, test.name);\n  let empty = declarations[0].value;\n  if (test.shape === 'outer') {\n    assert.equal(tag(empty), 'matchE');\n    const alternatives = array(empty.alternatives);\n    assert.equal(alternatives.length, 2, 'outer alternatives must not be consumed by nomatch');\n    empty = alternatives[0].snd.fst;\n  } else if (test.shape === 'argument') {\n    assert.equal(tag(empty), 'app');\n    assert.equal(array(empty.args).length, 1);\n    empty = array(empty.args)[0];\n  }\n  assert.equal(tag(empty), 'matchE');\n  assert.equal(array(empty.alternatives).length, 0);\n  if (test.shape === 'computed') {\n    assert.deepEqual(applicationShape(empty.scrutinee), app(ref('get'), ref('value')));\n  } else {\n    assert.equal(tag(empty.scrutinee), 'reference');\n  }\n  const term = kind === 'lean' ? test.leanTerm : test.psTerm, start = source.indexOf(term);\n  assert(start >= 0);\n  assert.deepEqual(positionData(empty.span.start), emptyPosition(source, start));\n  assert.deepEqual(positionData(empty.span.stop), emptyPosition(source, start + term.length));\n  return diagnostic(empty.span);\n}\n\nfunction checkEmptySyntax(compiler) {\n  const lean = compiler.PsCompilerSourceKind.lean, ps = compiler.PsCompilerSourceKind.proofScript;\n  const pairs = emptySyntaxCases.map((test) => {\n    const parsedLean = ok(compiler.psCompilerParseSource(lean, test.lean), test.name + '_LEAN_PARSE');\n    const parsedPs = ok(compiler.psCompilerParseSource(ps, test.ps), test.name + '_PS_PARSE');\n    assert.deepEqual(syntaxData(parsedLean), syntaxData(parsedPs), test.name + ': common AST');\n    const spans = { lean: checkEmptySyntaxShape(parsedLean, test, 'lean'),\n      ps: checkEmptySyntaxShape(parsedPs, test, 'ps') };\n    const canonicalLean = translate(compiler, lean, lean, test.lean, test.name + '_LEAN');\n    const canonicalPs = translate(compiler, lean, ps, test.lean, test.name + '_TO_PS');\n    const reparsed = ok(compiler.psCompilerParseSource(ps, canonicalPs), test.name + '_ROUND_TRIP');\n    assert.deepEqual(syntaxData(reparsed), syntaxData(parsedLean), test.name + ': round-trip AST');\n    assert.equal(translate(compiler, ps, lean, canonicalPs, test.name + '_BACK'), canonicalLean);\n    assert.equal(translate(compiler, ps, ps, test.ps, test.name + '_PS'), canonicalPs);\n    assert.equal(translate(compiler, lean, lean, canonicalLean, test.name + '_LEAN_STABLE'), canonicalLean);\n    assert.equal(translate(compiler, ps, ps, canonicalPs, test.name + '_PS_STABLE'), canonicalPs);\n    if (test.shape !== 'empty-type') assert(canonicalLean.includes('nomatch '));\n    return { name: test.name, leanSha256: sha256(test.lean), proofScriptSha256: sha256(test.ps),\n      canonicalLeanSha256: sha256(canonicalLean), canonicalProofScriptSha256: sha256(canonicalPs),\n      astSha256: sha256(JSON.stringify(syntaxData(parsedLean))), spans };\n  });\n  const refusals = emptySyntaxRefusals.map(([name, kind, source]) => ({\n    ...refused(compiler.psCompilerParseSource(kind === 'lean' ? lean : ps, source), name,\n      [kind === 'lean' ? 'leanFrontend' : 'proofScriptFrontend', 'parse']),\n    sourceKind: kind, sourceSha256: sha256(source),\n  }));\n  return { pairs, refusals, canonicalRoundTrips: pairs.length,\n    sourceScope: 'regular empty data; one Lean nomatch scrutinee; current PS empty braces',\n    additionalPreparations: 0, nativeMultiScrutineeNomatch: false,\n    bareLeanEmptyMatch: 'refused', fullStandardConformance: false,\n    fullPscvConformance: false, kernelChecked: false };\n}\n\nexport function runSh1GrammarConformance({ compiler, compilerSha256 }) {"
+        },
+        {
+          "before": "  const lexical = checkLexical(compiler);",
+          "after": "  const emptyElimination = checkEmptySyntax(compiler);\n  const lexical = checkLexical(compiler);"
+        },
+        {
+          "before": "      applicationCases, supportedCases, parseRefusals,",
+          "after": "      applicationCases, supportedCases, parseRefusals, emptySyntaxCases, emptySyntaxRefusals,"
+        },
+        {
+          "before": "      printerRefusals: 1,\n    },",
+          "after": "      printerRefusals: 1,\n      emptySyntaxPairs: emptyElimination.pairs.length,\n      emptySyntaxRefusals: emptyElimination.refusals.length,\n    },"
+        },
+        {
+          "before": "    applications, supported, refusals, lexical, emptyCallMeaning, printerRefusal,",
+          "after": "    applications, supported, refusals, lexical, emptyCallMeaning, printerRefusal, emptyElimination,"
+        },
+        {
+          "before": "export function runSh1GrammarConformance({ compiler, compilerSha256 }) {",
+          "after": "\nconst zeroFieldRecordSyntax = {\n  lean: 'structure RecordUnit where\\ndef value : RecordUnit := {}\\n',\n  ps: 'structure RecordUnit where {}\\ndef value : RecordUnit := {}\\n',\n};\nconst zeroFieldRecordRefusals = [\n  ['zero-field-structure-missing-close', 'structure RecordUnit where {\\n'],\n  ['zero-field-structure-semicolon', 'structure RecordUnit where { ; }\\n'],\n];\n\nfunction checkZeroFieldRecords(compiler) {\n  const lean = compiler.PsCompilerSourceKind.lean, ps = compiler.PsCompilerSourceKind.proofScript;\n  const parsed = {};\n  const spans = {};\n  for (const kind of ['lean', 'ps']) {\n    const source = zeroFieldRecordSyntax[kind];\n    parsed[kind] = ok(compiler.psCompilerParseSource(kind === 'lean' ? lean : ps, source),\n      'ZERO_FIELD_RECORD_' + kind);\n    const declarations = array(parsed[kind].declarations);\n    assert.equal(declarations.length, 2);\n    assert.equal(tag(declarations[0]), 'structureDecl');\n    assert.equal(array(declarations[0].fields).length, 0);\n    assert.equal(tag(declarations[1].value), 'record');\n    assert.equal(array(declarations[1].value.fields).length, 0);\n    const stop = kind === 'lean' ? source.indexOf('where') + 5 : source.indexOf('}') + 1;\n    assert.deepEqual(positionData(declarations[0].span.stop), emptyPosition(source, stop));\n    const recordStart = source.lastIndexOf('{}');\n    assert.deepEqual(positionData(declarations[1].value.span.start), emptyPosition(source, recordStart));\n    assert.deepEqual(positionData(declarations[1].value.span.stop), emptyPosition(source, recordStart + 2));\n    spans[kind] = { structure: diagnostic(declarations[0].span), record: diagnostic(declarations[1].value.span) };\n  }\n  assert.deepEqual(syntaxData(parsed.lean), syntaxData(parsed.ps));\n  const canonicalLean = translate(compiler, lean, lean, zeroFieldRecordSyntax.lean, 'ZERO_RECORD_LEAN');\n  const canonicalPs = translate(compiler, lean, ps, zeroFieldRecordSyntax.lean, 'ZERO_RECORD_TO_PS');\n  assert.deepEqual(syntaxData(parse(compiler, canonicalPs, 'ZERO_RECORD_ROUND_TRIP')), syntaxData(parsed.lean));\n  assert.equal(translate(compiler, ps, lean, canonicalPs, 'ZERO_RECORD_BACK'), canonicalLean);\n  assert.equal(translate(compiler, ps, ps, zeroFieldRecordSyntax.ps, 'ZERO_RECORD_PS'), canonicalPs);\n  assert.equal(translate(compiler, lean, lean, canonicalLean, 'ZERO_RECORD_LEAN_STABLE'), canonicalLean);\n  assert.equal(translate(compiler, ps, ps, canonicalPs, 'ZERO_RECORD_PS_STABLE'), canonicalPs);\n  const refusals = zeroFieldRecordRefusals.map(([name, source]) => ({\n    ...refused(compiler.psCompilerParseSource(ps, source), name, ['proofScriptFrontend', 'parse']),\n    sourceSha256: sha256(source),\n  }));\n  return { pairs: [{ name: 'inhabited-zero-field-structure-and-record',\n      leanSha256: sha256(zeroFieldRecordSyntax.lean), proofScriptSha256: sha256(zeroFieldRecordSyntax.ps),\n      canonicalLeanSha256: sha256(canonicalLean), canonicalProofScriptSha256: sha256(canonicalPs),\n      astSha256: sha256(JSON.stringify(syntaxData(parsed.lean))), spans }],\n    refusals, canonicalRoundTrips: 1, additionalPreparations: 0,\n    inhabitedStructure: true, emptyInductiveElimination: false,\n    fullStandardConformance: false, fullPscvConformance: false, kernelChecked: false };\n}\n\nexport function runSh1GrammarConformance({ compiler, compilerSha256 }) {"
+        },
+        {
+          "before": "  const emptyElimination = checkEmptySyntax(compiler);",
+          "after": "  const emptyElimination = checkEmptySyntax(compiler);\n  const zeroFieldRecords = checkZeroFieldRecords(compiler);"
+        },
+        {
+          "before": "      applicationCases, supportedCases, parseRefusals, emptySyntaxCases, emptySyntaxRefusals,",
+          "after": "      applicationCases, supportedCases, parseRefusals, emptySyntaxCases, emptySyntaxRefusals,\n      zeroFieldRecordSyntax, zeroFieldRecordRefusals,"
+        },
+        {
+          "before": "      emptySyntaxRefusals: emptyElimination.refusals.length,\n    },",
+          "after": "      emptySyntaxRefusals: emptyElimination.refusals.length,\n      zeroFieldRecordPairs: zeroFieldRecords.pairs.length,\n      zeroFieldRecordRefusals: zeroFieldRecords.refusals.length,\n    },"
+        },
+        {
+          "before": "    applications, supported, refusals, lexical, emptyCallMeaning, printerRefusal, emptyElimination,",
+          "after": "    applications, supported, refusals, lexical, emptyCallMeaning, printerRefusal, emptyElimination, zeroFieldRecords,"
+        }
+      ],
+      "reversible": true
+    },
+    {
+      "path": "psc0/scripts/sh1-ir-checker-conformance.mjs",
+      "expectedBaseBlob": "a5dfb43838615e91288f4d853829618f615dc661",
+      "deltaBaseBlob": "a5dfb43838615e91288f4d853829618f615dc661",
+      "candidateBlob": "dd53f2067046a201cda96fe5ede40f500ece5b20",
+      "edits": [
+        {
+          "before": "  const positive = module([...base,",
+          "after": "  const emptyLayouts = [inductive('Empty', []), inductive('EmptyBox', [], ['T0'])];\n  const emptyMatch = (scrutinee, owner = 'Empty', types = []) =>\n    E.matchE(owner, list(types), scrutinee, list([]));\n  const emptyDeclarations = [\n    declaration('eliminateEmptyNat', nat, emptyMatch(variable('empty')), [['empty', named('Empty')]]),\n    declaration('eliminateEmptyFunction', fnNat, emptyMatch(variable('empty')), [['empty', named('Empty')]]),\n    declaration('eliminateEmptyGeneric', T0, emptyMatch(variable('empty'), 'EmptyBox', [T0]),\n      [['empty', named('EmptyBox', [T0])]], ['T0']),\n    declaration('eliminateEmptyTypedCall', nat,\n      call(E.letE('emptyResult', fnNat, emptyMatch(variable('empty')), variable('emptyResult')), [natural(7)]),\n      [['empty', named('Empty')]]),\n    declaration('eliminateEmptyComputed', nat, emptyMatch(call('makeEmpty', [])),\n      [['makeEmpty', functionType([], named('Empty'))]]),\n  ];\n  const positive = module([...base,"
+        },
+        {
+          "before": "    declaration('fromCharacter', string, intrinsic('stringPush', [\n      text('x'), intrinsic('charOfNat', [natural(65)]),\n    ])),\n  ]);",
+          "after": "    declaration('fromCharacter', string, intrinsic('stringPush', [\n      text('x'), intrinsic('charOfNat', [natural(65)]),\n    ])),\n    ...emptyDeclarations,\n  ], layouts, [...choices, ...emptyLayouts]);"
+        },
+        {
+          "before": "    ['empty-layout', module([], [], [inductive('Empty', [])]), 'empty-layout-unsupported'],\n    ['empty-match', module([declaration('eliminate', nat,\n      E.matchE('Empty', list([]), variable('empty'), list([])), [['empty', named('Empty')]])],\n      [], [inductive('Empty', [])]), 'empty-match-unsupported'],",
+          "after": "    ['empty-match-missing-result-hint', module([declaration('eliminate', nat,\n      call(emptyMatch(variable('empty')), [natural(1)]), [['empty', named('Empty')]])],\n      [], emptyLayouts), 'empty-match-result-type-required'],\n    ['empty-match-wrong-scrutinee', module([declaration('eliminate', nat,\n      emptyMatch(natural(1)))], [], emptyLayouts), 'type-mismatch'],\n    ['empty-match-type-argument-arity', module([declaration('eliminate', nat,\n      emptyMatch(variable('empty'), 'EmptyBox'), [['empty', named('EmptyBox', [nat])]])],\n      [], emptyLayouts), 'layout-type-arity'],\n    ['empty-match-inhabited-layout', single(match([])), 'match-coverage'],"
+        },
+        {
+          "before": "  return {\n    status: 'pass', observations, exhaustiveForAllInputs: false,",
+          "after": "  let scrutineeCalls = 0;\n  const scrutineeFailure = new Error('empty scrutinee probe');\n  assert.throws(() => runtime.eliminateEmptyComputed(() => {\n    scrutineeCalls++; throw scrutineeFailure;\n  }), (error) => error === scrutineeFailure, 'PSC0_SH1_IR_EMPTY_SCRUTINEE_PRECEDENCE');\n  assert.equal(scrutineeCalls, 1, 'PSC0_SH1_IR_EMPTY_SCRUTINEE_ONCE');\n  observations++;\n  return {\n    status: 'pass', observations, exhaustiveForAllInputs: false,\n    emptyScrutinee: { callbackCalls: scrutineeCalls, propagatedOriginalFailure: true,\n      noEmptyInhabitantConstructed: true },"
+        },
+        {
+          "before": "function assertRejected(report, label, code) {",
+          "after": "function observeEmptyAbi(typeScript, declarations) {\n  assert.match(typeScript, /export type Empty = never;/u);\n  assert.match(typeScript, /export type EmptyBox<T0> = never;/u);\n  assert.equal(typeScript.split('__ps$Computation<never>').length - 1, 5);\n  const names = ['eliminateEmptyNat', 'eliminateEmptyFunction', 'eliminateEmptyGeneric',\n    'eliminateEmptyTypedCall', 'eliminateEmptyComputed'];\n  const signatures = names.map((name) => {\n    const lines = declarations.split(/\\r?\\n/u)\n      .filter((line) => line.startsWith('export declare function ' + name + '(') ||\n        line.startsWith('export declare function ' + name + '<'));\n    assert.equal(lines.length, 1, 'PSC0_SH1_IR_EMPTY_ABI: ' + name);\n    return { name, signature: lines[0] };\n  });\n  assert.match(declarations, /export type Empty = never;/u);\n  assert.match(declarations, /export type EmptyBox<T0> = never;/u);\n  assert.match(signatures[0].signature, /\\(empty: Empty\\): bigint;/u);\n  assert.match(signatures[1].signature, /\\(empty: Empty\\): \\([^)]*: bigint\\) => bigint;/u);\n  assert.match(signatures[2].signature, /<T0>\\(empty: EmptyBox<T0>\\): T0;/u);\n  assert.match(signatures[3].signature, /\\(empty: Empty\\): bigint;/u);\n  assert.match(signatures[4].signature, /\\(makeEmpty: \\(\\) => Empty\\): bigint;/u);\n  return { emptyLayoutCount: 2, emptyEliminationCount: 5, signatures,\n    declarationArtifact: 'accepted/index.d.ts', declarationSha256: sha256(declarations),\n    additionalTypeScriptCompilations: 0, nativeValueOracle: false,\n    strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false };\n}\n\nfunction assertRejected(report, label, code) {"
+        },
+        {
+          "before": "  const behavior = assertBehavior(await import(pathToFileURL(generated).href));\n  const rejected = [];",
+          "after": "  const behavior = assertBehavior(await import(pathToFileURL(generated).href));\n  const emptyElimination = observeEmptyAbi(typeScript,\n    await readFile(path.join(outDir, 'accepted', 'index.d.ts'), 'utf8'));\n  const rejected = [];"
+        },
+        {
+          "before": "    behavior, rejected, exhausted, directTypeOperations, carrierRejections,",
+          "after": "    behavior, rejected, exhausted, directTypeOperations, carrierRejections, emptyElimination,"
+        },
+        {
+          "before": "    ...emptyDeclarations,\n  ], layouts, [...choices, ...emptyLayouts]);",
+          "after": "    ...emptyDeclarations,\n    declaration('zeroFieldRecordValue', named('RecordUnit'), record('RecordUnit', [])),\n  ], [...layouts, structure('RecordUnit', [])], [...choices, ...emptyLayouts]);"
+        },
+        {
+          "before": "  let scrutineeCalls = 0;",
+          "after": "  assert.deepEqual(Object.getOwnPropertyNames(runtime.zeroFieldRecordValue), []);\n  const recordBrands = Object.getOwnPropertySymbols(runtime.zeroFieldRecordValue);\n  assert.equal(recordBrands.length, 1);\n  assert.equal(runtime.zeroFieldRecordValue[recordBrands[0]], true);\n  observations++;\n  let scrutineeCalls = 0;"
+        },
+        {
+          "before": "    emptyScrutinee: { callbackCalls: scrutineeCalls, propagatedOriginalFailure: true,",
+          "after": "    zeroFieldRecord: { ownStringFields: 0, ownBrandSymbols: 1, inhabited: true },\n    emptyScrutinee: { callbackCalls: scrutineeCalls, propagatedOriginalFailure: true,"
+        },
+        {
+          "before": "  const emptyElimination = observeEmptyAbi(typeScript,\n    await readFile(path.join(outDir, 'accepted', 'index.d.ts'), 'utf8'));",
+          "after": "  const declarations = await readFile(path.join(outDir, 'accepted', 'index.d.ts'), 'utf8');\n  const emptyElimination = observeEmptyAbi(typeScript, declarations);\n  assert.match(declarations, /export interface RecordUnit/u);\n  assert.match(declarations, /export declare const zeroFieldRecordValue: RecordUnit;/u);\n  const zeroFieldRecords = { structureCount: 1, fieldCount: 0, valueCount: 1,\n    declarationArtifact: 'accepted/index.d.ts', declarationSha256: sha256(declarations),\n    inhabited: true, additionalTypeScriptCompilations: 0,\n    strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false };"
+        },
+        {
+          "before": "    behavior, rejected, exhausted, directTypeOperations, carrierRejections, emptyElimination,",
+          "after": "    behavior, rejected, exhausted, directTypeOperations, carrierRejections, emptyElimination, zeroFieldRecords,"
+        }
+      ],
+      "reversible": true
+    },
+    {
+      "path": "psc0/test/IrCheckerTests.lean",
+      "expectedBaseBlob": "5c675cf9d9a8befdd7f6f427d6c737fef304d2e7",
+      "deltaBaseBlob": "5c675cf9d9a8befdd7f6f427d6c737fef304d2e7",
+      "candidateBlob": "2f507fdaef96411dfa5833016c94655549b99938",
+      "edits": [
+        {
+          "before": "def psIrNativeHasCode (report : PsIrCheckReport) (code : String) : Bool :=",
+          "after": "-- The exact five-declaration uninhabited source fixture is also checked by native\n-- Lean in this existing executable. No test constructs or supplies an Empty value.\ninductive Sh1Empty (alpha : Type) where\ndef sh1EmptyNat (value : Sh1Empty Nat) : Nat := nomatch value\ndef sh1EmptyFunction (value : Sh1Empty Nat) : Nat -> Nat := nomatch value\ndef sh1EmptyGeneric (alpha : Type) (value : Sh1Empty alpha) : alpha := nomatch value\ndef sh1EmptyFresh (value : Sh1Empty Nat) (emptyResult : Nat) : Nat := nomatch value\n\n-- A zero-field structure is inhabited; keep this separate from empty elimination.\nstructure Sh1EmptyRecord where\ndef sh1EmptyRecordValue : Sh1EmptyRecord := {}\n\ndef psIrNativeZeroFieldValue : Bool :=\n  match sh1EmptyRecordValue with\n  | Sh1EmptyRecord.mk => true\n\ndef psIrNativeEmptyType : PsVerifiedIrType :=\n  PsVerifiedIrType.named \"NativeEmpty\" []\n\ndef psIrNativeEmptyLayout : PsVerifiedIrInductive :=\n  PsVerifiedIrInductive.mk \"NativeEmpty\" [] []\n\ndef psIrNativeEmptyBoxLayout : PsVerifiedIrInductive :=\n  PsVerifiedIrInductive.mk \"NativeEmptyBox\" [PsVerifiedIrTypeParameter.mk \"T0\"] []\n\ndef psIrNativeEmptyMatch : PsVerifiedIrExpr :=\n  PsVerifiedIrExpr.matchE \"NativeEmpty\" [] (PsVerifiedIrExpr.var \"empty\") []\n\ndef psIrNativeEmptyCase (body : PsVerifiedIrExpr) : PsVerifiedIrModule :=\n  PsVerifiedIrModule.mk [] [] [psIrNativeEmptyLayout, psIrNativeEmptyBoxLayout]\n    [PsVerifiedIrDeclaration.mk \"nativeEmptyCase\" []\n      [PsVerifiedIrParameter.mk \"empty\" psIrNativeEmptyType] psIrNativeNat body]\n\ndef psIrNativeEmptyPositive : PsVerifiedIrModule :=\n  let typeParameter := PsVerifiedIrType.typeParameter \"T0\"\n  PsVerifiedIrModule.mk [] [PsVerifiedIrStructure.mk \"NativeRecordUnit\" [] []]\n    [psIrNativeEmptyLayout, psIrNativeEmptyBoxLayout]\n    [PsVerifiedIrDeclaration.mk \"nativeEmptyNat\" []\n       [PsVerifiedIrParameter.mk \"empty\" psIrNativeEmptyType] psIrNativeNat psIrNativeEmptyMatch,\n     PsVerifiedIrDeclaration.mk \"nativeEmptyFunction\" []\n       [PsVerifiedIrParameter.mk \"empty\" psIrNativeEmptyType] psIrNativeNatFunction psIrNativeEmptyMatch,\n     PsVerifiedIrDeclaration.mk \"nativeEmptyGeneric\" [PsVerifiedIrTypeParameter.mk \"T0\"]\n       [PsVerifiedIrParameter.mk \"empty\" (PsVerifiedIrType.named \"NativeEmptyBox\" [typeParameter])]\n       typeParameter (PsVerifiedIrExpr.matchE \"NativeEmptyBox\" [typeParameter] (PsVerifiedIrExpr.var \"empty\") []),\n     PsVerifiedIrDeclaration.mk \"nativeEmptyTypedCall\" []\n       [PsVerifiedIrParameter.mk \"empty\" psIrNativeEmptyType] psIrNativeNat\n       (PsVerifiedIrExpr.call\n         (PsVerifiedIrExpr.letE \"emptyResult\" psIrNativeNatFunction\n           psIrNativeEmptyMatch (PsVerifiedIrExpr.var \"emptyResult\"))\n         [] [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 7)]),\n     PsVerifiedIrDeclaration.mk \"nativeZeroFieldRecord\" [] []\n       (PsVerifiedIrType.named \"NativeRecordUnit\" [])\n       (PsVerifiedIrExpr.record \"NativeRecordUnit\" [] [])]\n\ndef psIrNativeInhabitedEmptyMatch : PsVerifiedIrModule :=\n  PsVerifiedIrModule.mk [] []\n    [PsVerifiedIrInductive.mk \"NativeUnit\" [] [PsVerifiedIrConstructor.mk \"mk\" []]]\n    [PsVerifiedIrDeclaration.mk \"nativeInhabitedEmpty\" [] [] psIrNativeNat\n      (PsVerifiedIrExpr.matchE \"NativeUnit\" []\n        (PsVerifiedIrExpr.constructor \"NativeUnit\" \"mk\" [] []) [])]\n\ndef psIrNativeHasCode (report : PsIrCheckReport) (code : String) : Bool :="
+        },
+        {
+          "before": "  let noDetails := psCheckVerifiedIrModule\n    { psIrCheckDefaultOptions with maxFindings := 0 } psIrNativeFalseAnnotation\n  [",
+          "after": "  let noDetails := psCheckVerifiedIrModule\n    { psIrCheckDefaultOptions with maxFindings := 0 } psIrNativeFalseAnnotation\n  let emptyAccepted := psCheckVerifiedIrModule psIrCheckDefaultOptions psIrNativeEmptyPositive\n  ["
+        },
+        {
+          "before": "    (\"diagnostic cap preserves finding count\",\n      !noDetails.accepted && noDetails.findingCount > 0 && noDetails.findings.isEmpty)\n  ]",
+          "after": "    (\"diagnostic cap preserves finding count\",\n      !noDetails.accepted && noDetails.findingCount > 0 && noDetails.findings.isEmpty),\n    (\"empty layouts and typed empty results are accepted\",\n      emptyAccepted.accepted && emptyAccepted.traversalComplete && emptyAccepted.findingCount == 0),\n    (\"empty layouts emit never and typed empty generators\",\n      match psTsEmitCheckedModule psIrCheckDefaultOptions psIrNativeEmptyPositive with\n      | Except.ok output =>\n          (output.splitOn \"export type NativeEmpty = never;\").length == 2 &&\n          (output.splitOn \"export type NativeEmptyBox<T0> = never;\").length == 2 &&\n          (output.splitOn \"__ps$Computation<never>\").length == 5\n      | Except.error _ => false),\n    (\"empty match without an expected result is rejected\",\n      psIrNativeRejects\n        (psIrNativeEmptyCase\n          (PsVerifiedIrExpr.call psIrNativeEmptyMatch []\n            [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)]))\n        \"empty-match-result-type-required\"),\n    (\"empty match still checks its scrutinee\",\n      psIrNativeRejects\n        (psIrNativeEmptyCase (PsVerifiedIrExpr.matchE \"NativeEmpty\" []\n          (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)) []))\n        \"type-mismatch\"),\n    (\"empty match still checks layout type arity\",\n      psIrNativeRejects\n        (psIrNativeEmptyCase (PsVerifiedIrExpr.matchE \"NativeEmptyBox\" []\n          (PsVerifiedIrExpr.var \"empty\") []))\n        \"layout-type-arity\"),\n    (\"empty alternatives still refuse an inhabited datatype\",\n      psIrNativeRejects psIrNativeInhabitedEmptyMatch \"match-coverage\"),\n    (\"zero-field source record has its nullary inhabitant\",\n      psIrNativeZeroFieldValue)\n  ]"
+        },
+        {
+          "before": "    toString cases.length ++ \",\\\"checkedEmitterRejectsInvalidIr\\\":true,\\\"strictSh1Qualified\\\":false}\")",
+          "after": "    toString cases.length ++ \",\\\"checkedEmitterRejectsInvalidIr\\\":true,\\\"strictSh1Qualified\\\":false,\" ++\n    \"\\\"emptyElimination\\\":{\\\"nativeSourceFixturePath\\\":\\\"test/fixtures/selfhost-sh1-empty.lean\\\",\" ++\n    \"\\\"nativeSourceFixtureSha256\\\":\\\"243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5\\\",\" ++\n    \"\\\"nativeSourceDeclarations\\\":5,\\\"emptyLayouts\\\":2,\\\"emptyEliminations\\\":4,\\\"nativeValueOracle\\\":false},\" ++\n    \"\\\"zeroFieldRecords\\\":{\\\"structureCount\\\":1,\\\"fieldCount\\\":0,\\\"inhabited\\\":true,\\\"nullaryValueMatched\\\":true}}\")"
+        }
+      ],
+      "reversible": true
+    }
+  ],
+  "narrowRecordDeltas": [
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "deltaBaseBlob": "3d2cded0edae1043757cbd4e6e1111bc79511cdc",
+      "candidateBlob": "e987f2834e74c8acded0fa628e245ef823dcc17a",
+      "edits": [
+        {
+          "before": "function reservedRuntimeNameCases() {",
+          "after": "\nfunction observeZeroFieldRecord(result, sourceKind) {\n  const layouts = emptyItems(result.originalIr.structures).filter((item) => item.name === 'Sh1EmptyRecord');\n  assert.equal(layouts.length, 1);\n  assert.equal(emptyItems(layouts[0].fields).length, 0);\n  assert.equal(emptyItems(layouts[0].typeParameters).length, 0);\n  const values = emptyItems(result.originalIr.declarations)\n    .filter((item) => item.name === 'sh1EmptyRecordValue');\n  assert.equal(values.length, 1);\n  const value = values[0];\n  assert.equal(emptyItems(value.parameters).length, 0);\n  assert.equal(emptyItems(value.typeParameters).length, 0);\n  assert.equal(emptyTag(value.resultType), 'named');\n  assert.equal(value.resultType.name, 'Sh1EmptyRecord');\n  assert.equal(emptyTag(value.body), 'record');\n  assert.equal(value.body.structureName, 'Sh1EmptyRecord');\n  assert.equal(emptyItems(value.body.typeArguments).length, 0);\n  assert.equal(emptyItems(value.body.fields).length, 0);\n  const origin = result.evidence.sourceOrigins.modules[0];\n  const batches = origin.batches.filter((batch) =>\n    batch.sourceName.length === 1 && ['Sh1EmptyRecord', 'sh1EmptyRecordValue'].includes(batch.sourceName[0]));\n  assert.deepEqual(batches.map((batch) => batch.sourceName), [['Sh1EmptyRecord'], ['sh1EmptyRecordValue']]);\n  assert.deepEqual(batches.map((batch) => batch.members.map((member) => member.role)),\n    [['structureType', 'constructor', 'recursor'], ['sourceDeclaration']]);\n  assert(batches.every((batch) => batch.normalization === null));\n  return { sourceKind, structureName: layouts[0].name, valueName: value.name,\n    moduleName: origin.moduleName, sourceDeclarationCount: 2, coreDeclarationCount: 4,\n    constructorCount: 1, fieldCount: 0, recordFieldCount: 0,\n    actualRecordValueRetained: true, inhabited: true,\n    atomicAcceptedId: sourceKind + '-raw-imports-and-ordinary-do-spellings',\n    atomicSourceInputsSha256: result.evidence.sourceInputsSha256,\n    typeScriptArtifact: 'accepted-' + sourceKind + '.ts', typeScriptSha256: sha256(result.typeScript) };\n}\n\nfunction reservedRuntimeNameCases() {"
+        },
+        {
+          "before": "  const accepted = [], emptyObservations = [], emittedBundles = [];",
+          "after": "  const accepted = [], emptyObservations = [], zeroFieldObservations = [], emittedBundles = [];"
+        },
+        {
+          "before": "      'def sh1OriginWords : String := \"do compilerPure compilerBind\"\\n',\n    ps:",
+          "after": "      'def sh1OriginWords : String := \"do compilerPure compilerBind\"\\n' +\n      'structure Sh1EmptyRecord where\\n' +\n      'def sh1EmptyRecordValue : Sh1EmptyRecord := {}\\n',\n    ps:"
+        },
+        {
+          "before": "      'def sh1OriginWords : String := \"do compilerPure compilerBind\"\\n',\n  };",
+          "after": "      'def sh1OriginWords : String := \"do compilerPure compilerBind\"\\n' +\n      'structure Sh1EmptyRecord where {}\\n' +\n      'def sh1EmptyRecordValue : Sh1EmptyRecord := {}\\n',\n  };"
+        },
+        {
+          "before": "    assert.equal(result.evidence.sourcePolicy.stats.declarationCount, 9);",
+          "after": "    assert.equal(result.evidence.sourcePolicy.stats.declarationCount, 11);"
+        },
+        {
+          "before": "    assert.equal(result.evidence.sourceOrigins.sourceDeclarationCount, 9);",
+          "after": "    assert.equal(result.evidence.sourceOrigins.sourceDeclarationCount, 11);"
+        },
+        {
+          "before": "    assert.equal(result.evidence.sourceOrigins.coreDeclarationCount, 12);",
+          "after": "    assert.equal(result.evidence.sourceOrigins.coreDeclarationCount, 16);"
+        },
+        {
+          "before": "    emptyObservations.push(observeEmptySource(result, kind, emptySources[kind]));",
+          "after": "    emptyObservations.push(observeEmptySource(result, kind, emptySources[kind]));\n    zeroFieldObservations.push(observeZeroFieldRecord(result, kind));"
+        },
+        {
+          "before": "  const refused = [];\n  for (const test of sourceCases()) {",
+          "after": "  const zeroFieldRecords = {\n    feature: 'inhabited-zero-field-structures', observations: zeroFieldObservations,\n    emittedTypeScriptEqual: true, typeScriptSha256: sha256(emittedBundles[0]),\n    observationBoundary: 'actual-original-ir-after-atomic-emission',\n    additionalPreparations: 0, additionalPortableIrChecks: 0,\n    strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false,\n  };\n  const refused = [];\n  for (const test of sourceCases()) {"
+        },
+        {
+          "before": "    accepted, refused, carrierRefusals, ingressSnapshots, emptyElimination,",
+          "after": "    accepted, refused, carrierRefusals, ingressSnapshots, emptyElimination, zeroFieldRecords,"
+        }
+      ],
+      "reversible": true
+    },
+    {
+      "path": "psc0/scripts/sh1-grammar-conformance.mjs",
+      "deltaBaseBlob": "4cb445f55285aa5b79712f249050aa6704c90ff1",
+      "candidateBlob": "77dcbec4a94f7ba27b0727a0888b4098d77f05fc",
+      "edits": [
+        {
+          "before": "export function runSh1GrammarConformance({ compiler, compilerSha256 }) {",
+          "after": "\nconst zeroFieldRecordSyntax = {\n  lean: 'structure RecordUnit where\\ndef value : RecordUnit := {}\\n',\n  ps: 'structure RecordUnit where {}\\ndef value : RecordUnit := {}\\n',\n};\nconst zeroFieldRecordRefusals = [\n  ['zero-field-structure-missing-close', 'structure RecordUnit where {\\n'],\n  ['zero-field-structure-semicolon', 'structure RecordUnit where { ; }\\n'],\n];\n\nfunction checkZeroFieldRecords(compiler) {\n  const lean = compiler.PsCompilerSourceKind.lean, ps = compiler.PsCompilerSourceKind.proofScript;\n  const parsed = {};\n  const spans = {};\n  for (const kind of ['lean', 'ps']) {\n    const source = zeroFieldRecordSyntax[kind];\n    parsed[kind] = ok(compiler.psCompilerParseSource(kind === 'lean' ? lean : ps, source),\n      'ZERO_FIELD_RECORD_' + kind);\n    const declarations = array(parsed[kind].declarations);\n    assert.equal(declarations.length, 2);\n    assert.equal(tag(declarations[0]), 'structureDecl');\n    assert.equal(array(declarations[0].fields).length, 0);\n    assert.equal(tag(declarations[1].value), 'record');\n    assert.equal(array(declarations[1].value.fields).length, 0);\n    const stop = kind === 'lean' ? source.indexOf('where') + 5 : source.indexOf('}') + 1;\n    assert.deepEqual(positionData(declarations[0].span.stop), emptyPosition(source, stop));\n    const recordStart = source.lastIndexOf('{}');\n    assert.deepEqual(positionData(declarations[1].value.span.start), emptyPosition(source, recordStart));\n    assert.deepEqual(positionData(declarations[1].value.span.stop), emptyPosition(source, recordStart + 2));\n    spans[kind] = { structure: diagnostic(declarations[0].span), record: diagnostic(declarations[1].value.span) };\n  }\n  assert.deepEqual(syntaxData(parsed.lean), syntaxData(parsed.ps));\n  const canonicalLean = translate(compiler, lean, lean, zeroFieldRecordSyntax.lean, 'ZERO_RECORD_LEAN');\n  const canonicalPs = translate(compiler, lean, ps, zeroFieldRecordSyntax.lean, 'ZERO_RECORD_TO_PS');\n  assert.deepEqual(syntaxData(parse(compiler, canonicalPs, 'ZERO_RECORD_ROUND_TRIP')), syntaxData(parsed.lean));\n  assert.equal(translate(compiler, ps, lean, canonicalPs, 'ZERO_RECORD_BACK'), canonicalLean);\n  assert.equal(translate(compiler, ps, ps, zeroFieldRecordSyntax.ps, 'ZERO_RECORD_PS'), canonicalPs);\n  assert.equal(translate(compiler, lean, lean, canonicalLean, 'ZERO_RECORD_LEAN_STABLE'), canonicalLean);\n  assert.equal(translate(compiler, ps, ps, canonicalPs, 'ZERO_RECORD_PS_STABLE'), canonicalPs);\n  const refusals = zeroFieldRecordRefusals.map(([name, source]) => ({\n    ...refused(compiler.psCompilerParseSource(ps, source), name, ['proofScriptFrontend', 'parse']),\n    sourceSha256: sha256(source),\n  }));\n  return { pairs: [{ name: 'inhabited-zero-field-structure-and-record',\n      leanSha256: sha256(zeroFieldRecordSyntax.lean), proofScriptSha256: sha256(zeroFieldRecordSyntax.ps),\n      canonicalLeanSha256: sha256(canonicalLean), canonicalProofScriptSha256: sha256(canonicalPs),\n      astSha256: sha256(JSON.stringify(syntaxData(parsed.lean))), spans }],\n    refusals, canonicalRoundTrips: 1, additionalPreparations: 0,\n    inhabitedStructure: true, emptyInductiveElimination: false,\n    fullStandardConformance: false, fullPscvConformance: false, kernelChecked: false };\n}\n\nexport function runSh1GrammarConformance({ compiler, compilerSha256 }) {"
+        },
+        {
+          "before": "  const emptyElimination = checkEmptySyntax(compiler);",
+          "after": "  const emptyElimination = checkEmptySyntax(compiler);\n  const zeroFieldRecords = checkZeroFieldRecords(compiler);"
+        },
+        {
+          "before": "      applicationCases, supportedCases, parseRefusals, emptySyntaxCases, emptySyntaxRefusals,",
+          "after": "      applicationCases, supportedCases, parseRefusals, emptySyntaxCases, emptySyntaxRefusals,\n      zeroFieldRecordSyntax, zeroFieldRecordRefusals,"
+        },
+        {
+          "before": "      emptySyntaxRefusals: emptyElimination.refusals.length,\n    },",
+          "after": "      emptySyntaxRefusals: emptyElimination.refusals.length,\n      zeroFieldRecordPairs: zeroFieldRecords.pairs.length,\n      zeroFieldRecordRefusals: zeroFieldRecords.refusals.length,\n    },"
+        },
+        {
+          "before": "    applications, supported, refusals, lexical, emptyCallMeaning, printerRefusal, emptyElimination,",
+          "after": "    applications, supported, refusals, lexical, emptyCallMeaning, printerRefusal, emptyElimination, zeroFieldRecords,"
+        }
+      ],
+      "reversible": true
+    }
+  ],
+  "fixturePins": {
+    "lean": {
+      "path": "test/fixtures/selfhost-sh1-empty.lean",
+      "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+      "bytes": 345
+    },
+    "ps": {
+      "path": "test/fixtures/selfhost-sh1-empty.ps",
+      "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390",
+      "bytes": 369
+    }
+  },
+  "counts": {
+    "source": {
+      "accepted": 2,
+      "refused": 33,
+      "carrierRefusals": 2,
+      "modulesEach": 3,
+      "declarationsEach": 11,
+      "coreDeclarationsEach": 16,
+      "importsEach": 1,
+      "normalizationsEach": 0,
+      "emptyModuleDeclarations": 5,
+      "emptyModuleCoreDeclarations": 6,
+      "emptyLayoutsEach": 1,
+      "emptyEliminationsEach": 4,
+      "typedResultsEach": 4,
+      "zeroFieldSourceDeclarationsEach": 2,
+      "zeroFieldCoreDeclarationsEach": 4,
+      "ingressMalformedOptions": 14,
+      "ingressInterceptedProbe": 1,
+      "ingressEmittedInputsEach": 3,
+      "additionalPreparations": 0,
+      "additionalPortableIrChecks": 0
+    },
+    "grammar": {
+      "emptySyntaxPairs": 5,
+      "emptySyntaxRefusals": 6,
+      "zeroFieldRecordPairs": 1,
+      "zeroFieldRecordRefusals": 2,
+      "additionalPreparations": 0
+    },
+    "originalIr": {
+      "acceptedDeclarations": 33,
+      "acceptedInductives": 4,
+      "acceptedStructures": 3,
+      "emptyLayouts": 2,
+      "emptyEliminations": 5,
+      "rejected": 38,
+      "behaviorObservations": 61,
+      "existingTypeScriptCompilations": 1,
+      "additionalTypeScriptCompilations": 0,
+      "emptyScrutineeCallbacks": 1,
+      "zeroFieldRecordValues": 1
+    },
+    "native": {
+      "existingProcesses": 1,
+      "cases": 15,
+      "inlineSourceFixtureDeclarations": 5,
+      "emptyLayouts": 2,
+      "emptyEliminations": 4,
+      "zeroFieldRecordStructures": 1,
+      "additionalCompilerPreparations": 0
+    }
+  },
+  "receiptFields": {
+    "source": [
+      "emptyElimination",
+      "zeroFieldRecords"
+    ],
+    "grammar": [
+      "emptyElimination",
+      "zeroFieldRecords"
+    ],
+    "originalIr": [
+      "emptyElimination",
+      "zeroFieldRecords",
+      "behavior.emptyScrutinee",
+      "behavior.zeroFieldRecord"
+    ],
+    "native": [
+      "fixtures.emptyElimination",
+      "fixtures.zeroFieldRecords"
+    ]
+  },
+  "artifactPaths": {
+    "source": [
+      "empty.lean",
+      "empty.ps",
+      "accepted-lean.ts",
+      "accepted-ps.ts"
+    ],
+    "originalIr": [
+      "accepted/index.ts",
+      "accepted/index.js",
+      "accepted/index.d.ts"
+    ],
+    "native": [
+      "native.stdout.log",
+      "receipt.json"
+    ]
+  },
+  "scope": {
+    "uninhabitedNativeValueOracle": false,
+    "zeroFieldRecordsAreInhabited": true,
+    "currentGrammarOnly": true,
+    "kernelProviderChanges": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false
+  },
+  "validation": {
+    "exactForwardReverseText": true,
+    "executed": false,
+    "qualified": false,
+    "refsChanged": false
+  }
+}

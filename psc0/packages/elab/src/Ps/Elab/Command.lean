@@ -936,7 +936,9 @@ def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxPr
   -- Only declarations and their metadata leave this program owner; scope frames
   -- and local resolution settings cannot escape into the next module.
   let result : PsElabModuleWithOriginsResult := {
-    result := { environment := state.environment, declarations := state.declarationsRev.reverse,
+    result := {
+      environment := state.environment
+      declarations := state.declarationsRev.reverse
       commandDiagnostics := state.commandDiagnosticsRev.reverse }
     origins := state.originsRev.reverse
     privateNames := state.privateNames

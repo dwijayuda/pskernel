@@ -172,27 +172,23 @@ structure PsKernelC0DeepDeferredLambdaFrame where
     (psKernelC0DeepSubstForce delayedOpening, remainingRanges) =
       psKernelC0DeepEagerBinderOpening originalBody fresh originalRanges
 
-/-- A *real* deferred binder-opening operation. Unlike the eager source
-    prepare, its successful path never traverses the original lambda body
-    to apply a substitution before returning its continuation. -/
-def psKernelC0DeepLambdaPrepareDeferred
-    (smaller : PsKernelC0BinderSmaller)
+/-- Resume after the domain has already been checked. A mixed
+    worklist must not re-run that judgment: `domainResult` is its exact
+    checked type and resulting state. This stage owns the source sort check,
+    fresh-name allocation, local scope and delayed binder opening. -/
+def psKernelC0DeepLambdaResumeCheckedDomain
     (whnf : PsKernelC0BinderWhnf)
-    (defeq : PsKernelC0BinderDefEq)
     (nextContext : PsKernelCheckerContext)
-    (state : PsKernelCheckerState)
+    (domainResult : PsKernelExpr × PsKernelCheckerState)
     (name : PsKernelName)
     (domain body : PsKernelExpr)
     (binderInfo : PsKernelBinderInfo)
     (currentBinderRanges : List Nat) :
     Except String PsKernelC0DeepDeferredLambdaFrame :=
-  match smaller [] [] whnf defeq nextContext state domain false with
+  match psKernelEnsureSortWith whnf nextContext
+      domainResult.2 domainResult.1 with
   | .error error => .error error
-  | .ok domainResult =>
-    match psKernelEnsureSortWith whnf nextContext
-        domainResult.2 domainResult.1 with
-    | .error error => .error error
-    | .ok sortResult =>
+  | .ok sortResult =>
       let freshResult := psKernelCheckerStateFreshName sortResult.2 name
       let fresh := freshResult.1
       let state1 := freshResult.2
@@ -216,6 +212,27 @@ def psKernelC0DeepLambdaPrepareDeferred
         openingSource :=
           psKernelC0DeepDeferBinderOpening_source body fresh currentBinderRanges
       }
+
+/-- A *real* deferred binder-opening operation. Unlike the eager source
+    prepare, its successful path never traverses the original lambda body
+    to apply a substitution before returning its continuation. -/
+def psKernelC0DeepLambdaPrepareDeferred
+    (smaller : PsKernelC0BinderSmaller)
+    (whnf : PsKernelC0BinderWhnf)
+    (defeq : PsKernelC0BinderDefEq)
+    (nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (domain body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (currentBinderRanges : List Nat) :
+    Except String PsKernelC0DeepDeferredLambdaFrame :=
+  match smaller [] [] whnf defeq nextContext state domain false with
+  | .error error => .error error
+  | .ok domainResult =>
+      psKernelC0DeepLambdaResumeCheckedDomain
+        whnf nextContext domainResult
+        name domain body binderInfo currentBinderRanges
 
 /-- Force only at a genuine source typing observation boundary, exactly
     through the source capture-avoiding instantiator. -/

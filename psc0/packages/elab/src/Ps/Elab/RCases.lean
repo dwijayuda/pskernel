@@ -29,7 +29,8 @@ def psProofRCasesAlternatives (context : PsElabContext) (span : PsSourceSpan)
           resolvedName := some
             (psNameAppendNum (psRootName "$psc0RCasesField") (context.localContext.nextId + index)) }
     let rest ← psProofRCasesAlternatives context span constructors remaining
-    return { constructor := name, patterns := fields, names
+    return {
+      constructor := name, patterns := fields, names
       span := psSyntaxRCasesPatternSpan pattern } :: rest
 
 -- Quot has its own checked primitive kind. Its selected elimination target is
@@ -81,7 +82,8 @@ def psProofRCasesQuotient
   let inner := psProofRCasesRemoveLocals opened.context
     (majorId :: dependents.map (·.binder.id))
   let body ← visit { value := .fvar field.id, pattern } {
-    frame with context := inner, target := opened.body
+    frame with
+    context := inner, target := opened.body
     tag := psProofTag frame.tag "mk"
     refinements := frame.refinements ++ opened.replacements }
   let body ← psElabCloseDependents fieldContext opened body specialized

@@ -98,6 +98,6 @@ def psProofReplaceLocalEq (state : PsProofState) (context : PsElabContext)
       [.letE newId name type checked.term] fresh.expr
     | throw (.proof "invalid transported local scope")
   let inner := psElabContextWithMeta inner constraints
-  let state ← psProofNormalize { (psProofUpdate state inner) with goals :=
-    { id := child, tag := goal.tag } :: state.goals.drop 1 }
+  let state ← psProofNormalize { (psProofUpdate state inner) with
+    goals := { id := child, tag := goal.tag } :: state.goals.drop 1 }
   return (state, newId)

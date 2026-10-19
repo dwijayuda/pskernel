@@ -482,7 +482,7 @@ def exposed_proof_cases():
         ("ProofBoundaryClient", "module\npublic import ProofBoundaryProvider\npublic theorem coreProofKeepRfl (A : Type) (unused x : A) : coreProofKeep A unused x = x := by rfl\npublic theorem coreProofLetRfl (A : Type) (unused x : A) : coreProofLet A unused x = x := by rfl\npublic def coreProofSignatureUse (A : Type) (x : A) : A := coreProofSignature A x\n", ()),
         ("ProofBoundaryDirectPrivate", "module\nprivate theorem coreSecretEq (A : Type) (x : A) : x = x := by rfl\npublic abbrev coreProofDirect (A : Type) (x : A) : A := (fun (_h : x = x) => x) (coreSecretEq A x)\n", ("coreSecretEq",)),
         ("ProofBoundaryData", "module\nprivate def coreSecretValue (A : Type) (x : A) : A := x\npublic abbrev coreProofData (A : Type) (x : A) : A := by exact coreSecretValue A x\n", ("coreSecretValue",)),
-        ("ProofBoundaryHiddenType", "module\nprivate def CoreHiddenProp (A : Type) (x : A) : Prop := x = x\nprivate theorem coreHiddenProof (A : Type) (x : A) : CoreHiddenProp A x := by rfl\npublic abbrev coreProofHiddenType (A : Type) (x : A) : A := (fun (_h : CoreHiddenProp A x) => x) (by exact coreHiddenProof A x)\n", ("CoreHiddenProp",)),
+        ("ProofBoundaryHiddenType", "module\nprivate def CoreHiddenProp (A : Type) (x : A) : Prop := x = x\nprivate theorem coreHiddenProof (A : Type) (x : A) : CoreHiddenProp A x := by rfl\npublic abbrev coreProofHiddenType (A : Type) (x : A) : A := (fun (_h : CoreHiddenProp A x) => x) (Eq.refl x)\n", ("CoreHiddenProp",)),
         ("ProofBoundaryPrivateAlias", "module\npublic import ProofBoundaryProvider\npublic theorem coreProofPrivateAlias (A : Type) (x : A) : x = x := coreSecretEq A x\n", ("coreSecretEq",)),
         ("ProofBoundaryImportProvider", "module\npublic theorem coreImportedSecretEq (A : Type) (x : A) : x = x := by rfl\n", ()),
         ("ProofBoundaryImportLibrary", "module\nimport ProofBoundaryImportProvider\npublic abbrev coreImportedProofKeep (A : Type) (x : A) : A := (fun (_h : x = x) => x) (by exact coreImportedSecretEq A x)\n", ()),
@@ -698,6 +698,9 @@ def main():
                 )
                 diagnostics.append(item)
             case["diagnostics"] = diagnostics
+            for diagnostic in diagnostics:
+                if diagnostic["data"].startswith("CORE-EQUATION-VISIBILITY"):
+                    print(diagnostic["data"], flush=True)
             errors = [item for item in diagnostics if item["severity"] == "error"]
             if expected_errors:
                 require(completed.returncode == 1, f"{name}: refusal must exit exactly 1")

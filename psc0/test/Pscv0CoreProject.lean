@@ -662,6 +662,199 @@ private def checkImportedBodies : IO Unit := do
     "Lean and PS imported-body admissions differ"
   IO.println "PSCV0_CORE_IMPORTED_BODY: paired exposed abbreviation and exported theorem proofs, ordinary definition opacity and owned rfl refusal passed"
 
+
+private def importVisibilityInput (kind : PsCompilerSourceKind)
+    (name imports : String) (pieces : List (String × String)) :
+    PsPscv0ModuleSource :=
+  let body := pieces.foldl (fun acc piece =>
+    acc ++ (match kind with
+      | .lean => piece.fst
+      | .proofScript => piece.snd)) ""
+  input kind name ((match kind with
+    | .lean => "module\n"
+    | .proofScript => "") ++ imports ++ body)
+
+private def importVisibilityProvider : List (String × String) := [
+  ("public def coreImportType (A : Type) : Type := A\n",
+   "function coreImportType(A: Type): Type := A\n"),
+  ("public def coreImportValue (A : Type) (x : A) : A := x\n",
+   "function coreImportValue(A: Type, x: A): A := x\n"),
+  ("public theorem coreImportProof (A : Type) (x : A) : x = x := by rfl\n",
+   "theorem coreImportProof(A: Type, x: A): x = x := by { rfl }\n")]
+
+private def importVisibilitySignature : String × String :=
+  ("public def coreImportSignature (A : Type) (x : coreImportType A) (y : A) : A := y\n",
+   "function coreImportSignature(A: Type, x: coreImportType(A), y: A): A := y\n")
+
+private def importVisibilityExposed : String × String :=
+  ("public abbrev coreImportExposed (A : Type) (x : A) : A := coreImportValue A x\n",
+   "abbrev coreImportExposed(A: Type, x: A): A := coreImportValue(A, x)\n")
+
+private def importVisibilityOpaque : String × String :=
+  ("public def coreImportOpaque (A : Type) (x : A) : A := coreImportValue A x\n",
+   "function coreImportOpaque(A: Type, x: A): A := coreImportValue(A, x)\n")
+
+private def importVisibilityProof : String × String :=
+  ("public theorem coreImportViaProof (A : Type) (x : A) : x = x := coreImportProof A x\n",
+   "theorem coreImportViaProof(A: Type, x: A): x = x := coreImportProof(A, x)\n")
+
+private def importVisibilityBridge : String × String :=
+  ("public def coreImportBridge (A : Type) (x : A) : A := coreImportValue A x\n",
+   "function coreImportBridge(A: Type, x: A): A := coreImportValue(A, x)\n")
+
+private def importVisibilityAcrossBridge : String × String :=
+  ("public abbrev coreImportAcrossBridge (A : Type) (x : A) : A := coreImportBridge A x\n",
+   "abbrev coreImportAcrossBridge(A: Type, x: A): A := coreImportBridge(A, x)\n")
+
+private def importVisibilityDeclaration (output : PsCompilerEngineProjectOutput)
+    (name : String) : IO PsDeclaration := do
+  let some declaration := output.prepared.declarations.find?
+      (fun declaration => psNameEq (psDeclarationName declaration) (psRootName name))
+    | fail ("missing import-visibility declaration " ++ name)
+  return declaration
+
+private def importVisibilityInterface (output : PsCompilerEngineProjectOutput) :
+    IO PsPscv0ModuleInterface := do
+  let some entry := output.moduleProfiles.find? (fun item => item.name == "Entry")
+    | fail "import-visibility entry receipt missing"
+  return entry.interface
+
+private def checkImportVisibilityDependencies
+    (output : PsCompilerEngineProjectOutput) (withPublicUses : Bool) : IO Unit := do
+  let ordinary ← importVisibilityDeclaration output "coreImportOpaque"
+  let some ordinaryBody := psDeclarationValue ordinary
+    | fail "ordinary implementation body disappeared from checked declarations"
+  ensure ((psPscv0ExprConstants ordinaryBody).any
+      (psNameEq (psRootName "coreImportValue")))
+    "ordinary implementation lost its imported dependency"
+  let proof ← importVisibilityDeclaration output "coreImportViaProof"
+  let .theoremDecl _ _ _ proofBody := proof
+    | fail "imported proof changed declaration kind"
+  ensure ((psPscv0ExprConstants proofBody).any
+      (psNameEq (psRootName "coreImportProof")))
+    "theorem lost its private imported proof dependency"
+  if withPublicUses then
+    let signature ← importVisibilityDeclaration output "coreImportSignature"
+    ensure ((psPscv0ExprConstants (psDeclarationType signature)).any
+        (psNameEq (psRootName "coreImportType")))
+      "imported signature dependency disappeared"
+    let exposed ← importVisibilityDeclaration output "coreImportExposed"
+    let some exposedBody := psDeclarationValue exposed
+      | fail "exposed implementation body missing"
+    ensure ((psPscv0ExprConstants exposedBody).any
+        (psNameEq (psRootName "coreImportValue")))
+      "exposed implementation lost its imported dependency"
+
+private def checkImportVisibility : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let ordinaryPieces := [importVisibilityOpaque, importVisibilityProof]
+  let allPieces := [importVisibilitySignature, importVisibilityExposed,
+    importVisibilityOpaque, importVisibilityProof]
+  let ordinaryNames := ["coreImportOpaque", "coreImportViaProof"].map psRootName
+  let allNames := ["coreImportSignature", "coreImportExposed",
+    "coreImportOpaque", "coreImportViaProof"].map psRootName
+  let providerNames := ["coreImportType", "coreImportValue", "coreImportProof"].map psRootName
+  let signatureRefusal :=
+    "PSCV0-MODULE: public signature references private import in coreImportSignature"
+  let exposedRefusal :=
+    "PSCV0-MODULE: exposed body references private import in coreImportExposed"
+  let mut ordinaryPairs : List String := []
+  let mut bridgePairs : List String := []
+  let mut publicReference : Option String := none
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let library := importVisibilityInput kind "Library" "" importVisibilityProvider
+    let facade := importVisibilityInput kind "Facade" "public import Library\n" []
+    let left := importVisibilityInput kind "Left" "public import Library\n" []
+    let right := importVisibilityInput kind "Right" "public import Library\n" []
+    let ordinary ← prepare profile "Entry"
+      [importVisibilityInput kind "Entry" "import Library\n" ordinaryPieces, library]
+    let _ ← admit seed ordinary.admissions
+    checkImportVisibilityDependencies ordinary false
+    let ordinaryView ← importVisibilityInterface ordinary
+    ensure (sameNames ordinary.mainNames ordinaryNames &&
+        sameNames (ordinaryView.declarations.map psDeclarationName) ordinaryNames)
+      "ordinary import leaked provider names into the interface"
+    ordinaryPairs := ordinaryPairs ++ [ordinary.admissions]
+    for (imports, intermediate) in
+        [("public import Library\n", []),
+         ("public import Facade\n", [facade]),
+         ("import Left\npublic import Right\n", [left, right]),
+         ("public import Right\nimport Left\n", [left, right])] do
+      let output ← prepare profile "Entry"
+        (importVisibilityInput kind "Entry" imports allPieces :: intermediate ++ [library])
+      let _ ← admit seed output.admissions
+      checkImportVisibilityDependencies output true
+      ensure (sameNames output.mainNames allNames)
+        "public import changed executable entry ownership"
+      let view ← importVisibilityInterface output
+      ensure (sameNames (view.declarations.map psDeclarationName) (allNames ++ providerNames))
+        "public import did not retain its exact transitive interface"
+      for name in providerNames do
+        ensure ((view.declarations.filter (fun declaration =>
+            psNameEq (psDeclarationName declaration) name)).length == 1)
+          "public import diamond duplicated a declaration"
+      match publicReference with
+      | none => publicReference := some output.admissions
+      | some reference =>
+          ensure (output.admissions == reference)
+            "public import route, order or source kind changed canonical declarations"
+    refuse profile "Entry"
+      [importVisibilityInput kind "Entry" "import Library\n" [importVisibilitySignature], library]
+      true signatureRefusal
+    refuse profile "Entry"
+      [importVisibilityInput kind "Entry" "import Library\n" [importVisibilityExposed], library]
+      true exposedRefusal
+    refuse profile "Entry"
+      [importVisibilityInput kind "Entry" "import Facade\n" [importVisibilitySignature],
+       facade, library]
+      true signatureRefusal
+    let bridgeFacade := importVisibilityInput kind "Facade" "import Library\n"
+      [importVisibilityBridge]
+    let bridge ← prepare profile "Entry"
+      [importVisibilityInput kind "Entry" "public import Facade\n"
+         [importVisibilityAcrossBridge], bridgeFacade, library]
+    let _ ← admit seed bridge.admissions
+    let bridgeView ← importVisibilityInterface bridge
+    let bridgeName := psRootName "coreImportBridge"
+    let acrossName := psRootName "coreImportAcrossBridge"
+    ensure (sameNames (bridgeView.declarations.map psDeclarationName) [acrossName, bridgeName])
+      "opaque bridge leaked its private import or lost its public name"
+    let some (.opaqueDecl ..) := bridgeView.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) bridgeName)
+      | fail "ordinary bridge exposed its hidden implementation"
+    let some (.definitionDecl _ _ _ acrossBody) := bridgeView.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) acrossName)
+      | fail "client abbreviation lost its exposed bridge call"
+    ensure ((psPscv0ExprConstants acrossBody).any (psNameEq bridgeName))
+      "client bridge dependency disappeared"
+    let bridgeDecl ← importVisibilityDeclaration bridge "coreImportBridge"
+    let some bridgeBody := psDeclarationValue bridgeDecl
+      | fail "bridge implementation missing from checked declarations"
+    ensure ((psPscv0ExprConstants bridgeBody).any
+        (psNameEq (psRootName "coreImportValue")))
+      "bridge implementation lost its private imported dependency"
+    refuse profile "Entry"
+      [importVisibilityInput kind "Entry" "public import Facade\n"
+         [importVisibilityExposed], bridgeFacade, library]
+      true "PSCV0-SCOPE: unknown name coreImportValue"
+    bridgePairs := bridgePairs ++ [bridge.admissions]
+  let [leanOrdinary, psOrdinary] := ordinaryPairs
+    | fail "ordinary import paired source count changed"
+  ensure (leanOrdinary == psOrdinary) "ordinary-import paired admissions differ"
+  let [leanBridge, psBridge] := bridgePairs
+    | fail "bridge paired source count changed"
+  ensure (leanBridge == psBridge) "bridge paired admissions differ"
+  let legacyBody := allPieces.foldl (fun acc piece => acc ++ piece.fst) ""
+  let legacy ← prepare profile "Entry"
+    [input .lean "Entry" ("import Library\n" ++ legacyBody),
+     importVisibilityInput .lean "Library" "" importVisibilityProvider]
+  let _ ← admit seed legacy.admissions
+  let some reference := publicReference
+    | fail "public import canonical reference missing"
+  ensure (legacy.admissions == reference)
+    "legacy name-visibility exemption changed canonical declarations"
+  IO.println "PSCV0_CORE_IMPORT_VISIBILITY: 13 positive projects, eight owned refusals, paired canonical admission, retained type/body/proof dependencies, public diamonds, opaque bridges and legacy exemption passed"
+
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
   let seed ← match result with
@@ -720,4 +913,5 @@ def main : IO Unit := do
   checkVisibilityScopes
   checkModuleKinds seed profile
   checkImportedBodies
+  checkImportVisibility
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

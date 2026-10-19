@@ -206,7 +206,7 @@ def psPscv0ExprConstants : PsExpr → List PsName
   | .letE _ type value body =>
       psPscv0ExprConstants type ++ psPscv0ExprConstants value ++
         psPscv0ExprConstants body
-  | .proj _ _ value => psPscv0ExprConstants value
+  | .proj typeName _ value => typeName :: psPscv0ExprConstants value
   | _ => []
 
 def psPscv0GeneratedPrivateNames (origins : List PsElabBatchOrigin) : List PsName :=
@@ -310,18 +310,6 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
       psPscv0GeneratedPrivateNames elaborated.origins
     let ownPublic := psPscv0OwnInterface elaborated.result.environment
       elaborated.result.declarations hidden elaborated.exposedNames
-    -- A public type must never refer to this module's private constants, even
-    -- though public executable bodies may call those constants internally.
-    for decl in ownPublic.declarations do
-      if (psPscv0ExprConstants (psDeclarationType decl)).any
-          (fun dependency => hidden.any (psNameEq dependency)) then
-        throw ("PSCV0-MODULE: public signature references private name in " ++
-          psNameToString (psDeclarationName decl))
-      if let some body := psDeclarationValue decl then
-        if (psPscv0ExprConstants body).any
-            (fun dependency => hidden.any (psNameEq dependency)) then
-          throw ("PSCV0-MODULE: exposed body references private name in " ++
-            psNameToString (psDeclarationName decl))
     let mut interface := ownPublic
     for imp in item.program.imports do
       if imp.isPublic then
@@ -329,6 +317,37 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
           module.name == psPscv0ImportKey imp)
           | throw "PSCV0-MODULE: missing public dependency"
         interface := psPscv0InterfaceMerge interface linked.interface
+    -- The exported view is also the availability boundary for public types
+    -- and exposed definitions. A public-import path can make a declaration
+    -- available even when another direct import of its provider is private.
+    let publicNames := interface.declarations.map psDeclarationName
+    let publiclyAvailable := fun name =>
+      psEnvironmentContains profile.baseEnvironment name ||
+        publicNames.any (psNameEq name)
+    for decl in ownPublic.declarations do
+      let typeDependencies := psPscv0ExprConstants (psDeclarationType decl)
+      if typeDependencies.any
+          (fun dependency => hidden.any (psNameEq dependency)) then
+        throw ("PSCV0-MODULE: public signature references private name in " ++
+          psNameToString (psDeclarationName decl))
+      -- Native legacy roots do not restrict their exported environment.
+      if item.program.isModule &&
+          typeDependencies.any (fun dependency => !publiclyAvailable dependency) then
+        throw ("PSCV0-MODULE: public signature references private import in " ++
+          psNameToString (psDeclarationName decl))
+      -- Imported ordinary definitions are opaque in ownPublic; theorem proofs
+      -- are likewise absent from psDeclarationValue. Their private implementation
+      -- dependencies are retained for checking, without becoming exposed bodies.
+      if let some body := psDeclarationValue decl then
+        let bodyDependencies := psPscv0ExprConstants body
+        if bodyDependencies.any
+            (fun dependency => hidden.any (psNameEq dependency)) then
+          throw ("PSCV0-MODULE: exposed body references private name in " ++
+            psNameToString (psDeclarationName decl))
+        if item.program.isModule &&
+            bodyDependencies.any (fun dependency => !publiclyAvailable dependency) then
+          throw ("PSCV0-MODULE: exposed body references private import in " ++
+            psNameToString (psDeclarationName decl))
     moduleProfiles := moduleProfiles ++ [{
       name := item.name, sourceName := item.sourceName, source := item.source
       imports := item.program.imports.map (fun imp => (psPscv0ImportKey imp, imp.isPublic))

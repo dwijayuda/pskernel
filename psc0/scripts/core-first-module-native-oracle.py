@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pinned native module-kind and exported-body conformance oracle."""
+"""Pinned native module-kind, import-visibility and exported-body oracle."""
 
 from datetime import datetime, timezone
 import hashlib
@@ -92,6 +92,101 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
+    ] + visibility_cases()
+
+
+def visibility_cases():
+    provider = source("""
+        module
+
+        public def coreImportType (A : Type) : Type := A
+        public def coreImportValue (A : Type) (x : A) : A := x
+        public theorem coreImportProof (A : Type) (x : A) :
+            x = x := by
+          rfl
+        """)
+
+    signature = source("""
+        public def coreImportSignature
+            (A : Type) (x : coreImportType A) (y : A) : A := y
+        """)
+
+    exposed = source("""
+        public abbrev coreImportExposed
+            (A : Type) (x : A) : A := coreImportValue A x
+        """)
+
+    facade = source("""
+        module
+        import ImportVisibilityProvider
+
+        public def coreImportBridge (A : Type) (x : A) : A :=
+          coreImportValue A x
+
+        public theorem coreImportViaProof (A : Type) (x : A) :
+            x = x :=
+          coreImportProof A x
+        """)
+
+    bridge_client = source("""
+        module
+        public import ImportVisibilityFacade
+
+        public abbrev coreImportAcrossBridge
+            (A : Type) (x : A) : A :=
+          coreImportBridge A x
+        """)
+
+    hidden_client = source("""
+        module
+        public import ImportVisibilityFacade
+
+        public def coreImportHidden (A : Type) (x : A) : A :=
+          coreImportValue A x
+        """)
+
+    def private_import_error(name):
+        return (
+            f"Unknown identifier `{name}`",
+            f"A public declaration `{name}` exists but is imported privately",
+            "public import ImportVisibilityProvider",
+        )
+
+    ordinary_header = "module\nimport ImportVisibilityProvider\n\n"
+    public_header = "module\npublic import ImportVisibilityProvider\n\n"
+    public_client = signature + "\n" + exposed
+    legacy_client = (
+        "import ImportVisibilityProvider\n\n"
+        + signature.replace("public def ", "def ")
+        + "\n"
+        + exposed.replace("public abbrev ", "abbrev ")
+    )
+
+    return [
+        ("ImportVisibilityProvider", provider, ()),
+        ("ImportVisibilityFacade", facade, ()),
+        ("ImportVisibilityOrdinarySignature", ordinary_header + signature,
+         private_import_error("coreImportType")),
+        ("ImportVisibilityOrdinaryExposed", ordinary_header + exposed,
+         private_import_error("coreImportValue")),
+        ("ImportVisibilityPublic", public_header + public_client, ()),
+        ("ImportVisibilityBridgeClient", bridge_client, ()),
+        ("ImportVisibilityHiddenClient", hidden_client,
+         ("Unknown identifier `coreImportValue`",)),
+        ("ImportVisibilityLeft",
+         "module\npublic import ImportVisibilityProvider\n", ()),
+        ("ImportVisibilityRight",
+         "module\npublic import ImportVisibilityProvider\n", ()),
+        ("ImportVisibilityPrivateTransitiveSignature",
+         "module\nimport ImportVisibilityLeft\n\n" + signature,
+         private_import_error("coreImportType")),
+        ("ImportVisibilityDiamondPrivateFirst",
+         "module\nimport ImportVisibilityLeft\npublic import ImportVisibilityRight\n\n"
+         + public_client, ()),
+        ("ImportVisibilityDiamondPublicFirst",
+         "module\npublic import ImportVisibilityRight\nimport ImportVisibilityLeft\n\n"
+         + public_client, ()),
+        ("ImportVisibilityLegacy", legacy_client, ()),
     ]
 
 
@@ -185,9 +280,9 @@ def main():
         require(version == PIN_VERSION, f"wrong Lean version: {version!r}")
         require(githash == PIN_GITHASH, f"wrong Lean commit: {githash!r}")
         fixtures = cases()
-        require(len(fixtures) == 12, "oracle must contain 12 compile cases")
-        require(sum(not expected for _, _, expected in fixtures) == 8,
-                "oracle must contain eight expected successful compilations")
+        require(len(fixtures) == 25, "oracle must contain 25 compile cases")
+        require(sum(not expected for _, _, expected in fixtures) == 17,
+                "oracle must contain 17 expected successful compilations")
 
         for name, contents, expected_errors in fixtures:
             input_path = run_dir / f"{name}.lean"
@@ -241,7 +336,8 @@ def main():
             else:
                 require(completed.returncode == 0 and not errors,
                         f"{name}: expected successful native compilation")
-                require(not any("declaration uses 'sorry'" in item["data"]
+                require(not any(item.get("kind") == "hasSorry"
+                                or "declaration uses `sorry`" in item["data"]
                                 for item in diagnostics),
                         f"{name}: native compilation reported a proof hole")
                 require(output_path.is_file() and output_path.stat().st_size > 0,
@@ -250,8 +346,8 @@ def main():
             print(f"PASS {name}: {case['expectation']}", flush=True)
 
         report["status"] = "PASS"
-        report["successful_compilations"] = 8
-        report["expected_refusals"] = 4
+        report["successful_compilations"] = 17
+        report["expected_refusals"] = 8
     except Exception as exc:
         report["status"] = "FAIL"
         report["failure"] = f"{type(exc).__name__}: {exc}"
@@ -280,8 +376,8 @@ def main():
         "expected_refusals": report["expected_refusals"],
         "cases": report["cases"],
     }, sort_keys=True), flush=True)
-    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 12 cases passed "
-          "(8 successful compilations, 4 expected refusals)", flush=True)
+    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 25 cases passed "
+          "(17 successful compilations, 8 expected refusals)", flush=True)
     return 0
 
 

@@ -26,26 +26,20 @@ private theorem c0_bound_lt_pred (o a : Nat) :
 private theorem c0_bound_lt_succ (o a : Nat) :
     (o < a + 1) ↔ (o ≤ a) := by omega
 
-private theorem c0_bound_decide_ble (o a : Nat) :
-    decide (o ≤ a) = Nat.ble o a := by
-  by_cases h : o ≤ a
-  · have p : Nat.ble o a = true := Nat.ble_eq_true_of_le h
-    simp [h, p]
-  · have p : Nat.ble o a = false := by
-      cases k : Nat.ble o a with
-      | false => rfl
-      | true => exact False.elim (h (Nat.le_of_ble_eq_true k))
-    simp [h, p]
+private theorem c0_bound_blt_ble (o a : Nat) :
+    Nat.blt o (a + 1) = Nat.ble o a := by
+  omega
 
-private theorem c0_bound_decide_max (o a b : Nat) :
-    decide (o < Nat.max a b) =
-      (decide (o < a) || decide (o < b)) := by
+private theorem c0_bound_blt_max (o a b : Nat) :
+    Nat.blt o (Nat.max a b) =
+      (Nat.blt o a || Nat.blt o b) := by
   by_cases h : o < a <;> by_cases k : o < b <;>
-    simp_all [c0_bound_lt_max]
+    simp_all [c0_bound_lt_max, Nat.blt_eq]
 
-private theorem c0_bound_decide_pred (o a : Nat) :
-    decide (o < a - 1) = decide (o + 1 < a) := by
-  by_cases h : o < a - 1 <;> simp_all [c0_bound_lt_pred]
+private theorem c0_bound_blt_pred (o a : Nat) :
+    Nat.blt o (a - 1) = Nat.blt (o + 1) a := by
+  by_cases h : o < a - 1 <;>
+    simp_all [c0_bound_lt_pred, Nat.blt_eq]
 
 /-- All-input complete equivalence to the original recursive source
     algorithm, including every binding-depth and let-domain case.
@@ -57,21 +51,21 @@ theorem c0LooseBVarBound_source (expr : PsKernelExpr) (offset : Nat) :
   | app fn arg ihf iha =>
       simp only [psKernelC0HasLooseBVarFast,
         PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
-      rw [c0_bound_decide_max, ihf offset, iha offset]
+      rw [c0_bound_blt_max, ihf offset, iha offset]
   | lam name ty body bi iht ihb =>
       simp only [psKernelC0HasLooseBVarFast,
         PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
-      rw [c0_bound_decide_max, c0_bound_decide_pred,
+      rw [c0_bound_blt_max, c0_bound_blt_pred,
         iht offset, ihb (offset + 1)]
   | forallE name ty body bi iht ihb =>
       simp only [psKernelC0HasLooseBVarFast,
         PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
-      rw [c0_bound_decide_max, c0_bound_decide_pred,
+      rw [c0_bound_blt_max, c0_bound_blt_pred,
         iht offset, ihb (offset + 1)]
   | letE name ty value body nondep iht ihv ihb =>
       simp only [psKernelC0HasLooseBVarFast,
         PsKernelExpr.psKernelC0LooseBVarBound, psKernelExprHasLooseAt]
-      rw [c0_bound_decide_max, c0_bound_decide_max, c0_bound_decide_pred,
+      rw [c0_bound_blt_max, c0_bound_blt_max, c0_bound_blt_pred,
         iht offset, ihv offset, ihb (offset + 1)]
   | mdata _ body ih =>
       simpa [psKernelC0HasLooseBVarFast,
@@ -84,7 +78,7 @@ theorem c0LooseBVarBound_source (expr : PsKernelExpr) (offset : Nat) :
   | _ =>
       simp [psKernelC0HasLooseBVarFast,
         PsKernelExpr.psKernelC0LooseBVarBound,
-        psKernelExprHasLooseAt, c0_bound_lt_succ, c0_bound_decide_ble]
+        psKernelExprHasLooseAt, c0_bound_lt_succ, c0_bound_blt_ble]
 
 
 /-!

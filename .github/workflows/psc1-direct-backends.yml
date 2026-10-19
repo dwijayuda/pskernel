@@ -102,3 +102,48 @@ jobs:
             exit 1
           fi
           test ! -e /tmp/psc1-should-not-emit.js
+
+          # Both source grammars must reach the same DirectJS runtime.
+          cat >/tmp/psc1-direct.ps <<'EOF'
+          def idNat(x : Nat) : Nat := x;
+          EOF
+          lake exe psc1 build /tmp/psc1-direct.ps --target js --out /tmp/psc1-direct-ps.js
+          test -s /tmp/psc1-direct-ps.js.map
+          test -s /tmp/psc1-direct-ps.d.ts
+          cp /tmp/psc1-direct-ps.js /tmp/psc1-direct-ps.mjs
+          node --input-type=module -e 'import("/tmp/psc1-direct-ps.mjs").then(m=>{if(m.idNat(42n)!==42n)process.exit(1)})'
+
+          # Inspect the actual SourceMap VLQ entries, not merely JSON metadata.
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const map = JSON.parse(readFileSync('/tmp/psc1-direct.js.map', 'utf8'));
+          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+          const first = map.mappings.split(';').find(line => line.includes(',') || line.length > 0);
+          if (!first) throw new Error('PSC1_DIRECT_MAPPING_NOT_EMITTED');
+          const segment = first.split(',')[0];
+          const fields = [];
+          let acc = 0, shift = 0;
+          for (const c of segment) {
+            const digit = chars.indexOf(c);
+            if (digit < 0) throw new Error('PSC1_DIRECT_MAPPING_INVALID_DIGIT');
+            acc |= (digit & 31) << shift;
+            if (digit & 32) shift += 5;
+            else { fields.push((acc & 1) ? -(acc >>> 1) : (acc >>> 1)); acc = 0; shift = 0; }
+          }
+          if (fields.length !== 4 || fields[1] !== 0 || fields[2] !== 0 || fields[3] !== 0)
+            throw new Error('PSC1_DIRECT_MAPPING_INCORRECT_SOURCE_POSITION');
+          console.log('PSC1_DIRECT_SOURCE_MAP_ACTUAL_ORIGIN: PASS');
+          NODE
+
+          # Execute a scalar Wasm ABI export, separately from reference-valued Nat.
+          cat >/tmp/psc1-wasm-scalar.lean <<'EOF'
+          def answer : UInt32 := 42
+          EOF
+          lake exe psc1 build /tmp/psc1-wasm-scalar.lean --target wasm-core --out /tmp/psc1-wasm-scalar.wasm
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const {instance} = await WebAssembly.instantiate(readFileSync('/tmp/psc1-wasm-scalar.wasm'));
+          if (instance.exports.answer() !== 42) throw new Error('PSC1_WASM_SCALAR_RUNTIME_MISMATCH');
+          console.log('PSC1_WASM_SCALAR_RUNTIME: PASS');
+          NODE
+

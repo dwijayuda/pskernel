@@ -229,6 +229,10 @@ lean_exe psc1_direct_source_map_regression where
   srcDir := "test"
   root := `DirectSourceMapRegression
 
+lean_exe psc1_artifact_publication_regression where
+  srcDir := "test"
+  root := `ArtifactPublicationRegression
+
 lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests

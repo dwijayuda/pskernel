@@ -44,6 +44,79 @@ def psHostDirectEnsureParent (path : String) : IO Unit := do
   if let some parent := (System.FilePath.mk path).parent then
     IO.FS.createDirAll parent
 
+-- Staging must live alongside the official artifacts for same-filesystem rename.
+-- createTempDir supplies a fresh, unpredictable OS token; no abandoned fixed
+-- .psc1-stage directory is reused. This does not promise crash-atomic updates.
+def psHostDirectStageDirectory (outputPath : String) : IO System.FilePath := do
+  let entropy ← IO.FS.createTempDir
+  let suffix := entropy.fileName.getD ""
+  IO.FS.removeDirAll entropy
+  if suffix.isEmpty then
+    throw (IO.userError "PSC1_OUTPUT_STAGE_TOKEN_MISSING")
+  let stage := System.FilePath.mk (outputPath ++ ".psc1-stage-" ++ suffix)
+  IO.FS.createDir stage
+  return stage
+
+structure PsHostPublicationFile where
+  staged : System.FilePath
+  destination : System.FilePath
+  backup : System.FilePath
+
+-- Preflight every path, back up all originals, then install each staged file.
+-- On ordinary IO errors restore exact previous bytes. If restoration itself
+-- fails, backups stay in the private stage and the caller preserves that stage.
+def psHostPublishPreparedFilesWithFailureAfter
+    (files : List PsHostPublicationFile)
+    (failureAfter : Option Nat) : IO Unit := do
+  let mut planned : List (PsHostPublicationFile × Bool) := []
+  for file in files do
+    if !(← file.staged.pathExists) then
+      throw (IO.userError "PSC1_OUTPUT_STAGED_FILE_MISSING")
+    if ← file.backup.pathExists then
+      throw (IO.userError "PSC1_OUTPUT_BACKUP_PATH_OCCUPIED")
+    let existed ← file.destination.pathExists
+    if existed then
+      if ← file.destination.isDir then
+        throw (IO.userError "PSC1_OUTPUT_DESTINATION_IS_DIRECTORY")
+    planned := (file, existed) :: planned
+  let planned := planned.reverse
+  try
+    for (file, existed) in planned do
+      if existed then
+        IO.FS.rename file.destination file.backup
+    let mut installed : Nat := 0
+    for (file, _) in planned do
+      if failureAfter == some installed then
+        throw (IO.userError "PSC1_OUTPUT_TEST_INJECTED_PUBLICATION_FAILURE")
+      IO.FS.rename file.staged file.destination
+      installed := installed + 1
+  catch originalError =>
+    try
+      for (file, existed) in planned.reverse do
+        if ← file.backup.pathExists then
+          if ← file.destination.pathExists then
+            IO.FS.removeFile file.destination
+          IO.FS.rename file.backup file.destination
+        else if !existed then
+          if ← file.destination.pathExists then
+            IO.FS.removeFile file.destination
+    catch restoreError =>
+      throw (IO.userError ("PSC1_OUTPUT_ROLLBACK_FAILED: " ++
+        toString restoreError ++ "; previous: " ++ toString originalError))
+    throw originalError
+
+def psHostPublishPreparedFiles (files : List PsHostPublicationFile) : IO Unit :=
+  psHostPublishPreparedFilesWithFailureAfter files none
+
+def psHostDiscardStageAfterFailure
+    (stage : System.FilePath) (files : List PsHostPublicationFile) : IO Unit := do
+  let mut preserve := false
+  for file in files do
+    if ← file.backup.pathExists then
+      preserve := true
+  if !preserve then
+    IO.FS.removeDirAll stage
+
 def psHostDirectType (value : PsVerifiedIrType) : Except String String :=
   -- Only scalar public declarations have a qualified .d.ts representation yet.
   match value with
@@ -99,9 +172,27 @@ def psHostDirectJavaScript
     (((System.FilePath.mk inputPath).fileName).getD inputPath)
     sourceText name parsed emitted
   psHostDirectEnsureParent outputPath
-  IO.FS.writeFile outputPath (emitted.text ++ "\n//# sourceMappingURL=" ++ name ++ ".map\n")
-  IO.FS.writeFile (stem ++ ".d.ts") declaration
-  IO.FS.writeFile (outputPath ++ ".map") mapping
+  let stage ← psHostDirectStageDirectory outputPath
+  let stagedJs := stage / "module.js"
+  let stagedTypes := stage / "module.d.ts"
+  let stagedMap := stage / "module.js.map"
+  let files : List PsHostPublicationFile := [
+    { staged := stagedJs, destination := System.FilePath.mk outputPath,
+      backup := stage / "previous.js" },
+    { staged := stagedTypes, destination := System.FilePath.mk (stem ++ ".d.ts"),
+      backup := stage / "previous.d.ts" },
+    { staged := stagedMap, destination := System.FilePath.mk (outputPath ++ ".map"),
+      backup := stage / "previous.js.map" }
+  ]
+  try
+    IO.FS.writeFile stagedJs (emitted.text ++ "\n//# sourceMappingURL=" ++ name ++ ".map\n")
+    IO.FS.writeFile stagedTypes declaration
+    IO.FS.writeFile stagedMap mapping
+    psHostPublishPreparedFiles files
+    IO.FS.removeDirAll stage
+  catch error =>
+    psHostDiscardStageAfterFailure stage files
+    throw error
   IO.println ("PSC1_DIRECT_JS: " ++ outputPath)
   IO.println ("PSC1_DIRECT_DECLARATION: " ++ stem ++ ".d.ts")
   IO.println ("PSC1_DIRECT_SOURCE_MAP: " ++ outputPath ++ ".map")

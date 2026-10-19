@@ -81,16 +81,26 @@ def psHostDirectWasmComponent
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_COMPONENT_BINARY_UNSUPPORTED")
   psHostDirectEnsureParent outputPath
-  let stageDir : System.FilePath := System.FilePath.mk (outputPath ++ ".psc1-stage")
-  if ← stageDir.pathExists then
-    throw (IO.userError "PSC1_COMPONENT_STAGE_EXISTS")
-  IO.FS.createDirAll stageDir
+  let stageDir ← psHostDirectStageDirectory outputPath
   let stagedCore := stageDir / "module.core.wasm"
   let stagedCoreWat := stageDir / "module.core.wat"
   let stagedWit := stageDir / "module.wit"
   let stagedEmbedded := stageDir / "module.embedded.wasm"
   let stagedComponent := stageDir / "module.wasm"
   let stagedComponentWat := stageDir / "module.wat"
+  let stem := outputPath.dropRight 5
+  let publishedFiles : List PsHostPublicationFile := [
+    { staged := stagedCore, destination := System.FilePath.mk (stem ++ ".core.wasm"),
+      backup := stageDir / "previous.core.wasm" },
+    { staged := stagedCoreWat, destination := System.FilePath.mk (stem ++ ".core.wat"),
+      backup := stageDir / "previous.core.wat" },
+    { staged := stagedWit, destination := System.FilePath.mk (stem ++ ".wit"),
+      backup := stageDir / "previous.wit" },
+    { staged := stagedComponentWat, destination := System.FilePath.mk (stem ++ ".wat"),
+      backup := stageDir / "previous.wat" },
+    { staged := stagedComponent, destination := System.FilePath.mk outputPath,
+      backup := stageDir / "previous.wasm" }
+  ]
   try
     IO.FS.writeBinFile stagedCore (ByteArray.mk bytes.toArray)
     IO.FS.writeFile stagedWit wit
@@ -113,14 +123,11 @@ def psHostDirectWasmComponent
     let canonicalObserved := psHostWitWithoutWhitespace observedWit
     if (canonicalObserved.splitOn exactExport).length <= 1 then
       throw (IO.userError "PSC1_COMPONENT_WIT_SIGNATURE_MISMATCH")
-    let stem := outputPath.dropRight 5
-    IO.FS.rename stagedCore (System.FilePath.mk (stem ++ ".core.wasm"))
-    IO.FS.rename stagedCoreWat (System.FilePath.mk (stem ++ ".core.wat"))
-    IO.FS.rename stagedWit (System.FilePath.mk (stem ++ ".wit"))
-    IO.FS.rename stagedComponentWat (System.FilePath.mk (stem ++ ".wat"))
-    IO.FS.rename stagedComponent (System.FilePath.mk outputPath)
+    psHostPublishPreparedFiles publishedFiles
+    IO.FS.removeDirAll stageDir
     IO.println ("PSC1_COMPONENT_WASM: " ++ outputPath)
     IO.println ("PSC1_COMPONENT_WIT: " ++ stem ++ ".wit")
     IO.println ("PSC1_COMPONENT_WAT: " ++ stem ++ ".wat")
-  finally
-    IO.FS.removeDirAll stageDir
+  catch error =>
+    psHostDiscardStageAfterFailure stageDir publishedFiles
+    throw error

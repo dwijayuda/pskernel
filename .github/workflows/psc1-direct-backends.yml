@@ -24,6 +24,14 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install WABT text/binary validator
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq wabt
+          wasm2wat --version
+          wat2wasm --version
       - name: Build PSC1 independent backend libraries
         working-directory: psc1
         shell: bash
@@ -84,6 +92,10 @@ jobs:
           cargo test --manifest-path /tmp/psc1-direct-cargo/Cargo.toml --release
           lake exe psc1 build /tmp/psc1-direct.lean --target wasm-core --out /tmp/psc1-direct.wasm
           test -s /tmp/psc1-direct.wasm
+          lake exe psc1 wat /tmp/psc1-direct.wasm --out /tmp/psc1-direct.wat
+          test -s /tmp/psc1-direct.wat
+          wat2wasm --enable-gc /tmp/psc1-direct.wat -o /tmp/psc1-direct-roundtrip.wasm
+          node -e 'const fs=require("fs");const b=fs.readFileSync("/tmp/psc1-direct-roundtrip.wasm");if(!WebAssembly.validate(b))process.exit(1)'
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
           const bytes = readFileSync('/tmp/psc1-direct.wasm');

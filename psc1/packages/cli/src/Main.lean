@@ -14,7 +14,8 @@ def psCliUsage : String :=
   "  psc1 compile <input.lean|input.ps> --out <output.js|output.ts>\n" ++
   "  psc1 build <input.lean|input.ps> --target js --out <output.js>\n" ++
   "  psc1 build <input.lean|input.ps> --target rust --out <output.rs>\n" ++
-  "  psc1 build <input.lean|input.ps> --target wasm-core --out <output.wasm>"
+  "  psc1 build <input.lean|input.ps> --target wasm-core --out <output.wasm>\n" ++
+  "  psc1 wat <input.wasm> --out <output.wat> (requires wasm2wat)"
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -44,6 +45,8 @@ def main (args : List String) : IO Unit := do
       psHostDirectRust inputPath outputPath
   | ["build", inputPath, "--target", "wasm-core", "--out", outputPath] =>
       psHostDirectWasmCore inputPath outputPath
+  | ["wat", binaryPath, "--out", watPath] =>
+      psHostWasmBinaryToWat binaryPath watPath
   | ["build", inputPath, "--out", outputPath] =>
       psHostCompilerBuild inputPath outputPath
   | ["compile", inputPath, "--out", outputPath] =>

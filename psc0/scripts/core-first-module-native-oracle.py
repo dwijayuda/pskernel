@@ -92,7 +92,79 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases() + escaped_identifier_cases() + declaration_universe_cases() + qualified_declaration_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases() + escaped_identifier_cases() + declaration_universe_cases() + qualified_declaration_cases() + equation_visibility_cases()
+
+
+def equation_visibility_cases():
+    provider = source("""
+        module
+        public def coreEquationOpaque (n : Nat) : Nat := Nat.succ n
+        public abbrev coreEquationExposed (n : Nat) : Nat := Nat.succ n
+        private theorem forceOpaqueUnfold (n : Nat) :
+            coreEquationOpaque n = Nat.succ n := coreEquationOpaque.eq_def n
+        private theorem forceOpaqueRows (n : Nat) :
+            coreEquationOpaque n = Nat.succ n := by rw [coreEquationOpaque]
+        """)
+    module_probe = source("""
+        module
+        public import Lean
+        public import EquationVisibilityProvider
+        open Lean Elab Command
+        private def equationVisibilityProbe (label text : String) : CommandElabM Bool := do
+          let command ← match Parser.runParserCategory (← getEnv) (Name.mkSimple "command") text with
+            | .ok value => pure value
+            | .error message => throwError "equation visibility probe parse failure: {message}"
+          let saved ← get
+          let messages ← try
+            modify fun (state : Command.State) =>
+              { state with messages := MessageLog.empty, snapshotTasks := #[] }
+            Tactic.GuardMsgs.runAndCollectMessages command
+          finally
+            set saved
+          let errors := messages.toList.filter fun message => message.severity == .error
+          let mut diagnostics : Array String := #[]
+          for message in messages.toList do
+            let text ← message.data.toString
+            if ["heartbeat", "recursion depth", "maximum recursion", "timeout",
+                "invalid `Name.append`", "PANIC", "declaration uses `sorry`"].any
+                (fun marker => (text.splitOn marker).length > 1) then
+              throwError "equation visibility probe is not semantic evidence: {text}"
+            if message.severity == .error then diagnostics := diagnostics.push text
+          let accepted := errors.isEmpty
+          logInfo m!"CORE-EQUATION-VISIBILITY {label} accepted={accepted} errors={diagnostics}"
+          return accepted
+        run_cmd do
+          let _ ← getConstInfo `coreEquationOpaque
+          let _ ← getConstInfo `coreEquationExposed
+          let rwOpaque ← equationVisibilityProbe "public-rw-opaque"
+            "public theorem equationProbeRw (n : Nat) : coreEquationOpaque n = Nat.succ n := by rw [coreEquationOpaque]"
+          let unfoldOpaque ← equationVisibilityProbe "public-unfold-opaque"
+            "public theorem equationProbeUnfold (n : Nat) : coreEquationOpaque n = Nat.succ n := by unfold coreEquationOpaque; rfl"
+          let namedOpaque ← equationVisibilityProbe "public-generated-private-name"
+            "public theorem equationProbeNamed (n : Nat) : coreEquationOpaque n = Nat.succ n := coreEquationOpaque.eq_def n"
+          let rwExposed ← equationVisibilityProbe "public-rw-exposed"
+            "public theorem equationProbeExposedRw (n : Nat) : coreEquationExposed n = Nat.succ n := by rw [coreEquationExposed]"
+          let unfoldExposed ← equationVisibilityProbe "public-unfold-exposed"
+            "public theorem equationProbeExposedUnfold (n : Nat) : coreEquationExposed n = Nat.succ n := by unfold coreEquationExposed; rfl"
+          unless rwExposed && unfoldExposed do throwError "exposed equation positive controls failed"
+          logInfo m!"CORE-EQUATION-VISIBILITY-VECTOR opaque-rw={rwOpaque} opaque-unfold={unfoldOpaque} generated-name={namedOpaque}"
+        """)
+    legacy = source("""
+        import EquationVisibilityProvider
+        theorem equationLegacyRw (n : Nat) :
+            coreEquationOpaque n = Nat.succ n := by rw [coreEquationOpaque]
+        theorem equationLegacyUnfold (n : Nat) :
+            coreEquationOpaque n = Nat.succ n := by
+          unfold coreEquationOpaque
+          rfl
+        theorem equationLegacyExposed (n : Nat) :
+            coreEquationExposed n = Nat.succ n := by rw [coreEquationExposed]
+        """)
+    return [
+        ("EquationVisibilityProvider", provider, ()),
+        ("EquationVisibilityModuleProbe", module_probe, ()),
+        ("EquationVisibilityLegacy", legacy, ()),
+    ]
 
 
 def visibility_cases():
@@ -584,9 +656,9 @@ def main():
         require(version == PIN_VERSION, f"wrong Lean version: {version!r}")
         require(githash == PIN_GITHASH, f"wrong Lean commit: {githash!r}")
         fixtures = cases()
-        require(len(fixtures) == 115, "oracle must contain 115 compile cases")
-        require(sum(not expected for _, _, expected in fixtures) == 55,
-                "oracle must contain 55 expected successful compilations")
+        require(len(fixtures) == 118, "oracle must contain 118 compile cases")
+        require(sum(not expected for _, _, expected in fixtures) == 58,
+                "oracle must contain 58 expected successful compilations")
 
         for name, contents, expected_errors in fixtures:
             input_path = run_dir / f"{name}.lean"
@@ -652,7 +724,7 @@ def main():
             print(f"PASS {name}: {case['expectation']}", flush=True)
 
         report["status"] = "PASS"
-        report["successful_compilations"] = 55
+        report["successful_compilations"] = 58
         report["expected_refusals"] = 60
     except Exception as exc:
         report["status"] = "FAIL"
@@ -682,8 +754,8 @@ def main():
         "expected_refusals": report["expected_refusals"],
         "cases": report["cases"],
     }, sort_keys=True), flush=True)
-    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 115 cases passed "
-          "(55 successful compilations, 60 expected refusals)", flush=True)
+    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 118 cases passed "
+          "(58 successful compilations, 60 expected refusals)", flush=True)
     return 0
 
 

@@ -252,19 +252,18 @@ def psEnvironmentAddSourceEquations (environment : PsEnvironment)
     match psEnvironmentFind environment entry.owner with
     | some (.definitionDecl ..) | some (.theoremDecl ..) | some (.opaqueDecl ..) => pure ()
     | _ => throw "PSCV0-EQUATIONS: source owner has no checked value declaration"
-    if entry.equations.isEmpty then
-      throw "PSCV0-EQUATIONS: source owner has an empty equation roster"
     for name in entry.equations do
       if (entry.equations.filter (psNameEq name)).length != 1 then
         throw "PSCV0-EQUATIONS: source owner repeats an equation"
+    -- A source nomatch may have no branch equations. The unfolding theorem
+    -- is independently authenticated and is not added to the rewrite roster.
+    for name in entry.equations ++ entry.unfolding?.toList do
       let some (.theoremDecl _ _ type _) := psEnvironmentFind environment name
         | throw "PSCV0-EQUATIONS: registered equation is not a checked theorem"
       let some owner := psSourceEquationLeftOwner? type
         | throw "PSCV0-EQUATIONS: registered theorem has no source-headed equality"
       if !psNameEq owner entry.owner then
         throw "PSCV0-EQUATIONS: registered theorem belongs to another source"
-    if entry.unfolding?.any (fun name => !entry.equations.any (psNameEq name)) then
-      throw "PSCV0-EQUATIONS: unfolding theorem is outside its source roster"
     match psEnvironmentFindSourceEquations environment entry.owner with
     | some previous =>
       if psSourceEquationsEqual previous entry then return environment

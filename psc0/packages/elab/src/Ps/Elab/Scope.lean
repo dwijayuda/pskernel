@@ -374,8 +374,9 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
             | _, _ => false
           let result ← match pattern with
             | none => pure ([], bound)
-            | some pattern => psScopeRCasesDependencies fuel visit bound pattern
-                (rootIsLocal && psScopeRCasesSimple pattern)
+            | some item => do
+              let simple := psScopeRCasesSimple item
+              psScopeRCasesDependencies fuel visit bound item (rootIsLocal && simple)
           pure (psScopeUnion used result.1, equations ++ result.2)
         | .rintroE patterns type _ =>
           psScopeRIntroDependencies fuel visit bound patterns type

@@ -31,9 +31,8 @@ def psPscv0RCasesPatternAtom (readType : PsPscv0TermReader) (fuel : Nat)
       if following.span.start.byteOffset != token.span.stop.byteOffset then
         throw (psProofScriptExpectedError "adjacent pattern after @" next.cursor)
       let pattern ← psPscv0RCasesPatternAtom readType fuel next.cursor
-      return { value := .explicit pattern.value
-        (psSyntaxSpanJoin token.span (psSyntaxRCasesPatternSpan pattern.value))
-        cursor := pattern.cursor }
+      let span := psSyntaxSpanJoin token.span (psSyntaxRCasesPatternSpan pattern.value)
+      return { value := .explicit pattern.value span, cursor := pattern.cursor }
     if token.text == "⟨" then
       let next ← psTokenCursorExpectText cursor "⟨"
       let patterns ← psPscv0RCasesTuple readType fuel next.cursor
@@ -74,9 +73,8 @@ def psPscv0RCasesPatternMedium (readType : PsPscv0TermReader) (fuel : Nat)
     | [pattern] => return { value := pattern, cursor := patterns.cursor }
     | first :: rest =>
       let last := rest.getLastD first
-      return { value := .alternatives patterns.value
-        (psSyntaxSpanJoin (psSyntaxRCasesPatternSpan first) (psSyntaxRCasesPatternSpan last))
-        cursor := patterns.cursor }
+      let span := psSyntaxSpanJoin (psSyntaxRCasesPatternSpan first) (psSyntaxRCasesPatternSpan last)
+      return { value := .alternatives patterns.value span, cursor := patterns.cursor }
 
 def psPscv0RCasesPatternLow (readType : PsPscv0TermReader) (fuel : Nat)
     (cursor : PsTokenCursor) :
@@ -88,9 +86,8 @@ def psPscv0RCasesPatternLow (readType : PsPscv0TermReader) (fuel : Nat)
     if !psTokenCursorAtText pattern.cursor ":" then return pattern
     let colon ← psTokenCursorExpectText pattern.cursor ":"
     let type ← readType colon.cursor
-    return { value := .typed pattern.value type.value
-      (psSyntaxSpanJoin (psSyntaxRCasesPatternSpan pattern.value) (psSyntaxTermSpan type.value))
-      cursor := type.cursor }
+    let span := psSyntaxSpanJoin (psSyntaxRCasesPatternSpan pattern.value) (psSyntaxTermSpan type.value)
+    return { value := .typed pattern.value type.value span, cursor := type.cursor }
 
 def psPscv0RCasesTuple (readType : PsPscv0TermReader) (fuel : Nat)
     (cursor : PsTokenCursor) :
@@ -126,8 +123,8 @@ def psPscv0RIntroPattern (readType : PsPscv0TermReader) (fuel : Nat)
           pure (some type.value, type.cursor)
         else pure (none, patterns.cursor)
         let close ← psTokenCursorExpectText next ")"
-        pure { value := PsSyntaxRIntroPattern.group patterns.value annotation
-          (psSyntaxSpanJoin opening.token.span close.token.span), cursor := close.cursor }
+        let span := psSyntaxSpanJoin opening.token.span close.token.span
+        pure { value := PsSyntaxRIntroPattern.group patterns.value annotation span, cursor := close.cursor }
       match attempt with
       | .ok result => return result
       | .error .fuelExhausted => throw .fuelExhausted

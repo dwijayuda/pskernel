@@ -1413,6 +1413,23 @@ def coreByteWordCandidateRoots : List Lean.Name :=
    `ByteArray, `ByteArray.mk, `ByteArray.size, `ByteArray.push,
    `ByteArray.foldl, `String.toUTF8]
 
+-- Actual pinned Init.Ext registrations, exported independently from trust zero.
+-- This candidate does not change the selected Core or Full profile.
+def coreExtCandidateRoots : List Lean.Name :=
+  [`Prod.ext, `PProd.ext, `MProd.ext, `Sigma.ext, `PSigma.ext, `PLift.ext, `ULift.ext, `PULift.ext, `funext, `propext, `Subtype.ext, `Array.ext, `Char.ext, `PUnit.ext, `Thunk.ext]
+
+def exportCoreExtCandidate (output : System.FilePath) : IO Unit :=
+  exportStandardCore {
+    roots := coreExtCandidateRoots
+    boundary := []
+    baseDeclarations := []
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psCoreExtCandidate"
+    privatePrefix := "coreExtCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nIndependent actual native closure for the fifteen Init.Ext theorem registrations.\nEmpty boundary, trust zero, unchanged per-declaration admission budgets.\nProfile installation and source ext qualification are separate gates.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 def exportCoreBootstrapCandidate (output : System.FilePath) : IO Unit :=
   exportStandardCore {
     roots := coreBootstrapCandidateRoots

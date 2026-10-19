@@ -270,6 +270,7 @@ private def refusal : PsElabError → String
   | .matchConstructorUnknown _ => "constructor"
   | .matchRecursorUnsupported => "group"
   | .structuralRecursionNotDecreasing => "structural"
+  | .data message => "data:" ++ message
   | .proof message => "proof:" ++ message
   | .refinement message => "refinement:" ++ message
   | .infer .applicationTypeMismatch => "infer:application"
@@ -316,7 +317,7 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
     "proof:group induction requires a complete motive family"
   expectRefused environment "group nondecreasing recursive call"
     "function bad(x: M3MatchLeft(Nat, 0)): Nat := match x with { | .leaf value => 0 | .link n next => bad(x) }\n"
-    "structural"
+    "data:PSCV0-MUTUAL-TOTAL: DECREASE: recursive major has no checked strict-child hypothesis"
   expectRefused (remove environment (psRootName "HEq")) "missing heterogeneous equality"
     "theorem bad(x: M3MatchRight(Nat, 0, 0)): x = x := match x with { | .zero previous => by { rfl } }\n"
     "missing:HEq"

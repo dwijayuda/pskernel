@@ -337,7 +337,7 @@ def psElabCommandRegisteredMainResult (environment : PsEnvironment)
   for (member, owned) in outputs do
     for entry in owned.sourceEquations do
       if !psNameEq entry.owner member.name ||
-          !entry.equations.all (fun name =>
+          !(entry.equations ++ entry.unfolding?.toList).all (fun name =>
             owned.declarations.any (fun declaration =>
               psNameEq name (psDeclarationName declaration))) then
         throw (.data "PSCV0-PREDEFINITION-REGISTRATION: equation changed its checked source owner")

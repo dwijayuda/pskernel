@@ -2,6 +2,8 @@ import Ps.Host.StandardExport
 
 def main (args : List String) : IO Unit := do
   match args with
+  | ["ext", output] =>
+      PsV7Native.exportCoreExtCandidate (System.FilePath.mk output)
   | ["bootstrap", output] =>
       PsV7Native.exportCoreBootstrapCandidate (System.FilePath.mk output)
   | ["foundation-metadata", output] =>
@@ -13,4 +15,4 @@ def main (args : List String) : IO Unit := do
   | ["compiler", output] =>
       PsV7Native.exportCoreCompilerCandidate (System.FilePath.mk output)
   | _ =>
-      throw (IO.userError "usage: pscv0_core_environment_export (bootstrap|foundation|foundation-metadata|byte-word|compiler) OUTPUT")
+      throw (IO.userError "usage: pscv0_core_environment_export (ext|bootstrap|foundation|foundation-metadata|byte-word|compiler) OUTPUT")

@@ -34,6 +34,11 @@ lean_lib PsV7PlatformChecks where
   roots := #[`Pscv0PlatformTests]
 
 -- Shared typed-predefinition evidence invoked by the structural fixture.
+-- Shared source/native proof-command qualification invoked by CoreMatches.
+lean_lib PsV7CoreProofChecks where
+  srcDir := "../test"
+  roots := #[`CoreProofCommands]
+
 lean_lib PsV7M3PreDefinitionChecks where
   srcDir := "../test"
   roots := #[`Pscv0M3PreDefinitions]
@@ -219,6 +224,11 @@ lean_exe pscv0_core_patterns where
   root := `Pscv0CorePatterns
 
 -- Checked source-match rows, dependent refinement and total recursion parity.
+-- Recursive elimination, source scopes and independent K0 value witnesses.
+lean_exe pscv0_core_rcases where
+  srcDir := "../test"
+  root := `Pscv0CoreRCases
+
 lean_exe pscv0_core_matches where
   srcDir := "../test"
   root := `Pscv0CoreMatches

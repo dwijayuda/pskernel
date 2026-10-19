@@ -186,13 +186,18 @@ jobs:
           .lake/build/bin/pscv0_core_selected 2>&1 | tee ../dist/core-first/seams/selected-check.log
           sha256sum .lake/build/bin/pscv0_core_selected > ../dist/core-first/seams/selected-executable.sha256
           stat -c '%s' .lake/build/bin/pscv0_core_selected > ../dist/core-first/seams/selected-executable-bytes.txt
+      - name: Check native module and legacy equation visibility
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/core-first/seams
+          lake env python3 ../scripts/core-first-module-native-oracle.py 2>&1 | tee ../dist/core-first/seams/module-native-oracle.log
       - name: Check selected project imports and retained environment
         run: |
           set -euo pipefail
           /usr/bin/time -v -o ../dist/core-first/seams/project-build-resource.txt lake build pscv0_core_project 2>&1 | tee ../dist/core-first/seams/project-build.log
           .lake/build/bin/pscv0_core_project 2>&1 | tee ../dist/core-first/seams/project-check.log
           lake env lean ../test/Pscv0CoreVisibilityOracle.lean 2>&1 | tee ../dist/core-first/seams/visibility-native-oracle.log
-          lake env python3 ../scripts/core-first-module-native-oracle.py 2>&1 | tee ../dist/core-first/seams/module-native-oracle.log
           sha256sum .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable.sha256
           stat -c '%s' .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable-bytes.txt
       - name: Check inspection commands, unchanged admissions and native diagnostics
@@ -411,8 +416,22 @@ jobs:
           restore-keys: |
             pscv0-core-first-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
             pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+      - name: Build the native proof-closure authorer
+        id: ext_build
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/core-first/authoring
+          printf '%s\n' "$GITHUB_SHA" > ../dist/core-first/authoring/source-sha.txt
+          /usr/bin/time -v -o ../dist/core-first/authoring/ext-build-resource.txt lake build pscv0_core_environment_export 2>&1 | tee ../dist/core-first/authoring/ext-build.log
+      - name: Author and independently check the actual native ext theorem closure
+        if: ${{ !cancelled() && steps.ext_build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o ../dist/core-first/authoring/ext-resource.txt lake env .lake/build/bin/pscv0_core_environment_export ext ../dist/core-first/authoring/CoreExtCandidate.lean 2>&1 | tee ../dist/core-first/authoring/ext-export.log
+          sha256sum ../dist/core-first/authoring/CoreExtCandidate.lean > ../dist/core-first/authoring/ext.sha256
       - name: Build unchanged Full composition and empty-boundary authorer
         id: build
+        if: ${{ !cancelled() && steps.ext_build.outcome == 'success' }}
         run: |
           set -euo pipefail
           mkdir -p ../dist/core-first/authoring

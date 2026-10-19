@@ -821,6 +821,25 @@ private def checkPackedEntry (environment : PsEnvironment) (sourceName : String)
     | .ok _ => throw (IO.userError "packed WF accepted reordered, duplicated or foreign entry fields")
     | .error _ => pure ()
 
+private def traceWFType (fuel : Nat) (term : PsExpr) : String :=
+  match fuel with
+  | 0 => "..."
+  | fuel + 1 =>
+    let render := traceWFType fuel
+    match term with
+    | .bvar index => "#" ++ toString index
+    | .fvar id => "$" ++ toString id
+    | .mvar id => "?" ++ toString id
+    | .sortE _ => "Sort"
+    | .constE name _ => psNameToString name
+    | .app fn arg => "(" ++ render fn ++ " " ++ render arg ++ ")"
+    | .lam name type body _ => "(fun " ++ psNameToString name ++ " : " ++ render type ++ " => " ++ render body ++ ")"
+    | .forallE name type body _ => "(forall " ++ psNameToString name ++ " : " ++ render type ++ ", " ++ render body ++ ")"
+    | .letE name type value body => "(let " ++ psNameToString name ++ " : " ++ render type ++ " := " ++ render value ++ "; " ++ render body ++ ")"
+    | .lit (.natural value) => toString value
+    | .lit (.string value) => value
+    | .proj name index value => "(" ++ psNameToString name ++ "." ++ toString index ++ " " ++ render value ++ ")"
+
 -- Failure-only replay of the original command stream. The successful
 -- qualification still uses psElabProgramWithOrigins on the complete program.
 private def traceWFElaborationFailure (label : String) (program : PsSyntaxProgram) : IO Unit := do
@@ -843,6 +862,15 @@ private def traceWFElaborationFailure (label : String) (program : PsSyntaxProgra
           | _ => []
         let names := sources.map fun source =>
           String.intercalate "." (psScopeQualified state.scope (psElabOriginSource source).fst).segments
+        if names.contains "m3wfiterateStep" then
+          for text in ["m3wfiterate", "m3wfiterate.eq_def", "funext"] do
+            let name := psSyntaxNameAppendSegments (text.splitOn ".") .anonymous
+            match psEnvironmentFind state.environment name with
+            | none => IO.println ("PSCV0_M3_WF_ACTUAL_TYPE: missing " ++ text)
+            | some declaration =>
+              let rendered := traceWFType 48 (psDeclarationType declaration)
+              IO.println ("PSCV0_M3_WF_ACTUAL_TYPE: " ++ text ++ " := " ++
+                String.ofList (rendered.toList.take 20000))
         let previous := match state.originsRev with
           | origin :: _ => String.intercalate "." origin.sourceName.segments
           | [] => "<none>"

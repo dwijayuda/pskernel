@@ -7,12 +7,13 @@ structure PsDirectSourceOrigin where
   position : PsSourcePos
 
 def psDirectSourceOrigins (module : PsSyntaxModule) : List PsDirectSourceOrigin :=
-  module.declarations.map fun declaration =>
-    { name := psHostSyntaxDeclarationName declaration
-      position := (psElabOriginSource declaration).2.start }
+  module.declarations.map fun declaration => {
+    name := psHostSyntaxDeclarationName declaration
+    position := (psElabOriginSource declaration).2.start
+  }
 
 -- Parser columns are 1-based Unicode scalar positions; maps require zero-based
--- UTF-16 columns. Never saturate invalid zero coordinates into a valid origin.
+-- UTF-16 columns. Invalid zero coordinates cannot become a valid origin.
 def psDirectSourceUtf16Column
     (source : String) (position : PsSourcePos) : Option Nat := do
   if position.line == 0 || position.column == 0 then none else do
@@ -32,8 +33,8 @@ partial def psDirectVLQDigits (n : Nat) : String :=
     (if remaining == 0 then "" else psDirectVLQDigits remaining)
 
 def psDirectVLQ (value : Int) : String :=
-  -- ECMA-426: a negative value sets the low sign bit; it does NOT subtract one
-  -- from the doubled magnitude. Signed -2^31 has the specification's code 1.
+  -- Negative values set the low sign bit; they do not subtract from magnitude.
+  -- Signed -2^31 has the specification's special code 1.
   psDirectVLQDigits (if value == -2147483648 then 1
     else if value < 0 then value.natAbs * 2 + 1 else value.natAbs * 2)
 
@@ -54,8 +55,11 @@ def psDirectMapUnmapped
   let comma := if !nextLine && state.hasSegmentOnLine then "," else ""
   let entry := psDirectVLQ (Int.ofNat span.start.column - Int.ofNat columnBase)
   let updated : PsDirectMapState := {
-    state with generatedLine := generatedLine, generatedColumn := span.start.column,
-    hasSegmentOnLine := true }
+    state with
+    generatedLine := generatedLine
+    generatedColumn := span.start.column
+    hasSegmentOnLine := true
+  }
   (semicolons ++ comma ++ entry, updated)
 
 def psDirectMapSegments
@@ -85,12 +89,16 @@ def psDirectMapSegments
           psDirectVLQ (Int.ofNat sourceLine - Int.ofNat state.sourceLine) ++
           psDirectVLQ (Int.ofNat sourceColumn - Int.ofNat state.sourceColumn)
         let updated : PsDirectMapState := {
-          generatedLine := generatedLine, generatedColumn := span.start.column,
-          sourceLine := sourceLine, sourceColumn := sourceColumn, hasSegmentOnLine := true }
+          generatedLine := generatedLine
+          generatedColumn := span.start.column
+          sourceLine := sourceLine
+          sourceColumn := sourceColumn
+          hasSegmentOnLine := true
+        }
         semicolons ++ comma ++ entry ++ psDirectMapSegments sourceText origins rest updated
 
--- Compatibility mapping API. Current DirectJS/TS production maps observe the
--- final formatted AST and the complete captured source closure in host-tools.
+-- Compatibility API. Production DirectJS/TS maps observe the final formatted
+-- AST and the complete captured source closure in the host-tools package.
 def psDirectSourceMap
     (sourcePath sourceText outputName : String)
     (parsed : PsSyntaxModule) (printed : PsJsPrintedModule) : String :=

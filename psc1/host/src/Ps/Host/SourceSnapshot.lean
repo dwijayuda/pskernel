@@ -33,11 +33,17 @@ mutual
       let parsed ← psHostParseSource path text
       let imported ← captureImports remaining root (path :: stack) parsed.imports state
       let elaborated ← psHostElabDeclarationsDetailed path imported.environment parsed.declarations []
+      let source : PsHostCapturedSource := {
+        path := path
+        text := text
+        parsed := parsed
+      }
       return {
         environment := elaborated.environment
         declarations := imported.declarations ++ elaborated.declarations
-        sources := imported.sources ++ [{ path := path, text := text, parsed := parsed }]
-        loaded := path :: imported.loaded }
+        sources := imported.sources ++ [source]
+        loaded := path :: imported.loaded
+      }
 
   private partial def captureImports
       (fuel : Nat) (root : String) (stack : List String)
@@ -50,13 +56,17 @@ mutual
       captureImports fuel root stack rest next
 end
 
-/-- A dependency-ordered immutable input snapshot. All target builders share this
-value; none of them reads source files again. This is a captured byte snapshot,
-not a claim that the filesystem itself is locked against concurrent writers. -/
+/-- A dependency-ordered immutable input snapshot. Target builders share these
+captured bytes, rather than rereading source files after admission. The filesystem
+itself is not claimed to be locked against concurrent writers. -/
 def psHostCaptureProject
     (baseEnvironment : PsEnvironment) (inputPath : String) : IO PsHostCapturedProject := do
   let entryPath := (← IO.FS.realPath inputPath).toString
   let state ← captureModule 4096 (psHostDirectoryOfPath entryPath) entryPath []
     { environment := baseEnvironment }
-  return { entryPath := entryPath, environment := state.environment,
-    declarations := state.declarations, sources := state.sources }
+  return {
+    entryPath := entryPath
+    environment := state.environment
+    declarations := state.declarations
+    sources := state.sources
+  }

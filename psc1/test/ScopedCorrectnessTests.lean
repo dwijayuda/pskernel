@@ -15,10 +15,20 @@ def main : IO Unit := do
   require "WIT rejects consecutive hyphens" (!psHostWitIdent "read--value")
   require "WIT rejects reserved world" (!psHostWitIdent "world")
   require "WIT rejects uppercase" (!psHostWitIdent "Value")
-  let forged : PsValidatedIrModule := { raw := {
-    imports := [], structures := [], inductives := [], declarations := [{
-      name := "forged", typeParameters := [], parameters := [],
-      resultType := .primitive .nat, body := .literal (.bool true) }] } }
+  let declaration : PsVerifiedIrDeclaration := {
+    name := "forged"
+    typeParameters := []
+    parameters := []
+    resultType := .primitive .nat
+    body := .literal (.bool true)
+  }
+  let raw : PsVerifiedIrModule := {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [declaration]
+  }
+  let forged : PsValidatedIrModule := { raw := raw }
   require "forged validated wrapper rejected before specialization"
     (match psIrSpecializeValidatedModule forged with | .error _ => true | .ok _ => false)
   require "forged uniform wrapper rejected before specialization"

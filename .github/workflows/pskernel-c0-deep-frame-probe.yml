@@ -10,6 +10,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0DeepFrameSourceProof.lean'
       - 'psc0/packages/pskernel-c0/test/C0DeepBinderSourceProof.lean'
       - 'psc0/packages/pskernel-c0/test/C0DeepMixedWorklistProof.lean'
+      - 'psc0/packages/pskernel-c0/test/C0DeepSubstDifferential.lean'
   workflow_dispatch:
 permissions:
   contents: read
@@ -38,5 +39,6 @@ jobs:
           lake env lean -R src test/C0DeepFrameSourceProof.lean
           lake env lean -R src test/C0DeepBinderSourceProof.lean
           lake env lean -R src test/C0DeepMixedWorklistProof.lean
+          lake env lean --run test/C0DeepSubstDifferential.lean
           lake build c0OfficialReplay
           echo 'C0_DEEP_FRAME=SOURCE_COMPILED_NONADMITTING fuel=4096'

@@ -61,15 +61,15 @@ private def psCompilerSourceCandidateEnvironmentWithNoncomputable
       throw ("CORE-SOURCE-CANDIDATE: missing noncomputable target " ++ psNameToString name)
     tagged := name :: tagged
     environment := psEnvironmentMarkNoncomputable environment name
-  let className := psRootName "OfNat"
+  let className : PsName := .str .anonymous "OfNat"
   let some (.inductiveDecl _) := psEnvironmentFind environment className
     | throw "CORE-SOURCE-CANDIDATE: missing OfNat class declaration"
-  let instanceName := psRootName "instOfNatNat"
+  let instanceName : PsName := .str .anonymous "instOfNatNat"
   let some (.definitionDecl _ levels type _) := psEnvironmentFind environment instanceName
     | throw "CORE-SOURCE-CANDIDATE: missing instOfNatNat definition"
   if !levels.isEmpty then
     throw "CORE-SOURCE-CANDIDATE: instOfNatNat universe metadata changed"
-  if !psEnvironmentContains environment (psNameAppendStr (psRootName "Bool") "decEq") then
+  if !psEnvironmentContains environment (psNameAppendStr (.str .anonymous "Bool") "decEq") then
     throw "CORE-SOURCE-CANDIDATE: missing direct Bool.decEq"
   let ordinary : PsInstanceEntry := {
     value := .constE instanceName []
@@ -89,7 +89,7 @@ private def psCompilerSourceCandidateEnvironmentWithNoncomputable
 -- auditCoreFoundationCandidateMetadata. Bool.not is reached by Bool.decEq;
 -- retaining its native tag does not establish portable runtime correspondence.
 def psCompilerSourceCandidateNoncomputableNames : List PsName :=
-  [psNameAppendStr (psRootName "Bool") "not"]
+  [psNameAppendStr (.str .anonymous "Bool") "not"]
 
 def psCompilerSourceCandidateEnvironment : Except String PsEnvironment :=
   psCompilerSourceCandidateEnvironmentWithNoncomputable

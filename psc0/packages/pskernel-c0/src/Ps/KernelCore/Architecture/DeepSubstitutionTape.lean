@@ -87,3 +87,59 @@ theorem psKernelC0DeepSubstForceOneSource
       psKernelExprInstantiate1 expr replacement := by
   simp [psKernelC0DeepSubstForcePush,
     psKernelC0DeepSubstForcePure, psKernelC0DeepSubstApply]
+
+/-- The original source rule for opening a lambda/Pi body. Kept as an
+    independent eager oracle for validating a later suspended worklist. -/
+def psKernelC0DeepEagerBinderOpening
+    (body : PsKernelExpr)
+    (fresh : PsKernelName)
+    (ranges : List Nat) : PsKernelExpr × List Nat :=
+  match ranges with
+  | range :: tail =>
+    if range == 0 then (body, tail)
+    else (psKernelExprInstantiate1 body (.fvar fresh), [])
+  | [] => (psKernelExprInstantiate1 body (.fvar fresh), [])
+
+/-- Build the identical binder-opening operation *without traversing body*.
+    Only a zero-range summary may omit substitution, as in the old source.
+    Otherwise we append the exactly equivalent offset-zero operation in O(1).
+    A consumer must force the tape before any operation that observes its
+    expression, until a stronger head-observation theorem is established. -/
+def psKernelC0DeepDeferBinderOpening
+    (body : PsKernelExpr)
+    (fresh : PsKernelName)
+    (ranges : List Nat) : PsKernelC0DeepSubstTape × List Nat :=
+  match ranges with
+  | range :: tail =>
+    if range == 0 then (psKernelC0DeepSubstPure body, tail)
+    else
+      (psKernelC0DeepSubstPush (psKernelC0DeepSubstPure body)
+        ⟨.fvar fresh, 0⟩, [])
+  | [] =>
+    (psKernelC0DeepSubstPush (psKernelC0DeepSubstPure body)
+      ⟨.fvar fresh, 0⟩, [])
+
+/-- Both the body and remaining source Pi/lambda range metadata are EXACT.
+    This is a pure all-input semantic equality, with no assumptions about
+    DAG sharing, freshness or the actual source binder term. -/
+theorem psKernelC0DeepDeferBinderOpening_source
+    (body : PsKernelExpr)
+    (fresh : PsKernelName)
+    (ranges : List Nat) :
+    (psKernelC0DeepSubstForce
+        (psKernelC0DeepDeferBinderOpening body fresh ranges).1,
+      (psKernelC0DeepDeferBinderOpening body fresh ranges).2) =
+      psKernelC0DeepEagerBinderOpening body fresh ranges := by
+  cases ranges with
+  | nil =>
+      simp [psKernelC0DeepDeferBinderOpening,
+        psKernelC0DeepEagerBinderOpening,
+        psKernelC0DeepSubstForceOneSource]
+  | cons range tail =>
+      by_cases h : range = 0
+      · simp [psKernelC0DeepDeferBinderOpening,
+          psKernelC0DeepEagerBinderOpening, h,
+          psKernelC0DeepSubstForcePure]
+      · simp [psKernelC0DeepDeferBinderOpening,
+          psKernelC0DeepEagerBinderOpening, h,
+          psKernelC0DeepSubstForceOneSource]

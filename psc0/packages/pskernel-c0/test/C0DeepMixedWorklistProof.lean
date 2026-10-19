@@ -38,3 +38,14 @@ example
 #check psKernelC0DeepDeferBinderOpening_source
 #check psKernelC0DeepMixedStep
 #check psKernelC0DeepMixedRunDiagnostic
+
+/-- No substituted body is needed for source lambda closing. This is the
+    exact source equality for every body type and complete checker state. -/
+example
+    (frame : PsKernelC0DeepDeferredLambdaFrame)
+    (bodyType : PsKernelExpr)
+    (bodyState : PsKernelCheckerState) :
+    psKernelC0DeepLambdaCloseDeferred frame bodyType bodyState =
+      psKernelC0DeepLambdaClose
+        (psKernelC0DeepLambdaForceFrame frame) bodyType bodyState :=
+  psKernelC0DeepLambdaCloseDeferred_source frame bodyType bodyState

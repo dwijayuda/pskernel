@@ -237,7 +237,7 @@ def check (root : System.FilePath) : IO Unit := do
       "native control admitted unselected mutation, monadic if-let or incomplete term if"
   let provider : PsPscv0ModuleSource := {
     name := "Library", sourceKind := .lean
-    source := "def library (n : Nat) : Nat := Nat.succ n\n" }
+    source := "module\npublic def library (n : Nat) : Nat := Nat.succ n\n" }
   let project ← fromExcept (psPscv0ProjectParse [provider,
     { name := "Main", source := "import Library\nconst answer: Nat := library(3)\n" }])
   ensure ((project.map (·.sourceName)) == ["Library.lean", "Main.ps"])

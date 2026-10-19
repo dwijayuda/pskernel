@@ -1,5 +1,6 @@
 import Ps.Compiler.Pscv0ModuleEngine
 import Ps.CompilerIr.Checked
+import Ps.Environment.Logic
 import PsKernelLean.Replay
 import PsKernelLean.Protocol
 
@@ -400,8 +401,55 @@ private def scopePublicNames : List PsName :=
    psRootName "afterNestedPublic",
    psNameAppendStr (psRootName "AtEof") "value"]
 
-private def checkVisibilityScopes (seed : Lean.Kernel.Environment)
-    (profile : PsCompilerProfileContext) : IO Unit := do
+-- Mutual predefinitions emit checked equation theorems. Keep their dependency
+-- explicit in this separate four-declaration fixture base; the other project
+-- checks still use only CoreSelectedIdentity.
+private def scopeContext :
+    IO (Lean.Kernel.Environment × PsCompilerProfileContext) := do
+  let eqNames := [psEqName, psNameAppendStr psEqName "refl",
+    psNameAppendStr psEqName "rec"]
+  let equality := psLogicDeclarations.filter fun declaration =>
+    eqNames.any (psNameEq (psDeclarationName declaration))
+  ensure (sameNames (equality.map psDeclarationName) eqNames)
+    "scope equality-family roster changed"
+  ensure (match equality with
+    | [.inductiveDecl _, .constructorDecl _, .recursorDecl _] => true
+    | _ => false) "scope equality-family kinds changed"
+  let declarations := baseDecl :: equality
+  let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations declarations
+  let seed ← match result with
+    | .ok environment => pure environment
+    | .error error => throw (IO.userError error.message)
+  let environment ← declarations.foldlM (fun environment declaration => do
+    let some next := psEnvironmentAdd environment declaration
+      | fail "duplicate scope base declaration"
+    pure next) psEnvironmentEmpty
+  ensure (environment.declarations.length == 4)
+    "scope base declaration count changed"
+  for name in ["Nat", "Bool", "False", "True"] do
+    ensure (!(psEnvironmentContains environment (psRootName name)) &&
+        (seed.find? (PsKernelLean.toLeanName (psRootName name))).isNone)
+      ("unselected scope base declaration: " ++ name)
+  let profile : PsCompilerProfileContext := {
+    baseEnvironment := environment
+    runtimePrelude := fun _ _ => [] }
+  return (seed, profile)
+
+private def scopePrivateNames : List PsName :=
+  let library := psNameAppendStr (psRootName "$psc0Private") "Library"
+  let visibility := psNameAppendStr library "CoreVisibility"
+  [psNameAppendStr visibility "before",
+   psNameAppendStr (psNameAppendStr visibility "Nested") "overridden",
+   psNameAppendStr visibility "mutualPrivate",
+   psNameAppendStr visibility "afterPublic",
+   psNameAppendStr library "rootAfter",
+   psNameAppendStr library "afterAnonymous",
+   psNameAppendStr
+     (psNameAppendStr (psRootName "CoreVisibility") "mutualPublic") "eq_def",
+   psNameAppendStr (psNameAppendStr visibility "mutualPrivate") "eq_def"]
+
+private def checkVisibilityScopes : IO Unit := do
+  let (seed, profile) ← scopeContext
   let mut paired : List String := []
   for kind in [PsCompilerSourceKind.lean, .proofScript] do
     let library := input kind "Library" (scopeLibrarySource kind)
@@ -422,17 +470,20 @@ private def checkVisibilityScopes (seed : Lean.Kernel.Environment)
     ensure (sameNames
         (receipt.interface.declarations.map psDeclarationName) scopePublicNames)
       "visibility-scope public roster changed"
-    ensure (receipt.privateNames.length == 6 &&
+    ensure (receipt.privateNames.length == scopePrivateNames.length &&
+        scopePrivateNames.all (fun expected =>
+          receipt.privateNames.any (psNameEq expected)) &&
         receipt.privateNames.all (fun name =>
           !receipt.interface.declarations.any
             (fun declaration => psNameEq (psDeclarationName declaration) name)))
-      "visibility-scope private roster leaked"
+      "visibility-scope six private declarations or two equation helpers changed"
     ensure (sameNames output.mainNames [psRootName "coreVisibilityClient"])
       "visibility-scope entry ownership changed"
     for hidden in
         ["CoreVisibility.before", "CoreVisibility.Nested.overridden",
          "CoreVisibility.mutualPrivate", "CoreVisibility.afterPublic",
-         "rootAfter", "afterAnonymous"] do
+         "rootAfter", "afterAnonymous", "CoreVisibility.mutualPublic.eq_def",
+         "CoreVisibility.mutualPrivate.eq_def"] do
       refuse profile "Entry"
         [library, input kind "Entry" (scopeClientSource kind hidden)] true
         ("PSCV0-SCOPE: unknown name " ++ hidden)
@@ -459,7 +510,154 @@ private def checkVisibilityScopes (seed : Lean.Kernel.Environment)
   let _ ← admit seed headerless.admissions
   ensure (sameNames headerless.mainNames [psRootName "coreVisibilityHeaderless"])
     "headerless public section changed visibility"
-  IO.println "PSCV0_CORE_VISIBILITY_SCOPES: paired nested scopes, mutual privacy, overrides, restoration, EOF equality, exact interfaces, six private leakage refusals and end controls passed"
+  IO.println "PSCV0_CORE_VISIBILITY_SCOPES: paired nested scopes, mutual privacy, overrides, restoration, EOF equality, exact interfaces, six source-private declarations, two private equation helpers and end controls passed"
+
+private def moduleKindRefusal : String :=
+  "PSCV0-MODULE-KIND: module Entry cannot import non-module Library"
+
+private def kindHeader (kind : PsCompilerSourceKind) (nativeModule : Bool) : String :=
+  match kind with
+  | .lean => if nativeModule then "module\n" else ""
+  | .proofScript => ""
+
+private def kindPublic (kind : PsCompilerSourceKind) (nativeModule : Bool) : String :=
+  match kind with
+  | .lean => if nativeModule then "public " else ""
+  | .proofScript => ""
+
+private def kindLibrary (kind : PsCompilerSourceKind) (nativeModule : Bool) :
+    PsPscv0ModuleSource :=
+  input kind "Library"
+    (kindHeader kind nativeModule ++ kindPublic kind nativeModule ++
+      identitySource kind "coreKindValue")
+
+private def kindEntry (kind : PsCompilerSourceKind) (nativeModule : Bool)
+    (publicImport : Bool := false) (withDeclaration : Bool := true) :
+    PsPscv0ModuleSource :=
+  input kind "Entry"
+    (kindHeader kind nativeModule ++
+      (if publicImport then "public import Library\n" else "import Library\n") ++
+      (if withDeclaration then
+        kindPublic kind nativeModule ++
+          scopeIdentity kind "" "coreKindUse" "coreKindValue"
+       else ""))
+
+private def checkModuleKinds (seed : Lean.Kernel.Environment)
+    (profile : PsCompilerProfileContext) : IO Unit := do
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    for nativeModule in [false, true] do
+      let source := kindLibrary kind nativeModule
+      let parsed ← match psCompilerParsePscv0Program kind source.source with
+        | .ok parsed => pure parsed
+        | .error message => fail message
+      let expected := match kind with
+        | .lean => nativeModule
+        | .proofScript => true
+      ensure (parsed.isModule == expected) "source reader lost its module kind"
+  let reference ← prepare profile "Entry"
+    [kindEntry .lean false, kindLibrary .lean false]
+  let check := fun (library entry : PsPscv0ModuleSource) => do
+    let output ← prepare profile "Entry" [entry, library]
+    ensure (output.admissions == reference.admissions)
+      "module kind changed canonical declarations"
+    ensure (sameNames output.mainNames [psRootName "coreKindUse"])
+      "module kind changed entry ownership"
+    let _ ← admit seed output.admissions
+    pure output
+  for clientModule in [false, true] do
+    for providerModule in [false, true] do
+      let library := kindLibrary .lean providerModule
+      let entry := kindEntry .lean clientModule
+      if clientModule && !providerModule then
+        refuse profile "Entry" [entry, library] false moduleKindRefusal
+      else
+        let _ ← check library entry
+        pure ()
+  for (library, entry) in
+      [(kindLibrary .proofScript true, kindEntry .proofScript true),
+       (kindLibrary .lean true, kindEntry .proofScript true),
+       (kindLibrary .proofScript true, kindEntry .lean true),
+       (kindLibrary .proofScript true, kindEntry .lean false)] do
+    let _ ← check library entry
+    pure ()
+  refuse profile "Entry"
+    [kindEntry .proofScript true, kindLibrary .lean false]
+    false moduleKindRefusal
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let publicEntry := kindEntry kind true true
+    let publicOutput ← check (kindLibrary .lean true) publicEntry
+    let some receipt := publicOutput.moduleProfiles.find?
+        (fun item => item.name == "Entry")
+      | fail "module-kind public import receipt missing"
+    ensure (receipt.imports == [("Library", true)])
+      "module-kind public import flag changed"
+    refuse profile "Entry"
+      [publicEntry, kindLibrary .lean false] false moduleKindRefusal
+    for publicImport in [false, true] do
+      refuse profile "Entry"
+        [kindEntry kind true publicImport false, kindLibrary .lean false]
+        false moduleKindRefusal
+  IO.println "PSCV0_CORE_MODULE_KIND: native 2x2 matrix, mixed source directions, public imports and import-only refusals passed"
+
+private def bodyLibrarySource (kind : PsCompilerSourceKind) : String :=
+  match kind with
+  | .lean =>
+      "module\n" ++
+      "public def coreBodyOpaque (A : Type) (x : A) : A := x\n" ++
+      "public abbrev coreBodyExposed (A : Type) (x : A) : A := x\n" ++
+      "public theorem coreBodySpec (A : Type) (x : A) : coreBodyOpaque A x = x := by rfl\n"
+  | .proofScript =>
+      "function coreBodyOpaque(A: Type, x: A): A := x\n" ++
+      "abbrev coreBodyExposed(A: Type, x: A): A := x\n" ++
+      "theorem coreBodySpec(A: Type, x: A): coreBodyOpaque(A, x) = x := by { rfl }\n"
+
+private def bodyClientSource (kind : PsCompilerSourceKind) (forbidden : Bool) : String :=
+  match kind with
+  | .lean =>
+      "module\npublic import Library\n" ++
+      (if forbidden then
+        "public theorem coreBodyForbidden (A : Type) (x : A) : coreBodyOpaque A x = x := by rfl\n"
+       else
+        "public theorem coreBodyProof (A : Type) (x : A) : coreBodyExposed A x = x := by rfl\n" ++
+        "public theorem coreBodyViaSpec (A : Type) (x : A) : coreBodyOpaque A x = x := coreBodySpec A x\n")
+  | .proofScript =>
+      "public import Library\n" ++
+      (if forbidden then
+        "theorem coreBodyForbidden(A: Type, x: A): coreBodyOpaque(A, x) = x := by { rfl }\n"
+       else
+        "theorem coreBodyProof(A: Type, x: A): coreBodyExposed(A, x) = x := by { rfl }\n" ++
+        "theorem coreBodyViaSpec(A: Type, x: A): coreBodyOpaque(A, x) = x := coreBodySpec(A, x)\n")
+
+private def checkImportedBodies : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let opaqueName := psRootName "coreBodyOpaque"
+  let exposedName := psRootName "coreBodyExposed"
+  let mut paired : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let library := input kind "Library" (bodyLibrarySource kind)
+    let entry := input kind "Entry" (bodyClientSource kind false)
+    let output ← prepare profile "Entry" [entry, library]
+    let _ ← admit seed output.admissions
+    let some receipt := output.moduleProfiles.find?
+        (fun item => item.name == "Library")
+      | fail "body-visibility library receipt missing"
+    ensure (sameNames receipt.exposedNames [exposedName])
+      "body exposure ownership changed"
+    let some (.opaqueDecl ..) := receipt.interface.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) opaqueName)
+      | fail "ordinary imported definition exposed its body"
+    let some (.definitionDecl ..) := receipt.interface.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) exposedName)
+      | fail "imported abbreviation lost its exposed body"
+    refuse profile "Entry"
+      [library, input kind "Entry" (bodyClientSource kind true)]
+      true "PSCV0-PROOF: rfl requires definitionally equal sides"
+    paired := paired ++ [output.admissions]
+  let [leanAdmissions, psAdmissions] := paired
+    | fail "body-visibility paired source count changed"
+  ensure (leanAdmissions == psAdmissions)
+    "Lean and PS imported-body admissions differ"
+  IO.println "PSCV0_CORE_IMPORTED_BODY: paired exposed abbreviation and exported theorem proofs, ordinary definition opacity and owned rfl refusal passed"
 
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
@@ -516,5 +714,7 @@ def main : IO Unit := do
     | fail "paired re-export source count changed"
   ensure (leanExports == psExports) "Lean and PS re-export admissions differ"
   checkModuleHeaders seed profile
-  checkVisibilityScopes seed profile
+  checkVisibilityScopes
+  checkModuleKinds seed profile
+  checkImportedBodies
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

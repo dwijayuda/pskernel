@@ -37,7 +37,7 @@ def psPscv0ProjectParse (sources : List PsPscv0ModuleSource) :
   for entry in sources do
     if !psPscv0ValidModuleKey entry.name then
       throw ("PSCV0-MODULE: invalid module identity " ++ entry.name)
-  sources.mapM fun input => do
+  let parsed : List PsPscv0ParsedModule ← sources.mapM fun input => do
     let program ← psCompilerParsePscv0Program input.sourceKind input.source
     let dependencies := program.imports.map psPscv0ImportKey
     if dependencies.length != dependencies.eraseDups.length then
@@ -49,6 +49,19 @@ def psPscv0ProjectParse (sources : List PsPscv0ModuleSource) :
       name := input.name, source := input.source, sourceKind := input.sourceKind
       sourceName := if input.sourceName.isEmpty then input.name ++ psCompilerSourceKindExtension input.sourceKind else input.sourceName
       program }
+  -- Pinned Lean rejects module-mode imports of legacy non-module files.
+  -- Validate the actual parsed graph, including import-only clients, before
+  -- declaration elaboration; the source extension alone cannot supply this bit.
+  for client in parsed do
+    if client.program.isModule then
+      for entry in client.program.imports do
+        let dependency := psPscv0ImportKey entry
+        let some provider := parsed.find? (fun item => item.name == dependency)
+          | throw ("PSCV0-MODULE: missing module " ++ dependency ++ " imported by " ++ client.name)
+        if !provider.program.isModule then
+          throw ("PSCV0-MODULE-KIND: module " ++ client.name ++
+            " cannot import non-module " ++ dependency)
+  return parsed
 
 -- Topological planning over the complete explicit graph. A cycle is an error,
 -- not an opportunity to infer mutually recursive cross-file declarations.

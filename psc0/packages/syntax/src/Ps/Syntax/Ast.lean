@@ -392,4 +392,7 @@ inductive PsSyntaxCommand where
 structure PsSyntaxProgram where
   imports : List PsSyntaxImport
   commands : List PsSyntaxCommand
+  -- Derived by the selected reader: PS is implicitly module-mode, while
+  -- native Lean retains the presence or absence of its leading module header.
+  isModule : Bool := false
 

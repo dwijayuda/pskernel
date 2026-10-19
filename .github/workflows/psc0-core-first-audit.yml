@@ -172,6 +172,7 @@ jobs:
           /usr/bin/time -v -o ../dist/core-first/seams/project-build-resource.txt lake build pscv0_core_project 2>&1 | tee ../dist/core-first/seams/project-build.log
           .lake/build/bin/pscv0_core_project 2>&1 | tee ../dist/core-first/seams/project-check.log
           lake env lean ../test/Pscv0CoreVisibilityOracle.lean 2>&1 | tee ../dist/core-first/seams/visibility-native-oracle.log
+          lake env python3 ../scripts/core-first-module-native-oracle.py 2>&1 | tee ../dist/core-first/seams/module-native-oracle.log
           sha256sum .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable.sha256
           stat -c '%s' .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable-bytes.txt
       - name: Retain the qualified complete Foundation source regression

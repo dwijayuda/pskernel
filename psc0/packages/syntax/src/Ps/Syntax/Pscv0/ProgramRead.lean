@@ -230,5 +230,5 @@ def psPscv0ParseProgramTokens (tokens : List PsToken) : Except String PsSyntaxPr
   let imports ← (psParseProofScriptImportsWithFuel (tokens.length + 1)
     (psTokenCursorFromTokens tokens) []).mapError psPscv0ParseError
   let commands ← psPscv0ReadCommands 4096 imports.cursor []
-  return { imports := imports.value, commands }
+  return { imports := imports.value, commands, isModule := true }
 

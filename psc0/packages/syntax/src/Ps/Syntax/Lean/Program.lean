@@ -172,4 +172,4 @@ def psLeanParseProgram (source : String) : Except String PsSyntaxProgram := do
   let cursor ← if hasModuleHeader then pure (← psPscv0Expect cursor "module").cursor else pure cursor
   let imports ← psLeanProgramImports (tokens.length + 1) cursor hasModuleHeader []
   let commands ← psLeanProgramCommands 4096 imports.cursor [] hasModuleHeader
-  return { imports := imports.value, commands }
+  return { imports := imports.value, commands, isModule := hasModuleHeader }

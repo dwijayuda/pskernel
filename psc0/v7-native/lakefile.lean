@@ -197,3 +197,8 @@ lean_exe pscv0_bootstrap_compatibility where
   srcDir := "../test"
   root := `Pscv0BootstrapCompatibility
   supportInterpreter := true
+
+-- Selected project preparation over an independently checked caller context.
+lean_exe pscv0_core_project where
+  srcDir := "../test"
+  root := `Pscv0CoreProject

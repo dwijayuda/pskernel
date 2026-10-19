@@ -184,6 +184,7 @@ lean_lib PsCompiler where
     `Ps.Compiler.WellFoundedRuntime,
     `Ps.Compiler.Sh1,
     `Ps.Compiler.Pscv0Engine,
+    `Ps.Compiler.Pscv0ModuleEngine,
     `Ps.Compiler.Pscv0,
     `Ps.Compiler.Pscv0Modules
   ]

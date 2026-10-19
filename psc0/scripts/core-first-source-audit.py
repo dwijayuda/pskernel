@@ -20,13 +20,14 @@ OTHER_ROOTS = [
     "Ps.Host.NativeV7", "PsKernelLean.Prelude", "Ps.Compiler.Engine",
     "Ps.Compiler.Core", "Ps.Environment.Bootstrap", "Ps.Environment.Core",
     "Ps.Environment.Full", "Ps.Environment.Fingerprint", "PsKernelLean.Replay",
-    "Ps.Compiler.Pscv0Engine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
+    "Ps.Compiler.Pscv0Engine", "Ps.Compiler.Pscv0ModuleEngine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
 ]
 ISOLATED_ROOTS = [
     "Ps.Environment.Bootstrap", "Ps.Environment.Fingerprint", "PsKernelLean.Replay", "Ps.Compiler.Engine",
-    "Ps.Compiler.Pscv0Engine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
+    "Ps.Compiler.Pscv0Engine", "Ps.Compiler.Pscv0ModuleEngine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
 ]
 INDEPENDENT_COMPILER_ROOTS = ["Ps.Compiler.Pscv0Engine"] + PORTABLE_ROOTS[1:]
+INDEPENDENT_PROJECT_ROOTS = ["Ps.Compiler.Pscv0ModuleEngine"] + PORTABLE_ROOTS[1:]
 FEATURES = {
     "mutual_blocks": r"(?m)^\s*mutual\b",
     "inductive_declarations": r"(?m)^\s*(?:(?:private|protected)\s+)?inductive\b",
@@ -206,6 +207,7 @@ def audit(repository):
         "sourceBytes": sum(item["bytes"] for item in modules.values()),
         "portableCompiler": portable,
         "independentCompilerCandidate": closure(INDEPENDENT_COMPILER_ROOTS, modules),
+        "independentProjectCandidate": closure(INDEPENDENT_PROJECT_ROOTS, modules),
         "portableFeatureSignals": dict(sorted(signals.items())),
         "rootClosures": {name: closure([name], modules) for name in OTHER_ROOTS},
         "heavyAssets": assets, "packages": packages, "modules": modules,
@@ -235,14 +237,15 @@ def main():
                      item.startswith(("Ps.Environment.Standard", "Ps.Host."))]
         if forbidden:
             raise ValueError("isolated seam imports selected environment: " + repr(forbidden))
-    independent = candidate["independentCompilerCandidate"]
-    if independent["unresolvedProjectImports"] or independent["externalImports"]:
-        raise ValueError("independent compiler root has an unresolved or host import")
-    if any(name in {"Ps.Environment.Prelude", "Ps.Environment.SelfHostPrelude",
-                     "Ps.Environment.SelfHostProd", "PsKernelLean.Prelude"} or
-           name.startswith(("Ps.Environment.Standard", "Ps.Host.", "PsKernelLean."))
-           for name in independent["modules"]):
-        raise ValueError("independent compiler imports a Full or host composition")
+    for key in ["independentCompilerCandidate", "independentProjectCandidate"]:
+        independent = candidate[key]
+        if independent["unresolvedProjectImports"] or independent["externalImports"]:
+            raise ValueError(key + " has an unresolved or host import")
+        if any(name in {"Ps.Environment.Prelude", "Ps.Environment.SelfHostPrelude",
+                         "Ps.Environment.SelfHostProd", "PsKernelLean.Prelude"} or
+               name.startswith(("Ps.Environment.Standard", "Ps.Host.", "PsKernelLean."))
+               for name in independent["modules"]):
+            raise ValueError(key + " imports a Full or host composition")
     report = {
         "schema": "psc0-core-first-source-audit/1",
         "claim": "source/import/package inventory only; not semantic closure, selfhost or verified qualification",
@@ -277,6 +280,13 @@ def main():
         print("PSC0_CORE_INDEPENDENT_COMPILER_IMPORTS " + json.dumps({
             "label": label,
             **{key: graph[key] for key in ["moduleCount", "sourceBytes",
+                "environmentBytes", "externalImports", "unresolvedProjectImports",
+                "fullCompositionImports"]}
+        }, sort_keys=True))
+        project = value["independentProjectCandidate"]
+        print("PSC0_CORE_INDEPENDENT_PROJECT_IMPORTS " + json.dumps({
+            "label": label, "roots": INDEPENDENT_PROJECT_ROOTS,
+            **{key: project[key] for key in ["moduleCount", "sourceBytes",
                 "environmentBytes", "externalImports", "unresolvedProjectImports",
                 "fullCompositionImports"]}
         }, sort_keys=True))

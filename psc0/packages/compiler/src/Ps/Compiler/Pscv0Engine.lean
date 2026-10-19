@@ -4,8 +4,8 @@ import Ps.Syntax.Pscv0.Module
 import Ps.Elab.Command
 
 -- Source-owned v7 entry point. No generated frontend or host elaborator fallback.
--- Project import/exposure semantics are a later language milestone; never silently
--- flatten or ignore imports in this bounded single-module development entry point.
+-- Ps.Compiler.Pscv0ModuleEngine owns project import/exposure semantics. This
+-- bounded single-source entry refuses imports rather than flattening them.
 def psCompilerParsePscv0Program (sourceKind : PsCompilerSourceKind)
     (source : String) : Except String PsSyntaxProgram :=
   match sourceKind with

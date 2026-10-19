@@ -1,0 +1,130 @@
+name: PSKernel-C0 complete external compiler root replay (Lean 4.35)
+on:
+  push:
+    branches: [feature/pskernel-c0-core-qualification-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-all-compiler-roots.yml'
+      - 'psc0/packages/pskernel-c0/test/C0CoreAllRoots.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  full-native-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout independent checker and exact roster audits
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: c0
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - name: Checkout exact independently measured PSC0 compiler source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 53c28cfe3abd9e8fae93e7935357dbc4402c4b09
+          path: psc0-source
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/
+      - name: Fetch immutable successful native compiler closure receipt
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 39189428714
+          name: c0-core-first-native-dependency-closure
+          path: input
+          github-token: ${{ github.token }}
+      - name: Audit exact 458 roots; prohibit omission, changes or new axioms
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          python3 c0/psc0/packages/pskernel-c0/test/C0CoreFirstClosureContract.py \
+            --psc0 psc0-source --closure input/native-closure.json \
+            --output output/closure-integrity.json
+          python3 c0/psc0/packages/pskernel-c0/test/C0CoreAllRoots.py \
+            input/native-closure.json output/all-roots.txt output/root-manifest.json
+          test "$(wc -l < output/all-roots.txt)" -eq 458
+          sha256sum input/native-closure.json output/all-roots.txt output/root-manifest.json > output/input-SHA256SUMS
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: c0/psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Build independent native C0 and pinned official exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat c0/psc0/packages/pskernel-c0/lean-toolchain)" = leanprover/lean4:v4.35.0
+          (cd c0/psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+      - name: Export full authentic compiler-owned native external closure in ONE graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t ROOTS < output/all-roots.txt
+          test "${#ROOTS[@]}" -eq 458
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/output/export-resources.txt" \
+              timeout 720s lake env .lake/build/bin/lean4export Init -- "${ROOTS[@]}" \
+              > "$GITHUB_WORKSPACE/output/all-roots.ndjson"
+          )
+          test -s output/all-roots.ndjson
+          sha256sum output/all-roots.ndjson > output/real-export-SHA256SUMS
+          wc -lc output/all-roots.ndjson | tee output/real-export-size.txt
+          echo 'C0_EXTERNAL_ROSTER_EXPORT=COMPLETE 458_roots=true no_skips=true'
+      - name: Require independent official Lean acceptance for same bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/output/official-resources.txt" \
+              timeout 600s lake env leanchecker --from-export "$GITHUB_WORKSPACE/output/all-roots.ndjson" \
+              > "$GITHUB_WORKSPACE/output/official-verdict.txt" 2>&1
+          )
+          grep -Fq 'Lean default kernel accepts the solution' output/official-verdict.txt
+          echo 'C0_EXTERNAL_ROSTER_OFFICIAL=ACCEPTED complete=true'
+      - name: Strict C0 replay must accept entire combined corpus without fuel changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (
+            cd c0/psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/output/c0-resources.txt" \
+              timeout 900s .lake/build/bin/c0OfficialReplay --require-accepted \
+              "$GITHUB_WORKSPACE/output/all-roots.ndjson" 4096 \
+              > "$GITHUB_WORKSPACE/output/c0-verdict.txt" 2>&1
+          )
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > output/c0-exit-code.txt
+          grep -F 'C0_REAL_EXPORT replay_outcome=' output/c0-verdict.txt | tail -n 1 || true
+          if [ "$rc" -ne 0 ]; then
+            echo "C0_EXTERNAL_ROSTER=NOT_QUALIFIED exit=$rc; no_timeout_as_proof" >&2
+            tail -n 75 output/c0-verdict.txt
+            exit 1
+          fi
+          grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' output/c0-verdict.txt
+          echo 'C0_EXTERNAL_ROSTER=ACCEPTED_TRUE_COMPILER_NATIVE_LIBRARY_CLOSURE_NOT_SELFHOST'
+      - name: Preserve exact provenance, all input records, resource and checker verdicts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: c0-full-external-compiler-root-replay
+          path: |
+            output/
+          retention-days: 21
+          if-no-files-found: warn

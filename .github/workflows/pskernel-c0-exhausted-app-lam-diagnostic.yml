@@ -1,0 +1,40 @@
+name: C0 exact exhausted app-lam declaration diagnostic
+on:
+  push:
+    branches: [research/pskernel-c0-instantiation-closed-subtree-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-exhausted-app-lam-diagnostic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  archived-exhaustion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 39244843409
+          name: c0-arena193-closed-subtree-skip-ab
+          path: ./archived
+          github-token: ${{ github.token }}
+      - name: Diagnose exact C0 resource classification without rerunning proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          ls -lah archived
+          python3 - <<'PY'
+          from pathlib import Path
+          logs = list(Path("archived").rglob("*candidate*verdict.txt"))
+          assert len(logs) == 1, logs
+          lines=logs[0].read_text(errors="replace").splitlines()
+          print(f"C0_EXHAUSTED_ARCHIVE lines={len(lines)}")
+          for ln in lines[-80:]:
+            print("C0_EXHAUSTED_LAST " + ln[:1200])
+          markers=[ln for ln in lines if any(w in ln.lower() for w in
+                   ["budget exhausted","resourceexhausted","resource_exhausted","replay_outcome=","name=dag_app_binder","error"])]
+          print(f"C0_EXHAUSTED_MARKERS count={len(markers)}")
+          for ln in markers[-30:]:
+            print("C0_EXHAUSTED_REASON " + ln[:1200])
+          PY

@@ -109,9 +109,13 @@ theorem c0LooseBVarBound_source (expr : PsKernelExpr) (offset : Nat) :
 /-- Native compiler-only refinement of the existing syntactic loose-variable
     query. Neither this compiler rewrite nor cached metadata confers theorem,
     type, definitional equality, admission or fuel authority. -/
+def psKernelC0HasLooseBVarFast0 (expr : PsKernelExpr) : Bool :=
+  psKernelC0HasLooseBVarFast expr 0
+
 @[csimp] theorem psKernelExprHasLooseBVar_csimp :
     @psKernelExprHasLooseBVar =
-      (fun expr => psKernelC0HasLooseBVarFast expr 0) := by
+      @psKernelC0HasLooseBVarFast0 := by
   funext expr
-  simpa only [psKernelExprHasLooseBVar] using
+  simpa only [psKernelExprHasLooseBVar,
+    psKernelC0HasLooseBVarFast0] using
     (c0LooseBVarBound_source expr 0).symm

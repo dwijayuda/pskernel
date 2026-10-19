@@ -63,11 +63,38 @@ structure PsElabSavedScope where
   levelNames : List PsName
   sourceSpan : Option PsSourceSpan := none
   wellFoundedRecursions : List PsElabWellFoundedRecursion := []
+  -- Explicit lexical ownership for compiler-created recursion locals.
+  auxiliaryLocalIds : List Nat := []
+  termHoleHints : List (PsSourceSpan × PsExpr) := []
 
 inductive PsElabPendingWork where
   | core (scope : PsElabSavedScope) (constraint : PsSyntheticConstraint)
   | expectedTerm (scope : PsElabSavedScope) (id : Nat) (value type : PsExpr)
   | sourceTerm (scope : PsElabSavedScope) (id : Nat) (source : PsSyntaxTerm)
+
+-- Compiler boundaries retain a checked source closure and its exact typed
+-- specialization template. The stream follows successful elaboration events.
+inductive PsElabCoreBoundaryKind where
+  | source (discrFlags : List Bool) (proofCount : Nat)
+  | row
+  | primitive (selectedSlot prefixArity : Nat)
+  | recursiveCall (captureCount sourceArity : Nat)
+
+-- Each pattern is a typed lambda over the entire checked row prefix.
+-- Caller values precede this match's ds/ys and equation binders.
+structure PsElabCoreRow where
+  binderCount : Nat
+  patterns : List PsExpr
+  aliases : List (PsName × Nat)
+  callerValues : List PsExpr
+
+structure PsElabCoreBoundary where
+  name : PsName
+  kind : PsElabCoreBoundaryKind
+  type : PsExpr
+  value : PsExpr
+  localIds : List Nat
+  row? : Option PsElabCoreRow := none
 
 structure PsElabContext where
   environment : PsEnvironment
@@ -82,10 +109,17 @@ structure PsElabContext where
   collectInfo : Bool := true
   infoRev : List PsElabInfoEntry := []
   wellFoundedRecursions : List PsElabWellFoundedRecursion := []
+  -- Explicit lexical ownership for compiler-created recursion locals.
+  auxiliaryLocalIds : List Nat := []
   -- Like infoRev, this is an event stream, not saved lexical authority.
   -- Each metavariable owns its original complete branch context.
   wellFoundedGoalsRev : List (Nat × PsSourceSpan) := []
   wellFoundedCallsRev : List PsElabRecursionCall := []
+  coreBoundaries : List PsElabCoreBoundary := []
+  -- Actual tactic boundaries, retained with source info across typed closure.
+  proofBoundariesRev : List PsName := []
+  -- Lexical typed syntax hints are not emitted into checked declarations.
+  termHoleHints : List (PsSourceSpan × PsExpr) := []
 
 def psElabContextEmpty (environment : PsEnvironment) (levelNames : List PsName := []) : PsElabContext :=
   {
@@ -113,7 +147,9 @@ def psElabSaveScope (context : PsElabContext) : PsElabSavedScope :=
   { environment := context.environment, localContext := context.localContext,
     instances := context.instances, structuralRecursion := context.structuralRecursion,
     levelNames := context.levelNames, sourceSpan := context.sourceSpan
-    wellFoundedRecursions := context.wellFoundedRecursions }
+    wellFoundedRecursions := context.wellFoundedRecursions
+    auxiliaryLocalIds := context.auxiliaryLocalIds
+    termHoleHints := context.termHoleHints }
 
 def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : PsElabContext :=
   { context with
@@ -123,6 +159,8 @@ def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : Ps
     instances := scope.instances
     structuralRecursion := scope.structuralRecursion
     wellFoundedRecursions := scope.wellFoundedRecursions
+    auxiliaryLocalIds := scope.auxiliaryLocalIds
+    termHoleHints := scope.termHoleHints
     levelNames := scope.levelNames, sourceSpan := scope.sourceSpan }
 
 -- Root fields keep their established call map in every nested body. Only the
@@ -138,14 +176,15 @@ def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext
 -- local identity still mentioned by the shared metavariable context.
 def psElabLeaveScope (outer inner : PsElabContext) : PsElabContext :=
   { outer with
-    localContext := {
-      nextId := max outer.localContext.nextId inner.localContext.nextId
-      declarations := outer.localContext.declarations }
+    localContext := { outer.localContext with
+      nextId := max outer.localContext.nextId inner.localContext.nextId }
     metaContext := inner.metaContext
     pending := inner.pending
     infoRev := inner.infoRev
     wellFoundedGoalsRev := inner.wellFoundedGoalsRev
-    wellFoundedCallsRev := inner.wellFoundedCallsRev }
+    wellFoundedCallsRev := inner.wellFoundedCallsRev
+    coreBoundaries := inner.coreBoundaries
+    proofBoundariesRev := inner.proofBoundariesRev }
 
 def psElabContextWithEnvironment (context : PsElabContext)
     (environment : PsEnvironment) : PsElabContext :=
@@ -159,5 +198,6 @@ def psElabRecordInfo (context : PsElabContext) (info : PsElabInfo) : PsElabConte
   else context
 
 def psElabFinishSourceInfo (context : PsElabContext) (owner : PsName) : PsElabSourceInfo :=
-  { owner, metaContext := context.metaContext, entries := context.infoRev.reverse }
+  { owner, metaContext := context.metaContext, entries := context.infoRev.reverse
+    proofBoundaries := context.proofBoundariesRev.reverse }
 

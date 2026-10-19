@@ -11,6 +11,7 @@ structure PsScopedLocalDefinition where
   name : PsName
   alias : PsSyntaxName
   terminationScope : Option PsWhereTerminationScope := none
+  isPrivate : Bool := false
 
 structure PsScopedPreDefinition where
   source : PsSyntaxDeclaration
@@ -67,18 +68,32 @@ def psScopeWhereTermination (resolver : PsScopeResolver) (bound : List String)
 -- Header annotations/defaults see the enclosing header before local helpers
 -- enter. Bodies see the local helper frame; own/nested binders shadow it.
 def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMember)
-    (alias : PsSyntaxName) (inheritedPartial : Bool := false) :
+    (alias : PsSyntaxName) (inheritedPartial : Bool := false)
+    (privateAuxiliaryPrefix : List String := [])
+    (bodyNamespace : Option (List String) := none) :
     Except PsElabError PsScopedPreDefinition := do
   let (base, locals, whereSpan) ← psWhereSourceParts member.declaration
   let (sourceName, sourceBinders, sourceType, sourceValue) ← psWhereValueParts base
-  let qualified := psScopeQualified resolver.scope sourceName
-  let name := { qualified with
-    segments := (psScopePrivateRewrite resolver qualified.segments).getD qualified.segments }
-  let some coreName := psSyntaxNameToName name | throw .emptyName
+  let name := psScopeDeclarationName resolver sourceName
+  let some coreName := psSyntaxNameToName (psScopeCanonicalNameSyntax name) | throw .emptyName
+  let resolver := psScopeDeclarationBodyResolver resolver sourceName bodyNamespace
+  let exposesBody := match member.registration with
+    | some .abbrevDecl => true
+    | _ => false
+  let mayExposeBodyProofs := match member.registration with
+    | some .abbrevDecl | some (.instanceDecl _)
+    | some (.defaultInstanceDecl _ (some _)) => true
+    | _ => false
+  let privateHelpers := !privateAuxiliaryPrefix.isEmpty && !exposesBody
+  let helperParentName :=
+    if privateHelpers && name.resolvedName.isNone then
+      psElabPrivateName (privateAuxiliaryPrefix ++ name.segments)
+    else coreName
   let headerResolver := { resolver with mutualAliases := [], localAliases := [] }
   let binders ← psScopeBinders (psScopeTerm 4096 headerResolver) [] sourceBinders
   let type ← psScopeTerm 4096 headerResolver binders.bound sourceType
   let helperNames ← locals.mapM fun localDefinition => do
+    psScopeCheckSourceName resolver localDefinition.name
     if localDefinition.name.segments.length != 1 then
       throw (.scope "PSCV0-D-WHERE-01: local name must be one identifier")
     let some shortName := localDefinition.name.segments.head? | throw .emptyName
@@ -91,6 +106,7 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
   let qualifiedFrame := (locals.zip helperAliases).map fun (localDefinition, localAlias) =>
     (name.segments ++ localDefinition.name.segments, localAlias.segments)
   let bodyResolver := { resolver with
+    abstractProofs := resolver.abstractProofs && mayExposeBodyProofs
     localAliases := localFrame ++ resolver.localAliases
     mutualAliases := qualifiedFrame ++ resolver.mutualAliases }
   let parentBound := binders.bound.filter (fun key => !helperNames.contains key)
@@ -120,13 +136,15 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
         type := localType.map (·.term)
         value := localValue.term
         recursion := localDefinition.recursion }
-      name := psNameAppendStr coreName shortName
+      name := psNameAppendStr helperParentName shortName
       alias := localAlias
+      isPrivate := member.isPrivate || privateHelpers
       terminationScope }
     let used := psScopeUnion localBinders.used (psScopeUnion (localType.map (·.used) |>.getD [])
       localValue.used)
     return (scopedLocal, used)
-  let mapped ← psWhereMapValue base name binders.binders type.term value.term termination
+  let mapped ← psWhereMapValue base (psScopeCanonicalNameSyntax name)
+    binders.binders type.term value.term termination
   let source := match whereSpan with
     | some span => PsSyntaxDeclaration.whereDeclaration mapped (scopedLocals.map (·.fst.source)) span
     | none => mapped

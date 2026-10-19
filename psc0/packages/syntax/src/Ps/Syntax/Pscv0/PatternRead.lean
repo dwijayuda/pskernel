@@ -6,7 +6,7 @@ def psPscv0PatternStart (cursor : PsTokenCursor) : Bool :=
   | some token =>
       !psPscv0ReservedArgument token.text && token.text != "matches" &&
         (psTokenKindEq token.kind .identifier || psTokenKindEq token.kind .natural ||
-          token.text == "." || token.text == "(")
+          token.text == "." || token.text == "(" || token.text == "[")
 
 def psPscv0PatternTuple (patterns : List PsSyntaxPattern) (span : PsSourceSpan) :
     Except PsParseError PsSyntaxPattern := do
@@ -16,6 +16,13 @@ def psPscv0PatternTuple (patterns : List PsSyntaxPattern) (span : PsSourceSpan) 
   | pattern :: rest =>
     return .ctor (PsSyntaxName.mk ["_root_", "Prod", "mk"] span)
       [pattern, ← psPscv0PatternTuple rest span] span
+
+-- Built-in list patterns use only the pinned List constructors.
+def psPscv0PatternList (patterns : List PsSyntaxPattern) (span : PsSourceSpan) :
+    PsSyntaxPattern :=
+  patterns.foldr (fun head tail =>
+    .ctor (PsSyntaxName.mk ["_root_", "List", "cons"] span) [head, tail] span)
+      (.ctor (PsSyntaxName.mk ["_root_", "List", "nil"] span) [] span)
 
 -- Pattern application owns native whitespace arguments. Comma-call syntax
 -- belongs exclusively to expressions; parentheses group one nested pattern or
@@ -32,7 +39,22 @@ def psPscv0PatternAtom (fuel : Nat) (cursor : PsTokenCursor) :
       let fields ← psPscv0Patterns fuel opening.cursor
       let close ← psTokenCursorExpectText fields.cursor ")"
       let span := psSyntaxSpanJoin opening.token.span close.token.span
-      return { value := ← psPscv0PatternTuple fields.value span, cursor := close.cursor }
+      let value ← psPscv0PatternTuple fields.value span
+      let value : PsSyntaxPattern := match value with
+        | .natural n _ => .natural n span
+        | .bool b _ => .bool b span
+        | .wildcard _ => .wildcard span
+        | .variable name => .variable { name with span }
+        | .ctor name fields _ => .ctor name fields span
+        | .dotCtor name fields _ => .dotCtor name fields span
+        | .inaccessible value => .inaccessible value
+      return { value, cursor := close.cursor }
+    if token.text == "[" then
+      let opening ← psTokenCursorExpectText cursor "["
+      let fields ← psPscv0ListPatterns fuel opening.cursor
+      let close ← psTokenCursorExpectText fields.cursor "]"
+      let span := psSyntaxSpanJoin opening.token.span close.token.span
+      return { value := psPscv0PatternList fields.value span, cursor := close.cursor }
     if token.text == "_" then
       let read ← psTokenCursorExpectText cursor "_"
       return { value := .wildcard token.span, cursor := read.cursor }
@@ -46,7 +68,7 @@ def psPscv0PatternAtom (fuel : Nat) (cursor : PsTokenCursor) :
     if token.text == "." then
       let dot ← psTokenCursorExpectText cursor "."
       let name ← psParseSyntaxNameWith true dot.cursor
-      return { value := .ctor name.value [] (psSyntaxSpanJoin token.span name.value.span)
+      return { value := .dotCtor name.value [] (psSyntaxSpanJoin token.span name.value.span)
                cursor := name.cursor }
     let name ← psParseSyntaxNameWith true cursor
     return { value := if name.value.segments.length == 1 then .variable name.value
@@ -60,36 +82,79 @@ def psPscv0PatternArguments (fuel : Nat) (headSpan : PsSourceSpan) (cursor : PsT
   | fuel + 1 =>
     if !psPscv0PatternStart cursor then return { value := fields.reverse, cursor }
     let some token := psTokenCursorPeek cursor | return { value := fields.reverse, cursor }
+    if (token.text == "(" || token.text == "[") &&
+        token.span.start.byteOffset == headSpan.stop.byteOffset then
+      throw (psProofScriptExpectedError "native pattern arguments; expression calls are not patterns" cursor)
     if token.span.start.line > headSpan.stop.line &&
         token.span.start.column <= headSpan.start.column then
       return { value := fields.reverse, cursor }
     let field ← psPscv0PatternAtom fuel cursor
-    psPscv0PatternArguments fuel headSpan field.cursor (field.value :: fields)
+    psPscv0PatternArguments fuel
+      { headSpan with stop := (psSyntaxPatternSpan field.value).stop }
+      field.cursor (field.value :: fields)
 
-def psPscv0Pattern (fuel : Nat) (cursor : PsTokenCursor) :
+def psPscv0PatternTail (minimum fuel : Nat) (head : PsSyntaxPattern)
+    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxPattern) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    if minimum <= 67 && psTokenCursorAtText cursor "::" then
+      let cons ← psTokenCursorExpectText cursor "::"
+      let tail ← psPscv0PatternAtPrecedence 67 fuel cons.cursor
+      let span := psSyntaxSpanJoin (psSyntaxPatternSpan head) (psSyntaxPatternSpan tail.value)
+      let value := PsSyntaxPattern.ctor (PsSyntaxName.mk ["_root_", "List", "cons"] span)
+        [head, tail.value] span
+      return ← psPscv0PatternTail minimum fuel value tail.cursor
+    if minimum <= 65 && psTokenCursorAtText cursor "+" then
+      let plus ← psTokenCursorExpectText cursor "+"
+      let right ← psPscv0PatternAtPrecedence 66 fuel plus.cursor
+      let span := psSyntaxSpanJoin (psSyntaxPatternSpan head) (psSyntaxPatternSpan right.value)
+      -- Pattern reduction is typed: a literal offset belongs to Nat, including
+      -- zero; a nonliteral arithmetic pattern reaches the elaboration gate.
+      let value := PsSyntaxPattern.ctor (PsSyntaxName.mk ["_root_", "Nat", "add"] span)
+        [head, right.value] span
+      return ← psPscv0PatternTail minimum fuel value right.cursor
+    return { value := head, cursor }
+
+def psPscv0PatternAtPrecedence (minimum fuel : Nat) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
     let head ← psPscv0PatternAtom fuel cursor
-    let some token := psTokenCursorPeek head.cursor | return head
-    if token.text == "+" then
-      let plus ← psTokenCursorExpectText head.cursor "+"
-      let one ← psTokenCursorExpectText plus.cursor "1"
-      let span := psSyntaxSpanJoin (psSyntaxPatternSpan head.value) one.token.span
-      return { value := .ctor (PsSyntaxName.mk ["_root_", "Nat", "succ"] span)
-                [head.value] span, cursor := one.cursor }
-    if token.text == "(" && token.span.start.byteOffset == (psSyntaxPatternSpan head.value).stop.byteOffset then
-      throw (psProofScriptExpectedError "native pattern arguments; expression calls are not patterns" head.cursor)
     let fields ← psPscv0PatternArguments fuel (psSyntaxPatternSpan head.value) head.cursor []
-    if fields.value.isEmpty then return head
-    let name ← match head.value with
-      | .variable name => pure name
-      | .ctor name [] _ => pure name
-      | _ => throw (psProofScriptExpectedError "constructor pattern head" cursor)
-    let some last := fields.value.getLast? | throw (.unexpectedEnd "pattern argument")
-    let span := psSyntaxSpanJoin (psSyntaxPatternSpan head.value) (psSyntaxPatternSpan last)
-    return { value := .ctor name fields.value span, cursor := fields.cursor }
+    let parsed ← if fields.value.isEmpty then pure head else do
+      let (name, dotted) ← match head.value with
+        | .variable name => pure (name, false)
+        | .ctor name [] _ => pure (name, false)
+        | .dotCtor name [] _ => pure (name, true)
+        | _ => throw (psProofScriptExpectedError "constructor pattern head" cursor)
+      let some last := fields.value.getLast? | throw (.unexpectedEnd "pattern argument")
+      let span := psSyntaxSpanJoin (psSyntaxPatternSpan head.value) (psSyntaxPatternSpan last)
+      pure {
+        value := if dotted then PsSyntaxPattern.dotCtor name fields.value span
+          else PsSyntaxPattern.ctor name fields.value span
+        cursor := fields.cursor }
+    psPscv0PatternTail minimum fuel parsed.value parsed.cursor
+
+def psPscv0Pattern (fuel : Nat) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxPattern) :=
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 => psPscv0PatternAtPrecedence 0 fuel cursor
+
+def psPscv0ListPatterns (fuel : Nat) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult (List PsSyntaxPattern)) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    if psTokenCursorAtText cursor "]" then return { value := [], cursor }
+    let pattern ← psPscv0Pattern fuel cursor
+    if psTokenCursorAtText pattern.cursor "," then
+      let comma ← psTokenCursorExpectText pattern.cursor ","
+      let rest ← psPscv0ListPatterns fuel comma.cursor
+      return { value := pattern.value :: rest.value, cursor := rest.cursor }
+    return { value := [pattern.value], cursor := pattern.cursor }
 
 def psPscv0Patterns (fuel : Nat) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (List PsSyntaxPattern)) := do
@@ -116,6 +181,64 @@ def psPscv0Discriminants (read : PsPscv0TermReader) (fuel : Nat) (cursor : PsTok
       return { value := value.value :: rest.value, cursor := rest.cursor }
     return { value := [value.value], cursor := value.cursor }
 
+-- Every alternative pattern list keeps its own source binder scope.
+def psPscv0AlternativePatterns (fuel : Nat) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult (List (List PsSyntaxPattern))) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let patterns ← psPscv0Patterns fuel cursor
+    if psTokenCursorAtText patterns.cursor "|" then
+      let bar ← psTokenCursorExpectText patterns.cursor "|"
+      let rest ← psPscv0AlternativePatterns fuel bar.cursor
+      return { value := patterns.value :: rest.value, cursor := rest.cursor }
+    return { value := [patterns.value], cursor := patterns.cursor }
+
+def psPscv0MatchGeneralizing (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult (Option Bool)) := do
+  let starts := match cursor.remaining with
+    | opening :: name :: _ => opening.text == "(" && name.text == "generalizing"
+    | _ => false
+  if !starts then return { value := none, cursor }
+  let opening ← psTokenCursorExpectText cursor "("
+  let name ← psTokenCursorExpectText opening.cursor "generalizing"
+  let assign ← psTokenCursorExpectText name.cursor ":="
+  let some token := psTokenCursorPeek assign.cursor |
+    throw (.unexpectedEnd "true or false")
+  if token.text != "true" && token.text != "false" then
+    throw (psProofScriptExpectedError "true or false" assign.cursor)
+  let flag ← psTokenCursorExpectText assign.cursor token.text
+  let close ← psTokenCursorExpectText flag.cursor ")"
+  return { value := some (token.text == "true"), cursor := close.cursor }
+
+def psPscv0MatchEquationName (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult (Option PsSyntaxName)) := do
+  match psParseSyntaxNameWith true cursor with
+  | .ok name =>
+    if psTokenCursorAtText name.cursor ":" then
+      let colon ← psTokenCursorExpectText name.cursor ":"
+      return { value := some name.value, cursor := colon.cursor }
+    return { value := none, cursor }
+  | .error .fuelExhausted => throw .fuelExhausted
+  | .error _ => return { value := none, cursor }
+
+def psPscv0MatchDiscriminants (read : PsPscv0TermReader) (fuel : Nat)
+    (cursor : PsTokenCursor) :
+    Except PsParseError
+      (PsParseResult (List (PsSyntaxMatchDiscriminant PsSyntaxTerm))) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let name ← psPscv0MatchEquationName cursor
+    let value ← read name.cursor
+    let discriminant : PsSyntaxMatchDiscriminant PsSyntaxTerm :=
+      { term := value.value, equationName? := name.value }
+    if psTokenCursorAtText value.cursor "," then
+      let comma ← psTokenCursorExpectText value.cursor ","
+      let rest ← psPscv0MatchDiscriminants read fuel comma.cursor
+      return { value := discriminant :: rest.value, cursor := rest.cursor }
+    return { value := [discriminant], cursor := value.cursor }
+
 def psPscv0MatchRows (read : PsPscv0TermReader) (fuel : Nat) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))) := do
   match fuel with
@@ -123,29 +246,31 @@ def psPscv0MatchRows (read : PsPscv0TermReader) (fuel : Nat) (cursor : PsTokenCu
   | fuel + 1 =>
     if psTokenCursorAtText cursor "}" then return { value := [], cursor }
     let bar ← psTokenCursorExpectText cursor "|"
-    let patterns ← psPscv0Patterns fuel bar.cursor
+    let patterns ← psPscv0AlternativePatterns fuel bar.cursor
     let arrow ← psTokenCursorExpectText patterns.cursor "=>"
     let body ← read arrow.cursor
     let rest ← psPscv0MatchRows read fuel body.cursor
     return {
-      value := (patterns.value, body.value,
-        psSyntaxSpanJoin bar.token.span (psSyntaxTermSpan body.value)) :: rest.value
+      value := patterns.value.map (fun row => (row, body.value,
+        psSyntaxSpanJoin bar.token.span (psSyntaxTermSpan body.value))) ++ rest.value
       cursor := rest.cursor }
 
 def psPscv0ReadMatch (read : PsPscv0TermReader) (fuel : Nat) (impossible : Bool)
     (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
   let some keyword := psTokenCursorAdvance cursor | throw (.unexpectedEnd "match")
-  let inputs ← psPscv0Discriminants read fuel keyword.cursor
   if impossible then
+    let inputs ← psPscv0Discriminants read fuel keyword.cursor
     let some last := inputs.value.getLast? | throw (.unexpectedEnd "nomatch discriminant")
-    return { value := .matchMany inputs.value []
+    return { value := .matchMany (inputs.value.map fun term => { term }) [] none
                (psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan last))
              cursor := inputs.cursor }
+  let generalization ← psPscv0MatchGeneralizing keyword.cursor
+  let inputs ← psPscv0MatchDiscriminants read fuel generalization.cursor
   let withToken ← psTokenCursorExpectText inputs.cursor "with"
   let opening ← psTokenCursorExpectText withToken.cursor "{"
   let rows ← psPscv0MatchRows read fuel opening.cursor
   let close ← psTokenCursorExpectText rows.cursor "}"
-  return { value := .matchMany inputs.value rows.value
+  return { value := .matchMany inputs.value rows.value generalization.value
              (psSyntaxSpanJoin keyword.token.span close.token.span)
            cursor := close.cursor }
 

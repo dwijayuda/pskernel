@@ -1,8 +1,30 @@
 import Ps.Foundation.Source
+import Ps.Foundation.Name
 
-structure PsSyntaxName where
+-- Declaration-local universe binders retain source components and spans only.
+-- They cannot carry an already-resolved internal Core identity.
+structure PsSyntaxUniverseBinder where
   segments : List String
   span : PsSourceSpan
+  escaped : Bool := false
+
+structure PsSyntaxName where
+  name ::
+  segments : List String
+  span : PsSourceSpan
+  -- Lexical quoting determines whether a keyword/underscore is an identifier.
+  escaped : Bool := false
+  -- Only the scope owner supplies an actual checked internal alias identity.
+  -- Source readers never construct this field.
+  resolvedName : Option PsName := none
+  -- Only a declaration head owns the optional nonempty .{u, v} suffix.
+  universeBinders : List PsSyntaxUniverseBinder := []
+
+def PsSyntaxName.mk (segments : List String) (span : PsSourceSpan) : PsSyntaxName :=
+  .name segments span false none []
+
+def psSyntaxNameIsAnonymous (name : PsSyntaxName) : Bool :=
+  !name.escaped && name.segments == ["_"]
 
 inductive PsSyntaxBinderKind where
   | explicit
@@ -46,7 +68,7 @@ def psSyntaxBinderSelectNames (head : PsSyntaxBinderHead)
 
 def psSyntaxAnonymousInstanceBinder (head : PsSyntaxBinderHead) : Bool :=
   match head.kind, head.name.segments with
-  | .instanceImplicit, [name] => head.moreNames.isEmpty && name.startsWith "$psc0Inst"
+  | .instanceImplicit, [name] => !head.name.escaped && head.moreNames.isEmpty && name.startsWith "$psc0Inst"
   | _, _ => false
 
 inductive PsSyntaxPattern where
@@ -55,37 +77,45 @@ inductive PsSyntaxPattern where
   | wildcard (span : PsSourceSpan)
   | variable (name : PsSyntaxName)
   | ctor (name : PsSyntaxName) (fields : List PsSyntaxPattern) (span : PsSourceSpan)
+  -- Preserve native dot-head preprocessing; it cannot be recovered from a name.
+  | dotCtor (name : PsSyntaxName) (fields : List PsSyntaxPattern) (span : PsSourceSpan)
+  -- Internal scope metadata for an ordinary term in a constructor parameter
+  -- position. The selected parser does not add a new surface pattern form.
+  | inaccessible (pattern : PsSyntaxPattern)
 
 -- Construction helper for existing flat parser clients; the stored tree is
 -- uniformly recursive.
 def PsSyntaxPattern.constructor (name : PsSyntaxName) (binders : List PsSyntaxName)
     (span : PsSourceSpan) : PsSyntaxPattern :=
   .ctor name (binders.map fun name =>
-    if name.segments == ["_"] then .wildcard name.span else .variable name) span
+    if psSyntaxNameIsAnonymous name then .wildcard name.span else .variable name) span
 
 def psSyntaxPatternNames (fuel : Nat) (pattern : PsSyntaxPattern) : List PsSyntaxName :=
   match fuel with
   | 0 => []
   | fuel + 1 => match pattern with
     | .variable name => [name]
-    | .ctor _ fields _ => fields.flatMap (psSyntaxPatternNames fuel)
+    | .ctor _ fields _ | .dotCtor _ fields _ => fields.flatMap (psSyntaxPatternNames fuel)
     | _ => []
 
 -- Universe syntax has its own category; its names are never term variables.
 inductive PsSyntaxLevel where
   | number (value : Nat)
   | name (value : String)
+  | qualifiedName (segments : List String)
   | hole
   | offset (base : PsSyntaxLevel) (amount : Nat)
   | max (left right : PsSyntaxLevel)
   | imax (left right : PsSyntaxLevel)
 
 structure PsSyntaxProofScope where
+  -- Internal exporting scope, supplied by the command owner; not source syntax.
+  abstractProofs : Bool := false
   namePrefix : List String := []
   opened : List (List String) := []
   -- Module-owned private names are resolved within tactic terms, never
   -- serialized as public names or made visible to external importers.
-  privateAliases : List (List String × List String) := []
+  privateAliases : List (List String × PsName) := []
   -- Delayed proof terms resolve a mutual peer to its checked local alias,
   -- which already supplies the common captured telescope with all binder kinds.
   mutualAliases : List (List String × List String) := []
@@ -99,10 +129,30 @@ inductive PsSyntaxOperatorKind where
   | unary | binary | rightAction | relation | booleanRelation
   deriving BEq
 
+structure PsSyntaxMatchDiscriminant (α : Type) where
+  term : α
+  equationName? : Option PsSyntaxName := none
+
+def psSyntaxMatchEquationNames {α : Type}
+    (discriminants : List (PsSyntaxMatchDiscriminant α)) : List PsSyntaxName :=
+  discriminants.filterMap fun discriminant =>
+    discriminant.equationName?.filter fun name => !psSyntaxNameIsAnonymous name
+
+-- Proof locations retain their checked term spelling until the goal supplies
+-- its actual local scope. A target marker is independent of written hypotheses.
+inductive PsSyntaxProofLocation (α : Type) where
+  | targets (hypotheses : List α) (target : Bool)
+  | all
+
+def psSyntaxProofLocationTerms {α : Type} : PsSyntaxProofLocation α → List α
+  | .targets hypotheses _ => hypotheses
+  | .all => []
+
 mutual
 inductive PsSyntaxTerm where
   | doE (items : List PsSyntaxDoItem) (span : PsSourceSpan)
   | byE (tactics : List PsSyntaxTactic) (scope : PsSyntaxProofScope) (span : PsSourceSpan)
+  | calcE (steps : List (PsSyntaxTerm × PsSyntaxTerm)) (span : PsSourceSpan)
   | sortE (isType : Bool) (level : PsSyntaxLevel) (span : PsSourceSpan)
   | reference (name : PsSyntaxName)
   | hole (span : PsSourceSpan)
@@ -152,8 +202,9 @@ inductive PsSyntaxTerm where
       (elseBranch : PsSyntaxTerm)
       (span : PsSourceSpan)
   | matchMany
-      (scrutinees : List PsSyntaxTerm)
+      (discriminants : List (PsSyntaxMatchDiscriminant PsSyntaxTerm))
       (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+      (generalizing? : Option Bool)
       (span : PsSourceSpan)
 
 -- Do is source control syntax. Effect selection belongs to typed elaboration.
@@ -167,22 +218,54 @@ inductive PsSyntaxDoItem where
   | conditionalPattern (pattern : PsSyntaxPattern) (value : PsSyntaxTerm)
       (yes no : List PsSyntaxDoItem) (span : PsSourceSpan)
 
+-- Recursive-elimination grouping is independent of expression patterns.
+inductive PsSyntaxRCasesPattern where
+  | one (name : PsSyntaxName)
+  | clear (span : PsSourceSpan)
+  | explicit (pattern : PsSyntaxRCasesPattern) (span : PsSourceSpan)
+  | typed (pattern : PsSyntaxRCasesPattern) (type : PsSyntaxTerm) (span : PsSourceSpan)
+  | tuple (patterns : List PsSyntaxRCasesPattern) (span : PsSourceSpan)
+  | alternatives (patterns : List PsSyntaxRCasesPattern) (span : PsSourceSpan)
+  | paren (pattern : PsSyntaxRCasesPattern) (span : PsSourceSpan)
+
+inductive PsSyntaxRIntroPattern where
+  | pattern (value : PsSyntaxRCasesPattern)
+  | group (patterns : List PsSyntaxRIntroPattern) (type : Option PsSyntaxTerm)
+      (span : PsSourceSpan)
+
 inductive PsSyntaxTactic where
   | exactE (value : PsSyntaxTerm) (refine : Bool) (span : PsSourceSpan)
   | applyE (value : PsSyntaxTerm) (span : PsSourceSpan)
+  | rewriteE (rules : List (PsSyntaxTerm × Bool))
+      (location : PsSyntaxProofLocation PsSyntaxTerm) (close : Bool) (span : PsSourceSpan)
   | localE (name : PsSyntaxName) (type : Option PsSyntaxTerm) (value : PsSyntaxTerm)
       (reducible : Bool) (span : PsSourceSpan)
   | change (type : PsSyntaxTerm) (select : Bool) (span : PsSourceSpan)
   | eliminate (value : PsSyntaxTerm) (induction : Bool) (span : PsSourceSpan)
+  | rcasesE (targets : List (PsSyntaxMatchDiscriminant PsSyntaxTerm))
+      (pattern : Option PsSyntaxRCasesPattern) (span : PsSourceSpan)
+  | rintroE (patterns : List PsSyntaxRIntroPattern) (type : Option PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | obtainE (pattern : Option PsSyntaxRCasesPattern) (type : Option PsSyntaxTerm)
+      (values : Option (List PsSyntaxTerm)) (span : PsSourceSpan)
+  | byCases (name : Option PsSyntaxName) (proposition : PsSyntaxTerm) (span : PsSourceSpan)
+  | exfalso (span : PsSourceSpan)
+  | decide (span : PsSourceSpan)
+  | extE (patterns : List PsSyntaxRIntroPattern) (depth : Nat) (span : PsSourceSpan)
   | caseE (tag : Option PsSyntaxName) (names : List PsSyntaxName)
       (body : List PsSyntaxTactic) (span : PsSourceSpan)
   | intro (names : List PsSyntaxName) (span : PsSourceSpan)
+  | intros (names : List PsSyntaxName) (span : PsSourceSpan)
+  | suffices (name : PsSyntaxName) (type value : PsSyntaxTerm) (span : PsSourceSpan)
+  | classicalE (body : List PsSyntaxTactic) (span : PsSourceSpan)
+  | calcE (steps : List (PsSyntaxTerm × PsSyntaxTerm)) (span : PsSourceSpan)
   | assumption (span : PsSourceSpan)
   -- Compiler-generated index side-condition solver. It never introduces
   -- axioms, guesses inequalities or leaves unsolved proof metavariables.
   | indexValidity (span : PsSourceSpan)
   | reflexivity (span : PsSourceSpan)
   | constructor (span : PsSourceSpan)
+  | constructorFirst (span : PsSourceSpan)
   | focus (body : List PsSyntaxTactic) (mustClose : Bool) (span : PsSourceSpan)
   | each (body : List PsSyntaxTactic) (any : Bool) (span : PsSourceSpan)
 end
@@ -200,20 +283,79 @@ def psSyntaxDoSpan : PsSyntaxDoItem → PsSourceSpan
   | .binding _ _ _ _ span | .action _ span | .returnValue _ span
   | .conditional _ _ _ _ span | .conditionalPattern _ _ _ _ span => span
 
+def psSyntaxRCasesPatternSpan : PsSyntaxRCasesPattern → PsSourceSpan
+  | .one name => name.span
+  | .clear span | .explicit _ span | .typed _ _ span | .tuple _ span
+  | .alternatives _ span | .paren _ span => span
+
+def psSyntaxRCasesPatternNames (fuel : Nat) (pattern : PsSyntaxRCasesPattern) :
+    List PsSyntaxName :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match pattern with
+    | .one name =>
+      if name.segments == ["_"] || name.segments == ["rfl"] then [] else [name]
+    | .explicit value _ | .typed value _ _ | .paren value _ =>
+      psSyntaxRCasesPatternNames fuel value
+    | .tuple values _ | .alternatives values _ =>
+      values.flatMap (psSyntaxRCasesPatternNames fuel)
+    | .clear _ => []
+
+def psSyntaxRCasesPatternTerms (fuel : Nat) (pattern : PsSyntaxRCasesPattern) :
+    List PsSyntaxTerm :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match pattern with
+    | .typed value type _ => type :: psSyntaxRCasesPatternTerms fuel value
+    | .explicit value _ | .paren value _ => psSyntaxRCasesPatternTerms fuel value
+    | .tuple values _ | .alternatives values _ =>
+      values.flatMap (psSyntaxRCasesPatternTerms fuel)
+    | _ => []
+
+def psSyntaxRIntroPatternNames (fuel : Nat) (pattern : PsSyntaxRIntroPattern) :
+    List PsSyntaxName :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match pattern with
+    | .pattern value => psSyntaxRCasesPatternNames fuel value
+    | .group values _ _ => values.flatMap (psSyntaxRIntroPatternNames fuel)
+
+def psSyntaxRIntroPatternTerms (fuel : Nat) (pattern : PsSyntaxRIntroPattern) :
+    List PsSyntaxTerm :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match pattern with
+    | .pattern value => psSyntaxRCasesPatternTerms fuel value
+    | .group values type _ => type.toList ++
+      values.flatMap (psSyntaxRIntroPatternTerms fuel)
+
 def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTerm :=
   match fuel with
   | 0 => []
   | fuel + 1 => match tactic with
     | .exactE value _ _ | .applyE value _ | .change value _ _ | .eliminate value _ _ => [value]
+    | .rcasesE targets pattern _ => targets.map (·.term) ++
+      pattern.toList.flatMap (psSyntaxRCasesPatternTerms fuel)
+    | .rintroE patterns type _ => type.toList ++
+      patterns.flatMap (psSyntaxRIntroPatternTerms fuel)
+    | .obtainE pattern type values _ => type.toList ++ values.toList.flatten ++
+      pattern.toList.flatMap (psSyntaxRCasesPatternTerms fuel)
+    | .byCases _ proposition _ => [proposition]
+    | .rewriteE rules location _ _ => rules.map Prod.fst ++ psSyntaxProofLocationTerms location
+    | .extE patterns _ _ => patterns.flatMap (psSyntaxRIntroPatternTerms fuel)
     | .localE _ type value _ _ => type.toList ++ [value]
-    | .focus body _ _ | .each body _ _ | .caseE _ _ body _ => body.flatMap (psSyntaxTacticTerms fuel)
+    | .suffices _ type value _ => [type, value]
+    | .calcE steps _ => steps.flatMap (fun (type, value) => [type, value])
+    | .focus body _ _ | .each body _ _ | .caseE _ _ body _ | .classicalE body _ =>
+      body.flatMap (psSyntaxTacticTerms fuel)
     | _ => []
 
 -- Single-scrutinee clients construct the same matrix representation.
 def PsSyntaxTerm.matchE (scrutinee : PsSyntaxTerm)
     (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
     (span : PsSourceSpan) : PsSyntaxTerm :=
-  .matchMany [scrutinee] (alternatives.map fun (pattern, body, span) => ([pattern], body, span)) span
+  .matchMany [{ term := scrutinee }]
+    (alternatives.map fun (pattern, body, span) => ([pattern], body, span)) none span
 
 def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan :=
   { start := start.start, stop := stop.stop }
@@ -221,6 +363,7 @@ def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan
 def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .doE _ span => span
   | .byE _ _ span => span
+  | .calcE _ span => span
   | .sortE _ _ span => span
   | .hole span => span
   | .omittedType span => span
@@ -241,13 +384,14 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .forallE _ _ span => span
   | .letE _ _ _ _ span | .haveE _ _ _ _ span => span
   | .ifE _ _ _ _ span => span
-  | .matchMany _ _ span => span
+  | .matchMany _ _ _ span => span
 
 def psSyntaxPatternSpan : PsSyntaxPattern -> PsSourceSpan
   | .natural _ span => span
   | .bool _ span => span
   | .wildcard span => span
-  | .ctor _ _ span => span
+  | .ctor _ _ span | .dotCtor _ _ span => span
+  | .inaccessible pattern => psSyntaxPatternSpan pattern
   | .variable name => name.span
 
 structure PsSyntaxInductiveConstructor where
@@ -362,20 +506,38 @@ inductive PsSyntaxRegistration where
   | instanceDecl (priority : Nat)
   | defaultInstanceDecl (priority : Nat) (ordinaryPriority : Option Nat)
 
+-- Only this fixed source attribute roster may mutate declaration registries.
+inductive PsSyntaxAttribute where
+  | simpAttribute
+  | instanceAttribute
+  | defaultInstanceAttribute (priority : Nat)
+
 -- A source mutual block keeps ordered declaration and modifier ownership.
 -- It is not flattened into sequential commands or a mutual-inductive group.
 structure PsSyntaxMutualMember where
   declaration : PsSyntaxDeclaration
   isPrivate : Bool := false
   registration : Option PsSyntaxRegistration := none
+  attributes : List PsSyntaxAttribute := []
+
+inductive PsSyntaxInspection where
+  | checkTerm (term : PsSyntaxTerm)
+  | printDeclaration (name : PsSyntaxName) (axioms : Bool)
+  | reduceTerm (term : PsSyntaxTerm)
+  | evalTerm (term : PsSyntaxTerm)
 
 inductive PsSyntaxCommand where
+  | inspectionCmd (command : PsSyntaxInspection) (span : PsSourceSpan)
   | universeCmd (names : List PsSyntaxName) (span : PsSourceSpan)
   | registeredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
   | declaration (value : PsSyntaxDeclaration)
   -- Modifier ownership stays in command syntax; data/term ASTs are unchanged.
   | privateDeclaration (value : PsSyntaxDeclaration)
   | privateRegisteredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
+  | attributedDeclaration (value : PsSyntaxDeclaration) (registration : Option PsSyntaxRegistration)
+      (isPrivate : Bool) (attributes : List PsSyntaxAttribute)
+  | attributedDerivingDeclaration (value : PsSyntaxDeclaration) (handlers : List PsSyntaxName)
+      (isPrivate : Bool) (attributes : List PsSyntaxAttribute)
   -- A trailing allowlisted deriving clause belongs to its defining data
   -- command, not to a second unconstrained source macro or derived type AST.
   | derivingDeclaration (value : PsSyntaxDeclaration) (handlers : List PsSyntaxName)
@@ -392,4 +554,7 @@ inductive PsSyntaxCommand where
 structure PsSyntaxProgram where
   imports : List PsSyntaxImport
   commands : List PsSyntaxCommand
+  -- Derived by the selected reader: PS is implicitly module-mode, while
+  -- native Lean retains the presence or absence of its leading module header.
+  isModule : Bool := false
 

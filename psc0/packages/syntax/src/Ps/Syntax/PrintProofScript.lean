@@ -169,6 +169,7 @@ def psPrintProofScriptTermWithFuel
       | .doE items _ => do
           let body ← psPrintDoItems true smaller 4096 items
           return "do {\n  " ++ body.replace "\n" "\n  " ++ "\n}"
+      | .calcE steps _ => psPrintCalc smaller remaining steps
       | .byE tactics _ _ => do
           let body ← psPrintTactics smaller 4096 tactics
           return "by {\n  " ++ body.replace "\n" "\n  " ++ "\n}"
@@ -317,38 +318,32 @@ def psPrintProofScriptTermWithFuel
                               " := "
                               (psPrintProofScriptGroupedTerm value printedValue)
                               (psPrintProofScriptConcat2 "\n" printedBody))
-      | .ifE proofName condition thenBranch elseBranch _ =>
-          match
-              smaller condition with
-          | Except.error error => Except.error error
-          | Except.ok printedCondition =>
-              match
-                  smaller thenBranch with
-              | Except.error error => Except.error error
-              | Except.ok printedThen =>
-                  match
-                      smaller elseBranch with
-                  | Except.error error => Except.error error
-                  | Except.ok printedElse =>
-                      Except.ok
-                        (psPrintProofScriptConcat6
-                          "if ("
-                          ((match proofName with
-                            | none => ""
-                            | some name => String.intercalate "." name.segments ++ " : ") ++ printedCondition)
-                          ") { "
-                          printedThen
-                          " } else { "
-                          (psPrintProofScriptConcat2 printedElse " }"))
-      | .matchMany scrutinees alternatives _ => do
-          let scrutinees ← scrutinees.mapM smaller
-          let discriminants := String.intercalate ", " scrutinees
+      | .ifE proofName condition thenBranch elseBranch _ => do
+          let printedCondition ← smaller condition
+          let printedThen ← smaller thenBranch
+          let printedElse ← smaller elseBranch
+          let proofPrefix ← match proofName with
+            | none => pure ""
+            | some name => return (← psPrintSyntaxName name) ++ " : "
+          return "if (" ++ proofPrefix ++ printedCondition ++ ") { " ++ printedThen ++ " } else { " ++ printedElse ++ " }"
+      | .matchMany discriminants alternatives generalizing? _ => do
+          let plain := generalizing?.isNone &&
+            discriminants.all (fun discriminant => discriminant.equationName?.isNone)
+          let printed ← discriminants.mapM fun discriminant => do
+            let term ← smaller discriminant.term
+            match discriminant.equationName? with
+            | none => return term
+            | some name => return (← psPrintSyntaxName name) ++ " : " ++ term
+          let discriminants := String.intercalate ", " printed
+          let configuration := match generalizing? with
+            | none => ""
+            | some flag => "(generalizing := " ++ (if flag then "true" else "false") ++ ") "
           let alternatives ← alternatives.mapM fun (patterns, body, _) => do
             let patterns ← patterns.mapM psPrintPattern
             let body ← smaller body
             return "  | " ++ String.intercalate ", " patterns ++ " => " ++ body
-          if alternatives.isEmpty then return "nomatch " ++ discriminants
-          return "match " ++ discriminants ++ " with {\n" ++ String.intercalate "\n" alternatives ++ "\n}"
+          if alternatives.isEmpty && plain then return "nomatch " ++ discriminants
+          return "match " ++ configuration ++ discriminants ++ " with {\n" ++ String.intercalate "\n" alternatives ++ "\n}"
 
 def psPrintProofScriptTerm
     (term : PsSyntaxTerm) :
@@ -575,7 +570,7 @@ def psPrintProofScriptDeclaration
         | .fixedpointDefinition .. => pure "\npartial_fixpoint"
         | .wellFoundedDefinition _ _ _ _ termination _ => psPrintProofScriptTermination termination
         | _ => pure ""
-      let printedName ← psPrintSyntaxName name
+      let printedName ← psPrintDeclarationName name
       let printedBinders ← psPrintProofScriptDeclarationBinders binders
       let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
       let printedValue ← psPrintProofScriptTerm value
@@ -585,14 +580,14 @@ def psPrintProofScriptDeclaration
       return declarationPrefix ++ printedName ++ printedBinders ++
         annotation ++ " := " ++ printedValue ++ suffix
   | .partialDefinition name binders type value _ => do
-      let printedName ← psPrintSyntaxName name
+      let printedName ← psPrintDeclarationName name
       let printedBinders ← psPrintProofScriptDeclarationBinders binders
       let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
       let printedValue ← psPrintProofScriptTerm value
       return "partial def " ++ printedName ++ printedBinders ++
         annotation ++ " := " ++ printedValue
   | .theoremDecl name binders type value _ =>
-      match psPrintSyntaxName name with
+      match psPrintDeclarationName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
           let printedBindersResult :
@@ -616,7 +611,7 @@ def psPrintProofScriptDeclaration
                           printedType
                           (psPrintProofScriptConcat2 " := " printedValue))
   | .inductiveDecl name params resultType constructors _ =>
-      match psPrintSyntaxName name with
+      match psPrintDeclarationName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
           let printedParamsResult :
@@ -656,7 +651,7 @@ def psPrintProofScriptDeclaration
                             (psPrintJoin "\n" printedConstructors)
                             "\n}"))
   | .structureDecl name params result fields _ => do
-      let name ← psPrintSyntaxName name
+      let name ← psPrintDeclarationName name
       let params ← psPrintProofScriptDeclarationBinders params
       let result ← match result with
         | none => pure ""

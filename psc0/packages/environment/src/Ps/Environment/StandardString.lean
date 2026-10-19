@@ -5,13 +5,10 @@ Author: Leonardo de Moura. Apache-2.0; see psc0/THIRD_PARTY_NOTICES.md.
 Modified: portable Core definitions and an input-bounded total string traversal.
 -/
 import Ps.Environment.StandardNatOrder
+import Ps.Environment.ReprExpr
 
 -- The pinned quoting rules are definitions over the existing audited Unicode
 -- operations. They add no string primitive or formatting axiom.
-def psStandardStringIf (type condition yes no : PsExpr) : PsExpr :=
-  psLogicApply (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
-    [psLogicLam 90 "_" (.constE psBoolName []) type, no, yes, condition]
-
 def psStandardHexDigit (n : PsExpr) : PsExpr :=
   let code := psStandardStringIf psOrderNat
     (psOrderCall "Nat.ble" [n, .lit (.natural 9)])

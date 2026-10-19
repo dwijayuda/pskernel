@@ -12,7 +12,7 @@ require proofscriptSelfhost from ".."
 lean_lib PsKernelLean where
   srcDir := "../packages/pskernel-lean/provider"
   roots := #[`PsKernelLean.Error, `PsKernelLean.Convert,
-    `PsKernelLean.Protocol, `PsKernelLean.Prelude, `PsKernelLean.Admission]
+    `PsKernelLean.Protocol, `PsKernelLean.Prelude, `PsKernelLean.Replay, `PsKernelLean.Admission]
 
 lean_lib PsV7Host where
   srcDir := "../host/src"
@@ -34,6 +34,11 @@ lean_lib PsV7PlatformChecks where
   roots := #[`Pscv0PlatformTests]
 
 -- Shared typed-predefinition evidence invoked by the structural fixture.
+-- Shared source/native proof-command qualification invoked by CoreMatches.
+lean_lib PsV7CoreProofChecks where
+  srcDir := "../test"
+  roots := #[`CoreProofCommands]
+
 lean_lib PsV7M3PreDefinitionChecks where
   srcDir := "../test"
   roots := #[`Pscv0M3PreDefinitions]
@@ -157,3 +162,78 @@ lean_exe pscv0_m3_mutual_well_founded_export where
 lean_exe pscv0_m3_mutual_packing where
   srcDir := "../test"
   root := `Pscv0M3MutualPacking
+
+-- Independent Core-first seam checks; no selected Core profile is implied.
+lean_exe pscv0_core_seams where
+  srcDir := "../test"
+  root := `Pscv0CoreSeams
+
+lean_exe pscv0_core_environment_export where
+  srcDir := "../scripts"
+  root := `Pscv0CoreEnvironmentExport
+  supportInterpreter := true
+
+lean_exe pscv0_core_engine_seams where
+  srcDir := "../test"
+  root := `Pscv0CoreEngineSeams
+
+lean_exe pscv0_core_selected where
+  srcDir := "../test"
+  root := `Pscv0CoreSelected
+
+lean_exe pscv0_core_native_closure where
+  srcDir := "../scripts"
+  root := `Pscv0CoreNativeClosure
+  supportInterpreter := true
+
+lean_exe pscv0_core_native_seed_checks where
+  srcDir := "../scripts"
+  root := `Pscv0CoreNativeSeedChecks
+  supportInterpreter := true
+
+-- The replay target has no Full environment or authoring dependency.
+lean_exe pscv0_bootstrap_replay where
+  srcDir := "../test"
+  root := `Pscv0BootstrapReplay
+  supportInterpreter := true
+
+-- Literal Full comparison remains a separate host audit.
+lean_exe pscv0_bootstrap_compatibility where
+  srcDir := "../test"
+  root := `Pscv0BootstrapCompatibility
+  supportInterpreter := true
+
+-- Selected project preparation over an independently checked caller context.
+lean_exe pscv0_core_project where
+  srcDir := "../test"
+  root := `Pscv0CoreProject
+
+-- Complete compiler-owned sources, selected and admitted against the candidate.
+lean_exe pscv0_core_compiler_source where
+  srcDir := "../test"
+  root := `Pscv0CoreCompilerSource
+
+-- Paired Core language eliminations over the independently replayed Foundation.
+lean_exe pscv0_core_elimination where
+  srcDir := "../test"
+  root := `Pscv0CoreElimination
+
+-- Selected pattern syntax, kernel equations and native runtime oracle.
+lean_exe pscv0_core_patterns where
+  srcDir := "../test"
+  root := `Pscv0CorePatterns
+
+-- Checked source-match rows, dependent refinement and total recursion parity.
+-- Recursive elimination, source scopes and independent K0 value witnesses.
+lean_exe pscv0_core_rcases where
+  srcDir := "../test"
+  root := `Pscv0CoreRCases
+
+lean_exe pscv0_core_matches where
+  srcDir := "../test"
+  root := `Pscv0CoreMatches
+
+-- Read-only source commands, native message oracle and host provenance.
+lean_exe pscv0_core_inspection where
+  srcDir := "../test"
+  root := `Pscv0CoreInspection

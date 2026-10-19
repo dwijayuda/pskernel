@@ -73,7 +73,7 @@ def psPscv0DoStatement (read annotation : PsPscv0TermReader) (fuel : Nat)
             | some next =>
               if psTokenKindEq next.token.kind .identifier && psTokenCursorAtText next.cursor ":" then do
                 let colon ← psTokenCursorExpectText next.cursor ":"
-                pure (some (PsSyntaxName.mk [next.token.text] next.token.span), colon.cursor)
+                pure (some ((psSyntaxNameFromToken next.token)), colon.cursor)
               else pure (none, opening.cursor)
             | none => pure (none, opening.cursor)
           let value ← read cursor

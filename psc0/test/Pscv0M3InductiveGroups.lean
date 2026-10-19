@@ -218,7 +218,7 @@ private def expectIotaRefusal (declarations : List PsDeclaration) (probe : PsExp
 private def expectDataRefusal (text expected : String) : IO Unit := do
   match elaborate text with
   | .ok _ => throw (IO.userError ("unexpected group acceptance: " ++ expected))
-  | .error message => ensure (message.contains expected) ("wrong group refusal: " ++ message)
+  | .error message => ensure (message.contains expected) ("wrong group refusal; expected " ++ expected ++ ": " ++ message ++ "\nsource:\n" ++ text)
 
 private def expectCodecRefusal (declarations : List PsDeclaration) : IO Unit := do
   match psEncodeCheckedAdmissionsCanonical declarations with
@@ -283,10 +283,10 @@ def main : IO Unit := do
     "constructor parameters must remain uniform"
   expectDataRefusal
     "inductive P where { | bad(next: Q -> Nat) }\ninductive Q where { | good }\n"
-    "unsupported recursive field"
+    "recursive family occurs in a function-field domain"
   expectDataRefusal
     "inductive P where { | nested(next: List(Q -> Nat)) }\ninductive Q where { | good }\n"
-    "unsupported recursive field"
+    "recursive family occurs in a function-field domain"
 
   let some first := group.declarations.head? | throw (IO.userError "missing group head")
   expectCodecRefusal (group.declarations ++ [first])

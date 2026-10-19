@@ -35,23 +35,23 @@ def psPscv0FindBlock (blocks : List PsPscv0DoBlock) (offset : Nat) : Option PsPs
 def psPscv0BodyBlock (blocks : List PsPscv0DoBlock) (value : PsSyntaxTerm) : Option PsPscv0DoBlock :=
   match value with
   | .reference name =>
-      if psStringEq (psPscv0NameText name) psPscv0DoSlot then psPscv0FindBlock blocks name.span.start.byteOffset
+      if name.segments == [psPscv0DoSlot] then psPscv0FindBlock blocks name.span.start.byteOffset
       else Option.none
   | _ => Option.none
 
 def psPscv0ExceptType (type : PsSyntaxTerm) : Bool :=
   match type with
   | .call (.reference name) args _ =>
-      psStringEq (psPscv0NameText name) "Except" && args.length == 2 && args.all (fun a => a.fst.isNone)
+      name.segments == ["Except"] && args.length == 2 && args.all (fun a => a.fst.isNone)
   | .app fn args _ =>
       match fn with
       | .reference name =>
-          if psStringEq (psPscv0NameText name) "Except" then Nat.beq (psListLength args) 2 else false
+          if name.segments == ["Except"] then Nat.beq (psListLength args) 2 else false
       | _ => false
   | _ => false
 
 def psPscv0BinderShadowsExcept (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : Bool :=
-  (psSyntaxBinderNames binder.fst).any (fun name => psStringEq (psPscv0NameText name) "Except")
+  (psSyntaxBinderNames binder.fst).any (fun name => name.segments == ["Except"])
 def psPscv0BinderType (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : PsSyntaxTerm := binder.snd
 
 def psPscv0ConstructorTerms (constructor : PsSyntaxInductiveConstructor) : List PsSyntaxTerm :=
@@ -227,6 +227,8 @@ def psPscv0ParseProgram (source : String) : Except String PsSyntaxProgram := do
     match command with
     | .declaration declaration | .registeredDeclaration declaration _
     | .privateDeclaration declaration | .privateRegisteredDeclaration declaration _
+    | .attributedDeclaration declaration _ _ _
+    | .attributedDerivingDeclaration declaration _ _ _
     | .derivingDeclaration declaration _ _ =>
       -- Partial strategy is retained by the AST; executable admission belongs
       -- to elaboration/model preparation, not a historical blanket parse ban.
@@ -274,7 +276,9 @@ def psPscv0PrintResultAnnotation (proofScript : Bool) (type : PsSyntaxTerm) : Ex
 def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
     (surface : PsPscv0SurfaceDeclaration) : Except String String :=
   match surface.declaration with
-  | .definition name binders type value _ =>
+  | .definition name binders type value _ => do
+      let name ← (psPrintDeclarationName name).mapError
+        (fun _ => "PSCV0-DECLARATION-NAME-PRINT-UNSUPPORTED")
       match psPscv0PrintBinders proofScript binders with
       | Except.error error => Except.error error
       | Except.ok parameters =>
@@ -289,7 +293,7 @@ def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
               | Except.error error => Except.error error
               | Except.ok expression =>
                   let keyword := if proofScript then surface.keyword else "def";
-                  Except.ok (psPscv0Cat [keyword, " ", psPscv0NameText name,
+                  Except.ok (psPscv0Cat [keyword, " ", name,
                     parameters, resultType, " := ", expression])
   | _ =>
       let printed : Except PsSourcePrintError String :=

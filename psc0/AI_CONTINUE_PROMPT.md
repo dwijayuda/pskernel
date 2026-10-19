@@ -1,181 +1,95 @@
-# Continue PSC0 v7.2 — Complete M3+B
+# Continue PSC0 Core language M1–M5, then selfhost
 
-Continue implementation autonomously using repository truth. First read
-AI_WORK_STATE.md, the canonical PSCV0_LANGUAGE_REFERENCE_v7.2.md, the existing
-roadmap and docs/PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md.
-Reconcile current refs, complete CI job steps/logs/artifacts and the unmerged
-draft PR109 before writes. Do not restart completed work or cancel healthy CI.
+Continue authorized open-source compiler correctness and formal-verification work in `dwijayuda/pskernel`. **Complete Core language/compiler M1–M5 first; selfhost is the final phase.** Execute useful implementation and qualification, using existing shared owners and evidence. Preserve v7.2 and the architecture; do not restart the compiler or expand unrelated research.
 
-## Work contract
+## Restore exact state and priority
 
-Complete all six M3+B exits autonomously through GitHub connectors and GitHub
-Linux CI only. No local checkout/files/build/test/compiler or Desktop Commander.
-Native portable .lean, official Lean4.35.0
- eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Study pinned source/tests before
-substantial design; preserve upstream Apache-2.0 notices. Minimal coherent
-validation; no PSKernel-Core/C0, self-hosting or C5. Approved assumptions exactly
-propext, Quot.sound, Classical.choice. Wasm GC internally; linear memory only
-at explicit ABI boundaries. Never weaken acceptance or enlarge budgets.
+Read the current Core ref, [draft PR #151](https://github.com/dwijayuda/pskernel/pull/151), [AI_WORK_STATE.md](AI_WORK_STATE.md), the revised [Core roadmap](docs/PSC0_CORE_FIRST_ROADMAP.md), [completion register](docs/PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md), machine manifest and qualification ledger. Work on `psc0/core-first-environments-20261019`; preserve Stage0 and unfinished Full separately.
 
-**Input-language contract clarified by the user on18 October:** both `.ps`
-and `.lean` files supplied to PSC0 follow the selected v7.2 language features,
-semantics and assurance rules when compiling to JavaScript, TypeScript, Rust,
-Wasm, WAT and other supported artifacts. This concerns compiler INPUTS; it is
-not merely an instruction about the compiler implementation's .lean files.
-The two source kinds keep their respective surface grammars: native Lean layout
-and application in .lean, owned ProofScript spelling in .ps. Both must converge
-on shared resolution/elaboration, checked Core, typed erasure, validated IR and
-backends. A .lean extension cannot bypass unsupported-feature, dependency,
-assumption, recursion or verification rules. Do not silently parse .lean as .ps,
-treat arbitrary host Lean as accepted input, or infer input parity from native
-reference tests. Record actual support separately until paired qualification
-passes. Compiler implementation remains native portable .lean; self-hosting
-and immediate C5 stay out of scope.
+The user's 19 October 2026 directive overrides earlier instructions to make compiler-source conversion or Stage2/Stage3 an M1–M5 exit. Language/compiler completion still requires every selected Core feature, native/paired-source correspondence, independent checking, correct runtime/targets, refusals, artifact authentication and reproducibility. No milestone closes through this revision. The compiler implementation/selfhost inventory is retained for the later complete source denominator.
 
-Repo dwijayuda/pskernel. Main psc0/pscv0-v7-native-lean-v1; preparation
-psc0/m3-fixedpoint-foundation-20261018. PR109 stays draft/open/unmerged on
-psc0/pscv0-v7-m1-parser-ownership-v1. Fresh refs, expected-HEAD non-force writes,
-preserve concurrent history. Never supersede/cancel a healthy main Native.
-Prep cancel-in-progress:false; keep at most one active and one pending run.
+## Latest exact qualification
 
+Qualified executable commit: `da1116dc28b282dfcf0c8e178c52a69f11477708`, tree `031cd3cd7e4917ca29ce7c7296c24051aa07a82e`. [Core Linux run 39255930001](https://github.com/dwijayuda/pskernel/actions/runs/39255930001) completed successfully at 2026-10-19T13:05:10Z: all four jobs passed.
 
-## Current state and evidence
+| Job | Exact job ID | Result |
+| --- | --- | --- |
+| candidate-authoring | [118072260820](https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260820) | Success |
+| source-inventory | [118072260814](https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260814) | Success |
+| native-seams | [118072260854](https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260854) | Success |
+| bootstrap-closure | [118072260568](https://github.com/dwijayuda/pskernel/actions/runs/39255930001/job/118072260568) | Success |
 
-Latest fully qualified five-gate compiler/test SHA and current main:
-**6cdb9a6ee36b3262b366d80f36c238b50fd9676d**.
-Native39095176453, M339095176451, F139095176460, F239095176458 and
-F339095176455 all completed SUCCESS. Receipt:
-docs/PSCV0_M3_INTEGRATION_6CDB9A6E_2026-10-18.md.
-Never cancel or supersede a healthy main Native run.
+Named namespaces and sections now introduce one frame per component. Named ends close the matching innermost components; unnamed-section barriers, bare-end restrictions, variable restoration and sequential public-section defaults are checked. Literal `_root_` components in scope headers retain their canonical identity. The paired rooted fixtures cover direct, registered, inferred, where, ordinary mutual and structure-family names. Lean exercises its absolute declaration-head syntax; ProofScript uses its selected unqualified declaration head after closing the namespace. Both readers exercise absolute term references.
 
-Latest fully successful preparation compiler/test SHA:
-**9b5cc7c7f64bf18e2b1908cbb63fa4db0e60404f**.
-Run39095995956/job117582435491 completed SUCCESS; artifact12124459802,
-SHA256146bbd763d4b3046e3a803546deae79c08c6d98af4bfb939a1cc604f37395154.
-Receipt: docs/PSCV0_M3_RUNTIME_OWNERSHIP_9B5CC7C7_2026-10-18.md.
-Actual-functional executable ownership, original headers/returned functions,
-prepared helper restoration, complete coverage and forged-body refusals passed.
-All original logical and private runtime definitions were checked by the official
-kernel. This receipt does not establish mutual WF source/backend execution.
+Headerless legacy clients receive original elaboration declarations and metadata through every transitive import edge, before preparation or runtime lowering. Ordinary checked definition bodies and their private implementation dependencies remain available; genuine source opaque declarations remain opaque. Module clients keep the separate public interface and signature/exposed-body visibility checks. Legacy local-private signatures and exposed bodies are checked separately.
 
-## Current implementation and next work
+Ordinary module where helpers now have private checked identities. Provider-local aliases allow later commands in that provider to use the source helper name; importers cannot resolve that spelling. Headerless providers retain public helper names. The fixtures check the real helper dependencies, generated equation ownership and source provenance.
 
-This child activates source mutual WF through the shared PreDefinition owner.
-Both surface grammars produce the same scoped typed blocks; the producer returns
-actual auxiliaries/results, while PreDefinition independently reconstructs exact
-source equations and derives ordinary checked private implementations. The first
-source member owns the shared auxiliary; each member owns its private body.
-Compiler recovery independently validates those bodies before typed erasure.
-Original admissions and assurance graphs remain intact. Header opening is a
-shared dependency leaf, avoiding a producer/runtime import cycle.
+| New selected-source group | Independently admitted projects | Owned refusals |
+| --- | ---: | ---: |
+| component scopes | 16 | 16 |
+| literal root scope identity | 2 | 0 |
+| legacy import implementation closure | 11 | 10 |
+| legacy local-private references | 2 | 4 |
+| legacy class/instance/default metadata | 2 | 2 |
+| module/private and legacy/public where helpers | 3 | 6 |
+| **Total** | **36** | **38** |
 
-The child selects the independently measured five-declaration PSum extension and
-strict identities below. Existing paired input/backend fixtures now cover a
-three-member polymorphic WF component with reordered dependent parameters and
-a returned function, plus ordinary partial P0 and selected fixedpoint P1.
-General total-only IR admission and combined ordinary runtime admission are both
-exercised. **This activation child is not yet qualified.**
+The native module oracle passes 50 actual compilations: 28 successes and 22 semantic refusals. The visibility oracle passes 25 ordinary classifications, 15 rooted name/privacy checks and three unsupported-scope syntax refusals. Native version/full commit, error ownership/cardinality, exact refusal fragments, output artifacts and proof-hole diagnostics are checked.
 
-Next:
-1. Inspect the complete activation preparation run. Resolve actual invariant
-   failures coherently; preserve all existing controls, timeouts and budgets.
-2. After preparation passes, integrate its exact compiler/test SHA when main
-   Native is idle; qualify Native, M3 and F1/F2/F3. Both input kinds must actually
-   execute the new exports in existing JS/TS/Rust/GC/component lanes.
-3. Reconcile all six M3 exits against source rules and pinned Lean source/tests.
-   Data/elimination, owned strategies, total recursion, P0, P1 and cross-stage
-   integration need scoped source/kernel/runtime or intended-refusal evidence.
-   M3+B and full selected input parity remain OPEN.
-4. Update both handoffs, roadmap and exit ledger at each completed milestone.
-   M4+C/D and M5+E/C5 remain later phases; bounded M2 acceptance is historical.
+Every new positive project uses the separately checked four-declaration base `CoreSelectedIdentity`, `Eq`, `Eq.refl` and `Eq.rec`, with no axioms. Independent checking retains empty trust0 and 2,000,000 heartbeats / 20,000 recursion depth per declaration. The separate Full wrapper policy is unchanged.
 
-## Foundation identity for the activation child
+Legacy metadata proofs execute ordinary instance synthesis. Default-instance identity, priority 700 and deduplication are inspected directly; fallback execution and complete rollback/default ordering are not claimed. Registered `abbrev ... where` retains the existing `PSCV0-PREDEFINITION-REGISTRATION` refusal. The rooted ordinary mutual fixture makes no new explicit partial-mutual/P0 admission claim.
 
-Selected Standard:3757declarations,44classes,371ordinary instances,13defaults.
-FNV3071911941504503432; snapshot SHA
-364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1;
-surface SHA9b07ab5dc1ce2e429fb5ebe4dba0e8da5db667d395521718e0a9a65f9e748214.
-These exact candidate identities were independently measured by successful9b5
-preparation before selection. Main6cdb and preparation9b5 retain the old selected
-3752-declaration identity; do not relabel their evidence. PSum adds5declarations,
-2rules,0assumptions and one reducibility registration, no runtime primitive.
-Keep frozen pre-Order/pre-mutual authoring boundaries. Classical.propDecidable
-is not an automatic runtime instance; approved assumptions remain exactly three.
+The complete Foundation.Source/List regression still retains 25 prepared declarations and the exact 53,310-byte canonical payload, SHA-256 `6c7603e8cd49e830a61fca136153117630097052cd8e93bfd3f87f248d2b27a1`. The original source files, their ProofScript counterparts, 92-declaration Foundation candidate, 76-declaration Bootstrap seed and Full logical identity are unchanged.
 
-## Scope and design invariants
+The retained `pscv0-v7-native-bounded/73` Full compatibility application passes 1,069 observations on each of TypeScript 7.0.2, direct JavaScript and Rust 1.98.1. These application results remain separately attributed from the new scope/import preparation, admission and native controls. Complete Core runtime/profile and formal target refinement remain open.
 
-Canonical v7.2 lines1872–1890 selects function-like mutual blocks (def/function),
-not arbitrary native mutual commands. Native mutual inductive syntax is outside
-that selected source grammar; internal mutual/nested data APIs retain separately
-scoped evidence. Do not expand to unrestricted host Lean.
+Preceding attempt 1: [run 39253923410](https://github.com/dwijayuda/pskernel/actions/runs/39253923410) at `31e01c0a45a7ae00d297cb81b3383600bbf5fa73`. The new ProofScript fixture used a qualified declaration head, but its selected declared-name reader consumes one identifier. The remaining dot caused the existing function-without-explicit-binders refusal. Keep Lean's absolute declaration inside the literal-root namespace. In ProofScript, close that namespace and then declare the same absolute identity with its selected unqualified head. Declaration order, bodies, paired canonical admission and all positive/private/family controls are unchanged.
 
-Pinned WF/Main31–35 rejects zero-varying members. WF/Rel first establishes one
-fixed measure codomain and one dictionary in the fixed scope. Runtime recovery
-uses disjoint fresh common fixed IDs above original raw headers because local
-substitution is ordered. Do not globally change substitution semantics, erase
-original source arity or flatten a returned function into the header.
-Pinned WF/{Main,PackMutual,Rel,Fix,Eqns,Unfold}, Basic, ArgsPacker and fixedParams
-tests are the reference; notices retained. See the runtime design note and
-existing exact-component receipt for the independent equation/runtime boundaries.
+Preceding attempt 2: [run 39254947000](https://github.com/dwijayuda/pskernel/actions/runs/39254947000) at `c823f9564edaa481f2e75d74fdc694007ca8af78`. The new metadata proof used native positional-after-named application order, which the selected reader deliberately rejects. Move x before named A in the selected metadata theorem and matching native fixture. The application owner still supplies A before dictionary synthesis; all bodies, type/class/default/reducibility checks, ordinary synthesis, positive admission and negative controls remain.
 
-Activation preparation began at c15c2bc054555ea0a301f7eba6a7ec937f6a3623
-(run39096826484). The child also updates both adversarial singleton producer
-fixtures to the shared component result interface; their exact forged-source
-and returned-function rejection assertions are unchanged. Inspect the newest
-preparation SHA before promotion; no source/backend qualification is claimed.
+Each failed run keeps its own code/job attribution. The final qualification belongs only to the successful executable above.
 
-## Shared application continuation correction
+[The exact qualification](docs/core-first-evidence/core-language-scope-legacy-qualification.json) records the final code/test blobs, unchanged workflow, successful jobs, semantic markers, native case records, archive digests, resource observations and retained identities. The 5 cache-assisted seam build commands totaled 20.98 seconds; this is a command observation, not a controlled speedup.
 
-Activation preparation c15c2bc0 (run39096826484/job117584917200) built and passed
-strict manifests, component kernel/runtime ownership and all other retained
-preparation groups. Its paired native source check failed with
-PSCV0-WF-ARITY: the recursive call exceeds its source header telescope.
-The flat native application supplied returned-function arguments in the same
-spine; the old owned-prefix capture incorrectly rejected that suffix, while
-chained .ps calls already separated it.
+The requested component/end/root and legacy-body/private/metadata/where obligations are closed at this recorded scope. Complete CL04/CL05 and M2 remain open: the complete selected rule/form/interaction-to-fixture mapping, native proof abstraction inside exposed definitions, full native elaboration/module correspondence and complete Core profile obligations need their own evidence. Core M1–M5 remain the priority; selfhost follows their acceptance.
 
-The child returns the unconsumed positional/named suffix from the same generic
-ordered application engine. The WF owner constructs/closes exactly the original
-header call and genuine decrease proof, then resumes ordinary application on
-that actual checked result. It preserves once-only header capture, result
-arity, argument order, constraints and expected types. Ordinary completion
-explicitly rejects an accidentally unconsumed suffix. No parser rewrite or
-second argument elaborator. Reference: pinned Lean4.35.0
-Elab/PreDefinition/WF/Fix.lean72–95 and Elab/App.lean's ordered argument engine.
-Existing paired fixture/strict checked-Core comparison remains unchanged.
-Qualification pending; newest expected-HEAD preparation child is authoritative.
+A documentation-only descendant may be newer than the qualified executable. Preserve every executable/test/asset/workflow blob. Documentation is not a new CI run or loadable profile authority.
 
-Continuation e9eb8f73 failed compilation only: clearing both generic suffix
-lists left the prefix finisher's argument-kind parameter unconstrained. The
-child explicitly pins that existing source argument kind to PsSyntaxTerm;
-no algorithm, source fixture or acceptance condition changed. Inspect the
-child's complete preparation before promotion.
+## Completed work to preserve
 
-## Checked packing specialization before runtime erasure
+Fingerprint/Replay, explicit-context Engine and selected readers, 24 deriving-helper moves and Pscv0ModuleEngine project preparation are implemented. Existing Api/Pscv0/Pscv0Modules retain Full compatibility signatures and selection. Per-module preparation uses actual imported environments; final preparation retains the caller profile. Existing graph/scope/metadata refusals and None/32/64 typed-IR controls remain.
 
-Preparation feac89b1 / run39097887649 built and passed all groups except the
-paired source/runtime check. Source elaboration and strict checked-Core parity
-advanced past the earlier header-spine failure; total-only IR admission failed:
-`PSCV0-ERASURE: unknown constant PSum.casesOn (in parityFirst)`.
-The exact source assertions remain unchanged.
+The complete Foundation.Source/List gate passed at `1995a478af7aeb83032749fbdb9a2cfa96d28a88`, [run 39191534560](https://github.com/dwijayuda/pskernel/actions/runs/39191534560). It retains all twelve original source headers, both ProofScript counterparts, 25 prepared declarations including three structural helpers, strict 53,310-byte canonical equality and independent admission over the same checked 92-declaration base. [The raw receipt](docs/core-first-evidence/compiler-source-qualification.json) retains exact inputs and logical identity. Its native elaboration parity, complete Core runtime and selfhost limits remain.
 
-Runtime recovery now specializes its actual checked packing functional before
-constructing the ordinary private implementation. It unfolds only the actual
-selected PSum/PSigma casesOn definitions and uses shared registered recursor/
-projection iota. Public definitions and logical fixedpoints never delta-reduce.
-Non-value beta arguments retain real lets, preserving source evaluation order
-and sharing. A result let below the original header preserves returned-function
-entry arity. Both the specialized body and its closed private definition are
-type checked; the independent prepared-body reconstruction and forged-body/
-incomplete-coverage refusals remain active.
+The original 76-declaration seed has no axioms and empty source registries. The separate 92-declaration candidate retains each original declaration/effective reducibility, selects measured OfNat registration (ordinary instOfNatNat priority 1000, separate default 100), and preserves native Bool.not noncomputability. Its data asset SHA-256 remains `911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9`; no Full fallback or unchecked runtime replacement is part of that component.
 
-Pinned references: Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
-Compiler/LCNF/ToLCNF.lean visitCases, Compiler/LCNF/Simp/Main.lean
-simpCasesOnCtor?, plus WF/Main and Basic.addAndCompilePartialRec. This is
-Core construction using the existing reducer, with upstream notices retained;
-no target primitive, runtime PSum dependency, new axiom or budget change.
-Qualification is pending the newest preparation; main6cdb remains fully qualified.
+The seed/Full comparison remains 42 exact, 31 different and three absent. Its 34-cell classification is inspection, not semantic equivalence or a Full migration. Complete Core profile identity and compatible profile nesting remain unqualified. Compiler-sufficient Bootstrap is retained for final selfhost.
 
-Packing specialization f52b4147 failed at compile time only: its pure Boolean
-value classifier used a do-style let-else. The child uses an ordinary match;
-no algorithm, fixture or acceptance condition changed. Qualification pending.
+Preserved Stage0: `psc0/pscv0-v7-native-lean-v1` at `33676076bcda7b0de5ec1f9803f49b8b1d28a058`, PR #109 open/draft/unmerged. Its five exact-SHA receipts retain their original scope. Unfinished Full remains `psc0/m3-fixedpoint-foundation-20261018` at `bf496ce399d9ec39794d6e9f7c3be919dfcffa58`; its six Full exits remain open. The actual final Stage1 executor must be qualified separately after M1–M5.
+
+## Continue at the next Core language boundary
+
+1. Preserve passing source/project/Bootstrap checks and exact assets. Use [the completion register](docs/PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md) to map every selected Core rule and interaction to a shared owner, fixture, intended phase and checking/runtime observation.
+2. Preserve the qualified public-section/EOF, module-kind, imported-body, public import-visibility, component/end/root and legacy-body/private/metadata/where cells. The requested scope and legacy-import obligations are closed at their recorded scope. Complete the remaining M1/M2 Core profile, native elaboration and full conformance-mapping obligations through exact positive/refusal fixtures.
+3. Continue M3 through reviewed shared data/matching/recursion/deriving owners. The next concrete inspected correction is checked computed/let elimination-target preparation and induction's distinct-variable-index guard. Transfer only its minimal expression-abstraction/target adapter, not the unrelated Full file; qualify paired proof/computational examples and negative cases anew.
+4. Complete Core control flow, String/word/byte primitives and runtime/assurance correspondence. Existing development-baseline TS/JS/Rust behavior uses Full compatibility context and does not select a small Core profile or discharge formal target refinement.
+5. Complete M5 actual compiler/API/target integration, real artifact consumers, cold/warm/incremental comparison, deterministic reconstruction, diagnostics/provenance/tooling and applicable package gates. No selected persistent-cache loader exists today; receipts and claimant-supplied hashes cannot authenticate reuse.
+6. After M1–M5 acceptance, pin the actual qualified Lean-backed Stage1 executor, complete authoritative compiler-source conversions and compiler-sufficient Bootstrap, then Stage1–3 under the retained selfhost plan.
+
+The String/Token → Cursor → Name source inspection, two native mutual-data representation conversions and compiler hash-padding conversion remain in the [final selfhost backlog](docs/PSC0_CORE_SELFHOST_PLAN.md). Undertake one earlier only when it directly resolves a current Core language/runtime obligation. Do not advance compiler file counts as the primary completion measure.
+
+## Work quickly and close real obligations
+
+Use one remaining-capability register and one shared semantic pipeline. Reuse accepted foundations and existing exact fixtures. Parallelize independent review and preparation; serialize integration. Use focused tests for the actual changing owner, then its required final integrated gates. Preserve Source/List as a cheap regression and retain existing source/authoring checks; measured cache restoration is preferable to speculative CI rewrites.
+
+When a gate passes, record the exact code/profile/runtime/checker identity and its limited scope, then move on. Update both handoffs and the PR with the next concrete obligation. Do not substitute a plan, percentage estimate, native build or descriptive manifest for working language behavior.
+
+## Execution and authority constraints
+
+Use connected GitHub and cloud Linux only for repository work. No local checkout, repository shell/filesystem or local builds. Root is the sole writer; agents review read-only. Refresh refs, use expected SHA and force:false, preserve history and at most one active / one pending Core run. Do not cancel healthy evidence.
+
+Pinned v7.2 reference blob `694115223777599ba28ee175e14bb642b7b6aa4b`; Lean 4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Approved maximum logical assumptions remain propext, Quot.sound and Classical.choice; each component records its actual smaller closure. Generic independent admission starts at empty trust0 with 2,000,000 heartbeats / 20,000 recursion depth per declaration. Preserve the separately reviewed Full wrapper policy. No holes, unchecked proof authority, runtime choice, budget expansion or weakened refusals.
+
+Preserve ordinary/partial/unsafe/verified/model/refinement identities, WasmGC internals and explicit ABI boundaries. Native implementation build, selected-source acceptance, independent admission, native elaboration parity, runtime execution and selfhost are separate results. Do not merge, select a release default or publish packages without the corresponding gates and authorization. PSKernel-Core/C0 and unrelated research lines remain outside this task.

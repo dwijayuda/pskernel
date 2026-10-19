@@ -13,8 +13,8 @@ def psPscv0CommandNames (line fuel : Nat) (cursor : PsTokenCursor)
       psPscv0CommandNames line fuel name.cursor (name.value :: acc)
 
 -- A deriving clause is parsed after the data body's closing brace,
--- before the command separator. The syntax layer selects a fixed handler
--- vocabulary; the elaborator supplies the checked generated instance.
+-- before the command separator. Retain handler names and source order here;
+-- elaboration resolves each name and checks the selected handler registry.
 def psPscv0SelectedDerivingNames : List String :=
   ["Inhabited", "BEq", "DecidableEq", "Repr", "Hashable"]
 
@@ -24,11 +24,6 @@ def psPscv0DerivingHandlers (fuel : Nat) (cursor : PsTokenCursor)
   | 0 => throw "PSCV0-DERIVE-HANDLER-BUDGET"
   | fuel + 1 =>
     let name ← (psParseSyntaxName cursor).mapError psPscv0ParseError
-    let selected := name.value.segments
-    if !(psPscv0SelectedDerivingNames.map fun name => [name]).contains selected then
-      throw "PSCV0-DERIVE-HANDLER-UNKNOWN"
-    if (acc.any (fun previous => previous.segments == selected)) then
-      throw "PSCV0-DERIVE-HANDLER-DUPLICATE"
     let accumulated := name.value :: acc
     if psTokenCursorAtText name.cursor "," then
       let comma ← (psTokenCursorExpectText name.cursor ",").mapError psPscv0ParseError
@@ -68,9 +63,49 @@ def psPscv0ReadScopeCommand
     return some { value := .variableCmd binders.value { start := token.span.start, stop }, cursor := next }
   return none
 
+def psPscv0ReadInspectionCommand
+    (readTerm : PsTokenCursor → Except PsParseError (PsParseResult PsSyntaxTerm))
+    (finish : PsSyntaxCommand → PsSourcePos → PsTokenCursor →
+      Except String (PsParseResult PsSyntaxCommand))
+    (proofScript : Bool) (cursor : PsTokenCursor) :
+    Except String (Option (PsParseResult PsSyntaxCommand)) := do
+  if !psTokenCursorAtText cursor "#" then return none
+  let marker ← psPscv0Expect cursor "#"
+  let some head := psTokenCursorAdvance marker.cursor
+    | throw "PSCV0-INSPECTION-COMMAND"
+  if marker.token.span.stop.byteOffset != head.token.span.start.byteOffset ||
+      !["check", "print", "reduce", "eval"].contains head.token.text then
+    throw "PSCV0-INSPECTION-COMMAND: selected #check, #print, #reduce or #eval required"
+  if let some next := psTokenCursorPeek head.cursor then
+    if next.text == "!" && next.span.start.byteOffset == head.token.span.stop.byteOffset then
+      throw "PSCV0-INSPECTION-COMMAND: #eval! is outside the closed command grammar"
+  if head.token.text == "print" then
+    let axioms := psTokenCursorAtText head.cursor "axioms"
+    let input ← if axioms then pure (← psPscv0Expect head.cursor "axioms").cursor
+      else pure head.cursor
+    if psTokenCursorAtText input "commands" then
+      throw "PSCV0-INSPECTION-COMMAND: #print commands is outside the closed grammar"
+    let name ← (psParseSyntaxName input).mapError psPscv0ParseError
+    let span := psSyntaxSpanJoin marker.token.span name.value.span
+    return some (← finish (.inspectionCmd (.printDeclaration name.value axioms) span)
+      span.stop name.cursor)
+  let term ← (readTerm head.cursor).mapError psPscv0ParseError
+  if proofScript then psPscv0ValidateTermWithFuel head.cursor.remaining 4096 term.value
+  let command : PsSyntaxInspection := match head.token.text with
+    | "check" => .checkTerm term.value
+    | "reduce" => .reduceTerm term.value
+    | _ => .evalTerm term.value
+  let span := psSyntaxSpanJoin marker.token.span (psSyntaxTermSpan term.value)
+  return some (← finish (.inspectionCmd command span) span.stop term.cursor)
+
 def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor)
     (mutualMember : Bool := false) :
     Except String (PsParseResult PsSyntaxCommand) := do
+  if !mutualMember then
+    if let some parsed ← psPscv0ReadInspectionCommand (psPscv0ParseTerm false)
+        (fun command stop cursor => do
+          let next ← (psParseProofScriptCommandSeparator stop cursor).mapError psPscv0ParseError
+          return { value := command, cursor := next }) true cursor then return parsed
   let some first := psTokenCursorPeek cursor | throw "PSCV0-COMMAND-MISSING"
   let isPrivate := first.text == "private"
   let cursor ← if isPrivate then
@@ -140,10 +175,65 @@ def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor)
   return { value := if isPrivate then .privateDeclaration declaration.value
                     else .declaration declaration.value, cursor := next }
 
-def psPscv0SelectedAttributes : List String := ["default_instance"]
+def psPscv0SelectedAttributes : List String := ["simp", "instance", "default_instance"]
 
--- Selected declaration attributeName only; unsupported attributes are refused.
--- The default priority is independent of an instance declaration's priority.
+-- The selected list uses native comma ownership. Only the already-selected
+-- default-instance priority spelling has an argument; simp/instance are bare.
+def psPscv0ReadAttributes (fuel : Nat) (cursor : PsTokenCursor)
+    (attributesRev : List PsSyntaxAttribute) :
+    Except String (PsParseResult (List PsSyntaxAttribute)) := do
+  match fuel with
+  | 0 => throw "PSCV0-ATTRIBUTE-COUNT-BUDGET"
+  | fuel + 1 =>
+    let some name := psTokenCursorAdvance cursor
+      | throw "PSCV0-ATTRIBUTE-NAME: expected selected attribute"
+    if !psPscv0SelectedAttributes.contains name.token.text then
+      throw ("PSCV0-ATTRIBUTE-NAME: unselected attribute " ++ name.token.text)
+    let parsed ← if name.token.text == "default_instance" then do
+      let priority ←
+        if psTokenCursorAtText name.cursor "]" || psTokenCursorAtText name.cursor "," then
+          pure (PsParseResult.mk 1000 name.cursor)
+        else do
+          let some atom := psTokenCursorAdvance name.cursor
+            | throw "PSCV0-DEFAULT-INSTANCE-PRIORITY"
+          let value ← (psPscv0PriorityValue atom.token.text name.cursor).mapError psPscv0ParseError
+          pure (PsParseResult.mk value atom.cursor)
+      pure (PsParseResult.mk (.defaultInstanceAttribute priority.value) priority.cursor)
+    else
+      pure (PsParseResult.mk
+        (if name.token.text == "simp" then PsSyntaxAttribute.simpAttribute else .instanceAttribute)
+        name.cursor)
+    let attributesRev := parsed.value :: attributesRev
+    if psTokenCursorAtText parsed.cursor "]" then
+      let close ← psPscv0Expect parsed.cursor "]"
+      return { value := attributesRev.reverse, cursor := close.cursor }
+    let comma ← psPscv0Expect parsed.cursor ","
+    psPscv0ReadAttributes fuel comma.cursor attributesRev
+
+-- Preserve the established single-default AST contract. General lists keep
+-- the declaration's source kind separate from its post-check registrations.
+def psPscv0AttachAttributes : List PsSyntaxAttribute → PsSyntaxCommand →
+    Except String PsSyntaxCommand
+  | [.defaultInstanceAttribute priority], .declaration source =>
+    pure (.registeredDeclaration source (.defaultInstanceDecl priority none))
+  | [.defaultInstanceAttribute priority], .privateDeclaration source =>
+    pure (.privateRegisteredDeclaration source (.defaultInstanceDecl priority none))
+  | [.defaultInstanceAttribute priority], .registeredDeclaration source (.instanceDecl ordinary) =>
+    pure (.registeredDeclaration source (.defaultInstanceDecl priority (some ordinary)))
+  | [.defaultInstanceAttribute priority], .privateRegisteredDeclaration source (.instanceDecl ordinary) =>
+    pure (.privateRegisteredDeclaration source (.defaultInstanceDecl priority (some ordinary)))
+  | attributes, .declaration source =>
+    pure (.attributedDeclaration source none false attributes)
+  | attributes, .privateDeclaration source =>
+    pure (.attributedDeclaration source none true attributes)
+  | attributes, .registeredDeclaration source registration =>
+    pure (.attributedDeclaration source (some registration) false attributes)
+  | attributes, .privateRegisteredDeclaration source registration =>
+    pure (.attributedDeclaration source (some registration) true attributes)
+  | attributes, .derivingDeclaration source handlers isPrivate =>
+    pure (.attributedDerivingDeclaration source handlers isPrivate attributes)
+  | _, _ => throw "PSCV0-ATTRIBUTE-DECLARATION: selected declaration required"
+
 def psPscv0ReadAttributedCommand
     (readCommand : PsTokenCursor → Except String (PsParseResult PsSyntaxCommand))
     (cursor : PsTokenCursor) :
@@ -152,27 +242,9 @@ def psPscv0ReadAttributedCommand
   else
     let marker ← psPscv0Expect cursor "@"
     let opening ← psPscv0Expect marker.cursor "["
-    let attributeName ← psPscv0Expect opening.cursor "default_instance"
-    let priority ←
-      if psTokenCursorAtText attributeName.cursor "]" then
-        pure (PsParseResult.mk 1000 attributeName.cursor)
-      else do
-        let some atom := psTokenCursorAdvance attributeName.cursor
-          | throw "PSCV0-DEFAULT-INSTANCE-PRIORITY"
-        let value ← (psPscv0PriorityValue atom.token.text attributeName.cursor).mapError psPscv0ParseError
-        pure (PsParseResult.mk value atom.cursor)
-    let close ← psPscv0Expect priority.cursor "]"
-    let parsed ← readCommand close.cursor
-    let command ← match parsed.value with
-      | .declaration source => pure (.registeredDeclaration source
-          (.defaultInstanceDecl priority.value none))
-      | .privateDeclaration source => pure (.privateRegisteredDeclaration source
-          (.defaultInstanceDecl priority.value none))
-      | .registeredDeclaration source (.instanceDecl ordinary) =>
-        pure (.registeredDeclaration source (.defaultInstanceDecl priority.value (some ordinary)))
-      | .privateRegisteredDeclaration source (.instanceDecl ordinary) =>
-        pure (.privateRegisteredDeclaration source (.defaultInstanceDecl priority.value (some ordinary)))
-      | _ => throw "PSCV0-DEFAULT-INSTANCE-DECLARATION"
+    let attributes ← psPscv0ReadAttributes 4096 opening.cursor []
+    let parsed ← readCommand attributes.cursor
+    let command ← psPscv0AttachAttributes attributes.value parsed.value
     return { parsed with value := command }
 
 def psPscv0ReadOrdinaryCommand (cursor : PsTokenCursor)
@@ -198,12 +270,14 @@ def psPscv0ReadMutualMembers (fuel : Nat) (cursor : PsTokenCursor)
       return PsParseResult.mk (membersRev.reverse, closing.token.span) closing.cursor
     let parsed ← psPscv0ReadOrdinaryCommand cursor true
     let member ← match parsed.value with
-      | .declaration declaration => pure (PsSyntaxMutualMember.mk declaration false none)
-      | .privateDeclaration declaration => pure (PsSyntaxMutualMember.mk declaration true none)
+      | .declaration declaration => pure (PsSyntaxMutualMember.mk declaration false none [])
+      | .privateDeclaration declaration => pure (PsSyntaxMutualMember.mk declaration true none [])
       | .registeredDeclaration declaration registration =>
-        pure (PsSyntaxMutualMember.mk declaration false (some registration))
+        pure (PsSyntaxMutualMember.mk declaration false (some registration) [])
       | .privateRegisteredDeclaration declaration registration =>
-        pure (PsSyntaxMutualMember.mk declaration true (some registration))
+        pure (PsSyntaxMutualMember.mk declaration true (some registration) [])
+      | .attributedDeclaration declaration registration isPrivate attributes =>
+        pure { declaration, registration, isPrivate, attributes }
       | _ => throw "PSCV0-MUTUAL-HEAD: only selected function-like declarations belong to mutual"
     psPscv0ReadMutualMembers fuel parsed.cursor (member :: membersRev)
 
@@ -230,5 +304,5 @@ def psPscv0ParseProgramTokens (tokens : List PsToken) : Except String PsSyntaxPr
   let imports ← (psParseProofScriptImportsWithFuel (tokens.length + 1)
     (psTokenCursorFromTokens tokens) []).mapError psPscv0ParseError
   let commands ← psPscv0ReadCommands 4096 imports.cursor []
-  return { imports := imports.value, commands }
+  return { imports := imports.value, commands, isModule := true }
 

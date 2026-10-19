@@ -105,7 +105,8 @@ structure PsScopedMutualMember where
   isPrivate : Bool
 
 def psScopeMutualMember (resolver : PsScopeResolver)
-    (member : PsSyntaxMutualMember) (alias : PsSyntaxName) :
+    (member : PsSyntaxMutualMember) (alias : PsSyntaxName)
+    (bodyNamespace : Option (List String) := none) :
     Except PsElabError PsScopedMutualMember := do
   let (sourceName, binders, type, value, span, isPartial) ← match member.declaration with
     | .partialDefinition name binders type value span =>
@@ -113,18 +114,18 @@ def psScopeMutualMember (resolver : PsScopeResolver)
     | .definition name binders type value span =>
       pure (name, binders, type, value, span, false)
     | _ => throw (.data "PSCV0-MUTUAL-STRATEGY: selected mutual batch requires partial def/function members")
-  let qualified := psScopeQualified resolver.scope sourceName
-  let name := { qualified with
-    segments := (psScopePrivateRewrite resolver qualified.segments).getD qualified.segments }
+  let name := psScopeDeclarationName resolver sourceName
+  let resolver := psScopeDeclarationBodyResolver resolver sourceName bodyNamespace
   -- Headers may resolve peer identities for diagnostics but cannot borrow a
   -- value or inhabitant from a peer whose checked header does not yet exist.
   let headerResolver := { resolver with mutualAliases := [] }
   let binders ← psScopeBinders (psScopeTerm 4096 headerResolver) [] binders
   let type ← psScopeTerm 4096 headerResolver binders.bound type
-  let value ← psScopeTerm 4096 resolver binders.bound value
+  let value ← psScopeTerm 4096 { resolver with abstractProofs := false } binders.bound value
   return {
-    source := if isPartial then .partialDefinition name binders.binders type.term value.term span
-      else .definition name binders.binders type.term value.term span
+    source := if isPartial then
+        .partialDefinition (psScopeCanonicalNameSyntax name) binders.binders type.term value.term span
+      else .definition (psScopeCanonicalNameSyntax name) binders.binders type.term value.term span
     alias
     used := psScopeUnion binders.used (psScopeUnion type.used value.used)
     isPrivate := member.isPrivate }

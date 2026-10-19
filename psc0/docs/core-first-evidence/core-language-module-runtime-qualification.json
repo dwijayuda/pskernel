@@ -1,0 +1,746 @@
+{
+  "schema": "psc0-core-language-module-runtime-qualification/1",
+  "repository": "dwijayuda/pskernel",
+  "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+  "tree": "5b0f3b4aaccb5b2b878a53df144e9348b4489707",
+  "workflow": ".github/workflows/psc0-core-first-audit.yml",
+  "workflowRun": 39195343005,
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/39195343005",
+  "status": "completed",
+  "conclusion": "success",
+  "completedAt": "2026-10-19T03:47:06Z",
+  "scope": "Selected Lean leading-module/import/declaration-visibility slice and paired project admission; independent existing development-baseline application execution on TypeScript, direct JavaScript and Rust. The runtime baseline uses the Full compatibility context. No whole Core milestone, complete Core profile or selfhost stage is qualified by this receipt.",
+  "jobs": [
+    {
+      "id": 117877847664,
+      "name": "native-seams",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847664"
+    },
+    {
+      "id": 117877847785,
+      "name": "source-inventory",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847785"
+    },
+    {
+      "id": 117877847879,
+      "name": "candidate-authoring",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847879"
+    },
+    {
+      "id": 117877847994,
+      "name": "bootstrap-closure",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847994"
+    }
+  ],
+  "changedExecutableInputs": [
+    {
+      "path": ".github/workflows/psc0-core-first-audit.yml",
+      "gitBlobSHA1": "ca0a76c30fa047368f538d12f8c42940cfb66fa4"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Lean/Program.lean",
+      "gitBlobSHA1": "d9913930e3a5ced99271babd81b406a9912958d7"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "gitBlobSHA1": "299512d76fe1e9db62bd615d379db179148710d9"
+    },
+    {
+      "path": "psc0/test/Pscv0CoreProject.lean",
+      "gitBlobSHA1": "8e770453a3ad5aa1819c188fb9d60abce4669e2b"
+    }
+  ],
+  "languageAuthority": {
+    "reference": "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md",
+    "referenceGitBlobSHA1": "694115223777599ba28ee175e14bb642b7b6aa4b",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "nativeSources": [
+      "src/Lean/Parser/Module/Syntax.lean",
+      "src/Lean/Parser/Module.lean",
+      "src/Lean/Elab/DeclModifiers.lean"
+    ],
+    "authorityUse": "Pinned native source review informs this selected implementation; complete native module elaboration parity remains open."
+  },
+  "moduleSlice": {
+    "testOwner": "psc0/test/Pscv0CoreProject.lean",
+    "sharedOwner": "Ps.Compiler.Pscv0ModuleEngine",
+    "acceptedBehavior": [
+      "Optional leading module header",
+      "Module-mode default-private declarations",
+      "Explicit public/private declaration modifiers through existing shared visibility owners",
+      "Public import with a leading module header",
+      "Complete module-mode provider/facade/client public re-export chain",
+      "Explicit public declaration without a module header",
+      "Original no-header source behavior retained"
+    ],
+    "pairedSourceCanonicalEquality": true,
+    "independentCanonicalAdmission": true,
+    "retainedExactSourceProvenance": true,
+    "refusalControls": [
+      {
+        "case": "public import without leading module",
+        "owner": "PSCV0-LEAN-MODULE-REQUIRED"
+      },
+      {
+        "case": "duplicate module header",
+        "owner": "PSCV0-LEAN-MODULE-HEADER"
+      },
+      {
+        "case": "module header after import",
+        "owner": "PSCV0-LEAN-MODULE-HEADER"
+      },
+      {
+        "case": "module header after declaration",
+        "owner": "PSCV0-LEAN-MODULE-HEADER"
+      },
+      {
+        "case": "ordinary import after declaration",
+        "owner": "PSCV0-LEAN-IMPORT-ORDER"
+      },
+      {
+        "case": "public import after declaration",
+        "owner": "PSCV0-LEAN-IMPORT-ORDER"
+      },
+      {
+        "case": "conflicting public/private modifiers",
+        "owner": "PSCV0-LEAN-VISIBILITY-MODIFIER"
+      },
+      {
+        "case": "public section before visibility-scope support",
+        "owner": "PSCV0-LEAN-VISIBILITY-SCOPE-PENDING"
+      }
+    ],
+    "privateImportLeakRefused": true,
+    "marker": "PSCV0_CORE_MODULE_HEADER: paired re-export, default privacy, explicit public and eight owned refusal controls passed",
+    "observedAt": "2026-10-19T03:39:47.2008727Z",
+    "proofAndPreparedProjectScope": "Paired prepared outputs are independently admitted from the checked base. Existing None/32/64 typed-IR controls remain. These new module fixtures are not separately executed by the development-baseline target harnesses.",
+    "completeNativeModuleParityQualified": false,
+    "visibilityScopesQualified": false,
+    "completeImportedModuleKindContractQualified": false,
+    "completeNonExposedBodyContractQualified": false
+  },
+  "developmentBaselineRuntime": {
+    "context": "Existing Full compatibility context and shared checked application corpus, including optional capabilities present in that corpus",
+    "compilerEntry": "pscv0_native --emit-all",
+    "profile": "pscv0-v7-native-bounded/73",
+    "compilerExecutionSHA": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+    "qualified": true,
+    "targets": [
+      {
+        "target": "typescript",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T03:45:49.7381928Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (typescript)"
+      },
+      {
+        "target": "directjs",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T03:45:50.0110117Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (directjs)"
+      },
+      {
+        "target": "rust",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T03:46:18.9528596Z",
+        "logMarker": "PSCV0_NATIVE_RUST_RUNTIME: PASS 1069 shared runtime observations"
+      }
+    ],
+    "typescriptVersion": "7.0.2",
+    "rustVersion": "1.98.1",
+    "harnesses": [
+      "psc0/scripts/pscv0-native-runtime.mjs",
+      "psc0/scripts/pscv0-native-rust.mjs"
+    ],
+    "artifactName": "psc0-core-language-baseline-ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+    "artifactManifest": "psc0/dist/core-first/language-baseline/application.sha256",
+    "perEmittedFileHashesReadByReviewer": false,
+    "artifactHashNote": "CI saved application hashes and emitted products in the named artifact. The archive digest was retrieved; individual saved application hashes were not separately downloaded.",
+    "wasmExecutionIncluded": false,
+    "completeCoreRuntimeProfileQualified": false,
+    "formalTargetRefinementQualified": false
+  },
+  "retainedRegression": {
+    "exactReproduction": {
+      "bootstrapRawManifestUnchanged": true,
+      "compilerSourceQualificationFileUnchanged": true,
+      "foundationNativeMetadataFileUnchanged": true,
+      "foundationAuthoringJSONLineUnchanged": true,
+      "bootstrapFullCompatibilityFileUnchanged": true,
+      "bootstrapSourceSHA256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54",
+      "foundationSourceSHA256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9"
+    },
+    "sourceQualification": "psc0/docs/core-first-evidence/compiler-source-qualification.json",
+    "full": {
+      "declarations": 3757,
+      "classes": 44,
+      "instances": 371,
+      "fingerprint": "fnv1a64:3071911941504503432",
+      "payloadSHA256": "364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1",
+      "nativeChecksPassed": true
+    },
+    "sourceInventory": {
+      "path": "psc0/docs/PSC0_CORE_SOURCE_AUDIT.json",
+      "fullModules": 322,
+      "fullSourceBytes": 26402995,
+      "independentProjectModules": 224,
+      "independentProjectSourceBytes": 2785929,
+      "compilerSourceCandidateModules": 11,
+      "compilerSourceCandidateSourceBytes": 211778
+    },
+    "nativeWorkload": {
+      "summary": {
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "closureDeclarations": 5690,
+        "externalRoots": 458,
+        "partial": [],
+        "schema": "pscv0-core-native-closure-summary/1",
+        "sourceDeclarations": 191637,
+        "sourceModules": 322,
+        "unsafe": []
+      },
+      "roster": {
+        "candidateKernelAdmitted": false,
+        "nativeClosureDeclarations": 5690,
+        "nativeClosureSHA256": "0f410e4594255da8295cccdfdab7efbe16d50f4601c5fa5d61be17587c4836f3",
+        "sourceHead": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+        "sourceModules": 322,
+        "sourceParityClaim": false
+      },
+      "assumptionPaths": "psc0/docs/core-first-evidence/core-language-native-assumption-paths.json",
+      "candidateKernelAdmitted": false
+    }
+  },
+  "resources": {
+    "seams": {
+      "generatedSources": [],
+      "resources": [
+        {
+          "file": "build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_seams\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:02.11",
+            "Exit status": "0",
+            "File system inputs": "8",
+            "File system outputs": "231904",
+            "Involuntary context switches": "131",
+            "Major (requiring I/O) page faults": "425",
+            "Maximum resident set size (kbytes)": "1619772",
+            "Minor (reclaiming a frame) page faults": "171919",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "127%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.97",
+            "User time (seconds)": "1.71",
+            "Voluntary context switches": "682"
+          }
+        },
+        {
+          "file": "compiler-source-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_compiler_source\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:05.21",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "261776",
+            "Involuntary context switches": "1458",
+            "Major (requiring I/O) page faults": "461",
+            "Maximum resident set size (kbytes)": "1717304",
+            "Minor (reclaiming a frame) page faults": "220983",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "159%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "1.44",
+            "User time (seconds)": "6.86",
+            "Voluntary context switches": "25389"
+          }
+        },
+        {
+          "file": "compiler-source-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_compiler_source ../packages/foundation/src/Ps/Foundation/Source.lean ../packages/foundation/src/Ps/Foundation/List.lean ../selfhost/core-v7/Ps/Foundation/Source.ps ../selfhost/core-v7/Ps/Foundation/List.ps ../packages/environment/src/Ps/Environment/CompilerSourceCandidateData.lean ../dist/core-first/seams/compiler-source-qualification.json\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.12",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "8",
+            "Involuntary context switches": "3",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "83140",
+            "Minor (reclaiming a frame) page faults": "1850",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.00",
+            "User time (seconds)": "0.11",
+            "Voluntary context switches": "388"
+          }
+        },
+        {
+          "file": "engine-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_engine_seams\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:02.59",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "241944",
+            "Involuntary context switches": "233",
+            "Major (requiring I/O) page faults": "446",
+            "Maximum resident set size (kbytes)": "1686792",
+            "Minor (reclaiming a frame) page faults": "179351",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "127%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.99",
+            "User time (seconds)": "2.30",
+            "Voluntary context switches": "1871"
+          }
+        },
+        {
+          "file": "project-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_project\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:03.38",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "249104",
+            "Involuntary context switches": "251",
+            "Major (requiring I/O) page faults": "449",
+            "Maximum resident set size (kbytes)": "1713644",
+            "Minor (reclaiming a frame) page faults": "182034",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "127%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "1.03",
+            "User time (seconds)": "3.28",
+            "Voluntary context switches": "2544"
+          }
+        },
+        {
+          "file": "selected-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_selected\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:02.59",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "244304",
+            "Involuntary context switches": "285",
+            "Major (requiring I/O) page faults": "453",
+            "Maximum resident set size (kbytes)": "1700640",
+            "Minor (reclaiming a frame) page faults": "179885",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "128%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.99",
+            "User time (seconds)": "2.32",
+            "Voluntary context switches": "2088"
+          }
+        }
+      ],
+      "schema": "psc0-core-ci-resource-observations/1",
+      "scope": "actual commands; not a complete Core release or performance claim"
+    },
+    "bootstrap": {
+      "generatedSources": [],
+      "resources": [
+        {
+          "file": "build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_bootstrap_replay\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:10.11",
+            "Exit status": "0",
+            "File system inputs": "8",
+            "File system outputs": "480504",
+            "Involuntary context switches": "20839",
+            "Major (requiring I/O) page faults": "829",
+            "Maximum resident set size (kbytes)": "1643548",
+            "Minor (reclaiming a frame) page faults": "519930",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "210%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "3.62",
+            "User time (seconds)": "17.67",
+            "Voluntary context switches": "29483"
+          }
+        },
+        {
+          "file": "replay-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake env .lake/build/bin/pscv0_bootstrap_replay ../packages/environment/src/Ps/Environment/BootstrapData.lean ../dist/core-first/bootstrap/bootstrap-manifest.json\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.59",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "8",
+            "Involuntary context switches": "27",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "843928",
+            "Minor (reclaiming a frame) page faults": "30047",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.19",
+            "User time (seconds)": "0.39",
+            "Voluntary context switches": "212"
+          }
+        }
+      ],
+      "schema": "psc0-core-ci-resource-observations/1",
+      "scope": "actual commands; not a complete Core release or performance claim"
+    },
+    "authoring": {
+      "generatedSources": [
+        {
+          "bytes": 118573,
+          "file": "CoreBootstrapCandidate.lean",
+          "sha256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54"
+        },
+        {
+          "bytes": 16111994,
+          "file": "CoreByteWordCandidate.lean",
+          "sha256": "7d61ebb72eb891ab7a39cee3e780411f26219b2fcfa57570effa7d4f127ed17a"
+        },
+        {
+          "bytes": 174266,
+          "file": "CoreFoundationCandidate.lean",
+          "sha256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9"
+        }
+      ],
+      "resources": [
+        {
+          "file": "bootstrap-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_environment_export bootstrap ../dist/core-first/authoring/CoreBootstrapCandidate.lean\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:04.54",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "232",
+            "Involuntary context switches": "41",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "624816",
+            "Minor (reclaiming a frame) page faults": "18020",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.14",
+            "User time (seconds)": "4.40",
+            "Voluntary context switches": "214"
+          }
+        },
+        {
+          "file": "build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_native pscv0_native_checks pscv0_core_environment_export pscv0_core_native_closure pscv0_core_native_seed_checks pscv0_bootstrap_compatibility\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.70",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "0",
+            "Involuntary context switches": "203",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "880688",
+            "Minor (reclaiming a frame) page faults": "19866",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "112%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.24",
+            "User time (seconds)": "0.54",
+            "Voluntary context switches": "2826"
+          }
+        },
+        {
+          "file": "byte-word-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_environment_export byte-word ../dist/core-first/authoring/CoreByteWordCandidate.lean\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:12.54",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "31472",
+            "Involuntary context switches": "81",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "933592",
+            "Minor (reclaiming a frame) page faults": "38288",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.32",
+            "User time (seconds)": "12.16",
+            "Voluntary context switches": "27277"
+          }
+        },
+        {
+          "file": "foundation-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_environment_export foundation ../dist/core-first/authoring/CoreFoundationCandidate.lean\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:04.55",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "344",
+            "Involuntary context switches": "41",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "628988",
+            "Minor (reclaiming a frame) page faults": "18308",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.12",
+            "User time (seconds)": "4.42",
+            "Voluntary context switches": "309"
+          }
+        },
+        {
+          "file": "native-closure-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake env .lake/build/bin/pscv0_core_native_closure ../dist/core-first/authoring/native-closure.json\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:15.02",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "40544",
+            "Involuntary context switches": "132",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "855392",
+            "Minor (reclaiming a frame) page faults": "36975",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.28",
+            "User time (seconds)": "14.73",
+            "Voluntary context switches": "9"
+          }
+        }
+      ],
+      "schema": "psc0-core-ci-resource-observations/1",
+      "scope": "actual commands; not a complete Core release or performance claim"
+    }
+  },
+  "efficiency": {
+    "nativeSeamCacheMode": "Restore-only established Lean/Lake cache; source rebuild and every prior gate retained",
+    "nativeSeamBuildsSeconds": 15.88,
+    "controlledSpeedupClaimed": false,
+    "budgetsIncreased": false,
+    "workflowTriggerInputsExpanded": true
+  },
+  "artifacts": [
+    {
+      "id": 12162325839,
+      "name": "psc0-core-first-authoring-ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+      "sizeInBytes": 3152183,
+      "digest": "sha256:8953a9eddefb3932cb7b539aeb927c12f2e36ee1cd73623eada7bf512d422484",
+      "expired": false,
+      "createdAt": "2026-10-19T03:47:02Z",
+      "expiresAt": "2026-11-18T03:47:01Z",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12162325839"
+    },
+    {
+      "id": 12162151136,
+      "name": "psc0-core-language-baseline-ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+      "sizeInBytes": 729508,
+      "digest": "sha256:0a1a286165e44995d3d16798e0123cbf952be30383aac329a10f53775d698c37",
+      "expired": false,
+      "createdAt": "2026-10-19T03:46:20Z",
+      "expiresAt": "2026-11-18T03:46:19Z",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12162151136"
+    },
+    {
+      "id": 12161802593,
+      "name": "psc0-core-bootstrap-ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+      "sizeInBytes": 5334,
+      "digest": "sha256:310ee06bf26383b1904f819477a9d5279dce1662928c8d3fcfca3d94940f50f0",
+      "expired": false,
+      "createdAt": "2026-10-19T03:39:46Z",
+      "expiresAt": "2026-11-18T03:39:45Z",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12161802593"
+    },
+    {
+      "id": 12161473692,
+      "name": "psc0-core-first-seams-ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+      "sizeInBytes": 15543,
+      "digest": "sha256:66ec4d0545e2d79be8cfde9330d1511ed31837c66fc9cda06772786f5cfd5430",
+      "expired": false,
+      "createdAt": "2026-10-19T03:39:53Z",
+      "expiresAt": "2026-11-18T03:39:52Z",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12161473692"
+    },
+    {
+      "id": 12161433868,
+      "name": "psc0-core-first-source-audit-ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+      "sizeInBytes": 114403,
+      "digest": "sha256:6b734256ea67cef74b6cd69655cf06dd9df724be0309460efe0d70ddfb2bb547",
+      "expired": false,
+      "createdAt": "2026-10-19T03:39:46Z",
+      "expiresAt": "2026-11-18T03:39:45Z",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12161433868"
+    }
+  ],
+  "precedingRun": {
+    "head": "bdd6941e79abc292a8e734671dec4715eb8018b5",
+    "run": 39195122996,
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 117876137171,
+        "name": "bootstrap-closure",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117876137173,
+        "name": "source-inventory",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117876137216,
+        "name": "candidate-authoring",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117876137270,
+        "name": "native-seams",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "successorReason": "Read-only review strengthened the public re-export positive to use module headers on provider and client, and added exact workflow triggers for consumed CLI/native harness inputs. Production parser code is unchanged in the successor."
+  },
+  "executionPlan": {
+    "priority": "core-language-M1-M5-then-selfhost",
+    "conformanceRegister": "psc0/docs/PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md",
+    "completedCoreMilestones": [],
+    "completedSelfhostStages": [],
+    "completeFixtureMappingQualified": false
+  },
+  "remaining": [
+    "Complete selected Core capability/interaction-to-fixture mapping",
+    "Remaining module visibility scopes and native/module-kind/non-exposed-body correspondence",
+    "Checked computed/let elimination targets and induction distinct-index guard",
+    "Remaining Core data/recursion/deriving/control/runtime requirements",
+    "Complete dependency-closed Core profile and exact runtime identity",
+    "Applicable target execution and promised assurance/model/refinement evidence",
+    "Actual authenticated artifact/incremental consumers and reconstruction",
+    "Whole compiler-sufficient Bootstrap, complete-source conversions and Stage1-3 after M1-M5"
+  ],
+  "completeCoreProfileQualified": false,
+  "completeCoreBackendExecutionQualified": false,
+  "nativeElaborationParityQualified": false,
+  "wholeCompilerSelfhostQualified": false,
+  "documentationIsLoadableAuthority": false,
+  "mergeOrPublicationAuthorized": false
+}

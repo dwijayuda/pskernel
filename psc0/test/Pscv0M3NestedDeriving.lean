@@ -28,7 +28,34 @@ inductive M3NestedIndexedDisplay (A : Type u) (a : A) : Nat → Type u where
   | leaf (value : A) : M3NestedIndexedDisplay A a 0
   | row (n : Nat) (children : List (M3NestedIndexedDisplay A a 0)) :
       M3NestedIndexedDisplay A a (Nat.succ n)
-  deriving Repr
+  deriving Repr, BEq
+
+private def expectNativeNestedMissingBEq : Lean.Elab.Command.CommandElabM Unit := do
+  let source := "inductive M3NestedMissingBEq : Nat → Type where\n  | leaf (value : Nat → Nat) : M3NestedMissingBEq 0\n  | row (n : Nat) (children : List (M3NestedMissingBEq 0)) : M3NestedMissingBEq (Nat.succ n)\n  deriving BEq\n"
+  let command ← match Lean.Parser.runParserCategory (← Lean.getEnv)
+      (Lean.Name.mkSimple "command") source with
+    | .ok command => pure command
+    | .error message => throwError "native indexed nested BEq refusal did not parse: {message}"
+  let saved ← get
+  try
+    modify fun (state : Lean.Elab.Command.State) =>
+      { state with messages := Lean.MessageLog.empty, snapshotTasks := #[] }
+    let messages ← Lean.Elab.Tactic.GuardMsgs.runAndCollectMessages command
+    let errors := messages.toList.filter fun message => message.severity == .error
+    unless errors.length == 1 do
+      throwError "native indexed nested BEq expected one dictionary refusal, got {errors.length}"
+    for error in errors do
+      let message ← error.data.toString
+      if ["heartbeat", "recursion depth", "maximum recursion", "timeout"].any
+          (fun marker => (message.splitOn marker).length > 1) then
+        throwError "native indexed nested BEq refusal exhausted resources: {message}"
+      unless (message.splitOn "BEq").length > 1 &&
+          (message.splitOn "failed to synthesize").length > 1 do
+        throwError "native indexed nested BEq reached the wrong refusal owner: {message}"
+  finally
+    set saved
+
+run_cmd expectNativeNestedMissingBEq
 
 inductive M3NestedAtom where
   | atom (flag : Bool)
@@ -100,6 +127,17 @@ def beqOutput (flag : Bool) : UInt64 :=
   let right := branch n m
   bits (x == x) (x == y) (y == x) (x == .leaf n) (.leaf n == x)
     (left == right) (left == .direct (.leaf n))
+
+def indexedBEqOutput (flag : Bool) : UInt64 :=
+  let n := payload flag
+  let x := indexed n
+  let y := indexed (if flag then n else n + 1)
+  let short : M3NestedIndexedDisplay Nat 0 3 := .row 2 [.leaf n]
+  let empty : M3NestedIndexedDisplay Nat 0 3 := .row 2 []
+  let leaf : M3NestedIndexedDisplay Nat 0 0 := .leaf n
+  let other : M3NestedIndexedDisplay Nat 0 0 := .leaf (n + 1)
+  bits (x == x) (x == y) (y == x) (x == short) (short == x)
+    (empty == empty) (leaf == other)
 
 def arrayValue (n m : Nat) : M3NestedDisplay Nat 0 :=
   .array (Array.mk [.direct (.leaf n), .direct (.leaf m)])
@@ -198,6 +236,7 @@ private def runtimeSource : String :=
     " } else { " ++ literal (M3NestedDerivingOracle.indexedText false) ++ " }\n" ++
   " let actual: String := Std.Format.pretty(Repr.reprPrec(m3NestedIndexedDisplayValue(n), prec), width, 0, 0)\n" ++
   " if (actual == expected) { UInt64.ofNat(1) } else { UInt64.ofNat(0) }\n}\n" ++
+  "function m3nestedindexedbeq(flag: Bool): UInt64 := {\n let n: Nat := if (flag) { 43 } else { 17 }\n let m: Nat := if (flag) { n } else { n + 1 }\n let x: M3NestedIndexedDisplay(Nat, 0, 3) := m3NestedIndexedDisplayValue(n)\n let y: M3NestedIndexedDisplay(Nat, 0, 3) := m3NestedIndexedDisplayValue(m)\n let short: M3NestedIndexedDisplay(Nat, 0, 3) := M3NestedIndexedDisplay.row(2, List.cons(M3NestedIndexedDisplay.leaf(n), List.nil))\n let empty: M3NestedIndexedDisplay(Nat, 0, 3) := M3NestedIndexedDisplay.row(2, List.nil)\n let leaf: M3NestedIndexedDisplay(Nat, 0, 0) := M3NestedIndexedDisplay.leaf(n)\n let other: M3NestedIndexedDisplay(Nat, 0, 0) := M3NestedIndexedDisplay.leaf(n + 1)\n m3NestedDerivingBits(x == x, x == y, y == x, x == short, short == x, empty == empty, leaf == other)\n}\n" ++
   "function m3nestedbeq(flag: Bool): UInt64 := {\n" ++
   " let n: Nat := if (flag) { 43 } else { 17 }\n" ++
   " let m: Nat := if (flag) { n + 1 } else { n + 2 }\n" ++
@@ -504,7 +543,8 @@ private def checkPlans (environment : PsEnvironment)
   ensure (plan.parametersRev.length == 2 && plan.elimination.slots.length == 9 &&
     psInductiveEliminationNumMinors plan.elimination == 18)
     "nested deriving did not retain the complete dependent-parameter nine-slot group"
-  let marked := psElabDeriveRequirements plan (psRootName "Repr")
+  let marked ← fromExcept ((psElabDeriveRequirements plan (psRootName "Repr")).mapError
+    psCompilerPscv0ElabError)
   ensure (marked.requirementsRev.length == 1)
     "Repr generated a dictionary for the value parameter or a recursive family"
   let atomic ← fromExcept (plan.elimination.slots.mapM fun slot =>
@@ -535,9 +575,21 @@ private def checkPlans (environment : PsEnvironment)
   ensure (indexed.indicesRev.length == 1 &&
     indexed.elimination.slots.map (·.family.numIndices) == [1, 0])
     "nested Repr reused the public index telescope for the auxiliary List"
-  expectRefused "indexed nested BEq" "deriving indexed families is not yet implemented"
-    (psElabDeriveGroupHandler environment indexedOrigin
-      { segments := ["BEq"], span := indexedOrigin.span })
+  let derived ← fromExcept ((psElabDeriveGroupHandler environment indexedOrigin
+    { segments := ["BEq"], span := indexedOrigin.span }).mapError psCompilerPscv0ElabError)
+  let [.definitionDecl name levels type value] := derived
+    | throw (IO.userError "indexed nested BEq did not generate its real dictionary")
+  ensure (psNameEq name (psNameAppendStr (psRootName "M3NestedIndexedDisplay") "instBEq"))
+    "indexed nested BEq changed its canonical generated identity"
+  let _ ← fromExcept ((psElabResolvedTerm (psElabContextEmpty environment levels)
+    value (some type)).mapError psCompilerPscv0ElabError)
+  let (missing, missingOrigin) ← fromExcept (elaborateGroup
+    "inductive M3NestedMissingBEq: Nat -> Type where { | leaf(value: Nat -> Nat): M3NestedMissingBEq(0) | row(n: Nat, children: List(M3NestedMissingBEq(0))): M3NestedMissingBEq(Nat.succ(n)) }\n")
+  let missingEnvironment ← add environment missing.declarations
+  expectRefused "indexed nested field has no function dictionary"
+    "PSCV0-DATA: deriving field has no checked instance (at indexed BEq field dictionary)"
+    (psElabDeriveGroupHandler missingEnvironment missingOrigin
+      { segments := ["BEq"], span := missingOrigin.span })
 
 private def boolAnd (left right : PsExpr) : PsExpr :=
   let bool := PsExpr.constE psBoolName []
@@ -622,6 +674,7 @@ private def outputCases : List (String × (Bool → UInt64)) :=
   [("m3nestedrepr", fun _ => 3),
    ("m3nestedtuplerepr", fun _ => 1),
    ("m3nestedindexedrepr", fun _ => 1),
+   ("m3nestedindexedbeq", M3NestedDerivingOracle.indexedBEqOutput),
    ("m3nestedbeq", M3NestedDerivingOracle.beqOutput),
    ("m3nestedarraybeq", M3NestedDerivingOracle.arrayOutput),
    ("m3nestedatombeq", M3NestedDerivingOracle.atomOutput)]
@@ -667,9 +720,9 @@ def main (args : List String) : IO Unit := do
   -- Both handlers see the same pre-instance environment. They cannot search
   -- for a partially generated self/group dictionary during induction.
   let ordinary ← derive input origin ["Repr", "BEq"]
-  let dependent ← derive input indexedOrigin ["Repr"]
+  let dependent ← derive input indexedOrigin ["Repr", "BEq"]
   let instances := ordinary ++ dependent
-  ensure (instances.length == 5) "nested deriving did not generate each requested public instance"
+  ensure (instances.length == 6) "nested deriving did not generate each requested public instance"
   let registered ← inPhase "admit derived instances" <| register input instances
   let orderEquations ← inPhase "check comparison order" <| checkComparisonOrder registered
   let logical ← inPhase "elaborate logical source" <| sourceResult registered logicalSource
@@ -679,9 +732,9 @@ def main (args : List String) : IO Unit := do
   let prepared ← inPhase "prepare checked runtime" <| fromExcept ((psCompilerPrepareElaboratedWithOutput
     { environment := runtime.result.environment, declarations }).mapError psCompilerPscv0Error)
   let workers := prepared.prepared.recursorWorkerGroups
-  ensure (workers.length == 5 &&
+  ensure (workers.length == 6 &&
     (workers.filter (fun group => group.workers.length == 9 && group.captureCount == 3)).length == 4 &&
-    (workers.filter (fun group => group.workers.length == 2 && group.captureCount == 3)).length == 1)
+    (workers.filter (fun group => group.workers.length == 2 && group.captureCount == 3)).length == 2)
     "nested deriving lost heterogeneous slot closures or traversed right-side BEq hypotheses"
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
@@ -716,4 +769,4 @@ def main (args : List String) : IO Unit := do
     Lean.Json.mkObj (("flag", Lean.toJson flag) ::
       outputCases.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag)))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_NESTED_DERIVING: PASS checked heterogeneous visible/nested Repr and nonindexed BEq, native collection/tuple formatting, List/Array comparison order, real dictionaries and all recursor signatures; five-target parity follows"
+  IO.println "PSCV0_M3_NESTED_DERIVING: PASS checked heterogeneous visible/nested Repr and indexed/nonindexed BEq, native function-dictionary refusal, collection/tuple formatting, List/Array comparison order, real dictionaries and all recursor signatures; five-target parity follows"

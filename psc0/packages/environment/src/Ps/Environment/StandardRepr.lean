@@ -5,9 +5,7 @@ Apache-2.0; see THIRD_PARTY_NOTICES.md.
 Modified: checked Core construction, ordinary shared runtime erasure.
 -/
 import Ps.Environment.StandardToFormat
-
-def psReprText (text : String) : PsExpr :=
-  psFormatCall "text" [.lit (.string text)]
+import Ps.Environment.ReprExpr
 
 def psReprMethodType (type : PsExpr) : PsExpr :=
   psLogicPi 2 "value" type (psLogicPi 3 "prec" psOrderNat psFormatType)
@@ -47,9 +45,6 @@ def psReprApiDeclarations : List PsDeclaration :=
       [{ name := "f", type := psFormatType }, { name := "prec", type := psOrderNat }] psFormatType
       (psFormatIf psFormatType (psOrderCall "Nat.ble" [psFormatNat 1024, .fvar 1])
         (psFormatCall "paren" [.fvar 0]) (.fvar 0)) ]
-
-def psReprAddAppParen (document precedence : PsExpr) : PsExpr :=
-  psOrderCall "Repr.addAppParen" [document, precedence]
 
 -- Public scalar methods and their dictionaries share one checked body.
 def psReprScalarMethods : List PsDeclaration :=
@@ -194,3 +189,42 @@ def psStandardReprExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardRegisterInstances environment "ReprAtom" psReprAtomInstances
   { environment with exportedAliases :=
       (psRootName "reprPrec", psDecisionName "Repr.reprPrec") :: environment.exportedAliases }
+
+-- Additional checked Fin dictionaries for the selected data handlers.
+def psStandardFinReprDeclarations : List PsDeclaration :=
+  let fin := PsExpr.app (.constE (psRootName "Fin") []) (.fvar 0)
+  let method := psLogicLam 1 "value" fin
+    (psLogicLam 2 "prec" psOrderNat
+      (psReprPrec psOrderNat (.constE (psDecisionName "PsStandard.instReprNat") [])
+        (.proj (psRootName "Fin") 0 (.fvar 1)) (psFormatNat 0)))
+  [ .definitionDecl (psDecisionName "PsStandard.instReprFin") []
+      (psLogicPi 0 "n" psOrderNat (psFormatClassType "Repr" fin))
+      (psLogicLam 0 "n" psOrderNat (psFormatClassValue "Repr" fin method)) ]
+
+def psStandardFinReprExtend (environment : PsEnvironment) : PsEnvironment :=
+  let environment := psStandardFinReprDeclarations.foldl psPreludeAdd environment
+  -- The frozen collection stage already registered this canonical identity.
+  -- Replacing its checked body does not add a second instance-search entry.
+  let missing := psStandardFinReprDeclarations.filter fun declaration =>
+    !environment.instances.entries.any (fun entry => match entry.value with
+      | .constE name _ => psNameEq name (psDeclarationName declaration)
+      | _ => false)
+  psStandardRegisterInstances environment "Repr" missing
+
+-- Pinned Prelude derives Fin equality from the exact Nat-value comparison;
+-- reflected proof fields do not participate in the Boolean method.
+def psStandardFinBEqDeclarations : List PsDeclaration :=
+  let fin := PsExpr.app (.constE (psRootName "Fin") []) (.fvar 0)
+  let method := psLogicLam 1 "left" fin
+    (psLogicLam 2 "right" fin
+      (psOrderCall "Nat.beq"
+        [.proj (psRootName "Fin") 0 (.fvar 1),
+         .proj (psRootName "Fin") 0 (.fvar 2)]))
+  [ .definitionDecl (psDecisionName "PsStandard.instBEqFin") []
+      (psLogicPi 0 "n" psOrderNat (psFormatClassType "BEq" fin))
+      (psLogicLam 0 "n" psOrderNat (psFormatClassValue "BEq" fin method)) ]
+
+def psStandardFinDerivingExtend (environment : PsEnvironment) : PsEnvironment :=
+  let environment := psStandardFinReprExtend environment
+  let environment := psStandardFinBEqDeclarations.foldl psPreludeAdd environment
+  psStandardRegisterInstances environment "BEq" psStandardFinBEqDeclarations

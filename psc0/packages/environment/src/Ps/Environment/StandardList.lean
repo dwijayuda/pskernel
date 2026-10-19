@@ -1,14 +1,11 @@
 import Ps.Environment.StandardOption
 import Ps.Core.Equality
+import Ps.Environment.ReprExpr
 
 -- Lean 4.35.0 List.rec: result sort first, then element universe.
 def psStandardListRecursor (element : PsLevel := .zero)
     (result : PsLevel := .succ .zero) : PsExpr :=
   .constE psSelfHostListRecName [result, element]
-
-def psStandardListCall (suffix : String) (arguments : List PsExpr)
-    (levels : List PsLevel := [.zero]) : PsExpr :=
-  psLogicApply (.constE (psNameAppendStr psListName suffix) levels) arguments
 
 def psStandardListLengthDeclaration : PsDeclaration :=
   let u := PsLevel.param (psRootName "u")

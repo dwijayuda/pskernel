@@ -240,6 +240,7 @@ def psPrintLeanTermWithFuel
       | .doE items _ => do
           let body ← psPrintDoItems false smaller 4096 items
           return "do\n  " ++ body.replace "\n" "\n  "
+      | .calcE steps _ => psPrintCalc smaller remaining steps
       | .byE tactics _ _ => do
           let body ← psPrintTactics smaller 4096 tactics
           return "by\n  " ++ body.replace "\n" "\n  "
@@ -391,35 +392,34 @@ def psPrintLeanTermWithFuel
                               " := "
                               printedValue
                               (psPrintLeanConcat2 "; " printedBody))
-      | .ifE proofName condition thenBranch elseBranch _ =>
-          match smaller condition with
-          | Except.error error => Except.error error
-          | Except.ok printedCondition =>
-              match smaller thenBranch with
-              | Except.error error => Except.error error
-              | Except.ok printedThen =>
-                  match smaller elseBranch with
-                  | Except.error error => Except.error error
-                  | Except.ok printedElse =>
-                      Except.ok
-                        (psPrintLeanConcat6
-                          "if "
-                          ((match proofName with
-                            | none => ""
-                            | some name => String.intercalate "." name.segments ++ " : ") ++ printedCondition)
-                          " then "
-                          printedThen
-                          " else "
-                          printedElse)
-      | .matchMany scrutinees alternatives _ => do
-          let scrutinees ← scrutinees.mapM smaller
-          let discriminants := String.intercalate ", " scrutinees
+      | .ifE proofName condition thenBranch elseBranch _ => do
+          let printedCondition ← smaller condition
+          let printedThen ← smaller thenBranch
+          let printedElse ← smaller elseBranch
+          let proofPrefix ← match proofName with
+            | none => pure ""
+            | some name => return (← psPrintSyntaxName name) ++ " : "
+          return "if " ++ proofPrefix ++ printedCondition ++ " then " ++ printedThen ++ " else " ++ printedElse
+      | .matchMany discriminants alternatives generalizing? _ => do
+          let plain := generalizing?.isNone &&
+            discriminants.all (fun discriminant => discriminant.equationName?.isNone)
+          let printed ← discriminants.mapM fun discriminant => do
+            let term ← smaller discriminant.term
+            match discriminant.equationName? with
+            | none => return term
+            | some name => return (← psPrintSyntaxName name) ++ " : " ++ term
+          let discriminants := String.intercalate ", " printed
+          let configuration := match generalizing? with
+            | none => ""
+            | some flag => "(generalizing := " ++ (if flag then "true" else "false") ++ ") "
           let alternatives ← alternatives.mapM fun (patterns, body, _) => do
             let patterns ← patterns.mapM psPrintPattern
             let body ← smaller body
             return "  | " ++ String.intercalate ", " patterns ++ " => " ++ body
-          if alternatives.isEmpty then return "nomatch " ++ discriminants
-          return "match " ++ discriminants ++ " with\n" ++ String.intercalate "\n" alternatives
+          if alternatives.isEmpty && plain then return "nomatch " ++ discriminants
+          if alternatives.isEmpty then
+            throw (.unsupportedSourceForm "native named or configured match requires an alternative")
+          return "match " ++ configuration ++ discriminants ++ " with\n" ++ String.intercalate "\n" alternatives
 
 def psPrintLeanTerm
     (term : PsSyntaxTerm) :
@@ -521,7 +521,7 @@ def psPrintLeanDeclaration
         | .fixedpointDefinition .. => pure "\npartial_fixpoint"
         | .wellFoundedDefinition _ _ _ _ termination _ => psPrintLeanTermination termination
         | _ => pure ""
-      let printedName ← psPrintSyntaxName name
+      let printedName ← psPrintDeclarationName name
       let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
       let annotation ← psPrintDeclarationResult psPrintLeanTerm type
       let printedValue ← psPrintLeanTerm value
@@ -531,14 +531,14 @@ def psPrintLeanDeclaration
       return declarationPrefix ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
         annotation ++ " := " ++ printedValue ++ suffix
   | .partialDefinition name binders type value _ => do
-      let printedName ← psPrintSyntaxName name
+      let printedName ← psPrintDeclarationName name
       let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
       let annotation ← psPrintDeclarationResult psPrintLeanTerm type
       let printedValue ← psPrintLeanTerm value
       return "partial def " ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
         annotation ++ " := " ++ printedValue
   | .theoremDecl name binders type value _ =>
-      match psPrintSyntaxName name with
+      match psPrintDeclarationName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
           let printedBindersResult :
@@ -564,7 +564,7 @@ def psPrintLeanDeclaration
                           printedType
                           (psPrintLeanConcat2 " := " printedValue))
   | .inductiveDecl name params resultType constructors _ =>
-      match psPrintSyntaxName name with
+      match psPrintDeclarationName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
           let printedParamsResult :
@@ -604,7 +604,7 @@ def psPrintLeanDeclaration
                           " where\n"
                           (psPrintJoin "\n" printedConstructors))
   | .structureDecl name params result fields _ => do
-      let name ← psPrintSyntaxName name
+      let name ← psPrintDeclarationName name
       let params ← psPrintLeanMapBinders psPrintLeanBinder params
       let result ← match result with
         | none => pure ""

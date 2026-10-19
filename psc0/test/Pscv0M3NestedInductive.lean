@@ -6,6 +6,64 @@ import PsKernelLean.Admission
 -- declarations as Core metadata or recursive instance assumptions.
 universe u
 
+-- Preserve the formerly refused constructor-local program under native
+-- automatic promotion. Its n becomes a common parameter before nesting.
+inductive Captured : Nat → Type where
+  | branch (n : Nat) (children : List (Captured n)) : Captured n
+
+def capturedTag (value : Captured 2) : Nat :=
+  match value with
+  | .branch _ _ => 0
+
+example : capturedTag (Captured.branch 2 []) = 0 := rfl
+
+run_cmd do
+  let family ← Lean.getConstInfoInduct ``Captured
+  let some (.recInfo recursor) := (← Lean.getEnv).find? ``Captured.rec
+    | throwError "native promoted nested recursor missing"
+  unless family.numParams == 1 && family.numIndices == 0 &&
+      recursor.numParams == 1 && recursor.numIndices == 0 &&
+      recursor.numMotives == 2 && recursor.numMinors == 3 do
+    throwError "native promoted nested parameter/recursor telescope changed"
+
+private def expectNativeNestedLocalRefusal (command : Lean.Syntax) :
+    Lean.Elab.Command.CommandElabM Unit := do
+  let saved ← get
+  let failed ← try
+    modify fun (state : Lean.Elab.Command.State) =>
+      { state with messages := Lean.MessageLog.empty, snapshotTasks := #[] }
+    let messages ← Lean.Elab.Tactic.GuardMsgs.runAndCollectMessages command
+    let errors := messages.toList.filter fun message => message.severity == .error
+    unless errors.length == 1 do
+      throwError "native nested refusal expected one semantic error, got {errors.length}"
+    let mut owned := false
+    for message in errors do
+      let content ← message.data.toString
+      if ["heartbeat", "recursion depth", "maximum recursion", "timeout"].any
+          (fun marker => (content.splitOn marker).length > 1) then
+        throwError "native nested refusal exhausted resources: {content}"
+      if (content.splitOn "nested inductive datatypes parameters cannot contain local variables").length > 1 then
+        owned := true
+      else
+        throwError "native nested refusal reached the wrong owner: {content}"
+    pure owned
+  finally
+    set saved
+  unless failed do
+    throwError "native nested family did not refuse its constructor-local specialization"
+
+run_cmd do
+  let source := "inductive CapturedLocal : Nat → Type where\n  | zero : CapturedLocal 0\n  | branch (n : Nat) (children : List (CapturedLocal n)) : CapturedLocal n\n"
+  let command ← match Lean.Parser.runParserCategory (← Lean.getEnv) `command source
+      "CapturedLocalNative.lean" with
+    | .ok command => pure command
+    | .error error => throwError "native nested refusal source did not parse: {error}"
+  expectNativeNestedLocalRefusal command
+
+inductive M3FunctionNested where
+  | node (children : List (Nat → M3FunctionNested))
+example : M3FunctionNested := .node [fun _ => .node []]
+
 inductive M3NestedShape (A : Type u) (a : A) : Type u where
   | leaf (value : A)
   | direct (child : M3NestedShape A a)
@@ -248,12 +306,15 @@ private def elaborateGroup (text : String) :
     | _ => throw "nested fixture expected native inductive members"
   let first :: _ := sources | throw "nested fixture has no group source"
   let result ← (psElabInductiveGroup psSelfHostProdPreludeEnvironment chunks [psRootName "u"]).mapError
-    psCompilerPscv0ElabError
+    (fun error => "nested group " ++
+      psNameToString ((psSyntaxNameToName (psElabOriginSource first).fst).getD .anonymous) ++
+      ": " ++ psCompilerPscv0ElabError error)
   let origin := psElabBatchOriginAt 0 first (psElabStableMemberOrigins result.declarations 0) none
   return (result, origin)
 
 private def add (environment : PsEnvironment) (declarations : List PsDeclaration) : IO PsEnvironment :=
-  fromExcept ((psAddDeclarationList environment declarations).mapError psCompilerPscv0ElabError)
+  fromExcept ((psAddDeclarationList environment declarations).mapError
+    (fun error => "nested checked insertion: " ++ psCompilerPscv0ElabError error))
 
 private def selectedOrigin (origin : PsElabBatchOrigin) (name : PsName) : PsElabBatchOrigin :=
   {
@@ -498,14 +559,17 @@ private def remove (environment : PsEnvironment) (name : PsName) : PsEnvironment
     index := psEnvironmentIndexSetWorker 16 environment.index hash
       (psEnvironmentRemoveName name bucket) }
 
+private def capturedSource : String :=
+  "inductive Captured: Nat -> Type where { | branch(n: Nat, children: List(Captured(n))): Captured(n) }\nfunction capturedTag(value: Captured(2)): Nat := match value with { | Captured.branch _ _ => 0 }\ntheorem capturedTagEquation: capturedTag(Captured.branch(2, List.nil)) = 0 := by { rfl }\n"
+
 private def checkRefusals (environment : PsEnvironment) (shape : PsElabDeclarationBatchResult)
     (origin : PsElabBatchOrigin) (probe : PsExpr) : IO Unit := do
   expectSourceRefused environment "constructor-local specialization"
-    "inductive Captured: Nat -> Type where { | branch(n: Nat, children: List(Captured(n))): Captured(n) }\n"
+    "inductive CapturedLocal: Nat -> Type where { | zero: CapturedLocal(0) | branch(n: Nat, children: List(CapturedLocal(n))): CapturedLocal(n) }\n"
     "nested specialization requires selected containers and common parameters only"
-  expectSourceRefused environment "function-valued nested field"
-    "inductive FunctionNested where { | node(children: List(Nat -> FunctionNested)) }\n"
-    "unsupported recursive field; expected a positive direct family occurrence"
+  expectSourceRefused environment "negative function domain inside List"
+    "inductive NegativeFunctionNested where { | node(children: List(NegativeFunctionNested -> Nat)) }\n"
+    "recursive family occurs in a function-field domain"
   expectSourceRefused environment "nonuniform occurrence erased by beta reduction"
     "inductive ErasedNonuniform(A: Type) where { | hide(value: (fun (T: Type) => Nat)(ErasedNonuniform(Nat))) }\n"
     "constructor parameters must remain uniform"
@@ -659,22 +723,30 @@ def main (args : List String) : IO Unit := do
   let (mutualGroup, mutualOrigin) ← fromExcept (elaborateGroup mutualSource)
   let (indexed, indexedOrigin) ← fromExcept (elaborateGroup indexedSource)
   let (keyGroup, _) ← fromExcept (elaborateGroup keySource)
-  let groups := shape.declarations ++ mutualGroup.declarations ++ indexed.declarations
+  let (functionGroup, _) ← fromExcept (elaborateGroup
+    "inductive M3FunctionNested where { | node(children: List(Nat -> M3FunctionNested)) }\n")
+  let groups := shape.declarations ++ mutualGroup.declarations ++ indexed.declarations ++ functionGroup.declarations
   let input ← add psSelfHostProdPreludeEnvironment (groups ++ keyGroup.declarations)
   oneAdmission input shape.declarations 1
   oneAdmission input mutualGroup.declarations 2
   oneAdmission input indexed.declarations 1
   oneAdmission input keyGroup.declarations 1
+  oneAdmission input functionGroup.declarations 1
   checkPlans input
   let origins := [shapeOrigin,
     selectedOrigin mutualOrigin (psRootName "M3NestedLeft"),
     selectedOrigin mutualOrigin (psRootName "M3NestedRight"), indexedOrigin]
-  let folds ← fromExcept ((origins.mapM (fold input)).mapError psCompilerPscv0ElabError)
+  let folds ← fromExcept (origins.mapM fun origin =>
+    (fold input origin).mapError (fun error => "nested fold " ++
+      psNameToString ((psSyntaxNameToName origin.sourceName).getD .anonymous) ++
+      ": " ++ psCompilerPscv0ElabError error))
   -- All handlers see the same pre-instance environment. Recursive children
   -- therefore cannot obtain a dictionary for a partially generated instance.
-  let derived ← fromExcept (([shapeOrigin, mutualOrigin, indexedOrigin].mapM fun origin =>
-    psElabDeriveGroupHandler input origin { segments := ["Hashable"], span := origin.span }).mapError
-      psCompilerPscv0ElabError)
+  let derived ← fromExcept ([shapeOrigin, mutualOrigin, indexedOrigin].mapM fun origin =>
+    (psElabDeriveGroupHandler input origin { segments := ["Hashable"], span := origin.span }).mapError
+      (fun error => "nested Hashable " ++
+        psNameToString ((psSyntaxNameToName origin.sourceName).getD .anonymous) ++
+        ": " ++ psCompilerPscv0ElabError error))
   let instances := derived.flatten
   ensure (folds.length == 4 && instances.length == 4) "nested group did not generate each selected method"
   let methods ← add input (folds ++ instances)
@@ -691,6 +763,20 @@ def main (args : List String) : IO Unit := do
     { environment := runtime.result.environment, declarations }).mapError psCompilerPscv0Error)
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  let captured ← sourceResult psSelfHostProdPreludeEnvironment capturedSource
+  let some capturedInfo := psEnvironmentFindInductive captured.result.environment (psRootName "Captured")
+    | throw (IO.userError "promoted nested family missing")
+  let some capturedRec := psEnvironmentFindRecursor captured.result.environment
+      (psNameAppendStr (psRootName "Captured") "rec")
+    | throw (IO.userError "promoted nested recursor missing")
+  ensure (capturedInfo.numParams == 1 && capturedInfo.numIndices == 0 &&
+    capturedRec.numParams == 1 && capturedRec.numIndices == 0 &&
+    capturedRec.numMotives == 2 && capturedRec.numMinors == 3)
+    "promoted nested family lost the independently checked native telescope"
+  let capturedAdmitted ← checked captured.result.environment prelude
+    (captured.result.declarations ++ signatureWitnesses captured.result.declarations)
+  kernelShapes capturedAdmitted captured.result.declarations
+  IO.println "PSCV0_M3_PROMOTED_NESTED: PASS native promotion, actual parameter/nesting metadata, checked reduction and genuine constructor-local refusal"
   checkKeyKernelOracle input prelude keyGroup.declarations
   let keyAdmitted ← checked input prelude
     (keyGroup.declarations ++ signatureWitnesses keyGroup.declarations)

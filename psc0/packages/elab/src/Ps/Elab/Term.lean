@@ -5,6 +5,7 @@ import Ps.Elab.Universe
 import Ps.Elab.Proof
 import Ps.Elab.WellFounded
 import Ps.Elab.PatternMatrix
+import Ps.Elab.StructuralField
 
 import Ps.Elab.Do
 
@@ -80,7 +81,9 @@ def psElabStructuralCommonChildType (context : PsElabContext)
   let some first := calls.head? | none
   let some declaration := psLocalFindById context.localContext first.fst | none
   let result := psLocalDeclType declaration
-  if calls.all (fun entry =>
+  if let .forallE .. := psWhnf context.environment context.metaContext context.localContext result then
+    none
+  else if calls.all (fun entry =>
       match psLocalFindById context.localContext entry.fst with
       | none => false
       | some child => psDefEqReadOnlyWithEnv
@@ -123,59 +126,51 @@ def psElabValidateStructuralArguments (elaborate : PsElaborator)
 
 def psElabValidateStructuralCall (elaborate : PsElaborator)
     (context : PsElabContext) (recursion : PsElabStructuralRecursion)
-    (arguments : List PsSyntaxTerm) : Except PsElabError (PsElabContext × Nat) := do
+    (arguments : List PsSyntaxTerm) : Except PsElabError (PsElabContext × PsExpr) := do
   let majorId ← psElabCheckStructuralTelescope context recursion
   let some source := arguments[recursion.recursiveParameterIndex]?
     | throw .structuralRecursionArity
-  let (childId, hypothesisId, context, prechecked) ←
+  let (context, major, prechecked) ←
     match psElabSyntaxLocalId context source with
-    | some childId => do
-      let some hypothesisId := psElabStructuralRecursionFindCall recursion.calls childId
-        | throw .structuralRecursionNotDecreasing
-      pure (childId, hypothesisId, context, none)
+    | some childId => pure (context, PsExpr.fvar childId, none)
     | none => do
-      -- Earlier arguments must be unchanged, direct binder references.
-      -- Prechecking the computed major cannot reorder any actual computation;
-      -- the normal telescope still elaborates these references in order.
-      -- Other changing-prefix calls may instead use the separately checked
-      -- state-parameter worker normalization, never a synthetic IH.
+      -- Prechecking the major must not reorder computation in earlier slots.
       let fixedPrefix := recursion.explicitParameterIds.take recursion.recursiveParameterIndex
       let sourcePrefix := arguments.take recursion.recursiveParameterIndex
       if fixedPrefix.length != sourcePrefix.length ||
           !(fixedPrefix.zip sourcePrefix).all (fun entry =>
             psElabSyntaxLocalId context entry.snd == some entry.fst) then
         throw .structuralRecursionInvariantArgument
-      let expected := psElabStructuralCommonChildType context recursion.calls
-      let checked ← elaborate context source expected
-      -- The operator's class dictionary may be a deferred ordinary
-      -- synthetic constraint. Resolve available non-default evidence before
-      -- comparing with existing induction hypotheses; never force default
-      -- instances or resume a suspended source in the wrong lexical scope.
-      -- No pending work needs a scheduler pass. The ordinary queue solver
-      -- remains responsible for all non-default constraints when present.
+      let checked ← elaborate context source
+        (psElabStructuralCommonChildType context recursion.calls)
       let progressed ← if checked.context.pending.isEmpty then pure checked.context
         else psElabProgressPending elaborate checked.context
       let checked := { checked with context := progressed }
-      let some (childId, hypothesisId) :=
-        psElabStructuralDefEqChild checked.context checked.term recursion.calls
-        | throw .structuralRecursionNotDecreasing
-      pure (childId, hypothesisId, checked.context,
+      pure (checked.context, checked.term,
         some (recursion.recursiveParameterIndex, checked))
-  let some child := psLocalFindById context.localContext childId
-    | throw .structuralRecursionInternal
+  let some (childId, fieldArgs) := psElabStructuralFieldArguments context
+      (recursion.calls.map Prod.fst) major | throw .structuralRecursionNotDecreasing
+  let some hypothesisId := psElabStructuralRecursionFindCall recursion.calls childId
+    | throw .structuralRecursionNotDecreasing
+  let hypothesis ← psElabApplyCore context (.fvar hypothesisId) fieldArgs
+  let context := hypothesis.context
+  let majorType ← (psInferType context.environment context.metaContext
+    context.localContext major).mapError PsElabError.infer
   let childType := psExprAppView (psWhnf context.environment context.metaContext
-    context.localContext (psLocalDeclType child))
+    context.localContext majorType)
   let .constE family _ := childType.head | throw .structuralRecursionInternal
   let some info := psEnvironmentFindInductive context.environment family
     | throw .structuralRecursionInternal
+  if !fieldArgs.isEmpty && !(← psElabStructuralFieldSortAllowed context info hypothesis.type) then
+    throw .structuralRecursionNotDecreasing
   let indices := childType.args.drop info.numParams
   let substitutions ← recursion.indices.mapM fun entry => do
     let some value := indices[entry.snd]? | throw .structuralRecursionInternal
     return (entry.fst, value)
   let context ← psElabValidateStructuralArguments elaborate
-    (substitutions ++ [(majorId, .fvar childId)]) recursion.explicitParameterIds
+    (substitutions ++ [(majorId, major)]) recursion.explicitParameterIds
     arguments context prechecked
-  return (context, hypothesisId)
+  return (context, hypothesis.term)
 
 def psElabStructuralNameIsLocal (context : PsElabContext) (name : PsName) : Bool :=
   match psLocalFindUser context.localContext name with
@@ -191,8 +186,8 @@ def psTryElabStructuralSelfCall (elaborate : PsElaborator)
   if !psNameEq calledName recursion.functionName || psElabStructuralNameIsLocal context calledName then
     return none
   if arguments.length != recursion.explicitParameterIds.length then throw .structuralRecursionArity
-  let (context, hypothesisId) ← psElabValidateStructuralCall elaborate context recursion arguments
-  let result ← psElabResolvedTerm context (.fvar hypothesisId) expected
+  let (context, hypothesis) ← psElabValidateStructuralCall elaborate context recursion arguments
+  let result ← psElabResolvedTerm context hypothesis expected
   return some result
 
 def psElabStructuralReferenceEscapes
@@ -254,7 +249,8 @@ def psElabTermWithFuel
             | .operatorE .. => psElabOperator smaller context term expected
             | .doE items _ => psElabDo smaller context items expected
             | .byE tactics scope _ => psElabProof smaller context tactics scope expected
-            | .hole _ => Except.ok (psElabHole context expected)
+            | .hole span => psElabSourceHole context span expected
+            | .calcE steps _ => psElabCalc smaller context steps expected
             | .omittedType _ => Except.error (.data "PSCV0-RESULT-ANNOTATION: omitted result syntax is declaration-only")
             | .optionalType _ _ _ => Except.error PsElabError.unsupportedTerm
             | .ascription value type _ => psElabAscription smaller context value type expected
@@ -341,13 +337,8 @@ def psElabTermWithFuel
                   thenBranch
                   elseBranch
                   expected
-            | .matchMany scrutinee alternatives _ =>
-                psElabMatchMatrix
-                  smaller
-                  context
-                  scrutinee
-                  alternatives
-                  expected
+            | .matchMany discriminants alternatives generalizing? _ =>
+                psElabMatchMatrixSource smaller context discriminants alternatives generalizing? expected
             | .app fn args _ =>
                 -- An adjacent empty call has its own completion path above.
                 match args with

@@ -2,6 +2,7 @@ import Ps.Core.Declaration
 import Ps.Core.Equality
 import Ps.Elab.Recursion
 import Ps.Elab.Data
+import Ps.Elab.SourceNames
 
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
@@ -11,6 +12,7 @@ structure PsElabDeclarationResult where
 structure PsElabModuleResult where
   environment : PsEnvironment
   declarations : List PsDeclaration
+  commandDiagnostics : List PsDiagnostic := []
 
 -- Origins attach to the actual output batch of one source declaration.
 -- Source and member indices are local; module identity is attached by the caller.
@@ -60,6 +62,7 @@ structure PsElabBatchOrigin where
   mutualGroup : Option PsElabMutualGroupOrigin := none
   localDefinitions : List PsElabLocalDefinitionOrigin := []
   diagnostics : List PsDiagnostic := []
+  sourceEquations : List PsSourceEquations := []
 
 structure PsElabOriginError where
   error : PsElabError
@@ -183,8 +186,8 @@ def psElabStructuralRecursionFromSource
     (resultType : PsExpr) :
     Option PsElabStructuralRecursion :=
   match body with
-  | .matchMany [scrutinee] _ _ =>
-      match scrutinee with
+  | .matchMany [scrutinee] _ _ _ =>
+      match scrutinee.term with
       | .reference scrutineeName =>
           match psSyntaxNameToName scrutineeName with
           | none =>
@@ -251,6 +254,9 @@ def psElabDeclarationParts
     binderResult.bindersRev annotation.type
   if psExprHasTermMeta (psMetaInstantiate annotation.context.metaContext header) then
     throw (.data "PSCV0-DECLARATION-HEADER: an explicit header must resolve parameter and result types before the body")
+  if isTheorem then
+    psElabCheckDeclarationUniverseUsage [nameSyntax]
+      [psMetaInstantiate annotation.context.metaContext header]
   let valueContext := if isTheorem then annotation.context else
     psElabContextWithStructuralRecursion annotation.context
       (psElabStructuralRecursionFromSource name binderResult.bindersRev
@@ -273,17 +279,18 @@ def psElabDeclarationParts
 def psElabPartialDeclaration (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
     (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
-    (typeSyntax valueSyntax : PsSyntaxTerm) :
+    (typeSyntax valueSyntax : PsSyntaxTerm) (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationResult := do
   let some name := psSyntaxNameToName nameSyntax | throw .emptyName
   let binderResult ← psElabTypedBinders psElabDeclarationTermCallback
-    (psElabContextEmpty environment) binders
+    (psElabContextEmpty environment levelNames) binders
   let annotation ← psElabType psElabDeclarationTermCallback binderResult.context typeSyntax
   let openType := psMetaInstantiate annotation.context.metaContext annotation.type
   let closedType := psCloseElabForallBinders annotation.context.metaContext
     binderResult.bindersRev openType
   if psExprHasUnresolvedMeta closedType then throw .unresolvedMetavariable
-  let header := PsDeclaration.axiomDecl name [] closedType
+  let header := PsDeclaration.axiomDecl name
+    (psElabDeclarationLevels levelNames [closedType]) closedType
   let some withSelf := psEnvironmentAdd environment header
     | throw (.duplicateDeclaration name)
   let value ← psElabTerm (psElabContextWithEnvironment annotation.context withSelf)
@@ -294,7 +301,8 @@ def psElabPartialDeclaration (environment : PsEnvironment)
   if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd then
     throw .unresolvedMetavariable
   return {
-    declaration := .partialDecl name [] closed.snd closed.fst
+    declaration := .partialDecl name
+      (psElabDeclarationLevels levelNames [closed.snd, closed.fst]) closed.snd closed.fst
     metaContext
     sourceInfo := psElabFinishSourceInfo value.context name }
 
@@ -317,7 +325,7 @@ def psElabDeclaration
         name
         binders
         type
-        value
+        value levelNames
   | .noncomputableDefinition .. =>
       Except.error (.data "PSCV0-NONCOMPUTABLE-BATCH: noncomputable policy requires typed command-batch elaboration")
   | .fixedpointDefinition _ _ _ _ _ =>
@@ -438,6 +446,8 @@ def psElabDeclarationBatchStable
       | .ok result =>
           .ok {
             declarations := [result.declaration, result.equation]
+            sourceEquations := [psSourceEquationsSingle
+              (psDeclarationName result.declaration) (psDeclarationName result.equation)]
             sourceInfo := [result.sourceInfo]
           }
   | .inductiveDecl name params resultType constructors _ =>
@@ -466,7 +476,7 @@ def psElabDeclarationBatchStable
 -- Historical callers can request the unchanged stable elaborator explicitly.
 -- The ordinary path keeps its one typed normalization attempt for the same
 -- capability refusal. Origins are recorded from that execution, not a replay.
-def psElabDeclarationBatchWithOrigins
+def psElabDeclarationBatchWithOriginsCore
     (environment : PsEnvironment) (sourceIndex : Nat)
     (source : PsSyntaxDeclaration) (levelNames : List PsName := []) :
     Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult :=
@@ -477,7 +487,8 @@ def psElabDeclarationBatchWithOrigins
       Except.ok
         (PsElabDeclarationBatchWithOriginsResult.mk result
           { (psElabBatchOriginAt sourceIndex source members Option.none) with
-            sourceInfo := result.sourceInfo })
+            sourceInfo := result.sourceInfo
+            sourceEquations := result.sourceEquations })
   | Except.error error =>
       match error with
       | PsElabError.structuralRecursionInvariantArgument
@@ -527,6 +538,38 @@ def psElabDeclarationBatchWithOrigins
             (psElabOriginErrorAt sourceIndex source
               PsElabOriginPhase.stableDeclaration error)
 
+def psElabDeclarationUniverseTypeOnly : PsSyntaxDeclaration → Bool
+  | .whereDeclaration parent _ _ => psElabDeclarationUniverseTypeOnly parent
+  | .theoremDecl .. => true
+  | _ => false
+
+def psElabDeclarationUniverseExpressions (source : PsSyntaxDeclaration)
+    (declarations : List PsDeclaration) : List PsExpr :=
+  declarations.flatMap fun declaration =>
+    let type := psDeclarationType declaration
+    if psElabDeclarationUniverseTypeOnly source then [type]
+    else
+      match declaration with
+      | .definitionDecl _ _ _ value | .theoremDecl _ _ _ value
+      | .opaqueDecl _ _ _ value | .partialDecl _ _ _ value => [type, value]
+      | _ => [type]
+
+-- The incoming universe list belongs to the surrounding command scope.
+-- Expand/check the retained declId suffix once, before source elaboration;
+-- explicit usage is checked on the actual complete closed output batch.
+def psElabDeclarationBatchWithOrigins
+    (environment : PsEnvironment) (sourceIndex : Nat)
+    (source : PsSyntaxDeclaration) (levelNames : List PsName := []) :
+    Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult := do
+  let sourceName := (psElabOriginSource source).fst
+  let available ← (psElabDeclarationUniverseNames levelNames [sourceName]).mapError
+    (psElabOriginErrorAt sourceIndex source .stableDeclaration)
+  let result ← psElabDeclarationBatchWithOriginsCore environment sourceIndex source available
+  (psElabCheckDeclarationUniverseUsage [sourceName]
+    (psElabDeclarationUniverseExpressions source result.result.declarations)).mapError
+      (psElabOriginErrorAt sourceIndex source .stableDeclaration)
+  return result
+
 def psElabDeclarationBatch
     (environment : PsEnvironment) (source : PsSyntaxDeclaration)
     (levelNames : List PsName := []) :
@@ -543,6 +586,15 @@ def psPrependBatchReverse
     (psElabReverseDeclarations declarations)
     declarationsRev
 
+-- Internal scoped batches use psElabDeclarationBatchWithOrigins above.
+-- The legacy public source-list/module entry points validate original syntax.
+def psElabSourceDeclarationBatchWithOrigins (environment : PsEnvironment)
+    (sourceIndex : Nat) (source : PsSyntaxDeclaration) :
+    Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult := do
+  (psElabSourceDeclarationNames 4096 source).mapError
+    (psElabOriginErrorAt sourceIndex source .stableDeclaration)
+  psElabDeclarationBatchWithOrigins environment sourceIndex source
+
 def psElabDeclarationsWithOriginsWorker
     (sources : List PsSyntaxDeclaration)
     (environment : PsEnvironment)
@@ -556,16 +608,16 @@ def psElabDeclarationsWithOriginsWorker
         (PsElabModuleWithOriginsResult.mk
           (PsElabModuleResult.mk
             environment
-            (psElabReverseDeclarations declarationsRev))
+            (psElabReverseDeclarations declarationsRev) [])
           (psListReverse originsRev) [] [])
   | List.cons source rest =>
-      match psElabDeclarationBatchWithOrigins environment sourceIndex source with
+      match psElabSourceDeclarationBatchWithOrigins environment sourceIndex source with
       | Except.error error => Except.error error
       | Except.ok batch =>
           match
-              psAddDeclarationList
+              psAddDeclarationBatch
                 environment
-                batch.result.declarations with
+                batch.result with
           | Except.error error =>
               Except.error
                 (PsElabOriginError.mk error batch.origin.sourceIndex
@@ -606,7 +658,10 @@ def psElabDeclarations
 def psElabModuleWithOrigins
     (environment : PsEnvironment)
     (sourceModule : PsSyntaxModule) :
-    Except PsElabOriginError PsElabModuleWithOriginsResult :=
+    Except PsElabOriginError PsElabModuleWithOriginsResult := do
+  for entry in sourceModule.imports do
+    (psElabSourceName entry.moduleName).mapError fun error =>
+      PsElabOriginError.mk error 0 entry.moduleName entry.span .stableDeclaration
   psElabDeclarationsWithOriginsWorker
     sourceModule.declarations environment List.nil List.nil 0
 

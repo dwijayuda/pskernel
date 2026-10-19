@@ -19,7 +19,7 @@ def psPscv0ReadValueDeclarationBody (cursor : PsTokenCursor) :
   match psTokenCursorAdvance cursor with
   | none => Except.error "PSCV0-DECLARATION-MISSING"
   | some keyword =>
-      match psParseProofScriptDeclaredName keyword.cursor with
+      match psParseDeclarationName keyword.cursor with
       | Except.error error => Except.error (psPscv0ParseError error)
       | Except.ok name =>
           let bindersResult : Except PsParseError
@@ -38,10 +38,10 @@ def psPscv0ReadValueDeclarationBody (cursor : PsTokenCursor) :
                 else true;
               if signatureValid then
                 -- Omission is selected here for the shared value owner. The
-                -- existing abbrev registration route remains explicit-only;
+                -- inferred abbrev uses its checked registration finalizer;
                 -- v7.2 requires an explicit result annotation for opaque.
                 match psPscv0ReadDeclarationResult
-                    (!["def", "function", "const"].contains keyword.token.text)
+                    (!["def", "function", "const", "abbrev"].contains keyword.token.text)
                     binders.cursor with
                 | Except.error error => Except.error error
                 | Except.ok resultType =>

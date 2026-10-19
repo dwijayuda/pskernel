@@ -46,6 +46,42 @@ def psProofFreshGoals (before : Nat) (context : PsElabContext) : List PsProofGoa
       some { id := entry.id, tag := entry.origin.tag }
     else none
 
+-- Pinned Meta/Tactic/Intro.introN preserves a visible let before reducing
+-- other heads. Unnamed and Name '_' introductions receive an inaccessible
+-- identity; source components cannot forge a numeric local name.
+structure PsProofIntroPrepared where
+  context : PsElabContext
+  body : PsExpr
+  abstraction : PsMetaAbstraction
+  id : Nat
+
+def psProofPrepareIntro (context : PsElabContext) (target : PsExpr)
+    (source : Option PsSyntaxName) : Except PsElabError PsProofIntroPrepared := do
+  let target := psMetaInstantiate context.metaContext target
+  let inaccessible := PsName.num (psRootName "_intro") context.localContext.nextId
+  let name ← match source with
+    | none => pure inaccessible
+    | some source => do
+      let some name := psSyntaxNameToName source | throw .emptyName
+      pure (if psNameEq name (psRootName "_") then inaccessible else name)
+  match target with
+  | .letE _ type value body =>
+    let pushed := psLocalPushLet context.localContext name type value
+    return {
+      context := psElabContextWithLocal context pushed.context
+      body := psExprInstantiate1 body (.fvar pushed.id)
+      abstraction := .letE pushed.id name type value
+      id := pushed.id }
+  | _ =>
+    let pi ← (psInferEnsureForall context.environment context.metaContext
+      context.localContext target).mapError PsElabError.infer
+    let pushed := psLocalPushBinding context.localContext name pi.domain pi.binder
+    return {
+      context := psElabContextWithLocal context pushed.context
+      body := psExprInstantiate1 pi.body (.fvar pushed.id)
+      abstraction := .lambdaE pushed.id name pi.domain pi.binder
+      id := pushed.id }
+
 def psProofIntro (state : PsProofState) (source : Option PsSyntaxName) :
     Except PsElabError PsProofState := do
   let state ← psProofNormalize state
@@ -53,24 +89,40 @@ def psProofIntro (state : PsProofState) (source : Option PsSyntaxName) :
   let context ← psProofContext state goal.id
   let some declaration := psMetaFindDecl context.metaContext goal.id
     | throw (.proof "unknown goal")
-  let pi ← (psInferEnsureForall context.environment context.metaContext
-    context.localContext declaration.type).mapError PsElabError.infer
-  let name ← match source with
-    | none => pure pi.name
-    | some source => match psSyntaxNameToName source with
-      | none => throw .emptyName
-      | some name => pure name
-  let pushed := psLocalPushBinding context.localContext name pi.domain pi.binder
-  let context := psElabContextWithLocal context pushed.context
-  let fresh := psMetaFresh context.metaContext context.localContext
-    (psExprInstantiate1 pi.body (.fvar pushed.id)) .syntheticOpaque
+  let prepared ← psProofPrepareIntro context declaration.type source
+  let fresh := psMetaFresh prepared.context.metaContext prepared.context.localContext
+    prepared.body .syntheticOpaque
   let .mvar child := fresh.expr | throw (.proof "invalid fresh goal")
   let some constraints := psMetaAssignDelayed fresh.context goal.id
-      [.lambdaE pushed.id name pi.domain pi.binder] fresh.expr
+      [prepared.abstraction] fresh.expr
     | throw (.proof "invalid intro scope")
-  let context := psElabContextWithMeta context constraints
+  let context := psElabContextWithMeta prepared.context constraints
   return { (psProofUpdate state context) with
     goals := { id := child, tag := goal.tag } :: rest }
+
+-- Native intros counts only the raw instantiated forall/let prefix.
+def psProofIntrosSize : PsExpr → Nat
+  | .forallE _ _ body _ | .letE _ _ _ body => psProofIntrosSize body + 1
+  | _ => 0
+
+def psProofIntroCount (state : PsProofState) (count : Nat) :
+    Except PsElabError PsProofState := do
+  match count with
+  | 0 => pure state
+  | remaining + 1 => psProofIntroCount (← psProofIntro state none) remaining
+
+def psProofIntros (state : PsProofState) (names : List PsSyntaxName) :
+    Except PsElabError PsProofState := do
+  if !names.isEmpty then
+    names.foldlM (fun current name => psProofIntro current (some name)) state
+  else
+    let state ← psProofNormalize state
+    let goal :: _ := state.goals | throw (.proof "no goals to introduce")
+    let context ← psProofContext state goal.id
+    let some declaration := psMetaFindDecl context.metaContext goal.id
+      | throw (.proof "unknown goal")
+    psProofIntroCount state (psProofIntrosSize
+      (psMetaInstantiate context.metaContext declaration.type))
 
 -- A completed local fact enters only this goal's context. Closing its scope
 -- uses the same deferred abstraction as intro, including nested proof goals.

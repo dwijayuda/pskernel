@@ -45,7 +45,7 @@ def psParseLeanImport
 
 def psLeanReservedApplicationToken (token : PsToken) : Bool :=
   if ["namespace", "section", "end", "open", "include", "omit", "universe",
-      "variable", "private", "abbrev", "opaque", "class", "instance", "mutual",
+      "variable", "private", "public", "module", "abbrev", "opaque", "class", "instance", "mutual",
       "noncomputable", "unsafe", "deriving", "termination_by", "decreasing_by",
       "partial_fixpoint", "monotonicity"].contains token.text then true
   else if psStringEq token.text "def" then
@@ -675,10 +675,7 @@ def psParseLeanBinderNamesWithFuel
             PsTokenKind.identifier with
       | Except.error error => Except.error error
       | Except.ok name =>
-          let sourceName : PsSyntaxName := {
-            segments := List.cons name.token.text List.nil
-            span := name.token.span
-          };
+          let sourceName : PsSyntaxName := (psSyntaxNameFromToken name.token);
           let nextNames :=
             List.cons sourceName namesRev;
           if psTokenCursorAtText name.cursor ":" then
@@ -823,10 +820,7 @@ def psParseLeanBinder
                   match psParseBinderClosing opening type.cursor with
                   | Except.error error => Except.error error
                   | Except.ok closing =>
-                      let binderName : PsSyntaxName := {
-                        segments := List.cons name.token.text List.nil
-                        span := name.token.span
-                      };
+                      let binderName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                       let binder : PsSyntaxBinderHead := {
                         name := binderName
                         kind := opening.kind
@@ -952,16 +946,8 @@ def psParseLeanDependentArrowTail
 def psLeanPatternBinderName
     (token : PsToken)
     (fallback : String) : PsSyntaxName :=
-  let segment :=
-    if psStringEq token.text "_" then
-      fallback
-    else
-      token.text;
-  {
-    segments :=
-      List.cons segment List.nil
-    span := token.span
-  }
+  if psStringEq token.text "_" then PsSyntaxName.mk [fallback] token.span
+  else psSyntaxNameFromToken token
 
 def psParseLeanListPattern
     (cursor : PsTokenCursor) :
@@ -1395,13 +1381,7 @@ def psParseLeanDoWithFuel
                                           afterSemi.cursor with
                                     | Except.error error => Except.error error
                                     | Except.ok body =>
-                                        let nameSyntax : PsSyntaxName := {
-                                          segments :=
-                                            List.cons
-                                              name.token.text
-                                              List.nil
-                                          span := name.token.span
-                                        };
+                                        let nameSyntax : PsSyntaxName := (psSyntaxNameFromToken name.token);
                                         let binderStop : PsSourcePos :=
                                           psLeanTermStop binderType.value;
                                         let binder : PsSyntaxBinderHead := {
@@ -1600,10 +1580,7 @@ def psParseLeanTermWithFuel
                 PsTokenKind.identifier with
             | Except.error error => Except.error error
             | Except.ok name =>
-                let sourceName : PsSyntaxName := {
-                  segments := [name.token.text]
-                  span := name.token.span
-                };
+                let sourceName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                 if psTokenCursorAtText name.cursor ":" then
                   match psTokenCursorAdvance name.cursor with
                   | Option.none =>
@@ -1846,10 +1823,7 @@ def psParseLeanInductiveConstructorsWithFuel
                       [] with
                   | Except.error error => Except.error error
                   | Except.ok fields =>
-                      let sourceName : PsSyntaxName := {
-                        segments := List.cons name.token.text List.nil
-                        span := name.token.span
-                      };
+                      let sourceName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                       let stop : PsSourcePos :=
                         match psParseListReverse fields.value with
                         | List.nil => name.token.span.stop
@@ -1873,7 +1847,7 @@ def psParseLeanInductiveConstructorsWithFuel
 
 def psLeanTopLevelDeclarationToken (token : PsToken) : Bool :=
   if ["namespace", "section", "end", "open", "include", "omit", "universe",
-      "variable", "private", "abbrev", "opaque", "class", "instance", "mutual",
+      "variable", "private", "public", "module", "abbrev", "opaque", "class", "instance", "mutual",
       "noncomputable", "unsafe", "deriving"].contains token.text then true
   else if psStringEq token.text "def" then
     true
@@ -1940,13 +1914,7 @@ def psParseLeanStructureField
                 | Except.error error => Except.error error
                 | Except.ok type =>
                     if psTokenCursorDone type.cursor then
-                      let fieldName : PsSyntaxName := {
-                        segments :=
-                          List.cons
-                            name.token.text
-                            List.nil
-                        span := name.token.span
-                      };
+                      let fieldName : PsSyntaxName := (psSyntaxNameFromToken name.token);
                       let head : PsSyntaxBinderHead := {
                         name := fieldName
                         kind := PsSyntaxBinderKind.explicit
@@ -2033,7 +2001,7 @@ def psParseLeanStructureDeclaration
   match psTokenCursorExpectText cursor "structure" with
   | Except.error error => Except.error error
   | Except.ok keyword =>
-      match psParseSyntaxName keyword.cursor with
+      match psParseDeclarationName keyword.cursor with
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
@@ -2078,7 +2046,7 @@ def psParseLeanInductiveDeclaration
   match psTokenCursorExpectText cursor "inductive" with
   | Except.error error => Except.error error
   | Except.ok keyword =>
-      match psParseSyntaxName keyword.cursor with
+      match psParseDeclarationName keyword.cursor with
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
@@ -2309,6 +2277,7 @@ def psLeanPatternHeadEq
             leftName.segments
             rightName.segments
       | _ => false
+  | .dotCtor .. | .inaccessible .. => false
 
 def psLeanPatternListContainsHead
     (patterns : List PsSyntaxPattern)
@@ -2747,7 +2716,7 @@ def psParseLeanDeclaration
           match afterKind with
           | Except.error error => Except.error error
           | Except.ok afterKeyword =>
-              match psParseSyntaxName afterKeyword with
+              match psParseDeclarationName afterKeyword with
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseLeanBindersWithFuel

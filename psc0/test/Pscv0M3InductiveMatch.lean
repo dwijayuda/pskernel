@@ -72,9 +72,10 @@ theorem compoundMajor (n : Nat) (x : M3MatchRight Nat 0 (Nat.succ n)) : x = x :=
 
 inductive RepeatedMajor : Nat → Nat → Type where
   | diagonal (n : Nat) : RepeatedMajor n n
+  | offDiagonal : RepeatedMajor 0 1
 
-theorem repeatedMajor (n : Nat) (x : RepeatedMajor n n) : x = x := by
-  cases x <;> rfl
+theorem repeatedMajor (n : Nat) (x : RepeatedMajor n n) : x = x :=
+  match x with | .diagonal k => by rfl
 
 def fixedContext (x : M3MatchRight Nat 0 0) (k : x = x → Nat) : Nat := by
   cases x
@@ -132,6 +133,45 @@ example : nestedOutput true = 10 := rfl
 example : zeroOutput false = 23 := rfl
 example : zeroOutput true = 23 := rfl
 
+def groupDescendant (x : M3MatchLeft Nat 0) : Nat :=
+  match x with
+  | .leaf value => 0
+  | .link n next =>
+    match next with
+    | .zero previous => Nat.succ (groupDescendant previous)
+    | .step k previous => Nat.succ (groupDescendant previous)
+
+example : groupDescendant (.link 0 (.zero (.leaf 7))) = 1 := rfl
+example : groupDescendant (.link 1 (.step 0 (.link 0 (.zero (.leaf 7))))) = 2 := rfl
+#guard groupDescendant (.link 0 (.zero (.leaf 7))) = 1
+#guard groupDescendant (.link 1 (.step 0 (.link 0 (.zero (.leaf 7))))) = 2
+
+private def expectNativeGroupNondecrease : Lean.Elab.Command.CommandElabM Unit := do
+  let source := "def nativeGroupBad (x : M3MatchLeft Nat 0) : Nat := match x with\n  | .leaf value => 0\n  | .link n next => nativeGroupBad x\n"
+  let command ← match Lean.Parser.runParserCategory (← Lean.getEnv) (Lean.Name.mkSimple "command") source with
+    | .ok command => pure command
+    | .error message => throwError "native group decrease control did not parse: {message}"
+  let saved ← get
+  let refused ← try
+    modify fun (state : Lean.Elab.Command.State) =>
+      { state with messages := Lean.MessageLog.empty, snapshotTasks := #[] }
+    let messages ← Lean.Elab.Tactic.GuardMsgs.runAndCollectMessages command
+    let errors := messages.toList.filter fun message => message.severity == .error
+    let mut owned := false
+    for message in errors do
+      let content ← message.data.toString
+      if ["heartbeat", "recursion depth", "maximum recursion", "timeout"].any
+          (fun word => (content.splitOn word).length > 1) then
+        throwError "native group decrease control exhausted resources: {content}"
+      if (content.splitOn "termination").length > 1 then owned := true
+      else throwError "native group decrease control reached the wrong owner: {content}"
+    pure owned
+  finally
+    set saved
+  unless refused do throwError "native group nondecreasing call was accepted"
+
+run_cmd expectNativeGroupNondecrease
+
 end M3InductiveMatchOracle
 
 namespace M3InductiveMatch
@@ -155,11 +195,14 @@ private def propSource : String :=
 
 private def logicalSource : String :=
   "universe u v\n" ++
+  "function m3MatchGroupDescendant(x: M3MatchLeft(Nat, 0)): Nat := match x with { | .leaf value => 0 | .link n next => match next with { | .zero previous => Nat.succ(m3MatchGroupDescendant(previous)) | .step k previous => Nat.succ(m3MatchGroupDescendant(previous)) } }\n" ++
+  "theorem m3MatchGroupDescendantOne: m3MatchGroupDescendant(M3MatchLeft.link(0, M3MatchRight.zero(M3MatchLeft.leaf(7)))) = 1 := by { rfl }\n" ++
+  "theorem m3MatchGroupDescendantTwo: m3MatchGroupDescendant(M3MatchLeft.link(1, M3MatchRight.step(0, M3MatchLeft.link(0, M3MatchRight.zero(M3MatchLeft.leaf(7)))))) = 2 := by { rfl }\n" ++
   "function m3MatchChoose(A: Type u, a: A, R: Sort v, fallback: R, x: M3MatchLeft(A, a)): R := match x with { | .leaf value => fallback | .link n next => fallback }\n" ++
   "theorem m3MatchFixedMajor(x: M3MatchRight(Nat, 0, 0)): x = x := match x with { | .zero previous => by { rfl } }\n" ++
   "theorem m3MatchFixedContext(x: M3MatchRight(Nat, 0, 0), h: x = x): x = x := match x with { | .zero previous => h }\n" ++
   "theorem m3MatchCompoundMajor(n: Nat, x: M3MatchRight(Nat, 0, Nat.succ(n))): x = x := match x with { | .step k previous => by { rfl } }\n" ++
-  "inductive M3RepeatedMajor: Nat -> Nat -> Type where { | diagonal(n: Nat): M3RepeatedMajor(n, n) }\n" ++
+  "inductive M3RepeatedMajor: Nat -> Nat -> Type where { | diagonal(n: Nat): M3RepeatedMajor(n, n) | offDiagonal: M3RepeatedMajor(0, 1) }\n" ++
   "theorem m3MatchRepeatedMajor(n: Nat, x: M3RepeatedMajor(n, n)): x = x := match x with { | .diagonal k => by { rfl } }\n" ++
   "theorem m3MatchMajor(A: Type u, a: A, n: Nat, x: M3MatchRight(A, a, n)): x = x := match x with { | .zero previous => by { rfl } | .step k previous => by { rfl } }\n" ++
   "theorem m3MatchDependent(A: Type u, a: A, n: Nat, x: M3MatchRight(A, a, n), h: n = n): n = n := match x with { | .zero previous => h | .step k previous => h }\n" ++
@@ -227,6 +270,7 @@ private def refusal : PsElabError → String
   | .matchConstructorUnknown _ => "constructor"
   | .matchRecursorUnsupported => "group"
   | .structuralRecursionNotDecreasing => "structural"
+  | .data message => "data:" ++ message
   | .proof message => "proof:" ++ message
   | .refinement message => "refinement:" ++ message
   | .infer .applicationTypeMismatch => "infer:application"
@@ -271,10 +315,9 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
   expectRefused environment "group induction"
     "theorem bad(x: M3MatchLeft(Nat, 0)): x = x := by { induction x }\n"
     "proof:group induction requires a complete motive family"
-  expectRefused environment "group structural recursion"
-    ("function bad(x: M3MatchLeft(Nat, 0)): Nat := match x with { | .leaf value => 0 | .link n next => " ++
-      "match next with { | .zero previous => bad(previous) | .step k previous => bad(previous) } }\n")
-    "structural"
+  expectRefused environment "group nondecreasing recursive call"
+    "function bad(x: M3MatchLeft(Nat, 0)): Nat := match x with { | .leaf value => 0 | .link n next => bad(x) }\n"
+    "data:PSCV0-MUTUAL-TOTAL: DECREASE: recursive major has no checked strict-child hypothesis"
   expectRefused (remove environment (psRootName "HEq")) "missing heterogeneous equality"
     "theorem bad(x: M3MatchRight(Nat, 0, 0)): x = x := match x with { | .zero previous => by { rfl } }\n"
     "missing:HEq"
@@ -298,7 +341,7 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
   let wrongUnit := psEnvironmentInsert environment
     (.constructorDecl { constructor with type := .constE psNatName [] })
   expectRefused wrongUnit "wrong PUnit inhabitant type" simpleMatch "group"
-  IO.println "PSCV0_M3_INDUCTIVE_MATCH_REFUSALS: PASS source coverage, group ownership, actual PUnit typing, Prop elimination and explicit induction/recursion limits and actual HEq foundation"
+  IO.println "PSCV0_M3_INDUCTIVE_MATCH_REFUSALS: PASS source coverage, group ownership, actual PUnit typing, Prop elimination, explicit induction limit, actual nondecreasing-call refusal and actual HEq foundation"
 
 private def outputCases : List (String × (Bool → UInt64)) :=
   [("m3matchleft", M3InductiveMatchOracle.leftOutput),

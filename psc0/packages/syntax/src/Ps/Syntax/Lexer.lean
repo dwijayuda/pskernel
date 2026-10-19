@@ -346,6 +346,37 @@ def psLexNaturalContinue (char : Char) : Bool :=
   else
     psLexCharEq char '_'
 
+-- One identifier component, without grammar-keyword classification.
+def psLexPlainIdentifier (text : String) : Bool :=
+  match text.toList with
+  | [] => false
+  | first :: rest => psLexIdentifierStart first && rest.all psLexIdentifierContinue
+
+-- Canonical module/universe spelling quotes selected reserved token words.
+-- Term syntax separately retains whether its source identifier was escaped:
+-- legacy synthetic Type/Prop references must keep their existing sort meaning.
+def psLexReservedIdentifier (text : String) : Bool :=
+  (["_", "Type", "Prop", "Sort", "if", "then", "else", "fun", "forall", "match",
+    "nomatch", "with", "let", "have", "show", "from", "do", "return", "for",
+    "in", "unless", "while", "break", "continue", "try", "catch", "finally",
+    "where", "by", "def", "function", "theorem", "abbrev", "opaque", "axiom",
+    "example", "class", "instance", "inductive", "coinductive", "structure",
+    "extends", "universe", "namespace", "section", "end", "open", "variable",
+    "include", "omit", "module", "import", "export", "public", "private",
+    "protected", "meta", "noncomputable", "unsafe", "partial", "nonrec",
+    "mutual", "deriving", "attribute", "set_option", "local", "scoped",
+    "syntax", "macro", "macro_rules", "elab", "elab_rules", "notation",
+    "infix", "infixl", "infixr", "prefix", "postfix", "initialize",
+    "builtin_initialize", "termination_by", "decreasing_by", "partial_fixpoint",
+    "monotonicity_by", "exact", "refine", "apply", "change", "cases",
+    "induction", "case", "intro", "intros", "constructor", "constructor!",
+    "suffices", "classical", "calc", "rfl", "assumption", "rw", "rewrite", "at",
+    "rcases", "rintro", "obtain", "by_cases", "exfalso", "decide", "ext",
+    "all_goals", "any_goals", "axioms", "commands", "true", "false"] : List String).contains text
+
+def psLexIdentifierSpelling (text : String) (forceEscape : Bool := false) : String :=
+  if !forceEscape && psLexPlainIdentifier text then text else "«" ++ text ++ "»"
+
 def psLexReadIdentifier
     (remaining : List Char) :
     PsSourcePos -> List Char -> PsLexRead :=
@@ -369,6 +400,21 @@ def psLexReadIdentifier
             cursor := { remaining := List.cons char rest, position := position }
             charsRev := charsRev
           }
+
+-- Pinned Lean Parser.identFnAux accepts everything up to the first closing
+-- guillemet, including whitespace and an empty component; there is no nesting
+-- or backslash escape layer. Preserve the full spelling and original span.
+def psLexReadEscapedIdentifier (remaining : List Char)
+    (position start : PsSourcePos) (charsRev : List Char) :
+    Except PsLexError PsLexRead :=
+  match remaining with
+  | [] => .error (.invalidSource "unterminated identifier escape" (psLexSpan start position))
+  | char :: rest =>
+    let position := psLexAdvanceChar position char
+    let charsRev := char :: charsRev
+    if psLexCharEq char '»' then
+      .ok { cursor := { remaining := rest, position }, charsRev }
+    else psLexReadEscapedIdentifier rest position start charsRev
 
 def psLexReadNatural
     (remaining : List Char) :
@@ -845,7 +891,11 @@ def psLexReadToken
       Except.ok
         (Prod.mk token cursor)
   | List.cons first rest =>
-      if psLexCharEq first '"' then
+      if psLexCharEq first '«' then
+        match psLexReadEscapedIdentifier rest (psLexAdvanceChar start first) start [first] with
+        | .error error => .error error
+        | .ok read => .ok (psLexTokenFromRead .identifier start read, read.cursor)
+      else if psLexCharEq first '"' then
         let afterOpen := psLexAdvanceChar start first;
         match
             psLexReadStringBody
@@ -877,7 +927,7 @@ def psLexReadToken
             -- parenthesized term. All other malformed characters still fail.
             match rest with
             | proofStart :: _ =>
-              if psLexIdentifierStart proofStart || psLexCharEq proofStart '(' then
+              if psLexIdentifierStart proofStart || psLexCharEq proofStart '«' || psLexCharEq proofStart '(' then
                 let read : PsLexRead := {
                   cursor := { remaining := rest, position := afterOpen }
                   charsRev := [first] }
@@ -943,6 +993,13 @@ def psLexReadToken
                   read.cursor)
             else if psLexDigit first then
               psLexNumericToken first (List.cons second tail) start
+            else if psLexPairEq first second '<' ';' &&
+                tail.head?.any (fun char => psLexCharEq char '>') then
+              let stop := psLexAdvanceChar (psLexAdvanceTwo start first second) '>'
+              let read : PsLexRead := {
+                cursor := { remaining := tail.drop 1, position := stop }
+                charsRev := ['>', second, first] }
+              Except.ok (psLexTokenFromRead .symbol start read, read.cursor)
             else if psLexIsTwoCharSymbol first second then
               let stop := psLexAdvanceTwo start first second;
               let read : PsLexRead := {

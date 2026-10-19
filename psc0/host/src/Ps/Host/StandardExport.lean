@@ -6,6 +6,7 @@ Generated upstream bodies retain their Apache-2.0 attribution.
 This tool is not imported by the portable compiler.
 -/
 import Ps.Host.StandardClosure
+import Lean.Meta.Tactic.Simp.Attr
 import Ps.Meta.Reduce
 import Ps.Host.StandardSource
 import Ps.Host.StandardManifest
@@ -1394,5 +1395,812 @@ def checkPartialFixpointFoundation : IO Unit := do
     ("proposedInstances", Lean.toJson proposed.instances.entries.length),
     ("activeFoundationDeclarations", Lean.toJson activeNames.length),
     ("runtimeQualified", Lean.toJson false)]).compress
+
+-- Independent Core-first authoring profiles. These never consume the Full
+-- portable prelude or a legacy bootstrap axiom boundary.
+def coreBootstrapCandidateRoots : List Lean.Name :=
+  [`Nat, `Bool, `PUnit, `Unit, `Empty, `PEmpty,
+   `True, `False, `Eq, `HEq, `And, `Or, `Exists, `Nonempty,
+   `Prod, `PProd, `Sum, `Option, `List, `Except, `Decidable,
+   `id, `ite, `dite, `optParam, `outParam]
+
+def coreByteWordCandidateRoots : List Lean.Name :=
+  [`UInt8.ofNat, `UInt8.toUInt32, `UInt8.toUInt64,
+   `UInt32.ofNat, `UInt32.toNat, `UInt32.add, `UInt32.sub,
+   `UInt32.land, `UInt32.lor, `UInt32.xor, `UInt32.complement,
+   `UInt32.shiftLeft, `UInt32.shiftRight,
+   `UInt64.ofNat, `UInt64.toNat, `UInt64.toUInt8,
+   `UInt64.mul, `UInt64.xor, `UInt64.shiftRight,
+   `ByteArray, `ByteArray.mk, `ByteArray.size, `ByteArray.push,
+   `ByteArray.foldl, `String.toUTF8]
+
+-- Actual pinned Init.Ext registrations, exported independently from trust zero.
+-- This candidate does not change the selected Core or Full profile.
+def coreExtCandidateRoots : List Lean.Name :=
+  [`Prod.ext, `PProd.ext, `MProd.ext, `Sigma.ext, `PSigma.ext, `PLift.ext, `ULift.ext, `PULift.ext, `funext, `propext, `Subtype.ext, `Array.ext, `Char.ext, `PUnit.ext, `Thunk.ext]
+
+def exportCoreExtCandidate (output : System.FilePath) : IO Unit :=
+  exportStandardCore {
+    roots := coreExtCandidateRoots
+    boundary := []
+    baseDeclarations := []
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psCoreExtCandidate"
+    privatePrefix := "coreExtCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nIndependent actual native closure for the fifteen Init.Ext theorem registrations.\nEmpty boundary, trust zero, unchanged per-declaration admission budgets.\nProfile installation and source ext qualification are separate gates.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+def exportCoreBootstrapCandidate (output : System.FilePath) : IO Unit :=
+  exportStandardCore {
+    roots := coreBootstrapCandidateRoots
+    boundary := []
+    baseDeclarations := []
+    shareSource := true
+    publicPrefix := "psCoreBootstrapCandidate"
+    privatePrefix := "coreBootstrapCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nIndependent Core-first bootstrap candidate from an empty kernel environment.\nActual native declarations; no Full boundary or legacy primitive assumptions.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+-- Complete native closure for the two unchanged compiler-source modules
+-- Ps.Foundation.Source and Ps.Foundation.List. This remains an unselected
+-- candidate; source registry metadata and source compilation are separate gates.
+def coreFoundationCandidateRoots : List Lean.Name :=
+  coreBootstrapCandidateRoots ++
+    [`OfNat, `OfNat.ofNat, `instOfNatNat, `Bool.decEq]
+
+def exportCoreFoundationCandidate (output : System.FilePath) : IO Unit :=
+  exportStandardCore {
+    roots := coreFoundationCandidateRoots
+    boundary := []
+    baseDeclarations := []
+    allowedAssumptions := []
+    shareSource := true
+    publicPrefix := "psCoreFoundationCandidate"
+    privatePrefix := "coreFoundationCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nIndependent native candidate for the complete Ps.Foundation.Source/List source workload.\nEmpty boundary; actual reached declarations; no Full fallback or added assumptions.\nSource registry metadata and source acceptance require separate qualification.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+def exportCoreByteWordCandidate (output : System.FilePath) : IO Unit :=
+  exportStandardCore {
+    roots := coreBootstrapCandidateRoots ++ coreByteWordCandidateRoots
+    boundary := []
+    baseDeclarations := []
+    allowedAssumptions := [`propext, `Quot.sound]
+    eraseAutoParams := true
+    shareSource := true
+    publicPrefix := "psCoreByteWordCandidate"
+    privatePrefix := "coreByteWordCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nNative closure for the measured compiler byte/word workload.\nStandalone candidate; source compiler closure and runtime qualification remain separate.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+def exportCoreCompilerCandidate (output : System.FilePath) : IO Unit := do
+  let measured ← collectCoreNativeClosure
+  IO.FS.writeFile (System.FilePath.mk (output.toString ++ ".native-closure.json"))
+    (measured.report.compress ++ "\n")
+  let allowed : List Lean.Name := [`propext, `Quot.sound]
+  let refused := measured.entries.filter fun info =>
+    info.isUnsafe || info.isPartial ||
+      (info.isAxiom && !allowed.contains info.name)
+  unless refused.isEmpty do
+    IO.println (Lean.Json.mkObj [
+      ("schema", Lean.toJson ("pscv0-core-candidate-refusal/1" : String)),
+      ("declarations", Lean.toJson (refused.map (fun info => toString info.name))),
+      ("policy", Lean.toJson
+        ("No source-root trimming, unsafe or partial declarations, or new assumptions." : String))]).compress
+    throw (IO.userError
+      "measured native Core closure exceeds the independently approved authoring policy")
+  exportStandardCore {
+    roots := coreBootstrapCandidateRoots ++ measured.roots
+    boundary := []
+    baseDeclarations := []
+    allowedAssumptions := allowed
+    eraseAutoParams := true
+    shareSource := true
+    nativeModules := coreNativeCompilerImports
+    publicPrefix := "psCoreCompilerCandidate"
+    privatePrefix := "coreCompilerCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nEmpty-boundary native closure of measured compiler dependencies plus explicit bootstrap seeds.\nCandidate authoring only; no selected Core/Full inclusion or runtime qualification is asserted.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+private def coreProbeSubmission (declarations : List PsDeclaration)
+    (declaration : PsDeclaration) : IO Lean.Declaration := do
+  match PsKernelLean.toLeanPreludeDeclaration declarations declaration with
+  | .ok (some value) => pure value
+  | .ok none => throw (IO.userError "Core probe expected a kernel submission")
+  | .error error => throw (IO.userError error.message)
+
+-- The expected failure is precise. Resource failures, unrelated conversion
+-- failures and other IO errors never satisfy a negative authoring control.
+private def coreExpectAuthoringFailure (expected : String)
+    (action : IO Unit) : IO Unit := do
+  let failure ← try
+    action
+    pure none
+  catch error =>
+    pure (some error)
+  match failure with
+  | some (.userError reason) => do
+      unless reason == expected do
+        throw (IO.userError ("Core control failed at the wrong rule: " ++ reason))
+  | some error => throw error
+  | none => throw (IO.userError "Core control unexpectedly accepted the mutation")
+
+def checkCoreExportControls : IO Unit := do
+  Lean.initSearchPath (← Lean.findSysroot)
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Core controls require pinned Lean 4.35.0")
+  let native ← Lean.importModules #[{ module := `Init }] {}
+  let mut seen : Lean.NameSet := {}
+  let mut entries : Array Lean.ConstantInfo := #[]
+  for root in [`Nat, `Bool, `Eq] do
+    for info in ← standardDependencyClosure native root do
+      unless seen.contains info.name do
+        seen := seen.insert info.name
+        entries := entries.push info
+  let declarations ← entries.toList.mapM fun info => do
+    match exportDeclaration native [] info with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error)
+  checkCandidate declarations declarations
+  let compared ← checkRecursorRules native declarations declarations
+  unless compared > 0 do
+    throw (IO.userError "Core controls did not exercise a native recursor rule")
+  let empty := (← Lean.mkEmptyEnvironment 0).toKernelEnv
+  let replay ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    PsKernelLean.replayPreludeDeclarations declarations declarations.reverse empty
+  let checked ← match replay with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error.message)
+  let nat := PsExpr.constE (exportName `Nat) []
+  let zero := PsExpr.lit (.natural 0)
+  let one := PsExpr.lit (.natural 1)
+  let natural : PsDeclaration := .definitionDecl
+    (exportName `_pscv0CoreNaturalProbe) [] nat zero
+  let naturalSubmission ← coreProbeSubmission declarations natural
+  let absent ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    empty.addDeclCore 2000000 20000 naturalSubmission none
+  match absent with
+  | .error (.unknownConstant _ name) => do
+      unless name == `Nat do
+        throw (IO.userError "Core empty-environment control missed a different dependency")
+  | .error error =>
+      throw (IO.userError ("Core missing-dependency control failed at the wrong rule: " ++
+        PsKernelLean.kernelExceptionSummary error))
+  | .ok _ => throw (IO.userError "empty kernel unexpectedly supplied Nat")
+  let present ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    checked.addDeclCore 2000000 20000 naturalSubmission none
+  match present with
+  | .ok _ => pure ()
+  | .error error => throw (IO.userError (PsKernelLean.kernelExceptionSummary error))
+  let equality := fun (left right : PsExpr) =>
+    PsExpr.app (.app (.app (.constE (exportName `Eq) [.succ .zero]) nat) left) right
+  let reflexivity := PsExpr.app
+    (.app (.constE (exportName `Eq.refl) [.succ .zero]) nat) zero
+  let good : PsDeclaration := .theoremDecl
+    (exportName `_pscv0CoreTrueEquation) [] (equality zero zero) reflexivity
+  checkCandidate (good :: declarations) [good]
+  let bad : PsDeclaration := .theoremDecl
+    (exportName `_pscv0CoreFalseEquation) [] (equality zero one) reflexivity
+  let badSubmission ← coreProbeSubmission declarations bad
+  let falseProof ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    checked.addDeclCore 2000000 20000 badSubmission none
+  match falseProof with
+  | .error (.declTypeMismatch ..) => pure ()
+  | .error error =>
+      throw (IO.userError ("Core false-proof control failed at the wrong rule: " ++
+        PsKernelLean.kernelExceptionSummary error))
+  | .ok _ => throw (IO.userError "Core candidate kernel accepted false reflexivity")
+  let forged := declarations.map fun declaration =>
+    match declaration with
+    | .recursorDecl info =>
+        if psNameEq info.name (exportName `Nat.rec) then
+          PsDeclaration.recursorDecl { info with type := nat }
+        else declaration
+    | _ => declaration
+  coreExpectAuthoringFailure "regenerated metadata signature differs: Nat.rec"
+    (checkCandidate forged forged)
+  for name in [`propext, `Quot.sound, `Classical.choice] do
+    let some (.axiomInfo info) := native.checked.get.find? name
+      | throw (IO.userError ("missing native assumption control: " ++ toString name))
+    match exportDeclaration native [] (.axiomInfo info) with
+    | .error reason => do
+        unless reason == "unapproved imported assumption in Standard asset" do
+          throw (IO.userError ("assumption control failed at the wrong rule: " ++ reason))
+    | .ok _ => throw (IO.userError "empty Core assumption policy accepted an axiom")
+    if name != `Classical.choice then
+      match exportDeclaration native [`propext, `Quot.sound] (.axiomInfo info) with
+      | .ok (.axiomDecl ..) => pure ()
+      | .ok _ => throw (IO.userError "approved native axiom changed declaration kind")
+      | .error error => throw (IO.userError error)
+    else
+      match exportDeclaration native [`propext, `Quot.sound] (.axiomInfo info) with
+      | .error reason => do
+          unless reason == "unapproved imported assumption in Standard asset" do
+            throw (IO.userError ("Classical control failed at the wrong rule: " ++ reason))
+      | .ok _ => throw (IO.userError "byte-word assumption policy accepted Classical.choice")
+  IO.println
+    "PSCV0_CORE_EXPORT_CONTROLS: PASS empty kernel, checked positive proof, typed false-proof refusal, regenerated-signature refusal, exact assumption policy"
+
+private def coreCandidateKind : PsDeclaration → String
+  | .quotientDecl .. => "quotient"
+  | .axiomDecl .. => "axiom"
+  | .definitionDecl .. => "definition"
+  | .theoremDecl .. => "theorem"
+  | .partialDecl .. => "partial"
+  | .opaqueDecl .. => "opaque"
+  | .inductiveDecl _ => "inductive"
+  | .constructorDecl _ => "constructor"
+  | .recursorDecl _ => "recursor"
+
+private def coreCandidateBody : PsDeclaration → Option String
+  | .definitionDecl _ _ _ value | .theoremDecl _ _ _ value
+  | .partialDecl _ _ _ value | .opaqueDecl _ _ _ value =>
+      some (psStandardSnapshotExpr value)
+  | _ => none
+
+private def coreCandidateFamily : PsDeclaration → String
+  | .quotientDecl _ _ _ kind => psQuotientKindTag kind
+  | .inductiveDecl info => psStandardSnapshotNode "inductiveMetadata" [
+      toString info.numParams, toString info.numIndices,
+      psStandardSnapshotList psStandardSnapshotName info.constructors,
+      psStandardSnapshotBool info.isStructure]
+  | .constructorDecl info => psStandardSnapshotNode "constructorMetadata" [
+      psStandardSnapshotName info.inductiveName, toString info.constructorIndex,
+      toString info.numParams, toString info.numFields,
+      psStandardSnapshotList toString info.recursiveFields]
+  | .recursorDecl info => psStandardSnapshotNode "recursorMetadata" [
+      psStandardSnapshotList psStandardSnapshotName info.inductiveNames,
+      toString info.numParams, toString info.numIndices,
+      toString info.numMotives, toString info.numMinors]
+  | _ => "none"
+
+private def coreCandidateNativeReducibility (native : Lean.Environment)
+    (name : Lean.Name) : PsReducibility :=
+  match Lean.getReducibilityStatusCore native name with
+  | .reducible => .reducible
+  | .semireducible => .semireducible
+  | .irreducible => .irreducible
+  | .instanceReducible => .instanceReducible
+  | .implicitReducible => .implicitReducible
+
+private def coreCandidateComparison (candidate full : PsEnvironment)
+    (declaration : PsDeclaration) : Lean.Json :=
+  let name := psDeclarationName declaration
+  let found := psEnvironmentFind full name
+  let exact := found.any fun existing =>
+    psStandardSnapshotDeclaration declaration == psStandardSnapshotDeclaration existing
+  let effectiveStatus := psReducibilityName (psEnvironmentReducibility candidate name)
+  let fullStatus := psReducibilityName (psEnvironmentReducibility full name)
+  let explicitStatus := (psEnvironmentReducibility? candidate name).map psReducibilityName
+  let fullExplicitStatus := (psEnvironmentReducibility? full name).map psReducibilityName
+  Lean.Json.mkObj [
+    ("name", Lean.toJson (psNameToString name)),
+    ("nameKey", Lean.toJson (psStandardSnapshotName name)),
+    ("presentInFull", Lean.toJson found.isSome),
+    ("candidateKind", Lean.toJson (coreCandidateKind declaration)),
+    ("fullKind", Lean.toJson (found.map coreCandidateKind)),
+    ("kindExact", Lean.toJson (found.any fun existing =>
+      coreCandidateKind declaration == coreCandidateKind existing)),
+    ("levelParametersExact", Lean.toJson (found.any fun existing =>
+      psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams declaration) ==
+        psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams existing))),
+    ("typeExact", Lean.toJson (found.any fun existing =>
+      psStandardSnapshotExpr (psDeclarationType declaration) ==
+        psStandardSnapshotExpr (psDeclarationType existing))),
+    ("bodyOrProofExact", Lean.toJson (found.any fun existing =>
+      coreCandidateBody declaration == coreCandidateBody existing)),
+    ("familyMetadataExact", Lean.toJson (found.any fun existing =>
+      coreCandidateFamily declaration == coreCandidateFamily existing)),
+    ("declarationExact", Lean.toJson exact),
+    ("candidateReducibility", Lean.toJson effectiveStatus),
+    ("fullReducibility", Lean.toJson (if found.isSome then some fullStatus else none)),
+    ("effectiveReducibilityExact", Lean.toJson (found.isSome && effectiveStatus == fullStatus)),
+    ("candidateExplicitReducibility", Lean.toJson explicitStatus),
+    ("fullExplicitReducibility", Lean.toJson fullExplicitStatus),
+    ("explicitReducibilityMetadataExact",
+      Lean.toJson (found.isSome && explicitStatus == fullExplicitStatus)),
+    ("candidateNoncomputable", Lean.toJson (psEnvironmentIsNoncomputable candidate name)),
+    ("fullNoncomputable", Lean.toJson (psEnvironmentIsNoncomputable full name)),
+    ("noncomputableMetadataExact", Lean.toJson (found.isSome &&
+      psEnvironmentIsNoncomputable candidate name == psEnvironmentIsNoncomputable full name)),
+    ("candidateDeclarationSHA256",
+      Lean.toJson (psStandardSnapshotSHA256 (psStandardSnapshotDeclaration declaration))),
+    ("fullDeclarationSHA256", Lean.toJson (found.map fun existing =>
+      psStandardSnapshotSHA256 (psStandardSnapshotDeclaration existing)))]
+
+-- The inputs are the actual compiled generated lists. This report performs
+-- literal structural comparisons; it never equates different declarations
+-- through reduction, proof irrelevance, annotation erasure or name matching.
+-- Optional autoParam policy is used only to authenticate the source asset
+-- against its independently checked native authoring profile.
+def auditCoreCandidateAgainstFull (label : String)
+    (declarations : List PsDeclaration)
+    (statuses : List (PsName × PsReducibility))
+    (output : System.FilePath)
+    (eraseAutoParams : Bool := false)
+    (allowedAssumptions : List Lean.Name := []) : IO Unit := do
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Core compatibility audit requires the pinned Lean commit")
+  let names := declarations.map (PsKernelLean.toLeanName ∘ psDeclarationName)
+  unless names.eraseDups.length == names.length do
+    throw (IO.userError "Core compatibility candidate has duplicate declarations")
+  let statusNames := statuses.map (PsKernelLean.toLeanName ∘ Prod.fst)
+  let definitionNames := declarations.filterMap fun declaration =>
+    match declaration with
+    | .definitionDecl name .. => some (PsKernelLean.toLeanName name)
+    | _ => none
+  unless statusNames.eraseDups.length == statusNames.length &&
+      statusNames.length == definitionNames.length &&
+      statusNames.all definitionNames.contains do
+    throw (IO.userError "Core compatibility reducibility roster differs from definitions")
+  Lean.initSearchPath (← Lean.findSysroot)
+  let native ← Lean.importModules #[{ module := `Init }] {}
+  for declaration in declarations do
+    let name := PsKernelLean.toLeanName (psDeclarationName declaration)
+    let some original := native.checked.get.find? name
+      | throw (IO.userError ("Core candidate has no native declaration: " ++ toString name))
+    if eraseAutoParams then checkAutoParamSignature native original
+    let expected ← match exportDeclaration native allowedAssumptions original eraseAutoParams with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+    unless psStandardSnapshotDeclaration declaration == psStandardSnapshotDeclaration expected do
+      throw (IO.userError ("rendered Core candidate differs from native authoring: " ++ toString name))
+  for (name, status) in statuses do
+    unless psReducibilityName status ==
+        psReducibilityName (coreCandidateNativeReducibility native (PsKernelLean.toLeanName name)) do
+      throw (IO.userError ("rendered Core reducibility differs from native: " ++ psNameToString name))
+  let initial := declarations.foldl psEnvironmentInsert psEnvironmentEmpty
+  let candidate := statuses.foldl
+    (fun current entry => psEnvironmentSetReducibility current entry.fst entry.snd) initial
+  let full := psSelfHostProdPreludeEnvironment
+  let exactDeclaration := fun declaration =>
+    (psEnvironmentFind full (psDeclarationName declaration)).any fun existing =>
+      psStandardSnapshotDeclaration declaration == psStandardSnapshotDeclaration existing
+  let exactEffective := fun declaration =>
+    let name := psDeclarationName declaration
+    exactDeclaration declaration &&
+      psReducibilityName (psEnvironmentReducibility candidate name) ==
+        psReducibilityName (psEnvironmentReducibility full name)
+  let exactExplicit := fun declaration =>
+    let name := psDeclarationName declaration
+    exactDeclaration declaration &&
+      (psEnvironmentReducibility? candidate name).map psReducibilityName ==
+        (psEnvironmentReducibility? full name).map psReducibilityName
+  -- Class extensions need initialized aggregate metadata. This environment is
+  -- used only for reporting; declaration authentication and replay stay separate.
+  unsafe Lean.enableInitializersExecution
+  let nativeMetadata ← Lean.importModules #[{ module := `Init }] {} (loadExts := true)
+  let nativeClasses := names.filter (Lean.isClass nativeMetadata)
+  let classRows := nativeClasses.map fun name =>
+    let portable := exportName name
+    Lean.Json.mkObj [
+      ("name", Lean.toJson (toString name)),
+      ("nameKey", Lean.toJson (psStandardSnapshotName portable)),
+      ("nativeOutputParameters", Lean.toJson (Lean.getOutParamPositions? nativeMetadata name)),
+      ("nativeOutputLevels", Lean.toJson (Lean.getOutLevelParamPositions? nativeMetadata name)),
+      ("candidateRegistered", Lean.toJson (candidate.classes.any (psNameEq portable))),
+      ("fullRegistered", Lean.toJson (full.classes.any (psNameEq portable))),
+      ("fullParameterRecords", Lean.toJson
+        ((full.classParameters.filter (fun entry => psNameEq entry.fst portable)).map
+          psStandardSnapshotClassParameters))]
+  let payload := psStandardSnapshotPayload candidate
+  let report := Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-core-full-compatibility/1" : String)),
+    ("candidate", Lean.toJson label),
+    ("nativeCommit", Lean.toJson Lean.githash),
+    ("candidateDeclarations", Lean.toJson declarations.length),
+    ("fullDeclarations", Lean.toJson full.declarations.length),
+    ("fullClasses", Lean.toJson full.classes.length),
+    ("fullInstances", Lean.toJson full.instances.entries.length),
+    ("nativeDeclarationAndReducibilityAuthentication", Lean.toJson true),
+    ("exactDeclarations", Lean.toJson ((declarations.filter exactDeclaration).length)),
+    ("exactDeclarationsAndEffectiveReducibility",
+      Lean.toJson ((declarations.filter exactEffective).length)),
+    ("exactDeclarationsAndExplicitReducibilityMetadata",
+      Lean.toJson ((declarations.filter exactExplicit).length)),
+    ("declarationInclusionExact", Lean.toJson (declarations.all exactDeclaration)),
+    ("declarationAndEffectiveReducibilityInclusionExact",
+      Lean.toJson (declarations.all exactEffective)),
+    ("declarationAndExplicitReducibilityMetadataInclusionExact",
+      Lean.toJson (declarations.all exactExplicit)),
+    ("sourceRegistryInclusionClaimed", Lean.toJson false),
+    ("candidatePayloadSHA256", Lean.toJson (psStandardSnapshotSHA256 payload)),
+    ("nativeClassMetadataExtensionsLoaded", Lean.toJson true),
+    ("nativeClassesAmongCandidateDeclarations", .arr classRows.toArray),
+    ("comparisons", .arr ((declarations.map (coreCandidateComparison candidate full)).toArray))]
+  IO.FS.writeFile output (report.compress ++ "\n")
+  IO.println (Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-core-full-compatibility-summary/1" : String)),
+    ("candidate", Lean.toJson label),
+    ("declarations", Lean.toJson declarations.length),
+    ("exactDeclarations", Lean.toJson ((declarations.filter exactDeclaration).length)),
+    ("exactDeclarationsAndEffectiveReducibility",
+      Lean.toJson ((declarations.filter exactEffective).length)),
+    ("fullDeclarations", Lean.toJson full.declarations.length)]).compress
+
+-- Search metadata is an independently measured part of the source profile.
+-- Reading this receipt does not qualify the generated declaration asset or
+-- claim that the complete compiler-source pair has elaborated successfully.
+def auditCoreFoundationCandidateMetadata (output : System.FilePath) : IO Unit := do
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Core foundation metadata requires the pinned Lean commit")
+  Lean.initSearchPath (← Lean.findSysroot)
+  unsafe Lean.enableInitializersExecution
+  let native ← Lean.importModules #[{ module := `Init }] {} (loadExts := true)
+  let mut reachedNames : Lean.NameSet := {}
+  let mut reached : Array Lean.ConstantInfo := #[]
+  for root in coreFoundationCandidateRoots do
+    for info in ← standardDependencyClosure native root {} false do
+      if !reachedNames.contains info.name then
+        reachedNames := reachedNames.insert info.name
+        reached := reached.push info
+  reached := reached.qsort (fun a b => Lean.Name.lt a.name b.name)
+  let noncomputableEntries : Array Lean.ConstantInfo := reached.filter fun info =>
+    Lean.isNoncomputable native info.name
+  let noncomputableRows : Array Lean.Json := noncomputableEntries.map fun info =>
+    let path := standardDependencyPath native coreFoundationCandidateRoots info.name {} false
+    Lean.Json.mkObj [
+      ("name", Lean.toJson (toString info.name)),
+      ("nativeNoncomputable", Lean.toJson true),
+      ("dependencyPath", Lean.toJson (path.map toString))]
+  let outputs := (Lean.getOutParamPositions? native `OfNat).map Array.toList
+  let outputLevels := (Lean.getOutLevelParamPositions? native `OfNat).map Array.toList
+  unless Lean.isClass native `OfNat &&
+      outputs == some ([] : List Nat) &&
+      outputLevels == some ([] : List Nat) do
+    throw (IO.userError "native OfNat class/output metadata differs")
+  let some ordinary :=
+      (Lean.Meta.instanceExtension.getState native).instanceNames.find? `instOfNatNat
+    | throw (IO.userError "native ordinary instOfNatNat registration is absent")
+  let ordinaryGlobal := match ordinary.attrKind with
+    | .global => true
+    | _ => false
+  unless ordinary.priority == 1000 &&
+      ordinary.globalName? == some `instOfNatNat && ordinaryGlobal &&
+      ordinary.val == Lean.Expr.const `instOfNatNat [] do
+    throw (IO.userError "native ordinary instOfNatNat metadata differs")
+  let defaultState := Lean.Meta.defaultInstanceExtension.getState native
+  let defaultCandidates := (defaultState.defaultInstances.find? `OfNat).getD []
+  let defaults := defaultCandidates.filter (fun entry => entry.1 == `instOfNatNat)
+  let [(_, defaultPriority)] := defaults
+    | throw (IO.userError "native default instOfNatNat is absent or duplicated")
+  unless defaultPriority == 100 do
+    throw (IO.userError "native default instOfNatNat priority differs")
+  let some instanceInfo := native.find? `instOfNatNat
+    | throw (IO.userError "native instOfNatNat declaration is absent")
+  unless instanceInfo.levelParams.isEmpty &&
+      instanceInfo.type.getForallBody.getAppFn.isConstOf `OfNat do
+    throw (IO.userError "native instOfNatNat telescope/class differs")
+  unless sourceStatus native `instOfNatNat == ".instanceReducible" &&
+      sourceStatus native `Bool.decEq == ".implicitReducible" do
+    throw (IO.userError "native foundation search transparency differs")
+  let instanceType ← match exportExpr instanceInfo.type with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error)
+  let declarationRows ←
+      ([`OfNat, `OfNat.ofNat, `instOfNatNat, `Bool.decEq] : List Lean.Name).mapM
+        fun name => do
+          let some info := native.find? name
+            | throw (IO.userError ("native foundation root is absent: " ++ toString name))
+          let declaration ← match exportDeclaration native [] info with
+            | .ok value => pure value
+            | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+          let definition := match info with
+            | .defnInfo _ => true
+            | _ => false
+          pure (Lean.Json.mkObj [
+            ("name", Lean.toJson (toString name)),
+            ("levelParameters", Lean.toJson (info.levelParams.map toString)),
+            ("declaration", Lean.toJson (psStandardSnapshotDeclaration declaration)),
+            ("reducibility", Lean.toJson
+              (if definition then some (sourceStatus native name) else none))])
+  let instanceRow := fun (priority : Nat) => Lean.Json.mkObj [
+    ("name", Lean.toJson ("instOfNatNat" : String)),
+    ("valueDeclaration", Lean.toJson ("instOfNatNat" : String)),
+    ("className", Lean.toJson ("OfNat" : String)),
+    ("levelParameters", Lean.toJson (instanceInfo.levelParams.map toString)),
+    ("type", Lean.toJson (psStandardSnapshotExpr instanceType)),
+    ("priority", Lean.toJson priority)]
+  let report := Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-core-foundation-native-metadata/1" : String)),
+    ("nativeCommit", Lean.toJson Lean.githash),
+    ("nativeModules", Lean.toJson (["Init"] : List String)),
+    ("nativeClassMetadataExtensionsLoaded", Lean.toJson true),
+    ("roots", Lean.toJson (coreFoundationCandidateRoots.map toString)),
+    ("nativeClosureDeclarations", Lean.toJson reached.size),
+    ("nativeClosureNames", Lean.toJson (reached.map (fun info => toString info.name))),
+    ("nativeNoncomputableNames", Lean.toJson
+      (noncomputableEntries.map (fun info => toString info.name))),
+    ("nativeNoncomputableDeclarations", .arr noncomputableRows),
+    ("portableNoncomputableMetadataInstalled", Lean.toJson false),
+    ("runtimePolicyQualified", Lean.toJson false),
+    ("selectedClasses", .arr #[Lean.Json.mkObj [
+      ("name", Lean.toJson ("OfNat" : String)),
+      ("outputParameters", Lean.toJson outputs),
+      ("outputLevels", Lean.toJson outputLevels)]]),
+    ("selectedOrdinaryInstances", .arr #[instanceRow ordinary.priority]),
+    ("selectedDefaultInstances", .arr #[instanceRow defaultPriority]),
+    ("selectedExportedAliases", Lean.toJson ([] : List String)),
+    ("nativeRootDeclarations", .arr declarationRows.toArray),
+    ("portableProfileInstalled", Lean.toJson false),
+    ("completeSourceAcceptanceQualified", Lean.toJson false)]
+  IO.FS.writeFile output (report.compress ++ "\n")
+  IO.println report.compress
+
+-- Read-only measurement of the actual pinned instance extension and selected
+-- Full declarations. It neither installs a dictionary nor qualifies calc.
+def auditCalcMetadata (output : System.FilePath) : IO Unit := do
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "calc metadata requires the pinned Lean commit")
+  Lean.initSearchPath (← Lean.findSysroot)
+  unsafe Lean.enableInitializersExecution
+  let native ← Lean.importModules #[{ module := Lean.Name.mkSimple "Init" }] {} (loadExts := true)
+  let nativeName := fun (text : String) => (text.splitOn ".").foldl Lean.Name.str .anonymous
+  let transName := nativeName "Trans"
+  let environment := psSelfHostProdPreludeEnvironment
+  let outputs := (Lean.getOutParamPositions? native transName).map Array.toList
+  let outputLevels := (Lean.getOutLevelParamPositions? native transName).map Array.toList
+  unless Lean.isClass native transName && outputs == some [5] && outputLevels == some [2] do
+    throw (IO.userError "pinned Trans class/output metadata differs from calc's actual application")
+  let entries := ((Lean.Meta.instanceExtension.getState native).instanceNames.toArray.filter
+    (fun (name, _) => (native.find? name).any fun info =>
+      info.type.getForallBody.getAppFn.isConstOf transName)).qsort
+        (fun a b => Lean.Name.lt a.1 b.1)
+  let mut instanceRows : Array Lean.Json := #[]
+  let mut dependencyNames : Lean.NameSet := {}
+  let mut dependencies : Array Lean.ConstantInfo := #[]
+  for (name, entry) in entries do
+    let some info := native.find? name
+      | throw (IO.userError ("registered native calc instance has no declaration: " ++ toString name))
+    let declaration ← match exportDeclaration native [] info with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+    let sourceName := exportName name
+    let selected := psEnvironmentFind environment sourceName
+    let registered := environment.instances.entries.filter fun item =>
+      match item.value with
+      | .constE actual _ => psNameEq actual sourceName
+      | _ => false
+    let attrKind := match entry.attrKind with
+      | .global => "global"
+      | .local => "local"
+      | .scoped => "scoped"
+    instanceRows := instanceRows.push (Lean.Json.mkObj [
+      ("name", Lean.toJson (toString name)),
+      ("priority", Lean.toJson entry.priority),
+      ("attrKind", Lean.toJson attrKind),
+      ("nativeGlobalName", Lean.toJson (entry.globalName?.map toString)),
+      ("levelParameters", Lean.toJson (info.levelParams.map toString)),
+      ("nativeDeclaration", Lean.toJson (psStandardSnapshotDeclaration declaration)),
+      ("nativeReducibility", Lean.toJson (sourceStatus native name)),
+      ("fullPresent", Lean.toJson selected.isSome),
+      ("fullKind", Lean.toJson (selected.map coreCandidateKind)),
+      ("fullExactNativeDeclaration", Lean.toJson (selected.any fun actual =>
+        psStandardSnapshotDeclaration actual == psStandardSnapshotDeclaration declaration)),
+      ("fullRegisteredPriorities", Lean.toJson (registered.map (·.priority)))])
+    for dependency in ← standardDependencyClosure native name {} false do
+      if !dependencyNames.contains dependency.name then
+        dependencyNames := dependencyNames.insert dependency.name
+        dependencies := dependencies.push dependency
+  let required := ["eq_self", "iff_self", "Trans", "Trans.mk", "Trans.trans", "Trans.rec",
+    "instTransEq", "instTransEq_1", "Iff.trans",
+    "Nat.le_trans", "Nat.lt_trans", "Nat.lt_of_le_of_lt", "Nat.lt_of_lt_of_le",
+    "Int.le_trans", "Int.lt_trans", "Int.lt_of_le_of_lt", "Int.lt_of_lt_of_le"].map nativeName
+  let requiredRows ← required.mapM fun name => do
+    let some info := native.find? name
+      | throw (IO.userError ("native calc dependency is missing: " ++ toString name))
+    let type ← match exportExpr info.type with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+    let selected := psEnvironmentFind environment (exportName name)
+    pure (Lean.Json.mkObj [
+      ("name", Lean.toJson (toString name)),
+      ("nativeLevelParameters", Lean.toJson (info.levelParams.map toString)),
+      ("nativeType", Lean.toJson (psStandardSnapshotExpr type)),
+      ("fullPresent", Lean.toJson selected.isSome),
+      ("fullKind", Lean.toJson (selected.map coreCandidateKind)),
+      ("fullLevelParameters", Lean.toJson
+        (selected.map (fun declaration => (psDeclarationLevelParams declaration).map psNameToString))),
+      ("fullType", Lean.toJson (selected.map (fun declaration =>
+        psStandardSnapshotExpr (psDeclarationType declaration))))])
+  let missing := (dependencies.filter fun info =>
+    (psEnvironmentFind environment (exportName info.name)).isNone).map (fun info => toString info.name)
+  let fullParameters := environment.classParameters.find? (fun (name, _) =>
+    psNameEq name (psRootName "Trans"))
+  let defaults := ((Lean.Meta.defaultInstanceExtension.getState native).defaultInstances.find?
+    transName).getD []
+  let report := Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-calc-native-metadata/1" : String)),
+    ("nativeCommit", Lean.toJson Lean.githash),
+    ("nativeModules", Lean.toJson (["Init"] : List String)),
+    ("nativeClassExtensionsLoaded", Lean.toJson true),
+    ("nativeOutputParameters", Lean.toJson outputs),
+    ("nativeOutputLevels", Lean.toJson outputLevels),
+    ("nativeOrdinaryInstances", .arr instanceRows),
+    ("nativeDefaultInstances", .arr (defaults.map (fun (name, priority) =>
+      Lean.Json.mkObj [("name", Lean.toJson (toString name)),
+        ("priority", Lean.toJson priority)])).toArray),
+    ("fullClassRegistered", Lean.toJson (environment.classes.any (psNameEq (psRootName "Trans")))),
+    ("fullOutputParameters", Lean.toJson (fullParameters.map (fun item => item.2.outputs))),
+    ("fullOutputLevels", Lean.toJson (fullParameters.map (fun item => item.2.outputLevels))),
+    ("requiredDependencies", .arr requiredRows.toArray),
+    ("nativeInstanceDependencyCount", Lean.toJson dependencies.size),
+    ("missingFullInstanceDependencies", Lean.toJson missing),
+    ("metadataReadOnly", Lean.toJson true),
+    ("calcQualified", Lean.toJson false)]
+  IO.FS.writeFile output (report.compress ++ "\n")
+  IO.println report.compress
+
+private def coreSimpTrieRows :
+    Nat → Nat → Array Lean.Meta.DiscrTree.Key →
+      Lean.Meta.DiscrTree.Trie Lean.Meta.SimpTheorem →
+      Except String (Nat × Array (Array Lean.Meta.DiscrTree.Key × Nat × Lean.Meta.SimpTheorem))
+  | 0, _, _, _ => throw "simp metadata trie depth exhausted"
+  | _ + 1, 0, _, _ => throw "simp metadata trie node budget exhausted"
+  | depth + 1, nodes + 1, path, .node values children => do
+    let mut remaining := nodes
+    let mut rows := values.mapIdx fun index value => (path, index, value)
+    for (key, child) in children do
+      let (next, found) ← coreSimpTrieRows depth remaining (path.push key) child
+      remaining := next
+      rows := rows ++ found
+    return (remaining, rows)
+
+private def coreSimpTreeRows (tree : Lean.Meta.DiscrTree Lean.Meta.SimpTheorem) :
+    Except String (Array (Array Lean.Meta.DiscrTree.Key × Nat × Lean.Meta.SimpTheorem)) := do
+  let roots : Array (Lean.Meta.DiscrTree.Key ×
+      Lean.Meta.DiscrTree.Trie Lean.Meta.SimpTheorem) :=
+    tree.root.foldl (fun entries key child => entries.push (key, child)) #[]
+  let mut remaining := 2000000
+  let mut rows : Array (Array Lean.Meta.DiscrTree.Key × Nat × Lean.Meta.SimpTheorem) := #[]
+  for (key, child) in roots do
+    let (next, found) ← coreSimpTrieRows 4096 remaining #[key] child
+    remaining := next
+    rows := rows ++ found
+  return rows
+
+private def coreSimpDeclarationComparison (native : Lean.Environment)
+    (installed : PsEnvironment) (name : Lean.Name) : Lean.Json := Id.run do
+  let selected? := psEnvironmentFind installed (exportName name)
+  let original? := native.find? name
+  let reference? := original?.bind fun info =>
+    match exportDeclaration native [] info with
+    | .ok declaration => some declaration
+    | .error _ => none
+  let compared := match selected?, reference? with
+    | some selected, some reference => Lean.Json.mkObj [
+        ("kind", Lean.toJson (coreCandidateKind selected == coreCandidateKind reference)),
+        ("levels", Lean.toJson
+          (psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams selected) ==
+           psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams reference))),
+        ("type", Lean.toJson
+          (psStandardSnapshotExpr (psDeclarationType selected) ==
+           psStandardSnapshotExpr (psDeclarationType reference))),
+        ("body", Lean.toJson (coreCandidateBody selected == coreCandidateBody reference)),
+        ("completeDeclaration", Lean.toJson
+          (psStandardSnapshotDeclaration selected == psStandardSnapshotDeclaration reference))]
+    | _, _ => .null
+  return Lean.Json.mkObj [
+    ("name", Lean.toJson (toString name)),
+    ("installed", Lean.toJson selected?.isSome),
+    ("nativePresent", Lean.toJson original?.isSome),
+    ("nativeExportableWithoutNewAssumptions", Lean.toJson reference?.isSome),
+    ("comparison", compared)]
+
+def auditCoreSimpMetadata (declarations : List PsDeclaration)
+    (output : System.FilePath) : IO Unit := do
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Core simp metadata requires the pinned Lean commit")
+  Lean.initSearchPath (← Lean.findSysroot)
+  unsafe Lean.enableInitializersExecution
+  let native ← Lean.importModules #[{ module := `Init }] {} (loadExts := true)
+  let installed := declarations.foldl psEnvironmentInsert psEnvironmentEmpty
+  let simp := Lean.Meta.simpExtension.getState native
+  let pre ← match coreSimpTreeRows simp.pre with
+    | .ok rows => pure rows
+    | .error error => throw (IO.userError error)
+  let post ← match coreSimpTreeRows simp.post with
+    | .ok rows => pure rows
+    | .error error => throw (IO.userError error)
+  let mut rows : Array Lean.Json := #[]
+  let mut missingProofRoots : List Lean.Name := []
+  let mut activeNativeRules := 0
+  let mut skippedOrigins : List Lean.Name := []
+  for (treePost, entries) in [(false, pre), (true, post)] do
+    for (path, bucketIndex, rule) in entries do
+      if simp.erased.contains rule.origin ||
+          !simp.lemmaNames.contains rule.origin then continue
+      activeNativeRules := activeNativeRules + 1
+      let .decl origin originPost inverse := rule.origin
+        | throw (IO.userError "imported native simp metadata has a non-declaration origin")
+      if (psEnvironmentFind installed (exportName origin)).isNone then
+        unless skippedOrigins.contains origin do
+          skippedOrigins := origin :: skippedOrigins
+        continue
+      let proofName? := match rule.proof with
+        | .const name _ => some name
+        | _ => none
+      if let some name := proofName? then
+        if (psEnvironmentFind installed (exportName name)).isNone &&
+            !missingProofRoots.contains name then
+          missingProofRoots := name :: missingProofRoots
+      let proofTemplate ← match exportExpr rule.proof with
+        | .ok expression => pure (psStandardSnapshotExpr expression)
+        | .error error => throw (IO.userError
+            ("native simp proof template cannot be exported: " ++ toString origin ++ ": " ++ error))
+      rows := rows.push (Lean.Json.mkObj [
+        ("origin", coreSimpDeclarationComparison native installed origin),
+        ("originPost", Lean.toJson originPost),
+        ("inverse", Lean.toJson inverse),
+        ("priority", Lean.toJson rule.priority),
+        ("post", Lean.toJson rule.post),
+        ("treePost", Lean.toJson treePost),
+        ("permutative", Lean.toJson rule.perm),
+        ("rfl", Lean.toJson rule.rfl),
+        ("backwardRfl", Lean.toJson rule.backwardRfl),
+        ("keys", Lean.toJson (rule.keys.map reprStr)),
+        ("bucketPath", Lean.toJson (path.map reprStr)),
+        ("bucketIndex", Lean.toJson bucketIndex),
+        ("proofLevelParameters", Lean.toJson (rule.levelParams.map toString)),
+        ("proofTemplate", Lean.toJson proofTemplate),
+        ("proofDeclaration", match proofName? with
+          | some name => coreSimpDeclarationComparison native installed name
+          | none => .null)])
+  let mut unfoldRows : Array Lean.Json := #[]
+  for declaration in declarations do
+    let name := PsKernelLean.toLeanName (psDeclarationName declaration)
+    let delta := simp.toUnfold.contains name
+    let equations? := simp.toUnfoldThms.find? name
+    if delta || equations?.isSome then
+      unfoldRows := unfoldRows.push (Lean.Json.mkObj [
+        ("origin", coreSimpDeclarationComparison native installed name),
+        ("delta", Lean.toJson delta),
+        ("equations", match equations? with
+          | some equations => Lean.toJson (equations.map toString)
+          | none => .null),
+        ("equationDeclarations", match equations? with
+          | some equations => .arr (equations.map (coreSimpDeclarationComparison native installed))
+          | none => .null)])
+  let subsingletonName := Lean.Name.mkSimple "Subsingleton"
+  let decidableName := Lean.Name.mkSimple "Decidable"
+  let subsingletonInstances :=
+    ((Lean.Meta.instanceExtension.getState native).instanceNames.toArray.filter
+      (fun (name, _) => (native.find? name).any fun info =>
+        let conclusion := info.type.getForallBody
+        conclusion.getAppFn.isConstOf subsingletonName &&
+          conclusion.getAppArgs.any (fun argument =>
+            argument.getAppFn.isConstOf decidableName))).qsort
+      (fun left right => Lean.Name.lt left.1 right.1)
+  let subsingletonRows := subsingletonInstances.map fun (name, entry) =>
+    Lean.Json.mkObj [
+      ("declaration", coreSimpDeclarationComparison native installed name),
+      ("priority", Lean.toJson entry.priority),
+      ("globalName", Lean.toJson (entry.globalName?.map toString))]
+  let report := Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-core-native-simp-metadata/1" : String)),
+    ("nativeCommit", Lean.toJson Lean.githash),
+    ("nativeModules", Lean.toJson (["Init"] : List String)),
+    ("nativeMetadataExtensionsLoaded", Lean.toJson true),
+    ("selectedDeclarations", Lean.toJson declarations.length),
+    ("activeNativeRules", Lean.toJson activeNativeRules),
+    ("selectedNativeRules", Lean.toJson rows.size),
+    ("rules", .arr rows),
+    ("unfolding", .arr unfoldRows),
+    ("uninstalledOrigins", Lean.toJson (skippedOrigins.toArray.qsort Lean.Name.lt |>.map toString)),
+    ("missingNormalizedProofRoots", Lean.toJson
+      (missingProofRoots.toArray.qsort Lean.Name.lt |>.map toString)),
+    ("simpOnlyBuiltins", .arr (([`eq_self, `iff_self] : List Lean.Name).toArray.map
+      (coreSimpDeclarationComparison native installed))),
+    ("dependentDecisionCongruence", .arr
+      ((["Subsingleton", "Subsingleton.elim", "Decidable.eq"] : List String).toArray.map
+        (fun name => coreSimpDeclarationComparison native installed
+          ((name.splitOn ".").foldl Lean.Name.str .anonymous)))),
+    ("nativeSubsingletonDecidableInstances", .arr subsingletonRows),
+    ("portableMetadataInstalled", Lean.toJson false),
+    ("freshKernelReplayPerformedByThisAudit", Lean.toJson false),
+    ("sourceAcceptanceQualified", Lean.toJson false)]
+  IO.FS.writeFile output (report.compress ++ "\n")
+  IO.println report.compress
 
 end PsV7Native

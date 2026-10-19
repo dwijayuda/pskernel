@@ -1,5 +1,5 @@
 import Ps.Elab.DerivingContext
-import Ps.Environment.StandardInhabited
+import Ps.Environment.InhabitedExpr
 
 /-
 Reference: Lean 4.35.0 Lean/Elab/Deriving/Inhabited.lean at eb6cafb.
@@ -31,6 +31,7 @@ def psElabDeriveInhabitedConstructor (plan : PsElabDeriveContext)
     constructorValue := .app constructorValue fresh.expr
   let result := psUnify context.environment context.localContext context.metaContext
     cursor plan.family
+  if result.resourceExceeded then throw .fuelExhausted
   if !result.success then
     throw (.data "derived constructor does not produce the expected family")
   context := psElabContextWithMeta context result.context
@@ -50,6 +51,7 @@ def psElabDeriveInhabitedConstructor (plan : PsElabDeriveContext)
       let checked ← psElabResolvedTerm context defaultValue (some domain)
       let assigned := psUnify checked.context.environment checked.context.localContext
         checked.context.metaContext (.mvar id) checked.term
+      if assigned.resourceExceeded then throw .fuelExhausted
       if !assigned.success then
         throw (.data "derived constructor default does not fill its field")
       context := psElabContextWithMeta checked.context assigned.context
@@ -67,7 +69,8 @@ def psElabDeriveInhabitedValue (plan : PsElabDeriveContext) : Except PsElabError
       | throw (.data "deriving constructor is missing")
     match psElabDeriveInhabitedConstructor plan constructor with
     | .ok value => return value
-    | .error _ => pure ()
+    | .error error =>
+      if psElabErrorIsResource error then throw error else pure ()
   throw (.data "Inhabited deriving requires a constructor with inhabitable fields")
 
 def psElabDeriveInhabited (environment : PsEnvironment)
@@ -80,8 +83,9 @@ def psElabDeriveInhabited (environment : PsEnvironment)
   -- empty constructor must beat an earlier constructor requiring Inhabited α.
   let (plan, defaultValue) ← match psElabDeriveInhabitedValue plan with
     | .ok value => pure (plan, value)
-    | .error _ => do
-      let plan := psElabDeriveRequirements plan (psRootName "Inhabited")
+    | .error error => do
+      if psElabErrorIsResource error then throw error
+      let plan ← psElabDeriveRequirements plan (psRootName "Inhabited")
       let value ← psElabDeriveInhabitedValue plan
       pure (plan, value)
   let level ← psElabExpressionSort plan.context plan.family

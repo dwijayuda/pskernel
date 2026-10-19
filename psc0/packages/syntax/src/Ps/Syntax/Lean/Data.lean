@@ -53,7 +53,7 @@ def psLeanConstructors (fuel : Nat) (cursor : PsTokenCursor)
 def psLeanReadData (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) := do
   let some keyword := psTokenCursorAdvance cursor | throw (.unexpectedEnd "native data declaration")
-  let name ← psParseSyntaxName keyword.cursor
+  let name ← psParseDeclarationName keyword.cursor
   let params ← psLeanProgramBinders name.cursor
   let result ← if psTokenCursorAtText params.cursor ":" then do
     let colon ← psTokenCursorExpectText params.cursor ":"
@@ -97,7 +97,7 @@ def psLeanInstanceFieldBinders (fuel : Nat) (cursor : PsTokenCursor)
       if !psTokenKindEq token.kind .identifier || psPscv0ReservedArgument token.text then
         return { value := accRev.reverse, cursor }
       let name ← psTokenCursorExpectKind cursor .identifier
-      let head := PsSyntaxBinderHead.mk (PsSyntaxName.mk [name.token.text] name.token.span)
+      let head := PsSyntaxBinderHead.mk ((psSyntaxNameFromToken name.token))
         .explicit name.token.span
       psLeanInstanceFieldBinders fuel name.cursor ((head, .hole name.token.span) :: accRev)
 
@@ -133,7 +133,7 @@ def psLeanReadInstance (cursor : PsTokenCursor) :
   let name ← match psTokenCursorPeek priority.cursor with
     | some token =>
       if psTokenKindEq token.kind .identifier && !psPscv0ReservedArgument token.text then
-        psParseSyntaxName priority.cursor
+        psParseDeclarationName priority.cursor
       else pure (PsParseResult.mk
         (PsSyntaxName.mk ["$psc0Instance" ++ psNatToString keyword.token.span.start.byteOffset]
           keyword.token.span) priority.cursor)

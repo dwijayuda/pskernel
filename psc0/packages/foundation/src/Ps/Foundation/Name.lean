@@ -104,6 +104,14 @@ def psNameToString (name : PsName) : String :=
           (String.Internal.append prefixText ".")
           suffix
 
+-- Preserve string components, including embedded dots. Numeric components
+-- here are presentation/scope keys only: actual identities retain PsName.
+def psNameToSegments (name : PsName) : List String :=
+  match name with
+  | .anonymous => []
+  | .str parent value => psNameToSegments parent ++ [value]
+  | .num parent value => psNameToSegments parent ++ [psNatToString value]
+
 def psNameLastComponent (name : PsName) : String :=
   match name with
   | PsName.anonymous => ""

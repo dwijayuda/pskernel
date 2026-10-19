@@ -11,6 +11,8 @@ structure PsLevelMetaContext where
   nextId : Nat
   declarations : List Nat
   assignments : List PsLevelAssignment
+  deferUnsolved : Bool := false
+  pending : List (PsLevel × PsLevel) := []
 
 structure PsLevelFreshResult where
   context : PsLevelMetaContext
@@ -19,6 +21,7 @@ structure PsLevelFreshResult where
 structure PsLevelUnifyResult where
   context : PsLevelMetaContext
   success : Bool
+  resourceExceeded : Bool := false
 
 def psLevelMetaEmpty : PsLevelMetaContext :=
   { nextId := 0, declarations := [], assignments := [] }
@@ -43,11 +46,9 @@ def psLevelFindAssignmentInList
 def psLevelMetaFresh (context : PsLevelMetaContext) : PsLevelFreshResult :=
   let id := context.nextId;
   {
-    context := {
+    context := { context with
       nextId := Nat.succ id
-      declarations := List.cons id context.declarations
-      assignments := context.assignments
-    }
+      declarations := List.cons id context.declarations }
     level := PsLevel.mvar id
   }
 
@@ -116,9 +117,7 @@ def psLevelAssign
         if psLevelOccurs context id resolved then
           Option.none
         else
-          Option.some {
-            nextId := context.nextId
-            declarations := context.declarations
+          Option.some { context with
             assignments :=
               List.cons
                 (PsLevelAssignment.mk id resolved)
@@ -133,7 +132,7 @@ def psLevelUnifyWithFuelWorker
   match fuel with
   | Nat.zero =>
       fun (context : PsLevelMetaContext) (_left : PsLevel) (_right : PsLevel) =>
-        { context := context, success := false }
+        { context := context, success := false, resourceExceeded := true }
   | Nat.succ remaining =>
       fun (context : PsLevelMetaContext) (left : PsLevel) (right : PsLevel) =>
         let smaller : PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=
@@ -179,12 +178,39 @@ def psLevelUnifyWithFuelWorker
                   | _ => { context := context, success := false }
               | _ => { context := context, success := false }
 
+-- Only the constructor/result-universe owner enables deferred constraints.
+-- Ordinary term unification keeps its existing strict default.
+def psLevelUnifyHasMVar : PsLevel → Bool
+  | .mvar _ => true
+  | .succ level => psLevelUnifyHasMVar level
+  | .max left right | .imax left right => psLevelUnifyHasMVar left || psLevelUnifyHasMVar right
+  | _ => false
+
+def psLevelUnifyMayDefer (left right : PsLevel) : Bool :=
+  if !(psLevelUnifyHasMVar left || psLevelUnifyHasMVar right) then false else
+  match left, right with
+  | .zero, _ => !psLevelAlwaysPositive right
+  | _, .zero => !psLevelAlwaysPositive left
+  | .succ _, .param _ | .param _, .succ _ => false
+  | _, _ => true
+
 def psLevelUnifyWithFuel
     (context : PsLevelMetaContext)
     (fuel : Nat)
     (left : PsLevel)
     (right : PsLevel) : PsLevelUnifyResult :=
-  psLevelUnifyWithFuelWorker fuel context left right
+  let result := psLevelUnifyWithFuelWorker fuel context left right
+  if result.success || result.resourceExceeded || !context.deferUnsolved then result else
+  let left := psLevelNormalize (psLevelInstantiate context left)
+  let right := psLevelNormalize (psLevelInstantiate context right)
+  if !psLevelUnifyMayDefer left right then result else
+  -- A failed structural attempt may have assigned a max component. Discard
+  -- those trial assignments; retain the complete original equation instead.
+  let repeated := context.pending.any fun pair =>
+    psLevelStructuralEq pair.fst left && psLevelStructuralEq pair.snd right
+  { context := { context with
+      pending := if repeated then context.pending else context.pending ++ [(left, right)] }
+    success := true }
 
 def psLevelUnify
     (context : PsLevelMetaContext)

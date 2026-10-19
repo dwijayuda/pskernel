@@ -85,11 +85,11 @@ def psElabDeriveHashable (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
   let plan ← psElabDerivePrepare environment origin { groups := true, indices := true, nested := true }
   let className := psRootName "Hashable"
-  let plan := psElabDeriveRequirements plan className
+  let plan ← psElabDeriveRequirements plan className
   -- Validate the complete family before generating any branch.
   for slot in plan.elimination.slots do
     for constructor in slot.constructors do
-      let _ ← psElabDeriveSlotFields plan slot constructor
+      let _ ← psElabDeriveSlotFields plan slot constructor true
       pure ()
   let type ← psElabDeriveClassType plan.context className plan.family
   let .app (.constE _ levels) _ := type | throw .typeMismatch

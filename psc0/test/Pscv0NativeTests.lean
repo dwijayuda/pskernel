@@ -848,8 +848,13 @@ private def comparisonNotationFixture : String :=
 private def utf8Fixture : String :=
   "namespace Utf8Cases\nconst samples: Array ByteArray := #[List.toByteArray([]), List.toByteArray([0]), List.toByteArray([65, 0, 66]), List.toByteArray([127, 194, 128, 223, 191, 224, 160, 128, 239, 191, 191, 240, 144, 128, 128, 244, 143, 191, 191]), List.toByteArray([239, 187, 191, 65]), List.toByteArray([195, 169, 240, 159, 152, 128]), List.toByteArray([128]), List.toByteArray([192, 128]), List.toByteArray([193, 191]), List.toByteArray([194]), List.toByteArray([226, 130]), List.toByteArray([226, 65, 172]), List.toByteArray([224, 159, 191]), List.toByteArray([237, 160, 128]), List.toByteArray([240, 143, 191, 191]), List.toByteArray([244, 144, 128, 128]), List.toByteArray([245, 128, 128, 128]), List.toByteArray([255]), List.toByteArray([65, 195])]\nfunction sample(index: Nat): ByteArray := Array.getD(samples, index, ByteArray.empty)\nfunction read(decode: ByteArray -> Option String, bytes: ByteArray): String := match decode(bytes) with { | .none => \"#invalid\" | .some text => \"#\" ++ text }\nend Utf8Cases\nfunction utf8ValidateCase(index: Nat): Bool := ByteArray.validateUTF8(Utf8Cases.sample(index))\nfunction utf8DecodeCase(index: Nat): String := Utf8Cases.read(String.fromUTF8?, Utf8Cases.sample(index))\nfunction utf8RoundtripCase(index: Nat): String := match String.fromUTF8?(Utf8Cases.sample(index)) with { | .none => \"#invalid\" | .some text => reprStr(List.map(UInt8.toNat, ByteArray.toList(String.toUTF8(text)))) }\nfunction utf8Encode(text: String): String := reprStr(List.map(UInt8.toNat, ByteArray.toList(String.toUTF8(text))))\nconst utf8Persistent: Bool := {\n let before: ByteArray := Utf8Cases.sample(5)\n let decoded: Option String := String.fromUTF8?(before)\n let after: ByteArray := ByteArray.set!(before, 0, 65)\n ByteArray.beq(before, Utf8Cases.sample(5)) && ByteArray.validateUTF8(before) && !ByteArray.validateUTF8(after)\n}\n"
 
+private def coreEliminationRuntimeFixture : String :=
+  "inductive CoreElimRecursiveFunction: Type where {\n  | leaf(value: Nat): CoreElimRecursiveFunction\n  | node(children: Nat -> CoreElimRecursiveFunction): CoreElimRecursiveFunction\n}\nfunction coreElimRecursiveField(key: Nat, x: CoreElimRecursiveFunction): Nat := match x with {\n  | CoreElimRecursiveFunction.leaf value => value\n  | CoreElimRecursiveFunction.node children => Nat.succ(coreElimRecursiveField(key, children(key)))\n}\nconst coreElimRecursiveLeafAnswer: Nat := coreElimRecursiveField(4, CoreElimRecursiveFunction.leaf(13))\nconst coreElimRecursiveZeroAnswer: Nat := coreElimRecursiveField(0, CoreElimRecursiveFunction.node(fun (n: Nat) => CoreElimRecursiveFunction.leaf(Nat.succ(n))))\nconst coreElimRecursiveSevenAnswer: Nat := coreElimRecursiveField(7, CoreElimRecursiveFunction.node(fun (n: Nat) => CoreElimRecursiveFunction.leaf(Nat.succ(n))))\n" ++
+  "inductive CoreElimFunction: Type where {\n  | leaf(value: Nat): CoreElimFunction\n  | node(children: Nat -> CoreElimFunction): CoreElimFunction\n}\nfunction coreElimFunctionFold(x: CoreElimFunction): Nat := by {\n  induction x\n  case leaf value => exact value\n  case node children ih => exact ih(0)\n}\ninductive CoreElimFunctionIndexed: Nat -> Type where {\n  | leaf(n: Nat): CoreElimFunctionIndexed(n)\n  | node(children: (n: Nat) -> CoreElimFunctionIndexed(n)): CoreElimFunctionIndexed(0)\n}\nfunction coreElimDependentFold(n: Nat, x: CoreElimFunctionIndexed(n)): Nat := by {\n  induction x\n  case leaf k => exact k\n  case node children ih => exact ih(19)\n}\nconst coreElimFunctionLeafAnswer: Nat := coreElimFunctionFold(CoreElimFunction.leaf(13))\nconst coreElimFunctionNodeAnswer: Nat := coreElimFunctionFold(CoreElimFunction.node(fun (_: Nat) => CoreElimFunction.leaf(17)))\nconst coreElimDependentFunctionAnswer: Nat := coreElimDependentFold(0, CoreElimFunctionIndexed.node(fun (n: Nat) => CoreElimFunctionIndexed.leaf(n)))\n" ++
+  "function coreElimCasesComputed(n: Nat): Nat := by {\n  cases Nat.succ(n)\n  case zero => exact 41\n  case succ k => exact k\n}\nfunction coreElimCasesLet(n: Nat): Nat := by {\n  let value: Nat := Nat.succ(n)\n  cases value\n  case zero => exact 43\n  case succ k => exact k\n}\nfunction coreElimInductionComputed(n: Nat): Nat := by {\n  induction Nat.succ(n)\n  case zero => exact 0\n  case succ k ih => exact Nat.succ(ih)\n}\nfunction coreElimInductionLet(n: Nat): Nat := by {\n  let value: Nat := Nat.succ(n)\n  induction value\n  case zero => exact 0\n  case succ k ih => exact Nat.succ(ih)\n}\n"
+
 private def application : String :=
-  operatorTreeFixture ++ logicDecisionFixture ++ utf8Fixture ++ comparisonNotationFixture ++ arrayFilterFixture ++ floatDisplayFixture ++ floatConversionsFixture ++ executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ literalConstraintFixture ++ scientificLiteralFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  coreEliminationRuntimeFixture ++ operatorTreeFixture ++ logicDecisionFixture ++ utf8Fixture ++ comparisonNotationFixture ++ arrayFilterFixture ++ floatDisplayFixture ++ floatConversionsFixture ++ executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ literalConstraintFixture ++ scientificLiteralFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -1634,7 +1639,7 @@ private def semanticCases : IO Unit := do
     { source := "section\nvariable (P: Prop) (proof: P)\ntheorem bad: P := proof\nend\n" },
     { source := "function bad(value: Nat := true): Nat := value\n" },
     { source := "function need(value: Nat := 1, required: Nat): Nat := required\nconst bad: Nat := need()\n" },
-    { source := "section\nvariable (value: Nat)\nconst good: Nat := value\n" },
+    { source := "section\nvariable (value: Nat)\nconst good: Nat := value\nend\nend\n" },
     { source := "const bad: Nat -> Nat -> Nat := fun (x: Nat, y: Nat) => x\n" },
     { source := "const bad: Unit -> Nat := fun() => 0\n" },
     { source := "const bad: forall (A: Type) A -> A := fun (A: Type) x => x\n" },
@@ -1729,7 +1734,7 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
-    "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
+    "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: end without",
     "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-PARSE", "PSCV0-SCOPE: unknown name", "PSCV0-SCOPE: duplicate active section variable",
     "PSCV0-PARSE: PSCV0-BIND-02", "PSCV0-PARSE: nonempty binder group",
@@ -2179,7 +2184,7 @@ private def projectBoundaries : IO Unit := do
     name := "HiddenFacade"
     source := "import Library\nnamespace HiddenFacade\nconst local: Nat := Library.double(2)\nend HiddenFacade\n" }
   let hiddenClient := "import HiddenFacade\nconst leaked: Nat := Library.double(7)\n"
-  let opacityClient := "import Library\ntheorem cannotUnfold: Library.double(7) = 14 := by { rfl }\n"
+  let opacityClient := "public import Library\ntheorem cannotUnfold: Library.double(7) = 14 := by { rfl }\n"
   let vault : PsPscv0ModuleSource := {
     name := "Vault"
     source := "namespace Vault\nprivate const hidden: Nat := 4\nfunction addHidden(value: Nat): Nat := Nat.add(hidden, value)\nend Vault\n" }
@@ -2217,7 +2222,7 @@ private def projectBoundaries : IO Unit := do
     name := "RightExport", source := "public import Palette\nconst rightTag: Nat := 2\n" }
   let derivedClient : PsPscv0ModuleSource := {
     name := "DerivedClient"
-    source := "import LeftExport\nimport RightExport\nconst chosen: Palette.Shade := Inhabited.default\n" }
+    source := "public import LeftExport\npublic import RightExport\nconst chosen: Palette.Shade := Inhabited.default\n" }
   let derived ← get "public derived-instance diamond"
     (psCompilerPreparePscv0Project "DerivedClient"
       [derivedClient, leftExport, rightExport, palette])
@@ -2235,9 +2240,9 @@ private def projectBoundaries : IO Unit := do
     name := "Aliases"
     source := "namespace Aliases\nabbrev six: Nat := 6\nfunction twice(value: Nat): Nat := Nat.add(value, value)\nend Aliases\n" }
   let abbreviationClient :=
-    "import Aliases\ntheorem exposed: Aliases.six = 6 := by { rfl }\n"
+    "public import Aliases\ntheorem exposed: Aliases.six = 6 := by { rfl }\n"
   let abbreviationOpacity :=
-    "import Aliases\ntheorem cannotUnfold: Aliases.twice(3) = 6 := by { rfl }\n"
+    "public import Aliases\ntheorem cannotUnfold: Aliases.twice(3) = 6 := by { rfl }\n"
   let invalidExposed : PsPscv0ModuleSource := {
     name := "InvalidExposed"
     source := "namespace InvalidExposed\nprivate const seed: Nat := 9\nabbrev leaked: Nat := seed\nend InvalidExposed\n" }
@@ -2702,24 +2707,78 @@ private def projectBoundaries : IO Unit := do
     | _, _ => throw (IO.userError s!"module official checker acceptance mismatch {i}")
   IO.println "PSCV0_NATIVE_MODULES: PASS module boundaries, RC4 raw/radix, checked ToString dictionaries, abbreviation exposure and entry exports"
 
+namespace Pscv0DerivingBoundaryOracle
+
+universe u
+structure DependentBEq where
+  n : Nat
+  value : Fin n
+  deriving BEq
+structure DependentDecEq where
+  n : Nat
+  value : Fin n
+  deriving DecidableEq
+inductive Promoted : Nat → Type where
+  | intro (n : Nat) : Promoted n
+  deriving DecidableEq
+inductive Chain (A : Type u) : Nat → Type u where
+  | nil : Chain A 0
+  | cons (head : A) (tail : List (Chain A 0)) : Chain A (Nat.succ 0)
+  deriving BEq
+inductive NestedFin where
+  | loop (n : Nat) (value : Fin n) (tails : List NestedFin)
+  deriving Repr
+
+run_cmd do
+  let promoted ← Lean.getConstInfoInduct ``Promoted
+  unless promoted.numParams == 1 && promoted.numIndices == 0 do
+    throwError "native deriving boundary lost index promotion"
+  let chain ← Lean.getConstInfoInduct ``Chain
+  unless chain.numParams == 1 && chain.numIndices == 1 && chain.isNested do
+    throwError "native deriving boundary lost genuine indexed nested BEq"
+  let nested ← Lean.getConstInfoInduct ``NestedFin
+  unless nested.numParams == 0 && nested.numIndices == 0 && nested.isNested do
+    throwError "native deriving boundary lost nested Fin payload"
+
+def finOne : Fin 2 := Fin.mk 1 Nat.le.refl
+def finZero : Fin 2 := Fin.mk 0 (Nat.le.step Nat.le.refl)
+def chain (n : Nat) : Chain Nat 1 := Chain.cons n [Chain.nil]
+def observations : List Bool := [
+  DependentBEq.mk 2 finOne == DependentBEq.mk 2 finOne,
+  !(DependentBEq.mk 2 finOne == DependentBEq.mk 2 finZero),
+  Decidable.decide (self := decEq (DependentDecEq.mk 2 finOne) (DependentDecEq.mk 2 finOne)),
+  !(Decidable.decide (self := decEq (DependentDecEq.mk 2 finOne) (DependentDecEq.mk 2 finZero))),
+  Decidable.decide (self := decEq (Promoted.intro 7) (Promoted.intro 7)),
+  chain 3 == chain 3,
+  !(chain 3 == chain 4),
+  reprStr (NestedFin.loop 2 finOne []) ==
+    "Pscv0DerivingBoundaryOracle.NestedFin.loop 2 1 []"]
+
+end Pscv0DerivingBoundaryOracle
+
 private def derivingBoundaries : IO Unit := do
+  let native := Pscv0DerivingBoundaryOracle.observations
+  unless native.length == 8 && native.all id do
+    throw (IO.userError "native dependent/nested deriving observations changed")
   -- Type-valued fields exercise kernel projection inference only; their runtime
   -- representation is outside the selected backend subset.
   let projection : PsV7Native.Request := {
     source := "universe u\nstructure TypeField: Type (u + 1) where { value: Type u }\nconst record: TypeField := TypeField.mk(Nat)\nconst projected: Type := record.value\ntheorem correct: projected = Nat := by { rfl }\nfunction emptyList{A: Type u}(unit: Unit): List A := Inhabited.default\nfunction equalLists{A: Type u}[BEq A](xs: List A, ys: List A): Bool := List.beq(xs, ys)\ntheorem emptyTypes: emptyList(A := Type, unit := Unit.unit) = List.nil := by { rfl }\nfunction listProof{A: Type u}(xs: List A, i: Nat, h: Nat.lt(i, List.length(xs))): A := xs[i]'h\nfunction listOptional{A: Type u}(xs: List A, i: Nat): Option A := xs[i]?\nfunction listBang{A: Type u}[Inhabited A](xs: List A, i: Nat): A := xs[i]!\nfunction listPublicBang{A: Type u}[Inhabited A](xs: List A, i: Nat): A := List.get!(xs, i)\nfunction requireListLaw{A: Type u}[LawfulGetElem(List A, Nat, A, fun xs => fun i => Nat.lt(i, List.length(xs)))](xs: List A): Nat := List.length(xs)\nfunction listLaw{A: Type u}(xs: List A): Nat := requireListLaw(xs)\ntheorem typeIndex: listOptional([Nat], 0) = Option.some(Nat) := by { rfl }\n" }
   let requests : Array PsV7Native.Request := #[
     { source := "universe u\nstructure Box(A: Type u): Type u where { value: A } deriving BEq\nfunction bad(x: Box(Nat -> Nat)): Bool := x == x\n" },
-    { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\n" },
-    { source := "universe u\ninductive Chain(A: Type u): Nat -> Type u where { | nil: Chain(A, 0) | cons(head: A, tail: List(Chain(A, 0))): Chain(A, Nat.succ(0)) } deriving BEq\n" },
+    { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\ntheorem boundaryDependentBEqSame:\n  (Dependent.mk(2, Fin.mk(1, Nat.le.refl)) ==\n    Dependent.mk(2, Fin.mk(1, Nat.le.refl))) = true := by { rfl }\ntheorem boundaryDependentBEqDifferent:\n  (Dependent.mk(2, Fin.mk(1, Nat.le.refl)) ==\n    Dependent.mk(2, Fin.mk(0, Nat.le.step(Nat.le.refl)))) = false := by { rfl }\n" },
+    { source := "universe u\ninductive Chain(A: Type u): Nat -> Type u where { | nil: Chain(A, 0) | cons(head: A, tail: List(Chain(A, 0))): Chain(A, Nat.succ(0)) } deriving BEq\ntheorem boundaryIndexedNestedBEqSame:\n  ((Chain.cons(3, [Chain.nil]): Chain(Nat, 1)) ==\n    Chain.cons(3, [Chain.nil])) = true := by { rfl }\ntheorem boundaryIndexedNestedBEqDifferent:\n  ((Chain.cons(3, [Chain.nil]): Chain(Nat, 1)) ==\n    Chain.cons(4, [Chain.nil])) = false := by { rfl }\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving DecidableEq\n" },
-    { source := "structure Bad where {\n n: Nat\n value: Fin n\n} deriving DecidableEq\n" },
+    { source := "structure Bad where {\n n: Nat\n value: Fin n\n} deriving DecidableEq\ntheorem boundaryDependentDecEqSame:\n  Decidable.decide(self := decEq(Bad.mk(2, Fin.mk(1, Nat.le.refl)),\n    Bad.mk(2, Fin.mk(1, Nat.le.refl)))) = true := by { rfl }\ntheorem boundaryDependentDecEqDifferent:\n  Decidable.decide(self := decEq(Bad.mk(2, Fin.mk(1, Nat.le.refl)),\n    Bad.mk(2, Fin.mk(0, Nat.le.step(Nat.le.refl))))) = false := by { rfl }\n" },
     { source := "inductive Bad where { | nil | cons(next: List Bad) } deriving DecidableEq\n" },
-    { source := "inductive Bad: Nat -> Type where { | intro(n: Nat): Bad n } deriving DecidableEq\n" },
+    { source := "inductive Bad: Nat -> Type where { | intro(n: Nat): Bad n } deriving DecidableEq\ntheorem boundaryPromotedDecEq:\n  Decidable.decide(self := decEq(Bad.intro(7), Bad.intro(7))) = true := by { rfl }\n" },
     { source := "structure Bad where { value: Nat := true } deriving Inhabited\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving Repr\n" },
-    { source := "inductive Bad where { | loop(n: Nat, value: Fin n, tails: List Bad) } deriving Repr\n" },
+    { source := "inductive Bad where { | loop(n: Nat, value: Fin n, tails: List Bad) } deriving Repr\ntheorem boundaryNestedFinRepr:\n  reprStr(Bad.loop(2, Fin.mk(1, Nat.le.refl), [])) =\n    \"Bad.loop 2 1 []\" := by { rfl }\n" },
     { source := "structure Required where { value: Nat }\nconst bad: Required := {}\n" }
   ]
+  let accepted : Array Bool := #[false, true, true, false, true, false, true, false, false, true, false]
+  let labels : Array String := #["missing generic BEq dictionary", "dependent Fin BEq", "genuine indexed nested BEq", "missing function DecidableEq", "dependent Fin DecidableEq", "native nested DecidableEq refusal", "promoted parameter DecidableEq", "ill-typed declared default", "missing function Repr", "nested Fin Repr", "missing required record field"]
   let batch ← match ← PsV7Native.runBatch (#[projection] ++ requests) with
     | .ok batch => pure batch
     | .error error => throw (IO.userError ("deriving host prelude: " ++ error.message))
@@ -2728,13 +2787,27 @@ private def derivingBoundaries : IO Unit := do
   match projectionResult with
   | .ok _ => pure ()
   | .error error => throw (IO.userError ("projection universe inference: " ++ error.message))
-  for result in batch.results.toList.drop 1 do
-    match result with
-    | .error error =>
+  unless batch.results.size == requests.size + 1 && accepted.size == requests.size &&
+      labels.size == requests.size do
+    throw (IO.userError "deriving boundary observation roster changed")
+  for i in [:requests.size] do
+    let some result := batch.results[i + 1]?
+      | throw (IO.userError "deriving boundary result missing")
+    let label := labels[i]!
+    match accepted[i]!, result with
+    | true, .ok value =>
+      unless value.artifacts.length == 3 do
+        throw (IO.userError (label ++ " lost a checked target"))
+    | true, .error error =>
+      throw (IO.userError (label ++ " refused at " ++ error.phase ++ ": " ++ error.message))
+    | false, .error error =>
       unless error.phase == "elaborate" do
-        throw (IO.userError ("deriving refusal escaped elaboration: " ++ error.phase ++ ": " ++ error.message))
-    | .ok _ => throw (IO.userError "deriving admitted an unsupported comparison")
-  IO.println "PSCV0_DERIVING_BOUNDARIES: PASS missing dictionaries, dependent runtime fields, indexed BEq, nested/indexed DecidableEq, ill-typed defaults and missing required fields"
+        throw (IO.userError (label ++ " escaped elaboration: " ++ error.phase ++ ": " ++ error.message))
+      if ["fuel", "heartbeat", "recursion depth", "maximum recursion", "timeout"].any
+          (fun word => (error.message.splitOn word).length > 1) then
+        throw (IO.userError (label ++ " exhausted resources instead of refusing: " ++ error.message))
+    | false, .ok _ => throw (IO.userError (label ++ " unexpectedly succeeded"))
+  IO.println "PSCV0_DERIVING_BOUNDARIES: PASS five native-applicable dependent/promoted/nested derivations, eight independent native observations and checked source equations, six elaboration refusals for real missing dictionaries, native-unsupported nested DecidableEq, ill-typed defaults and required fields"
 
 private def sourceInfoBoundaries : IO Unit := do
   let source :=
@@ -3247,7 +3320,7 @@ private def transparencyBoundaries : IO Unit := do
     { source := "const Hidden: Type := Nat\nconst bad: Hidden := Inhabited.default\n" },
     { source := "const Hidden: Type := Nat\nconst bad: Hidden := 937\n" },
     { moduleName := "Client",
-      source := "import Types\nconst value: Clear := Inhabited.default\nconst numeral: Clear := 937\n",
+      source := "public import Types\nconst value: Clear := Inhabited.default\nconst numeral: Clear := 937\n",
       modules := [{ name := "Types", source := "abbrev Clear: Type := Nat\n" }] }
   ]
   let batch ← match ← PsV7Native.runBatch requests with

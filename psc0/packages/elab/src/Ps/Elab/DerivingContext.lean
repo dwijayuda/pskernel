@@ -27,10 +27,9 @@ def psElabDeriveSourceFamily (origin : PsElabBatchOrigin) : Except PsElabError P
     | throw (.data "deriving requires an inductive/structure declaration")
   return member.name
 
-def psElabDerivePrepare (environment : PsEnvironment)
-    (origin : PsElabBatchOrigin) (capabilities : PsElabDeriveCapabilities := {}) :
+def psElabDerivePrepareFamily (environment : PsEnvironment)
+    (name : PsName) (capabilities : PsElabDeriveCapabilities := {}) :
     Except PsElabError PsElabDeriveContext := do
-  let name ← psElabDeriveSourceFamily origin
   let some info := psEnvironmentFindInductive environment name
     | throw (.data "derived family is not an inductive")
   let some group := psInductiveGroupIdentityFor
@@ -60,6 +59,11 @@ def psElabDerivePrepare (environment : PsEnvironment)
     parametersRev := parameters.bindersRev.map fun binder => { binder with binder := .implicit }
     indicesRev := indices.bindersRev.map fun binder => { binder with binder := .implicit }
     family }
+
+def psElabDerivePrepare (environment : PsEnvironment)
+    (origin : PsElabBatchOrigin) (capabilities : PsElabDeriveCapabilities := {}) :
+    Except PsElabError PsElabDeriveContext := do
+  psElabDerivePrepareFamily environment (← psElabDeriveSourceFamily origin) capabilities
 
 def psElabDeriveConstructorNames (plan : PsElabDeriveContext) : List PsName :=
   plan.group.members.flatMap (·.constructors)
@@ -93,21 +97,24 @@ def psElabDeriveClassType (context : PsElabContext) (className : PsName)
   return target
 
 def psElabDeriveRequirements (plan : PsElabDeriveContext) (className : PsName) :
-    PsElabDeriveContext :=
-  plan.parametersRev.reverse.foldl (fun plan parameter =>
+    Except PsElabError PsElabDeriveContext :=
+  plan.parametersRev.reverse.foldlM (fun plan parameter => do
     match psElabDeriveClassType plan.context className (.fvar parameter.id) with
-    | .error _ => plan
+    | .error error =>
+      if psElabErrorIsResource error then throw error else return plan
     | .ok type =>
       let name := psNameAppendStr parameter.name "inst"
       let pushed := psLocalPushBinding plan.context.localContext name type .instanceImplicit
-      { plan with
+      return { plan with
         context := psElabContextWithLocal plan.context pushed.context
         requirementsRev := .mk pushed.id name type .instanceImplicit :: plan.requirementsRev }) plan
 
 def psElabDeriveInstance (context : PsElabContext) (target : PsExpr) :
     Except PsElabError PsExpr := do
-  let result := psSynthInstance context.environment context.localContext context.instances
-    context.metaContext target
+  let search := psSynthInstanceWithLimits context.environment context.localContext context.instances
+    context.metaContext 64 {} target
+  if search.table.resourceExceeded then throw .fuelExhausted
+  let result := search.result
   let some value := result.value | throw (.data "deriving field has no checked instance")
   let value := psMetaInstantiate result.context value
   if psExprHasUnresolvedMeta value then throw .unresolvedMetavariable
@@ -131,6 +138,20 @@ def psElabDeriveConstructor (plan : PsElabDeriveContext) (constructor : PsConstr
   let cursor ← psElabProjectionApplyParameters plan.context arguments type
   return (psExprApplyMany (.constE constructor.name levels) arguments, cursor)
 
+-- A repeated handler is another real derivation in source order. Preserve
+-- the first canonical member name and choose an unused name for later values.
+def psElabDeriveFreshName (environment : PsEnvironment) (family : PsName)
+    (suffix : String) (fuel : Nat := 4096) (index : Nat := 0) :
+    Except PsElabError PsName := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let component := if index == 0 then suffix else suffix ++ "_" ++ toString index
+    let name := psNameAppendStr family component
+    if psEnvironmentContains environment name then
+      psElabDeriveFreshName environment family suffix fuel (index + 1)
+    else return name
+
 def psElabDeriveFinish (plan : PsElabDeriveContext) (suffix : String)
     (type value : PsExpr) (pruneRequirements : Bool := false) :
     Except PsElabError PsDeclaration := do
@@ -147,7 +168,8 @@ def psElabDeriveFinish (plan : PsElabDeriveContext) (suffix : String)
     throw .unresolvedMetavariable
   if !psExprFVarsInContext psLocalEmpty value || !psExprFVarsInContext psLocalEmpty type then
     throw (.data "derived declaration contains an unbound local")
-  return .definitionDecl (psNameAppendStr plan.info.name suffix) plan.info.levelParams type value
+  let name ← psElabDeriveFreshName plan.context.environment plan.info.name suffix
+  return .definitionDecl name plan.info.levelParams type value
 
 -- Runtime fields must have homogeneous types in the parameter telescope.
 -- Proof fields may depend on earlier values: they carry no comparison payload,
@@ -182,15 +204,31 @@ structure PsElabDeriveFields where
   cursor : PsExpr
   fields : List PsElabTypedBinder
   proofs : List Bool
+  -- Constructor recursion metadata includes positive function fields. Class
+  -- methods consume only direct IHs; function fields need ordinary dictionaries.
+  directRecursiveFields : List Nat := []
   resultIndices : List PsExpr := []
+
+-- Structural recursion metadata and class-method recursion are distinct:
+-- a pointwise IH cannot supply a dictionary for a function-valued field.
+def psElabDeriveDirectRecursiveFields (context : PsElabContext)
+    (fields : List PsElabTypedBinder) (recursiveFields : List Nat) : List Nat :=
+  recursiveFields.filter fun index =>
+    match fields[index]? with
+    | none => false
+    | some field => match psWhnf context.environment context.metaContext
+        context.localContext field.type with
+      | .forallE .. => false
+      | _ => true
 
 -- Recursion is an explicit handler capability, not permission to bypass the
 -- family/field checks. Direct recursive fields must agree with both metadata
--- and an instantiated member of the complete group. Only those field types
--- may depend on constructor indices; ordinary dictionary planning remains in
--- the shared parameter telescope. Nested/function-valued recursion is separate.
+-- and an instantiated member of the complete group. A handler may explicitly
+-- defer ordinary dependent dictionaries to the actual checked field scope.
+-- Nested/function-valued recursion remains a separate capability.
 def psElabDeriveFieldsWithRecursion (plan : PsElabDeriveContext) (name : PsName)
-    (allowDirectRecursion : Bool) : Except PsElabError PsElabDeriveFields := do
+    (allowDirectRecursion : Bool) (allowDependentFields : Bool := false) :
+    Except PsElabError PsElabDeriveFields := do
   let some constructor := psEnvironmentFindConstructor plan.context.environment name
     | throw (.data "deriving constructor missing")
   if !allowDirectRecursion && !constructor.recursiveFields.isEmpty then
@@ -202,7 +240,8 @@ def psElabDeriveFieldsWithRecursion (plan : PsElabDeriveContext) (name : PsName)
   let fields := opened.bindersRev.reverse
   let proofs ← fields.zipIdx.mapM fun (field, index) => do
     let recursive := constructor.recursiveFields.contains index
-    let child ← psElabDeriveFamilyView plan opened.context field.type
+    let telescope ← psElabOpenCoreTelescope 4096 opened.context field.type none
+    let child ← psElabDeriveFamilyView plan telescope.context telescope.body
     if recursive then
       let some _ := child
         | throw (.data "deriving recursive field is not a uniform direct group family")
@@ -211,7 +250,8 @@ def psElabDeriveFieldsWithRecursion (plan : PsElabDeriveContext) (name : PsName)
       throw (.data "deriving direct field is absent from recursive metadata")
     let level ← psElabExpressionSort opened.context field.type
     if psLevelEquivalent level .zero then return true
-    if !recursive && !psExprFVarsInContext plan.context.localContext field.type then
+    if !allowDependentFields && (!recursive || !telescope.bindersRev.isEmpty) &&
+        !psExprFVarsInContext plan.context.localContext field.type then
       throw (.data "deriving requires independent runtime field types")
     if plan.group.members.any (fun member => psExprHasConst member.name field.type) &&
         !(allowDirectRecursion && recursive) then
@@ -221,7 +261,8 @@ def psElabDeriveFieldsWithRecursion (plan : PsElabDeriveContext) (name : PsName)
     | throw (.data "deriving constructor result mismatch")
   if !psNameEq result.info.name constructor.inductiveName then
     throw (.data "deriving constructor result mismatch")
-  return { constructor, cursor, fields, proofs }
+  let directRecursiveFields := psElabDeriveDirectRecursiveFields opened.context fields constructor.recursiveFields
+  return { constructor, cursor, fields, proofs, directRecursiveFields }
 
 def psElabDeriveFields (plan : PsElabDeriveContext) (name : PsName) :
     Except PsElabError PsElabDeriveFields :=
@@ -254,8 +295,8 @@ def psElabDeriveSlotConstructor (plan : PsElabDeriveContext)
   return (head, cursor)
 
 def psElabDeriveSlotFields (plan : PsElabDeriveContext)
-    (slot : PsInductiveEliminationSlot) (constructor : PsInductiveEliminationConstructor) :
-    Except PsElabError PsElabDeriveFields := do
+    (slot : PsInductiveEliminationSlot) (constructor : PsInductiveEliminationConstructor)
+    (allowDependentFields : Bool := false) : Except PsElabError PsElabDeriveFields := do
   if !psConstructorRecursiveFieldsOrdered constructor.info then
     throw (.data "deriving recursive field metadata is invalid")
   if slot.publicMember then
@@ -266,22 +307,26 @@ def psElabDeriveSlotFields (plan : PsElabDeriveContext)
   let (_, cursor) ← psElabDeriveSlotConstructor plan constructor
   let opened ← psElabOpenCoreTelescope 4096 plan.context cursor (some constructor.info.numFields)
   let fields := opened.bindersRev.reverse
+  let directRecursiveFields := psElabDeriveDirectRecursiveFields opened.context fields
+    (constructor.recursiveFields.map Prod.fst)
   let proofs ← fields.zipIdx.mapM fun (field, index) => do
     let edge := constructor.recursiveFields.find? (fun edge => edge.1 == index)
     if let some (_, target) := edge then
       let some target := plan.elimination.slots[target]?
         | throw (.data "deriving field target slot is absent")
-      let _ ← psElabDeriveSlotIndices plan opened.context target field.type
+      let telescope ← psElabOpenCoreTelescope 4096 opened.context field.type none
+      let _ ← psElabDeriveSlotIndices plan telescope.context target telescope.body
       pure ()
     let level ← psElabExpressionSort opened.context field.type
     if psLevelEquivalent level .zero then return true
-    if edge.isNone && !psExprFVarsInContext plan.context.localContext field.type then
+    if !allowDependentFields && !directRecursiveFields.contains index &&
+        !psExprFVarsInContext plan.context.localContext field.type then
       throw (.data "deriving requires independent runtime field types")
     if edge.isNone && plan.group.members.any (fun member => psExprHasConst member.name field.type) then
       throw (.data "deriving recursive field is not a supported elimination slot")
     return false
   let resultIndices ← psElabDeriveSlotIndices plan opened.context slot opened.body
-  return { constructor := constructor.info, cursor, fields, proofs, resultIndices }
+  return { constructor := constructor.info, cursor, fields, proofs, directRecursiveFields, resultIndices }
 
 structure PsElabDeriveHypothesis where
   fieldId : Nat
@@ -354,15 +399,22 @@ def psElabDeriveEliminateSlotAt (plan : PsElabDeriveContext)
         (some (ctor.numFields + constructor.recursiveFields.length))
       let binders := opened.bindersRev.reverse
       let fields := binders.take ctor.numFields
-      let hypotheses ← (constructor.recursiveFields.zip (binders.drop ctor.numFields)).mapM
+      let validated ← (constructor.recursiveFields.zip (binders.drop ctor.numFields)).mapM
         (fun ((index, target), hypothesis) => do
           let some field := fields[index]?
             | throw (.data "deriving induction hypothesis has no field")
-          let expected ← motiveAt opened.context target field.type (.fvar field.id)
+          let telescope ← psElabOpenCoreTelescope 4096 opened.context field.type none
+          let applied := psExprApplyMany (.fvar field.id) (psElabBinderArguments telescope.bindersRev)
+          let expected ← motiveAt telescope.context target telescope.body applied
+          let expected := psCloseElabForallBinders telescope.context.metaContext telescope.bindersRev expected
           if !psDefEqReadOnlyWithEnv opened.context.environment opened.context.metaContext
               opened.context.localContext hypothesis.type expected then
             throw (.data "deriving induction hypothesis type mismatch")
-          return (PsElabDeriveHypothesis.mk field.id target (.fvar hypothesis.id)))
+          -- A pointwise IH is not an instance for the function itself. Retain
+          -- and check its real binder, but let handlers resolve that dictionary.
+          return if telescope.bindersRev.isEmpty then
+            some (PsElabDeriveHypothesis.mk field.id target (.fvar hypothesis.id)) else none)
+      let hypotheses := validated.filterMap id
       let some head := psInductiveEliminationInstantiate recursor.plan
           (plan.info.levelParams.map PsLevel.param) parameters constructor.head
         | throw (.data "deriving constructor specialization is invalid")

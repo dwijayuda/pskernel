@@ -115,7 +115,7 @@ private def prepareCommands (state : PsCommandState) : List PsSyntaxCommand →
     let used := scopedMembers.foldl (fun used member => psScopeUnion used member.used) []
     let captures := psScopeSelect state.scope used
     let block ← psElabPreparePreDefinitions state.environment
-      (state.scope.levelNames.map psRootName) captures scopedMembers span
+      state.scope.levelNames captures scopedMembers span
     return { environment := state.environment, block }
   | command :: rest => do
     let state ← psElabCommand state command
@@ -278,12 +278,25 @@ private def wrongFunctionWellFounded : PsElabPreDefinitionWellFoundedConsumer :=
     let nat := PsExpr.constE psNatName []
     let value := PsExpr.lam (psRootName "n") nat
       (.lam (psRootName "seed") nat (.lit (.natural 0)) .explicit) .explicit
-    let result ← psElabPreDefinitionNonrecursive environment levels { member with value }
-    let [declaration, equation] := result.batch.declarations
+    let result ← psElabPreDefinitionNonrecursive environment levels { member with value } false
+    let [declaration] := result.batch.declarations
       | throw (.data "malformed checked constant-function fixture")
+    let staged ← psAddDeclarationList environment [declaration]
+    let opened ← psElabPreDefinitionOpen (psElabPreDefinitionHeaderCount member)
+      (psElabContextEmpty staged levels) member.type value
+    let left ← psElabApplyCore opened.context (.constE member.name (levels.map PsLevel.param))
+      (psElabBinderArguments opened.bindersRev)
+    let level ← psElabExpressionSort left.context opened.type
+    let equationType := psLogicEq level opened.type left.term opened.value
+    let proof ← psElabResolvedTerm left.context (psLogicRefl level opened.type opened.value)
+      (some equationType)
+    let closed := psCloseElabTypedBinders proof.context.metaContext opened.bindersRev proof.term equationType
+    let equation := PsDeclaration.theoremDecl (psNameAppendStr member.name "eq_def")
+      levels closed.snd closed.fst
+    let _ ← psAddDeclarationList staged [equation]
     return { results := [{
       declaration, equation
-      metaContext := (psElabContextEmpty environment levels).metaContext
+      metaContext := proof.context.metaContext
       sourceInfo := member.sourceInfo }] }
 
 private def checkWellFoundedIdentity : IO Unit := do
@@ -303,7 +316,7 @@ private def checkWellFoundedIdentity : IO Unit := do
       (some wrongFunctionWellFounded) with
   | .ok _ => throw (IO.userError "a checked zero function replaced the retained recursive function body")
   | .error error =>
-    ensure (refusal error == "PSCV0-PREDEFINITION-WF-EQUATION: checked constructor cases do not prove the actual RHS equals the retained source RHS")
+    ensure (refusal error == "PSCV0-PREDEFINITION-WF-EQUATION: checked extensionality and constructor cases do not prove the actual RHS equals the retained source RHS")
       ("wrong function body did not reach the checked case-proof refusal: " ++ refusal error)
 
 private def checkInheritedStrategy : IO Unit := do

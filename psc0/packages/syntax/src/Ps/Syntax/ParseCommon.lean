@@ -35,6 +35,11 @@ def psParseListAppend {α : Type}
       fun (ys : List α) =>
         List.cons head (smaller ys)
 
+def psSyntaxNameFromToken (token : PsToken) : PsSyntaxName :=
+  { segments := [psTokenIdentifierText token]
+    span := token.span
+    escaped := psTokenIdentifierEscaped token }
+
 def psSyntaxSyntheticName
     (text : String)
     (span : PsSourceSpan) : PsSyntaxName :=
@@ -120,14 +125,23 @@ def psParseSyntaxNameTailWithFuel
                   Except.error
                     (PsParseError.unexpectedEnd "identifier")
               | List.cons next after =>
-                  if
+                  -- A declaration owns .{...}; leave its suffix on the cursor.
+                  if next.text == "{" then
+                    Except.ok {
+                      value := {
+                        segments := psParseListReverse segmentsRev
+                        span := { start := start, stop := stop }
+                      }
+                      cursor := { remaining := List.cons dot rest }
+                    }
+                  else if
                       psTokenKindEq
                         next.kind
                         PsTokenKind.identifier then
                     if adjacent && next.span.start.byteOffset != dot.span.stop.byteOffset then
                       Except.error (PsParseError.unexpectedEnd "adjacent qualified-name component")
                     else smaller
-                      (List.cons next.text segmentsRev)
+                      (List.cons (psTokenIdentifierText next) segmentsRev)
                       start
                       next.span.stop
                       after
@@ -166,14 +180,54 @@ def psParseSyntaxNameWith (adjacent : Bool)
   match cursor.remaining with
   | [] => Except.error (PsParseError.unexpectedEnd "identifier")
   | token :: rest =>
-    if psTokenKindEq token.kind PsTokenKind.identifier then
-      psParseSyntaxNameTailWithFuel (rest.length + 1) adjacent
-        [token.text] token.span.start token.span.stop rest
+    if psTokenKindEq token.kind PsTokenKind.identifier then do
+      let parsed ← psParseSyntaxNameTailWithFuel (rest.length + 1) adjacent
+        [psTokenIdentifierText token] token.span.start token.span.stop rest
+      let escaped := cursor.remaining.any fun item =>
+        item.span.start.byteOffset < parsed.value.span.stop.byteOffset &&
+          psTokenIdentifierEscaped item
+      return { parsed with value := { parsed.value with escaped } }
     else .error (.expectedKind .identifier token.kind token.span)
 
 def psParseSyntaxName (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxName) :=
   psParseSyntaxNameWith false cursor
+
+-- Pinned Parser.Command.declId owns a nonempty comma-separated identifier
+-- list immediately after the declaration name. These are source binders;
+-- duplicate/shadowed/unused universes are checked by the shared elaborator.
+def psParseDeclarationUniverseBinders (fuel : Nat) (cursor : PsTokenCursor)
+    (accRev : List PsSyntaxUniverseBinder) :
+    Except PsParseError (PsParseResult (List PsSyntaxUniverseBinder)) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let name ← psParseSyntaxNameWith true cursor
+    if psSyntaxNameIsAnonymous name.value then
+      throw (.expectedText "universe identifier" "_" name.value.span)
+    let binder : PsSyntaxUniverseBinder := {
+      segments := name.value.segments, span := name.value.span, escaped := name.value.escaped }
+    if psTokenCursorAtText name.cursor "}" then
+      return { value := (binder :: accRev).reverse, cursor := name.cursor }
+    let comma ← psTokenCursorExpectText name.cursor ","
+    psParseDeclarationUniverseBinders fuel comma.cursor (binder :: accRev)
+
+def psParseDeclarationName (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxName) := do
+  let name ← psParseSyntaxNameWith true cursor
+  if !psTokenCursorAtText name.cursor "." then return name
+  let dot ← psTokenCursorExpectText name.cursor "."
+  let opening ← psTokenCursorExpectText dot.cursor "{"
+  if dot.token.span.start.byteOffset != name.value.span.stop.byteOffset ||
+      opening.token.span.start.byteOffset != dot.token.span.stop.byteOffset then
+    throw (.expectedText "adjacent declaration universe suffix .{" ". {" dot.token.span)
+  let levels ← psParseDeclarationUniverseBinders 4096 opening.cursor []
+  let close ← psTokenCursorExpectText levels.cursor "}"
+  return {
+    value := { name.value with
+      universeBinders := levels.value
+      span := { name.value.span with stop := close.token.span.stop } }
+    cursor := close.cursor }
 
 def psTokenCursorStartsNamedAssignment
     (cursor : PsTokenCursor) : Bool :=
@@ -555,10 +609,7 @@ def psParsePatternBindersWithFuel
                       cursor := cursor
                     }
                 | some read =>
-                    let binder : PsSyntaxName := {
-                      segments := List.cons token.text List.nil
-                      span := token.span
-                    };
+                    let binder : PsSyntaxName := (psSyntaxNameFromToken token);
                     smaller
                       read.cursor
                       (List.cons binder bindersRev)
@@ -631,8 +682,7 @@ def psParseBasicPattern
             match psParseSyntaxName dot.cursor with
             | Except.error error => Except.error error
             | Except.ok constructorName =>
-                let shorthandName : PsSyntaxName := {
-                  segments := constructorName.value.segments
+                let shorthandName : PsSyntaxName := { constructorName.value with
                   span := {
                     start := token.span.start
                     stop := constructorName.value.span.stop

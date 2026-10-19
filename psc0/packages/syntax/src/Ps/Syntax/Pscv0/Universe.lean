@@ -30,7 +30,8 @@ def psPscv0ReadLevel (fuel : Nat) (offsets : Bool) (cursor : PsTokenCursor) :
         let inner ← psPscv0ReadLevel fuel true next.cursor
         let close ← psTokenCursorExpectText inner.cursor ")"
         pure { inner with cursor := close.cursor }
-      else if token.text == "max" || token.text == "imax" then do
+      else if (token.text == "max" || token.text == "imax") &&
+          !psTokenCursorAtText next.cursor "." then do
         let first ← psPscv0ReadLevel fuel false next.cursor
         let mut current := first.cursor
         let mut levels := [first.value]
@@ -48,8 +49,12 @@ def psPscv0ReadLevel (fuel : Nat) (offsets : Bool) (cursor : PsTokenCursor) :
       else if token.text == "_" then pure { value := PsSyntaxLevel.hole, cursor := next.cursor }
       else if psTokenKindEq token.kind .natural then
         pure { value := PsSyntaxLevel.number (← psPscv0LevelNumber token), cursor := next.cursor }
-      else if psTokenKindEq token.kind .identifier && psPscv0LevelStart cursor then
-        pure { value := PsSyntaxLevel.name token.text, cursor := next.cursor }
+      else if psTokenKindEq token.kind .identifier && psPscv0LevelStart cursor then do
+        let name ← psParseSyntaxNameWith true cursor
+        let level := match name.value.segments with
+          | [part] => PsSyntaxLevel.name part
+          | parts => PsSyntaxLevel.qualifiedName parts
+        pure { value := level, cursor := name.cursor }
       else throw (psProofScriptExpectedError "universe level" cursor)
     if offsets then
       for _ in [:fuel] do

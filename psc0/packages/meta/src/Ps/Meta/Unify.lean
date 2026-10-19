@@ -97,7 +97,9 @@ def psUnifyLevelLists
         | List.nil => psUnifyFailure context
         | List.cons right rightRest =>
             let unified := psLevelUnify context.levels left right;
-            if unified.success then
+            if unified.resourceExceeded then
+              { context, success := false, resourceExceeded := true }
+            else if unified.success then
               smaller
                 (psMetaSetLevels context unified.context)
                 rightRest
@@ -275,6 +277,41 @@ def psUnifyResultFamily
   | some (declaration, arguments) =>
     some (psUnifyResultFamilyAttempt unify environment locals context declaration arguments left)
 
+-- Lean's function eta rule opens the lambda's actual typed domain. Check
+-- the other function's Pi before comparing applications in the extended
+-- context; type, scope and resource failures cannot become eta successes.
+def psUnifyFunctionEta
+    (unify : PsLocalContext → PsMetaContext → PsExpr → PsExpr → PsUnifyResult)
+    (environment : PsEnvironment) (locals : PsLocalContext) (context : PsMetaContext)
+    (name : PsName) (domain body : PsExpr) (binder : PsBinderInfo) (other : PsExpr) :
+    PsUnifyResult :=
+  match psInferType environment context locals other with
+  | .error error => psUnifyInferFailure context error
+  | .ok otherType =>
+    match psInferEnsureForall environment context locals otherType with
+    | .error error => psUnifyInferFailure context error
+    | .ok pi =>
+      let domains := unify locals context domain pi.domain
+      if !domains.success then { domains with context } else
+        let pushed := psLocalPushBinding locals name domain binder
+        let value := PsExpr.fvar pushed.id
+        let result := unify pushed.context domains.context
+          (psExprInstantiate1 body value) (.app other value)
+        if result.success then result else { result with context }
+
+def psUnifyEta
+    (unify : PsLocalContext → PsMetaContext → PsExpr → PsExpr → PsUnifyResult)
+    (environment : PsEnvironment) (locals : PsLocalContext) (context : PsMetaContext)
+    (left right : PsExpr) : Option PsUnifyResult :=
+  match left, right with
+  | .lam .., .lam .. => none
+  | .lam name domain body binder, other =>
+    some (psUnifyFunctionEta unify environment locals context name domain body binder other)
+  | other, .lam name domain body binder =>
+    some (psUnifyFunctionEta (fun locals context left right => unify locals context right left)
+      environment locals context name domain body binder other)
+  | _, _ => none
+
 -- Recovery is supplied by a higher layer to resolve a checked reduction blocker.
 -- The default public worker uses no recovery, so Meta does not depend on
 -- typeclass search or elaborator work queues.
@@ -340,6 +377,8 @@ def psUnifyWithFuelRecoverWorker
                 (psUnifyFlexible assign context leftValue rightValue).orElse (fun _ =>
                   psUnifyResultFamily (smaller environment) environment localContext
                     context leftValue rightValue) then result
+            else if let some result := psUnifyEta (smaller environment)
+                environment localContext context leftValue rightValue then result
             else
               match leftValue with
               | .mvar leftId =>
@@ -367,7 +406,9 @@ def psUnifyWithFuelRecoverWorker
                       assign id leftValue
                   | .sortE rightLevel =>
                       let unified := psLevelUnify context.levels leftLevel rightLevel;
-                      if unified.success then
+                      if unified.resourceExceeded then
+                        { context, success := false, resourceExceeded := true }
+                      else if unified.success then
                         psUnifySuccess (psMetaSetLevels context unified.context)
                       else
                         psUnifyFailure context

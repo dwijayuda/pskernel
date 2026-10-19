@@ -8,6 +8,7 @@ with direct index fields. No partial fallback or assumed self
 dictionary. Independent runtime fields retain the shared admissibility boundary.
 -/
 import Ps.Elab.DerivingContext
+import Ps.Elab.DerivingIndexed
 
 -- Distinguish erased proofs, determined indices, independent dictionaries and
 -- actual child induction evidence. A missing dictionary is never recursion.
@@ -26,7 +27,7 @@ def psElabDeriveBEqPlanConstructor (plan : PsElabDeriveContext) (name : PsName) 
   let fields ← psElabDeriveFieldsWithRecursion plan name true
   let comparisons ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof then return PsElabDeriveBEqField.erased
-    if fields.constructor.recursiveFields.contains index then
+    if fields.directRecursiveFields.contains index then
       return PsElabDeriveBEqField.recursive
     let target ← psElabDeriveClassType plan.context (psRootName "BEq") field.type
     let dictionary ← psElabDeriveInstance plan.context target
@@ -108,7 +109,7 @@ def psElabDeriveBEqPlanSlot (plan : PsElabDeriveContext) (slotIndex : Nat)
   let comparisons ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof then return PsElabDeriveBEqField.erased
     if indexFields.contains field.id then return PsElabDeriveBEqField.index
-    if constructor.recursiveFields.any (fun edge => edge.1 == index) then
+    if fields.directRecursiveFields.contains index then
       return PsElabDeriveBEqField.recursive
     let target ← psElabDeriveClassType plan.context (psRootName "BEq") field.type
     let dictionary ← psElabDeriveInstance plan.context target
@@ -225,16 +226,14 @@ def psElabDeriveBEqInductive (plan : PsElabDeriveContext)
 def psElabDeriveBEq (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
   let plan ← psElabDerivePrepare environment origin { groups := true, indices := true, nested := true }
-  if plan.group.members.any (·.numIndices != 0) then
-    if plan.group.members.length != 1 || plan.elimination.slots.length != 1 ||
-        plan.elimination.slots.any (fun slot =>
-          slot.constructors.any (fun constructor => !constructor.recursiveFields.isEmpty)) then
-      throw (.data "deriving indexed families is not yet implemented")
   let className := psRootName "BEq"
-  let plan := psElabDeriveRequirements plan className
+  let plan ← psElabDeriveRequirements plan className
   let type ← psElabDeriveClassType plan.context className plan.family
   let .app (.constE _ levels) _ := type | throw .typeMismatch
-  let method ← if plan.info.isStructure then do
+  let ordered ← psElabDeriveNeedsOrderedComparison plan
+  let method ← if ordered then
+      psElabDeriveIndexedBEqMethod plan
+    else if plan.info.isStructure then do
       let constructors ← (psElabDeriveConstructorNames plan).mapM (psElabDeriveBEqPlanConstructor plan)
       match constructors with
       | [constructor] => psElabDeriveBEqStructure plan constructor

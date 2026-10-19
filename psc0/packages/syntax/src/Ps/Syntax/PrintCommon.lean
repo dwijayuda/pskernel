@@ -1,4 +1,5 @@
 import Ps.Syntax.Ast
+import Ps.Syntax.Lexer
 
 inductive PsSourcePrintError where
   | fuelExhausted
@@ -30,11 +31,25 @@ def psPrintJoin
             (psPrintJoin separator rest)
 
 def psPrintSyntaxName (name : PsSyntaxName) :
-    Except PsSourcePrintError String :=
-  let segments := name.segments;
-  match segments with
-  | List.nil => Except.error PsSourcePrintError.emptyName
-  | List.cons _ _ => Except.ok (psPrintJoin "." segments)
+    Except PsSourcePrintError String := do
+  if name.resolvedName.isSome then
+    throw (.unsupportedSourceForm "an internal resolved name has no source spelling")
+  if !name.universeBinders.isEmpty then
+    throw (.unsupportedSourceForm "universe binders require a declaration head")
+  if name.segments.isEmpty then throw .emptyName
+  if name.segments.any (fun part => part.toList.contains '»') then
+    throw (.unsupportedSourceForm "identifier contains a closing guillemet")
+  return psPrintJoin "." (name.segments.map fun part =>
+    psLexIdentifierSpelling part name.escaped)
+
+def psPrintDeclarationName (name : PsSyntaxName) :
+    Except PsSourcePrintError String := do
+  let head ← psPrintSyntaxName { name with universeBinders := [] }
+  if name.universeBinders.isEmpty then return head
+  let levels ← name.universeBinders.mapM fun binder =>
+    psPrintSyntaxName {
+      segments := binder.segments, span := binder.span, escaped := binder.escaped }
+  return head ++ ".{" ++ psPrintJoin ", " levels ++ "}"
 
 def psPrintSyntaxNames
     (names : List PsSyntaxName) :
@@ -84,12 +99,16 @@ def psPrintPatternWithFuel (fuel : Nat) (pattern : PsSyntaxPattern) :
     | .bool value _ => return if value then "true" else "false"
     | .wildcard _ => return "_"
     | .variable name => psPrintSyntaxName name
-    | .ctor name fields _ =>
+    | .inaccessible value => psPrintPatternWithFuel fuel value
+    | .ctor name fields _ | .dotCtor name fields _ =>
       let name ← psPrintSyntaxName name
+      let name := match pattern with | .dotCtor .. => "." ++ name | _ => name
       let fields ← fields.mapM fun field => do
         let text ← psPrintPatternWithFuel fuel field
         return match field with
-          | .ctor _ (_ :: _) _ => "(" ++ text ++ ")"
+          | .ctor _ (_ :: _) _ | .dotCtor _ (_ :: _) _ => "(" ++ text ++ ")"
+          | .inaccessible (.ctor _ (_ :: _) _) =>
+            "(" ++ text ++ ")"
           | _ => text
       return String.intercalate " " (name :: fields)
 
@@ -120,7 +139,11 @@ def psPrintArrowChain
 -- Parenthesize composite levels independently of the surrounding term printer.
 def psPrintSyntaxLevel : PsSyntaxLevel → String
   | .number n => toString n
-  | .name name => name
+  | .name name => psLexIdentifierSpelling name
+      (psLexReservedIdentifier name || (["max", "imax"] : List String).contains name)
+  | .qualifiedName segments => String.intercalate "." (segments.map fun part =>
+      psLexIdentifierSpelling part
+        (psLexReservedIdentifier part || (["max", "imax"] : List String).contains part))
   | .hole => "_"
   | .offset base n => "(" ++ psPrintSyntaxLevel base ++ " + " ++ toString n ++ ")"
   | .max left right => "(max " ++ psPrintSyntaxLevel left ++ " " ++ psPrintSyntaxLevel right ++ ")"
@@ -141,6 +164,120 @@ def psPrintDeclarationResult (printTerm : PsSyntaxTerm → Except PsSourcePrintE
   | .omittedType _ => return ""
   | _ => return " : " ++ (← printTerm type)
 
+def psPrintRCasesAtom (pattern : PsSyntaxRCasesPattern) (text : String) : String :=
+  match pattern with
+  | .typed .. | .alternatives .. => "(" ++ text ++ ")"
+  | _ => text
+
+def psPrintRCasesPattern (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (fuel : Nat) (pattern : PsSyntaxRCasesPattern) : Except PsSourcePrintError String := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .one name => psPrintSyntaxName name
+    | .clear _ => return "-"
+    | .explicit pattern _ =>
+      return "@" ++ psPrintRCasesAtom pattern (← psPrintRCasesPattern printTerm fuel pattern)
+    | .typed pattern type _ =>
+      let text ← psPrintRCasesPattern printTerm fuel pattern
+      let text := match pattern with | .typed .. => "(" ++ text ++ ")" | _ => text
+      return text ++ " : " ++ (← printTerm type)
+    | .tuple patterns _ =>
+      let patterns ← patterns.mapM (psPrintRCasesPattern printTerm fuel)
+      return "⟨" ++ psPrintJoin ", " patterns ++ "⟩"
+    | .alternatives patterns _ =>
+      if patterns.isEmpty then throw (.unsupportedSourceForm "empty rcases alternatives")
+      let patterns ← patterns.mapM fun pattern => do
+        let text ← psPrintRCasesPattern printTerm fuel pattern
+        pure (psPrintRCasesAtom pattern text)
+      return psPrintJoin " | " patterns
+    | .paren pattern _ =>
+      return "(" ++ (← psPrintRCasesPattern printTerm fuel pattern) ++ ")"
+
+def psPrintRIntroPattern (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (fuel : Nat) (pattern : PsSyntaxRIntroPattern) : Except PsSourcePrintError String := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .pattern pattern =>
+      return psPrintRCasesAtom pattern (← psPrintRCasesPattern printTerm fuel pattern)
+    | .group patterns type _ =>
+      if patterns.isEmpty then throw (.unsupportedSourceForm "empty rintro group")
+      let patterns ← patterns.mapM (psPrintRIntroPattern printTerm fuel)
+      let annotation ← match type with
+        | none => pure ""
+        | some type => do pure (" : " ++ (← printTerm type))
+      return "(" ++ psPrintJoin " " patterns ++ annotation ++ ")"
+
+-- Printing a calc annotation must preserve the leading-hole type hint.
+-- Parenthesizing its first infix operand would turn _ into (_) and change
+-- native elaboration in heterogeneous/coercion chains.
+def psPrintCalcLeadingHole (fuel start : Nat) (source : PsSyntaxTerm) :
+    Except PsSourcePrintError Bool := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    if (psSyntaxTermSpan source).start.byteOffset != start then return false
+    match source with
+    | .hole span => return span.stop.byteOffset == span.start.byteOffset + 1
+    | _ =>
+      let children := match source with
+        | .operatorE _ _ _ arguments _ => arguments
+        | .app fn arguments _ => fn :: arguments
+        | .call fn arguments _ => fn :: arguments.map Prod.snd
+        | .ascription value _ _ => [value]
+        | _ => []
+      for child in children do
+        if ← psPrintCalcLeadingHole fuel start child then return true
+      return false
+
+def psPrintCalcAnnotation (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (fuel : Nat) (source : PsSyntaxTerm) : Except PsSourcePrintError String := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    if !(← psPrintCalcLeadingHole (fuel + 1) (psSyntaxTermSpan source).start.byteOffset source) then
+      return ← printTerm source
+    match source with
+    | .operatorE _ _ spelling [left, right] _ =>
+      return (← psPrintCalcAnnotation printTerm fuel left) ++ " " ++ spelling ++ " " ++
+        (← printTerm right)
+    | .app (.reference name) [left, right] _ =>
+      let spelling := [(["And"], "∧"), (["Or"], "∨"), (["Iff"], "↔"),
+        (["Prod"], "×"), (["List", "cons"], "::")].find? (fun item => item.1 == name.segments)
+      match spelling with
+      | some (_, spelling) =>
+        return (← psPrintCalcAnnotation printTerm fuel left) ++ " " ++ spelling ++ " " ++
+          (← printTerm right)
+      | none => printTerm source
+    | _ => printTerm source
+
+def psPrintCalc (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (fuel : Nat) (steps : List (PsSyntaxTerm × PsSyntaxTerm)) :
+    Except PsSourcePrintError String := do
+  if steps.isEmpty then throw (.unsupportedSourceForm "empty calc")
+  let rows ← steps.mapM fun (annotation, proof) => do
+    let annotation ← psPrintCalcAnnotation printTerm fuel annotation
+    let proof ← printTerm proof
+    pure ((annotation ++ " := " ++ proof).replace "\n" "\n  ")
+  return "calc\n  " ++ psPrintJoin "\n  " rows
+
+
+def psPrintProofLocation (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (location : PsSyntaxProofLocation PsSyntaxTerm) : Except PsSourcePrintError String := do
+  match location with
+  | .all => return " at *"
+  | .targets [] true => return ""
+  | .targets hypotheses target =>
+    if hypotheses.isEmpty && !target then
+      throw (.unsupportedSourceForm "empty proof location")
+    let hypotheses ← hypotheses.mapM fun term => do
+      let text ← printTerm term
+      pure ("(" ++ text ++ ")")
+    return " at " ++ psPrintJoin " " (hypotheses ++ if target then ["⊢"] else [])
+
 def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
     (fuel : Nat) (tactics : List PsSyntaxTactic) : Except PsSourcePrintError String := do
   match fuel with
@@ -150,6 +287,11 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
       match tactic with
       | .exactE value refine _ => return (if refine then "refine " else "exact ") ++ (← printTerm value)
       | .applyE value _ => return "apply " ++ (← printTerm value)
+      | .rewriteE rules location close _ =>
+        let rules ← rules.mapM fun (source, reverse) => do
+          pure ((if reverse then "← " else "") ++ (← printTerm source))
+        return (if close then "rw [" else "rewrite [") ++ psPrintJoin ", " rules ++ "]" ++
+          (← psPrintProofLocation printTerm location)
       | .localE name type value reducible _ =>
         let annotation ← match type with
           | none => pure ""
@@ -171,6 +313,60 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
         let body ← psPrintTactics printTerm fuel body
         return header ++ (if names.isEmpty then "" else " " ++ psPrintJoin " " names) ++
           " =>\n  " ++ body.replace "\n" "\n  "
+      | .suffices name type value _ =>
+        return "suffices " ++ (← psPrintSyntaxName name) ++ " : " ++
+          (← printTerm type) ++ " from " ++ (← printTerm value)
+      | .calcE steps _ => psPrintCalc printTerm fuel steps
+      | .classicalE body _ =>
+        let body ← psPrintTactics printTerm fuel body
+        return "classical\n  " ++ body.replace "\n" "\n  "
+      | .intros names _ =>
+        let rendered ← psPrintSyntaxNames names
+        return "intros" ++ (if rendered.isEmpty then "" else " " ++ psPrintJoin " " rendered)
+      | .rcasesE targets pattern _ =>
+        let targets ← targets.mapM fun target => do
+          let equation ← match target.equationName? with
+            | none => pure ""
+            | some name => do pure ((← psPrintSyntaxName name) ++ " : ")
+          pure (equation ++ (← printTerm target.term))
+        let pattern ← match pattern with
+          | none => pure ""
+          | some pattern => do pure (" with " ++ (← psPrintRCasesPattern printTerm fuel pattern))
+        return "rcases" ++ (if targets.isEmpty then "" else " " ++ psPrintJoin ", " targets) ++ pattern
+      | .rintroE patterns type _ =>
+        if patterns.isEmpty then throw (.unsupportedSourceForm "empty rintro")
+        let patterns ← patterns.mapM (psPrintRIntroPattern printTerm fuel)
+        let annotation ← match type with
+          | none => pure ""
+          | some type => do pure (" : " ++ (← printTerm type))
+        return "rintro " ++ psPrintJoin " " patterns ++ annotation
+      | .obtainE pattern type values _ =>
+        let pattern ← match pattern with
+          | none => pure ""
+          | some pattern => do
+            let text ← psPrintRCasesPattern printTerm fuel pattern
+            let text := match pattern with | .typed .. => "(" ++ text ++ ")" | _ => text
+            pure (" " ++ text)
+        let annotation ← match type with
+          | none => pure ""
+          | some type => do pure (" : " ++ (← printTerm type))
+        let values ← match values with
+          | none => pure ""
+          | some values => do
+            if values.isEmpty then throw (.unsupportedSourceForm "empty obtain values")
+            pure (" := " ++ psPrintJoin ", " (← values.mapM printTerm))
+        return "obtain" ++ pattern ++ annotation ++ values
+      | .byCases name proposition _ =>
+        let name ← match name with
+          | none => pure ""
+          | some name => do pure ((← psPrintSyntaxName name) ++ " : ")
+        return "by_cases " ++ name ++ (← printTerm proposition)
+      | .exfalso _ => return "exfalso"
+      | .decide _ => return "decide"
+      | .extE patterns depth _ =>
+        let patterns ← patterns.mapM (psPrintRIntroPattern printTerm fuel)
+        return "ext" ++ (if patterns.isEmpty then "" else " " ++ psPrintJoin " " patterns) ++
+          (if depth == 100 then "" else " : " ++ psNatToString depth)
       | .intro names _ =>
         let rendered ← psPrintSyntaxNames names
         return "intro" ++ (if rendered.isEmpty then "" else " " ++ psPrintJoin " " rendered)
@@ -178,6 +374,7 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
       | .indexValidity _ => return "get_elem_tactic"
       | .reflexivity _ => return "rfl"
       | .constructor _ => return "constructor"
+      | .constructorFirst _ => return "constructor!"
       | .focus body close _ =>
         let body ← psPrintTactics printTerm fuel body
         return (if close then "·" else "focus") ++ "\n  " ++ body.replace "\n" "\n  "

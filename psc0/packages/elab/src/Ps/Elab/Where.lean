@@ -155,7 +155,7 @@ def psElabWhereHelperHeader (context : PsElabContext)
     source := .localDefinition parent.name source
     sourceIndex := parent.sourceIndex
     sourceSpan := source.span
-    isPrivate := parent.isPrivate
+    isPrivate := parent.isPrivate || localDefinition.isPrivate
     registration := none
     strategy := ← psElabWhereLocalStrategy mainSources source
     ambient := parent.ambient ++ ownCaptures
@@ -171,8 +171,10 @@ def psElabWherePeers (context : PsElabContext) (headers : List PsElabWhereHeader
     let _ ← (psInferType state.fst.environment state.fst.metaContext state.fst.localContext type).mapError
       PsElabError.infer
     let pushed := psLocalPushBinding state.fst.localContext header.alias type .explicit
-    return (psElabContextWithLocal state.fst pushed.context,
-      state.snd ++ [{ header with peerId := pushed.id }] )) (context, [])
+    let context := { state.fst with
+      localContext := pushed.context
+      auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
+    return (context, state.snd ++ [{ header with peerId := pushed.id }] )) (context, [])
 
 def psElabWhereLexicalAliases (context : PsElabContext) (helpers : List PsElabWhereHeader) :
     Except PsElabError (PsElabContext × List (Nat × PsExpr)) := do
@@ -183,7 +185,10 @@ def psElabWhereLexicalAliases (context : PsElabContext) (helpers : List PsElabWh
     let type := psMetaInstantiate state.fst.metaContext helper.sourceType
     let value := PsExpr.fvar helper.peerId
     let pushed := psLocalPushLet state.fst.localContext name type value
-    return (psElabContextWithLocal state.fst pushed.context, state.snd ++ [(pushed.id, value)]))
+    let context := { state.fst with
+      localContext := pushed.context
+      auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
+    return (context, state.snd ++ [(pushed.id, value)]))
     (context, [])
 
 def psElabWhereReadBody (shared lexical : PsElabContext) (header : PsElabWhereHeader)
@@ -203,7 +208,8 @@ def psElabWhereParentBodies (shared : PsElabContext) (mainPeers : List PsLocalDe
     Except PsElabError (PsElabContext × List PsElabWhereBody) := do
   let parentScope := { parent.context with
     localContext := { parent.context.localContext with
-      declarations := mainPeers ++ parent.context.localContext.declarations } }
+      declarations := mainPeers ++ parent.context.localContext.declarations }
+    auxiliaryLocalIds := mainPeers.map psLocalDeclId ++ parent.context.auxiliaryLocalIds }
   let parentContext := psElabWhereEnter shared parentScope
   let (headerContext, helpers) ← locals.foldlM
     (fun (state : PsElabContext × List PsElabWhereHeader) localDefinition => do
@@ -291,8 +297,29 @@ def psElabWhereInfoSpan (info : PsElabInfo) : Option PsSourceSpan :=
   | .binderGroup head _ _ => some head.span
   | .instanceSelection span _ _ | .insertedArgument span _ _ _ _ _ => span
 
-def psElabWhereSourceInfo (context : PsElabContext) (header : PsElabWhereHeader) : PsElabSourceInfo :=
+-- Lifted members keep only proof boundaries created by the checked source
+-- execution and still occurring in this member's actual closed type or body.
+-- A rendered name or another member's unrelated proof cannot supply provenance.
+def psElabWhereHasProofBoundary (boundary : PsName) : PsExpr → Bool
+  | .letE name type value body =>
+    psNameEq name boundary ||
+      psElabWhereHasProofBoundary boundary type ||
+      psElabWhereHasProofBoundary boundary value ||
+      psElabWhereHasProofBoundary boundary body
+  | .app function argument =>
+    psElabWhereHasProofBoundary boundary function ||
+      psElabWhereHasProofBoundary boundary argument
+  | .lam _ type body _ | .forallE _ type body _ =>
+    psElabWhereHasProofBoundary boundary type ||
+      psElabWhereHasProofBoundary boundary body
+  | .proj _ _ value => psElabWhereHasProofBoundary boundary value
+  | _ => false
+
+def psElabWhereSourceInfo (context : PsElabContext) (header : PsElabWhereHeader)
+    (type value : PsExpr) : PsElabSourceInfo :=
   { owner := header.name, metaContext := context.metaContext
+    proofBoundaries := context.proofBoundariesRev.reverse.filter fun boundary =>
+      psElabWhereHasProofBoundary boundary type || psElabWhereHasProofBoundary boundary value
     entries := context.infoRev.reverse.filter fun entry =>
       match psElabWhereInfoSpan entry.info with
       | none => false
@@ -324,7 +351,10 @@ def psElabWhereLift (shared : PsElabContext) (availableLevels : List PsName)
       let sort ← (psInferType state.fst.environment psMetaEmpty psLocalEmpty type).mapError PsElabError.infer
       let _ ← (psInferEnsureSort state.fst.environment psMetaEmpty psLocalEmpty sort).mapError PsElabError.infer
       let pushed := psLocalPushBinding state.fst.localContext input.header.alias type .explicit
-      return (psElabContextWithLocal state.fst pushed.context, state.snd ++ [pushed.id]))
+      let context := { state.fst with
+        localContext := pushed.context
+        auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
+      return (context, state.snd ++ [pushed.id]))
     (initial, ([] : List Nat))
   let replacements := (inputs.zip fullPeers).map fun (input, id) =>
     (input.header.peerId, psExprApplyMany (.fvar id)
@@ -348,7 +378,7 @@ def psElabWhereLift (shared : PsElabContext) (availableLevels : List PsName)
       sourceIndex := input.header.sourceIndex
       isPrivate := input.header.isPrivate
       registration := input.header.registration
-      sourceInfo := psElabWhereSourceInfo shared input.header } : PsElabPreDefinition)
+      sourceInfo := psElabWhereSourceInfo shared input.header type checked.term } : PsElabPreDefinition)
   let levelNames := psElabDeclarationLevels availableLevels
     (members.flatMap fun member => [member.type, member.value])
   return { context := { context with levelNames }, levelNames, members, span }
@@ -358,6 +388,11 @@ def psElabPreparePreDefinitionsWithSource (environment : PsEnvironment) (levelNa
     (span : PsSourceSpan) : Except PsElabError PsElabWherePrepared := do
   if members.isEmpty then throw (psElabWhereError "EMPTY" "a typed source block must contain a declaration")
   psElabPreDefinitionCheckMainModifiers (members.map (fun member => .declaration member.source))
+  let sourceNames ← members.mapM fun member => do
+    let (base, _, _) ← psWhereSourceParts member.source
+    let (name, _, _, _) ← psWhereValueParts base
+    return name
+  let levelNames ← psElabDeclarationUniverseNames levelNames sourceNames
   let captured ← psElabTypedBinders psElabTerm (psElabContextEmpty environment levelNames) capturedSyntax
   let ambient := captured.bindersRev.reverse.map fun binder =>
     ({ origin := { owner := none, id := binder.id }, binder } : PsElabWhereCapture)
@@ -385,6 +420,8 @@ def psElabPreparePreDefinitionsWithSource (environment : PsEnvironment) (levelNa
   let inputs ← psElabWhereCloseCaptures
     (1 + inputs.length * (1 + (inputs.flatMap (·.header.ambient)).length)) sectionIds inputs
   let block ← psElabWhereLift solved.context levelNames inputs span
+  psElabCheckDeclarationUniverseUsage sourceNames
+    (block.members.flatMap fun member => [member.type, member.value])
   return { block, inputs, context := solved.context }
 
 def psElabPreparePreDefinitions (environment : PsEnvironment) (levelNames : List PsName)

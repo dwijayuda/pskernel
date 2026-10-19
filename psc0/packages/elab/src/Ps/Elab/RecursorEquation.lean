@@ -121,3 +121,93 @@ def psElabRecursorEquationProofWithFuel (fuel : Nat) (context : PsElabContext)
 def psElabRecursorEquationProof (context : PsElabContext)
     (major expected : PsExpr) (span : PsSourceSpan) : Except PsElabError PsExpr :=
   psElabRecursorEquationProofWithFuel 64 context major expected span
+
+structure PsElabSourceEquationPointwise where
+  context : PsElabContext
+  bindersRev : List PsElabTypedBinder
+  type : PsExpr
+  proof : PsExpr
+
+-- Native 4.35.0 Structural/Eqns.mkUnfoldEq, WF/Unfold.mkUnfoldEq
+-- and Eqns.unfoldThmType use lambdaTelescope on the retained source value.
+-- This consumes actual leading lambdas, including returned-function lambdas;
+-- it does not unfold a let or a function-valued constant to invent parameters.
+-- The original-header theorem remains the proof owner. Additional arguments
+-- use ordinary checked Eq.rec congruence after that theorem is instantiated.
+def psElabSourceEquationPointwiseWithFuel (fuel headerRemaining : Nat)
+    (context : PsElabContext) (source type proof : PsExpr)
+    (bindersRev : List PsElabTypedBinder) :
+    Except PsElabError PsElabSourceEquationPointwise := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match source with
+    | .lam name domain body binder =>
+      let functionType ← match headerRemaining with
+        | 0 => do
+          let equation ← psElabRecursorEquationView context type
+          if !psDefEqReadOnlyWithEnv context.environment context.metaContext
+              context.localContext equation.right source then
+            throw (psElabRecursorEquationError "source equation has a different retained right side")
+          pure equation.type
+        | _ + 1 => pure type
+      let pi ← (psInferEnsureForall context.environment context.metaContext
+        context.localContext functionType).mapError PsElabError.infer
+      if !psBinderInfoEq binder pi.binder ||
+          !psExprFVarsInContext context.localContext domain ||
+          !psDefEqReadOnlyWithEnv context.environment context.metaContext
+            context.localContext domain pi.domain then
+        throw (psElabRecursorEquationError "source equation lambda differs from its checked telescope")
+      let pushed := psLocalPushBinding context.localContext name domain binder
+      let inner := psElabContextWithLocal context pushed.context
+      let argument := PsExpr.fvar pushed.id
+      let nextSource := psExprInstantiate1 body argument
+      let nextBinders := PsElabTypedBinder.mk pushed.id name domain binder :: bindersRev
+      match headerRemaining with
+      | remaining + 1 =>
+        let applied ← psElabApplyCore inner proof [argument]
+        psElabSourceEquationPointwiseWithFuel fuel remaining applied.context
+          nextSource applied.type applied.term nextBinders
+      | 0 =>
+        let equation ← psElabEquationView inner type proof
+        let resultType := psExprInstantiate1 pi.body argument
+        let functionId := inner.localContext.nextId
+        let applyArgument := psLogicLam functionId "_sourceFunction" equation.type
+          (.app (.fvar functionId) argument)
+        let congruence ← psElabEquationCongr inner equation applyArgument resultType
+        let nextType := psLogicEq congruence.level congruence.type
+          (.app equation.left argument) (.app equation.right argument)
+        let checked ← psElabResolvedTerm inner congruence.proof (some nextType)
+        psElabSourceEquationPointwiseWithFuel fuel 0 checked.context
+          nextSource nextType checked.term nextBinders
+    | _ =>
+      if headerRemaining != 0 then
+        throw (psElabRecursorEquationError "source equation header exceeds its raw lambda prefix")
+      let equation ← psElabRecursorEquationView context type
+      if !psDefEqReadOnlyWithEnv context.environment context.metaContext
+          context.localContext equation.right source then
+        throw (psElabRecursorEquationError "source equation has a different retained right side")
+      return { context, bindersRev, type, proof }
+
+-- Publication is still an ordinary closed theorem checked in the actual
+-- staged environment. The adapter changes its quantified telescope, never
+-- recursion parameters, body checking, decrease obligations or conversion.
+def psElabSourceEquationPointwiseDeclaration (environment : PsEnvironment)
+    (levels : List PsName) (name : PsName) (sourceHeaderCount : Nat)
+    (sourceValue equationType equationProof : PsExpr) :
+    Except PsElabError PsDeclaration := do
+  if [sourceValue, equationType, equationProof].any (fun expression =>
+      psExprHasUnresolvedMeta expression ||
+      !psExprFVarsInContext psLocalEmpty expression) then
+    throw (psElabRecursorEquationError "source equation publication retains a local or metavariable")
+  let initial := psElabContextEmpty environment levels
+  let opened ← psElabSourceEquationPointwiseWithFuel 4096 sourceHeaderCount initial
+    sourceValue equationType equationProof []
+  let closed := psCloseElabTypedBinders opened.context.metaContext
+    opened.bindersRev opened.proof opened.type
+  if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd ||
+      !psExprFVarsInContext psLocalEmpty closed.fst ||
+      !psExprFVarsInContext psLocalEmpty closed.snd then
+    throw (psElabRecursorEquationError "pointwise source equation did not close over its actual lambdas")
+  let checked ← psElabResolvedTerm initial closed.fst (some closed.snd)
+  return .theoremDecl name levels closed.snd checked.term

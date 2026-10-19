@@ -255,10 +255,12 @@ def psElabFixedpointFromChecked (environment : PsEnvironment) (levels : List PsN
           declarations := (if index == 0 then [auxiliary] else []) ++
             [publicDeclaration, wholeEquation, sourceEquation, implementation]
           sourceInfo := [{ member.sourceInfo with owner := PsName.num member.name 0 }]
+          sourceEquations := [psSourceEquationsSingle member.name (psDeclarationName sourceEquation)]
         } : PsElabDeclarationBatchResult)
   return {
     batch := {
       declarations := [auxiliary] ++ publicDeclarations ++ wholeEquations ++
         sourceEquations ++ implementations
-      sourceInfo := results.flatMap (·.sourceInfo) }
+      sourceInfo := results.flatMap (·.sourceInfo)
+      sourceEquations := results.flatMap (·.sourceEquations) }
     members := results }

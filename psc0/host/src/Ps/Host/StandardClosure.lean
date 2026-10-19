@@ -218,4 +218,169 @@ def standardClosureAudit : IO Lean.Json := do
     ("roots", Lean.toJson reports),
     ("arithmeticReuseProbe", ← compatibilityProbe native `Nat.mod_lt portableNames)]
 
+-- Core-first source ownership is read from imported module metadata. Declaration
+-- names and literal strings are never used to guess which code is portable.
+def coreNativeCompilerImports : Array Lean.Import :=
+  #[{ module := `Ps.Compiler.Pscv0Modules },
+    { module := `Ps.BackendTs.Readable },
+    { module := `Ps.BackendRust.Module },
+    { module := `Ps.BackendWasm.Module },
+    { module := `Ps.CompilerIr.Checked },
+    { module := `Ps.Codegen.Api },
+    { module := `Ps.Codegen.Provenance }]
+
+private def coreNativeNameParts : Lean.Name → List Lean.Json
+  | .anonymous => []
+  | .str parent value =>
+      coreNativeNameParts parent ++
+        [Lean.Json.mkObj [("str", Lean.toJson value)]]
+  | .num parent value =>
+      coreNativeNameParts parent ++
+        [Lean.Json.mkObj [("num", Lean.toJson value)]]
+
+private def coreNativeNameJson (name : Lean.Name) : Lean.Json :=
+  Lean.Json.mkObj [
+    ("display", Lean.toJson (toString name)),
+    ("parts", .arr (coreNativeNameParts name).toArray)]
+
+private def coreNativeOwner? (native : Lean.Environment)
+    (name : Lean.Name) : Option Lean.Name := do
+  let index ← native.getModuleIdxFor? name
+  native.header.moduleNames[index.toNat]?
+
+private def coreNativeSourceModule (name : Lean.Name) : Bool :=
+  (`Ps : Lean.Name).isPrefixOf name
+
+private def coreNativeFamilyDependencies (info : Lean.ConstantInfo) :
+    Array Lean.Name :=
+  match info with
+  | .inductInfo value =>
+      value.all.toArray ++ value.ctors.toArray ++ #[.str value.name "rec"]
+  | .ctorInfo value => #[value.induct]
+  | .quotInfo _ => #[`Quot, `Quot.mk, `Quot.lift, `Quot.ind]
+  | .recInfo value =>
+      value.all.toArray ++
+        (value.rules.toArray.flatMap fun rule =>
+          #[rule.ctor] ++ rule.rhs.getUsedConstants)
+  | _ => #[]
+
+structure CoreNativeClosure where
+  sourceModules : Array Lean.Name
+  sourceDeclarations : Nat
+  roots : List Lean.Name
+  entries : Array Lean.ConstantInfo
+  report : Lean.Json
+
+-- Source compilation needs every declaration in each owned source module,
+-- including private helpers and generated equations. External roots are the
+-- actual constants referenced by those checked types, values and rule bodies.
+-- The report records the raw graph: it does not erase annotations or admit
+-- declarations, and it does not select a portable Standard environment.
+def collectCoreNativeClosure : IO CoreNativeClosure := do
+  Lean.initSearchPath (← Lean.findSysroot)
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Core ownership audit requires pinned Lean 4.35.0")
+  let native ← Lean.importModules coreNativeCompilerImports {}
+  let sourceModules := native.header.moduleNames.filter coreNativeSourceModule
+  for imported in coreNativeCompilerImports do
+    unless sourceModules.contains imported.module do
+      throw (IO.userError
+        ("missing native source-module owner: " ++ toString imported.module))
+  let sourceEntries := (native.checked.get.constants.fold
+    (fun (entries : Array Lean.ConstantInfo) _ info =>
+      if (coreNativeOwner? native info.name).any coreNativeSourceModule then
+        entries.push info
+      else entries) #[]).qsort (fun a b => Lean.Name.lt a.name b.name)
+  unless !sourceEntries.isEmpty do
+    throw (IO.userError "native source ownership audit found no declarations")
+  let mut roots : Lean.NameSet := {}
+  let mut witnesses : Array Lean.Json := #[]
+  for info in sourceEntries do
+    let some owner := coreNativeOwner? native info.name
+      | throw (IO.userError "source declaration lost its module owner")
+    let edges : List (String × Array Lean.Name) :=
+      [("type", info.type.getUsedConstants),
+       ("value", ((info.value? true).map (fun value => value.getUsedConstants)).getD #[]),
+       ("family-or-rule", coreNativeFamilyDependencies info)]
+    for (kind, dependencies) in edges do
+      for dependency in dependencies do
+        let some target := native.checked.get.find? dependency
+          | throw (IO.userError
+              ("missing checked dependency: " ++ toString dependency))
+        if (coreNativeOwner? native target.name).any coreNativeSourceModule then
+          continue
+        unless roots.contains dependency do
+          roots := roots.insert dependency
+          witnesses := witnesses.push (Lean.Json.mkObj [
+            ("root", coreNativeNameJson dependency),
+            ("source", coreNativeNameJson info.name),
+            ("sourceModule", coreNativeNameJson owner),
+            ("edge", Lean.toJson kind)])
+  let mut entries : Array Lean.ConstantInfo := #[]
+  let mut seen : Lean.NameSet := {}
+  let orderedRoots := (native.checked.get.constants.fold
+    (fun (names : Array Lean.Name) name _ =>
+      if roots.contains name then names.push name else names) #[]).qsort Lean.Name.lt
+  unless orderedRoots.size == witnesses.size do
+    throw (IO.userError "native external-root roster did not resolve exactly")
+  let mut pending := orderedRoots.toList
+  while !pending.isEmpty do
+    let name := pending.head!
+    pending := pending.tail!
+    unless seen.contains name do
+      seen := seen.insert name
+      let some info := native.checked.get.find? name
+        | throw (IO.userError
+            ("missing native Core closure declaration: " ++ toString name))
+      if (coreNativeOwner? native info.name).any coreNativeSourceModule then
+        throw (IO.userError
+          ("native library closure re-enters source module: " ++ toString info.name))
+      entries := entries.push info
+      pending := (closureDependencies info).toList ++ pending
+  entries := entries.qsort (fun a b => Lean.Name.lt a.name b.name)
+  for info in entries do
+    for dependency in closureDependencies info do
+      unless seen.contains dependency do
+        throw (IO.userError
+          ("open native Core dependency: " ++ toString info.name ++
+            " -> " ++ toString dependency))
+  let entryJson := fun (info : Lean.ConstantInfo) => Lean.Json.mkObj [
+    ("name", coreNativeNameJson info.name),
+    ("kind", Lean.toJson (closureKind info)),
+    ("typeDependencies", .arr (info.type.getUsedConstants.map coreNativeNameJson)),
+    ("valueDependencies", .arr
+      ((((info.value? true).map (fun value => value.getUsedConstants)).getD #[]).map
+        coreNativeNameJson)),
+    ("familyOrRuleDependencies", .arr
+      ((coreNativeFamilyDependencies info).map coreNativeNameJson)),
+    ("dependencies", .arr ((closureDependencies info).map coreNativeNameJson)),
+    ("module", match coreNativeOwner? native info.name with
+      | some name => coreNativeNameJson name
+      | none => Lean.Json.null)]
+  let report := Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-core-native-closure/1" : String)),
+    ("leanCommit", Lean.toJson Lean.githash),
+    ("importRoots", .arr (coreNativeCompilerImports.map fun item =>
+      coreNativeNameJson item.module)),
+    ("sourceModules", .arr (sourceModules.map coreNativeNameJson)),
+    ("sourceDeclarations", Lean.toJson sourceEntries.size),
+    ("externalRootCount", Lean.toJson orderedRoots.size),
+    ("externalRoots", .arr (orderedRoots.map coreNativeNameJson)),
+    ("rootWitnesses", .arr witnesses),
+    ("closureDeclarationCount", Lean.toJson entries.size),
+    ("closureDeclarations", .arr (entries.map entryJson)),
+    ("axioms", .arr ((entries.filter Lean.ConstantInfo.isAxiom).map entryJson)),
+    ("unsafe", .arr ((entries.filter Lean.ConstantInfo.isUnsafe).map entryJson)),
+    ("partial", .arr ((entries.filter Lean.ConstantInfo.isPartial).map entryJson)),
+    ("emptyBoundary", Lean.toJson true),
+    ("annotationsErased", Lean.toJson false),
+    ("candidateKernelAdmitted", Lean.toJson false)]
+  return {
+    sourceModules
+    sourceDeclarations := sourceEntries.size
+    roots := orderedRoots.toList
+    entries
+    report
+  }
+
 end PsV7Native

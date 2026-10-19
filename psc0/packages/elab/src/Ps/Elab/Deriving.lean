@@ -20,7 +20,7 @@ def psElabDeriveHandler (environment : PsEnvironment)
   | ["Hashable"] => psElabDeriveHashable environment origin
   | ["Repr"] => psElabDeriveRepr environment origin
   | ["DecidableEq"] => psElabDeriveDecEq environment origin
-  | _ => .error (.data "deriving handler is selected but not yet implemented")
+  | _ => .error (.data "deriving handler is not registered in the selected profile")
 
 -- Native group API. Provenance must name exactly the registered family group;
 -- the source command still selects singleton declarations under v7.2 grammar.
@@ -33,7 +33,7 @@ def psElabDeriveGroupHandler (environment : PsEnvironment)
     Except PsElabError (List PsDeclaration) := do
   match handler.segments with
   | ["Hashable"] | ["Repr"] | ["BEq"] | ["DecidableEq"] | ["Inhabited"] => pure ()
-  | _ => throw (.data "deriving handler does not provide a complete group motive family")
+  | _ => throw (.data "deriving handler is not registered in the selected profile")
   let name ← psElabDeriveSourceFamily origin
   let some info := psEnvironmentFindInductive environment name
     | throw (.data "derived family is not an inductive")

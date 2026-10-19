@@ -519,7 +519,7 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
     exports := .selected (exports.map Prod.fst)
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] }
   let moduleRequest : PsV7Native.Request := {
-    source := "import P1Provider\nfunction client(n: Nat): Nat := p1Visible(n)\ntheorem clientEquation(n: Nat): Eq(p1Visible(n), match n with { | 0 => 9 | k + 1 => p1Visible(k) }) := by { exact p1PublicEquation(n) }\n"
+    source := "public import P1Provider\nfunction client(n: Nat): Nat := p1Visible(n)\ntheorem clientEquation(n: Nat): Eq(p1Visible(n), match n with { | 0 => 9 | k + 1 => p1Visible(k) }) := by { exact p1PublicEquation(n) }\n"
     sourceName := "p1-client.ps", moduleName := "Main"
     modules := [{ name := "P1Provider", sourceName := "p1-provider.ps", source := moduleProvider }] }
   let requests := #[ordinary,

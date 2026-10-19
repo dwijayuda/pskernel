@@ -403,6 +403,9 @@ private def fromExcept (result : Except String α) : IO α :=
   | .ok value => pure value
   | .error error => throw (IO.userError error)
 
+private def moduleHelperName (moduleIdentity : String) (parent : PsName) (helper : String) : PsName :=
+  psElabPrivateName ([moduleIdentity] ++ psNameToSegments parent ++ [helper])
+
 private def captureSource : String :=
   "function wcapture(bias: Nat, n: Nat): Nat := first(n)\n" ++
   "where {\n" ++
@@ -718,9 +721,9 @@ private def unusedHintSource : String :=
   "}\n" ++
   "end\n" ++
   "theorem uhOrdinaryEq: Eq(ordinary(7), 7) := by { rfl }\n" ++
-  "theorem uhOrdinaryHelperEq: Eq(ordinary.loop(7), 7) := by { rfl }\n" ++
+  "private theorem uhOrdinaryHelperEq: Eq(ordinary.loop(7), 7) := by { rfl }\n" ++
   "theorem uhShadowEq: Eq(uhShadow(8), 8) := by { rfl }\n" ++
-  "theorem uhShadowHelperEq: Eq(uhShadow.shadow(8), 8) := by { rfl }\n" ++
+  "private theorem uhShadowHelperEq: Eq(uhShadow.shadow(8), 8) := by { rfl }\n" ++
   "theorem uhMainEq: Eq(uhMain(9), 9) := by { rfl }\n" ++
   "theorem uhDictPlainEq: Eq(hintDictPlain(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { rfl }\n" ++
   "theorem uhDictIgnoredEq: Eq(hintDictIgnored(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { rfl }\n" ++
@@ -840,7 +843,15 @@ private def checkUnusedHints : IO Unit := do
       (["hintDictIgnored"], ["tag", "d", "n"]), (["hintDictIgnored", "helper"], ["tag", "d", "k"]),
       (["uhTypePlain"], ["n"]), (["uhTypePlain", "helper"], ["_k"]),
       (["uhTypeHinted"], ["n"]), (["uhTypeHinted", "helper"], ["_k"])] do
-    let name := psSyntaxNameAppendSegments segments .anonymous
+    let sourceName := psSyntaxNameAppendSegments segments .anonymous
+    let name := if segments.length > 1 then
+      psElabPrivateName ("UnusedHints" :: segments)
+      else sourceName
+    if segments.length > 1 then
+      ensure (compiled.privateNames.any (psNameEq name) &&
+        compiled.privateNames.any (psNameEq (psNameAppendStr name "eq_def")) &&
+        (psEnvironmentFind environment sourceName).isNone)
+        "ordinary helper leaked a public canonical identity or lost its private equation"
     match psEnvironmentFind environment name,
         psEnvironmentFind environment (psNameAppendStr name "eq_def") with
     | some (.definitionDecl _ levels type value),
@@ -860,8 +871,10 @@ private def checkUnusedHints : IO Unit := do
         | _ => throw (IO.userError "noncapturing helper lost its complete Nat-to-Nat header")
     | _, _ => throw (IO.userError ("unused hint lost ordinary checked definition/equation: " ++ psNameToString name))
   for suffix in [[], ["helper"]] do
-    let first := psSyntaxNameAppendSegments (["hintDictPlain"] ++ suffix) .anonymous
-    let second := psSyntaxNameAppendSegments (["hintDictIgnored"] ++ suffix) .anonymous
+    let first := if suffix.isEmpty then psRootName "hintDictPlain"
+      else moduleHelperName "UnusedHints" (psRootName "hintDictPlain") "helper"
+    let second := if suffix.isEmpty then psRootName "hintDictIgnored"
+      else moduleHelperName "UnusedHints" (psRootName "hintDictIgnored") "helper"
     match psEnvironmentFind environment first, psEnvironmentFind environment second with
     | some (.definitionDecl _ _ firstType _), some (.definitionDecl _ _ secondType _) =>
       ensure (psExprAlphaEq firstType secondType)
@@ -981,7 +994,7 @@ private def checkSectionInstances : IO Unit := do
   let compiled ← fromExcept ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed
     "SectionBody").mapError psCompilerPscv0ElabError)
   let environment := compiled.result.environment
-  let privateName := psSyntaxNameAppendSegments ["$psc0Private", "SectionBody", "sectionPrivate"] .anonymous
+  let privateName := psElabPrivateName ["SectionBody", "sectionPrivate"]
   for (name, parameters) in [
       (psRootName "sectionPlain", ["tag", "d", "n"]),
       (psRootName "sectionHinted", ["tag", "d", "n"]),
@@ -1138,8 +1151,8 @@ private def checkPartialHintScopes : IO Unit := do
   let environment := compiled.result.environment
   for (name, parameters) in [
       (psRootName "phMain", ["base", "n"]),
-      (psNameAppendStr (psRootName "phMain") "loop", ["base", "k"]),
-      (psNameAppendStr (psRootName "phMain") "proofLoop", ["base", "k"]),
+      (moduleHelperName "PartialHintScope" (psRootName "phMain") "loop", ["base", "k"]),
+      (moduleHelperName "PartialHintScope" (psRootName "phMain") "proofLoop", ["base", "k"]),
       (psRootName "phPeer", ["n"])] do
     match psEnvironmentFind environment name,
         psEnvironmentFind environment (PsName.num name 0) with
@@ -1192,9 +1205,9 @@ private def checkConstruction : IO Unit := do
     "WhereFixture").mapError psCompilerPscv0ElabError)
   let environment := compiled.result.environment
   for (name, parameters) in [
-      (psNameAppendStr (psRootName "wcapture") "first", ["bias", "k"]),
-      (psNameAppendStr (psRootName "wcapture") "second", ["bias", "k", "delta"]),
-      (psNameAppendStr (psRootName "wcycle") "helper", ["bias", "k"])] do
+      (moduleHelperName "WhereFixture" (psRootName "wcapture") "first", ["bias", "k"]),
+      (moduleHelperName "WhereFixture" (psRootName "wcapture") "second", ["bias", "k", "delta"]),
+      (moduleHelperName "WhereFixture" (psRootName "wcycle") "helper", ["bias", "k"])] do
     let some (.definitionDecl _ _ type value) := psEnvironmentFind environment name
       | throw (IO.userError ("missing real lifted total helper " ++ psNameToString name))
     ensure (binderNames type == parameters && (psExprFVarIds value).isEmpty &&
@@ -1204,31 +1217,31 @@ private def checkConstruction : IO Unit := do
     | some (.theoremDecl ..) => pure ()
     | _ => throw (IO.userError "lifted total helper lost its checked equation")
   for shortName in ["loop", "alternate"] do
-    let name := psNameAppendStr (psRootName "wpick") shortName
+    let name := moduleHelperName "WhereFixture" (psRootName "wpick") shortName
     let some (.definitionDecl _ levels type _) := psEnvironmentFind environment name
       | throw (IO.userError "all-kind recursive helper was not constructed")
     ensure (binderNames type == ["A", "dictionary", "fallback", "h", "k"] &&
       levels.map psNameToString == ["u"])
       "helper clique lost transitive type/instance/value/proof captures or its shared universe"
-  let parentName := psSyntaxNameAppendSegments ["$psc0Private", "WhereFixture", "WScope", "shadow"] .anonymous
+  let parentName := psElabPrivateName ["WhereFixture", "WScope", "shadow"]
   let helperName := psNameAppendStr parentName "helper"
   for name in [parentName, helperName, psNameAppendStr parentName "eq_def", psNameAppendStr helperName "eq_def"] do
     ensure ((psEnvironmentFind environment name).isSome && compiled.privateNames.any (psNameEq name))
       "private where declaration or helper equation escaped its module-qualified owner"
   let operational := psRootName "woperational"
-  for name in [operational, psNameAppendStr operational "loop"] do
+  for name in [operational, moduleHelperName "WhereFixture" operational "loop"] do
     match psEnvironmentFind environment name,
         psEnvironmentFind environment (PsName.num name 0) with
     | some (.opaqueDecl ..), some (.partialDecl ..) => pure ()
     | _, _ => throw (IO.userError "explicit/inherited recursive partial intent lost actual opaque/body ownership")
     ensure ((psEnvironmentFind environment (psNameAppendStr name "eq_def")).isNone)
       "partial helper acquired an invented defining equation"
-  match psEnvironmentFind environment (psNameAppendStr operational "bump") with
+  match psEnvironmentFind environment (moduleHelperName "WhereFixture" operational "bump") with
   | some (.definitionDecl ..) => pure ()
   | _ => throw (IO.userError "plain nonrecursive helper inheriting partial intent did not remain total")
   let disconnected := psRootName "wdisconnected"
   for shortName in ["loop", "fixedLoop"] do
-    let name := psNameAppendStr disconnected shortName
+    let name := moduleHelperName "WhereFixture" disconnected shortName
     match psEnvironmentFind environment name,
         psEnvironmentFind environment (PsName.num name 0) with
     | some (.opaqueDecl _ levels type _), some (.partialDecl ..) =>
@@ -1246,8 +1259,8 @@ private def checkConstruction : IO Unit := do
       (psEnvironmentFind environment (psNameAppendStr disconnected "eq_def")).isNone)
       "explicit-source partial opacity or ignored-hint header ownership changed"
   | _, _ => throw (IO.userError "the explicit partial main lost its logical/body identities")
-  for name in [psNameAppendStr disconnected "bump",
-      psNameAppendStr disconnected "measured", psRootName "wredundantWF", psRootName "wredundantP1"] do
+  for name in [moduleHelperName "WhereFixture" disconnected "bump",
+      moduleHelperName "WhereFixture" disconnected "measured", psRootName "wredundantWF", psRootName "wredundantP1"] do
     match psEnvironmentFind environment name,
         psEnvironmentFind environment (psNameAppendStr name "eq_def") with
     | some (.definitionDecl _ levels type value), some (.theoremDecl _ _ equationType proof) =>
@@ -1257,7 +1270,7 @@ private def checkConstruction : IO Unit := do
         !psExprHasUnresolvedMeta equationType && !psExprHasUnresolvedMeta proof)
         "an unused hint changed an ordinary value into a WF construction or left unchecked terms"
     | _, _ => throw (IO.userError "unused hints changed nonrecursive-first checked definition/equation ownership")
-  let proofName := psNameAppendStr disconnected "proof"
+  let proofName := moduleHelperName "WhereFixture" disconnected "proof"
   match psEnvironmentFind environment proofName,
       psEnvironmentFind environment (psNameAppendStr proofName "eq_def") with
   | some (.theoremDecl _ _ type value), some (.theoremDecl _ _ equationType proof) =>
@@ -1267,7 +1280,7 @@ private def checkConstruction : IO Unit := do
       "inferred local theorem or its exact proof equation lost its checked header"
   | _, _ => throw (IO.userError "an inferred proof-valued helper did not emit a checked theorem and equation")
   for shortName in ["descend", "walk"] do
-    let measuredName := psNameAppendStr (psRootName "wmeasured") shortName
+    let measuredName := moduleHelperName "WhereFixture" (psRootName "wmeasured") shortName
     match psEnvironmentFind environment measuredName,
         psEnvironmentFind environment (psNameAppendStr measuredName "eq_def") with
     | some (.definitionDecl _ _ type value), some (.theoremDecl _ _ _ proof) =>

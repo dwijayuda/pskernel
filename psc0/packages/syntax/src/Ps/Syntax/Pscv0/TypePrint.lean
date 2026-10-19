@@ -12,7 +12,7 @@ def psPscv0ArrowDomain
   | .lambda _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | .letE _ _ _ _ _ | .haveE _ _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | .ifE _ _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
-  | .matchMany _ _ _ => psPrintLeanConcat3 "(" printed ")"
+  | .matchMany _ _ _ _ | .calcE _ _ => psPrintLeanConcat3 "(" printed ")"
   | _ => printed
 
 def psPscv0PrintLeanTypeWithFuel (fuel : Nat) :
@@ -30,7 +30,7 @@ def psPscv0PrintLeanTypeWithFuel (fuel : Nat) :
                 let head := binder.fst
                 let typeText ← smaller binder.snd
                 let anonymous := match head.kind with
-                  | .explicit => head.name.segments == ["_"] && head.moreNames.isEmpty
+                  | .explicit => psSyntaxNameIsAnonymous head.name && head.moreNames.isEmpty
                   | _ => false
                 if anonymous then return psPscv0ArrowDomain binder.snd typeText
                 psPrintTypedBinder head typeText;

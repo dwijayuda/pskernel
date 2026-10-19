@@ -145,7 +145,7 @@ def psPscv0ReadConditional (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
     | some next =>
       if psTokenKindEq next.token.kind .identifier && psTokenCursorAtText next.cursor ":" then do
         let colon ← psTokenCursorExpectText next.cursor ":"
-        pure (some (PsSyntaxName.mk [next.token.text] next.token.span), colon.cursor)
+        pure (some ((psSyntaxNameFromToken next.token)), colon.cursor)
       else pure (none, opening.cursor)
     | none => pure (none, opening.cursor)
   let condition ← read cursor
@@ -203,6 +203,8 @@ def psPscv0ParseTermAtPrecedence
               value := psPscv0OperatorTerm .unary "Neg.neg" "-" [argument.value]
                 (psSyntaxSpanJoin sign.token.span (psSyntaxTermSpan argument.value))
               cursor := argument.cursor }
+          else if psTokenCursorAtText cursor "calc" then
+            psPscv0ReadCalc smaller readAnnotation (remaining + 1) cursor
           else if psTokenCursorAtText cursor "by" then
             psPscv0ReadProof smaller readAnnotation (remaining + 1) cursor
           else if psTokenCursorAtText cursor "do" then
@@ -217,6 +219,9 @@ def psPscv0ParseTermAtPrecedence
             psPscv0ReadConditional smaller cursor
           else if psTokenCursorAtText cursor "have" then
             psPscv0ReadHave smaller readAnnotation continuation cursor
+          else if psTokenCursorAtText cursor "suffices" then
+            psPscv0ReadSufficesTerm smaller readAnnotation continuation
+              psParseProofScriptBodySeparator cursor
           else if psTokenCursorAtText cursor "show" then
             psPscv0ReadShow smaller readAnnotation cursor
           else if psTokenCursorAtText cursor "exists" || psTokenCursorAtText cursor "∃" then

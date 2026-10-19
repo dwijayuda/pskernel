@@ -1,0 +1,170 @@
+{
+  "head": "93107eab14b7347f9605b1396c7a79f2b628ba61",
+  "run": 39181815014,
+  "bootstrap": {
+    "id": 117835978751,
+    "conclusion": "success"
+  },
+  "seams": {
+    "id": 117835978577,
+    "conclusion": "success"
+  },
+  "source": {
+    "id": 117835978775,
+    "conclusion": "success"
+  },
+  "bootstrapResources": {
+    "generatedSources": [],
+    "resources": [
+      {
+        "file": "build-resource.txt",
+        "gnuTime": {
+          "Average resident set size (kbytes)": "0",
+          "Average shared text size (kbytes)": "0",
+          "Average stack size (kbytes)": "0",
+          "Average total size (kbytes)": "0",
+          "Average unshared data size (kbytes)": "0",
+          "Command being timed": "\"lake build pscv0_bootstrap_replay\"",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:10.34",
+          "Exit status": "0",
+          "File system inputs": "8",
+          "File system outputs": "480424",
+          "Involuntary context switches": "19063",
+          "Major (requiring I/O) page faults": "854",
+          "Maximum resident set size (kbytes)": "1643232",
+          "Minor (reclaiming a frame) page faults": "520145",
+          "Page size (bytes)": "4096",
+          "Percent of CPU this job got": "218%",
+          "Signals delivered": "0",
+          "Socket messages received": "0",
+          "Socket messages sent": "0",
+          "Swaps": "0",
+          "System time (seconds)": "4.56",
+          "User time (seconds)": "18.00",
+          "Voluntary context switches": "27679"
+        }
+      },
+      {
+        "file": "replay-resource.txt",
+        "gnuTime": {
+          "Average resident set size (kbytes)": "0",
+          "Average shared text size (kbytes)": "0",
+          "Average stack size (kbytes)": "0",
+          "Average total size (kbytes)": "0",
+          "Average unshared data size (kbytes)": "0",
+          "Command being timed": "\"lake env .lake/build/bin/pscv0_bootstrap_replay ../packages/environment/src/Ps/Environment/BootstrapData.lean ../dist/core-first/bootstrap/bootstrap-manifest.json\"",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.56",
+          "Exit status": "0",
+          "File system inputs": "0",
+          "File system outputs": "8",
+          "Involuntary context switches": "37",
+          "Major (requiring I/O) page faults": "0",
+          "Maximum resident set size (kbytes)": "844992",
+          "Minor (reclaiming a frame) page faults": "30316",
+          "Page size (bytes)": "4096",
+          "Percent of CPU this job got": "99%",
+          "Signals delivered": "0",
+          "Socket messages received": "0",
+          "Socket messages sent": "0",
+          "Swaps": "0",
+          "System time (seconds)": "0.23",
+          "User time (seconds)": "0.32",
+          "Voluntary context switches": "212"
+        }
+      }
+    ],
+    "schema": "psc0-core-ci-resource-observations/1",
+    "scope": "actual commands; not a complete Core release or performance claim"
+  },
+  "seamsResources": {
+    "generatedSources": [],
+    "resources": [
+      {
+        "file": "build-resource.txt",
+        "gnuTime": {
+          "Average resident set size (kbytes)": "0",
+          "Average shared text size (kbytes)": "0",
+          "Average stack size (kbytes)": "0",
+          "Average total size (kbytes)": "0",
+          "Average unshared data size (kbytes)": "0",
+          "Command being timed": "\"lake build pscv0_core_seams\"",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:05.77",
+          "Exit status": "0",
+          "File system inputs": "8",
+          "File system outputs": "247760",
+          "Involuntary context switches": "5526",
+          "Major (requiring I/O) page faults": "418",
+          "Maximum resident set size (kbytes)": "1636964",
+          "Minor (reclaiming a frame) page faults": "440741",
+          "Page size (bytes)": "4096",
+          "Percent of CPU this job got": "187%",
+          "Signals delivered": "0",
+          "Socket messages received": "0",
+          "Socket messages sent": "0",
+          "Swaps": "0",
+          "System time (seconds)": "2.73",
+          "User time (seconds)": "8.12",
+          "Voluntary context switches": "11626"
+        }
+      },
+      {
+        "file": "engine-build-resource.txt",
+        "gnuTime": {
+          "Average resident set size (kbytes)": "0",
+          "Average shared text size (kbytes)": "0",
+          "Average stack size (kbytes)": "0",
+          "Average total size (kbytes)": "0",
+          "Average unshared data size (kbytes)": "0",
+          "Command being timed": "\"lake build pscv0_core_engine_seams\"",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:35.27",
+          "Exit status": "0",
+          "File system inputs": "0",
+          "File system outputs": "453960",
+          "Involuntary context switches": "174679",
+          "Major (requiring I/O) page faults": "447",
+          "Maximum resident set size (kbytes)": "1688740",
+          "Minor (reclaiming a frame) page faults": "2242879",
+          "Page size (bytes)": "4096",
+          "Percent of CPU this job got": "347%",
+          "Signals delivered": "0",
+          "Socket messages received": "0",
+          "Socket messages sent": "0",
+          "Swaps": "0",
+          "System time (seconds)": "16.72",
+          "User time (seconds)": "105.76",
+          "Voluntary context switches": "177643"
+        }
+      },
+      {
+        "file": "selected-build-resource.txt",
+        "gnuTime": {
+          "Average resident set size (kbytes)": "0",
+          "Average shared text size (kbytes)": "0",
+          "Average stack size (kbytes)": "0",
+          "Average total size (kbytes)": "0",
+          "Average unshared data size (kbytes)": "0",
+          "Command being timed": "\"lake build pscv0_core_selected\"",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:14.05",
+          "Exit status": "0",
+          "File system inputs": "0",
+          "File system outputs": "320200",
+          "Involuntary context switches": "44216",
+          "Major (requiring I/O) page faults": "461",
+          "Maximum resident set size (kbytes)": "1700744",
+          "Minor (reclaiming a frame) page faults": "1038171",
+          "Page size (bytes)": "4096",
+          "Percent of CPU this job got": "331%",
+          "Signals delivered": "0",
+          "Socket messages received": "0",
+          "Socket messages sent": "0",
+          "Swaps": "0",
+          "System time (seconds)": "7.28",
+          "User time (seconds)": "39.26",
+          "Voluntary context switches": "39214"
+        }
+      }
+    ],
+    "schema": "psc0-core-ci-resource-observations/1",
+    "scope": "actual commands; not a complete Core release or performance claim"
+  }
+}

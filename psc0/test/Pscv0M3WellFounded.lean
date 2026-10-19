@@ -94,6 +94,12 @@ def iterate (step : Nat → Nat) (n : Nat) : Nat → Nat :=
 termination_by n
 decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)
 
+-- The generated source equation is pointwise in the returned function.
+-- Its result binder does not become a termination parameter.
+theorem iterate_step (step : Nat → Nat) (k : Nat) :
+    iterate step (Nat.succ k) = (fun seed => iterate step (k - 1) (step seed)) :=
+  funext fun seed => iterate.eq_def step (Nat.succ k) seed
+
 -- family is an erased index; p and h retain ordinary proof Unit slots.
 -- The changing Fin state must be specialized to the smaller n at each call.
 def dependentState (family : Nat → Type u) (p : Prop) (h : p)
@@ -260,7 +266,7 @@ run_cmd do
       ``WellFounded.fix, ``WellFounded.fix_eq,
       ``skip, ``skip_step, ``branches, ``shiftedMeasure, ``defaultDecrease,
       ``accumulate, ``offset, ``offset_step, ``twoStates, ``fixedOnly,
-      ``reverseList, ``digest, ``iterate, ``dependentState, ``bounded, ``bounded_step,
+      ``reverseList, ``digest, ``iterate, ``iterate_step, ``dependentState, ``bounded, ``bounded_step,
       ``relationLeft, ``relationLeft_step, ``relationRight, ``relationRight_step,
       ``packed, ``packed_step, ``packedBounded, ``packedBounded_step,
       ``independentLeft, ``independentLeft_step,
@@ -387,7 +393,7 @@ private def typedSource : String :=
   "function m3wfiterate(step: Nat -> Nat, n: Nat): Nat -> Nat := fun (seed: Nat) => match n with { | 0 => step(seed) | k + 1 => m3wfiterate(step, k - 1)(step(seed)) }\n" ++
   "termination_by n\n" ++
   "decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n" ++
-  "theorem m3wfiterateStep(step: Nat -> Nat, k: Nat): m3wfiterate(step, Nat.succ(k)) = (fun (seed: Nat) => m3wfiterate(step, k - 1)(step(seed))) := by { exact m3wfiterate.eq_def(step, Nat.succ(k)) }\n" ++
+  "theorem m3wfiterateStep(step: Nat -> Nat, k: Nat): m3wfiterate(step, Nat.succ(k)) = (fun (seed: Nat) => m3wfiterate(step, k - 1)(step(seed))) := funext(fun (seed: Nat) => m3wfiterate.eq_def(step, Nat.succ(k), seed))\n" ++
   "function m3wfdependent(family: Nat -> Type u, p: Prop, h: p, n: Nat, acc: Fin(n + 1)): Nat := match n with { | 0 => Fin.val(acc) | k + 1 => Fin.val(acc) + m3wfdependent(family, p, h, k - 1, Fin.mk(k - 1, Nat.lt_succ_self(k - 1))) }\n" ++
   "termination_by n\n" ++
   "decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n" ++
@@ -815,6 +821,25 @@ private def checkPackedEntry (environment : PsEnvironment) (sourceName : String)
     | .ok _ => throw (IO.userError "packed WF accepted reordered, duplicated or foreign entry fields")
     | .error _ => pure ()
 
+private def traceWFType (fuel : Nat) (term : PsExpr) : String :=
+  match fuel with
+  | 0 => "..."
+  | fuel + 1 =>
+    let render := traceWFType fuel
+    match term with
+    | .bvar index => "#" ++ toString index
+    | .fvar id => "$" ++ toString id
+    | .mvar id => "?" ++ toString id
+    | .sortE _ => "Sort"
+    | .constE name _ => psNameToString name
+    | .app fn arg => "(" ++ render fn ++ " " ++ render arg ++ ")"
+    | .lam name type body _ => "(fun " ++ psNameToString name ++ " : " ++ render type ++ " => " ++ render body ++ ")"
+    | .forallE name type body _ => "(forall " ++ psNameToString name ++ " : " ++ render type ++ ", " ++ render body ++ ")"
+    | .letE name type value body => "(let " ++ psNameToString name ++ " : " ++ render type ++ " := " ++ render value ++ "; " ++ render body ++ ")"
+    | .lit (.natural value) => toString value
+    | .lit (.string value) => value
+    | .proj name index value => "(" ++ psNameToString name ++ "." ++ toString index ++ " " ++ render value ++ ")"
+
 -- Failure-only replay of the original command stream. The successful
 -- qualification still uses psElabProgramWithOrigins on the complete program.
 private def traceWFElaborationFailure (label : String) (program : PsSyntaxProgram) : IO Unit := do
@@ -837,6 +862,15 @@ private def traceWFElaborationFailure (label : String) (program : PsSyntaxProgra
           | _ => []
         let names := sources.map fun source =>
           String.intercalate "." (psScopeQualified state.scope (psElabOriginSource source).fst).segments
+        if names.contains "m3wfiterateStep" then
+          for text in ["m3wfiterate", "m3wfiterate.eq_def", "funext"] do
+            let name := psSyntaxNameAppendSegments (text.splitOn ".") .anonymous
+            match psEnvironmentFind state.environment name with
+            | none => IO.println ("PSCV0_M3_WF_ACTUAL_TYPE: missing " ++ text)
+            | some declaration =>
+              let rendered := traceWFType 48 (psDeclarationType declaration)
+              IO.println ("PSCV0_M3_WF_ACTUAL_TYPE: " ++ text ++ " := " ++
+                String.ofList (rendered.toList.take 20000))
         let previous := match state.originsRev with
           | origin :: _ => String.intercalate "." origin.sourceName.segments
           | [] => "<none>"

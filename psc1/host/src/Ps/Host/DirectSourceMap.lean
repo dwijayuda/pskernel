@@ -77,7 +77,7 @@ def psDirectSourceMap
     if psDirectMapSourceCoordinatesSupported sourceText then
       psDirectMapSegments (psDirectSourceOrigins parsed) printed.spans {}
     else ""
-  "{\\"version\\":3,\\"file\\":" ++ psJsonQuote outputName ++
-    ",\\"sources\\":[" ++ psJsonQuote sourcePath ++
-    "],\\"sourcesContent\\":[" ++ psJsonQuote sourceText ++
-    "],\\"names\\":[],\\"mappings\\":" ++ psJsonQuote mapping ++ "}\n"
+  "{\"version\":3,\"file\":" ++ psJsonQuote outputName ++
+    ",\"sources\":[" ++ psJsonQuote sourcePath ++
+    "],\"sourcesContent\":[" ++ psJsonQuote sourceText ++
+    "],\"names\":[],\"mappings\":" ++ psJsonQuote mapping ++ "}\n"

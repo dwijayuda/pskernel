@@ -37,8 +37,14 @@ jobs:
           lake build PsKernelC0
           lake env lean -R src test/C0DeepFrameProof.lean
           lake env lean -R src test/C0DeepFrameSourceProof.lean
-          lake env lean -R src test/C0DeepBinderSourceProof.lean
           lake env lean -R src test/C0DeepMixedWorklistProof.lean
           lake env lean --run test/C0DeepSubstDifferential.lean
           lake build c0OfficialReplay
-          echo 'C0_DEEP_FRAME=SOURCE_COMPILED_NONADMITTING fuel=4096'
+          echo 'C0_DEEP_FRAME=NONADMITTING_SMOKE_AND_DIFFERENTIAL_PASS source_fuel=4096'
+      - name: Prove all-context checked lambda and deferred binder refinement
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          lake env lean -R src test/C0DeepBinderSourceProof.lean
+          echo 'C0_DEEP_LAMBDA=FULL_SOURCE_REFINEMENT_PROVED'

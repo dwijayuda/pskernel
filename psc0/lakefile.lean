@@ -75,6 +75,8 @@ lean_lib PsEnvironment where
     `Ps.Environment.Basic,
     `Ps.Environment.BootstrapData,
     `Ps.Environment.Bootstrap,
+    `Ps.Environment.CompilerSourceCandidateData,
+    `Ps.Environment.CompilerSourceCandidate,
     `Ps.Environment.LocalContext,
     `Ps.Environment.Instances,
     `Ps.Environment.Resolve,

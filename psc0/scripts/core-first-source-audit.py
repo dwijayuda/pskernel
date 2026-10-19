@@ -18,12 +18,12 @@ PORTABLE_ROOTS = [
 OTHER_ROOTS = [
     "Ps.Compiler.Api", "Ps.Bootstrap.SelfHost", "Ps.BackendTs.Compiler",
     "Ps.Host.NativeV7", "PsKernelLean.Prelude", "Ps.Compiler.Engine",
-    "Ps.Compiler.Core", "Ps.Environment.Bootstrap", "Ps.Environment.Core",
+    "Ps.Compiler.Core", "Ps.Environment.Bootstrap", "Ps.Environment.CompilerSourceCandidate", "Ps.Environment.Core",
     "Ps.Environment.Full", "Ps.Environment.Fingerprint", "PsKernelLean.Replay",
     "Ps.Compiler.Pscv0Engine", "Ps.Compiler.Pscv0ModuleEngine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
 ]
 ISOLATED_ROOTS = [
-    "Ps.Environment.Bootstrap", "Ps.Environment.Fingerprint", "PsKernelLean.Replay", "Ps.Compiler.Engine",
+    "Ps.Environment.Bootstrap", "Ps.Environment.CompilerSourceCandidate", "Ps.Environment.Fingerprint", "PsKernelLean.Replay", "Ps.Compiler.Engine",
     "Ps.Compiler.Pscv0Engine", "Ps.Compiler.Pscv0ModuleEngine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
 ]
 INDEPENDENT_COMPILER_ROOTS = ["Ps.Compiler.Pscv0Engine"] + PORTABLE_ROOTS[1:]

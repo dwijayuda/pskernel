@@ -202,3 +202,8 @@ lean_exe pscv0_bootstrap_compatibility where
 lean_exe pscv0_core_project where
   srcDir := "../test"
   root := `Pscv0CoreProject
+
+-- Complete compiler-owned sources, selected and admitted against the candidate.
+lean_exe pscv0_core_compiler_source where
+  srcDir := "../test"
+  root := `Pscv0CoreCompilerSource

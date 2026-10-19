@@ -157,6 +157,13 @@ jobs:
           .lake/build/bin/pscv0_core_project 2>&1 | tee ../dist/core-first/seams/project-check.log
           sha256sum .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable.sha256
           stat -c '%s' .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable-bytes.txt
+      - name: Qualify the complete compiler-source workload
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o ../dist/core-first/seams/compiler-source-build-resource.txt lake build pscv0_core_compiler_source 2>&1 | tee ../dist/core-first/seams/compiler-source-build.log
+          /usr/bin/time -v -o ../dist/core-first/seams/compiler-source-resource.txt .lake/build/bin/pscv0_core_compiler_source ../packages/foundation/src/Ps/Foundation/Source.lean ../packages/foundation/src/Ps/Foundation/List.lean ../selfhost/core-v7/Ps/Foundation/Source.ps ../selfhost/core-v7/Ps/Foundation/List.ps ../packages/environment/src/Ps/Environment/CompilerSourceCandidateData.lean ../dist/core-first/seams/compiler-source-qualification.json 2>&1 | tee ../dist/core-first/seams/compiler-source-check.log
+          sha256sum .lake/build/bin/pscv0_core_compiler_source > ../dist/core-first/seams/compiler-source-executable.sha256
+          stat -c '%s' .lake/build/bin/pscv0_core_compiler_source > ../dist/core-first/seams/compiler-source-executable-bytes.txt
       - name: Summarize actual seam build resource observations
         if: always()
         run: |
@@ -374,6 +381,7 @@ jobs:
           sha256sum ../packages/foundation/src/Ps/Foundation/Source.lean ../packages/foundation/src/Ps/Foundation/List.lean ../selfhost/core-v7/Ps/Foundation/Source.ps ../selfhost/core-v7/Ps/Foundation/List.ps | tee ../dist/core-first/authoring/foundation-workload.sha256
           wc -c ../packages/foundation/src/Ps/Foundation/Source.lean ../packages/foundation/src/Ps/Foundation/List.lean ../selfhost/core-v7/Ps/Foundation/Source.ps ../selfhost/core-v7/Ps/Foundation/List.ps | tee ../dist/core-first/authoring/foundation-workload-bytes.txt
           /usr/bin/time -v -o ../dist/core-first/authoring/foundation-resource.txt .lake/build/bin/pscv0_core_environment_export foundation ../dist/core-first/authoring/CoreFoundationCandidate.lean 2>&1 | tee ../dist/core-first/authoring/foundation-export.log | sed '/^PSCV0_STANDARD_SOURCE /d'
+          cmp ../dist/core-first/authoring/CoreFoundationCandidate.lean ../packages/environment/src/Ps/Environment/CompilerSourceCandidateData.lean
           sha256sum ../dist/core-first/authoring/CoreFoundationCandidate.lean > ../dist/core-first/authoring/foundation.sha256
           python3 ../scripts/core-first-ci-evidence.py foundation-source ../dist/core-first/authoring/CoreFoundationCandidate.lean
       - name: Author and check the standalone compiler byte-word candidate

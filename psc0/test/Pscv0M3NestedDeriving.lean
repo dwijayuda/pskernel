@@ -587,7 +587,7 @@ private def checkPlans (environment : PsEnvironment)
     "inductive M3NestedMissingBEq: Nat -> Type where { | leaf(value: Nat -> Nat): M3NestedMissingBEq(0) | row(n: Nat, children: List(M3NestedMissingBEq(0))): M3NestedMissingBEq(Nat.succ(n)) }\n")
   let missingEnvironment ← add environment missing.declarations
   expectRefused "indexed nested field has no function dictionary"
-    "deriving field has no checked instance"
+    "PSCV0-DATA: deriving field has no checked instance (at indexed BEq field dictionary)"
     (psElabDeriveGroupHandler missingEnvironment missingOrigin
       { segments := ["BEq"], span := missingOrigin.span })
 

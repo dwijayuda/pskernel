@@ -1594,6 +1594,26 @@ private def checkFinEvidenceFinite : IO Unit := do
   let selected := psStandardFinReprDeclarations ++ psStandardFinBEqDeclarations ++
     psStandardFinEvidenceDeclarations
   ensure (selected.length == 6) "CORE-MATCHES: Fin evidence selection changed"
+  let lawful := psStandardNatLawfulBEqDeclaration
+  let some (.theoremDecl _ [] actualType actualValue) := psEnvironmentFind environment
+      (psDeclarationName lawful)
+    | throw (IO.userError "CORE-MATCHES: selected Nat LawfulBEq proof is absent")
+  let .theoremDecl _ [] expectedType expectedValue := lawful
+    | throw (IO.userError "CORE-MATCHES: selected Nat law is not a checked theorem")
+  ensure (psExprAlphaEq actualType expectedType && psExprAlphaEq actualValue expectedValue)
+    "CORE-MATCHES: selected Nat LawfulBEq proof drift"
+  let entries := environment.instances.entries.filter fun entry =>
+    match entry.value with
+    | .constE name _ => psNameEq name (psDeclarationName lawful)
+    | _ => false
+  let [entry] := entries
+    | throw (IO.userError "CORE-MATCHES: selected Nat law registration is not unique")
+  ensure (entry.priority == 1000 && psExprAlphaEq entry.type expectedType)
+    "CORE-MATCHES: selected Nat law registration changed its actual dictionary"
+  let context := psElabContextEmpty environment []
+  let proof ← fromExcept ((psElabDeriveInstance context expectedType).mapError psCompilerPscv0ElabError)
+  let _ ← fromExcept ((psElabResolvedTerm context proof (some expectedType)).mapError psCompilerPscv0ElabError)
+  let selected := selected ++ [lawful]
   let _ ← fromExcept (psStandardFinEvidenceAudit environment)
   for declaration in psStandardFinReprDeclarations ++ psStandardFinBEqDeclarations ++
       psStandardFinDecEqDeclarations do
@@ -1634,7 +1654,7 @@ private def checkFinEvidenceFinite : IO Unit := do
   for declaration in selected do
     ensure ((checked.find? (PsKernelLean.toLeanName (psDeclarationName declaration))).isSome)
       "CORE-MATCHES: finite Fin evidence replay omitted a selected declaration"
-  IO.println "CORE-MATCHES: all six Fin additions freshly kernel checked at trust0/2M/20k"
+  IO.println "CORE-MATCHES: all six Fin declarations and the selected Nat LawfulBEq proof freshly kernel checked at trust0/2M/20k"
 
 private def lawfulRequirementFailure (owned : Bool) : PsElabError → Bool
   | .atDeclaration _ cause => lawfulRequirementFailure owned cause
@@ -1842,6 +1862,95 @@ private def checkRuntime (root : System.FilePath) : IO Unit := do
     IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
     IO.println ("CORE-MATCHES native observations " ++ stem ++ ": " ++
       (Lean.Json.arr rows.toArray).compress)
+private def coreLogicalDependencyNames (declaration : PsDeclaration) : List PsName :=
+  let expressions := psDeclarationType declaration ::
+    (match declaration with
+    | .definitionDecl _ _ _ value | .theoremDecl _ _ _ value
+    | .opaqueDecl _ _ _ value | .partialDecl _ _ _ value => [value]
+    | _ => [])
+  let names := expressions.flatMap psPscv0ExprConstants
+  match declaration with
+  | .inductiveDecl info => names ++ info.constructors
+  | .constructorDecl info => info.inductiveName :: names
+  | .recursorDecl info => info.inductiveNames ++ names
+  | .quotientDecl .. =>
+    [psRootName "Quot", psNameAppendStr (psRootName "Quot") "mk",
+      psNameAppendStr (psRootName "Quot") "lift",
+      psNameAppendStr (psRootName "Quot") "ind"] ++ names
+  | _ => names
+
+private def coreLogicalDependencyClosure (fuel : Nat) (environment : PsEnvironment)
+    (pending : List PsName) (seen : List PsName := []) :
+    Except String (List PsName) := do
+  match pending with
+  | [] => return seen
+  | name :: rest =>
+    match fuel with
+    | 0 => throw "CORE-LOGIC: dependency closure exhausted its finite bound"
+    | fuel + 1 =>
+      if seen.any (psNameEq name) then
+        coreLogicalDependencyClosure fuel environment rest seen
+      else
+        let some declaration := psEnvironmentFind environment name
+          | throw ("CORE-LOGIC: missing actual logical dependency " ++ psNameToString name)
+        coreLogicalDependencyClosure fuel environment
+          (coreLogicalDependencyNames declaration ++ rest) (name :: seen)
+
+private def checkCoreExtensionalityClosure : IO Unit := do
+  let environment := psSelfHostProdPreludeEnvironment
+  let some (.theoremDecl _ levels type value) :=
+      psEnvironmentFind environment (psRootName "funext")
+    | throw (IO.userError "CORE-LOGIC: funext is not a stored checked theorem")
+  ensure (levels.length == 2 && !psExprHasUnresolvedMeta value &&
+      psExprFVarsInContext psLocalEmpty value)
+    "CORE-LOGIC: funext lost its closed two-universe theorem body"
+  let _ ← fromExcept ((psElabResolvedTerm (psElabContextEmpty environment levels)
+    value (some type)).mapError psCompilerPscv0ElabError)
+  let some (.axiomDecl _ [] _) :=
+      psEnvironmentFind environment (psRootName "propext")
+    | throw (IO.userError "CORE-LOGIC: the existing approved propext assumption changed kind")
+  let names ← fromExcept (coreLogicalDependencyClosure 4096 environment
+    [psRootName "funext", psRootName "propext"])
+  let selected := environment.declarations.filter fun declaration =>
+    names.any (psNameEq (psDeclarationName declaration))
+  ensure (selected.length == names.length)
+    "CORE-LOGIC: logical dependency closure has duplicate or absent declarations"
+  for declaration in selected do
+    if let .axiomDecl name .. := declaration then
+      ensure (psNameEq name (psRootName "propext") ||
+        psNameEq name (psNameAppendStr (psRootName "Quot") "sound"))
+        ("CORE-LOGIC: unexpected assumption " ++ psNameToString name)
+  let initial := (← Lean.mkEmptyEnvironment 0).toKernelEnv
+  ensure ((initial.find? (Lean.Name.mkSimple "funext")).isNone)
+    "CORE-LOGIC: fresh kernel unexpectedly contained funext"
+  let result ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    PsKernelLean.replayPreludeDeclarations environment.declarations
+      selected initial 2000000 20000
+  let checked ← fromExcept (result.mapError (fun error =>
+    error.kind.code ++ ": " ++ error.message))
+  let some (.thmInfo actual) := checked.find? (Lean.Name.mkSimple "funext")
+    | throw (IO.userError "CORE-LOGIC: finite fresh replay did not admit funext as a theorem")
+  let actualType ← fromExcept ((PsKernelLean.toLeanExpr type).mapError
+    (fun error => error.kind.code ++ ": " ++ error.message))
+  let actualValue ← fromExcept ((PsKernelLean.toLeanExpr value).mapError
+    (fun error => error.kind.code ++ ": " ++ error.message))
+  ensure (actual.type == actualType && actual.value == actualValue)
+    "CORE-LOGIC: finite admission changed the actual funext theorem"
+  IO.println ("CORE-LOGIC: checked actual funext/propext dependency closure from empty at trust0/2M/20k; declarations=" ++
+    toString selected.length)
+
+private def inspectCoreExtDeclarations : IO Unit := do
+  let environment := psSelfHostProdPreludeEnvironment
+  for text in ["Prod.ext", "PProd.ext", "MProd.ext", "Sigma.ext", "PSigma.ext",
+      "PLift.ext", "ULift.ext", "PULift.ext", "funext", "propext",
+      "Subtype.ext", "Array.ext", "Char.ext", "PUnit.ext", "Thunk.ext"] do
+    let kind := match psEnvironmentFind environment (psDecisionName text) with
+      | none => "absent"
+      | some (.theoremDecl ..) => "theorem"
+      | some (.axiomDecl ..) => "axiom"
+      | some _ => "other"
+    IO.println ("CORE-EXT-DECLARATION: " ++ text ++ " " ++ kind)
+
 end CoreM3Matches
 
 open CoreM3Matches in
@@ -1850,6 +1959,8 @@ def main (args : List String) : IO Unit := do
   let root := System.FilePath.mk directory
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "CORE-MATCHES: expected pinned Lean 4.35.0"
+  inspectCoreExtDeclarations
+  checkCoreExtensionalityClosure
   checkFinEvidenceFinite
   -- Native Format.pretty calls a partial worker. Check actual rendering by
   -- execution while the native theorems above check the generated Format tree.

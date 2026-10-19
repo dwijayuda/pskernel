@@ -94,6 +94,12 @@ def iterate (step : Nat → Nat) (n : Nat) : Nat → Nat :=
 termination_by n
 decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)
 
+-- The generated source equation is pointwise in the returned function.
+-- Its result binder does not become a termination parameter.
+theorem iterate_step (step : Nat → Nat) (k : Nat) :
+    iterate step (Nat.succ k) = (fun seed => iterate step (k - 1) (step seed)) :=
+  funext fun seed => iterate.eq_def step (Nat.succ k) seed
+
 -- family is an erased index; p and h retain ordinary proof Unit slots.
 -- The changing Fin state must be specialized to the smaller n at each call.
 def dependentState (family : Nat → Type u) (p : Prop) (h : p)
@@ -260,7 +266,7 @@ run_cmd do
       ``WellFounded.fix, ``WellFounded.fix_eq,
       ``skip, ``skip_step, ``branches, ``shiftedMeasure, ``defaultDecrease,
       ``accumulate, ``offset, ``offset_step, ``twoStates, ``fixedOnly,
-      ``reverseList, ``digest, ``iterate, ``dependentState, ``bounded, ``bounded_step,
+      ``reverseList, ``digest, ``iterate, ``iterate_step, ``dependentState, ``bounded, ``bounded_step,
       ``relationLeft, ``relationLeft_step, ``relationRight, ``relationRight_step,
       ``packed, ``packed_step, ``packedBounded, ``packedBounded_step,
       ``independentLeft, ``independentLeft_step,
@@ -387,7 +393,7 @@ private def typedSource : String :=
   "function m3wfiterate(step: Nat -> Nat, n: Nat): Nat -> Nat := fun (seed: Nat) => match n with { | 0 => step(seed) | k + 1 => m3wfiterate(step, k - 1)(step(seed)) }\n" ++
   "termination_by n\n" ++
   "decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n" ++
-  "theorem m3wfiterateStep(step: Nat -> Nat, k: Nat): m3wfiterate(step, Nat.succ(k)) = (fun (seed: Nat) => m3wfiterate(step, k - 1)(step(seed))) := by { exact m3wfiterate.eq_def(step, Nat.succ(k)) }\n" ++
+  "theorem m3wfiterateStep(step: Nat -> Nat, k: Nat): m3wfiterate(step, Nat.succ(k)) = (fun (seed: Nat) => m3wfiterate(step, k - 1)(step(seed))) := funext(fun (seed: Nat) => m3wfiterate.eq_def(step, Nat.succ(k), seed))\n" ++
   "function m3wfdependent(family: Nat -> Type u, p: Prop, h: p, n: Nat, acc: Fin(n + 1)): Nat := match n with { | 0 => Fin.val(acc) | k + 1 => Fin.val(acc) + m3wfdependent(family, p, h, k - 1, Fin.mk(k - 1, Nat.lt_succ_self(k - 1))) }\n" ++
   "termination_by n\n" ++
   "decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n" ++

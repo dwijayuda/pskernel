@@ -73,10 +73,10 @@ private def originalSpine (depth : Nat) : PsKernelExpr :=
   | Nat.succ remaining =>
       PsKernelExpr.app (originalSpine remaining) (PsKernelExpr.bvar 1)
 
-private def validate (label : String) (meta : DemoExprMeta) : IO Unit := do
-  unless meta.hash == psKernelExprHash meta.expr &&
-      meta.hasFVar == psKernelExprHasFVar meta.expr &&
-      (meta.looseRange > 0) == psKernelExprHasLooseBVar meta.expr do
+private def validate (label : String) (cached : DemoExprMeta) : IO Unit := do
+  unless cached.hash == psKernelExprHash cached.expr &&
+      cached.hasFVar == psKernelExprHasFVar cached.expr &&
+      (cached.looseRange > 0) == psKernelExprHasLooseBVar cached.expr do
     throw (IO.userError s!"EXPR_METADATA_INVARIANT_FAILED: {label}")
   IO.println s!"PSC1_METADATA_INVARIANT PASS: {label}"
 
@@ -90,22 +90,22 @@ private def bench (operation : String) (depth calls : Nat)
   IO.println s!"PSC1_METADATA_NATIVE operation={operation} depth={depth} calls={calls} ms={stop-start} checksum={checksum}"
 
 private def testDepth (depth : Nat) : IO Unit := do
-  let meta := demoSpine depth
+  let cached := demoSpine depth
   let original := originalSpine depth
-  validate s!"application-depth-{depth}" meta
-  unless psKernelExprEq meta.expr original do
+  validate s!"application-depth-{depth}" cached
+  unless psKernelExprEq cached.expr original do
     throw (IO.userError "EXPR_METADATA_SOURCE_SHAPE_CHANGED")
   let calls := 12000
   bench "raw_hash" depth calls (fun _ => psKernelExprHash original)
-  bench "computed_hash" depth calls (fun _ => meta.hash)
+  bench "computed_hash" depth calls (fun _ => cached.hash)
   bench "raw_has_fvar" depth calls
     (fun _ => if psKernelExprHasFVar original then 1 else 0)
   bench "computed_has_fvar" depth calls
-    (fun _ => if meta.hasFVar then 1 else 0)
+    (fun _ => if cached.hasFVar then 1 else 0)
   bench "raw_has_bvar" depth calls
     (fun _ => if psKernelExprHasLooseBVar original then 1 else 0)
   bench "computed_has_bvar" depth calls
-    (fun _ => if meta.looseRange > 0 then 1 else 0)
+    (fun _ => if cached.looseRange > 0 then 1 else 0)
 
 def main : IO Unit := do
   let name := PsKernelName.str PsKernelName.anonymous "metaLocal"

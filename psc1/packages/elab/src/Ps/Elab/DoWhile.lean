@@ -100,9 +100,16 @@ def psElabDoWhile
     psWhnf context.environment context.metaContext context.localContext resultType
   match (psExprAppView reducedResult).head with
   | .constE name _ =>
-      match psEnvironmentFind context.environment name with
-      | some (.inductiveDecl _) => pure ()
-      | _ => throw PsElabError.doWhileUnsupportedBody
+      -- The retained profile represents these fixed primitive data types by
+      -- trusted prelude headers, not by source-defined opaque type constants.
+      if psNameEq name psBoolName || psNameEq name psUnitName ||
+          psNameEq name psNatName || psNameEq name psIntName ||
+          psNameEq name psStringName || psNameEq name psCharName then
+        pure ()
+      else
+        match psEnvironmentFind context.environment name with
+        | some (.inductiveDecl _) => pure ()
+        | _ => throw PsElabError.doWhileUnsupportedBody
   | _ => throw PsElabError.doWhileUnsupportedBody
   let carried := psElabDoMutableVisible context state
   let continuation <- psElabDoJoin

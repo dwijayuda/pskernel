@@ -57,7 +57,10 @@ def psRustTailLet (name : String) (type : PsVerifiedIrType) (value : PsVerifiedI
         match psRustEmitClosureValueType type with
         | Except.error error => Except.error error
         | Except.ok printed => Except.ok (psRustConcat2 ": " printed)
-    | _ => Except.ok "";
+    | _ =>
+        match psRustEmitType type with
+        | Except.error error => Except.error error
+        | Except.ok printed => Except.ok (psRustConcat2 ": " printed);
   match annotation with
   | Except.error error => Except.error error
   | Except.ok printedType =>

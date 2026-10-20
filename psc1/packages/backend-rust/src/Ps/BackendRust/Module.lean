@@ -407,6 +407,64 @@ def psRustEmitFunctionResultExpr
     4096
     expr
 
+-- Internal continuation helpers use recursively typed Rc closure values. Public
+-- declaration signatures keep the existing, narrower ABI checks above.
+def psRustEmitPrivateDeclarationParameter
+    (parameter : PsVerifiedIrParameter) : Except PsRustEmitError String := do
+  if !psRustDirectClosureTypeSupported parameter.type then
+    throw (PsRustEmitError.nestedFunctionParameterUnsupported parameter.name)
+  let printed <- psRustEmitHigherOrderParameterType parameter.type
+  pure (psRustConcat3 (psRustIdentifier parameter.name) ": " printed)
+
+def psRustEmitPrivateDeclarationParameterList
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsRustEmitError (List String) :=
+  match parameters with
+  | [] => .ok []
+  | parameter :: rest => do
+      let printed <- psRustEmitPrivateDeclarationParameter parameter
+      let others <- psRustEmitPrivateDeclarationParameterList rest
+      pure (printed :: others)
+
+-- The ordinary emitter has typed closure lets and return blocks for these
+-- forms. Direct extraction of a stored function remains outside this path.
+def psRustPrivateFunctionResultExprSupportedWithFuel
+    (fuel : Nat) : PsVerifiedIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero => fun _ => false
+  | Nat.succ remaining =>
+      let smaller := psRustPrivateFunctionResultExprSupportedWithFuel remaining
+      fun expr =>
+        match expr with
+        | .lambda _ result body =>
+            if psRustTypeContainsFunction result then
+              psRustDirectClosureTypeSupported result && smaller body
+            else true
+        | .var _ => true
+        | .call _ _ _ => true
+        | .intrinsic operation _ _ =>
+            match operation with
+            | .arrayFoldl => true
+            | _ => false
+        | .letE _ type value body =>
+            if psRustTypeContainsFunction type then
+              psRustDirectClosureTypeSupported type && smaller value && smaller body
+            else smaller body
+        | .ifE _ yes no => smaller yes && smaller no
+        | .matchE _ _ _ alternatives =>
+            !psListAny (fun alternative => !smaller (Prod.snd (Prod.snd alternative))) alternatives
+        | _ => false
+
+def psRustEmitPrivateDeclarationResultType
+    (declaration : PsVerifiedIrDeclaration) : Except PsRustEmitError String :=
+  match declaration.resultType with
+  | .function _ _ =>
+      if psRustDirectClosureTypeSupported declaration.resultType &&
+          psRustPrivateFunctionResultExprSupportedWithFuel 4096 declaration.body then
+        psRustEmitClosureValueType declaration.resultType
+      else .error (PsRustEmitError.functionResultUnsupported declaration.name)
+  | _ => psRustEmitType declaration.resultType
+
 def psRustEmitDeclarationWithVisibility (isPublic : Bool)
     (allDeclarations : List PsVerifiedIrDeclaration)
     (valueNames : List String)
@@ -416,11 +474,13 @@ def psRustEmitDeclarationWithVisibility (isPublic : Bool)
     Except.error
       (PsRustEmitError.genericValueUnsupported declaration.name)
   else
-    match psRustEmitDeclarationParameterList declaration.parameters with
+    match (if isPublic then psRustEmitDeclarationParameterList declaration.parameters
+      else psRustEmitPrivateDeclarationParameterList declaration.parameters) with
     | Except.error error =>
         Except.error error
     | Except.ok printedParameters =>
-        match psRustEmitDeclarationResultType declaration with
+        match (if isPublic then psRustEmitDeclarationResultType declaration
+          else psRustEmitPrivateDeclarationResultType declaration) with
         | Except.error error =>
             Except.error error
         | Except.ok printedResult =>

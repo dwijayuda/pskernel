@@ -19,6 +19,7 @@ const targets = (process.env.PSC1_CONFORMANCE_TARGETS ||
 const records = [];
 const divergence = [];
 const rejections = [];
+const failures = [];
 const read = file => fs.readFileSync(file, 'utf8');
 const json = file => JSON.parse(read(file));
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -46,6 +47,13 @@ function reject(name, syntax, args, pattern) {
   const diagnostic = result.stdout + '\n' + result.stderr;
   assert.match(diagnostic, pattern, name);
   rejections.push({ name, syntax, passed: true, diagnostic });
+}
+function recordFailure(phase, syntax, target, error) {
+  const detail = error.stack || String(error);
+  const failure = { phase, syntax, target, error: detail };
+  failures.push(failure);
+  console.error('PSC1_WHILE_FAILURE: ' + phase + '/' + syntax + '/' + target + '\n' + detail);
+  return failure;
 }
 function externalTimeout(command, args) {
   const result = invoke(command, args, { timeout: 2000 });
@@ -387,47 +395,63 @@ try {
     const spin = path.join(folder, 'Spin.' + syntax);
     for (const target of targets) {
       console.log('PSC1_WHILE_CONFORMANCE_START: ' + syntax + '/' + target);
-      const selected = target === 'wasm-component' ? ['semantic'] : names;
-      const finite = build(entry, target, syntax, 'finite', selected);
-      const values = executeFinite(finite, target);
-      for (const [name, no, yes] of values) {
-        assert.equal(no, true, syntax + '/' + target + '/' + name + '(false)');
-        assert.equal(yes, true, syntax + '/' + target + '/' + name + '(true)');
+      try {
+        const selected = target === 'wasm-component' ? ['semantic'] : names;
+        const finite = build(entry, target, syntax, 'finite', selected);
+        const values = executeFinite(finite, target);
+        for (const [name, no, yes] of values) {
+          assert.equal(no, true, syntax + '/' + target + '/' + name + '(false)');
+          assert.equal(yes, true, syntax + '/' + target + '/' + name + '(true)');
+        }
+        if (target === targets[0]) {
+          const prior = [hash(finite.output), hash(finite.output + '.bundle.json')];
+          reject('default-refuses-unrestricted-while', syntax,
+            ['build', entry, '--target', target, '--out', finite.output], /PSC1_PREPARATION_FAILED/);
+          reject('verified-refuses-unrestricted-while', syntax,
+            ['build', entry, '--assurance', 'verified', '--target', target, '--out', finite.output],
+            /PSC1_VERIFIED_EXECUTION_UNAVAILABLE/);
+          assert.deepEqual([hash(finite.output), hash(finite.output + '.bundle.json')], prior,
+            'failed assurance requests changed a published artifact');
+        }
+        records.push({ syntax, target, passed: true, checks: values,
+          assurance: finite.manifest.assurance, behaviorallyVerified: false,
+          publicNames: finite.manifest.publicNames,
+          partialDeclarations: finite.manifest.partialDeclarations,
+          artifactSha256: finite.artifactSha256, manifestSha256: finite.manifestSha256 });
+        console.log('PSC1_WHILE_CONFORMANCE_PASS: ' + syntax + '/' + target);
+      } catch (error) {
+        records.push({ passed: false, ...recordFailure('finite', syntax, target, error) });
       }
-      records.push({ syntax, target, passed: true, checks: values,
-        assurance: finite.manifest.assurance, behaviorallyVerified: false,
-        publicNames: finite.manifest.publicNames,
-        partialDeclarations: finite.manifest.partialDeclarations,
-        artifactSha256: finite.artifactSha256, manifestSha256: finite.manifestSha256 });
-      console.log('PSC1_WHILE_CONFORMANCE_PASS: ' + syntax + '/' + target);
-      if (target === targets[0]) {
-        const prior = [hash(finite.output), hash(finite.output + '.bundle.json')];
-        reject('default-refuses-unrestricted-while', syntax,
-          ['build', entry, '--target', target, '--out', finite.output], /PSC1_PREPARATION_FAILED/);
-        reject('verified-refuses-unrestricted-while', syntax,
-          ['build', entry, '--assurance', 'verified', '--target', target, '--out', finite.output],
-          /PSC1_VERIFIED_EXECUTION_UNAVAILABLE/);
-        assert.deepEqual([hash(finite.output), hash(finite.output + '.bundle.json')], prior,
-          'failed assurance requests changed a published artifact');
+      try {
+        const infinite = build(spin, target, syntax, 'divergence', ['spin']);
+        const deadline = executeDivergence(infinite, target);
+        divergence.push({ syntax, target, passed: true, ...deadline,
+          earlyReturnPreflight: true, unusedNonvalueCallEvaluated: true,
+          publicNames: infinite.manifest.publicNames,
+          artifactSha256: infinite.artifactSha256, manifestSha256: infinite.manifestSha256 });
+        console.log('PSC1_WHILE_DIVERGENCE_PASS: ' + syntax + '/' + target);
+      } catch (error) {
+        divergence.push({ passed: false, ...recordFailure('divergence', syntax, target, error) });
       }
-      const infinite = build(spin, target, syntax, 'divergence', ['spin']);
-      const deadline = executeDivergence(infinite, target);
-      divergence.push({ syntax, target, passed: true, ...deadline,
-        earlyReturnPreflight: true, unusedNonvalueCallEvaluated: true,
-        publicNames: infinite.manifest.publicNames,
-        artifactSha256: infinite.artifactSha256, manifestSha256: infinite.manifestSha256 });
-      console.log('PSC1_WHILE_DIVERGENCE_PASS: ' + syntax + '/' + target);
     }
     for (const [name, pattern, text] of unsupported) {
-      const stem = 'negative_' + name.replaceAll('-', '_');
-      const lean = source(leanFolder, stem + '.lean', text);
-      let input = lean;
-      if (syntax === 'ps') {
-        input = path.join(psFolder, stem + '.ps');
-        run(native, ['translate', lean, '--to', 'ps', '--out', input]);
+      try {
+        const stem = 'negative_' + name.replaceAll('-', '_');
+        const lean = source(leanFolder, stem + '.lean', text);
+        let input = lean;
+        if (syntax === 'ps') {
+          input = path.join(psFolder, stem + '.ps');
+          run(native, ['translate', lean, '--to', 'ps', '--out', input]);
+        }
+        reject(name, syntax, ['check', input, '--assurance', 'ordinary'], pattern);
+      } catch (error) {
+        rejections.push({ name, passed: false, ...recordFailure('source-profile', syntax, name, error) });
       }
-      reject(name, syntax, ['check', input, '--assurance', 'ordinary'], pattern);
     }
+  }
+  if (failures.length) {
+    throw new Error('PSC1_ORDINARY_WHILE_CONFORMANCE_FAILED: ' +
+      failures.map(value => value.phase + '/' + value.syntax + '/' + value.target).join(', '));
   }
   console.log('PSC1_ORDINARY_WHILE_CONFORMANCE: PASS ' + records.length +
     ' finite bundles, ' + divergence.length + ' external divergence deadlines, ' +
@@ -443,7 +467,7 @@ try {
     oracleFields: Object.keys(oracle).filter(key => key.startsWith('while')),
     loopChecks: checks, longLoopIterations: 100000,
     targetCount: targets.length, sourceSyntaxes: ['lean', 'ps'],
-    records, divergence, rejections
+    records, divergence, rejections, failures
   }, null, 2) + '\n');
   fs.rmSync(work, { recursive: true, force: true });
 }

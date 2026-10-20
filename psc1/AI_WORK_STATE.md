@@ -1,41 +1,63 @@
 # PSC1 current work state — Practical Core control flow and data
 
 Updated 2026-10-20. Branch: `feature/psc1-practical-control-data-20261020`.
-This continuation is stacked on seven-backend PR #165 at the independently
-re-fetched head `5539059a47c13a3dbc9806a504775b72f7bfd0fe`.
-PRs #162, #163 and #165 remain intact. The baseline passed
-[Linux run 39367216761](https://github.com/dwijayuda/pskernel/actions/runs/39367216761).
+Draft [PR #166](https://github.com/dwijayuda/pskernel/pull/166) is stacked on
+seven-backend PR #165 at preserved head
+`5539059a47c13a3dbc9806a504775b72f7bfd0fe`.
+PRs #162, #163 and #165 remain intact; no merge or publication is performed.
 
-## Current implementation milestone
+## Implemented continuation and observed evidence
 
-The first continuation slice adds a common procedural AST and checked functional
-lowering for lexical mutable locals, assignment, branch continuations and early
-return. Tuple/array construction reuses the existing checked datatypes. The
-runtime oracle and native tests are extended across the seven existing direct
-targets. Source changes in this checkpoint are awaiting their own focused Linux
-qualification; no full family is promoted to complete.
+The shared procedural AST/controller now implements lexical mutable locals,
+assignment, branch continuations, early return, finite List/Array/Nat-range
+iteration, contextual pure, tuple/array expressions and optional array lookup.
+Selected Id/Except while sites specialize to checked private ordinary helpers
+with direct tail recurrence; generic markers never enter runtime graphs.
 
-The design retains expression-oriented executable IR. Assignments produce
-checked local values; branch continuations carry the selected mutable bindings.
-The independent official Lean provider still admits the complete logical graph,
-and ordinary execution retains exact logical/runtime body pairing.
+At source head `88487343a41b9ec79fa4646602a5f4d512de0ce7`,
+[Linux run 39378507559](https://github.com/dwijayuda/pskernel/actions/runs/39378507559)
+compiled all new code. Existing Do/Data native suites passed. New Nat/Except while
+fixtures passed independent ordinary admission, strict IR and private JS expected
+result execution, including 10,000 iterations, captures, source-self reference,
+sequential loops and while inside a finite for. The all-seven run did not pass:
+the regular corpus passed JS/TS, Rust exposed nested-closure lowering and empty-array
+annotation failures, and the while divergence fixture exposed an overly narrow
+Bool/Unit result-head gate. These are failed-check findings, not qualification.
 
-Pinned Lean source review identified two scope requirements:
-- A mutable local cannot be shadowed inside the same procedural controller.
-- A direct nested `do` statement splices into that controller. A parenthesized
-  `do` term or a lambda establishes a separate computation boundary.
+The current repair keeps known primitive data heads separate from arbitrary opaque
+or generic type heads, preserves strict typed let annotations in Rust, and adds
+bounded nested closure support for private continuation signatures. Public Rust
+signature and named function-storage gates remain. Runtime suites accumulate
+per-target failures so one target cannot hide other observations, then fail the
+overall check if any record failed.
 
-The implementation tests these distinctions rather than using host mutable cells.
-No new logical axiom, unchecked loop primitive, runtime fuel, backend certificate,
-package publication, merge or full self-host run is introduced.
+## Assurance and selected limits
 
-## Continuing work
+Official Lean 4.35.0, commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, remains the authoritative admission
+provider. The owned kernel remains separately natively tested. No new admitted
+axiom, unchecked loop primitive, runtime fuel or backend certificate is introduced.
 
-Qualify this source head through the focused PR workflow; repair real failures
-before extending finite iteration and ordinary while integration. Complete
-remaining tuples/patterns, safe array lookup, typed errors, namespace scopes,
-operator decision evidence and the explicitly bounded typed-IO contract in
-coherent subsequent slices. Preserve target ABI refusals.
+Ordinary partial preparation is unchanged: constructive opaque witness plus exact
+separately checked body, with immutable graph pairing revalidated before erasure.
+Default checked and explicit verified requests refuse partial execution. Execution
+tests are not formal backend-preservation proofs.
+
+Finite continuations have linear construction space; optional array lookup scans
+the array. While excludes nested procedural loops in its body, CompilerM, unknown
+or function-valued computation result heads, and general dependent local-let
+captures. All fourteen feature families remain incomplete. Tuple patterns,
+throw/try/catch handlers, namespace scopes, Prop-valued ordering with checked
+decision evidence and a bounded typed-IO contract remain future work.
+
+## Next required checkpoint
+
+Finish focused Linux qualification for this exact implementation; retain every
+source/admission/IR/runtime/publication gate. Then reconcile README, architecture,
+runtime/npm notes, the fourteen-family/seven-target status and an immutable exact
+qualification receipt. Preserve historical five-target and seven-target receipts;
+do not extend their scope retroactively. Full self-host, joint-census, fixed-point,
+merge, release and npm registry publication remain excluded.
 
 ## Preserved seven-backend checkpoint and history
 

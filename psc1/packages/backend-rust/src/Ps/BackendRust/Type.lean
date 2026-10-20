@@ -255,6 +255,27 @@ def psRustFunctionTypeIsFirstOrder
   | _ =>
       false
 
+-- Closure values may nest arrows directly. Named aggregates keep the existing
+-- static-function storage contract and must not hide closure-valued arguments.
+def psRustDirectClosureTypeSupportedWithFuel
+    (fuel : Nat) : PsVerifiedIrType -> Bool :=
+  match fuel with
+  | Nat.zero => fun _ => false
+  | Nat.succ remaining =>
+      let smaller := psRustDirectClosureTypeSupportedWithFuel remaining
+      fun type =>
+        match type with
+        | PsVerifiedIrType.unknown => false
+        | PsVerifiedIrType.function parameters result =>
+            !psListAny (fun parameter => !smaller parameter) parameters && smaller result
+        | PsVerifiedIrType.named _ arguments =>
+            !psListAny psRustTypeContainsFunction arguments &&
+              !psListAny (fun argument => !smaller argument) arguments
+        | _ => true
+
+def psRustDirectClosureTypeSupported (type : PsVerifiedIrType) : Bool :=
+  psRustDirectClosureTypeSupportedWithFuel 4096 type
+
 def psRustEmitClosureValueTypeWithFuel
     (fuel : Nat) :
     PsVerifiedIrType ->

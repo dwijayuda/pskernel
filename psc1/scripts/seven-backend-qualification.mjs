@@ -18,6 +18,8 @@ const distribution = read('dist/scoped-correctness/npm-native/qualification.json
 const library = read(distribution.optionalLibraryReceipt);
 const targets = ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'];
 assert.equal(runtime.records.length, targets.length * 2);
+assert.equal(runtime.failures.length, 0);
+assert.equal(minimumRuntime.failures.length, 0);
 assert.deepEqual([...new Set(runtime.records.map(x => x.target))].sort(), [...targets].sort());
 assert.equal(minimumRuntime.records.length, 2);
 assert.ok(minimumRuntime.records.every(x => x.target === 'python'));
@@ -30,6 +32,7 @@ for (const [data, expectedTargets] of [[whileRuntime, targets], [minimumWhile, [
   assert.equal(data.divergence.length, expectedTargets.length * 2);
   assert.deepEqual([...new Set(data.records.map(x => x.target))].sort(), [...expectedTargets].sort());
   assert.deepEqual([...new Set(data.divergence.map(x => x.target))].sort(), [...expectedTargets].sort());
+  assert.equal(data.failures.length, 0);
   assert.equal(data.assurance, 'ordinary-checked');
   assert.equal(data.behaviorallyVerified, false);
   assert.equal(data.nativeLean.commit, runtime.nativeLean.commit);

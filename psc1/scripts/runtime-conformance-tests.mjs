@@ -14,6 +14,7 @@ const evidence = path.join(root, 'dist/scoped-correctness', process.env.PSC1_RUN
 fs.mkdirSync(evidence, { recursive: true });
 const env = { ...process.env, PSC1_HOST_TOOLS: path.join(root, 'host-tools/artifacts.mjs') };
 const records = [];
+const failures = [];
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 function run(command, args, options = {}) {
   const deadline = options.timeout ?? 180000;
@@ -308,6 +309,7 @@ try {
   for (const syntax of ['lean', 'ps']) {
     const entry = syntax === 'lean' ? input : translated;
     for (const target of targets) {
+      try {
       console.log('PSC1_RUNTIME_CONFORMANCE_START: ' + syntax + '/' + target);
       const ext = { js: 'js', ts: 'ts', rust: 'rs', 'wasm-core': 'wasm',
         'wasm-component': 'wasm', python: 'py', php: 'php' }[target];
@@ -408,7 +410,17 @@ try {
         runtime: manifest.targetPlans[0], generation: path.basename(path.dirname(fs.realpathSync(output))),
         publicNames: manifest.publicNames });
       console.log('PSC1_RUNTIME_CONFORMANCE_PASS: ' + syntax + '/' + target);
+      } catch (error) {
+        const detail = error.stack || String(error);
+        failures.push({ syntax, target, error: detail });
+        records.push({ syntax, target, passed: false, error: detail });
+        console.error('PSC1_RUNTIME_CONFORMANCE_FAIL: ' + syntax + '/' + target + '\n' + detail);
+      }
     }
+  }
+  if (failures.length) {
+    throw new Error('PSC1_RUNTIME_CONFORMANCE_FAILED: ' +
+      failures.map(value => value.syntax + '/' + value.target).join(', '));
   }
 } finally {
   fs.writeFileSync(path.join(evidence, 'results.json'), JSON.stringify({
@@ -420,7 +432,7 @@ try {
     controlFlowOracle: 'pinned-native-Lean',
     handwrittenLiteralSyntaxes: ['lean', 'ps'],
     handwrittenOptionalIndexSyntaxes: ['lean', 'ps'],
-    records
+    records, failures
   }, null, 2) + '\n');
   fs.rmSync(work, { recursive: true, force: true });
 }

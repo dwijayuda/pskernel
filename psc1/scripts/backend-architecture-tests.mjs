@@ -39,6 +39,14 @@ try {
   assert.equal(manifest.target, 'ecma');
   assert.deepEqual(manifest.targets, ['ts', 'js']);
   assert.equal(manifest.sharedCheckedInput, true);
+  assert.equal(manifest.runtimeContract, 'psc1-runtime-semantics/1');
+  assert.deepEqual(manifest.targetPlans.map(plan => plan.target), ['js', 'ts']);
+  for (const plan of manifest.targetPlans) {
+    assert.equal(plan.runtimeFree, true);
+    assert.equal(plan.runtimeBytes, 0);
+    assert.deepEqual(plan.runtimeRequirements, []);
+    assert.equal(plan.runtimeSha256, digest(''));
+  }
   assert.deepEqual(manifest.publicNames, ['negate']);
   assert.equal(manifest.logicalCheckerCommit, 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
   assert.equal(manifest.behaviorallyVerified, false);
@@ -70,6 +78,24 @@ try {
   }
   records.push({ group: 'one-admission-independent-ts-js', passed: true,
     jsBytes: fs.statSync(stem + '.js').size, tsBytes: fs.statSync(stem + '.ts').size });
+
+  for (const [target, extension] of [['rust', '.rs'], ['wasm-core', '.wasm']]) {
+    const output = path.join(work, 'small-' + target + extension);
+    command(native, ['build', input, '--target', target, '--out', output]);
+    const emittedPlan = JSON.parse(read(output + '.bundle.json')).targetPlans[0];
+    assert.equal(emittedPlan.runtimeFree, true, target);
+    assert.deepEqual(emittedPlan.runtimeRequirements, [], target);
+    if (target === 'rust') {
+      assert.doesNotMatch(read(output), /num_bigint|num_traits|fn __ps_/);
+      assert.doesNotMatch(read(output.replace(/\.rs$/, '.cargo/Cargo.toml')), /num-bigint|num-traits/);
+    } else {
+      const wasm = await WebAssembly.instantiate(fs.readFileSync(output));
+      assert.equal(wasm.instance.exports.negate(1), 0);
+      assert.equal(wasm.instance.exports.negate(0), 1);
+    }
+    records.push({ group: target + '-boolean-runtime-free', passed: true,
+      artifactBytes: fs.statSync(output).size });
+  }
 
   const before = read(receipt);
   const files = ['.js', '.ts', '.d.ts', '.js.map', '.ts.map'].map(ext => [stem + ext, read(stem + ext)]);

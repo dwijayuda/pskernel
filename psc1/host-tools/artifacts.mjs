@@ -239,13 +239,159 @@ export function prepareRust(stage, fileName) {
   const crate = path.join(stage, fileName.slice(0, -3) + '.cargo');
   fs.mkdirSync(path.join(crate, 'src'), { recursive: true });
   fs.writeFileSync(path.join(crate, 'src', 'lib.rs'), formatted);
+  const plan = readTargetPlans(stage)?.plans.find(item => item.target === 'rust');
+  const requirements = plan?.runtimeRequirements ?? ['num-bigint@0.4.6', 'num-traits@0.2.19'];
   fs.writeFileSync(path.join(crate, 'Cargo.toml'),
     '[package]\nname = "psc1_generated"\nversion = "0.0.0"\nedition = "2021"\npublish = false\n\n' +
-    '[lib]\npath = "src/lib.rs"\n\n[dependencies]\nnum-bigint = "=0.4.6"\nnum-traits = "=0.2.19"\n');
+    '[lib]\npath = "src/lib.rs"\n\n[dependencies]\n' +
+    (requirements.includes('num-bigint@0.4.6') ? 'num-bigint = "=0.4.6"\n' : '') +
+    (requirements.includes('num-traits@0.2.19') ? 'num-traits = "=0.2.19"\n' : ''));
   run('cargo', ['generate-lockfile', '--manifest-path', path.join(crate, 'Cargo.toml')]);
   run('cargo', ['check', '--locked', '--manifest-path', path.join(crate, 'Cargo.toml')], {
     env: { ...process.env, CARGO_TARGET_DIR: path.join(os.tmpdir(), 'psc1-scoped-cargo-target') }
   });
+}
+
+const targetInfoName = 'psc1-target.json';
+
+function readTargetPlans(stage) {
+  const file = path.join(stage, targetInfoName);
+  if (!fs.existsSync(file)) return undefined;
+  const descriptor = readJson(file);
+  if (descriptor.schema !== 'psc1-direct-target-plan/1' ||
+      descriptor.runtimeContract !== 'psc1-runtime-semantics/1' ||
+      !Array.isArray(descriptor.plans) || descriptor.plans.length === 0) {
+    fail('PSC1_TARGET_PLAN_INVALID');
+  }
+  for (const plan of descriptor.plans) {
+    if (typeof plan.target !== 'string' || typeof plan.file !== 'string' ||
+        path.basename(plan.file) !== plan.file ||
+        typeof plan.runtimeVersion !== 'string' || typeof plan.runtimeSource !== 'string' ||
+        !Array.isArray(plan.runtimeRequirements) ||
+        !plan.runtimeRequirements.every(item => typeof item === 'string' && item.length > 0) ||
+        new Set(plan.runtimeRequirements).size !== plan.runtimeRequirements.length ||
+        !Array.isArray(plan.declarationLines)) fail('PSC1_TARGET_PLAN_INVALID');
+  }
+  return descriptor;
+}
+
+function scriptOrigins(stage, fileName, plan, info) {
+  const sources = new Map();
+  for (const source of info.sources) {
+    for (const origin of source.origins) {
+      if (sources.has(origin.name)) fail('PSC1_SOURCE_ORIGIN_AMBIGUOUS', origin.name);
+      sources.set(origin.name, { path: slash(path.relative(path.dirname(info.entryPath), source.path)),
+        line: origin.line + 1, column: origin.column, sourceName: origin.sourceName });
+    }
+  }
+  const lineCount = fs.readFileSync(path.join(stage, fileName), 'utf8').split('\n').length;
+  const seen = new Set();
+  const declarations = plan.declarationLines.map(item => {
+    if (typeof item.name !== 'string' || seen.has(item.name) ||
+        !Number.isSafeInteger(item.line) || item.line < 1 || item.line > lineCount) {
+      fail('PSC1_GENERATED_DECLARATION_ORIGIN_INVALID');
+    }
+    seen.add(item.name);
+    return { name: item.name, generatedLine: item.line, original: sources.get(item.name) ?? null };
+  });
+  for (const name of info.publicNames) {
+    if (!seen.has(name) || !sources.has(name)) fail('PSC1_PUBLIC_SOURCE_ORIGIN_MISSING', name);
+  }
+  fs.writeFileSync(path.join(stage, fileName + '.origins.json'), json({
+    schema: 'psc1-source-origins/1', generatedFile: fileName,
+    coverage: 'declaration-starts-only', generatedLineBase: 1, originalLineBase: 1,
+    originalColumnBase: 0, originalColumnUnit: 'utf16-code-units',
+    generatedHelperOrigins: 'unmapped', declarations
+  }));
+}
+
+export function prepareScript(stage, kind, fileName) {
+  const descriptor = readTargetPlans(stage);
+  const plan = descriptor?.plans.find(item => item.target === kind && item.file === fileName);
+  if (!plan || descriptor.plans.length !== 1) fail('PSC1_SCRIPT_TARGET_PLAN_MISSING');
+  const info = readJson(path.join(stage, sourceInfoName));
+  const file = path.join(stage, fileName);
+  const source = fs.readFileSync(file, 'utf8');
+  let validation;
+  let companion;
+  if (kind === 'python') {
+    companion = path.join(stage, fileName.replace(/\.py$/, '.pyi'));
+    const checker = [
+      'import ast,json,pathlib,sys',
+      'if sys.version_info < (3,14): raise SystemExit("PSC1_PYTHON_VERSION_REQUIRED: Python >=3.14")',
+      'source=pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")',
+      'stub=pathlib.Path(sys.argv[2]).read_text(encoding="utf-8")',
+      'compile(source,sys.argv[1],"exec")',
+      'compile(stub,sys.argv[2],"exec")',
+      'tree=ast.parse(source)',
+      'exports=None',
+      'for node in tree.body:',
+      ' if isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="__all__" for t in node.targets): exports=ast.literal_eval(node.value)',
+      'stub_tree=ast.parse(stub)',
+      'names=[node.name for node in stub_tree.body if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef))]',
+      'names += [node.target.id for node in stub_tree.body if isinstance(node,ast.AnnAssign) and isinstance(node.target,ast.Name) ]',
+      'print(json.dumps({"runtime":sys.version.split()[0],"parser":"python-compile","exports":exports,"stubNames":names}))'
+    ].join('\n');
+    validation = JSON.parse(run(process.env.PSC1_PYTHON || 'python3',
+      ['-I', '-c', checker, file, companion]));
+    if (!Array.isArray(validation.exports) ||
+        !isDeepStrictEqual([...validation.exports].sort(), [...info.publicNames].sort()) ||
+        !isDeepStrictEqual(validation.stubNames.filter(name => info.publicNames.includes(name) || !name.startsWith('_')).sort(),
+          [...info.publicNames].sort())) {
+      fail('PSC1_PYTHON_PUBLIC_API_MISMATCH');
+    }
+  } else if (kind === 'php') {
+    companion = path.join(stage, fileName.replace(/\.php$/, '.composer.json'));
+    const composer = readJson(companion);
+    const needsGmp = Object.hasOwn(composer.require ?? {}, 'ext-gmp');
+    if (composer.require?.php !== '>=8.5') fail('PSC1_PHP_COMPOSER_VERSION_CONTRACT');
+    const checker = [
+      'if (PHP_VERSION_ID < 80500) { fwrite(STDERR, "PSC1_PHP_VERSION_REQUIRED: PHP >=8.5"); exit(1); }',
+      needsGmp ? 'if (!extension_loaded("gmp")) { fwrite(STDERR, "PSC1_PHP_GMP_REQUIRED: install ext-gmp for this target"); exit(1); }' : '',
+      'echo json_encode(["runtime" => PHP_VERSION, "parser" => "php-lint", "gmp" => extension_loaded("gmp")]);'
+    ].join('\n');
+    const php = process.env.PSC1_PHP || 'php';
+    validation = JSON.parse(run(php, ['-r', checker]));
+    run(php, ['-l', file]);
+  } else fail('PSC1_SCRIPT_TARGET_INVALID', kind);
+  plan.validation = { ...validation, sourceSha256: sha256(source),
+    companionSha256: sha256(fs.readFileSync(companion)) };
+  fs.writeFileSync(path.join(stage, targetInfoName), json(descriptor));
+  scriptOrigins(stage, fileName, plan, info);
+}
+
+function sealTargetPlans(stage, kind) {
+  const descriptor = readTargetPlans(stage);
+  if (!descriptor) {
+    if (kind === 'python' || kind === 'php') fail('PSC1_SCRIPT_TARGET_PLAN_MISSING');
+    return undefined;
+  }
+  const expected = kind === 'ecma' ? ['js', 'ts'] : [kind];
+  if (!isDeepStrictEqual(descriptor.plans.map(item => item.target).sort(), expected.sort())) {
+    fail('PSC1_TARGET_PLAN_SET_MISMATCH');
+  }
+  const plans = descriptor.plans.map(plan => {
+    const bytes = fs.readFileSync(path.join(stage, plan.file));
+    if (plan.runtimeSource && !bytes.toString('utf8').includes(plan.runtimeSource) &&
+        !['js', 'ts', 'rust', 'wasm-core', 'wasm-component'].includes(plan.target)) {
+      fail('PSC1_RUNTIME_IMPLEMENTATION_NOT_BUNDLED', plan.file);
+    }
+    if (plan.target === 'python' || plan.target === 'php') {
+      const companion = plan.file.replace(plan.target === 'python' ? /\.py$/ : /\.php$/,
+        plan.target === 'python' ? '.pyi' : '.composer.json');
+      if (!plan.validation || plan.validation.sourceSha256 !== sha256(bytes) ||
+          plan.validation.companionSha256 !== sha256(fs.readFileSync(path.join(stage, companion)))) {
+        fail('PSC1_SCRIPT_VALIDATION_IDENTITY_MISMATCH', plan.file);
+      }
+    }
+    const { runtimeSource, ...metadata } = plan;
+    return { ...metadata, runtimeSha256: sha256(runtimeSource),
+      runtimeBytes: Buffer.byteLength(runtimeSource),
+      runtimeFree: runtimeSource.length === 0 && plan.runtimeRequirements.length === 0 };
+  });
+  const sealed = { ...descriptor, plans };
+  fs.writeFileSync(path.join(stage, targetInfoName), json(sealed));
+  return sealed;
 }
 
 function outputLayout(output) {
@@ -333,10 +479,12 @@ export function publish(stage, output, kind) {
   }));
   // Persist a relocatable snapshot; no later source-file reads enter this bundle.
   fs.writeFileSync(infoPath, json({ ...info, entryPath: path.basename(info.entryPath), sources: sourceRecords }));
-  const publicPaths = fs.readdirSync(stage).filter(name => name !== sourceInfoName && name !== 'admissions.json').sort();
+  const publicPaths = fs.readdirSync(stage).filter(name => name !== sourceInfoName && name !== 'admissions.json' && name !== targetInfoName).sort();
   const mustHave = kind === 'js' || kind === 'ts'
     ? [layout.name, layout.name + '.map', layout.name.replace(/\.(?:js|ts)$/, '.d.ts')]
     : kind === 'ecma' ? ['.js', '.ts', '.d.ts', '.js.map', '.ts.map'].map(extension => layout.name.slice(0, -5) + extension)
+    : kind === 'python' ? [layout.name, layout.name.slice(0, -3) + '.pyi', layout.name + '.origins.json']
+    : kind === 'php' ? [layout.name, layout.name.slice(0, -4) + '.composer.json', layout.name + '.origins.json']
     : kind === 'rust' ? [layout.name, layout.name.slice(0, -3) + '.cargo']
     : kind === 'wasm-component' ? [layout.name, layout.name.slice(0, -5) + '.wat', layout.name.slice(0, -5) + '.wit', layout.name.slice(0, -5) + '.core.wasm', layout.name.slice(0, -5) + '.core.wat']
     : kind === 'wasm-core' ? [layout.name, layout.name.slice(0, -5) + '.wat'] : fail('PSC1_BUNDLE_TARGET_INVALID', kind);
@@ -357,6 +505,7 @@ export function publish(stage, output, kind) {
   const currentStat = inspect(current);
   if (currentStat && !currentStat.isSymbolicLink()) fail('PSC1_CURRENT_POINTER_NOT_SYMLINK');
   publicationFault('before-seal');
+  const targetPlan = sealTargetPlans(stage, kind);
   const files = fileInventory(stage);
   const manifest = {
     schema: 'psc1-artifact-bundle/1', target: kind,
@@ -367,7 +516,8 @@ export function publish(stage, output, kind) {
     kernelAdmissionSha256: sha256(admissions),
     sourceClosureSha256: sha256(json(sourceRecords.map(({ path, sha256, bytes }) => ({ path, sha256, bytes })))),
     compiler: info.compiler ?? 'PSC1 native', publicNames: info.publicNames,
-    formatter: { prettier: '3.6.2', babelParser: '7.28.0' },
+    formatter: ['js', 'ts', 'ecma'].includes(kind) ? { prettier: '3.6.2', babelParser: '7.28.0' } : null,
+    ...(targetPlan ? { runtimeContract: targetPlan.runtimeContract, targetPlans: targetPlan.plans } : {}),
     claim: 'source admission and bounded IR validation; not a backend-preservation proof',
     files
   };
@@ -426,6 +576,7 @@ async function main(args) {
   if (command === 'stage' && rest.length === 1) console.log(createStage(rest[0]));
   else if (command === 'format' && rest.length === 3) await formatTarget(rest[0], rest[1], rest[2]);
   else if (command === 'rust' && rest.length === 2) prepareRust(rest[0], rest[1]);
+  else if (command === 'script' && rest.length === 3) prepareScript(rest[0], rest[1], rest[2]);
   else if (command === 'wit-check' && rest.length === 2) checkWit(rest[0], rest[1]);
   else if (command === 'publish' && rest.length === 3) console.log(json(publish(rest[0], rest[1], rest[2])).trim());
   else fail('PSC1_HOST_TOOL_USAGE');

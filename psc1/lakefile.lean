@@ -132,6 +132,7 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.TailAlias,
     `Ps.BackendRust.Tail,
     `Ps.BackendRust.Runtime,
+    `Ps.BackendRust.RuntimePlan,
     `Ps.BackendRust.Module
   ]
 
@@ -150,7 +151,8 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.TailCalls,
     `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.Encode,
-    `Ps.BackendWasm.Binary
+    `Ps.BackendWasm.Binary,
+    `Ps.BackendWasm.RuntimePlan
   ]
 
 -- Independent admission is host-only; logical checking is never delegated to

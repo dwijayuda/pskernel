@@ -1,3 +1,4 @@
+import Ps.BackendRust.RuntimePlan
 import Ps.CompilerIr.Validate
 import Ps.Foundation.List
 import Ps.BackendRust.Tail
@@ -1296,7 +1297,8 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
       psRustEmitInductiveWithVisibility (publicTypes.contains value.name) value
     let declarations ← module.declarations.mapM fun value =>
       psRustEmitDeclarationWithVisibility (publicValues.contains value.name) module.declarations valueNames value
-    return psRustAssembleModuleSource structures inductives declarations
+    let runtime := psRustPlanRuntime module
+    return String.intercalate "\n" (["#![forbid(unsafe_code)]", runtime.source] ++ structures ++ inductives ++ declarations) ++ "\n"
   match printed with
   | .ok value => return value
   | .error _ => throw "PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering"

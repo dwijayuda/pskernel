@@ -65,7 +65,7 @@ def psHostDirectEmitWasmComponent
     | .error error => throw (IO.userError ("PSC1_COMPONENT_LOWER_UNSUPPORTED: " ++ psHostWasmLowerErrorText error))
   if !lowered.exports.any (fun item => item.1 == exportName) then
     throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_LOWERED")
-  let selected := { lowered with exports := lowered.exports.filter (fun item => item.1 == exportName) }
+  let selected := psWasmSelectRuntime { lowered with exports := lowered.exports.filter (fun item => item.1 == exportName) }
   let bytes ← match psWasmEncodeModule selected with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_COMPONENT_BINARY_UNSUPPORTED")
@@ -92,6 +92,12 @@ def psHostDirectEmitWasmComponent
     let _ ← psHostArtifactTool #["wit-check", witPath.toString, observed.toString]
     IO.FS.removeFile embedded
     IO.FS.removeFile observed
+    let runtime ← match psWasmRuntimeCanonicalSource selected with
+      | .ok value => pure value
+      | .error reason => throw (IO.userError reason)
+    psHostWriteArtifactTargetPlans stage [
+      psHostArtifactTargetPlanJson "wasm-component" name "psc1-wasm-runtime/1"
+        runtime (psWasmRuntimeRequirements selected) [] "psc-wasm-ir-json/1:functions"]
     psHostPublishArtifactStage stage outputPath "wasm-component"
   IO.println ("PSC1_COMPONENT_WASM: " ++ outputPath)
 

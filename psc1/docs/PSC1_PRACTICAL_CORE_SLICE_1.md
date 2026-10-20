@@ -2,17 +2,46 @@
 
 ## Qualification
 
-This is an implementation candidate until its exact commit passes focused Linux CI.
-The separately qualified Lean 4.35 migration is
+**The first scoped implementation slice passed** at
+[`4be91b111c1773f02a009fb2f643b18912cee920`](https://github.com/dwijayuda/pskernel/commit/4be91b111c1773f02a009fb2f643b18912cee920),
+[Linux run 39348537989](https://github.com/dwijayuda/pskernel/actions/runs/39348537989). CI checked merge commit
+`aa3afeb4f7087f7b9781d67230dda919ff0b38ff`; its tree
+`cb778954f86ce09fe22b4ed36240cb89f4e16382` is byte-identical to the implementation tree.
+This receipt describes that exact implementation checkpoint, independently of
+later documentation-only commits.
+
+[Download the readable bundles and execution evidence](https://github.com/dwijayuda/pskernel/actions/runs/39348537989/artifacts/12231958323).
+The artifact digest is `sha256:df0ba1a2cef4b11caf640b9bc2f1b1b2fdf817758a1525cb99216772d235374f`; retention expires
+2026-11-03T00:38:16Z. The versioned
+[`PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json`](PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json)
+records the exact source, checkout, counts, target scope and artifact identity.
+
+| Qualification group | Actual result |
+|---|---|
+| Host formatting/publication regressions | 15 passed |
+| Native owned-kernel regressions | 18 passed |
+| Preserved backend/publication matrix | 24 groups passed |
+| Source ownership, generics and recursion edges | 5 groups passed |
+| Contextual inference | 25 positive/negative checks passed |
+| Typed do | 32 checks passed, including independent kernel reduction and negative cases |
+| Operators | Checked-Core equivalence and negative suite passed |
+| Ordinary admission | Independent admission, opacity, exact graph/body pairing and witness-budget suite passed |
+| Practical forms runtime | 36 generated artifacts executed; 132 result assertions |
+| Ordinary runtime/negative boundary cases | All 9 groups passed |
+
+IR specialization input/output checks, maps, independent provider and host-boundary
+suites also passed. These are overlapping scoped groups, not a single test census.
+
+The separately qualified Lean 4.35 migration remains
 [`1bd0854`](https://github.com/dwijayuda/pskernel/commit/1bd0854f735cf8d0c8f3d07f705195c131acbd61),
 [run 39344155280](https://github.com/dwijayuda/pskernel/actions/runs/39344155280).
-Do not use that pin-only run as language execution evidence.
 The complete fourteen-family matrix remains in
-[`PSC1_PRACTICAL_CORE_STATUS.json`](PSC1_PRACTICAL_CORE_STATUS.json).
+[`PSC1_PRACTICAL_CORE_STATUS.json`](PSC1_PRACTICAL_CORE_STATUS.json);
+every full family is still explicitly incomplete.
 
 ## Selected behavior
 
-| Area | Implemented candidate | Remaining selected-family work |
+| Area | Qualified bounded implementation | Remaining selected-family work |
 |---|---|---|
 | Operators | Fixed precedence; Nat +, -, *, /, %; Int +, -, *, unary minus; Boolean !, &&, ||; selected equality and product types | Prop ordering including a < b, general decision/if-proof paths, remaining operator type combinations |
 | Inference | Expected-result constraints reach ordinary nondependent explicit call arguments before contextual literals; existing local inference retained | Broader dependent/universe/class inference and further interaction qualification |
@@ -65,6 +94,41 @@ Bundles record `ordinary-checked` or `checked-logical`,
 `behaviorallyVerified: false`, and captured partial declaration names. They also
 retain exact Lean version/commit and checksummed source/admission/output evidence.
 These labels do not claim behavioral certification.
+
+## Exact runtime coverage
+
+| Cases | Source forms | Targets actually executed |
+|---|---|---|
+| Contextual Int calls, named Prod/Array operations, Nat/Int arithmetic | Lean and ProofScript | JS, TS and Rust |
+| Bool operator expression, Id do through a checked type alias, Except do/error sequencing | Lean and ProofScript | JS, TS, Rust, core Wasm and component Wasm |
+| Ordinary recursive countdown | Lean and ProofScript | JS; returns 42 at 7 in both forms, with Lean also checked at 0 and 100000 |
+| Ordinary recursive Bool dependency, kept private to the entry API | Lean | JS, TS, Rust, core Wasm and component Wasm |
+| Existing checked CompilerM library | Lean | Independent kernel conversion and typed IR; read 7, write 8, observe sum 15 |
+
+ProofScript ordinary partials also passed native independent admission and strict
+IR tests. TS/Rust/Wasm ordinary fixtures in this receipt use Lean source. Numeric
+Practical Core forms are not newly qualified on Wasm by this suite. The public
+component ABI remains Bool only.
+
+The runtime scripts keep full readable bundles and hashed execution records.
+Rust consumers use independent dereferenced copies of sealed crates. JS generation
+has no hidden TypeScript compiler; the separate TS consumer is compiled with the
+pinned checker before execution.
+
+## Corrections required by qualification
+
+ProofScript native-spaced type application now consumes the final type argument
+before `:=`, while record/call delimiter rules remain. Identity binds lower to
+checked Core lets, preserving one evaluation and lexical scope. Sort-valued
+definitions remain checked and available for type normalization but have no runtime
+declaration. Host ownership and erasure share the same selected runtime-prelude
+closure, including collision-aware names when Id.run is unused.
+
+Wasm keeps mutually recursive heap types together and emits function types as
+separate singleton groups without changing flat type indices. This permits the
+Bool component boundary to match canonical function signatures. The formatter
+preserves quoted constructor keys so its complete syntax-tree equality check
+remains intact; computed payload fields retain their semantics.
 
 ## Focused qualification commands
 

@@ -30,8 +30,11 @@
     },
     {
       "id": "practical-core-slice-1",
-      "status": "implementation-candidate",
-      "qualification": "pending focused Linux compile, independent admission and actual target execution"
+      "status": "qualified-subset",
+      "qualification": "focused Linux compile, independent admission, typed IR and actual target execution passed",
+      "commit": "4be91b111c1773f02a009fb2f643b18912cee920",
+      "runId": 39348537989,
+      "receipt": "docs/PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json"
     }
   ],
   "stages": [
@@ -45,15 +48,18 @@
     {
       "id": "operators",
       "priority": "P0",
-      "status": "implementation-candidate",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
         "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
-        "psc1/packages/environment/src/Ps/Environment/Prelude.lean"
+        "psc1/packages/environment/src/Ps/Environment/Prelude.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/Operators.lean",
+        "psc1/packages/elab/src/Ps/Elab/Operators.lean",
+        "psc1/test/OperatorTests.lean"
       ],
-      "notes": "Candidate fixed-precedence Nat +,-,*,/,% and Int +,-,*,unary -, Bool !/&&/|| and selected equality. Prop-valued ordering (<, <=, >, >=) remains unsupported; family incomplete.",
+      "notes": "Qualified fixed-precedence Nat +,-,*,/,% and Int +,-,*,unary -, Bool !/&&/|| and selected equality checking. Numeric runtime cases passed JS/TS/Rust; Bool operator cases passed all five targets in both syntaxes. Prop-valued ordering (<, <=, >, >=) remains unsupported; family incomplete.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -61,19 +67,26 @@
         "wasm-core": "not-qualified-for-complete-family",
         "wasm-component": "not-qualified-for-complete-family"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+          "runId": 39348537989,
+          "suite": "psc1_operator_tests and practical-forms-backend-tests.mjs",
+          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        }
+      ]
     },
     {
       "id": "local-inference",
       "priority": "P0",
-      "status": "implementation-candidate",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/elab/src/Ps/Elab/Term.lean",
         "psc1/test/BootstrapTests.lean"
       ],
-      "notes": "Existing typed/inferred locals retained; new contextual-call interaction fixtures and actual target matrix pending.",
+      "notes": "Retained typed/inferred locals and contextual-call interactions passed native positive/negative checks; named Prod/Array Int examples executed on JS/TS/Rust in both syntaxes. General family remains incomplete.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -81,20 +94,30 @@
         "wasm-core": "not-qualified-for-complete-family",
         "wasm-component": "not-qualified-for-complete-family"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+          "runId": 39348537989,
+          "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
+          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        }
+      ]
     },
     {
       "id": "do",
       "priority": "P0",
-      "status": "implementation-candidate",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
         "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean"
+        "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
+        "psc1/packages/elab/src/Ps/Elab/Do.lean",
+        "psc1/test/DoTests.lean"
       ],
-      "notes": "Candidate shared typed sequencing, immutable lets/binds, Unit actions and terminal return for monomorphic Type0 Id, Except and actual checked CompilerM. No identity fallback; higher-universe Id/early exits/mutation/loops remain incomplete.",
+      "notes": "Qualified shared typed sequencing, immutable lets/binds, Unit actions and terminal return for monomorphic Type0 Id, Except and actual checked CompilerM. Id aliases and Except execute on all five targets in both syntaxes. CompilerM read/update has independent kernel reduction and typed IR evidence. Higher universes, early exits, mutation and loops remain incomplete.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -102,7 +125,14 @@
         "wasm-core": "not-qualified-for-complete-family",
         "wasm-component": "not-qualified-for-complete-family"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+          "runId": 39348537989,
+          "suite": "psc1_do_tests and practical-forms-backend-tests.mjs",
+          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        }
+      ]
     },
     {
       "id": "for",
@@ -132,7 +162,7 @@
       "sourceEvidence": [
         "psc1/packages/syntax/src/Ps/Syntax/Ast.lean"
       ],
-      "notes": "No arbitrary-loop runtime or assurance path.",
+      "notes": "Ordinary partial function execution now exists; while syntax and loop/control lowering remain missing.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -164,13 +194,16 @@
     {
       "id": "return",
       "priority": "P0",
-      "status": "implementation-candidate",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean"
+        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
+        "psc1/packages/elab/src/Ps/Elab/Do.lean",
+        "psc1/test/DoTests.lean"
       ],
-      "notes": "Candidate terminal return in selected typed do families. Branch/loop/handler early return remains unimplemented.",
+      "notes": "Qualified terminal return in selected typed do families. Branch/loop/handler early return remains unimplemented.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -178,20 +211,30 @@
         "wasm-core": "not-qualified-for-complete-family",
         "wasm-component": "not-qualified-for-complete-family"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+          "runId": 39348537989,
+          "suite": "psc1_do_tests and practical-forms-backend-tests.mjs",
+          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        }
+      ]
     },
     {
       "id": "partial-def",
       "priority": "P0",
-      "status": "implementation-candidate",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/core/src/Ps/Core/Declaration.lean",
         "psc1/packages/elab/src/Ps/Elab/Declaration.lean",
-        "psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean"
+        "psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+        "psc1/packages/compiler/src/Ps/Compiler/Ordinary.lean",
+        "psc1/test/OrdinaryExecutionTests.lean",
+        "psc1/scripts/practical-ordinary-tests.mjs"
       ],
-      "notes": "Candidate explicit --assurance ordinary: public safe opaque witness plus independently checked exact body, immutable graph binding, original-body erasure, explicit unavailability of verified execution. Focused CI pending; total recursive/loop family scope remains incomplete.",
+      "notes": "Qualified explicit --assurance ordinary: safe opaque constructive witness plus independently checked exact body, immutable graph pairing, original-body erasure, and explicit refusal of verified execution. Lean fixtures execute on all five targets; ProofScript countdown executes in JS and has native admission/IR evidence. Wider function/loop scope remains incomplete.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -199,7 +242,14 @@
         "wasm-core": "not-qualified-for-complete-family",
         "wasm-component": "not-qualified-for-complete-family"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+          "runId": 39348537989,
+          "suite": "psc1_ordinary_tests and practical-ordinary-tests.mjs",
+          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        }
+      ]
     },
     {
       "id": "tuples",
@@ -219,7 +269,14 @@
         "wasm-core": "not-qualified-for-complete-family",
         "wasm-component": "not-qualified-for-complete-family"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+          "runId": 39348537989,
+          "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
+          "scope": "existing named Prod/Array operations with contextual Int elements, JS/TS/Rust, both source forms"
+        }
+      ]
     },
     {
       "id": "arrays",
@@ -239,7 +296,14 @@
         "wasm-core": "not-qualified-for-complete-family",
         "wasm-component": "not-qualified-for-complete-family"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+          "runId": 39348537989,
+          "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
+          "scope": "existing named Prod/Array operations with contextual Int elements, JS/TS/Rust, both source forms"
+        }
+      ]
     },
     {
       "id": "typed-errors",
@@ -251,7 +315,7 @@
         "psc1/stdlib/ProofScript/Data/Result.lean",
         "psc1/stdlib/ProofScript/Compiler/Effect.lean"
       ],
-      "notes": "Pure library effects exist; selected try/catch/throw syntax and interactions missing.",
+      "notes": "Checked Except do sequencing and error propagation are qualified in this slice; selected try/catch/throw syntax and interactions remain missing.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -264,14 +328,14 @@
     {
       "id": "call-inference",
       "priority": "P1",
-      "status": "implementation-candidate",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/elab/src/Ps/Elab/Term.lean",
         "psc1/packages/meta/src/Ps/Meta/Unify.lean"
       ],
-      "notes": "Candidate transactional expected-result constraints before nondependent explicit call arguments. Dependent/intervening-implicit telescopes retain sequential checking. Positive/negative tests and target execution pending.",
+      "notes": "Qualified transactional expected-result constraints before nondependent explicit call arguments. Dependent/intervening-implicit telescopes retain sequential checking. All 25 positive/negative native checks passed; contextual Int/Prod/Array runtime examples passed JS/TS/Rust in both syntaxes.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -279,7 +343,14 @@
         "wasm-core": "not-qualified-for-complete-family",
         "wasm-component": "not-qualified-for-complete-family"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+          "runId": 39348537989,
+          "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
+          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        }
+      ]
     },
     {
       "id": "namespaces",
@@ -326,8 +397,8 @@
   "assurance": {
     "currentArtifact": "psc1-checked-direct/1",
     "endToEndVerifiedMode": "explicit --assurance verified rejects; no ordinary fallback",
-    "partialExecution": "candidate ordinary-checked path; exact new CI qualification pending",
-    "effects": "candidate Type0 Id/Except/checked CompilerM sequencing; no general IO",
+    "partialExecution": "ordinary-checked scoped qualification passed; see exact receipt for target/source-form coverage",
+    "effects": "qualified Type0 Id/Except sequencing and checked CompilerM kernel/IR state read/update; no general IO",
     "directAdmissionProvider": "independent official Lean",
     "ownedKernel": "source integrated; separately native-tested"
   },
@@ -335,5 +406,6 @@
     "Bool"
   ],
   "fullSelfHostTests": false,
-  "deferred": "All unimplemented v7.2 features outside the fourteen approved families; public unsafe, partial_fixpoint, break/continue/finally, macros, broad automation, networking/FFI, optional scalar families, full standard and full self-host qualification."
+  "deferred": "All unimplemented v7.2 features outside the fourteen approved families; public unsafe, partial_fixpoint, break/continue/finally, macros, broad automation, networking/FFI, optional scalar families, full standard and full self-host qualification.",
+  "qualificationReceipt": "docs/PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json"
 }

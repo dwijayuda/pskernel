@@ -176,20 +176,18 @@ def psKernelExprV2TryWhnfStateWithFuel
                 psKernelExprV2TryWhnfCoreStateWithFuel remaining context state root
 
 def psKernelExprV2TryWhnfWithFuel
-    (fuel : Nat) :
-    PsKernelCheckerContext -> PsKernelExprV2PagedArena -> Nat ->
+    (fuel : Nat) (context : PsKernelCheckerContext)
+    (arena : PsKernelExprV2PagedArena) (root : Nat) :
     Option (Except String (Prod PsKernelExprV2PagedArena Nat)) :=
-  fun (context : PsKernelCheckerContext)
-      (arena : PsKernelExprV2PagedArena) (root : Nat) =>
-    match psKernelExprV2TryWhnfStateWithFuel fuel context
-        (psKernelExprV2WhnfStateEmpty arena) root with
-    | Option.none => Option.none
-    | Option.some attempted =>
-        match attempted with
-        | Except.error error => Option.some (Except.error error)
-        | Except.ok reduced =>
-            let state := Prod.fst reduced;
-            Option.some (Except.ok (Prod.mk state.arena (Prod.snd reduced)))
+  match psKernelExprV2TryWhnfStateWithFuel fuel context
+      (psKernelExprV2WhnfStateEmpty arena) root with
+  | Option.none => Option.none
+  | Option.some attempted =>
+      match attempted with
+      | Except.error error => Option.some (Except.error error)
+      | Except.ok reduced =>
+          let state := Prod.fst reduced;
+          Option.some (Except.ok (Prod.mk state.arena (Prod.snd reduced)))
 
 /-
 The same-arena identity shortcut runs only after both full public checks.

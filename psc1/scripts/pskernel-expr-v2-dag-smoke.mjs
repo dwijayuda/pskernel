@@ -485,7 +485,7 @@ for(const wrappers of [0,1,5]){
     }
   }
   const checker=get("psKernelKernelSessionChecker")(session(),nil,S.safe);
-  const attempted=get("psKernelExprV2TryWhnfWithFuel")(4096n)(checker.context)(graph.fst)(graph.snd);
+  const attempted=get("psKernelExprV2TryWhnfWithFuel")(4096n,checker.context,graph.fst,graph.snd);
   must(attempted&&typeof attempted==="object"&&"value" in attempted,
     "zeta-executes-dag-native-worker-"+wrappers);
   const reduced=accepted(attempted.value,"zeta-native-worker");
@@ -550,7 +550,7 @@ console.log("PSC1_V2_DAG_JS_ZETA: PASS");
           "beta-complete-whnf-"+index+"-"+fuel+"-"+depth);
         const checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
         const old=get("psKernelSessionWhnf")(fuel,checker,term);
-        const attempted=get("psKernelExprV2TryWhnfWithFuel")(fuel)(checker.context)(betaArena)(root);
+        const attempted=get("psKernelExprV2TryWhnfWithFuel")(fuel,checker.context,betaArena,root);
         must(attempted&&typeof attempted==="object"&&"value" in attempted,
           "beta-direct-worker-selected-"+index+"-"+fuel+"-"+depth);
         const direct=attempted.value;
@@ -577,7 +577,7 @@ console.log("PSC1_V2_DAG_JS_ZETA: PASS");
   const checker=get("psKernelKernelSessionChecker")(session(),nil,S.safe);
   const cached=accepted(get("psKernelSessionWhnf")(4n,checker,cacheTerm),"beta-cache-oracle");
   must(exact(cached.fst,sort0),"beta-cache-oracle-low-budget");
-  const direct=get("psKernelExprV2TryWhnfWithFuel")(4n)(checker.context)(betaArena)(cacheRoot);
+  const direct=get("psKernelExprV2TryWhnfWithFuel")(4n,checker.context,betaArena,cacheRoot);
   must(direct&&typeof direct==="object"&&"value" in direct,
     "beta-cache-sensitive-function-normalization-is-dag-native");
   const reduced=accepted(direct.value,"beta-cache-sensitive-direct-result");
@@ -705,7 +705,7 @@ console.log("PSC1_V2_DAG_JS_BETA: PASS");
   const letLocals=get("psKernelLocalContextAddLet")(checker.context.localContext,
     localName,localName,sort1,sort0);
   const letContext=get("psKernelCheckerContextWithLocalContext")(checker.context,letLocals);
-  const declined=get("psKernelExprV2TryWhnfWithFuel")(64n)(letContext)(stateArena)(fvar);
+  const declined=get("psKernelExprV2TryWhnfWithFuel")(64n,letContext,stateArena,fvar);
   const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
   must(declined!==undefined&&sameRuntimeValue(declined,none),"local-let-value-explicit-fallback");
 }

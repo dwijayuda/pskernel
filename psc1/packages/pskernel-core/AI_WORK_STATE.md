@@ -18,8 +18,14 @@ exact cached-result syntax, real hash collisions, fuel/depth entry guards,
 official Lean fixtures, 1,755 transformation comparisons, and all 21 local
 proof axiom audits. Three new cache lemmas establish empty initialization and
 FVar-flag exclusion. They do not prove cache-result validity or whole-kernel
-soundness. Generated runtime and canonical PS qualification of this stateful
-slice are still pending.
+soundness. The generated stateful job failed in a direct-worker test invocation after
+public zeta parity and all 578 transform comparisons passed. The wrapper's
+leading lambda is hoisted by the authentic PSC1 erasure pass into a flat
+four-argument declaration entry; the host smoke still used the previous
+returned-function calling convention. This follow-up makes all four parameters
+explicit and fixes the four host calls without weakening assertions. Recursive
+workers whose bodies start with a fuel match keep unary returned arrows.
+Generated stateful and canonical PS requalification remain pending.
 
 The previous stateless implementation at
 [fa0ca224c6fd192d0afa2418d415a6dc67f9f333](https://github.com/dwijayuda/pskernel/commit/fa0ca224c6fd192d0afa2418d415a6dc67f9f333)

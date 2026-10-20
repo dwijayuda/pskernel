@@ -106,6 +106,10 @@ lean_lib PsBackendTs where
   ]
 
 -- Target libraries remain outside the portable bootstrap import closure.
+lean_lib PsBackendCommon where
+  srcDir := "packages/backend-common/src"
+  roots := #[`Ps.BackendCommon.Script]
+
 lean_lib PsBackendJs where
   srcDir := "packages/backend-js/src"
   roots := #[
@@ -288,3 +292,7 @@ lean_exe psc1_operator_tests where
 lean_exe psc1_ordinary_tests where
   srcDir := "test"
   root := `OrdinaryExecutionTests
+
+lean_exe psc1_script_plan_tests where
+  srcDir := "test"
+  root := `ScriptPlanTests

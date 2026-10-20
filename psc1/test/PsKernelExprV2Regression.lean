@@ -359,6 +359,8 @@ private def testChunkedArena : IO Unit := do
         throw (IO.userError "PSC1_V2_CHUNKED_ID_MISMATCH")
     requireV2 s!"chunked-size-{limit}"
       (chunked.size == classic.nodes.size)
+    let _ ← expectV2 (psKernelExprV2ValidateChunked chunked)
+    requireV2 s!"chunked-replay-validated-{limit}" true
     for id in [:512] do
       let reference ← expectV2 (psKernelExprV2Lookup classic id)
       match psKernelExprV2ChunkedFind chunked id with
@@ -382,6 +384,26 @@ private def testChunkedArena : IO Unit := do
       (match psKernelExprV2ChunkedFind extended newId with
         | Option.none => false
         | Option.some _ => true)
+  let (single, id) := psKernelExprV2MkBVar psKernelExprV2Empty 0
+  let validEntry ← expectV2 (psKernelExprV2Lookup single id)
+  let corruptEntry : PsKernelExprV2Entry := {
+    validEntry with hasFVar := true
+  }
+  let (bad, _) := psKernelExprV2ChunkedPush
+    psKernelExprV2ChunkedEmpty corruptEntry
+  requireV2 "chunked-forged-fvar-rejected"
+    (match psKernelExprV2ValidateChunked bad with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let invalidReference : PsKernelExprV2Entry := {
+    validEntry with node := PsKernelExprV2Node.app 42 0
+  }
+  let (forward, _) := psKernelExprV2ChunkedPush
+    psKernelExprV2ChunkedEmpty invalidReference
+  requireV2 "chunked-forward-reference-rejected"
+    (match psKernelExprV2ValidateChunked forward with
+      | Except.error _ => true
+      | Except.ok _ => false)
   IO.println "PSC1_EXPR_V2_CHUNKED: PASS nodes=512 limits=5"
 
 

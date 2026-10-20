@@ -84,6 +84,11 @@ jobs:
         run: |
           set -euo pipefail
           lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Index.lean
+      - name: Check all V2 indexed smart constructors through PSC1
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2IndexedBuilder.lean
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -99,7 +104,7 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
-          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Index.lean --out dist/expr-v2/index.js
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2IndexedBuilder.lean --out dist/expr-v2/index.js
           test -s dist/expr-v2/index.js
           test -s dist/expr-v2/index.d.ts
           test -s dist/expr-v2/index.js.map

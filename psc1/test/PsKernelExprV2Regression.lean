@@ -1,5 +1,5 @@
 import Ps.KernelCore.Research.ExprV2Validation
-import Ps.KernelCore.Research.ExprV2Index
+import Ps.KernelCore.Research.ExprV2IndexedBuilder
 
 private def requireV2 (label : String) (ok : Bool) : IO Unit := do
   unless ok do
@@ -232,6 +232,119 @@ private def testIndexedArena : IO Unit := do
       | Option.some _ => true)
   IO.println "PSC1_EXPR_V2_INDEXED: PASS nodes=384"
 
+private def testIndexedSmartConstructors : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "indexedDemo"
+  let mut arrayArena := psKernelExprV2Empty
+  let mut indexedArena := psKernelExprV2IndexedEmpty
+  let mut cases : List (String × Nat × Nat) := List.nil
+
+  let (a0, b0) := psKernelExprV2MkBVar arrayArena 0
+  let (i0, j0) ← expectV2 (psKernelExprV2IndexedMkBVar indexedArena 0)
+  arrayArena := a0
+  indexedArena := i0
+  cases := ("bvar", b0, j0) :: cases
+
+  let (a1, b1) := psKernelExprV2MkBVar arrayArena 2
+  let (i1, j1) ← expectV2 (psKernelExprV2IndexedMkBVar indexedArena 2)
+  arrayArena := a1
+  indexedArena := i1
+  cases := ("bvar2", b1, j1) :: cases
+
+  let (a2, b2) := psKernelExprV2MkFVar arrayArena name
+  let (i2, j2) ← expectV2 (psKernelExprV2IndexedMkFVar indexedArena name)
+  arrayArena := a2
+  indexedArena := i2
+  cases := ("fvar", b2, j2) :: cases
+
+  let (a3, b3) := psKernelExprV2MkMVar arrayArena name
+  let (i3, j3) ← expectV2 (psKernelExprV2IndexedMkMVar indexedArena name)
+  arrayArena := a3
+  indexedArena := i3
+  cases := ("mvar", b3, j3) :: cases
+
+  let (a4, b4) := psKernelExprV2MkSort arrayArena PsKernelLevel.zero
+  let (i4, j4) ← expectV2 (psKernelExprV2IndexedMkSort indexedArena PsKernelLevel.zero)
+  arrayArena := a4
+  indexedArena := i4
+  cases := ("sort", b4, j4) :: cases
+
+  let (a5, b5) := psKernelExprV2MkConst arrayArena name [PsKernelLevel.zero]
+  let (i5, j5) ← expectV2 (psKernelExprV2IndexedMkConst indexedArena name [PsKernelLevel.zero])
+  arrayArena := a5
+  indexedArena := i5
+  cases := ("const", b5, j5) :: cases
+
+  let (a6, b6) := psKernelExprV2MkLit arrayArena (.nat 42)
+  let (i6, j6) ← expectV2 (psKernelExprV2IndexedMkLit indexedArena (.nat 42))
+  arrayArena := a6
+  indexedArena := i6
+  cases := ("lit", b6, j6) :: cases
+
+  let (a7, b7) ← expectV2 (psKernelExprV2MkApp arrayArena b0 b2)
+  let (i7, j7) ← expectV2 (psKernelExprV2IndexedMkApp indexedArena j0 j2)
+  arrayArena := a7
+  indexedArena := i7
+  cases := ("app", b7, j7) :: cases
+
+  let (a8, b8) ← expectV2
+    (psKernelExprV2MkLam arrayArena name b4 b1 PsKernelBinderInfo.default)
+  let (i8, j8) ← expectV2
+    (psKernelExprV2IndexedMkLam indexedArena name j4 j1 PsKernelBinderInfo.default)
+  arrayArena := a8
+  indexedArena := i8
+  cases := ("lambda", b8, j8) :: cases
+
+  let (a9, b9) ← expectV2
+    (psKernelExprV2MkForall arrayArena name b4 b0 PsKernelBinderInfo.implicit)
+  let (i9, j9) ← expectV2
+    (psKernelExprV2IndexedMkForall indexedArena name j4 j0 PsKernelBinderInfo.implicit)
+  arrayArena := a9
+  indexedArena := i9
+  cases := ("forall", b9, j9) :: cases
+
+  let (a10, b10) ← expectV2 (psKernelExprV2MkLet arrayArena name b4 b2 b1 false)
+  let (i10, j10) ← expectV2 (psKernelExprV2IndexedMkLet indexedArena name j4 j2 j1 false)
+  arrayArena := a10
+  indexedArena := i10
+  cases := ("let", b10, j10) :: cases
+
+  let (a11, b11) ← expectV2 (psKernelExprV2MkMData arrayArena 31 b7)
+  let (i11, j11) ← expectV2 (psKernelExprV2IndexedMkMData indexedArena 31 j7)
+  arrayArena := a11
+  indexedArena := i11
+  cases := ("mdata", b11, j11) :: cases
+
+  let (a12, b12) ← expectV2 (psKernelExprV2MkProj arrayArena name 0 b11)
+  let (i12, j12) ← expectV2 (psKernelExprV2IndexedMkProj indexedArena name 0 j11)
+  arrayArena := a12
+  indexedArena := i12
+  cases := ("proj", b12, j12) :: cases
+
+  requireV2 "all-smart-builder-count-parity"
+    (indexedArena.size == arrayArena.nodes.size)
+  let _ ← expectV2 (psKernelExprV2ValidateLinear arrayArena)
+  for (label, a, b) in cases do
+    requireV2 ("indexed-smart-id-" ++ label) (a == b)
+    let old ← expectV2 (psKernelExprV2Lookup arrayArena a)
+    let newer ← expectV2 (psKernelExprV2IndexedRequire indexedArena b)
+    requireV2 ("indexed-smart-metadata-" ++ label)
+      (psKernelExprV2SameMetadata old newer)
+  requireV2 "indexed-smart-invalid-child"
+    (match psKernelExprV2IndexedMkApp indexedArena 7777 j2 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let mut shared := indexedArena
+  let mut root := j0
+  for _ in [:24] do
+    let (next, id) ← expectV2 (psKernelExprV2IndexedMkApp shared root root)
+    shared := next
+    root := id
+  let finalEntry ← expectV2 (psKernelExprV2IndexedRequire shared root)
+  requireV2 "indexed-smart-large-sharing-depth" (finalEntry.depth == 25)
+  requireV2 "indexed-smart-large-sharing-nodes"
+    (shared.size == indexedArena.size + 24)
+  IO.println "PSC1_EXPR_V2_INDEXED_BUILDERS: PASS"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -239,4 +352,5 @@ def main : IO Unit := do
   testDeepSpines
   testExponentialSharing
   testIndexedArena
+  testIndexedSmartConstructors
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

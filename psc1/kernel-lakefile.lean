@@ -89,7 +89,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.SelfHost,
     `Ps.KernelCore.Research.ExprV2,
     `Ps.KernelCore.Research.ExprV2Validation,
-    `Ps.KernelCore.Research.ExprV2Index
+    `Ps.KernelCore.Research.ExprV2Index,
+    `Ps.KernelCore.Research.ExprV2IndexedBuilder
   ]
 
 lean_exe psc1_kernel_regression where

@@ -18,7 +18,8 @@ def main : IO Unit := do
     ("errorCapture", errorCapture), ("errorFor", errorFor),
     ("errorForReturn", errorForReturn), ("errorNestedDo", errorNestedDo),
     ("errorBoundThrow", errorBoundThrow), ("errorThrowShadow", errorThrowShadow),
-    ("errorResultPayload", errorResultPayload), ("errorWhile", errorWhile)
+    ("errorResultPayload", errorResultPayload), ("errorPatternFor", errorPatternFor),
+    ("errorWhile", errorWhile)
   ]
   let observed := cases.flatMap fun (name, program) =>
     [(name ++ "False", encode (program false)), (name ++ "True", encode (program true))]

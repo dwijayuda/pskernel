@@ -148,6 +148,113 @@ try {
       passed: true, publicNames: reservedManifest.publicNames });
   }
 
+
+  // Runtime intrinsics must not resolve to legal source declarations or captures.
+  // These paired sources are authored independently, not obtained by translation.
+  const ambientFixtures = {
+    lean: [
+      'def _BigInt (n : Nat) : Nat := n',
+      'def BigInt (n : Nat) : Nat := 99',
+      'def globalRuntime (flag : Bool) : Bool := Nat.beq (String.Internal.length "🙂a") 2',
+      'def lexicalRuntime (BigInt : Nat) (Number : Nat) (String : Nat) (Array : Nat) : Bool :=',
+      '  Nat.beq (_root_.String.Internal.length "🙂a") 2 && Nat.beq (_root_.Char.toNat (_root_.Char.ofNat 65)) 65',
+      'structure Labels where',
+      '  BigInt : Nat',
+      '  Number : Nat',
+      'def labels (flag : Bool) : Bool :=',
+      '  let x : Labels := Labels.mk 5 7;',
+      '  Nat.beq x.BigInt 5 && Nat.beq x.Number 7',
+      ''
+    ].join('\n'),
+    ps: [
+      'def _BigInt(n : Nat) : Nat := n',
+      'def BigInt(n : Nat) : Nat := 99',
+      'def globalRuntime(flag : Bool) : Bool := Nat.beq(String.Internal.length("🙂a"), 2)',
+      'def lexicalRuntime(BigInt : Nat, Number : Nat, String : Nat, Array : Nat) : Bool :=',
+      '  Nat.beq(_root_.String.Internal.length("🙂a"), 2) && Nat.beq(_root_.Char.toNat(_root_.Char.ofNat(65)), 65)',
+      'structure Labels where {',
+      '  BigInt : Nat',
+      '  Number : Nat',
+      '}',
+      'def labels(flag : Bool) : Bool :=',
+      '  let x : Labels := Labels.mk(5, 7)',
+      '  Nat.beq(x.BigInt, 5) && Nat.beq(x.Number, 7)',
+      ''
+    ].join('\n')
+  };
+  const hygieneFailures = [];
+  for (const [syntax, ambientSource] of Object.entries(ambientFixtures)) {
+    try {
+    const folder = path.join(work, 'ambient-' + syntax);
+    fs.mkdirSync(folder, { recursive: true });
+    const ambientInput = path.join(folder, 'ambient.' + syntax);
+    fs.writeFileSync(ambientInput, ambientSource);
+    const outputDirectory = path.join(folder, 'out');
+    command(native, ['build', ambientInput, '--targets', 'ts,js', '--out-dir', outputDirectory]);
+    const ambientStem = path.join(outputDirectory, 'ambient');
+    const ambientJs = await import(pathToFileURL(ambientStem + '.js').href);
+    assert.equal(ambientJs.globalRuntime(false), true, 'DirectJS ambient intrinsic global capture');
+    assert.equal(ambientJs.lexicalRuntime(0n, 0n, 0n, 0n), true, 'DirectJS ambient intrinsic lexical capture');
+    const ambientConsumer = path.join(folder, 'consumer');
+    command(process.execPath, [checker, '--ignoreConfig', ambientStem + '.ts',
+      '--target', 'ES2020', '--module', 'ES2022', '--strict', '--skipLibCheck', '--outDir', ambientConsumer]);
+    const ambientTs = await import(pathToFileURL(path.join(ambientConsumer, 'ambient.js')).href);
+    for (const [target, module] of [['js', ambientJs], ['ts', ambientTs]]) {
+      assert.equal(module._BigInt(7n), 7n, target + ' authored escaped-looking global');
+      assert.equal(module._BigInt_(7n), 99n, target + ' ambient global collision');
+      for (const flag of [false, true]) {
+        assert.equal(module.globalRuntime(flag), true, target + ' global intrinsic hygiene');
+        assert.equal(module.labels(flag), true, target + ' unchanged property labels');
+      }
+      assert.equal(module.lexicalRuntime(0n, 0n, 0n, 0n), true, target + ' lexical intrinsic hygiene');
+    }
+    const generation = path.dirname(fs.realpathSync(ambientStem + '.js'));
+    assert.equal(read(path.join(generation, 'admissions.json')), command(native, ['admissions', ambientInput]));
+    const provenance = JSON.parse(read(path.join(generation, 'psc1-input.json')));
+    const captured = provenance.sources.find(item => item.text === ambientSource);
+    assert.ok(captured);
+    assert.equal(captured.origins.find(origin => origin.sourceName === 'BigInt')?.name, '_BigInt_');
+    records.push({ group: syntax + '-runtime-intrinsic-hygiene', passed: true });
+    } catch (error) {
+      hygieneFailures.push(syntax + '-runtime-intrinsic-hygiene');
+      console.error('PSC1_RUNTIME_HYGIENE_FAIL: ' + syntax + '\n' + error.stack);
+    }
+  }
+
+
+  // __proto__ is an own source field, never an object-literal prototype setter.
+  const protoFixtures = {
+    lean: 'structure Labels where\n  __proto__ : Nat\n  Number : Nat\ndef labels (flag : Bool) : Bool :=\n  let x : Labels := Labels.mk 5 7;\n  Nat.beq x.__proto__ 5 && Nat.beq x.Number 7\ndef recordLabels (flag : Bool) : Bool :=\n  let x : Labels := { __proto__ := 5, Number := 7 };\n  Nat.beq x.__proto__ 5 && Nat.beq x.Number 7\n',
+    ps: 'structure Labels where {\n  __proto__ : Nat\n  Number : Nat\n}\ndef labels(flag : Bool) : Bool :=\n  let x : Labels := Labels.mk(5, 7)\n  Nat.beq(x.__proto__, 5) && Nat.beq(x.Number, 7)\ndef recordLabels(flag : Bool) : Bool :=\n  let x : Labels := { __proto__ := 5, Number := 7 }\n  Nat.beq(x.__proto__, 5) && Nat.beq(x.Number, 7)\n'
+  };
+  for (const [syntax, protoSource] of Object.entries(protoFixtures)) {
+    try {
+      const folder = path.join(work, 'proto-' + syntax);
+      fs.mkdirSync(folder, { recursive: true });
+      const protoInput = path.join(folder, 'proto.' + syntax);
+      fs.writeFileSync(protoInput, protoSource);
+      const outputDirectory = path.join(folder, 'out');
+      command(native, ['build', protoInput, '--targets', 'ts,js', '--out-dir', outputDirectory]);
+      const protoStem = path.join(outputDirectory, 'proto');
+      const protoJs = await import(pathToFileURL(protoStem + '.js').href);
+      const protoConsumer = path.join(folder, 'consumer');
+      command(process.execPath, [checker, '--ignoreConfig', protoStem + '.ts',
+        '--target', 'ES2020', '--module', 'ES2022', '--strict', '--skipLibCheck', '--outDir', protoConsumer]);
+      const protoTs = await import(pathToFileURL(path.join(protoConsumer, 'proto.js')).href);
+      for (const [target, module] of [['js', protoJs], ['ts', protoTs]]) {
+        assert.equal(module.labels(false), true, target + ' prototype-named source field');
+        assert.equal(module.labels(true), true, target + ' prototype-named source field');
+        assert.equal(module.recordLabels(false), true, target + ' prototype-named record literal');
+        assert.equal(module.recordLabels(true), true, target + ' prototype-named record literal');
+      }
+      records.push({ group: syntax + '-prototype-property-hygiene', passed: true });
+    } catch (error) {
+      hygieneFailures.push(syntax + '-prototype-property-hygiene');
+      console.error('PSC1_PROTOTYPE_HYGIENE_FAIL: ' + syntax + '\n' + error.stack);
+    }
+  }
+  assert.deepEqual(hygieneFailures, [], 'all source binding/property hygiene cases must pass');
+
   for (const [target, extension] of [['rust', '.rs'], ['wasm-core', '.wasm']]) {
     const output = path.join(work, 'small-' + target + extension);
     command(native, ['build', input, '--target', target, '--out', output]);

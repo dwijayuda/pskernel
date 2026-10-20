@@ -71,5 +71,10 @@ for (const phase of phases) {
   console.log('PSC1_COMPILER_CENSUS: ' + phase.name + ' ' + rows.length + ' modules; parse accepted=' +
     rows.filter(row => row.parse === 'accepted').length + '; elaboration accepted=' +
     rows.filter(row => row.elaboration === 'accepted').length);
+  for (const stage of ['parse', 'elaboration']) {
+    const first = rows.find(row => row[stage] === 'refused');
+    if (first) console.log('PSC1_COMPILER_CENSUS_FIRST_REFUSAL: ' +
+      JSON.stringify({ phase: phase.name, stage, module: first.module, path: first.path, detail: first.detail }));
+  }
 }
 // Only inventory/probe integrity fails; source refusals remain explicit blockers.

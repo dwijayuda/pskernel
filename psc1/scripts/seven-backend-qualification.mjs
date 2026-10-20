@@ -19,6 +19,55 @@ const library = read(distribution.optionalLibraryReceipt);
 const namespaceBoundaries = ['lean', 'ps'].map(syntax =>
   read('dist/scoped-correctness/namespace-boundaries/' + syntax + '.json'));
 const targets = ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'];
+
+const typedErrors = read('dist/scoped-correctness/typed-errors/results.json');
+const minimumErrors = read('dist/scoped-correctness/typed-errors-python314/results.json');
+const components = read('dist/scoped-correctness/wasm-component-direct.json');
+const compilerProtocol = read('dist/scoped-correctness/compiler-host-protocol/results.json');
+const compilerCensus = read('dist/scoped-correctness/compiler-source-census/inventory.json');
+const compilerStages = read('dist/scoped-correctness/compiler-source-census/stages.json');
+for (const [data, expectedTargets] of [[typedErrors, targets], [minimumErrors, ['python']]]) {
+  assert.equal(data.testedCommit, process.env.GITHUB_SHA || null);
+  assert.equal(data.branchHeadCommit, process.env.PSC1_HEAD_SHA || null);
+  assert.equal(data.leanCommit, runtime.nativeLean.commit);
+  assert.equal(data.passed, true);
+  assert.deepEqual(data.failures, []);
+  assert.equal(data.nativeObservations, 34);
+  const expectedPairs = ['checked', 'ordinary'].flatMap(lane =>
+    ['lean', 'ps'].flatMap(syntax => expectedTargets.map(target => lane + '/' + syntax + '/' + target)));
+  assert.deepEqual(data.records.map(row => row.lane + '/' + row.syntax + '/' + row.target).sort(),
+    expectedPairs.sort(), 'complete unique typed-error target/source pairs');
+  for (const row of data.records) {
+    assert.equal(row.passed, true);
+    assert.equal(row.observations, row.lane === 'checked' ? 32 : 2);
+    assert.equal(row.refusals, row.lane === 'checked' ? 2 : 3);
+  }
+}
+assert.equal(components.sourceCommit, process.env.GITHUB_SHA || null);
+assert.deepEqual(components.results.map(row => row.syntax).sort(), ['lean', 'ps']);
+assert.ok(components.results.every(row => row.status === 'pass' && row.directEncoding &&
+  row.exactEmbeddedCore && row.deterministic && row.refusalPreservesGeneration));
+assert.equal(compilerProtocol.commit, process.env.GITHUB_SHA || null);
+assert.equal(compilerProtocol.fixedPoint, false);
+assert.equal(compilerProtocol.sourceClosureSelfCompilation, false);
+assert.deepEqual(compilerProtocol.records.map(row => row.target).sort(), ['js', 'rust']);
+assert.ok(compilerProtocol.records.every(row => row.transportExecution === 'passed' &&
+  row.independentAdmission === 'passed' && row.selfHosting === false));
+assert.equal(compilerCensus.commit, process.env.GITHUB_SHA || null);
+assert.equal(compilerCensus.probe.completed, true);
+assert.equal(compilerCensus.probe.status, 0);
+assert.equal(compilerCensus.modules.length, compilerStages.records.length);
+assert.equal(compilerStages.admission, 'not-run');
+assert.equal(compilerStages.ir, 'not-run');
+assert.equal(compilerStages.generatedExecution, 'not-run');
+assert.equal(compilerStages.fixedPoint, 'not-run');
+for (const syntax of ['lean', 'ps']) {
+  for (const group of ['runtime-intrinsic-hygiene', 'prototype-property-hygiene']) {
+    assert.ok(architecture.records.some(row => row.group === syntax + '-' + group && row.passed),
+      'missing source hygiene execution: ' + syntax + '/' + group);
+  }
+}
+
 assert.equal(runtime.records.length, targets.length * 2);
 assert.equal(runtime.failures.length, 0);
 assert.equal(minimumRuntime.failures.length, 0);
@@ -210,6 +259,31 @@ const receipt = {
     group: x.group, artifactBytes: x.sourceBytes,
     runtimeBytes: x.runtime.runtimeBytes, runtimeSha256: x.runtime.runtimeSha256
   })),
+  architectureFoundation: {
+    typedErrors: { nativeObservations: typedErrors.nativeObservations,
+      targetSourceBundles: typedErrors.records.length,
+      refusalChecks: typedErrors.records.reduce((n, row) => n + row.refusals, 0),
+      minimumPythonBundles: minimumErrors.records.length,
+      evidence: 'typed-errors/results.json', minimumEvidence: 'typed-errors-python314/results.json' },
+    directComponents: { grammars: components.results.map(row => row.syntax),
+      evidence: 'wasm-component-direct.json', publicAbi: 'Bool-only' },
+    generatedCompilerProtocol: { targets: ['js', 'rust'], transportExecuted: true,
+      selfHosting: false, fixedPoint: false, evidence: 'compiler-host-protocol/results.json' },
+    compilerSourceCensus: { diagnosticCompleted: true, grammar: 'lean',
+      phases: compilerCensus.phases.map(phase => {
+        const rows = compilerStages.records.filter(row => phase.modules.includes(row.module));
+        return { name: phase.name, modules: rows.length,
+          parseAccepted: rows.filter(row => row.parse === 'accepted').length,
+          elaborationAccepted: rows.filter(row => row.elaboration === 'accepted').length,
+          firstRefusals: ['parse', 'elaboration'].map(stage => {
+            const first = rows.find(row => row[stage] === 'refused');
+            return first ? { stage, module: first.module, detail: first.detail } : null;
+          }).filter(Boolean) };
+      }),
+      admission: 'not-run', ir: 'not-run', generatedExecution: 'not-run',
+      selfCompilation: 'not-run', fixedPoint: 'not-run',
+      inventory: 'compiler-source-census/inventory.json', stages: 'compiler-source-census/stages.json' }
+  },
   npm: distribution,
   optionalLibrary: library,
   evidence: {

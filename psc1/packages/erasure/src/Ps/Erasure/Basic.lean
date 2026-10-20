@@ -455,7 +455,9 @@ def psErasureSafeIdentifier
 -- Keeping this policy in shared erasure gives JS and TS the same typed IR.
 def psErasureBindingReserved (value : String) : Bool :=
   psListAny (fun (keyword : String) => psStringEq value keyword)
-    ["arguments",
+    ["BigInt", "Number", "String", "Array", "Math", "Error",
+      "Map", "WeakMap", "Reflect", "Symbol", "Uint32Array", "Function", "Generator",
+      "arguments",
       "await",
       "break",
       "case",

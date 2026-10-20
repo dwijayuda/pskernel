@@ -56,11 +56,15 @@
     },
     {
       "id": "typed-error-handlers",
-      "status": "integration-awaiting-ci",
-      "branch": "research/psc1-ultra-architecture-20261021",
+      "status": "qualified-selected-subset",
+      "branch": "research/psc1-ultra-qualified-20261021",
       "baselineCommit": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
       "integratedCommit": "a830668d2c23886843e616951836d8d990aa2ff5",
-      "scope": "single typed catch, contextual throw, distinct early-return packet, lexical and CompilerM rollback; exact current qualification pending"
+      "scope": "Selected single typed handlers, distinct control packets, nested scope/state, lexical captures, finite-loop pattern fallthrough and ordinary while; 28 target/source bundles and 70 refusals; minimum Python4 bundles/10 refusals. CompilerM remains native/private-JS evidence; no complete-family or formal preservation claim.",
+      "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
+      "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
+      "runId": 39495181966,
+      "receipt": "docs/PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json"
     }
   ],
   "stages": [
@@ -482,9 +486,14 @@
         "psc1/stdlib/ProofScript/Compiler/Effect.lean",
         "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
         "psc1/test/DoTests.lean",
-        "psc1/test/WhileTests.lean"
+        "psc1/test/WhileTests.lean",
+        "psc1/packages/elab/src/Ps/Elab/DoTry.lean",
+        "psc1/test/TypedErrorTests.lean",
+        "psc1/test/TypedErrorFixtures.lean",
+        "psc1/test/TypedErrorOracle.lean",
+        "psc1/scripts/typed-error-conformance-tests.mjs"
       ],
-      "notes": "Existing Except/checked CompilerM bind propagation interacts with selected control and finite loops; selected ordinary Except while is exercised. Throw/try/catch syntax and handler/control/state semantics remain missing.",
+      "notes": "Selected contextual throw and single try/catch in Except and checked CompilerM now compose with early returns, lexical rollback, pattern bindings, finite loops and selected ordinary while. Except cases execute both grammars/all seven; CompilerM retains native/private-JS state checks. Finally, multiple/pattern handlers and general MonadExcept remain deferred; full family remains incomplete.",
       "targets": {
         "js": "selected-cases-executed",
         "ts": "selected-cases-executed",
@@ -501,17 +510,15 @@
           "runId": 39407097682,
           "suite": "psc1_do_tests, psc1_while_tests and the selected Except runtime predicates",
           "scope": "Selected Except propagation, including ordinary while, executes on seven targets in both grammars. CompilerM control/state propagation uses native/private-JS comparisons; throw/try/catch remains missing."
+        },
+        {
+          "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
+          "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
+          "runId": 39495181966,
+          "suite": "psc1_typed_error_tests, typed-error-conformance-tests.mjs, pinned native Lean oracle",
+          "scope": "Selected single typed handlers, distinct control packets, nested scope/state, lexical captures, finite-loop pattern fallthrough and ordinary while; 28 target/source bundles and 70 refusals; minimum Python4 bundles/10 refusals. CompilerM remains native/private-JS evidence; no complete-family or formal preservation claim."
         }
-      ],
-      "pendingImplementation": {
-        "status": "implemented-awaiting-ci",
-        "source": "psc1/packages/elab/src/Ps/Elab/DoTry.lean",
-        "tests": [
-          "psc1/test/TypedErrorTests.lean",
-          "psc1/test/TypedErrorOracle.lean",
-          "psc1/scripts/typed-error-conformance-tests.mjs"
-        ]
-      }
+      ]
     },
     {
       "id": "call-inference",
@@ -617,7 +624,7 @@
     "currentArtifact": "psc1-checked-direct/1",
     "endToEndVerifiedMode": "explicit --assurance verified rejects; no ordinary fallback",
     "partialExecution": "Unchanged constructive opaque-witness/exact-body pairing; source while helpers are privately specialized before ordinary preparation. Selected Id/Except ordinary execution passed; default checked and explicit verified partial requests refuse.",
-    "effects": "Selected Type0 Id/Except/checked CompilerM control and finite loops; selected Id/Except ordinary while; no admitted general IO or handlers.",
+    "effects": "Selected Type0 Id/Except/checked CompilerM control, finite loops and typed single catch; selected Id/Except ordinary while. CompilerM execution scope remains native/private-JS. No admitted general source IO profile.",
     "directAdmissionProvider": "independent official Lean",
     "ownedKernel": "source integrated; separately native-tested"
   },
@@ -628,15 +635,15 @@
   "deferred": "All unimplemented v7.2 features outside the fourteen approved families; public unsafe, partial_fixpoint, break/continue/finally, macros, broad automation, networking/FFI, optional scalar families, full standard and full self-host qualification.",
   "qualificationReceipt": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json",
   "continuation": {
-    "pr": 166,
-    "basePr": 165,
-    "baseCommit": "5539059a47c13a3dbc9806a504775b72f7bfd0fe",
-    "branch": "feature/psc1-practical-control-data-20261020",
-    "status": "qualified-selected-cases",
-    "receipt": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json",
-    "documentation": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES.md",
-    "implementationCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
-    "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
-    "runId": 39467579973
+    "pr": 169,
+    "basePr": 168,
+    "baseCommit": "7e25943b991446ee2ab5a32b445238ef5af47cb5",
+    "branch": "research/psc1-ultra-qualified-20261021",
+    "status": "qualified-architecture-foundation-and-selected-cases",
+    "receipt": "docs/PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json",
+    "documentation": "docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md",
+    "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
+    "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
+    "runId": 39495181966
   }
 }

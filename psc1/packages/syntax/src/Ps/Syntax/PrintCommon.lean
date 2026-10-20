@@ -313,7 +313,12 @@ def psPrintDoBody
                   if psSyntaxTermSimpleForApplication value then printed
                   else psPrintCommonConcat3 "(" printed ")";
                 Except.ok (psPrintCommonConcat2 "return " groupedValue)
-        | _ => printTerm body
+        | _ =>
+            match printTerm body with
+            | Except.error error => Except.error error
+            | Except.ok printed =>
+                if psSyntaxTermSimpleForApplication body then Except.ok printed
+                else Except.ok (psPrintCommonConcat3 "(" printed ")")
 
 -- Operators consume primary/application operands. Preserve low-precedence
 -- source forms as grouped terms in both surface printers.

@@ -1,6 +1,6 @@
 {
   "schema": "psc1-language-backend-parity/1",
-  "kind": "audit-baseline-not-new-qualification",
+  "kind": "source-audit-with-qualified-selected-updates",
   "baseline": {
     "head": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
     "pr": 166,
@@ -2714,21 +2714,21 @@
     {
       "id": "typed-error-handlers",
       "family": "practical-core-subcase",
-      "selection": "throw/try/catch",
+      "selection": "selected contextual throw and single typed catch with checked control packets",
       "complete": false,
       "inputGrammars": {
-        "lean": "missing-at-baseline-candidate-PR167",
-        "ps": "missing-at-baseline-candidate-PR167"
+        "lean": "implemented-selected-and-executed",
+        "ps": "implemented-selected-and-executed"
       },
       "ir": {
-        "status": "source-gap-or-future-profile",
-        "form": "candidate-control-packets"
+        "status": "independently-admitted-and-strictly-validated-selected-cases",
+        "form": "checked-Except-and-Prod-control-packets"
       },
-      "sourceEvidence": "PR167 a830668d2c23886843e616951836d8d990aa2ff5",
+      "sourceEvidence": "Elab.DoTry; test/TypedErrorTests.lean; test/TypedErrorFixtures.lean; scripts/typed-error-conformance-tests.mjs",
       "targets": {
         "js": {
-          "lowering": "not-qualified-from-selected-source",
-          "runtime": "none-at-baseline",
+          "lowering": "implemented-selected",
+          "runtime": "selected-native-oracle-comparisons-passed",
           "publicAbi": "depends-on-result-signature",
           "assurance": {
             "logical": "independent-official-Lean-for-admitted-source-cases",
@@ -2738,8 +2738,8 @@
           }
         },
         "ts": {
-          "lowering": "not-qualified-from-selected-source",
-          "runtime": "none-at-baseline",
+          "lowering": "implemented-selected",
+          "runtime": "selected-native-oracle-comparisons-passed",
           "publicAbi": "depends-on-result-signature",
           "assurance": {
             "logical": "independent-official-Lean-for-admitted-source-cases",
@@ -2749,8 +2749,8 @@
           }
         },
         "rust": {
-          "lowering": "not-qualified-from-selected-source",
-          "runtime": "none-at-baseline",
+          "lowering": "implemented-selected",
+          "runtime": "selected-native-oracle-comparisons-passed",
           "publicAbi": "depends-on-result-signature",
           "assurance": {
             "logical": "independent-official-Lean-for-admitted-source-cases",
@@ -2760,8 +2760,8 @@
           }
         },
         "wasm-core": {
-          "lowering": "not-qualified-from-selected-source",
-          "runtime": "none-at-baseline",
+          "lowering": "implemented-selected",
+          "runtime": "selected-native-oracle-comparisons-passed",
           "publicAbi": "depends-on-result-signature",
           "assurance": {
             "logical": "independent-official-Lean-for-admitted-source-cases",
@@ -2771,8 +2771,8 @@
           }
         },
         "wasm-component": {
-          "lowering": "not-qualified-from-selected-source",
-          "runtime": "none-at-baseline",
+          "lowering": "implemented-selected",
+          "runtime": "selected-native-oracle-comparisons-passed",
           "publicAbi": "depends-on-result-signature",
           "assurance": {
             "logical": "independent-official-Lean-for-admitted-source-cases",
@@ -2782,8 +2782,8 @@
           }
         },
         "python": {
-          "lowering": "not-qualified-from-selected-source",
-          "runtime": "none-at-baseline",
+          "lowering": "implemented-selected",
+          "runtime": "selected-native-oracle-comparisons-passed",
           "publicAbi": "depends-on-result-signature",
           "assurance": {
             "logical": "independent-official-Lean-for-admitted-source-cases",
@@ -2793,8 +2793,8 @@
           }
         },
         "php": {
-          "lowering": "not-qualified-from-selected-source",
-          "runtime": "none-at-baseline",
+          "lowering": "implemented-selected",
+          "runtime": "selected-native-oracle-comparisons-passed",
           "publicAbi": "depends-on-result-signature",
           "assurance": {
             "logical": "independent-official-Lean-for-admitted-source-cases",
@@ -2803,7 +2803,15 @@
             "verifiedRequest": "refused"
           }
         }
-      }
+      },
+      "qualification": {
+        "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
+        "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
+        "runId": 39495181966,
+        "suite": "psc1_typed_error_tests, typed-error-conformance-tests.mjs, pinned native Lean oracle",
+        "scope": "Selected single typed handlers, distinct control packets, nested scope/state, lexical captures, finite-loop pattern fallthrough and ordinary while; 28 target/source bundles and 70 refusals; minimum Python4 bundles/10 refusals. CompilerM remains native/private-JS evidence; no complete-family or formal preservation claim."
+      },
+      "notes": "Except: both grammars/all7; component observes internals through Bool harness. CompilerM: native/private-JS only. Full family/general handlers not complete."
     },
     {
       "id": "call-inference",
@@ -3561,13 +3569,16 @@
   "evidence": {
     "receipts": [
       "psc1/docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json",
-      "psc1/docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json"
+      "psc1/docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json",
+      "psc1/docs/PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json"
     ],
     "sourceScripts": [
       "psc1/scripts/runtime-conformance-tests.mjs",
       "psc1/scripts/ordinary-while-conformance-tests.mjs",
       "psc1/scripts/practical-forms-backend-tests.mjs",
-      "psc1/scripts/scoped-backend-tests.mjs"
+      "psc1/scripts/scoped-backend-tests.mjs",
+      "psc1/scripts/typed-error-conformance-tests.mjs",
+      "psc1/scripts/backend-architecture-tests.mjs"
     ],
     "runtimeCorpus": {
       "bundles": 14,
@@ -3581,6 +3592,15 @@
         "tuple-patterns",
         "namespaces"
       ]
+    },
+    "typedHandlers": {
+      "nativeObservations": 34,
+      "bundles": 28,
+      "refusals": 70,
+      "minimumPythonBundles": 4,
+      "mostPSInput": "translated-from-exact-Lean-fixtures",
+      "componentHarness": "Bool semantic predicate; no aggregate ABI",
+      "grammarRoundtrip": "canonical graph equality and private-JS layout cases"
     }
   },
   "proposedPolicy": {
@@ -3612,5 +3632,12 @@
       "no behavioral proof claim inferred from execution",
       "missing/skipped/duplicate/unknown records fail CI"
     ]
+  },
+  "currentCheckpoint": {
+    "head": "5496943a30423269654fffcd7579b3c5dd16b4f9",
+    "pr": 169,
+    "run": 39495181966,
+    "testedMerge": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
+    "receipt": "psc1/docs/PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json"
   }
 }

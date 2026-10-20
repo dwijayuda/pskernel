@@ -1,0 +1,315 @@
+{
+  "schema": "psc1-ultra-foundation-qualification/1",
+  "qualification": "passed-scoped-execution",
+  "date": "2026-10-21",
+  "repository": "dwijayuda/pskernel",
+  "branch": "research/psc1-ultra-qualified-20261021",
+  "pullRequest": 169,
+  "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
+  "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
+  "base": {
+    "pr": 168,
+    "head": "7e25943b991446ee2ab5a32b445238ef5af47cb5"
+  },
+  "preservedQualifiedBaseline": {
+    "pr": 166,
+    "head": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
+    "runId": 39469312498
+  },
+  "integratedTypedErrors": "a830668d2c23886843e616951836d8d990aa2ff5",
+  "workflows": [
+    {
+      "id": 39495181966,
+      "job": 118878564368,
+      "conclusion": "success",
+      "steps": 37,
+      "successfulSteps": 37,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39495181966"
+    },
+    {
+      "id": 39495181847,
+      "job": 118878299328,
+      "conclusion": "success",
+      "scope": "seven independent native typed-control groups",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39495181847"
+    }
+  ],
+  "artifact": {
+    "id": 12297322572,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39495181966/artifacts/12297322572",
+    "bytes": 44988754,
+    "digest": "sha256:387cbb6e49dea0af1c2d6ed2b9c8680139fba3f17871f91a392fa58f42e3b628",
+    "expiresAtUtc": "2026-11-03T20:57:01Z",
+    "retention": "GitHub artifact retention applies; committed receipt does not extend it"
+  },
+  "toolVersions": {
+    "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "node": "v22.23.3",
+    "npm": "10.9.9",
+    "typescriptConsumer": "Version 7.0.2",
+    "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+    "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+    "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+    "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+    "python": "Python 3.15.0",
+    "pythonMinimum": "Python 3.14.8",
+    "php": "PHP 8.5.11 (cli) (built: Sep 23 2026 12:33:37) (NTS)"
+  },
+  "linux": "ubuntu-24.04",
+  "assurance": {
+    "checked": true,
+    "explicitOrdinary": true,
+    "behavioralCertificate": false,
+    "verifiedRequest": "refused"
+  },
+  "logicalChecker": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "observations": {
+    "architectureGroups": 11,
+    "runtimeBundles": 14,
+    "scriptingGroups": 28,
+    "minimumPython": {
+      "targetExecutionBundles": 2,
+      "scriptingRegressionGroups": 14,
+      "artifactBundles": 12,
+      "runtimeEvidence": "runtime-conformance-python314/results.json",
+      "scriptingEvidence": "script-backends-python314/results.json"
+    },
+    "foundation": {
+      "typedErrors": {
+        "nativeObservations": 34,
+        "targetSourceBundles": 28,
+        "refusalChecks": 70,
+        "minimumPythonBundles": 4,
+        "evidence": "typed-errors/results.json",
+        "minimumEvidence": "typed-errors-python314/results.json"
+      },
+      "directComponents": {
+        "grammars": [
+          "lean",
+          "ps"
+        ],
+        "evidence": "wasm-component-direct.json",
+        "publicAbi": "Bool-only"
+      },
+      "generatedCompilerProtocol": {
+        "targets": [
+          "js",
+          "rust"
+        ],
+        "transportExecuted": true,
+        "selfHosting": false,
+        "fixedPoint": false,
+        "evidence": "compiler-host-protocol/results.json"
+      },
+      "compilerSourceCensus": {
+        "diagnosticCompleted": true,
+        "grammar": "lean",
+        "phases": [
+          {
+            "name": "semantic-compiler",
+            "modules": 67,
+            "parseAccepted": 40,
+            "elaborationAccepted": 35,
+            "firstRefusals": [
+              {
+                "stage": "parse",
+                "module": "Ps.Syntax.Ast",
+                "detail": "35:41: expected 'partial def, def, theorem, inductive, or structure', got '++'"
+              },
+              {
+                "stage": "elaboration",
+                "module": "Ps.Erasure.Definition",
+                "detail": "structuralRecursionArity"
+              }
+            ]
+          },
+          {
+            "name": "directjs-compiler",
+            "modules": 79,
+            "parseAccepted": 48,
+            "elaborationAccepted": 41,
+            "firstRefusals": [
+              {
+                "stage": "parse",
+                "module": "Ps.Syntax.Ast",
+                "detail": "35:41: expected 'partial def, def, theorem, inductive, or structure', got '++'"
+              },
+              {
+                "stage": "elaboration",
+                "module": "Ps.Erasure.Definition",
+                "detail": "structuralRecursionArity"
+              }
+            ]
+          },
+          {
+            "name": "rust-compiler",
+            "modules": 83,
+            "parseAccepted": 49,
+            "elaborationAccepted": 40,
+            "firstRefusals": [
+              {
+                "stage": "parse",
+                "module": "Ps.Syntax.Ast",
+                "detail": "35:41: expected 'partial def, def, theorem, inductive, or structure', got '++'"
+              },
+              {
+                "stage": "elaboration",
+                "module": "Ps.Erasure.Definition",
+                "detail": "structuralRecursionArity"
+              }
+            ]
+          }
+        ],
+        "admission": "not-run",
+        "ir": "not-run",
+        "generatedExecution": "not-run",
+        "selfCompilation": "not-run",
+        "fixedPoint": "not-run",
+        "inventory": "compiler-source-census/inventory.json",
+        "stages": "compiler-source-census/stages.json"
+      }
+    },
+    "nativePracticalSuites": [
+      {
+        "suite": "psc1_do_tests",
+        "passed": true,
+        "evidence": "practical-core/psc1_do_tests.log"
+      },
+      {
+        "suite": "psc1_data_tests",
+        "passed": true,
+        "evidence": "practical-core/psc1_data_tests.log"
+      },
+      {
+        "suite": "psc1_while_tests",
+        "passed": true,
+        "evidence": "practical-core/psc1_while_tests.log"
+      },
+      {
+        "suite": "psc1_namespace_tests",
+        "passed": true,
+        "evidence": "practical-core/psc1_namespace_tests.log"
+      }
+    ]
+  },
+  "correctedDefects": [
+    "A03-terminal-do-roundtrip",
+    "A14-ECMAScript-ambient-capture",
+    "A15-TS-prototype-property-semantics",
+    "A16-WIT-plan-keywords",
+    "A17-pattern-handler-fallthrough"
+  ],
+  "reproductions": [
+    {
+      "commit": "7e25943b991446ee2ab5a32b445238ef5af47cb5",
+      "runs": [
+        39490333426,
+        39490333445
+      ],
+      "conclusion": "failure",
+      "observed": "PS-to-Lean terminal match handler roundtrip"
+    },
+    {
+      "commit": "8ad97dcc6fdfd3e6f8bebab8d77e895b4b5093ba",
+      "run": 39492745046,
+      "conclusion": "failure",
+      "observed": "WIT keyword own; TS prototype-named record constructor field; pattern-handler oracle mismatch on all seven targets/both grammars",
+      "fixtureLimit": "Initial ambient case used unsupported String.length and PS structures omitted where; these were fixture failures, not valid ambient reproductions."
+    },
+    {
+      "commit": "9196093342837d816f9c328ff90e275476324e28",
+      "run": 39494671024,
+      "conclusion": "cancelled-after-reproduction",
+      "observed": "Corrected fixtures reached actual DirectJS intrinsic-global capture and TS prototype-field mismatches in both authored grammars; not qualification."
+    }
+  ],
+  "sourceFilesChangedByPr169BeforeDocumentation": [
+    "psc1/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+    "psc1/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+    "psc1/packages/backend-wasm/src/Ps/BackendWasm/Component.lean",
+    "psc1/packages/elab/src/Ps/Elab/DoTry.lean",
+    "psc1/packages/erasure/src/Ps/Erasure/Basic.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+    "psc1/scripts/backend-architecture-tests.mjs",
+    "psc1/scripts/compiler-source-census.mjs",
+    "psc1/scripts/seven-backend-qualification.mjs",
+    "psc1/scripts/typed-error-conformance-tests.mjs",
+    "psc1/test/BackendCommonTests.lean",
+    "psc1/test/TypedErrorFixtures.lean",
+    "psc1/test/TypedErrorOracle.lean",
+    "psc1/test/TypedErrorTests.lean"
+  ],
+  "changedFilesSinceQualifiedPr166": [
+    ".github/workflows/psc1-architecture-native.yml",
+    ".github/workflows/psc1-scoped-correctness.yml",
+    "psc1/AI_WORK_STATE.md",
+    "psc1/docs/PSC1_COMPILER_SELFHOST_ARCHITECTURE.md",
+    "psc1/docs/PSC1_COMPILER_SOURCE_CENSUS_BASELINE.json",
+    "psc1/docs/PSC1_FOREIGN_INTEROP_ARCHITECTURE.md",
+    "psc1/docs/PSC1_LANGUAGE_BACKEND_PARITY.json",
+    "psc1/docs/PSC1_LANGUAGE_BACKEND_PARITY.md",
+    "psc1/docs/PSC1_PRACTICAL_CORE_DECISIONS.md",
+    "psc1/docs/PSC1_PRACTICAL_CORE_STATUS.json",
+    "psc1/docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md",
+    "psc1/docs/PSC1_SOURCE_REFACTOR_ARCHITECTURE.md",
+    "psc1/docs/PSC1_TYPED_ERRORS.md",
+    "psc1/docs/PSC1_ULTRA_ARCHITECTURE_AUDIT.md",
+    "psc1/docs/PSC1_ULTRA_EXECUTION_STATUS.json",
+    "psc1/docs/PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json",
+    "psc1/docs/PSC1_WASM_ARCHITECTURE_V2.md",
+    "psc1/host-tools/compiler-host-protocol.mjs",
+    "psc1/host/src/Ps/Host/ProjectCompiler.lean",
+    "psc1/host/src/Ps/Host/WasmComponent.lean",
+    "psc1/lakefile.lean",
+    "psc1/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+    "psc1/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+    "psc1/packages/backend-wasm/src/Ps/BackendWasm/Component.lean",
+    "psc1/packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.lean",
+    "psc1/packages/bridge/src/Ps/Bridge/CompilerHost.lean",
+    "psc1/packages/cli/src/Main.lean",
+    "psc1/packages/compiler/src/Ps/Compiler/Sh1.lean",
+    "psc1/packages/elab/src/Ps/Elab/Do.lean",
+    "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
+    "psc1/packages/elab/src/Ps/Elab/DoTry.lean",
+    "psc1/packages/elab/src/Ps/Elab/DoWhile.lean",
+    "psc1/packages/elab/src/Ps/Elab/Recursion.lean",
+    "psc1/packages/elab/src/Ps/Elab/Term.lean",
+    "psc1/packages/erasure/src/Ps/Erasure/Basic.lean",
+    "psc1/packages/erasure/src/Ps/Erasure/Definition.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+    "psc1/scripts/SourceCensusProbe.lean",
+    "psc1/scripts/backend-architecture-tests.mjs",
+    "psc1/scripts/compiler-host-protocol-tests.mjs",
+    "psc1/scripts/compiler-source-census.mjs",
+    "psc1/scripts/seven-backend-qualification.mjs",
+    "psc1/scripts/typed-error-conformance-tests.mjs",
+    "psc1/scripts/wasm-component-direct-tests.mjs",
+    "psc1/test/BackendCommonTests.lean",
+    "psc1/test/TypedErrorFixtures.lean",
+    "psc1/test/TypedErrorOracle.lean",
+    "psc1/test/TypedErrorTests.lean",
+    "psc1/test/TypedErrorWhileFixture.lean"
+  ],
+  "evidenceLimits": [
+    "Typed-error PS corpus is translated from exact Lean fixtures; new hygiene sources are independently authored in both grammars.",
+    "Special-name structure construction and record literals are executed; special-name inductive constructor table/payload paths are source-inspected with ordinary constructor regression coverage.",
+    "Transport graph is supplied by native stage0; no generated compiler execution, self-compilation or fixed point.",
+    "Census probes Lean parse/elaboration only; admission/IR/generation stages not-run.",
+    "No formal backend preservation theorem; public aggregate ABI restrictions remain; all fourteen full feature families remain incomplete."
+  ],
+  "selfHosting": false,
+  "fixedPoint": false,
+  "behavioralPreservation": false,
+  "merged": false,
+  "releasePublished": false,
+  "npmRegistryPublished": false
+}

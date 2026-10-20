@@ -158,10 +158,32 @@ private def matchLayoutBoundaries : IO Unit := do
     ("binding match retains same-column alternatives", binding, 5),
     ("nested do leaves dedented alternatives to its enclosing match", enclosing, 3)
   ] do
-    for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
-      let text <- if kind matches .lean then pure (source ++ extract) else translate (source ++ extract)
+    let originalSource := source ++ extract
+    let proofScript <- translate originalSource
+    let reconstructed <- match psCompilerTranslateSource .proofScript .lean proofScript with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError (label ++ ": reverse translation failed"))
+    for (kind, text) in [
+      (PsCompilerSourceKind.lean, originalSource),
+      (PsCompilerSourceKind.proofScript, proofScript),
+      (PsCompilerSourceKind.lean, reconstructed)
+    ] do
       psPracticalCheckExecuted label (<- prepare kind text)
         (PsExpr.constE psNatName []) (.lit (.natural expected))
+    let original <- prepare .lean originalSource
+    let roundtripped <- prepare .lean reconstructed
+    match psCompilerAdmissionsFromPrepared original, psCompilerAdmissionsFromPrepared roundtripped with
+    | .ok a, .ok b => require (label ++ " canonical graph roundtrip") (a == b)
+    | _, _ => throw (IO.userError (label ++ ": graph encoding failed"))
+
+  let missingInner :=
+    "def choose (input : Except Nat Nat) : Except Nat Nat := match input with\n" ++
+    "  | Except.ok ignored => do\n" ++
+    "    let inner : Except Nat Nat := Except.error 3\n" ++
+    "    match inner with\n" ++
+    "  | Except.error error => Except.ok error\n"
+  require "dedented outer alternative cannot fill a missing inner match"
+    (match psCompilerPrepareSource .lean missingInner with | .error _ => true | .ok _ => false)
 
 private def handlerCorpus : IO Unit := do
   let source <- IO.FS.readFile "test/TypedErrorFixtures.lean"
@@ -180,6 +202,19 @@ private def handlerCorpus : IO Unit := do
   match psCompilerAdmissionsFromPrepared original, psCompilerAdmissionsFromPrepared roundtripped with
   | .ok a, .ok b => require "PS-to-Lean handler graph roundtrip" (a == b)
   | _, _ => throw (IO.userError "typed-error reverse graph encoding")
+
+private def patternHandlerBoundary : IO Unit := do
+  let fixture <- IO.FS.readFile "test/TypedErrorFixtures.lean"
+  for (flag, expected) in [("false", 1003), ("true", 9)] do
+    let source := fixture ++
+      "\ndef result : Nat := match errorPatternFor " ++ flag ++ " with\n" ++
+      "  | Except.error error => error\n" ++
+      "  | Except.ok value => 1000 + value\n"
+    for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+      let text <- if kind matches .lean then pure source else translate source
+      psPracticalCheckExecuted
+        ("pattern fallthrough cannot catch a later iteration: " ++ flag)
+        (<- prepare kind text) (PsExpr.constE psNatName []) (.lit (.natural expected))
 
 private def rejectionBoundaries : IO Unit := do
   for (label, body) in [
@@ -212,6 +247,7 @@ def main : IO Unit := do
     ("match layout", matchLayoutBoundaries),
     ("nested handlers", layoutBoundaries),
     ("handler corpus", handlerCorpus),
+    ("pattern handler boundary", patternHandlerBoundary),
     ("rejection boundaries", rejectionBoundaries),
     ("PS spelling", proofScriptSpelling),
     ("CompilerM", compilerM)]

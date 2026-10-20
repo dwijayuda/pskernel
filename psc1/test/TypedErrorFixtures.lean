@@ -155,3 +155,15 @@ def errorResultPayload (flag : Bool) : Except Nat Nat := do
     match inner with
     | Except.error value => Except.ok (value + 100)
     | Except.ok value => Except.ok (value + 200)
+
+def errorPatternFor (flag : Bool) : Except Nat Nat := do
+  let mut total : Nat := 0
+  for i in [0:2] do
+    if flag && Nat.beq i 1 then
+      throw 9
+    try
+      let (value, ignored) : Nat × Nat := (i, 0)
+      total := total + value + 1
+    catch error =>
+      return error + 100
+  return total

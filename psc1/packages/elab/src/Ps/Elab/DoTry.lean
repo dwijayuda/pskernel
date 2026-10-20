@@ -17,7 +17,7 @@ def PsElabDoTryNext : Type :=
 def psElabDoNoFallthrough : PsSyntaxTerm -> Bool
   | .doEndE _ => false
   | .doReturnE _ _ => true
-  | .letE _ _ _ rest _ | .doLetMutE _ _ _ rest _
+  | .letE _ _ _ rest _ | .letPatternE _ _ _ rest _ | .doLetMutE _ _ _ rest _
   | .doAssignE _ _ rest _ | .doBindE _ _ _ rest _
   | .doThenE _ rest _ => psElabDoNoFallthrough rest
   | .doIfE _ yes no rest _ =>

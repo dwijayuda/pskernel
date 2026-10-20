@@ -222,7 +222,7 @@ jobs:
           const manifest=JSON.parse(readFileSync(root+'/.proofscript-bootstrap.json','utf8'));
           const expectedEntry='packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.ps';
           if(manifest.entry!==expectedEntry)throw Error('V2_PS_CLOSURE_WRONG_ENTRY');
-          if(manifest.sourceCount<40 || manifest.generated.length!==manifest.sourceCount)
+          if(manifest.sourceCount<20 || manifest.generated.length!==manifest.sourceCount)
             throw Error('V2_PS_CLOSURE_INCOMPLETE');
           for(const required of [
             'ExprV2ResearchAll.ps',

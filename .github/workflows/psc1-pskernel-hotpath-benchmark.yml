@@ -9,6 +9,7 @@ on:
       - psc1/lean-toolchain
       - psc1/kernel-lakefile.lean
       - psc1/test/PsKernelHotpathProfiling.lean
+      - psc1/test/PsKernelMetadataExperiment.lean
       - psc1/scripts/pskernel-hotpath-probe.mjs
       - psc1/packages/pskernel-core/**
       - .github/workflows/psc1-pskernel-hotpath-benchmark.yml
@@ -38,7 +39,7 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
-          lake -f kernel-lakefile.lean build psc1_kernel_hotpath
+          lake -f kernel-lakefile.lean build psc1_kernel_hotpath psc1_kernel_metadata
       - name: Measure same-shape Lean Expr and PSC1 Expr operations
         working-directory: psc1
         run: |
@@ -47,6 +48,11 @@ jobs:
             -o "$RUNNER_TEMP/psc1-native-hotpath.memory" \
             .lake/build/bin/psc1_kernel_hotpath \
             | tee "$RUNNER_TEMP/psc1-native-hotpath.log"
+      - name: Validate metadata constructor invariants and profile cached queries
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_metadata | tee "$RUNNER_TEMP/psc1-metadata-prototype.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -54,6 +60,7 @@ jobs:
           path: |
             ${{ runner.temp }}/psc1-native-hotpath.log
             ${{ runner.temp }}/psc1-native-hotpath.memory
+            ${{ runner.temp }}/psc1-metadata-prototype.log
           retention-days: 30
 
   generated-js-metadata:

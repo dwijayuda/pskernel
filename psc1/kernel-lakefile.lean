@@ -124,3 +124,8 @@ lean_exe psc1_kernel_hotpath where
 lean_exe psc1_kernel_matched_official where
   srcDir := "test"
   root := `PsKernelMatchedNative
+
+-- Isolated smart-metadata experiment; no production kernel paths are modified.
+lean_exe psc1_kernel_metadata where
+  srcDir := "test"
+  root := `PsKernelMetadataExperiment

@@ -188,6 +188,7 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
+          node scripts/compiler-source-census-contract-tests.mjs
           node scripts/compiler-source-census.mjs
           node scripts/compiler-host-protocol-tests.mjs
       - name: Execute runtime contract against pinned Lean reference results

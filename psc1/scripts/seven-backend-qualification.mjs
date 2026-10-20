@@ -26,6 +26,7 @@ const components = read('dist/scoped-correctness/wasm-component-direct.json');
 const compilerProtocol = read('dist/scoped-correctness/compiler-host-protocol/results.json');
 const compilerCensus = read('dist/scoped-correctness/compiler-source-census/inventory.json');
 const compilerStages = read('dist/scoped-correctness/compiler-source-census/stages.json');
+const compilerPsStages = read('dist/scoped-correctness/compiler-source-census/stages-ps.json');
 for (const [data, expectedTargets] of [[typedErrors, targets], [minimumErrors, ['python']]]) {
   assert.equal(data.testedCommit, process.env.GITHUB_SHA || null);
   assert.equal(data.branchHeadCommit, process.env.PSC1_HEAD_SHA || null);
@@ -61,6 +62,23 @@ assert.equal(compilerStages.admission, 'not-run');
 assert.equal(compilerStages.ir, 'not-run');
 assert.equal(compilerStages.generatedExecution, 'not-run');
 assert.equal(compilerStages.fixedPoint, 'not-run');
+for (const [grammar, stages] of [['lean', compilerStages], ['ps', compilerPsStages]]) {
+  const lane = compilerCensus.lanes[grammar];
+  assert.equal(lane.probe.completed, true);
+  assert.equal(lane.probe.status, 0);
+  assert.equal(lane.probe.integrityError, null);
+  assert.equal(stages.grammar, grammar);
+  assert.equal(stages.records.length, compilerCensus.modules.length);
+  assert.equal(stages.sourceDerivation, lane.sourceDerivation);
+  assert.equal(stages.admission, 'not-run');
+  assert.equal(stages.ir, 'not-run');
+  assert.equal(stages.generatedExecution, 'not-run');
+  assert.equal(stages.fixedPoint, 'not-run');
+}
+for (const row of compilerPsStages.records.filter(row => row.translation === 'accepted')) {
+  assert.ok(row.inputArtifact.startsWith('translated-ps/'));
+  assert.match(row.inputSha256, /^[0-9a-f]{64}$/);
+}
 for (const syntax of ['lean', 'ps']) {
   for (const group of ['runtime-intrinsic-hygiene', 'prototype-property-hygiene']) {
     assert.ok(architecture.records.some(row => row.group === syntax + '-' + group && row.passed),
@@ -269,7 +287,9 @@ const receipt = {
       evidence: 'wasm-component-direct.json', publicAbi: 'Bool-only' },
     generatedCompilerProtocol: { targets: ['js', 'rust'], transportExecuted: true,
       selfHosting: false, fixedPoint: false, evidence: 'compiler-host-protocol/results.json' },
-    compilerSourceCensus: { diagnosticCompleted: true, grammar: 'lean',
+    compilerSourceCensus: { diagnosticCompleted: true, grammar: 'lean', grammars: ['lean', 'ps'],
+      psSourceDerivation: 'owned-canonical-translation-from-lean',
+      independentlyAuthoredPsCompiler: false,
       phases: compilerCensus.phases.map(phase => {
         const rows = compilerStages.records.filter(row => phase.modules.includes(row.module));
         return { name: phase.name, modules: rows.length,
@@ -282,7 +302,19 @@ const receipt = {
       }),
       admission: 'not-run', ir: 'not-run', generatedExecution: 'not-run',
       selfCompilation: 'not-run', fixedPoint: 'not-run',
-      inventory: 'compiler-source-census/inventory.json', stages: 'compiler-source-census/stages.json' }
+      psPhases: compilerCensus.phases.map(phase => {
+        const rows = compilerPsStages.records.filter(row => phase.modules.includes(row.module));
+        return { name: phase.name, modules: rows.length,
+          translationAccepted: rows.filter(row => row.translation === 'accepted').length,
+          parseAccepted: rows.filter(row => row.parse === 'accepted').length,
+          elaborationAccepted: rows.filter(row => row.elaboration === 'accepted').length,
+          firstRefusals: ['translation', 'parse', 'elaboration'].map(stage => {
+            const first = rows.find(row => row[stage] === 'refused');
+            return first ? { stage, module: first.module, detail: first.detail } : null;
+          }).filter(Boolean) };
+      }),
+      inventory: 'compiler-source-census/inventory.json', stages: 'compiler-source-census/stages.json',
+      psStages: 'compiler-source-census/stages-ps.json' }
   },
   npm: distribution,
   optionalLibrary: library,

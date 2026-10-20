@@ -15,7 +15,8 @@ def psParseDataElementsWithFuel
     PsSourcePos -> PsTokenCursor -> List PsSyntaxTerm -> Bool ->
     Except PsParseError PsDataDelimited :=
   match fuel with
-  | 0 => fun _ _ _ _ => Except.error PsParseError.fuelExhausted
+  | 0 => fun (start : PsSourcePos) (cursor : PsTokenCursor)
+      (elementsRev : List PsSyntaxTerm) (separated : Bool) => Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
       fun (start : PsSourcePos) (cursor : PsTokenCursor)
           (elementsRev : List PsSyntaxTerm) (separated : Bool) =>
@@ -103,7 +104,7 @@ Capacity is only an allocation hint. -/
 def psSyntaxArrayPushes (elements : List PsSyntaxTerm) :
     PsSyntaxTerm -> PsSourceSpan -> PsSyntaxTerm :=
   match elements with
-  | [] => fun (current : PsSyntaxTerm) (_ : PsSourceSpan) => current
+  | [] => fun (current : PsSyntaxTerm) (span : PsSourceSpan) => current
   | value :: rest =>
       fun (current : PsSyntaxTerm) (span : PsSourceSpan) =>
         let smaller : PsSyntaxTerm -> PsSourceSpan -> PsSyntaxTerm :=
@@ -150,7 +151,8 @@ def psParseDataOptionalIndexTailWithFuel
     PsSyntaxTerm -> PsSourceSpan -> PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match fuel with
-  | 0 => fun _ _ _ => Except.error PsParseError.fuelExhausted
+  | 0 => fun (current : PsSyntaxTerm) (surfaceSpan : PsSourceSpan)
+      (cursor : PsTokenCursor) => Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
       fun (current : PsSyntaxTerm) (surfaceSpan : PsSourceSpan) (cursor : PsTokenCursor) =>
         let smaller : PsSyntaxTerm -> PsSourceSpan -> PsTokenCursor ->

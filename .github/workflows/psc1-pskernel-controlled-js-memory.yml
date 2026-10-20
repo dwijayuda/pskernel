@@ -1,14 +1,15 @@
-name: PSC1 controlled same-compiler JS memory A/B
+name: PSC1 Lean 4.35 same-compiler JS memory A/B
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - fix/psc1-pskernel-core-cross-branch-20261020
+      - research/psc1-pskernel-lean435-performance-20261020
     paths:
       - psc1/scripts/pskernel-js-memory-probe.mjs
       - psc1/scripts/pskernel-js-controlled-report.mjs
-      - psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Instantiate.lean
+      - psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/**
+      - psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Knot.lean
       - .github/workflows/psc1-pskernel-controlled-js-memory.yml
 
 permissions:
@@ -19,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 55
     env:
-      BASE_KERNEL_SHA: 0a53836489c4e88f46df8f5b8b0c19cc41bafbbb
+      BASE_KERNEL_SHA: 3eb61f1aa0ed1d7e6e4d11563c8ad00f740898bf
     steps:
       - uses: actions/checkout@v4
         with:

@@ -124,7 +124,7 @@ def psKernelExprV2TransformLeaf
                   Except.ok (Prod.mk arena (Option.some source))
                 else
                   let relative := Nat.sub index (Nat.add start offset);
-                  let rebuilt :=
+                  let rebuilt : Except String (Prod PsKernelExprV2PagedArena Nat) :=
                     match psKernelExprV2TransformNatGet values relative with
                     | Option.some replacement =>
                         psKernelExprV2TransformLiftReplacement arena replacement offset
@@ -212,7 +212,7 @@ def psKernelExprV2TransformWithFuel
             let effective :=
               if Nat.ble (Nat.succ remaining) entry.depth then Nat.succ remaining
               else entry.depth;
-            let depth :=
+            let depth : Nat :=
               match operation with
               | PsKernelExprV2Transform.levels _ _ => 0
               | _ => offset;
@@ -268,10 +268,13 @@ def psKernelExprV2TransformOnCanonicalWithFuel
 def psKernelExprV2TransformOnCanonical
     (operation : PsKernelExprV2Transform) (arena : PsKernelExprV2PagedArena) (root offset : Nat) :
     Except String (Prod PsKernelExprV2PagedArena Nat) :=
-  match psKernelExprV2TransformCountOnCanonical arena root with
-  | Except.error error => Except.error error
-  | Except.ok count =>
-      psKernelExprV2TransformOnCanonicalWithFuel (Nat.succ count) operation arena root offset
+  match psKernelExprV2PagedFind arena root with
+  | Option.none => Except.error "PSKERNEL_V2_TRANSFORM_BAD_ROOT"
+  | Option.some entry =>
+      -- On a canonical graph depth <= expanded node count, so the sufficient
+      -- legacy budget, already capped to depth by the worker, equals depth.
+      -- Avoid a separate occurrence-count traversal on every substitution.
+      psKernelExprV2TransformOnCanonicalWithFuel entry.depth operation arena root offset
 
 def psKernelExprV2TransformCheckedWithFuel
     (fuel : Nat) (operation : PsKernelExprV2Transform)

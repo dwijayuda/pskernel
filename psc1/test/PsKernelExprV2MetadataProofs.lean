@@ -1,4 +1,5 @@
 import Init.Data.Nat.Basic
+import Lean.Elab.Tactic.Omega
 import Ps.KernelCore.Core.ExprV2.Node
 import Ps.KernelCore.Research.ExprV2Validation
 
@@ -107,6 +108,19 @@ theorem proj_preserves
   · simp only [psKernelExprV2ProjEntry, psKernelExprV2LegacyHasMVar, hb.hasExprMVar]
   · simp only [psKernelExprV2ProjEntry, psKernelExprV2LegacyDepth, hb.depth]
 
+theorem legacy_depth_le_count (expr : PsKernelExpr) :
+    psKernelExprV2LegacyDepth expr ≤ psKernelExprNodeCount expr := by
+  induction expr <;>
+    simp_all [psKernelExprV2LegacyDepth, psKernelExprNodeCount] <;> omega
+
+theorem legacy_default_budget_caps_to_depth (expr : PsKernelExpr) :
+    (if Nat.ble (Nat.succ (psKernelExprNodeCount expr)) (psKernelExprV2LegacyDepth expr)
+      then Nat.succ (psKernelExprNodeCount expr) else psKernelExprV2LegacyDepth expr) =
+    psKernelExprV2LegacyDepth expr := by
+  have bound := legacy_depth_le_count expr
+  have beyond : ¬ Nat.succ (psKernelExprNodeCount expr) ≤ psKernelExprV2LegacyDepth expr := by omega
+  simp only [Nat.ble_eq, beyond, if_false]
+
 end PsKernelExprV2MetadataProofs
 
 #print axioms PsKernelExprV2MetadataProofs.app_preserves
@@ -115,3 +129,6 @@ end PsKernelExprV2MetadataProofs
 #print axioms PsKernelExprV2MetadataProofs.let_preserves
 #print axioms PsKernelExprV2MetadataProofs.mdata_preserves
 #print axioms PsKernelExprV2MetadataProofs.proj_preserves
+
+#print axioms PsKernelExprV2MetadataProofs.legacy_depth_le_count
+#print axioms PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth

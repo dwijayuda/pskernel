@@ -333,3 +333,15 @@ nested beta/zeta, low budgets, and a cache-sensitive case which explicitly
 requires fallback. General function normalization still needs operation-owned
 structural core caches; erasing those caches would change low-fuel outcomes.
 The implementation remains partial and is not yet a full DAG-native checker.
+
+### Transformation elaboration and redundant count removal — pending CI
+
+The next authentic PSC1 error was an untyped match RHS in TransformLeaf
+(`matchExpectedType`). Explicit result annotations now cover both such RHSs;
+this uses the existing language profile. Default canonical transformations
+now read exact cached depth directly instead of traversing the graph to compute
+an expanded count that the worker immediately caps to depth. A native lemma
+checks depth <= recursive node count and the corresponding cap equality. The
+explicit bounded API and all checker fuel limits remain unchanged. Global
+validated-arena correspondence and substitution refinement remain unproved;
+conditional local metadata lemmas and finite parity tests do not imply them.

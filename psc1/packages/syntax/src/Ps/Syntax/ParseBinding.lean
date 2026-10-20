@@ -53,16 +53,15 @@ def psParseBindingPatternsWithFuel
                         span := { start := start, stop := closing.token.span.stop }
                         cursor := closing.cursor }
 
-def psSyntaxBindingTuple (values : List PsSyntaxBindingPattern) :
-    PsSourceSpan -> PsSyntaxBindingPattern :=
+def psSyntaxBindingTuple (values : List PsSyntaxBindingPattern)
+    (span : PsSourceSpan) : PsSyntaxBindingPattern :=
   match values with
-  | List.nil => fun (span : PsSourceSpan) => PsSyntaxBindingPattern.unit span
+  | List.nil => PsSyntaxBindingPattern.unit span
   | List.cons first rest =>
-      let smaller : PsSourceSpan -> PsSyntaxBindingPattern := psSyntaxBindingTuple rest;
-      fun (span : PsSourceSpan) =>
-        match rest with
-        | List.nil => first
-        | List.cons _ _ => PsSyntaxBindingPattern.pair first (smaller span) span
+      match rest with
+      | List.nil => first
+      | List.cons _ _ =>
+          PsSyntaxBindingPattern.pair first (psSyntaxBindingTuple rest span) span
 
 def psParseBindingPatternWithFuel (fuel : Nat) :
     PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxBindingPattern) :=

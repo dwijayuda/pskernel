@@ -105,6 +105,19 @@ private def testParseCommon : IO Unit := do
     require "mismatched or unclosed PS namespace refuses"
       (match psParseProofScriptSource source with | .error _ => true | .ok _ => false)
 
+private def testUnusedParserFuel : IO Unit := do
+  let cursor <- match psLex "" with
+    | .ok tokens => pure (psTokenCursorFromTokens tokens)
+    | .error _ => throw (IO.userError "empty source lex")
+  let result := psParseScopedDeclarationsWithFuel
+    (fun _ => Except.error PsParseError.fuelExhausted)
+    (fun _ next => Except.ok next)
+    1000000000 cursor [] []
+  require "empty scoped parser returns without traversing unused fuel"
+    (match result with
+    | .error _ => false
+    | .ok parsed => parsed.value.isEmpty && psTokenCursorDone parsed.cursor)
+
 private def testPreludeClosure : IO Unit := do
   let rootName := PsName.str .anonymous "root"
   let aName := PsName.str .anonymous "a"
@@ -135,5 +148,6 @@ def main : IO Unit := do
   testPatternNames
   testScopedDeclaration
   testParseCommon
+  testUnusedParserFuel
   testPreludeClosure
   IO.println "PSC1_CENSUS_NORMALIZATION: pattern and runtime closure behavior passed"

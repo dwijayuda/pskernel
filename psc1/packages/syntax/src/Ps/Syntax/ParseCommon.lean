@@ -770,12 +770,12 @@ def psParseScopedDeclarationsWithFuel
           psParseScopedDeclarationsFinish cursor scopes declarationsRev
         else Except.error PsParseError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          PsTokenCursor -> List PsSyntaxName -> List PsSyntaxDeclaration ->
-          Except PsParseError (PsParseResult (List PsSyntaxDeclaration)) :=
-        psParseScopedDeclarationsWithFuel parseDeclaration separator remaining;
       fun (cursor : PsTokenCursor) (scopes : List PsSyntaxName)
           (declarationsRev : List PsSyntaxDeclaration) =>
+        let smaller :
+            PsTokenCursor -> List PsSyntaxName -> List PsSyntaxDeclaration ->
+            Except PsParseError (PsParseResult (List PsSyntaxDeclaration)) :=
+          psParseScopedDeclarationsWithFuel parseDeclaration separator remaining;
         if psTokenCursorDone cursor then
           psParseScopedDeclarationsFinish cursor scopes declarationsRev
         else if psTokenCursorAtText cursor "namespace" then

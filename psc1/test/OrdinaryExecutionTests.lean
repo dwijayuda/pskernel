@@ -1,6 +1,7 @@
 import Ps.Compiler.Ordinary
 import Ps.Host.LeanChecked
 import Ps.CompilerIr.Validate
+import Ps.Elab.DoLoop
 
 private def require (condition : Bool) (message : String) : IO Unit := do
   if !condition then throw (IO.userError message)
@@ -55,7 +56,38 @@ private def requireProductWitnessBudget : IO Unit := do
       else throw (IO.userError ("PSC1_ORDINARY_BUDGET_FAIL: " ++ reason))
   | .ok _ => throw (IO.userError "PSC1_ORDINARY_BUDGET_FAIL: exponential witness accepted")
 
+
+private def requireLoopHelperAdmission : IO Unit := do
+  let name := psElabDoLoopName (psRootName "loopOwner")
+  let declaration := psElabDoLoopDeclaration name
+  let input := PsElabModuleResult.mk psSelfHostProdPreludeEnvironment [declaration]
+  let prepared ← match psCompilerPrepareOrdinary input with
+    | .error message => throw (IO.userError ("loop helper ordinary expansion: " ++ message))
+    | .ok value => pure value
+  match ← psHostLeanCheckPrepared prepared.logical with
+  | .error message => throw (IO.userError ("loop helper independent admission: " ++ message))
+  | .ok _ => pure ()
+  match declaration, prepared.logical.declarations with
+  | .partialDecl _ _ type body,
+      [.opaqueDecl _ _ logicalType witness, .definitionDecl checkedName _ checkedType checkedBody] =>
+      require (psExprAlphaEq type logicalType && psExprAlphaEq type checkedType)
+        "loop helper changed its checked type"
+      require (psNameEq checkedName (psOrdinaryBodyName name))
+        "loop helper lost exact body ownership"
+      require (psExprAlphaEq body checkedBody)
+        "loop helper runtime body differs from admitted body"
+      require (!psExprAlphaEq witness checkedBody)
+        "loop helper logical witness must not expose recursive execution"
+      require (psElabDoLoopOccurs name body)
+        "loop helper fixture does not exercise a recursive body"
+  | _, _ => throw (IO.userError "loop helper expansion shape changed")
+  match psCompilerPrepareElaborated input with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "loop helper bypassed explicit ordinary assurance")
+  IO.println "PSC1_LOOP_HELPER_ADMISSION: safe opaque witness and exact recursive body passed"
+
 def main : IO Unit := do
+  requireLoopHelperAdmission
   requireProductWitnessBudget
   let source := "partial def countdown (n : Nat) : Nat := if Nat.beq n 0 then 42 else countdown (Nat.sub n 1)\n"
   let first ← prepare .lean source

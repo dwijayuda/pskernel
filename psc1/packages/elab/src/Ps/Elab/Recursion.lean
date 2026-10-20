@@ -420,6 +420,45 @@ def psElabRecursionWalkWithFuel
                               (psListAppend conditionResult.changedIds
                                 (psListAppend thenResult.changedIds
                                   (psListAppend elseResult.changedIds restResult.changedIds))))
+        | PsSyntaxTerm.doForE name collection loopBody rest span =>
+            match smaller context collection with
+            | Except.error error => Except.error error
+            | Except.ok collectionResult =>
+                match smaller (psElabRecursionPushName context name) loopBody with
+                | Except.error error => Except.error error
+                | Except.ok bodyResult =>
+                    match smaller context rest with
+                    | Except.error error => Except.error error
+                    | Except.ok restResult =>
+                        Except.ok (PsElabRecursionWalkResult.mk
+                          (PsSyntaxTerm.doForE name collectionResult.term
+                            bodyResult.term restResult.term span)
+                          (psListAppend collectionResult.changedIds
+                            (psListAppend bodyResult.changedIds restResult.changedIds)))
+        | PsSyntaxTerm.doForRangeE name lower upper loopBody rest span =>
+            match psElabRecursionWalkTerms smaller [lower, upper, rest] context with
+            | Except.error error => Except.error error
+            | Except.ok outerResult =>
+                match smaller (psElabRecursionPushName context name) loopBody with
+                | Except.error error => Except.error error
+                | Except.ok bodyResult =>
+                    match outerResult.fst with
+                    | [nextLower, nextUpper, nextRest] =>
+                        Except.ok (PsElabRecursionWalkResult.mk
+                          (PsSyntaxTerm.doForRangeE name nextLower nextUpper
+                            bodyResult.term nextRest span)
+                          (psListAppend outerResult.snd bodyResult.changedIds))
+                    | _ => Except.error PsElabError.structuralRecursionInternal
+        | PsSyntaxTerm.doWhileE condition loopBody rest span =>
+            match psElabRecursionWalkTerms smaller [condition, loopBody, rest] context with
+            | Except.error error => Except.error error
+            | Except.ok result =>
+                match result.fst with
+                | [nextCondition, nextBody, nextRest] =>
+                    Except.ok (PsElabRecursionWalkResult.mk
+                      (PsSyntaxTerm.doWhileE nextCondition nextBody nextRest span)
+                      result.snd)
+                | _ => Except.error PsElabError.structuralRecursionInternal
         | PsSyntaxTerm.record fields span =>
             match psElabRecursionWalkFields smaller fields context with
             | Except.error error => Except.error error

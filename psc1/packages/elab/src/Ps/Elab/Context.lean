@@ -30,6 +30,7 @@ structure PsElabContext where
   instances : PsInstanceIndex
   metaContext : PsMetaContext
   structuralRecursion : Option PsElabStructuralRecursion
+  whileHelper : Option PsName := Option.none
 
 def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
   {
@@ -38,6 +39,7 @@ def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
     instances := psInstanceIndexEmpty
     metaContext := psMetaEmpty
     structuralRecursion := Option.none
+    whileHelper := Option.none
   }
 
 def psElabContextWithLocal
@@ -49,6 +51,7 @@ def psElabContextWithLocal
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := context.structuralRecursion
+    whileHelper := context.whileHelper
   }
 
 def psElabContextWithMeta
@@ -60,6 +63,7 @@ def psElabContextWithMeta
     instances := context.instances
     metaContext := metaContext
     structuralRecursion := context.structuralRecursion
+    whileHelper := context.whileHelper
   }
 
 def psElabContextWithStructuralRecursion
@@ -72,6 +76,7 @@ def psElabContextWithStructuralRecursion
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := structuralRecursion
+    whileHelper := context.whileHelper
   }
 
 -- Root fields keep their established call map in every nested body. Only the
@@ -84,3 +89,8 @@ def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext
         (Option.some (PsElabStructuralRecursion.mk
           recursion.functionName recursion.parameterIds recursion.explicitParameterIds
           recursion.recursiveParameterIndex recursion.calls recursion.resultType false))
+
+-- Only an explicitly partial source declaration supplies this capability.
+def psElabContextWithWhileHelper
+    (context : PsElabContext) (helper : PsName) : PsElabContext :=
+  { context with whileHelper := Option.some helper }

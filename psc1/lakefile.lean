@@ -212,6 +212,7 @@ lean_lib PsElab where
     `Ps.Elab.Context,
     `Ps.Elab.Literal,
     `Ps.Elab.Basic,
+    `Ps.Elab.DoLoop,
     `Ps.Elab.Do,
     `Ps.Elab.Operators,
     `Ps.Elab.Term,

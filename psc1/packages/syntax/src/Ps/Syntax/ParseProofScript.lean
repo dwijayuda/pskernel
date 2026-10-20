@@ -160,6 +160,9 @@ def psProofScriptTermWithSpan
   | .doAssignE name value body _ => PsSyntaxTerm.doAssignE name value body span
   | .doIfE condition thenBody elseBody rest _ => PsSyntaxTerm.doIfE condition thenBody elseBody rest span
   | .doEndE _ => PsSyntaxTerm.doEndE span
+  | .doForE name collection body rest _ => .doForE name collection body rest span
+  | .doForRangeE name lower upper body rest _ => .doForRangeE name lower upper body rest span
+  | .doWhileE condition body rest _ => .doWhileE condition body rest span
   | .lambda binders body _ => PsSyntaxTerm.lambda binders body span
   | .forallE binders body _ => PsSyntaxTerm.forallE binders body span
   | .letE name type value body _ =>

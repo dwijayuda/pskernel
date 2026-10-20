@@ -302,6 +302,12 @@ def psPrintLeanTermWithFuel
           Except.error (PsSourcePrintError.unsupportedSourceForm "procedural conditional outside do block")
       | .doEndE _ =>
           Except.error (PsSourcePrintError.unsupportedSourceForm "procedural continuation outside do block")
+      | .doForE _ _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "for statement outside do block")
+      | .doForRangeE _ _ _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "range iteration outside do block")
+      | .doWhileE _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "while statement outside do block")
       | .doReturnE _ _ =>
           Except.error (PsSourcePrintError.unsupportedSourceForm "return outside do block")
       | .lambda binders body _ =>

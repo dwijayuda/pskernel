@@ -146,6 +146,18 @@ def psPrintDoBinding
               Except.ok (psPrintJoin ""
                 [bindingPrefix, printedName, printedType, separator, groupedValue])
 
+def psPrintDoLoopHead
+    (printBody : PsSyntaxTerm -> Except PsSourcePrintError String)
+    (native : Bool) (header : String) (body : PsSyntaxTerm) :
+    Except PsSourcePrintError String :=
+  match printBody body with
+  | Except.error error => Except.error error
+  | Except.ok printedBody =>
+      if native then
+        Except.ok (psPrintJoin "" [header, " do { ", printedBody, " }"])
+      else
+        Except.ok (psPrintJoin "" [header, " {\n  ", printedBody, "\n}"])
+
 def psPrintDoBody
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
     (native : Bool) (separator : String) (fuel : Nat) :
@@ -206,6 +218,40 @@ def psPrintDoBody
                             Except.ok (psPrintJoin "" [head, " else { ", printedElse, " }"])
                           else
                             Except.ok (psPrintJoin "" [head, " else {\n  ", printedElse, "\n}"]);
+            withTail printedHead tail
+        | PsSyntaxTerm.doForE name collection loopBody tail _ =>
+            let printedHead :=
+              match psPrintSyntaxName name with
+              | Except.error error => Except.error error
+              | Except.ok printedName =>
+                  match printTerm collection with
+                  | Except.error error => Except.error error
+                  | Except.ok printedCollection =>
+                      psPrintDoLoopHead smaller native
+                        (psPrintJoin "" ["for ", printedName, " in ", printedCollection]) loopBody;
+            withTail printedHead tail
+        | PsSyntaxTerm.doForRangeE name lower upper loopBody tail _ =>
+            let printedHead :=
+              match psPrintSyntaxName name with
+              | Except.error error => Except.error error
+              | Except.ok printedName =>
+                  match printTerm lower with
+                  | Except.error error => Except.error error
+                  | Except.ok printedLower =>
+                      match printTerm upper with
+                      | Except.error error => Except.error error
+                      | Except.ok printedUpper =>
+                          psPrintDoLoopHead smaller native
+                            (psPrintJoin "" ["for ", printedName, " in [",
+                              printedLower, ":", printedUpper, "]"]) loopBody;
+            withTail printedHead tail
+        | PsSyntaxTerm.doWhileE condition loopBody tail _ =>
+            let printedHead :=
+              match printTerm condition with
+              | Except.error error => Except.error error
+              | Except.ok printedCondition =>
+                  psPrintDoLoopHead smaller native
+                    (psPrintJoin "" ["while (", printedCondition, ")"]) loopBody;
             withTail printedHead tail
         | PsSyntaxTerm.doBindE name annotation value tail _ =>
             withTail (psPrintDoBinding printTerm name annotation "let " " <- " value) tail

@@ -1,6 +1,7 @@
 import Ps.Core.Declaration
 import Ps.Core.Equality
 import Ps.Elab.Recursion
+import Ps.Elab.DoLoop
 
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
@@ -353,6 +354,7 @@ def psElabContextWithEnvironment
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := context.structuralRecursion
+    whileHelper := context.whileHelper
   }
 
 def psElabBinderArgument
@@ -1350,15 +1352,26 @@ def psElabPartialDeclaration
                         Except.error
                           (PsElabError.duplicateDeclaration name)
                     | Option.some withSelf =>
-                        let valueContext :=
-                          psElabContextWithEnvironment
-                            typeResult.context
-                            withSelf;
-                        match
-                            psElabTerm
-                              valueContext
-                              valueSyntax
-                              (Option.some openType) with
+                        let helperName := psElabDoLoopName name;
+                        -- Elaborator-only signature, like the source self header above.
+                        -- Batch construction emits the genuine partial declaration; ordinary
+                        -- expansion admits its opaque witness and exact body independently.
+                        let helperHeader :=
+                          PsDeclaration.axiomDecl helperName [] psElabDoLoopType;
+                        let valueContextResult :=
+                          match psEnvironmentAdd withSelf helperHeader with
+                          | Option.none =>
+                              Except.error (PsElabError.duplicateDeclaration helperName)
+                          | Option.some withHelper =>
+                              Except.ok (psElabContextWithWhileHelper
+                                (psElabContextWithEnvironment typeResult.context withHelper)
+                                helperName);
+                        let valueResult :=
+                          match valueContextResult with
+                          | Except.error error => Except.error error
+                          | Except.ok valueContext =>
+                              psElabTerm valueContext valueSyntax (Option.some openType);
+                        match valueResult with
                         | Except.error error => Except.error error
                         | Except.ok valueResult =>
                             let metaContext :=
@@ -1526,9 +1539,15 @@ def psElabDeclarationBatchStable
       match psElabDeclaration environment source with
       | Except.error error => Except.error error
       | Except.ok result =>
-          Except.ok
-            (PsElabDeclarationBatchResult.mk
-              (List.cons result.declaration List.nil))
+          let declarations :=
+            match result.declaration with
+            | .partialDecl name _ _ value =>
+                let helperName := psElabDoLoopName name;
+                if psElabDoLoopOccurs helperName value then
+                  [psElabDoLoopDeclaration helperName, result.declaration]
+                else [result.declaration]
+            | _ => [result.declaration];
+          Except.ok (PsElabDeclarationBatchResult.mk declarations)
 
 -- Historical callers can request the unchanged stable elaborator explicitly.
 -- The ordinary path keeps its one typed normalization attempt for the same
@@ -1540,7 +1559,16 @@ def psElabDeclarationBatchWithOrigins
   match psElabDeclarationBatchStable environment source with
   | Except.ok result =>
       let members : List PsElabMemberOrigin :=
-        psElabStableMemberOrigins result.declarations 0;
+        match result.declarations with
+        | [helper, publicDeclaration] =>
+            match helper, publicDeclaration with
+            | .partialDecl helperName _ _ _, .partialDecl publicName _ _ _ =>
+                if psNameEq helperName (psElabDoLoopName publicName) then
+                  [PsElabMemberOrigin.mk 0 helperName PsElabOriginRole.normalizedWorker,
+                   PsElabMemberOrigin.mk 1 publicName PsElabOriginRole.publicWrapper]
+                else psElabStableMemberOrigins result.declarations 0
+            | _, _ => psElabStableMemberOrigins result.declarations 0
+        | _ => psElabStableMemberOrigins result.declarations 0;
       Except.ok
         (PsElabDeclarationBatchWithOriginsResult.mk result
           (psElabBatchOriginAt sourceIndex source members Option.none))

@@ -101,7 +101,7 @@ Generated JS size: 4,991,405 bytes. The test process had peak RSS 196,604 KiB an
 
 The new test-only source psc1/test/PsKernelMetadataExperiment.lean computes and carries subtree hash, has-FVar and loose-bvar range alongside an original PsKernelExpr. It implements sample BVar, Sort, FVar, App, Lambda and Let smart constructors. Every sample is checked against the existing full recursive implementations BEFORE timing. No production kernel or portable source module is changed.
 
-The **native job** at [CI 39369351773](https://github.com/dwijayuda/pskernel/actions/runs/39369351773) passed validation for lambda, open/closed let, free-variable apps, and application spines to depth 512.
+Both jobs at [CI 39369351773](https://github.com/dwijayuda/pskernel/actions/runs/39369351773) **PASSED**. The native job validated the metadata prototype on lambda, open/closed let, free-variable apps, and application spines to depth 512. The generated-JS job independently rebuilt and ran the existing 4.35 source kernel; it did NOT compile the new metadata wrapper into JavaScript or demonstrate metadata speedups in that backend.
 
 | Native operation, 12,000 queries | Original, depth 32/128/512 | Precomputed field, depth 32/128/512 |
 |---|---|---|

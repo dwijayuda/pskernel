@@ -1,8 +1,6 @@
 import Ps.Compiler.Api
 
-/-- An ordinary runtime view retains the original immutable declaration graph and
-its exact independently checkable logical expansion. No behavioral certificate is
-represented by this record. The host recomputes it from captured source. -/
+/-- Exact immutable source graph, its checkable logical expansion, and runtime view. -/
 structure PsCompilerOrdinaryModule where
   source : PsCompilerAdmissionReadyModule
   logical : PsCompilerAdmissionReadyModule
@@ -13,198 +11,249 @@ def psOrdinaryHasType
     (environment : PsEnvironment) (locals : PsLocalContext)
     (value type : PsExpr) : Bool :=
   match psInferType environment psMetaEmpty locals value with
-  | .error _ => false
-  | .ok actual =>
-      let result := psUnify environment locals psMetaEmpty actual type
+  | Except.error _ => false
+  | Except.ok actual =>
+      let result := psUnify environment locals psMetaEmpty actual type;
       result.success && !psExprHasUnresolvedMeta value && !psExprHasUnresolvedMeta type
 
 def psOrdinaryLocalWitness
-    (environment : PsEnvironment) (locals : PsLocalContext) (type : PsExpr) :
-    List PsLocalDecl -> Option PsExpr
-  | [] => none
-  | declaration :: rest =>
-      let value := PsExpr.fvar (psLocalDeclId declaration)
-      if psOrdinaryHasType environment locals value type then some value
+    (environment : PsEnvironment) (locals : PsLocalContext) (type : PsExpr)
+    (declarations : List PsLocalDecl) : Option PsExpr :=
+  match declarations with
+  | List.nil => Option.none
+  | List.cons declaration rest =>
+      let value := PsExpr.fvar (psLocalDeclId declaration);
+      if psOrdinaryHasType environment locals value type then Option.some value
       else psOrdinaryLocalWitness environment locals type rest
 
-/-- Bounded constructive inhabitant selection for the admitted core. Failure
-means no inhabitant was found by this subset, not a proof of uninhabitedness.
-The executable recursive body is never consulted, unfolded or run here. -/
--- The structural fuel bounds recursion depth; budget counts every attempted
--- witness expansion and is shared by siblings and failed alternatives.
+def PsOrdinaryWitnessSearch : Type :=
+  PsEnvironment -> PsLocalContext -> PsExpr -> Nat -> Prod (Option PsExpr) Nat
+
+def psOrdinaryAtomicWitness (name : PsName) : Option PsExpr :=
+  if psNameEq name psNatName then Option.some (PsExpr.lit (PsLiteral.natural 0))
+  else if psNameEq name psIntName then
+    Option.some (PsExpr.app (PsExpr.constE psIntOfNatName []) (PsExpr.lit (PsLiteral.natural 0)))
+  else if psNameEq name psBoolName then Option.some (PsExpr.constE psBoolFalseName [])
+  else if psNameEq name psStringName then Option.some (PsExpr.lit (PsLiteral.string ""))
+  else if psNameEq name psCharName then
+    Option.some (PsExpr.app (PsExpr.constE psCharOfNatName []) (PsExpr.lit (PsLiteral.natural 0)))
+  else if psNameEq name psUnitName then Option.some (PsExpr.constE psUnitUnitName [])
+  else Option.none
+
+def psOrdinaryUnaryWitness (name : PsName) (element : PsExpr) : Option PsExpr :=
+  if psNameEq name psListName then
+    Option.some (PsExpr.app (PsExpr.constE psSelfHostListNilName []) element)
+  else if psNameEq name psOptionName then
+    Option.some (PsExpr.app (PsExpr.constE psSelfHostOptionNoneName []) element)
+  else if psNameEq name psArrayName then
+    Option.some (psExprApplyMany (PsExpr.constE psArrayEmptyWithCapacityName [])
+      [element, PsExpr.lit (PsLiteral.natural 0)])
+  else Option.none
+
+-- Siblings and failed alternatives share the remaining witness-attempt budget.
+def psOrdinaryBinaryWitness
+    (smaller : PsOrdinaryWitnessSearch) (environment : PsEnvironment) (locals : PsLocalContext)
+    (name : PsName) (first second : PsExpr) (available : Nat) :
+    Prod (Option PsExpr) Nat :=
+  if psNameEq name psProdName then
+    let left := smaller environment locals first available;
+    match left.fst with
+    | Option.none => Prod.mk Option.none left.snd
+    | Option.some leftValue =>
+        let right := smaller environment locals second left.snd;
+        match right.fst with
+        | Option.none => Prod.mk Option.none right.snd
+        | Option.some rightValue =>
+            Prod.mk (Option.some (psExprApplyMany (PsExpr.constE psProdMkName [])
+              [first, second, leftValue, rightValue])) right.snd
+  else if psNameEq name psSelfHostExceptName then
+    let success := smaller environment locals second available;
+    match success.fst with
+    | Option.some value =>
+        Prod.mk (Option.some (psSelfHostExceptOkOf first second value)) success.snd
+    | Option.none =>
+        let failure := smaller environment locals first success.snd;
+        match failure.fst with
+        | Option.some error =>
+            Prod.mk (Option.some (psSelfHostExceptErrorOf first second error)) failure.snd
+        | Option.none => Prod.mk Option.none failure.snd
+  else Prod.mk Option.none available
+
+def psOrdinaryApplicationWitness
+    (smaller : PsOrdinaryWitnessSearch) (environment : PsEnvironment) (locals : PsLocalContext)
+    (reduced : PsExpr) (available : Nat) : Prod (Option PsExpr) Nat :=
+  let view := psExprAppView reduced;
+  match view.head with
+  | PsExpr.constE name _ =>
+      match view.args with
+      | List.nil => Prod.mk Option.none available
+      | List.cons first rest =>
+          match rest with
+          | List.nil => Prod.mk (psOrdinaryUnaryWitness name first) available
+          | List.cons second tail =>
+              match tail with
+              | List.nil => psOrdinaryBinaryWitness smaller environment locals name first second available
+              | _ => Prod.mk Option.none available
+  | _ => Prod.mk Option.none available
+
+def psOrdinarySortWitness (level : PsLevel) : Option PsExpr :=
+  match level with
+  | PsLevel.zero =>
+      Option.some (psExprApplyMany (PsExpr.constE psEqName [PsLevel.succ PsLevel.zero])
+        [PsExpr.constE psNatName [], PsExpr.lit (PsLiteral.natural 0),
+          PsExpr.lit (PsLiteral.natural 0)])
+  | PsLevel.succ inner =>
+      match inner with
+      | PsLevel.zero => Option.some (PsExpr.constE psNatName [])
+      | _ => Option.none
+  | _ => Option.none
+
+/-- Bounded constructive search; absence is not uninhabitedness evidence.
+The recursive executable body is never consulted here. -/
+def psOrdinaryWitnessBudgetWorker (fuel : Nat) : PsOrdinaryWitnessSearch :=
+  match fuel with
+  | 0 =>
+      fun (environment : PsEnvironment) (locals : PsLocalContext) (type : PsExpr) (budget : Nat) =>
+        Prod.mk Option.none budget
+  | remaining + 1 =>
+      let smaller : PsOrdinaryWitnessSearch := psOrdinaryWitnessBudgetWorker remaining;
+      fun (environment : PsEnvironment) (locals : PsLocalContext) (type : PsExpr) (budget : Nat) =>
+        match budget with
+        | 0 => Prod.mk Option.none 0
+        | available + 1 =>
+            let reduced := psWhnf environment psMetaEmpty locals type;
+            let candidate : Prod (Option PsExpr) Nat :=
+              match psOrdinaryLocalWitness environment locals type locals.declarations with
+              | Option.some value => Prod.mk (Option.some value) available
+              | Option.none =>
+                  match reduced with
+                  | PsExpr.forallE name domain body binder =>
+                      let pushed := psLocalPushBinding locals name domain binder;
+                      let child := smaller environment pushed.context
+                        (psExprInstantiate1 body (PsExpr.fvar pushed.id)) available;
+                      match child.fst with
+                      | Option.none => Prod.mk Option.none child.snd
+                      | Option.some value =>
+                          Prod.mk (Option.some (PsExpr.lam name domain
+                            (psExprAbstractFVar pushed.id value) binder)) child.snd
+                  | PsExpr.sortE level => Prod.mk (psOrdinarySortWitness level) available
+                  | PsExpr.constE name _ => Prod.mk (psOrdinaryAtomicWitness name) available
+                  | _ => psOrdinaryApplicationWitness smaller environment locals reduced available;
+            match candidate.fst with
+            | Option.none => candidate
+            | Option.some value =>
+                if psOrdinaryHasType environment locals value type then candidate
+                else Prod.mk Option.none candidate.snd
+
 def psOrdinaryWitnessBudgetWithFuel
     (fuel : Nat) (environment : PsEnvironment) (locals : PsLocalContext)
     (type : PsExpr) (budget : Nat) : Prod (Option PsExpr) Nat :=
-  match fuel with
-  | 0 => (none, budget)
-  | remaining + 1 =>
-      match budget with
-      | 0 => (none, 0)
-      | available + 1 =>
-          let reduced := psWhnf environment psMetaEmpty locals type
-          let candidate : Prod (Option PsExpr) Nat :=
-            match psOrdinaryLocalWitness environment locals type locals.declarations with
-            | some value => (some value, available)
-            | none =>
-              match reduced with
-              | .forallE name domain body binder =>
-                  let pushed := psLocalPushBinding locals name domain binder
-                  let child := psOrdinaryWitnessBudgetWithFuel remaining environment
-                    pushed.context (psExprInstantiate1 body (.fvar pushed.id)) available
-                  match child.fst with
-                  | none => (none, child.snd)
-                  | some value =>
-                      (some (.lam name domain (psExprAbstractFVar pushed.id value) binder),
-                        child.snd)
-              | .sortE .zero =>
-                  (some (psExprApplyMany
-                    (.constE psEqName [PsLevel.succ PsLevel.zero])
-                    [.constE psNatName [], .lit (.natural 0), .lit (.natural 0)]), available)
-              | .sortE (.succ .zero) => (some (.constE psNatName []), available)
-              | .constE name _ =>
-                  let value : Option PsExpr :=
-                    if psNameEq name psNatName then some (.lit (.natural 0))
-                    else if psNameEq name psIntName then
-                      some (.app (.constE psIntOfNatName []) (.lit (.natural 0)))
-                    else if psNameEq name psBoolName then some (.constE psBoolFalseName [])
-                    else if psNameEq name psStringName then some (.lit (.string ""))
-                    else if psNameEq name psCharName then
-                      some (.app (.constE psCharOfNatName []) (.lit (.natural 0)))
-                    else if psNameEq name psUnitName then some (.constE psUnitUnitName [])
-                    else none
-                  (value, available)
-              | _ =>
-                  let view := psExprAppView reduced
-                  match view.head, view.args with
-                  | .constE name _, [element] =>
-                      let value : Option PsExpr :=
-                        if psNameEq name psListName then
-                          some (.app (.constE psSelfHostListNilName []) element)
-                        else if psNameEq name psOptionName then
-                          some (.app (.constE psSelfHostOptionNoneName []) element)
-                        else if psNameEq name psArrayName then
-                          some (psExprApplyMany (.constE psArrayEmptyWithCapacityName [])
-                            [element, .lit (.natural 0)])
-                        else none
-                      (value, available)
-                  | .constE name _, [first, second] =>
-                      if psNameEq name psProdName then
-                        let left := psOrdinaryWitnessBudgetWithFuel remaining
-                          environment locals first available
-                        match left.fst with
-                        | none => (none, left.snd)
-                        | some leftValue =>
-                            let right := psOrdinaryWitnessBudgetWithFuel remaining
-                              environment locals second left.snd
-                            match right.fst with
-                            | none => (none, right.snd)
-                            | some rightValue =>
-                                (some (psExprApplyMany (.constE psProdMkName [])
-                                  [first, second, leftValue, rightValue]), right.snd)
-                      else if psNameEq name psSelfHostExceptName then
-                        let success := psOrdinaryWitnessBudgetWithFuel remaining
-                          environment locals second available
-                        match success.fst with
-                        | some value =>
-                            (some (psSelfHostExceptOkOf first second value), success.snd)
-                        | none =>
-                            let failure := psOrdinaryWitnessBudgetWithFuel remaining
-                              environment locals first success.snd
-                            match failure.fst with
-                            | some error =>
-                                (some (psSelfHostExceptErrorOf first second error), failure.snd)
-                            | none => (none, failure.snd)
-                      else (none, available)
-                  | _, _ => (none, available)
-          match candidate.fst with
-          | none => candidate
-          | some value =>
-              if psOrdinaryHasType environment locals value type then candidate
-              else (none, candidate.snd)
+  psOrdinaryWitnessBudgetWorker fuel environment locals type budget
 
 def psOrdinaryWitnessWithFuel
     (fuel : Nat) (environment : PsEnvironment) (locals : PsLocalContext)
     (type : PsExpr) : Option PsExpr :=
-  (psOrdinaryWitnessBudgetWithFuel fuel environment locals type fuel).fst
+  let searched : Prod (Option PsExpr) Nat :=
+    psOrdinaryWitnessBudgetWithFuel fuel environment locals type fuel;
+  searched.fst
 
 def psOrdinaryBodyName (owner : PsName) : PsName :=
-  -- Numeric name components cannot be authored by the source name parser.
   PsName.num (PsName.str owner "_psc1PartialBody") 0
 
 def psOrdinaryAdd
     (environment : PsEnvironment) (declaration : PsDeclaration) :
     Except String PsEnvironment :=
   match psEnvironmentAdd environment declaration with
-  | none => .error ("PSC1_ORDINARY_DUPLICATE: " ++ psNameToString (psDeclarationName declaration))
-  | some result => .ok result
+  | Option.none =>
+      Except.error (String.Internal.append "PSC1_ORDINARY_DUPLICATE: "
+        (psNameToString (psDeclarationName declaration)))
+  | Option.some result => Except.ok result
+
+def psOrdinaryExpandWorker (declarations : List PsDeclaration) :
+    PsEnvironment -> Except String (Prod (List PsDeclaration) (List PsName)) :=
+  match declarations with
+  | List.nil =>
+      fun (environment : PsEnvironment) => Except.ok (Prod.mk List.nil List.nil)
+  | List.cons declaration rest =>
+      let smaller : PsEnvironment -> Except String (Prod (List PsDeclaration) (List PsName)) :=
+        psOrdinaryExpandWorker rest;
+      fun (environment : PsEnvironment) =>
+        match declaration with
+        | PsDeclaration.axiomDecl _ _ _ => Except.error "PSC1_SOURCE_AXIOM_FORBIDDEN"
+        | PsDeclaration.opaqueDecl _ _ _ _ => Except.error "PSC1_SOURCE_OPAQUE_NOT_SELECTED"
+        | PsDeclaration.partialDecl name levels type body =>
+            match psWhnf environment psMetaEmpty psLocalEmpty type with
+            | PsExpr.forallE _ _ _ _ =>
+                match psOrdinaryWitnessWithFuel 128 environment psLocalEmpty type with
+                | Option.none =>
+                    Except.error (String.Internal.append
+                      "PSC1_PARTIAL_NO_CHECKED_INHABITANT: " (psNameToString name))
+                | Option.some witness =>
+                    let logical := PsDeclaration.opaqueDecl name levels type witness;
+                    match psOrdinaryAdd environment logical with
+                    | Except.error error => Except.error error
+                    | Except.ok withLogical =>
+                        let implementation := PsDeclaration.definitionDecl
+                          (psOrdinaryBodyName name) levels type body;
+                        match psOrdinaryAdd withLogical implementation with
+                        | Except.error error => Except.error error
+                        | Except.ok withBody =>
+                            match smaller withBody with
+                            | Except.error error => Except.error error
+                            | Except.ok expanded =>
+                                Except.ok (Prod.mk
+                                  (List.cons logical (List.cons implementation expanded.fst))
+                                  (List.cons name expanded.snd))
+            | _ =>
+                Except.error (String.Internal.append
+                  "PSC1_PARTIAL_EXPECTED_FUNCTION: " (psNameToString name))
+        | _ =>
+            match psOrdinaryAdd environment declaration with
+            | Except.error error => Except.error error
+            | Except.ok next =>
+                match smaller next with
+                | Except.error error => Except.error error
+                | Except.ok expanded =>
+                    Except.ok (Prod.mk (List.cons declaration expanded.fst) expanded.snd)
 
 def psOrdinaryExpand
     (declarations : List PsDeclaration) (environment : PsEnvironment) :
-    Except String (List PsDeclaration × List PsName) := do
-  match declarations with
-  | [] => return ([], [])
-  | declaration :: rest =>
-      match declaration with
-      | .axiomDecl _ _ _ =>
-          throw "PSC1_SOURCE_AXIOM_FORBIDDEN"
-      | .opaqueDecl _ _ _ _ =>
-          throw "PSC1_SOURCE_OPAQUE_NOT_SELECTED"
-      | .partialDecl name levels type body =>
-          match psWhnf environment psMetaEmpty psLocalEmpty type with
-          | .forallE _ _ _ _ => pure ()
-          | _ => throw ("PSC1_PARTIAL_EXPECTED_FUNCTION: " ++ psNameToString name)
-          let some witness := psOrdinaryWitnessWithFuel 128 environment psLocalEmpty type
-            | throw ("PSC1_PARTIAL_NO_CHECKED_INHABITANT: " ++ psNameToString name)
-          let logical := PsDeclaration.opaqueDecl name levels type witness
-          let withLogical ← psOrdinaryAdd environment logical
-          let implementation := PsDeclaration.definitionDecl
-            (psOrdinaryBodyName name) levels type body
-          -- The body refers to the public opaque function, never to a temporary
-          -- source axiom. The independent provider checks this exact definition.
-          let withBody ← psOrdinaryAdd withLogical implementation
-          let (tail, partials) ← psOrdinaryExpand rest withBody
-          return (logical :: implementation :: tail, name :: partials)
-      | _ =>
-          let next ← psOrdinaryAdd environment declaration
-          let (tail, partials) ← psOrdinaryExpand rest next
-          return (declaration :: tail, partials)
+    Except String (Prod (List PsDeclaration) (List PsName)) :=
+  psOrdinaryExpandWorker declarations environment
 
 def psCompilerPrepareOrdinary
-    (elaborated : PsElabModuleResult) : Except String PsCompilerOrdinaryModule := do
-  let (logical, partials) ←
-    psOrdinaryExpand elaborated.declarations psSelfHostProdPreludeEnvironment
-  -- Encoding checks every expression for forbidden free/unresolved variables.
-  match psEncodeCheckedAdmissionsCanonical logical with
-  | .error _ => throw "PSC1_ORDINARY_LOGICAL_ENCODING_FAILED"
-  | .ok _ => pure ()
-  let runtimeEnvironment ← match psAddDeclarationList
-      psSelfHostProdPreludeEnvironment elaborated.declarations with
-    | .error _ => throw "PSC1_ORDINARY_RUNTIME_CLOSURE_FAILED"
-    | .ok value => pure value
-  return {
-    source := { declarations := elaborated.declarations }
-    logical := { declarations := logical }
-    runtimeEnvironment := runtimeEnvironment
-    partialNames := partials
-  }
+    (elaborated : PsElabModuleResult) : Except String PsCompilerOrdinaryModule :=
+  match psOrdinaryExpand elaborated.declarations psSelfHostProdPreludeEnvironment with
+  | Except.error error => Except.error error
+  | Except.ok expanded =>
+      match psEncodeCheckedAdmissionsCanonical expanded.fst with
+      | Except.error _ => Except.error "PSC1_ORDINARY_LOGICAL_ENCODING_FAILED"
+      | Except.ok encoded =>
+          match psAddDeclarationList psSelfHostProdPreludeEnvironment elaborated.declarations with
+          | Except.error _ => Except.error "PSC1_ORDINARY_RUNTIME_CLOSURE_FAILED"
+          | Except.ok runtimeEnvironment =>
+              Except.ok (PsCompilerOrdinaryModule.mk
+                (PsCompilerAdmissionReadyModule.mk elaborated.declarations)
+                (PsCompilerAdmissionReadyModule.mk expanded.fst)
+                runtimeEnvironment expanded.snd)
 
-/-- The compiler API has no authority to claim the host performed admission.
-It only computes a typed runtime candidate from its exact source graph. -/
+/-- This API computes a typed candidate; independent admission belongs to the host. -/
 def psCompilerOrdinaryIr
-    (prepared : PsCompilerOrdinaryModule) : Except String PsVerifiedIrModule := do
-  -- Recompute the graph rather than trusting supplied pairing metadata.
-  let repeated ← psCompilerPrepareOrdinary
-    { environment := prepared.runtimeEnvironment
-      declarations := prepared.source.declarations }
-  let originalEncoded ← match psCompilerAdmissionsFromPrepared prepared.logical with
-    | .error _ => throw "PSC1_ORDINARY_LOGICAL_INTEGRITY_FAILED"
-    | .ok value => pure value
-  let repeatedEncoded ← match psCompilerAdmissionsFromPrepared repeated.logical with
-    | .error _ => throw "PSC1_ORDINARY_LOGICAL_INTEGRITY_FAILED"
-    | .ok value => pure value
-  if originalEncoded != repeatedEncoded then
-    throw "PSC1_ORDINARY_BODY_BINDING_MISMATCH"
-  match psEraseCoreModuleWithRuntimePrelude repeated.runtimeEnvironment
-      psSelfHostRuntimePreludeDeclarationsWithProd repeated.source.declarations with
-  | .error _ => throw "PSC1_ORDINARY_ERASURE_FAILED"
-  | .ok ir => return ir
+    (prepared : PsCompilerOrdinaryModule) : Except String PsVerifiedIrModule :=
+  let elaborated : PsElabModuleResult :=
+    PsElabModuleResult.mk prepared.runtimeEnvironment prepared.source.declarations;
+  match psCompilerPrepareOrdinary elaborated with
+  | Except.error error => Except.error error
+  | Except.ok repeated =>
+      match psCompilerAdmissionsFromPrepared prepared.logical with
+      | Except.error _ => Except.error "PSC1_ORDINARY_LOGICAL_INTEGRITY_FAILED"
+      | Except.ok originalEncoded =>
+          match psCompilerAdmissionsFromPrepared repeated.logical with
+          | Except.error _ => Except.error "PSC1_ORDINARY_LOGICAL_INTEGRITY_FAILED"
+          | Except.ok repeatedEncoded =>
+              if psStringEq originalEncoded repeatedEncoded then
+                match psEraseCoreModuleWithRuntimePrelude repeated.runtimeEnvironment
+                    psSelfHostRuntimePreludeDeclarationsWithProd repeated.source.declarations with
+                | Except.error _ => Except.error "PSC1_ORDINARY_ERASURE_FAILED"
+                | Except.ok ir => Except.ok ir
+              else Except.error "PSC1_ORDINARY_BODY_BINDING_MISMATCH"

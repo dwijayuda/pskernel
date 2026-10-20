@@ -131,6 +131,27 @@ all inductive/structure checks and raw API projections. Original declaration nam
 remain. Complete Declaration parse/elaboration is gated in BOTH lanes.
 Next semantic parse blocker after that is Compiler.Ordinary.
 
+## Ordinary source candidate and partial-context typing — pending Linux CI
+
+Focused run39518232640 at6859fe2d5bfe03ce9fe40a6ed2600837922c63d4:
+native behavior and namespace passed. Both lanes: semantic67/66/64,
+JS79/74/70, Rust83/75/69. DoLoopLift now fully accepted. Overall failed maintained
+Declaration gate at psElabPartialDeclaration:matchExpectedType.
+Type its valueContextResult/valueResult as Except PsElabError PsElabContext and
+Except PsElabError PsElabTermResult, respectively.
+
+Normalize full Compiler.Ordinary. Keep constructive witness selection, final
+psOrdinaryHasType validation, depth/total-attempt sharing and fixed128 budget;
+never consult the executable body to invent an inhabitant. Preserve exact logical
+opaque witness plus private definition expansion, public body-name construction,
+canonical encoding checks, original source graph, recomputed source/body binding
+comparison and erasure guards. Structural workers carry changing environment,
+local context, type and witness budget through returned functions. No runtime fuel.
+Dedicated existing ordinary tests are added to focused execution. Complete
+Ordinary and Declaration parse/elaboration remain maintained in BOTH lanes.
+If semantic source acceptance completes, continue other closure phases and
+independent whole-closure admission/strict IR; do not equate census with either.
+
 ## Census integrity and continuation
 
 Fresh Lean and PS preparation states measure the full ordered explicit import

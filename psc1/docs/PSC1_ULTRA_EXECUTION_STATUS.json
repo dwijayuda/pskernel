@@ -423,7 +423,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "Term-Recursion-focused-accepted-Declaration-and-loop-catchall-pending",
+    "status": "loop-source-focused-accepted-ordinary-and-declaration-context-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -509,37 +509,37 @@
       }
     },
     "pendingModules": [
-      "psc1/packages/elab/src/Ps/Elab/DoLoopLift.lean",
-      "psc1/packages/elab/src/Ps/Elab/Declaration.lean"
+      "psc1/packages/elab/src/Ps/Elab/Declaration.lean",
+      "psc1/packages/compiler/src/Ps/Compiler/Ordinary.lean"
     ],
     "latestFocused": {
-      "head": "39e7037b38848f0d2d3bbb5cd0aa42568704f459",
-      "runId": 39517856980,
-      "overall": "failed-maintained-loop-elaboration-gate",
+      "head": "6859fe2d5bfe03ce9fe40a6ed2600837922c63d4",
+      "runId": 39518232640,
+      "overall": "failed-maintained-Declaration-elaboration-gate",
       "nativeBehaviorAndNamespace": "passed",
       "contractChecks": 38,
       "counts": {
         "semantic": [
           67,
-          65,
-          63
+          66,
+          64
         ],
         "directjs": [
           79,
-          73,
-          69
+          74,
+          70
         ],
         "rust": [
           83,
-          74,
-          68
+          75,
+          69
         ]
       },
       "nextRefusal": {
-        "module": "Ps.Elab.DoLoopLift",
+        "module": "Ps.Elab.Declaration",
         "stage": "elaboration",
-        "declaration": "psElabDoLoopReplaceOwner",
-        "detail": "matchConstructorUnknown:PsExpr.value"
+        "declaration": "psElabPartialDeclaration",
+        "detail": "matchExpectedType"
       }
     },
     "latestNativeFailure": {

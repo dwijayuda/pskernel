@@ -1381,7 +1381,7 @@ def psElabPartialDeclaration
                         -- ordinary expansion admits each opaque witness and exact body independently.
                         let helperHeader :=
                           PsDeclaration.axiomDecl helperName [] psElabDoLoopType;
-                        let valueContextResult :=
+                        let valueContextResult : Except PsElabError PsElabContext :=
                           match psEnvironmentAdd withSelf helperHeader with
                           | Option.none =>
                               Except.error (PsElabError.duplicateDeclaration helperName)
@@ -1389,7 +1389,7 @@ def psElabPartialDeclaration
                               Except.ok (psElabContextWithWhileHelper
                                 (psElabContextWithEnvironment typeResult.context withHelper)
                                 helperName);
-                        let valueResult :=
+                        let valueResult : Except PsElabError PsElabTermResult :=
                           match valueContextResult with
                           | Except.error error => Except.error error
                           | Except.ok valueContext =>

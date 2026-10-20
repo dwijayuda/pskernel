@@ -1067,7 +1067,7 @@ def psJsParameterName
     (parameter : PsJsIrParameter) : String :=
   parameter.name
 
-def psJsPrintDeclaration
+def psJsPrintDeclarationWithVisibility (isPublic : Bool)
     (declaration : PsJsIrDeclaration) :
     Except PsJsEmitError String :=
   match psJsPrintExpr declaration.body with
@@ -1077,7 +1077,7 @@ def psJsPrintDeclaration
       | List.nil =>
           Except.ok
             (psJsConcat4
-              "export const "
+              (if isPublic then "export const " else "const ")
               declaration.name
               " = "
               (psJsConcat2 body ";\n"))
@@ -1088,7 +1088,7 @@ def psJsPrintDeclaration
               declaration.parameters;
           Except.ok
             (psJsConcat6
-              "export function "
+              (if isPublic then "export function " else "function ")
               declaration.name
               "("
               (psJsJoin ", " parameters)
@@ -1097,6 +1097,9 @@ def psJsPrintDeclaration
 
 -- Generated coordinates are separate from parser positions: UTF-8 byte
 -- offsets plus zero-based ECMAScript lines and UTF-16 columns.
+def psJsPrintDeclaration (declaration : PsJsIrDeclaration) : Except PsJsEmitError String :=
+  psJsPrintDeclarationWithVisibility true declaration
+
 structure PsJsGeneratedPosition where
   byteOffset : Nat
   line : Nat
@@ -1532,7 +1535,7 @@ def psJsTailEmitWithFuel
                     printed
                     ";")
 
-def psJsPrintTailLoop
+def psJsPrintTailLoopWithVisibility (isPublic : Bool)
     (declaration : PsJsIrDeclaration) : Option String :=
   match declaration.parameters with
   | List.nil => Option.none
@@ -1554,7 +1557,7 @@ def psJsPrintTailLoop
                   let parameters := psJsJoin ", " names;
                   Option.some
                     (psJsJoin "" [
-                      "export function ", declaration.name, "(", parameters,
+                      (if isPublic then "export function " else "function "), declaration.name, "(", parameters,
                       ") { let __ps$tail$state = [", parameters,
                       "]; while (true) { const [", parameters,
                       "] = __ps$tail$state; ", printedBody, " } }\n"
@@ -1562,10 +1565,13 @@ def psJsPrintTailLoop
         else Option.none
       else Option.none
 
-def psJsPrintDeclarationStackSafe
+def psJsPrintTailLoop (declaration : PsJsIrDeclaration) : Option String :=
+  psJsPrintTailLoopWithVisibility true declaration
+
+def psJsPrintDeclarationStackSafeWithVisibility (isPublic : Bool)
     (declaration : PsJsIrDeclaration) :
     Except PsJsEmitError String :=
-  match psJsPrintTailLoop declaration with
+  match psJsPrintTailLoopWithVisibility isPublic declaration with
   | Option.some printed =>
       Except.ok printed
   | Option.none =>
@@ -1586,7 +1592,7 @@ def psJsPrintDeclarationStackSafe
                   (psJsJoin
                     ""
                     [
-                      "export const ",
+                      (if isPublic then "export const " else "const "),
                       declaration.name,
                       " = __ps$run((function*() { return ",
                       body,
@@ -1605,7 +1611,7 @@ def psJsPrintDeclarationStackSafe
                   (psJsJoin
                     ""
                     [
-                      "export function ",
+                      (if isPublic then "export function " else "function "),
                       declaration.name,
                       "(",
                       joinedParameters,
@@ -1628,7 +1634,10 @@ def psJsPrintDeclarationStackSafe
                       ");\n"
                     ])
       else
-        psJsPrintDeclaration declaration
+        psJsPrintDeclarationWithVisibility isPublic declaration
+
+def psJsPrintDeclarationStackSafe (declaration : PsJsIrDeclaration) : Except PsJsEmitError String :=
+  psJsPrintDeclarationStackSafeWithVisibility true declaration
 
 def psJsPrintDeclarationsStackSafe
     (declarations : List PsJsIrDeclaration) :
@@ -1637,12 +1646,41 @@ def psJsPrintDeclarationsStackSafe
     psJsPrintDeclarationStackSafe declarations psTextBuilderEmpty
 
 
+/-- The direct printer's two helper groups are selected from structured JsIR. -/
+partial def psJsNeedsUtf8Runtime : PsJsIrExpr → Bool
+  | .literal _ | .var _ => false
+  | .unary _ value | .projection value _ => psJsNeedsUtf8Runtime value
+  | .binary _ left right | .letE _ left right => psJsNeedsUtf8Runtime left || psJsNeedsUtf8Runtime right
+  | .runtime operation arguments =>
+      (match operation with
+        | .stringUtf8ByteSize | .stringNext | .stringGet | .stringAtEnd => true
+        | _ => false) || arguments.any psJsNeedsUtf8Runtime
+  | .lambda _ body => psJsNeedsUtf8Runtime body
+  | .call fn arguments => psJsNeedsUtf8Runtime fn || arguments.any psJsNeedsUtf8Runtime
+  | .ifE condition left right =>
+      psJsNeedsUtf8Runtime condition || psJsNeedsUtf8Runtime left || psJsNeedsUtf8Runtime right
+  | .record fields | .constructor _ fields => fields.any (fun f => psJsNeedsUtf8Runtime f.2)
+  | .matchE scrutinee alternatives =>
+      psJsNeedsUtf8Runtime scrutinee || alternatives.any (fun a => psJsNeedsUtf8Runtime a.2.2)
+
+def psJsNeedsStackRuntime (declaration : PsJsIrDeclaration) : Bool :=
+  match psJsPrintTailLoop declaration with
+  | some _ => false
+  | none => psJsExprUsesNameWithFuel 4096 declaration.body declaration.name
+
+def psJsSelectedRuntimeRequirements (module : PsJsIrModule) : List String :=
+  (if module.declarations.any psJsNeedsStackRuntime then ["generator-stack"] else []) ++
+  (if module.declarations.any (fun d => psJsNeedsUtf8Runtime d.body) then ["utf8-byte-index"] else [])
+
+def psJsSelectedRuntimeSource (module : PsJsIrModule) : String :=
+  (if module.declarations.any (fun d => psJsNeedsUtf8Runtime d.body) then psJsStringRuntimeSupport else "") ++
+  (if module.declarations.any psJsNeedsStackRuntime then psJsStackRuntimeSupport else "")
+
 def psJsPrintStackSafePrelude (module : PsJsIrModule) : String :=
   psJsJoin "" [
     "// generated by ProofScript direct JsIR v1 stack-safe\n",
     psJsPrintImports module.imports,
-    psJsStringRuntimeSupport,
-    psJsStackRuntimeSupport
+    psJsSelectedRuntimeSource module
   ]
 
 def psJsPrintModuleStackSafeWithPositions

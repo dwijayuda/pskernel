@@ -336,6 +336,7 @@ export function publish(stage, output, kind) {
   const publicPaths = fs.readdirSync(stage).filter(name => name !== sourceInfoName && name !== 'admissions.json').sort();
   const mustHave = kind === 'js' || kind === 'ts'
     ? [layout.name, layout.name + '.map', layout.name.replace(/\.(?:js|ts)$/, '.d.ts')]
+    : kind === 'ecma' ? ['.js', '.ts', '.d.ts', '.js.map', '.ts.map'].map(extension => layout.name.slice(0, -5) + extension)
     : kind === 'rust' ? [layout.name, layout.name.slice(0, -3) + '.cargo']
     : kind === 'wasm-component' ? [layout.name, layout.name.slice(0, -5) + '.wat', layout.name.slice(0, -5) + '.wit', layout.name.slice(0, -5) + '.core.wasm', layout.name.slice(0, -5) + '.core.wat']
     : kind === 'wasm-core' ? [layout.name, layout.name.slice(0, -5) + '.wat'] : fail('PSC1_BUNDLE_TARGET_INVALID', kind);
@@ -359,6 +360,7 @@ export function publish(stage, output, kind) {
   const files = fileInventory(stage);
   const manifest = {
     schema: 'psc1-artifact-bundle/1', target: kind,
+    ...(kind === 'ecma' ? { targets: ['ts', 'js'], sharedCheckedInput: true } : {}),
     profile: info.profile, logicalChecker: 'lean4:' + info.leanVersion,
     logicalCheckerCommit: info.leanCommit,
     assurance, behaviorallyVerified: false, partialDeclarations,

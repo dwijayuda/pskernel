@@ -22,10 +22,15 @@ The owned kernel remains separately tested. Verified execution remains unavailab
 - Audited the actual source architecture, active checkpoint and successful parent CI.
 - Archived the stale architecture document and wrote current native architecture/decisions.
 - Added the minimal backend-common target identity, capability and closed-plan module.
+  Commit `ee799b7ea84be414c84733d097f8454b404ba9b4` passed the full focused Linux suite,
+  run [39358447353](https://github.com/dwijayuda/pskernel/actions/runs/39358447353).
 - DirectPython, DirectPHP and native npm packaging/source resolution proceed in isolated
   branches. Integration must inspect their actual trees and retain history.
 - New targets are **not yet qualified**. Existing target qualification belongs to the parent.
-- Text-based export selection and broad runtime inclusion are identified liabilities.
+- Structured export inputs replace host source-string rewriting for JS/TS/Rust.
+- JS/TS now select UTF-8/stack helper groups; pure TS expressions emit directly.
+- Combined `--targets ts,js --out-dir` shares one admitted plan and one atomic generation.
+  These follow-up changes await their own Linux qualification.
 - Int division/modulo, unqualified machine/float scalars, broad public aggregate ABIs and
   missing Practical Core source forms remain unsupported unless separately implemented.
 

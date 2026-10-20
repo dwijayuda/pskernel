@@ -9,6 +9,7 @@ def psCliUsage : String :=
   "  psc1 check <input.lean|input.ps>\n" ++
   "  psc1 build <input.lean|input.ps> --out <output.js|output.ts>\n" ++
   "  psc1 build <input.lean|input.ps> --target <js|ts|rust|wasm-core> --out <output>\n" ++
+  "  psc1 build <input.lean|input.ps> --targets ts,js --out-dir <directory>\n" ++
   "  psc1 build <input.lean|input.ps> --target wasm-component --export <name> --out <component.wasm>\n" ++
   "  psc1 translate <input.lean|input.ps> --to <lean|ps> [--out <output>]\n" ++
   "  psc1 emit-lean <input.lean|input.ps> [--out <output.lean>]\n" ++
@@ -48,6 +49,12 @@ private def buildFor
   else if target == "wasm-core" then psHostDirectEmitWasmCore session outputPath
   else throw (IO.userError ("PSC1_TARGET_UNKNOWN: " ++ target))
 
+private def buildTargetsFor (inputPath outputDir targets : String)
+    (assurance : PsHostAssurance) : IO Unit := do
+  if targets != "ts,js" && targets != "js,ts" then
+    throw (IO.userError "PSC1_TARGET_SET_UNSUPPORTED: combined target set must be ts,js")
+  psHostDirectEmitEcmaPair (← psHostDirectPrepareFor inputPath assurance) outputDir
+
 private def buildDefaultFor
     (inputPath outputPath : String) (assurance : PsHostAssurance) : IO Unit := do
   if outputPath.endsWith ".js" then buildFor inputPath outputPath "js" assurance
@@ -62,6 +69,8 @@ private def psCliExecution
   | ["check", inputPath] => psHostDirectCheckFor inputPath assurance
   | ["admissions", inputPath] => psHostDirectAdmissionsFor inputPath assurance
   | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSourceFor inputPath assurance)
+  | ["build", inputPath, "--targets", targets, "--out-dir", outputDir] =>
+      buildTargetsFor inputPath outputDir targets assurance
   | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath] =>
       psHostDirectEmitWasmComponent (← psHostDirectPrepareFor inputPath assurance) exportName outputPath
   | ["build", inputPath, "--target", target, "--out", outputPath] =>
@@ -91,6 +100,8 @@ private def psCliCheckedExecution (args : List String) : IO Unit := do
   | ["build", inputPath, "--target", "ts", "--out", outputPath] => psHostDirectTypeScript inputPath outputPath
   | ["build", inputPath, "--target", "rust", "--out", outputPath] => psHostDirectRust inputPath outputPath
   | ["build", inputPath, "--target", "wasm-core", "--out", outputPath] => psHostDirectWasmCore inputPath outputPath
+  | ["build", inputPath, "--targets", targets, "--out-dir", outputDir] =>
+      buildTargetsFor inputPath outputDir targets .checked
   | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath] =>
       psHostDirectWasmComponent inputPath exportName outputPath
   | ["build", inputPath, "--out", outputPath] | ["compile", inputPath, "--out", outputPath] =>

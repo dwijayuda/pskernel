@@ -252,9 +252,6 @@ private def declarationSource (session : PsHostDirectPrepared) (plan : PsValidat
       String.intercalate "\n" declarations ++ "\n" ++
       (if session.publicNames.isEmpty then "export {};\n" else "")
 
-private def withoutExport (text : String) : String :=
-  if text.startsWith "export " then String.ofList (text.toList.drop 7) else text
-
 private def jsSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModule) : IO String := do
   let lowered ← match psJsLowerValidatedModule plan with
     | .ok value => pure value
@@ -263,10 +260,10 @@ private def jsSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModul
   | .error _ => throw (IO.userError "PSC1_JS_TARGET_VALIDATION_FAILED")
   | .ok _ => pure ()
   let printed ← lowered.declarations.mapM fun declaration => do
-    let text ← match psJsPrintDeclarationStackSafe declaration with
+    let text ← match psJsPrintDeclarationStackSafeWithVisibility (session.publicNames.contains declaration.name) declaration with
       | .ok value => pure value
       | .error _ => throw (IO.userError ("PSC1_JS_PRINT_FAILED: declaration=" ++ declaration.name))
-    return if session.publicNames.contains declaration.name then text else withoutExport text
+    return text
   return psJsPrintStackSafePrelude lowered ++ String.intercalate "\n" printed ++
     (if session.publicNames.isEmpty then "\nexport {};\n" else "")
 
@@ -274,20 +271,20 @@ private def tsSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModul
   let raw := plan.raw
   let brands := psTsBuildBrandMap raw
   let tags := psTsBuildTagMap raw
-  let structures ← match raw.structures.mapM (psTsEmitStructure brands) with
+  let structures ← match raw.structures.mapM (psTsEmitStructureWithVisibility false brands) with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_TS_STRUCTURE_PRINT_FAILED")
-  let inductives ← match raw.inductives.mapM (psTsEmitInductive tags) with
+  let inductives ← match raw.inductives.mapM (psTsEmitInductiveWithVisibility false tags) with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_TS_INDUCTIVE_PRINT_FAILED")
   let declarations ← raw.declarations.mapM fun declaration => do
-    let text ← match psTsEmitDeclaration brands tags declaration with
+    let text ← match psTsEmitDeclarationWithVisibility (session.publicNames.contains declaration.name) brands tags declaration with
       | .ok value => pure value
       | .error _ => throw (IO.userError ("PSC1_TS_PRINT_FAILED: declaration=" ++ declaration.name))
-    return if session.publicNames.contains declaration.name then text else withoutExport text
-  let internalTypes := (structures.flatten ++ inductives.flatten).map withoutExport
+    return text
+  let internalTypes := structures.flatten ++ inductives.flatten
   return String.intercalate "\n" (
-    ["// PSC1: independently admitted source; revalidated specialized IR.", psTsRuntimeSupport] ++
+    ["// PSC1: independently admitted source; revalidated specialized IR.", psTsSelectedRuntimeSource raw] ++
     raw.imports.map psTsEmitImport ++ internalTypes ++ declarations) ++ "\n" ++
     (if session.publicNames.isEmpty then "export {};\n" else "")
 
@@ -314,6 +311,27 @@ private def emitEcma (session : PsHostDirectPrepared) (outputPath kind : String)
     let _ ← psHostArtifactTool #["format", stage.toString, kind, name]
     psHostPublishArtifactStage stage outputPath kind
   IO.println ("PSC1_DIRECT_" ++ (if kind == "js" then "JS" else "TS") ++ ": " ++ outputPath)
+
+/-- Generate two independent direct outputs from one captured admitted closure
+and one closed plan. Both syntax validations finish before one publication point. -/
+def psHostDirectEmitEcmaPair (session : PsHostDirectPrepared) (outputDir : String) : IO Unit := do
+  let entryName := psHostArtifactFileName session.captured.entryPath "module.ps"
+  let stem := if entryName.endsWith ".lean" then (entryName.dropEnd 5).toString
+    else if entryName.endsWith ".ps" then (entryName.dropEnd 3).toString else entryName
+  let outputPath := ((System.FilePath.mk outputDir) / (stem ++ ".ecma")).toString
+  let plan ← ecmaPlan session
+  let declarations ← declarationSource session plan
+  let javaScript ← jsSource session plan
+  let typeScript ← tsSource session plan
+  psHostWithArtifactStage outputPath fun stage => do
+    psHostDirectWriteProvenance session stage
+    IO.FS.writeFile (stage / (stem ++ ".js")) javaScript
+    IO.FS.writeFile (stage / (stem ++ ".ts")) typeScript
+    IO.FS.writeFile (stage / (stem ++ ".d.ts")) declarations
+    let _ ← psHostArtifactTool #["format", stage.toString, "js", stem ++ ".js"]
+    let _ ← psHostArtifactTool #["format", stage.toString, "ts", stem ++ ".ts"]
+    psHostPublishArtifactStage stage outputPath "ecma"
+  IO.println ("PSC1_DIRECT_TS_JS: " ++ outputDir)
 
 def psHostDirectEmitJavaScript (session : PsHostDirectPrepared) (outputPath : String) : IO Unit :=
   emitEcma session outputPath "js"
@@ -349,31 +367,21 @@ private def publicTypeClosure
             | none => []
         publicTypeClosure raw remaining (fields ++ rest) (name :: seen)
 
-private def rustVisibility (valueNames typeNames : List String) (source : String) : String :=
-  let keep := fun (line : String) =>
-    valueNames.any (fun name => line.startsWith ("pub fn " ++ name ++ "(") ||
-      line.startsWith ("pub fn " ++ name ++ "<") || line.startsWith ("pub const " ++ name ++ ":")) ||
-    typeNames.any (fun name => ["struct ", "enum ", "type "].any (fun kind =>
-      line.startsWith ("pub " ++ kind ++ name ++ " ") || line.startsWith ("pub " ++ kind ++ name ++ "<") ||
-      line.startsWith ("pub " ++ kind ++ name ++ "(") || line == "pub " ++ kind ++ name ++ ";"))
-  String.intercalate "\n" ((source.splitOn "\n").map fun line =>
-    if line.startsWith "pub " && !keep line then String.ofList (line.toList.drop 4) else line)
-
 def psHostDirectEmitRust (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".rs" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .rs")
-  let emitted ← match psRustEmitValidatedModule session.validated with
-    | .ok value => pure value
-    | .error _ => throw (IO.userError "PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering")
   let signatures := session.validated.raw.declarations.filter (fun d => session.publicNames.contains d.name)
   let seeds := session.authoredTypeNames ++ signatures.flatMap (fun d =>
     namedTypes d.resultType ++ d.parameters.flatMap (fun p => namedTypes p.type))
   let types ← match publicTypeClosure session.validated.raw 4096 seeds [] with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
+  let emitted ← match psRustEmitSelectedValidatedModule session.validated session.publicNames types with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
   let name := psHostArtifactFileName outputPath "module.rs"
   psHostWithArtifactStage outputPath fun stage => do
     psHostDirectWriteProvenance session stage
-    IO.FS.writeFile (stage / name) (rustVisibility session.publicNames types emitted)
+    IO.FS.writeFile (stage / name) emitted
     let _ ← psHostArtifactTool #["rust", stage.toString, name]
     psHostPublishArtifactStage stage outputPath "rust"
   IO.println ("PSC1_DIRECT_RUST: " ++ outputPath)

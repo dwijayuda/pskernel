@@ -1,3 +1,4 @@
+import Ps.CompilerIr.Validate
 import Ps.Foundation.List
 import Ps.BackendRust.Tail
 import Ps.BackendRust.ValueRefs
@@ -81,7 +82,7 @@ def psRustEmitStructureFieldList
             | Except.ok printedRest =>
                 Except.ok (List.cons rendered printedRest)
 
-def psRustEmitStructure
+def psRustEmitStructureWithVisibility (isPublic : Bool)
     (structureInfo : PsVerifiedIrStructure) :
     Except PsRustEmitError String :=
   match psRustEmitStructureFieldList structureInfo.fields with
@@ -92,7 +93,7 @@ def psRustEmitStructure
         psRustGenericNames structureInfo.typeParameters;
       Except.ok
         (psRustConcat4
-          "#[derive(Clone)]\npub struct "
+          (if isPublic then "#[derive(Clone)]\npub struct " else "#[derive(Clone)]\nstruct ")
           (psRustIdentifier structureInfo.name)
           generic
           (psRustConcat4
@@ -100,6 +101,9 @@ def psRustEmitStructure
             (psRustJoin ", " printedFields)
             " }"
             ""))
+
+def psRustEmitStructure (value : PsVerifiedIrStructure) : Except PsRustEmitError String :=
+  psRustEmitStructureWithVisibility true value
 
 def psRustEmitConstructorFieldList
     (fields : List PsVerifiedIrConstructorField) :
@@ -181,7 +185,7 @@ def psRustEmitConstructorList
           | Except.ok printedRest =>
               Except.ok (List.cons printed printedRest)
 
-def psRustEmitInductive
+def psRustEmitInductiveWithVisibility (isPublic : Bool)
     (inductiveInfo : PsVerifiedIrInductive) :
     Except PsRustEmitError String :=
   match psRustEmitConstructorList inductiveInfo.constructors with
@@ -192,7 +196,7 @@ def psRustEmitInductive
         psRustGenericNames inductiveInfo.typeParameters;
       Except.ok
         (psRustConcat4
-          "#[derive(Clone)]\npub enum "
+          (if isPublic then "#[derive(Clone)]\npub enum " else "#[derive(Clone)]\nenum ")
           (psRustIdentifier inductiveInfo.name)
           generic
           (psRustConcat4
@@ -200,6 +204,9 @@ def psRustEmitInductive
             (psRustJoin ", " printedConstructors)
             " }"
             ""))
+
+def psRustEmitInductive (value : PsVerifiedIrInductive) : Except PsRustEmitError String :=
+  psRustEmitInductiveWithVisibility true value
 
 def psRustEmitHigherOrderParameterType
     (type : PsVerifiedIrType) :
@@ -399,7 +406,7 @@ def psRustEmitFunctionResultExpr
     4096
     expr
 
-def psRustEmitDeclaration
+def psRustEmitDeclarationWithVisibility (isPublic : Bool)
     (allDeclarations : List PsVerifiedIrDeclaration)
     (valueNames : List String)
     (declaration : PsVerifiedIrDeclaration) :
@@ -438,7 +445,7 @@ def psRustEmitDeclaration
                       psRustGenericNames declaration.typeParameters;
                     Except.ok
                       (psRustConcat4
-                        "pub fn "
+                        (if isPublic then "pub fn " else "fn ")
                         (psRustIdentifier declaration.name)
                         generic
                         (psRustConcat4
@@ -450,6 +457,10 @@ def psRustEmitDeclaration
                             " { "
                             printedBody
                             " }")))
+
+def psRustEmitDeclaration (allDeclarations : List PsVerifiedIrDeclaration)
+    (valueNames : List String) (value : PsVerifiedIrDeclaration) : Except PsRustEmitError String :=
+  psRustEmitDeclarationWithVisibility true allDeclarations valueNames value
 
 def psRustEmitStructureList
     (structures : List PsVerifiedIrStructure) :
@@ -1266,3 +1277,26 @@ def psRustEmitValidatedModule
     (module : PsValidatedIrModule) :
     Except PsRustEmitError String :=
   psRustEmitModule module.raw
+
+/-- Public ownership is selected before printing, including derived aggregate
+type visibility. No text rewriting decides which declarations are exported. -/
+def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
+    (publicValues publicTypes : List String) : Except String String := do
+  let module ← match psStrictValidateModule source.raw with
+    | .ok value => pure value.raw
+    | .error _ => throw "PSC1_RUST_INPUT_IR_INVALID"
+  if psRustModuleHasImports module.imports then throw "PSC1_RUST_EXTERNAL_IMPORT_UNSUPPORTED"
+  let valueNames := psRustValueDeclarationNames module.declarations
+  let printed : Except PsRustEmitError String := do
+    let _ ← psRustValidateModuleNames module
+    let _ ← psRustValidateModuleFunctionStorage module
+    let structures ← module.structures.mapM fun value =>
+      psRustEmitStructureWithVisibility (publicTypes.contains value.name) value
+    let inductives ← module.inductives.mapM fun value =>
+      psRustEmitInductiveWithVisibility (publicTypes.contains value.name) value
+    let declarations ← module.declarations.mapM fun value =>
+      psRustEmitDeclarationWithVisibility (publicValues.contains value.name) module.declarations valueNames value
+    return psRustAssembleModuleSource structures inductives declarations
+  match printed with
+  | .ok value => return value
+  | .error _ => throw "PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering"

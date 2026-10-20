@@ -106,6 +106,9 @@ jobs:
           export PSC1_NATIVE="$PWD/.lake/build/bin/psc1"
           export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
           node scripts/scoped-source-edge-tests.mjs
+      - name: Execute shared target planning, independent TS JS and publication regressions
+        working-directory: psc1
+        run: node scripts/backend-architecture-tests.mjs
       - name: Execute Practical Core admission, IR and real target regressions
         working-directory: psc1
         run: |

@@ -42,9 +42,9 @@ def psKernelExprV2NatPublish
     | PsKernelNatReductionValue.nat number =>
         psKernelExprV2PagedMkLit state.arena (PsKernelLiteral.nat number)
     | PsKernelNatReductionValue.bool boolean =>
-        psKernelExprV2PagedMkConst state.arena
-          (if boolean then psKernelBoolTrueName else psKernelBoolFalseName)
-          List.nil;
+        let name : PsKernelName :=
+          if boolean then psKernelBoolTrueName else psKernelBoolFalseName;
+        psKernelExprV2PagedMkConst state.arena name List.nil;
   match built with
   | Except.error error => Except.error error
   | Except.ok result =>

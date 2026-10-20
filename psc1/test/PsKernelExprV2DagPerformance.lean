@@ -238,6 +238,120 @@ private def runDagCacheComparisons : IO Unit := do
         IO.print measured.stdout
         IO.print measured.stderr
 
+private structure DagDefEqFixture where
+  left : PsKernelExpr := s0
+  right : PsKernelExpr := s0
+  officialLeft : Lean.Expr := officialS0
+  officialRight : Lean.Expr := officialS0
+  arena : PsKernelExprV2PagedArena := psKernelExprV2PagedEmpty
+  leftId : Nat := 0
+  rightId : Nat := 0
+
+private def mkDagDefEqFixture (variant : String) (depth tag : Nat) :
+    IO DagDefEqFixture := do
+  if variant == "legacy" then
+    let mut left := s0
+    let mut right := s0
+    for i in [:depth] do
+      left := .mdata (tag * 1000 + i) left
+      right := .mdata (tag * 1000 + i + 65521) right
+    return { left := left, right := right }
+  else if variant == "lean" then
+    let mut left := officialS0
+    let mut right := officialS0
+    for i in [:depth] do
+      let key := Lean.Name.str .anonymous "pskernel-bench-tag"
+      left := .mdata (Lean.KVMap.setNat {} key (tag * 1000 + i)) left
+      right := .mdata (Lean.KVMap.setNat {} key (tag * 1000 + i + 65521)) right
+    return { officialLeft := left, officialRight := right }
+  else
+    let (initial, zero) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+    let mut arena := initial
+    let mut left := zero
+    let mut right := zero
+    for i in [:depth] do
+      let (next, root) ← expect (psKernelExprV2PagedMkMData arena (tag * 1000 + i) left)
+      arena := next
+      left := root
+      let (next, root) ← expect
+        (psKernelExprV2PagedMkMData arena (tag * 1000 + i + 65521) right)
+      arena := next
+      right := root
+    return { arena := arena, leftId := left, rightId := right }
+
+private def runDagDefEqWorker (variant : String) (depth calls : Nat) : IO Unit := do
+  unless (["lean", "legacy", "dag"] : List String).contains variant do
+    throw (IO.userError "DAG_PERF_DEFEQ_UNKNOWN_VARIANT")
+  if depth == 0 || calls == 0 then
+    throw (IO.userError "DAG_PERF_DEFEQ_EMPTY_WORKLOAD")
+  let env ← Lean.mkEmptyEnvironment
+  let session ← match psKernelKernelSessionEmpty
+      psKernelResourcePolicyDefault psKernelProviderDefault with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "DAG_PERF_DEFEQ_SESSION")
+  unless session.resources.fuel == 4096 do
+    throw (IO.userError "DAG_PERF_DEFEQ_CHANGED_FUEL")
+  let setupStart ← IO.monoNanosNow
+  let mut fixtures : Array DagDefEqFixture := #[]
+  for tag in [:5] do
+    fixtures := fixtures.push (← mkDagDefEqFixture variant depth tag)
+  let setupStop ← IO.monoNanosNow
+  IO.println s!"PSC1_DAG_NATIVE_CONSTRUCTION variant={variant} shape=metadata-pair depth={depth} pool=5 input_ns={setupStop-setupStart} representation=measured_variant_only"
+  let run : Nat → IO Nat := fun i => do
+    let some fixture := fixtures[i % fixtures.size]?
+      | throw (IO.userError "DAG_PERF_DEFEQ_FIXTURE_MISSING")
+    if variant == "lean" then
+      for term in [fixture.officialLeft, fixture.officialRight] do
+        match Lean.Kernel.check env {} term with
+        | .ok type =>
+            unless Lean.Expr.equal type officialS1 do
+              throw (IO.userError "DAG_PERF_DEFEQ_OFFICIAL_TYPE")
+        | .error _ => throw (IO.userError "DAG_PERF_DEFEQ_OFFICIAL_CHECK")
+      match Lean.Kernel.isDefEq env {} fixture.officialLeft fixture.officialRight with
+      | .ok true => pure ()
+      | _ => throw (IO.userError "DAG_PERF_DEFEQ_OFFICIAL_VALUE")
+    else if variant == "legacy" then
+      match psKernelV1IsDefEq session [] .safe fixture.left fixture.right with
+      | .ok true => pure ()
+      | _ => throw (IO.userError "DAG_PERF_DEFEQ_LEGACY_VALUE")
+    else
+      match psKernelV1RunDag session [] .safe fixture.arena
+          [.isDefEq fixture.leftId fixture.rightId] with
+      | .ok result =>
+          match result.replies with
+          | [.equal true] => pure ()
+          | _ => throw (IO.userError "DAG_PERF_DEFEQ_DAG_VALUE")
+      | .error _ => throw (IO.userError "DAG_PERF_DEFEQ_DAG_REJECTED")
+    return 1
+  let coldStart ← IO.monoNanosNow
+  let coldCorrect ← run 0
+  let coldStop ← IO.monoNanosNow
+  unless coldCorrect == 1 do throw (IO.userError "DAG_PERF_DEFEQ_COLD")
+  for i in [:fixtures.size] do
+    discard (run i)
+  let mut correct := 0
+  let start ← IO.monoNanosNow
+  for i in [:calls] do
+    correct := correct + (← run i)
+  let stop ← IO.monoNanosNow
+  unless correct == calls do throw (IO.userError "DAG_PERF_DEFEQ_INCOMPLETE")
+  IO.println s!"PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant={variant} shape=metadata-pair depth={depth} calls={calls} warm_ns={stop-start} cold_ns={coldStop-coldStart} input_pool={fixtures.size} fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation"
+
+private def runDagDefEqComparisons : IO Unit := do
+  let executable ← IO.appPath
+  for (depth, calls) in [(32, 100), (96, 40), (192, 20)] do
+    for variant in ["lean", "legacy", "dag", "dag", "legacy", "lean"] do
+      let measured ← IO.Process.output {
+        cmd := "/usr/bin/time"
+        args := #["-f",
+          s!"PSC1_DAG_NATIVE_PROCESS_MEMORY variant={variant} shape=metadata-pair depth={depth} peak_rss_kib=%M scope=isolated_worker",
+          executable.toString, "defeq-worker", variant, toString depth, toString calls]
+      }
+      unless measured.exitCode == 0 do
+        throw (IO.userError s!"DAG_PERF_DEFEQ_WORKER_FAILED {variant} {depth}\n{measured.stdout}\n{measured.stderr}")
+      IO.print measured.stdout
+      IO.print measured.stderr
+
 private def runDagBenchmarks : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let session ← match psKernelKernelSessionEmpty
@@ -265,6 +379,7 @@ private def runDagBenchmarks : IO Unit := do
     for variant in ["lean", "legacy", "dag", "dag", "legacy", "lean"] do
       measureDagPublicWhnf env session variant shape depth calls fixtures
   runDagCacheComparisons
+  runDagDefEqComparisons
   IO.println "PSC1_V2_DAG_NATIVE_BENCH: PASS"
 
 def main (args : List String) : IO Unit := do
@@ -276,4 +391,10 @@ def main (args : List String) : IO Unit := do
       let some calls := callsText.toNat?
         | throw (IO.userError "DAG_PERF_INVALID_CALLS")
       runDagCacheWorker variant shape depth calls
+  | ["defeq-worker", variant, depthText, callsText] =>
+      let some depth := depthText.toNat?
+        | throw (IO.userError "DAG_PERF_DEFEQ_INVALID_DEPTH")
+      let some calls := callsText.toNat?
+        | throw (IO.userError "DAG_PERF_DEFEQ_INVALID_CALLS")
+      runDagDefEqWorker variant depth calls
   | _ => throw (IO.userError "DAG_PERF_INVALID_ARGUMENTS")

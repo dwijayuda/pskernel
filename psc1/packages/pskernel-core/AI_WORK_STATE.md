@@ -10,6 +10,13 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
 ## Current checkpoint and evidence
 
+The first authentic PSC1 check of f56d00e failed at Nat.lean:46:
+an embedded conditional argument was outside the accepted parser profile.
+This commit binds the selected Bool constructor name in an explicitly typed
+local before calling the smart constructor. No reduction or resource rule changes.
+The exact failure is recorded in [39516197791](https://github.com/dwijayuda/pskernel/actions/runs/39516197791);
+generated Nat/projection qualification is pending this correction.
+
 The latest native-qualified Nat/projection source is
 [58fab028f9ea80ddcbdb621d72bbbe28b8d9f3a7](https://github.com/dwijayuda/pskernel/commit/58fab028f9ea80ddcbdb621d72bbbe28b8d9f3a7).
 The native job in [39516506237](https://github.com/dwijayuda/pskernel/actions/runs/39516506237)
@@ -219,6 +226,22 @@ collisions, wrong-typed operands and exact public error variants. Native also
 compares the 12 corresponding raw judgments with pinned official Lean. Two local
 lemmas prove arbitrary-arena fuel-zero and recursion-depth-error precedence over
 syntax; they do not prove full DefEq refinement. Tests and proofs are pending CI.
+
+## Expanded complete-operation measurements (this commit; results pending)
+
+The isolated JS A-B-B-A driver now also times checked Nat.succ chains, constructor
+projection with a deeply wrapped unselected field, and paired-metadata DefEq
+whose operands are structurally distinct. Nat/structure environments undergo
+real ordinary-inductive admission; its wall time is reported separately from
+input construction and complete public calls. Nat reductions check the exact
+expected numeral, projections the selected sort, and DefEq the strict Boolean.
+
+The native driver adds isolated paired-metadata DefEq workers for original
+PSKernel, DAG and official Lean. Official workers check both inputs before
+calling the official DefEq operation. Only each measured representation is
+constructed, and each process reports cold/warm time and peak RSS. The PS
+fuel remains4096; official Lean uses its internal policy. New measurements
+are pending Actions and cannot yet support a performance claim.
 
 ## Latest generated whole-checker measurements
 

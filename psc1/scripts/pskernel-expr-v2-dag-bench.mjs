@@ -14,6 +14,9 @@ if(mode!=="worker"){
     ["metadata",32,6,"check"],["metadata",96,4,"check"],["metadata",192,2,"check"],
     ["zeta",8,3,"check"],["zeta",24,2,"check"],["zeta",48,1,"check"],
     ["metadata",96,4,"whnf"],["metadata",96,4,"defeq"],["metadata",96,2,"batch-check"],
+    ["metadata-pair",32,4,"defeq"],["metadata-pair",96,2,"defeq"],
+    ["nat-succ",8,3,"whnf"],["nat-succ",32,1,"whnf"],["nat-succ",96,1,"whnf"],
+    ["projection-field",8,3,"whnf"],["projection-field",32,1,"whnf"],["projection-field",96,1,"whnf"],
     ["zeta",8,3,"whnf"],["zeta",24,2,"whnf"],["zeta",48,1,"whnf"],
     ...["fn-shared","fn-alpha","fn-unique","fn-collision"].flatMap(shape=>
       [[8,2],[32,1],[128,1]].map(([depth,calls])=>[shape,depth,calls,"whnf"]))
@@ -37,7 +40,7 @@ if(mode!=="worker"){
   console.log("PSC1_DAG_WHOLE_CHECKER_ABBA "+JSON.stringify({
     node:process.version,toolchain:readFileSync("lean-toolchain","utf8").trim(),
     meaning:"complete public checks, checked WHNF and checked DefEq; DAG includes validation and decoding on every batch call",
-    scope:"terminal/metadata inference and checked terminal/metadata/beta/zeta/function-position WHNF migration; composite checking uses legacy fallback; batch-check amortizes one validation across eight fresh-context checks",
+    scope:"terminal/metadata inference, checked beta/zeta/Nat/projection WHNF and fresh quick DefEq; composite checking uses legacy fallback; batch-check amortizes one validation across eight fresh-context checks",
     limitations:"finite fixtures; no general speedup or allocation-counter claim",
     observations
   }));
@@ -56,9 +59,33 @@ if(mode!=="worker"){
   const sort0=E.sort(L.zero),sort1=E.sort(L.succ(L.zero));
   if(k.psKernelExprEq(sort0)(sort0)!==true||k.psKernelExprEq(sort0)(sort1)!==false)
     throw Error("PSC1_DAG_BENCH_EQUALITY_HARNESS_INVALID");
-  const session=accepted(k.psKernelKernelSessionEmpty(
+  let session=accepted(k.psKernelKernelSessionEmpty(
     k.psKernelResourcePolicyDefault,k.psKernelProviderDefault),"session");
   if(session.resources.fuel!==4096n)throw Error("PSC1_DAG_BENCH_RESOURCE_POLICY_CHANGED");
+  const list=xs=>xs.reduceRight((tail,head)=>k.List.cons(head,tail),nil);
+  const name=value=>N.str(N.anonymous,value);
+  const boxName=name("DagBenchBox"),boxCtor=N.str(boxName,"mk");
+  const admissionStart=performance.now();
+  if(shape==="nat-succ"){
+    const nat=E.const(k.psKernelNatName,nil);
+    session=accepted(k.psKernelV1AdmitDeclaration(session,
+      k.PsKernelDeclarationRequest.ordinaryInductive({
+        levelParams:nil,name:k.psKernelNatName,type:sort1,numParams:0n,isUnsafe:false,
+        ctors:list([{name:k.psKernelNatZeroName,type:nat},
+          {name:k.psKernelNatSuccName,
+            type:E.forallE(name("n"),nat,nat,k.PsKernelBinderInfo.default)}])
+      })),"benchmark-Nat-admission").session;
+  }else if(shape==="projection-field"){
+    const box=E.const(boxName,nil);
+    const type=E.forallE(name("A"),sort1,
+      E.forallE(name("B"),sort1,box,k.PsKernelBinderInfo.default),k.PsKernelBinderInfo.default);
+    session=accepted(k.psKernelV1AdmitDeclaration(session,
+      k.PsKernelDeclarationRequest.ordinaryInductive({
+        levelParams:nil,name:boxName,type:E.sort(L.succ(L.succ(L.zero))),
+        numParams:0n,isUnsafe:false,ctors:list([{name:boxCtor,type}])
+      })),"benchmark-projection-admission").session;
+  }
+  const admissionMs=performance.now()-admissionStart;
   const values=[];
   const setupStart=performance.now();
   for(let fixture=0;fixture<5;fixture++){
@@ -70,8 +97,16 @@ if(mode!=="worker"){
     const binderInfo=i=>shape==="fn-alpha"&&i%2===1?
       k.PsKernelBinderInfo.implicit:k.PsKernelBinderInfo.default;
     if(variant==="legacy"){
-      let term=sort0;
-      if(cacheShape){
+      let term=sort0,other=sort0;
+      if(shape==="nat-succ"){
+        term=E.lit(k.PsKernelLiteral.nat(0n));
+        const succ=E.const(k.psKernelNatSuccName,nil);
+        for(let i=0;i<depth;i++)
+          term=E.app(succ,E.mdata(BigInt(fixture*1000+i),term));
+      }else if(shape==="projection-field"){
+        for(let i=0;i<depth;i++)term=E.mdata(BigInt(fixture*1000+i),term);
+        term=E.proj(boxName,0n,E.app(E.app(E.const(boxCtor,nil),sort0),term));
+      }else if(cacheShape){
         const type=E.forallE(N.anonymous,sort1,sort1,k.PsKernelBinderInfo.default);
         const head=i=>E.letE(headName(i),type,
           E.mdata(marker(i),E.lam(headName(i),sort1,E.bvar(0n),binderInfo(i))),
@@ -80,20 +115,54 @@ if(mode!=="worker"){
         for(let i=0;i<depth;i++)term=E.app(shape==="fn-shared"?shared:head(i),term);
       }else{
         for(let i=0;i<depth;i++){
-          term=shape==="metadata"?E.mdata(BigInt(fixture*1000+i),term):
+          term=shape==="metadata"||shape==="metadata-pair"?
+            E.mdata(BigInt(fixture*1000+i),term):
             E.letE(binder,sort1,term,E.bvar(0n),false);
+          if(shape==="metadata-pair")
+            other=E.mdata(BigInt(fixture*1000+i)+65521n,other);
         }
       }
-      values.push(term);
+      values.push(shape==="metadata-pair"?{left:term,right:other}:term);
     }else{
-      let a=accepted(k.psKernelExprV2PagedMkSort(k.psKernelExprV2PagedEmpty,L.zero),"s0");
-      const s0=a.snd;
-      a=accepted(k.psKernelExprV2PagedMkSort(a.fst,L.succ(L.zero)),"s1");
-      const s1=a.snd;
-      a=accepted(k.psKernelExprV2PagedMkBVar(a.fst,0n),"b0");
-      const b0=a.snd;
-      let root=s0,arena=a.fst;
-      if(cacheShape){
+      let s0=0n,s1=0n,b0=0n,root=0n,right=0n,arena=k.psKernelExprV2PagedEmpty;
+      if(shape!=="nat-succ"){
+        let a=accepted(k.psKernelExprV2PagedMkSort(arena,L.zero),"s0");
+        s0=a.snd;
+        a=accepted(k.psKernelExprV2PagedMkSort(a.fst,L.succ(L.zero)),"s1");
+        s1=a.snd;
+        a=accepted(k.psKernelExprV2PagedMkBVar(a.fst,0n),"b0");
+        b0=a.snd;
+        root=s0;right=s0;arena=a.fst;
+      }
+      if(shape==="nat-succ"){
+        // This fixture owns only the required numeral and successor nodes.
+        let initial=accepted(k.psKernelExprV2PagedMkLit(
+          k.psKernelExprV2PagedEmpty,k.PsKernelLiteral.nat(0n)),"nat-zero");
+        root=initial.snd;
+        initial=accepted(k.psKernelExprV2PagedMkConst(
+          initial.fst,k.psKernelNatSuccName,nil),"nat-succ");
+        arena=initial.fst;
+        const succ=initial.snd;
+        for(let i=0;i<depth;i++){
+          const marked=accepted(k.psKernelExprV2PagedMkMData(
+            arena,BigInt(fixture*1000+i),root),"nat-mark");
+          const applied=accepted(k.psKernelExprV2PagedMkApp(
+            marked.fst,succ,marked.snd),"nat-apply");
+          arena=applied.fst;root=applied.snd;
+        }
+      }else if(shape==="projection-field"){
+        for(let i=0;i<depth;i++){
+          const marked=accepted(k.psKernelExprV2PagedMkMData(
+            arena,BigInt(fixture*1000+i),root),"projection-unselected");
+          arena=marked.fst;root=marked.snd;
+        }
+        const ctor=accepted(k.psKernelExprV2PagedMkConst(arena,boxCtor,nil),"projection-ctor");
+        const first=accepted(k.psKernelExprV2PagedMkApp(ctor.fst,ctor.snd,s0),"projection-first");
+        const major=accepted(k.psKernelExprV2PagedMkApp(first.fst,first.snd,root),"projection-major");
+        const projected=accepted(k.psKernelExprV2PagedMkProj(
+          major.fst,boxName,0n,major.snd),"projection");
+        arena=projected.fst;root=projected.snd;
+      }else if(cacheShape){
         const add=(kind,...args)=>{
           const inserted=accepted(k["psKernelExprV2PagedMk"+kind](arena,...args),"cache-"+kind);
           arena=inserted.fst;return inserted.snd;
@@ -108,15 +177,20 @@ if(mode!=="worker"){
         for(let i=0;i<depth;i++)root=add("App",shape==="fn-shared"?shared:head(i),root);
       }else{
         for(let i=0;i<depth;i++){
-          const next=shape==="metadata"?
+          const next=shape==="metadata"||shape==="metadata-pair"?
             k.psKernelExprV2PagedMkMData(arena,BigInt(fixture*1000+i),root):
             k.psKernelExprV2PagedMkLet(arena,binder,s1,root,b0,false);
           const inserted=accepted(next,"node");
           arena=inserted.fst;root=inserted.snd;
+          if(shape==="metadata-pair"){
+            const paired=accepted(k.psKernelExprV2PagedMkMData(
+              arena,BigInt(fixture*1000+i)+65521n,right),"paired-node");
+            arena=paired.fst;right=paired.snd;
+          }
         }
       }
       const command=operation==="whnf"?k.PsKernelDagCommand.whnf(root):
-        operation==="defeq"?k.PsKernelDagCommand.isDefEq(root,root):
+        operation==="defeq"?k.PsKernelDagCommand.isDefEq(root,shape==="metadata-pair"?right:root):
         k.PsKernelDagCommand.check(root);
       let commands=nil;
       for(let i=0;i<batchSize;i++)commands=k.List.cons(command,commands);
@@ -126,7 +200,8 @@ if(mode!=="worker"){
   const setupMs=performance.now()-setupStart;
   const validate=value=>{
     if(operation==="whnf"){
-      if(k.psKernelExprEq(value)(sort0)!==true)
+      const expected=shape==="nat-succ"?E.lit(k.PsKernelLiteral.nat(BigInt(depth))):sort0;
+      if(k.psKernelExprEq(value)(expected)!==true)
         throw Error("PSC1_DAG_BENCH_WRONG_WHNF");
     }else if(operation==="defeq"){
       if(value!==true)throw Error("PSC1_DAG_BENCH_WRONG_DEFEQ");
@@ -141,7 +216,9 @@ if(mode!=="worker"){
         const result=operation==="whnf"?
           k.psKernelV1Whnf(session,nil,k.PsKernelDefinitionSafety.safe,value):
           operation==="defeq"?
-            k.psKernelV1IsDefEq(session,nil,k.PsKernelDefinitionSafety.safe,value,value):
+            k.psKernelV1IsDefEq(session,nil,k.PsKernelDefinitionSafety.safe,
+              shape==="metadata-pair"?value.left:value,
+              shape==="metadata-pair"?value.right:value):
             k.psKernelV1CheckExpression(session,nil,k.PsKernelDefinitionSafety.safe,value);
         validate(accepted(result,"legacy-"+operation));
       }
@@ -222,7 +299,7 @@ if(mode!=="worker"){
     variant,shape,depth,calls,operation,batch_size:batchSize,
     checked_public_operations:calls*batchSize,checksum,all_correct:checksum===calls,
     check_ms:Number(ms.toFixed(3)),cold_check_ms:Number(coldMs.toFixed(3)),
-    input_construction_ms:Number(setupMs.toFixed(3)),
+    input_construction_ms:Number(setupMs.toFixed(3)),environment_admission_ms:Number(admissionMs.toFixed(3)),
     peak_rss_kib:measuredPeakRss,cache_diagnostic:cacheDiagnostic,fuel:4096,
     heap_before_bytes:before.heapUsed,heap_after_gc_bytes:after.heapUsed,
     retained_heap_delta_bytes:after.heapUsed-before.heapUsed,

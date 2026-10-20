@@ -27,12 +27,20 @@ def psSyntaxBindingPatternSpan : PsSyntaxBindingPattern -> PsSourceSpan
   | .unit span => span
   | .pair _ _ span => span
 
+-- Preserve traversal order and duplicate leaves for binding validation.
+def psSyntaxAppendNames (left : List PsSyntaxName) : List PsSyntaxName -> List PsSyntaxName :=
+  match left with
+  | List.nil => fun (right : List PsSyntaxName) => right
+  | List.cons name rest =>
+      let smaller : List PsSyntaxName -> List PsSyntaxName := psSyntaxAppendNames rest;
+      fun (right : List PsSyntaxName) => List.cons name (smaller right)
+
 def psSyntaxBindingPatternNames : PsSyntaxBindingPattern -> List PsSyntaxName
   | .name name => [name]
   | .wildcard _ => []
   | .unit _ => []
   | .pair first second _ =>
-      psSyntaxBindingPatternNames first ++ psSyntaxBindingPatternNames second
+      psSyntaxAppendNames (psSyntaxBindingPatternNames first) (psSyntaxBindingPatternNames second)
 
 def psSyntaxBindingPatternSize : PsSyntaxBindingPattern -> Nat
   | .name _ => 1
@@ -175,7 +183,7 @@ def psSyntaxNamespaceAppend (left : List String) (right : List String) : List St
   | first :: rest => first :: psSyntaxNamespaceAppend rest right
 
 def psSyntaxNamespaceName (namespacePrefix : List String) (name : PsSyntaxName) : PsSyntaxName :=
-  { name with segments := psSyntaxNamespaceAppend namespacePrefix name.segments }
+  PsSyntaxName.mk (psSyntaxNamespaceAppend namespacePrefix name.segments) name.span
 
 def psSyntaxDeclarationQualify (namespacePrefix : List String) :
     PsSyntaxDeclaration -> PsSyntaxDeclaration

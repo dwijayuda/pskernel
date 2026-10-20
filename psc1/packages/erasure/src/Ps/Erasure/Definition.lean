@@ -545,11 +545,13 @@ def psErasureRuntimePreludeClosure
   match fuel with
   | Nat.zero => fun (selected : List PsDeclaration) => selected
   | Nat.succ remaining =>
+      let smaller : List PsDeclaration -> List PsDeclaration :=
+        psErasureRuntimePreludeClosure roots candidates remaining;
       fun (selected : List PsDeclaration) =>
         let next := psErasureSelectRuntimePrelude
           (psErasureAppendDeclarations roots selected) candidates;
         if Nat.beq (psListLength next) (psListLength selected) then next
-        else psErasureRuntimePreludeClosure roots candidates remaining next
+        else smaller next
 
 -- Host ownership/name planning and runtime erasure must use this same ordered
 -- closure, including whether a prelude runtime definition is actually needed.

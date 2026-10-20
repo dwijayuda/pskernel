@@ -53,14 +53,18 @@ def psCensusProbe (output : String) (args : List String) : IO Unit := do
               psCensusPair "parse" "accepted", psCensusPair "elaboration" "blocked-by-import",
               ("blockedImports", Lean.toJson blocked)]))
           else
-            match psCompilerPreparationStepParsed state parsed with
+            match psCompilerPreparationStepParsedWithOrigins state parsed with
             | .error error =>
                 failed := moduleName :: failed
                 pure (Lean.Json.mkObj (base ++ [
                   psCensusPair "parse" "accepted", psCensusPair "elaboration" "refused",
-                  psCensusPair "detail" (psCensusParseDetail error)]))
+                  psCensusPair "detail" (psHostElabErrorText error.error),
+                  psCensusPair "sourceDeclaration" (String.intercalate "." error.sourceName.segments),
+                  ("sourceIndex", Lean.toJson error.sourceIndex),
+                  ("line", Lean.toJson error.span.start.line),
+                  ("column", Lean.toJson error.span.start.column)]))
             | .ok next =>
-                state := next
+                state := next.state
                 pure (Lean.Json.mkObj (base ++ [
                   psCensusPair "parse" "accepted", psCensusPair "elaboration" "accepted",
                   ("sourceDeclarations", Lean.toJson parsed.declarations.length)]))

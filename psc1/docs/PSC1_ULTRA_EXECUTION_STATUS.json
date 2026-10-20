@@ -273,5 +273,18 @@
     "generatedCompilerExecution": false,
     "selfCompilation": false,
     "fixedPoint": false
+  },
+  "censusContinuation": {
+    "branch": "fix/psc1-census-normalization-20261021",
+    "parentPullRequest": 169,
+    "parentHead": "6d2cc114f6534a8d56343cfe91a6c966368ccacf",
+    "status": "source-fixes-pending-linux-ci",
+    "changes": [
+      "named ordered binding-name append; explicit qualified-name construction",
+      "partial structural runtime-prelude closure worker",
+      "source-origin failure diagnostics and maintained census acceptance gates",
+      "native pattern-name and runtime dependency closure regressions"
+    ],
+    "sourceStages": "lean parse/elaboration only; all later whole-closure stages not-run"
   }
 }

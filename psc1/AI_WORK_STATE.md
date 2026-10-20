@@ -31,7 +31,7 @@ Both lanes: semantic67/51/48, JS79/59/54, Rust83/60/53
 Ps.Environment.Control30:7 (missing explicit let separator); PS translation
 refuses at the same original source. Full per-module refusals are in CI logs.
 
-## Active candidate after that checkpoint — pending Linux CI
+## Subsequent focused source checkpoint — full scoped CI pending
 
 Normalize Environment.Control, SelfHostProd, Resolve, Elab.Context, DoBase,
 DoFor, DoWhile, DoTry, Data and Operators. Keep exact checked operation construction and guards.
@@ -44,8 +44,12 @@ and bound evaluation order, continuation delay/capture, primitive/inductive whil
 result restrictions, partial-helper requirement, error state reset, early return
 packets, and handler boundaries. No runtime execution fuel or new selected feature.
 
-All ten candidate modules have maintained parse/elaboration gates in BOTH
-lanes. Existing tests remain; focused CI additionally executes the dedicated
+All ten subsequent modules have maintained parse/elaboration gates in BOTH
+lanes and now pass focused Linux CI at4250f5d0de52d4d409804c380b33d8c073c38eed
+(run39515329696). Native typed-error, normalization, data, operator, do, while
+and namespace suites passed.38 integrity checks and live strict incomplete-closure
+refusal passed. Both lanes: semantic67/61/60, JS79/69/66, Rust83/70/65.
+Full scoped qualification of this later source batch is still pending. Existing tests remain; focused CI additionally executes the dedicated
 namespace suite and retains the actual resolver/context caller audit.
 Do not transfer the qualified checkpoint to this candidate before actual CI.
 
@@ -63,6 +67,17 @@ constraint ordering, left-to-right constructed runtime evaluation, Nat/Bool
 equality, selected arithmetic and explicit proposition-order refusal. Existing
 private data helper names are retained as plain definitions so every declaration
 is part of source preparation, rather than filtered out.
+
+## Active do-controller candidate — pending Linux CI
+
+The next actual refusal is Ps.Elab.Do27:11, untyped fuel-branch lambdas.
+Normalize complete controller source with typed callbacks, explicit constructors,
+list construction and let separators. Preserve psElabDoBodyWithExit and all public
+entry points; a new structural worker carries result/onReturn/liftTerminal in its
+returned function so nested try contexts do not change fixed recursion parameters.
+The existing4096 controller budget is unchanged. No runtime execution fuel added.
+The full module must parse/elaborate in BOTH lanes. Continue to Term, Recursion,
+DoLoopLift, Declaration and Ordinary after the next actual census result.
 
 ## Census integrity and continuation
 

@@ -423,7 +423,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "frontend-checkpoint-qualified-environment-resolve-pattern-correction-and-data-operators-pending",
+    "status": "seventeen-source-modules-focused-accepted-Do-controller-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -509,46 +509,38 @@
       }
     },
     "pendingModules": [
-      "psc1/packages/environment/src/Ps/Environment/Control.lean",
-      "psc1/packages/environment/src/Ps/Environment/SelfHostProd.lean",
-      "psc1/packages/environment/src/Ps/Environment/Resolve.lean",
-      "psc1/packages/elab/src/Ps/Elab/Context.lean",
-      "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
-      "psc1/packages/elab/src/Ps/Elab/DoFor.lean",
-      "psc1/packages/elab/src/Ps/Elab/DoWhile.lean",
-      "psc1/packages/elab/src/Ps/Elab/DoTry.lean",
-      "psc1/packages/elab/src/Ps/Elab/Data.lean",
-      "psc1/packages/elab/src/Ps/Elab/Operators.lean"
+      "psc1/packages/elab/src/Ps/Elab/Do.lean"
     ],
     "latestFocused": {
-      "head": "e285ed994727654823fffb75f2187d45307ae861",
-      "runId": 39514902700,
-      "overall": "failed-Resolve-maintained-gate",
+      "head": "4250f5d0de52d4d409804c380b33d8c073c38eed",
+      "runId": 39515329696,
+      "overall": "success",
       "nativeBehaviorAndNamespace": "passed",
       "contractChecks": 38,
+      "liveStrict": "incomplete-semantic-closure-refusal-verified",
       "counts": {
         "semantic": [
           67,
-          58,
-          53
+          61,
+          60
         ],
         "directjs": [
           79,
-          66,
-          59
+          69,
+          66
         ],
         "rust": [
           83,
-          67,
-          58
+          70,
+          65
         ]
       },
       "nextRefusal": {
-        "module": "Ps.Environment.Resolve",
+        "module": "Ps.Elab.Do",
         "stage": "parse",
-        "line": 107,
-        "column": 17,
-        "detail": "expected '=>', got '('"
+        "line": 27,
+        "column": 11,
+        "detail": "expected typed lambda binder, got underscore"
       }
     }
   }

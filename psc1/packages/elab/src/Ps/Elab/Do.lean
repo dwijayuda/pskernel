@@ -2,145 +2,148 @@ import Ps.Elab.DoTry
 import Ps.Elab.Data
 
 def psElabDoPatternMutableConflict
-    (state : List PsElabDoMutable) : List PsSyntaxName -> Option PsName
-  | [] => none
-  | source :: rest =>
+    (state : List PsElabDoMutable) (sources : List PsSyntaxName) : Option PsName :=
+  match sources with
+  | List.nil => Option.none
+  | List.cons source rest =>
       match psSyntaxNameToName source with
-      | none => psElabDoPatternMutableConflict state rest
-      | some name =>
-          if psElabDoMutableHasName name state then some name
+      | Option.none => psElabDoPatternMutableConflict state rest
+      | Option.some name =>
+          if psElabDoMutableHasName name state then Option.some name
           else psElabDoPatternMutableConflict state rest
 
-def psElabDoBodyWithExit
+def psElabDoBodyWithExitWorker
     (fuel : Nat)
     (elaborate :
       PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
       Except PsElabError PsElabTermResult)
-    (ops : PsElabDoOps) (returnType result : PsExpr)
-    (onReturn : PsElabDoReturn) (liftTerminal : Bool) :
-    PsElabContext -> List PsElabDoMutable -> PsSyntaxTerm ->
-    (PsElabContext -> List PsElabDoMutable ->
-      Except PsElabError PsElabTermResult) ->
-    Except PsElabError PsElabTermResult :=
+    (ops : PsElabDoOps) (returnType : PsExpr) :
+    PsExpr -> PsElabDoReturn -> Bool -> PsElabDoForNext :=
   match fuel with
   | 0 =>
-      fun _ _ _ _ => .error PsElabError.fuelExhausted
+      fun (result : PsExpr) (onReturn : PsElabDoReturn) (liftTerminal : Bool)
+          (context : PsElabContext) (state : List PsElabDoMutable) (body : PsSyntaxTerm)
+          (finish : PsElabDoForFinish) => Except.error PsElabError.fuelExhausted
   | remaining + 1 =>
-      fun context state body finish =>
-        let smaller := psElabDoBodyWithExit remaining elaborate ops returnType result onReturn liftTerminal
-        let expected := some (psElabDoType ops result)
+      fun (result : PsExpr) (onReturn : PsElabDoReturn) (liftTerminal : Bool)
+          (context : PsElabContext) (state : List PsElabDoMutable) (body : PsSyntaxTerm)
+          (finish : PsElabDoForFinish) =>
+        let smallerWorker : PsExpr -> PsElabDoReturn -> Bool -> PsElabDoForNext :=
+          psElabDoBodyWithExitWorker remaining elaborate ops returnType;
+        let smaller : PsElabDoForNext := smallerWorker result onReturn liftTerminal;
+        let expected : Option PsExpr := Option.some (psElabDoType ops result);
         match body with
         | PsSyntaxTerm.doEndE _ => finish context state
         | PsSyntaxTerm.doReturnE value _ =>
-            match elaborate context value (some returnType) with
-            | .error error => .error error
-            | .ok valueResult =>
+            match elaborate context value (Option.some returnType) with
+            | Except.error error => Except.error error
+            | Except.ok valueResult =>
                 onReturn valueResult.context valueResult.term
         | PsSyntaxTerm.letPatternE pattern annotation value rest _ =>
             match psElabDoPatternMutableConflict state (psSyntaxBindingPatternNames pattern) with
-            | some name => .error (PsElabError.doMutableShadowing name)
-            | none =>
+            | Option.some name => Except.error (PsElabError.doMutableShadowing name)
+            | Option.none =>
                 psElabLetPattern elaborate context pattern annotation value
-                  (fun bodyContext => smaller bodyContext state rest finish) expected
+                  (fun (bodyContext : PsElabContext) => smaller bodyContext state rest finish) expected
         | PsSyntaxTerm.letE sourceName annotation value rest _ =>
             match psSyntaxNameToName sourceName with
-            | none => .error PsElabError.emptyName
-            | some name =>
+            | Option.none => Except.error PsElabError.emptyName
+            | Option.some name =>
                 if psElabDoMutableHasName name state then
-                  .error (PsElabError.doMutableShadowing name)
+                  Except.error (PsElabError.doMutableShadowing name)
                 else
                   match psElabDoLocalValue elaborate context annotation value with
-                  | .error error => .error error
-                  | .ok valueResult =>
+                  | Except.error error => Except.error error
+                  | Except.ok valueResult =>
                       psElabDoWithLocal
-                        (fun bodyContext _ => smaller bodyContext state rest finish)
+                        (fun (bodyContext : PsElabContext) (id : Nat) => smaller bodyContext state rest finish)
                         context name valueResult.type valueResult expected
         | PsSyntaxTerm.doLetMutE sourceName annotation value rest _ =>
             match psSyntaxNameToName sourceName with
-            | none => .error PsElabError.emptyName
-            | some name =>
+            | Option.none => Except.error PsElabError.emptyName
+            | Option.some name =>
                 if psElabDoMutableHasName name state then
-                  .error (PsElabError.doMutableShadowing name)
+                  Except.error (PsElabError.doMutableShadowing name)
                 else
                   match psElabDoLocalValue elaborate context annotation value with
-                  | .error error => .error error
-                  | .ok valueResult =>
-                      let type := psMetaInstantiate valueResult.context.metaContext valueResult.type
+                  | Except.error error => Except.error error
+                  | Except.ok valueResult =>
+                      let type := psMetaInstantiate valueResult.context.metaContext valueResult.type;
                       psElabDoWithLocal
-                        (fun bodyContext id =>
+                        (fun (bodyContext : PsElabContext) (id : Nat) =>
                           smaller bodyContext
-                            (PsElabDoMutable.mk id id name type :: state) rest finish)
+                            (List.cons (PsElabDoMutable.mk id id name type) state) rest finish)
                         context name type valueResult expected
         | PsSyntaxTerm.doAssignE sourceName value rest _ =>
             match psSyntaxNameToName sourceName with
-            | none => .error PsElabError.emptyName
-            | some name =>
+            | Option.none => Except.error PsElabError.emptyName
+            | Option.some name =>
                 match psLocalFindUser context.localContext name with
-                | none => .error (PsElabError.unknownName name)
-                | some declaration =>
+                | Option.none => Except.error (PsElabError.unknownName name)
+                | Option.some declaration =>
                     match psElabDoMutableFindCurrent (psLocalDeclId declaration) state with
-                    | none => .error (PsElabError.doImmutableAssignment name)
-                    | some entry =>
-                        let type := psMetaInstantiate context.metaContext entry.type
-                        match elaborate context value (some type) with
-                        | .error error => .error error
-                        | .ok valueResult =>
+                    | Option.none => Except.error (PsElabError.doImmutableAssignment name)
+                    | Option.some entry =>
+                        let type := psMetaInstantiate context.metaContext entry.type;
+                        match elaborate context value (Option.some type) with
+                        | Except.error error => Except.error error
+                        | Except.ok valueResult =>
                             psElabDoWithLocal
-                              (fun bodyContext id =>
+                              (fun (bodyContext : PsElabContext) (id : Nat) =>
                                 smaller bodyContext
                                   (psElabDoMutableUpdate entry.bindingId id state) rest finish)
                               context name type valueResult expected
         | PsSyntaxTerm.doBindE sourceName annotation action rest _ =>
             match psSyntaxNameToName sourceName with
-            | none => .error PsElabError.emptyName
-            | some name =>
+            | Option.none => Except.error PsElabError.emptyName
+            | Option.some name =>
                 if psElabDoMutableHasName name state then
-                  .error (PsElabError.doMutableShadowing name)
+                  Except.error (PsElabError.doMutableShadowing name)
                 else
                   match psElabDoAction elaborate ops context annotation action with
-                  | .error error => .error error
-                  | .ok actionResult =>
+                  | Except.error error => Except.error error
+                  | Except.ok actionResult =>
                       psElabDoContinue
-                        (fun bodyContext nextBody _ => smaller bodyContext state nextBody finish)
+                        (fun (bodyContext : PsElabContext) (nextBody : PsSyntaxTerm) (expectedBody : Option PsExpr) => smaller bodyContext state nextBody finish)
                         ops context result name actionResult.fst actionResult.snd rest
         | PsSyntaxTerm.doThenE action rest _ =>
-            let unitType := PsExpr.constE psUnitName []
+            let unitType := PsExpr.constE psUnitName [];
             match psElabDoEffectTerm elaborate ops context unitType action with
-            | .error error => .error error
-            | .ok actionResult =>
+            | Except.error error => Except.error error
+            | Except.ok actionResult =>
                 psElabDoContinue
-                  (fun bodyContext nextBody _ => smaller bodyContext state nextBody finish)
+                  (fun (bodyContext : PsElabContext) (nextBody : PsSyntaxTerm) (expectedBody : Option PsExpr) => smaller bodyContext state nextBody finish)
                   ops context result (psRootName "_") actionResult unitType rest
         | PsSyntaxTerm.doIfE condition thenBranch elseBranch rest _ =>
-            let boolType := PsExpr.constE psBoolName []
-            match elaborate context condition (some boolType) with
-            | .error error => .error error
-            | .ok conditionResult =>
-                let conditionName := psElabDoInternalName "_psc1DoCondition" context
+            let boolType := PsExpr.constE psBoolName [];
+            match elaborate context condition (Option.some boolType) with
+            | Except.error error => Except.error error
+            | Except.ok conditionResult =>
+                let conditionName := psElabDoInternalName "_psc1DoCondition" context;
                 psElabDoWithLocal
-                  (fun conditionContext conditionId =>
-                    let conditionValue := PsExpr.fvar conditionId
+                  (fun (conditionContext : PsElabContext) (conditionId : Nat) =>
+                    let conditionValue := PsExpr.fvar conditionId;
                     match rest with
                     | PsSyntaxTerm.doEndE _ =>
                         psElabDoBranches
-                          (fun branchContext branch =>
+                          (fun (branchContext : PsElabContext) (branch : PsSyntaxTerm) =>
                             smaller branchContext state branch finish)
                           ops result conditionContext conditionValue thenBranch elseBranch
                     | _ =>
-                        let carried := psElabDoMutableVisible conditionContext state
+                        let carried := psElabDoMutableVisible conditionContext state;
                         match psElabDoJoin
-                            (fun joinContext joinState =>
+                            (fun (joinContext : PsElabContext) (joinState : List PsElabDoMutable) =>
                               smaller joinContext joinState rest finish)
                             carried conditionContext state with
-                        | .error error => .error error
-                        | .ok joinResult =>
-                            let joinName := psElabDoInternalName "_psc1DoJoin" conditionContext
+                        | Except.error error => Except.error error
+                        | Except.ok joinResult =>
+                            let joinName := psElabDoInternalName "_psc1DoJoin" conditionContext;
                             psElabDoWithLocal
-                              (fun branchContext joinId =>
-                                let next :=
-                                  psElabDoJoinCall ops result joinId carried
+                              (fun (branchContext : PsElabContext) (joinId : Nat) =>
+                                let next : PsElabDoForFinish :=
+                                  psElabDoJoinCall ops result joinId carried;
                                 psElabDoBranches
-                                  (fun current branch =>
+                                  (fun (current : PsElabContext) (branch : PsSyntaxTerm) =>
                                     smaller current state branch next)
                                   ops result branchContext conditionValue thenBranch elseBranch)
                               conditionContext joinName joinResult.type joinResult expected)
@@ -151,9 +154,8 @@ def psElabDoBodyWithExit
             psElabDoForRange elaborate smaller ops result context state name lower upper loopBody rest finish
         | PsSyntaxTerm.doTryE action name recovery rest _ =>
             psElabDoTry
-              (fun innerResult innerReturn =>
-                psElabDoBodyWithExit remaining elaborate ops returnType
-                  innerResult innerReturn true)
+              (fun (innerResult : PsExpr) (innerReturn : PsElabDoReturn) =>
+                smallerWorker innerResult innerReturn true)
               smaller ops returnType result onReturn context state
               action name recovery rest finish
         | PsSyntaxTerm.doWhileE condition loopBody rest _ =>
@@ -163,6 +165,14 @@ def psElabDoBodyWithExit
               psElabDoLiftTerminal elaborate ops returnType result onReturn context body
             else psElabDoEffectTerm elaborate ops context result body
 
+def psElabDoBodyWithExit
+    (fuel : Nat)
+    (elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (ops : PsElabDoOps) (returnType result : PsExpr)
+    (onReturn : PsElabDoReturn) (liftTerminal : Bool) : PsElabDoForNext :=
+  psElabDoBodyWithExitWorker fuel elaborate ops returnType result onReturn liftTerminal
+
 -- Preserve the established public controller entry point. A nested do term
 -- gets its own return context; direct nested statements are parser-spliced.
 def psElabDoBodyWithState
@@ -171,7 +181,7 @@ def psElabDoBodyWithState
       Except PsElabError PsElabTermResult)
     (ops : PsElabDoOps) (result : PsExpr) : PsElabDoForNext :=
   psElabDoBodyWithExit fuel elaborate ops result result
-    (fun current value => psElabDoPure ops current
+    (fun (current : PsElabContext) (value : PsExpr) => psElabDoPure ops current
       (psMetaInstantiate current.metaContext result) value) false
 
 def psElabDoBody
@@ -182,9 +192,9 @@ def psElabDoBody
     (ops : PsElabDoOps) (result : PsExpr) :
     PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
     Except PsElabError PsElabTermResult :=
-  fun context body _ =>
+  fun (context : PsElabContext) (body : PsSyntaxTerm) (expectedBody : Option PsExpr) =>
     psElabDoBodyWithState fuel elaborate ops result context [] body
-      (fun current _ =>
+      (fun (current : PsElabContext) (state : List PsElabDoMutable) =>
         psElabDoPure ops current result (PsExpr.constE psUnitUnitName []))
 
 def psElabDo

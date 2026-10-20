@@ -76,3 +76,42 @@ An indexed entry is not a permission to trust data: before V2 can reach the kern
 - PSC1's JS codegen currently uses BigInt and a generator-stack runtime for general recursion; V2 cannot eliminate all backend overhead by itself.
 
 **Exit criterion for M1:** independent native CI green, all constructor parity and explicit sharing, incorrect metadata/forward references rejected, hash collision not equated. Production checker code remains byte-identical to baseline; no automatic merge.
+
+
+## Qualified V2 M2 and native M3 evidence
+
+### V2 M1/M2: source and generated-JS qualification
+
+- The full twelve-constructor immutable DAG with cached structural hash, exact loose-variable range, FVar/expression-MVar flags and depth, explicit subtree reuse, topological import/decode, collision-safe equality and metadata validation passed the native differential CI.
+- [Expression V2 CI 39382990568](https://github.com/dwijayuda/pskernel/actions/runs/39382990568) **PASSED** native and PSC1 portability jobs, exercising both indexed and chunked all-constructor builders. Real PSC1-generated TypeScript 7.0.2 and Node22 JavaScript passed. The combined V2 source contains 271 PSC1-checked declarations.
+- [Production PSC1 correctness 39382990460](https://github.com/dwijayuda/pskernel/actions/runs/39382990460) **PASSED** native and full 79-module self-hosting portability; the production checker does NOT import research V2.
+
+### Storage ablation
+
+PSC1-generated TypeScript and DirectJS implement Array.push by creating a new array with spread-copy. An Array-backed growing DAG can therefore incur quadratic copied elements. The persistent binary index avoids O(N)-per-append copies, but was extremely slow on Node22 because it invokes generated recursive and BigInt operations at each index level.
+
+[CI 39382668149](https://github.com/dwijayuda/pskernel/actions/runs/39382668149) stored identical prevalidated metadata entries and verified readback of oldest, middle, and newest entries. Every timed snapshot remained live for forced-GC retained-heap observations.
+
+| Size | Full array, ms | Chunk 16, ms | Chunk 32, ms | Chunk 64, ms | Binary index, ms |
+|---|---|---|---|---|---|
+| 256 | 0.955 / 0.217 | 0.544 / 0.299 | 0.240 / 0.329 | 0.234 / 0.190 | 75.935 / 65.204 |
+| 1,024 | 1.237 / 0.979 | 1.022 / 1.147 | 0.800 / 1.526 | 0.725 / 0.259 | not checked |
+| 4,096 | 8.198 / 8.017 | 2.053 / 2.124 | 1.613 / 1.015 | **1.031 / 0.733** | not checked |
+
+The *research* chunk default is now 64. These are two synthetic, order-dependent samples per variant, not a statistical generalization or whole-kernel speedup. Whole-checker end-to-end memory and throughput still determine production promotion.
+
+### M3 — validated sharing-aware binder lifting
+
+Research module: packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Lift.lean.
+
+- The public liftChecked entry validates every input chunked-DAG node via independent smart-constructor replay and checks the exact root ID.
+- A verified, cached loose-bound-variable range proves when a subtree can be reused unchanged.
+- Recursive lift preserves all unchanged node IDs, updates only changed nodes through smart constructors and memoizes by original ID, binder cutoff, and lift amount. This prevents exponential repeated work on structurally shared subgraphs.
+- The output DAG is fully replay-validated. Forged metadata and forward child references fail closed.
+- [Native M3 CI 39383763403](https://github.com/dwijayuda/pskernel/actions/runs/39383763403) **PASSED** 108 finite oracle comparisons across nine expression shapes, four cutoffs and three amounts. It also verified unchanged-node identity, invalid-metadata rejection and the sharing bound: 21 input nodes grew only to 42 output nodes.
+
+**M3 portability is NOT complete.** The native lifting reference uses Lean do/mutable-local constructs not accepted by PSC1's current source subset. It remains outside the portable V2 composition root and production checking. The next step is functional PSC1-source lowering for the lift and then independent generated PS/JS differential qualification, followed by capture-avoiding substitution, WHNF and DefEq integration.
+
+### Promotion rules remain unchanged
+
+No unvalidated metadata may grant proof admission or skip structural equality. Hash collisions require equality checks. Loose-bvar range must not underestimate and hasFVar must never be falsely negative. Keep Lean 4.35 semantics, the fixed fuel policy, scope-safe memoization, 79-module source self-hosting, generated JS and negative/adversarial regression gates. Do not merge research V2 into main until whole-checker measurements demonstrate a benefit and the correctness gates pass.

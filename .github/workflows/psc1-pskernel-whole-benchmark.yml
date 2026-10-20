@@ -7,7 +7,7 @@ on:
       - research/psc1-pskernel-lean435-performance-20261020
     paths:
       - psc1/test/PsKernelWholeComparison.lean
-      - psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Instantiate.lean
+      - psc1/packages/pskernel-core/**
       - psc1/scripts/pskernel-whole-report.mjs
       - psc1/scripts/pskernel-native-abba-report.mjs
       - psc1/kernel-lakefile.lean
@@ -40,12 +40,8 @@ jobs:
           git cat-file -e "$BASE_KERNEL_SHA^{commit}"
           git worktree add --detach "$RUNNER_TEMP/psc1-whole-original" "$BASE_KERNEL_SHA"
           cp psc1/test/PsKernelWholeComparison.lean "$RUNNER_TEMP/psc1-whole-original/psc1/test/PsKernelWholeComparison.lean"
-          cat >> "$RUNNER_TEMP/psc1-whole-original/psc1/kernel-lakefile.lean" <<'LAKE'
-
-          lean_exe psc1_kernel_whole_comparison where
-            srcDir := "test"
-            root := `PsKernelWholeComparison
-          LAKE
+          # Both 4.35 source snapshots already declare psc1_kernel_whole_comparison.
+          # Do not append a duplicate Lake target to the baseline worktree.
           cmp psc1/test/PsKernelWholeComparison.lean "$RUNNER_TEMP/psc1-whole-original/psc1/test/PsKernelWholeComparison.lean"
           test "$(cat psc1/lean-toolchain)" = "$(cat "$RUNNER_TEMP/psc1-whole-original/psc1/lean-toolchain")"
           printf 'original=%s\noptimized=%s\n' "$BASE_KERNEL_SHA" "$(git rev-parse HEAD)" | tee "$RUNNER_TEMP/psc1-whole-reports/refs.txt"

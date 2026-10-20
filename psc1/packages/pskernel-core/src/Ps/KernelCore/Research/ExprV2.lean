@@ -181,7 +181,7 @@ def psKernelExprV2MkApp
     (arena : PsKernelExprV2Arena) (fn arg : Nat) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With2 arena fn arg
-    (fun f a =>
+    (fun (f : PsKernelExprV2Entry) => fun (a : PsKernelExprV2Entry) =>
       {
         node := PsKernelExprV2Node.app fn arg
         hash := psKernelCacheMix (psKernelCacheMix 26 f.hash) a.hash
@@ -196,7 +196,7 @@ def psKernelExprV2MkLam
     (name : PsKernelName) (type body : Nat) (binderInfo : PsKernelBinderInfo) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With2 arena type body
-    (fun t b =>
+    (fun (t : PsKernelExprV2Entry) => fun (b : PsKernelExprV2Entry) =>
       {
         node := PsKernelExprV2Node.lam name type body binderInfo
         hash := psKernelCacheMix (psKernelCacheMix 27 t.hash) b.hash
@@ -211,7 +211,7 @@ def psKernelExprV2MkForall
     (name : PsKernelName) (type body : Nat) (binderInfo : PsKernelBinderInfo) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With2 arena type body
-    (fun t b =>
+    (fun (t : PsKernelExprV2Entry) => fun (b : PsKernelExprV2Entry) =>
       {
         node := PsKernelExprV2Node.forallE name type body binderInfo
         hash := psKernelCacheMix (psKernelCacheMix 28 t.hash) b.hash
@@ -227,7 +227,7 @@ def psKernelExprV2MkLet
     Except String (PsKernelExprV2Arena × Nat) :=
   let flag : Nat := if nondep then 1 else 0;
   psKernelExprV2With3 arena type value body
-    (fun t v b =>
+    (fun (t : PsKernelExprV2Entry) => fun (v : PsKernelExprV2Entry) => fun (b : PsKernelExprV2Entry) =>
       {
         node := PsKernelExprV2Node.letE name type value body nondep
         hash := psKernelCacheMix
@@ -247,7 +247,7 @@ def psKernelExprV2MkMData
     (arena : PsKernelExprV2Arena) (metadata body : Nat) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With1 arena body
-    (fun b =>
+    (fun (b : PsKernelExprV2Entry) =>
       {
         node := PsKernelExprV2Node.mdata metadata body
         hash := psKernelCacheMix (psKernelCacheMix 31 metadata) b.hash
@@ -262,7 +262,7 @@ def psKernelExprV2MkProj
     (typeName : PsKernelName) (index body : Nat) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With1 arena body
-    (fun b =>
+    (fun (b : PsKernelExprV2Entry) =>
       {
         node := PsKernelExprV2Node.proj typeName index body
         hash := psKernelCacheMix

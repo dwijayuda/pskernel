@@ -110,3 +110,7 @@ lean_exe psc1_kernel_multi_perf where
 lean_exe psc1_kernel_lift_perf where
   srcDir := "test"
   root := `PsKernelLiftPerformance
+
+lean_exe psc1_kernel_whole_comparison where
+  srcDir := "test"
+  root := `PsKernelWholeComparison

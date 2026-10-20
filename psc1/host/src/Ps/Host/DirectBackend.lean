@@ -67,7 +67,7 @@ def psHostDirectJavaScript
     | .ok text => pure text
     | .error _ => throw (IO.userError "PSC1_DIRECT_JS_TARGET_UNSUPPORTED")
   let name := ((System.FilePath.mk outputPath).fileName).getD "module.js"
-  let stem := outputPath.dropRight 3
+  let stem := (String.dropEnd outputPath 3).copy
   -- A standards-valid, deliberately *unmapped* map is emitted for now.
   -- We do not invent original source coordinates from declaration names.
   let mapping := "{\"version\":3,\"file\":" ++ psJsonQuote name ++

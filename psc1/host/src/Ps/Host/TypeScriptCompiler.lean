@@ -12,7 +12,7 @@ structure PsTypeScriptCompileResult where
 def psReplaceSuffix
     (value suffix replacement : String) : String :=
   if value.endsWith suffix then
-    value.dropRight suffix.length ++ replacement
+    (String.dropEnd value suffix.length).copy ++ replacement
   else
     value ++ replacement
 

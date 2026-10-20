@@ -115,7 +115,7 @@ def psHostCompilerBuild
     if outputPath.endsWith ".ts" then
       pure outputPath
     else if outputPath.endsWith ".js" then
-      pure (outputPath.dropRight 3 ++ ".ts")
+      pure ((String.dropEnd outputPath 3).copy ++ ".ts")
     else
       throw
         (IO.userError

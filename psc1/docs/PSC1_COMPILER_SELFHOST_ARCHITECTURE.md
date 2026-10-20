@@ -156,3 +156,11 @@ Failure categories remain source parse, elaboration, canonical admission,
 erasure, IR validation, target emission, runtime, host protocol and fixed-point
 comparison. Maintain the work state with the first actionable blocker, never a
 percentage or a blanket “self-hostable” label.
+
+## Concrete service identity and correspondence trust
+
+For the first generated compiler service, the host launches a hash-pinned, CI-qualified generated executable/module and retains its owned process/channel and captured request identity. Bind the entire response, source/import closure, options, target and staged artifacts to that pending session. Caller-selected service binaries or arbitrary outside candidate JSON cannot enter checked publication.
+
+This trusts the generated compiler's engineering correctness to the same degree as the existing native compiler. Exact graph admission and matching hashes do not prove source-to-Core, erasure or backend preservation. The host alone invokes the independent checker, validates IR/target/ABI and grants publication state. An arbitrary compiler plugin needs a separate certification/replay mechanism or candidate-only output. Never replace this boundary with hidden handwritten native elaboration, erasure or emission; that would invalidate compiler-only self-hosting.
+
+Census the compiler+Rust-emitter closure independently of the JS service and record the shared union. Rust qualification also stresses deep source/AST/list traversal, non-tail calls and dropping the final owner of deep Rc DAG/tree values. Shallow cloning does not solve recursive evaluation/destruction; measure limits or use stack-safe workers rather than enlarging the process stack.

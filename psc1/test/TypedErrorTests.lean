@@ -139,18 +139,20 @@ private def matchLayoutBoundaries : IO Unit := do
     "  | Except.ok value => Except.ok (value + 1)\n"
   let binding :=
     "def program : Except Nat Nat := do\n" ++
-    "  let value : Nat := match Bool.true with\n" ++
-    "  | Bool.true => 5\n" ++
-    "  | Bool.false => 7\n" ++
+    "  let input : Except Nat Nat := Except.ok 5\n" ++
+    "  let value : Nat := match input with\n" ++
+    "  | Except.ok value => value\n" ++
+    "  | Except.error error => error\n" ++
     "  return value\n"
   let enclosing :=
-    "def choose (flag : Bool) : Except Nat Nat := match flag with\n" ++
-    "  | Bool.true => do\n" ++
-    "    match Bool.false with\n" ++
-    "    | Bool.true => Except.ok 1\n" ++
-    "    | Bool.false => Except.ok 3\n" ++
-    "  | Bool.false => Except.ok 7\n" ++
-    "def program : Except Nat Nat := choose Bool.true\n"
+    "def choose (input : Except Nat Nat) : Except Nat Nat := match input with\n" ++
+    "  | Except.ok ignored => do\n" ++
+    "    let inner : Except Nat Nat := Except.error 3\n" ++
+    "    match inner with\n" ++
+    "    | Except.error error => Except.ok error\n" ++
+    "    | Except.ok value => Except.ok value\n" ++
+    "  | Except.error error => Except.ok 7\n" ++
+    "def program : Except Nat Nat := choose (Except.ok 0)\n"
   for (label, source, expected) in [
     ("terminal match retains same-column alternatives", terminal, 6),
     ("binding match retains same-column alternatives", binding, 5),
@@ -161,9 +163,7 @@ private def matchLayoutBoundaries : IO Unit := do
       psPracticalCheckExecuted label (<- prepare kind text)
         (PsExpr.constE psNatName []) (.lit (.natural expected))
 
-def main : IO Unit := do
-  matchLayoutBoundaries
-  layoutBoundaries
+private def handlerCorpus : IO Unit := do
   let source <- IO.FS.readFile "test/TypedErrorFixtures.lean"
   let ps <- translate source
   let original <- prepare .lean source
@@ -180,6 +180,8 @@ def main : IO Unit := do
   match psCompilerAdmissionsFromPrepared original, psCompilerAdmissionsFromPrepared roundtripped with
   | .ok a, .ok b => require "PS-to-Lean handler graph roundtrip" (a == b)
   | _, _ => throw (IO.userError "typed-error reverse graph encoding")
+
+private def rejectionBoundaries : IO Unit := do
   for (label, body) in [
     ("throw error type mismatch", "def result : Except Nat Nat := do { throw true }"),
     ("Id has no typed-error channel", "def result : Id Nat := do { try { return 1 } catch error => { return 2 } }"),
@@ -200,7 +202,27 @@ def main : IO Unit := do
   ] do
     require "malformed or out-of-block handler refuses"
       (match psCompilerPrepareSource .lean source with | .error _ => true | .ok _ => false)
+
+private def proofScriptSpelling : IO Unit := do
   let barePs := "def result : Except Nat Nat := do {\n try {\n  throw 7\n } catch error => {\n  return error\n }\n}\n"
   checkPrepared "native-spelled PS throw and braces" (<- prepare .proofScript barePs)
-  compilerM
+
+def main : IO Unit := do
+  let groups : List (String × IO Unit) := [
+    ("match layout", matchLayoutBoundaries),
+    ("nested handlers", layoutBoundaries),
+    ("handler corpus", handlerCorpus),
+    ("rejection boundaries", rejectionBoundaries),
+    ("PS spelling", proofScriptSpelling),
+    ("CompilerM", compilerM)]
+  let mut failures : List String := []
+  for (label, action) in groups do
+    try
+      action
+      IO.println ("PSC1_TYPED_ERROR_GROUP_PASS: " ++ label)
+    catch error =>
+      IO.eprintln ("PSC1_TYPED_ERROR_GROUP_FAIL: " ++ label ++ ": " ++ toString error)
+      failures := failures ++ [label]
+  if !failures.isEmpty then
+    throw (IO.userError ("PSC1_TYPED_ERROR_TESTS_FAILED: " ++ String.intercalate ", " failures))
   IO.println "PSC1_TYPED_ERROR_TESTS: PASS"

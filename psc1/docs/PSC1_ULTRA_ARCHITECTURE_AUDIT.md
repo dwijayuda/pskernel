@@ -39,3 +39,21 @@ Measure before declaring a performance redesign complete. Baseline/replacement w
 Reproduce each changed defect first, inspect actual Linux native/target logs, retain negative refusals and prior-generation preservation, then run integration. Update `AI_WORK_STATE.md` and execution status with exact head/tested-merge/run identities. P0 logical checking cannot be traded for green CI. P1 designs above are concrete implementation assignments; they remain open until their executable criteria pass.
 
 Read the companion Practical Core decisions, source/backend matrix, Wasm design, self-host architecture and host protocol. First generated JS compiler success must execute compiler logic without invoking the handwritten native compiler; an explicit independent checker service is permissible. Repeat for Rust and generations before claiming fixed point. No merge, release or npm publication is part of this assignment.
+
+## Integration findings from actual Linux execution
+
+Run 39486868090 at bd4ed2bd8cfec82d057ba288465c77a3e0577586 passed the direct component test and generated JS/Rust external-checker transport. Live source census observed semantic compiler 67 modules (40 parse / 35 elaborate), JS closure79 (48 /41), Rust closure83 (49 /40); these are accepted stage counts, not source or self-host completion.
+
+The typed-error corpus exposed a further shared identifier defect: a valid lexical binding named throw was not escaped for JS/TS. DirectJS refused and directTS produced a reserved-keyword syntax error while the other five targets executed it correctly. Repair shared erasure naming before collision allocation; do not remove lexical shadowing or rewrite printed source.
+
+Native parser-boundary regressions must use registered inductive matches. Generic Bool matching currently lacks the required source inductive metadata; ordinary Boolean control uses if. The tests now retain the aligned/dedented layout assertions using Except data, without selecting another language feature.
+
+## Precise finite-loop worker implementation seam
+
+Use a checked worker returning State -> M R. Its authored entry lambda prefix ends at the major list/count; the recursor's motive is State -> M R, and each minor introduces the state lambda internally. The step returns M (Continue State | Done R), with typed failure in the outer M. Only Continue invokes the recursive hypothesis; Done returns and outer failure propagates. Retain State=Unit for zero mutable locals. For ranges/arrays carry index and state while decreasing remaining count; arrays also need efficient checked reads.
+
+Environment/Control and DoFor.psElabDoForList/Array/RangeLoop are the construction seam. Erasure/Definition.psEraseOpenDefinitionWithFuel preserves the actual entry lambda prefix rather than eta-expanding it; Erasure/Expr.psOpenMatchMinorHypotheses replaces the IH with a recursive call beneath the state lambda/Continue branch. Inspect resulting IR: no recursive call at closure construction, Done or typed failure.
+
+Do not globally delay arbitrary recursor IHs: partial callbacks can observe strictness/divergence. Use the checked worker shape and original graph pairing. If a target scheduler cannot tail-call the resulting immediately applied unary worker, introduce a narrow shared typed worker-entry/application fusion and revalidate. Restrict fusion to the known worker shape and already evaluated ANF state/capture values, preserving argument/body evaluation order; reject or retain original lowering for arbitrary escaping closures/nonvalue arguments. No broad SSA stage or unchecked loop opcode is required.
+
+Qualify first-return ranges 10^3/10^6/10^9 with constant iteration work after bound evaluation, list first-return without tail construction, full traversal with linear work/bounded stack, skipped later divergence, catch recovery and old-value captures. Native oracle, both grammars/all7, malformed packet/types, wrong worker entry shape, stale graph and shadowed capture refusals remain mandatory. Record actual memory/work/time rather than inventing speedups.

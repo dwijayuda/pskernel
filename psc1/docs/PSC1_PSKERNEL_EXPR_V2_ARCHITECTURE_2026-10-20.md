@@ -32,7 +32,17 @@ Research file: packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2.lean.
 - Same-arena identity can short-circuit valid equality; for other IDs, a matching hash triggers **actual structural comparison**, never unconditional equality. Binder annotations and display names intentionally follow PSC1 legacy semantic equality. Hashes are not proof certificates.
 - A validator recalculates the hash, range, flags and depth from independently decoded *legacy* expressions for every DAG node, and rejects forged metadata. The public arena structure is not yet sealed; **no V2 result can be trusted by the kernel without validation**.
 
-This version is a **Lean-native research model only**. The first native regression does not demonstrate acceptance by PSC1's portable .lean parser, generated .ps source, TypeScript backend, or the independent checker. The production SelfHost root does not import V2. Portable implementation and full self-host qualification are required before integration.
+**Updated qualification:** The main Expression V2 module has now passed both native regression and a real PSC1 compiler check: [GitHub Actions 39380246845](https://github.com/dwijayuda/pskernel/actions/runs/39380246845), including 234 PSC1-checked declarations. A separate native Expr V2 run [39376416446](https://github.com/dwijayuda/pskernel/actions/runs/39376416446) passed 124 individual V2 assertions. This does **not** qualify generated JS, the alternative persistent index, full kernel M3–M5 integration, or independent soundness. The production SelfHost root continues to exclude V2.
+
+## M2 discovery: array-backed DAG vs persistent indexed DAG
+
+The TypeScript backend at psc1/packages/backend-ts/src/Ps/BackendTs/Expr.lean, intrinsic arrayPush case, emits the complete expression "[...(array), value]". The DirectJS backend in packages/backend-js/src/Ps/BackendJs/Print.lean similarly emits a spread-copy. Therefore building an immutable V2 arena with one array push per node copies the entire existing array each time: O(N²) total copied elements over N inserts. This is confirmed in the backend **source**, not guessed from native Lean timing.
+
+The research implementation now includes packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Index.lean, a persistent binary trie keyed by exact (node ID + 1), independent of cached *expression hash*. Each insert/lookup traverses O(log N) tree levels and reuses unchanged branches. The scheme prevents index-key collisions by construction, but it still needs benchmarks: generated JS executes Nat arithmetic as BigInt and uses a generator runtime for general recursion; its constant factors can be high.
+
+The new test at test/PsKernelExprV2Regression.lean compares array-backed and index-backed metadata for 384 nodes, tests out-of-range access, verifies immutability after extension, and retains hash-collision/forged-metadata tests. The updated PSC1 Expression V2 GitHub workflow now checks this indexed source through PSC1, attempts TypeScript 7.0.2/JS emission, and runs runtime smoke with storage cost observations. These **additional gates are not complete** until the corresponding CI runs pass.
+
+An indexed entry is not a permission to trust data: before V2 can reach the kernel, imported/serialized graph payloads must be recomputed and checked, with node-IDs scoped to their owning immutable arena.
 
 ## Migration milestones
 

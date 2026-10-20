@@ -365,8 +365,10 @@ const pagedPairs=accepted(pagedEqBatch(pagedEqGraph,pairQueries),
   "paged-eq-ordered-batch");
 demand(boolListEq(pagedPairs)(expectedPairAnswers)===true &&
   boolListEq(pagedPairs)(paired)===true,"paged-eq-batch-parity");
-const badPagedEq=pagedStructuralEq(forgedPaged,0n,0n);
-const badPagedBatch=pagedEqBatch(forgedPaged,pairQueries);
+const forgedPagedEq=pagedPush(pagedEmptyWithLimit(64n),
+  {...firstEntry,hasFVar:true}).fst;
+const badPagedEq=pagedStructuralEq(forgedPagedEq,0n,0n);
+const badPagedBatch=pagedEqBatch(forgedPagedEq,pairQueries);
 demand(badPagedEq&&"error" in badPagedEq &&
   badPagedBatch&&"error" in badPagedBatch,
   "paged-eq-forged-metadata-rejected");

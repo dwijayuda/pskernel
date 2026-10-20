@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - research/psc1-pskernel-lean435-performance-20261020
+      - research/psc1-pskernel-expr-v2-lean435-20261020
     paths:
       - psc1/lean-toolchain
       - psc1/host/**

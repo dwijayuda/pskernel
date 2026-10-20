@@ -1,0 +1,57 @@
+name: PSC1 PSKernel-Core Expression V2 research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-pskernel-expr-v2-lean435-20261020
+    paths:
+      - psc1/lean-toolchain
+      - psc1/packages/pskernel-core/src/Ps/KernelCore/Research/**
+      - psc1/test/PsKernelExprV2Regression.lean
+      - psc1/kernel-lakefile.lean
+      - .github/workflows/psc1-pskernel-expr-v2.yml
+
+permissions:
+  contents: read
+
+jobs:
+  expr-v2-differential:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify exact Lean source commit
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      - name: Build independent Expr V2 DAG and regression
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_regression
+      - name: Differential all-constructor checks and metadata validation
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e' \
+            -o "$RUNNER_TEMP/expr-v2.memory" \
+            .lake/build/bin/psc1_kernel_expr_v2_regression \
+            | tee "$RUNNER_TEMP/expr-v2-regression.log"
+          grep -q "PSC1_EXPR_V2_REGRESSION: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-expr-v2-differential-lean435
+          path: |
+            ${{ runner.temp }}/expr-v2.memory
+            ${{ runner.temp }}/expr-v2-regression.log
+          retention-days: 30

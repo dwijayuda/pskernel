@@ -129,3 +129,8 @@ lean_exe psc1_kernel_matched_official where
 lean_exe psc1_kernel_metadata where
   srcDir := "test"
   root := `PsKernelMetadataExperiment
+
+-- Isolated Expression V2 DAG/invariant qualification; not yet a kernel provider.
+lean_exe psc1_kernel_expr_v2_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2Regression

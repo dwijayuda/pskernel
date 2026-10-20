@@ -1027,7 +1027,7 @@ private def testPortablePairEquality : IO Unit := do
     let expected := psKernelExprEq oldLeft oldRight
     let observed ← expectV2
       (psKernelExprV2PortableEqChecked arena left right)
-    requireV2 ("pair-eq-"+label) (observed == expected)
+    requireV2 ("pair-eq-" ++ label) (observed == expected)
   requireV2 "pair-eq-invalid-left"
     (match psKernelExprV2PortableEqChecked arena 99999 app with
       | Except.error _ => true

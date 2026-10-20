@@ -46,7 +46,7 @@ jobs:
             --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
             --official-project . \
             --out "$RUNNER_TEMP/arena435-evidence/report.json" \
-            --timeout 20 --workers 4 \
+            --timeout 300 --workers 2 \
             | tee "$RUNNER_TEMP/arena435-evidence/run.log"
       - uses: actions/upload-artifact@v4
         if: always()

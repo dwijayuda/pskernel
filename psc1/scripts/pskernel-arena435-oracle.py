@@ -13,6 +13,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import json
 import pathlib
+import os
+import signal
 import re
 import subprocess
 import sys
@@ -125,16 +127,24 @@ def parse_verdict(output: str, status: int) -> dict:
 def official(project: pathlib.Path, path: pathlib.Path, timeout: int, log: pathlib.Path) -> dict:
     start = time.monotonic()
     try:
-        done = subprocess.run(["lake", "env", "leanchecker", "--from-export", str(path)],
-                              cwd=project, capture_output=True, text=True,
-                              encoding="utf-8", errors="replace", timeout=timeout, check=False)
-        output = done.stdout + "\n" + done.stderr
-        result = {**parse_verdict(output, done.returncode), "returncode": done.returncode}
-    except subprocess.TimeoutExpired as exc:
-        def decoded(value):
-            return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
-        output = decoded(exc.stdout) + "\n" + decoded(exc.stderr)
-        result = {"verdict": "timeout", "returncode": None}
+        with subprocess.Popen(["lake", "env", "leanchecker", "--from-export", str(path)],
+                              cwd=project, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              text=True, encoding="utf-8", errors="replace",
+                              start_new_session=True) as process:
+            try:
+                stdout, stderr = process.communicate(timeout=timeout)
+                output = stdout + "\n" + stderr
+                result = {**parse_verdict(output, process.returncode), "returncode": process.returncode}
+            except subprocess.TimeoutExpired:
+                # lake may launch leanchecker as a child: terminate and reap the
+                # complete isolated group before the next case is evaluated.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                stdout, stderr = process.communicate()
+                output = stdout + "\n" + stderr
+                result = {"verdict": "timeout", "returncode": None}
     except OSError as exc:
         output = str(exc)
         result = {"verdict": "driver_error", "returncode": None}

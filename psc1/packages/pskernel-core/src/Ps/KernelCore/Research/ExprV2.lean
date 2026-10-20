@@ -183,16 +183,29 @@ but not anonymous typed lambdas inside function arguments. Explicit worker
 definitions also make each smart constructor's metadata rules auditable.
 -/
 
+/-
+Semantic-independent metadata combinators. Use named functions rather than
+inline if expressions in higher-order argument positions because PSC1's
+portable frontend only accepts the simpler term grammar.
+-/
+def psKernelExprV2NatMax
+    (left right : Nat) : Nat :=
+  if Nat.ble left right then right else left
+
+def psKernelExprV2BoolOr
+    (left right : Bool) : Bool :=
+  if left then true else right
+
 def psKernelExprV2AppEntry
     (fn arg : Nat)
     (f a : PsKernelExprV2Entry) : PsKernelExprV2Entry :=
   PsKernelExprV2Entry.mk
     (PsKernelExprV2Node.app fn arg)
     (psKernelCacheMix (psKernelCacheMix 26 f.hash) a.hash)
-    (Nat.max f.looseRange a.looseRange)
-    (if f.hasFVar then true else a.hasFVar)
-    (if f.hasExprMVar then true else a.hasExprMVar)
-    (Nat.succ (Nat.max f.depth a.depth))
+    (psKernelExprV2NatMax f.looseRange a.looseRange)
+    (psKernelExprV2BoolOr f.hasFVar a.hasFVar)
+    (psKernelExprV2BoolOr f.hasExprMVar a.hasExprMVar)
+    (Nat.succ (psKernelExprV2NatMax f.depth a.depth))
 
 def psKernelExprV2LamEntry
     (name : PsKernelName)
@@ -201,10 +214,10 @@ def psKernelExprV2LamEntry
   PsKernelExprV2Entry.mk
     (PsKernelExprV2Node.lam name type body binderInfo)
     (psKernelCacheMix (psKernelCacheMix 27 t.hash) b.hash)
-    (Nat.max t.looseRange (Nat.sub b.looseRange 1))
-    (if t.hasFVar then true else b.hasFVar)
-    (if t.hasExprMVar then true else b.hasExprMVar)
-    (Nat.succ (Nat.max t.depth b.depth))
+    (psKernelExprV2NatMax t.looseRange (Nat.sub b.looseRange 1))
+    (psKernelExprV2BoolOr t.hasFVar b.hasFVar)
+    (psKernelExprV2BoolOr t.hasExprMVar b.hasExprMVar)
+    (Nat.succ (psKernelExprV2NatMax t.depth b.depth))
 
 def psKernelExprV2ForallEntry
     (name : PsKernelName)
@@ -213,10 +226,10 @@ def psKernelExprV2ForallEntry
   PsKernelExprV2Entry.mk
     (PsKernelExprV2Node.forallE name type body binderInfo)
     (psKernelCacheMix (psKernelCacheMix 28 t.hash) b.hash)
-    (Nat.max t.looseRange (Nat.sub b.looseRange 1))
-    (if t.hasFVar then true else b.hasFVar)
-    (if t.hasExprMVar then true else b.hasExprMVar)
-    (Nat.succ (Nat.max t.depth b.depth))
+    (psKernelExprV2NatMax t.looseRange (Nat.sub b.looseRange 1))
+    (psKernelExprV2BoolOr t.hasFVar b.hasFVar)
+    (psKernelExprV2BoolOr t.hasExprMVar b.hasExprMVar)
+    (Nat.succ (psKernelExprV2NatMax t.depth b.depth))
 
 def psKernelExprV2LetEntry
     (name : PsKernelName) (type value body : Nat) (nondep : Bool)
@@ -228,12 +241,11 @@ def psKernelExprV2LetEntry
       (psKernelCacheMix
         (psKernelCacheMix
           (psKernelCacheMix 29 t.hash) v.hash) b.hash) flag)
-    (Nat.max
-      (Nat.max t.looseRange v.looseRange) (Nat.sub b.looseRange 1))
-    (if t.hasFVar then true else if v.hasFVar then true else b.hasFVar)
-    (if t.hasExprMVar then true else
-      if v.hasExprMVar then true else b.hasExprMVar)
-    (Nat.succ (Nat.max (Nat.max t.depth v.depth) b.depth))
+    (psKernelExprV2NatMax
+      (psKernelExprV2NatMax t.looseRange v.looseRange) (Nat.sub b.looseRange 1))
+    (psKernelExprV2BoolOr (psKernelExprV2BoolOr t.hasFVar v.hasFVar) b.hasFVar)
+    (psKernelExprV2BoolOr (psKernelExprV2BoolOr t.hasExprMVar v.hasExprMVar) b.hasExprMVar)
+    (Nat.succ (psKernelExprV2NatMax (psKernelExprV2NatMax t.depth v.depth) b.depth))
 
 def psKernelExprV2MDataEntry
     (metadata body : Nat) (b : PsKernelExprV2Entry) :

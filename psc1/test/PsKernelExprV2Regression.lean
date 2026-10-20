@@ -345,6 +345,120 @@ private def testIndexedSmartConstructors : IO Unit := do
     (shared.size == indexedArena.size + 24)
   IO.println "PSC1_EXPR_V2_INDEXED_BUILDERS: PASS"
 
+private def testChunkedSmartConstructors : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "chunkedDemo"
+  let mut arrayArena := psKernelExprV2Empty
+  let mut chunkedArena := psKernelExprV2ChunkedEmpty
+  let mut cases : List (String × Nat × Nat) := List.nil
+
+  let (a0, b0) := psKernelExprV2MkBVar arrayArena 0
+  let (i0, j0) ← expectV2 (psKernelExprV2ChunkedMkBVar chunkedArena 0)
+  arrayArena := a0
+  chunkedArena := i0
+  cases := ("bvar", b0, j0) :: cases
+
+  let (a1, b1) := psKernelExprV2MkBVar arrayArena 2
+  let (i1, j1) ← expectV2 (psKernelExprV2ChunkedMkBVar chunkedArena 2)
+  arrayArena := a1
+  chunkedArena := i1
+  cases := ("bvar2", b1, j1) :: cases
+
+  let (a2, b2) := psKernelExprV2MkFVar arrayArena name
+  let (i2, j2) ← expectV2 (psKernelExprV2ChunkedMkFVar chunkedArena name)
+  arrayArena := a2
+  chunkedArena := i2
+  cases := ("fvar", b2, j2) :: cases
+
+  let (a3, b3) := psKernelExprV2MkMVar arrayArena name
+  let (i3, j3) ← expectV2 (psKernelExprV2ChunkedMkMVar chunkedArena name)
+  arrayArena := a3
+  chunkedArena := i3
+  cases := ("mvar", b3, j3) :: cases
+
+  let (a4, b4) := psKernelExprV2MkSort arrayArena PsKernelLevel.zero
+  let (i4, j4) ← expectV2 (psKernelExprV2ChunkedMkSort chunkedArena PsKernelLevel.zero)
+  arrayArena := a4
+  chunkedArena := i4
+  cases := ("sort", b4, j4) :: cases
+
+  let (a5, b5) := psKernelExprV2MkConst arrayArena name [PsKernelLevel.zero]
+  let (i5, j5) ← expectV2 (psKernelExprV2ChunkedMkConst chunkedArena name [PsKernelLevel.zero])
+  arrayArena := a5
+  chunkedArena := i5
+  cases := ("const", b5, j5) :: cases
+
+  let (a6, b6) := psKernelExprV2MkLit arrayArena (.nat 42)
+  let (i6, j6) ← expectV2 (psKernelExprV2ChunkedMkLit chunkedArena (.nat 42))
+  arrayArena := a6
+  chunkedArena := i6
+  cases := ("lit", b6, j6) :: cases
+
+  let (a7, b7) ← expectV2 (psKernelExprV2MkApp arrayArena b0 b2)
+  let (i7, j7) ← expectV2 (psKernelExprV2ChunkedMkApp chunkedArena j0 j2)
+  arrayArena := a7
+  chunkedArena := i7
+  cases := ("app", b7, j7) :: cases
+
+  let (a8, b8) ← expectV2
+    (psKernelExprV2MkLam arrayArena name b4 b1 PsKernelBinderInfo.default)
+  let (i8, j8) ← expectV2
+    (psKernelExprV2ChunkedMkLam chunkedArena name j4 j1 PsKernelBinderInfo.default)
+  arrayArena := a8
+  chunkedArena := i8
+  cases := ("lambda", b8, j8) :: cases
+
+  let (a9, b9) ← expectV2
+    (psKernelExprV2MkForall arrayArena name b4 b0 PsKernelBinderInfo.implicit)
+  let (i9, j9) ← expectV2
+    (psKernelExprV2ChunkedMkForall chunkedArena name j4 j0 PsKernelBinderInfo.implicit)
+  arrayArena := a9
+  chunkedArena := i9
+  cases := ("forall", b9, j9) :: cases
+
+  let (a10, b10) ← expectV2 (psKernelExprV2MkLet arrayArena name b4 b2 b1 false)
+  let (i10, j10) ← expectV2 (psKernelExprV2ChunkedMkLet chunkedArena name j4 j2 j1 false)
+  arrayArena := a10
+  chunkedArena := i10
+  cases := ("let", b10, j10) :: cases
+
+  let (a11, b11) ← expectV2 (psKernelExprV2MkMData arrayArena 31 b7)
+  let (i11, j11) ← expectV2 (psKernelExprV2ChunkedMkMData chunkedArena 31 j7)
+  arrayArena := a11
+  chunkedArena := i11
+  cases := ("mdata", b11, j11) :: cases
+
+  let (a12, b12) ← expectV2 (psKernelExprV2MkProj arrayArena name 0 b11)
+  let (i12, j12) ← expectV2 (psKernelExprV2ChunkedMkProj chunkedArena name 0 j11)
+  arrayArena := a12
+  chunkedArena := i12
+  cases := ("proj", b12, j12) :: cases
+
+  requireV2 "all-smart-builder-count-parity"
+    (chunkedArena.size == arrayArena.nodes.size)
+  let _ ← expectV2 (psKernelExprV2ValidateLinear arrayArena)
+  for (label, a, b) in cases do
+    requireV2 ("chunked-smart-id-" ++ label) (a == b)
+    let old ← expectV2 (psKernelExprV2Lookup arrayArena a)
+    let newer ← expectV2 (psKernelExprV2ChunkedRequire chunkedArena b)
+    requireV2 ("chunked-smart-metadata-" ++ label)
+      (psKernelExprV2SameMetadata old newer)
+  requireV2 "chunked-smart-invalid-child"
+    (match psKernelExprV2ChunkedMkApp chunkedArena 7777 j2 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let mut shared := chunkedArena
+  let mut root := j0
+  for _ in [:24] do
+    let (next, id) ← expectV2 (psKernelExprV2ChunkedMkApp shared root root)
+    shared := next
+    root := id
+  let finalEntry ← expectV2 (psKernelExprV2ChunkedRequire shared root)
+  requireV2 "chunked-smart-large-sharing-depth" (finalEntry.depth == 25)
+  requireV2 "chunked-smart-large-sharing-nodes"
+    (shared.size == chunkedArena.size + 24)
+  IO.println "PSC1_EXPR_V2_CHUNKED_BUILDERS: PASS"
+
+
 private def testChunkedArena : IO Unit := do
   for limit in [0, 1, 8, 32, 64] do
     let mut classic := psKernelExprV2Empty
@@ -415,5 +529,6 @@ def main : IO Unit := do
   testExponentialSharing
   testIndexedArena
   testIndexedSmartConstructors
+  testChunkedSmartConstructors
   testChunkedArena
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

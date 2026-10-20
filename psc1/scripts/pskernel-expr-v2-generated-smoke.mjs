@@ -34,6 +34,7 @@ const chunkedFind=load("psKernelExprV2ChunkedFind");
 const chunkedMkBVar=load("psKernelExprV2ChunkedMkBVar");
 const chunkedMkApp=load("psKernelExprV2ChunkedMkApp");
 const portableValidate=load("psKernelExprV2PortableValidate");
+const portableLift=load("psKernelExprV2PortableLiftChecked");
 const level=load("PsKernelLevel");
 const mkSort=load("psKernelExprV2MkSort");
 let arena=empty;
@@ -107,6 +108,26 @@ const validatedShared=accepted(portableValidate(shared),"portable-validate-share
 demand(validatedShared.size===shared.size,"portable-shared-validation-count");
 const sharedEntry=acceptedOption(chunkedFind(validatedShared,root),"portable-shared-root");
 demand(sharedEntry.depth===13n,"portable-shared-depth");
+
+const lifted=accepted(portableLift(shared,root,0n,2n),"portable-lift-shared");
+const liftedRoot=acceptedOption(
+  chunkedFind(lifted.fst,lifted.snd),"portable-lift-root");
+demand(liftedRoot.depth===sharedEntry.depth,"portable-lift-preserves-depth");
+demand(liftedRoot.looseRange===3n,"portable-lift-increases-loose-range");
+demand(lifted.fst.size<=shared.size+13n,"portable-lift-sharing-growth");
+const liftedApp=liftedRoot.node;
+demand(liftedApp.fn===liftedApp.arg,"portable-lift-shared-child-id");
+const liftedZero=accepted(portableLift(shared,root,0n,0n),"portable-lift-zero");
+demand(liftedZero.snd===root && liftedZero.fst.size===shared.size,
+  "portable-lift-zero-allocation");
+const liftedAbove=accepted(portableLift(shared,root,3n,1n),"portable-lift-above-range");
+demand(liftedAbove.snd===root && liftedAbove.fst.size===shared.size,
+  "portable-lift-prunes-unaffected");
+const forgedLift=portableLift(forgedChunk,0n,0n,1n);
+demand(forgedLift&&"error" in forgedLift,"portable-lift-rejects-forged-metadata");
+const missingLift=portableLift(shared,9999n,0n,1n);
+demand(missingLift&&"error" in missingLift,"portable-lift-rejects-invalid-root");
+
 
 
 const timings=[];

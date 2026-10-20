@@ -80,17 +80,6 @@ private def psc1MatchedMeasure (env : Lean.Environment) (op label : String) (cal
   unless passed == calls do throw (IO.userError "MATCHED_KERNEL_INCOMPLETE")
   IO.println s!"PSC1_MATCHED_KERNEL operation={op} variant={label} calls={calls} ms={after-before} all_correct=true"
 
-def main : IO Unit := do
-  let env ← Lean.mkEmptyEnvironment
-  for op in ["check_sort", "beta_whnf", "defeq_positive"] do
-    psc1MatchedMeasure env op "lean" 2400
-    psc1MatchedMeasure env op "psc" 2400
-    psc1MatchedMeasure env op "psc" 2400
-    psc1MatchedMeasure env op "lean" 2400
-  psc1MatchedDeepAll env
-  IO.println "PSC1_MATCHED_KERNEL: COMPLETE"
-
-
 /-
 Depth-controlled closed zeta chains, built once before timing. Each let is
 let x : Sort 1 := previous; x, so the expression checks with type Sort 1
@@ -183,3 +172,13 @@ private def psc1MatchedDeepAll (env : Lean.Environment) : IO Unit := do
       psc1MatchedDeepMeasure env op "psc" depth calls psTerm leanTerm
       psc1MatchedDeepMeasure env op "lean" depth calls psTerm leanTerm
   IO.println "PSC1_MATCHED_DEEP: COMPLETE"
+
+def main : IO Unit := do
+  let env ← Lean.mkEmptyEnvironment
+  for op in ["check_sort", "beta_whnf", "defeq_positive"] do
+    psc1MatchedMeasure env op "lean" 2400
+    psc1MatchedMeasure env op "psc" 2400
+    psc1MatchedMeasure env op "psc" 2400
+    psc1MatchedMeasure env op "lean" 2400
+  psc1MatchedDeepAll env
+  IO.println "PSC1_MATCHED_KERNEL: COMPLETE"

@@ -426,7 +426,7 @@ console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG terminal inference, terminal/metadata/zeta WHNF and checked structural shortcut; legacy general checker fallback; incomplete"
+  checker_representation:"DAG terminal inference, terminal/metadata/zeta/syntactic-lambda-beta WHNF and checked structural shortcut; legacy general checker fallback; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");
 }
@@ -463,5 +463,100 @@ for(const wrappers of [0,1,5]){
     "zeta-nested-binder-result-"+wrappers);
 }
 console.log("PSC1_V2_DAG_JS_ZETA: PASS");
+
+// Direct syntactic-lambda beta spines preserve both original core visits.
+{
+  let betaArena=empty;
+  const betaAdd=(kind,...args)=>{
+    const next=mk(betaArena,kind,...args);
+    betaArena=next.fst; return next.snd;
+  };
+  const bs0=betaAdd("Sort",L.zero);
+  const bs1=betaAdd("Sort",L.succ(L.zero));
+  const bs2=betaAdd("Sort",L.succ(L.succ(L.zero)));
+  const bb0=betaAdd("BVar",0n),bb1=betaAdd("BVar",1n);
+  const bx=name("beta-x"),by=name("beta-y"),bz=name("beta-z");
+  const bi=betaAdd("Lam",bx,bs1,bb0,B.default);
+  const identity=E.lam(bx,sort1,E.bvar(0n),B.default);
+  const bsingle=betaAdd("App",bi,bs0);
+  const inner=betaAdd("Lam",by,bs1,bb1,B.implicit);
+  const partialHead=betaAdd("Lam",bx,bs1,inner,B.default);
+  const bpartial=betaAdd("App",partialHead,bs0);
+  const reverseInner=betaAdd("Lam",by,bs1,bb1,B.default);
+  const reverseHead=betaAdd("Lam",bx,bs2,reverseInner,B.default);
+  const reverseFirst=betaAdd("App",reverseHead,bs1);
+  const breverse=betaAdd("App",reverseFirst,bs0);
+  const tagged=betaAdd("MData",9n,bb0);
+  const letBody=betaAdd("Let",by,bs1,bb0,tagged,false);
+  const zetaHead=betaAdd("Lam",bx,bs1,letBody,B.default);
+  const bzeta=betaAdd("App",zetaHead,bs0);
+  const overZ=betaAdd("Lam",bz,bs1,bb1,B.default);
+  const overY=betaAdd("Lam",by,bs1,overZ,B.default);
+  const overBody=betaAdd("App",overY,bb0);
+  const overX=betaAdd("Lam",bx,bs1,overBody,B.default);
+  const overFirst=betaAdd("App",overX,bs0);
+  const bover=betaAdd("App",overFirst,bs0);
+  const sort2=E.sort(L.succ(L.succ(L.zero)));
+  const fixtures=[
+    [bsingle,E.app(identity,sort0),sort0],
+    [bpartial,E.app(E.lam(bx,sort1,E.lam(by,sort1,E.bvar(1n),B.implicit),B.default),sort0),
+      E.lam(by,sort1,sort0,B.implicit)],
+    [breverse,E.app(E.app(E.lam(bx,sort2,E.lam(by,sort1,E.bvar(1n),B.default),B.default),sort1),sort0),
+      sort1],
+    [bzeta,E.app(E.lam(bx,sort1,E.letE(by,sort1,E.bvar(0n),E.mdata(9n,E.bvar(0n)),false),B.default),sort0),
+      sort0],
+    [bover,E.app(E.app(E.lam(bx,sort1,E.app(E.lam(by,sort1,E.lam(bz,sort1,E.bvar(1n),B.default),B.default),E.bvar(0n)),B.default),sort0),sort0),
+      sort0]
+  ];
+  for(let index=0;index<fixtures.length;index++){
+    const [root,term,expected]=fixtures[index];
+    for(const fuel of [0n,1n,2n,3n,4n,5n,6n,8n,16n,64n]){
+      for(const depth of [0n,1n,2n]){
+        const s=session(fuel,depth);
+        must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,term),
+          invoke(betaArena,[C.whnf(root)],s),exact),
+          "beta-complete-whnf-"+index+"-"+fuel+"-"+depth);
+        const checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+        const old=get("psKernelSessionWhnf")(fuel,checker,term);
+        const attempted=get("psKernelExprV2TryWhnfWithFuel")(fuel)(checker.context,betaArena,root);
+        must(attempted&&typeof attempted==="object"&&"value" in attempted,
+          "beta-direct-worker-selected-"+index+"-"+fuel+"-"+depth);
+        const direct=attempted.value;
+        if(rejected(old)){
+          must(rejected(direct)&&old.error===direct.error,
+            "beta-direct-worker-error-parity-"+index+"-"+fuel+"-"+depth);
+        }else{
+          const result=accepted(direct,"beta-worker-result");
+          const built=accepted(decode(result.fst),"beta-valid-result");
+          const actual=accepted(decoded(built,result.snd),"beta-result-read");
+          must(exact(actual,accepted(old,"beta-legacy-whnf").fst)&&exact(actual,expected),
+            "beta-direct-worker-value-parity-"+index+"-"+fuel+"-"+depth);
+        }
+      }
+    }
+  }
+  const functionType=betaAdd("Forall",N.anonymous,bs1,bs1,B.default);
+  const cacheHead=betaAdd("Let",name("beta-f"),functionType,bi,bb0,false);
+  const cacheInner=betaAdd("App",cacheHead,bs0);
+  const cacheRoot=betaAdd("App",cacheHead,cacheInner);
+  const legacyHead=E.letE(name("beta-f"),E.forallE(N.anonymous,sort1,sort1,B.default),
+    identity,E.bvar(0n),false);
+  const cacheTerm=E.app(legacyHead,E.app(legacyHead,sort0));
+  const checker=get("psKernelKernelSessionChecker")(session(),nil,S.safe);
+  const cached=accepted(get("psKernelSessionWhnf")(4n,checker,cacheTerm),"beta-cache-oracle");
+  must(exact(cached.fst,sort0),"beta-cache-oracle-low-budget");
+  const declined=get("psKernelExprV2TryWhnfWithFuel")(4n)(checker.context,betaArena,cacheRoot);
+  const Option=get("Option");
+  const none=typeof Option.none==="function"?Option.none():Option.none;
+  must(declined!==undefined&&json(declined)===json(none),
+    "beta-cache-sensitive-function-normalization-falls-back");
+  for(const fuel of [0n,1n,2n,3n,4n,5n,8n,16n,64n]){
+    const s=session(fuel);
+    must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,cacheTerm),
+      invoke(betaArena,[C.whnf(cacheRoot)],s),exact),
+      "beta-cache-sensitive-public-parity-"+fuel);
+  }
+}
+console.log("PSC1_V2_DAG_JS_BETA: PASS");
 
 reportDagSmoke();

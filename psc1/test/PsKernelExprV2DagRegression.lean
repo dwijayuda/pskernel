@@ -229,6 +229,81 @@ private def zetaWhnfParity : IO Unit := do
                 (match original with | .ok old => psKernelExprEqual old.fst value | _ => false)
   IO.println "PSC1_V2_DAG_NATIVE_ZETA: PASS"
 
+private def betaWhnfParity : IO Unit := do
+  let sort2 := PsKernelExpr.sort (.succ (.succ .zero))
+  let identity := PsKernelExpr.lam (nm "x") sort1 (.bvar 0) .default
+  let partialTerm := PsKernelExpr.app
+    (.lam (nm "x") sort1 (.lam (nm "y") sort1 (.bvar 1) .implicit) .default)
+    sort0
+  let reversed := PsKernelExpr.app
+    (.app (.lam (nm "x") sort2
+      (.lam (nm "y") sort1 (.bvar 1) .default) .default) sort1)
+    sort0
+  let zetaBody := PsKernelExpr.app
+    (.lam (nm "x") sort1
+      (.letE (nm "y") sort1 (.bvar 0) (.mdata 9 (.bvar 0)) false) .default)
+    sort0
+  let oversaturated := PsKernelExpr.app
+    (.app (.lam (nm "x") sort1
+      (.app (.lam (nm "y") sort1
+        (.lam (nm "z") sort1 (.bvar 1) .default) .default) (.bvar 0)) .default)
+      sort0)
+    sort0
+  let zetaOuter := PsKernelExpr.letE (nm "x") sort1 sort0
+    (.app identity (.bvar 0)) false
+  let mut deep := sort0
+  for _ in [:20] do deep := .app identity deep
+  let seeds := [
+    PsKernelExpr.app identity sort0, partialTerm, reversed, zetaBody,
+    oversaturated, zetaOuter, deep
+  ]
+  for seed in seeds do
+    for wrappers in [0,1,3] do
+      let mut term := seed
+      for tag in [:wrappers] do term := .mdata tag term
+      let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+      for fuel in [0,1,2,3,4,5,6,8,12,24,64,128] do
+        for depth in [0,1,2] do
+          let session ← fresh fuel depth
+          require "beta-public-whnf-fuel-depth-parity"
+            (sameWhnf
+              (psKernelV1Whnf session [] .safe term)
+              (psKernelV1RunDag session [] .safe arena [.whnf root]))
+          let checker := psKernelKernelSessionChecker session [] .safe
+          let original := psKernelSessionWhnf fuel checker term
+          match psKernelExprV2TryWhnfWithFuel fuel checker.context arena root with
+          | none => throw (IO.userError "syntactic-lambda beta fixture unexpectedly used fallback")
+          | some (.error error) =>
+              require "beta-core-error-parity"
+                (match original with | .error old => old == error | _ => false)
+          | some (.ok (next, reduced)) =>
+              let _ ← expect (psKernelExprV2PagedValidate next)
+              let decoded ← expect (psKernelExprV2DecodeChecked next)
+              let value ← expect (psKernelExprV2DecodedRequire decoded reduced)
+              require "beta-core-value-parity"
+                (match original with | .ok old => psKernelExprEqual old.fst value | _ => false)
+  -- A completed function normalization can publish a cache needed by the
+  -- second occurrence of the same let head. That hit matters at fuel four.
+  let functionType := PsKernelExpr.forallE .anonymous sort1 sort1 .default
+  let cachedHead := PsKernelExpr.letE (nm "f") functionType identity (.bvar 0) false
+  let cacheSensitive := PsKernelExpr.app cachedHead (.app cachedHead sort0)
+  let (arena, root) ← expect (psKernelExprV2PagedImportChecked cacheSensitive)
+  let session ← fresh
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let original ← expect (psKernelSessionWhnf 4 checker cacheSensitive)
+  require "beta-cache-sensitive-oracle-low-budget"
+    (psKernelExprEqual original.fst sort0)
+  require "beta-cache-sensitive-function-head-falls-back"
+    (match psKernelExprV2TryWhnfWithFuel 4 checker.context arena root with
+     | none => true | _ => false)
+  for fuel in [0,1,2,3,4,5,8,16,64] do
+    let session ← fresh fuel
+    require "beta-cache-sensitive-public-parity"
+      (sameWhnf
+        (psKernelV1Whnf session [] .safe cacheSensitive)
+        (psKernelV1RunDag session [] .safe arena [.whnf root]))
+  IO.println "PSC1_V2_DAG_NATIVE_BETA: PASS"
+
 private def structuralShortcutParity : IO Unit := do
   let (a, zero) ← expect (psKernelExprV2PagedMkLit psKernelExprV2PagedEmpty (.nat 0))
   let (b, collision) ← expect (psKernelExprV2PagedMkLit a (.nat 65521))
@@ -399,6 +474,7 @@ def main : IO Unit := do
   semanticParity
   metadataParity
   zetaWhnfParity
+  betaWhnfParity
   structuralShortcutParity
   hostileInputs
   admissions

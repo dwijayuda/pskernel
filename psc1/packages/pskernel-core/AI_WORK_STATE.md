@@ -312,3 +312,24 @@ changing the compiler, declared API staging, resources or semantic branches.
 Application-spine reconstruction also matches its decreasing argument list at
 the top level as required by PSC1 structural-recursion elaboration. These
 source-profile corrections are pending authentic PSC1 validation.
+
+The first complete Arena reference run39509681088 evaluated all193 cases:
+120 accepted,71 rejected,2 official-harness timeouts, with both controls passing.
+The timed-out cases were good/perf/magma-list-deep-n36.ndjson and
+magma-list-pair-n21.ndjson. No cases were excluded. The host timeout originally
+killed lake without reliably reaping its leanchecker child; the harness now
+kills/reaps the isolated process group. The official-reference wall cap is
+300 seconds with two workers so the two performance cases can be evaluated.
+PSKernel's fuel4096 and its published resource policy are unchanged. Corpus
+coverage is not called complete until all actual verdicts are observed.
+
+### Direct beta-spine integration — pending qualification
+
+The checked DAG WHNF worker now handles direct syntactic lambda heads using
+C0's simultaneous reversed-argument substitution and remaining-spine rebuild.
+Both original core calls retain their exact predecessor fuel/depth. New native
+and generated tests include multi-binder reversal, partial/overapplication,
+nested beta/zeta, low budgets, and a cache-sensitive case which explicitly
+requires fallback. General function normalization still needs operation-owned
+structural core caches; erasing those caches would change low-fuel outcomes.
+The implementation remains partial and is not yet a full DAG-native checker.

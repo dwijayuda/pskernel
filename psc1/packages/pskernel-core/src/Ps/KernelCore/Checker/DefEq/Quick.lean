@@ -36,14 +36,19 @@ def psKernelDefEqQuick
   -- The initial recursive DefEq entry already compared both expressions
   -- and probed the successful-pair cache. Avoid repeating these on that path.
   -- Re-normalized terms need their own checks, so call with false there.
-  if !entryChecked && psKernelExprEq left right then
+  if
+      if entryChecked then
+        false
+      else
+        psKernelExprEq left right then
     Except.ok
       (Prod.mk
         (Option.some true)
         state)
   else if
-      if
-          !entryChecked &&
+      if entryChecked then
+        false
+      else if
           psKernelSemanticPairCacheEligible
             left
             right then

@@ -13,18 +13,6 @@ array/chunk layout) from becoming kernel authority. Hash comparison alone
 is never used to authorize equality or an admission decision.
 -/
 
-def psKernelExprV2PortableSameMetadata
-    (left right : PsKernelExprV2Entry) : Bool :=
-  if Nat.beq left.hash right.hash then
-    if Nat.beq left.looseRange right.looseRange then
-      if psKernelBoolEq left.hasFVar right.hasFVar then
-        if psKernelBoolEq left.hasExprMVar right.hasExprMVar then
-          Nat.beq left.depth right.depth
-        else false
-      else false
-    else false
-  else false
-
 def psKernelExprV2PortableReplayNode
     (checked : PsKernelExprV2ChunkedArena)
     (node : PsKernelExprV2Node) :

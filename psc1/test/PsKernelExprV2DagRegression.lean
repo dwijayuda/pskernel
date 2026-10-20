@@ -191,6 +191,55 @@ private def metadataParity : IO Unit := do
   IO.println "PSC1_V2_DAG_NATIVE_INFERENCE: PASS"
   IO.println "PSC1_V2_DAG_NATIVE_WHNF_IDENTITY: PASS"
 
+private def structuralShortcutParity : IO Unit := do
+  let (a, zero) ← expect (psKernelExprV2PagedMkLit psKernelExprV2PagedEmpty (.nat 0))
+  let (b, collision) ← expect (psKernelExprV2PagedMkLit a (.nat 65521))
+  let left ← expect (psKernelExprV2PagedRequire b zero)
+  let right ← expect (psKernelExprV2PagedRequire b collision)
+  require "real-closed-term-hash-collision" (left.hash == right.hash)
+  let equal ← expect (psKernelExprV2PagedEqChecked b zero collision)
+  require "closed-term-collision-not-syntactically-equal" (!equal)
+  for fuel in [0,1,2,3,8,64] do
+    let session ← fresh fuel
+    require "hash-collision-defeq-resource-parity"
+      (sameDefEq
+        (psKernelV1IsDefEq session [] .safe (.lit (.nat 0)) (.lit (.nat 65521)))
+        (psKernelV1RunDag session [] .safe b [.isDefEq zero collision]))
+  let session ← fresh
+  let result ← expectPublic (psKernelV1RunDag session [] .safe b [.isDefEq zero collision])
+  require "closed-term-hash-collision-not-admitted-equal"
+    (match result.replies with | [.equal false] => true | _ => false)
+  let (a, ty) ← expect (psKernelExprV2PagedMkSort b (.succ .zero))
+  let (a, bound) ← expect (psKernelExprV2PagedMkBVar a 0)
+  let (a, lamA) ← expect (psKernelExprV2PagedMkLam a (nm "a") ty bound .default)
+  let (a, lamB) ← expect (psKernelExprV2PagedMkLam a (nm "b") ty bound .implicit)
+  require "alpha-lambdas-have-distinct-ids" (lamA != lamB)
+  for fuel in [0,1,2,3,4,8,64] do
+    let session ← fresh fuel
+    require "alpha-structural-shortcut-exact-resource-parity"
+      (sameDefEq
+        (psKernelV1IsDefEq session [] .safe
+          (.lam (nm "a") sort1 (.bvar 0) .default)
+          (.lam (nm "b") sort1 (.bvar 0) .implicit))
+        (psKernelV1RunDag session [] .safe a [.isDefEq lamA lamB]))
+  let (a, s) ← expect (psKernelExprV2PagedMkSort a .zero)
+  let (a, tagA) ← expect (psKernelExprV2PagedMkMData a 0 s)
+  let (a, tagB) ← expect (psKernelExprV2PagedMkMData a 65521 s)
+  let structural ← expect (psKernelExprV2PagedEqChecked a tagA tagB)
+  require "metadata-tags-structurally-distinct" (!structural)
+  for fuel in [0,1,2,3,4,8,64] do
+    let session ← fresh fuel
+    require "structural-false-falls-back-to-complete-defeq"
+      (sameDefEq
+        (psKernelV1IsDefEq session [] .safe (.mdata 0 sort0) (.mdata 65521 sort0))
+        (psKernelV1RunDag session [] .safe a [.isDefEq tagA tagB]))
+  let (a, badA) ← expect (psKernelExprV2PagedMkApp a s s)
+  let (a, badB) ← expect (psKernelExprV2PagedMkApp a s s)
+  require "different-id-equal-illtyped-terms-rejected"
+    (match psKernelV1RunDag session [] .safe a [.isDefEq badA badB] with
+     | .error (.rejectedInvalid _) => true | _ => false)
+  IO.println "PSC1_V2_DAG_STRUCTURAL_SHORTCUT: PASS"
+
 private def hostileInputs : IO Unit := do
   let session ← fresh
   let (a, root) ← expect
@@ -311,6 +360,7 @@ def main : IO Unit := do
   constructorDecode
   semanticParity
   metadataParity
+  structuralShortcutParity
   hostileInputs
   admissions
   officialComparison

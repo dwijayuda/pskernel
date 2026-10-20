@@ -8,12 +8,21 @@ package proofscriptSelfhost
 lean_lib PsKernelCore where
   srcDir := "packages/pskernel-core/src"
   roots := #[
+    `Ps.KernelCore.Core.ExprScalar,
+    `Ps.KernelCore.Runtime.Acceleration.ScalarHash,
+    `Ps.KernelCore.Core.ExprV2.Node,
+    `Ps.KernelCore.Core.ExprV2.Paged,
+    `Ps.KernelCore.Core.ExprV2.Builder,
+    `Ps.KernelCore.Core.ExprV2.Validation,
     `Ps.KernelCore.Core.ExprV2.Decode,
+    `Ps.KernelCore.Core.ExprV2.PairMemo,
+    `Ps.KernelCore.Core.ExprV2.Equality,
     `Ps.KernelCore.API.DagTypes,
     `Ps.KernelCore.API.DagDeclaration,
     `Ps.KernelCore.API.Dag,
     `Ps.KernelCore.Checker.ExprV2.Terminal,
     `Ps.KernelCore.Checker.ExprV2.Whnf,
+    `Ps.KernelCore.Checker.ExprV2.DefEq,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,

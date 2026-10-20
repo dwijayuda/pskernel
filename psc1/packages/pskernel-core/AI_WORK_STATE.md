@@ -140,3 +140,41 @@ work; do not present representation microbenchmarks as complete-checker gains.
   A-B-B-A generated workers, cold and warm samples, construction, peak RSS and
   post-GC heap. Results remain pending. Native samples also compare official
   Lean on matched checked metadata/zeta terms; no generalized speedup claim.
+
+## Current production integration slice
+
+The paged Node/Entry, storage, smart constructors, replay validator and
+collision-safe equality now have single owners under `Core/ExprV2`.
+Scalar syntax and hash helpers have been extracted without semantic changes.
+Research import modules forward to those owners. The production foundation
+imports no Research module, recursive expression type or checker cache.
+Decode remains a separately named transitional adapter.
+
+Terminal checking and terminal WHNF operate on DAG nodes. Public DAG DefEq
+fully checks both operands, applies the original entry resource guards, and
+uses same-arena collision-safe structural equality for syntactic success.
+The pair memo starts empty and is discarded per operation. A false syntax
+result always falls back to full DefEq; it is never a negative DefEq verdict.
+Composite checking, other reductions and declaration admission remain legacy.
+
+Native run [39504184911](https://github.com/dwijayuda/pskernel/actions/runs/39504184911)
+on 7ac92b1737504d01a56c14f0abc9aeeeed75a4f7 passed expanded exact check/WHNF/
+identity fuel-depth parity, adversarial inputs, official comparison, existing
+V2 regressions and the matched native performance harness. Its generated job
+was still pending at this work-state update. The subsequent structural-equality
+promotion requires new CI; this earlier result does not qualify later code.
+
+| Native complete check fixture | Calls per phase | Original ms, A/A | DAG ms, B/B | Official Lean ms, first/last |
+| --- | ---: | --- | --- | --- |
+| Metadata, depth 32 | 1200 | 26 / 26 | 10 / 10 | 2 / 2 |
+| Metadata, depth 96 | 600 | 67 / 72 | 13 / 15 | 3 / 2 |
+| Metadata, depth 192 | 300 | 104 / 102 | 13 / 13 | 2 / 3 |
+| Zeta, depth 32 | 100 | 6 / 5 | 7 / 7 | 2 / 3 |
+| Zeta, depth 96 | 50 | 16 / 16 | 18 / 17 | 3 / 4 |
+| Zeta, depth 192 | 20 | 22 / 23 | 22 / 23 | 3 / 2 |
+
+DAG times include validation and decoding on every checked public call. Inputs
+were preconstructed. The native clock is millisecond resolution; combined
+construction was below that resolution. The metadata slice improves on these
+fixtures, while zeta exhibits overhead or parity. These finite cases do not
+establish a general kernel speedup or satisfy full migration acceptance.

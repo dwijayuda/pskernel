@@ -13,7 +13,7 @@ const requireExport = name => {
   return lib[name];
 };
 const must = (condition,label) => {
-  if (!condition) throw Error("PSC1_V2_JS_BRIDGE_FAILED " + label);
+  if (condition !== true) throw Error("PSC1_V2_JS_BRIDGE_FAILED " + label + " result-type=" + typeof condition);
   console.log("PSC1_V2_JS_BRIDGE_PASS " + label);
 };
 const accepted = (result,label) => {
@@ -33,7 +33,8 @@ const list=requireExport("List");
 const nil=typeof list.nil==="function"?list.nil():list.nil;
 const sort0=expr.sort(levels.zero);
 const sort1=expr.sort(levels.succ(levels.zero));
-const eq=requireExport("psKernelExprEq");
+const eq=(left,right)=>requireExport("psKernelExprEq")(left)(right);
+must(eq(sort0,sort0)===true&&eq(sort0,sort1)===false,"equality-harness-is-not-vacuous");
 const env=requireExport("psKernelEnvironmentEmpty");
 const maxNat=requireExport("psKernelLeanNatMaxSizeDefault");
 const session=requireExport("psKernelMkCheckerSession")(
@@ -57,11 +58,11 @@ const makeZeta=(depth,nameIndex)=>{
 };
 function trustedWhnf(term){
   const checked=accepted(whnf(4096n,session,term),"trusted-whnf");
-  if(!eq(checked.fst,sort0))throw Error("PSC1_V2_JS_BRIDGE_TRUSTED_WHNF_MISMATCH");
+  if(eq(checked.fst,sort0)!==true)throw Error("PSC1_V2_JS_BRIDGE_TRUSTED_WHNF_MISMATCH");
 }
 function trustedCheck(term){
   const checked=accepted(check(4096n,session,term),"trusted-check");
-  if(!eq(checked.fst,sort1))throw Error("PSC1_V2_JS_BRIDGE_TRUSTED_TYPE_MISMATCH");
+  if(eq(checked.fst,sort1)!==true)throw Error("PSC1_V2_JS_BRIDGE_TRUSTED_TYPE_MISMATCH");
 }
 function trustedDefEq(term){
   const checked=accepted(defeq(4096n,session,term,sort0),"trusted-defeq");

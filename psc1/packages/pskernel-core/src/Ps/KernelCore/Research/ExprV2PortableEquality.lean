@@ -1,4 +1,5 @@
 import Ps.KernelCore.Research.ExprV2PortableHeadMachine
+import Ps.KernelCore.Core.ExprV2.PairMemo
 
 /-
 PSKernel-Core Expression V2 / M4 research: portable, memoized equality on
@@ -16,37 +17,6 @@ are both memoized, so shared subgraphs are not traversed exponentially.
 This implements only legacy PsKernelExprEq structural semantics; it is not
 definitional equality and is not wired into admission or checker caches.
 -/
-
-structure PsKernelExprV2PairMemo where
-  left : Nat
-  right : Nat
-  result : Bool
-
-def psKernelExprV2PairMemoFind
-    (entries : List PsKernelExprV2PairMemo)
-    (left right : Nat) : Option Bool :=
-  match entries with
-  | List.nil =>
-      Option.none
-  | List.cons item rest =>
-      if Nat.beq left item.left then
-        if Nat.beq right item.right then
-          Option.some item.result
-        else
-          psKernelExprV2PairMemoFind rest left right
-      else
-        psKernelExprV2PairMemoFind rest left right
-
-def psKernelExprV2PairMemoInsert
-    (entries : List PsKernelExprV2PairMemo)
-    (left right : Nat) (result : Bool) :
-    List PsKernelExprV2PairMemo :=
-  let item : PsKernelExprV2PairMemo := {
-    left := left
-    right := right
-    result := result
-  };
-  List.cons item entries
 
 def psKernelExprV2PairCompare2
     (step :

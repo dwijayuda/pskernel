@@ -1,5 +1,5 @@
 import Ps.KernelCore.Checker.Context
-import Ps.KernelCore.Research.ExprV2PagedBuilder
+import Ps.KernelCore.Core.ExprV2.Builder
 
 /-
 DAG terminal WHNF, with exactly the public/core entry budget distinction.

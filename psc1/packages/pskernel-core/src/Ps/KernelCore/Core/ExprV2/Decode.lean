@@ -1,5 +1,5 @@
 import Ps.KernelCore.Core.Expr
-import Ps.KernelCore.Research.ExprV2PagedValidation
+import Ps.KernelCore.Core.ExprV2.Validation
 
 /-
 Transitional, sharing-preserving input boundary for the complete kernel.

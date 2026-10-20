@@ -170,6 +170,36 @@ must(rejected(invoke(arena,[C.isDefEq(ids.illtyped,ids.illtyped)])),
   "equal-node-id-still-requires-full-type-check");
 must(rejected(invoke(arena,[C.check(arena.size)])),"invalid-root-rejected");
 
+add("collision0","Lit",get("PsKernelLiteral").nat(0n));
+add("collision1","Lit",get("PsKernelLiteral").nat(65521n));
+const collisionLeft=accepted(get("psKernelExprV2PagedRequire")(arena,ids.collision0),"collision-left");
+const collisionRight=accepted(get("psKernelExprV2PagedRequire")(arena,ids.collision1),"collision-right");
+must(collisionLeft.hash===collisionRight.hash,"real-closed-term-hash-collision");
+must(accepted(get("psKernelExprV2PagedEqChecked")(arena,ids.collision0,ids.collision1),"collision-equality")===false,
+  "collision-never-proves-structural-equality");
+for(const fuel of [0n,1n,2n,4n,16n]){
+  const current=session(fuel);
+  must(sameOperation(get("psKernelV1IsDefEq")(current,nil,S.safe,
+    E.lit(get("PsKernelLiteral").nat(0n)),E.lit(get("PsKernelLiteral").nat(65521n))),
+    invoke(arena,[C.isDefEq(ids.collision0,ids.collision1)],current),(a,b)=>a===b),
+    "closed-collision-defeq-resource-"+fuel);
+}
+const collisionAnswer=accepted(invoke(arena,[C.isDefEq(ids.collision0,ids.collision1)]),"collision-defeq");
+must(array(collisionAnswer.replies)[0].value===false,"collision-does-not-authorize-defeq");
+add("alphaA","Lam",name("alpha-a"),ids.s1,ids.b0,B.default);
+add("alphaB","Lam",name("alpha-b"),ids.s1,ids.b0,B.implicit);
+const alphaAnswer=accepted(invoke(arena,[C.isDefEq(ids.alphaA,ids.alphaB)]),"alpha-defeq");
+must(ids.alphaA!==ids.alphaB&&array(alphaAnswer.replies)[0].value===true,"distinct-id-structural-shortcut");
+add("tagA","MData",0n,ids.s0);
+add("tagB","MData",65521n,ids.s0);
+must(accepted(get("psKernelExprV2PagedEqChecked")(arena,ids.tagA,ids.tagB),"tags-syntax")===false,
+  "metadata-tags-structurally-distinct");
+const tagAnswer=accepted(invoke(arena,[C.isDefEq(ids.tagA,ids.tagB)]),"tags-defeq");
+must(array(tagAnswer.replies)[0].value===true,"structural-false-still-uses-full-defeq");
+add("badCopy","App",ids.s0,ids.s0);
+must(rejected(invoke(arena,[C.isDefEq(ids.illtyped,ids.badCopy)])),
+  "distinct-ids-with-equal-illtyped-syntax-rejected");
+
 const fEntry=accepted(get("psKernelExprV2PagedRequire")(arena,ids.f),"fvar-entry");
 for(const changes of [
   {hash:fEntry.hash+1n},{looseRange:1n},{hasFVar:false},

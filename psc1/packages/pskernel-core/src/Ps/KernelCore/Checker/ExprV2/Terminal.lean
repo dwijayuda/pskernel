@@ -1,5 +1,5 @@
 import Ps.KernelCore.Checker.Inference
-import Ps.KernelCore.Research.ExprV2PagedBuilder
+import Ps.KernelCore.Core.ExprV2.Builder
 
 /-
 First DAG-native checking slice. The caller owns a replay-validated arena and

@@ -2,7 +2,8 @@ import Ps.Syntax.ParseCommon
 
 /-- Surface data notation reuses the already checked Type0 Prod and Array
 operations. No additional logical constant, effect or runtime representation is
-introduced here. Dotted builtin names cannot be introduced as local binders. -/
+introduced here. Builtin references remain absolute through namespaces and
+canonical source printing. -/
 abbrev PsDataTermParser :=
   PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm)
 
@@ -44,7 +45,7 @@ def psParseDataElementsWithFuel
 
 def psSyntaxDataReference (root member : String)
     (span : PsSourceSpan) : PsSyntaxTerm :=
-  .reference { segments := [root, member], span := span }
+  psSyntaxRootReference [root, member] span
 
 def psSyntaxTupleValue (elements : List PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=

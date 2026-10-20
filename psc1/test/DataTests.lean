@@ -223,6 +223,63 @@ private def testBindingPatterns : IO Unit := do
     checkPatternRhsOnce "unused tuple RHS remains once in a strict Core let" kind
       (helper ++ expression ("let (_, _) := " ++ call) "7")
 
+private def testConstructorNotationHygiene : IO Unit := do
+  let natType : PsExpr := .constE psNatName []
+  let leanPrelude :=
+    "def makePair (left : Nat) (right : Nat) : Nat × Nat := (left, right)\n" ++
+    "def makeArray (value : Nat) : Array Nat := #[value]\n" ++
+    "namespace Capture\nnamespace Prod\n" ++
+    "def mk (left : Nat) (right : Nat) : Nat × Nat := makePair right left\n" ++
+    "end Prod\nnamespace Array\n" ++
+    "def emptyWithCapacity (capacity : Nat) : Array Nat := makeArray 88\n" ++
+    "def push (values : Array Nat) (value : Nat) : Array Nat := makeArray 99\n" ++
+    "end Array\ndef Prod : Type := Nat\n"
+  let psPrelude :=
+    "def makePair(left : Nat, right : Nat) : Nat × Nat := (left, right)\n" ++
+    "def makeArray(value : Nat) : Array(Nat) := #[value]\n" ++
+    "namespace Capture\nnamespace Prod\n" ++
+    "def mk(left : Nat, right : Nat) : Nat × Nat := makePair(right, left)\n" ++
+    "end Prod\nnamespace Array\n" ++
+    "def emptyWithCapacity(capacity : Nat) : Array(Nat) := makeArray(88)\n" ++
+    "def push(values : Array(Nat), value : Nat) : Array(Nat) := makeArray(99)\n" ++
+    "end Array\ndef Prod : Type := Nat\n"
+  let leanTuple := leanPrelude ++
+    "def tupleBoundary : Nat := let (left, right) : Nat × Nat := (1,2); " ++
+    "let named : Nat × Nat := Prod.mk 1 2; left * 10 + Prod.fst named\n" ++
+    "end Capture\ndef result : Nat := Capture.tupleBoundary\n"
+  let psTuple := psPrelude ++
+    "def tupleBoundary : Nat := let (left, right) : Nat × Nat := (1,2)\n" ++
+    " let named : Nat × Nat := Prod.mk(1,2)\n left * 10 + Prod.fst(named)\n" ++
+    "end Capture\ndef result : Nat := Capture.tupleBoundary\n"
+  checkExecuted "Lean tuple notation is hygienic and explicit names remain relative" .lean
+    leanTuple natType (.lit (.natural 12))
+  checkExecuted "PS tuple notation is hygienic and explicit names remain relative" .proofScript
+    psTuple natType (.lit (.natural 12))
+  roundTrip "tuple constructor hygiene Lean to PS" .lean .proofScript leanTuple
+  roundTrip "tuple constructor hygiene PS to Lean" .proofScript .lean psTuple
+  let leanArray := leanPrelude ++
+    "def arrayBoundary : Nat := let empty : Array Nat := #[]; " ++
+    "let values : Array Nat := #[11,22]; " ++
+    "let namedEmpty : Array Nat := Array.emptyWithCapacity 0; " ++
+    "let namedPush : Array Nat := Array.push values 5; " ++
+    "Array.size empty * 1000 + Array.size values * 100 + " ++
+    "Array.size namedEmpty * 10 + Array.size namedPush\n" ++
+    "end Capture\ndef result : Nat := Capture.arrayBoundary\n"
+  let psArray := psPrelude ++
+    "def arrayBoundary : Nat := let empty : Array(Nat) := #[]\n" ++
+    " let values : Array(Nat) := #[11,22]\n" ++
+    " let namedEmpty : Array(Nat) := Array.emptyWithCapacity(0)\n" ++
+    " let namedPush : Array(Nat) := Array.push(values,5)\n" ++
+    " Array.size(empty) * 1000 + Array.size(values) * 100 + " ++
+    "Array.size(namedEmpty) * 10 + Array.size(namedPush)\n" ++
+    "end Capture\ndef result : Nat := Capture.arrayBoundary\n"
+  checkExecuted "Lean array notation is hygienic and explicit names remain relative" .lean
+    leanArray natType (.lit (.natural 211))
+  checkExecuted "PS array notation is hygienic and explicit names remain relative" .proofScript
+    psArray natType (.lit (.natural 211))
+  roundTrip "array constructor hygiene Lean to PS" .lean .proofScript leanArray
+  roundTrip "array constructor hygiene PS to Lean" .proofScript .lean psArray
+
 def main : IO Unit := do
   same "Lean right-associated tuple with contextual Int" .lean
     "def result : Prod Int (Prod Bool Nat) := (1, true, 2)\n"
@@ -344,4 +401,5 @@ def main : IO Unit := do
   roundTrip "optional index PS to Lean" .proofScript .lean
     "def result : Option(Nat) := (#[11,22])[1]?\n"
   testBindingPatterns
+  testConstructorNotationHygiene
   IO.println "PSC1_DATA_TESTS: PASS"

@@ -22,6 +22,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.Ast,
     `Ps.Syntax.ParserState,
     `Ps.Syntax.ParseCommon,
+    `Ps.Syntax.ParseBinding,
     `Ps.Syntax.ParseDo,
     `Ps.Syntax.ParseData,
     `Ps.Syntax.Operators,

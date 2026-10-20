@@ -81,11 +81,17 @@ def psSyntaxSyntheticReference
     (span : PsSourceSpan) : PsSyntaxTerm :=
   PsSyntaxTerm.reference (psSyntaxSyntheticName text span)
 
+def psSyntaxRootName (segments : List String) (span : PsSourceSpan) : PsSyntaxName :=
+  { segments := "_root_" :: segments, span := span }
+
+def psSyntaxRootReference (segments : List String) (span : PsSourceSpan) : PsSyntaxTerm :=
+  PsSyntaxTerm.reference (psSyntaxRootName segments span)
+
 def psSyntaxCompilerPure
     (value : PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
   PsSyntaxTerm.app
-    (psSyntaxSyntheticReference "compilerPure" span)
+    (psSyntaxRootReference ["compilerPure"] span)
     (List.cons value List.nil)
     span
 
@@ -105,7 +111,7 @@ def psSyntaxCompilerBind
         stop := bodySpan.stop
       };
   PsSyntaxTerm.app
-    (psSyntaxSyntheticReference "compilerBind" span)
+    (psSyntaxRootReference ["compilerBind"] span)
     (List.cons action (List.cons lambda List.nil))
     span
 
@@ -202,7 +208,7 @@ def psParseSyntaxName
         if psStringEq token.text "_root_" then
           Except.error
             (PsParseError.expectedText
-              "_root_ escapes are outside the selected namespace profile"
+              "_root_ escapes are allowed only in references"
               token.text token.span)
         else
           psParseSyntaxNameTail
@@ -216,6 +222,29 @@ def psParseSyntaxName
             PsTokenKind.identifier
             token.kind
             token.span)
+
+-- Root escapes are permitted only where a name denotes a reference.
+-- Declarations, namespace commands, imports and ordinary binder/field names
+-- continue through psParseSyntaxName and retain its explicit root refusal.
+def psParseSyntaxReferenceName
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxName) :=
+  if psTokenCursorAtText cursor "_root_" then
+    match psTokenCursorExpectText cursor "_root_" with
+    | .error error => .error error
+    | .ok rootToken =>
+        match psTokenCursorExpectText rootToken.cursor "." with
+        | .error error => .error error
+        | .ok dot =>
+            match psParseSyntaxName dot.cursor with
+            | .error error => .error error
+            | .ok parsed =>
+                .ok {
+                  value := psSyntaxRootName parsed.value.segments
+                    { start := rootToken.token.span.start, stop := parsed.value.span.stop }
+                  cursor := parsed.cursor
+                }
+  else psParseSyntaxName cursor
 
 def psTokenCursorStartsNamedAssignment
     (cursor : PsTokenCursor) : Bool :=
@@ -366,7 +395,7 @@ def psParseSimpleTerm
                 cursor := read.cursor
               }
         else
-          match psParseSyntaxName cursor with
+          match psParseSyntaxReferenceName cursor with
           | Except.error error => Except.error error
           | Except.ok parsed =>
               Except.ok {
@@ -664,7 +693,7 @@ def psParseBasicPattern
         match psTokenCursorAdvance cursor with
         | none => Except.error (PsParseError.unexpectedEnd "constructor name")
         | some dot =>
-            match psParseSyntaxName dot.cursor with
+            match psParseSyntaxReferenceName dot.cursor with
             | Except.error error => Except.error error
             | Except.ok constructorName =>
                 let shorthandName : PsSyntaxName := {
@@ -678,7 +707,7 @@ def psParseBasicPattern
                   shorthandName
                   constructorName.cursor
       else
-        match psParseSyntaxName cursor with
+        match psParseSyntaxReferenceName cursor with
         | Except.error error => Except.error error
         | Except.ok constructorName =>
             psParseConstructorPatternTail

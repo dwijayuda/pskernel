@@ -202,12 +202,15 @@ def psSh1FindOrigin (origins : List PsSourceSpan) (offset : Nat) : Option PsSour
 
 def psSh1IsCompilerDoName (segments : List String) : Bool :=
   match segments with
-  | List.nil => false
-  | List.cons first rest =>
-      if psListIsEmpty rest then
-        if psStringEq first "compilerPure" then true
-        else psStringEq first "compilerBind"
+  | [name] =>
+      if psStringEq name "compilerPure" then true
+      else psStringEq name "compilerBind"
+  | [rootName, name] =>
+      if psStringEq rootName "_root_" then
+        if psStringEq name "compilerPure" then true
+        else psStringEq name "compilerBind"
       else false
+  | _ => false
 
 -- The owned Lean parser gives a lowered do reference its originating do span.
 -- Match that provenance, not arbitrary occurrences of the word or helper name.

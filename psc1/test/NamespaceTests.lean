@@ -172,8 +172,12 @@ private def testShared (label : String) (kind other : PsCompilerSourceKind) : IO
     "namespace _root_.A\ndef value : Nat := 7\nend _root_.A\n"
   rejectedParse (label ++ " root escape declaration is outside selected surface") kind
     "def _root_.A.value : Nat := 7\n"
-  rejectedParse (label ++ " root escape reference is outside selected surface") kind
-    "def value : Nat := 7\ndef result : Nat := _root_.value\n"
+  checkExecuted (label ++ " explicit root reference bypasses namespace shadow") kind
+    ("def value : Nat := 7\nnamespace A\ndef value : Nat := 99\n" ++
+      "def selected : Nat := _root_.value\nend A\ndef result : Nat := A.selected\n")
+    (.constE psNatName []) (.lit (.natural 7))
+  rejectedParse (label ++ " root reference requires a following name") kind
+    "def result : Nat := _root_\n"
 
 private def rejectedStructural (label : String) (kind : PsCompilerSourceKind)
     (source : String) (accept : PsElabError -> Bool) : IO Unit := do
@@ -229,10 +233,10 @@ private def testLean : IO Unit := do
       "  | Nat.zero => 0\n" ++
       "  | Nat.succ k => let count : Nat -> Nat := fun (x : Nat) => x; count k\n" ++
       "end Math\ndef result : Nat := Math.count 4\n") natType (.lit (.natural 3))
-  rejectedStructural "Lean namespaced self cannot escape" .lean
+  rejectedStructural "Lean rooted namespaced self cannot escape" .lean
     ("namespace Math\ndef bad (n : Nat) : Nat := match n with\n" ++
       "  | Nat.zero => 0\n" ++
-      "  | Nat.succ k => let escaped : Nat -> Nat := bad; escaped k\nend Math\n")
+      "  | Nat.succ k => let escaped : Nat -> Nat := _root_.Math.bad; escaped k\nend Math\n")
     (fun error => match error with | .structuralRecursionEscapingReference => true | _ => false)
   rejectedStructural "Lean qualified self must decrease" .lean
     ("namespace Math\ndef bad (n : Nat) : Nat := match n with\n" ++
@@ -274,10 +278,10 @@ private def testProofScript : IO Unit := do
       "  | Nat.zero => 0\n" ++
       "  | Nat.succ k => let count : Nat -> Nat := fun (x : Nat) => x\n    count(k)\n" ++
       "}\nend Math\ndef result : Nat := Math.count(4)\n") natType (.lit (.natural 3))
-  rejectedStructural "PS namespaced self cannot escape" .proofScript
+  rejectedStructural "PS rooted namespaced self cannot escape" .proofScript
     ("namespace Math\ndef bad(n : Nat) : Nat := match n with {\n" ++
       "  | Nat.zero => 0\n" ++
-      "  | Nat.succ k => let escaped : Nat -> Nat := bad\n    escaped(k)\n}\nend Math\n")
+      "  | Nat.succ k => let escaped : Nat -> Nat := _root_.Math.bad\n    escaped(k)\n}\nend Math\n")
     (fun error => match error with | .structuralRecursionEscapingReference => true | _ => false)
   rejectedStructural "PS qualified self must decrease" .proofScript
     ("namespace Math\ndef bad(n : Nat) : Nat := match n with {\n" ++

@@ -110,13 +110,7 @@ def psLeanApplicationWithArgument
 def psLeanListConstructorName
     (constructor : String)
     (span : PsSourceSpan) : PsSyntaxName :=
-  {
-    segments :=
-      List.cons
-        "List"
-        (List.cons constructor List.nil)
-    span := span
-  }
+  psSyntaxRootName ["List", constructor] span
 
 def psLeanBuildListLiteral
     (elements : List PsSyntaxTerm)
@@ -917,13 +911,7 @@ def psParseLeanListPattern
             if psStringEq second.text "]" then
               let span :=
                 psSyntaxSpanJoin first.span second.span;
-              let name : PsSyntaxName := {
-                segments :=
-                  List.cons
-                    "List"
-                    (List.cons "nil" List.nil)
-                span := span
-              };
+              let name := psLeanListConstructorName "nil" span;
               let value :=
                 PsSyntaxPattern.constructor
                   name
@@ -948,13 +936,7 @@ def psParseLeanListPattern
                           PsTokenKind.identifier then
                       let span :=
                         psSyntaxSpanJoin first.span third.span;
-                      let name : PsSyntaxName := {
-                        segments :=
-                          List.cons
-                            "List"
-                            (List.cons "cons" List.nil)
-                        span := span
-                      };
+                      let name := psLeanListConstructorName "cons" span;
                       let headBinder :=
                         psLeanPatternBinderName
                           first
@@ -997,13 +979,7 @@ def psParseLeanListPattern
                         PsTokenKind.identifier then
                     let span :=
                       psSyntaxSpanJoin first.span third.span;
-                    let name : PsSyntaxName := {
-                      segments :=
-                        List.cons
-                          "List"
-                          (List.cons "cons" List.nil)
-                      span := span
-                    };
+                    let name := psLeanListConstructorName "cons" span;
                     let headBinder :=
                       psLeanPatternBinderName first "_listHead";
                     let tailBinder :=
@@ -1030,13 +1006,7 @@ def psParseLeanListPattern
 def psLeanNatPatternName
     (constructor : String)
     (span : PsSourceSpan) : PsSyntaxName :=
-  {
-    segments :=
-      List.cons
-        "Nat"
-        (List.cons constructor List.nil)
-    span := span
-  }
+  psSyntaxRootName ["Nat", constructor] span
 
 def psParseLeanNatPattern
     (cursor : PsTokenCursor) :

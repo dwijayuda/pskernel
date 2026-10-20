@@ -13,8 +13,10 @@ patterns to ordinary `let` and selected `do let`, plus semantic
 `namespace N` / `end N` scopes in both source grammars. The implementation
 retains one strict Core let for each pattern RHS, checks projected field types,
 resolves namespace names lexically, and retains entry-module export ownership.
-Mutable and monadic binding patterns, namespace aliases and `_root_` escapes
-remain outside the selected surface.
+Mutable and monadic binding patterns, namespace aliases and root-escaped
+namespace/declaration commands remain outside the selected surface. Reference-only
+`_root_.Name` spelling preserves builtin notation identity across namespaces and
+source translation; authored relative names retain normal scope resolution.
 
 The new native, target-execution, strictness-deadline and publication-boundary
 regressions are awaiting their own focused Linux qualification. The successful

@@ -1383,13 +1383,7 @@ def psParseProofScriptStructureFieldsWithFuel
 def psParseProofScriptDeclaredName
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxName) :=
-  match psTokenCursorExpectKind cursor PsTokenKind.identifier with
-  | Except.error error => Except.error error
-  | Except.ok name =>
-      Except.ok {
-        value := { segments := [name.token.text], span := name.token.span }
-        cursor := name.cursor
-      }
+  psParseSyntaxName cursor
 
 def psParseProofScriptStructureDeclaration
     (cursor : PsTokenCursor) :

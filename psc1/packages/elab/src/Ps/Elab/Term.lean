@@ -305,7 +305,10 @@ def psElabResolveReferenceBase
   match psSyntaxNameToName sourceName with
   | Option.none => Option.none
   | Option.some name =>
-      match psResolveNameInNamespace localContext environment currentNamespace name with
+      let referenceLocals := match psResolveExplicitRoot name with
+        | .some _ => psLocalEmpty
+        | .none => localContext
+      match psResolveNameInNamespace referenceLocals environment currentNamespace name with
       | Option.some resolved => Option.some (Prod.mk resolved List.nil)
       | Option.none =>
           match sourceName.segments with
@@ -315,11 +318,11 @@ def psElabResolveReferenceBase
               | List.nil => Option.none
               | List.cons second rest =>
                   let base := psNameAppendStr PsName.anonymous first;
-                  match psResolveNameInNamespace localContext environment currentNamespace base with
+                  match psResolveNameInNamespace referenceLocals environment currentNamespace base with
                   | Option.some resolved => Option.some (Prod.mk resolved tail)
                   | Option.none =>
                       let longerBase := psNameAppendStr base second
-                      match psElabLocalProjectionBaseWorker localContext rest longerBase with
+                      match psElabLocalProjectionBaseWorker referenceLocals rest longerBase with
                       | .some selected => .some selected
                       | .none => psElabGlobalProjectionBaseWorker
                           environment currentNamespace rest longerBase

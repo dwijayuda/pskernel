@@ -1,5 +1,6 @@
 import Ps.Environment.SelfHostPrelude
 import Ps.Environment.Control
+import Ps.Foundation.List
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -182,4 +183,4 @@ def psSelfHostRuntimePreludeDeclarationsWithProdBase :
                     psSelfHostRuntimePreludeDeclarations))
 
 def psSelfHostRuntimePreludeDeclarationsWithProd : List PsDeclaration :=
-  psControlLoopDeclarations ++ psSelfHostRuntimePreludeDeclarationsWithProdBase
+  psListAppend psControlLoopDeclarations psSelfHostRuntimePreludeDeclarationsWithProdBase

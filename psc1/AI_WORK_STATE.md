@@ -1,84 +1,89 @@
-# PSC1 current work state — continuous compiler closure normalization
+# PSC1 current work state — continuous source closure execution
 
 Updated 2026-10-21. Active draft [PR #172](https://github.com/dwijayuda/pskernel/pull/172)
-preserves [PR #171](https://github.com/dwijayuda/pskernel/pull/171) at
-1fad9ed53cda9b23ac30be9cea85e7857437564e and all earlier ancestry.
-Parent final scoped run39508739868 passed37/37 steps; focused39508739941
-passed11/11. Tested merge16581a45341e73b716865ff6c4446f4ca2c07728.
+preserves #171 at1fad9ed53cda9b23ac30be9cea85e7857437564e and all prior history.
+Execute the [Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md) continuously
+through subsequent blockers; the user explicitly rejects small-milestone handoffs.
 
-## Active execution
+## Qualified frontend checkpoint
 
-Execute the attached [Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
-from current evidence, not its historical #169 blockers. The user explicitly
-requests continuous work through subsequent blockers, without small milestone
-handoffs. Current prerequisite is complete compiler closure source acceptance.
+Head4906ff5f520acda45cf4128effcbe226f2311e6f passed scoped Linux
+[39512729664](https://github.com/dwijayuda/pskernel/actions/runs/39512729664)
+37/37 steps and focused
+[39512729792](https://github.com/dwijayuda/pskernel/actions/runs/39512729792)
+11/11. Tested merge8733eb8d419c073f401527519ad2c4f02c48351c. Exact receipt:
+[frontend qualification](docs/PSC1_FRONTEND_NORMALIZATION_QUALIFICATION_2026-10-21.json).
+Retained scoped artifact12306479654 digest
+sha256:7747d254008f59389b3f51b93b491e136556bdfadb3966a57850e39001ce206a.
+Artifact retention applies; the committed receipt is durable.
 
-ParseDo now parses and elaborates in focused Linux run39511079292
-(head cd1f0bfa3303efb3f8e45cc5b6e5b457485dcde2). Existing typed-error,
-normalization, operator, data, do and while native suites passed in that run.
-Semantic67/45/41, JS79/53/47, Rust83/54/46 (modules/parse/elaboration).
-Scoped CI for that intermediate head was superseded/cancelled, not qualified.
+ParseDo, ParseData, ParseLean, ParseProofScript, PrintCommon, PrintLean and
+PrintProofScript now parse AND elaborate in BOTH measured grammar lanes.
+All earlier Ast, Erasure.Definition, ParseCommon, ParseBinding and Operators
+gates remain enforced. No original declaration was removed. ParseDo adds span
+helpers. Native do/while/data/operators/typed-error/normalization checks and the
+full scoped admission, strict IR, seven-target runtime, namespace, minimum
+Python, direct Wasm component and installed npm toolchain checks passed within
+their existing scopes. This is scoped execution evidence, not full language proof.
 
-Changes preserve token/span ownership, layout, evaluation placement and budgets:
-named span helpers, explicit constructors/Except sequencing, typed local matches,
-and structural range/header workers. ParseData normalization additionally preserves
-tuple grouping/comma policy, array push order and strict optional-index adjacency.
-Its next confirmed refusal was infix cons construction at44:63 in run39511657432;
-the current candidate uses List.cons. ParseLean source sequencing and shorthand
-normalization is also submitted. Complete acceptance of both remains pending.
+Both lanes: semantic67/51/48, JS79/59/54, Rust83/60/53
+(modules/parse/elaboration). First Lean parse refusal is
+Ps.Environment.Control30:7 (missing explicit let separator); PS translation
+refuses at the same original source. Full per-module refusals are in CI logs.
 
-## Independent grammar measurement and strict gate
+## Active candidate after that checkpoint — pending Linux CI
 
-The native census now runs fresh Lean and PS preparation states over the same
-ordered explicit import closure. PS input is owned canonical translation of each
-repository Lean module, retained with UTF8 byte count, SHA256 and readable .ps
-artifacts. It is not an independently authored PS compiler or a fixed point.
-Both lanes actually parse/elaborate; acceptance is never copied across lanes.
+Normalize Environment.Control, SelfHostProd, Resolve, Elab.Context, DoBase,
+DoFor, DoWhile and DoTry. Keep exact checked operation construction and guards.
+Use explicit constructors, binders, Except sequencing and structural workers.
+Control application carries its changing expression through a returned function.
+Resolve retains default no-self lookup plus an explicit self-candidate helper.
+Context initializes namespace/helper fields explicitly. Do joins/open-state workers
+carry evolving contexts/state through structural list folds. Preserve collection
+and bound evaluation order, continuation delay/capture, primitive/inductive while
+result restrictions, partial-helper requirement, error state reset, early return
+packets, and handler boundaries. No runtime execution fuel or new selected feature.
 
-Run39511657432 passed38 census contract checks and independently measured both
-lanes. Each then reported semantic67/45/41, JS79/53/47, Rust83/54/46, with
-ParseData refusing Lean parsing and PS translation. Its overall result failed,
-as required by the maintained ParseData acceptance gate. No refusal was waived.
+All eight candidate modules have maintained parse/elaboration gates in BOTH
+lanes. Existing tests remain; focused CI additionally executes the dedicated
+namespace suite and retains the actual resolver/context caller audit.
+Do not transfer the qualified checkpoint to this candidate before actual CI.
 
-Integrity checks reject missing/duplicate/reordered/unknown modules, incorrect
-source metadata/import ownership, invalid stage transitions and stale outputs.
-The driver rehashes original sources after both probes. Optional
-`--strict-phase semantic-compiler|directjs-compiler|rust-compiler` refuses until
-every module translates where needed, parses and elaborates in BOTH lanes,
-including every import-blocked module. Default mode is an explicit partial census.
-The consolidated scoped receipt now requires and records both actual lanes.
+## Census integrity and continuation
 
-## Continue execution
-
-Inspect current focused Linux run, correct complete source modules topologically,
-and retain maintained gates. Prepare PS frontend normalization next. Qualify
-substantial batches with full scoped Linux CI; keep every existing test.
-Whole-closure independent admission/IR and generated compiler execution follow
-only when their source prerequisites pass.
+Fresh Lean and PS preparation states measure the full ordered explicit import
+closure. PS input is owned canonical translation from repository Lean, retained
+as readable .ps with exact byte counts and SHA256. It is not independently
+authored PS compiler source. Record path/grammar/bytes/order/import ownership,
+failure propagation, unchanged source snapshots, and fresh output integrity are
+checked.38 contract checks passed. The live strict semantic check actually
+refused incomplete closure as expected; it does not qualify the source closure.
 
 Cloud commands:
-`lake build psc1 psc1_source_census_probe psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_do_tests psc1_while_tests`;
+`lake build psc1 psc1_source_census_probe psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_do_tests psc1_while_tests psc1_namespace_tests`;
 `node scripts/compiler-source-census-contract-tests.mjs`;
 `node scripts/compiler-source-census.mjs`;
-`node scripts/compiler-source-census.mjs --strict-phase semantic-compiler`.
-Strict mode is currently expected to refuse incomplete closure; its refusal is not
-a completed source qualification. Inspect inventory.json, stages.json,
-stages-ps.json and translated-ps/ artifacts.
+`node scripts/compiler-source-census-strict-tests.mjs`.
+Manual strict gate:
+`node scripts/compiler-source-census.mjs --strict-phase semantic-compiler`
+(or directjs-compiler/rust-compiler). Every selected module must translate where
+needed, parse and elaborate in BOTH lanes; import-blocked modules also refuse.
+Inspect inventory.json, stages.json, stages-ps.json, strict-semantic.json and
+translated-ps/. PS diagnostic coordinates refer to retained translated input.
+Continue correcting the complete next refused module, then whole-closure
+independent admission/IR and generated compiler execution after prerequisites.
 
-## Assurance boundaries and constraints
+## Retained boundaries
 
 Official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc is the independent
-checker. Owned-kernel checks remain separate. Preserve exact source/body pairing,
-strict IR, ABI validation, unavailable-verified refusal and atomic publication.
-No unchecked axioms, fabricated authority, parser expansion, skipped declarations,
-runtime execution fuel, changed tool pins or relaxed tests/budgets.
+checker. Owned-kernel checks are separate. Whole-closure admission/IR, generated
+compiler execution, self-compilation and fixed points remain not-run. All14 full
+Practical Core families remain incomplete. Collection/iteration efficiency, Rust
+callbacks, typed IO and parity remain open. Wasm component ABI remains Bool-only.
+Earlier PSC2/Lean4.34 receipts do not qualify this compiler. Historical receipts
+are preserved. Parent #171 final scoped39508739868 and focused39508739941 were
+also verified before writes.
 
-Whole-closure admission/IR, generated compiler execution, self-compilation and
-fixed points remain not-run. All fourteen full Practical Core families remain
-incomplete. Efficient collections/iteration, Rust callbacks, typed IO and parity
-remain open. Wasm component ABI remains Bool-only. Historical PSC2/Lean4.34
-receipts do not qualify this compiler. Immutable prior receipts remain unchanged.
-
-GitHub/Linux CI only; expected-SHA non-forced branch updates. No main merge,
-release or npm registry publication. Record exact passed, failed, cancelled,
-in-progress and pending boundaries.
+GitHub/Linux CI only. Expected-SHA non-forced history-preserving commits; no main
+merge, release or npm registry publication. No unchecked axioms, fabricated
+authority, declaration filtering, parser widening, relaxed tests/budgets or pins.

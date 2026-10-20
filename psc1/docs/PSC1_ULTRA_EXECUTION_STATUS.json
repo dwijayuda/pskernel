@@ -423,7 +423,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "ParseDo-focused-passed-dual-census-live-ParseData-ParseLean-pending",
+    "status": "frontends-scoped-qualified-environment-and-do-elaboration-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -434,31 +434,89 @@
       "scoped": "cancelled-superseded"
     },
     "dualGrammarCensus": {
-      "implementationCommit": "a206510fb32b0671a0fb8f7f9f5f37757d72ba49",
-      "runId": 39511657432,
+      "implementationCommit": "4906ff5f520acda45cf4128effcbe226f2311e6f",
+      "runId": 39512729664,
       "contractChecks": 38,
       "probeIntegrity": "passed-both-lanes",
-      "overall": "failed-maintained-ParseData-gate",
+      "overall": "scoped-passed-partial-source-census",
       "psSourceDerivation": "owned-canonical-translation-from-lean",
       "independentlyAuthoredPsCompiler": false,
-      "strictSelectedPhase": true,
+      "strictSelectedPhase": "incomplete-closure-refusal-verified",
       "counts": {
         "semantic": [
           67,
-          45,
-          41
+          51,
+          48
         ],
         "directjs": [
           79,
-          53,
-          47
+          59,
+          54
         ],
         "rust": [
           83,
-          54,
-          46
+          60,
+          53
         ]
       }
-    }
+    },
+    "frontendCheckpoint": {
+      "head": "4906ff5f520acda45cf4128effcbe226f2311e6f",
+      "testedMergeCommit": "8733eb8d419c073f401527519ad2c4f02c48351c",
+      "scopedRunId": 39512729664,
+      "nativeRunId": 39512729792,
+      "scopedSteps": 37,
+      "receipt": "PSC1_FRONTEND_NORMALIZATION_QUALIFICATION_2026-10-21.json",
+      "scopedArtifact": {
+        "id": 12306479654,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMwNjQ3OTY1NA==",
+        "name": "psc1-scoped-correctness-8733eb8d419c073f401527519ad2c4f02c48351c",
+        "size_in_bytes": 45156554,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12306479654",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12306479654/zip",
+        "expired": false,
+        "digest": "sha256:7747d254008f59389b3f51b93b491e136556bdfadb3966a57850e39001ce206a",
+        "created_at": "2026-10-20T23:19:31Z",
+        "updated_at": "2026-10-20T23:19:31Z",
+        "expires_at": "2026-11-03T23:19:25Z",
+        "workflow_run": {
+          "id": 39512729664,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "4906ff5f520acda45cf4128effcbe226f2311e6f"
+        }
+      },
+      "nativeArtifact": {
+        "id": 12305444750,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMwNTQ0NDc1MA==",
+        "name": "psc1-architecture-native-8733eb8d419c073f401527519ad2c4f02c48351c",
+        "size_in_bytes": 180960,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12305444750",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12305444750/zip",
+        "expired": false,
+        "digest": "sha256:f956ae5dade94026c5f25564eb231860d46064154537f968d9d5c0c5a6bba90f",
+        "created_at": "2026-10-20T23:08:47Z",
+        "updated_at": "2026-10-20T23:08:47Z",
+        "expires_at": "2026-11-03T23:08:46Z",
+        "workflow_run": {
+          "id": 39512729792,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "4906ff5f520acda45cf4128effcbe226f2311e6f"
+        }
+      }
+    },
+    "pendingModules": [
+      "psc1/packages/environment/src/Ps/Environment/Control.lean",
+      "psc1/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+      "psc1/packages/environment/src/Ps/Environment/Resolve.lean",
+      "psc1/packages/elab/src/Ps/Elab/Context.lean",
+      "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
+      "psc1/packages/elab/src/Ps/Elab/DoFor.lean",
+      "psc1/packages/elab/src/Ps/Elab/DoWhile.lean",
+      "psc1/packages/elab/src/Ps/Elab/DoTry.lean"
+    ]
   }
 }

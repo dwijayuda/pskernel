@@ -27,6 +27,7 @@ const compilerProtocol = read('dist/scoped-correctness/compiler-host-protocol/re
 const compilerCensus = read('dist/scoped-correctness/compiler-source-census/inventory.json');
 const compilerStages = read('dist/scoped-correctness/compiler-source-census/stages.json');
 const compilerPsStages = read('dist/scoped-correctness/compiler-source-census/stages-ps.json');
+const compilerStrict = read('dist/scoped-correctness/compiler-source-census/strict-semantic.json');
 for (const [data, expectedTargets] of [[typedErrors, targets], [minimumErrors, ['python']]]) {
   assert.equal(data.testedCommit, process.env.GITHUB_SHA || null);
   assert.equal(data.branchHeadCommit, process.env.PSC1_HEAD_SHA || null);
@@ -79,6 +80,11 @@ for (const row of compilerPsStages.records.filter(row => row.translation === 'ac
   assert.ok(row.inputArtifact.startsWith('translated-ps/'));
   assert.match(row.inputSha256, /^[0-9a-f]{64}$/);
 }
+assert.equal(compilerStrict.commit, process.env.GITHUB_SHA || null);
+assert.equal(compilerStrict.passed, true);
+assert.equal(compilerStrict.phase, 'semantic-compiler');
+assert.equal(compilerStrict.expectedAcceptance, compilerStrict.measured.lean && compilerStrict.measured.ps);
+assert.equal(compilerStrict.status === 0, compilerStrict.expectedAcceptance);
 for (const syntax of ['lean', 'ps']) {
   for (const group of ['runtime-intrinsic-hygiene', 'prototype-property-hygiene']) {
     assert.ok(architecture.records.some(row => row.group === syntax + '-' + group && row.passed),
@@ -290,6 +296,8 @@ const receipt = {
     compilerSourceCensus: { diagnosticCompleted: true, grammar: 'lean', grammars: ['lean', 'ps'],
       psSourceDerivation: 'owned-canonical-translation-from-lean',
       independentlyAuthoredPsCompiler: false,
+      strictSemantic: { policyCheckPassed: compilerStrict.passed,
+        closureAccepted: compilerStrict.expectedAcceptance, status: compilerStrict.status },
       phases: compilerCensus.phases.map(phase => {
         const rows = compilerStages.records.filter(row => phase.modules.includes(row.module));
         return { name: phase.name, modules: rows.length,

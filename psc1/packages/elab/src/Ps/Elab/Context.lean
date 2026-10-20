@@ -16,9 +16,9 @@ def psElabStructuralRecursionFindCall
     (calls : List (Prod Nat Nat))
     (fieldId : Nat) : Option Nat :=
   match calls with
-  | [] =>
+  | List.nil =>
       Option.none
-  | entry :: rest =>
+  | List.cons entry rest =>
       if Nat.beq (Prod.fst entry) fieldId then
         Option.some (Prod.snd entry)
       else
@@ -30,8 +30,8 @@ structure PsElabContext where
   instances : PsInstanceIndex
   metaContext : PsMetaContext
   structuralRecursion : Option PsElabStructuralRecursion
-  whileHelper : Option PsName := Option.none
-  currentNamespace : PsName := PsName.anonymous
+  whileHelper : Option PsName
+  currentNamespace : PsName
 
 def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
   {
@@ -41,6 +41,7 @@ def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
     metaContext := psMetaEmpty
     structuralRecursion := Option.none
     whileHelper := Option.none
+    currentNamespace := PsName.anonymous
   }
 
 def psElabContextWithLocal
@@ -97,12 +98,16 @@ def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext
 -- Only an explicitly partial source declaration supplies this capability.
 def psElabContextWithWhileHelper
     (context : PsElabContext) (helper : PsName) : PsElabContext :=
-  { context with whileHelper := Option.some helper }
+  PsElabContext.mk context.environment context.localContext context.instances
+    context.metaContext context.structuralRecursion (Option.some helper) context.currentNamespace
 
 def psElabContextForDeclaration
     (environment : PsEnvironment) (name : PsName) : PsElabContext :=
-  let currentNamespace := match name with
-    | .anonymous => PsName.anonymous
-    | .str parent _ => parent
-    | .num parent _ => parent
-  { psElabContextEmpty environment with currentNamespace := currentNamespace }
+  let currentNamespace : PsName :=
+    match name with
+    | PsName.anonymous => PsName.anonymous
+    | PsName.str parent _ => parent
+    | PsName.num parent _ => parent;
+  let context : PsElabContext := psElabContextEmpty environment;
+  PsElabContext.mk context.environment context.localContext context.instances
+    context.metaContext context.structuralRecursion context.whileHelper currentNamespace

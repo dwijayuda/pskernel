@@ -66,7 +66,8 @@ lean_lib PsBridge where
     `Ps.Bridge.Json,
     `Ps.Bridge.CheckedAdmissions,
     `Ps.Bridge.Codec,
-    `Ps.Bridge.Protocol
+    `Ps.Bridge.Protocol,
+    `Ps.Bridge.CompilerHost
   ]
 
 lean_lib PsCompilerIr where
@@ -155,7 +156,8 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.Encode,
     `Ps.BackendWasm.Binary,
-    `Ps.BackendWasm.RuntimePlan
+    `Ps.BackendWasm.RuntimePlan,
+    `Ps.BackendWasm.Component
   ]
 
 lean_lib PsBackendPython where
@@ -353,3 +355,11 @@ lean_exe psc1_typed_error_tests where
 lean_exe psc1_namespace_tests where
   srcDir := "test"
   root := `NamespaceTests
+
+lean_exe psc1_source_census_probe where
+  srcDir := "scripts"
+  root := `SourceCensusProbe
+
+lean_exe psc1_independent_checker where
+  srcDir := "packages/pskernel-lean/provider"
+  root := `PsKernelLean.Main

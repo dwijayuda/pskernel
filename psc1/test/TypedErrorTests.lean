@@ -84,7 +84,86 @@ private def compilerM : IO Unit := do
   psPracticalCheckExecuted "CompilerM early return preserves successful effect state"
     prepared (PsExpr.constE psNatName []) (PsExpr.lit (PsLiteral.natural 308))
 
+private def layoutBoundaries : IO Unit := do
+  let source :=
+    "def nestedHandler : Except Nat Nat := do\n" ++
+    "  try\n" ++
+    "    let nested : Except Nat Nat := do\n" ++
+    "      try\n" ++
+    "        throw 2\n" ++
+    "      catch inner =>\n" ++
+    "        return inner + 3\n" ++
+    "    let value : Nat <- nested\n" ++
+    "    throw (value + 4)\n" ++
+    "  catch outer =>\n" ++
+    "    return outer + 1\n" ++
+    "def result : Nat := match nestedHandler with\n" ++
+    "  | Except.error error => 0\n" ++
+    "  | Except.ok value => value\n"
+  for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+    let text <- if kind matches .lean then pure source else translate source
+    psPracticalCheckExecuted "nested RHS catch stays inside its layout scope"
+      (<- prepare kind text) (PsExpr.constE psNatName []) (.lit (.natural 10))
+  let inlineSource :=
+    "def inlineHandler : Except Nat Nat := do\n" ++
+    "  let nested : Except Nat Nat := do try throw 2 catch inner => return inner + 3\n" ++
+    "  let value : Nat <- nested\n" ++
+    "  return value + 4\n" ++
+    "def result : Nat := match inlineHandler with\n" ++
+    "  | Except.error error => 0\n" ++
+    "  | Except.ok value => value\n"
+  for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+    let text <- if kind matches .lean then pure inlineSource else translate inlineSource
+    psPracticalCheckExecuted "same-line nested RHS owns its typed catch"
+      (<- prepare kind text) (PsExpr.constE psNatName []) (.lit (.natural 9))
+  let missingInner :=
+    "def result : Except Nat Nat := do\n" ++
+    "  try\n" ++
+    "    try\n" ++
+    "      throw 2\n" ++
+    "  catch outer =>\n" ++
+    "    return outer\n"
+  require "a nested try cannot consume a dedented outer catch"
+    (match psCompilerPrepareSource .lean missingInner with | .error _ => true | .ok _ => false)
+
+private def matchLayoutBoundaries : IO Unit := do
+  let extract :=
+    "def result : Nat := match program with\n" ++
+    "  | Except.error error => 0\n" ++
+    "  | Except.ok value => value\n"
+  let terminal :=
+    "def program : Except Nat Nat := do\n" ++
+    "  let value : Except Nat Nat := Except.ok 5\n" ++
+    "  match value with\n" ++
+    "  | Except.error error => Except.error error\n" ++
+    "  | Except.ok value => Except.ok (value + 1)\n"
+  let binding :=
+    "def program : Except Nat Nat := do\n" ++
+    "  let value : Nat := match Bool.true with\n" ++
+    "  | Bool.true => 5\n" ++
+    "  | Bool.false => 7\n" ++
+    "  return value\n"
+  let enclosing :=
+    "def choose (flag : Bool) : Except Nat Nat := match flag with\n" ++
+    "  | Bool.true => do\n" ++
+    "    match Bool.false with\n" ++
+    "    | Bool.true => Except.ok 1\n" ++
+    "    | Bool.false => Except.ok 3\n" ++
+    "  | Bool.false => Except.ok 7\n" ++
+    "def program : Except Nat Nat := choose Bool.true\n"
+  for (label, source, expected) in [
+    ("terminal match retains same-column alternatives", terminal, 6),
+    ("binding match retains same-column alternatives", binding, 5),
+    ("nested do leaves dedented alternatives to its enclosing match", enclosing, 3)
+  ] do
+    for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+      let text <- if kind matches .lean then pure (source ++ extract) else translate (source ++ extract)
+      psPracticalCheckExecuted label (<- prepare kind text)
+        (PsExpr.constE psNatName []) (.lit (.natural expected))
+
 def main : IO Unit := do
+  matchLayoutBoundaries
+  layoutBoundaries
   let source <- IO.FS.readFile "test/TypedErrorFixtures.lean"
   let ps <- translate source
   let original <- prepare .lean source

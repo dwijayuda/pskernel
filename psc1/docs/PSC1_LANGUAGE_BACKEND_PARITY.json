@@ -1,0 +1,3616 @@
+{
+  "schema": "psc1-language-backend-parity/1",
+  "kind": "audit-baseline-not-new-qualification",
+  "baseline": {
+    "head": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
+    "pr": 166,
+    "run": 39469312498,
+    "semanticLean": {
+      "version": "4.35.0",
+      "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+    }
+  },
+  "dimensions": [
+    "feature",
+    "input-grammar",
+    "IR",
+    "target",
+    "runtime-qualification",
+    "public-ABI",
+    "assurance"
+  ],
+  "definitions": {
+    "selectedObserved": "Only recorded baseline cases; not complete family or all interactions.",
+    "notSeparatelyInventoried": "Source implementation exists; no feature-by-feature all-target evidence is claimed here.",
+    "sourceInspected": "A production path exists; execution qualification must be added.",
+    "none": "No qualification exists for this baseline selection."
+  },
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "publicAbi": {
+    "js": {
+      "scalars": "Nat/Int bigint; Bool; Char/String; Unit",
+      "aggregate": "internal-only",
+      "functionValue": "internal-only",
+      "genericPublic": "refused"
+    },
+    "ts": {
+      "scalars": "same-runtime-as-js",
+      "aggregate": "internal-only",
+      "functionValue": "internal-only",
+      "genericPublic": "refused"
+    },
+    "rust": {
+      "scalars": "owned-selected-runtime-types",
+      "aggregate": "qualified-subset",
+      "functionValue": "printer-restricted",
+      "genericPublic": "retained-checked-path"
+    },
+    "wasm-core": {
+      "scalars": "lowered-Wasm-types",
+      "aggregate": "GC-interface-no-portable-marshalling-claim",
+      "functionValue": "typed-Wasm-closure-interface",
+      "genericPublic": "refused"
+    },
+    "wasm-component": {
+      "scalars": "Bool-only",
+      "aggregate": "refused",
+      "functionValue": "refused",
+      "genericPublic": "refused"
+    },
+    "python": {
+      "scalars": "int-not-bool; bool; scalar/surrogate-free-str; None",
+      "aggregate": "internal-only",
+      "functionValue": "internal-only",
+      "genericPublic": "refused"
+    },
+    "php": {
+      "scalars": "GMP-Nat/Int; bool; valid-UTF8-string; null",
+      "aggregate": "internal-only",
+      "functionValue": "internal-only",
+      "genericPublic": "refused"
+    }
+  },
+  "features": [
+    {
+      "id": "definitions",
+      "family": "existing",
+      "selection": "named typed definitions",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "let/call/typed-declaration"
+      },
+      "sourceEvidence": "Declaration.psElabDeclarationBatchWithOrigins",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "proofs",
+      "family": "existing",
+      "selection": "theorem proof terms; erasure",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "Core-proof-erasure"
+      },
+      "sourceEvidence": "Compiler.Api; Erasure.Definition",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "not-applicable-erased",
+          "publicAbi": "not-applicable-erased",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "not-applicable-erased",
+          "publicAbi": "not-applicable-erased",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "not-applicable-erased",
+          "publicAbi": "not-applicable-erased",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "not-applicable-erased",
+          "publicAbi": "not-applicable-erased",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "not-applicable-erased",
+          "publicAbi": "not-applicable-erased",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "not-applicable-erased",
+          "publicAbi": "not-applicable-erased",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "not-applicable-erased",
+          "publicAbi": "not-applicable-erased",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "binders-pi",
+      "family": "existing",
+      "selection": "explicit/implicit/strict/instance binders; lambda/Pi; selected dependent telescopes",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-bounded",
+        "ps": "implemented-bounded"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "types-and-erased-binders"
+      },
+      "sourceEvidence": "Term.psElabTypedBinders; psElabForall; psElabApplyArgs",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "not-separately-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "not-separately-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "not-separately-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "not-separately-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "not-separately-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "not-separately-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "not-separately-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "generics",
+      "family": "existing",
+      "selection": "rank-one generic helpers",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-bounded",
+        "ps": "implemented-bounded"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "generic-IR-or-closed-specialization"
+      },
+      "sourceEvidence": "BackendCommon.Plan.psBackendClosedPlan",
+      "targets": {
+        "js": {
+          "lowering": "closed-specialization-revalidated",
+          "runtime": "selected-observed",
+          "publicAbi": "generic",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "closed-specialization-revalidated",
+          "runtime": "selected-observed",
+          "publicAbi": "generic",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "retained-generic-checked-path",
+          "runtime": "selected-observed",
+          "publicAbi": "generic",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "closed-specialization-revalidated",
+          "runtime": "selected-observed",
+          "publicAbi": "generic",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "closed-specialization-revalidated",
+          "runtime": "selected-observed",
+          "publicAbi": "generic",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "closed-specialization-revalidated",
+          "runtime": "selected-observed",
+          "publicAbi": "generic",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "closed-specialization-revalidated",
+          "runtime": "selected-observed",
+          "publicAbi": "generic",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "structures-records",
+      "family": "existing",
+      "selection": "bounded Type0 structures and record construction/projection",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-bounded",
+        "ps": "implemented-bounded"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "named-record/projection"
+      },
+      "sourceEvidence": "Declaration.psElabStructureDeclaration; Term.psElabRecord",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-observed",
+          "publicAbi": "qualified-subset",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-observed",
+          "publicAbi": "GC-interface-no-portable-marshalling-claim",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-observed",
+          "publicAbi": "refused",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "inductives",
+      "family": "existing",
+      "selection": "Type0 unindexed inductives and selected nested containers",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-bounded",
+        "ps": "implemented-bounded"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "constructor/match"
+      },
+      "sourceEvidence": "Declaration.psElabInductiveDeclaration",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "qualified-subset",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "GC-interface-no-portable-marshalling-claim",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "refused",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "matches",
+      "family": "existing",
+      "selection": "expected-type nondependent single-motive matching with constructor/wildcard cases",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-bounded",
+        "ps": "implemented-bounded"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "matchE"
+      },
+      "sourceEvidence": "Term.psElabMatch",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-internal-not-exhaustively-inventoried",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "structural-recursion",
+      "family": "existing",
+      "selection": "checked direct structural recursion",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-bounded",
+        "ps": "implemented-bounded"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "recursor-lowering"
+      },
+      "sourceEvidence": "Elab.Recursion; Erasure.Inductive",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "target/case-specific-inventory-required",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "target/case-specific-inventory-required",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "target/case-specific-inventory-required",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "target/case-specific-inventory-required",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "target/case-specific-inventory-required",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "target/case-specific-inventory-required",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "target/case-specific-inventory-required",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "closure-capture",
+      "family": "existing",
+      "selection": "value-capturing closures and higher-order array map",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "lambda/call"
+      },
+      "sourceEvidence": "Term.psElabLambda; BackendRust.Expr",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "printer-restricted",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "typed-Wasm-closure-interface",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "refused",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "closure-aggregate-storage",
+      "family": "existing-gap",
+      "selection": "captured functions stored in data/arrays/generic containers",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "source-and-IR-forms-present",
+        "ps": "source-and-IR-forms-present"
+      },
+      "ir": {
+        "status": "source-gap-or-future-profile",
+        "form": "lambda-in-named-layout"
+      },
+      "sourceEvidence": "BackendRust.Module.psRustValidateStaticStoredFunction",
+      "targets": {
+        "js": {
+          "lowering": "source-inspection-only",
+          "runtime": "no-complete-seven-target-fixture",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "source-inspection-only",
+          "runtime": "no-complete-seven-target-fixture",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "refused-for-capturing/nested-storage",
+          "runtime": "no-complete-seven-target-fixture",
+          "publicAbi": "qualified-subset",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "source-inspection-only",
+          "runtime": "no-complete-seven-target-fixture",
+          "publicAbi": "GC-interface-no-portable-marshalling-claim",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "source-inspection-only",
+          "runtime": "no-complete-seven-target-fixture",
+          "publicAbi": "refused",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "source-inspection-only",
+          "runtime": "no-complete-seven-target-fixture",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "source-inspection-only",
+          "runtime": "no-complete-seven-target-fixture",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "import-closure",
+      "family": "existing",
+      "selection": "dependency snapshots, entry public ownership and private helpers",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "closed-module-plus-origins"
+      },
+      "sourceEvidence": "Host.SourceSnapshot; Host.DirectBackend",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "nat-exact",
+      "family": "existing",
+      "selection": "unbounded Nat arithmetic including zero-divisor rules",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "Nat-intrinsics"
+      },
+      "sourceEvidence": "scripts/runtime-conformance-tests.mjs:natcheck",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "Nat/Int bigint; Bool; Char/String; Unit",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "same-runtime-as-js",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "owned-selected-runtime-types",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "lowered-Wasm-types",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "Bool-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "int-not-bool; bool; scalar/surrogate-free-str; None",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "GMP-Nat/Int; bool; valid-UTF8-string; null",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "int-exact",
+      "family": "existing",
+      "selection": "Int conversion/add/sub/mul/negation/repr",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "Int-intrinsics"
+      },
+      "sourceEvidence": "scripts/runtime-conformance-tests.mjs:intcheck",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "Nat/Int bigint; Bool; Char/String; Unit",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "same-runtime-as-js",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "owned-selected-runtime-types",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "lowered-Wasm-types",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "Bool-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "int-not-bool; bool; scalar/surrogate-free-str; None",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "GMP-Nat/Int; bool; valid-UTF8-string; null",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "unicode",
+      "family": "existing",
+      "selection": "Unicode scalars and pinned raw UTF8 string offsets",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "Char/String-intrinsics"
+      },
+      "sourceEvidence": "scripts/runtime-conformance-tests.mjs:unicodecheck",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "Nat/Int bigint; Bool; Char/String; Unit",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "same-runtime-as-js",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "owned-selected-runtime-types",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "lowered-Wasm-types",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "Bool-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "int-not-bool; bool; scalar/surrogate-free-str; None",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "GMP-Nat/Int; bool; valid-UTF8-string; null",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "operators",
+      "family": "practical-core",
+      "selection": "fixed arithmetic/Bool/equality subset",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "intrinsic/conditional/Prop-equality"
+      },
+      "sourceEvidence": "Elab.Operators",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "prop-ordering",
+      "family": "practical-core-subcase",
+      "selection": "Prop-valued Nat/Int order with checked decisions",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "missing",
+        "ps": "missing"
+      },
+      "ir": {
+        "status": "source-gap-or-future-profile",
+        "form": "not-selected-yet"
+      },
+      "sourceEvidence": "Operators.psElabBinaryOperator",
+      "targets": {
+        "js": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "erased-and-runtime-decision",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "erased-and-runtime-decision",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "erased-and-runtime-decision",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "erased-and-runtime-decision",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "erased-and-runtime-decision",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "erased-and-runtime-decision",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "erased-and-runtime-decision",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "local-inference",
+      "family": "practical-core",
+      "selection": "bounded bidirectional contextual inference",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-bounded",
+        "ps": "implemented-bounded"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "resolved-typed-Core"
+      },
+      "sourceEvidence": "Term; test/ContextualInferenceTests.lean",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "do",
+      "family": "practical-core",
+      "selection": "Type0 Id/Except sequencing",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "checked-calls-and-control-packets"
+      },
+      "sourceEvidence": "Elab.Do; Elab.DoBase",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "compiler-effect",
+      "family": "practical-core-subcase",
+      "selection": "checked CompilerM state/error control",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "checked-library-calls"
+      },
+      "sourceEvidence": "stdlib/ProofScript/Compiler/Effect.lean",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-private-JS-expected-value",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "for",
+      "family": "practical-core",
+      "selection": "List/Array/half-open-unit-step-Nat ranges",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "checked-recursor-continuations"
+      },
+      "sourceEvidence": "Elab.DoFor; Environment.Control",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-linear-construction",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-linear-construction",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-linear-construction",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-linear-construction",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-linear-construction",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-linear-construction",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-linear-construction",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "while",
+      "family": "practical-core",
+      "selection": "selected ordinary Id/Except while",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "checked-private-partial-helpers"
+      },
+      "sourceEvidence": "Elab.DoWhile; DoLoopLift",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-finite-and-external-timeout-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-finite-and-external-timeout-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-finite-and-external-timeout-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-finite-and-external-timeout-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-finite-and-external-timeout-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-finite-and-external-timeout-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-finite-and-external-timeout-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "mutation",
+      "family": "practical-core",
+      "selection": "fixed-type lexical mutable locals",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "immutable-Core-let-state-threading"
+      },
+      "sourceEvidence": "Elab.DoBase; Elab.Do",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "return",
+      "family": "practical-core",
+      "selection": "selected branch/loop early return",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "checked-controller-values"
+      },
+      "sourceEvidence": "Elab.Do",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "partial-def",
+      "family": "practical-core",
+      "selection": "ordinary checked-body/opaque-witness pairing",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "original-body-runtime-IR"
+      },
+      "sourceEvidence": "Compiler.Ordinary",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-ordinary-cases-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-ordinary-cases-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-ordinary-cases-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-ordinary-cases-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-ordinary-cases-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-ordinary-cases-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-ordinary-cases-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "tuples",
+      "family": "practical-core",
+      "selection": "Unit/grouping/right-associated products and immutable product/wildcard binding",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "strict-let-plus-projections"
+      },
+      "sourceEvidence": "Elab.Data; Syntax.ParseBinding",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "qualified-subset",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "GC-interface-no-portable-marshalling-claim",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "refused",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "unit-binding",
+      "family": "practical-core-subcase",
+      "selection": "Unit binding pattern",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "strict-let-and-Unit-check"
+      },
+      "sourceEvidence": "test/DataTests.lean",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-private-JS-expected-value",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "not-qualified-dedicated-target-cases",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "arrays",
+      "family": "practical-core",
+      "selection": "literals, persistence, optional lookup",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "Array-intrinsics-and-fold"
+      },
+      "sourceEvidence": "Elab.Data.psElabArrayGetOption",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-full-scan",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-full-scan",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-full-scan",
+          "publicAbi": "qualified-subset",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-full-scan",
+          "publicAbi": "GC-interface-no-portable-marshalling-claim",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-full-scan",
+          "publicAbi": "refused",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-full-scan",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed-full-scan",
+          "publicAbi": "internal-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "typed-errors",
+      "family": "practical-core",
+      "selection": "typed Except propagation",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "checked-Except-library"
+      },
+      "sourceEvidence": "Elab.DoBase; test/WhileTests.lean",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "typed-error-handlers",
+      "family": "practical-core-subcase",
+      "selection": "throw/try/catch",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "missing-at-baseline-candidate-PR167",
+        "ps": "missing-at-baseline-candidate-PR167"
+      },
+      "ir": {
+        "status": "source-gap-or-future-profile",
+        "form": "candidate-control-packets"
+      },
+      "sourceEvidence": "PR167 a830668d2c23886843e616951836d8d990aa2ff5",
+      "targets": {
+        "js": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none-at-baseline",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none-at-baseline",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none-at-baseline",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none-at-baseline",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none-at-baseline",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none-at-baseline",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none-at-baseline",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "call-inference",
+      "family": "practical-core",
+      "selection": "transactional nondependent expected-result constraints; sequential dependent checking",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-bounded",
+        "ps": "implemented-bounded"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "fully-resolved-call"
+      },
+      "sourceEvidence": "Term.psElabApplicationWithExpected",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "namespaces",
+      "family": "practical-core",
+      "selection": "nested/reopened/dotted namespace identities and root references",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "implemented-selected",
+        "ps": "implemented-selected"
+      },
+      "ir": {
+        "status": "implemented-selected",
+        "form": "fully-qualified-Core-identities"
+      },
+      "sourceEvidence": "Environment.Resolve; Elab.Context",
+      "targets": {
+        "js": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "implemented-selected",
+          "runtime": "selected-observed",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "typed-io",
+      "family": "practical-core",
+      "selection": "bounded console and UTF8 file host capabilities",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "missing",
+        "ps": "missing"
+      },
+      "ir": {
+        "status": "source-gap-or-future-profile",
+        "form": "no-admitted-source-IO-profile"
+      },
+      "sourceEvidence": "CompilerIr.Model; current-status",
+      "targets": {
+        "js": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "empty-Unit-call",
+      "family": "surface-gap",
+      "selection": "f() exactly-one-Unit completion",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "missing-deferred-profile-change",
+        "ps": "missing-deferred-profile-change"
+      },
+      "ir": {
+        "status": "source-gap-or-future-profile",
+        "form": "empty-app-rejected"
+      },
+      "sourceEvidence": "Term.psElabTermWithFuel",
+      "targets": {
+        "js": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "source-universes-indexed",
+      "family": "outside-profile",
+      "selection": "explicit universes/Sort syntax and indexed inductive source declarations",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "outside-selected-source-profile",
+        "ps": "outside-selected-source-profile"
+      },
+      "ir": {
+        "status": "source-gap-or-future-profile",
+        "form": "Core-more-expressive-than-source"
+      },
+      "sourceEvidence": "Declaration.psElabInductiveDeclaration fixes levels/indices",
+      "targets": {
+        "js": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "class-instance-tactic-macro",
+      "family": "outside-profile",
+      "selection": "user classes/instances/tactic blocks/macros/mutual blocks",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "outside-selected-source-profile",
+        "ps": "outside-selected-source-profile"
+      },
+      "ir": {
+        "status": "source-gap-or-future-profile",
+        "form": "not-a-shared-AST-capability"
+      },
+      "sourceEvidence": "Syntax.Ast",
+      "targets": {
+        "js": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "depends-on-result-signature",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "machine-float-int-divmod",
+      "family": "outside-profile",
+      "selection": "fixed width/floats and Int division/modulo",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "outside-active-profile",
+        "ps": "outside-active-profile"
+      },
+      "ir": {
+        "status": "source-gap-or-future-profile",
+        "form": "some-constructor/printer-code-is-not-qualification"
+      },
+      "sourceEvidence": "BackendCommon.Plan.psBackendActivePrimitive",
+      "targets": {
+        "js": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "Nat/Int bigint; Bool; Char/String; Unit",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "same-runtime-as-js",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "owned-selected-runtime-types",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "lowered-Wasm-types",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "Bool-only",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "int-not-bool; bool; scalar/surrogate-free-str; None",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "GMP-Nat/Int; bool; valid-UTF8-string; null",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    },
+    {
+      "id": "foreign-import",
+      "family": "outside-profile",
+      "selection": "target ecosystem imports",
+      "complete": false,
+      "inputGrammars": {
+        "lean": "missing-source-profile",
+        "ps": "missing-source-profile"
+      },
+      "ir": {
+        "status": "source-gap-or-future-profile",
+        "form": "strict-IR-rejects-all-external-imports"
+      },
+      "sourceEvidence": "CompilerIr.Check:external-import-abi-unqualified",
+      "targets": {
+        "js": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "ts": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "rust": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-core": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "wasm-component": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "python": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        },
+        "php": {
+          "lowering": "not-qualified-from-selected-source",
+          "runtime": "none",
+          "publicAbi": "host-capability",
+          "assurance": {
+            "logical": "independent-official-Lean-for-admitted-source-cases",
+            "strictIr": "required-for-emission",
+            "behavioralCertificate": "unavailable",
+            "verifiedRequest": "refused"
+          }
+        }
+      }
+    }
+  ],
+  "evidence": {
+    "receipts": [
+      "psc1/docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json",
+      "psc1/docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json"
+    ],
+    "sourceScripts": [
+      "psc1/scripts/runtime-conformance-tests.mjs",
+      "psc1/scripts/ordinary-while-conformance-tests.mjs",
+      "psc1/scripts/practical-forms-backend-tests.mjs",
+      "psc1/scripts/scoped-backend-tests.mjs"
+    ],
+    "runtimeCorpus": {
+      "bundles": 14,
+      "individualPredicates": 18,
+      "componentHarness": "combined semantic Bool export; internal observations only",
+      "nativeOracleFields": 84,
+      "mostCommonPSInput": "translated-from-Lean",
+      "handwrittenPairedSubcases": [
+        "data-literals",
+        "optional-index",
+        "tuple-patterns",
+        "namespaces"
+      ]
+    }
+  },
+  "proposedPolicy": {
+    "script": "psc1/scripts/check-language-backend-parity.mjs",
+    "status": "design-only",
+    "requiredRecords": [
+      "caseId",
+      "featureId",
+      "grammar",
+      "target",
+      "sourceClosureHashes",
+      "compilerIdentity",
+      "canonicalAdmissionHash",
+      "strictIrResult",
+      "targetValidationResult",
+      "runtimeObservation",
+      "oracleIdentity",
+      "assurance",
+      "runId",
+      "testedCommit",
+      "branchHead"
+    ],
+    "rules": [
+      "selected portable cases require both grammars and all seven targets",
+      "erased proof/type cases require admission and erasure, runtime explicitly not applicable",
+      "no family complete until every selected finite-contract case passes",
+      "no source-language claim inferred from ABI",
+      "no public aggregate marshalling claim inferred from Bool harness",
+      "no behavioral proof claim inferred from execution",
+      "missing/skipped/duplicate/unknown records fail CI"
+    ]
+  }
+}

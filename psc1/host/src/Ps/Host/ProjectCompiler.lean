@@ -103,6 +103,12 @@ def psHostPackageDirectory : List String -> Option String
   | "Ps" :: "Compiler" :: _ => some "compiler"
   | "Ps" :: "Erasure" :: _ => some "erasure"
   | "Ps" :: "BackendTs" :: _ => some "backend-ts"
+  | "Ps" :: "BackendCommon" :: _ => some "backend-common"
+  | "Ps" :: "BackendJs" :: _ => some "backend-js"
+  | "Ps" :: "BackendRust" :: _ => some "backend-rust"
+  | "Ps" :: "BackendWasm" :: _ => some "backend-wasm"
+  | "Ps" :: "BackendPython" :: _ => some "backend-python"
+  | "Ps" :: "BackendPhp" :: _ => some "backend-php"
   | _ => none
 
 def psHostImportSearchBases

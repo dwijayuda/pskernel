@@ -26,15 +26,15 @@ def psParseDoArrow (cursor : PsTokenCursor) : Bool :=
 -- branch closes the statement, while an else in its RHS remains part of the term.
 def psParseDoTakeStatement
     (fuel : Nat) (start : PsSourcePos) :
-    Nat -> Nat -> PsTokenCursor -> List PsToken ->
+    Nat -> Nat -> Nat -> PsTokenCursor -> List PsToken ->
     PsParseResult (List PsToken) :=
   match fuel with
   | Nat.zero =>
-      fun (_depth _conditionals : Nat) (cursor : PsTokenCursor)
+      fun (_depth _conditionals _handlers : Nat) (cursor : PsTokenCursor)
           (tokensRev : List PsToken) =>
         PsParseResult.mk (psParseListReverse tokensRev) cursor
   | Nat.succ remaining =>
-      fun (depth conditionals : Nat) (cursor : PsTokenCursor)
+      fun (depth conditionals handlers : Nat) (cursor : PsTokenCursor)
           (tokensRev : List PsToken) =>
         let smaller := psParseDoTakeStatement remaining start;
         match psTokenCursorPeek cursor with
@@ -45,14 +45,13 @@ def psParseDoTakeStatement
               else if Nat.beq depth 0 then
                 if psParseDoCloseToken token.text then true
                 else if psStringEq token.text ";" then true
-                else if psStringEq token.text "catch" then
-                  -- A catch inside a more-indented RHS do belongs to that term.
-                  -- Same-line/outer catches delimit this procedural statement.
-                  if Nat.beq token.span.start.line start.line then true
-                  else Nat.ble token.span.start.column start.column
+                else if psStringEq token.text "catch" then Nat.beq handlers 0
                 else if psStringEq token.text "else" then Nat.beq conditionals 0
                 else if Nat.ble (Nat.succ start.line) token.span.start.line then
-                  Nat.ble token.span.start.column start.column
+                  -- Match alternatives may align with their match expression.
+                  if psStringEq token.text "|" then
+                    Nat.blt token.span.start.column start.column
+                  else Nat.ble token.span.start.column start.column
                 else false
               else false;
             if stop then PsParseResult.mk (psParseListReverse tokensRev) cursor
@@ -70,7 +69,13 @@ def psParseDoTakeStatement
                       else if psStringEq token.text "else" then Nat.sub conditionals 1
                       else conditionals
                     else conditionals;
-                  smaller nextDepth nextConditionals read.cursor (List.cons token tokensRev)
+                  let nextHandlers :=
+                    if Nat.beq depth 0 then
+                      if psStringEq token.text "try" then Nat.succ handlers
+                      else if psStringEq token.text "catch" then Nat.sub handlers 1
+                      else handlers
+                    else handlers;
+                  smaller nextDepth nextConditionals nextHandlers read.cursor (List.cons token tokensRev)
 
 inductive PsParseDoHead where
   | binding
@@ -690,7 +695,7 @@ def psParseDoBody
                 psParseDoWhile parseTerm smaller allowSemicolon cursor
               else
                 let chunk := psParseDoTakeStatement
-                  (Nat.succ (psParseListLength cursor.remaining)) first.span.start 0 0 cursor [];
+                  (Nat.succ (psParseListLength cursor.remaining)) first.span.start 0 0 0 cursor [];
                 match psParseDoStatement parseTerm (PsTokenCursor.mk chunk.value) with
                 | Except.error error => Except.error error
                 | Except.ok head => Except.ok (PsParseResult.mk head chunk.cursor);

@@ -1,0 +1,3411 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc1-static-compiler-source-census/1",
+  "repository": "dwijayuda/pskernel",
+  "sourceCommit": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
+  "generatedOn": "2026-10-21",
+  "method": {
+    "input": "All 137 non-test/non-legacy lean_lib roots declared in psc1/lakefile.lean, fetched through connected GitHub at the immutable sourceCommit",
+    "edges": "Lexical top-level import statements. Explicit imports only; Lean implicit Init/prelude primitives remain dependencies of native and generated execution.",
+    "qualification": "Static inventory only. No parser/elaborator/admission/erasure/backend runtime/fixed-point qualification is inferred."
+  },
+  "phases": [
+    {
+      "id": "semanticCompiler",
+      "roots": [
+        "Ps.Compiler.Api",
+        "Ps.Compiler.Ordinary"
+      ],
+      "modules": [
+        "Ps.Bridge.CheckedAdmissions",
+        "Ps.Bridge.Json",
+        "Ps.Compiler.Api",
+        "Ps.Compiler.Ordinary",
+        "Ps.CompilerIr.Model",
+        "Ps.Core.Abstract",
+        "Ps.Core.Builtin",
+        "Ps.Core.Declaration",
+        "Ps.Core.Equality",
+        "Ps.Core.Expr",
+        "Ps.Core.Level",
+        "Ps.Core.LevelSubst",
+        "Ps.Core.Subst",
+        "Ps.Elab.Basic",
+        "Ps.Elab.Context",
+        "Ps.Elab.Data",
+        "Ps.Elab.Declaration",
+        "Ps.Elab.Do",
+        "Ps.Elab.DoBase",
+        "Ps.Elab.DoFor",
+        "Ps.Elab.DoLoop",
+        "Ps.Elab.DoLoopLift",
+        "Ps.Elab.DoWhile",
+        "Ps.Elab.Literal",
+        "Ps.Elab.Operators",
+        "Ps.Elab.Recursion",
+        "Ps.Elab.Term",
+        "Ps.Environment.Basic",
+        "Ps.Environment.Control",
+        "Ps.Environment.Instances",
+        "Ps.Environment.LocalContext",
+        "Ps.Environment.Prelude",
+        "Ps.Environment.Resolve",
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Environment.SelfHostProd",
+        "Ps.Erasure.Basic",
+        "Ps.Erasure.Definition",
+        "Ps.Erasure.Expr",
+        "Ps.Erasure.Inductive",
+        "Ps.Erasure.Structure",
+        "Ps.Erasure.StructureRecursor",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.Source",
+        "Ps.Meta.Context",
+        "Ps.Meta.Infer",
+        "Ps.Meta.LevelContext",
+        "Ps.Meta.Reduce",
+        "Ps.Meta.SynthInstance",
+        "Ps.Meta.Unify",
+        "Ps.Syntax.Ast",
+        "Ps.Syntax.Cursor",
+        "Ps.Syntax.Lexer",
+        "Ps.Syntax.Operators",
+        "Ps.Syntax.ParseBinding",
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseData",
+        "Ps.Syntax.ParseDo",
+        "Ps.Syntax.ParseLean",
+        "Ps.Syntax.ParseProofScript",
+        "Ps.Syntax.ParserState",
+        "Ps.Syntax.PrintCommon",
+        "Ps.Syntax.PrintLean",
+        "Ps.Syntax.PrintProofScript",
+        "Ps.Syntax.Token",
+        "Ps.Syntax.Translate"
+      ],
+      "localModuleCount": 66,
+      "externalModules": [],
+      "bytes": 1227616,
+      "lines": 31122,
+      "explicitHostNativeReferences": []
+    },
+    {
+      "id": "directJsCompiler",
+      "roots": [
+        "Ps.Compiler.Api",
+        "Ps.Compiler.Ordinary",
+        "Ps.BackendCommon.Plan",
+        "Ps.BackendJs.Lower",
+        "Ps.BackendJs.Validate",
+        "Ps.BackendJs.Print"
+      ],
+      "modules": [
+        "Ps.BackendCommon.Plan",
+        "Ps.BackendJs.Lower",
+        "Ps.BackendJs.Model",
+        "Ps.BackendJs.Print",
+        "Ps.BackendJs.TailAlias",
+        "Ps.BackendJs.Validate",
+        "Ps.Bridge.CheckedAdmissions",
+        "Ps.Bridge.Json",
+        "Ps.Compiler.Api",
+        "Ps.Compiler.Ordinary",
+        "Ps.CompilerIr.Check",
+        "Ps.CompilerIr.CheckSize",
+        "Ps.CompilerIr.CheckTypes",
+        "Ps.CompilerIr.Model",
+        "Ps.CompilerIr.Specialize",
+        "Ps.CompilerIr.Validate",
+        "Ps.Core.Abstract",
+        "Ps.Core.Builtin",
+        "Ps.Core.Declaration",
+        "Ps.Core.Equality",
+        "Ps.Core.Expr",
+        "Ps.Core.Level",
+        "Ps.Core.LevelSubst",
+        "Ps.Core.Subst",
+        "Ps.Elab.Basic",
+        "Ps.Elab.Context",
+        "Ps.Elab.Data",
+        "Ps.Elab.Declaration",
+        "Ps.Elab.Do",
+        "Ps.Elab.DoBase",
+        "Ps.Elab.DoFor",
+        "Ps.Elab.DoLoop",
+        "Ps.Elab.DoLoopLift",
+        "Ps.Elab.DoWhile",
+        "Ps.Elab.Literal",
+        "Ps.Elab.Operators",
+        "Ps.Elab.Recursion",
+        "Ps.Elab.Term",
+        "Ps.Environment.Basic",
+        "Ps.Environment.Control",
+        "Ps.Environment.Instances",
+        "Ps.Environment.LocalContext",
+        "Ps.Environment.Prelude",
+        "Ps.Environment.Resolve",
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Environment.SelfHostProd",
+        "Ps.Erasure.Basic",
+        "Ps.Erasure.Definition",
+        "Ps.Erasure.Expr",
+        "Ps.Erasure.Inductive",
+        "Ps.Erasure.Structure",
+        "Ps.Erasure.StructureRecursor",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.Source",
+        "Ps.Foundation.Text",
+        "Ps.Meta.Context",
+        "Ps.Meta.Infer",
+        "Ps.Meta.LevelContext",
+        "Ps.Meta.Reduce",
+        "Ps.Meta.SynthInstance",
+        "Ps.Meta.Unify",
+        "Ps.Syntax.Ast",
+        "Ps.Syntax.Cursor",
+        "Ps.Syntax.Lexer",
+        "Ps.Syntax.Operators",
+        "Ps.Syntax.ParseBinding",
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseData",
+        "Ps.Syntax.ParseDo",
+        "Ps.Syntax.ParseLean",
+        "Ps.Syntax.ParseProofScript",
+        "Ps.Syntax.ParserState",
+        "Ps.Syntax.PrintCommon",
+        "Ps.Syntax.PrintLean",
+        "Ps.Syntax.PrintProofScript",
+        "Ps.Syntax.Token",
+        "Ps.Syntax.Translate"
+      ],
+      "localModuleCount": 78,
+      "externalModules": [],
+      "bytes": 1547280,
+      "lines": 39289,
+      "explicitHostNativeReferences": []
+    },
+    {
+      "id": "rustCompiler",
+      "roots": [
+        "Ps.Compiler.Api",
+        "Ps.Compiler.Ordinary",
+        "Ps.BackendCommon.Plan",
+        "Ps.BackendRust.Module"
+      ],
+      "modules": [
+        "Ps.BackendCommon.Plan",
+        "Ps.BackendRust.Captures",
+        "Ps.BackendRust.Expr",
+        "Ps.BackendRust.Identifier",
+        "Ps.BackendRust.Module",
+        "Ps.BackendRust.Runtime",
+        "Ps.BackendRust.RuntimePlan",
+        "Ps.BackendRust.Tail",
+        "Ps.BackendRust.TailAlias",
+        "Ps.BackendRust.Type",
+        "Ps.BackendRust.ValueRefs",
+        "Ps.Bridge.CheckedAdmissions",
+        "Ps.Bridge.Json",
+        "Ps.Compiler.Api",
+        "Ps.Compiler.Ordinary",
+        "Ps.CompilerIr.Check",
+        "Ps.CompilerIr.CheckSize",
+        "Ps.CompilerIr.CheckTypes",
+        "Ps.CompilerIr.Model",
+        "Ps.CompilerIr.Specialize",
+        "Ps.CompilerIr.Validate",
+        "Ps.Core.Abstract",
+        "Ps.Core.Builtin",
+        "Ps.Core.Declaration",
+        "Ps.Core.Equality",
+        "Ps.Core.Expr",
+        "Ps.Core.Level",
+        "Ps.Core.LevelSubst",
+        "Ps.Core.Subst",
+        "Ps.Elab.Basic",
+        "Ps.Elab.Context",
+        "Ps.Elab.Data",
+        "Ps.Elab.Declaration",
+        "Ps.Elab.Do",
+        "Ps.Elab.DoBase",
+        "Ps.Elab.DoFor",
+        "Ps.Elab.DoLoop",
+        "Ps.Elab.DoLoopLift",
+        "Ps.Elab.DoWhile",
+        "Ps.Elab.Literal",
+        "Ps.Elab.Operators",
+        "Ps.Elab.Recursion",
+        "Ps.Elab.Term",
+        "Ps.Environment.Basic",
+        "Ps.Environment.Control",
+        "Ps.Environment.Instances",
+        "Ps.Environment.LocalContext",
+        "Ps.Environment.Prelude",
+        "Ps.Environment.Resolve",
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Environment.SelfHostProd",
+        "Ps.Erasure.Basic",
+        "Ps.Erasure.Definition",
+        "Ps.Erasure.Expr",
+        "Ps.Erasure.Inductive",
+        "Ps.Erasure.Structure",
+        "Ps.Erasure.StructureRecursor",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.Source",
+        "Ps.Meta.Context",
+        "Ps.Meta.Infer",
+        "Ps.Meta.LevelContext",
+        "Ps.Meta.Reduce",
+        "Ps.Meta.SynthInstance",
+        "Ps.Meta.Unify",
+        "Ps.Syntax.Ast",
+        "Ps.Syntax.Cursor",
+        "Ps.Syntax.Lexer",
+        "Ps.Syntax.Operators",
+        "Ps.Syntax.ParseBinding",
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseData",
+        "Ps.Syntax.ParseDo",
+        "Ps.Syntax.ParseLean",
+        "Ps.Syntax.ParseProofScript",
+        "Ps.Syntax.ParserState",
+        "Ps.Syntax.PrintCommon",
+        "Ps.Syntax.PrintLean",
+        "Ps.Syntax.PrintProofScript",
+        "Ps.Syntax.Token",
+        "Ps.Syntax.Translate"
+      ],
+      "localModuleCount": 82,
+      "externalModules": [],
+      "bytes": 1551285,
+      "lines": 38984,
+      "explicitHostNativeReferences": []
+    },
+    {
+      "id": "nativeCliHost",
+      "roots": [
+        "Ps.Host.WasmComponent",
+        "Ps.Host.ScriptBackend"
+      ],
+      "modules": [
+        "Lean",
+        "Ps.BackendCommon.Plan",
+        "Ps.BackendJs.Lower",
+        "Ps.BackendJs.Model",
+        "Ps.BackendJs.Print",
+        "Ps.BackendJs.TailAlias",
+        "Ps.BackendJs.Validate",
+        "Ps.BackendPhp.Module",
+        "Ps.BackendPhp.Runtime",
+        "Ps.BackendPython.Module",
+        "Ps.BackendPython.Runtime",
+        "Ps.BackendRust.Captures",
+        "Ps.BackendRust.Expr",
+        "Ps.BackendRust.Identifier",
+        "Ps.BackendRust.Module",
+        "Ps.BackendRust.Runtime",
+        "Ps.BackendRust.RuntimePlan",
+        "Ps.BackendRust.Tail",
+        "Ps.BackendRust.TailAlias",
+        "Ps.BackendRust.Type",
+        "Ps.BackendRust.ValueRefs",
+        "Ps.BackendTs.Checked",
+        "Ps.BackendTs.Compiler",
+        "Ps.BackendTs.Expr",
+        "Ps.BackendTs.Module",
+        "Ps.BackendTs.Sh1",
+        "Ps.BackendTs.Sh1Target",
+        "Ps.BackendTs.Type",
+        "Ps.BackendWasm.Binary",
+        "Ps.BackendWasm.Encode",
+        "Ps.BackendWasm.IntUtil",
+        "Ps.BackendWasm.Lower",
+        "Ps.BackendWasm.LowerFloat",
+        "Ps.BackendWasm.LowerInt",
+        "Ps.BackendWasm.Model",
+        "Ps.BackendWasm.RuntimeInt",
+        "Ps.BackendWasm.RuntimeIntRepr",
+        "Ps.BackendWasm.RuntimeNat",
+        "Ps.BackendWasm.RuntimePlan",
+        "Ps.BackendWasm.RuntimeString",
+        "Ps.BackendWasm.TailCalls",
+        "Ps.BackendWasm.Type",
+        "Ps.Bridge.CheckedAdmissions",
+        "Ps.Bridge.Codec",
+        "Ps.Bridge.Json",
+        "Ps.Compiler.Api",
+        "Ps.Compiler.Ordinary",
+        "Ps.Compiler.Sh1",
+        "Ps.CompilerIr.Check",
+        "Ps.CompilerIr.CheckSize",
+        "Ps.CompilerIr.CheckTypes",
+        "Ps.CompilerIr.Construct",
+        "Ps.CompilerIr.Model",
+        "Ps.CompilerIr.Specialize",
+        "Ps.CompilerIr.Validate",
+        "Ps.Core.Abstract",
+        "Ps.Core.Builtin",
+        "Ps.Core.Declaration",
+        "Ps.Core.Equality",
+        "Ps.Core.Expr",
+        "Ps.Core.Level",
+        "Ps.Core.LevelSubst",
+        "Ps.Core.Subst",
+        "Ps.Elab.Basic",
+        "Ps.Elab.Context",
+        "Ps.Elab.Data",
+        "Ps.Elab.Declaration",
+        "Ps.Elab.Do",
+        "Ps.Elab.DoBase",
+        "Ps.Elab.DoFor",
+        "Ps.Elab.DoLoop",
+        "Ps.Elab.DoLoopLift",
+        "Ps.Elab.DoWhile",
+        "Ps.Elab.Literal",
+        "Ps.Elab.Operators",
+        "Ps.Elab.Recursion",
+        "Ps.Elab.Term",
+        "Ps.Environment.Basic",
+        "Ps.Environment.Control",
+        "Ps.Environment.Instances",
+        "Ps.Environment.LocalContext",
+        "Ps.Environment.Prelude",
+        "Ps.Environment.Resolve",
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Environment.SelfHostProd",
+        "Ps.Erasure.Basic",
+        "Ps.Erasure.Definition",
+        "Ps.Erasure.Expr",
+        "Ps.Erasure.Inductive",
+        "Ps.Erasure.Structure",
+        "Ps.Erasure.StructureRecursor",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.Source",
+        "Ps.Foundation.Text",
+        "Ps.Host.ArtifactBundle",
+        "Ps.Host.CompilerDriver",
+        "Ps.Host.DirectBackend",
+        "Ps.Host.DirectSourceMap",
+        "Ps.Host.LeanChecked",
+        "Ps.Host.ProjectCompiler",
+        "Ps.Host.ScriptBackend",
+        "Ps.Host.SourceSnapshot",
+        "Ps.Host.TypeScriptCompiler",
+        "Ps.Host.WasmComponent",
+        "Ps.Meta.Context",
+        "Ps.Meta.Infer",
+        "Ps.Meta.LevelContext",
+        "Ps.Meta.Reduce",
+        "Ps.Meta.SynthInstance",
+        "Ps.Meta.Unify",
+        "Ps.Syntax.Ast",
+        "Ps.Syntax.Cursor",
+        "Ps.Syntax.Lexer",
+        "Ps.Syntax.Operators",
+        "Ps.Syntax.ParseBinding",
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseData",
+        "Ps.Syntax.ParseDo",
+        "Ps.Syntax.ParseLean",
+        "Ps.Syntax.ParseProofScript",
+        "Ps.Syntax.ParserState",
+        "Ps.Syntax.PrintCommon",
+        "Ps.Syntax.PrintLean",
+        "Ps.Syntax.PrintProofScript",
+        "Ps.Syntax.Token",
+        "Ps.Syntax.Translate",
+        "PsKernelLean.Admission",
+        "PsKernelLean.Convert",
+        "PsKernelLean.Error",
+        "PsKernelLean.Prelude",
+        "PsKernelLean.Protocol"
+      ],
+      "localModuleCount": 131,
+      "externalModules": [
+        "Lean"
+      ],
+      "bytes": 2476295,
+      "lines": 61513,
+      "explicitHostNativeReferences": [
+        {
+          "module": "Ps.Host.ArtifactBundle",
+          "matches": [
+            {
+              "line": 6,
+              "text": "  if let some configured ← IO.getEnv \"PSC1_HOST_TOOLS\" then"
+            },
+            {
+              "line": 7,
+              "text": "    if ← (System.FilePath.mk configured).pathExists then return configured"
+            },
+            {
+              "line": 8,
+              "text": "    throw (IO.userError (\"PSC1_HOST_TOOLS_MISSING: \" ++ configured))"
+            },
+            {
+              "line": 9,
+              "text": "  let executable ← IO.appPath"
+            },
+            {
+              "line": 10,
+              "text": "  let bin := executable.parent.getD (System.FilePath.mk \".\")"
+            },
+            {
+              "line": 18,
+              "text": "    System.FilePath.mk \"host-tools/artifacts.mjs\","
+            },
+            {
+              "line": 19,
+              "text": "    System.FilePath.mk \"psc1/host-tools/artifacts.mjs\"]"
+            },
+            {
+              "line": 22,
+              "text": "      return (← IO.FS.realPath candidate).toString"
+            },
+            {
+              "line": 23,
+              "text": "  throw (IO.userError \"PSC1_HOST_TOOLS_MISSING: install host-tools dependencies and set PSC1_HOST_TOOLS to artifacts.mjs\")"
+            },
+            {
+              "line": 27,
+              "text": "  let result ← IO.Process.output { cmd := \"node\", args := #[tool] ++ arguments }"
+            },
+            {
+              "line": 29,
+              "text": "    throw (IO.userError (\"PSC1_ARTIFACT_PHASE_FAILED: \" ++ result.stderr))"
+            },
+            {
+              "line": 35,
+              "text": "    (outputPath : String) (action : System.FilePath → IO α) : IO α := do"
+            }
+          ]
+        },
+        {
+          "module": "Ps.Host.CompilerDriver",
+          "matches": [
+            {
+              "line": 31,
+              "text": "          (IO.userError"
+            },
+            {
+              "line": 39,
+              "text": "          (IO.userError"
+            },
+            {
+              "line": 43,
+              "text": "  let source ← IO.FS.readFile inputPath"
+            },
+            {
+              "line": 47,
+              "text": "        (IO.userError"
+            },
+            {
+              "line": 55,
+              "text": "  IO.print (← psHostCompilerTranslatedSource inputPath targetText)"
+            },
+            {
+              "line": 62,
+              "text": "  IO.FS.writeFile outputPath output"
+            },
+            {
+              "line": 63,
+              "text": "  IO.println"
+            },
+            {
+              "line": 78,
+              "text": "        (IO.userError"
+            },
+            {
+              "line": 81,
+              "text": "      IO.println"
+            },
+            {
+              "line": 92,
+              "text": "        (IO.userError"
+            },
+            {
+              "line": 95,
+              "text": "      IO.print encoded"
+            },
+            {
+              "line": 103,
+              "text": "        (IO.userError"
+            }
+          ]
+        },
+        {
+          "module": "Ps.Host.DirectBackend",
+          "matches": [
+            {
+              "line": 51,
+              "text": "    | .error _ => throw (IO.userError \"PSC1_PREPARATION_FAILED: phase=canonical-core\")"
+            },
+            {
+              "line": 54,
+              "text": "    | .error reason => throw (IO.userError (\"PSC1_KERNEL_ADMISSION_FAILED: \" ++ reason))"
+            },
+            {
+              "line": 66,
+              "text": "    | .error reason => throw (IO.userError reason)"
+            },
+            {
+              "line": 69,
+              "text": "    | .error reason => throw (IO.userError (\"PSC1_KERNEL_ADMISSION_FAILED: \" ++ reason))"
+            },
+            {
+              "line": 114,
+              "text": "        throw (IO.userError \"PSC1_VERIFIED_EXECUTION_UNAVAILABLE: no behavioral certificate; no ordinary fallback\")"
+            },
+            {
+              "line": 119,
+              "text": "          | .error _ => throw (IO.userError \"PSC1_ERASURE_FAILED: phase=runtime-erasure\")"
+            },
+            {
+              "line": 125,
+              "text": "          | .error reason => throw (IO.userError reason)"
+            },
+            {
+              "line": 129,
+              "text": "    | .error _ => throw (IO.userError (\"PSC1_IR_VALIDATION_FAILED: \" ++ irFailureText raw))"
+            },
+            {
+              "line": 131,
+              "text": "    | throw (IO.userError \"PSC1_ENTRY_SNAPSHOT_MISSING\")"
+            },
+            {
+              "line": 158,
+              "text": "  IO.println (\"PSC1_KERNEL_CHECK: PASS (\" ++ toString prepared.declarations.length ++ \" declarations; Lean 4.35.0)\")"
+            },
+            {
+              "line": 162,
+              "text": "  IO.print admissions"
+            },
+            {
+              "line": 167,
+              "text": "      throw (IO.userError \"PSC1_VERIFIED_EXECUTION_UNAVAILABLE: no behavioral certificate; no ordinary fallback\")"
+            }
+          ]
+        },
+        {
+          "module": "Ps.Host.ProjectCompiler",
+          "matches": [
+            {
+              "line": 13,
+              "text": "  if System.Platform.isWindows then '\\\\' else '/'"
+            },
+            {
+              "line": 74,
+              "text": "      let hasPackages ← System.FilePath.pathExists packageDir"
+            },
+            {
+              "line": 75,
+              "text": "      let hasStdlib ← System.FilePath.pathExists stdlibDir"
+            },
+            {
+              "line": 76,
+              "text": "      let hasBootstrap ← System.FilePath.pathExists (psHostJoinPath path \".proofscript-bootstrap.json\")"
+            },
+            {
+              "line": 77,
+              "text": "      let hasSelfhost ← System.FilePath.pathExists (psHostJoinPath path \".proofscript-selfhost.json\")"
+            },
+            {
+              "line": 78,
+              "text": "      let hasProject ← System.FilePath.pathExists (psHostJoinPath path \".proofscript-project.json\")"
+            },
+            {
+              "line": 137,
+              "text": "  let hasLean ← System.FilePath.pathExists leanPath"
+            },
+            {
+              "line": 138,
+              "text": "  let hasProofScript ← System.FilePath.pathExists proofScriptPath"
+            },
+            {
+              "line": 144,
+              "text": "        (IO.userError"
+            },
+            {
+              "line": 184,
+              "text": "    if let some configured ← IO.getEnv \"PSC1_LIBRARY_RESOLVER\" then"
+            },
+            {
+              "line": 185,
+              "text": "      pure (System.FilePath.mk configured)"
+            },
+            {
+              "line": 187,
+              "text": "      let tool := System.FilePath.mk (← psHostArtifactToolPath)"
+            }
+          ]
+        },
+        {
+          "module": "Ps.Host.ScriptBackend",
+          "matches": [
+            {
+              "line": 11,
+              "text": "  | .error reason => throw (IO.userError reason)"
+            },
+            {
+              "line": 14,
+              "text": "  | .error reason => throw (IO.userError reason)"
+            },
+            {
+              "line": 17,
+              "text": "  if !outputPath.endsWith \".py\" then throw (IO.userError \"PSC1_OUTPUT_EXTENSION: expected .py\")"
+            },
+            {
+              "line": 21,
+              "text": "    | .error reason => throw (IO.userError (\"PSC1_PYTHON_TARGET_UNSUPPORTED: \" ++ reason))"
+            },
+            {
+              "line": 25,
+              "text": "    IO.FS.writeFile (stage / name) printed.source"
+            },
+            {
+              "line": 26,
+              "text": "    IO.FS.writeFile (stage / ((name.dropEnd 3).toString ++ \".pyi\")) printed.stub"
+            },
+            {
+              "line": 32,
+              "text": "  IO.println (\"PSC1_DIRECT_PYTHON: \" ++ outputPath)"
+            },
+            {
+              "line": 35,
+              "text": "  if !outputPath.endsWith \".php\" then throw (IO.userError \"PSC1_OUTPUT_EXTENSION: expected .php\")"
+            },
+            {
+              "line": 39,
+              "text": "    | .error reason => throw (IO.userError (\"PSC1_PHP_TARGET_UNSUPPORTED: \" ++ reason))"
+            },
+            {
+              "line": 43,
+              "text": "    IO.FS.writeFile (stage / name) printed.source"
+            },
+            {
+              "line": 44,
+              "text": "    IO.FS.writeFile (stage / ((name.dropEnd 4).toString ++ \".composer.json\")) printed.composer"
+            },
+            {
+              "line": 50,
+              "text": "  IO.println (\"PSC1_DIRECT_PHP: \" ++ outputPath)"
+            }
+          ]
+        },
+        {
+          "module": "Ps.Host.SourceSnapshot",
+          "matches": [
+            {
+              "line": 25,
+              "text": "    let path := (← IO.FS.realPath inputPath).toString"
+            },
+            {
+              "line": 28,
+              "text": "      throw (IO.userError (\"PSC1_PROJECT_DEPENDENCY_CYCLE: \" ++ path))"
+            },
+            {
+              "line": 30,
+              "text": "    | 0 => throw (IO.userError \"PSC1_PROJECT_FUEL_EXHAUSTED\")"
+            },
+            {
+              "line": 32,
+              "text": "      let text ← IO.FS.readFile path"
+            },
+            {
+              "line": 64,
+              "text": "  let entryPath := (← IO.FS.realPath inputPath).toString"
+            }
+          ]
+        },
+        {
+          "module": "Ps.Host.TypeScriptCompiler",
+          "matches": [
+            {
+              "line": 30,
+              "text": "  let version := (← IO.getEnv \"PSC0_TYPESCRIPT_VERSION\").getD \"7.0.2\""
+            },
+            {
+              "line": 34,
+              "text": "    throw (IO.userError"
+            },
+            {
+              "line": 39,
+              "text": "  if System.Platform.isWindows then"
+            },
+            {
+              "line": 50,
+              "text": "def psTypeScriptPathKey (value : System.FilePath) : String :="
+            },
+            {
+              "line": 51,
+              "text": "  if System.Platform.isWindows then"
+            },
+            {
+              "line": 57,
+              "text": "    (packageJson : System.FilePath) : IO System.FilePath := do"
+            },
+            {
+              "line": 58,
+              "text": "  let realPackageJson ← IO.FS.realPath packageJson"
+            },
+            {
+              "line": 62,
+              "text": "    | none => throw (IO.userError \"package.json has no parent directory\")"
+            },
+            {
+              "line": 63,
+              "text": "  let source ← IO.FS.readFile realPackageJson"
+            },
+            {
+              "line": 67,
+              "text": "    | Except.error _ => throw (IO.userError \"invalid TypeScript package.json\")"
+            },
+            {
+              "line": 72,
+              "text": "    throw (IO.userError \"package.json must declare the typescript package\")"
+            },
+            {
+              "line": 76,
+              "text": "    | none => throw (IO.userError \"package.json must declare string bin.tsc\")"
+            }
+          ]
+        },
+        {
+          "module": "Ps.Host.WasmComponent",
+          "matches": [
+            {
+              "line": 57,
+              "text": "  if !outputPath.endsWith \".wasm\" then throw (IO.userError \"PSC1_COMPONENT_OUTPUT_EXTENSION\")"
+            },
+            {
+              "line": 59,
+              "text": "    throw (IO.userError \"PSC1_COMPONENT_EXPORT_NOT_IN_ENTRY_SOURCE\")"
+            },
+            {
+              "line": 62,
+              "text": "    | .error reason => throw (IO.userError reason)"
+            },
+            {
+              "line": 65,
+              "text": "  | .error reason => throw (IO.userError reason)"
+            },
+            {
+              "line": 68,
+              "text": "    | .error reason => throw (IO.userError reason)"
+            },
+            {
+              "line": 71,
+              "text": "    | .error error => throw (IO.userError (\"PSC1_COMPONENT_LOWER_UNSUPPORTED: \" ++ psHostWasmLowerErrorText error))"
+            },
+            {
+              "line": 73,
+              "text": "    throw (IO.userError \"PSC1_COMPONENT_EXPORT_NOT_LOWERED\")"
+            },
+            {
+              "line": 77,
+              "text": "    | .error _ => throw (IO.userError \"PSC1_COMPONENT_BINARY_UNSUPPORTED\")"
+            },
+            {
+              "line": 87,
+              "text": "    IO.FS.writeBinFile core (ByteArray.mk bytes.toArray)"
+            },
+            {
+              "line": 88,
+              "text": "    IO.FS.writeFile witPath wit"
+            },
+            {
+              "line": 97,
+              "text": "    IO.FS.writeFile observed observedWit"
+            },
+            {
+              "line": 99,
+              "text": "    IO.FS.removeFile embedded"
+            }
+          ]
+        },
+        {
+          "module": "PsKernelLean.Admission",
+          "matches": [
+            {
+              "line": 8,
+              "text": "    (error : Lean.Kernel.Exception) : PsKernelLeanError :="
+            },
+            {
+              "line": 19,
+              "text": "    Nat -> List Lean.Declaration -> Lean.Environment ->"
+            },
+            {
+              "line": 20,
+              "text": "    Except PsKernelLeanError Lean.Environment"
+            },
+            {
+              "line": 30,
+              "text": "    (env : Lean.Environment)"
+            },
+            {
+              "line": 31,
+              "text": "    (declarations : Array Lean.Declaration) :"
+            },
+            {
+              "line": 32,
+              "text": "    Except PsKernelLeanError Lean.Environment :="
+            },
+            {
+              "line": 36,
+              "text": "    (source : String) : IO (Except PsKernelLeanError Lean.Environment) := do"
+            }
+          ]
+        },
+        {
+          "module": "PsKernelLean.Convert",
+          "matches": [
+            {
+              "line": 10,
+              "text": "def toLeanName : PsName -> Lean.Name"
+            },
+            {
+              "line": 15,
+              "text": "def toLeanLevel : PsLevel -> Except PsKernelLeanError Lean.Level"
+            },
+            {
+              "line": 31,
+              "text": "def toLeanLevels : List PsLevel -> Except PsKernelLeanError (List Lean.Level)"
+            },
+            {
+              "line": 38,
+              "text": "def toLeanBinderInfo : PsBinderInfo -> Lean.BinderInfo"
+            },
+            {
+              "line": 44,
+              "text": "def toLeanLiteral : PsLiteral -> Lean.Literal"
+            },
+            {
+              "line": 48,
+              "text": "partial def toLeanExpr : PsExpr -> Except PsKernelLeanError Lean.Expr"
+            },
+            {
+              "line": 80,
+              "text": "def toLeanNames (names : List PsName) : List Lean.Name :="
+            }
+          ]
+        },
+        {
+          "module": "PsKernelLean.Prelude",
+          "matches": [
+            {
+              "line": 10,
+              "text": "def kernelExceptionSummary : Lean.Kernel.Exception -> String"
+            },
+            {
+              "line": 41,
+              "text": "    Except PsKernelLeanError Lean.Constructor := do"
+            },
+            {
+              "line": 52,
+              "text": "    List PsName -> Except PsKernelLeanError (List Lean.Constructor)"
+            },
+            {
+              "line": 61,
+              "text": "    PsDeclaration -> Except PsKernelLeanError (Option Lean.Declaration)"
+            },
+            {
+              "line": 119,
+              "text": "  | admitted (env : Lean.Environment)"
+            },
+            {
+              "line": 124,
+              "text": "    (env : Lean.Environment)"
+            },
+            {
+              "line": 142,
+              "text": "    List PsDeclaration -> Lean.Environment ->"
+            },
+            {
+              "line": 143,
+              "text": "    Except PsKernelLeanError (Lean.Environment × List PsDeclaration)"
+            },
+            {
+              "line": 156,
+              "text": "    (env : Lean.Environment) :"
+            },
+            {
+              "line": 157,
+              "text": "    Except PsKernelLeanError Lean.Environment := do"
+            },
+            {
+              "line": 169,
+              "text": "def buildLeanPreludeEnvironment : IO (Except PsKernelLeanError Lean.Environment) := do"
+            },
+            {
+              "line": 170,
+              "text": "  let env ← Lean.mkEmptyEnvironment 0"
+            }
+          ]
+        },
+        {
+          "module": "PsKernelLean.Protocol",
+          "matches": [
+            {
+              "line": 58,
+              "text": "    Except PsKernelLeanError Lean.Name := do"
+            },
+            {
+              "line": 63,
+              "text": "    Except PsKernelLeanError (List Lean.Name) := do"
+            },
+            {
+              "line": 68,
+              "text": "    Except PsKernelLeanError Lean.Expr := do"
+            },
+            {
+              "line": 73,
+              "text": "    Except PsKernelLeanError Lean.ReducibilityHints := do"
+            },
+            {
+              "line": 88,
+              "text": "    Except PsKernelLeanError Lean.Declaration := do"
+            },
+            {
+              "line": 107,
+              "text": "    Except PsKernelLeanError Lean.Declaration := do"
+            },
+            {
+              "line": 120,
+              "text": "    Except PsKernelLeanError Lean.Declaration := do"
+            },
+            {
+              "line": 137,
+              "text": "    Except PsKernelLeanError Lean.Constructor := do"
+            },
+            {
+              "line": 143,
+              "text": "    Except PsKernelLeanError Lean.InductiveType := do"
+            },
+            {
+              "line": 151,
+              "text": "    Except PsKernelLeanError Lean.Declaration := do"
+            },
+            {
+              "line": 162,
+              "text": "    Except PsKernelLeanError Lean.Declaration := do"
+            },
+            {
+              "line": 175,
+              "text": "    Except PsKernelLeanError Lean.Declaration := do"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "historicalStrictSh1",
+      "roots": [
+        "Ps.Compiler.Sh1"
+      ],
+      "modules": [
+        "Ps.Bridge.CheckedAdmissions",
+        "Ps.Bridge.Json",
+        "Ps.Compiler.Api",
+        "Ps.Compiler.Sh1",
+        "Ps.CompilerIr.Model",
+        "Ps.Core.Abstract",
+        "Ps.Core.Builtin",
+        "Ps.Core.Declaration",
+        "Ps.Core.Equality",
+        "Ps.Core.Expr",
+        "Ps.Core.Level",
+        "Ps.Core.LevelSubst",
+        "Ps.Core.Subst",
+        "Ps.Elab.Basic",
+        "Ps.Elab.Context",
+        "Ps.Elab.Data",
+        "Ps.Elab.Declaration",
+        "Ps.Elab.Do",
+        "Ps.Elab.DoBase",
+        "Ps.Elab.DoFor",
+        "Ps.Elab.DoLoop",
+        "Ps.Elab.DoLoopLift",
+        "Ps.Elab.DoWhile",
+        "Ps.Elab.Literal",
+        "Ps.Elab.Operators",
+        "Ps.Elab.Recursion",
+        "Ps.Elab.Term",
+        "Ps.Environment.Basic",
+        "Ps.Environment.Control",
+        "Ps.Environment.Instances",
+        "Ps.Environment.LocalContext",
+        "Ps.Environment.Prelude",
+        "Ps.Environment.Resolve",
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Environment.SelfHostProd",
+        "Ps.Erasure.Basic",
+        "Ps.Erasure.Definition",
+        "Ps.Erasure.Expr",
+        "Ps.Erasure.Inductive",
+        "Ps.Erasure.Structure",
+        "Ps.Erasure.StructureRecursor",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.Source",
+        "Ps.Meta.Context",
+        "Ps.Meta.Infer",
+        "Ps.Meta.LevelContext",
+        "Ps.Meta.Reduce",
+        "Ps.Meta.SynthInstance",
+        "Ps.Meta.Unify",
+        "Ps.Syntax.Ast",
+        "Ps.Syntax.Cursor",
+        "Ps.Syntax.Lexer",
+        "Ps.Syntax.Operators",
+        "Ps.Syntax.ParseBinding",
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseData",
+        "Ps.Syntax.ParseDo",
+        "Ps.Syntax.ParseLean",
+        "Ps.Syntax.ParseProofScript",
+        "Ps.Syntax.ParserState",
+        "Ps.Syntax.PrintCommon",
+        "Ps.Syntax.PrintLean",
+        "Ps.Syntax.PrintProofScript",
+        "Ps.Syntax.Token",
+        "Ps.Syntax.Translate"
+      ],
+      "localModuleCount": 66,
+      "externalModules": [],
+      "bytes": 1251807,
+      "lines": 31677,
+      "explicitHostNativeReferences": []
+    }
+  ],
+  "modules": [
+    {
+      "name": "Ps.Foundation.List",
+      "path": "psc1/packages/foundation/src/Ps/Foundation/List.lean",
+      "gitBlobSha": "29e4e59c271c1a26604cc738a8794f9bb70a2e83",
+      "utf8Bytes": 2386,
+      "lineCount": 67,
+      "imports": [],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Foundation.Name",
+      "path": "psc1/packages/foundation/src/Ps/Foundation/Name.lean",
+      "gitBlobSha": "b907616cb4cbf65089ba0c9a8e13f57b220008cf",
+      "utf8Bytes": 3984,
+      "lineCount": 112,
+      "imports": [],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Foundation.Source",
+      "path": "psc1/packages/foundation/src/Ps/Foundation/Source.lean",
+      "gitBlobSha": "1451dabae049d324b7aeb2d1b89b7bf56dea32fd",
+      "utf8Bytes": 148,
+      "lineCount": 9,
+      "imports": [],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Foundation.Diagnostic",
+      "path": "psc1/packages/foundation/src/Ps/Foundation/Diagnostic.lean",
+      "gitBlobSha": "eba5727643e6e3c553e6fa23d7d037c5bcba977e",
+      "utf8Bytes": 202,
+      "lineCount": 12,
+      "imports": [
+        "Ps.Foundation.Source"
+      ],
+      "phaseMembership": []
+    },
+    {
+      "name": "Ps.Foundation.Text",
+      "path": "psc1/packages/foundation/src/Ps/Foundation/Text.lean",
+      "gitBlobSha": "7d324534b2f46c54a53392d348a77246d6271a1d",
+      "utf8Bytes": 2147,
+      "lineCount": 66,
+      "imports": [],
+      "phaseMembership": [
+        "directJsCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.Token",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/Token.lean",
+      "gitBlobSha": "5bc9895dbe7a9ba9157b00f6e184da6d16af738f",
+      "utf8Bytes": 959,
+      "lineCount": 44,
+      "imports": [
+        "Ps.Foundation.Source"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.Cursor",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/Cursor.lean",
+      "gitBlobSha": "cde16d84dc7a088bf7b9f74c65303b22b991fe85",
+      "utf8Bytes": 2808,
+      "lineCount": 93,
+      "imports": [
+        "Ps.Foundation.Source"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.Lexer",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/Lexer.lean",
+      "gitBlobSha": "598b8d75d0d1bf1b6ea7ec05a62814343e33599a",
+      "utf8Bytes": 36625,
+      "lineCount": 1087,
+      "imports": [
+        "Ps.Syntax.Cursor",
+        "Ps.Syntax.Token"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.Ast",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
+      "gitBlobSha": "94d8181820bbe210706f779f864b4a259526cd63",
+      "utf8Bytes": 7170,
+      "lineCount": 199,
+      "imports": [
+        "Ps.Foundation.Source"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.ParserState",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/ParserState.lean",
+      "gitBlobSha": "e784c5836a37e522a21f67db0d52653d5ab12a57",
+      "utf8Bytes": 2516,
+      "lineCount": 79,
+      "imports": [
+        "Ps.Foundation.Name",
+        "Ps.Syntax.Token"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.ParseCommon",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+      "gitBlobSha": "56e5ad6c850a194c84d4a064ac61f4d62f9d405c",
+      "utf8Bytes": 28462,
+      "lineCount": 799,
+      "imports": [
+        "Ps.Syntax.Ast",
+        "Ps.Syntax.ParserState"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.ParseBinding",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/ParseBinding.lean",
+      "gitBlobSha": "e67a580e7677f196b859e55ef445e724f3034ff0",
+      "utf8Bytes": 5192,
+      "lineCount": 113,
+      "imports": [
+        "Ps.Syntax.ParseCommon"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.ParseDo",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
+      "gitBlobSha": "16a2e2eba7e88b1223ec3c0d74d2ff45044abc70",
+      "utf8Bytes": 37414,
+      "lineCount": 719,
+      "imports": [
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseBinding"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.ParseData",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/ParseData.lean",
+      "gitBlobSha": "1d925a818ef8d7be857090c2cf7c9f79232c59a2",
+      "utf8Bytes": 6152,
+      "lineCount": 136,
+      "imports": [
+        "Ps.Syntax.ParseCommon"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.Operators",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/Operators.lean",
+      "gitBlobSha": "ad9ec3476b5ac031eec22dfaa82e76c54e5338f2",
+      "utf8Bytes": 4270,
+      "lineCount": 89,
+      "imports": [
+        "Ps.Syntax.ParseCommon"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.ParseLean",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "gitBlobSha": "6938cb6c91a068a95fee247b5d4159344541b5d9",
+      "utf8Bytes": 99503,
+      "lineCount": 2686,
+      "imports": [
+        "Ps.Syntax.Lexer",
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseBinding",
+        "Ps.Syntax.ParseDo",
+        "Ps.Syntax.ParseData",
+        "Ps.Syntax.Operators"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.ParseProofScript",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+      "gitBlobSha": "593a9c7dc3e73e6d7f26f7f5c768982e7b4f0a06",
+      "utf8Bytes": 76923,
+      "lineCount": 1763,
+      "imports": [
+        "Ps.Syntax.Lexer",
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseBinding",
+        "Ps.Syntax.ParseDo",
+        "Ps.Syntax.ParseData",
+        "Ps.Syntax.Operators"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.PrintCommon",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+      "gitBlobSha": "1d32ae5ab9d9a9beeceab29becd58a112387a435",
+      "utf8Bytes": 14202,
+      "lineCount": 336,
+      "imports": [
+        "Ps.Syntax.Ast"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.PrintLean",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+      "gitBlobSha": "db3906b109acd1729ec9bf06020e51f977ba826a",
+      "utf8Bytes": 31566,
+      "lineCount": 780,
+      "imports": [
+        "Ps.Syntax.PrintCommon"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.PrintProofScript",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+      "gitBlobSha": "4adaa8bfe6fc1d0d9595f9d19788f3225bea9ab0",
+      "utf8Bytes": 34110,
+      "lineCount": 828,
+      "imports": [
+        "Ps.Syntax.PrintCommon"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Syntax.Translate",
+      "path": "psc1/packages/syntax/src/Ps/Syntax/Translate.lean",
+      "gitBlobSha": "eafd7159b14a251fe11ffdbfb1e2482bcc773c9b",
+      "utf8Bytes": 2074,
+      "lineCount": 64,
+      "imports": [
+        "Ps.Syntax.ParseLean",
+        "Ps.Syntax.ParseProofScript",
+        "Ps.Syntax.PrintLean",
+        "Ps.Syntax.PrintProofScript"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Core.Level",
+      "path": "psc1/packages/core/src/Ps/Core/Level.lean",
+      "gitBlobSha": "2607a00d69cb0299de20aecb6b94a00adc7852a2",
+      "utf8Bytes": 286,
+      "lineCount": 13,
+      "imports": [
+        "Ps.Foundation.Name"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Core.Expr",
+      "path": "psc1/packages/core/src/Ps/Core/Expr.lean",
+      "gitBlobSha": "eac8f1a8f883f87af78cc68317644c843ba40fd2",
+      "utf8Bytes": 753,
+      "lineCount": 26,
+      "imports": [
+        "Ps.Foundation.Name",
+        "Ps.Core.Level"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Core.Abstract",
+      "path": "psc1/packages/core/src/Ps/Core/Abstract.lean",
+      "gitBlobSha": "8ac0f21d92538502ee14fc6932eb0f48fda48a85",
+      "utf8Bytes": 2618,
+      "lineCount": 83,
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Core.Builtin",
+      "path": "psc1/packages/core/src/Ps/Core/Builtin.lean",
+      "gitBlobSha": "479ee1d118b219f9f01415f3e0538b7b647ce758",
+      "utf8Bytes": 5201,
+      "lineCount": 239,
+      "imports": [
+        "Ps.Foundation.Name"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Core.LevelSubst",
+      "path": "psc1/packages/core/src/Ps/Core/LevelSubst.lean",
+      "gitBlobSha": "48f0d7b821fe0c09e14de126cbf4df40cba7559a",
+      "utf8Bytes": 3613,
+      "lineCount": 110,
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Core.Equality",
+      "path": "psc1/packages/core/src/Ps/Core/Equality.lean",
+      "gitBlobSha": "0762bd4fee3540083eb7dab3aeb70dff8d02b6c4",
+      "utf8Bytes": 6468,
+      "lineCount": 219,
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Core.Subst",
+      "path": "psc1/packages/core/src/Ps/Core/Subst.lean",
+      "gitBlobSha": "c8439e444e38b642043f2d18561a77a2bdd420a2",
+      "utf8Bytes": 5297,
+      "lineCount": 163,
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Core.Declaration",
+      "path": "psc1/packages/core/src/Ps/Core/Declaration.lean",
+      "gitBlobSha": "c34c280b1c42f23138cfec79f4e448db17071952",
+      "utf8Bytes": 1349,
+      "lineCount": 63,
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Environment.Basic",
+      "path": "psc1/packages/environment/src/Ps/Environment/Basic.lean",
+      "gitBlobSha": "26016c3e4a460358fa34d34a3b4e2966744912a7",
+      "utf8Bytes": 9104,
+      "lineCount": 224,
+      "imports": [
+        "Ps.Foundation.Name",
+        "Ps.Core.Declaration"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Environment.LocalContext",
+      "path": "psc1/packages/environment/src/Ps/Environment/LocalContext.lean",
+      "gitBlobSha": "fcd057e60367c2fa3f9ffcdf7cf5c40a7c5d49a6",
+      "utf8Bytes": 2690,
+      "lineCount": 102,
+      "imports": [
+        "Ps.Foundation.Name",
+        "Ps.Core.Expr"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Environment.Instances",
+      "path": "psc1/packages/environment/src/Ps/Environment/Instances.lean",
+      "gitBlobSha": "75b0d66c402b2807149cd2c832207a2d311c2db3",
+      "utf8Bytes": 1616,
+      "lineCount": 54,
+      "imports": [
+        "Ps.Core.Expr",
+        "Ps.Environment.LocalContext"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Environment.Resolve",
+      "path": "psc1/packages/environment/src/Ps/Environment/Resolve.lean",
+      "gitBlobSha": "5c34a720966f06045c32a1669899ec2b7e4b96c7",
+      "utf8Bytes": 4173,
+      "lineCount": 100,
+      "imports": [
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Environment.Prelude",
+      "path": "psc1/packages/environment/src/Ps/Environment/Prelude.lean",
+      "gitBlobSha": "2d2d90df8378009d076ecc0fdd7c479c6fcdafe5",
+      "utf8Bytes": 24854,
+      "lineCount": 909,
+      "imports": [
+        "Ps.Core.Builtin",
+        "Ps.Environment.Basic"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Environment.SelfHostPrelude",
+      "path": "psc1/packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+      "gitBlobSha": "6cf42afab46f3fa49118ac998fff1ce10ee3d4ef",
+      "utf8Bytes": 18920,
+      "lineCount": 638,
+      "imports": [
+        "Ps.Environment.Prelude"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Environment.SelfHostProd",
+      "path": "psc1/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+      "gitBlobSha": "75b23d43f9a875f2a9c325966c80df54901f6da2",
+      "utf8Bytes": 4723,
+      "lineCount": 186,
+      "imports": [
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Environment.Control"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Environment.Control",
+      "path": "psc1/packages/environment/src/Ps/Environment/Control.lean",
+      "gitBlobSha": "bd6b210c5da76e4830110a6b2d892c48e247af16",
+      "utf8Bytes": 4148,
+      "lineCount": 99,
+      "imports": [
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Core.Abstract"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Bridge.Json",
+      "path": "psc1/packages/bridge/src/Ps/Bridge/Json.lean",
+      "gitBlobSha": "1b4ff4efcf78be15221514f8eea0dd47fe43be0e",
+      "utf8Bytes": 35383,
+      "lineCount": 998,
+      "imports": [],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Bridge.CheckedAdmissions",
+      "path": "psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+      "gitBlobSha": "b0ffdaa0f837d2fe3b3bb209ab1f56d34c155ff5",
+      "utf8Bytes": 46303,
+      "lineCount": 1047,
+      "imports": [
+        "Ps.Bridge.Json",
+        "Ps.Core.Declaration",
+        "Ps.Core.Abstract",
+        "Ps.Core.Subst",
+        "Ps.Core.Equality",
+        "Ps.Foundation.List",
+        "Ps.Environment.Basic"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Bridge.Codec",
+      "path": "psc1/packages/bridge/src/Ps/Bridge/Codec.lean",
+      "gitBlobSha": "6143b486196ecd596d5a52df5cfe7e263df1e818",
+      "utf8Bytes": 16713,
+      "lineCount": 396,
+      "imports": [
+        "Ps.Bridge.CheckedAdmissions"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Bridge.Protocol",
+      "path": "psc1/packages/bridge/src/Ps/Bridge/Protocol.lean",
+      "gitBlobSha": "640e9396d0ed0ecbe8634757bf8a0374f74b23ba",
+      "utf8Bytes": 7522,
+      "lineCount": 222,
+      "imports": [
+        "Ps.Bridge.Codec"
+      ],
+      "phaseMembership": []
+    },
+    {
+      "name": "Ps.CompilerIr.Model",
+      "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "gitBlobSha": "2226d606eee2eaff464c0edf7267d6612eaa9ef1",
+      "utf8Bytes": 5888,
+      "lineCount": 270,
+      "imports": [],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.CompilerIr.Construct",
+      "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+      "gitBlobSha": "154cc013b692a449a6a47e6e4270957856d5bc0b",
+      "utf8Bytes": 2510,
+      "lineCount": 58,
+      "imports": [
+        "Ps.CompilerIr.Model"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.CompilerIr.CheckTypes",
+      "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+      "gitBlobSha": "71a4231fe23c7049c0930976c383fbc60cc5c24f",
+      "utf8Bytes": 26018,
+      "lineCount": 578,
+      "imports": [
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.CompilerIr.Model"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.CompilerIr.CheckSize",
+      "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+      "gitBlobSha": "49f267282ea27f978eaa522e6038d8787676994e",
+      "utf8Bytes": 18919,
+      "lineCount": 319,
+      "imports": [
+        "Ps.CompilerIr.CheckTypes"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.CompilerIr.Check",
+      "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "gitBlobSha": "178ecf89498be6502be5f747f0c0d62eb1133420",
+      "utf8Bytes": 46479,
+      "lineCount": 865,
+      "imports": [
+        "Ps.CompilerIr.CheckTypes",
+        "Ps.CompilerIr.CheckSize"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.CompilerIr.Specialize",
+      "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+      "gitBlobSha": "a1d4c3794fc715328a6f3a33204ba6f9e03bb893",
+      "utf8Bytes": 64400,
+      "lineCount": 1749,
+      "imports": [
+        "Ps.CompilerIr.Check"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.CompilerIr.Validate",
+      "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+      "gitBlobSha": "d479e2f488e673c8dbf51681dabcc28e90f32dfb",
+      "utf8Bytes": 1402,
+      "lineCount": 37,
+      "imports": [
+        "Ps.CompilerIr.Check",
+        "Ps.CompilerIr.Specialize"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendCommon.Plan",
+      "path": "psc1/packages/backend-common/src/Ps/BackendCommon/Plan.lean",
+      "gitBlobSha": "8c42c06af63ed9f17bb949db2594573dbbdd37ce",
+      "utf8Bytes": 3978,
+      "lineCount": 95,
+      "imports": [
+        "Ps.CompilerIr.Validate"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Erasure.Basic",
+      "path": "psc1/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "gitBlobSha": "36da024f2fdc9951220877b87d24f143ddb1265c",
+      "utf8Bytes": 30054,
+      "lineCount": 746,
+      "imports": [
+        "Ps.Foundation.List",
+        "Ps.CompilerIr.Model",
+        "Ps.Core.Builtin",
+        "Ps.Core.Subst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context",
+        "Ps.Meta.Infer",
+        "Ps.Meta.Reduce"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Erasure.Inductive",
+      "path": "psc1/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "gitBlobSha": "afd981e10d609d38db9ce4698fb4a6152bb50c7f",
+      "utf8Bytes": 17652,
+      "lineCount": 409,
+      "imports": [
+        "Ps.Erasure.Basic"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Erasure.Structure",
+      "path": "psc1/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "gitBlobSha": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75",
+      "utf8Bytes": 6731,
+      "lineCount": 148,
+      "imports": [
+        "Ps.Erasure.Inductive"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Erasure.StructureRecursor",
+      "path": "psc1/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "gitBlobSha": "57e76a17858b3f4333a44ed880326ac33695351e",
+      "utf8Bytes": 10378,
+      "lineCount": 213,
+      "imports": [
+        "Ps.Erasure.Structure"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Erasure.Expr",
+      "path": "psc1/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "gitBlobSha": "61f281e4658d582ea7fe01b275a2349bcb6e6c32",
+      "utf8Bytes": 138429,
+      "lineCount": 2729,
+      "imports": [
+        "Ps.Erasure.Basic"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Erasure.Definition",
+      "path": "psc1/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "gitBlobSha": "ad27625c129f6d16e66341b0be3f8d326cb6a043",
+      "utf8Bytes": 26095,
+      "lineCount": 616,
+      "imports": [
+        "Ps.Erasure.Expr",
+        "Ps.Erasure.Inductive",
+        "Ps.Erasure.StructureRecursor"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Compiler",
+      "path": "psc1/packages/compiler/src/Ps/Compiler.lean",
+      "gitBlobSha": "cd70a1f23af11022cb19b1b6e01f82de8391f5cd",
+      "utf8Bytes": 23,
+      "lineCount": 2,
+      "imports": [
+        "Ps.Compiler.Api"
+      ],
+      "phaseMembership": []
+    },
+    {
+      "name": "Ps.Compiler.Api",
+      "path": "psc1/packages/compiler/src/Ps/Compiler/Api.lean",
+      "gitBlobSha": "f31d88f0172122d4cf62d62f35f372fe89581c18",
+      "utf8Bytes": 12189,
+      "lineCount": 322,
+      "imports": [
+        "Ps.Syntax.Translate",
+        "Ps.Bridge.CheckedAdmissions",
+        "Ps.Environment.SelfHostProd",
+        "Ps.Elab.Declaration",
+        "Ps.Erasure.Definition"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Compiler.Ordinary",
+      "path": "psc1/packages/compiler/src/Ps/Compiler/Ordinary.lean",
+      "gitBlobSha": "335804565b88df0d8e28bc73252eae7c13091ad3",
+      "utf8Bytes": 11003,
+      "lineCount": 211,
+      "imports": [
+        "Ps.Compiler.Api"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Compiler.Sh1",
+      "path": "psc1/packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "gitBlobSha": "4f68b7e912ce674808b722b9f27349a69ef7b423",
+      "utf8Bytes": 35194,
+      "lineCount": 766,
+      "imports": [
+        "Ps.Compiler.Api"
+      ],
+      "phaseMembership": [
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.BackendTs.Type",
+      "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "gitBlobSha": "074bf2b838994d2af375a20ef1600941d21e956c",
+      "utf8Bytes": 4202,
+      "lineCount": 117,
+      "imports": [
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.CompilerIr.Model",
+        "Ps.Bridge.Json"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendTs.Expr",
+      "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "gitBlobSha": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "utf8Bytes": 35639,
+      "lineCount": 703,
+      "imports": [
+        "Ps.BackendTs.Type"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendTs.Module",
+      "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "gitBlobSha": "67071b287296e78faca160a7153f879ed1e3ddae",
+      "utf8Bytes": 45316,
+      "lineCount": 775,
+      "imports": [
+        "Ps.BackendTs.Expr"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendTs.Checked",
+      "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+      "gitBlobSha": "b9b073b7ec341be105895817a6ddda441020e351",
+      "utf8Bytes": 2595,
+      "lineCount": 64,
+      "imports": [
+        "Ps.Compiler.Api",
+        "Ps.BackendTs.Module",
+        "Ps.CompilerIr.Check",
+        "Ps.CompilerIr.Construct"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendTs.Sh1Target",
+      "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+      "gitBlobSha": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139",
+      "utf8Bytes": 30077,
+      "lineCount": 604,
+      "imports": [
+        "Ps.BackendTs.Module",
+        "Ps.Erasure.Basic"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendTs.Sh1",
+      "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "gitBlobSha": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53",
+      "utf8Bytes": 3405,
+      "lineCount": 68,
+      "imports": [
+        "Ps.Compiler.Sh1",
+        "Ps.BackendTs.Checked",
+        "Ps.BackendTs.Sh1Target"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendTs.Compiler",
+      "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+      "gitBlobSha": "9b6f62bc9b55f1d1ad2ea06a129df11d7e554e44",
+      "utf8Bytes": 1398,
+      "lineCount": 41,
+      "imports": [
+        "Ps.Compiler.Api",
+        "Ps.BackendTs.Module",
+        "Ps.BackendTs.Checked",
+        "Ps.BackendTs.Sh1"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendJs.Model",
+      "path": "psc1/packages/backend-js/src/Ps/BackendJs/Model.lean",
+      "gitBlobSha": "9a4f36c9b96785057555de613d7b83ccb0f33c3b",
+      "utf8Bytes": 3246,
+      "lineCount": 179,
+      "imports": [
+        "Ps.CompilerIr.Model"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendJs.TailAlias",
+      "path": "psc1/packages/backend-js/src/Ps/BackendJs/TailAlias.lean",
+      "gitBlobSha": "310563f6d857e60aeb3a3a4a841208051c5dbf21",
+      "utf8Bytes": 10594,
+      "lineCount": 209,
+      "imports": [
+        "Ps.BackendJs.Model",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendJs.Encode",
+      "path": "psc1/packages/backend-js/src/Ps/BackendJs/Encode.lean",
+      "gitBlobSha": "7a967ecd81fa2ea684b6c166c1cf64ea165b4edf",
+      "utf8Bytes": 13064,
+      "lineCount": 420,
+      "imports": [
+        "Ps.BackendJs.Model",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": []
+    },
+    {
+      "name": "Ps.BackendJs.Lower",
+      "path": "psc1/packages/backend-js/src/Ps/BackendJs/Lower.lean",
+      "gitBlobSha": "af3baa148a47270f5ff37ba54d36f9701e18bd9e",
+      "utf8Bytes": 62474,
+      "lineCount": 1715,
+      "imports": [
+        "Ps.BackendJs.Model",
+        "Ps.CompilerIr.Specialize",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendJs.Validate",
+      "path": "psc1/packages/backend-js/src/Ps/BackendJs/Validate.lean",
+      "gitBlobSha": "bd828bca0f6749c6b710e16f85ac2b138671504b",
+      "utf8Bytes": 16649,
+      "lineCount": 566,
+      "imports": [
+        "Ps.BackendJs.Lower",
+        "Ps.CompilerIr.Validate"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendJs.Print",
+      "path": "psc1/packages/backend-js/src/Ps/BackendJs/Print.lean",
+      "gitBlobSha": "b4d9d826cbec1611a98782539ac7f2535b446cb5",
+      "utf8Bytes": 63358,
+      "lineCount": 1789,
+      "imports": [
+        "Ps.BackendJs.Lower",
+        "Ps.BackendJs.Validate",
+        "Ps.BackendJs.TailAlias",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.Text"
+      ],
+      "phaseMembership": [
+        "directJsCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.Identifier",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Identifier.lean",
+      "gitBlobSha": "6511e8785b4d723a313dc114d6aa64bd1b5c2c59",
+      "utf8Bytes": 4822,
+      "lineCount": 179,
+      "imports": [
+        "Ps.Bridge.Json",
+        "Ps.Foundation.Name"
+      ],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.Type",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Type.lean",
+      "gitBlobSha": "84470b3e5ab412f45325adc759d052f07b33f457",
+      "utf8Bytes": 12556,
+      "lineCount": 381,
+      "imports": [
+        "Ps.CompilerIr.Model",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.List",
+        "Ps.BackendRust.Identifier"
+      ],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.ValueRefs",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/ValueRefs.lean",
+      "gitBlobSha": "9a5b3c096808709cae260c108e81501a44800fb3",
+      "utf8Bytes": 10911,
+      "lineCount": 335,
+      "imports": [
+        "Ps.BackendRust.Type"
+      ],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.Captures",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Captures.lean",
+      "gitBlobSha": "b45a891c52e017f31337d7acfa22b16ddb825c91",
+      "utf8Bytes": 7247,
+      "lineCount": 194,
+      "imports": [
+        "Ps.BackendRust.ValueRefs"
+      ],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.Expr",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Expr.lean",
+      "gitBlobSha": "28b786ddf3b887ed2ec2f97776f8ee5b04a18e2c",
+      "utf8Bytes": 42638,
+      "lineCount": 1219,
+      "imports": [
+        "Ps.BackendRust.Captures"
+      ],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.TailAlias",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/TailAlias.lean",
+      "gitBlobSha": "4b244c1c8b50bd3655adde96eac0cf9ef8588b77",
+      "utf8Bytes": 7902,
+      "lineCount": 174,
+      "imports": [
+        "Ps.BackendRust.Expr"
+      ],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.Tail",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Tail.lean",
+      "gitBlobSha": "918dce0313fcd2078e05f271b7e645d5bd836059",
+      "utf8Bytes": 8652,
+      "lineCount": 147,
+      "imports": [
+        "Ps.BackendRust.TailAlias"
+      ],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.Runtime",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Runtime.lean",
+      "gitBlobSha": "6a6def3924caac5c3761f9bb5a4e1e57c826824d",
+      "utf8Bytes": 5693,
+      "lineCount": 54,
+      "imports": [],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.RuntimePlan",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/RuntimePlan.lean",
+      "gitBlobSha": "1521a53588a7459dfcb80c2989a943d3601e8e2f",
+      "utf8Bytes": 13883,
+      "lineCount": 148,
+      "imports": [
+        "Ps.CompilerIr.Model"
+      ],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendRust.Module",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Module.lean",
+      "gitBlobSha": "e4bf09a1145ddd3a223cc0ca2d9a04bad37b9a55",
+      "utf8Bytes": 48169,
+      "lineCount": 1388,
+      "imports": [
+        "Ps.BackendRust.RuntimePlan",
+        "Ps.CompilerIr.Validate",
+        "Ps.Foundation.List",
+        "Ps.BackendRust.Tail",
+        "Ps.BackendRust.ValueRefs",
+        "Ps.BackendRust.Runtime"
+      ],
+      "phaseMembership": [
+        "rustCompiler",
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.Model",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Model.lean",
+      "gitBlobSha": "d656093c250e38c939f69284d45f6039cad05d49",
+      "utf8Bytes": 3218,
+      "lineCount": 163,
+      "imports": [
+        "Ps.CompilerIr.Model"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.IntUtil",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/IntUtil.lean",
+      "gitBlobSha": "2870dc70009598e16450f5b0c09e5b37eb356ad0",
+      "utf8Bytes": 3376,
+      "lineCount": 128,
+      "imports": [
+        "Ps.Foundation.Name"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.Type",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Type.lean",
+      "gitBlobSha": "b14da6e26568fa13f02500ac6e910360f5177c80",
+      "utf8Bytes": 9037,
+      "lineCount": 255,
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.Foundation.Name"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.RuntimeNat",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean",
+      "gitBlobSha": "2a25483d569f21b392d31a4268860eecfae0efbe",
+      "utf8Bytes": 23707,
+      "lineCount": 648,
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.RuntimeInt",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean",
+      "gitBlobSha": "843a6d5d972b2fa062a0b0998ccda8a4d52f4b0d",
+      "utf8Bytes": 10575,
+      "lineCount": 293,
+      "imports": [
+        "Ps.BackendWasm.RuntimeNat",
+        "Ps.BackendWasm.IntUtil",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.RuntimeString",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeString.lean",
+      "gitBlobSha": "4a448eb457a3857f2f8c189c538e9751aa62ff71",
+      "utf8Bytes": 35270,
+      "lineCount": 915,
+      "imports": [
+        "Ps.BackendWasm.RuntimeNat",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.RuntimeIntRepr",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeIntRepr.lean",
+      "gitBlobSha": "9fc834d86a5f6217f02835409824c57976434246",
+      "utf8Bytes": 3707,
+      "lineCount": 110,
+      "imports": [
+        "Ps.BackendWasm.RuntimeInt",
+        "Ps.BackendWasm.RuntimeString",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.LowerInt",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/LowerInt.lean",
+      "gitBlobSha": "888c6511a5d13b406b76c621bf0721fcceb11b17",
+      "utf8Bytes": 3984,
+      "lineCount": 122,
+      "imports": [
+        "Ps.BackendWasm.Type"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.LowerFloat",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/LowerFloat.lean",
+      "gitBlobSha": "977c2b5514d4be199ff0235bb8ca12e818985ce9",
+      "utf8Bytes": 1353,
+      "lineCount": 42,
+      "imports": [
+        "Ps.BackendWasm.Type"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.TailCalls",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/TailCalls.lean",
+      "gitBlobSha": "93929f443a3f8f463e4dca2db612b700b2bcd2e1",
+      "utf8Bytes": 4781,
+      "lineCount": 91,
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.Lower",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+      "gitBlobSha": "76cd56e64d18b6fc63097aabc740270ff50ab6ce",
+      "utf8Bytes": 269440,
+      "lineCount": 6453,
+      "imports": [
+        "Ps.BackendWasm.TailCalls",
+        "Ps.CompilerIr.Specialize",
+        "Ps.CompilerIr.Validate",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.BackendWasm.LowerInt",
+        "Ps.BackendWasm.LowerFloat",
+        "Ps.BackendWasm.RuntimeNat",
+        "Ps.BackendWasm.RuntimeInt",
+        "Ps.BackendWasm.RuntimeString",
+        "Ps.BackendWasm.RuntimeIntRepr"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.Encode",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Encode.lean",
+      "gitBlobSha": "6ccf21747655c0327a485eac4c04195474a1803b",
+      "utf8Bytes": 13733,
+      "lineCount": 402,
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.Binary",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Binary.lean",
+      "gitBlobSha": "6e99fcaa919d6d12aa840de9c2562182f47f2b15",
+      "utf8Bytes": 42102,
+      "lineCount": 1126,
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.BackendWasm.IntUtil",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendWasm.RuntimePlan",
+      "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimePlan.lean",
+      "gitBlobSha": "363be1e1141747942e4d7bd699cfd33f163e62f9",
+      "utf8Bytes": 2402,
+      "lineCount": 45,
+      "imports": [
+        "Ps.BackendWasm.Lower",
+        "Ps.BackendWasm.Encode"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendPython.Runtime",
+      "path": "psc1/packages/backend-python/src/Ps/BackendPython/Runtime.lean",
+      "gitBlobSha": "a56be6b30c60175b852779badc5a2c711390ce3a",
+      "utf8Bytes": 5396,
+      "lineCount": 51,
+      "imports": [],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendPython.Module",
+      "path": "psc1/packages/backend-python/src/Ps/BackendPython/Module.lean",
+      "gitBlobSha": "5f90b9e296aed95510b8ce396863a85c08fb2895",
+      "utf8Bytes": 20261,
+      "lineCount": 458,
+      "imports": [
+        "Ps.CompilerIr.Validate",
+        "Ps.Bridge.Json",
+        "Ps.BackendPython.Runtime"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendPhp.Runtime",
+      "path": "psc1/packages/backend-php/src/Ps/BackendPhp/Runtime.lean",
+      "gitBlobSha": "4be39889353a3fad89285f8e949f84c651008ea3",
+      "utf8Bytes": 5606,
+      "lineCount": 140,
+      "imports": [],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.BackendPhp.Module",
+      "path": "psc1/packages/backend-php/src/Ps/BackendPhp/Module.lean",
+      "gitBlobSha": "b671ee548209eed545c8851f3a02571a72f5fb68",
+      "utf8Bytes": 27952,
+      "lineCount": 579,
+      "imports": [
+        "Ps.CompilerIr.Validate",
+        "Ps.BackendPhp.Runtime"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "PsKernelLean.Error",
+      "path": "psc1/packages/pskernel-lean/provider/PsKernelLean/Error.lean",
+      "gitBlobSha": "bd6f83ebfe3f13833a2b58e2309ad7dd959f476e",
+      "utf8Bytes": 809,
+      "lineCount": 29,
+      "imports": [],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "PsKernelLean.Convert",
+      "path": "psc1/packages/pskernel-lean/provider/PsKernelLean/Convert.lean",
+      "gitBlobSha": "99f2afb50d9e8f113684b67145935135fcbd1e94",
+      "utf8Bytes": 3167,
+      "lineCount": 84,
+      "imports": [
+        "Lean",
+        "Ps.Core.Declaration",
+        "PsKernelLean.Error"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "PsKernelLean.Protocol",
+      "path": "psc1/packages/pskernel-lean/provider/PsKernelLean/Protocol.lean",
+      "gitBlobSha": "e6e917715723c20b2fd8bee320c2ad08b18facb0",
+      "utf8Bytes": 8734,
+      "lineCount": 217,
+      "imports": [
+        "Lean",
+        "Ps.Bridge.Codec",
+        "PsKernelLean.Convert",
+        "PsKernelLean.Error"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "PsKernelLean.Prelude",
+      "path": "psc1/packages/pskernel-lean/provider/PsKernelLean/Prelude.lean",
+      "gitBlobSha": "04e2be628d021370d2236ecbe7838a4ebe6e1f31",
+      "utf8Bytes": 6923,
+      "lineCount": 175,
+      "imports": [
+        "Lean",
+        "Ps.Environment.SelfHostProd",
+        "PsKernelLean.Convert"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "PsKernelLean.Admission",
+      "path": "psc1/packages/pskernel-lean/provider/PsKernelLean/Admission.lean",
+      "gitBlobSha": "daa02dcc965364bcfbeb1a63d15d909fd747a191",
+      "utf8Bytes": 1487,
+      "lineCount": 46,
+      "imports": [
+        "PsKernelLean.Protocol",
+        "PsKernelLean.Prelude"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "PsKernelLean.Main",
+      "path": "psc1/packages/pskernel-lean/provider/PsKernelLean/Main.lean",
+      "gitBlobSha": "b1f045a0fce7f4898a0dbc60068ee215fc11aee8",
+      "utf8Bytes": 1312,
+      "lineCount": 45,
+      "imports": [
+        "PsKernelLean.Admission"
+      ],
+      "phaseMembership": []
+    },
+    {
+      "name": "Ps.Bootstrap.SelfHost",
+      "path": "psc1/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+      "gitBlobSha": "c88f449644e3caf966c19f01e9534345bbb8c831",
+      "utf8Bytes": 242,
+      "lineCount": 6,
+      "imports": [
+        "Ps.BackendTs.Compiler"
+      ],
+      "phaseMembership": []
+    },
+    {
+      "name": "Ps.Host.TypeScriptCompiler",
+      "path": "psc1/host/src/Ps/Host/TypeScriptCompiler.lean",
+      "gitBlobSha": "9197c2e32d8aa736011f4f146ad1f3ca0904d0db",
+      "utf8Bytes": 9198,
+      "lineCount": 231,
+      "imports": [
+        "Ps.BackendTs.Module",
+        "Ps.Bridge.Json"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Host.ProjectCompiler",
+      "path": "psc1/host/src/Ps/Host/ProjectCompiler.lean",
+      "gitBlobSha": "406e535ea571ae1aa3c8a2f3ddb7cf0db235ef32",
+      "utf8Bytes": 19301,
+      "lineCount": 518,
+      "imports": [
+        "Ps.Environment.Prelude",
+        "Ps.Syntax.ParseLean",
+        "Ps.Syntax.ParseProofScript",
+        "Ps.Elab.Declaration",
+        "Ps.Host.ArtifactBundle"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Host.SourceSnapshot",
+      "path": "psc1/host/src/Ps/Host/SourceSnapshot.lean",
+      "gitBlobSha": "fc7069eb87543fc4a6f1461ba45955602df11d62",
+      "utf8Bytes": 2851,
+      "lineCount": 73,
+      "imports": [
+        "Ps.Host.ProjectCompiler"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Host.ArtifactBundle",
+      "path": "psc1/host/src/Ps/Host/ArtifactBundle.lean",
+      "gitBlobSha": "8220cef0f14528424a7c5ee69e3105b0073bd3f1",
+      "utf8Bytes": 3842,
+      "lineCount": 74,
+      "imports": [
+        "Ps.Bridge.Json"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Host.CompilerDriver",
+      "path": "psc1/host/src/Ps/Host/CompilerDriver.lean",
+      "gitBlobSha": "43e2b169fef4f6a98dfbe3fc96fc0853dc4eed26",
+      "utf8Bytes": 4353,
+      "lineCount": 134,
+      "imports": [
+        "Ps.Compiler.Api",
+        "Ps.BackendTs.Compiler",
+        "Ps.Host.ProjectCompiler",
+        "Ps.Host.TypeScriptCompiler"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Host.LeanChecked",
+      "path": "psc1/host/src/Ps/Host/LeanChecked.lean",
+      "gitBlobSha": "b6998e8dd5210848873cb083a206ae7d6aa46b39",
+      "utf8Bytes": 1293,
+      "lineCount": 26,
+      "imports": [
+        "Ps.BackendTs.Compiler",
+        "PsKernelLean.Admission"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Host.DirectSourceMap",
+      "path": "psc1/host/src/Ps/Host/DirectSourceMap.lean",
+      "gitBlobSha": "b08b0ebae071e0a117207f6f6aac3749f7cd44bb",
+      "utf8Bytes": 4917,
+      "lineCount": 110,
+      "imports": [
+        "Ps.BackendJs.Print",
+        "Ps.Host.ProjectCompiler",
+        "Ps.Bridge.Json"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Host.DirectBackend",
+      "path": "psc1/host/src/Ps/Host/DirectBackend.lean",
+      "gitBlobSha": "3561c4629b97a5126994220e260560e0b8df45bc",
+      "utf8Bytes": 27602,
+      "lineCount": 511,
+      "imports": [
+        "Ps.Host.CompilerDriver",
+        "Ps.Host.LeanChecked",
+        "Ps.Host.SourceSnapshot",
+        "Ps.Host.ArtifactBundle",
+        "Ps.Host.DirectSourceMap",
+        "Ps.Compiler.Ordinary",
+        "Ps.CompilerIr.Validate",
+        "Ps.BackendCommon.Plan",
+        "Ps.BackendJs.Print",
+        "Ps.BackendRust.Module",
+        "Ps.BackendWasm.Binary",
+        "Ps.BackendWasm.Lower",
+        "Ps.BackendWasm.RuntimePlan",
+        "Ps.BackendTs.Module"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Host.ScriptBackend",
+      "path": "psc1/host/src/Ps/Host/ScriptBackend.lean",
+      "gitBlobSha": "0f69771ec1781a1649316d228300276506a3e445",
+      "utf8Bytes": 2883,
+      "lineCount": 51,
+      "imports": [
+        "Ps.Host.DirectBackend",
+        "Ps.BackendPython.Module",
+        "Ps.BackendPhp.Module"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Host.WasmComponent",
+      "path": "psc1/host/src/Ps/Host/WasmComponent.lean",
+      "gitBlobSha": "c232cd94254aa67824a27d4d2ec7f945f250cc03",
+      "utf8Bytes": 6233,
+      "lineCount": 113,
+      "imports": [
+        "Ps.Host.DirectBackend"
+      ],
+      "phaseMembership": [
+        "nativeCliHost"
+      ]
+    },
+    {
+      "name": "Ps.Meta.LevelContext",
+      "path": "psc1/packages/meta/src/Ps/Meta/LevelContext.lean",
+      "gitBlobSha": "b0fcde267d2a9dd07f7de9fc12f57ca5b3a38882",
+      "utf8Bytes": 8701,
+      "lineCount": 269,
+      "imports": [
+        "Ps.Core.Equality",
+        "Ps.Core.Expr",
+        "Ps.Core.Level"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Meta.Context",
+      "path": "psc1/packages/meta/src/Ps/Meta/Context.lean",
+      "gitBlobSha": "dd69906bb92ffbae9a4f8541d9941c10eb239771",
+      "utf8Bytes": 9092,
+      "lineCount": 312,
+      "imports": [
+        "Ps.Core.Expr",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.LevelContext"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Meta.Reduce",
+      "path": "psc1/packages/meta/src/Ps/Meta/Reduce.lean",
+      "gitBlobSha": "1a547f20911ac23a1f0a9368839593383f9c31e0",
+      "utf8Bytes": 6230,
+      "lineCount": 183,
+      "imports": [
+        "Ps.Core.Equality",
+        "Ps.Core.Subst",
+        "Ps.Core.LevelSubst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Meta.Unify",
+      "path": "psc1/packages/meta/src/Ps/Meta/Unify.lean",
+      "gitBlobSha": "18f904b9d2d06fbe9b5330fc2d30e04a4dba1848",
+      "utf8Bytes": 11105,
+      "lineCount": 314,
+      "imports": [
+        "Ps.Core.Equality",
+        "Ps.Core.Subst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context",
+        "Ps.Meta.Reduce"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Meta.SynthInstance",
+      "path": "psc1/packages/meta/src/Ps/Meta/SynthInstance.lean",
+      "gitBlobSha": "9d64e65a7e3ca2a9d55b575bbdfa7003c4686f55",
+      "utf8Bytes": 12794,
+      "lineCount": 385,
+      "imports": [
+        "Ps.Core.Subst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.Instances",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context",
+        "Ps.Meta.Reduce",
+        "Ps.Meta.Unify"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Meta.Infer",
+      "path": "psc1/packages/meta/src/Ps/Meta/Infer.lean",
+      "gitBlobSha": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+      "utf8Bytes": 21458,
+      "lineCount": 567,
+      "imports": [
+        "Ps.Core.Abstract",
+        "Ps.Core.Builtin",
+        "Ps.Core.LevelSubst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context",
+        "Ps.Meta.Reduce"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.Context",
+      "path": "psc1/packages/elab/src/Ps/Elab/Context.lean",
+      "gitBlobSha": "4202405d8267367b1f3550b7b643eca734a51f71",
+      "utf8Bytes": 3700,
+      "lineCount": 109,
+      "imports": [
+        "Ps.Environment.Basic",
+        "Ps.Environment.Instances",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.Literal",
+      "path": "psc1/packages/elab/src/Ps/Elab/Literal.lean",
+      "gitBlobSha": "dae4980c822dae5c9170638ee51ef8525635ce01",
+      "utf8Bytes": 10490,
+      "lineCount": 342,
+      "imports": [
+        "Ps.Syntax.Cursor"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.Basic",
+      "path": "psc1/packages/elab/src/Ps/Elab/Basic.lean",
+      "gitBlobSha": "1edea933d972856ee9bc92bd0b5eec1614e4ad6b",
+      "utf8Bytes": 7853,
+      "lineCount": 276,
+      "imports": [
+        "Ps.Core.Abstract",
+        "Ps.Core.Subst",
+        "Ps.Meta.Infer",
+        "Ps.Meta.Unify",
+        "Ps.Syntax.Ast",
+        "Ps.Elab.Context"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.Data",
+      "path": "psc1/packages/elab/src/Ps/Elab/Data.lean",
+      "gitBlobSha": "53d65cf72173d663e95a425179eea548f54fbc05",
+      "utf8Bytes": 9294,
+      "lineCount": 186,
+      "imports": [
+        "Ps.Elab.Basic",
+        "Ps.Core.Abstract",
+        "Ps.Core.Subst",
+        "Ps.Environment.SelfHostProd"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.DoLoop",
+      "path": "psc1/packages/elab/src/Ps/Elab/DoLoop.lean",
+      "gitBlobSha": "1c322f19053cbd0bcd3e9a9d4b1e384e9c53b3f1",
+      "utf8Bytes": 3166,
+      "lineCount": 73,
+      "imports": [
+        "Ps.Core.Declaration",
+        "Ps.Core.Builtin",
+        "Ps.Elab.Basic"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.DoLoopLift",
+      "path": "psc1/packages/elab/src/Ps/Elab/DoLoopLift.lean",
+      "gitBlobSha": "32bb1777a544e1c14b33c905ad02a81cfa519605",
+      "utf8Bytes": 16809,
+      "lineCount": 347,
+      "imports": [
+        "Ps.Elab.DoLoop",
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.DoBase",
+      "path": "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
+      "gitBlobSha": "cc5b1bf600f6f7f3974d0ead8c01238d3ffbeeda",
+      "utf8Bytes": 20031,
+      "lineCount": 435,
+      "imports": [
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Elab.Basic",
+        "Ps.Environment.Resolve"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.DoFor",
+      "path": "psc1/packages/elab/src/Ps/Elab/DoFor.lean",
+      "gitBlobSha": "0de18d8c9e3f25a5f8b9b75f9a89cfb421bb7c39",
+      "utf8Bytes": 11204,
+      "lineCount": 216,
+      "imports": [
+        "Ps.Elab.DoBase",
+        "Ps.Environment.Control"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.DoWhile",
+      "path": "psc1/packages/elab/src/Ps/Elab/DoWhile.lean",
+      "gitBlobSha": "d564ea18c0fdbd82f6068f57abac4582ed351f54",
+      "utf8Bytes": 7402,
+      "lineCount": 152,
+      "imports": [
+        "Ps.Elab.DoFor",
+        "Ps.Elab.DoLoop"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.Do",
+      "path": "psc1/packages/elab/src/Ps/Elab/Do.lean",
+      "gitBlobSha": "6be36be464b195454d545470cf2456d81701f528",
+      "utf8Bytes": 9600,
+      "lineCount": 181,
+      "imports": [
+        "Ps.Elab.DoWhile",
+        "Ps.Elab.Data"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.Operators",
+      "path": "psc1/packages/elab/src/Ps/Elab/Operators.lean",
+      "gitBlobSha": "32d746b80e2a1ee1aa2827a62ad826fefa81528d",
+      "utf8Bytes": 6701,
+      "lineCount": 147,
+      "imports": [
+        "Ps.Elab.Basic",
+        "Ps.Core.Builtin"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.Term",
+      "path": "psc1/packages/elab/src/Ps/Elab/Term.lean",
+      "gitBlobSha": "3741a54e66ab6a011af0ade08a54c5d7b78d2dfb",
+      "utf8Bytes": 110372,
+      "lineCount": 3061,
+      "imports": [
+        "Ps.Core.Abstract",
+        "Ps.Core.Equality",
+        "Ps.Core.Subst",
+        "Ps.Environment.Resolve",
+        "Ps.Meta.Infer",
+        "Ps.Meta.SynthInstance",
+        "Ps.Meta.Unify",
+        "Ps.Syntax.Ast",
+        "Ps.Elab.Context",
+        "Ps.Elab.Literal",
+        "Ps.Elab.Basic",
+        "Ps.Elab.Do",
+        "Ps.Elab.Data",
+        "Ps.Elab.Operators"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.Recursion",
+      "path": "psc1/packages/elab/src/Ps/Elab/Recursion.lean",
+      "gitBlobSha": "38b98e923a6f736307e1abbd1a5dc875e33dd3c8",
+      "utf8Bytes": 46126,
+      "lineCount": 897,
+      "imports": [
+        "Ps.Elab.Term",
+        "Ps.Foundation.List"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    },
+    {
+      "name": "Ps.Elab.Declaration",
+      "path": "psc1/packages/elab/src/Ps/Elab/Declaration.lean",
+      "gitBlobSha": "57b9b52d8ab26fbb523aec3f93bba1c6cbff22fc",
+      "utf8Bytes": 63106,
+      "lineCount": 1730,
+      "imports": [
+        "Ps.Core.Declaration",
+        "Ps.Core.Equality",
+        "Ps.Elab.Recursion",
+        "Ps.Elab.DoLoopLift"
+      ],
+      "phaseMembership": [
+        "semanticCompiler",
+        "directJsCompiler",
+        "rustCompiler",
+        "nativeCliHost",
+        "historicalStrictSh1"
+      ]
+    }
+  ],
+  "sourceBlockers": [
+    {
+      "id": "S1",
+      "stage": "source",
+      "status": "confirmed-static-refusal",
+      "module": "Ps.CompilerIr.Validate",
+      "reason": "Current source contains deriving Repr, while psParseLeanDeclaration only dispatches partial def/def/theorem/inductive/structure. No current source-closure parse success is claimed.",
+      "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+      "line": 10,
+      "excerpt": "  deriving Repr"
+    },
+    {
+      "id": "S2",
+      "stage": "source",
+      "status": "confirmed-static-refusal",
+      "module": "Ps.BackendCommon.Plan",
+      "reason": "deriving BEq/Repr is outside selected subset; generated compiler also needs target equality implemented explicitly or expanded into supported checked declarations.",
+      "path": "psc1/packages/backend-common/src/Ps/BackendCommon/Plan.lean",
+      "line": 6,
+      "excerpt": "  deriving BEq, Repr"
+    },
+    {
+      "id": "S3",
+      "stage": "source",
+      "status": "confirmed-static-refusal",
+      "module": "Ps.Elab.Data",
+      "reason": "private declaration modifier has no parser dispatch in current subset.",
+      "path": "psc1/packages/elab/src/Ps/Elab/Data.lean",
+      "line": 10,
+      "excerpt": "private def psDataApply (name : PsName) (args : List PsExpr) : PsExpr :="
+    },
+    {
+      "id": "S4",
+      "stage": "source",
+      "status": "confirmed-static-refusal",
+      "module": "Ps.BackendRust.RuntimePlan",
+      "reason": "private def/private partial def helpers are outside current parser dispatch; Rust source closure must parse/elaborate them.",
+      "path": "psc1/packages/backend-rust/src/Ps/BackendRust/RuntimePlan.lean",
+      "line": 52,
+      "excerpt": "private def intrinsicHelpers : PsVerifiedIrIntrinsic → List String"
+    },
+    {
+      "id": "S5",
+      "stage": "source",
+      "status": "not-executed",
+      "module": "Ps.BackendJs.Print",
+      "reason": "New helper uses selected partial syntax but equation-style recursion and nested projections require actual generated closure parse/elaboration/runtime qualification.",
+      "path": "psc1/packages/backend-js/src/Ps/BackendJs/Print.lean",
+      "line": 1650,
+      "excerpt": "partial def psJsNeedsUtf8Runtime : PsJsIrExpr → Bool"
+    }
+  ],
+  "executionStatus": {
+    "nativeBaseline": "PR #166 documented green Linux run 39469312498; this inventory does not rerun it",
+    "closureParse": "not-run",
+    "closureElaboration": "not-run",
+    "directJsGeneration": "not-run",
+    "rustGeneration": "not-run",
+    "generatedExecution": "not-run",
+    "selfCompilation": "not-run",
+    "fixedPoint": "not-run"
+  },
+  "recommendedTargets": {
+    "first": [
+      "directJsCompiler",
+      "rustCompiler"
+    ],
+    "exclude": [
+      "nativeCliHost",
+      "PsKernelLean.*",
+      "owned kernel source"
+    ]
+  }
+}

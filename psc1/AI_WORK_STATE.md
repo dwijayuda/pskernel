@@ -4,7 +4,7 @@ Updated 2026-10-21. Branch: `research/psc1-ultra-architecture-20261021`.
 
 This branch integrates typed-error source from PR #167 at `a830668d2c23886843e616951836d8d990aa2ff5` with qualified PR #166 at `da880d864ca5f9e35729255fd7e4f8a17953cd39`. Pattern, namespace, admission and runtime changes from #166 are retained. Source/IR/backend qualification for this integration is pending. Prior exact receipts keep their original scope. No merge to main, publication or self-host claim.
 
-The architecture audit, Wasm decision, self-host source census and Sol High handoff are in progress. Compiler-only self-hosting is authorized in this phase; the prior checkpoint exclusion below describes historical scope.
+Architecture audit and finite Practical Core, seven-target, Wasm, interop/refactor and self-host decisions are in docs/PSC1_*ARCHITECTURE*.md and companion parity/decision files. The first integration run 39484282465 failed on nested catch and same-column match scanning. This increment tracks nested handlers, retains aligned match alternatives, adds regressions, a portable direct Bool component encoder, real compiler source phase census, and generated JS/Rust protocol transport against an external checker. Six missing backend workspace fallback mappings are repaired. Exact runtime pins replace floating CI series. Qualification is pending; Sol High handoff follows actual results. Compiler-only self-hosting is authorized in this phase; the prior checkpoint exclusion below describes historical scope.
 
 ---
 

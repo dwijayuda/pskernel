@@ -76,7 +76,7 @@ jobs:
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests
+          lake build psc1 psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
@@ -121,6 +121,11 @@ jobs:
             if ! node "scripts/$script"; then result=1; fi
           done
           exit "$result"
+      - name: Execute runtime contract against pinned Lean reference results
+        working-directory: psc1
+        env:
+          PSC1_CONFORMANCE_TARGETS: js,ts,rust,wasm-core,wasm-component
+        run: node scripts/runtime-conformance-tests.mjs
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4

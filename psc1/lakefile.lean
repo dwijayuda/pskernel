@@ -298,3 +298,7 @@ lean_exe psc1_ordinary_tests where
 lean_exe psc1_backend_common_tests where
   srcDir := "test"
   root := `BackendCommonTests
+
+lean_exe psc1_runtime_oracle where
+  srcDir := "test"
+  root := `RuntimeOracle

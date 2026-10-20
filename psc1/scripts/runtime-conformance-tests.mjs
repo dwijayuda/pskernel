@@ -24,9 +24,20 @@ function run(command, args, options = {}) {
 const oracle = JSON.parse(run(path.join(root, '.lake/build/bin/psc1_runtime_oracle'), []));
 assert.equal(oracle.leanCommit, 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 fs.writeFileSync(path.join(evidence, 'lean-runtime-oracle.json'), JSON.stringify(oracle, null, 2) + '\n');
+console.log('PSC1_PINNED_LEAN_ORACLE: ' + JSON.stringify(oracle));
 const n = key => oracle[key];
 const eqNat = (expression, expected) => 'Nat.beq (' + expression + ') ' + expected;
-const q = JSON.stringify;
+function textChecks(expression, expected) {
+  const chars = Array.from(expected);
+  const checks = [eqNat('String.Internal.length (' + expression + ')', chars.length),
+    eqNat('String.utf8ByteSize (' + expression + ')', Buffer.byteLength(expected))];
+  let offset = 0;
+  for (const character of chars) {
+    checks.push(eqNat('Char.toNat (String.Internal.get (' + expression + ') ' + offset + ')', character.codePointAt(0)));
+    offset += Buffer.byteLength(character);
+  }
+  return checks;
+}
 const groups = {
   natcheck: [
     eqNat('Nat.add huge huge', n('largeAdd')),
@@ -38,8 +49,8 @@ const groups = {
     eqNat('Nat.mod 17 5', n('natMod'))
   ],
   intcheck: [
-    '(Int.repr (Int.add (-7) (-13)) == ' + q(n('intAdd')) + ')',
-    '(Int.repr (Int.mul (-7) 3) == ' + q(n('intMul')) + ')'
+    ...textChecks('Int.repr (Int.add (-7) (-13))', n('intAdd')),
+    ...textChecks('Int.repr (Int.mul (-7) 3)', n('intMul'))
   ],
   unicodecheck: [
     eqNat('String.Internal.length text', n('stringLength')),
@@ -50,8 +61,8 @@ const groups = {
     eqNat('String.Internal.next text 1', n('nextValid')),
     eqNat('String.Internal.next text 2', n('nextMiddle')),
     eqNat('String.Internal.next text 7', n('nextEnd')),
-    '(String.Internal.extract text 1 5 == ' + q(n('extractValid')) + ')',
-    '(String.Internal.extract text 1 3 == ' + q(n('extractMiddle')) + ')',
+    ...textChecks('String.Internal.extract text 1 5', n('extractValid')),
+    ...textChecks('String.Internal.extract text 1 3', n('extractMiddle')),
     eqNat('Char.toNat (Char.ofNat 55296)', n('charSurrogate')),
     eqNat('Char.toNat (Char.ofNat 1114112)', n('charOutOfRange')),
     eqNat('Char.toNat (Char.ofNat 4294967361)', n('charLarge'))

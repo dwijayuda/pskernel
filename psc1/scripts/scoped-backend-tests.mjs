@@ -262,7 +262,7 @@ try {
       const file = output(`function-parameter-${syntax}/module.wasm`);
       const message = reject(native, ['build', input, '--target', 'wasm-component',
         '--export', 'applybool', '--out', file]);
-      assert.match(message, /PSC1_PUBLIC_TARGET_SIGNATURE_UNQUALIFIED: wasm-component:applybool/);
+      assert.match(message, /PSC1_COMPONENT_WIT_TYPE_UNSUPPORTED\b/);
       for (const suffix of ['', '.bundle.json']) assert.equal(fs.existsSync(file + suffix), false);
       for (const extension of ['.wit', '.wat', '.core.wasm', '.core.wat']) {
         assert.equal(fs.existsSync(file.slice(0, -5) + extension), false);

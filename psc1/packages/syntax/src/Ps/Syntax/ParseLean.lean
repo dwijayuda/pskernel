@@ -509,40 +509,77 @@ def psParseLeanBinderTypeWithFuel
             PsTokenCursor ->
             Except PsParseError (PsParseResult PsSyntaxTerm) :=
           psParseLeanBinderTypeWithFuel remaining;
-        -- A parenthesized binder domain may itself contain arrows. Recurse
-        -- through the full binder-type parser while preserving product/operator
-        -- precedence outside those parentheses.
-        match psParseOperatorsWithFuel
-            (psParseLeanApplicationWithFuel smaller (Nat.succ remaining))
-            (Nat.succ remaining) 0 cursor with
-        | Except.error error => Except.error error
-        | Except.ok domain =>
-            if psTokenCursorAtArrow domain.cursor then
-              match psTokenCursorExpectArrow domain.cursor with
-              | Except.error error => Except.error error
-              | Except.ok afterArrow =>
-                  match smaller afterArrow.cursor with
+        let ordinary :
+            Unit -> Except PsParseError (PsParseResult PsSyntaxTerm) :=
+          fun (_ : Unit) =>
+            -- Recurse through the full type grammar inside parentheses,
+            -- preserving product/operator precedence outside them.
+            match psParseOperatorsWithFuel
+                (psParseLeanApplicationWithFuel smaller (Nat.succ remaining))
+                (Nat.succ remaining) 0 cursor with
+            | Except.error error => Except.error error
+            | Except.ok domain =>
+                if psTokenCursorAtArrow domain.cursor then
+                  match psTokenCursorExpectArrow domain.cursor with
                   | Except.error error => Except.error error
-                  | Except.ok codomain =>
-                      let domainSpan :=
-                        psSyntaxTermSpan domain.value;
-                      Except.ok {
-                        value :=
-                          PsSyntaxTerm.forallE
-                            (List.cons
-                              (Prod.mk
-                                (psSyntaxAnonymousExplicitBinder
-                                  domainSpan)
-                                domain.value)
-                              List.nil)
-                            codomain.value
-                            (psSyntaxSpanJoin
-                              domainSpan
-                              (psSyntaxTermSpan codomain.value))
-                        cursor := codomain.cursor
-                      }
-            else
-              Except.ok domain
+                  | Except.ok afterArrow =>
+                      match smaller afterArrow.cursor with
+                      | Except.error error => Except.error error
+                      | Except.ok codomain =>
+                          let domainSpan := psSyntaxTermSpan domain.value;
+                          Except.ok {
+                            value :=
+                              PsSyntaxTerm.forallE
+                                (List.cons
+                                  (Prod.mk
+                                    (psSyntaxAnonymousExplicitBinder domainSpan)
+                                    domain.value)
+                                  List.nil)
+                                codomain.value
+                                (psSyntaxSpanJoin domainSpan (psSyntaxTermSpan codomain.value))
+                            cursor := codomain.cursor
+                          }
+                else
+                  Except.ok domain;
+        -- The Lean printer preserves named and anonymous dependent binders.
+        -- A grouped domain without a binder colon follows the ordinary path.
+        match psParseBinderOpening cursor with
+        | Except.error _ => ordinary ()
+        | Except.ok opening =>
+            match psTokenCursorExpectKind opening.cursor PsTokenKind.identifier with
+            | Except.error _ => ordinary ()
+            | Except.ok name =>
+                if psTokenCursorAtText name.cursor ":" then
+                  match psTokenCursorExpectText name.cursor ":" with
+                  | Except.error error => Except.error error
+                  | Except.ok colon =>
+                      match smaller colon.cursor with
+                      | Except.error error => Except.error error
+                      | Except.ok type =>
+                          match psParseBinderClosing opening type.cursor with
+                          | Except.error error => Except.error error
+                          | Except.ok closing =>
+                              match psTokenCursorExpectArrow closing.cursor with
+                              | Except.error error => Except.error error
+                              | Except.ok afterArrow =>
+                                  match smaller afterArrow.cursor with
+                                  | Except.error error => Except.error error
+                                  | Except.ok codomain =>
+                                      let binderName :=
+                                        PsSyntaxName.mk
+                                          (List.cons name.token.text List.nil)
+                                          name.token.span;
+                                      let binder :=
+                                        PsSyntaxBinderHead.mk binderName opening.kind closing.value;
+                                      Except.ok {
+                                        value := PsSyntaxTerm.forallE
+                                          (List.cons (Prod.mk binder type.value) List.nil)
+                                          codomain.value
+                                          (psSyntaxSpanJoin closing.value (psSyntaxTermSpan codomain.value))
+                                        cursor := codomain.cursor
+                                      }
+                else
+                  ordinary ()
 
 def psParseLeanBinderType
     (cursor : PsTokenCursor) :

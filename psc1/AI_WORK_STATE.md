@@ -34,7 +34,7 @@ refuses at the same original source. Full per-module refusals are in CI logs.
 ## Active candidate after that checkpoint — pending Linux CI
 
 Normalize Environment.Control, SelfHostProd, Resolve, Elab.Context, DoBase,
-DoFor, DoWhile and DoTry. Keep exact checked operation construction and guards.
+DoFor, DoWhile, DoTry, Data and Operators. Keep exact checked operation construction and guards.
 Use explicit constructors, binders, Except sequencing and structural workers.
 Control application carries its changing expression through a returned function.
 Resolve retains default no-self lookup plus an explicit self-candidate helper.
@@ -44,10 +44,25 @@ and bound evaluation order, continuation delay/capture, primitive/inductive whil
 result restrictions, partial-helper requirement, error state reset, early return
 packets, and handler boundaries. No runtime execution fuel or new selected feature.
 
-All eight candidate modules have maintained parse/elaboration gates in BOTH
+All ten candidate modules have maintained parse/elaboration gates in BOTH
 lanes. Existing tests remain; focused CI additionally executes the dedicated
 namespace suite and retains the actual resolver/context caller audit.
 Do not transfer the qualified checkpoint to this candidate before actual CI.
+
+Latest focused run39514902700 at e285ed994727654823fffb75f2187d45307ae861:
+all native behavior and dedicated namespace groups passed;38 census contract
+checks passed. Both lanes measured semantic67/58/53, JS79/66/59, Rust83/67/58.
+The maintained Resolve gate correctly refused nested constructor pattern107:17.
+The current candidate expands that pattern into nested matches, then continues
+Data and Operators. Earlier run39514468960 stopped before census solely because
+rg was absent; the audit now uses grep when necessary. No checks were waived.
+
+Data keeps checked fold-based optional lookup, exact array/index evaluation order,
+duplicate binding rejection and tuple projection scope. Operators retain literal
+constraint ordering, left-to-right constructed runtime evaluation, Nat/Bool
+equality, selected arithmetic and explicit proposition-order refusal. Existing
+private data helper names are retained as plain definitions so every declaration
+is part of source preparation, rather than filtered out.
 
 ## Census integrity and continuation
 

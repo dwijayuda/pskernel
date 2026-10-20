@@ -104,5 +104,8 @@ def psResolveNameIsTarget
     (localContext : PsLocalContext) (environment : PsEnvironment)
     (currentNamespace name target : PsName) : Bool :=
   match psResolveNameInNamespaceWithSelf localContext environment currentNamespace name (Option.some target) with
-  | Option.some (PsResolvedName.global selected) => psNameEq selected target
-  | _ => false
+  | Option.some resolved =>
+      match resolved with
+      | PsResolvedName.global selected => psNameEq selected target
+      | _ => false
+  | Option.none => false

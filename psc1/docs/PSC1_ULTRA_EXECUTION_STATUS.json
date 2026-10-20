@@ -423,7 +423,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "frontends-scoped-qualified-environment-and-do-elaboration-pending",
+    "status": "frontend-checkpoint-qualified-environment-resolve-pattern-correction-and-data-operators-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -516,7 +516,40 @@
       "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
       "psc1/packages/elab/src/Ps/Elab/DoFor.lean",
       "psc1/packages/elab/src/Ps/Elab/DoWhile.lean",
-      "psc1/packages/elab/src/Ps/Elab/DoTry.lean"
-    ]
+      "psc1/packages/elab/src/Ps/Elab/DoTry.lean",
+      "psc1/packages/elab/src/Ps/Elab/Data.lean",
+      "psc1/packages/elab/src/Ps/Elab/Operators.lean"
+    ],
+    "latestFocused": {
+      "head": "e285ed994727654823fffb75f2187d45307ae861",
+      "runId": 39514902700,
+      "overall": "failed-Resolve-maintained-gate",
+      "nativeBehaviorAndNamespace": "passed",
+      "contractChecks": 38,
+      "counts": {
+        "semantic": [
+          67,
+          58,
+          53
+        ],
+        "directjs": [
+          79,
+          66,
+          59
+        ],
+        "rust": [
+          83,
+          67,
+          58
+        ]
+      },
+      "nextRefusal": {
+        "module": "Ps.Environment.Resolve",
+        "stage": "parse",
+        "line": 107,
+        "column": 17,
+        "detail": "expected '=>', got '('"
+      }
+    }
   }
 }

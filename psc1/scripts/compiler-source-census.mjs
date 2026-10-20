@@ -154,6 +154,8 @@ for (const [module, stage] of [
   ['Ps.Environment.Control', 'parse'], ['Ps.Environment.Control', 'elaboration'],
   ['Ps.Environment.SelfHostProd', 'parse'], ['Ps.Environment.SelfHostProd', 'elaboration'],
   ['Ps.Environment.Resolve', 'parse'], ['Ps.Environment.Resolve', 'elaboration'],
+  ['Ps.Elab.Data', 'parse'], ['Ps.Elab.Data', 'elaboration'],
+  ['Ps.Elab.Operators', 'parse'], ['Ps.Elab.Operators', 'elaboration'],
   ['Ps.Elab.DoBase', 'parse'], ['Ps.Elab.DoBase', 'elaboration'],
   ['Ps.Elab.DoFor', 'parse'], ['Ps.Elab.DoFor', 'elaboration'],
   ['Ps.Elab.DoWhile', 'parse'], ['Ps.Elab.DoWhile', 'elaboration'],

@@ -1,0 +1,2639 @@
+{
+  "schema": "psc1-practical-core-patterns-namespaces-qualification/1",
+  "observedOn": "2026-10-20",
+  "status": "passed-scoped-execution",
+  "branch": "feature/psc1-practical-control-data-20261020",
+  "branchHeadCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
+  "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+  "workflowRun": 39467579973,
+  "workflowJob": 118782890400,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39467579973",
+  "workflowConclusion": "success",
+  "workflowSteps": {
+    "total": 34,
+    "success": 34,
+    "failed": 0,
+    "skipped": 0
+  },
+  "pullRequest": 166,
+  "stackedOn": {
+    "pullRequest": 165,
+    "branch": "feature/psc1-seven-backend-architecture-20261020",
+    "commit": "5539059a47c13a3dbc9806a504775b72f7bfd0fe"
+  },
+  "independentAdmission": {
+    "provider": "official Lean",
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "ownedKernel": "separately native-tested; not the authoritative admission provider"
+  },
+  "runtimeContract": "psc1-runtime-semantics/1",
+  "sourceSyntaxes": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "observedCoverage": {
+    "nativeOutcomes": {
+      "total": 323,
+      "categories": {
+        "Do": {
+          "outcomes": 101,
+          "privateJS": 42,
+          "legacyConversion": 12,
+          "rejections": 29,
+          "roundtrips": 14,
+          "other": 4
+        },
+        "Data": {
+          "outcomes": 135,
+          "canonical": 18,
+          "privateJS": 30,
+          "parseRejections": 28,
+          "typeRejections": 39,
+          "roundtrips": 16,
+          "graph": 4
+        },
+        "While": {
+          "outcomes": 27,
+          "privateJS": 15,
+          "graph": 3,
+          "boundary": 9
+        },
+        "Namespaces": {
+          "outcomes": 60,
+          "privateJS": 20,
+          "canonical": 4,
+          "roundtrips": 2,
+          "scopeMetadata": 2,
+          "typeRejections": 8,
+          "parseRejections": 18,
+          "exactStructuralRejections": 4,
+          "qualifiedHelperAndOrdinaryRoundtrips": 2
+        }
+      },
+      "meaning": "Categorical admission, refusal, translation, graph and private execution outcomes; not 323 runtime proofs.",
+      "suites": [
+        {
+          "suite": "psc1_do_tests",
+          "passed": true,
+          "evidence": "practical-core/psc1_do_tests.log"
+        },
+        {
+          "suite": "psc1_data_tests",
+          "passed": true,
+          "evidence": "practical-core/psc1_data_tests.log"
+        },
+        {
+          "suite": "psc1_while_tests",
+          "passed": true,
+          "evidence": "practical-core/psc1_while_tests.log"
+        },
+        {
+          "suite": "psc1_namespace_tests",
+          "passed": true,
+          "evidence": "practical-core/psc1_namespace_tests.log"
+        }
+      ],
+      "logReconciliation": {
+        "Data": {
+          "explicitPass": 89,
+          "privateJS": 30,
+          "silentRoundtrips": 16,
+          "outcomes": 135
+        },
+        "Namespaces": {
+          "explicitPass": 38,
+          "privateJS": 20,
+          "silentRoundtrips": 2,
+          "outcomes": 60
+        },
+        "note": "Silent standalone roundtrips are sequential checks reached before each suite's final success marker; metadata and helper assertions are grouped as documented outcomes."
+      }
+    },
+    "authenticLeanOracle": {
+      "totalFields": 84,
+      "identityFields": 2,
+      "resultObservations": 82,
+      "baselineResults": 23,
+      "controlDataResults": 33,
+      "ordinaryWhileResults": 18,
+      "rustPrivateClosureResults": 2,
+      "tuplePatternResults": 4,
+      "namespaceResults": 2,
+      "newObservedResults": {
+        "tuplePatternFalse": "-22",
+        "tuplePatternTrue": "6",
+        "tuplePatternDoFalse": "33",
+        "tuplePatternDoTrue": "29",
+        "namespaceFalse": "217",
+        "namespaceTrue": "123"
+      },
+      "meaning": "84 JSON fields comprise 82 observed results and two toolchain identity fields."
+    },
+    "focusedBackendGroups": 28,
+    "retainedPracticalFormsExecutedArtifacts": 36,
+    "sharedArchitectureGroups": 5,
+    "regularRuntime": {
+      "targetSourceBundles": 14,
+      "individualPredicates": 18,
+      "combinedPredicate": "semantic",
+      "componentExports": [
+        "semantic"
+      ],
+      "otherTargetsExports": 19,
+      "scope": "Internal selected control/data, immutable tuple patterns and imported namespace behavior through established public Bool predicates; no new public aggregate ABI."
+    },
+    "ordinaryWhile": {
+      "targetExecutionBundles": 14,
+      "externalDivergenceDeadlines": 14,
+      "refusalChecks": 16,
+      "loopChecks": [
+        "whilefalsecheck",
+        "whilecountcheck",
+        "whileearlycheck",
+        "whilecapturecheck",
+        "whilesequentialcheck",
+        "whileforcheck",
+        "whileselfcheck",
+        "whileexceptcheck"
+      ],
+      "longLoopIterations": 100000,
+      "referenceFields": [
+        "whileCaptureFalse",
+        "whileCaptureTrue",
+        "whileCountFalse",
+        "whileCountTrue",
+        "whileEarlyFalse",
+        "whileEarlyTrue",
+        "whileExceptFalseTag",
+        "whileExceptFalseValue",
+        "whileExceptTrueTag",
+        "whileExceptTrueValue",
+        "whileFalseFalse",
+        "whileFalseTrue",
+        "whileForFalse",
+        "whileForTrue",
+        "whileSelfFalse",
+        "whileSelfTrue",
+        "whileSequentialFalse",
+        "whileSequentialTrue"
+      ],
+      "minimumPythonBundles": 2,
+      "minimumPythonDeadlines": 2,
+      "evidence": "ordinary-while-conformance/results.json",
+      "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json"
+    },
+    "rustPrivateClosures": [
+      {
+        "syntax": "lean",
+        "target": "rust",
+        "passed": true,
+        "privateExecution": true,
+        "publicRefusal": true,
+        "oracleFields": [
+          "rustPrivateFalse",
+          "rustPrivateTrue"
+        ],
+        "publicNames": [
+          "privatehighercheck"
+        ],
+        "checks": [
+          [
+            "privatehighercheck",
+            true,
+            true
+          ]
+        ],
+        "refusalReason": "nested-function-parameter:f"
+      },
+      {
+        "syntax": "ps",
+        "target": "rust",
+        "passed": true,
+        "privateExecution": true,
+        "publicRefusal": true,
+        "oracleFields": [
+          "rustPrivateFalse",
+          "rustPrivateTrue"
+        ],
+        "publicNames": [
+          "privatehighercheck"
+        ],
+        "checks": [
+          [
+            "privatehighercheck",
+            true,
+            true
+          ]
+        ],
+        "refusalReason": "nested-function-parameter:f"
+      }
+    ],
+    "currentScripting": {
+      "artifactBundles": 24,
+      "boundaryRecords": 4,
+      "totalRecords": 28,
+      "tailValueCases": [
+        "simultaneous parameter updates",
+        "stable closure captures",
+        "local self-name shadowing"
+      ],
+      "deepNonTailIterations": 100000
+    },
+    "minimumPython": {
+      "targetExecutionBundles": 2,
+      "scriptingRegressionGroups": 14,
+      "artifactBundles": 12,
+      "runtimeEvidence": "runtime-conformance-python314/results.json",
+      "scriptingEvidence": "script-backends-python314/results.json",
+      "boundaryRecords": 2,
+      "ordinaryWhileBundles": 2,
+      "externalDivergenceDeadlines": 2,
+      "ordinaryWhileRefusals": 16,
+      "patternStrictnessDeadlines": 2
+    },
+    "compilerM": "Actual checked CompilerM definitions: native independent admission, strict IR and private-JavaScript expected-value comparisons for selected mutation/branch/return/finite-loop state. Not an all-seven native-oracle claim.",
+    "familyCompletion": {
+      "families": 14,
+      "complete": 0,
+      "qualifiedSubset": 13,
+      "partial": 0,
+      "missing": 1
+    },
+    "tuplePatterns": {
+      "checks": [
+        "tuplepatterncheck",
+        "tuplepatterndocheck"
+      ],
+      "handwrittenSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "referenceFields": [
+        "tuplePatternFalse",
+        "tuplePatternTrue",
+        "tuplePatternDoFalse",
+        "tuplePatternDoTrue"
+      ],
+      "strictRhsEvaluation": {
+        "targetSourceBundles": 14,
+        "minimumPythonBundles": 2,
+        "externalDeadlineMs": 2000,
+        "earlyReturnPreflight": true,
+        "evidence": "ordinary-while-conformance/results.json:patternStrictness",
+        "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json:patternStrictness"
+      }
+    },
+    "namespaces": {
+      "nativeSuite": "psc1_namespace_tests",
+      "checks": [
+        "namespacecheck"
+      ],
+      "handwrittenSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "referenceFields": [
+        "namespaceFalse",
+        "namespaceTrue"
+      ],
+      "importedHelpersPrivate": true,
+      "entryNamespaceExported": true,
+      "boundaryChecks": [
+        {
+          "syntax": "lean",
+          "passed": true,
+          "refusalChecks": 6,
+          "previousArtifactPreservationChecks": 5,
+          "evidence": "namespace-boundaries/lean.json"
+        },
+        {
+          "syntax": "ps",
+          "passed": true,
+          "refusalChecks": 6,
+          "previousArtifactPreservationChecks": 5,
+          "evidence": "namespace-boundaries/ps.json"
+        }
+      ]
+    }
+  },
+  "artifact": {
+    "id": 12285373763,
+    "name": "psc1-scoped-correctness-45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39467579973/artifacts/12285373763",
+    "bytes": 38945246,
+    "digest": "sha256:86415bd383aac67e11084b580d3ce0d33834def6cf1e01681d66db5cfbcc5e58",
+    "createdAt": "2026-10-20T17:41:54Z",
+    "expiresAt": "2026-11-03T17:41:51Z",
+    "retention": "GitHub Actions artifact retention; this immutable source receipt does not extend artifact availability."
+  },
+  "assurance": {
+    "checked": true,
+    "explicitOrdinary": true,
+    "behavioralCertificate": false,
+    "verifiedRequest": "refused",
+    "ordinaryPartialPairing": "Constructive opaque logical witness plus separately checked exact body; immutable graph pairing revalidated before erasure.",
+    "newAdmittedAxioms": false,
+    "uncheckedLoopOpcodes": false,
+    "generatedRuntimeFuel": false,
+    "formalBackendPreservation": false
+  },
+  "limitations": [
+    "All fourteen feature families remain incomplete; qualified subsets do not imply unrestricted Lean.",
+    "Finite-loop continuation construction uses linear space; large arbitrary finite collections are not qualified.",
+    "Optional array access scans the array and does not add a public aggregate ABI; plain/proof access requires genuine validity evidence and panic access is excluded.",
+    "Selected ordinary source while supports Type0 Id/Except with recognized direct tail recurrence and known complete computation type heads; nested procedural loops in a while body, CompilerM while and general dependent local-let capture fail closed.",
+    "Immutable product/Unit/wildcard bindings and semantic namespaces are selected. Mutable/monadic/arbitrary constructor binding patterns, open/section/export aliases, unnamed ends, root-escaped declarations/namespaces/imports, throw/try/catch and Prop-valued Nat/Int ordering remain outside this increment. Root escapes are selected for references only.",
+    "Typed source IO is absent; its future contract must cover line input/output and bounded UTF-8 file read/write with paths, EOF/newline, size/error and target adapters.",
+    "Existing component Bool-only and scripting public-aggregate restrictions remain; private closure execution does not widen those public ABIs.",
+    "PHP direct self-tail calls reuse a frame; non-tail recursion still retains scheduler frames. Nullary thunks may repeat work.",
+    "Int division/modulo, fixed-width/floating scalars and non-Linux native package qualification remain outside the active profile."
+  ],
+  "notPerformed": [
+    "Full self-host qualification",
+    "joint-census qualification",
+    "fixed-point qualification",
+    "formal backend behavioral certification",
+    "merge",
+    "release",
+    "npm registry publication",
+    "force push",
+    "local repository build or test"
+  ],
+  "laterHeadPolicy": "This receipt records implementation head 7e1158875cdf236a677448598bd5f677c11d4daf only. Later heads, including documentation-only commits, require their own successful focused Linux PR check; qualification is not inherited.",
+  "ciQualification": {
+    "schema": "psc1-seven-backend-qualification/1",
+    "qualification": "passed-scoped-execution",
+    "testedCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+    "branchHeadCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39467579973",
+    "logicalChecker": {
+      "version": "4.35.0",
+      "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+    },
+    "runtimeContract": "psc1-runtime-semantics/1",
+    "assurance": {
+      "checked": true,
+      "explicitOrdinary": true,
+      "behavioralCertificate": false,
+      "verifiedRequest": "refused"
+    },
+    "versions": {
+      "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "typescriptConsumer": "Version 7.0.2",
+      "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+      "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+      "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+      "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+      "python": "Python 3.15.0",
+      "pythonMinimum": "Python 3.14.8",
+      "php": "PHP 8.5.11 (cli) (built: Sep 23 2026 12:33:37) (NTS)"
+    },
+    "sourceSyntaxes": [
+      "lean",
+      "ps"
+    ],
+    "targetExecutionBundles": 14,
+    "scriptingRegressionGroups": 28,
+    "scriptingArtifactBundles": 24,
+    "architectureRegressionGroups": 5,
+    "minimumPython": {
+      "targetExecutionBundles": 2,
+      "scriptingRegressionGroups": 14,
+      "artifactBundles": 12,
+      "runtimeEvidence": "runtime-conformance-python314/results.json",
+      "scriptingEvidence": "script-backends-python314/results.json"
+    },
+    "practicalCore": {
+      "nativeSuites": [
+        {
+          "suite": "psc1_do_tests",
+          "passed": true,
+          "evidence": "practical-core/psc1_do_tests.log"
+        },
+        {
+          "suite": "psc1_data_tests",
+          "passed": true,
+          "evidence": "practical-core/psc1_data_tests.log"
+        },
+        {
+          "suite": "psc1_while_tests",
+          "passed": true,
+          "evidence": "practical-core/psc1_while_tests.log"
+        },
+        {
+          "suite": "psc1_namespace_tests",
+          "passed": true,
+          "evidence": "practical-core/psc1_namespace_tests.log"
+        }
+      ],
+      "controlFlowChecks": [
+        "mutationcheck",
+        "capturecheck",
+        "earlycheck",
+        "shadowcheck",
+        "danglingcheck",
+        "errorcheck",
+        "forlistcheck",
+        "forarraycheck",
+        "forrangecheck"
+      ],
+      "referenceOracle": "pinned-native-Lean",
+      "handwrittenLiteralSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "handwrittenOptionalIndexSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "tuplePatterns": {
+        "checks": [
+          "tuplepatterncheck",
+          "tuplepatterndocheck"
+        ],
+        "handwrittenSyntaxes": [
+          "lean",
+          "ps"
+        ],
+        "referenceFields": [
+          "tuplePatternFalse",
+          "tuplePatternTrue",
+          "tuplePatternDoFalse",
+          "tuplePatternDoTrue"
+        ],
+        "strictRhsEvaluation": {
+          "targetSourceBundles": 14,
+          "minimumPythonBundles": 2,
+          "externalDeadlineMs": 2000,
+          "earlyReturnPreflight": true,
+          "evidence": "ordinary-while-conformance/results.json:patternStrictness",
+          "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json:patternStrictness"
+        }
+      },
+      "namespaces": {
+        "nativeSuite": "psc1_namespace_tests",
+        "checks": [
+          "namespacecheck"
+        ],
+        "handwrittenSyntaxes": [
+          "lean",
+          "ps"
+        ],
+        "referenceFields": [
+          "namespaceFalse",
+          "namespaceTrue"
+        ],
+        "importedHelpersPrivate": true,
+        "entryNamespaceExported": true,
+        "boundaryChecks": [
+          {
+            "syntax": "lean",
+            "passed": true,
+            "refusalChecks": 6,
+            "previousArtifactPreservationChecks": 5,
+            "evidence": "namespace-boundaries/lean.json"
+          },
+          {
+            "syntax": "ps",
+            "passed": true,
+            "refusalChecks": 6,
+            "previousArtifactPreservationChecks": 5,
+            "evidence": "namespace-boundaries/ps.json"
+          }
+        ]
+      },
+      "rustPrivateClosures": [
+        {
+          "syntax": "lean",
+          "target": "rust",
+          "passed": true,
+          "privateExecution": true,
+          "publicRefusal": true,
+          "oracleFields": [
+            "rustPrivateFalse",
+            "rustPrivateTrue"
+          ],
+          "publicNames": [
+            "privatehighercheck"
+          ],
+          "checks": [
+            [
+              "privatehighercheck",
+              true,
+              true
+            ]
+          ],
+          "refusalReason": "nested-function-parameter:f"
+        },
+        {
+          "syntax": "ps",
+          "target": "rust",
+          "passed": true,
+          "privateExecution": true,
+          "publicRefusal": true,
+          "oracleFields": [
+            "rustPrivateFalse",
+            "rustPrivateTrue"
+          ],
+          "publicNames": [
+            "privatehighercheck"
+          ],
+          "checks": [
+            [
+              "privatehighercheck",
+              true,
+              true
+            ]
+          ],
+          "refusalReason": "nested-function-parameter:f"
+        }
+      ],
+      "ordinaryWhile": {
+        "targetExecutionBundles": 14,
+        "externalDivergenceDeadlines": 14,
+        "refusalChecks": 16,
+        "loopChecks": [
+          "whilefalsecheck",
+          "whilecountcheck",
+          "whileearlycheck",
+          "whilecapturecheck",
+          "whilesequentialcheck",
+          "whileforcheck",
+          "whileselfcheck",
+          "whileexceptcheck"
+        ],
+        "longLoopIterations": 100000,
+        "referenceFields": [
+          "whileCaptureFalse",
+          "whileCaptureTrue",
+          "whileCountFalse",
+          "whileCountTrue",
+          "whileEarlyFalse",
+          "whileEarlyTrue",
+          "whileExceptFalseTag",
+          "whileExceptFalseValue",
+          "whileExceptTrueTag",
+          "whileExceptTrueValue",
+          "whileFalseFalse",
+          "whileFalseTrue",
+          "whileForFalse",
+          "whileForTrue",
+          "whileSelfFalse",
+          "whileSelfTrue",
+          "whileSequentialFalse",
+          "whileSequentialTrue"
+        ],
+        "minimumPythonBundles": 2,
+        "minimumPythonDeadlines": 2,
+        "evidence": "ordinary-while-conformance/results.json",
+        "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json"
+      },
+      "completeFamilies": false
+    },
+    "programs": [
+      {
+        "target": "js",
+        "syntax": "lean",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 47263,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-js-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 1247,
+        "runtimeSha256": "ddcbeaf5ea8a95d1b25f00e5d57219ce91a7e8f90fcc3f353a552236d41a17aa",
+        "runtimeRequirements": [
+          "generator-stack",
+          "utf8-byte-index"
+        ]
+      },
+      {
+        "target": "ts",
+        "syntax": "lean",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 101213,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-ts-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 2781,
+        "runtimeSha256": "7dd77c1bffc8fa37517f7df6827593a7755d658f3f253b84e2f41a13020280a1",
+        "runtimeRequirements": [
+          "generator-stack",
+          "utf8-byte-index"
+        ]
+      },
+      {
+        "target": "rust",
+        "syntax": "lean",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 99438,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-rust-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 3746,
+        "runtimeSha256": "34d190d1a76e02e212348ab73d87ea3e7ba1ba30b3f05ad19f3da70b8f6cc47e",
+        "runtimeRequirements": [
+          "num-bigint@0.4.6",
+          "num-traits@0.2.19",
+          "__ps_nat_lit",
+          "__ps_nat_add",
+          "__ps_nat_sub",
+          "__ps_nat_mul",
+          "__ps_nat_div",
+          "__ps_nat_mod",
+          "__ps_int_of_nat",
+          "__ps_int_neg",
+          "__ps_int_add",
+          "__ps_int_mul",
+          "__ps_char_of_nat",
+          "__ps_char_to_nat",
+          "__ps_string_length",
+          "__ps_string_utf8_byte_size",
+          "__ps_string_next",
+          "__ps_string_get",
+          "__ps_string_extract",
+          "__ps_array_empty_with_capacity",
+          "__ps_array_size",
+          "__ps_array_push",
+          "__ps_array_get_d",
+          "__ps_array_set_if_in_bounds",
+          "__ps_array_map",
+          "__ps_array_foldl"
+        ]
+      },
+      {
+        "target": "wasm-core",
+        "syntax": "lean",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 19868,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-wasm-runtime/1",
+        "runtimeEncoding": "psc-wasm-ir-json/1:functions",
+        "runtimeBytes": 25617,
+        "runtimeSha256": "3e0657950adc1da4a3aa321574353ade76eb434cbeb775e83e9c16f3e441d9f1",
+        "runtimeRequirements": [
+          "__ps_wasm_nat_zero",
+          "__ps_wasm_nat_half",
+          "__ps_wasm_nat_low",
+          "__ps_wasm_nat_mk_bit0",
+          "__ps_wasm_nat_bit1",
+          "__ps_wasm_nat_succ",
+          "__ps_wasm_nat_cmp",
+          "__ps_wasm_nat_add",
+          "__ps_wasm_nat_sub_ge",
+          "__ps_wasm_nat_sub",
+          "__ps_wasm_nat_mul",
+          "__ps_wasm_nat_divmod",
+          "__ps_wasm_nat_div",
+          "__ps_wasm_nat_mod",
+          "__ps_wasm_nat_fits_bits",
+          "__ps_wasm_nat_fits_u32",
+          "__ps_wasm_nat_to_u32",
+          "__ps_wasm_nat_of_u32",
+          "__ps_wasm_int_of_nat",
+          "__ps_wasm_int_neg",
+          "__ps_wasm_int_add",
+          "__ps_wasm_int_mul",
+          "__ps_wasm_string_size_add",
+          "__ps_wasm_char_utf8_width",
+          "__ps_wasm_string_byte_width",
+          "__ps_wasm_string_write_scalar",
+          "__ps_wasm_string_singleton",
+          "__ps_wasm_string_length",
+          "__ps_wasm_string_utf8_byte_size",
+          "__ps_wasm_string_append",
+          "__ps_wasm_string_push",
+          "__ps_wasm_string_has_position",
+          "__ps_wasm_string_read_scalar",
+          "__ps_wasm_string_get",
+          "__ps_wasm_string_next",
+          "__ps_wasm_string_count_from",
+          "__ps_wasm_string_extract",
+          "__ps_wasm_nat_ten",
+          "__ps_wasm_nat_repr_positive",
+          "__ps_wasm_nat_repr",
+          "__ps_wasm_int_repr"
+        ]
+      },
+      {
+        "target": "wasm-component",
+        "syntax": "lean",
+        "publicNames": [
+          "semantic"
+        ],
+        "artifactBytes": 19831,
+        "executedChecks": [
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-wasm-runtime/1",
+        "runtimeEncoding": "psc-wasm-ir-json/1:functions",
+        "runtimeBytes": 25617,
+        "runtimeSha256": "3e0657950adc1da4a3aa321574353ade76eb434cbeb775e83e9c16f3e441d9f1",
+        "runtimeRequirements": [
+          "__ps_wasm_nat_zero",
+          "__ps_wasm_nat_half",
+          "__ps_wasm_nat_low",
+          "__ps_wasm_nat_mk_bit0",
+          "__ps_wasm_nat_bit1",
+          "__ps_wasm_nat_succ",
+          "__ps_wasm_nat_cmp",
+          "__ps_wasm_nat_add",
+          "__ps_wasm_nat_sub_ge",
+          "__ps_wasm_nat_sub",
+          "__ps_wasm_nat_mul",
+          "__ps_wasm_nat_divmod",
+          "__ps_wasm_nat_div",
+          "__ps_wasm_nat_mod",
+          "__ps_wasm_nat_fits_bits",
+          "__ps_wasm_nat_fits_u32",
+          "__ps_wasm_nat_to_u32",
+          "__ps_wasm_nat_of_u32",
+          "__ps_wasm_int_of_nat",
+          "__ps_wasm_int_neg",
+          "__ps_wasm_int_add",
+          "__ps_wasm_int_mul",
+          "__ps_wasm_string_size_add",
+          "__ps_wasm_char_utf8_width",
+          "__ps_wasm_string_byte_width",
+          "__ps_wasm_string_write_scalar",
+          "__ps_wasm_string_singleton",
+          "__ps_wasm_string_length",
+          "__ps_wasm_string_utf8_byte_size",
+          "__ps_wasm_string_append",
+          "__ps_wasm_string_push",
+          "__ps_wasm_string_has_position",
+          "__ps_wasm_string_read_scalar",
+          "__ps_wasm_string_get",
+          "__ps_wasm_string_next",
+          "__ps_wasm_string_count_from",
+          "__ps_wasm_string_extract",
+          "__ps_wasm_nat_ten",
+          "__ps_wasm_nat_repr_positive",
+          "__ps_wasm_nat_repr",
+          "__ps_wasm_int_repr"
+        ]
+      },
+      {
+        "target": "python",
+        "syntax": "lean",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 96632,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-python-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 3287,
+        "runtimeSha256": "932c1e762b0042525d7d2fba0a5a8f2b20d3a8fd6790ebe7aa935336fca80258",
+        "runtimeRequirements": [
+          "builtins",
+          "calls",
+          "int-repr",
+          "string-get",
+          "string-next",
+          "string-extract",
+          "char-of-nat",
+          "array-set-if",
+          "array-map",
+          "array-get-d",
+          "array-foldl"
+        ]
+      },
+      {
+        "target": "php",
+        "syntax": "lean",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 234802,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-php-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 4204,
+        "runtimeSha256": "45484d5d50522441dbee22e1509072530b5ec52e33d42e9b7c94a2a87d0e25bc",
+        "runtimeRequirements": [
+          "gmp",
+          "calls",
+          "unicodeChars",
+          "charOfNat",
+          "charToNat",
+          "stringGet",
+          "stringNext",
+          "stringExtract"
+        ]
+      },
+      {
+        "target": "js",
+        "syntax": "ps",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 47263,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-js-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 1247,
+        "runtimeSha256": "ddcbeaf5ea8a95d1b25f00e5d57219ce91a7e8f90fcc3f353a552236d41a17aa",
+        "runtimeRequirements": [
+          "generator-stack",
+          "utf8-byte-index"
+        ]
+      },
+      {
+        "target": "ts",
+        "syntax": "ps",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 101213,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-ts-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 2781,
+        "runtimeSha256": "7dd77c1bffc8fa37517f7df6827593a7755d658f3f253b84e2f41a13020280a1",
+        "runtimeRequirements": [
+          "generator-stack",
+          "utf8-byte-index"
+        ]
+      },
+      {
+        "target": "rust",
+        "syntax": "ps",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 99438,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-rust-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 3746,
+        "runtimeSha256": "34d190d1a76e02e212348ab73d87ea3e7ba1ba30b3f05ad19f3da70b8f6cc47e",
+        "runtimeRequirements": [
+          "num-bigint@0.4.6",
+          "num-traits@0.2.19",
+          "__ps_nat_lit",
+          "__ps_nat_add",
+          "__ps_nat_sub",
+          "__ps_nat_mul",
+          "__ps_nat_div",
+          "__ps_nat_mod",
+          "__ps_int_of_nat",
+          "__ps_int_neg",
+          "__ps_int_add",
+          "__ps_int_mul",
+          "__ps_char_of_nat",
+          "__ps_char_to_nat",
+          "__ps_string_length",
+          "__ps_string_utf8_byte_size",
+          "__ps_string_next",
+          "__ps_string_get",
+          "__ps_string_extract",
+          "__ps_array_empty_with_capacity",
+          "__ps_array_size",
+          "__ps_array_push",
+          "__ps_array_get_d",
+          "__ps_array_set_if_in_bounds",
+          "__ps_array_map",
+          "__ps_array_foldl"
+        ]
+      },
+      {
+        "target": "wasm-core",
+        "syntax": "ps",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 19868,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-wasm-runtime/1",
+        "runtimeEncoding": "psc-wasm-ir-json/1:functions",
+        "runtimeBytes": 25617,
+        "runtimeSha256": "3e0657950adc1da4a3aa321574353ade76eb434cbeb775e83e9c16f3e441d9f1",
+        "runtimeRequirements": [
+          "__ps_wasm_nat_zero",
+          "__ps_wasm_nat_half",
+          "__ps_wasm_nat_low",
+          "__ps_wasm_nat_mk_bit0",
+          "__ps_wasm_nat_bit1",
+          "__ps_wasm_nat_succ",
+          "__ps_wasm_nat_cmp",
+          "__ps_wasm_nat_add",
+          "__ps_wasm_nat_sub_ge",
+          "__ps_wasm_nat_sub",
+          "__ps_wasm_nat_mul",
+          "__ps_wasm_nat_divmod",
+          "__ps_wasm_nat_div",
+          "__ps_wasm_nat_mod",
+          "__ps_wasm_nat_fits_bits",
+          "__ps_wasm_nat_fits_u32",
+          "__ps_wasm_nat_to_u32",
+          "__ps_wasm_nat_of_u32",
+          "__ps_wasm_int_of_nat",
+          "__ps_wasm_int_neg",
+          "__ps_wasm_int_add",
+          "__ps_wasm_int_mul",
+          "__ps_wasm_string_size_add",
+          "__ps_wasm_char_utf8_width",
+          "__ps_wasm_string_byte_width",
+          "__ps_wasm_string_write_scalar",
+          "__ps_wasm_string_singleton",
+          "__ps_wasm_string_length",
+          "__ps_wasm_string_utf8_byte_size",
+          "__ps_wasm_string_append",
+          "__ps_wasm_string_push",
+          "__ps_wasm_string_has_position",
+          "__ps_wasm_string_read_scalar",
+          "__ps_wasm_string_get",
+          "__ps_wasm_string_next",
+          "__ps_wasm_string_count_from",
+          "__ps_wasm_string_extract",
+          "__ps_wasm_nat_ten",
+          "__ps_wasm_nat_repr_positive",
+          "__ps_wasm_nat_repr",
+          "__ps_wasm_int_repr"
+        ]
+      },
+      {
+        "target": "wasm-component",
+        "syntax": "ps",
+        "publicNames": [
+          "semantic"
+        ],
+        "artifactBytes": 19831,
+        "executedChecks": [
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-wasm-runtime/1",
+        "runtimeEncoding": "psc-wasm-ir-json/1:functions",
+        "runtimeBytes": 25617,
+        "runtimeSha256": "3e0657950adc1da4a3aa321574353ade76eb434cbeb775e83e9c16f3e441d9f1",
+        "runtimeRequirements": [
+          "__ps_wasm_nat_zero",
+          "__ps_wasm_nat_half",
+          "__ps_wasm_nat_low",
+          "__ps_wasm_nat_mk_bit0",
+          "__ps_wasm_nat_bit1",
+          "__ps_wasm_nat_succ",
+          "__ps_wasm_nat_cmp",
+          "__ps_wasm_nat_add",
+          "__ps_wasm_nat_sub_ge",
+          "__ps_wasm_nat_sub",
+          "__ps_wasm_nat_mul",
+          "__ps_wasm_nat_divmod",
+          "__ps_wasm_nat_div",
+          "__ps_wasm_nat_mod",
+          "__ps_wasm_nat_fits_bits",
+          "__ps_wasm_nat_fits_u32",
+          "__ps_wasm_nat_to_u32",
+          "__ps_wasm_nat_of_u32",
+          "__ps_wasm_int_of_nat",
+          "__ps_wasm_int_neg",
+          "__ps_wasm_int_add",
+          "__ps_wasm_int_mul",
+          "__ps_wasm_string_size_add",
+          "__ps_wasm_char_utf8_width",
+          "__ps_wasm_string_byte_width",
+          "__ps_wasm_string_write_scalar",
+          "__ps_wasm_string_singleton",
+          "__ps_wasm_string_length",
+          "__ps_wasm_string_utf8_byte_size",
+          "__ps_wasm_string_append",
+          "__ps_wasm_string_push",
+          "__ps_wasm_string_has_position",
+          "__ps_wasm_string_read_scalar",
+          "__ps_wasm_string_get",
+          "__ps_wasm_string_next",
+          "__ps_wasm_string_count_from",
+          "__ps_wasm_string_extract",
+          "__ps_wasm_nat_ten",
+          "__ps_wasm_nat_repr_positive",
+          "__ps_wasm_nat_repr",
+          "__ps_wasm_int_repr"
+        ]
+      },
+      {
+        "target": "python",
+        "syntax": "ps",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 96632,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-python-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 3287,
+        "runtimeSha256": "932c1e762b0042525d7d2fba0a5a8f2b20d3a8fd6790ebe7aa935336fca80258",
+        "runtimeRequirements": [
+          "builtins",
+          "calls",
+          "int-repr",
+          "string-get",
+          "string-next",
+          "string-extract",
+          "char-of-nat",
+          "array-set-if",
+          "array-map",
+          "array-get-d",
+          "array-foldl"
+        ]
+      },
+      {
+        "target": "php",
+        "syntax": "ps",
+        "publicNames": [
+          "natcheck",
+          "intcheck",
+          "unicodecheck",
+          "arraycheck",
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck",
+          "dataliteralcheck",
+          "optionalindexcheck",
+          "tuplepatterncheck",
+          "tuplepatterndocheck",
+          "namespacecheck",
+          "semantic"
+        ],
+        "artifactBytes": 234802,
+        "executedChecks": [
+          [
+            "natcheck",
+            true,
+            true
+          ],
+          [
+            "intcheck",
+            true,
+            true
+          ],
+          [
+            "unicodecheck",
+            true,
+            true
+          ],
+          [
+            "arraycheck",
+            true,
+            true
+          ],
+          [
+            "mutationcheck",
+            true,
+            true
+          ],
+          [
+            "capturecheck",
+            true,
+            true
+          ],
+          [
+            "earlycheck",
+            true,
+            true
+          ],
+          [
+            "shadowcheck",
+            true,
+            true
+          ],
+          [
+            "danglingcheck",
+            true,
+            true
+          ],
+          [
+            "errorcheck",
+            true,
+            true
+          ],
+          [
+            "forlistcheck",
+            true,
+            true
+          ],
+          [
+            "forarraycheck",
+            true,
+            true
+          ],
+          [
+            "forrangecheck",
+            true,
+            true
+          ],
+          [
+            "dataliteralcheck",
+            true,
+            true
+          ],
+          [
+            "optionalindexcheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterncheck",
+            true,
+            true
+          ],
+          [
+            "tuplepatterndocheck",
+            true,
+            true
+          ],
+          [
+            "namespacecheck",
+            true,
+            true
+          ],
+          [
+            "semantic",
+            true,
+            true
+          ]
+        ],
+        "runtimeVersion": "psc1-php-runtime/1",
+        "runtimeEncoding": "utf8-source",
+        "runtimeBytes": 4204,
+        "runtimeSha256": "45484d5d50522441dbee22e1509072530b5ec52e33d42e9b7c94a2a87d0e25bc",
+        "runtimeRequirements": [
+          "gmp",
+          "calls",
+          "unicodeChars",
+          "charOfNat",
+          "charToNat",
+          "stringGet",
+          "stringNext",
+          "stringExtract"
+        ]
+      }
+    ],
+    "runtimeFreeScriptingExamples": [
+      {
+        "group": "python-constant-lean",
+        "artifactBytes": 242,
+        "runtimeBytes": 0,
+        "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "group": "python-constant-ps",
+        "artifactBytes": 242,
+        "runtimeBytes": 0,
+        "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "group": "python-empty-entry",
+        "artifactBytes": 205,
+        "runtimeBytes": 0,
+        "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "group": "php-constant-lean",
+        "artifactBytes": 472,
+        "runtimeBytes": 0,
+        "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "group": "php-constant-ps",
+        "artifactBytes": 472,
+        "runtimeBytes": 0,
+        "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "group": "php-empty-entry",
+        "artifactBytes": 438,
+        "runtimeBytes": 0,
+        "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "group": "php-symbol-identity",
+        "artifactBytes": 968,
+        "runtimeBytes": 0,
+        "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "npm": {
+      "schemaVersion": 1,
+      "sourceCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+      "branchHeadCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
+      "compilerIdentity": {
+        "protocol": "psc1-native/1",
+        "profile": "psc1-checked-direct/1",
+        "lean": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "targets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component",
+          "python",
+          "php"
+        ]
+      },
+      "nativeSha256": "0689a5f4cffc891fc3e96e1b47a668c6b5e21c2b5610989077036157f18fac5d",
+      "nativeBytes": 123493728,
+      "platform": {
+        "os": "linux",
+        "cpu": "x64",
+        "libc": "glibc",
+        "qualifiedGlibc": "2.39"
+      },
+      "hostDependencyLockSha256": "7d8f3f53689b0ae639a2c1b6dccc26955016b026a3578a0b3d9b343fe3411345",
+      "bundledNpmDependencies": {
+        "@babel/parser": "7.28.0",
+        "prettier": "3.6.2"
+      },
+      "bundledNativeLibraries": [],
+      "logicalAdmission": "official Lean 4.35.0",
+      "noSelfHostQualification": true,
+      "publicationStatus": "unpublished",
+      "packageQualification": "receipt written only after install and execution tests",
+      "qualification": "passed",
+      "tarball": "dist/scoped-correctness/npm-native/run-GblaOa/tarballs/proofscript-0.1.0-psc1.2.tgz",
+      "tarballSha256": "606265f59c8b7855f84758a44ffb78f00db11c079d9ede0c52d9e3baf85ea1f9",
+      "tarballBytes": 37501094,
+      "offlineLocalInstall": true,
+      "offlineGlobalInstall": true,
+      "nativeNpmIdentityAgreement": true,
+      "nativeDirectBuild": true,
+      "generatedJavaScriptExecuted": true,
+      "typeScriptInstalled": false,
+      "optionalLibraryReceipt": "dist/scoped-correctness/npm-native/run-GblaOa/library/qualification.json",
+      "nodeVersion": "v22.23.3",
+      "npmVersion": "10.9.9"
+    },
+    "optionalLibrary": {
+      "schemaVersion": 1,
+      "sourceCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+      "branchHeadCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
+      "compilerIdentity": {
+        "schemaVersion": 1,
+        "scope": "psc1-current-native-source",
+        "toolchain": "leanprover/lean4:v4.35.0",
+        "version": "4.35.0",
+        "tag": "v4.35.0",
+        "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "compilerProtocol": "psc1-native/1",
+        "compilerProfile": "psc1-checked-direct/1",
+        "providerProtocol": "pskernel-lean/1",
+        "providerProfile": "lean4.35-core",
+        "historicalBundles": {
+          "status": "archived-4.34-assets; not current native compiler/provider evidence",
+          "nativePin": "packages/pskernel-lean/LEAN_SOURCE_PIN.json",
+          "nativeManifest": "packages/pskernel-lean/PREBUILT_MANIFEST.json",
+          "wasmPin": "packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json",
+          "wasmManifest": "packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json"
+        },
+        "qualificationPolicy": "exact-commit Linux CI required; archive qualification is not inherited"
+      },
+      "installedPackages": [
+        "@psc1-demo/seed@0.0.1",
+        "@psc1-demo/naturals@0.0.1"
+      ],
+      "target": "js",
+      "result": "42",
+      "capturedSources": 4,
+      "independentlyAdmitted": true,
+      "sourceOnly": true,
+      "publicExports": [
+        "answer"
+      ],
+      "checkedControlFlow": [
+        "Id",
+        "let-mut",
+        "assignment",
+        "conditional",
+        "early-return"
+      ],
+      "transitivePackageDependency": true,
+      "privateModuleRefused": true,
+      "incompatibleProfileRefused": true,
+      "illTypedDependencyRefused": true,
+      "failedBuildPreservedPrevious": true,
+      "sourceClosureSha256": "c3c6b461e9c668fe24d90fe233bc663aa4bea796ac6bac3a3182488f1c4e8956",
+      "outputSha256": "725c33437566a84d4b4f8ade758360d58f4ef209505fd57aaba5e29e11d6fed4",
+      "libraryTarballs": [
+        {
+          "file": "psc1-demo-seed-0.0.1.tgz",
+          "sha256": "cf3f7a7dc433289a0604d6233f2352cf5e48796bb57098f3783bd2da0f2f09f0"
+        },
+        {
+          "file": "psc1-demo-naturals-0.0.1.tgz",
+          "sha256": "aac62326095acd9e51b305be3f62d02bb65bdfe7ff9a122b889a067aa6dc108e"
+        }
+      ],
+      "checkOutput": "PSC1_KERNEL_CHECK: PASS (4 declarations; Lean 4.35.0)\n",
+      "buildOutput": "PSC1_BUNDLE: {\n  \"generation\": \"651cece494485e10d28a707e60b56645fcf415d53e88cf33f61596f50e80d4c0\",\n  \"bundle\": \"/home/runner/work/pskernel/pskernel/psc1/dist/scoped-correctness/npm-native/run-GblaOa/library/consumer/dist/.Main.js.psc1/generations/651cece494485e10d28a707e60b56645fcf415d53e88cf33f61596f50e80d4c0\",\n  \"manifest\": \"/home/runner/work/pskernel/pskernel/psc1/dist/scoped-correctness/npm-native/run-GblaOa/library/consumer/dist/.Main.js.psc1/generations/651cece494485e10d28a707e60b56645fcf415d53e88cf33f61596f50e80d4c0/manifest.json\"\n}\nPSC1_DIRECT_JS: /home/runner/work/pskernel/pskernel/psc1/dist/scoped-correctness/npm-native/run-GblaOa/library/consumer/dist/Main.js\n"
+    },
+    "evidence": {
+      "runtime": "runtime-conformance/results.json",
+      "nativeOracle": "runtime-conformance/lean-runtime-oracle.json",
+      "scripting": "script-backends/results.json",
+      "directIr": "script-ir/",
+      "combinedPublication": "backend-architecture/results.json",
+      "npm": "npm-native/qualification.json"
+    },
+    "exclusions": [
+      "full Practical Core feature families",
+      "unrestricted Lean",
+      "Int division/modulo",
+      "fixed-width/floating runtime scalars",
+      "Python/PHP public compound ABI",
+      "non-Bool component public ABI",
+      "formal backend preservation",
+      "full self-host/fixed-point qualification",
+      "npm registry publication",
+      "non-Linux native package qualification"
+    ]
+  },
+  "priorQualificationReceipt": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json"
+}

@@ -1,5 +1,10 @@
 # PSC1 Practical Core: control flow and data
 
+> Historical scope at implementation `8d6f80ea5813edd0644440971095abffd9dddacd`.
+> The newer [tuple-binding and namespace checkpoint](PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES.md)
+> supplies the current additional surface. Missing-feature statements below
+> describe this earlier checkpoint; its qualification receipt remains unchanged.
+
 This continuation is stacked on draft PR #165, whose preserved head is
 `5539059a47c13a3dbc9806a504775b72f7bfd0fe`. Draft PR #166 implements the selected
 control and data forms described below. All fourteen Practical Core families

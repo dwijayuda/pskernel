@@ -1,6 +1,39 @@
 # PSC1 backend conformance
 
-## Practical Core control/data continuation
+## Immutable tuple bindings and semantic namespaces
+
+Implementation head `7e1158875cdf236a677448598bd5f677c11d4daf` passed all **34/34** steps in
+[focused Linux run 39467579973](https://github.com/dwijayuda/pskernel/actions/runs/39467579973).
+The workflow tested GitHub merge commit `45169fa903b6bd68c3d9cc46348f8c4487d382c3`
+against the preserved PR #165 base.
+
+The [immutable qualification receipt](PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json)
+records exact source/tool identities, observed checks and package hashes.
+[Retained evidence archive](https://github.com/dwijayuda/pskernel/actions/runs/39467579973/artifacts/12285373763):
+38,945,246 bytes,
+SHA-256 `86415bd383aac67e11084b580d3ce0d33834def6cf1e01681d66db5cfbcc5e58`.
+GitHub's artifact retention applies; the committed receipt does not extend it.
+
+The selected new surface includes immutable product/Unit/wildcard bindings with
+one strict RHS evaluation, semantic namespace scopes and declaration identities,
+and reference-only roots that preserve builtin notation through translation.
+Authored relative names keep namespace lookup; imports keep their original
+ownership boundary.
+
+Observed evidence includes 323 native categorical outcomes, 84 native-Lean
+oracle fields (82 results plus two identity fields), 14 regular target/source
+bundles with 18 individual predicates plus `semantic`, 14 additional pattern
+strictness deadlines and two minimum-Python repetitions. The namespace host
+groups add 12 refusals and ten prior-output preservation cases. The focused
+backend suite now has 28 groups; existing ordinary-while, scripting, architecture,
+private Rust closure and installed npm/source-library checks also passed.
+
+See [the exact selected scope](PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES.md)
+and [current status](PSC1_PRACTICAL_CORE_STATUS.json). All fourteen families remain
+incomplete. The historical checkpoint sections below retain their own scope.
+
+
+## Historical Practical Core control/data continuation
 
 Implementation head `8d6f80ea5813edd0644440971095abffd9dddacd` passed all 34 steps in
 [focused Linux run 39407097682](https://github.com/dwijayuda/pskernel/actions/runs/39407097682). The workflow tested

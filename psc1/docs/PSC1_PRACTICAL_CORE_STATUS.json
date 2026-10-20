@@ -44,6 +44,15 @@
       "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
       "runId": 39407097682,
       "receipt": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json"
+    },
+    {
+      "id": "practical-core-immutable-patterns-semantic-namespaces",
+      "status": "qualified-subset",
+      "qualification": "Both-grammar native admission and strict IR, selected seven-target execution, strict tuple-RHS deadlines, namespace ownership/refusals, minimum Python and installed package checks passed",
+      "commit": "7e1158875cdf236a677448598bd5f677c11d4daf",
+      "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+      "runId": 39467579973,
+      "receipt": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json"
     }
   ],
   "stages": [
@@ -147,9 +156,11 @@
         "psc1/packages/elab/src/Ps/Elab/Do.lean",
         "psc1/test/DoTests.lean",
         "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
-        "psc1/packages/elab/src/Ps/Elab/DoFor.lean"
+        "psc1/packages/elab/src/Ps/Elab/DoFor.lean",
+        "psc1/packages/elab/src/Ps/Elab/Data.lean",
+        "psc1/test/DataTests.lean"
       ],
-      "notes": "Type0 Id, Except and actual checked CompilerM share lexical mutation, branch continuations, early return, finite loops and contextual pure. CompilerM control/state sequencing has independent admission/IR plus private JS expected-value execution, not an all-seven native-oracle claim. Source while is restricted to selected ordinary Id/Except cases; general effects/handlers remain missing.",
+      "notes": "Type0 Id, Except and actual checked CompilerM share lexical mutation, branch continuations, early return, finite loops and contextual pure. CompilerM control/state sequencing has independent admission/IR plus private JS expected-value execution, not an all-seven native-oracle claim. Source while is restricted to selected ordinary Id/Except cases; general effects/handlers remain missing. Immutable product/Unit/wildcard let patterns now share the same controller; mutable and monadic patterns remain refused.",
       "targets": {
         "js": "selected-cases-executed",
         "ts": "selected-cases-executed",
@@ -172,6 +183,13 @@
           "runId": 39407097682,
           "suite": "psc1_do_tests, runtime-conformance-tests.mjs and native/private-JS CompilerM fixtures",
           "scope": "Selected Id/Except control executes in both grammars on all seven targets; actual checked CompilerM control/state is separately independently admitted, IR checked and compared through private JavaScript execution."
+        },
+        {
+          "implementationCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
+          "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+          "runId": 39467579973,
+          "suite": "psc1_data_tests and runtime-conformance-tests.mjs",
+          "scope": "Selected immutable pattern bindings preserve outer RHS scope, closure captures, mutation continuations and early return; native finite-loop interactions and both-grammar seven-target do-pattern predicates pass."
         }
       ]
     },
@@ -367,9 +385,13 @@
         "psc1/packages/environment/src/Ps/Environment/SelfHostProd.lean",
         "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
         "psc1/packages/syntax/src/Ps/Syntax/ParseData.lean",
-        "psc1/test/DataTests.lean"
+        "psc1/test/DataTests.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseBinding.lean",
+        "psc1/packages/elab/src/Ps/Elab/Data.lean",
+        "psc1/packages/elab/src/Ps/Elab/Do.lean",
+        "psc1/scripts/ordinary-while-conformance-tests.mjs"
       ],
-      "notes": "Unit/grouping and right-associated tuple expressions lower to existing checked Prod constructors; contextual elements, nested tuples and round trips are exercised. Tuple destructuring and nested binding patterns remain missing.",
+      "notes": "Unit/grouping and right-associated tuple expressions plus immutable nested product/Unit/wildcard binding patterns in ordinary let and selected do let. A single strict Core let retains RHS evaluation even for all-wildcard patterns; typed projections, original RHS scope, immutable shadowing and closure capture are checked. Duplicate named leaves, mutable and monadic patterns, arbitrary/dependent constructor patterns remain outside the selected profile. No new public aggregate ABI or full-family completion claim.",
       "targets": {
         "js": "selected-cases-executed",
         "ts": "selected-cases-executed",
@@ -392,6 +414,13 @@
           "runId": 39407097682,
           "suite": "psc1_data_tests and runtime-conformance-tests.mjs",
           "scope": "Unit/grouping/right-associated product expressions, contextual elements and internal aggregate use; both grammars and seven-target Bool predicates. No destructuring or new public aggregate ABI."
+        },
+        {
+          "implementationCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
+          "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+          "runId": 39467579973,
+          "suite": "psc1_data_tests, runtime-conformance-tests.mjs and ordinary-while-conformance-tests.mjs",
+          "scope": "Immutable nested product/Unit/wildcard patterns execute in handwritten source cases across both grammars and all seven targets. Native graph, notation-hygiene and translation cases preserve checked Core. All-wildcard RHS strictness reaches 14 external target/source deadlines plus two minimum-Python repetitions. Mutable and monadic patterns remain refused."
         }
       ]
     },
@@ -509,25 +538,40 @@
     {
       "id": "namespaces",
       "priority": "P1",
-      "status": "partial",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/environment/src/Ps/Environment/Resolve.lean",
         "psc1/packages/elab/src/Ps/Elab/Context.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean"
+        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
+        "psc1/packages/elab/src/Ps/Elab/Declaration.lean",
+        "psc1/packages/elab/src/Ps/Elab/Term.lean",
+        "psc1/packages/elab/src/Ps/Elab/Recursion.lean",
+        "psc1/host/src/Ps/Host/DirectBackend.lean",
+        "psc1/test/NamespaceTests.lean",
+        "psc1/scripts/scoped-backend-tests.mjs"
       ],
-      "notes": "Exact dotted references, local-before-global lookup, entry-module export ownership and imported-helper privacy remain supported. Genuine namespace/end scopes, declaration identity, current/enclosing-name resolution, ambiguity checking, matched ends and integration with existing import ownership remain missing; no parser renaming shortcut is used.",
+      "notes": "Nested, reopened and dotted namespace/end scopes retain per-declaration semantic metadata and fully qualified identity. Exact local lookup precedes current/enclosing/root global search, including relative qualified names; dotted declarations establish their parent body/type namespace. End commands match the innermost opened name, duplicate full identities and unresolved names reject, and qualified global projections are checked. Structural recursion, contextual pure, private while-helper ownership, translation and entry-module import/export privacy are exercised. Imports remain module headers. Reference-only _root_.Name spelling selects exact root globals and preserves generated notation identity through translation; authored relative names remain namespace-sensitive. Open/section/export aliases, unnamed ends and root-escaped namespace/declaration commands remain outside this increment; no full-family completion claim.",
       "targets": {
-        "js": "qualified-references-only-family-incomplete",
-        "ts": "qualified-references-only-family-incomplete",
-        "rust": "qualified-references-only-family-incomplete",
-        "wasm-core": "qualified-references-only-family-incomplete",
-        "wasm-component": "qualified-references-only-family-incomplete",
-        "python": "qualified-references-only-family-incomplete",
-        "php": "qualified-references-only-family-incomplete"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
+          "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+          "runId": 39467579973,
+          "suite": "psc1_namespace_tests, runtime-conformance-tests.mjs and scoped-backend-tests.mjs",
+          "scope": "60 native categorical outcomes plus both-grammar seven-target imported namespace predicates. Native/private-JS cases cover identity, lexical resolution, constructors, projections and recursion; host tests separately check scoped entry exports/source origins, imported privacy, 12 refusals and ten prior-output preservation cases."
+        }
+      ]
     },
     {
       "id": "typed-io",
@@ -565,17 +609,17 @@
   ],
   "fullSelfHostTests": false,
   "deferred": "All unimplemented v7.2 features outside the fourteen approved families; public unsafe, partial_fixpoint, break/continue/finally, macros, broad automation, networking/FFI, optional scalar families, full standard and full self-host qualification.",
-  "qualificationReceipt": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json",
+  "qualificationReceipt": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json",
   "continuation": {
     "pr": 166,
     "basePr": 165,
     "baseCommit": "5539059a47c13a3dbc9806a504775b72f7bfd0fe",
     "branch": "feature/psc1-practical-control-data-20261020",
     "status": "qualified-selected-cases",
-    "receipt": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json",
-    "documentation": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA.md",
-    "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-    "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-    "runId": 39407097682
+    "receipt": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json",
+    "documentation": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES.md",
+    "implementationCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
+    "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
+    "runId": 39467579973
   }
 }

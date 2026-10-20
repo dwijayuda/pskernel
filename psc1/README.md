@@ -6,7 +6,7 @@ TypeScript, Rust, core WebAssembly, component WebAssembly, Python and PHP direct
 from checked compiler IR. The independent admission provider is official
 **Lean 4.35.0**, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
 
-This branch is the control/data Practical Core continuation in draft PR #166,
+This branch continues Practical Core control/data, tuple bindings and namespaces in draft PR #166,
 stacked on the preserved seven-backend PR #165.
 Consult [backend conformance](docs/PSC1_BACKEND_CONFORMANCE.md) for exact commits,
 executed coverage, target tools and remaining limitations. The presence of an emitter
@@ -107,16 +107,23 @@ Selected Id/Except while loops require an explicit partial declaration and
 pairing. Nested procedural loops inside a while body, CompilerM while, unknown or
 function result heads, and general dependent captures remain outside this profile.
 
-The fourteen Practical Core feature families remain incomplete. Tuple patterns,
-throw/try/catch handlers, namespace scopes, Prop-valued ordering and bounded typed IO
-still require work. Unrestricted Lean, full type-class syntax, Int division/modulo and
+Immutable nested tuple/Unit/wildcard bindings now share one checked RHS evaluation
+in ordinary and selected procedural lets. Semantic namespace/end scopes support
+nested, reopened and dotted names with local/current/enclosing/root resolution,
+preserving imported-helper privacy and entry-module exports. Reference-only
+`_root_.Name` protects generated notation through source translation.
+
+The fourteen Practical Core feature families remain incomplete. Mutable/monadic
+binding patterns, broader namespace commands, throw/try/catch handlers,
+Prop-valued ordering and bounded typed IO still require work. Unrestricted Lean, full type-class syntax, Int division/modulo and
 fixed-width/floating runtime scalars are outside the currently qualified direct profile. Python/PHP initially expose scalar public signatures; aggregate
 values can be internal. Rust retains its existing checked generic public path. Component
 Wasm retains its bounded Bool ABI.
 
 See [the selected language reference](PSC1_LANGUAGE_REFERENCE_v7.2.md),
 [Practical Core status](docs/PSC1_PRACTICAL_CORE_STATUS.json),
-[control/data scope and exact evidence](docs/PSC1_PRACTICAL_CORE_CONTROL_DATA.md),
+[tuple/namespace scope and exact evidence](docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES.md),
+[the preceding control/data checkpoint](docs/PSC1_PRACTICAL_CORE_CONTROL_DATA.md),
 [architecture](ARCHITECTURE.md), [runtime semantics](docs/PSC1_RUNTIME_SEMANTICS.md)
 and [current work state](AI_WORK_STATE.md).
 

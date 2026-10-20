@@ -1,0 +1,101 @@
+name: PSC1 Lean 4.35 independent kernel hotpath profiling
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-pskernel-lean435-performance-20261020
+    paths:
+      - psc1/lean-toolchain
+      - psc1/kernel-lakefile.lean
+      - psc1/test/PsKernelHotpathProfiling.lean
+      - psc1/scripts/pskernel-hotpath-probe.mjs
+      - psc1/packages/pskernel-core/**
+      - .github/workflows/psc1-pskernel-hotpath-benchmark.yml
+
+permissions:
+  contents: read
+
+jobs:
+  native-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Confirm official Lean 4.35.0 commit
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      - name: Compile native structural hotpath benchmark
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean build psc1_kernel_hotpath
+      - name: Measure same-shape Lean Expr and PSC1 Expr operations
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e' \
+            -o "$RUNNER_TEMP/psc1-native-hotpath.memory" \
+            .lake/build/bin/psc1_kernel_hotpath \
+            | tee "$RUNNER_TEMP/psc1-native-hotpath.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-native-hotpath-lean435
+          path: |
+            ${{ runner.temp }}/psc1-native-hotpath.log
+            ${{ runner.temp }}/psc1-native-hotpath.memory
+          retention-days: 30
+
+  generated-js-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean and isolated TypeScript 7
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          mkdir -p "$RUNNER_TEMP/psc1-hotpath-ts"
+          echo '{"name":"psc1-hotpath-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-hotpath-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-hotpath-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-hotpath-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Build real PSC1 compiler and check kernel source
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake build psc1
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+      - name: Emit generated JS from the pinned source kernel
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean --out dist/hotpath/pskernel-core.js
+          test -s dist/hotpath/pskernel-core.js
+          node --check dist/hotpath/pskernel-core.js
+      - name: Profile generated-JS expression metadata and equality helpers
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node --expose-gc scripts/pskernel-hotpath-probe.mjs dist/hotpath/pskernel-core.js \
+            | tee "$RUNNER_TEMP/psc1-js-hotpath.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-js-hotpath-lean435
+          path: ${{ runner.temp }}/psc1-js-hotpath.log
+          retention-days: 30

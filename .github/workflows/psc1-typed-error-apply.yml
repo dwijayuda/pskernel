@@ -17,14 +17,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 3
+          fetch-depth: 2
       - name: Execute exact guarded source edits in cloud
-        env:
-          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = 20aa39e7e74a0f655b367c14067896be314a00ee
+          test "$(git rev-parse HEAD^)" = 96a92887598e6672834de7e39ec229dc437a61dd
           python3 - <<'PY'
           from pathlib import Path
           import textwrap
@@ -35,12 +33,22 @@ jobs:
           script = textwrap.dedent(script)
           print('Executing reviewed Python source bytes:', len(script))
           exec(compile(script, 'reviewed-cloud-integration.py', 'exec'))
+          p = Path('psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean')
+          old = '  | .doWhileE condition body rest _ => .doWhileE condition body rest span'
+          text = p.read_text()
+          assert text.count(old) == 1
+          p.write_text(text.replace(old, '  | .doTryE body name handler rest _ => .doTryE body name handler rest span\n'+old))
+          p = Path('psc1/packages/compiler/src/Ps/Compiler/Sh1.lean')
+          old = '  | PsSyntaxTerm.doWhileE _ _ _ span =>'
+          text = p.read_text()
+          assert text.count(old) == 1
+          p.write_text(text.replace(old, '  | PsSyntaxTerm.doTryE _ _ _ _ span\n'+old))
           PY
           git diff --check
           git diff --stat
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add psc1 .github/workflows/psc1-scoped-correctness.yml
+          git add psc1
           git commit -m 'feat(psc1): integrate typed catch boundaries and exact-source cross-target tests'
           git push origin HEAD:refs/heads/feature/psc1-typed-errors-20261020
           echo "Integrated head $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"

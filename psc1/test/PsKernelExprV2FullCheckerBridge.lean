@@ -169,6 +169,21 @@ private def bridgeRunBenchmark (depth calls : Nat) : IO Unit := do
         throw (IO.userError "PSC1_V2_BRIDGE_IMPORTED_HEAD_MISMATCH")
     | _ => throw (IO.userError "PSC1_V2_BRIDGE_IMPORTED_NOT_SORT")
 
+  let v2ImportOnly : Nat → IO Nat := fun _ => do
+    let (a,r) ← bridgeExpect (psKernelExprV2PagedImportChecked term)
+    let e ← bridgeExpect (psKernelExprV2PagedRequire a r)
+    if e.depth > 0 then return 1
+    throw (IO.userError "PSC1_V2_BRIDGE_IMPORT_EMPTY_RESULT")
+
+  let v2WithImportMaterialized : Nat → IO Nat := fun _ => do
+    let (a,r) ← bridgeExpect (psKernelExprV2PagedImportChecked term)
+    let (out,id) ← bridgeExpect
+      (psKernelExprV2PagedHeadMachineChecked (Nat.succ depth) a r)
+    let decoded ← bridgeDecodePaged out id
+    if psKernelExprEqual decoded bridgeSort0 &&
+        psKernelExprEq decoded bridgeSort0 then return 1
+    throw (IO.userError "PSC1_V2_BRIDGE_MATERIALIZED_RESULT_MISMATCH")
+
   let fullCheck : Nat → IO Nat := fun _ => do
     let result ← bridgeExpect
       (psKernelSessionCheck 4096 bridgeSession term)
@@ -181,21 +196,25 @@ private def bridgeRunBenchmark (depth calls : Nat) : IO Unit := do
     if Prod.fst result then return 1
     throw (IO.userError "PSC1_V2_BRIDGE_DEFEQ_MISMATCH")
 
-  -- A-B-B-A for the two comparable observed WHNF outputs. The V2 machine
-  -- is deliberately *subset-only* and has a different research step budget.
+  -- A-B-B-A: full independent checker WHNF versus the *complete*
+  -- research subset path, including both input and output conversions.
+  -- Verdicts are comparable ONLY for this supported closed zeta subset.
+  -- The V2 machine is NOT a general checker or resource-policy equivalent.
   bridgeBenchmark "trusted_whnf" depth calls fullWhnf
-  bridgeBenchmark "v2_with_import" depth calls v2WithImport
-  bridgeBenchmark "v2_with_import" depth calls v2WithImport
+  bridgeBenchmark "v2_import_head_decode" depth calls v2WithImportMaterialized
+  bridgeBenchmark "v2_import_head_decode" depth calls v2WithImportMaterialized
   bridgeBenchmark "trusted_whnf" depth calls fullWhnf
 
-  -- Separately report the performance that excludes V2 conversion cost.
+  -- Isolate conversion and head-execution costs rather than hiding them.
+  bridgeBenchmark "v2_import_only" depth calls v2ImportOnly
+  bridgeBenchmark "v2_import_head" depth calls v2WithImport
   bridgeBenchmark "v2_head_preimported" depth calls v2HeadOnly
   bridgeBenchmark "trusted_check_type" depth calls fullCheck
   bridgeBenchmark "trusted_defeq_positive" depth calls fullDefEq
 
 def main : IO Unit := do
   bridgePositiveAndNegative
-  bridgeRunBenchmark 32 12
-  bridgeRunBenchmark 96 8
-  bridgeRunBenchmark 192 4
+  bridgeRunBenchmark 32 400
+  bridgeRunBenchmark 96 160
+  bridgeRunBenchmark 192 70
   IO.println "PSC1_V2_FULL_CHECKER_BRIDGE: PASS"

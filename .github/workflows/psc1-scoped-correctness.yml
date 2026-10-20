@@ -190,6 +190,7 @@ jobs:
           set -euo pipefail
           node scripts/compiler-source-census-contract-tests.mjs
           node scripts/compiler-source-census.mjs
+          node scripts/compiler-source-census-strict-tests.mjs
           node scripts/compiler-host-protocol-tests.mjs
       - name: Execute runtime contract against pinned Lean reference results
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}

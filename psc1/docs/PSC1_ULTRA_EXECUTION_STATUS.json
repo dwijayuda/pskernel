@@ -423,8 +423,42 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "ParseDo-normalization-pending-linux-ci",
+    "status": "ParseDo-focused-passed-dual-census-live-ParseData-ParseLean-pending",
     "continuousUserAuthorization": true,
-    "smallMilestoneHandoffs": false
+    "smallMilestoneHandoffs": false,
+    "pullRequest": 172,
+    "parseDoFocused": {
+      "head": "cd1f0bfa3303efb3f8e45cc5b6e5b457485dcde2",
+      "runId": 39511079292,
+      "accepted": true,
+      "scoped": "cancelled-superseded"
+    },
+    "dualGrammarCensus": {
+      "implementationCommit": "a206510fb32b0671a0fb8f7f9f5f37757d72ba49",
+      "runId": 39511657432,
+      "contractChecks": 38,
+      "probeIntegrity": "passed-both-lanes",
+      "overall": "failed-maintained-ParseData-gate",
+      "psSourceDerivation": "owned-canonical-translation-from-lean",
+      "independentlyAuthoredPsCompiler": false,
+      "strictSelectedPhase": true,
+      "counts": {
+        "semantic": [
+          67,
+          45,
+          41
+        ],
+        "directjs": [
+          79,
+          53,
+          47
+        ],
+        "rust": [
+          83,
+          54,
+          46
+        ]
+      }
+    }
   }
 }

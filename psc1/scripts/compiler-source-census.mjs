@@ -141,13 +141,17 @@ for (const [module, stage] of [
   ['Ps.Syntax.ParseCommon', 'parse'], ['Ps.Syntax.ParseCommon', 'elaboration'],
   ['Ps.Syntax.ParseBinding', 'parse'], ['Ps.Syntax.ParseBinding', 'elaboration'],
   ['Ps.Syntax.Operators', 'parse'], ['Ps.Syntax.Operators', 'elaboration'],
+  ['Ps.Syntax.ParseProofScript', 'parse'], ['Ps.Syntax.ParseProofScript', 'elaboration'],
+  ['Ps.Syntax.PrintCommon', 'parse'], ['Ps.Syntax.PrintCommon', 'elaboration'],
   ['Ps.Syntax.ParseLean', 'parse'], ['Ps.Syntax.ParseLean', 'elaboration'],
   ['Ps.Syntax.ParseData', 'parse'], ['Ps.Syntax.ParseData', 'elaboration'],
   ['Ps.Syntax.ParseDo', 'parse'], ['Ps.Syntax.ParseDo', 'elaboration']
 ]) {
-  const row = observed.records.find(row => row.module === module);
-  if (!row || row[stage] !== 'accepted') {
-    throw new Error('PSC1_CENSUS_NORMALIZATION_REGRESSION: ' +
-      JSON.stringify({ module, stage, observed: row || null }));
+  for (const grammar of ['lean', 'ps']) {
+    const row = lanes[grammar].observed.records.find(row => row.module === module);
+    if (!row || row[stage] !== 'accepted') {
+      throw new Error('PSC1_CENSUS_NORMALIZATION_REGRESSION: ' +
+        JSON.stringify({ grammar, module, stage, observed: row || null }));
+    }
   }
 }

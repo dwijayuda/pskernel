@@ -56,7 +56,8 @@ jobs:
           .lake/build/bin/psc1_do_tests 2>&1 | tee dist/architecture-native/do.log
           .lake/build/bin/psc1_while_tests 2>&1 | tee dist/architecture-native/while.log
           node scripts/compiler-source-census-contract-tests.mjs
-          node scripts/compiler-source-census.mjs 2>&1 | tee dist/architecture-native/compiler-source-census.log
+          node scripts/compiler-source-census.mjs
+          node scripts/compiler-source-census-strict-tests.mjs 2>&1 | tee dist/architecture-native/compiler-source-census.log
           cp -r dist/scoped-correctness/compiler-source-census dist/architecture-native/
       - name: Retain focused diagnostic evidence
         if: always()

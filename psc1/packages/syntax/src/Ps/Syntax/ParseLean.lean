@@ -1409,7 +1409,7 @@ def psParseLeanTermWithFuel
                                 }
       else if psParseAtBindingPatternLet cursor then
         psParseBindingLet smaller
-          (fun (span : PsSourceSpan) (current : PsTokenCursor) =>
+          (fun (start : PsSourcePos) (current : PsTokenCursor) =>
             match psTokenCursorExpectText current ";" with
             | Except.error error => Except.error error
             | Except.ok separator => Except.ok separator.cursor) cursor
@@ -2682,7 +2682,7 @@ def psParseLeanTokens
   | Except.error error => Except.error error
   | Except.ok imports =>
       match psParseScopedDeclarationsWithFuel
-          psParseLeanDeclaration (fun (span : PsSourceSpan) (cursor : PsTokenCursor) => Except.ok cursor)
+          psParseLeanDeclaration (fun (start : PsSourcePos) (cursor : PsTokenCursor) => Except.ok cursor)
           (psParseListLength tokens) imports.cursor [] [] with
       | Except.error error => Except.error error
       | Except.ok declarations =>

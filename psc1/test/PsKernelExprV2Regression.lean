@@ -470,6 +470,122 @@ private def testChunkedSmartConstructors : IO Unit := do
   IO.println "PSC1_EXPR_V2_CHUNKED_BUILDERS: PASS"
 
 
+private def testPagedSmartConstructors : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "pagedDemo"
+  let mut arrayArena := psKernelExprV2Empty
+  let mut pagedArena := psKernelExprV2PagedEmpty
+  let mut cases : List (String × Nat × Nat) := List.nil
+
+  let (a0, b0) := psKernelExprV2MkBVar arrayArena 0
+  let (i0, j0) ← expectV2 (psKernelExprV2PagedMkBVar pagedArena 0)
+  arrayArena := a0
+  pagedArena := i0
+  cases := ("bvar", b0, j0) :: cases
+
+  let (a1, b1) := psKernelExprV2MkBVar arrayArena 2
+  let (i1, j1) ← expectV2 (psKernelExprV2PagedMkBVar pagedArena 2)
+  arrayArena := a1
+  pagedArena := i1
+  cases := ("bvar2", b1, j1) :: cases
+
+  let (a2, b2) := psKernelExprV2MkFVar arrayArena name
+  let (i2, j2) ← expectV2 (psKernelExprV2PagedMkFVar pagedArena name)
+  arrayArena := a2
+  pagedArena := i2
+  cases := ("fvar", b2, j2) :: cases
+
+  let (a3, b3) := psKernelExprV2MkMVar arrayArena name
+  let (i3, j3) ← expectV2 (psKernelExprV2PagedMkMVar pagedArena name)
+  arrayArena := a3
+  pagedArena := i3
+  cases := ("mvar", b3, j3) :: cases
+
+  let (a4, b4) := psKernelExprV2MkSort arrayArena PsKernelLevel.zero
+  let (i4, j4) ← expectV2 (psKernelExprV2PagedMkSort pagedArena PsKernelLevel.zero)
+  arrayArena := a4
+  pagedArena := i4
+  cases := ("sort", b4, j4) :: cases
+
+  let (a5, b5) := psKernelExprV2MkConst arrayArena name [PsKernelLevel.zero]
+  let (i5, j5) ← expectV2 (psKernelExprV2PagedMkConst pagedArena name [PsKernelLevel.zero])
+  arrayArena := a5
+  pagedArena := i5
+  cases := ("const", b5, j5) :: cases
+
+  let (a6, b6) := psKernelExprV2MkLit arrayArena (.nat 42)
+  let (i6, j6) ← expectV2 (psKernelExprV2PagedMkLit pagedArena (.nat 42))
+  arrayArena := a6
+  pagedArena := i6
+  cases := ("lit", b6, j6) :: cases
+
+  let (a7, b7) ← expectV2 (psKernelExprV2MkApp arrayArena b0 b2)
+  let (i7, j7) ← expectV2 (psKernelExprV2PagedMkApp pagedArena j0 j2)
+  arrayArena := a7
+  pagedArena := i7
+  cases := ("app", b7, j7) :: cases
+
+  let (a8, b8) ← expectV2
+    (psKernelExprV2MkLam arrayArena name b4 b1 PsKernelBinderInfo.default)
+  let (i8, j8) ← expectV2
+    (psKernelExprV2PagedMkLam pagedArena name j4 j1 PsKernelBinderInfo.default)
+  arrayArena := a8
+  pagedArena := i8
+  cases := ("lambda", b8, j8) :: cases
+
+  let (a9, b9) ← expectV2
+    (psKernelExprV2MkForall arrayArena name b4 b0 PsKernelBinderInfo.implicit)
+  let (i9, j9) ← expectV2
+    (psKernelExprV2PagedMkForall pagedArena name j4 j0 PsKernelBinderInfo.implicit)
+  arrayArena := a9
+  pagedArena := i9
+  cases := ("forall", b9, j9) :: cases
+
+  let (a10, b10) ← expectV2 (psKernelExprV2MkLet arrayArena name b4 b2 b1 false)
+  let (i10, j10) ← expectV2 (psKernelExprV2PagedMkLet pagedArena name j4 j2 j1 false)
+  arrayArena := a10
+  pagedArena := i10
+  cases := ("let", b10, j10) :: cases
+
+  let (a11, b11) ← expectV2 (psKernelExprV2MkMData arrayArena 31 b7)
+  let (i11, j11) ← expectV2 (psKernelExprV2PagedMkMData pagedArena 31 j7)
+  arrayArena := a11
+  pagedArena := i11
+  cases := ("mdata", b11, j11) :: cases
+
+  let (a12, b12) ← expectV2 (psKernelExprV2MkProj arrayArena name 0 b11)
+  let (i12, j12) ← expectV2 (psKernelExprV2PagedMkProj pagedArena name 0 j11)
+  arrayArena := a12
+  pagedArena := i12
+  cases := ("proj", b12, j12) :: cases
+
+  requireV2 "all-smart-builder-count-parity"
+    (pagedArena.size == arrayArena.nodes.size)
+  let _ ← expectV2 (psKernelExprV2ValidateLinear arrayArena)
+  let _ ← expectV2 (psKernelExprV2PagedValidate pagedArena)
+  for (label, a, b) in cases do
+    requireV2 ("paged-smart-id-" ++ label) (a == b)
+    let old ← expectV2 (psKernelExprV2Lookup arrayArena a)
+    let newer ← expectV2 (psKernelExprV2PagedRequire pagedArena b)
+    requireV2 ("paged-smart-metadata-" ++ label)
+      (psKernelExprV2SameMetadata old newer)
+  requireV2 "paged-smart-invalid-child"
+    (match psKernelExprV2PagedMkApp pagedArena 7777 j2 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let mut shared := pagedArena
+  let mut root := j0
+  for _ in [:24] do
+    let (next, id) ← expectV2 (psKernelExprV2PagedMkApp shared root root)
+    shared := next
+    root := id
+  let finalEntry ← expectV2 (psKernelExprV2PagedRequire shared root)
+  requireV2 "paged-smart-large-sharing-depth" (finalEntry.depth == 25)
+  requireV2 "paged-smart-large-sharing-nodes"
+    (shared.size == pagedArena.size + 24)
+  IO.println "PSC1_EXPR_V2_PAGED_BUILDERS: PASS"
+
+
+
 private def testChunkedArena : IO Unit := do
   for limit in [0, 1, 8, 32, 64] do
     let mut classic := psKernelExprV2Empty
@@ -1215,6 +1331,100 @@ private def testPortableLegacyImport : IO Unit := do
       | Except.ok _ => false)
   IO.println "PSC1_EXPR_V2_LEGACY_IMPORT: PASS cases=13"
 
+
+/-
+Paged V2 native differential: full ID-index replay, old/middle/new lookups,
+snapshot preservation, malformed-layout rejection and forged metadata.
+-/
+private def testPagedArena : IO Unit := do
+  for limit in [0,1,8,32,64] do
+    let mut legacy := psKernelExprV2Empty
+    let mut paged := psKernelExprV2PagedEmptyWithLimit limit
+    for index in [:512] do
+      let (next,assigned) := psKernelExprV2MkBVar legacy index
+      legacy := next
+      let original ← expectV2 (psKernelExprV2Lookup legacy assigned)
+      let (nextPaged,pagedId) := psKernelExprV2PagedPush paged original
+      unless assigned == pagedId do
+        throw (IO.userError "PSC1_V2_PAGED_ID_MISMATCH")
+      paged := nextPaged
+    requireV2 s!"paged-size-{limit}" (paged.size == legacy.nodes.size)
+    let validated ← expectV2 (psKernelExprV2PagedValidate paged)
+    requireV2 s!"paged-validation-{limit}"
+      (validated.size == paged.size && validated.pageLimit == paged.pageLimit)
+    for id in [:512] do
+      let original ← expectV2 (psKernelExprV2Lookup legacy id)
+      match psKernelExprV2PagedFind paged id with
+      | Option.none => throw (IO.userError "PSC1_V2_PAGED_MISSING_NODE")
+      | Option.some current =>
+          unless psKernelExprV2SameMetadata original current do
+            throw (IO.userError "PSC1_V2_PAGED_METADATA_MISMATCH")
+    requireV2 s!"paged-out-of-range-{limit}"
+      (match psKernelExprV2PagedFind paged 512 with
+        | Option.none => true
+        | Option.some _ => false)
+    let prior := paged
+    let first ← expectV2 (psKernelExprV2Lookup legacy 0)
+    let (extended,newId) := psKernelExprV2PagedPush paged first
+    requireV2 s!"paged-old-snapshot-{limit}"
+      (match psKernelExprV2PagedFind prior newId with
+        | Option.none => true
+        | Option.some _ => false)
+    requireV2 s!"paged-new-snapshot-{limit}"
+      (match psKernelExprV2PagedFind extended newId with
+        | Option.none => false
+        | Option.some _ => true)
+  let (legacy,id) := psKernelExprV2MkBVar psKernelExprV2Empty 0
+  let valid ← expectV2 (psKernelExprV2Lookup legacy id)
+  let corrupt : PsKernelExprV2Entry := { valid with hasFVar := true }
+  let (forged,forgedId) := psKernelExprV2PagedPush
+    psKernelExprV2PagedEmpty corrupt
+  requireV2 "paged-forged-metadata-rejected"
+    (match psKernelExprV2PagedValidate forged with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  requireV2 "paged-valid-size-not-trust-bypass" (forgedId == 0)
+  let invalidNode : PsKernelExprV2Entry := {
+    valid with node := PsKernelExprV2Node.app 77 0
+  }
+  let (forward,_) := psKernelExprV2PagedPush
+    psKernelExprV2PagedEmpty invalidNode
+  requireV2 "paged-forward-reference-rejected"
+    (match psKernelExprV2PagedValidate forward with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let noCapacity : PsKernelExprV2PagedArena := {
+    pages := Array.emptyWithCapacity 0
+    active := Array.emptyWithCapacity 0
+    size := 0
+    pageLimit := 0
+  }
+  requireV2 "paged-zero-capacity-rejected"
+    (match psKernelExprV2PagedValidate noCapacity with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let incomplete : PsKernelExprV2PagedArena := {
+    pages := #[Array.emptyWithCapacity 0]
+    active := Array.emptyWithCapacity 0
+    size := 64
+    pageLimit := 64
+  }
+  requireV2 "paged-incomplete-completed-page-rejected"
+    (match psKernelExprV2PagedValidate incomplete with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let impossibleSize : PsKernelExprV2PagedArena := {
+    pages := Array.emptyWithCapacity 0
+    active := Array.emptyWithCapacity 0
+    size := 3
+    pageLimit := 64
+  }
+  requireV2 "paged-mismatched-size-rejected"
+    (match psKernelExprV2PagedValidate impossibleSize with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_PAGED: PASS nodes=512 capacities=5"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -1225,6 +1435,8 @@ def main : IO Unit := do
   testIndexedSmartConstructors
   testChunkedSmartConstructors
   testChunkedArena
+  testPagedSmartConstructors
+  testPagedArena
   testChunkedLiftDifferential
   testSharedLift
   testPortableInstantiation

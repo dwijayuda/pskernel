@@ -1,14 +1,13 @@
 import Ps.KernelCore.Research.ExprV2Paged
 
 /-
-Persistent-index smart constructors for the future V2 execution path.
+Two-level paged smart constructors for the V2 research execution path.
 
-All child references are checked against the *current* immutable indexed
-arena before insertion. Metadata is built from verified older nodes rather
-than from recursion over an expanded legacy tree.
+Every child reference is checked against the owning immutable paged arena
+before appending a fresh node. Metadata is computed from prior validated
+child entries, not by expanding the legacy expression tree.
 
-The source is research-only until the indexed arena and every operation
-qualify through both PSC1 source/JS and native kernel checks.
+This module remains isolated until native and generated-JS qualification.
 -/
 
 /-
@@ -27,7 +26,7 @@ def psKernelExprV2PagedRequire
     Except String PsKernelExprV2Entry :=
   match psKernelExprV2PagedFind arena id with
   | Option.none =>
-      Except.error "PSKERNEL_V2_CHUNKED_INVALID_CHILD"
+      Except.error "PSKERNEL_V2_PAGED_INVALID_CHILD"
   | Option.some entry =>
       Except.ok entry
 

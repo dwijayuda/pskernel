@@ -43,6 +43,12 @@ const portableStructuralEq=load("psKernelExprV2PortableEqChecked");
 const portableEqBatch=load("psKernelExprV2PortableEqBatchChecked");
 const portableImport=load("psKernelExprV2PortableImportChecked");
 const portableImportInto=load("psKernelExprV2PortableImportIntoChecked");
+const pagedEmptyWithLimit=load("psKernelExprV2PagedEmptyWithLimit");
+const pagedPush=load("psKernelExprV2PagedPush");
+const pagedFind=load("psKernelExprV2PagedFind");
+const pagedValidate=load("psKernelExprV2PagedValidate");
+const pagedMkBVar=load("psKernelExprV2PagedMkBVar");
+const pagedMkApp=load("psKernelExprV2PagedMkApp");
 const legacyExpr=load("PsKernelExpr");
 const boolListEq=load("psKernelExprV2PortableBoolListEq");
 const boolList=load("List");
@@ -371,9 +377,51 @@ for(const depth of [8,24,48]){
 }
 console.log("PSC1_EXPR_V2_HEAD_MACHINE_TIMINGS "+JSON.stringify(headMachineMetrics));
 
+
+
+// Paged arena is an independently validated experimental alternative.
+// Old and middle node IDs must remain directly accessible after page rollover.
+let paged= pagedEmptyWithLimit(64n);
+for(let i=0;i<128;i++){
+  const add=pagedPush(paged,firstEntry);
+  demand(add.snd===BigInt(i),"paged-id-"+i);
+  paged=add.fst;
+}
+demand(paged.size===128n,"paged-size-128");
+const checkedPaged=accepted(pagedValidate(paged),"paged-replay-validated");
+for(const i of [0,1,31,63,64,65,96,127]){
+  const entry=acceptedOption(pagedFind(checkedPaged,BigInt(i)),
+    "paged-readback-"+i);
+  demand(entry.hash===firstEntry.hash &&
+    entry.looseRange===firstEntry.looseRange,"paged-lookup-"+i);
+}
+const invalidPage=pagedFind(paged,128n);
+demand(!invalidPage||!("value" in invalidPage),"paged-out-of-bounds");
+
+const firstPaged=accepted(pagedMkBVar(pagedEmptyWithLimit(64n),0n),
+  "paged-smart-bvar");
+const pairPaged=accepted(pagedMkApp(firstPaged.fst,firstPaged.snd,firstPaged.snd),
+  "paged-smart-shared-app");
+const pagedApp=acceptedOption(pagedFind(pairPaged.fst,pairPaged.snd),
+  "paged-app-lookup");
+demand(pagedApp.depth===2n,"paged-smart-app-depth");
+demand(accepted(pagedValidate(pairPaged.fst),"paged-smart-validation").size===2n,
+  "paged-smart-count");
+const forgedPaged=pagedPush(pagedEmptyWithLimit(64n),
+  {...firstEntry,hasFVar:true}).fst;
+const forgedPagedResult=pagedValidate(forgedPaged);
+demand(forgedPagedResult&&"error" in forgedPagedResult,
+  "paged-forged-metadata-rejected");
+const badPagedLayout={...paged,size:paged.size+1n};
+const badPagedResult=pagedValidate(badPagedLayout);
+demand(badPagedResult&&"error" in badPagedResult,
+  "paged-malformed-layout-rejected");
+
+
 const timings=[];
 const readArray=(a,id)=>accepted(lookup(a,id),"measured-array-read");
 const readChunked=(a,id)=>acceptedOption(chunkedFind(a,id),"measured-chunked-read");
+const readPaged=(a,id)=>acceptedOption(pagedFind(a,id),"measured-paged-read");
 const readIndexed=(a,id)=>acceptedOption(indexedFind(a,id),"measured-indexed-read");
 function acceptedOption(option,label){
   if(option&&"value" in option)return option.value;
@@ -418,6 +466,11 @@ for(const n of [256,1024,4096]){
         for(let i=0;i<n;i++)x=chunkedPush(x,firstEntry).fst;
         return x;
       },readChunked);
+      timed("paged"+limit+"-"+n+"-"+round,n,()=>{
+        let x=pagedEmptyWithLimit(BigInt(limit));
+        for(let i=0;i<n;i++)x=pagedPush(x,firstEntry).fst;
+        return x;
+      },readPaged);
     }
     if(n===256){
       timed("indexed-"+n+"-"+round,n,()=>{
@@ -430,10 +483,44 @@ for(const n of [256,1024,4096]){
     }
   }
 }
-demand(timings.length===26 &&
+demand(timings.length===44 &&
   timings.every(x=>x.checksum===String(firstEntry.hash*3n) &&
     x.n===Number(x.label.split("-")[1])),"matched-storage-build-and-readback");
 console.log("PSC1_EXPR_V2_JS_TIMINGS "+JSON.stringify(timings));
+
+// V2 DAG algorithms repeatedly reference previously built nodes, not only
+// append new nodes. Compare cold/old-page lookups after equal construction.
+let lookupChunked=chunkedEmptyWithLimit(64n);
+let lookupPaged=pagedEmptyWithLimit(64n);
+for(let i=0;i<4096;i++){
+  lookupChunked=chunkedPush(lookupChunked,firstEntry).fst;
+  lookupPaged=pagedPush(lookupPaged,firstEntry).fst;
+}
+const lookupIds=[0n,63n,1024n,2048n,4095n];
+const lookupResults=[];
+function measureLookups(kind){
+  const find=kind==="paged"?pagedFind:chunkedFind;
+  const arena=kind==="paged"?lookupPaged:lookupChunked;
+  let checksum=0n;
+  const start=performance.now();
+  for(let r=0;r<24;r++){
+    for(const id of lookupIds){
+      const entry=acceptedOption(find(arena,id),"measured-"+kind+"-"+id);
+      checksum+=entry.hash+entry.looseRange;
+    }
+  }
+  const elapsed=performance.now()-start;
+  const expected=120n*(firstEntry.hash+firstEntry.looseRange);
+  if(checksum!==expected)throw Error("PSC1_V2_LOOKUP_CHECKSUM "+kind);
+  lookupResults.push({kind,queries:120,arena_nodes:4096,
+    ms:Number(elapsed.toFixed(3)),checksum:String(checksum)});
+}
+measureLookups("chunked");
+measureLookups("paged");
+measureLookups("paged");
+measureLookups("chunked");
+console.log("PSC1_EXPR_V2_LOOKUP_TIMINGS "+JSON.stringify(lookupResults));
+
 console.log("PSC1_EXPR_V2_JS_SUMMARY "+JSON.stringify({
   node:process.version,source_bytes:fs.statSync(filename).size,
   rss_bytes:process.memoryUsage().rss,

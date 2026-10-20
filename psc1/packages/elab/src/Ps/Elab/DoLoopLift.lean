@@ -82,7 +82,7 @@ def psElabDoLoopReplaceOwner (owner : PsName) (replacement : PsExpr) (term : PsE
         (psElabDoLoopReplaceOwner owner replacement body)
   | PsExpr.proj name index value =>
       PsExpr.proj name index (psElabDoLoopReplaceOwner owner replacement value)
-  | value => value
+  | _ => term
 
 def psElabDoLoopBetaValue (term : PsExpr) : Bool :=
   match term with

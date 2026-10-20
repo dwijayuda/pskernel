@@ -113,6 +113,24 @@ Existing internal headers remain internal; no new unchecked admission authority.
 All existing behavioral, namespace, typed-error and scoped suites remain enforced,
 plus complete DoLoopLift parse/elaboration gates in both lanes.
 
+## Declaration source candidate and loop catch-all correction — pending Linux CI
+
+Focused run39517856980 at39e7037b38848f0d2d3bbb5cd0aa42568704f459:
+native behavior/namespace suites and38 integrity checks passed. Term and Recursion
+parse/elaborate in BOTH lanes. Counts semantic67/65/63, JS79/73/69, Rust83/74/68.
+Overall failed maintained DoLoopLift elaboration gate:
+matchConstructorUnknown:PsExpr.value in psElabDoLoopReplaceOwner. Replace the
+catch-all variable pattern with a wildcard returning the named input.
+No checker or grammar change.
+
+Normalize complete Declaration source: explicit Prod types/constructors,
+source-origin qualification, exact batch classification, index/environment folds
+with changing state returned as function arguments. Preserve actual execution
+origins, source/member indices, insertion order, normalization fallback trigger,
+all inductive/structure checks and raw API projections. Original declaration names
+remain. Complete Declaration parse/elaboration is gated in BOTH lanes.
+Next semantic parse blocker after that is Compiler.Ordinary.
+
 ## Census integrity and continuation
 
 Fresh Lean and PS preparation states measure the full ordered explicit import

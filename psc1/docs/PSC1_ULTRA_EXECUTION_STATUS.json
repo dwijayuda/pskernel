@@ -423,7 +423,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "Term-native-record-correction-Recursion-and-DoLoopLift-pending",
+    "status": "Term-Recursion-focused-accepted-Declaration-and-loop-catchall-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -509,39 +509,37 @@
       }
     },
     "pendingModules": [
-      "psc1/packages/elab/src/Ps/Elab/Term.lean",
-      "psc1/packages/elab/src/Ps/Elab/Recursion.lean",
-      "psc1/packages/elab/src/Ps/Elab/DoLoopLift.lean"
+      "psc1/packages/elab/src/Ps/Elab/DoLoopLift.lean",
+      "psc1/packages/elab/src/Ps/Elab/Declaration.lean"
     ],
     "latestFocused": {
-      "head": "ed3039c28136e43cc562d6de58dfc092a83e84b5",
-      "runId": 39516022276,
-      "overall": "success",
+      "head": "39e7037b38848f0d2d3bbb5cd0aa42568704f459",
+      "runId": 39517856980,
+      "overall": "failed-maintained-loop-elaboration-gate",
+      "nativeBehaviorAndNamespace": "passed",
       "contractChecks": 38,
-      "liveStrict": "incomplete-semantic-closure-refusal-verified",
       "counts": {
         "semantic": [
           67,
-          62,
-          61
+          65,
+          63
         ],
         "directjs": [
           79,
-          70,
-          67
+          73,
+          69
         ],
         "rust": [
           83,
-          71,
-          66
+          74,
+          68
         ]
       },
       "nextRefusal": {
-        "module": "Ps.Elab.Term",
-        "stage": "parse",
-        "line": 282,
-        "column": 15,
-        "detail": "expected typed lambda binder, got underscore"
+        "module": "Ps.Elab.DoLoopLift",
+        "stage": "elaboration",
+        "declaration": "psElabDoLoopReplaceOwner",
+        "detail": "matchConstructorUnknown:PsExpr.value"
       }
     },
     "latestNativeFailure": {

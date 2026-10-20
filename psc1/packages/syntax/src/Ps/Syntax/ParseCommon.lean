@@ -60,6 +60,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .doEndE span => span
   | .doForE _ _ _ _ span => span
   | .doForRangeE _ _ _ _ _ span => span
+  | .doTryE _ _ _ _ span => span
   | .doWhileE _ _ _ span => span
   | .lambda _ _ span => span
   | .forallE _ _ span => span

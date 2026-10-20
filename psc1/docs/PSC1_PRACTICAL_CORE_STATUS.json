@@ -53,6 +53,14 @@
       "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
       "runId": 39467579973,
       "receipt": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json"
+    },
+    {
+      "id": "typed-error-handlers",
+      "status": "integration-awaiting-ci",
+      "branch": "research/psc1-ultra-architecture-20261021",
+      "baselineCommit": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
+      "integratedCommit": "a830668d2c23886843e616951836d8d990aa2ff5",
+      "scope": "single typed catch, contextual throw, distinct early-return packet, lexical and CompilerM rollback; exact current qualification pending"
     }
   ],
   "stages": [
@@ -494,7 +502,16 @@
           "suite": "psc1_do_tests, psc1_while_tests and the selected Except runtime predicates",
           "scope": "Selected Except propagation, including ordinary while, executes on seven targets in both grammars. CompilerM control/state propagation uses native/private-JS comparisons; throw/try/catch remains missing."
         }
-      ]
+      ],
+      "pendingImplementation": {
+        "status": "implemented-awaiting-ci",
+        "source": "psc1/packages/elab/src/Ps/Elab/DoTry.lean",
+        "tests": [
+          "psc1/test/TypedErrorTests.lean",
+          "psc1/test/TypedErrorOracle.lean",
+          "psc1/scripts/typed-error-conformance-tests.mjs"
+        ]
+      }
     },
     {
       "id": "call-inference",

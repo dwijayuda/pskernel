@@ -1,0 +1,52 @@
+{
+  "schema": "psc1-ultra-execution/1",
+  "date": "2026-10-21",
+  "repository": "dwijayuda/pskernel",
+  "branch": "research/psc1-ultra-architecture-20261021",
+  "pullRequest": 168,
+  "sourceBaseline": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
+  "integratedTypedErrors": "a830668d2c23886843e616951836d8d990aa2ff5",
+  "implementationCommit": null,
+  "qualification": {
+    "status": "pending",
+    "initialRun": 39484282465,
+    "initialRunConclusion": "failure",
+    "initialFailure": "nested RHS handlers and same-column match alternatives require compositional statement scanning; retained suites passed"
+  },
+  "decisions": {
+    "commonIr": "retain checked expression IR; measure before structured stage",
+    "practicalCore": "bounded roles for all14; no full family marked complete",
+    "wasm": "existing GC core + shared concrete component schema/direct encoder; explicit memory adapters only",
+    "selfHost": "pure compiler + external capture/checker/tool/publication host; JS then Rust; transport slice not selfhost",
+    "foreign": "separate optional adapters; existing portable-source v2 contract preserved",
+    "refactor": "shared typed AST + future trivia/resolved-origin side tables"
+  },
+  "p1Remaining": [
+    "efficient optional array indexing",
+    "avoid whole-input finite-loop continuation construction",
+    "Rust capturing closures inside aggregates",
+    "compiler source parser/elaboration/runtime closure gaps",
+    "typed IO adapters and full generated compiler service"
+  ],
+  "selfHosting": false,
+  "fixedPoint": false,
+  "backendPreservationTheorem": false,
+  "publication": "not authorized",
+  "lean": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "toolPins": {
+    "linux": "ubuntu-24.04",
+    "node": "22.23.3",
+    "python": [
+      "3.14.8",
+      "3.15.0"
+    ],
+    "php": "8.5.11",
+    "rust": "1.90.0",
+    "typescript": "7.0.2",
+    "wasmTools": "1.254.0",
+    "wasmtime": "49.0.4"
+  }
+}

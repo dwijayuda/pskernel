@@ -53,7 +53,7 @@ def psBuildErasureDeclarationNamesWorker
       | Option.none => psBuildErasureDeclarationNamesWorker rest state
       | Option.some name =>
           let raw :=
-            psErasureSafeIdentifier (psNameToString name) "decl";
+            psErasureBindingIdentifier (psNameToString name) "decl";
           let candidate :=
             psErasureAddUniqueString state.used raw 4096;
           psBuildErasureDeclarationNamesWorker
@@ -369,7 +369,7 @@ def psEraseDefinition
           name with
       | Option.some known => known
       | Option.none =>
-          psErasureSafeIdentifier
+          psErasureBindingIdentifier
             (psNameToString name)
             "decl";
     match psErasureEnsureDefinitionEntry environment scope name type value with

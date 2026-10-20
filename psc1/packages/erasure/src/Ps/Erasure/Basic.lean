@@ -449,6 +449,91 @@ def psErasureSafeIdentifier
     else if Nat.beq (Char.toNat first) (Char.toNat '$') then base
     else String.Internal.append "_" base
 
+-- Source/Core identity and property labels are not executable binding names.
+-- Escape strict ECMAScript bindings and TypeScript type/declaration keywords
+-- before the existing global/local collision allocators choose their exact names.
+-- Keeping this policy in shared erasure gives JS and TS the same typed IR.
+def psErasureBindingReserved (value : String) : Bool :=
+  psListAny (fun (keyword : String) => psStringEq value keyword)
+    ["arguments",
+      "await",
+      "break",
+      "case",
+      "catch",
+      "class",
+      "const",
+      "continue",
+      "debugger",
+      "default",
+      "delete",
+      "do",
+      "else",
+      "enum",
+      "eval",
+      "export",
+      "extends",
+      "false",
+      "finally",
+      "for",
+      "function",
+      "if",
+      "implements",
+      "import",
+      "in",
+      "instanceof",
+      "interface",
+      "let",
+      "new",
+      "null",
+      "package",
+      "private",
+      "protected",
+      "public",
+      "return",
+      "static",
+      "super",
+      "switch",
+      "this",
+      "throw",
+      "true",
+      "try",
+      "typeof",
+      "var",
+      "void",
+      "while",
+      "with",
+      "yield",
+      "abstract",
+      "any",
+      "as",
+      "asserts",
+      "bigint",
+      "boolean",
+      "declare",
+      "infer",
+      "is",
+      "keyof",
+      "module",
+      "namespace",
+      "never",
+      "number",
+      "object",
+      "readonly",
+      "require",
+      "string",
+      "symbol",
+      "type",
+      "undefined",
+      "unique",
+      "unknown",
+      "__ps$utf8",
+      "__ps$utf8Cache"]
+
+def psErasureBindingIdentifier (raw fallback : String) : String :=
+  let sanitized := psErasureSafeIdentifier raw fallback;
+  if psErasureBindingReserved sanitized then String.Internal.append "_" sanitized
+  else sanitized
+
 def psErasureLocalNameUsed (scope : PsErasureScope) (candidate : String) : Bool :=
   let localUses : (Nat × String) -> Bool :=
     fun (entry : Nat × String) =>
@@ -472,11 +557,7 @@ def psErasureLocalNameWithFuel
       else candidate
 
 def psErasureLocalName (scope : PsErasureScope) (raw fallback : String) (id : Nat) : String :=
-  let sanitized := psErasureSafeIdentifier raw fallback;
-  let base :=
-    if psStringEq sanitized "arguments" then "_arguments"
-    else if psStringEq sanitized "eval" then "_eval"
-    else sanitized;
+  let base := psErasureBindingIdentifier raw fallback;
   let fuel := Nat.succ (Nat.add (psListLength scope.runtimeLocals) scope.declarationNames.count);
   if psStringEq base "_" then psErasureLocalNameWithFuel scope fallback fuel id
   else if psErasureLocalNameUsed scope base then psErasureLocalNameWithFuel scope base fuel id

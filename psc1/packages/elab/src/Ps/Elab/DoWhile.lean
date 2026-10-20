@@ -13,6 +13,9 @@ def psElabDoWhileNestedLoop : PsSyntaxTerm -> Bool
   | .doAssignE _ _ rest _ => psElabDoWhileNestedLoop rest
   | .doBindE _ _ _ rest _ => psElabDoWhileNestedLoop rest
   | .doThenE _ rest _ => psElabDoWhileNestedLoop rest
+  | .doTryE action _ recovery rest _ =>
+      psElabDoWhileNestedLoop action || psElabDoWhileNestedLoop recovery ||
+        psElabDoWhileNestedLoop rest
   | .doIfE _ yes no rest _ =>
       psElabDoWhileNestedLoop yes || psElabDoWhileNestedLoop no ||
         psElabDoWhileNestedLoop rest

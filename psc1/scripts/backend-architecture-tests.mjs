@@ -79,6 +79,75 @@ try {
   records.push({ group: 'one-admission-independent-ts-js', passed: true,
     jsBytes: fs.statSync(stem + '.js').size, tsBytes: fs.statSync(stem + '.ts').size });
 
+
+  // Reserved source spellings are bindings, not host keywords. Exercise the
+  // common erasure name map, collisions and both independent target consumers.
+  const reservedFixtures = {
+    lean: [
+      'def _throw (flag : Bool) : Bool := flag',
+      'def throw (flag : Bool) : Bool := if flag then false else true',
+      'def keyword (flag : Bool) : Bool :=',
+      '  let _throw : Bool := flag;',
+      '  let throw : Bool := if flag then false else true;',
+      '  let await : Bool -> Bool := fun (yield : Bool) => if yield then throw else _throw;',
+      '  if flag then !(await true) && await false else await true && !(await false)',
+      ''
+    ].join('\n'),
+    ps: [
+      'def _throw(flag : Bool) : Bool := flag',
+      'def throw(flag : Bool) : Bool := if (flag) { false } else { true }',
+      'def keyword(flag : Bool) : Bool :=',
+      '  let _throw : Bool := flag',
+      '  let throw : Bool := if (flag) { false } else { true }',
+      '  let await : Bool -> Bool := fun (yield : Bool) => if (yield) { throw } else { _throw }',
+      '  if (flag) { !(await(true)) && await(false) } else { await(true) && !(await(false)) }',
+      ''
+    ].join('\n')
+  };
+  for (const [syntax, reservedSource] of Object.entries(reservedFixtures)) {
+    const folder = path.join(work, 'reserved-' + syntax);
+    fs.mkdirSync(folder, { recursive: true });
+    const reservedInput = path.join(folder, 'reserved.' + syntax);
+    fs.writeFileSync(reservedInput, reservedSource);
+    const outputDirectory = path.join(folder, 'out');
+    command(native, ['build', reservedInput, '--targets', 'ts,js', '--out-dir', outputDirectory]);
+    const reservedStem = path.join(outputDirectory, 'reserved');
+    const reservedManifest = JSON.parse(read(reservedStem + '.ecma.bundle.json'));
+    // The existing public contract uses canonical runtime identifiers. Escaping
+    // reserves _throw for its earlier authored binding and allocates _throw_ for throw.
+    assert.deepEqual([...reservedManifest.publicNames].sort(), ['_throw', '_throw_', 'keyword'].sort());
+    const reservedJs = await import(pathToFileURL(reservedStem + '.js').href);
+    const reservedConsumer = path.join(folder, 'consumer');
+    command(process.execPath, [checker, '--ignoreConfig', reservedStem + '.ts',
+      '--target', 'ES2020', '--module', 'ES2022', '--strict', '--skipLibCheck', '--outDir', reservedConsumer]);
+    const reservedTs = await import(pathToFileURL(path.join(reservedConsumer, 'reserved.js')).href);
+    for (const [target, module] of [['js', reservedJs], ['ts', reservedTs]]) {
+      assert.deepEqual(Object.keys(module).sort(), ['_throw', '_throw_', 'keyword'].sort(), target);
+      for (const flag of [false, true]) {
+        assert.equal(module._throw(flag), flag, target + ' authored escaped-looking global');
+        assert.equal(module._throw_(flag), !flag, target + ' reserved global collision');
+        assert.equal(module.keyword(flag), true, target + ' local/capture keyword shadowing');
+      }
+    }
+    const declarations = read(reservedStem + '.d.ts');
+    assert.match(declarations, /export declare function _throw\(/);
+    assert.match(declarations, /export declare function _throw_\(/);
+    const generation = path.dirname(fs.realpathSync(reservedStem + '.js'));
+    const provenance = JSON.parse(read(path.join(generation, 'psc1-input.json')));
+    const captured = provenance.sources.find(source => source.text === reservedSource);
+    assert.ok(captured, 'source text remains exact');
+    assert.equal(captured.origins.find(origin => origin.sourceName === '_throw')?.name, '_throw');
+    assert.equal(captured.origins.find(origin => origin.sourceName === 'throw')?.name, '_throw_');
+    assert.equal(read(path.join(generation, 'admissions.json')), command(native, ['admissions', reservedInput]),
+      'runtime binding escape must not rewrite canonical logical declarations');
+    for (const extension of ['.js', '.ts']) {
+      const sourceMap = JSON.parse(read(reservedStem + extension + '.map'));
+      assert.ok(sourceMap.sourcesContent.includes(reservedSource), extension + ' source identity');
+    }
+    records.push({ group: syntax + '-reserved-identifiers-collisions-and-origins',
+      passed: true, publicNames: reservedManifest.publicNames });
+  }
+
   for (const [target, extension] of [['rust', '.rs'], ['wasm-core', '.wasm']]) {
     const output = path.join(work, 'small-' + target + extension);
     command(native, ['build', input, '--target', target, '--out', output]);

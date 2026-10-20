@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   linux-scoped:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     defaults:
       run:
@@ -36,21 +36,21 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.23.3'
       - name: Install minimum supported Python for compatibility checks
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
-          python-version: '3.14'
+          python-version: '3.14.8'
       - name: Record minimum Python interpreter
         run: echo "PSC1_PYTHON_314=$(python -c 'import sys; print(sys.executable)')" >> "$GITHUB_ENV"
       - name: Install current Python for target validation and execution
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
-          python-version: '3.15'
+          python-version: '3.15.0'
       - name: Install PHP and selected exact-integer extension
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
-          php-version: '8.5'
+          php-version: '8.5.11'
           extensions: gmp
           tools: none
           coverage: none
@@ -109,7 +109,7 @@ jobs:
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests
+          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
@@ -169,6 +169,27 @@ jobs:
             if ! node "scripts/$script"; then result=1; fi
           done
           exit "$result"
+      - name: Execute typed-error admission and seven-target reference comparisons
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          mkdir -p dist/scoped-correctness/typed-errors
+          result=0
+          if ! .lake/build/bin/psc1_typed_error_tests 2>&1 | tee dist/scoped-correctness/typed-errors/native-tests.log; then result=1; fi
+          if ! node scripts/typed-error-conformance-tests.mjs; then result=1; fi
+          exit "$result"
+      - name: Execute owned component binary encoder with external encoding disabled
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: node scripts/wasm-component-direct-tests.mjs
+      - name: Census real compiler source phases and generated JS Rust host transport
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/compiler-source-census.mjs
+          node scripts/compiler-host-protocol-tests.mjs
       - name: Execute runtime contract against pinned Lean reference results
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
@@ -192,6 +213,9 @@ jobs:
           export PSC1_CONFORMANCE_TARGETS=python
           export PSC1_RUNTIME_EVIDENCE=runtime-conformance-python314
           export PSC1_WHILE_EVIDENCE=ordinary-while-conformance-python314
+          export PSC1_ERROR_TARGETS=python
+          export PSC1_ERROR_EVIDENCE=typed-errors-python314
+          node scripts/typed-error-conformance-tests.mjs
           node scripts/runtime-conformance-tests.mjs
           node scripts/ordinary-while-conformance-tests.mjs
           node scripts/script-backend-tests.mjs

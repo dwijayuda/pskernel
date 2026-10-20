@@ -66,7 +66,8 @@ lean_lib PsBridge where
     `Ps.Bridge.Json,
     `Ps.Bridge.CheckedAdmissions,
     `Ps.Bridge.Codec,
-    `Ps.Bridge.Protocol
+    `Ps.Bridge.Protocol,
+    `Ps.Bridge.CompilerHost
   ]
 
 lean_lib PsCompilerIr where
@@ -155,7 +156,11 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.Encode,
     `Ps.BackendWasm.Binary,
-    `Ps.BackendWasm.RuntimePlan
+    `Ps.BackendWasm.RuntimePlan,
+    `Ps.BackendWasm.ValidateStructure,
+    `Ps.BackendWasm.ValidateTyping,
+    `Ps.BackendWasm.ValidateIr,
+    `Ps.BackendWasm.Component
   ]
 
 lean_lib PsBackendPython where
@@ -221,6 +226,7 @@ lean_lib PsElab where
     `Ps.Elab.DoBase,
     `Ps.Elab.DoFor,
     `Ps.Elab.DoWhile,
+    `Ps.Elab.DoTry,
     `Ps.Elab.Do,
     `Ps.Elab.Operators,
     `Ps.Elab.Term,
@@ -337,6 +343,26 @@ lean_exe psc1_while_tests where
   srcDir := "test"
   root := `WhileTests
 
+lean_lib PsTypedErrorReference where
+  srcDir := "test"
+  roots := #[`TypedErrorFixtures, `TypedErrorWhileFixture]
+
+lean_exe psc1_typed_error_oracle where
+  srcDir := "test"
+  root := `TypedErrorOracle
+
+lean_exe psc1_typed_error_tests where
+  srcDir := "test"
+  root := `TypedErrorTests
+
 lean_exe psc1_namespace_tests where
   srcDir := "test"
   root := `NamespaceTests
+
+lean_exe psc1_source_census_probe where
+  srcDir := "scripts"
+  root := `SourceCensusProbe
+
+lean_exe psc1_independent_checker where
+  srcDir := "packages/pskernel-lean/provider"
+  root := `PsKernelLean.Main

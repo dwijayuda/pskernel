@@ -26,15 +26,15 @@ def psParseDoArrow (cursor : PsTokenCursor) : Bool :=
 -- branch closes the statement, while an else in its RHS remains part of the term.
 def psParseDoTakeStatement
     (fuel : Nat) (start : PsSourcePos) :
-    Nat -> Nat -> PsTokenCursor -> List PsToken ->
+    Nat -> Nat -> Nat -> PsTokenCursor -> List PsToken ->
     PsParseResult (List PsToken) :=
   match fuel with
   | Nat.zero =>
-      fun (_depth _conditionals : Nat) (cursor : PsTokenCursor)
+      fun (_depth _conditionals _handlers : Nat) (cursor : PsTokenCursor)
           (tokensRev : List PsToken) =>
         PsParseResult.mk (psParseListReverse tokensRev) cursor
   | Nat.succ remaining =>
-      fun (depth conditionals : Nat) (cursor : PsTokenCursor)
+      fun (depth conditionals handlers : Nat) (cursor : PsTokenCursor)
           (tokensRev : List PsToken) =>
         let smaller := psParseDoTakeStatement remaining start;
         match psTokenCursorPeek cursor with
@@ -45,9 +45,13 @@ def psParseDoTakeStatement
               else if Nat.beq depth 0 then
                 if psParseDoCloseToken token.text then true
                 else if psStringEq token.text ";" then true
+                else if psStringEq token.text "catch" then Nat.beq handlers 0
                 else if psStringEq token.text "else" then Nat.beq conditionals 0
                 else if Nat.ble (Nat.succ start.line) token.span.start.line then
-                  Nat.ble token.span.start.column start.column
+                  -- Match alternatives may align with their match expression.
+                  if psStringEq token.text "|" then
+                    Nat.blt token.span.start.column start.column
+                  else Nat.ble token.span.start.column start.column
                 else false
               else false;
             if stop then PsParseResult.mk (psParseListReverse tokensRev) cursor
@@ -65,7 +69,13 @@ def psParseDoTakeStatement
                       else if psStringEq token.text "else" then Nat.sub conditionals 1
                       else conditionals
                     else conditionals;
-                  smaller nextDepth nextConditionals read.cursor (List.cons token tokensRev)
+                  let nextHandlers :=
+                    if Nat.beq depth 0 then
+                      if psStringEq token.text "try" then Nat.succ handlers
+                      else if psStringEq token.text "catch" then Nat.sub handlers 1
+                      else handlers
+                    else handlers;
+                  smaller nextDepth nextConditionals nextHandlers read.cursor (List.cons token tokensRev)
 
 inductive PsParseDoHead where
   | binding
@@ -79,6 +89,8 @@ inductive PsParseDoHead where
   | forEach (name : PsSyntaxName) (collection body : PsSyntaxTerm) (span : PsSourceSpan)
   | forRange (name : PsSyntaxName) (lower upper body : PsSyntaxTerm) (span : PsSourceSpan)
   | whileLoop (condition body : PsSyntaxTerm) (span : PsSourceSpan)
+  | handler (body : PsSyntaxTerm) (name : PsSyntaxName)
+      (recovery : PsSyntaxTerm) (span : PsSourceSpan)
   | action (value : PsSyntaxTerm)
   | nested (body : PsSyntaxTerm) (span : PsSourceSpan)
   | returnValue (value : PsSyntaxTerm) (span : PsSourceSpan)
@@ -148,7 +160,16 @@ def psParseDoPatternBinding
 def psParseDoStatement
     (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
     (cursor : PsTokenCursor) : Except PsParseError PsParseDoHead :=
-  if psTokenCursorAtText cursor "return" then
+  if psTokenCursorAtText cursor "throw" then
+    match psTokenCursorAdvance cursor with
+    | none => .error (PsParseError.unexpectedEnd "throw value")
+    | some keyword =>
+        match psParseDoCompleteTerm parseTerm keyword.cursor with
+        | .error error => .error error
+        | .ok value =>
+            let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan value)
+            .ok (.action (.app (psSyntaxSyntheticReference "throw" keyword.token.span) [value] span))
+  else if psTokenCursorAtText cursor "return" then
     match psTokenCursorAdvance cursor with
     | Option.none => Except.error (PsParseError.unexpectedEnd "return value")
     | Option.some keyword =>
@@ -208,6 +229,7 @@ def psParseDoHeadSpan (head : PsParseDoHead) : PsSourceSpan :=
   | PsParseDoHead.forRange _ _ _ _ span => span
   | PsParseDoHead.whileLoop _ _ span => span
   | PsParseDoHead.returnValue _ span => span
+  | PsParseDoHead.handler _ _ _ span => span
   | PsParseDoHead.action value => psSyntaxTermSpan value
   | PsParseDoHead.nested _ span => span
 
@@ -238,6 +260,12 @@ def psParseDoFallthrough (body : PsSyntaxTerm) : PsSyntaxTerm :=
       .doForRangeE name lower upper loopBody (psParseDoFallthrough rest) span
   | .doWhileE condition loopBody rest span =>
       .doWhileE condition loopBody (psParseDoFallthrough rest) span
+  | .doTryE action name recovery rest span =>
+      match rest with
+      | .doEndE _ =>
+          .doTryE (psParseDoFallthrough action) name
+            (psParseDoFallthrough recovery) rest span
+      | _ => .doTryE action name recovery (psParseDoFallthrough rest) span
   | .doReturnE _ _ => body
   | .doEndE _ => body
   | _ => .doThenE body (.doEndE (psSyntaxTermSpan body)) (psSyntaxTermSpan body)
@@ -299,6 +327,15 @@ def psParseDoAppend (fuel : Nat) (tail : PsSyntaxTerm) :
             rebuild rest (fun (appended : PsSyntaxTerm) =>
               .doWhileE condition loopBody appended
                 (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
+        | .doTryE action name recovery rest span =>
+            match rest with
+            | .doEndE _ =>
+                Except.ok (.doTryE (psParseDoFallthrough action) name
+                  (psParseDoFallthrough recovery) tail
+                  (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
+            | _ =>
+                rebuild rest (fun appended => .doTryE action name recovery appended
+                  (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
         | .doReturnE _ _ =>
             Except.error (PsParseError.expectedText
               "terminal return in this statement sequence" "following statement"
@@ -347,6 +384,11 @@ def psParseDoCloseHead
       Except.ok (.doForRangeE name lower upper (psParseDoFallthrough body) rest fullSpan)
   | PsParseDoHead.whileLoop condition body _ =>
       Except.ok (.doWhileE condition (psParseDoFallthrough body) rest fullSpan)
+  | PsParseDoHead.handler action name recovery _ =>
+      match tail with
+      | none => .ok (.doTryE action name recovery rest fullSpan)
+      | some _ => .ok (.doTryE (psParseDoFallthrough action) name
+          (psParseDoFallthrough recovery) rest fullSpan)
   | PsParseDoHead.conditional condition thenBody elseBody _ =>
       match tail with
       | Option.none => Except.ok (PsSyntaxTerm.doIfE condition thenBody elseBody rest fullSpan)
@@ -380,7 +422,7 @@ def psParseDoBranch
     match psTokenCursorPeek cursor with
     | Option.none => Except.error (PsParseError.unexpectedEnd "branch body")
     | Option.some first =>
-        if psTokenCursorAtText cursor "else" then
+        if psTokenCursorAtText cursor "else" || psTokenCursorAtText cursor "catch" then
           Except.error (psParseDoExpected "branch body" cursor)
         else parseBody false first.span.start.column cursor
   else Except.error (psParseDoExpected "{" cursor)
@@ -608,6 +650,25 @@ def psParseDoWhile
                   { start := keyword.token.span.start,
                     stop := (psSyntaxTermSpan body.value).stop }) body.cursor)
 
+-- A single typed catch delimits the handler scope. Braces are required by PS;
+-- native Lean may use layout. A nested try may not steal an outer catch.
+def psParseDoTry
+    (parseBody : Bool -> Nat -> PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (native : Bool) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsParseDoHead) := do
+  let keyword <- psTokenCursorExpectText cursor "try"
+  let body <- psParseDoBranch parseBody native keyword.cursor
+  let catchToken <- psTokenCursorExpectText body.cursor "catch"
+  if native && catchToken.token.span.start.column < keyword.token.span.start.column then
+    throw (psParseDoExpected "catch aligned with its try" body.cursor)
+  let binder <- psTokenCursorExpectKind catchToken.cursor PsTokenKind.identifier
+  let separator <- psTokenCursorExpectText binder.cursor "=>"
+  let recovery <- psParseDoBranch parseBody native separator.cursor
+  let name := PsSyntaxName.mk [binder.token.text] binder.token.span
+  let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan recovery.value)
+  pure (PsParseResult.mk (.handler body.value name recovery.value span) recovery.cursor)
+
 def psParseDoBody
     (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
     (allowSemicolon : Bool) (fuel : Nat) :
@@ -628,11 +689,13 @@ def psParseDoBody
                 psParseDoConditional parseTerm smaller allowSemicolon cursor
               else if psTokenCursorAtText cursor "for" then
                 psParseDoFor parseTerm smaller allowSemicolon cursor
+              else if psTokenCursorAtText cursor "try" then
+                psParseDoTry smaller allowSemicolon cursor
               else if psTokenCursorAtText cursor "while" then
                 psParseDoWhile parseTerm smaller allowSemicolon cursor
               else
                 let chunk := psParseDoTakeStatement
-                  (Nat.succ (psParseListLength cursor.remaining)) first.span.start 0 0 cursor [];
+                  (Nat.succ (psParseListLength cursor.remaining)) first.span.start 0 0 0 cursor [];
                 match psParseDoStatement parseTerm (PsTokenCursor.mk chunk.value) with
                 | Except.error error => Except.error error
                 | Except.ok head => Except.ok (PsParseResult.mk head chunk.cursor);
@@ -654,6 +717,7 @@ def psParseDoBody
                     let hasNext :=
                       if psTokenCursorDone next.snd then false
                       else if psTokenCursorAtText next.snd "}" then false
+                      else if psTokenCursorAtText next.snd "catch" then false
                       else if psTokenCursorAtText next.snd "else" then false
                       else if braced then true
                       else

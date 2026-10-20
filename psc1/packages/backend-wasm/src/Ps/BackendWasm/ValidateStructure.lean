@@ -1,5 +1,6 @@
 import Ps.BackendWasm.Model
 import Ps.Foundation.List
+import Ps.Foundation.Name
 
 inductive PsWasmIrValidationError where
   | duplicateTypeName (name : String)

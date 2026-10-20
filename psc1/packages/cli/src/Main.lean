@@ -79,7 +79,8 @@ private def psCliExecution
   | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSourceFor inputPath assurance)
   | ["build", inputPath, "--targets", targets, "--out-dir", outputDir] =>
       buildTargetsFor inputPath outputDir targets assurance
-  | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath] =>
+  | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath]
+  | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--export", exportName] =>
       psHostDirectEmitWasmComponent (← psHostDirectPrepareFor inputPath assurance) exportName outputPath
   | ["build", inputPath, "--target", target, "--out", outputPath] =>
       buildFor inputPath outputPath target assurance
@@ -108,7 +109,8 @@ private def psCliCheckedExecution (args : List String) : IO Unit := do
       buildFor inputPath outputPath target .checked
   | ["build", inputPath, "--targets", targets, "--out-dir", outputDir] =>
       buildTargetsFor inputPath outputDir targets .checked
-  | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath] =>
+  | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath]
+  | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--export", exportName] =>
       psHostDirectWasmComponent inputPath exportName outputPath
   | ["build", inputPath, "--out", outputPath] | ["compile", inputPath, "--out", outputPath] =>
       buildDefault inputPath outputPath

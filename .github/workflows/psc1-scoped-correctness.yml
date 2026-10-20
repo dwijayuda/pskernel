@@ -109,7 +109,7 @@ jobs:
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_operator_tests psc1_ordinary_tests
+          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
@@ -169,6 +169,16 @@ jobs:
             if ! node "scripts/$script"; then result=1; fi
           done
           exit "$result"
+      - name: Execute typed-error admission and seven-target reference comparisons
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          mkdir -p dist/scoped-correctness/typed-errors
+          result=0
+          if ! .lake/build/bin/psc1_typed_error_tests 2>&1 | tee dist/scoped-correctness/typed-errors/native-tests.log; then result=1; fi
+          if ! node scripts/typed-error-conformance-tests.mjs; then result=1; fi
+          exit "$result"
       - name: Execute runtime contract against pinned Lean reference results
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
@@ -192,6 +202,9 @@ jobs:
           export PSC1_CONFORMANCE_TARGETS=python
           export PSC1_RUNTIME_EVIDENCE=runtime-conformance-python314
           export PSC1_WHILE_EVIDENCE=ordinary-while-conformance-python314
+          export PSC1_ERROR_TARGETS=python
+          export PSC1_ERROR_EVIDENCE=typed-errors-python314
+          node scripts/typed-error-conformance-tests.mjs
           node scripts/runtime-conformance-tests.mjs
           node scripts/ordinary-while-conformance-tests.mjs
           node scripts/script-backend-tests.mjs

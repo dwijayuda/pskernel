@@ -1,18 +1,34 @@
 import Ps.Elab.DoWhile
 
--- A handler is not a tail-resumptive branch. Running the following statements
--- under its catch would catch errors that are outside the source try block.
--- Instead, return a checked packet through the base effect:
---   Except ReturnValue MutableState
--- Its error tag is an EARLY RETURN, not a base-effect error. Its ok tag carries
--- successful fallthrough state. Only the outer base-effect error is caught.
--- The packet is eliminated before the enclosing continuation is resumed.
-
-abbrev PsElabDoReturn :=
+-- A handler is not tail-resumptive: the following statements must run outside
+-- its catch. Pack successful fallthrough and early return inside the base effect
+-- using existing checked Except/Prod data. Packet.error is an EARLY RETURN;
+-- only an error of the outer base effect is a caught source error.
+def PsElabDoReturn : Type :=
   PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult
 
-abbrev PsElabDoTryNext :=
+def PsElabDoTryNext : Type :=
   PsExpr -> PsElabDoReturn -> PsElabDoForNext
+
+-- A terminal arm which never invokes its fallthrough continuation does not
+-- require a state packet. Return callbacks are exclusively base pure/packet
+-- constructors, never source continuations. This avoids inventing a value for
+-- an unreachable fallthrough branch in a non-Unit terminal computation.
+def psElabDoNoFallthrough : PsSyntaxTerm -> Bool
+  | .doEndE _ => false
+  | .doReturnE _ _ => true
+  | .letE _ _ _ rest _ | .doLetMutE _ _ _ rest _
+  | .doAssignE _ _ rest _ | .doBindE _ _ _ rest _
+  | .doThenE _ rest _ => psElabDoNoFallthrough rest
+  | .doIfE _ yes no rest _ =>
+      psElabDoNoFallthrough rest ||
+        (psElabDoNoFallthrough yes && psElabDoNoFallthrough no)
+  | .doTryE body _ handler rest _ =>
+      psElabDoNoFallthrough rest ||
+        (psElabDoNoFallthrough body && psElabDoNoFallthrough handler)
+  | .doForE _ _ _ rest _ | .doForRangeE _ _ _ _ rest _
+  | .doWhileE _ _ rest _ => psElabDoNoFallthrough rest
+  | _ => true
 
 def psElabDoExceptCases
     (context : PsElabContext) (error value result scrutinee onError onOk : PsExpr) :
@@ -41,16 +57,14 @@ def psElabDoCatch
       psElabDoExceptCases current error type (psElabDoType ops type)
         action handler okBranch.term
   | .compiler reader state error =>
-      -- These are the already checked library operations. In particular the
-      -- catch restarts from its input state; no host exception is intercepted.
+      -- Existing checked library operation; failure resets its effect state.
       psElabResolvedTerm context
         (psExprApplyMany (PsExpr.constE (psRootName "compilerTryCatch") [])
           [reader, state, error, type, action, handler])
         (some (psElabDoType ops type))
 
--- A terminal effect expression in a lifted handler has the original source
--- result type, not the internal packet type. Sequence it in the base effect
--- and forward its value through the selected return continuation.
+-- A terminal effect expression retains its original source result type. Only
+-- its successful value is then forwarded through the enclosing return context.
 def psElabDoLiftTerminal
     (elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
       Except PsElabError PsElabTermResult)
@@ -79,6 +93,18 @@ def psElabDoTry
   let some name := psSyntaxNameToName errorName | throw PsElabError.emptyName
   if psElabDoMutableHasName name state then
     throw (PsElabError.doMutableShadowing name)
+  let terminal := match rest with | .doEndE _ => true | _ => false
+  if terminal && psElabDoNoFallthrough body && psElabDoNoFallthrough handler then
+    let action <- inside result onReturn context state body finish
+    let current := psElabContextWithMeta context action.context.metaContext
+    let recovery <- psElabDoForLambda
+      (fun recoveryContext _ =>
+        inside result onReturn recoveryContext state handler finish)
+      current name (psMetaInstantiate current.metaContext errorType)
+    let current := psElabContextWithMeta context recovery.context.metaContext
+    return <- psElabDoCatch ops current
+      (psMetaInstantiate current.metaContext result)
+      (psMetaInstantiate current.metaContext action.term) recovery.term
   let carried := psElabDoMutableVisible context state
   let stateType := psElabDoWhileStateType context carried
   let packetType := psSelfHostExceptOf returnType stateType
@@ -96,8 +122,8 @@ def psElabDoTry
         (psMetaInstantiate current.metaContext returnType)
         (psMetaInstantiate current.metaContext stateType) packed)
   let action <- inside packetType returnPacket context state body finishPacket
-  -- Both arms start from the pre-try lexical values. Success carries updated
-  -- values in the packet; failure discards them before entering the handler.
+  -- Both arms start from the pre-try lexical values. Only successful
+  -- fallthrough carries changed values beyond the handler boundary.
   let current := psElabContextWithMeta context action.context.metaContext
   let recovery <- psElabDoForLambda
     (fun recoveryContext _ =>

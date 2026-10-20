@@ -283,6 +283,18 @@ def psPrintDoBody
                   psPrintDoLoopHead smaller native
                     (psPrintJoin "" ["while (", printedCondition, ")"]) loopBody;
             withTail printedHead tail
+        | PsSyntaxTerm.doTryE action name recovery tail _ =>
+            let printedHead := do
+              let printedName <- psPrintSyntaxName name
+              let printedBody <- smaller action
+              let printedRecovery <- smaller recovery
+              if native then
+                pure (psPrintJoin "" ["try { ", printedBody, " } catch ",
+                  printedName, " => { ", printedRecovery, " }"])
+              else
+                pure (psPrintJoin "" ["try {\n  ", printedBody, "\n} catch ",
+                  printedName, " => {\n  ", printedRecovery, "\n}"])
+            withTail printedHead tail
         | PsSyntaxTerm.doBindE name annotation value tail _ =>
             withTail (psPrintDoBinding printTerm name annotation "let " " <- " value) tail
         | PsSyntaxTerm.doThenE action tail _ =>

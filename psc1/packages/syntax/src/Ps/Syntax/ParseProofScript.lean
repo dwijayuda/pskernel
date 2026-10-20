@@ -165,6 +165,7 @@ def psProofScriptTermWithSpan
   | .doEndE _ => PsSyntaxTerm.doEndE span
   | .doForE name collection body rest _ => .doForE name collection body rest span
   | .doForRangeE name lower upper body rest _ => .doForRangeE name lower upper body rest span
+  | .doTryE body name handler rest _ => .doTryE body name handler rest span
   | .doWhileE condition body rest _ => .doWhileE condition body rest span
   | .lambda binders body _ => PsSyntaxTerm.lambda binders body span
   | .forallE binders body _ => PsSyntaxTerm.forallE binders body span

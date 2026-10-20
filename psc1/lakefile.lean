@@ -221,6 +221,7 @@ lean_lib PsElab where
     `Ps.Elab.DoBase,
     `Ps.Elab.DoFor,
     `Ps.Elab.DoWhile,
+    `Ps.Elab.DoTry,
     `Ps.Elab.Do,
     `Ps.Elab.Operators,
     `Ps.Elab.Term,
@@ -336,6 +337,18 @@ lean_exe psc1_data_tests where
 lean_exe psc1_while_tests where
   srcDir := "test"
   root := `WhileTests
+
+lean_lib PsTypedErrorReference where
+  srcDir := "test"
+  roots := #[`TypedErrorFixtures, `TypedErrorWhileFixture]
+
+lean_exe psc1_typed_error_oracle where
+  srcDir := "test"
+  root := `TypedErrorOracle
+
+lean_exe psc1_typed_error_tests where
+  srcDir := "test"
+  root := `TypedErrorTests
 
 lean_exe psc1_namespace_tests where
   srcDir := "test"

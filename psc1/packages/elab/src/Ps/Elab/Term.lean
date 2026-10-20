@@ -2992,6 +2992,7 @@ def psElabTermWithFuel
             | .doEndE _ => Except.error PsElabError.doStatementOutsideBlock
             | .doForE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doForRangeE _ _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .doTryE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doWhileE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .letPatternE pattern declaredType value body _ =>
                 psElabLetPattern smaller context pattern declaredType value

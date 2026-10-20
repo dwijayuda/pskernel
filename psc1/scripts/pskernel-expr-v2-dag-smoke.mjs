@@ -679,18 +679,26 @@ console.log("PSC1_V2_DAG_JS_BETA: PASS");
   compareState(exactOriginal,attemptedState(4n,checker.context,syntax),
     "state-dag-retains-first-cached-syntax");
   must(rejected(invoke(stateArena,[C.whnf(syntax)])),"state-raw-syntax-fixture-rejected-publicly");
-  const warmOld=accepted(get("psKernelSessionWhnf")(4n,checker,fixtures[0][1]),"warm-old");
-  const warmAttempt=attemptedState(4n,checker.context,shared);
+  const warmContext={...checker.context,maxRecDepth:1n};
+  const warmChecker={...checker,context:warmContext};
+  const warmOld=accepted(get("psKernelSessionWhnf")(4n,warmChecker,fixtures[0][1]),"warm-old");
+  const warmAttempt=attemptedState(4n,warmContext,shared);
   must(warmAttempt&&typeof warmAttempt==="object"&&"value" in warmAttempt,"warm-dag-direct");
   const warmDag=accepted(warmAttempt.value,"warm-dag");
   const noCallback=()=>{throw Error("PSC1_DAG_UNEXPECTED_WARM_CORE_CALLBACK");};
-  for(const context of [checker.context,{...checker.context,maxRecDepth:1n,recDepth:16n}]){
+  for(const context of [warmContext,{...warmContext,recDepth:16n}]){
     for(const fuel of [0n,1n]){
       const original=get("psKernelWhnfCoreWithFuel")(fuel)
         (noCallback)(noCallback)(context)(warmOld.snd.state)(fixtures[0][1])(false)(false);
-      const actual=get("psKernelExprV2TryWhnfCoreStateWithFuel")(fuel)
-        (context)(warmDag.fst)(shared);
+      const actual=get("psKernelExprV2TryWhnfCoreStateWithFuel")(fuel,context,warmDag.fst,shared);
       compareState(original,actual,"state-warm-entry-guards-"+context.recDepth+"-"+fuel);
+    }
+  }
+  for(const context of [warmContext,{...warmContext,recDepth:16n}]){
+    for(const fuel of [0n,1n]){
+      compareState(get("psKernelSessionWhnf")(fuel,{...warmOld.snd,context},fixtures[0][1]),
+        get("psKernelExprV2TryWhnfStateWithFuel")(fuel)(context)(warmDag.fst)(shared),
+        "public-warm-entry-guards-"+context.recDepth+"-"+fuel);
     }
   }
   const localName=name("state-local");
@@ -701,7 +709,8 @@ console.log("PSC1_V2_DAG_JS_BETA: PASS");
   const openAttempt=attemptedState(64n,localContext,openRoot);
   must(openAttempt&&typeof openAttempt==="object"&&"value" in openAttempt,"open-state-direct");
   const openResult=accepted(openAttempt.value,"open-state-result");
-  must(array(openResult.fst.coreCache).length===0,"open-state-cache-ineligible");
+  must(array(openResult.fst.coreCache).length===0&&
+    array(openResult.fst.publicCache).length===0,"open-state-cache-ineligible");
   const letLocals=get("psKernelLocalContextAddLet")(checker.context.localContext,
     localName,localName,sort1,sort0);
   const letContext=get("psKernelCheckerContextWithLocalContext")(checker.context,letLocals);
@@ -710,5 +719,268 @@ console.log("PSC1_V2_DAG_JS_BETA: PASS");
   must(declined!==undefined&&sameRuntimeValue(declined,none),"local-let-value-explicit-fallback");
 }
 console.log("PSC1_V2_DAG_JS_WHNF_STATE: PASS");
+
+
+{
+  let reductionArena=empty;
+  const addReduction=(kind,...args)=>{
+    const result=mk(reductionArena,kind,...args);
+    reductionArena=result.fst;return result.snd;
+  };
+  const literal=get("PsKernelLiteral"),natName=get("psKernelNatName");
+  const numeral=value=>E.lit(literal.nat(value));
+  const natID=value=>addReduction("Lit",literal.nat(value));
+  const binary=(op,left,right)=>{
+    const fn=addReduction("Const",N.str(natName,op),nil);
+    const a=addReduction("MData",13n,natID(left)),b=addReduction("MData",17n,natID(right));
+    const root=addReduction("App",addReduction("App",fn,a),b);
+    const term=E.app(E.app(E.const(N.str(natName,op),nil),E.mdata(13n,numeral(left))),
+      E.mdata(17n,numeral(right)));
+    return [root,term];
+  };
+  const compareRaw=(fuel,checker,root,term,label)=>{
+    const original=get("psKernelSessionWhnf")(fuel,checker,term);
+    const attempt=get("psKernelExprV2TryWhnfStateWithFuel")(fuel)(checker.context)
+      (get("psKernelExprV2WhnfStateEmpty")(reductionArena))(root);
+    must(attempt&&typeof attempt==="object"&&"value" in attempt,label+"-direct");
+    const actual=attempt.value;
+    if(rejected(original)){
+      must(rejected(actual)&&original.error===actual.error,label+"-error");
+    }else{
+      const result=accepted(actual,label+"-success");
+      const built=accepted(decode(result.fst.arena),label+"-canonical-result");
+      must(exact(accepted(decoded(built,result.snd),label+"-decode"),
+        accepted(original,label+"-original").fst),label+"-exact-value");
+    }
+  };
+  const initial=session(),checker=get("psKernelKernelSessionChecker")(initial,nil,S.safe);
+  const outcomes=[
+    ["add",numeral(13n)],["sub",numeral(5n)],["mul",numeral(36n)],
+    ["pow",numeral(6561n)],["gcd",numeral(1n)],["mod",numeral(1n)],
+    ["div",numeral(2n)],["beq",E.const(get("psKernelBoolFalseName"),nil)],
+    ["ble",E.const(get("psKernelBoolFalseName"),nil)],["land",numeral(0n)],
+    ["lor",numeral(13n)],["xor",numeral(13n)],["shiftLeft",numeral(144n)],
+    ["shiftRight",numeral(0n)]
+  ];
+  for(const [op,expected]of outcomes){
+    const [root,term]=binary(op,9n,4n);
+    must(exact(accepted(get("psKernelSessionWhnf")(64n,checker,term),op+"-expected").fst,expected),
+      "nat-independent-expected-"+op);
+    for(const fuel of [0n,1n,2n,3n,4n,6n,12n,64n]){
+      for(const depth of [0n,1n]){
+        for(const maxNatSize of [0n,1n,get("psKernelLeanNatMaxSizeDefault")]){
+          compareRaw(fuel,{...checker,context:{...checker.context,maxRecDepth:depth,maxNatSize}},
+            root,term,"nat-full-pipeline-"+op+"-"+fuel+"-"+depth+"-"+maxNatSize);
+        }
+      }
+    }
+  }
+  for(const [op,left,right]of [["pow",2n,4294967296n],["shiftLeft",1n,4294967296n],
+      ["div",9n,0n],["mod",9n,0n],["pow",0n,0n]]){
+    const [root,term]=binary(op,left,right);
+    compareRaw(64n,checker,root,term,"nat-count-and-zero-"+op+"-"+left+"-"+right);
+  }
+  const rs0=addReduction("Sort",L.zero),rs1=addReduction("Sort",L.succ(L.zero));
+  let deep=rs0;for(const tag of [3n,2n,1n])deep=addReduction("MData",tag,deep);
+  const unknownFn=addReduction("Const",name("notNat"),nil);
+  const unknownRoot=addReduction("App",addReduction("App",unknownFn,rs0),deep);
+  const unknown=E.app(E.app(E.const(name("notNat"),nil),sort0),E.mdata(1n,E.mdata(2n,E.mdata(3n,sort0))));
+  for(const fuel of [0n,1n,2n,3n,4n,5n,6n,16n])
+    compareRaw(fuel,checker,unknownRoot,unknown,"nonprimitive-binary-order-"+fuel);
+  const exhausted=get("psKernelSessionWhnf")(3n,checker,unknown);
+  must(rejected(exhausted)&&exhausted.error==="kernel reduction budget exhausted",
+    "nonprimitive-still-normalizes-both-operands");
+  const Request=get("PsKernelDeclarationRequest"),nat=E.const(natName,nil);
+  const natSession=accepted(get("psKernelV1AdmitDeclaration")(initial,Request.ordinaryInductive({
+    levelParams:nil,name:natName,type:sort1,numParams:0n,isUnsafe:false,
+    ctors:list([{name:get("psKernelNatZeroName"),type:nat},
+      {name:get("psKernelNatSuccName"),type:E.forallE(name("n"),nat,nat,B.default)}])
+  })),"real-Nat-admission").session;
+  const succFn=addReduction("Const",get("psKernelNatSuccName"),nil);
+  const succRoot=addReduction("App",succFn,addReduction("MData",3n,
+    addReduction("App",succFn,natID(4n))));
+  const succ=E.app(E.const(get("psKernelNatSuccName"),nil),
+    E.mdata(3n,E.app(E.const(get("psKernelNatSuccName"),nil),numeral(4n))));
+  for(const fuel of [0n,1n,2n,3n,4n,5n,6n,8n,16n,64n]){
+    for(const maxRecDepth of [0n,1n,2n]){
+      const s={...natSession,resources:{...natSession.resources,fuel,maxRecDepth}};
+      must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,succ),
+        invoke(reductionArena,[C.whnf(succRoot)],s),exact),
+        "checked-Nat-successor-parity-"+fuel+"-"+maxRecDepth);
+    }
+  }
+  const natReply=array(accepted(invoke(reductionArena,[C.whnf(succRoot)],natSession),
+    "checked-Nat-successor").replies);
+  must(natReply.length===1&&exact(natReply[0].value,numeral(6n)),"checked-Nat-successor-value");
+  const box=name("DagProjectionBox"),ctor=N.str(box,"mk"),boxType=E.const(box,nil);
+  const ctorType=E.forallE(name("A"),sort1,E.forallE(name("B"),sort1,boxType,B.default),B.default);
+  const boxSession=accepted(get("psKernelV1AdmitDeclaration")(initial,Request.ordinaryInductive({
+    levelParams:nil,name:box,type:E.sort(L.succ(L.succ(L.zero))),numParams:0n,isUnsafe:false,
+    ctors:list([{name:ctor,type:ctorType}])
+  })),"real-projection-inductive-admission").session;
+  const boxChecker=get("psKernelKernelSessionChecker")(boxSession,nil,S.safe);
+  const boxID=addReduction("Const",box,nil),ctorID=addReduction("Const",ctor,nil);
+  const value=addReduction("App",addReduction("App",ctorID,addReduction("MData",7n,rs0)),
+    addReduction("MData",9n,rs0));
+  let unselected=rs0,unselectedTerm=sort0;
+  for(const tag of [0n,1n,2n,3n]){
+    unselected=addReduction("MData",tag,unselected);
+    unselectedTerm=E.mdata(tag,unselectedTerm);
+  }
+  const budgetRoot=addReduction("Proj",box,0n,
+    addReduction("App",addReduction("App",ctorID,rs0),unselected));
+  const budgetTerm=E.proj(box,0n,E.app(E.app(E.const(ctor,nil),sort0),unselectedTerm));
+  for(const fuel of [6n,7n]){
+    const original=get("psKernelSessionWhnf")(fuel,boxChecker,budgetTerm);
+    if(fuel===6n){
+      must(rejected(original)&&original.error==="kernel reduction budget exhausted",
+        "projection-unselected-field-budget-six");
+    }else{
+      must(exact(accepted(original,"projection-budget-seven").fst,sort0),
+        "projection-unselected-field-budget-seven");
+    }
+    compareRaw(fuel,boxChecker,budgetRoot,budgetTerm,"projection-unselected-field-"+fuel);
+  }
+  console.log("PSC1_V2_DAG_JS_PROJECTION_UNSELECTED_FIELD: PASS");
+  const b0=addReduction("BVar",0n);
+  const betaValue=addReduction("App",addReduction("Lam",N.anonymous,boxID,b0,B.default),value);
+  const changed=addReduction("App",addReduction("App",addReduction("MData",71n,ctorID),rs0),rs0);
+  const oldValue=E.app(E.app(E.const(ctor,nil),E.mdata(7n,sort0)),E.mdata(9n,sort0));
+  const oldBeta=E.app(E.lam(N.anonymous,boxType,E.bvar(0n),B.default),oldValue);
+  const oldChanged=E.app(E.app(E.mdata(71n,E.const(ctor,nil)),sort0),sort0);
+  const projectionFixtures=[
+    [addReduction("Proj",box,0n,value),E.proj(box,0n,oldValue),true],
+    [addReduction("Proj",box,1n,betaValue),E.proj(box,1n,oldBeta),true],
+    [addReduction("Proj",box,1n,changed),E.proj(box,1n,oldChanged),true],
+    [addReduction("Proj",box,2n,value),E.proj(box,2n,oldValue),false],
+    [addReduction("Proj",box,4294967296n,betaValue),E.proj(box,4294967296n,oldBeta),false],
+    [addReduction("Proj",name("OtherBox"),0n,value),E.proj(name("OtherBox"),0n,oldValue),false]
+  ];
+  for(let index=0;index<projectionFixtures.length;index++){
+    const [root,term,valid]=projectionFixtures[index];
+    for(const fuel of [0n,1n,2n,3n,4n,5n,6n,8n,12n,64n]){
+      for(const maxRecDepth of [0n,1n,2n]){
+        const s={...boxSession,resources:{...boxSession.resources,fuel,maxRecDepth}};
+        compareRaw(fuel,{...boxChecker,context:{...boxChecker.context,maxRecDepth}},
+          root,term,"projection-raw-"+index+"-"+fuel+"-"+maxRecDepth);
+        must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,term),
+          invoke(reductionArena,[C.whnf(root)],s),exact),
+          "projection-public-"+index+"-"+fuel+"-"+maxRecDepth);
+      }
+    }
+    const normalized=invoke(reductionArena,[C.whnf(root)],boxSession);
+    if(valid){
+      const replies=array(accepted(normalized,"projection-checked-result").replies);
+      must(replies.length===1&&exact(replies[0].value,sort0),"projection-selected-field-"+index);
+    }else{
+      must(rejected(normalized)&&sameRuntimeValue(
+        get("psKernelErrorOutcome")(normalized.error),get("PsKernelOutcome").rejectedInvalid),
+        "invalid-projection-is-rejected-"+index);
+    }
+  }
+  const parameterBox=name("DagParameterBox"),parameterCtor=N.str(parameterBox,"mk");
+  const parameterType=E.forallE(name("A"),sort1,sort1,B.default);
+  const parameterCtorType=E.forallE(name("A"),sort1,
+    E.forallE(name("value"),E.bvar(0n),E.app(E.const(parameterBox,nil),E.bvar(1n)),B.default),B.default);
+  const parameterSession=accepted(get("psKernelV1AdmitDeclaration")(natSession,Request.ordinaryInductive({
+    levelParams:nil,name:parameterBox,type:parameterType,numParams:1n,isUnsafe:false,
+    ctors:list([{name:parameterCtor,type:parameterCtorType}])
+  })),"parameterized-inductive-admission").session;
+  const parameterChecker=get("psKernelKernelSessionChecker")(parameterSession,nil,S.safe);
+  const parameterCtorID=addReduction("Const",parameterCtor,nil),natTypeID=addReduction("Const",natName,nil);
+  const parameterRoot=addReduction("Proj",parameterBox,0n,
+    addReduction("App",addReduction("App",parameterCtorID,natTypeID),natID(4n)));
+  const parameterTerm=E.proj(parameterBox,0n,E.app(E.app(E.const(parameterCtor,nil),nat),numeral(4n)));
+  for(const fuel of [0n,1n,2n,3n,4n,5n,6n,8n,16n,64n]){
+    compareRaw(fuel,parameterChecker,parameterRoot,parameterTerm,"projection-parameter-offset-"+fuel);
+    const s={...parameterSession,resources:{...parameterSession.resources,fuel}};
+    must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,parameterTerm),
+      invoke(reductionArena,[C.whnf(parameterRoot)],s),exact),
+      "parameterized-projection-public-"+fuel);
+  }
+  const parameterReply=array(accepted(invoke(reductionArena,[C.whnf(parameterRoot)],parameterSession),
+    "parameter-projection-result").replies);
+  must(parameterReply.length===1&&exact(parameterReply[0].value,numeral(4n)),
+    "parameterized-projection-selects-field-not-parameter");
+  const [projectionRoot,projectionTerm]=projectionFixtures[0];
+  compareRaw(64n,checker,projectionRoot,projectionTerm,"projection-empty-environment-scope");
+  must(rejected(invoke(reductionArena,[C.whnf(projectionRoot)],initial)),
+    "projection-cannot-reuse-another-environment");
+}
+console.log("PSC1_V2_DAG_JS_NAT_PROJECTION: PASS");
+
+{
+  let arena=empty;
+  const add=(kind,...args)=>{
+    const result=mk(arena,kind,...args);arena=result.fst;return result.snd;
+  };
+  const typeId=add("Sort",L.succ(L.zero)),bodyId=add("BVar",0n);
+  const alphaAId=add("Lam",name("public-a"),typeId,bodyId,B.default);
+  const alphaBId=add("Lam",name("public-b"),typeId,bodyId,B.implicit);
+  const collisionBodyA=add("MData",0n,bodyId),collisionBodyB=add("MData",65521n,bodyId);
+  const collisionAId=add("Lam",name("public-c"),typeId,collisionBodyA,B.default);
+  const collisionBId=add("Lam",name("public-c"),typeId,collisionBodyB,B.default);
+  const alphaA=E.lam(name("public-a"),sort1,E.bvar(0n),B.default);
+  const alphaB=E.lam(name("public-b"),sort1,E.bvar(0n),B.implicit);
+  const collisionA=E.lam(name("public-c"),sort1,E.mdata(0n,E.bvar(0n)),B.default);
+  const collisionB=E.lam(name("public-c"),sort1,E.mdata(65521n,E.bvar(0n)),B.default);
+  must(alphaAId!==alphaBId,"public-cache-distinct-alpha-keys");
+  must(accepted(get("psKernelExprV2PagedEqOnCanonical")(arena,alphaAId,alphaBId),
+    "public-alpha-comparison"),"public-cache-alpha-key-equality");
+  const ca=accepted(get("psKernelExprV2PagedRequire")(arena,collisionAId),"public-collision-a");
+  const cb=accepted(get("psKernelExprV2PagedRequire")(arena,collisionBId),"public-collision-b");
+  must(ca.hash===cb.hash&&get("psKernelExprHash")(collisionA)===get("psKernelExprHash")(collisionB),
+    "public-cache-real-collision");
+  must(!accepted(get("psKernelExprV2PagedEqOnCanonical")(arena,collisionAId,collisionBId),
+    "public-collision-comparison"),"public-cache-unequal-collision-keys");
+  const s=session(4096n,1n);
+  const checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+  for(const [term,root]of [[alphaA,alphaAId],[alphaB,alphaBId],
+      [collisionA,collisionAId],[collisionB,collisionBId]]){
+    accepted(get("psKernelV1CheckExpression")(s,nil,S.safe,term),"public-cache-legacy-typed");
+    accepted(get("psKernelV1RunDag")(s,nil,S.safe,arena,list([C.check(root)])),"public-cache-dag-typed");
+  }
+  const call=(fuel,context,state,root)=>
+    get("psKernelExprV2TryWhnfStateWithFuel")(fuel)(context)(state)(root);
+  const originalCall=(fuel,context,state,term)=>
+    get("psKernelWhnfWithRecursorFuel")(fuel,get("psKernelIsDefEqWithFuel")(fuel),context,state,term);
+  const compare=(original,attempted,label)=>{
+    const result=accepted(attempted,label+"-direct");
+    if(rejected(original)){
+      must(rejected(result)&&original.error===result.error,label+"-error");return;
+    }
+    const reduced=accepted(result,label+"-result");
+    const graph=accepted(decode(reduced.fst.arena),label+"-valid");
+    const actual=accepted(decoded(graph,reduced.snd),label+"-decoded");
+    must(exact(accepted(original,label+"-original").fst,actual),label+"-value");
+  };
+  const warmOriginal=accepted(get("psKernelSessionWhnf")(2n,checker,alphaA),
+    "public-alpha-prime-original");
+  const warmDag=accepted(accepted(call(2n,checker.context,
+    get("psKernelExprV2WhnfStateEmpty")(arena),alphaAId),"public-alpha-prime-direct"),
+    "public-alpha-prime-dag");
+  for(const context of [checker.context,{...checker.context,recDepth:16n}]){
+    const original=originalCall(1n,context,warmOriginal.snd.state,alphaB);
+    const value=accepted(original,"public-alpha-warm-original").fst;
+    must(exact(value,alphaA)&&!exact(value,alphaB),"public-cache-hit-retains-first-lambda-syntax");
+    compare(original,call(1n,context,warmDag.fst,alphaBId),"public-cache-hit-precedes-core-depth");
+    const exhausted=originalCall(0n,context,warmOriginal.snd.state,alphaB);
+    must(rejected(exhausted)&&exhausted.error==="kernel reduction budget exhausted",
+      "public-cache-hit-does-not-bypass-zero-fuel");
+    compare(exhausted,call(0n,context,warmDag.fst,alphaBId),"public-cache-zero-fuel-parity");
+  }
+  const collisionOriginal=accepted(get("psKernelSessionWhnf")(2n,checker,collisionA),
+    "public-collision-prime-original");
+  const collisionDag=accepted(accepted(call(2n,checker.context,
+    get("psKernelExprV2WhnfStateEmpty")(arena),collisionAId),"public-collision-prime-direct"),
+    "public-collision-prime-dag");
+  const collisionMiss=originalCall(1n,checker.context,collisionOriginal.snd.state,collisionB);
+  must(rejected(collisionMiss)&&collisionMiss.error==="kernel reduction budget exhausted",
+    "public-cache-collision-cannot-authorize-low-fuel-hit");
+  compare(collisionMiss,call(1n,checker.context,collisionDag.fst,collisionBId),
+    "public-cache-collision-miss-parity");
+  console.log("PSC1_V2_DAG_JS_PUBLIC_CACHE: PASS");
+}
+
 
 reportDagSmoke();

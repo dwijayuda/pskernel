@@ -183,12 +183,20 @@ def psKernelNatShiftLeft
     value
     (psKernelNatPow 2 count)
 
-def psKernelReduceNatBinary
+/-
+Scalar primitive results are shared by recursive-expression and DAG workers.
+All numeral/count checks and their ordering stay in this one implementation.
+-/
+inductive PsKernelNatReductionValue where
+  | nat (value : Nat)
+  | bool (value : Bool)
+
+def psKernelReduceNatBinaryValue
     (maxNatSize : Nat)
     (op : PsKernelName)
     (left : Nat)
     (right : Nat) :
-    Except String (Option PsKernelExpr) :=
+    Except String (Option PsKernelNatReductionValue) :=
   if psKernelNameEq op psKernelNatAddName then
     let result :=
       Nat.add left right;
@@ -201,8 +209,7 @@ def psKernelReduceNatBinary
     | Except.ok _ =>
         Except.ok
           (Option.some
-            (PsKernelExpr.lit
-              (PsKernelLiteral.nat result)))
+            (PsKernelNatReductionValue.nat result))
   else if psKernelNameEq op psKernelNatSubName then
     let result :=
       Nat.sub left right;
@@ -215,8 +222,7 @@ def psKernelReduceNatBinary
     | Except.ok _ =>
         Except.ok
           (Option.some
-            (PsKernelExpr.lit
-              (PsKernelLiteral.nat result)))
+            (PsKernelNatReductionValue.nat result))
   else if psKernelNameEq op psKernelNatMulName then
     let result :=
       Nat.mul left right;
@@ -229,8 +235,7 @@ def psKernelReduceNatBinary
     | Except.ok _ =>
         Except.ok
           (Option.some
-            (PsKernelExpr.lit
-              (PsKernelLiteral.nat result)))
+            (PsKernelNatReductionValue.nat result))
   else if psKernelNameEq op psKernelNatPowName then
     match
         psKernelCheckCountArg
@@ -243,8 +248,7 @@ def psKernelReduceNatBinary
           if Nat.beq right 0 then
             Except.ok
               (Option.some
-                (PsKernelExpr.lit
-                  (PsKernelLiteral.nat 1)))
+                (PsKernelNatReductionValue.nat 1))
           else
             let rightBytes :=
               Nat.div
@@ -259,25 +263,22 @@ def psKernelReduceNatBinary
             else
               Except.ok
                 (Option.some
-                  (PsKernelExpr.lit
-                    (PsKernelLiteral.nat
+                  (PsKernelNatReductionValue.nat
                       (psKernelNatPow
                         left
-                        right))))
+                        right)))
         else
           Except.ok
             (Option.some
-              (PsKernelExpr.lit
-                (PsKernelLiteral.nat
+              (PsKernelNatReductionValue.nat
                   (psKernelNatPow
                     left
-                    right))))
+                    right)))
   else if psKernelNameEq op psKernelNatGcdName then
     Except.ok
       (Option.some
-        (PsKernelExpr.lit
-          (PsKernelLiteral.nat
-            (psKernelNatGcd left right))))
+        (PsKernelNatReductionValue.nat
+            (psKernelNatGcd left right)))
   else if psKernelNameEq op psKernelNatModName then
     let result :=
       if Nat.beq right 0 then
@@ -286,8 +287,7 @@ def psKernelReduceNatBinary
         Nat.mod left right;
     Except.ok
       (Option.some
-        (PsKernelExpr.lit
-          (PsKernelLiteral.nat result)))
+        (PsKernelNatReductionValue.nat result))
   else if psKernelNameEq op psKernelNatDivName then
     let result :=
       if Nat.beq right 0 then
@@ -296,51 +296,46 @@ def psKernelReduceNatBinary
         Nat.div left right;
     Except.ok
       (Option.some
-        (PsKernelExpr.lit
-          (PsKernelLiteral.nat result)))
+        (PsKernelNatReductionValue.nat result))
   else if psKernelNameEq op psKernelNatBeqName then
     Except.ok
       (Option.some
-        (psKernelBoolExpr
+        (PsKernelNatReductionValue.bool
           (Nat.beq left right)))
   else if psKernelNameEq op psKernelNatBleName then
     Except.ok
       (Option.some
-        (psKernelBoolExpr
+        (PsKernelNatReductionValue.bool
           (Nat.ble left right)))
   else if psKernelNameEq op psKernelNatLandName then
     Except.ok
       (Option.some
-        (PsKernelExpr.lit
-          (PsKernelLiteral.nat
+        (PsKernelNatReductionValue.nat
             (psKernelNatBitwise
               PsKernelNatBitwiseOp.land
               left
-              right))))
+              right)))
   else if psKernelNameEq op psKernelNatLorName then
     Except.ok
       (Option.some
-        (PsKernelExpr.lit
-          (PsKernelLiteral.nat
+        (PsKernelNatReductionValue.nat
             (psKernelNatBitwise
               PsKernelNatBitwiseOp.lor
               left
-              right))))
+              right)))
   else if psKernelNameEq op psKernelNatXorName then
     Except.ok
       (Option.some
-        (PsKernelExpr.lit
-          (PsKernelLiteral.nat
+        (PsKernelNatReductionValue.nat
             (psKernelNatBitwise
               PsKernelNatBitwiseOp.xor
               left
-              right))))
+              right)))
   else if psKernelNameEq op psKernelNatShiftLeftName then
     if Nat.beq left 0 then
       Except.ok
         (Option.some
-          (PsKernelExpr.lit
-            (PsKernelLiteral.nat 0)))
+          (PsKernelNatReductionValue.nat 0))
     else
       match
           psKernelCheckCountArg
@@ -364,18 +359,35 @@ def psKernelReduceNatBinary
           else
             Except.ok
               (Option.some
-                (PsKernelExpr.lit
-                  (PsKernelLiteral.nat
+                (PsKernelNatReductionValue.nat
                     (psKernelNatShiftLeft
                       left
-                      right))))
+                      right)))
   else if psKernelNameEq op psKernelNatShiftRightName then
     Except.ok
       (Option.some
-        (PsKernelExpr.lit
-          (PsKernelLiteral.nat
+        (PsKernelNatReductionValue.nat
             (psKernelNatShiftRight
               left
-              right))))
+              right)))
   else
     Except.ok Option.none
+
+/- Compatibility result construction for the original checker. -/
+def psKernelReduceNatBinary
+    (maxNatSize : Nat)
+    (op : PsKernelName)
+    (left : Nat)
+    (right : Nat) :
+    Except String (Option PsKernelExpr) :=
+  match psKernelReduceNatBinaryValue maxNatSize op left right with
+  | Except.error error => Except.error error
+  | Except.ok result =>
+      match result with
+      | Option.none => Except.ok Option.none
+      | Option.some value =>
+          match value with
+          | PsKernelNatReductionValue.nat number =>
+              Except.ok (Option.some (PsKernelExpr.lit (PsKernelLiteral.nat number)))
+          | PsKernelNatReductionValue.bool boolean =>
+              Except.ok (Option.some (psKernelBoolExpr boolean))

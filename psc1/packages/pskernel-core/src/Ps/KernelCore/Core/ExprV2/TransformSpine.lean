@@ -9,7 +9,11 @@ def psKernelExprV2TransformAppSpineWithFuel
       fun (_arena : PsKernelExprV2PagedArena) (_root : Nat) (_args : List Nat) =>
         Except.error "PSKERNEL_V2_APP_SPINE_FUEL"
   | Nat.succ remaining =>
-      let smaller := psKernelExprV2TransformAppSpineWithFuel remaining;
+      let smaller :=
+        fun (nextArena : PsKernelExprV2PagedArena) (nextRoot : Nat)
+            (nextArgs : List Nat) =>
+          let recur := psKernelExprV2TransformAppSpineWithFuel remaining;
+          recur nextArena nextRoot nextArgs;
       fun (arena : PsKernelExprV2PagedArena) (root : Nat) (args : List Nat) =>
         match psKernelExprV2PagedFind arena root with
         | Option.none => Except.error "PSKERNEL_V2_TRANSFORM_BAD_ROOT"

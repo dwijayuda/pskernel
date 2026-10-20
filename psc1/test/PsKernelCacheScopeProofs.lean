@@ -95,6 +95,26 @@ theorem dag_whnf_fvar_flag_prevents_publication
       Except.ok (Prod.mk state result) := by
   simp [psKernelExprV2WhnfCoreFinish, found, flag]
 
+
+theorem dag_whnf_starts_without_public_cache (arena : PsKernelExprV2PagedArena) :
+    (psKernelExprV2WhnfStateEmpty arena).publicCache = List.nil := by
+  rfl
+
+theorem dag_whnf_fvar_flag_prevents_public_lookup
+    (state : PsKernelExprV2WhnfState) (source : Nat)
+    (entry : PsKernelExprV2Entry) (flag : entry.hasFVar = true) :
+    psKernelExprV2WhnfPublicCacheFind state source entry = Except.ok Option.none := by
+  simp [psKernelExprV2WhnfPublicCacheFind, flag]
+
+theorem dag_whnf_fvar_flag_prevents_public_publication
+    (state : PsKernelExprV2WhnfState) (source result : Nat)
+    (entry : PsKernelExprV2Entry)
+    (found : psKernelExprV2PagedRequire state.arena source = Except.ok entry)
+    (flag : entry.hasFVar = true) :
+    psKernelExprV2WhnfPublicFinish state source result =
+      Except.ok (Prod.mk state result) := by
+  simp [psKernelExprV2WhnfPublicFinish, found, flag]
+
 end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.exit_scope_restores_all_caches
@@ -111,3 +131,7 @@ end PsKernelCacheScopeProofs
 #print axioms PsKernelCacheScopeProofs.dag_whnf_starts_without_cache
 #print axioms PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup
 #print axioms PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication
+
+#print axioms PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache
+#print axioms PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup
+#print axioms PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication

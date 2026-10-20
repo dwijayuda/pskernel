@@ -364,6 +364,83 @@ private def rawStateWhnfParity {alpha : Type}
       require label
         (match original with | .ok old => psKernelExprEqual old.fst value | _ => false)
 
+private def whnfPublicCacheParity : IO Unit := do
+  let session ← fresh 4096 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let alphaA := PsKernelExpr.lam (nm "public-a") sort1 (.bvar 0) .default
+  let alphaB := PsKernelExpr.lam (nm "public-b") sort1 (.bvar 0) .implicit
+  let collisionA := PsKernelExpr.lam (nm "public-c") sort1
+    (.mdata 0 (.bvar 0)) .default
+  let collisionB := PsKernelExpr.lam (nm "public-c") sort1
+    (.mdata 65521 (.bvar 0)) .default
+  let (arena, typeId) ← expect
+    (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty (.succ .zero))
+  let (arena, bodyId) ← expect (psKernelExprV2PagedMkBVar arena 0)
+  let (arena, alphaAId) ← expect
+    (psKernelExprV2PagedMkLam arena (nm "public-a") typeId bodyId .default)
+  let (arena, alphaBId) ← expect
+    (psKernelExprV2PagedMkLam arena (nm "public-b") typeId bodyId .implicit)
+  let (arena, collisionBodyA) ← expect (psKernelExprV2PagedMkMData arena 0 bodyId)
+  let (arena, collisionBodyB) ← expect (psKernelExprV2PagedMkMData arena 65521 bodyId)
+  let (arena, collisionAId) ← expect
+    (psKernelExprV2PagedMkLam arena (nm "public-c") typeId collisionBodyA .default)
+  let (arena, collisionBId) ← expect
+    (psKernelExprV2PagedMkLam arena (nm "public-c") typeId collisionBodyB .default)
+  require "public-cache-distinct-alpha-keys" (alphaAId != alphaBId)
+  require "public-cache-alpha-key-equality"
+    (← expect (psKernelExprV2PagedEqOnCanonical arena alphaAId alphaBId))
+  let ca ← expect (psKernelExprV2PagedRequire arena collisionAId)
+  let cb ← expect (psKernelExprV2PagedRequire arena collisionBId)
+  require "public-cache-real-collision"
+    (ca.hash == cb.hash &&
+      psKernelExprHash collisionA == psKernelExprHash collisionB)
+  require "public-cache-unequal-collision-keys"
+    (!(← expect (psKernelExprV2PagedEqOnCanonical arena collisionAId collisionBId)))
+  for (term, root) in
+      [(alphaA, alphaAId), (alphaB, alphaBId),
+       (collisionA, collisionAId), (collisionB, collisionBId)] do
+    let _ ← expectPublic (psKernelV1CheckExpression session [] .safe term)
+    let _ ← expectPublic (oneCheck session arena root)
+    pure ()
+  let warmOriginal ← expect (psKernelSessionWhnf 2 checker alphaA)
+  let warmDag ← expect
+    (match psKernelExprV2TryWhnfStateWithFuel 2 checker.context
+        (psKernelExprV2WhnfStateEmpty arena) alphaAId with
+     | some value => value | none => .error "public alpha priming used fallback")
+  let blockedContext := { checker.context with recDepth := 16 }
+  for context in [checker.context, blockedContext] do
+    let original := psKernelWhnfWithRecursorFuel 1 (psKernelIsDefEqWithFuel 1)
+      context warmOriginal.snd.state alphaB
+    let exactResult ← expect original
+    require "public-cache-hit-retains-first-lambda-syntax"
+      (psKernelExprEqual exactResult.fst alphaA &&
+        !psKernelExprEqual exactResult.fst alphaB)
+    rawStateWhnfParity "public-cache-hit-precedes-core-depth"
+      original
+      (psKernelExprV2TryWhnfStateWithFuel 1 context warmDag.fst alphaBId)
+    let exhausted := psKernelWhnfWithRecursorFuel 0 (psKernelIsDefEqWithFuel 0)
+      context warmOriginal.snd.state alphaB
+    require "public-cache-hit-does-not-bypass-zero-fuel"
+      (match exhausted with
+       | .error "kernel reduction budget exhausted" => true | _ => false)
+    rawStateWhnfParity "public-cache-zero-fuel-parity"
+      exhausted
+      (psKernelExprV2TryWhnfStateWithFuel 0 context warmDag.fst alphaBId)
+  let collisionOriginal ← expect (psKernelSessionWhnf 2 checker collisionA)
+  let collisionDag ← expect
+    (match psKernelExprV2TryWhnfStateWithFuel 2 checker.context
+        (psKernelExprV2WhnfStateEmpty arena) collisionAId with
+     | some value => value | none => .error "public collision priming used fallback")
+  let collisionMiss := psKernelWhnfWithRecursorFuel 1 (psKernelIsDefEqWithFuel 1)
+    checker.context collisionOriginal.snd.state collisionB
+  require "public-cache-collision-cannot-authorize-low-fuel-hit"
+    (match collisionMiss with
+     | .error "kernel reduction budget exhausted" => true | _ => false)
+  rawStateWhnfParity "public-cache-collision-miss-parity"
+    collisionMiss
+    (psKernelExprV2TryWhnfStateWithFuel 1 checker.context collisionDag.fst collisionBId)
+  IO.println "PSC1_V2_DAG_NATIVE_PUBLIC_CACHE: PASS"
+
 private def whnfFunctionStateParity : IO Unit := do
   let identityA := PsKernelExpr.lam (nm "a") sort1 (.bvar 0) .default
   let identityB := PsKernelExpr.lam (nm "b") sort1 (.bvar 0) .implicit
@@ -443,18 +520,27 @@ private def whnfFunctionStateParity : IO Unit := do
       (psKernelExprV2WhnfStateEmpty collisionArena) collisionRoot)
   -- Even a warm cache cannot bypass the core entry's fuel or depth checks.
   let (warmArena, warmRoot) ← expect (psKernelExprV2PagedImportChecked shared)
-  let warmOriginal ← expect (psKernelSessionWhnf 4 checker shared)
+  let warmContext := { checker.context with maxRecDepth := 1 }
+  let warmChecker := { checker with context := warmContext }
+  let warmOriginal ← expect (psKernelSessionWhnf 4 warmChecker shared)
   let warmDag ← expect
-    (match psKernelExprV2TryWhnfStateWithFuel 4 checker.context
+    (match psKernelExprV2TryWhnfStateWithFuel 4 warmContext
         (psKernelExprV2WhnfStateEmpty warmArena) warmRoot with
      | some value => value | none => .error "missing warm DAG result")
-  let blockedContext := { checker.context with maxRecDepth := 1, recDepth := 16 }
-  for context in [checker.context, blockedContext] do
+  let blockedContext := { warmContext with recDepth := 16 }
+  for context in [warmContext, blockedContext] do
     for fuel in [0,1] do
       rawStateWhnfParity "warm-cache-entry-guards"
         (psKernelWhnfCoreWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel)
           context warmOriginal.snd.state shared false false)
         (psKernelExprV2TryWhnfCoreStateWithFuel fuel context warmDag.fst warmRoot)
+  -- The public cache is checked before entering the core depth guard, while
+  -- public fuel zero is still checked first.
+  for context in [warmContext, blockedContext] do
+    for fuel in [0,1] do
+      rawStateWhnfParity "warm-public-cache-entry-guards"
+        (psKernelSessionWhnf fuel { warmOriginal.snd with context := context } shared)
+        (psKernelExprV2TryWhnfStateWithFuel fuel context warmDag.fst warmRoot)
   -- Open source expressions never publish a semantic entry.
   let localName := nm "local"
   let locals := psKernelLocalContextAddLocal checker.context.localContext
@@ -466,7 +552,8 @@ private def whnfFunctionStateParity : IO Unit := do
     (match psKernelExprV2TryWhnfStateWithFuel 64 localContext
         (psKernelExprV2WhnfStateEmpty openArena) openRoot with
      | some value => value | none => .error "missing open DAG result")
-  require "fvar-containing-source-cache-ineligible" openResult.fst.coreCache.isEmpty
+  require "fvar-containing-source-cache-ineligible"
+    (openResult.fst.coreCache.isEmpty && openResult.fst.publicCache.isEmpty)
   let localLet := psKernelLocalContextAddLet checker.context.localContext
     localName localName sort1 sort0
   let letContext := psKernelCheckerContextWithLocalContext checker.context localLet
@@ -475,6 +562,218 @@ private def whnfFunctionStateParity : IO Unit := do
     (match psKernelExprV2TryWhnfWithFuel 64 letContext fvarArena fvarRoot with
      | none => true | _ => false)
   IO.println "PSC1_V2_DAG_NATIVE_WHNF_STATE: PASS"
+
+private def projectionUnselectedFieldFuel
+    (context : PsKernelCheckerContext) (state : PsKernelCheckerState)
+    (typeName ctorName : PsKernelName) : IO Unit := do
+  let (initial, s0) ← expect
+    (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let (initial, ctor) ← expect (psKernelExprV2PagedMkConst initial ctorName [])
+  let mut arena := initial
+  let mut hidden := s0
+  let mut hiddenTerm := sort0
+  for tag in [:4] do
+    let (next, root) ← expect (psKernelExprV2PagedMkMData arena tag hidden)
+    arena := next
+    hidden := root
+    hiddenTerm := .mdata tag hiddenTerm
+  let (arena, first) ← expect (psKernelExprV2PagedMkApp arena ctor s0)
+  let (arena, major) ← expect (psKernelExprV2PagedMkApp arena first hidden)
+  let (arena, root) ← expect (psKernelExprV2PagedMkProj arena typeName 0 major)
+  let term := PsKernelExpr.proj typeName 0
+    (.app (.app (.const ctorName []) sort0) hiddenTerm)
+  for fuel in [6,7] do
+    let original := psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel)
+      context state term
+    require "projection-unselected-field-original-budget-boundary"
+      (if fuel == 6 then
+         match original with
+         | .error "kernel reduction budget exhausted" => true | _ => false
+       else
+         match original with
+         | .ok result => psKernelExprEqual result.fst sort0 | _ => false)
+    rawStateWhnfParity "projection-unselected-field-budget-parity"
+      original
+      (psKernelExprV2TryWhnfStateWithFuel fuel context
+        (psKernelExprV2WhnfStateEmpty arena) root)
+  IO.println "PSC1_V2_DAG_NATIVE_PROJECTION_UNSELECTED_FIELD: PASS"
+
+private def natProjectionWhnfParity : IO Unit := do
+  let initial ← fresh
+  let checker := psKernelKernelSessionChecker initial [] .safe
+  let numeral (n : Nat) := PsKernelExpr.lit (.nat n)
+  let operation (name : String) (a b : Nat) :=
+    PsKernelExpr.app (.app (.const (PsKernelName.str psKernelNatName name) [])
+      (.mdata 13 (numeral a))) (.mdata 17 (numeral b))
+  let results : List (String × PsKernelExpr) := [
+    ("add", numeral 13), ("sub", numeral 5), ("mul", numeral 36),
+    ("pow", numeral 6561), ("gcd", numeral 1), ("mod", numeral 1),
+    ("div", numeral 2), ("beq", .const psKernelBoolFalseName []),
+    ("ble", .const psKernelBoolFalseName []), ("land", numeral 0),
+    ("lor", numeral 13), ("xor", numeral 13), ("shiftLeft", numeral 144),
+    ("shiftRight", numeral 0)]
+  Lean.initSearchPath (← Lean.findSysroot)
+  let officialEnv ← Lean.importModules #[{ module := `Init }] {}
+  for (name, expected) in results do
+    let official := Lean.Expr.app
+      (.app (.const (Lean.Name.str `Nat name) []) (.lit (.natVal 9)))
+      (.lit (.natVal 4))
+    let officialExpected : Lean.Expr :=
+      match expected with
+      | .lit (.nat value) => .lit (.natVal value)
+      | _ => .const `Bool.false []
+    require "official-Lean-Nat-reduction"
+      (match Lean.Kernel.whnf officialEnv {} official with
+       | .ok value => Lean.Expr.equal value officialExpected | _ => false)
+    let term := operation name 9 4
+    let old ← expect (psKernelSessionWhnf 64 checker term)
+    require "nat-independent-expected-result" (psKernelExprEqual old.fst expected)
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,3,4,5,6,8,16,64] do
+      for depth in [0,1,2] do
+        for size in [0,1,psKernelLeanNatMaxSizeDefault] do
+          let context := { checker.context with maxRecDepth := depth, maxNatSize := size }
+          let session := { checker with context := context }
+          rawStateWhnfParity "nat-full-pipeline-resource-parity"
+            (psKernelSessionWhnf fuel session term)
+            (psKernelExprV2TryWhnfStateWithFuel fuel context
+              (psKernelExprV2WhnfStateEmpty arena) root)
+  -- These branches reject/count-bound before any expensive arithmetic.
+  for term in [operation "pow" 2 4294967296, operation "shiftLeft" 1 4294967296,
+      operation "div" 9 0, operation "mod" 9 0, operation "pow" 0 0] do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    rawStateWhnfParity "nat-count-and-zero-division-parity"
+      (psKernelSessionWhnf 64 checker term)
+      (psKernelExprV2TryWhnfStateWithFuel 64 checker.context
+        (psKernelExprV2WhnfStateEmpty arena) root)
+  -- A nonprimitive binary constant still normalizes both arguments under the
+  -- published PSKernel policy, even though the resulting application stays put.
+  let deep := PsKernelExpr.mdata 1 (.mdata 2 (.mdata 3 sort0))
+  let unknown := PsKernelExpr.app (.app (.const (nm "notNat") []) sort0) deep
+  let (unknownArena, unknownRoot) ← expect (psKernelExprV2PagedImportChecked unknown)
+  for fuel in [0,1,2,3,4,5,6,16] do
+    rawStateWhnfParity "nonprimitive-binary-argument-order-and-fuel"
+      (psKernelSessionWhnf fuel checker unknown)
+      (psKernelExprV2TryWhnfStateWithFuel fuel checker.context
+        (psKernelExprV2WhnfStateEmpty unknownArena) unknownRoot)
+  require "nonprimitive-still-exhausts-argument-budget"
+    (match psKernelSessionWhnf 3 checker unknown with
+     | .error "kernel reduction budget exhausted" => true | _ => false)
+  -- Nat.succ is checked through a real admitted Nat declaration.
+  let nat := PsKernelExpr.const psKernelNatName []
+  let natDecl := PsKernelSimpleInductiveDecl.mk [] psKernelNatName sort1
+    [PsKernelSimpleConstructorDecl.mk psKernelNatZeroName nat,
+     PsKernelSimpleConstructorDecl.mk psKernelNatSuccName
+       (.forallE (nm "n") nat nat .default)] false 0
+  let natAdmitted ← expectPublic
+    (psKernelV1AdmitDeclaration initial (.ordinaryInductive natDecl))
+  let natSession := natAdmitted.session
+  let succ := PsKernelExpr.app (.const psKernelNatSuccName [])
+    (.mdata 3 (.app (.const psKernelNatSuccName []) (numeral 4)))
+  let (natArena, natRoot) ← expect (psKernelExprV2PagedImportChecked succ)
+  for fuel in [0,1,2,3,4,5,6,8,16,64] do
+    for depth in [0,1,2] do
+      let session := { natSession with resources :=
+        { natSession.resources with fuel := fuel, maxRecDepth := depth } }
+      require "checked-nat-successor-resource-parity"
+        (sameWhnf (psKernelV1Whnf session [] .safe succ)
+          (psKernelV1RunDag session [] .safe natArena [.whnf natRoot]))
+  let natNormalized ← expectPublic
+    (psKernelV1RunDag natSession [] .safe natArena [.whnf natRoot])
+  require "checked-nat-successor-value"
+    (match natNormalized.replies with
+     | [.normalized value] => psKernelExprEqual value (numeral 6) | _ => false)
+  -- Projection reads only constructor layout metadata from the admitted
+  -- environment; fields and reductions remain IDs in the owning arena.
+  let box := nm "DagProjectionBox"
+  let ctor := PsKernelName.str box "mk"
+  let boxType := PsKernelExpr.const box []
+  let ctorType := PsKernelExpr.forallE (nm "A") sort1
+    (.forallE (nm "B") sort1 boxType .default) .default
+  let boxDecl := PsKernelSimpleInductiveDecl.mk [] box (.sort (.succ (.succ .zero)))
+    [PsKernelSimpleConstructorDecl.mk ctor ctorType] false 0
+  let boxAdmitted ← expectPublic
+    (psKernelV1AdmitDeclaration initial (.ordinaryInductive boxDecl))
+  let boxSession := boxAdmitted.session
+  let boxChecker := psKernelKernelSessionChecker boxSession [] .safe
+  projectionUnselectedFieldFuel boxChecker.context boxChecker.state box ctor
+  let value := PsKernelExpr.app (.app (.const ctor []) (.mdata 7 sort0)) (.mdata 9 sort0)
+  let betaValue := PsKernelExpr.app (.lam .anonymous boxType (.bvar 0) .default) value
+  let hiddenCtor := PsKernelExpr.app (.app (.mdata 71 (.const ctor [])) sort0) sort0
+  let p0 := PsKernelExpr.proj box 0 value
+  let p1 := PsKernelExpr.proj box 1 betaValue
+  let changedHead := PsKernelExpr.proj box 1 hiddenCtor
+  let invalidIndex := PsKernelExpr.proj box 2 value
+  let hugeIndex := PsKernelExpr.proj box 4294967296 betaValue
+  let wrongType := PsKernelExpr.proj (nm "OtherBox") 0 value
+  for term in [p0,p1,changedHead,invalidIndex,hugeIndex,wrongType] do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,3,4,5,6,8,12,64] do
+      for depth in [0,1,2] do
+        let session := { boxSession with resources :=
+          { boxSession.resources with fuel := fuel, maxRecDepth := depth } }
+        let context := { boxChecker.context with maxRecDepth := depth }
+        rawStateWhnfParity "projection-raw-exact-resource-parity"
+          (psKernelSessionWhnf fuel { boxChecker with context := context } term)
+          (psKernelExprV2TryWhnfStateWithFuel fuel context
+            (psKernelExprV2WhnfStateEmpty arena) root)
+        require "projection-public-exact-resource-parity"
+          (sameWhnf (psKernelV1Whnf session [] .safe term)
+            (psKernelV1RunDag session [] .safe arena [.whnf root]))
+  for term in [p0,p1,changedHead] do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    let reduced ← expectPublic
+      (psKernelV1RunDag boxSession [] .safe arena [.whnf root])
+    require "checked-projection-selected-field"
+      (match reduced.replies with
+       | [.normalized result] => psKernelExprEqual result sort0 | _ => false)
+  for term in [invalidIndex,hugeIndex,wrongType] do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    require "checked-invalid-projection-rejected"
+      (match psKernelV1RunDag boxSession [] .safe arena [.whnf root] with
+       | .error (.rejectedInvalid _) => true | _ => false)
+  -- A second owner with the same IDs cannot reuse this environment or cache.
+  let emptyChecker := psKernelKernelSessionChecker initial [] .safe
+  let (arena, root) ← expect (psKernelExprV2PagedImportChecked p0)
+  rawStateWhnfParity "projection-context-does-not-leak"
+    (psKernelSessionWhnf 64 emptyChecker p0)
+    (psKernelExprV2TryWhnfStateWithFuel 64 emptyChecker.context
+      (psKernelExprV2WhnfStateEmpty arena) root)
+  require "projection-empty-environment-rejects"
+    (match psKernelV1RunDag initial [] .safe arena [.whnf root] with
+     | .error (.rejectedInvalid _) => true | _ => false)
+  let parameterBox := nm "DagParameterBox"
+  let parameterCtor := PsKernelName.str parameterBox "mk"
+  let parameterType := PsKernelExpr.forallE (nm "A") sort1 sort1 .default
+  let parameterCtorType := PsKernelExpr.forallE (nm "A") sort1
+    (.forallE (nm "value") (.bvar 0)
+      (.app (.const parameterBox []) (.bvar 1)) .default) .default
+  let parameterDecl := PsKernelSimpleInductiveDecl.mk [] parameterBox parameterType
+    [PsKernelSimpleConstructorDecl.mk parameterCtor parameterCtorType] false 1
+  let parameterAdmitted ← expectPublic
+    (psKernelV1AdmitDeclaration natSession (.ordinaryInductive parameterDecl))
+  let parameterSession := parameterAdmitted.session
+  let parameterChecker := psKernelKernelSessionChecker parameterSession [] .safe
+  let parameterTerm := PsKernelExpr.proj parameterBox 0
+    (.app (.app (.const parameterCtor []) nat) (numeral 4))
+  let (parameterArena, parameterRoot) ← expect (psKernelExprV2PagedImportChecked parameterTerm)
+  for fuel in [0,1,2,3,4,5,6,8,16,64] do
+    rawStateWhnfParity "projection-skips-admitted-parameters"
+      (psKernelSessionWhnf fuel parameterChecker parameterTerm)
+      (psKernelExprV2TryWhnfStateWithFuel fuel parameterChecker.context
+        (psKernelExprV2WhnfStateEmpty parameterArena) parameterRoot)
+    let session := { parameterSession with resources :=
+      { parameterSession.resources with fuel := fuel } }
+    require "parameterized-projection-public-parity"
+      (sameWhnf (psKernelV1Whnf session [] .safe parameterTerm)
+        (psKernelV1RunDag session [] .safe parameterArena [.whnf parameterRoot]))
+  let parameterResult ← expectPublic
+    (psKernelV1RunDag parameterSession [] .safe parameterArena [.whnf parameterRoot])
+  require "parameterized-projection-returns-field-not-type-argument"
+    (match parameterResult.replies with
+     | [.normalized value] => psKernelExprEqual value (numeral 4) | _ => false)
+  IO.println "PSC1_V2_DAG_NATIVE_OFFICIAL_NAT: PASS"
+  IO.println "PSC1_V2_DAG_NATIVE_NAT_PROJECTION: PASS"
 
 private def structuralShortcutParity : IO Unit := do
   let (a, zero) ← expect (psKernelExprV2PagedMkLit psKernelExprV2PagedEmpty (.nat 0))
@@ -649,6 +948,8 @@ def main : IO Unit := do
   zetaWhnfParity
   betaWhnfParity
   whnfFunctionStateParity
+  whnfPublicCacheParity
+  natProjectionWhnfParity
   structuralShortcutParity
   hostileInputs
   admissions

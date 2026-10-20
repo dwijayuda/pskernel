@@ -6,9 +6,9 @@ belongs to its owning canonical arena and to an append-only continuation of
 that arena. No caller-provided cache is accepted at the public DAG boundary.
 The checker context is unchanged except for recursion depth in this fragment.
 
-The cache stores successful core results only. Hashes only filter candidates;
-same-arena identity or full collision-safe structural comparison decides a hit.
-Free-variable-containing sources are never entered into this semantic cache.
+The disjoint core/public caches store successful results only. Hashes filter
+candidates; same-arena identity or collision-safe structural comparison decides
+a hit. Free-variable-containing sources never enter either semantic cache.
 -/
 structure PsKernelExprV2WhnfCacheEntry where
   source : Nat
@@ -18,15 +18,16 @@ structure PsKernelExprV2WhnfCacheEntry where
 structure PsKernelExprV2WhnfState where
   arena : PsKernelExprV2PagedArena
   coreCache : List PsKernelExprV2WhnfCacheEntry
+  publicCache : List PsKernelExprV2WhnfCacheEntry
 
 def psKernelExprV2WhnfStateEmpty
     (arena : PsKernelExprV2PagedArena) : PsKernelExprV2WhnfState :=
-  PsKernelExprV2WhnfState.mk arena List.nil
+  PsKernelExprV2WhnfState.mk arena List.nil List.nil
 
 def psKernelExprV2WhnfStateWithArena
     (state : PsKernelExprV2WhnfState) (arena : PsKernelExprV2PagedArena) :
     PsKernelExprV2WhnfState :=
-  PsKernelExprV2WhnfState.mk arena state.coreCache
+  PsKernelExprV2WhnfState.mk arena state.coreCache state.publicCache
 
 def psKernelExprV2WhnfCacheFindIn
     (entries : List PsKernelExprV2WhnfCacheEntry) :
@@ -68,5 +69,28 @@ def psKernelExprV2WhnfCoreFinish
             (PsKernelExprV2WhnfState.mk state.arena
               (List.cons
                 (PsKernelExprV2WhnfCacheEntry.mk source result entry.hash)
-                state.coreCache))
+                state.coreCache)
+              state.publicCache)
+            result)
+
+def psKernelExprV2WhnfPublicCacheFind
+    (state : PsKernelExprV2WhnfState) (source : Nat)
+    (entry : PsKernelExprV2Entry) : Except String (Option Nat) :=
+  if entry.hasFVar then Except.ok Option.none
+  else psKernelExprV2WhnfCacheFindIn state.publicCache state.arena source entry.hash
+
+def psKernelExprV2WhnfPublicFinish
+    (state : PsKernelExprV2WhnfState) (source result : Nat) :
+    Except String (Prod PsKernelExprV2WhnfState Nat) :=
+  match psKernelExprV2PagedRequire state.arena source with
+  | Except.error error => Except.error error
+  | Except.ok entry =>
+      if entry.hasFVar then Except.ok (Prod.mk state result)
+      else
+        Except.ok
+          (Prod.mk
+            (PsKernelExprV2WhnfState.mk state.arena state.coreCache
+              (List.cons
+                (PsKernelExprV2WhnfCacheEntry.mk source result entry.hash)
+                state.publicCache))
             result)

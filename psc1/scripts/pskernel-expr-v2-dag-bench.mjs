@@ -201,9 +201,14 @@ if(mode!=="worker"){
       maxBucket=Math.max(maxBucket,bucket.length);
       entries=entries.tail;
     }
+    let publicEntries=state.publicCache,publicCount=0;
+    while(publicEntries&&typeof publicEntries==="object"&&"head" in publicEntries){
+      publicCount++;publicEntries=publicEntries.tail;
+    }
     cacheDiagnostic={
       scope:"one untimed raw DAG operation after public timing and memory snapshot",
-      direct_success:true,publications,cache_high_water_entries:publications,
+      direct_success:true,core_publications:publications,core_cache_high_water_entries:publications,
+      public_cache_entries:publicCount,total_cache_entries:publications+publicCount,
       distinct_source_ids:sourceIDs.size,equivalent_shadowed_entries:shadowed,
       hash_buckets:buckets.size,max_hash_bucket_length:maxBucket,
       arena_nodes_before:input.arena.size.toString(),

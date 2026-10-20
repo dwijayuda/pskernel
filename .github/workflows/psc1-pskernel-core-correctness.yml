@@ -19,6 +19,7 @@ on:
       - psc1/kernel-lakefile.lean
       - psc1/check-psc1-source.mjs
       - psc1/scripts/pskernel-generated-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - .github/workflows/psc1-pskernel-core-correctness.yml
 
 permissions:
@@ -198,6 +199,26 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-canonical-js-smoke.log"
           echo 'PSC1_GENERATED_JS_KERNEL: PASS'
+      - name: Run checked DAG semantics from the canonical ProofScript bundle
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          test -s "$PSC1_PS_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-dag-smoke.mjs "$PSC1_PS_RUN_DIR/dag-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" --expose-gc dag-smoke.mjs kernel.mjs 2>&1 \
+            | tee "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_BETA: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_WHNF_STATE: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_NAT_PROJECTION: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_PUBLIC_CACHE: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          echo 'PSC1_CANONICAL_DAG_JS_KERNEL: PASS'
       - name: Report DirectJS kernel capability without claiming support
         working-directory: psc1
         shell: bash
@@ -226,5 +247,6 @@ jobs:
             psc1/dist/pskernel-selfhost/pskernel-core.d.ts
             psc1/dist/pskernel-selfhost/pskernel-core.js.map
             ${{ runner.temp }}/psc1-canonical-js-smoke.log
+            ${{ runner.temp }}/psc1-canonical-dag-smoke.log
             ${{ runner.temp }}/psc1-direct-capability.log
           retention-days: 30

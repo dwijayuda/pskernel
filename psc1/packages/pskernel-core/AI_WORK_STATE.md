@@ -10,7 +10,23 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
 ## Current checkpoint and evidence
 
-The latest native-qualified implementation is
+The refreshed source checkpoint is
+[463d956f40f360960dd78ad8b8d8b3749a80c03f](https://github.com/dwijayuda/pskernel/commit/463d956f40f360960dd78ad8b8d8b3749a80c03f).
+Its [integration run 39514448898](https://github.com/dwijayuda/pskernel/actions/runs/39514448898)
+has passed the native job, authentic PSC1 source check, complete JS generation,
+strict standalone DAG semantics and isolated A-B-B-A measurements. The final
+whole-executable step is still running, so the complete run is not yet claimed
+green. The corrected Arena adapter controls passed in
+[39513874902](https://github.com/dwijayuda/pskernel/actions/runs/39513874902);
+all 193 independent replay is running with unchanged fuel4096.
+
+The [original correctness/portability run 39513010680](https://github.com/dwijayuda/pskernel/actions/runs/39513010680)
+at 50dd83b passed both jobs, deriving 101 canonical modules and 1,239 declarations,
+checking their complete PS closure and executing the full V1 JS smoke. Its
+canonical runtime did not yet run the DAG smoke; this commit adds that gate
+against the same already compiled standalone bundle.
+
+The earlier native-qualified implementation is
 [50dd83b308db22ef7befc0c08fa04d5de6249adb](https://github.com/dwijayuda/pskernel/commit/50dd83b308db22ef7befc0c08fa04d5de6249adb).
 Its native job in [39513010613](https://github.com/dwijayuda/pskernel/actions/runs/39513010613)
 passed complete DAG regressions, stateful function-position normalization,
@@ -96,7 +112,7 @@ read DAG entries directly. All structural shortcuts resolve hash collisions.
 Both terms still undergo complete checking before the DefEq shortcut.
 
 **General inference, full DefEq, environment/local declaration expression fields,
-delta/recursor/projection/primitive behavior and declaration admission still use
+delta/recursor/String-constructor behavior and declaration admission still use
 the original recursive expression internally.** This once-per-batch decoder and
 the complete fallback are transitional. The default original V1 API also remains.
 Do not describe this architecture as the finished replacement or retire the
@@ -173,6 +189,48 @@ performance gain is claimed before their new native/generated measurements.
 Native benchmark receipts now explicitly label fuel_scope=pskernel_only so
 official Lean rows cannot be mistaken for the same PSKernel fuel mechanism.
 
+## Nat and projection migration (this commit; qualification pending)
+
+The production WHNF worker now preserves a fixed public callback during core
+recursion and owns separate core/public caches. Public cache lookup remains
+before core recursion-depth entry, while public fuel-zero remains first.
+The owning environment, local context, maxNatSize and all other semantic policy
+fields are fixed for the operation; only recursion depth varies internally.
+
+The new Nat worker reads DAG nodes directly, performs successor and all fourteen
+supported binary reductions, and constructs results directly in the same arena.
+Primitive arithmetic/count/numeral checks have one shared scalar implementation;
+the original checker keeps a small result-construction wrapper. The existing
+PSKernel rule that BOTH arguments of any binary empty-level constant application
+are normalized before primitive recognition is preserved. Pinned Lean 4.35
+recognizes primitive names first; the finite-fuel PSKernel ordering is preserved
+as published, not silently relabeled as identical official resource behavior.
+
+Projection normalizes the major through the public callback, reads admitted
+constructor name/parameter-count metadata, selects the existing field ID, and
+recurses with the original predecessor core fuel. Failed selection returns the
+exact original projection. Changed application heads retain the extra rebuilt
+core recursion. Nonrecursor heads can remain stuck; active recursor/Quot heads,
+actual delta targets, local let values and String-major constructor expansion
+still request complete original-checker fallback. No legacy tree is imported by
+these new workers. Full inference/DefEq/admission and those remaining reductions
+have not yet migrated.
+
+Native and generated additions exercise all primitive outcomes, numeral/count
+limits, zero division/modulus, nonprimitive argument evaluation, real Nat
+admission plus checked successor, real two-field inductive admission, correct
+and invalid projections, changed function heads, exact resource errors and
+environment isolation. Native also compares fourteen ordinary Nat reductions
+against pinned official Lean. New local public-cache initialization/FVar
+exclusion proofs extend the existing local claims; they do not prove full
+cache-result validity. These additions have not yet passed CI on this commit.
+
+Canonical PS runtime qualification now reuses the complete compiled bundle for
+the same strict DAG/transform smoke in a detached directory with PATH empty,
+in addition to the existing complete V1 smoke. Counts continue to come from the
+dependency manifest. Native and generated full-checker benchmarks remain required;
+no new Nat/projection performance improvement is claimed.
+
 ## Milestone matrix
 
 | Milestone | Implementation | Native correctness | PSC1 / PS / JS | Whole-checker performance | Status |
@@ -180,7 +238,7 @@ official Lean rows cannot be mistaken for the same PSKernel fuel mechanism.
 | Paged representation | Single production owner; all 12 families; exact cached metadata | Forgery, collision, sharing, page and reference tests pass | Qualified foundation; current complete closure builds | Construction and validation included in complete-operation measurements | Integrated foundation |
 | Transformations | Lift, instantiate/multi/reverse, abstract, universe substitution, spines; scoped memo | 1,755 comparisons plus budget/sharing/negative cases pass | Authentic source and strict generated transform smoke pass | Large shared-DAG fixture; not a full checker speedup claim | Integrated prerequisite |
 | Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
-| WHNF | Terminal/metadata/zeta/syntactic-lambda beta qualified; operation-owned function-normalization cache added | Stateful slice native resource/cache parity passes | Stateless slice strict generated smoke passes; stateful generated gate pending | Deep stateful workloads improve; small/collision regressions remain | Partial; full delta/iota/projection/primitive migration open |
+| WHNF | Function normalization, separate core/public caches, direct Nat and constructor projection added | Prior stateful slice passes; new Nat/projection gate pending | Prior generated wrapper ABI corrected; current expanded gate pending | Deep stateful workloads improve; small/collision regressions remain | Partial; delta/iota/local-value/String migration open |
 | Inference and DefEq | Terminal/metadata inference; collision-safe checked syntactic shortcut | Complete fallback and shortcut tests pass | Complete checker executes in generated JS | Metadata checks improve; general inference unqualified as DAG-native | Partial |
 | Inductive admission | Direct DAG request ingress, complete original admission internally | Existing admission tests pass | Real generated definition/ordinary-inductive checks pass | Full admission comparison pending | Not migrated internally |
 | Canonical self-hosting | Actual full production import closure; counts from manifest | Pinned Lean build passes | Current source/canonical checks pass; current final executable gates still running | Generator/runtime costs remain visible | Partial integration qualification |

@@ -86,7 +86,9 @@ for (const phase of phases) {
 for (const [module, stage] of [
   ['Ps.Syntax.Ast', 'parse'], ['Ps.Syntax.Ast', 'elaboration'],
   ['Ps.Erasure.Definition', 'elaboration'],
-  ['Ps.Syntax.ParseCommon', 'parse'], ['Ps.Syntax.ParseCommon', 'elaboration']
+  ['Ps.Syntax.ParseCommon', 'parse'], ['Ps.Syntax.ParseCommon', 'elaboration'],
+  ['Ps.Syntax.ParseBinding', 'parse'], ['Ps.Syntax.ParseBinding', 'elaboration'],
+  ['Ps.Syntax.Operators', 'parse'], ['Ps.Syntax.Operators', 'elaboration']
 ]) {
   const row = observed.records.find(row => row.module === module);
   if (!row || row[stage] !== 'accepted') {

@@ -8,6 +8,21 @@ No merge, release or publication. Use expected-SHA non-forced updates.
 
 ## Current work
 
+ParseCommon is accepted in focused Linux run39505999415 at
+48aa400b347f262631e99fdb06a1c8a86a055619. That checkpoint passed all24 census
+behavior checks and retained native control groups. Census advanced to
+semantic67/42/38, JS79/50/44, Rust83/51/43. It remains partial source coverage.
+
+Continue with ParseBinding and Operators. Retain the binding-parser alias as a
+named type definition, spell monadic failure sequencing explicitly, and expose
+structural workers. Operator implementation uses named String equality and Bool
+Nat comparison while retaining source operator acceptance/refusal policy.
+The focused workflow now executes the existing independent operator equivalence
+and data/pattern admission/execution suites. Lean installation gets bounded
+retries for observed transient TLS failures; all tool pins and timeouts remain.
+These additional modules are pending Linux qualification.
+
+
 Normalize the whole Ps.Syntax.ParseCommon source module, starting from its
 86:26 unsupported list-cons expression. Root names use explicit construction.
 Recursive namespace text/equality/path helpers expose structural arguments;

@@ -420,7 +420,7 @@
           "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
           "runId": 39467579973,
           "suite": "psc1_data_tests, runtime-conformance-tests.mjs and ordinary-while-conformance-tests.mjs",
-          "scope": "Immutable nested product/Unit/wildcard patterns execute in handwritten source cases across both grammars and all seven targets. Native graph, notation-hygiene and translation cases preserve checked Core. All-wildcard RHS strictness reaches 14 external target/source deadlines plus two minimum-Python repetitions. Mutable and monadic patterns remain refused."
+          "scope": "Immutable nested product and wildcard patterns execute in handwritten source cases across both grammars and all seven targets. Unit binding patterns are covered by native admission and private-JS cases. Native graph, notation-hygiene and translation cases preserve checked Core. All-wildcard RHS strictness reaches 14 external target/source deadlines plus two minimum-Python repetitions. Mutable and monadic patterns remain refused."
         }
       ]
     },

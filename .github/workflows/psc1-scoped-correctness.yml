@@ -96,13 +96,16 @@ jobs:
           echo '{"name":"psc1-ts7-consumer-tests","version":"0.0.0","private":true}' > "$RUNNER_TEMP/psc1-ts7/package.json"
           npm install --prefix "$RUNNER_TEMP/psc1-ts7" --ignore-scripts --no-save --no-audit --no-fund typescript@7.0.2
           echo "PSC1_TSC=$RUNNER_TEMP/psc1-ts7/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Execute npm source metadata boundary regressions
+        working-directory: psc1
+        run: node scripts/npm-library-resolution-tests.mjs
       - name: Compile native compiler and focused regressions
         working-directory: psc1
         run: |
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests
+          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
@@ -112,6 +115,14 @@ jobs:
           .lake/build/bin/psc1_direct_map_tests
           .lake/build/bin/psc1_lean_kernel_provider_tests
           .lake/build/bin/psc1_scoped_tests
+      - name: Execute scripting IR rejection and compound closure consumers
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          mkdir -p dist/scoped-correctness/script-ir
+          .lake/build/bin/psc1_script_ir_tests dist/scoped-correctness/script-ir/capture
+          python3 -c 'import importlib.util,sys; s=importlib.util.spec_from_file_location("capture",sys.argv[1]); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); assert m.answer(41)==42; assert m.answer(0)==1; assert m.__all__==["answer"]; print("Python compound closure: PASS")' dist/scoped-correctness/script-ir/capture.py
+          php -r '$api=require $argv[1]; if(gmp_cmp($api["answer"](gmp_init(41)),42)!==0 || gmp_cmp($api["answer"](gmp_init(0)),1)!==0 || array_keys($api)!==["answer"]) exit(1); echo "PHP compound closure: PASS\n";' dist/scoped-correctness/script-ir/capture.php
       - name: Compile and test corrected PSKernel-Core natively only
         working-directory: psc1
         run: |
@@ -153,6 +164,9 @@ jobs:
       - name: Execute Python and PHP ABI, recursion and failure boundaries
         working-directory: psc1
         run: node scripts/script-backend-tests.mjs
+      - name: Pack and qualify installed native npm toolchain and real source libraries
+        working-directory: psc1
+        run: node scripts/npm-native-distribution.mjs
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4

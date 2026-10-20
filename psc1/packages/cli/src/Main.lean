@@ -23,7 +23,7 @@ def psCliUsage : String :=
 private def buildDefault (inputPath outputPath : String) : IO Unit := do
   if outputPath.endsWith ".js" then psHostDirectJavaScript inputPath outputPath
   else if outputPath.endsWith ".ts" then psHostDirectTypeScript inputPath outputPath
-  else throw (IO.userError "PSC1_OUTPUT_EXTENSION: use --target for Rust or Wasm")
+  else throw (IO.userError "PSC1_OUTPUT_EXTENSION: use --target for Rust, Wasm, Python or PHP")
 
 /-- Parse the one explicit assurance option without changing command ordering.
 Duplicate, incomplete and unknown requests fail before any output is staged. -/
@@ -67,7 +67,7 @@ private def buildDefaultFor
     (inputPath outputPath : String) (assurance : PsHostAssurance) : IO Unit := do
   if outputPath.endsWith ".js" then buildFor inputPath outputPath "js" assurance
   else if outputPath.endsWith ".ts" then buildFor inputPath outputPath "ts" assurance
-  else throw (IO.userError "PSC1_OUTPUT_EXTENSION: use --target for Rust or Wasm")
+  else throw (IO.userError "PSC1_OUTPUT_EXTENSION: use --target for Rust, Wasm, Python or PHP")
 
 private def psCliExecution
     (assurance : PsHostAssurance) (args : List String) : IO Unit := do

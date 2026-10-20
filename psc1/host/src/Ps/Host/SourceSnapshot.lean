@@ -51,7 +51,7 @@ mutual
     match imports with
     | [] => return state
     | sourceImport :: rest =>
-      let dependency ← psHostResolveImport root sourceImport.moduleName
+      let dependency ← psHostResolveImportFrom root (stack.headD root) sourceImport.moduleName
       let next ← captureModule fuel root dependency stack state
       captureImports fuel root stack rest next
 end

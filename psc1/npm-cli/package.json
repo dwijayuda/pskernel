@@ -1,9 +1,14 @@
 {
   "name": "@proofscript/psc1-cli",
-  "version": "0.1.0-psc1.1",
+  "version": "0.1.0-psc1.2",
   "private": true,
   "type": "module",
-  "description": "PSC1 workspace native launcher; publication requires a separately qualified native distribution",
-  "bin": { "psc": "psc.js", "psc1": "psc.js" },
-  "engines": { "node": ">=22" }
+  "description": "PSC1 checked native compiler launcher",
+  "bin": {
+    "psc": "psc.js",
+    "psc1": "psc.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

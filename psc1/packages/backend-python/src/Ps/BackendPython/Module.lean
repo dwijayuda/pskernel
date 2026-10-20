@@ -258,7 +258,9 @@ private def expression (fuel : Nat) (m : PsVerifiedIrModule) (scope : Scope)
           line (result ++ " = " ++ right)
         pure result
     | .intrinsic operation typeArguments arguments =>
-        typeArguments.forM (checkType 256)
+        typeArguments.forM fun argumentType => do
+          let _ ← checkType 256 argumentType
+          pure ()
         let values ← arguments.mapM fun a => smaller a false
         emitIntrinsic operation values tail
     | .lambda parameters resultType body =>
@@ -271,7 +273,9 @@ private def expression (fuel : Nat) (m : PsVerifiedIrModule) (scope : Scope)
           line ("return " ++ result)
         pure name
     | .call fn typeArguments arguments =>
-        typeArguments.forM (checkType 256)
+        typeArguments.forM fun argumentType => do
+          let _ ← checkType 256 argumentType
+          pure ()
         let callee ← smaller fn false
         -- Freeze the callee before evaluating any argument.
         let saved ← bindValue callee
@@ -296,7 +300,9 @@ private def expression (fuel : Nat) (m : PsVerifiedIrModule) (scope : Scope)
           line (result ++ " = " ++ value)
         pure result
     | .record name types fields =>
-        types.forM (checkType 256)
+        types.forM fun argumentType => do
+          let _ ← checkType 256 argumentType
+          pure ()
         let schema ← structureFields m name
         let values ← fields.mapM fun field => do
           let value ← smaller field.2 false
@@ -307,13 +313,17 @@ private def expression (fuel : Nat) (m : PsVerifiedIrModule) (scope : Scope)
           | none => throw ("PSC1_PYTHON_FIELD_MISSING: " ++ field)
         bindValue (tuple ordered)
     | .projection name types target field =>
-        types.forM (checkType 256)
+        types.forM fun argumentType => do
+          let _ ← checkType 256 argumentType
+          pure ()
         let target ← smaller target false
         let fields ← structureFields m name
         let index ← fieldPosition fields field
         bindValue (target ++ "[" ++ toString index ++ "]")
     | .constructor owner name types fields =>
-        types.forM (checkType 256)
+        types.forM fun argumentType => do
+          let _ ← checkType 256 argumentType
+          pure ()
         let schema ← constructorFields m owner name
         let values ← fields.mapM fun field => do
           let value ← smaller field.2 false
@@ -324,7 +334,9 @@ private def expression (fuel : Nat) (m : PsVerifiedIrModule) (scope : Scope)
           | none => throw ("PSC1_PYTHON_FIELD_MISSING: " ++ field)
         bindValue (tuple (psJsonQuote name :: ordered))
     | .matchE owner types scrutinee alternatives =>
-        types.forM (checkType 256)
+        types.forM fun argumentType => do
+          let _ ← checkType 256 argumentType
+          pure ()
         let scrutinee ← smaller scrutinee false
         let result ← fresh "match"
         for alternative in alternatives do
@@ -387,7 +399,11 @@ private def emitModuleBody (m : PsVerifiedIrModule) (publicNames : List String) 
       line (globalName d.name ++ " = " ++ (if calls then "_psc_run(" ++ valueName d.name ++ ")" else valueName d.name ++ "()"))
   line ""
   let mut stubs : List String := ["# Generated PSC1 scalar API; Nat values are nonnegative Python int.", "import builtins as _psc_b", ""]
+  let mut seenPublic : List String := []
   for name in publicNames do
+    if seenPublic.contains name then
+      throw ("PSC1_PYTHON_DUPLICATE_PUBLIC_DECLARATION: " ++ name)
+    seenPublic := name :: seenPublic
     if !publicNameAllowed name then
       throw ("PSC1_PYTHON_PUBLIC_NAME_UNSUPPORTED: " ++ name)
     let some d := m.declarations.find? (fun d => d.name == name)

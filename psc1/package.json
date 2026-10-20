@@ -1,11 +1,11 @@
 {
-  "name": "@proofscript/psc2-selfhost-workspace",
+  "name": "@proofscript/psc1-workspace",
   "private": true,
   "version": "0.0.0-dev",
-  "description": "Minimal PSC2 self-host workspace bootstrapped from PSC1-compatible Lean",
+  "description": "PSC1 checked native compiler workspace",
   "type": "module",
   "bin": {
-    "psc": "./packages/cli/bin/psc.mjs"
+    "psc": "./npm-cli/psc.js"
   },
   "workspaces": [
     "packages/*",
@@ -13,7 +13,7 @@
     "stdlib"
   ],
   "scripts": {
-    "psc": "node packages/cli/bin/psc.mjs",
+    "psc": "node npm-cli/psc.js",
     "clean": "node scripts/clean.mjs",
     "check:workspace": "node scripts/bootstrap-closure-contract-tests.mjs && node scripts/check-workspace.mjs",
     "check:source:bootstrap": "node check-psc1-source.mjs",
@@ -130,8 +130,10 @@
     "dev:sh1": "lake build psc1 psc1_sh1_compile psc1_ir_check_tests && node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out dist/sh1",
     "iterate:sh1": "node scripts/sh1-iterate.mjs",
     "check:typescript-profile": "node scripts/check-typescript-profile.mjs --out dist/typescript-profile",
-    "npm:release": "node scripts/npm-distribution.mjs",
-    "npm:inspect": "node scripts/npm-distribution.mjs --inspect"
+    "npm:pack:native": "node scripts/npm-native-distribution.mjs",
+    "test:npm-libraries": "node scripts/npm-library-resolution-tests.mjs",
+    "npm:archive:psc0": "node scripts/npm-distribution.mjs",
+    "npm:inspect:psc0": "node scripts/npm-distribution.mjs --inspect"
   },
   "devDependencies": {
     "typescript": "7.0.2"

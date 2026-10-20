@@ -268,7 +268,7 @@ private def phpEmitExpr : Nat → PhpContext → PsVerifiedIrExpr → PhpEmit St
         let printed ← arguments.mapM emit
         phpIntrinsic context operation printed
     | .call fn _ arguments =>
-        let target ← emit fn
+        let target ← phpBind (← emit fn)
         let printed ← arguments.mapM emit
         phpBind (phpInvoke context target printed)
     | .letE name type value body =>
@@ -382,6 +382,11 @@ private def phpEmitDeclaration (context : PhpContext)
   phpLine ""
   return line
 
+private def phpPublicScalar : PsVerifiedIrType → Bool
+  | .primitive .nat | .primitive .int | .primitive .bool
+  | .primitive .char | .primitive .string | .primitive .unit => true
+  | _ => false
+
 def psPhpEmitValidatedModule
     (irModule : PsValidatedIrModule) (publicNames : List String) :
     Except String PsPhpPrintedModule := do
@@ -402,9 +407,15 @@ def psPhpEmitValidatedModule
     for ctor in item.constructors do
       for field in ctor.fields do
         discard (phpType 4096 field.type)
+  let mut seenPublic : List String := []
   for name in publicNames do
-    if !raw.declarations.any (fun declaration => declaration.name == name) then
-      throw ("PSC1_PHP_UNKNOWN_PUBLIC_DECLARATION: " ++ name)
+    if seenPublic.contains name then throw ("PSC1_PHP_DUPLICATE_PUBLIC_DECLARATION: " ++ name)
+    seenPublic := name :: seenPublic
+    match raw.declarations.find? (fun d => d.name == name) with
+    | none => throw ("PSC1_PHP_UNKNOWN_PUBLIC_DECLARATION: " ++ name)
+    | some d =>
+        if !phpPublicScalar d.resultType || !d.parameters.all (fun p => phpPublicScalar p.type) then
+          throw ("PSC1_PHP_PUBLIC_ABI_UNSUPPORTED: " ++ name)
   let valueNames := (raw.declarations.filter (fun d => d.parameters.isEmpty)).map (fun d => d.name)
   let requested := raw.declarations.flatMap fun declaration =>
     phpTypeRequirements 4096 declaration.resultType ++

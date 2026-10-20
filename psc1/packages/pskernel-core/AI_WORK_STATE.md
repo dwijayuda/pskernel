@@ -289,3 +289,17 @@ and all new local metadata/cache-scope theorem checks. The original native
 correctness job in run39509139873 also passed. Generated and canonical .ps
 qualification remain pending. Additional flat-pattern source fixes and strict
 generated transformation tests are included next; they require their own CI.
+
+### Complete Arena reference execution — pending CI
+
+The new reference workflow evaluates every one of the 193 cases from the
+SHA256-pinned round-2026-09 archive using official Lean at the exact 4.35 pin.
+It records each verdict, original/adapted hashes, byte-identical declaration
+body hashes, timeouts and driver errors. Only the historical first metadata
+line is adapted; this is not a native 4.35 re-export or unchanged-envelope
+qualification. No case, including performance cases, is excluded. Accept/reject
+controls guard the oracle. This job establishes official reference coverage;
+it explicitly does not establish PSKernel-Core corpus compatibility. A current
+strict DAG transport with generated-recursors metadata comparison is required
+for the independent checker. The older adapter's high fuel and dropped recursor
+metadata are not reused.

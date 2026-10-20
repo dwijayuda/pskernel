@@ -1,0 +1,57 @@
+name: PSC1 Lean Arena 4.35 reference corpus
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - integration/psc1-pskernel-expr-v2-lean435-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-arena435.yml
+      - psc1/scripts/pskernel-arena435-oracle.py
+      - psc1/packages/pskernel-core/**
+      - psc1/lean-toolchain
+permissions:
+  contents: read
+jobs:
+  official-arena-reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify exact toolchain and authenticate full archive
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          lean --version
+          python3 -m py_compile scripts/pskernel-arena435-oracle.py
+          curl -fL --retry 3 --retry-delay 2 \
+            -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+      - name: Evaluate all 193 declaration bodies with official Lean 4.35
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/arena435-evidence"
+          python3 scripts/pskernel-arena435-oracle.py \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --official-project . \
+            --out "$RUNNER_TEMP/arena435-evidence/report.json" \
+            --timeout 20 --workers 4 \
+            | tee "$RUNNER_TEMP/arena435-evidence/run.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-arena435-official-reference
+          path: ${{ runner.temp }}/arena435-evidence
+          if-no-files-found: error
+          retention-days: 30

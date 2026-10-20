@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "packageName": "@proofscript/pskernel-lean-wasm",
+  "packageVersion": "4.34.0",
+  "protocol": "pskernel-lean/1",
+  "provider": "lean4-cpp",
+  "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "emscriptenVersion": "6.0.9",
+  "sourceCommit": "1b21b2483df7e8de7542873c24eaff2501539b1b",
+  "artifacts": {
+    "launcher": {
+      "path": "wasm/pskernel-lean.cjs",
+      "bytes": 69410,
+      "sha256": "c7f45ae1cbe5c8c56948b60f70f6c44dbd9c88b72da496bb097f654a1f12ef4c"
+    },
+    "wasm": {
+      "path": "wasm/pskernel-lean.wasm",
+      "bytes": 2177471,
+      "sha256": "ca6bbb58ea5bafe2d5fbc9fa0fce083933ae0dd5e06a2cbe475077b7d71e9428"
+    }
+  }
+}

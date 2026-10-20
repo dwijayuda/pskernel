@@ -1,0 +1,145 @@
+name: PSCV V6 Lean native packages
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "pscv0/v6/**"
+      - ".github/workflows/pscv-v6-core-npm.yml"
+  push:
+    branches: ["pscv/v6-minimal-npm-core"]
+    paths:
+      - "pscv0/v6/**"
+      - ".github/workflows/pscv-v6-core-npm.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35 RC3
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc3
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify exact Lean semantic toolchain identity
+        working-directory: pscv0/v6
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "470d5ce1400764999581fd26d5d72b00d990b0f4"
+      - name: Install npm package manifests without lifecycle scripts
+        working-directory: pscv0/v6
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Build compiler packages and native executable from Lean sources
+        working-directory: pscv0/v6
+        run: npm run build:native
+      - name: Research-only build probe for old Lean RuntimeIR and InterfaceIR modules
+        working-directory: pscv0/v6
+        run: |
+          lake build PscvReuseProbeFoundation PscvReuseProbeRuntimeIr PscvReuseProbeInterfaceIr pscv_v6_reuse_smoke PscvReuseProbeSyntax
+          lake exe pscv_v6_reuse_smoke
+      - name: Execute actual Lean kernel proof-acceptance/rejection and extension checks
+        working-directory: pscv0/v6
+        run: npm test
+      - name: Inspect native CLI and explicit unsupported compilation mode
+        working-directory: pscv0/v6
+        run: |
+          set -euo pipefail
+          lake exe pscv_v6_dev --version
+          lake exe pscv_v6_dev capabilities
+          lake exe pscv_v6_dev providers
+          lake exe pscv_v6_dev core-smoke
+          lake exe pscv_v6_kernel_dev kernel-empty-smoke
+          if lake exe pscv_v6_dev build src/Main.ps; then
+            echo "ERROR: incomplete compiler falsely accepted a build" >&2
+            exit 1
+          fi
+      - name: Measure minimal Lean executable and aggressive stripping
+        working-directory: pscv0/v6
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build pscv_v6_minimal_probe
+          hello=".lake/build/bin/pscv_v6_minimal_probe"
+          test -x "$hello"
+          echo "Minimal Lean binary bytes (unstripped): $(wc -c < "$hello")"
+          cp "$hello" /tmp/pscv-v6-minimal-debug-stripped
+          strip --strip-debug /tmp/pscv-v6-minimal-debug-stripped
+          echo "Minimal Lean binary bytes (debug stripped): $(wc -c < /tmp/pscv-v6-minimal-debug-stripped)"
+          cp "$hello" /tmp/pscv-v6-minimal-all-stripped
+          strip --strip-all /tmp/pscv-v6-minimal-all-stripped
+          echo "Minimal Lean binary bytes (all stripped): $(wc -c < /tmp/pscv-v6-minimal-all-stripped)"
+          env -i PATH=/usr/bin:/bin /tmp/pscv-v6-minimal-all-stripped
+      - name: Stage native Linux npm package and check minimal runtime path
+        working-directory: pscv0/v6
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary=".lake/build/bin/pscv_v6_dev"
+          test -x "$binary"
+          mkdir -p release/npm/linux-x64/bin
+          cp "$binary" release/npm/linux-x64/bin/pscv-v6-dev
+          chmod 755 release/npm/linux-x64/bin/pscv-v6-dev
+          echo "Core executable bytes (unstripped): $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
+          strip --strip-debug release/npm/linux-x64/bin/pscv-v6-dev
+          echo "Core executable bytes (debug stripped): $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
+          sha256sum release/npm/linux-x64/bin/pscv-v6-dev
+          ldd release/npm/linux-x64/bin/pscv-v6-dev || true
+          env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/linux-x64/bin/pscv-v6-dev" --version
+          env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/linux-x64/bin/pscv-v6-dev" core-smoke
+          (cd release/npm/linux-x64 && npm pack --ignore-scripts --pack-destination "$GITHUB_WORKSPACE")
+          kernel=".lake/build/bin/pscv_v6_kernel_dev"
+          test -x "$kernel"
+          mkdir -p release/npm/kernel-linux-x64/bin
+          cp "$kernel" release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev
+          chmod 755 release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev
+          echo "Kernel executable bytes (unstripped): $(wc -c < release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev)"
+          strip --strip-debug release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev
+          echo "Kernel executable bytes (debug stripped): $(wc -c < release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev)"
+          env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev" kernel-empty-smoke
+          (cd release/npm/kernel-linux-x64 && npm pack --ignore-scripts --pack-destination "$GITHUB_WORKSPACE")
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pscv-v6-native-linux-x64-development-npm
+          path: "*.tgz"
+          if-no-files-found: error
+      - name: Inspect npm source package contents
+        working-directory: pscv0/v6
+        run: npm run pack:dry
+
+  existing-lean-provider-oracles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install only V6 npm package metadata
+        working-directory: pscv0/v6
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Verify provider copies and npm workspace resolution
+        working-directory: pscv0/v6
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(realpath node_modules/@proofscript/pskernel-lean)" = "$(realpath packages/pskernel-lean)"
+          test "$(realpath node_modules/@proofscript/pskernel-lean-wasm)" = "$(realpath packages/pskernel-lean-wasm)"
+          test "$(git rev-parse HEAD:pscv0/v6/packages/pskernel-lean)" = "$(git rev-parse HEAD:pscv0/packages/pskernel-lean)"
+          test "$(git rev-parse HEAD:pscv0/v6/packages/pskernel-lean-wasm)" = "$(git rev-parse HEAD:pscv0/packages/pskernel-lean-wasm)"
+      - name: Verify copied native and Wasm prebuilt binaries
+        working-directory: pscv0/v6
+        run: npm run check:kernel-package-copies
+      - name: Run independent provider checks, no PSCV certification claim
+        working-directory: pscv0/v6
+        run: npm run test:provider-oracles

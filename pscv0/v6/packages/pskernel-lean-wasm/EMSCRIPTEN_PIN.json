@@ -1,0 +1,6 @@
+{
+  "version": "6.0.9",
+  "sdk": "emsdk",
+  "status": "verified-upstream-v4.34-baseline",
+  "reason": "Lean v4.34.0 has a reported working Emscripten build with emsdk 6.0.9; use the proven baseline before considering upgrades."
+}

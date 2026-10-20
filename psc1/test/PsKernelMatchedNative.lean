@@ -70,7 +70,7 @@ private def independentOne (op : String) : IO Nat := do
         else throw (IO.userError "PSC1_KERNEL_DEFEQ_FALSE")
     | Except.error _ => throw (IO.userError "PSC1_KERNEL_DEFEQ_REJECTED")
 
-private def measure (env : Lean.Environment) (op label : String) (calls : Nat) : IO Unit := do
+private def psc1MatchedMeasure (env : Lean.Environment) (op label : String) (calls : Nat) : IO Unit := do
   let mut passed := 0
   let before ← IO.monoMsNow
   for _ in [:calls] do
@@ -83,8 +83,8 @@ private def measure (env : Lean.Environment) (op label : String) (calls : Nat) :
 def main : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   for op in ["infer_sort", "beta_whnf", "defeq_positive"] do
-    measure env op "lean" 2400
-    measure env op "psc" 2400
-    measure env op "psc" 2400
-    measure env op "lean" 2400
+    psc1MatchedMeasure env op "lean" 2400
+    psc1MatchedMeasure env op "psc" 2400
+    psc1MatchedMeasure env op "psc" 2400
+    psc1MatchedMeasure env op "lean" 2400
   IO.println "PSC1_MATCHED_KERNEL: COMPLETE"

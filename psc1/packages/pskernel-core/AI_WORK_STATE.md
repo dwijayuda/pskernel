@@ -233,3 +233,16 @@ forged graph data, and a 24-level shared graph without materializing its tree.
 These additions are pending native and authentic PSC1/generated qualification;
 the complete checker migration is still unfinished. The following integration
 slice connects the canonical visitor to public checked zeta WHNF.
+
+### Complete executable qualification expansion — pending CI
+
+The original correctness workflow now runs on this integration branch and
+derives the complete canonical source closure from imports, comparing it to
+the reconstruction manifest instead of hardcoding 79. Exact Lean commit,
+TypeScript 7.0.2 output, declarations, source-map structure, and detached Node
+execution are checked. The generated .ps checker smoke now performs checking,
+inference, beta/zeta/delta/iota, positive/negative DefEq, declaration admission,
+ordinary and mutual inductives, cache-scope tests, and zero-fuel rejection.
+Its previously vacuous curried equality assertions are fixed and sentinel-tested.
+DirectJS is probed separately: known non-scalar/generic emitter limitations
+are explicitly reported as unsupported, never as passing kernel execution.

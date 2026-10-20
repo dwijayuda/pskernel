@@ -5,10 +5,12 @@ on:
     branches:
       - research/psc1-pskernel-lean435-performance-20261020
       - research/psc1-pskernel-expr-v2-lean435-20261020
+      - integration/psc1-pskernel-expr-v2-lean435-20261021
     paths:
       - psc1/lean-toolchain
       - psc1/host/**
       - psc1/packages/pskernel-core/**
+      - psc1/packages/pskernel-core/AI_WORK_STATE.md
       - psc1/test/PsKernelCoreRegression.lean
       - psc1/test/PsKernelInstantiatePerformance.lean
       - psc1/test/PsKernelMultiInstantiatePerformance.lean
@@ -39,6 +41,8 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
           lean --version
           lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression psc1_kernel_perf psc1_kernel_instantiate_perf psc1_kernel_multi_perf psc1_kernel_lift_perf
       - name: Run native safety and semantics regression
@@ -83,7 +87,7 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Check all 79 kernel modules are in portable source profile
+      - name: Check kernel modules are in portable source profile
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -92,6 +96,8 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
           lake build psc1
       - name: Translate first kernel source through PSC1
         working-directory: psc1
@@ -99,7 +105,7 @@ jobs:
           set -euo pipefail
           lake exe psc1 translate packages/pskernel-core/src/Ps/KernelCore/Core/Name.lean --to ps --out /tmp/psc1-pskernel-name.ps
           test -s /tmp/psc1-pskernel-name.ps
-      - name: Check complete 79-module kernel using PSC1
+      - name: Check complete kernel source closure using PSC1
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -115,15 +121,38 @@ jobs:
             dist/pskernel-selfhost/workspace
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
+          import path from 'node:path';
           import { assertBootstrapWorkspaceManifest } from './scripts/bootstrap-manifest.mjs';
+          import { packageBySection, parseImports } from './scripts/workspace-layout.mjs';
           const workspace='dist/pskernel-selfhost/workspace';
+          const entry='packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean';
           const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
-          if(manifest.sourceCount!==79 || manifest.generated.length!==79)
-            throw Error('PSKERNEL_PORTABLE_FULL_CLOSURE_REQUIRED_79');
-          if(!manifest.generated.every(p=>p.startsWith('packages/pskernel-core/src/Ps/KernelCore/')))
-            throw Error('PSKERNEL_CLOSURE_HAS_UNEXPECTED_MODULES');
+          const expected=new Set(), visited=new Set();
+          function visit(source){
+            if(visited.has(source))return;
+            visited.add(source);
+            const text=readFileSync(source,'utf8');
+            for(const imported of parseImports(text)){
+              const parts=imported.split('.');
+              let dependency;
+              if(parts[0]==='ProofScript'){
+                dependency=path.posix.join('stdlib',...parts)+'.lean';
+              }else if(parts[0]==='Ps' && packageBySection.has(parts[1])){
+                dependency=path.posix.join('packages',packageBySection.get(parts[1]),'src',...parts)+'.lean';
+              }else throw Error('PSKERNEL_CLOSURE_UNKNOWN_IMPORT '+imported);
+              visit(dependency);
+            }
+            expected.add(source.replace(/\.lean$/u,'.ps'));
+          }
+          visit(entry);
+          if(manifest.entry!==entry.replace(/\.lean$/u,'.ps') ||
+              manifest.sourceCount!==expected.size ||
+              manifest.generated.length!==expected.size ||
+              new Set(manifest.generated).size!==expected.size ||
+              !manifest.generated.every(p=>expected.has(p)))
+            throw Error('PSKERNEL_PORTABLE_FULL_SOURCE_CLOSURE_REQUIRED');
           await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
-          console.log('PSKERNEL_CANONICAL_79_PS_SOURCES: PASS');
+          console.log('PSKERNEL_CANONICAL_PS_SOURCES: PASS modules='+expected.size);
           NODE
       - name: PSC1 checks generated ProofScript kernel
         working-directory: psc1
@@ -151,6 +180,51 @@ jobs:
             --out dist/pskernel-selfhost/pskernel-core.js
           test -s dist/pskernel-selfhost/pskernel-core.js
           test -s dist/pskernel-selfhost/pskernel-core.d.ts
+          test -s dist/pskernel-selfhost/pskernel-core.js.map
           node --check dist/pskernel-selfhost/pskernel-core.js
-          node scripts/pskernel-generated-smoke.mjs dist/pskernel-selfhost/pskernel-core.js
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const map=JSON.parse(readFileSync('dist/pskernel-selfhost/pskernel-core.js.map','utf8'));
+          if(map.version!==3 || !Array.isArray(map.sources) || map.sources.length===0 ||
+              typeof map.mappings!=='string' || map.mappings.length===0)
+            throw Error('PSKERNEL_INVALID_GENERATED_SOURCE_MAP');
+          NODE
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          mkdir -p "$PSC1_PS_RUN_DIR"
+          cp dist/pskernel-selfhost/pskernel-core.js "$PSC1_PS_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-generated-smoke.mjs "$PSC1_PS_RUN_DIR/smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-canonical-js-smoke.log"
           echo 'PSC1_GENERATED_JS_KERNEL: PASS'
+      - name: Report DirectJS kernel capability without claiming support
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          if lake exe psc1 build \
+              dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+              --target js --out dist/pskernel-selfhost/pskernel-direct.js \
+              > "$RUNNER_TEMP/psc1-direct-capability.log" 2>&1; then
+            node scripts/pskernel-generated-smoke.mjs dist/pskernel-selfhost/pskernel-direct.js \
+              | tee -a "$RUNNER_TEMP/psc1-direct-capability.log"
+            echo 'PSC1_DIRECTJS_COMPLETE_KERNEL_RUNTIME: PASS'
+          else
+            cat "$RUNNER_TEMP/psc1-direct-capability.log"
+            grep -Eq 'PSC1_DIRECT_NONSCALAR_PUBLIC_SIGNATURE_UNQUALIFIED|PSC1_DIRECT_GENERIC_DECLARATION_NOT_QUALIFIED' \
+              "$RUNNER_TEMP/psc1-direct-capability.log"
+            echo 'PSC1_DIRECTJS_COMPLETE_KERNEL: UNSUPPORTED (explicit emitter capability limit)'
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-canonical-kernel-qualification
+          path: |
+            psc1/dist/pskernel-selfhost/workspace/.proofscript-bootstrap.json
+            psc1/dist/pskernel-selfhost/pskernel-core.js
+            psc1/dist/pskernel-selfhost/pskernel-core.d.ts
+            psc1/dist/pskernel-selfhost/pskernel-core.js.map
+            ${{ runner.temp }}/psc1-canonical-js-smoke.log
+            ${{ runner.temp }}/psc1-direct-capability.log
+          retention-days: 30

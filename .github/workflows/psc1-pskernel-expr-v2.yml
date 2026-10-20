@@ -55,6 +55,8 @@ jobs:
           grep -q "PSC1_EXPR_V2_HEAD_REDUCTION: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_HEAD_SEQUENCE: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_HEAD_MACHINE: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
+          grep -q "PSC1_EXPR_V2_PAIR_EQUALITY: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
+          grep -q "PSC1_EXPR_V2_PAIR_SHARING: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_LIFT_DIFFERENTIAL: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
       - uses: actions/upload-artifact@v4
         if: always()
@@ -127,6 +129,11 @@ jobs:
         run: |
           set -euo pipefail
           lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PortableHeadMachine.lean
+      - name: Check portable validated structural equality and pair memo
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PortableEquality.lean
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

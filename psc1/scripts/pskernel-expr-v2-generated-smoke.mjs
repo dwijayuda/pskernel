@@ -39,6 +39,7 @@ const portableInstantiate=load("psKernelExprV2PortableInstantiate1Checked");
 const portableHeadStep=load("psKernelExprV2PortableHeadStepChecked");
 const portableHeadSequence=load("psKernelExprV2PortableHeadSequenceChecked");
 const portableHeadMachine=load("psKernelExprV2PortableHeadMachineChecked");
+const portableStructuralEq=load("psKernelExprV2PortableEqChecked");
 const chunkedMkLet=load("psKernelExprV2ChunkedMkLet");
 const chunkedMkMData=load("psKernelExprV2ChunkedMkMData");
 const chunkedMkSort=load("psKernelExprV2ChunkedMkSort");
@@ -224,6 +225,42 @@ demand(machineBad&&"error" in machineBad,"head-machine-forged-rejected");
 
 
 
+
+
+// Same-arena equality uses verified IDs and hash only as acceleration.
+// Equal hashes still need the structural comparison (bvar 0 vs 65521).
+const firstBVar=accepted(chunkedMkBVar(chunkedEmptyWithLimit(64n),0n),
+  "pair-eq-bvar-zero");
+const duplicateBVar=accepted(chunkedMkBVar(firstBVar.fst,0n),
+  "pair-eq-bvar-duplicate");
+const collidingBVar=accepted(chunkedMkBVar(duplicateBVar.fst,65521n),
+  "pair-eq-bvar-hash-collision");
+const collidingFirst=acceptedOption(
+  chunkedFind(collidingBVar.fst,firstBVar.snd),"pair-eq-first-entry");
+const collidingLast=acceptedOption(
+  chunkedFind(collidingBVar.fst,collidingBVar.snd),"pair-eq-last-entry");
+demand(collidingFirst.hash===collidingLast.hash,"pair-eq-actual-hash-collision");
+demand(accepted(portableStructuralEq(
+  collidingBVar.fst,firstBVar.snd,duplicateBVar.snd),"pair-eq-duplicate"),
+  "pair-eq-distinct-identical-nodes");
+demand(accepted(portableStructuralEq(
+  collidingBVar.fst,firstBVar.snd,collidingBVar.snd),"pair-eq-collision")===false,
+  "pair-eq-hash-collision-not-equality");
+demand(portableStructuralEq(forgedChunk,0n,0n)?.error!==undefined,
+  "pair-eq-forged-metadata-rejected");
+let eqGraph=firstBVar.fst;
+let eqLeft=firstBVar.snd, eqRight=firstBVar.snd;
+for(let i=0;i<20;i++){
+  const one=accepted(chunkedMkApp(eqGraph,eqLeft,eqLeft),"pair-eq-shared-left");
+  const two=accepted(chunkedMkApp(one.fst,eqRight,eqRight),"pair-eq-shared-right");
+  eqGraph=two.fst; eqLeft=one.snd; eqRight=two.snd;
+}
+demand(eqGraph.size===41n,"pair-eq-compact-DAG");
+demand(eqLeft!==eqRight &&
+  accepted(portableStructuralEq(eqGraph,eqLeft,eqRight),"pair-eq-shared-graph"),
+  "pair-eq-sharing-memo-success");
+const pairEqInvalid=portableStructuralEq(eqGraph,999999n,eqRight);
+demand(pairEqInvalid&&"error" in pairEqInvalid,"pair-eq-invalid-id-rejected");
 
 // Order-balanced comparison; both implementations see equivalent prebuilt DAGs.
 // Every result and returned arena size is checked before accepting a timing.

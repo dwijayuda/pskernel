@@ -1,6 +1,7 @@
 import Ps.KernelCore.Research.ExprV2Validation
 import Ps.KernelCore.Research.ExprV2Lift
 import Ps.KernelCore.Research.ExprV2PortableHeadMachine
+import Ps.KernelCore.Research.ExprV2PortableEquality
 import Ps.KernelCore.Research.ExprV2PortableLift
 import Ps.KernelCore.Research.ExprV2PortableInstantiate
 import Ps.KernelCore.Research.ExprV2PortableReduction
@@ -929,6 +930,149 @@ private def testHeadMachineDeep : IO Unit := do
     IO.println s!"PSC1_EXPR_V2_HEAD_MACHINE_NATIVE depth={depth} slow_ms={t1-t0} fast_ms={t2-t1} root={fastRoot} size={sourceSize}"
   IO.println "PSC1_EXPR_V2_HEAD_MACHINE: PASS"
 
+
+/-
+Portable V2 alpha-insensitive structural equality, collision safety, and
+pair memoization on a repeated DAG. Differentiation against the old
+PsKernelExprEq is done only on finitely materialized small expressions.
+-/
+private def testPortablePairEquality : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "alphaLeft"
+  let anotherName := PsKernelName.str PsKernelName.anonymous "alphaRight"
+  let mut arena := psKernelExprV2ChunkedEmpty
+  let (a0,bvar0) ← expectV2 (psKernelExprV2ChunkedMkBVar arena 0)
+  arena := a0
+  let (a1,bvarCopy) ← expectV2 (psKernelExprV2ChunkedMkBVar arena 0)
+  arena := a1
+  let (a2,bvarCollision) ← expectV2
+    (psKernelExprV2ChunkedMkBVar arena 65521)
+  arena := a2
+  let (a3,sort) ← expectV2
+    (psKernelExprV2ChunkedMkSort arena PsKernelLevel.zero)
+  arena := a3
+  let (a4,sortCopy) ← expectV2
+    (psKernelExprV2ChunkedMkSort arena PsKernelLevel.zero)
+  arena := a4
+  let (a5,fvar) ← expectV2 (psKernelExprV2ChunkedMkFVar arena name)
+  arena := a5
+  let (a6,mvar) ← expectV2 (psKernelExprV2ChunkedMkMVar arena name)
+  arena := a6
+  let (a7,constant) ← expectV2
+    (psKernelExprV2ChunkedMkConst arena name [PsKernelLevel.zero])
+  arena := a7
+  let (a8,lit) ← expectV2 (psKernelExprV2ChunkedMkLit arena (.nat 5))
+  arena := a8
+  let (a9,app) ← expectV2
+    (psKernelExprV2ChunkedMkApp arena bvar0 sort)
+  arena := a9
+  let (a10,appCopy) ← expectV2
+    (psKernelExprV2ChunkedMkApp arena bvarCopy sortCopy)
+  arena := a10
+  let (a11,lam) ← expectV2
+    (psKernelExprV2ChunkedMkLam arena name sort bvar0 PsKernelBinderInfo.default)
+  arena := a11
+  let (a12,lamAlpha) ← expectV2
+    (psKernelExprV2ChunkedMkLam arena anotherName sortCopy bvarCopy
+      PsKernelBinderInfo.implicit)
+  arena := a12
+  let (a13,forall) ← expectV2
+    (psKernelExprV2ChunkedMkForall arena name sort bvar0 PsKernelBinderInfo.default)
+  arena := a13
+  let (a14,forallAlpha) ← expectV2
+    (psKernelExprV2ChunkedMkForall arena anotherName sortCopy bvarCopy
+      PsKernelBinderInfo.implicit)
+  arena := a14
+  let (a15,letE) ← expectV2
+    (psKernelExprV2ChunkedMkLet arena name sort sort bvar0 false)
+  arena := a15
+  let (a16,letCopy) ← expectV2
+    (psKernelExprV2ChunkedMkLet arena anotherName sortCopy sortCopy
+      bvarCopy false)
+  arena := a16
+  let (a17,letDifferent) ← expectV2
+    (psKernelExprV2ChunkedMkLet arena name sort sort bvar0 true)
+  arena := a17
+  let (a18,mdata) ← expectV2 (psKernelExprV2ChunkedMkMData arena 22 app)
+  arena := a18
+  let (a19,mdataCopy) ← expectV2
+    (psKernelExprV2ChunkedMkMData arena 22 appCopy)
+  arena := a19
+  let (a20,proj) ← expectV2 (psKernelExprV2ChunkedMkProj arena name 0 app)
+  arena := a20
+  let (a21,projCopy) ← expectV2
+    (psKernelExprV2ChunkedMkProj arena name 0 appCopy)
+  arena := a21
+  let pairs : List (String × Nat × Nat) := [
+    ("same-id",bvar0,bvar0),
+    ("two-bvars",bvar0,bvarCopy),
+    ("real-hash-collision",bvar0,bvarCollision),
+    ("two-sorts",sort,sortCopy),
+    ("sort-vs-const",sort,constant),
+    ("fvar-vs-mvar",fvar,mvar),
+    ("const-vs-literal",constant,lit),
+    ("two-apps",app,appCopy),
+    ("two-lambdas-ignore-name-and-info",lam,lamAlpha),
+    ("two-foralls-ignore-name-and-info",forall,forallAlpha),
+    ("lambda-vs-forall",lam,forall),
+    ("two-lets",letE,letCopy),
+    ("let-nondep-different",letE,letDifferent),
+    ("two-metadata",mdata,mdataCopy),
+    ("two-projections",proj,projCopy),
+    ("projection-vs-metadata",proj,mdata)
+  ]
+  let valid ← expectV2 (psKernelExprV2PortableValidate arena)
+  for (label,left,right) in pairs do
+    let oldLeft ← expectV2 (psKernelExprV2ChunkedDecode valid left)
+    let oldRight ← expectV2 (psKernelExprV2ChunkedDecode valid right)
+    let expected := psKernelExprEq oldLeft oldRight
+    let observed ← expectV2
+      (psKernelExprV2PortableEqChecked arena left right)
+    requireV2 ("pair-eq-"+label) (observed == expected)
+  requireV2 "pair-eq-invalid-left"
+    (match psKernelExprV2PortableEqChecked arena 99999 app with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  requireV2 "pair-eq-invalid-right"
+    (match psKernelExprV2PortableEqChecked arena app 99999 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let forgedEntry ← expectV2 (psKernelExprV2ChunkedRequire arena bvar0)
+  let corrupt : PsKernelExprV2Entry := {
+    forgedEntry with hasFVar := true
+  }
+  let (forged,root) := psKernelExprV2ChunkedPush
+    psKernelExprV2ChunkedEmpty corrupt
+  requireV2 "pair-eq-forged-metadata-rejected"
+    (match psKernelExprV2PortableEqChecked forged root root with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_PAIR_EQUALITY: PASS cases=16"
+
+private def testPortablePairSharing : IO Unit := do
+  let (start,leaf) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let mut arena := start
+  let mut lhs := leaf
+  let mut rhs := leaf
+  let depth : Nat := 24
+  for _ in [:depth] do
+    let (next,left) ← expectV2
+      (psKernelExprV2ChunkedMkApp arena lhs lhs)
+    let (next2,right) ← expectV2
+      (psKernelExprV2ChunkedMkApp next rhs rhs)
+    arena := next2
+    lhs := left
+    rhs := right
+  requireV2 "pair-shared-compact-node-count"
+    (arena.size == depth*2+1)
+  let equal ← expectV2 (psKernelExprV2PortableEqChecked arena lhs rhs)
+  requireV2 "pair-shared-distinct-ids-structurally-equal"
+    (lhs != rhs && equal)
+  let different ← expectV2
+    (psKernelExprV2PortableEqChecked arena leaf lhs)
+  requireV2 "pair-shared-shapes-distinct" (!different)
+  IO.println "PSC1_EXPR_V2_PAIR_SHARING: PASS nodes=49 depth=24"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -946,4 +1090,6 @@ def main : IO Unit := do
   testPortableHeadReduction
   testPortableHeadSequence
   testHeadMachineDeep
+  testPortablePairEquality
+  testPortablePairSharing
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

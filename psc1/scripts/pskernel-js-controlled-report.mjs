@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 
+const pinnedLean=fs.readFileSync(new URL("../lean-toolchain",import.meta.url),"utf8").trim();
+if(!/^leanprover\/lean4:v[0-9]+\.[0-9]+\.[0-9]+$/.test(pinnedLean))
+  throw Error("PSC1_CONTROLLED_REPORT_INVALID_LEAN_PIN "+pinnedLean);
 const dir=process.argv[2];
 if(!dir)throw Error("CONTROLLED_REPORT_DIRECTORY_REQUIRED");
 const read=name=>fs.readFileSync(path.join(dir,name),"utf8");
@@ -78,7 +81,7 @@ for(const fixture of fixtures) {
 const refs=Object.fromEntries(read("refs.txt").trim().split("\n").map(l=>l.split("=")));
 const sourcePaths=Object.fromEntries(read("sizes.txt").trim().split("\n").map(l=>l.split("=")));
 const report={
- refs,toolchain:"single PSC1 compiler source snapshot, Lean 4.34, TS 7.0.2, Node 22",
+ refs,toolchain:"single PSC1 compiler source snapshot, "+pinnedLean+", TS 7.0.2, Node 22",
  order:ordered,fixtures,source_artifact_sizes_bytes:sourcePaths,
  operations,memory,isolated,
  caveats:"ABBA uses 2 fresh processes per side, 6 in-process operation rounds per side. RSS is process max; post-GC heapUsed measures retained V8 heap, not total allocations. Small timing differences are uncertain."
@@ -97,7 +100,7 @@ const memrows=fixtures.map(name=>{
 const md="# Same-compiler controlled PSC1 generated-JS A/B\n\n"+
 "Source compiler: "+refs.compiler+"; original kernel: "+refs.baseline+
 "; optimized kernel: "+refs.optimized+"\n\n"+
-"One GitHub Actions Linux runner; Node 22, Lean 4.34, TypeScript 7.0.2. Both builds use identical compiler sources and configurations. Both full kernels passed strict semantic guards.\n"+
+"One GitHub Actions Linux runner; Node 22, "+pinnedLean+", TypeScript 7.0.2. Both builds use identical compiler sources and configurations. Both full kernels passed strict semantic guards.\n"+
 "Execution order: A-B-B-A, with two separate fresh processes per variant. Three guarded rounds per process. Memory below is recorded independently, not inferred from timing.\n\n"+
 "| Checked operation | Original median ms | Optimized median ms | Ratio |\n|---|---:|---:|---:|\n"+rows+"\n\n"+
 "Full-suite peak RSS original "+memory.original.max_rss_kib.map(mib).join(", ")+" MiB versus optimized "+

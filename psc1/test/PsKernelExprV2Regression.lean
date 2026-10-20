@@ -22,6 +22,20 @@ private def expectV2 {α : Type} (x : Except String α) : IO α := do
   | .ok v => return v
   | .error error => throw (IO.userError ("PSC1_EXPR_V2_UNEXPECTED_ERROR: " ++ error))
 
+/-
+Research-only independent materializer to compare a validated paged DAG
+against the exact legacy expression oracle. Never use it in the fast path.
+-/
+private def psKernelExprV2DecodePagedForTest
+    (source : PsKernelExprV2PagedArena) (root : Nat) :
+    IO PsKernelExpr := do
+  let paged ← expectV2 (psKernelExprV2PagedValidate source)
+  let mut flat := psKernelExprV2Empty
+  for id in [:paged.size] do
+    let node ← expectV2 (psKernelExprV2PagedRequire paged id)
+    flat := (psKernelExprV2Push flat node).fst
+  expectV2 (psKernelExprV2Decode flat root)
+
 private def buildSpine (depth : Nat) :
     Except String (PsKernelExprV2Arena × Nat) := do
   let (a, first) := psKernelExprV2MkBVar psKernelExprV2Empty 0
@@ -1554,20 +1568,6 @@ private def testPagedSharedAppSpines : IO Unit := do
       | Option.none => false)
   IO.println "PSC1_EXPR_V2_PAGED_SPINE: PASS nodes=1025"
 
-
-/-
-Research-only independent materializer to compare a validated paged DAG
-against the exact legacy expression oracle. Never use it in the fast path.
--/
-private def psKernelExprV2DecodePagedForTest
-    (source : PsKernelExprV2PagedArena) (root : Nat) :
-    IO PsKernelExpr := do
-  let paged ← expectV2 (psKernelExprV2PagedValidate source)
-  let mut flat := psKernelExprV2Empty
-  for id in [:paged.size] do
-    let node ← expectV2 (psKernelExprV2PagedRequire paged id)
-    flat := (psKernelExprV2Push flat node).fst
-  expectV2 (psKernelExprV2Decode flat root)
 
 private def testPagedLiftDifferential : IO Unit := do
   let name := PsKernelName.str PsKernelName.anonymous "pagedLift"

@@ -423,7 +423,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "seventeen-source-modules-focused-accepted-Do-controller-pending",
+    "status": "do-controller-focused-accepted-Term-and-Recursion-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -509,37 +509,37 @@
       }
     },
     "pendingModules": [
-      "psc1/packages/elab/src/Ps/Elab/Do.lean"
+      "psc1/packages/elab/src/Ps/Elab/Term.lean",
+      "psc1/packages/elab/src/Ps/Elab/Recursion.lean"
     ],
     "latestFocused": {
-      "head": "4250f5d0de52d4d409804c380b33d8c073c38eed",
-      "runId": 39515329696,
+      "head": "ed3039c28136e43cc562d6de58dfc092a83e84b5",
+      "runId": 39516022276,
       "overall": "success",
-      "nativeBehaviorAndNamespace": "passed",
       "contractChecks": 38,
       "liveStrict": "incomplete-semantic-closure-refusal-verified",
       "counts": {
         "semantic": [
           67,
-          61,
-          60
+          62,
+          61
         ],
         "directjs": [
           79,
-          69,
-          66
+          70,
+          67
         ],
         "rust": [
           83,
-          70,
-          65
+          71,
+          66
         ]
       },
       "nextRefusal": {
-        "module": "Ps.Elab.Do",
+        "module": "Ps.Elab.Term",
         "stage": "parse",
-        "line": 27,
-        "column": 11,
+        "line": 282,
+        "column": 15,
         "detail": "expected typed lambda binder, got underscore"
       }
     }

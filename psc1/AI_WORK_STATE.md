@@ -79,6 +79,24 @@ The existing4096 controller budget is unchanged. No runtime execution fuel added
 The full module must parse/elaborate in BOTH lanes. Continue to Term, Recursion,
 DoLoopLift, Declaration and Ordinary after the next actual census result.
 
+## Current Term and recursion candidate — pending Linux CI
+
+Do controller passed focused run39516022276 at
+ed3039c28136e43cc562d6de58dfc092a83e84b5 in BOTH lanes:
+semantic67/62/61, JS79/70/67, Rust83/71/66. Existing native groups,
+38 census contract checks and live strict incomplete-closure refusal passed.
+The next confirmed source refusal was Elab.Term282:15 (untyped lambda).
+
+Normalize the full Term and Recursion modules. Keep reference/projection priority,
+type constraints, implicit argument rules, match validation and structural-call
+checks. Make Term's namespace argument explicit at its existing four-argument
+call sites; type match results/callbacks and qualify constructors. Remove the
+recursion plan's unused field default (both constructors already supply it).
+Preserve binding-pattern context traversal through a structural worker and
+normalize try traversal plus exact-size term-list dispatch without widening arity.
+Keep every original declaration and all existing budgets. Both full modules are
+maintained parse/elaboration gates. Continue DoLoopLift, Declaration and Ordinary.
+
 ## Census integrity and continuation
 
 Fresh Lean and PS preparation states measure the full ordered explicit import

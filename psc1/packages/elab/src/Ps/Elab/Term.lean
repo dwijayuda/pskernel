@@ -79,7 +79,7 @@ def psElabListLength {α : Type}
     (values : List α) : Nat :=
   match values with
   | [] => 0
-  | _ :: rest => Nat.succ (psElabListLength rest)
+  | List.cons _ rest => Nat.succ (psElabListLength rest)
 
 def psElabProjectionApplyParameters
     (context : PsElabContext)
@@ -90,7 +90,7 @@ def psElabProjectionApplyParameters
   | [] =>
       fun (cursor : PsExpr) =>
         Except.ok cursor
-  | parameter :: rest =>
+  | List.cons parameter rest =>
       let smaller : PsExpr -> Except PsElabError PsExpr :=
         psElabProjectionApplyParameters context rest;
       fun (cursor : PsExpr) =>
@@ -164,11 +164,11 @@ def psElabProjectionStep
       current.type;
   let view := psInferAppView reducedType;
   match view.head with
-  | .constE typeName _ =>
+  | PsExpr.constE typeName _ =>
       match psEnvironmentFindInductive current.context.environment typeName with
       | none => Except.error PsElabError.unsupportedTerm
       | some info =>
-          let projectionInvalid :=
+          let projectionInvalid : Bool :=
             if info.isStructure then
               if Nat.beq info.numIndices 0 then
                 if Nat.beq (psElabListLength view.args) info.numParams then
@@ -233,7 +233,7 @@ def psElabProjectionChainWorker
       fun (_context : PsElabContext) =>
         fun (current : PsElabTermResult) =>
           Except.ok current
-  | field :: rest =>
+  | List.cons field rest =>
       let smaller :
           PsElabContext -> PsElabTermResult -> Except PsElabError PsElabTermResult :=
         psElabProjectionChainWorker rest;
@@ -279,17 +279,18 @@ def psElabGlobalProjectionBaseWorker
     (fields : List String) :
     PsName -> Option (Prod PsResolvedName (List String)) :=
   match fields with
-  | [] => fun _ => Option.none
-  | field :: rest =>
-      let smaller := psElabGlobalProjectionBaseWorker environment currentNamespace rest
-      fun base =>
+  | [] => fun (base : PsName) => Option.none
+  | List.cons field rest =>
+      let smaller : PsName -> Option (Prod PsResolvedName (List String)) :=
+        psElabGlobalProjectionBaseWorker environment currentNamespace rest;
+      fun (base : PsName) =>
         match smaller (psNameAppendStr base field) with
-        | .some selected => .some selected
-        | .none =>
+        | Option.some selected => Option.some selected
+        | Option.none =>
             match psResolveGlobalInNamespace environment Option.none base currentNamespace with
-            | .none => .none
-            | .some selected =>
-                .some (Prod.mk (PsResolvedName.global selected) (field :: rest))
+            | Option.none => Option.none
+            | Option.some selected =>
+                Option.some (Prod.mk (PsResolvedName.global selected) (List.cons field rest))
 
 -- Share name selection between elaboration and hygienic recursion rewriting.
 -- Exact complete names precede the established first-segment projection base.
@@ -300,14 +301,14 @@ def psElabResolveReferenceBase
     (localContext : PsLocalContext)
     (environment : PsEnvironment)
     (sourceName : PsSyntaxName)
-    (currentNamespace : PsName := PsName.anonymous) :
+    (currentNamespace : PsName) :
     Option (Prod PsResolvedName (List String)) :=
   match psSyntaxNameToName sourceName with
   | Option.none => Option.none
   | Option.some name =>
-      let referenceLocals := match psResolveExplicitRoot name with
-        | .some _ => psLocalEmpty
-        | .none => localContext
+      let referenceLocals : PsLocalContext := match psResolveExplicitRoot name with
+        | Option.some _ => psLocalEmpty
+        | Option.none => localContext;
       match psResolveNameInNamespace referenceLocals environment currentNamespace name with
       | Option.some resolved => Option.some (Prod.mk resolved List.nil)
       | Option.none =>
@@ -321,10 +322,10 @@ def psElabResolveReferenceBase
                   match psResolveNameInNamespace referenceLocals environment currentNamespace base with
                   | Option.some resolved => Option.some (Prod.mk resolved tail)
                   | Option.none =>
-                      let longerBase := psNameAppendStr base second
+                      let longerBase := psNameAppendStr base second;
                       match psElabLocalProjectionBaseWorker referenceLocals rest longerBase with
-                      | .some selected => .some selected
-                      | .none => psElabGlobalProjectionBaseWorker
+                      | Option.some selected => Option.some selected
+                      | Option.none => psElabGlobalProjectionBaseWorker
                           environment currentNamespace rest longerBase
 
 def psElabProjectionReference
@@ -406,7 +407,7 @@ def psElabNatural
               context.localContext
               expectedType;
           match reducedExpected with
-          | .constE name _ =>
+          | PsExpr.constE name _ =>
               if psNameEq name psIntName then
                 psElabResolvedTerm
                   context
@@ -484,10 +485,10 @@ structure PsElabTypedBindersResult where
   bindersRev : List PsElabTypedBinder
 
 def psElabBinderKindToCore : PsSyntaxBinderKind -> PsBinderInfo
-  | .explicit => PsBinderInfo.explicit
-  | .implicit => PsBinderInfo.implicit
-  | .strictImplicit => PsBinderInfo.strictImplicit
-  | .instanceImplicit => PsBinderInfo.instanceImplicit
+  | PsSyntaxBinderKind.explicit => PsBinderInfo.explicit
+  | PsSyntaxBinderKind.implicit => PsBinderInfo.implicit
+  | PsSyntaxBinderKind.strictImplicit => PsBinderInfo.strictImplicit
+  | PsSyntaxBinderKind.instanceImplicit => PsBinderInfo.instanceImplicit
 
 def psElabTypedBindersAcc
     (elaborate :
@@ -546,7 +547,7 @@ def psElabTypedBindersAcc
                         id := pushed.id
                         name := name
                         type := typeResult.term
-                        binder := binder
+                        binder := binder;
                       };
                       smaller
                         nextContext
@@ -592,7 +593,7 @@ def psCloseElabTypedBinders
       fun (value : PsExpr) =>
         fun (type : PsExpr) =>
           Prod.mk value type
-  | binder :: rest =>
+  | List.cons binder rest =>
       let smaller :
           PsExpr ->
           PsExpr ->
@@ -631,7 +632,7 @@ def psElabLambdaExpectedBody
               (psMetaInstantiate
                 context.metaContext
                 expectedType))
-  | binder :: rest =>
+  | List.cons binder rest =>
       let smaller :
           PsElabContext ->
           PsExpr ->
@@ -748,7 +749,7 @@ def psCloseElabForallBinders
   | [] =>
       fun (body : PsExpr) =>
         body
-  | binder :: rest =>
+  | List.cons binder rest =>
       let smaller : PsExpr -> PsExpr :=
         psCloseElabForallBinders metaContext rest;
       fun (body : PsExpr) =>
@@ -885,26 +886,26 @@ def psExprHasConst
     (target : PsName)
     (expr : PsExpr) : Bool :=
   match expr with
-  | .constE name _ => psNameEq name target
-  | .app fn argument =>
+  | PsExpr.constE name _ => psNameEq name target
+  | PsExpr.app fn argument =>
       psElabBoolOr
         (psExprHasConst target fn)
         (psExprHasConst target argument)
-  | .lam _ type body _ =>
+  | PsExpr.lam _ type body _ =>
       psElabBoolOr
         (psExprHasConst target type)
         (psExprHasConst target body)
-  | .forallE _ type body _ =>
+  | PsExpr.forallE _ type body _ =>
       psElabBoolOr
         (psExprHasConst target type)
         (psExprHasConst target body)
-  | .letE _ type value body =>
+  | PsExpr.letE _ type value body =>
       psElabBoolOr
         (psExprHasConst target type)
         (psElabBoolOr
           (psExprHasConst target value)
           (psExprHasConst target body))
-  | .proj _ _ value => psExprHasConst target value
+  | PsExpr.proj _ _ value => psExprHasConst target value
   | _ => false
 
 def psMatchNameEqTarget
@@ -918,7 +919,7 @@ def psMatchNameListContains
   match names with
   | [] =>
       false
-  | name :: rest =>
+  | List.cons name rest =>
       if psMatchNameEqTarget target name then
         true
       else
@@ -936,7 +937,7 @@ def psElabMatchAlternativeFind
     Option PsElabMatchAlternative :=
   match alternatives with
   | [] => Option.none
-  | alternative :: rest =>
+  | List.cons alternative rest =>
       if psNameEq alternative.constructorName name then
         Option.some alternative
       else
@@ -960,7 +961,7 @@ def psElabFillWildcardAlternatives
   | [] =>
       fun (alternativesRev : List PsElabMatchAlternative) =>
         alternativesRev
-  | ctorName :: rest =>
+  | List.cons ctorName rest =>
       let smaller :
           List PsElabMatchAlternative ->
           List PsElabMatchAlternative :=
@@ -978,7 +979,7 @@ def psElabFillWildcardAlternatives
                 constructorName := ctorName
                 pattern := pattern
                 body := body
-                span := span
+                span := span;
               };
               List.cons alternative alternativesRev;
         smaller next
@@ -990,7 +991,7 @@ def psElabMatchAlternativeListReverseAux
   match values with
   | [] =>
       fun (acc : List PsElabMatchAlternative) => acc
-  | value :: rest =>
+  | List.cons value rest =>
       let smaller :
           List PsElabMatchAlternative ->
           List PsElabMatchAlternative :=
@@ -1008,7 +1009,7 @@ def psElabMatchAlternativesCoverConstructors
     (constructors : List PsName) : Bool :=
   match constructors with
   | [] => true
-  | constructorName :: rest =>
+  | List.cons constructorName rest =>
       if
           psElabMatchAlternativeCovered
             alternatives
@@ -1023,7 +1024,7 @@ def psElabMatchPatternConstructorName
     (pattern : PsSyntaxPattern) :
     Except PsElabError PsName :=
   match pattern with
-  | .bool value _ =>
+  | PsSyntaxPattern.bool value _ =>
       if psNameEq inductiveInfo psBoolName then
         if value then
           Except.ok psBoolTrueName
@@ -1031,16 +1032,16 @@ def psElabMatchPatternConstructorName
           Except.ok psBoolFalseName
       else
         Except.error PsElabError.matchPatternUnsupported
-  | .wildcard _ =>
+  | PsSyntaxPattern.wildcard _ =>
       Except.error PsElabError.matchPatternUnsupported
-  | .constructor syntaxName _ _ =>
+  | PsSyntaxPattern.constructor syntaxName _ _ =>
       match syntaxName.segments with
       | [] => Except.error PsElabError.matchPatternUnsupported
-      | segment :: rest =>
+      | List.cons segment rest =>
           match rest with
           | [] =>
               Except.ok (psNameAppendStr inductiveInfo segment)
-          | _ :: _ =>
+          | List.cons _ _ =>
               match psSyntaxNameToName syntaxName with
               | none => Except.error PsElabError.matchPatternUnsupported
               | some name =>
@@ -1068,7 +1069,7 @@ def psElabPrepareMatchAlternativesWorker
           Except.ok alternatives
         else
           Except.error PsElabError.matchNonExhaustive
-  | entry :: rest =>
+  | List.cons entry rest =>
       let smaller :
           List PsElabMatchAlternative ->
           Except PsElabError (List PsElabMatchAlternative) :=
@@ -1082,7 +1083,7 @@ def psElabPrepareMatchAlternativesWorker
         let body := Prod.fst payload;
         let span := Prod.snd payload;
         match pattern with
-        | .wildcard _ =>
+        | PsSyntaxPattern.wildcard _ =>
             match rest with
             | [] =>
                 Except.ok
@@ -1093,7 +1094,7 @@ def psElabPrepareMatchAlternativesWorker
                       span
                       inductiveInfo.constructors
                       alternativesRev))
-            | _ :: _ =>
+            | List.cons _ _ =>
                 Except.error PsElabError.matchPatternUnsupported
         | _ =>
             match psElabMatchPatternConstructorName
@@ -1121,7 +1122,7 @@ def psElabPrepareMatchAlternativesWorker
                         constructorName := ctorName
                         pattern := pattern
                         body := body
-                        span := span
+                        span := span;
                       };
                       smaller
                         (List.cons alternative alternativesRev)
@@ -1157,7 +1158,7 @@ def psElabMatchApplyParametersWorker
   | [] =>
       fun (cursor : PsExpr) =>
         Except.ok cursor
-  | parameter :: rest =>
+  | List.cons parameter rest =>
       let smaller : PsExpr -> Except PsElabError PsExpr :=
         psElabMatchApplyParametersWorker
           context
@@ -1257,7 +1258,7 @@ def psElabMatchFieldsWorker
               context := context
               fieldsRev := fieldsRev
             }
-  | binderSyntax :: rest =>
+  | List.cons binderSyntax rest =>
       let smaller :
           PsElabContext ->
           PsExpr ->
@@ -1292,7 +1293,7 @@ def psElabMatchFieldsWorker
                       id := pushed.id
                       name := binderName
                       type := forallView.domain
-                      binder := forallView.binder
+                      binder := forallView.binder;
                     };
                     smaller
                       nextContext
@@ -1324,7 +1325,7 @@ def psElabMatchFieldAtWorker
         match fields with
         | [] =>
             Option.none
-        | field :: _rest =>
+        | List.cons field _rest =>
             Option.some field
   | nextIndex + 1 =>
       fun (fields : List PsElabMatchField) =>
@@ -1334,7 +1335,7 @@ def psElabMatchFieldAtWorker
         match fields with
         | [] =>
             Option.none
-        | _field :: rest =>
+        | List.cons _field rest =>
             smaller rest
 
 def psElabMatchFieldAt
@@ -1361,7 +1362,7 @@ def psElabPushRecursiveHypothesesWorker
             context := context
             hypothesesRev := hypothesesRev
           }
-  | fieldIndex :: rest =>
+  | List.cons fieldIndex rest =>
       let smaller :
           PsElabContext ->
           List PsElabMatchField ->
@@ -1404,7 +1405,7 @@ def psElabPushRecursiveHypothesesWorker
                           List.cons (Prod.mk field.id pushed.id) recursion.calls
                         else recursion.calls
                       resultType := recursion.resultType
-                      collectCalls := recursion.collectCalls
+                      collectCalls := recursion.collectCalls;
                     };
                     psElabContextWithStructuralRecursion
                       withLocal
@@ -1413,7 +1414,7 @@ def psElabPushRecursiveHypothesesWorker
                 id := pushed.id
                 name := hypothesisName
                 type := expectedType
-                binder := PsBinderInfo.explicit
+                binder := PsBinderInfo.explicit;
               };
               smaller
                 withRecursion
@@ -1441,7 +1442,7 @@ def psCloseElabMatchFieldsWorker
   | [] =>
       fun (term : PsExpr) =>
         term
-  | field :: rest =>
+  | List.cons field rest =>
       let smaller : PsExpr -> PsExpr :=
         psCloseElabMatchFieldsWorker metaContext rest;
       fun (term : PsExpr) =>
@@ -1484,7 +1485,7 @@ def psElabWildcardBinderNamesWorker
           String.Internal.append "_wild" (psNatToString index);
         let syntaxName : PsSyntaxName := {
           segments := List.cons segment List.nil
-          span := span
+          span := span;
         };
         List.cons
           syntaxName
@@ -1507,7 +1508,7 @@ def psElabMatchFieldListReverseWorker
   | [] =>
       fun (acc : List PsElabMatchField) =>
         acc
-  | field :: rest =>
+  | List.cons field rest =>
       let smaller :
           List PsElabMatchField -> List PsElabMatchField :=
         psElabMatchFieldListReverseWorker rest;
@@ -1634,7 +1635,7 @@ def psElabMatchMinor
     (alternative : PsElabMatchAlternative) :
     Except PsElabError PsElabMatchMinorResult :=
   match alternative.pattern with
-  | .bool _ _ =>
+  | PsSyntaxPattern.bool _ _ =>
       match elaborate context alternative.body (Option.some expectedType) with
       | Except.error error => Except.error error
       | Except.ok bodyResult =>
@@ -1642,7 +1643,7 @@ def psElabMatchMinor
             context := bodyResult.context
             term := bodyResult.term
           }
-  | .wildcard span =>
+  | PsSyntaxPattern.wildcard span =>
       psElabMatchConstructorMinor
         elaborate
         context
@@ -1654,7 +1655,7 @@ def psElabMatchMinor
         alternative.body
         span
         Option.none
-  | .constructor _ binders span =>
+  | PsSyntaxPattern.constructor _ binders span =>
       psElabMatchConstructorMinor
         elaborate
         context
@@ -1692,7 +1693,7 @@ def psElabMatchMinorsWorker
           context := context
           minors := []
         }
-  | ctorName :: rest =>
+  | List.cons ctorName rest =>
       let smaller :
           PsElabContext ->
           Except PsElabError PsElabMatchMinorsResult :=
@@ -1830,7 +1831,7 @@ def psElabExprListAppendWorker
   | [] =>
       fun (right : List PsExpr) =>
         right
-  | value :: rest =>
+  | List.cons value rest =>
       let smaller : List PsExpr -> List PsExpr :=
         psElabExprListAppendWorker rest;
       fun (right : List PsExpr) =>
@@ -1896,7 +1897,7 @@ def psElabMatch
               scrutineeResult.type;
           let typeView := psExprAppView scrutineeType;
           match typeView.head with
-          | .constE inductiveName inductiveLevels =>
+          | PsExpr.constE inductiveName inductiveLevels =>
               match psEnvironmentFindInductive
                   scrutineeResult.context.environment
                   inductiveName with
@@ -1958,7 +1959,7 @@ def psElabMatch
                                   | Except.error error =>
                                       Except.error (PsElabError.infer error)
                                   | Except.ok resultLevel =>
-                                      let recursorLevels :=
+                                      let recursorLevels : List PsLevel :=
                                         if Nat.beq (psElabListLength recInfo.levelParams) 0 then
                                           []
                                         else if Nat.beq (psElabListLength recInfo.levelParams) 1 then
@@ -2017,17 +2018,17 @@ def psElabMatch
 
 def psBinderAcceptsExplicitArgument (binder : PsBinderInfo) : Bool :=
   match binder with
-  | .explicit => true
+  | PsBinderInfo.explicit => true
   | _ => false
 
 def psBinderIsStrictImplicit (binder : PsBinderInfo) : Bool :=
   match binder with
-  | .strictImplicit => true
+  | PsBinderInfo.strictImplicit => true
   | _ => false
 
 def psBinderIsInstanceImplicit (binder : PsBinderInfo) : Bool :=
   match binder with
-  | .instanceImplicit => true
+  | PsBinderInfo.instanceImplicit => true
   | _ => false
 
 structure PsElabApplicationResult where
@@ -2039,7 +2040,7 @@ def psSyntaxTermListIsEmpty
   match values with
   | [] =>
       true
-  | _ :: _ =>
+  | List.cons _ _ =>
       false
 
 -- The preview only removes binders unused in the entire remaining telescope.
@@ -2048,31 +2049,31 @@ def psSyntaxTermListIsEmpty
 def psElabApplicationUsesBinderWorker
     (expr : PsExpr) : Nat -> Bool :=
   match expr with
-  | .bvar index =>
+  | PsExpr.bvar index =>
       fun (depth : Nat) => Nat.beq index depth
-  | .app fn arg =>
+  | PsExpr.app fn arg =>
       let usesFn : Nat -> Bool := psElabApplicationUsesBinderWorker fn;
       let usesArg : Nat -> Bool := psElabApplicationUsesBinderWorker arg;
       fun (depth : Nat) =>
         psElabBoolOr (usesFn depth) (usesArg depth)
-  | .lam _ type body _ =>
+  | PsExpr.lam _ type body _ =>
       let usesType : Nat -> Bool := psElabApplicationUsesBinderWorker type;
       let usesBody : Nat -> Bool := psElabApplicationUsesBinderWorker body;
       fun (depth : Nat) =>
         psElabBoolOr (usesType depth) (usesBody (Nat.succ depth))
-  | .forallE _ type body _ =>
+  | PsExpr.forallE _ type body _ =>
       let usesType : Nat -> Bool := psElabApplicationUsesBinderWorker type;
       let usesBody : Nat -> Bool := psElabApplicationUsesBinderWorker body;
       fun (depth : Nat) =>
         psElabBoolOr (usesType depth) (usesBody (Nat.succ depth))
-  | .letE _ type value body =>
+  | PsExpr.letE _ type value body =>
       let usesType : Nat -> Bool := psElabApplicationUsesBinderWorker type;
       let usesValue : Nat -> Bool := psElabApplicationUsesBinderWorker value;
       let usesBody : Nat -> Bool := psElabApplicationUsesBinderWorker body;
       fun (depth : Nat) =>
         psElabBoolOr (usesType depth)
           (psElabBoolOr (usesValue depth) (usesBody (Nat.succ depth)))
-  | .proj _ _ value =>
+  | PsExpr.proj _ _ value =>
       psElabApplicationUsesBinderWorker value
   | _ =>
       fun (_depth : Nat) => false
@@ -2096,7 +2097,7 @@ def psElabApplicationResultTypeWithFuel
         match argumentCount with
         | 0 =>
             match reduced with
-            | .forallE _ _ _ binder =>
+            | PsExpr.forallE _ _ _ binder =>
                 if psBinderAcceptsExplicitArgument binder then
                   Option.some reduced
                 else
@@ -2104,7 +2105,7 @@ def psElabApplicationResultTypeWithFuel
             | _ => Option.some reduced
         | remainingArguments + 1 =>
             match reduced with
-            | .forallE _ _ body binder =>
+            | PsExpr.forallE _ _ body binder =>
                 if psBinderAcceptsExplicitArgument binder then
                   if psElabApplicationUsesBinderWorker body 0 then
                     Option.none
@@ -2189,7 +2190,7 @@ def psElabApplyArgsWithFuelWorker
                         result := current
                         pendingInstancesRev := pendingInstancesRev
                       }
-                  | argument :: rest =>
+                  | List.cons argument rest =>
                       match elaborate
                           current.context
                           argument
@@ -2207,7 +2208,7 @@ def psElabApplyArgsWithFuelWorker
                           let nextResult : PsElabTermResult := {
                             context := elaboratedArgument.context
                             term := nextTerm
-                            type := nextType
+                            type := nextType;
                           };
                           smaller
                             nextResult
@@ -2222,7 +2223,7 @@ def psElabApplyArgsWithFuelWorker
                     pendingInstancesRev := pendingInstancesRev
                   }
                 else
-                  let kind :=
+                  let kind : PsMetaVarKind :=
                     if psBinderIsInstanceImplicit binder then
                       PsMetaVarKind.synthetic
                     else
@@ -2240,7 +2241,7 @@ def psElabApplyArgsWithFuelWorker
                   let nextResult : PsElabTermResult := {
                     context := nextContext
                     term := PsExpr.app current.term fresh.expr
-                    type := psExprInstantiate1 body fresh.expr
+                    type := psExprInstantiate1 body fresh.expr;
                   };
                   let nextPending : List Nat :=
                     if psBinderIsInstanceImplicit binder then
@@ -2312,7 +2313,7 @@ def psElabSolvePendingInstancesWorker
           term := psMetaInstantiate metaContext current.term
           type := psMetaInstantiate metaContext current.type
         }
-  | id :: rest =>
+  | List.cons id rest =>
       let smaller :
           PsElabTermResult ->
           Except PsElabError PsElabTermResult :=
@@ -2357,7 +2358,7 @@ def psElabSolvePendingInstancesWorker
                                 current.context
                                 assigned
                             term := current.term
-                            type := current.type
+                            type := current.type;
                           };
                           smaller assignedResult
 
@@ -2396,7 +2397,7 @@ def psElabDropForallBindersWorker
         let smaller : PsExpr -> Option PsExpr :=
           psElabDropForallBindersWorker nextRemaining;
         match type with
-        | .forallE _ _ body _ =>
+        | PsExpr.forallE _ _ body _ =>
             smaller body
         | _ => Option.none
 
@@ -2419,7 +2420,7 @@ def psElabTakeForallNamesWorker
         let smaller : PsExpr -> Option (List String) :=
           psElabTakeForallNamesWorker nextRemaining;
         match type with
-        | .forallE name _ body _ =>
+        | PsExpr.forallE name _ body _ =>
             match smaller body with
             | none => Option.none
             | some rest =>
@@ -2439,11 +2440,11 @@ def psSyntaxRecordLastSegment
   match segments with
   | [] =>
       Option.none
-  | first :: rest =>
+  | List.cons first rest =>
       match rest with
       | [] =>
           Option.some first
-      | _ :: _ =>
+      | List.cons _ _ =>
           psSyntaxRecordLastSegment rest
 
 def psSyntaxRecordFieldName
@@ -2466,7 +2467,7 @@ def psSyntaxRecordHasField
   match fields with
   | [] =>
       false
-  | field :: rest =>
+  | List.cons field rest =>
       if psSyntaxRecordFieldMatchesName name field then
         true
       else
@@ -2484,7 +2485,7 @@ def psSyntaxRecordFieldsMatchWorker
   | [] =>
       fun (_fields : List (Prod PsSyntaxName PsSyntaxTerm)) =>
         true
-  | name :: rest =>
+  | List.cons name rest =>
       let smaller :
           List (Prod PsSyntaxName PsSyntaxTerm) -> Bool :=
         psSyntaxRecordFieldsMatchWorker rest;
@@ -2509,7 +2510,7 @@ def psSyntaxRecordFindField
   match fields with
   | [] =>
       Option.none
-  | field :: rest =>
+  | List.cons field rest =>
       match psSyntaxRecordFieldName field with
       | Option.some fieldName =>
           if psStringEq fieldName name then
@@ -2526,7 +2527,7 @@ def psSyntaxRecordOrderFields
   match names with
   | [] =>
       Option.some []
-  | name :: rest =>
+  | List.cons name rest =>
       match psSyntaxRecordFindField fields name with
       | Option.none =>
           Option.none
@@ -2545,7 +2546,7 @@ def psElabRecordCandidateForInfo
     match info.constructors with
     | [] =>
         Option.none
-    | constructorName :: rest =>
+    | List.cons constructorName rest =>
         match rest with
         | [] =>
             match
@@ -2570,7 +2571,7 @@ def psElabRecordCandidateForInfo
                           constructorName := constructorName
                           fieldNames := fieldNames
                         }
-        | _ :: _ =>
+        | List.cons _ _ =>
             Option.none
   else
     Option.none
@@ -2587,7 +2588,7 @@ def psElabRecordCandidateFromExpected
       expected;
   let view := psInferAppView reduced;
   match view.head with
-  | .constE typeName _ =>
+  | PsExpr.constE typeName _ =>
       match
           psEnvironmentFindInductive
             context.environment
@@ -2611,7 +2612,7 @@ def psElabRecordCandidates
   match declarations with
   | [] =>
       candidatesRev
-  | declaration :: rest =>
+  | List.cons declaration rest =>
       let candidates :=
         psElabRecordCandidates
           environment
@@ -2619,7 +2620,7 @@ def psElabRecordCandidates
           rest
           candidatesRev;
       match declaration with
-      | .inductiveDecl info =>
+      | PsDeclaration.inductiveDecl info =>
           match
               psElabRecordCandidateForInfo
                 environment
@@ -2650,10 +2651,10 @@ def psElabUniqueRecordCandidate
         [] with
   | [] =>
       Option.none
-  | candidate :: rest =>
+  | List.cons candidate rest =>
       match rest with
       | [] => Option.some candidate
-      | _ :: _ => Option.none
+      | List.cons _ _ => Option.none
 
 def psElabRecord
     (elaborate :
@@ -2722,7 +2723,7 @@ def psElabRecord
 def psElabSyntaxLocalId
     (context : PsElabContext) :
     PsSyntaxTerm -> Option Nat
-  | .reference sourceName =>
+  | PsSyntaxTerm.reference sourceName =>
       match psSyntaxNameToName sourceName with
       | Option.none => Option.none
       | Option.some name =>
@@ -2735,8 +2736,8 @@ def psElabSyntaxLocalId
           | Option.none => Option.none
           | Option.some resolved =>
               match resolved with
-              | .local id => Option.some id
-              | .global _ => Option.none
+              | PsResolvedName.local id => Option.some id
+              | PsResolvedName.global _ => Option.none
   | _ => Option.none
 
 def psElabNatListAtWorker
@@ -2748,7 +2749,7 @@ def psElabNatListAtWorker
         match values with
         | [] =>
             Option.none
-        | value :: _ =>
+        | List.cons value _ =>
             Option.some value
   | nextIndex + 1 =>
       fun (values : List Nat) =>
@@ -2758,7 +2759,7 @@ def psElabNatListAtWorker
         match values with
         | [] =>
             Option.none
-        | _ :: rest =>
+        | List.cons _ rest =>
             smaller rest
 
 def psElabNatListAt
@@ -2785,7 +2786,7 @@ def psElabValidateStructuralCallWorker
                   Except.ok resolvedHypothesisId
               | Option.none =>
                   Except.error PsElabError.structuralRecursionInternal
-  | argument :: rest =>
+  | List.cons argument rest =>
       let smaller :
           PsElabContext ->
           PsElabStructuralRecursion ->
@@ -2864,7 +2865,7 @@ def psTryElabStructuralSelfCall
       Except.ok Option.none
   | Option.some recursion =>
       match fn with
-      | .reference sourceName =>
+      | PsSyntaxTerm.reference sourceName =>
           match psSyntaxNameToName sourceName with
           | Option.some calledName =>
               if psElabBoolNot (psResolveNameIsTarget context.localContext
@@ -2933,7 +2934,7 @@ def psElabTermWithFuel
                 Except PsElabError PsElabTermResult :=
               psElabTermWithFuel remaining;
             match term with
-            | .reference name =>
+            | PsSyntaxTerm.reference name =>
                 if psElabStructuralReferenceEscapes context name then
                   Except.error PsElabError.structuralRecursionEscapingReference
                 else
@@ -2948,56 +2949,56 @@ def psElabTermWithFuel
                       | Except.error error => Except.error error
                       | Except.ok application =>
                           psElabFinishApplication application expected
-            | .natural text _ =>
+            | PsSyntaxTerm.natural text _ =>
                 psElabNatural context text expected
-            | .string text _ =>
+            | PsSyntaxTerm.string text _ =>
                 psElabString context text expected
-            | .character text _ =>
+            | PsSyntaxTerm.character text _ =>
                 psElabCharacter context text expected
-            | .unit _ =>
+            | PsSyntaxTerm.unit _ =>
                 psElabUnit context expected
-            | .record fields _ =>
+            | PsSyntaxTerm.record fields _ =>
                 psElabRecord
                   smaller
                   context
                   fields
                   expected
-            | .bool value _ =>
+            | PsSyntaxTerm.bool value _ =>
                 psElabBool context value expected
-            | .lambda binders body _ =>
+            | PsSyntaxTerm.lambda binders body _ =>
                 psElabLambda
                   smaller
                   context
                   binders
                   body
                   expected
-            | .forallE binders body _ =>
+            | PsSyntaxTerm.forallE binders body _ =>
                 psElabForall
                   smaller
                   context
                   binders
                   body
                   expected
-            | .unary operator operand span => psElabUnaryOperator smaller context operator operand span expected
-            | .binary operator left right span => psElabBinaryOperator smaller context operator left right span expected
-            | .doE body _ => psElabDo smaller context body expected
-            | .doBindE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .doThenE _ _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .doReturnE _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .doLetMutE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .doAssignE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .doIfE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .arrayGetOptionE array index _ =>
+            | PsSyntaxTerm.unary operator operand span => psElabUnaryOperator smaller context operator operand span expected
+            | PsSyntaxTerm.binary operator left right span => psElabBinaryOperator smaller context operator left right span expected
+            | PsSyntaxTerm.doE body _ => psElabDo smaller context body expected
+            | PsSyntaxTerm.doBindE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.doThenE _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.doReturnE _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.doLetMutE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.doAssignE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.doIfE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.arrayGetOptionE array index _ =>
                 psElabArrayGetOption smaller context array index expected
-            | .doEndE _ => Except.error PsElabError.doStatementOutsideBlock
-            | .doForE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .doForRangeE _ _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .doTryE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .doWhileE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
-            | .letPatternE pattern declaredType value body _ =>
+            | PsSyntaxTerm.doEndE _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.doForE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.doForRangeE _ _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.doTryE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.doWhileE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | PsSyntaxTerm.letPatternE pattern declaredType value body _ =>
                 psElabLetPattern smaller context pattern declaredType value
-                  (fun bodyContext => smaller bodyContext body expected) expected
-            | .letE name declaredType value body _ =>
+                  (fun (bodyContext : PsElabContext) => smaller bodyContext body expected) expected
+            | PsSyntaxTerm.letE name declaredType value body _ =>
                 psElabLet
                   smaller
                   context
@@ -3006,7 +3007,7 @@ def psElabTermWithFuel
                   value
                   body
                   expected
-            | .ifE condition thenBranch elseBranch _ =>
+            | PsSyntaxTerm.ifE condition thenBranch elseBranch _ =>
                 psElabIf
                   smaller
                   context
@@ -3014,14 +3015,14 @@ def psElabTermWithFuel
                   thenBranch
                   elseBranch
                   expected
-            | .matchE scrutinee alternatives _ =>
+            | PsSyntaxTerm.matchE scrutinee alternatives _ =>
                 psElabMatch
                   smaller
                   context
                   scrutinee
                   alternatives
                   expected
-            | .app fn args _ =>
+            | PsSyntaxTerm.app fn args _ =>
                 -- R3 empty calls request argument completion. This bounded
                 -- profile has no optional/default parameter metadata yet.
                 -- Keep [] distinct from an explicit Unit argument and fail closed.

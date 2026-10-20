@@ -55,3 +55,26 @@ jobs:
             ${{ runner.temp }}/expr-v2.memory
             ${{ runner.temp }}/expr-v2-regression.log
           retention-days: 30
+
+
+  portable-v2-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build actual PSC1 compiler
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake build psc1
+      - name: Check Expression V2 module with portable PSC1 elaborator
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2.lean

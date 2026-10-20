@@ -916,7 +916,7 @@ private def testHeadMachineDeep : IO Unit := do
       forged with hasFVar := true
     }
     let falseArena : PsKernelExprV2ChunkedArena := {
-      arena with active := Array.push arena.active invalid
+      arena with active := Array.push arena.active invalid,
       size := arena.size + 1
     }
     requireV2 s!"head-machine-depth-{depth}-forged-rejected"

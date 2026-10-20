@@ -693,14 +693,14 @@ def psTsEmitPureDeclaration (isPublic : Bool) (brands tags : List (String × Str
   if declaration.parameters.isEmpty && !declaration.typeParameters.isEmpty then none else do
     let body ← psTsTailPrintPure brands tags [] (psTsInlineEtaApplication declaration.body)
     let result ← (psTsEmitType declaration.resultType).toOption
-    let prefix := if isPublic then "export " else ""
+    let exportPrefix := if isPublic then "export " else ""
     if declaration.parameters.isEmpty then
-      return prefix ++ "const " ++ declaration.name ++ ": " ++ result ++ " = " ++ body ++ ";"
+      return exportPrefix ++ "const " ++ declaration.name ++ ": " ++ result ++ " = " ++ body ++ ";"
     else
       let parameters ← declaration.parameters.mapM fun parameter => do
         let type ← (psTsEmitType parameter.type).toOption
         return parameter.name ++ ": " ++ type
-      return prefix ++ "function " ++ declaration.name ++ psTsGenericNames declaration.typeParameters ++
+      return exportPrefix ++ "function " ++ declaration.name ++ psTsGenericNames declaration.typeParameters ++
         "(" ++ String.intercalate ", " parameters ++ "): " ++ result ++ " { return " ++ body ++ "; }"
 
 def psTsEmitDeclarationWithVisibility (isPublic : Bool) (brands tags : List (Prod String String))

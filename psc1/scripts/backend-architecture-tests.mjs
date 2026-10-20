@@ -56,7 +56,7 @@ try {
   const checker = process.env.PSC1_TSC;
   assert.ok(checker, 'the separate TypeScript consumer checker must be installed for this test');
   const consumer = path.join(work, 'consumer');
-  command(process.execPath, [checker, stem + '.ts', '--target', 'ES2020', '--module', 'ES2022',
+  command(process.execPath, [checker, '--ignoreConfig', stem + '.ts', '--target', 'ES2020', '--module', 'ES2022',
     '--strict', '--skipLibCheck', '--outDir', consumer]);
   const ts = await import(pathToFileURL(path.join(consumer, 'main.js')).href);
   assert.equal(ts.negate(true), false);

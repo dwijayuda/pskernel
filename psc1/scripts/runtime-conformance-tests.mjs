@@ -72,9 +72,15 @@ const groups = {
     'Nat.beq (Array.getD changed 0 0) 11',
     'Nat.beq (Array.getD changed huge 19) 19',
     'Nat.beq (Array.getD shifted 0 0) 12',
+    'Nat.beq offset 100',
     'Nat.beq (Prod.fst pair) 41'
   ]
 };
+function conjoin(clauses) {
+  if (clauses.length === 1) return '(' + clauses[0] + ')';
+  const middle = Math.floor(clauses.length / 2);
+  return '(' + conjoin(clauses.slice(0, middle)) + ' && ' + conjoin(clauses.slice(middle)) + ')';
+}
 let source = '';
 for (const [name, clauses] of Object.entries(groups)) {
   source += 'def ' + name + ' (flag : Bool) : Bool :=\n';
@@ -84,13 +90,15 @@ for (const [name, clauses] of Object.entries(groups)) {
     source += ' let base : Array Nat := Array.push (Array.emptyWithCapacity 1) 7;\n' +
       ' let changed : Array Nat := Array.setIfInBounds base 0 11;\n' +
       ' let offset : Nat := 5;\n' +
-      ' let shifted : Array Nat := Array.map (fun (value : Nat) => Nat.add value offset) base;\n' +
+      ' let mapper : Nat -> Nat := fun (value : Nat) => Nat.add value offset;\n' +
+      ' let offset : Nat := 100;\n' +
+      ' let shifted : Array Nat := Array.map mapper base;\n' +
       ' let pair : Prod Nat Bool := Prod.mk 41 flag;\n';
   }
-  source += ' (' + clauses.join(') &&\n (') + ') && (flag || !flag)\n';
+  source += ' ' + conjoin([...clauses, '(flag || !flag)']) + '\n';
 }
 source += 'def semantic (flag : Bool) : Bool := ' +
-  Object.keys(groups).map(name => name + ' flag').join(' && ') + '\n';
+  conjoin(Object.keys(groups).map(name => name + ' flag')) + '\n';
 const names = [...Object.keys(groups), 'semantic'];
 const input = path.join(evidence, 'Runtime.lean');
 fs.writeFileSync(input, source);

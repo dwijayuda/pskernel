@@ -416,5 +416,15 @@
     "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
     "psc1/scripts/compiler-source-census.mjs",
     "psc1/test/CensusNormalizationTests.lean"
-  ]
+  ],
+  "continuousClosureExecution": {
+    "parentPullRequest": 171,
+    "parentHead": "1fad9ed53cda9b23ac30be9cea85e7857437564e",
+    "parentScopedRunId": 39508739868,
+    "parentNativeRunId": 39508739941,
+    "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
+    "status": "ParseDo-normalization-pending-linux-ci",
+    "continuousUserAuthorization": true,
+    "smallMilestoneHandoffs": false
+  }
 }

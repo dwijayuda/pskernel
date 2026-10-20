@@ -41,7 +41,7 @@ jobs:
             sleep 5
           done
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_typed_error_tests psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_source_census_probe
+          lake build psc1_typed_error_tests psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_do_tests psc1_while_tests psc1_source_census_probe
       - name: Execute all independent native control groups
         run: |
           set -euo pipefail
@@ -53,6 +53,8 @@ jobs:
           .lake/build/bin/psc1_census_normalization_tests 2>&1 | tee dist/architecture-native/census-normalization.log
           .lake/build/bin/psc1_operator_tests 2>&1 | tee dist/architecture-native/operators.log
           .lake/build/bin/psc1_data_tests 2>&1 | tee dist/architecture-native/data.log
+          .lake/build/bin/psc1_do_tests 2>&1 | tee dist/architecture-native/do.log
+          .lake/build/bin/psc1_while_tests 2>&1 | tee dist/architecture-native/while.log
           node scripts/compiler-source-census.mjs 2>&1 | tee dist/architecture-native/compiler-source-census.log
           cp -r dist/scoped-correctness/compiler-source-census dist/architecture-native/
       - name: Retain focused diagnostic evidence

@@ -88,7 +88,8 @@ for (const [module, stage] of [
   ['Ps.Erasure.Definition', 'elaboration'],
   ['Ps.Syntax.ParseCommon', 'parse'], ['Ps.Syntax.ParseCommon', 'elaboration'],
   ['Ps.Syntax.ParseBinding', 'parse'], ['Ps.Syntax.ParseBinding', 'elaboration'],
-  ['Ps.Syntax.Operators', 'parse'], ['Ps.Syntax.Operators', 'elaboration']
+  ['Ps.Syntax.Operators', 'parse'], ['Ps.Syntax.Operators', 'elaboration'],
+  ['Ps.Syntax.ParseDo', 'parse'], ['Ps.Syntax.ParseDo', 'elaboration']
 ]) {
   const row = observed.records.find(row => row.module === module);
   if (!row || row[stage] !== 'accepted') {

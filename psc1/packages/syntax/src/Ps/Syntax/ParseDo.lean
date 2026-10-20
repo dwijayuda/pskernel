@@ -3,6 +3,10 @@ import Ps.Syntax.ParseBinding
 
 -- Both surfaces build the same procedural AST. Layout and delimiters are
 -- frontend concerns; lexical mutation and return are elaborated into checked Core.
+def psParseDoTermStop (value : PsSyntaxTerm) : PsSourcePos :=
+  let span := psSyntaxTermSpan value;
+  span.stop
+
 def psParseDoExpected (expected : String) (cursor : PsTokenCursor) : PsParseError :=
   match psTokenCursorPeek cursor with
   | Option.none => PsParseError.unexpectedEnd expected
@@ -121,7 +125,7 @@ def psParseDoBindingValue
         | Except.ok value =>
             Except.ok
               (PsParseDoHead.binding name annotation value monadic mutable
-                { start := start, stop := (psSyntaxTermSpan value).stop })
+                { start := start, stop := (psParseDoTermStop value) })
   else Except.error (psParseDoExpected ":= or <-" cursor)
 
 def psParseDoNamedBinding
@@ -150,25 +154,31 @@ def psParseDoNamedBinding
 def psParseDoPatternBinding
     (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
     (start : PsSourcePos) (cursor : PsTokenCursor) :
-    Except PsParseError PsParseDoHead := do
-  let header ← psParseBindingPatternHeader parseTerm cursor
-  let assign ← psTokenCursorExpectText header.cursor ":="
-  let value ← psParseDoCompleteTerm parseTerm assign.cursor
-  return .patternBinding header.pattern header.annotation value
-    { start := start, stop := (psSyntaxTermSpan value).stop }
+    Except PsParseError PsParseDoHead :=
+  match psParseBindingPatternHeader parseTerm cursor with
+  | Except.error error => Except.error error
+  | Except.ok header =>
+      match psTokenCursorExpectText header.cursor ":=" with
+      | Except.error error => Except.error error
+      | Except.ok assign =>
+          match psParseDoCompleteTerm parseTerm assign.cursor with
+          | Except.error error => Except.error error
+          | Except.ok value =>
+              Except.ok (PsParseDoHead.patternBinding header.pattern header.annotation value
+                { start := start, stop := psParseDoTermStop value })
 
 def psParseDoStatement
     (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
     (cursor : PsTokenCursor) : Except PsParseError PsParseDoHead :=
   if psTokenCursorAtText cursor "throw" then
     match psTokenCursorAdvance cursor with
-    | none => .error (PsParseError.unexpectedEnd "throw value")
+    | none => Except.error (PsParseError.unexpectedEnd "throw value")
     | some keyword =>
         match psParseDoCompleteTerm parseTerm keyword.cursor with
-        | .error error => .error error
-        | .ok value =>
-            let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan value)
-            .ok (.action (.app (psSyntaxSyntheticReference "throw" keyword.token.span) [value] span))
+        | Except.error error => Except.error error
+        | Except.ok value =>
+            let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan value);
+            Except.ok (PsParseDoHead.action (PsSyntaxTerm.app (psSyntaxSyntheticReference "throw" keyword.token.span) [value] span))
   else if psTokenCursorAtText cursor "return" then
     match psTokenCursorAdvance cursor with
     | Option.none => Except.error (PsParseError.unexpectedEnd "return value")
@@ -177,7 +187,7 @@ def psParseDoStatement
         | Except.error error => Except.error error
         | Except.ok value =>
             Except.ok (PsParseDoHead.returnValue value
-              { start := keyword.token.span.start, stop := (psSyntaxTermSpan value).stop })
+              { start := keyword.token.span.start, stop := (psParseDoTermStop value) })
   else if psTokenCursorAtText cursor "do" then
     match psParseDoCompleteTerm parseTerm cursor with
     | Except.error error => Except.error error
@@ -198,7 +208,7 @@ def psParseDoStatement
           psParseDoPatternBinding parseTerm keyword.token.span.start keyword.cursor
         else psParseDoNamedBinding parseTerm keyword.token.span.start false keyword.cursor
   else
-    let action :=
+    let action : Except PsParseError PsParseDoHead :=
       match psParseDoCompleteTerm parseTerm cursor with
       | Except.error error => Except.error error
       | Except.ok value => Except.ok (PsParseDoHead.action value);
@@ -215,7 +225,7 @@ def psParseDoStatement
                 | Except.ok value =>
                     Except.ok (PsParseDoHead.assignment
                       (PsSyntaxName.mk [name.token.text] name.token.span) value
-                      { start := name.token.span.start, stop := (psSyntaxTermSpan value).stop })
+                      { start := name.token.span.start, stop := (psParseDoTermStop value) })
           else action
         else action
 
@@ -233,42 +243,46 @@ def psParseDoHeadSpan (head : PsParseDoHead) : PsSourceSpan :=
   | PsParseDoHead.action value => psSyntaxTermSpan value
   | PsParseDoHead.nested _ span => span
 
+def psParseDoHeadStopLine (head : PsParseDoHead) : Nat :=
+  let span := psParseDoHeadSpan head;
+  span.stop.line
+
 -- A branch followed by another statement has a Unit fallthrough path.
 -- Explicit returns remain separate and do not execute the continuation.
 def psParseDoFallthrough (body : PsSyntaxTerm) : PsSyntaxTerm :=
   match body with
-  | .letE name type value rest span =>
-      .letE name type value (psParseDoFallthrough rest) span
-  | .letPatternE pattern type value rest span =>
-      .letPatternE pattern type value (psParseDoFallthrough rest) span
-  | .doLetMutE name type value rest span =>
-      .doLetMutE name type value (psParseDoFallthrough rest) span
-  | .doAssignE name value rest span =>
-      .doAssignE name value (psParseDoFallthrough rest) span
-  | .doBindE name type value rest span =>
-      .doBindE name type value (psParseDoFallthrough rest) span
-  | .doThenE action rest span => .doThenE action (psParseDoFallthrough rest) span
-  | .doIfE condition thenBody elseBody rest span =>
+  | PsSyntaxTerm.letE name type value rest span =>
+      PsSyntaxTerm.letE name type value (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.letPatternE pattern type value rest span =>
+      PsSyntaxTerm.letPatternE pattern type value (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doLetMutE name type value rest span =>
+      PsSyntaxTerm.doLetMutE name type value (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doAssignE name value rest span =>
+      PsSyntaxTerm.doAssignE name value (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doBindE name type value rest span =>
+      PsSyntaxTerm.doBindE name type value (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doThenE action rest span => PsSyntaxTerm.doThenE action (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doIfE condition thenBody elseBody rest span =>
       match rest with
-      | .doEndE _ =>
-          .doIfE condition (psParseDoFallthrough thenBody)
+      | PsSyntaxTerm.doEndE _ =>
+          PsSyntaxTerm.doIfE condition (psParseDoFallthrough thenBody)
             (psParseDoFallthrough elseBody) rest span
-      | _ => .doIfE condition thenBody elseBody (psParseDoFallthrough rest) span
-  | .doForE name collection loopBody rest span =>
-      .doForE name collection loopBody (psParseDoFallthrough rest) span
-  | .doForRangeE name lower upper loopBody rest span =>
-      .doForRangeE name lower upper loopBody (psParseDoFallthrough rest) span
-  | .doWhileE condition loopBody rest span =>
-      .doWhileE condition loopBody (psParseDoFallthrough rest) span
-  | .doTryE action name recovery rest span =>
+      | _ => PsSyntaxTerm.doIfE condition thenBody elseBody (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doForE name collection loopBody rest span =>
+      PsSyntaxTerm.doForE name collection loopBody (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doForRangeE name lower upper loopBody rest span =>
+      PsSyntaxTerm.doForRangeE name lower upper loopBody (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doWhileE condition loopBody rest span =>
+      PsSyntaxTerm.doWhileE condition loopBody (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doTryE action name recovery rest span =>
       match rest with
-      | .doEndE _ =>
-          .doTryE (psParseDoFallthrough action) name
+      | PsSyntaxTerm.doEndE _ =>
+          PsSyntaxTerm.doTryE (psParseDoFallthrough action) name
             (psParseDoFallthrough recovery) rest span
-      | _ => .doTryE action name recovery (psParseDoFallthrough rest) span
-  | .doReturnE _ _ => body
-  | .doEndE _ => body
-  | _ => .doThenE body (.doEndE (psSyntaxTermSpan body)) (psSyntaxTermSpan body)
+      | _ => PsSyntaxTerm.doTryE action name recovery (psParseDoFallthrough rest) span
+  | PsSyntaxTerm.doReturnE _ _ => body
+  | PsSyntaxTerm.doEndE _ => body
+  | _ => PsSyntaxTerm.doThenE body (PsSyntaxTerm.doEndE (psSyntaxTermSpan body)) (psSyntaxTermSpan body)
 
 -- Lean's direct do-element nests by splicing its statement sequence. A
 -- parenthesized do term remains an ordinary action with its own return context.
@@ -287,68 +301,68 @@ def psParseDoAppend (fuel : Nat) (tail : PsSyntaxTerm) :
             | Except.error error => Except.error error
             | Except.ok appended => Except.ok (make appended);
         match body with
-        | .letE name type value rest span =>
-            rebuild rest (fun (appended : PsSyntaxTerm) => .letE name type value appended
+        | PsSyntaxTerm.letE name type value rest span =>
+            rebuild rest (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.letE name type value appended
               (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .letPatternE pattern type value rest span =>
-            rebuild rest (fun (appended : PsSyntaxTerm) => .letPatternE pattern type value appended
+        | PsSyntaxTerm.letPatternE pattern type value rest span =>
+            rebuild rest (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.letPatternE pattern type value appended
               (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doLetMutE name type value rest span =>
-            rebuild rest (fun (appended : PsSyntaxTerm) => .doLetMutE name type value appended
+        | PsSyntaxTerm.doLetMutE name type value rest span =>
+            rebuild rest (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doLetMutE name type value appended
               (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doAssignE name value rest span =>
-            rebuild rest (fun (appended : PsSyntaxTerm) => .doAssignE name value appended
+        | PsSyntaxTerm.doAssignE name value rest span =>
+            rebuild rest (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doAssignE name value appended
               (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doBindE name type value rest span =>
-            rebuild rest (fun (appended : PsSyntaxTerm) => .doBindE name type value appended
+        | PsSyntaxTerm.doBindE name type value rest span =>
+            rebuild rest (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doBindE name type value appended
               (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doThenE action rest span =>
-            rebuild rest (fun (appended : PsSyntaxTerm) => .doThenE action appended
+        | PsSyntaxTerm.doThenE action rest span =>
+            rebuild rest (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doThenE action appended
               (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doIfE condition thenBody elseBody rest span =>
+        | PsSyntaxTerm.doIfE condition thenBody elseBody rest span =>
             match rest with
-            | .doEndE _ =>
-                Except.ok (.doIfE condition
+            | PsSyntaxTerm.doEndE _ =>
+                Except.ok (PsSyntaxTerm.doIfE condition
                   (psParseDoFallthrough thenBody)
                   (psParseDoFallthrough elseBody) tail
                   (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
             | _ =>
-                rebuild rest (fun (appended : PsSyntaxTerm) => .doIfE condition thenBody elseBody appended
+                rebuild rest (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doIfE condition thenBody elseBody appended
                   (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doForE name collection loopBody rest span =>
+        | PsSyntaxTerm.doForE name collection loopBody rest span =>
             rebuild rest (fun (appended : PsSyntaxTerm) =>
-              .doForE name collection loopBody appended
+              PsSyntaxTerm.doForE name collection loopBody appended
                 (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doForRangeE name lower upper loopBody rest span =>
+        | PsSyntaxTerm.doForRangeE name lower upper loopBody rest span =>
             rebuild rest (fun (appended : PsSyntaxTerm) =>
-              .doForRangeE name lower upper loopBody appended
+              PsSyntaxTerm.doForRangeE name lower upper loopBody appended
                 (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doWhileE condition loopBody rest span =>
+        | PsSyntaxTerm.doWhileE condition loopBody rest span =>
             rebuild rest (fun (appended : PsSyntaxTerm) =>
-              .doWhileE condition loopBody appended
+              PsSyntaxTerm.doWhileE condition loopBody appended
                 (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doTryE action name recovery rest span =>
+        | PsSyntaxTerm.doTryE action name recovery rest span =>
             match rest with
-            | .doEndE _ =>
-                Except.ok (.doTryE (psParseDoFallthrough action) name
+            | PsSyntaxTerm.doEndE _ =>
+                Except.ok (PsSyntaxTerm.doTryE (psParseDoFallthrough action) name
                   (psParseDoFallthrough recovery) tail
                   (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
             | _ =>
-                rebuild rest (fun appended => .doTryE action name recovery appended
+                rebuild rest (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doTryE action name recovery appended
                   (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
-        | .doReturnE _ _ =>
+        | PsSyntaxTerm.doReturnE _ _ =>
             Except.error (PsParseError.expectedText
               "terminal return in this statement sequence" "following statement"
               (psSyntaxTermSpan tail))
-        | .doEndE _ => Except.ok tail
-        | _ => Except.ok (.doThenE body tail
+        | PsSyntaxTerm.doEndE _ => Except.ok tail
+        | _ => Except.ok (PsSyntaxTerm.doThenE body tail
             (psSyntaxSpanJoin (psSyntaxTermSpan body) (psSyntaxTermSpan tail)))
 
 def psParseDoCloseHead
     (head : PsParseDoHead) (tail : Option PsSyntaxTerm) :
     Except PsParseError PsSyntaxTerm :=
   let span := psParseDoHeadSpan head;
-  let rest :=
+  let rest : PsSyntaxTerm :=
     match tail with
     | Option.none => PsSyntaxTerm.doEndE span
     | Option.some body => body;
@@ -371,7 +385,7 @@ def psParseDoCloseHead
       | Option.some following =>
           Except.ok (PsSyntaxTerm.doThenE value following fullSpan)
   | PsParseDoHead.patternBinding pattern annotation value _ =>
-      Except.ok (.letPatternE pattern annotation value rest fullSpan)
+      Except.ok (PsSyntaxTerm.letPatternE pattern annotation value rest fullSpan)
   | PsParseDoHead.binding name annotation value monadic mutable _ =>
       if mutable then Except.ok (PsSyntaxTerm.doLetMutE name annotation value rest fullSpan)
       else if monadic then Except.ok (PsSyntaxTerm.doBindE name annotation value rest fullSpan)
@@ -379,15 +393,15 @@ def psParseDoCloseHead
   | PsParseDoHead.assignment name value _ =>
       Except.ok (PsSyntaxTerm.doAssignE name value rest fullSpan)
   | PsParseDoHead.forEach name collection body _ =>
-      Except.ok (.doForE name collection (psParseDoFallthrough body) rest fullSpan)
+      Except.ok (PsSyntaxTerm.doForE name collection (psParseDoFallthrough body) rest fullSpan)
   | PsParseDoHead.forRange name lower upper body _ =>
-      Except.ok (.doForRangeE name lower upper (psParseDoFallthrough body) rest fullSpan)
+      Except.ok (PsSyntaxTerm.doForRangeE name lower upper (psParseDoFallthrough body) rest fullSpan)
   | PsParseDoHead.whileLoop condition body _ =>
-      Except.ok (.doWhileE condition (psParseDoFallthrough body) rest fullSpan)
+      Except.ok (PsSyntaxTerm.doWhileE condition (psParseDoFallthrough body) rest fullSpan)
   | PsParseDoHead.handler action name recovery _ =>
       match tail with
-      | none => .ok (.doTryE action name recovery rest fullSpan)
-      | some _ => .ok (.doTryE (psParseDoFallthrough action) name
+      | none => Except.ok (PsSyntaxTerm.doTryE action name recovery rest fullSpan)
+      | some _ => Except.ok (PsSyntaxTerm.doTryE (psParseDoFallthrough action) name
           (psParseDoFallthrough recovery) rest fullSpan)
   | PsParseDoHead.conditional condition thenBody elseBody _ =>
       match tail with
@@ -436,7 +450,7 @@ def psParseDoConditional
   match psTokenCursorExpectText cursor "if" with
   | Except.error error => Except.error error
   | Except.ok keyword =>
-      let condition :=
+      let condition : Except PsParseError (PsParseResult PsSyntaxTerm) :=
         if native then
           match parseTerm keyword.cursor with
           | Except.error error => Except.error error
@@ -469,7 +483,7 @@ def psParseDoConditional
                         Nat.ble keyword.token.span.start.column token.span.start.column
                   else true
                 else false;
-              let elseBody :=
+              let elseBody : Except PsParseError (PsParseResult PsSyntaxTerm) :=
                 if hasElse then
                   match psTokenCursorAdvance thenBody.cursor with
                   | Option.none => Except.error (PsParseError.unexpectedEnd "else branch")
@@ -482,7 +496,7 @@ def psParseDoConditional
                   Except.ok (PsParseResult.mk
                     (PsParseDoHead.conditional condition.value thenBody.value elseBody.value
                       { start := keyword.token.span.start,
-                        stop := (psSyntaxTermSpan elseBody.value).stop }) elseBody.cursor)
+                        stop := (psParseDoTermStop elseBody.value) }) elseBody.cursor)
 
 
 -- A procedural header ends at an outer delimiter. This prevents the PS body
@@ -496,6 +510,10 @@ def psParseDoTakeHeader (delimiter : String) (fuel : Nat) :
         Except.error PsParseError.fuelExhausted
   | Nat.succ remaining =>
       fun (depth : Nat) (cursor : PsTokenCursor) (tokensRev : List PsToken) =>
+        let smaller :
+            Nat -> PsTokenCursor -> List PsToken ->
+            Except PsParseError (PsParseResult (List PsToken)) :=
+          psParseDoTakeHeader delimiter remaining;
         match psTokenCursorPeek cursor with
         | Option.none => Except.error (psParseDoExpected delimiter cursor)
         | Option.some token =>
@@ -511,7 +529,7 @@ def psParseDoTakeHeader (delimiter : String) (fuel : Nat) :
                     if psParseDoOpenToken token.text then Nat.succ depth
                     else if psParseDoCloseToken token.text then Nat.sub depth 1
                     else depth;
-                  psParseDoTakeHeader delimiter remaining nextDepth read.cursor
+                  smaller nextDepth read.cursor
                     (List.cons token tokensRev)
 
 def psParseDoLoopBody
@@ -527,17 +545,20 @@ def psParseDoLoopBody
 
 -- A bracketed List literal is an ordinary iterable. Only a colon at the
 -- outer bracket level selects range syntax; nested type/group delimiters do not.
-def psParseDoRangeColon : List PsToken -> Nat -> Bool
-  | [], _ => false
-  | token :: rest, depth =>
-      if Nat.beq depth 0 && psStringEq token.text "]" then false
-      else if Nat.beq depth 0 && psStringEq token.text ":" then true
-      else
-        let nextDepth :=
-          if psParseDoOpenToken token.text then Nat.succ depth
-          else if psParseDoCloseToken token.text then Nat.sub depth 1
-          else depth
-        psParseDoRangeColon rest nextDepth
+def psParseDoRangeColon (tokens : List PsToken) : Nat -> Bool :=
+  match tokens with
+  | List.nil => fun (_depth : Nat) => false
+  | List.cons token rest =>
+      fun (depth : Nat) =>
+        let smaller : Nat -> Bool := psParseDoRangeColon rest;
+        if Nat.beq depth 0 && psStringEq token.text "]" then false
+        else if Nat.beq depth 0 && psStringEq token.text ":" then true
+        else
+          let nextDepth :=
+            if psParseDoOpenToken token.text then Nat.succ depth
+            else if psParseDoCloseToken token.text then Nat.sub depth 1
+            else depth;
+          smaller nextDepth
 
 def psParseDoIsRange (cursor : PsTokenCursor) : Bool :=
   if psTokenCursorAtText cursor "[" then
@@ -575,10 +596,10 @@ def psParseDoFor
                       match psTokenCursorAdvance headerCursor with
                       | Option.none => Except.error (PsParseError.unexpectedEnd "range")
                       | Option.some opening =>
-                          let lower :=
+                          let lower : Except PsParseError (PsParseResult PsSyntaxTerm) :=
                             if psTokenCursorAtText opening.cursor ":" then
                               Except.ok (PsParseResult.mk
-                                (.natural "0" opening.token.span) opening.cursor)
+                                (PsSyntaxTerm.natural "0" opening.token.span) opening.cursor)
                             else parseTerm opening.cursor;
                           match lower with
                           | Except.error error => Except.error error
@@ -608,9 +629,9 @@ def psParseDoFor
                       | Except.ok body =>
                           let span : PsSourceSpan := {
                             start := keyword.token.span.start
-                            stop := (psSyntaxTermSpan body.value).stop
+                            stop := (psParseDoTermStop body.value)
                           };
-                          let head :=
+                          let head : PsParseDoHead :=
                             match iterable.snd with
                             | Option.none =>
                                 PsParseDoHead.forEach sourceName iterable.fst body.value span
@@ -627,7 +648,7 @@ def psParseDoWhile
   match psTokenCursorExpectText cursor "while" with
   | Except.error error => Except.error error
   | Except.ok keyword =>
-      let condition :=
+      let condition : Except PsParseError (PsParseResult PsSyntaxTerm) :=
         if native then parseTerm keyword.cursor
         else
           match psTokenCursorExpectText keyword.cursor "(" with
@@ -648,7 +669,7 @@ def psParseDoWhile
               Except.ok (PsParseResult.mk
                 (PsParseDoHead.whileLoop condition.value body.value
                   { start := keyword.token.span.start,
-                    stop := (psSyntaxTermSpan body.value).stop }) body.cursor)
+                    stop := (psParseDoTermStop body.value) }) body.cursor)
 
 -- A single typed catch delimits the handler scope. Braces are required by PS;
 -- native Lean may use layout. A nested try may not steal an outer catch.
@@ -656,18 +677,32 @@ def psParseDoTry
     (parseBody : Bool -> Nat -> PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
     (native : Bool) (cursor : PsTokenCursor) :
-    Except PsParseError (PsParseResult PsParseDoHead) := do
-  let keyword <- psTokenCursorExpectText cursor "try"
-  let body <- psParseDoBranch parseBody native keyword.cursor
-  let catchToken <- psTokenCursorExpectText body.cursor "catch"
-  if native && catchToken.token.span.start.column < keyword.token.span.start.column then
-    throw (psParseDoExpected "catch aligned with its try" body.cursor)
-  let binder <- psTokenCursorExpectKind catchToken.cursor PsTokenKind.identifier
-  let separator <- psTokenCursorExpectText binder.cursor "=>"
-  let recovery <- psParseDoBranch parseBody native separator.cursor
-  let name := PsSyntaxName.mk [binder.token.text] binder.token.span
-  let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan recovery.value)
-  pure (PsParseResult.mk (.handler body.value name recovery.value span) recovery.cursor)
+    Except PsParseError (PsParseResult PsParseDoHead) :=
+  match psTokenCursorExpectText cursor "try" with
+  | Except.error error => Except.error error
+  | Except.ok keyword =>
+      match psParseDoBranch parseBody native keyword.cursor with
+      | Except.error error => Except.error error
+      | Except.ok body =>
+          match psTokenCursorExpectText body.cursor "catch" with
+          | Except.error error => Except.error error
+          | Except.ok catchToken =>
+              if native && Nat.blt catchToken.token.span.start.column keyword.token.span.start.column then
+                Except.error (psParseDoExpected "catch aligned with its try" body.cursor)
+              else
+                match psTokenCursorExpectKind catchToken.cursor PsTokenKind.identifier with
+                | Except.error error => Except.error error
+                | Except.ok binder =>
+                    match psTokenCursorExpectText binder.cursor "=>" with
+                    | Except.error error => Except.error error
+                    | Except.ok separator =>
+                        match psParseDoBranch parseBody native separator.cursor with
+                        | Except.error error => Except.error error
+                        | Except.ok recovery =>
+                            let name := PsSyntaxName.mk [binder.token.text] binder.token.span;
+                            let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan recovery.value);
+                            Except.ok (PsParseResult.mk
+                              (PsParseDoHead.handler body.value name recovery.value span) recovery.cursor)
 
 def psParseDoBody
     (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
@@ -684,7 +719,7 @@ def psParseDoBody
         match psTokenCursorPeek cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "do statement")
         | Option.some first =>
-            let parsedHead :=
+            let parsedHead : Except PsParseError (PsParseResult PsParseDoHead) :=
               if psTokenCursorAtText cursor "if" then
                 psParseDoConditional parseTerm smaller allowSemicolon cursor
               else if psTokenCursorAtText cursor "for" then
@@ -727,10 +762,10 @@ def psParseDoBody
                             if psParseDoCloseToken token.text then false
                             else if next.fst then
                               if Nat.beq token.span.start.line
-                                  (psParseDoHeadSpan parsed.value).stop.line then true
+                                  (psParseDoHeadStopLine parsed.value) then true
                               else Nat.ble column token.span.start.column
                             else
-                              if Nat.ble (Nat.succ (psParseDoHeadSpan parsed.value).stop.line)
+                              if Nat.ble (Nat.succ (psParseDoHeadStopLine parsed.value))
                                   token.span.start.line then
                                 Nat.beq column token.span.start.column
                               else false;
@@ -779,4 +814,4 @@ def psParseDo
             else
               Except.ok (PsParseResult.mk
                 (PsSyntaxTerm.doE body.value
-                  { start := start, stop := (psSyntaxTermSpan body.value).stop }) body.cursor)
+                  { start := start, stop := (psParseDoTermStop body.value) }) body.cursor)

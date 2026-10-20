@@ -148,6 +148,71 @@ try {
       passed: true, publicNames: reservedManifest.publicNames });
   }
 
+
+  // Runtime intrinsics must not resolve to legal source declarations or captures.
+  // These paired sources are authored independently, not obtained by translation.
+  const ambientFixtures = {
+    lean: [
+      'def _BigInt (n : Nat) : Nat := n',
+      'def BigInt (n : Nat) : Nat := 99',
+      'def globalRuntime (flag : Bool) : Bool := Nat.beq (String.length (if flag then "🙂a" else "")) (if flag then 2 else 0)',
+      'def lexicalRuntime (BigInt : Nat) (Number : Nat) (String : Nat) (Array : Nat) : Bool :=',
+      '  Nat.beq (_root_.String.length "🙂a") 2 && _root_.String.beq (_root_.String.singleton (_root_.Char.ofNat 65)) "A"',
+      'structure Labels where',
+      '  BigInt : Nat',
+      '  Number : Nat',
+      'def labels (flag : Bool) : Bool :=',
+      '  let x : Labels := Labels.mk 5 7;',
+      '  Nat.beq x.BigInt 5 && Nat.beq x.Number 7',
+      ''
+    ].join('\n'),
+    ps: [
+      'def _BigInt(n : Nat) : Nat := n',
+      'def BigInt(n : Nat) : Nat := 99',
+      'def globalRuntime(flag : Bool) : Bool := Nat.beq(String.length(if (flag) { "🙂a" } else { "" }), if (flag) { 2 } else { 0 })',
+      'def lexicalRuntime(BigInt : Nat, Number : Nat, String : Nat, Array : Nat) : Bool :=',
+      '  Nat.beq(_root_.String.length("🙂a"), 2) && _root_.String.beq(_root_.String.singleton(_root_.Char.ofNat(65)), "A")',
+      'structure Labels {',
+      '  BigInt : Nat',
+      '  Number : Nat',
+      '}',
+      'def labels(flag : Bool) : Bool :=',
+      '  let x : Labels := Labels.mk(5, 7)',
+      '  Nat.beq(x.BigInt, 5) && Nat.beq(x.Number, 7)',
+      ''
+    ].join('\n')
+  };
+  for (const [syntax, ambientSource] of Object.entries(ambientFixtures)) {
+    const folder = path.join(work, 'ambient-' + syntax);
+    fs.mkdirSync(folder, { recursive: true });
+    const ambientInput = path.join(folder, 'ambient.' + syntax);
+    fs.writeFileSync(ambientInput, ambientSource);
+    const outputDirectory = path.join(folder, 'out');
+    command(native, ['build', ambientInput, '--targets', 'ts,js', '--out-dir', outputDirectory]);
+    const ambientStem = path.join(outputDirectory, 'ambient');
+    const ambientJs = await import(pathToFileURL(ambientStem + '.js').href);
+    const ambientConsumer = path.join(folder, 'consumer');
+    command(process.execPath, [checker, '--ignoreConfig', ambientStem + '.ts',
+      '--target', 'ES2020', '--module', 'ES2022', '--strict', '--skipLibCheck', '--outDir', ambientConsumer]);
+    const ambientTs = await import(pathToFileURL(path.join(ambientConsumer, 'ambient.js')).href);
+    for (const [target, module] of [['js', ambientJs], ['ts', ambientTs]]) {
+      assert.equal(module._BigInt(7n), 7n, target + ' authored escaped-looking global');
+      assert.equal(module._BigInt_(7n), 99n, target + ' ambient global collision');
+      for (const flag of [false, true]) {
+        assert.equal(module.globalRuntime(flag), true, target + ' global intrinsic hygiene');
+        assert.equal(module.labels(flag), true, target + ' unchanged property labels');
+      }
+      assert.equal(module.lexicalRuntime(0n, 0n, 0n, 0n), true, target + ' lexical intrinsic hygiene');
+    }
+    const generation = path.dirname(fs.realpathSync(ambientStem + '.js'));
+    assert.equal(read(path.join(generation, 'admissions.json')), command(native, ['admissions', ambientInput]));
+    const provenance = JSON.parse(read(path.join(generation, 'psc1-input.json')));
+    const captured = provenance.sources.find(item => item.text === ambientSource);
+    assert.ok(captured);
+    assert.equal(captured.origins.find(origin => origin.sourceName === 'BigInt')?.name, '_BigInt_');
+    records.push({ group: syntax + '-runtime-intrinsic-hygiene', passed: true });
+  }
+
   for (const [target, extension] of [['rust', '.rs'], ['wasm-core', '.wasm']]) {
     const output = path.join(work, 'small-' + target + extension);
     command(native, ['build', input, '--target', target, '--out', output]);

@@ -43,7 +43,7 @@ assert.equal(oracle.leanCommit, 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 write(path.join(evidence, 'native-oracle.json'), JSON.stringify(oracle, null, 2) + '\n');
 const cases = ['errorCaught','errorUncaught','errorAfter','errorEarly','errorTerminal',
   'errorNested','errorHandlerRethrow','errorShadow','errorCapture','errorFor','errorForReturn',
-  'errorNestedDo','errorBoundThrow','errorThrowShadow','errorResultPayload'];
+  'errorNestedDo','errorBoundThrow','errorThrowShadow','errorResultPayload','errorPatternFor'];
 assert.equal(Object.keys(oracle).length, (cases.length + 1) * 2 + 2);
 function entry(moduleName, names) {
   const definitions = names.map((name, index) => {

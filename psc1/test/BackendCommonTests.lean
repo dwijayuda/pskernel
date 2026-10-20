@@ -104,3 +104,17 @@ def main : IO Unit := do
     (match psWasmComponentEmit componentPlan extraExport with
       | .error "PSC1_COMPONENT_CORE_EXPORT_SET_MISMATCH" => true | _ => false)
 
+
+  -- Exact token keywords from the pinned wasm-tools 1.254.0 WIT lexer.
+  -- Public schema validation must refuse before emitting invalid WIT.
+  for keyword in ["use", "type", "func", "u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64", "f32", "f64", "char", "resource", "own", "borrow", "record", "flags", "variant", "enum", "bool", "string", "option", "result", "future", "stream", "error-context", "list", "map", "_", "as", "from", "static", "interface", "tuple", "world", "import", "export", "package", "constructor", "include", "with", "async"] do
+    require ("WIT keyword is not a bare identifier: " ++ keyword)
+      (!psWasmComponentWitIdent keyword)
+    require ("WIT keyword export refuses: " ++ keyword)
+      (match psWasmComponentValidatePlan { exports := [{ name := keyword, parameters := [] }] } with
+        | .error "PSC1_COMPONENT_WIT_EXPORT_NAME_UNSUPPORTED" => true | _ => false)
+    require ("WIT keyword argument refuses: " ++ keyword)
+      (match psWasmComponentValidatePlan { exports := [{ name := "identity", parameters := [keyword] }] } with
+        | .error "PSC1_COMPONENT_WIT_ARGUMENT_NAME_UNSUPPORTED" => true | _ => false)
+  require "WIT keyword substring remains a legal identifier"
+    (psWasmComponentWitIdent "option-value")

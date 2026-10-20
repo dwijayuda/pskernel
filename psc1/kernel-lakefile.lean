@@ -111,7 +111,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Research.ExprV2PagedInstantiate,
     `Ps.KernelCore.Research.ExprV2PagedHeadMachine,
     `Ps.KernelCore.Research.ExprV2PagedEquality,
-    `Ps.KernelCore.Research.ExprV2PagedEqualityBatch
+    `Ps.KernelCore.Research.ExprV2PagedEqualityBatch,
+    `Ps.KernelCore.Research.ExprV2PagedImport
   ]
 
 lean_exe psc1_kernel_regression where

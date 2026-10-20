@@ -52,6 +52,8 @@ const pagedInst=load("psKernelExprV2PagedInstantiate1Checked");
 const pagedHead=load("psKernelExprV2PagedHeadMachineChecked");
 const pagedStructuralEq=load("psKernelExprV2PagedEqChecked");
 const pagedEqBatch=load("psKernelExprV2PagedEqBatchChecked");
+const pagedImport=load("psKernelExprV2PagedImportChecked");
+const pagedImportInto=load("psKernelExprV2PagedImportIntoChecked");
 const pagedMkLam=load("psKernelExprV2PagedMkLam");
 const pagedMkLet=load("psKernelExprV2PagedMkLet");
 const pagedMkMData=load("psKernelExprV2PagedMkMData");
@@ -414,6 +416,26 @@ demand(accepted(portableStructuralEq(
 const importedForged=portableImportInto(forgedChunk,oldSort);
 demand(importedForged&&"error" in importedForged,
   "portable-import-rejects-forged-input");
+
+const importedPaged=accepted(pagedImport(oldBeta),"paged-import-old-beta");
+const importedPagedCopy=accepted(pagedImportInto(importedPaged.fst,oldBeta),
+  "paged-import-copy");
+demand(importedPaged.snd!==importedPagedCopy.snd &&
+  accepted(pagedStructuralEq(importedPagedCopy.fst,
+    importedPaged.snd,importedPagedCopy.snd),"paged-import-copy-eq")===true,
+  "paged-import-copy-structural-equality");
+const pagedBetaOutput=accepted(pagedHead(2n,importedPaged.fst,importedPaged.snd),
+  "paged-import-beta");
+const pagedWithSort=accepted(pagedMkSort(pagedBetaOutput.fst,level.zero),
+  "paged-import-sort-expected");
+demand(accepted(pagedStructuralEq(
+    pagedWithSort.fst,pagedBetaOutput.snd,pagedWithSort.snd),
+    "paged-import-beta-equality")===true,
+  "paged-import-beta-parity");
+const pagedImportBad=pagedImportInto(forgedPagedEq,oldSort);
+demand(pagedImportBad&&"error" in pagedImportBad,
+  "paged-import-forged-metadata-rejected");
+
 
 // Order-balanced comparison; both implementations see equivalent prebuilt DAGs.
 // Every result and returned arena size is checked before accepting a timing.

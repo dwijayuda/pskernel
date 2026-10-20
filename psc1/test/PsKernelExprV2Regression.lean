@@ -1369,6 +1369,15 @@ private def testPortableLegacyImport : IO Unit := do
     let actual ← expectV2 (psKernelExprV2ChunkedDecode arena root)
     requireV2 ("legacy-import-roundtrip-" ++ label)
       (psKernelExprEq actual expr && psKernelExprEqual actual expr)
+    let (paged,pageRoot) ← expectV2 (psKernelExprV2PagedImportChecked expr)
+    let pagedExpr ← psKernelExprV2DecodePagedForTest paged pageRoot
+    requireV2 ("paged-import-roundtrip-" ++ label)
+      (psKernelExprEq pagedExpr expr && psKernelExprEqual pagedExpr expr)
+    let (pagedCopyArena,pageCopy) ← expectV2
+      (psKernelExprV2PagedImportIntoChecked paged expr)
+    let pagedEqual ← expectV2
+      (psKernelExprV2PagedEqChecked pagedCopyArena pageRoot pageCopy)
+    requireV2 ("paged-import-cross-copy-" ++ label) pagedEqual
     let (joined,copy) ← expectV2
       (psKernelExprV2PortableImportIntoChecked arena expr)
     let isEqual ← expectV2
@@ -1384,6 +1393,13 @@ private def testPortableLegacyImport : IO Unit := do
   let reduced ← expectV2 (psKernelExprV2ChunkedDecode resultArena result)
   requireV2 "legacy-import-checked-beta-reduction"
     (psKernelExprEq reduced sort0 && psKernelExprEqual reduced sort0)
+  let (paged,pagedBeta) ← expectV2 (psKernelExprV2PagedImportChecked small)
+  let (pagedOutput,pagedResult) ← expectV2
+    (psKernelExprV2PagedHeadMachineChecked 2 paged pagedBeta)
+  let pagedReduced ← psKernelExprV2DecodePagedForTest pagedOutput pagedResult
+  requireV2 "paged-import-checked-beta"
+    (psKernelExprEq pagedReduced sort0 &&
+      psKernelExprEqual pagedReduced sort0)
   let entry ← expectV2 (psKernelExprV2ChunkedRequire arena beta)
   let corrupted : PsKernelExprV2Entry := { entry with hash := 0 }
   let (malformed,badRoot) := psKernelExprV2ChunkedPush
@@ -1392,6 +1408,12 @@ private def testPortableLegacyImport : IO Unit := do
     (match psKernelExprV2PortableImportIntoChecked malformed sort0 with
       | Except.error _ => true
       | Except.ok _ => false)
+  let (pagedMalformed,_) := psKernelExprV2PagedPush
+    psKernelExprV2PagedEmpty corrupted
+  requireV2 "paged-import-refuses-forged-source"
+    (match psKernelExprV2PagedImportIntoChecked pagedMalformed sort0 with
+      | Except.error _ => true | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_PAGED_LEGACY_IMPORT: PASS cases=13"
   IO.println "PSC1_EXPR_V2_LEGACY_IMPORT: PASS cases=13"
 
 

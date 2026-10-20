@@ -1,0 +1,46 @@
+name: PSC1 guarded cloud source integration
+on:
+  push:
+    branches: [feature/psc1-typed-errors-20261020]
+    paths: [.github/workflows/psc1-typed-error-apply.yml]
+permissions:
+  contents: write
+concurrency:
+  group: psc1-typed-error-integration
+  cancel-in-progress: false
+jobs:
+  integrate:
+    if: github.repository == 'dwijayuda/pskernel' && github.ref == 'refs/heads/feature/psc1-typed-errors-20261020'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 3
+      - name: Execute exact guarded source edits in cloud
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 20aa39e7e74a0f655b367c14067896be314a00ee
+          python3 - <<'PY'
+          from pathlib import Path
+          import textwrap
+          source = Path('.github/workflows/psc1-typed-error-integration.yml').read_text()
+          marker = "          python3 - <<'PY'\n"
+          assert source.count(marker) == 1
+          script = source.split(marker, 1)[1].split('\n          PY\n', 1)[0]
+          script = textwrap.dedent(script)
+          print('Executing reviewed Python source bytes:', len(script))
+          exec(compile(script, 'reviewed-cloud-integration.py', 'exec'))
+          PY
+          git diff --check
+          git diff --stat
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add psc1 .github/workflows/psc1-scoped-correctness.yml
+          git commit -m 'feat(psc1): integrate typed catch boundaries and exact-source cross-target tests'
+          git push origin HEAD:refs/heads/feature/psc1-typed-errors-20261020
+          echo "Integrated head $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"

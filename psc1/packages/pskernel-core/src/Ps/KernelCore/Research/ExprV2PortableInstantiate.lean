@@ -218,8 +218,10 @@ def psKernelExprV2PortableInstReplace
       | Except.error error =>
           Except.error error
       | Except.ok lifted =>
+          let liftedState : PsKernelExprV2PortableLiftState :=
+            Prod.fst lifted;
           let output : PsKernelExprV2PortableInstState := {
-            arena := (Prod.fst lifted).arena
+            arena := liftedState.arena
             memo := state.memo
           };
           Except.ok

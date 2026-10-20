@@ -9,6 +9,7 @@ on:
       - psc1/lean-toolchain
       - psc1/packages/pskernel-core/src/Ps/KernelCore/Research/**
       - psc1/test/PsKernelExprV2Regression.lean
+      - psc1/test/PsKernelExprV2FullCheckerBridge.lean
       - psc1/scripts/pskernel-expr-v2-generated-smoke.mjs
       - psc1/kernel-lakefile.lean
       - .github/workflows/psc1-pskernel-expr-v2.yml
@@ -310,4 +311,44 @@ jobs:
           path: |
             ${{ runner.temp }}/psc1-v2-ps-js.log
             psc1/dist/expr-v2/ps-workspace/.proofscript-bootstrap.json
+          retention-days: 30
+
+  full-checker-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile bridge with the independent production checker and V2
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_checker_bridge
+      - name: Compare fully checked positive and negative results, with import-cost timing
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e' \
+            -o "$RUNNER_TEMP/psc1-v2-checker-bridge.memory" \
+            .lake/build/bin/psc1_kernel_expr_v2_checker_bridge \
+            | tee "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
+          grep -q 'PSC1_V2_BRIDGE_REJECTION: PASS' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
+          grep -q 'PSC1_V2_FULL_CHECKER_BRIDGE: PASS' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
+          grep -q 'variant=v2_with_import' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
+          grep -q 'variant=trusted_whnf' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-v2-full-checker-bridge-lean435
+          path: |
+            ${{ runner.temp }}/psc1-v2-checker-bridge.log
+            ${{ runner.temp }}/psc1-v2-checker-bridge.memory
           retention-days: 30

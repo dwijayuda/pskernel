@@ -160,3 +160,8 @@ lean_exe psc1_kernel_metadata where
 lean_exe psc1_kernel_expr_v2_regression where
   srcDir := "test"
   root := `PsKernelExprV2Regression
+
+-- Research-only bridge to the complete trusted PSC1 checker; never a kernel backend.
+lean_exe psc1_kernel_expr_v2_checker_bridge where
+  srcDir := "test"
+  root := `PsKernelExprV2FullCheckerBridge

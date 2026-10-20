@@ -155,9 +155,9 @@ try {
     lean: [
       'def _BigInt (n : Nat) : Nat := n',
       'def BigInt (n : Nat) : Nat := 99',
-      'def globalRuntime (flag : Bool) : Bool := Nat.beq (String.length (if flag then "🙂a" else "")) (if flag then 2 else 0)',
+      'def globalRuntime (flag : Bool) : Bool := Nat.beq (String.Internal.length "🙂a") 2',
       'def lexicalRuntime (BigInt : Nat) (Number : Nat) (String : Nat) (Array : Nat) : Bool :=',
-      '  Nat.beq (_root_.String.length "🙂a") 2 && _root_.String.beq (_root_.String.singleton (_root_.Char.ofNat 65)) "A"',
+      '  Nat.beq (_root_.String.Internal.length "🙂a") 2 && Nat.beq (_root_.Char.toNat (_root_.Char.ofNat 65)) 65',
       'structure Labels where',
       '  BigInt : Nat',
       '  Number : Nat',
@@ -169,10 +169,10 @@ try {
     ps: [
       'def _BigInt(n : Nat) : Nat := n',
       'def BigInt(n : Nat) : Nat := 99',
-      'def globalRuntime(flag : Bool) : Bool := Nat.beq(String.length(if (flag) { "🙂a" } else { "" }), if (flag) { 2 } else { 0 })',
+      'def globalRuntime(flag : Bool) : Bool := Nat.beq(String.Internal.length("🙂a"), 2)',
       'def lexicalRuntime(BigInt : Nat, Number : Nat, String : Nat, Array : Nat) : Bool :=',
-      '  Nat.beq(_root_.String.length("🙂a"), 2) && _root_.String.beq(_root_.String.singleton(_root_.Char.ofNat(65)), "A")',
-      'structure Labels {',
+      '  Nat.beq(_root_.String.Internal.length("🙂a"), 2) && Nat.beq(_root_.Char.toNat(_root_.Char.ofNat(65)), 65)',
+      'structure Labels where {',
       '  BigInt : Nat',
       '  Number : Nat',
       '}',
@@ -193,6 +193,8 @@ try {
     command(native, ['build', ambientInput, '--targets', 'ts,js', '--out-dir', outputDirectory]);
     const ambientStem = path.join(outputDirectory, 'ambient');
     const ambientJs = await import(pathToFileURL(ambientStem + '.js').href);
+    assert.equal(ambientJs.globalRuntime(false), true, 'DirectJS ambient intrinsic global capture');
+    assert.equal(ambientJs.lexicalRuntime(0n, 0n, 0n, 0n), true, 'DirectJS ambient intrinsic lexical capture');
     const ambientConsumer = path.join(folder, 'consumer');
     command(process.execPath, [checker, '--ignoreConfig', ambientStem + '.ts',
       '--target', 'ES2020', '--module', 'ES2022', '--strict', '--skipLibCheck', '--outDir', ambientConsumer]);
@@ -215,15 +217,15 @@ try {
     records.push({ group: syntax + '-runtime-intrinsic-hygiene', passed: true });
     } catch (error) {
       hygieneFailures.push(syntax + '-runtime-intrinsic-hygiene');
-      console.error('PSC1_RUNTIME_HYGIENE_FAIL: ' + syntax + '\\n' + error.stack);
+      console.error('PSC1_RUNTIME_HYGIENE_FAIL: ' + syntax + '\n' + error.stack);
     }
   }
 
 
   // __proto__ is an own source field, never an object-literal prototype setter.
   const protoFixtures = {
-    lean: 'structure Labels where\n  __proto__ : Nat\n  Number : Nat\ndef labels (flag : Bool) : Bool :=\n  let x : Labels := Labels.mk 5 7;\n  Nat.beq x.__proto__ 5 && Nat.beq x.Number 7\n',
-    ps: 'structure Labels {\n  __proto__ : Nat\n  Number : Nat\n}\ndef labels(flag : Bool) : Bool :=\n  let x : Labels := Labels.mk(5, 7)\n  Nat.beq(x.__proto__, 5) && Nat.beq(x.Number, 7)\n'
+    lean: 'structure Labels where\n  __proto__ : Nat\n  Number : Nat\ndef labels (flag : Bool) : Bool :=\n  let x : Labels := Labels.mk 5 7;\n  Nat.beq x.__proto__ 5 && Nat.beq x.Number 7\ndef recordLabels (flag : Bool) : Bool :=\n  let x : Labels := { __proto__ := 5, Number := 7 };\n  Nat.beq x.__proto__ 5 && Nat.beq x.Number 7\n',
+    ps: 'structure Labels where {\n  __proto__ : Nat\n  Number : Nat\n}\ndef labels(flag : Bool) : Bool :=\n  let x : Labels := Labels.mk(5, 7)\n  Nat.beq(x.__proto__, 5) && Nat.beq(x.Number, 7)\ndef recordLabels(flag : Bool) : Bool :=\n  let x : Labels := { __proto__ := 5, Number := 7 }\n  Nat.beq(x.__proto__, 5) && Nat.beq(x.Number, 7)\n'
   };
   for (const [syntax, protoSource] of Object.entries(protoFixtures)) {
     try {
@@ -242,6 +244,8 @@ try {
       for (const [target, module] of [['js', protoJs], ['ts', protoTs]]) {
         assert.equal(module.labels(false), true, target + ' prototype-named source field');
         assert.equal(module.labels(true), true, target + ' prototype-named source field');
+        assert.equal(module.recordLabels(false), true, target + ' prototype-named record literal');
+        assert.equal(module.recordLabels(true), true, target + ' prototype-named record literal');
       }
       records.push({ group: syntax + '-prototype-property-hygiene', passed: true });
     } catch (error) {

@@ -120,6 +120,73 @@ private def optionalArrayValue (result : Option Int) : Int :=
   | .none => 0
   | .some value => value
 
+private def whileFalseReference (flag : Bool) : Nat := Id.run do
+  let mut value : Nat := if flag then 7 else 9
+  while false do
+    value := 99
+  return value
+
+private def whileCountReference (flag : Bool) : Nat := Id.run do
+  let limit : Nat := if flag then 100000 else 0
+  let mut index : Nat := 0
+  let mut total : Nat := 7
+  while !(Nat.beq index limit) do
+    total := total + 1
+    index := index + 1
+  return total
+
+private def whileEarlyReference (flag : Bool) : Nat := Id.run do
+  let mut index : Nat := 0
+  let mut total : Nat := 3
+  while !(Nat.beq index 100000) do
+    if flag && Nat.beq index 7 then
+      return total
+    total := total + 2
+    index := index + 1
+  return total
+
+private def whileCaptureReference (flag : Bool) : Nat := Id.run do
+  let mut value : Nat := if flag then 3 else 5
+  let captured : Nat → Nat := fun n => value + n
+  let mut steps : Nat := 0
+  while !(Nat.beq steps 3) do
+    value := value + 10
+    steps := steps + 1
+  return captured value + steps
+
+private def whileSequentialReference (flag : Bool) : Nat := Id.run do
+  let mut value : Nat := if flag then 2 else 1
+  let mut index : Nat := 0
+  while !(Nat.beq index 3) do
+    value := value * 10 + index
+    index := index + 1
+  let mut tail : Nat := 0
+  while !(Nat.beq tail 2) do
+    value := value + 7
+    tail := tail + 1
+  return value
+
+private def whileForReference (flag : Bool) : Nat := Id.run do
+  let bounds : List Nat := [if flag then 2 else 0, 3]
+  let mut total : Nat := 0
+  for upper in bounds do
+    let mut index : Nat := 0
+    while !(Nat.beq index upper) do
+      total := total + 1
+      index := index + 1
+  return total
+
+private def whileExceptReference (flag : Bool) : Except Nat Nat := do
+  let mut index : Nat := 0
+  let mut total : Nat := 7
+  while !(Nat.beq index 3) do
+    total := total + index
+    if flag && Nat.beq index 1 then
+      let _ignored : Unit ← Except.error total
+      total := 999
+    index := index + 1
+  return total
+
 /-- Executed under the same pinned Lean runtime as source admission. The JSON
 uses decimal strings so a JavaScript test harness cannot round large integers. -/
 def main : IO Unit := do
@@ -185,5 +252,21 @@ def main : IO Unit := do
     ("optionalIndexFalseValue", toJson (Int.repr (optionalArrayValue (optionalArrayReference false)))),
     ("optionalIndexTrueValue", toJson (Int.repr (optionalArrayValue (optionalArrayReference true)))),
     ("optionalHugeAbsent", toJson (!(optionalArrayIsSome (optionalValues[huge]?)))),
-    ("optionalEmptyAbsent", toJson (!(optionalArrayIsSome (optionalEmpty[0]?))))]
+    ("optionalEmptyAbsent", toJson (!(optionalArrayIsSome (optionalEmpty[0]?)))),
+    ("whileFalseFalse", toJson (toString (whileFalseReference false))),
+    ("whileFalseTrue", toJson (toString (whileFalseReference true))),
+    ("whileCountFalse", toJson (toString (whileCountReference false))),
+    ("whileCountTrue", toJson (toString (whileCountReference true))),
+    ("whileEarlyFalse", toJson (toString (whileEarlyReference false))),
+    ("whileEarlyTrue", toJson (toString (whileEarlyReference true))),
+    ("whileCaptureFalse", toJson (toString (whileCaptureReference false))),
+    ("whileCaptureTrue", toJson (toString (whileCaptureReference true))),
+    ("whileSequentialFalse", toJson (toString (whileSequentialReference false))),
+    ("whileSequentialTrue", toJson (toString (whileSequentialReference true))),
+    ("whileForFalse", toJson (toString (whileForReference false))),
+    ("whileForTrue", toJson (toString (whileForReference true))),
+    ("whileExceptFalseValue", toJson (toString (controlErrorValue (whileExceptReference false)))),
+    ("whileExceptTrueValue", toJson (toString (controlErrorValue (whileExceptReference true)))),
+    ("whileExceptFalseTag", toJson (controlIsError (whileExceptReference false))),
+    ("whileExceptTrueTag", toJson (controlIsError (whileExceptReference true)))]
   IO.println (Lean.Json.mkObj values).compress

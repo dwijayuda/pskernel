@@ -331,3 +331,7 @@ lean_exe psc1_script_ir_tests where
 lean_exe psc1_data_tests where
   srcDir := "test"
   root := `DataTests
+
+lean_exe psc1_while_tests where
+  srcDir := "test"
+  root := `WhileTests

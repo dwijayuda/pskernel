@@ -9,6 +9,8 @@ const output = path.join(root, 'dist/scoped-correctness');
 const read = relative => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
 const runtime = read('dist/scoped-correctness/runtime-conformance/results.json');
 const scripts = read('dist/scoped-correctness/script-backends/results.json');
+const whileRuntime = read('dist/scoped-correctness/ordinary-while-conformance/results.json');
+const minimumWhile = read('dist/scoped-correctness/ordinary-while-conformance-python314/results.json');
 const architecture = read('dist/scoped-correctness/backend-architecture/results.json');
 const minimumRuntime = read('dist/scoped-correctness/runtime-conformance-python314/results.json');
 const minimumScripts = read('dist/scoped-correctness/script-backends-python314/results.json');
@@ -19,9 +21,25 @@ assert.equal(runtime.records.length, targets.length * 2);
 assert.deepEqual([...new Set(runtime.records.map(x => x.target))].sort(), [...targets].sort());
 assert.equal(minimumRuntime.records.length, 2);
 assert.ok(minimumRuntime.records.every(x => x.target === 'python'));
-for (const data of [runtime, scripts, architecture, minimumRuntime, minimumScripts]) {
+for (const data of [runtime, scripts, architecture, minimumRuntime, minimumScripts, whileRuntime, minimumWhile]) {
   assert.equal(data.commit, process.env.GITHUB_SHA || null);
   assert.ok(data.records.length && data.records.every(x => x.passed === true));
+}
+for (const [data, expectedTargets] of [[whileRuntime, targets], [minimumWhile, ['python']]]) {
+  assert.equal(data.records.length, expectedTargets.length * 2);
+  assert.equal(data.divergence.length, expectedTargets.length * 2);
+  assert.deepEqual([...new Set(data.records.map(x => x.target))].sort(), [...expectedTargets].sort());
+  assert.deepEqual([...new Set(data.divergence.map(x => x.target))].sort(), [...expectedTargets].sort());
+  assert.equal(data.assurance, 'ordinary-checked');
+  assert.equal(data.behaviorallyVerified, false);
+  assert.equal(data.nativeLean.commit, runtime.nativeLean.commit);
+  assert.equal(data.oracleFields.length, 16);
+  assert.equal(data.loopChecks.length, 7);
+  assert.equal(data.longLoopIterations, 100000);
+  assert.equal(data.rejections.length, 16);
+  assert.ok(data.rejections.every(x => x.passed));
+  assert.ok(data.divergence.every(x => x.passed && x.exitCode === 124 &&
+    x.earlyReturnPreflight && x.unusedNonvalueCallEvaluated));
 }
 assert.equal(distribution.qualification, 'passed');
 assert.equal(library.independentlyAdmitted, true);
@@ -34,7 +52,8 @@ assert.deepEqual(runtime.handwrittenLiteralSyntaxes, ['lean', 'ps']);
 assert.deepEqual(runtime.handwrittenOptionalIndexSyntaxes, ['lean', 'ps']);
 const practicalNative = [
   ['psc1_do_tests', 'PSC1_DO_TESTS: PASS'],
-  ['psc1_data_tests', 'PSC1_DATA_TESTS: PASS']
+  ['psc1_data_tests', 'PSC1_DATA_TESTS: PASS'],
+  ['psc1_while_tests', 'PSC1_WHILE_TESTS: PASS']
 ].map(([suite, marker]) => {
   const evidence = 'practical-core/' + suite + '.log';
   const log = fs.readFileSync(path.join(output, evidence), 'utf8');
@@ -81,6 +100,18 @@ const receipt = {
     referenceOracle: runtime.controlFlowOracle,
     handwrittenLiteralSyntaxes: runtime.handwrittenLiteralSyntaxes,
     handwrittenOptionalIndexSyntaxes: runtime.handwrittenOptionalIndexSyntaxes,
+    ordinaryWhile: {
+      targetExecutionBundles: whileRuntime.records.length,
+      externalDivergenceDeadlines: whileRuntime.divergence.length,
+      refusalChecks: whileRuntime.rejections.length,
+      loopChecks: whileRuntime.loopChecks,
+      longLoopIterations: whileRuntime.longLoopIterations,
+      referenceFields: whileRuntime.oracleFields,
+      minimumPythonBundles: minimumWhile.records.length,
+      minimumPythonDeadlines: minimumWhile.divergence.length,
+      evidence: 'ordinary-while-conformance/results.json',
+      minimumPythonEvidence: 'ordinary-while-conformance-python314/results.json'
+    },
     completeFamilies: false
   },
   programs: runtime.records.map(x => ({

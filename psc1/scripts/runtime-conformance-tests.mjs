@@ -318,7 +318,28 @@ try {
       const args = ['build', entry, '--target', target];
       if (target === 'wasm-component') args.push('--export', 'semantic');
       args.push('--out', output);
-      run(native, args);
+      try {
+        run(native, args);
+      } catch (error) {
+        if (target === 'rust') {
+          const probes = path.join(evidence, 'rust-isolation');
+          fs.mkdirSync(probes, { recursive: true });
+          for (const definition of fs.readFileSync(entry, 'utf8').split(/(?=^def )/m)) {
+            const match = /^def ([A-Za-z][A-Za-z0-9]*)/.exec(definition);
+            if (!match || match[1] === 'semantic') continue;
+            const probe = path.join(probes, match[1] + '.' + syntax);
+            fs.writeFileSync(probe, definition);
+            try {
+              run(native, ['build', probe, '--target', 'rust', '--out', path.join(work, match[1] + '.rs')]);
+              console.error('PSC1_RUNTIME_RUST_PROBE_PASS: ' + match[1]);
+            } catch (probeError) {
+              console.error('PSC1_RUNTIME_RUST_PROBE_FAIL: ' + match[1] + '\n' + probeError.message);
+              console.error(definition);
+            }
+          }
+        }
+        throw error;
+      }
       console.log('PSC1_RUNTIME_CONFORMANCE_BUILT: ' + syntax + '/' + target);
       const manifest = JSON.parse(fs.readFileSync(output + '.bundle.json', 'utf8'));
       assert.equal(manifest.logicalCheckerCommit, oracle.leanCommit);

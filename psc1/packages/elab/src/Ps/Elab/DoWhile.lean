@@ -96,9 +96,14 @@ def psElabDoWhile
   if psElabDoWhileNestedLoop body then
     throw PsElabError.doWhileUnsupportedBody
   let resultType := psElabDoType ops result
-  match psWhnf context.environment context.metaContext context.localContext resultType with
-  | .forallE _ _ _ _ => throw PsElabError.doWhileUnsupportedBody
-  | _ => pure ()
+  let reducedResult :=
+    psWhnf context.environment context.metaContext context.localContext resultType
+  match (psExprAppView reducedResult).head with
+  | .constE name _ =>
+      match psEnvironmentFind context.environment name with
+      | some (.inductiveDecl _) => pure ()
+      | _ => throw PsElabError.doWhileUnsupportedBody
+  | _ => throw PsElabError.doWhileUnsupportedBody
   let carried := psElabDoMutableVisible context state
   let continuation <- psElabDoJoin
     (fun current currentState => next current currentState rest finish)

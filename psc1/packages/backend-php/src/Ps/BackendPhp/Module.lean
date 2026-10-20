@@ -357,6 +357,102 @@ private def phpEmitExpr : Nat → PhpContext → PsVerifiedIrExpr → PhpEmit St
           phpLine "}"
         return result
 
+-- A zero-parameter declaration is a value: reading its global may execute it.
+-- Only a fully saturated, unshadowed function reference is a direct self call.
+private def phpDirectSelfCall (declaration : PsVerifiedIrDeclaration)
+    (bound : List String) (expr : PsVerifiedIrExpr) : Option (List PsVerifiedIrExpr) :=
+  match expr with
+  | .call (.var name) _ arguments =>
+      if !declaration.parameters.isEmpty && name == declaration.name &&
+          !bound.contains name && arguments.length == declaration.parameters.length then
+        some arguments
+      else none
+  | _ => none
+
+private def phpHasDirectSelfTail (declaration : PsVerifiedIrDeclaration) :
+    Nat → List String → PsVerifiedIrExpr → Bool
+  | 0, _, _ => false
+  | fuel+1, bound, expr =>
+      match phpDirectSelfCall declaration bound expr with
+      | some _ => true
+      | none =>
+          match expr with
+          | .letE name _ _ body =>
+              phpHasDirectSelfTail declaration fuel (name :: bound) body
+          | .ifE _ yes no =>
+              phpHasDirectSelfTail declaration fuel bound yes ||
+                phpHasDirectSelfTail declaration fuel bound no
+          | .matchE _ _ _ alternatives =>
+              alternatives.any (fun alternative =>
+                phpHasDirectSelfTail declaration fuel
+                  (alternative.2.1.map (fun binding => binding.name) ++ bound) alternative.2.2)
+          | _ => false
+
+-- Tail recurrence replaces only this declaration's frame. Calls in initializers,
+-- arguments and other non-tail positions retain the generator scheduler.
+-- Every new argument is evaluated and saved before any parameter is reassigned.
+private def phpEmitDirectSelfTail (declaration : PsVerifiedIrDeclaration)
+    (parameters : List String) : Nat → PhpContext → PsVerifiedIrExpr → PhpEmit Unit
+  | 0, _, _ => throw "PSC1_PHP_LOWERING_BUDGET"
+  | fuel+1, context, expr => do
+      let emit := phpEmitExpr fuel context
+      match phpDirectSelfCall declaration (context.locals.map (fun item => item.1)) expr with
+      | some arguments =>
+          let values ← arguments.mapM (fun argument => do
+            let value ← emit argument
+            phpBind value)
+          for (parameter, value) in parameters.zip values do
+            phpLine (parameter ++ " = " ++ value ++ ";")
+          phpLine "continue;"
+      | none =>
+          match expr with
+          | .letE name type value body =>
+              let _ ← phpLift (phpType 4096 type)
+              let printed ← emit value
+              let localName ← phpFresh name
+              phpLine (localName ++ " = " ++ printed ++ ";")
+              phpEmitDirectSelfTail declaration parameters fuel
+                { context with locals := (name, localName) :: context.locals } body
+          | .ifE condition yes no =>
+              let printedCondition ← emit condition
+              phpLine ("if (" ++ printedCondition ++ " === true) {")
+              phpIndent 1
+              phpEmitDirectSelfTail declaration parameters fuel context yes
+              phpIndent (-1)
+              phpLine "} else {"
+              phpIndent 1
+              phpEmitDirectSelfTail declaration parameters fuel context no
+              phpIndent (-1)
+              phpLine "}"
+          | .matchE _ _ scrutinee alternatives =>
+              let target ← emit scrutinee
+              let mut first := true
+              for alternative in alternatives do
+                phpLine ((if first then "if (" else "} elseif (") ++ target ++
+                  "[0] === " ++ phpQuote alternative.1 ++ ") {")
+                first := false
+                phpIndent 1
+                let mut locals := context.locals
+                for binding in alternative.2.1 do
+                  let _ ← phpLift (phpType 4096 binding.type)
+                  let localName ← phpFresh binding.name
+                  phpLine (localName ++ " = " ++ target ++ "[1][" ++ phpQuote binding.field ++ "];")
+                  locals := (binding.name, localName) :: locals
+                phpEmitDirectSelfTail declaration parameters fuel
+                  { context with locals := locals } alternative.2.2
+                phpIndent (-1)
+              if first then
+                phpLine "throw new \\UnexpectedValueException('PSC1_PHP_EMPTY_MATCH');"
+              else
+                phpLine "} else {"
+                phpIndent 1
+                phpLine "throw new \\UnexpectedValueException('PSC1_PHP_CONSTRUCTOR_TAG');"
+                phpIndent (-1)
+                phpLine "}"
+          | _ =>
+              let value ← emit expr
+              phpLine ("return " ++ value ++ ";")
+
 private def phpEmitDeclaration (context : PhpContext)
     (declaration : PsVerifiedIrDeclaration) : PhpEmit Nat := do
   let symbol ← match context.globals.find? (fun item => item.1 == declaration.name) with
@@ -377,10 +473,22 @@ private def phpEmitDeclaration (context : PhpContext)
   phpIndent 1
   phpLine ("if (func_num_args() !== " ++ toString parameters.length ++ ") { throw new \\ArgumentCountError('PSC1_PHP_ARITY'); }")
   if context.scheduled then phpLine "if (false) { yield; }"
-  for parameter in parameters do phpGuard parameter.2.1 parameter.2.2.2
   let locals := parameters.map (fun parameter => (parameter.1, parameter.2.1))
-  let value ← phpEmitExpr 4096 { context with locals } declaration.body
-  phpLine ("return " ++ value ++ ";")
+  let hasTail := phpHasDirectSelfTail declaration 4096
+    (declaration.parameters.map (fun parameter => parameter.name)) declaration.body
+  if hasTail then
+    phpLine "while (true) {"
+    phpIndent 1
+  for parameter in parameters do phpGuard parameter.2.1 parameter.2.2.2
+  if hasTail then
+    phpEmitDirectSelfTail declaration (parameters.map (fun parameter => parameter.2.1))
+      4096 { context with locals } declaration.body
+  else
+    let value ← phpEmitExpr 4096 { context with locals } declaration.body
+    phpLine ("return " ++ value ++ ";")
+  if hasTail then
+    phpIndent (-1)
+    phpLine "}"
   phpIndent (-1)
   phpLine (if context.scheduled then "});" else "};")
   phpLine ""

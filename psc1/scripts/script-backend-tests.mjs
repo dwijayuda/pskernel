@@ -248,6 +248,37 @@ try {
     assert.deepEqual(consumer(recursive, { calls: [{ name: 'count', args: [{ nat: '100000' }] }] }).values, ['100000']);
     retain(recursive, { input: '100000', output: '100000', executionFuel: null });
 
+    source(target + '-tail-semantics/Dep.lean', [
+      'partial def tailSwap (n : Nat) (left : Nat) (right : Nat) : Nat :=',
+      '  if Nat.beq n 0 then Nat.add (Nat.mul left 10) right',
+      '  else tailSwap (Nat.sub n 1) right left',
+      'partial def tailCapture (n : Nat) (value : Nat) (saved : Nat -> Nat) : Nat :=',
+      '  if Nat.beq n 0 then saved value',
+      '  else (let current : Nat -> Nat := fun (x : Nat) => Nat.add value x;',
+      '    tailCapture (Nat.sub n 1) (Nat.succ value) current)',
+      'partial def tailShadow (n : Nat) : Nat :=',
+      '  if Nat.beq n 0 then',
+      '    (let tailShadow : Nat -> Nat := fun (x : Nat) => Nat.add x 7; tailShadow 5)',
+      '  else tailShadow (Nat.sub n 1)'
+    ].join('\n') + '\n');
+    const tailSemantics = build(source(target + '-tail-semantics/Main.lean', [
+      'import Dep',
+      'def swapped (n : Nat) : Nat := tailSwap n 1 2',
+      'def captured (n : Nat) : Nat := tailCapture n 3 (fun (x : Nat) => x)',
+      'def shadowed (n : Nat) : Nat := tailShadow n'
+    ].join('\n') + '\n'), target, target + '-self-tail-value-semantics', 'ordinary');
+    const tailObserved = consumer(tailSemantics, { calls: [
+      { name: 'swapped', args: [{ nat: '1' }] },
+      { name: 'swapped', args: [{ nat: '2' }] },
+      { name: 'captured', args: [{ nat: '1' }] },
+      { name: 'captured', args: [{ nat: '2' }] },
+      { name: 'shadowed', args: [{ nat: '0' }] },
+      { name: 'shadowed', args: [{ nat: '3' }] }
+    ] }, { timeout: 10000 });
+    assert.deepEqual(tailObserved.values, ['21', '12', '7', '9', '12', '12']);
+    retain(tailSemantics, { observations: tailObserved.values,
+      parallelArgumentSnapshots: true, capturedParameterValues: true, shadowedSelfCall: true });
+
     const ordinary = build(source(target + '-ordinary.ps',
       'partial def countdown(n : Nat) : Nat := if (Nat.beq(n, 0)) { 42 } else { countdown(Nat.sub(n, 1)) }\n'),
       target, target + '-ordinary-recursion', 'ordinary');

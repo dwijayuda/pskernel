@@ -1,6 +1,85 @@
 # PSC1 backend conformance
 
-## Recorded successful implementation checkpoint
+## Immutable tuple bindings and semantic namespaces
+
+Implementation head `7e1158875cdf236a677448598bd5f677c11d4daf` passed all **34/34** steps in
+[focused Linux run 39467579973](https://github.com/dwijayuda/pskernel/actions/runs/39467579973).
+The workflow tested GitHub merge commit `45169fa903b6bd68c3d9cc46348f8c4487d382c3`
+against the preserved PR #165 base.
+
+The [immutable qualification receipt](PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json)
+records exact source/tool identities, observed checks and package hashes.
+[Retained evidence archive](https://github.com/dwijayuda/pskernel/actions/runs/39467579973/artifacts/12285373763):
+38,945,246 bytes,
+SHA-256 `86415bd383aac67e11084b580d3ce0d33834def6cf1e01681d66db5cfbcc5e58`.
+GitHub's artifact retention applies; the committed receipt does not extend it.
+
+The selected new surface includes immutable product/Unit/wildcard bindings with
+one strict RHS evaluation, semantic namespace scopes and declaration identities,
+and reference-only roots that preserve builtin notation through translation.
+Authored relative names keep namespace lookup; imports keep their original
+ownership boundary.
+
+Observed evidence includes 323 native categorical outcomes, 84 native-Lean
+oracle fields (82 results plus two identity fields), 14 regular target/source
+bundles with 18 individual predicates plus `semantic`, 14 additional pattern
+strictness deadlines and two minimum-Python repetitions. The namespace host
+groups add 12 refusals and ten prior-output preservation cases. The focused
+backend suite now has 28 groups; existing ordinary-while, scripting, architecture,
+private Rust closure and installed npm/source-library checks also passed.
+
+See [the exact selected scope](PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES.md)
+and [current status](PSC1_PRACTICAL_CORE_STATUS.json). All fourteen families remain
+incomplete. The historical checkpoint sections below retain their own scope.
+
+
+## Historical Practical Core control/data continuation
+
+Implementation head `8d6f80ea5813edd0644440971095abffd9dddacd` passed all 34 steps in
+[focused Linux run 39407097682](https://github.com/dwijayuda/pskernel/actions/runs/39407097682). The workflow tested
+GitHub merge commit `164fb133a8da410140cc3a84dcd51382c4a230a6` against preserved PR #165.
+
+The [immutable qualification receipt](PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json)
+records the exact compiler/tool identities, observed checks and package hashes.
+[Retained evidence archive](https://github.com/dwijayuda/pskernel/actions/runs/39407097682/artifacts/12257218795): 38,733,488 bytes,
+SHA-256 `2b59e2401d4d68149360e5bce8ac91a371d904bfec715141705c8c85bd6edd98`.
+This is a scoped execution checkpoint; later heads require their own successful
+focused check. All fourteen feature families remain incomplete.
+
+The continuation adds shared mutable-local, branch/return and finite-loop
+semantics; tuple/array expressions and optional lookup; and selected explicit
+ordinary Id/Except while execution. Both source grammars use the same typed
+controller. The [control/data scope document](PSC1_PRACTICAL_CORE_CONTROL_DATA.md)
+separates implemented cases, rejected shapes, native admission and execution
+evidence. The fourteen-family status remains incomplete.
+
+The current focused matrix records 14 regular target/source bundles, 14 ordinary
+finite-while bundles and 14 external-timeout divergence bundles. It additionally
+checks two private Rust higher-order closure bundles and their public-signature
+refusals. The component public interface remains Bool-only; both grammars also
+test refusal of function-valued public parameters before artifacts appear.
+
+The Python/PHP scripting suite retains 24 artifact bundles plus four boundary
+records (28 total records). The minimum Python line repeats 12 artifact bundles
+plus two boundary records (14 total), both regular source bundles, both finite
+while bundles and both divergence checks. The focused backend suite has 26
+groups. These current counts do not alter the historical checkpoint below.
+
+Direct self-tail PHP calls now reuse the current declaration frame when the
+callee is fully saturated, unshadowed and in a recognized tail position. Argument
+values are captured before simultaneous parameter updates. Focused interpreter
+checks cover swaps, closure captures and a local function shadowing the recursive
+name. Non-tail calls still retain scheduler frames; the existing 100,000-step
+non-tail case remains part of qualification.
+
+The Wasm computed-callee path derives the exact closed function type with the
+bounded strict IR checker, evaluates the callee once, and uses typed closure
+calls. Rust permits the needed private nested direct closures and preserves
+typed local lets. Public aggregate/function-storage restrictions remain explicit.
+See the new checkpoint receipt for actual runtime versions, per-target hashes,
+package sizes and the artifact, rather than reusing historical measurements.
+
+## Preserved seven-backend implementation checkpoint
 
 All seven direct targets passed the focused Linux suite at branch head
 `1f59f46bca18e5eb2d8a6bc9670e6f632202af66`, [run 39366310670](https://github.com/dwijayuda/pskernel/actions/runs/39366310670).
@@ -124,7 +203,8 @@ qualified profile. Python/PHP public compound ABIs and non-Bool component export
 are refused.
 
 Python/PHP nullary declarations are pure thunks and can repeat computation. PHP
-tail calls currently retain heap frames. Python/PHP origins are declaration-level
+tail calls retained heap frames at this historical checkpoint; the control/data
+continuation above specializes recognized direct self-tail calls. Python/PHP origins are declaration-level
 metadata, not full debugger maps. Optional library manifests/lockfiles are not
 yet included in general package-version provenance. The initial native npm package
 is Linux x64/glibc only.

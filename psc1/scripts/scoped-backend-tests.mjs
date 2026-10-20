@@ -34,6 +34,7 @@ function reject(cmd, args, options = {}) {
   const result = spawnSync(cmd, args, { env, encoding: 'utf8', timeout: 120_000,
     maxBuffer: 64 * 1024 * 1024, cwd: root, ...options });
   if (result.error) throw result.error;
+  assert.equal(result.signal, null, 'rejection must exit normally');
   assert.notEqual(result.status, 0, `unexpected success: ${cmd} ${args.join(' ')}`);
   return `${result.stdout}\n${result.stderr}`;
 }
@@ -252,6 +253,23 @@ try {
     assert.match(command('wasmtime', ['run', '--invoke', 'second(true, false)', component]), /false/);
     assert.match(command('wasmtime', ['run', '--invoke', 'second(false, true)', component]), /true/);
   });
+  for (const [syntax, body] of [
+    ['lean', 'def applybool (f : Bool -> Bool) (x : Bool) : Bool := f x\n'],
+    ['ps', 'def applybool(f : Bool -> Bool, x : Bool) : Bool := f(x)\n'],
+  ]) {
+    await test(`${syntax} component exports refuse function parameters`, () => {
+      const input = source(`function-parameter.${syntax}`, body);
+      const file = output(`function-parameter-${syntax}/module.wasm`);
+      const message = reject(native, ['build', input, '--target', 'wasm-component',
+        '--export', 'applybool', '--out', file]);
+      assert.match(message, /PSC1_COMPONENT_WIT_TYPE_UNSUPPORTED\b/);
+      for (const suffix of ['', '.bundle.json']) assert.equal(fs.existsSync(file + suffix), false);
+      for (const extension of ['.wit', '.wat', '.core.wasm', '.core.wat']) {
+        assert.equal(fs.existsSync(file.slice(0, -5) + extension), false);
+      }
+    });
+  }
+
   // The copied WIT table previously advertised ten capabilities that the active
   // IR checker explicitly excludes. Do not weaken that gate or silently expand
   // the language to make a positive identity test pass. The public WIT API now
@@ -298,6 +316,83 @@ try {
     command(native, ['build', input, '--target', 'js', '--out', file]);
     assert.equal((await load(file)).answer, false);
   });
+  for (const syntax of ['lean', 'ps']) {
+    await test(syntax + ' namespace imports and refusal publication boundaries', async () => {
+      const folder = 'namespace-' + syntax;
+      source(folder + '/Dep.' + syntax,
+        'namespace Boundary\nnamespace Nested\n' +
+        (syntax === 'lean' ? 'def hidden (flag : Bool) : Bool := flag\n'
+          : 'def hidden(flag : Bool) : Bool := flag\n') +
+        'end Nested\nend Boundary\n');
+      const entry = source(folder + '/Main.' + syntax, 'import Dep\n' +
+        (syntax === 'lean' ? 'def exposed (flag : Bool) : Bool := Boundary.Nested.hidden flag\n'
+          : 'def exposed(flag : Bool) : Bool := Boundary.Nested.hidden(flag)\n'));
+      const file = build(entry, 'js', folder + '-output/module.js');
+      const module = await load(file);
+      assert.deepEqual(Object.keys(module), ['exposed']);
+      assert.deepEqual(json(file + '.bundle.json').publicNames, ['exposed']);
+      assert.equal(module.exposed(false), false);
+      assert.equal(module.exposed(true), true);
+      const scopedEntry = source(folder + '/ScopedMain.' + syntax, 'import Dep\nnamespace EntryBoundary\n' +
+        (syntax === 'lean' ? 'def exposed (flag : Bool) : Bool := Boundary.Nested.hidden flag\n'
+          : 'def exposed(flag : Bool) : Bool := Boundary.Nested.hidden(flag)\n') +
+        'end EntryBoundary\n');
+      const scopedFile = build(scopedEntry, 'js', folder + '-scoped-output/module.js');
+      const scopedModule = await load(scopedFile);
+      const scopedNames = Object.keys(scopedModule);
+      assert.equal(scopedNames.length, 1);
+      assert.deepEqual(json(scopedFile + '.bundle.json').publicNames, scopedNames);
+      const scopedName = scopedNames[0];
+      assert.equal(typeof scopedModule[scopedName], 'function');
+      assert.equal(scopedModule[scopedName](false), false);
+      assert.equal(scopedModule[scopedName](true), true);
+      assert.equal(traceDeclaration(scopedFile, scopedName).source, 'ScopedMain.' + syntax);
+      assert.doesNotMatch(text(file.replace(/\.js$/, '.d.ts')), /hidden/);
+      const companions = [file, file + '.map', file.replace(/\.js$/, '.d.ts'), file + '.bundle.json'];
+      const beforeHashes = companions.map(hash);
+      const beforeGeneration = fs.realpathSync(file);
+      const refusals = [];
+      const invalid = [
+        ['duplicate-qualified-name',
+          'def Boundary.value : Bool := true\nnamespace Boundary\ndef value : Bool := false\nend Boundary\n',
+          /PSC1_PROJECT_ELAB_FAILED:/],
+        ['mismatched-end',
+          'namespace Boundary\ndef value : Bool := true\nend Different\n', /PSC1_PROJECT_PARSE_FAILED:/],
+        ['unterminated-namespace',
+          'namespace Boundary\ndef value : Bool := true\n', /PSC1_PROJECT_PARSE_FAILED:/],
+        ['unmatched-end',
+          'end Boundary\n', /PSC1_PROJECT_PARSE_FAILED:/],
+        ['unresolved-namespace-name',
+          'namespace Boundary\ndef value : Bool := missingName\nend Boundary\n', /PSC1_PROJECT_ELAB_FAILED:/]
+      ];
+      for (const [name, body, diagnostic] of invalid) {
+        const bad = source(folder + '/' + name + '.' + syntax, body);
+        const message = reject(native, ['build', bad, '--target', 'js', '--out', file]);
+        assert.match(message, diagnostic);
+        assert.equal(fs.realpathSync(file), beforeGeneration);
+        assert.deepEqual(companions.map(hash), beforeHashes);
+        refusals.push({ name, passed: true, previousArtifactsPreserved: true, diagnostic: message });
+      }
+      const refused = output(folder + '/private-component.wasm');
+      const message = reject(native, ['build', entry, '--target', 'wasm-component',
+        '--export', 'Boundary.Nested.hidden', '--out', refused]);
+      assert.match(message, /PSC1_COMPONENT_EXPORT_NOT_IN_ENTRY_SOURCE\b/);
+      for (const suffix of ['', '.bundle.json']) assert.equal(fs.existsSync(refused + suffix), false);
+      for (const extension of ['.wit', '.wat', '.core.wasm', '.core.wat']) {
+        assert.equal(fs.existsSync(refused.slice(0, -5) + extension), false);
+      }
+      refusals.push({ name: 'imported-helper-export', passed: true, noArtifact: true, diagnostic: message });
+      const destination = path.join(evidence, 'namespace-boundaries');
+      fs.mkdirSync(destination, { recursive: true });
+      fs.writeFileSync(path.join(destination, syntax + '.json'), JSON.stringify({
+        commit: process.env.GITHUB_SHA || null,
+        branchHeadCommit: process.env.PSC1_HEAD_SHA || null,
+        syntax, passed: true, importedHelperPrivate: true, publicNames: ['exposed'],
+        entryNamespaceExported: true, entryNamespacePublicNames: scopedNames,
+        executedChecks: [['exposed', false, true]], refusals
+      }, null, 2) + '\n');
+    });
+  }
   console.log(`PSC1_SCOPED_BACKENDS: ${records.length} passed; full self-host tests not run`);
 } finally {
   // Retain real successful examples even when a later independent regression

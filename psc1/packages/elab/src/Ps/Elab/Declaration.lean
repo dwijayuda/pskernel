@@ -1,6 +1,7 @@
 import Ps.Core.Declaration
 import Ps.Core.Equality
 import Ps.Elab.Recursion
+import Ps.Elab.DoLoopLift
 
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
@@ -79,6 +80,9 @@ def psElabOriginSource
   | PsSyntaxDeclaration.theoremDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.inductiveDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.structureDecl name _ _ span => Prod.mk name span
+  | PsSyntaxDeclaration.scopedDecl path declaration =>
+      let origin := psElabOriginSource declaration
+      Prod.mk (psSyntaxNamespaceName path (Prod.fst origin)) (Prod.snd origin)
 
 def psElabOriginErrorAt
     (sourceIndex : Nat) (source : PsSyntaxDeclaration)
@@ -113,6 +117,20 @@ def psElabStableMemberOrigins
         (PsElabMemberOrigin.mk index (psDeclarationName declaration)
           (psElabStableMemberRole declaration))
         (psElabStableMemberOrigins rest (Nat.succ index))
+
+def psElabWhileMemberOrigins
+    (owner : PsName) (declarations : List PsDeclaration)
+    (index : Nat) : List PsElabMemberOrigin :=
+  match declarations with
+  | [] => []
+  | declaration :: rest =>
+      let name := psDeclarationName declaration;
+      let role :=
+        if psElabDoLoopIsLiftedName owner name then PsElabOriginRole.normalizedWorker
+        else if psNameEq owner name then PsElabOriginRole.publicWrapper
+        else psElabStableMemberRole declaration;
+      PsElabMemberOrigin.mk index name role ::
+        psElabWhileMemberOrigins owner rest (Nat.succ index)
 
 def psElabExplicitParameterIds
     (binders : List PsElabTypedBinder) : List Nat :=
@@ -166,9 +184,10 @@ def psElabStructuralRecursionFromSource
               Option.none
           | some sourceName =>
               match
-                  psResolveName
+                  psResolveNameInNamespace
                     context.localContext
                     context.environment
+                    context.currentNamespace
                     sourceName with
               | some resolution =>
                   match resolution with
@@ -223,7 +242,7 @@ def psElabDeclarationParts
       Except.error PsElabError.emptyName
   | some name =>
       let initial : PsElabContext :=
-        psElabContextEmpty environment;
+        psElabContextForDeclaration environment name;
       match
           psElabTypedBinders
             psElabDeclarationTermCallback
@@ -353,6 +372,8 @@ def psElabContextWithEnvironment
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := context.structuralRecursion
+    whileHelper := context.whileHelper
+    currentNamespace := context.currentNamespace
   }
 
 def psElabBinderArgument
@@ -1141,7 +1162,7 @@ def psElabInductiveDeclaration
   match psSyntaxNameToName nameSyntax with
   | Option.none => Except.error PsElabError.emptyName
   | Option.some name =>
-      let initial := psElabContextEmpty environment;
+      let initial := psElabContextForDeclaration environment name;
       match psElabTypedBinders
           psElabDeclarationTermCallback
           initial
@@ -1306,7 +1327,7 @@ def psElabPartialDeclaration
   match psSyntaxNameToName nameSyntax with
   | Option.none => Except.error PsElabError.emptyName
   | Option.some name =>
-      let initial := psElabContextEmpty environment;
+      let initial := psElabContextForDeclaration environment name;
       match
           psElabTypedBinders
             psElabDeclarationTermCallback
@@ -1350,15 +1371,26 @@ def psElabPartialDeclaration
                         Except.error
                           (PsElabError.duplicateDeclaration name)
                     | Option.some withSelf =>
-                        let valueContext :=
-                          psElabContextWithEnvironment
-                            typeResult.context
-                            withSelf;
-                        match
-                            psElabTerm
-                              valueContext
-                              valueSyntax
-                              (Option.some openType) with
+                        let helperName := psElabDoLoopName name;
+                        -- Elaborator-only signature, like the source self header above.
+                        -- Batch construction specializes every marker to private partial helpers;
+                        -- ordinary expansion admits each opaque witness and exact body independently.
+                        let helperHeader :=
+                          PsDeclaration.axiomDecl helperName [] psElabDoLoopType;
+                        let valueContextResult :=
+                          match psEnvironmentAdd withSelf helperHeader with
+                          | Option.none =>
+                              Except.error (PsElabError.duplicateDeclaration helperName)
+                          | Option.some withHelper =>
+                              Except.ok (psElabContextWithWhileHelper
+                                (psElabContextWithEnvironment typeResult.context withHelper)
+                                helperName);
+                        let valueResult :=
+                          match valueContextResult with
+                          | Except.error error => Except.error error
+                          | Except.ok valueContext =>
+                              psElabTerm valueContext valueSyntax (Option.some openType);
+                        match valueResult with
                         | Except.error error => Except.error error
                         | Except.ok valueResult =>
                             let metaContext :=
@@ -1401,6 +1433,7 @@ def psElabDeclaration
     (environment : PsEnvironment)
     (source : PsSyntaxDeclaration) :
     Except PsElabError PsElabDeclarationResult :=
+  let source := psSyntaxDeclarationQualify [] source;
   match source with
   | .definition name binders type value _ =>
       psElabDeclarationParts
@@ -1428,6 +1461,8 @@ def psElabDeclaration
   | .inductiveDecl _ _ _ _ _ =>
       Except.error PsElabError.unsupportedTerm
   | .structureDecl _ _ _ _ =>
+      Except.error PsElabError.unsupportedTerm
+  | .scopedDecl _ _ =>
       Except.error PsElabError.unsupportedTerm
 
 -- Elaborate the canonical worker with the original source self name, then give
@@ -1506,6 +1541,7 @@ def psElabDeclarationBatchStable
     (environment : PsEnvironment)
     (source : PsSyntaxDeclaration) :
     Except PsElabError PsElabDeclarationBatchResult :=
+  let source := psSyntaxDeclarationQualify [] source;
   match source with
   | .inductiveDecl name params resultType constructors _ =>
       psElabInductiveDeclaration
@@ -1526,9 +1562,13 @@ def psElabDeclarationBatchStable
       match psElabDeclaration environment source with
       | Except.error error => Except.error error
       | Except.ok result =>
-          Except.ok
-            (PsElabDeclarationBatchResult.mk
-              (List.cons result.declaration List.nil))
+          match result.declaration with
+          | .partialDecl name levels type value =>
+              match psElabDoLoopLiftDeclaration environment name levels type value with
+              | Except.error error => Except.error error
+              | Except.ok declarations =>
+                  Except.ok (PsElabDeclarationBatchResult.mk declarations)
+          | _ => Except.ok (PsElabDeclarationBatchResult.mk [result.declaration])
 
 -- Historical callers can request the unchanged stable elaborator explicitly.
 -- The ordinary path keeps its one typed normalization attempt for the same
@@ -1537,10 +1577,16 @@ def psElabDeclarationBatchWithOrigins
     (environment : PsEnvironment) (sourceIndex : Nat)
     (source : PsSyntaxDeclaration) :
     Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult :=
+  let source := psSyntaxDeclarationQualify [] source;
   match psElabDeclarationBatchStable environment source with
   | Except.ok result =>
       let members : List PsElabMemberOrigin :=
-        psElabStableMemberOrigins result.declarations 0;
+        match source, result.declarations with
+        | .partialDefinition sourceName _ _ _ _, _ :: _ :: _ =>
+            match psSyntaxNameToName sourceName with
+            | some owner => psElabWhileMemberOrigins owner result.declarations 0
+            | none => psElabStableMemberOrigins result.declarations 0
+        | _, _ => psElabStableMemberOrigins result.declarations 0;
       Except.ok
         (PsElabDeclarationBatchWithOriginsResult.mk result
           (psElabBatchOriginAt sourceIndex source members Option.none))

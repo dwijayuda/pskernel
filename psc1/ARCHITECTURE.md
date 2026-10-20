@@ -64,11 +64,28 @@ The independent official Lean kernel is the direct admission provider. The owned
 PSKernel-Core is separately integrated and natively regression-tested. There is no
 automatic fallback, new axiom policy, or behavioral certificate.
 
-The executable IR is expression-oriented: typed calls, lets, lambdas, conditionals,
-records, constructors and matches. Existing do/Except/Id sequencing already lowers to
-these operations. A second procedural IR is not needed to add Python/PHP for this
-qualified subset. Mutation, loop and early-return expansion belongs to the separate
-Practical Core work and must preserve all backend semantics when added.
+The executable IR remains expression-oriented: typed calls, lets, lambdas,
+conditionals, records, constructors and matches. The control/data continuation
+uses those same operations. Lexical mutable binding identities track successive
+immutable Core values. Branch and finite-loop continuations carry the visible
+state; early return bypasses the continuation. List/Nat iteration uses two total
+checked helper definitions, and Array iteration uses the existing fold.
+
+Selected ordinary while loops first elaborate through a temporary internal marker.
+A checked Core lifting pass captures lexical values, specializes the state/step
+continuation into a private partial helper, requires fully saturated direct tail
+recurrence, and rechecks the helper and rewritten source. Every marker is removed
+before admission. Temporary self/type headers are elaborator context only; they
+are not admitted source axioms. The unchanged ordinary preparation independently
+admits each opaque witness and exact body, then rechecks immutable graph pairing.
+
+Tuples and array literals use existing datatype constructors. Optional lookup binds
+receiver/index once and scans through the checked Array fold to construct Option.
+No procedural IR, unchecked loop opcode, host mutable cell or execution fuel is added.
+
+See [control/data architecture and scope](docs/PSC1_PRACTICAL_CORE_CONTROL_DATA.md)
+for supported effects, closure restrictions, finite-loop space use, optional-lookup
+cost, native admission/execution distinctions and exact qualification.
 
 ## Runtime ownership
 

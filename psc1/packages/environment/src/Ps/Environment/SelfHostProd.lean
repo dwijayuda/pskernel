@@ -1,4 +1,5 @@
 import Ps.Environment.SelfHostPrelude
+import Ps.Environment.Control
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -23,7 +24,7 @@ def psSelfHostProdMkOf
       fst)
     snd
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+def psSelfHostProdBasePreludeEnvironment : PsEnvironment :=
   let uName := psRootName "u";
   let alphaName := psRootName "α";
   let betaName := psRootName "β";
@@ -149,7 +150,10 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
         1
         1))
 
-def psSelfHostRuntimePreludeDeclarationsWithProd :
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psControlPreludeEnvironment psSelfHostProdBasePreludeEnvironment
+
+def psSelfHostRuntimePreludeDeclarationsWithProdBase :
     List PsDeclaration :=
   match
       psEnvironmentFind
@@ -176,3 +180,6 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
                   (List.cons
                     prodRecDeclaration
                     psSelfHostRuntimePreludeDeclarations))
+
+def psSelfHostRuntimePreludeDeclarationsWithProd : List PsDeclaration :=
+  psControlLoopDeclarations ++ psSelfHostRuntimePreludeDeclarationsWithProdBase

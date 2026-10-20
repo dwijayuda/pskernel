@@ -285,8 +285,12 @@ def psPrintLeanTermWithFuel
           psPrintUnaryOperator smaller operator operand
       | .binary operator left right _ =>
           psPrintBinaryOperator smaller operator left right
+      | .arrayGetOptionE array index _ => do
+          let printedArray <- smaller array
+          let printedIndex <- smaller index
+          pure ("(" ++ printedArray ++ ")[" ++ printedIndex ++ "]?")
       | .doE body _ =>
-          match psPrintDoBody smaller "; " remaining body with
+          match psPrintDoBody smaller true "; " remaining body with
           | Except.error error => Except.error error
           | Except.ok printed =>
               Except.ok (psPrintCommonConcat3 "do { " printed " }")
@@ -294,6 +298,20 @@ def psPrintLeanTermWithFuel
           Except.error (PsSourcePrintError.unsupportedSourceForm "do bind outside do block")
       | .doThenE _ _ _ =>
           Except.error (PsSourcePrintError.unsupportedSourceForm "do action outside do block")
+      | .doLetMutE _ _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "mutable binding outside do block")
+      | .doAssignE _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "assignment outside do block")
+      | .doIfE _ _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "procedural conditional outside do block")
+      | .doEndE _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "procedural continuation outside do block")
+      | .doForE _ _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "for statement outside do block")
+      | .doForRangeE _ _ _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "range iteration outside do block")
+      | .doWhileE _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "while statement outside do block")
       | .doReturnE _ _ =>
           Except.error (PsSourcePrintError.unsupportedSourceForm "return outside do block")
       | .lambda binders body _ =>
@@ -366,6 +384,10 @@ def psPrintLeanTermWithFuel
               | Except.ok printedBody =>
                   Except.ok
                     (psPrintArrowChain printedBinders printedBody)
+      | .letPatternE pattern type value body _ => do
+          let head ← psPrintBindingPatternHead smaller pattern type value
+          let tail ← smaller body
+          pure (psPrintLeanConcat3 head "; " tail)
       | .letE name type value body _ =>
           match psPrintSyntaxName name with
           | Except.error error => Except.error error
@@ -527,6 +549,16 @@ def psPrintLeanDeclaration
     (declaration : PsSyntaxDeclaration) :
     Except PsSourcePrintError String :=
   match declaration with
+  | .scopedDecl path inner =>
+      match path with
+      | [] => psPrintLeanDeclaration inner
+      | _ :: _ =>
+          match psPrintLeanDeclaration inner with
+          | .error error => .error error
+          | .ok body =>
+              let name := psPrintJoin "." path;
+              Except.ok (psPrintLeanConcat6
+                "namespace " name "\n" body "\nend " name)
   | .definition name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error

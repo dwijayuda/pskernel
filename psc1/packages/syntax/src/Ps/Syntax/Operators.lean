@@ -16,7 +16,7 @@ def psOperatorNode
     PsSyntaxTerm :=
   let span := psSyntaxSpanJoin (psSyntaxTermSpan left) (psSyntaxTermSpan right)
   if operator == "×" then
-    .app (.reference { segments := ["Prod"], span := tokenSpan }) [left, right] span
+    .app (psSyntaxRootReference ["Prod"] tokenSpan) [left, right] span
   else
     .binary operator left right span
 

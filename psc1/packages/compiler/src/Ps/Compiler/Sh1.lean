@@ -202,12 +202,15 @@ def psSh1FindOrigin (origins : List PsSourceSpan) (offset : Nat) : Option PsSour
 
 def psSh1IsCompilerDoName (segments : List String) : Bool :=
   match segments with
-  | List.nil => false
-  | List.cons first rest =>
-      if psListIsEmpty rest then
-        if psStringEq first "compilerPure" then true
-        else psStringEq first "compilerBind"
+  | [name] =>
+      if psStringEq name "compilerPure" then true
+      else psStringEq name "compilerBind"
+  | [rootName, name] =>
+      if psStringEq rootName "_root_" then
+        if psStringEq name "compilerPure" then true
+        else psStringEq name "compilerBind"
       else false
+  | _ => false
 
 -- The owned Lean parser gives a lowered do reference its originating do span.
 -- Match that provenance, not arbitrary occurrences of the word or helper name.
@@ -373,10 +376,27 @@ def psSh1SyntaxTermStep
   | PsSyntaxTerm.doE _ span
   | PsSyntaxTerm.doBindE _ _ _ _ span
   | PsSyntaxTerm.doThenE _ _ span
-  | PsSyntaxTerm.doReturnE _ span =>
+  | PsSyntaxTerm.doReturnE _ span
+  | PsSyntaxTerm.doLetMutE _ _ _ _ span
+  | PsSyntaxTerm.doAssignE _ _ _ span
+  | PsSyntaxTerm.doIfE _ _ _ _ span
+  | PsSyntaxTerm.doEndE span
+  | PsSyntaxTerm.doForE _ _ _ _ span
+  | PsSyntaxTerm.doForRangeE _ _ _ _ _ span
+  | PsSyntaxTerm.doWhileE _ _ _ span =>
       Except.error
         (psSh1SourceFailure "source-do-unsupported"
           "do semantics are outside the historical SH1 source profile"
+          moduleName owner (Option.some span))
+  | PsSyntaxTerm.arrayGetOptionE _ _ span =>
+      Except.error
+        (psSh1SourceFailure "source-optional-index-unsupported"
+          "optional array indexing is outside the historical SH1 source profile"
+          moduleName owner (Option.some span))
+  | PsSyntaxTerm.letPatternE _ _ _ _ span =>
+      Except.error
+        (psSh1SourceFailure "source-binding-pattern-unsupported"
+          "binding patterns are outside the historical SH1 source profile"
           moduleName owner (Option.some span))
   | PsSyntaxTerm.lambda binders body _ =>
       Except.ok (psSh1SyntaxSchedule state
@@ -471,6 +491,8 @@ def psSh1PrimitiveDeclarationNameReserved (text : String) : Bool :=
 
 def psSh1SourceDeclarationName (source : PsSyntaxDeclaration) : PsSyntaxName :=
   match source with
+  | PsSyntaxDeclaration.scopedDecl path inner =>
+      psSyntaxNamespaceName path (psSh1SourceDeclarationName inner)
   | PsSyntaxDeclaration.definition name _ _ _ _ => name
   | PsSyntaxDeclaration.partialDefinition name _ _ _ _ => name
   | PsSyntaxDeclaration.theoremDecl name _ _ _ _ => name
@@ -487,6 +509,12 @@ def psSh1SyntaxDeclarationBodyStep
     (moduleName : String) (source : PsSyntaxDeclaration) (state : PsSh1SyntaxState) :
     Except PsSh1SourceError PsSh1SyntaxState :=
   match source with
+  | PsSyntaxDeclaration.scopedDecl _ _ =>
+      Except.error
+        (psSh1SourceFailure "source-namespace-unsupported"
+          "namespace commands are outside the historical SH1 source profile"
+          moduleName (psSh1NameText (psSh1SourceDeclarationName source).segments)
+          (Option.some (psSyntaxDeclarationSpan source)))
   | PsSyntaxDeclaration.definition name binders type value _ =>
       Except.ok (psSh1SyntaxSchedule (psSh1CountDeclaration state false)
         (psSh1DeclarationTasks name binders type value))

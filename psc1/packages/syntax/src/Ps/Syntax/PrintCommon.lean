@@ -57,6 +57,15 @@ def psPrintSyntaxNames
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
+def psPrintBindingPattern : PsSyntaxBindingPattern -> Except PsSourcePrintError String
+  | .name name => psPrintSyntaxName name
+  | .wildcard _ => .ok "_"
+  | .unit _ => .ok "()"
+  | .pair first second _ => do
+      let left ← psPrintBindingPattern first
+      let right ← psPrintBindingPattern second
+      pure (psPrintJoin "" ["(", left, ", ", right, ")"])
+
 def psPrintBinderDelimiters
     (kind : PsSyntaxBinderKind) : Prod String String :=
   match kind with
@@ -122,7 +131,7 @@ def psPrintArrowChain
 def psPrintDoBinding
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
     (name : PsSyntaxName) (annotation : Option PsSyntaxTerm)
-    (separator : String) (value : PsSyntaxTerm) :
+    (bindingPrefix separator : String) (value : PsSyntaxTerm) :
     Except PsSourcePrintError String :=
   match psPrintSyntaxName name with
   | Except.error error => Except.error error
@@ -144,11 +153,42 @@ def psPrintDoBinding
                 if psSyntaxTermSimpleForApplication value then printedValue
                 else psPrintCommonConcat3 "(" printedValue ")";
               Except.ok (psPrintJoin ""
-                ["let ", printedName, printedType, separator, groupedValue])
+                [bindingPrefix, printedName, printedType, separator, groupedValue])
+
+def psPrintBindingPatternHead
+    (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
+    (pattern : PsSyntaxBindingPattern) (annotation : Option PsSyntaxTerm)
+    (value : PsSyntaxTerm) : Except PsSourcePrintError String := do
+  let printedPattern ← psPrintBindingPattern pattern
+  let printedPattern := match pattern with
+    | .name _ => psPrintCommonConcat3 "(" printedPattern ")"
+    | .wildcard _ => psPrintCommonConcat3 "(" printedPattern ")"
+    | _ => printedPattern
+  let printedType ← match annotation with
+    | none => pure ""
+    | some type => do
+        let printed ← printTerm type
+        pure (psPrintCommonConcat2 " : " printed)
+  let printedValue ← printTerm value
+  let groupedValue := if psSyntaxTermSimpleForApplication value then printedValue
+    else psPrintCommonConcat3 "(" printedValue ")"
+  pure (psPrintJoin "" ["let ", printedPattern, printedType, " := ", groupedValue])
+
+def psPrintDoLoopHead
+    (printBody : PsSyntaxTerm -> Except PsSourcePrintError String)
+    (native : Bool) (header : String) (body : PsSyntaxTerm) :
+    Except PsSourcePrintError String :=
+  match printBody body with
+  | Except.error error => Except.error error
+  | Except.ok printedBody =>
+      if native then
+        Except.ok (psPrintJoin "" [header, " do { ", printedBody, " }"])
+      else
+        Except.ok (psPrintJoin "" [header, " {\n  ", printedBody, "\n}"])
 
 def psPrintDoBody
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
-    (separator : String) (fuel : Nat) :
+    (native : Bool) (separator : String) (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
   match fuel with
   | Nat.zero =>
@@ -156,7 +196,7 @@ def psPrintDoBody
   | Nat.succ remaining =>
       fun (body : PsSyntaxTerm) =>
         let smaller : PsSyntaxTerm -> Except PsSourcePrintError String :=
-          psPrintDoBody printTerm separator remaining;
+          psPrintDoBody printTerm native separator remaining;
         let withTail :
             Except PsSourcePrintError String -> PsSyntaxTerm ->
             Except PsSourcePrintError String :=
@@ -167,12 +207,84 @@ def psPrintDoBody
                 match smaller tail with
                 | Except.error error => Except.error error
                 | Except.ok printedTail =>
-                    Except.ok (psPrintCommonConcat3 printedHead separator printedTail);
+                    if String.isEmpty printedTail then Except.ok printedHead
+                    else Except.ok (psPrintCommonConcat3 printedHead separator printedTail);
         match body with
+        | PsSyntaxTerm.letPatternE pattern annotation value tail _ =>
+            withTail (psPrintBindingPatternHead printTerm pattern annotation value) tail
         | PsSyntaxTerm.letE name annotation value tail _ =>
-            withTail (psPrintDoBinding printTerm name annotation " := " value) tail
+            withTail (psPrintDoBinding printTerm name annotation "let " " := " value) tail
+        | PsSyntaxTerm.doEndE _ => Except.ok ""
+        | PsSyntaxTerm.doLetMutE name annotation value tail _ =>
+            withTail (psPrintDoBinding printTerm name annotation "let mut " " := " value) tail
+        | PsSyntaxTerm.doAssignE name value tail _ =>
+            let printedHead :=
+              match psPrintSyntaxName name with
+              | Except.error error => Except.error error
+              | Except.ok printedName =>
+                  match printTerm value with
+                  | Except.error error => Except.error error
+                  | Except.ok printedValue =>
+                      Except.ok (psPrintJoin "" [printedName, " := (", printedValue, ")"]);
+            withTail printedHead tail
+        | PsSyntaxTerm.doIfE condition thenBody elseBody tail _ =>
+            let printedHead :=
+              match printTerm condition with
+              | Except.error error => Except.error error
+              | Except.ok printedCondition =>
+                  match smaller thenBody with
+                  | Except.error error => Except.error error
+                  | Except.ok printedThen =>
+                      match smaller elseBody with
+                      | Except.error error => Except.error error
+                      | Except.ok printedElse =>
+                          let head :=
+                            if native then
+                              psPrintJoin "" ["if ", printedCondition, " then { ", printedThen, " }"]
+                            else
+                              psPrintJoin "" ["if (", printedCondition, ") {\n  ", printedThen, "\n}"];
+                          if String.isEmpty printedElse then Except.ok head
+                          else if native then
+                            Except.ok (psPrintJoin "" [head, " else { ", printedElse, " }"])
+                          else
+                            Except.ok (psPrintJoin "" [head, " else {\n  ", printedElse, "\n}"]);
+            withTail printedHead tail
+        | PsSyntaxTerm.doForE name collection loopBody tail _ =>
+            let printedHead :=
+              match psPrintSyntaxName name with
+              | Except.error error => Except.error error
+              | Except.ok printedName =>
+                  match printTerm collection with
+                  | Except.error error => Except.error error
+                  | Except.ok printedCollection =>
+                      psPrintDoLoopHead smaller native
+                        (psPrintJoin "" ["for ", printedName, " in ", printedCollection]) loopBody;
+            withTail printedHead tail
+        | PsSyntaxTerm.doForRangeE name lower upper loopBody tail _ =>
+            let printedHead :=
+              match psPrintSyntaxName name with
+              | Except.error error => Except.error error
+              | Except.ok printedName =>
+                  match printTerm lower with
+                  | Except.error error => Except.error error
+                  | Except.ok printedLower =>
+                      match printTerm upper with
+                      | Except.error error => Except.error error
+                      | Except.ok printedUpper =>
+                          psPrintDoLoopHead smaller native
+                            (psPrintJoin "" ["for ", printedName, " in [",
+                              printedLower, ":", printedUpper, "]"]) loopBody;
+            withTail printedHead tail
+        | PsSyntaxTerm.doWhileE condition loopBody tail _ =>
+            let printedHead :=
+              match printTerm condition with
+              | Except.error error => Except.error error
+              | Except.ok printedCondition =>
+                  psPrintDoLoopHead smaller native
+                    (psPrintJoin "" ["while (", printedCondition, ")"]) loopBody;
+            withTail printedHead tail
         | PsSyntaxTerm.doBindE name annotation value tail _ =>
-            withTail (psPrintDoBinding printTerm name annotation " <- " value) tail
+            withTail (psPrintDoBinding printTerm name annotation "let " " <- " value) tail
         | PsSyntaxTerm.doThenE action tail _ =>
             let printedAction :=
               match printTerm action with
@@ -191,13 +303,23 @@ def psPrintDoBody
                 Except.ok (psPrintCommonConcat2 "return " groupedValue)
         | _ => printTerm body
 
+-- Operators consume primary/application operands. Preserve low-precedence
+-- source forms as grouped terms in both surface printers.
+def psPrintOperatorOperand (term : PsSyntaxTerm) (printed : String) : String :=
+  match term with
+  | .ifE _ _ _ _ | .letE _ _ _ _ _ | .letPatternE _ _ _ _ _ | .matchE _ _ _
+    | .lambda _ _ _ | .forallE _ _ _ | .doE _ _ =>
+      psPrintCommonConcat3 "(" printed ")"
+  | _ => printed
+
 def psPrintUnaryOperator
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
     (operator : String) (operand : PsSyntaxTerm) :
     Except PsSourcePrintError String :=
   match printTerm operand with
   | Except.error error => Except.error error
-  | Except.ok printed => Except.ok (psPrintJoin "" ["(", operator, printed, ")"])
+  | Except.ok printed =>
+      Except.ok (psPrintJoin "" ["(", operator, psPrintOperatorOperand operand printed, ")"])
 
 def psPrintBinaryOperator
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
@@ -209,4 +331,5 @@ def psPrintBinaryOperator
       match printTerm right with
       | Except.error error => Except.error error
       | Except.ok printedRight =>
-          Except.ok (psPrintJoin "" ["(", printedLeft, " ", operator, " ", printedRight, ")"])
+          Except.ok (psPrintJoin "" ["(", psPrintOperatorOperand left printedLeft,
+            " ", operator, " ", psPrintOperatorOperand right printedRight, ")"])

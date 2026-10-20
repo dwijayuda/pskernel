@@ -407,6 +407,64 @@ def psRustEmitFunctionResultExpr
     4096
     expr
 
+-- Internal continuation helpers use recursively typed Rc closure values. Public
+-- declaration signatures keep the existing, narrower ABI checks above.
+def psRustEmitPrivateDeclarationParameter
+    (parameter : PsVerifiedIrParameter) : Except PsRustEmitError String := do
+  if !psRustDirectClosureTypeSupported parameter.type then
+    throw (PsRustEmitError.nestedFunctionParameterUnsupported parameter.name)
+  let printed <- psRustEmitHigherOrderParameterType parameter.type
+  pure (psRustConcat3 (psRustIdentifier parameter.name) ": " printed)
+
+def psRustEmitPrivateDeclarationParameterList
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsRustEmitError (List String) :=
+  match parameters with
+  | [] => .ok []
+  | parameter :: rest => do
+      let printed <- psRustEmitPrivateDeclarationParameter parameter
+      let others <- psRustEmitPrivateDeclarationParameterList rest
+      pure (printed :: others)
+
+-- The ordinary emitter has typed closure lets and return blocks for these
+-- forms. Direct extraction of a stored function remains outside this path.
+def psRustPrivateFunctionResultExprSupportedWithFuel
+    (fuel : Nat) : PsVerifiedIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero => fun _ => false
+  | Nat.succ remaining =>
+      let smaller := psRustPrivateFunctionResultExprSupportedWithFuel remaining
+      fun expr =>
+        match expr with
+        | .lambda _ result body =>
+            if psRustTypeContainsFunction result then
+              psRustDirectClosureTypeSupported result && smaller body
+            else true
+        | .var _ => true
+        | .call _ _ _ => true
+        | .intrinsic operation _ _ =>
+            match operation with
+            | .arrayFoldl => true
+            | _ => false
+        | .letE _ type value body =>
+            if psRustTypeContainsFunction type then
+              psRustDirectClosureTypeSupported type && smaller value && smaller body
+            else smaller body
+        | .ifE _ yes no => smaller yes && smaller no
+        | .matchE _ _ _ alternatives =>
+            !psListAny (fun alternative => !smaller (Prod.snd (Prod.snd alternative))) alternatives
+        | _ => false
+
+def psRustEmitPrivateDeclarationResultType
+    (declaration : PsVerifiedIrDeclaration) : Except PsRustEmitError String :=
+  match declaration.resultType with
+  | .function _ _ =>
+      if psRustDirectClosureTypeSupported declaration.resultType &&
+          psRustPrivateFunctionResultExprSupportedWithFuel 4096 declaration.body then
+        psRustEmitClosureValueType declaration.resultType
+      else .error (PsRustEmitError.functionResultUnsupported declaration.name)
+  | _ => psRustEmitType declaration.resultType
+
 def psRustEmitDeclarationWithVisibility (isPublic : Bool)
     (allDeclarations : List PsVerifiedIrDeclaration)
     (valueNames : List String)
@@ -416,11 +474,13 @@ def psRustEmitDeclarationWithVisibility (isPublic : Bool)
     Except.error
       (PsRustEmitError.genericValueUnsupported declaration.name)
   else
-    match psRustEmitDeclarationParameterList declaration.parameters with
+    match (if isPublic then psRustEmitDeclarationParameterList declaration.parameters
+      else psRustEmitPrivateDeclarationParameterList declaration.parameters) with
     | Except.error error =>
         Except.error error
     | Except.ok printedParameters =>
-        match psRustEmitDeclarationResultType declaration with
+        match (if isPublic then psRustEmitDeclarationResultType declaration
+          else psRustEmitPrivateDeclarationResultType declaration) with
         | Except.error error =>
             Except.error error
         | Except.ok printedResult =>
@@ -1281,6 +1341,28 @@ def psRustEmitValidatedModule
 
 /-- Public ownership is selected before printing, including derived aggregate
 type visibility. No text rewriting decides which declarations are exported. -/
+def psRustEmitFailureReason : PsRustEmitError -> String
+  | .fuelExhausted => "fuel-exhausted"
+  | .intrinsicArity => "intrinsic-arity"
+  | .externalImportUnsupported => "external-import"
+  | .genericValueUnsupported name => "generic-value:" ++ name
+  | .functionResultUnsupported name => "function-result:" ++ name
+  | .functionStorageUnsupported name => "function-storage:" ++ name
+  | .nestedFunctionParameterUnsupported name => "nested-function-parameter:" ++ name
+  | .lambdaFunctionParameterUnsupported name => "lambda-function-parameter:" ++ name
+  | .lambdaFunctionResultUnsupported => "lambda-function-result"
+  | .unknownStructure name => "unknown-structure:" ++ name
+  | .unknownInductive name => "unknown-inductive:" ++ name
+  | .namedTypeArity name => "named-type-arity:" ++ name
+  | .unknownRuntimeType => "unknown-runtime-type"
+
+def psRustWithFailureLocation {α : Type} (location : String)
+    (result : Except PsRustEmitError α) : Except String α :=
+  match result with
+  | .ok value => .ok value
+  | .error error => .error ("PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering location=" ++
+      location ++ " reason=" ++ psRustEmitFailureReason error)
+
 def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
     (publicValues publicTypes : List String) : Except String String := do
   let module ← match psStrictValidateModule source.raw with
@@ -1288,17 +1370,18 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
     | .error _ => throw "PSC1_RUST_INPUT_IR_INVALID"
   if psRustModuleHasImports module.imports then throw "PSC1_RUST_EXTERNAL_IMPORT_UNSUPPORTED"
   let valueNames := psRustValueDeclarationNames module.declarations
-  let printed : Except PsRustEmitError String := do
-    let _ ← psRustValidateModuleNames module
-    let _ ← psRustValidateModuleFunctionStorage module
-    let structures ← module.structures.mapM fun value =>
-      psRustEmitStructureWithVisibility (publicTypes.contains value.name) value
-    let inductives ← module.inductives.mapM fun value =>
-      psRustEmitInductiveWithVisibility (publicTypes.contains value.name) value
-    let declarations ← module.declarations.mapM fun value =>
-      psRustEmitDeclarationWithVisibility (publicValues.contains value.name) module.declarations valueNames value
-    let runtime := psRustPlanRuntime module
-    return String.intercalate "\n" (["#![forbid(unsafe_code)]", runtime.source] ++ structures ++ inductives ++ declarations) ++ "\n"
-  match printed with
-  | .ok value => return value
-  | .error _ => throw "PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering"
+  let _ ← psRustWithFailureLocation "names" (psRustValidateModuleNames module)
+  let _ ← psRustWithFailureLocation "function-storage" (psRustValidateModuleFunctionStorage module)
+  let structures ← module.structures.mapM fun value =>
+    psRustWithFailureLocation ("structure:" ++ value.name)
+      (psRustEmitStructureWithVisibility (publicTypes.contains value.name) value)
+  let inductives ← module.inductives.mapM fun value =>
+    psRustWithFailureLocation ("inductive:" ++ value.name)
+      (psRustEmitInductiveWithVisibility (publicTypes.contains value.name) value)
+  let declarations ← module.declarations.mapM fun value =>
+    psRustWithFailureLocation ("declaration:" ++ value.name)
+      (psRustEmitDeclarationWithVisibility (publicValues.contains value.name)
+        module.declarations valueNames value)
+  let runtime := psRustPlanRuntime module
+  return String.intercalate "\n"
+    (["#![forbid(unsafe_code)]", runtime.source] ++ structures ++ inductives ++ declarations) ++ "\n"

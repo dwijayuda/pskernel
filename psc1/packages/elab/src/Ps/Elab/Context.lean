@@ -30,6 +30,8 @@ structure PsElabContext where
   instances : PsInstanceIndex
   metaContext : PsMetaContext
   structuralRecursion : Option PsElabStructuralRecursion
+  whileHelper : Option PsName := Option.none
+  currentNamespace : PsName := PsName.anonymous
 
 def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
   {
@@ -38,6 +40,7 @@ def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
     instances := psInstanceIndexEmpty
     metaContext := psMetaEmpty
     structuralRecursion := Option.none
+    whileHelper := Option.none
   }
 
 def psElabContextWithLocal
@@ -49,6 +52,8 @@ def psElabContextWithLocal
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := context.structuralRecursion
+    whileHelper := context.whileHelper
+    currentNamespace := context.currentNamespace
   }
 
 def psElabContextWithMeta
@@ -60,6 +65,8 @@ def psElabContextWithMeta
     instances := context.instances
     metaContext := metaContext
     structuralRecursion := context.structuralRecursion
+    whileHelper := context.whileHelper
+    currentNamespace := context.currentNamespace
   }
 
 def psElabContextWithStructuralRecursion
@@ -72,6 +79,8 @@ def psElabContextWithStructuralRecursion
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := structuralRecursion
+    whileHelper := context.whileHelper
+    currentNamespace := context.currentNamespace
   }
 
 -- Root fields keep their established call map in every nested body. Only the
@@ -84,3 +93,16 @@ def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext
         (Option.some (PsElabStructuralRecursion.mk
           recursion.functionName recursion.parameterIds recursion.explicitParameterIds
           recursion.recursiveParameterIndex recursion.calls recursion.resultType false))
+
+-- Only an explicitly partial source declaration supplies this capability.
+def psElabContextWithWhileHelper
+    (context : PsElabContext) (helper : PsName) : PsElabContext :=
+  { context with whileHelper := Option.some helper }
+
+def psElabContextForDeclaration
+    (environment : PsEnvironment) (name : PsName) : PsElabContext :=
+  let currentNamespace := match name with
+    | .anonymous => PsName.anonymous
+    | .str parent _ => parent
+    | .num parent _ => parent
+  { psElabContextEmpty environment with currentNamespace := currentNamespace }

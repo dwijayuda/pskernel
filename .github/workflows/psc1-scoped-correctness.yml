@@ -103,12 +103,13 @@ jobs:
         working-directory: psc1
         run: node scripts/npm-library-resolution-tests.mjs
       - name: Compile native compiler and focused regressions
+        id: native_build
         working-directory: psc1
         run: |
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests
+          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
@@ -143,6 +144,7 @@ jobs:
           export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
           node scripts/scoped-backend-tests.mjs
       - name: Execute small generic, symbol-identity and recursion source regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -150,27 +152,37 @@ jobs:
           export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
           node scripts/scoped-source-edge-tests.mjs
       - name: Execute shared target planning, independent TS JS and publication regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: node scripts/backend-architecture-tests.mjs
       - name: Execute Practical Core admission, IR and real target regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
           result=0
-          for test in contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests; do
-            if ! ".lake/build/bin/$test"; then result=1; fi
+          mkdir -p dist/scoped-correctness/practical-core
+          for test in contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests; do
+            if ! ".lake/build/bin/$test" 2>&1 | tee "dist/scoped-correctness/practical-core/$test.log"; then result=1; fi
           done
           for script in practical-forms-backend-tests.mjs practical-ordinary-tests.mjs; do
             if ! node "scripts/$script"; then result=1; fi
           done
           exit "$result"
       - name: Execute runtime contract against pinned Lean reference results
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: node scripts/runtime-conformance-tests.mjs
+      - name: Execute ordinary while against pinned Lean and external divergence deadlines
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: node scripts/ordinary-while-conformance-tests.mjs
       - name: Execute Python and PHP ABI, recursion and failure boundaries
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: node scripts/script-backend-tests.mjs
       - name: Execute full scripting and runtime corpus on minimum Python
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -179,9 +191,12 @@ jobs:
           export PSC1_SCRIPT_EVIDENCE=script-backends-python314
           export PSC1_CONFORMANCE_TARGETS=python
           export PSC1_RUNTIME_EVIDENCE=runtime-conformance-python314
+          export PSC1_WHILE_EVIDENCE=ordinary-while-conformance-python314
           node scripts/runtime-conformance-tests.mjs
+          node scripts/ordinary-while-conformance-tests.mjs
           node scripts/script-backend-tests.mjs
       - name: Pack and qualify installed native npm toolchain and real source libraries
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: node scripts/npm-native-distribution.mjs
       - name: Consolidate exact-commit seven-target and package qualification

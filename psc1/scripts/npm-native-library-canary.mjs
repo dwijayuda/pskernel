@@ -59,7 +59,15 @@ write(path.join(library, 'package.json'), json({
 }));
 write(path.join(library, 'src/Demo/Private.ps'), 'def privateOffset : Nat := 2\n');
 write(path.join(library, 'src/Demo/Math.ps'),
-  'import Seed.Value\nimport Demo.Private\n\ndef demoAnswer : Nat := seedValue + privateOffset\n');
+  'import Seed.Value\nimport Demo.Private\n\n' +
+  'def demoAnswer : Nat := Id.run(do {\n' +
+  '  let mut value : Nat := seedValue\n' +
+  '  value := value + privateOffset\n' +
+  '  if (Nat.beq(value, 42)) {\n' +
+  '    return value\n' +
+  '  }\n' +
+  '  return 0\n' +
+  '})\n');
 const libraryTarball = pack(library);
 const project = path.join(root, 'consumer');
 write(path.join(project, 'package.json'), json({
@@ -115,7 +123,8 @@ const receipt = { schemaVersion: 1, sourceCommit: process.env.GITHUB_SHA || null
   compilerIdentity: pin, installedPackages: ['@psc1-demo/seed@0.0.1', '@psc1-demo/naturals@0.0.1'],
   target: 'js', result: '42', capturedSources: captured.sources.length,
   independentlyAdmitted: true, sourceOnly: true, publicExports: Object.keys(mod),
-  transitivePackageDependency: true, privateModuleRefused: true, incompatibleProfileRefused: true,
+  checkedControlFlow: ['Id', 'let-mut', 'assignment', 'conditional', 'early-return'],
+    transitivePackageDependency: true, privateModuleRefused: true, incompatibleProfileRefused: true,
   illTypedDependencyRefused: true, failedBuildPreservedPrevious: true,
   sourceClosureSha256: manifest.sourceClosureSha256, outputSha256: previous,
   libraryTarballs: [seedTarball, libraryTarball].map(file => ({ file: path.basename(file), sha256: sha(file) })),

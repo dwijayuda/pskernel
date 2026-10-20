@@ -28,7 +28,7 @@ const read = file => fs.readFileSync(file, 'utf8');
 try {
   fs.writeFileSync(path.join(work, 'package.json'), '{"type":"module"}\n');
   const input = path.join(work, 'main.lean');
-  const source = 'def negate (value : Bool) : Bool := Bool.not value\n';
+  const source = 'def negate (value : Bool) : Bool := if value then false else true\n';
   fs.writeFileSync(input, source);
   const out = path.join(work, 'out');
   const args = ['build', input, '--targets', 'ts,js', '--out-dir', out];

@@ -474,7 +474,7 @@ def psParseDoConditional
           match psParseDoBranch parseBody native condition.cursor with
           | Except.error error => Except.error error
           | Except.ok thenBody =>
-              let hasElse :=
+              let hasElse : Bool :=
                 if psTokenCursorAtText thenBody.cursor "else" then
                   if native then
                     match psTokenCursorPeek thenBody.cursor with
@@ -749,7 +749,7 @@ def psParseDoBody
                 match next with
                 | Except.error error => Except.error error
                 | Except.ok next =>
-                    let hasNext :=
+                    let hasNext : Bool :=
                       if psTokenCursorDone next.snd then false
                       else if psTokenCursorAtText next.snd "}" then false
                       else if psTokenCursorAtText next.snd "catch" then false
@@ -790,7 +790,7 @@ def psParseDo
   if if requireBraces then if braced then false else true else false then
     Except.error (psParseDoExpected "{" cursor)
   else
-    let bodyCursor :=
+    let bodyCursor : PsTokenCursor :=
       if braced then
         match psTokenCursorAdvance cursor with
         | Option.none => cursor

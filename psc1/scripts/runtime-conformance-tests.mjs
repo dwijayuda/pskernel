@@ -16,7 +16,9 @@ const env = { ...process.env, PSC1_HOST_TOOLS: path.join(root, 'host-tools/artif
 const records = [];
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 function run(command, args, options = {}) {
-  const result = spawnSync(command, args, { env, encoding: 'utf8', timeout: 180000, ...options });
+  const deadline = options.timeout ?? 180000;
+  const result = spawnSync('timeout', ['--kill-after=5s', Math.ceil(deadline / 1000) + 's', command, ...args],
+    { env, encoding: 'utf8', ...options, timeout: deadline + 10000 });
   assert.equal(result.error, undefined, result.error?.message);
   assert.equal(result.status, 0, command + ' ' + args.join(' ') + '\n' + result.stdout + result.stderr);
   return result.stdout;

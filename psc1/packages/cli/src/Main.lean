@@ -1,4 +1,5 @@
 import Ps.Host.WasmComponent
+import Ps.Host.ScriptBackend
 
 -- Native and npm launchers use this one command model. There is no implicit
 -- fallback to the archived generated PSC0 compiler or its stale kernel artifact.
@@ -8,7 +9,7 @@ def psCliUsage : String :=
   "  Add --assurance ordinary for checked partial execution; --assurance verified is unavailable and rejects.\n" ++
   "  psc1 check <input.lean|input.ps>\n" ++
   "  psc1 build <input.lean|input.ps> --out <output.js|output.ts>\n" ++
-  "  psc1 build <input.lean|input.ps> --target <js|ts|rust|wasm-core> --out <output>\n" ++
+  "  psc1 build <input.lean|input.ps> --target <js|ts|rust|wasm-core|python|php> --out <output>\n" ++
   "  psc1 build <input.lean|input.ps> --targets ts,js --out-dir <directory>\n" ++
   "  psc1 build <input.lean|input.ps> --target wasm-component --export <name> --out <component.wasm>\n" ++
   "  psc1 translate <input.lean|input.ps> --to <lean|ps> [--out <output>]\n" ++
@@ -17,7 +18,7 @@ def psCliUsage : String :=
   "  psc1 admissions <input.lean|input.ps>\n" ++
   "  psc1 typescript <input.lean|input.ps>\n" ++
   "  psc1 wat <input.wasm> --out <output.wat>\n" ++
-  "Direct builds require installed PSC1 host-tools; Rust also requires cargo/rustfmt, Wasm requires wasm-tools."
+  "Direct builds require installed PSC1 host-tools; Rust also requires cargo/rustfmt, Wasm requires wasm-tools, Python requires Python >=3.14, PHP requires PHP >=8.5 with ext-gmp only for exact integers."
 
 private def buildDefault (inputPath outputPath : String) : IO Unit := do
   if outputPath.endsWith ".js" then psHostDirectJavaScript inputPath outputPath
@@ -42,12 +43,19 @@ private def psCliAssuranceArgs :
 
 private def buildFor
     (inputPath outputPath target : String) (assurance : PsHostAssurance) : IO Unit := do
+  let some kind := psBackendTargetFromName target
+    | throw (IO.userError ("PSC1_TARGET_UNKNOWN: " ++ target))
+  if kind == .wasmComponent then
+    throw (IO.userError "PSC1_COMPONENT_EXPORT_REQUIRED: add --export <name>")
   let session ← psHostDirectPrepareFor inputPath assurance
-  if target == "js" then psHostDirectEmitJavaScript session outputPath
-  else if target == "ts" then psHostDirectEmitTypeScript session outputPath
-  else if target == "rust" then psHostDirectEmitRust session outputPath
-  else if target == "wasm-core" then psHostDirectEmitWasmCore session outputPath
-  else throw (IO.userError ("PSC1_TARGET_UNKNOWN: " ++ target))
+  match kind with
+  | .js => psHostDirectEmitJavaScript session outputPath
+  | .ts => psHostDirectEmitTypeScript session outputPath
+  | .rust => psHostDirectEmitRust session outputPath
+  | .wasmCore => psHostDirectEmitWasmCore session outputPath
+  | .python => psHostDirectEmitPython session outputPath
+  | .php => psHostDirectEmitPhp session outputPath
+  | .wasmComponent => throw (IO.userError "PSC1_COMPONENT_EXPORT_REQUIRED")
 
 private def buildTargetsFor (inputPath outputDir targets : String)
     (assurance : PsHostAssurance) : IO Unit := do
@@ -83,9 +91,9 @@ private def psCliExecution
 private def psCliCheckedExecution (args : List String) : IO Unit := do
   match args with
   | [] | ["--help"] | ["-h"] => IO.println psCliUsage
-  | ["--version"] => IO.println ("PSC1 0.1.0-psc1.1 (checked native; Lean " ++ Lean.versionString ++ ")")
+  | ["--version"] => IO.println ("PSC1 0.1.0-psc1.2 (checked native; Lean " ++ Lean.versionString ++ ")")
   | ["--identity"] =>
-      IO.println ("{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"" ++ Lean.versionString ++ "\",\"leanCommit\":\"" ++ Lean.githash ++ "\"}")
+      IO.println ("{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"" ++ Lean.versionString ++ "\",\"leanCommit\":\"" ++ Lean.githash ++ "\",\"targets\":" ++ psJsonArray (psBackendTargets.map (fun target => psJsonQuote (psBackendTargetName target))) ++ "}")
   | ["check", inputPath] => psHostDirectCheck inputPath
   | ["admissions", inputPath] => psHostDirectAdmissions inputPath
   | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSource inputPath)
@@ -96,10 +104,8 @@ private def psCliCheckedExecution (args : List String) : IO Unit := do
   | ["emit-lean", inputPath, "--out", outputPath] => psHostCompilerTranslateToFile inputPath "lean" outputPath
   | ["emit-ps", inputPath] => psHostCompilerTranslate inputPath "ps"
   | ["emit-ps", inputPath, "--out", outputPath] => psHostCompilerTranslateToFile inputPath "ps" outputPath
-  | ["build", inputPath, "--target", "js", "--out", outputPath] => psHostDirectJavaScript inputPath outputPath
-  | ["build", inputPath, "--target", "ts", "--out", outputPath] => psHostDirectTypeScript inputPath outputPath
-  | ["build", inputPath, "--target", "rust", "--out", outputPath] => psHostDirectRust inputPath outputPath
-  | ["build", inputPath, "--target", "wasm-core", "--out", outputPath] => psHostDirectWasmCore inputPath outputPath
+  | ["build", inputPath, "--target", target, "--out", outputPath] =>
+      buildFor inputPath outputPath target .checked
   | ["build", inputPath, "--targets", targets, "--out-dir", outputDir] =>
       buildTargetsFor inputPath outputDir targets .checked
   | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath] =>

@@ -15,13 +15,17 @@ on:
       - .github/workflows/psc1-scoped-correctness.yml
       - .github/workflows/psc1-direct-backends.yml
 
+concurrency:
+  group: psc1-scoped-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   linux-scoped:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     defaults:
       run:
         shell: bash
@@ -30,6 +34,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install minimum supported Python for compatibility checks
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14'
+      - name: Record minimum Python interpreter
+        run: echo "PSC1_PYTHON_314=$(python -c 'import sys; print(sys.executable)')" >> "$GITHUB_ENV"
+      - name: Install current Python for target validation and execution
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.15'
+      - name: Install PHP and selected exact-integer extension
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5'
+          extensions: gmp
+          tools: none
+          coverage: none
+      - name: Record scripting target runtimes
+        run: |
+          python3 --version
+          php --version
+          php -r 'echo "gmp=" . (extension_loaded("gmp") ? "enabled" : "missing") . PHP_EOL;'
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
@@ -123,9 +149,10 @@ jobs:
           exit "$result"
       - name: Execute runtime contract against pinned Lean reference results
         working-directory: psc1
-        env:
-          PSC1_CONFORMANCE_TARGETS: js,ts,rust,wasm-core,wasm-component
         run: node scripts/runtime-conformance-tests.mjs
+      - name: Execute Python and PHP ABI, recursion and failure boundaries
+        working-directory: psc1
+        run: node scripts/script-backend-tests.mjs
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4

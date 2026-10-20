@@ -5,6 +5,9 @@ inductive PsBackendTarget where
   | js | ts | rust | wasmCore | wasmComponent | python | php
   deriving BEq, Repr
 
+def psBackendTargets : List PsBackendTarget :=
+  [.js, .ts, .rust, .wasmCore, .wasmComponent, .python, .php]
+
 def psBackendTargetName : PsBackendTarget → String
   | .js => "js"
   | .ts => "ts"

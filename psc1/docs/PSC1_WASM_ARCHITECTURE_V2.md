@@ -1,6 +1,6 @@
 # PSC1 Wasm architecture v2
 
-Status: selected architecture with a candidate direct Bool-component foundation.
+Status: selected architecture with direct Bool-component foundation qualified at 5496943a30423269654fffcd7579b3c5dd16b4f9, run39495181966. Compound ABI milestones remain planned.
 Only the exact qualifying SHA/run recorded in AI_WORK_STATE and
 PSC1_ULTRA_EXECUTION_STATUS establishes implementation completion.
 
@@ -134,3 +134,14 @@ PSC0 historically qualified a different set, which must not silently replace
 PSC1's toolchain. Target validation and differential execution remain separate
 from logical admission and a backend preservation proof. Wasm compiler
 self-hosting follows the immediate JS/Rust compiler-only bootstrap.
+
+The qualified plan now rejects every bare keyword in the exact
+[wasm-tools1.254.0 lexer](https://github.com/bytecodealliance/wasm-tools/blob/v1.254.0/crates/wit-parser/src/ast/lex.rs#L338-L381),
+including option/result/list/own/error-context. Independent host validation had already
+prevented invalid-WIT publication; this closes plan validation earlier.
+
+Upstream Component Model HEAD observed on21 October is d095e2f60ddae1f9a1e9b1e2fb547ec1114da677.
+Keep the explicit implementation reference6c48079bbc808bb3bdeb9554f338ab3a5b187388.
+Issue525 remains open; the [18 October discussion](https://github.com/WebAssembly/component-model/issues/525#issuecomment-6253238588)
+still discusses copying and unresolved lifetime support. No production GC-native
+Canonical ABI interoperability is inferred from core engine GC support.

@@ -1,6 +1,6 @@
 # PSC1 source/backend parity contract
 
-Audit baseline: `da880d864ca5f9e35729255fd7e4f8a17953cd39` (PR #166). Baseline final Linux run: [39469312498](https://github.com/dwijayuda/pskernel/actions/runs/39469312498). This draft does not qualify later integration commits. Typed-error handlers from PR #167 remain an integration candidate until their actual run passes.
+Audit baseline: `da880d864ca5f9e35729255fd7e4f8a17953cd39` (PR #166). Baseline final Linux run: [39469312498](https://github.com/dwijayuda/pskernel/actions/runs/39469312498). Current selected handler/hygiene integration is qualified at 5496943a30423269654fffcd7579b3c5dd16b4f9, [run 39495181966](https://github.com/dwijayuda/pskernel/actions/runs/39495181966); tested merge a4e3b9bd626c36437557b58f5e7dfb3c477fcf39. This does not make full feature families or general backend parity complete.
 
 ## Shared source semantics
 
@@ -31,7 +31,7 @@ The governing `PSC1_LANGUAGE_REFERENCE_v7.2.md` explicitly retains adjacent comm
 | Ordinary while | Selected / selected | Lifted checked private helpers | Finite execution and external divergence deadlines on all seven | Explicit partial owner; Id/Except; nested procedural loop/effect/capture restrictions remain |
 | Tuple/wildcard bindings | Selected / selected | Strict RHS let plus projections | Handwritten cases all seven | Unit binding only native/private-JS evidence; mutable/monadic patterns refused |
 | Array literals/persistence/optional indexing | Selected / selected | Present | Aliasing/OOB/huge-index cases all seven | Optional access currently full scan; no proof/panic indexing claim |
-| Typed error propagation | Selected / selected | Except/CompilerM library calls | Selected Except cases | Throw/try/catch absent at baseline; candidate #167 not yet qualified |
+| Typed error propagation/handlers | Selected / selected | Checked Except/CompilerM and control packets | 28 source/target bundles; 34 native-oracle observations; 70 refusals | Single catch/contextual throw; CompilerM remains native/private-JS. Finally/general handlers and full family not complete |
 | Namespaces/import ownership | Selected / selected | Full Core names and captured source closure | Handwritten namespace cases and host refusal tests | Namespace identity never grants entry-module ownership |
 | Typed IO / foreign imports | Missing / missing | No admitted execution profile | None | Raw IR imports fail strict validation |
 | Fixed-width/floating scalars | Outside profile | Some model/printer constructors exist | No active-profile claim | Type names/printer cases do not confer support |

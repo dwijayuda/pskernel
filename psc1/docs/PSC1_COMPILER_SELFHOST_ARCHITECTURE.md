@@ -164,3 +164,23 @@ For the first generated compiler service, the host launches a hash-pinned, CI-qu
 This trusts the generated compiler's engineering correctness to the same degree as the existing native compiler. Exact graph admission and matching hashes do not prove source-to-Core, erasure or backend preservation. The host alone invokes the independent checker, validates IR/target/ABI and grants publication state. An arbitrary compiler plugin needs a separate certification/replay mechanism or candidate-only output. Never replace this boundary with hidden handwritten native elaboration, erasure or emission; that would invalidate compiler-only self-hosting.
 
 Census the compiler+Rust-emitter closure independently of the JS service and record the shared union. Rust qualification also stresses deep source/AST/list traversal, non-tail calls and dropping the final owner of deep Rc DAG/tree values. Shallow cloning does not solve recursive evaluation/destruction; measure limits or use stack-safe workers rather than enlarging the process stack.
+
+## Current qualified diagnostic checkpoint
+
+At 5496943a30423269654fffcd7579b3c5dd16b4f9, run39495181966, the actual census is semantic-compiler 67/40/35; directjs-compiler 79/48/41; rust-compiler 83/49/40 (modules/parse accepted/elaboration accepted).
+It covers Lean parse/elaboration only. Admission, IR, generated compiler execution
+and repeated generations remain not-run, despite successful generated transport.
+
+First parse refusal: Ps.Syntax.Ast35:41, ++ in psSyntaxBindingPatternNames.
+The selected operator table has no ++. Normalize with a supported named typed list
+append helper and rerun; do not skip the declaration or widen notation silently.
+First elaboration refusal: Ps.Erasure.Definition, structuralRecursionArity.
+A source-confirmed candidate is psErasureRuntimePreludeClosure: three authored
+explicit binders followed by a returned list function, but a direct four-argument
+recursive call. Use the established partially applied smaller-worker pattern.
+The module-level diagnostic does not prove this is the sole failing declaration;
+add per-declaration tracing and qualify the actual normalization before claiming a fix.
+
+The finalized continuation prompt specifies dual-grammar strict census, whole-closure
+admission/IR and actual generated compiler/fixed-point gates. Historical
+checked-selfhost.mjs still uses lean434/PSC2 receipt profiles and is not current evidence.

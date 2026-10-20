@@ -120,3 +120,16 @@ Zero milliseconds means below 1 ms granularity. The precomputed-field query time
 5. Kernel fuel, scoped cache restoration, the 79-module portable source closure, and generated JavaScript correctness and memory gates must remain intact.
 
 **Disposition:** the Lean 4.35 migration and DefEq first-entry cleanup have qualified native/portable checking; native-vs-official slowdown is measured on deep zeta cases; an isolated metadata prototype validates the architectural hypothesis. Production metadata, general speedups, formal metatheory and full Lean Arena remain unresolved research work.
+
+
+## Concrete quadratic work in cold zeta-WHNF
+
+The source-level hot path establishes a stronger complexity explanation for nested let terms, not merely "functional language overhead":
+
+- In Checker/Reduction/WhnfCore.lean, for each let expression the core first invokes psKernelSemanticCacheEligible and psKernelExprMapGet (around lines 245–255). On a cold miss it instantiates the let body, recursively reduces the remaining nested term, and calls psKernelWhnfCoreFinish (around lines 258–279).
+- psKernelWhnfCoreFinish again calls psKernelSemanticCacheEligible and then psKernelExprMapInsert for cacheable closed terms (lines 71–95).
+- Runtime/Acceleration/CachePolicy.lean implements eligibility by recursively walking psKernelExprHasFVar over the full expression (Core/Expr.lean lines 739–771). Runtime/Acceleration/Cache.lean recomputes the recursive expression hash for indexed lookup/insertion and uses further structural comparison for collisions.
+- A cold let chain of depth D makes this process operate on subtree sizes D, D−1, ..., 1. Just the full-subtree eligibility scans can therefore cost proportional to D(D+1)/2. Indexed hashes contribute similar traversal costs. This gives a plausible **quadratic cold-path repeated-work term** even when every individual substitution is correct and efficient.
+- The measured native WHNF cost per call rose from roughly 0.28 ms at depth 96 (14 ms for 50 calls) to 1 ms at depth 192 (20 ms for 20 calls), consistent with this structural amplification. This ratio is NOT proof of exact quadratic runtime, since there are other costs and 1 ms timing resolution.
+
+A safe acceleration must preserve correct cache-key equality, scope-sensitive eligibility, and resource/fuel outcomes. Simply removing the memo table may trade repeated hashing for repeated reductions and increase total work or rejection under fixed fuel. A metadata-aware cache prototype must separately measure one-shot versus genuinely reusable subtrees, allocation and checking outcomes; do not change the production cache policy based on this one synthetic benchmark.

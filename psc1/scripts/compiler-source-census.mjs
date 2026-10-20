@@ -89,6 +89,7 @@ for (const [module, stage] of [
   ['Ps.Syntax.ParseCommon', 'parse'], ['Ps.Syntax.ParseCommon', 'elaboration'],
   ['Ps.Syntax.ParseBinding', 'parse'], ['Ps.Syntax.ParseBinding', 'elaboration'],
   ['Ps.Syntax.Operators', 'parse'], ['Ps.Syntax.Operators', 'elaboration'],
+  ['Ps.Syntax.ParseData', 'parse'], ['Ps.Syntax.ParseData', 'elaboration'],
   ['Ps.Syntax.ParseDo', 'parse'], ['Ps.Syntax.ParseDo', 'elaboration']
 ]) {
   const row = observed.records.find(row => row.module === module);

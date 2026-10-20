@@ -1,10 +1,7 @@
 import Ps.Syntax.ParseCommon
 
-/-- Surface data notation reuses the already checked Type0 Prod and Array
-operations. No additional logical constant, effect or runtime representation is
-introduced here. Builtin references remain absolute through namespaces and
-canonical source printing. -/
-abbrev PsDataTermParser :=
+/-- Surface data uses the checked Type0 Prod and Array operations. -/
+def PsDataTermParser : Type :=
   PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm)
 
 structure PsDataDelimited where
@@ -18,30 +15,42 @@ def psParseDataElementsWithFuel
     PsSourcePos -> PsTokenCursor -> List PsSyntaxTerm -> Bool ->
     Except PsParseError PsDataDelimited :=
   match fuel with
-  | 0 => fun _ _ _ _ => .error .fuelExhausted
-  | remaining + 1 => fun start cursor elementsRev separated => do
-      if psTokenCursorAtText cursor closeText then
-        let close ← psTokenCursorExpectText cursor closeText
-        return {
-          elements := psParseListReverse elementsRev
-          separated := separated
-          span := { start := start, stop := close.token.span.stop }
-          cursor := close.cursor
-        }
-      else
-        let element ← parseTerm cursor
-        if psTokenCursorAtText element.cursor "," then
-          let comma ← psTokenCursorExpectText element.cursor ","
-          psParseDataElementsWithFuel parseTerm closeText remaining start
-            comma.cursor (element.value :: elementsRev) true
+  | 0 => fun _ _ _ _ => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      fun (start : PsSourcePos) (cursor : PsTokenCursor)
+          (elementsRev : List PsSyntaxTerm) (separated : Bool) =>
+        let smaller : PsSourcePos -> PsTokenCursor -> List PsSyntaxTerm -> Bool ->
+            Except PsParseError PsDataDelimited :=
+          psParseDataElementsWithFuel parseTerm closeText remaining;
+        if psTokenCursorAtText cursor closeText then
+          match psTokenCursorExpectText cursor closeText with
+          | Except.error error => Except.error error
+          | Except.ok close =>
+              Except.ok {
+                elements := psParseListReverse elementsRev
+                separated := separated
+                span := { start := start, stop := close.token.span.stop }
+                cursor := close.cursor
+              }
         else
-          let close ← psTokenCursorExpectText element.cursor closeText
-          return {
-            elements := psParseListReverse (element.value :: elementsRev)
-            separated := separated
-            span := { start := start, stop := close.token.span.stop }
-            cursor := close.cursor
-          }
+          match parseTerm cursor with
+          | Except.error error => Except.error error
+          | Except.ok element =>
+              if psTokenCursorAtText element.cursor "," then
+                match psTokenCursorExpectText element.cursor "," with
+                | Except.error error => Except.error error
+                | Except.ok comma =>
+                    smaller start comma.cursor (element.value :: elementsRev) true
+              else
+                match psTokenCursorExpectText element.cursor closeText with
+                | Except.error error => Except.error error
+                | Except.ok close =>
+                    Except.ok {
+                      elements := psParseListReverse (element.value :: elementsRev)
+                      separated := separated
+                      span := { start := start, stop := close.token.span.stop }
+                      cursor := close.cursor
+                    }
 
 def psSyntaxDataReference (root member : String)
     (span : PsSourceSpan) : PsSyntaxTerm :=
@@ -50,55 +59,81 @@ def psSyntaxDataReference (root member : String)
 def psSyntaxTupleValue (elements : List PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
   match elements with
-  | [] => .unit span
-  | [value] => value
+  | [] => PsSyntaxTerm.unit span
   | first :: rest =>
-      .app (psSyntaxDataReference "Prod" "mk" span)
-        [first, psSyntaxTupleValue rest span] span
+      match rest with
+      | [] => first
+      | _ :: _ =>
+          PsSyntaxTerm.app (psSyntaxDataReference "Prod" "mk" span)
+            [first, psSyntaxTupleValue rest span] span
 
-/-- Grouping remains distinct from tuples. A comma requires at least two fields;
-larger tuples associate to the right, following the pinned Lean parser. -/
+/-- A comma requires at least two fields; larger tuples associate right. -/
 def psParseDataParen (parseTerm : PsDataTermParser)
     (groupSpan : PsSyntaxTerm -> PsSourceSpan -> PsSyntaxTerm)
-    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
-  let opening ← psTokenCursorExpectText cursor "("
-  let parsed ← psParseDataElementsWithFuel parseTerm ")"
-    (Nat.succ (psParseListLength opening.cursor.remaining))
-    opening.token.span.start opening.cursor [] false
-  match parsed.elements with
-  | [_] =>
-      if parsed.separated then
-        throw (.expectedText "at least two tuple elements" ")" parsed.span)
-      else
-        return { value := groupSpan (psSyntaxTupleValue parsed.elements parsed.span) parsed.span
-                 cursor := parsed.cursor }
-  | _ =>
-      return { value := psSyntaxTupleValue parsed.elements parsed.span
-               cursor := parsed.cursor }
+    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match psTokenCursorExpectText cursor "(" with
+  | Except.error error => Except.error error
+  | Except.ok opening =>
+      match psParseDataElementsWithFuel parseTerm ")"
+          (Nat.succ (psParseListLength opening.cursor.remaining))
+          opening.token.span.start opening.cursor [] false with
+      | Except.error error => Except.error error
+      | Except.ok parsed =>
+          match parsed.elements with
+          | [] =>
+              Except.ok { value := psSyntaxTupleValue parsed.elements parsed.span
+                          cursor := parsed.cursor }
+          | _ :: rest =>
+              match rest with
+              | [] =>
+                  if parsed.separated then
+                    Except.error (PsParseError.expectedText
+                      "at least two tuple elements" ")" parsed.span)
+                  else
+                    Except.ok {
+                      value := groupSpan (psSyntaxTupleValue parsed.elements parsed.span) parsed.span
+                      cursor := parsed.cursor
+                    }
+              | _ :: _ =>
+                  Except.ok { value := psSyntaxTupleValue parsed.elements parsed.span
+                              cursor := parsed.cursor }
 
-/-- The nested push expression evaluates earlier elements before later ones.
-Capacity is an allocation hint only; it is not a semantic iteration limit. -/
-def psSyntaxArrayPushes (elements : List PsSyntaxTerm)
-    (current : PsSyntaxTerm) (span : PsSourceSpan) : PsSyntaxTerm :=
+/-- Earlier elements evaluate before later ones in the nested push expression.
+Capacity is only an allocation hint. -/
+def psSyntaxArrayPushes (elements : List PsSyntaxTerm) :
+    PsSyntaxTerm -> PsSourceSpan -> PsSyntaxTerm :=
   match elements with
-  | [] => current
+  | [] => fun (current : PsSyntaxTerm) (_ : PsSourceSpan) => current
   | value :: rest =>
-      psSyntaxArrayPushes rest
-        (.app (psSyntaxDataReference "Array" "push" span) [current, value] span) span
+      fun (current : PsSyntaxTerm) (span : PsSourceSpan) =>
+        let smaller : PsSyntaxTerm -> PsSourceSpan -> PsSyntaxTerm :=
+          psSyntaxArrayPushes rest;
+        smaller (PsSyntaxTerm.app (psSyntaxDataReference "Array" "push" span)
+          [current, value] span) span
 
 def psParseDataArray (parseTerm : PsDataTermParser)
-    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
-  let hashToken ← psTokenCursorExpectText cursor "#"
-  let opening ← psTokenCursorExpectText hashToken.cursor "["
-  if !(Nat.beq hashToken.token.span.stop.byteOffset opening.token.span.start.byteOffset) then
-    throw (.expectedText "adjacent #[" "[" opening.token.span)
-  let parsed ← psParseDataElementsWithFuel parseTerm "]"
-    (Nat.succ (psParseListLength opening.cursor.remaining))
-    hashToken.token.span.start opening.cursor [] false
-  let initial : PsSyntaxTerm := .app (psSyntaxDataReference "Array" "emptyWithCapacity" parsed.span)
-    [.natural "0" parsed.span] parsed.span
-  return { value := psSyntaxArrayPushes parsed.elements initial parsed.span
-           cursor := parsed.cursor }
+    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match psTokenCursorExpectText cursor "#" with
+  | Except.error error => Except.error error
+  | Except.ok hashToken =>
+      match psTokenCursorExpectText hashToken.cursor "[" with
+      | Except.error error => Except.error error
+      | Except.ok opening =>
+          if !(Nat.beq hashToken.token.span.stop.byteOffset opening.token.span.start.byteOffset) then
+            Except.error (PsParseError.expectedText "adjacent #[" "[" opening.token.span)
+          else
+            match psParseDataElementsWithFuel parseTerm "]"
+                (Nat.succ (psParseListLength opening.cursor.remaining))
+                hashToken.token.span.start opening.cursor [] false with
+            | Except.error error => Except.error error
+            | Except.ok parsed =>
+                let initial : PsSyntaxTerm :=
+                  PsSyntaxTerm.app (psSyntaxDataReference "Array" "emptyWithCapacity" parsed.span)
+                    [PsSyntaxTerm.natural "0" parsed.span] parsed.span;
+                Except.ok {
+                  value := psSyntaxArrayPushes parsed.elements initial parsed.span
+                  cursor := parsed.cursor
+                }
 
 def psDataAtAdjacentIndex (surfaceSpan : PsSourceSpan)
     (cursor : PsTokenCursor) : Bool :=
@@ -109,27 +144,41 @@ def psDataAtAdjacentIndex (surfaceSpan : PsSourceSpan)
         Nat.beq surfaceSpan.stop.byteOffset token.span.start.byteOffset
       else false
 
-/-- Only the selected optional form is accepted. Plain, proof-bearing and panic
-indexing cannot silently use a default or a host exception. -/
+/-- Only optional indexing is accepted, with adjacent brackets and suffix. -/
 def psParseDataOptionalIndexTailWithFuel
     (parseTerm : PsDataTermParser) (fuel : Nat) :
     PsSyntaxTerm -> PsSourceSpan -> PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match fuel with
-  | 0 => fun _ _ _ => .error .fuelExhausted
-  | remaining + 1 => fun current surfaceSpan cursor => do
-      if psDataAtAdjacentIndex surfaceSpan cursor then
-        let opening ← psTokenCursorExpectText cursor "["
-        let index ← parseTerm opening.cursor
-        let close ← psTokenCursorExpectText index.cursor "]"
-        let optional ← psTokenCursorExpectText close.cursor "?"
-        if !(Nat.beq close.token.span.stop.byteOffset optional.token.span.start.byteOffset) then
-          throw (.expectedText "adjacent ]? for optional indexing" "?" optional.token.span)
-        let span : PsSourceSpan := {
-          start := surfaceSpan.start
-          stop := optional.token.span.stop
-        }
-        let next := PsSyntaxTerm.arrayGetOptionE current index.value span
-        psParseDataOptionalIndexTailWithFuel parseTerm remaining next span optional.cursor
-      else
-        return { value := current, cursor := cursor }
+  | 0 => fun _ _ _ => Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      fun (current : PsSyntaxTerm) (surfaceSpan : PsSourceSpan) (cursor : PsTokenCursor) =>
+        let smaller : PsSyntaxTerm -> PsSourceSpan -> PsTokenCursor ->
+            Except PsParseError (PsParseResult PsSyntaxTerm) :=
+          psParseDataOptionalIndexTailWithFuel parseTerm remaining;
+        if psDataAtAdjacentIndex surfaceSpan cursor then
+          match psTokenCursorExpectText cursor "[" with
+          | Except.error error => Except.error error
+          | Except.ok opening =>
+              match parseTerm opening.cursor with
+              | Except.error error => Except.error error
+              | Except.ok index =>
+                  match psTokenCursorExpectText index.cursor "]" with
+                  | Except.error error => Except.error error
+                  | Except.ok close =>
+                      match psTokenCursorExpectText close.cursor "?" with
+                      | Except.error error => Except.error error
+                      | Except.ok optional =>
+                          if !(Nat.beq close.token.span.stop.byteOffset optional.token.span.start.byteOffset) then
+                            Except.error (PsParseError.expectedText
+                              "adjacent ]? for optional indexing" "?" optional.token.span)
+                          else
+                            let span : PsSourceSpan := {
+                              start := surfaceSpan.start
+                              stop := optional.token.span.stop
+                            };
+                            let next : PsSyntaxTerm :=
+                              PsSyntaxTerm.arrayGetOptionE current index.value span;
+                            smaller next span optional.cursor
+        else
+          Except.ok { value := current, cursor := cursor }

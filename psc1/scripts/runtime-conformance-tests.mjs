@@ -5,7 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const native = process.env.PSC1_NATIVE || path.join(root, '.lake/build/bin/psc1');
@@ -112,6 +112,7 @@ try {
   for (const syntax of ['lean', 'ps']) {
     const entry = syntax === 'lean' ? input : translated;
     for (const target of targets) {
+      console.log('PSC1_RUNTIME_CONFORMANCE_START: ' + syntax + '/' + target);
       const ext = { js: 'js', ts: 'ts', rust: 'rs', 'wasm-core': 'wasm',
         'wasm-component': 'wasm', python: 'py', php: 'php' }[target];
       assert.ok(ext, target);
@@ -122,6 +123,7 @@ try {
       if (target === 'wasm-component') args.push('--export', 'semantic');
       args.push('--out', output);
       run(native, args);
+      console.log('PSC1_RUNTIME_CONFORMANCE_BUILT: ' + syntax + '/' + target);
       const manifest = JSON.parse(fs.readFileSync(output + '.bundle.json', 'utf8'));
       assert.equal(manifest.logicalCheckerCommit, oracle.leanCommit);
       assert.equal(manifest.runtimeContract, 'psc1-runtime-semantics/1');
@@ -136,8 +138,12 @@ try {
             '--target', 'ES2022', '--module', 'ES2022', '--skipLibCheck', '--outDir', consumer]);
           moduleFile = path.join(consumer, 'module.js');
         }
-        const module = await import(pathToFileURL(moduleFile).href);
-        values = names.map(name => [name, module[name](false), module[name](true)]);
+        const consumerProgram = 'import {pathToFileURL} from "node:url"; ' +
+          'const module=await import(pathToFileURL(process.argv[1]).href); ' +
+          'const names=JSON.parse(process.argv[2]); ' +
+          'console.log(JSON.stringify(names.map(name=>[name,module[name](false),module[name](true)])));';
+        values = JSON.parse(run(process.execPath, ['--input-type=module', '-e', consumerProgram,
+          moduleFile, JSON.stringify(names)], { timeout: 60000 }));
       } else if (target === 'rust') {
         const crate = path.join(folder, 'consumer');
         fs.cpSync(fs.realpathSync(output.replace(/\.rs$/, '.cargo')), crate,
@@ -150,9 +156,12 @@ try {
           { env: { ...env, CARGO_TARGET_DIR: path.join(work, 'cargo-target') } });
         values = names.map(name => [name, true, true]);
       } else if (target === 'wasm-core') {
-        const { instance } = await WebAssembly.instantiate(fs.readFileSync(output));
-        values = names.map(name => [name, Boolean(instance.exports[name](0)),
-          Boolean(instance.exports[name](1))]);
+        const consumerProgram = 'import fs from "node:fs"; ' +
+          'const {instance}=await WebAssembly.instantiate(fs.readFileSync(process.argv[1])); ' +
+          'const names=JSON.parse(process.argv[2]); ' +
+          'console.log(JSON.stringify(names.map(name=>[name,Boolean(instance.exports[name](0)),Boolean(instance.exports[name](1))])));';
+        values = JSON.parse(run(process.execPath, ['--input-type=module', '-e', consumerProgram,
+          output, JSON.stringify(names)], { timeout: 60000 }));
       } else if (target === 'wasm-component') {
         values = [['semantic',
           run('wasmtime', ['run', '--invoke', 'semantic(false)', output]).trim() === 'true',

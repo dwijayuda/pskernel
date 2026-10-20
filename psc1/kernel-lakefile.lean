@@ -8,6 +8,11 @@ package proofscriptSelfhost
 lean_lib PsKernelCore where
   srcDir := "packages/pskernel-core/src"
   roots := #[
+    `Ps.KernelCore.Core.ExprV2.Decode,
+    `Ps.KernelCore.API.DagTypes,
+    `Ps.KernelCore.API.DagDeclaration,
+    `Ps.KernelCore.API.Dag,
+    `Ps.KernelCore.Checker.ExprV2.Terminal,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,
@@ -171,3 +176,8 @@ lean_exe psc1_kernel_expr_v2_checker_bridge where
 lean_exe psc1_kernel_expr_v2_whnf_subset_regression where
   srcDir := "test"
   root := `PsKernelExprV2WhnfSubsetRegression
+
+-- Full checked DAG input plus direct terminal-inference parity.
+lean_exe psc1_kernel_expr_v2_dag_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2DagRegression

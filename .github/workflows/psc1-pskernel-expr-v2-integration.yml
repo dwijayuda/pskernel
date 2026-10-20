@@ -1,0 +1,117 @@
+name: PSC1 Expression V2 production integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - integration/psc1-pskernel-expr-v2-lean435-20261021
+    paths:
+      - psc1/lean-toolchain
+      - psc1/packages/pskernel-core/src/**
+      - psc1/test/PsKernelExprV2DagRegression.lean
+      - psc1/test/PsKernelExprV2TransformRegression.lean
+      - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-dag-bench.mjs
+      - psc1/kernel-lakefile.lean
+      - .github/workflows/psc1-pskernel-expr-v2-integration.yml
+
+permissions:
+  contents: read
+
+jobs:
+  native-dag-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile complete checker with checked DAG input
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression
+      - name: Run native DAG semantics, adversarial, fuel and official comparison
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e' \
+            -o "$RUNNER_TEMP/psc1-dag-native.memory" \
+            .lake/build/bin/psc1_kernel_expr_v2_dag_regression \
+            | tee "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_REGRESSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_LEAN: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          .lake/build/bin/psc1_kernel_expr_v2_regression \
+            | tee "$RUNNER_TEMP/psc1-v2-existing-native.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-v2-dag-native
+          path: |
+            ${{ runner.temp }}/psc1-dag-native.log
+            ${{ runner.temp }}/psc1-dag-native.memory
+            ${{ runner.temp }}/psc1-v2-existing-native.log
+          retention-days: 30
+
+  generated-dag-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build authentic PSC1 and check complete kernel source
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          lake build psc1
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+      - name: Install pinned TypeScript
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-dag-ts"
+          echo '{"name":"psc1-dag-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-dag-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-dag-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-dag-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Compile the complete independent kernel to JavaScript
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            --out dist/expr-v2/integration/kernel.js
+          test -s dist/expr-v2/integration/kernel.js
+          test -s dist/expr-v2/integration/kernel.d.ts
+          test -s dist/expr-v2/integration/kernel.js.map
+          node --check dist/expr-v2/integration/kernel.js
+      - name: Run real generated checker without external Lean on PATH
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          env PATH="" "$PSC1_NODE_BIN" --expose-gc scripts/pskernel-expr-v2-dag-smoke.mjs \
+            dist/expr-v2/integration/kernel.js \
+            | tee "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-v2-dag-generated-js
+          path: |
+            ${{ runner.temp }}/psc1-dag-generated-js.log
+            psc1/dist/expr-v2/integration/kernel.js
+            psc1/dist/expr-v2/integration/kernel.d.ts
+            psc1/dist/expr-v2/integration/kernel.js.map
+          retention-days: 30

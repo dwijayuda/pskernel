@@ -55,6 +55,8 @@ const pagedEqBatch=load("psKernelExprV2PagedEqBatchChecked");
 const pagedImport=load("psKernelExprV2PagedImportChecked");
 const pagedImportInto=load("psKernelExprV2PagedImportIntoChecked");
 const pagedMkLam=load("psKernelExprV2PagedMkLam");
+const pagedMkForall=load("psKernelExprV2PagedMkForall");
+const pagedWhnfSubset=load("psKernelExprV2PagedWhnfSubsetChecked");
 const pagedMkLet=load("psKernelExprV2PagedMkLet");
 const pagedMkMData=load("psKernelExprV2PagedMkMData");
 const pagedMkSort=load("psKernelExprV2PagedMkSort");
@@ -571,6 +573,59 @@ for(const depth of [8,24,48]){
   }
 }
 console.log("PSC1_EXPR_V2_PAGED_HEAD_TIMINGS "+JSON.stringify(pagedHeadTimings));
+
+
+// Research WHNF subset: the function of an application may first be a
+// let-bound or metadata-wrapped lambda. This tests reduction order and
+// sharing; complete typing remains the authority of PSKernel-Core.
+const subsetName=nameConstructors.str(nameConstructors.anonymous,"function-head");
+const whnfZero=accepted(pagedMkSort(pagedEmptyWithLimit(64n),level.zero),
+  "whnf-subset-sort-zero");
+const whnfOne=accepted(pagedMkSort(whnfZero.fst,level.succ(level.zero)),
+  "whnf-subset-sort-one");
+const whnfBvar=accepted(pagedMkBVar(whnfOne.fst,0n),"whnf-subset-bvar");
+const whnfLambda=accepted(pagedMkLam(
+  whnfBvar.fst,subsetName,whnfOne.snd,whnfBvar.snd,binderConstructors.default),
+  "whnf-subset-lambda");
+const whnfType=accepted(pagedMkForall(
+  whnfLambda.fst,subsetName,whnfOne.snd,whnfOne.snd,binderConstructors.default),
+  "whnf-subset-function-type");
+const whnfLetFunction=accepted(pagedMkLet(whnfType.fst,subsetName,
+  whnfType.snd,whnfLambda.snd,whnfBvar.snd,false),
+  "whnf-subset-let-function");
+const whnfLetApp=accepted(pagedMkApp(
+  whnfLetFunction.fst,whnfLetFunction.snd,whnfZero.snd),
+  "whnf-subset-application");
+const whnfLetReduced=accepted(
+  pagedWhnfSubset(20n,whnfLetApp.fst,whnfLetApp.snd),
+  "whnf-subset-let-beta");
+demand(whnfLetReduced.snd===whnfZero.snd,
+  "whnf-subset-normalizes-function-position");
+const whnfWrapped=accepted(pagedMkMData(
+  whnfLetApp.fst,71n,whnfLetFunction.snd),"whnf-subset-mdata");
+const whnfMetaApp=accepted(pagedMkApp(
+  whnfWrapped.fst,whnfWrapped.snd,whnfZero.snd),
+  "whnf-subset-mdata-app");
+const whnfMetaReduced=accepted(
+  pagedWhnfSubset(20n,whnfMetaApp.fst,whnfMetaApp.snd),
+  "whnf-subset-mdata-beta");
+demand(whnfMetaReduced.snd===whnfZero.snd,
+  "whnf-subset-metadata-function-position");
+const whnfNeutral=accepted(pagedMkApp(
+  whnfLetApp.fst,whnfZero.snd,whnfZero.snd),"whnf-subset-neutral");
+const neutralResult=accepted(
+  pagedWhnfSubset(8n,whnfNeutral.fst,whnfNeutral.snd),
+  "whnf-subset-neutral-reduction");
+demand(neutralResult.snd===whnfNeutral.snd,
+  "whnf-subset-neutral-not-admitted");
+const whnfNoFuel=pagedWhnfSubset(0n,whnfNeutral.fst,whnfNeutral.snd);
+demand(whnfNoFuel&&"error" in whnfNoFuel,"whnf-subset-zero-fuel-rejected");
+const whnfForged=pagedWhnfSubset(8n,forgedPaged,0n);
+demand(whnfForged&&"error" in whnfForged,"whnf-subset-forged-rejected");
+const whnfBadRoot=pagedWhnfSubset(8n,whnfLetApp.fst,99999n);
+demand(whnfBadRoot&&"error" in whnfBadRoot,
+  "whnf-subset-invalid-root-rejected");
+console.log("PSC1_EXPR_V2_WHNF_SUBSET_JS: PASS");
 
 const timings=[];
 const readArray=(a,id)=>accepted(lookup(a,id),"measured-array-read");

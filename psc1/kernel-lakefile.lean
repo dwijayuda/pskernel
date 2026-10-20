@@ -96,7 +96,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Research.ExprV2ChunkedBuilder,
     `Ps.KernelCore.Research.ExprV2Lift,
     `Ps.KernelCore.Research.ExprV2PortableValidation,
-    `Ps.KernelCore.Research.ExprV2PortableLift
+    `Ps.KernelCore.Research.ExprV2PortableLift,
+    `Ps.KernelCore.Research.ExprV2PortableInstantiate
   ]
 
 lean_exe psc1_kernel_regression where

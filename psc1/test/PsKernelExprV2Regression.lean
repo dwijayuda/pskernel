@@ -1,6 +1,8 @@
 import Ps.KernelCore.Research.ExprV2Validation
 import Ps.KernelCore.Research.ExprV2Lift
 import Ps.KernelCore.Research.ExprV2PortableLift
+import Ps.KernelCore.Research.ExprV2PortableInstantiate
+import Ps.KernelCore.Core.Substitution.Instantiate
 import Ps.KernelCore.Core.Substitution.Lift
 import Ps.KernelCore.Research.ExprV2ResearchAll
 
@@ -653,6 +655,114 @@ private def testSharedLift : IO Unit := do
     (portableArena.size <= a.size + depth + 1)
   IO.println s!"PSC1_EXPR_V2_LIFT_SHARING: PASS input_nodes={a.size} output_nodes={transformed.size}"
 
+
+
+/- Finite, source-exact instantiate1 oracle over each V2 expression constructor.
+Each replacement remains in the same validated arena; no conversion is
+performed by the optimized instantiation worker. -/
+private def testPortableInstantiation : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "instantiate"
+  let mut arena := psKernelExprV2ChunkedEmpty
+  let (a0,b0) ← expectV2 (psKernelExprV2ChunkedMkBVar arena 0)
+  arena := a0
+  let (a1,b1) ← expectV2 (psKernelExprV2ChunkedMkBVar arena 1)
+  arena := a1
+  let (a2,b2) ← expectV2 (psKernelExprV2ChunkedMkBVar arena 2)
+  arena := a2
+  let (a3,sort) ← expectV2
+    (psKernelExprV2ChunkedMkSort arena PsKernelLevel.zero)
+  arena := a3
+  let (a4,fv) ← expectV2 (psKernelExprV2ChunkedMkFVar arena name)
+  arena := a4
+  let (a5,app) ← expectV2 (psKernelExprV2ChunkedMkApp arena b0 b2)
+  arena := a5
+  let (a6,lam) ← expectV2
+    (psKernelExprV2ChunkedMkLam arena name sort app PsKernelBinderInfo.default)
+  arena := a6
+  let (a7,pi) ← expectV2
+    (psKernelExprV2ChunkedMkForall arena name b2 app PsKernelBinderInfo.implicit)
+  arena := a7
+  let (a8,letE) ← expectV2
+    (psKernelExprV2ChunkedMkLet arena name b2 app b1 false)
+  arena := a8
+  let (a9,mdata) ← expectV2 (psKernelExprV2ChunkedMkMData arena 17 app)
+  arena := a9
+  let (a10,proj) ← expectV2
+    (psKernelExprV2ChunkedMkProj arena name 0 mdata)
+  arena := a10
+  let (a11,both) ← expectV2 (psKernelExprV2ChunkedMkApp arena app app)
+  arena := a11
+  let cases : List (String × Nat) := [
+    ("bvar-zero",b0),("bvar-one",b1),("bvar-two",b2),
+    ("sort",sort),("fvar",fv),("app",app),("lambda",lam),
+    ("forall",pi),("let",letE),("mdata",mdata),
+    ("projection",proj),("shared-app",both)
+  ]
+  let replacements : List (String × Nat) := [
+    ("closed-sort",sort),("open-bvar2",b2),
+    ("open-app",app),("free-var",fv)
+  ]
+  let _ ← expectV2 (psKernelExprV2PortableValidate arena)
+  for (label,root) in cases do
+    let source ← expectV2 (psKernelExprV2ChunkedDecode arena root)
+    for (replacementLabel,replacement) in replacements do
+      let oldReplacement ← expectV2
+        (psKernelExprV2ChunkedDecode arena replacement)
+      let expected := psKernelExprInstantiate1 source oldReplacement
+      let (resultArena,resultId) ← expectV2
+        (psKernelExprV2PortableInstantiate1Checked arena root replacement)
+      let actual ← expectV2 (psKernelExprV2ChunkedDecode resultArena resultId)
+      requireV2 s!"instantiate-{label}-{replacementLabel}"
+        (psKernelExprEq actual expected && psKernelExprEqual actual expected)
+  requireV2 "instantiate-invalid-root"
+    (match psKernelExprV2PortableInstantiate1Checked arena 999 sort with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  requireV2 "instantiate-invalid-replacement"
+    (match psKernelExprV2PortableInstantiate1Checked arena app 999 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let entry ← expectV2 (psKernelExprV2ChunkedRequire arena b0)
+  let forgedEntry : PsKernelExprV2Entry := {
+    entry with looseRange := 0
+  }
+  let (forged,id) := psKernelExprV2ChunkedPush
+    psKernelExprV2ChunkedEmpty forgedEntry
+  requireV2 "instantiate-rejects-forged-range"
+    (match psKernelExprV2PortableInstantiate1Checked forged id id with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_INSTANTIATE_DIFFERENTIAL: PASS cases=48"
+
+private def testPortableSharedInstantiation : IO Unit := do
+  let (initial,leaf) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let (a0,sort) ← expectV2
+    (psKernelExprV2ChunkedMkSort initial PsKernelLevel.zero)
+  let mut arena := a0
+  let mut root := leaf
+  let depth : Nat := 20
+  for _ in [:depth] do
+    let (next,newId) ← expectV2
+      (psKernelExprV2ChunkedMkApp arena root root)
+    arena := next
+    root := newId
+  requireV2 "instantiate-shared-input-nodes" (arena.size == depth+2)
+  let (resultArena,resultId) ← expectV2
+    (psKernelExprV2PortableInstantiate1Checked arena root sort)
+  let resultEntry ← expectV2
+    (psKernelExprV2ChunkedRequire resultArena resultId)
+  requireV2 "instantiate-shared-depth" (resultEntry.depth == depth+1)
+  requireV2 "instantiate-shared-bound-variable-removed"
+    (resultEntry.looseRange == 0)
+  requireV2 "instantiate-shared-bounded-node-growth"
+    (resultArena.size <= arena.size+depth+1)
+  requireV2 "instantiate-shared-subtree-reused"
+    (match resultEntry.node with
+      | PsKernelExprV2Node.app left right => left == right
+      | _ => false)
+  IO.println s!"PSC1_EXPR_V2_INSTANTIATE_SHARING: PASS input_nodes={arena.size} output_nodes={resultArena.size}"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -665,4 +775,6 @@ def main : IO Unit := do
   testChunkedArena
   testChunkedLiftDifferential
   testSharedLift
+  testPortableInstantiation
+  testPortableSharedInstantiation
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

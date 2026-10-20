@@ -1,0 +1,418 @@
+name: PSC1 one-shot typed-error integration
+on:
+  push:
+    branches: [feature/psc1-typed-errors-20261020]
+    paths: [.github/workflows/psc1-typed-error-integration.yml]
+permissions:
+  contents: write
+concurrency:
+  group: psc1-typed-error-integration
+  cancel-in-progress: false
+jobs:
+  integrate:
+    if: github.repository == 'dwijayuda/pskernel' && github.ref == 'refs/heads/feature/psc1-typed-errors-20261020'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Apply reviewed changes with exact source guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 7c40160b7b9ce8e357fe401f8c8eea0d421d2e49
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          files = {}
+          def load(path):
+              if path not in files:
+                  files[path] = Path(path).read_text()
+              return files[path]
+          def replace(path, old, new, count=1):
+              text = load(path)
+              actual = text.count(old)
+              assert actual == count, (path, actual, count, old[:100])
+              files[path] = text.replace(old, new)
+          def insert(path, anchor, text):
+              replace(path, anchor, text + anchor)
+          def section(path, first, last, value):
+              text = load(path)
+              assert text.count(first) == 1 and text.count(last) == 1, path
+              a, b = text.index(first), text.index(last)
+              assert a < b
+              files[path] = text[:a] + value + text[b:]
+          syntax = 'psc1/packages/syntax/src/Ps/Syntax/'
+          elab = 'psc1/packages/elab/src/Ps/Elab/'
+          insert(syntax+'Ast.lean', '  | doEndE (span : PsSourceSpan)', '''  | doTryE
+                (body : PsSyntaxTerm) (errorName : PsSyntaxName)
+                (handler rest : PsSyntaxTerm) (span : PsSourceSpan)
+          ''')
+          insert(syntax+'ParseCommon.lean', '  | .doWhileE _ _ _ span => span', '  | .doTryE _ _ _ _ span => span\n')
+          p = syntax+'ParseDo.lean'
+          insert(p, '  | action (value : PsSyntaxTerm)', '''  | handler (body : PsSyntaxTerm) (name : PsSyntaxName)
+                (recovery : PsSyntaxTerm) (span : PsSourceSpan)
+          ''')
+          insert(p, '  | PsParseDoHead.action value => psSyntaxTermSpan value', '  | PsParseDoHead.handler _ _ _ span => span\n')
+          replace(p, 'else if psStringEq token.text "else" then Nat.beq conditionals 0',
+              'else if psStringEq token.text "catch" then true\n                else if psStringEq token.text "else" then Nat.beq conditionals 0')
+          replace(p, '  if psTokenCursorAtText cursor "return" then', '''  if psTokenCursorAtText cursor "throw" then
+              match psTokenCursorAdvance cursor with
+              | none => .error (PsParseError.unexpectedEnd "throw value")
+              | some keyword =>
+                  match psParseDoCompleteTerm parseTerm keyword.cursor with
+                  | .error error => .error error
+                  | .ok value =>
+                      let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan value)
+                      .ok (.action (.app (psSyntaxSyntheticReference "throw" keyword.token.span) [value] span))
+            else if psTokenCursorAtText cursor "return" then''')
+          insert(p, '  | .doReturnE _ _ => body', '''  | .doTryE action name recovery rest span =>
+                match rest with
+                | .doEndE _ =>
+                    .doTryE (psParseDoFallthrough action) name
+                      (psParseDoFallthrough recovery) rest span
+                | _ => .doTryE action name recovery (psParseDoFallthrough rest) span
+          ''')
+          insert(p, '        | .doReturnE _ _ =>\n            Except.error', '''        | .doTryE action name recovery rest span =>
+                      match rest with
+                      | .doEndE _ =>
+                          Except.ok (.doTryE (psParseDoFallthrough action) name
+                            (psParseDoFallthrough recovery) tail
+                            (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
+                      | _ =>
+                          rebuild rest (fun appended => .doTryE action name recovery appended
+                            (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
+          ''')
+          insert(p, '  | PsParseDoHead.conditional condition thenBody elseBody _ =>', '''  | PsParseDoHead.handler action name recovery _ =>
+                match tail with
+                | none => .ok (.doTryE action name recovery rest fullSpan)
+                | some _ => .ok (.doTryE (psParseDoFallthrough action) name
+                    (psParseDoFallthrough recovery) rest fullSpan)
+          ''')
+          replace(p, 'if psTokenCursorAtText cursor "else" then\n          Except.error',
+              'if psTokenCursorAtText cursor "else" || psTokenCursorAtText cursor "catch" then\n          Except.error')
+          insert(p, 'def psParseDoBody\n', '''-- A single typed catch delimits the handler scope. Braces are required by PS;
+          -- native Lean may use layout. A nested try may not steal an outer catch.
+          def psParseDoTry
+              (parseBody : Bool -> Nat -> PsTokenCursor ->
+                Except PsParseError (PsParseResult PsSyntaxTerm))
+              (native : Bool) (cursor : PsTokenCursor) :
+              Except PsParseError (PsParseResult PsParseDoHead) := do
+            let keyword <- psTokenCursorExpectText cursor "try"
+            let body <- psParseDoBranch parseBody native keyword.cursor
+            let catchToken <- psTokenCursorExpectText body.cursor "catch"
+            if native && catchToken.token.span.start.column < keyword.token.span.start.column then
+              throw (psParseDoExpected "catch aligned with its try" body.cursor)
+            let binder <- psTokenCursorExpectKind catchToken.cursor PsTokenKind.identifier
+            let separator <- psTokenCursorExpectText binder.cursor "=>"
+            let recovery <- psParseDoBranch parseBody native separator.cursor
+            let name := PsSyntaxName.mk [binder.token.text] binder.token.span
+            let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan recovery.value)
+            pure (PsParseResult.mk (.handler body.value name recovery.value span) recovery.cursor)
+
+          ''')
+          insert(p, '              else if psTokenCursorAtText cursor "while" then',
+              '              else if psTokenCursorAtText cursor "try" then\n                psParseDoTry smaller allowSemicolon cursor\n')
+          insert(p, '                      else if psTokenCursorAtText next.snd "else" then false',
+              '                      else if psTokenCursorAtText next.snd "catch" then false\n')
+          p = syntax+'PrintCommon.lean'
+          insert(p, '        | PsSyntaxTerm.doBindE name annotation value tail _ =>', '''        | PsSyntaxTerm.doTryE action name recovery tail _ =>
+                      let printedHead := do
+                        let printedName <- psPrintSyntaxName name
+                        let printedBody <- smaller action
+                        let printedRecovery <- smaller recovery
+                        if native then
+                          pure (psPrintJoin "" ["try { ", printedBody, " } catch ",
+                            printedName, " => { ", printedRecovery, " }"])
+                        else
+                          pure (psPrintJoin "" ["try {\\n  ", printedBody, "\\n} catch ",
+                            printedName, " => {\\n  ", printedRecovery, "\\n}"])
+                      withTail printedHead tail
+          ''')
+          for p in ['PrintLean.lean','PrintProofScript.lean']:
+              insert(syntax+p, '      | .doWhileE _ _ _ _ =>', '''      | .doTryE _ _ _ _ _ =>
+                    Except.error (PsSourcePrintError.unsupportedSourceForm "try statement outside do block")
+          ''')
+          p = elab+'DoBase.lean'
+          section(p, 'def psElabDoPureArgument\n', 'def psElabDoBind\n', '''def psElabDoBuiltinArgument
+              (context : PsElabContext) (builtin : String) : PsSyntaxTerm -> Option PsSyntaxTerm
+            | .app (.reference sourceName) [value] _ =>
+                match sourceName.segments with
+                | [segment] =>
+                    if psStringEq segment builtin then
+                      let name := psRootName builtin
+                      match psLocalFindUser context.localContext name with
+                      | some _ => none
+                      | none =>
+                          match psEnvironmentFind context.environment name with
+                          | some _ => none
+                          | none => some value
+                    else none
+                | _ => none
+            | _ => none
+
+          def psElabDoPureArgument (context : PsElabContext) : PsSyntaxTerm -> Option PsSyntaxTerm :=
+            psElabDoBuiltinArgument context "pure"
+
+          def psElabDoErrorType : PsElabDoOps -> Except PsElabError PsExpr
+            | .except error => .ok error
+            | .compiler _ _ error => .ok error
+            | .identity _ => .error PsElabError.doUnsupportedEffect
+
+          def psElabDoRaise (ops : PsElabDoOps) (context : PsElabContext)
+              (type value : PsExpr) : Except PsElabError PsElabTermResult := do
+            let term <- match ops with
+              | .identity _ => throw PsElabError.doUnsupportedEffect
+              | .except error => pure (psSelfHostExceptErrorOf error type value)
+              | .compiler reader state error =>
+                  pure (psExprApplyMany (PsExpr.constE (psRootName "compilerThrow") [])
+                    [reader, state, error, type, value])
+            psElabResolvedTerm context term (some (psElabDoType ops type))
+
+          def psElabDoEffectTerm
+              (elaborate :
+                PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
+                Except PsElabError PsElabTermResult)
+              (ops : PsElabDoOps) (context : PsElabContext)
+              (type : PsExpr) (action : PsSyntaxTerm) :
+              Except PsElabError PsElabTermResult := do
+            match psElabDoPureArgument context action with
+            | some value =>
+                let checked <- elaborate context value (some type)
+                psElabDoPure ops checked.context
+                  (psMetaInstantiate checked.context.metaContext type) checked.term
+            | none =>
+                match psElabDoBuiltinArgument context "throw" action with
+                | none => elaborate context action (some (psElabDoType ops type))
+                | some value =>
+                    let errorType <- psElabDoErrorType ops
+                    let checked <- elaborate context value (some errorType)
+                    psElabDoRaise ops checked.context
+                      (psMetaInstantiate checked.context.metaContext type) checked.term
+
+          ''')
+          p = elab+'Do.lean'
+          replace(p, 'import Ps.Elab.DoWhile', 'import Ps.Elab.DoTry')
+          replace(p, 'def psElabDoBodyWithState\n', 'def psElabDoBodyWithExit\n')
+          # Only the worker gets a separate source return type/control continuation.
+          text = load(p)
+          prefix, suffix = text.split('def psElabDoBody\n', 1)
+          old = '(ops : PsElabDoOps) (result : PsExpr) :'
+          assert prefix.count(old) == 1
+          prefix = prefix.replace(old, '(ops : PsElabDoOps) (returnType result : PsExpr)\n    (onReturn : PsElabDoReturn) (liftTerminal : Bool) :')
+          files[p] = prefix + 'def psElabDoBody\n' + suffix
+          replace(p, 'let smaller := psElabDoBodyWithState remaining elaborate ops result',
+              'let smaller := psElabDoBodyWithExit remaining elaborate ops returnType result onReturn liftTerminal')
+          replace(p, 'match elaborate context value (some result) with',
+              'match elaborate context value (some returnType) with')
+          replace(p, '''                psElabDoPure ops valueResult.context
+                            (psMetaInstantiate valueResult.context.metaContext result) valueResult.term''',
+              '                onReturn valueResult.context valueResult.term')
+          insert(p, '        | PsSyntaxTerm.doWhileE condition loopBody rest _ =>', '''        | PsSyntaxTerm.doTryE action name recovery rest _ =>
+                      psElabDoTry
+                        (fun innerResult innerReturn =>
+                          psElabDoBodyWithExit remaining elaborate ops returnType
+                            innerResult innerReturn true)
+                        smaller ops returnType result onReturn context state
+                        action name recovery rest finish
+          ''')
+          replace(p, '        | _ => psElabDoEffectTerm elaborate ops context result body', '''        | _ =>
+                      if liftTerminal then
+                        psElabDoLiftTerminal elaborate ops returnType result onReturn context body
+                      else psElabDoEffectTerm elaborate ops context result body''')
+          insert(p, 'def psElabDoBody\n', '''-- Preserve the established public controller entry point. A nested do term
+          -- gets its own return context; direct nested statements are parser-spliced.
+          def psElabDoBodyWithState
+              (fuel : Nat)
+              (elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
+                Except PsElabError PsElabTermResult)
+              (ops : PsElabDoOps) (result : PsExpr) : PsElabDoForNext :=
+            psElabDoBodyWithExit fuel elaborate ops result result
+              (fun current value => psElabDoPure ops current
+                (psMetaInstantiate current.metaContext result) value) false
+
+          ''')
+          insert(elab+'Term.lean', '            | .doWhileE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock',
+              '            | .doTryE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock\n')
+          insert(elab+'DoWhile.lean', '  | .doIfE _ yes no rest _ =>', '''  | .doTryE action _ recovery rest _ =>
+                psElabDoWhileNestedLoop action || psElabDoWhileNestedLoop recovery ||
+                  psElabDoWhileNestedLoop rest
+          ''')
+          insert(elab+'Recursion.lean', '        | PsSyntaxTerm.doWhileE condition loopBody rest span =>', '''        | PsSyntaxTerm.doTryE action name recovery rest span => do
+                      let actionResult <- smaller context action
+                      let recoveryResult <- smaller (psElabRecursionPushName context name) recovery
+                      let restResult <- smaller context rest
+                      pure (PsElabRecursionWalkResult.mk
+                        (.doTryE actionResult.term name recoveryResult.term restResult.term span)
+                        (psListAppend actionResult.changedIds
+                          (psListAppend recoveryResult.changedIds restResult.changedIds)))
+          ''')
+          p = 'psc1/test/TypedErrorFixtures.lean'
+          text = load(p)
+          assert text.count('partial def errorWhile') == 1
+          total, loop = text.split('partial def errorWhile', 1)
+          assert not Path('psc1/test/TypedErrorWhileFixture.lean').exists()
+          files['psc1/test/TypedErrorWhileFixture.lean'] = 'partial def errorWhile' + loop
+          files[p] = total.rstrip() + '\n'
+          replace(p, '| Except.error error => throw error', '| Except.error error => Except.error error')
+          replace(p, '| Except.ok value => return (value + 100)', '| Except.ok value => Except.ok (value + 100)')
+          replace(p, '| Except.error error => return (error + 1000)', '| Except.error error => Except.ok (error + 1000)')
+          replace(p, '| Except.error value => return (value + 100)', '| Except.error value => Except.ok (value + 100)')
+          replace(p, '| Except.ok value => return (value + 200)', '| Except.ok value => Except.ok (value + 200)')
+          p = 'psc1/test/TypedErrorTests.lean'
+          files[p] = load(p).replace('let mut local : Nat', 'let mut localValue : Nat').replace('local :=', 'localValue :=').replace('local + error', 'localValue + error').replace('return local\\n', 'return localValue\\n')
+          p = 'psc1/lakefile.lean'
+          insert(p, '    `Ps.Elab.Do,', '    `Ps.Elab.DoTry,\n')
+          files[p] = load(p).rstrip() + '''
+
+          lean_lib PsTypedErrorReference where
+            srcDir := "test"
+            roots := #[`TypedErrorFixtures, `TypedErrorWhileFixture]
+
+          lean_exe psc1_typed_error_oracle where
+            srcDir := "test"
+            root := `TypedErrorOracle
+
+          lean_exe psc1_typed_error_tests where
+            srcDir := "test"
+            root := `TypedErrorTests
+          '''
+          p = '.github/workflows/psc1-scoped-correctness.yml'
+          replace(p, 'psc1_operator_tests psc1_ordinary_tests\n',
+              'psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests\n')
+          insert(p, '      - name: Execute runtime contract against pinned Lean reference results', '''      - name: Execute typed-error admission and seven-target reference comparisons
+                  if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+                  working-directory: psc1
+                  run: |
+                    set -euo pipefail
+                    mkdir -p dist/scoped-correctness/typed-errors
+                    result=0
+                    if ! .lake/build/bin/psc1_typed_error_tests 2>&1 | tee dist/scoped-correctness/typed-errors/native-tests.log; then result=1; fi
+                    if ! node scripts/typed-error-conformance-tests.mjs; then result=1; fi
+                    exit "$result"
+          ''')
+          replace(p, '          export PSC1_WHILE_EVIDENCE=ordinary-while-conformance-python314',
+              '          export PSC1_ERROR_TARGETS=python\n          export PSC1_ERROR_EVIDENCE=typed-errors-python314\n          export PSC1_WHILE_EVIDENCE=ordinary-while-conformance-python314\n          node scripts/typed-error-conformance-tests.mjs')
+          p = 'psc1/docs/PSC1_PRACTICAL_CORE_STATUS.json'
+          status = json.loads(load(p))
+          status['currentMilestones'].append({'id':'typed-error-handlers', 'status':'implemented-awaiting-ci',
+              'branch':'feature/psc1-typed-errors-20261020', 'baselineCommit':'1e63628169459539783450e28c641f3f70bf701f',
+              'scope':'single typed catch, contextual throw, distinct early-return packet, lexical and CompilerM rollback; qualification pending'})
+          matches = [f for f in status['features'] if f['id'] in ['typed-errors','errors']]
+          assert len(matches) == 1, [f['id'] for f in status['features']]
+          matches[0]['pendingImplementation'] = {'status':'implemented-awaiting-ci',
+              'source':'psc1/packages/elab/src/Ps/Elab/DoTry.lean',
+              'tests':['psc1/test/TypedErrorTests.lean','psc1/test/TypedErrorOracle.lean','psc1/scripts/typed-error-conformance-tests.mjs']}
+          files[p] = json.dumps(status, indent=2) + '\n'
+          p = 'psc1/AI_WORK_STATE.md'
+          files[p] = '''# PSC1 typed-error continuation — implementation awaiting CI
+
+          Branch: `feature/psc1-typed-errors-20261020`. Base: qualified PR #166 head
+          `1e63628169459539783450e28c641f3f70bf701f` (Linux run 39408221046).
+          Existing PRs #162/#163/#165/#166 remain intact. No merge or publication.
+
+          New source work: contextual typed throw and a single try/catch inside do.
+          Both frontends share one AST and handler elaborator. The handler returns
+          checked `Except ReturnValue MutableState` packets inside the base effect;
+          only the base error is caught, and the following continuation runs outside
+          that catch. Catch arms start from pre-try lexical mutable values. Existing
+          checked CompilerM catch additionally restarts from its original effect state.
+          Local/global bindings named throw keep precedence. No host exceptions,
+          runtime traps, admission failures, timeouts or compiler resource errors
+          become caught source values.
+
+          Qualification is pending: native admission/IR/roundtrip/scope tests,
+          exact-source pinned Lean oracle, checked and ordinary loops on all seven
+          targets, minimum Python and failure/publication boundaries are wired into
+          scoped Linux CI. No full self-host/census/fixed-point tests. `verified`
+          remains fail-closed. No added axiom, runtime fuel or backend certificate.
+
+          Read `docs/PSC1_TYPED_ERRORS.md`. Do not claim this new slice qualified
+          until its own exact-head focused CI succeeds. Prior receipts below retain
+          their original scope. All fourteen complete flags remain false.
+
+          ---
+
+          ''' + load(p)
+          files['psc1/docs/PSC1_TYPED_ERRORS.md'] = '''# PSC1 typed errors: one checked handler boundary
+
+          Status: implementation awaiting its own focused Linux qualification.
+          Base: PR #166, `1e63628169459539783450e28c641f3f70bf701f`.
+          Semantic authority: official Lean 4.35.0,
+          `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+
+          ## Selected syntax and semantics
+
+          Inside typed do, native Lean accepts `try ... catch error => ...` with
+          selected layout or braces. PS uses `try { ... } catch error => { ... }`.
+          `throw error` uses the current Except or checked CompilerM error type.
+          Contextual `throw(error)` is equivalent; existing local/global names win.
+          Wrong error types, missing error channels, escaping handler binders and
+          catch binders shadowing a mutable local fail closed.
+
+          This slice uses one catch binder. Finally, multiple handlers, annotated
+          or pattern catches and arbitrary MonadExcept instances remain deferred.
+          Existing while restrictions and public target ABI limits are unchanged.
+
+          ## Checked construction
+
+          `DoTry.lean` constructs an internal control packet using existing checked
+          Except and Prod definitions: `Except ReturnValue MutableState` inside
+          the source base effect. The packet error tag means EARLY RETURN and is
+          distinct from the outer typed error. Successful fallthrough carries the
+          visible mutable values. A base-effect failure discards those values and
+          enters the handler from the original lexical state. Existing CompilerM
+          `compilerTryCatch` also restarts from its original library state.
+
+          The packet is eliminated only AFTER the base catch. Consequently a
+          later throw is not accidentally caught by the preceding handler, a
+          handler rethrow propagates outward, and early return skips the rest.
+          Nested handlers and parenthesized do computations preserve their own
+          return boundaries. No target exception instruction or unchecked control
+          primitive is added. Source admission and typed IR validate all terms.
+
+          The pinned design reference is Lean's
+          `src/Lean/Elab/BuiltinDo/TryCatch.lean`: it explicitly explains why a
+          following continuation cannot be pushed under tryCatch. The PSC1 code
+          is an independent bounded construction using its existing Core helpers.
+
+          ## Evidence to collect
+
+          The exact reference fixtures compile under pinned native Lean and PSC1,
+          then translate to PS. Native tests cover admission, strict IR, canonical
+          graph roundtrips, lexical scopes and actual CompilerM rollback. Runtime
+          tests compare base error tags and payloads, success, nested/rethrown
+          errors, capture snapshots, loop exits and post-handler errors on seven
+          targets through public Bool predicates. Ordinary while is separately
+          classified. Minimum Python repeats both lanes and grammars.
+
+          Previous artifact generations must survive wrong-source, checked/partial
+          and unavailable-verified requests. Neither runtime comparisons nor
+          kernel admission proves backend semantic preservation. All original
+          qualification receipts remain historical and unchanged.
+          '''
+          for name, text in files.items():
+              Path(name).parent.mkdir(parents=True, exist_ok=True)
+              Path(name).write_text(text)
+              print('CHANGED', name)
+          print('SOURCE VISITOR AUDIT: doWhileE contexts')
+          for p in Path('psc1/packages').rglob('*.lean'):
+              lines = p.read_text().splitlines()
+              for i, line in enumerate(lines):
+                  if 'doWhileE' in line:
+                      print(str(p)+':'+str(i+1), '\n'.join(lines[max(0,i-1):i+4]))
+          PY
+          git diff --check
+          git diff --stat
+      - name: Commit reviewed source integration without force
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add psc1 .github/workflows/psc1-scoped-correctness.yml
+          git commit -m 'feat(psc1): integrate typed catch boundaries and exact-source cross-target tests'
+          git push origin HEAD:refs/heads/feature/psc1-typed-errors-20261020
+          echo "Integrated head $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"

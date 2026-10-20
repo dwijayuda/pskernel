@@ -59,9 +59,10 @@ def psKernelExprV2Lookup
 def psKernelExprV2Push
     (arena : PsKernelExprV2Arena) (entry : PsKernelExprV2Entry) :
     PsKernelExprV2Arena × Nat :=
-  Prod.mk
-    { nodes := Array.push arena.nodes entry }
-    (Array.size arena.nodes)
+  let next : PsKernelExprV2Arena := {
+    nodes := Array.push arena.nodes entry
+  };
+  Prod.mk next (Array.size arena.nodes)
 
 def psKernelExprV2With1
     (arena : PsKernelExprV2Arena) (child : Nat)

@@ -812,7 +812,7 @@ private def testPortableHeadReduction : IO Unit := do
       (psKernelExprV2PortableHeadStepChecked a10 root)
     let actual ← expectV2
       (psKernelExprV2ChunkedDecode resultArena resultId)
-    requireV2 ("head-step-"+label)
+    requireV2 s!"head-step-{label}"
       (psKernelExprEq actual expected && psKernelExprEqual actual expected)
   let (neutralArena,neutralRoot) ← expectV2
     (psKernelExprV2PortableHeadStepChecked a10 neutral)

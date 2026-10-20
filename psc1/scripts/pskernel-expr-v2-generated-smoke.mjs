@@ -37,6 +37,7 @@ const portableValidate=load("psKernelExprV2PortableValidate");
 const portableLift=load("psKernelExprV2PortableLiftChecked");
 const portableInstantiate=load("psKernelExprV2PortableInstantiate1Checked");
 const portableHeadStep=load("psKernelExprV2PortableHeadStepChecked");
+const portableHeadSequence=load("psKernelExprV2PortableHeadSequenceChecked");
 const chunkedMkLet=load("psKernelExprV2ChunkedMkLet");
 const chunkedMkMData=load("psKernelExprV2ChunkedMkMData");
 const chunkedMkSort=load("psKernelExprV2ChunkedMkSort");
@@ -190,6 +191,22 @@ const invalidHead=portableHeadStep(headBeta.fst,999999n);
 demand(invalidHead&&"error" in invalidHead,"head-invalid-root-rejected");
 const forgedHead=portableHeadStep(forgedChunk,0n);
 demand(forgedHead&&"error" in forgedHead,"head-forged-metadata-rejected");
+
+const compositeLet=accepted(chunkedMkLet(metadata.fst,nameConstructors.anonymous,
+  sourceWithSort.snd,sourceWithSort.snd,metadata.snd,false),"head-sequence-input");
+const headSequenceDone=accepted(
+  portableHeadSequence(4n,compositeLet.fst,compositeLet.snd),
+  "head-sequence-composition");
+demand(headSequenceDone.snd===sourceWithSort.snd,
+  "head-sequence-beta-zeta-mdata-normal-form");
+const headSequenceExhausted=portableHeadSequence(3n,compositeLet.fst,compositeLet.snd);
+demand(headSequenceExhausted&&"error" in headSequenceExhausted,
+  "head-sequence-resource-exhaustion");
+const headNeutral=accepted(portableHeadSequence(1n,sourceWithSort.fst,sourceWithSort.snd),
+  "head-sequence-neutral");
+demand(headNeutral.snd===sourceWithSort.snd,
+  "head-sequence-neutral-identity");
+
 
 
 

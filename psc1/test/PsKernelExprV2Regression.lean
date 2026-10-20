@@ -1425,6 +1425,50 @@ private def testPagedArena : IO Unit := do
       | Except.ok _ => false)
   IO.println "PSC1_EXPR_V2_PAGED: PASS nodes=512 capacities=5"
 
+
+/-
+A realistic DAG construction and lookup pattern: a deep App spine reuses
+one very old leaf while extending a recent head. Both chunked and paged
+arenas must compute identical hashes, flags, depths, loose-bvar ranges,
+and node IDs. Neither a hash collision nor a fast node lookup grants
+admission authority.
+-/
+private def testPagedSharedAppSpines : IO Unit := do
+  let (firstChunk,leafChunk) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let (firstPaged,leafPaged) ← expectV2
+    (psKernelExprV2PagedMkBVar psKernelExprV2PagedEmpty 0)
+  let mut chunked := firstChunk
+  let mut paged := firstPaged
+  let mut chunkRoot := leafChunk
+  let mut pageRoot := leafPaged
+  let count : Nat := 1024
+  for _ in [:count] do
+    let (nextChunk,idChunk) ← expectV2
+      (psKernelExprV2ChunkedMkApp chunked chunkRoot leafChunk)
+    let (nextPage,idPage) ← expectV2
+      (psKernelExprV2PagedMkApp paged pageRoot leafPaged)
+    chunked := nextChunk
+    paged := nextPage
+    chunkRoot := idChunk
+    pageRoot := idPage
+    unless chunkRoot == pageRoot do
+      throw (IO.userError "PSC1_V2_PAGED_APP_NODE_ID_MISMATCH")
+  let validPage ← expectV2 (psKernelExprV2PagedValidate paged)
+  let validChunk ← expectV2 (psKernelExprV2PortableValidate chunked)
+  let old ← expectV2 (psKernelExprV2ChunkedRequire validChunk chunkRoot)
+  let fresh ← expectV2 (psKernelExprV2PagedRequire validPage pageRoot)
+  requireV2 "paged-shared-spine-root-metadata"
+    (psKernelExprV2SameMetadata old fresh)
+  requireV2 "paged-shared-spine-exact-depth" (fresh.depth == count + 1)
+  requireV2 "paged-shared-spine-index-range" (fresh.looseRange == 1)
+  requireV2 "paged-shared-spine-page-count" (paged.size == count + 1)
+  requireV2 "paged-shared-spine-old-leaf-access"
+    (match psKernelExprV2PagedFind paged leafPaged with
+      | Option.some entry => entry.looseRange == 1
+      | Option.none => false)
+  IO.println "PSC1_EXPR_V2_PAGED_SPINE: PASS nodes=1025"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -1437,6 +1481,7 @@ def main : IO Unit := do
   testChunkedArena
   testPagedSmartConstructors
   testPagedArena
+  testPagedSharedAppSpines
   testChunkedLiftDifferential
   testSharedLift
   testPortableInstantiation

@@ -521,6 +521,55 @@ measureLookups("paged");
 measureLookups("chunked");
 console.log("PSC1_EXPR_V2_LOOKUP_TIMINGS "+JSON.stringify(lookupResults));
 
+// Realistic DAG construction: every application references a newly
+// built head and the oldest BVar leaf. Both arenas must compute the
+// SAME checked metadata while preserving old and recent node access.
+// Construction is measured separately from replay validation.
+const spineMeasures=[];
+function buildSharedSpine(kind,depth){
+  const isPaged=kind==="paged";
+  const start=accepted(
+    isPaged?pagedMkBVar(pagedEmptyWithLimit(64n),0n):
+      chunkedMkBVar(chunkedEmptyWithLimit(64n),0n),
+    "spine-leaf-"+kind);
+  let arena=start.fst, root=start.snd;
+  const leaf=root;
+  const startTime=performance.now();
+  for(let i=0;i<depth;i++){
+    const next=accepted(
+      isPaged?pagedMkApp(arena,root,leaf):
+        chunkedMkApp(arena,root,leaf),
+      "spine-append-"+kind);
+    arena=next.fst;
+    root=next.snd;
+  }
+  const buildMs=performance.now()-startTime;
+  const find=isPaged?pagedFind:chunkedFind;
+  const value=acceptedOption(find(arena,root),"spine-root-"+kind);
+  const leafValue=acceptedOption(find(arena,leaf),"spine-leaf-"+kind);
+  if(value.depth!==BigInt(depth+1)||value.looseRange!==1n||
+     value.hasFVar!==false || leafValue.looseRange!==1n ||
+     arena.size!==BigInt(depth+1))
+    throw Error("PSC1_V2_SPINE_METADATA_PARITY "+kind+" "+depth);
+  const checksum=value.hash+leafValue.hash+value.looseRange+value.depth;
+  return {arena,root,checksum,buildMs};
+}
+for(const depth of [1024,4096,8192]){
+  let expectedChecksum=null;
+  for(const kind of ["chunked","paged","paged","chunked"]){
+    const result=buildSharedSpine(kind,depth);
+    if(expectedChecksum===null)expectedChecksum=result.checksum;
+    if(expectedChecksum!==result.checksum)
+      throw Error("PSC1_V2_SPINE_HASH_MISMATCH "+kind+" "+depth);
+    spineMeasures.push({kind,depth,
+      build_ms:Number(result.buildMs.toFixed(3)),
+      node_count:Number(result.arena.size),
+      checksum:String(result.checksum)});
+  }
+}
+console.log("PSC1_EXPR_V2_SPINE_TIMINGS "+JSON.stringify(spineMeasures));
+
+
 console.log("PSC1_EXPR_V2_JS_SUMMARY "+JSON.stringify({
   node:process.version,source_bytes:fs.statSync(filename).size,
   rss_bytes:process.memoryUsage().rss,

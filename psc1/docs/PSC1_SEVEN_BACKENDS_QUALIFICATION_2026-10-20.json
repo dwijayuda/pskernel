@@ -1,0 +1,126 @@
+{
+  "schema": "psc1-seven-backend-checkpoint/1",
+  "observedOn": "2026-10-20",
+  "status": "passed-scoped-execution",
+  "branchHeadCommit": "1f59f46bca18e5eb2d8a6bc9670e6f632202af66",
+  "testedMergeCommit": "951afe99a0c876cfc87b3bb6f192b6688b33b3e9",
+  "workflowRun": 39366310670,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39366310670",
+  "pullRequest": 165,
+  "stackedOn": {
+    "pullRequest": 163,
+    "commit": "ea03ce125ad4d4902070d6fef92d92b51cb2e857"
+  },
+  "independentAdmission": {
+    "provider": "official Lean",
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "changed": false
+  },
+  "runtimeContract": "psc1-runtime-semantics/1",
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "sourceSyntaxes": [
+    "lean",
+    "ps"
+  ],
+  "observedCoverage": {
+    "runtimeOracleBundles": 14,
+    "sourceScriptingArtifactGroups": 22,
+    "scriptingFailureAndNegativeGroups": 4,
+    "directIrBoundaryGroups": 10,
+    "combinedAndRuntimeFreeGroups": 5,
+    "npmMetadataBoundaryGroups": 10,
+    "priorScopedBackendGroups": 24,
+    "priorPracticalFormsExecutedArtifacts": 36,
+    "pythonMinimumAtThisCheckpoint": "3.14.8 constant and scalar ABI compatibility checks; main suite on 3.15.0",
+    "deepRecursion": 100000,
+    "unboundedDecimalDigits": 5001,
+    "pythonDigitLimit": 640,
+    "packagePlatform": "linux-x64-glibc-2.39"
+  },
+  "toolVersions": {
+    "lean": "4.35.0",
+    "node": "22.23.3",
+    "npm": "10.9.9",
+    "typescriptConsumer": "7.0.2",
+    "rust": "1.90.0",
+    "wasmTools": "1.254.0",
+    "wasmtime": "49.0.4",
+    "python": "3.15.0",
+    "pythonMinimumCompatibility": "3.14.8",
+    "php": "8.5.11"
+  },
+  "package": {
+    "name": "proofscript",
+    "version": "0.1.0-psc1.2",
+    "publication": "unpublished",
+    "nativeBytes": 123037384,
+    "nativeSha256": "85ade4d58f23d0dc22dcd7b2ab207b89b72cdd963a6cbea17e62ff81c1c4120b",
+    "tarballBytes": 37342712,
+    "tarballSha256": "22a0c960967fc999359e314893388a8ef7665f13dda80534ca535c752aac54ad",
+    "bundledNativeLibraries": [],
+    "offlineLocalInstall": true,
+    "offlineGlobalInstall": true,
+    "nativeNpmIdentityAgreement": true,
+    "generatedJavaScriptExecuted": true,
+    "typeScriptInstalledInPackage": false
+  },
+  "optionalLibrary": {
+    "packages": [
+      "@psc1-demo/seed@0.0.1",
+      "@psc1-demo/naturals@0.0.1"
+    ],
+    "capturedSources": 4,
+    "independentlyAdmitted": true,
+    "publicExports": [
+      "answer"
+    ],
+    "result": "42",
+    "sourceClosureSha256": "e7c8485993e2db759a5aec6e95182c37fae12d71317a03c34e6bc94bce80744c",
+    "outputSha256": "902932d3de1d948782f089072e98092873e09d97c202fe05ffad021f2a6c20cf",
+    "privateModuleRefused": true,
+    "incompatibleProfileRefused": true,
+    "illTypedDependencyRefused": true,
+    "failedBuildPreservedPrevious": true
+  },
+  "artifact": {
+    "id": 12239956282,
+    "name": "psc1-scoped-correctness-951afe99a0c876cfc87b3bb6f192b6688b33b3e9",
+    "bytes": 37743282,
+    "digest": "sha256:0e0578ac9a45ed8b5c24ff0b394588b6d4c5a69af54bcc2327b815b6e088ae51",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39366310670/artifacts/12239956282",
+    "expiresAt": "2026-11-03T03:54:04Z"
+  },
+  "assurance": {
+    "behaviorallyVerified": false,
+    "verifiedRequest": "refused",
+    "ordinaryBodyPairing": "preserved"
+  },
+  "notPerformed": [
+    "full self-host",
+    "compiler/kernel fixed-point",
+    "merge",
+    "release",
+    "npm publication"
+  ],
+  "limitations": [
+    "retained subset plus qualified Practical Core slice, not all 14 families",
+    "no Int division/modulo or fixed-width/floating direct-profile qualification",
+    "Python/PHP scalar public ABI; component public ABI remains Bool-only",
+    "declaration-start origins for Python/PHP, not full debugger maps",
+    "PHP recursion uses heap frames including tail calls",
+    "nullary scripting declarations may be re-evaluated, without memoization",
+    "initial native npm package is Linux x64/glibc only",
+    "package metadata/lockfiles are not yet in general source-closure provenance",
+    "execution tests do not establish backend-preservation proofs"
+  ],
+  "laterHeadPolicy": "This is an observed immutable checkpoint. Later heads require their own successful workflow and generated SEVEN_BACKEND_QUALIFICATION.json."
+}

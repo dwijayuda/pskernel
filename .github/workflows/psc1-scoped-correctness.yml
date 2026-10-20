@@ -170,9 +170,23 @@ jobs:
       - name: Execute Python and PHP ABI, recursion and failure boundaries
         working-directory: psc1
         run: node scripts/script-backend-tests.mjs
+      - name: Execute full scripting and runtime corpus on minimum Python
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          export PSC1_PYTHON="$PSC1_PYTHON_314"
+          export PSC1_SCRIPT_TARGETS=python
+          export PSC1_SCRIPT_EVIDENCE=script-backends-python314
+          export PSC1_CONFORMANCE_TARGETS=python
+          export PSC1_RUNTIME_EVIDENCE=runtime-conformance-python314
+          node scripts/runtime-conformance-tests.mjs
+          node scripts/script-backend-tests.mjs
       - name: Pack and qualify installed native npm toolchain and real source libraries
         working-directory: psc1
         run: node scripts/npm-native-distribution.mjs
+      - name: Consolidate exact-commit seven-target and package qualification
+        working-directory: psc1
+        run: node scripts/seven-backend-qualification.mjs
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4

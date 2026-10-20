@@ -13,6 +13,7 @@
     "target": "php",
     "minimumRuntime": "8.5",
     "runtimeVersion": "psc1-php-runtime/1",
-    "qualification": "pending"
+    "qualification": "scoped-linux-execution",
+    "qualificationReceipt": "../../docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json"
   }
 }

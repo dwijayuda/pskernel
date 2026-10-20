@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const native = process.env.PSC1_NATIVE || path.join(root, '.lake/build/bin/psc1');
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-script-backends-'));
-const evidence = path.join(root, 'dist/scoped-correctness/script-backends');
+const evidence = path.join(root, 'dist/scoped-correctness', process.env.PSC1_SCRIPT_EVIDENCE || 'script-backends');
 fs.mkdirSync(evidence, { recursive: true });
 const env = { ...process.env, PSC1_HOST_TOOLS: path.join(root, 'host-tools/artifacts.mjs') };
 const records = [];
@@ -125,7 +125,9 @@ function retain(artifact, observations) {
 }
 
 try {
-  for (const target of ['python', 'php']) {
+  const targets = (process.env.PSC1_SCRIPT_TARGETS || 'python,php').split(',');
+  assert.ok(targets.length && targets.every(target => ['python', 'php'].includes(target)));
+  for (const target of targets) {
     for (const syntax of ['lean', 'ps']) {
       const constant = build(source('constant.' + syntax, 'def answer : Bool := true\n'),
         target, target + '-constant-' + syntax);

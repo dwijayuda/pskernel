@@ -17,8 +17,8 @@ preserved verbatim in [the historical document](docs/history/ARCHITECTURE_BEFORE
 5. `Ps.Erasure` removes proofs and type-only declarations and selects referenced runtime
    prelude declarations. `Ps.CompilerIr` checks the resulting typed executable IR.
 6. `Ps.BackendCommon.Plan` shares target identities, public capability checks and the
-   closed specialization/revalidation plan. Rust retains its checked generic IR; Wasm
-   retains its existing checked target-specific specialization boundary.
+   closed specialization/revalidation plan. JS, TS, Python, PHP and both Wasm paths use
+   that closed plan; Rust retains its checked generic IR.
 7. Direct backend packages lower and print target code. Host tools perform target syntax
    checking, formatting, final source-map observation and filesystem publication.
 8. Complete checksummed bundles are staged privately and exposed by one atomic generation
@@ -79,14 +79,14 @@ it is not an implicit dependency of newly generated Python/PHP programs.
 
 Runtime-free programs should use native target values and operators. Helpers must be
 selected by required operations and their dependencies; emitted bundles record the
-runtime contract/version and checksums. Shared external runtimes require an explicit
-option; the initial distribution prefers self-contained readable bundles.
+runtime contract/version and checksums. A shared external runtime mode is not implemented; generated bundles include their
+selected readable helpers.
 
 ## Direct TS and JS
 
 DirectTS prints TypeScript. DirectJS prints JavaScript without invoking a TypeScript
-compiler. Combined output must capture and admit source once, share the closed public
-plan, print both independently and validate both before publication. A TypeScript checker
+compiler. Combined output captures and admits source once, shares the closed public
+plan, prints both independently and validates both before publication. A TypeScript checker
 used in CI is an independent consumer test, not a hidden DirectJS code generator.
 
 ## npm and future self-hosting

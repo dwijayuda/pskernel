@@ -1,43 +1,73 @@
 # PSC1 current work state — seven direct backends and npm
 
 Updated 2026-10-20. Branch: `feature/psc1-seven-backend-architecture-20261020`.
-Stacked on PR #163 at verified HEAD `ea03ce125ad4d4902070d6fef92d92b51cb2e857`.
-Parent Linux run [39349606554](https://github.com/dwijayuda/pskernel/actions/runs/39349606554)
-is successful. The preserved Practical Core state is in
-`docs/history/AI_WORK_STATE_BEFORE_SEVEN_BACKENDS_2026-10-20.md`.
+Draft [PR #165](https://github.com/dwijayuda/pskernel/pull/165) is stacked on PR #163
+at `ea03ce125ad4d4902070d6fef92d92b51cb2e857`; repair PR #162 stays intact.
 
-## Scope and authorization
+## Observed qualification
 
-Implement the supplied seven-backend/npm brief through reviewable changes. GitHub and
-Linux cloud CI only; no local repository execution, full self-host/census/fixed-point
-runs, unrelated branch edits, force updates, merges, releases or npm publication.
+Implementation head `1f59f46bca18e5eb2d8a6bc9670e6f632202af66` passed
+[Linux run 39366310670](https://github.com/dwijayuda/pskernel/actions/runs/39366310670).
+The tested merge commit was `951afe99a0c876cfc87b3bb6f192b6688b33b3e9`.
+All seven direct targets executed the pinned reference corpus in both source
+grammars. New scripting ABI/large-integer/recursion/failure tests, direct IR
+boundaries, combined TS/JS publication, preserved source/native/kernel regressions
+and native npm/source-library installation all passed.
 
-Official Lean 4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` remains the
-independent admission provider. Preserve exact captured source, checked logical/runtime
-pairing, typed IR and specialization validation, public ownership, artifacts and assurance.
-The owned kernel remains separately tested. Verified execution remains unavailable.
+This is an immutable observed checkpoint. Later heads require their own successful
+PR check. The current workflow emits `SEVEN_BACKEND_QUALIFICATION.json` for its
+exact tested and branch-head commits and additionally runs the full Python corpus
+on both the minimum and current interpreter lines. See
+[backend conformance](docs/PSC1_BACKEND_CONFORMANCE.md) and
+[the checkpoint receipt](docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json).
 
-## Audit and implementation in progress
+## Completed architecture
 
-- Audited the actual source architecture, active checkpoint and successful parent CI.
-- Archived the stale architecture document and wrote current native architecture/decisions.
-- Added the minimal backend-common target identity, capability and closed-plan module.
-  Commit `ee799b7ea84be414c84733d097f8454b404ba9b4` passed the full focused Linux suite,
-  run [39358447353](https://github.com/dwijayuda/pskernel/actions/runs/39358447353).
-- DirectPython, DirectPHP and native npm packaging/source resolution proceed in isolated
-  branches. Integration must inspect their actual trees and retain history.
-- New targets are **not yet qualified**. Existing target qualification belongs to the parent.
-- Structured export inputs replace host source-string rewriting for JS/TS/Rust.
-- JS/TS now select UTF-8/stack helper groups; pure TS expressions emit directly.
-- Combined `--targets ts,js --out-dir` shares one admitted plan and one atomic generation.
-  These follow-up changes await their own Linux qualification.
-- Int division/modulo, unqualified machine/float scalars, broad public aggregate ABIs and
-  missing Practical Core source forms remain unsupported unless separately implemented.
+- One native Lean compiler, with JS, TS, Rust, core Wasm, component Wasm, Python and PHP.
+- Shared target identity, public capability checks and closed specialization/
+  revalidation; Rust retains the checked generic path.
+- Structured public visibility before printing; no host stripping of export text.
+- Independent direct TS and JS in a single admitted/atomic combined request.
+- Selected backend-owned runtime helpers and dependencies, versioned runtime
+  contracts, exact artifact hashes and explicit Wasm runtime digest encoding.
+- Python `.py`/`.pyi` and PHP `.php`/Composer companions, actual interpreter
+  validation before publication, and declaration-start source origins.
+- Scalar host ABI guards, unbounded exact integers, raw UTF-8 semantics, lexical
+  closures and deep recursion without generated execution fuel.
+- Forward nullary values use pure thunks; PHP helper selection respects shadowing.
+- Unpublished native npm tarball with all built-in targets and locked host tools.
+- Importer-aware portable npm source libraries re-enter captured independent
+  admission; actual two-library canary executes `answer = 42`.
 
-## Next execution
+## Preserved authority and scope
 
-Integrate target printers and selective runtimes, native CLI/publication and source origins.
-Build all relevant focused native tests in Linux Actions, execute actual generated
-Python/PHP plus the preserved five-target suites, test TS/JS combined generation and native
-npm installation with a real optional source library. Fix failures at the responsible layer.
-Record exact source SHA, CI run, runtime versions, output sizes and limitations.
+Official Lean **4.35.0**, commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, remains authoritative for admission.
+No admission policy or logical/runtime pairing shortcut was introduced. Raw IR
+wrappers and npm manifests confer no logical authority. The owned PSKernel-Core
+continues to compile and run its native regressions separately.
+
+`--assurance ordinary` retains the qualified explicit partial-function path.
+`--assurance verified` refuses because backend behavioral certificates are
+unavailable. Execution tests do not constitute backend-preservation proofs.
+
+All work and validation use GitHub and Linux cloud CI. No local repository build,
+full self-host/census/fixed-point run, unrelated branch update, force push, merge,
+release or npm publication was performed.
+
+## Remaining boundaries
+
+The compiler supports the retained subset and qualified Practical Core slice, not
+all fourteen feature families or unrestricted Lean. Int division/modulo,
+fixed-width/floating runtime scalars, general Python/PHP public aggregate ABIs and
+non-Bool component exports remain unqualified. Python/PHP source origins cover
+declaration starts. PHP tail recursion retains heap frames; nullary thunks can
+repeat work. The initial npm binary package is Linux x64/glibc only.
+
+Future source-language expansion, runtime adapters, additional platforms, formal
+behavioral certificates and full self-host qualification require separate work.
+Current commands, ABI/runtime details and installation are documented in
+[README](README.md), [architecture](ARCHITECTURE.md),
+[runtime semantics](docs/PSC1_RUNTIME_SEMANTICS.md) and
+[the npm guide](docs/PSC1_NPM_ECOSYSTEM.md). Historical current-state documents and
+the previous README/architecture/npm state remain preserved under `docs/history/`.

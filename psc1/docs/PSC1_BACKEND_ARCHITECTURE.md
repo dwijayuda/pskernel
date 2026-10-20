@@ -13,7 +13,7 @@ Implementation work is stacked on Practical Core PR #163; repair PR #162 stays i
 | Visibility depends on modifying printed source | `DirectBackend.lean::withoutExport`, `rustVisibility` | Architectural liability. Make public selection an input to printers, then check actual target output. |
 | Target selection, ABI rules and publication inventories are spread across host and CLI code | `DirectBackend.lean`, `Main.lean`, `artifacts.mjs::publish` | Small common target plan and explicit output descriptors; keep target-specific validation separate. |
 | ECMAScript/Rust prelude support is broadly emitted | `BackendTs.Module::psTsRuntimeSupport`, `BackendJs.Print::psJsPrintStackSafePrelude`, Rust runtime | Output-size liability, not logical unsoundness. New backends select helper closure; existing selective linking is changed only with real execution regressions. |
-| All Practical Core families are incomplete | `docs/PSC1_PRACTICAL_CORE_STATUS.json` | Deliberate scope boundary. Adding a backend is not permission for a language rewrite. |
+| Practical Core does not yet cover all fourteen families | `docs/PSC1_PRACTICAL_CORE_STATUS.json` | Deliberate scope boundary. Adding a backend is not permission for a language rewrite. |
 
 ## Decisions
 
@@ -71,3 +71,34 @@ qualification. Verified requests continue to refuse without fallback.
 Python 3.15.0 is the current stable release observed on 2026-10-20; Python 3.14 remains
 a supported line. PHP's stable series is 8.5. Minimum requirements and exact versions
 actually tested are recorded in the conformance receipt, not inferred from this survey.
+
+## Implemented runtime selection
+
+Native JS/TS printing now receives public visibility as structured input. The direct TS
+printer emits call-free expressions without a generator wrapper. UTF-8 and stack helper
+groups are selected from target IR. Rust uses an explicit helper catalogue with dependency
+metadata, and Cargo dependencies follow the native plan. Wasm selects the transitive helper
+call closure from lowered instructions while retaining user functions and closure references.
+
+Every native target describes its runtime under `psc1-runtime-semantics/1`. Source target
+hashes cover the canonical selected helper text before deterministic formatting. Wasm hashes
+cover `psc-wasm-ir-json/1:functions`, the selected lowered helper instruction definitions.
+The final artifact bytes have independent hashes in the same bundle. Runtime-free Boolean
+JS/TS/Rust/core-Wasm examples and the existing target suite passed at
+`5bf41561ca5031d4ecca61c614ea0ad4bfcf5908`,
+[run 39361050286](https://github.com/dwijayuda/pskernel/actions/runs/39361050286).
+
+A pinned native Lean oracle is used for numeric/Unicode/value-semantics comparisons. The
+source-level Boolean equality operator remains limited to Nat and Bool. String observations
+in the conformance fixture therefore use admitted length, byte-position and Char operations;
+no String equality syntax is introduced to make the test pass.
+
+## Integrated qualification
+
+Both new emitters, native npm installation and the real optional-library consumer passed
+at `1f59f46bca18e5eb2d8a6bc9670e6f632202af66`,
+[run 39366310670](https://github.com/dwijayuda/pskernel/actions/runs/39366310670).
+Python forward values and PHP lexical helper selection have direct-IR execution regressions.
+The runtime oracle executed all seven targets in both source grammars. See the
+[conformance record](PSC1_BACKEND_CONFORMANCE.md) for exact scope, interpreter versions,
+artifact hashes and the policy for later heads.

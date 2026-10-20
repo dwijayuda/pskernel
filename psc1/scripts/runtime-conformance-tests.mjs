@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const native = process.env.PSC1_NATIVE || path.join(root, '.lake/build/bin/psc1');
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-runtime-conformance-'));
-const evidence = path.join(root, 'dist/scoped-correctness/runtime-conformance');
+const evidence = path.join(root, 'dist/scoped-correctness', process.env.PSC1_RUNTIME_EVIDENCE || 'runtime-conformance');
 fs.mkdirSync(evidence, { recursive: true });
 const env = { ...process.env, PSC1_HOST_TOOLS: path.join(root, 'host-tools/artifacts.mjs') };
 const records = [];

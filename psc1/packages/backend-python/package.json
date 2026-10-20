@@ -13,6 +13,7 @@
     "target": "python",
     "minimumRuntime": "3.14",
     "runtimeVersion": "psc1-python-runtime/1",
-    "qualification": "pending"
+    "qualification": "scoped-linux-execution",
+    "qualificationReceipt": "../../docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json"
   }
 }

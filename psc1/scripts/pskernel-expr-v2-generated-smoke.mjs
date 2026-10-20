@@ -35,6 +35,11 @@ const chunkedMkBVar=load("psKernelExprV2ChunkedMkBVar");
 const chunkedMkApp=load("psKernelExprV2ChunkedMkApp");
 const portableValidate=load("psKernelExprV2PortableValidate");
 const portableLift=load("psKernelExprV2PortableLiftChecked");
+const portableInstantiate=load("psKernelExprV2PortableInstantiate1Checked");
+const chunkedMkSort=load("psKernelExprV2ChunkedMkSort");
+const chunkedMkLam=load("psKernelExprV2ChunkedMkLam");
+const nameConstructors=load("PsKernelName");
+const binderConstructors=load("PsKernelBinderInfo");
 const level=load("PsKernelLevel");
 const mkSort=load("psKernelExprV2MkSort");
 let arena=empty;
@@ -127,6 +132,36 @@ const forgedLift=portableLift(forgedChunk,0n,0n,1n);
 demand(forgedLift&&"error" in forgedLift,"portable-lift-rejects-forged-metadata");
 const missingLift=portableLift(shared,9999n,0n,1n);
 demand(missingLift&&"error" in missingLift,"portable-lift-rejects-invalid-root");
+
+const sourceWithSort=accepted(chunkedMkSort(shared,level.zero),"inst-shared-sort");
+const instClosed=accepted(
+  portableInstantiate(sourceWithSort.fst,root,sourceWithSort.snd),
+  "portable-instantiate-shared");
+const instRoot=acceptedOption(chunkedFind(instClosed.fst,instClosed.snd),"inst-root");
+demand(instRoot.looseRange===0n,"instantiate-closed-substitution");
+demand(instRoot.depth===sharedEntry.depth,"instantiate-preserves-depth");
+demand(instClosed.fst.size<=sourceWithSort.fst.size+13n,"instantiate-sharing-node-bound");
+demand(instRoot.node.fn===instRoot.node.arg,"instantiate-shared-children");
+
+const x1=accepted(chunkedMkBVar(sourceWithSort.fst,1n),"inst-bvar-one");
+const x2=accepted(chunkedMkBVar(x1.fst,2n),"inst-bvar-two");
+const lam=accepted(chunkedMkLam(x2.fst,nameConstructors.anonymous,
+  sourceWithSort.snd,x1.snd,binderConstructors.default),"inst-open-lambda");
+const instLam=accepted(portableInstantiate(lam.fst,lam.snd,x2.snd),
+  "instantiate-under-binder");
+const actualLam=acceptedOption(chunkedFind(instLam.fst,instLam.snd),"inst-lambda");
+demand(actualLam.looseRange===3n,"instantiate-binder-depth-capture-avoidance");
+const untouched=accepted(chunkedMkLam(lam.fst,nameConstructors.anonymous,
+  sourceWithSort.snd,firstId,binderConstructors.default),"inst-closed-lambda");
+const instUntouched=accepted(portableInstantiate(untouched.fst,untouched.snd,x2.snd),
+  "instantiate-closed-lambda");
+demand(instUntouched.snd===untouched.snd &&
+  instUntouched.fst.size===untouched.fst.size,"instantiate-preserves-bound-bvar");
+const instInvalid=portableInstantiate(sourceWithSort.fst,root,999999n);
+demand(instInvalid&&"error" in instInvalid,"instantiate-invalid-replacement-rejected");
+const instForged=portableInstantiate(forgedChunk,0n,0n);
+demand(instForged&&"error" in instForged,"instantiate-forged-metadata-rejected");
+
 
 
 

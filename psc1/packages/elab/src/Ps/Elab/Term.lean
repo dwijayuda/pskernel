@@ -2950,6 +2950,10 @@ def psElabTermWithFuel
             | .doBindE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doThenE _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doReturnE _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .doLetMutE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .doAssignE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .doIfE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .doEndE _ => Except.error PsElabError.doStatementOutsideBlock
             | .letE name declaredType value body _ =>
                 psElabLet
                   smaller

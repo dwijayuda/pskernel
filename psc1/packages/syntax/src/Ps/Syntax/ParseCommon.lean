@@ -53,6 +53,10 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .doBindE _ _ _ _ span => span
   | .doThenE _ _ span => span
   | .doReturnE _ span => span
+  | .doLetMutE _ _ _ _ span => span
+  | .doAssignE _ _ _ span => span
+  | .doIfE _ _ _ _ span => span
+  | .doEndE span => span
   | .lambda _ _ span => span
   | .forallE _ _ span => span
   | .letE _ _ _ _ span => span

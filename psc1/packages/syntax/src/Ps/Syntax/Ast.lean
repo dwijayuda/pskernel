@@ -44,6 +44,14 @@ inductive PsSyntaxTerm where
       (span : PsSourceSpan)
   | doThenE (action body : PsSyntaxTerm) (span : PsSourceSpan)
   | doReturnE (value : PsSyntaxTerm) (span : PsSourceSpan)
+  | doLetMutE
+      (name : PsSyntaxName) (type : Option PsSyntaxTerm)
+      (value body : PsSyntaxTerm) (span : PsSourceSpan)
+  | doAssignE
+      (name : PsSyntaxName) (value body : PsSyntaxTerm) (span : PsSourceSpan)
+  | doIfE
+      (condition thenBody elseBody rest : PsSyntaxTerm) (span : PsSourceSpan)
+  | doEndE (span : PsSourceSpan)
   | lambda
       (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (body : PsSyntaxTerm)

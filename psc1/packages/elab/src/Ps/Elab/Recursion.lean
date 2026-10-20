@@ -374,6 +374,52 @@ def psElabRecursionWalkWithFuel
                             valueResult.term bodyResult.term span)
                           (psListAppend (Prod.snd typeResult)
                             (psListAppend valueResult.changedIds bodyResult.changedIds)))
+        | PsSyntaxTerm.doLetMutE name type value body span =>
+            match psElabRecursionWalkOptionalType smaller context type with
+            | Except.error error => Except.error error
+            | Except.ok typeResult =>
+                match smaller context value with
+                | Except.error error => Except.error error
+                | Except.ok valueResult =>
+                    match smaller (psElabRecursionPushName context name) body with
+                    | Except.error error => Except.error error
+                    | Except.ok bodyResult =>
+                        Except.ok (PsElabRecursionWalkResult.mk
+                          (PsSyntaxTerm.doLetMutE name (Prod.fst typeResult)
+                            valueResult.term bodyResult.term span)
+                          (psListAppend (Prod.snd typeResult)
+                            (psListAppend valueResult.changedIds bodyResult.changedIds)))
+        | PsSyntaxTerm.doAssignE name value body span =>
+            match smaller context value with
+            | Except.error error => Except.error error
+            | Except.ok valueResult =>
+                -- Assignment creates a fresh value. Do not keep a stale
+                -- structural-subterm identity in the following sequence.
+                match smaller (psElabRecursionPushName context name) body with
+                | Except.error error => Except.error error
+                | Except.ok bodyResult =>
+                    Except.ok (PsElabRecursionWalkResult.mk
+                      (PsSyntaxTerm.doAssignE name valueResult.term bodyResult.term span)
+                      (psListAppend valueResult.changedIds bodyResult.changedIds))
+        | PsSyntaxTerm.doIfE condition thenBody elseBody rest span =>
+            match smaller context condition with
+            | Except.error error => Except.error error
+            | Except.ok conditionResult =>
+                match smaller context thenBody with
+                | Except.error error => Except.error error
+                | Except.ok thenResult =>
+                    match smaller context elseBody with
+                    | Except.error error => Except.error error
+                    | Except.ok elseResult =>
+                        match smaller context rest with
+                        | Except.error error => Except.error error
+                        | Except.ok restResult =>
+                            Except.ok (PsElabRecursionWalkResult.mk
+                              (PsSyntaxTerm.doIfE conditionResult.term thenResult.term
+                                elseResult.term restResult.term span)
+                              (psListAppend conditionResult.changedIds
+                                (psListAppend thenResult.changedIds
+                                  (psListAppend elseResult.changedIds restResult.changedIds))))
         | PsSyntaxTerm.record fields span =>
             match psElabRecursionWalkFields smaller fields context with
             | Except.error error => Except.error error

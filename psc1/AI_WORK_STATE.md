@@ -1,3 +1,44 @@
+# PSC1 current work state — Practical Core control flow and data
+
+Updated 2026-10-20. Branch: `feature/psc1-practical-control-data-20261020`.
+This continuation is stacked on seven-backend PR #165 at the independently
+re-fetched head `5539059a47c13a3dbc9806a504775b72f7bfd0fe`.
+PRs #162, #163 and #165 remain intact. The baseline passed
+[Linux run 39367216761](https://github.com/dwijayuda/pskernel/actions/runs/39367216761).
+
+## Current implementation milestone
+
+The first continuation slice adds a common procedural AST and checked functional
+lowering for lexical mutable locals, assignment, branch continuations and early
+return. Tuple/array construction reuses the existing checked datatypes. The
+runtime oracle and native tests are extended across the seven existing direct
+targets. Source changes in this checkpoint are awaiting their own focused Linux
+qualification; no full family is promoted to complete.
+
+The design retains expression-oriented executable IR. Assignments produce
+checked local values; branch continuations carry the selected mutable bindings.
+The independent official Lean provider still admits the complete logical graph,
+and ordinary execution retains exact logical/runtime body pairing.
+
+Pinned Lean source review identified two scope requirements:
+- A mutable local cannot be shadowed inside the same procedural controller.
+- A direct nested `do` statement splices into that controller. A parenthesized
+  `do` term or a lambda establishes a separate computation boundary.
+
+The implementation tests these distinctions rather than using host mutable cells.
+No new logical axiom, unchecked loop primitive, runtime fuel, backend certificate,
+package publication, merge or full self-host run is introduced.
+
+## Continuing work
+
+Qualify this source head through the focused PR workflow; repair real failures
+before extending finite iteration and ordinary while integration. Complete
+remaining tuples/patterns, safe array lookup, typed errors, namespace scopes,
+operator decision evidence and the explicitly bounded typed-IO contract in
+coherent subsequent slices. Preserve target ABI refusals.
+
+## Preserved seven-backend checkpoint and history
+
 # PSC1 current work state — seven direct backends and npm
 
 Updated 2026-10-20. Branch: `feature/psc1-seven-backend-architecture-20261020`.

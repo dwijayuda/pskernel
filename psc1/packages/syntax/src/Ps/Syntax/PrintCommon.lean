@@ -122,7 +122,7 @@ def psPrintArrowChain
 def psPrintDoBinding
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
     (name : PsSyntaxName) (annotation : Option PsSyntaxTerm)
-    (separator : String) (value : PsSyntaxTerm) :
+    (prefix separator : String) (value : PsSyntaxTerm) :
     Except PsSourcePrintError String :=
   match psPrintSyntaxName name with
   | Except.error error => Except.error error
@@ -144,11 +144,11 @@ def psPrintDoBinding
                 if psSyntaxTermSimpleForApplication value then printedValue
                 else psPrintCommonConcat3 "(" printedValue ")";
               Except.ok (psPrintJoin ""
-                ["let ", printedName, printedType, separator, groupedValue])
+                [prefix, printedName, printedType, separator, groupedValue])
 
 def psPrintDoBody
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
-    (separator : String) (fuel : Nat) :
+    (native : Bool) (separator : String) (fuel : Nat) :
     PsSyntaxTerm -> Except PsSourcePrintError String :=
   match fuel with
   | Nat.zero =>
@@ -156,7 +156,7 @@ def psPrintDoBody
   | Nat.succ remaining =>
       fun (body : PsSyntaxTerm) =>
         let smaller : PsSyntaxTerm -> Except PsSourcePrintError String :=
-          psPrintDoBody printTerm separator remaining;
+          psPrintDoBody printTerm native separator remaining;
         let withTail :
             Except PsSourcePrintError String -> PsSyntaxTerm ->
             Except PsSourcePrintError String :=
@@ -167,12 +167,48 @@ def psPrintDoBody
                 match smaller tail with
                 | Except.error error => Except.error error
                 | Except.ok printedTail =>
-                    Except.ok (psPrintCommonConcat3 printedHead separator printedTail);
+                    if String.isEmpty printedTail then Except.ok printedHead
+                    else Except.ok (psPrintCommonConcat3 printedHead separator printedTail);
         match body with
         | PsSyntaxTerm.letE name annotation value tail _ =>
-            withTail (psPrintDoBinding printTerm name annotation " := " value) tail
+            withTail (psPrintDoBinding printTerm name annotation "let " " := " value) tail
+        | PsSyntaxTerm.doEndE _ => Except.ok ""
+        | PsSyntaxTerm.doLetMutE name annotation value tail _ =>
+            withTail (psPrintDoBinding printTerm name annotation "let mut " " := " value) tail
+        | PsSyntaxTerm.doAssignE name value tail _ =>
+            let printedHead :=
+              match psPrintSyntaxName name with
+              | Except.error error => Except.error error
+              | Except.ok printedName =>
+                  match printTerm value with
+                  | Except.error error => Except.error error
+                  | Except.ok printedValue =>
+                      Except.ok (psPrintJoin "" [printedName, " := (", printedValue, ")"]);
+            withTail printedHead tail
+        | PsSyntaxTerm.doIfE condition thenBody elseBody tail _ =>
+            let printedHead :=
+              match printTerm condition with
+              | Except.error error => Except.error error
+              | Except.ok printedCondition =>
+                  match smaller thenBody with
+                  | Except.error error => Except.error error
+                  | Except.ok printedThen =>
+                      match smaller elseBody with
+                      | Except.error error => Except.error error
+                      | Except.ok printedElse =>
+                          let head :=
+                            if native then
+                              psPrintJoin "" ["if ", printedCondition, " then { ", printedThen, " }"]
+                            else
+                              psPrintJoin "" ["if (", printedCondition, ") {\n  ", printedThen, "\n}"];
+                          if String.isEmpty printedElse then Except.ok head
+                          else if native then
+                            Except.ok (psPrintJoin "" [head, " else { ", printedElse, " }"])
+                          else
+                            Except.ok (psPrintJoin "" [head, " else {\n  ", printedElse, "\n}"]);
+            withTail printedHead tail
         | PsSyntaxTerm.doBindE name annotation value tail _ =>
-            withTail (psPrintDoBinding printTerm name annotation " <- " value) tail
+            withTail (psPrintDoBinding printTerm name annotation "let " " <- " value) tail
         | PsSyntaxTerm.doThenE action tail _ =>
             let printedAction :=
               match printTerm action with

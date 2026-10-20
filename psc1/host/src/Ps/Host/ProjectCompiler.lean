@@ -295,6 +295,8 @@ def psHostElabErrorText : PsElabError -> String
   | .doExpectedType => "doExpectedType: do requires an expected effect type"
   | .doUnsupportedEffect => "doUnsupportedEffect: expected Id, Except, or checked CompilerM"
   | .doStatementOutsideBlock => "doStatementOutsideBlock: statement requires an enclosing do block"
+  | .doImmutableAssignment name => "doImmutableAssignment: " ++ psNameToString name ++ " is not a mutable local"
+  | .doMutableShadowing name => "doMutableShadowing: mutable local " ++ psNameToString name ++ " cannot be shadowed"
   | .emptyName => "emptyName"
   | .unknownName name =>
       "unknownName:" ++ psNameToString name

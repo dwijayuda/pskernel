@@ -208,7 +208,7 @@ def psPrintProofScriptTermWithFuel
       | .binary operator left right _ =>
           psPrintBinaryOperator smaller operator left right
       | .doE body _ =>
-          match psPrintDoBody smaller "\n  " remaining body with
+          match psPrintDoBody smaller false "\n  " remaining body with
           | Except.error error => Except.error error
           | Except.ok printed =>
               Except.ok (psPrintCommonConcat3 "do {\n  " printed "\n}")
@@ -216,6 +216,14 @@ def psPrintProofScriptTermWithFuel
           Except.error (PsSourcePrintError.unsupportedSourceForm "do bind outside do block")
       | .doThenE _ _ _ =>
           Except.error (PsSourcePrintError.unsupportedSourceForm "do action outside do block")
+      | .doLetMutE _ _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "mutable binding outside do block")
+      | .doAssignE _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "assignment outside do block")
+      | .doIfE _ _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "procedural conditional outside do block")
+      | .doEndE _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "procedural continuation outside do block")
       | .doReturnE _ _ =>
           Except.error (PsSourcePrintError.unsupportedSourceForm "return outside do block")
       | .lambda binders body _ =>

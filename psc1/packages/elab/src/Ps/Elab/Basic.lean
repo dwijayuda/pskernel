@@ -14,6 +14,8 @@ inductive PsElabError where
   | doExpectedType
   | doUnsupportedEffect
   | doStatementOutsideBlock
+  | doImmutableAssignment (name : PsName)
+  | doMutableShadowing (name : PsName)
   | unknownName (name : PsName)
   | invalidNatural (text : String)
   | invalidString (text : String)

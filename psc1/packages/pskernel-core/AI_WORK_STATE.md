@@ -219,3 +219,17 @@ those equality guards did not establish semantic equality. The integration
 work now corrects both to `psKernelExprEq(a)(b)`, requires strict Booleans,
 and checks an unequal sentinel before measurements. They must be rerun before
 using their assertions as qualification evidence.
+
+### Next transformation slice — qualification pending
+
+The integration branch now includes one production generic DAG visitor for
+multi-variable/reverse instantiation, abstraction, universe substitution, and
+application spines. The bounded zero-budget behavior preserves the original
+subtree. Memo keys include effective remaining depth and binder offset. The
+actual default worker budget is capped by validated depth before constructing
+recursive closures, avoiding expanded-tree fuel allocation on shared DAGs.
+Native fixtures cover every expression family, partial-budget memo reuse,
+forged graph data, and a 24-level shared graph without materializing its tree.
+These additions are pending native and authentic PSC1/generated qualification;
+the complete checker migration is still unfinished. The following integration
+slice connects the canonical visitor to public checked zeta WHNF.

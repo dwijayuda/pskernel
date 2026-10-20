@@ -18,6 +18,9 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Core.ExprV2.PairMemo,
     `Ps.KernelCore.Core.ExprV2.Equality,
     `Ps.KernelCore.Core.ExprV2.Lift,
+    `Ps.KernelCore.Core.ExprV2.TransformSupport,
+    `Ps.KernelCore.Core.ExprV2.Transform,
+    `Ps.KernelCore.Core.ExprV2.TransformSpine,
     `Ps.KernelCore.API.DagTypes,
     `Ps.KernelCore.API.DagDeclaration,
     `Ps.KernelCore.API.Dag,
@@ -198,3 +201,8 @@ lean_exe psc1_kernel_expr_v2_dag_regression where
 lean_exe psc1_kernel_expr_v2_dag_performance where
   srcDir := "test"
   root := `PsKernelExprV2DagPerformance
+
+-- Exact bounded transform semantics, sharing, and hostile input regression.
+lean_exe psc1_kernel_expr_v2_transform_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2TransformRegression

@@ -78,7 +78,7 @@ private def roundTrip (label : String) (kind target : PsCompilerSourceKind)
   | .ok first, .ok second => require label (first == second)
   | _, _ => throw (IO.userError (label ++ ": canonical admissions"))
 
-private def testCompilerM (natType seven : PsExpr) : IO Unit := do
+private def testCompilerM (natType : PsExpr) : IO Unit := do
   let resultLibrary ← IO.FS.readFile "stdlib/ProofScript/Data/Result.lean"
   let effectLibrary ← IO.FS.readFile "stdlib/ProofScript/Compiler/Effect.lean"
   let fixture :=
@@ -88,13 +88,14 @@ private def testCompilerM (natType seven : PsExpr) : IO Unit := do
     "  compilerSet next\n" ++
     "  return original\n" ++
     "def result : Nat := match program.run () 7 with\n" ++
-    "  | Result.ok pair => pair.fst\n" ++
+    "  | Result.ok pair => Nat.add pair.fst pair.snd\n" ++
     "  | Result.error error => 0\n"
   let prepared ←
     match psCompilerPrepareSources .lean [resultLibrary, effectLibrary, fixture] with
     | .ok value => pure value
     | .error _ => throw (IO.userError "CompilerM library preparation")
-  checkReduced "existing checked CompilerM" prepared natType seven
+  checkReduced "existing checked CompilerM read and state update" prepared natType
+    (PsExpr.lit (PsLiteral.natural 15))
 
 def main : IO Unit := do
   let natType := PsExpr.constE psNatName []
@@ -193,5 +194,5 @@ def main : IO Unit := do
     (conversionFixture plain natType (PsExpr.lit (PsLiteral.natural 8)))
   require "kernel conversion harness rejects a wrong result"
     (match wrongConversion with | .error _ => true | .ok _ => false)
-  testCompilerM natType seven
+  testCompilerM natType
   IO.println "PSC1_DO_TESTS: PASS"

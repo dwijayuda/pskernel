@@ -63,7 +63,7 @@ export async function formatEcma(source, kind) {
   const text = await prettier.format(source, {
     parser: kind === 'ts' ? 'typescript' : 'babel', printWidth: 100,
     tabWidth: 2, useTabs: false, semi: true, singleQuote: false,
-    trailingComma: 'none', endOfLine: 'lf'
+    trailingComma: 'none', endOfLine: 'lf', quoteProps: 'preserve'
   });
   const after = parseProgram(text, kind);
   if (!isDeepStrictEqual(semanticTree(before), semanticTree(after))) {

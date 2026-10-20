@@ -65,8 +65,8 @@ const boolCases = [
   {
     "name": "iddo",
     "expected": [false, true],
-    "lean": "def answer (flag : Bool) : Bool := Id.run (do { let a : Bool := flag; let b <- a; return b })\n",
-    "ps": "def answer(flag : Bool) : Bool := Id.run(do {\n let a : Bool := flag\n let b <- a\n return b\n})\n"
+    "lean": "def BoolAction : Type := Id Bool\ndef answer (flag : Bool) : Bool := let action : BoolAction := do { let a : Bool := flag; let b <- a; return b }; Id.run action\n",
+    "ps": "def BoolAction : Type := Id Bool\ndef answer(flag : Bool) : Bool := let action : BoolAction := do {\n let a : Bool := flag\n let b <- a\n return b\n}\n Id.run(action)\n"
   },
   {
     "name": "exceptdo",

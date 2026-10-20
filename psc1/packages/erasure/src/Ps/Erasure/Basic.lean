@@ -281,6 +281,14 @@ def psErasureIsProp
           psLevelNormalizesToZero level
       | _ => false
 
+-- Type/proposition-valued constants are checked declarations without a
+-- runtime value. Keep them in the environment for definitional equality.
+def psErasureDefinitionIsErased
+    (environment : PsEnvironment) (type : PsExpr) : Bool :=
+  match psWhnf environment psMetaEmpty psLocalEmpty type with
+  | PsExpr.sortE _ => true
+  | _ => psErasureIsProp environment psLocalEmpty type
+
 def psErasureClassifyBinder
     (environment : PsEnvironment)
     (localContext : PsLocalContext)
@@ -351,7 +359,7 @@ def psErasureAddDeclarationEntry
     (entries : PsErasureNameIndex PsErasureEntryInfo) :
     Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo) :=
   -- The emitted declaration loop drops these definitions before opening binders.
-  if psErasureIsProp environment psLocalEmpty type then Except.ok entries
+  if psErasureDefinitionIsErased environment type then Except.ok entries
   else
     match psErasureEntryInfoWithFuel environment 4096 psLocalEmpty type value with
     | Except.error error => Except.error error

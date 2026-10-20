@@ -360,7 +360,7 @@ def psEraseDefinition
     (name : PsName)
     (type value : PsExpr) :
     Except PsErasureError (Option PsVerifiedIrDeclaration) :=
-  if psErasureIsProp environment psLocalEmpty type then
+  if psErasureDefinitionIsErased environment type then
     Except.ok Option.none
   else
     let outputName : String :=
@@ -551,16 +551,22 @@ def psErasureRuntimePreludeClosure
         if Nat.beq (psListLength next) (psListLength selected) then next
         else psErasureRuntimePreludeClosure roots candidates remaining next
 
+-- Host ownership/name planning and runtime erasure must use this same ordered
+-- closure, including whether a prelude runtime definition is actually needed.
+def psErasureRuntimeDeclarations
+    (runtimePreludeDeclarations declarations : List PsDeclaration) : List PsDeclaration :=
+  let selectedRuntimePrelude :=
+    psErasureRuntimePreludeClosure declarations runtimePreludeDeclarations
+      (Nat.succ (psListLength runtimePreludeDeclarations)) [];
+  psErasureAppendDeclarations selectedRuntimePrelude declarations
+
 def psEraseCoreModuleWithRuntimePrelude
     (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
     Except PsErasureError PsVerifiedIrModule :=
-  let selectedRuntimePrelude :=
-    psErasureRuntimePreludeClosure declarations runtimePreludeDeclarations
-      (Nat.succ (psListLength runtimePreludeDeclarations)) [];
   let runtimeDeclarations :=
-    psErasureAppendDeclarations selectedRuntimePrelude declarations;
+    psErasureRuntimeDeclarations runtimePreludeDeclarations declarations;
   let names := psErasureDeclarationNames runtimeDeclarations;
   let baseScope := psErasureScopeEmpty names;
   match psErasurePrepareDeclarationEntries environment runtimeDeclarations baseScope with

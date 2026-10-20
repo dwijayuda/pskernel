@@ -128,7 +128,7 @@ def psHostDirectPrepareFor (inputPath : String) (assurance : PsHostAssurance) :
   -- Names come from the original runtime graph, never from inhabitant witnesses
   -- or the logical body-marker declarations used for independent admission.
   let names := psErasureDeclarationNames
-    (psSelfHostRuntimePreludeDeclarationsWithProd ++ declarations)
+    (psErasureRuntimeDeclarations psSelfHostRuntimePreludeDeclarationsWithProd declarations)
   let authoredNames := entry.parsed.declarations.filterMap (runtimeName names)
   let publicNames := (raw.declarations.filter (fun d => authoredNames.contains d.name)).map (fun d => d.name)
   let authoredTypeNames := (raw.structures.map (fun s => s.name) ++ raw.inductives.map (fun i => i.name)).filter authoredNames.contains

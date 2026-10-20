@@ -14,6 +14,7 @@ inductive PsElabError where
   | doExpectedType
   | doUnsupportedEffect
   | doWhileNeedsPartial
+  | doWhileUnsupportedBody
   | doForUnsupportedIterable
   | doStatementOutsideBlock
   | doImmutableAssignment (name : PsName)

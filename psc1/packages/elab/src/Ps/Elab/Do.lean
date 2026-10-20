@@ -1,4 +1,4 @@
-import Ps.Elab.DoFor
+import Ps.Elab.DoWhile
 
 def psElabDoBodyWithState
     (fuel : Nat)
@@ -132,6 +132,8 @@ def psElabDoBodyWithState
             psElabDoFor elaborate smaller ops result context state name collection loopBody rest finish
         | PsSyntaxTerm.doForRangeE name lower upper loopBody rest _ =>
             psElabDoForRange elaborate smaller ops result context state name lower upper loopBody rest finish
+        | PsSyntaxTerm.doWhileE condition loopBody rest _ =>
+            psElabDoWhile elaborate smaller ops result context state condition loopBody rest finish
         | _ => psElabDoEffectTerm elaborate ops context result body
 
 def psElabDoBody

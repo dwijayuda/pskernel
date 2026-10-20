@@ -459,6 +459,27 @@ def psParseDoLoopBody
     | Except.ok keyword => psParseDoBranch parseBody true keyword.cursor
   else psParseDoBranch parseBody false cursor
 
+-- A bracketed List literal is an ordinary iterable. Only a colon at the
+-- outer bracket level selects range syntax; nested type/group delimiters do not.
+def psParseDoRangeColon : List PsToken -> Nat -> Bool
+  | [], _ => false
+  | token :: rest, depth =>
+      if Nat.beq depth 0 && psStringEq token.text "]" then false
+      else if Nat.beq depth 0 && psStringEq token.text ":" then true
+      else
+        let nextDepth :=
+          if psParseDoOpenToken token.text then Nat.succ depth
+          else if psParseDoCloseToken token.text then Nat.sub depth 1
+          else depth
+        psParseDoRangeColon rest nextDepth
+
+def psParseDoIsRange (cursor : PsTokenCursor) : Bool :=
+  if psTokenCursorAtText cursor "[" then
+    match psTokenCursorAdvance cursor with
+    | none => false
+    | some opening => psParseDoRangeColon opening.cursor.remaining 0
+  else false
+
 def psParseDoFor
     (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
     (parseBody : Bool -> Nat -> PsTokenCursor ->
@@ -484,7 +505,7 @@ def psParseDoFor
                   let headerCursor := PsTokenCursor.mk header.value;
                   let iterable :
                       Except PsParseError (Prod PsSyntaxTerm (Option PsSyntaxTerm)) :=
-                    if psTokenCursorAtText headerCursor "[" then
+                    if psParseDoIsRange headerCursor then
                       match psTokenCursorAdvance headerCursor with
                       | Option.none => Except.error (PsParseError.unexpectedEnd "range")
                       | Option.some opening =>

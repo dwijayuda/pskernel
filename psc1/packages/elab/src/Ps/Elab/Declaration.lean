@@ -1,7 +1,7 @@
 import Ps.Core.Declaration
 import Ps.Core.Equality
 import Ps.Elab.Recursion
-import Ps.Elab.DoLoop
+import Ps.Elab.DoLoopLift
 
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
@@ -114,6 +114,20 @@ def psElabStableMemberOrigins
         (PsElabMemberOrigin.mk index (psDeclarationName declaration)
           (psElabStableMemberRole declaration))
         (psElabStableMemberOrigins rest (Nat.succ index))
+
+def psElabWhileMemberOrigins
+    (owner : PsName) (declarations : List PsDeclaration)
+    (index : Nat) : List PsElabMemberOrigin :=
+  match declarations with
+  | [] => []
+  | declaration :: rest =>
+      let name := psDeclarationName declaration;
+      let role :=
+        if psElabDoLoopIsLiftedName owner name then PsElabOriginRole.normalizedWorker
+        else if psNameEq owner name then PsElabOriginRole.publicWrapper
+        else psElabStableMemberRole declaration;
+      PsElabMemberOrigin.mk index name role ::
+        psElabWhileMemberOrigins owner rest (Nat.succ index)
 
 def psElabExplicitParameterIds
     (binders : List PsElabTypedBinder) : List Nat :=
@@ -1354,8 +1368,8 @@ def psElabPartialDeclaration
                     | Option.some withSelf =>
                         let helperName := psElabDoLoopName name;
                         -- Elaborator-only signature, like the source self header above.
-                        -- Batch construction emits the genuine partial declaration; ordinary
-                        -- expansion admits its opaque witness and exact body independently.
+                        -- Batch construction specializes every marker to private partial helpers;
+                        -- ordinary expansion admits each opaque witness and exact body independently.
                         let helperHeader :=
                           PsDeclaration.axiomDecl helperName [] psElabDoLoopType;
                         let valueContextResult :=
@@ -1539,15 +1553,13 @@ def psElabDeclarationBatchStable
       match psElabDeclaration environment source with
       | Except.error error => Except.error error
       | Except.ok result =>
-          let declarations :=
-            match result.declaration with
-            | .partialDecl name _ _ value =>
-                let helperName := psElabDoLoopName name;
-                if psElabDoLoopOccurs helperName value then
-                  [psElabDoLoopDeclaration helperName, result.declaration]
-                else [result.declaration]
-            | _ => [result.declaration];
-          Except.ok (PsElabDeclarationBatchResult.mk declarations)
+          match result.declaration with
+          | .partialDecl name levels type value =>
+              match psElabDoLoopLiftDeclaration environment name levels type value with
+              | Except.error error => Except.error error
+              | Except.ok declarations =>
+                  Except.ok (PsElabDeclarationBatchResult.mk declarations)
+          | _ => Except.ok (PsElabDeclarationBatchResult.mk [result.declaration])
 
 -- Historical callers can request the unchanged stable elaborator explicitly.
 -- The ordinary path keeps its one typed normalization attempt for the same
@@ -1559,16 +1571,12 @@ def psElabDeclarationBatchWithOrigins
   match psElabDeclarationBatchStable environment source with
   | Except.ok result =>
       let members : List PsElabMemberOrigin :=
-        match result.declarations with
-        | [helper, publicDeclaration] =>
-            match helper, publicDeclaration with
-            | .partialDecl helperName _ _ _, .partialDecl publicName _ _ _ =>
-                if psNameEq helperName (psElabDoLoopName publicName) then
-                  [PsElabMemberOrigin.mk 0 helperName PsElabOriginRole.normalizedWorker,
-                   PsElabMemberOrigin.mk 1 publicName PsElabOriginRole.publicWrapper]
-                else psElabStableMemberOrigins result.declarations 0
-            | _, _ => psElabStableMemberOrigins result.declarations 0
-        | _ => psElabStableMemberOrigins result.declarations 0;
+        match source, result.declarations with
+        | .partialDefinition sourceName _ _ _ _, _ :: _ :: _ =>
+            match psSyntaxNameToName sourceName with
+            | some owner => psElabWhileMemberOrigins owner result.declarations 0
+            | none => psElabStableMemberOrigins result.declarations 0
+        | _, _ => psElabStableMemberOrigins result.declarations 0;
       Except.ok
         (PsElabDeclarationBatchWithOriginsResult.mk result
           (psElabBatchOriginAt sourceIndex source members Option.none))

@@ -346,6 +346,16 @@ private def testFiniteLoops (natType : PsExpr) : IO Unit := do
       "  let values : List Nat := List.nil\n" ++
       "  for value in values do\n    total := Nat.add total value\n" ++
       "  return total\n") natType (nat 7)
+  checkExecutedSource "finite List literal header is not a range" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut total := 0\n" ++
+      "  for value in [1, 2, 3] do\n    total := Nat.add total value\n" ++
+      "  return total\n") natType (nat 6)
+  checkExecutedSource "empty List literal header is not a range" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut total := 7\n" ++
+      "  for value in [] do\n    total := Nat.add total value\n" ++
+      "  return total\n") natType (nat 7)
   checkExecutedSource "finite List singleton" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut total := 1\n" ++

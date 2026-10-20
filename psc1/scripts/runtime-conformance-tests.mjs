@@ -103,7 +103,7 @@ for (const [name, clauses] of Object.entries(groups)) {
 const referenceChoice = stem => '(if flag then ' + n(stem + 'True') + ' else ' + n(stem + 'False') + ')';
 const controlBodies = {
   mutationcheck:
-    ' let observed : Id Nat := do\n' +
+    ' let observed : Id Nat := (do\n' +
     '  let mut value : Nat := 3\n' +
     '  if flag then\n' +
     '   value := value + 4\n' +
@@ -111,16 +111,16 @@ const controlBodies = {
     '   value := value + 8\n' +
     '  value := value * 2\n' +
     '  return value\n' +
-    ' Nat.beq (Id.run observed) ' + referenceChoice('controlMutation') + '\n',
+    ' );\n Nat.beq (Id.run observed) ' + referenceChoice('controlMutation') + '\n',
   capturecheck:
-    ' let observed : Id Nat := do\n' +
+    ' let observed : Id Nat := (do\n' +
     '  let mut value : Nat := if flag then 3 else 5\n' +
     '  let captured : Nat -> Nat := fun (n : Nat) => value + n\n' +
     '  value := 100\n' +
     '  return captured value\n' +
-    ' Nat.beq (Id.run observed) ' + referenceChoice('controlCapture') + '\n',
+    ' );\n Nat.beq (Id.run observed) ' + referenceChoice('controlCapture') + '\n',
   earlycheck:
-    ' let observed : Id Nat := do\n' +
+    ' let observed : Id Nat := (do\n' +
     '  let mut value : Nat := 3\n' +
     '  if flag then\n' +
     '   value := 7\n' +
@@ -131,16 +131,16 @@ const controlBodies = {
     '   value := 11\n' +
     '  value := value + 1\n' +
     '  return value\n' +
-    ' Nat.beq (Id.run observed) ' + referenceChoice('controlEarly') + '\n',
+    ' );\n Nat.beq (Id.run observed) ' + referenceChoice('controlEarly') + '\n',
   shadowcheck:
-    ' let observed : Id Nat := do\n' +
+    ' let observed : Id Nat := (do\n' +
     '  let value : Bool := false\n' +
     '  let mut value : Nat := if flag then 3 else 5\n' +
     '  value := value + 1\n' +
     '  return value\n' +
-    ' Nat.beq (Id.run observed) ' + referenceChoice('controlShadow') + '\n',
+    ' );\n Nat.beq (Id.run observed) ' + referenceChoice('controlShadow') + '\n',
   danglingcheck:
-    ' let observed : Id Nat := do\n' +
+    ' let observed : Id Nat := (do\n' +
     '  let mut value : Nat := 3\n' +
     '  if flag then\n' +
     '   if false then\n' +
@@ -148,16 +148,16 @@ const controlBodies = {
     '  else\n' +
     '   value := 50\n' +
     '  return value\n' +
-    ' Nat.beq (Id.run observed) ' + referenceChoice('controlDangling') + '\n',
+    ' );\n Nat.beq (Id.run observed) ' + referenceChoice('controlDangling') + '\n',
   errorcheck:
-    ' let observed : Except Nat Nat := do\n' +
+    ' let observed : Except Nat Nat := (do\n' +
     '  let mut value : Nat := 3\n' +
     '  value := value + 4\n' +
     '  if flag then\n' +
     '   let ignored : Unit <- Except.error value\n' +
     '   return 999\n' +
     '  return value\n' +
-    ' match observed with\n' +
+    ' );\n match observed with\n' +
     '  | Except.error value => Nat.beq value (if flag then ' + n('controlErrorTrueValue') +
       ' else ' + n('controlErrorFalseValue') + ') && (if flag then ' + n('controlErrorTrueTag') +
       ' else ' + n('controlErrorFalseTag') + ')\n' +
@@ -165,26 +165,25 @@ const controlBodies = {
       ' else ' + n('controlErrorFalseValue') + ') && !(if flag then ' + n('controlErrorTrueTag') +
       ' else ' + n('controlErrorFalseTag') + ')\n',
   forlistcheck:
-    ' let observed : Id Nat := do\n' +
-    '  let values : List Nat := List.cons 1 (List.cons 2 (List.cons 3 List.nil))\n' +
+    ' let observed : Id Nat := (do\n' +
     '  let mut total : Nat := 0\n' +
-    '  for value in values do\n' +
+    '  for value in [1, 2, 3] do\n' +
     '   if flag && Nat.beq value 2 then\n' +
     '    return total\n' +
     '   total := total * 10 + value\n' +
     '  return total\n' +
-    ' Nat.beq (Id.run observed) ' + referenceChoice('forList') + '\n',
+    ' );\n Nat.beq (Id.run observed) ' + referenceChoice('forList') + '\n',
   forarraycheck:
-    ' let observed : Id Nat := do\n' +
+    ' let observed : Id Nat := (do\n' +
     '  let mut values : Array Nat := if flag then #[1, 2, 3] else #[]\n' +
     '  let mut total : Nat := 0\n' +
     '  for value in values do\n' +
     '   values := #[99]\n' +
     '   total := total + value\n' +
     '  return total * 10 + Array.size values\n' +
-    ' Nat.beq (Id.run observed) ' + referenceChoice('forArray') + '\n',
+    ' );\n Nat.beq (Id.run observed) ' + referenceChoice('forArray') + '\n',
   forrangecheck:
-    ' let observed : Id Nat := do\n' +
+    ' let observed : Id Nat := (do\n' +
     '  let mut lower : Nat := if flag then 2 else 5\n' +
     '  let mut upper : Nat := if flag then 5 else 2\n' +
     '  let mut total : Nat := 0\n' +
@@ -193,17 +192,17 @@ const controlBodies = {
     '   upper := 0\n' +
     '   total := total * 10 + value\n' +
     '  return total\n' +
-    ' let empty : Id Nat := do\n' +
+    ' );\n let empty : Id Nat := (do\n' +
     '  let mut total : Nat := 0\n' +
     '  for value in [3:3] do\n' +
     '   total := total + 1\n' +
     '  return total\n' +
-    ' let zeroStart : Id Nat := do\n' +
+    ' );\n let zeroStart : Id Nat := (do\n' +
     '  let mut total : Nat := 0\n' +
     '  for value in [:3] do\n' +
     '   total := total * 10 + value\n' +
     '  return total\n' +
-    ' Nat.beq (Id.run observed) ' + referenceChoice('forRange') +
+    ' );\n Nat.beq (Id.run observed) ' + referenceChoice('forRange') +
     ' && Nat.beq (Id.run empty) ' + n('forRangeEmpty') +
     ' && Nat.beq (Id.run zeroStart) ' + n('forRangeZero') + '\n'
 };
@@ -219,11 +218,13 @@ const translated = path.join(evidence, 'Runtime.ps');
 // in each grammar after translating the common corpus to exercise both parsers.
 run(native, ['translate', input, '--to', 'ps', '--out', translated]);
 const literalTotal = n('literalTotal');
+const literalLeanFlag = '(if flag then ' + n('literalTrueFlag') + ' else ' + n('literalFalseFlag') + ')';
+const literalPsFlag = '(if (flag) { ' + n('literalTrueFlag') + ' } else { ' + n('literalFalseFlag') + ' })';
 const literalLeanChecks = [
   ...textChecks('Int.repr total', literalTotal),
   eqNat('Array.size values', n('literalArraySize')),
   eqNat('Array.size empty', n('literalEmptySize')),
-  'if flag then Prod.fst (Prod.snd pair) else !(Prod.fst (Prod.snd pair))'
+  'if Prod.fst (Prod.snd pair) then ' + literalLeanFlag + ' else !' + literalLeanFlag
 ];
 function psTextChecks(expression, expected) {
   const checks = [
@@ -241,7 +242,7 @@ const literalPsChecks = [
   ...psTextChecks('Int.repr(total)', literalTotal),
   'Nat.beq(Array.size(values), ' + n('literalArraySize') + ')',
   'Nat.beq(Array.size(empty), ' + n('literalEmptySize') + ')',
-  'if (flag) { Prod.fst(Prod.snd(pair)) } else { !(Prod.fst(Prod.snd(pair))) }'
+  'if (Prod.fst(Prod.snd(pair))) { ' + literalPsFlag + ' } else { !' + literalPsFlag + ' }'
 ];
 const literalLean =
   'def dataliteralcheck (flag : Bool) : Bool :=\n' +
@@ -295,8 +296,6 @@ const optionalPs =
   ' let empty : Array(Int) := #[]\n' +
   ' let emptyAbsent : Bool := match empty[0]? with { | Option.none => true | Option.some value => false }\n' +
   ' ' + conjoin(optionalPsChecks) + '\n';
-assert.equal(n('literalFalseFlag'), false);
-assert.equal(n('literalTrueFlag'), true);
 fs.appendFileSync(input, literalLean + optionalLean + 'def semantic (flag : Bool) : Bool := ' +
   conjoin(checkNames.map(name => name + ' flag')) + '\n');
 fs.appendFileSync(translated, literalPs + optionalPs + 'def semantic(flag : Bool) : Bool := ' +

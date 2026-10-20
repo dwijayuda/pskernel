@@ -35,9 +35,12 @@ const bench=(operation,depth,calls,fn)=>{
 };
 for(const depth of [32,128,256]) {
   const expr=make(depth), clone=make(depth);
-  if(kernel.psKernelExprHasLooseBVar(expr)!==true ||
-      kernel.psKernelExprHasFVar(expr)!==false ||
-      kernel.psKernelExprEq(expr,clone)!==true)
+  const loose=kernel.psKernelExprHasLooseBVar(expr);
+  const fvar=kernel.psKernelExprHasFVar(expr);
+  const same=kernel.psKernelExprEq(expr,clone);
+  console.log("PSC1_HOTPATH_JS_GUARD "+JSON.stringify({depth,loose,fvar,same,
+    looseType:typeof loose,fvarType:typeof fvar,sameType:typeof same}));
+  if(loose!==true || fvar!==false || same!==true)
     throw Error("PSKERNEL_HOTPATH_SEMANTIC_GUARD "+depth);
   global.gc();
   const calls=120;

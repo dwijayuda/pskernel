@@ -101,7 +101,7 @@ write(path.join(stage, 'README.md'), '# ProofScript PSC1\n\nUnpublished Linux x6
   'JavaScript output needs no TypeScript compiler. Selected Rust/Wasm/Python/PHP targets require their target tools.\n' +
   'The compiler, host formatter and libraries resolver ship together. Portable source libraries are independently checked.\n' +
   'No npm installation script, network binary download, compiler fallback or package publication is used.\n');
-const distribution = { schemaVersion: 1, sourceCommit: process.env.GITHUB_SHA || null,
+const distribution = { schemaVersion: 1, sourceCommit: process.env.GITHUB_SHA || null, branchHeadCommit: process.env.PSC1_HEAD_SHA || null,
   compilerIdentity: nativeIdentity, nativeSha256: sha(native), nativeBytes: fs.statSync(native).size,
   platform: { os: 'linux', cpu: 'x64', libc: 'glibc', qualifiedGlibc: process.report.getReport().header.glibcVersionRuntime },
   hostDependencyLockSha256: sha(path.join(root, 'host-tools/package-lock.json')),
@@ -142,7 +142,7 @@ run(path.join(installed, 'native/bin/psc1'), ['build', source, '--target', 'js',
 const globalPrefix = path.join(runRoot, 'global');
 run('npm', ['install', '--global', '--prefix', globalPrefix, '--cache', emptyCache, '--offline', '--ignore-scripts', '--no-audit', '--no-fund', tarball]);
 assert.deepEqual(JSON.parse(run(path.join(globalPrefix, 'bin/psc'), ['--identity'])), nativeIdentity);
-run(process.execPath, [path.join(root, 'scripts/npm-native-library-canary.mjs'), path.join(runRoot, 'library'), cli]);
+console.log(run(process.execPath, [path.join(root, 'scripts/npm-native-library-canary.mjs'), path.join(runRoot, 'library'), cli]).trim());
 const receipt = { ...distribution, qualification: 'passed', tarball: path.relative(root, tarball),
   tarballSha256: sha(tarball), tarballBytes: fs.statSync(tarball).size,
   offlineLocalInstall: true, offlineGlobalInstall: true, nativeNpmIdentityAgreement: true,
@@ -150,4 +150,10 @@ const receipt = { ...distribution, qualification: 'passed', tarball: path.relati
   optionalLibraryReceipt: path.relative(root, path.join(runRoot, 'library/qualification.json')),
   nodeVersion: process.version, npmVersion: run('npm', ['--version']).trim() };
 write(path.join(output, 'qualification.json'), json(receipt));
+write(path.join(runRoot, 'NATIVE_DISTRIBUTION.json'), json(distribution));
+// Retain the installable tarball, receipts and library/source bundles once every
+// qualification succeeded. Avoid archiving four duplicate native installations.
+for (const temporary of [stage, consumer, globalPrefix, emptyCache]) {
+  fs.rmSync(temporary, { recursive: true, force: true });
+}
 console.log('PSC1_NPM_NATIVE_DISTRIBUTION: PASS ' + JSON.stringify(receipt));

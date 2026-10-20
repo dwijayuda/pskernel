@@ -111,7 +111,7 @@ write(installedSource, 'def seedValue : Nat := true\n');
 rejected('import Demo.Math\n\ndef answer : Nat := demoAnswer\n', /PSC1_PROJECT_ELAB_FAILED/);
 write(installedSource, 'def seedValue : Nat := 40\n');
 write(input, 'import Demo.Math\n\ndef answer : Nat := demoAnswer\n');
-const receipt = { schemaVersion: 1, sourceCommit: process.env.GITHUB_SHA || null,
+const receipt = { schemaVersion: 1, sourceCommit: process.env.GITHUB_SHA || null, branchHeadCommit: process.env.PSC1_HEAD_SHA || null,
   compilerIdentity: pin, installedPackages: ['@psc1-demo/seed@0.0.1', '@psc1-demo/naturals@0.0.1'],
   target: 'js', result: '42', capturedSources: captured.sources.length,
   independentlyAdmitted: true, sourceOnly: true, publicExports: Object.keys(mod),

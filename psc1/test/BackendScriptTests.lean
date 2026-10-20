@@ -57,6 +57,22 @@ private def captureModule : PsVerifiedIrModule := {
   }]
 }
 
+private def reorderedValues : PsVerifiedIrModule := {
+  psVerifiedIrModuleEmpty with declarations := [
+    { name := "answer", typeParameters := [], parameters := [], resultType := natT, body := .var "value" },
+    { name := "value", typeParameters := [], parameters := [], resultType := natT, body := natE 42 }
+  ]
+}
+
+private def shadowedValue : PsVerifiedIrModule := {
+  psVerifiedIrModuleEmpty with declarations := [
+    { name := "x", typeParameters := [], parameters := [], resultType := .primitive .bool,
+      body := .literal (.bool true) },
+    { name := "shadow", typeParameters := [], parameters := [param "x" (.primitive .bool)],
+      resultType := .primitive .bool, body := .var "x" }
+  ]
+}
+
 private def rejectWith (marker : String) (result : Except String α) : IO Unit :=
   match result with
   | .error message =>
@@ -100,8 +116,18 @@ def main (args : List String) : IO UInt32 := do
   unless emptyPython.runtimeSource.isEmpty && emptyPython.runtimeHelpers.isEmpty &&
       emptyPhp.runtimeSource.isEmpty && emptyPhp.runtimeRequirements.isEmpty do
     throw (IO.userError "empty checked module acquired runtime dependencies")
+  let reordered ← validate reorderedValues
+  let reorderedPython ← requireResult (psPythonEmitModule reordered ["answer"])
+  let reorderedPhp ← requireResult (psPhpEmitValidatedModule reordered ["answer"])
+  let shadowed ← validate shadowedValue
+  let shadowedPhp ← requireResult (psPhpEmitValidatedModule shadowed ["x", "shadow"])
+  unless shadowedPhp.runtimeSource.isEmpty && shadowedPhp.runtimeRequirements.isEmpty do
+    throw (IO.userError "lexical shadowing selected an unused PHP runtime")
   if let some outputBase := args.head? then
     IO.FS.writeFile (outputBase ++ ".py") python.source
     IO.FS.writeFile (outputBase ++ ".php") php.source
-  IO.println "Direct scripting IR boundaries: 8 groups passed"
+    IO.FS.writeFile (outputBase ++ "-reordered.py") reorderedPython.source
+    IO.FS.writeFile (outputBase ++ "-reordered.php") reorderedPhp.source
+    IO.FS.writeFile (outputBase ++ "-shadow.php") shadowedPhp.source
+  IO.println "Direct scripting IR boundaries: 10 groups passed"
   return 0

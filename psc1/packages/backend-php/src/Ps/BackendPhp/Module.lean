@@ -69,25 +69,29 @@ private def phpIntrinsicRequirements : PsVerifiedIrIntrinsic → List String
   | _ => ["gmp"]
 
 private def phpExprRequirements
-    (valueNames : List String) : Nat → PsVerifiedIrExpr → List String
-  | 0, _ => []
-  | n+1, expr =>
-    let visit := phpExprRequirements valueNames n
+    (valueNames : List String) : Nat → List String → PsVerifiedIrExpr → List String
+  | 0, _, _ => []
+  | n+1, bound, expr =>
+    let visit := phpExprRequirements valueNames n bound
     match expr with
     | .literal (.natural _) | .literal (.integer _) => ["gmp"]
     | .literal _ => []
-    | .var name => if valueNames.contains name then ["calls"] else []
+    | .var name => if valueNames.contains name && !bound.contains name then ["calls"] else []
     | .intrinsic op types args =>
         phpIntrinsicRequirements op ++ types.flatMap (phpTypeRequirements n) ++ args.flatMap visit
     | .lambda parameters result body =>
         parameters.flatMap (fun p => phpTypeRequirements n p.type) ++
-          phpTypeRequirements n result ++ visit body
+          phpTypeRequirements n result ++
+          phpExprRequirements valueNames n (parameters.map (fun p => p.name) ++ bound) body
     | .call fn _ args => "calls" :: (visit fn ++ args.flatMap visit)
-    | .letE _ type value body => phpTypeRequirements n type ++ visit value ++ visit body
+    | .letE name type value body =>
+        phpTypeRequirements n type ++ visit value ++
+          phpExprRequirements valueNames n (name :: bound) body
     | .ifE condition yes no => visit condition ++ visit yes ++ visit no
     | .record _ _ fields | .constructor _ _ _ fields => fields.flatMap (fun field => visit field.2)
     | .projection _ _ target _ => visit target
-    | .matchE _ _ target alternatives => visit target ++ alternatives.flatMap (fun alt => visit alt.2.2)
+    | .matchE _ _ target alternatives => visit target ++ alternatives.flatMap (fun alt =>
+        phpExprRequirements valueNames n (alt.2.1.map (fun binding => binding.name) ++ bound) alt.2.2)
 
 private structure PhpContext where
   globals : List (String × String)
@@ -420,7 +424,7 @@ def psPhpEmitValidatedModule
   let requested := raw.declarations.flatMap fun declaration =>
     phpTypeRequirements 4096 declaration.resultType ++
     declaration.parameters.flatMap (fun parameter => phpTypeRequirements 4096 parameter.type) ++
-    phpExprRequirements valueNames 4096 declaration.body
+    phpExprRequirements valueNames 4096 (declaration.parameters.map (fun p => p.name)) declaration.body
   let requirements := psPhpRuntimeClosure requested
   let runtimeSource := psPhpSelectedRuntimeSource requirements
   let globals := (raw.declarations.zipIdx).map fun (d, index) =>

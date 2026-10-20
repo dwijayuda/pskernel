@@ -19,6 +19,9 @@ concurrency:
   group: psc1-scoped-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
 permissions:
   contents: read
 
@@ -123,6 +126,9 @@ jobs:
           .lake/build/bin/psc1_script_ir_tests dist/scoped-correctness/script-ir/capture
           python3 -c 'import importlib.util,sys; s=importlib.util.spec_from_file_location("capture",sys.argv[1]); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); assert m.answer(41)==42; assert m.answer(0)==1; assert m.__all__==["answer"]; print("Python compound closure: PASS")' dist/scoped-correctness/script-ir/capture.py
           php -r '$api=require $argv[1]; if(gmp_cmp($api["answer"](gmp_init(41)),42)!==0 || gmp_cmp($api["answer"](gmp_init(0)),1)!==0 || array_keys($api)!==["answer"]) exit(1); echo "PHP compound closure: PASS\n";' dist/scoped-correctness/script-ir/capture.php
+          python3 -c 'import runpy,sys; m=runpy.run_path(sys.argv[1]); assert m["answer"]==42; print("Python forward value: PASS")' dist/scoped-correctness/script-ir/capture-reordered.py
+          php -r '$api=require $argv[1]; if(gmp_cmp($api["answer"],42)!==0) exit(1); echo "PHP forward value: PASS\n";' dist/scoped-correctness/script-ir/capture-reordered.php
+          php -n -r '$api=require $argv[1]; if($api["x"]!==true || $api["shadow"](false)!==false) exit(1); echo "PHP shadowing without runtime: PASS\n";' dist/scoped-correctness/script-ir/capture-shadow.php
       - name: Compile and test corrected PSKernel-Core natively only
         working-directory: psc1
         run: |

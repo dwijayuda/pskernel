@@ -108,11 +108,6 @@ private def bindValue (value : String) : Emit String := do
   line (name ++ " = " ++ value)
   pure name
 
-private def findLocal (scope : Scope) (name : String) : String :=
-  match scope.find? (fun pair => pair.1 == name) with
-  | some pair => pair.2
-  | none => globalName name
-
 private def tuple (values : List String) : String :=
   match values with
   | [] => "()"
@@ -236,7 +231,13 @@ private def expression (fuel : Nat) (m : PsVerifiedIrModule) (scope : Scope)
     let smaller := expression fuel m scope
     match expr with
     | .literal value => bindValue (← literal value)
-    | .var name => pure (findLocal scope name)
+    | .var name =>
+        match scope.find? (fun binding => binding.1 == name) with
+        | some binding => pure binding.2
+        | none =>
+            if m.declarations.any (fun d => d.name == name && d.parameters.isEmpty) then
+              emitCall (valueName name) [] tail
+            else pure (globalName name)
     | .intrinsic .boolAnd _ [a, b] =>
         let left ← smaller a false
         let result ← fresh "and"
@@ -394,9 +395,8 @@ private def emitModuleBody (m : PsVerifiedIrModule) (publicNames : List String) 
   for d in m.declarations do
     emitDeclaration m d
   let calls := (← get).helpers.contains "calls"
-  for d in m.declarations do
-    if d.parameters.isEmpty then
-      line (globalName d.name ++ " = " ++ (if calls then "_psc_run(" ++ valueName d.name ++ ")" else valueName d.name ++ "()"))
+  -- Nullary declarations are pure thunks. All definitions precede forcing, so
+  -- valid forward value references and specialization order cannot change meaning.
   line ""
   let mut stubs : List String := ["# Generated PSC1 scalar API; Nat values are nonnegative Python int.", "import builtins as _psc_b", ""]
   let mut seenPublic : List String := []
@@ -410,7 +410,7 @@ private def emitModuleBody (m : PsVerifiedIrModule) (publicNames : List String) 
       | throw ("PSC1_PYTHON_PUBLIC_DECLARATION_MISSING: " ++ name)
     let resultType ← scalarType d.resultType
     if d.parameters.isEmpty then
-      line (name ++ " = " ++ globalName name)
+      line (name ++ " = " ++ (if calls then "_psc_run(" ++ valueName name ++ ")" else valueName name ++ "()"))
       stubs := stubs ++ [name ++ ": " ++ resultType]
     else
       helper "builtins"

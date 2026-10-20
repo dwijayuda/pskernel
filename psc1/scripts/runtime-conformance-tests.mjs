@@ -197,7 +197,7 @@ try {
   }
 } finally {
   fs.writeFileSync(path.join(evidence, 'results.json'), JSON.stringify({
-    schema: 'psc1-runtime-conformance/1', commit: process.env.GITHUB_SHA || null,
+    schema: 'psc1-runtime-conformance/1', commit: process.env.GITHUB_SHA || null, branchHeadCommit: process.env.PSC1_HEAD_SHA || null,
     nativeLean: { version: oracle.leanVersion, commit: oracle.leanCommit },
     oracleSha256: sha(JSON.stringify(oracle)), node: process.version,
     targetCount: targets.length, records

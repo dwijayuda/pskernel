@@ -60,6 +60,7 @@ module=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 request=json.loads(sys.argv[2])
 def decode(value):
+ if isinstance(value,dict) and "invalidString" in value: return chr(0xD800)
  if isinstance(value,dict) and "power10" in value: return 10 ** value["power10"]
  if isinstance(value,dict) and ("nat" in value or "int" in value): return int(next(iter(value.values())))
  if isinstance(value,dict) and "char" in value: return value["char"]
@@ -84,6 +85,7 @@ print(json.dumps({"exports":module.__all__,"values":values,"errors":errors,"runt
 const phpProgram = String.raw`$api = require $argv[1];
 $request = json_decode($argv[2], true, 512, JSON_THROW_ON_ERROR);
 $decode = static function($value) {
+ if (is_array($value) && array_key_exists('invalidString',$value)) return chr(0x80);
  if (is_array($value) && array_key_exists('power10',$value)) return gmp_pow(gmp_init('10'),$value['power10']);
  if (is_array($value) && (array_key_exists('nat',$value) || array_key_exists('int',$value))) return gmp_init(array_values($value)[0],10);
  if (is_array($value) && array_key_exists('char',$value)) return $value['char'];
@@ -171,6 +173,8 @@ try {
         { name: 'echoChar', args: [{ char: '' }] },
         { name: 'echoChar', args: [{ char: 'ab' }] },
         { name: 'echoString', args: [false] },
+        { name: 'echoString', args: [{ invalidString: true }] },
+        { name: 'echoChar', args: [{ char: 'e\u0301' }] },
         { name: 'echoUnit', args: [false] },
         { name: 'first', args: [{ nat: '1' }] },
         { name: 'first', args: [{ nat: '1' }, { nat: '2' }, { nat: '3' }] }
@@ -295,7 +299,7 @@ try {
   }
 } finally {
   fs.writeFileSync(path.join(evidence, 'results.json'), JSON.stringify({
-    schema: 'psc1-script-backend-execution/1', commit: process.env.GITHUB_SHA || null, records
+    schema: 'psc1-script-backend-execution/1', commit: process.env.GITHUB_SHA || null, branchHeadCommit: process.env.PSC1_HEAD_SHA || null, records
   }, null, 2) + '\n');
   fs.rmSync(work, { recursive: true, force: true });
 }

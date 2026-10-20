@@ -41,13 +41,13 @@ def psParseDataElementsWithFuel
                 match psTokenCursorExpectText element.cursor "," with
                 | Except.error error => Except.error error
                 | Except.ok comma =>
-                    smaller start comma.cursor (element.value :: elementsRev) true
+                    smaller start comma.cursor (List.cons element.value elementsRev) true
               else
                 match psTokenCursorExpectText element.cursor closeText with
                 | Except.error error => Except.error error
                 | Except.ok close =>
                     Except.ok {
-                      elements := psParseListReverse (element.value :: elementsRev)
+                      elements := psParseListReverse (List.cons element.value elementsRev)
                       separated := separated
                       span := { start := start, stop := close.token.span.stop }
                       cursor := close.cursor
@@ -60,11 +60,11 @@ def psSyntaxDataReference (root member : String)
 def psSyntaxTupleValue (elements : List PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
   match elements with
-  | [] => PsSyntaxTerm.unit span
-  | first :: rest =>
+  | List.nil => PsSyntaxTerm.unit span
+  | List.cons first rest =>
       match rest with
-      | [] => first
-      | _ :: _ =>
+      | List.nil => first
+      | List.cons _ _ =>
           PsSyntaxTerm.app (psSyntaxDataReference "Prod" "mk" span)
             [first, psSyntaxTupleValue rest span] span
 
@@ -81,12 +81,12 @@ def psParseDataParen (parseTerm : PsDataTermParser)
       | Except.error error => Except.error error
       | Except.ok parsed =>
           match parsed.elements with
-          | [] =>
+          | List.nil =>
               Except.ok { value := psSyntaxTupleValue parsed.elements parsed.span
                           cursor := parsed.cursor }
-          | _ :: rest =>
+          | List.cons _ rest =>
               match rest with
-              | [] =>
+              | List.nil =>
                   if parsed.separated then
                     Except.error (PsParseError.expectedText
                       "at least two tuple elements" ")" parsed.span)
@@ -95,7 +95,7 @@ def psParseDataParen (parseTerm : PsDataTermParser)
                       value := groupSpan (psSyntaxTupleValue parsed.elements parsed.span) parsed.span
                       cursor := parsed.cursor
                     }
-              | _ :: _ =>
+              | List.cons _ _ =>
                   Except.ok { value := psSyntaxTupleValue parsed.elements parsed.span
                               cursor := parsed.cursor }
 
@@ -104,8 +104,8 @@ Capacity is only an allocation hint. -/
 def psSyntaxArrayPushes (elements : List PsSyntaxTerm) :
     PsSyntaxTerm -> PsSourceSpan -> PsSyntaxTerm :=
   match elements with
-  | [] => fun (current : PsSyntaxTerm) (span : PsSourceSpan) => current
-  | value :: rest =>
+  | List.nil => fun (current : PsSyntaxTerm) (span : PsSourceSpan) => current
+  | List.cons value rest =>
       fun (current : PsSyntaxTerm) (span : PsSourceSpan) =>
         let smaller : PsSyntaxTerm -> PsSourceSpan -> PsSyntaxTerm :=
           psSyntaxArrayPushes rest;
@@ -139,8 +139,8 @@ def psParseDataArray (parseTerm : PsDataTermParser)
 def psDataAtAdjacentIndex (surfaceSpan : PsSourceSpan)
     (cursor : PsTokenCursor) : Bool :=
   match psTokenCursorPeek cursor with
-  | none => false
-  | some token =>
+  | Option.none => false
+  | Option.some token =>
       if psStringEq token.text "[" then
         Nat.beq surfaceSpan.stop.byteOffset token.span.start.byteOffset
       else false

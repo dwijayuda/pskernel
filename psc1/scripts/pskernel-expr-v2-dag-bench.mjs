@@ -49,6 +49,8 @@ if(mode!=="worker"){
   };
   const depth=Number(depthArg),calls=Number(callsArg);
   const sort0=E.sort(L.zero),sort1=E.sort(L.succ(L.zero));
+  if(k.psKernelExprEq(sort0)(sort0)!==true||k.psKernelExprEq(sort0)(sort1)!==false)
+    throw Error("PSC1_DAG_BENCH_EQUALITY_HARNESS_INVALID");
   const session=accepted(k.psKernelKernelSessionEmpty(
     k.psKernelResourcePolicyDefault,k.psKernelProviderDefault),"session");
   const values=[];
@@ -92,7 +94,7 @@ if(mode!=="worker"){
         session,nil,k.PsKernelDefinitionSafety.safe,value.arena,value.commands),"dag-check");
       checked=output.replies.head.value;
     }
-    if(!k.psKernelExprEq(checked.type,sort1))
+    if(k.psKernelExprEq(checked.type)(sort1)!==true)
       throw Error("PSC1_DAG_BENCH_WRONG_CHECKED_TYPE");
     return 1;
   };

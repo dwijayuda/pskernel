@@ -11,7 +11,7 @@ const get=name=>{
   return k[name];
 };
 const must=(ok,label)=>{
-  if(!ok)throw Error("PSC1_DAG_FAILED "+label);
+  if(ok!==true)throw Error("PSC1_DAG_FAILED "+label+" result-type="+typeof ok);
   console.log("PSC1_DAG_PASS "+label);
 };
 const accepted=(r,label)=>{
@@ -33,7 +33,11 @@ const array=xs=>{
 };
 const name=s=>N.str(N.anonymous,s);
 const sort0=E.sort(L.zero),sort1=E.sort(L.succ(L.zero));
-const equal=get("psKernelExprEq"),exact=get("psKernelExprEqual");
+const equal=(left,right)=>get("psKernelExprEq")(left)(right);
+const exact=(left,right)=>get("psKernelExprEqual")(left)(right);
+must(equal(sort0,sort0)===true&&equal(sort0,sort1)===false&&
+  exact(sort0,sort0)===true&&exact(sort0,sort1)===false,
+  "equality-harness-rejects-unequal-terms");
 const run=get("psKernelV1RunDag");
 const session=(fuel=4096n,depth=0n)=>accepted(
   get("psKernelKernelSessionEmpty")(
@@ -81,7 +85,7 @@ for(const [key,id] of Object.entries(ids)){
   must(exact(accepted(decoded(built,id),"read-"+key),terms[key]),"exact-decode-"+key);
 }
 const shared=accepted(decoded(built,ids.app),"shared-app");
-must(shared.fn===shared.arg,"decoder-preserves-physical-child-sharing");
+must(shared.fn!==undefined&&shared.fn===shared.arg,"decoder-preserves-physical-child-sharing");
 must(built.size===arena.size,"each-unique-node-decoded-once");
 
 const json=x=>JSON.stringify(x,(_,v)=>typeof v==="bigint"?String(v):v);

@@ -1,5 +1,6 @@
 import Ps.KernelCore.Research.ExprV2Validation
 import Ps.KernelCore.Research.ExprV2Lift
+import Ps.KernelCore.Research.ExprV2PortableHeadMachine
 import Ps.KernelCore.Research.ExprV2PortableLift
 import Ps.KernelCore.Research.ExprV2PortableInstantiate
 import Ps.KernelCore.Research.ExprV2PortableReduction
@@ -843,10 +844,18 @@ private def testPortableHeadSequence : IO Unit := do
     (psKernelExprV2ChunkedMkLet a4 name sort sort metadata false)
   let (doneArena,doneRoot) ← expectV2
     (psKernelExprV2PortableHeadSequenceChecked 4 a5 outerLet)
+  let (fastArena,fastRoot) ← expectV2
+    (psKernelExprV2PortableHeadMachineChecked 4 a5 outerLet)
+  requireV2 "head-machine-matches-slow-root"
+    (fastRoot == doneRoot && fastArena.size == doneArena.size)
   requireV2 "head-sequence-composed-normal-form"
     (doneRoot == sort && doneArena.size == a5.size)
   requireV2 "head-sequence-rejects-insufficient-fuel"
     (match psKernelExprV2PortableHeadSequenceChecked 3 a5 outerLet with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  requireV2 "head-machine-rejects-insufficient-fuel"
+    (match psKernelExprV2PortableHeadMachineChecked 3 a5 outerLet with
       | Except.error _ => true
       | Except.ok _ => false)
   let (neutral,neutralRoot) ← expectV2
@@ -857,7 +866,66 @@ private def testPortableHeadSequence : IO Unit := do
     (match psKernelExprV2PortableHeadSequenceChecked 0 a5 sort with
       | Except.error _ => true
       | Except.ok _ => false)
+  requireV2 "head-machine-invalid-root"
+    (match psKernelExprV2PortableHeadMachineChecked 4 a5 99999 with
+      | Except.error _ => true
+      | Except.ok _ => false)
   IO.println "PSC1_EXPR_V2_HEAD_SEQUENCE: PASS"
+
+
+/-
+Head sequences over nested let terms that do not depend on their binders.
+Both implementations must reach the same root under identical research
+step fuel; slow replays on every step, fast replays once at entry and exit.
+Timings are observations, never proof of relative performance.
+-/
+private def testHeadMachineDeep : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "headMachine"
+  for depth in [1,8,24,48] do
+    let (start,sort) ← expectV2
+      (psKernelExprV2ChunkedMkSort
+        psKernelExprV2ChunkedEmpty PsKernelLevel.zero)
+    let mut arena := start
+    let mut root := sort
+    for _ in [:depth] do
+      let (next,id) ← expectV2
+        (psKernelExprV2ChunkedMkLet
+          arena name sort sort root false)
+      arena := next
+      root := id
+    let sourceSize := arena.size
+    let t0 ← IO.monoMsNow
+    let (slowArena,slowRoot) ← expectV2
+      (psKernelExprV2PortableHeadSequenceChecked
+        (depth+1) arena root)
+    let t1 ← IO.monoMsNow
+    let (fastArena,fastRoot) ← expectV2
+      (psKernelExprV2PortableHeadMachineChecked
+        (depth+1) arena root)
+    let t2 ← IO.monoMsNow
+    requireV2 s!"head-machine-depth-{depth}-root-parity"
+      (slowRoot == sort && fastRoot == sort)
+    requireV2 s!"head-machine-depth-{depth}-arena-parity"
+      (slowArena.size == sourceSize && fastArena.size == sourceSize)
+    requireV2 s!"head-machine-depth-{depth}-fail-closed-fuel"
+      (match psKernelExprV2PortableHeadMachineChecked depth arena root with
+        | Except.error _ => true
+        | Except.ok _ => false)
+    let forged ← expectV2 (psKernelExprV2ChunkedRequire arena root)
+    let invalid : PsKernelExprV2Entry := {
+      forged with hasFVar := true
+    }
+    let falseArena : PsKernelExprV2ChunkedArena := {
+      arena with active := Array.push arena.active invalid
+      size := arena.size + 1
+    }
+    requireV2 s!"head-machine-depth-{depth}-forged-rejected"
+      (match psKernelExprV2PortableHeadMachineChecked
+          (depth+1) falseArena root with
+        | Except.error _ => true
+        | Except.ok _ => false)
+    IO.println s!"PSC1_EXPR_V2_HEAD_MACHINE_NATIVE depth={depth} slow_ms={t1-t0} fast_ms={t2-t1} root={fastRoot} size={sourceSize}"
+  IO.println "PSC1_EXPR_V2_HEAD_MACHINE: PASS"
 
 def main : IO Unit := do
   testAllConstructors
@@ -875,4 +943,5 @@ def main : IO Unit := do
   testPortableSharedInstantiation
   testPortableHeadReduction
   testPortableHeadSequence
+  testHeadMachineDeep
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

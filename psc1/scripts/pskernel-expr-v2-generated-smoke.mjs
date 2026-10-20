@@ -38,6 +38,7 @@ const portableLift=load("psKernelExprV2PortableLiftChecked");
 const portableInstantiate=load("psKernelExprV2PortableInstantiate1Checked");
 const portableHeadStep=load("psKernelExprV2PortableHeadStepChecked");
 const portableHeadSequence=load("psKernelExprV2PortableHeadSequenceChecked");
+const portableHeadMachine=load("psKernelExprV2PortableHeadMachineChecked");
 const chunkedMkLet=load("psKernelExprV2ChunkedMkLet");
 const chunkedMkMData=load("psKernelExprV2ChunkedMkMData");
 const chunkedMkSort=load("psKernelExprV2ChunkedMkSort");
@@ -206,11 +207,51 @@ const headNeutral=accepted(portableHeadSequence(1n,sourceWithSort.fst,sourceWith
   "head-sequence-neutral");
 demand(headNeutral.snd===sourceWithSort.snd,
   "head-sequence-neutral-identity");
+const machineDone=accepted(portableHeadMachine(4n,compositeLet.fst,compositeLet.snd),
+  "head-machine-composition");
+demand(machineDone.snd===headSequenceDone.snd &&
+  machineDone.fst.size===headSequenceDone.fst.size,
+  "head-machine-same-result");
+const machineExhausted=portableHeadMachine(3n,compositeLet.fst,compositeLet.snd);
+demand(machineExhausted&&"error" in machineExhausted,
+  "head-machine-remaining-fuel-rejected");
+const machineBad=portableHeadMachine(4n,forgedChunk,0n);
+demand(machineBad&&"error" in machineBad,"head-machine-forged-rejected");
 
 
 
 
 
+
+
+
+// Order-balanced comparison; both implementations see equivalent prebuilt DAGs.
+// Every result and returned arena size is checked before accepting a timing.
+const headMachineMetrics=[];
+for(const depth of [8,24,48]){
+  let a=accepted(chunkedMkSort(chunkedEmptyWithLimit(64n),level.zero),
+    "head-machine-sort");
+  const sortId=a.snd;
+  for(let i=0;i<depth;i++){
+    a=accepted(chunkedMkLet(a.fst,nameConstructors.anonymous,
+      sortId,sortId,a.snd,false),"head-machine-let");
+  }
+  const evaluate=(kind)=>{
+    const start=performance.now();
+    const ret=accepted(
+      (kind==="fast"?portableHeadMachine:portableHeadSequence)(
+        BigInt(depth+1),a.fst,a.snd),
+      "head-machine-"+kind+"-"+depth);
+    const elapsed=performance.now()-start;
+    if(ret.snd!==sortId || ret.fst.size!==a.fst.size)
+      throw Error("PSC1_V2_HEAD_MACHINE_PARITY "+kind+" "+depth);
+    headMachineMetrics.push({kind,depth,ms:Number(elapsed.toFixed(3)),
+      input_nodes:Number(a.fst.size),output_nodes:Number(ret.fst.size)});
+  };
+  // ABBA to expose order/warmup bias; timings remain microbenchmarks.
+  evaluate("slow"); evaluate("fast"); evaluate("fast"); evaluate("slow");
+}
+console.log("PSC1_EXPR_V2_HEAD_MACHINE_TIMINGS "+JSON.stringify(headMachineMetrics));
 
 const timings=[];
 const readArray=(a,id)=>accepted(lookup(a,id),"measured-array-read");

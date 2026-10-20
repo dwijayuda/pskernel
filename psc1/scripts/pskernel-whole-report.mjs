@@ -40,7 +40,7 @@ const median=arr=>[...arr].sort((x,y)=>x-y)[Math.floor(arr.length/2)];
 const rows=[...paired].map(([operation,{before,after}])=>{
   if(before.length!==3 || after.length!==3) throw Error("EXPECTED_THREE_ROUNDS_"+operation);
   const original_ms=median(before),optimized_ms=median(after);
-  return {operation,rounds:3,original_ms,optimized_ms,speedup:optimized_ms?original_ms/optimized_ms:null,original_samples_ms:before,optimized_samples_ms:after};
+  return {operation,rounds:3,original_ms,optimized_ms,speedup:original_ms>=5 && optimized_ms>=5 ? original_ms/optimized_ms : null,original_samples_ms:before,optimized_samples_ms:after};
 }).sort((a,b)=>a.operation.localeCompare(b.operation));
 const refs=Object.fromEntries(read("refs.txt").trim().split("\n").map(s=>s.split("=")));
 const report={refs,toolchain:"leanprover/lean4:v4.34.0",scope:"Project-local synthetic complete checker, same runner, identical source and accepted/rejected counts",memory:{original_rss_kib:a.rss,optimized_rss_kib:b.rss},rows};

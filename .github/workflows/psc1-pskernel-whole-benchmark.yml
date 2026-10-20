@@ -65,7 +65,7 @@ jobs:
           set -euo pipefail
           cd "$RUNNER_TEMP/psc1-whole-original/psc1"
           /usr/bin/time -f 'max_rss_kb=%M elapsed_wall_sec=%e' -o "$RUNNER_TEMP/psc1-whole-reports/original.memory" \
-            lake -f kernel-lakefile.lean exe psc1_kernel_whole_comparison \
+            .lake/build/bin/psc1_kernel_whole_comparison \
             | tee "$RUNNER_TEMP/psc1-whole-reports/original.log"
       - name: Measure optimized complete checker
         shell: bash
@@ -73,7 +73,7 @@ jobs:
         run: |
           set -euo pipefail
           /usr/bin/time -f 'max_rss_kb=%M elapsed_wall_sec=%e' -o "$RUNNER_TEMP/psc1-whole-reports/optimized.memory" \
-            lake -f kernel-lakefile.lean exe psc1_kernel_whole_comparison \
+            .lake/build/bin/psc1_kernel_whole_comparison \
             | tee "$RUNNER_TEMP/psc1-whole-reports/optimized.log"
       - name: Enforce identical complete operations and write paired report
         shell: bash

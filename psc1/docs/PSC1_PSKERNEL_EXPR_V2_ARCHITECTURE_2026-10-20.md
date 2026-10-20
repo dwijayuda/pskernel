@@ -1,6 +1,6 @@
 # PSKernel-Core Expression V2 — Lean 4.35.0 architecture pivot
 
-Status: **M1 research implementation; NOT a production kernel replacement**.
+Status: **M1/M2 qualified; M3 portable lifting, instantiation and bounded beta/zeta head execution qualified; M4 scoped equality research. NOT a production kernel replacement**.
 Branch: research/psc1-pskernel-expr-v2-lean435-20261020
 Baseline: 45eb5ed24f13e15e192e79e6afba8cb1f9d5736f
 Lean: leanprover/lean4:v4.35.0 (eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
@@ -110,8 +110,42 @@ Research module: packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Lift.le
 - The output DAG is fully replay-validated. Forged metadata and forward child references fail closed.
 - [Native M3 CI 39383763403](https://github.com/dwijayuda/pskernel/actions/runs/39383763403) **PASSED** 108 finite oracle comparisons across nine expression shapes, four cutoffs and three amounts. It also verified unchanged-node identity, invalid-metadata rejection and the sharing bound: 21 input nodes grew only to 42 output nodes.
 
-**M3 portability is NOT complete.** The native lifting reference uses Lean do/mutable-local constructs not accepted by PSC1's current source subset. It remains outside the portable V2 composition root and production checking. The next step is functional PSC1-source lowering for the lift and then independent generated PS/JS differential qualification, followed by capture-avoiding substitution, WHNF and DefEq integration.
+**Updated M3 status:** The previous native-only limitation was resolved by separate PSC1-compatible pure functional modules: ExprV2PortableLift, ExprV2PortableInstantiate, ExprV2PortableReduction, ExprV2PortableHeadSequence, and ExprV2PortableHeadMachine. These compile and run through generated JavaScript. They implement verified research subsets of lifting, capture-avoiding instantiate1, direct beta/zeta/metadata reductions and a bounded head-step sequence; they do NOT implement complete WHNF or full DefEq, and none is imported by the production SelfHost kernel.
 
 ### Promotion rules remain unchanged
 
 No unvalidated metadata may grant proof admission or skip structural equality. Hash collisions require equality checks. Loose-bvar range must not underestimate and hasFVar must never be falsely negative. Keep Lean 4.35 semantics, the fixed fuel policy, scope-safe memoization, 79-module source self-hosting, generated JS and negative/adversarial regression gates. Do not merge research V2 into main until whole-checker measurements demonstrate a benefit and the correctness gates pass.
+
+
+## Validated-once head machine: measured M3 milestone
+
+Reference source: packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PortableHeadMachine.lean. A checked public gateway replays and validates the entire input DAG once, then executes a bounded sequence of direct beta/zeta/metadata head steps using only immutable smart constructors, and finally validates the entire output graph once. It avoids calling the original slow validator again on every intermediate step. Internal OnCanonical helpers are **not** safe independent public admission APIs: they require their owning caller to establish the validated-arena invariant.
+
+[CI 39464660266](https://github.com/dwijayuda/pskernel/actions/runs/39464660266) passed native regression, PSC1 portable source checking, TS 7.0.2 output, generated JS execution and negative fuel/forged-data tests. The previously qualified [CI 39464411708](https://github.com/dwijayuda/pskernel/actions/runs/39464411708) provides this matched single-run Node22 A-B-B-A timing evidence:
+
+| Direct nested-let head sequence | Old: replay per step | New: replay once on entry/exit |
+|---|---:|---:|
+| Depth 8 | 15.962 / 21.100 ms | 2.043 / 1.714 ms |
+| Depth 24 | 150.765 / 130.524 ms | 3.952 / 4.032 ms |
+| Depth 48 | 438.288 / 421.535 ms | 10.194 / 13.232 ms |
+
+This is a substantial M3 algorithmic gain on this specific research subset, not an end-to-end Lean-vs-PSC1 or production-kernel speedup. The native version is too fast at these depths for reliable ratios at 1-ms resolution. The research-specific step budget currently differs from the published checker fuel policy; full WHNF and checker integration remain unqualified.
+
+## M4: arena-scoped structural equality
+
+Source: ExprV2PortableEquality.lean.
+
+- Replays untrusted metadata once, then uses same-arena immutable node ID equality as a sufficient success condition.
+- Validated cached hash mismatch is an inequality shortcut; **hash equality never authorizes equality**. Matching hashes lead to a structural comparison that intentionally follows existing PsKernelExprEq binder semantics, including ignored lambda/forall binder names and display binder-info.
+- Within each comparison, a memo keyed by (left node ID, right node ID) avoids exponentially repeated work on shared subgraphs. This memo cannot escape its owning immutable arena.
+- [CI 39466695438](https://github.com/dwijayuda/pskernel/actions/runs/39466695438) **PASSED** native differential regressions and PSC1-generated JavaScript checks. Tests include all twelve constructor families, 16 direct old-kernel comparisons, a real 65521-modulus bvar hash collision, forged-metadata refusal and equality of two 24-level, structurally equal but separately constructed DAGs in a 49-node arena.
+
+The follow-on ExprV2PortableEqualityBatch.lean research module adds one validated gateway for a list of structural comparisons. It checks one canonical arena once, scopes all intermediate memo entries to the batch and returns only the ordered Bool results. The batch cannot introduce a cross-arena or local-context-dependent cache into the production checker; it is *not* proof admission or DefEq. Native test parity is implemented, and the generated-JS timing/portability gate must pass before this feature is marked qualified.
+
+## Next real correctness and performance obligations
+
+1. Measure old production complete-checker inference, WHNF and DefEq against V2 on **identical semantic fixtures** and under compatible fuel limits. Do not extrapolate the 32–43x research head-sequence microbenchmark to the whole checker.
+2. Extend V2 head normalization to application-function normalization, delta reduction, projection and recursor/iota rules with full context and fuel preservation before promoting any WHNF or DefEq worker.
+3. Prevent malformed metadata and cross-arena or free-variable-context leakage by type or by checked ingress, with regression and ideally metatheory proofs. Validating once internally is safe only if every subsequent mutation is via verified immutable smart constructors.
+4. Complete PSC1 generated .ps source closure for the new modules and verify JS memory, differential acceptance/rejection and benchmark reproducibility.
+5. Only after real source, PS/JS correctness and end-to-end performance wins should the team replace the old PsKernelExpr in the 79-module production kernel.

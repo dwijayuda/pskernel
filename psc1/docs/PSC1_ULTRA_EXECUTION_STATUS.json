@@ -2,24 +2,23 @@
   "schema": "psc1-ultra-execution/1",
   "date": "2026-10-21",
   "repository": "dwijayuda/pskernel",
-  "branch": "research/psc1-ultra-qualified-20261021",
-  "pullRequest": 169,
+  "branch": "fix/psc1-census-normalization-20261021",
+  "pullRequest": 170,
   "sourceBaseline": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
   "integratedTypedErrors": "a830668d2c23886843e616951836d8d990aa2ff5",
-  "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
+  "implementationCommit": "81f271292086da3cd9f266115300086998360217",
   "qualification": {
     "status": "passed-scoped-execution",
-    "runId": 39495181966,
-    "nativeRunId": 39495181847,
+    "runId": 39501336732,
+    "nativeRunId": 39501336380,
     "steps": 37,
-    "receipt": "PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json",
+    "receipt": "PSC1_CENSUS_NORMALIZATION_QUALIFICATION_2026-10-21.json",
     "artifact": {
-      "id": 12297322572,
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39495181966/artifacts/12297322572",
-      "bytes": 44988754,
-      "digest": "sha256:387cbb6e49dea0af1c2d6ed2b9c8680139fba3f17871f91a392fa58f42e3b628",
-      "expiresAtUtc": "2026-11-03T20:57:01Z",
-      "retention": "GitHub artifact retention applies; committed receipt does not extend it"
+      "id": 12301656823,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39501336732/artifacts/12301656823",
+      "bytes": 44989037,
+      "digest": "sha256:e8597ec0f257e95fc5e1ceddd016487bd4ec7caf3d1f80f897e74e66190fea0f",
+      "expiresAtUtc": "2026-11-03T21:42:17Z"
     }
   },
   "decisions": {
@@ -31,7 +30,7 @@
     "refactor": "shared typed AST + future trivia/resolved-origin side tables"
   },
   "p1Remaining": [
-    "strict dual-grammar compiler census and source normalization; first Ps.Syntax.Ast35:41 ++, first Ps.Erasure.Definition structuralRecursionArity",
+    "compiler source normalization; first Ps.Syntax.ParseCommon86:26 ::; strict dual-grammar census remains pending",
     "efficient optional array indexing",
     "avoid whole-input finite-loop continuation construction",
     "Rust capturing closures inside aggregates",
@@ -60,7 +59,7 @@
     "wasmTools": "1.254.0",
     "wasmtime": "49.0.4"
   },
-  "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
+  "testedMergeCommit": "6eb2a7c140ac56a32d37dbef00a874c296137605",
   "ancestry": {
     "pr168": "7e25943b991446ee2ab5a32b445238ef5af47cb5",
     "pr166": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
@@ -75,54 +74,39 @@
       {
         "name": "semantic-compiler",
         "modules": 67,
-        "parseAccepted": 40,
-        "elaborationAccepted": 35,
+        "parseAccepted": 41,
+        "elaborationAccepted": 37,
         "firstRefusals": [
           {
             "stage": "parse",
-            "module": "Ps.Syntax.Ast",
-            "detail": "35:41: expected 'partial def, def, theorem, inductive, or structure', got '++'"
-          },
-          {
-            "stage": "elaboration",
-            "module": "Ps.Erasure.Definition",
-            "detail": "structuralRecursionArity"
+            "module": "Ps.Syntax.ParseCommon",
+            "detail": "86:26: expected ', or }', got '::'"
           }
         ]
       },
       {
         "name": "directjs-compiler",
         "modules": 79,
-        "parseAccepted": 48,
-        "elaborationAccepted": 41,
+        "parseAccepted": 49,
+        "elaborationAccepted": 43,
         "firstRefusals": [
           {
             "stage": "parse",
-            "module": "Ps.Syntax.Ast",
-            "detail": "35:41: expected 'partial def, def, theorem, inductive, or structure', got '++'"
-          },
-          {
-            "stage": "elaboration",
-            "module": "Ps.Erasure.Definition",
-            "detail": "structuralRecursionArity"
+            "module": "Ps.Syntax.ParseCommon",
+            "detail": "86:26: expected ', or }', got '::'"
           }
         ]
       },
       {
         "name": "rust-compiler",
         "modules": 83,
-        "parseAccepted": 49,
-        "elaborationAccepted": 40,
+        "parseAccepted": 50,
+        "elaborationAccepted": 42,
         "firstRefusals": [
           {
             "stage": "parse",
-            "module": "Ps.Syntax.Ast",
-            "detail": "35:41: expected 'partial def, def, theorem, inductive, or structure', got '++'"
-          },
-          {
-            "stage": "elaboration",
-            "module": "Ps.Erasure.Definition",
-            "detail": "structuralRecursionArity"
+            "module": "Ps.Syntax.ParseCommon",
+            "detail": "86:26: expected ', or }', got '::'"
           }
         ]
       }
@@ -133,7 +117,20 @@
     "selfCompilation": "not-run",
     "fixedPoint": "not-run",
     "inventory": "compiler-source-census/inventory.json",
-    "stages": "compiler-source-census/stages.json"
+    "stages": "compiler-source-census/stages.json",
+    "noDirectElaborationRefusalObserved": true,
+    "maintainedModuleGates": [
+      {
+        "module": "Ps.Syntax.Ast",
+        "parse": "accepted",
+        "elaboration": "accepted"
+      },
+      {
+        "module": "Ps.Erasure.Definition",
+        "parse": "accepted",
+        "elaboration": "accepted"
+      }
+    ]
   },
   "corrections": [
     {
@@ -278,13 +275,38 @@
     "branch": "fix/psc1-census-normalization-20261021",
     "parentPullRequest": 169,
     "parentHead": "6d2cc114f6534a8d56343cfe91a6c966368ccacf",
-    "status": "source-fixes-pending-linux-ci",
+    "status": "both-blockers-corrected-scoped-and-focused-linux-passed",
     "changes": [
-      "named ordered binding-name append; explicit qualified-name construction",
-      "partial structural runtime-prelude closure worker",
-      "source-origin failure diagnostics and maintained census acceptance gates",
-      "native pattern-name and runtime dependency closure regressions"
+      "Ast explicit structural helpers and constructor source normalization; no parser expansion",
+      "runtime-prelude partial structural worker; budgets unchanged",
+      "source-origin failure diagnostics and maintained Ast parse/elaboration + Erasure.Definition elaboration gates",
+      "eleven native pattern/namespace/dependency-closure behavior checks"
     ],
-    "sourceStages": "lean parse/elaboration only; all later whole-closure stages not-run"
+    "sourceStages": "lean parse/elaboration only; all later whole-closure stages not-run",
+    "implementationCommit": "81f271292086da3cd9f266115300086998360217",
+    "nativeRunId": 39501336380,
+    "behaviorChecks": 11,
+    "scopedRunId": 39501336732
+  },
+  "pr169Foundation": {
+    "branch": "research/psc1-ultra-qualified-20261021",
+    "pullRequest": 169,
+    "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
+    "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
+    "qualification": {
+      "status": "passed-scoped-execution",
+      "runId": 39495181966,
+      "nativeRunId": 39495181847,
+      "steps": 37,
+      "receipt": "PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json",
+      "artifact": {
+        "id": 12297322572,
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39495181966/artifacts/12297322572",
+        "bytes": 44988754,
+        "digest": "sha256:387cbb6e49dea0af1c2d6ed2b9c8680139fba3f17871f91a392fa58f42e3b628",
+        "expiresAtUtc": "2026-11-03T20:57:01Z",
+        "retention": "GitHub artifact retention applies; committed receipt does not extend it"
+      }
+    }
   }
 }

@@ -1,0 +1,262 @@
+{
+  "schema": "psc1-census-normalization-qualification/1",
+  "date": "2026-10-21",
+  "repository": "dwijayuda/pskernel",
+  "pullRequest": 170,
+  "parent": {
+    "pullRequest": 169,
+    "head": "6d2cc114f6534a8d56343cfe91a6c966368ccacf",
+    "branch": "research/psc1-ultra-qualified-20261021"
+  },
+  "branch": "fix/psc1-census-normalization-20261021",
+  "implementationCommit": "81f271292086da3cd9f266115300086998360217",
+  "testedMergeCommit": "6eb2a7c140ac56a32d37dbef00a874c296137605",
+  "qualification": "passed-scoped-execution",
+  "scoped": {
+    "runId": 39501336732,
+    "jobId": 118899769398,
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39501336732",
+    "steps": 37,
+    "conclusion": "success",
+    "artifact": {
+      "id": 12301656823,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39501336732/artifacts/12301656823",
+      "bytes": 44989037,
+      "digest": "sha256:e8597ec0f257e95fc5e1ceddd016487bd4ec7caf3d1f80f897e74e66190fea0f",
+      "expiresAtUtc": "2026-11-03T21:42:17Z"
+    }
+  },
+  "focusedNative": {
+    "runId": 39501336380,
+    "jobId": 118899304119,
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39501336380",
+    "conclusion": "success",
+    "testedMergeCommit": "6eb2a7c140ac56a32d37dbef00a874c296137605",
+    "existingNativeControlGroups": 7,
+    "censusBehaviorChecks": 11,
+    "artifact": {
+      "id": 12301730533,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39501336380/artifacts/12301730533",
+      "bytes": 11446,
+      "digest": "sha256:a7a34b0dce08d2672acaa4381419774af9992684d96ec1061189a502919bbeff",
+      "expiresAtUtc": "2026-11-03T21:35:11Z"
+    }
+  },
+  "changedSourceModules": [
+    {
+      "module": "Ps.Syntax.Ast",
+      "parse": "accepted",
+      "elaboration": "accepted",
+      "changes": [
+        "named ordered append preserving duplicate binding leaves",
+        "explicit list/name/declaration constructors",
+        "explicit structural recursion for recursive helpers"
+      ]
+    },
+    {
+      "module": "Ps.Erasure.Definition",
+      "parse": "accepted",
+      "elaboration": "accepted",
+      "changes": [
+        "recursive closure function applied at its three explicit binders before selection"
+      ]
+    }
+  ],
+  "behaviorChecks": [
+    "nested pattern names preserve duplicate order and spans",
+    "empty/singleton name append",
+    "namespace name and span preservation",
+    "nested declaration scopes preserve accumulation order",
+    "scoped leaf declaration span",
+    "structural binding-pattern size",
+    "zero fuel returns incoming selection",
+    "direct references and metadata retain candidate order",
+    "transitive closure prunes unused definitions",
+    "stable selection agrees at additional fuel",
+    "empty candidates retain roots"
+  ],
+  "compilerSourceCensus": {
+    "diagnosticCompleted": true,
+    "grammar": "lean",
+    "phases": [
+      {
+        "name": "semantic-compiler",
+        "modules": 67,
+        "parseAccepted": 41,
+        "elaborationAccepted": 37,
+        "firstRefusals": [
+          {
+            "stage": "parse",
+            "module": "Ps.Syntax.ParseCommon",
+            "detail": "86:26: expected ', or }', got '::'"
+          }
+        ]
+      },
+      {
+        "name": "directjs-compiler",
+        "modules": 79,
+        "parseAccepted": 49,
+        "elaborationAccepted": 43,
+        "firstRefusals": [
+          {
+            "stage": "parse",
+            "module": "Ps.Syntax.ParseCommon",
+            "detail": "86:26: expected ', or }', got '::'"
+          }
+        ]
+      },
+      {
+        "name": "rust-compiler",
+        "modules": 83,
+        "parseAccepted": 50,
+        "elaborationAccepted": 42,
+        "firstRefusals": [
+          {
+            "stage": "parse",
+            "module": "Ps.Syntax.ParseCommon",
+            "detail": "86:26: expected ', or }', got '::'"
+          }
+        ]
+      }
+    ],
+    "admission": "not-run",
+    "ir": "not-run",
+    "generatedExecution": "not-run",
+    "selfCompilation": "not-run",
+    "fixedPoint": "not-run",
+    "inventory": "compiler-source-census/inventory.json",
+    "stages": "compiler-source-census/stages.json",
+    "noDirectElaborationRefusalObserved": true,
+    "maintainedModuleGates": [
+      {
+        "module": "Ps.Syntax.Ast",
+        "parse": "accepted",
+        "elaboration": "accepted"
+      },
+      {
+        "module": "Ps.Erasure.Definition",
+        "parse": "accepted",
+        "elaboration": "accepted"
+      }
+    ]
+  },
+  "authority": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "versions": {
+    "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "node": "v22.23.3",
+    "npm": "10.9.9",
+    "typescriptConsumer": "Version 7.0.2",
+    "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+    "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+    "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+    "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+    "python": "Python 3.15.0",
+    "pythonMinimum": "Python 3.14.8",
+    "php": "PHP 8.5.11 (cli) (built: Sep 23 2026 12:33:37) (NTS)"
+  },
+  "retainedCoverage": {
+    "typedErrors": {
+      "nativeObservations": 34,
+      "targetSourceBundles": 28,
+      "refusalChecks": 70,
+      "minimumPythonBundles": 4,
+      "evidence": "typed-errors/results.json",
+      "minimumEvidence": "typed-errors-python314/results.json"
+    },
+    "directComponents": {
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "evidence": "wasm-component-direct.json",
+      "publicAbi": "Bool-only"
+    },
+    "generatedCompilerProtocol": {
+      "targets": [
+        "js",
+        "rust"
+      ],
+      "transportExecuted": true,
+      "selfHosting": false,
+      "fixedPoint": false,
+      "evidence": "compiler-host-protocol/results.json"
+    },
+    "ordinaryWhile": {
+      "targetExecutionBundles": 14,
+      "externalDivergenceDeadlines": 14,
+      "refusalChecks": 16,
+      "loopChecks": [
+        "whilefalsecheck",
+        "whilecountcheck",
+        "whileearlycheck",
+        "whilecapturecheck",
+        "whilesequentialcheck",
+        "whileforcheck",
+        "whileselfcheck",
+        "whileexceptcheck"
+      ],
+      "longLoopIterations": 100000,
+      "referenceFields": [
+        "whileCaptureFalse",
+        "whileCaptureTrue",
+        "whileCountFalse",
+        "whileCountTrue",
+        "whileEarlyFalse",
+        "whileEarlyTrue",
+        "whileExceptFalseTag",
+        "whileExceptFalseValue",
+        "whileExceptTrueTag",
+        "whileExceptTrueValue",
+        "whileFalseFalse",
+        "whileFalseTrue",
+        "whileForFalse",
+        "whileForTrue",
+        "whileSelfFalse",
+        "whileSelfTrue",
+        "whileSequentialFalse",
+        "whileSequentialTrue"
+      ],
+      "minimumPythonBundles": 2,
+      "minimumPythonDeadlines": 2,
+      "evidence": "ordinary-while-conformance/results.json",
+      "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json"
+    },
+    "npmOfflineQualification": "passed",
+    "optionalLibraryQualification": "42"
+  },
+  "reproductions": [
+    {
+      "head": "caa31ae6686091f450a6c9e03a84816120ca0ceb",
+      "runId": 39500111608,
+      "attempt": 1,
+      "result": "infrastructure TLS failure downloading pinned Lean before compilation"
+    },
+    {
+      "head": "caa31ae6686091f450a6c9e03a84816120ca0ceb",
+      "runId": 39500111608,
+      "attempt": 2,
+      "result": "native behavior passed; Erasure.Definition elaborated; Ast parser refused shorthand constructor at193:7"
+    },
+    {
+      "head": "5246906a1211fb521701717c3ee7c6f8ead8cae0",
+      "runId": 39500923458,
+      "result": "earlier parse-only gate passed; Ast elaboration still refused unknownName:psSyntaxBindingPatternNames; partial checkpoint"
+    }
+  ],
+  "boundary": {
+    "compilerCensusGrammar": "lean",
+    "proofScriptCompilerClosureCensus": "not-run",
+    "wholeClosureIndependentAdmission": "not-run",
+    "wholeClosureIR": "not-run",
+    "generatedCompilerExecution": "not-run",
+    "selfCompilation": "not-run",
+    "fixedPoint": "not-run",
+    "formalBackendPreservation": false,
+    "mainMerged": false,
+    "publication": false
+  },
+  "artifactPolicy": "GitHub artifact retention applies; committed receipt preserves metadata, not artifact bytes"
+}

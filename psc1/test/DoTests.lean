@@ -1,6 +1,7 @@
 import Ps.Host.LeanChecked
 import Ps.Host.ProjectCompiler
 import Ps.CompilerIr.Check
+import PracticalExecution
 
 private def require (label : String) (condition : Bool) : IO Unit := do
   if !condition then throw (IO.userError ("PSC1_DO_FAIL: " ++ label))
@@ -47,7 +48,12 @@ private def checkReduced (label : String) (prepared : PsCompilerAdmissionReadyMo
     (type expected : PsExpr) : IO Unit := do
   let checked := conversionFixture prepared type expected
   match ← psHostLeanCheckPrepared checked with
-  | .error error => throw (IO.userError (label ++ ": " ++ error))
+  | .error error =>
+      match ← psHostLeanCheckPrepared prepared with
+      | .error sourceError =>
+          throw (IO.userError (label ++ ": original source declarations failed: " ++ sourceError))
+      | .ok _ =>
+          throw (IO.userError (label ++ ": source declarations admitted; expected result conversion failed: " ++ error))
   | .ok _ => pure ()
   match psCompilerVerifiedIrFromPrepared prepared with
   | .error _ => throw (IO.userError (label ++ ": ordinary erasure"))
@@ -62,6 +68,11 @@ private def checkSource (label : String) (kind : PsCompilerSourceKind)
     (source : String) (type expected : PsExpr) : IO Unit := do
   let prepared ← prepare label kind source
   checkReduced label prepared type expected
+
+private def checkExecutedSource (label : String) (kind : PsCompilerSourceKind)
+    (source : String) (type expected : PsExpr) : IO Unit := do
+  let prepared ← prepare label kind source
+  psPracticalCheckExecuted label prepared type expected
 
 private def reject (label : String) (kind : PsCompilerSourceKind) (source : String) : IO Unit :=
   require label (match psCompilerPrepareSource kind source with | .error _ => true | .ok _ => false)
@@ -116,8 +127,27 @@ private def testCompilerM (natType : PsExpr) : IO Unit := do
     match psCompilerPrepareSources .lean [resultLibrary, effectLibrary, controlFixture] with
     | .ok value => pure value
     | .error _ => throw (IO.userError "CompilerM control-flow library preparation")
-  checkReduced "checked CompilerM mutation branch and early return" controlled natType
+  psPracticalCheckExecuted "checked CompilerM mutation branch and early return" controlled natType
     (PsExpr.lit (PsLiteral.natural 15))
+
+
+  let loopFixture :=
+    "def loopProgram : CompilerM Unit Nat String Nat := do\n" ++
+    "  let mut total := 0\n" ++
+    "  for i in [0:3] do\n" ++
+    "    let old : Nat <- compilerGet ()\n" ++
+    "    compilerSet (Nat.add old 1)\n" ++
+    "    total := Nat.add total old\n" ++
+    "  return total\n" ++
+    "def result : Nat := match loopProgram.run () 7 with\n" ++
+    "  | Result.ok pair => Nat.add pair.fst pair.snd\n" ++
+    "  | Result.error error => 0\n"
+  let looped ←
+    match psCompilerPrepareSources .lean [resultLibrary, effectLibrary, loopFixture] with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "CompilerM finite-loop preparation")
+  psPracticalCheckExecuted "checked CompilerM finite loop sequences state effects" looped natType
+    (PsExpr.lit (PsLiteral.natural 34))
 
 private def testControlFlow (natType : PsExpr) : IO Unit := do
   let seven := PsExpr.lit (PsLiteral.natural 7)
@@ -140,14 +170,14 @@ private def testControlFlow (natType : PsExpr) : IO Unit := do
     "  else\n" ++
     "    value := 99\n" ++
     "  return value\n"
-  checkSource "PS lexical mutation and branch join" .proofScript psMutation natType seven
-  checkSource "Lean lexical mutation and branch join" .lean leanMutation natType seven
-  checkSource "Lean braced mutable locals" .lean
+  checkExecutedSource "PS lexical mutation and branch join" .proofScript psMutation natType seven
+  checkExecutedSource "Lean lexical mutation and branch join" .lean leanMutation natType seven
+  checkExecutedSource "Lean braced mutable locals" .lean
     "def result : Id Nat := do { let mut value := 3; value := value + 4; return value }"
     natType seven
   roundTrip "PS mutation to Lean preserves checked Core" .proofScript .lean psMutation
   roundTrip "Lean mutation to PS preserves checked Core" .lean .proofScript leanMutation
-  checkSource "false branch updates outer mutable local" .lean
+  checkExecutedSource "false branch updates outer mutable local" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut value := 1\n" ++
       "  if false then\n" ++
@@ -155,13 +185,13 @@ private def testControlFlow (natType : PsExpr) : IO Unit := do
       "  else\n" ++
       "    value := 7\n" ++
       "  return value\n") natType seven
-  checkSource "omitted else preserves current state" .lean
+  checkExecutedSource "omitted else preserves current state" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut value := 7\n" ++
       "  if false then\n" ++
       "    value := 99\n" ++
       "  return value\n") natType seven
-  checkSource "nested branch mutation and early return" .lean
+  checkExecutedSource "nested branch mutation and early return" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut value := 3\n" ++
       "  if true then\n" ++
@@ -180,27 +210,27 @@ private def testControlFlow (natType : PsExpr) : IO Unit := do
     "  }\n" ++
     "  value := 99\n" ++
     "  return value\n}\n"
-  checkSource "PS branch return bypasses continuation" .proofScript psEarly natType seven
+  checkExecutedSource "PS branch return bypasses continuation" .proofScript psEarly natType seven
   roundTrip "PS early return roundtrip" .proofScript .lean psEarly
-  checkSource "mutable capture retains captured value" .lean
+  checkExecutedSource "mutable capture retains captured value" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut value := 3\n" ++
       "  let captured : Nat -> Nat := fun (n : Nat) => value + n\n" ++
       "  value := 100\n" ++
       "  return captured 4\n") natType seven
-  checkSource "mutable local may shadow an immutable binding" .lean
+  checkExecutedSource "mutable local may shadow an immutable binding" .lean
     ("def result : Id Nat := do\n" ++
       "  let value : Bool := false\n" ++
       "  let mut value : Nat := 3\n" ++
       "  value := value + 4\n" ++
       "  return value\n") natType seven
-  checkSource "direct nested do shares mutable locals" .lean
+  checkExecutedSource "direct nested do shares mutable locals" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut value := 3\n" ++
       "  do\n" ++
       "    value := value + 4\n" ++
       "  return value\n") natType seven
-  checkSource "direct nested do carries branch return outward" .lean
+  checkExecutedSource "direct nested do carries branch return outward" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut value := 3\n" ++
       "  do\n" ++
@@ -208,11 +238,11 @@ private def testControlFlow (natType : PsExpr) : IO Unit := do
       "      return 7\n" ++
       "    value := 99\n" ++
       "  return value\n") natType seven
-  checkSource "terminal expression-valued if remains supported" .lean
+  checkExecutedSource "terminal expression-valued if remains supported" .lean
     "def result : Id Nat := do if true then 7 else 9" natType seven
-  checkSource "PS terminal expression-valued if remains supported" .proofScript
+  checkExecutedSource "PS terminal expression-valued if remains supported" .proofScript
     "def result : Id Nat := do { if (true) { 7 } else { 9 } }\n" natType seven
-  checkSource "dedented else belongs to the outer conditional" .lean
+  checkExecutedSource "dedented else belongs to the outer conditional" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut value := 7\n" ++
       "  if true then\n" ++
@@ -221,7 +251,7 @@ private def testControlFlow (natType : PsExpr) : IO Unit := do
       "  else\n" ++
       "    value := 50\n" ++
       "  return value\n") natType seven
-  checkSource "nested do return has its own boundary" .lean
+  checkExecutedSource "nested do return has its own boundary" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut value := 3\n" ++
       "  let inner : Id Nat := (do { return 4 })\n" ++
@@ -229,14 +259,14 @@ private def testControlFlow (natType : PsExpr) : IO Unit := do
       "  return value\n") natType seven
   let stringType := PsExpr.constE psStringName []
   let exceptType := psSelfHostExceptOf stringType natType
-  checkSource "Except early branch return preserves effect" .lean
+  checkExecutedSource "Except early branch return preserves effect" .lean
     ("def result : Except String Nat := do\n" ++
       "  let mut value := 3\n" ++
       "  if true then\n" ++
       "    value := 7\n" ++
       "    return value\n" ++
       "  return 99\n") exceptType (psSelfHostExceptOkOf stringType natType seven)
-  checkSource "Except error bypasses assignment and continuation" .proofScript
+  checkExecutedSource "Except error bypasses assignment and continuation" .proofScript
     ("def result : Except String Nat := do {\n" ++
       "  let mut value := 3\n" ++
       "  value := value + 4\n" ++
@@ -307,27 +337,27 @@ private def testFiniteLoops (natType : PsExpr) : IO Unit := do
     "  for value in List.cons(1, List.cons(2, List.cons(3, List.nil))) {\n" ++
     "    total := Nat.add(Nat.mul(total, 10), value)\n" ++
     "  }\n  return total\n}\n"
-  checkSource "finite List iterates left-to-right" .lean leanList natType (nat 123)
-  checkSource "PS finite List iterates left-to-right" .proofScript psList natType (nat 123)
+  checkExecutedSource "finite List iterates left-to-right" .lean leanList natType (nat 123)
+  checkExecutedSource "PS finite List iterates left-to-right" .proofScript psList natType (nat 123)
   roundTrip "finite List PS to Lean" .proofScript .lean psList
-  checkSource "finite List empty does not execute body" .lean
+  checkExecutedSource "finite List empty does not execute body" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut total := 7\n" ++
       "  let values : List Nat := List.nil\n" ++
       "  for value in values do\n    total := Nat.add total value\n" ++
       "  return total\n") natType (nat 7)
-  checkSource "finite List singleton" .lean
+  checkExecutedSource "finite List singleton" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut total := 1\n" ++
       "  for value in List.cons 8 List.nil do\n    total := Nat.add total value\n" ++
       "  return total\n") natType (nat 9)
-  checkSource "finite Array iterates left-to-right" .lean
+  checkExecutedSource "finite Array iterates left-to-right" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut total := 0\n" ++
       "  for value in " ++ array ++ " do\n" ++
       "    total := Nat.add (Nat.mul total 10) value\n" ++
       "  return total\n") natType (nat 123)
-  checkSource "finite Array collection is captured once" .lean
+  checkExecutedSource "finite Array collection is captured once" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut values := " ++ array ++ "\n" ++
       "  let mut total := 0\n" ++
@@ -335,7 +365,7 @@ private def testFiniteLoops (natType : PsExpr) : IO Unit := do
       "    values := Array.emptyWithCapacity 0\n" ++
       "    total := Nat.add total value\n" ++
       "  return total\n") natType (nat 6)
-  checkSource "finite Array empty" .lean
+  checkExecutedSource "finite Array empty" .lean
     ("def result : Id Nat := do\n" ++
       "  let values : Array Nat := Array.emptyWithCapacity 0\n" ++
       "  let mut total := 7\n" ++
@@ -361,35 +391,35 @@ private def testFiniteLoops (natType : PsExpr) : IO Unit := do
     "    upper := 0\n" ++
     "    total := Nat.add(Nat.mul(total, 10), value)\n" ++
     "  }\n  return total\n}\n"
-  checkSource "finite range is ascending and captures both bounds once" .lean
+  checkExecutedSource "finite range is ascending and captures both bounds once" .lean
     leanRange natType (nat 234)
-  checkSource "PS finite range and loop-carried state" .proofScript
+  checkExecutedSource "PS finite range and loop-carried state" .proofScript
     psRange natType (nat 234)
   roundTrip "finite range Lean to PS" .lean .proofScript leanRange
-  checkSource "finite range equal bounds is empty" .lean
+  checkExecutedSource "finite range equal bounds is empty" .lean
     "def result : Id Nat := do { let mut n := 7; for i in [3:3] do { n := Nat.add n i }; return n }"
     natType (nat 7)
-  checkSource "finite range reversed bounds is empty" .lean
+  checkExecutedSource "finite range reversed bounds is empty" .lean
     "def result : Id Nat := do { let mut n := 7; for i in [5:2] do { n := Nat.add n i }; return n }"
     natType (nat 7)
-  checkSource "finite range omitted lower bound" .lean
+  checkExecutedSource "finite range omitted lower bound" .lean
     "def result : Id Nat := do { let mut n := 0; for i in [:3] do { n := Nat.add n i }; return n }"
     natType (nat 3)
-  checkSource "finite nested loops carry the outer mutable local" .lean
+  checkExecutedSource "finite nested loops carry the outer mutable local" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut total := 0\n" ++
       "  for x in List.cons 1 (List.cons 2 List.nil) do\n" ++
       "    for y in [3:5] do\n" ++
       "      total := Nat.add total (Nat.add x y)\n" ++
       "  return total\n") natType (nat 20)
-  checkSource "finite loop early return skips later iterations and rest" .lean
+  checkExecutedSource "finite loop early return skips later iterations and rest" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut total := 0\n" ++
       "  for value in " ++ list ++ " do\n" ++
       "    if Nat.beq value 2 then\n      return total\n" ++
       "    total := Nat.add total value\n" ++
       "  return 999\n") natType (nat 1)
-  checkSource "return from nested finite loops leaves the enclosing computation" .lean
+  checkExecutedSource "return from nested finite loops leaves the enclosing computation" .lean
     ("def result : Id Nat := do\n" ++
       "  let mut total := 0\n" ++
       "  for x in [1:4] do\n" ++
@@ -401,14 +431,14 @@ private def testFiniteLoops (natType : PsExpr) : IO Unit := do
   let exceptType := psSelfHostExceptOf stringType natType
   let expectedError := psSelfHostExceptErrorOf stringType natType
     (PsExpr.lit (PsLiteral.string "two"))
-  checkSource "finite loops propagate typed Except failure" .lean
+  checkExecutedSource "finite loops propagate typed Except failure" .lean
     ("def result : Except String Nat := do\n" ++
       "  let mut total := 0\n" ++
       "  for i in [0:4] do\n" ++
       "    let value : Nat <- if Nat.beq i 2 then Except.error \"two\" else Except.ok i\n" ++
       "    total := Nat.add total value\n" ++
       "  return total\n") exceptType expectedError
-  checkSource "finite early return is separate from a later typed error" .lean
+  checkExecutedSource "finite early return is separate from a later typed error" .lean
     ("def result : Except String Nat := do\n" ++
       "  let mut total := 0\n" ++
       "  for i in [0:4] do\n" ++
@@ -431,7 +461,38 @@ private def testFiniteLoops (natType : PsExpr) : IO Unit := do
   reject "finite loop mutation keeps one type" .lean
     "def result : Id Nat := do { let mut value := 0; for i in [0:3] do { value := true }; return value }"
 
-def main : IO Unit := do
+private def testContextualPure (natType : PsExpr) : IO Unit := do
+  let stringType := PsExpr.constE psStringName []
+  let exceptType := psSelfHostExceptOf stringType natType
+  let seven := psSelfHostExceptOkOf stringType natType (.lit (.natural 7))
+  let lean :=
+    "def result : Except String Nat := do\n" ++
+    "  let x : Nat <- pure 3\n" ++
+    "  pure ()\n" ++
+    "  pure (Nat.add x 4)\n"
+  let ps :=
+    "def result : Except(String, Nat) := do {\n" ++
+    "  let x : Nat <- pure(3)\n" ++
+    "  pure(())\n" ++
+    "  pure(Nat.add(x, 4))\n}\n"
+  checkExecutedSource "contextual pure for typed Except actions" .lean lean exceptType seven
+  checkExecutedSource "PS contextual pure for typed Except actions" .proofScript ps exceptType seven
+  roundTrip "contextual pure PS to Lean" .proofScript .lean ps
+  checkExecutedSource "local pure binding retains precedence" .lean
+    ("def result : Except String Nat := do\n" ++
+      "  let pure : Nat -> Except String Nat := fun (x : Nat) => Except.ok (Nat.add x 1)\n" ++
+      "  pure 3\n") exceptType
+    (psSelfHostExceptOkOf stringType natType (.lit (.natural 4)))
+  checkExecutedSource "global pure binding retains precedence" .lean
+    ("def pure (x : Nat) : Except String Nat := Except.ok (Nat.add x 2)\n" ++
+      "def result : Except String Nat := do { pure 3 }\n") exceptType
+    (psSelfHostExceptOkOf stringType natType (.lit (.natural 5)))
+  reject "shadowed ill-typed pure is not rewritten" .lean
+    ("def result : Except String Nat := do\n" ++
+      "  let pure : Nat -> Nat := fun (x : Nat) => x\n" ++
+      "  pure 3\n")
+
+private def testLegacyDo : IO Unit := do
   let natType := PsExpr.constE psNatName []
   let stringType := PsExpr.constE psStringName []
   let seven := PsExpr.lit (PsLiteral.natural 7)
@@ -526,7 +587,23 @@ def main : IO Unit := do
     (conversionFixture plain natType (PsExpr.lit (PsLiteral.natural 8)))
   require "kernel conversion harness rejects a wrong result"
     (match wrongConversion with | .error _ => true | .ok _ => false)
-  testCompilerM natType
-  testControlFlow natType
-  testFiniteLoops natType
+  pure ()
+
+def main : IO Unit := do
+  let natType := PsExpr.constE psNatName []
+  let groups : List (String × IO Unit) := [
+    ("legacy", testLegacyDo),
+    ("CompilerM", testCompilerM natType),
+    ("control-flow", testControlFlow natType),
+    ("finite-loops", testFiniteLoops natType),
+    ("contextual-pure", testContextualPure natType)]
+  let mut failures : List String := []
+  for (label, action) in groups do
+    try
+      action
+    catch error =>
+      IO.eprintln ("PSC1_DO_GROUP_FAIL: " ++ label ++ ": " ++ toString error)
+      failures := failures ++ [label]
+  if !failures.isEmpty then
+    throw (IO.userError ("PSC1_DO_TESTS_FAILED: " ++ String.intercalate ", " failures))
   IO.println "PSC1_DO_TESTS: PASS"

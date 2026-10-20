@@ -25,6 +25,22 @@ for (const data of [runtime, scripts, architecture, minimumRuntime, minimumScrip
 }
 assert.equal(distribution.qualification, 'passed');
 assert.equal(library.independentlyAdmitted, true);
+assert.deepEqual(library.checkedControlFlow, ['Id', 'let-mut', 'assignment', 'conditional', 'early-return']);
+assert.equal(runtime.controlFlowOracle, 'pinned-native-Lean');
+assert.deepEqual(runtime.controlFlowChecks,
+  ['mutationcheck', 'capturecheck', 'earlycheck', 'shadowcheck', 'danglingcheck',
+   'errorcheck', 'forlistcheck', 'forarraycheck', 'forrangecheck']);
+assert.deepEqual(runtime.handwrittenLiteralSyntaxes, ['lean', 'ps']);
+assert.deepEqual(runtime.handwrittenOptionalIndexSyntaxes, ['lean', 'ps']);
+const practicalNative = [
+  ['psc1_do_tests', 'PSC1_DO_TESTS: PASS'],
+  ['psc1_data_tests', 'PSC1_DATA_TESTS: PASS']
+].map(([suite, marker]) => {
+  const evidence = 'practical-core/' + suite + '.log';
+  const log = fs.readFileSync(path.join(output, evidence), 'utf8');
+  assert.ok(log.includes(marker), 'missing native suite success: ' + suite);
+  return { suite, passed: true, evidence };
+});
 function version(command, args) {
   const result = spawnSync(command, args, { cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
   if (result.error || result.status !== 0) throw Error('PSC1_QUALIFICATION_VERSION: ' + command + '\n' + result.stdout + result.stderr);
@@ -59,6 +75,14 @@ const receipt = {
   architectureRegressionGroups: architecture.records.length,
   minimumPython: { targetExecutionBundles: minimumRuntime.records.length, scriptingRegressionGroups: minimumScripts.records.length,
     runtimeEvidence: 'runtime-conformance-python314/results.json', scriptingEvidence: 'script-backends-python314/results.json' },
+  practicalCore: {
+    nativeSuites: practicalNative,
+    controlFlowChecks: runtime.controlFlowChecks,
+    referenceOracle: runtime.controlFlowOracle,
+    handwrittenLiteralSyntaxes: runtime.handwrittenLiteralSyntaxes,
+    handwrittenOptionalIndexSyntaxes: runtime.handwrittenOptionalIndexSyntaxes,
+    completeFamilies: false
+  },
   programs: runtime.records.map(x => ({
     target: x.target, syntax: x.syntax, publicNames: x.publicNames,
     artifactBytes: x.sourceBytes, executedChecks: x.checks,

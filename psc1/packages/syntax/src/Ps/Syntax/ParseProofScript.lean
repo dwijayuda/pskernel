@@ -940,6 +940,16 @@ def psParseProofScriptMatchAlternativesWithFuel
                               (psProofScriptExpectedError
                                 "next match bar or closing brace, without semicolon" body.cursor)
 
+def psParseProofScriptOperatorContinuation
+    (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat) (primary : PsParseResult PsSyntaxTerm) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let application ← psParseProofScriptApplicationAfterPrimary parseTerm fuel primary
+  let operators ← psParseOperatorTailWithFuel
+    (psParseOperatorsWithFuel (psParseProofScriptApplicationWithFuel parseTerm fuel) fuel)
+    fuel 0 false application
+  psParseProofScriptArrowTail parseTerm operators
+
 def psParseProofScriptGroupedContinuation
     (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
     (fuel : Nat) (opening : PsTokenRead)
@@ -1192,46 +1202,16 @@ def psParseProofScriptTermWithFuel
           (smaller)
           cursor
       else if psTokenCursorAtText cursor "(" then
-        match psTokenCursorAdvance cursor with
-        | Option.none => Except.error (PsParseError.unexpectedEnd "(")
-        | Option.some opening =>
-            if psTokenCursorAtText opening.cursor ")" then
-              match psTokenCursorAdvance opening.cursor with
-              | Option.none => Except.error (PsParseError.unexpectedEnd ")")
-              | Option.some close =>
-                  Except.ok {
-                    value :=
-                      PsSyntaxTerm.unit {
-                        start := opening.token.span.start
-                        stop := close.token.span.stop
-                      }
-                    cursor := close.cursor
-                  }
-            else
-              match psParseProofScriptBinder cursor with
-              | Except.ok binder =>
-                  if psTokenCursorAtArrow binder.cursor then
-                    psParseProofScriptDependentArrowTail
-                      (smaller)
-                      binder
-                  else
-                    match smaller opening.cursor with
-                    | Except.error error => Except.error error
-                    | Except.ok grouped =>
-                        match psTokenCursorExpectText grouped.cursor ")" with
-                        | Except.error error => Except.error error
-                        | Except.ok close =>
-                            psParseProofScriptGroupedContinuation
-                              smaller (Nat.succ remaining) opening grouped close
-              | Except.error _ =>
-                  match smaller opening.cursor with
-                  | Except.error error => Except.error error
-                  | Except.ok grouped =>
-                      match psTokenCursorExpectText grouped.cursor ")" with
-                      | Except.error error => Except.error error
-                      | Except.ok close =>
-                          psParseProofScriptGroupedContinuation
-                            smaller (Nat.succ remaining) opening grouped close
+        match psParseProofScriptBinder cursor with
+        | .ok binder =>
+            if psTokenCursorAtArrow binder.cursor then
+              psParseProofScriptDependentArrowTail smaller binder
+            else do
+              let value ← psParseProofScriptPrimary smaller cursor
+              psParseProofScriptOperatorContinuation smaller (Nat.succ remaining) value
+        | .error _ => do
+            let value ← psParseProofScriptPrimary smaller cursor
+            psParseProofScriptOperatorContinuation smaller (Nat.succ remaining) value
       else
         match
             psParseOperatorsWithFuel

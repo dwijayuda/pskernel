@@ -88,7 +88,7 @@ def psElabDoBodyWithState
                         ops context result name actionResult.fst actionResult.snd rest
         | PsSyntaxTerm.doThenE action rest _ =>
             let unitType := PsExpr.constE psUnitName []
-            match elaborate context action (some (psElabDoType ops unitType)) with
+            match psElabDoEffectTerm elaborate ops context unitType action with
             | .error error => .error error
             | .ok actionResult =>
                 psElabDoContinue
@@ -132,7 +132,7 @@ def psElabDoBodyWithState
             psElabDoFor elaborate smaller ops result context state name collection loopBody rest finish
         | PsSyntaxTerm.doForRangeE name lower upper loopBody rest _ =>
             psElabDoForRange elaborate smaller ops result context state name lower upper loopBody rest finish
-        | _ => elaborate context body expected
+        | _ => psElabDoEffectTerm elaborate ops context result body
 
 def psElabDoBody
     (fuel : Nat)

@@ -1516,30 +1516,16 @@ def psParseLeanTermWithFuel
         let value ← psParseRecordLiteral smaller cursor
         psParseLeanOperatorContinuation smaller (remaining + 1) value
       else if psTokenCursorAtText cursor "(" then
-        match psTokenCursorAdvance cursor with
-        | none => .error (.unexpectedEnd "(")
-        | some opening =>
-            if psTokenCursorAtText opening.cursor ")" then do
-              let close ← psTokenCursorExpectText opening.cursor ")"
-              psParseLeanOperatorContinuation smaller (remaining + 1) {
-                value := .unit { start := opening.token.span.start, stop := close.token.span.stop }
-                cursor := close.cursor
-              }
-            else
-              match psParseLeanBinder cursor with
-              | .ok binder =>
-                  if psTokenCursorAtArrow binder.cursor then
-                    psParseLeanDependentArrowTail smaller binder
-                  else do
-                    let grouped ← smaller opening.cursor
-                    let close ← psTokenCursorExpectText grouped.cursor ")"
-                    psParseLeanOperatorContinuation smaller (remaining + 1)
-                      { value := grouped.value, cursor := close.cursor }
-              | .error _ => do
-                  let grouped ← smaller opening.cursor
-                  let close ← psTokenCursorExpectText grouped.cursor ")"
-                  psParseLeanOperatorContinuation smaller (remaining + 1)
-                    { value := grouped.value, cursor := close.cursor }
+        match psParseLeanBinder cursor with
+        | .ok binder =>
+            if psTokenCursorAtArrow binder.cursor then
+              psParseLeanDependentArrowTail smaller binder
+            else do
+              let value ← psParseLeanApplicationPrimary smaller smaller cursor
+              psParseLeanOperatorContinuation smaller (remaining + 1) value
+        | .error _ => do
+            let value ← psParseLeanApplicationPrimary smaller smaller cursor
+            psParseLeanOperatorContinuation smaller (remaining + 1) value
       else do
         let operators ← psParseOperatorsWithFuel
           (psParseLeanOperatorApplication smaller (remaining + 1))

@@ -230,6 +230,10 @@ lean_exe psc1 where
   srcDir := "packages/cli/src"
   root := `Main
 
+lean_lib PsPracticalTestSupport where
+  srcDir := "test"
+  roots := #[`PracticalExecution]
+
 lean_exe psc1_tests where
   srcDir := "test"
   root := `BootstrapTests

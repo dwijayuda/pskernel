@@ -1,4 +1,5 @@
 import Ps.KernelCore.Research.ExprV2Validation
+import Ps.KernelCore.Research.ExprV2Index
 
 private def requireV2 (label : String) (ok : Bool) : IO Unit := do
   unless ok do
@@ -186,10 +187,56 @@ private def testExponentialSharing : IO Unit := do
   let _ ← expectV2 (psKernelExprV2Decode checked root)
   IO.println s!"PSC1_EXPR_V2_DAG_REPLAY nodes={arena.nodes.size} levels={depth} elapsed_ms={finish-begin}"
 
+/-
+Persistent-index regression tests. This index is intentionally not yet the
+production V2 arena: the JS persistent array-copy issue must be measured.
+-/
+private def testIndexedArena : IO Unit := do
+  let mut classic := psKernelExprV2Empty
+  let mut indexed := psKernelExprV2IndexedEmpty
+  for i in [:384] do
+    let (nextClassic, id) := psKernelExprV2MkBVar classic i
+    classic := nextClassic
+    let entry ← expectV2 (psKernelExprV2Lookup classic id)
+    let (nextIndexed, insertedId) ←
+      expectV2 (psKernelExprV2IndexedPush indexed entry)
+    indexed := nextIndexed
+    unless insertedId == id do
+      throw (IO.userError "PSC1_V2_INDEX_ID_MISMATCH")
+  requireV2 "indexed-count-parity"
+    (indexed.size == classic.nodes.size)
+  let _ ← expectV2 (psKernelExprV2ValidateLinear classic)
+  for i in [:384] do
+    let c ← expectV2 (psKernelExprV2Lookup classic i)
+    match psKernelExprV2IndexedFind indexed i with
+    | Option.none =>
+        throw (IO.userError "PSC1_V2_INDEX_LOOKUP_MISSING")
+    | Option.some v =>
+        unless psKernelExprV2SameMetadata c v do
+          throw (IO.userError "PSC1_V2_INDEX_METADATA_MISMATCH")
+  requireV2 "indexed-no-out-of-range-alias"
+    (match psKernelExprV2IndexedFind indexed 384 with
+      | Option.none => true
+      | Option.some _ => false)
+  let old := indexed
+  let (newArena, newId) ← expectV2
+    (psKernelExprV2IndexedPush indexed
+      (← expectV2 (psKernelExprV2Lookup classic 0)))
+  requireV2 "indexed-persistent-old-root"
+    (match psKernelExprV2IndexedFind old newId with
+      | Option.none => true
+      | Option.some _ => false)
+  requireV2 "indexed-new-root-has-entry"
+    (match psKernelExprV2IndexedFind newArena newId with
+      | Option.none => false
+      | Option.some _ => true)
+  IO.println "PSC1_EXPR_V2_INDEXED: PASS nodes=384"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
   testInvalidInput
   testDeepSpines
   testExponentialSharing
+  testIndexedArena
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

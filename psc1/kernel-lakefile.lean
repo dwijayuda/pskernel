@@ -87,7 +87,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Runtime.Capability.Lean434NativeReduction,
     `Ps.KernelCore.Runtime.Capability.Types,
     `Ps.KernelCore.SelfHost,
-    `Ps.KernelCore.Research.ExprV2
+    `Ps.KernelCore.Research.ExprV2,
+    `Ps.KernelCore.Research.ExprV2Validation
   ]
 
 lean_exe psc1_kernel_regression where

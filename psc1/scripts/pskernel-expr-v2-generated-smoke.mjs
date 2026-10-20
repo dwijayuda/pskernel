@@ -36,6 +36,9 @@ const chunkedMkApp=load("psKernelExprV2ChunkedMkApp");
 const portableValidate=load("psKernelExprV2PortableValidate");
 const portableLift=load("psKernelExprV2PortableLiftChecked");
 const portableInstantiate=load("psKernelExprV2PortableInstantiate1Checked");
+const portableHeadStep=load("psKernelExprV2PortableHeadStepChecked");
+const chunkedMkLet=load("psKernelExprV2ChunkedMkLet");
+const chunkedMkMData=load("psKernelExprV2ChunkedMkMData");
 const chunkedMkSort=load("psKernelExprV2ChunkedMkSort");
 const chunkedMkLam=load("psKernelExprV2ChunkedMkLam");
 const nameConstructors=load("PsKernelName");
@@ -161,6 +164,33 @@ const instInvalid=portableInstantiate(sourceWithSort.fst,root,999999n);
 demand(instInvalid&&"error" in instInvalid,"instantiate-invalid-replacement-rejected");
 const instForged=portableInstantiate(forgedChunk,0n,0n);
 demand(instForged&&"error" in instForged,"instantiate-forged-metadata-rejected");
+
+
+// Head reduction is deliberately one step, not a full WHNF interpreter.
+const headLam=accepted(chunkedMkLam(sourceWithSort.fst,nameConstructors.anonymous,
+  sourceWithSort.snd,firstId,binderConstructors.default),"head-lambda");
+const headBeta=accepted(chunkedMkApp(headLam.fst,headLam.snd,sourceWithSort.snd),
+  "head-beta-input");
+const betaStep=accepted(portableHeadStep(headBeta.fst,headBeta.snd),"head-beta-step");
+demand(betaStep.snd===sourceWithSort.snd,"head-beta-to-argument");
+const headLet=accepted(chunkedMkLet(headBeta.fst,nameConstructors.anonymous,
+  sourceWithSort.snd,sourceWithSort.snd,firstId,false),"head-let-input");
+const letStep=accepted(portableHeadStep(headLet.fst,headLet.snd),"head-zeta-step");
+demand(letStep.snd===sourceWithSort.snd,"head-zeta-to-value");
+const metadata=accepted(chunkedMkMData(headBeta.fst,17n,headBeta.snd),"head-mdata-input");
+const mdataStep=accepted(portableHeadStep(metadata.fst,metadata.snd),"head-mdata-step");
+demand(mdataStep.snd===headBeta.snd,"head-mdata-only-unwraps-once");
+const neutralHead=accepted(chunkedMkApp(headBeta.fst,sourceWithSort.snd,sourceWithSort.snd),
+  "head-neutral-input");
+const neutralStep=accepted(portableHeadStep(neutralHead.fst,neutralHead.snd),
+  "head-neutral-step");
+demand(neutralStep.snd===neutralHead.snd &&
+  neutralStep.fst.size===neutralHead.fst.size,"head-neutral-identity");
+const invalidHead=portableHeadStep(headBeta.fst,999999n);
+demand(invalidHead&&"error" in invalidHead,"head-invalid-root-rejected");
+const forgedHead=portableHeadStep(forgedChunk,0n);
+demand(forgedHead&&"error" in forgedHead,"head-forged-metadata-rejected");
+
 
 
 

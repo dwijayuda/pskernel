@@ -41,6 +41,9 @@ const portableHeadSequence=load("psKernelExprV2PortableHeadSequenceChecked");
 const portableHeadMachine=load("psKernelExprV2PortableHeadMachineChecked");
 const portableStructuralEq=load("psKernelExprV2PortableEqChecked");
 const portableEqBatch=load("psKernelExprV2PortableEqBatchChecked");
+const portableImport=load("psKernelExprV2PortableImportChecked");
+const portableImportInto=load("psKernelExprV2PortableImportIntoChecked");
+const legacyExpr=load("PsKernelExpr");
 const boolListEq=load("psKernelExprV2PortableBoolListEq");
 const boolList=load("List");
 const boolListNil=typeof boolList.nil==="function"?boolList.nil():boolList.nil;
@@ -312,6 +315,33 @@ compareBatch("batch");
 compareBatch("batch");
 compareBatch("repeated-single");
 console.log("PSC1_EXPR_V2_PAIR_BATCH_TIMINGS "+JSON.stringify(pairBatchMetrics));
+
+
+// Real legacy-expression input adapter, checked by the same portable
+// smart-constructor replay used for V2 metadata/collision safety.
+const oldSort=legacyExpr.sort(level.zero);
+const oldIdentityLam=legacyExpr.lam(nameConstructors.anonymous,
+  oldSort,legacyExpr.bvar(0n),binderConstructors.default);
+const oldBeta=legacyExpr.app(oldIdentityLam,oldSort);
+const imported=accepted(portableImport(oldBeta),"portable-import-old-beta");
+const importedCopy=accepted(
+  portableImportInto(imported.fst,oldBeta),"portable-import-copy");
+demand(imported.snd!==importedCopy.snd &&
+  accepted(portableStructuralEq(importedCopy.fst,imported.snd,importedCopy.snd),
+    "portable-import-identity-parity"),
+  "portable-import-structural-copy-equality");
+const importedStep=accepted(
+  portableHeadMachine(2n,imported.fst,imported.snd),
+  "portable-import-beta-reduction");
+const sortWithRoot=accepted(chunkedMkSort(importedStep.fst,level.zero),
+  "portable-import-beta-expected-sort");
+demand(accepted(portableStructuralEq(
+  sortWithRoot.fst,importedStep.snd,sortWithRoot.snd),
+  "portable-import-beta-result-equality"),
+  "portable-import-beta-parity");
+const importedForged=portableImportInto(forgedChunk,oldSort);
+demand(importedForged&&"error" in importedForged,
+  "portable-import-rejects-forged-input");
 
 // Order-balanced comparison; both implementations see equivalent prebuilt DAGs.
 // Every result and returned arena size is checked before accepting a timing.

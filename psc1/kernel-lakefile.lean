@@ -102,7 +102,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Research.ExprV2PortableHeadSequence,
     `Ps.KernelCore.Research.ExprV2PortableHeadMachine,
     `Ps.KernelCore.Research.ExprV2PortableEquality,
-    `Ps.KernelCore.Research.ExprV2PortableEqualityBatch
+    `Ps.KernelCore.Research.ExprV2PortableEqualityBatch,
+    `Ps.KernelCore.Research.ExprV2PortableImport
   ]
 
 lean_exe psc1_kernel_regression where

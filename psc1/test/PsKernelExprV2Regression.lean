@@ -3,6 +3,7 @@ import Ps.KernelCore.Research.ExprV2Lift
 import Ps.KernelCore.Research.ExprV2PortableHeadMachine
 import Ps.KernelCore.Research.ExprV2PortableEquality
 import Ps.KernelCore.Research.ExprV2PortableEqualityBatch
+import Ps.KernelCore.Research.ExprV2PortableImport
 import Ps.KernelCore.Research.ExprV2PortableLift
 import Ps.KernelCore.Research.ExprV2PortableInstantiate
 import Ps.KernelCore.Research.ExprV2PortableReduction
@@ -1156,6 +1157,64 @@ private def testPortableEqualityBatchSharing : IO Unit := do
     (psKernelExprV2PortableBoolListEq result expected)
   IO.println "PSC1_EXPR_V2_PAIR_BATCH_SHARING: PASS nodes=41 comparisons=16"
 
+
+/-
+M4 interoperability: import existing kernel expressions with a checked
+PSC1-portable adapter; decode only in this independent regression and
+compare original expression structure, metadata, and structural equality.
+-/
+private def testPortableLegacyImport : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "legacyImport"
+  let sort0 := PsKernelExpr.sort PsKernelLevel.zero
+  let bvar0 := PsKernelExpr.bvar 0
+  let bvar2 := PsKernelExpr.bvar 2
+  let app := PsKernelExpr.app bvar0 bvar2
+  let lam := PsKernelExpr.lam name sort0 app PsKernelBinderInfo.default
+  let cases : List (String × PsKernelExpr) := [
+    ("bvar",bvar2),
+    ("fvar",PsKernelExpr.fvar name),
+    ("mvar",PsKernelExpr.mvar name),
+    ("sort",sort0),
+    ("const",PsKernelExpr.const name [PsKernelLevel.zero]),
+    ("nat-literal",PsKernelExpr.lit (PsKernelLiteral.nat 42)),
+    ("string-literal",PsKernelExpr.lit (PsKernelLiteral.str "v2-import")),
+    ("app",app),("lambda",lam),
+    ("forall",PsKernelExpr.forallE name sort0 app PsKernelBinderInfo.implicit),
+    ("let",PsKernelExpr.letE name sort0 sort0 app false),
+    ("mdata",PsKernelExpr.mdata 7 app),
+    ("projection",PsKernelExpr.proj name 0 app)
+  ]
+  for (label,expr) in cases do
+    let (arena,root) ← expectV2
+      (psKernelExprV2PortableImportChecked expr)
+    let actual ← expectV2 (psKernelExprV2ChunkedDecode arena root)
+    requireV2 ("legacy-import-roundtrip-" ++ label)
+      (psKernelExprEq actual expr && psKernelExprEqual actual expr)
+    let (joined,copy) ← expectV2
+      (psKernelExprV2PortableImportIntoChecked arena expr)
+    let isEqual ← expectV2
+      (psKernelExprV2PortableEqChecked joined root copy)
+    requireV2 ("legacy-import-cross-copy-" ++ label) isEqual
+  let small : PsKernelExpr :=
+    PsKernelExpr.app
+      (PsKernelExpr.lam name sort0 bvar0 PsKernelBinderInfo.default)
+      sort0
+  let (arena,beta) ← expectV2 (psKernelExprV2PortableImportChecked small)
+  let (resultArena,result) ← expectV2
+    (psKernelExprV2PortableHeadMachineChecked 2 arena beta)
+  let reduced ← expectV2 (psKernelExprV2ChunkedDecode resultArena result)
+  requireV2 "legacy-import-checked-beta-reduction"
+    (psKernelExprEq reduced sort0 && psKernelExprEqual reduced sort0)
+  let entry ← expectV2 (psKernelExprV2ChunkedRequire arena beta)
+  let corrupted : PsKernelExprV2Entry := { entry with hash := 0 }
+  let (malformed,badRoot) := psKernelExprV2ChunkedPush
+    psKernelExprV2ChunkedEmpty corrupted
+  requireV2 "legacy-import-refuses-forged-source"
+    (match psKernelExprV2PortableImportIntoChecked malformed sort0 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_LEGACY_IMPORT: PASS cases=13"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -1177,4 +1236,5 @@ def main : IO Unit := do
   testPortablePairSharing
   testPortableEqualityBatch
   testPortableEqualityBatchSharing
+  testPortableLegacyImport
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

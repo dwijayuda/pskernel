@@ -74,7 +74,22 @@ for (const phase of phases) {
   for (const stage of ['parse', 'elaboration']) {
     const first = rows.find(row => row[stage] === 'refused');
     if (first) console.log('PSC1_COMPILER_CENSUS_FIRST_REFUSAL: ' +
-      JSON.stringify({ phase: phase.name, stage, module: first.module, path: first.path, detail: first.detail }));
+      JSON.stringify({ phase: phase.name, stage, module: first.module, path: first.path, detail: first.detail,
+        sourceDeclaration: first.sourceDeclaration, sourceIndex: first.sourceIndex,
+        line: first.line, column: first.column }));
   }
 }
 // Only inventory/probe integrity fails; source refusals remain explicit blockers.
+
+// These normalized compiler modules are maintained regressions, not a waiver for
+// any other refusal. The full inventory above still reports every module.
+for (const [module, stage] of [
+  ['Ps.Syntax.Ast', 'parse'], ['Ps.Syntax.Ast', 'elaboration'],
+  ['Ps.Erasure.Definition', 'elaboration']
+]) {
+  const row = observed.records.find(row => row.module === module);
+  if (!row || row[stage] !== 'accepted') {
+    throw new Error('PSC1_CENSUS_NORMALIZATION_REGRESSION: ' +
+      JSON.stringify({ module, stage, observed: row || null }));
+  }
+}

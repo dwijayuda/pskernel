@@ -366,3 +366,7 @@ lean_exe psc1_source_census_probe where
 lean_exe psc1_independent_checker where
   srcDir := "packages/pskernel-lean/provider"
   root := `PsKernelLean.Main
+
+lean_exe psc1_census_normalization_tests where
+  srcDir := "test"
+  root := `CensusNormalizationTests

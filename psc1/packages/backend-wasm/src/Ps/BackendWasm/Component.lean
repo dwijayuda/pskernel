@@ -22,9 +22,8 @@ def psWasmComponentWitIdent (name : String) : Bool :=
   let validPart := fun (part : String) => match part.toList with
     | [] => false
     | first :: rest => lower first && rest.all (fun c => lower c || digit c)
-  let reserved := ["world", "interface", "package", "export", "import", "use", "type",
-    "func", "record", "variant", "resource", "constructor", "static", "bool", "string",
-    "char", "u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64", "f32", "f64"]
+  -- Exact bare-keyword set from wasm-tools v1.254.0 wit-parser/ast/lex.rs.
+  let reserved := ["use", "type", "func", "u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64", "f32", "f64", "char", "resource", "own", "borrow", "record", "flags", "variant", "enum", "bool", "string", "option", "result", "future", "stream", "error-context", "list", "map", "_", "as", "from", "static", "interface", "tuple", "world", "import", "export", "package", "constructor", "include", "with", "async"]
   !reserved.contains name && (name.splitOn "-").all validPart
 
 def psWasmComponentValidatePlan (plan : PsWasmComponentPlan) : Except String Unit := do

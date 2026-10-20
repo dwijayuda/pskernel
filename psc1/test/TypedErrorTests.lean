@@ -203,6 +203,19 @@ private def handlerCorpus : IO Unit := do
   | .ok a, .ok b => require "PS-to-Lean handler graph roundtrip" (a == b)
   | _, _ => throw (IO.userError "typed-error reverse graph encoding")
 
+private def patternHandlerBoundary : IO Unit := do
+  let fixture <- IO.FS.readFile "test/TypedErrorFixtures.lean"
+  for (flag, expected) in [("false", 1003), ("true", 9)] do
+    let source := fixture ++
+      "\ndef result : Nat := match errorPatternFor " ++ flag ++ " with\n" ++
+      "  | Except.error error => error\n" ++
+      "  | Except.ok value => 1000 + value\n"
+    for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+      let text <- if kind matches .lean then pure source else translate source
+      psPracticalCheckExecuted
+        ("pattern fallthrough cannot catch a later iteration: " ++ flag)
+        (<- prepare kind text) (PsExpr.constE psNatName []) (.lit (.natural expected))
+
 private def rejectionBoundaries : IO Unit := do
   for (label, body) in [
     ("throw error type mismatch", "def result : Except Nat Nat := do { throw true }"),
@@ -234,6 +247,7 @@ def main : IO Unit := do
     ("match layout", matchLayoutBoundaries),
     ("nested handlers", layoutBoundaries),
     ("handler corpus", handlerCorpus),
+    ("pattern handler boundary", patternHandlerBoundary),
     ("rejection boundaries", rejectionBoundaries),
     ("PS spelling", proofScriptSpelling),
     ("CompilerM", compilerM)]

@@ -131,7 +131,7 @@ def psTsEmitConstructorValue
   let resultType := psTsJoin "" [inductiveInfo.name, generic];
   if if psListIsEmpty inductiveInfo.typeParameters then psListIsEmpty constructorInfo.fields else false then
     Except.ok
-      (psTsJoin "" ["  ", psJsonQuote constructorInfo.name, ": { [", tag, "]: ", psJsonQuote constructorInfo.name, " } as ", resultType, ","])
+      (psTsJoin "" ["  [", psJsonQuote constructorInfo.name, "]: { [", tag, "]: ", psJsonQuote constructorInfo.name, " } as ", resultType, ","])
   else
     let printParameter : PsVerifiedIrConstructorField -> Except PsTsEmitError String :=
       fun (field : PsVerifiedIrConstructorField) =>
@@ -151,13 +151,13 @@ def psTsEmitConstructorValue
         let formatField : (PsVerifiedIrConstructorField × String) -> String :=
           fun (entry : PsVerifiedIrConstructorField × String) =>
             match entry with
-            | Prod.mk field name => psTsJoin "" [field.name, ": ", name];
+            | Prod.mk field name => psTsJoin "" ["[", psJsonQuote field.name, "]: ", name];
         let fields := psListMap formatField (psListZip constructorInfo.fields parameterNames);
         let suffix :=
           if psListIsEmpty fields then ""
           else psTsJoin "" [", ", psTsJoin ", " fields];
         Except.ok
-          (psTsJoin "" ["  ", psJsonQuote constructorInfo.name, ": ", generic, "(", psTsJoin ", " parameters, "): ", resultType, " => ({ [", tag, "]: ", psJsonQuote constructorInfo.name, suffix, " } as ", resultType, "),"])
+          (psTsJoin "" ["  [", psJsonQuote constructorInfo.name, "]: ", generic, "(", psTsJoin ", " parameters, "): ", resultType, " => ({ [", tag, "]: ", psJsonQuote constructorInfo.name, suffix, " } as ", resultType, "),"])
 
 def psTsEmitInductiveWithVisibility (isPublic : Bool)
     (tags : List (String × String))

@@ -122,7 +122,7 @@ def psPrintArrowChain
 def psPrintDoBinding
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
     (name : PsSyntaxName) (annotation : Option PsSyntaxTerm)
-    (prefix separator : String) (value : PsSyntaxTerm) :
+    (bindingPrefix separator : String) (value : PsSyntaxTerm) :
     Except PsSourcePrintError String :=
   match psPrintSyntaxName name with
   | Except.error error => Except.error error
@@ -144,7 +144,7 @@ def psPrintDoBinding
                 if psSyntaxTermSimpleForApplication value then printedValue
                 else psPrintCommonConcat3 "(" printedValue ")";
               Except.ok (psPrintJoin ""
-                [prefix, printedName, printedType, separator, groupedValue])
+                [bindingPrefix, printedName, printedType, separator, groupedValue])
 
 def psPrintDoBody
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)

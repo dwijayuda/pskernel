@@ -156,6 +156,10 @@ def psProofScriptTermWithSpan
   | .doBindE name type action body _ => PsSyntaxTerm.doBindE name type action body span
   | .doThenE action body _ => PsSyntaxTerm.doThenE action body span
   | .doReturnE value _ => PsSyntaxTerm.doReturnE value span
+  | .doLetMutE name type value body _ => PsSyntaxTerm.doLetMutE name type value body span
+  | .doAssignE name value body _ => PsSyntaxTerm.doAssignE name value body span
+  | .doIfE condition thenBody elseBody rest _ => PsSyntaxTerm.doIfE condition thenBody elseBody rest span
+  | .doEndE _ => PsSyntaxTerm.doEndE span
   | .lambda binders body _ => PsSyntaxTerm.lambda binders body span
   | .forallE binders body _ => PsSyntaxTerm.forallE binders body span
   | .letE name type value body _ =>

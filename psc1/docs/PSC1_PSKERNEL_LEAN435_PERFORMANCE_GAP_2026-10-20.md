@@ -119,6 +119,8 @@ Zero milliseconds means below 1 ms granularity. The precomputed-field query time
 4. Every expression constructor and update, binder traversal, substitution, level instantiation, recursor and projection must preserve the metadata invariant. Sample testing alone is not a formal proof.
 5. Kernel fuel, scoped cache restoration, the 79-module portable source closure, and generated JavaScript correctness and memory gates must remain intact.
 
+**Final correctness qualification:** [CI 39369192351](https://github.com/dwijayuda/pskernel/actions/runs/39369192351) PASSED both native and full PSC1 portability jobs after the research benchmark additions. [Metadata profiling CI 39369351773](https://github.com/dwijayuda/pskernel/actions/runs/39369351773) PASSED both native and generated-JS jobs. Since the earlier optimized semantic source at commit 2250558d5d5223f3de53cd27cf0b566c4872c253, later commits affect only research tests, benchmark workflows, report scripts, kernel-lakefile benchmark target registration and documentation; **production kernel source is unchanged**.
+
 **Disposition:** the Lean 4.35 migration and DefEq first-entry cleanup have qualified native/portable checking; native-vs-official slowdown is measured on deep zeta cases; an isolated metadata prototype validates the architectural hypothesis. Production metadata, general speedups, formal metatheory and full Lean Arena remain unresolved research work.
 
 

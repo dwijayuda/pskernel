@@ -1,0 +1,89 @@
+name: PSC1 generated JavaScript whole-kernel comparison
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/psc1-pskernel-core-cross-branch-20261020
+    paths:
+      - psc1/scripts/pskernel-whole-js-bench.mjs
+      - psc1/scripts/pskernel-whole-js-report.mjs
+      - .github/workflows/psc1-pskernel-whole-js-benchmark.yml
+
+permissions:
+  contents: read
+
+jobs:
+  matched-generated-js:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      BASE_KERNEL_SHA: 0a53836489c4e88f46df8f5b8b0c19cc41bafbbb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean and isolated TypeScript 7
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          mkdir -p "$RUNNER_TEMP/psc1-whole-ts" "$RUNNER_TEMP/psc1-whole-js-reports"
+          echo '{"name":"psc1-whole-bench","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-whole-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-whole-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-whole-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Pin original and optimized kernel snapshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          git cat-file -e "$BASE_KERNEL_SHA^{commit}"
+          git worktree add --detach "$RUNNER_TEMP/psc1-js-original" "$BASE_KERNEL_SHA"
+          test "$(cat psc1/lean-toolchain)" = "$(cat "$RUNNER_TEMP/psc1-js-original/psc1/lean-toolchain")"
+          printf 'original=%s\noptimized=%s\n' "$BASE_KERNEL_SHA" "$(git rev-parse HEAD)" > "$RUNNER_TEMP/psc1-whole-js-reports/refs.txt"
+      - name: Generate corrected original kernel JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/psc1-js-original/psc1"
+          lake build psc1
+          node scripts/bootstrap-project.mjs packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/whole-js/workspace
+          lake exe psc1 build dist/whole-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps --out dist/whole-js/kernel.js
+          test -s dist/whole-js/kernel.js
+          test -s dist/whole-js/kernel.d.ts
+          node --check dist/whole-js/kernel.js
+      - name: Generate optimized kernel JavaScript
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake build psc1
+          node scripts/bootstrap-project.mjs packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/whole-js/workspace
+          lake exe psc1 build dist/whole-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps --out dist/whole-js/kernel.js
+          test -s dist/whole-js/kernel.js
+          test -s dist/whole-js/kernel.d.ts
+          node --check dist/whole-js/kernel.js
+      - name: Benchmark original generated JS complete operations
+        shell: bash
+        run: |
+          set -euo pipefail
+          node psc1/scripts/pskernel-whole-js-bench.mjs "$RUNNER_TEMP/psc1-js-original/psc1/dist/whole-js/kernel.js" original | tee "$RUNNER_TEMP/psc1-whole-js-reports/original.log"
+      - name: Benchmark optimized generated JS complete operations
+        shell: bash
+        run: |
+          set -euo pipefail
+          node psc1/scripts/pskernel-whole-js-bench.mjs "$GITHUB_WORKSPACE/psc1/dist/whole-js/kernel.js" optimized | tee "$RUNNER_TEMP/psc1-whole-js-reports/optimized.log"
+      - name: Compare fully checked results and save JS report
+        shell: bash
+        run: |
+          set -euo pipefail
+          node psc1/scripts/pskernel-whole-js-report.mjs "$RUNNER_TEMP/psc1-whole-js-reports"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-whole-generated-js-comparison
+          path: ${{ runner.temp }}/psc1-whole-js-reports/
+          retention-days: 30

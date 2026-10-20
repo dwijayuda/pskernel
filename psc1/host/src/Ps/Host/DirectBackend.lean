@@ -5,6 +5,7 @@ import Ps.Host.ArtifactBundle
 import Ps.Host.DirectSourceMap
 import Ps.Compiler.Ordinary
 import Ps.CompilerIr.Validate
+import Ps.BackendCommon.Plan
 import Ps.BackendJs.Print
 import Ps.BackendRust.Module
 import Ps.BackendWasm.Binary
@@ -209,16 +210,9 @@ private def ecmaPlan (session : PsHostDirectPrepared) : IO PsValidatedIrModule :
       match psHostDirectDeclaration declaration with
       | .ok _ => pure ()
       | .error reason => throw (IO.userError (reason ++ ": declaration=" ++ declaration.name))
-  let specialized ← match psIrSpecializeValidatedModule session.validated with
-    | .ok value => pure value
-    | .error reason => throw (IO.userError ("PSC1_SPECIALIZATION_FAILED: " ++ specializeFailureText reason))
-  let plan ← match psStrictValidateModule specialized.raw with
-    | .ok value => pure value
-    | .error _ => throw (IO.userError ("PSC1_POST_SPECIALIZATION_INVALID: " ++ irFailureText specialized.raw))
-  for name in session.publicNames do
-    if !plan.raw.declarations.any (fun declaration => declaration.name == name) then
-      throw (IO.userError ("PSC1_PUBLIC_DECLARATION_LOST: " ++ name))
-  return plan
+  match psBackendClosedPlan session.validated session.publicNames with
+  | .ok plan => return plan
+  | .error reason => throw (IO.userError reason)
 
 private def sourceJson (session : PsHostDirectPrepared) (source : PsHostCapturedSource) : String :=
   let origins := source.parsed.declarations.filterMap fun declaration => do

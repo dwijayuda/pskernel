@@ -78,6 +78,10 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.Validate
   ]
 
+lean_lib PsBackendCommon where
+  srcDir := "packages/backend-common/src"
+  roots := #[`Ps.BackendCommon.Plan]
+
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
   roots := #[
@@ -288,3 +292,7 @@ lean_exe psc1_operator_tests where
 lean_exe psc1_ordinary_tests where
   srcDir := "test"
   root := `OrdinaryExecutionTests
+
+lean_exe psc1_backend_common_tests where
+  srcDir := "test"
+  root := `BackendCommonTests

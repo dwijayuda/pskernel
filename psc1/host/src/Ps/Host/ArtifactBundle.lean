@@ -13,6 +13,7 @@ def psHostArtifactToolPath : IO String := do
   let root := lake.parent.getD lake
   let candidates := [
     bin / "host-tools" / "artifacts.mjs",
+    lake / "host-tools" / "artifacts.mjs",
     root / "host-tools" / "artifacts.mjs",
     System.FilePath.mk "host-tools/artifacts.mjs",
     System.FilePath.mk "psc1/host-tools/artifacts.mjs"]

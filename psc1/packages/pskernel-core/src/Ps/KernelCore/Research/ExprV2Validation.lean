@@ -330,3 +330,21 @@ def psKernelExprV2ValidateChunked
     if !psKernelExprV2SameMetadata entry expected then
       throw "PSKERNEL_V2_CHUNKED_METADATA_INVALID"
     checked := next
+
+
+/-
+Correctness-oracle materializer for *validated* chunked expressions only.
+It replays metadata first, then builds a legacy tree in increasing node-ID
+order. Never use materialization on the fast checker execution path.
+-/
+def psKernelExprV2ChunkedDecode
+    (arena : PsKernelExprV2ChunkedArena)
+    (root : Nat) : Except String PsKernelExpr := do
+  let _ ← psKernelExprV2ValidateChunked arena
+  let mut array := psKernelExprV2Empty
+  for id in [:arena.size] do
+    let entry ← match psKernelExprV2ChunkedFind arena id with
+      | Option.none => throw "PSKERNEL_V2_DECODE_CHUNK_MISSING"
+      | Option.some e => pure e
+    array := (psKernelExprV2Push array entry).fst
+  psKernelExprV2Decode array root

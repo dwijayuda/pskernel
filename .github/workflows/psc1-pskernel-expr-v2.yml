@@ -188,3 +188,94 @@ jobs:
           name: psc1-expr-v2-portable-js-lean435
           path: ${{ runner.temp }}/expr-v2-generated-js.log
           retention-days: 30
+
+  portable-ps-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build the authentic PSC1 compiler
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          lake build psc1
+      - name: Reconstruct complete V2 project closure as canonical ProofScript
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/bootstrap-project.mjs \
+            packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean \
+            dist/expr-v2/ps-workspace
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { assertBootstrapWorkspaceManifest } from './scripts/bootstrap-manifest.mjs';
+          const root='dist/expr-v2/ps-workspace';
+          const manifest=JSON.parse(readFileSync(root+'/.proofscript-bootstrap.json','utf8'));
+          const expectedEntry='packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.ps';
+          if(manifest.entry!==expectedEntry)throw Error('V2_PS_CLOSURE_WRONG_ENTRY');
+          if(manifest.sourceCount<40 || manifest.generated.length!==manifest.sourceCount)
+            throw Error('V2_PS_CLOSURE_INCOMPLETE');
+          for(const required of [
+            'ExprV2ResearchAll.ps',
+            'ExprV2PagedValidation.ps',
+            'ExprV2PortableEqualityBatch.ps',
+            'ExprV2PortableImport.ps',
+            'ExprV2PortableHeadMachine.ps',
+          ]){
+            if(!manifest.generated.some(p=>p.endsWith('/Research/'+required)))
+              throw Error('V2_PS_CLOSURE_MISSING_MODULE_'+required);
+          }
+          await assertBootstrapWorkspaceManifest(root,manifest,'bootstrap');
+          console.log('PSC1_V2_CANONICAL_PS_CLOSURE: PASS modules='+manifest.sourceCount);
+          NODE
+      - name: Check complete generated ProofScript V2 source closure
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake exe psc1 check \
+            dist/expr-v2/ps-workspace/packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.ps
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated TypeScript 7.0.2 for reconstructed source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-v2-ps-ts"
+          echo '{"name":"psc1-v2-ps-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-v2-ps-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-v2-ps-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-v2-ps-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Build and execute generated JavaScript from the full PS closure
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 build \
+            dist/expr-v2/ps-workspace/packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.ps \
+            --out dist/expr-v2/from-ps/v2.js
+          test -s dist/expr-v2/from-ps/v2.js
+          test -s dist/expr-v2/from-ps/v2.d.ts
+          test -s dist/expr-v2/from-ps/v2.js.map
+          node --check dist/expr-v2/from-ps/v2.js
+          node --expose-gc scripts/pskernel-expr-v2-generated-smoke.mjs \
+            dist/expr-v2/from-ps/v2.js \
+            | tee "$RUNNER_TEMP/psc1-v2-ps-js.log"
+          grep -q 'PSC1_EXPR_V2_JS_SMOKE: PASS' "$RUNNER_TEMP/psc1-v2-ps-js.log"
+          echo 'PSC1_V2_GENERATED_PS_JS: PASS'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-v2-canonical-ps-closure-lean435
+          path: |
+            ${{ runner.temp }}/psc1-v2-ps-js.log
+            psc1/dist/expr-v2/ps-workspace/.proofscript-bootstrap.json
+          retention-days: 30

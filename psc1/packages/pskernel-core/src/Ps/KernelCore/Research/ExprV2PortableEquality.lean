@@ -96,50 +96,87 @@ def psKernelExprV2PairCompareShape
     (memo : List PsKernelExprV2PairMemo)
     (left right : PsKernelExprV2Node) :
     Except String (Bool × List PsKernelExprV2PairMemo) :=
-  match left,right with
-  | PsKernelExprV2Node.bvar x, PsKernelExprV2Node.bvar y =>
-      Except.ok (Prod.mk (Nat.beq x y) memo)
-  | PsKernelExprV2Node.fvar x, PsKernelExprV2Node.fvar y =>
-      Except.ok (Prod.mk (psKernelNameEq x y) memo)
-  | PsKernelExprV2Node.mvar x, PsKernelExprV2Node.mvar y =>
-      Except.ok (Prod.mk (psKernelNameEq x y) memo)
-  | PsKernelExprV2Node.sort x, PsKernelExprV2Node.sort y =>
-      Except.ok (Prod.mk (psKernelLevelEq x y) memo)
-  | PsKernelExprV2Node.const x xs, PsKernelExprV2Node.const y ys =>
-      if psKernelNameEq x y then
-        Except.ok (Prod.mk (psKernelLevelListEq xs ys) memo)
-      else
-        Except.ok (Prod.mk false memo)
-  | PsKernelExprV2Node.lit x, PsKernelExprV2Node.lit y =>
-      Except.ok (Prod.mk (psKernelLiteralEq x y) memo)
-  | PsKernelExprV2Node.app lf la, PsKernelExprV2Node.app rf ra =>
-      psKernelExprV2PairCompare2 step arena memo lf rf la ra
-  | PsKernelExprV2Node.lam _ lt lb _, PsKernelExprV2Node.lam _ rt rb _ =>
-      psKernelExprV2PairCompare2 step arena memo lt rt lb rb
-  | PsKernelExprV2Node.forallE _ lt lb _, PsKernelExprV2Node.forallE _ rt rb _ =>
-      psKernelExprV2PairCompare2 step arena memo lt rt lb rb
-  | PsKernelExprV2Node.letE _ lt lv lb ld,
-      PsKernelExprV2Node.letE _ rt rv rb rd =>
-      if psKernelBoolEq ld rd then
-        psKernelExprV2PairCompare3 step arena memo
-          lt rt lv rv lb rb
-      else
-        Except.ok (Prod.mk false memo)
-  | PsKernelExprV2Node.mdata lt lb, PsKernelExprV2Node.mdata rt rb =>
-      if Nat.beq lt rt then
-        step arena memo lb rb
-      else
-        Except.ok (Prod.mk false memo)
-  | PsKernelExprV2Node.proj ln li lb, PsKernelExprV2Node.proj rn ri rb =>
-      if psKernelNameEq ln rn then
-        if Nat.beq li ri then
-          step arena memo lb rb
-        else
-          Except.ok (Prod.mk false memo)
-      else
-        Except.ok (Prod.mk false memo)
-  | _,_ =>
-      Except.ok (Prod.mk false memo)
+  -- PSC1 portable .lean supports single-scrutinee pattern matching.
+  match left with
+  | PsKernelExprV2Node.bvar x =>
+      match right with
+      | PsKernelExprV2Node.bvar y =>
+          Except.ok (Prod.mk (Nat.beq x y) memo)
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.fvar x =>
+      match right with
+      | PsKernelExprV2Node.fvar y =>
+          Except.ok (Prod.mk (psKernelNameEq x y) memo)
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.mvar x =>
+      match right with
+      | PsKernelExprV2Node.mvar y =>
+          Except.ok (Prod.mk (psKernelNameEq x y) memo)
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.sort x =>
+      match right with
+      | PsKernelExprV2Node.sort y =>
+          Except.ok (Prod.mk (psKernelLevelEq x y) memo)
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.const x xs =>
+      match right with
+      | PsKernelExprV2Node.const y ys =>
+          if psKernelNameEq x y then
+            Except.ok (Prod.mk (psKernelLevelListEq xs ys) memo)
+          else
+            Except.ok (Prod.mk false memo)
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.lit x =>
+      match right with
+      | PsKernelExprV2Node.lit y =>
+          Except.ok (Prod.mk (psKernelLiteralEq x y) memo)
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.app fn arg =>
+      match right with
+      | PsKernelExprV2Node.app otherFn otherArg =>
+          psKernelExprV2PairCompare2 step arena memo
+            fn otherFn arg otherArg
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.lam _ type body _ =>
+      match right with
+      | PsKernelExprV2Node.lam _ otherType otherBody _ =>
+          psKernelExprV2PairCompare2 step arena memo
+            type otherType body otherBody
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.forallE _ type body _ =>
+      match right with
+      | PsKernelExprV2Node.forallE _ otherType otherBody _ =>
+          psKernelExprV2PairCompare2 step arena memo
+            type otherType body otherBody
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.letE _ type value body nondep =>
+      match right with
+      | PsKernelExprV2Node.letE _ otherType otherValue otherBody otherNondep =>
+          if psKernelBoolEq nondep otherNondep then
+            psKernelExprV2PairCompare3 step arena memo
+              type otherType value otherValue body otherBody
+          else
+            Except.ok (Prod.mk false memo)
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.mdata tag body =>
+      match right with
+      | PsKernelExprV2Node.mdata otherTag otherBody =>
+          if Nat.beq tag otherTag then
+            step arena memo body otherBody
+          else
+            Except.ok (Prod.mk false memo)
+      | _ => Except.ok (Prod.mk false memo)
+  | PsKernelExprV2Node.proj name idx body =>
+      match right with
+      | PsKernelExprV2Node.proj otherName otherIdx otherBody =>
+          if psKernelNameEq name otherName then
+            if Nat.beq idx otherIdx then
+              step arena memo body otherBody
+            else
+              Except.ok (Prod.mk false memo)
+          else
+            Except.ok (Prod.mk false memo)
+      | _ => Except.ok (Prod.mk false memo)
 
 def psKernelExprV2PairCompareWithFuel
     (fuel : Nat) :

@@ -1,6 +1,6 @@
 # PSKernel-Core Expression V2 — Lean 4.35.0 architecture pivot
 
-Status: **M1/M2 qualified; M3 portable lifting, instantiation and bounded beta/zeta head execution qualified; M4 scoped equality research. NOT a production kernel replacement**.
+Status: **M1/M2 qualified; portable M3 lift, instantiate and bounded beta/zeta head reduction qualified; M4 structural equality and validated-once scoped batching qualified as research. NOT a production kernel replacement**.
 Branch: research/psc1-pskernel-expr-v2-lean435-20261020
 Baseline: 45eb5ed24f13e15e192e79e6afba8cb1f9d5736f
 Lean: leanprover/lean4:v4.35.0 (eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
@@ -140,7 +140,9 @@ Source: ExprV2PortableEquality.lean.
 - Within each comparison, a memo keyed by (left node ID, right node ID) avoids exponentially repeated work on shared subgraphs. This memo cannot escape its owning immutable arena.
 - [CI 39466695438](https://github.com/dwijayuda/pskernel/actions/runs/39466695438) **PASSED** native differential regressions and PSC1-generated JavaScript checks. Tests include all twelve constructor families, 16 direct old-kernel comparisons, a real 65521-modulus bvar hash collision, forged-metadata refusal and equality of two 24-level, structurally equal but separately constructed DAGs in a 49-node arena.
 
-The follow-on ExprV2PortableEqualityBatch.lean research module adds one validated gateway for a list of structural comparisons. It checks one canonical arena once, scopes all intermediate memo entries to the batch and returns only the ordered Bool results. The batch cannot introduce a cross-arena or local-context-dependent cache into the production checker; it is *not* proof admission or DefEq. Native test parity is implemented, and the generated-JS timing/portability gate must pass before this feature is marked qualified.
+The follow-on ExprV2PortableEqualityBatch.lean research module adds one validated gateway for a list of structural comparisons. It checks one canonical arena once, scopes all intermediate memo entries to the batch and returns only the ordered Bool results. The batch cannot introduce a cross-arena or local-context-dependent cache into the production checker; it is *not* proof admission or DefEq. **Qualified at [CI 39467735634](https://github.com/dwijayuda/pskernel/actions/runs/39467735634)**: both native and portable jobs passed, including generated TS 7.0.2/JS execution and 318 PSC1-checked declarations.
+
+The controlled, guard-checked Node22 batch fixture made 12 equal comparisons on a 41-node shared DAG. Individual public validated comparisons took 45.954/50.404 ms in the two order-balanced phases; the single validated batch with a scoped memo took 10.012/4.105 ms. This 4.6–12.3× *microbenchmark* advantage says nothing about full checker throughput and is not evidence that a global cache across different arenas is safe.
 
 ## Next real correctness and performance obligations
 

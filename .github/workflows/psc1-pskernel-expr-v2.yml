@@ -342,7 +342,9 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
           grep -q 'PSC1_V2_BRIDGE_REJECTION: PASS' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
           grep -q 'PSC1_V2_FULL_CHECKER_BRIDGE: PASS' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
-          grep -q 'variant=v2_with_import' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
+          grep -q 'variant=v2_import_head_decode' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
+          grep -q 'variant=v2_import_only' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
+          grep -q 'variant=v2_head_preimported' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
           grep -q 'variant=trusted_whnf' "$RUNNER_TEMP/psc1-v2-checker-bridge.log"
       - uses: actions/upload-artifact@v4
         if: always()

@@ -17,6 +17,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Core.ExprV2.Decode,
     `Ps.KernelCore.Core.ExprV2.PairMemo,
     `Ps.KernelCore.Core.ExprV2.Equality,
+    `Ps.KernelCore.Core.ExprV2.Lift,
     `Ps.KernelCore.API.DagTypes,
     `Ps.KernelCore.API.DagDeclaration,
     `Ps.KernelCore.API.Dag,

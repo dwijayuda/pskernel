@@ -267,6 +267,6 @@ console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG terminal inference; legacy composite fallback; incomplete"
+  checker_representation:"DAG terminal inference/WHNF and checked structural shortcut; legacy composite fallback; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");

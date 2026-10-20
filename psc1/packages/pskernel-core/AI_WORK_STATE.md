@@ -178,3 +178,44 @@ were preconstructed. The native clock is millisecond resolution; combined
 construction was below that resolution. The metadata slice improves on these
 fixtures, while zeta exhibits overhead or parity. These finite cases do not
 establish a general kernel speedup or satisfy full migration acceptance.
+
+Generated run 39504184911 has now also passed on 7ac92b1: authentic PSC1
+checking of 1,173 declarations, TypeScript 7.0.2, JS/declarations/maps, real
+positive/negative checks and admissions with PATH empty, and isolated Node22
+A-B-B-A samples. This does not qualify the later foundation commit.
+
+Generated metadata check samples (original vs DAG total milliseconds):
+depth32/6 calls 217.115,215.529 vs 83.133,86.491;
+depth96/4 calls 340.132,319.812 vs 77.781,80.440;
+depth192/2 calls 363.929,391.873 vs 63.011,63.327.
+At depth192, isolated peak RSS was 213,964–214,816 KiB original versus
+140,424–140,588 KiB DAG; post-GC heaps were about19.23MB versus19.11MB.
+DAG input construction cost was22.6–22.8ms for5 inputs versus0.708–0.710ms.
+Generated zeta checks regressed: depth8/3calls90.463,94.854ms original versus
+123.351,126.853ms DAG; depth24/2calls103.756,108.923 versus138.612,141.043;
+depth48/1call101.532,95.461 versus117.685,123.007. The legacy fallback plus
+input adapter is not qualified as a general replacement. Production default
+V1 APIs retain the existing complete checker. Native/JS batch-throughput and
+additional checked WHNF/DefEq measurements are being added; they do not erase
+these observed regressions. Allocation counts and detailed cache counters
+remain unmeasured.
+
+### Consolidated foundation qualification (2026-10-20 UTC)
+
+At implementation commit `713bd35a3959a4b7fb44cff3eb8c9857c84b2a6c`, both
+[production DAG integration jobs](https://github.com/dwijayuda/pskernel/actions/runs/39505188175)
+and all six [research jobs](https://github.com/dwijayuda/pskernel/actions/runs/39505188468)
+passed. Authentic PSC1 checked 1,136 declarations in the complete SelfHost
+closure. Generated TypeScript 7.0.2/Node 22.23.3 executed the complete kernel
+and strict DAG assertions. The generated source was 5,138,980 bytes; smoke
+peak RSS was 270,756 KiB and post-GC heap 36,843,824 bytes. These are whole
+smoke-process observations, not an allocation bound or proof of soundness.
+The corrected combined bridge passed its unequal-term sentinel and actual
+result comparisons (1,315 declarations in that larger research closure).
+
+The historical whole-JS and memory-probe harnesses also contained the curried
+`psKernelExprEq(a,b)` truthiness bug. Their timing observations existed, but
+those equality guards did not establish semantic equality. The integration
+work now corrects both to `psKernelExprEq(a)(b)`, requires strict Booleans,
+and checks an unequal sentinel before measurements. They must be rerun before
+using their assertions as qualification evidence.

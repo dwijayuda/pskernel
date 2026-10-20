@@ -7,12 +7,15 @@ on:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
     paths:
       - psc1/lean-toolchain
+      - psc1/packages/pskernel-core/AI_WORK_STATE.md
       - psc1/packages/pskernel-core/src/**
       - psc1/test/PsKernelExprV2DagRegression.lean
       - psc1/test/PsKernelExprV2DagPerformance.lean
       - psc1/test/PsKernelExprV2TransformRegression.lean
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-bench.mjs
+      - psc1/scripts/pskernel-whole-js-bench.mjs
+      - psc1/scripts/pskernel-js-memory-probe.mjs
       - psc1/kernel-lakefile.lean
       - .github/workflows/psc1-pskernel-expr-v2-integration.yml
 
@@ -113,8 +116,12 @@ jobs:
         run: |
           set -euo pipefail
           PSC1_NODE_BIN="$(command -v node)"
-          env PATH="" "$PSC1_NODE_BIN" --expose-gc scripts/pskernel-expr-v2-dag-smoke.mjs \
-            dist/expr-v2/integration/kernel.js \
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          mkdir -p "$PSC1_DAG_RUN_DIR"
+          cp dist/expr-v2/integration/kernel.js "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-dag-smoke.mjs "$PSC1_DAG_RUN_DIR/smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" --expose-gc smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
       - name: Measure complete generated checks in isolated A-B-B-A workers
@@ -125,6 +132,18 @@ jobs:
             dist/expr-v2/integration/kernel.js \
             | tee "$RUNNER_TEMP/psc1-dag-generated-bench.log"
           grep -q 'PSC1_V2_DAG_BENCH: PASS' "$RUNNER_TEMP/psc1-dag-generated-bench.log"
+      - name: Recheck full executable workloads with strict value assertions
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/pskernel-whole-js-bench.mjs \
+            dist/expr-v2/integration/kernel.js optimized \
+            | tee "$RUNNER_TEMP/psc1-whole-strict.log"
+          grep -q 'PSC1_JS_WHOLE_SUMMARY' "$RUNNER_TEMP/psc1-whole-strict.log"
+          node --expose-gc scripts/pskernel-js-memory-probe.mjs \
+            dist/expr-v2/integration/kernel.js optimized warm_infer \
+            | tee "$RUNNER_TEMP/psc1-memory-strict.log"
+          grep -q 'PSC1_JS_WHOLE_SUMMARY' "$RUNNER_TEMP/psc1-memory-strict.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -132,6 +151,8 @@ jobs:
           path: |
             ${{ runner.temp }}/psc1-dag-generated-js.log
             ${{ runner.temp }}/psc1-dag-generated-bench.log
+            ${{ runner.temp }}/psc1-whole-strict.log
+            ${{ runner.temp }}/psc1-memory-strict.log
             psc1/dist/expr-v2/integration/kernel.js
             psc1/dist/expr-v2/integration/kernel.d.ts
             psc1/dist/expr-v2/integration/kernel.js.map

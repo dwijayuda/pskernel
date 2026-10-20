@@ -8,6 +8,7 @@ on:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
     paths:
       - psc1/lean-toolchain
+      - psc1/packages/pskernel-core/AI_WORK_STATE.md
       - psc1/packages/pskernel-core/src/**
       - psc1/test/PsKernelExprV2Regression.lean
       - psc1/test/PsKernelExprV2FullCheckerBridge.lean

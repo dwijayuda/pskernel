@@ -48,7 +48,7 @@ const mkSession=decl("psKernelMkCheckerSession"), sessionInfer=decl("psKernelSes
 const sessionCheck=decl("psKernelSessionCheck"), sessionWhnf=decl("psKernelSessionWhnf");
 const sessionEq=decl("psKernelSessionIsDefEq"), admitAxiom=decl("psKernelAddAxiom");
 const admitDefinition=decl("psKernelAddDefinition"), addInductive=decl("psKernelAddSimpleInductive");
-const addMutual=decl("psKernelAddSimpleMutualInductive"), eq=decl("psKernelExprEq");
+const addMutual=decl("psKernelAddSimpleMutualInductive"), eq=(left,right)=>decl("psKernelExprEq")(left)(right);
 const exists=decl("psKernelEnvironmentContains");
 const zero=Level.zero, sort0=Expr.sort(zero), sort1=Expr.sort(Level.succ(zero));
 const idLam=Expr.lam(Name.anonymous,sort0,Expr.bvar(0n),Binder.default);
@@ -62,7 +62,8 @@ function rejected(result,caseName) {
   if(result && "error" in result) return true;
   throw Error("KERNEL_JS_FALSE_ACCEPT "+caseName);
 }
-function demand(test,caseName) {if(!test)throw Error("KERNEL_JS_WRONG_SEMANTICS "+caseName);}
+function demand(test,caseName) {if(test!==true)throw Error("KERNEL_JS_WRONG_SEMANTICS "+caseName);}
+demand(eq(sort0,sort0)===true && eq(sort0,sort1)===false,"equality harness rejects unequal terms");
 const originalSession=mkSession(empty,nil,Safety.safe,depth,maxNat);
 const fnName=Name.str(Name.anonymous,"BenchCheckedFunction");
 let pi=sort0;
@@ -82,7 +83,7 @@ function run(operation,round,iterations,invoke,guard) {
   let completed=0;
   for(let i=0;i<iterations;i++){
     const result=invoke(i);
-    if(!guard(result,i))throw Error("KERNEL_JS_BENCH_VERDICT_FAILED "+operation+" "+i);
+    if(guard(result,i)!==true)throw Error("KERNEL_JS_BENCH_VERDICT_FAILED "+operation+" "+i);
     completed++;
   }
   const ms=performance.now()-start;

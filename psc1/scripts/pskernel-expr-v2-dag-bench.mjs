@@ -4,20 +4,21 @@ import { performance } from "node:perf_hooks";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-const [filename,mode,variant,shape,depthArg,callsArg]=process.argv.slice(2);
+const [filename,mode,variant,shape,depthArg,callsArg,operationArg]=process.argv.slice(2);
 if(!filename)throw Error("PSC1_DAG_BENCH_REQUIRES_GENERATED_KERNEL");
 const absolute=path.resolve(filename);
 
 if(mode!=="worker"){
   const observations=[];
-  for(const [shape,depth,calls] of [
-    ["metadata",32,6],["metadata",96,4],["metadata",192,2],
-    ["zeta",8,3],["zeta",24,2],["zeta",48,1]
+  for(const [shape,depth,calls,operation] of [
+    ["metadata",32,6,"check"],["metadata",96,4,"check"],["metadata",192,2,"check"],
+    ["zeta",8,3,"check"],["zeta",24,2,"check"],["zeta",48,1,"check"],
+    ["metadata",96,4,"whnf"],["metadata",96,4,"defeq"],["metadata",96,2,"batch-check"]
   ]){
     for(const variant of ["legacy","dag","dag","legacy"]){
       const result=spawnSync(process.execPath,
         ["--expose-gc",fileURLToPath(import.meta.url),absolute,"worker",
-          variant,shape,String(depth),String(calls)],
+          variant,shape,String(depth),String(calls),operation],
         {encoding:"utf8",timeout:180000,maxBuffer:16*1024*1024});
       if(result.status!==0)throw Error("PSC1_DAG_BENCH_WORKER_FAILED "+
         [variant,shape,depth,result.stderr,result.stdout].join(" "));
@@ -32,8 +33,8 @@ if(mode!=="worker"){
   }
   console.log("PSC1_DAG_WHOLE_CHECKER_ABBA "+JSON.stringify({
     node:process.version,toolchain:readFileSync("lean-toolchain","utf8").trim(),
-    meaning:"complete public expression checking; DAG includes validation and decoding on every call",
-    scope:"terminal/metadata inference migration, zeta uses legacy checker fallback",
+    meaning:"complete public checks, checked WHNF and checked DefEq; DAG includes validation and decoding on every batch call",
+    scope:"terminal/metadata migration; zeta uses legacy checker fallback; batch-check amortizes one validation across eight fresh-context checks",
     limitations:"finite fixtures; no general speedup or allocation-counter claim",
     observations
   }));
@@ -47,7 +48,8 @@ if(mode!=="worker"){
     if(r&&typeof r==="object"&&"value" in r)return r.value;
     throw Error("PSC1_DAG_BENCH_REJECTED "+label);
   };
-  const depth=Number(depthArg),calls=Number(callsArg);
+  const depth=Number(depthArg),calls=Number(callsArg),operation=operationArg||"check";
+  const batchSize=operation==="batch-check"?8:1;
   const sort0=E.sort(L.zero),sort1=E.sort(L.succ(L.zero));
   if(k.psKernelExprEq(sort0)(sort0)!==true||k.psKernelExprEq(sort0)(sort1)!==false)
     throw Error("PSC1_DAG_BENCH_EQUALITY_HARNESS_INVALID");
@@ -79,23 +81,45 @@ if(mode!=="worker"){
         const inserted=accepted(next,"node");
         arena=inserted.fst;root=inserted.snd;
       }
-      values.push({arena,root,commands:k.List.cons(k.PsKernelDagCommand.check(root),nil)});
+      const command=operation==="whnf"?k.PsKernelDagCommand.whnf(root):
+        operation==="defeq"?k.PsKernelDagCommand.isDefEq(root,root):
+        k.PsKernelDagCommand.check(root);
+      let commands=nil;
+      for(let i=0;i<batchSize;i++)commands=k.List.cons(command,commands);
+      values.push({arena,root,commands});
     }
   }
   const setupMs=performance.now()-setupStart;
+  const validate=value=>{
+    if(operation==="whnf"){
+      if(k.psKernelExprEq(value)(sort0)!==true)
+        throw Error("PSC1_DAG_BENCH_WRONG_WHNF");
+    }else if(operation==="defeq"){
+      if(value!==true)throw Error("PSC1_DAG_BENCH_WRONG_DEFEQ");
+    }else if(k.psKernelExprEq(value.type)(sort1)!==true){
+      throw Error("PSC1_DAG_BENCH_WRONG_CHECKED_TYPE");
+    }
+  };
   const perform=i=>{
     const value=values[i%values.length];
-    let checked;
     if(variant==="legacy"){
-      checked=accepted(k.psKernelV1CheckExpression(
-        session,nil,k.PsKernelDefinitionSafety.safe,value),"legacy-check");
+      for(let n=0;n<batchSize;n++){
+        const result=operation==="whnf"?
+          k.psKernelV1Whnf(session,nil,k.PsKernelDefinitionSafety.safe,value):
+          operation==="defeq"?
+            k.psKernelV1IsDefEq(session,nil,k.PsKernelDefinitionSafety.safe,value,value):
+            k.psKernelV1CheckExpression(session,nil,k.PsKernelDefinitionSafety.safe,value);
+        validate(accepted(result,"legacy-"+operation));
+      }
     }else{
       const output=accepted(k.psKernelV1RunDag(
-        session,nil,k.PsKernelDefinitionSafety.safe,value.arena,value.commands),"dag-check");
-      checked=output.replies.head.value;
+        session,nil,k.PsKernelDefinitionSafety.safe,value.arena,value.commands),"dag-"+operation);
+      let replies=output.replies,count=0;
+      while(replies&&typeof replies==="object"&&"head" in replies){
+        validate(replies.head.value);count++;replies=replies.tail;
+      }
+      if(count!==batchSize)throw Error("PSC1_DAG_BENCH_REPLY_COUNT");
     }
-    if(k.psKernelExprEq(checked.type)(sort1)!==true)
-      throw Error("PSC1_DAG_BENCH_WRONG_CHECKED_TYPE");
     return 1;
   };
   const coldStart=performance.now();
@@ -111,7 +135,8 @@ if(mode!=="worker"){
   global.gc();
   const after=process.memoryUsage();
   console.log("PSC1_DAG_SAMPLE "+JSON.stringify({
-    variant,shape,depth,calls,checksum,all_correct:checksum===calls,
+    variant,shape,depth,calls,operation,batch_size:batchSize,
+    checked_public_operations:calls*batchSize,checksum,all_correct:checksum===calls,
     check_ms:Number(ms.toFixed(3)),cold_check_ms:Number(coldMs.toFixed(3)),
     input_construction_ms:Number(setupMs.toFixed(3)),
     peak_rss_kib:process.resourceUsage().maxRSS,

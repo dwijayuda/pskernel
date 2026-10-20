@@ -11,8 +11,8 @@ One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
 Terminal checking and terminal/metadata/beta/zeta/Nat/projection WHNF read DAG nodes directly with the original entry
 fuel/depth/rule ordering. Operation-owned core/public caches preserve function-position normalization,
-constructor projections and the complete Nat post-core pipeline; no cache escapes a public WHNF call. Collision-safe DAG equality supplies DefEq's syntactic shortcut
-only after both complete checks. Other composite checking, reductions, DefEq
+constructor projections and the complete Nat post-core pipeline; no cache escapes a public WHNF call. Collision-safe DAG equality, sort universe equality, literals and paired metadata supply
+DefEq's definitive quick rules only after both complete checks. Other composite checking, reductions, DefEq
 and admission use the complete existing kernel with unchanged resources.
 
 psKernelV1RunDag is the public untrusted-input boundary. The portable source
@@ -24,7 +24,7 @@ Every declaration is still rechecked by V1. No equality memo survives this
 boundary. A sealed constructor API remains a source-profile limitation.
 
 This is a partial representation migration. Terminal inference, supported WHNF slices, and the
-checked structural-equality shortcut are DAG-native. Other composite checking, reduction,
+checked definitive quick DefEq rules are DAG-native. Other composite checking, reduction,
 DefEq and admission retain PsKernelExpr internally.
 Eliminating that fallback and adapter remains required for completion.
 -/
@@ -98,16 +98,16 @@ def psKernelDagIsDefEq
       | Except.error error => Except.error error
       | Except.ok _ =>
           let checker := psKernelKernelSessionChecker session levelParams safety;
-          match psKernelExprV2TrySyntacticDefEq
+          match psKernelExprV2TryQuickDefEqWithFuel
               session.resources.fuel checker.context arena left right with
-          | Except.error error => Except.error (psKernelErrorFromMessage error)
-          | Except.ok matched =>
-              if matched then
-                Except.ok true
-              else
-                match psKernelSessionIsDefEq session.resources.fuel checker a b with
-                | Except.error error => Except.error (psKernelErrorFromMessage error)
-                | Except.ok result => Except.ok (Prod.fst result)
+          | Option.some attempted =>
+              match attempted with
+              | Except.error error => Except.error (psKernelErrorFromMessage error)
+              | Except.ok value => Except.ok value
+          | Option.none =>
+              match psKernelSessionIsDefEq session.resources.fuel checker a b with
+              | Except.error error => Except.error (psKernelErrorFromMessage error)
+              | Except.ok result => Except.ok (Prod.fst result)
 
 def psKernelDagRunCommand
     (session : PsKernelKernelSession)

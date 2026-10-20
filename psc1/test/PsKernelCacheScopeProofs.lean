@@ -1,6 +1,7 @@
 import Init.Data.Nat.MinMax
 import Ps.KernelCore.Checker.State
 import Ps.KernelCore.Checker.ExprV2.WhnfState
+import Ps.KernelCore.Checker.ExprV2.DefEq
 import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-!
@@ -115,6 +116,21 @@ theorem dag_whnf_fvar_flag_prevents_public_publication
       Except.ok (Prod.mk state result) := by
   simp [psKernelExprV2WhnfPublicFinish, found, flag]
 
+theorem dag_quick_defeq_zero_fuel_precedes_syntax
+    (context : PsKernelCheckerContext) (arena : PsKernelExprV2PagedArena)
+    (left right : Nat) :
+    psKernelExprV2TryQuickDefEqWithFuel 0 context arena left right =
+      Option.some (Except.error "kernel definitional equality budget exhausted") := by
+  rfl
+
+theorem dag_quick_defeq_depth_error_precedes_syntax
+    (fuel : Nat) (context : PsKernelCheckerContext)
+    (arena : PsKernelExprV2PagedArena) (left right : Nat) (error : String)
+    (guard : psKernelCheckerContextEnterRecDepth context = Except.error error) :
+    psKernelExprV2TryQuickDefEqWithFuel (Nat.succ fuel) context arena left right =
+      Option.some (Except.error error) := by
+  simp [psKernelExprV2TryQuickDefEqWithFuel, guard]
+
 end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.exit_scope_restores_all_caches
@@ -135,3 +151,6 @@ end PsKernelCacheScopeProofs
 #print axioms PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache
 #print axioms PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup
 #print axioms PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication
+
+#print axioms PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax
+#print axioms PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax

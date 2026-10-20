@@ -813,7 +813,7 @@ private def structuralShortcutParity : IO Unit := do
   require "metadata-tags-structurally-distinct" (!structural)
   for fuel in [0,1,2,3,4,8,64] do
     let session ← fresh fuel
-    require "structural-false-falls-back-to-complete-defeq"
+    require "paired-metadata-exact-defeq-parity"
       (sameDefEq
         (psKernelV1IsDefEq session [] .safe (.mdata 0 sort0) (.mdata 65521 sort0))
         (psKernelV1RunDag session [] .safe a [.isDefEq tagA tagB]))
@@ -823,6 +823,141 @@ private def structuralShortcutParity : IO Unit := do
     (match psKernelV1RunDag session [] .safe a [.isDefEq badA badB] with
      | .error (.rejectedInvalid _) => true | _ => false)
   IO.println "PSC1_V2_DAG_STRUCTURAL_SHORTCUT: PASS"
+
+private def quickOfficialName : PsKernelName → Lean.Name
+  | .anonymous => .anonymous
+  | .str parent value => .str (quickOfficialName parent) value
+  | .num parent value => .num (quickOfficialName parent) value
+
+private def quickOfficialLevel : PsKernelLevel → Option Lean.Level
+  | .zero => some .zero
+  | .succ value => (quickOfficialLevel value).map Lean.Level.succ
+  | .max left right => do
+      return .max (← quickOfficialLevel left) (← quickOfficialLevel right)
+  | .imax left right => do
+      return .imax (← quickOfficialLevel left) (← quickOfficialLevel right)
+  | .param name => some (.param (quickOfficialName name))
+  | .mvar _ => none
+
+private def quickOfficialExpr : PsKernelExpr → Option Lean.Expr
+  | .sort level => (quickOfficialLevel level).map Lean.Expr.sort
+  | .lit (.nat value) => some (.lit (.natVal value))
+  | .lit (.str value) => some (.lit (.strVal value))
+  | .mdata _ body => (quickOfficialExpr body).map (Lean.Expr.mdata {})
+  | _ => none
+
+private def sameQuickDefEq
+    (legacy : Except String (Prod Bool PsKernelCheckerSession))
+    (attempted : Option (Except String Bool)) : Bool :=
+  match legacy, attempted with
+  | .error left, some (.error right) => left == right
+  | .ok left, some (.ok right) => left.fst == right
+  | _, _ => false
+
+private def quickDefEqParity : IO Unit := do
+  let u := PsKernelLevel.param (nm "quick-u")
+  let v := PsKernelLevel.param (nm "quick-v")
+  let params := [nm "quick-u", nm "quick-v"]
+  let maxZero := PsKernelExpr.sort (.max .zero .zero)
+  let imaxZero := PsKernelExpr.sort (.imax (.succ .zero) .zero)
+  let mut nestedLeft := maxZero
+  let mut nestedRight := sort0
+  for tag in [:17] do
+    nestedLeft := .mdata tag nestedLeft
+    nestedRight := .mdata (tag + 65521) nestedRight
+  let fixtures : List (String × PsKernelExpr × PsKernelExpr × Bool) := [
+    ("sort-max-zero", maxZero, sort0, true),
+    ("sort-imax-zero", imaxZero, sort0, true),
+    ("sort-max-commute", .sort (.max u v), .sort (.max v u), true),
+    ("sort-distinct", sort0, sort1, false),
+    ("sort-param-succ", .sort u, .sort (.succ u), false),
+    ("literal-equal", .lit (.nat 7), .lit (.nat 7), true),
+    ("literal-hash-collision", .lit (.nat 0), .lit (.nat 65521), false),
+    ("literal-kinds", .lit (.nat 0), .lit (.str "0"), false),
+    ("literal-strings", .lit (.str "λ-雪"), .lit (.str "λ-雨"), false),
+    ("metadata-equivalent", .mdata 0 maxZero, .mdata 65521 sort0, true),
+    ("metadata-distinct", .mdata 0 sort0, .mdata 1 sort1, false),
+    ("metadata-nested", nestedLeft, nestedRight, true)]
+  let officialEnv ← Lean.mkEmptyEnvironment
+  for (label, left, right, expected) in fixtures do
+    let some officialLeft := quickOfficialExpr left
+      | throw (IO.userError ("official-quick-left-conversion-" ++ label))
+    let some officialRight := quickOfficialExpr right
+      | throw (IO.userError ("official-quick-right-conversion-" ++ label))
+    require ("official-Lean-quick-defeq-" ++ label)
+      (match Lean.Kernel.isDefEq officialEnv {} officialLeft officialRight with
+       | .ok value => value == expected | .error _ => false)
+    let (initial, leftId) ← expect (psKernelExprV2PagedImportChecked left)
+    let (arena, rightId) ← expect (psKernelExprV2PagedImportIntoChecked initial right)
+    for fuel in [0,1,2,3,4,8,16,17,18,64] do
+      for maxDepth in [0,1,2] do
+        let session ← fresh fuel maxDepth
+        let checker := psKernelKernelSessionChecker session params .safe
+        for entryDepth in [0,15,16] do
+          let context := { checker.context with recDepth := entryDepth }
+          require ("quick-defeq-raw-" ++ label)
+            (sameQuickDefEq
+              (psKernelSessionIsDefEq fuel { checker with context := context } left right)
+              (psKernelExprV2TryQuickDefEqWithFuel fuel context arena leftId rightId))
+        require ("quick-defeq-public-" ++ label)
+          (sameDefEq
+            (psKernelV1IsDefEq session params .safe left right)
+            (psKernelV1RunDag session params .safe arena [.isDefEq leftId rightId]))
+    let session ← fresh
+    let checker := psKernelKernelSessionChecker session params .safe
+    require ("quick-defeq-direct-answer-" ++ label)
+      (match psKernelExprV2TryQuickDefEqWithFuel 64 checker.context arena leftId rightId with
+       | some (.ok value) => value == expected
+       | _ => false)
+    let result ← expectPublic
+      (psKernelV1RunDag session params .safe arena [.isDefEq leftId rightId])
+    require ("quick-defeq-checked-answer-" ++ label)
+      (match result.replies with | [.equal value] => value == expected | _ => false)
+  let redex := PsKernelExpr.app
+    (.lam (nm "quick-x") sort1 (.bvar 0) .default) sort0
+  let fallback : List (String × PsKernelExpr × PsKernelExpr) := [
+    ("metadata-one-sided", .mdata 9 sort0, sort0),
+    ("metadata-composite", .mdata 9 redex, .mdata 10 sort0),
+    ("mixed-constructors", sort0, .lit (.nat 0)),
+    ("constant-level-rule", .const (nm "quick-missing") [.max .zero .zero],
+      .const (nm "quick-missing") [.zero])]
+  for (label, left, right) in fallback do
+    let (initial, leftId) ← expect (psKernelExprV2PagedImportChecked left)
+    let (arena, rightId) ← expect (psKernelExprV2PagedImportIntoChecked initial right)
+    let session ← fresh
+    let checker := psKernelKernelSessionChecker session params .safe
+    require ("quick-defeq-explicit-fallback-" ++ label)
+      (match psKernelExprV2TryQuickDefEqWithFuel 64 checker.context arena leftId rightId with
+       | none => true | _ => false)
+    for fuel in [0,1,2,3,4,8,64] do
+      for maxDepth in [0,1,2] do
+        let session ← fresh fuel maxDepth
+        require ("quick-defeq-fallback-parity-" ++ label)
+          (sameDefEq
+            (psKernelV1IsDefEq session params .safe left right)
+            (psKernelV1RunDag session params .safe arena [.isDefEq leftId rightId]))
+  let bad := PsKernelExpr.app sort0 sort0
+  let badLeft := PsKernelExpr.mdata 0 bad
+  let badRight := PsKernelExpr.mdata 1 bad
+  let (initial, leftId) ← expect (psKernelExprV2PagedImportChecked badLeft)
+  let (arena, rightId) ← expect (psKernelExprV2PagedImportIntoChecked initial badRight)
+  let session ← fresh
+  let checker := psKernelKernelSessionChecker session params .safe
+  require "quick-defeq-raw-rule-is-not-an-admission"
+    (match psKernelExprV2TryQuickDefEqWithFuel 64 checker.context arena leftId rightId with
+     | some (.ok true) => true | _ => false)
+  require "quick-defeq-checks-both-metadata-operands-before-shortcut"
+    (match psKernelV1RunDag session params .safe arena [.isDefEq leftId rightId] with
+     | .error (.rejectedInvalid _) => true | _ => false)
+  let (arena, goodId) ← expect (psKernelExprV2PagedImportIntoChecked arena sort0)
+  for (left, right, a, b) in [
+      (leftId, goodId, badLeft, sort0), (goodId, rightId, sort0, badRight)] do
+    require "quick-defeq-neither-invalid-operand-can-be-skipped"
+      (sameDefEq
+        (psKernelV1IsDefEq session params .safe a b)
+        (psKernelV1RunDag session params .safe arena [.isDefEq left right]))
+  IO.println "PSC1_V2_DAG_OFFICIAL_QUICK_DEFEQ: PASS"
+  IO.println "PSC1_V2_DAG_QUICK_DEFEQ: PASS"
 
 private def hostileInputs : IO Unit := do
   let session ← fresh
@@ -951,6 +1086,7 @@ def main : IO Unit := do
   whnfPublicCacheParity
   natProjectionWhnfParity
   structuralShortcutParity
+  quickDefEqParity
   hostileInputs
   admissions
   officialComparison

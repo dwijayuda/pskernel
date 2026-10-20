@@ -217,6 +217,7 @@ jobs:
           grep -q '^PSC1_V2_DAG_JS_WHNF_STATE: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_NAT_PROJECTION: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_PUBLIC_CACHE: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           echo 'PSC1_CANONICAL_DAG_JS_KERNEL: PASS'
       - name: Report DirectJS kernel capability without claiming support

@@ -458,7 +458,7 @@ console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG terminal inference, terminal/metadata/beta/zeta WHNF with operation-owned function normalization and checked structural shortcut; legacy general checker fallback; incomplete"
+  checker_representation:"DAG terminal inference, beta/zeta/Nat/constructor-projection WHNF with separate core/public caches and checked quick DefEq rules; legacy general checker/delta/iota/admission fallback; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");
 }
@@ -982,5 +982,135 @@ console.log("PSC1_V2_DAG_JS_NAT_PROJECTION: PASS");
   console.log("PSC1_V2_DAG_JS_PUBLIC_CACHE: PASS");
 }
 
+
+// Definitive DAG quick DefEq rules keep the complete entry fuel/depth ordering.
+// Unsupported pairs explicitly return None and restart the full public operation.
+{
+  let quickArena=empty;
+  const qadd=(kind,...args)=>{
+    const result=mk(quickArena,kind,...args);
+    quickArena=result.fst;
+    return result.snd;
+  };
+  const Literal=get("PsKernelLiteral");
+  const u=L.param(name("quick-u")),v=L.param(name("quick-v"));
+  const params=list([name("quick-u"),name("quick-v")]);
+  const maxZero=E.sort(L.max(L.zero,L.zero));
+  const imaxZero=E.sort(L.imax(L.succ(L.zero),L.zero));
+  const q0=qadd("Sort",L.zero),q1=qadd("Sort",L.succ(L.zero));
+  const qm=qadd("Sort",L.max(L.zero,L.zero));
+  const qi=qadd("Sort",L.imax(L.succ(L.zero),L.zero));
+  const quv=qadd("Sort",L.max(u,v)),qvu=qadd("Sort",L.max(v,u));
+  const qu=qadd("Sort",u),qsu=qadd("Sort",L.succ(u));
+  const q7a=qadd("Lit",Literal.nat(7n)),q7b=qadd("Lit",Literal.nat(7n));
+  const qn0=qadd("Lit",Literal.nat(0n)),qnc=qadd("Lit",Literal.nat(65521n));
+  const qs0=qadd("Lit",Literal.str("0"));
+  const qsA=qadd("Lit",Literal.str("λ-雪")),qsB=qadd("Lit",Literal.str("λ-雨"));
+  let nestedLeft=maxZero,nestedRight=sort0,nestedLeftId=qm,nestedRightId=q0;
+  for(let tag=0n;tag<17n;tag++){
+    nestedLeft=E.mdata(tag,nestedLeft);
+    nestedRight=E.mdata(tag+65521n,nestedRight);
+    nestedLeftId=qadd("MData",tag,nestedLeftId);
+    nestedRightId=qadd("MData",tag+65521n,nestedRightId);
+  }
+  const fixtures=[
+    ["sort-max-zero",qm,q0,maxZero,sort0,true],
+    ["sort-imax-zero",qi,q0,imaxZero,sort0,true],
+    ["sort-max-commute",quv,qvu,E.sort(L.max(u,v)),E.sort(L.max(v,u)),true],
+    ["sort-distinct",q0,q1,sort0,sort1,false],
+    ["sort-param-succ",qu,qsu,E.sort(u),E.sort(L.succ(u)),false],
+    ["literal-equal",q7a,q7b,E.lit(Literal.nat(7n)),E.lit(Literal.nat(7n)),true],
+    ["literal-hash-collision",qn0,qnc,E.lit(Literal.nat(0n)),E.lit(Literal.nat(65521n)),false],
+    ["literal-kinds",qn0,qs0,E.lit(Literal.nat(0n)),E.lit(Literal.str("0")),false],
+    ["literal-strings",qsA,qsB,E.lit(Literal.str("λ-雪")),E.lit(Literal.str("λ-雨")),false],
+    ["metadata-equivalent",qadd("MData",0n,qm),qadd("MData",65521n,q0),
+      E.mdata(0n,maxZero),E.mdata(65521n,sort0),true],
+    ["metadata-distinct",qadd("MData",0n,q0),qadd("MData",1n,q1),
+      E.mdata(0n,sort0),E.mdata(1n,sort1),false],
+    ["metadata-nested",nestedLeftId,nestedRightId,nestedLeft,nestedRight,true]
+  ];
+  const boolEqual=(a,b)=>typeof a==="boolean"&&typeof b==="boolean"&&a===b;
+  const quick=(fuel,context,left,right)=>
+    get("psKernelExprV2TryQuickDefEqWithFuel")(fuel)(context)(quickArena)(left)(right);
+  const publicQuick=(s,left,right)=>run(s,params,S.safe,quickArena,list([C.isDefEq(left,right)]));
+  const compareRaw=(original,attempted,label)=>{
+    must(attempted&&typeof attempted==="object"&&"value" in attempted,label+"-direct");
+    const result=attempted.value;
+    if(rejected(original)){
+      must(rejected(result)&&original.error===result.error,label+"-error");
+    }else{
+      const expected=accepted(original,label+"-original").fst;
+      const actual=accepted(result,label+"-result");
+      must(boolEqual(expected,actual),label+"-value");
+    }
+  };
+  for(const [label,leftId,rightId,left,right,expected] of fixtures){
+    for(const fuel of [0n,1n,2n,3n,4n,8n,16n,17n,18n,64n]){
+      for(const maxDepth of [0n,1n,2n]){
+        const s=session(fuel,maxDepth);
+        const checker=get("psKernelKernelSessionChecker")(s,params,S.safe);
+        for(const recDepth of [0n,15n,16n]){
+          const context={...checker.context,recDepth};
+          compareRaw(get("psKernelSessionIsDefEq")(fuel,{...checker,context},left,right),
+            quick(fuel,context,leftId,rightId),
+            "quick-defeq-raw-"+label+"-"+fuel+"-"+maxDepth+"-"+recDepth);
+        }
+        must(sameOperation(get("psKernelV1IsDefEq")(s,params,S.safe,left,right),
+          publicQuick(s,leftId,rightId),boolEqual),
+          "quick-defeq-public-"+label+"-"+fuel+"-"+maxDepth);
+      }
+    }
+    const s=session(),checker=get("psKernelKernelSessionChecker")(s,params,S.safe);
+    must(boolEqual(accepted(accepted(quick(64n,checker.context,leftId,rightId),
+      "quick-some-"+label),"quick-answer-"+label),expected),"quick-defeq-direct-answer-"+label);
+    const replies=array(accepted(publicQuick(s,leftId,rightId),"quick-public-"+label).replies);
+    must(replies.length===1&&boolEqual(replies[0].value,expected),
+      "quick-defeq-checked-answer-"+label);
+  }
+  const bound=qadd("BVar",0n);
+  const lam=qadd("Lam",name("quick-x"),q1,bound,B.default);
+  const redexId=qadd("App",lam,q0);
+  const redex=E.app(E.lam(name("quick-x"),sort1,E.bvar(0n),B.default),sort0);
+  const fallback=[
+    ["metadata-one-sided",qadd("MData",9n,q0),q0,E.mdata(9n,sort0),sort0],
+    ["metadata-composite",qadd("MData",9n,redexId),qadd("MData",10n,q0),
+      E.mdata(9n,redex),E.mdata(10n,sort0)],
+    ["mixed-constructors",q0,qn0,sort0,E.lit(Literal.nat(0n))],
+    ["constant-level-rule",qadd("Const",name("quick-missing"),list([L.max(L.zero,L.zero)])),
+      qadd("Const",name("quick-missing"),list([L.zero])),
+      E.const(name("quick-missing"),list([L.max(L.zero,L.zero)])),
+      E.const(name("quick-missing"),list([L.zero]))]
+  ];
+  const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  for(const [label,leftId,rightId,left,right] of fallback){
+    const checker=get("psKernelKernelSessionChecker")(session(),params,S.safe);
+    must(sameRuntimeValue(quick(64n,checker.context,leftId,rightId),none),
+      "quick-defeq-explicit-fallback-"+label);
+    for(const fuel of [0n,1n,2n,3n,4n,8n,64n])for(const maxDepth of [0n,1n,2n]){
+      const s=session(fuel,maxDepth);
+      must(sameOperation(get("psKernelV1IsDefEq")(s,params,S.safe,left,right),
+        publicQuick(s,leftId,rightId),boolEqual),
+        "quick-defeq-fallback-parity-"+label+"-"+fuel+"-"+maxDepth);
+    }
+  }
+  const bad=E.app(sort0,sort0),badId=qadd("App",q0,q0);
+  const badLeft=E.mdata(0n,bad),badRight=E.mdata(1n,bad);
+  const badLeftId=qadd("MData",0n,badId),badRightId=qadd("MData",1n,badId);
+  const s=session(),checker=get("psKernelKernelSessionChecker")(s,params,S.safe);
+  must(accepted(accepted(quick(64n,checker.context,badLeftId,badRightId),
+    "quick-invalid-some"),"quick-invalid-raw")===true,"quick-defeq-raw-rule-is-not-admission");
+  const invalidPublic=publicQuick(s,badLeftId,badRightId);
+  must(rejected(invalidPublic)&&sameOperation(
+    get("psKernelV1IsDefEq")(s,params,S.safe,badLeft,badRight),invalidPublic,boolEqual),
+    "quick-defeq-checks-both-metadata-operands-before-shortcut");
+  for(const [leftId,rightId,left,right] of [
+      [badLeftId,q0,badLeft,sort0],[q0,badRightId,sort0,badRight]]){
+    const result=publicQuick(s,leftId,rightId);
+    must(rejected(result)&&sameOperation(
+      get("psKernelV1IsDefEq")(s,params,S.safe,left,right),result,boolEqual),
+      "quick-defeq-neither-invalid-operand-can-be-skipped");
+  }
+}
+console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
 
 reportDagSmoke();

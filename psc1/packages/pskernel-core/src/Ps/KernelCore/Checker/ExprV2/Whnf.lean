@@ -333,17 +333,3 @@ def psKernelExprV2TryWhnfWithFuel
           let state := Prod.fst reduced;
           Option.some (Except.ok (Prod.mk state.arena (Prod.snd reduced)))
 
-/-
-The same-arena identity shortcut runs only after both full public checks.
-It retains IsDefEqWithFuel's entry fuel and recursion-depth checks. Its
-discarded fresh cache state cannot authorize a different operation.
--/
-def psKernelExprV2CheckedIdentity
-    (fuel : Nat) (context : PsKernelCheckerContext) :
-    Except String Bool :=
-  if Nat.beq fuel 0 then
-    Except.error "kernel definitional equality budget exhausted"
-  else
-    match psKernelCheckerContextEnterRecDepth context with
-    | Except.error error => Except.error error
-    | Except.ok _ => Except.ok true

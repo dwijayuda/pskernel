@@ -10,92 +10,43 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
 ## Current checkpoint and evidence
 
-The Nat/projection source in
-[f56d00ea5510cea25fffb6c527b7cf02bf9c2ae7](https://github.com/dwijayuda/pskernel/commit/f56d00ea5510cea25fffb6c527b7cf02bf9c2ae7)
-compiled natively, but its first regression target stopped at a mutable-variable
-shadowing error in the new unselected-projection-field fixture. This follow-up
-renames the builder variable; the fixture and its exact fuel6/fuel7 assertions
-are retained. [Run 39516197791](https://github.com/dwijayuda/pskernel/actions/runs/39516197791)
-does not qualify the new slice until the corrected regression executes.
+The latest native-qualified Nat/projection source is
+[58fab028f9ea80ddcbdb621d72bbbe28b8d9f3a7](https://github.com/dwijayuda/pskernel/commit/58fab028f9ea80ddcbdb621d72bbbe28b8d9f3a7).
+The native job in [39516506237](https://github.com/dwijayuda/pskernel/actions/runs/39516506237)
+passed public/core cache ordering, all 14 Nat binary reductions, checked successor,
+constructor projections with parameters, exact unselected-field fuel6/fuel7,
+official Lean Nat comparisons, full DAG regressions, 1,755 transformation comparisons,
+local metadata/cache proofs and complete-public benchmarks. Authentic generated
+and canonical PS gates for this expanded slice are still running. The first
+attempt at f56d00e compiled production source but stopped on a test-only mutable
+variable shadow;58fab renames that builder without changing its assertions.
 
-The preceding source463d956 is now fully green in
-[integration 39514448898](https://github.com/dwijayuda/pskernel/actions/runs/39514448898),
-[original correctness/portability 39514448820](https://github.com/dwijayuda/pskernel/actions/runs/39514448820),
-and [research 39514448956](https://github.com/dwijayuda/pskernel/actions/runs/39514448956).
-All96 generated A-B-B-A samples and all33 strict whole-executable operations
-passed. These finite successes do not complete the migration or the independent
-Arena qualification.
+The preceding stateful source
+[463d956f40f360960dd78ad8b8d8b3749a80c03f](https://github.com/dwijayuda/pskernel/commit/463d956f40f360960dd78ad8b8d8b3749a80c03f)
+is fully green in
+[integration39514448898](https://github.com/dwijayuda/pskernel/actions/runs/39514448898),
+[original correctness/portability39514448820](https://github.com/dwijayuda/pskernel/actions/runs/39514448820)
+and [all-six research39514448956](https://github.com/dwijayuda/pskernel/actions/runs/39514448956).
+This includes 578 strict generated transformations,96 correctness-guarded
+A-B-B-A samples, all 33 whole-executable operations and detached JS execution.
+Its manifest derives 101 canonical modules and 1,239 declarations, with authentic
+PS checks, TypeScript7.0.2 output, declarations and source maps. DirectJS reports
+an explicit unsupported emitter capability; it is not a qualified kernel backend.
+Canonical DAG runtime smoke first appears at f56d; the older canonical success
+only covers the complete original V1 executable.
 
-The refreshed source checkpoint is
-[463d956f40f360960dd78ad8b8d8b3749a80c03f](https://github.com/dwijayuda/pskernel/commit/463d956f40f360960dd78ad8b8d8b3749a80c03f).
-Its [integration run 39514448898](https://github.com/dwijayuda/pskernel/actions/runs/39514448898)
-has passed the native job, authentic PSC1 source check, complete JS generation,
-strict standalone DAG semantics and isolated A-B-B-A measurements. The final
-whole-executable step is still running, so the complete run is not yet claimed
-green. The corrected Arena adapter controls passed in
+The corrected independent Arena controls passed in
 [39513874902](https://github.com/dwijayuda/pskernel/actions/runs/39513874902);
-all 193 independent replay is running with unchanged fuel4096.
+all 193 independent replay is running at unchanged fuel4096. Its official pinned
+reference passed 193 cases: 122 accepted, 71 rejected, with body hashes preserved
+and no exclusions. No independent full-corpus result is claimed yet. Symbol-tag
+comparisons preserve exact outcomes, safety/binder/hint variants and resource
+kinds; actual unsupported/cancelled controls remain distinct from rejection.
 
-The [original correctness/portability run 39513010680](https://github.com/dwijayuda/pskernel/actions/runs/39513010680)
-at 50dd83b passed both jobs, deriving 101 canonical modules and 1,239 declarations,
-checking their complete PS closure and executing the full V1 JS smoke. Its
-canonical runtime did not yet run the DAG smoke; this commit adds that gate
-against the same already compiled standalone bundle.
-
-The earlier native-qualified implementation is
-[50dd83b308db22ef7befc0c08fa04d5de6249adb](https://github.com/dwijayuda/pskernel/commit/50dd83b308db22ef7befc0c08fa04d5de6249adb).
-Its native job in [39513010613](https://github.com/dwijayuda/pskernel/actions/runs/39513010613)
-passed complete DAG regressions, stateful function-position normalization,
-exact cached-result syntax, real hash collisions, fuel/depth entry guards,
-official Lean fixtures, 1,755 transformation comparisons, and all 21 local
-proof axiom audits. Three new cache lemmas establish empty initialization and
-FVar-flag exclusion. They do not prove cache-result validity or whole-kernel
-soundness. The generated stateful job failed in a direct-worker test invocation after
-public zeta parity and all 578 transform comparisons passed. The wrapper's
-leading lambda is hoisted by the authentic PSC1 erasure pass into a flat
-four-argument declaration entry; the host smoke still used the previous
-returned-function calling convention. This follow-up makes all four parameters
-explicit and fixes the four host calls without weakening assertions. Recursive
-workers whose bodies start with a fuel match keep unary returned arrows.
-Generated stateful and canonical PS requalification remain pending.
-
-The previous stateless implementation at
-[fa0ca224c6fd192d0afa2418d415a6dc67f9f333](https://github.com/dwijayuda/pskernel/commit/fa0ca224c6fd192d0afa2418d415a6dc67f9f333)
-is fully green in integration run
-[39512106401](https://github.com/dwijayuda/pskernel/actions/runs/39512106401).
-Native and authentic generated JS passed, including 578 strict transformation
-comparisons, standalone runtime, the existing 33 complete-checker operations,
-and correctness-guarded benchmarks.
-
-The full original correctness/portability workflow at 269552f is green:
-[39511802691](https://github.com/dwijayuda/pskernel/actions/runs/39511802691).
-The dependency manifest derived 100 canonical modules and 1,225 declarations.
-Authentic PSC1 source checking, canonical PS reconstruction/checking, TypeScript
-7.0.2 output with declarations/source maps, and the complete independent JS
-positive/negative, delta/iota/mutual/context/fuel smoke passed. DirectJS reports
-an explicit unsupported emitter capability; it is not claimed as a supported
-complete-kernel executable. The six-job research workflow also passed at
-[39511802573](https://github.com/dwijayuda/pskernel/actions/runs/39511802573).
-
-The first independent Arena job at c29f418 passed canonical reconstruction,
-checking and TypeScript generation, but its transport controls failed before
-the corpus started:
-[39511629448](https://github.com/dwijayuda/pskernel/actions/runs/39511629448).
-The authentic backend stores constructor tags in Symbol properties;
-Object.keys/JSON comparisons omitted them. This commit changes the transport
-discriminator and shallow enum/kind comparisons to preserve Symbol identity,
-classifies typed errors exactly, and adds all-pairs controls for outcome,
-safety, hints, binder and quotient variants. Actual unsupported/cancelled V1
-controls must remain distinct from semantic rejection. Native and generated
-DAG error-parity controls now compare all nine public error/resource cases,
-including their exact message. Earlier finite parity checks that erased tags
-are superseded by this stronger gate. No independent all-193 corpus result is
-claimed until corrected controls and the complete replay pass.
-
-Do not substitute any earlier successful run for final-commit qualification.
-
-No PR has been merged. Keep the integration branch isolated until all relevant
-gates on the eventual implementation commit have passed.
+The quick DefEq migration in this commit has source-reviewed tests and local
+entry-guard lemmas but has not yet passed its own CI. Do not substitute earlier
+successful runs for final-commit qualification. No PR has been merged; keep the
+integration branch isolated until all required kernel gates qualify.
 
 ## Objective and execution constraints
 
@@ -148,7 +99,7 @@ arenas are unrelated. The portable profile exposes internal helpers/records;
 the documented checked boundary, not a sealed constructor type, establishes
 canonical arena/decoded correspondence.
 
-## Function-normalization migration (native qualified; generated gate pending)
+## Function-normalization migration (qualified at463d956)
 
 The production slice at 50dd83b replaces the stateless WHNF fragment with an
 operation-owned core cache and threads it through function-position and result
@@ -205,7 +156,7 @@ performance gain is claimed before their new native/generated measurements.
 Native benchmark receipts now explicitly label fuel_scope=pskernel_only so
 official Lean rows cannot be mistaken for the same PSKernel fuel mechanism.
 
-## Nat and projection migration (this commit; qualification pending)
+## Nat and projection migration (native qualified at58fab; generated pending)
 
 The production WHNF worker now preserves a fixed public callback during core
 recursion and owns separate core/public caches. Public cache lookup remains
@@ -239,13 +190,59 @@ and invalid projections, changed function heads, exact resource errors and
 environment isolation. Native also compares fourteen ordinary Nat reductions
 against pinned official Lean. New local public-cache initialization/FVar
 exclusion proofs extend the existing local claims; they do not prove full
-cache-result validity. These additions have not yet passed CI on this commit.
+cache-result validity. These additions passed the native gate at58fab; generated qualification is pending.
 
 Canonical PS runtime qualification now reuses the complete compiled bundle for
 the same strict DAG/transform smoke in a detached directory with PATH empty,
 in addition to the existing complete V1 smoke. Counts continue to come from the
 dependency manifest. Native and generated full-checker benchmarks remain required;
 no new Nat/projection performance improvement is claimed.
+
+## Definitive quick DefEq migration (this commit; qualification pending)
+
+The production DAG path now implements the original fresh-operation entry rules:
+fuel and recursion-depth guards, collision-safe structural equality, Sort universe
+equivalence, literal equality and paired metadata descent. Sort/literal rules can
+return definite false as well as true. All unsupported pairs request the complete
+original operation with its original resources. Both operands are still fully
+checked before a direct result can be observed.
+
+This worker intentionally has no reusable semantic pair cache. Its metadata
+descent is linear and starts from the empty state used by the public API; no
+sibling can observe a prior result. It is not an existing-state recursive DefEq
+callback. Constants with equivalent universe arguments are not moved earlier:
+the original algorithm reaches that rule after reductions, which matters to fuel.
+
+New native/generated fixtures compare 12 decisive cases and 4 explicit fallback
+families, fuel0–64, entry depths0/15/16, nested metadata, real literal hash
+collisions, wrong-typed operands and exact public error variants. Native also
+compares the 12 corresponding raw judgments with pinned official Lean. Two local
+lemmas prove arbitrary-arena fuel-zero and recursion-depth-error precedence over
+syntax; they do not prove full DefEq refinement. Tests and proofs are pending CI.
+
+## Latest generated whole-checker measurements
+
+[The463d956 integration log](https://github.com/dwijayuda/pskernel/actions/runs/39514448898)
+records isolated A-B-B-A workers at unchanged fuel4096, full public checking,
+validation/decoding included, and fresh semantic caches per public operation:
+
+| Complete operation | Repeated calls | Original warm ms | DAG warm ms |
+| --- | --- | --- | --- |
+| Metadata DefEq, depth96 |4|676.665–678.099|57.260–59.817|
+| Shared-function WHNF, depth128 |1|1025.213–1074.086|441.722–447.103|
+| Unique-function WHNF, depth128 |1|1679.600–1694.843|1151.830–1158.018|
+| Collision-function WHNF, depth128 |1|4268.574–4283.050|3524.619–3617.324|
+| Zeta check-only, depth8 |3|85.236–85.618|98.839–99.623|
+
+Memory remains a qualification gap. Unique-function depth128 peak RSS was
+248,492–248,936KiB original versus 293,156–294,992KiB DAG. Post-GC heap was
+21,356,528–21,356,800 bytes original versus 25,893,536–25,896,056 bytes DAG;
+within-worker retained deltas were 34,664–35,024 versus70,968–206,576 bytes.
+The separate untimed DAG diagnostic found 256 core publications, no shadowed
+equivalent keys and zero appended nodes for that fixture. It does not measure
+allocation or hit/miss/probe counts. These figures establish improvements on
+specific complete operations alongside real memory/small-check regressions,
+not general production performance acceptance.
 
 ## Milestone matrix
 
@@ -254,8 +251,8 @@ no new Nat/projection performance improvement is claimed.
 | Paged representation | Single production owner; all 12 families; exact cached metadata | Forgery, collision, sharing, page and reference tests pass | Qualified foundation; current complete closure builds | Construction and validation included in complete-operation measurements | Integrated foundation |
 | Transformations | Lift, instantiate/multi/reverse, abstract, universe substitution, spines; scoped memo | 1,755 comparisons plus budget/sharing/negative cases pass | Authentic source and strict generated transform smoke pass | Large shared-DAG fixture; not a full checker speedup claim | Integrated prerequisite |
 | Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
-| WHNF | Function normalization, separate core/public caches, direct Nat and constructor projection added | Prior stateful slice passes; new Nat/projection gate pending | Prior generated wrapper ABI corrected; current expanded gate pending | Deep stateful workloads improve; small/collision regressions remain | Partial; delta/iota/local-value/String migration open |
-| Inference and DefEq | Terminal/metadata inference; collision-safe checked syntactic shortcut | Complete fallback and shortcut tests pass | Complete checker executes in generated JS | Metadata checks improve; general inference unqualified as DAG-native | Partial |
+| WHNF | Function normalization, separate core/public caches, direct Nat and constructor projection | Nat/projection/cache native gate passes at58fab | Statefully generated at463; expanded gate pending | Deep stateful workloads improve; small/collision regressions remain | Partial; delta/iota/local-value/String migration open |
+| Inference and DefEq | Terminal/metadata inference; definitive quick DefEq rules added | Prior structural shortcut passes; expanded quick gate pending | Complete checker executes; expanded gate pending | Metadata checks improve; general inference unqualified as DAG-native | Partial |
 | Inductive admission | Direct DAG request ingress, complete original admission internally | Existing admission tests pass | Real generated definition/ordinary-inductive checks pass | Full admission comparison pending | Not migrated internally |
 | Canonical self-hosting | Actual full production import closure; counts from manifest | Pinned Lean build passes | Current source/canonical checks pass; current final executable gates still running | Generator/runtime costs remain visible | Partial integration qualification |
 | Lean Arena | All193 official bodies evaluated; independent metadata-aware transport and full comparison added | Official reference122 accept/71 reject | Independent generated corpus execution pending | Host limits separated from kernel fuel | Not yet independently qualified |
@@ -528,7 +525,7 @@ Application-spine reconstruction also matches its decreasing argument list at
 the top level as required by PSC1 structural-recursion elaboration. These
 source-profile corrections are pending authentic PSC1 validation.
 
-The first complete Arena reference run39509681088 evaluated all193 cases:
+The first complete Arena reference run39509681088 evaluated all 193 cases:
 120 accepted,71 rejected,2 official-harness timeouts, with both controls passing.
 The timed-out cases were good/perf/magma-list-deep-n36.ndjson and
 magma-list-pair-n21.ndjson. No cases were excluded. The host timeout originally
@@ -564,7 +561,7 @@ conditional local metadata lemmas and finite parity tests do not imply them.
 ### Full reference corpus observed; independent replay gate added
 
 Run [39510753165](https://github.com/dwijayuda/pskernel/actions/runs/39510753165)
-on dd466701 evaluated all193 cases:122 accepted,71 rejected,zero timeouts,
+on dd466701 evaluated all 193 cases: 122 accepted, 71 rejected,zero timeouts,
 both controls passed. This is official Lean reference evidence only. The
 complete independent comparison gate now reconstructs the canonical .ps kernel,
 compiles real TypeScript7.0.2/Node22, exercises adversarial transport controls,

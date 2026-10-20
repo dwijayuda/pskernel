@@ -73,3 +73,27 @@ def psKernelExprV2PortableEqBatchChecked
           Except.error error
       | Except.ok answers =>
           Except.ok (Prod.fst answers)
+
+
+/- Small portable oracle helper for checking the batch's ordered results in
+generated JS. It is not used as an admission predicate. -/
+def psKernelExprV2PortableBoolListEq
+    (left : List Bool) :
+    List Bool -> Bool :=
+  match left with
+  | List.nil =>
+      fun (right : List Bool) =>
+        match right with
+        | List.nil => true
+        | List.cons _ _ => false
+  | List.cons head tail =>
+      let smaller : List Bool -> Bool :=
+        psKernelExprV2PortableBoolListEq tail;
+      fun (right : List Bool) =>
+        match right with
+        | List.nil => false
+        | List.cons other rest =>
+            if psKernelBoolEq head other then
+              smaller rest
+            else
+              false

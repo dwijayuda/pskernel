@@ -293,9 +293,13 @@ private def betaWhnfParity : IO Unit := do
   let original ← expect (psKernelSessionWhnf 4 checker cacheSensitive)
   require "beta-cache-sensitive-oracle-low-budget"
     (psKernelExprEqual original.fst sort0)
-  require "beta-cache-sensitive-function-head-falls-back"
+  let (next, reduced) ← expect
     (match psKernelExprV2TryWhnfWithFuel 4 checker.context arena root with
-     | none => true | _ => false)
+     | some value => value | none => .error "cache-sensitive function head used fallback")
+  let decoded ← expect (psKernelExprV2DecodeChecked next)
+  let value ← expect (psKernelExprV2DecodedRequire decoded reduced)
+  require "beta-cache-sensitive-function-head-is-dag-native"
+    (psKernelExprEqual value sort0)
   for fuel in [0,1,2,3,4,5,8,16,64] do
     let session ← fresh fuel
     require "beta-cache-sensitive-public-parity"
@@ -303,6 +307,133 @@ private def betaWhnfParity : IO Unit := do
         (psKernelV1Whnf session [] .safe cacheSensitive)
         (psKernelV1RunDag session [] .safe arena [.whnf root]))
   IO.println "PSC1_V2_DAG_NATIVE_BETA: PASS"
+
+private def rawStateWhnfParity {alpha : Type}
+    (label : String)
+    (original : Except String (Prod PsKernelExpr alpha))
+    (attempt : Option (Except String (Prod PsKernelExprV2WhnfState Nat))) :
+    IO Unit := do
+  match attempt with
+  | none => throw (IO.userError ("unexpected DAG WHNF fallback: " ++ label))
+  | some (.error error) =>
+      require label (match original with | .error old => old == error | _ => false)
+  | some (.ok (state, root)) =>
+      let decoded ← expect (psKernelExprV2DecodeChecked state.arena)
+      let value ← expect (psKernelExprV2DecodedRequire decoded root)
+      require label
+        (match original with | .ok old => psKernelExprEqual old.fst value | _ => false)
+
+private def whnfFunctionStateParity : IO Unit := do
+  let identityA := PsKernelExpr.lam (nm "a") sort1 (.bvar 0) .default
+  let identityB := PsKernelExpr.lam (nm "b") sort1 (.bvar 0) .implicit
+  let functionType := PsKernelExpr.forallE .anonymous sort1 sort1 .default
+  let headA := PsKernelExpr.letE (nm "fa") functionType identityA (.bvar 0) false
+  let headB := PsKernelExpr.letE (nm "fb") functionType identityB (.bvar 0) false
+  let shared := PsKernelExpr.app headA (.app headA sort0)
+  let copied := PsKernelExpr.app headA (.app headB sort0)
+  let exactSyntax := PsKernelExpr.app headA headB
+  let collisionA := PsKernelExpr.letE (nm "c") functionType
+    (.mdata 0 identityA) (.bvar 0) false
+  let collisionB := PsKernelExpr.letE (nm "c") functionType
+    (.mdata 65521 identityA) (.bvar 0) false
+  let collision := PsKernelExpr.app collisionA (.app collisionB sort0)
+  let metadataHead := PsKernelExpr.app (.mdata 73 identityA) sort0
+  let fixtures := [shared, copied, exactSyntax, collision, metadataHead]
+  for term in fixtures do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,3,4,5,6,7,8,12,24,64] do
+      for depth in [0,1,2] do
+        let session ← fresh fuel depth
+        let checker := psKernelKernelSessionChecker session [] .safe
+        rawStateWhnfParity "function-normalization-state-and-resource-parity"
+          (psKernelSessionWhnf fuel checker term)
+          (psKernelExprV2TryWhnfStateWithFuel fuel checker.context
+            (psKernelExprV2WhnfStateEmpty arena) root)
+        require "function-normalization-complete-public-parity"
+          (sameWhnf
+            (psKernelV1Whnf session [] .safe term)
+            (psKernelV1RunDag session [] .safe arena [.whnf root]))
+  let session ← fresh
+  let checker := psKernelKernelSessionChecker session [] .safe
+  for term in [shared, copied] do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    let (first, args) ← expect (psKernelExprV2TransformAppSpineOnCanonical arena root)
+    let arg ← expect
+      (match args with | .cons a _ => .ok a | _ => .error "missing cache fixture argument")
+    let (second, _) ← expect (psKernelExprV2TransformAppSpineOnCanonical arena arg)
+    require "cache-fixture-distinct-source-ids" (first != second)
+    require "cache-fixture-alpha-equivalent-keys"
+      (← expect (psKernelExprV2PagedEqOnCanonical arena first second))
+    let original ← expect (psKernelSessionWhnf 4 checker term)
+    require "cache-fixture-low-fuel-oracle-success" (psKernelExprEqual original.fst sort0)
+    rawStateWhnfParity "cache-fixture-low-fuel-dag-success"
+      (.ok original)
+      (psKernelExprV2TryWhnfStateWithFuel 4 checker.context
+        (psKernelExprV2WhnfStateEmpty arena) root)
+  let (syntaxArena, syntaxRoot) ← expect (psKernelExprV2PagedImportChecked exactSyntax)
+  let syntaxOracle ← expect (psKernelSessionWhnf 4 checker exactSyntax)
+  require "cache-hit-retains-first-result-syntax"
+    (psKernelExprEqual syntaxOracle.fst identityA &&
+      !psKernelExprEqual syntaxOracle.fst identityB)
+  rawStateWhnfParity "dag-cache-hit-retains-first-result-syntax"
+    (.ok syntaxOracle)
+    (psKernelExprV2TryWhnfStateWithFuel 4 checker.context
+      (psKernelExprV2WhnfStateEmpty syntaxArena) syntaxRoot)
+  require "raw-cache-syntax-fixture-is-not-publicly-admitted"
+    (match psKernelV1RunDag session [] .safe syntaxArena [.whnf syntaxRoot] with
+     | .error (.rejectedInvalid _) => true | _ => false)
+  let (collisionArena, collisionRoot) ← expect (psKernelExprV2PagedImportChecked collision)
+  let (first, args) ← expect
+    (psKernelExprV2TransformAppSpineOnCanonical collisionArena collisionRoot)
+  let arg ← expect
+    (match args with | .cons a _ => .ok a | _ => .error "missing collision fixture argument")
+  let (second, _) ← expect (psKernelExprV2TransformAppSpineOnCanonical collisionArena arg)
+  let firstEntry ← expect (psKernelExprV2PagedRequire collisionArena first)
+  let secondEntry ← expect (psKernelExprV2PagedRequire collisionArena second)
+  require "cache-fixture-real-hash-collision" (firstEntry.hash == secondEntry.hash)
+  require "cache-fixture-collision-structurally-unequal"
+    (!(← expect (psKernelExprV2PagedEqOnCanonical collisionArena first second)))
+  require "collision-must-not-create-low-fuel-cache-hit"
+    (match psKernelSessionWhnf 5 checker collision with
+     | .error "kernel reduction budget exhausted" => true | _ => false)
+  rawStateWhnfParity "collision-rejection-retains-original-fuel"
+    (psKernelSessionWhnf 5 checker collision)
+    (psKernelExprV2TryWhnfStateWithFuel 5 checker.context
+      (psKernelExprV2WhnfStateEmpty collisionArena) collisionRoot)
+  -- Even a warm cache cannot bypass the core entry's fuel or depth checks.
+  let (warmArena, warmRoot) ← expect (psKernelExprV2PagedImportChecked shared)
+  let warmOriginal ← expect (psKernelSessionWhnf 4 checker shared)
+  let warmDag ← expect
+    (match psKernelExprV2TryWhnfStateWithFuel 4 checker.context
+        (psKernelExprV2WhnfStateEmpty warmArena) warmRoot with
+     | some value => value | none => .error "missing warm DAG result")
+  let blockedContext := { checker.context with maxRecDepth := 1, recDepth := 16 }
+  for context in [checker.context, blockedContext] do
+    for fuel in [0,1] do
+      rawStateWhnfParity "warm-cache-entry-guards"
+        (psKernelWhnfCoreWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel)
+          context warmOriginal.snd.state shared false false)
+        (psKernelExprV2TryWhnfCoreStateWithFuel fuel context warmDag.fst warmRoot)
+  -- Open source expressions never publish a semantic entry.
+  let localName := nm "local"
+  let locals := psKernelLocalContextAddLocal checker.context.localContext
+    localName localName sort1 .default
+  let localContext := psKernelCheckerContextWithLocalContext checker.context locals
+  let openTerm := PsKernelExpr.app identityA (.fvar localName)
+  let (openArena, openRoot) ← expect (psKernelExprV2PagedImportChecked openTerm)
+  let openResult ← expect
+    (match psKernelExprV2TryWhnfStateWithFuel 64 localContext
+        (psKernelExprV2WhnfStateEmpty openArena) openRoot with
+     | some value => value | none => .error "missing open DAG result")
+  require "fvar-containing-source-cache-ineligible" openResult.fst.coreCache.isEmpty
+  let localLet := psKernelLocalContextAddLet checker.context.localContext
+    localName localName sort1 sort0
+  let letContext := psKernelCheckerContextWithLocalContext checker.context localLet
+  let (fvarArena, fvarRoot) ← expect (psKernelExprV2PagedImportChecked (.fvar localName))
+  require "legacy-local-let-value-remains-explicit-fallback"
+    (match psKernelExprV2TryWhnfWithFuel 64 letContext fvarArena fvarRoot with
+     | none => true | _ => false)
+  IO.println "PSC1_V2_DAG_NATIVE_WHNF_STATE: PASS"
 
 private def structuralShortcutParity : IO Unit := do
   let (a, zero) ← expect (psKernelExprV2PagedMkLit psKernelExprV2PagedEmpty (.nat 0))
@@ -475,6 +606,7 @@ def main : IO Unit := do
   metadataParity
   zetaWhnfParity
   betaWhnfParity
+  whnfFunctionStateParity
   structuralShortcutParity
   hostileInputs
   admissions

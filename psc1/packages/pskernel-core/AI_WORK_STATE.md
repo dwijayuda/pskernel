@@ -1,122 +1,210 @@
 # PSKernel-Core Expression V2 integration work state
 
-Date: 2026-10-21 (Asia/Jakarta)
-Status: **IN PROGRESS — NOT a finished Expression V2 checker**
+Date: 2026-10-21 (Asia/Jakarta; Actions timestamps use UTC)
+Status: **IN PROGRESS — NOT a completed Expression V2 kernel**
 Integration branch: `integration/psc1-pskernel-expr-v2-lean435-20261021`
 Research parent: `research/psc1-pskernel-expr-v2-lean435-20261020`
 Refreshed research HEAD: `c98be336e2e95dda998e4353dd791bdba5d8cb4f`
 Toolchain: `leanprover/lean4:v4.35.0`
 Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
-## Objective and trusted boundary
+## Current checkpoint and evidence
 
-Finish the paged, sharing-aware expression architecture in the complete,
-independent PSKernel-Core checker. The user's complete acceptance criteria
-remain binding: native, official Lean differential, applicable full Arena,
-PSC1 source and canonical PS, generated JS, unchanged resources/axioms,
-whole-checker memory/performance, and final-commit CI.
+The latest native-qualified implementation is
+[fa0ca224c6fd192d0afa2418d415a6dc67f9f333](https://github.com/dwijayuda/pskernel/commit/fa0ca224c6fd192d0afa2418d415a6dc67f9f333).
+Its native job in [39512106401](https://github.com/dwijayuda/pskernel/actions/runs/39512106401)
+passed the complete DAG regressions, official Lean fixtures, beta/zeta resource
+parity, 1,755 transformation comparisons, local metadata/cache-scope theorems,
+the new depth/count budget equivalence theorems, and matched native benchmarks.
+The proof axiom check passed. This is not a whole-kernel soundness theorem.
+
+The strict generated runtime smoke for the same semantic implementation passed
+on 269552f in [39511802579](https://github.com/dwijayuda/pskernel/actions/runs/39511802579).
+The generated job is fully green: 578 strict transformation comparisons,
+large shared-DAG, beta/zeta, standalone runtime, whole-checker benchmarks and
+33 existing complete-checker operations passed. The workflow itself remains
+red because its earlier native proof failed; fa0ca224 corrects that proof.
+The earlier dd466 run checked all 1,225 source declarations and emitted JS,
+declarations and a source map. Its runtime failure was a host-harness ABI error:
+returned function arrows are unary, while known declaration entries have flat
+arguments. Seven call sites were corrected; the strict unapplied-oracle guard
+remains.
+
+The first independent Arena job at c29f418 has passed complete canonical PS
+reconstruction and checking and is generating the executable. The full corpus
+comparison has not yet produced a qualified independent result.
+The last fully green integration + six-job research checkpoint remains
+[69de396ec537c8130b87388ba8045859e443141b](https://github.com/dwijayuda/pskernel/commit/69de396ec537c8130b87388ba8045859e443141b):
+[39506742023](https://github.com/dwijayuda/pskernel/actions/runs/39506742023)
+and [39506742177](https://github.com/dwijayuda/pskernel/actions/runs/39506742177).
+Do not substitute that earlier result for final-commit qualification.
+
+No PR has been merged. Keep the integration branch isolated until all relevant
+gates on the eventual implementation commit have passed.
+
+## Objective and execution constraints
+
+Finish the paged expression architecture in the complete independent checker.
+The user's complete acceptance criteria remain binding: production integration,
+native and official Lean differential checking, all applicable Arena cases,
+authentic PSC1 and canonical PS, executable independent JS, unchanged resources
+and axioms, whole-checker memory/performance, and final-commit Actions evidence.
 
 All repository reads/writes and tests use connected GitHub and GitHub Actions.
-No local checkout, local compilation, force update, release or publication.
-No sorry/admit, unchecked proof assumptions, fuel increase, or excluded
-difficult corpus cases. No claim that finite regressions prove soundness.
+No local checkout or compilation, force updates, release or package publication.
+Do not add proof holes, unchecked assumptions, higher kernel fuel, weakened
+negative assertions, or exclusions for difficult cases. Finite tests do not
+establish formal soundness.
 
-## Refreshed baseline evidence
+## Actual implementation and remaining boundary
 
-The branch had not advanced past c98be336 when inspected. Its only difference
-from dd1df299264a3b4e4a1eedc3a98852041043bc74 is documentation.
+Production owns the paged Node/Entry, indexed storage, smart constructors,
+metadata replay validator, collision-safe equality, lifting, multi/reverse
+instantiation, abstraction, universe substitution, spine helpers and decoder.
+Scalar expression syntax and scalar hashing were factored into shared modules;
+the DAG foundation does not import the legacy recursive expression or checker
+cache. Promoted Research module names forward to the production owners.
 
-- [39494544496](https://github.com/dwijayuda/pskernel/actions/runs/39494544496):
-  six Expression V2 research jobs passed.
-- [39494159604](https://github.com/dwijayuda/pskernel/actions/runs/39494159604):
-  both original native and PSC1 portability jobs passed.
-- [39492950104](https://github.com/dwijayuda/pskernel/actions/runs/39492950104):
-  combined generated checker/restricted V2 bridge passed.
+`psKernelV1RunDag` is the public untrusted-input boundary. It validates one arena
+and decodes each unique node once for an ordered command batch. Input tables can
+be constructed directly through the production paged smart constructors.
+Terminal/metadata inference, checked syntactic DefEq, and qualified WHNF slices
+read DAG entries directly. All structural shortcuts resolve hash collisions.
+Both terms still undergo complete checking before the DefEq shortcut.
 
-The old generated production smoke only exercised helper operations.
-The combined bridge checked real terms, but did not migrate the checker.
+**General inference, full DefEq, environment/local declaration expression fields,
+delta/recursor/projection/primitive behavior and declaration admission still use
+the original recursive expression internally.** This once-per-batch decoder and
+the complete fallback are transitional. The default original V1 API also remains.
+Do not describe this architecture as the finished replacement or retire the
+oracle before the remaining semantic migration qualifies.
 
-## Exact architectural findings
+Kernel fuel4096 is a recursive bound, not a globally spent instruction count.
+Public/core WHNF entry order, recursion-depth guards, C0 beta-spine batching and
+expression-derived substitution bounds are preserved. Default DAG transforms use
+cached depth after validation: the old expanded count+1 was already capped to
+that depth. The native depth/count lemmas justify that numeric cap, not full
+substitution refinement. Bounded zero-fuel transforms retain the input subtree.
 
-The original production closure is 79 files / 843,451 bytes at c98be336:
-28 Admission files, 26 Checker, 10 Core, 5 Runtime, 5 API, 4 Environment,
-and SelfHost. New closure counts must come from imports and the bootstrap
-manifest, never an asserted count of 79.
+All seven original semantic caches are restored when leaving a local scope;
+only the maximum fresh-name counter survives. FVar-containing terms cannot
+publish semantic cache knowledge across contexts. Same numeric IDs in separate
+arenas are unrelated. The portable profile exposes internal helpers/records;
+the documented checked boundary, not a sealed constructor type, establishes
+canonical arena/decoded correspondence.
 
-Expression V2's prior dependency on Runtime/Acceleration/Cache imported the
-legacy expression representation. Scalar syntax and hashing must be factored
-out before production DAG modules can stand independently.
+## New function-normalization migration (qualification pending on this commit)
 
-The existing V2 subset does not have the production resource contract.
-Kernel fuel is a **recursive bound**, not an accumulated instruction count.
-WHNF public/core entry ordering, recursion-depth guards, spine beta batching,
-recursor callbacks and expression-derived substitution budgets must be kept.
+The next production slice replaces the stateless WHNF fragment with an
+operation-owned core cache and threads it through function-position and result
+normalization. It directly handles beta/zeta/metadata function heads, preserving
+the original predecessor fuel for both calls. Alpha-equivalent keys with
+different IDs use collision-safe structural lookup and return the first stored
+result syntax; FVar-containing keys are ineligible. Fuel/depth checks precede
+hits. The public wrapper always starts empty and discards its internal cache.
+Unsupported constant/local-let/recursor/projection/primitive paths still restart
+the complete original checker with the original resources.
 
-All seven semantic caches are restored on local-scope exit; only the maximum
-fresh-name counter survives. FVar-sensitive computations cannot be cached
-across contexts. Same numeric IDs in sibling immutable arenas are unrelated.
-A caller-supplied equality memo or raw arena is not trusted.
+New native and generated tests cover distinct-ID cache hits, exact cached
+syntax, a real hash collision, warmed-cache fuel/depth entry guards, local-scope
+exclusion and complete public checking. Three local proofs establish empty
+initialization and flag-based lookup/publication exclusion; they do not prove
+arena ownership or global cache correctness.
 
-## Active implementation
-
-1. Factor scalar types and hash helpers. Promote the one paged Node/Entry,
-   storage, constructor and replay-validation implementation to Core/ExprV2.
-   Research modules become forwarding imports where appropriate.
-2. Add Core/ExprV2/Decode: one topological materialization per unique node,
-   with paged decoded storage and physical sharing. No per-WHNF/DefEq import.
-3. Add API/DagTypes, DagDeclaration and Dag: untrusted DAG commands for the
-   existing expression checking and complete declaration request families.
-   One public batch validates/reconstructs its graph once; each command uses
-   the complete KernelContract-v1 API and its unchanged resource policy.
-4. Implement the missing multi/reverse instantiation, abstraction,
-   universe substitution and spine helpers with bounded legacy parity.
-5. Strengthen generated JS tests to run real checking, admissions,
-   negative outcomes, contexts and resource cases; derive closure counts.
-6. Add native and generated DAG ingress regression, forged-data rejection,
-   same-ID/different-arena cases, exact low-fuel parity, ordinary induction
-   and official Lean comparisons.
-
-**The DAG ingress is transitional. Terminal inference (including metadata
-chains), terminal WHNF and checked same-arena identity now have direct
-node-reading candidates; other composite inference, reductions, DefEq and
-admission still require migration. No completion or speedup claim
-follows from its existence or passing tests.**
+The same complete-public benchmark now includes shared heads, copied
+alpha-equivalent heads, unique tags and hash collisions at depths8/32/128.
+Native samples use isolated processes with actual peak RSS and matching official
+check+WHNF; official Lean exposes no PS fuel parameter. JS retains isolated
+A-B-B-A, cold/warm, construction and post-GC heap measurements. An untimed raw
+diagnostic reports actual cache growth after the public timing/memory snapshot;
+it explicitly does not measure hit/miss/probe counters. No cache eviction or
+fuel change is allowed. Results for this slice remain pending.
 
 ## Milestone matrix
 
 | Milestone | Implementation | Native correctness | PSC1 / PS / JS | Whole-checker performance | Status |
 | --- | --- | --- | --- | --- | --- |
-| Paged representation | Qualified research; production factoring underway | Baseline green | Baseline green | Microbenchmarks only | In progress |
-| Single instantiate / lift / structural equality | Qualified research | Baseline green | Baseline green | Research measurements only | Not production checker |
-| General transformations | New production prerequisites underway | Pending | Pending | Pending | In progress |
-| Checked DAG input / complete API | New one-time input adapter underway | Pending | Pending | Pending | Transitional |
-| Full DAG-native WHNF | Missing | Not qualified | Not qualified | Not measured | Incomplete |
-| DAG-native inference and DefEq | Terminal/mdata inference candidate; full DefEq missing | Pending | Pending | Not measured | Incomplete |
-| DAG-native inductive admission | Missing | Not qualified | Not qualified | Not measured | Incomplete |
-| Complete integrated self-hosting | New full source closure must qualify | Pending | Pending | Pending | Incomplete |
-| Lean Arena | Existing infrastructure audit underway | Full applicable run not established | Not established | Not measured | Incomplete |
-| Formal invariants/metatheory | Existing semantics retained; no new soundness theorem | Not proved | Not applicable | Not applicable | Open |
+| Paged representation | Single production owner; all 12 families; exact cached metadata | Forgery, collision, sharing, page and reference tests pass | Qualified foundation; current complete closure builds | Construction and validation included in complete-operation measurements | Integrated foundation |
+| Transformations | Lift, instantiate/multi/reverse, abstract, universe substitution, spines; scoped memo | 1,755 comparisons plus budget/sharing/negative cases pass | Authentic source and strict generated transform smoke pass | Large shared-DAG fixture; not a full checker speedup claim | Integrated prerequisite |
+| Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
+| WHNF | Terminal/metadata/zeta/syntactic-lambda beta qualified; operation-owned function-normalization cache added; qualification pending | Qualified slice has exact low-fuel/depth parity | Qualified slice strict generated smoke passes | Native checked zeta WHNF improves on matched fixtures | Partial; full delta/iota/projection/primitive migration open |
+| Inference and DefEq | Terminal/metadata inference; collision-safe checked syntactic shortcut | Complete fallback and shortcut tests pass | Complete checker executes in generated JS | Metadata checks improve; general inference unqualified as DAG-native | Partial |
+| Inductive admission | Direct DAG request ingress, complete original admission internally | Existing admission tests pass | Real generated definition/ordinary-inductive checks pass | Full admission comparison pending | Not migrated internally |
+| Canonical self-hosting | Actual full production import closure; counts from manifest | Pinned Lean build passes | Current source/canonical checks pass; current final executable gates still running | Generator/runtime costs remain visible | Partial integration qualification |
+| Lean Arena | All193 official bodies evaluated; independent metadata-aware transport and full comparison added | Official reference122 accept/71 reject | Independent generated corpus execution pending | Host limits separated from kernel fuel | Not yet independently qualified |
+| Formal invariants | Composite metadata preservation, local-cache restoration/eligibility and budget-cap lemmas | Native axiom gate passes | Proofs intentionally outside portable executable closure | Not applicable | Global DAG/substitution/DefEq/admission soundness remains open |
 
-## Next migration obligations
+## Latest matched native measurements
 
-Preserve the existing control flow while moving expression operations to an
-arena owned by checker state. Environment/local declarations and all semantic
-caches must refer to that same arena. Missing full behavior includes lazy
-delta, local-let unfolding, Quot reduction, Nat primitives, recursors with K
-and structure conversion, projections, both function-eta directions,
-structure eta, unit-like types, proof irrelevance and universe equivalence.
+Run39512106401 uses the same pinned toolchain, fuel and correctness guards.
+DAG time includes public validation/decode. Input construction is separate.
+These are two A-B-B-A observations per variant; no generalized improvement follows.
 
-Do not replace these with the bounded beta/zeta research worker. Retain the
-legacy complete checker only as a migration fallback/oracle until all
-equivalent operations qualify, then retire obsolete implementations.
+| Complete public operation | Fixture / calls | Original ms | DAG ms |
+| --- | --- | --- | --- |
+| Check | Metadata96 / 600 | 68 / 67 | 13 / 14 |
+| Check | Zeta96 / 50 | 17 / 17 | 18 / 18 |
+| Checked WHNF | Metadata96 / 300 | 34 / 34 | 7 / 8 |
+| Checked WHNF | Zeta96 / 50 | 32 / 36 | 19 / 20 |
+| Checked WHNF | Zeta192 / 20 | 44 / 56 | 25 / 26 |
 
-## Evidence discipline
+Generated Node22 checked WHNF in the green269552f generated job also improves:
+Zeta24 (two calls) original136.434/141.860ms vs DAG73.340/70.592ms;
+peak RSS233,912/233,804KiB vs184,712/189,380KiB. Zeta48 (one call)
+is110.821/117.433ms vs69.356/68.058ms. Ordinary zeta type checking still has
+adapter overhead (depth24:59.389/63.765ms vs66.908/67.939ms).
 
-Only record a new implementation as qualified after reading its actual
-Actions result on the exact commit. Retain failed runs and diagnosis.
-Benchmark the complete checked operations with conversions, construction,
-memory and runtime overhead visible. An ingress adapter is expected to add
-work; do not present representation microbenchmarks as complete-checker gains.
+The generated harness reports cold/warm full calls, construction, isolated-worker
+peak RSS and post-GC heap. Earlier qualified numbers and adapter regressions are
+retained below. Allocation, actual semantic cache hit/miss counts and trampoline
+costs have not been fully instrumented. Do not infer them from GC event counts.
+
+## Arena evidence and profile
+
+The authenticated round-2026-09 archive has193 cases and SHA256
+`98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d`.
+Official run [39510753165](https://github.com/dwijayuda/pskernel/actions/runs/39510753165)
+passed all122 historical good and71 historical bad cases, with positive/negative
+controls and no exclusions or remaining timeouts. Only the metadata header was
+adapted to the pinned4.35 commit; declaration-body bytes are hash-verified as
+unchanged. This is not a fresh native4.35 export and is not independent-kernel
+qualification.
+
+The new host transport constructs direct DAG input, invokes the real complete
+admission API once, and compares every supplied exported constant/constructor/
+inductive/recursor field with the regenerated environment. Exported recursor
+rules are never installed as trusted rules. Exact integers and duplicate keys,
+invalid references, forged recursor counts/RHS and constructor metadata have
+explicit controls. Unrepresented all-lists, oversized UInt32 hints and unsafe/
+partial contract differences remain explicit outcomes. Projection type names
+participate in dependency ordering. Blank records and non-LeanExport fvar/mvar
+wire constructors are rejected; internal expression support is unaffected.
+
+The comparison records every case, distinguishes kernel/metadata/transport
+rejection from unsupported and host/kernel resource failures, and fails the full
+gate if any case is unmatched. Node executes in a detached directory with empty
+PATH; fuel remains4096. Host timeout60s, heap2GiB and two workers are reported
+separately. Never turn an OOM/timeout into a semantic rejection or silently
+remove the case.
+
+## Next implementation obligations
+
+Complete the operation-owned DAG WHNF state and function-position normalization
+with exact cache-key, value, fuel and depth parity, then qualify its cache-heavy
+complete-check performance. Cache eviction cannot be used to bound memory:
+removing an existing hit can alter fixed-fuel acceptance. List lookup scalability
+must be measured before broader migration.
+
+Then migrate environment/local values and checker state to one owning arena,
+followed by full delta, recursor/iota, projection, supported primitives, general
+inference, lazy DefEq, universes, proof irrelevance and inductive admission.
+Retain every established rejection and resource decision. Extend formal replay,
+substitution and cache-ownership invariants; do not substitute test counts for
+those obligations. Retire legacy adapters and duplicate research algorithms only
+after replacement qualification. Keep the full193 independent report and final
+Actions results visible throughout the remaining work.
+
+## Historical evidence (superseded where the checkpoint above is newer)
 
 ## Execution evidence and corrections
 

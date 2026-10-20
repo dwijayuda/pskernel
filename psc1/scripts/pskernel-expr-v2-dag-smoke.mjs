@@ -426,7 +426,7 @@ console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG terminal inference, terminal/metadata/zeta/syntactic-lambda-beta WHNF and checked structural shortcut; legacy general checker fallback; incomplete"
+  checker_representation:"DAG terminal inference, terminal/metadata/beta/zeta WHNF with operation-owned function normalization and checked structural shortcut; legacy general checker fallback; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");
 }
@@ -545,11 +545,13 @@ console.log("PSC1_V2_DAG_JS_ZETA: PASS");
   const checker=get("psKernelKernelSessionChecker")(session(),nil,S.safe);
   const cached=accepted(get("psKernelSessionWhnf")(4n,checker,cacheTerm),"beta-cache-oracle");
   must(exact(cached.fst,sort0),"beta-cache-oracle-low-budget");
-  const declined=get("psKernelExprV2TryWhnfWithFuel")(4n)(checker.context)(betaArena)(cacheRoot);
-  const Option=get("Option");
-  const none=typeof Option.none==="function"?Option.none():Option.none;
-  must(declined!==undefined&&json(declined)===json(none),
-    "beta-cache-sensitive-function-normalization-falls-back");
+  const direct=get("psKernelExprV2TryWhnfWithFuel")(4n)(checker.context)(betaArena)(cacheRoot);
+  must(direct&&typeof direct==="object"&&"value" in direct,
+    "beta-cache-sensitive-function-normalization-is-dag-native");
+  const reduced=accepted(direct.value,"beta-cache-sensitive-direct-result");
+  const cacheGraph=accepted(decode(reduced.fst),"beta-cache-sensitive-valid-arena");
+  must(exact(accepted(decoded(cacheGraph,reduced.snd),"beta-cache-sensitive-decoded"),sort0),
+    "beta-cache-sensitive-direct-value");
   for(const fuel of [0n,1n,2n,3n,4n,5n,8n,16n,64n]){
     const s=session(fuel);
     must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,cacheTerm),
@@ -558,5 +560,123 @@ console.log("PSC1_V2_DAG_JS_ZETA: PASS");
   }
 }
 console.log("PSC1_V2_DAG_JS_BETA: PASS");
+
+{
+  let stateArena=empty;
+  const addState=(kind,...args)=>{
+    const result=mk(stateArena,kind,...args);
+    stateArena=result.fst; return result.snd;
+  };
+  const s0=addState("Sort",L.zero),s1=addState("Sort",L.succ(L.zero));
+  const b0=addState("BVar",0n);
+  const type=addState("Forall",N.anonymous,s1,s1,B.default);
+  const aName=name("state-a"),bName=name("state-b");
+  const ia=addState("Lam",aName,s1,b0,B.default);
+  const ib=addState("Lam",bName,s1,b0,B.implicit);
+  const ha=addState("Let",name("state-fa"),type,ia,b0,false);
+  const hb=addState("Let",name("state-fb"),type,ib,b0,false);
+  const innerA=addState("App",ha,s0),innerB=addState("App",hb,s0);
+  const shared=addState("App",ha,innerA),copied=addState("App",ha,innerB);
+  const syntax=addState("App",ha,hb);
+  const tag0=addState("MData",0n,ia),tag1=addState("MData",65521n,ia);
+  const hc0=addState("Let",name("state-c"),type,tag0,b0,false);
+  const hc1=addState("Let",name("state-c"),type,tag1,b0,false);
+  const collisionInner=addState("App",hc1,s0);
+  const collision=addState("App",hc0,collisionInner);
+  const metadataFn=addState("MData",73n,ia);
+  const metadataApp=addState("App",metadataFn,s0);
+  const ftype=E.forallE(N.anonymous,sort1,sort1,B.default);
+  const identA=E.lam(aName,sort1,E.bvar(0n),B.default);
+  const identB=E.lam(bName,sort1,E.bvar(0n),B.implicit);
+  const headA=E.letE(name("state-fa"),ftype,identA,E.bvar(0n),false);
+  const headB=E.letE(name("state-fb"),ftype,identB,E.bvar(0n),false);
+  const c0=E.letE(name("state-c"),ftype,E.mdata(0n,identA),E.bvar(0n),false);
+  const c1=E.letE(name("state-c"),ftype,E.mdata(65521n,identA),E.bvar(0n),false);
+  const fixtures=[
+    [shared,E.app(headA,E.app(headA,sort0))],
+    [copied,E.app(headA,E.app(headB,sort0))],
+    [syntax,E.app(headA,headB)],
+    [collision,E.app(c0,E.app(c1,sort0))],
+    [metadataApp,E.app(E.mdata(73n,identA),sort0)]
+  ];
+  const emptyState=()=>get("psKernelExprV2WhnfStateEmpty")(stateArena);
+  const attemptedState=(fuel,context,root)=>
+    get("psKernelExprV2TryWhnfStateWithFuel")(fuel)(context)(emptyState())(root);
+  const compareState=(original,attempted,label)=>{
+    must(attempted&&typeof attempted==="object"&&"value" in attempted,label+"-direct");
+    const result=attempted.value;
+    if(rejected(original)){
+      must(rejected(result)&&original.error===result.error,label+"-error");
+      return;
+    }
+    const reduced=accepted(result,label+"-result");
+    const graph=accepted(decode(reduced.fst.arena),label+"-valid");
+    const actual=accepted(decoded(graph,reduced.snd),label+"-decoded");
+    must(exact(accepted(original,label+"-original").fst,actual),label+"-value");
+  };
+  for(let index=0;index<fixtures.length;index++){
+    const [root,term]=fixtures[index];
+    for(const fuel of [0n,1n,2n,3n,4n,5n,6n,8n,12n,64n]){
+      for(const depth of [0n,1n,2n]){
+        const s=session(fuel,depth);
+        const checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+        compareState(get("psKernelSessionWhnf")(fuel,checker,term),
+          attemptedState(fuel,checker.context,root),
+          "stateful-whnf-"+index+"-"+fuel+"-"+depth);
+        must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,term),
+          invoke(stateArena,[C.whnf(root)],s),exact),
+          "stateful-public-"+index+"-"+fuel+"-"+depth);
+      }
+    }
+  }
+  const checker=get("psKernelKernelSessionChecker")(session(),nil,S.safe);
+  must(ha!==hb&&accepted(get("psKernelExprV2PagedEqOnCanonical")(stateArena,ha,hb),
+    "state-alpha-keys")===true,"state-distinct-alpha-keys");
+  const ca=accepted(get("psKernelExprV2PagedRequire")(stateArena,hc0),"collision-key0");
+  const cb=accepted(get("psKernelExprV2PagedRequire")(stateArena,hc1),"collision-key1");
+  must(ca.hash===cb.hash&&
+    accepted(get("psKernelExprV2PagedEqOnCanonical")(stateArena,hc0,hc1),"collision-equality")===false,
+    "state-real-hash-collision");
+  const collisionOld=get("psKernelSessionWhnf")(5n,checker,fixtures[3][1]);
+  must(rejected(collisionOld)&&collisionOld.error==="kernel reduction budget exhausted",
+    "state-hash-collision-cannot-create-cache-hit");
+  const exactOriginal=get("psKernelSessionWhnf")(4n,checker,fixtures[2][1]);
+  const exactOld=accepted(exactOriginal,"state-exact-syntax");
+  must(exact(exactOld.fst,identA)&&!exact(exactOld.fst,identB),
+    "state-oracle-retains-first-cached-syntax");
+  compareState(exactOriginal,attemptedState(4n,checker.context,syntax),
+    "state-dag-retains-first-cached-syntax");
+  must(rejected(invoke(stateArena,[C.whnf(syntax)])),"state-raw-syntax-fixture-rejected-publicly");
+  const warmOld=accepted(get("psKernelSessionWhnf")(4n,checker,fixtures[0][1]),"warm-old");
+  const warmAttempt=attemptedState(4n,checker.context,shared);
+  must(warmAttempt&&typeof warmAttempt==="object"&&"value" in warmAttempt,"warm-dag-direct");
+  const warmDag=accepted(warmAttempt.value,"warm-dag");
+  const noCallback=()=>{throw Error("PSC1_DAG_UNEXPECTED_WARM_CORE_CALLBACK");};
+  for(const context of [checker.context,{...checker.context,maxRecDepth:1n,recDepth:16n}]){
+    for(const fuel of [0n,1n]){
+      const original=get("psKernelWhnfCoreWithFuel")(fuel)
+        (noCallback)(noCallback)(context)(warmOld.snd.state)(fixtures[0][1])(false)(false);
+      const actual=get("psKernelExprV2TryWhnfCoreStateWithFuel")(fuel)
+        (context)(warmDag.fst)(shared);
+      compareState(original,actual,"state-warm-entry-guards-"+context.recDepth+"-"+fuel);
+    }
+  }
+  const localName=name("state-local");
+  const fvar=addState("FVar",localName),openRoot=addState("App",ia,fvar);
+  const locals=get("psKernelLocalContextAddLocal")(checker.context.localContext,
+    localName,localName,sort1,B.default);
+  const localContext=get("psKernelCheckerContextWithLocalContext")(checker.context,locals);
+  const openAttempt=attemptedState(64n,localContext,openRoot);
+  must(openAttempt&&typeof openAttempt==="object"&&"value" in openAttempt,"open-state-direct");
+  const openResult=accepted(openAttempt.value,"open-state-result");
+  must(array(openResult.fst.coreCache).length===0,"open-state-cache-ineligible");
+  const letLocals=get("psKernelLocalContextAddLet")(checker.context.localContext,
+    localName,localName,sort1,sort0);
+  const letContext=get("psKernelCheckerContextWithLocalContext")(checker.context,letLocals);
+  const declined=get("psKernelExprV2TryWhnfWithFuel")(64n)(letContext)(stateArena)(fvar);
+  const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  must(declined!==undefined&&json(declined)===json(none),"local-let-value-explicit-fallback");
+}
+console.log("PSC1_V2_DAG_JS_WHNF_STATE: PASS");
 
 reportDagSmoke();

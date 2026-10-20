@@ -9,8 +9,9 @@ Checked DAG ingress for the complete KernelContract-v1 implementation.
 
 One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
-Terminal checking and terminal/metadata/zeta/syntactic-lambda-beta WHNF read DAG nodes directly with the original entry
-fuel/depth/rule ordering. Collision-safe DAG equality supplies DefEq's syntactic shortcut
+Terminal checking and terminal/metadata/beta/zeta WHNF read DAG nodes directly with the original entry
+fuel/depth/rule ordering. Operation-owned core caches preserve supported
+function-position normalization; no cache escapes a public WHNF call. Collision-safe DAG equality supplies DefEq's syntactic shortcut
 only after both complete checks. Other composite checking, reductions, DefEq
 and admission use the complete existing kernel with unchanged resources.
 
@@ -22,7 +23,7 @@ receipts, are forgeable observations and never authorize proof admission.
 Every declaration is still rechecked by V1. No equality memo survives this
 boundary. A sealed constructor API remains a source-profile limitation.
 
-This is a partial representation migration. Terminal inference, terminal/metadata/zeta/syntactic-lambda-beta WHNF, and the
+This is a partial representation migration. Terminal inference, terminal/metadata/beta/zeta WHNF, and the
 checked structural-equality shortcut are DAG-native. Other composite checking, reduction,
 DefEq and admission retain PsKernelExpr internally.
 Eliminating that fallback and adapter remains required for completion.

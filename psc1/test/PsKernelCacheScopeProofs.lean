@@ -1,5 +1,6 @@
 import Init.Data.Nat.MinMax
 import Ps.KernelCore.Checker.State
+import Ps.KernelCore.Checker.ExprV2.WhnfState
 import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-!
@@ -75,6 +76,25 @@ theorem inference_ineligible_of_fvar_flag
     psKernelInferCacheEligible inferOnly expr = false := by
   simp [psKernelInferCacheEligible, psKernelSemanticCacheEligible, flag]
 
+theorem dag_whnf_starts_without_cache (arena : PsKernelExprV2PagedArena) :
+    (psKernelExprV2WhnfStateEmpty arena).coreCache = List.nil := by
+  rfl
+
+theorem dag_whnf_fvar_flag_prevents_lookup
+    (state : PsKernelExprV2WhnfState) (source : Nat)
+    (entry : PsKernelExprV2Entry) (flag : entry.hasFVar = true) :
+    psKernelExprV2WhnfCacheFind state source entry = Except.ok Option.none := by
+  simp [psKernelExprV2WhnfCacheFind, flag]
+
+theorem dag_whnf_fvar_flag_prevents_publication
+    (state : PsKernelExprV2WhnfState) (source result : Nat)
+    (entry : PsKernelExprV2Entry)
+    (found : psKernelExprV2PagedRequire state.arena source = Except.ok entry)
+    (flag : entry.hasFVar = true) :
+    psKernelExprV2WhnfCoreFinish state source result =
+      Except.ok (Prod.mk state result) := by
+  simp [psKernelExprV2WhnfCoreFinish, found, flag]
+
 end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.exit_scope_restores_all_caches
@@ -87,3 +107,7 @@ end PsKernelCacheScopeProofs
 #print axioms PsKernelCacheScopeProofs.semantic_fvar_ineligible
 #print axioms PsKernelCacheScopeProofs.semantic_pair_eligible_iff_no_fvar_flags
 #print axioms PsKernelCacheScopeProofs.inference_ineligible_of_fvar_flag
+
+#print axioms PsKernelCacheScopeProofs.dag_whnf_starts_without_cache
+#print axioms PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup
+#print axioms PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication

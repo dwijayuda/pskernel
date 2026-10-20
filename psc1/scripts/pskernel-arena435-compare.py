@@ -182,6 +182,16 @@ def main() -> int:
                       f"official={record.get('official', {}).get('verdict', 'none')} "
                       f"pskernel={record.get('pskernel', {}).get('verdict', 'none')} "
                       f"class={record['classification']}", flush=True)
+                if not record["classification"].startswith("matched_"):
+                    observation = record.get("pskernel", {})
+                    diagnostic = {key: observation.get(key) for key in
+                                  ("verdict", "stage", "reason", "coreInvoked",
+                                   "exportedDeclarations", "admissionCommands", "arenaNodes",
+                                   "elapsed_seconds", "peak_rss_kib")}
+                    diagnostic.update(index=record["index"], name=record["name"],
+                                      label=record["label"], classification=record["classification"])
+                    print("PSC1_ARENA435_DIAGNOSTIC " +
+                          json.dumps(diagnostic, ensure_ascii=False), flush=True)
     results.sort(key=lambda record: record["index"])
     counts = Counter(record["classification"] for record in results)
     observed_counts = Counter(record.get("pskernel", {}).get("verdict", "not_run") for record in results)

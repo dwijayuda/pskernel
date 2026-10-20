@@ -53,6 +53,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_REGRESSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_LEAN: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_NATIVE_BETA: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_WHNF_STATE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           .lake/build/bin/psc1_kernel_expr_v2_regression \
             | tee "$RUNNER_TEMP/psc1-v2-existing-native.log"
       - name: Check DAG transformation semantics and sharing
@@ -153,6 +154,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_BETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_WHNF_STATE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
       - name: Measure complete generated checks in isolated A-B-B-A workers
         working-directory: psc1

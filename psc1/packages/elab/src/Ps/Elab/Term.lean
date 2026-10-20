@@ -547,7 +547,7 @@ def psElabTypedBindersAcc
                         id := pushed.id
                         name := name
                         type := typeResult.term
-                        binder := binder;
+                        binder := binder
                       };
                       smaller
                         nextContext
@@ -979,7 +979,7 @@ def psElabFillWildcardAlternatives
                 constructorName := ctorName
                 pattern := pattern
                 body := body
-                span := span;
+                span := span
               };
               List.cons alternative alternativesRev;
         smaller next
@@ -1122,7 +1122,7 @@ def psElabPrepareMatchAlternativesWorker
                         constructorName := ctorName
                         pattern := pattern
                         body := body
-                        span := span;
+                        span := span
                       };
                       smaller
                         (List.cons alternative alternativesRev)
@@ -1293,7 +1293,7 @@ def psElabMatchFieldsWorker
                       id := pushed.id
                       name := binderName
                       type := forallView.domain
-                      binder := forallView.binder;
+                      binder := forallView.binder
                     };
                     smaller
                       nextContext
@@ -1405,7 +1405,7 @@ def psElabPushRecursiveHypothesesWorker
                           List.cons (Prod.mk field.id pushed.id) recursion.calls
                         else recursion.calls
                       resultType := recursion.resultType
-                      collectCalls := recursion.collectCalls;
+                      collectCalls := recursion.collectCalls
                     };
                     psElabContextWithStructuralRecursion
                       withLocal
@@ -1414,7 +1414,7 @@ def psElabPushRecursiveHypothesesWorker
                 id := pushed.id
                 name := hypothesisName
                 type := expectedType
-                binder := PsBinderInfo.explicit;
+                binder := PsBinderInfo.explicit
               };
               smaller
                 withRecursion
@@ -1485,7 +1485,7 @@ def psElabWildcardBinderNamesWorker
           String.Internal.append "_wild" (psNatToString index);
         let syntaxName : PsSyntaxName := {
           segments := List.cons segment List.nil
-          span := span;
+          span := span
         };
         List.cons
           syntaxName
@@ -2208,7 +2208,7 @@ def psElabApplyArgsWithFuelWorker
                           let nextResult : PsElabTermResult := {
                             context := elaboratedArgument.context
                             term := nextTerm
-                            type := nextType;
+                            type := nextType
                           };
                           smaller
                             nextResult
@@ -2241,7 +2241,7 @@ def psElabApplyArgsWithFuelWorker
                   let nextResult : PsElabTermResult := {
                     context := nextContext
                     term := PsExpr.app current.term fresh.expr
-                    type := psExprInstantiate1 body fresh.expr;
+                    type := psExprInstantiate1 body fresh.expr
                   };
                   let nextPending : List Nat :=
                     if psBinderIsInstanceImplicit binder then
@@ -2358,7 +2358,7 @@ def psElabSolvePendingInstancesWorker
                                 current.context
                                 assigned
                             term := current.term
-                            type := current.type;
+                            type := current.type
                           };
                           smaller assignedResult
 

@@ -423,7 +423,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "do-controller-focused-accepted-Term-and-Recursion-pending",
+    "status": "Term-native-record-correction-Recursion-and-DoLoopLift-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -510,7 +510,8 @@
     },
     "pendingModules": [
       "psc1/packages/elab/src/Ps/Elab/Term.lean",
-      "psc1/packages/elab/src/Ps/Elab/Recursion.lean"
+      "psc1/packages/elab/src/Ps/Elab/Recursion.lean",
+      "psc1/packages/elab/src/Ps/Elab/DoLoopLift.lean"
     ],
     "latestFocused": {
       "head": "ed3039c28136e43cc562d6de58dfc092a83e84b5",
@@ -542,6 +543,13 @@
         "column": 15,
         "detail": "expected typed lambda binder, got underscore"
       }
+    },
+    "latestNativeFailure": {
+      "head": "4760db63b8e79754394d5333a64f2f1087aeb708",
+      "runId": 39516727332,
+      "stage": "native-build",
+      "detail": "Term record field separators",
+      "correction": "remove misplaced field semicolons; keep all gates"
     }
   }
 }

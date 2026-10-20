@@ -97,6 +97,22 @@ normalize try traversal plus exact-size term-list dispatch without widening arit
 Keep every original declaration and all existing budgets. Both full modules are
 maintained parse/elaboration gates. Continue DoLoopLift, Declaration and Ordinary.
 
+## Loop-lifting candidate and Term native correction — pending Linux CI
+
+Focused run39516727332 at4760db63b8e79754394d5333a64f2f1087aeb708 failed
+native compilation: Term record fields had misplaced separators. Remove those
+separators; no acceptance gate or test is relaxed.
+
+Normalize complete DoLoopLift source. Preserve all original declaration names,
+capture dependency/telescope order, strict function-before-argument traversal,
+value-only beta inlining and delayed Core lets, exact five/six-argument control
+forms, tail validation, owner capture, temporary header lifecycle and every
+4096 normalization/lifting budget. Structural workers carry changing locals/work
+state. Marker classification retains exact empty levels and six arguments.
+Existing internal headers remain internal; no new unchecked admission authority.
+All existing behavioral, namespace, typed-error and scoped suites remain enforced,
+plus complete DoLoopLift parse/elaboration gates in both lanes.
+
 ## Census integrity and continuation
 
 Fresh Lean and PS preparation states measure the full ordered explicit import

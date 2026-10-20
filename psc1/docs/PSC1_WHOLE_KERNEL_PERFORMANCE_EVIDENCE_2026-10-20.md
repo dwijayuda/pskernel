@@ -90,3 +90,23 @@ These generated-JS checks demonstrate correct behavior on a finite complete-oper
 To resolve this, repeat with reversed process order and independent CI reruns, use a single pinned current PSC1 compiler to generate both source variants, capture JS module bytes and V8 heap/GC instrumentation, and compare operation-isolated max RSS with retained-heap measurements. Any backend-specific performance fix must still pass the entire portable source/Lean checker/JS semantic gate.
 
 The native evidence above remains the stronger attribution-controlled check: its original and optimized kernel sources use the identical native toolchain and the same source fixtures, with mostly unchanged complete-operation timings and near-identical ~10 MiB executable RSS. The JS observation must not be conflated with native memory.
+
+## Native A–B–B–A execution-order control
+
+**Success:** [GitHub Actions run 39350046319](https://github.com/dwijayuda/pskernel/actions/runs/39350046319), comparing corrected baseline `0a53836489c4e88f46df8f5b8b0c19cc41bafbbb` with optimized SHA `8b91fbf44f5d25d93ea9e36ec99c7e35058b1b17`. The exact same Lean 4.34 source fixture was compiled and run in A–B–B–A order on one GitHub Linux runner, three rounds per phase, six samples per variant per operation; all expected checker successes and rejections passed. The [run artifacts](https://github.com/dwijayuda/pskernel/actions/runs/39350046319) include raw logs and `native-abba-report.json` with first-versus-reversed-order measurements and full fixture identities.
+
+| Whole-kernel operation | Original six-sample median | Optimized six-sample median |
+|---|---:|---:|
+| Cold zeta-WHNF, depth 96 | 17 ms | 17 ms |
+| Cold zeta-WHNF, depth 192 | 25 ms | 26 ms |
+| Admit wide checked library, 192-argument function | 9 ms | 9 ms |
+| Check application, 192 arguments | 3 ms | 3 ms (resolution-limited) |
+| Varied checked applications, 160 checks | 4.5 ms | 5 ms (resolution-limited) |
+
+Process maximum RSS in the four corresponding independently executed phases was original 10,152 / 10,152 KiB and optimized 10,100 / 10,180 KiB. The small zeta-192 difference is not a reproducible established regression on this evidence. Native checked paths remain *close to performance parity*, and memory remains ~10 MiB. Ratios below 5 ms are suppressed because of timer granularity and small workload size.
+
+## Controlled same-compiler JavaScript memory-ablation protocol
+
+To distinguish the ~25% JavaScript RSS increase observed in [run 39346721193](https://github.com/dwijayuda/pskernel/actions/runs/39346721193) from compiler-version drift, this branch now contains `.github/workflows/psc1-pskernel-controlled-js-memory.yml`, `scripts/pskernel-js-memory-probe.mjs`, and `scripts/pskernel-js-controlled-report.mjs`. The test uses the **same current PSC1 compiler source and TypeScript 7.0.2 version** on original and optimized kernel source overlays, executes each full guarded JS corpus in fresh processes in **A–B–B–A** order, then runs WHNF, positive DefEq, checked application, ordinary inductive admission and mutual inductive admission in separate processes. It records JS bundle bytes, module-import cost, peak process RSS, post-forced-GC retained V8 heap, and garbage-collection event counts/durations.
+
+This protocol is **not a passed result until its GitHub CI concludes successfully**. In particular, historical generated artifacts from separately versioned compiler snapshots remain only observational evidence; do not attribute the old ~25% memory difference to the kernel optimizations until this controlled compiler-source ablation completes and is replicated.

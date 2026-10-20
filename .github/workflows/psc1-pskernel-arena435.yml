@@ -1,4 +1,4 @@
-name: PSC1 Lean Arena 4.35 reference corpus
+name: PSC1 Lean Arena 4.35 full corpus qualification
 on:
   workflow_dispatch:
   push:
@@ -7,6 +7,9 @@ on:
     paths:
       - .github/workflows/psc1-pskernel-arena435.yml
       - psc1/scripts/pskernel-arena435-oracle.py
+      - psc1/scripts/pskernel-arena435-compare.py
+      - psc1/scripts/pskernel-arena-replay.mjs
+      - psc1/scripts/pskernel-arena-replay-controls.mjs
       - psc1/packages/pskernel-core/**
       - psc1/lean-toolchain
 permissions:
@@ -54,4 +57,109 @@ jobs:
           name: psc1-arena435-official-reference
           path: ${{ runner.temp }}/arena435-evidence
           if-no-files-found: error
+          retention-days: 30
+
+  generated-arena-comparison:
+    if: ${{ always() && !cancelled() }}
+    needs: official-arena-reference
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-arena435-official-reference
+          path: ${{ runner.temp }}/arena435-official
+      - name: Install pinned Lean for the real PSC1 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Reconstruct and check the complete canonical kernel closure
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          node check-psc1-source.mjs --all-portable
+          node --check scripts/pskernel-arena-replay.mjs
+          node --check scripts/pskernel-arena-replay-controls.mjs
+          python3 -m py_compile scripts/pskernel-arena435-oracle.py scripts/pskernel-arena435-compare.py
+          lake build psc1
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+          node scripts/bootstrap-project.mjs \
+            packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            dist/arena435/workspace
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { assertBootstrapWorkspaceManifest } from './scripts/bootstrap-manifest.mjs';
+          const workspace='dist/arena435/workspace';
+          const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
+          if(manifest.entry!=='packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps')throw Error('wrong kernel closure entry');
+          await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
+          console.log('PSC1_ARENA_CANONICAL_CLOSURE modules='+manifest.sourceCount);
+          NODE
+          lake exe psc1 check dist/arena435/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
+      - name: Generate the independent kernel through TypeScript 7.0.2
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/arena435-ts7"
+          echo '{"name":"psc1-arena-ts7-isolated","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/arena435-ts7/package.json"
+          npm install --prefix "$RUNNER_TEMP/arena435-ts7" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          export PSC0_TSC="$RUNNER_TEMP/arena435-ts7/node_modules/typescript/bin/tsc"
+          node "$PSC0_TSC" --version
+          lake exe psc1 build \
+            dist/arena435/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+            --out dist/arena435/kernel.js
+          test -s dist/arena435/kernel.js
+          node --check dist/arena435/kernel.js
+      - name: Exercise positive, negative, exact-integer, and forged-recursors controls
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_ARENA_NODE="$(command -v node)"
+          PSC1_ARENA_DETACHED="$RUNNER_TEMP/arena435-detached"
+          mkdir -p "$PSC1_ARENA_DETACHED"
+          cp dist/arena435/kernel.js "$PSC1_ARENA_DETACHED/kernel.mjs"
+          cp scripts/pskernel-arena-replay.mjs scripts/pskernel-arena-replay-controls.mjs "$PSC1_ARENA_DETACHED/"
+          cd "$PSC1_ARENA_DETACHED"
+          env PATH="" "$PSC1_ARENA_NODE" pskernel-arena-replay-controls.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/arena435-controls.log"
+          grep -q 'PSC1_ARENA_REPLAY_CONTROLS: PASS' "$RUNNER_TEMP/arena435-controls.log"
+      - name: Compare all 193 cases without exclusions and without changing kernel fuel
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 \
+            -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          mkdir -p "$RUNNER_TEMP/arena435-independent"
+          python3 scripts/pskernel-arena435-compare.py \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --oracle-report "$RUNNER_TEMP/arena435-official/report.json" \
+            --kernel dist/arena435/kernel.js \
+            --out "$RUNNER_TEMP/arena435-independent/report.json" \
+            --timeout 60 --workers 2 \
+            | tee "$RUNNER_TEMP/arena435-independent/run.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-arena435-generated-comparison
+          path: |
+            ${{ runner.temp }}/arena435-independent
+            ${{ runner.temp }}/arena435-controls.log
+            psc1/dist/arena435/kernel.js
+            psc1/dist/arena435/kernel.d.ts
+            psc1/dist/arena435/kernel.js.map
+            psc1/dist/arena435/workspace/.proofscript-bootstrap.json
+          if-no-files-found: warn
           retention-days: 30

@@ -345,3 +345,26 @@ checks depth <= recursive node count and the corresponding cap equality. The
 explicit bounded API and all checker fuel limits remain unchanged. Global
 validated-arena correspondence and substitution refinement remain unproved;
 conditional local metadata lemmas and finite parity tests do not imply them.
+
+### Full reference corpus observed; independent replay gate added
+
+Run [39510753165](https://github.com/dwijayuda/pskernel/actions/runs/39510753165)
+on dd466701 evaluated all193 cases:122 accepted,71 rejected,zero timeouts,
+both controls passed. This is official Lean reference evidence only. The
+complete independent comparison gate now reconstructs the canonical .ps kernel,
+compiles real TypeScript7.0.2/Node22, exercises adversarial transport controls,
+and runs every adapted body in a detached process with PATH empty and kernel
+fuel4096. The host limit is60 seconds/2GiB per case, explicitly separate from
+kernel resources. Nonqualifying outcomes fail the full gate after writing all
+results; unsupported inputs and resource limits are never counted as matches.
+The adapter builds paged expressions directly and validates every supplied
+exported constructor/recursor/Quot field against independently admitted data.
+It does not install exported recursor bodies. Metadata-kind counts and actual
+checker invocation are recorded. Noncanonical all-list metadata remains an
+explicit transport limitation. General V1 admission still uses legacy internal
+expressions, so a corpus pass would not establish a complete V2 migration.
+
+The beta native build failure was a missing explicit Lake root registration,
+not a semantic-test result; that registration is now included. Authentic PSC1
+accepted the complete .lean source at dd466701. Its canonical/generated runtime
+and the new beta/native proofs still require their own passing evidence.

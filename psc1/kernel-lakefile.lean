@@ -25,6 +25,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagDeclaration,
     `Ps.KernelCore.API.Dag,
     `Ps.KernelCore.Checker.ExprV2.Terminal,
+    `Ps.KernelCore.Checker.ExprV2.Beta,
     `Ps.KernelCore.Checker.ExprV2.Whnf,
     `Ps.KernelCore.Checker.ExprV2.DefEq,
     `Ps.KernelCore.API.Kernel,

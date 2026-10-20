@@ -1003,6 +1003,27 @@ def psWasmEncodeTypeSectionPayload
         (psWasmEncodeVector encodedTypes typeCount);
     psWasmEncodeVector recursiveGroup 1
 
+-- Indexed value/storage references resolve only into structures ++ arrays.
+-- Keep that prefix mutually recursive. Function composites refer backward to
+-- the heap prefix, never to later function types, so each can be a singleton
+-- group. Flattened type indices stay unchanged; scalar ABI signatures no
+-- longer inherit unrelated heap types' recursive-group identity.
+def psWasmEncodeGroupedTypeSectionPayload
+    (encodedHeapTypes : List UInt8)
+    (heapTypeCount : Nat)
+    (encodedFunctionTypes : List UInt8)
+    (functionTypeCount : Nat) : List UInt8 :=
+  if Nat.beq heapTypeCount 0 then
+    psWasmEncodeVector encodedFunctionTypes functionTypeCount
+  else
+    let recursiveGroup : List UInt8 :=
+      psListAppend
+        (List.cons (psWasmByte 78) List.nil)
+        (psWasmEncodeVector encodedHeapTypes heapTypeCount);
+    psWasmEncodeVector
+      (psListAppend recursiveGroup encodedFunctionTypes)
+      (Nat.succ functionTypeCount)
+
 def psWasmEncodeModule
     (module : PsWasmModule) :
     Except PsWasmEncodeError (List UInt8) :=
@@ -1063,26 +1084,16 @@ def psWasmEncodeModule
                                     module.functions with
                               | Except.error error => Except.error error
                               | Except.ok encodedBodies =>
-                                  let typeCount : Nat :=
-                                    Nat.add
-                                      (Nat.add
-                                        (Nat.add
-                                          (psListLength module.structures)
-                                          (psListLength module.arrays))
-                                        (psListLength module.functionTypes))
-                                      (psListLength module.functions);
-                                  let encodedTypes : List UInt8 :=
-                                    psListAppend
-                                      encodedStructTypes
-                                      (psListAppend
-                                        encodedArrayTypes
-                                        (psListAppend
-                                          encodedNamedFunctionTypes
-                                          encodedFunctionTypes));
                                   let typePayload : List UInt8 :=
-                                    psWasmEncodeTypeSectionPayload
-                                      encodedTypes
-                                      typeCount;
+                                    psWasmEncodeGroupedTypeSectionPayload
+                                      (psListAppend encodedStructTypes encodedArrayTypes)
+                                      (Nat.add
+                                        (psListLength module.structures)
+                                        (psListLength module.arrays))
+                                      (psListAppend encodedNamedFunctionTypes encodedFunctionTypes)
+                                      (Nat.add
+                                        (psListLength module.functionTypes)
+                                        (psListLength module.functions));
                                   let functionPayload :=
                                     psWasmEncodeVector
                                       encodedFunctionTypeIndices

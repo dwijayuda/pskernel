@@ -3,8 +3,8 @@
   "reference": "PSKERNEL_REFERENCE.md",
   "target": {
     "product": "Lean",
-    "version": "4.34.0",
-    "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+    "version": "4.35.0",
+    "gitCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
   },
   "semanticRootModule": "Ps.KernelCore.SelfHost",
   "semanticRootPath": "packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
@@ -479,5 +479,6 @@
   ],
   "lakeLibrary": "PsKernelCore",
   "ruleInventory": "LEAN_4_34_KERNEL_RULES.json",
-  "diagnosticInventory": "KERNEL_DIAGNOSTICS.json"
+  "diagnosticInventory": "KERNEL_DIAGNOSTICS.json",
+  "ruleInventoryStatus": "LEAN_4_34_KERNEL_RULES.json is preserved historical evidence, not a Lean 4.35 conformance claim"
 }

@@ -1,5 +1,7 @@
 import Ps.Syntax.Lexer
 import Ps.Syntax.ParseCommon
+import Ps.Syntax.ParseDo
+import Ps.Syntax.Operators
 
 def psLeanTermStop
     (term : PsSyntaxTerm) : PsSourcePos :=
@@ -69,6 +71,10 @@ def psLeanReservedApplicationToken (token : PsToken) : Bool :=
   else if psStringEq token.text "if" then
     true
   else if psStringEq token.text "match" then
+    true
+  else if psStringEq token.text "do" then
+    true
+  else if psStringEq token.text "return" then
     true
   else if psStringEq token.text "nomatch" then
     true
@@ -520,67 +526,20 @@ def psParseLeanSimpleApplication
 
 def psParseLeanProductWithNomatchWithFuel
     (useNomatchParser : Bool)
-    (parseNomatchScrutinee :
-      PsTokenCursor ->
+    (parseNomatchScrutinee : PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
     (fuel : Nat) :
-    PsTokenCursor ->
-    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+    PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match fuel with
-  | 0 =>
-      fun (_cursor : PsTokenCursor) =>
-        Except.error PsParseError.fuelExhausted
+  | 0 => fun _ => .error .fuelExhausted
   | remaining + 1 =>
-      fun (cursor : PsTokenCursor) =>
-        let smaller :
-            PsTokenCursor ->
-            Except PsParseError (PsParseResult PsSyntaxTerm) :=
-          psParseLeanProductWithNomatchWithFuel
-            useNomatchParser
-            parseNomatchScrutinee
-            remaining;
-        let parseScrutinee :
-            PsTokenCursor ->
-            Except PsParseError (PsParseResult PsSyntaxTerm) :=
-          if useNomatchParser then parseNomatchScrutinee else smaller;
-        match
-            psParseLeanApplicationWithNomatchWithFuel
-              parseScrutinee
-              smaller
-              (Nat.add remaining 1)
-              cursor with
-        | Except.error error => Except.error error
-        | Except.ok left =>
-            if psTokenCursorAtText left.cursor "×" then
-              match psTokenCursorAdvance left.cursor with
-              | Option.none =>
-                  Except.error
-                    (PsParseError.unexpectedEnd "product type")
-              | Option.some afterProduct =>
-                  match smaller afterProduct.cursor with
-                  | Except.error error => Except.error error
-                  | Except.ok right =>
-                      let span :=
-                        psSyntaxSpanJoin
-                          (psSyntaxTermSpan left.value)
-                          (psSyntaxTermSpan right.value);
-                      let prodName : PsSyntaxName := {
-                        segments :=
-                          List.cons "Prod" List.nil
-                        span := afterProduct.token.span
-                      };
-                      Except.ok {
-                        value :=
-                          PsSyntaxTerm.app
-                            (PsSyntaxTerm.reference prodName)
-                            (List.cons
-                              left.value
-                              (List.cons right.value List.nil))
-                            span
-                        cursor := right.cursor
-                      }
-            else
-              Except.ok left
+      fun cursor =>
+        let smaller := psParseLeanProductWithNomatchWithFuel
+          useNomatchParser parseNomatchScrutinee remaining
+        let parseScrutinee := if useNomatchParser then parseNomatchScrutinee else smaller
+        psParseOperatorsWithFuel
+          (psParseLeanApplicationWithNomatchWithFuel parseScrutinee smaller (remaining + 1))
+          (remaining + 1) 0 cursor
 
 def psParseLeanProductWithFuel
     (fuel : Nat) :
@@ -1307,133 +1266,11 @@ def psParseLeanMatchAlternativesWithFuel
         }
 
 def psParseLeanDoWithFuel
-    (parseTerm :
-      PsTokenCursor ->
+    (parseTerm : PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
-    (fuel : Nat) :
-    PsSourcePos ->
-    PsTokenCursor ->
+    (_fuel : Nat) (start : PsSourcePos) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  match fuel with
-  | 0 =>
-      fun
-        (_start : PsSourcePos)
-        (_cursor : PsTokenCursor) =>
-        Except.error PsParseError.fuelExhausted
-  | remaining + 1 =>
-      fun
-        (start : PsSourcePos)
-        (cursor : PsTokenCursor) =>
-      let smaller :
-          PsSourcePos ->
-          PsTokenCursor ->
-          Except PsParseError (PsParseResult PsSyntaxTerm) :=
-        psParseLeanDoWithFuel parseTerm remaining;
-      if psTokenCursorAtText cursor "return" then
-        match psTokenCursorAdvance cursor with
-        | Option.none =>
-            Except.error
-              (PsParseError.unexpectedEnd "do return value")
-        | Option.some returnKeyword =>
-            match parseTerm returnKeyword.cursor with
-            | Except.error error => Except.error error
-            | Except.ok value =>
-                let finalCursor : PsTokenCursor :=
-                  if psTokenCursorAtText value.cursor ";" then
-                    match psTokenCursorAdvance value.cursor with
-                    | Option.none => value.cursor
-                    | Option.some afterSemi => afterSemi.cursor
-                  else
-                    value.cursor;
-                let span : PsSourceSpan := {
-                  start := start
-                  stop := psLeanTermStop value.value
-                };
-                Except.ok {
-                  value := psSyntaxCompilerPure value.value span
-                  cursor := finalCursor
-                }
-      else if psTokenCursorAtText cursor "let" then
-        match psTokenCursorAdvance cursor with
-        | Option.none =>
-            Except.error
-              (PsParseError.unexpectedEnd "do binding name")
-        | Option.some letKeyword =>
-            match psTokenCursorExpectKind
-                letKeyword.cursor
-                PsTokenKind.identifier with
-            | Except.error error => Except.error error
-            | Except.ok name =>
-                match psTokenCursorExpectText name.cursor ":" with
-                | Except.error error => Except.error error
-                | Except.ok afterColon =>
-                    match parseTerm afterColon.cursor with
-                    | Except.error error => Except.error error
-                    | Except.ok binderType =>
-                        match
-                            psTokenCursorExpectText
-                              binderType.cursor
-                              "<-" with
-                        | Except.error error => Except.error error
-                        | Except.ok afterArrow =>
-                            match parseTerm afterArrow.cursor with
-                            | Except.error error => Except.error error
-                            | Except.ok action =>
-                                match
-                                    psTokenCursorExpectText
-                                      action.cursor
-                                      ";" with
-                                | Except.error error => Except.error error
-                                | Except.ok afterSemi =>
-                                    match
-                                        smaller
-                                          start
-                                          afterSemi.cursor with
-                                    | Except.error error => Except.error error
-                                    | Except.ok body =>
-                                        let nameSyntax : PsSyntaxName := {
-                                          segments :=
-                                            List.cons
-                                              name.token.text
-                                              List.nil
-                                          span := name.token.span
-                                        };
-                                        let binderStop : PsSourcePos :=
-                                          psLeanTermStop binderType.value;
-                                        let binder : PsSyntaxBinderHead := {
-                                          name := nameSyntax
-                                          kind := PsSyntaxBinderKind.explicit
-                                          span := {
-                                            start := name.token.span.start
-                                            stop := binderStop
-                                          }
-                                        };
-                                        let span : PsSourceSpan := {
-                                          start := start
-                                          stop :=
-                                            psLeanTermStop body.value
-                                        };
-                                        Except.ok {
-                                          value :=
-                                            psSyntaxCompilerBind
-                                              binder
-                                              binderType.value
-                                              action.value
-                                              body.value
-                                              span
-                                          cursor := body.cursor
-                                        }
-      else
-        match psTokenCursorPeek cursor with
-        | Option.none =>
-            Except.error
-              (PsParseError.unexpectedEnd "do statement")
-        | Option.some token =>
-            Except.error
-              (PsParseError.expectedText
-                "let or return"
-                token.text
-                token.span)
+  psParseDo parseTerm true false start cursor
 
 def psParseLeanRecordApplicationTailWithFuel
     (parseTerm :
@@ -1476,6 +1313,26 @@ def psParseLeanRecordApplicationTailWithFuel
             value := current
             cursor := cursor
           }
+
+def psParseLeanOperatorApplication
+    (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let first ← psParseLeanApplicationWithNomatchWithFuel parseTerm parseTerm fuel cursor
+  psParseLeanRecordApplicationTailWithFuel parseTerm fuel first.value first.cursor
+
+def psParseLeanOperatorContinuation
+    (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat) (primary : PsParseResult PsSyntaxTerm) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let application ← psParseLeanApplicationTailWithFuel
+    parseTerm fuel primary.value primary.cursor
+  let records ← psParseLeanRecordApplicationTailWithFuel
+    parseTerm fuel application.value application.cursor
+  let operators ← psParseOperatorTailWithFuel
+    (psParseOperatorsWithFuel (psParseLeanOperatorApplication parseTerm fuel) fuel)
+    fuel 0 false records
+  psParseLeanArrowTail parseTerm operators
 
 def psParseLeanTermWithFuel
     (fuel : Nat) :
@@ -1713,86 +1570,43 @@ def psParseLeanTermWithFuel
                             }
       else if psTokenCursorAtText cursor "[" then
         match psTokenCursorAdvance cursor with
-        | Option.none =>
-            Except.error
-              (PsParseError.unexpectedEnd "[")
-        | Option.some opening =>
-            psParseLeanListLiteral
-              (smaller)
-              opening
-      else if psTokenCursorAtText cursor "{" then
-        psParseRecordLiteral
-          (smaller)
-          cursor
+        | none => .error (.unexpectedEnd "[")
+        | some opening => do
+            let value ← psParseLeanListLiteral smaller opening
+            psParseLeanOperatorContinuation smaller (remaining + 1) value
+      else if psTokenCursorAtText cursor "{" then do
+        let value ← psParseRecordLiteral smaller cursor
+        psParseLeanOperatorContinuation smaller (remaining + 1) value
       else if psTokenCursorAtText cursor "(" then
         match psTokenCursorAdvance cursor with
-        | Option.none => Except.error (PsParseError.unexpectedEnd "(")
-        | Option.some opening =>
-            if psTokenCursorAtText opening.cursor ")" then
-              match psTokenCursorAdvance opening.cursor with
-              | Option.none => Except.error (PsParseError.unexpectedEnd ")")
-              | Option.some close =>
-                  Except.ok {
-                    value :=
-                      PsSyntaxTerm.unit {
-                        start := opening.token.span.start
-                        stop := close.token.span.stop
-                      }
-                    cursor := close.cursor
-                  }
+        | none => .error (.unexpectedEnd "(")
+        | some opening =>
+            if psTokenCursorAtText opening.cursor ")" then do
+              let close ← psTokenCursorExpectText opening.cursor ")"
+              psParseLeanOperatorContinuation smaller (remaining + 1) {
+                value := .unit { start := opening.token.span.start, stop := close.token.span.stop }
+                cursor := close.cursor
+              }
             else
               match psParseLeanBinder cursor with
-              | Except.ok binder =>
+              | .ok binder =>
                   if psTokenCursorAtArrow binder.cursor then
-                    psParseLeanDependentArrowTail
-                      (smaller)
-                      binder
-                  else
-                    match smaller opening.cursor with
-                    | Except.error error => Except.error error
-                    | Except.ok grouped =>
-                        match psTokenCursorExpectText grouped.cursor ")" with
-                        | Except.error error => Except.error error
-                        | Except.ok close =>
-                            psParseLeanArrowTail
-                              (smaller)
-                              {
-                                value := grouped.value
-                                cursor := close.cursor
-                              }
-              | Except.error _ =>
-                  match smaller opening.cursor with
-                  | Except.error error => Except.error error
-                  | Except.ok grouped =>
-                      match psTokenCursorExpectText grouped.cursor ")" with
-                      | Except.error error => Except.error error
-                      | Except.ok close =>
-                          psParseLeanArrowTail
-                            (smaller)
-                            {
-                              value := grouped.value
-                              cursor := close.cursor
-                            }
-      else
-        match
-            psParseLeanProductWithNomatchWithFuel
-              true
-              smaller
-              remaining
-              cursor with
-        | Except.error error => Except.error error
-        | Except.ok domain =>
-            match
-                psParseLeanRecordApplicationTailWithFuel
-                  (smaller)
-                  remaining
-                  domain.value
-                  domain.cursor with
-            | Except.error error => Except.error error
-            | Except.ok withRecords =>
-                psParseLeanArrowTail
-                  (smaller)
-                  withRecords
+                    psParseLeanDependentArrowTail smaller binder
+                  else do
+                    let grouped ← smaller opening.cursor
+                    let close ← psTokenCursorExpectText grouped.cursor ")"
+                    psParseLeanOperatorContinuation smaller (remaining + 1)
+                      { value := grouped.value, cursor := close.cursor }
+              | .error _ => do
+                  let grouped ← smaller opening.cursor
+                  let close ← psTokenCursorExpectText grouped.cursor ")"
+                  psParseLeanOperatorContinuation smaller (remaining + 1)
+                    { value := grouped.value, cursor := close.cursor }
+      else do
+        let operators ← psParseOperatorsWithFuel
+          (psParseLeanOperatorApplication smaller (remaining + 1))
+          (remaining + 1) 0 cursor
+        psParseLeanArrowTail smaller operators
 
 def psParseLeanTerm
     (cursor : PsTokenCursor) :

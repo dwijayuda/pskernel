@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 
 const pin=JSON.parse(
-  readFileSync(new URL('../LEAN_SOURCE_PIN.json',import.meta.url),'utf8'),
+  readFileSync(new URL('../../../NATIVE_SOURCE_PIN.json',import.meta.url),'utf8'),
 );
 const leanExecutable=process.platform==='win32'?'lean.exe':'lean';
 
@@ -38,13 +38,13 @@ if(gitHash!==pin.commit){
   );
 }
 
-if(pin.toolchain!=='leanprover/lean4:v4.34.0'){
+if(pin.toolchain!=='leanprover/lean4:v4.35.0'){
   throw new Error(`unexpected provider toolchain pin: ${pin.toolchain}`);
 }
 if(pin.providerProtocol!=='pskernel-lean/1'){
   throw new Error(`unexpected provider protocol pin: ${pin.providerProtocol}`);
 }
-if(pin.providerProfile!=='lean4.34-core'){
+if(pin.providerProfile!=='lean4.35-core'){
   throw new Error(`unexpected provider profile pin: ${pin.providerProfile}`);
 }
 

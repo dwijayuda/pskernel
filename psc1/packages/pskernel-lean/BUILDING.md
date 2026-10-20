@@ -1,5 +1,18 @@
 # Building and using the PSC2 Lean 4.34 kernel provider
 
+## Current native source target
+
+The PSC1 workspace now pins Lean 4.35.0 at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` in
+[`NATIVE_SOURCE_PIN.json`](../../NATIVE_SOURCE_PIN.json). Current native compilation,
+provider identity, launchers and bundle provenance use this exact source pin.
+Fresh Linux qualification is required; archived receipts are not inherited.
+
+The package-local 4.34 binaries, source pin, manifests and vendored kernel files
+remain historical assets. The recipes below describe that historical package;
+use its matching revision when rebuilding those archived artifacts.
+
+## Historical Lean 4.34 package record
+
 This document covers both the bundled native distribution and source development for `psc15selfhost/packages/pskernel-lean`.
 
 The provider uses the pinned official Lean 4.34 toolchain and calls the real Lean kernel through `Lean.Environment.addDeclCore`. The copied `kernel/`, `runtime/`, and `util/` source trees are retained for a later standalone C++/WASM provider; they are not compiled directly by this build.

@@ -21,6 +21,25 @@ await test('formatting preserves JS literals, operators and exports', async () =
   assert.match(result.text, /\n/);
   assert.equal((await formatEcma(result.text, 'js')).text, result.text);
 });
+await test('formatting preserves nested constructor keys and computed field semantics', async () => {
+  const input = `export function answer(flag) {
+    const inner = ({ "$ps$tag": "ok", "$ps$fields": { ["value"]: flag, ["__proto__"]: false } });
+    const outer = ({ "$ps$tag": "ok", "$ps$fields": { ["item"]: inner } });
+    const fields = outer["$ps$fields"]["item"]["$ps$fields"];
+    if (outer["$ps$tag"] !== "ok" || inner["$ps$tag"] !== "ok" ||
+        !Object.prototype.hasOwnProperty.call(fields, "__proto__") ||
+        fields["__proto__"] !== false || Object.getPrototypeOf(fields) !== Object.prototype) {
+      throw new Error("PSC1_TAGGED_FORMAT_FIELD_SEMANTICS_CHANGED");
+    }
+    return fields["value"];
+  }`;
+  const result = await formatEcma(input, 'js');
+  assert.deepEqual(exportedNames(result.program), ['answer']);
+  const formattedModule = await import('data:text/javascript,' + encodeURIComponent(result.text));
+  assert.equal(formattedModule.answer(false), false);
+  assert.equal(formattedModule.answer(true), true);
+  assert.equal((await formatEcma(result.text, 'js')).text, result.text);
+});
 await test('formatting preserves TS declarations and types', async () => {
   const input = 'export declare function identity(x: bigint):bigint;';
   const result = await formatEcma(input, 'ts');
@@ -61,7 +80,7 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-publication-unit-'));
 function stageFor(output, literal) {
   const stage = createStage(output);
   const name = path.basename(output);
-  const info = { profile: 'psc1-checked-direct/1', entryPath: path.join(root, 'input.lean'),
+  const info = { profile: 'psc1-checked-direct/1', leanVersion: '4.35.0', leanCommit: 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc', entryPath: path.join(root, 'input.lean'),
     publicNames: ['answer'], sources: [{ path: path.join(root, 'input.lean'), text: `def answer : Bool := ${literal}\n`, origins: [] }] };
   fs.writeFileSync(path.join(stage, 'psc1-input.json'), JSON.stringify(info));
   fs.writeFileSync(path.join(stage, 'admissions.json'), '["artificial-I/O-test-metadata-not-a-proof"]\n');

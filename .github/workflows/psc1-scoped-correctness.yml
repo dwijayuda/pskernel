@@ -75,7 +75,8 @@ jobs:
         run: |
           set -euo pipefail
           lean --version
-          lake build psc1 psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1 psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
@@ -104,6 +105,18 @@ jobs:
           export PSC1_NATIVE="$PWD/.lake/build/bin/psc1"
           export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
           node scripts/scoped-source-edge-tests.mjs
+      - name: Execute Practical Core admission, IR and real target regressions
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          result=0
+          for test in contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests; do
+            if ! ".lake/build/bin/$test"; then result=1; fi
+          done
+          for script in practical-forms-backend-tests.mjs practical-ordinary-tests.mjs; do
+            if ! node "scripts/$script"; then result=1; fi
+          done
+          exit "$result"
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4

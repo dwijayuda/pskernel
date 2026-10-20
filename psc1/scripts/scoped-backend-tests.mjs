@@ -50,7 +50,8 @@ function build(input, target, name, extra = []) {
   assert.ok(fs.statSync(destination).size > 0);
   const manifest = json(destination + '.bundle.json');
   assert.equal(manifest.target, target);
-  assert.equal(manifest.logicalChecker, 'lean4:4.34.0');
+  assert.equal(manifest.logicalChecker, 'lean4:4.35.0');
+  assert.equal(manifest.logicalCheckerCommit, 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
   const generation = path.dirname(fs.realpathSync(destination + '.bundle.json'));
   for (const item of manifest.files) {
     assert.equal(hash(path.join(generation, item.path)), item.sha256, item.path);
@@ -96,7 +97,24 @@ try {
       const actual = command(process.execPath, [path.join(root, launcher), '--identity'], { env: { ...env, PSC1_NATIVE: native } });
       assert.equal(actual, expected);
     }
-    assert.equal(JSON.parse(expected).protocol, 'psc1-native/1');
+    const actualIdentity = JSON.parse(expected);
+    assert.equal(actualIdentity.protocol, 'psc1-native/1');
+    assert.equal(actualIdentity.lean, '4.35.0');
+    assert.equal(actualIdentity.leanCommit, 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+    for (const [label, identity] of [
+      ['historical-4.34', { ...actualIdentity, lean: '4.34.0', leanCommit: '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b' }],
+      ['wrong-commit', { ...actualIdentity, leanCommit: '0'.repeat(40) }],
+      ['missing-commit', { ...actualIdentity, leanCommit: undefined }],
+    ]) {
+      const fakeNative = source(label + '-native', '#!/usr/bin/env node\n' +
+        'if(process.argv.includes("--identity")) process.stdout.write(' + JSON.stringify(JSON.stringify(identity)) + ');\n' +
+        'else process.exit(42);\n');
+      fs.chmodSync(fakeNative, 0o755);
+      const refused = reject(process.execPath, [path.join(root, 'npm-cli/psc.js'), '--version'], {
+        env: { ...env, PSC1_NATIVE: fakeNative }
+      });
+      assert.match(refused, /PSC1_NATIVE_IDENTITY_MISMATCH/, label);
+    }
     const error = reject(process.execPath, [path.join(root, 'npm-cli/psc.js'), '--version'], {
       env: { ...env, PSC1_NATIVE: path.join(work, 'missing-native') }
     });

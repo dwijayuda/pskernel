@@ -83,4 +83,17 @@ await test('non-tail recursive Nat execution uses the stack-safe direct printer'
   assert.equal(result.module.count(100000n), 100000n);
   assert.match(fs.readFileSync(result.output, 'utf8'), /function\*/);
 });
+await test('unused runtime prelude names cannot hide an entry declaration', async () => {
+  for (const kind of ['lean', 'ps']) {
+    const text = kind === 'lean'
+      ? 'def Id_run (flag : Bool) : Bool := flag\n'
+      : 'def Id_run(flag : Bool) : Bool := flag\n';
+    const entry = source('unused-prelude-' + kind + '/Main.' + kind, text);
+    const result = await compile(entry, 'unused-prelude-' + kind);
+    assert.deepEqual(Object.keys(result.module), ['Id_run']);
+    assert.equal(result.module.Id_run(false), false);
+    assert.equal(result.module.Id_run(true), true);
+    assert.match(result.declarations, /Id_run\(flag: boolean\): boolean/);
+  }
+});
 console.log(`PSC1_SOURCE_EDGE_TESTS: ${records.length} passed`);

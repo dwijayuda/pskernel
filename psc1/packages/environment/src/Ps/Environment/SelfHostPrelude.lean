@@ -103,6 +103,31 @@ def psSelfHostReplacePreludeAxiom
   | none => environment
   | some next => next
 
+-- Id is an ordinary checked identity alias, selected at Type 0 in this slice.
+def psSelfHostIdName : PsName := psRootName "Id"
+def psSelfHostIdRunName : PsName := psNameAppendStr psSelfHostIdName "run"
+
+-- Higher-universe Id is outside the current shared effect profile.
+def psSelfHostIdDeclaration : PsDeclaration :=
+  let alpha := psRootName "α";
+  let type := PsExpr.sortE (PsLevel.succ PsLevel.zero);
+  PsDeclaration.definitionDecl psSelfHostIdName []
+    (PsExpr.forallE alpha type type PsBinderInfo.explicit)
+    (PsExpr.lam alpha type (PsExpr.bvar 0) PsBinderInfo.explicit)
+
+def psSelfHostIdRunDeclaration : PsDeclaration :=
+  let alpha := psRootName "α";
+  let value := psRootName "value";
+  let type := PsExpr.sortE (PsLevel.succ PsLevel.zero);
+  let domain := PsExpr.app (PsExpr.constE psSelfHostIdName []) (PsExpr.bvar 0);
+  PsDeclaration.definitionDecl psSelfHostIdRunName []
+    (PsExpr.forallE alpha type
+      (PsExpr.forallE value domain (PsExpr.bvar 1) PsBinderInfo.explicit)
+      PsBinderInfo.implicit)
+    (PsExpr.lam alpha type
+      (PsExpr.lam value domain (PsExpr.bvar 0) PsBinderInfo.explicit)
+      PsBinderInfo.implicit)
+
 def psSelfHostPreludeEnvironment : PsEnvironment :=
   let uName := psRootName "u";
   let alphaName := psRootName "α";
@@ -503,19 +528,22 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           2
           1
           []));
-  psPreludeAdd withExceptOk
-    (PsDeclaration.recursorDecl
-      (PsRecursorInfo.mk
-        psSelfHostExceptRecName
-        [uName]
-        exceptRecType
-        [psSelfHostExceptName]
-        2
-        0
-        1
-        2))
+  let withExceptRec :=
+    psPreludeAdd withExceptOk
+      (PsDeclaration.recursorDecl
+        (PsRecursorInfo.mk
+          psSelfHostExceptRecName
+          [uName]
+          exceptRecType
+          [psSelfHostExceptName]
+          2
+          0
+          1
+          2));
+  let withId := psPreludeAdd withExceptRec psSelfHostIdDeclaration;
+  psPreludeAdd withId psSelfHostIdRunDeclaration
 
-def psSelfHostRuntimePreludeDeclarations : List PsDeclaration :=
+def psSelfHostRuntimeDataPreludeDeclarations : List PsDeclaration :=
   match
       psEnvironmentFind
         psSelfHostPreludeEnvironment
@@ -602,3 +630,8 @@ def psSelfHostRuntimePreludeDeclarations : List PsDeclaration :=
                                                     exceptOkDeclaration,
                                                     exceptRecDeclaration
                                                   ]
+
+-- Runtime definitions use the same checked prelude identity. Erasure selects
+-- only referenced definitions and their closure, then lowers them ordinarily.
+def psSelfHostRuntimePreludeDeclarations : List PsDeclaration :=
+  List.cons psSelfHostIdRunDeclaration psSelfHostRuntimeDataPreludeDeclarations

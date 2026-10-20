@@ -547,6 +547,20 @@ def psEncodeCodecTheorem
               psCheckedAdmissionJsonField "v" (encodedValue)
             ])
 
+def psEncodeCodecOpaque
+    (name : PsName) (levelParams : List PsName) (type value : PsExpr) :
+    Except PsCheckedAdmissionCodecError String := do
+  let encodedType ← psEncodeCodecExpr type
+  let encodedValue ← psEncodeCodecExpr value
+  return psJsonObject [
+    psCheckedAdmissionJsonField "k" (psJsonQuote "opaque"),
+    psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList levelParams),
+    psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
+    psCheckedAdmissionJsonField "s" (psJsonQuote "safe"),
+    psCheckedAdmissionJsonField "t" encodedType,
+    psCheckedAdmissionJsonField "v" encodedValue
+  ]
+
 def psEncodeConstantAdmission (declaration : String) : String :=
   psJsonObject [
     psCheckedAdmissionJsonField "declaration" (declaration),
@@ -630,9 +644,15 @@ def psEncodeCheckedAdmissionsLoop
         | .axiomDecl _ _ _ =>
             Except.error
               PsCheckedAdmissionCodecError.unsupportedDeclaration
-        | .opaqueDecl _ _ _ _ =>
-            Except.error
-              PsCheckedAdmissionCodecError.unsupportedDeclaration
+        | .opaqueDecl name levelParams type value =>
+            match psEncodeCodecOpaque name levelParams type value with
+            | Except.error error => Except.error error
+            | Except.ok encoded =>
+                smaller {
+                  heights := state.heights
+                  admissionsRev :=
+                    List.cons (psEncodeConstantAdmission encoded) state.admissionsRev
+                }
         | .partialDecl _ _ _ _ =>
             Except.error
               PsCheckedAdmissionCodecError.unsupportedDeclaration

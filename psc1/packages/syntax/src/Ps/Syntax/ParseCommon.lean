@@ -47,6 +47,12 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .unit span => span
   | .record _ span => span
   | .app _ _ span => span
+  | .unary _ _ span => span
+  | .binary _ _ _ span => span
+  | .doE _ span => span
+  | .doBindE _ _ _ _ span => span
+  | .doThenE _ _ span => span
+  | .doReturnE _ span => span
   | .lambda _ _ span => span
   | .forallE _ _ span => span
   | .letE _ _ _ _ span => span

@@ -18,6 +18,7 @@ const fail = (code, detail = '') => { throw new Error(`${code}${detail ? ': ' + 
 const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const json = value => JSON.stringify(value, null, 2) + '\n';
 const sourceInfoName = 'psc1-input.json';
+const nativePin = readJson(fileURLToPath(new URL('../NATIVE_SOURCE_PIN.json', import.meta.url)));
 
 export function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -62,7 +63,7 @@ export async function formatEcma(source, kind) {
   const text = await prettier.format(source, {
     parser: kind === 'ts' ? 'typescript' : 'babel', printWidth: 100,
     tabWidth: 2, useTabs: false, semi: true, singleQuote: false,
-    trailingComma: 'none', endOfLine: 'lf'
+    trailingComma: 'none', endOfLine: 'lf', quoteProps: 'preserve'
   });
   const after = parseProgram(text, kind);
   if (!isDeepStrictEqual(semanticTree(before), semanticTree(after))) {
@@ -309,6 +310,20 @@ export function publish(stage, output, kind) {
   if (info.profile !== 'psc1-checked-direct/1' || !Array.isArray(info.publicNames) || !Array.isArray(info.sources)) {
     fail('PSC1_BUNDLE_PROFILE_INVALID');
   }
+  if (info.leanVersion !== nativePin.version || info.leanCommit !== nativePin.commit) {
+    fail('PSC1_BUNDLE_NATIVE_PIN_MISMATCH');
+  }
+  const assurance = info.assurance ?? 'checked-logical';
+  const partialDeclarations = info.partialDeclarations ?? [];
+  if (!['checked-logical', 'ordinary-checked'].includes(assurance) ||
+      (info.behaviorallyVerified !== undefined && info.behaviorallyVerified !== false) ||
+      !Array.isArray(partialDeclarations) ||
+      !partialDeclarations.every(name => typeof name === 'string' && name.length > 0) ||
+      new Set(partialDeclarations).size !== partialDeclarations.length ||
+      (assurance === 'checked-logical' && partialDeclarations.length !== 0)) {
+    fail('PSC1_BUNDLE_ASSURANCE_INVALID');
+  }
+
   const admissions = fs.readFileSync(path.join(stage, 'admissions.json'));
   if (!admissions.length) fail('PSC1_BUNDLE_ADMISSIONS_MISSING');
   const root = path.dirname(info.entryPath);
@@ -344,7 +359,9 @@ export function publish(stage, output, kind) {
   const files = fileInventory(stage);
   const manifest = {
     schema: 'psc1-artifact-bundle/1', target: kind,
-    profile: info.profile, logicalChecker: 'lean4:4.34.0',
+    profile: info.profile, logicalChecker: 'lean4:' + info.leanVersion,
+    logicalCheckerCommit: info.leanCommit,
+    assurance, behaviorallyVerified: false, partialDeclarations,
     kernelAdmissionSha256: sha256(admissions),
     sourceClosureSha256: sha256(json(sourceRecords.map(({ path, sha256, bytes }) => ({ path, sha256, bytes })))),
     compiler: info.compiler ?? 'PSC1 native', publicNames: info.publicNames,

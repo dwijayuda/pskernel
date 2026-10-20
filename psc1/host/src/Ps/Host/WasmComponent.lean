@@ -62,7 +62,7 @@ def psHostDirectEmitWasmComponent
     | .error reason => throw (IO.userError reason)
   let lowered ← match psWasmLowerValidatedModule { wordSize := PsWasmWordSize.wasm32 } session.validated with
     | .ok value => pure value
-    | .error _ => throw (IO.userError "PSC1_COMPONENT_LOWER_UNSUPPORTED")
+    | .error error => throw (IO.userError ("PSC1_COMPONENT_LOWER_UNSUPPORTED: " ++ psHostWasmLowerErrorText error))
   if !lowered.exports.any (fun item => item.1 == exportName) then
     throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_LOWERED")
   let selected := { lowered with exports := lowered.exports.filter (fun item => item.1 == exportName) }
@@ -70,7 +70,7 @@ def psHostDirectEmitWasmComponent
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_COMPONENT_BINARY_UNSUPPORTED")
   let name := psHostArtifactFileName outputPath "module.wasm"
-  let stem := name.dropRight 5
+  let stem := (name.dropEnd 5).toString
   psHostWithArtifactStage outputPath fun stage => do
     psHostDirectWriteSelectedProvenance session stage [exportName]
     let core := stage / (stem ++ ".core.wasm")

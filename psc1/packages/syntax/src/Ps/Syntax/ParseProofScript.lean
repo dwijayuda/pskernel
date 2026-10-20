@@ -1,5 +1,7 @@
 import Ps.Syntax.Lexer
 import Ps.Syntax.ParseCommon
+import Ps.Syntax.ParseDo
+import Ps.Syntax.Operators
 
 -- Current host tools authenticate this source format before reading or emitting PS.
 -- Historical seed recovery calls its own immutable compiler on raw Lean source.
@@ -148,6 +150,12 @@ def psProofScriptTermWithSpan
   | .unit _ => PsSyntaxTerm.unit span
   | .record fields _ => PsSyntaxTerm.record fields span
   | .app fn args _ => PsSyntaxTerm.app fn args span
+  | .unary operator operand _ => PsSyntaxTerm.unary operator operand span
+  | .binary operator left right _ => PsSyntaxTerm.binary operator left right span
+  | .doE body _ => PsSyntaxTerm.doE body span
+  | .doBindE name type action body _ => PsSyntaxTerm.doBindE name type action body span
+  | .doThenE action body _ => PsSyntaxTerm.doThenE action body span
+  | .doReturnE value _ => PsSyntaxTerm.doReturnE value span
   | .lambda binders body _ => PsSyntaxTerm.lambda binders body span
   | .forallE binders body _ => PsSyntaxTerm.forallE binders body span
   | .letE name type value body _ =>
@@ -289,6 +297,7 @@ def psProofScriptReservedArgument (text : String) : Bool :=
   else if psStringEq text "if" then true
   else if psStringEq text "match" then true
   else if psStringEq text "do" then true
+  else if psStringEq text "return" then true
   else if psStringEq text "requires" then true
   else if psStringEq text "ensures" then true
   else if psStringEq text "given" then true
@@ -314,8 +323,6 @@ def psProofScriptCanStartNativeArgument
   | Option.none => false
   | Option.some token =>
       if psProofScriptReservedArgument token.text then
-        false
-      else if psTokenCursorStartsNamedAssignment cursor then
         false
       else if psProofScriptBoolNot
           (Nat.ble (Nat.succ span.stop.byteOffset) token.span.start.byteOffset) then
@@ -944,25 +951,22 @@ def psParseProofScriptMatchAlternativesWithFuel
                                 "next match bar or closing brace, without semicolon" body.cursor)
 
 def psParseProofScriptGroupedContinuation
-    (parseTerm :
-      PsTokenCursor ->
-      Except PsParseError (PsParseResult PsSyntaxTerm))
-    (fuel : Nat)
-    (opening : PsTokenRead)
-    (grouped : PsParseResult PsSyntaxTerm)
-    (close : PsTokenRead) :
-    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+    (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat) (opening : PsTokenRead)
+    (grouped : PsParseResult PsSyntaxTerm) (close : PsTokenRead) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
   let primary : PsParseResult PsSyntaxTerm := {
     value := psProofScriptTermWithSpan grouped.value {
       start := opening.token.span.start
       stop := close.token.span.stop
     }
     cursor := close.cursor
-  };
-  match psParseProofScriptApplicationAfterPrimary parseTerm fuel primary with
-  | Except.error error => Except.error error
-  | Except.ok application =>
-      psParseProofScriptArrowTail parseTerm application
+  }
+  let application ← psParseProofScriptApplicationAfterPrimary parseTerm fuel primary
+  let operators ← psParseOperatorTailWithFuel
+    (psParseOperatorsWithFuel (psParseProofScriptApplicationWithFuel parseTerm fuel) fuel)
+    fuel 0 false application
+  psParseProofScriptArrowTail parseTerm operators
 
 def psParseProofScriptTermWithFuel
     (fuel : Nat) :
@@ -979,9 +983,10 @@ def psParseProofScriptTermWithFuel
             Except PsParseError (PsParseResult PsSyntaxTerm) :=
           psParseProofScriptTermWithFuel remaining;
         if psTokenCursorAtText cursor "do" then
-          Except.error
-            (psProofScriptExpectedError
-              "supported pure term; do is not enabled in this source subset" cursor)
+          match psTokenCursorAdvance cursor with
+          | Option.none => Except.error (PsParseError.unexpectedEnd "do")
+          | Option.some keyword =>
+              psParseDo smaller false true keyword.token.span.start keyword.cursor
       else if psTokenCursorAtText cursor "match" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "match scrutinee")
@@ -1239,10 +1244,9 @@ def psParseProofScriptTermWithFuel
                             smaller (Nat.succ remaining) opening grouped close
       else
         match
-            psParseProofScriptApplicationWithFuel
-              (smaller)
-              (Nat.add remaining 1)
-              cursor with
+            psParseOperatorsWithFuel
+              (psParseProofScriptApplicationWithFuel smaller (Nat.succ remaining))
+              (Nat.succ remaining) 0 cursor with
         | Except.error error => Except.error error
         | Except.ok domain =>
             psParseProofScriptArrowTail

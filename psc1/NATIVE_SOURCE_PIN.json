@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "scope": "psc1-current-native-source",
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "version": "4.35.0",
+  "tag": "v4.35.0",
+  "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "compilerProtocol": "psc1-native/1",
+  "compilerProfile": "psc1-checked-direct/1",
+  "providerProtocol": "pskernel-lean/1",
+  "providerProfile": "lean4.35-core",
+  "historicalBundles": {
+    "status": "archived-4.34-assets; not current native compiler/provider evidence",
+    "nativePin": "packages/pskernel-lean/LEAN_SOURCE_PIN.json",
+    "nativeManifest": "packages/pskernel-lean/PREBUILT_MANIFEST.json",
+    "wasmPin": "packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json",
+    "wasmManifest": "packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json"
+  },
+  "qualificationPolicy": "exact-commit Linux CI required; archive qualification is not inherited"
+}

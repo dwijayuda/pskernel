@@ -8,44 +8,9 @@ import Ps.Meta.Unify
 import Ps.Syntax.Ast
 import Ps.Elab.Context
 import Ps.Elab.Literal
-
-inductive PsElabError where
-  | fuelExhausted
-  | emptyName
-  | unknownName (name : PsName)
-  | invalidNatural (text : String)
-  | invalidString (text : String)
-  | invalidCharacter (text : String)
-  | infer (error : PsInferError)
-  | typeMismatch
-  | implicitApplicationUnsupported
-  | emptyCallUnsupported
-  | unsupportedTerm
-  | matchExpectedType
-  | matchScrutineeUnsupported
-  | matchInductiveUnsupported
-  | matchParameterArity
-  | matchPatternUnsupported
-  | matchConstructorUnknown (name : PsName)
-  | matchDuplicateConstructor (name : PsName)
-  | matchNonExhaustive
-  | matchRecursorUnsupported
-  | matchRecursorLevels
-  | matchConstructorArity (name : PsName)
-  | matchRecursiveFieldUnsupported (name : PsName)
-  | duplicateDeclaration (name : PsName)
-  | unresolvedMetavariable
-  | structuralRecursionArity
-  | structuralRecursionNotDecreasing
-  | structuralRecursionInvariantArgument
-  | structuralRecursionInternal
-  | structuralRecursionDependentParameter
-  | structuralRecursionEscapingReference
-
-structure PsElabTermResult where
-  context : PsElabContext
-  term : PsExpr
-  type : PsExpr
+import Ps.Elab.Basic
+import Ps.Elab.Do
+import Ps.Elab.Operators
 
 def psElabBoolNot (value : Bool) : Bool :=
   if value then false else true
@@ -114,83 +79,6 @@ def psElabListLength {α : Type}
   match values with
   | [] => 0
   | _ :: rest => Nat.succ (psElabListLength rest)
-
-def psSyntaxNameAppendSegments
-    (segments : List String) :
-    PsName -> PsName :=
-  match segments with
-  | [] =>
-      fun (name : PsName) =>
-        name
-  | segment :: rest =>
-      let smaller : PsName -> PsName :=
-        psSyntaxNameAppendSegments rest;
-      fun (name : PsName) =>
-        smaller (psNameAppendStr name segment)
-
-def psSyntaxNameToName (name : PsSyntaxName) : Option PsName :=
-  match name.segments with
-  | [] => Option.none
-  | first :: rest =>
-      Option.some
-        (psSyntaxNameAppendSegments
-          rest
-          (psNameAppendStr PsName.anonymous first))
-
-def psElabResultWithMeta
-    (result : PsElabTermResult)
-    (metaContext : PsMetaContext)
-    (type : PsExpr) : PsElabTermResult :=
-  {
-    context := psElabContextWithMeta result.context metaContext
-    term := psMetaInstantiate metaContext result.term
-    type := psMetaInstantiate metaContext type
-  }
-
-def psElabFinalizeExpected
-    (result : PsElabTermResult)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  match expected with
-  | none => Except.ok result
-  | some expectedType =>
-      let unified :=
-        psUnify
-          result.context.environment
-          result.context.localContext
-          result.context.metaContext
-          result.type
-          expectedType;
-      if unified.success then
-        Except.ok
-          (psElabResultWithMeta
-            result
-            unified.context
-            expectedType)
-      else
-        Except.error PsElabError.typeMismatch
-
-def psElabResolvedTerm
-    (context : PsElabContext)
-    (term : PsExpr)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  match psInferType
-      context.environment
-      context.metaContext
-      context.localContext
-      term with
-  | Except.error error =>
-      Except.error (PsElabError.infer error)
-  | Except.ok type =>
-      let result :=
-        PsElabTermResult.mk
-          context
-          term
-          type;
-      psElabFinalizeExpected
-        result
-        expected
 
 def psElabProjectionApplyParameters
     (context : PsElabContext)
@@ -888,124 +776,6 @@ def psElabForall
                 closed
                 expected
 
-def psElabLetAfterValue
-    (elaborate :
-      PsElabContext ->
-      PsSyntaxTerm ->
-      Option PsExpr ->
-      Except PsElabError PsElabTermResult)
-    (outerContext : PsElabContext)
-    (name : PsName)
-    (bindingType : PsExpr)
-    (valueResult : PsElabTermResult)
-    (body : PsSyntaxTerm)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  let pushed :=
-    psLocalPushLet
-      valueResult.context.localContext
-      name
-      bindingType
-      valueResult.term;
-  let bodyContext :=
-    psElabContextWithLocal
-      valueResult.context
-      pushed.context;
-  match elaborate bodyContext body expected with
-  | Except.error error => Except.error error
-  | Except.ok bodyResult =>
-      let metaContext := bodyResult.context.metaContext;
-      let closedBindingType :=
-        psMetaInstantiate metaContext bindingType;
-      let closedValue :=
-        psMetaInstantiate metaContext valueResult.term;
-      let openBody :=
-        psMetaInstantiate metaContext bodyResult.term;
-      let closedBody :=
-        psExprAbstractFVar pushed.id openBody;
-      let term :=
-        PsExpr.letE
-          name
-          closedBindingType
-          closedValue
-          closedBody;
-      let restoredContext :=
-        psElabContextWithMeta outerContext metaContext;
-      psElabResolvedTerm
-        restoredContext
-        term
-        expected
-
-def psElabLet
-    (elaborate :
-      PsElabContext ->
-      PsSyntaxTerm ->
-      Option PsExpr ->
-      Except PsElabError PsElabTermResult)
-    (context : PsElabContext)
-    (nameSyntax : PsSyntaxName)
-    (declaredType : Option PsSyntaxTerm)
-    (value : PsSyntaxTerm)
-    (body : PsSyntaxTerm)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  match psSyntaxNameToName nameSyntax with
-  | none => Except.error PsElabError.emptyName
-  | some name =>
-      match declaredType with
-      | none =>
-          match elaborate context value Option.none with
-          | Except.error error => Except.error error
-          | Except.ok valueResult =>
-              psElabLetAfterValue
-                elaborate
-                context
-                name
-                valueResult.type
-                valueResult
-                body
-                expected
-      | some sourceType =>
-          match elaborate context sourceType Option.none with
-          | Except.error error => Except.error error
-          | Except.ok typeResult =>
-              match psInferEnsureSort
-                  typeResult.context.environment
-                  typeResult.context.metaContext
-                  typeResult.context.localContext
-                  typeResult.type with
-              | Except.error error =>
-                  Except.error (PsElabError.infer error)
-              | Except.ok _ =>
-                  match elaborate
-                      typeResult.context
-                      value
-                      (Option.some typeResult.term) with
-                  | Except.error error => Except.error error
-                  | Except.ok valueResult =>
-                      psElabLetAfterValue
-                        elaborate
-                        context
-                        name
-                        typeResult.term
-                        valueResult
-                        body
-                        expected
-
-def psExprApplyManyWorker
-    (arguments : List PsExpr)
-    (fn : PsExpr) : PsExpr :=
-  match arguments with
-  | [] => fn
-  | argument :: rest =>
-      psExprApplyManyWorker rest (PsExpr.app fn argument)
-
-def psExprApplyMany
-    (fn : PsExpr)
-    (arguments : List PsExpr) :
-    PsExpr :=
-  psExprApplyManyWorker arguments fn
-
 def psElabIf
     (elaborate :
       PsElabContext ->
@@ -1084,30 +854,6 @@ def psElabIf
                         restoredContext
                         term
                         expected
-
-structure PsExprAppView where
-  head : PsExpr
-  args : List PsExpr
-
-def psExprAppViewAccWorker
-    (expr : PsExpr)
-    (args : List PsExpr) : PsExprAppView :=
-  match expr with
-  | .app fn argument =>
-      psExprAppViewAccWorker fn (List.cons argument args)
-  | _ =>
-      {
-        head := expr
-        args := args
-      }
-
-def psExprAppViewAcc
-    (expr : PsExpr)
-    (args : List PsExpr) : PsExprAppView :=
-  psExprAppViewAccWorker expr args
-
-def psExprAppView (expr : PsExpr) : PsExprAppView :=
-  psExprAppViewAcc expr []
 
 def psExprHasConst
     (target : PsName)
@@ -2259,6 +2005,111 @@ def psSyntaxTermListIsEmpty
   | _ :: _ =>
       false
 
+-- The preview only removes binders unused in the entire remaining telescope.
+-- Inspect beneath binders as well as in their domains; a later parameter may
+-- depend on the argument even when the final result does not.
+def psElabApplicationUsesBinderWorker
+    (expr : PsExpr) : Nat -> Bool :=
+  match expr with
+  | .bvar index =>
+      fun (depth : Nat) => Nat.beq index depth
+  | .app fn arg =>
+      let usesFn : Nat -> Bool := psElabApplicationUsesBinderWorker fn;
+      let usesArg : Nat -> Bool := psElabApplicationUsesBinderWorker arg;
+      fun (depth : Nat) =>
+        psElabBoolOr (usesFn depth) (usesArg depth)
+  | .lam _ type body _ =>
+      let usesType : Nat -> Bool := psElabApplicationUsesBinderWorker type;
+      let usesBody : Nat -> Bool := psElabApplicationUsesBinderWorker body;
+      fun (depth : Nat) =>
+        psElabBoolOr (usesType depth) (usesBody (Nat.succ depth))
+  | .forallE _ type body _ =>
+      let usesType : Nat -> Bool := psElabApplicationUsesBinderWorker type;
+      let usesBody : Nat -> Bool := psElabApplicationUsesBinderWorker body;
+      fun (depth : Nat) =>
+        psElabBoolOr (usesType depth) (usesBody (Nat.succ depth))
+  | .letE _ type value body =>
+      let usesType : Nat -> Bool := psElabApplicationUsesBinderWorker type;
+      let usesValue : Nat -> Bool := psElabApplicationUsesBinderWorker value;
+      let usesBody : Nat -> Bool := psElabApplicationUsesBinderWorker body;
+      fun (depth : Nat) =>
+        psElabBoolOr (usesType depth)
+          (psElabBoolOr (usesValue depth) (usesBody (Nat.succ depth)))
+  | .proj _ _ value =>
+      psElabApplicationUsesBinderWorker value
+  | _ =>
+      fun (_depth : Nat) => false
+
+-- Leading ordinary implicits have already been inserted when the function was
+-- elaborated. Leave dependent and intervening implicit telescopes to the normal
+-- sequential argument checker. This lookahead creates no argument metavariables.
+def psElabApplicationResultTypeWithFuel
+    (context : PsElabContext)
+    (fuel : Nat) :
+    PsExpr -> Nat -> Option PsExpr :=
+  match fuel with
+  | 0 =>
+      fun (_type : PsExpr) (_argumentCount : Nat) => Option.none
+  | remaining + 1 =>
+      fun (type : PsExpr) (argumentCount : Nat) =>
+        let smaller : PsExpr -> Nat -> Option PsExpr :=
+          psElabApplicationResultTypeWithFuel context remaining;
+        let reduced :=
+          psWhnf context.environment context.metaContext context.localContext type;
+        match argumentCount with
+        | 0 =>
+            match reduced with
+            | .forallE _ _ _ binder =>
+                if psBinderAcceptsExplicitArgument binder then
+                  Option.some reduced
+                else
+                  Option.none
+            | _ => Option.some reduced
+        | remainingArguments + 1 =>
+            match reduced with
+            | .forallE _ _ body binder =>
+                if psBinderAcceptsExplicitArgument binder then
+                  if psElabApplicationUsesBinderWorker body 0 then
+                    Option.none
+                  else
+                    -- The replacement cannot occur after the dependency check;
+                    -- instantiate1 only adjusts the remaining de Bruijn indices.
+                    smaller
+                      (psExprInstantiate1 body (PsExpr.sortE PsLevel.zero))
+                      remainingArguments
+                else
+                  Option.none
+            | _ => Option.none
+
+def psElabApplicationWithExpected
+    (current : PsElabTermResult)
+    (arguments : List PsSyntaxTerm)
+    (expected : Option PsExpr) : PsElabTermResult :=
+  match expected with
+  | Option.none => current
+  | Option.some expectedType =>
+      if psExprHasUnresolvedMeta current.type then
+        let argumentCount := psElabListLength arguments;
+        match psElabApplicationResultTypeWithFuel
+            current.context (Nat.succ argumentCount) current.type argumentCount with
+        | Option.none => current
+        | Option.some resultType =>
+            let unified :=
+              psUnify
+                current.context.environment
+                current.context.localContext
+                current.context.metaContext
+                resultType
+                expectedType;
+            if unified.success then
+              psElabResultWithMeta current unified.context current.type
+            else
+              -- A failed preview is transactional, including partial assignments.
+              -- Actual arguments and the final result still use their usual checks.
+              current
+      else
+        current
+
 def psElabApplyArgsWithFuelWorker
     (elaborate :
       PsElabContext ->
@@ -3093,6 +2944,12 @@ def psElabTermWithFuel
                   binders
                   body
                   expected
+            | .unary operator operand span => psElabUnaryOperator smaller context operator operand span expected
+            | .binary operator left right span => psElabBinaryOperator smaller context operator left right span expected
+            | .doE body _ => psElabDo smaller context body expected
+            | .doBindE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .doThenE _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .doReturnE _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .letE name declaredType value body _ =>
                 psElabLet
                   smaller
@@ -3138,9 +2995,11 @@ def psElabTermWithFuel
                             match smaller context fn Option.none with
                             | Except.error error => Except.error error
                             | Except.ok elaboratedFn =>
+                                let contextualFn :=
+                                  psElabApplicationWithExpected elaboratedFn args expected;
                                 match psElabApplyArgs
                                     smaller
-                                    elaboratedFn
+                                    contextualFn
                                     args
                                     [] with
                                 | Except.error error => Except.error error

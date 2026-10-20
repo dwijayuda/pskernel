@@ -22,6 +22,8 @@ lean_lib PsSyntax where
     `Ps.Syntax.Ast,
     `Ps.Syntax.ParserState,
     `Ps.Syntax.ParseCommon,
+    `Ps.Syntax.ParseDo,
+    `Ps.Syntax.Operators,
     `Ps.Syntax.ParseLean,
     `Ps.Syntax.ParseProofScript,
     `Ps.Syntax.PrintCommon,
@@ -89,7 +91,7 @@ lean_lib PsErasure where
 
 lean_lib PsCompiler where
   srcDir := "packages/compiler/src"
-  roots := #[`Ps.Compiler, `Ps.Compiler.Api, `Ps.Compiler.Sh1]
+  roots := #[`Ps.Compiler, `Ps.Compiler.Api, `Ps.Compiler.Ordinary, `Ps.Compiler.Sh1]
 
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
@@ -194,6 +196,9 @@ lean_lib PsElab where
   roots := #[
     `Ps.Elab.Context,
     `Ps.Elab.Literal,
+    `Ps.Elab.Basic,
+    `Ps.Elab.Do,
+    `Ps.Elab.Operators,
     `Ps.Elab.Term,
     `Ps.Elab.Recursion,
     `Ps.Elab.Declaration
@@ -267,3 +272,19 @@ lean_exe psc2_selfhost_replay_audit where
 lean_exe psc1_sh1_compile where
   srcDir := "scripts"
   root := `StrictSourceCompile
+
+lean_exe contextual_inference_tests where
+  srcDir := "test"
+  root := `ContextualInferenceTests
+
+lean_exe psc1_do_tests where
+  srcDir := "test"
+  root := `DoTests
+
+lean_exe psc1_operator_tests where
+  srcDir := "test"
+  root := `OperatorTests
+
+lean_exe psc1_ordinary_tests where
+  srcDir := "test"
+  root := `OrdinaryExecutionTests

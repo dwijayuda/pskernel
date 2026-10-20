@@ -1,106 +1,121 @@
-# PSC1 current work state — scoped repair qualified
+# PSC1 current work state — Practical Core v7.2 continuation
 
-Updated 2026-10-20. Branch: `fix/psc1-scoped-correctness-20261020`.
+Updated 2026-10-20. Branch: `feature/psc1-v7.2-practical-core-v1`.
+Continuation [draft PR #163](https://github.com/dwijayuda/pskernel/pull/163).
 
-## Exact completed checkpoint
+## Authorized work and preserved lineage
 
-**Implementation `f933691a1d6fa578c59623636afbb02119909837` is GREEN** in GitHub
-Linux Actions **run39332460452**, job118333724117. All workflow steps completed
-successfully. The evidence is exact-commit, not borrowed from a prior baseline.
+Continue the repaired PSC1 implementation with **PSC1 Practical Core — v7.2 subset**:
+retained supported functionality plus exactly fourteen approved feature families.
+The selected reference is `PSC1_LANGUAGE_REFERENCE_v7.2.md`; the acceptance
+matrix is `docs/PSC1_PRACTICAL_CORE_STATUS.json`.
 
-Observed results:
+PR #162 remains open with head `a2778be648850a1f6a2381e28babcd4a6e783e31`,
+targeting `psc1/direct-multibackend-v1`. This continuation is stacked on that
+unchanged repair branch. The parent implementation
+`f933691a1d6fa578c59623636afbb02119909837` passed run 39332460452;
+the repaired head passed run 39333660822. The f933-to-a277 difference is three
+documentation files. Historical repair evidence remains intact, and the prior
+work state is in `docs/history/AI_WORK_STATE_BEFORE_PRACTICAL_CORE_2026-10-20.md`.
 
-- Native compiler/focused executables: 233 Lake build jobs, success.
-- Corrected PSKernel-Core: 163 native build jobs and 15 regressions, success.
-- Host formatting/maps/WIT/transaction tests: 14 passed.
-- Scoped native assertions: 23 passed.
-- Existing IR specialization, native map and independent Lean provider suites pass.
-- Source-to-backend integration groups: 24 passed, including 10 unqualified scalar
-  refusals. Additional source edge groups: 4 passed.
-- The edge suite actually executes imported generic specialization, distinct
-  mangled symbol identities, empty public modules, and non-tail Nat recursion at
-  depth 100,000 in emitted JavaScript.
+## Completed checkpoint: first coherent slice
 
-Archive12224164905 contains 35 readable example/evidence files; SHA-256:
-`981902c3e3bbba31043e895042806b09e56ea92545bac883f5f8926837851b48`.
-See `docs/PSC1_SCOPED_QUALIFICATION_2026-10-20.json` and
-`docs/PSC1_SCOPED_CORRECTNESS_2026-10-20.md` for durable details and links.
-A later documentation-only commit preserves these implementation bytes; do not
-mistake a later pending documentation/PR workflow for this tested implementation.
+**The scoped first slice is implemented and qualified** at
+[`4be91b111c1773f02a009fb2f643b18912cee920`](https://github.com/dwijayuda/pskernel/commit/4be91b111c1773f02a009fb2f643b18912cee920),
+[Linux run 39348537989](https://github.com/dwijayuda/pskernel/actions/runs/39348537989), conclusion **success**.
+CI checkout `aa3afeb4f7087f7b9781d67230dda919ff0b38ff` has the same tree
+`cb778954f86ce09fe22b4ed36240cb89f4e16382` as that implementation commit.
+Later documentation-only commits record this evidence; they do not redefine the
+tested implementation checkpoint.
 
-## User goal and boundaries
+The exact receipt is
+`docs/PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json`; the readable explanation is
+`docs/PSC1_PRACTICAL_CORE_SLICE_1.md`.
+[Readable output bundles and execution records](https://github.com/dwijayuda/pskernel/actions/runs/39348537989/artifacts/12231958323)
+have digest `sha256:df0ba1a2cef4b11caf640b9bc2f1b1b2fdf817758a1525cb99216772d235374f` and expire
+2026-11-03T00:38:16Z. The versioned scripts reproduce the evidence.
 
-Repair existing compiler/kernel integration and output correctness while keeping
-readable JS, TS, Rust, WIT and WAT. Do not add substantial language features,
-upgrade Lean, weaken kernel/IR checks, increase fuel, run full self-host suites,
-publish npm packages, force-push or mutate unrelated PSC0/main work.
-Use GitHub + Linux cloud CI. Fetch actual HEAD before writes. No local checkout,
-compiler/kernel build or test execution is authorized in this workstream.
+Passed groups: 15 host tests; 18 native owned-kernel regressions; IR specialization,
+maps, official provider and host boundaries; 24 preserved backend groups; five
+source-edge groups; 25 contextual-inference checks; 32 typed-do checks; operator
+Core-equivalence/negative tests; ordinary admission/opacity/pairing/budget tests;
+36 executed forms artifacts with 132 result assertions; all nine ordinary runtime
+and negative-boundary groups.
 
-## Current architecture
+### Implemented and qualified boundaries
 
-- Captured dependency-ordered source bytes/ASTs, canonical paths and cycle checks.
-  No source reread after admission for target emission or provenance.
-- The same immutable canonical declaration graph is independently admitted by
-  official Lean before erasure; raw typed IR and specialization input/output are
-  checked. Normal host emission goes through a private-constructor session.
-- Entry public identities and origins reuse erasure's collision-aware Core-name
-  map. Imported helpers remain linked but private. JS declarations and code use
-  the same closed checked target plan; internal generic helpers specialize.
-- Rust retains its checked generic IR and required public named-type closure;
-  the JS scalar public ABI does not accidentally narrow Rust/core Wasm.
-- Readable JS/TS use committed locked formatting dependencies and parsed-tree
-  stability checks. Maps observe final formatted layout, all captured sources,
-  UTF-16 columns, unmapped boundaries and correct negative VLQ encoding.
-- DirectJS uses the stack-safe printer. Rust uses rustfmt and ships a usable
-  exact-direct-pin, locked Cargo library. WAT is printed from actual final bytes.
-- WIT complete bounded signatures are compared structurally to the component.
-  WIT capability selection uses the unchanged IR capability contract.
-- Each complete target bundle publishes via one atomic current-pointer switch
-  to a checksummed immutable generation. Failure retains previous accepted bytes.
-- Both npm launcher paths route to the same identity-checked native executable,
-  without archived PSC0 compiler/kernel fallback. Duplicate stdlib workspace
-  identity is fixed. Formatter dependencies have a committed actual cloud lock.
+- Transactional expected-result constraints for ordinary nondependent call
+  arguments, preserving sequential dependent/intervening-implicit checking.
+- Fixed-precedence selected Nat/Int/Bool operators and checked equality forms.
+  Genuine Prop-valued ordering such as `a < b` is still unsupported.
+- Shared Type0 Id/Except/checked CompilerM do sequencing, immutable typed/inferred
+  locals and binds, Unit actions, terminal return, aliases and roundtrips.
+  The CompilerM kernel fixture observes both reading 7 and updating state to 8.
+- Explicit ordinary partial execution with a safe opaque constructive inhabitant
+  plus independently checked exact executable-body declaration. Runtime erasure
+  consumes the original body only after recomputing and comparing the exact
+  ordered logical graph. Verified mode refuses without fallback.
+- Shared runtime-prelude selection for host ownership and erasure; checked
+  Sort-valued declarations erased from runtime only; quote-preserving formatting
+  with the strict AST gate retained; Wasm function/heap type grouping corrected.
 
-## Important capability and authority distinctions
+Forms coverage is explicit: numeric inference/Prod/Array/operator examples ran
+on JS/TS/Rust in both syntaxes; Bool operators and Id/Except do ran on all five
+targets in both syntaxes. Ordinary countdown ran on JS in both syntaxes; ordinary
+recursive Bool dependencies ran on all five targets from Lean. ProofScript
+ordinary also has native admission and strict IR evidence. CompilerM has kernel/IR
+evidence, not general source-IO or all-target runtime qualification.
 
-The **official Lean 4.34.0 kernel** is the independent current direct-output
-admission provider. **Corrected PSKernel-Core source** is integrated and separately
-native-regression-tested, not claimed to be that default provider.
-Source admission and IR/runtime tests do not prove backend semantic preservation.
+The witness constructor shares a total attempt budget across product children
+and failed Except alternatives. This bounds compilation work. Runtime recursion
+has no semantic fuel cutoff. Intentional divergence passed an external 1000 ms
+process-timeout check.
 
-Current WIT component scalar is **Bool only**. Previous copied code advertised
-integer/float WIT representations that the active IR checker intentionally refuses.
-The repair keeps that guard and now refuses those exports explicitly in both
-policy and tests. This is not a scalar-feature activation or hidden gate relaxation.
+## Completed prerequisite: Lean 4.35 migration
 
-## Remaining work — not blockers silently renamed complete
+The separate pin-only checkpoint
+`1bd0854f735cf8d0c8f3d07f705195c131acbd61` passed
+[run 39344155280](https://github.com/dwijayuda/pskernel/actions/runs/39344155280)
+before feature changes. The actual compiler/provider pin is Lean 4.35.0 commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Native identity and bundle provenance enforce the current version and commit.
+Historical 4.34 assets retain their original pins and receipts. The owned kernel
+is separately native-tested; official Lean remains the direct admission provider.
 
-Separate/incremental module compilation, runtime extraction/tree-shaking, source
-expression-level maps, fully structured target diagnostics, formal preservation,
-full-language conformance, native platform/npm distribution, making owned Core the
-default direct-output provider, optional scalar activation and full self-hosting
-remain separate work. Do not expand into these without an explicit workstream.
+The normative PSC0 reference remains commit
+`33676076bcda7b0de5ec1f9803f49b8b1d28a058`, blob
+`694115223777599ba28ee175e14bb642b7b6aa4b`. PSC0 stays read-only.
 
-Publication is per-target and Linux-qualified. A consistent multi-file reader
-pins an immutable generation once. Existing ordinary/foreign output paths are
-refused; use fresh paths for legacy output migration. JS and TS with the same
-stem need separate directories because both own a `.d.ts` path. Old generations
-remain available; automatic collection and power-failure proof are not implemented.
+## Remaining selected work and next slices
 
-`build --target ts` is the qualified formatted TS path. The `typescript` stdout
-convenience path still uses the native printer directly. No statement that every
-printer path is normalized by Prettier is justified.
+Every full family remains incomplete. Continue from the qualified checkpoint;
+do not repeat the completed pin migration as unfinished work.
 
-The work is prepared for integration review against `psc1/direct-multibackend-v1`.
-Do not merge/promote on an uninspected moving HEAD. Preserve the exact tested
-checkpoint and distinguish actual PR/integration CI from branch-push qualification.
+1. Add genuine proposition-valued comparisons and the checked decision/if path,
+   then qualify remaining bounded operator and inference interactions.
+2. Extend shared control lowering to branch/handler early return, lexical
+   mutation, finite for iteration and while. Reuse the explicit ordinary
+   logical/runtime separation; do not add forbidden control forms or fuel cutoffs.
+3. Complete selected tuple/array literals, patterns and indexing; typed
+   try/catch/throw; namespace declarations and lookup.
+4. Add small typed source IO through an explicit bounded adapter contract and
+   qualify each claimed target/source-form interaction.
 
-## History
+The matrix remains authoritative for all fourteen families. Qualification of this
+subset does not mean full v7.2, unrestricted Lean, behavioral certification, or
+complete family coverage.
 
-Baseline0fd7b9aa8bc2f51b21e0cd9477edde35063de0e4 already contained the corrected
-kernel source from0a53836489c4e88f46df8f5b8b0c19cc41bafbbb, specialization
-rechecks and Lean admission. Repair runs exposed and corrected duplicate npm
-workspace identity, Lean record layout and false scalar advertisement before the
-complete green checkpoint above. The historical full state remains byte-for-byte
-in `docs/history/AI_WORK_STATE_BEFORE_SCOPED_2026-10-20.md`.
+## Architecture invariants and execution rules
+
+Preserve captured immutable source closure, exact admitted graph/runtime identity,
+specialization input/output rechecks, source ownership, collision-aware symbols,
+implementation/.d.ts agreement, useful maps with unmapped generated regions, and
+transactional target publication. Component public ABI remains Bool-only.
+DirectJS has no hidden TS compiler. JS host helpers perform layout/filesystem work,
+not source elaboration or trust decisions.
+
+Use connected GitHub and focused Linux cloud CI only. No local checkout/build/test,
+full self-host generation/census/fixed-point tests, package publication, releases,
+merge, force updates, kernel fuel increases or new assumption allowlist.
+Read actual HEAD before writes and use non-force expected-HEAD updates.
+Keep repair PR #162 separate and continuation PR #163 as a draft.

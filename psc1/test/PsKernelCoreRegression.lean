@@ -10,6 +10,23 @@ private def requireKernel
     throw (IO.userError s!"PSC1_KERNEL_REGRESSION FAIL: {caseName}")
 
 def main : IO Unit := do
+  requireKernel "Lean 4.35 default provider is compatible"
+    (psKernelProviderCompatible psKernelProviderDefault)
+  let historicalEvaluator := PsKernelNativeEvaluator.mk
+    (fun _ => Except.ok (Option.some true))
+    (fun _ => Except.ok (Option.some 0))
+  let historicalProvider := PsKernelProviderCapability.mk psKernelTargetIdentityV1
+    (Option.some historicalEvaluator)
+  requireKernel "Lean 4.35 rejects native evaluator during session construction"
+    (match psKernelKernelSessionEmpty psKernelResourcePolicyDefault historicalProvider with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let forgedSession := PsKernelKernelSession.mk psKernelEnvironmentEmpty
+    psKernelResourcePolicyDefault historicalProvider
+  requireKernel "Lean 4.35 rejects native evaluator during session preflight"
+    (match psKernelKernelSessionPreflight forgedSession with
+      | Except.error _ => true
+      | Except.ok _ => false)
   let fName := PsKernelName.str PsKernelName.anonymous "bound"
   let localExpr := PsKernelExpr.fvar fName
   let closed := PsKernelExpr.sort PsKernelLevel.zero
@@ -54,9 +71,9 @@ def main : IO Unit := do
     (!psKernelExprPairSetContains restored.failure localExpr closed)
   let sample := "héllo"
   let p := String.Pos.Raw.mk 0
-  requireKernel "Lean 4.34 string atEnd alias parity"
+  requireKernel "Lean 4.35 string atEnd alias parity"
     (String.Pos.Raw.atEnd sample p == String.Internal.atEnd sample p)
-  requireKernel "Lean 4.34 UTF-8 next alias parity"
+  requireKernel "Lean 4.35 UTF-8 next alias parity"
     (String.Pos.Raw.byteIdx (String.Pos.Raw.next sample p) ==
       String.Pos.Raw.byteIdx (String.Internal.next sample p))
   requireKernel "Nat maximum shim matches pinned Lean"

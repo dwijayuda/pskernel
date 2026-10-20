@@ -2,20 +2,70 @@
   "schema": "psc1-native-profile/1",
   "implementation": "Lean-native PSC1",
   "version": "0.1.0-psc1.1",
-  "leanToolchain": "leanprover/lean4:v4.34.0",
-  "sourceProfile": "existing PSC1 bounded source subset; no v7.2 expansion",
-  "admissionProvider": "independent official Lean 4.34.0 kernel",
+  "leanToolchain": "leanprover/lean4:v4.35.0",
+  "sourceProfile": "PSC1 Practical Core — v7.2 subset",
+  "admissionProvider": "independent official Lean 4.35.0 kernel",
   "ownedKernel": "corrected PSKernel-Core source integrated and separately regression-tested; not the current default direct-output provider",
-  "targets": ["js", "ts", "rust", "wasm-core", "wasm-component"],
-  "activeIrScalars": ["Nat", "Int", "Bool", "Char", "String", "Unit"],
-  "activeComponentScalars": ["Bool"],
-  "unqualifiedScalars": ["UInt8", "UInt16", "UInt32", "UInt64", "USize", "Int8", "Int16", "Int32", "Int64", "ISize", "Float32", "Float"],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component"
+  ],
+  "activeIrScalars": [
+    "Nat",
+    "Int",
+    "Bool",
+    "Char",
+    "String",
+    "Unit"
+  ],
+  "activeComponentScalars": [
+    "Bool"
+  ],
+  "unqualifiedScalars": [
+    "UInt8",
+    "UInt16",
+    "UInt32",
+    "UInt64",
+    "USize",
+    "Int8",
+    "Int16",
+    "Int32",
+    "Int64",
+    "ISize",
+    "Float32",
+    "Float"
+  ],
   "componentPolicy": "WIT representability and active IR capability must both hold; no gate bypass",
   "artifactProfile": "psc1-checked-direct/1",
-  "publicationPlatforms": ["linux"],
+  "publicationPlatforms": [
+    "linux"
+  ],
   "publicApi": "runtime declarations authored in the entry module; dependencies linked privately",
   "targetPlanning": "JS/TS share a revalidated closed plan; Rust retains checked generic IR; Wasm specializes through its checked target boundary",
   "readability": "format before final source-map observation; no minification",
   "npmDistribution": "private workspace launcher; native binary packaging/publication not qualified",
-  "selfHosting": "not part of this qualification"
+  "selfHosting": "not part of this qualification",
+  "languageReference": "PSC1_LANGUAGE_REFERENCE_v7.2.md",
+  "featureStatus": "docs/PSC1_PRACTICAL_CORE_STATUS.json",
+  "normativeLean": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "pinMigration": "qualified exact native compiler/provider/owned-kernel/backend migration at 1bd0854f735cf8d0c8f3d07f705195c131acbd61, Linux run 39344155280",
+  "assurance": {
+    "ordinary": "qualified ordinary-checked logical admission plus exact separately typed runtime body; no behavioral certification",
+    "verified": "unavailable; explicit request fails without fallback",
+    "partial": "selected first-order and local-inhabitant functions; independent exact body admission and scoped target execution qualified"
+  },
+  "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "activeNativeSourcePin": "NATIVE_SOURCE_PIN.json",
+  "archivedArtifacts": "Prebuilt 4.34 artifacts retain their original pin and are not the active native provider",
+  "practicalCoreSlice": "docs/PSC1_PRACTICAL_CORE_SLICE_1.md",
+  "doValueUniverse": "Type 0 only for the newly selected Id/Except/CompilerM surface",
+  "practicalCoreQualification": "docs/PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json",
+  "practicalCoreQualifiedCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+  "practicalCoreQualifiedRun": 39348537989
 }

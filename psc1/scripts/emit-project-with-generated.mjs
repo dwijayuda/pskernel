@@ -304,7 +304,7 @@ async function writeGeneratedProjectMetadata() {
   } else {
     await writeFile(
       path.join(outputWorkspace, "lean-toolchain"),
-      "leanprover/lean4:v4.34.0\n",
+      "leanprover/lean4:v4.35.0\n",
       "utf8",
     );
     await writeFile(

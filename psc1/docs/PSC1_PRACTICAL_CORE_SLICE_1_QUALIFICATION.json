@@ -1,0 +1,131 @@
+{
+  "schema": "psc1-practical-core-qualification/1",
+  "profile": "PSC1 Practical Core — v7.2 subset",
+  "milestone": "slice-1",
+  "status": "qualified-scoped-subset",
+  "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
+  "implementationTree": "cb778954f86ce09fe22b4ed36240cb89f4e16382",
+  "workflow": {
+    "path": ".github/workflows/psc1-scoped-correctness.yml",
+    "runId": 39348537989,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39348537989",
+    "conclusion": "success",
+    "checkoutCommit": "aa3afeb4f7087f7b9781d67230dda919ff0b38ff",
+    "checkoutTree": "cb778954f86ce09fe22b4ed36240cb89f4e16382",
+    "checkoutTreeMatchesImplementation": true,
+    "platform": "Linux"
+  },
+  "checker": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "provider": "independent official Lean",
+    "behavioralCertification": false
+  },
+  "counts": {
+    "host": 15,
+    "do": 32,
+    "kernel": 18,
+    "ordinaryRuntime": 9,
+    "sourceEdges": 5,
+    "inference": 25,
+    "backendGroups": 24,
+    "formsArtifacts": 36
+  },
+  "additionalPassedSuites": [
+    "operator checked-Core equivalence and negative cases",
+    "ordinary independent admission, logical opacity, exact body/graph pairing, witness construction budget",
+    "IR input/output specialization validation",
+    "source maps",
+    "official provider and host boundaries"
+  ],
+  "formsExecution": {
+    "sourceForms": [
+      "lean",
+      "ps"
+    ],
+    "artifacts": 36,
+    "valueAssertions": 132,
+    "numericAndContextualTargets": [
+      "js",
+      "ts",
+      "rust"
+    ],
+    "boolOperatorIdAliasExceptTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component"
+    ],
+    "compilerM": "independent kernel conversion and typed IR; state read plus update observed"
+  },
+  "ordinaryExecution": {
+    "groups": 9,
+    "leanTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component"
+    ],
+    "proofScriptTargets": [
+      "js"
+    ],
+    "otherProofScriptEvidence": "native independent admission and strict IR",
+    "countdown": {
+      "inputs": [
+        "0",
+        "7",
+        "100000"
+      ],
+      "result": "42"
+    },
+    "importedBoolBody": {
+      "inputs": [
+        false,
+        true
+      ],
+      "results": [
+        true,
+        true
+      ]
+    },
+    "divergence": {
+      "externalTimeoutMs": 1000,
+      "expectedError": "ETIMEDOUT",
+      "runtimeFuel": false
+    },
+    "verifiedRequest": "explicit refusal without ordinary fallback"
+  },
+  "artifact": {
+    "id": 12231958323,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39348537989/artifacts/12231958323",
+    "name": "psc1-scoped-correctness-aa3afeb4f7087f7b9781d67230dda919ff0b38ff",
+    "digest": "sha256:df0ba1a2cef4b11caf640b9bc2f1b1b2fdf817758a1525cb99216772d235374f",
+    "bytes": 186126,
+    "expiresAt": "2026-11-03T00:38:16Z",
+    "evidencePaths": [
+      "practical-forms/execution-results.json",
+      "practical-forms/execution-results.json.sha256",
+      "ordinary/results.json",
+      "ordinary/divergence.json",
+      "source-edges.json"
+    ],
+    "readableBundles": true,
+    "evidenceRoot": "dist/scoped-correctness"
+  },
+  "pinOnlyQualification": {
+    "commit": "1bd0854f735cf8d0c8f3d07f705195c131acbd61",
+    "runId": 39344155280
+  },
+  "scope": {
+    "allFourteenFamiliesComplete": false,
+    "componentPublicScalars": [
+      "Bool"
+    ],
+    "fullSelfHostTests": false,
+    "packagePublication": false,
+    "fullV72Conformance": false,
+    "unrestrictedLean": false
+  }
+}

@@ -86,36 +86,67 @@ const chunkedBeyond=chunkedFind(chunked,BigInt(count));
 demand(!chunkedBeyond || !("value" in chunkedBeyond),"chunked-out-of-range");
 
 const timings=[];
-function timed(label,build){
-  const before=performance.now();
-  const result=build();
-  const elapsed=performance.now()-before;
-  timings.push({label,ms:Number(elapsed.toFixed(3)),n:result});
+const readArray=(a,id)=>accepted(lookup(a,id),"measured-array-read");
+const readChunked=(a,id)=>acceptedOption(chunkedFind(a,id),"measured-chunked-read");
+const readIndexed=(a,id)=>acceptedOption(indexedFind(a,id),"measured-indexed-read");
+function acceptedOption(option,label){
+  if(option&&"value" in option)return option.value;
+  throw Error("PSC1_V2_OPTION_MISSING "+label);
+}
+function timed(label,n,build,read){
+  // All benchmark variants insert the *same* already-validated metadata entry,
+  // and must read the beginning, middle and end from the completed arena.
+  const t0=performance.now();
+  const arena=build();
+  const checks=[0n,BigInt(Math.floor(n/2)),BigInt(n-1)];
+  let checksum=0n;
+  for(const id of checks){
+    const entry=read(arena,id);
+    if(entry.looseRange!==firstEntry.looseRange)
+      throw Error("PSC1_V2_BENCH_READBACK_LOOSE "+label+" "+id);
+    checksum+=entry.hash;
+  }
+  const ms=performance.now()-t0;
+  if(checksum!==3n*firstEntry.hash)
+    throw Error("PSC1_V2_BENCH_READBACK_HASH "+label);
+  if(typeof global.gc==="function")global.gc();
+  const m=process.memoryUsage();
+  // Keep the completed snapshot live past the forced-GC measurement.
+  if(read(arena,0n).hash!==firstEntry.hash)
+    throw Error("PSC1_V2_BENCH_GC_LOST_SNAPSHOT "+label);
+  timings.push({
+    label,n,ms:Number(ms.toFixed(3)),checksum:String(checksum),
+    post_gc_heap_bytes:m.heapUsed,rss_bytes:m.rss
+  });
 }
 for(const n of [256,1024,4096]){
   for(let round=0;round<2;round++){
-    timed("array-"+n+"-"+round,()=>{
+    timed("array-"+n+"-"+round,n,()=>{
       let x=empty;
       for(let i=0;i<n;i++)x=push(x,firstEntry).fst;
-      return x.nodes.length;
-    });
-    timed("chunked32-"+n+"-"+round,()=>{
-      let x=chunkedEmptyWithLimit(32n);
-      for(let i=0;i<n;i++)x=chunkedPush(x,firstEntry).fst;
-      return Number(x.size);
-    });
+      return x;
+    },readArray);
+    for(const limit of [16,32,64]){
+      timed("chunked"+limit+"-"+n+"-"+round,n,()=>{
+        let x=chunkedEmptyWithLimit(BigInt(limit));
+        for(let i=0;i<n;i++)x=chunkedPush(x,firstEntry).fst;
+        return x;
+      },readChunked);
+    }
     if(n===256){
-      timed("indexed-"+n+"-"+round,()=>{
+      timed("indexed-"+n+"-"+round,n,()=>{
         let x=emptyIndex;
         for(let i=0;i<n;i++){
           x=accepted(indexedPush(x,firstEntry),"bench-index-push").fst;
         }
-        return Number(x.size);
-      });
+        return x;
+      },readIndexed);
     }
   }
 }
-demand(timings.every(x=>x.n===Number(x.label.split("-")[1])),"matched-build-work");
+demand(timings.length===26 &&
+  timings.every(x=>x.checksum===String(firstEntry.hash*3n) &&
+    x.n===Number(x.label.split("-")[1])),"matched-storage-build-and-readback");
 console.log("PSC1_EXPR_V2_JS_TIMINGS "+JSON.stringify(timings));
 console.log("PSC1_EXPR_V2_JS_SUMMARY "+JSON.stringify({
   node:process.version,source_bytes:fs.statSync(filename).size,

@@ -59,6 +59,8 @@ jobs:
           grep -q "PSC1_EXPR_V2_PAIR_SHARING: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_PAIR_BATCH: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_PAIR_BATCH_SHARING: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
+          grep -q "PSC1_EXPR_V2_PAGED_PAIR_EQUALITY: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
+          grep -q "PSC1_EXPR_V2_PAGED_PAIR_BATCH: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_LEGACY_IMPORT: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_PAGED: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_PAGED_SPINE: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
@@ -168,6 +170,11 @@ jobs:
         run: |
           set -euo pipefail
           lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PagedHeadMachine.lean
+      - name: Check paged structural equality and scoped batch
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PagedEqualityBatch.lean
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -243,6 +250,8 @@ jobs:
             'ExprV2PagedLift.ps',
             'ExprV2PagedInstantiate.ps',
             'ExprV2PagedHeadMachine.ps',
+            'ExprV2PagedEquality.ps',
+            'ExprV2PagedEqualityBatch.ps',
             'ExprV2PortableEqualityBatch.ps',
             'ExprV2PortableImport.ps',
             'ExprV2PortableHeadMachine.ps',

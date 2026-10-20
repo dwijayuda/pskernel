@@ -50,6 +50,8 @@ const pagedValidate=load("psKernelExprV2PagedValidate");
 const pagedLift=load("psKernelExprV2PagedLiftChecked");
 const pagedInst=load("psKernelExprV2PagedInstantiate1Checked");
 const pagedHead=load("psKernelExprV2PagedHeadMachineChecked");
+const pagedStructuralEq=load("psKernelExprV2PagedEqChecked");
+const pagedEqBatch=load("psKernelExprV2PagedEqBatchChecked");
 const pagedMkLam=load("psKernelExprV2PagedMkLam");
 const pagedMkLet=load("psKernelExprV2PagedMkLet");
 const pagedMkMData=load("psKernelExprV2PagedMkMData");
@@ -329,6 +331,61 @@ compareBatch("batch");
 compareBatch("repeated-single");
 console.log("PSC1_EXPR_V2_PAIR_BATCH_TIMINGS "+JSON.stringify(pairBatchMetrics));
 
+
+
+
+// M4 same-arena paged structural equality and operation-scoped batch memo.
+// Copy one *already valid* chunked DAG in topological order, then require
+// independent paged metadata replay before any identity/hash shortcut.
+let pagedEqGraph=pagedEmptyWithLimit(64n);
+for(let id=0n;id<eqGraph.size;id++){
+  const source=acceptedOption(chunkedFind(eqGraph,id),"paged-eq-source-"+id);
+  const appended=pagedPush(pagedEqGraph,source);
+  if(appended.snd!==id)throw Error("PSC1_V2_PAGED_EQ_BAD_ID "+id);
+  pagedEqGraph=appended.fst;
+}
+pagedEqGraph=accepted(pagedValidate(pagedEqGraph),"paged-eq-validate");
+demand(accepted(pagedStructuralEq(pagedEqGraph,eqLeft,eqRight),
+    "paged-eq-shared")===true,"paged-eq-distinct-equal-DAGs");
+demand(accepted(pagedStructuralEq(pagedEqGraph,eqLeft,firstBVar.snd),
+    "paged-eq-not-equal")===false,"paged-eq-different-shapes");
+const pagedBVarCollision=accepted(pagedMkBVar(
+  pagedEmptyWithLimit(64n),0n),"paged-collision-left");
+const pagedCollisionDone=accepted(pagedMkBVar(
+  pagedBVarCollision.fst,65521n),"paged-collision-right");
+const hash0=acceptedOption(pagedFind(pagedCollisionDone.fst,pagedBVarCollision.snd),
+  "paged-collision-first").hash;
+const hash1=acceptedOption(pagedFind(pagedCollisionDone.fst,pagedCollisionDone.snd),
+  "paged-collision-second").hash;
+demand(hash0===hash1 &&
+  accepted(pagedStructuralEq(pagedCollisionDone.fst,
+    pagedBVarCollision.snd,pagedCollisionDone.snd),"paged-hash-collision")===false,
+  "paged-eq-hash-collision-safe");
+const pagedPairs=accepted(pagedEqBatch(pagedEqGraph,pairQueries),
+  "paged-eq-ordered-batch");
+demand(boolListEq(pagedPairs)(expectedPairAnswers)===true &&
+  boolListEq(pagedPairs)(paired)===true,"paged-eq-batch-parity");
+const badPagedEq=pagedStructuralEq(forgedPaged,0n,0n);
+const badPagedBatch=pagedEqBatch(forgedPaged,pairQueries);
+demand(badPagedEq&&"error" in badPagedEq &&
+  badPagedBatch&&"error" in badPagedBatch,
+  "paged-eq-forged-metadata-rejected");
+const badPagedId=pagedEqBatch(pagedEqGraph,
+  boolList.cons({fst:999999n,snd:eqRight},boolListNil));
+demand(badPagedId&&"error" in badPagedId,"paged-eq-batch-invalid-ID");
+const pagedEqTimings=[];
+for(const kind of ["chunked","paged","paged","chunked"]){
+  const arena=kind==="paged"?pagedEqGraph:eqGraph;
+  const operation=kind==="paged"?pagedEqBatch:portableEqBatch;
+  const begin=performance.now();
+  const values=accepted(operation(arena,repeatedPairs),"paged-pair-timing");
+  const ms=performance.now()-begin;
+  if(!boolListEq(values)(repeatedExpected))
+    throw Error("PSC1_V2_PAGED_EQ_BATCH_TIMING_PARITY");
+  pagedEqTimings.push({kind,queries:12,arena_nodes:Number(arena.size),
+    ms:Number(ms.toFixed(3))});
+}
+console.log("PSC1_EXPR_V2_PAGED_PAIR_TIMINGS "+JSON.stringify(pagedEqTimings));
 
 // Real legacy-expression input adapter, checked by the same portable
 // smart-constructor replay used for V2 metadata/collision safety.

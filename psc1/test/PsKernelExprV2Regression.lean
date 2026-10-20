@@ -1054,6 +1054,26 @@ Portable V2 alpha-insensitive structural equality, collision safety, and
 pair memoization on a repeated DAG. Differentiation against the old
 PsKernelExprEq is done only on finitely materialized small expressions.
 -/
+
+/-
+Test-only comparison adapter. It does NOT bless source metadata: both
+incoming chunks and the resulting paged arena must independently validate.
+Each node is copied in topological ID order so the paged validator can
+recompute every cached field using its own checked smart constructors.
+-/
+private def psKernelExprV2CopyPagedForTest
+    (chunked : PsKernelExprV2ChunkedArena) :
+    IO PsKernelExprV2PagedArena := do
+  let _ ← expectV2 (psKernelExprV2PortableValidate chunked)
+  let mut pages := psKernelExprV2PagedEmpty
+  for id in [:chunked.size] do
+    let entry ← expectV2 (psKernelExprV2ChunkedRequire chunked id)
+    let (next,newId) := psKernelExprV2PagedPush pages entry
+    unless newId == id do
+      throw (IO.userError "PSC1_V2_PAGED_TEST_COPY_ID_MISMATCH")
+    pages := next
+  expectV2 (psKernelExprV2PagedValidate pages)
+
 private def testPortablePairEquality : IO Unit := do
   let name := PsKernelName.str PsKernelName.anonymous "alphaLeft"
   let anotherName := PsKernelName.str PsKernelName.anonymous "alphaRight"
@@ -1139,6 +1159,7 @@ private def testPortablePairEquality : IO Unit := do
     ("projection-vs-metadata",proj,mdata)
   ]
   let valid ← expectV2 (psKernelExprV2PortableValidate arena)
+  let pages ← psKernelExprV2CopyPagedForTest arena
   for (label,left,right) in pairs do
     let oldLeft ← expectV2 (psKernelExprV2ChunkedDecode valid left)
     let oldRight ← expectV2 (psKernelExprV2ChunkedDecode valid right)
@@ -1146,6 +1167,10 @@ private def testPortablePairEquality : IO Unit := do
     let observed ← expectV2
       (psKernelExprV2PortableEqChecked arena left right)
     requireV2 ("pair-eq-" ++ label) (observed == expected)
+    let pagedAnswer ← expectV2
+      (psKernelExprV2PagedEqChecked pages left right)
+    requireV2 ("paged-pair-eq-" ++ label)
+      (pagedAnswer == observed && pagedAnswer == expected)
   requireV2 "pair-eq-invalid-left"
     (match psKernelExprV2PortableEqChecked arena 99999 app with
       | Except.error _ => true
@@ -1154,6 +1179,12 @@ private def testPortablePairEquality : IO Unit := do
     (match psKernelExprV2PortableEqChecked arena app 99999 with
       | Except.error _ => true
       | Except.ok _ => false)
+  requireV2 "paged-pair-eq-invalid-left"
+    (match psKernelExprV2PagedEqChecked pages 99999 app with
+      | Except.error _ => true | Except.ok _ => false)
+  requireV2 "paged-pair-eq-invalid-right"
+    (match psKernelExprV2PagedEqChecked pages app 99999 with
+      | Except.error _ => true | Except.ok _ => false)
   let forgedEntry ← expectV2 (psKernelExprV2ChunkedRequire arena bvar0)
   let corrupt : PsKernelExprV2Entry := {
     forgedEntry with hasFVar := true
@@ -1164,6 +1195,12 @@ private def testPortablePairEquality : IO Unit := do
     (match psKernelExprV2PortableEqChecked forged root root with
       | Except.error _ => true
       | Except.ok _ => false)
+  let (forgedPaged,pagedId) := psKernelExprV2PagedPush
+    psKernelExprV2PagedEmpty corrupt
+  requireV2 "paged-pair-eq-forged-metadata-rejected"
+    (match psKernelExprV2PagedEqChecked forgedPaged pagedId pagedId with
+      | Except.error _ => true | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_PAGED_PAIR_EQUALITY: PASS cases=16"
   IO.println "PSC1_EXPR_V2_PAIR_EQUALITY: PASS cases=16"
 
 private def testPortablePairSharing : IO Unit := do
@@ -1184,6 +1221,9 @@ private def testPortablePairSharing : IO Unit := do
   requireV2 "pair-shared-compact-node-count"
     (arena.size == depth*2+1)
   let equal ← expectV2 (psKernelExprV2PortableEqChecked arena lhs rhs)
+  let pages ← psKernelExprV2CopyPagedForTest arena
+  let pagedEqual ← expectV2 (psKernelExprV2PagedEqChecked pages lhs rhs)
+  requireV2 "paged-pair-eq-deep-sharing" (pagedEqual == equal && pagedEqual)
   requireV2 "pair-shared-distinct-ids-structurally-equal"
     (lhs != rhs && equal)
   let different ← expectV2
@@ -1217,6 +1257,12 @@ private def testPortableEqualityBatch : IO Unit := do
     (psKernelExprV2PortableEqBatchChecked arena pairs)
   requireV2 "pair-batch-ordered-results"
     (psKernelExprV2PortableBoolListEq observed expected)
+  let pages ← psKernelExprV2CopyPagedForTest arena
+  let pagedAnswers ← expectV2
+    (psKernelExprV2PagedEqBatchChecked pages pairs)
+  requireV2 "paged-pair-batch-ordered-results"
+    (psKernelExprV2PortableBoolListEq pagedAnswers expected &&
+      psKernelExprV2PortableBoolListEq pagedAnswers observed)
   let emptyResult ← expectV2
     (psKernelExprV2PortableEqBatchChecked arena List.nil)
   requireV2 "pair-batch-empty-input"
@@ -1226,6 +1272,10 @@ private def testPortableEqualityBatch : IO Unit := do
         arena [(left,999999)] with
       | Except.error _ => true
       | Except.ok _ => false)
+  requireV2 "paged-pair-batch-rejects-invalid-node"
+    (match psKernelExprV2PagedEqBatchChecked
+        pages [(left,999999)] with
+      | Except.error _ => true | Except.ok _ => false)
   let rootEntry ← expectV2 (psKernelExprV2ChunkedRequire arena left)
   let forgedEntry : PsKernelExprV2Entry := {
     rootEntry with hasFVar := true
@@ -1237,6 +1287,13 @@ private def testPortableEqualityBatch : IO Unit := do
         forged [(forgedId,forgedId)] with
       | Except.error _ => true
       | Except.ok _ => false)
+  let (forgedPage,pageId) := psKernelExprV2PagedPush
+    psKernelExprV2PagedEmpty forgedEntry
+  requireV2 "paged-pair-batch-forged-metadata-rejected"
+    (match psKernelExprV2PagedEqBatchChecked
+        forgedPage [(pageId,pageId)] with
+      | Except.error _ => true | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_PAGED_PAIR_BATCH: PASS cases=5"
   let (separate,other) ← expectV2
     (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
   let (separate,otherDifferent) ← expectV2
@@ -1269,6 +1326,12 @@ private def testPortableEqualityBatchSharing : IO Unit := do
     expected := List.cons true expected
   let result ← expectV2
     (psKernelExprV2PortableEqBatchChecked arena queries)
+  let pages ← psKernelExprV2CopyPagedForTest arena
+  let pagedResult ← expectV2
+    (psKernelExprV2PagedEqBatchChecked pages queries)
+  requireV2 "paged-pair-batch-reuses-shared-comparisons"
+    (psKernelExprV2PortableBoolListEq pagedResult expected &&
+      psKernelExprV2PortableBoolListEq pagedResult result)
   requireV2 "pair-batch-reuses-shared-comparisons"
     (psKernelExprV2PortableBoolListEq result expected)
   IO.println "PSC1_EXPR_V2_PAIR_BATCH_SHARING: PASS nodes=41 comparisons=16"

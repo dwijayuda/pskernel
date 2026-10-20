@@ -23,6 +23,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.ParserState,
     `Ps.Syntax.ParseCommon,
     `Ps.Syntax.ParseDo,
+    `Ps.Syntax.ParseData,
     `Ps.Syntax.Operators,
     `Ps.Syntax.ParseLean,
     `Ps.Syntax.ParseProofScript,
@@ -54,7 +55,8 @@ lean_lib PsEnvironment where
     `Ps.Environment.Resolve,
     `Ps.Environment.Prelude,
     `Ps.Environment.SelfHostPrelude,
-    `Ps.Environment.SelfHostProd
+    `Ps.Environment.SelfHostProd,
+    `Ps.Environment.Control
   ]
 
 lean_lib PsBridge where
@@ -213,6 +215,8 @@ lean_lib PsElab where
     `Ps.Elab.Literal,
     `Ps.Elab.Basic,
     `Ps.Elab.DoLoop,
+    `Ps.Elab.DoBase,
+    `Ps.Elab.DoFor,
     `Ps.Elab.Do,
     `Ps.Elab.Operators,
     `Ps.Elab.Term,
@@ -316,3 +320,7 @@ lean_exe psc1_runtime_oracle where
 lean_exe psc1_script_ir_tests where
   srcDir := "test"
   root := `BackendScriptTests
+
+lean_exe psc1_data_tests where
+  srcDir := "test"
+  root := `DataTests

@@ -1,6 +1,7 @@
 import Ps.Syntax.Lexer
 import Ps.Syntax.ParseCommon
 import Ps.Syntax.ParseDo
+import Ps.Syntax.ParseData
 import Ps.Syntax.Operators
 
 def psLeanTermStop
@@ -291,31 +292,9 @@ def psParseLeanApplicationPrimary
   if psTokenCursorAtText cursor "nomatch" then
     psParseLeanNomatch parseNomatchScrutinee cursor
   else if psTokenCursorAtText cursor "(" then
-    match psTokenCursorAdvance cursor with
-    | Option.none => Except.error (PsParseError.unexpectedEnd "(")
-    | Option.some opening =>
-        if psTokenCursorAtText opening.cursor ")" then
-          match psTokenCursorAdvance opening.cursor with
-          | Option.none => Except.error (PsParseError.unexpectedEnd ")")
-          | Option.some close =>
-              Except.ok {
-                value := PsSyntaxTerm.unit {
-                  start := opening.token.span.start
-                  stop := close.token.span.stop
-                }
-                cursor := close.cursor
-              }
-        else
-          match parseParenthesized opening.cursor with
-          | Except.error error => Except.error error
-          | Except.ok inner =>
-              match psTokenCursorExpectText inner.cursor ")" with
-              | Except.error error => Except.error error
-              | Except.ok close =>
-                  Except.ok {
-                    value := inner.value
-                    cursor := close.cursor
-                  }
+    psParseDataParen parseParenthesized (fun value _ => value) cursor
+  else if psTokenCursorAtText cursor "#" then
+    psParseDataArray parseParenthesized cursor
   else if psTokenCursorAtText cursor "[" then
     match psTokenCursorAdvance cursor with
     | Option.none => Except.error (PsParseError.unexpectedEnd "[")
@@ -343,6 +322,8 @@ def psLeanCanStartSimpleArgument
       else if startsLaterAssignment then
         false
       else if psStringEq token.text "(" then
+        true
+      else if psStringEq token.text "#" then
         true
       else if psStringEq token.text "[" then
         true
@@ -393,39 +374,15 @@ def psParseLeanApplicationTailWithFuel
           remaining;
       if psLeanCanStartSimpleArgument current cursor then
         if psTokenCursorAtText cursor "(" then
-          match psTokenCursorAdvance cursor with
-          | Option.none => Except.error (PsParseError.unexpectedEnd "(")
-          | Option.some opening =>
-              if psTokenCursorAtText opening.cursor ")" then
-                match psTokenCursorAdvance opening.cursor with
-                | Option.none => Except.error (PsParseError.unexpectedEnd ")")
-                | Option.some close =>
-                    let argument :=
-                      PsSyntaxTerm.unit {
-                        start := opening.token.span.start
-                        stop := close.token.span.stop
-                      };
-                    let next :=
-                      psLeanApplicationWithArgument
-                        current
-                        argument;
-                    smaller
-                      next
-                      close.cursor
-              else
-                match parseParenthesized opening.cursor with
-                | Except.error error => Except.error error
-                | Except.ok inner =>
-                    match psTokenCursorExpectText inner.cursor ")" with
-                    | Except.error error => Except.error error
-                    | Except.ok close =>
-                        let next :=
-                          psLeanApplicationWithArgument
-                            current
-                            inner.value;
-                        smaller
-                          next
-                          close.cursor
+          match psParseDataParen parseParenthesized (fun value _ => value) cursor with
+          | .error error => .error error
+          | .ok argument =>
+              smaller (psLeanApplicationWithArgument current argument.value) argument.cursor
+        else if psTokenCursorAtText cursor "#" then
+          match psParseDataArray parseParenthesized cursor with
+          | .error error => .error error
+          | .ok argument =>
+              smaller (psLeanApplicationWithArgument current argument.value) argument.cursor
         else if psTokenCursorAtText cursor "[" then
           match psTokenCursorAdvance cursor with
           | Option.none =>

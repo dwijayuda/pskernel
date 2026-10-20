@@ -97,6 +97,340 @@ private def testCompilerM (natType : PsExpr) : IO Unit := do
   checkReduced "existing checked CompilerM read and state update" prepared natType
     (PsExpr.lit (PsLiteral.natural 15))
 
+  let controlFixture :=
+    "def program : CompilerM Unit Nat String Nat := do\n" ++
+    "  let original : Nat <- compilerGet ()\n" ++
+    "  let mut next : Nat := original\n" ++
+    "  if Nat.beq original 7 then\n" ++
+    "    next := Nat.add next 1\n" ++
+    "  else\n" ++
+    "    next := Nat.add next 2\n" ++
+    "  compilerSet next\n" ++
+    "  if Nat.beq next 8 then\n" ++
+    "    return original\n" ++
+    "  return 0\n" ++
+    "def result : Nat := match program.run () 7 with\n" ++
+    "  | Result.ok pair => Nat.add pair.fst pair.snd\n" ++
+    "  | Result.error error => 0\n"
+  let controlled ←
+    match psCompilerPrepareSources .lean [resultLibrary, effectLibrary, controlFixture] with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "CompilerM control-flow library preparation")
+  checkReduced "checked CompilerM mutation branch and early return" controlled natType
+    (PsExpr.lit (PsLiteral.natural 15))
+
+private def testControlFlow (natType : PsExpr) : IO Unit := do
+  let seven := PsExpr.lit (PsLiteral.natural 7)
+  let psMutation :=
+    "def result : Id Nat := do {\n" ++
+    "  let mut value : Nat := 1\n" ++
+    "  value := value + 2\n" ++
+    "  if (true) {\n" ++
+    "    value := value + 4\n" ++
+    "  } else {\n" ++
+    "    value := 99\n" ++
+    "  }\n" ++
+    "  return value\n}\n"
+  let leanMutation :=
+    "def result : Id Nat := do\n" ++
+    "  let mut value : Nat := 1\n" ++
+    "  value := value + 2\n" ++
+    "  if true then\n" ++
+    "    value := value + 4\n" ++
+    "  else\n" ++
+    "    value := 99\n" ++
+    "  return value\n"
+  checkSource "PS lexical mutation and branch join" .proofScript psMutation natType seven
+  checkSource "Lean lexical mutation and branch join" .lean leanMutation natType seven
+  checkSource "Lean braced mutable locals" .lean
+    "def result : Id Nat := do { let mut value := 3; value := value + 4; return value }"
+    natType seven
+  roundTrip "PS mutation to Lean preserves checked Core" .proofScript .lean psMutation
+  roundTrip "Lean mutation to PS preserves checked Core" .lean .proofScript leanMutation
+  checkSource "false branch updates outer mutable local" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 1\n" ++
+      "  if false then\n" ++
+      "    value := 99\n" ++
+      "  else\n" ++
+      "    value := 7\n" ++
+      "  return value\n") natType seven
+  checkSource "omitted else preserves current state" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 7\n" ++
+      "  if false then\n" ++
+      "    value := 99\n" ++
+      "  return value\n") natType seven
+  checkSource "nested branch mutation and early return" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 3\n" ++
+      "  if true then\n" ++
+      "    value := 7\n" ++
+      "    if Nat.beq value 7 then\n" ++
+      "      return value\n" ++
+      "    value := 99\n" ++
+      "  value := value + 1\n" ++
+      "  return value\n") natType seven
+  let psEarly :=
+    "def result : Id Nat := do {\n" ++
+    "  let mut value := 3\n" ++
+    "  if (true) {\n" ++
+    "    value := 7\n" ++
+    "    return value\n" ++
+    "  }\n" ++
+    "  value := 99\n" ++
+    "  return value\n}\n"
+  checkSource "PS branch return bypasses continuation" .proofScript psEarly natType seven
+  roundTrip "PS early return roundtrip" .proofScript .lean psEarly
+  checkSource "mutable capture retains captured value" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 3\n" ++
+      "  let captured : Nat -> Nat := fun (n : Nat) => value + n\n" ++
+      "  value := 100\n" ++
+      "  return captured 4\n") natType seven
+  checkSource "mutable local may shadow an immutable binding" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let value : Bool := false\n" ++
+      "  let mut value : Nat := 3\n" ++
+      "  value := value + 4\n" ++
+      "  return value\n") natType seven
+  checkSource "direct nested do shares mutable locals" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 3\n" ++
+      "  do\n" ++
+      "    value := value + 4\n" ++
+      "  return value\n") natType seven
+  checkSource "direct nested do carries branch return outward" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 3\n" ++
+      "  do\n" ++
+      "    if true then\n" ++
+      "      return 7\n" ++
+      "    value := 99\n" ++
+      "  return value\n") natType seven
+  checkSource "terminal expression-valued if remains supported" .lean
+    "def result : Id Nat := do if true then 7 else 9" natType seven
+  checkSource "PS terminal expression-valued if remains supported" .proofScript
+    "def result : Id Nat := do { if (true) { 7 } else { 9 } }\n" natType seven
+  checkSource "dedented else belongs to the outer conditional" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 7\n" ++
+      "  if true then\n" ++
+      "    if false then\n" ++
+      "      value := 99\n" ++
+      "  else\n" ++
+      "    value := 50\n" ++
+      "  return value\n") natType seven
+  checkSource "nested do return has its own boundary" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 3\n" ++
+      "  let inner : Id Nat := (do { return 4 })\n" ++
+      "  value := value + Id.run inner\n" ++
+      "  return value\n") natType seven
+  let stringType := PsExpr.constE psStringName []
+  let exceptType := psSelfHostExceptOf stringType natType
+  checkSource "Except early branch return preserves effect" .lean
+    ("def result : Except String Nat := do\n" ++
+      "  let mut value := 3\n" ++
+      "  if true then\n" ++
+      "    value := 7\n" ++
+      "    return value\n" ++
+      "  return 99\n") exceptType (psSelfHostExceptOkOf stringType natType seven)
+  checkSource "Except error bypasses assignment and continuation" .proofScript
+    ("def result : Except String Nat := do {\n" ++
+      "  let mut value := 3\n" ++
+      "  value := value + 4\n" ++
+      "  if (true) {\n" ++
+      "    let ignored : Unit <- Except.error(\"first\")\n" ++
+      "    value := 99\n" ++
+      "  }\n" ++
+      "  return value\n}\n")
+    exceptType (psSelfHostExceptErrorOf stringType natType
+      (PsExpr.lit (PsLiteral.string "first")))
+  reject "assignment to immutable local" .lean
+    "def result : Id Nat := do { let value := 7; value := 8; return value }"
+  reject "assignment to unknown local" .proofScript
+    "def result : Id Nat := do {\n value := 8\n return 7\n}\n"
+  reject "assignment type mismatch" .lean
+    "def result : Id Nat := do { let mut value : Nat := 7; value := true; return value }"
+  reject "immutable binding cannot shadow a mutable local" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 7\n" ++
+      "  if true then\n" ++
+      "    let value := 1\n" ++
+      "    value := 9\n" ++
+      "  return value\n")
+  reject "mutable binding cannot shadow a mutable local" .lean
+    "def result : Id Nat := do { let mut value := 7; let mut value := 8; return value }"
+  reject "branch local cannot escape" .proofScript
+    ("def result : Id Nat := do {\n" ++
+      "  if (true) {\n" ++
+      "    let hidden := 7\n" ++
+      "    ()\n" ++
+      "  }\n" ++
+      "  return hidden\n}\n")
+  reject "branch return type mismatch" .lean
+    ("def result : Id Nat := do\n" ++
+      "  if true then\n" ++
+      "    return false\n" ++
+      "  return 7\n")
+  reject "fallthrough branch cannot invent a Nat result" .lean
+    "def result : Id Nat := do\n  if true then\n    return 7\n"
+  reject "independent nested do cannot assign outer mutable local" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut value := 7\n" ++
+      "  let inner : Id Nat := do { value := 8; return value }\n" ++
+      "  return Id.run inner\n")
+  require "unassured partial control flow retains the admission refusal"
+    (match psCompilerPrepareSource .lean
+      ("partial def result (flag : Bool) : Id Nat := do\n" ++
+        "  let mut value := 7\n" ++
+        "  if flag then\n" ++
+        "    value := 8\n" ++
+        "  return value\n") with
+      | .error (.admission _) => true
+      | _ => false)
+
+private def testFiniteLoops (natType : PsExpr) : IO Unit := do
+  let nat (n : Nat) := PsExpr.lit (PsLiteral.natural n)
+  let list := "List.cons 1 (List.cons 2 (List.cons 3 List.nil))"
+  let array := "Array.push (Array.push (Array.push (Array.emptyWithCapacity 0) 1) 2) 3"
+  let leanList :=
+    "def result : Id Nat := do\n" ++
+    "  let mut total : Nat := 0\n" ++
+    "  for value in " ++ list ++ " do\n" ++
+    "    total := Nat.add (Nat.mul total 10) value\n" ++
+    "  return total\n"
+  let psList :=
+    "def result : Id Nat := do {\n" ++
+    "  let mut total : Nat := 0\n" ++
+    "  for value in List.cons(1, List.cons(2, List.cons(3, List.nil))) {\n" ++
+    "    total := Nat.add(Nat.mul(total, 10), value)\n" ++
+    "  }\n  return total\n}\n"
+  checkSource "finite List iterates left-to-right" .lean leanList natType (nat 123)
+  checkSource "PS finite List iterates left-to-right" .proofScript psList natType (nat 123)
+  roundTrip "finite List PS to Lean" .proofScript .lean psList
+  checkSource "finite List empty does not execute body" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut total := 7\n" ++
+      "  let values : List Nat := List.nil\n" ++
+      "  for value in values do\n    total := Nat.add total value\n" ++
+      "  return total\n") natType (nat 7)
+  checkSource "finite List singleton" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut total := 1\n" ++
+      "  for value in List.cons 8 List.nil do\n    total := Nat.add total value\n" ++
+      "  return total\n") natType (nat 9)
+  checkSource "finite Array iterates left-to-right" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut total := 0\n" ++
+      "  for value in " ++ array ++ " do\n" ++
+      "    total := Nat.add (Nat.mul total 10) value\n" ++
+      "  return total\n") natType (nat 123)
+  checkSource "finite Array collection is captured once" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut values := " ++ array ++ "\n" ++
+      "  let mut total := 0\n" ++
+      "  for value in values do\n" ++
+      "    values := Array.emptyWithCapacity 0\n" ++
+      "    total := Nat.add total value\n" ++
+      "  return total\n") natType (nat 6)
+  checkSource "finite Array empty" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let values : Array Nat := Array.emptyWithCapacity 0\n" ++
+      "  let mut total := 7\n" ++
+      "  for value in values do\n    total := Nat.add total value\n" ++
+      "  return total\n") natType (nat 7)
+  let leanRange :=
+    "def result : Id Nat := do\n" ++
+    "  let mut total := 0\n" ++
+    "  let mut lower := 2\n" ++
+    "  let mut upper := 5\n" ++
+    "  for value in [lower:upper] do\n" ++
+    "    lower := 100\n" ++
+    "    upper := 0\n" ++
+    "    total := Nat.add (Nat.mul total 10) value\n" ++
+    "  return total\n"
+  let psRange :=
+    "def result : Id Nat := do {\n" ++
+    "  let mut total := 0\n" ++
+    "  let mut lower := 2\n" ++
+    "  let mut upper := 5\n" ++
+    "  for value in [lower:upper] {\n" ++
+    "    lower := 100\n" ++
+    "    upper := 0\n" ++
+    "    total := Nat.add(Nat.mul(total, 10), value)\n" ++
+    "  }\n  return total\n}\n"
+  checkSource "finite range is ascending and captures both bounds once" .lean
+    leanRange natType (nat 234)
+  checkSource "PS finite range and loop-carried state" .proofScript
+    psRange natType (nat 234)
+  roundTrip "finite range Lean to PS" .lean .proofScript leanRange
+  checkSource "finite range equal bounds is empty" .lean
+    "def result : Id Nat := do { let mut n := 7; for i in [3:3] do { n := Nat.add n i }; return n }"
+    natType (nat 7)
+  checkSource "finite range reversed bounds is empty" .lean
+    "def result : Id Nat := do { let mut n := 7; for i in [5:2] do { n := Nat.add n i }; return n }"
+    natType (nat 7)
+  checkSource "finite range omitted lower bound" .lean
+    "def result : Id Nat := do { let mut n := 0; for i in [:3] do { n := Nat.add n i }; return n }"
+    natType (nat 3)
+  checkSource "finite nested loops carry the outer mutable local" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut total := 0\n" ++
+      "  for x in List.cons 1 (List.cons 2 List.nil) do\n" ++
+      "    for y in [3:5] do\n" ++
+      "      total := Nat.add total (Nat.add x y)\n" ++
+      "  return total\n") natType (nat 20)
+  checkSource "finite loop early return skips later iterations and rest" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut total := 0\n" ++
+      "  for value in " ++ list ++ " do\n" ++
+      "    if Nat.beq value 2 then\n      return total\n" ++
+      "    total := Nat.add total value\n" ++
+      "  return 999\n") natType (nat 1)
+  checkSource "return from nested finite loops leaves the enclosing computation" .lean
+    ("def result : Id Nat := do\n" ++
+      "  let mut total := 0\n" ++
+      "  for x in [1:4] do\n" ++
+      "    for y in [1:4] do\n" ++
+      "      if Nat.beq y 2 then\n        return Nat.add total x\n" ++
+      "      total := Nat.add total y\n" ++
+      "  return 999\n") natType (nat 2)
+  let stringType := PsExpr.constE psStringName []
+  let exceptType := psSelfHostExceptOf stringType natType
+  let expectedError := psSelfHostExceptErrorOf stringType natType
+    (PsExpr.lit (PsLiteral.string "two"))
+  checkSource "finite loops propagate typed Except failure" .lean
+    ("def result : Except String Nat := do\n" ++
+      "  let mut total := 0\n" ++
+      "  for i in [0:4] do\n" ++
+      "    let value : Nat <- if Nat.beq i 2 then Except.error \"two\" else Except.ok i\n" ++
+      "    total := Nat.add total value\n" ++
+      "  return total\n") exceptType expectedError
+  checkSource "finite early return is separate from a later typed error" .lean
+    ("def result : Except String Nat := do\n" ++
+      "  let mut total := 0\n" ++
+      "  for i in [0:4] do\n" ++
+      "    if Nat.beq i 1 then\n      return total\n" ++
+      "    let value : Nat <- if Nat.beq i 2 then Except.error \"two\" else Except.ok i\n" ++
+      "    total := Nat.add total value\n" ++
+      "  return 999\n") exceptType (psSelfHostExceptOkOf stringType natType (nat 0))
+  reject "finite for rejects a noniterable" .lean
+    "def result : Id Nat := do { for value in true do { () }; return 7 }"
+  reject "finite range rejects a non-Nat bound" .lean
+    "def result : Id Nat := do { for value in [false:3] do { () }; return 7 }"
+  reject "finite loop variable is immutable" .lean
+    "def result : Id Nat := do { for value in [0:3] do { value := 4 }; return 7 }"
+  reject "finite loop variable cannot shadow a mutable local" .lean
+    "def result : Id Nat := do { let mut value := 0; for value in [0:3] do { () }; return value }"
+  reject "finite loop iterator does not escape" .lean
+    "def result : Id Nat := do { for value in [0:3] do { () }; return value }"
+  reject "finite loop local does not escape" .lean
+    "def result : Id Nat := do { for value in [0:3] do { let local := value; () }; return local }"
+  reject "finite loop mutation keeps one type" .lean
+    "def result : Id Nat := do { let mut value := 0; for i in [0:3] do { value := true }; return value }"
+
 def main : IO Unit := do
   let natType := PsExpr.constE psNatName []
   let stringType := PsExpr.constE psStringName []
@@ -178,8 +512,6 @@ def main : IO Unit := do
     "def result : Id Nat := do { let value := 7; return value }\n"
   reject "PS braces required" .proofScript
     "def result : Id Nat := do\n  return 7\n"
-  reject "mutation is outside first do slice" .lean
-    "def result : Id Nat := do { let mut value := 7; return value }"
   reject "missing expected effect" .lean
     "def result : Nat := let value := do { return 7 }; value"
   require "unassured partial do retains the admission refusal"
@@ -195,4 +527,6 @@ def main : IO Unit := do
   require "kernel conversion harness rejects a wrong result"
     (match wrongConversion with | .error _ => true | .ok _ => false)
   testCompilerM natType
+  testControlFlow natType
+  testFiniteLoops natType
   IO.println "PSC1_DO_TESTS: PASS"

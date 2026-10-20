@@ -1,6 +1,7 @@
 import Ps.Syntax.Lexer
 import Ps.Syntax.ParseCommon
 import Ps.Syntax.ParseDo
+import Ps.Syntax.ParseData
 import Ps.Syntax.Operators
 
 -- Current host tools authenticate this source format before reading or emitting PS.
@@ -343,6 +344,7 @@ def psProofScriptCanStartNativeArgument
         false
       else if psTokenCursorAtText cursor "(" then true
       else if psTokenCursorAtText cursor "{" then true
+      else if psTokenCursorAtText cursor "#" then true
       else if psTokenKindEq token.kind PsTokenKind.identifier then true
       else if psTokenKindEq token.kind PsTokenKind.natural then true
       else if psTokenKindEq token.kind PsTokenKind.string then true
@@ -357,34 +359,9 @@ def psParseProofScriptPrimary
   if psTokenCursorAtText cursor "{" then
     psParseProofScriptRecordLiteral parseInner cursor
   else if psTokenCursorAtText cursor "(" then
-    match psTokenCursorAdvance cursor with
-    | Option.none => Except.error (PsParseError.unexpectedEnd "parenthesized term")
-    | Option.some opening =>
-        if psTokenCursorAtText opening.cursor ")" then
-          match psTokenCursorAdvance opening.cursor with
-          | Option.none => Except.error (PsParseError.unexpectedEnd ")")
-          | Option.some close =>
-              Except.ok {
-                value := PsSyntaxTerm.unit {
-                  start := opening.token.span.start
-                  stop := close.token.span.stop
-                }
-                cursor := close.cursor
-              }
-        else
-          match parseInner opening.cursor with
-          | Except.error error => Except.error error
-          | Except.ok inner =>
-              match psTokenCursorExpectText inner.cursor ")" with
-              | Except.error error => Except.error error
-              | Except.ok close =>
-                  Except.ok {
-                    value := psProofScriptTermWithSpan inner.value {
-                      start := opening.token.span.start
-                      stop := close.token.span.stop
-                    }
-                    cursor := close.cursor
-                  }
+    psParseDataParen parseInner psProofScriptTermWithSpan cursor
+  else if psTokenCursorAtText cursor "#" then
+    psParseDataArray parseInner cursor
   else
     psParseSimpleTerm cursor
 

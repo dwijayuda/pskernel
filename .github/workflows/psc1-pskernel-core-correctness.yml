@@ -6,6 +6,7 @@ on:
       - research/psc1-pskernel-lean435-performance-20261020
     paths:
       - psc1/lean-toolchain
+      - psc1/host/**
       - psc1/packages/pskernel-core/**
       - psc1/test/PsKernelCoreRegression.lean
       - psc1/test/PsKernelInstantiatePerformance.lean

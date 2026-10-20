@@ -123,7 +123,13 @@ def psElabDoBind
               let term :=
                 match ops with
                 | PsElabDoOps.identity _ =>
-                    PsExpr.app continuation action
+                    -- Generated continuations are lambdas. Preserve strict
+                    -- single evaluation as an ordinary checked Core let,
+                    -- avoiding a needless computed runtime call target.
+                    match continuation with
+                    | PsExpr.lam name type body _ =>
+                        PsExpr.letE name type action body
+                    | _ => PsExpr.app continuation action
                 | PsElabDoOps.except error =>
                     let motive :=
                       PsExpr.lam (psRootName "_") inputType

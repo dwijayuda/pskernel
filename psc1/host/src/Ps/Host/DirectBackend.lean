@@ -398,11 +398,32 @@ def psHostWriteWat (binaryPath watPath : System.FilePath) : IO Unit := do
   if text.isEmpty then throw (IO.userError "PSC1_WAT_EMPTY")
   IO.FS.writeFile watPath text
 
+def psHostWasmLowerErrorText : PsWasmLowerError -> String
+  | .unsupportedType => "unsupported type"
+  | .unsupportedTypeContext context => "unsupported type: " ++ context
+  | .unsupportedExpression => "unsupported expression"
+  | .unsupportedExpressionContext context reason => context ++ ": " ++ reason
+  | .specializationFailed error => "specialization: " ++ specializeFailureText error
+  | .unsupportedIntrinsic => "unsupported intrinsic"
+  | .invalidIntrinsicArity => "invalid intrinsic arity"
+  | .invalidCallArity => "invalid call arity"
+  | .unknownVariable name => "unknown variable: " ++ name
+  | .unknownStructure name => "unknown structure: " ++ name
+  | .unknownStructureField name field => "unknown structure field: " ++ name ++ "." ++ field
+  | .missingRecordField name field => "missing record field: " ++ name ++ "." ++ field
+  | .unknownInductive name => "unknown inductive: " ++ name
+  | .unknownConstructor name constructorName => "unknown constructor: " ++ name ++ "." ++ constructorName
+  | .unknownConstructorField name constructorName field =>
+      "unknown constructor field: " ++ name ++ "." ++ constructorName ++ "." ++ field
+  | .missingConstructorField name constructorName field =>
+      "missing constructor field: " ++ name ++ "." ++ constructorName ++ "." ++ field
+  | .unsupportedModuleFeature => "unsupported module feature"
+
 def psHostDirectEmitWasmCore (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".wasm" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .wasm")
   let lowered ← match psWasmLowerValidatedModule { wordSize := PsWasmWordSize.wasm32 } session.validated with
     | .ok value => pure value
-    | .error _ => throw (IO.userError "PSC1_WASM_LOWER_UNSUPPORTED")
+    | .error error => throw (IO.userError ("PSC1_WASM_LOWER_UNSUPPORTED: " ++ psHostWasmLowerErrorText error))
   for name in session.publicNames do
     if !lowered.exports.any (fun item => item.1 == name) then
       throw (IO.userError ("PSC1_WASM_PUBLIC_DECLARATION_NOT_LOWERED: " ++ name))

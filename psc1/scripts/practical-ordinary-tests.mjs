@@ -14,7 +14,9 @@ const work = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-ordinary-'));
 const evidence = path.join(root, 'dist/scoped-correctness/ordinary');
 const env = { ...process.env, PSC1_HOST_TOOLS: path.join(root, 'host-tools/artifacts.mjs') };
 const records = [];
+const artifacts = [];
 fs.mkdirSync(evidence, { recursive: true });
+fs.writeFileSync(path.join(evidence, 'package.json'), '{"type":"module"}\n');
 fs.writeFileSync(path.join(work, 'package.json'), '{"type":"module"}\n');
 const read = file => fs.readFileSync(file, 'utf8');
 const json = file => JSON.parse(read(file));
@@ -44,7 +46,7 @@ function source(name, text) {
   return file;
 }
 function build(input, target, name, extra = []) {
-  const output = path.join(work, name);
+  const output = path.join(evidence, name);
   run(native, ['build', input, '--assurance', 'ordinary',
     '--target', target, ...extra, '--out', output]);
   const manifest = json(output + '.bundle.json');
@@ -59,6 +61,11 @@ function build(input, target, name, extra = []) {
     assert.equal(hash(path.join(generation, item.path)), item.sha256);
     assert.equal(fs.statSync(path.join(generation, item.path)).size, item.bytes);
   }
+  artifacts.push({
+    target, output: path.relative(evidence, output), sourceClosureSha256: manifest.sourceClosureSha256,
+    artifactSha256: hash(output), manifestSha256: hash(output + '.bundle.json'),
+    partialDeclarations: manifest.partialDeclarations
+  });
   return output;
 }
 const load = file => import(pathToFileURL(fs.realpathSync(file)).href);
@@ -78,7 +85,7 @@ async function test(name, action) {
   } finally {
     fs.writeFileSync(path.join(evidence, 'results.json'), JSON.stringify({
       sha: process.env.GITHUB_SHA, assurance: 'ordinary-checked',
-      behaviorallyVerified: false, fullSelfHostTests: false, cases: records
+      behaviorallyVerified: false, fullSelfHostTests: false, artifacts, cases: records
     }, null, 2) + '\n');
   }
 }
@@ -140,7 +147,7 @@ try {
   await test('ordinary Rust crate compiles and executes the recursive Bool dependency', () => {
     const output = build(entry, 'rust', 'rust/module.rs');
     const crate = path.join(work, 'rust-test');
-    fs.cpSync(fs.realpathSync(output.replace(/\.rs$/, '.cargo')), crate, { recursive: true });
+    fs.cpSync(fs.realpathSync(output.replace(/\.rs$/, '.cargo')), crate, { recursive: true, dereference: true });
     fs.chmodSync(path.join(crate, 'src/lib.rs'), 0o644);
     fs.appendFileSync(path.join(crate, 'src/lib.rs'),
       '\n#[cfg(test)] mod ordinary_tests { use super::*; #[test] fn exact_body() { assert!(answer(false)); assert!(answer(true)); } }\n');
@@ -158,8 +165,9 @@ try {
   await test('ordinary component Wasm keeps the public ABI Bool only', () => {
     const output = build(entry, 'wasm-component', 'component/module.wasm', ['--export', 'answer']);
     assert.match(read(output.replace(/\.wasm$/, '.wit')), /func\(b: bool\) -> bool/);
-    const result = run('wasmtime', ['run', '--invoke', 'answer(false)', output]).trim();
-    assert.match(result, /true/);
+    const values = [false, true].map(value =>
+      run('wasmtime', ['run', '--invoke', 'answer(' + value + ')', output]).trim());
+    assert.deepEqual(values, ['true', 'true']);
     const unsupported = path.join(work, 'component-nat.wasm');
     reject(['build', lean, '--assurance', 'ordinary', '--target', 'wasm-component',
       '--export', 'countdown', '--out', unsupported], /PSC1_COMPONENT/);

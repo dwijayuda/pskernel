@@ -18,16 +18,8 @@ private def prepare (label : String) (kind : PsCompilerSourceKind) (source : Str
       throw (IO.userError (label ++ ": " ++ psHostLexErrorText error))
   | .error (.proofScriptFrontend (.parse error)) =>
       throw (IO.userError (label ++ ": " ++ psHostParseErrorText error))
-  | .error (.elaboration .doExpectedType) =>
-      throw (IO.userError (label ++ ": do expected type"))
-  | .error (.elaboration .doUnsupportedEffect) =>
-      throw (IO.userError (label ++ ": unsupported do effect"))
-  | .error (.elaboration .typeMismatch) =>
-      throw (IO.userError (label ++ ": type mismatch"))
-  | .error (.elaboration (.infer _)) =>
-      throw (IO.userError (label ++ ": Core inference"))
-  | .error (.elaboration _) =>
-      throw (IO.userError (label ++ ": elaboration"))
+  | .error (.elaboration error) =>
+      throw (IO.userError (label ++ ": " ++ psHostElabErrorText error))
   | .error (.admission _) =>
       throw (IO.userError (label ++ ": admission encoding"))
   | .error _ => throw (IO.userError (label ++ ": parsing/preparation"))

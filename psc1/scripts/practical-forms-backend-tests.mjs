@@ -82,7 +82,7 @@ async function executePortable(label, source, expected) {
     const artifact = build(label + "-" + target, source, target, target === "rust" ? "rs" : target);
     if (target === "rust") {
       const crate = path.join(work, label + "-crate");
-      fs.cpSync(fs.realpathSync(artifact.output.replace(/\.rs$/, ".cargo")), crate, { recursive: true });
+      fs.cpSync(fs.realpathSync(artifact.output.replace(/\.rs$/, ".cargo")), crate, { recursive: true, dereference: true });
       const assertions = calls.map(c =>
         "assert_eq!(" + c.name + "(" + c.argument + "), " + JSON.stringify(c.expected) + ");").join("\n");
       fs.chmodSync(path.join(crate, "src/lib.rs"), 0o644);

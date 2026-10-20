@@ -324,8 +324,6 @@ def psProofScriptCanStartNativeArgument
   | Option.some token =>
       if psProofScriptReservedArgument token.text then
         false
-      else if psTokenCursorStartsNamedAssignment cursor then
-        false
       else if psProofScriptBoolNot
           (Nat.ble (Nat.succ span.stop.byteOffset) token.span.start.byteOffset) then
         false

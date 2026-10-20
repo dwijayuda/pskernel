@@ -303,3 +303,12 @@ it explicitly does not establish PSKernel-Core corpus compatibility. A current
 strict DAG transport with generated-recursors metadata comparison is required
 for the independent checker. The older adapter's high fuel and dropped recursor
 metadata are not reused.
+
+Authentic PSC1 rejected the initially delayed recursive call form with
+`structuralRecursionArity` in Terminal.lean. The supported form now binds the
+one-argument recursive call inside the delayed lambda, then applies the local
+function to context/arena/root. This retains the delayed computation without
+changing the compiler, declared API staging, resources or semantic branches.
+Application-spine reconstruction also matches its decreasing argument list at
+the top level as required by PSC1 structural-recursion elaboration. These
+source-profile corrections are pending authentic PSC1 validation.

@@ -28,12 +28,15 @@ def psKernelExprV2TransformAppSpineOnCanonical
 def psKernelExprV2TransformApplyArgsOnCanonical
     (args : List Nat) (arena : PsKernelExprV2PagedArena) (head : Nat) :
     Except String (Prod PsKernelExprV2PagedArena Nat) :=
-  match psKernelExprV2PagedFind arena head with
-  | Option.none => Except.error "PSKERNEL_V2_TRANSFORM_BAD_ROOT"
-  | Option.some _ =>
-      match args with
-      | List.nil => Except.ok (Prod.mk arena head)
-      | List.cons first rest =>
+  match args with
+  | List.nil =>
+      match psKernelExprV2PagedFind arena head with
+      | Option.none => Except.error "PSKERNEL_V2_TRANSFORM_BAD_ROOT"
+      | Option.some _ => Except.ok (Prod.mk arena head)
+  | List.cons first rest =>
+      match psKernelExprV2PagedFind arena head with
+      | Option.none => Except.error "PSKERNEL_V2_TRANSFORM_BAD_ROOT"
+      | Option.some _ =>
           match psKernelExprV2PagedMkApp arena head first with
           | Except.error error => Except.error error
           | Except.ok result =>

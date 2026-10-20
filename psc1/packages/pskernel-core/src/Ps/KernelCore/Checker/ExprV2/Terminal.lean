@@ -31,7 +31,8 @@ def psKernelExprV2TryCheckTerminalWithFuel
       let smaller :=
         fun (nextContext : PsKernelCheckerContext)
             (nextArena : PsKernelExprV2PagedArena) (nextRoot : Nat) =>
-          psKernelExprV2TryCheckTerminalWithFuel remaining nextContext nextArena nextRoot;
+          let recur := psKernelExprV2TryCheckTerminalWithFuel remaining;
+          recur nextContext nextArena nextRoot;
       fun (context : PsKernelCheckerContext)
           (arena : PsKernelExprV2PagedArena) (root : Nat) =>
         match psKernelCheckerContextEnterRecDepth context with

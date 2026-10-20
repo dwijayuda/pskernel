@@ -25,7 +25,8 @@ def psKernelExprV2TryWhnfZetaCoreWithFuel
       let smaller :=
         fun (nextContext : PsKernelCheckerContext)
             (nextArena : PsKernelExprV2PagedArena) (nextRoot : Nat) =>
-          psKernelExprV2TryWhnfZetaCoreWithFuel remaining nextContext nextArena nextRoot;
+          let recur := psKernelExprV2TryWhnfZetaCoreWithFuel remaining;
+          recur nextContext nextArena nextRoot;
       fun (context : PsKernelCheckerContext)
           (arena : PsKernelExprV2PagedArena) (root : Nat) =>
         match psKernelCheckerContextEnterRecDepth context with
@@ -64,7 +65,8 @@ def psKernelExprV2TryWhnfWithFuel
       let smaller :=
         fun (nextContext : PsKernelCheckerContext)
             (nextArena : PsKernelExprV2PagedArena) (nextRoot : Nat) =>
-          psKernelExprV2TryWhnfWithFuel remaining nextContext nextArena nextRoot;
+          let recur := psKernelExprV2TryWhnfWithFuel remaining;
+          recur nextContext nextArena nextRoot;
       fun (context : PsKernelCheckerContext)
           (arena : PsKernelExprV2PagedArena) (root : Nat) =>
         match psKernelExprV2PagedRequire arena root with

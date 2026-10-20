@@ -213,7 +213,8 @@ def psKernelDefEqFinishLazyStep
         context
         state
         left
-        right with
+        right
+        false with
   | Except.error error =>
       Except.error error
   | Except.ok quickResult =>

@@ -1,5 +1,8 @@
 # PSC1 PSKernel-Core: qualified C0 beta-path performance port
 
+> **Current production status, 2026-10-20:** The C0 single- and multi-variable structural substitution workers described below remain *experimental differential references*, no longer active in production at [commit e411801](https://github.com/dwijayuda/pskernel/commit/e411801a72389467b79a07c732b8600e20674f2f). [Same-compiler ablation 39352328822](https://github.com/dwijayuda/pskernel/actions/runs/39352328822) linked them to severe operation-specific generated-JS memory regressions despite faster native helper microbenchmarks. Production uses the previously qualified bounded instantiation entry points. Beta-spine and lifting ports remain active. The new source must pass canonical generated-PS and JS checks before integration review; see [whole-kernel performance evidence](PSC1_WHOLE_KERNEL_PERFORMANCE_EVIDENCE_2026-10-20.md).
+
+
 **Date:** 2026-10-20 (Asia/Jakarta)
 **Branch:** `fix/psc1-pskernel-core-cross-branch-20261020`
 **First qualified beta-spine source commit:** `893527ec9d082bddbe0c20db4b71e0eadefb0c26`

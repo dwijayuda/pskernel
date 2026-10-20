@@ -154,3 +154,23 @@ The single-workload fresh-process observations were:
 The direction of the positive DefEq peak and post-GC heap anomaly repeats across the canonical `.ps` and direct `.lean` paths, but the magnitude varies substantially. **Do not treat the 792 MiB peak as a deterministic memory requirement or claim every workload regresses.** This motivates a source ablation with current compiler bytes fixed.
 
 Latency for the complete suite in this direct-source run was largely at parity or improved by only a few percent, while memory remained workload-specific and highly variable. The controlling experiment must distinguish direct beta-spine, substitution and lifting changes under an otherwise identical compiler/runtime. A finite passing checker corpus is not a formal soundness proof or a full compiler/kernel fixed point.
+
+## Five-variant same-compiler substitution ablation — 2026-10-20
+
+**Successful ablation:** [run 39352328822](https://github.com/dwijayuda/pskernel/actions/runs/39352328822), source snapshot 4bb42d87951d24b89d98db4aa44eb4bdcf5b050e; baseline 0a53836489c4e88f46df8f5b8b0c19cc41bafbbb; [report artifact 12235161877](https://github.com/dwijayuda/pskernel/actions/runs/39352328822/artifacts/12235161877). An identical PSC1 compiler binary (SHA256 958900cce8d73fd31bc2f406ebdc7d0d47921df2fd1fde715dcc0c224b608689), Lean 4.34.0, TypeScript 7.0.2, and Node 22 checked and emitted all five source overlays on GitHub Actions Linux. Every tested checked operation passed semantic guards.
+
+| JS operation | Original RSS MiB | All ports RSS MiB | No substitution ports RSS MiB | Original post-GC heap MiB | All ports post-GC heap MiB | No substitution ports post-GC heap MiB |
+|---|---:|---:|---:|---:|---:|---:|
+| Positive DefEq | 230.0 | **805.5** | **229.4** | 20.7 | **54.4** | **20.6** |
+| Mutual inductive admission | 234.4 | **344.1** | **229.1** | 23.7 | **28.9** | **23.3** |
+| Ordinary inductive admission | 230.2 | 233.5 | 229.1 | 22.7 | 23.0 | 22.7 |
+| Beta WHNF | 242.2 | 233.0 | 266.9 | 22.9 | 20.6 | 25.2 |
+| Checked 16-argument application | 206.8 | 206.5 | 208.6 | 20.7 | 20.9 | 20.7 |
+
+Each entry is a median of two fresh Node processes per operation/variant, each executing three guarded rounds. Variant order is fixed. V8 heap growth and garbage collection introduce noise, so this is not a statistically robust memory bound.
+
+**Interpretation:** The substitution-port *family* is the dominant observed source of severe positive-DefEq and mutual-inductive memory regression: restoring original substitution while retaining beta and lifting restores near-baseline RSS and post-GC heap. This ablation does not separately identify single-variable versus multi-variable effects, nor the lower-level V8 allocation mechanism. From individual checked-round logs, the two process medians for positive DefEq averaged about 1,389 ms with all ports, 1,190 ms with the original and 1,193 ms without substitution ports. These few samples are not a general performance guarantee.
+
+**Mitigation committed:** [e411801a72389467b79a07c732b8600e20674f2f](https://github.com/dwijayuda/pskernel/commit/e411801a72389467b79a07c732b8600e20674f2f) restores the original bounded capture-avoiding production substitution entry points, retaining the C0 structural workers for native differential research only. Updated focused tests independently exercise both paths. No checking rule, trust boundary, universe normalization, scoped cache eligibility, or original kernel admission fuel was weakened.
+
+Native CI passed all 61 focused cases at [run 39359421956](https://github.com/dwijayuda/pskernel/actions/runs/39359421956). **The complete generated ProofScript portability job and [same-compiler JS memory run 39359421889](https://github.com/dwijayuda/pskernel/actions/runs/39359421889) still require their own final green result** before integration review. Do not infer full Lean Arena conformance, repeated self-host fixed point, formal soundness, or backend equivalence from these measurements.

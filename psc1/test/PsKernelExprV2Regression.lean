@@ -975,7 +975,7 @@ private def testPortablePairEquality : IO Unit := do
     (psKernelExprV2ChunkedMkLam arena anotherName sortCopy bvarCopy
       PsKernelBinderInfo.implicit)
   arena := a12
-  let (a13,forall) ← expectV2
+  let (a13,piNode) ← expectV2
     (psKernelExprV2ChunkedMkForall arena name sort bvar0 PsKernelBinderInfo.default)
   arena := a13
   let (a14,forallAlpha) ← expectV2
@@ -1012,8 +1012,8 @@ private def testPortablePairEquality : IO Unit := do
     ("const-vs-literal",constant,lit),
     ("two-apps",app,appCopy),
     ("two-lambdas-ignore-name-and-info",lam,lamAlpha),
-    ("two-foralls-ignore-name-and-info",forall,forallAlpha),
-    ("lambda-vs-forall",lam,forall),
+    ("two-foralls-ignore-name-and-info",piNode,forallAlpha),
+    ("lambda-vs-forall",lam,piNode),
     ("two-lets",letE,letCopy),
     ("let-nondep-different",letE,letDifferent),
     ("two-metadata",mdata,mdataCopy),

@@ -173,4 +173,29 @@ Each entry is a median of two fresh Node processes per operation/variant, each e
 
 **Mitigation committed:** [e411801a72389467b79a07c732b8600e20674f2f](https://github.com/dwijayuda/pskernel/commit/e411801a72389467b79a07c732b8600e20674f2f) restores the original bounded capture-avoiding production substitution entry points, retaining the C0 structural workers for native differential research only. Updated focused tests independently exercise both paths. No checking rule, trust boundary, universe normalization, scoped cache eligibility, or original kernel admission fuel was weakened.
 
-Native CI passed all 61 focused cases at [run 39359421956](https://github.com/dwijayuda/pskernel/actions/runs/39359421956). **The complete generated ProofScript portability job and [same-compiler JS memory run 39359421889](https://github.com/dwijayuda/pskernel/actions/runs/39359421889) still require their own final green result** before integration review. Do not infer full Lean Arena conformance, repeated self-host fixed point, formal soundness, or backend equivalence from these measurements.
+**Final qualification at the exact corrected semantic SHA:** [PSC1 correctness and portability run 39359421956](https://github.com/dwijayuda/pskernel/actions/runs/39359421956), **SUCCESS**, both native and PSC1 portability jobs. Native Lean 4.34, 61 focused regressions, full 79-source portable profile, PSC1 checking of the complete Lean kernel closure, canonical regeneration/recheck of all 79 ProofScript files, generated JS and TypeScript declaration build, JS syntax validation, and generated-runtime semantic smoke all passed. [Controlled same-compiler generated-JS run 39359421889](https://github.com/dwijayuda/pskernel/actions/runs/39359421889), **SUCCESS**, exact semantic commit e411801a72389467b79a07c732b8600e20674f2f, with [raw report artifact 12237023061](https://github.com/dwijayuda/pskernel/actions/runs/39359421889/artifacts/12237023061). [Native A-B-B-A full-checker run 39360528448](https://github.com/dwijayuda/pskernel/actions/runs/39360528448), **SUCCESS**, workflow-only HEAD 7284a8cf4ad643809609bc63e25af11a243c2548 (same semantic kernel source), [raw report artifact 12236574981](https://github.com/dwijayuda/pskernel/actions/runs/39360528448/artifacts/12236574981). No semantic source modification was made between these receipts.
+
+### Corrected-source controlled JavaScript results
+
+| Checked operation isolated | Original RSS MiB | Corrected RSS MiB | Original post-GC heap MiB | Corrected post-GC heap MiB |
+|---|---:|---:|---:|---:|
+| Beta WHNF | 232.5 | 230.3 | 20.6 | 20.6 |
+| Positive DefEq | 231.6 | **226.1** | 20.7 | **20.6** |
+| Checked application (16) | 201.1 | 203.0 | 20.7 | 20.8 |
+| Ordinary inductive admission | 226.5 | 228.4 | 22.7 | 22.8 |
+| Mutual inductive admission | 228.1 | **236.8** | 23.4 | **24.0** |
+
+Single-process isolated samples above are observations, not strict maximum memory guarantees. The four full-suite processes were run A-B-B-A: original peak RSS **271.5, 270.5 MiB**, corrected **281.2, 278.7 MiB**. Positive DefEq six-round median took **1256.3 vs 1292.9 ms** (original vs corrected); mutual-inductive **645.2 vs 642.9 ms**, ordinary admission **653.5 vs 657.5 ms**. Other operations were near parity, with a few small gains/losses. The severe roughly 805 MiB DefEq peak from the all-C0 source ablation is **not reproduced** by this corrected production path. Two fresh processes per side for complete-suite timings and one per side for isolated memory still limit generalization.
+
+### Corrected-source native A-B-B-A results
+
+| Complete native operation | Original median | Corrected median |
+|---|---:|---:|
+| Admit wide checked library, 32 declarations and 192 arguments | 14 ms | 13 ms |
+| 160 varied checked applications | 7.5 ms | 7 ms |
+| Cold zeta-WHNF, depth 96 | 20 ms | 21 ms |
+| Cold zeta-WHNF, depth 192 | 29.5 ms | 32 ms |
+
+These are six order-balanced samples per side on one runner, not statistically generalizable. Native process peak RSS was **10,092 and 10,200 KiB** for original in the two orders, **10,256 and 10,284 KiB** for corrected. This remains near native performance parity, with candidate zeta-WHNF and local-reference regressions worth future profiling. It does **not** establish a broad speedup.
+
+**Disposition:** retain the bounded production substitution source; keep C0 direct structural substitution experimental until a demonstrably better checked whole-kernel/JS allocation design exists. The scoped regression/portability/memory acceptance conditions are met for integration **review**, not automatic merge or soundness promotion. The underlying V8 allocation mechanism and the single-versus-multi-variable decomposition remain open research questions. Do not infer full Lean Arena conformance, repeated compiler/kernel fixed-point reproduction, formal soundness or backend equivalence from these tests.

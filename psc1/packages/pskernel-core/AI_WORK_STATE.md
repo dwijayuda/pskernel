@@ -368,3 +368,16 @@ The beta native build failure was a missing explicit Lake root registration,
 not a semantic-test result; that registration is now included. Authentic PSC1
 accepted the complete .lean source at dd466701. Its canonical/generated runtime
 and the new beta/native proofs still require their own passing evidence.
+
+### Generated transform harness ABI correction
+
+Run [39510753173](https://github.com/dwijayuda/pskernel/actions/runs/39510753173)
+checked all 1,225 source declarations with authentic PSC1 and built the complete
+TypeScript 7.0.2 / JavaScript executable, declarations and source map. Execution
+passed the preceding DAG/admission/negative checks, then the strict oracle-value
+guard rejected the first bounded transform comparison because the host harness
+under-applied a returned function. Erasure's actual ABI curries each function-value
+arrow, while known declaration entries retain flat arguments. The seven affected
+bounded-transform and raw-WHNF test calls now follow that ABI. The strict guard
+remains; this correction has no kernel or fuel-policy effect and awaits runtime
+qualification. Native Beta module registration was corrected in c29f418.

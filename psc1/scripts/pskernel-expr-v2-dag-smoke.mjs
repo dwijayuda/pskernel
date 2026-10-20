@@ -269,14 +269,14 @@ for(const id of [0n,63n,64n,127n,128n,255n,256n]){
   const originalInst=get("psKernelExprInstantiateAt");
   const originalRev=get("psKernelExprInstantiateRev");
   const originalAbstract=get("psKernelExprAbstractFVarsAt");
-  // These definitions have one explicit argument followed by one lambda
-  // containing all remaining binders. Apply both generated stages.
+  // Declared entry arguments are flat; returned function values consume
+  // one argument per arrow. Keep the strict unapplied-oracle guard below.
   const originalInstFuel=(fuel,term,start,values,offset)=>
-    get("psKernelExprInstantiateAtChangedWithFuel")(fuel)(term,start,values,offset).fst;
+    get("psKernelExprInstantiateAtChangedWithFuel")(fuel)(term)(start)(values)(offset).fst;
   const originalAbstractFuel=(fuel,term,names,offset)=>
-    get("psKernelExprAbstractFVarsAtChangedWithFuel")(fuel)(term,names,offset).fst;
+    get("psKernelExprAbstractFVarsAtChangedWithFuel")(fuel)(term)(names)(offset).fst;
   const originalLevels=(term,params,values)=>
-    get("psKernelExprInstantiateLevelParams")(term)(params,values);
+    get("psKernelExprInstantiateLevelParams")(term)(params)(values);
   let comparisons=0;
   const readGraph=(graph,label)=>accepted(
     decoded(accepted(decode(graph.fst),label+"-decode"),graph.snd),label+"-root");
@@ -396,7 +396,7 @@ for(const id of [0n,63n,64n,127n,128n,255n,256n]){
     ta,spine.fst,spine.snd),"transform-reapply-spine");
   must(exact(readGraph(reapplied,"transform-spine-roundtrip"),terms.app)===true,
     "transform-spine-preserves-argument-order");
-  must(rejected(get("psKernelExprV2TransformAppSpineWithFuel")(0n)(ta,ids.app,nil))===true,
+  must(rejected(get("psKernelExprV2TransformAppSpineWithFuel")(0n)(ta)(ids.app)(nil))===true,
     "transform-spine-zero-fuel-rejected");
   must(rejected(inst(ta,ta.size,0n,nil,0n))===true,"transform-invalid-root");
   must(rejected(inst(ta,ids.s0,99n,list([ta.size]),0n))===true,
@@ -453,7 +453,7 @@ for(const wrappers of [0,1,5]){
     }
   }
   const checker=get("psKernelKernelSessionChecker")(session(),nil,S.safe);
-  const attempted=get("psKernelExprV2TryWhnfWithFuel")(4096n)(checker.context,graph.fst,graph.snd);
+  const attempted=get("psKernelExprV2TryWhnfWithFuel")(4096n)(checker.context)(graph.fst)(graph.snd);
   must(attempted&&typeof attempted==="object"&&"value" in attempted,
     "zeta-executes-dag-native-worker-"+wrappers);
   const reduced=accepted(attempted.value,"zeta-native-worker");
@@ -518,7 +518,7 @@ console.log("PSC1_V2_DAG_JS_ZETA: PASS");
           "beta-complete-whnf-"+index+"-"+fuel+"-"+depth);
         const checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
         const old=get("psKernelSessionWhnf")(fuel,checker,term);
-        const attempted=get("psKernelExprV2TryWhnfWithFuel")(fuel)(checker.context,betaArena,root);
+        const attempted=get("psKernelExprV2TryWhnfWithFuel")(fuel)(checker.context)(betaArena)(root);
         must(attempted&&typeof attempted==="object"&&"value" in attempted,
           "beta-direct-worker-selected-"+index+"-"+fuel+"-"+depth);
         const direct=attempted.value;
@@ -545,7 +545,7 @@ console.log("PSC1_V2_DAG_JS_ZETA: PASS");
   const checker=get("psKernelKernelSessionChecker")(session(),nil,S.safe);
   const cached=accepted(get("psKernelSessionWhnf")(4n,checker,cacheTerm),"beta-cache-oracle");
   must(exact(cached.fst,sort0),"beta-cache-oracle-low-budget");
-  const declined=get("psKernelExprV2TryWhnfWithFuel")(4n)(checker.context,betaArena,cacheRoot);
+  const declined=get("psKernelExprV2TryWhnfWithFuel")(4n)(checker.context)(betaArena)(cacheRoot);
   const Option=get("Option");
   const none=typeof Option.none==="function"?Option.none():Option.none;
   must(declined!==undefined&&json(declined)===json(none),

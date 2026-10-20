@@ -1,0 +1,55 @@
+name: PSC1 Lean 4.35 official-versus-independent checker
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-pskernel-lean435-performance-20261020
+    paths:
+      - psc1/lean-toolchain
+      - psc1/kernel-lakefile.lean
+      - psc1/test/PsKernelMatchedNative.lean
+      - psc1/packages/pskernel-core/**
+      - .github/workflows/psc1-pskernel-matched-official.yml
+
+permissions:
+  contents: read
+
+jobs:
+  matched-official:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check official target source pin
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      - name: Build native official and PSC1 matched checker fixture
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean build psc1_kernel_matched_official
+      - name: Compare cold checking of identical closed expression shapes A-B-B-A
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'max_rss_kib=%M elapsed_s=%e' \
+            -o "$RUNNER_TEMP/psc1-matched-official.memory" \
+            .lake/build/bin/psc1_kernel_matched_official \
+            | tee "$RUNNER_TEMP/psc1-matched-official.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-lean435-official-matched
+          path: |
+            ${{ runner.temp }}/psc1-matched-official.log
+            ${{ runner.temp }}/psc1-matched-official.memory
+          retention-days: 30

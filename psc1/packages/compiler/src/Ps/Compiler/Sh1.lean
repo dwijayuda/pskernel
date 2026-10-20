@@ -365,6 +365,19 @@ def psSh1SyntaxTermStep
   | PsSyntaxTerm.app fn args _ =>
       Except.ok (psSh1SyntaxSchedule state
         [PsSh1SyntaxTask.term owner region fn, PsSh1SyntaxTask.terms owner region args])
+  | PsSyntaxTerm.unary _ operand _ =>
+      Except.ok (psSh1SyntaxSchedule state [PsSh1SyntaxTask.term owner region operand])
+  | PsSyntaxTerm.binary _ left right _ =>
+      Except.ok (psSh1SyntaxSchedule state
+        [PsSh1SyntaxTask.term owner region left, PsSh1SyntaxTask.term owner region right])
+  | PsSyntaxTerm.doE _ span
+  | PsSyntaxTerm.doBindE _ _ _ _ span
+  | PsSyntaxTerm.doThenE _ _ span
+  | PsSyntaxTerm.doReturnE _ span =>
+      Except.error
+        (psSh1SourceFailure "source-do-unsupported"
+          "do semantics are outside the historical SH1 source profile"
+          moduleName owner (Option.some span))
   | PsSyntaxTerm.lambda binders body _ =>
       Except.ok (psSh1SyntaxSchedule state
         [PsSh1SyntaxTask.binders owner binders, PsSh1SyntaxTask.term owner region body])

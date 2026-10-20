@@ -1,9 +1,10 @@
 import Ps.KernelCore.SelfHost
 
 /-
-PSC1 native matched multi-substitution comparison. Original withFuel worker
-uses exact expression node-count fuel, with identical inputs for the C0 worker.
-Semantic parity and output checksums are required; wall time is advisory.
+PSC1 native matched experimental multi-substitution comparison. Original
+withFuel worker is again the production path. Compare the retained C0
+structural worker directly with original on identical inputs. Parity and
+checksums are required; timings are advisory and not production gains.
 -/
 private def multiAppSpine (depth : Nat) : PsKernelExpr :=
   match depth with
@@ -18,7 +19,7 @@ private def multiReference (expr : PsKernelExpr)
 
 private def multiCandidate (expr : PsKernelExpr)
     (subst : List PsKernelExpr) : PsKernelExpr :=
-  Prod.fst (psKernelExprInstantiateAtChanged expr 0 subst 0)
+  Prod.fst (psKernelC0ExprInstantiateAtChanged expr 0 subst 0)
 
 private def multiLoop (optimized : Bool)
     (times : Nat) (expr : PsKernelExpr) : IO Nat := do

@@ -43,10 +43,11 @@ private def inst1BeforeC0 (term replacement : PsKernelExpr) : PsKernelExpr :=
 
 private def requireInst1Parity (caseName : String)
     (term replacement : PsKernelExpr) : IO Unit := do
+  let prior := inst1BeforeC0 term replacement
   requireKernel caseName
-    (psKernelExprEq
-      (inst1BeforeC0 term replacement)
-      (psKernelExprInstantiate1 term replacement))
+    (psKernelExprEq prior (psKernelExprInstantiate1 term replacement) &&
+      psKernelExprEq prior
+        (Prod.fst (psKernelC0ExprInstantiateOneChanged term replacement 0)))
 
 
 -- Source-equivalent multi-substitution differential oracle with the original
@@ -57,10 +58,13 @@ private def requireMultiParity
     IO Unit := do
   let old := psKernelExprInstantiateAtChangedWithFuel
     (Nat.succ (psKernelExprNodeCount term)) term start substitutions offset
-  let newv := psKernelExprInstantiateAtChanged term start substitutions offset
+  let production := psKernelExprInstantiateAtChanged term start substitutions offset
+  let experimental := psKernelC0ExprInstantiateAtChanged term start substitutions offset
   requireKernel caseName
-    (psKernelExprEq (Prod.fst old) (Prod.fst newv) &&
-      Prod.snd old == Prod.snd newv)
+    (psKernelExprEq (Prod.fst old) (Prod.fst production) &&
+      Prod.snd old == Prod.snd production &&
+      psKernelExprEq (Prod.fst old) (Prod.fst experimental) &&
+      Prod.snd old == Prod.snd experimental)
 
 
 -- Preserve the exact old fuel-based worker as an executable oracle.

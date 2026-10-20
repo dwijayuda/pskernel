@@ -1,10 +1,11 @@
 import Ps.KernelCore.SelfHost
 
 /-
-PSC1/C0 single-substitution benchmark.  Both paths operate in the same native
-process on source expressions, with parity checked before timing.
-The original bounded generic substitution is retained as the oracle.
-Measurements are informational, not acceptance proof or blanket speedup.
+PSC1/C0 experimental single-substitution benchmark. Both paths operate in
+the same native process with parity checked before timing. The previous
+bounded source is now also the production implementation; the C0 worker is
+retained only for research. These are informational helper timings, not a
+whole-checker performance claim.
 -/
 private def inst1Prior (e r : PsKernelExpr) : PsKernelExpr :=
   if psKernelExprHasLooseBVar e then
@@ -23,7 +24,7 @@ private def inst1Repeat (optimized : Bool)
   for index in [:times] do
     let replacement := PsKernelExpr.bvar index
     let actual := if optimized
-      then psKernelExprInstantiate1 e replacement
+      then Prod.fst (psKernelC0ExprInstantiateOneChanged e replacement 0)
       else inst1Prior e replacement
     checksum := checksum + psKernelExprNodeCount actual
   pure checksum
@@ -33,7 +34,9 @@ private def inst1Benchmark
   let term := inst1AppSpine depth
   let rep := PsKernelExpr.bvar 3
   unless psKernelExprEq (inst1Prior term rep)
-      (psKernelExprInstantiate1 term rep) do
+      (Prod.fst (psKernelC0ExprInstantiateOneChanged term rep 0)) &&
+      psKernelExprEq (inst1Prior term rep)
+        (psKernelExprInstantiate1 term rep) do
     throw (IO.userError "PSC1_C0_INST1_BENCH_PARITY_FAILED")
   let beforeStart ← IO.monoMsNow
   let baselineSum ← inst1Repeat false times term

@@ -179,10 +179,11 @@ def psKernelExprInstantiateAtChangedWithFuel
             Prod.mk expr false
 
 /-
-Portable C0 multi-variable substitution with direct structural recursion.
-The original node-count/fuel worker above remains an independent oracle for
-differential tests. The only cost optimization here is removing that prepass;
-binder index shifting, unchanged-subtree reuse and offset handling are unchanged.
+Experimental C0 multi-variable structural substitution. Keep this worker for
+native differential experiments, but do not route production through it:
+same-compiler generated-JS source ablation (run 39352328822) identified a
+large DefEq/mutual-inductive allocation regression with the structural
+substitution ports. The bounded worker remains the production path.
 -/
 def psKernelC0ExprInstantiateAtChanged
     (expr : PsKernelExpr)
@@ -335,10 +336,9 @@ def psKernelC0ExprInstantiateAtChanged
 
 
 /-
-C0 dedicated single-variable substitution for beta and zeta.
-The generic list-substitution path remains for simultaneous substitutions.
-This path removes a list lookup and list-length traversal at every BVar.
-It preserves unchanged subtrees and lifts replacements across binders.
+The C0 single-variable worker below remains an independent experimental
+candidate, not a production reduction path. Both public instantiation entry
+points use the pre-port checked implementation pending repeatable JS gains.
 -/
 
 def psKernelExprInstantiateAtChanged
@@ -347,7 +347,12 @@ def psKernelExprInstantiateAtChanged
     (subst : List PsKernelExpr)
     (offset : Nat) :
     Prod PsKernelExpr Bool :=
-  psKernelC0ExprInstantiateAtChanged expr start subst offset
+  psKernelExprInstantiateAtChangedWithFuel
+    (Nat.succ (psKernelExprNodeCount expr))
+    expr
+    start
+    subst
+    offset
 
 def psKernelExprInstantiateAt
     (expr : PsKernelExpr)
@@ -374,10 +379,10 @@ def psKernelExprInstantiate
     0
 
 /-
-C0's structurally recursive single-variable substitution.  The fuel-based
-general substitution above remains unchanged; it is also an independent
-reference for native differential checks.  Structural recursion terminates
-on immediate subexpressions and preserves the same de Bruijn capture avoidance.
+Experimental C0 single-variable structural substitution. Retained for
+differential tests, but not called by production psKernelExprInstantiate1,
+which uses the previously qualified loose-bound-variable guard and bounded
+general substitution path.
 -/
 def psKernelC0ExprInstantiateOneChanged
     (expr : PsKernelExpr)
@@ -511,24 +516,12 @@ def psKernelC0ExprInstantiateOneChanged
 def psKernelExprInstantiate1
     (expr : PsKernelExpr)
     (replacement : PsKernelExpr) : PsKernelExpr :=
-  match expr with
-  | PsKernelExpr.lam _ _ _ _ =>
-      if psKernelExprHasLooseBVar expr then
-        Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
-      else
-        expr
-  | PsKernelExpr.forallE _ _ _ _ =>
-      if psKernelExprHasLooseBVar expr then
-        Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
-      else
-        expr
-  | PsKernelExpr.letE _ _ _ _ _ =>
-      if psKernelExprHasLooseBVar expr then
-        Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
-      else
-        expr
-  | _ =>
-      Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
+  if psKernelExprHasLooseBVar expr then
+    psKernelExprInstantiate
+      expr
+      (List.cons replacement List.nil)
+  else
+    expr
 
 def psKernelExprInstantiateRev
     (expr : PsKernelExpr)

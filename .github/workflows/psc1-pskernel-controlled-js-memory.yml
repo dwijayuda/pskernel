@@ -8,6 +8,7 @@ on:
     paths:
       - psc1/scripts/pskernel-js-memory-probe.mjs
       - psc1/scripts/pskernel-js-controlled-report.mjs
+      - psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Instantiate.lean
       - .github/workflows/psc1-pskernel-controlled-js-memory.yml
 
 permissions:

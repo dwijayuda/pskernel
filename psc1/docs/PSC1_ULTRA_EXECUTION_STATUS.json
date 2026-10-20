@@ -322,5 +322,26 @@
     "psc1/scripts/SourceCensusProbe.lean",
     "psc1/scripts/compiler-source-census.mjs",
     "psc1/test/CensusNormalizationTests.lean"
-  ]
+  ],
+  "sourceNormalizationContinuation": {
+    "parentPullRequest": 170,
+    "parentHead": "bdd26a4bd501cf92d207e72a98f5f15874885d82",
+    "status": "ParseCommon-source-normalization-pending-linux-ci",
+    "modules": [
+      "Ps.Syntax.ParseCommon"
+    ],
+    "maintainedAcceptance": [
+      "Ast parse/elaboration",
+      "Erasure.Definition elaboration",
+      "ParseCommon parse/elaboration"
+    ],
+    "logicalAdmission": "unchanged official independent Lean4.35; no whole-closure admission claim",
+    "parentFinalQualification": {
+      "head": "bdd26a4bd501cf92d207e72a98f5f15874885d82",
+      "scopedRunId": 39502865307,
+      "nativeRunId": 39502865431,
+      "testedMergeCommit": "46624bf15fb36ddf3d57aeb45fa6922947bd1918",
+      "scopedSteps": 37
+    }
+  }
 }

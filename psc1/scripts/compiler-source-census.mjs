@@ -85,7 +85,8 @@ for (const phase of phases) {
 // any other refusal. The full inventory above still reports every module.
 for (const [module, stage] of [
   ['Ps.Syntax.Ast', 'parse'], ['Ps.Syntax.Ast', 'elaboration'],
-  ['Ps.Erasure.Definition', 'elaboration']
+  ['Ps.Erasure.Definition', 'elaboration'],
+  ['Ps.Syntax.ParseCommon', 'parse'], ['Ps.Syntax.ParseCommon', 'elaboration']
 ]) {
   const row = observed.records.find(row => row.module === module);
   if (!row || row[stage] !== 'accepted') {

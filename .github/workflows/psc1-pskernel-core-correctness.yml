@@ -20,6 +20,7 @@ on:
       - psc1/check-psc1-source.mjs
       - psc1/scripts/pskernel-generated-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
+      - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - .github/workflows/psc1-pskernel-core-correctness.yml
 
 permissions:
@@ -220,6 +221,18 @@ jobs:
           grep -q '^PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           echo 'PSC1_CANONICAL_DAG_JS_KERNEL: PASS'
+      - name: Check large numerals in the canonical ProofScript executable
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          cp scripts/pskernel-nat-runtime-smoke.mjs "$PSC1_PS_RUN_DIR/nat-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" nat-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-canonical-nat-smoke.log"
+          grep -q 'PSC1_NAT_LARGE_RUNTIME: PASS' "$RUNNER_TEMP/psc1-canonical-nat-smoke.log"
       - name: Report DirectJS kernel capability without claiming support
         working-directory: psc1
         shell: bash
@@ -249,5 +262,6 @@ jobs:
             psc1/dist/pskernel-selfhost/pskernel-core.js.map
             ${{ runner.temp }}/psc1-canonical-js-smoke.log
             ${{ runner.temp }}/psc1-canonical-dag-smoke.log
+            ${{ runner.temp }}/psc1-canonical-nat-smoke.log
             ${{ runner.temp }}/psc1-direct-capability.log
           retention-days: 30

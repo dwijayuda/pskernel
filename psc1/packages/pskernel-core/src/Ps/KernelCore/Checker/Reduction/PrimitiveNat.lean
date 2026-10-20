@@ -12,7 +12,9 @@ def psKernelNatPowWithFuel
   | Nat.succ remaining =>
       let smaller :
           Nat -> Nat -> Nat :=
-        psKernelNatPowWithFuel remaining;
+        fun (nextBase : Nat) (nextExponent : Nat) =>
+          let recur := psKernelNatPowWithFuel remaining;
+          recur nextBase nextExponent;
       fun
         (base : Nat)
         (exponent : Nat) =>
@@ -95,7 +97,9 @@ def psKernelNatBitwiseWithFuel
           Nat ->
           Nat ->
           Nat :=
-        psKernelNatBitwiseWithFuel remaining;
+        fun (nextOp : PsKernelNatBitwiseOp) (nextLeft : Nat) (nextRight : Nat) =>
+          let recur := psKernelNatBitwiseWithFuel remaining;
+          recur nextOp nextLeft nextRight;
       fun
         (op : PsKernelNatBitwiseOp)
         (left : Nat)
@@ -155,7 +159,9 @@ def psKernelNatShiftRightWithFuel
   | Nat.succ remaining =>
       let smaller :
           Nat -> Nat -> Nat :=
-        psKernelNatShiftRightWithFuel remaining;
+        fun (nextValue : Nat) (nextCount : Nat) =>
+          let recur := psKernelNatShiftRightWithFuel remaining;
+          recur nextValue nextCount;
       fun
         (value : Nat)
         (count : Nat) =>

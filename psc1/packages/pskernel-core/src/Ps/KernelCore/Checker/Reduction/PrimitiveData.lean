@@ -12,7 +12,9 @@ def psKernelNatGcdWithFuel
   | Nat.succ remaining =>
       let smaller :
           Nat -> Nat -> Nat :=
-        psKernelNatGcdWithFuel remaining;
+        fun (nextLeft : Nat) (nextRight : Nat) =>
+          let recur := psKernelNatGcdWithFuel remaining;
+          recur nextLeft nextRight;
       fun
         (left : Nat)
         (right : Nat) =>
@@ -43,7 +45,9 @@ def psKernelNatHeapWordCountWithFuel
         0
   | Nat.succ remaining =>
       let smaller : Nat -> Nat :=
-        psKernelNatHeapWordCountWithFuel remaining;
+        fun (nextValue : Nat) =>
+          let recur := psKernelNatHeapWordCountWithFuel remaining;
+          recur nextValue;
       fun (value : Nat) =>
         if Nat.beq value 0 then
           0

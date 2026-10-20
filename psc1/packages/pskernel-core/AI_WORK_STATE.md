@@ -10,50 +10,67 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
 ## Current checkpoint and evidence
 
-The first authentic PSC1 check of f56d00e failed at Nat.lean:46:
-an embedded conditional argument was outside the accepted parser profile.
-This commit binds the selected Bool constructor name in an explicitly typed
-local before calling the smart constructor. No reduction or resource rule changes.
-The exact failure is recorded in [39516197791](https://github.com/dwijayuda/pskernel/actions/runs/39516197791);
-generated Nat/projection qualification is pending this correction.
-
-The latest native-qualified Nat/projection source is
-[58fab028f9ea80ddcbdb621d72bbbe28b8d9f3a7](https://github.com/dwijayuda/pskernel/commit/58fab028f9ea80ddcbdb621d72bbbe28b8d9f3a7).
-The native job in [39516506237](https://github.com/dwijayuda/pskernel/actions/runs/39516506237)
-passed public/core cache ordering, all 14 Nat binary reductions, checked successor,
-constructor projections with parameters, exact unselected-field fuel6/fuel7,
-official Lean Nat comparisons, full DAG regressions, 1,755 transformation comparisons,
-local metadata/cache proofs and complete-public benchmarks. Authentic generated
-and canonical PS gates for this expanded slice are still running. The first
-attempt at f56d00e compiled production source but stopped on a test-only mutable
-variable shadow;58fab renames that builder without changing its assertions.
+The latest source before this numeral change is
+[9b34a9351f509a9a042664e354821545368200ba](https://github.com/dwijayuda/pskernel/commit/9b34a9351f509a9a042664e354821545368200ba).
+Its [native integration job](https://github.com/dwijayuda/pskernel/actions/runs/39517166107)
+passed the complete DAG regressions, exact Nat/projection and quick-DefEq resource
+parity, official Lean fixtures, 1,755 transformations, local proofs and complete
+native benchmarks. Authentic PSC1 source checking has passed; generated and
+canonical executable qualification is still running. The parser failure at
+Nat.lean:46 in f56d/58fab is corrected by a typed local constructor name.
+Do not substitute earlier successful jobs for final-source qualification.
 
 The preceding stateful source
 [463d956f40f360960dd78ad8b8d8b3749a80c03f](https://github.com/dwijayuda/pskernel/commit/463d956f40f360960dd78ad8b8d8b3749a80c03f)
-is fully green in
-[integration39514448898](https://github.com/dwijayuda/pskernel/actions/runs/39514448898),
+passed [integration39514448898](https://github.com/dwijayuda/pskernel/actions/runs/39514448898),
 [original correctness/portability39514448820](https://github.com/dwijayuda/pskernel/actions/runs/39514448820)
 and [all-six research39514448956](https://github.com/dwijayuda/pskernel/actions/runs/39514448956).
-This includes 578 strict generated transformations,96 correctness-guarded
-A-B-B-A samples, all 33 whole-executable operations and detached JS execution.
-Its manifest derives 101 canonical modules and 1,239 declarations, with authentic
-PS checks, TypeScript7.0.2 output, declarations and source maps. DirectJS reports
-an explicit unsupported emitter capability; it is not a qualified kernel backend.
-Canonical DAG runtime smoke first appears at f56d; the older canonical success
-only covers the complete original V1 executable.
+Its generated executable passed 578 transformations,96 correctness-guarded ABBA
+samples and all33 whole-executable operations. Canonical reconstruction derived
+101 modules/1,239 declarations. TypeScript7.0.2/Node22, declarations, maps and
+detached V1 runtime passed. Canonical DAG runtime was added later and needs its
+own evidence. DirectJS remains an explicitly unsupported emitter capability.
 
-The corrected independent Arena controls passed in
-[39513874902](https://github.com/dwijayuda/pskernel/actions/runs/39513874902);
-all 193 independent replay is running at unchanged fuel4096. Its official pinned
-reference passed 193 cases: 122 accepted, 71 rejected, with body hashes preserved
-and no exclusions. No independent full-corpus result is claimed yet. Symbol-tag
-comparisons preserve exact outcomes, safety/binder/hint variants and resource
-kinds; actual unsupported/cancelled controls remain distinct from rejection.
+### Numeral recursive-alias repair — pending this commit's CI
 
-The quick DefEq migration in this commit has source-reviewed tests and local
-entry-guard lemmas but has not yet passed its own CI. Do not substitute earlier
-successful runs for final-commit qualification. No PR has been merged; keep the
-integration branch isolated until all required kernel gates qualify.
+Five scalar workers (GCD, heap-word counting, power, bitwise and right shift)
+previously constructed their predecessor function before inspecting arguments.
+The generated backend could therefore allocate an enormous closure chain from
+a fuel initialized to a numeral or exponent. Recursive aliases are now delayed
+inside their argument lambdas. Their supplied fuel, equations, zero-fuel
+results, checks and errors are unchanged. A native proof file retains the exact
+old equations and proves extensional equality for every supplied fuel.
+Those lemmas and the new native/independent-JS large-numeral gates are pending CI.
+
+The generated gate uses a30-second host watchdog, unchanged kernel fuel4096,
+129-bit numerals, UInt32-limit exponent cases, low-fuel equations, exact numeral
+size thresholds, complete checking/WHNF/positive-negative DefEq, and real
+positive/negative declaration admission. It is run from both .lean-generated
+and canonical .ps-generated bundles with PATH empty. It does not use official
+Lean at runtime. This is a functional/allocation regression gate, not an
+A-B performance result or a proof of an allocation bound.
+
+### First complete independent Arena report — gate failed, no exclusions
+
+[39513874902](https://github.com/dwijayuda/pskernel/actions/runs/39513874902)
+completed all193 independent cases and110 controls at fuel4096. Strict matches:
+165 (102 accepts,55 kernel rejections,1 metadata rejection,7 transport rejections).
+Unresolved:24 host timeouts (5 bad/19 good), one nested restored-validation
+diagnostic classified internal, one init-prelude noncanonical source all-list
+declined as unsupported, and two agreeing unsafe/partial rejections with a
+documented policy distinction. No false admission was observed among completed
+verdicts; the timed-out cases remain unresolved. The official pinned reference
+passed all193 (122 accepted/71 rejected). All body hashes were preserved.
+
+Timeout records report only host wall time; they do not establish that kernel
+admission began or attribute the cost. Source inspection identifies large Nat
+literals in some cases, but causation by the recursive-alias defect is unmeasured.
+Input diagnostics will separate numeric names from numerals. Known nested error
+wrappers and the nonchecking Lean DefinitionVal.all annotation need principled
+adapter fixes; neither is permission to weaken declaration checking.
+
+No PR is merged. This branch remains a partial migration with full-checker
+fallback and open performance/memory, Arena and formal-refinement obligations.
 
 ## Objective and execution constraints
 

@@ -21,6 +21,7 @@ const accepted=(result,label)=>{
 const empty=load("psKernelExprV2Empty");
 const emptyIndex=load("psKernelExprV2IndexedEmpty");
 const mkBVar=load("psKernelExprV2MkBVar");
+const push=load("psKernelExprV2Push");
 const mkApp=load("psKernelExprV2MkApp");
 const lookup=load("psKernelExprV2Lookup");
 const indexedPush=load("psKernelExprV2IndexedPush");
@@ -68,15 +69,13 @@ const n=256;
 for(let round=0;round<2;round++){
   timed("array-"+round,()=>{
     let x=empty;
-    for(let i=0;i<n;i++)x=mkBVar(x,BigInt(i)).fst;
+    for(let i=0;i<n;i++)x=push(x,firstEntry).fst;
     return x.nodes.length;
   });
   timed("indexed-"+round,()=>{
     let x=emptyIndex;
     for(let i=0;i<n;i++){
-      // Each index uses metadata computed through a real V2 constructor.
-      const e=accepted(lookup(arena,firstId),"bench-entry");
-      x=accepted(indexedPush(x,e),"bench-push").fst;
+      x=accepted(indexedPush(x,firstEntry),"bench-push").fst;
     }
     return Number(x.size);
   });

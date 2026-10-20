@@ -373,7 +373,11 @@ def psSh1SyntaxTermStep
   | PsSyntaxTerm.doE _ span
   | PsSyntaxTerm.doBindE _ _ _ _ span
   | PsSyntaxTerm.doThenE _ _ span
-  | PsSyntaxTerm.doReturnE _ span =>
+  | PsSyntaxTerm.doReturnE _ span
+  | PsSyntaxTerm.doLetMutE _ _ _ _ span
+  | PsSyntaxTerm.doAssignE _ _ _ span
+  | PsSyntaxTerm.doIfE _ _ _ _ span
+  | PsSyntaxTerm.doEndE span =>
       Except.error
         (psSh1SourceFailure "source-do-unsupported"
           "do semantics are outside the historical SH1 source profile"

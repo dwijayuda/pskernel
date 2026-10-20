@@ -54,10 +54,9 @@ def psKernelExprV2PortableInstOnCanonical
           | Except.error error =>
               Except.error error
           | Except.ok result =>
-              Except.ok
-                (Prod.mk
-                  (Prod.fst result).arena
-                  (Prod.snd result))
+              let completed : PsKernelExprV2PortableInstState :=
+                Prod.fst result;
+              Except.ok (Prod.mk completed.arena (Prod.snd result))
 
 def psKernelExprV2PortableHeadStepOnCanonical
     (arena : PsKernelExprV2ChunkedArena)

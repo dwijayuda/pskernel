@@ -189,3 +189,17 @@ optional source libraries do not install a global generated-program runtime.
 - [npm pack](https://docs.npmjs.com/cli/v11/commands/npm-pack/)
 - [Node module resolution](https://nodejs.org/api/modules.html#loading-from-node_modules-folders)
 - [Node package exports](https://nodejs.org/api/packages.html#package-entry-points)
+
+## Control/data continuation canary
+
+The continuation's installed two-package canary compiles real transitive source
+containing an Id do block, a lexical mutable local, assignment, a conditional and
+early return. The installed native compiler independently admits the source graph,
+and generated JS executes `answer = 42`. The canary receipt records these
+`checkedControlFlow` forms. Existing private-module/profile/ill-typed-transitive
+refusals and preservation of an earlier output remain mandatory.
+
+See [the control/data checkpoint](PSC1_PRACTICAL_CORE_CONTROL_DATA.md) for the
+observed exact head and workflow. This evidence covers the installed selected
+source path; it does not qualify all fourteen families, a new public aggregate
+ABI, non-Linux package installation, or npm registry publication.

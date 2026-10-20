@@ -6,7 +6,8 @@ TypeScript, Rust, core WebAssembly, component WebAssembly, Python and PHP direct
 from checked compiler IR. The independent admission provider is official
 **Lean 4.35.0**, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
 
-This branch is the seven-backend integration stacked on Practical Core PR #163.
+This branch is the control/data Practical Core continuation in draft PR #166,
+stacked on the preserved seven-backend PR #165.
 Consult [backend conformance](docs/PSC1_BACKEND_CONFORMANCE.md) for exact commits,
 executed coverage, target tools and remaining limitations. The presence of an emitter
 does not qualify every language feature.
@@ -95,18 +96,27 @@ Lean provider remains authoritative for direct builds.
 
 Both input syntaxes share the compiler pipeline. The retained slice includes typed
 functions, internal generic specialization, structures/inductives and matching,
-selected higher-order/array operations, immutable lets, qualified Id/Except do forms,
-numeric/Boolean operators and explicit ordinary partial functions.
+selected higher-order/array operations, contextual local inference, numeric/Boolean
+operators and explicit ordinary partial functions. The control/data continuation adds
+lexical mutable locals, assignment, branch/loop early return, finite List/Array/Nat-range
+loops, tuple/array expressions and optional array access. Id/Except and the actual
+checked CompilerM share the selected finite controller.
 
-The fourteen Practical Core feature families remain a staged implementation target.
-Full mutation/loop/early-return expansion, unrestricted Lean, full type-class syntax,
-Int division/modulo and fixed-width/floating runtime scalars are outside the currently
-qualified direct profile. Python/PHP initially expose scalar public signatures; aggregate
+Selected Id/Except while loops require an explicit partial declaration and
+`--assurance ordinary`. Per-site helpers retain the exact checked witness/body
+pairing. Nested procedural loops inside a while body, CompilerM while, unknown or
+function result heads, and general dependent captures remain outside this profile.
+
+The fourteen Practical Core feature families remain incomplete. Tuple patterns,
+throw/try/catch handlers, namespace scopes, Prop-valued ordering and bounded typed IO
+still require work. Unrestricted Lean, full type-class syntax, Int division/modulo and
+fixed-width/floating runtime scalars are outside the currently qualified direct profile. Python/PHP initially expose scalar public signatures; aggregate
 values can be internal. Rust retains its existing checked generic public path. Component
 Wasm retains its bounded Bool ABI.
 
 See [the selected language reference](PSC1_LANGUAGE_REFERENCE_v7.2.md),
 [Practical Core status](docs/PSC1_PRACTICAL_CORE_STATUS.json),
+[control/data scope and exact evidence](docs/PSC1_PRACTICAL_CORE_CONTROL_DATA.md),
 [architecture](ARCHITECTURE.md), [runtime semantics](docs/PSC1_RUNTIME_SEMANTICS.md)
 and [current work state](AI_WORK_STATE.md).
 

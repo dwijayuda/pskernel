@@ -4,32 +4,48 @@ Updated 2026-10-20. Branch: `feature/psc1-practical-control-data-20261020`.
 Draft [PR #166](https://github.com/dwijayuda/pskernel/pull/166) is stacked on
 seven-backend PR #165 at preserved head
 `5539059a47c13a3dbc9806a504775b72f7bfd0fe`.
-PRs #162, #163 and #165 remain intact; no merge or publication is performed.
+PRs #162, #163 and #165 remain intact; no merge or publication was performed.
 
-## Implemented continuation and observed evidence
+## Qualified implementation checkpoint
 
-The shared procedural AST/controller now implements lexical mutable locals,
+Implementation head `8d6f80ea5813edd0644440971095abffd9dddacd` passed all 34 steps in
+[focused Linux run 39407097682](https://github.com/dwijayuda/pskernel/actions/runs/39407097682). The workflow tested
+GitHub merge commit `164fb133a8da410140cc3a84dcd51382c4a230a6` against preserved PR #165.
+
+The [immutable qualification receipt](docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json)
+records the exact compiler/tool identities, observed checks and package hashes.
+[Retained evidence archive](https://github.com/dwijayuda/pskernel/actions/runs/39407097682/artifacts/12257218795): 38,733,488 bytes,
+SHA-256 `2b59e2401d4d68149360e5bce8ac91a371d904bfec715141705c8c85bd6edd98`.
+This is a scoped execution checkpoint; later heads require their own successful
+focused check. All fourteen feature families remain incomplete.
+
+The shared procedural AST/controller implements lexical mutable locals,
 assignment, branch continuations, early return, finite List/Array/Nat-range
 iteration, contextual pure, tuple/array expressions and optional array lookup.
 Selected Id/Except while sites specialize to checked private ordinary helpers
 with direct tail recurrence; generic markers never enter runtime graphs.
 
-At source head `88487343a41b9ec79fa4646602a5f4d512de0ce7`,
-[Linux run 39378507559](https://github.com/dwijayuda/pskernel/actions/runs/39378507559)
-compiled all new code. Existing Do/Data native suites passed. New Nat/Except while
-fixtures passed independent ordinary admission, strict IR and private JS expected
-result execution, including 10,000 iterations, captures, source-self reference,
-sequential loops and while inside a finite for. The all-seven run did not pass:
-the regular corpus passed JS/TS, Rust exposed nested-closure lowering and empty-array
-annotation failures, and the while divergence fixture exposed an overly narrow
-Bool/Unit result-head gate. These are failed-check findings, not qualification.
+The focused Linux evidence covers 101 Do, 71 Data and 27 While native outcomes;
+14 regular target/source bundles; 14 ordinary finite-while bundles with eight
+loop predicates; 14 external divergence deadlines; and 16 while refusals.
+The authentic pinned native-Lean oracle has 78 fields: 76 result observations
+and two toolchain identity fields. Two additional Rust
+private-closure records check reused captures and preserve the public nested
+function-signature refusal. Minimum Python repeats both grammars.
 
-The current repair keeps known primitive data heads separate from arbitrary opaque
-or generic type heads, preserves strict typed let annotations in Rust, and adds
-bounded nested closure support for private continuation signatures. Public Rust
-signature and named function-storage gates remain. Runtime suites accumulate
-per-target failures so one target cannot hide other observations, then fail the
-overall check if any record failed.
+Wasm computed calls now derive the complete closed callee type with the bounded
+strict IR checker before typed closure lowering. PHP direct self-tail calls reuse
+their declaration frame with argument snapshots and lexical-shadow checks; non-tail
+calls retain scheduler continuations. Rust keeps typed local lets and supports the
+needed private direct nested closures. The public component Bool-only and scripting
+aggregate boundaries remain.
+
+The scripting suite retains 24 bundles plus four boundary records; minimum Python
+retains 12 bundles plus two boundary records. Tiny interpreter cases distinguish
+simultaneous parameter updates, stable closure captures and shadowed self names.
+The focused backend suite has 26 groups. The installed two-package npm canary now
+uses checked Id mutation/branch/early return and still returns 42 through a
+four-source independently admitted import closure.
 
 ## Assurance and selected limits
 
@@ -40,28 +56,37 @@ axiom, unchecked loop primitive, runtime fuel or backend certificate is introduc
 
 Ordinary partial preparation is unchanged: constructive opaque witness plus exact
 separately checked body, with immutable graph pairing revalidated before erasure.
-Default checked and explicit verified requests refuse partial execution. Execution
-tests are not formal backend-preservation proofs.
+Default checked and explicit verified requests refuse partial execution and
+preserve previously published artifacts. Execution tests are not formal backend
+preservation proofs.
 
 Finite continuations have linear construction space; optional array lookup scans
 the array. While excludes nested procedural loops in its body, CompilerM, unknown
-or function-valued computation result heads, and general dependent local-let
+or function heads of the complete computation type, and general dependent local-let
 captures. All fourteen feature families remain incomplete. Tuple patterns,
 throw/try/catch handlers, namespace scopes, Prop-valued ordering with checked
 decision evidence and a bounded typed-IO contract remain future work.
 
-## Next required checkpoint
+## Resume from here
 
-Finish focused Linux qualification for this exact implementation; retain every
-source/admission/IR/runtime/publication gate. Then reconcile README, architecture,
-runtime/npm notes, the fourteen-family/seven-target status and an immutable exact
-qualification receipt. Preserve historical five-target and seven-target receipts;
-do not extend their scope retroactively. Full self-host, joint-census, fixed-point,
-merge, release and npm registry publication remain excluded.
+Read `docs/PSC1_PRACTICAL_CORE_CONTROL_DATA.md`, the machine-readable
+`docs/PSC1_PRACTICAL_CORE_STATUS.json`, and the new immutable qualification
+receipt before making a broader claim. Each later branch head needs its own
+successful focused check. Historical five-target and seven-target receipts keep
+their original scope.
+
+Future source work should choose one explicitly missing family boundary and carry
+it through parser, typed elaboration, independent admission, strict IR, both
+grammars and all affected target consumers. Typed IO requires console line
+input/output plus bounded UTF-8 file read/write, with root/path, EOF/newline,
+size/error and publication refusal contracts. Stdout alone is insufficient.
+
+Full self-host, joint-census, fixed-point, merge, release and npm registry
+publication remain excluded from this continuation.
 
 ## Preserved seven-backend checkpoint and history
 
-# PSC1 current work state — seven direct backends and npm
+### Historical PSC1 work state — seven direct backends and npm
 
 Updated 2026-10-20. Branch: `feature/psc1-seven-backend-architecture-20261020`.
 Draft [PR #165](https://github.com/dwijayuda/pskernel/pull/165) is stacked on PR #163
@@ -124,7 +149,7 @@ The compiler supports the retained subset and qualified Practical Core slice, no
 all fourteen feature families or unrestricted Lean. Int division/modulo,
 fixed-width/floating runtime scalars, general Python/PHP public aggregate ABIs and
 non-Bool component exports remain unqualified. Python/PHP source origins cover
-declaration starts. PHP tail recursion retains heap frames; nullary thunks can
+declaration starts. At that checkpoint, PHP tail recursion retained heap frames; nullary thunks can
 repeat work. The initial npm binary package is Linux x64/glibc only.
 
 Future source-language expansion, runtime adapters, additional platforms, formal

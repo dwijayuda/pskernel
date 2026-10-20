@@ -35,6 +35,15 @@
       "commit": "4be91b111c1773f02a009fb2f643b18912cee920",
       "runId": 39348537989,
       "receipt": "docs/PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json"
+    },
+    {
+      "id": "practical-core-control-data-ordinary-while",
+      "status": "qualified-subset",
+      "qualification": "focused Linux compile, independent admission, strict IR and selected execution in both grammars on seven targets passed",
+      "commit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+      "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+      "runId": 39407097682,
+      "receipt": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json"
     }
   ],
   "stages": [
@@ -57,15 +66,18 @@
         "psc1/packages/environment/src/Ps/Environment/Prelude.lean",
         "psc1/packages/syntax/src/Ps/Syntax/Operators.lean",
         "psc1/packages/elab/src/Ps/Elab/Operators.lean",
-        "psc1/test/OperatorTests.lean"
+        "psc1/test/OperatorTests.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/PrintCommon.lean"
       ],
-      "notes": "Qualified fixed-precedence Nat +,-,*,/,% and Int +,-,*,unary -, Bool !/&&/|| and selected equality checking. Numeric runtime cases passed JS/TS/Rust; Bool operator cases passed all five targets in both syntaxes. Prop-valued ordering (<, <=, >, >=) remains unsupported; family incomplete.",
+      "notes": "Existing Nat arithmetic, selected Int arithmetic, Bool operations and Nat/Bool equality remain qualified in the retained profile. New control lowering reuses existing Bool decision evidence. Prop-valued Nat/Int ordering is still missing; Int division/modulo remains outside the active profile.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
       "evidence": [
         {
@@ -73,6 +85,13 @@
           "runId": 39348537989,
           "suite": "psc1_operator_tests and practical-forms-backend-tests.mjs",
           "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        },
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_operator_tests, runtime-conformance-tests.mjs and operator translation roundtrips",
+          "scope": "Retained selected arithmetic/Bool predicates execute in both grammars on all seven targets; operator grouping roundtrips preserve the selected syntax. No new Prop-ordering family claim."
         }
       ]
     },
@@ -84,15 +103,19 @@
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/elab/src/Ps/Elab/Term.lean",
-        "psc1/test/BootstrapTests.lean"
+        "psc1/test/BootstrapTests.lean",
+        "psc1/packages/elab/src/Ps/Elab/Data.lean",
+        "psc1/test/DataTests.lean"
       ],
-      "notes": "Retained typed/inferred locals and contextual-call interactions passed native positive/negative checks; named Prod/Array Int examples executed on JS/TS/Rust in both syntaxes. General family remains incomplete.",
+      "notes": "Typed/inferred local lets, contextual literals and selected tuple/array/control interactions are exercised. Unresolved metavariables fail closed. This does not claim general Lean inference.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
       "evidence": [
         {
@@ -100,6 +123,13 @@
           "runId": 39348537989,
           "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
           "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        },
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "contextual_inference_tests, psc1_data_tests and runtime-conformance-tests.mjs",
+          "scope": "Selected contextual data/control inference participates in native tests and both-grammar seven-target predicates. General Lean inference remains unclaimed."
         }
       ]
     },
@@ -115,15 +145,19 @@
         "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
         "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
         "psc1/packages/elab/src/Ps/Elab/Do.lean",
-        "psc1/test/DoTests.lean"
+        "psc1/test/DoTests.lean",
+        "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
+        "psc1/packages/elab/src/Ps/Elab/DoFor.lean"
       ],
-      "notes": "Qualified shared typed sequencing, immutable lets/binds, Unit actions and terminal return for monomorphic Type0 Id, Except and actual checked CompilerM. Id aliases and Except execute on all five targets in both syntaxes. CompilerM read/update has independent kernel reduction and typed IR evidence. Higher universes, early exits, mutation and loops remain incomplete.",
+      "notes": "Type0 Id, Except and actual checked CompilerM share lexical mutation, branch continuations, early return, finite loops and contextual pure. CompilerM control/state sequencing has independent admission/IR plus private JS expected-value execution, not an all-seven native-oracle claim. Source while is restricted to selected ordinary Id/Except cases; general effects/handlers remain missing.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
       "evidence": [
         {
@@ -131,65 +165,115 @@
           "runId": 39348537989,
           "suite": "psc1_do_tests and practical-forms-backend-tests.mjs",
           "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        },
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_do_tests, runtime-conformance-tests.mjs and native/private-JS CompilerM fixtures",
+          "scope": "Selected Id/Except control executes in both grammars on all seven targets; actual checked CompilerM control/state is separately independently admitted, IR checked and compared through private JavaScript execution."
         }
       ]
     },
     {
       "id": "for",
       "priority": "P0",
-      "status": "missing",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean"
+        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
+        "psc1/packages/elab/src/Ps/Elab/DoFor.lean",
+        "psc1/packages/environment/src/Ps/Environment/Control.lean",
+        "psc1/test/DoTests.lean"
       ],
-      "notes": "No iteration/control AST or parser.",
+      "notes": "List, Array and finite unit-step Nat ranges capture collection/endpoints once and preserve selected left-to-right bodies, mutation, early return and effect sequencing. Includes literal/empty Lists and equal/reversed/zero-start ranges. O(n) continuation construction; arbitrary iterator instances and broad resource qualification remain outside the profile.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_do_tests and runtime-conformance-tests.mjs",
+          "scope": "Selected List/Array/unit-step Nat ranges execute in both grammars on all seven targets; CompilerM finite-loop state cases use native/private-JS evidence. No broad large-collection resource claim."
+        }
+      ]
     },
     {
       "id": "while",
       "priority": "P0",
-      "status": "missing",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean"
+        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
+        "psc1/packages/elab/src/Ps/Elab/DoWhile.lean",
+        "psc1/packages/elab/src/Ps/Elab/DoLoopLift.lean",
+        "psc1/test/WhileTests.lean",
+        "psc1/scripts/ordinary-while-conformance-tests.mjs"
       ],
-      "notes": "Ordinary partial function execution now exists; while syntax and loop/control lowering remain missing.",
+      "notes": "Explicit partial source owners and ordinary assurance only. Selected Type0 Id/Except loops require a known datatype or selected primitive data result head and fully saturated direct tail recurrence after checked per-site closure conversion. No procedural loop in a while body's control spine, CompilerM while, unknown/function head of the complete computation type, or general dependent local-let capture. Includes sequential loops, while within a finite for, early return, typed error propagation and external-timeout divergence; no generated execution fuel.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_while_tests and ordinary-while-conformance-tests.mjs",
+          "scope": "Selected explicit ordinary Id/Except loops: 14 finite target/source bundles, 14 external divergence deadlines and 16 refusals; 100000-iteration cases. Complete families remain false."
+        }
+      ]
     },
     {
       "id": "mutation",
       "priority": "P0",
-      "status": "missing",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean"
+        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
+        "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
+        "psc1/packages/elab/src/Ps/Elab/Do.lean",
+        "psc1/test/DoTests.lean",
+        "psc1/test/WhileTests.lean"
       ],
-      "notes": "No lexical assignment/control lowering.",
+      "notes": "Lexical fixed-type let-mut and assignment become checked immutable Core lets; branches and selected loops carry current values. Immutable shadowing by a new mutable local is allowed, while rebinding/shadowing an existing mutable name inside its controller is refused. Earlier closures retain captured values. General handler/effect interactions remain incomplete.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_do_tests, psc1_while_tests and both runtime matrices",
+          "scope": "Selected lexical fixed-type assignment, branch/loop joins and value capture execute in both-grammar target predicates; additional CompilerM state cases use native/private-JS evidence."
+        }
+      ]
     },
     {
       "id": "return",
@@ -201,15 +285,18 @@
         "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
         "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
         "psc1/packages/elab/src/Ps/Elab/Do.lean",
-        "psc1/test/DoTests.lean"
+        "psc1/test/DoTests.lean",
+        "psc1/test/WhileTests.lean"
       ],
-      "notes": "Qualified terminal return in selected typed do families. Branch/loop/handler early return remains unimplemented.",
+      "notes": "Terminal and nested branch/selected loop early return use one procedural controller. A direct nested do shares it; a parenthesized do term or lambda creates a separate computation. Handler interactions and unsupported loop/effect shapes remain incomplete.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
       "evidence": [
         {
@@ -217,6 +304,13 @@
           "runId": 39348537989,
           "suite": "psc1_do_tests and practical-forms-backend-tests.mjs",
           "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        },
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_do_tests, psc1_while_tests and both runtime matrices",
+          "scope": "Selected branch/finite/ordinary-while early returns execute in both-grammar target predicates; independent nested-do/controller boundaries are pinned in native tests."
         }
       ]
     },
@@ -232,15 +326,20 @@
         "psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
         "psc1/packages/compiler/src/Ps/Compiler/Ordinary.lean",
         "psc1/test/OrdinaryExecutionTests.lean",
-        "psc1/scripts/practical-ordinary-tests.mjs"
+        "psc1/scripts/practical-ordinary-tests.mjs",
+        "psc1/packages/elab/src/Ps/Elab/DoLoopLift.lean",
+        "psc1/test/WhileTests.lean",
+        "psc1/scripts/ordinary-while-conformance-tests.mjs"
       ],
-      "notes": "Qualified explicit --assurance ordinary: safe opaque constructive witness plus independently checked exact body, immutable graph pairing, original-body erasure, and explicit refusal of verified execution. Lean fixtures execute on all five targets; ProofScript countdown executes in JS and has native admission/IR evidence. Wider function/loop scope remains incomplete.",
+      "notes": "Explicit ordinary execution retains independently admitted constructive opaque witnesses and exact checked bodies with immutable graph pairing. Generated private while helpers use the unchanged ordinary path; their generic elaboration markers are absent from runtime graphs. Default checked and explicit verified requests refuse and preserve prior published artifacts. Broader function/control qualification remains incomplete.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
       "evidence": [
         {
@@ -248,26 +347,37 @@
           "runId": 39348537989,
           "suite": "psc1_ordinary_tests and practical-ordinary-tests.mjs",
           "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        },
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_ordinary_tests, practical-ordinary-tests.mjs and ordinary-while-conformance-tests.mjs",
+          "scope": "Preserved independently admitted opaque-witness/exact-body pairing plus selected private ordinary while helpers; default/verified refusals preserve prior artifacts. No behavioral certificate."
         }
       ]
     },
     {
       "id": "tuples",
       "priority": "P1",
-      "status": "partial",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/environment/src/Ps/Environment/SelfHostProd.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean"
+        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseData.lean",
+        "psc1/test/DataTests.lean"
       ],
-      "notes": "Checked Prod machinery exists; tuple expression/pattern sugar missing.",
+      "notes": "Unit/grouping and right-associated tuple expressions lower to existing checked Prod constructors; contextual elements, nested tuples and round trips are exercised. Tuple destructuring and nested binding patterns remain missing.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
       "evidence": [
         {
@@ -275,26 +385,38 @@
           "runId": 39348537989,
           "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
           "scope": "existing named Prod/Array operations with contextual Int elements, JS/TS/Rust, both source forms"
+        },
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_data_tests and runtime-conformance-tests.mjs",
+          "scope": "Unit/grouping/right-associated product expressions, contextual elements and internal aggregate use; both grammars and seven-target Bool predicates. No destructuring or new public aggregate ABI."
         }
       ]
     },
     {
       "id": "arrays",
       "priority": "P1",
-      "status": "partial",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/environment/src/Ps/Environment/Prelude.lean",
-        "psc1/packages/erasure/src/Ps/Erasure/Expr.lean"
+        "psc1/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseData.lean",
+        "psc1/packages/elab/src/Ps/Elab/Data.lean",
+        "psc1/test/DataTests.lean"
       ],
-      "notes": "Typed named Array operations exist; literal and optional/proof indexing syntax missing.",
+      "notes": "Array literals, contextual empty arrays and adjacent optional xs[i]? implement the selected minimum through existing checked Array machinery. Optional lookup binds receiver then Nat index once and returns none on empty/OOB/huge indices without a default element. The implementation scans the array. Plain/proof access remains refused pending genuine validity evidence; panic access is excluded by this selection. These refusals are not additional minimum-completion obligations. Full-family completion beyond the demonstrated selected cases is not claimed.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
       "evidence": [
         {
@@ -302,28 +424,48 @@
           "runId": 39348537989,
           "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
           "scope": "existing named Prod/Array operations with contextual Int elements, JS/TS/Rust, both source forms"
+        },
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_data_tests and runtime-conformance-tests.mjs",
+          "scope": "Array literals, contextual empties and optional Nat indexing, including empty/OOB/huge-index cases, execute through internal operations in both grammars on seven targets. Plain/proof/panic forms remain refused."
         }
       ]
     },
     {
       "id": "typed-errors",
       "priority": "P1",
-      "status": "partial",
+      "status": "qualified-subset",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/stdlib/ProofScript/Data/Result.lean",
-        "psc1/stdlib/ProofScript/Compiler/Effect.lean"
+        "psc1/stdlib/ProofScript/Compiler/Effect.lean",
+        "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
+        "psc1/test/DoTests.lean",
+        "psc1/test/WhileTests.lean"
       ],
-      "notes": "Checked Except do sequencing and error propagation are qualified in this slice; selected try/catch/throw syntax and interactions remain missing.",
+      "notes": "Existing Except/checked CompilerM bind propagation interacts with selected control and finite loops; selected ordinary Except while is exercised. Throw/try/catch syntax and handler/control/state semantics remain missing.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
-      "evidence": []
+      "evidence": [
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "psc1_do_tests, psc1_while_tests and the selected Except runtime predicates",
+          "scope": "Selected Except propagation, including ordinary while, executes on seven targets in both grammars. CompilerM control/state propagation uses native/private-JS comparisons; throw/try/catch remains missing."
+        }
+      ]
     },
     {
       "id": "call-inference",
@@ -333,15 +475,20 @@
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/elab/src/Ps/Elab/Term.lean",
-        "psc1/packages/meta/src/Ps/Meta/Unify.lean"
+        "psc1/packages/meta/src/Ps/Meta/Unify.lean",
+        "psc1/test/DataTests.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "psc1/test/DoTests.lean"
       ],
-      "notes": "Qualified transactional expected-result constraints before nondependent explicit call arguments. Dependent/intervening-implicit telescopes retain sequential checking. All 25 positive/negative native checks passed; contextual Int/Prod/Array runtime examples passed JS/TS/Rust in both syntaxes.",
+      "notes": "Retained transactional expected-result constraints precede nondependent explicit arguments; selected contextual data/control interactions are exercised. Dependent and intervening-implicit telescopes retain sequential checking; general Lean inference is not claimed.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "selected-cases-executed",
+        "ts": "selected-cases-executed",
+        "rust": "selected-cases-executed",
+        "wasm-core": "selected-cases-executed",
+        "wasm-component": "selected-cases-executed",
+        "python": "selected-cases-executed",
+        "php": "selected-cases-executed"
       },
       "evidence": [
         {
@@ -349,6 +496,13 @@
           "runId": 39348537989,
           "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
           "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+        },
+        {
+          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+          "runId": 39407097682,
+          "suite": "contextual_inference_tests, grouped-arrow roundtrips and private Rust closure consumers",
+          "scope": "Retained contextual constraints, grouped/dependent-arrow roundtrips and both private Rust higher-order reuse consumers; the public nested-function signature still refuses. General dependent inference is not claimed."
         }
       ]
     },
@@ -363,13 +517,15 @@
         "psc1/packages/elab/src/Ps/Elab/Context.lean",
         "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean"
       ],
-      "notes": "Qualified references exist; namespace scope/declaration/lookup support missing.",
+      "notes": "Exact dotted references, local-before-global lookup, entry-module export ownership and imported-helper privacy remain supported. Genuine namespace/end scopes, declaration identity, current/enclosing-name resolution, ambiguity checking, matched ends and integration with existing import ownership remain missing; no parser renaming shortcut is used.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "qualified-references-only-family-incomplete",
+        "ts": "qualified-references-only-family-incomplete",
+        "rust": "qualified-references-only-family-incomplete",
+        "wasm-core": "qualified-references-only-family-incomplete",
+        "wasm-component": "qualified-references-only-family-incomplete",
+        "python": "qualified-references-only-family-incomplete",
+        "php": "qualified-references-only-family-incomplete"
       },
       "evidence": []
     },
@@ -383,13 +539,15 @@
         "psc1/host/src/Ps/Host/DirectBackend.lean",
         "psc1/packages/compiler-ir/src/Ps/CompilerIr/Model.lean"
       ],
-      "notes": "No admitted source IO or explicit bounded host adapter contract.",
+      "notes": "No admitted source IO profile. Completion requires typed console line input/output and bounded UTF-8 file read/write with path roots, EOF/newline, size/error semantics, target adapters and refusal before publication. Stdout alone is not completion.",
       "targets": {
-        "js": "not-qualified-for-complete-family",
-        "ts": "not-qualified-for-complete-family",
-        "rust": "not-qualified-for-complete-family",
-        "wasm-core": "not-qualified-for-complete-family",
-        "wasm-component": "not-qualified-for-complete-family"
+        "js": "not-implemented",
+        "ts": "not-implemented",
+        "rust": "not-implemented",
+        "wasm-core": "not-implemented",
+        "wasm-component": "not-implemented",
+        "python": "not-implemented",
+        "php": "not-implemented"
       },
       "evidence": []
     }
@@ -397,8 +555,8 @@
   "assurance": {
     "currentArtifact": "psc1-checked-direct/1",
     "endToEndVerifiedMode": "explicit --assurance verified rejects; no ordinary fallback",
-    "partialExecution": "ordinary-checked scoped qualification passed; see exact receipt for target/source-form coverage",
-    "effects": "qualified Type0 Id/Except sequencing and checked CompilerM kernel/IR state read/update; no general IO",
+    "partialExecution": "Unchanged constructive opaque-witness/exact-body pairing; source while helpers are privately specialized before ordinary preparation. Selected Id/Except ordinary execution passed; default checked and explicit verified partial requests refuse.",
+    "effects": "Selected Type0 Id/Except/checked CompilerM control and finite loops; selected Id/Except ordinary while; no admitted general IO or handlers.",
     "directAdmissionProvider": "independent official Lean",
     "ownedKernel": "source integrated; separately native-tested"
   },
@@ -407,5 +565,17 @@
   ],
   "fullSelfHostTests": false,
   "deferred": "All unimplemented v7.2 features outside the fourteen approved families; public unsafe, partial_fixpoint, break/continue/finally, macros, broad automation, networking/FFI, optional scalar families, full standard and full self-host qualification.",
-  "qualificationReceipt": "docs/PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json"
+  "qualificationReceipt": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json",
+  "continuation": {
+    "pr": 166,
+    "basePr": 165,
+    "baseCommit": "5539059a47c13a3dbc9806a504775b72f7bfd0fe",
+    "branch": "feature/psc1-practical-control-data-20261020",
+    "status": "qualified-selected-cases",
+    "receipt": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json",
+    "documentation": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA.md",
+    "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
+    "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
+    "runId": 39407097682
+  }
 }

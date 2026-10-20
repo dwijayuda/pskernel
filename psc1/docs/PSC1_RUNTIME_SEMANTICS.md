@@ -118,8 +118,12 @@ valid values on later calls; no general aliasing or ownership API is introduced.
 
 Python uses a selected generator-call trampoline with an explicit continuation
 stack. Tail requests replace the current frame. PHP uses a selected private
-WeakMap/generator scheduler and stores suspended calls on the heap. These helpers
-schedule generated function calls; they do not interpret serialized IR.
+WeakMap/generator scheduler and stores non-tail suspended calls on the heap.
+Recognized fully saturated, unshadowed direct self-tail calls reuse the current
+declaration frame through a generated loop. All argument values are saved before
+parameters are reassigned, preserving simultaneous updates and closure captures.
+Other calls retain the scheduler's continuation behavior. These helpers schedule
+generated function calls; they do not interpret serialized IR.
 
 Generated programs have no compiler-imposed execution fuel. Compile-time structural
 traversal bounds and bounded helper dependency-closure traversal are not execution
@@ -127,9 +131,11 @@ fuel. Host memory and external process limits still apply. The deep PHP regressi
 allows 1 GiB for 100,000 pending frames. Deliberately divergent ordinary code is
 observed only through an external timeout.
 
-The new-target suite tests deep non-tail recursion and ordinary partial recursion
-on actual interpreters. It does not extend every existing backend's recursion
-qualification. Use the conformance record for the precise tested cases.
+The scripting suite tests deep non-tail recursion and ordinary partial recursion
+on actual Python/PHP interpreters. That deep non-tail qualification remains
+specific to those targets. The control/data continuation separately tests selected
+ordinary while programs on all seven targets; it does not establish a general
+recursion guarantee. Use the conformance record for the precise tested cases.
 
 ## Large decimal integers in Python
 
@@ -212,3 +218,40 @@ receipts. Tests are evidence for their explicit cases, not a preservation proof.
 - [Python integer conversion limits](https://docs.python.org/3/library/stdtypes.html#integer-string-conversion-length-limitation)
 - [PHP GMP](https://www.php.net/manual/en/book.gmp.php)
 - [WebAssembly component WIT](https://component-model.bytecodealliance.org/design/wit.html)
+
+## Selected Practical Core control and data continuation
+
+The [control/data qualification](PSC1_PRACTICAL_CORE_CONTROL_DATA.md) records
+the exact source head, native oracle, target observations and remaining fourteen-family
+gaps. All target/public ABI restrictions above still apply.
+
+Mutation is lexical value threading. A closure created before an assignment keeps
+the earlier value. Conditions are evaluated once per branch entry. A while condition
+is reevaluated at each iteration against the current carried state. Early return
+skips the rest of its controller, including pending loop iterations and the
+post-loop continuation. Direct nested do shares the controller; a parenthesized
+do term or a lambda defines a separate computation.
+
+List/Array collections and Nat-range endpoints are captured once. Unit-step
+ranges are lower-inclusive and upper-exclusive; equal/reversed ranges execute
+no bodies. The finite implementation builds continuations with linear construction
+space. Selected while helpers use explicit ordinary execution with no generated
+fuel; long-loop and external-timeout evidence is reported separately from finite
+loop scalability.
+
+Optional array syntax `xs[i]?` evaluates the receiver before its Nat index,
+exactly once each. Empty and out-of-bounds lookups return none. Its selected
+implementation is a full array fold, O(array length), and requires no default
+element. Array literals and updates retain the existing persistent-value contract.
+
+The initial while profile requires Id/Except, an explicit partial owner, a result
+that reduces to a known datatype or a selected primitive data head, and
+recognized direct tail recurrence. Nested
+procedural loops within a while body, CompilerM while and general dependent
+local-let captures are refused. These are compiler capability boundaries;
+they do not introduce different loop results or a runtime budget.
+
+The pinned native Lean oracle is the behavioral reference. Independent logical
+admission does not evaluate opaque ordinary bodies and does not prove backend
+behavior. Private JS expected-value fixtures are used where retained nonreducing
+prelude declarations prevent kernel conversion from serving as an execution oracle.

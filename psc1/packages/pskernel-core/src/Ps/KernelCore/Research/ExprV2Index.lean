@@ -137,10 +137,8 @@ def psKernelExprV2IndexedPush
   | Except.error error =>
       Except.error error
   | Except.ok index =>
-      Except.ok
-        (Prod.mk
-          {
-            index := index
-            size := key
-          }
-          arena.size)
+      let next : PsKernelExprV2IndexedArena := {
+        index := index
+        size := key
+      };
+      Except.ok (Prod.mk next arena.size)

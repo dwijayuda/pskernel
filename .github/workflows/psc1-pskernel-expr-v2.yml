@@ -10,6 +10,7 @@ on:
       - psc1/packages/pskernel-core/src/Ps/KernelCore/Research/**
       - psc1/test/PsKernelExprV2Regression.lean
       - psc1/test/PsKernelExprV2FullCheckerBridge.lean
+      - psc1/scripts/pskernel-expr-v2-full-checker-bridge.mjs
       - psc1/scripts/pskernel-expr-v2-generated-smoke.mjs
       - psc1/kernel-lakefile.lean
       - .github/workflows/psc1-pskernel-expr-v2.yml
@@ -353,4 +354,66 @@ jobs:
           path: |
             ${{ runner.temp }}/psc1-v2-checker-bridge.log
             ${{ runner.temp }}/psc1-v2-checker-bridge.memory
+          retention-days: 30
+
+  generated-js-full-checker-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated TypeScript 7.0.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-v2-combined-ts"
+          echo '{"name":"psc1-v2-combined-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-v2-combined-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-v2-combined-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-v2-combined-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Build complete real PSC1 compiler and check combined research entry
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          lake build psc1
+          lake exe psc1 check \
+            packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2CheckerBridgeRoot.lean
+      - name: Generate JavaScript with both complete published kernel and V2 research
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake exe psc1 build \
+            packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2CheckerBridgeRoot.lean \
+            --out dist/expr-v2/combined/core-v2.js
+          test -s dist/expr-v2/combined/core-v2.js
+          test -s dist/expr-v2/combined/core-v2.d.ts
+          test -s dist/expr-v2/combined/core-v2.js.map
+          node --check dist/expr-v2/combined/core-v2.js
+      - name: Compare complete checked JS operations to the restricted V2 head machine
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --expose-gc scripts/pskernel-expr-v2-full-checker-bridge.mjs \
+            dist/expr-v2/combined/core-v2.js \
+            | tee "$RUNNER_TEMP/psc1-v2-js-checker-bridge.log"
+          grep -q 'PSC1_V2_JS_FULL_CHECKER_BRIDGE: PASS' \
+            "$RUNNER_TEMP/psc1-v2-js-checker-bridge.log"
+          grep -q 'production-checker-rejects-illtyped-application' \
+            "$RUNNER_TEMP/psc1-v2-js-checker-bridge.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-v2-complete-checker-generated-js-lean435
+          path: ${{ runner.temp }}/psc1-v2-js-checker-bridge.log
           retention-days: 30

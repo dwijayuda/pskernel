@@ -7,6 +7,7 @@ on:
       - fix/psc1-pskernel-core-cross-branch-20261020
     paths:
       - psc1/test/PsKernelWholeComparison.lean
+      - psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Instantiate.lean
       - psc1/scripts/pskernel-whole-report.mjs
       - psc1/scripts/pskernel-native-abba-report.mjs
       - psc1/kernel-lakefile.lean

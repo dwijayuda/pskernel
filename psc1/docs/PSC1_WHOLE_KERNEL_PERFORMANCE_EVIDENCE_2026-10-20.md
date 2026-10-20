@@ -136,3 +136,21 @@ With the compiler version now controlled, these observations point to **operatio
 The source-level memory ablation is implemented as `.github/workflows/psc1-pskernel-js-ablation.yml`. It uses **one immutable current compiler executable**, comparing original, all-optimized, no-lift-port, no-single/multi-substitution-ports, and no-beta-spine-ports, each through the same checked source-to-JS path. It measures the five individual operations above in fresh processes, twice per variant. Source variants must pass PSC1 checks and the emitted JS must execute guarded kernel operations; no relaxation is allowed.
 
 **Do not claim an individual optimization caused the memory increase until this ablation successfully completes and its effects are replicated.** If no single port explains the memory, investigate interaction effects and V8 allocation/retention profiling rather than broadly rolling back correct kernel improvements.
+
+## Same-compiler direct `.lean → JS` replication
+
+The direct-source, same-compiler replication also **passed**: [GitHub Actions run 39350548040](https://github.com/dwijayuda/pskernel/actions/runs/39350548040), compiler snapshot `c50c43cb0da9dd2c1ac80856d4ce1598cb552218`, original corrected kernel source `0a53836489c4e88f46df8f5b8b0c19cc41bafbbb`. It uses the same PSC1 compiler source for both variants, but takes the direct `.lean → JS` path instead of the canonical `.lean → .ps → JS` path. All guarded checks passed. [Raw logs and structured report](https://github.com/dwijayuda/pskernel/actions/runs/39350548040/artifacts/12234240173).
+
+The single-workload fresh-process observations were:
+
+| Checked operation | Original peak RSS | Optimized peak RSS | Original post-GC heap | Optimized post-GC heap |
+| --- | ---: | ---: | ---: | ---: |
+| Beta WHNF | 228.4 MiB | 233.3 MiB | 20.6 MiB | 20.6 MiB |
+| Positive DefEq | 228.9 MiB | **791.9 MiB** | 20.7 MiB | **54.4 MiB** |
+| Checked application, 16 arguments | 209.8 MiB | 203.4 MiB | 20.7 MiB | 20.9 MiB |
+| Ordinary inductive admission | 236.1 MiB | 250.8 MiB | 23.4 MiB | 27.3 MiB |
+| Mutual inductive admission | 229.3 MiB | 275.2 MiB | 23.4 MiB | 24.9 MiB |
+
+The direction of the positive DefEq peak and post-GC heap anomaly repeats across the canonical `.ps` and direct `.lean` paths, but the magnitude varies substantially. **Do not treat the 792 MiB peak as a deterministic memory requirement or claim every workload regresses.** This motivates a source ablation with current compiler bytes fixed.
+
+Latency for the complete suite in this direct-source run was largely at parity or improved by only a few percent, while memory remained workload-specific and highly variable. The controlling experiment must distinguish direct beta-spine, substitution and lifting changes under an otherwise identical compiler/runtime. A finite passing checker corpus is not a formal soundness proof or a full compiler/kernel fixed point.

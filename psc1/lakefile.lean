@@ -78,6 +78,10 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.Validate
   ]
 
+lean_lib PsBackendCommon where
+  srcDir := "packages/backend-common/src"
+  roots := #[`Ps.BackendCommon.Plan]
+
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
   roots := #[
@@ -128,6 +132,7 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.TailAlias,
     `Ps.BackendRust.Tail,
     `Ps.BackendRust.Runtime,
+    `Ps.BackendRust.RuntimePlan,
     `Ps.BackendRust.Module
   ]
 
@@ -146,8 +151,17 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.TailCalls,
     `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.Encode,
-    `Ps.BackendWasm.Binary
+    `Ps.BackendWasm.Binary,
+    `Ps.BackendWasm.RuntimePlan
   ]
+
+lean_lib PsBackendPython where
+  srcDir := "packages/backend-python/src"
+  roots := #[`Ps.BackendPython.Runtime, `Ps.BackendPython.Module]
+
+lean_lib PsBackendPhp where
+  srcDir := "packages/backend-php/src"
+  roots := #[`Ps.BackendPhp.Runtime, `Ps.BackendPhp.Module]
 
 -- Independent admission is host-only; logical checking is never delegated to
 -- formatters, transport code, the elaborator or an unvalidated raw IR wrapper.
@@ -171,6 +185,7 @@ lean_lib PsHost where
     `Ps.Host.LeanChecked,
     `Ps.Host.DirectSourceMap,
     `Ps.Host.DirectBackend,
+    `Ps.Host.ScriptBackend,
     `Ps.Host.WasmComponent
   ]
 
@@ -288,3 +303,15 @@ lean_exe psc1_operator_tests where
 lean_exe psc1_ordinary_tests where
   srcDir := "test"
   root := `OrdinaryExecutionTests
+
+lean_exe psc1_backend_common_tests where
+  srcDir := "test"
+  root := `BackendCommonTests
+
+lean_exe psc1_runtime_oracle where
+  srcDir := "test"
+  root := `RuntimeOracle
+
+lean_exe psc1_script_ir_tests where
+  srcDir := "test"
+  root := `BackendScriptTests

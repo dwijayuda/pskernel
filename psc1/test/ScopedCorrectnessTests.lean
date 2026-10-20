@@ -42,3 +42,18 @@ def main : IO Unit := do
     (match psIrSpecializeValidatedModule forged with | .error _ => true | .ok _ => false)
   require "forged uniform wrapper rejected before specialization"
     (match psIrSpecializeUniformValidatedModule forged with | .error _ => true | .ok _ => false)
+
+  let selected : PsValidatedIrModule := { raw := { raw with declarations := [{
+    declaration with name := "visible", body := .literal (.natural 42)
+  }] }}
+  let privateRust ← match psRustEmitSelectedValidatedModule selected [] [] with
+    | .ok source => pure source
+    | .error reason => throw (IO.userError reason)
+  require "Rust selects private function before printing"
+    ((privateRust.splitOn "fn visible").length == 2 &&
+      (privateRust.splitOn "pub fn visible").length == 1)
+  let publicRust ← match psRustEmitSelectedValidatedModule selected ["visible"] [] with
+    | .ok source => pure source
+    | .error reason => throw (IO.userError reason)
+  require "Rust selects public function before printing"
+    ((publicRust.splitOn "pub fn visible").length == 2)

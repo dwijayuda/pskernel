@@ -2,6 +2,7 @@ import Ps.Environment.Prelude
 import Ps.Syntax.ParseLean
 import Ps.Syntax.ParseProofScript
 import Ps.Elab.Declaration
+import Ps.Host.ArtifactBundle
 
 structure PsHostProjectState where
   environment : PsEnvironment
@@ -175,9 +176,44 @@ def psHostPreferAuthoritativeLean
   | "ProofScript" :: _ => true
   | _ => false
 
-def psHostResolveImport
-    (root : String)
+/-- Host metadata transport selects source paths only. The captured text is
+parsed and independently admitted through the existing native pipeline. -/
+private def psHostNpmResolveImport
+    (root importer : String) (sourceName : PsSyntaxName) : IO (Option String) := do
+  let resolver ←
+    if let some configured ← IO.getEnv "PSC1_LIBRARY_RESOLVER" then
+      pure (System.FilePath.mk configured)
+    else
+      let tool := System.FilePath.mk (← psHostArtifactToolPath)
+      let directory := tool.parent.getD (System.FilePath.mk ".")
+      let packageRoot := directory.parent.getD directory
+      pure (packageRoot / "npm-cli" / "libraries.mjs")
+  if !(← resolver.pathExists) then
+    throw (IO.userError "PSC1_LIBRARY_RESOLVER_MISSING: install the native toolchain")
+  let name := match psSyntaxNameToName sourceName with
+    | some value => psNameToString value
+    | none => ""
+  let result ← IO.Process.output {
+    cmd := "node"
+    args := #[resolver.toString, "resolve", name, root, importer]
+  }
+  if result.exitCode != 0 then
+    throw (IO.userError ("PSC1_LIBRARY_RESOLUTION_FAILED: " ++ result.stderr))
+  if result.stdout.isEmpty then return none
+  let marker := "PSC1_LIBRARY_PATH_V2\n"
+  if !result.stdout.startsWith marker then
+    throw (IO.userError "PSC1_LIBRARY_TRANSPORT_PROTOCOL")
+  let resolved := (result.stdout.drop marker.length).toString.trimAscii.toString
+  if resolved.isEmpty || !(resolved.endsWith ".lean" || resolved.endsWith ".ps") then
+    throw (IO.userError "PSC1_LIBRARY_SOURCE_KIND")
+  if !(← (System.FilePath.mk resolved).pathExists) then
+    throw (IO.userError "PSC1_LIBRARY_SOURCE_MISSING")
+  return some resolved
+
+def psHostResolveImportFrom
+    (root importer : String)
     (sourceName : PsSyntaxName) : IO String := do
+  if let some path ← psHostNpmResolveImport root importer sourceName then return path
   let relative := psHostModuleRelativePath sourceName
   if relative.isEmpty then
     throw (IO.userError "PSC1_PROJECT_IMPORT_NAME")
@@ -194,6 +230,10 @@ def psHostResolveImport
       throw
         (IO.userError
           ("PSC1_PROJECT_SOURCE_MISSING: " ++ relative))
+
+def psHostResolveImport
+    (root : String) (sourceName : PsSyntaxName) : IO String :=
+  psHostResolveImportFrom root (psHostJoinPath root "__entry__.lean") sourceName
 
 def psHostTokenKindText : PsTokenKind -> String
   | .identifier => "identifier"
@@ -432,7 +472,7 @@ mutual
     | [], state => pure state
     | sourceImport :: rest, state => do
         let dependency ←
-          psHostResolveImport root sourceImport.moduleName
+          psHostResolveImportFrom root (stack.headD root) sourceImport.moduleName
         let next ←
           psHostLoadModuleWithFuel
             fuel

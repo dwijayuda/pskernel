@@ -1,79 +1,123 @@
-# PSC0 compiler and self-host implementation
+# PSC1 checked native compiler
 
-Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
+PSC1 is a Lean-native compiler for the retained ProofScript subset and the qualified
+slice of **PSC1 Practical Core — v7.2 subset**. The built-in backends emit JavaScript,
+TypeScript, Rust, core WebAssembly, component WebAssembly, Python and PHP directly
+from checked compiler IR. The independent admission provider is official
+**Lean 4.35.0**, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
 
-This directory began as the preserved 2026-10-03 compiler-only bootstrap snapshot, copied from
-`psc2/selfhost-lean-kernel` at GitHub commit
-`d4298a712d1e2ea6505185d311e9af10a698b2ca`.
+This branch is the seven-backend integration stacked on Practical Core PR #163.
+Consult [backend conformance](docs/PSC1_BACKEND_CONFORMANCE.md) for exact commits,
+executed coverage, target tools and remaining limitations. The presence of an emitter
+does not qualify every language feature.
 
-The first fixed-point record is in
-`docs/continuity/COMPILER_FIXED_POINT_2026-10-03.md`.
-The self-host source entry remains
-`packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean`. The preserved October 3
-closure contained 55 modules in 12 package groups; later qualified checkpoints
-record their own exact closure manifests rather than changing that historical
-receipt.
+## A small program
 
-## Current compiler authoring and `.ps` grammar
+```lean
+def invert (flag : Bool) : Bool := if flag then false else true
+```
 
-The current compiler uses the bounded PSC authoring capabilities described in
-[the current authoring guide](docs/selfhost-language/CURRENT.md). Handwritten
-`.lean` remains authoritative. The qualified, cold-recovered R compiler is the
-explicitly selected authoring seed, recorded by [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6).
-Current compiler emission and selected-R cache-miss recovery use TypeScript
-7.0.2. TypeScript 5.8.3 remains in archived S0/A producer metadata and recipes;
-current tooling does not execute those recovery paths.
+The equivalent supported `.ps` input is:
 
-This branch installs the **new-only `ps-0.9-r3` bounded self-host subset** for
-current `.ps` input and canonical output. Source
-`fe2560aba0f347b1caf8d000d371464642d44f23` passed full compiler qualification and
-independent provider acceptance in
-[run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635).
-[Cold successor recovery](docs/selfhost-language/grammar-migration-cold-recovery.json)
-is verified, with receipt SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`, and R is explicitly
-selected. The lexer, parser, printer, active fixtures and source provenance
-migrate together. F at `fcd875c8f38db4b0524090bd10c7c2fd5024053d` separately completed the
-chosen practical-v1 source migration and its compiler/provider qualification in
-[F run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800). R remains the selected authoring seed.
-[PS_GRAMMAR_ADOPTION.md](docs/selfhost-language/PS_GRAMMAR_ADOPTION.md) records the
-pinned reference, enabled forms, explicit exclusions and qualification gates.
-Current `.ps` does not have a legacy grammar mode. Immutable historical source
-and artifacts keep their original recovery rules.
+```text
+def invert(flag : Bool) : Bool := if (flag) { false } else { true }
+```
 
-The edition change does not activate full Standard/PSCV or strict SH/1 or migrate
-the Lean 4.34 provider. Seed selection has separate authenticated recovery and
-provider evidence requirements. Completed results and pending work are recorded in
-[IMPLEMENTATION.md](docs/selfhost-language/IMPLEMENTATION.md).
+From this directory, with the pinned Lean toolchain and locked host dependencies installed:
 
-## Active self-host layout
+```sh
+lake build psc1
+.lake/build/bin/psc1 check example.lean
+.lake/build/bin/psc1 build example.lean --targets ts,js --out-dir out
+.lake/build/bin/psc1 build example.lean --target python --out out/example.py
+.lake/build/bin/psc1 build example.lean --target php --out out/example.php
+.lake/build/bin/psc1 build example.lean --target rust --out out/example.rs
+.lake/build/bin/psc1 build example.lean --target wasm-core --out out/example.wasm
+.lake/build/bin/psc1 build example.lean --target wasm-component --export invert --out out/component.wasm
+```
 
-- `packages/`: the 12 portable bootstrap packages, the host-side CLI,
-  and the Lean 4.34 native/WASM kernel-provider integrations (NOT part of
-  the portable source closure).
-- `host/`, `lean-checked/`: Lean-powered bootstrap and checked-host tooling.
-- `scripts/`, `test/`: bootstrap, checked-generation, fixed-point and
-  compiler-regression tooling.
-- `stdlib/`: supporting portable standard-library and prelude material.
-- `legacy/`: exact historical optional backend/project/kernel trees,
-  associated research receipts, experiments and extension tests.
+Host dependency installation is `npm --prefix host-tools --workspaces=false ci --ignore-scripts`.
+Select the tools for the desired target; installing the compiler does not install
+Python, PHP or Rust. The unpublished native npm distribution and installed source-library
+workflow are described in [the npm guide](docs/PSC1_NPM_ECOSYSTEM.md).
 
-The native Lean provider source remains in `packages/pskernel-lean/`
-because the `lean-checked/` seed imports its admission implementation.
-The WASM provider remains the default host-side checked provider.
+## Outputs and tools
 
-`legacy/packages/project` is retained as a *regression-only* Lake
-module import for `test/BootstrapTests.lean`. It is not imported by the
-compiler fixed-point root. The experimental owned-kernel provider is
-optional and is loaded through the host-side adapter when explicitly
-selected; it is not a bootstrap source dependency.
+| Target | Main output and companions | Target validation and runtime |
+| --- | --- | --- |
+| `js` | `.js`, `.d.ts`, `.js.map` | Locked host parser/formatter; qualified Node runtime |
+| `ts` | Direct `.ts`, `.d.ts`, `.ts.map` | Locked host parser/formatter; independent TypeScript consumer checking in CI |
+| `rust` | `.rs`, Cargo crate and lockfile | Rustfmt and Cargo; numeric dependencies selected by the native runtime plan |
+| `wasm-core` | Core `.wasm` and readable `.wat` | wasm-tools; qualified Wasm runtime |
+| `wasm-component` | Component/core `.wasm`, both `.wat`, exact `.wit` | wasm-tools and Wasmtime; public ABI remains Bool-only |
+| `python` | `.py`, `.pyi`, `.py.origins.json` | Python >=3.14; standard-library helpers selected as needed |
+| `php` | `.php`, `.composer.json`, `.php.origins.json` | PHP >=8.5; ext-gmp required when exact Nat/Int values are used |
 
-## Important limits
+Every successful build publishes a checksummed `.bundle.json` with source closure,
+logical admission, assurance, public names, target/runtime descriptors and artifact
+hashes. The combined TS/JS request captures and admits source once, then independently
+prints and validates both outputs before a single atomic publication.
 
-The original October 3 compiler fixed point was measured on the original
-historical tree. This reorganization does not constitute a new fixed-point
-run, and it does not certify any owned-kernel or joint compiler/kernel
-self-hosting. Archive sources and receipts are preserved, not silently
-treated as current implementation or verification results.
+JavaScript is emitted directly. TypeScript consumer compilation in CI tests the generated
+TypeScript independently. It is outside the DirectJS implementation.
 
-When working inside this directory, use its own toolchain/commands and
-consult `legacy/README.md` before attempting historical extension tests.
+Python modules expose their declared API through `__all__`; `.pyi` describes those
+same source-owned values and functions. A PHP module returns its public API map:
+
+```php
+$api = require 'out/example.php';
+assert($api['invert'](true) === false);
+```
+
+Python/PHP declaration-origin files explicitly describe their coverage. JS/TS use
+standard source maps produced from final formatted output and captured source text.
+Backend helper code is identified separately from authored declarations.
+
+## Admission and execution assurance
+
+The compiler captures dependency source once, elaborates canonical Core, checks it
+with the independent pinned Lean kernel, erases proofs, checks executable IR, creates
+the target plan and emits the requested target. Raw IR wrappers and package manifests
+are data. They cannot substitute for the admitted host session.
+
+Default `checked` mode retains the existing logically checked program path.
+Explicit `--assurance ordinary` admits the qualified partial-function slice and
+preserves exact logical/executable body pairing. Recursive generated code has no
+compiler-imposed execution fuel. Host resources and each qualified target's lowering
+still bound execution.
+
+`--assurance verified` currently fails because behavioral certificates are unavailable.
+A successful logical admission or runtime test is not presented as a backend-preservation
+proof. The owned PSKernel-Core remains separately compiled and tested; the official
+Lean provider remains authoritative for direct builds.
+
+## Current language boundaries
+
+Both input syntaxes share the compiler pipeline. The retained slice includes typed
+functions, internal generic specialization, structures/inductives and matching,
+selected higher-order/array operations, immutable lets, qualified Id/Except do forms,
+numeric/Boolean operators and explicit ordinary partial functions.
+
+The fourteen Practical Core feature families remain a staged implementation target.
+Full mutation/loop/early-return expansion, unrestricted Lean, full type-class syntax,
+Int division/modulo and fixed-width/floating runtime scalars are outside the currently
+qualified direct profile. Python/PHP initially expose scalar public signatures; aggregate
+values can be internal. Rust retains its existing checked generic public path. Component
+Wasm retains its bounded Bool ABI.
+
+See [the selected language reference](PSC1_LANGUAGE_REFERENCE_v7.2.md),
+[Practical Core status](docs/PSC1_PRACTICAL_CORE_STATUS.json),
+[architecture](ARCHITECTURE.md), [runtime semantics](docs/PSC1_RUNTIME_SEMANTICS.md)
+and [current work state](AI_WORK_STATE.md).
+
+## Historical material and future self-hosting
+
+The compiler continues to be authored in Lean and executed natively during development.
+The semantic compiler plus one chosen backend is the eventual minimal self-host closure.
+Adding built-in emitters to the native host does not put every backend, target runtime,
+npm tool or kernel experiment into that portable closure.
+
+Historical seeds, fixed-point receipts and old generated-compiler packages remain
+preserved under their existing recovery rules. No new full self-host, compiler/kernel
+fixed-point or joint-closure qualification is claimed here. The previous README is
+preserved [verbatim](docs/history/README_BEFORE_SEVEN_BACKENDS_2026-10-20.md).

@@ -60,12 +60,18 @@ def psHostDirectEmitWasmComponent
   let wit ← match psHostWitSelectedExport session.validated exportName with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
-  let lowered ← match psWasmLowerValidatedModule { wordSize := PsWasmWordSize.wasm32 } session.validated with
+  match psBackendCheckPublicApi .wasmComponent session.validated [exportName] with
+  | .ok _ => pure ()
+  | .error reason => throw (IO.userError reason)
+  let plan ← match psBackendClosedPlan session.validated [exportName] with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
+  let lowered ← match psWasmLowerSpecializedModule { wordSize := PsWasmWordSize.wasm32 } plan.raw with
     | .ok value => pure value
     | .error error => throw (IO.userError ("PSC1_COMPONENT_LOWER_UNSUPPORTED: " ++ psHostWasmLowerErrorText error))
   if !lowered.exports.any (fun item => item.1 == exportName) then
     throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_LOWERED")
-  let selected := { lowered with exports := lowered.exports.filter (fun item => item.1 == exportName) }
+  let selected := psWasmSelectRuntime { lowered with exports := lowered.exports.filter (fun item => item.1 == exportName) }
   let bytes ← match psWasmEncodeModule selected with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_COMPONENT_BINARY_UNSUPPORTED")
@@ -92,6 +98,12 @@ def psHostDirectEmitWasmComponent
     let _ ← psHostArtifactTool #["wit-check", witPath.toString, observed.toString]
     IO.FS.removeFile embedded
     IO.FS.removeFile observed
+    let runtime ← match psWasmRuntimeCanonicalSource selected with
+      | .ok value => pure value
+      | .error reason => throw (IO.userError reason)
+    psHostWriteArtifactTargetPlans stage [
+      psHostArtifactTargetPlanJson "wasm-component" name "psc1-wasm-runtime/1"
+        runtime (psWasmRuntimeRequirements selected) [] "psc-wasm-ir-json/1:functions"]
     psHostPublishArtifactStage stage outputPath "wasm-component"
   IO.println ("PSC1_COMPONENT_WASM: " ++ outputPath)
 

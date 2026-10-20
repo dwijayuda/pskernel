@@ -1,0 +1,19 @@
+{
+  "name": "@proofscript/backend-php",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lean-native DirectPhp backend with selected target runtime source",
+  "files": [
+    "src",
+    "runtime",
+    "README.md"
+  ],
+  "proofscript": {
+    "kind": "builtin-backend-source",
+    "target": "php",
+    "minimumRuntime": "8.5",
+    "runtimeVersion": "psc1-php-runtime/1",
+    "qualification": "scoped-linux-execution",
+    "qualificationReceipt": "../../docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json"
+  }
+}

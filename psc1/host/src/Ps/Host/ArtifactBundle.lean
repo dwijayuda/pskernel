@@ -13,6 +13,7 @@ def psHostArtifactToolPath : IO String := do
   let root := lake.parent.getD lake
   let candidates := [
     bin / "host-tools" / "artifacts.mjs",
+    lake / "host-tools" / "artifacts.mjs",
     root / "host-tools" / "artifacts.mjs",
     System.FilePath.mk "host-tools/artifacts.mjs",
     System.FilePath.mk "psc1/host-tools/artifacts.mjs"]
@@ -50,3 +51,23 @@ def psHostPublishArtifactStage
 
 def psHostArtifactFileName (path : String) (fallback : String) : String :=
   ((System.FilePath.mk path).fileName).getD fallback
+
+/-- Native target metadata is descriptive. It never authorizes admission.
+The publisher hashes exact selected runtime bytes and removes this temporary
+copy before sealing the bundle. Origins are declaration starts, not source maps. -/
+def psHostArtifactTargetPlanJson
+    (target fileName runtimeVersion runtimeSource : String)
+    (requirements : List String) (declarationLines : List (String × Nat))
+    (runtimeEncoding : String := "utf8-source") : String :=
+  "{\"target\":" ++ psJsonQuote target ++ ",\"file\":" ++ psJsonQuote fileName ++
+  ",\"runtimeVersion\":" ++ psJsonQuote runtimeVersion ++
+  ",\"runtimeSource\":" ++ psJsonQuote runtimeSource ++
+  ",\"runtimeEncoding\":" ++ psJsonQuote runtimeEncoding ++
+  ",\"runtimeRequirements\":" ++ psJsonArray (requirements.map psJsonQuote) ++
+  ",\"declarationLines\":" ++ psJsonArray (declarationLines.map fun item =>
+    "{\"name\":" ++ psJsonQuote item.1 ++ ",\"line\":" ++ toString item.2 ++ "}") ++ "}"
+
+def psHostWriteArtifactTargetPlans (stage : System.FilePath) (plans : List String) : IO Unit :=
+  IO.FS.writeFile (stage / "psc1-target.json")
+    ("{\"schema\":\"psc1-direct-target-plan/1\",\"runtimeContract\":\"psc1-runtime-semantics/1\",\"plans\":" ++
+      psJsonArray plans ++ "}\n")

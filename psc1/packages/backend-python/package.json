@@ -1,0 +1,19 @@
+{
+  "name": "@proofscript/backend-python",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lean-native DirectPython backend with selected target runtime source",
+  "files": [
+    "src",
+    "runtime",
+    "README.md"
+  ],
+  "proofscript": {
+    "kind": "builtin-backend-source",
+    "target": "python",
+    "minimumRuntime": "3.14",
+    "runtimeVersion": "psc1-python-runtime/1",
+    "qualification": "scoped-linux-execution",
+    "qualificationReceipt": "../../docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json"
+  }
+}

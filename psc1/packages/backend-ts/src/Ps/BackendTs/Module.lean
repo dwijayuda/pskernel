@@ -78,7 +78,7 @@ def psTsNameSequence (namePrefix : String) (count : Nat) : Nat -> List String :=
   | Nat.succ remaining =>
       fun (index : Nat) => let smaller : Nat -> List String := psTsNameSequence namePrefix remaining; List.cons (String.Internal.append namePrefix (psNatToString index)) (smaller (Nat.succ index))
 
-def psTsEmitStructure
+def psTsEmitStructureWithVisibility (isPublic : Bool)
     (brands : List (String × String))
     (structureInfo : PsVerifiedIrStructure) :
     Except PsTsEmitError (List String) :=
@@ -99,8 +99,11 @@ def psTsEmitStructure
           let generic :=
             psTsGenericNames structureInfo.typeParameters;
           let brandLine := psTsJoin "" ["const ", brand, ": unique symbol = Symbol(", psJsonQuote (psTsJoin "" ["ProofScript.", structureInfo.name]), ");"];
-          let interfaceLine := psTsJoin "" ["export interface ", structureInfo.name, generic, " { readonly [", brand, "]: true; ", psTsJoin " " fields, " }"];
+          let interfaceLine := psTsJoin "" [(if isPublic then "export interface " else "interface "), structureInfo.name, generic, " { readonly [", brand, "]: true; ", psTsJoin " " fields, " }"];
           Except.ok [brandLine, interfaceLine]
+
+def psTsEmitStructure (brands : List (String × String)) (value : PsVerifiedIrStructure) :
+    Except PsTsEmitError (List String) := psTsEmitStructureWithVisibility true brands value
 
 def psTsEmitConstructorVariant
     (tag : String)
@@ -156,7 +159,7 @@ def psTsEmitConstructorValue
         Except.ok
           (psTsJoin "" ["  ", psJsonQuote constructorInfo.name, ": ", generic, "(", psTsJoin ", " parameters, "): ", resultType, " => ({ [", tag, "]: ", psJsonQuote constructorInfo.name, suffix, " } as ", resultType, "),"])
 
-def psTsEmitInductive
+def psTsEmitInductiveWithVisibility (isPublic : Bool)
     (tags : List (String × String))
     (inductiveInfo : PsVerifiedIrInductive) :
     Except PsTsEmitError (List String) :=
@@ -174,12 +177,15 @@ def psTsEmitInductive
                 psTsGenericNames inductiveInfo.typeParameters;
               let typeLine :=
                 if psListIsEmpty variants then
-                  psTsJoin "" ["export type ", inductiveInfo.name, generic, " = never;"]
+                  psTsJoin "" [(if isPublic then "export type " else "type "), inductiveInfo.name, generic, " = never;"]
                 else
-                  psTsJoin "" ["export type ", inductiveInfo.name, generic, " =\n  | ", psTsJoin "\n  | " variants, ";"];
+                  psTsJoin "" [(if isPublic then "export type " else "type "), inductiveInfo.name, generic, " =\n  | ", psTsJoin "\n  | " variants, ";"];
               let tagLine := psTsJoin "" ["const ", tag, ": unique symbol = Symbol(", psJsonQuote (psTsJoin "" ["ProofScript.", inductiveInfo.name, ".tag"]), ");"];
-              let exportLine := psTsJoin "" ["export const ", inductiveInfo.name, " = {"];
+              let exportLine := psTsJoin "" [(if isPublic then "export const " else "const "), inductiveInfo.name, " = {"];
               Except.ok (psTsAppendLines [tagLine, typeLine, exportLine] (psTsAppendLines constructorValues ["} as const;"]))
+
+def psTsEmitInductive (tags : List (String × String)) (value : PsVerifiedIrInductive) :
+    Except PsTsEmitError (List String) := psTsEmitInductiveWithVisibility true tags value
 
 def psTsEmitImport (item : PsVerifiedIrExternalImport) : String :=
   let alias := if psStringEq item.importedName item.localName then ""
@@ -276,7 +282,7 @@ def psTsInlineEtaApplication (expr : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
       else expr
   | _ => expr
 
-def psTsEmitDeclarationGeneral
+def psTsEmitDeclarationGeneralWithVisibility (isPublic : Bool)
     (brands : List (String × String))
     (tags : List (String × String))
     (declaration : PsVerifiedIrDeclaration) :
@@ -291,7 +297,7 @@ def psTsEmitDeclarationGeneral
           if psListIsEmpty declaration.parameters then
             if psListIsEmpty declaration.typeParameters then
               Except.ok
-                (psTsJoin "" ["export const ", declaration.name, ": ", resultType, " = __ps$run((function*(): __ps$Computation<", resultType, "> { return ", body, "; })());"])
+                (psTsJoin "" [(if isPublic then "export const " else "const "), declaration.name, ": ", resultType, " = __ps$run((function*(): __ps$Computation<", resultType, "> { return ", body, "; })());"])
             else
               Except.error
                 (PsTsEmitError.genericValueUnsupported declaration.name)
@@ -311,11 +317,14 @@ def psTsEmitDeclarationGeneral
                 let arguments := psTsJoin ", " (psListMap parameterName declaration.parameters);
                 let implementation := String.Internal.append "__ps$impl$" declaration.name;
                 Except.ok
-                  (psTsJoin "" ["export function ", declaration.name, generic, "(", psTsJoin ", " parameters, "): ", resultType, " { return __ps$run(", implementation, generic, "(", arguments, ")); }\nfunction* ", implementation, generic, "(", psTsJoin ", " parameters, "): __ps$Computation<", resultType, "> { return ", body, "; }\n__ps$implementations.set(", declaration.name, ", ", implementation, ");"])
+                  (psTsJoin "" [(if isPublic then "export function " else "function "), declaration.name, generic, "(", psTsJoin ", " parameters, "): ", resultType, " { return __ps$run(", implementation, generic, "(", arguments, ")); }\nfunction* ", implementation, generic, "(", psTsJoin ", " parameters, "): __ps$Computation<", resultType, "> { return ", body, "; }\n__ps$implementations.set(", declaration.name, ", ", implementation, ");"])
 
 -- A zero/successor fold over one recursive field is a count. Emit its exact
 -- computation as a loop, avoiding a suspended generator for every list cell.
 -- Recognition uses the IR shape, not a source function or inductive name.
+def psTsEmitDeclarationGeneral (brands tags : List (String × String)) (value : PsVerifiedIrDeclaration) :
+    Except PsTsEmitError String := psTsEmitDeclarationGeneralWithVisibility true brands tags value
+
 def psTsCountLiteral (expected : Nat) (expr : PsVerifiedIrExpr) : Bool :=
   match expr with
   | PsVerifiedIrExpr.literal literal =>
@@ -382,7 +391,7 @@ def psTsEmitCountCases (tag : String) (name : String)
               ": __ps$cursor = __ps$cursor.", field, "; __ps$count += 1n; break; default: throw new Error(\"invalid ProofScript constructor tag\"); } }"])
   else Option.none
 
-def psTsEmitCountLoop (tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
+def psTsEmitCountLoopWithVisibility (isPublic : Bool) (tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
   match declaration.resultType with
   | PsVerifiedIrType.primitive primitive =>
       match primitive with
@@ -412,7 +421,7 @@ def psTsEmitCountLoop (tags : List (Prod String String)) (declaration : PsVerifi
                                             match psTsEmitType parameter.type with
                                             | Except.error _ => Option.none
                                             | Except.ok type =>
-                                                Option.some (psTsJoin "" ["export function ", declaration.name,
+                                                Option.some (psTsJoin "" [(if isPublic then "export function " else "function "), declaration.name,
                                                   psTsGenericNames declaration.typeParameters, "(", parameter.name, ": ", type,
                                                   "): bigint { let __ps$cursor = ", parameter.name, "; ", printed, " }"])
                                       else Option.none
@@ -428,6 +437,9 @@ def psTsEmitCountLoop (tags : List (Prod String String)) (declaration : PsVerifi
 
 -- Closed tail workers need no suspended continuations. This recognizer accepts
 -- pure expressions and exact self calls only; all other code uses generators.
+def psTsEmitCountLoop (tags : List (Prod String String)) (value : PsVerifiedIrDeclaration) :
+    Option String := psTsEmitCountLoopWithVisibility true tags value
+
 structure PsTsTailAlias where
   name : String
   captured : List PsVerifiedIrExpr
@@ -648,7 +660,7 @@ def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration 
             | Option.none => Option.none
             | Option.some printed => Option.some (psTsJoin "" ["return ", printed, ";"])
 
-def psTsEmitTailLoop (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
+def psTsEmitTailLoopWithVisibility (isPublic : Bool) (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
   if psListIsEmpty declaration.typeParameters then
     if psListIsEmpty declaration.parameters then Option.none
     else
@@ -665,19 +677,46 @@ def psTsEmitTailLoop (brands tags : List (Prod String String)) (declaration : Ps
           | Option.some parameters =>
               match psTsEmitType declaration.resultType with
               | Except.error _ => Option.none
-              | Except.ok resultType => Option.some (psTsJoin "" ["export function ", declaration.name, "(",
+              | Except.ok resultType => Option.some (psTsJoin "" [(if isPublic then "export function " else "function "), declaration.name, "(",
                   psTsJoin ", " parameters, "): ", resultType, " { while (true) { ", printedBody, " } }"])
   else Option.none
 
 
-def psTsEmitDeclaration (brands tags : List (Prod String String))
+def psTsEmitTailLoop (brands tags : List (Prod String String)) (value : PsVerifiedIrDeclaration) :
+    Option String := psTsEmitTailLoopWithVisibility true brands tags value
+
+/-- Call-free expressions need neither generators nor a synthetic loop.
+The existing pure-expression recognizer excludes calls, closures, let/match
+suspensions and higher-order array operations. -/
+def psTsEmitPureDeclaration (isPublic : Bool) (brands tags : List (String × String))
+    (declaration : PsVerifiedIrDeclaration) : Option String := do
+  if declaration.parameters.isEmpty && !declaration.typeParameters.isEmpty then none else do
+    let body ← psTsTailPrintPure brands tags [] (psTsInlineEtaApplication declaration.body)
+    let result ← (psTsEmitType declaration.resultType).toOption
+    let exportPrefix := if isPublic then "export " else ""
+    if declaration.parameters.isEmpty then
+      return exportPrefix ++ "const " ++ declaration.name ++ ": " ++ result ++ " = " ++ body ++ ";"
+    else
+      let parameters ← declaration.parameters.mapM fun parameter => do
+        let type ← (psTsEmitType parameter.type).toOption
+        return parameter.name ++ ": " ++ type
+      return exportPrefix ++ "function " ++ declaration.name ++ psTsGenericNames declaration.typeParameters ++
+        "(" ++ String.intercalate ", " parameters ++ "): " ++ result ++ " { return " ++ body ++ "; }"
+
+def psTsEmitDeclarationWithVisibility (isPublic : Bool) (brands tags : List (Prod String String))
     (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
-  match psTsEmitCountLoop tags declaration with
-  | Option.some loop => Except.ok loop
-  | Option.none =>
-      match psTsEmitTailLoop brands tags declaration with
+  match psTsEmitPureDeclaration isPublic brands tags declaration with
+  | some source => .ok source
+  | none =>
+      match psTsEmitCountLoopWithVisibility isPublic tags declaration with
       | Option.some loop => Except.ok loop
-      | Option.none => psTsEmitDeclarationGeneral brands tags declaration
+      | Option.none =>
+          match psTsEmitTailLoopWithVisibility isPublic brands tags declaration with
+          | Option.some loop => Except.ok loop
+          | Option.none => psTsEmitDeclarationGeneralWithVisibility isPublic brands tags declaration
+
+def psTsEmitDeclaration (brands tags : List (Prod String String)) (value : PsVerifiedIrDeclaration) :
+    Except PsTsEmitError String := psTsEmitDeclarationWithVisibility true brands tags value
 
 def psTsFlattenLines (groups : List (List String)) : List String :=
   match groups with
@@ -701,3 +740,35 @@ def psTsEmitModule
               let header : List String := ["// generated from pskernel-admitted ProofScript checked core", psTsRuntimeSupport];
               let lines := psTsFlattenLines [header, psListMap psTsEmitImport module.imports, psTsFlattenLines structures, psTsFlattenLines inductives, declarations];
               Except.ok (psTsJoin "" [psTsJoin "\n" lines, "\n"])
+
+partial def psTsNeedsUtf8Runtime : PsVerifiedIrExpr → Bool
+  | .literal _ | .var _ => false
+  | .intrinsic operation _ arguments =>
+      (match operation with
+        | .stringUtf8ByteSize | .stringNext | .stringGet | .stringAtEnd => true
+        | _ => false) || arguments.any psTsNeedsUtf8Runtime
+  | .lambda _ _ body => psTsNeedsUtf8Runtime body
+  | .call fn _ arguments => psTsNeedsUtf8Runtime fn || arguments.any psTsNeedsUtf8Runtime
+  | .letE _ _ value body => psTsNeedsUtf8Runtime value || psTsNeedsUtf8Runtime body
+  | .ifE condition left right => psTsNeedsUtf8Runtime condition || psTsNeedsUtf8Runtime left || psTsNeedsUtf8Runtime right
+  | .record _ _ fields | .constructor _ _ _ fields => fields.any (fun f => psTsNeedsUtf8Runtime f.2)
+  | .projection _ _ target _ => psTsNeedsUtf8Runtime target
+  | .matchE _ _ scrutinee alternatives => psTsNeedsUtf8Runtime scrutinee || alternatives.any (fun a => psTsNeedsUtf8Runtime a.2.2)
+
+def psTsNeedsStackRuntime (brands tags : List (String × String))
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  (psTsEmitPureDeclaration false brands tags declaration).isNone &&
+    (psTsEmitCountLoop tags declaration).isNone &&
+    (psTsEmitTailLoop brands tags declaration).isNone
+
+def psTsSelectedRuntimeRequirements (module : PsVerifiedIrModule) : List String :=
+  let brands := psTsBuildBrandMap module
+  let tags := psTsBuildTagMap module
+  (if module.declarations.any (psTsNeedsStackRuntime brands tags) then ["generator-stack"] else []) ++
+  (if module.declarations.any (fun d => psTsNeedsUtf8Runtime d.body) then ["utf8-byte-index"] else [])
+
+def psTsSelectedRuntimeSource (module : PsVerifiedIrModule) : String :=
+  let needs := psTsSelectedRuntimeRequirements module
+  String.intercalate "\n" (
+    (if needs.contains "generator-stack" then [psTsStackRuntimeSupport] else []) ++
+    (if needs.contains "utf8-byte-index" then [psTsUtf8RuntimeSupport] else []))

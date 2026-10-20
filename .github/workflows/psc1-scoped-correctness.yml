@@ -15,13 +15,20 @@ on:
       - .github/workflows/psc1-scoped-correctness.yml
       - .github/workflows/psc1-direct-backends.yml
 
+concurrency:
+  group: psc1-scoped-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
 permissions:
   contents: read
 
 jobs:
   linux-scoped:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     defaults:
       run:
         shell: bash
@@ -30,6 +37,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install minimum supported Python for compatibility checks
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14'
+      - name: Record minimum Python interpreter
+        run: echo "PSC1_PYTHON_314=$(python -c 'import sys; print(sys.executable)')" >> "$GITHUB_ENV"
+      - name: Install current Python for target validation and execution
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.15'
+      - name: Install PHP and selected exact-integer extension
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5'
+          extensions: gmp
+          tools: none
+          coverage: none
+      - name: Record scripting target runtimes
+        run: |
+          python3 --version
+          php --version
+          php -r 'echo "gmp=" . (extension_loaded("gmp") ? "enabled" : "missing") . PHP_EOL;'
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
@@ -70,21 +99,36 @@ jobs:
           echo '{"name":"psc1-ts7-consumer-tests","version":"0.0.0","private":true}' > "$RUNNER_TEMP/psc1-ts7/package.json"
           npm install --prefix "$RUNNER_TEMP/psc1-ts7" --ignore-scripts --no-save --no-audit --no-fund typescript@7.0.2
           echo "PSC1_TSC=$RUNNER_TEMP/psc1-ts7/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Execute npm source metadata boundary regressions
+        working-directory: psc1
+        run: node scripts/npm-library-resolution-tests.mjs
       - name: Compile native compiler and focused regressions
         working-directory: psc1
         run: |
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests
+          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
           set -euo pipefail
+          .lake/build/bin/psc1_backend_common_tests
           .lake/build/bin/psc1_ir_specialize_tests
           .lake/build/bin/psc1_direct_map_tests
           .lake/build/bin/psc1_lean_kernel_provider_tests
           .lake/build/bin/psc1_scoped_tests
+      - name: Execute scripting IR rejection and compound closure consumers
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          mkdir -p dist/scoped-correctness/script-ir
+          .lake/build/bin/psc1_script_ir_tests dist/scoped-correctness/script-ir/capture
+          python3 -c 'import importlib.util,sys; s=importlib.util.spec_from_file_location("capture",sys.argv[1]); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); assert m.answer(41)==42; assert m.answer(0)==1; assert m.__all__==["answer"]; print("Python compound closure: PASS")' dist/scoped-correctness/script-ir/capture.py
+          php -r '$api=require $argv[1]; if(gmp_cmp($api["answer"](gmp_init(41)),42)!==0 || gmp_cmp($api["answer"](gmp_init(0)),1)!==0 || array_keys($api)!==["answer"]) exit(1); echo "PHP compound closure: PASS\n";' dist/scoped-correctness/script-ir/capture.php
+          python3 -c 'import runpy,sys; m=runpy.run_path(sys.argv[1]); assert m["answer"]==42; print("Python forward value: PASS")' dist/scoped-correctness/script-ir/capture-reordered.py
+          php -r '$api=require $argv[1]; if(gmp_cmp($api["answer"],42)!==0) exit(1); echo "PHP forward value: PASS\n";' dist/scoped-correctness/script-ir/capture-reordered.php
+          php -n -r '$api=require $argv[1]; if($api["x"]!==true || $api["shadow"](false)!==false) exit(1); echo "PHP shadowing without runtime: PASS\n";' dist/scoped-correctness/script-ir/capture-shadow.php
       - name: Compile and test corrected PSKernel-Core natively only
         working-directory: psc1
         run: |
@@ -105,6 +149,9 @@ jobs:
           export PSC1_NATIVE="$PWD/.lake/build/bin/psc1"
           export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
           node scripts/scoped-source-edge-tests.mjs
+      - name: Execute shared target planning, independent TS JS and publication regressions
+        working-directory: psc1
+        run: node scripts/backend-architecture-tests.mjs
       - name: Execute Practical Core admission, IR and real target regressions
         working-directory: psc1
         run: |
@@ -117,6 +164,29 @@ jobs:
             if ! node "scripts/$script"; then result=1; fi
           done
           exit "$result"
+      - name: Execute runtime contract against pinned Lean reference results
+        working-directory: psc1
+        run: node scripts/runtime-conformance-tests.mjs
+      - name: Execute Python and PHP ABI, recursion and failure boundaries
+        working-directory: psc1
+        run: node scripts/script-backend-tests.mjs
+      - name: Execute full scripting and runtime corpus on minimum Python
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          export PSC1_PYTHON="$PSC1_PYTHON_314"
+          export PSC1_SCRIPT_TARGETS=python
+          export PSC1_SCRIPT_EVIDENCE=script-backends-python314
+          export PSC1_CONFORMANCE_TARGETS=python
+          export PSC1_RUNTIME_EVIDENCE=runtime-conformance-python314
+          node scripts/runtime-conformance-tests.mjs
+          node scripts/script-backend-tests.mjs
+      - name: Pack and qualify installed native npm toolchain and real source libraries
+        working-directory: psc1
+        run: node scripts/npm-native-distribution.mjs
+      - name: Consolidate exact-commit seven-target and package qualification
+        working-directory: psc1
+        run: node scripts/seven-backend-qualification.mjs
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4

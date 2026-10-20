@@ -152,9 +152,9 @@ def main : IO Unit := do
   roundTrip "PS do to Lean preserves checked Core" .proofScript .lean psId
   roundTrip "Lean do to PS preserves checked Core" .lean .proofScript leanId
   roundTrip "Except do roundtrip" .proofScript .lean psExcept
-  let scoped := "def result : Id Nat := do { let x := 7; (let x := 8; ()); return x }"
-  checkSource "discarded compound action preserves lexical scope" .lean scoped natType seven
-  roundTrip "discarded compound action roundtrip" .lean .proofScript scoped
+  let scopedSource := "def result : Id Nat := do { let x := 7; (let x := 8; ()); return x }"
+  checkSource "discarded compound action preserves lexical scope" .lean scopedSource natType seven
+  roundTrip "discarded compound action roundtrip" .lean .proofScript scopedSource
   reject "bare Nat is not an effect" .lean "def result : Nat := do { return 7 }"
   reject "Option has no registered operations in this slice" .proofScript
     "def result : Option Nat := do { return 7 }\n"

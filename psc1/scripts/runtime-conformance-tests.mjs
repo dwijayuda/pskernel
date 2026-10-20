@@ -15,6 +15,7 @@ fs.mkdirSync(evidence, { recursive: true });
 const env = { ...process.env, PSC1_HOST_TOOLS: path.join(root, 'host-tools/artifacts.mjs') };
 const records = [];
 const failures = [];
+const rustPrivateClosures = [];
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 function run(command, args, options = {}) {
   const deadline = options.timeout ?? 180000;
@@ -305,6 +306,98 @@ const targets = (process.env.PSC1_CONFORMANCE_TARGETS ||
   'js,ts,rust,wasm-core,wasm-component,python,php').split(',');
 fs.writeFileSync(path.join(work, 'package.json'), '{"type":"module"}\n');
 
+function recordRustPrivateFailure(record, phase, error) {
+  const detail = error.stack || String(error);
+  failures.push({ syntax: record.syntax, target: 'rust', phase, error: detail });
+  (record.errors ||= []).push({ phase, error: detail });
+  console.error('PSC1_RUST_PRIVATE_CLOSURE_FAIL: ' + record.syntax + '/' + phase + '\n' + detail);
+}
+
+function checkRustPrivateClosureBoundary(syntax) {
+  const record = { syntax, target: 'rust', passed: false, privateExecution: false,
+    publicRefusal: false, oracleFields: ['rustPrivateFalse', 'rustPrivateTrue'] };
+  rustPrivateClosures.push(record);
+  const folder = path.join(evidence, 'rust-private-closures', syntax);
+  fs.mkdirSync(folder, { recursive: true });
+  const dep = path.join(folder, 'HigherOrderDep.' + syntax);
+  const entry = path.join(folder, 'HigherOrderEntry.' + syntax);
+  const depSource =
+    'def applyTransform (f : (Nat -> Nat) -> Nat -> Nat) (g : Nat -> Nat) (x : Nat) : Nat :=\n' +
+    ' f g x\n';
+  const entrySource =
+    'import HigherOrderDep\n' +
+    'def privatehighercheck (flag : Bool) : Bool :=\n' +
+    ' let offset : Nat := if flag then 3 else 5;\n' +
+    ' let g : Nat -> Nat := fun (x : Nat) => x * 10 + offset;\n' +
+    ' let f : (Nat -> Nat) -> Nat -> Nat := fun (h : Nat -> Nat) => fun (x : Nat) => h (x + 1) + offset;\n' +
+    ' let first : Nat := applyTransform f g 2;\n' +
+    ' let second : Nat := applyTransform f g 5;\n' +
+    ' let observed : Nat := first * 100 + second;\n' +
+    ' Nat.beq observed (if flag then ' + n('rustPrivateTrue') + ' else ' + n('rustPrivateFalse') + ')\n';
+  try {
+    if (syntax === 'lean') {
+      fs.writeFileSync(dep, depSource);
+      fs.writeFileSync(entry, entrySource);
+    } else {
+      const leanFolder = path.join(evidence, 'rust-private-closures', 'lean');
+      run(native, ['translate', path.join(leanFolder, 'HigherOrderDep.lean'), '--to', 'ps', '--out', dep]);
+      run(native, ['translate', path.join(leanFolder, 'HigherOrderEntry.lean'), '--to', 'ps', '--out', entry]);
+    }
+  } catch (error) {
+    recordRustPrivateFailure(record, 'fixture-source', error);
+    return;
+  }
+  try {
+    const output = path.join(work, syntax + '-private-higher-order.rs');
+    run(native, ['build', entry, '--target', 'rust', '--out', output]);
+    const manifest = JSON.parse(fs.readFileSync(output + '.bundle.json', 'utf8'));
+    assert.equal(manifest.logicalCheckerCommit, oracle.leanCommit);
+    assert.equal(manifest.runtimeContract, 'psc1-runtime-semantics/1');
+    assert.deepEqual(manifest.publicNames, ['privatehighercheck']);
+    const crate = path.join(work, syntax + '-private-higher-order-consumer');
+    fs.cpSync(fs.realpathSync(output.replace(/\.rs$/, '.cargo')), crate,
+      { recursive: true, dereference: true });
+    fs.chmodSync(path.join(crate, 'src/lib.rs'), 0o644);
+    fs.appendFileSync(path.join(crate, 'src/lib.rs'),
+      '\n#[cfg(test)] mod private_closure_contract { use super::*;\n' +
+      '#[test] fn imported_helper_reuses_captures() {\n' +
+      'assert!(privatehighercheck(false)); assert!(privatehighercheck(true));\n' +
+      '} }\n');
+    run('cargo', ['test', '--locked', '--manifest-path', path.join(crate, 'Cargo.toml')],
+      { env: { ...env, CARGO_TARGET_DIR: path.join(work, 'cargo-target') } });
+    fs.cpSync(path.dirname(fs.realpathSync(output + '.bundle.json')),
+      path.join(evidence, 'rust-private-closures', syntax + '-bundle'), { recursive: true });
+    record.privateExecution = true;
+    record.publicNames = manifest.publicNames;
+    record.checks = [['privatehighercheck', true, true]];
+    console.log('PSC1_RUST_PRIVATE_CLOSURE_EXECUTION_PASS: ' + syntax);
+  } catch (error) {
+    recordRustPrivateFailure(record, 'imported-private-execution', error);
+  }
+  try {
+    const rejectedOutput = path.join(work, syntax + '-public-higher-order.rs');
+    const result = spawnSync('timeout', ['--kill-after=5s', '60s', native,
+      'build', dep, '--target', 'rust', '--out', rejectedOutput],
+      { env, encoding: 'utf8', timeout: 70000 });
+    assert.equal(result.error, undefined, result.error?.message);
+    assert.equal(result.signal, null, 'public higher-order refusal must exit normally');
+    assert.notEqual(result.status, 0, 'public nested-function parameter must remain unsupported');
+    assert.notEqual(result.status, 124, 'public higher-order refusal must not time out');
+    const diagnostic = result.stdout + result.stderr;
+    assert.match(diagnostic,
+      /PSC1_RUST_TARGET_UNSUPPORTED:[^\n]*reason=nested-function-parameter:f\b/);
+    assert.equal(fs.existsSync(rejectedOutput), false);
+    assert.equal(fs.existsSync(rejectedOutput + '.bundle.json'), false);
+    fs.writeFileSync(path.join(folder, 'public-refusal.txt'), diagnostic);
+    record.publicRefusal = true;
+    record.refusalReason = 'nested-function-parameter:f';
+    console.log('PSC1_RUST_PUBLIC_CLOSURE_REFUSAL_PASS: ' + syntax);
+  } catch (error) {
+    recordRustPrivateFailure(record, 'public-signature-refusal', error);
+  }
+  record.passed = record.privateExecution && record.publicRefusal;
+}
+
 try {
   for (const syntax of ['lean', 'ps']) {
     const entry = syntax === 'lean' ? input : translated;
@@ -418,6 +511,9 @@ try {
       }
     }
   }
+  if (targets.includes('rust')) {
+    for (const syntax of ['lean', 'ps']) checkRustPrivateClosureBoundary(syntax);
+  }
   if (failures.length) {
     throw new Error('PSC1_RUNTIME_CONFORMANCE_FAILED: ' +
       failures.map(value => value.syntax + '/' + value.target).join(', '));
@@ -432,7 +528,7 @@ try {
     controlFlowOracle: 'pinned-native-Lean',
     handwrittenLiteralSyntaxes: ['lean', 'ps'],
     handwrittenOptionalIndexSyntaxes: ['lean', 'ps'],
-    records, failures
+    records, failures, rustPrivateClosures
   }, null, 2) + '\n');
   fs.rmSync(work, { recursive: true, force: true });
 }

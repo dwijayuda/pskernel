@@ -120,6 +120,18 @@ private def optionalArrayValue (result : Option Int) : Int :=
   | .none => 0
   | .some value => value
 
+private def rustHigherOrderApply (f : (Nat → Nat) → Nat → Nat)
+    (g : Nat → Nat) (x : Nat) : Nat :=
+  f g x
+
+private def rustPrivateCaptureReference (flag : Bool) : Nat :=
+  let offset : Nat := if flag then 3 else 5
+  let g : Nat → Nat := fun x => x * 10 + offset
+  let f : (Nat → Nat) → Nat → Nat := fun h => fun x => h (x + 1) + offset
+  let first : Nat := rustHigherOrderApply f g 2
+  let second : Nat := rustHigherOrderApply f g 5
+  first * 100 + second
+
 private def whileFalseReference (flag : Bool) : Nat := Id.run do
   let mut value : Nat := if flag then 7 else 9
   while false do
@@ -175,6 +187,18 @@ private def whileForReference (flag : Bool) : Nat := Id.run do
       total := total + 1
       index := index + 1
   return total
+
+private partial def whileSourceReference (n : Nat) : Id Nat := do
+  if Nat.beq n 0 then
+    return 10
+  let mut i := 0
+  while Nat.blt i 1 do
+    let previous : Nat := Id.run (whileSourceReference (Nat.sub n 1))
+    return Nat.succ previous
+  return 999
+
+private def whileSelfReference (flag : Bool) : Nat :=
+  Id.run (whileSourceReference (if flag then 4 else 2))
 
 private def whileExceptReference (flag : Bool) : Except Nat Nat := do
   let mut index : Nat := 0
@@ -253,6 +277,10 @@ def main : IO Unit := do
     ("optionalIndexTrueValue", toJson (Int.repr (optionalArrayValue (optionalArrayReference true)))),
     ("optionalHugeAbsent", toJson (!(optionalArrayIsSome (optionalValues[huge]?)))),
     ("optionalEmptyAbsent", toJson (!(optionalArrayIsSome (optionalEmpty[0]?)))),
+    ("rustPrivateFalse", toJson (toString (rustPrivateCaptureReference false))),
+    ("rustPrivateTrue", toJson (toString (rustPrivateCaptureReference true))),
+    ("whileSelfFalse", toJson (toString (whileSelfReference false))),
+    ("whileSelfTrue", toJson (toString (whileSelfReference true))),
     ("whileFalseFalse", toJson (toString (whileFalseReference false))),
     ("whileFalseTrue", toJson (toString (whileFalseReference true))),
     ("whileCountFalse", toJson (toString (whileCountReference false))),

@@ -273,13 +273,23 @@ def psPrintDoBody
                 Except.ok (psPrintCommonConcat2 "return " groupedValue)
         | _ => printTerm body
 
+-- Operators consume primary/application operands. Preserve low-precedence
+-- source forms as grouped terms in both surface printers.
+def psPrintOperatorOperand (term : PsSyntaxTerm) (printed : String) : String :=
+  match term with
+  | .ifE _ _ _ _ | .letE _ _ _ _ _ | .matchE _ _ _
+    | .lambda _ _ _ | .forallE _ _ _ | .doE _ _ =>
+      psPrintCommonConcat3 "(" printed ")"
+  | _ => printed
+
 def psPrintUnaryOperator
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
     (operator : String) (operand : PsSyntaxTerm) :
     Except PsSourcePrintError String :=
   match printTerm operand with
   | Except.error error => Except.error error
-  | Except.ok printed => Except.ok (psPrintJoin "" ["(", operator, printed, ")"])
+  | Except.ok printed =>
+      Except.ok (psPrintJoin "" ["(", operator, psPrintOperatorOperand operand printed, ")"])
 
 def psPrintBinaryOperator
     (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
@@ -291,4 +301,5 @@ def psPrintBinaryOperator
       match printTerm right with
       | Except.error error => Except.error error
       | Except.ok printedRight =>
-          Except.ok (psPrintJoin "" ["(", printedLeft, " ", operator, " ", printedRight, ")"])
+          Except.ok (psPrintJoin "" ["(", psPrintOperatorOperand left printedLeft,
+            " ", operator, " ", psPrintOperatorOperand right printedRight, ")"])

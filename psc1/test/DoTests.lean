@@ -321,6 +321,13 @@ private def testControlFlow (natType : PsExpr) : IO Unit := do
       | .error (.admission _) => true
       | _ => false)
 
+  roundTrip "conditional operands preserve grouping from Lean to PS" .lean .proofScript
+    ("def result (flag : Bool) : Bool :=\n" ++
+      "  (true && (if flag then true else false)) && !(if flag then false else true)\n")
+  roundTrip "conditional operands preserve grouping from PS to Lean" .proofScript .lean
+    ("def result(flag : Bool) : Bool :=\n" ++
+      "  (true && (if (flag) { true } else { false })) && !(if (flag) { false } else { true })\n")
+
 private def testFiniteLoops (natType : PsExpr) : IO Unit := do
   let nat (n : Nat) := PsExpr.lit (PsLiteral.natural n)
   let list := "List.cons 1 (List.cons 2 (List.cons 3 List.nil))"

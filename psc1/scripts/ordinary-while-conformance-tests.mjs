@@ -45,7 +45,7 @@ function reject(name, syntax, args, pattern) {
   assert.notEqual(result.status, 0, name + ': unexpected acceptance');
   assert.notEqual(result.status, 124, name + ': compiler timed out');
   const diagnostic = result.stdout + '\n' + result.stderr;
-  assert.match(diagnostic, pattern, name);
+  assert.match(diagnostic, pattern, name + '\n' + diagnostic);
   rejections.push({ name, syntax, passed: true, diagnostic });
 }
 function recordFailure(phase, syntax, target, error) {
@@ -135,6 +135,15 @@ partial def whileFor (flag : Bool) : Id Nat := do
       total := total + 1
       index := index + 1
   return total
+partial def whileSource (n : Nat) : Id Nat := do
+  if Nat.beq n 0 then
+    return 10
+  let mut i := 0
+  while Nat.blt i 1 do
+    let previous : Nat := Id.run (whileSource (Nat.sub n 1))
+    return Nat.succ previous
+  return 999
+def whileSelf (flag : Bool) : Id Nat := whileSource (if flag then 4 else 2)
 partial def whileExcept (flag : Bool) : Except Nat Nat := do
   let mut index : Nat := 0
   let mut total : Nat := 7
@@ -149,7 +158,8 @@ partial def whileExcept (flag : Bool) : Except Nat Nat := do
 const cases = [
   ['whilefalsecheck', 'whileFalse'], ['whilecountcheck', 'whileCount'],
   ['whileearlycheck', 'whileEarly'], ['whilecapturecheck', 'whileCapture'],
-  ['whilesequentialcheck', 'whileSequential'], ['whileforcheck', 'whileFor']
+  ['whilesequentialcheck', 'whileSequential'], ['whileforcheck', 'whileFor'],
+  ['whileselfcheck', 'whileSelf']
 ];
 let entrySource = 'import Loops\n';
 for (const [name, implementation] of cases) {
@@ -369,8 +379,8 @@ const unsupported = [
   return value
 `],
   ['CompilerM-body', selectedBody,
-    read(path.join(root, 'stdlib/ProofScript/Data/Result.lean')) + '\n' +
-    read(path.join(root, 'stdlib/ProofScript/Compiler/Effect.lean')) + '\n' +
+    read(path.join(root, 'stdlib/ProofScript/Data/Result.lean')).replace(/^import[^\n]*(?:\n|$)/gm, '') + '\n' +
+    read(path.join(root, 'stdlib/ProofScript/Compiler/Effect.lean')).replace(/^import[^\n]*(?:\n|$)/gm, '') + '\n' +
     `partial def unsupported (flag : Bool) : CompilerM Unit Nat String Nat := do
   while false do
     compilerSet 0

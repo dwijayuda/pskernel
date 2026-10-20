@@ -36,8 +36,8 @@ for (const [data, expectedTargets] of [[whileRuntime, targets], [minimumWhile, [
   assert.equal(data.assurance, 'ordinary-checked');
   assert.equal(data.behaviorallyVerified, false);
   assert.equal(data.nativeLean.commit, runtime.nativeLean.commit);
-  assert.equal(data.oracleFields.length, 16);
-  assert.equal(data.loopChecks.length, 7);
+  assert.equal(data.oracleFields.length, 18);
+  assert.equal(data.loopChecks.length, 8);
   assert.equal(data.longLoopIterations, 100000);
   assert.equal(data.rejections.length, 16);
   assert.ok(data.rejections.every(x => x.passed));
@@ -53,6 +53,19 @@ assert.deepEqual(runtime.controlFlowChecks,
    'errorcheck', 'forlistcheck', 'forarraycheck', 'forrangecheck']);
 assert.deepEqual(runtime.handwrittenLiteralSyntaxes, ['lean', 'ps']);
 assert.deepEqual(runtime.handwrittenOptionalIndexSyntaxes, ['lean', 'ps']);
+assert.equal(runtime.rustPrivateClosures.length, 2);
+assert.deepEqual(runtime.rustPrivateClosures.map(x => x.syntax).sort(), ['lean', 'ps']);
+assert.equal(minimumRuntime.rustPrivateClosures.length, 0);
+for (const record of runtime.rustPrivateClosures) {
+  assert.equal(record.target, 'rust');
+  assert.equal(record.passed, true);
+  assert.equal(record.privateExecution, true);
+  assert.equal(record.publicRefusal, true);
+  assert.deepEqual(record.publicNames, ['privatehighercheck']);
+  assert.deepEqual(record.oracleFields, ['rustPrivateFalse', 'rustPrivateTrue']);
+  assert.equal(record.refusalReason, 'nested-function-parameter:f');
+}
+
 const practicalNative = [
   ['psc1_do_tests', 'PSC1_DO_TESTS: PASS'],
   ['psc1_data_tests', 'PSC1_DATA_TESTS: PASS'],
@@ -103,6 +116,7 @@ const receipt = {
     referenceOracle: runtime.controlFlowOracle,
     handwrittenLiteralSyntaxes: runtime.handwrittenLiteralSyntaxes,
     handwrittenOptionalIndexSyntaxes: runtime.handwrittenOptionalIndexSyntaxes,
+    rustPrivateClosures: runtime.rustPrivateClosures,
     ordinaryWhile: {
       targetExecutionBundles: whileRuntime.records.length,
       externalDivergenceDeadlines: whileRuntime.divergence.length,

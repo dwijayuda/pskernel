@@ -1,6 +1,6 @@
 # PSKernel-Core Expression V2 — Lean 4.35.0 architecture pivot
 
-Status: **M1/M2 qualified; portable M3 lift, instantiate and bounded beta/zeta head reduction qualified; M4 structural equality and validated-once scoped batching qualified as research. NOT a production kernel replacement**.
+Status: **M1/M2 qualified; portable M3 lift, instantiate and bounded beta/zeta head reduction qualified; M4 structural equality, scoped batching and checked legacy-tree import qualified as research. NOT a production kernel replacement**.
 Branch: research/psc1-pskernel-expr-v2-lean435-20261020
 Baseline: 45eb5ed24f13e15e192e79e6afba8cb1f9d5736f
 Lean: leanprover/lean4:v4.35.0 (eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
@@ -151,3 +151,27 @@ The controlled, guard-checked Node22 batch fixture made 12 equal comparisons on 
 3. Prevent malformed metadata and cross-arena or free-variable-context leakage by type or by checked ingress, with regression and ideally metatheory proofs. Validating once internally is safe only if every subsequent mutation is via verified immutable smart constructors.
 4. Complete PSC1 generated .ps source closure for the new modules and verify JS memory, differential acceptance/rejection and benchmark reproducibility.
 5. Only after real source, PS/JS correctness and end-to-end performance wins should the team replace the old PsKernelExpr in the 79-module production kernel.
+
+
+## M4 legacy-expression interoperability qualified
+
+Source: packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PortableImport.lean.
+
+- The source input is the existing canonical PsKernelExpr syntax tree. A structurally fuel-bounded PSC1-compatible importer covers **all twelve constructor families** and creates new chunked V2 DAG nodes exclusively via validated smart constructors.
+- The public import entry validates the incoming arena and independently validates the full result. It never treats an imported hash, constructor ID, or metadata flag as proof, and never changes the original production expression.
+- Differential tests in PsKernelExprV2Regression.lean cover 13 sample expression shapes (including both literal variants). Each checks a round-trip decode against the original PsKernelExpr and equality of two separately imported copies in the *same validated arena*. A legacy beta-redex is imported and reduced using V2's bounded checked head machine.
+- [GitHub Actions 39468674615](https://github.com/dwijayuda/pskernel/actions/runs/39468674615) passed **both** native V2 regression and PSC1 portable/Node22 generated-JS jobs. PSC1 accepted 321 declarations in the complete V2 research source closure; generated JS passed structural copy comparison, legacy-beta parity and malformed-arena rejection.
+
+**Important limitations:** The importer converts a legacy tree and does not detect already shared physical subtrees or hash-cons duplicate legacy structures. Repeated source import also performs full DAG replay validation and can be expensive. That conversion overhead must not be hidden in whole-checker comparisons. For true production-scale performance, V2 should be constructed directly from a checked frontend/erasure boundary or use separately qualified sharing-preserving import, not import each expression again inside WHNF/DefEq.
+
+The combined research modules now have the following verified-but-isolated capabilities: all V2 constructors and cached metadata, native/portable DAG source composition, chunked storage, checked lifting, capture-avoiding instantiate1, direct bounded beta/zeta/mdata steps, validated-once head execution, collision-safe pair-memoized structural equality, scoped equality batching, and checked legacy-tree import. These are **not** complete WHNF, DefEq, universe-level checking, recursor/iota/projection reduction, verified preservation proofs, or an end-to-end self-hosted production kernel replacement.
+
+### Immediate next work and promotion gates
+
+1. **Benchmark import versus direct construction** on identical workloads, with raw graph-construction time, end-to-end checker time, JS heap, and peak RSS separately measured. No win should be claimed unless it survives imports, conversions, memo allocation, and garbage collection.
+2. **Expand only the missing correct reduction semantics**: normalize application functions, delta unfold, recursors/iota, projection and primitive reductions under Lean 4.35-equivalent fuel; preserve checked environment and local-context invariants.
+3. **Prove or thoroughly validate representation invariants** for all constructors and transformations (loose-range exactness, no false-negative FVar metadata, hash soundness for equality rejection, nonforged identities, context-sensitive cache scope). The sample oracle tests are not formal soundness proofs.
+4. **Dual-check whole checker fixtures** (positive and negative admission and definitional-equality cases), including matched official Lean 4.35 and PSC1, before migrating production DefEq or inference to V2.
+5. **Integrate and retire the old representation only after** the native, 79-module PSC1 .lean/.ps source fixed point, generated-JS/TS and workload memory/performance qualification remain green. The current source layout deliberately keeps Research imports out of the trusted SelfHost root.
+
+Evidence for unchanged production kernel correctness: [PSC1 full correctness and portability run 39466327195](https://github.com/dwijayuda/pskernel/actions/runs/39466327195), green on both jobs. The most recent CI for the import commit may finish later; do not treat uncompleted jobs as passing.

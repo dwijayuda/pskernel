@@ -1,5 +1,6 @@
 import Ps.KernelCore.Research.ExprV2Validation
 import Ps.KernelCore.Research.ExprV2Lift
+import Ps.KernelCore.Research.ExprV2PortableLift
 import Ps.KernelCore.Core.Substitution.Lift
 import Ps.KernelCore.Research.ExprV2ResearchAll
 
@@ -593,6 +594,15 @@ private def testChunkedLiftDifferential : IO Unit := do
         requireV2 s!"lift-{label}-cutoff{cutoff}-amount{amount}"
           (psKernelExprEqual actual expected &&
             psKernelExprEq actual expected)
+        let (portableArena,portableId) ← expectV2
+          (psKernelExprV2PortableLiftChecked a id cutoff amount)
+        let portableActual ← expectV2
+          (psKernelExprV2ChunkedDecode portableArena portableId)
+        requireV2 s!"portable-lift-{label}-cutoff{cutoff}-amount{amount}"
+          (psKernelExprEqual portableActual expected &&
+            psKernelExprEq portableActual expected)
+        requireV2 s!"portable-vs-native-lift-{label}-cutoff{cutoff}-amount{amount}"
+          (psKernelExprEq portableActual actual)
         if amount == 0 then
           requireV2 s!"lift-zero-allocation-{label}"
             (transformed.size == a.size && newId == id)
@@ -629,6 +639,18 @@ private def testSharedLift : IO Unit := do
     (match psKernelExprV2LiftChecked forged forgedId 0 1 with
       | Except.error _ => true
       | Except.ok _ => false)
+  requireV2 "portable-lift-rejects-unvalidated-metadata"
+    (match psKernelExprV2PortableLiftChecked forged forgedId 0 1 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let (portableArena,portableRoot) ← expectV2
+    (psKernelExprV2PortableLiftChecked a root 0 1)
+  let portableEntry ← expectV2
+    (psKernelExprV2ChunkedRequire portableArena portableRoot)
+  requireV2 "portable-shared-lift-depth"
+    (portableEntry.depth == newEntry.depth)
+  requireV2 "portable-shared-lift-bounded-growth"
+    (portableArena.size <= a.size + depth + 1)
   IO.println s!"PSC1_EXPR_V2_LIFT_SHARING: PASS input_nodes={a.size} output_nodes={transformed.size}"
 
 def main : IO Unit := do

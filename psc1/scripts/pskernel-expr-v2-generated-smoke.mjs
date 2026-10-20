@@ -53,7 +53,8 @@ demand(indexed.size===BigInt(count),"indexed-arena-size");
 for(const i of [0,1,3,7,15,63,127]){
   const id=BigInt(i);
   const indexedEntry=indexedFind(indexed,id);
-  demand(indexedEntry!==null&&indexedEntry!==undefined,"indexed-lookup-"+i);
+  demand(indexedEntry&&"value" in indexedEntry &&
+    indexedEntry.value.looseRange===id+1n,"indexed-lookup-"+i);
 }
 const firstEntry=accepted(lookup(arena,firstId),"first-entry");
 demand(firstEntry.looseRange===1n,"first-loose-range");
@@ -67,7 +68,8 @@ const freshIndex=accepted(indexedMkBVar(emptyIndex,0n),"indexed-builder-bvar");
 const indexedApplication=accepted(indexedMkApp(freshIndex.fst,freshIndex.snd,freshIndex.snd),
   "indexed-builder-shared-app");
 const newestIndexed=indexedFind(indexedApplication.fst,indexedApplication.snd);
-demand(newestIndexed!==null&&newestIndexed!==undefined,"indexed-builder-app-lookup");
+demand(newestIndexed&&"value" in newestIndexed &&
+  newestIndexed.value.depth===2n,"indexed-builder-app-lookup");
 let chunked=chunkedEmptyWithLimit(32n);
 for(let i=0;i<count;i++){
   const added=chunkedPush(chunked,firstEntry);
@@ -77,10 +79,11 @@ for(let i=0;i<count;i++){
 demand(chunked.size===BigInt(count),"chunked-count");
 for(const i of [0,1,31,32,63,64,127]){
   const entry=chunkedFind(chunked,BigInt(i));
-  demand(entry!==null&&entry!==undefined,"chunked-lookup-"+i);
+  demand(entry&&"value" in entry &&
+    entry.value.looseRange===firstEntry.looseRange,"chunked-lookup-"+i);
 }
-demand(chunkedFind(chunked,BigInt(count))===null ||
-  chunkedFind(chunked,BigInt(count))===undefined,"chunked-out-of-range");
+const chunkedBeyond=chunkedFind(chunked,BigInt(count));
+demand(!chunkedBeyond || !("value" in chunkedBeyond),"chunked-out-of-range");
 
 const timings=[];
 function timed(label,build){

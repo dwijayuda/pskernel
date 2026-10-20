@@ -111,7 +111,7 @@ theorem proj_preserves
 theorem legacy_depth_le_count (expr : PsKernelExpr) :
     psKernelExprV2LegacyDepth expr ≤ psKernelExprNodeCount expr := by
   induction expr <;>
-    simp_all [psKernelExprV2LegacyDepth, psKernelExprNodeCount] <;> omega
+    simp_all [psKernelExprV2LegacyDepth, psKernelExprNodeCount, Nat.max_le] <;> omega
 
 theorem legacy_default_budget_caps_to_depth (expr : PsKernelExpr) :
     (if Nat.ble (Nat.succ (psKernelExprNodeCount expr)) (psKernelExprV2LegacyDepth expr)
@@ -119,7 +119,7 @@ theorem legacy_default_budget_caps_to_depth (expr : PsKernelExpr) :
     psKernelExprV2LegacyDepth expr := by
   have bound := legacy_depth_le_count expr
   have beyond : ¬ Nat.succ (psKernelExprNodeCount expr) ≤ psKernelExprV2LegacyDepth expr := by omega
-  simp only [Nat.ble_eq, beyond, if_false]
+  simp only [Nat.ble_eq, beyond, ite_false]
 
 end PsKernelExprV2MetadataProofs
 

@@ -16,10 +16,10 @@ def psResolveName
       | Option.some _ => Option.some (PsResolvedName.global name)
       | Option.none => Option.none
 
-def psResolveAppendName (prefix : PsName) : PsName -> PsName
-  | .anonymous => prefix
-  | .str parent segment => .str (psResolveAppendName prefix parent) segment
-  | .num parent value => .num (psResolveAppendName prefix parent) value
+def psResolveAppendName (namespacePrefix : PsName) : PsName -> PsName
+  | .anonymous => namespacePrefix
+  | .str parent segment => .str (psResolveAppendName namespacePrefix parent) segment
+  | .num parent value => .num (psResolveAppendName namespacePrefix parent) value
 
 def psResolveGlobalCandidate
     (environment : PsEnvironment) (self : Option PsName) (name : PsName) : Bool :=

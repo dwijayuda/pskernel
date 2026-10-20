@@ -160,6 +160,10 @@ def psPrintBindingPatternHead
     (pattern : PsSyntaxBindingPattern) (annotation : Option PsSyntaxTerm)
     (value : PsSyntaxTerm) : Except PsSourcePrintError String := do
   let printedPattern ← psPrintBindingPattern pattern
+  let printedPattern := match pattern with
+    | .name _ => psPrintCommonConcat3 "(" printedPattern ")"
+    | .wildcard _ => psPrintCommonConcat3 "(" printedPattern ")"
+    | _ => printedPattern
   let printedType ← match annotation with
     | none => pure ""
     | some type => do

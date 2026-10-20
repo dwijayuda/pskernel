@@ -118,6 +118,14 @@ private def testBindingPatterns : IO Unit := do
   checkExecuted "PS nested annotated tuple binding" .proofScript psNested intType intNine
   roundTrip "nested pattern Lean to PS" .lean .proofScript leanNested
   roundTrip "nested pattern PS to Lean" .proofScript .lean psNested
+  roundTrip "grouped name pattern Lean to PS" .lean .proofScript
+    "def result : Nat := let (x) := 7; x\n"
+  roundTrip "grouped name pattern PS to Lean" .proofScript .lean
+    "def result : Nat := let (x) := 7\n x\n"
+  roundTrip "grouped wildcard pattern Lean to PS" .lean .proofScript
+    "def result : Nat := let (_) := 7; 9\n"
+  roundTrip "grouped wildcard pattern PS to Lean" .proofScript .lean
+    "def result : Nat := let (_) := 7\n 9\n"
   let leanCapture :=
     "def result : Id Nat := do\n" ++
     "  let x : Nat := 5\n" ++

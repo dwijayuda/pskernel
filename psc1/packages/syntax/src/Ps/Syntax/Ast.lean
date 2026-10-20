@@ -171,23 +171,23 @@ def psSyntaxNamespaceAppend (left : List String) (right : List String) : List St
   | [] => right
   | first :: rest => first :: psSyntaxNamespaceAppend rest right
 
-def psSyntaxNamespaceName (prefix : List String) (name : PsSyntaxName) : PsSyntaxName :=
-  { name with segments := psSyntaxNamespaceAppend prefix name.segments }
+def psSyntaxNamespaceName (namespacePrefix : List String) (name : PsSyntaxName) : PsSyntaxName :=
+  { name with segments := psSyntaxNamespaceAppend namespacePrefix name.segments }
 
-def psSyntaxDeclarationQualify (prefix : List String) :
+def psSyntaxDeclarationQualify (namespacePrefix : List String) :
     PsSyntaxDeclaration -> PsSyntaxDeclaration
   | .scopedDecl path declaration =>
-      psSyntaxDeclarationQualify (psSyntaxNamespaceAppend prefix path) declaration
+      psSyntaxDeclarationQualify (psSyntaxNamespaceAppend namespacePrefix path) declaration
   | .definition name binders type value span =>
-      .definition (psSyntaxNamespaceName prefix name) binders type value span
+      .definition (psSyntaxNamespaceName namespacePrefix name) binders type value span
   | .partialDefinition name binders type value span =>
-      .partialDefinition (psSyntaxNamespaceName prefix name) binders type value span
+      .partialDefinition (psSyntaxNamespaceName namespacePrefix name) binders type value span
   | .theoremDecl name binders type value span =>
-      .theoremDecl (psSyntaxNamespaceName prefix name) binders type value span
+      .theoremDecl (psSyntaxNamespaceName namespacePrefix name) binders type value span
   | .inductiveDecl name params type constructors span =>
-      .inductiveDecl (psSyntaxNamespaceName prefix name) params type constructors span
+      .inductiveDecl (psSyntaxNamespaceName namespacePrefix name) params type constructors span
   | .structureDecl name params fields span =>
-      .structureDecl (psSyntaxNamespaceName prefix name) params fields span
+      .structureDecl (psSyntaxNamespaceName namespacePrefix name) params fields span
 
 def psSyntaxDeclarationSpan : PsSyntaxDeclaration -> PsSourceSpan
   | .definition _ _ _ _ span => span

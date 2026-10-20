@@ -114,3 +114,8 @@ lean_exe psc1_kernel_lift_perf where
 lean_exe psc1_kernel_whole_comparison where
   srcDir := "test"
   root := `PsKernelWholeComparison
+
+-- Read-only Lean 4.35 versus PSC1 hotpath profiling; no kernel implementation changes.
+lean_exe psc1_kernel_hotpath where
+  srcDir := "test"
+  root := `PsKernelHotpathProfiling

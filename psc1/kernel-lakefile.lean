@@ -56,6 +56,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.DefEq.Shortcuts,
     `Ps.KernelCore.Checker.DefEq.Support,
     `Ps.KernelCore.Checker.Inference,
+    `Ps.KernelCore.Checker.Inference.Constant,
     `Ps.KernelCore.Checker.Inference.Core,
     `Ps.KernelCore.Checker.Inference.Helpers,
     `Ps.KernelCore.Checker.Knot,
@@ -181,3 +182,8 @@ lean_exe psc1_kernel_expr_v2_whnf_subset_regression where
 lean_exe psc1_kernel_expr_v2_dag_regression where
   srcDir := "test"
   root := `PsKernelExprV2DagRegression
+
+-- Matched complete public DAG/legacy/official checking, with unchanged resources.
+lean_exe psc1_kernel_expr_v2_dag_performance where
+  srcDir := "test"
+  root := `PsKernelExprV2DagPerformance

@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Inference.Helpers
+import Ps.KernelCore.Checker.Inference.Constant
 
 /-
 Syntax-directed core inference.
@@ -144,93 +145,15 @@ def psKernelInferCoreWithFuel
                           result))
                 | PsKernelExpr.const name levels =>
                     match
-                        psKernelEnvironmentFind
-                          nextContext.environment
-                          name with
-                    | Option.none =>
-                        Except.error
-                          "unknown constant"
-                    | Option.some info =>
-                        let params :=
-                          psKernelConstantInfoLevelParams
-                            info;
-                        if
-                            Nat.beq
-                              (psKernelNameListLength params)
-                              (psKernelLevelListLength levels) then
-                          if inferOnly then
-                            let result :=
-                              psKernelExprInstantiateLevelParams
-                                (psKernelConstantInfoType info)
-                                params
-                                levels;
-                            Except.ok
-                              (Prod.mk
-                                result
-                                (psKernelCacheInferResult
-                                  state
-                                  inferOnly
-                                  expr
-                                  result))
-                          else if
-                              psKernelConstantInfoIsUnsafe info then
-                            if
-                                psKernelDefinitionSafetyIsUnsafe
-                                  nextContext.safety then
-                              let result :=
-                                psKernelExprInstantiateLevelParams
-                                  (psKernelConstantInfoType info)
-                                  params
-                                  levels;
-                              Except.ok
-                                (Prod.mk
-                                  result
-                                  (psKernelCacheInferResult
-                                    state
-                                    inferOnly
-                                    expr
-                                    result))
-                            else
-                              Except.error
-                                "safe declaration uses unsafe constant"
-                          else if
-                              psKernelConstantInfoIsPartial info then
-                            if
-                                psKernelDefinitionSafetyIsSafe
-                                  nextContext.safety then
-                              Except.error
-                                "safe declaration uses partial constant"
-                            else
-                              let result :=
-                                psKernelExprInstantiateLevelParams
-                                  (psKernelConstantInfoType info)
-                                  params
-                                  levels;
-                              Except.ok
-                                (Prod.mk
-                                  result
-                                  (psKernelCacheInferResult
-                                    state
-                                    inferOnly
-                                    expr
-                                    result))
-                          else
-                            let result :=
-                              psKernelExprInstantiateLevelParams
-                                (psKernelConstantInfoType info)
-                                params
-                                levels;
-                            Except.ok
-                              (Prod.mk
-                                result
-                                (psKernelCacheInferResult
-                                  state
-                                  inferOnly
-                                  expr
-                                  result))
-                        else
-                          Except.error
-                            "incorrect number of universe levels"
+                        psKernelInferConstantType
+                          nextContext name levels inferOnly with
+                    | Except.error error => Except.error error
+                    | Except.ok result =>
+                        Except.ok
+                          (Prod.mk
+                            result
+                            (psKernelCacheInferResult
+                              state inferOnly expr result))
                 | PsKernelExpr.lit literal =>
                     match literal with
                     | PsKernelLiteral.nat value =>

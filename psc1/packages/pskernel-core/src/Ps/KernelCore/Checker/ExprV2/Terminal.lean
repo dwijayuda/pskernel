@@ -16,37 +16,6 @@ means acceptance. Except.error preserves the existing diagnostic. Constant
 types still live in the legacy environment and use its qualified universe
 substitution; migrating environment expressions remains a separate step.
 -/
-def psKernelExprV2ConstantType
-    (context : PsKernelCheckerContext)
-    (name : PsKernelName) (levels : List PsKernelLevel) :
-    Except String PsKernelExpr :=
-  match psKernelEnvironmentFind context.environment name with
-  | Option.none => Except.error "unknown constant"
-  | Option.some info =>
-      let params := psKernelConstantInfoLevelParams info;
-      if Nat.beq
-          (psKernelNameListLength params) (psKernelLevelListLength levels) then
-        if psKernelConstantInfoIsUnsafe info then
-          if psKernelDefinitionSafetyIsUnsafe context.safety then
-            Except.ok
-              (psKernelExprInstantiateLevelParams
-                (psKernelConstantInfoType info) params levels)
-          else
-            Except.error "safe declaration uses unsafe constant"
-        else if psKernelConstantInfoIsPartial info then
-          if psKernelDefinitionSafetyIsSafe context.safety then
-            Except.error "safe declaration uses partial constant"
-          else
-            Except.ok
-              (psKernelExprInstantiateLevelParams
-                (psKernelConstantInfoType info) params levels)
-        else
-          Except.ok
-            (psKernelExprInstantiateLevelParams
-              (psKernelConstantInfoType info) params levels)
-      else
-        Except.error "incorrect number of universe levels"
-
 def psKernelExprV2TryCheckTerminalWithFuel
     (fuel : Nat) :
     PsKernelCheckerContext -> PsKernelExprV2PagedArena -> Nat ->
@@ -84,7 +53,7 @@ def psKernelExprV2TryCheckTerminalWithFuel
                       (Except.ok (PsKernelExpr.sort (PsKernelLevel.succ level)))
                 | PsKernelExprV2Node.const name levels =>
                     Option.some
-                      (psKernelExprV2ConstantType nextContext name levels)
+                      (psKernelInferConstantType nextContext name levels false)
                 | PsKernelExprV2Node.lit literal =>
                     match literal with
                     | PsKernelLiteral.nat value =>

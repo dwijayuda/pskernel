@@ -1,4 +1,5 @@
 import Ps.Host.LeanChecked
+import Ps.Host.ProjectCompiler
 import Ps.CompilerIr.Check
 
 private def require (label : String) (condition : Bool) : IO Unit := do
@@ -9,6 +10,14 @@ private def prepare (label : String) (kind : PsCompilerSourceKind) (source : Str
     IO PsCompilerAdmissionReadyModule := do
   match psCompilerPrepareSource kind source with
   | .ok value => pure value
+  | .error (.leanFrontend (.lex error)) =>
+      throw (IO.userError (label ++ ": " ++ psHostLexErrorText error))
+  | .error (.leanFrontend (.parse error)) =>
+      throw (IO.userError (label ++ ": " ++ psHostParseErrorText error))
+  | .error (.proofScriptFrontend (.lex error)) =>
+      throw (IO.userError (label ++ ": " ++ psHostLexErrorText error))
+  | .error (.proofScriptFrontend (.parse error)) =>
+      throw (IO.userError (label ++ ": " ++ psHostParseErrorText error))
   | .error (.elaboration .doExpectedType) =>
       throw (IO.userError (label ++ ": do expected type"))
   | .error (.elaboration .doUnsupportedEffect) =>

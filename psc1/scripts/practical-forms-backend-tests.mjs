@@ -116,8 +116,14 @@ async function executePortable(label, source, expected) {
 }
 try {
   for (const kind of ["lean", "ps"]) {
-    const numericSource = path.join(outputRoot, "numeric." + kind);
-    fs.writeFileSync(numericSource, numeric[kind]);
+    // Keep the inference helper private, matching the existing public ABI:
+    // source-owned generic dependencies specialize before target emission.
+    const numericDirectory = path.join(outputRoot, "numeric-" + kind + "-source");
+    fs.mkdirSync(numericDirectory, { recursive: true });
+    const newline = numeric[kind].indexOf("\n");
+    fs.writeFileSync(path.join(numericDirectory, "Dep." + kind), numeric[kind].slice(0, newline + 1));
+    const numericSource = path.join(numericDirectory, "Main." + kind);
+    fs.writeFileSync(numericSource, "import Dep\n" + numeric[kind].slice(newline + 1));
     assert.match(run(native, ["check", numericSource]), /PSC1_KERNEL_CHECK: PASS/);
     await executePortable("numeric-" + kind, numericSource, numericExpected);
     for (const test of boolCases) {

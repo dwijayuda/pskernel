@@ -157,6 +157,9 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Encode,
     `Ps.BackendWasm.Binary,
     `Ps.BackendWasm.RuntimePlan,
+    `Ps.BackendWasm.ValidateStructure,
+    `Ps.BackendWasm.ValidateTyping,
+    `Ps.BackendWasm.ValidateIr,
     `Ps.BackendWasm.Component
   ]
 

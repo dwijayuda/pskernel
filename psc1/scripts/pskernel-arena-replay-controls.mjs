@@ -1,12 +1,46 @@
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
-import { parseExactJSON, replayText } from './pskernel-arena-replay.mjs';
+import { parseExactJSON, replayText, generatedVariantEqual, kernelErrorVerdict } from './pskernel-arena-replay.mjs';
 
 if(process.argv.length!==3)throw Error('usage: node pskernel-arena-replay-controls.mjs generated-kernel.js');
 const kernel=await import(pathToFileURL(path.resolve(process.argv[2])).href);
 const get=name=>{if(!(name in kernel))throw Error('missing export '+name);return kernel[name];};
 let passed=0;
 const must=(condition,label)=>{if(condition!==true)throw Error('PSC1_ARENA_CONTROL_FAILED '+label);passed++;console.log('PSC1_ARENA_CONTROL_PASS '+label);};
+const outcome=get('PsKernelOutcome'),hints=get('PsKernelReducibilityHints');
+const safety=get('PsKernelDefinitionSafety'),errors=get('PsKernelError'),resources=get('PsKernelResourceError');
+const distinctVariants=(values,label)=>{
+  for(let i=0;i<values.length;i++)for(let j=0;j<values.length;j++)
+    must(generatedVariantEqual(values[i],values[j])===(i===j),label+' '+i+'/'+j);
+};
+distinctVariants([outcome.accepted,outcome.rejectedInvalid,outcome.declinedUnsupported,
+  outcome.resourceExhausted,outcome.internalError],'all outcome Symbol tags');
+distinctVariants([safety.safe,safety.unsafeDef,safety.partialDef],'all safety Symbol tags');
+distinctVariants([hints.opaqueHint,hints.abbrevHint,hints.regular(0n),hints.regular(1n)],'hint tags and exact payloads');
+must(generatedVariantEqual(hints.regular(9007199254740993n),hints.regular(9007199254740993n)),
+  'same exact large scalar enum payload');
+must(!generatedVariantEqual(hints.regular(9007199254740993n),hints.regular(9007199254740992n)),
+  'distinct exact large scalar enum payloads');
+const sameMessage='arena classification sentinel';
+for(const [error,expected] of [[errors.rejectedInvalid(sameMessage),'rejected'],
+    [errors.declinedUnsupported(sameMessage),'unsupported'],
+    [errors.resourceExhausted(resources.fuel,sameMessage),'resource_exhausted'],
+    [errors.internalError(sameMessage),'internal_error']])
+  must(kernelErrorVerdict(kernel,error)===expected,'typed error classification '+expected);
+const constantInfo=get('PsKernelConstantInfo'),payload={};
+must(!generatedVariantEqual(constantInfo.thmInfo(payload),constantInfo.opaqueInfo(payload)),
+  'ConstantInfo kind differs when payload is identical');
+const binders=get('PsKernelBinderInfo');
+distinctVariants([binders.default,binders.implicit,binders.strictImplicit,binders.instImplicit],
+  'all binder Symbol tags');
+const quotKinds=get('PsKernelQuotKind');
+distinctVariants([quotKinds.typeQ,quotKinds.ctorQ,quotKinds.liftQ,quotKinds.indQ],
+  'all quotient Symbol tags');
+console.log('PSC1_ARENA_SYMBOL_ABI '+JSON.stringify({
+  outcomeSymbols:Object.getOwnPropertySymbols(outcome.accepted).map(symbol=>symbol.description),
+  enumerableOutcomeKeys:Object.keys(outcome.accepted),
+  jsonErasesDistinctTags:JSON.stringify(hints.opaqueHint)===JSON.stringify(hints.abbrevHint)
+}));
 const accepted=result=>{if(result&&typeof result==='object'&&'value' in result)return result.value;throw Error('unexpected control rejection');};
 const observe=source=>{try{return replayText(kernel,source);}catch(error){return {verdict:error.verdict||'driver_error',reason:error.message};}};
 const exactJSON=value=>{
@@ -49,6 +83,18 @@ const s1=E.sort(L.succ(L.zero));
 const session=accepted(get('psKernelKernelSessionEmpty')(get('psKernelResourcePolicyDefault'),get('psKernelProviderDefault')));
 const request=get('PsKernelDeclarationRequest').ordinaryInductive({levelParams:nil,name:n,type:s1,
   ctors:List.cons({name:c,type:E.const(n,nil)},nil),isUnsafe:false,numParams:0n});
+const unsupportedResult=get('psKernelV1AdmitDeclaration')(session,
+  get('PsKernelDeclarationRequest').unsupported('arena unsupported control'));
+must(unsupportedResult&&typeof unsupportedResult==='object'&&'error' in unsupportedResult&&
+  kernelErrorVerdict(kernel,unsupportedResult.error)==='unsupported',
+  'actual V1 unsupported result is never a rejection');
+const cancelledSession={...session,resources:{...session.resources,cancelled:true}};
+const resourceResult=get('psKernelV1AdmitDeclaration')(cancelledSession,request);
+must(resourceResult&&typeof resourceResult==='object'&&'error' in resourceResult&&
+  kernelErrorVerdict(kernel,resourceResult.error)==='resource_exhausted',
+  'actual V1 resource result is never a rejection');
+must(cancelledSession.resources.fuel===4096n&&session.resources.cancelled===false,
+  'resource control preserves published fuel and original session');
 const admitted=accepted(get('psKernelV1AdmitDeclaration')(session,request));
 const info=name=>accepted(get('psKernelEnvironmentFind')(admitted.session.environment,name)).value;
 const induct=info(n),ctor=info(c),rec=info(r);
@@ -62,7 +108,7 @@ function nameID(value){
   records.push({in:id,...item});nameIDs.set(value,id);return id;
 }
 const discriminator=(sample,payload)=>{
-  const fields=Object.keys(sample).filter(key=>!payload.includes(key));
+  const fields=Reflect.ownKeys(sample).filter(key=>!payload.includes(key));
   if(fields.length!==1)throw Error('unexpected generated constructor discriminator');return fields[0];
 };
 const levelTag=discriminator(L.succ(L.zero),['of']);
@@ -95,7 +141,7 @@ function exprID(value){
   else if(kind==='const')item={const:{name:nameID(value.name),us:array(value.levels).map(levelID)}};
   else if(kind==='app')item={app:{fn:exprID(value.fn),arg:exprID(value.arg)}};
   else if(kind==='lam'||kind==='forallE'){
-    const binder=['default','implicit','strictImplicit','instImplicit'].find(key=>exactJSON(B[key])===exactJSON(value.binderInfo));
+    const binder=['default','implicit','strictImplicit','instImplicit'].find(key=>generatedVariantEqual(B[key],value.binderInfo));
     if(!binder)throw Error('unknown generated binder');
     item={[kind]:{name:nameID(value.name),type:exprID(value.type),body:exprID(value.body),binderInfo:binder}};
   }else if(kind==='letE')item={letE:{name:nameID(value.name),type:exprID(value.type),value:exprID(value.value),body:exprID(value.body),nondep:value.nondep}};

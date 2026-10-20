@@ -88,7 +88,39 @@ const shared=accepted(decoded(built,ids.app),"shared-app");
 must(shared.fn!==undefined&&shared.fn===shared.arg,"decoder-preserves-physical-child-sharing");
 must(built.size===arena.size,"each-unique-node-decoded-once");
 
-const json=x=>JSON.stringify(x,(_,v)=>typeof v==="bigint"?String(v):v);
+// Constructor tags are Symbol properties in the authentic TypeScript backend.
+// Error parity must preserve them, including nested resource-kind variants.
+const sameRuntimeValue=(left,right)=>{
+  if(left===right)return true;
+  if(left===null||right===null||typeof left!=="object"||typeof right!=="object")return false;
+  const keys=Reflect.ownKeys(left),otherKeys=Reflect.ownKeys(right);
+  return keys.length===otherKeys.length&&keys.every(key=>
+    Object.hasOwn(right,key)&&sameRuntimeValue(left[key],right[key]));
+};
+{
+  const ErrorKind=get("PsKernelError"),Resource=get("PsKernelResourceError");
+  const message="identical error payload";
+  const errors=[
+    ErrorKind.rejectedInvalid(message),ErrorKind.declinedUnsupported(message),
+    ErrorKind.internalError(message),
+    ...["fuel","recursionDepth","natSize","cancelled","declarationLimit","hostStack"]
+      .map(kind=>ErrorKind.resourceExhausted(Resource[kind],message))
+  ];
+  for(let i=0;i<errors.length;i++)for(let j=0;j<errors.length;j++)
+    must(sameRuntimeValue(errors[i],errors[j])===(i===j),
+      "exact-public-error-tag-matrix-"+i+"-"+j);
+  must(!sameRuntimeValue(ErrorKind.resourceExhausted(Resource.fuel,"a"),
+    ErrorKind.resourceExhausted(Resource.fuel,"b")),"exact-public-error-message");
+
+  must(!sameRuntimeValue(ErrorKind.rejectedInvalid(message),ErrorKind.declinedUnsupported(message)),
+    "error-parity-preserves-symbol-constructor-kind");
+  must(!sameRuntimeValue(ErrorKind.resourceExhausted(Resource.fuel,message),
+    ErrorKind.resourceExhausted(Resource.cancelled,message)),
+    "error-parity-preserves-nested-resource-kind");
+  must(sameRuntimeValue(ErrorKind.resourceExhausted({...Resource.fuel},message),
+    ErrorKind.resourceExhausted({...Resource.fuel},message)),
+    "error-parity-compares-distinct-equivalent-resource-records");
+}
 const checkedResult=r=>{
   if(rejected(r))return {error:r.error};
   const replies=array(accepted(r,"batch-result").replies);
@@ -96,7 +128,7 @@ const checkedResult=r=>{
   return {value:replies[0].value};
 };
 const sameOperation=(original,actual,compare)=>{
-  if(rejected(original))return rejected(actual)&&json(original.error)===json(actual.error);
+  if(rejected(original))return rejected(actual)&&sameRuntimeValue(original.error,actual.error);
   if(rejected(actual))return false;
   const expected=accepted(original,"legacy-operation");
   const replies=array(accepted(actual,"dag-operation").replies);
@@ -108,7 +140,7 @@ for(const [key,id] of Object.entries(ids)){
     const original=get("psKernelV1CheckExpression")(s,nil,S.safe,terms[key]);
     const actual=checkedResult(invoke(arena,[C.check(id)],s));
     if(rejected(original)){
-      must(rejected(actual)&&json(original.error)===json(actual.error),
+      must(rejected(actual)&&sameRuntimeValue(original.error,actual.error),
         "same-negative-and-resource-"+key+"-"+fuel);
     }else{
       const expected=accepted(original,"legacy-check");
@@ -136,7 +168,7 @@ for(const depth of [0,8,16,17,32,64]){
       const original=get("psKernelV1CheckExpression")(s,nil,S.safe,term);
       const actual=checkedResult(invoke(graph.fst,[C.check(graph.snd)],s));
       if(rejected(original)){
-        must(rejected(actual)&&json(original.error)===json(actual.error),
+        must(rejected(actual)&&sameRuntimeValue(original.error,actual.error),
           "metadata-resource-parity-"+depth+"-"+fuel+"-"+recDepth);
       }else{
         must(!rejected(actual)&&equal(actual.value.type,sort1),
@@ -675,7 +707,7 @@ console.log("PSC1_V2_DAG_JS_BETA: PASS");
   const letContext=get("psKernelCheckerContextWithLocalContext")(checker.context,letLocals);
   const declined=get("psKernelExprV2TryWhnfWithFuel")(64n)(letContext)(stateArena)(fvar);
   const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
-  must(declined!==undefined&&json(declined)===json(none),"local-let-value-explicit-fallback");
+  must(declined!==undefined&&sameRuntimeValue(declined,none),"local-let-value-explicit-fallback");
 }
 console.log("PSC1_V2_DAG_JS_WHNF_STATE: PASS");
 

@@ -81,20 +81,38 @@ export function parseExactJSON(text){
   return result;
 }
 
+// Compare one generated constructor, including its Symbol tag. Payloads here
+// are scalars or the same shared object; this is not expression equality.
+export function generatedVariantEqual(left,right){
+  for(const value of [left,right]){
+    if(value===null||typeof value!=='object'||Object.getOwnPropertySymbols(value).length!==1)
+      throw Error('invalid generated constructor representation');
+  }
+  const keys=Reflect.ownKeys(left),otherKeys=Reflect.ownKeys(right);
+  return keys.length===otherKeys.length&&keys.every(key=>
+    Object.hasOwn(right,key)&&left[key]===right[key]);
+}
+
+export function kernelErrorVerdict(kernel,error){
+  const outcome=kernel.psKernelErrorOutcome(error),O=kernel.PsKernelOutcome;
+  for(const [kind,verdict] of [['rejectedInvalid','rejected'],['declinedUnsupported','unsupported'],
+      ['resourceExhausted','resource_exhausted'],['internalError','internal_error']]){
+    if(generatedVariantEqual(outcome,O[kind]))return verdict;
+  }
+  throw Error('generated error returned an invalid outcome');
+}
+
 export function replayText(kernel,text){
   const get=name=>{if(!(name in kernel))throw Error('missing generated export '+name);return kernel[name];};
   const N=get('PsKernelName'),L=get('PsKernelLevel'),B=get('PsKernelBinderInfo');
   const S=get('PsKernelDefinitionSafety'),H=get('PsKernelReducibilityHints');
   const D=get('PsKernelDagDeclarationRequest'),C=get('PsKernelDagCommand');
-  const CI=get('PsKernelConstantInfo'),Q=get('PsKernelQuotKind'),O=get('PsKernelOutcome');
+  const CI=get('PsKernelConstantInfo'),Q=get('PsKernelQuotKind');
   const List=get('List'),nil=typeof List.nil==='function'?List.nil():List.nil;
   const list=items=>items.reduceRight((tail,head)=>List.cons(head,tail),nil);
   const array=items=>{const result=[];while(items&&typeof items==='object'&&'head' in items){result.push(items.head);items=items.tail;}return result;};
   const encode=value=>JSON.stringify(value,(_key,item)=>typeof item==='bigint'?item.toString():item);
-  const enumEq=(left,right)=>{
-    if(left===undefined||right===undefined)throw Error('missing generated enum value');
-    return encode(left)===encode(right);
-  };
+  const enumEq=generatedVariantEqual;
   const nameEq=(left,right)=>get('psKernelNameEq')(left)(right)===true;
   const exprEq=(left,right)=>get('psKernelExprEq')(left)(right)===true;
   const nameListEq=(left,right)=>{
@@ -105,11 +123,7 @@ export function replayText(kernel,text){
     if(result&&typeof result==='object'&&'value' in result)return result.value;
     if(result&&typeof result==='object'&&'error' in result){
       if(typeof result.error==='string')fail('malformed',stage,result.error);
-      const outcome=get('psKernelErrorOutcome')(result.error);
-      const verdict=enumEq(outcome,O.rejectedInvalid)?'rejected':
-        enumEq(outcome,O.declinedUnsupported)?'unsupported':
-        enumEq(outcome,O.resourceExhausted)?'resource_exhausted':'internal_error';
-      fail(verdict,stage,encode(result.error));
+      fail(kernelErrorVerdict(kernel,result.error),stage,encode(result.error));
     }
     throw Error('invalid generated Except shape at '+stage);
   }
@@ -380,8 +394,7 @@ export function replayText(kernel,text){
       if(!found||typeof found!=='object'||!('value' in found))reject('missing regenerated '+kind);
       const info=found.value;
       if(!info||typeof info!=='object'||!('value' in info))throw Error('invalid generated ConstantInfo shape');
-      const expected=CI[kind](info.value),keys=Object.keys(info);
-      if(keys.length!==Object.keys(expected).length||keys.some(key=>info[key]!==expected[key]))
+      if(!generatedVariantEqual(info,CI[kind](info.value)))
         reject('regenerated constant has wrong kind: '+kind);
       return info.value;
     }

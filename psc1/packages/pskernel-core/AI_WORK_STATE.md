@@ -11,33 +11,50 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 ## Current checkpoint and evidence
 
 The latest native-qualified implementation is
-[fa0ca224c6fd192d0afa2418d415a6dc67f9f333](https://github.com/dwijayuda/pskernel/commit/fa0ca224c6fd192d0afa2418d415a6dc67f9f333).
-Its native job in [39512106401](https://github.com/dwijayuda/pskernel/actions/runs/39512106401)
-passed the complete DAG regressions, official Lean fixtures, beta/zeta resource
-parity, 1,755 transformation comparisons, local metadata/cache-scope theorems,
-the new depth/count budget equivalence theorems, and matched native benchmarks.
-The proof axiom check passed. This is not a whole-kernel soundness theorem.
+[50dd83b308db22ef7befc0c08fa04d5de6249adb](https://github.com/dwijayuda/pskernel/commit/50dd83b308db22ef7befc0c08fa04d5de6249adb).
+Its native job in [39513010613](https://github.com/dwijayuda/pskernel/actions/runs/39513010613)
+passed complete DAG regressions, stateful function-position normalization,
+exact cached-result syntax, real hash collisions, fuel/depth entry guards,
+official Lean fixtures, 1,755 transformation comparisons, and all 21 local
+proof axiom audits. Three new cache lemmas establish empty initialization and
+FVar-flag exclusion. They do not prove cache-result validity or whole-kernel
+soundness. Generated runtime and canonical PS qualification of this stateful
+slice are still pending.
 
-The strict generated runtime smoke for the same semantic implementation passed
-on 269552f in [39511802579](https://github.com/dwijayuda/pskernel/actions/runs/39511802579).
-The generated job is fully green: 578 strict transformation comparisons,
-large shared-DAG, beta/zeta, standalone runtime, whole-checker benchmarks and
-33 existing complete-checker operations passed. The workflow itself remains
-red because its earlier native proof failed; fa0ca224 corrects that proof.
-The earlier dd466 run checked all 1,225 source declarations and emitted JS,
-declarations and a source map. Its runtime failure was a host-harness ABI error:
-returned function arrows are unary, while known declaration entries have flat
-arguments. Seven call sites were corrected; the strict unapplied-oracle guard
-remains.
+The previous stateless implementation at
+[fa0ca224c6fd192d0afa2418d415a6dc67f9f333](https://github.com/dwijayuda/pskernel/commit/fa0ca224c6fd192d0afa2418d415a6dc67f9f333)
+is fully green in integration run
+[39512106401](https://github.com/dwijayuda/pskernel/actions/runs/39512106401).
+Native and authentic generated JS passed, including 578 strict transformation
+comparisons, standalone runtime, the existing 33 complete-checker operations,
+and correctness-guarded benchmarks.
 
-The first independent Arena job at c29f418 has passed complete canonical PS
-reconstruction and checking and is generating the executable. The full corpus
-comparison has not yet produced a qualified independent result.
-The last fully green integration + six-job research checkpoint remains
-[69de396ec537c8130b87388ba8045859e443141b](https://github.com/dwijayuda/pskernel/commit/69de396ec537c8130b87388ba8045859e443141b):
-[39506742023](https://github.com/dwijayuda/pskernel/actions/runs/39506742023)
-and [39506742177](https://github.com/dwijayuda/pskernel/actions/runs/39506742177).
-Do not substitute that earlier result for final-commit qualification.
+The full original correctness/portability workflow at 269552f is green:
+[39511802691](https://github.com/dwijayuda/pskernel/actions/runs/39511802691).
+The dependency manifest derived 100 canonical modules and 1,225 declarations.
+Authentic PSC1 source checking, canonical PS reconstruction/checking, TypeScript
+7.0.2 output with declarations/source maps, and the complete independent JS
+positive/negative, delta/iota/mutual/context/fuel smoke passed. DirectJS reports
+an explicit unsupported emitter capability; it is not claimed as a supported
+complete-kernel executable. The six-job research workflow also passed at
+[39511802573](https://github.com/dwijayuda/pskernel/actions/runs/39511802573).
+
+The first independent Arena job at c29f418 passed canonical reconstruction,
+checking and TypeScript generation, but its transport controls failed before
+the corpus started:
+[39511629448](https://github.com/dwijayuda/pskernel/actions/runs/39511629448).
+The authentic backend stores constructor tags in Symbol properties;
+Object.keys/JSON comparisons omitted them. This commit changes the transport
+discriminator and shallow enum/kind comparisons to preserve Symbol identity,
+classifies typed errors exactly, and adds all-pairs controls for outcome,
+safety, hints, binder and quotient variants. Actual unsupported/cancelled V1
+controls must remain distinct from semantic rejection. Native and generated
+DAG error-parity controls now compare all nine public error/resource cases,
+including their exact message. Earlier finite parity checks that erased tags
+are superseded by this stronger gate. No independent all-193 corpus result is
+claimed until corrected controls and the complete replay pass.
+
+Do not substitute any earlier successful run for final-commit qualification.
 
 No PR has been merged. Keep the integration branch isolated until all relevant
 gates on the eventual implementation commit have passed.
@@ -93,9 +110,9 @@ arenas are unrelated. The portable profile exposes internal helpers/records;
 the documented checked boundary, not a sealed constructor type, establishes
 canonical arena/decoded correspondence.
 
-## New function-normalization migration (qualification pending on this commit)
+## Function-normalization migration (native qualified; generated gate pending)
 
-The next production slice replaces the stateless WHNF fragment with an
+The production slice at 50dd83b replaces the stateless WHNF fragment with an
 operation-owned core cache and threads it through function-position and result
 normalization. It directly handles beta/zeta/metadata function heads, preserving
 the original predecessor fuel for both calls. Alpha-equivalent keys with
@@ -118,7 +135,27 @@ check+WHNF; official Lean exposes no PS fuel parameter. JS retains isolated
 A-B-B-A, cold/warm, construction and post-GC heap measurements. An untimed raw
 diagnostic reports actual cache growth after the public timing/memory snapshot;
 it explicitly does not measure hit/miss/probe counters. No cache eviction or
-fuel change is allowed. Results for this slice remain pending.
+fuel change is allowed.
+
+Native complete-public checked WHNF results at 50dd83b, depth128 and ten calls
+per isolated worker (two repetitions), are:
+
+| Shape | Original PSKernel warm ms | DAG warm ms | Official Lean check + WHNF ms |
+| --- | --- | --- | --- |
+| Shared function head | 17.106–17.400 | 5.611–5.975 | 0.485–0.492 |
+| Alpha-equivalent heads | 17.673–17.775 | 7.252–7.348 | 0.603–0.617 |
+| Unique metadata tags | 30.684–31.040 | 11.999–12.126 | 23.142–23.380 |
+| Deliberate hash collisions | 40.750–42.118 | 42.434–42.482 | 23.131–23.567 |
+
+There are real smaller-workload regressions: alpha-equivalent depth8/100 calls
+is 3.013–3.098ms DAG versus 2.443–2.499ms original; collision depth32/40 calls
+is 16.590–16.997ms DAG versus 14.588–14.661ms original. The slice is not
+generally performance-qualified. Across all 72 isolated workers peak RSS ranges
+overlap: original 68,424–71,404KiB, DAG 68,352–71,212KiB and Lean
+68,140–71,208KiB. These are process peaks, not allocation/retained-heap measures.
+The benchmark's fuel4096 field applies to PSKernel only; official Lean uses
+its own internal resource policy. Generated stateful timing/heap results remain
+pending.
 
 ## Milestone matrix
 
@@ -127,7 +164,7 @@ fuel change is allowed. Results for this slice remain pending.
 | Paged representation | Single production owner; all 12 families; exact cached metadata | Forgery, collision, sharing, page and reference tests pass | Qualified foundation; current complete closure builds | Construction and validation included in complete-operation measurements | Integrated foundation |
 | Transformations | Lift, instantiate/multi/reverse, abstract, universe substitution, spines; scoped memo | 1,755 comparisons plus budget/sharing/negative cases pass | Authentic source and strict generated transform smoke pass | Large shared-DAG fixture; not a full checker speedup claim | Integrated prerequisite |
 | Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
-| WHNF | Terminal/metadata/zeta/syntactic-lambda beta qualified; operation-owned function-normalization cache added; qualification pending | Qualified slice has exact low-fuel/depth parity | Qualified slice strict generated smoke passes | Native checked zeta WHNF improves on matched fixtures | Partial; full delta/iota/projection/primitive migration open |
+| WHNF | Terminal/metadata/zeta/syntactic-lambda beta qualified; operation-owned function-normalization cache added | Stateful slice native resource/cache parity passes | Stateless slice strict generated smoke passes; stateful generated gate pending | Deep stateful workloads improve; small/collision regressions remain | Partial; full delta/iota/projection/primitive migration open |
 | Inference and DefEq | Terminal/metadata inference; collision-safe checked syntactic shortcut | Complete fallback and shortcut tests pass | Complete checker executes in generated JS | Metadata checks improve; general inference unqualified as DAG-native | Partial |
 | Inductive admission | Direct DAG request ingress, complete original admission internally | Existing admission tests pass | Real generated definition/ordinary-inductive checks pass | Full admission comparison pending | Not migrated internally |
 | Canonical self-hosting | Actual full production import closure; counts from manifest | Pinned Lean build passes | Current source/canonical checks pass; current final executable gates still running | Generator/runtime costs remain visible | Partial integration qualification |

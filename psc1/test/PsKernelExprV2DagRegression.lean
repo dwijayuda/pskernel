@@ -10,11 +10,52 @@ private def expect {α : Type} (value : Except String α) : IO α := do
   | .ok result => return result
   | .error error => throw (IO.userError error)
 
+private def resourceText : PsKernelResourceError → String
+  | .fuel => "fuel"
+  | .recursionDepth => "recursionDepth"
+  | .natSize => "natSize"
+  | .cancelled => "cancelled"
+  | .declarationLimit => "declarationLimit"
+  | .hostStack => "hostStack"
+
 private def errorText : PsKernelError → String
   | .rejectedInvalid message => "invalid:" ++ message
   | .declinedUnsupported message => "unsupported:" ++ message
-  | .resourceExhausted _ message => "resource:" ++ message
+  | .resourceExhausted kind message => "resource:" ++ resourceText kind ++ ":" ++ message
   | .internalError message => "internal:" ++ message
+
+private def sameResourceError : PsKernelResourceError → PsKernelResourceError → Bool
+  | .fuel, .fuel => true
+  | .recursionDepth, .recursionDepth => true
+  | .natSize, .natSize => true
+  | .cancelled, .cancelled => true
+  | .declarationLimit, .declarationLimit => true
+  | .hostStack, .hostStack => true
+  | _, _ => false
+
+private def samePublicError : PsKernelError → PsKernelError → Bool
+  | .rejectedInvalid a, .rejectedInvalid b => a == b
+  | .declinedUnsupported a, .declinedUnsupported b => a == b
+  | .resourceExhausted ra a, .resourceExhausted rb b =>
+      sameResourceError ra rb && a == b
+  | .internalError a, .internalError b => a == b
+  | _, _ => false
+
+private def errorComparatorRegression : IO Unit := do
+  let cases : List (PsKernelError × Nat) := [
+    (.rejectedInvalid "same", 0), (.declinedUnsupported "same", 1),
+    (.internalError "same", 2), (.resourceExhausted .fuel "same", 3),
+    (.resourceExhausted .recursionDepth "same", 4),
+    (.resourceExhausted .natSize "same", 5),
+    (.resourceExhausted .cancelled "same", 6),
+    (.resourceExhausted .declarationLimit "same", 7),
+    (.resourceExhausted .hostStack "same", 8)]
+  for (left, leftTag) in cases do
+    for (right, rightTag) in cases do
+      require "typed-error-comparator-tags"
+        (samePublicError left right == (leftTag == rightTag))
+  require "typed-error-comparator-message"
+    (!(samePublicError (.resourceExhausted .fuel "a") (.resourceExhausted .fuel "b")))
 
 private def expectPublic {α : Type} (value : Except PsKernelError α) : IO α := do
   match value with
@@ -40,7 +81,7 @@ private def sameCheck
     (legacy : Except PsKernelError PsKernelCheckedExpression)
     (dag : Except PsKernelError PsKernelDagBatchResult) : Bool :=
   match legacy, dag with
-  | .error a, .error b => errorText a == errorText b
+  | .error a, .error b => samePublicError a b
   | .ok a, .ok b =>
       match checkReply b with
       | some value =>
@@ -53,7 +94,7 @@ private def sameWhnf
     (legacy : Except PsKernelError PsKernelExpr)
     (dag : Except PsKernelError PsKernelDagBatchResult) : Bool :=
   match legacy, dag with
-  | .error a, .error b => errorText a == errorText b
+  | .error a, .error b => samePublicError a b
   | .ok a, .ok b =>
       match b.replies with
       | [.normalized value] => psKernelExprEqual a value
@@ -64,7 +105,7 @@ private def sameDefEq
     (legacy : Except PsKernelError Bool)
     (dag : Except PsKernelError PsKernelDagBatchResult) : Bool :=
   match legacy, dag with
-  | .error a, .error b => errorText a == errorText b
+  | .error a, .error b => samePublicError a b
   | .ok a, .ok b =>
       match b.replies with
       | [.equal value] => a == value
@@ -601,6 +642,7 @@ private def officialComparison : IO Unit := do
   IO.println "PSC1_V2_DAG_OFFICIAL_LEAN: PASS"
 
 def main : IO Unit := do
+  errorComparatorRegression
   constructorDecode
   semanticParity
   metadataParity

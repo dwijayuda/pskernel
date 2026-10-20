@@ -104,13 +104,13 @@ def psElabDoPure
 
 -- The selected do effect gives bare pure its result type. Ordinary
 -- local and global bindings retain precedence over this contextual spelling.
-def psElabDoPureArgument
-    (context : PsElabContext) : PsSyntaxTerm -> Option PsSyntaxTerm
+def psElabDoBuiltinArgument
+    (context : PsElabContext) (builtin : String) : PsSyntaxTerm -> Option PsSyntaxTerm
   | .app (.reference sourceName) [value] _ =>
       match sourceName.segments with
       | [segment] =>
-          if psStringEq segment "pure" then
-            let name := psRootName "pure"
+          if psStringEq segment builtin then
+            let name := psRootName builtin
             match psLocalFindUser context.localContext name with
             | some _ => none
             | none =>
@@ -121,20 +121,43 @@ def psElabDoPureArgument
       | _ => none
   | _ => none
 
+def psElabDoPureArgument (context : PsElabContext) : PsSyntaxTerm -> Option PsSyntaxTerm :=
+  psElabDoBuiltinArgument context "pure"
+
+def psElabDoErrorType : PsElabDoOps -> Except PsElabError PsExpr
+  | .except error => .ok error
+  | .compiler _ _ error => .ok error
+  | .identity _ => .error PsElabError.doUnsupportedEffect
+
+def psElabDoRaise (ops : PsElabDoOps) (context : PsElabContext)
+    (type value : PsExpr) : Except PsElabError PsElabTermResult := do
+  let term <- match ops with
+    | .identity _ => throw PsElabError.doUnsupportedEffect
+    | .except error => pure (psSelfHostExceptErrorOf error type value)
+    | .compiler reader state error =>
+        pure (psExprApplyMany (PsExpr.constE (psRootName "compilerThrow") [])
+          [reader, state, error, type, value])
+  psElabResolvedTerm context term (some (psElabDoType ops type))
+
 def psElabDoEffectTerm
     (elaborate :
       PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
       Except PsElabError PsElabTermResult)
     (ops : PsElabDoOps) (context : PsElabContext)
     (type : PsExpr) (action : PsSyntaxTerm) :
-    Except PsElabError PsElabTermResult :=
+    Except PsElabError PsElabTermResult := do
   match psElabDoPureArgument context action with
-  | none => elaborate context action (some (psElabDoType ops type))
   | some value =>
-      match elaborate context value (some type) with
-      | .error error => .error error
-      | .ok checked =>
-          psElabDoPure ops checked.context
+      let checked <- elaborate context value (some type)
+      psElabDoPure ops checked.context
+        (psMetaInstantiate checked.context.metaContext type) checked.term
+  | none =>
+      match psElabDoBuiltinArgument context "throw" action with
+      | none => elaborate context action (some (psElabDoType ops type))
+      | some value =>
+          let errorType <- psElabDoErrorType ops
+          let checked <- elaborate context value (some errorType)
+          psElabDoRaise ops checked.context
             (psMetaInstantiate checked.context.metaContext type) checked.term
 
 def psElabDoBind

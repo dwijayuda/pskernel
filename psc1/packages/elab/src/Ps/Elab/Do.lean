@@ -1,11 +1,12 @@
-import Ps.Elab.DoWhile
+import Ps.Elab.DoTry
 
-def psElabDoBodyWithState
+def psElabDoBodyWithExit
     (fuel : Nat)
     (elaborate :
       PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
       Except PsElabError PsElabTermResult)
-    (ops : PsElabDoOps) (result : PsExpr) :
+    (ops : PsElabDoOps) (returnType result : PsExpr)
+    (onReturn : PsElabDoReturn) (liftTerminal : Bool) :
     PsElabContext -> List PsElabDoMutable -> PsSyntaxTerm ->
     (PsElabContext -> List PsElabDoMutable ->
       Except PsElabError PsElabTermResult) ->
@@ -15,16 +16,15 @@ def psElabDoBodyWithState
       fun _ _ _ _ => .error PsElabError.fuelExhausted
   | remaining + 1 =>
       fun context state body finish =>
-        let smaller := psElabDoBodyWithState remaining elaborate ops result
+        let smaller := psElabDoBodyWithExit remaining elaborate ops returnType result onReturn liftTerminal
         let expected := some (psElabDoType ops result)
         match body with
         | PsSyntaxTerm.doEndE _ => finish context state
         | PsSyntaxTerm.doReturnE value _ =>
-            match elaborate context value (some result) with
+            match elaborate context value (some returnType) with
             | .error error => .error error
             | .ok valueResult =>
-                psElabDoPure ops valueResult.context
-                  (psMetaInstantiate valueResult.context.metaContext result) valueResult.term
+                onReturn valueResult.context valueResult.term
         | PsSyntaxTerm.letE sourceName annotation value rest _ =>
             match psSyntaxNameToName sourceName with
             | none => .error PsElabError.emptyName
@@ -132,9 +132,30 @@ def psElabDoBodyWithState
             psElabDoFor elaborate smaller ops result context state name collection loopBody rest finish
         | PsSyntaxTerm.doForRangeE name lower upper loopBody rest _ =>
             psElabDoForRange elaborate smaller ops result context state name lower upper loopBody rest finish
+        | PsSyntaxTerm.doTryE action name recovery rest _ =>
+            psElabDoTry
+              (fun innerResult innerReturn =>
+                psElabDoBodyWithExit remaining elaborate ops returnType
+                  innerResult innerReturn true)
+              smaller ops returnType result onReturn context state
+              action name recovery rest finish
         | PsSyntaxTerm.doWhileE condition loopBody rest _ =>
             psElabDoWhile elaborate smaller ops result context state condition loopBody rest finish
-        | _ => psElabDoEffectTerm elaborate ops context result body
+        | _ =>
+            if liftTerminal then
+              psElabDoLiftTerminal elaborate ops returnType result onReturn context body
+            else psElabDoEffectTerm elaborate ops context result body
+
+-- Preserve the established public controller entry point. A nested do term
+-- gets its own return context; direct nested statements are parser-spliced.
+def psElabDoBodyWithState
+    (fuel : Nat)
+    (elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (ops : PsElabDoOps) (result : PsExpr) : PsElabDoForNext :=
+  psElabDoBodyWithExit fuel elaborate ops result result
+    (fun current value => psElabDoPure ops current
+      (psMetaInstantiate current.metaContext result) value) false
 
 def psElabDoBody
     (fuel : Nat)

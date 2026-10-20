@@ -380,6 +380,7 @@ def psSh1SyntaxTermStep
   | PsSyntaxTerm.doEndE span
   | PsSyntaxTerm.doForE _ _ _ _ span
   | PsSyntaxTerm.doForRangeE _ _ _ _ _ span
+  | PsSyntaxTerm.doTryE _ _ _ _ span
   | PsSyntaxTerm.doWhileE _ _ _ span =>
       Except.error
         (psSh1SourceFailure "source-do-unsupported"

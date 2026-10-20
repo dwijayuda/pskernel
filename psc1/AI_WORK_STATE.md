@@ -1,3 +1,31 @@
+# PSC1 typed-error continuation — implementation awaiting CI
+
+Branch: `feature/psc1-typed-errors-20261020`. Base: qualified PR #166 head
+`1e63628169459539783450e28c641f3f70bf701f` (Linux run 39408221046).
+Existing PRs #162/#163/#165/#166 remain intact. No merge or publication.
+
+New source work: contextual typed throw and a single try/catch inside do.
+Both frontends share one AST and handler elaborator. The handler returns
+checked `Except ReturnValue MutableState` packets inside the base effect;
+only the base error is caught, and the following continuation runs outside
+that catch. Catch arms start from pre-try lexical mutable values. Existing
+checked CompilerM catch additionally restarts from its original effect state.
+Local/global bindings named throw keep precedence. No host exceptions,
+runtime traps, admission failures, timeouts or compiler resource errors
+become caught source values.
+
+Qualification is pending: native admission/IR/roundtrip/scope tests,
+exact-source pinned Lean oracle, checked and ordinary loops on all seven
+targets, minimum Python and failure/publication boundaries are wired into
+scoped Linux CI. No full self-host/census/fixed-point tests. `verified`
+remains fail-closed. No added axiom, runtime fuel or backend certificate.
+
+Read `docs/PSC1_TYPED_ERRORS.md`. Do not claim this new slice qualified
+until its own exact-head focused CI succeeds. Prior receipts below retain
+their original scope. All fourteen complete flags remain false.
+
+---
+
 # PSC1 current work state — Practical Core control flow and data
 
 Updated 2026-10-20. Branch: `feature/psc1-practical-control-data-20261020`.

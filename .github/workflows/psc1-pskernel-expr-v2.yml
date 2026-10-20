@@ -52,6 +52,7 @@ jobs:
           grep -q "PSC1_EXPR_V2_LIFT_SHARING: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_INSTANTIATE_DIFFERENTIAL: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_INSTANTIATE_SHARING: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
+          grep -q "PSC1_EXPR_V2_HEAD_REDUCTION: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_LIFT_DIFFERENTIAL: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
       - uses: actions/upload-artifact@v4
         if: always()
@@ -109,6 +110,11 @@ jobs:
         run: |
           set -euo pipefail
           lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PortableInstantiate.lean
+      - name: Check portable beta, zeta and metadata head steps through PSC1
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PortableReduction.lean
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

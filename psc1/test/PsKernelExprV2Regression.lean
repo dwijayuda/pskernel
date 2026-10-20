@@ -2,6 +2,7 @@ import Ps.KernelCore.Research.ExprV2Validation
 import Ps.KernelCore.Research.ExprV2Lift
 import Ps.KernelCore.Research.ExprV2PortableLift
 import Ps.KernelCore.Research.ExprV2PortableInstantiate
+import Ps.KernelCore.Research.ExprV2PortableReduction
 import Ps.KernelCore.Core.Substitution.Instantiate
 import Ps.KernelCore.Core.Substitution.Lift
 import Ps.KernelCore.Research.ExprV2ResearchAll
@@ -763,6 +764,66 @@ private def testPortableSharedInstantiation : IO Unit := do
       | _ => false)
   IO.println s!"PSC1_EXPR_V2_INSTANTIATE_SHARING: PASS input_nodes={arena.size} output_nodes={resultArena.size}"
 
+
+
+/- One-step beta/zeta/mdata semantic parity, without claiming full WHNF. -/
+private def testPortableHeadReduction : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "head"
+  let (a0,b0) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let (a1,b1) ← expectV2 (psKernelExprV2ChunkedMkBVar a0 1)
+  let (a2,sort) ← expectV2
+    (psKernelExprV2ChunkedMkSort a1 PsKernelLevel.zero)
+  let (a3,lam) ← expectV2
+    (psKernelExprV2ChunkedMkLam a2 name sort b0 PsKernelBinderInfo.default)
+  let (a4,beta) ← expectV2
+    (psKernelExprV2ChunkedMkApp a3 lam sort)
+  let (a5,zeta) ← expectV2
+    (psKernelExprV2ChunkedMkLet a4 name sort sort b0 false)
+  let (a6,mdata) ← expectV2
+    (psKernelExprV2ChunkedMkMData a5 77 beta)
+  let (a7,neutral) ← expectV2
+    (psKernelExprV2ChunkedMkApp a6 sort sort)
+  let (a8,outerLam) ← expectV2
+    (psKernelExprV2ChunkedMkLam a7 name sort b1 PsKernelBinderInfo.default)
+  let (a9,outerBeta) ← expectV2
+    (psKernelExprV2ChunkedMkApp a8 outerLam sort)
+  let (a10,outerZeta) ← expectV2
+    (psKernelExprV2ChunkedMkLet a9 name sort sort b1 false)
+  let cases : List (String × Nat × PsKernelExpr) := [
+    ("beta-identity",beta,PsKernelExpr.sort PsKernelLevel.zero),
+    ("zeta-identity",zeta,PsKernelExpr.sort PsKernelLevel.zero),
+    ("metadata-one-step",mdata,
+      PsKernelExpr.app
+        (PsKernelExpr.lam name
+          (PsKernelExpr.sort PsKernelLevel.zero)
+          (PsKernelExpr.bvar 0) PsKernelBinderInfo.default)
+        (PsKernelExpr.sort PsKernelLevel.zero)),
+    ("neutral-app",neutral,
+      PsKernelExpr.app
+        (PsKernelExpr.sort PsKernelLevel.zero)
+        (PsKernelExpr.sort PsKernelLevel.zero)),
+    ("beta-outer-decrement",outerBeta,PsKernelExpr.bvar 0),
+    ("zeta-outer-decrement",outerZeta,PsKernelExpr.bvar 0),
+    ("sort",sort,PsKernelExpr.sort PsKernelLevel.zero)
+  ]
+  for (label,root,expected) in cases do
+    let (resultArena,resultId) ← expectV2
+      (psKernelExprV2PortableHeadStepChecked a10 root)
+    let actual ← expectV2
+      (psKernelExprV2ChunkedDecode resultArena resultId)
+    requireV2 ("head-step-"+label)
+      (psKernelExprEq actual expected && psKernelExprEqual actual expected)
+  let (neutralArena,neutralRoot) ← expectV2
+    (psKernelExprV2PortableHeadStepChecked a10 neutral)
+  requireV2 "head-step-neutral-identity"
+    (neutralRoot == neutral && neutralArena.size == a10.size)
+  requireV2 "head-step-invalid-root"
+    (match psKernelExprV2PortableHeadStepChecked a10 99999 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_HEAD_REDUCTION: PASS cases=7"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -777,4 +838,5 @@ def main : IO Unit := do
   testSharedLift
   testPortableInstantiation
   testPortableSharedInstantiation
+  testPortableHeadReduction
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

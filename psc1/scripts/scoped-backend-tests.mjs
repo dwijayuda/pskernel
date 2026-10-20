@@ -254,15 +254,15 @@ try {
     assert.match(command('wasmtime', ['run', '--invoke', 'second(false, true)', component]), /true/);
   });
   for (const [syntax, body] of [
-    ['lean', 'def applyBool (f : Bool -> Bool) (x : Bool) : Bool := f x\n'],
-    ['ps', 'def applyBool(f : Bool -> Bool, x : Bool) : Bool := f(x)\n'],
+    ['lean', 'def applybool (f : Bool -> Bool) (x : Bool) : Bool := f x\n'],
+    ['ps', 'def applybool(f : Bool -> Bool, x : Bool) : Bool := f(x)\n'],
   ]) {
     await test(`${syntax} component exports refuse function parameters`, () => {
       const input = source(`function-parameter.${syntax}`, body);
       const file = output(`function-parameter-${syntax}/module.wasm`);
       const message = reject(native, ['build', input, '--target', 'wasm-component',
-        '--export', 'applyBool', '--out', file]);
-      assert.match(message, /PSC1_PUBLIC_TARGET_SIGNATURE_UNQUALIFIED: wasm-component:applyBool/);
+        '--export', 'applybool', '--out', file]);
+      assert.match(message, /PSC1_PUBLIC_TARGET_SIGNATURE_UNQUALIFIED: wasm-component:applybool/);
       for (const suffix of ['', '.bundle.json']) assert.equal(fs.existsSync(file + suffix), false);
       for (const extension of ['.wit', '.wat', '.core.wasm', '.core.wat']) {
         assert.equal(fs.existsSync(file.slice(0, -5) + extension), false);

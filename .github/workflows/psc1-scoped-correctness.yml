@@ -144,6 +144,7 @@ jobs:
           export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
           node scripts/scoped-backend-tests.mjs
       - name: Execute small generic, symbol-identity and recursion source regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -151,9 +152,11 @@ jobs:
           export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
           node scripts/scoped-source-edge-tests.mjs
       - name: Execute shared target planning, independent TS JS and publication regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: node scripts/backend-architecture-tests.mjs
       - name: Execute Practical Core admission, IR and real target regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -175,9 +178,11 @@ jobs:
         working-directory: psc1
         run: node scripts/ordinary-while-conformance-tests.mjs
       - name: Execute Python and PHP ABI, recursion and failure boundaries
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: node scripts/script-backend-tests.mjs
       - name: Execute full scripting and runtime corpus on minimum Python
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -191,6 +196,7 @@ jobs:
           node scripts/ordinary-while-conformance-tests.mjs
           node scripts/script-backend-tests.mjs
       - name: Pack and qualify installed native npm toolchain and real source libraries
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: node scripts/npm-native-distribution.mjs
       - name: Consolidate exact-commit seven-target and package qualification

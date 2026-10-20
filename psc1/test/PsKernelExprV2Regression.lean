@@ -1469,6 +1469,109 @@ private def testPagedSharedAppSpines : IO Unit := do
       | Option.none => false)
   IO.println "PSC1_EXPR_V2_PAGED_SPINE: PASS nodes=1025"
 
+
+/-
+Research-only independent materializer to compare a validated paged DAG
+against the exact legacy expression oracle. Never use it in the fast path.
+-/
+private def psKernelExprV2DecodePagedForTest
+    (source : PsKernelExprV2PagedArena) (root : Nat) :
+    IO PsKernelExpr := do
+  let paged ← expectV2 (psKernelExprV2PagedValidate source)
+  let mut flat := psKernelExprV2Empty
+  for id in [:paged.size] do
+    let node ← expectV2 (psKernelExprV2PagedRequire paged id)
+    flat := (psKernelExprV2Push flat node).fst
+  expectV2 (psKernelExprV2Decode flat root)
+
+private def testPagedLiftDifferential : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "pagedLift"
+  let mut c := psKernelExprV2ChunkedEmpty
+  let mut p := psKernelExprV2PagedEmpty
+  let (c0,b0) ← expectV2 (psKernelExprV2ChunkedMkBVar c 0)
+  let (p0,q0) ← expectV2 (psKernelExprV2PagedMkBVar p 0)
+  c := c0
+  p := p0
+  let (c1,b2) ← expectV2 (psKernelExprV2ChunkedMkBVar c 2)
+  let (p1,q2) ← expectV2 (psKernelExprV2PagedMkBVar p 2)
+  c := c1
+  p := p1
+  let (c2,sort) ← expectV2 (psKernelExprV2ChunkedMkSort c PsKernelLevel.zero)
+  let (p2,pageSort) ← expectV2 (psKernelExprV2PagedMkSort p PsKernelLevel.zero)
+  c := c2
+  p := p2
+  let (c3,app) ← expectV2 (psKernelExprV2ChunkedMkApp c b0 b2)
+  let (p3,pageApp) ← expectV2 (psKernelExprV2PagedMkApp p q0 q2)
+  c := c3
+  p := p3
+  let (c4,lam) ← expectV2
+    (psKernelExprV2ChunkedMkLam c name sort app PsKernelBinderInfo.default)
+  let (p4,pageLam) ← expectV2
+    (psKernelExprV2PagedMkLam p name pageSort pageApp PsKernelBinderInfo.default)
+  c := c4
+  p := p4
+  let (c5,piNode) ← expectV2
+    (psKernelExprV2ChunkedMkForall c name sort app PsKernelBinderInfo.implicit)
+  let (p5,pagePi) ← expectV2
+    (psKernelExprV2PagedMkForall p name pageSort pageApp PsKernelBinderInfo.implicit)
+  c := c5
+  p := p5
+  let (c6,letE) ← expectV2
+    (psKernelExprV2ChunkedMkLet c name sort app b0 false)
+  let (p6,pageLet) ← expectV2
+    (psKernelExprV2PagedMkLet p name pageSort pageApp q0 false)
+  c := c6
+  p := p6
+  let (c7,mdata) ← expectV2 (psKernelExprV2ChunkedMkMData c 17 app)
+  let (p7,pageMData) ← expectV2 (psKernelExprV2PagedMkMData p 17 pageApp)
+  c := c7
+  p := p7
+  let (c8,proj) ← expectV2 (psKernelExprV2ChunkedMkProj c name 1 mdata)
+  let (p8,pageProj) ← expectV2 (psKernelExprV2PagedMkProj p name 1 pageMData)
+  c := c8
+  p := p8
+  let cases : List (String × Nat × Nat) := [
+    ("bvar0",b0,q0),("bvar2",b2,q2),("sort",sort,pageSort),
+    ("app",app,pageApp),("lambda",lam,pageLam),
+    ("forall",piNode,pagePi),("let",letE,pageLet),
+    ("metadata",mdata,pageMData),("projection",proj,pageProj)
+  ]
+  let _ ← expectV2 (psKernelExprV2PortableValidate c)
+  let _ ← expectV2 (psKernelExprV2PagedValidate p)
+  for (label,cId,pId) in cases do
+    let old ← expectV2 (psKernelExprV2ChunkedDecode c cId)
+    for cutoff in [0,1,2,3] do
+      for amount in [0,1,2] do
+        let expected := psKernelExprLiftLooseBVars old cutoff amount
+        let (newChunk,chunkId) ← expectV2
+          (psKernelExprV2PortableLiftChecked c cId cutoff amount)
+        let (newPaged,pageId) ← expectV2
+          (psKernelExprV2PagedLiftChecked p pId cutoff amount)
+        let slow ← expectV2 (psKernelExprV2ChunkedDecode newChunk chunkId)
+        let fast ← psKernelExprV2DecodePagedForTest newPaged pageId
+        requireV2 s!"paged-lift-legacy-{label}-{cutoff}-{amount}"
+          (psKernelExprEqual fast expected &&
+            psKernelExprEq fast expected)
+        requireV2 s!"paged-lift-chunked-{label}-{cutoff}-{amount}"
+          (psKernelExprEqual fast slow && psKernelExprEq fast slow)
+        if amount == 0 then
+          requireV2 s!"paged-lift-preserves-zero-{label}"
+            (newPaged.size == p.size && pageId == pId)
+  requireV2 "paged-lift-invalid-root"
+    (match psKernelExprV2PagedLiftChecked p 99999 0 1 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let forgedSource ← expectV2 (psKernelExprV2PagedRequire p b0)
+  let invalid : PsKernelExprV2Entry := {
+    forgedSource with looseRange := 0
+  }
+  let (forged,forgedId) := psKernelExprV2PagedPush psKernelExprV2PagedEmpty invalid
+  requireV2 "paged-lift-forged-metadata-rejected"
+    (match psKernelExprV2PagedLiftChecked forged forgedId 0 1 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_PAGED_LIFT: PASS cases=108"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -1482,6 +1585,7 @@ def main : IO Unit := do
   testPagedSmartConstructors
   testPagedArena
   testPagedSharedAppSpines
+  testPagedLiftDifferential
   testChunkedLiftDifferential
   testSharedLift
   testPortableInstantiation

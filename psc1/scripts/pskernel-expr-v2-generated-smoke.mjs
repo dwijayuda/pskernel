@@ -47,6 +47,7 @@ const pagedEmptyWithLimit=load("psKernelExprV2PagedEmptyWithLimit");
 const pagedPush=load("psKernelExprV2PagedPush");
 const pagedFind=load("psKernelExprV2PagedFind");
 const pagedValidate=load("psKernelExprV2PagedValidate");
+const pagedLift=load("psKernelExprV2PagedLiftChecked");
 const pagedMkBVar=load("psKernelExprV2PagedMkBVar");
 const pagedMkApp=load("psKernelExprV2PagedMkApp");
 const legacyExpr=load("PsKernelExpr");
@@ -568,6 +569,43 @@ for(const depth of [1024,4096,8192]){
   }
 }
 console.log("PSC1_EXPR_V2_SPINE_TIMINGS "+JSON.stringify(spineMeasures));
+
+// Pilot port of M3 binder lifting from the linked-chunk arena to pages.
+// Compare identical shared App DAGs and checked output metadata.
+const pagedLiftMeasurements=[];
+for(const depth of [128,512,1024]){
+  const chunkGraph=buildSharedSpine("chunked",depth);
+  const pageGraph=buildSharedSpine("paged",depth);
+  let expectedHash=null;
+  for(const kind of ["chunked","paged","paged","chunked"]){
+    const isPaged=kind==="paged";
+    const graph=isPaged?pageGraph:chunkGraph;
+    const start=performance.now();
+    const reduced=accepted(
+      (isPaged?pagedLift:portableLift)(graph.arena,graph.root,0n,2n),
+      "paged-lift-"+kind+"-"+depth);
+    const elapsed=performance.now()-start;
+    const value=acceptedOption(
+      (isPaged?pagedFind:chunkedFind)(reduced.fst,reduced.snd),
+      "paged-lift-root-"+kind);
+    if(value.depth!==BigInt(depth+1)||value.looseRange!==3n||
+       value.hasFVar!==false||reduced.fst.size>graph.arena.size+BigInt(depth+1))
+      throw Error("PSC1_V2_PAGED_LIFT_INVALID_RESULT "+kind+" "+depth);
+    const signature=String(value.hash)+"-"+String(value.depth)+"-"+String(value.looseRange);
+    if(expectedHash===null)expectedHash=signature;
+    if(signature!==expectedHash)
+      throw Error("PSC1_V2_PAGED_LIFT_METADATA_DIFFERENCE "+kind+" "+depth);
+    pagedLiftMeasurements.push({
+      kind,depth,ms:Number(elapsed.toFixed(3)),
+      input_nodes:Number(graph.arena.size),output_nodes:Number(reduced.fst.size),
+      checksum:signature
+    });
+  }
+}
+const pagedLiftForged=pagedLift(forgedPaged,0n,0n,1n);
+demand(pagedLiftForged&&"error" in pagedLiftForged,"paged-lift-forged-rejected");
+console.log("PSC1_EXPR_V2_PAGED_LIFT_TIMINGS "+JSON.stringify(pagedLiftMeasurements));
+
 
 
 console.log("PSC1_EXPR_V2_JS_SUMMARY "+JSON.stringify({

@@ -35,14 +35,16 @@ def psSyntaxAppendNames (left : List PsSyntaxName) : List PsSyntaxName -> List P
       let smaller : List PsSyntaxName -> List PsSyntaxName := psSyntaxAppendNames rest;
       fun (right : List PsSyntaxName) => List.cons name (smaller right)
 
-def psSyntaxBindingPatternNames : PsSyntaxBindingPattern -> List PsSyntaxName
+def psSyntaxBindingPatternNames (pattern : PsSyntaxBindingPattern) : List PsSyntaxName :=
+  match pattern with
   | .name name => [name]
   | .wildcard _ => []
   | .unit _ => []
   | .pair first second _ =>
       psSyntaxAppendNames (psSyntaxBindingPatternNames first) (psSyntaxBindingPatternNames second)
 
-def psSyntaxBindingPatternSize : PsSyntaxBindingPattern -> Nat
+def psSyntaxBindingPatternSize (pattern : PsSyntaxBindingPattern) : Nat :=
+  match pattern with
   | .name _ => 1
   | .wildcard _ => 1
   | .unit _ => 1
@@ -185,22 +187,37 @@ def psSyntaxNamespaceAppend (left : List String) (right : List String) : List St
 def psSyntaxNamespaceName (namespacePrefix : List String) (name : PsSyntaxName) : PsSyntaxName :=
   PsSyntaxName.mk (psSyntaxNamespaceAppend namespacePrefix name.segments) name.span
 
-def psSyntaxDeclarationQualify (namespacePrefix : List String) :
-    PsSyntaxDeclaration -> PsSyntaxDeclaration
-  | .scopedDecl path declaration =>
-      psSyntaxDeclarationQualify (psSyntaxNamespaceAppend namespacePrefix path) declaration
-  | .definition name binders type value span =>
-      PsSyntaxDeclaration.definition (psSyntaxNamespaceName namespacePrefix name) binders type value span
-  | .partialDefinition name binders type value span =>
-      PsSyntaxDeclaration.partialDefinition (psSyntaxNamespaceName namespacePrefix name) binders type value span
-  | .theoremDecl name binders type value span =>
-      PsSyntaxDeclaration.theoremDecl (psSyntaxNamespaceName namespacePrefix name) binders type value span
-  | .inductiveDecl name params type constructors span =>
-      PsSyntaxDeclaration.inductiveDecl (psSyntaxNamespaceName namespacePrefix name) params type constructors span
-  | .structureDecl name params fields span =>
-      PsSyntaxDeclaration.structureDecl (psSyntaxNamespaceName namespacePrefix name) params fields span
+-- Recurse structurally on the declaration before supplying the namespace.
+def psSyntaxDeclarationQualifyWorker (source : PsSyntaxDeclaration) :
+    List String -> PsSyntaxDeclaration :=
+  match source with
+  | PsSyntaxDeclaration.scopedDecl path declaration =>
+      let smaller : List String -> PsSyntaxDeclaration :=
+        psSyntaxDeclarationQualifyWorker declaration;
+      fun (namespacePrefix : List String) =>
+        smaller (psSyntaxNamespaceAppend namespacePrefix path)
+  | PsSyntaxDeclaration.definition name binders type value span =>
+      fun (namespacePrefix : List String) =>
+        PsSyntaxDeclaration.definition (psSyntaxNamespaceName namespacePrefix name) binders type value span
+  | PsSyntaxDeclaration.partialDefinition name binders type value span =>
+      fun (namespacePrefix : List String) =>
+        PsSyntaxDeclaration.partialDefinition (psSyntaxNamespaceName namespacePrefix name) binders type value span
+  | PsSyntaxDeclaration.theoremDecl name binders type value span =>
+      fun (namespacePrefix : List String) =>
+        PsSyntaxDeclaration.theoremDecl (psSyntaxNamespaceName namespacePrefix name) binders type value span
+  | PsSyntaxDeclaration.inductiveDecl name params type constructors span =>
+      fun (namespacePrefix : List String) =>
+        PsSyntaxDeclaration.inductiveDecl (psSyntaxNamespaceName namespacePrefix name) params type constructors span
+  | PsSyntaxDeclaration.structureDecl name params fields span =>
+      fun (namespacePrefix : List String) =>
+        PsSyntaxDeclaration.structureDecl (psSyntaxNamespaceName namespacePrefix name) params fields span
 
-def psSyntaxDeclarationSpan : PsSyntaxDeclaration -> PsSourceSpan
+def psSyntaxDeclarationQualify (namespacePrefix : List String)
+    (source : PsSyntaxDeclaration) : PsSyntaxDeclaration :=
+  psSyntaxDeclarationQualifyWorker source namespacePrefix
+
+def psSyntaxDeclarationSpan (source : PsSyntaxDeclaration) : PsSourceSpan :=
+  match source with
   | .definition _ _ _ _ span => span
   | .partialDefinition _ _ _ _ span => span
   | .theoremDecl _ _ _ _ span => span

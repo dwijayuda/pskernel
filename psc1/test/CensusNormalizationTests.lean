@@ -26,6 +26,24 @@ private def testPatternNames : IO Unit := do
     (qualified.segments == ["Outer", "Inner", "same"] &&
       qualified.span.start.byteOffset == 2 && qualified.span.stop.byteOffset == 3)
 
+private def testScopedDeclaration : IO Unit := do
+  let span := PsSourceSpan.mk (PsSourcePos.mk 10 2 1) (PsSourcePos.mk 40 3 1)
+  let name := PsSyntaxName.mk ["value"] span
+  let term := PsSyntaxTerm.natural "1" span
+  let source := PsSyntaxDeclaration.scopedDecl ["Outer"]
+    (.scopedDecl ["Inner"] (.definition name [] term term span))
+  let qualified := psSyntaxDeclarationQualify ["Root"] source
+  require "nested declaration scopes accumulate in order"
+    (match qualified with
+    | .definition resultName binders _ _ resultSpan =>
+        resultName.segments == ["Root", "Outer", "Inner", "value"] &&
+        binders.isEmpty && resultSpan.start.byteOffset == 10
+    | _ => false)
+  require "scoped declaration span is the leaf declaration span"
+    ((psSyntaxDeclarationSpan source).stop.byteOffset == 40)
+  require "binding pattern size preserves nested structural counts"
+    (psSyntaxBindingPatternSize (.pair (.name name) (.pair (.unit span) (.wildcard span) span) span) == 5)
+
 private def testPreludeClosure : IO Unit := do
   let rootName := PsName.str .anonymous "root"
   let aName := PsName.str .anonymous "a"
@@ -54,5 +72,6 @@ private def testPreludeClosure : IO Unit := do
 
 def main : IO Unit := do
   testPatternNames
+  testScopedDeclaration
   testPreludeClosure
   IO.println "PSC1_CENSUS_NORMALIZATION: pattern and runtime closure behavior passed"

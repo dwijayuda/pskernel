@@ -3,6 +3,7 @@ import Ps.KernelCore.Research.ExprV2Lift
 import Ps.KernelCore.Research.ExprV2PortableLift
 import Ps.KernelCore.Research.ExprV2PortableInstantiate
 import Ps.KernelCore.Research.ExprV2PortableReduction
+import Ps.KernelCore.Research.ExprV2PortableHeadSequence
 import Ps.KernelCore.Core.Substitution.Instantiate
 import Ps.KernelCore.Core.Substitution.Lift
 import Ps.KernelCore.Research.ExprV2ResearchAll
@@ -824,6 +825,40 @@ private def testPortableHeadReduction : IO Unit := do
       | Except.ok _ => false)
   IO.println "PSC1_EXPR_V2_HEAD_REDUCTION: PASS cases=7"
 
+
+
+private def testPortableHeadSequence : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "sequence"
+  let (a0,b0) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let (a1,sort) ← expectV2
+    (psKernelExprV2ChunkedMkSort a0 PsKernelLevel.zero)
+  let (a2,lam) ← expectV2
+    (psKernelExprV2ChunkedMkLam a1 name sort b0 PsKernelBinderInfo.default)
+  let (a3,beta) ← expectV2
+    (psKernelExprV2ChunkedMkApp a2 lam sort)
+  let (a4,metadata) ← expectV2
+    (psKernelExprV2ChunkedMkMData a3 7 beta)
+  let (a5,outerLet) ← expectV2
+    (psKernelExprV2ChunkedMkLet a4 name sort sort metadata false)
+  let (doneArena,doneRoot) ← expectV2
+    (psKernelExprV2PortableHeadSequenceChecked 4 a5 outerLet)
+  requireV2 "head-sequence-composed-normal-form"
+    (doneRoot == sort && doneArena.size == a5.size)
+  requireV2 "head-sequence-rejects-insufficient-fuel"
+    (match psKernelExprV2PortableHeadSequenceChecked 3 a5 outerLet with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let (neutral,neutralRoot) ← expectV2
+    (psKernelExprV2PortableHeadSequenceChecked 1 a5 sort)
+  requireV2 "head-sequence-neutral-fuel-one"
+    (neutralRoot == sort && neutral.size == a5.size)
+  requireV2 "head-sequence-zero-fuel-rejected"
+    (match psKernelExprV2PortableHeadSequenceChecked 0 a5 sort with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_HEAD_SEQUENCE: PASS"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -839,4 +874,5 @@ def main : IO Unit := do
   testPortableInstantiation
   testPortableSharedInstantiation
   testPortableHeadReduction
+  testPortableHeadSequence
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

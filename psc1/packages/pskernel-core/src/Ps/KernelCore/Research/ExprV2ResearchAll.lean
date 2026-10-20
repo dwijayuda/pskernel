@@ -5,6 +5,7 @@ import Ps.KernelCore.Research.ExprV2PortableValidation
 import Ps.KernelCore.Research.ExprV2PortableLift
 import Ps.KernelCore.Research.ExprV2PortableInstantiate
 import Ps.KernelCore.Research.ExprV2PortableReduction
+import Ps.KernelCore.Research.ExprV2PortableHeadSequence
 
 /- Test-only composition root to compile every V2 storage model with the real PSC1 compiler. -/
 def psKernelExprV2ResearchAllPresent : Bool := true

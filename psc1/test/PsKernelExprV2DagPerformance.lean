@@ -84,6 +84,34 @@ private def measureDagPublicChecks (env : Lean.Environment) (session : PsKernelK
   unless correct == calls do throw (IO.userError "DAG_PERF_INCOMPLETE")
   IO.println s!"PSC1_DAG_NATIVE_SAMPLE variant={variant} shape={shape} depth={depth} calls={calls} ms={stop-start} all_correct=true"
 
+private def measureDagPublicWhnf (session : PsKernelKernelSession)
+    (variant shape : String) (depth calls : Nat)
+    (fixtures : Array (PsKernelExpr × Lean.Expr × PsKernelExprV2PagedArena × Nat)) :
+    IO Unit := do
+  let mut correct := 0
+  let start ← IO.monoMsNow
+  for i in [:calls] do
+    match fixtures[i % fixtures.size]? with
+    | none => throw (IO.userError "DAG_PERF_WHNF_FIXTURE_MISSING")
+    | some (term, _, arena, root) =>
+        let value ← if variant == "legacy" then
+          match psKernelV1Whnf session [] .safe term with
+          | .ok value => pure value
+          | .error _ => throw (IO.userError "DAG_PERF_LEGACY_WHNF_REJECTED")
+        else
+          match psKernelV1RunDag session [] .safe arena [.whnf root] with
+          | .ok result =>
+              match result.replies with
+              | [.normalized value] => pure value
+              | _ => throw (IO.userError "DAG_PERF_DAG_WHNF_REPLY")
+          | .error _ => throw (IO.userError "DAG_PERF_DAG_WHNF_REJECTED")
+        unless psKernelExprEqual value s0 do
+          throw (IO.userError "DAG_PERF_WRONG_WHNF")
+        correct := correct + 1
+  let stop ← IO.monoMsNow
+  unless correct == calls do throw (IO.userError "DAG_PERF_WHNF_INCOMPLETE")
+  IO.println s!"PSC1_DAG_NATIVE_WHNF_SAMPLE variant={variant} shape={shape} depth={depth} calls={calls} ms={stop-start} all_correct=true"
+
 def main : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let session ← match psKernelKernelSessionEmpty
@@ -102,4 +130,12 @@ def main : IO Unit := do
     IO.println s!"PSC1_DAG_NATIVE_CONSTRUCTION shape={shape} depth={depth} pool=5 combined_inputs_ms={stop-start}"
     for variant in ["lean", "legacy", "dag", "dag", "legacy", "lean"] do
       measureDagPublicChecks env session variant shape depth calls fixtures
+  for (metadata, depth, calls) in [
+      (true, 96, 300), (false, 32, 100), (false, 96, 50), (false, 192, 20)] do
+    let shape := if metadata then "metadata" else "zeta"
+    let mut fixtures := #[]
+    for tag in [:5] do
+      fixtures := fixtures.push (← mkTerms metadata depth (tag * 1000))
+    for variant in ["legacy", "dag", "dag", "legacy"] do
+      measureDagPublicWhnf session variant shape depth calls fixtures
   IO.println "PSC1_V2_DAG_NATIVE_BENCH: PASS"

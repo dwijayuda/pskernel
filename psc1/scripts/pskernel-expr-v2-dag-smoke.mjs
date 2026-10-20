@@ -258,6 +258,164 @@ for(const id of [0n,63n,64n,127n,128n,255n,256n]){
   must(exact(accepted(decoded(pagedDecoded,id),"page-boundary"),E.bvar(id)),
     "page-boundary-"+id);
 }
+// Portable DAG transformations: exact legacy parity and scoped memoization.
+{
+  const T=get("PsKernelExprV2Transform");
+  const inst=get("psKernelExprV2PagedInstantiateAtChecked");
+  const instRev=get("psKernelExprV2PagedInstantiateRevChecked");
+  const abstract=get("psKernelExprV2PagedAbstractFVarsAtChecked");
+  const levels=get("psKernelExprV2PagedInstantiateLevelParamsChecked");
+  const bounded=get("psKernelExprV2TransformCheckedWithFuel");
+  const originalInst=get("psKernelExprInstantiateAt");
+  const originalRev=get("psKernelExprInstantiateRev");
+  const originalAbstract=get("psKernelExprAbstractFVarsAt");
+  // These definitions have one explicit argument followed by one lambda
+  // containing all remaining binders. Apply both generated stages.
+  const originalInstFuel=(fuel,term,start,values,offset)=>
+    get("psKernelExprInstantiateAtChangedWithFuel")(fuel)(term,start,values,offset).fst;
+  const originalAbstractFuel=(fuel,term,names,offset)=>
+    get("psKernelExprAbstractFVarsAtChangedWithFuel")(fuel)(term,names,offset).fst;
+  const originalLevels=(term,params,values)=>
+    get("psKernelExprInstantiateLevelParams")(term)(params,values);
+  let comparisons=0;
+  const readGraph=(graph,label)=>accepted(
+    decoded(accepted(decode(graph.fst),label+"-decode"),graph.snd),label+"-root");
+  const parity=(label,result,expected)=>{
+    if(!expected||typeof expected!=="object")throw Error("PSC1_TRANSFORM_UNAPPLIED_ORACLE "+label);
+    const graph=accepted(result,label);
+    must(exact(readGraph(graph,label),expected)===true,label);
+    comparisons++;
+    return graph;
+  };
+  let ta=arena;
+  const append=(kind,...args)=>{
+    const r=mk(ta,kind,...args);ta=r.fst;return r.snd;
+  };
+  const b2=append("BVar",2n);
+  const u=name("transform-u"),v=name("transform-v");
+  const uSort=append("Sort",L.param(u));
+  const uConst=append("Const",name("Poly"),list([L.param(u),L.succ(L.param(u))]));
+  const body=append("App",b2,ids.f);
+  const inner=append("Lam",name("inner"),uSort,body,B.instImplicit);
+  const nested=append("Forall",name("outer"),uSort,inner,B.strictImplicit);
+  const nestedLet=append("Let",name("let"),uSort,b2,inner,true);
+  const fixtureCases=Object.entries(terms).map(([key,term])=>({key,root:ids[key],term}));
+  fixtureCases.push(
+    {key:"universe-sort",root:uSort,term:E.sort(L.param(u))},
+    {key:"universe-constant",root:uConst,term:E.const(name("Poly"),list([L.param(u),L.succ(L.param(u))]))},
+    {key:"nested-binders",root:nested,term:E.forallE(name("outer"),E.sort(L.param(u)),
+      E.lam(name("inner"),E.sort(L.param(u)),E.app(E.bvar(2n),terms.f),B.instImplicit),B.strictImplicit)},
+    {key:"nested-let",root:nestedLet,term:E.letE(name("let"),E.sort(L.param(u)),E.bvar(2n),
+      E.lam(name("inner"),E.sort(L.param(u)),E.app(E.bvar(2n),terms.f),B.instImplicit),true)}
+  );
+  const substitutions=[
+    {ids:[],terms:[]},
+    {ids:[b2],terms:[E.bvar(2n)]},
+    {ids:[ids.s0,b2,ids.f],terms:[sort0,E.bvar(2n),terms.f]}
+  ];
+  const names=list([name("f"),name("unused"),name("f")]);
+  for(const fixture of fixtureCases){
+    for(let variant=0;variant<substitutions.length;variant++){
+      const values=substitutions[variant],refs=list(values.ids),replacements=list(values.terms);
+      for(const start of [0n,1n])for(const offset of [0n,2n]){
+        parity("transform-multi-"+fixture.key+"-"+variant+"-"+start+"-"+offset,
+          inst(ta,fixture.root,start,refs,offset),
+          originalInst(fixture.term,start,replacements,offset));
+      }
+      parity("transform-reverse-"+fixture.key+"-"+variant,
+        instRev(ta,fixture.root,refs),originalRev(fixture.term,replacements));
+      for(const fuel of [0n,1n,3n]){
+        const result=parity("transform-bounded-multi-"+fixture.key+"-"+variant+"-"+fuel,
+          bounded(fuel,T.instantiate(0n,refs),ta,fixture.root,1n),
+          originalInstFuel(fuel,fixture.term,0n,replacements,1n));
+        if(fuel===0n)must(result.snd===fixture.root&&result.fst.size===ta.size,
+          "transform-zero-budget-retains-subtree-"+fixture.key+"-"+variant);
+      }
+    }
+    for(const offset of [0n,2n]){
+      parity("transform-abstract-"+fixture.key+"-"+offset,
+        abstract(ta,fixture.root,names,offset),originalAbstract(fixture.term,names,offset));
+    }
+    for(const fuel of [0n,1n,3n]){
+      parity("transform-bounded-abstract-"+fixture.key+"-"+fuel,
+        bounded(fuel,T.abstractFVars(names),ta,fixture.root,1n),
+        originalAbstractFuel(fuel,fixture.term,names,1n));
+    }
+    for(const [label,params,values] of [
+      ["empty",nil,nil],
+      ["replace",list([u]),list([L.zero])],
+      ["missing-value",list([u,v]),list([L.succ(L.zero)])]
+    ]){
+      const transformed=parity("transform-levels-"+fixture.key+"-"+label,
+        levels(ta,fixture.root,params,values),originalLevels(fixture.term,params,values));
+      if(label==="empty")must(transformed.snd===fixture.root&&transformed.fst.size===ta.size,
+        "transform-unchanged-levels-retain-id-"+fixture.key);
+    }
+  }
+  // One child occurs at two depths. Partial results must not cross budgets.
+  let sx=mk(empty,"BVar",0n),sy=mk(sx.fst,"BVar",1n);
+  const shared=mk(sy.fst,"App",sx.snd,sy.snd);
+  const wrapped=mk(shared.fst,"MData",7n,shared.snd);
+  const replacement=mk(wrapped.fst,"Sort",L.zero);
+  const sharedTree=E.app(E.bvar(0n),E.bvar(1n));
+  for(const reverse of [false,true]){
+    const root=mk(replacement.fst,"App",reverse?wrapped.snd:shared.snd,reverse?shared.snd:wrapped.snd);
+    const term=E.app(reverse?E.mdata(7n,sharedTree):sharedTree,
+      reverse?sharedTree:E.mdata(7n,sharedTree));
+    parity("transform-effective-budget-memo-"+reverse,
+      bounded(3n,T.instantiate(0n,list([replacement.snd])),root.fst,root.snd,0n),
+      originalInstFuel(3n,term,0n,list([sort0]),0n));
+  }
+  // A 25-node shared term represents 33,554,431 tree occurrences.
+  // Inspect the graph directly without materializing that tree.
+  let large=mk(get("psKernelExprV2PagedEmptyWithLimit")(3n),"BVar",0n);
+  for(let i=0;i<24;i++)large=mk(large.fst,"App",large.snd,large.snd);
+  const largeValue=mk(large.fst,"Sort",L.zero);
+  must(accepted(get("psKernelExprV2TransformCountOnCanonical")(
+    largeValue.fst,large.snd),"large-expanded-count")===33554431n,
+    "transform-large-count-retains-occurrence-multiplicity");
+  const largeResult=accepted(get("psKernelExprV2PagedInstantiateChecked")(
+    largeValue.fst,large.snd,list([largeValue.snd])),"large-default-transform");
+  must(largeResult.fst.size<=largeValue.fst.size+24n,
+    "transform-large-default-bounds-allocation-by-shared-nodes");
+  let cursor=largeResult.snd;
+  for(let i=0;i<24;i++){
+    const entry=accepted(get("psKernelExprV2PagedRequire")(largeResult.fst,cursor),"large-node");
+    must(typeof entry.node.fn==="bigint"&&entry.node.fn===entry.node.arg,
+      "transform-large-preserves-both-shared-edges-"+i);
+    cursor=entry.node.fn;
+  }
+  must(cursor===largeValue.snd,"transform-large-reaches-original-replacement-id");
+  const unchanged=accepted(abstract(largeResult.fst,largeResult.snd,
+    list([name("unused")]),0n),"large-unchanged-abstraction");
+  must(unchanged.snd===largeResult.snd&&unchanged.fst.size===largeResult.fst.size,
+    "transform-large-unchanged-retains-id-without-materialization");
+  const spine=accepted(get("psKernelExprV2PagedAppSpineChecked")(
+    ta,ids.app),"transform-app-spine");
+  const reapplied=accepted(get("psKernelExprV2PagedApplyArgsChecked")(
+    ta,spine.fst,spine.snd),"transform-reapply-spine");
+  must(exact(readGraph(reapplied,"transform-spine-roundtrip"),terms.app)===true,
+    "transform-spine-preserves-argument-order");
+  must(rejected(get("psKernelExprV2TransformAppSpineWithFuel")(0n)(ta,ids.app,nil))===true,
+    "transform-spine-zero-fuel-rejected");
+  must(rejected(inst(ta,ta.size,0n,nil,0n))===true,"transform-invalid-root");
+  must(rejected(inst(ta,ids.s0,99n,list([ta.size]),0n))===true,
+    "transform-invalid-replacement-rejected-before-pruning");
+  must(rejected(bounded(0n,T.instantiate(0n,list([ta.size])),ta,ids.b0,0n))===true,
+    "transform-zero-fuel-does-not-bypass-reference-validation");
+  const forged=get("psKernelExprV2PagedPush")(empty,{...fEntry,hasFVar:false}).fst;
+  must(rejected(bounded(0n,T.abstractFVars(nil),forged,0n,0n))===true,
+    "transform-zero-fuel-does-not-bypass-metadata-validation");
+  must(rejected(levels(forged,0n,nil,nil))===true,"transform-empty-levels-reject-forgery");
+  must(rejected(abstract(cyclic,0n,nil,0n))===true,"transform-cycle-rejected");
+  console.log("PSC1_V2_TRANSFORM_JS_SUMMARY "+JSON.stringify({
+    comparisons,constructor_families:12,shared_depth:24,
+    shared_input_nodes:Number(largeValue.fst.size),shared_output_nodes:Number(largeResult.fst.size),
+    exact_comparison:true,large_graph_materialized:false
+  }));
+  console.log("PSC1_V2_TRANSFORM_JS: PASS");
+}
+
 const source=readFileSync(filename,"utf8");
 must(!/from\s*["'](?:lean|node:child_process)|require\(["'](?:lean|child_process)/.test(source),
   "independent-generated-runtime");

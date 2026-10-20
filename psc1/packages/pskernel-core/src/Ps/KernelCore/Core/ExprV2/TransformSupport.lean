@@ -34,35 +34,70 @@ def psKernelExprV2TransformSameChildren
           if Nat.beq (Prod.fst first) current then psKernelExprV2TransformSameChildren rest tail
           else false
 
+def psKernelExprV2TransformBuildOne
+    (arena : PsKernelExprV2PagedArena) (children : List Nat)
+    (builder : PsKernelExprV2PagedArena -> Nat -> Except String (PsKernelExprV2PagedArena × Nat)) :
+    Except String (PsKernelExprV2PagedArena × Nat) :=
+  match children with
+  | List.nil => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+  | List.cons first rest =>
+      match rest with
+      | List.nil => builder arena first
+      | List.cons _ _ => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+
+def psKernelExprV2TransformBuildTwo
+    (arena : PsKernelExprV2PagedArena) (children : List Nat)
+    (builder : PsKernelExprV2PagedArena -> Nat -> Nat -> Except String (PsKernelExprV2PagedArena × Nat)) :
+    Except String (PsKernelExprV2PagedArena × Nat) :=
+  match children with
+  | List.nil => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+  | List.cons first rest =>
+      match rest with
+      | List.nil => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+      | List.cons second tail =>
+          match tail with
+          | List.nil => builder arena first second
+          | List.cons _ _ => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+
+def psKernelExprV2TransformBuildThree
+    (arena : PsKernelExprV2PagedArena) (children : List Nat)
+    (builder : PsKernelExprV2PagedArena -> Nat -> Nat -> Nat -> Except String (PsKernelExprV2PagedArena × Nat)) :
+    Except String (PsKernelExprV2PagedArena × Nat) :=
+  match children with
+  | List.nil => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+  | List.cons first rest =>
+      match rest with
+      | List.nil => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+      | List.cons second tail =>
+          match tail with
+          | List.nil => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+          | List.cons third last =>
+              match last with
+              | List.nil => builder arena first second third
+              | List.cons _ _ => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+
 def psKernelExprV2TransformBuild
-    (arena : PsKernelExprV2PagedArena) (node : PsKernelExprV2Node) (children : List Nat) :
+    (arena : PsKernelExprV2PagedArena)
+    (node : PsKernelExprV2Node) (children : List Nat) :
     Except String (PsKernelExprV2PagedArena × Nat) :=
   match node with
   | PsKernelExprV2Node.app _ _ =>
-      match children with
-      | List.cons fn (List.cons arg List.nil) => psKernelExprV2PagedMkApp arena fn arg
-      | _ => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+      psKernelExprV2TransformBuildTwo arena children psKernelExprV2PagedMkApp
   | PsKernelExprV2Node.lam name _ _ info =>
-      match children with
-      | List.cons type (List.cons body List.nil) => psKernelExprV2PagedMkLam arena name type body info
-      | _ => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+      psKernelExprV2TransformBuildTwo arena children
+        (psKernelExprV2PagedLiftMkLam name info)
   | PsKernelExprV2Node.forallE name _ _ info =>
-      match children with
-      | List.cons type (List.cons body List.nil) => psKernelExprV2PagedMkForall arena name type body info
-      | _ => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+      psKernelExprV2TransformBuildTwo arena children
+        (psKernelExprV2PagedLiftMkForall name info)
   | PsKernelExprV2Node.letE name _ _ _ nondep =>
-      match children with
-      | List.cons type (List.cons value (List.cons body List.nil)) =>
-          psKernelExprV2PagedMkLet arena name type value body nondep
-      | _ => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+      psKernelExprV2TransformBuildThree arena children
+        (psKernelExprV2PagedLiftMkLet name nondep)
   | PsKernelExprV2Node.mdata tag _ =>
-      match children with
-      | List.cons body List.nil => psKernelExprV2PagedMkMData arena tag body
-      | _ => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+      psKernelExprV2TransformBuildOne arena children
+        (psKernelExprV2PagedLiftMkMData tag)
   | PsKernelExprV2Node.proj name index _ =>
-      match children with
-      | List.cons body List.nil => psKernelExprV2PagedMkProj arena name index body
-      | _ => Except.error "PSKERNEL_V2_TRANSFORM_CHILDREN"
+      psKernelExprV2TransformBuildOne arena children
+        (psKernelExprV2PagedLiftMkProj name index)
   | _ => Except.error "PSKERNEL_V2_TRANSFORM_NOT_COMPOSITE"
 
 def psKernelExprV2TransformNatGet (values : List Nat) (index : Nat) : Option Nat :=

@@ -151,6 +151,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
       - name: Measure complete generated checks in isolated A-B-B-A workers
         working-directory: psc1
         run: |

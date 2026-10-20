@@ -13,7 +13,8 @@ if(mode!=="worker"){
   for(const [shape,depth,calls,operation] of [
     ["metadata",32,6,"check"],["metadata",96,4,"check"],["metadata",192,2,"check"],
     ["zeta",8,3,"check"],["zeta",24,2,"check"],["zeta",48,1,"check"],
-    ["metadata",96,4,"whnf"],["metadata",96,4,"defeq"],["metadata",96,2,"batch-check"]
+    ["metadata",96,4,"whnf"],["metadata",96,4,"defeq"],["metadata",96,2,"batch-check"],
+    ["zeta",8,3,"whnf"],["zeta",24,2,"whnf"],["zeta",48,1,"whnf"]
   ]){
     for(const variant of ["legacy","dag","dag","legacy"]){
       const result=spawnSync(process.execPath,
@@ -34,7 +35,7 @@ if(mode!=="worker"){
   console.log("PSC1_DAG_WHOLE_CHECKER_ABBA "+JSON.stringify({
     node:process.version,toolchain:readFileSync("lean-toolchain","utf8").trim(),
     meaning:"complete public checks, checked WHNF and checked DefEq; DAG includes validation and decoding on every batch call",
-    scope:"terminal/metadata migration; zeta uses legacy checker fallback; batch-check amortizes one validation across eight fresh-context checks",
+    scope:"terminal/metadata inference and terminal/metadata/zeta WHNF migration; zeta checking uses legacy fallback; batch-check amortizes one validation across eight fresh-context checks",
     limitations:"finite fixtures; no general speedup or allocation-counter claim",
     observations
   }));

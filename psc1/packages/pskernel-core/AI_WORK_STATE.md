@@ -279,3 +279,13 @@ oracle comparisons passed at `7ffd17f707225645c9aa2bc5282cbae2bcdbbee8` and
 again at the following documentation/qualification checkpoint. Generated
 transformation execution, the new checked zeta path, local proofs and expanded
 canonical checker smoke still require successful CI on their implementation.
+
+### Native zeta and local theorem evidence
+
+Run [39509139906](https://github.com/dwijayuda/pskernel/actions/runs/39509139906)
+passed native integration at `d0ad5dac3d0e057dec0bd5edd9ff4d797c0f8d77`,
+including checked zeta fuel/depth parity, 1,755 transformation comparisons,
+and all new local metadata/cache-scope theorem checks. The original native
+correctness job in run39509139873 also passed. Generated and canonical .ps
+qualification remain pending. Additional flat-pattern source fixes and strict
+generated transformation tests are included next; they require their own CI.

@@ -2959,6 +2959,7 @@ def psElabTermWithFuel
             | .doEndE _ => Except.error PsElabError.doStatementOutsideBlock
             | .doForE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doForRangeE _ _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .doTryE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doWhileE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .letE name declaredType value body _ =>
                 psElabLet

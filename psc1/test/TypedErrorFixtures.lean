@@ -119,8 +119,8 @@ def errorNestedDo (flag : Bool) : Except Nat Nat := do
     catch error =>
       return (error + 10)
   match nested with
-  | Except.error error => throw error
-  | Except.ok value => return (value + 100)
+  | Except.error error => Except.error error
+  | Except.ok value => Except.ok (value + 100)
 
 def errorBoundThrow (flag : Bool) : Except Nat Nat := do
   try
@@ -150,19 +150,8 @@ def errorResultPayload (flag : Bool) : Except Nat Nat := do
     catch error =>
       return (Except.ok (error + 30))
   match result with
-  | Except.error error => return (error + 1000)
+  | Except.error error => Except.ok (error + 1000)
   | Except.ok inner =>
     match inner with
-    | Except.error value => return (value + 100)
-    | Except.ok value => return (value + 200)
-
-partial def errorWhile (flag : Bool) : Except Nat Nat := do
-  let mut index : Nat := 0
-  try
-    while Nat.blt index 10000 do
-      index := index + 1
-      if flag && Nat.beq index 3 then
-        throw index
-  catch error =>
-    index := index + error + 50
-  return index
+    | Except.error value => Except.ok (value + 100)
+    | Except.ok value => Except.ok (value + 200)

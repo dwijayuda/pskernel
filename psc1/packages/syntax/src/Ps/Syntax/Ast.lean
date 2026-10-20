@@ -52,6 +52,9 @@ inductive PsSyntaxTerm where
       (name : PsSyntaxName) (value body : PsSyntaxTerm) (span : PsSourceSpan)
   | doIfE
       (condition thenBody elseBody rest : PsSyntaxTerm) (span : PsSourceSpan)
+  | doTryE
+      (body : PsSyntaxTerm) (errorName : PsSyntaxName)
+      (handler rest : PsSyntaxTerm) (span : PsSourceSpan)
   | doEndE (span : PsSourceSpan)
   | doForE
       (name : PsSyntaxName) (collection body rest : PsSyntaxTerm)

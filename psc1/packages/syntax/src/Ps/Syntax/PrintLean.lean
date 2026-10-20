@@ -310,6 +310,8 @@ def psPrintLeanTermWithFuel
           Except.error (PsSourcePrintError.unsupportedSourceForm "for statement outside do block")
       | .doForRangeE _ _ _ _ _ _ =>
           Except.error (PsSourcePrintError.unsupportedSourceForm "range iteration outside do block")
+      | .doTryE _ _ _ _ _ =>
+          Except.error (PsSourcePrintError.unsupportedSourceForm "try statement outside do block")
       | .doWhileE _ _ _ _ =>
           Except.error (PsSourcePrintError.unsupportedSourceForm "while statement outside do block")
       | .doReturnE _ _ =>

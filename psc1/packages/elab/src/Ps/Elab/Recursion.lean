@@ -449,6 +449,14 @@ def psElabRecursionWalkWithFuel
                             bodyResult.term nextRest span)
                           (psListAppend outerResult.snd bodyResult.changedIds))
                     | _ => Except.error PsElabError.structuralRecursionInternal
+        | PsSyntaxTerm.doTryE action name recovery rest span => do
+            let actionResult <- smaller context action
+            let recoveryResult <- smaller (psElabRecursionPushName context name) recovery
+            let restResult <- smaller context rest
+            pure (PsElabRecursionWalkResult.mk
+              (.doTryE actionResult.term name recoveryResult.term restResult.term span)
+              (psListAppend actionResult.changedIds
+                (psListAppend recoveryResult.changedIds restResult.changedIds)))
         | PsSyntaxTerm.doWhileE condition loopBody rest span =>
             match psElabRecursionWalkTerms smaller [condition, loopBody, rest] context with
             | Except.error error => Except.error error

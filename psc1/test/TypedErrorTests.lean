@@ -44,16 +44,16 @@ private def compilerM : IO Unit := do
   let effectLibrary <- IO.FS.readFile "stdlib/ProofScript/Compiler/Effect.lean"
   let fixture :=
     "def program : CompilerM Unit Nat Nat Nat := do\n" ++
-    "  let mut local : Nat := 2\n" ++
+    "  let mut localValue : Nat := 2\n" ++
     "  try\n" ++
-    "    local := 100\n" ++
+    "    localValue := 100\n" ++
     "    compilerSet 99\n" ++
     "    throw 5\n" ++
     "  catch error =>\n" ++
     "    let original : Nat <- compilerGet ()\n" ++
-    "    local := local + error + original\n" ++
+    "    localValue := localValue + error + original\n" ++
     "    compilerSet (original + 1)\n" ++
-    "  return local\n" ++
+    "  return localValue\n" ++
     "def result : Nat := match program.run () 7 with\n" ++
     "  | Result.ok pair => pair.fst * 100 + pair.snd\n" ++
     "  | Result.error error => 0\n"

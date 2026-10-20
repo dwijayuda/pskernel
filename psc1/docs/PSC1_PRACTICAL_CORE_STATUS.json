@@ -1,6 +1,6 @@
 {
   "schema": "psc1-practical-core-status/1",
-  "name": "PSC1 Practical Core — v7.2 subset",
+  "name": "PSC1 Practical Core \u2014 v7.2 subset",
   "baselineCommit": "a2778be648850a1f6a2381e28babcd4a6e783e31",
   "reference": {
     "path": "psc1/PSC1_LANGUAGE_REFERENCE_v7.2.md",
@@ -44,6 +44,13 @@
       "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
       "runId": 39407097682,
       "receipt": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json"
+    },
+    {
+      "id": "typed-error-handlers",
+      "status": "implemented-awaiting-ci",
+      "branch": "feature/psc1-typed-errors-20261020",
+      "baselineCommit": "1e63628169459539783450e28c641f3f70bf701f",
+      "scope": "single typed catch, contextual throw, distinct early-return packet, lexical and CompilerM rollback; qualification pending"
     }
   ],
   "stages": [
@@ -465,7 +472,16 @@
           "suite": "psc1_do_tests, psc1_while_tests and the selected Except runtime predicates",
           "scope": "Selected Except propagation, including ordinary while, executes on seven targets in both grammars. CompilerM control/state propagation uses native/private-JS comparisons; throw/try/catch remains missing."
         }
-      ]
+      ],
+      "pendingImplementation": {
+        "status": "implemented-awaiting-ci",
+        "source": "psc1/packages/elab/src/Ps/Elab/DoTry.lean",
+        "tests": [
+          "psc1/test/TypedErrorTests.lean",
+          "psc1/test/TypedErrorOracle.lean",
+          "psc1/scripts/typed-error-conformance-tests.mjs"
+        ]
+      }
     },
     {
       "id": "call-inference",

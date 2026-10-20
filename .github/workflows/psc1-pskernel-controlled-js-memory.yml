@@ -1,0 +1,127 @@
+name: PSC1 controlled same-compiler JS memory A/B
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/psc1-pskernel-core-cross-branch-20261020
+    paths:
+      - psc1/scripts/pskernel-js-memory-probe.mjs
+      - psc1/scripts/pskernel-js-controlled-report.mjs
+      - .github/workflows/psc1-pskernel-controlled-js-memory.yml
+
+permissions:
+  contents: read
+
+jobs:
+  controlled-same-compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      BASE_KERNEL_SHA: 0a53836489c4e88f46df8f5b8b0c19cc41bafbbb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean and TypeScript outside npm workspaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          mkdir -p "$RUNNER_TEMP/psc1-controlled-ts" "$RUNNER_TEMP/psc1-controlled-results"
+          echo '{"name":"psc1-controlled-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-controlled-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-controlled-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-controlled-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Create baseline kernel overlay with exact same compiler source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git cat-file -e "$BASE_KERNEL_SHA^{commit}"
+          git worktree add --detach "$RUNNER_TEMP/psc1-controlled-original" "$GITHUB_SHA"
+          git -C "$RUNNER_TEMP/psc1-controlled-original" restore --source "$BASE_KERNEL_SHA" --worktree -- psc1/packages/pskernel-core/src
+          git -C "$RUNNER_TEMP/psc1-controlled-original" diff --name-only > "$RUNNER_TEMP/psc1-controlled-results/kernel-overlay-paths.txt"
+          test -s "$RUNNER_TEMP/psc1-controlled-results/kernel-overlay-paths.txt"
+          if grep -v '^psc1/packages/pskernel-core/src/' "$RUNNER_TEMP/psc1-controlled-results/kernel-overlay-paths.txt"; then
+            echo 'ERROR: baseline overlay changed compiler or runtime source' >&2
+            exit 1
+          fi
+          cmp psc1/lean-toolchain "$RUNNER_TEMP/psc1-controlled-original/psc1/lean-toolchain"
+          cmp psc1/scripts/bootstrap-project.mjs "$RUNNER_TEMP/psc1-controlled-original/psc1/scripts/bootstrap-project.mjs"
+          cmp psc1/lakefile.lean "$RUNNER_TEMP/psc1-controlled-original/psc1/lakefile.lean"
+          printf 'compiler=%s\nbaseline=%s\noptimized=%s\n' "$(git rev-parse HEAD)" "$BASE_KERNEL_SHA" "$(git rev-parse HEAD)" > "$RUNNER_TEMP/psc1-controlled-results/refs.txt"
+      - name: Build current pinned compiler once per identical-source worktree
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc1 && lake build psc1)
+          (cd "$RUNNER_TEMP/psc1-controlled-original/psc1" && lake build psc1)
+          echo 'Both independent compiler builds come from the same checked-out compiler sources'
+          sha256sum psc1/.lake/build/bin/psc1 "$RUNNER_TEMP/psc1-controlled-original/psc1/.lake/build/bin/psc1" > "$RUNNER_TEMP/psc1-controlled-results/compiler-executable-sha256.txt"
+      - name: Generate original kernel with current compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/psc1-controlled-original/psc1"
+          node scripts/bootstrap-project.mjs packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/controlled-js/workspace
+          lake exe psc1 check dist/controlled-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
+          lake exe psc1 build dist/controlled-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps --out dist/controlled-js/kernel.js
+          test -s dist/controlled-js/kernel.js
+          test -s dist/controlled-js/kernel.d.ts
+          node --check dist/controlled-js/kernel.js
+          stat -c 'baseline_js=%s' dist/controlled-js/kernel.js >> "$RUNNER_TEMP/psc1-controlled-results/sizes.txt"
+      - name: Generate optimized kernel with same compiler source
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/bootstrap-project.mjs packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/controlled-js/workspace
+          lake exe psc1 check dist/controlled-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
+          lake exe psc1 build dist/controlled-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps --out dist/controlled-js/kernel.js
+          test -s dist/controlled-js/kernel.js
+          test -s dist/controlled-js/kernel.d.ts
+          node --check dist/controlled-js/kernel.js
+          stat -c 'optimized_js=%s' dist/controlled-js/kernel.js >> "$RUNNER_TEMP/psc1-controlled-results/sizes.txt"
+      - name: Compare complete checked operations in A-B-B-A fresh processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for run in original-all-1 optimized-all-1 optimized-all-2 original-all-2; do
+            label="${run%%-*}"
+            if [ "$label" = original ]; then
+              artifact="$RUNNER_TEMP/psc1-controlled-original/psc1/dist/controlled-js/kernel.js"
+            else
+              artifact="$GITHUB_WORKSPACE/psc1/dist/controlled-js/kernel.js"
+            fi
+            node --expose-gc psc1/scripts/pskernel-js-memory-probe.mjs "$artifact" "$label" all \
+              | tee "$RUNNER_TEMP/psc1-controlled-results/$run.log"
+          done
+      - name: Isolate complete checked operations and measure retained heap and GC
+        shell: bash
+        run: |
+          set -euo pipefail
+          for operation in whnf_beta defeq_positive checked_application_16 admit_ordinary_inductive admit_mutual_inductive; do
+            for label in original optimized; do
+              if [ "$label" = original ]; then
+                artifact="$RUNNER_TEMP/psc1-controlled-original/psc1/dist/controlled-js/kernel.js"
+              else
+                artifact="$GITHUB_WORKSPACE/psc1/dist/controlled-js/kernel.js"
+              fi
+              node --expose-gc psc1/scripts/pskernel-js-memory-probe.mjs "$artifact" "$label" "$operation" \
+                | tee "$RUNNER_TEMP/psc1-controlled-results/$label-$operation.log"
+            done
+          done
+      - name: Verify every verdict and publish controlled performance report
+        shell: bash
+        run: |
+          set -euo pipefail
+          node psc1/scripts/pskernel-js-controlled-report.mjs "$RUNNER_TEMP/psc1-controlled-results"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-same-compiler-js-abba-memory
+          path: ${{ runner.temp }}/psc1-controlled-results/
+          retention-days: 30

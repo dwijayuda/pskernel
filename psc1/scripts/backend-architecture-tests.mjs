@@ -182,7 +182,9 @@ try {
       ''
     ].join('\n')
   };
+  const hygieneFailures = [];
   for (const [syntax, ambientSource] of Object.entries(ambientFixtures)) {
+    try {
     const folder = path.join(work, 'ambient-' + syntax);
     fs.mkdirSync(folder, { recursive: true });
     const ambientInput = path.join(folder, 'ambient.' + syntax);
@@ -211,7 +213,43 @@ try {
     assert.ok(captured);
     assert.equal(captured.origins.find(origin => origin.sourceName === 'BigInt')?.name, '_BigInt_');
     records.push({ group: syntax + '-runtime-intrinsic-hygiene', passed: true });
+    } catch (error) {
+      hygieneFailures.push(syntax + '-runtime-intrinsic-hygiene');
+      console.error('PSC1_RUNTIME_HYGIENE_FAIL: ' + syntax + '\\n' + error.stack);
+    }
   }
+
+
+  // __proto__ is an own source field, never an object-literal prototype setter.
+  const protoFixtures = {
+    lean: 'structure Labels where\n  __proto__ : Nat\n  Number : Nat\ndef labels (flag : Bool) : Bool :=\n  let x : Labels := Labels.mk 5 7;\n  Nat.beq x.__proto__ 5 && Nat.beq x.Number 7\n',
+    ps: 'structure Labels {\n  __proto__ : Nat\n  Number : Nat\n}\ndef labels(flag : Bool) : Bool :=\n  let x : Labels := Labels.mk(5, 7)\n  Nat.beq(x.__proto__, 5) && Nat.beq(x.Number, 7)\n'
+  };
+  for (const [syntax, protoSource] of Object.entries(protoFixtures)) {
+    try {
+      const folder = path.join(work, 'proto-' + syntax);
+      fs.mkdirSync(folder, { recursive: true });
+      const protoInput = path.join(folder, 'proto.' + syntax);
+      fs.writeFileSync(protoInput, protoSource);
+      const outputDirectory = path.join(folder, 'out');
+      command(native, ['build', protoInput, '--targets', 'ts,js', '--out-dir', outputDirectory]);
+      const protoStem = path.join(outputDirectory, 'proto');
+      const protoJs = await import(pathToFileURL(protoStem + '.js').href);
+      const protoConsumer = path.join(folder, 'consumer');
+      command(process.execPath, [checker, '--ignoreConfig', protoStem + '.ts',
+        '--target', 'ES2020', '--module', 'ES2022', '--strict', '--skipLibCheck', '--outDir', protoConsumer]);
+      const protoTs = await import(pathToFileURL(path.join(protoConsumer, 'proto.js')).href);
+      for (const [target, module] of [['js', protoJs], ['ts', protoTs]]) {
+        assert.equal(module.labels(false), true, target + ' prototype-named source field');
+        assert.equal(module.labels(true), true, target + ' prototype-named source field');
+      }
+      records.push({ group: syntax + '-prototype-property-hygiene', passed: true });
+    } catch (error) {
+      hygieneFailures.push(syntax + '-prototype-property-hygiene');
+      console.error('PSC1_PROTOTYPE_HYGIENE_FAIL: ' + syntax + '\n' + error.stack);
+    }
+  }
+  assert.deepEqual(hygieneFailures, [], 'all source binding/property hygiene cases must pass');
 
   for (const [target, extension] of [['rust', '.rs'], ['wasm-core', '.wasm']]) {
     const output = path.join(work, 'small-' + target + extension);

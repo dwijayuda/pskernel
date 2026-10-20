@@ -26,6 +26,11 @@ const mkApp=load("psKernelExprV2MkApp");
 const lookup=load("psKernelExprV2Lookup");
 const indexedPush=load("psKernelExprV2IndexedPush");
 const indexedFind=load("psKernelExprV2IndexedFind");
+const indexedMkBVar=load("psKernelExprV2IndexedMkBVar");
+const indexedMkApp=load("psKernelExprV2IndexedMkApp");
+const chunkedEmptyWithLimit=load("psKernelExprV2ChunkedEmptyWithLimit");
+const chunkedPush=load("psKernelExprV2ChunkedPush");
+const chunkedFind=load("psKernelExprV2ChunkedFind");
 const level=load("PsKernelLevel");
 const mkSort=load("psKernelExprV2MkSort");
 let arena=empty;
@@ -58,6 +63,25 @@ const appResult=accepted(mkApp(arena,firstId,firstId),"shared-app");
 const appEntry=accepted(lookup(appResult.fst,appResult.snd),"shared-app-lookup");
 demand(appEntry.depth===2n,"shared-app-depth");
 demand(appEntry.hasFVar===false,"shared-app-no-fvar");
+const freshIndex=accepted(indexedMkBVar(emptyIndex,0n),"indexed-builder-bvar");
+const indexedApplication=accepted(indexedMkApp(freshIndex.fst,freshIndex.snd,freshIndex.snd),
+  "indexed-builder-shared-app");
+const newestIndexed=indexedFind(indexedApplication.fst,indexedApplication.snd);
+demand(newestIndexed!==null&&newestIndexed!==undefined,"indexed-builder-app-lookup");
+let chunked=chunkedEmptyWithLimit(32n);
+for(let i=0;i<count;i++){
+  const added=chunkedPush(chunked,firstEntry);
+  demand(added.snd===BigInt(i),"chunked-id-"+i);
+  chunked=added.fst;
+}
+demand(chunked.size===BigInt(count),"chunked-count");
+for(const i of [0,1,31,32,63,64,127]){
+  const entry=chunkedFind(chunked,BigInt(i));
+  demand(entry!==null&&entry!==undefined,"chunked-lookup-"+i);
+}
+demand(chunkedFind(chunked,BigInt(count))===null ||
+  chunkedFind(chunked,BigInt(count))===undefined,"chunked-out-of-range");
+
 const timings=[];
 function timed(label,build){
   const before=performance.now();
@@ -65,22 +89,30 @@ function timed(label,build){
   const elapsed=performance.now()-before;
   timings.push({label,ms:Number(elapsed.toFixed(3)),n:result});
 }
-const n=256;
-for(let round=0;round<2;round++){
-  timed("array-"+round,()=>{
-    let x=empty;
-    for(let i=0;i<n;i++)x=push(x,firstEntry).fst;
-    return x.nodes.length;
-  });
-  timed("indexed-"+round,()=>{
-    let x=emptyIndex;
-    for(let i=0;i<n;i++){
-      x=accepted(indexedPush(x,firstEntry),"bench-push").fst;
+for(const n of [256,1024,4096]){
+  for(let round=0;round<2;round++){
+    timed("array-"+n+"-"+round,()=>{
+      let x=empty;
+      for(let i=0;i<n;i++)x=push(x,firstEntry).fst;
+      return x.nodes.length;
+    });
+    timed("chunked32-"+n+"-"+round,()=>{
+      let x=chunkedEmptyWithLimit(32n);
+      for(let i=0;i<n;i++)x=chunkedPush(x,firstEntry).fst;
+      return Number(x.size);
+    });
+    if(n===256){
+      timed("indexed-"+n+"-"+round,()=>{
+        let x=emptyIndex;
+        for(let i=0;i<n;i++){
+          x=accepted(indexedPush(x,firstEntry),"bench-index-push").fst;
+        }
+        return Number(x.size);
+      });
     }
-    return Number(x.size);
-  });
+  }
 }
-demand(timings.every(x=>x.n===n),"matched-build-work");
+demand(timings.every(x=>x.n===Number(x.label.split("-")[1])),"matched-build-work");
 console.log("PSC1_EXPR_V2_JS_TIMINGS "+JSON.stringify(timings));
 console.log("PSC1_EXPR_V2_JS_SUMMARY "+JSON.stringify({
   node:process.version,source_bytes:fs.statSync(filename).size,

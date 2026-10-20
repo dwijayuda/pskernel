@@ -31,6 +31,9 @@ const indexedMkApp=load("psKernelExprV2IndexedMkApp");
 const chunkedEmptyWithLimit=load("psKernelExprV2ChunkedEmptyWithLimit");
 const chunkedPush=load("psKernelExprV2ChunkedPush");
 const chunkedFind=load("psKernelExprV2ChunkedFind");
+const chunkedMkBVar=load("psKernelExprV2ChunkedMkBVar");
+const chunkedMkApp=load("psKernelExprV2ChunkedMkApp");
+const portableValidate=load("psKernelExprV2PortableValidate");
 const level=load("PsKernelLevel");
 const mkSort=load("psKernelExprV2MkSort");
 let arena=empty;
@@ -84,6 +87,27 @@ for(const i of [0,1,31,32,63,64,127]){
 }
 const chunkedBeyond=chunkedFind(chunked,BigInt(count));
 demand(!chunkedBeyond || !("value" in chunkedBeyond),"chunked-out-of-range");
+
+const validatedChunked=accepted(portableValidate(chunked),"portable-chunked-validate");
+demand(validatedChunked.size===chunked.size,"portable-validation-count");
+const forgedChunk=chunkedPush(chunkedEmptyWithLimit(32n),{...firstEntry,hasFVar:true}).fst;
+const forgedCheck=portableValidate(forgedChunk);
+demand(forgedCheck&&"error" in forgedCheck,"portable-rejects-forged-closedness");
+
+const initialShared=accepted(chunkedMkBVar(chunkedEmptyWithLimit(64n),0n),
+  "portable-shared-leaf");
+let shared=initialShared.fst, root=initialShared.snd;
+for(let i=0;i<12;i++){
+  const next=accepted(chunkedMkApp(shared,root,root),"portable-shared-app-"+i);
+  shared=next.fst;
+  root=next.snd;
+}
+demand(shared.size===13n,"portable-shared-node-count");
+const validatedShared=accepted(portableValidate(shared),"portable-validate-shared-dag");
+demand(validatedShared.size===shared.size,"portable-shared-validation-count");
+const sharedEntry=acceptedOption(chunkedFind(validatedShared,root),"portable-shared-root");
+demand(sharedEntry.depth===13n,"portable-shared-depth");
+
 
 const timings=[];
 const readArray=(a,id)=>accepted(lookup(a,id),"measured-array-read");

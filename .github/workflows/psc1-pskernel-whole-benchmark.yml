@@ -8,6 +8,7 @@ on:
     paths:
       - psc1/test/PsKernelWholeComparison.lean
       - psc1/scripts/pskernel-whole-report.mjs
+      - psc1/scripts/pskernel-native-abba-report.mjs
       - psc1/kernel-lakefile.lean
       - .github/workflows/psc1-pskernel-whole-benchmark.yml
 
@@ -75,11 +76,25 @@ jobs:
           /usr/bin/time -f 'max_rss_kb=%M elapsed_wall_sec=%e' -o "$RUNNER_TEMP/psc1-whole-reports/optimized.memory" \
             .lake/build/bin/psc1_kernel_whole_comparison \
             | tee "$RUNNER_TEMP/psc1-whole-reports/optimized.log"
+      - name: Reverse measurement order to test native runtime order effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc1 && /usr/bin/time -f 'max_rss_kb=%M elapsed_wall_sec=%e' \
+            -o "$RUNNER_TEMP/psc1-whole-reports/optimized-reverse.memory" \
+            .lake/build/bin/psc1_kernel_whole_comparison \
+            | tee "$RUNNER_TEMP/psc1-whole-reports/optimized-reverse.log")
+          (cd "$RUNNER_TEMP/psc1-whole-original/psc1" && \
+            /usr/bin/time -f 'max_rss_kb=%M elapsed_wall_sec=%e' \
+            -o "$RUNNER_TEMP/psc1-whole-reports/original-reverse.memory" \
+            .lake/build/bin/psc1_kernel_whole_comparison \
+            | tee "$RUNNER_TEMP/psc1-whole-reports/original-reverse.log")
       - name: Enforce identical complete operations and write paired report
         shell: bash
         run: |
           set -euo pipefail
           node psc1/scripts/pskernel-whole-report.mjs "$RUNNER_TEMP/psc1-whole-reports"
+          node psc1/scripts/pskernel-native-abba-report.mjs "$RUNNER_TEMP/psc1-whole-reports"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

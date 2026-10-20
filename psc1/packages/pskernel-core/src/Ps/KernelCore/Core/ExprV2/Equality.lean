@@ -159,12 +159,18 @@ def psKernelExprV2PagedPairCompareWithFuel
             fun (_right : Nat) =>
               Except.error "PSKERNEL_V2_PAIR_COMPARE_FUEL"
   | Nat.succ remaining =>
+      -- Build recursive workers only when a child comparison is needed.
+      -- Identity, hash and scalar-shape misses keep the same fuel/error rules.
       let smaller :
           PsKernelExprV2PagedArena ->
           List PsKernelExprV2PairMemo ->
           Nat -> Nat ->
           Except String (Bool × List PsKernelExprV2PairMemo) :=
-        psKernelExprV2PagedPairCompareWithFuel remaining;
+        fun (nextArena : PsKernelExprV2PagedArena)
+            (nextMemo : List PsKernelExprV2PairMemo)
+            (nextLeft nextRight : Nat) =>
+          let recur := psKernelExprV2PagedPairCompareWithFuel remaining;
+          recur nextArena nextMemo nextLeft nextRight;
       fun (arena : PsKernelExprV2PagedArena) =>
         fun (memo : List PsKernelExprV2PairMemo) =>
           fun (left : Nat) =>

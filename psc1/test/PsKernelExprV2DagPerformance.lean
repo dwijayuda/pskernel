@@ -199,7 +199,7 @@ private def measureDagPublicWhnf (env : Lean.Environment) (session : PsKernelKer
     correct := correct + (← run i)
   let stop ← IO.monoNanosNow
   unless correct == calls do throw (IO.userError "DAG_PERF_WHNF_INCOMPLETE")
-  IO.println s!"PSC1_DAG_NATIVE_WHNF_SAMPLE variant={variant} shape={shape} depth={depth} calls={calls} ms={(stop-start)/1000000} warm_ns={stop-start} cold_ns={coldStop-coldStart} input_pool={fixtures.size} fuel={session.resources.fuel} all_correct=true semantic_cache=fresh_per_public_operation"
+  IO.println s!"PSC1_DAG_NATIVE_WHNF_SAMPLE variant={variant} shape={shape} depth={depth} calls={calls} ms={(stop-start)/1000000} warm_ns={stop-start} cold_ns={coldStop-coldStart} input_pool={fixtures.size} fuel={session.resources.fuel} fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation"
 
 private def runDagCacheWorker (variant shape : String) (depth calls : Nat) : IO Unit := do
   unless (["lean", "legacy", "dag"] : List String).contains variant do

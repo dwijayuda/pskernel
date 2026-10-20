@@ -157,6 +157,16 @@ The benchmark's fuel4096 field applies to PSKernel only; official Lean uses
 its own internal resource policy. Generated stateful timing/heap results remain
 pending.
 
+A focused follow-up delays construction of the recursive structural-equality
+worker until a child comparison is needed. Identity, hash and scalar-shape
+short circuits otherwise created an unnecessary chain of closures proportional
+to cached depth. The comparison budget, validation/error order, memo lookup and
+collision fallback are unchanged. Existing exact resource/semantic regressions
+and complete-public collision/alpha workloads are the qualification gates; no
+performance gain is claimed before their new native/generated measurements.
+Native benchmark receipts now explicitly label fuel_scope=pskernel_only so
+official Lean rows cannot be mistaken for the same PSKernel fuel mechanism.
+
 ## Milestone matrix
 
 | Milestone | Implementation | Native correctness | PSC1 / PS / JS | Whole-checker performance | Status |

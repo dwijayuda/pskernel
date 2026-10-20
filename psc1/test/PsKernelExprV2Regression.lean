@@ -1,5 +1,5 @@
 import Ps.KernelCore.Research.ExprV2Validation
-import Ps.KernelCore.Research.ExprV2IndexedBuilder
+import Ps.KernelCore.Research.ExprV2ResearchAll
 
 private def requireV2 (label : String) (ok : Bool) : IO Unit := do
   unless ok do
@@ -345,6 +345,46 @@ private def testIndexedSmartConstructors : IO Unit := do
     (shared.size == indexedArena.size + 24)
   IO.println "PSC1_EXPR_V2_INDEXED_BUILDERS: PASS"
 
+private def testChunkedArena : IO Unit := do
+  for limit in [0, 1, 8, 32, 64] do
+    let mut classic := psKernelExprV2Empty
+    let mut chunked := psKernelExprV2ChunkedEmptyWithLimit limit
+    for i in [:512] do
+      let (nextClassic, id) := psKernelExprV2MkBVar classic i
+      classic := nextClassic
+      let entry ← expectV2 (psKernelExprV2Lookup classic id)
+      let (nextChunked, assigned) := psKernelExprV2ChunkedPush chunked entry
+      chunked := nextChunked
+      unless assigned == id do
+        throw (IO.userError "PSC1_V2_CHUNKED_ID_MISMATCH")
+    requireV2 s!"chunked-size-{limit}"
+      (chunked.size == classic.nodes.size)
+    for id in [:512] do
+      let reference ← expectV2 (psKernelExprV2Lookup classic id)
+      match psKernelExprV2ChunkedFind chunked id with
+      | Option.none =>
+          throw (IO.userError "PSC1_V2_CHUNKED_MISSING")
+      | Option.some value =>
+          unless psKernelExprV2SameMetadata reference value do
+            throw (IO.userError "PSC1_V2_CHUNKED_METADATA_MISMATCH")
+    requireV2 s!"chunked-no-out-of-bounds-{limit}"
+      (match psKernelExprV2ChunkedFind chunked 512 with
+        | Option.none => true
+        | Option.some _ => false)
+    let original := chunked
+    let entry ← expectV2 (psKernelExprV2Lookup classic 0)
+    let (extended, newId) := psKernelExprV2ChunkedPush chunked entry
+    requireV2 s!"chunked-persistent-old-snapshot-{limit}"
+      (match psKernelExprV2ChunkedFind original newId with
+        | Option.none => true
+        | Option.some _ => false)
+    requireV2 s!"chunked-extended-{limit}"
+      (match psKernelExprV2ChunkedFind extended newId with
+        | Option.none => false
+        | Option.some _ => true)
+  IO.println "PSC1_EXPR_V2_CHUNKED: PASS nodes=512 limits=5"
+
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -353,4 +393,5 @@ def main : IO Unit := do
   testExponentialSharing
   testIndexedArena
   testIndexedSmartConstructors
+  testChunkedArena
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

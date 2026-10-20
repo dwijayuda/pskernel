@@ -39,15 +39,18 @@ private def bridgeSession : PsKernelCheckerSession :=
     4096
     psKernelLeanNatMaxSizeDefault
 
-private def bridgeZeta : Nat → PsKernelExpr
+private def bridgeZetaNamed (name : PsKernelName) : Nat → PsKernelExpr
   | Nat.zero => bridgeSort0
   | Nat.succ remaining =>
       PsKernelExpr.letE
-        PsKernelName.anonymous
+        name
         bridgeSort1
-        (bridgeZeta remaining)
+        (bridgeZetaNamed name remaining)
         (PsKernelExpr.bvar 0)
         false
+
+private def bridgeZeta (depth : Nat) : PsKernelExpr :=
+  bridgeZetaNamed PsKernelName.anonymous depth
 
 private def bridgeRequire (label : String) (pass : Bool) : IO Unit := do
   unless pass do
@@ -135,22 +138,38 @@ private def bridgeBenchmark
   IO.println s!"PSC1_V2_BRIDGE_TIMING variant={label} depth={depth} calls={calls} ms={finished-started} checksum={checksum}"
 
 private def bridgeRunBenchmark (depth calls : Nat) : IO Unit := do
-  let term := bridgeZeta depth
-  let (imported,root) ← bridgeExpect (psKernelExprV2PagedImportChecked term)
+  -- Preconstruct a family of semantically equal but separately allocated,
+  -- syntactically distinct typed let-chains. Runtime index selection must
+  -- influence every timed operation, preventing easy loop-invariant
+  -- hoisting of pure imports/normalization from a constant closure capture.
+  let mut prepared : Array PsKernelExpr := #[]
+  let mut converted : Array (PsKernelExprV2PagedArena × Nat) := #[]
+  for i in [:17] do
+    let name := PsKernelName.str PsKernelName.anonymous
+      ("runtime-binder-" ++ toString i)
+    let term := bridgeZetaNamed name depth
+    bridgeCheckTrusted depth term
+    bridgeCheckV2 depth term
+    prepared := prepared.push term
+    converted := converted.push
+      (← bridgeExpect (psKernelExprV2PagedImportChecked term))
+  let terms := prepared
+  let v2Inputs := converted
+  let defaultTerm := bridgeZeta depth
+  let defaultV2 ← bridgeExpect (psKernelExprV2PagedImportChecked defaultTerm)
 
-  -- Check all verdicts separately before timing.
-  bridgeCheckTrusted depth term
-  bridgeCheckV2 depth term
-
-  let fullWhnf : Nat → IO Nat := fun _ => do
+  let fullWhnf : Nat → IO Nat := fun index => do
+    let term := Array.getD terms (index % terms.size) defaultTerm
     let result ← bridgeExpect
       (psKernelSessionWhnf 4096 bridgeSession term)
     if psKernelExprEq (Prod.fst result) bridgeSort0 then return 1
     throw (IO.userError "PSC1_V2_BRIDGE_TRUSTED_WHNF_MISMATCH")
 
-  let v2HeadOnly : Nat → IO Nat := fun _ => do
+  let v2HeadOnly : Nat → IO Nat := fun index => do
+    let input := Array.getD v2Inputs (index % v2Inputs.size) defaultV2
     let (a,r) ← bridgeExpect
-      (psKernelExprV2PagedHeadMachineChecked (Nat.succ depth) imported root)
+      (psKernelExprV2PagedHeadMachineChecked (Nat.succ depth)
+        (Prod.fst input) (Prod.snd input))
     let e ← bridgeExpect (psKernelExprV2PagedRequire a r)
     match e.node with
     | PsKernelExprV2Node.sort level =>
@@ -158,7 +177,8 @@ private def bridgeRunBenchmark (depth calls : Nat) : IO Unit := do
         throw (IO.userError "PSC1_V2_BRIDGE_HEAD_MISMATCH")
     | _ => throw (IO.userError "PSC1_V2_BRIDGE_HEAD_NOT_SORT")
 
-  let v2WithImport : Nat → IO Nat := fun _ => do
+  let v2WithImport : Nat → IO Nat := fun index => do
+    let term := Array.getD terms (index % terms.size) defaultTerm
     let (a,r) ← bridgeExpect (psKernelExprV2PagedImportChecked term)
     let (out,id) ← bridgeExpect
       (psKernelExprV2PagedHeadMachineChecked (Nat.succ depth) a r)
@@ -169,13 +189,15 @@ private def bridgeRunBenchmark (depth calls : Nat) : IO Unit := do
         throw (IO.userError "PSC1_V2_BRIDGE_IMPORTED_HEAD_MISMATCH")
     | _ => throw (IO.userError "PSC1_V2_BRIDGE_IMPORTED_NOT_SORT")
 
-  let v2ImportOnly : Nat → IO Nat := fun _ => do
+  let v2ImportOnly : Nat → IO Nat := fun index => do
+    let term := Array.getD terms (index % terms.size) defaultTerm
     let (a,r) ← bridgeExpect (psKernelExprV2PagedImportChecked term)
     let e ← bridgeExpect (psKernelExprV2PagedRequire a r)
     if e.depth > 0 then return 1
     throw (IO.userError "PSC1_V2_BRIDGE_IMPORT_EMPTY_RESULT")
 
-  let v2WithImportMaterialized : Nat → IO Nat := fun _ => do
+  let v2WithImportMaterialized : Nat → IO Nat := fun index => do
+    let term := Array.getD terms (index % terms.size) defaultTerm
     let (a,r) ← bridgeExpect (psKernelExprV2PagedImportChecked term)
     let (out,id) ← bridgeExpect
       (psKernelExprV2PagedHeadMachineChecked (Nat.succ depth) a r)
@@ -184,13 +206,15 @@ private def bridgeRunBenchmark (depth calls : Nat) : IO Unit := do
         psKernelExprEq decoded bridgeSort0 then return 1
     throw (IO.userError "PSC1_V2_BRIDGE_MATERIALIZED_RESULT_MISMATCH")
 
-  let fullCheck : Nat → IO Nat := fun _ => do
+  let fullCheck : Nat → IO Nat := fun index => do
+    let term := Array.getD terms (index % terms.size) defaultTerm
     let result ← bridgeExpect
       (psKernelSessionCheck 4096 bridgeSession term)
     if psKernelExprEq (Prod.fst result) bridgeSort1 then return 1
     throw (IO.userError "PSC1_V2_BRIDGE_CHECK_TYPE_MISMATCH")
 
-  let fullDefEq : Nat → IO Nat := fun _ => do
+  let fullDefEq : Nat → IO Nat := fun index => do
+    let term := Array.getD terms (index % terms.size) defaultTerm
     let result ← bridgeExpect
       (psKernelSessionIsDefEq 4096 bridgeSession term bridgeSort0)
     if Prod.fst result then return 1

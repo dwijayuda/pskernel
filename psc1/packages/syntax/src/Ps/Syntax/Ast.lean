@@ -190,15 +190,15 @@ def psSyntaxDeclarationQualify (namespacePrefix : List String) :
   | .scopedDecl path declaration =>
       psSyntaxDeclarationQualify (psSyntaxNamespaceAppend namespacePrefix path) declaration
   | .definition name binders type value span =>
-      .definition (psSyntaxNamespaceName namespacePrefix name) binders type value span
+      PsSyntaxDeclaration.definition (psSyntaxNamespaceName namespacePrefix name) binders type value span
   | .partialDefinition name binders type value span =>
-      .partialDefinition (psSyntaxNamespaceName namespacePrefix name) binders type value span
+      PsSyntaxDeclaration.partialDefinition (psSyntaxNamespaceName namespacePrefix name) binders type value span
   | .theoremDecl name binders type value span =>
-      .theoremDecl (psSyntaxNamespaceName namespacePrefix name) binders type value span
+      PsSyntaxDeclaration.theoremDecl (psSyntaxNamespaceName namespacePrefix name) binders type value span
   | .inductiveDecl name params type constructors span =>
-      .inductiveDecl (psSyntaxNamespaceName namespacePrefix name) params type constructors span
+      PsSyntaxDeclaration.inductiveDecl (psSyntaxNamespaceName namespacePrefix name) params type constructors span
   | .structureDecl name params fields span =>
-      .structureDecl (psSyntaxNamespaceName namespacePrefix name) params fields span
+      PsSyntaxDeclaration.structureDecl (psSyntaxNamespaceName namespacePrefix name) params fields span
 
 def psSyntaxDeclarationSpan : PsSyntaxDeclaration -> PsSourceSpan
   | .definition _ _ _ _ span => span

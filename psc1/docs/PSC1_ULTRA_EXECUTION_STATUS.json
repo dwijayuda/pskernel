@@ -2,23 +2,23 @@
   "schema": "psc1-ultra-execution/1",
   "date": "2026-10-21",
   "repository": "dwijayuda/pskernel",
-  "branch": "fix/psc1-census-normalization-20261021",
-  "pullRequest": 170,
+  "branch": "fix/psc1-parsecommon-normalization-20261021",
+  "pullRequest": 171,
   "sourceBaseline": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
   "integratedTypedErrors": "a830668d2c23886843e616951836d8d990aa2ff5",
-  "implementationCommit": "81f271292086da3cd9f266115300086998360217",
+  "implementationCommit": "db72f0d9947aa1700599eca9cffbe6879a684b5e",
   "qualification": {
     "status": "passed-scoped-execution",
-    "runId": 39501336732,
-    "nativeRunId": 39501336380,
+    "runId": 39506934493,
+    "nativeRunId": 39506934509,
     "steps": 37,
-    "receipt": "PSC1_CENSUS_NORMALIZATION_QUALIFICATION_2026-10-21.json",
+    "receipt": "PSC1_SYNTAX_NORMALIZATION_QUALIFICATION_2026-10-21.json",
     "artifact": {
-      "id": 12301656823,
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39501336732/artifacts/12301656823",
-      "bytes": 44989037,
-      "digest": "sha256:e8597ec0f257e95fc5e1ceddd016487bd4ec7caf3d1f80f897e74e66190fea0f",
-      "expiresAtUtc": "2026-11-03T21:42:17Z"
+      "id": 12303354326,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39506934493/artifacts/12303354326",
+      "bytes": 44987887,
+      "digest": "sha256:f4137f14cfcbd102470e1080967f240a5c68ccf6286ae1f043ce720f2ef0be35",
+      "expiresAtUtc": "2026-11-03T22:29:46Z"
     }
   },
   "decisions": {
@@ -30,7 +30,7 @@
     "refactor": "shared typed AST + future trivia/resolved-origin side tables"
   },
   "p1Remaining": [
-    "compiler source normalization; first Ps.Syntax.ParseCommon86:26 ::; strict dual-grammar census remains pending",
+    "continue compiler source normalization; first Ps.Syntax.ParseDo124:67 grouped-expression projection; independently tracked PS lane and strict selected-phase census remain pending",
     "efficient optional array indexing",
     "avoid whole-input finite-loop continuation construction",
     "Rust capturing closures inside aggregates",
@@ -59,7 +59,7 @@
     "wasmTools": "1.254.0",
     "wasmtime": "49.0.4"
   },
-  "testedMergeCommit": "6eb2a7c140ac56a32d37dbef00a874c296137605",
+  "testedMergeCommit": "483be6cff76389e8c88613b7b9ecf58a082e4b2e",
   "ancestry": {
     "pr168": "7e25943b991446ee2ab5a32b445238ef5af47cb5",
     "pr166": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
@@ -74,39 +74,39 @@
       {
         "name": "semantic-compiler",
         "modules": 67,
-        "parseAccepted": 41,
-        "elaborationAccepted": 37,
+        "parseAccepted": 44,
+        "elaborationAccepted": 40,
         "firstRefusals": [
           {
             "stage": "parse",
-            "module": "Ps.Syntax.ParseCommon",
-            "detail": "86:26: expected ', or }', got '::'"
+            "module": "Ps.Syntax.ParseDo",
+            "detail": "124:67: expected ', or }', got '.'"
           }
         ]
       },
       {
         "name": "directjs-compiler",
         "modules": 79,
-        "parseAccepted": 49,
-        "elaborationAccepted": 43,
+        "parseAccepted": 52,
+        "elaborationAccepted": 46,
         "firstRefusals": [
           {
             "stage": "parse",
-            "module": "Ps.Syntax.ParseCommon",
-            "detail": "86:26: expected ', or }', got '::'"
+            "module": "Ps.Syntax.ParseDo",
+            "detail": "124:67: expected ', or }', got '.'"
           }
         ]
       },
       {
         "name": "rust-compiler",
         "modules": 83,
-        "parseAccepted": 50,
-        "elaborationAccepted": 42,
+        "parseAccepted": 53,
+        "elaborationAccepted": 45,
         "firstRefusals": [
           {
             "stage": "parse",
-            "module": "Ps.Syntax.ParseCommon",
-            "detail": "86:26: expected ', or }', got '::'"
+            "module": "Ps.Syntax.ParseDo",
+            "detail": "124:67: expected ', or }', got '.'"
           }
         ]
       }
@@ -119,17 +119,29 @@
     "inventory": "compiler-source-census/inventory.json",
     "stages": "compiler-source-census/stages.json",
     "noDirectElaborationRefusalObserved": true,
-    "maintainedModuleGates": [
+    "normalizedModules": [
       {
-        "module": "Ps.Syntax.Ast",
+        "module": "Ps.Syntax.ParseCommon",
         "parse": "accepted",
         "elaboration": "accepted"
       },
       {
-        "module": "Ps.Erasure.Definition",
+        "module": "Ps.Syntax.ParseBinding",
+        "parse": "accepted",
+        "elaboration": "accepted"
+      },
+      {
+        "module": "Ps.Syntax.Operators",
         "parse": "accepted",
         "elaboration": "accepted"
       }
+    ],
+    "maintainedModuleGates": [
+      "Ps.Syntax.Ast parse/elaboration",
+      "Ps.Erasure.Definition elaboration",
+      "Ps.Syntax.ParseCommon parse/elaboration",
+      "Ps.Syntax.ParseBinding parse/elaboration",
+      "Ps.Syntax.Operators parse/elaboration"
     ]
   },
   "corrections": [
@@ -170,7 +182,7 @@
     "U3": "fourteen bounded decisions and acceptance contract specified; full families incomplete",
     "U4": "shared semantic/IR and capability axes specified; selected runtime qualified, general parity pending",
     "U5": "PSC0 comparison/design complete; direct Bool foundation qualified; compound ABI roadmap pending",
-    "U6": "phase census and generated transport qualified; compiler-only host boundary/generation plan concrete; actual compiler self-host false",
+    "U6": "compiler source census advanced through ParseCommon/ParseBinding/Operators; selected modules accepted, Lean closure partial, PS lane pending; generated transport only, actual compiler self-host false",
     "U7": "target adapter architecture selected; broad runtime FFI remains planned",
     "U8": "checked refactoring/trivia/origin architecture selected; broad editing deferred",
     "U9": "complete copy-paste continuation saved"
@@ -248,7 +260,10 @@
     "psc1/test/TypedErrorTests.lean",
     "psc1/test/TypedErrorWhileFixture.lean",
     "psc1/test/CensusNormalizationTests.lean",
-    "psc1/docs/PSC1_CENSUS_NORMALIZATION_QUALIFICATION_2026-10-21.json"
+    "psc1/docs/PSC1_CENSUS_NORMALIZATION_QUALIFICATION_2026-10-21.json",
+    "psc1/docs/PSC1_SYNTAX_NORMALIZATION_QUALIFICATION_2026-10-21.json",
+    "psc1/packages/syntax/src/Ps/Syntax/Operators.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/ParseBinding.lean"
   ],
   "toolVersions": {
     "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
@@ -320,6 +335,85 @@
     "psc1/packages/erasure/src/Ps/Erasure/Definition.lean",
     "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
     "psc1/scripts/SourceCensusProbe.lean",
+    "psc1/scripts/compiler-source-census.mjs",
+    "psc1/test/CensusNormalizationTests.lean"
+  ],
+  "sourceNormalizationContinuation": {
+    "parentPullRequest": 170,
+    "parentHead": "bdd26a4bd501cf92d207e72a98f5f15874885d82",
+    "status": "three-modules-corrected-scoped-and-focused-linux-passed",
+    "modules": [
+      "Ps.Syntax.ParseCommon",
+      "Ps.Syntax.ParseBinding",
+      "Ps.Syntax.Operators"
+    ],
+    "maintainedAcceptance": [
+      "Ast parse/elaboration",
+      "Erasure.Definition elaboration",
+      "ParseCommon parse/elaboration"
+    ],
+    "logicalAdmission": "unchanged official independent Lean4.35; no whole-closure admission claim",
+    "parentFinalQualification": {
+      "head": "bdd26a4bd501cf92d207e72a98f5f15874885d82",
+      "scopedRunId": 39502865307,
+      "nativeRunId": 39502865431,
+      "testedMergeCommit": "46624bf15fb36ddf3d57aeb45fa6922947bd1918",
+      "scopedSteps": 37
+    },
+    "parseCommonFocused": {
+      "head": "48aa400b347f262631e99fdb06a1c8a86a055619",
+      "runId": 39505999415,
+      "behaviorChecks": 24,
+      "accepted": true
+    },
+    "implementationCommit": "db72f0d9947aa1700599eca9cffbe6879a684b5e",
+    "scopedRunId": 39506934493,
+    "nativeRunId": 39506934509,
+    "censusBehaviorObservations": 25,
+    "nextRefusal": {
+      "module": "Ps.Syntax.ParseDo",
+      "path": "packages/syntax/src/Ps/Syntax/ParseDo.lean",
+      "line": 124,
+      "column": 67,
+      "declaration": "psParseDoBindingValue",
+      "stage": "parse",
+      "detail": "expected ', or }', got '.'",
+      "sourceExpression": "(psSyntaxTermSpan value).stop",
+      "nextAction": "normalize named span, then rerun complete module; preserve do/catch layout"
+    }
+  },
+  "pr170CensusQualification": {
+    "branch": "fix/psc1-census-normalization-20261021",
+    "pullRequest": 170,
+    "implementationCommit": "81f271292086da3cd9f266115300086998360217",
+    "testedMergeCommit": "6eb2a7c140ac56a32d37dbef00a874c296137605",
+    "qualification": {
+      "status": "passed-scoped-execution",
+      "runId": 39501336732,
+      "nativeRunId": 39501336380,
+      "steps": 37,
+      "receipt": "PSC1_CENSUS_NORMALIZATION_QUALIFICATION_2026-10-21.json",
+      "artifact": {
+        "id": 12301656823,
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39501336732/artifacts/12301656823",
+        "bytes": 44989037,
+        "digest": "sha256:e8597ec0f257e95fc5e1ceddd016487bd4ec7caf3d1f80f897e74e66190fea0f",
+        "expiresAtUtc": "2026-11-03T21:42:17Z"
+      }
+    },
+    "finalHead": "bdd26a4bd501cf92d207e72a98f5f15874885d82",
+    "finalScopedRunId": 39502865307,
+    "finalNativeRunId": 39502865431,
+    "finalTestedMergeCommit": "46624bf15fb36ddf3d57aeb45fa6922947bd1918"
+  },
+  "changedFilesBySourceNormalizationContinuation": [
+    ".github/workflows/psc1-architecture-native.yml",
+    "psc1/AI_WORK_STATE.md",
+    "psc1/docs/PSC1_SYNTAX_NORMALIZATION_QUALIFICATION_2026-10-21.json",
+    "psc1/docs/PSC1_ULTRA_EXECUTION_STATUS.json",
+    "psc1/packages/syntax/src/Ps/Syntax/Operators.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/ParseBinding.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
     "psc1/scripts/compiler-source-census.mjs",
     "psc1/test/CensusNormalizationTests.lean"
   ]

@@ -1,4 +1,5 @@
-import Ps.Syntax.Ast
+import Ps.Syntax.ParseLean
+import Ps.Syntax.ParseProofScript
 import Ps.Erasure.Definition
 
 private def require (label : String) (condition : Bool) : IO Unit := do
@@ -44,6 +45,79 @@ private def testScopedDeclaration : IO Unit := do
   require "binding pattern size preserves nested structural counts"
     (psSyntaxBindingPatternSize (.pair (.name name) (.pair (.unit span) (.wildcard span) span) span) == 5)
 
+private def testParseCommon : IO Unit := do
+  let span := PsSourceSpan.mk (PsSourcePos.mk 0 1 1) (PsSourcePos.mk 1 1 2)
+  let name := fun segments => PsSyntaxName.mk segments span
+  require "namespace text handles empty singleton and compound paths"
+    (psParseNamespaceText [] == "" && psParseNamespaceText ["Outer"] == "Outer" &&
+      psParseNamespaceText ["Outer", "Inner"] == "Outer.Inner")
+  require "namespace equality checks all segments and exact length"
+    (psParseNamespaceEq ["Outer", "Inner"] ["Outer", "Inner"] &&
+      !psParseNamespaceEq ["Outer"] ["Outer", "Inner"] &&
+      !psParseNamespaceEq ["Outer", "Inner"] ["Outer"] &&
+      !psParseNamespaceEq ["Outer", "Inner"] ["Outer", "Other"] &&
+      psParseNamespaceEq [] [])
+  require "namespace stack becomes outer-to-inner declaration path"
+    (psParseNamespacePath [name ["Inner"], name ["Outer", "Nested"]] ==
+      ["Outer", "Nested", "Inner"])
+  let cursor <- match psLex "_root_.Outer.value tail" with
+    | .ok tokens => pure (psTokenCursorFromTokens tokens)
+    | .error _ => throw (IO.userError "root reference lex")
+  match psParseSyntaxReferenceName cursor with
+  | .error _ => throw (IO.userError "root reference parse")
+  | .ok parsed =>
+      require "root reference retains escape full span and unconsumed tail"
+        (parsed.value.segments == ["_root_", "Outer", "value"] &&
+          parsed.value.span.start.byteOffset == 0 &&
+          parsed.value.span.stop.byteOffset == 18 &&
+          psTokenCursorAtText parsed.cursor "tail")
+  require "declaration name parser refuses a root escape"
+    (match psParseSyntaxName cursor with | .error _ => true | .ok _ => false)
+  for leanInput in [true, false] do
+    let label := if leanInput then "lean" else "ps"
+    let text := "namespace Outer\nnamespace Inner\ndef value : Nat := 1\nend Inner\nend Outer\n"
+    let parsed : Except Unit PsSyntaxModule :=
+      if leanInput then
+        match psParseLeanSource text with
+        | .error _ => .error ()
+        | .ok value => .ok value
+      else
+        match psParseProofScriptSource text with
+        | .error _ => .error ()
+        | .ok value => .ok value
+    match parsed with
+    | .error _ => throw (IO.userError (label ++ " nested namespace parse"))
+    | .ok source =>
+        require (label ++ " scoped declaration order")
+          (match source.declarations with
+          | [declaration] =>
+              match psSyntaxDeclarationQualify [] declaration with
+              | .definition sourceName _ _ _ _ =>
+                  sourceName.segments == ["Outer", "Inner", "value"]
+              | _ => false
+          | _ => false)
+  for source in [
+    "end Outer\n", "namespace Outer\nend Inner\n",
+    "namespace Outer\ndef value : Nat := 1\n"
+  ] do
+    require "mismatched or unclosed Lean namespace refuses"
+      (match psParseLeanSource source with | .error _ => true | .ok _ => false)
+    require "mismatched or unclosed PS namespace refuses"
+      (match psParseProofScriptSource source with | .error _ => true | .ok _ => false)
+
+private def testUnusedParserFuel : IO Unit := do
+  let cursor <- match psLex "" with
+    | .ok tokens => pure (psTokenCursorFromTokens tokens)
+    | .error _ => throw (IO.userError "empty source lex")
+  let result := psParseScopedDeclarationsWithFuel
+    (fun _ => Except.error PsParseError.fuelExhausted)
+    (fun _ next => Except.ok next)
+    1000000000 cursor [] []
+  require "empty scoped parser returns without traversing unused fuel"
+    (match result with
+    | .error _ => false
+    | .ok parsed => parsed.value.isEmpty && psTokenCursorDone parsed.cursor)
+
 private def testPreludeClosure : IO Unit := do
   let rootName := PsName.str .anonymous "root"
   let aName := PsName.str .anonymous "a"
@@ -73,5 +147,7 @@ private def testPreludeClosure : IO Unit := do
 def main : IO Unit := do
   testPatternNames
   testScopedDeclaration
+  testParseCommon
+  testUnusedParserFuel
   testPreludeClosure
   IO.println "PSC1_CENSUS_NORMALIZATION: pattern and runtime closure behavior passed"

@@ -1,0 +1,310 @@
+{
+  "schema": "psc1-syntax-normalization-qualification/1",
+  "date": "2026-10-21",
+  "repository": "dwijayuda/pskernel",
+  "pullRequest": 171,
+  "branch": "fix/psc1-parsecommon-normalization-20261021",
+  "parent": {
+    "pullRequest": 170,
+    "head": "bdd26a4bd501cf92d207e72a98f5f15874885d82",
+    "branch": "fix/psc1-census-normalization-20261021",
+    "finalScopedRunId": 39502865307,
+    "finalNativeRunId": 39502865431,
+    "finalTestedMergeCommit": "46624bf15fb36ddf3d57aeb45fa6922947bd1918",
+    "finalScopedSteps": 37,
+    "verifiedBeforeWrites": true
+  },
+  "implementationCommit": "db72f0d9947aa1700599eca9cffbe6879a684b5e",
+  "testedMergeCommit": "483be6cff76389e8c88613b7b9ecf58a082e4b2e",
+  "qualification": "passed-scoped-execution",
+  "scoped": {
+    "runId": 39506934493,
+    "jobId": 118918363205,
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39506934493",
+    "conclusion": "success",
+    "steps": 37,
+    "artifact": {
+      "id": 12303354326,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39506934493/artifacts/12303354326",
+      "bytes": 44987887,
+      "digest": "sha256:f4137f14cfcbd102470e1080967f240a5c68ccf6286ae1f043ce720f2ef0be35",
+      "expiresAtUtc": "2026-11-03T22:29:46Z"
+    }
+  },
+  "focusedNative": {
+    "runId": 39506934509,
+    "jobId": 118918090651,
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39506934509",
+    "conclusion": "success",
+    "testedMergeCommit": "483be6cff76389e8c88613b7b9ecf58a082e4b2e",
+    "steps": 11,
+    "censusBehaviorObservations": 25,
+    "existingNativeControlGroups": 7,
+    "additionalExistingSuites": [
+      "psc1_operator_tests: independently checked Core equivalence and refusals",
+      "psc1_data_tests: data/pattern admission and execution"
+    ],
+    "unusedParserFuelObservation": {
+      "fuel": 1000000000,
+      "input": "empty scoped input",
+      "result": "accepted without traversing unused fuel",
+      "scope": "native observation only; no generated compiler complexity qualification"
+    },
+    "artifact": {
+      "id": 12303422622,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39506934509/artifacts/12303422622",
+      "bytes": 13041,
+      "digest": "sha256:ffc2add30e6f39de94ba821f8023bc0edd9157de839e0fad859eca1a4fc4ae1f",
+      "expiresAtUtc": "2026-11-03T22:18:34Z"
+    }
+  },
+  "normalizedModules": [
+    {
+      "module": "Ps.Syntax.ParseCommon",
+      "path": "packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+      "parse": "accepted",
+      "elaboration": "accepted",
+      "changes": [
+        "explicit constructors",
+        "structural namespace helpers",
+        "typed scoped parser workers and local match",
+        "named span before field projection",
+        "retained worker evaluation placement"
+      ]
+    },
+    {
+      "module": "Ps.Syntax.ParseBinding",
+      "path": "packages/syntax/src/Ps/Syntax/ParseBinding.lean",
+      "parse": "accepted",
+      "elaboration": "accepted",
+      "changes": [
+        "public parser type alias retained as a named type definition",
+        "explicit Except sequencing",
+        "structural pattern workers",
+        "same tuple shape/comma/annotation/token rules"
+      ]
+    },
+    {
+      "module": "Ps.Syntax.Operators",
+      "path": "packages/syntax/src/Ps/Syntax/Operators.lean",
+      "parse": "accepted",
+      "elaboration": "accepted",
+      "changes": [
+        "named String equality and equivalent Bool Nat guard",
+        "correctly applied structural fuel workers",
+        "same precedence/associativity/refusal policy; no operator/domain expansion"
+      ]
+    }
+  ],
+  "maintainedModuleGates": [
+    "Ps.Syntax.Ast parse/elaboration",
+    "Ps.Erasure.Definition elaboration",
+    "Ps.Syntax.ParseCommon parse/elaboration",
+    "Ps.Syntax.ParseBinding parse/elaboration",
+    "Ps.Syntax.Operators parse/elaboration"
+  ],
+  "compilerSourceCensus": {
+    "diagnosticCompleted": true,
+    "grammar": "lean",
+    "phases": [
+      {
+        "name": "semantic-compiler",
+        "modules": 67,
+        "parseAccepted": 44,
+        "elaborationAccepted": 40,
+        "firstRefusals": [
+          {
+            "stage": "parse",
+            "module": "Ps.Syntax.ParseDo",
+            "detail": "124:67: expected ', or }', got '.'"
+          }
+        ]
+      },
+      {
+        "name": "directjs-compiler",
+        "modules": 79,
+        "parseAccepted": 52,
+        "elaborationAccepted": 46,
+        "firstRefusals": [
+          {
+            "stage": "parse",
+            "module": "Ps.Syntax.ParseDo",
+            "detail": "124:67: expected ', or }', got '.'"
+          }
+        ]
+      },
+      {
+        "name": "rust-compiler",
+        "modules": 83,
+        "parseAccepted": 53,
+        "elaborationAccepted": 45,
+        "firstRefusals": [
+          {
+            "stage": "parse",
+            "module": "Ps.Syntax.ParseDo",
+            "detail": "124:67: expected ', or }', got '.'"
+          }
+        ]
+      }
+    ],
+    "admission": "not-run",
+    "ir": "not-run",
+    "generatedExecution": "not-run",
+    "selfCompilation": "not-run",
+    "fixedPoint": "not-run",
+    "inventory": "compiler-source-census/inventory.json",
+    "stages": "compiler-source-census/stages.json"
+  },
+  "firstNextSourceOwner": {
+    "module": "Ps.Syntax.ParseDo",
+    "path": "packages/syntax/src/Ps/Syntax/ParseDo.lean",
+    "line": 124,
+    "column": 67,
+    "declaration": "psParseDoBindingValue",
+    "stage": "parse",
+    "detail": "expected ', or }', got '.'",
+    "sourceExpression": "(psSyntaxTermSpan value).stop",
+    "nextAction": "normalize named span, then rerun complete module; preserve do/catch layout"
+  },
+  "logicalChecker": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "versions": {
+    "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "node": "v22.23.3",
+    "npm": "10.9.9",
+    "typescriptConsumer": "Version 7.0.2",
+    "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+    "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+    "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+    "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+    "python": "Python 3.15.0",
+    "pythonMinimum": "Python 3.14.8",
+    "php": "PHP 8.5.11 (cli) (built: Sep 23 2026 12:33:37) (NTS)"
+  },
+  "retainedCoverage": {
+    "typedErrors": {
+      "nativeObservations": 34,
+      "targetSourceBundles": 28,
+      "refusalChecks": 70,
+      "minimumPythonBundles": 4,
+      "evidence": "typed-errors/results.json",
+      "minimumEvidence": "typed-errors-python314/results.json"
+    },
+    "directComponents": {
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "evidence": "wasm-component-direct.json",
+      "publicAbi": "Bool-only"
+    },
+    "transport": {
+      "targets": [
+        "js",
+        "rust"
+      ],
+      "transportExecuted": true,
+      "selfHosting": false,
+      "fixedPoint": false,
+      "evidence": "compiler-host-protocol/results.json"
+    },
+    "ordinaryWhile": {
+      "targetExecutionBundles": 14,
+      "externalDivergenceDeadlines": 14,
+      "refusalChecks": 16,
+      "loopChecks": [
+        "whilefalsecheck",
+        "whilecountcheck",
+        "whileearlycheck",
+        "whilecapturecheck",
+        "whilesequentialcheck",
+        "whileforcheck",
+        "whileselfcheck",
+        "whileexceptcheck"
+      ],
+      "longLoopIterations": 100000,
+      "referenceFields": [
+        "whileCaptureFalse",
+        "whileCaptureTrue",
+        "whileCountFalse",
+        "whileCountTrue",
+        "whileEarlyFalse",
+        "whileEarlyTrue",
+        "whileExceptFalseTag",
+        "whileExceptFalseValue",
+        "whileExceptTrueTag",
+        "whileExceptTrueValue",
+        "whileFalseFalse",
+        "whileFalseTrue",
+        "whileForFalse",
+        "whileForTrue",
+        "whileSelfFalse",
+        "whileSelfTrue",
+        "whileSequentialFalse",
+        "whileSequentialTrue"
+      ],
+      "minimumPythonBundles": 2,
+      "minimumPythonDeadlines": 2,
+      "evidence": "ordinary-while-conformance/results.json",
+      "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json"
+    },
+    "targetExecutionBundles": 14,
+    "scriptingRegressionGroups": 28,
+    "architectureGroups": 11,
+    "npmOfflineQualification": "passed",
+    "optionalLibraryResult": "42"
+  },
+  "reproductions": [
+    {
+      "head": "2f86128a88ed07c3532049fc89ff73a15eb5cfdd",
+      "runId": 39504613518,
+      "result": "new native harness mixed frontend error types; corrected without dropping assertions"
+    },
+    {
+      "head": "49bb03d36d625d1eff38ab7078c667c424d29b32",
+      "runId": 39505209801,
+      "attempt": 1,
+      "result": "TLS downloading pinned Lean before compilation"
+    },
+    {
+      "head": "49bb03d36d625d1eff38ab7078c667c424d29b32",
+      "runId": 39505209801,
+      "attempt": 2,
+      "result": "24 behavior observations passed; Common parse refused grouped projection at814:69"
+    },
+    {
+      "head": "706073bcaefbd7c2532acdb2480b97e5fd13c40d",
+      "runId": 39505667269,
+      "result": "Common parsed; scoped worker elaboration refused matchExpectedType"
+    },
+    {
+      "head": "48aa400b347f262631e99fdb06a1c8a86a055619",
+      "runId": 39505999415,
+      "result": "Common parse/elaboration accepted; 24 behavior checks passed"
+    },
+    {
+      "head": "12641fd2cc14c515fdd1286eeafefc8fed41f1dd",
+      "runId": 39506354023,
+      "result": "all three modules and operator/data suites accepted; current source also retains evaluation placement"
+    }
+  ],
+  "boundary": {
+    "compilerCensusGrammar": "lean",
+    "proofScriptCompilerClosureCensus": "not-run",
+    "wholeClosureIndependentAdmission": "not-run",
+    "wholeClosureIR": "not-run",
+    "generatedCompilerExecution": "not-run",
+    "selfCompilation": "not-run",
+    "fixedPoint": "not-run",
+    "completePracticalCoreFamilies": false,
+    "formalBackendPreservation": false,
+    "toolPinsUnchanged": true,
+    "testBudgetsUnchanged": true,
+    "existingTestsPreserved": true,
+    "mainMerged": false,
+    "releaseOrRegistryPublication": false
+  },
+  "artifactPolicy": "GitHub retention applies; committed receipt preserves metadata, not artifact bytes"
+}

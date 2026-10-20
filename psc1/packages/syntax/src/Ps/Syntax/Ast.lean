@@ -179,8 +179,8 @@ structure PsSyntaxModule where
 -- per-declaration scope metadata at semantic declaration boundaries.
 def psSyntaxNamespaceAppend (left : List String) (right : List String) : List String :=
   match left with
-  | [] => right
-  | first :: rest => first :: psSyntaxNamespaceAppend rest right
+  | List.nil => right
+  | List.cons first rest => List.cons first (psSyntaxNamespaceAppend rest right)
 
 def psSyntaxNamespaceName (namespacePrefix : List String) (name : PsSyntaxName) : PsSyntaxName :=
   PsSyntaxName.mk (psSyntaxNamespaceAppend namespacePrefix name.segments) name.span

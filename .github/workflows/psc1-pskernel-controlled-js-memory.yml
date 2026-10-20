@@ -66,9 +66,8 @@ jobs:
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/psc1-controlled-original/psc1"
-          node scripts/bootstrap-project.mjs packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/controlled-js/workspace
-          lake exe psc1 check dist/controlled-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
-          lake exe psc1 build dist/controlled-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps --out dist/controlled-js/kernel.js
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean --out dist/controlled-js/kernel.js
           test -s dist/controlled-js/kernel.js
           test -s dist/controlled-js/kernel.d.ts
           node --check dist/controlled-js/kernel.js
@@ -78,9 +77,8 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
-          node scripts/bootstrap-project.mjs packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/controlled-js/workspace
-          lake exe psc1 check dist/controlled-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
-          lake exe psc1 build dist/controlled-js/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps --out dist/controlled-js/kernel.js
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean --out dist/controlled-js/kernel.js
           test -s dist/controlled-js/kernel.js
           test -s dist/controlled-js/kernel.d.ts
           node --check dist/controlled-js/kernel.js

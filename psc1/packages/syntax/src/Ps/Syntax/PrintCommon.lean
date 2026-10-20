@@ -1,5 +1,5 @@
 import Ps.Syntax.Ast
-import Ps.Foundation.Text
+import Ps.Foundation.Name
 
 inductive PsSourcePrintError where
   | fuelExhausted

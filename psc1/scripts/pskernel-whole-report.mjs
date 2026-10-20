@@ -11,9 +11,11 @@ function parse(label) {
     const ms = line.match(/milliseconds=(\d+)/)?.[1];
     const round = line.match(/round=(\d+)/)?.[1];
     if (!operation || ms === undefined || round === undefined) continue;
-    const arity = line.match(/arguments=(\d+)/)?.[1] ?? "";
-    const style = line.match(/style=(\d+)/)?.[1] ?? "";
-    const key = [operation, arity, style].filter(Boolean).join("/");
+    // Every qualifier matters: depth, index, arity, style and expected counts.
+    // Only the measured duration is excluded from the fixture identity.
+    const key = line.slice(line.indexOf("operation="))
+      .replace(/\bmilliseconds=\d+\b/, "")
+      .trim().replace(/\s+/g, " ").replace(/^operation=/, "");
     const identity = round + ":" + key;
     if (results.has(identity)) throw Error("DUPLICATE_BENCHMARK_SAMPLE " + label + " " + identity);
     results.set(identity, Number(ms));

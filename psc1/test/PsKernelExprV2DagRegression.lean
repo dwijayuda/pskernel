@@ -569,15 +569,15 @@ private def projectionUnselectedFieldFuel
   let (initial, s0) ← expect
     (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
   let (initial, ctor) ← expect (psKernelExprV2PagedMkConst initial ctorName [])
-  let mut arena := initial
+  let mut workingArena := initial
   let mut hidden := s0
   let mut hiddenTerm := sort0
   for tag in [:4] do
-    let (next, root) ← expect (psKernelExprV2PagedMkMData arena tag hidden)
-    arena := next
+    let (next, root) ← expect (psKernelExprV2PagedMkMData workingArena tag hidden)
+    workingArena := next
     hidden := root
     hiddenTerm := .mdata tag hiddenTerm
-  let (arena, first) ← expect (psKernelExprV2PagedMkApp arena ctor s0)
+  let (arena, first) ← expect (psKernelExprV2PagedMkApp workingArena ctor s0)
   let (arena, major) ← expect (psKernelExprV2PagedMkApp arena first hidden)
   let (arena, root) ← expect (psKernelExprV2PagedMkProj arena typeName 0 major)
   let term := PsKernelExpr.proj typeName 0

@@ -10,6 +10,22 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
 ## Current checkpoint and evidence
 
+The Nat/projection source in
+[f56d00ea5510cea25fffb6c527b7cf02bf9c2ae7](https://github.com/dwijayuda/pskernel/commit/f56d00ea5510cea25fffb6c527b7cf02bf9c2ae7)
+compiled natively, but its first regression target stopped at a mutable-variable
+shadowing error in the new unselected-projection-field fixture. This follow-up
+renames the builder variable; the fixture and its exact fuel6/fuel7 assertions
+are retained. [Run 39516197791](https://github.com/dwijayuda/pskernel/actions/runs/39516197791)
+does not qualify the new slice until the corrected regression executes.
+
+The preceding source463d956 is now fully green in
+[integration 39514448898](https://github.com/dwijayuda/pskernel/actions/runs/39514448898),
+[original correctness/portability 39514448820](https://github.com/dwijayuda/pskernel/actions/runs/39514448820),
+and [research 39514448956](https://github.com/dwijayuda/pskernel/actions/runs/39514448956).
+All96 generated A-B-B-A samples and all33 strict whole-executable operations
+passed. These finite successes do not complete the migration or the independent
+Arena qualification.
+
 The refreshed source checkpoint is
 [463d956f40f360960dd78ad8b8d8b3749a80c03f](https://github.com/dwijayuda/pskernel/commit/463d956f40f360960dd78ad8b8d8b3749a80c03f).
 Its [integration run 39514448898](https://github.com/dwijayuda/pskernel/actions/runs/39514448898)

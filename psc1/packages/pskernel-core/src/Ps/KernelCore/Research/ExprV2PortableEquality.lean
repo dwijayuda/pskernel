@@ -253,7 +253,7 @@ def psKernelExprV2PortableEqChecked
           | Option.none =>
               Except.error "PSKERNEL_V2_PAIR_CHECK_INVALID_RIGHT"
           | Option.some b =>
-              let maxDepth := Nat.max a.depth b.depth;
+              let maxDepth := psKernelExprV2NatMax a.depth b.depth;
               match
                   psKernelExprV2PairCompareWithFuel
                     (Nat.succ maxDepth)

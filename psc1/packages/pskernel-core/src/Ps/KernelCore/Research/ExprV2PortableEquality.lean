@@ -41,12 +41,12 @@ def psKernelExprV2PairMemoInsert
     (entries : List PsKernelExprV2PairMemo)
     (left right : Nat) (result : Bool) :
     List PsKernelExprV2PairMemo :=
-  List.cons
-    { left := left
-      right := right
-      result := result
-    }
-    entries
+  let item : PsKernelExprV2PairMemo := {
+    left := left
+    right := right
+    result := result
+  };
+  List.cons item entries
 
 def psKernelExprV2PairCompare2
     (step :

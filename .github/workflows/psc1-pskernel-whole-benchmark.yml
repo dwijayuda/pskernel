@@ -1,0 +1,88 @@
+name: PSC1 whole-kernel paired benchmarks
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/psc1-pskernel-core-cross-branch-20261020
+    paths:
+      - psc1/test/PsKernelWholeComparison.lean
+      - psc1/scripts/pskernel-whole-report.mjs
+      - psc1/kernel-lakefile.lean
+      - .github/workflows/psc1-pskernel-whole-benchmark.yml
+
+permissions:
+  contents: read
+
+jobs:
+  matched-native-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BASE_KERNEL_SHA: 0a53836489c4e88f46df8f5b8b0c19cc41bafbbb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Prepare identical fixture for original and optimized independent kernels
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-whole-reports"
+          git cat-file -e "$BASE_KERNEL_SHA^{commit}"
+          git worktree add --detach "$RUNNER_TEMP/psc1-whole-original" "$BASE_KERNEL_SHA"
+          cp psc1/test/PsKernelWholeComparison.lean "$RUNNER_TEMP/psc1-whole-original/psc1/test/PsKernelWholeComparison.lean"
+          cat >> "$RUNNER_TEMP/psc1-whole-original/psc1/kernel-lakefile.lean" <<'LAKE'
+
+          lean_exe psc1_kernel_whole_comparison where
+            srcDir := "test"
+            root := `PsKernelWholeComparison
+          LAKE
+          cmp psc1/test/PsKernelWholeComparison.lean "$RUNNER_TEMP/psc1-whole-original/psc1/test/PsKernelWholeComparison.lean"
+          test "$(cat psc1/lean-toolchain)" = "$(cat "$RUNNER_TEMP/psc1-whole-original/psc1/lean-toolchain")"
+          printf 'original=%s\noptimized=%s\n' "$BASE_KERNEL_SHA" "$(git rev-parse HEAD)" | tee "$RUNNER_TEMP/psc1-whole-reports/refs.txt"
+      - name: Compile original complete-checker benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/psc1-whole-original/psc1"
+          lake -f kernel-lakefile.lean build psc1_kernel_whole_comparison
+      - name: Compile optimized complete-checker benchmark
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean build psc1_kernel_whole_comparison
+      - name: Measure corrected pre-optimization complete checker
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/psc1-whole-original/psc1"
+          /usr/bin/time -f 'max_rss_kb=%M elapsed_wall_sec=%e' -o "$RUNNER_TEMP/psc1-whole-reports/original.memory" \
+            lake -f kernel-lakefile.lean exe psc1_kernel_whole_comparison \
+            | tee "$RUNNER_TEMP/psc1-whole-reports/original.log"
+      - name: Measure optimized complete checker
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'max_rss_kb=%M elapsed_wall_sec=%e' -o "$RUNNER_TEMP/psc1-whole-reports/optimized.memory" \
+            lake -f kernel-lakefile.lean exe psc1_kernel_whole_comparison \
+            | tee "$RUNNER_TEMP/psc1-whole-reports/optimized.log"
+      - name: Enforce identical complete operations and write paired report
+        shell: bash
+        run: |
+          set -euo pipefail
+          node psc1/scripts/pskernel-whole-report.mjs "$RUNNER_TEMP/psc1-whole-reports"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-matched-native-whole-kernel
+          path: ${{ runner.temp }}/psc1-whole-reports/
+          retention-days: 30

@@ -112,7 +112,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Research.ExprV2PagedHeadMachine,
     `Ps.KernelCore.Research.ExprV2PagedEquality,
     `Ps.KernelCore.Research.ExprV2PagedEqualityBatch,
-    `Ps.KernelCore.Research.ExprV2PagedImport
+    `Ps.KernelCore.Research.ExprV2PagedImport,
+    `Ps.KernelCore.Research.ExprV2PagedWhnfSubset
   ]
 
 lean_exe psc1_kernel_regression where
@@ -165,3 +166,8 @@ lean_exe psc1_kernel_expr_v2_regression where
 lean_exe psc1_kernel_expr_v2_checker_bridge where
   srcDir := "test"
   root := `PsKernelExprV2FullCheckerBridge
+
+-- Read-only paged function-head WHNF subset vs complete PSC1 checker.
+lean_exe psc1_kernel_expr_v2_whnf_subset_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2WhnfSubsetRegression

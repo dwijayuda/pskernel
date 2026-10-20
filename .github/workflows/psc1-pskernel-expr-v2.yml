@@ -10,6 +10,7 @@ on:
       - psc1/packages/pskernel-core/src/Ps/KernelCore/Research/**
       - psc1/test/PsKernelExprV2Regression.lean
       - psc1/test/PsKernelExprV2FullCheckerBridge.lean
+      - psc1/test/PsKernelExprV2WhnfSubsetRegression.lean
       - psc1/scripts/pskernel-expr-v2-full-checker-bridge.mjs
       - psc1/scripts/pskernel-expr-v2-generated-smoke.mjs
       - psc1/kernel-lakefile.lean
@@ -163,6 +164,11 @@ jobs:
         run: |
           set -euo pipefail
           lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PagedValidation.lean
+      - name: Check portable function-head WHNF research subset through PSC1
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PagedWhnfSubset.lean
       - name: Check portable paged sharing-aware binder lift
         working-directory: psc1
         run: |
@@ -416,4 +422,36 @@ jobs:
         with:
           name: psc1-v2-complete-checker-generated-js-lean435
           path: ${{ runner.temp }}/psc1-v2-js-checker-bridge.log
+          retention-days: 30
+
+  whnf-subset-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile V2 function-head WHNF subset with original checker
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_whnf_subset_regression
+      - name: Guard positive checking, WHNF, DefEq and negative admissions
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_whnf_subset_regression \
+            | tee "$RUNNER_TEMP/psc1-v2-whnf-subset.log"
+          grep -q 'PSC1_V2_WHNF_SUBSET: PASS cases=5' \
+            "$RUNNER_TEMP/psc1-v2-whnf-subset.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-v2-whnf-subset-lean435
+          path: ${{ runner.temp }}/psc1-v2-whnf-subset.log
           retention-days: 30

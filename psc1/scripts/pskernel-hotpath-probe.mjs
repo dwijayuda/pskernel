@@ -37,7 +37,7 @@ for(const depth of [32,128,256]) {
   const expr=make(depth), clone=make(depth);
   const loose=kernel.psKernelExprHasLooseBVar(expr);
   const fvar=kernel.psKernelExprHasFVar(expr);
-  const same=kernel.psKernelExprEq(expr,clone);
+  const same=kernel.psKernelExprEq(expr)(clone);
   console.log("PSC1_HOTPATH_JS_GUARD "+JSON.stringify({depth,loose,fvar,same,
     looseType:typeof loose,fvarType:typeof fvar,sameType:typeof same}));
   if(loose!==true || fvar!==false || same!==true)
@@ -47,7 +47,7 @@ for(const depth of [32,128,256]) {
   bench("psc_hash",depth,calls,()=>kernel.psKernelExprHash(expr));
   bench("psc_has_fvar",depth,calls,()=>kernel.psKernelExprHasFVar(expr));
   bench("psc_has_bvar",depth,calls,()=>kernel.psKernelExprHasLooseBVar(expr));
-  bench("psc_equal",depth,calls,()=>kernel.psKernelExprEq(expr,clone));
+  bench("psc_equal",depth,calls,()=>kernel.psKernelExprEq(expr)(clone));
 }
 global.gc();
 const summary={source:path.basename(filename),node:process.version,bytes:fs.statSync(filename).size,

@@ -177,100 +177,132 @@ def psKernelExprV2MkLit
     depth := 1
   }
 
+/-
+PSC1's portable parser accepts typed declarations and partial applications,
+but not anonymous typed lambdas inside function arguments. Explicit worker
+definitions also make each smart constructor's metadata rules auditable.
+-/
+
+def psKernelExprV2AppEntry
+    (fn arg : Nat)
+    (f a : PsKernelExprV2Entry) : PsKernelExprV2Entry :=
+  {
+    node := PsKernelExprV2Node.app fn arg
+    hash := psKernelCacheMix (psKernelCacheMix 26 f.hash) a.hash
+    looseRange := Nat.max f.looseRange a.looseRange
+    hasFVar := if f.hasFVar then true else a.hasFVar
+    hasExprMVar := if f.hasExprMVar then true else a.hasExprMVar
+    depth := Nat.succ (Nat.max f.depth a.depth)
+  }
+
+def psKernelExprV2LamEntry
+    (name : PsKernelName)
+    (type body : Nat) (binderInfo : PsKernelBinderInfo)
+    (t b : PsKernelExprV2Entry) : PsKernelExprV2Entry :=
+  {
+    node := PsKernelExprV2Node.lam name type body binderInfo
+    hash := psKernelCacheMix (psKernelCacheMix 27 t.hash) b.hash
+    looseRange := Nat.max t.looseRange (Nat.sub b.looseRange 1)
+    hasFVar := if t.hasFVar then true else b.hasFVar
+    hasExprMVar := if t.hasExprMVar then true else b.hasExprMVar
+    depth := Nat.succ (Nat.max t.depth b.depth)
+  }
+
+def psKernelExprV2ForallEntry
+    (name : PsKernelName)
+    (type body : Nat) (binderInfo : PsKernelBinderInfo)
+    (t b : PsKernelExprV2Entry) : PsKernelExprV2Entry :=
+  {
+    node := PsKernelExprV2Node.forallE name type body binderInfo
+    hash := psKernelCacheMix (psKernelCacheMix 28 t.hash) b.hash
+    looseRange := Nat.max t.looseRange (Nat.sub b.looseRange 1)
+    hasFVar := if t.hasFVar then true else b.hasFVar
+    hasExprMVar := if t.hasExprMVar then true else b.hasExprMVar
+    depth := Nat.succ (Nat.max t.depth b.depth)
+  }
+
+def psKernelExprV2LetEntry
+    (name : PsKernelName) (type value body : Nat) (nondep : Bool)
+    (t v b : PsKernelExprV2Entry) : PsKernelExprV2Entry :=
+  let flag : Nat := if nondep then 1 else 0;
+  {
+    node := PsKernelExprV2Node.letE name type value body nondep
+    hash := psKernelCacheMix
+      (psKernelCacheMix
+        (psKernelCacheMix
+          (psKernelCacheMix 29 t.hash) v.hash) b.hash) flag
+    looseRange := Nat.max
+      (Nat.max t.looseRange v.looseRange) (Nat.sub b.looseRange 1)
+    hasFVar := if t.hasFVar then true else
+      if v.hasFVar then true else b.hasFVar
+    hasExprMVar := if t.hasExprMVar then true else
+      if v.hasExprMVar then true else b.hasExprMVar
+    depth := Nat.succ (Nat.max (Nat.max t.depth v.depth) b.depth)
+  }
+
+def psKernelExprV2MDataEntry
+    (metadata body : Nat) (b : PsKernelExprV2Entry) :
+    PsKernelExprV2Entry :=
+  {
+    node := PsKernelExprV2Node.mdata metadata body
+    hash := psKernelCacheMix (psKernelCacheMix 31 metadata) b.hash
+    looseRange := b.looseRange
+    hasFVar := b.hasFVar
+    hasExprMVar := b.hasExprMVar
+    depth := Nat.succ b.depth
+  }
+
+def psKernelExprV2ProjEntry
+    (typeName : PsKernelName) (index body : Nat)
+    (b : PsKernelExprV2Entry) : PsKernelExprV2Entry :=
+  {
+    node := PsKernelExprV2Node.proj typeName index body
+    hash := psKernelCacheMix
+      (psKernelCacheMix
+        (psKernelCacheMix 32 (psKernelCacheNameHash typeName))
+        index) b.hash
+    looseRange := b.looseRange
+    hasFVar := b.hasFVar
+    hasExprMVar := b.hasExprMVar
+    depth := Nat.succ b.depth
+  }
+
 def psKernelExprV2MkApp
     (arena : PsKernelExprV2Arena) (fn arg : Nat) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With2 arena fn arg
-    (fun (f : PsKernelExprV2Entry) => fun (a : PsKernelExprV2Entry) =>
-      {
-        node := PsKernelExprV2Node.app fn arg
-        hash := psKernelCacheMix (psKernelCacheMix 26 f.hash) a.hash
-        looseRange := Nat.max f.looseRange a.looseRange
-        hasFVar := if f.hasFVar then true else a.hasFVar
-        hasExprMVar := if f.hasExprMVar then true else a.hasExprMVar
-        depth := Nat.succ (Nat.max f.depth a.depth)
-      })
+    (psKernelExprV2AppEntry fn arg)
 
 def psKernelExprV2MkLam
     (arena : PsKernelExprV2Arena)
     (name : PsKernelName) (type body : Nat) (binderInfo : PsKernelBinderInfo) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With2 arena type body
-    (fun (t : PsKernelExprV2Entry) => fun (b : PsKernelExprV2Entry) =>
-      {
-        node := PsKernelExprV2Node.lam name type body binderInfo
-        hash := psKernelCacheMix (psKernelCacheMix 27 t.hash) b.hash
-        looseRange := Nat.max t.looseRange (Nat.sub b.looseRange 1)
-        hasFVar := if t.hasFVar then true else b.hasFVar
-        hasExprMVar := if t.hasExprMVar then true else b.hasExprMVar
-        depth := Nat.succ (Nat.max t.depth b.depth)
-      })
+    (psKernelExprV2LamEntry name type body binderInfo)
 
 def psKernelExprV2MkForall
     (arena : PsKernelExprV2Arena)
     (name : PsKernelName) (type body : Nat) (binderInfo : PsKernelBinderInfo) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With2 arena type body
-    (fun (t : PsKernelExprV2Entry) => fun (b : PsKernelExprV2Entry) =>
-      {
-        node := PsKernelExprV2Node.forallE name type body binderInfo
-        hash := psKernelCacheMix (psKernelCacheMix 28 t.hash) b.hash
-        looseRange := Nat.max t.looseRange (Nat.sub b.looseRange 1)
-        hasFVar := if t.hasFVar then true else b.hasFVar
-        hasExprMVar := if t.hasExprMVar then true else b.hasExprMVar
-        depth := Nat.succ (Nat.max t.depth b.depth)
-      })
+    (psKernelExprV2ForallEntry name type body binderInfo)
 
 def psKernelExprV2MkLet
     (arena : PsKernelExprV2Arena)
     (name : PsKernelName) (type value body : Nat) (nondep : Bool) :
     Except String (PsKernelExprV2Arena × Nat) :=
-  let flag : Nat := if nondep then 1 else 0;
   psKernelExprV2With3 arena type value body
-    (fun (t : PsKernelExprV2Entry) => fun (v : PsKernelExprV2Entry) => fun (b : PsKernelExprV2Entry) =>
-      {
-        node := PsKernelExprV2Node.letE name type value body nondep
-        hash := psKernelCacheMix
-          (psKernelCacheMix
-            (psKernelCacheMix
-              (psKernelCacheMix 29 t.hash) v.hash) b.hash) flag
-        looseRange := Nat.max
-          (Nat.max t.looseRange v.looseRange) (Nat.sub b.looseRange 1)
-        hasFVar := if t.hasFVar then true else
-          if v.hasFVar then true else b.hasFVar
-        hasExprMVar := if t.hasExprMVar then true else
-          if v.hasExprMVar then true else b.hasExprMVar
-        depth := Nat.succ (Nat.max (Nat.max t.depth v.depth) b.depth)
-      })
+    (psKernelExprV2LetEntry name type value body nondep)
 
 def psKernelExprV2MkMData
     (arena : PsKernelExprV2Arena) (metadata body : Nat) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With1 arena body
-    (fun (b : PsKernelExprV2Entry) =>
-      {
-        node := PsKernelExprV2Node.mdata metadata body
-        hash := psKernelCacheMix (psKernelCacheMix 31 metadata) b.hash
-        looseRange := b.looseRange
-        hasFVar := b.hasFVar
-        hasExprMVar := b.hasExprMVar
-        depth := Nat.succ b.depth
-      })
+    (psKernelExprV2MDataEntry metadata body)
 
 def psKernelExprV2MkProj
     (arena : PsKernelExprV2Arena)
     (typeName : PsKernelName) (index body : Nat) :
     Except String (PsKernelExprV2Arena × Nat) :=
   psKernelExprV2With1 arena body
-    (fun (b : PsKernelExprV2Entry) =>
-      {
-        node := PsKernelExprV2Node.proj typeName index body
-        hash := psKernelCacheMix
-          (psKernelCacheMix
-            (psKernelCacheMix 32 (psKernelCacheNameHash typeName))
-            index) b.hash
-        looseRange := b.looseRange
-        hasFVar := b.hasFVar
-        hasExprMVar := b.hasExprMVar
-        depth := Nat.succ b.depth
-      })
+    (psKernelExprV2ProjEntry typeName index body)

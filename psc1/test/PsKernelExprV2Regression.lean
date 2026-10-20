@@ -1,4 +1,4 @@
-import Ps.KernelCore.Research.ExprV2
+import Ps.KernelCore.Research.ExprV2Validation
 
 private def requireV2 (label : String) (ok : Bool) : IO Unit := do
   unless ok do
@@ -26,7 +26,10 @@ private def verifyV2Arena
     (label : String) (arena : PsKernelExprV2Arena) (root : Nat)
     (reference : PsKernelExpr) : IO Unit := do
   let _ ← expectV2 (psKernelExprV2Validate arena)
-  let decoded ← expectV2 (psKernelExprV2Decode arena root)
+  let checked ← expectV2 (psKernelExprV2ValidateLinear arena)
+  requireV2 (label ++ "-linear-node-count")
+    (checked.nodes.size == arena.nodes.size)
+  let decoded ← expectV2 (psKernelExprV2Decode checked root)
   requireV2 (label ++ "-roundtrip") (psKernelExprEq decoded reference)
   let head ← expectV2 (psKernelExprV2Lookup arena root)
   requireV2 (label ++ "-hash") (head.hash == psKernelExprHash decoded)
@@ -118,10 +121,18 @@ private def testInvalidInput : IO Unit := do
     (match psKernelExprV2Validate altered with
       | .error _ => true
       | .ok _ => false)
+  requireV2 "linear-forged-closedness-rejected"
+    (match psKernelExprV2ValidateLinear altered with
+      | .error _ => true
+      | .ok _ => false)
   let forward : PsKernelExprV2Arena :=
     { nodes := #[{ good with node := .app 1 2 }] }
   requireV2 "forward-references-rejected"
     (match psKernelExprV2Validate forward with
+      | .error _ => true
+      | .ok _ => false)
+  requireV2 "linear-forward-references-rejected"
+    (match psKernelExprV2ValidateLinear forward with
       | .error _ => true
       | .ok _ => false)
   requireV2 "invalid-root-rejected"
@@ -145,9 +156,40 @@ private def testDeepSpines : IO Unit := do
   verifyV2Arena "spine-32-full-validation" arena root
     (← expectV2 (psKernelExprV2Decode arena root))
 
+
+
+/-
+A DAG with D levels of repeated (x x) represents 2^D terminal
+occurrences while retaining only D+1 nodes. Legacy whole-tree validation
+would revisit exponentially many paths; linear replay never expands them.
+-/
+private def testExponentialSharing : IO Unit := do
+  let (initial, leaf) := psKernelExprV2MkBVar psKernelExprV2Empty 0
+  let mut arena := initial
+  let mut root := leaf
+  let depth : Nat := 28
+  for _ in [:depth] do
+    let (next, node) ← expectV2 (psKernelExprV2MkApp arena root root)
+    arena := next
+    root := node
+  requireV2 "exponential-sharing-node-count"
+    (arena.nodes.size == depth + 1)
+  let begin ← IO.monoMsNow
+  let checked ← expectV2 (psKernelExprV2ValidateLinear arena)
+  let finish ← IO.monoMsNow
+  requireV2 "exponential-sharing-replay-count"
+    (checked.nodes.size == arena.nodes.size)
+  let entry ← expectV2 (psKernelExprV2Lookup checked root)
+  requireV2 "exponential-sharing-depth" (entry.depth == depth + 1)
+  requireV2 "exponential-sharing-identity"
+    (psKernelExprV2Eq checked root root)
+  let _ ← expectV2 (psKernelExprV2Decode checked root)
+  IO.println s!"PSC1_EXPR_V2_DAG_REPLAY nodes={arena.nodes.size} levels={depth} elapsed_ms={finish-begin}"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
   testInvalidInput
   testDeepSpines
+  testExponentialSharing
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

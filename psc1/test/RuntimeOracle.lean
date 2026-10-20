@@ -1,4 +1,5 @@
 import Lean
+open Lean
 
 /-- Executed under the same pinned Lean runtime as source admission. The JSON
 uses decimal strings so a JavaScript test harness cannot round large integers. -/

@@ -259,7 +259,7 @@ private structure EcmaPrinted where
   runtimeSource : String
 
 private def jsSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModule) : IO EcmaPrinted := do
-  let lowered ← match psJsLowerValidatedModule plan with
+  let lowered ← match psJsLowerSpecializedModule plan.raw with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_JS_LOWER_FAILED: phase=jsir; source-profile=checked-direct/1")
   match psJsValidateModule lowered with
@@ -391,6 +391,9 @@ private def publicTypeClosure
 
 def psHostDirectEmitRust (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".rs" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .rs")
+  match psBackendCheckPublicApi .rust session.validated session.publicNames with
+  | .ok _ => pure ()
+  | .error reason => throw (IO.userError reason)
   let signatures := session.validated.raw.declarations.filter (fun d => session.publicNames.contains d.name)
   let seeds := session.authoredTypeNames ++ signatures.flatMap (fun d =>
     namedTypes d.resultType ++ d.parameters.flatMap (fun p => namedTypes p.type))
@@ -449,7 +452,13 @@ def psHostWasmLowerErrorText : PsWasmLowerError -> String
 
 def psHostDirectEmitWasmCore (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".wasm" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .wasm")
-  let lowered ← match psWasmLowerValidatedModule { wordSize := PsWasmWordSize.wasm32 } session.validated with
+  match psBackendCheckPublicApi .wasmCore session.validated session.publicNames with
+  | .ok _ => pure ()
+  | .error reason => throw (IO.userError reason)
+  let plan ← match psBackendClosedPlan session.validated session.publicNames with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
+  let lowered ← match psWasmLowerSpecializedModule { wordSize := PsWasmWordSize.wasm32 } plan.raw with
     | .ok value => pure value
     | .error error => throw (IO.userError ("PSC1_WASM_LOWER_UNSUPPORTED: " ++ psHostWasmLowerErrorText error))
   for name in session.publicNames do

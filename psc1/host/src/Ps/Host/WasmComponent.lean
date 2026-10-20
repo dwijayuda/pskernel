@@ -60,7 +60,13 @@ def psHostDirectEmitWasmComponent
   let wit ← match psHostWitSelectedExport session.validated exportName with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
-  let lowered ← match psWasmLowerValidatedModule { wordSize := PsWasmWordSize.wasm32 } session.validated with
+  match psBackendCheckPublicApi .wasmComponent session.validated [exportName] with
+  | .ok _ => pure ()
+  | .error reason => throw (IO.userError reason)
+  let plan ← match psBackendClosedPlan session.validated [exportName] with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
+  let lowered ← match psWasmLowerSpecializedModule { wordSize := PsWasmWordSize.wasm32 } plan.raw with
     | .ok value => pure value
     | .error error => throw (IO.userError ("PSC1_COMPONENT_LOWER_UNSUPPORTED: " ++ psHostWasmLowerErrorText error))
   if !lowered.exports.any (fun item => item.1 == exportName) then

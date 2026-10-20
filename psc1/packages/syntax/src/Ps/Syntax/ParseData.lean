@@ -98,3 +98,37 @@ def psParseDataArray (parseTerm : PsDataTermParser)
     [.natural "0" parsed.span] parsed.span
   return { value := psSyntaxArrayPushes parsed.elements initial parsed.span
            cursor := parsed.cursor }
+
+def psDataAtAdjacentIndex (surfaceSpan : PsSourceSpan)
+    (cursor : PsTokenCursor) : Bool :=
+  match psTokenCursorPeek cursor with
+  | none => false
+  | some token =>
+      if psStringEq token.text "[" then
+        Nat.beq surfaceSpan.stop.byteOffset token.span.start.byteOffset
+      else false
+
+/-- Only the selected optional form is accepted. Plain, proof-bearing and panic
+indexing cannot silently use a default or a host exception. -/
+def psParseDataOptionalIndexTailWithFuel
+    (parseTerm : PsDataTermParser) (fuel : Nat) :
+    PsSyntaxTerm -> PsSourceSpan -> PsTokenCursor ->
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match fuel with
+  | 0 => fun _ _ _ => .error .fuelExhausted
+  | remaining + 1 => fun current surfaceSpan cursor => do
+      if psDataAtAdjacentIndex surfaceSpan cursor then
+        let opening ← psTokenCursorExpectText cursor "["
+        let index ← parseTerm opening.cursor
+        let close ← psTokenCursorExpectText index.cursor "]"
+        let optional ← psTokenCursorExpectText close.cursor "?"
+        if !(Nat.beq close.token.span.stop.byteOffset optional.token.span.start.byteOffset) then
+          throw (.expectedText "adjacent ]? for optional indexing" "?" optional.token.span)
+        let span : PsSourceSpan := {
+          start := surfaceSpan.start
+          stop := optional.token.span.stop
+        }
+        let next := PsSyntaxTerm.arrayGetOptionE current index.value span
+        psParseDataOptionalIndexTailWithFuel parseTerm remaining next span optional.cursor
+      else
+        return { value := current, cursor := cursor }

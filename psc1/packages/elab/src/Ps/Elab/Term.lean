@@ -10,6 +10,7 @@ import Ps.Elab.Context
 import Ps.Elab.Literal
 import Ps.Elab.Basic
 import Ps.Elab.Do
+import Ps.Elab.Data
 import Ps.Elab.Operators
 
 def psElabBoolNot (value : Bool) : Bool :=
@@ -2953,6 +2954,8 @@ def psElabTermWithFuel
             | .doLetMutE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doAssignE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doIfE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .arrayGetOptionE array index _ =>
+                psElabArrayGetOption smaller context array index expected
             | .doEndE _ => Except.error PsElabError.doStatementOutsideBlock
             | .doForE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doForRangeE _ _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock

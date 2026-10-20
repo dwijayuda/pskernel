@@ -286,12 +286,12 @@ def psElabDoWithLocal
   match next bodyContext pushed.id with
   | .error error => .error error
   | .ok body =>
-      let meta := body.context.metaContext
+      let metas := body.context.metaContext
       let term :=
-        PsExpr.letE name (psMetaInstantiate meta type)
-          (psMetaInstantiate meta value.term)
-          (psExprAbstractFVar pushed.id (psMetaInstantiate meta body.term))
-      psElabResolvedTerm (psElabContextWithMeta outerContext meta) term expected
+        PsExpr.letE name (psMetaInstantiate metas type)
+          (psMetaInstantiate metas value.term)
+          (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
+      psElabResolvedTerm (psElabContextWithMeta outerContext metas) term expected
 
 -- A continuation is elaborated once in its original lexical scope. Only the
 -- visible mutable values are parameters. Branch-local declarations therefore
@@ -311,11 +311,11 @@ def psElabDoJoin
       match finish (psElabContextWithLocal context pushed.context) state with
       | .error error => .error error
       | .ok body =>
-          let meta := body.context.metaContext
+          let metas := body.context.metaContext
           let term := PsExpr.lam name unitType
-            (psExprAbstractFVar pushed.id (psMetaInstantiate meta body.term))
+            (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
             PsBinderInfo.explicit
-          psElabResolvedTerm (psElabContextWithMeta context meta) term none
+          psElabResolvedTerm (psElabContextWithMeta context metas) term none
   | entry :: rest =>
       let type := psMetaInstantiate context.metaContext entry.type
       let pushed := psLocalPushBinding context.localContext entry.userName type PsBinderInfo.explicit
@@ -324,11 +324,11 @@ def psElabDoJoin
           (psElabContextWithLocal context pushed.context) nextState with
       | .error error => .error error
       | .ok body =>
-          let meta := body.context.metaContext
-          let term := PsExpr.lam entry.userName (psMetaInstantiate meta type)
-            (psExprAbstractFVar pushed.id (psMetaInstantiate meta body.term))
+          let metas := body.context.metaContext
+          let term := PsExpr.lam entry.userName (psMetaInstantiate metas type)
+            (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
             PsBinderInfo.explicit
-          psElabResolvedTerm (psElabContextWithMeta context meta) term none
+          psElabResolvedTerm (psElabContextWithMeta context metas) term none
 
 def psElabDoJoinArguments
     (state : List PsElabDoMutable) :
@@ -360,17 +360,17 @@ def psElabDoCoreIf
     (ops : PsElabDoOps) (result : PsExpr) (context : PsElabContext)
     (condition thenValue elseValue : PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let meta := context.metaContext
-  let type := psMetaInstantiate meta (psElabDoType ops result)
-  match psInferType context.environment meta context.localContext type with
+  let metas := context.metaContext
+  let type := psMetaInstantiate metas (psElabDoType ops result)
+  match psInferType context.environment metas context.localContext type with
   | .error error => .error (PsElabError.infer error)
   | .ok typeType =>
-      match psInferEnsureSort context.environment meta context.localContext typeType with
+      match psInferEnsureSort context.environment metas context.localContext typeType with
       | .error error => .error (PsElabError.infer error)
       | .ok level =>
           let boolType := PsExpr.constE psBoolName []
           let trueValue := PsExpr.constE psBoolTrueName []
-          let condition := psMetaInstantiate meta condition
+          let condition := psMetaInstantiate metas condition
           let proposition := psExprApplyMany
             (PsExpr.constE psEqName [PsLevel.succ PsLevel.zero])
             [boolType, condition, trueValue]
@@ -378,7 +378,7 @@ def psElabDoCoreIf
             [condition, trueValue]
           let term := psExprApplyMany (PsExpr.constE psIteName [level])
             [type, proposition, decision,
-              psMetaInstantiate meta thenValue, psMetaInstantiate meta elseValue]
+              psMetaInstantiate metas thenValue, psMetaInstantiate metas elseValue]
           psElabResolvedTerm context term (some type)
 
 def psElabDoBranches

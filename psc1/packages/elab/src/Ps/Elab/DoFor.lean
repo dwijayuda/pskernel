@@ -18,11 +18,11 @@ def psElabDoForLambda
     Except PsElabError PsElabTermResult := do
   let pushed := psLocalPushBinding context.localContext name domain PsBinderInfo.explicit
   let body <- next (psElabContextWithLocal context pushed.context) pushed.id
-  let meta := body.context.metaContext
-  let term := PsExpr.lam name (psMetaInstantiate meta domain)
-    (psExprAbstractFVar pushed.id (psMetaInstantiate meta body.term))
+  let metas := body.context.metaContext
+  let term := PsExpr.lam name (psMetaInstantiate metas domain)
+    (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
     PsBinderInfo.explicit
-  psElabResolvedTerm (psElabContextWithMeta context meta) term none
+  psElabResolvedTerm (psElabContextWithMeta context metas) term none
 
 def psElabDoForApply
     (ops : PsElabDoOps) (result : PsExpr) (fn : PsExpr)

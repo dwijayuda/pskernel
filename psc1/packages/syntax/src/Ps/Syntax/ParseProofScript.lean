@@ -160,6 +160,7 @@ def psProofScriptTermWithSpan
   | .doLetMutE name type value body _ => PsSyntaxTerm.doLetMutE name type value body span
   | .doAssignE name value body _ => PsSyntaxTerm.doAssignE name value body span
   | .doIfE condition thenBody elseBody rest _ => PsSyntaxTerm.doIfE condition thenBody elseBody rest span
+  | .arrayGetOptionE array index _ => .arrayGetOptionE array index span
   | .doEndE _ => PsSyntaxTerm.doEndE span
   | .doForE name collection body rest _ => .doForE name collection body rest span
   | .doForRangeE name lower upper body rest _ => .doForRangeE name lower upper body rest span
@@ -384,7 +385,12 @@ def psParseProofScriptPostfixTailWithFuel
             PsTokenCursor ->
             Except PsParseError (PsParseResult PsSyntaxTerm) :=
           psParseProofScriptPostfixTailWithFuel parseArgument remaining;
-        if psProofScriptBoolAnd
+        if psDataAtAdjacentIndex (psSyntaxTermSpan current) cursor then
+          match psParseDataOptionalIndexTailWithFuel parseArgument (Nat.succ remaining)
+              current (psSyntaxTermSpan current) cursor with
+          | .error error => .error error
+          | .ok parsed => smaller parsed.value parsed.cursor
+        else if psProofScriptBoolAnd
             (psTokenCursorAtText cursor "(")
             (psProofScriptCallAdjacent current cursor) then
           match psTokenCursorAdvance cursor with

@@ -99,13 +99,208 @@ for (const [name, clauses] of Object.entries(groups)) {
   }
   source += ' ' + conjoin([...clauses, '(flag || !flag)']) + '\n';
 }
-source += 'def semantic (flag : Bool) : Bool := ' +
-  conjoin(Object.keys(groups).map(name => name + ' flag')) + '\n';
-const names = [...Object.keys(groups), 'semantic'];
+// Expected observations come from native pinned Lean, not a target oracle.
+const referenceChoice = stem => '(if flag then ' + n(stem + 'True') + ' else ' + n(stem + 'False') + ')';
+const controlBodies = {
+  mutationcheck:
+    ' let observed : Id Nat := do\n' +
+    '  let mut value : Nat := 3\n' +
+    '  if flag then\n' +
+    '   value := value + 4\n' +
+    '  else\n' +
+    '   value := value + 8\n' +
+    '  value := value * 2\n' +
+    '  return value\n' +
+    ' Nat.beq (Id.run observed) ' + referenceChoice('controlMutation') + '\n',
+  capturecheck:
+    ' let observed : Id Nat := do\n' +
+    '  let mut value : Nat := if flag then 3 else 5\n' +
+    '  let captured : Nat -> Nat := fun (n : Nat) => value + n\n' +
+    '  value := 100\n' +
+    '  return captured value\n' +
+    ' Nat.beq (Id.run observed) ' + referenceChoice('controlCapture') + '\n',
+  earlycheck:
+    ' let observed : Id Nat := do\n' +
+    '  let mut value : Nat := 3\n' +
+    '  if flag then\n' +
+    '   value := 7\n' +
+    '   if Nat.beq value 7 then\n' +
+    '    return value\n' +
+    '   value := 50\n' +
+    '  else\n' +
+    '   value := 11\n' +
+    '  value := value + 1\n' +
+    '  return value\n' +
+    ' Nat.beq (Id.run observed) ' + referenceChoice('controlEarly') + '\n',
+  shadowcheck:
+    ' let observed : Id Nat := do\n' +
+    '  let value : Bool := false\n' +
+    '  let mut value : Nat := if flag then 3 else 5\n' +
+    '  value := value + 1\n' +
+    '  return value\n' +
+    ' Nat.beq (Id.run observed) ' + referenceChoice('controlShadow') + '\n',
+  danglingcheck:
+    ' let observed : Id Nat := do\n' +
+    '  let mut value : Nat := 3\n' +
+    '  if flag then\n' +
+    '   if false then\n' +
+    '    value := 99\n' +
+    '  else\n' +
+    '   value := 50\n' +
+    '  return value\n' +
+    ' Nat.beq (Id.run observed) ' + referenceChoice('controlDangling') + '\n',
+  errorcheck:
+    ' let observed : Except Nat Nat := do\n' +
+    '  let mut value : Nat := 3\n' +
+    '  value := value + 4\n' +
+    '  if flag then\n' +
+    '   let ignored : Unit <- Except.error value\n' +
+    '   return 999\n' +
+    '  return value\n' +
+    ' match observed with\n' +
+    '  | Except.error value => Nat.beq value (if flag then ' + n('controlErrorTrueValue') +
+      ' else ' + n('controlErrorFalseValue') + ') && (if flag then ' + n('controlErrorTrueTag') +
+      ' else ' + n('controlErrorFalseTag') + ')\n' +
+    '  | Except.ok value => Nat.beq value (if flag then ' + n('controlErrorTrueValue') +
+      ' else ' + n('controlErrorFalseValue') + ') && !(if flag then ' + n('controlErrorTrueTag') +
+      ' else ' + n('controlErrorFalseTag') + ')\n',
+  forlistcheck:
+    ' let observed : Id Nat := do\n' +
+    '  let values : List Nat := List.cons 1 (List.cons 2 (List.cons 3 List.nil))\n' +
+    '  let mut total : Nat := 0\n' +
+    '  for value in values do\n' +
+    '   if flag && Nat.beq value 2 then\n' +
+    '    return total\n' +
+    '   total := total * 10 + value\n' +
+    '  return total\n' +
+    ' Nat.beq (Id.run observed) ' + referenceChoice('forList') + '\n',
+  forarraycheck:
+    ' let observed : Id Nat := do\n' +
+    '  let mut values : Array Nat := if flag then #[1, 2, 3] else #[]\n' +
+    '  let mut total : Nat := 0\n' +
+    '  for value in values do\n' +
+    '   values := #[99]\n' +
+    '   total := total + value\n' +
+    '  return total * 10 + Array.size values\n' +
+    ' Nat.beq (Id.run observed) ' + referenceChoice('forArray') + '\n',
+  forrangecheck:
+    ' let observed : Id Nat := do\n' +
+    '  let mut lower : Nat := if flag then 2 else 5\n' +
+    '  let mut upper : Nat := if flag then 5 else 2\n' +
+    '  let mut total : Nat := 0\n' +
+    '  for value in [lower:upper] do\n' +
+    '   lower := 100\n' +
+    '   upper := 0\n' +
+    '   total := total * 10 + value\n' +
+    '  return total\n' +
+    ' let empty : Id Nat := do\n' +
+    '  let mut total : Nat := 0\n' +
+    '  for value in [3:3] do\n' +
+    '   total := total + 1\n' +
+    '  return total\n' +
+    ' let zeroStart : Id Nat := do\n' +
+    '  let mut total : Nat := 0\n' +
+    '  for value in [:3] do\n' +
+    '   total := total * 10 + value\n' +
+    '  return total\n' +
+    ' Nat.beq (Id.run observed) ' + referenceChoice('forRange') +
+    ' && Nat.beq (Id.run empty) ' + n('forRangeEmpty') +
+    ' && Nat.beq (Id.run zeroStart) ' + n('forRangeZero') + '\n'
+};
+for (const [name, body] of Object.entries(controlBodies)) {
+  source += 'def ' + name + ' (flag : Bool) : Bool :=\n' + body;
+}
+const checkNames = [...Object.keys(groups), ...Object.keys(controlBodies), 'dataliteralcheck', 'optionalindexcheck'];
+const names = [...checkNames, 'semantic'];
 const input = path.join(evidence, 'Runtime.lean');
 fs.writeFileSync(input, source);
 const translated = path.join(evidence, 'Runtime.ps');
+// Translation lowers literals to named calls. Append handwritten data syntax
+// in each grammar after translating the common corpus to exercise both parsers.
 run(native, ['translate', input, '--to', 'ps', '--out', translated]);
+const literalTotal = n('literalTotal');
+const literalLeanChecks = [
+  ...textChecks('Int.repr total', literalTotal),
+  eqNat('Array.size values', n('literalArraySize')),
+  eqNat('Array.size empty', n('literalEmptySize')),
+  'if flag then Prod.fst (Prod.snd pair) else !(Prod.fst (Prod.snd pair))'
+];
+function psTextChecks(expression, expected) {
+  const checks = [
+    'Nat.beq(String.Internal.length(' + expression + '), ' + Array.from(expected).length + ')',
+    'Nat.beq(String.utf8ByteSize(' + expression + '), ' + Buffer.byteLength(expected) + ')'
+  ];
+  let offset = 0;
+  for (const char of Array.from(expected)) {
+    checks.push('Nat.beq(Char.toNat(String.Internal.get(' + expression + ', ' + offset + ')), ' + char.codePointAt(0) + ')');
+    offset += Buffer.byteLength(char);
+  }
+  return checks;
+}
+const literalPsChecks = [
+  ...psTextChecks('Int.repr(total)', literalTotal),
+  'Nat.beq(Array.size(values), ' + n('literalArraySize') + ')',
+  'Nat.beq(Array.size(empty), ' + n('literalEmptySize') + ')',
+  'if (flag) { Prod.fst(Prod.snd(pair)) } else { !(Prod.fst(Prod.snd(pair))) }'
+];
+const literalLean =
+  'def dataliteralcheck (flag : Bool) : Bool :=\n' +
+  ' let pair : Prod Int (Prod Bool Int) := (-7, (flag, 13));\n' +
+  ' let values : Array Int := #[Prod.fst pair, Prod.snd (Prod.snd pair), 29];\n' +
+  ' let empty : Array Int := #[];\n' +
+  ' let total : Int := Int.add (Array.getD values 0 0) (Array.getD values 1 0);\n' +
+  ' ' + conjoin(literalLeanChecks) + '\n';
+const literalPs =
+  'def dataliteralcheck(flag : Bool) : Bool :=\n' +
+  ' let pair : Prod(Int, Prod(Bool, Int)) := (-7, (flag, 13))\n' +
+  ' let values : Array(Int) := #[Prod.fst(pair), Prod.snd(Prod.snd(pair)), 29]\n' +
+  ' let empty : Array(Int) := #[]\n' +
+  ' let total : Int := Int.add(Array.getD(values, 0, 0), Array.getD(values, 1, 0))\n' +
+  ' ' + conjoin(literalPsChecks) + '\n';
+const optionalLeanTag = '(if flag then ' + n('optionalIndexTrueTag') + ' else ' + n('optionalIndexFalseTag') + ')';
+const optionalPsTag = '(if (flag) { ' + n('optionalIndexTrueTag') + ' } else { ' + n('optionalIndexFalseTag') + ' })';
+const optionalLeanChecks = [
+  'if selectedTag then ' + optionalLeanTag + ' else !' + optionalLeanTag,
+  'if flag then ' + conjoin(textChecks('Int.repr selectedValue', n('optionalIndexTrueValue'))) +
+    ' else ' + conjoin(textChecks('Int.repr selectedValue', n('optionalIndexFalseValue'))),
+  'if hugeAbsent then ' + n('optionalHugeAbsent') + ' else !' + n('optionalHugeAbsent'),
+  'if emptyAbsent then ' + n('optionalEmptyAbsent') + ' else !' + n('optionalEmptyAbsent')
+];
+const optionalPsChecks = [
+  'if (selectedTag) { ' + optionalPsTag + ' } else { !' + optionalPsTag + ' }',
+  'if (flag) { ' + conjoin(psTextChecks('Int.repr(selectedValue)', n('optionalIndexTrueValue'))) +
+    ' } else { ' + conjoin(psTextChecks('Int.repr(selectedValue)', n('optionalIndexFalseValue'))) + ' }',
+  'if (hugeAbsent) { ' + n('optionalHugeAbsent') + ' } else { !' + n('optionalHugeAbsent') + ' }',
+  'if (emptyAbsent) { ' + n('optionalEmptyAbsent') + ' } else { !' + n('optionalEmptyAbsent') + ' }'
+];
+const optionalLean =
+  'def optionalindexcheck (flag : Bool) : Bool :=\n' +
+  ' let values : Array Int := #[-7, 13];\n' +
+  ' let index : Nat := if flag then 1 else 2;\n' +
+  ' let selected : Option Int := values[index]?;\n' +
+  ' let selectedTag : Bool := match selected with | Option.none => false | Option.some value => true;\n' +
+  ' let selectedValue : Int := match selected with | Option.none => 0 | Option.some value => value;\n' +
+  ' let hugeAbsent : Bool := match values[' + n('huge') + ']? with | Option.none => true | Option.some value => false;\n' +
+  ' let empty : Array Int := #[];\n' +
+  ' let emptyAbsent : Bool := match empty[0]? with | Option.none => true | Option.some value => false;\n' +
+  ' ' + conjoin(optionalLeanChecks) + '\n';
+const optionalPs =
+  'def optionalindexcheck(flag : Bool) : Bool :=\n' +
+  ' let values : Array(Int) := #[-7, 13]\n' +
+  ' let index : Nat := if (flag) { 1 } else { 2 }\n' +
+  ' let selected : Option(Int) := values[index]?\n' +
+  ' let selectedTag : Bool := match selected with { | Option.none => false | Option.some value => true }\n' +
+  ' let selectedValue : Int := match selected with { | Option.none => 0 | Option.some value => value }\n' +
+  ' let hugeAbsent : Bool := match values[' + n('huge') + ']? with { | Option.none => true | Option.some value => false }\n' +
+  ' let empty : Array(Int) := #[]\n' +
+  ' let emptyAbsent : Bool := match empty[0]? with { | Option.none => true | Option.some value => false }\n' +
+  ' ' + conjoin(optionalPsChecks) + '\n';
+assert.equal(n('literalFalseFlag'), false);
+assert.equal(n('literalTrueFlag'), true);
+fs.appendFileSync(input, literalLean + optionalLean + 'def semantic (flag : Bool) : Bool := ' +
+  conjoin(checkNames.map(name => name + ' flag')) + '\n');
+fs.appendFileSync(translated, literalPs + optionalPs + 'def semantic(flag : Bool) : Bool := ' +
+  conjoin(checkNames.map(name => name + '(flag)')) + '\n');
 const targets = (process.env.PSC1_CONFORMANCE_TARGETS ||
   'js,ts,rust,wasm-core,wasm-component,python,php').split(',');
 fs.writeFileSync(path.join(work, 'package.json'), '{"type":"module"}\n');
@@ -200,7 +395,12 @@ try {
     schema: 'psc1-runtime-conformance/1', commit: process.env.GITHUB_SHA || null, branchHeadCommit: process.env.PSC1_HEAD_SHA || null,
     nativeLean: { version: oracle.leanVersion, commit: oracle.leanCommit },
     oracleSha256: sha(JSON.stringify(oracle)), node: process.version,
-    targetCount: targets.length, records
+    targetCount: targets.length,
+    controlFlowChecks: Object.keys(controlBodies),
+    controlFlowOracle: 'pinned-native-Lean',
+    handwrittenLiteralSyntaxes: ['lean', 'ps'],
+    handwrittenOptionalIndexSyntaxes: ['lean', 'ps'],
+    records
   }, null, 2) + '\n');
   fs.rmSync(work, { recursive: true, force: true });
 }

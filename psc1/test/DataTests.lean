@@ -63,6 +63,29 @@ private def roundTrip (label : String) (kind other : PsCompilerSourceKind)
       if first != second then fail label "translation changed canonical admission"
   | _, _ => fail label "translation admission encoding"
 
+private def conversionFixture (prepared : PsCompilerAdmissionReadyModule)
+    (type expected : PsExpr) : PsCompilerAdmissionReadyModule :=
+  let actual := PsExpr.constE (psRootName "result") []
+  let predicate := psRootName "P"
+  let witness := psRootName "h"
+  let predicateType := PsExpr.forallE (psRootName "index") type
+    (PsExpr.sortE (PsLevel.succ PsLevel.zero)) .explicit
+  let premise := PsExpr.app (PsExpr.bvar 0) (psExprLiftBVars 1 0 expected)
+  let conclusion := PsExpr.app (PsExpr.bvar 1) (psExprLiftBVars 2 0 actual)
+  let checkType := PsExpr.forallE predicate predicateType
+    (PsExpr.forallE witness premise conclusion .explicit) .explicit
+  let checkValue := PsExpr.lam predicate predicateType
+    (PsExpr.lam witness premise (PsExpr.bvar 0) .explicit) .explicit
+  PsCompilerAdmissionReadyModule.mk (prepared.declarations ++
+    [PsDeclaration.definitionDecl (psRootName "dataResultConversion") [] checkType checkValue])
+
+private def checkReduced (label : String) (kind : PsCompilerSourceKind)
+    (source : String) (type expected : PsExpr) : IO Unit := do
+  let prepared ← prepare label kind source
+  match ← psHostLeanCheckPrepared (conversionFixture prepared type expected) with
+  | .error error => fail label error
+  | .ok _ => IO.println ("PSC1_DATA_PASS: " ++ label ++ " independent result conversion")
+
 def main : IO Unit := do
   same "Lean right-associated tuple with contextual Int" .lean
     "def result : Prod Int (Prod Bool Nat) := (1, true, 2)\n"
@@ -139,4 +162,48 @@ def main : IO Unit := do
     .proofScript .lean "def result : Array(Prod(Int, Bool)) := #[(1, true), (2, false)]\n"
   roundTrip "Lean literal source translates via existing checked constructors"
     .lean .proofScript "def result : Array (Prod Int Bool) := #[(1, true), (2, false)]\n"
+  let natType : PsExpr := .constE psNatName []
+  let optionNat := psSelfHostOptionOf natType
+  let noneNat := psSelfHostOptionNoneOf natType
+  let someEleven := psSelfHostOptionSomeOf natType (.lit (.natural 11))
+  let someTwentyTwo := psSelfHostOptionSomeOf natType (.lit (.natural 22))
+  for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+    checkReduced "optional first element" kind
+      "def result : Option Nat := #[11,22][0]?\n" optionNat someEleven
+    checkReduced "optional last element" kind
+      "def result : Option Nat := #[11,22][1]?\n" optionNat someTwentyTwo
+    checkReduced "optional at length" kind
+      "def result : Option Nat := #[11,22][2]?\n" optionNat noneNat
+    checkReduced "optional far out of range" kind
+      "def result : Option Nat := #[11,22][999999999999999999999999999999]?\n" optionNat noneNat
+    checkReduced "empty array inferred from optional result" kind
+      "def result : Option Nat := #[][0]?\n" optionNat noneNat
+    checkReduced "parenthesized array keeps suffix adjacency" kind
+      "def result : Option Nat := (#[11,22])[1]?\n" optionNat someTwentyTwo
+    rejectedParse "plain indexing is not optional indexing" kind
+      "def result : Nat := #[1][0]\n"
+    rejectedParse "panic indexing remains unselected" kind
+      "def result : Nat := #[1][0]!\n"
+    rejectedParse "optional suffix must be adjacent" kind
+      "def result : Option Nat := #[1][0] ?\n"
+    rejectedType "optional index has fixed Nat type" kind
+      "def result : Option Nat := #[1][true]?\n"
+    rejectedType "optional negative Int index rejected" kind
+      "def result : Option Nat := #[1][-1]?\n"
+    rejectedType "optional result cannot silently unwrap" kind
+      "def result : Nat := #[1][0]?\n"
+  checkReduced "Lean suffix binds before its enclosing application" .lean
+    "def pick (value : Option Nat) : Nat := match value with | Option.none => 0 | Option.some item => item\ndef result : Nat := let xs := #[11,22]; pick xs[1]?\n"
+    natType (.lit (.natural 22))
+  checkReduced "PS optional argument" .proofScript
+    "def pick(value : Option(Nat)) : Nat := match value with { | Option.none => 0 | Option.some item => item }\ndef result : Nat := let xs := #[11,22]\n pick(xs[1]?)\n"
+    natType (.lit (.natural 22))
+  rejectedType "Lean nonarray receiver" .lean
+    "def bad(xs : List Nat) : Option Nat := xs[0]?\n"
+  rejectedType "PS nonarray receiver" .proofScript
+    "def bad(xs : List(Nat)) : Option(Nat) := xs[0]?\n"
+  roundTrip "optional index Lean to PS" .lean .proofScript
+    "def result : Option Nat := (#[11,22])[1]?\n"
+  roundTrip "optional index PS to Lean" .proofScript .lean
+    "def result : Option(Nat) := (#[11,22])[1]?\n"
   IO.println "PSC1_DATA_TESTS: PASS"

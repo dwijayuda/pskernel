@@ -214,6 +214,7 @@ lean_lib PsElab where
     `Ps.Elab.Context,
     `Ps.Elab.Literal,
     `Ps.Elab.Basic,
+    `Ps.Elab.Data,
     `Ps.Elab.DoLoop,
     `Ps.Elab.DoBase,
     `Ps.Elab.DoFor,

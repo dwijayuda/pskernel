@@ -56,6 +56,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .doLetMutE _ _ _ _ span => span
   | .doAssignE _ _ _ span => span
   | .doIfE _ _ _ _ span => span
+  | .arrayGetOptionE _ _ span => span
   | .doEndE span => span
   | .doForE _ _ _ _ span => span
   | .doForRangeE _ _ _ _ _ span => span

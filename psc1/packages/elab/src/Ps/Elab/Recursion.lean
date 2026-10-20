@@ -459,6 +459,15 @@ def psElabRecursionWalkWithFuel
                       (PsSyntaxTerm.doWhileE nextCondition nextBody nextRest span)
                       result.snd)
                 | _ => Except.error PsElabError.structuralRecursionInternal
+        | PsSyntaxTerm.arrayGetOptionE array index span =>
+            match psElabRecursionWalkTerms smaller [array, index] context with
+            | Except.error error => Except.error error
+            | Except.ok result =>
+                match result.fst with
+                | [nextArray, nextIndex] =>
+                    Except.ok (PsElabRecursionWalkResult.mk
+                      (PsSyntaxTerm.arrayGetOptionE nextArray nextIndex span) result.snd)
+                | _ => Except.error PsElabError.structuralRecursionInternal
         | PsSyntaxTerm.record fields span =>
             match psElabRecursionWalkFields smaller fields context with
             | Except.error error => Except.error error

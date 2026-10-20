@@ -207,6 +207,10 @@ def psPrintProofScriptTermWithFuel
           psPrintUnaryOperator smaller operator operand
       | .binary operator left right _ =>
           psPrintBinaryOperator smaller operator left right
+      | .arrayGetOptionE array index _ => do
+          let printedArray <- smaller array
+          let printedIndex <- smaller index
+          pure ("(" ++ printedArray ++ ")[" ++ printedIndex ++ "]?")
       | .doE body _ =>
           match psPrintDoBody smaller false "\n  " remaining body with
           | Except.error error => Except.error error

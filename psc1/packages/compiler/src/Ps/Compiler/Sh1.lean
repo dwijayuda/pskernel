@@ -385,6 +385,11 @@ def psSh1SyntaxTermStep
         (psSh1SourceFailure "source-do-unsupported"
           "do semantics are outside the historical SH1 source profile"
           moduleName owner (Option.some span))
+  | PsSyntaxTerm.arrayGetOptionE _ _ span =>
+      Except.error
+        (psSh1SourceFailure "source-optional-index-unsupported"
+          "optional array indexing is outside the historical SH1 source profile"
+          moduleName owner (Option.some span))
   | PsSyntaxTerm.lambda binders body _ =>
       Except.ok (psSh1SyntaxSchedule state
         [PsSh1SyntaxTask.binders owner binders, PsSh1SyntaxTask.term owner region body])

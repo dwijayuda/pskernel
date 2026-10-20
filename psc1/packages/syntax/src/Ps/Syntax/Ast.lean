@@ -34,6 +34,7 @@ inductive PsSyntaxTerm where
       (fields : List (Prod PsSyntaxName PsSyntaxTerm))
       (span : PsSourceSpan)
   | app (fn : PsSyntaxTerm) (args : List PsSyntaxTerm) (span : PsSourceSpan)
+  | arrayGetOptionE (array index : PsSyntaxTerm) (span : PsSourceSpan)
   | unary (operator : String) (operand : PsSyntaxTerm) (span : PsSourceSpan)
   | binary (operator : String) (left right : PsSyntaxTerm) (span : PsSourceSpan)
   | doE (body : PsSyntaxTerm) (span : PsSourceSpan)

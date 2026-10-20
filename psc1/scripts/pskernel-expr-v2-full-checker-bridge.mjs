@@ -83,9 +83,8 @@ for(const depth of [1,8,24,48]){
   trustedWhnf(term);
   trustedDefEq(term);
   v2Head(term,depth);
-  must(failed(headPaged(BigInt(depth),
-    accepted(importPaged(term),"v2-import-for-fuel").fst,
-    accepted(importPaged(term),"v2-import-for-fuel-2").snd)),
+  const initial=accepted(importPaged(term),"v2-import-for-fuel");
+  must(failed(headPaged(BigInt(depth),initial.fst,initial.snd)),
     "restricted-step-fuel-"+depth);
   console.log("PSC1_V2_JS_BRIDGE_VERDICT depth="+depth+" all_correct=true");
 }

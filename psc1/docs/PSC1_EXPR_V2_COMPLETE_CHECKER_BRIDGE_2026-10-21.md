@@ -49,7 +49,19 @@ Test script: scripts/pskernel-expr-v2-full-checker-bridge.mjs
 
 The generated-js-full-checker-bridge CI job checks the combined source, emits JS, TypeScript declarations and source map, executes complete production check/WHNF/positive DefEq plus a negative typing test, compares V2 outputs with validated structural equality, and records import-inclusive order-balanced JS timings.
 
-**Qualification must be read from the successful exact CI run**, not inferred from a pushed source file or the native bridge result. This job is independent of the already-qualified 28-module V2 canonical ProofScript closure.
+[Combined-checker generated-JS CI 39492950104](https://github.com/dwijayuda/pskernel/actions/runs/39492950104) **PASSED all five jobs**, including the complete checker/V2 combined bridge. The real PSC1 compiler checked **1,234 declarations**. Generated JS agreed on Sort checking, WHNF, positive DefEq and restricted V2 reduction for all guarded depths; the original kernel rejected an ill-typed application, while the V2 subset left its neutral head alone.
+
+Node22 timing evidence, two A-B-B-A samples per implementation, is below. V2 includes legacy expression import, replay validation, restricted head reduction, a checked sort construction and fully validated structural equality of the result. Full production WHNF invokes broader kernel semantics and uses its original fuel accounting; this is a *supported-subset* comparison.
+
+| Zeta depth; calls | Complete production WHNF | V2 paged restricted head with checked conversions |
+|---|---|---|
+| 8; 4 | 207.880 / 180.117 ms | 32.436 / 27.420 ms |
+| 24; 3 | 220.682 / 206.107 ms | 59.087 / 74.530 ms |
+| 48; 2 | 219.692 / 214.465 ms | 89.142 / 94.249 ms |
+
+The observed V2 advantage on this narrow generated-JS fixture ranges roughly **2x to 8x**; the specific ratios depend on depth and execution order. It is not an overall kernel speedup. The reported heap after forced GC rose modestly across the complete process as measurements accumulated; this single mixed-workload run does not establish a per-variant allocation or memory advantage.
+
+The separate native and JS source code remain directly comparable only within this correctly guarded zeta subset, not on unsupported recursors, delta unfolding, primitive reductions, proofs or negative DefEq.
 
 ## Why promotion remains blocked
 
@@ -60,3 +72,16 @@ The generated-js-full-checker-bridge CI job checks the combined source, emits JS
 - Do not change proof admissions or the 79-module SelfHost kernel until exact semantic parity, qualified generated PS and JS, hostile negative cases, memory and true whole-checker benchmarks are green.
 
 This work is authorized open-source theorem-prover correctness and compiler-performance research, not a completed metatheory/soundness proof.
+
+
+## Next semantic extension: normalization of application functions
+
+New isolated module: packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PagedWhnfSubset.lean.
+
+This bounded research operation normalizes an application's function position before attempting beta reduction. It handles a lambda hidden behind a typed let or transparent metadata, in addition to direct beta and zeta. If the reduced function is not a lambda, it preserves the neutral application (rebuilding it only when the function expression changed).
+
+[Native checker comparison CI 39494159712](https://github.com/dwijayuda/pskernel/actions/runs/39494159712) **PASSED its WHNF-subset regression job**: five positive cases agree with the original complete PSC1 checker on type, WHNF and positive DefEq (direct beta, let-function beta, metadata-function beta, metadata-let-function beta, and zeta). Negative tests reject forged cached metadata, invalid node IDs, zero fuel and typing-invalid applications through the original checker. The research subset never claims that a stuck neutral application is well typed.
+
+Portable PSC1 .lean/.ps and generated JS gates for this new module are separate. Do not claim them as qualified until they pass on the current exact source commit.
+
+This operation is still not full Lean 4.35 WHNF: delta, recursor/iota, projections, primitives, proof irrelevance, universe checking, state-sensitive caches and exact production resource policy remain unimplemented in V2.

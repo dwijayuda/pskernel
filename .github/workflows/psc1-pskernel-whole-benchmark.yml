@@ -1,10 +1,10 @@
-name: PSC1 whole-kernel paired benchmarks
+name: PSC1 Lean 4.35 whole-kernel A-B-B-A comparison
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - fix/psc1-pskernel-core-cross-branch-20261020
+      - research/psc1-pskernel-lean435-performance-20261020
     paths:
       - psc1/test/PsKernelWholeComparison.lean
       - psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Instantiate.lean
@@ -21,12 +21,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      BASE_KERNEL_SHA: 0a53836489c4e88f46df8f5b8b0c19cc41bafbbb
+      BASE_KERNEL_SHA: 3eb61f1aa0ed1d7e6e4d11563c8ad00f740898bf
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install pinned Lean 4.34
+      - name: Install pinned Lean 4.35.0
         shell: bash
         run: |
           set -euo pipefail

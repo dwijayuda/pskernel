@@ -2,7 +2,7 @@ import Ps.KernelCore.Checker.DefEq.BinderSpines
 import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
-Lean 4.34 quick definitional-equality rules.
+Lean 4.35 quick definitional-equality rules.
 
 These checks run before expensive reduction:
 - exact/semantic expression equality;
@@ -27,18 +27,23 @@ def psKernelDefEqQuick
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
     (left : PsKernelExpr)
-    (right : PsKernelExpr) :
+    (right : PsKernelExpr)
+    (entryChecked : Bool) :
     Except String
       (Prod
         (Option Bool)
         PsKernelCheckerState) :=
-  if psKernelExprEq left right then
+  -- The initial recursive DefEq entry already compared both expressions
+  -- and probed the successful-pair cache. Avoid repeating these on that path.
+  -- Re-normalized terms need their own checks, so call with false there.
+  if !entryChecked && psKernelExprEq left right then
     Except.ok
       (Prod.mk
         (Option.some true)
         state)
   else if
       if
+          !entryChecked &&
           psKernelSemanticPairCacheEligible
             left
             right then

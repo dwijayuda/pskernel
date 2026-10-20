@@ -374,7 +374,8 @@ def psKernelIsDefEqWithFuel
                     nextContext
                     state
                     left
-                    right with
+                    right
+                    true with
               | Except.error error =>
                   Except.error error
               | Except.ok quickResult =>
@@ -436,7 +437,8 @@ def psKernelIsDefEqWithFuel
                                             nextContext
                                             (Prod.snd rightCoreResult)
                                             leftCore
-                                            rightCore with
+                                            rightCore
+                                            false with
                                       | Except.error error =>
                                           Except.error error
                                       | Except.ok coreQuick =>

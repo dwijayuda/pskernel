@@ -1,4 +1,6 @@
 import Ps.KernelCore.Research.ExprV2Validation
+import Ps.KernelCore.Research.ExprV2Lift
+import Ps.KernelCore.Core.Substitution.Lift
 import Ps.KernelCore.Research.ExprV2ResearchAll
 
 private def requireV2 (label : String) (ok : Bool) : IO Unit := do
@@ -521,6 +523,91 @@ private def testChunkedArena : IO Unit := do
   IO.println "PSC1_EXPR_V2_CHUNKED: PASS nodes=512 limits=5"
 
 
+
+/-
+M3 lifted DAG oracle: exact legacy tree is built only for the finite test
+fixtures; validated chunked V2 execution processes shared IDs directly.
+-/
+private def testChunkedLiftDifferential : IO Unit := do
+  let name := PsKernelName.str PsKernelName.anonymous "lifted"
+  let mut a := psKernelExprV2ChunkedEmpty
+  let (a0,b0) ← expectV2 (psKernelExprV2ChunkedMkBVar a 0)
+  a := a0
+  let (a1,b2) ← expectV2 (psKernelExprV2ChunkedMkBVar a 2)
+  a := a1
+  let (a2,sort) ← expectV2 (psKernelExprV2ChunkedMkSort a PsKernelLevel.zero)
+  a := a2
+  let (a3,app) ← expectV2 (psKernelExprV2ChunkedMkApp a b0 b2)
+  a := a3
+  let (a4,lam) ← expectV2
+    (psKernelExprV2ChunkedMkLam a name sort app PsKernelBinderInfo.default)
+  a := a4
+  let (a5,pi) ← expectV2
+    (psKernelExprV2ChunkedMkForall a name b2 app PsKernelBinderInfo.implicit)
+  a := a5
+  let (a6,letE) ← expectV2
+    (psKernelExprV2ChunkedMkLet a name b2 app b0 false)
+  a := a6
+  let (a7,mdata) ← expectV2 (psKernelExprV2ChunkedMkMData a 19 app)
+  a := a7
+  let (a8,proj) ← expectV2 (psKernelExprV2ChunkedMkProj a name 1 mdata)
+  a := a8
+  let cases : List (String × Nat) := [
+    ("bvar-zero",b0),("bvar-two",b2),("sort",sort),
+    ("app",app),("lambda",lam),("forall",pi),
+    ("let",letE),("metadata",mdata),("projection",proj)
+  ]
+  let _ ← expectV2 (psKernelExprV2ValidateChunked a)
+  for (label,id) in cases do
+    let old ← expectV2 (psKernelExprV2ChunkedDecode a id)
+    for cutoff in [0,1,2,3] do
+      for amount in [0,1,2] do
+        let expected := psKernelExprLiftLooseBVars old cutoff amount
+        let (transformed,newId) ← expectV2
+          (psKernelExprV2LiftChecked a id cutoff amount)
+        let actual ← expectV2
+          (psKernelExprV2ChunkedDecode transformed newId)
+        requireV2 s!"lift-{label}-cutoff{cutoff}-amount{amount}"
+          (psKernelExprEqual actual expected &&
+            psKernelExprEq actual expected)
+        if amount == 0 then
+          requireV2 s!"lift-zero-allocation-{label}"
+            (transformed.size == a.size && newId == id)
+  IO.println "PSC1_EXPR_V2_LIFT_DIFFERENTIAL: PASS"
+
+private def testSharedLift : IO Unit := do
+  let (initial,leaf) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let mut a := initial
+  let mut root := leaf
+  let depth : Nat := 20
+  for _ in [:depth] do
+    let (next,newId) ← expectV2
+      (psKernelExprV2ChunkedMkApp a root root)
+    a := next
+    root := newId
+  requireV2 "lift-input-shared-node-count"
+    (a.size == depth+1)
+  let (transformed,newRoot) ← expectV2 (psKernelExprV2LiftChecked a root 0 1)
+  let _ ← expectV2 (psKernelExprV2ValidateChunked transformed)
+  let newEntry ← expectV2 (psKernelExprV2ChunkedRequire transformed newRoot)
+  requireV2 "lift-shared-result-depth"
+    (newEntry.depth == depth+1)
+  requireV2 "lift-sharing-bounded-node-growth"
+    (transformed.size <= a.size + depth + 1)
+  let (unchanged,sameId) ← expectV2 (psKernelExprV2LiftChecked a root 0 0)
+  requireV2 "lift-zero-preserves-identity"
+    (unchanged.size == a.size && sameId == root)
+  let valid ← expectV2 (psKernelExprV2ChunkedRequire a leaf)
+  let corrupt : PsKernelExprV2Entry := { valid with looseRange := 0 }
+  let (forged,forgedId) := psKernelExprV2ChunkedPush
+    psKernelExprV2ChunkedEmpty corrupt
+  requireV2 "lift-rejects-unvalidated-metadata"
+    (match psKernelExprV2LiftChecked forged forgedId 0 1 with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  IO.println s!"PSC1_EXPR_V2_LIFT_SHARING: PASS input_nodes={a.size} output_nodes={transformed.size}"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -531,4 +618,6 @@ def main : IO Unit := do
   testIndexedSmartConstructors
   testChunkedSmartConstructors
   testChunkedArena
+  testChunkedLiftDifferential
+  testSharedLift
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

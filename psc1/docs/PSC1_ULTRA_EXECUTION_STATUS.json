@@ -246,7 +246,9 @@
     "psc1/test/TypedErrorFixtures.lean",
     "psc1/test/TypedErrorOracle.lean",
     "psc1/test/TypedErrorTests.lean",
-    "psc1/test/TypedErrorWhileFixture.lean"
+    "psc1/test/TypedErrorWhileFixture.lean",
+    "psc1/test/CensusNormalizationTests.lean",
+    "psc1/docs/PSC1_CENSUS_NORMALIZATION_QUALIFICATION_2026-10-21.json"
   ],
   "toolVersions": {
     "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
@@ -308,5 +310,17 @@
         "retention": "GitHub artifact retention applies; committed receipt does not extend it"
       }
     }
-  }
+  },
+  "changedFilesByCensusContinuation": [
+    ".github/workflows/psc1-architecture-native.yml",
+    "psc1/AI_WORK_STATE.md",
+    "psc1/docs/PSC1_CENSUS_NORMALIZATION_QUALIFICATION_2026-10-21.json",
+    "psc1/docs/PSC1_ULTRA_EXECUTION_STATUS.json",
+    "psc1/lakefile.lean",
+    "psc1/packages/erasure/src/Ps/Erasure/Definition.lean",
+    "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
+    "psc1/scripts/SourceCensusProbe.lean",
+    "psc1/scripts/compiler-source-census.mjs",
+    "psc1/test/CensusNormalizationTests.lean"
+  ]
 }

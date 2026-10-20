@@ -119,3 +119,8 @@ lean_exe psc1_kernel_whole_comparison where
 lean_exe psc1_kernel_hotpath where
   srcDir := "test"
   root := `PsKernelHotpathProfiling
+
+-- Compare official Lean 4.35 closed checking operations against PSC1.
+lean_exe psc1_kernel_matched_official where
+  srcDir := "test"
+  root := `PsKernelMatchedNative

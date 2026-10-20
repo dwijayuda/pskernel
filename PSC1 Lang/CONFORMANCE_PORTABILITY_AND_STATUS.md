@@ -394,8 +394,8 @@ The fixture must run end-to-end, not just parse.
 The JavaScript bootstrap is conceptually:
 
 ```text
-compiler.lean --PSC0--> compiler.ts --tsc--> PSC1.js
-compiler.lean --PSC1--> compiler.ts --tsc--> PSC2.js
+compiler.lean --CompilerGen0--> compiler.ts --tsc--> CompilerGen1.js
+compiler.lean --CompilerGen1--> compiler.ts --tsc--> CompilerGen2.js
 ```
 
 A first core self-host claim requires stability beyond merely executing PSC1.

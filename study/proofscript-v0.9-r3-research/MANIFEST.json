@@ -1,0 +1,190 @@
+{
+  "workstream": "ProofScript v0.9 r3 accepted design",
+  "status": "accepted-design-baseline-not-implementation-release",
+  "branch": "research/proofscript-v0.9-r3",
+  "baseCommit": "65369c75c7b63124f1ba7f2289e573181db281f0",
+  "leanSemantics": {
+    "version": "4.34.0",
+    "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "profiles": [
+    "ps-standard-0.9-r3",
+    "ps-lean-extensible-0.9-r3",
+    "psc2-language-v1",
+    "psc2-standard-language-v1",
+    "lean-subset-psc2-v1",
+    "psc2-pattern-v1"
+  ],
+  "evidence": {
+    "researchSourcesReviewed": true,
+    "productionR3ParserImplemented": false,
+    "productionR3LowererImplemented": false,
+    "standaloneKernelChanged": false,
+    "formalOverlayProofCompleted": false,
+    "backendPreservationSliceCompleted": false,
+    "humanUsabilityStudyRun": false,
+    "referenceApplicationsBuilt": false,
+    "formalProofScope": "research plans only in final branch state; no executable proof artifacts retained",
+    "humanUsabilityStudyProtocolComplete": true,
+    "contractImplementationCompleted": false,
+    "applicationRuntimeImplemented": false,
+    "interfaceIRImporterImplemented": false,
+    "integratedR3CandidateCreated": false,
+    "acceptedR3ReferenceCreated": true
+  },
+  "repositorySafety": {
+    "mainModified": false,
+    "v07Overwritten": false,
+    "v09r2Overwritten": false,
+    "compilerChangedToMatchDocs": false,
+    "kernelChangedToMatchDocs": false
+  },
+  "acceptance": {
+    "acceptedIntoR3": true,
+    "acceptedDate": "2026-10-03",
+    "scope": "language/design documentation baseline",
+    "implementationClaim": false,
+    "proofClaim": false,
+    "humanStudyClaim": false
+  },
+  "acceptedGrammar": "ps-0.9-r3",
+  "specificationCompletion": {
+    "completed": true,
+    "methodology": "documentation research and normative design only",
+    "authorityMap": "embedded in primary reference; companion matrix non-normative",
+    "grammar": "embedded in primary reference",
+    "featureRegistry": "generated mirror of primary reference",
+    "standardRegistry": {
+      "id": "ps-standard-0.9-r3",
+      "path": "generated mirror of primary reference"
+    },
+    "semanticBundle": {
+      "schemaVersion": "psc-semantic-bundle-1.0.0",
+      "doc": "SEMANTIC-BUNDLE-v1.md",
+      "scope": "semantic-import protocol; separate from source-language authority"
+    },
+    "interfaceIR": {
+      "schemaVersion": "proofscript-interface-ir-1.0.0",
+      "doc": "INTERFACEIR-v1.md",
+      "scope": "foreign-binding protocol; separate from source-language authority"
+    },
+    "authorityDoc": "ProofScript_Language_Reference_v0.9.0_r3.md",
+    "contractCore": "embedded in primary reference",
+    "applicationSemantics": {
+      "doc": "08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md",
+      "scope": "Standard library/runtime semantic model; not base source syntax"
+    },
+    "preStableEvidenceGates": {
+      "doc": "23-PRE-STABLE-EVIDENCE-GATES.md",
+      "scope": "release/evidence policy; not source-language authority"
+    },
+    "prompt": "R3-SPEC-COMPLETION-PROMPT.md",
+    "report": "R3-SPEC-COMPLETION-REPORT.md",
+    "emptyCall": {
+      "canonicalLeanRequest": "f ..",
+      "zeroArgFunctionLowering": "def f (_ : Unit := ()) := ...",
+      "omitAllowedExplicitKinds": [
+        "optParam",
+        "autoParam"
+      ],
+      "rejectOrdinaryRequiredExplicit": true
+    },
+    "callGap": {
+      "inheritedHorizontalWhitespace": [
+        "space"
+      ],
+      "comments": "Lean comments with no physical line terminator",
+      "bareLineTerminator": false,
+      "tabsAddedByR3": false
+    },
+    "postPsc2LanguageRoadmap": "POST_PSC2_LANGUAGE_ROADMAP.md",
+    "bracedDefinitionBodies": {
+      "status": "accepted-current-language",
+      "featureId": "D-DECL-BODY-BRACE-R3",
+      "declarations": [
+        "def",
+        "const",
+        "function"
+      ],
+      "unbraced": ":= PSTerm",
+      "braced": ":= { PSTerm }",
+      "semanticRelation": "identical",
+      "statementBlock": false,
+      "implicitReturn": false,
+      "preservesExistingBracedTermOwnership": true
+    },
+    "moduleApi": {
+      "status": "accepted-current-language",
+      "featureId": "M-PUBLIC-IMPORT-R3",
+      "defaultTopLevelVisibility": "public-unless-private",
+      "ordinaryImportReexports": false,
+      "publicImportReexports": true,
+      "publicImportClosure": "transitive",
+      "openReexports": false,
+      "selectiveExportListsInCore": false
+    },
+    "contractBodyGrammar": {
+      "status": "corrected",
+      "rule": "ContractedFunction := FunctionHeader ContractClause* DefinitionBody"
+    }
+  },
+  "primaryReference": {
+    "path": "ProofScript_Language_Reference_v0.9.0_r3.md",
+    "purpose": "sole normative authority for ProofScript source syntax and language semantics",
+    "standalone": true,
+    "companionDocsCanOverrideLanguageMeaning": false,
+    "languageOnly": true,
+    "excludesCompilerImplementationArchitecture": true,
+    "excludesBackendImplementation": true,
+    "excludesReleaseEvidence": true,
+    "excludesInteropProtocolInternals": true,
+    "grammar": "ps-0.9-r3",
+    "semanticPin": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "psc2LanguageProfile": "psc2-language-v1",
+    "psc2StandardLanguageProfile": "psc2-standard-language-v1",
+    "leanCompatibilityProfile": "lean-subset-psc2-v1",
+    "patternProfile": "psc2-pattern-v1",
+    "fullLeanSourceCompatibilityClaim": false,
+    "postPsc2LanguageRoadmap": "POST_PSC2_LANGUAGE_ROADMAP.md"
+  },
+  "compilerProfiles": {
+    "requiredFirstCompiler": "psc2-compiler-v1",
+    "requiredLanguageCapability": "psc2-language-v1",
+    "leanCompatibility": "lean-subset-psc2-v1",
+    "patternProfile": "psc2-pattern-v1",
+    "standardLanguageProfile": "psc2-standard-language-v1",
+    "standardDistribution": "psc2-standard-v1",
+    "generationNaming": [
+      "CompilerGen0",
+      "CompilerGen1",
+      "CompilerGen2",
+      "CompilerGen3"
+    ]
+  },
+  "featureOwnership": [
+    "CORE",
+    "PSC2_FRONTEND",
+    "PSC2_ELAB",
+    "STANDARD_LIBRARY",
+    "STANDARD_PROVER",
+    "STANDARD_EXTENSION",
+    "CONTROLLED_PLUGIN",
+    "LEAN_COMPAT",
+    "HOST_BOUNDARY",
+    "POST_PSC2",
+    "DEFERRED"
+  ],
+  "protocolScopes": {
+    "interfaceIR": "normative interop protocol only; not source-language authority",
+    "semanticBundle": "normative semantic-import protocol only; not source-language authority",
+    "evidenceGates": "release/evidence policy only; not source-language authority",
+    "architecture": "implementation anti-drift guidance only; not source-language authority"
+  },
+  "platformProfiles": {
+    "psc-js-platform-v1": {
+      "status": "planned-platform-profile-not-language-profile",
+      "plan": "../../docs/plans/08_JS_PLATFORM_PROFILE.md",
+      "changesPsc2Language": false
+    }
+  }
+}

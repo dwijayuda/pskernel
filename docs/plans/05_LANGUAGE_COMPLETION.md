@@ -1,5 +1,8 @@
 # ProofScript language completion plan
 
+> **r3 reconciliation note.** This is an implementation/evidence roadmap, not language authority. The standalone r3 reference defines the exact `psc2-language-v1` source closure required by `psc2-compiler-v1`, the `psc2-standard-language-v1` Standard surface, and `lean-subset-psc2-v1`. Items in this plan that are libraries, prover facilities, extensions, host boundaries, platform work, or future language candidates do not become PSC2 core syntax unless a versioned language profile explicitly adds them.
+
+
 Status: **active anti-drift execution plan**
 
 > **Self-hosting priority override (2026-09-24):** this plan is now subordinate
@@ -8,6 +11,10 @@ Status: **active anti-drift execution plan**
 > retirement is promoted ahead of L1-L7 so all new foundation work lands on the
 > one checked-core compiler path. Kernel hardening continues separately on
 > `kernel/lean434-study-hardening`.
+
+## PSC2 language-freeze boundary
+
+On the r3 branch, `psc2-language-v1` should not grow merely to chase TypeScript feature parity. The remaining TypeScript-replacement work is tracked by `08_JS_PLATFORM_PROFILE.md` as `psc-js-platform-v1`: npm/module resolution, `.d.ts` normalization, callbacks/async/resource adapters, Node/Web bindings, package publication, bundler/tooling integration, and representative applications. Language growth requires an independently justified versioned language/extension profile.
 
 Goal:
 

@@ -1,5 +1,18 @@
 # ProofScript self-hosting foundation plan
 
+## r3 language-authority reconciliation
+
+On `research/proofscript-v0.9-r3`, this file is a bootstrap/self-host implementation plan, **not** a competing language specification.
+
+The sole normative source-language authority is:
+
+~~~text
+study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md
+~~~
+
+Historical PSC1 language/reference statements below describe bootstrap implementation history. They MUST NOT override `ps-0.9-r3`, `psc2-language-v1`, `psc2-standard-language-v1`, or `lean-subset-psc2-v1`. The product name `psc2-compiler-v1` requires the complete `psc2-language-v1` source closure.
+
+
 Status: **highest-priority ProofScript execution plan**
 
 This plan supersedes the previous package/infrastructure-first ordering for
@@ -7,6 +20,21 @@ ProofScript work on `main`. The objective is to finish one stable language and
 runtime foundation that can express the ProofScript compiler itself, first in a
 bounded Lean-compatible `.lean` subset and then in native `.ps`, without
 rewriting compiler infrastructure again after self-hosting starts.
+
+## Terminology reconciliation for the r3 branch
+
+On this branch, **PSC2 is reserved for the compiler capability/product profile** `psc2-compiler-v1`, as defined by the standalone r3 language reference.
+
+Historical self-host generation labels such as `PSC0`, `PSC1`, `PSC2`, and `PSC3` are deprecated when they mean successive compiler executables. Use:
+
+~~~text
+CompilerGen0
+CompilerGen1
+CompilerGen2
+CompilerGen3
+~~~
+
+The term `PSC1` below can still describe the historical bootstrap-language/foundation plan where that is genuinely what the section discusses. It must not be interpreted as a compiler-generation number.
 
 Kernel conformance work is intentionally separate. The TypeScript Lean 4.34
 kernel remains an independent checker and continues on the dedicated
@@ -1427,9 +1455,9 @@ kernel proof terms and pskernel remains final authority.
 
 SH8b should cover the tactic subset that ProofScript claims at that point; it
 does not require full Lean tactic parity. Tactic self-hosting must not block the
-first PSC0 -> PSC1 -> PSC2 core-compiler bootstrap.
+first CompilerGen0 -> CompilerGen1 -> CompilerGen2 core-compiler bootstrap.
 
-After PSC2 core stability, prioritize **Meta capability before tactic-name
+After CompilerGen2 core stability, prioritize **Meta capability before tactic-name
 breadth**. The preferred order is:
 
 1. general term holes and stronger implicit/instance handling in
@@ -1450,21 +1478,21 @@ requires them.
 
 ## SH9 — bootstrap in JavaScript
 
-Let PSC0 denote the current TypeScript implementation.
+Let CompilerGen0 denote the current TypeScript implementation.
 
 Required bootstrap:
 
 ```text
-compiler.lean --PSC0--> compiler.ts --tsc--> PSC1.js
-compiler.lean --PSC1--> compiler.ts --tsc--> PSC2.js
+compiler.lean --CompilerGen0--> compiler.ts --tsc--> CompilerGen1.js
+compiler.lean --CompilerGen1--> compiler.ts --tsc--> CompilerGen2.js
 ```
 
 Require equality of checked-core/IR fingerprints and normalized generated
 TypeScript. With a pinned toolchain, byte-stable JavaScript is preferred when
 practical.
 
-Do not claim self-hosting merely because PSC1 executes. The first core
-self-hosting claim requires PSC2 stability for SH8a; full current-language
+Do not claim self-hosting merely because CompilerGen1 executes. The first core
+self-hosting claim requires CompilerGen2 stability for SH8a; full current-language
 self-hosting additionally requires the applicable SH8b tactic/frontend gate.
 
 ## SH10 — make .ps the authoritative compiler source
@@ -1478,8 +1506,8 @@ generated/translated representation.
 The target condition is:
 
 ```text
-compiler.ps   --PSC1--> PSC2
-compiler.ps   --PSC2--> PSC3
+compiler.ps   --CompilerGen1--> CompilerGen2
+compiler.ps   --CompilerGen2--> CompilerGen3
 compiler.ps   --translate--> compiler.lean
 compiler.lean --translate--> compiler.ps
 ```
@@ -1592,7 +1620,7 @@ Unless demanded by an SH gate, defer:
 - extra package-manager features;
 - full Lean syntax/macros/metaprogramming;
 - large proof automation such as `omega`, `aesop`, `grind`, `linarith`,
-  `ring`, `native_decide`, or full Lean `simp` before SH8a/PSC2 stability;
+  `ring`, `native_decide`, or full Lean `simp` before SH8a/CompilerGen2 stability;
 - generalized dependent-pattern compilation beyond the bootstrap need;
 - precise TypeScript higher-kinded-type encodings or a generic HKT host
   framework; bootstrap may erase HKT-dependent host annotations conservatively;

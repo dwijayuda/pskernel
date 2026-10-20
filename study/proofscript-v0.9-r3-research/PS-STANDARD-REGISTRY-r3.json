@@ -1,0 +1,252 @@
+{
+  "schemaVersion": "proofscript-standard-language-registry-1",
+  "registryId": "ps-standard-0.9-r3",
+  "grammarRevision": "ps-0.9-r3",
+  "semanticPin": {
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "authority": "ProofScript_Language_Reference_v0.9.0_r3.md",
+  "languageCapabilityProfile": "psc2-language-v1",
+  "standardLanguageProfile": "psc2-standard-language-v1",
+  "leanCompatibilityProfile": "lean-subset-psc2-v1",
+  "patternProfile": "psc2-pattern-v1",
+  "closedGrammar": true,
+  "dependencyMayMutateGrammar": false,
+  "allowedSurfaceFeatures": [
+    "M-PUBLIC-IMPORT-R3",
+    "E-CALL-PARENS-R3",
+    "E-EMPTY-CALL-R3",
+    "D-NAMED-CALL",
+    "D-TRAILING-COMMA-CALL",
+    "D-TRAILING-COMMA-PARAMS",
+    "D-CONST-ALIAS",
+    "D-FUNCTION-ALIAS-R3",
+    "D-FUNCTION-UNIT-R3",
+    "D-DECL-BODY-BRACE-R3",
+    "D-EXPLICIT-PARAMS",
+    "E-IF-BRACE",
+    "E-STRUCT-BODY-R3",
+    "E-CLASS-BODY-R3",
+    "E-INDUCTIVE-BODY-R3",
+    "E-MATCH-BODY-R3",
+    "E-INSTANCE-BODY-R3",
+    "E-WHERE-BODY-R3",
+    "N-BASIC-DO-PSC2",
+    "S-PURE-CONTRACT-R3"
+  ],
+  "allowedCommandHeads": [
+    "import",
+    "namespace",
+    "end",
+    "section",
+    "variable",
+    "include",
+    "omit",
+    "open",
+    "universe",
+    "def",
+    "function",
+    "const",
+    "theorem",
+    "example",
+    "abbrev",
+    "opaque",
+    "axiom",
+    "structure",
+    "class",
+    "inductive",
+    "instance",
+    "mutual",
+    "attribute",
+    "set_option"
+  ],
+  "allowedDeclarationModifiers": [
+    "private",
+    "partial",
+    "noncomputable"
+  ],
+  "excludedDeclarationModifiers": [
+    "unsafe"
+  ],
+  "allowedTermFamilies": [
+    "identifier",
+    "literal",
+    "parenthesized",
+    "tuple",
+    "application",
+    "namedArgument",
+    "fieldNotation",
+    "lambda",
+    "let",
+    "if",
+    "match",
+    "do",
+    "record",
+    "recordUpdate",
+    "projection",
+    "typeAscription",
+    "dependentFunction",
+    "forall",
+    "exists",
+    "proofTerm",
+    "calc",
+    "have",
+    "show",
+    "suffices"
+  ],
+  "patternFamilies": [
+    "variable",
+    "wildcard",
+    "constructor",
+    "nested-constructor",
+    "tuple-product",
+    "supported-literal",
+    "single-scrutinee-match"
+  ],
+  "basicDoProfile": {
+    "semantics": "selected native Bind/Pure sequencing",
+    "requiredForms": [
+      "term-statement",
+      "simple-let",
+      "identifier-or-wildcard-monadic-bind",
+      "return-or-pure-completion"
+    ],
+    "excludedForms": [
+      "refutable-pattern-bind",
+      "let-mut",
+      "assignment",
+      "for",
+      "while",
+      "break",
+      "continue"
+    ]
+  },
+  "fixedTacticHeads": [
+    "rfl",
+    "exact",
+    "exact?",
+    "apply",
+    "refine",
+    "intro",
+    "intros",
+    "assumption",
+    "constructor",
+    "cases",
+    "induction",
+    "rw",
+    "simp",
+    "simpa",
+    "simp_all",
+    "unfold",
+    "change",
+    "dsimp",
+    "have",
+    "show",
+    "suffices",
+    "by_cases",
+    "by_contra",
+    "exfalso",
+    "subst",
+    "generalize",
+    "rcases",
+    "rintro",
+    "obtain",
+    "use",
+    "ext",
+    "decide",
+    "omega",
+    "grind"
+  ],
+  "dependencyMayAddTacticSyntax": false,
+  "allowedAttributeNames": [
+    "simp",
+    "instance",
+    "default_instance",
+    "inline",
+    "macro_inline",
+    "reducible",
+    "irreducible",
+    "deprecated",
+    "inherit_doc",
+    "pp_nodot"
+  ],
+  "dependencyMayRegisterAttributeHandler": false,
+  "optionPolicy": {
+    "allowed": "options selected by the fixed Standard registration closure",
+    "unknown": "reject",
+    "dependencyMayRegisterOption": false
+  },
+  "operatorPolicy": {
+    "source": "fixed Standard registration closure",
+    "dependencyMayAddOperatorNotation": false,
+    "propositionEquality": "=",
+    "booleanEquality": "=="
+  },
+  "forbiddenDynamicSyntaxHeads": [
+    "syntax",
+    "macro",
+    "macro_rules",
+    "elab",
+    "elab_rules",
+    "declare_syntax_cat",
+    "notation",
+    "infix",
+    "infixl",
+    "infixr",
+    "prefix",
+    "postfix"
+  ],
+  "quotationPolicy": "not-in-standard-source",
+  "toolingCommandHeads": [
+    "#check",
+    "#print",
+    "#reduce",
+    "#eval"
+  ],
+  "toolingCommandsAreLanguage": false,
+  "fixedTacticVariants": [
+    "simp only"
+  ],
+  "fixedProofCommandHeads": [
+    "classical"
+  ],
+  "nonStandardAutomation": [
+    "ring",
+    "linarith",
+    "SMT",
+    "AI/general proof search"
+  ],
+  "definitionBodyPolicy": {
+    "declarations": [
+      "def",
+      "const",
+      "function"
+    ],
+    "forms": [
+      ":= PSTerm",
+      ":= { PSTerm }"
+    ],
+    "bracedFormMeaning": "single-term wrapper semantically identical to unbraced body",
+    "statementBlock": false,
+    "implicitReturn": false,
+    "unrelatedAdjacentTerms": false,
+    "completeBracedTermOwnership": "preserved",
+    "wrappedRecordLiteralRequiresDoubleBrace": true
+  },
+  "allowedImportModifiers": [
+    "public"
+  ],
+  "moduleApiPolicy": {
+    "ordinaryTopLevelDeclarationVisibility": "public-unless-private",
+    "ordinaryImportReexports": false,
+    "publicImportReexports": true,
+    "publicImportClosure": "transitive-public-import-closure",
+    "privateDeclarationsReexported": false,
+    "openAffectsExports": false,
+    "selectiveExportListsInCore": false,
+    "defaultExportsInCore": false,
+    "namespaceExportsInCore": false,
+    "curatedApiPattern": "facade module with public declarations or public imports"
+  }
+}

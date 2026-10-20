@@ -1,0 +1,118 @@
+name: PSC1 isolated source optimization memory ablation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/psc1-pskernel-core-cross-branch-20261020
+    paths:
+      - .github/workflows/psc1-pskernel-js-ablation.yml
+      - psc1/scripts/pskernel-js-ablation-report.mjs
+      - psc1/scripts/pskernel-js-memory-probe.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  source-ablation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      BASE_KERNEL_SHA: 0a53836489c4e88f46df8f5b8b0c19cc41bafbbb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean and isolated TypeScript 7
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          mkdir -p "$RUNNER_TEMP/psc1-ablation-ts" "$RUNNER_TEMP/psc1-ablation"
+          echo '{"name":"psc1-kernel-ablation","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-ablation-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-ablation-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-ablation-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+          git cat-file -e "$BASE_KERNEL_SHA^{commit}"
+      - name: Build a single immutable PSC1 compiler
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake build psc1
+          sha256sum .lake/build/bin/psc1 | tee "$RUNNER_TEMP/psc1-ablation/compiler.sha256"
+      - name: Check and build five independently sourced kernel variants
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES=(
+            psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Beta.lean
+            psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean
+            psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Instantiate.lean
+            psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Lift.lean
+          )
+          for variant in original optimized no-beta no-instantiate no-lift; do
+            git restore --source=HEAD --worktree -- "${FILES[@]}"
+            case "$variant" in
+              original)
+                for f in "${FILES[@]}"; do git show "$BASE_KERNEL_SHA:$f" > "$f"; done ;;
+              no-beta)
+                for f in "${FILES[@]:0:2}"; do git show "$BASE_KERNEL_SHA:$f" > "$f"; done ;;
+              no-instantiate)
+                git show "$BASE_KERNEL_SHA:${FILES[2]}" > "${FILES[2]}" ;;
+              no-lift)
+                git show "$BASE_KERNEL_SHA:${FILES[3]}" > "${FILES[3]}" ;;
+              optimized) ;;
+            esac
+            git diff --name-only HEAD -- psc1/ |
+              tee "$RUNNER_TEMP/psc1-ablation/$variant-source-diff.txt"
+            if git diff --name-only HEAD -- psc1/ |
+                grep -vE '^psc1/packages/pskernel-core/src/Ps/KernelCore/(Core/Substitution/(Beta|Instantiate|Lift)|Checker/Reduction/WhnfCore)\.lean$' ; then
+              echo 'ABORT: unexpected change to compiler or unrelated kernel source' >&2; exit 1
+            fi
+            (cd psc1 &&
+              lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean &&
+              lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+                --out "dist/ablation/$variant.js" )
+            test -s "psc1/dist/ablation/$variant.js"
+            node --check "psc1/dist/ablation/$variant.js"
+            stat -c "$variant=%s" "psc1/dist/ablation/$variant.js" \
+              >> "$RUNNER_TEMP/psc1-ablation/module-sizes.txt"
+            sha256sum psc1/.lake/build/bin/psc1 \
+              >> "$RUNNER_TEMP/psc1-ablation/compiler-snapshots.sha256"
+          done
+          git restore --source=HEAD --worktree -- "${FILES[@]}"
+          test -z "$(git diff --name-only HEAD -- psc1/)"
+          printf 'original=%s\noptimized=%s\n' "$BASE_KERNEL_SHA" "$GITHUB_SHA" \
+            > "$RUNNER_TEMP/psc1-ablation/refs.txt"
+      - name: Run isolated checker correctness and memory twice per source variant
+        shell: bash
+        run: |
+          set -euo pipefail
+          for operation in whnf_beta defeq_positive checked_application_16 admit_ordinary_inductive admit_mutual_inductive; do
+            for variant in original optimized no-lift no-instantiate no-beta; do
+              for repetition in 1 2; do
+                label=optimized
+                if [ "$variant" = original ]; then label=original; fi
+                node --expose-gc \
+                  psc1/scripts/pskernel-js-memory-probe.mjs \
+                  "$GITHUB_WORKSPACE/psc1/dist/ablation/$variant.js" \
+                  "$label" "$operation" \
+                  | tee "$RUNNER_TEMP/psc1-ablation/$variant-$operation-$repetition.log"
+              done
+            done
+          done
+      - name: Require comparable correct verdicts and report source ablation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node psc1/scripts/pskernel-js-ablation-report.mjs "$RUNNER_TEMP/psc1-ablation"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-source-ablation-js-memory
+          path: ${{ runner.temp }}/psc1-ablation/
+          retention-days: 30

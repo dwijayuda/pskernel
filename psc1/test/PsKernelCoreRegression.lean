@@ -78,6 +78,23 @@ private def requireLiftParity (caseName : String) (term : PsKernelExpr)
       Prod.snd before == Prod.snd after)
 
 def main : IO Unit := do
+  let oldNativeName := PsKernelExpr.const psKernelReduceBoolName List.nil
+  let oldTarget := PsKernelExpr.const
+    (PsKernelName.str PsKernelName.anonymous "nativeMarkerTarget") List.nil
+  let legacyNative := PsKernelExpr.app oldNativeName oldTarget
+  let deniedNative : PsKernelNativeEvaluator := {
+    evalBool := fun _ => Except.error "obsolete Lean 4.34 evaluator must not run"
+    evalNat := fun _ => Except.error "obsolete Lean 4.34 evaluator must not run"
+  }
+  let testNativeContext :=
+    psKernelCheckerContextWithNativeEvaluator
+      (psKernelCheckerContextEmpty psKernelEnvironmentEmpty)
+      (Option.some deniedNative)
+  requireKernel "Lean 4.35 native evaluator is not a kernel reduction"
+    (match psKernelReduceNative testNativeContext legacyNative with
+      | Except.ok Option.none => true
+      | _ => false)
+
   let fName := PsKernelName.str PsKernelName.anonymous "bound"
   let localExpr := PsKernelExpr.fvar fName
   let closed := PsKernelExpr.sort PsKernelLevel.zero
@@ -221,9 +238,9 @@ def main : IO Unit := do
   requireLiftParity "C0 lift nested binders high cutoff" twoLams 4 3
   let sample := "héllo"
   let p := String.Pos.Raw.mk 0
-  requireKernel "Lean 4.34 string atEnd alias parity"
+  requireKernel "Lean 4.35 string atEnd alias parity"
     (String.Pos.Raw.atEnd sample p == String.Internal.atEnd sample p)
-  requireKernel "Lean 4.34 UTF-8 next alias parity"
+  requireKernel "Lean 4.35 UTF-8 next alias parity"
     (String.Pos.Raw.byteIdx (String.Pos.Raw.next sample p) ==
       String.Pos.Raw.byteIdx (String.Internal.next sample p))
   requireKernel "Nat maximum shim matches pinned Lean"

@@ -174,17 +174,17 @@ def psKernelEagerReduceName : PsKernelName :=
     PsKernelName.anonymous
     "eagerReduce"
 
+/-
+Lean 4.35.0 removed Lean.reduceBool/Lean.reduceNat and their kernel reduction
+hook (#14953). The historical optional callback remains in the source API
+for now, but must NEVER contribute to definitional equality or WHNF.
+No native value is accepted as a checking result.
+-/
 def psKernelReduceNative
-    (context : PsKernelCheckerContext)
-    (expr : PsKernelExpr) :
+    (_context : PsKernelCheckerContext)
+    (_expr : PsKernelExpr) :
     Except String (Option PsKernelExpr) :=
-  psKernelReduceNativeWith
-    context.nativeEvaluator
-    psKernelReduceBoolName
-    psKernelReduceNatName
-    psKernelBoolTrueName
-    psKernelBoolFalseName
-    expr
+  Except.ok Option.none
 
 def psKernelNatZeroName : PsKernelName :=
   PsKernelName.str

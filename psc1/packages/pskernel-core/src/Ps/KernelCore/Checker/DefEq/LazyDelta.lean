@@ -1,18 +1,18 @@
 import Ps.KernelCore.Checker.DefEq.DeltaStep
 
 /-
-Lean 4.34 iterative lazy-delta and projection-sensitive definitional equality.
+Lean 4.35.0 iterative lazy-delta and projection-sensitive definitional equality.
 
 PSK-DEFEQ-DELTA
 
 Algorithmic equality is intentionally incomplete and non-transitive, so the
 order of reductions is observable. This module orchestrates repeated
-single-step delta decisions with Nat/native reduction and projection-sensitive
+single-step delta decisions with Nat reduction and projection-sensitive
 comparison.
 
 Single-step definition selection/unfold ordering lives in `DeltaStep.lean`.
 
-Lean 4.34:
+Lean 4.35.0:
   src/kernel/type_checker.cpp::lazy_delta_reduction
   src/kernel/type_checker.cpp::lazy_delta_proj_reduction
 -/
@@ -46,83 +46,41 @@ def psKernelDefEqNativeThenLazyStep
     (right : PsKernelExpr) :
     Except String
       (Prod PsKernelDeltaResult PsKernelCheckerState) :=
-  match psKernelReduceNative context left with
+  -- Legacy helper name retained for the 79-module PSC1 source closure.
+  -- Lean 4.35 no longer dispatches untrusted native reduction callbacks.
+  match
+      psKernelDefEqLazyStep
+        defeq
+        coreWhnf
+        context
+        state
+        left
+        right with
   | Except.error error =>
       Except.error error
-  | Except.ok leftNative =>
-      match leftNative with
-      | Option.some value =>
-          match
-              defeq
-                context
-                state
-                value
-                right with
-          | Except.error error =>
-              Except.error error
-          | Except.ok result =>
-              Except.ok
-                (Prod.mk
-                  (PsKernelDeltaResult.decided
-                    (Prod.fst result))
-                  (Prod.snd result))
-      | Option.none =>
-          match psKernelReduceNative context right with
-          | Except.error error =>
-              Except.error error
-          | Except.ok rightNative =>
-              match rightNative with
-              | Option.some value =>
-                  match
-                      defeq
-                        context
-                        state
-                        left
-                        value with
-                  | Except.error error =>
-                      Except.error error
-                  | Except.ok result =>
-                      Except.ok
-                        (Prod.mk
-                          (PsKernelDeltaResult.decided
-                            (Prod.fst result))
-                          (Prod.snd result))
-              | Option.none =>
-                  match
-                      psKernelDefEqLazyStep
-                        defeq
-                        coreWhnf
-                        context
-                        state
-                        left
-                        right with
-                  | Except.error error =>
-                      Except.error error
-                  | Except.ok stepResult =>
-                      match Prod.fst stepResult with
-                      | PsKernelDeltaStepResult.continue nextLeft nextRight =>
-                          resume
-                            context
-                            (Prod.snd stepResult)
-                            nextLeft
-                            nextRight
-                      | PsKernelDeltaStepResult.unknown nextLeft nextRight =>
-                          Except.ok
-                            (Prod.mk
-                              (PsKernelDeltaResult.residual
-                                nextLeft
-                                nextRight)
-                              (Prod.snd stepResult))
-                      | PsKernelDeltaStepResult.equal =>
-                          Except.ok
-                            (Prod.mk
-                              (PsKernelDeltaResult.decided true)
-                              (Prod.snd stepResult))
-                      | PsKernelDeltaStepResult.different _ _ =>
-                          Except.ok
-                            (Prod.mk
-                              (PsKernelDeltaResult.decided false)
-                              (Prod.snd stepResult))
+  | Except.ok stepResult =>
+      match Prod.fst stepResult with
+      | PsKernelDeltaStepResult.continue nextLeft nextRight =>
+          resume
+            context
+            (Prod.snd stepResult)
+            nextLeft
+            nextRight
+      | PsKernelDeltaStepResult.unknown nextLeft nextRight =>
+          Except.ok
+            (Prod.mk
+              (PsKernelDeltaResult.residual nextLeft nextRight)
+              (Prod.snd stepResult))
+      | PsKernelDeltaStepResult.equal =>
+          Except.ok
+            (Prod.mk
+              (PsKernelDeltaResult.decided true)
+              (Prod.snd stepResult))
+      | PsKernelDeltaStepResult.different _ _ =>
+          Except.ok
+            (Prod.mk
+              (PsKernelDeltaResult.decided false)
+              (Prod.snd stepResult))
 
 def psKernelDefEqLazyReductionAfterPred
     (resume :

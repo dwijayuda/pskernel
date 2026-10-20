@@ -1572,6 +1572,195 @@ private def testPagedLiftDifferential : IO Unit := do
       | Except.ok _ => false)
   IO.println "PSC1_EXPR_V2_PAGED_LIFT: PASS cases=108"
 
+
+/-
+Paged M3 instantiation against existing trusted PsKernelExpr instantiate1
+AND the qualified V2 chunked worker. Both reconstructions are independent.
+Differential cases cover binder depth, nondep let, projections, metadata,
+open replacements, closed replacements, FVars, and repeated shared Apps.
+-/
+private def testPagedInstantiateDifferential : IO Unit := do
+  let n := PsKernelName.str PsKernelName.anonymous "pagedInst"
+  let mut chunked := psKernelExprV2ChunkedEmpty
+  let mut paged := psKernelExprV2PagedEmpty
+  let (c0,b0) ← expectV2 (psKernelExprV2ChunkedMkBVar chunked 0)
+  let (p0,q0) ← expectV2 (psKernelExprV2PagedMkBVar paged 0)
+  chunked := c0
+  paged := p0
+  let (c1,b1) ← expectV2 (psKernelExprV2ChunkedMkBVar chunked 1)
+  let (p1,q1) ← expectV2 (psKernelExprV2PagedMkBVar paged 1)
+  chunked := c1
+  paged := p1
+  let (c2,b2) ← expectV2 (psKernelExprV2ChunkedMkBVar chunked 2)
+  let (p2,q2) ← expectV2 (psKernelExprV2PagedMkBVar paged 2)
+  chunked := c2
+  paged := p2
+  let (c3,sort) ← expectV2
+    (psKernelExprV2ChunkedMkSort chunked PsKernelLevel.zero)
+  let (p3,pageSort) ← expectV2
+    (psKernelExprV2PagedMkSort paged PsKernelLevel.zero)
+  chunked := c3
+  paged := p3
+  let (c4,fv) ← expectV2 (psKernelExprV2ChunkedMkFVar chunked n)
+  let (p4,pageFVar) ← expectV2 (psKernelExprV2PagedMkFVar paged n)
+  chunked := c4
+  paged := p4
+  let (c5,app) ← expectV2 (psKernelExprV2ChunkedMkApp chunked b0 b2)
+  let (p5,pageApp) ← expectV2 (psKernelExprV2PagedMkApp paged q0 q2)
+  chunked := c5
+  paged := p5
+  let (c6,lam) ← expectV2
+    (psKernelExprV2ChunkedMkLam chunked n sort app PsKernelBinderInfo.default)
+  let (p6,pageLam) ← expectV2
+    (psKernelExprV2PagedMkLam paged n pageSort pageApp PsKernelBinderInfo.default)
+  chunked := c6
+  paged := p6
+  let (c7,piNode) ← expectV2
+    (psKernelExprV2ChunkedMkForall chunked n b2 app PsKernelBinderInfo.implicit)
+  let (p7,pagePi) ← expectV2
+    (psKernelExprV2PagedMkForall paged n q2 pageApp PsKernelBinderInfo.implicit)
+  chunked := c7
+  paged := p7
+  let (c8,letE) ← expectV2
+    (psKernelExprV2ChunkedMkLet chunked n b2 app b1 false)
+  let (p8,pageLet) ← expectV2
+    (psKernelExprV2PagedMkLet paged n q2 pageApp q1 false)
+  chunked := c8
+  paged := p8
+  let (c9,mdata) ← expectV2 (psKernelExprV2ChunkedMkMData chunked 9 app)
+  let (p9,pageMData) ← expectV2 (psKernelExprV2PagedMkMData paged 9 pageApp)
+  chunked := c9
+  paged := p9
+  let (c10,proj) ← expectV2
+    (psKernelExprV2ChunkedMkProj chunked n 1 mdata)
+  let (p10,pageProj) ← expectV2
+    (psKernelExprV2PagedMkProj paged n 1 pageMData)
+  chunked := c10
+  paged := p10
+  let (c11,shared) ← expectV2 (psKernelExprV2ChunkedMkApp chunked app app)
+  let (p11,pageShared) ← expectV2 (psKernelExprV2PagedMkApp paged pageApp pageApp)
+  chunked := c11
+  paged := p11
+  let cases : List (String × Nat × Nat) := [
+    ("bvar0",b0,q0),("bvar1",b1,q1),("bvar2",b2,q2),
+    ("sort",sort,pageSort),("fvar",fv,pageFVar),
+    ("app",app,pageApp),("lambda",lam,pageLam),
+    ("forall",piNode,pagePi),("let",letE,pageLet),
+    ("mdata",mdata,pageMData),("projection",proj,pageProj),
+    ("shared-app",shared,pageShared)
+  ]
+  let replacements : List (String × Nat × Nat) := [
+    ("sort",sort,pageSort),("bvar2",b2,q2),
+    ("open-app",app,pageApp),("fvar",fv,pageFVar)
+  ]
+  let _ ← expectV2 (psKernelExprV2PagedValidate paged)
+  for (label,chunkId,pageId) in cases do
+    let old ← expectV2 (psKernelExprV2ChunkedDecode chunked chunkId)
+    for (replLabel,chunkRepl,pageRepl) in replacements do
+      let oldRepl ← expectV2 (psKernelExprV2ChunkedDecode chunked chunkRepl)
+      let expected := psKernelExprInstantiate1 old oldRepl
+      let (chunkOut,chunkRoot) ← expectV2
+        (psKernelExprV2PortableInstantiate1Checked chunked chunkId chunkRepl)
+      let (pageOut,pageRoot) ← expectV2
+        (psKernelExprV2PagedInstantiate1Checked paged pageId pageRepl)
+      let chunkExpr ← expectV2 (psKernelExprV2ChunkedDecode chunkOut chunkRoot)
+      let pageExpr ← psKernelExprV2DecodePagedForTest pageOut pageRoot
+      requireV2 s!"paged-inst-legacy-{label}-{replLabel}"
+        (psKernelExprEqual pageExpr expected &&
+          psKernelExprEq pageExpr expected)
+      requireV2 s!"paged-inst-chunked-{label}-{replLabel}"
+        (psKernelExprEqual pageExpr chunkExpr &&
+          psKernelExprEq pageExpr chunkExpr)
+  requireV2 "paged-inst-invalid-root"
+    (match psKernelExprV2PagedInstantiate1Checked paged 9999 pageSort with
+      | Except.error _ => true | Except.ok _ => false)
+  requireV2 "paged-inst-invalid-replacement"
+    (match psKernelExprV2PagedInstantiate1Checked paged pageApp 9999 with
+      | Except.error _ => true | Except.ok _ => false)
+  let valid ← expectV2 (psKernelExprV2PagedRequire paged q0)
+  let fake : PsKernelExprV2Entry := { valid with looseRange := 0 }
+  let (forged,root) := psKernelExprV2PagedPush psKernelExprV2PagedEmpty fake
+  requireV2 "paged-inst-forged-loose-range"
+    (match psKernelExprV2PagedInstantiate1Checked forged root root with
+      | Except.error _ => true | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_PAGED_INSTANTIATE: PASS cases=48"
+
+private def testPagedHeadMachine : IO Unit := do
+  let n := PsKernelName.str PsKernelName.anonymous "pagedHead"
+  let (c0,b0) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let (p0,q0) ← expectV2
+    (psKernelExprV2PagedMkBVar psKernelExprV2PagedEmpty 0)
+  let (c1,sort) ← expectV2
+    (psKernelExprV2ChunkedMkSort c0 PsKernelLevel.zero)
+  let (p1,pageSort) ← expectV2
+    (psKernelExprV2PagedMkSort p0 PsKernelLevel.zero)
+  let (c2,lam) ← expectV2
+    (psKernelExprV2ChunkedMkLam c1 n sort b0 PsKernelBinderInfo.default)
+  let (p2,pageLam) ← expectV2
+    (psKernelExprV2PagedMkLam p1 n pageSort q0 PsKernelBinderInfo.default)
+  let (c3,beta) ← expectV2
+    (psKernelExprV2ChunkedMkApp c2 lam sort)
+  let (p3,pageBeta) ← expectV2
+    (psKernelExprV2PagedMkApp p2 pageLam pageSort)
+  let (c4,metadata) ← expectV2
+    (psKernelExprV2ChunkedMkMData c3 17 beta)
+  let (p4,pageMetadata) ← expectV2
+    (psKernelExprV2PagedMkMData p3 17 pageBeta)
+  let (c5,outerLet) ← expectV2
+    (psKernelExprV2ChunkedMkLet c4 n sort sort metadata false)
+  let (p5,pageOuterLet) ← expectV2
+    (psKernelExprV2PagedMkLet p4 n pageSort pageSort pageMetadata false)
+  let (chunkOut,chunkRoot) ← expectV2
+    (psKernelExprV2PortableHeadMachineChecked 4 c5 outerLet)
+  let (pageOut,pageRoot) ← expectV2
+    (psKernelExprV2PagedHeadMachineChecked 4 p5 pageOuterLet)
+  let chunkExpr ← expectV2 (psKernelExprV2ChunkedDecode chunkOut chunkRoot)
+  let pageExpr ← psKernelExprV2DecodePagedForTest pageOut pageRoot
+  requireV2 "paged-head-beta-zeta-mdata-equal"
+    (psKernelExprEqual chunkExpr pageExpr &&
+      psKernelExprEq pageExpr (PsKernelExpr.sort PsKernelLevel.zero))
+  requireV2 "paged-head-step-budget-enforced"
+    (match psKernelExprV2PagedHeadMachineChecked 3 p5 pageOuterLet with
+      | Except.error _ => true | Except.ok _ => false)
+  requireV2 "paged-head-invalid-root"
+    (match psKernelExprV2PagedHeadMachineChecked 4 p5 99999 with
+      | Except.error _ => true | Except.ok _ => false)
+  let valid ← expectV2 (psKernelExprV2PagedRequire p5 pageOuterLet)
+  let falseEntry : PsKernelExprV2Entry := {
+    valid with hasFVar := true
+  }
+  let (bad,badRoot) := psKernelExprV2PagedPush
+    psKernelExprV2PagedEmpty falseEntry
+  requireV2 "paged-head-forged-metadata-rejected"
+    (match psKernelExprV2PagedHeadMachineChecked 4 bad badRoot with
+      | Except.error _ => true | Except.ok _ => false)
+  for depth in [1,8,24,48] do
+    let mut old := c1
+    let mut fresh := p1
+    let mut oldRoot := sort
+    let mut freshRoot := pageSort
+    for _ in [:depth] do
+      let (next,idx) ← expectV2
+        (psKernelExprV2ChunkedMkLet old n sort sort oldRoot false)
+      let (newPage,pageIdx) ← expectV2
+        (psKernelExprV2PagedMkLet fresh n pageSort pageSort freshRoot false)
+      old := next
+      fresh := newPage
+      oldRoot := idx
+      freshRoot := pageIdx
+    let (oldOutput,oldResult) ← expectV2
+      (psKernelExprV2PortableHeadMachineChecked (depth+1) old oldRoot)
+    let (newOutput,newResult) ← expectV2
+      (psKernelExprV2PagedHeadMachineChecked (depth+1) fresh freshRoot)
+    requireV2 s!"paged-head-depth-{depth}-identical-result"
+      (oldResult == sort && newResult == pageSort &&
+        oldOutput.size == old.size && newOutput.size == fresh.size)
+    requireV2 s!"paged-head-depth-{depth}-insufficient-budget"
+      (match psKernelExprV2PagedHeadMachineChecked depth fresh freshRoot with
+        | Except.error _ => true | Except.ok _ => false)
+  IO.println "PSC1_EXPR_V2_PAGED_HEAD: PASS depths=1,8,24,48"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -1586,6 +1775,8 @@ def main : IO Unit := do
   testPagedArena
   testPagedSharedAppSpines
   testPagedLiftDifferential
+  testPagedInstantiateDifferential
+  testPagedHeadMachine
   testChunkedLiftDifferential
   testSharedLift
   testPortableInstantiation

@@ -12,6 +12,8 @@ import Ps.KernelCore.Research.ExprV2PortableEqualityBatch
 import Ps.KernelCore.Research.ExprV2PortableImport
 import Ps.KernelCore.Research.ExprV2PagedValidation
 import Ps.KernelCore.Research.ExprV2PagedLift
+import Ps.KernelCore.Research.ExprV2PagedInstantiate
+import Ps.KernelCore.Research.ExprV2PagedHeadMachine
 
 /- Test-only composition root to compile every V2 storage model with the real PSC1 compiler. -/
 def psKernelExprV2ResearchAllPresent : Bool := true

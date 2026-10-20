@@ -48,6 +48,12 @@ const pagedPush=load("psKernelExprV2PagedPush");
 const pagedFind=load("psKernelExprV2PagedFind");
 const pagedValidate=load("psKernelExprV2PagedValidate");
 const pagedLift=load("psKernelExprV2PagedLiftChecked");
+const pagedInst=load("psKernelExprV2PagedInstantiate1Checked");
+const pagedHead=load("psKernelExprV2PagedHeadMachineChecked");
+const pagedMkLam=load("psKernelExprV2PagedMkLam");
+const pagedMkLet=load("psKernelExprV2PagedMkLet");
+const pagedMkMData=load("psKernelExprV2PagedMkMData");
+const pagedMkSort=load("psKernelExprV2PagedMkSort");
 const pagedMkBVar=load("psKernelExprV2PagedMkBVar");
 const pagedMkApp=load("psKernelExprV2PagedMkApp");
 const legacyExpr=load("PsKernelExpr");
@@ -418,6 +424,72 @@ const badPagedResult=pagedValidate(badPagedLayout);
 demand(badPagedResult&&"error" in badPagedResult,
   "paged-malformed-layout-rejected");
 
+
+
+
+// Semantic-pilot parity: construct equivalent direct beta/zeta/mdata terms
+// using independent paged builders and the qualified chunked reference.
+const piLeaf=accepted(pagedMkBVar(pagedEmptyWithLimit(64n),0n),
+  "paged-inst-leaf");
+const piSort=accepted(pagedMkSort(piLeaf.fst,level.zero),"paged-inst-sort");
+const piLam=accepted(pagedMkLam(piSort.fst,nameConstructors.anonymous,
+  piSort.snd,piLeaf.snd,binderConstructors.default),"paged-inst-lambda");
+const piBeta=accepted(pagedMkApp(piLam.fst,piLam.snd,piSort.snd),
+  "paged-inst-beta");
+const piInst=accepted(pagedInst(piBeta.fst,piLeaf.snd,piSort.snd),
+  "paged-inst-substitution");
+demand(piInst.snd===piSort.snd,"paged-inst-identity-beta");
+const piMetadata=accepted(pagedMkMData(piBeta.fst,7n,piBeta.snd),
+  "paged-head-metadata");
+const piOuter=accepted(pagedMkLet(piMetadata.fst,nameConstructors.anonymous,
+  piSort.snd,piSort.snd,piMetadata.snd,false),"paged-head-outer-let");
+const piResult=accepted(pagedHead(4n,piOuter.fst,piOuter.snd),
+  "paged-head-beta-zeta-mdata");
+demand(piResult.snd===piSort.snd &&
+  piResult.fst.size===piOuter.fst.size,
+  "paged-head-checked-result");
+const piFuel=pagedHead(3n,piOuter.fst,piOuter.snd);
+demand(piFuel&&"error" in piFuel,"paged-head-fuel-rejected");
+const piBadInst=pagedInst(forgedPaged,0n,0n);
+const piBadHead=pagedHead(4n,forgedPaged,0n);
+demand(piBadInst&&"error" in piBadInst &&
+  piBadHead&&"error" in piBadHead,"paged-semantic-forged-rejected");
+const piInvalid=pagedInst(piOuter.fst,9999n,piSort.snd);
+demand(piInvalid&&"error" in piInvalid,"paged-inst-invalid-root-rejected");
+
+const pagedHeadTimings=[];
+for(const depth of [8,24,48]){
+  function make(kind){
+    const isPaged=kind==="paged";
+    let start=accepted(isPaged?
+      pagedMkSort(pagedEmptyWithLimit(64n),level.zero):
+      chunkedMkSort(chunkedEmptyWithLimit(64n),level.zero),
+      "paged-head-sort");
+    const sortId=start.snd;
+    for(let i=0;i<depth;i++){
+      start=accepted(isPaged?
+        pagedMkLet(start.fst,nameConstructors.anonymous,
+          sortId,sortId,start.snd,false):
+        chunkedMkLet(start.fst,nameConstructors.anonymous,
+          sortId,sortId,start.snd,false),"paged-head-nested-let");
+    }
+    return {arena:start.fst,root:start.snd,sort:sortId};
+  }
+  const chunk=make("chunked"),page=make("paged");
+  for(const kind of ["chunked","paged","paged","chunked"]){
+    const input=kind==="paged"?page:chunk;
+    const begin=performance.now();
+    const result=accepted(
+      (kind==="paged"?pagedHead:portableHeadMachine)(
+        BigInt(depth+1),input.arena,input.root),"paged-head-benchmark");
+    const ms=performance.now()-begin;
+    if(result.snd!==input.sort||result.fst.size!==input.arena.size)
+      throw Error("PSC1_V2_PAGED_HEAD_BENCH_PARITY "+depth+" "+kind);
+    pagedHeadTimings.push({kind,depth,ms:Number(ms.toFixed(3)),
+      input_nodes:Number(input.arena.size),output_nodes:Number(result.fst.size)});
+  }
+}
+console.log("PSC1_EXPR_V2_PAGED_HEAD_TIMINGS "+JSON.stringify(pagedHeadTimings));
 
 const timings=[];
 const readArray=(a,id)=>accepted(lookup(a,id),"measured-array-read");

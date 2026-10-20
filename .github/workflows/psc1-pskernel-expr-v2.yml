@@ -63,6 +63,8 @@ jobs:
           grep -q "PSC1_EXPR_V2_PAGED: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_PAGED_SPINE: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_PAGED_LIFT: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
+          grep -q "PSC1_EXPR_V2_PAGED_INSTANTIATE: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
+          grep -q "PSC1_EXPR_V2_PAGED_HEAD: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_PAGED_BUILDERS: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
           grep -q "PSC1_EXPR_V2_LIFT_DIFFERENTIAL: PASS" "$RUNNER_TEMP/expr-v2-regression.log"
       - uses: actions/upload-artifact@v4
@@ -161,6 +163,11 @@ jobs:
         run: |
           set -euo pipefail
           lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PagedLift.lean
+      - name: Check paged capture-avoiding instantiate1 source and head machine
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2PagedHeadMachine.lean
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -234,6 +241,8 @@ jobs:
             'ExprV2ResearchAll.ps',
             'ExprV2PagedValidation.ps',
             'ExprV2PagedLift.ps',
+            'ExprV2PagedInstantiate.ps',
+            'ExprV2PagedHeadMachine.ps',
             'ExprV2PortableEqualityBatch.ps',
             'ExprV2PortableImport.ps',
             'ExprV2PortableHeadMachine.ps',

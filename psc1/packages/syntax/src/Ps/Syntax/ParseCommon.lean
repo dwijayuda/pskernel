@@ -811,7 +811,8 @@ def psParseScopedDeclarationsWithFuel
           match parseDeclaration cursor with
           | Except.error error => Except.error error
           | Except.ok parsed =>
-              match separator (psSyntaxDeclarationSpan parsed.value).stop parsed.cursor with
+              let declarationSpan := psSyntaxDeclarationSpan parsed.value;
+              match separator declarationSpan.stop parsed.cursor with
               | Except.error error => Except.error error
               | Except.ok next =>
                   let path := psParseNamespacePath scopes;

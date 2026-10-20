@@ -177,8 +177,10 @@ export function replayText(kernel,text){
   const sameKeys=(left,right)=>left.length===right.length&&left.every((value,index)=>value===right[index]);
   const plainName=value=>internName('str',names.get(0n),value);
   try {
-    for(const line of text.split(/\r?\n/u)){
-      if(line.trim()==='')continue;
+    const inputLines=text.split(/\r?\n/u);
+    if(inputLines.at(-1)==='')inputLines.pop();
+    for(const line of inputLines){
+      if(line.trim()==='')malformed('blank record in export stream');
       const record=object(parseExactJSON(line));
       const keys=Object.keys(record);records++;
       if(keys.length===1&&keys[0]==='meta'){
@@ -218,7 +220,7 @@ export function replayText(kernel,text){
         if(keys.length!==2)malformed('invalid expression record keys');
         const kind=keys.find(key=>key!=='ie'),raw=record[kind];let id;
         if(kind==='bvar')id=addNode('BVar',[natural(raw)]);
-        else if(kind==='fvar'||kind==='mvar')id=addNode(kind==='fvar'?'FVar':'MVar',[name(raw)]);
+        // LeanExport 3.1.0 does not define fvar or mvar wire constructors.
         else if(kind==='sort')id=addNode('Sort',[level(raw)]);
         else if(kind==='const'){
           object(raw);id=addNode('Const',[name(raw.name),list(sequence(raw.us).map(level))],[],nameKey(raw.name));
@@ -233,7 +235,7 @@ export function replayText(kernel,text){
           object(raw);const children=[expr(raw.type),expr(raw.value),expr(raw.body)];
           id=addNode('Let',[name(raw.name),...children,boolean(raw.nondep)],children);
         }else if(kind==='proj'){
-          object(raw);const body=expr(raw.struct);id=addNode('Proj',[name(raw.typeName),natural(raw.idx),body],[body]);
+          object(raw);const body=expr(raw.struct);id=addNode('Proj',[name(raw.typeName),natural(raw.idx),body],[body],nameKey(raw.typeName));
         }else if(kind==='mdata'){
           object(raw);object(raw.data);const body=expr(raw.expr);
           // Lean 4.35 LeanExport.Parse also reconstructs every mdata payload as {}.

@@ -31,6 +31,9 @@ must(good.verdict==='accepted'&&good.metadataValidated===true&&good.fuel==='4096
 must(observe(definition(false)).verdict==='rejected','illtyped definition rejected by complete kernel');
 const hugeHint=definition(true).replace('"hints":"abbrev"','"hints":{"regular":4294967296}');
 must(observe(hugeHint).verdict==='unsupported','reducibility height outside UInt32 profile is explicit');
+must(observe(stream([{ie:0n,fvar:0n}])).verdict==='malformed','unsupported fvar wire constructor rejected');
+must(observe(stream([{ie:0n,mvar:0n}])).verdict==='malformed','unsupported mvar wire constructor rejected');
+must(observe(definition(true)+'\n').verdict==='malformed','extra blank export record rejected');
 must(observe(stream([{ie:0n,app:{fn:0n,arg:0n}}])).verdict==='malformed','cyclic expression table rejected');
 must(observe(stream([{ie:0n,app:{fn:1n,arg:1n}},{ie:1n,sort:0n}])).verdict==='malformed','forward expression table reference rejected');
 must(observe(stream([{il:0n,succ:0n}])).verdict==='malformed','duplicate universe table rejected');

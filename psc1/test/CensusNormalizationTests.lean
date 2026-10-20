@@ -73,12 +73,18 @@ private def testParseCommon : IO Unit := do
           psTokenCursorAtText parsed.cursor "tail")
   require "declaration name parser refuses a root escape"
     (match psParseSyntaxName cursor with | .error _ => true | .ok _ => false)
-  for (label, parsed) in [
-    ("lean", psParseLeanSource
-      "namespace Outer\nnamespace Inner\ndef value : Nat := 1\nend Inner\nend Outer\n"),
-    ("ps", psParseProofScriptSource
-      "namespace Outer\nnamespace Inner\ndef value : Nat := 1\nend Inner\nend Outer\n")
-  ] do
+  for leanInput in [true, false] do
+    let label := if leanInput then "lean" else "ps"
+    let text := "namespace Outer\nnamespace Inner\ndef value : Nat := 1\nend Inner\nend Outer\n"
+    let parsed : Except Unit PsSyntaxModule :=
+      if leanInput then
+        match psParseLeanSource text with
+        | .error _ => .error ()
+        | .ok value => .ok value
+      else
+        match psParseProofScriptSource text with
+        | .error _ => .error ()
+        | .ok value => .ok value
     match parsed with
     | .error _ => throw (IO.userError (label ++ " nested namespace parse"))
     | .ok source =>

@@ -816,7 +816,7 @@ def psParseScopedDeclarationsWithFuel
               | Except.error error => Except.error error
               | Except.ok next =>
                   let path := psParseNamespacePath scopes;
-                  let declaration :=
+                  let declaration : PsSyntaxDeclaration :=
                     match path with
                     | List.nil => parsed.value
                     | List.cons _ _ => PsSyntaxDeclaration.scopedDecl path parsed.value;

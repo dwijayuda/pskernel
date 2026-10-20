@@ -509,7 +509,12 @@ def psParseLeanBinderTypeWithFuel
             PsTokenCursor ->
             Except PsParseError (PsParseResult PsSyntaxTerm) :=
           psParseLeanBinderTypeWithFuel remaining;
-        match psParseLeanProductWithFuel remaining cursor with
+        -- A parenthesized binder domain may itself contain arrows. Recurse
+        -- through the full binder-type parser while preserving product/operator
+        -- precedence outside those parentheses.
+        match psParseOperatorsWithFuel
+            (psParseLeanApplicationWithFuel smaller (Nat.succ remaining))
+            (Nat.succ remaining) 0 cursor with
         | Except.error error => Except.error error
         | Except.ok domain =>
             if psTokenCursorAtArrow domain.cursor then

@@ -27,6 +27,17 @@ for (const data of [runtime, scripts, architecture, minimumRuntime, minimumScrip
   assert.equal(data.commit, process.env.GITHUB_SHA || null);
   assert.ok(data.records.length && data.records.every(x => x.passed === true));
 }
+for (const [data, expectedTargets] of [[scripts, ['python', 'php']], [minimumScripts, ['python']]]) {
+  for (const target of expectedTargets) {
+    const record = data.records.find(x => x.group === target + '-self-tail-value-semantics');
+    assert.ok(record, 'missing direct self-tail value regression: ' + target);
+    assert.equal(record.passed, true);
+    assert.equal(record.observations.parallelArgumentSnapshots, true);
+    assert.equal(record.observations.capturedParameterValues, true);
+    assert.equal(record.observations.shadowedSelfCall, true);
+    assert.deepEqual(record.observations.observations, ['21', '12', '7', '9', '12', '12']);
+  }
+}
 for (const [data, expectedTargets] of [[whileRuntime, targets], [minimumWhile, ['python']]]) {
   assert.equal(data.records.length, expectedTargets.length * 2);
   assert.equal(data.divergence.length, expectedTargets.length * 2);
@@ -107,8 +118,10 @@ const receipt = {
   sourceSyntaxes: ['lean', 'ps'],
   targetExecutionBundles: runtime.records.length,
   scriptingRegressionGroups: scripts.records.length,
+  scriptingArtifactBundles: scripts.records.filter(x => typeof x.sourceBytes === 'number').length,
   architectureRegressionGroups: architecture.records.length,
   minimumPython: { targetExecutionBundles: minimumRuntime.records.length, scriptingRegressionGroups: minimumScripts.records.length,
+    artifactBundles: minimumScripts.records.filter(x => typeof x.sourceBytes === 'number').length,
     runtimeEvidence: 'runtime-conformance-python314/results.json', scriptingEvidence: 'script-backends-python314/results.json' },
   practicalCore: {
     nativeSuites: practicalNative,

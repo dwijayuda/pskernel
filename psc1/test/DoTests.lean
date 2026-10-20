@@ -328,6 +328,13 @@ private def testControlFlow (natType : PsExpr) : IO Unit := do
     ("def result(flag : Bool) : Bool :=\n" ++
       "  (true && (if (flag) { true } else { false })) && !(if (flag) { false } else { true })\n")
 
+  roundTrip "grouped arrows and product binder precedence from Lean to PS" .lean .proofScript
+    ("def result (f : (Nat -> Nat) -> Nat × Bool -> Nat) (g : Nat -> Nat) (pair : Nat × Bool) : Nat :=\n" ++
+      "  f g pair\n")
+  roundTrip "grouped arrows and product binder precedence from PS to Lean" .proofScript .lean
+    ("def result(f : (Nat -> Nat) -> Prod(Nat, Bool) -> Nat, g : Nat -> Nat, pair : Prod(Nat, Bool)) : Nat :=\n" ++
+      "  f(g, pair)\n")
+
 private def testFiniteLoops (natType : PsExpr) : IO Unit := do
   let nat (n : Nat) := PsExpr.lit (PsLiteral.natural n)
   let list := "List.cons 1 (List.cons 2 (List.cons 3 List.nil))"

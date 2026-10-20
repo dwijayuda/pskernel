@@ -34,6 +34,7 @@ function reject(cmd, args, options = {}) {
   const result = spawnSync(cmd, args, { env, encoding: 'utf8', timeout: 120_000,
     maxBuffer: 64 * 1024 * 1024, cwd: root, ...options });
   if (result.error) throw result.error;
+  assert.equal(result.signal, null, 'rejection must exit normally');
   assert.notEqual(result.status, 0, `unexpected success: ${cmd} ${args.join(' ')}`);
   return `${result.stdout}\n${result.stderr}`;
 }
@@ -252,6 +253,23 @@ try {
     assert.match(command('wasmtime', ['run', '--invoke', 'second(true, false)', component]), /false/);
     assert.match(command('wasmtime', ['run', '--invoke', 'second(false, true)', component]), /true/);
   });
+  for (const [syntax, body] of [
+    ['lean', 'def applyBool (f : Bool -> Bool) (x : Bool) : Bool := f x\n'],
+    ['ps', 'def applyBool(f : Bool -> Bool, x : Bool) : Bool := f(x)\n'],
+  ]) {
+    await test(`${syntax} component exports refuse function parameters`, () => {
+      const input = source(`function-parameter.${syntax}`, body);
+      const file = output(`function-parameter-${syntax}/module.wasm`);
+      const message = reject(native, ['build', input, '--target', 'wasm-component',
+        '--export', 'applyBool', '--out', file]);
+      assert.match(message, /PSC1_PUBLIC_TARGET_SIGNATURE_UNQUALIFIED: wasm-component:applyBool/);
+      for (const suffix of ['', '.bundle.json']) assert.equal(fs.existsSync(file + suffix), false);
+      for (const extension of ['.wit', '.wat', '.core.wasm', '.core.wat']) {
+        assert.equal(fs.existsSync(file.slice(0, -5) + extension), false);
+      }
+    });
+  }
+
   // The copied WIT table previously advertised ten capabilities that the active
   // IR checker explicitly excludes. Do not weaken that gate or silently expand
   // the language to make a positive identity test pass. The public WIT API now

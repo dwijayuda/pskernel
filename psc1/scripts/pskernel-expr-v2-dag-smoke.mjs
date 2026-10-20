@@ -95,6 +95,13 @@ const checkedResult=r=>{
   if(replies.length!==1)throw Error("PSC1_DAG_WRONG_REPLY_COUNT");
   return {value:replies[0].value};
 };
+const sameOperation=(original,actual,compare)=>{
+  if(rejected(original))return rejected(actual)&&json(original.error)===json(actual.error);
+  if(rejected(actual))return false;
+  const expected=accepted(original,"legacy-operation");
+  const replies=array(accepted(actual,"dag-operation").replies);
+  return replies.length===1&&compare(expected,replies[0].value)===true;
+};
 for(const [key,id] of Object.entries(ids)){
   for(const fuel of [0n,1n,2n,4n,16n]){
     const s=session(fuel);
@@ -109,6 +116,11 @@ for(const [key,id] of Object.entries(ids)){
         exact(actual.value.expression,expected.expression),
         "same-complete-check-"+key+"-"+fuel);
     }
+    must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,terms[key]),
+      invoke(arena,[C.whnf(id)],s),exact),"same-whnf-resource-"+key+"-"+fuel);
+    must(sameOperation(get("psKernelV1IsDefEq")(s,nil,S.safe,terms[key],terms[key]),
+      invoke(arena,[C.isDefEq(id,id)],s),(a,b)=>a===b),
+      "same-checked-identity-resource-"+key+"-"+fuel);
   }
 }
 
@@ -130,6 +142,12 @@ for(const depth of [0,8,16,17,32,64]){
         must(!rejected(actual)&&equal(actual.value.type,sort1),
           "dag-native-metadata-check-"+depth+"-"+fuel+"-"+recDepth);
       }
+      must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,term),
+        invoke(graph.fst,[C.whnf(graph.snd)],s),exact),
+        "metadata-whnf-resource-"+depth+"-"+fuel+"-"+recDepth);
+      must(sameOperation(get("psKernelV1IsDefEq")(s,nil,S.safe,term,term),
+        invoke(graph.fst,[C.isDefEq(graph.snd,graph.snd)],s),(a,b)=>a===b),
+        "metadata-identity-resource-"+depth+"-"+fuel+"-"+recDepth);
     }
   }
 }
@@ -177,14 +195,13 @@ must(siblingGood.snd===siblingBad.snd&&
 
 const alias=name("DagAlias");
 add("alias","Const",alias,nil);
-const definition=get("PsKernelDagDefinition").mk(
-  get("PsKernelDagConstantBase").mk(alias,nil,ids.s1),
-  ids.s0,get("PsKernelReducibilityHints").abbrevHint,S.safe);
+const definition={base:{name:alias,levelParams:nil,type:ids.s1},
+  value:ids.s0,hints:get("PsKernelReducibilityHints").abbrevHint,safety:S.safe};
 const unitName=name("DagUnit"),ctorName=N.str(unitName,"mk");
 add("unit","Const",unitName,nil);
 add("ctor","Const",ctorName,nil);
-const inductive=get("PsKernelDagInductive").mk(unitName,ids.s1,list([
-  get("PsKernelDagConstructor").mk(ctorName,ids.unit)]));
+const inductive={name:unitName,type:ids.s1,
+  ctors:list([{name:ctorName,type:ids.unit}])};
 const commands=[
   C.admit(D.definitionDecl(definition)),C.whnf(ids.alias),
   C.admit(D.ordinaryInductive(nil,0n,inductive,false)),C.check(ids.ctor)

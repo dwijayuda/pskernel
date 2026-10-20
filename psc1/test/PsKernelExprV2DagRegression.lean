@@ -49,6 +49,28 @@ private def sameCheck
       | none => false
   | _, _ => false
 
+private def sameWhnf
+    (legacy : Except PsKernelError PsKernelExpr)
+    (dag : Except PsKernelError PsKernelDagBatchResult) : Bool :=
+  match legacy, dag with
+  | .error a, .error b => errorText a == errorText b
+  | .ok a, .ok b =>
+      match b.replies with
+      | [.normalized value] => psKernelExprEqual a value
+      | _ => false
+  | _, _ => false
+
+private def sameDefEq
+    (legacy : Except PsKernelError Bool)
+    (dag : Except PsKernelError PsKernelDagBatchResult) : Bool :=
+  match legacy, dag with
+  | .error a, .error b => errorText a == errorText b
+  | .ok a, .ok b =>
+      match b.replies with
+      | [.equal value] => a == value
+      | _ => false
+  | _, _ => false
+
 private def oneCheck
     (session : PsKernelKernelSession)
     (arena : PsKernelExprV2PagedArena) (root : Nat) :=
@@ -107,6 +129,14 @@ private def semanticParity : IO Unit := do
           (sameCheck
             (psKernelV1CheckExpression session [] .safe term)
             (oneCheck session arena root))
+        require "exact-whnf-and-resource-parity"
+          (sameWhnf
+            (psKernelV1Whnf session [] .safe term)
+            (psKernelV1RunDag session [] .safe arena [.whnf root]))
+        require "checked-identity-and-resource-parity"
+          (sameDefEq
+            (psKernelV1IsDefEq session [] .safe term term)
+            (psKernelV1RunDag session [] .safe arena [.isDefEq root root]))
   let session ← fresh
   for term in [beta, zeta, hidden, .mdata 1 zeta] do
     let (a, root) ← expect (psKernelExprV2PagedImportChecked term)
@@ -150,7 +180,16 @@ private def metadataParity : IO Unit := do
           (sameCheck
             (psKernelV1CheckExpression session [] .safe term)
             (oneCheck session arena root))
+        require "metadata-whnf-fuel-and-depth-parity"
+          (sameWhnf
+            (psKernelV1Whnf session [] .safe term)
+            (psKernelV1RunDag session [] .safe arena [.whnf root]))
+        require "metadata-identity-fuel-and-depth-parity"
+          (sameDefEq
+            (psKernelV1IsDefEq session [] .safe term term)
+            (psKernelV1RunDag session [] .safe arena [.isDefEq root root]))
   IO.println "PSC1_V2_DAG_NATIVE_INFERENCE: PASS"
+  IO.println "PSC1_V2_DAG_NATIVE_WHNF_IDENTITY: PASS"
 
 private def hostileInputs : IO Unit := do
   let session ← fresh

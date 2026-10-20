@@ -69,7 +69,7 @@ private def checkOne (env : Lean.Environment) (session : PsKernelKernelSession)
     | .error _ => throw (IO.userError "DAG_PERF_DAG_REJECTED")
   return 1
 
-private def measure (env : Lean.Environment) (session : PsKernelKernelSession)
+private def measureDagPublicChecks (env : Lean.Environment) (session : PsKernelKernelSession)
     (variant shape : String) (depth calls : Nat)
     (fixtures : Array (PsKernelExpr × Lean.Expr × PsKernelExprV2PagedArena × Nat)) :
     IO Unit := do
@@ -101,5 +101,5 @@ def main : IO Unit := do
     let stop ← IO.monoMsNow
     IO.println s!"PSC1_DAG_NATIVE_CONSTRUCTION shape={shape} depth={depth} pool=5 combined_inputs_ms={stop-start}"
     for variant in ["lean", "legacy", "dag", "dag", "legacy", "lean"] do
-      measure env session variant shape depth calls fixtures
+      measureDagPublicChecks env session variant shape depth calls fixtures
   IO.println "PSC1_V2_DAG_NATIVE_BENCH: PASS"

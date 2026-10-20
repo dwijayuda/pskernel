@@ -13,6 +13,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagDeclaration,
     `Ps.KernelCore.API.Dag,
     `Ps.KernelCore.Checker.ExprV2.Terminal,
+    `Ps.KernelCore.Checker.ExprV2.Whnf,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,

@@ -1,15 +1,17 @@
 import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 import Ps.KernelCore.Checker.ExprV2.Terminal
+import Ps.KernelCore.Checker.ExprV2.Whnf
 
 /-
 Checked DAG ingress for the complete KernelContract-v1 implementation.
 
 One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
-Terminal expression checking reads DAG nodes directly with the original
-fuel/depth/rule ordering. Composite checking and all normalization, DefEq
-and admission use the complete existing APIs with unchanged resources.
+Terminal checking and WHNF read DAG nodes directly with the original entry
+fuel/depth/rule ordering. Identical node IDs use DefEq's syntactic shortcut
+only after both complete checks. Other composite checking, reductions, DefEq
+and admission use the complete existing kernel with unchanged resources.
 
 psKernelV1RunDag is the public untrusted-input boundary. The portable source
 profile exposes constructors and helper functions: the internal command
@@ -19,8 +21,9 @@ receipts, are forgeable observations and never authorize proof admission.
 Every declaration is still rechecked by V1. No equality memo survives this
 boundary. A sealed constructor API remains a source-profile limitation.
 
-This is a partial representation migration. Terminal inference is DAG-native;
-composite checking, WHNF, DefEq and admission retain PsKernelExpr internally.
+This is a partial representation migration. Terminal inference/WHNF and the
+checked identity shortcut are DAG-native. Other composite checking, reduction,
+DefEq and admission retain PsKernelExpr internally.
 Eliminating that fallback and adapter remains required for completion.
 -/
 structure PsKernelDagBatchResult where
@@ -51,6 +54,52 @@ def psKernelDagCheckExpression
       | Except.ok type =>
           Except.ok (PsKernelCheckedExpression.mk expr type)
 
+def psKernelDagWhnfExpression
+    (session : PsKernelKernelSession)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (built : PsKernelExprV2Decoded)
+    (root : Nat) (expr : PsKernelExpr) :
+    Except PsKernelError PsKernelExpr :=
+  match psKernelDagCheckExpression session levelParams safety arena root expr with
+  | Except.error error => Except.error error
+  | Except.ok _ =>
+      let checker := psKernelKernelSessionChecker session levelParams safety;
+      match psKernelExprV2TryWhnfTerminalWithFuel
+          session.resources.fuel checker.context arena root with
+      | Option.some result =>
+          match result with
+          | Except.error error => Except.error (psKernelErrorFromMessage error)
+          | Except.ok id => psKernelDagRequire built id
+      | Option.none =>
+          match psKernelSessionWhnf session.resources.fuel checker expr with
+          | Except.error error => Except.error (psKernelErrorFromMessage error)
+          | Except.ok result => Except.ok (Prod.fst result)
+
+def psKernelDagIsDefEq
+    (session : PsKernelKernelSession)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (left right : Nat) (a b : PsKernelExpr) :
+    Except PsKernelError Bool :=
+  match psKernelDagCheckExpression session levelParams safety arena left a with
+  | Except.error error => Except.error error
+  | Except.ok _ =>
+      match psKernelDagCheckExpression session levelParams safety arena right b with
+      | Except.error error => Except.error error
+      | Except.ok _ =>
+          let checker := psKernelKernelSessionChecker session levelParams safety;
+          if Nat.beq left right then
+            match psKernelExprV2CheckedIdentity session.resources.fuel checker.context with
+            | Except.error error => Except.error (psKernelErrorFromMessage error)
+            | Except.ok value => Except.ok value
+          else
+            match psKernelSessionIsDefEq session.resources.fuel checker a b with
+            | Except.error error => Except.error (psKernelErrorFromMessage error)
+            | Except.ok result => Except.ok (Prod.fst result)
+
 def psKernelDagRunCommand
     (session : PsKernelKernelSession)
     (levelParams : List PsKernelName)
@@ -72,7 +121,7 @@ def psKernelDagRunCommand
       match psKernelDagRequire built root with
       | Except.error error => Except.error error
       | Except.ok expr =>
-          match psKernelV1Whnf session levelParams safety expr with
+          match psKernelDagWhnfExpression session levelParams safety arena built root expr with
           | Except.error error => Except.error error
           | Except.ok value =>
               Except.ok (Prod.mk (PsKernelDagReply.normalized value) session)
@@ -83,7 +132,7 @@ def psKernelDagRunCommand
           match psKernelDagRequire built right with
           | Except.error error => Except.error error
           | Except.ok b =>
-              match psKernelV1IsDefEq session levelParams safety a b with
+              match psKernelDagIsDefEq session levelParams safety arena left right a b with
               | Except.error error => Except.error error
               | Except.ok value =>
                   Except.ok (Prod.mk (PsKernelDagReply.equal value) session)

@@ -77,8 +77,9 @@ A caller-supplied equality memo or raw arena is not trusted.
    and official Lean comparisons.
 
 **The DAG ingress is transitional. Terminal inference (including metadata
-chains) now has a direct node-reading candidate; composite inference, WHNF,
-DefEq and admission still require migration. No completion or speedup claim
+chains), terminal WHNF and checked same-arena identity now have direct
+node-reading candidates; other composite inference, reductions, DefEq and
+admission still require migration. No completion or speedup claim
 follows from its existence or passing tests.**
 
 ## Milestone matrix
@@ -116,3 +117,26 @@ Actions result on the exact commit. Retain failed runs and diagnosis.
 Benchmark the complete checked operations with conversions, construction,
 memory and runtime overhead visible. An ingress adapter is expected to add
 work; do not present representation microbenchmarks as complete-checker gains.
+
+## Execution evidence and corrections
+
+- Commit 953de3067cf285f42ab74fa2cbde43b6ae977aba, run
+  [39502809730](https://github.com/dwijayuda/pskernel/actions/runs/39502809730):
+  native DAG, adversarial, fuel/depth, official Lean fixture and existing V2
+  regressions passed. Authentic PSC1 source checking and JS/declaration/map
+  generation passed. Generated runtime gate failed because its harness tried
+  to access erased structure constructors; corrected to typed object records.
+- Source audit found the JS expression comparator is curried. The older smoke
+  harness and initial new harness treated a returned function as truthy.
+  Corrected both-stage application, strict Boolean assertions and unequal-term
+  sentinels are mandatory before treating JS semantic assertions as evidence.
+- Commit 68508d13054d45bf6c244605511662245fc4209d factors one constant rule
+  shared by original and DAG inference, preserving lookup/arity/safety/cache
+  order. Native compilation of production source succeeded; the new benchmark
+  target collided with Lean's global `measure` name. The target now uses a
+  unique name. Run [39503690997](https://github.com/dwijayuda/pskernel/actions/runs/39503690997)
+  is retained as failed evidence, not a passing qualification.
+- Complete-check performance harnesses include validation and decoding, with
+  A-B-B-A generated workers, cold and warm samples, construction, peak RSS and
+  post-GC heap. Results remain pending. Native samples also compare official
+  Lean on matched checked metadata/zeta terms; no generalized speedup claim.

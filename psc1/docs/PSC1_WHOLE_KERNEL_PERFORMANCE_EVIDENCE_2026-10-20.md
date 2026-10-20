@@ -110,3 +110,29 @@ Process maximum RSS in the four corresponding independently executed phases was 
 To distinguish the ~25% JavaScript RSS increase observed in [run 39346721193](https://github.com/dwijayuda/pskernel/actions/runs/39346721193) from compiler-version drift, this branch now contains `.github/workflows/psc1-pskernel-controlled-js-memory.yml`, `scripts/pskernel-js-memory-probe.mjs`, and `scripts/pskernel-js-controlled-report.mjs`. The test uses the **same current PSC1 compiler source and TypeScript 7.0.2 version** on original and optimized kernel source overlays, executes each full guarded JS corpus in fresh processes in **A–B–B–A** order, then runs WHNF, positive DefEq, checked application, ordinary inductive admission and mutual inductive admission in separate processes. It records JS bundle bytes, module-import cost, peak process RSS, post-forced-GC retained V8 heap, and garbage-collection event counts/durations.
 
 This protocol is **not a passed result until its GitHub CI concludes successfully**. In particular, historical generated artifacts from separately versioned compiler snapshots remain only observational evidence; do not attribute the old ~25% memory difference to the kernel optimizations until this controlled compiler-source ablation completes and is replicated.
+
+## Same-compiler canonical `.ps` generated-JS memory results
+
+**Passed**: [GitHub Actions run 39349867322](https://github.com/dwijayuda/pskernel/actions/runs/39349867322), compiler/source snapshot `b47e8031ec7324380f499774d12c87366cba4ce2`, original corrected kernel `0a53836489c4e88f46df8f5b8b0c19cc41bafbbb`. Both source variants were compiled using the *same* current PSC1 compiler and its canonical `.lean → .ps → JS` path, with Node 22 / TypeScript 7.0.2 on one runner. All guarded operations passed. [Raw logs and structured report](https://github.com/dwijayuda/pskernel/actions/runs/39349867322/artifacts/12232918930) include A–B–B–A trials, V8 memory after forced GC, and individually isolated checked operations.
+
+**Execution-order variation is large**: full-suite maximum RSS for original was **363.3, 284.5 MiB** in its two separate processes; optimized was **272.0, 516.4 MiB** in the intervening two processes. A single old-versus-new process pair therefore cannot establish a general 25% RSS penalty.
+
+**More informative isolated probes** (one guarded workload in fresh processes; one sample per variant in this run):
+
+| Kernel operation | Original peak RSS | Optimized peak RSS | Original post-GC V8 heap | Optimized post-GC V8 heap |
+| --- | ---: | ---: | ---: | ---: |
+| Beta WHNF | 237.2 MiB | 232.6 MiB | 20.6 MiB | 20.6 MiB |
+| Full checked 16-argument application | 210.8 MiB | 210.2 MiB | 20.7 MiB | 20.9 MiB |
+| Positive DefEq | 226.7 MiB | 324.1 MiB | 20.7 MiB | 25.2 MiB |
+| Ordinary inductive admission | 227.7 MiB | 252.5 MiB | 22.7 MiB | 27.3 MiB |
+| Mutual inductive admission | 229.1 MiB | 488.4 MiB | 23.4 MiB | 36.9 MiB |
+
+With the compiler version now controlled, these observations point to **operation-dependent** allocation or retention effects rather than a uniform larger module import. However, an individual process peak may still include V8 heap capacity and transient GC timing; the isolated experiments have not been independently replicated or causally traced. `PerformanceObserver` reported zero GC events in this run, so do not infer a measured collection-count improvement or regression from those event counts.
+
+**Complete operation latency was mixed**: beta WHNF was 1,176 vs 1,119 ms, positive DefEq 1,132 vs 1,096 ms, and full checked application 256 vs 276 ms (original vs optimized medians). All 11 operation families ran three rounds in each of two fresh processes per kernel. The result supports selective gains and regressions, not a uniform throughput improvement.
+
+### Next attribution step
+
+The source-level memory ablation is implemented as `.github/workflows/psc1-pskernel-js-ablation.yml`. It uses **one immutable current compiler executable**, comparing original, all-optimized, no-lift-port, no-single/multi-substitution-ports, and no-beta-spine-ports, each through the same checked source-to-JS path. It measures the five individual operations above in fresh processes, twice per variant. Source variants must pass PSC1 checks and the emitted JS must execute guarded kernel operations; no relaxation is allowed.
+
+**Do not claim an individual optimization caused the memory increase until this ablation successfully completes and its effects are replicated.** If no single port explains the memory, investigate interaction effects and V8 allocation/retention profiling rather than broadly rolling back correct kernel improvements.

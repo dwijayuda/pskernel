@@ -56,7 +56,11 @@ jobs:
           .lake/build/bin/psc1_do_tests 2>&1 | tee dist/architecture-native/do.log
           .lake/build/bin/psc1_while_tests 2>&1 | tee dist/architecture-native/while.log
           .lake/build/bin/psc1_namespace_tests 2>&1 | tee dist/architecture-native/namespaces.log
-          rg -n 'psResolveNameInNamespace|PsElabContext[.]mk' packages test | tee dist/architecture-native/normalized-callers.log
+          if command -v rg >/dev/null 2>&1; then
+            rg -n 'psResolveNameInNamespace|PsElabContext[.]mk' packages test
+          else
+            grep -R -n -E --include='*.lean' 'psResolveNameInNamespace|PsElabContext[.]mk' packages test
+          fi | tee dist/architecture-native/normalized-callers.log
           node scripts/compiler-source-census-contract-tests.mjs
           node scripts/compiler-source-census.mjs
           node scripts/compiler-source-census-strict-tests.mjs 2>&1 | tee dist/architecture-native/compiler-source-census.log

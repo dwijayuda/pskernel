@@ -1,4 +1,4 @@
-import Ps.KernelCore.Research.ExprV2
+import Ps.KernelCore.Research.ExprV2Chunked
 
 /- Native research adapter: convert, independently validate and compare
 the portable immutable DAG. This module is NOT imported by the checker. -/
@@ -302,3 +302,31 @@ def psKernelExprV2ValidateLinear
       throw "PSKERNEL_V2_REPLAY_METADATA_MISMATCH"
     checked := next
   return checked
+
+
+/-
+Independently validate a chunked DAG from its nodes (in ID order), replaying
+EVERY entry using canonical V2 smart constructors. The validator does not
+trust cached hash, flags or loose range from the chunked source. Invalid
+forward references, forged flags, and malformed layout all fail closed.
+
+This is a research validation gate. The replay array is temporary and does
+not appear in the eventual production checking path.
+-/
+def psKernelExprV2ValidateChunked
+    (source : PsKernelExprV2ChunkedArena) :
+    Except String Unit := do
+  let mut checked := psKernelExprV2Empty
+  for id in [:source.size] do
+    let entry ← match psKernelExprV2ChunkedFind source id with
+      | Option.none =>
+          throw "PSKERNEL_V2_CHUNKED_MISSING_ENTRY"
+      | Option.some value =>
+          pure value
+    let (next, newId) ← psKernelExprV2ReplayNode checked entry.node
+    if newId != id then
+      throw "PSKERNEL_V2_CHUNKED_ID_REPLAY_MISMATCH"
+    let expected ← psKernelExprV2Lookup next newId
+    if !psKernelExprV2SameMetadata entry expected then
+      throw "PSKERNEL_V2_CHUNKED_METADATA_INVALID"
+    checked := next

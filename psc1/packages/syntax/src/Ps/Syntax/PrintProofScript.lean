@@ -310,6 +310,10 @@ def psPrintProofScriptTermWithFuel
               | Except.ok printedBody =>
                   Except.ok
                     (psPrintArrowChain printedBinders printedBody)
+      | .letPatternE pattern type value body _ => do
+          let head ← psPrintBindingPatternHead smaller pattern type value
+          let tail ← smaller body
+          pure (psPrintProofScriptConcat3 head "\n" tail)
       | .letE name type value body _ =>
           match psPrintSyntaxName name with
           | Except.error error => Except.error error
@@ -598,6 +602,16 @@ def psPrintProofScriptDeclaration
     (declaration : PsSyntaxDeclaration) :
     Except PsSourcePrintError String :=
   match declaration with
+  | .scopedDecl path inner =>
+      match path with
+      | [] => psPrintProofScriptDeclaration inner
+      | _ :: _ =>
+          match psPrintProofScriptDeclaration inner with
+          | .error error => .error error
+          | .ok body =>
+              let name := psPrintJoin "." path;
+              Except.ok (psPrintProofScriptConcat6
+                "namespace " name "\n" body "\nend " name)
   | .definition name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error

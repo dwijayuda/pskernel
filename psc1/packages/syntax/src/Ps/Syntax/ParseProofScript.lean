@@ -1,5 +1,6 @@
 import Ps.Syntax.Lexer
 import Ps.Syntax.ParseCommon
+import Ps.Syntax.ParseBinding
 import Ps.Syntax.ParseDo
 import Ps.Syntax.ParseData
 import Ps.Syntax.Operators
@@ -169,6 +170,8 @@ def psProofScriptTermWithSpan
   | .forallE binders body _ => PsSyntaxTerm.forallE binders body span
   | .letE name type value body _ =>
       PsSyntaxTerm.letE name type value body span
+  | .letPatternE pattern type value body _ =>
+      PsSyntaxTerm.letPatternE pattern type value body span
   | .ifE condition yes no _ => PsSyntaxTerm.ifE condition yes no span
   | .matchE scrutinee alternatives _ =>
       PsSyntaxTerm.matchE scrutinee alternatives span
@@ -1077,6 +1080,8 @@ def psParseProofScriptTermWithFuel
                                                           }
                                                       cursor := close.cursor
                                                     }
+      else if psParseAtBindingPatternLet cursor then
+        psParseBindingLet smaller psParseProofScriptBodySeparator cursor
       else if psTokenCursorAtText cursor "let" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "let binding name")
@@ -1634,6 +1639,7 @@ def psProofScriptDeclarationStop
   | .theoremDecl _ _ _ _ span => span.stop
   | .inductiveDecl _ _ _ _ span => span.stop
   | .structureDecl _ _ _ span => span.stop
+  | .scopedDecl _ declaration => (psSyntaxDeclarationSpan declaration).stop
 
 def psParseProofScriptImportsWithFuel
     (fuel : Nat) :
@@ -1735,10 +1741,9 @@ def psParseProofScriptTokens
   match psParseProofScriptImportsWithFuel (psParseListLength tokens) cursor [] with
   | Except.error error => Except.error error
   | Except.ok imports =>
-      match psParseProofScriptDeclarationsWithFuel
-          (psParseListLength tokens)
-          imports.cursor
-          [] with
+      match psParseScopedDeclarationsWithFuel
+          psParseProofScriptDeclaration psParseProofScriptCommandSeparator
+          (psParseListLength tokens) imports.cursor [] [] with
       | Except.error error => Except.error error
       | Except.ok declarations =>
           Except.ok {

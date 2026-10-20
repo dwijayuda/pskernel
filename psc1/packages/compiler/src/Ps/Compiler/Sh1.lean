@@ -390,6 +390,11 @@ def psSh1SyntaxTermStep
         (psSh1SourceFailure "source-optional-index-unsupported"
           "optional array indexing is outside the historical SH1 source profile"
           moduleName owner (Option.some span))
+  | PsSyntaxTerm.letPatternE _ _ _ _ span =>
+      Except.error
+        (psSh1SourceFailure "source-binding-pattern-unsupported"
+          "binding patterns are outside the historical SH1 source profile"
+          moduleName owner (Option.some span))
   | PsSyntaxTerm.lambda binders body _ =>
       Except.ok (psSh1SyntaxSchedule state
         [PsSh1SyntaxTask.binders owner binders, PsSh1SyntaxTask.term owner region body])
@@ -483,6 +488,8 @@ def psSh1PrimitiveDeclarationNameReserved (text : String) : Bool :=
 
 def psSh1SourceDeclarationName (source : PsSyntaxDeclaration) : PsSyntaxName :=
   match source with
+  | PsSyntaxDeclaration.scopedDecl path inner =>
+      psSyntaxNamespaceName path (psSh1SourceDeclarationName inner)
   | PsSyntaxDeclaration.definition name _ _ _ _ => name
   | PsSyntaxDeclaration.partialDefinition name _ _ _ _ => name
   | PsSyntaxDeclaration.theoremDecl name _ _ _ _ => name
@@ -499,6 +506,12 @@ def psSh1SyntaxDeclarationBodyStep
     (moduleName : String) (source : PsSyntaxDeclaration) (state : PsSh1SyntaxState) :
     Except PsSh1SourceError PsSh1SyntaxState :=
   match source with
+  | PsSyntaxDeclaration.scopedDecl _ _ =>
+      Except.error
+        (psSh1SourceFailure "source-namespace-unsupported"
+          "namespace commands are outside the historical SH1 source profile"
+          moduleName (psSh1NameText (psSh1SourceDeclarationName source).segments)
+          (Option.some (psSyntaxDeclarationSpan source)))
   | PsSyntaxDeclaration.definition name binders type value _ =>
       Except.ok (psSh1SyntaxSchedule (psSh1CountDeclaration state false)
         (psSh1DeclarationTasks name binders type value))

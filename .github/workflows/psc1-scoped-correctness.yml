@@ -109,7 +109,7 @@ jobs:
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_operator_tests psc1_ordinary_tests
+          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
@@ -162,7 +162,7 @@ jobs:
           set -euo pipefail
           result=0
           mkdir -p dist/scoped-correctness/practical-core
-          for test in contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_operator_tests psc1_ordinary_tests; do
+          for test in contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests; do
             if ! ".lake/build/bin/$test" 2>&1 | tee "dist/scoped-correctness/practical-core/$test.log"; then result=1; fi
           done
           for script in practical-forms-backend-tests.mjs practical-ordinary-tests.mjs; do

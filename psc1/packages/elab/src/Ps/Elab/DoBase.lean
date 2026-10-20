@@ -1,5 +1,6 @@
 import Ps.Environment.SelfHostPrelude
 import Ps.Elab.Basic
+import Ps.Environment.Resolve
 
 -- One typed controller serves both source syntaxes. Families only construct
 -- ordinary Core terms; psElabResolvedTerm checks every constructed operation.
@@ -111,12 +112,10 @@ def psElabDoPureArgument
       | [segment] =>
           if psStringEq segment "pure" then
             let name := psRootName "pure"
-            match psLocalFindUser context.localContext name with
+            match psResolveNameInNamespace context.localContext context.environment
+                context.currentNamespace name with
             | some _ => none
-            | none =>
-                match psEnvironmentFind context.environment name with
-                | some _ => none
-                | none => some value
+            | none => some value
           else none
       | _ => none
   | _ => none

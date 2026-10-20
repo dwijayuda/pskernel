@@ -64,6 +64,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .lambda _ _ span => span
   | .forallE _ _ span => span
   | .letE _ _ _ _ span => span
+  | .letPatternE _ _ _ _ span => span
   | .ifE _ _ _ span => span
   | .matchE _ _ span => span
 
@@ -198,11 +199,17 @@ def psParseSyntaxName
   | [] => Except.error (PsParseError.unexpectedEnd "identifier")
   | token :: rest =>
       if psTokenKindEq token.kind PsTokenKind.identifier then
-        psParseSyntaxNameTail
-          (List.cons token.text List.nil)
-          token.span.start
-          token.span.stop
-          rest
+        if psStringEq token.text "_root_" then
+          Except.error
+            (PsParseError.expectedText
+              "_root_ escapes are outside the selected namespace profile"
+              token.text token.span)
+        else
+          psParseSyntaxNameTail
+            (List.cons token.text List.nil)
+            token.span.start
+            token.span.stop
+            rest
       else
         Except.error
           (PsParseError.expectedKind
@@ -677,3 +684,86 @@ def psParseBasicPattern
             psParseConstructorPatternTail
               constructorName.value
               constructorName.cursor
+
+def psParseNamespaceText : List String -> String
+  | [] => ""
+  | [segment] => segment
+  | segment :: rest => String.Internal.append segment
+      (String.Internal.append "." (psParseNamespaceText rest))
+
+def psParseNamespaceEq : List String -> List String -> Bool
+  | [], [] => true
+  | left :: ls, right :: rs =>
+      if psStringEq left right then psParseNamespaceEq ls rs else false
+  | _, _ => false
+
+def psParseNamespacePath : List PsSyntaxName -> List String
+  | [] => []
+  | name :: rest => psSyntaxNamespaceAppend (psParseNamespacePath rest) name.segments
+
+def psParseScopedDeclarationsFinish
+    (cursor : PsTokenCursor) (scopes : List PsSyntaxName)
+    (declarationsRev : List PsSyntaxDeclaration) :
+    Except PsParseError (PsParseResult (List PsSyntaxDeclaration)) :=
+  match scopes with
+  | [] => Except.ok { value := psParseListReverse declarationsRev, cursor := cursor }
+  | name :: _ => Except.error (PsParseError.unexpectedEnd
+      (String.Internal.append "end " (psParseNamespaceText name.segments)))
+
+def psParseScopedDeclarationsWithFuel
+    (parseDeclaration : PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxDeclaration))
+    (separator : PsSourcePos -> PsTokenCursor -> Except PsParseError PsTokenCursor)
+    (fuel : Nat) :
+    PsTokenCursor -> List PsSyntaxName -> List PsSyntaxDeclaration ->
+    Except PsParseError (PsParseResult (List PsSyntaxDeclaration)) :=
+  match fuel with
+  | 0 => fun cursor scopes declarationsRev =>
+      if psTokenCursorDone cursor then
+        psParseScopedDeclarationsFinish cursor scopes declarationsRev
+      else Except.error PsParseError.fuelExhausted
+  | remaining + 1 => fun cursor scopes declarationsRev =>
+      let smaller := psParseScopedDeclarationsWithFuel
+        parseDeclaration separator remaining
+      if psTokenCursorDone cursor then
+        psParseScopedDeclarationsFinish cursor scopes declarationsRev
+      else if psTokenCursorAtText cursor "namespace" then
+        match psTokenCursorExpectText cursor "namespace" with
+        | .error error => .error error
+        | .ok keyword =>
+            match psParseSyntaxName keyword.cursor with
+            | .error error => .error error
+            | .ok name =>
+                match separator name.value.span.stop name.cursor with
+                | .error error => .error error
+                | .ok next => smaller next (name.value :: scopes) declarationsRev
+      else if psTokenCursorAtText cursor "end" then
+        match psTokenCursorExpectText cursor "end" with
+        | .error error => .error error
+        | .ok keyword =>
+            match scopes with
+            | [] => Except.error (PsParseError.expectedText
+                "namespace declaration" "end" keyword.token.span)
+            | opened :: outer =>
+                match psParseSyntaxName keyword.cursor with
+                | .error error => .error error
+                | .ok name =>
+                    if psParseNamespaceEq opened.segments name.value.segments then
+                      match separator name.value.span.stop name.cursor with
+                      | .error error => .error error
+                      | .ok next => smaller next outer declarationsRev
+                    else Except.error (PsParseError.expectedText
+                      (psParseNamespaceText opened.segments)
+                      (psParseNamespaceText name.value.segments) name.value.span)
+      else
+        match parseDeclaration cursor with
+        | .error error => .error error
+        | .ok parsed =>
+            match separator (psSyntaxDeclarationSpan parsed.value).stop parsed.cursor with
+            | .error error => .error error
+            | .ok next =>
+                let path := psParseNamespacePath scopes
+                let declaration := match path with
+                  | [] => parsed.value
+                  | _ :: _ => PsSyntaxDeclaration.scopedDecl path parsed.value
+                smaller next scopes (declaration :: declarationsRev)

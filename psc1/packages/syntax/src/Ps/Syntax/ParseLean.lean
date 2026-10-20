@@ -1,5 +1,6 @@
 import Ps.Syntax.Lexer
 import Ps.Syntax.ParseCommon
+import Ps.Syntax.ParseBinding
 import Ps.Syntax.ParseDo
 import Ps.Syntax.ParseData
 import Ps.Syntax.Operators
@@ -47,7 +48,9 @@ def psParseLeanImport
           }
 
 def psLeanReservedApplicationToken (token : PsToken) : Bool :=
-  if psStringEq token.text "def" then
+  if psStringEq token.text "namespace" then true
+  else if psStringEq token.text "end" then true
+  else if psStringEq token.text "def" then
     true
   else if psStringEq token.text "partial" then
     true
@@ -1423,6 +1426,11 @@ def psParseLeanTermWithFuel
                                       }
                                   cursor := elseBranch.cursor
                                 }
+      else if psParseAtBindingPatternLet cursor then
+        psParseBindingLet smaller
+          (fun _ current => do
+            let separator ← psTokenCursorExpectText current ";"
+            pure separator.cursor) cursor
       else if psTokenCursorAtText cursor "let" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "let binding name")
@@ -1647,7 +1655,9 @@ def psParseLeanInductiveConstructorsWithFuel
           }
 
 def psLeanTopLevelDeclarationToken (token : PsToken) : Bool :=
-  if psStringEq token.text "def" then
+  if psStringEq token.text "namespace" then true
+  else if psStringEq token.text "end" then true
+  else if psStringEq token.text "def" then
     true
   else if psStringEq token.text "partial" then
     true
@@ -2680,10 +2690,9 @@ def psParseLeanTokens
   match psParseLeanImportsWithFuel (psParseListLength tokens) cursor [] with
   | Except.error error => Except.error error
   | Except.ok imports =>
-      match psParseLeanDeclarationsWithFuel
-          (psParseListLength tokens)
-          imports.cursor
-          [] with
+      match psParseScopedDeclarationsWithFuel
+          psParseLeanDeclaration (fun _ cursor => Except.ok cursor)
+          (psParseListLength tokens) imports.cursor [] [] with
       | Except.error error => Except.error error
       | Except.ok declarations =>
           Except.ok {

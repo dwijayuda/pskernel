@@ -57,6 +57,15 @@ def psPrintSyntaxNames
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
+def psPrintBindingPattern : PsSyntaxBindingPattern -> Except PsSourcePrintError String
+  | .name name => psPrintSyntaxName name
+  | .wildcard _ => .ok "_"
+  | .unit _ => .ok "()"
+  | .pair first second _ => do
+      let left ← psPrintBindingPattern first
+      let right ← psPrintBindingPattern second
+      pure (psPrintJoin "" ["(", left, ", ", right, ")"])
+
 def psPrintBinderDelimiters
     (kind : PsSyntaxBinderKind) : Prod String String :=
   match kind with
@@ -146,6 +155,21 @@ def psPrintDoBinding
               Except.ok (psPrintJoin ""
                 [bindingPrefix, printedName, printedType, separator, groupedValue])
 
+def psPrintBindingPatternHead
+    (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
+    (pattern : PsSyntaxBindingPattern) (annotation : Option PsSyntaxTerm)
+    (value : PsSyntaxTerm) : Except PsSourcePrintError String := do
+  let printedPattern ← psPrintBindingPattern pattern
+  let printedType ← match annotation with
+    | none => pure ""
+    | some type => do
+        let printed ← printTerm type
+        pure (psPrintCommonConcat2 " : " printed)
+  let printedValue ← printTerm value
+  let groupedValue := if psSyntaxTermSimpleForApplication value then printedValue
+    else psPrintCommonConcat3 "(" printedValue ")"
+  pure (psPrintJoin "" ["let ", printedPattern, printedType, " := ", groupedValue])
+
 def psPrintDoLoopHead
     (printBody : PsSyntaxTerm -> Except PsSourcePrintError String)
     (native : Bool) (header : String) (body : PsSyntaxTerm) :
@@ -182,6 +206,8 @@ def psPrintDoBody
                     if String.isEmpty printedTail then Except.ok printedHead
                     else Except.ok (psPrintCommonConcat3 printedHead separator printedTail);
         match body with
+        | PsSyntaxTerm.letPatternE pattern annotation value tail _ =>
+            withTail (psPrintBindingPatternHead printTerm pattern annotation value) tail
         | PsSyntaxTerm.letE name annotation value tail _ =>
             withTail (psPrintDoBinding printTerm name annotation "let " " := " value) tail
         | PsSyntaxTerm.doEndE _ => Except.ok ""
@@ -277,7 +303,7 @@ def psPrintDoBody
 -- source forms as grouped terms in both surface printers.
 def psPrintOperatorOperand (term : PsSyntaxTerm) (printed : String) : String :=
   match term with
-  | .ifE _ _ _ _ | .letE _ _ _ _ _ | .matchE _ _ _
+  | .ifE _ _ _ _ | .letE _ _ _ _ _ | .letPatternE _ _ _ _ _ | .matchE _ _ _
     | .lambda _ _ _ | .forallE _ _ _ | .doE _ _ =>
       psPrintCommonConcat3 "(" printed ")"
   | _ => printed

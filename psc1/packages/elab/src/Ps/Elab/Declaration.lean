@@ -80,6 +80,9 @@ def psElabOriginSource
   | PsSyntaxDeclaration.theoremDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.inductiveDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.structureDecl name _ _ span => Prod.mk name span
+  | PsSyntaxDeclaration.scopedDecl path declaration =>
+      let origin := psElabOriginSource declaration
+      Prod.mk (psSyntaxNamespaceName path (Prod.fst origin)) (Prod.snd origin)
 
 def psElabOriginErrorAt
     (sourceIndex : Nat) (source : PsSyntaxDeclaration)
@@ -181,9 +184,10 @@ def psElabStructuralRecursionFromSource
               Option.none
           | some sourceName =>
               match
-                  psResolveName
+                  psResolveNameInNamespace
                     context.localContext
                     context.environment
+                    context.currentNamespace
                     sourceName with
               | some resolution =>
                   match resolution with
@@ -238,7 +242,7 @@ def psElabDeclarationParts
       Except.error PsElabError.emptyName
   | some name =>
       let initial : PsElabContext :=
-        psElabContextEmpty environment;
+        psElabContextForDeclaration environment name;
       match
           psElabTypedBinders
             psElabDeclarationTermCallback
@@ -369,6 +373,7 @@ def psElabContextWithEnvironment
     metaContext := context.metaContext
     structuralRecursion := context.structuralRecursion
     whileHelper := context.whileHelper
+    currentNamespace := context.currentNamespace
   }
 
 def psElabBinderArgument
@@ -1157,7 +1162,7 @@ def psElabInductiveDeclaration
   match psSyntaxNameToName nameSyntax with
   | Option.none => Except.error PsElabError.emptyName
   | Option.some name =>
-      let initial := psElabContextEmpty environment;
+      let initial := psElabContextForDeclaration environment name;
       match psElabTypedBinders
           psElabDeclarationTermCallback
           initial
@@ -1322,7 +1327,7 @@ def psElabPartialDeclaration
   match psSyntaxNameToName nameSyntax with
   | Option.none => Except.error PsElabError.emptyName
   | Option.some name =>
-      let initial := psElabContextEmpty environment;
+      let initial := psElabContextForDeclaration environment name;
       match
           psElabTypedBinders
             psElabDeclarationTermCallback
@@ -1428,6 +1433,7 @@ def psElabDeclaration
     (environment : PsEnvironment)
     (source : PsSyntaxDeclaration) :
     Except PsElabError PsElabDeclarationResult :=
+  let source := psSyntaxDeclarationQualify [] source;
   match source with
   | .definition name binders type value _ =>
       psElabDeclarationParts
@@ -1455,6 +1461,8 @@ def psElabDeclaration
   | .inductiveDecl _ _ _ _ _ =>
       Except.error PsElabError.unsupportedTerm
   | .structureDecl _ _ _ _ =>
+      Except.error PsElabError.unsupportedTerm
+  | .scopedDecl _ _ =>
       Except.error PsElabError.unsupportedTerm
 
 -- Elaborate the canonical worker with the original source self name, then give
@@ -1533,6 +1541,7 @@ def psElabDeclarationBatchStable
     (environment : PsEnvironment)
     (source : PsSyntaxDeclaration) :
     Except PsElabError PsElabDeclarationBatchResult :=
+  let source := psSyntaxDeclarationQualify [] source;
   match source with
   | .inductiveDecl name params resultType constructors _ =>
       psElabInductiveDeclaration
@@ -1568,6 +1577,7 @@ def psElabDeclarationBatchWithOrigins
     (environment : PsEnvironment) (sourceIndex : Nat)
     (source : PsSyntaxDeclaration) :
     Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult :=
+  let source := psSyntaxDeclarationQualify [] source;
   match psElabDeclarationBatchStable environment source with
   | Except.ok result =>
       let members : List PsElabMemberOrigin :=

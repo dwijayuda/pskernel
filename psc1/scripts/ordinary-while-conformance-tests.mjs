@@ -18,6 +18,7 @@ const targets = (process.env.PSC1_CONFORMANCE_TARGETS ||
   'js,ts,rust,wasm-core,wasm-component,python,php').split(',');
 const records = [];
 const divergence = [];
+const patternStrictness = [];
 const rejections = [];
 const failures = [];
 const read = file => fs.readFileSync(file, 'utf8');
@@ -189,6 +190,16 @@ partial def spin (flag : Bool) : Id Bool := do
     if !flag then
       return true
   return Id.run (endless flag)
+`;
+
+const patternSpinSource = `import Divergence
+partial def spin (flag : Bool) : Id Bool := do
+  while true do
+    if flag then
+      return true
+    let (_, _) : Prod Bool Bool := (Id.run (endless flag), false)
+    return true
+  return false
 `;
 
 function build(input, target, syntax, kind, publicNames) {
@@ -394,7 +405,7 @@ try {
   fs.mkdirSync(psFolder, { recursive: true });
   for (const [moduleName, text] of [
     ['Loops', loopsSource], ['Entry', entrySource],
-    ['Divergence', divergenceSource], ['Spin', spinSource]
+    ['Divergence', divergenceSource], ['Spin', spinSource], ['PatternSpin', patternSpinSource]
   ]) {
     const lean = source(leanFolder, moduleName + '.lean', text);
     run(native, ['translate', lean, '--to', 'ps', '--out', path.join(psFolder, moduleName + '.ps')]);
@@ -403,6 +414,7 @@ try {
     const folder = syntax === 'lean' ? leanFolder : psFolder;
     const entry = path.join(folder, 'Entry.' + syntax);
     const spin = path.join(folder, 'Spin.' + syntax);
+    const patternSpin = path.join(folder, 'PatternSpin.' + syntax);
     for (const target of targets) {
       console.log('PSC1_WHILE_CONFORMANCE_START: ' + syntax + '/' + target);
       try {
@@ -443,6 +455,17 @@ try {
       } catch (error) {
         divergence.push({ passed: false, ...recordFailure('divergence', syntax, target, error) });
       }
+      try {
+        const strict = build(patternSpin, target, syntax, 'pattern-divergence', ['spin']);
+        const deadline = executeDivergence(strict, target);
+        patternStrictness.push({ syntax, target, passed: true, ...deadline,
+          earlyReturnPreflight: true, unusedPatternRhsEvaluated: true,
+          publicNames: strict.manifest.publicNames,
+          artifactSha256: strict.artifactSha256, manifestSha256: strict.manifestSha256 });
+        console.log('PSC1_PATTERN_STRICTNESS_PASS: ' + syntax + '/' + target);
+      } catch (error) {
+        patternStrictness.push({ passed: false, ...recordFailure('pattern-strictness', syntax, target, error) });
+      }
     }
     for (const [name, pattern, text] of unsupported) {
       try {
@@ -463,6 +486,8 @@ try {
     throw new Error('PSC1_ORDINARY_WHILE_CONFORMANCE_FAILED: ' +
       failures.map(value => value.phase + '/' + value.syntax + '/' + value.target).join(', '));
   }
+  console.log('PSC1_PATTERN_STRICTNESS: PASS ' + patternStrictness.length +
+    ' external divergence deadlines');
   console.log('PSC1_ORDINARY_WHILE_CONFORMANCE: PASS ' + records.length +
     ' finite bundles, ' + divergence.length + ' external divergence deadlines, ' +
     rejections.length + ' refusals');
@@ -477,7 +502,7 @@ try {
     oracleFields: Object.keys(oracle).filter(key => key.startsWith('while')),
     loopChecks: checks, longLoopIterations: 100000,
     targetCount: targets.length, sourceSyntaxes: ['lean', 'ps'],
-    records, divergence, rejections, failures
+    records, divergence, patternStrictness, rejections, failures
   }, null, 2) + '\n');
   fs.rmSync(work, { recursive: true, force: true });
 }

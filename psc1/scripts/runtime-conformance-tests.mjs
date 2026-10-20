@@ -85,7 +85,33 @@ function conjoin(clauses) {
   const middle = Math.floor(clauses.length / 2);
   return '(' + conjoin(clauses.slice(0, middle)) + ' && ' + conjoin(clauses.slice(middle)) + ')';
 }
-let source = '';
+const namespaceLean = `namespace PracticalScope
+def offset : Nat := 7
+def pick (flag : Bool) : Nat := if flag then 5 else 3
+namespace Inner
+def offset : Nat := 11
+def sibling (flag : Bool) : Nat := if flag then offset else PracticalScope.offset
+def score (flag : Bool) : Nat :=
+ let offset : Nat := if flag then 100 else 200;
+ offset + sibling flag + pick flag + PracticalScope.offset
+end Inner
+end PracticalScope
+`;
+const namespacePs = `namespace PracticalScope
+def offset : Nat := 7
+def pick(flag : Bool) : Nat := if (flag) { 5 } else { 3 }
+namespace Inner
+def offset : Nat := 11
+def sibling(flag : Bool) : Nat := if (flag) { offset } else { PracticalScope.offset }
+def score(flag : Bool) : Nat :=
+ let offset : Nat := if (flag) { 100 } else { 200 }
+ offset + sibling(flag) + pick(flag) + PracticalScope.offset
+end Inner
+end PracticalScope
+`;
+fs.writeFileSync(path.join(evidence, 'NamespaceDepLean.lean'), namespaceLean);
+fs.writeFileSync(path.join(evidence, 'NamespaceDepPs.ps'), namespacePs);
+let source = 'import NamespaceDepLean\n';
 for (const [name, clauses] of Object.entries(groups)) {
   source += 'def ' + name + ' (flag : Bool) : Bool :=\n';
   source += ' let huge : Nat := ' + n('huge') + ';\n';
@@ -211,7 +237,10 @@ const controlBodies = {
 for (const [name, body] of Object.entries(controlBodies)) {
   source += 'def ' + name + ' (flag : Bool) : Bool :=\n' + body;
 }
-const checkNames = [...Object.keys(groups), ...Object.keys(controlBodies), 'dataliteralcheck', 'optionalindexcheck'];
+const tuplePatternChecks = ['tuplepatterncheck', 'tuplepatterndocheck'];
+const namespaceChecks = ['namespacecheck'];
+const checkNames = [...Object.keys(groups), ...Object.keys(controlBodies),
+  'dataliteralcheck', 'optionalindexcheck', ...tuplePatternChecks, ...namespaceChecks];
 const names = [...checkNames, 'semantic'];
 const input = path.join(evidence, 'Runtime.lean');
 fs.writeFileSync(input, source);
@@ -219,6 +248,11 @@ const translated = path.join(evidence, 'Runtime.ps');
 // Translation lowers literals to named calls. Append handwritten data syntax
 // in each grammar after translating the common corpus to exercise both parsers.
 run(native, ['translate', input, '--to', 'ps', '--out', translated]);
+const translatedCommon = fs.readFileSync(translated, 'utf8');
+assert.equal((translatedCommon.match(/^import NamespaceDepLean\r?$/gm) || []).length, 1,
+  'translated common corpus must retain exactly its namespace dependency');
+fs.writeFileSync(translated,
+  translatedCommon.replace(/^import NamespaceDepLean\r?$/m, 'import NamespaceDepPs'));
 const literalTotal = n('literalTotal');
 const literalLeanFlag = '(if flag then ' + n('literalTrueFlag') + ' else ' + n('literalFalseFlag') + ')';
 const literalPsFlag = '(if (flag) { ' + n('literalTrueFlag') + ' } else { ' + n('literalFalseFlag') + ' })';
@@ -298,9 +332,59 @@ const optionalPs =
   ' let empty : Array(Int) := #[]\n' +
   ' let emptyAbsent : Bool := match empty[0]? with { | Option.none => true | Option.some value => false }\n' +
   ' ' + conjoin(optionalPsChecks) + '\n';
-fs.appendFileSync(input, literalLean + optionalLean + 'def semantic (flag : Bool) : Bool := ' +
+const patternLean = `def tuplepatterncheck (flag : Bool) : Bool :=
+ let (left, (selected, right)) : Prod Int (Prod Bool Nat) :=
+  ((if flag then -7 else -11), (flag, 13));
+ let observed : Int := if selected then Int.add left (Int.ofNat right) else Int.mul left 2;
+ if flag then ${conjoin(textChecks('Int.repr observed', n('tuplePatternTrue')))}
+ else ${conjoin(textChecks('Int.repr observed', n('tuplePatternFalse')))}
+def tuplepatterndocheck (flag : Bool) : Bool :=
+ let observed : Id Nat := (do
+  let left : Nat := if flag then 3 else 5
+  let captured : Nat -> Nat := fun (n : Nat) => Nat.add left n
+  let (left, (_, right)) : Prod Nat (Prod Bool Nat) := (11, (flag, 13))
+  let mut total : Nat := Nat.add left right
+  if flag then
+   let (amount, enabled) : Prod Nat Bool := (2, flag)
+   total := Nat.add total amount
+   if enabled then
+    return captured total
+  total := Nat.add total 4
+  return captured total
+ );
+ Nat.beq (Id.run observed) ${referenceChoice('tuplePatternDo')}
+def namespacecheck (flag : Bool) : Bool :=
+ Nat.beq (PracticalScope.Inner.score flag) ${referenceChoice('namespace')}
+`;
+const psReferenceChoice = stem =>
+  '(if (flag) { ' + n(stem + 'True') + ' } else { ' + n(stem + 'False') + ' })';
+const patternPs = `def tuplepatterncheck(flag : Bool) : Bool :=
+ let (left, (selected, right)) : Prod(Int, Prod(Bool, Nat)) :=
+  ((if (flag) { -7 } else { -11 }), (flag, 13))
+ let observed : Int := if (selected) { Int.add(left, Int.ofNat(right)) } else { Int.mul(left, 2) }
+ if (flag) { ${conjoin(psTextChecks('Int.repr(observed)', n('tuplePatternTrue')))} }
+ else { ${conjoin(psTextChecks('Int.repr(observed)', n('tuplePatternFalse')))} }
+def tuplepatterndocheck(flag : Bool) : Bool :=
+ let observed : Id(Nat) := (do {
+  let left : Nat := if (flag) { 3 } else { 5 }
+  let captured : Nat -> Nat := fun (n : Nat) => Nat.add(left, n)
+  let (left, (_, right)) : Prod(Nat, Prod(Bool, Nat)) := (11, (flag, 13))
+  let mut total : Nat := Nat.add(left, right)
+  if (flag) {
+   let (amount, enabled) : Prod(Nat, Bool) := (2, flag)
+   total := Nat.add(total, amount)
+   if (enabled) { return captured(total) }
+  }
+  total := Nat.add(total, 4)
+  return captured(total)
+ })
+ Nat.beq(Id.run(observed), ${psReferenceChoice('tuplePatternDo')})
+def namespacecheck(flag : Bool) : Bool :=
+ Nat.beq(PracticalScope.Inner.score(flag), ${psReferenceChoice('namespace')})
+`;
+fs.appendFileSync(input, literalLean + optionalLean + patternLean + 'def semantic (flag : Bool) : Bool := ' +
   conjoin(checkNames.map(name => name + ' flag')) + '\n');
-fs.appendFileSync(translated, literalPs + optionalPs + 'def semantic(flag : Bool) : Bool := ' +
+fs.appendFileSync(translated, literalPs + optionalPs + patternPs + 'def semantic(flag : Bool) : Bool := ' +
   conjoin(checkNames.map(name => name + '(flag)')) + '\n');
 const targets = (process.env.PSC1_CONFORMANCE_TARGETS ||
   'js,ts,rust,wasm-core,wasm-component,python,php').split(',');
@@ -528,6 +612,10 @@ try {
     controlFlowOracle: 'pinned-native-Lean',
     handwrittenLiteralSyntaxes: ['lean', 'ps'],
     handwrittenOptionalIndexSyntaxes: ['lean', 'ps'],
+    handwrittenTuplePatternSyntaxes: ['lean', 'ps'],
+    handwrittenNamespaceSyntaxes: ['lean', 'ps'],
+    tuplePatternChecks, namespaceChecks,
+    namespaceImportOwnership: 'helpers retained privately; publicNames checked exactly',
     records, failures, rustPrivateClosures
   }, null, 2) + '\n');
   fs.rmSync(work, { recursive: true, force: true });

@@ -1,4 +1,15 @@
 import Ps.Elab.DoWhile
+import Ps.Elab.Data
+
+def psElabDoPatternMutableConflict
+    (state : List PsElabDoMutable) : List PsSyntaxName -> Option PsName
+  | [] => none
+  | source :: rest =>
+      match psSyntaxNameToName source with
+      | none => psElabDoPatternMutableConflict state rest
+      | some name =>
+          if psElabDoMutableHasName name state then some name
+          else psElabDoPatternMutableConflict state rest
 
 def psElabDoBodyWithState
     (fuel : Nat)
@@ -25,6 +36,12 @@ def psElabDoBodyWithState
             | .ok valueResult =>
                 psElabDoPure ops valueResult.context
                   (psMetaInstantiate valueResult.context.metaContext result) valueResult.term
+        | PsSyntaxTerm.letPatternE pattern annotation value rest _ =>
+            match psElabDoPatternMutableConflict state (psSyntaxBindingPatternNames pattern) with
+            | some name => .error (PsElabError.doMutableShadowing name)
+            | none =>
+                psElabLetPattern elaborate context pattern annotation value
+                  (fun bodyContext => smaller bodyContext state rest finish) expected
         | PsSyntaxTerm.letE sourceName annotation value rest _ =>
             match psSyntaxNameToName sourceName with
             | none => .error PsElabError.emptyName

@@ -9,6 +9,7 @@ structure PsElabRecursionPlan where
   explicitIds : List Nat
   majorId : Nat
   generalizedIds : List Nat
+  currentNamespace : PsName := PsName.anonymous
 
 structure PsElabRecursionWalkResult where
   term : PsSyntaxTerm
@@ -34,18 +35,14 @@ def psElabRecursionLocalId
   | _ => Option.none
 
 def psElabRecursionIsSelf
-    (plan : PsElabRecursionPlan) (context : PsLocalContext)
+    (plan : PsElabRecursionPlan) (environment : PsEnvironment) (context : PsLocalContext)
     (source : PsSyntaxTerm) : Bool :=
   match source with
   | PsSyntaxTerm.reference sourceName =>
       match psSyntaxNameToName sourceName with
       | Option.none => false
       | Option.some name =>
-          if psNameEq name plan.functionName then
-            match psLocalFindUser context name with
-            | Option.none => true
-            | Option.some _ => false
-          else false
+          psResolveNameIsTarget context environment plan.currentNamespace name plan.functionName
   | _ => false
 
 -- '$' is not a PSC source identifier character. These names exist only in the
@@ -73,6 +70,16 @@ def psElabRecursionPushNames
         psElabRecursionPushNames rest;
       fun (context : PsLocalContext) =>
         smaller (psElabRecursionPushName context name)
+
+def psElabRecursionBindingPatternContext
+    (context : PsLocalContext) (pattern : PsSyntaxBindingPattern) : PsLocalContext :=
+  match pattern with
+  | .name name => psElabRecursionPushName context name
+  | .wildcard _ => context
+  | .unit _ => context
+  | .pair first second _ =>
+      psElabRecursionBindingPatternContext
+        (psElabRecursionBindingPatternContext context first) second
 
 def psElabRecursionPatternContext
     (context : PsLocalContext) (pattern : PsSyntaxPattern) : PsLocalContext :=
@@ -284,12 +291,12 @@ def psElabRecursionWalkWithFuel
           psElabRecursionWalkWithFuel remaining plan environment;
         match source with
         | PsSyntaxTerm.reference sourceName =>
-            if psElabRecursionIsSelf plan context source then
+            if psElabRecursionIsSelf plan environment context source then
               Except.error PsElabError.structuralRecursionEscapingReference
             else if psListIsEmpty plan.generalizedIds then
               Except.ok (PsElabRecursionWalkResult.mk source List.nil)
             else
-              match psElabResolveReferenceBase context environment sourceName with
+              match psElabResolveReferenceBase context environment sourceName plan.currentNamespace with
               | Option.none => Except.ok (PsElabRecursionWalkResult.mk source List.nil)
               | Option.some selected =>
                   match Prod.fst selected with
@@ -307,7 +314,7 @@ def psElabRecursionWalkWithFuel
             match psElabRecursionWalkTerms smaller arguments context with
             | Except.error error => Except.error error
             | Except.ok args =>
-                if psElabRecursionIsSelf plan context fn then
+                if psElabRecursionIsSelf plan environment context fn then
                   match psElabRecursionRewriteCall
                       plan context fn arguments (Prod.fst args) span with
                   | Except.error error => Except.error error
@@ -494,6 +501,21 @@ def psElabRecursionWalkWithFuel
                     Except.ok (PsElabRecursionWalkResult.mk
                       (PsSyntaxTerm.forallE binderResult.binders bodyResult.term span)
                       (psListAppend binderResult.changedIds bodyResult.changedIds))
+        | PsSyntaxTerm.letPatternE pattern type value body span =>
+            match psElabRecursionWalkOptionalType smaller context type with
+            | Except.error error => Except.error error
+            | Except.ok typeResult =>
+                match smaller context value with
+                | Except.error error => Except.error error
+                | Except.ok valueResult =>
+                    match smaller (psElabRecursionBindingPatternContext context pattern) body with
+                    | Except.error error => Except.error error
+                    | Except.ok bodyResult =>
+                        Except.ok (PsElabRecursionWalkResult.mk
+                          (PsSyntaxTerm.letPatternE pattern (Prod.fst typeResult)
+                            valueResult.term bodyResult.term span)
+                          (psListAppend (Prod.snd typeResult)
+                            (psListAppend valueResult.changedIds bodyResult.changedIds)))
         | PsSyntaxTerm.letE name type value body span =>
             match psElabRecursionWalkOptionalType smaller context type with
             | Except.error error => Except.error error
@@ -823,7 +845,7 @@ def psElabPlanStructuralNormalizationWithOrigin
       | Option.none => Except.error PsElabError.emptyName
       | Option.some name =>
           match psElabTypedBinders psElabRecursionTermCallback
-              (psElabContextEmpty environment) binders with
+              (psElabContextForDeclaration environment name) binders with
           | Except.error error => Except.error error
           | Except.ok binderResult =>
               match psElabRecursionLocalId binderResult.context.localContext scrutinee with
@@ -843,7 +865,8 @@ def psElabPlanStructuralNormalizationWithOrigin
                         | Except.error error => Except.error (PsElabError.infer error)
                         | Except.ok _ =>
                             let plan := PsElabRecursionPlan.mk name
-                              (psElabRecursionParameterIds typed) explicitIds majorId List.nil;
+                              (psElabRecursionParameterIds typed) explicitIds majorId List.nil
+                              typeResult.context.currentNamespace;
                             match psElabRecursionWalkWithFuel
                                 4096 plan environment typeResult.context.localContext valueSyntax with
                             | Except.error error => Except.error error
@@ -851,7 +874,7 @@ def psElabPlanStructuralNormalizationWithOrigin
                                 if psListIsEmpty scanned.changedIds then Except.ok Option.none
                                 else
                                   let generalized := PsElabRecursionPlan.mk name
-                                    plan.parameterIds explicitIds majorId scanned.changedIds;
+                                    plan.parameterIds explicitIds majorId scanned.changedIds plan.currentNamespace;
                                   match psElabRecursionBuildNormalizationWithOrigin generalized
                                       binders typeSyntax valueSyntax span binderResult typeResult with
                                   | Except.error error => Except.error error

@@ -31,6 +31,7 @@ structure PsElabContext where
   metaContext : PsMetaContext
   structuralRecursion : Option PsElabStructuralRecursion
   whileHelper : Option PsName := Option.none
+  currentNamespace : PsName := PsName.anonymous
 
 def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
   {
@@ -52,6 +53,7 @@ def psElabContextWithLocal
     metaContext := context.metaContext
     structuralRecursion := context.structuralRecursion
     whileHelper := context.whileHelper
+    currentNamespace := context.currentNamespace
   }
 
 def psElabContextWithMeta
@@ -64,6 +66,7 @@ def psElabContextWithMeta
     metaContext := metaContext
     structuralRecursion := context.structuralRecursion
     whileHelper := context.whileHelper
+    currentNamespace := context.currentNamespace
   }
 
 def psElabContextWithStructuralRecursion
@@ -77,6 +80,7 @@ def psElabContextWithStructuralRecursion
     metaContext := context.metaContext
     structuralRecursion := structuralRecursion
     whileHelper := context.whileHelper
+    currentNamespace := context.currentNamespace
   }
 
 -- Root fields keep their established call map in every nested body. Only the
@@ -94,3 +98,11 @@ def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext
 def psElabContextWithWhileHelper
     (context : PsElabContext) (helper : PsName) : PsElabContext :=
   { context with whileHelper := Option.some helper }
+
+def psElabContextForDeclaration
+    (environment : PsEnvironment) (name : PsName) : PsElabContext :=
+  let currentNamespace := match name with
+    | .anonymous => PsName.anonymous
+    | .str parent _ => parent
+    | .num parent _ => parent
+  { psElabContextEmpty environment with currentNamespace := currentNamespace }

@@ -274,19 +274,38 @@ def psElabLocalProjectionBaseWorker
                   (PsResolvedName.local (psLocalDeclId declaration))
                   (List.cons field rest))
 
+def psElabGlobalProjectionBaseWorker
+    (environment : PsEnvironment) (currentNamespace : PsName)
+    (fields : List String) :
+    PsName -> Option (Prod PsResolvedName (List String)) :=
+  match fields with
+  | [] => fun _ => Option.none
+  | field :: rest =>
+      let smaller := psElabGlobalProjectionBaseWorker environment currentNamespace rest
+      fun base =>
+        match smaller (psNameAppendStr base field) with
+        | .some selected => .some selected
+        | .none =>
+            match psResolveGlobalInNamespace environment Option.none base currentNamespace with
+            | .none => .none
+            | .some selected =>
+                .some (Prod.mk (PsResolvedName.global selected) (field :: rest))
+
 -- Share name selection between elaboration and hygienic recursion rewriting.
 -- Exact complete names precede the established first-segment projection base.
--- Only an absent first segment permits a longer LOCAL base; a selected base
--- never falls back to another name after a field or type error.
+-- Only an absent first segment permits a longer local or qualified global base;
+-- local bases retain precedence, and a selected base never falls back after a
+-- field or type error.
 def psElabResolveReferenceBase
     (localContext : PsLocalContext)
     (environment : PsEnvironment)
-    (sourceName : PsSyntaxName) :
+    (sourceName : PsSyntaxName)
+    (currentNamespace : PsName := PsName.anonymous) :
     Option (Prod PsResolvedName (List String)) :=
   match psSyntaxNameToName sourceName with
   | Option.none => Option.none
   | Option.some name =>
-      match psResolveName localContext environment name with
+      match psResolveNameInNamespace localContext environment currentNamespace name with
       | Option.some resolved => Option.some (Prod.mk resolved List.nil)
       | Option.none =>
           match sourceName.segments with
@@ -296,11 +315,14 @@ def psElabResolveReferenceBase
               | List.nil => Option.none
               | List.cons second rest =>
                   let base := psNameAppendStr PsName.anonymous first;
-                  match psResolveName localContext environment base with
+                  match psResolveNameInNamespace localContext environment currentNamespace base with
                   | Option.some resolved => Option.some (Prod.mk resolved tail)
                   | Option.none =>
-                      psElabLocalProjectionBaseWorker
-                        localContext rest (psNameAppendStr base second)
+                      let longerBase := psNameAppendStr base second
+                      match psElabLocalProjectionBaseWorker localContext rest longerBase with
+                      | .some selected => .some selected
+                      | .none => psElabGlobalProjectionBaseWorker
+                          environment currentNamespace rest longerBase
 
 def psElabProjectionReference
     (context : PsElabContext)
@@ -308,7 +330,7 @@ def psElabProjectionReference
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match psElabResolveReferenceBase
-      context.localContext context.environment sourceName with
+      context.localContext context.environment sourceName context.currentNamespace with
   | Option.none =>
       match sourceName.segments with
       | List.nil => Except.error PsElabError.emptyName
@@ -993,6 +1015,7 @@ def psElabMatchAlternativesCoverConstructors
         false
 
 def psElabMatchPatternConstructorName
+    (context : PsElabContext)
     (inductiveInfo : PsName)
     (pattern : PsSyntaxPattern) :
     Except PsElabError PsName :=
@@ -1017,9 +1040,14 @@ def psElabMatchPatternConstructorName
           | _ :: _ =>
               match psSyntaxNameToName syntaxName with
               | none => Except.error PsElabError.matchPatternUnsupported
-              | some name => Except.ok name
+              | some name =>
+                  match psResolveGlobalInNamespace context.environment Option.none
+                      name context.currentNamespace with
+                  | some selected => Except.ok selected
+                  | none => Except.error (PsElabError.matchConstructorUnknown name)
 
 def psElabPrepareMatchAlternativesWorker
+    (context : PsElabContext)
     (inductiveInfo : PsInductiveInfo)
     (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) :
     List PsElabMatchAlternative ->
@@ -1042,6 +1070,7 @@ def psElabPrepareMatchAlternativesWorker
           List PsElabMatchAlternative ->
           Except PsElabError (List PsElabMatchAlternative) :=
         psElabPrepareMatchAlternativesWorker
+          context
           inductiveInfo
           rest;
       fun (alternativesRev : List PsElabMatchAlternative) =>
@@ -1065,6 +1094,7 @@ def psElabPrepareMatchAlternativesWorker
                 Except.error PsElabError.matchPatternUnsupported
         | _ =>
             match psElabMatchPatternConstructorName
+                context
                 inductiveInfo.name
                 pattern with
             | Except.error error => Except.error error
@@ -1094,11 +1124,13 @@ def psElabPrepareMatchAlternativesWorker
                         (List.cons alternative alternativesRev)
 
 def psElabPrepareMatchAlternatives
+    (context : PsElabContext)
     (inductiveInfo : PsInductiveInfo)
     (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
     (alternativesRev : List PsElabMatchAlternative) :
     Except PsElabError (List PsElabMatchAlternative) :=
   psElabPrepareMatchAlternativesWorker
+    context
     inductiveInfo
     entries
     alternativesRev
@@ -1874,6 +1906,7 @@ def psElabMatch
                     Except.error PsElabError.matchParameterArity
                   else
                     match psElabPrepareMatchAlternatives
+                        scrutineeResult.context
                         inductiveInfo
                         alternativesSyntax
                         [] with
@@ -2691,9 +2724,10 @@ def psElabSyntaxLocalId
       | Option.none => Option.none
       | Option.some name =>
           match
-              psResolveName
+              psResolveNameInNamespace
                 context.localContext
                 context.environment
+                context.currentNamespace
                 name with
           | Option.none => Option.none
           | Option.some resolved =>
@@ -2830,9 +2864,8 @@ def psTryElabStructuralSelfCall
       | .reference sourceName =>
           match psSyntaxNameToName sourceName with
           | Option.some calledName =>
-              if psElabBoolNot (psNameEq calledName recursion.functionName) then
-                Except.ok Option.none
-              else if psElabStructuralNameIsLocal context calledName then
+              if psElabBoolNot (psResolveNameIsTarget context.localContext
+                  context.environment context.currentNamespace calledName recursion.functionName) then
                 Except.ok Option.none
               else if
                   psElabNatNe
@@ -2871,11 +2904,8 @@ def psElabStructuralReferenceEscapes
       match psSyntaxNameToName sourceName with
       | Option.none => false
       | Option.some name =>
-          if psNameEq name recursion.functionName then
-            match psLocalFindUser context.localContext name with
-            | Option.none => true
-            | Option.some _ => false
-          else false
+          psResolveNameIsTarget context.localContext context.environment
+            context.currentNamespace name recursion.functionName
 
 def psElabTermWithFuel
     (fuel : Nat) :
@@ -2960,6 +2990,9 @@ def psElabTermWithFuel
             | .doForE _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doForRangeE _ _ _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
             | .doWhileE _ _ _ _ => Except.error PsElabError.doStatementOutsideBlock
+            | .letPatternE pattern declaredType value body _ =>
+                psElabLetPattern smaller context pattern declaredType value
+                  (fun bodyContext => smaller bodyContext body expected) expected
             | .letE name declaredType value body _ =>
                 psElabLet
                   smaller

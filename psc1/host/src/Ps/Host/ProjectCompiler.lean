@@ -369,7 +369,9 @@ def psHostParseSource
       (IO.userError
         ("PSC1_PROJECT_SOURCE_KIND: " ++ path))
 
-def psHostSyntaxDeclarationName : PsSyntaxDeclaration -> String
+def psHostSyntaxDeclarationName (declaration : PsSyntaxDeclaration) : String :=
+  match psSyntaxDeclarationQualify [] declaration with
+  | .scopedDecl _ _ => "<namespace>"
   | .definition name _ _ _ _ =>
       match psSyntaxNameToName name with
       | some value => psNameToString value

@@ -92,7 +92,9 @@ private def coreNameOfSyntaxName (name : PsSyntaxName) : Option PsName :=
   if name.segments.isEmpty then none
   else some (name.segments.foldl PsName.str PsName.anonymous)
 
-private def syntaxCoreName : PsSyntaxDeclaration → Option PsName
+private def syntaxCoreName (declaration : PsSyntaxDeclaration) : Option PsName :=
+  match psSyntaxDeclarationQualify [] declaration with
+  | .scopedDecl _ _ => none
   | .definition name _ _ _ _ => coreNameOfSyntaxName name
   | .partialDefinition name _ _ _ _ => coreNameOfSyntaxName name
   | .theoremDecl name _ _ _ _ => coreNameOfSyntaxName name

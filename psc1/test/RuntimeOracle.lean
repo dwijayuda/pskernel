@@ -120,6 +120,37 @@ private def optionalArrayValue (result : Option Int) : Int :=
   | .none => 0
   | .some value => value
 
+private def tuplePatternReference (flag : Bool) : Int :=
+  let (left, (selected, right)) : Int × (Bool × Nat) :=
+    ((if flag then -7 else -11), (flag, 13))
+  if selected then left + Int.ofNat right else left * 2
+
+private def tuplePatternDoReference (flag : Bool) : Nat := Id.run do
+  let left : Nat := if flag then 3 else 5
+  let captured : Nat → Nat := fun n => left + n
+  let (left, (_, right)) : Nat × (Bool × Nat) := (11, (flag, 13))
+  let mut total : Nat := left + right
+  if flag then
+    let (amount, enabled) : Nat × Bool := (2, flag)
+    total := total + amount
+    if enabled then
+      return captured total
+  total := total + 4
+  return captured total
+
+namespace PracticalNamespaceOracle
+def offset : Nat := 7
+def pick (flag : Bool) : Nat := if flag then 5 else 3
+namespace Inner
+def offset : Nat := 11
+def sibling (flag : Bool) : Nat :=
+  if flag then offset else PracticalNamespaceOracle.offset
+def score (flag : Bool) : Nat :=
+  let offset : Nat := if flag then 100 else 200
+  offset + sibling flag + pick flag + PracticalNamespaceOracle.offset
+end Inner
+end PracticalNamespaceOracle
+
 private def rustHigherOrderApply (f : (Nat → Nat) → Nat → Nat)
     (g : Nat → Nat) (x : Nat) : Nat :=
   f g x
@@ -277,6 +308,12 @@ def main : IO Unit := do
     ("optionalIndexTrueValue", toJson (Int.repr (optionalArrayValue (optionalArrayReference true)))),
     ("optionalHugeAbsent", toJson (!(optionalArrayIsSome (optionalValues[huge]?)))),
     ("optionalEmptyAbsent", toJson (!(optionalArrayIsSome (optionalEmpty[0]?)))),
+    ("tuplePatternFalse", toJson (Int.repr (tuplePatternReference false))),
+    ("tuplePatternTrue", toJson (Int.repr (tuplePatternReference true))),
+    ("tuplePatternDoFalse", toJson (toString (tuplePatternDoReference false))),
+    ("tuplePatternDoTrue", toJson (toString (tuplePatternDoReference true))),
+    ("namespaceFalse", toJson (toString (PracticalNamespaceOracle.Inner.score false))),
+    ("namespaceTrue", toJson (toString (PracticalNamespaceOracle.Inner.score true))),
     ("rustPrivateFalse", toJson (toString (rustPrivateCaptureReference false))),
     ("rustPrivateTrue", toJson (toString (rustPrivateCaptureReference true))),
     ("whileSelfFalse", toJson (toString (whileSelfReference false))),

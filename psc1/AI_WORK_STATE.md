@@ -6,6 +6,21 @@ seven-backend PR #165 at preserved head
 `5539059a47c13a3dbc9806a504775b72f7bfd0fe`.
 PRs #162, #163 and #165 remain intact; no merge or publication was performed.
 
+## Active continuation — tuple patterns and namespace scopes
+
+The current continuation adds immutable nested tuple/Unit/wildcard binding
+patterns to ordinary `let` and selected `do let`, plus semantic
+`namespace N` / `end N` scopes in both source grammars. The implementation
+retains one strict Core let for each pattern RHS, checks projected field types,
+resolves namespace names lexically, and retains entry-module export ownership.
+Mutable and monadic binding patterns, namespace aliases and `_root_` escapes
+remain outside the selected surface.
+
+The new native, target-execution, strictness-deadline and publication-boundary
+regressions are awaiting their own focused Linux qualification. The successful
+checkpoint below is historical and is not evidence for this new source state.
+No feature family is marked complete and no behavioral certificate is claimed.
+
 ## Qualified implementation checkpoint
 
 Implementation head `8d6f80ea5813edd0644440971095abffd9dddacd` passed all 34 steps in

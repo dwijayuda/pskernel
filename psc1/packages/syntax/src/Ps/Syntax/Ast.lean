@@ -15,6 +15,32 @@ structure PsSyntaxBinderHead where
   kind : PsSyntaxBinderKind
   span : PsSourceSpan
 
+inductive PsSyntaxBindingPattern where
+  | name (name : PsSyntaxName)
+  | wildcard (span : PsSourceSpan)
+  | unit (span : PsSourceSpan)
+  | pair (first second : PsSyntaxBindingPattern) (span : PsSourceSpan)
+
+def psSyntaxBindingPatternSpan : PsSyntaxBindingPattern -> PsSourceSpan
+  | .name name => name.span
+  | .wildcard span => span
+  | .unit span => span
+  | .pair _ _ span => span
+
+def psSyntaxBindingPatternNames : PsSyntaxBindingPattern -> List PsSyntaxName
+  | .name name => [name]
+  | .wildcard _ => []
+  | .unit _ => []
+  | .pair first second _ =>
+      psSyntaxBindingPatternNames first ++ psSyntaxBindingPatternNames second
+
+def psSyntaxBindingPatternSize : PsSyntaxBindingPattern -> Nat
+  | .name _ => 1
+  | .wildcard _ => 1
+  | .unit _ => 1
+  | .pair first second _ =>
+      1 + psSyntaxBindingPatternSize first + psSyntaxBindingPatternSize second
+
 inductive PsSyntaxPattern where
   | bool (value : Bool) (span : PsSourceSpan)
   | wildcard (span : PsSourceSpan)
@@ -68,6 +94,11 @@ inductive PsSyntaxTerm where
   | forallE
       (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (body : PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | letPatternE
+      (pattern : PsSyntaxBindingPattern)
+      (type : Option PsSyntaxTerm)
+      (value body : PsSyntaxTerm)
       (span : PsSourceSpan)
   | letE
       (name : PsSyntaxName)
@@ -125,6 +156,43 @@ inductive PsSyntaxDeclaration where
       (fields : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (span : PsSourceSpan)
 
+  | scopedDecl
+      (namespacePath : List String)
+      (declaration : PsSyntaxDeclaration)
+
 structure PsSyntaxModule where
   imports : List PsSyntaxImport
   declarations : List PsSyntaxDeclaration
+
+-- Namespace commands preserve local source names. These helpers interpret the
+-- per-declaration scope metadata at semantic declaration boundaries.
+def psSyntaxNamespaceAppend (left : List String) (right : List String) : List String :=
+  match left with
+  | [] => right
+  | first :: rest => first :: psSyntaxNamespaceAppend rest right
+
+def psSyntaxNamespaceName (prefix : List String) (name : PsSyntaxName) : PsSyntaxName :=
+  { name with segments := psSyntaxNamespaceAppend prefix name.segments }
+
+def psSyntaxDeclarationQualify (prefix : List String) :
+    PsSyntaxDeclaration -> PsSyntaxDeclaration
+  | .scopedDecl path declaration =>
+      psSyntaxDeclarationQualify (psSyntaxNamespaceAppend prefix path) declaration
+  | .definition name binders type value span =>
+      .definition (psSyntaxNamespaceName prefix name) binders type value span
+  | .partialDefinition name binders type value span =>
+      .partialDefinition (psSyntaxNamespaceName prefix name) binders type value span
+  | .theoremDecl name binders type value span =>
+      .theoremDecl (psSyntaxNamespaceName prefix name) binders type value span
+  | .inductiveDecl name params type constructors span =>
+      .inductiveDecl (psSyntaxNamespaceName prefix name) params type constructors span
+  | .structureDecl name params fields span =>
+      .structureDecl (psSyntaxNamespaceName prefix name) params fields span
+
+def psSyntaxDeclarationSpan : PsSyntaxDeclaration -> PsSourceSpan
+  | .definition _ _ _ _ span => span
+  | .partialDefinition _ _ _ _ span => span
+  | .theoremDecl _ _ _ _ span => span
+  | .inductiveDecl _ _ _ _ span => span
+  | .structureDecl _ _ _ span => span
+  | .scopedDecl _ declaration => psSyntaxDeclarationSpan declaration

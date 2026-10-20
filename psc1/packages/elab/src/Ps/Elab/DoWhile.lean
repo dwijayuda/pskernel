@@ -8,6 +8,7 @@ def psElabDoWhileNestedLoop : PsSyntaxTerm -> Bool
   | .doForRangeE _ _ _ _ _ _ => true
   | .doWhileE _ _ _ _ => true
   | .letE _ _ _ rest _ => psElabDoWhileNestedLoop rest
+  | .letPatternE _ _ _ rest _ => psElabDoWhileNestedLoop rest
   | .doLetMutE _ _ _ rest _ => psElabDoWhileNestedLoop rest
   | .doAssignE _ _ rest _ => psElabDoWhileNestedLoop rest
   | .doBindE _ _ _ rest _ => psElabDoWhileNestedLoop rest

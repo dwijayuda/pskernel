@@ -89,3 +89,97 @@ def psElabArrayGetOption
     (psMetaInstantiate metas arrayResult.term)
     (psExprAbstractFVar arrayBinding.id withIndex)
   psElabResolvedTerm indexResult.context withArray expected
+
+private def psBindingNameSeen (name : PsName) : List PsName -> Bool
+  | [] => false
+  | first :: rest => if psNameEq name first then true else psBindingNameSeen name rest
+
+private def psElabCheckBindingNames :
+    List PsSyntaxName -> List PsName -> Except PsElabError Unit
+  | [], _ => .ok ()
+  | source :: rest, seen =>
+      match source.segments with
+      | [text] =>
+          if psStringEq text "_" then .error .matchPatternUnsupported
+          else
+            match psSyntaxNameToName source with
+            | none => .error .emptyName
+            | some name =>
+                if psBindingNameSeen name seen then .error .matchPatternUnsupported
+                else psElabCheckBindingNames rest (name :: seen)
+      | _ => .error .matchPatternUnsupported
+
+/-- Close a checked Core let while retaining the RHS even if its local is unused.
+The fresh local id, rather than a source spelling, establishes binding identity. -/
+private def psElabPatternWithLocal
+    (next : PsElabContext -> Nat -> Except PsElabError PsElabTermResult)
+    (outer : PsElabContext) (name : PsName) (type : PsExpr)
+    (value : PsElabTermResult) (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  let pushed := psLocalPushLet value.context.localContext name type value.term
+  let bodyContext := psElabContextWithLocal value.context pushed.context
+  let body ← next bodyContext pushed.id
+  let metas := body.context.metaContext
+  let term := PsExpr.letE name (psMetaInstantiate metas type)
+    (psMetaInstantiate metas value.term)
+    (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
+  psElabResolvedTerm (psElabContextWithMeta outer metas) term expected
+
+private def psElabBindingPatternFields
+    (pattern : PsSyntaxBindingPattern) (context : PsElabContext)
+    (value type : PsExpr) (expected : Option PsExpr)
+    (next : PsElabContext -> Except PsElabError PsElabTermResult) :
+    Except PsElabError PsElabTermResult := do
+  match pattern with
+  | .wildcard _ => next context
+  | .unit _ =>
+      let checked ← psElabResolvedTerm context value (some (.constE psUnitName []))
+      next checked.context
+  | .name source =>
+      let name ← match psSyntaxNameToName source with
+        | none => throw .emptyName
+        | some name => pure name
+      let checked ← psElabResolvedTerm context value (some type)
+      psElabPatternWithLocal (fun bodyContext _ => next bodyContext)
+        context name checked.type checked expected
+  | .pair first second _ =>
+      let fields ←
+        match psWhnf context.environment context.metaContext context.localContext type with
+        | .app (.app (.constE name _) alpha) beta =>
+            if psNameEq name psProdName then pure (alpha, beta)
+            else throw .matchPatternUnsupported
+        | _ => throw .matchPatternUnsupported
+      let firstValue ← psElabResolvedTerm context (.proj psProdName 0 value)
+        (some fields.fst)
+      psElabBindingPatternFields first firstValue.context firstValue.term firstValue.type
+        expected (fun firstContext => do
+          let secondValue ← psElabResolvedTerm firstContext (.proj psProdName 1 value)
+            (some (psMetaInstantiate firstContext.metaContext fields.snd))
+          psElabBindingPatternFields second secondValue.context
+            secondValue.term secondValue.type expected next)
+
+/-- Immutable ordinary and procedural bindings share this typed lowering. Only
+the continuation determines the controller; pattern binding adds no effect or ABI.
+The unspellable numeric Core name prevents user names from capturing the RHS. -/
+def psElabLetPattern
+    (elaborate : PsDataElaborator) (context : PsElabContext)
+    (pattern : PsSyntaxBindingPattern) (annotation : Option PsSyntaxTerm)
+    (value : PsSyntaxTerm)
+    (next : PsElabContext -> Except PsElabError PsElabTermResult)
+    (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
+  psElabCheckBindingNames (psSyntaxBindingPatternNames pattern) []
+  let valueResult ←
+    match annotation with
+    | none => elaborate context value none
+    | some sourceType => do
+        let typeResult ← elaborate context sourceType none
+        match psInferEnsureSort typeResult.context.environment
+            typeResult.context.metaContext typeResult.context.localContext typeResult.type with
+        | .error error => throw (.infer error)
+        | .ok _ => elaborate typeResult.context value (some typeResult.term)
+  let type := psMetaInstantiate valueResult.context.metaContext valueResult.type
+  let temporary := PsName.num (psRootName "_psc1Pattern") valueResult.context.localContext.nextId
+  psElabPatternWithLocal
+    (fun bodyContext id =>
+      psElabBindingPatternFields pattern bodyContext (.fvar id) type expected next)
+    context temporary type valueResult expected

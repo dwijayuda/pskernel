@@ -1,4 +1,5 @@
 import Ps.Syntax.ParseCommon
+import Ps.Syntax.ParseBinding
 
 -- Both surfaces build the same procedural AST. Layout and delimiters are
 -- frontend concerns; lexical mutation and return are elaborated into checked Core.
@@ -70,6 +71,9 @@ inductive PsParseDoHead where
   | binding
       (name : PsSyntaxName) (annotation : Option PsSyntaxTerm)
       (value : PsSyntaxTerm) (monadic mutable : Bool) (span : PsSourceSpan)
+  | patternBinding
+      (pattern : PsSyntaxBindingPattern) (annotation : Option PsSyntaxTerm)
+      (value : PsSyntaxTerm) (span : PsSourceSpan)
   | assignment (name : PsSyntaxName) (value : PsSyntaxTerm) (span : PsSourceSpan)
   | conditional (condition thenBody elseBody : PsSyntaxTerm) (span : PsSourceSpan)
   | forEach (name : PsSyntaxName) (collection body : PsSyntaxTerm) (span : PsSourceSpan)
@@ -131,6 +135,16 @@ def psParseDoNamedBinding
       else
         psParseDoBindingValue parseTerm start sourceName mutable Option.none name.cursor
 
+def psParseDoPatternBinding
+    (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
+    (start : PsSourcePos) (cursor : PsTokenCursor) :
+    Except PsParseError PsParseDoHead := do
+  let header ← psParseBindingPatternHeader parseTerm cursor
+  let assign ← psTokenCursorExpectText header.cursor ":="
+  let value ← psParseDoCompleteTerm parseTerm assign.cursor
+  return .patternBinding header.pattern header.annotation value
+    { start := start, stop := (psSyntaxTermSpan value).stop }
+
 def psParseDoStatement
     (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
     (cursor : PsTokenCursor) : Except PsParseError PsParseDoHead :=
@@ -159,6 +173,8 @@ def psParseDoStatement
           | Option.none => Except.error (PsParseError.unexpectedEnd "mutable local name")
           | Option.some marker =>
               psParseDoNamedBinding parseTerm keyword.token.span.start true marker.cursor
+        else if psTokenCursorAtText keyword.cursor "(" then
+          psParseDoPatternBinding parseTerm keyword.token.span.start keyword.cursor
         else psParseDoNamedBinding parseTerm keyword.token.span.start false keyword.cursor
   else
     let action :=
@@ -185,6 +201,7 @@ def psParseDoStatement
 def psParseDoHeadSpan (head : PsParseDoHead) : PsSourceSpan :=
   match head with
   | PsParseDoHead.binding _ _ _ _ _ span => span
+  | PsParseDoHead.patternBinding _ _ _ span => span
   | PsParseDoHead.assignment _ _ span => span
   | PsParseDoHead.conditional _ _ _ span => span
   | PsParseDoHead.forEach _ _ _ span => span
@@ -200,6 +217,8 @@ def psParseDoFallthrough (body : PsSyntaxTerm) : PsSyntaxTerm :=
   match body with
   | .letE name type value rest span =>
       .letE name type value (psParseDoFallthrough rest) span
+  | .letPatternE pattern type value rest span =>
+      .letPatternE pattern type value (psParseDoFallthrough rest) span
   | .doLetMutE name type value rest span =>
       .doLetMutE name type value (psParseDoFallthrough rest) span
   | .doAssignE name value rest span =>
@@ -242,6 +261,9 @@ def psParseDoAppend (fuel : Nat) (tail : PsSyntaxTerm) :
         match body with
         | .letE name type value rest span =>
             rebuild rest (fun (appended : PsSyntaxTerm) => .letE name type value appended
+              (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
+        | .letPatternE pattern type value rest span =>
+            rebuild rest (fun (appended : PsSyntaxTerm) => .letPatternE pattern type value appended
               (psSyntaxSpanJoin span (psSyntaxTermSpan tail)))
         | .doLetMutE name type value rest span =>
             rebuild rest (fun (appended : PsSyntaxTerm) => .doLetMutE name type value appended
@@ -311,6 +333,8 @@ def psParseDoCloseHead
       | Option.none => Except.ok value
       | Option.some following =>
           Except.ok (PsSyntaxTerm.doThenE value following fullSpan)
+  | PsParseDoHead.patternBinding pattern annotation value _ =>
+      Except.ok (.letPatternE pattern annotation value rest fullSpan)
   | PsParseDoHead.binding name annotation value monadic mutable _ =>
       if mutable then Except.ok (PsSyntaxTerm.doLetMutE name annotation value rest fullSpan)
       else if monadic then Except.ok (PsSyntaxTerm.doBindE name annotation value rest fullSpan)

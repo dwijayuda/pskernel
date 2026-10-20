@@ -34,8 +34,10 @@ def psKernelExprV2ChunkedEmptyWithLimit
     chunkLimit := actual
   }
 
+/- Research default selected by guarded Node22/TS7 insertion-and-readback CI
+   39382668149; remains configurable and is not a whole-kernel speed claim. -/
 def psKernelExprV2ChunkedEmpty : PsKernelExprV2ChunkedArena :=
-  psKernelExprV2ChunkedEmptyWithLimit 32
+  psKernelExprV2ChunkedEmptyWithLimit 64
 
 def psKernelExprV2ChunkedPush
     (arena : PsKernelExprV2ChunkedArena)

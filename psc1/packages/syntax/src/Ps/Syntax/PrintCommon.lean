@@ -1,4 +1,5 @@
 import Ps.Syntax.Ast
+import Ps.Foundation.Text
 
 inductive PsSourcePrintError where
   | fuelExhausted
@@ -225,7 +226,7 @@ def psPrintDoBody
                 match smaller tail with
                 | Except.error error => Except.error error
                 | Except.ok printedTail =>
-                    if String.isEmpty printedTail then Except.ok printedHead
+                    if psStringEq printedTail "" then Except.ok printedHead
                     else Except.ok (psPrintCommonConcat3 printedHead separator printedTail);
         match body with
         | PsSyntaxTerm.letPatternE pattern annotation value tail _ =>
@@ -261,7 +262,7 @@ def psPrintDoBody
                               psPrintJoin "" ["if ", printedCondition, " then { ", printedThen, " }"]
                             else
                               psPrintJoin "" ["if (", printedCondition, ") {\n  ", printedThen, "\n}"];
-                          if String.isEmpty printedElse then Except.ok head
+                          if psStringEq printedElse "" then Except.ok head
                           else if native then
                             Except.ok (psPrintJoin "" [head, " else { ", printedElse, " }"])
                           else

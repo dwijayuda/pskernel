@@ -316,9 +316,10 @@ def psParseLeanApplicationPrimary
         | Option.some token => token.span.start;
       let stop : PsSourcePos := psLeanNomatchConsumedStop cursor.remaining
         (psTokenCursorPeek parsed.cursor) inner.stop;
+      let surfaceSpan : PsSourceSpan := { start := start, stop := stop };
       psParseDataOptionalIndexTailWithFuel parseParenthesized
         (Nat.succ (psParseListLength parsed.cursor.remaining))
-        parsed.value { start := start, stop := stop } parsed.cursor
+        parsed.value surfaceSpan parsed.cursor
 
 def psLeanCanStartSimpleArgument
     (current : PsSyntaxTerm)

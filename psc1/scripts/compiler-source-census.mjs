@@ -130,6 +130,16 @@ for (const [grammar, lane] of Object.entries(lanes)) {
     }
   }
 }
+for (const [grammar, lane] of Object.entries(lanes)) {
+  for (const row of lane.observed.records) {
+    if (['translation', 'parse', 'elaboration'].some(stage => row[stage] === 'refused'))
+      console.log('PSC1_COMPILER_CENSUS_MODULE_REFUSAL: ' + JSON.stringify({
+        grammar, module: row.module, translation: row.translation, parse: row.parse,
+        elaboration: row.elaboration, detail: row.detail, sourceDeclaration: row.sourceDeclaration,
+        sourceIndex: row.sourceIndex, line: row.line, column: row.column
+      }));
+  }
+}
 requireStrictCensus(phases, lanes, options.strictPhase);
 // Diagnostic mode retains all source refusals; strict mode requires both complete lanes.
 
@@ -142,6 +152,8 @@ for (const [module, stage] of [
   ['Ps.Syntax.ParseBinding', 'parse'], ['Ps.Syntax.ParseBinding', 'elaboration'],
   ['Ps.Syntax.Operators', 'parse'], ['Ps.Syntax.Operators', 'elaboration'],
   ['Ps.Syntax.ParseProofScript', 'parse'], ['Ps.Syntax.ParseProofScript', 'elaboration'],
+  ['Ps.Syntax.PrintLean', 'parse'], ['Ps.Syntax.PrintLean', 'elaboration'],
+  ['Ps.Syntax.PrintProofScript', 'parse'], ['Ps.Syntax.PrintProofScript', 'elaboration'],
   ['Ps.Syntax.PrintCommon', 'parse'], ['Ps.Syntax.PrintCommon', 'elaboration'],
   ['Ps.Syntax.ParseLean', 'parse'], ['Ps.Syntax.ParseLean', 'elaboration'],
   ['Ps.Syntax.ParseData', 'parse'], ['Ps.Syntax.ParseData', 'elaboration'],

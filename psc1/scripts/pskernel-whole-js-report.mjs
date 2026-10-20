@@ -18,7 +18,7 @@ function parse(label) {
       throw Error("INVALID_JS_WHOLE_SAMPLE "+label+" "+key);
     measurements.set(key,item);
   }
-  if(!summary?.all_correct || measurements.size!==30 || !(summary.max_rss_kib>0))
+  if(!summary?.all_correct || measurements.size!==33 || !(summary.max_rss_kib>0))
     throw Error("INCOMPLETE_JS_COMPLETE_OPERATIONS "+label+" "+measurements.size);
   return {measurements,summary};
 }

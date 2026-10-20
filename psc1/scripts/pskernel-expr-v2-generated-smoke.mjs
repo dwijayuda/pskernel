@@ -275,7 +275,7 @@ const pairQueries=boolList.cons({fst:eqLeft,snd:eqRight},
 const expectedPairAnswers=boolList.cons(true,
   boolList.cons(true,boolList.cons(false,boolListNil)));
 const paired=accepted(portableEqBatch(eqGraph,pairQueries),"pair-batch-checked");
-demand(boolListEq(paired,expectedPairAnswers)===true,
+demand(boolListEq(paired)(expectedPairAnswers)===true,
   "pair-batch-ordered-answers");
 const badBatch=portableEqBatch(eqGraph,
   boolList.cons({fst:eqLeft,snd:99999n},boolListNil));
@@ -301,7 +301,7 @@ function compareBatch(kind) {
   }else{
     const values=accepted(portableEqBatch(eqGraph,repeatedPairs),
       "pair-batch-amortized");
-    if(!boolListEq(values,repeatedExpected))
+    if(!boolListEq(values)(repeatedExpected))
       throw Error("PSC1_V2_PAIR_BATCH_BATCHED_MISMATCH");
   }
   pairBatchMetrics.push({kind,queries:12,arena_nodes:Number(eqGraph.size),

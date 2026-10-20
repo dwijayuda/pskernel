@@ -9,6 +9,7 @@ on:
       - psc1/lean-toolchain
       - psc1/packages/pskernel-core/src/Ps/KernelCore/Research/**
       - psc1/test/PsKernelExprV2Regression.lean
+      - psc1/scripts/pskernel-expr-v2-generated-smoke.mjs
       - psc1/kernel-lakefile.lean
       - .github/workflows/psc1-pskernel-expr-v2.yml
 
@@ -78,3 +79,41 @@ jobs:
         run: |
           set -euo pipefail
           lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2.lean
+      - name: Check persistent V2 index under the same portable compiler
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Index.lean
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated pinned TypeScript 7.0.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-v2-ts"
+          echo '{"name":"psc1-v2-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-v2-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-v2-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-v2-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Compile portable Expression V2 and persistent index to JS
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Index.lean --out dist/expr-v2/index.js
+          test -s dist/expr-v2/index.js
+          test -s dist/expr-v2/index.d.ts
+          test -s dist/expr-v2/index.js.map
+          node --check dist/expr-v2/index.js
+      - name: Run generated-JS V2 sharing, hash and indexed-arena smoke
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node --expose-gc scripts/pskernel-expr-v2-generated-smoke.mjs dist/expr-v2/index.js \
+            | tee "$RUNNER_TEMP/expr-v2-generated-js.log"
+          grep -q "PSC1_EXPR_V2_JS_SMOKE: PASS" "$RUNNER_TEMP/expr-v2-generated-js.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-expr-v2-portable-js-lean435
+          path: ${{ runner.temp }}/expr-v2-generated-js.log
+          retention-days: 30

@@ -175,3 +175,17 @@ The combined research modules now have the following verified-but-isolated capab
 5. **Integrate and retire the old representation only after** the native, 79-module PSC1 .lean/.ps source fixed point, generated-JS/TS and workload memory/performance qualification remain green. The current source layout deliberately keeps Research imports out of the trusted SelfHost root.
 
 Evidence for unchanged production kernel correctness: [PSC1 full correctness and portability run 39466327195](https://github.com/dwijayuda/pskernel/actions/runs/39466327195), green on both jobs. The most recent CI for the import commit may finish later; do not treat uncompleted jobs as passing.
+
+
+## Update: complete paged V2 M4 subset qualification (2026-10-21)
+
+The paged representation now has **qualified, isolated research equivalents** for: all twelve expression constructors; metadata validation; sharing-aware binder lifting; capture-avoiding instantiate1; validated-once bounded beta/zeta/metadata head reduction; collision-safe structural equality and arena-scoped equality batches; and direct bounded import of the legacy PsKernelExpr tree into paged V2 nodes.
+
+Evidence:
+- [V2 CI 39483527403](https://github.com/dwijayuda/pskernel/actions/runs/39483527403): all three gates green for paged instantiation/head reduction; 25 canonical generated ProofScript modules; correct legacy and chunked differential comparison.
+- [V2 CI 39485265194](https://github.com/dwijayuda/pskernel/actions/runs/39485265194): all three gates green for paged structural equality, equality batches, and checked legacy import; **28 canonical generated ProofScript modules** compiled and executed via TS7/JS.
+- Baseline trusted production kernel passed [PSC1 full correctness CI 39474579171](https://github.com/dwijayuda/pskernel/actions/runs/39474579171) on both native and full 79-module source/PS/JS portability. Further independent core runs may still be in progress, but the source comparison to the baseline shows no changes under Core, Checker, Runtime or Environment.
+
+The paged storage advantage is strongest on large shared-expression DAG construction and old-node lookup (see PSC1_PSKERNEL_EXPR_V2_PAGED_STORAGE_2026-10-21.md). On tiny whole-head and equality-batch microfixtures the paged implementation is near parity or occasionally slower than chunked. Do **not** infer the 20–24x DAG-construction observation applies to the full checker.
+
+**M4 remains partial.** Structural equality is not DefEq, direct beta/zeta/metadata head sequence is not full WHNF, and neither the research fuel policy nor these source transformations have been substituted into the production kernel. Next: full trusted semantics, formal invariant proofs, conversion/GC-aware end-to-end profiling, and eventually a single portable representation replacing legacy trees only after every trust boundary and self-hosting gate passes.

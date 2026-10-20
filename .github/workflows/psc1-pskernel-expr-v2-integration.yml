@@ -12,6 +12,8 @@ on:
       - psc1/test/PsKernelExprV2DagRegression.lean
       - psc1/test/PsKernelExprV2DagPerformance.lean
       - psc1/test/PsKernelExprV2TransformRegression.lean
+      - psc1/test/PsKernelExprV2MetadataProofs.lean
+      - psc1/test/PsKernelCacheScopeProofs.lean
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-bench.mjs
       - psc1/scripts/pskernel-whole-js-bench.mjs
@@ -59,6 +61,20 @@ jobs:
           .lake/build/bin/psc1_kernel_expr_v2_transform_regression \
             | tee "$RUNNER_TEMP/psc1-transform-native.log"
           grep -q 'PSKERNEL_V2_TRANSFORM_REGRESSION_PASSED' "$RUNNER_TEMP/psc1-transform-native.log"
+      - name: Check local metadata and cache-scope theorems
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2MetadataProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-metadata-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelCacheScopeProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-scope-proofs.log"
+          if grep -E 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' \
+              "$RUNNER_TEMP/psc1-metadata-proofs.log" "$RUNNER_TEMP/psc1-scope-proofs.log"; then
+            echo 'PSKERNEL_PROOF_UNAPPROVED_TRUST_DEPENDENCY'
+            exit 1
+          fi
+          echo 'PSKERNEL_LOCAL_METADATA_AND_SCOPE_PROOFS: PASS'
       - name: Measure complete native checks against original and official Lean
         working-directory: psc1
         run: |
@@ -77,6 +93,8 @@ jobs:
             ${{ runner.temp }}/psc1-dag-native.memory
             ${{ runner.temp }}/psc1-v2-existing-native.log
             ${{ runner.temp }}/psc1-transform-native.log
+            ${{ runner.temp }}/psc1-metadata-proofs.log
+            ${{ runner.temp }}/psc1-scope-proofs.log
             ${{ runner.temp }}/psc1-dag-native-bench.log
             ${{ runner.temp }}/psc1-dag-native-bench.memory
           retention-days: 30
@@ -132,6 +150,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" --expose-gc smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
       - name: Measure complete generated checks in isolated A-B-B-A workers
         working-directory: psc1
         run: |

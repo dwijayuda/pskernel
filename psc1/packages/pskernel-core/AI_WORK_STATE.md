@@ -246,3 +246,36 @@ ordinary and mutual inductives, cache-scope tests, and zero-fuel rejection.
 Its previously vacuous curried equality assertions are fixed and sentinel-tested.
 DirectJS is probed separately: known non-scalar/generic emitter limitations
 are explicitly reported as unsupported, never as passing kernel execution.
+
+### Checked zeta integration and local proof work — pending CI
+
+The public DAG WHNF operation now calls the canonical DAG substitution visitor
+for its terminal/metadata/zeta slice. Public and core WHNF keep separate exact
+fuel and recursion-depth rules; unsupported reduction forms restart the original
+operation with its original resources. Only newly appended result nodes are
+decoded. The operation does not publish semantic cache state or carry a memo to
+another command. Full beta/delta/recursor/projection/primitive migration remains.
+DAG terminal-inference and reduction workers now delay recursive worker creation
+until a branch needs it; this preserves numerical fuel and avoids allocating an
+unused predecessor-fuel closure chain. No legacy substitution worker was changed.
+
+Native proof files state conditional local metadata preservation for the six
+composite entry builders, exact restoration of all seven scope-sensitive cache
+fields, and fresh-counter/FVar-eligibility facts. These are pending proof-checking
+in CI, not proofs of replay validity, substitution refinement, all cache uses,
+DefEq, declaration admission or kernel soundness. No executable path imports them.
+
+### Refreshed checkpoint (2026-10-21 Asia/Jakarta)
+
+At `2760f486a0efc7e3631725c8f1c657fb97c3fafb`, native integration and the
+original native correctness gate passed. PSC1 parsing failed on projection
+from a parenthesized product expression in Transform.lean. The replacement
+uses an ordinary let-bound record projection, without expanding the language
+profile. The generated research bridge also encountered a Lean-download TLS
+failure before compilation. Neither failure is reported as a passing gate.
+The last fully green integration/research checkpoint remains
+`69de396ec537c8130b87388ba8045859e443141b`. The 1,755 native transformation
+oracle comparisons passed at `7ffd17f707225645c9aa2bc5282cbae2bcdbbee8` and
+again at the following documentation/qualification checkpoint. Generated
+transformation execution, the new checked zeta path, local proofs and expanded
+canonical checker smoke still require successful CI on their implementation.

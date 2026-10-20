@@ -1,46 +1,84 @@
 import Ps.KernelCore.Checker.Context
-import Ps.KernelCore.Core.ExprV2.Builder
+import Ps.KernelCore.Core.ExprV2.Transform
 
 /-
-DAG terminal WHNF, with exactly the public/core entry budget distinction.
-Public metadata recursion does not enter the recursion-depth guard. Lambda
-WHNF enters core with the predecessor budget and then checks recursion depth.
+DAG terminal/metadata/zeta WHNF, called after complete checking on a canonical
+arena. Public metadata recursion does not enter the depth guard. Every core
+entry does, and consumes its own original core budget. Zeta substitution uses
+its original sufficient transformation budget, independently of checker fuel.
 
-The caller must first fully check the expression in a fresh public-operation
-context. No reusable checker state is returned. Composite reductions request
-the complete kernel by returning none; none never authorizes a verdict.
+This linear core path has no previously completed branch whose cache it could
+consume. Its terminal results cannot trigger Nat or definition unfolding.
+Unsupported forms return none; the complete checker restarts on the original
+expression with the original resources. No memo escapes this operation.
 -/
-def psKernelExprV2TryWhnfTerminalWithFuel
+def psKernelExprV2TryWhnfZetaCoreWithFuel
     (fuel : Nat) :
     PsKernelCheckerContext -> PsKernelExprV2PagedArena -> Nat ->
-    Option (Except String Nat) :=
+    Option (Except String (PsKernelExprV2PagedArena × Nat)) :=
   match fuel with
   | Nat.zero =>
       fun (_context : PsKernelCheckerContext)
           (_arena : PsKernelExprV2PagedArena) (_root : Nat) =>
         Option.some (Except.error "kernel reduction budget exhausted")
   | Nat.succ remaining =>
-      let smaller := psKernelExprV2TryWhnfTerminalWithFuel remaining;
+      let smaller :=
+        fun (nextContext : PsKernelCheckerContext)
+            (nextArena : PsKernelExprV2PagedArena) (nextRoot : Nat) =>
+          psKernelExprV2TryWhnfZetaCoreWithFuel remaining nextContext nextArena nextRoot;
+      fun (context : PsKernelCheckerContext)
+          (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelCheckerContextEnterRecDepth context with
+        | Except.error error => Option.some (Except.error error)
+        | Except.ok nextContext =>
+            match psKernelExprV2PagedRequire arena root with
+            | Except.error error => Option.some (Except.error error)
+            | Except.ok entry =>
+                match entry.node with
+                | PsKernelExprV2Node.bvar _ => Option.some (Except.ok (Prod.mk arena root))
+                | PsKernelExprV2Node.mvar _ => Option.some (Except.ok (Prod.mk arena root))
+                | PsKernelExprV2Node.sort _ => Option.some (Except.ok (Prod.mk arena root))
+                | PsKernelExprV2Node.forallE _ _ _ _ => Option.some (Except.ok (Prod.mk arena root))
+                | PsKernelExprV2Node.lam _ _ _ _ => Option.some (Except.ok (Prod.mk arena root))
+                | PsKernelExprV2Node.lit _ => Option.some (Except.ok (Prod.mk arena root))
+                | PsKernelExprV2Node.mdata _ body => smaller nextContext arena body
+                | PsKernelExprV2Node.letE _ _ value body _ =>
+                    match psKernelExprV2TransformOnCanonical
+                        (PsKernelExprV2Transform.instantiate 0 (List.cons value List.nil))
+                        arena body 0 with
+                    | Except.error error => Option.some (Except.error error)
+                    | Except.ok reduced =>
+                        smaller nextContext (Prod.fst reduced) (Prod.snd reduced)
+                | _ => Option.none
+
+def psKernelExprV2TryWhnfWithFuel
+    (fuel : Nat) :
+    PsKernelCheckerContext -> PsKernelExprV2PagedArena -> Nat ->
+    Option (Except String (PsKernelExprV2PagedArena × Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_context : PsKernelCheckerContext)
+          (_arena : PsKernelExprV2PagedArena) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+      let smaller :=
+        fun (nextContext : PsKernelCheckerContext)
+            (nextArena : PsKernelExprV2PagedArena) (nextRoot : Nat) =>
+          psKernelExprV2TryWhnfWithFuel remaining nextContext nextArena nextRoot;
       fun (context : PsKernelCheckerContext)
           (arena : PsKernelExprV2PagedArena) (root : Nat) =>
         match psKernelExprV2PagedRequire arena root with
         | Except.error error => Option.some (Except.error error)
         | Except.ok entry =>
             match entry.node with
-            | PsKernelExprV2Node.bvar _ => Option.some (Except.ok root)
-            | PsKernelExprV2Node.mvar _ => Option.some (Except.ok root)
-            | PsKernelExprV2Node.sort _ => Option.some (Except.ok root)
-            | PsKernelExprV2Node.forallE _ _ _ _ => Option.some (Except.ok root)
-            | PsKernelExprV2Node.lit _ => Option.some (Except.ok root)
+            | PsKernelExprV2Node.bvar _ => Option.some (Except.ok (Prod.mk arena root))
+            | PsKernelExprV2Node.mvar _ => Option.some (Except.ok (Prod.mk arena root))
+            | PsKernelExprV2Node.sort _ => Option.some (Except.ok (Prod.mk arena root))
+            | PsKernelExprV2Node.forallE _ _ _ _ => Option.some (Except.ok (Prod.mk arena root))
+            | PsKernelExprV2Node.lit _ => Option.some (Except.ok (Prod.mk arena root))
             | PsKernelExprV2Node.mdata _ body => smaller context arena body
-            | PsKernelExprV2Node.lam _ _ _ _ =>
-                if Nat.beq remaining 0 then
-                  Option.some (Except.error "kernel reduction budget exhausted")
-                else
-                  match psKernelCheckerContextEnterRecDepth context with
-                  | Except.error error => Option.some (Except.error error)
-                  | Except.ok _ => Option.some (Except.ok root)
-            | _ => Option.none
+            | PsKernelExprV2Node.fvar _ => Option.none
+            | _ => psKernelExprV2TryWhnfZetaCoreWithFuel remaining context arena root
 
 /-
 The same-arena identity shortcut runs only after both full public checks.

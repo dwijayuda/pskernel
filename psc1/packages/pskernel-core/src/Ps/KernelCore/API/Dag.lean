@@ -9,7 +9,7 @@ Checked DAG ingress for the complete KernelContract-v1 implementation.
 
 One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
-Terminal checking and WHNF read DAG nodes directly with the original entry
+Terminal checking and terminal/metadata/zeta WHNF read DAG nodes directly with the original entry
 fuel/depth/rule ordering. Collision-safe DAG equality supplies DefEq's syntactic shortcut
 only after both complete checks. Other composite checking, reductions, DefEq
 and admission use the complete existing kernel with unchanged resources.
@@ -22,7 +22,7 @@ receipts, are forgeable observations and never authorize proof admission.
 Every declaration is still rechecked by V1. No equality memo survives this
 boundary. A sealed constructor API remains a source-profile limitation.
 
-This is a partial representation migration. Terminal inference/WHNF and the
+This is a partial representation migration. Terminal inference, terminal/metadata/zeta WHNF, and the
 checked structural-equality shortcut are DAG-native. Other composite checking, reduction,
 DefEq and admission retain PsKernelExpr internally.
 Eliminating that fallback and adapter remains required for completion.
@@ -67,12 +67,17 @@ def psKernelDagWhnfExpression
   | Except.error error => Except.error error
   | Except.ok _ =>
       let checker := psKernelKernelSessionChecker session levelParams safety;
-      match psKernelExprV2TryWhnfTerminalWithFuel
+      match psKernelExprV2TryWhnfWithFuel
           session.resources.fuel checker.context arena root with
       | Option.some result =>
           match result with
           | Except.error error => Except.error (psKernelErrorFromMessage error)
-          | Except.ok id => psKernelDagRequire built id
+          | Except.ok reduced =>
+              let next := Prod.fst reduced;
+              match psKernelExprV2DecodeCanonicalFuel
+                  (Nat.succ (Nat.sub next.size built.size)) next built built.size with
+              | Except.error error => Except.error (psKernelErrorFromMessage error)
+              | Except.ok extended => psKernelDagRequire extended (Prod.snd reduced)
       | Option.none =>
           match psKernelSessionWhnf session.resources.fuel checker expr with
           | Except.error error => Except.error (psKernelErrorFromMessage error)

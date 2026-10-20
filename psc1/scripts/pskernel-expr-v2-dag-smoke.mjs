@@ -261,12 +261,49 @@ for(const id of [0n,63n,64n,127n,128n,255n,256n]){
 const source=readFileSync(filename,"utf8");
 must(!/from\s*["'](?:lean|node:child_process)|require\(["'](?:lean|child_process)/.test(source),
   "independent-generated-runtime");
+function reportDagSmoke(){
 if(typeof global.gc==="function")global.gc();
 console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   node:process.version,source_bytes:statSync(filename).size,
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG terminal inference/WHNF and checked structural shortcut; legacy composite fallback; incomplete"
+  checker_representation:"DAG terminal inference, terminal/metadata/zeta WHNF and checked structural shortcut; legacy general checker fallback; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");
+}
+
+
+
+for(const wrappers of [0,1,5]){
+  let graph=mk(empty,"Sort",L.zero); const s0=graph.snd;
+  graph=mk(graph.fst,"Sort",L.succ(L.zero)); const s1=graph.snd;
+  graph=mk(graph.fst,"BVar",1n); const b1=graph.snd;
+  graph=mk(graph.fst,"Lam",name("inner"),s1,b1,B.implicit); const lam=graph.snd;
+  graph=mk(graph.fst,"Let",name("x"),s1,s0,lam,false);
+  let term=E.letE(name("x"),sort1,sort0,E.lam(name("inner"),sort1,E.bvar(1n),B.implicit),false);
+  for(let tag=0;tag<wrappers;tag++){
+    graph=mk(graph.fst,"MData",BigInt(tag),graph.snd);
+    term=E.mdata(BigInt(tag),term);
+  }
+  for(const fuel of [0n,1n,2n,3n,4n,8n,16n,64n]){
+    for(const depth of [0n,1n,2n]){
+      const s=session(fuel,depth);
+      must(sameOperation(get("psKernelV1Whnf")(s,nil,S.safe,term),
+        invoke(graph.fst,[C.whnf(graph.snd)],s),exact),
+        "zeta-complete-whnf-"+wrappers+"-"+fuel+"-"+depth);
+    }
+  }
+  const checker=get("psKernelKernelSessionChecker")(session(),nil,S.safe);
+  const attempted=get("psKernelExprV2TryWhnfWithFuel")(4096n)(checker.context,graph.fst,graph.snd);
+  must(attempted&&typeof attempted==="object"&&"value" in attempted,
+    "zeta-executes-dag-native-worker-"+wrappers);
+  const reduced=accepted(attempted.value,"zeta-native-worker");
+  const rebuilt=accepted(decode(reduced.fst),"zeta-native-valid-result");
+  const value=accepted(decoded(rebuilt,reduced.snd),"zeta-native-read");
+  must(exact(value,E.lam(name("inner"),sort1,sort0,B.implicit)),
+    "zeta-nested-binder-result-"+wrappers);
+}
+console.log("PSC1_V2_DAG_JS_ZETA: PASS");
+
+reportDagSmoke();

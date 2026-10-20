@@ -10,6 +10,8 @@ The terminal cases and metadata recursion preserve InferCoreWithFuel's
 ordering: fuel guard, EnterRecDepth, then the syntax-directed rule. Public
 check operations discard checker caches; a single metadata chain has no
 branch that could consume a cache produced earlier in the same operation.
+The recursive call remains inside its argument lambda, avoiding construction
+of a closure chain proportional to unused fuel before a terminal return.
 
 Option.none requests the complete checker for a composite form. It never
 means acceptance. Except.error preserves the existing diagnostic. Constant
@@ -26,7 +28,10 @@ def psKernelExprV2TryCheckTerminalWithFuel
           (_arena : PsKernelExprV2PagedArena) (_root : Nat) =>
         Option.some (Except.error "kernel inference budget exhausted")
   | Nat.succ remaining =>
-      let smaller := psKernelExprV2TryCheckTerminalWithFuel remaining;
+      let smaller :=
+        fun (nextContext : PsKernelCheckerContext)
+            (nextArena : PsKernelExprV2PagedArena) (nextRoot : Nat) =>
+          psKernelExprV2TryCheckTerminalWithFuel remaining nextContext nextArena nextRoot;
       fun (context : PsKernelCheckerContext)
           (arena : PsKernelExprV2PagedArena) (root : Nat) =>
         match psKernelCheckerContextEnterRecDepth context with

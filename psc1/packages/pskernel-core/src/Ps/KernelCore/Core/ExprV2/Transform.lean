@@ -103,7 +103,8 @@ def psKernelExprV2TransformLiftReplacement
           (Nat.succ entry.depth) state replacement 0 offset with
       | Except.error error => Except.error error
       | Except.ok result =>
-          Except.ok (Prod.mk (Prod.fst result).arena (Prod.snd result))
+          let transformed := Prod.fst result;
+          Except.ok (Prod.mk transformed.arena (Prod.snd result))
 
 def psKernelExprV2TransformLeaf
     (operation : PsKernelExprV2Transform) (arena : PsKernelExprV2PagedArena)
@@ -260,7 +261,9 @@ def psKernelExprV2TransformOnCanonicalWithFuel
           match psKernelExprV2TransformWithFuel actualFuel operation
               (PsKernelExprV2TransformState.mk arena List.nil) root offset with
           | Except.error error => Except.error error
-          | Except.ok result => Except.ok (Prod.mk (Prod.fst result).arena (Prod.snd result))
+          | Except.ok result =>
+              let transformed := Prod.fst result;
+              Except.ok (Prod.mk transformed.arena (Prod.snd result))
 
 def psKernelExprV2TransformOnCanonical
     (operation : PsKernelExprV2Transform) (arena : PsKernelExprV2PagedArena) (root offset : Nat) :

@@ -191,6 +191,44 @@ private def metadataParity : IO Unit := do
   IO.println "PSC1_V2_DAG_NATIVE_INFERENCE: PASS"
   IO.println "PSC1_V2_DAG_NATIVE_WHNF_IDENTITY: PASS"
 
+
+private def zetaWhnfParity : IO Unit := do
+  let lambdaBody := PsKernelExpr.lam (nm "inner") sort1 (.bvar 1) .implicit
+  let forallBody := PsKernelExpr.forallE (nm "inner") sort1 (.bvar 1) .default
+  let nested := PsKernelExpr.letE (nm "outer") sort1 sort0
+    (.letE (nm "inner") sort1 (.bvar 0) (.mdata 21 (.bvar 0)) false) false
+  let seeds := [
+    PsKernelExpr.letE (nm "x") sort1 sort0 (.bvar 0) false,
+    .letE (nm "x") sort1 sort0 lambdaBody false,
+    .letE (nm "x") sort1 sort0 forallBody true, nested
+  ]
+  for seed in seeds do
+    for wrappers in [0,1,3,8] do
+      let mut term := seed
+      for tag in [:wrappers] do term := .mdata tag term
+      let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+      for fuel in [0,1,2,3,4,5,8,12,32,64] do
+        for depth in [0,1,2] do
+          let session ← fresh fuel depth
+          require "zeta-public-whnf-fuel-depth-parity"
+            (sameWhnf
+              (psKernelV1Whnf session [] .safe term)
+              (psKernelV1RunDag session [] .safe arena [.whnf root]))
+          let checker := psKernelKernelSessionChecker session [] .safe
+          let original := psKernelSessionWhnf fuel checker term
+          match psKernelExprV2TryWhnfWithFuel fuel checker.context arena root with
+          | none => throw (IO.userError "zeta fixture unexpectedly used legacy fallback")
+          | some (.error error) =>
+              require "zeta-core-error-parity"
+                (match original with | .error old => old == error | _ => false)
+          | some (.ok (next, reduced)) =>
+              let _ ← expect (psKernelExprV2PagedValidate next)
+              let decoded ← expect (psKernelExprV2DecodeChecked next)
+              let value ← expect (psKernelExprV2DecodedRequire decoded reduced)
+              require "zeta-core-value-parity"
+                (match original with | .ok old => psKernelExprEqual old.fst value | _ => false)
+  IO.println "PSC1_V2_DAG_NATIVE_ZETA: PASS"
+
 private def structuralShortcutParity : IO Unit := do
   let (a, zero) ← expect (psKernelExprV2PagedMkLit psKernelExprV2PagedEmpty (.nat 0))
   let (b, collision) ← expect (psKernelExprV2PagedMkLit a (.nat 65521))
@@ -360,6 +398,7 @@ def main : IO Unit := do
   constructorDecode
   semanticParity
   metadataParity
+  zetaWhnfParity
   structuralShortcutParity
   hostileInputs
   admissions

@@ -40,6 +40,10 @@ const portableHeadStep=load("psKernelExprV2PortableHeadStepChecked");
 const portableHeadSequence=load("psKernelExprV2PortableHeadSequenceChecked");
 const portableHeadMachine=load("psKernelExprV2PortableHeadMachineChecked");
 const portableStructuralEq=load("psKernelExprV2PortableEqChecked");
+const portableEqBatch=load("psKernelExprV2PortableEqBatchChecked");
+const boolListEq=load("psKernelExprV2PortableBoolListEq");
+const boolList=load("List");
+const boolListNil=typeof boolList.nil==="function"?boolList.nil():boolList.nil;
 const chunkedMkLet=load("psKernelExprV2ChunkedMkLet");
 const chunkedMkMData=load("psKernelExprV2ChunkedMkMData");
 const chunkedMkSort=load("psKernelExprV2ChunkedMkSort");
@@ -261,6 +265,53 @@ demand(eqLeft!==eqRight &&
   "pair-eq-sharing-memo-success");
 const pairEqInvalid=portableStructuralEq(eqGraph,999999n,eqRight);
 demand(pairEqInvalid&&"error" in pairEqInvalid,"pair-eq-invalid-id-rejected");
+
+
+// An equality batch validates exactly one arena. It never carries a positive
+// result into a different arena, nor treats hash collisions as equality.
+const pairQueries=boolList.cons({fst:eqLeft,snd:eqRight},
+  boolList.cons({fst:eqRight,snd:eqLeft},
+    boolList.cons({fst:eqLeft,snd:firstBVar.snd},boolListNil)));
+const expectedPairAnswers=boolList.cons(true,
+  boolList.cons(true,boolList.cons(false,boolListNil)));
+const paired=accepted(portableEqBatch(eqGraph,pairQueries),"pair-batch-checked");
+demand(boolListEq(paired,expectedPairAnswers)===true,
+  "pair-batch-ordered-answers");
+const badBatch=portableEqBatch(eqGraph,
+  boolList.cons({fst:eqLeft,snd:99999n},boolListNil));
+demand(badBatch&&"error" in badBatch,"pair-batch-invalid-node-rejected");
+const batchForged=portableEqBatch(forgedChunk,
+  boolList.cons({fst:0n,snd:0n},boolListNil));
+demand(batchForged&&"error" in batchForged,
+  "pair-batch-forged-metadata-rejected");
+let repeatedPairs=boolListNil,repeatedExpected=boolListNil;
+for(let i=0;i<12;i++){
+  repeatedPairs=boolList.cons({fst:eqLeft,snd:eqRight},repeatedPairs);
+  repeatedExpected=boolList.cons(true,repeatedExpected);
+}
+const pairBatchMetrics=[];
+function compareBatch(kind) {
+  const start=performance.now();
+  if(kind==="repeated-single"){
+    for(let i=0;i<12;i++){
+      if(accepted(portableStructuralEq(eqGraph,eqLeft,eqRight),
+          "pair-batch-repeated-single")!==true)
+        throw Error("PSC1_V2_PAIR_BATCH_SINGLE_MISMATCH");
+    }
+  }else{
+    const values=accepted(portableEqBatch(eqGraph,repeatedPairs),
+      "pair-batch-amortized");
+    if(!boolListEq(values,repeatedExpected))
+      throw Error("PSC1_V2_PAIR_BATCH_BATCHED_MISMATCH");
+  }
+  pairBatchMetrics.push({kind,queries:12,arena_nodes:Number(eqGraph.size),
+    ms:Number((performance.now()-start).toFixed(3))});
+}
+compareBatch("repeated-single");
+compareBatch("batch");
+compareBatch("batch");
+compareBatch("repeated-single");
+console.log("PSC1_EXPR_V2_PAIR_BATCH_TIMINGS "+JSON.stringify(pairBatchMetrics));
 
 // Order-balanced comparison; both implementations see equivalent prebuilt DAGs.
 // Every result and returned arena size is checked before accepting a timing.

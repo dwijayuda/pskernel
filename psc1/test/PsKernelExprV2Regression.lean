@@ -2,6 +2,7 @@ import Ps.KernelCore.Research.ExprV2Validation
 import Ps.KernelCore.Research.ExprV2Lift
 import Ps.KernelCore.Research.ExprV2PortableHeadMachine
 import Ps.KernelCore.Research.ExprV2PortableEquality
+import Ps.KernelCore.Research.ExprV2PortableEqualityBatch
 import Ps.KernelCore.Research.ExprV2PortableLift
 import Ps.KernelCore.Research.ExprV2PortableInstantiate
 import Ps.KernelCore.Research.ExprV2PortableReduction
@@ -1073,6 +1074,88 @@ private def testPortablePairSharing : IO Unit := do
   requireV2 "pair-shared-shapes-distinct" (!different)
   IO.println "PSC1_EXPR_V2_PAIR_SHARING: PASS nodes=49 depth=24"
 
+
+/-
+Validated-once equality batch: the memo and its facts are scoped to the
+canonical arena and discarded when this operation returns. Results retain
+input order, and forged metadata or invalid references reject the batch.
+-/
+private def testPortableEqualityBatch : IO Unit := do
+  let (a0,left) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let (a1,clone) ← expectV2
+    (psKernelExprV2ChunkedMkBVar a0 0)
+  let (a2,different) ← expectV2
+    (psKernelExprV2ChunkedMkBVar a1 1)
+  let (a3,app1) ← expectV2
+    (psKernelExprV2ChunkedMkApp a2 left left)
+  let (arena,app2) ← expectV2
+    (psKernelExprV2ChunkedMkApp a3 clone clone)
+  let pairs : List (Nat × Nat) := [
+    (app1,app2),(left,different),(left,clone),
+    (app1,left),(app2,app1)
+  ]
+  let expected : List Bool := [true,false,true,false,true]
+  let observed ← expectV2
+    (psKernelExprV2PortableEqBatchChecked arena pairs)
+  requireV2 "pair-batch-ordered-results"
+    (psKernelExprV2PortableBoolListEq observed expected)
+  let emptyResult ← expectV2
+    (psKernelExprV2PortableEqBatchChecked arena List.nil)
+  requireV2 "pair-batch-empty-input"
+    (psKernelExprV2PortableBoolListEq emptyResult List.nil)
+  requireV2 "pair-batch-rejects-invalid-node"
+    (match psKernelExprV2PortableEqBatchChecked
+        arena [(left,999999)] with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let rootEntry ← expectV2 (psKernelExprV2ChunkedRequire arena left)
+  let forgedEntry : PsKernelExprV2Entry := {
+    rootEntry with hasFVar := true
+  }
+  let (forged,forgedId) := psKernelExprV2ChunkedPush
+    psKernelExprV2ChunkedEmpty forgedEntry
+  requireV2 "pair-batch-forged-metadata-rejected"
+    (match psKernelExprV2PortableEqBatchChecked
+        forged [(forgedId,forgedId)] with
+      | Except.error _ => true
+      | Except.ok _ => false)
+  let (separate,other) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let (separate,otherDifferent) ← expectV2
+    (psKernelExprV2ChunkedMkBVar separate 1)
+  let resultsOther ← expectV2
+    (psKernelExprV2PortableEqBatchChecked separate
+      [(other,otherDifferent)])
+  requireV2 "pair-batch-scoped-to-distinct-arena"
+    (psKernelExprV2PortableBoolListEq resultsOther [false])
+  IO.println "PSC1_EXPR_V2_PAIR_BATCH: PASS cases=5"
+
+private def testPortableEqualityBatchSharing : IO Unit := do
+  let (initial,leaf) ← expectV2
+    (psKernelExprV2ChunkedMkBVar psKernelExprV2ChunkedEmpty 0)
+  let mut arena := initial
+  let mut lhs := leaf
+  let mut rhs := leaf
+  for _ in [:20] do
+    let (next,l) ← expectV2
+      (psKernelExprV2ChunkedMkApp arena lhs lhs)
+    let (next2,r) ← expectV2
+      (psKernelExprV2ChunkedMkApp next rhs rhs)
+    arena := next2
+    lhs := l
+    rhs := r
+  let mut queries : List (Nat × Nat) := List.nil
+  let mut expected : List Bool := List.nil
+  for _ in [:16] do
+    queries := List.cons (Prod.mk lhs rhs) queries
+    expected := List.cons true expected
+  let result ← expectV2
+    (psKernelExprV2PortableEqBatchChecked arena queries)
+  requireV2 "pair-batch-reuses-shared-comparisons"
+    (psKernelExprV2PortableBoolListEq result expected)
+  IO.println "PSC1_EXPR_V2_PAIR_BATCH_SHARING: PASS nodes=41 comparisons=16"
+
 def main : IO Unit := do
   testAllConstructors
   testHashCollision
@@ -1092,4 +1175,6 @@ def main : IO Unit := do
   testHeadMachineDeep
   testPortablePairEquality
   testPortablePairSharing
+  testPortableEqualityBatch
+  testPortableEqualityBatchSharing
   IO.println "PSC1_EXPR_V2_REGRESSION: PASS"

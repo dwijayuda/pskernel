@@ -7,15 +7,15 @@ def PsDataElaborator : Type :=
   PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
     Except PsElabError PsElabTermResult
 
-def psDataApply (name : PsName) (args : List PsExpr) : PsExpr :=
+def Ps.Internal.ElabData.psDataApply (name : PsName) (args : List PsExpr) : PsExpr :=
   psExprApplyMany (PsExpr.constE name []) args
 
-def psDataOptionIf (type condition yes no : PsExpr) : PsExpr :=
+def Ps.Internal.ElabData.psDataOptionIf (type condition yes no : PsExpr) : PsExpr :=
   let boolType : PsExpr := PsExpr.constE psBoolName [];
   let trueValue : PsExpr := PsExpr.constE psBoolTrueName [];
   let proposition := psExprApplyMany
     (PsExpr.constE psEqName [PsLevel.succ PsLevel.zero]) [boolType, condition, trueValue];
-  let decision := psDataApply psBoolDecEqName [condition, trueValue];
+  let decision := Ps.Internal.ElabData.psDataApply psBoolDecEqName [condition, trueValue];
   psExprApplyMany (PsExpr.constE psIteName [PsLevel.succ PsLevel.zero])
     [type, proposition, decision, yes, no]
 
@@ -82,11 +82,11 @@ def psElabArrayGetOption
               let value : PsExpr := PsExpr.fvar valueBinding.id;
               let position : PsExpr := PsExpr.proj psProdName 0 stateValue;
               let previous : PsExpr := PsExpr.proj psProdName 1 stateValue;
-              let selected := psDataOptionIf optionType
-                (psDataApply psNatBeqName [position, indexValue])
+              let selected := Ps.Internal.ElabData.psDataOptionIf optionType
+                (Ps.Internal.ElabData.psDataApply psNatBeqName [position, indexValue])
                 (psSelfHostOptionSomeOf element value) previous;
               let next := psSelfHostProdMkOf natType optionType
-                (psDataApply psNatSuccName [position]) selected;
+                (Ps.Internal.ElabData.psDataApply psNatSuccName [position]) selected;
               let valueLambda := PsExpr.lam valueName element
                 (psExprAbstractFVar valueBinding.id next) PsBinderInfo.explicit;
               let step := PsExpr.lam stateName stateType
@@ -94,9 +94,9 @@ def psElabArrayGetOption
               let zero : PsExpr := PsExpr.lit (PsLiteral.natural 0);
               let initial := psSelfHostProdMkOf natType optionType zero
                 (psSelfHostOptionNoneOf element);
-              let folded := psDataApply psArrayFoldlName
+              let folded := Ps.Internal.ElabData.psDataApply psArrayFoldlName
                 [element, stateType, step, initial, arrayValue, zero,
-                  psDataApply psArraySizeName [element, arrayValue]];
+                  Ps.Internal.ElabData.psDataApply psArraySizeName [element, arrayValue]];
               let result : PsExpr := PsExpr.proj psProdName 1 folded;
               let withIndex := PsExpr.letE indexName natType
                 (psMetaInstantiate metas indexResult.term)
@@ -106,11 +106,11 @@ def psElabArrayGetOption
                 (psExprAbstractFVar arrayBinding.id withIndex);
               psElabResolvedTerm indexResult.context withArray expected
 
-def psBindingNameSeen (name : PsName) (names : List PsName) : Bool :=
+def Ps.Internal.ElabData.psBindingNameSeen (name : PsName) (names : List PsName) : Bool :=
   match names with
   | List.nil => false
   | List.cons first rest =>
-      if psNameEq name first then true else psBindingNameSeen name rest
+      if psNameEq name first then true else Ps.Internal.ElabData.psBindingNameSeen name rest
 
 def psElabCheckBindingNamesWorker (sources : List PsSyntaxName) :
     List PsName -> Except PsElabError Unit :=
@@ -130,15 +130,15 @@ def psElabCheckBindingNamesWorker (sources : List PsSyntaxName) :
                   match psSyntaxNameToName source with
                   | Option.none => Except.error PsElabError.emptyName
                   | Option.some name =>
-                      if psBindingNameSeen name seen then Except.error PsElabError.matchPatternUnsupported
+                      if Ps.Internal.ElabData.psBindingNameSeen name seen then Except.error PsElabError.matchPatternUnsupported
                       else smaller (List.cons name seen)
             | _ => Except.error PsElabError.matchPatternUnsupported
 
-def psElabCheckBindingNames (sources : List PsSyntaxName) (seen : List PsName) :
+def Ps.Internal.ElabData.psElabCheckBindingNames (sources : List PsSyntaxName) (seen : List PsName) :
     Except PsElabError Unit :=
   psElabCheckBindingNamesWorker sources seen
 
-def psElabPatternWithLocal
+def Ps.Internal.ElabData.psElabPatternWithLocal
     (next : PsElabContext -> Nat -> Except PsElabError PsElabTermResult)
     (outer : PsElabContext) (name : PsName) (type : PsExpr)
     (value : PsElabTermResult) (expected : Option PsExpr) :
@@ -195,7 +195,7 @@ def psElabBindingPatternFieldsWorker (pattern : PsSyntaxBindingPattern) :
             match psElabResolvedTerm context value (Option.some type) with
             | Except.error error => Except.error error
             | Except.ok checked =>
-                psElabPatternWithLocal
+                Ps.Internal.ElabData.psElabPatternWithLocal
                   (fun (bodyContext : PsElabContext) (id : Nat) => next bodyContext)
                   context name checked.type checked expected
   | PsSyntaxBindingPattern.pair first second _ =>
@@ -223,7 +223,7 @@ def psElabBindingPatternFieldsWorker (pattern : PsSyntaxBindingPattern) :
                     | Except.ok secondValue =>
                         secondFields secondValue.context secondValue.term secondValue.type expected next)
 
-def psElabBindingPatternFields
+def Ps.Internal.ElabData.psElabBindingPatternFields
     (pattern : PsSyntaxBindingPattern) (context : PsElabContext)
     (value type : PsExpr) (expected : Option PsExpr)
     (next : PsElabContext -> Except PsElabError PsElabTermResult) :
@@ -237,7 +237,7 @@ def psElabLetPattern
     (value : PsSyntaxTerm)
     (next : PsElabContext -> Except PsElabError PsElabTermResult)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult :=
-  match psElabCheckBindingNames (psSyntaxBindingPatternNames pattern) [] with
+  match Ps.Internal.ElabData.psElabCheckBindingNames (psSyntaxBindingPatternNames pattern) [] with
   | Except.error error => Except.error error
   | Except.ok checkedNames =>
       let valueResult : Except PsElabError PsElabTermResult :=
@@ -256,7 +256,7 @@ def psElabLetPattern
       | Except.ok valueResult =>
           let type := psMetaInstantiate valueResult.context.metaContext valueResult.type;
           let temporary := PsName.num (psRootName "_psc1Pattern") valueResult.context.localContext.nextId;
-          psElabPatternWithLocal
+          Ps.Internal.ElabData.psElabPatternWithLocal
             (fun (bodyContext : PsElabContext) (id : Nat) =>
-              psElabBindingPatternFields pattern bodyContext (PsExpr.fvar id) type expected next)
+              Ps.Internal.ElabData.psElabBindingPatternFields pattern bodyContext (PsExpr.fvar id) type expected next)
             context temporary type valueResult expected

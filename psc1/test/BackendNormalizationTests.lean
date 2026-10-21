@@ -1,3 +1,4 @@
+import Ps.Host.DirectBackend
 import Ps.BackendJs.Print
 import Ps.BackendRust.RuntimePlan
 import Ps.BackendRust.Type
@@ -74,3 +75,29 @@ def main : IO Unit := do
     (match psRustEmitClosureValueType callback with
       | .ok printed => printed == "std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
       | .error _ => false)
+
+  for source in [
+    "private def hidden : Nat := 1\n",
+    "def first : Nat := 1\nprivate def hidden : Nat := 2\n",
+    "def first : Nat := 1\nprivate partial def hidden (n : Nat) : Nat := n\n"
+  ] do
+    require "unsupported private token refuses in Lean without expression absorption"
+      (match psParseLeanSource source with | .error _ => true | .ok _ => false)
+    require "unsupported private token refuses in PS without expression absorption"
+      (match psParseProofScriptSource source with | .error _ => true | .ok _ => false)
+  IO.FS.createDirAll "dist/architecture-native/visibility"
+  for extension in ["lean", "ps"] do
+    let path := "dist/architecture-native/visibility/Entry." ++ extension
+    IO.FS.writeFile path
+      "def Ps.Internal.Visibility.hidden : Nat := 7\ndef visible : Nat := Ps.Internal.Visibility.hidden\n"
+    let prepared <- psHostDirectPrepare path
+    require ("qualified internal helper is retained and hidden from entry API: " ++ extension)
+      (prepared.publicNames == ["visible"] &&
+        prepared.declarationNames.any (fun entry =>
+          psNameToString entry.1 == "Ps.Internal.Visibility.hidden"))
+    let kind := if extension == "lean" then PsCompilerSourceKind.lean else .proofScript
+    require ("unqualified internal helper remains unavailable: " ++ extension)
+      (match psCompilerPrepareSource kind
+          "def Ps.Internal.Visibility.hidden : Nat := 7\ndef visible : Nat := hidden\n" with
+        | .error _ => true
+        | .ok _ => false)

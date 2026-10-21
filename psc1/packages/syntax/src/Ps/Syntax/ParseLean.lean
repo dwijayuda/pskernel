@@ -48,7 +48,8 @@ def psParseLeanImport
           }
 
 def psLeanReservedApplicationToken (token : PsToken) : Bool :=
-  if psStringEq token.text "namespace" then true
+  if psStringEq token.text "private" then true
+  else if psStringEq token.text "namespace" then true
   else if psStringEq token.text "end" then true
   else if psStringEq token.text "def" then
     true

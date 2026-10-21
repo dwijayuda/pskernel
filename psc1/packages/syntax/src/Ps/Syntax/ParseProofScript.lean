@@ -293,7 +293,8 @@ def psParseProofScriptRecordLiteral
               }
 
 def psProofScriptReservedArgument (text : String) : Bool :=
-  if psStringEq text "def" then true
+  if psStringEq text "private" then true
+  else if psStringEq text "def" then true
   else if psStringEq text "partial" then true
   else if psStringEq text "theorem" then true
   else if psStringEq text "const" then true

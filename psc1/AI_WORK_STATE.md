@@ -186,3 +186,24 @@ concrete typed traversal sites and one ordered List(List String) flattening
 worker; remove only the newly introduced unsuccessful wrapper, not any original
 compiler declaration. All original RuntimePlan decisions and private identities
 remain. The generic-wrapper inference limitation remains a separate open issue.
+
+## Root cause corrected: private-token absorption and helper ownership
+
+5008cf8c still refused RuntimePlan, now at the preceding flatten declaration.
+This proves the new generic helper was not the isolated cause: unsupported
+private was parsed as a trailing application argument of the previous body.
+Do not retain the earlier generic-inference diagnosis as established fact.
+Reserve private at both application boundaries and keep its declaration form
+unsupported. Migrate all four Rust private helpers to stable qualified
+Ps.Internal.RustRuntimePlan identities; calls use full identities. Correct the
+six original Data private helpers similarly under Ps.Internal.ElabData (their
+earlier normalization had made the leaf names global). Preserve every original
+helper's logic and leaf identity; document the explicit migration map.
+
+The direct publication host excludes the reserved compiler implementation
+namespace from entry API roots while retaining those declarations in the exact
+source/admitted/runtime graph. Actual handwritten Lean/PS captured entry tests
+check independent admission, retained helpers, public API hiding and refusal of
+unqualified helper references. Parser negatives cover private after a previous
+definition as well as at start. New semantic graph hashes require fresh exact
+qualification; prior immutable receipts remain scoped to their old identities.

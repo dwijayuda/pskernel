@@ -101,6 +101,14 @@ private def syntaxCoreName (declaration : PsSyntaxDeclaration) : Option PsName :
   | .inductiveDecl name _ _ _ _ => coreNameOfSyntaxName name
   | .structureDecl name _ _ _ => coreNameOfSyntaxName name
 
+-- Portable implementation helpers have stable qualified identities instead of
+-- native Lean's file-local mangling. This reserved compiler namespace is never
+-- a publication root, even when its defining file is the entry source.
+private def syntaxIsCompilerImplementation (declaration : PsSyntaxDeclaration) : Bool :=
+  match syntaxCoreName declaration with
+  | none => false
+  | some name => (psNameToString name).startsWith "Ps.Internal."
+
 private def runtimeName
     (names : List (PsName × String)) (declaration : PsSyntaxDeclaration) : Option String := do
   let coreName ← syntaxCoreName declaration
@@ -133,7 +141,8 @@ def psHostDirectPrepareFor (inputPath : String) (assurance : PsHostAssurance) :
   -- or the logical body-marker declarations used for independent admission.
   let names := psErasureDeclarationNames
     (psErasureRuntimeDeclarations psSelfHostRuntimePreludeDeclarationsWithProd declarations)
-  let authoredNames := entry.parsed.declarations.filterMap (runtimeName names)
+  let authoredNames := (entry.parsed.declarations.filter
+    (fun declaration => !syntaxIsCompilerImplementation declaration)).filterMap (runtimeName names)
   let publicNames := (raw.declarations.filter (fun d => authoredNames.contains d.name)).map (fun d => d.name)
   let authoredTypeNames := (raw.structures.map (fun s => s.name) ++ raw.inductives.map (fun i => i.name)).filter authoredNames.contains
   return {

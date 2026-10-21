@@ -6,7 +6,34 @@ on fix/psc1-closure-normalization-20261021 preserves #171 at
 Execute [the Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 continuously. The user explicitly requests no small-milestone handoff.
 
-## Current continuation — portable queue diagnostics; qualification pending
+## Current continuation — profile the actual240s bootstrap timeout
+
+Headadcb815733aca23d3d27e7e0ae4cbc589ba56000 passes focused39541282570
+and all3 whole-closure jobs39541282485. Both grammars fully accept semantic67,
+DirectJS83 and Rust86 modules. DirectJS3249 source /3251 logical declarations;
+canonical original IR4986782 bytes,
+SHA2560b89bdbb95c46815326357d800ab8916df25a69154cfc424f6dff78106f86adb.
+[Scheduler closure checkpoint](docs/PSC1_SCHEDULER_CLOSURES_2026-10-21.json)
+retains all actual per-lane graph/IR identities and artifact metadata.
+Full scoped39541282484 was still running when this checkpoint was written.
+
+Actual generated diagnostic39541282520 failed: native service seed timed out at
+the unchanged240000ms process cap, before any candidate/G1. The synthetic queue
+completion result does NOT qualify the actual bootstrap. Do not raise caps.
+The new Linux profiler times the existing production stages on a FIXED exact
+compiler source closure captured from immutableadcb, against baseline/candidate
+binaries. It preserves every validation and specialization budget, records phase
+progress before work (retained even if killed), counts initial references/unique
+requests and completed instances, then follows the same target lowering including
+its existing repeated specialization. A green profile-job process only means
+trace collection completed, never that the compiler/G1 passed.
+
+Next: read the last started/completed production stage and measured work; correct
+that mechanism, rerun identical-input comparison and the actual facade bootstrap.
+The profiler never produces/adopts G1, admits a candidate, or publishes anything.
+The host-session publisher is an in-memory draft, not implemented/qualified yet.
+
+## Earlier portable diagnostic correction
 
 Ata484b796 both grammars accept the entire new Foundation.StringSet module.
 The same-input queue comparison39540911070 passes again. Source qualification

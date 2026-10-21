@@ -394,3 +394,7 @@ lean_exe psc1_js_service_tests where
 lean_exe psc1_specialize_queue_benchmark where
   srcDir := "scripts"
   root := `SpecializeQueueBenchmark
+
+lean_exe psc1_compiler_profile where
+  srcDir := "scripts"
+  root := `CompilerStageProfile

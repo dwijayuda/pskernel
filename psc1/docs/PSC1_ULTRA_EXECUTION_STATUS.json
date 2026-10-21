@@ -741,37 +741,37 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "a484b7966917d0d520d0d231dcc2c9f55de38d70",
-    "status": "pending-linux-portable-natural-diagnostic",
-    "sourceAndOriginalIr": {
-      "scoped": 39537087657,
-      "focused": 39537087675,
-      "wholeClosures": 39537087643,
-      "final": "success"
+    "headBeforeCandidate": "adcb815733aca23d3d27e7e0ae4cbc589ba56000",
+    "status": "pending-linux-fixed-workload-stage-profile",
+    "sourceQualification": {
+      "wholeClosureRun": 39541282485,
+      "nativeRun": 39541282570,
+      "final": "success",
+      "sourceModules": [
+        67,
+        83,
+        86
+      ],
+      "receipt": "PSC1_SCHEDULER_CLOSURES_2026-10-21.json"
     },
-    "actualBootstrap": "not-run-source-gate-failed",
-    "queueBudget": 16384,
-    "queueDeduplication": "stable-first-canonical-key-with-full-string-equality",
-    "benchmark": "identical-IR-a37-versus-candidate-pending",
-    "generatedCompilerExecution": "not-run",
-    "fullAtomicServicePublication": "not-implemented",
-    "sourceRefusal": {
-      "run": 39540910973,
-      "module": "Ps.CompilerIr.Specialize",
-      "declaration": "psIrSpecializeScheduledLoop",
-      "detail": "unsupportedTerm",
-      "line": 1574,
-      "candidate": "replace native Nat.repr with portable psNatToString"
+    "fullScoped": {
+      "run": 39541282484,
+      "status": "pending"
     },
-    "queueComparison": {
-      "run": 39540600900,
-      "status": "same-input-baseline-refuses-candidate-completes",
-      "receipt": "PSC1_SPECIALIZATION_QUEUE_COMPARISON_2026-10-21.json"
+    "actualBootstrap": {
+      "run": 39541282520,
+      "status": "failed",
+      "error": "seed ETIMEDOUT",
+      "processTimeoutMs": 240000,
+      "G1": "not-produced"
     },
-    "latestQueueComparison": {
-      "run": 39540911070,
-      "status": "success"
-    }
+    "profiler": {
+      "fixedTargetSourceHead": "adcb815733aca23d3d27e7e0ae4cbc589ba56000",
+      "sameInputAcrossImplementations": true,
+      "queueBudget": 16384,
+      "authority": false
+    },
+    "hostSessionPublisher": "draft-only-uncommitted"
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

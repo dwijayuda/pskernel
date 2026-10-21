@@ -1,0 +1,72 @@
+name: PSC1 fixed compiler workload stage profile
+
+on:
+  pull_request:
+    paths:
+      - psc1/**
+      - .github/workflows/psc1-compiler-profile.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-compiler-profile-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  profile:
+    strategy:
+      fail-fast: false
+      matrix:
+        implementation: [baseline, candidate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: implementation
+      - uses: actions/checkout@v4
+        with:
+          ref: adcb815733aca23d3d27e7e0ae4cbc589ba56000
+          path: reference
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install repository-pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build the same IO profiler against the selected implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.implementation }}" = baseline ]; then
+            cp implementation/psc1/scripts/CompilerStageProfile.lean reference/psc1/scripts/CompilerStageProfile.lean
+            cat >> reference/psc1/lakefile.lean <<'LEAN'
+
+          lean_exe psc1_compiler_profile where
+            srcDir := "scripts"
+            root := `CompilerStageProfile
+          LEAN
+            build=reference/psc1
+          else
+            build=implementation/psc1
+          fi
+          (cd "$build" && node packages/pskernel-lean/host/check-pin.mjs && lake build psc1_compiler_profile)
+          echo "PROFILE_IMPLEMENTATION=$build" >> "$GITHUB_ENV"
+      - name: Profile the identical captured immutable compiler workload
+        shell: bash
+        run: |
+          set -euo pipefail
+          node implementation/psc1/scripts/compiler-stage-profile.mjs "$PROFILE_IMPLEMENTATION" reference/psc1 evidence "${{ matrix.implementation }}"
+      - name: Retain phase progress even on timeout or refusal
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-compiler-profile-${{ matrix.implementation }}-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 14

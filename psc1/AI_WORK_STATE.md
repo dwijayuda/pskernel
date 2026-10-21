@@ -46,6 +46,11 @@ standalone Python capability host through pinned Wasmtime Python49.0.0.
 Default Wasm/component policies remain. Native ABI positive/negative tests and independent wasm-tools validation of both
 native-generated core/component String binaries now pass during the focused tier.
 The authored boundary fixtures now use the qualified String.Internal.length API.
+Focused Wasm execution at87baa7540787bc40dd228d489293e508dcbdc59b passes both
+grammars on core and component consumers, including actual source IO and traps.
+Final full integration at the latest implementation is still pending.
+Rust/PHP FFI profiles explicitly refuse architectures outside qualified Linux
+x86_64; disabled PHP FFI is tested to refuse before root/guest access.
 Cross-adapter policy checks additionally require malformed path/text field values
 to preserve the same typed error classification in every standalone provider. Core and
 component execution tests run early in the focused tier for fast ABI feedback,

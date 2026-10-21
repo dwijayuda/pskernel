@@ -117,3 +117,10 @@ Qualification of5a0f999a1b5d06f5b68461392fab05a8c86ca535:
 https://github.com/dwijayuda/pskernel/actions/runs/39612250401
 Both grammars/all7:28 sequencing obligations, minimum Python adds4;8 actual
 JS/TS/Rust/Python consumers. PHP standalone and Wasm String ABI are excluded.
+
+
+Standalone Rust and PHP FFI profiles currently admit Linux x86_64, matching the
+qualified system-call ABI. Other architectures refuse before source execution.
+Node/Python use runtime-provided platform constants. All profiles classify
+non-string paths as pathDenied and non-string text as protocolError; shared
+policy tests exercise these malformed field classes.

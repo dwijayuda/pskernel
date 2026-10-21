@@ -76,6 +76,13 @@ with tempfile.TemporaryDirectory(prefix="psc1-standalone-io-") as temporary:
             required=[], root=str(root), maxFileBytes=32, maxLineBytes=16,
             inputFd=incoming.fileno(), outputFd=outgoing.fileno())
         reject({**config, "abi": "bad", "root": "/missing"}, "UNSUPPORTED_ABI")
+        if ABI == "psc1-php-linux-ffi-string-io/1":
+            disabled = [arg.replace("ffi.enable=1", "ffi.enable=0") for arg in COMMAND]
+            result = subprocess.run(disabled + [json.dumps({**config, "root": "/missing"})],
+                capture_output=True, text=True, timeout=10,
+                pass_fds=(config["inputFd"], config["outputFd"]))
+            assert result.returncode == 0, result.stderr
+            assert "UNSUPPORTED_ABI" in json.loads(result.stdout)["trap"], result.stdout
         check("unsupported ABI refuses before root access")
         reject({**config, "capabilities": [], "required": ["writeUtf8"], "root": "/missing"},
                "REQUIRED_CAPABILITY_DENIED")

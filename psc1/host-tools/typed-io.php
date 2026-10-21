@@ -31,6 +31,7 @@ final class Psc1TypedIo {
     }
     public function __construct(array $config) {
         if (PHP_OS_FAMILY !== 'Linux' || PHP_SAPI !== 'cli' || PHP_INT_SIZE !== 8 ||
+            php_uname('m') !== 'x86_64' ||
             ($config['abi'] ?? null) !== 'psc1-php-linux-ffi-string-io/1' ||
             !extension_loaded('FFI')) throw new RuntimeException('PSC1_IO_UNSUPPORTED_ABI');
         if (!self::exact($config, ['abi','capabilities','required','root','maxFileBytes','maxLineBytes','inputFd','outputFd']))

@@ -41,7 +41,7 @@ impl Config {
   Self::parse(&value)
  }
  pub fn parse(value:&Value)->std::result::Result<Self,String>{
-  if !cfg!(target_os="linux") || value["abi"]!="psc1-rust-linux-string-io/1"{
+  if !cfg!(all(target_os="linux",target_arch="x86_64")) || value["abi"]!="psc1-rust-linux-string-io/1"{
    return Err("PSC1_IO_UNSUPPORTED_ABI".into())
   }
   let invalid=||"PSC1_IO_CONFIGURATION".to_owned();

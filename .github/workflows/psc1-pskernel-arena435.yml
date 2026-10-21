@@ -13,6 +13,9 @@ on:
       - psc1/scripts/pskernel-arena435-oracle.py
       - psc1/scripts/pskernel-arena435-inspect.py
       - psc1/scripts/pskernel-arena435-compare.py
+      - psc1/scripts/pskernel-arena435-generated-cgroup.py
+      - psc1/scripts/pskernel-arena435-host-control.mjs
+      - psc1/scripts/pskernel-arena435-host-controls.py
       - psc1/scripts/pskernel-arena435-progress-controls.py
       - psc1/scripts/pskernel-arena-replay.mjs
       - psc1/scripts/pskernel-arena-replay-controls.mjs
@@ -104,7 +107,9 @@ jobs:
           node check-psc1-source.mjs --all-portable
           node --check scripts/pskernel-arena-replay.mjs
           node --check scripts/pskernel-arena-replay-controls.mjs
-          python3 -m py_compile scripts/pskernel-arena435-oracle.py scripts/pskernel-arena435-compare.py scripts/pskernel-arena435-progress-controls.py
+          python3 -m py_compile scripts/pskernel-arena435-oracle.py scripts/pskernel-arena435-compare.py scripts/pskernel-arena435-progress-controls.py \
+            scripts/pskernel-arena435-generated-cgroup.py scripts/pskernel-arena435-host-controls.py
+          node --check scripts/pskernel-arena435-host-control.mjs
           python3 scripts/pskernel-arena435-progress-controls.py \
             | tee "$RUNNER_TEMP/arena435-progress-controls.log"
           grep -q 'PSC1_ARENA_PROGRESS_CONTROLS: PASS count=24' "$RUNNER_TEMP/arena435-progress-controls.log"
@@ -123,6 +128,18 @@ jobs:
           console.log('PSC1_ARENA_CANONICAL_CLOSURE modules='+manifest.sourceCount);
           NODE
           lake exe psc1 check dist/arena435/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
+      - name: Enforce the exact host memory and deadline boundary
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/pskernel-arena435-host-controls.py \
+            --node "$(command -v node)" --out "$RUNNER_TEMP/arena435-host-controls" \
+            | tee "$RUNNER_TEMP/arena435-host-controls.log"
+          grep -Fqx 'PSC1_ARENA_HOST_PARSER_CONTROLS: PASS count=70' \
+            "$RUNNER_TEMP/arena435-host-controls.log"
+          grep -Fqx 'PSC1_ARENA_HOST_LIVE_CONTROLS: PASS count=6' \
+            "$RUNNER_TEMP/arena435-host-controls.log"
       - name: Generate the independent kernel through TypeScript 7.0.2
         shell: bash
         working-directory: psc1
@@ -176,6 +193,12 @@ jobs:
             ${{ runner.temp }}/arena435-independent
             ${{ runner.temp }}/arena435-controls.log
             ${{ runner.temp }}/arena435-progress-controls.log
+            ${{ runner.temp }}/arena435-host-controls/
+            ${{ runner.temp }}/arena435-host-controls.log
+            psc1/scripts/pskernel-arena435-generated-cgroup.py
+            psc1/scripts/pskernel-arena435-host-controls.py
+            psc1/scripts/pskernel-arena435-host-control.mjs
+            psc1/scripts/pskernel-arena435-compare.py
             psc1/dist/arena435/kernel.js
             psc1/dist/arena435/kernel.d.ts
             psc1/dist/arena435/kernel.js.map

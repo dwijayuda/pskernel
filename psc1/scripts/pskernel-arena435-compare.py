@@ -12,20 +12,20 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import importlib.util
 import json
-import os
 import pathlib
 import re
 import shutil
-import signal
-import subprocess
 import sys
 import tempfile
-import time
 
 HERE = pathlib.Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("arena_oracle", HERE / "pskernel-arena435-oracle.py")
 ORACLE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(ORACLE)
+HOST_PATH = HERE / "pskernel-arena435-generated-cgroup.py"
+HOST_SPEC = importlib.util.spec_from_file_location("arena_generated_cgroup", HOST_PATH)
+HOST = importlib.util.module_from_spec(HOST_SPEC)
+HOST_SPEC.loader.exec_module(HOST)
 PREFIX = "PSC1_ARENA_REPLAY "
 VERDICTS = {"accepted", "rejected", "malformed", "unsupported", "resource_exhausted", "internal_error", "driver_error"}
 
@@ -80,58 +80,54 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def process_case(node: pathlib.Path, runner: pathlib.Path, kernel: pathlib.Path,
-                 case: pathlib.Path, timeout: int, logs: pathlib.Path, index: int) -> dict:
-    stdout_path = logs / f"case-{index:03d}-stdout.txt"
-    stderr_path = logs / f"case-{index:03d}-stderr.txt"
-    time_path = logs / f"case-{index:03d}-time.txt"
-    command = ["/usr/bin/time", "-v", "-o", str(time_path), str(node),
-               "--max-old-space-size=2048", str(runner), str(kernel), str(case)]
-    source_sha256 = sha256(case.read_bytes())
-    started = time.monotonic()
-    env = dict(os.environ, PATH="", LC_ALL="C")
-    try:
-        process = subprocess.Popen(command, cwd=kernel.parent, env=env, start_new_session=True,
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                   text=True, encoding="utf-8", errors="replace")
-    except OSError as exc:
-        return {"verdict": "driver_error", "stage": "launch", "reason": str(exc)}
-    timed_out = False
-    try:
-        stdout, stderr = process.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        timed_out = True
-        try:
-            os.killpg(process.pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-        stdout, stderr = process.communicate()
-    stdout_path.write_text(stdout, encoding="utf-8")
-    stderr_path.write_text(stderr, encoding="utf-8")
-    measurement = {"elapsed_seconds": time.monotonic() - started,
-                   "returncode": process.returncode, "stdout": stdout_path.name,
-                   "stderr": stderr_path.name, "time_log": time_path.name}
-    measurement.update(progress_evidence(stderr, source_sha256))
-    if time_path.exists():
-        match = re.search(r"Maximum resident set size \(kbytes\):\s*(\d+)", time_path.read_text())
-        if match:
-            measurement["peak_rss_kib"] = int(match.group(1))
-    if timed_out:
-        return {**measurement, "verdict": "timeout", "stage": "host-wall-time", "timeout_seconds": timeout}
+def host_failure(host: dict, stderr: str) -> dict | None:
+    """Only incomplete host outcomes; this function can never return acceptance."""
+    if not isinstance(host, dict):
+        return {"verdict": "driver_error", "stage": "host-setup", "reason": "missing host receipt"}
+    status = host.get("status")
+    if status == "setup_failed" or host.get("hardLimitVerified") is not True:
+        return {"verdict": "driver_error", "stage": "host-setup", "reason": "host limit or launch setup failed"}
+    if host.get("cleanupOk") is not True:
+        return {"verdict": "driver_error", "stage": "host-cleanup", "reason": "private cgroup cleanup failed"}
+    if status == "host_error":
+        return {"verdict": "driver_error", "stage": "host-monitor", "reason": "host monitoring or wait failed"}
+    if host.get("testOnly") is not False or host.get("limitBytes") != HOST.LIMIT:
+        return {"verdict": "driver_error", "stage": "host-policy", "reason": "nonproduction host policy"}
+    events = host.get("memoryEvents")
+    if (not isinstance(events, dict) or not {"oom", "oom_kill"} <= events.keys()
+            or any(type(value) is not int or value < 0 for value in events.values())
+            or type(host.get("memoryPeakBytes")) is not int or host["memoryPeakBytes"] < 0):
+        return {"verdict": "driver_error", "stage": "host-monitor", "reason": "missing or invalid cgroup memory evidence"}
+    if status in ("cgroup_oom", "resource_limit") or any(events.get(key, 0) for key in ("oom", "oom_kill", "oom_group_kill")):
+        return {"verdict": "resource_exhausted", "stage": "host-memory",
+                "reason": "private cgroup reported memory exhaustion", "host_memory_limit_bytes": HOST.LIMIT}
+    if status == "timedout" or host.get("wallTimedOut") is True:
+        return {"verdict": "timeout", "stage": "host-wall-time", "timeout_seconds": host.get("wallSeconds")}
+    if status != "process_exit":
+        return {"verdict": "driver_error", "stage": "host-process", "reason": "unknown host process status"}
+    if host.get("returncode") not in (0, 2):
+        if re.search(r"FATAL ERROR:.*JavaScript heap out of memory", stderr):
+            return {"verdict": "resource_exhausted", "stage": "host-heap",
+                    "reason": "Node reported JavaScript heap exhaustion", "host_heap_mib": 2048}
+        return {"verdict": "driver_error", "stage": "host-process", "reason": "unexpected generated process exit"}
+    return None
+
+
+def finish_case(stdout: str, stderr: str, measurement: dict, source_sha256: str) -> dict:
+    failure = host_failure(measurement.get("host"), stderr)
+    if failure is not None:
+        return {**measurement, **failure}
     matches = [line[len(PREFIX):] for line in stdout.splitlines() if line.startswith(PREFIX)]
     if len(matches) != 1:
-        if re.search(r"FATAL ERROR:.*JavaScript heap out of memory", stderr):
-            return {**measurement, "verdict": "resource_exhausted", "stage": "host-heap",
-                    "reason": "Node reported JavaScript heap exhaustion", "host_heap_mib": 2048}
         return {**measurement, "verdict": "driver_error", "stage": "report",
                 "reason": "missing or duplicate generated-kernel verdict"}
     try:
         result = json.loads(matches[0])
     except (ValueError, TypeError) as exc:
         return {**measurement, "verdict": "driver_error", "stage": "report", "reason": str(exc)}
-    if (result.get("format") != "psc1-arena-replay-v1" or result.get("verdict") not in VERDICTS
+    if (not isinstance(result, dict) or result.get("format") != "psc1-arena-replay-v1" or result.get("verdict") not in VERDICTS
             or result.get("fuel") != "4096"
-            or process.returncode != (2 if result.get("verdict") == "driver_error" else 0)):
+            or measurement.get("returncode") != (2 if result.get("verdict") == "driver_error" else 0)):
         return {**measurement, "verdict": "driver_error", "stage": "report",
                 "reason": "invalid verdict envelope, exit status, or kernel fuel"}
     if result.get("sourceSha256") != source_sha256:
@@ -139,6 +135,39 @@ def process_case(node: pathlib.Path, runner: pathlib.Path, kernel: pathlib.Path,
     if result["verdict"] == "accepted" and (result.get("metadataValidated") is not True or result.get("coreInvoked") is not True):
         return {**measurement, "verdict": "driver_error", "stage": "report", "reason": "acceptance omitted metadata validation"}
     return {**result, **measurement}
+
+
+def process_case(node: pathlib.Path, runner: pathlib.Path, kernel: pathlib.Path,
+                 case: pathlib.Path, timeout: int, logs: pathlib.Path, index: int) -> dict:
+    stdout_path = logs / f"case-{index:03d}-stdout.txt"
+    stderr_path = logs / f"case-{index:03d}-stderr.txt"
+    time_path = logs / f"case-{index:03d}-time.txt"
+    source_sha256 = sha256(case.read_bytes())
+    try:
+        host = HOST.run_generated(node, runner, kernel, case, kernel.parent,
+                                  stdout_path, stderr_path, time_path, seconds=timeout)
+    except Exception as error:
+        return {"verdict": "driver_error", "stage": "host-setup", "reason": repr(error)}
+    stdout = stdout_path.read_text(encoding="utf-8", errors="replace") if stdout_path.exists() else ""
+    stderr = stderr_path.read_text(encoding="utf-8", errors="replace") if stderr_path.exists() else ""
+    measurement = {"elapsed_seconds": host.get("elapsedSeconds"),
+                   "returncode": host.get("returncode"), "stdout": stdout_path.name,
+                   "stderr": stderr_path.name, "time_log": time_path.name, "host": host,
+                   "host_status": host.get("status"),
+                   "cgroup_memory_peak_bytes": host.get("memoryPeakBytes"),
+                   "sampled_node_vm_hwm_bytes_lower_bound": host.get("sampledNodeVmHwmBytesLowerBound")}
+    measurement.update(progress_evidence(stderr, source_sha256))
+    if time_path.exists():
+        timing = time_path.read_text(encoding="utf-8", errors="replace")
+        for label, key, convert in [
+            (r"Maximum resident set size \(kbytes\)", "peak_rss_kib", int),
+            (r"User time \(seconds\)", "process_cpu_user_seconds", float),
+            (r"System time \(seconds\)", "process_cpu_system_seconds", float),
+        ]:
+            match = re.search(label + r":\s*([0-9]+(?:\.[0-9]+)?)", timing)
+            if match:
+                measurement[key] = convert(match.group(1))
+    return finish_case(stdout, stderr, measurement, source_sha256)
 
 
 def classify(reference: dict, observed: dict) -> str:
@@ -171,8 +200,8 @@ def main() -> int:
     parser.add_argument("--timeout", type=int, default=60)
     parser.add_argument("--workers", type=int, default=2)
     args = parser.parse_args()
-    if args.timeout < 1 or not 1 <= args.workers <= 2:
-        parser.error("positive timeout and 1..2 workers are required")
+    if not 1 <= args.timeout <= 60 or not 1 <= args.workers <= 2:
+        parser.error("1..60 second timeout and 1..2 workers are required")
     node, runner, kernel = (item.resolve(strict=True) for item in (args.node, args.runner, args.kernel))
     cases = ORACLE.read_archive(args.archive)
     reference = json.loads(args.oracle_report.read_text(encoding="utf-8"))
@@ -235,7 +264,8 @@ def main() -> int:
                     diagnostic = {key: observation.get(key) for key in
                                   ("verdict", "stage", "reason", "coreInvoked",
                                    "exportedDeclarations", "admissionCommands", "arenaNodes",
-                                   "elapsed_seconds", "peak_rss_kib", "last_progress", "invalid_progress_snapshots")}
+                                   "elapsed_seconds", "peak_rss_kib", "last_progress", "invalid_progress_snapshots",
+                                   "host_status", "cgroup_memory_peak_bytes", "sampled_node_vm_hwm_bytes_lower_bound")}
                     diagnostic.update(index=record["index"], name=record["name"],
                                       label=record["label"], classification=record["classification"])
                     print("PSC1_ARENA435_DIAGNOSTIC " +
@@ -244,12 +274,22 @@ def main() -> int:
     counts = Counter(record["classification"] for record in results)
     observed_counts = Counter(record.get("pskernel", {}).get("verdict", "not_run") for record in results)
     matched = sum(record["classification"].startswith("matched_") for record in results)
-    complete = len(results) == ORACLE.EXPECTED_CASES and matched == ORACLE.EXPECTED_CASES and controls_valid
+    host_limits_verified = len(results) == ORACLE.EXPECTED_CASES and all(
+        record.get("pskernel", {}).get("host", {}).get("hardLimitVerified") is True
+        and record.get("pskernel", {}).get("host", {}).get("cleanupOk") is True
+        and record.get("pskernel", {}).get("host", {}).get("testOnly") is False
+        for record in results)
+    complete = (len(results) == ORACLE.EXPECTED_CASES and matched == ORACLE.EXPECTED_CASES
+                and controls_valid and host_limits_verified)
     report = {
         "suite": "all 193 Lean Arena round-2026-09 bodies, current generated PSC1 DAG ingress",
         "archive_sha256": ORACLE.ARCHIVE_SHA256, "target_lean": ORACLE.TARGET,
         "kernel_module_sha256": kernel_hash, "kernel_fuel": 4096,
         "host_timeout_seconds_per_case": args.timeout, "node_heap_limit_mib": 2048,
+        "host_cgroup_memory_limit_bytes": HOST.LIMIT, "host_cgroup_swap_limit_bytes": 0,
+        "host_launcher_sha256": sha256(HOST_PATH.read_bytes()),
+        "all_case_host_limits_verified": host_limits_verified,
+        "memory_peak_scope": "cgroup charged memory; separate GNU time RSS and sampled Node VmHWM",
         "host_workers": args.workers, "runtime_path_empty": True,
         "runtime_working_directory_contains_no_Lean_or_repository_sources": True,
         "native_435_reexport": False, "declaration_body_bytes_unchanged": True,

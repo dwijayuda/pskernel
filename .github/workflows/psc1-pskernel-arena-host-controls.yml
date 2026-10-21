@@ -1,0 +1,64 @@
+name: PSC1 generated Arena host resource controls
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-pskernel-arena-host-20261021
+      - integration/psc1-pskernel-expr-v2-lean435-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-arena-host-controls.yml
+      - psc1/scripts/pskernel-arena435-generated-cgroup.py
+      - psc1/scripts/pskernel-arena435-host-control.mjs
+      - psc1/scripts/pskernel-arena435-host-controls.py
+      - psc1/scripts/pskernel-arena435-compare.py
+      - psc1/scripts/pskernel-arena435-oracle.py
+permissions:
+  contents: read
+jobs:
+  host-resource-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check host-only source and independent Node fixture
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/pskernel-arena435-generated-cgroup.py \
+            scripts/pskernel-arena435-host-controls.py scripts/pskernel-arena435-compare.py \
+            scripts/pskernel-arena435-oracle.py scripts/pskernel-arena435-progress-controls.py
+          node --check scripts/pskernel-arena435-host-control.mjs
+          python3 scripts/pskernel-arena435-progress-controls.py \
+            | tee "$RUNNER_TEMP/arena435-host-progress-controls.log"
+          grep -Fqx 'PSC1_ARENA_PROGRESS_CONTROLS: PASS count=24' \
+            "$RUNNER_TEMP/arena435-host-progress-controls.log"
+      - name: Exercise actual cgroup enforcement and host verdict precedence
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/pskernel-arena435-host-controls.py \
+            --node "$(command -v node)" --out "$RUNNER_TEMP/arena435-host-controls" \
+            | tee "$RUNNER_TEMP/arena435-host-controls.log"
+          grep -Fqx 'PSC1_ARENA_HOST_PARSER_CONTROLS: PASS count=70' \
+            "$RUNNER_TEMP/arena435-host-controls.log"
+          grep -Fqx 'PSC1_ARENA_HOST_LIVE_CONTROLS: PASS count=6' \
+            "$RUNNER_TEMP/arena435-host-controls.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-arena-host-controls
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/arena435-host-controls/
+            ${{ runner.temp }}/arena435-host-controls.log
+            ${{ runner.temp }}/arena435-host-progress-controls.log
+            psc1/scripts/pskernel-arena435-generated-cgroup.py
+            psc1/scripts/pskernel-arena435-host-controls.py
+            psc1/scripts/pskernel-arena435-host-control.mjs
+            psc1/scripts/pskernel-arena435-compare.py

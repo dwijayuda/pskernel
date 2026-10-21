@@ -1,3 +1,62 @@
+# Host-only generated Arena memory boundary candidate — NOT RUN
+
+Review parent: `384f3395036ba7022e6eea9d3ff77f37aacd62ca`.
+This commit is an isolated review object; no integration or research branch is
+advanced by its creation. The planned diagnostic branch is
+`research/psc1-pskernel-arena-host-20261021`.
+The containing candidate has **NOT RUN**. Its native, portable, canonical,
+generated, proof, provider and Arena statuses are not inherited from any parent.
+
+## Concrete host-only change
+
+The generated full-corpus comparison previously applied a 2048 MiB V8 old-space
+limit without an operating-system memory controller. Its historical observations
+remain labeled with that policy. The new generated launcher adapts the private
+cgroup creation, exact control readback, privilege drop, deadline and cleanup
+sequence from the native diagnostic at
+`f2e6c44a506a53dc294ae6569f8371e81ed6bdd5`.
+That original native helper and its strict API are untouched. The cache parent
+does not contain that native-only helper; this commit adds a separate generated
+helper without changing any native source or configuration.
+
+The production wrapper exposes no memory-limit parameter. Every corpus process
+receives `memory.max=2147483648`, `memory.swap.max=0`,
+`memory.oom.group=1`, unprivileged identity and an empty PATH.
+GNU time executes inside the same cgroup as Node and descendants. Charged cgroup
+memory peak, GNU time RSS, and sampled direct-Node VmHWM are distinct measurements.
+
+`pskernel-arena435-compare.py` keeps all 193 source identities, header/body
+authentication, the original semantic verdict assertions and safety classifications.
+Host setup/readback/cleanup errors, cgroup OOM, wall timeout, V8 heap exhaustion and
+unexpected exits are refused before a semantic envelope can authorize a result.
+Memory-limit events without OOM alone do not imply exhaustion. Kernel fuel stays
+4096; the production workflow retains the 60-second deadline and two workers.
+
+## Required diagnostic execution
+
+The new `psc1-pskernel-arena-host-controls.yml` workflow is intended to run
+first. Its planned controls comprise 70 host/parser assertions and six real
+Linux cases: normal exit, nonzero exit, deadline, a detached descendant, touched
+external-buffer OOM, and missing-executable refusal. The five launched diagnostic
+cases use an explicitly separate 128 MiB control-only API; they never qualify a
+corpus. The production setup-refusal case retains the fixed 2 GiB API. Node's
+supplementary groups are checked from /proc because its getgroups API also
+includes the effective group ID. The 24 existing progress controls remain intact.
+
+All files, workflows and assertions are source-review candidates until actual
+Linux execution succeeds. The full Arena workflow now requires these controls
+before running the corpus and records per-case memory-event, cleanup and limit
+receipts. No existing paired-performance evidence, portable kernel, resource
+policy, theorem, body, exported metadata or source budget is modified.
+
+Next action: review this exact diff, run the focused host-control workflow to a
+terminal result, repair genuine host/harness defects if any, and only then run
+the complete 193-case comparison under the enforced host policy. The preserved
+parent sections below retain the separate radix-proof and metadata-performance
+work, including the integration promotion hold.
+
+---
+
 # Current radix candidate — close symbolic successor proof branches
 
 Updated: 2026-10-21 UTC. Branch: `research/psc1-pskernel-v2-cache-20261021`.

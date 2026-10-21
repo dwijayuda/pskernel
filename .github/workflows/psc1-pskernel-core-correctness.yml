@@ -44,6 +44,9 @@ on:
       - psc1/test/PsKernelExprV2GeneratedOwnerRegression.lean
       - psc1/test/PsKernelExprV2GeneratedOwnerProofs.lean
       - psc1/scripts/pskernel-expr-v2-generated-owner-smoke.mjs
+      - psc1/test/PsKernelExprV2QuotOwnerRegression.lean
+      - psc1/test/PsKernelExprV2QuotOwnerProofs.lean
+      - psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs
       - psc1/test/PsKernelExprV2StringProjectionRegression.lean
       - psc1/test/PsKernelExprV2StringProjectionProofs.lean
       - psc1/scripts/pskernel-expr-v2-string-projection-smoke.mjs
@@ -450,6 +453,18 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" generated-owner-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-generated-owner-canonical.log"
           grep -Eq '^PSC1_V2_GENERATED_OWNER_JS_PASS owners=25 recursors=7 rules=14 cases=12 checks=216 whnf=216 defeq=216 private=13 independentDefinitions=12 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-generated-owner-canonical.log"
+      - name: Check canonical-source Quot owners and actual admissions in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          test -s "$PSC1_PS_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-quot-owner-smoke.mjs "$PSC1_PS_RUN_DIR/quot-owner-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" quot-owner-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-quot-owner-canonical.log"
+          grep -Eq '^PSC1_V2_QUOT_OWNER_JS_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 independentPositive=10 independentNegative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-quot-owner-canonical.log"
       - name: Check complete canonical-source DAG checker state in detached Node
         working-directory: psc1
         shell: bash
@@ -530,6 +545,7 @@ jobs:
             ${{ runner.temp }}/psc1-recursor-k-canonical.log
             ${{ runner.temp }}/psc1-string-projection-canonical.log
             ${{ runner.temp }}/psc1-generated-owner-canonical.log
+            ${{ runner.temp }}/psc1-quot-owner-canonical.log
             ${{ runner.temp }}/psc1-owned-state-canonical.log
             psc1/dist/pskernel-selfhost/provider/
             psc1/dist/pskernel-selfhost/workspace/.proofscript-bootstrap.json

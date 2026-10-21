@@ -50,6 +50,9 @@ on:
       - psc1/test/PsKernelExprV2GeneratedOwnerRegression.lean
       - psc1/test/PsKernelExprV2GeneratedOwnerProofs.lean
       - psc1/scripts/pskernel-expr-v2-generated-owner-smoke.mjs
+      - psc1/test/PsKernelExprV2QuotOwnerRegression.lean
+      - psc1/test/PsKernelExprV2QuotOwnerProofs.lean
+      - psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs
       - psc1/test/PsKernelExprV2StringProjectionRegression.lean
       - psc1/test/PsKernelExprV2StringProjectionProofs.lean
       - psc1/scripts/pskernel-expr-v2-string-projection-smoke.mjs
@@ -97,8 +100,9 @@ jobs:
           node --check scripts/pskernel-expr-v2-recursor-k-smoke.mjs
           node --check scripts/pskernel-expr-v2-string-projection-smoke.mjs
           node --check scripts/pskernel-expr-v2-generated-owner-smoke.mjs
+          node --check scripts/pskernel-expr-v2-quot-owner-smoke.mjs
           node --check scripts/pskernel-expr-v2-owned-state-smoke.mjs
-          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_recursor_k_regression psc1_kernel_expr_v2_owned_state_regression psc1_kernel_expr_v2_string_projection_regression psc1_kernel_expr_v2_generated_owner_regression
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_recursor_k_regression psc1_kernel_expr_v2_owned_state_regression psc1_kernel_expr_v2_string_projection_regression psc1_kernel_expr_v2_generated_owner_regression psc1_kernel_expr_v2_quot_owner_regression
       - name: Run native DAG semantics, adversarial, fuel and official comparison
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -290,6 +294,14 @@ jobs:
           .lake/build/bin/psc1_kernel_expr_v2_generated_owner_regression \
             | tee "$RUNNER_TEMP/psc1-generated-owner-native.log"
           grep -Fqx 'PSC1_V2_GENERATED_OWNER_PASS owners=25 recursors=7 rules=14 cases=12 checks=216 whnf=216 defeq=216 private=13 officialPositive=16 officialNegative=5' "$RUNNER_TEMP/psc1-generated-owner-native.log"
+      - name: Check checked Quot declaration owner installation
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_quot_owner_regression \
+            | tee "$RUNNER_TEMP/psc1-quot-owner-native.log"
+          grep -Fqx 'PSC1_V2_QUOT_OWNER_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 officialPositive=10 officialNegative=7' "$RUNNER_TEMP/psc1-quot-owner-native.log"
       - name: Check complete DAG checker state and callback ownership
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -339,6 +351,9 @@ jobs:
           test "$(grep -c '^#print axioms ' test/PsKernelExprV2GeneratedOwnerProofs.lean)" -eq 16
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2GeneratedOwnerProofs.lean \
             | tee "$RUNNER_TEMP/psc1-generated-owner-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2QuotOwnerProofs.lean)" -eq 20
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2QuotOwnerProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-quot-owner-proofs.log"
           test "$(grep -c '^#print axioms ' test/PsKernelExprV2StringProjectionProofs.lean)" -eq 10
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2StringProjectionProofs.lean \
             | tee "$RUNNER_TEMP/psc1-string-projection-proofs.log"
@@ -357,6 +372,7 @@ jobs:
               "$RUNNER_TEMP/psc1-recursor-k-proofs.log" \
               "$RUNNER_TEMP/psc1-string-projection-proofs.log" \
               "$RUNNER_TEMP/psc1-generated-owner-proofs.log" \
+              "$RUNNER_TEMP/psc1-quot-owner-proofs.log" \
               "$RUNNER_TEMP/psc1-whnf-abi-proofs.log" \
               "$RUNNER_TEMP/psc1-owned-state-proofs.log" \
               "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"; then
@@ -414,6 +430,7 @@ jobs:
             ${{ runner.temp }}/psc1-recursor-native.log
             ${{ runner.temp }}/psc1-recursor-k-native.log
             ${{ runner.temp }}/psc1-string-projection-native.log
+            ${{ runner.temp }}/psc1-quot-owner-native.log
             ${{ runner.temp }}/psc1-generated-owner-native.log
             ${{ runner.temp }}/psc1-owned-state-native.log
             psc1/dist/expr-v2/native-artifacts.json
@@ -434,6 +451,7 @@ jobs:
             ${{ runner.temp }}/psc1-recursor-k-proofs.log
             ${{ runner.temp }}/psc1-whnf-abi-proofs.log
             ${{ runner.temp }}/psc1-string-projection-proofs.log
+            ${{ runner.temp }}/psc1-quot-owner-proofs.log
             ${{ runner.temp }}/psc1-generated-owner-proofs.log
             ${{ runner.temp }}/psc1-owned-state-proofs.log
             ${{ runner.temp }}/psc1-admission-guard-proofs.log
@@ -686,6 +704,18 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" generated-owner-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-generated-owner-generated.log"
           grep -Eq '^PSC1_V2_GENERATED_OWNER_JS_PASS owners=25 recursors=7 rules=14 cases=12 checks=216 whnf=216 defeq=216 private=13 independentDefinitions=12 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-generated-owner-generated.log"
+      - name: Check generated Quot owners and actual admissions in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-quot-owner-smoke.mjs "$PSC1_DAG_RUN_DIR/quot-owner-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" quot-owner-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-quot-owner-generated.log"
+          grep -Eq '^PSC1_V2_QUOT_OWNER_JS_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 independentPositive=10 independentNegative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-quot-owner-generated.log"
       - name: Check complete generated DAG checker state in detached Node
         working-directory: psc1
         shell: bash
@@ -803,6 +833,7 @@ jobs:
             ${{ runner.temp }}/psc1-recursor-k-generated.log
             ${{ runner.temp }}/psc1-string-projection-generated.log
             ${{ runner.temp }}/psc1-generated-owner-generated.log
+            ${{ runner.temp }}/psc1-quot-owner-generated.log
             ${{ runner.temp }}/psc1-owned-state-generated.log
             psc1/dist/expr-v2/integration/provider/
             ${{ runner.temp }}/psc1-dag-generated-js.log

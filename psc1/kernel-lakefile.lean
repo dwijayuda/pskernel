@@ -315,3 +315,8 @@ lean_exe psc1_kernel_expr_v2_string_projection_regression where
 lean_exe psc1_kernel_expr_v2_generated_owner_regression where
   root := `PsKernelExprV2GeneratedOwnerRegression
   srcDir := "test"
+
+-- Checked same-batch Quot metadata, immutable caller IDs, and exact V1/official parity.
+lean_exe psc1_kernel_expr_v2_quot_owner_regression where
+  root := `PsKernelExprV2QuotOwnerRegression
+  srcDir := "test"

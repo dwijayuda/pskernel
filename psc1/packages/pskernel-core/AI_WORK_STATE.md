@@ -1,3 +1,15 @@
+# Current review — same-batch checked Quot owners (NOT RUN)
+
+This review combines current carrier `89c8b988fc349fa57d7757c8d11fe0b94f9e9188` with staged Quot source/test history `5ed52783a138d9c8fed13d4faccd6990bb2b1625`. It does not change any branch qualification.
+
+The new owner bridge first obtains all four authoritative live Quot records from the environment produced by successful existing Quot admission. It verifies the expected names/kinds, imports exact admitted types into the private operation arena, and preserves the original caller node namespace. Repeated Quot import is elided only when all four owners retain matching metadata, no delta body and exact admitted types. Missing plans publish nothing. Actual Eq/Quot validation, WHNF/iota, error order, resource placement and V1 provider defaults remain unchanged. Initial-session owner bootstrap is deferred; arbitrary low-level environment records are not authenticated by this bridge.
+
+New native and both authentic generated routes require:4owners,10real quotient terms,180check/180WHNF/180DefEq fixed-resource comparisons,90invalid-check rows,17mandatory direct admission results (10valid/7invalid),10complete-plan refusals,5damaged-owner repair controls and13private caller-ID forms. The native gate checks the same10positive/7negative definitions using official Lean. The generated scripts independently exercise V1 and DAG admissions with empty PATH. Twenty local proof equations and their trust-dependency reports are included. No finite fixture count is a global soundness proof.
+
+The exact native regression, JS regression, portable compiler closure, canonical source,20proofs and performance are **NOT RUN** for this Quot candidate. Existing group and cache fixes are still independently under CI. Do not mark gateB orC complete: four public whole-operation fallback sites remain, and the latest qualified full193-case runs each have17hosttimeouts,1fuel exhaustion,1unsupported case and2separate safety-contract agreements.
+
+---
+
 # Current continuation — compare exact inferred types (2026-10-21 16:02 UTC)
 
 Carrier `6d012ad9655d6e91416c70ff49ded35421a6c59b` compiled successfully, executed the preserved old native controls, and passed all16 generated-owner local proof equations and the existing trust-dependency gate. Its new owner regression failed [job119324895874](https://github.com/dwijayuda/pskernel/actions/runs/39629866426/job/119324895874) at `mutual-left-base-owned-check-is-Nat`. V1 application inference returns the instantiated forall body without normalizing that result type: the genuine indexed mutual fixture returns a motive application definitionally equal to Nat. The fixture incorrectly required syntactic Nat.

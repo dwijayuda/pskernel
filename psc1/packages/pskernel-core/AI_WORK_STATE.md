@@ -1,3 +1,13 @@
+# Review object — explicit name/string equality workers (NOT RUN)
+
+This object is independently based on qualified `f9e9b20f92ce2ffa4a666acaf55aa8852949f589`, without the pending cache or generated-owner changes. Only the internal evaluation strategy of `Core/Name.lean` changes: string/name comparisons receive all arguments before recursive descent, while public curried signatures, raw UTF-8 operations, full Nat identifiers, exact comparison and the original byte-derived fuel are retained. Eight local equations compare every supported input (including arbitrary Nat fuel and raw offsets) with frozen original definitions. Source/proofs are NOT RUN; native/generated fixtures and workflow wiring remain pending. No speedup is claimed.
+
+Authentic original-body profile run39622318432 at exact`3aa077cb64ff06f76727decd01c43ad6c33f351d` exposed string/name comparison and generated closure machinery among active frames. Profiles collect evidence, not compatibility passes. That run still observed Church fuel exhaustion and Init Prelude host timeout; all unchanged policy limits remain in force. This is a measured-cost hypothesis requiring exact-source correctness and full-operation comparison before promotion.
+
+The V1 operation algorithm/default remains separately selectable. Shared equality optimization affects both V1 and DAG callers; same-head DAG/V1 ratios alone cannot establish a speedup over the original f9 V1 artifact. Any performance report must distinguish those controls and source identities.
+
+---
+
 # PSKernel-Core Expression V2 integration work state
 
 Date: 2026-10-21 (Asia/Jakarta; Actions timestamps use UTC)
@@ -11,6 +21,98 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+
+## 2026-10-21 15:47 UTC — independent indexed-cache qualification candidate
+
+Qualification branch: `research/psc1-pskernel-v2-cache-20261021`.
+Base: exact qualified String-projection source
+`f9e9b20f92ce2ffa4a666acaf55aa8852949f589`.
+This branch intentionally carries only the cache change on that qualified base;
+the mutual/nested owner candidate is separately running at carrier
+`3b281560ad379004e9a28978a0d2112a134cac56`. They will be combined only after
+independent qualification, with a new exact-source integration gate. No current
+cache performance or correctness result is inferred from either other source.
+
+### Exact-source evidence
+
+| Source | Native | Portable .lean | Canonical .ps | Generated JS | Proofs | Benchmark | Arena | Provider |
+|---|---|---|---|---|---|---|---|---|
+| 3aa077cb64ff06f76727decd01c43ad6c33f351d | PASS | PASS | PASS | PASS | PASS | PASS, regressions | IN PROGRESS | PASS |
+| f9e9b20f92ce2ffa4a666acaf55aa8852949f589 | PASS | PASS | PASS | PASS | PASS | PASS, regressions | IN PROGRESS | PASS |
+| 3b281560ad379004e9a28978a0d2112a134cac56 | IN PROGRESS | IN PROGRESS | IN PROGRESS | IN PROGRESS | IN PROGRESS | NOT RUN | IN PROGRESS | NOT RUN |
+| This cache source | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+The active integration3aa now has terminal green integration39622318383,
+correctness39622318348 and research39622318349.
+[Its exact receipt](evidence/2026-10-21-3aa077c.json) and
+[the String predecessor receipt](evidence/2026-10-21-f9e9b20.json) bind the
+complete182-module portable/139-module canonical closures, native and both
+detached generated providers to their respective SHAs and immutable artifacts.
+Source/current native/generated/canonical success is not a full V2 or Arena claim.
+
+### Code, invariants and required qualification
+
+`Checker/ExprV2/WhnfCache.lean` preserves the original explicit scanner and
+curried ABI. The five unary owner caches use a small newest-first list through
+eight entries, then a persistent16-level radix index with no second history
+mirror. Matching still checks the complete arbitrary Nat hash and exact
+canonical-arena equality in the original relevant-candidate order. Same-hash
+collisions, low16 aliases, duplicate publications and first errors remain visible.
+WhnfState,CheckState and DefEq/DeltaStep change only lookup/publication
+representation. Pair caches, callbacks, guards, local scopes and budgets retain
+their placement. Diagnostic Entries enumeration is never a checking authority.
+
+Seventeen public local lemmas prove the filtered-history model and lookup
+equations for caches satisfying Models; a private bucket-empty helper closes a
+symbolic malformed-index proof case. These uncompiled lemmas do not claim
+lookup equals diagnostic enumeration for arbitrary malformed indexes, provenance
+of arbitrary caller state, or global soundness. The public boundary still never
+accepts caller caches. No runtime axiom, unsafe path or trusted hash is added.
+
+Twelve existing native files and twelve JS/benchmark files have explicit
+representation adapters with all original assertions retained. The new target
+`psc1_kernel_expr_v2_whnf_cache_regression` and both detached generated mirrors
+require1024 exact scanner comparisons across sizes0,1,7,8,9,16,64,128 and four
+hash patterns; seven first-error/latest-hit/missing-node/alias adversaries;
+immutable snapshots; nine real checked definitions and one invalid declaration;
+actual eight-to-nine entry promotion in all five owner caches;36 V1/DAG resource
+comparisons;16 exact poisoned-index precedence controls; scope restoration and
+ten complete-state callback cases. Native official Lean checks the same nine
+valid definitions and one invalid definition. Outer None always fails a required
+direct result; internal malformed rows are never admission evidence.
+
+All new tests/proofs/source are NOT RUN at commit creation. Existing full native
+and generated benchmark, provider, negative and trust gates remain mandatory.
+The new branch is enabled in integration, correctness, research, full193-case
+Arena and authentic-profile workflows. Toolchain, fuel4096, depth/numeric/proof
+policy,60-second corpus bound and2048MiB V8 old-space cap are unchanged.
+
+### Performance risk and release limits
+
+At4894's generated fn-unique/depth128 whole-checker diagnostic, the old scanner
+had117/662 CPU self samples and142081152/475791216 sampled allocation bytes.
+These are samples, not total allocation counts or proof of an Arena root cause.
+The index adds up to16 persistent path nodes per insertion and a nine-entry
+promotion rebuild; full-hash collisions keep their original scan length.
+Require complete shared/unique/collision/binder/admission cold/warm time,
+construction, post-GC retained heap and peak RSS before accepting performance.
+
+The [full f9e9 baseline](evidence/2026-10-21-f9e9b20-performance.json) retains
+every sample. Binder32 admission is513.382ms DAG versus195.613ms V1 (2.624×),
+construction73.210/0.580ms and max RSS273220/262284KiB. These are material
+regressions, not a general V2 speedup. The last terminal4894 Arena receipt
+remains193 =171 matches+2 safety agreements+18 host timeouts+1 fuel error+
+1 unsupported; no totals are inherited by this cache source.
+
+Four public whole-operation fallbacks, initial validated-arena decode,
+recursive metadata import, V1 inductive admission and incomplete owning
+references remain. A is achieved at the exact qualified scoped3aa/f9 sources.
+B/C are not achieved. Initial-session import, Quot owner work and the separate
+group-owner candidate are not included in this isolated cache experiment.
+
+Next: inspect actual native/proof/portability/runtime failures, fix the class
+without relaxing assertions or policies, then evaluate every full-operation
+time/memory control and full Arena result. Keep the original V1 selectable.
 
 ## 2026-10-21 15:04 UTC — owning DAG String projection candidate
 

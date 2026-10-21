@@ -117,6 +117,16 @@ captured state. It has independent authored inputs/native reference and all7
 target obligations (7×2×7=98); qualification pending. Do not treat a type-printer
 assertion as runtime evidence.
 
+## Returned callback fixture syntax correction
+
+Focused39556895516 refuses the new callback fixture's projection directly on
+a parenthesized application in both grammars. That postfix form is outside the
+current selected syntax. Bind the exact same computation to a typed immutable
+program local and project program.run, as the existing CompilerM contract does.
+The returned callback/Array/Option interactions and both observations remain.
+General expression postfix field access remains an explicit syntax gap, not
+silently claimed as supported by this correction.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

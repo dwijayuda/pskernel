@@ -71,7 +71,8 @@ def unitCase (flag : Bool) : Nat := Ps.Internal.CompilerMContract.observe (Ps.In
 
 -- Returned callbacks remain owned through product fields, arrays and options.
 def callbackCase (flag : Bool) : Nat :=
-  match (Ps.Internal.CompilerMContract.callbackProgram flag).run 3 7 with
+  let program : CompilerM Nat Nat Nat (Nat -> Nat) := Ps.Internal.CompilerMContract.callbackProgram flag;
+  match program.run 3 7 with
   | Result.error error => error
   | Result.ok pair =>
       let fallback : Option (Nat -> Nat) := Option.some pair.fst;

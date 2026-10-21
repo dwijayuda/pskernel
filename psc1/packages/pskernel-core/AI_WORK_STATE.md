@@ -1393,3 +1393,7 @@ arrow, while known declaration entries retain flat arguments. The seven affected
 bounded-transform and raw-WHNF test calls now follow that ABI. The strict guard
 remains; this correction has no kernel or fuel-policy effect and awaits runtime
 qualification. Native Beta module registration was corrected in c29f418.
+
+## Scanner proof correction after 35b5b84 (2026-10-21)
+
+The native integration job [119020166734](https://github.com/dwijayuda/pskernel/actions/runs/39538365457/job/119020166734) passed the binder, theorem, unsafe-admission, and infer-only runtime regressions, then rejected the false-hash branch of the new scanner equivalence proof. Lean simplifies the true Boolean equality bridge, but does not simplify the false bridge into propositional inequality. The proof now derives inequality by contradiction through the already accepted true bridge. Runtime source, fuel, and all gate requirements are unchanged. This correction is **pending Actions qualification**; the previous failed proof is not soundness evidence.

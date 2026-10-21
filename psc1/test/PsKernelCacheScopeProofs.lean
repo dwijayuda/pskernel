@@ -459,7 +459,11 @@ theorem psKernelExprV2WhnfCacheFindWorker_eq_before
   | cons first rest ih =>
       cases hashEqual : Nat.beq first.hash hash with
       | false =>
-          have hashRelation : first.hash ≠ hash := by simpa using hashEqual
+          have hashRelation : first.hash ≠ hash := by
+        intro sameHash
+        have yes : Nat.beq first.hash hash = true := by simpa using sameHash
+        rw [yes] at hashEqual
+        cases hashEqual
           simpa [psKernelExprV2WhnfCacheFindWorker,
             psKernelExprV2WhnfCacheFindInBefore, hashEqual, hashRelation] using ih
       | true =>

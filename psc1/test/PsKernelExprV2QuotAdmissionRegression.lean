@@ -101,7 +101,7 @@ private structure Prepared where
   arena : PsKernelExprV2PagedArena
   input : PsKernelExprV2Decoded
   before : PsKernelDagGeneratedState
-  prefix : List PsKernelDagCommand
+  prefixCommands : List PsKernelDagCommand
   cases : List Fixture
   natRoot : Nat
   sortRoot : Nat
@@ -490,7 +490,7 @@ private def samePublicFailure {α β : Type} (label : String)
   | _,_ => throw (IO.userError (label ++ "-expected-failure"))
 
 private def publicRegression (prepared : Prepared) (owned : PsKernelDagGeneratedState) : IO Unit := do
-  let commands := prepared.prefix ++ [.admit .quot]
+  let commands := prepared.prefixCommands ++ [.admit .quot]
   let queries := prepared.cases.flatMap fun fixture =>
     [PsKernelDagCommand.check fixture.root,.whnf fixture.root,.isDefEq fixture.root fixture.expectedRoot]
   let result ← expectPublic "complete-owned-bootstrap-and-consumers"
@@ -571,7 +571,7 @@ private def namespaceRegression (prepared : Prepared) (owned : PsKernelDagGenera
      .admit (.mutualInductive (.mk [] 0 [family] false)),
      .admit (.nestedInductive (.mk [] 0 [ctor] false))]
   let execution := PsKernelDagExecutionState.mk prepared.withQuot owned.declarations
-  let prelude := prepared.prefix ++ [.admit .quot]
+  let prelude := prepared.prefixCommands ++ [.admit .quot]
   for command in commands do
     require "owned-command-never-accepts-private-ID-as-source"
       (invalidReference (psKernelDagRunCommandOwnedWithSource prepared.input execution [] .safe

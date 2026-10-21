@@ -1,0 +1,113 @@
+{
+  "schema": "pskernel-direct-quot-preflight-failure-v1",
+  "sourceSha": "529085a8cf5aba5aec1b685d0496937c793dea41",
+  "run": 39667350230,
+  "job": 119455777755,
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/39667350230/job/119455777755",
+  "status": "completed",
+  "conclusion": "failure",
+  "classification": "native test-fixture source syntax",
+  "firstError": "test/PsKernelExprV2QuotAdmissionRegression.lean:104:10: unexpected identifier; expected prec",
+  "cause": "Prepared.prefix is parsed as the reserved prefix notation command. The truncated structure causes later field-projection errors.",
+  "productionModulesBuilt": [
+    "Ps.KernelCore.API.DagQuot",
+    "Ps.KernelCore.API.DagAdmission",
+    "Ps.KernelCore.API.Dag"
+  ],
+  "nativeRegression": "NOT RUN",
+  "proofs": "NOT RUN",
+  "portableSource": "NOT RUN",
+  "canonicalPs": "NOT RUN",
+  "generatedJs": "NOT RUN",
+  "provider": "NOT RUN",
+  "fix": "Rename only the Prepared field and its two projections to prefixCommands. No assertions, theorem statements, production source, policies or workflows changed.",
+  "artifact": {
+    "id": 12377754906,
+    "bytes": 7858,
+    "sha256": "8765751700e8e415b5739a141598df8d02cb1436fc2aa5ef8fde5c2218cebbae"
+  },
+  "jobs": [
+    {
+      "id": 119455777755,
+      "name": "native-quot-admission",
+      "status": "completed",
+      "conclusion": "failure",
+      "run_id": 39667350230,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Install pinned Lean",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Compile the complete kernel and owned Quot regression",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 5
+        },
+        {
+          "name": "Check direct bootstrap, exact guards, private owners and official declarations",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6
+        },
+        {
+          "name": "Preserve existing complete batch, mutual admission and owner controls",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7
+        },
+        {
+          "name": "Prove local publication, namespace and failure equations with retained controls",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        }
+      ]
+    }
+  ]
+}

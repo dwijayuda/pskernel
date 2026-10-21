@@ -1,3 +1,29 @@
+# Current research — repair the direct Quot fixture parser
+
+Updated: 2026-10-21 20:09 UTC.
+Branch: `research/psc1-pskernel-quot-direct-20261021`.
+Parent `529085a8cf5aba5aec1b685d0496937c793dea41` failed native preflight:
+https://github.com/dwijayuda/pskernel/actions/runs/39667350230/job/119455777755
+
+The first error is the reserved Lean notation keyword `prefix` used as a
+`Prepared` structure field (line104). Subsequent unknown-field errors are
+consequences of that truncated structure. The three changed production modules
+compiled, but no new regression or proof gate ran. This is a fixture syntax
+failure, not evidence of successful checker semantics.
+
+This commit renames only that field and its two projections to
+`prefixCommands`. All production source, assertion bodies, official fixtures,
+expected counts, proof statements, resource policies and workflow gates remain
+unchanged. Full failure receipt:
+`evidence/2026-10-21-529-direct-quot-native-failure.json`.
+
+Containing commit: **NOT RUN at creation**. Re-run the focused native job to its
+terminal result, then wire/run all required native, authentic portable/canonical
+and detached generated/provider gates before promotion. All B/C limitations and
+performance holds recorded below remain.
+
+---
+
 # Current research — direct DAG Quot admission preflight
 
 Updated: 2026-10-21 20:05 UTC.

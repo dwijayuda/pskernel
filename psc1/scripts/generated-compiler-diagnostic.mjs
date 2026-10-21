@@ -9,6 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createCompilerHostSession, compilerSourceClosureDigest } from '../host-tools/compiler-host-protocol.mjs';
 import { createGeneratedJsCompilerSession } from '../host-tools/generated-compiler-session.mjs';
+import { verifyGeneratedBundle, assertJsGeneration, checkGenerationRefusals } from '../host-tools/js-generation-manifest.mjs';
 import { validateClosureCounts } from './compiler-closure-contract.mjs';
 
 const root = process.cwd();
@@ -22,16 +23,36 @@ const checker = path.join(root, '.lake/build/bin/psc1_independent_checker');
 const checkerHash = sha(fs.readFileSync(checker));
 const seed = path.join(root, '.lake/build/bin/psc1_js_service_seed');
 const seedHash = sha(fs.readFileSync(seed));
+const runner = path.join(root, 'scripts/generated-compiler-runner.mjs');
+const runnerHash = sha(fs.readFileSync(runner));
+const nodeHash = sha(fs.readFileSync(process.execPath));
+const hostModuleInventory = ['scripts/generated-compiler-diagnostic.mjs',
+  'host-tools/generated-compiler-session.mjs','host-tools/js-generation-manifest.mjs',
+  'host-tools/compiler-host-protocol.mjs','scripts/compiler-closure-contract.mjs'].map(file =>
+    ({path:file,sha256:sha(fs.readFileSync(path.join(root,file)))}));
+const hostControllerHash = sha(JSON.stringify(hostModuleInventory));
+function verifyFixedTools() {
+  assert.equal(sha(fs.readFileSync(checker)),checkerHash,'checker unchanged');
+  assert.equal(sha(fs.readFileSync(runner)),runnerHash,'runner unchanged');
+  assert.equal(sha(fs.readFileSync(process.execPath)),nodeHash,'Node unchanged');
+  for (const file of hostModuleInventory)
+    assert.equal(sha(fs.readFileSync(path.join(root,file.path))),file.sha256,'host controller unchanged');
+}
 function run(role, executable, args) {
   if (!['stage0-seed', 'generated-service', 'target-check', 'target-execution'].includes(role) ||
       (role === 'stage0-seed' && (!nativeAllowed || seedCalls !== 0)))
     throw new Error('PSC1_NATIVE_COMPILER_DELEGATION_FORBIDDEN');
-  if (role === 'stage0-seed') seedCalls++;
+  if (role === 'stage0-seed') {
+    assert.equal(sha(fs.readFileSync(seed)),seedHash);
+    seedCalls++;
+  }
   if (role !== 'stage0-seed' && executable !== process.execPath)
     throw new Error('PSC1_GENERATED_TOOL_NOT_ALLOWED');
+  verifyFixedTools();
   const started = Date.now();
   const result = spawnSync(executable, args, { cwd: root, encoding: 'utf8',
     timeout: 240000, maxBuffer: 32 * 1024 * 1024 });
+  verifyFixedTools();
   events.push({ role, executable, args, status: result.status, signal: result.signal,
     elapsedMs: Date.now() - started, error: result.error?.message || null });
   return result;
@@ -122,17 +143,17 @@ function writeTarget(value, destination) {
   successful(run('target-check', process.execPath, ['--check', destination]), 'PSC1_TARGET_SYNTAX_REFUSED');
   assert.equal(sha(fs.readFileSync(destination)), sha(value.source));
 }
-function generated(request, id) {
+function generated(request, id, servicePath = g1Path, serviceHash = g1Hash) {
   const requestPath = path.join(directory, id + '.request.json');
   const responsePath = path.join(directory, id + '.candidate.json');
   fs.writeFileSync(requestPath, request.text);
   const result = run('generated-service', process.execPath,
-    [path.join(root, 'scripts/generated-compiler-runner.mjs'), g1Path, g1Hash, requestPath, responsePath]);
+    [runner, servicePath, serviceHash, requestPath, responsePath]);
   successful(result, 'PSC1_GENERATED_COMPILER_PROCESS_FAILED');
   const execution = JSON.parse(result.stdout.trim());
   const candidate = readCandidate(responsePath);
   assert.equal(execution.protocol, 'psc1-generated-service-run/1');
-  assert.equal(execution.serviceSha256, g1Hash);
+  assert.equal(execution.serviceSha256, serviceHash);
   assert.equal(execution.requestSha256, sha(request.text));
   assert.equal(execution.responseSha256, candidate.digest);
   return { candidate, execution };
@@ -207,28 +228,50 @@ try {
       sources: [{ module: 'Entry', text: 'partial def answer (limit : Nat) : Id Nat := do\n  let mut value : Nat := 0\n  while Nat.blt value limit do\n    value := Nat.succ value\n  return value\n' }],
       consumer: "if (m.answer(5n) !== 5n) throw Error('ordinary loop');" }
   ];
+  const observedExpressions = {
+    'lean-modules':'({answer:String(m.answer),exports:Object.keys(m)})',
+    'ps-integer-unicode':'({huge:String(m.huge),text:m.text})',
+    'lean-handler-pattern':'({normal:String(m.observe(false)),caught:String(m.observe(true))})',
+    'lean-ordinary-loop':'({zero:String(m.answer(0n)),five:String(m.answer(5n))})'
+  };
+  const expectedObservations = {
+    'lean-modules':{answer:'42',exports:['answer']},
+    'ps-integer-unicode':{huge:'-9007199254740993123456789',text:'λ🙂'},
+    'lean-handler-pattern':{normal:'3',caught:'8'},
+    'lean-ordinary-loop':{zero:'0',five:'5'}
+  };
+  function exercise(servicePath, serviceIdentity, label) {
+    const observations=[];
   for (const item of corpus) {
-    const request = encodeRequest(item.id, item.grammar, item.assurance, item.entry, item.sources);
-    const runner = path.join(root, 'scripts/generated-compiler-runner.mjs');
+    const request = encodeRequest(label + '-' + item.id, item.grammar, item.assurance, item.entry, item.sources);
+    verifyFixedTools();
     const session = createGeneratedJsCompilerSession({ requestId: request.id,
       sources: request.sources, entryModule: request.entry, assurance: request.assurance,
-      serviceFile: g1Path, serviceSha256: g1Hash, runnerFile: runner,
-      runnerSha256: sha(fs.readFileSync(runner)), checkerExecutable: checker,
-      checkerSha256: checkerHash, publicationRoot: path.join(directory, 'publication', item.id) });
-    const checked = session.execute();
-    const publication = session.publish();
-    events.push(...session.events);
+      serviceFile: servicePath, serviceSha256: serviceIdentity.sha256, runnerFile: runner,
+      runnerSha256: runnerHash, checkerExecutable: checker,
+      checkerSha256: checkerHash, publicationRoot: path.join(directory, 'publication', label + '-' + item.id) });
+    let checked, publication;
+    try { checked = session.execute(); publication = session.publish(); }
+    finally { events.push(...session.events); }
+    verifyFixedTools();
     const target = publication.target;
-    const consumer = path.join(directory, item.id + '-consumer.mjs');
+    const consumer = path.join(directory, label + '-' + item.id + '-consumer.mjs');
     fs.writeFileSync(consumer, "import * as m from " + JSON.stringify(
-      pathToFileURL(target).href) + ";\n" + item.consumer + '\n');
-    successful(run('target-execution', process.execPath, [consumer]), 'PSC1_GENERATED_CORPUS_OBSERVATION_FAILED');
+      pathToFileURL(target).href) + ";\n" + item.consumer + '\nconsole.log(JSON.stringify(' + observedExpressions[item.id] + '));\n');
+    const observationRun = run('target-execution', process.execPath, [consumer]);
+    successful(observationRun, 'PSC1_GENERATED_CORPUS_OBSERVATION_FAILED');
+    const observation = JSON.parse(observationRun.stdout.trim());
+    assert.deepEqual(observation,expectedObservations[item.id]);
+    observations.push({id:item.id,grammar:item.grammar,assurance:item.assurance,
+      sourceClosureDigest:checked.sourceClosureDigest,admissionsSha256:checked.admissionsSha256,
+      originalIrSha256:checked.originalIrSha256,specializedIrSha256:checked.specializedIrSha256,
+      sourceSha256:checked.sourceSha256,observation});
     report.generatedCompilerExecution = 'partial-selected-corpus';
-    report.cases.push({ ...checked, publication, targetExecution: 'passed',
+    report.cases.push({ generation:label, ...checked, publication, observation, targetExecution: 'passed',
       productionPublication: 'host-session-published-ci-store' });
-    console.log('PSC1_REAL_GENERATED_COMPILER_CASE: ' + JSON.stringify({ id: item.id,
+    console.log('PSC1_REAL_GENERATED_COMPILER_CASE: ' + JSON.stringify({ generation:label,id: item.id,
       elapsedMs: checked.execution.elapsedMs, maxRssKiB: checked.execution.maxRssKiB,
-      sourceSha256: checked.sourceSha256, generation: publication.generation }));
+      sourceSha256: checked.sourceSha256, publicationGeneration: publication.generation }));
   }
   for (const item of [
     { id: 'wrong-body', grammar: 'lean', assurance: 'checked', source: 'def bad : Nat := true\n', phase: 'elaboration' },
@@ -237,17 +280,109 @@ try {
     { id: 'verified', grammar: 'ps', assurance: 'verified', source: 'def value : Nat := 1\n', phase: 'wire' }
   ]) {
     const request = encodeRequest(item.id, item.grammar, item.assurance, 'Entry', [{ module: 'Entry', text: item.source }]);
-    const { candidate, execution } = generated(request, item.id);
+    const { candidate, execution } = generated(request, label + '-' + item.id, servicePath, serviceIdentity.sha256);
     assert.equal(candidate.value.status, 'refused');
     assert.equal(candidate.value.phase, item.phase);
     assert.equal(candidate.value.admission, 'not-run');
     assert.equal(candidate.value.source, undefined);
-    report.cases.push({ requestId: item.id, generatedRefusal: 'passed', phase: item.phase, execution });
+    observations.push({id:item.id,grammar:item.grammar,refused:true,phase:item.phase,code:candidate.value.code});
+    report.cases.push({ generation:label,requestId: request.id, generatedRefusal: 'passed', phase: item.phase, execution });
   }
+
+    return observations;
+  }
+  const sourceInventory = sources.map(row => ({module:row.module,grammar:'lean',
+    bytes:Buffer.byteLength(row.text),sha256:sha(row.text)}));
+  const sourceInventoryHash = sha(JSON.stringify(sourceInventory));
+  const firstObservations = exercise(g1Path,report.service,'G1');
+  report.generatedCompilerExecution='passed-G1-selected-corpus';
+  report.completedCorpusGenerations=[1];
+  const observationsHash = sha(JSON.stringify(firstObservations));
+  const expectedIdentity = {
+    sourceClosureDigest:bootstrap.digest,sourceInventorySha256:sourceInventoryHash,
+    serviceSha256:g1Hash,admissionsSha256:report.bootstrap.admissionsSha256,
+    originalIrSha256:report.bootstrap.originalIrSha256,
+    specializedIrSha256:report.bootstrap.specializedIrSha256,
+    checkerSha256:checkerHash,runnerSha256:runnerHash,nodeSha256:nodeHash,
+    corpusObservationsSha256:observationsHash,hostControllerSha256:hostControllerHash,
+    nativeSeedSha256:seedHash
+  };
+  function saveGeneration(generation, producer, identity, publication, observations) {
+    const manifest={schema:'psc1-js-generation/4.35.0-v1',generation,
+      testedCommit:process.env.GITHUB_SHA,branchHead:process.env.PSC1_BRANCH_HEAD||null,
+      logicalCheckerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
+      target:'js',grammar:'lean',assurance:'ordinary-checked',behaviorallyVerified:false,
+      ...expectedIdentity,...identity,producer,publicNames:['psCompilerJsServiceCandidate'],
+      sourceInventory,hostModuleInventory,publication,observations,claim:'bounded JS identities and actual corpus; no preservation theorem'};
+    assertJsGeneration(manifest,expectedIdentity);
+    const file=path.join(directory,'G'+generation+'.manifest.json');
+    fs.writeFileSync(file,JSON.stringify(manifest,null,2)+'\n');
+    return manifest;
+  }
+  const firstManifest=saveGeneration(1,{kind:'native-stage0',sha256:seedHash},{},
+    {kind:'checked-native-bootstrap-ci-staging',file:g1Path},firstObservations);
+  report.generations=[firstManifest];
+  let servicePath=g1Path,serviceIdentity=report.service;
+  const generationRoot=path.join(directory,'compiler-generations');
+  for (const generation of [2,3]) {
+    const request=encodeRequest('G'+generation+'-self','lean','ordinary-checked',
+      'Ps.BackendJs.CompilerService',sources);
+    verifyFixedTools();
+    const session=createGeneratedJsCompilerSession({requestId:request.id,sources:request.sources,
+      entryModule:request.entry,assurance:request.assurance,serviceFile:servicePath,
+      serviceSha256:serviceIdentity.sha256,runnerFile:runner,runnerSha256:runnerHash,
+      checkerExecutable:checker,checkerSha256:checkerHash,publicationRoot:generationRoot});
+    const attempt={generation,producer:serviceIdentity.sha256,sourceClosureDigest:bootstrap.digest,
+      requestSha256:sha(request.text),status:'started'};
+    (report.generationAttempts ||= []).push(attempt);
+    report.selfCompilation='attempting-G'+generation;
+    let compiled,publication;
+    try {
+      compiled=session.execute();
+      for (const [field,value] of Object.entries({sourceClosureDigest:bootstrap.digest,
+        sourceSha256:g1Hash,admissionsSha256:expectedIdentity.admissionsSha256,
+        originalIrSha256:expectedIdentity.originalIrSha256,
+        specializedIrSha256:expectedIdentity.specializedIrSha256}))
+        assert.equal(compiled[field],value,'PSC1_GENERATION_BEFORE_PUBLICATION:'+field);
+      assert.deepEqual(compiled.publicNames,['psCompilerJsServiceCandidate']);
+      publication=session.publish();
+      verifyGeneratedBundle(publication.directory,publication.manifestSha256,session.request);
+    } finally {
+      events.push(...session.events);
+      attempt.events=session.events;
+      if (!publication) attempt.status='failed-before-publication';
+    }
+    attempt.status='published-identities-matched-pending-corpus';
+    attempt.execution=compiled.execution;
+    const nextService={generation,sha256:compiled.sourceSha256,
+      export:'psCompilerJsServiceCandidate',sourceClosureDigest:bootstrap.digest,sourceModules:sources.length};
+    const nextPath=path.join(publication.directory,'target.mjs');
+    const observations=exercise(nextPath,nextService,'G'+generation);
+    assert.deepEqual(observations,firstObservations,'identical actual corpus observations/graphs/artifacts');
+    const manifest=saveGeneration(generation,{kind:'generated-js',generation:generation-1,
+      sha256:serviceIdentity.sha256},{serviceSha256:compiled.sourceSha256},
+      publication,observations);
+    manifest.negativeBoundaries=checkGenerationRefusals({directory:publication.directory,publication,
+      request:session.request,manifest,expected:expectedIdentity,
+      work:path.join(directory,'generation-refusals','G'+generation)});
+    fs.writeFileSync(path.join(directory,'G'+generation+'.manifest.json'),
+      JSON.stringify(manifest,null,2)+'\n');
+    report.generations.push(manifest);
+    report.completedCorpusGenerations.push(generation);
+    report.generatedCompilerExecution='passed-through-G'+generation+'-selected-corpus';
+    attempt.status='passed';attempt.execution=compiled.execution;
+    report.selfCompilation='passed-through-G'+generation;
+    console.log('PSC1_ACTUAL_JS_GENERATION: '+JSON.stringify({generation,
+      serviceSha256:compiled.sourceSha256,elapsedMs:compiled.execution.elapsedMs,
+      maxRssKiB:compiled.execution.maxRssKiB,admissionsSha256:compiled.admissionsSha256,
+      originalIrSha256:compiled.originalIrSha256,specializedIrSha256:compiled.specializedIrSha256,
+      corpusCases:observations.length,negativeBoundaries:manifest.negativeBoundaries}));
+    servicePath=nextPath;serviceIdentity=nextService;
+  }
+  report.fixedPoint='passed-G1-G2-G3-exact-graphs-IR-source-and-selected-observations';
   assert.equal(seedCalls, 1);
-  report.generatedCompilerExecution = 'passed-selected-corpus';
-  report.selfCompilation = 'not-run';
-  report.fixedPoint = 'not-run';
+  report.generatedCompilerExecution = 'passed-G1-G2-G3-selected-corpus';
+  report.selfCompilation = 'passed-G1-to-G2-to-G3';
   report.productionPublication = 'host-session-published-selected-corpus-ci-store';
   report.status = 'passed-diagnostic';
 } catch (error) {
@@ -259,5 +394,6 @@ try {
   fs.writeFileSync(path.join(directory, 'diagnostic.json'), JSON.stringify(report, null, 2) + '\n');
   console.log('PSC1_GENERATED_COMPILER_DIAGNOSTIC: ' + JSON.stringify({ status: report.status,
     generatedCompilerExecution: report.generatedCompilerExecution, selfCompilation: report.selfCompilation,
-    fixedPoint: report.fixedPoint, failure: report.failure, service: report.service, cases: report.cases.length }));
+    fixedPoint: report.fixedPoint, failure: report.failure, service: report.service, cases: report.cases.length,
+    completedCorpusGenerations:report.completedCorpusGenerations,generationAttempts:report.generationAttempts }));
 }

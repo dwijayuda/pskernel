@@ -741,93 +741,50 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "ab1b65165e86c765bca73dc01cc9a59f1cd4677b",
-    "status": "partial-real-G1-three-cases-fix-ordinary-fixture",
-    "sourceQualification": {
-      "wholeClosureRun": 39541282485,
-      "nativeRun": 39541282570,
+    "headBeforeCandidate": "921eb1d7b8a5dc539d192ccda5a4ceb14c21ac52",
+    "status": "G1-qualified-pending-real-G2-G3",
+    "G1": {
+      "run": 39543944316,
+      "final": "success",
+      "positiveCases": 4,
+      "refusalCases": 4,
+      "receipt": "PSC1_G1_EXECUTION_QUALIFICATION_2026-10-21.json",
+      "serviceSha256": "7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d"
+    },
+    "wholeClosures": {
+      "run": 39543944319,
       "final": "success",
       "sourceModules": [
-        67,
+        68,
         83,
         86
       ],
-      "receipt": "PSC1_SCHEDULER_CLOSURES_2026-10-21.json"
+      "logicalDeclarations": [
+        2439,
+        3254,
+        3033
+      ]
+    },
+    "focused": {
+      "run": 39543944344,
+      "final": "success"
     },
     "fullScoped": {
-      "run": 39541282484,
-      "status": "success",
-      "receipt": "PSC1_SCHEDULER_FULL_QUALIFICATION_2026-10-21.json"
+      "run": 39543944381,
+      "status": "in-progress"
     },
-    "actualBootstrap": {
-      "run": 39541282520,
-      "status": "failed",
-      "error": "seed ETIMEDOUT",
+    "transportComparison": {
+      "run": 39543395472,
+      "final": "success",
+      "receipt": "PSC1_COMPILER_TRANSPORT_COMPARISON_2026-10-21.json"
+    },
+    "repeatedGenerations": {
+      "schema": "psc1-js-generation/4.35.0-v1",
+      "status": "pending-real-G1-G2-G3",
+      "nativeSeedCalls": 1,
       "processTimeoutMs": 240000,
-      "G1": "not-produced"
-    },
-    "profiler": {
-      "fixedTargetSourceHead": "adcb815733aca23d3d27e7e0ae4cbc589ba56000",
-      "sameInputAcrossImplementations": true,
       "queueBudget": 16384,
-      "authority": false,
-      "run": 39542327917,
-      "status": "in-progress-preserved-across-descendants"
-    },
-    "hostSessionPublisher": {
-      "status": "24-host-boundary-checks-passed",
-      "head": "078a84c273eb918bf23293d06ee401e9ba777f66",
-      "run": 39542595382,
-      "job": 119033841229,
-      "actualG1": false
-    },
-    "prefixProfile": {
-      "run": 39542327917,
-      "receipt": "PSC1_COMPILER_PREFIX_PROFILE_2026-10-21.json",
-      "timesMs": [
-        14001,
-        27382
-      ],
-      "specializationMs": [
-        13,
-        20
-      ],
-      "initialReferences": 29185,
-      "initialUnique": 653,
-      "instances": 752,
-      "declarations": 2230,
-      "scope": "omitted-final-transport"
-    },
-    "next": "supported ordinary fixture native parity; actual full G1 corpus; exact profile comparison; G2/G3",
-    "nativeBuildRefusal": {
-      "run": 39543156071,
-      "path": "Ps.Bridge.Json",
-      "line": 199,
-      "column": 15,
-      "detail": "reserved prefix local",
-      "fix": "runText"
-    },
-    "generated": {
-      "run": 39543395379,
-      "job": 119036034964,
-      "G1": "produced-and-actually-executed",
-      "passedCases": 3,
-      "pending": "ordinary fixture and negative corpus",
-      "receipt": "PSC1_FIRST_GENERATED_EXECUTION_PARTIAL_2026-10-21.json",
-      "selfCompilation": "not-run",
-      "fixedPoint": "not-run"
-    },
-    "latestSourceQualification": {
-      "focused": 39543395455,
-      "wholeClosure": 39543395417,
-      "status": "success"
-    },
-    "baselineTransportProfile": {
-      "run": 39543156076,
-      "job": 119035265176,
-      "lastPhase": "encode-admission-request",
-      "elapsedMs": 240159,
-      "status": "timeout"
+      "formalPreservation": false
     }
   },
   "latestCanonicalIrCheckpoint": {

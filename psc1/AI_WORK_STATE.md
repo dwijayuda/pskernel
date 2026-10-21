@@ -1,421 +1,120 @@
-# PSC1 — complete compiler sources and whole closures qualified; continue generation
+# PSC1 — actual G1 qualified; continue G2/G3 continuously
 
 Updated2026-10-21. Active draft [PR172](https://github.com/dwijayuda/pskernel/pull/172)
-on fix/psc1-closure-normalization-20261021 preserves #171 at
-1fad9ed53cda9b23ac30be9cea85e7857437564e and every intermediate commit.
-Execute [the Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
-continuously. The user explicitly requests no small-milestone handoff.
+on fix/psc1-closure-normalization-20261021. Base #171 remains immutable at
+1fad9ed53cda9b23ac30be9cea85e7857437564e; every continuation commit is preserved.
+The user explicitly requests execution of the [Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
+without stopping at small milestones. Use GitHub tools and Linux CI only.
 
-## Current continuation — first actual G1 semantics; fix the ordinary fixture
+## Latest actual G1 execution
 
-Atab1b6516, focused39543395455 and all3 exact-closure jobs39543395417
-passed, including new native JSON quote checks and both complete source lanes.
-Host-session boundary checks passed again. Actual generated run39543395379
-PRODUCED G1, independently admitted its exact graph and executed3 compiler cases:
-multi-module/internal ownership2340ms/552844KiB; PS huge integer/Unicode1670ms/
-335944KiB; Lean handler/pattern5492ms/414092KiB. Each emitted target independently
-passed admission, syntax/API, atomic host-session publication and actual behavior.
-Native compiler tools were disabled after the one seed.
-[Exact partial receipt](docs/PSC1_FIRST_GENERATED_EXECUTION_PARTIAL_2026-10-21.json).
+Qualified implementation921eb1d7b8a5dc539d192ccda5a4ceb14c21ac52.
+Tested mergeece4925682d426509868564f663c26c482f91a2a.
+Generated workflow39543944316 is completed/success, including host boundary.
+[Durable G1 receipt](docs/PSC1_G1_EXECUTION_QUALIFICATION_2026-10-21.json).
+Actual G1 service SHA256:
+7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d.
+Full compiler source closure83 modules, canonical admissions
+1bbdfa80eb942ce1930b0889f77ff9c2bbe4115c6b22cdd83ce36bd7ab6e2d76;
+original IR1b92f8a5a779211d187a3e70273d5e7337a8c096a650bc885d97124d3a5ce888;
+specialized IRfd46ee97e13e06002abf33719e97c521036408333bcb3be87f5ed308669bb969.
 
-The fourth corpus case refused elaboration because the fixture used plain Nat
-do notation and a proposition-valued value<limit guard. Existing qualified
-WhileTests uses explicit Id Nat with Bool Nat.blt. Correct the fixture to that
-existing contract, add equivalent independently authored Lean/PS cases to native
-facade admission/target execution, then rerun G1. No language rule changes.
-Record partial-selected-corpus immediately after each actual success: the old
-finally report incorrectly remained not-run after3 executed successes.
+Native stage0 generated G1 once. Its exact graph was independently admitted.
+Native compiler binaries were then disabled; the explicit independent checker
+remained. Actual G1 compiled/admitted/published/executed:
+- Lean multi-module/internal ownership1546ms/564428KiB;
+- PS exact huge integer/Unicode1055ms/391292KiB;
+- Lean typed handler/pattern3593ms/387964KiB;
+- Lean explicit Id ordinary while4732ms/409288KiB.
+G1 refused wrong bodies, missing imports, checked-only partial and verified requests.
+These are selected cases, not complete language families or preservation.
 
-Extended immutable baseline profile job119035265176 in39543156076 confirmed
-the actual slow stage: encode-admission-request started, then240159ms timeout
-at unchanged240000ms. It already wrote the exact same admissions, original/
-specialized IR and generated source identities. Corrected candidate/profile
-comparison39543395472 is still running; its completion must be verified.
-G1 full corpus/negatives and G2/G3 remain pending. Continue without milestone stop.
+Focused39543944344 and all3 exact closure jobs39543944319 passed. Both grammar
+lanes accept EVERY selected module: semantic68, DirectJS83, Rust86. Exact logical
+counts2439,3254,3033; checked semantic and ordinary-checked backend graphs.
+Owned PS compiler input is canonical translation from Lean, not independent PS
+compiler authorship. Original graph/IR bytes match both lanes in each phase.
+Full scoped39543944381 was still running at receipt creation; re-query final state.
+The earlier fully scoped checkpointadcb8157 passed39541282484, focused39541282570
+and closures39541282485; [complete earlier receipt](docs/PSC1_SCHEDULER_FULL_QUALIFICATION_2026-10-21.json).
 
-## Earlier quoting local correction
+## Current candidate — actual repeated JS generations
 
-At2a347829 native builds refused Json.lean199:15 because the new local name
-prefix is a reserved Lean notation keyword. Rename only that local to runText.
-No algorithm, escaping, limit or test changes. Extended baseline profiling remains
-in progress under the preserved non-cancelling profile workflow. Candidate
-transport/source/actual G1 qualification awaits this compile correction.
+The new controller now attempts G1->G2->G3 over the IDENTICAL captured83-module
+compiler+JS closure. No native frontend/eraser/emitter is available after G1.
+The same official checker and target Node remain. Before successor publication,
+canonical admissions, original/specialized IR and generated source must equal
+G1. Each generation then executes the same corpus and actual observations.
 
-## Balanced JSON quoting and final transport measurement
+Versioned psc1-js-generation/4.35.0-v1 manifests retain exact source-file inventory,
+producer/service/seed/Node/checker/runner/host-controller identities and corpus
+observations. Closed bundle verification rejects missing/extra/changed files,
+stale graph/tool/manifest context and historical schemas; tests preserve originals.
+Readers return DATA, not publication authority. The private live host session
+still owns real execution/admission/target checks and the atomic pointer commit.
+G2/G3 and fixed point are PENDING actual CI. On failure retain the process event,
+stage files and last completed generation, then fix the reached mechanism.
+Do not raise240s process,16384 specialization or existing stack/heap/checker caps.
 
-The fixed-input prefix profiler39542327917 completed both binaries through JS
-printing in14001/27382ms with identical request and binary hashes. It measured
-29185 seed references,653 initial unique requests,28532 duplicates,752 final
-instances and2230 declarations. Specialization itself took13/20ms after scheduling.
-[Raw prefix receipt](docs/PSC1_COMPILER_PREFIX_PROFILE_2026-10-21.json).
-The initial profiler OMITTED final response assembly, so its profile-complete
-marker never qualified the actual facade. Actual G0 had still timed out240s.
+## Mechanisms corrected and measured
 
-Source inspection isolates the remaining transport hazard: psJsonQuote first
-materializes all characters, then concatenates one escaped character to the full
-already-built suffix recursively. Quoting the19MB exact admission graph is quadratic.
-The candidate scans owned UTF-8 positions, copies unchanged spans and uses existing
-immutable balanced PsTextBuilder chunks at escapes. The legacy List Char helper
-uses the same balanced builder; all escape choices/order and Unicode bytes stay.
-The byte-derived cursor bound remains; no process/queue/stack limit changes.
+ParseDo124:67 and every subsequent complete selected source blocker are normalized,
+with original decisions/refusals/budgets retained and maintained both-lane gates.
+Private compiler helpers retain explicit Ps.Internal owners, shared public-root
+filtering and full internal source/admission/runtime graphs. Native deriving
+instances live outside the portable closure. Canonical IR encoding retains all
+data and exact decimal integer strings; it supplies identity, never authority.
 
-Extend the fixed immutableadcb workload profile through admission-request quoting,
-generated-source quoting and ACTUAL final compilePrepared response assembly.
-Candidate output must equal independent ECMAScript JSON serialization. Baseline/
-candidate must share exact request, admission graph, original/specialized IR and
-generated source hashes. Both processes have240s; direct process execution ensures
-timeout kills the measured executable itself. Retain Linux VmHWM at the last phase
-mark (not a fabricated final peak for killed work). The comparison job requires
-candidate completion; collected profile data alone is no compiler qualification.
-Native tests compare legacy bytes, all ASCII controls, Unicode and independent
-Lean JSON parsing. Both grammar gates explicitly maintain Bridge.Json.
+Specialization formerly charged29185 repeated seed references against16384.
+Stable canonical-key scheduling reduces these to653 initial unique requests;
+752 final instances/2230 declarations complete without omitting source entries.
+Hash trie buckets always check full strings. The same-input synthetic fixture
+retains all128 concrete entries plus1 instance; baseline refuses, candidate finishes.
+[Queue receipt](docs/PSC1_SPECIALIZATION_QUEUE_COMPARISON_2026-10-21.json).
 
-Host-session boundary job119033841229 in39542595382 already passed24 real state/
-checker/publication checks at078a84c2 using native-prepared replay fixtures.
-This is host boundary evidence, not actual G1. The actual generated diagnostic is
-rerun after the quoting fix; G1/G2/G3 remain pending until real execution.
+Actual G0 then hit240s while quoting its19MB admission graph. Balanced immutable
+UTF-8 span quoting preserves exact bytes. Fixed immutableadcb workload comparison
+39543395472 completed/success: baseline times out in encode-admission-request;
+candidate completes the full40217563-byte response33710ms (quoting769ms).
+Admissions, original/specialized IR and generated JS hashes are IDENTICAL.
+Independent ECMAScript serialization validates the transport bytes.
+[Full comparison](docs/PSC1_COMPILER_TRANSPORT_COMPARISON_2026-10-21.json).
+The profiler is diagnostic only; its output is never adopted as G1.
 
-## Earlier timeout profiling and host-session candidate
+The host-only session pins inputs/options, whole candidate and tool identities;
+it performs actual generated invocation, independent exact graph admission,
+target syntax/export checks and closed inventory/hash rechecks under a lock.
+One atomic current-pointer rename publishes an immutable generation. Prior
+generations remain.24 host boundary checks passed on real checker/publication
+state with explicitly native-prepared replay fixtures. Actual G1 uses this same
+publisher. [Protocol](docs/PSC1_GENERATED_COMPILER_SERVICE.md).
 
-Full scoped39541282484 is now completed/success at immutableadcb8157,
-tested mergec21a784b217b0e984ab415d9d1aaa2405fd0aa09. Focused and all3
-whole-closure jobs also passed. [Full receipt](docs/PSC1_SCHEDULER_FULL_QUALIFICATION_2026-10-21.json)
-retains the complete scoped qualification and all artifact identities. This is
-the latest fully qualified source/admission/original-IR checkpoint, not G1.
+The first ordinary fixture used unsupported plain Nat do and Prop '<'. Corrected
+to the existing Id Nat / Bool Nat.blt contract, with both authored grammar cases
+admitted and executed through the native facade. No language rule was widened.
+The earlier3-case partial receipt remains immutable.
 
-The native phase profiler was added at71f48092. Both baseline and candidate use
-the SAME captured immutableadcb compiler input with the SAME budgets and240s cap.
-Its currently running measurement is preserved; the profile workflow now queues
-descendants instead of cancelling a measurement in progress.
+## Authority, remaining work and durable commands
 
-Add the host-only generated JS session and atomic CI-store publisher.
-It executes the pinned generated service itself; captures exact inputs/options,
-whole candidate/graph/IR/artifacts and service/runner/Node/checker identities;
-independently admits the exact graph; checks target syntax and actual public
-exports; and only its private admitted state can publish. The closed inventory,
-hashes, tools and prior pointer are rechecked under a lock, then one atomic pointer
-rename commits a sealed generation. Previous generations remain readable.
-[Protocol and limits](docs/PSC1_GENERATED_COMPILER_SERVICE.md).
+Official checker: Lean4.35.0,
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Owned kernel evidence is separate.
+Keep ubuntu24.04, Node22.23.3, TS7.0.2, Rust1.90.0, Python3.14.8/3.15.0,
+PHP8.5.11+GMP, wasm-tools1.254.0 and Wasmtime49.0.4 pins.
+Use expected-HEAD guarded non-force descendant updates; no main merge/release/npm.
 
-The separate boundary job uses native-prepared fixture replay (NOT generated
-compiler semantics) to test real admission/publication and fail-closed mutations.
-The actual G1 diagnostic is wired to this publisher for its corpus once G1 exists.
-Both this new host implementation and actual G1 execution remain unqualified.
-The primary blocker is the actual seed's240s timeout. Read the profiler's last
-stage, fix that mechanism, then continue actual generations; do not extend caps.
+Next: inspect new generated workflow at exact candidate head, complete real
+G2/G3 or resolve its actual bottleneck; verify current full scoped final state.
+Then follow Rust owned callbacks and R1/R2/R3, measured collections/control,
+finite fourteen-family grammar×target contract and typed console+UTF-8 file IO.
+Wasm W1-W6, optional adapters and source refactoring stay in dependency order.
+No formal erasure/backend preservation, broad conformance, complete14 families,
+Rust fixed point or unrestricted self-host claim is made.
 
-## Earlier actual240s bootstrap timeout
-
-Headadcb815733aca23d3d27e7e0ae4cbc589ba56000 passes focused39541282570
-and all3 whole-closure jobs39541282485. Both grammars fully accept semantic67,
-DirectJS83 and Rust86 modules. DirectJS3249 source /3251 logical declarations;
-canonical original IR4986782 bytes,
-SHA2560b89bdbb95c46815326357d800ab8916df25a69154cfc424f6dff78106f86adb.
-[Scheduler closure checkpoint](docs/PSC1_SCHEDULER_CLOSURES_2026-10-21.json)
-retains all actual per-lane graph/IR identities and artifact metadata.
-Full scoped39541282484 was still running when this checkpoint was written.
-
-Actual generated diagnostic39541282520 failed: native service seed timed out at
-the unchanged240000ms process cap, before any candidate/G1. The synthetic queue
-completion result does NOT qualify the actual bootstrap. Do not raise caps.
-The new Linux profiler times the existing production stages on a FIXED exact
-compiler source closure captured from immutableadcb, against baseline/candidate
-binaries. It preserves every validation and specialization budget, records phase
-progress before work (retained even if killed), counts initial references/unique
-requests and completed instances, then follows the same target lowering including
-its existing repeated specialization. A green profile-job process only means
-trace collection completed, never that the compiler/G1 passed.
-
-Next: read the last started/completed production stage and measured work; correct
-that mechanism, rerun identical-input comparison and the actual facade bootstrap.
-The profiler never produces/adopts G1, admits a candidate, or publishes anything.
-The host-session publisher is an in-memory draft, not implemented/qualified yet.
-
-## Earlier portable diagnostic correction
-
-Ata484b796 both grammars accept the entire new Foundation.StringSet module.
-The same-input queue comparison39540911070 passes again. Source qualification
-39540910973 now isolates unsupportedTerm in psIrSpecializeScheduledLoop:
-the newly added diagnostic used native Nat.repr. Replace it with the existing
-portable psNatToString (Foundation.Name), which uses supported Int.repr/Int.ofNat.
-No queue behavior changes. All30 native facade assertions passed before this
-source gate. Actual G1 remains not-run pending the corrected source gate.
-
-## Earlier index-recursion correction
-
-Atde26057a source census39540600631 refused the new StringSet module's
-psStringSetBucketContains at27:1, structuralRecursionArity, in both lanes.
-Its explicit list binder returns a String function, so direct self application
-with2 arguments violates the portable structural recurrence shape. Bind the
-partially applied smaller worker inside the returned lambda. Apply the same
-correction to FromListWorker proactively. Native signatures/evaluation remain.
-
-Linux benchmark39540600900 DID execute the exact fixture on both versions.
-[Receipt](docs/PSC1_SPECIALIZATION_QUEUE_COMPARISON_2026-10-21.json).
-Input3802251 bytes, SHA256a0780796c18ad15d4c880dcfd2356a84b8e76096adbd67e7b8dc2eaa40375097.
-Parent refuses fuel-exhausted316ms/67880KiB; candidate completes full revalidated
-output586ms/89492KiB with all128 concrete entries plus1 generic instance.
-This demonstrates bounded completion, not lower wall time or memory; the parent
-did less work because it refused. Native library compilation passed; whole portable
-source qualification and actual G1 are still pending after the recursion fix.
-
-## Stable specialization scheduling candidate
-
-Parent a37a4ce61139db229f86d50645c65a0597119035 has final successful
-full scoped39537087657, focused39537087675 and all3 exact-closure jobs39537087643.
-Generated diagnostic39537087665 failed at actual native compiler generation:
-request-loop / fuel-exhausted. No G1 was produced. This is separate from source
-acceptance, independent admission and strict original IR, which passed.
-
-The original loop charges every duplicate queued dependency against16384, even
-when its canonical key was already seen. The candidate schedules each valid key
-once, with a portable immutable string trie and full equality in collision buckets.
-First-encounter FIFO order remains, malformed requests remain, every nongeneric
-source declaration remains, and the existing singleton transformation and
-before/after validation remain. The budget is STILL16384; zero-budget refusal
-is unchanged. A dependency batch is captured with an empty queue because request
-processing never reads the pending queue; it only appends dependencies.
-
-Native assertions cover hash collisions, Unicode, persistent snapshots,4096 keys,
-stable ordering, duplicate elimination, seen keys and malformed first-error order.
-The new Linux comparison builds the SAME authored IR fixture against immutable
-a37 and the candidate, checks exact input SHA256 parity, all128 concrete entries
-retained plus one generic instance, unchanged limits, elapsed time and maximum
-RSS. Expected baseline refusal and candidate acceptance are hypotheses until CI.
-The generated compiler diagnostic separately reruns the ACTUAL full source workload.
-
-Next: inspect both-grammar source gates and queue comparison, then the actual G0
-seed/G1 execution. Do not raise limits or claim G1/fixed-point success from the
-synthetic benchmark. Continue the plan, including session publication and G1/G2/G3,
-after actual G1 semantics. Read-only retained-artifact inspection is manual-only;
-its first successful original-artifact inspection remains in history.
-
-## Earlier exact qualified checkpoint
-
-Source head912dcc1c055f78ead505c057b1271b88fd1656e5.
-Tested merge3c0e45261448a8c633fe82d4be79586d1ec1c90d.
-All final GitHub workflow states were re-queried completed/success:
-- [full scoped39527583902](https://github.com/dwijayuda/pskernel/actions/runs/39527583902),37/37 steps;
-- [focused native39527583957](https://github.com/dwijayuda/pskernel/actions/runs/39527583957),11/11;
-- [whole closures39527584037](https://github.com/dwijayuda/pskernel/actions/runs/39527584037), all3 phase jobs.
-
-[Exact committed receipt](docs/PSC1_BACKEND_CLOSURES_QUALIFICATION_2026-10-21.json)
-contains complete consolidated scoped qualification, per-lane canonical graph
-identities, source/logical counts, partial names and all artifact metadata.
-Scoped artifact12315040160:
-sha256:4a63bc481457054c9e3fe9bcf44b7bab135d349e619bd1f962311ffa9dc0ec73.
-Retention applies; committed receipts stay durable and are not authority tokens.
-
-## Complete actual compiler closures
-
-BOTH fresh grammar lanes accept every selected source module:
-semantic67/67/67; DirectJS79/79/79; Rust84/84/84
-(modules/parse/elaboration). Strict selected-phase gates run all source modules;
-none is skipped. PS is owned canonical translation from repository Lean, retained
-as actual readable parser inputs with byte counts/SHA256. It is not independently
-authored PS compiler source.
-
-Whole selected graphs actually passed independent official admission and original
-strict IR validation in both lanes:
-- semantic checked-only:2423 original/logical Core declarations;
-- DirectJS ordinary-checked:3144 original /3146 logical declarations;
-- Rust ordinary-checked:2961 original /2964 logical declarations.
-
-Actual origin/member coverage equals the original source Core batch. Ordinary
-logical expansion adds one retained private implementation body per actual partial:
-DirectJS psBackendPublicTypeSupported and psJsNeedsUtf8Runtime; Rust the target
-predicate and RuntimePlan typeRequirements/exprRequirements. The checker admits
-the exact retained logical graph. Erasure then consumes the SAME immutable checked
-batch or ordinary source/logical/body pairing; psCompilerOrdinaryIr repeats pairing
-validation. The actual psStrictValidateModule entry point accepts the resulting
-original IR. Canonical admission bytes match between lanes in each phase.
-
-Official Lean4.35.0 checker commit
-eb6cafb7290e8bd5f2937522d8d804f58f02bafc uses the unchanged provider-prelude
-environment and kernel limits. Owned-kernel checks remain separate. This is exact
-source-graph admission/IR evidence, not erasure/backend preservation, unrestricted
-language conformance or generated compiler execution.
-
-## Normalization and ownership
-
-ParseDo124:67 and all subsequent syntax/elaboration/compiler/backend census
-blockers are corrected. Complete module normalizations preserve all compiler
-decision logic, validation/refusal order and existing budgets, using explicit
-constructors, sequencing, typed callbacks and structural state workers.
-Maintained both-lane gates and all prior native/runtime/refusal groups remain.
-
-Unsupported private tokens formerly became trailing application arguments of a
-preceding definition. Both parsers now refuse them cleanly. Original file-private
-compiler helper leaf names move under explicit Ps.Internal.ElabData and
-Ps.Internal.RustRuntimePlan owners; every call uses the qualified identity.
-The active direct host excludes that reserved implementation namespace from public
-entry roots while retaining the exact source/admission/runtime dependency graph.
-This corrects the earlier Data normalization's global private leaf names.
-[Ownership map and policy](docs/PSC1_COMPILER_INTERNAL_OWNERSHIP.md).
-Actual handwritten Lean/PS captured-entry tests check admission, retained internal
-helpers, hidden public roots and refusal of unqualified helper access.
-
-Earlier immutable source/semantic/frontend receipts remain scoped to their
-original source identities. New qualified checkpoint above includes this correction.
-
-## Active continuation — canonical original IR identity, pending CI
-
-Add portable CompilerIr.Encode, registered as an explicit Lake root and selected
-DirectJS/Rust dependency. The candidate phase counts increase by one; do not
-substitute the old79/84 checkpoint for the new live census. Every new source must
-pass both maintained grammar gates.
-
-[IR identity format](docs/PSC1_IR_IDENTITY_FORMAT.md) retains all constructor tags,
-owners, labels, types, binders, list order and bodies; exact integer payloads are
-decimal JSON strings. Encoding is data, not validation. Retain the actual original
-IR that passed strict checking with size/hash and grammar byte parity, and derive
-primitive inventories from those IR bytes. Exhausted serialization depth refuses.
-New native tests cover independent JSON parsing, huge integers, Unicode/escapes,
-graph/body identity changes, match labels/bindings/projections, malformed IR
-validation and serialization exhaustion.
-
-Add a LIVE DirectJS checked-only refusal test: the real complete backend source
-with original partial functions must refuse unsupportedDeclaration before
-independent admission; no automatic ordinary fallback. Explicit ordinary mode
-continues as the separately qualified path.20 closure count/assurance contract
-checks remain, alongside38 census integrity checks and every prior gate.
-
-Next: qualify original/transformed IR identities and actual target emission, then
-add/execute a portable scalar compiler facade. Native stage0 may generate G1 once;
-afterwards deny native frontend/eraser/emitter delegation, retain the external
-checker and target tools, and record actual subprocess allowlists. Execute
-handwritten positive/negative multi-module/namespace/integer/Unicode/pattern/
-handler/ordinary-loop cases, then identical compiler closure G1->G2->G3.
-Rust owned aggregate callbacks and R1->R2->R3 follow with their own evidence.
-
-## Commands and pending boundaries
-
-Linux CI only:
-- lake build psc1_source_census_probe psc1_backend_normalization_tests psc1_ir_encoding_tests
-- node scripts/compiler-source-census-contract-tests.mjs
-- node scripts/compiler-closure-contract-tests.mjs
-- node scripts/compiler-source-census.mjs --strict-phase directjs-compiler
-- node scripts/compiler-closure-assurance-tests.mjs
-- node scripts/compiler-closure-qualification.mjs --phase semantic-compiler --assurance checked
-- node scripts/compiler-closure-qualification.mjs --phase directjs-compiler --assurance ordinary-checked
-- node scripts/compiler-closure-qualification.mjs --phase rust-compiler --assurance ordinary-checked
-
-Generated compiler execution, transformed compiler IR, self-compilation and
-G1/G2/G3/R1/R2/R3 remain not-run. Canonical IR encoding/inventories are pending in
-the current candidate. No formal preservation theorem is provided. All14 full
-Practical Core families remain incomplete. Efficient optional indexing/finite
-iteration must be measured/fixed where actual compiler workloads reach them;
-Rust aggregate closures, typed IO and remaining finite parity cases stay open.
-Component Wasm ABI remains Bool-only. PSC2/Lean4.34 history is not current evidence.
-
-GitHub/Linux CI exclusively; no local repository checkout/files/build/tests.
-Fresh expected-SHA non-forced descendants only. No main merge/release/registry
-publication, unchecked axiom/authority, source filtering, weakened tests or raised
-existing budgets/pins. The final #171 scoped39508739868/focused39508739941 were
-verified before continuation writes. Continue beyond this checkpoint.
-
-## Canonical IR whole-closure result at68490479
-
-[Exact run39529213948](https://github.com/dwijayuda/pskernel/actions/runs/39529213948)
-completed success in all3 phase jobs. Tested merge
-350b8caed3f0153f22c11147492508bf48e7cec0.
-BOTH lanes accept semantic67/67/67, DirectJS80/80/80, Rust85/85/85 and actually
-pass whole preparation, independent admission, original strict IR and canonical
-IR artifact validation. Source/logical counts:2423/2423,3172/3174,2989/2992.
-[Committed IR receipt](docs/PSC1_CANONICAL_COMPILER_IR_2026-10-21.json) retains
-every actual lane hash, size, inventory and artifact identity. The live checked-only
-DirectJS test also passed by actual unsupportedDeclaration refusal in BOTH lanes.
-
-Exact original IR bytes/hash:
-semantic3931582/f8610d242d5a627f82ab3727868bdefc551ef4a74e0bc35eb6ee581e0e336b36;
-DirectJS4874708/97ffc97585a6a3c7f34e7841b5a53df5e093a32ef3c74607a98521bf3de85e6a;
-Rust4925315/a6c950b58114e14d2a6fd422250d6214010fa0a18387f092a1ea0051d282f1bd.
-Actual graph inventory in each phase has20 intrinsic tags and6 primitive types;
-it is a whole-IR inventory, not a dynamic execution trace.
-
-Focused39529214057 failed the new unit fixture's comparison between encoded text
-and Lean.Json.compress output after parsing succeeded. Replace that formatting
-assumption with comparison to an independently constructed complete expected
-JSON value, retaining huge-integer/Unicode/order/body/match assertions and the
-host's exact compact-byte parity checks. Print the two small expected/actual trees
-on mismatch. This descendant's focused/full CI is pending. Do not claim the
-unit fixture passed or transfer912dcc1's full scoped qualification to this head.
-Target/transformed IR and actual generated compiler execution remain next.
-
-## Full canonical IR checkpoint and next actual compiler candidate
-
-Exact headEE8606baba02d268717cbe845ef772b73c2248b5 (lowercase in Git) passed
-full scoped39529882113, focused39529882130 and all3 exact-closure jobs in
-39529882129. Tested mergef128fa99e9153a50a55dbc453ae801ecba57b5e6.
-[Full committed receipt](docs/PSC1_CANONICAL_COMPILER_IR_QUALIFICATION_2026-10-21.json)
-contains actual lane/IR identities, all artifacts and consolidated scope. All8
-new IR encoding assertions passed. Both actual checked-only backend refusals passed.
-
-Continue with the NEW portable scalar compiler-service composition root.
-It imports every previous DirectJS dependency plus the existing pure
-Bridge.CompilerHost transport. Census roots now select the actual production
-composition root, preserving the full prior module set and adding the facade/
-transport. Expected new DirectJS module count82 is not a live qualification yet.
-Its own full parse/elaboration must pass in both lanes. Shared syntax ownership
-helpers give native and generated public-root decisions one production predicate.
-
-[Service protocol/limits](docs/PSC1_GENERATED_COMPILER_SERVICE.md).
-Candidate preparation, exact ordinary pairing, original/transformed IR checks,
-JS target checks/printing and origin transport are production code, not a
-handwritten host compiler. Candidate computation stays provisional until the
-external host admits the exact graph. New native facade tests independently
-check actual graphs, target syntax/execution and both-grammar missing/duplicate/
-extra/malformed/wrong-body/partial/verified boundaries.
-
-New psc1-generated-compiler Linux workflow builds the native seed/test/checker,
-qualifies the full exact composition, generates G1 exactly once with native
-stage0, checks/adopts its exact candidate, disables native compiler tools, then
-runs actual G1 compiler semantics on a handwritten corpus with tool-role/identity/
-resource records. The initial runner is diagnostic CI staging, not the complete
-production atomic service publisher. Actual G1 execution is PENDING, not assumed.
-No fixed point or source/backend preservation is claimed.
-
-Next actionable CI commands:
+Linux reproduction:
 lake build psc1_js_service_tests psc1_js_service_seed psc1_source_census_probe psc1_independent_checker;
 .lake/build/bin/psc1_js_service_tests;
 node scripts/compiler-source-census.mjs --strict-phase directjs-compiler;
 node scripts/compiler-closure-qualification.mjs --phase directjs-compiler --assurance ordinary-checked;
 node scripts/generated-compiler-diagnostic.mjs.
-If the actual compiler workload exposes target planning/runtime/collection costs,
-fix the general mechanism with measured evidence; do not raise limits or patch
-particular declarations. Continue to session publication binding and real G1/G2/G3
-after G1 actually executes, then Rust owned aggregate callbacks/generations.
-
-Atcad9bc63 native service tests failed to compile because the local variable
-syntax is a reserved Lean keyword (JsServiceTests66:7). Rename it targetSyntax;
-all assertions remain. Generated workflow39533776394 and focused39533776401
-stopped at native test compilation, before G1 generation. Do not claim execution.
-
-## First actual compiler-target blocker — specialization, not source acceptance
-
-Head0559453b5936ba15bf9cf92cfa47d1c8ab66d34f passed full scoped39534197238,
-focused39534197158 and exact closures39534197273. Native facade tests independently
-admitted/executed both-grammar program graphs and passed all refusal cases.
-Actual complete composition remains82 modules in both lanes; DirectJS source/
-logical Core counts3213/3215. Canonical original IR4951117 bytes:
-1a2c0aed5c3bbb863dc2c2d5a9aeff658ae8922ba32da36467d904ce5f079a59.
-
-Generated diagnostic39534197286 failed BEFORE producing G1. Native seed actually
-ran once for25933ms, then returned status=refused, phase=specialization,
-code=PSC1_BACKEND_SPECIALIZATION_FAILED. Read-only Linux artifact inspection
-39535477289 recovered the exact348-byte response from artifact12317101575,
-digestsha256:90ee85b793c1920e83c5002618ef5a802da91d52bfcba2a08488fd6b21da65af.
-The old host assertion checked grammar before status and hid this refusal;
-report status/phase/code first. Generated execution, self-compilation and fixed
-points remain not-run.
-
-Add general typed specialization diagnostics: preserve original tail-first seed
-and first-error order, original singleton per-item transformation, request queue/
-seen order, validation before/after and all64/128/16384 budgets. Record failed
-stage, IR owner, original error and request key. Legacy APIs keep their exact
-result/error types; shared closed-plan legacy messages are unchanged. The
-production facade consumes the detailed plan, not a diagnostic-only alternate
-compiler. Tests cover raw seed owner/order, request owner/key, forged input,
-unchanged zero-budget refusal and public-coverage/legacy message correspondence.
-This candidate is pending Linux qualification. Fix the actual traced mechanism;
-do not bypass specialization or filter the compiler source to make G1 pass.
+The diagnostic calls stage0 once, disables native tools, then runs generated
+semantics and repeated-generation attempts; use its retained records on failure.

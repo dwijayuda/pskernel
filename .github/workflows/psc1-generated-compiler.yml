@@ -18,6 +18,8 @@ jobs:
   generated-js:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
     defaults:
       run:
         shell: bash
@@ -32,6 +34,11 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check the generated service controller and manifest reader syntax
+        run: |
+          set -euo pipefail
+          node --check scripts/generated-compiler-diagnostic.mjs
+          node --check host-tools/js-generation-manifest.mjs
       - name: Build native seed and separate independent checker
         run: |
           set -euo pipefail

@@ -71,3 +71,24 @@ it is explicitly not G1 semantics. The generated diagnostic uses the same host
 session for actual G1 corpus publication into a CI-only store once bootstrap works.
 This host addition is pending Linux tests. G1 still has not been produced: the
 actual adcb seed hit240s. No registry/release/main publication is involved.
+
+## Repeated JS generation candidate
+
+The controller now attempts actual G1->G2->G3 over the identical host-captured
+compiler+JS closure. It retains versioned psc1-js-generation/4.35.0-v1 manifests,
+all source-file identities, seed/producer/service/Node/checker/runner/controller
+identities, canonical admissions and original/specialized IR, source bytes and
+actual corpus observations. The same exact checker and Node pins apply.
+Before the host publishes a successor, its graph/IR/source identities must match
+the checked G1 reference. A single generation store preserves prior versions.
+
+Each generated compiler executes the same positives and refusals; actual scalar
+observations are retained and compared. Host verification of the sealed bundle
+rejects missing/extra/tampered files and changed checker context; manifest checks
+reject stale identities/schema. These readers return data only. They cannot
+fabricate a live host admission/publication state. None is a preservation proof.
+
+G1 qualification is now actual: run39543944316 at921eb1d7 passed4 positive compiler
+cases and4 refusals after native tools were disabled, with host publication.
+The repeated-generation controller is a NEW candidate pending actual Linux
+execution. Do not infer G2/G3 success from G1 or source identity.

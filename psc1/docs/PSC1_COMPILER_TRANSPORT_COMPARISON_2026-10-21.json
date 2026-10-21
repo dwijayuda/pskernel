@@ -1,0 +1,137 @@
+{
+  "schema": "psc1-compiler-transport-comparison/1",
+  "baseline": {
+    "schema": "psc1-compiler-phase-profile/1",
+    "label": "baseline",
+    "commit": "dc177e67b68c37e27f05879a108affc49ed1e3ca",
+    "referenceCommit": "adcb815733aca23d3d27e7e0ae4cbc589ba56000",
+    "requestSha256": "4c291c30d4ae7569e45523d0b6a66972d6e25219ec09c4a5dc5b7aba864e9f91",
+    "sourceClosureDigest": "c76a6ea29300e75bce1ad3f68563918dcc38fccd77437a02f3487218de2de7c7",
+    "sourceModules": 83,
+    "identities": {
+      "original-ir.json": "0b89bdbb95c46815326357d800ab8916df25a69154cfc424f6dff78106f86adb",
+      "specialized-ir.json": "40caffdc19c87d8649436a116fccb2718a99ae9aec4c5debf6ca088011e775ea",
+      "source.mjs": "bdd5cd2831945c7e92f14677800bfa1864ddcd30a2a2d0cfdd51a132e075d8da",
+      "admissions.json": "9bca56d3e1d3dc63f6d9c097ce87ae53a4b9308c17fcf9a83c9a1bfffa8486f7"
+    },
+    "binarySha256": "2a85bbad22a59bb8c77bad8e5db6a0c9a840c10f12ba152d515221c564337b6c",
+    "vmHwmKiBAtLastMark": 230036,
+    "elapsedMs": 240178,
+    "timeoutMs": 240000,
+    "status": null,
+    "signal": "SIGTERM",
+    "error": "spawnSync /home/runner/work/pskernel/pskernel/reference/psc1/.lake/build/bin/psc1_compiler_profile ETIMEDOUT",
+    "lastRecord": {
+      "phase": "encode-admission-request",
+      "status": "started",
+      "elapsedClockMs": 167744,
+      "detail": ""
+    },
+    "completed": false,
+    "queueBudget": 16384,
+    "authoritative": false,
+    "G1": "not-produced-by-profiler",
+    "scope": "same production stage functions with IO timings; no candidate admission or publication"
+  },
+  "candidate": {
+    "schema": "psc1-compiler-phase-profile/1",
+    "label": "candidate",
+    "commit": "dc177e67b68c37e27f05879a108affc49ed1e3ca",
+    "referenceCommit": "adcb815733aca23d3d27e7e0ae4cbc589ba56000",
+    "requestSha256": "4c291c30d4ae7569e45523d0b6a66972d6e25219ec09c4a5dc5b7aba864e9f91",
+    "sourceClosureDigest": "c76a6ea29300e75bce1ad3f68563918dcc38fccd77437a02f3487218de2de7c7",
+    "sourceModules": 83,
+    "identities": {
+      "original-ir.json": "0b89bdbb95c46815326357d800ab8916df25a69154cfc424f6dff78106f86adb",
+      "specialized-ir.json": "40caffdc19c87d8649436a116fccb2718a99ae9aec4c5debf6ca088011e775ea",
+      "source.mjs": "bdd5cd2831945c7e92f14677800bfa1864ddcd30a2a2d0cfdd51a132e075d8da",
+      "admissions.json": "9bca56d3e1d3dc63f6d9c097ce87ae53a4b9308c17fcf9a83c9a1bfffa8486f7"
+    },
+    "binarySha256": "98ad5bed6273458654143f927f47b5c6300b0eeaa04ae7ab383a17d52aeb9e7a",
+    "vmHwmKiBAtLastMark": 313984,
+    "elapsedMs": 33710,
+    "timeoutMs": 240000,
+    "status": 0,
+    "signal": null,
+    "error": null,
+    "lastRecord": {
+      "phase": "profile-complete",
+      "status": "completed",
+      "elapsedClockMs": 175590,
+      "detail": "diagnostic only; candidate bytes=40217563"
+    },
+    "completed": true,
+    "queueBudget": 16384,
+    "authoritative": false,
+    "G1": "not-produced-by-profiler",
+    "scope": "same production stage functions with IO timings; no candidate admission or publication"
+  },
+  "baselineCompleted": false,
+  "formalPreservation": "not-provided",
+  "actualG1": "separate-generated-compiler-diagnostic",
+  "run": 39543395472,
+  "head": "ab1b65165e86c765bca73dc01cc9a59f1cd4677b",
+  "final": "success",
+  "artifacts": [
+    {
+      "id": 12321295363,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyMTI5NTM2Mw==",
+      "name": "psc1-compiler-profile-baseline-dc177e67b68c37e27f05879a108affc49ed1e3ca",
+      "size_in_bytes": 1681084,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12321295363",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12321295363/zip",
+      "expired": false,
+      "digest": "sha256:b28318230b6f4ebda50ca0f315b721e32a65f0470fa3cbef2294b10de31840f8",
+      "created_at": "2026-10-21T04:28:05Z",
+      "updated_at": "2026-10-21T04:28:05Z",
+      "expires_at": "2026-11-04T04:28:04Z",
+      "workflow_run": {
+        "id": 39543395472,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-closure-normalization-20261021",
+        "head_sha": "ab1b65165e86c765bca73dc01cc9a59f1cd4677b"
+      }
+    },
+    {
+      "id": 12320851616,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyMDg1MTYxNg==",
+      "name": "psc1-compiler-transport-comparison-dc177e67b68c37e27f05879a108affc49ed1e3ca",
+      "size_in_bytes": 1227,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12320851616",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12320851616/zip",
+      "expired": false,
+      "digest": "sha256:9bb2c82e2704a40e6f4ba19ce0c65cb498c3636c18e84a3b948416d2b7dc3425",
+      "created_at": "2026-10-21T04:28:17Z",
+      "updated_at": "2026-10-21T04:28:17Z",
+      "expires_at": "2026-11-04T04:28:16Z",
+      "workflow_run": {
+        "id": 39543395472,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-closure-normalization-20261021",
+        "head_sha": "ab1b65165e86c765bca73dc01cc9a59f1cd4677b"
+      }
+    },
+    {
+      "id": 12320513207,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyMDUxMzIwNw==",
+      "name": "psc1-compiler-profile-candidate-dc177e67b68c37e27f05879a108affc49ed1e3ca",
+      "size_in_bytes": 4204171,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12320513207",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12320513207/zip",
+      "expired": false,
+      "digest": "sha256:41bb14c4e4634a0a01ed86daf0782d20e5619a994ac27fe8b3f153d681adee09",
+      "created_at": "2026-10-21T04:24:44Z",
+      "updated_at": "2026-10-21T04:24:44Z",
+      "expires_at": "2026-11-04T04:24:43Z",
+      "workflow_run": {
+        "id": 39543395472,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-closure-normalization-20261021",
+        "head_sha": "ab1b65165e86c765bca73dc01cc9a59f1cd4677b"
+      }
+    }
+  ]
+}

@@ -231,6 +231,33 @@ def psKernelSimpleIndicesContainTarget
           target
           rest
 
+/- After the existing full-WHNF callback, a recursor-headed type which still
+   contains the datatype is not a positive recursive argument or a nested
+   inductive-family application. Lean 4.35.0 check_positivity rejects this
+   residual shape (src/kernel/inductive.cpp:435-450).
+
+   Only the reduced expression decides this narrow rejection. An occurrence
+   erased by normalization retains the original unsupported boundary below.
+   Genuine nested inductive heads and all other unsupported shapes are unchanged.
+   The live returned session supplies the previously checked head metadata.
+   Unsafe declarations retain the existing unsupported boundary: Lean skips
+   positivity for them, so this rejection rule must not apply. -/
+def psKernelSimpleInvalidRecursorOccurrence
+    (session : PsKernelCheckerSession) (target : PsKernelName)
+    (reduced : PsKernelExpr) : Bool :=
+  if psKernelDefinitionSafetyIsUnsafe session.context.safety then false
+  else if psKernelExprContainsConst target reduced then
+    match psKernelExprGetAppFn reduced with
+    | PsKernelExpr.const name _ =>
+        match psKernelEnvironmentFind session.context.environment name with
+        | Option.some info =>
+            match info with
+            | PsKernelConstantInfo.recInfo _ => true
+            | _ => false
+        | Option.none => false
+    | _ => false
+  else false
+
 def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
     (fuel : Nat) :
     PsKernelCheckerSession ->
@@ -374,8 +401,13 @@ def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
                           psKernelExprContainsConst
                             target
                             reduced then
-                      Except.error
-                        "simple inductive admission does not yet support nested recursive occurrences"
+                      if psKernelSimpleInvalidRecursorOccurrence
+                          (Prod.snd reducedResult) target reduced then
+                        Except.error
+                          "simple inductive field has an invalid recursor-headed recursive occurrence"
+                      else
+                        Except.error
+                          "simple inductive admission does not yet support nested recursive occurrences"
                     else
                       Except.ok
                         (PsKernelRecursiveArgumentResult.mk
@@ -593,3 +625,4 @@ def psKernelValidateSimpleConstructorResult
           "simple inductive constructor return index contains a recursive occurrence"
       else
         Except.ok indices
+

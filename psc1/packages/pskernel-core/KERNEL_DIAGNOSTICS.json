@@ -529,6 +529,10 @@
       "resource": "fuel"
     },
     {
+      "message": "simple inductive field has an invalid recursor-headed recursive occurrence",
+      "category": "rejectedInvalid"
+    },
+    {
       "message": "simple inductive index budget exhausted",
       "category": "resourceExhausted",
       "resource": "fuel"
@@ -579,3 +583,4 @@
     }
   ]
 }
+

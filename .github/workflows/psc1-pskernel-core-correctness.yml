@@ -27,6 +27,9 @@ on:
       - psc1/scripts/pskernel-provider-smoke.mjs
       - psc1/scripts/pskernel-artifact-manifest.mjs
       - psc1/npm-runtime/canonical-admissions-wire.mjs
+      - psc1/test/PsKernelInvalidRecursorOccurrenceRegression.lean
+      - psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs
+      - psc1/packages/pskernel-core/KERNEL_DIAGNOSTICS.json
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-infer-only-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-proof-irrelevance-smoke.mjs
@@ -280,6 +283,19 @@ jobs:
           grep -q '^PSC1_V2_DAG_JS_DEFEQ_REFLECTION: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_DEFEQ_PREFIX_GUARDS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           echo 'PSC1_CANONICAL_DAG_JS_KERNEL: PASS'
+      - name: Check canonical-source invalid recursor-headed occurrence in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          test -s "$PSC1_PS_RUN_DIR/kernel.mjs"
+          node --check scripts/pskernel-invalid-recursor-occurrence-smoke.mjs
+          cp scripts/pskernel-invalid-recursor-occurrence-smoke.mjs "$PSC1_PS_RUN_DIR/invalid-occurrence-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" invalid-occurrence-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-invalid-occurrence-canonical.log"
+          grep -Eq '^PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS [0-9]+ invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls$' "$RUNNER_TEMP/psc1-invalid-occurrence-canonical.log"
       - name: Run inference-mode parity from the canonical ProofScript executable
         working-directory: psc1
         shell: bash
@@ -492,6 +508,7 @@ jobs:
             ${{ runner.temp }}/psc1-proof-irrelevance-canonical.log
             ${{ runner.temp }}/psc1-lazy-nat-canonical.log
             ${{ runner.temp }}/psc1-lazy-delta-canonical.log
+            ${{ runner.temp }}/psc1-invalid-occurrence-canonical.log
             ${{ runner.temp }}/psc1-full-shape-canonical.log
             ${{ runner.temp }}/psc1-final-rules-canonical.log
             ${{ runner.temp }}/psc1-admission-guard-canonical.log

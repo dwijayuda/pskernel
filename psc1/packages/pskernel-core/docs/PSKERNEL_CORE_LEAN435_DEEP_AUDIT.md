@@ -76,6 +76,19 @@ Source review found a separate normal-cache pollution path, reproduced in Linux 
 
 Suppress normal-core cache publication when either cheap flag is true, while preserving the helper ABI, actual reduction flags, callback sequence and default full-mode behavior. The original frozen WhnfCore reference is preserved unchanged; the corrected eager-reference theorem covers all modes, and a separate all-input theorem establishes exact historical behavior with cheapRec=false. The old unrestricted historical equality is intentionally inapplicable to the repaired cache policy. Reproduce on checked declarations using a transparent major alias, cheap warm query and full warm/cold query in one owner. Require the new regression to fail against the exact parent implementation and pass after correction. Distinguish this internal mode-crossing defect from a demonstrated public false acceptance: current production DefEq ordinarily fixes cheapRec=false, so public exploitability has not been shown.
 
+### Safe invalid recursor-headed recursive occurrence
+
+The frozen `bugs/rec-missing-ih.ndjson` input is **officially rejected**. All 22 exported inductive groups are singleton with `numNested = 0`; its ordinary-import route is expected. Its `Native64TwoHashOwner.step` child field contains the new Owner datatype beneath a stuck `Native64TwoHashGate.rec` application. The live application head is a previously checked **recursor**, rather than a previously admitted inductive-family head such as List. Static inspection therefore identifies a missing narrow safe-positivity rejection, not evidence that this archive case requires a nested-import route.
+
+Pinned Lean `src/kernel/inductive.cpp` checks the residual after WHNF: a remaining recursive occurrence must satisfy its positive/direct-inductive conditions; this recursor-headed residual is invalid. The PS ordinary constructor worker already performs WHNF and attempts direct-recursive and Π classification, but then broadly emits its generic unsupported-nested diagnostic.
+
+The candidate adds `psKernelSimpleInvalidRecursorOccurrence` at that existing residual branch. It rejects only when the declaration is **safe**, the new datatype still occurs in the **reduced** expression, and the reduced application head's live metadata in the **returned WHNF session** is `recInfo`. It preserves the original callback, predecessor resources, branch order and publication boundary. Unsafe declarations are excluded because Lean skips positivity checking for them. Target occurrences erased by normalization, genuine inductive-headed nested cases and other unsupported shapes retain their previous outcomes.
+
+The new precise message, `simple inductive field has an invalid recursor-headed recursive occurrence`, is registered as `rejectedInvalid` in `API/Outcome.lean` and `KERNEL_DIAGNOSTICS.json`. The old unsupported message is unchanged. This is production validation, with no archive-specific acceptance, name-based exception, importer rerouting or harness relabeling.
+
+Qualification remains open until the exact candidate passes native and both detached generated-route controls, official checked comparisons, safe/unsafe differentiation, reducible/nonrecursive/erased/nested controls, resource ordering and atomic publication. Require the same controls to fail at the intended rejection assertion against the frozen old implementation. Finally replay the unchanged authenticated case 16 through the existing full corpus adapter at fuel4096 and require actual `rejectedInvalid` with official REJECTED. Static source analysis predicts this result; it is not an authentic replay receipt.
+
+
 ## 5. Why performance remains behind Lean
 
 The source supports several independent mechanisms:

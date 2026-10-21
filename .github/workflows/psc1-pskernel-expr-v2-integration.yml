@@ -12,6 +12,9 @@ on:
       - psc1/lean-toolchain
       - psc1/packages/pskernel-core/AI_WORK_STATE.md
       - psc1/packages/pskernel-core/src/**
+      - psc1/test/PsKernelInvalidRecursorOccurrenceRegression.lean
+      - psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs
+      - psc1/packages/pskernel-core/KERNEL_DIAGNOSTICS.json
       - psc1/test/PsKernelExprV2DagRegression.lean
       - psc1/test/PsKernelExprV2InferOnlyRegression.lean
       - psc1/test/PsKernelExprV2ProofIrrelevanceRegression.lean
@@ -111,7 +114,37 @@ jobs:
           restore_kernel_sources
           trap - EXIT
           echo 'PSC1_CACHE_MODE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d'
+          # Reproduce the invalid-recursive-occurrence boundary on exact parent semantics.
+          # The existing target refreshes imported kernel oleans; the new test stays unchanged.
+          PSC1_OCC_CTOR=packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean
+          PSC1_OCC_OUTCOME=packages/pskernel-core/src/Ps/KernelCore/API/Outcome.lean
+          restore_occurrence_sources() {
+            git restore --source="$GITHUB_SHA" -- "$PSC1_OCC_CTOR" "$PSC1_OCC_OUTCOME"
+          }
+          trap restore_occurrence_sources EXIT
+          git show 3aa077cb64ff06f76727decd01c43ad6c33f351d:psc1/"$PSC1_OCC_CTOR" > "$PSC1_OCC_CTOR"
+          git show 3aa077cb64ff06f76727decd01c43ad6c33f351d:psc1/"$PSC1_OCC_OUTCOME" > "$PSC1_OCC_OUTCOME"
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_recursor_regression
+          set +e
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelInvalidRecursorOccurrenceRegression.lean > "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log" 2>&1
+          PSC1_OCC_BASELINE_STATUS=$?
+          set -e
+          test "$PSC1_OCC_BASELINE_STATUS" -ne 0
+          grep -Fqx 'PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls' "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log"
+          grep -Fq 'PSC1_INVALID_RECURSOR_OCCURRENCE_FAIL public-invalid-exact-diagnostic' "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log"
+          restore_occurrence_sources
+          trap - EXIT
+          echo 'PSC1_INVALID_OCCURRENCE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d'
           lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_recursor_k_regression psc1_kernel_expr_v2_owned_state_regression
+      - name: Check invalid recursor-headed occurrence against official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelInvalidRecursorOccurrenceRegression.lean \
+            | tee "$RUNNER_TEMP/psc1-invalid-occurrence-native.log"
+          grep -Fqx 'PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls' "$RUNNER_TEMP/psc1-invalid-occurrence-native.log"
+          grep -Fqx 'PSC1_INVALID_RECURSOR_OCCURRENCE: PASS invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls' "$RUNNER_TEMP/psc1-invalid-occurrence-native.log"
       - name: Run native DAG semantics, adversarial, fuel and official comparison
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -409,6 +442,8 @@ jobs:
             psc1/dist/expr-v2/native-provider-linux.tar.gz
             psc1/host/kernel-provider/KernelProviderMain.lean
             ${{ runner.temp }}/psc1-cache-mode-parent.log
+            ${{ runner.temp }}/psc1-invalid-occurrence-parent.log
+            ${{ runner.temp }}/psc1-invalid-occurrence-native.log
             ${{ runner.temp }}/psc1-dag-native.log
             ${{ runner.temp }}/psc1-dag-native.memory
             ${{ runner.temp }}/psc1-v2-existing-native.log
@@ -523,6 +558,19 @@ jobs:
           grep -q 'PSC1_V2_DAG_JS_DEFEQ_REFLECTION: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_DEFEQ_PREFIX_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+      - name: Check generated invalid recursor-headed occurrence in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          node --check scripts/pskernel-invalid-recursor-occurrence-smoke.mjs
+          cp scripts/pskernel-invalid-recursor-occurrence-smoke.mjs "$PSC1_DAG_RUN_DIR/invalid-occurrence-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" invalid-occurrence-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-invalid-occurrence-generated.log"
+          grep -Eq '^PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS [0-9]+ invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls$' "$RUNNER_TEMP/psc1-invalid-occurrence-generated.log"
       - name: Run generated inference modes with separate checked authorization
         working-directory: psc1
         run: |
@@ -759,6 +807,7 @@ jobs:
             ${{ runner.temp }}/psc1-proof-irrelevance-generated.log
             ${{ runner.temp }}/psc1-lazy-nat-generated.log
             ${{ runner.temp }}/psc1-lazy-delta-generated.log
+            ${{ runner.temp }}/psc1-invalid-occurrence-generated.log
             ${{ runner.temp }}/psc1-full-shape-generated.log
             ${{ runner.temp }}/psc1-final-rules-generated.log
             ${{ runner.temp }}/psc1-admission-guard-generated.log

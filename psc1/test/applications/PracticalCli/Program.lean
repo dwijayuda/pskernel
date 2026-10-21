@@ -12,31 +12,39 @@ def cliIoError (error : IoError) : String :=
   | IoError.ioFailure => "ioFailure"
   | IoError.protocolError => "protocolError"
 
+def cliJsonError (error : JsonError) : String :=
+  match error with
+  | JsonError.invalidUnicode => "invalid-unicode"
+  | _ => "invalid-json"
+
+def cliWriteResult (result : Result String JsonError) (output : String) : Io Bool :=
+  match result with
+  | Result.error error => do
+      ioWriteLine (cliJsonError error)
+      return false
+  | Result.ok transformed => do
+      ioWriteUtf8 output transformed
+      ioWriteLine "ok"
+      return true
+
 def cliProcess (input output : String) : Io Bool := do
   try
     let source : String <- ioReadUtf8 input
-    match cliTransform source with
-    | Result.error error =>
-        match error with
-        | JsonError.invalidUnicode => ioWriteLine "invalid-unicode"
-        | _ => ioWriteLine "invalid-json"
-        return false
-    | Result.ok transformed =>
-        ioWriteUtf8 output transformed
-        ioWriteLine "ok"
-        return true
+    cliWriteResult (cliTransform source) output
   catch error =>
     ioWriteLine (jsonAppend "error:" (cliIoError error))
     return false
 
-def cliApplication (arguments : String) : Io Bool := do
+def cliCommandRun (command : CliCommand) : Io Bool :=
+  match command with
+  | CliCommand.help => do
+      ioWriteLine "usage: transform INPUT OUTPUT"
+      return true
+  | CliCommand.transform input output => cliProcess input output
+
+def cliApplication (arguments : String) : Io Bool :=
   match cliArguments arguments with
-  | Option.none =>
+  | Option.none => do
       ioWriteLine "usage: transform INPUT OUTPUT"
       return false
-  | Option.some command =>
-      match command with
-      | CliCommand.help =>
-          ioWriteLine "usage: transform INPUT OUTPUT"
-          return true
-      | CliCommand.transform input output => cliProcess input output
+  | Option.some command => cliCommandRun command

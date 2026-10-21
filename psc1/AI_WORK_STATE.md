@@ -164,3 +164,20 @@ closures and G1, preventing observed two-runner starvation. Selected integration
 jobs and aggregate requirements remain unchanged; a failed fast gate keeps the
 full test debt. Compiler-like source/diagnostic/100000-input harness is prepared
 in the active continuation, but is not yet a qualification claim.
+
+## Focused ordering pass and application grammar correction
+
+Implementation 89f37ccb5a7528a8ab539763102e09ab396bb540, tested merge
+7184fa392b7b2924fc842dc124db984e671a0563, run 39644133851 focused job
+119377105591 passes all 24 checked-order obligations (four cases, two authored
+grammars, JS/TS/Rust), including precise parser/typing/verified refusals and
+generation preservation. All seven/minimum/full qualification is still pending.
+
+The new CLI application then failed source parsing: .ps match/data blocks needed
+owned braces and constructor-spine patterns; Lean nested effectful branches
+needed explicit grouped do actions. All newly authored CLI, library and JSON
+separator .ps examples are corrected to the established grammar. CLI diagnostics
+are pure formatters and each action branch is explicitly sequenced. No compiler
+grammar is broadened, capability is granted or test expectation relaxed.
+The compiler-like source/harness remains prepared, uncommitted and unqualified
+until these prerequisites pass.

@@ -9,6 +9,31 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 12:20 UTC — require completed terminal DefEq results in existing fixtures
+
+Exact staged source `44bdbea5c4db451ee2ee4aafba963eea5f50d7a7` built all 365 native
+tasks, then job [119212233502](https://github.com/dwijayuda/pskernel/actions/runs/39597167334/job/119212233502)
+failed `quick-defeq-prefix-selected-path-mixed-constructors`. The newly integrated
+terminal unit-like rule returns `some (ok false)` for Sort 0 versus Nat literal 0;
+the old selected-path fixture expected outer `none`. Source review of V1 and DAG
+confirms the left inferred sort short-circuits the unit-like rule before right
+inference. Unequal binder-spine lengths have the same obsolete decline assertion.
+This is a fixture expectation repair, not a production semantic change.
+
+Native and generated existing suites now require the exact false result for these
+cases, retain the exact unknown-constant result, and add 49 raw V1 comparisons per
+runtime across the existing fuel/depth matrix (21 mixed-constructor, 28 binder).
+All public/adversarial/official assertions are retained. Actual parity remains
+unqualified until the new exact-source runs finish. The 44bdbea native correctness
+job119212232752 passed; its generated/canonical jobs were still running at review.
+
+Complete CheckState carrier source and 42/56/540 + 38/44 native/generated regression
+matrices are preserved separately at review commit `43ac7506b5fe9442a3baa7b21e2cd733938caffe`.
+Ten local carrier lemmas are included there. These are NOT RUN and unpromoted;
+they must be overlaid on the fresh staged source, preserving all intervening fixes.
+The attempted review-tree creation with a mistyped tree ID returned HTTP422 and
+made no change; the corrected reviewed tree/commit succeeded. No local execution.
+
 ## 2026-10-21 12:07 UTC — complete the Quot fixture reserved-name repair
 
 At0a69caf03e1ce0510349bdff2a0bf4a5eb771fbb native correctness119209641500

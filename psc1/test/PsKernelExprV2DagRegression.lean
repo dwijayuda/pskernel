@@ -930,18 +930,17 @@ private def quickDefEqParity : IO Unit := do
     require ("quick-defeq-prefix-selected-path-" ++ label)
       (match psKernelExprV2TryQuickDefEqWithFuel 64 checker.context arena leftId rightId with
        | some (.ok true) => directExpected
+       | some (.ok false) => label == "mixed-constructors"
        | some (.error error) => label == "constant-level-rule" && error == "unknown constant"
-       | none => !directExpected && label != "constant-level-rule"
-       | _ => false)
+       | none => false)
     for fuel in [0,1,2,3,4,8,64] do
       for maxDepth in [0,1,2] do
         let session ← fresh fuel maxDepth
-        if directExpected || label == "constant-level-rule" then
-          let checker := psKernelKernelSessionChecker session params .safe
-          require ("quick-defeq-prefix-raw-parity-" ++ label)
-            (sameQuickDefEq
-              (psKernelSessionIsDefEq fuel checker left right)
-              (psKernelExprV2TryQuickDefEqWithFuel fuel checker.context arena leftId rightId))
+        let checker := psKernelKernelSessionChecker session params .safe
+        require ("quick-defeq-prefix-raw-parity-" ++ label)
+          (sameQuickDefEq
+            (psKernelSessionIsDefEq fuel checker left right)
+            (psKernelExprV2TryQuickDefEqWithFuel fuel checker.context arena leftId rightId))
         require ("quick-defeq-fallback-parity-" ++ label)
           (sameDefEq
             (psKernelV1IsDefEq session params .safe left right)
@@ -3687,19 +3686,17 @@ private def binderSpineFallbackParity : IO Unit := do
         (match psKernelExprV2TryDefEqStateWithFuel 64
             (psKernelExprV2CheckContextEmpty checker.context)
             (psKernelExprV2CheckStateEmpty arena) leftId rightId with
-         | some (.ok result) => directExpected && result.snd
-         | none => !directExpected
+         | some (.ok result) => result.snd == directExpected
          | _ => false)
       for fuel in [0,1,2,3,4,8,64] do
         for maxDepth in [0,1] do
           let session ← fresh fuel maxDepth
-          if directExpected then
-            let checker := psKernelKernelSessionChecker session [] .safe
-            compareSpineRaw ("binder-spine-prefix-raw-" ++ label)
-              (psKernelIsDefEqWithFuel fuel checker.context checker.state left right)
-              (psKernelExprV2TryDefEqStateWithFuel fuel
-                (psKernelExprV2CheckContextEmpty checker.context)
-                (psKernelExprV2CheckStateEmpty arena) leftId rightId)
+          let checker := psKernelKernelSessionChecker session [] .safe
+          compareSpineRaw ("binder-spine-prefix-raw-" ++ label)
+            (psKernelIsDefEqWithFuel fuel checker.context checker.state left right)
+            (psKernelExprV2TryDefEqStateWithFuel fuel
+              (psKernelExprV2CheckContextEmpty checker.context)
+              (psKernelExprV2CheckStateEmpty arena) leftId rightId)
           require ("binder-spine-fallback-public-" ++ label)
             (sameDefEq (psKernelV1IsDefEq session [] .safe left right)
               (psKernelV1RunDag session [] .safe arena [.isDefEq leftId rightId]))

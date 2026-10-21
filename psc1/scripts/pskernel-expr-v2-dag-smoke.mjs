@@ -1125,15 +1125,17 @@ console.log("PSC1_V2_DAG_JS_NAT_PROJECTION: PASS");
       must(rejected(answer)&&answer.error==="unknown constant","quick-prefix-exact-unknown-constant");
       compareRaw(get("psKernelSessionIsDefEq")(64n,checker,left,right),selected,
         "quick-prefix-reference-unknown-constant");
-    }else must(sameRuntimeValue(selected,none),"quick-defeq-explicit-fallback-"+label);
+    }else{
+      const answer=accepted(accepted(selected,"quick-prefix-false-some-"+label),
+        "quick-prefix-false-answer-"+label);
+      must(label==="mixed-constructors"&&answer===false,"quick-prefix-exact-mixed-constructor-false");
+    }
     for(const fuel of [0n,1n,2n,3n,4n,8n,64n])for(const maxDepth of [0n,1n,2n]){
       const s=session(fuel,maxDepth);
-      if(directExpected||label==="constant-level-rule"){
-        const current=get("psKernelKernelSessionChecker")(s,params,S.safe);
-        compareRaw(get("psKernelSessionIsDefEq")(fuel,current,left,right),
-          quick(fuel,current.context,leftId,rightId),
-          "quick-defeq-prefix-raw-"+label+"-"+fuel+"-"+maxDepth);
-      }
+      const current=get("psKernelKernelSessionChecker")(s,params,S.safe);
+      compareRaw(get("psKernelSessionIsDefEq")(fuel,current,left,right),
+        quick(fuel,current.context,leftId,rightId),
+        "quick-defeq-prefix-raw-"+label+"-"+fuel+"-"+maxDepth);
       must(sameOperation(get("psKernelV1IsDefEq")(s,params,S.safe,left,right),
         publicQuick(s,leftId,rightId),boolEqual),
         "quick-defeq-fallback-parity-"+label+"-"+fuel+"-"+maxDepth);
@@ -3316,17 +3318,14 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     const base=get("psKernelKernelSessionChecker")(session(64n),nil,S.safe);
     for(const [label,left,right,directExpected] of fixtures){
       const selected=raw(64n,typed(base.context),freshState(),left.id,right.id);
-      if(directExpected)must(accepted(accepted(selected,"binder-prefix-some-"+label),
-        "binder-prefix-result-"+label).snd===true,"binder-spine-prefix-direct-"+isLambda+"-"+label);
-      else must(sameRuntimeValue(selected,none),"binder-spine-explicit-fallback-"+isLambda+"-"+label);
+      must(accepted(accepted(selected,"binder-prefix-some-"+label),
+        "binder-prefix-result-"+label).snd===directExpected,"binder-spine-prefix-direct-"+isLambda+"-"+label);
       for(const fuel of [0n,1n,2n,3n,4n,8n,64n])for(const maxRecDepth of [0n,1n]){
         const s=session(fuel,maxRecDepth);
-        if(directExpected){
-          const current=get("psKernelKernelSessionChecker")(s,nil,S.safe);
-          compare(original(fuel,current.context,current.state,left.term,right.term),
-            raw(fuel,typed(current.context),freshState(),left.id,right.id),
-            "binder-spine-prefix-raw-"+isLambda+"-"+label+"-"+fuel+"-"+maxRecDepth);
-        }
+        const current=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+        compare(original(fuel,current.context,current.state,left.term,right.term),
+          raw(fuel,typed(current.context),freshState(),left.id,right.id),
+          "binder-spine-prefix-raw-"+isLambda+"-"+label+"-"+fuel+"-"+maxRecDepth);
         must(sameOperation(get("psKernelV1IsDefEq")(s,nil,S.safe,left.term,right.term),
           publicPair(s,left,right),boolEqual),
           "binder-spine-fallback-parity-"+isLambda+"-"+label+"-"+fuel+"-"+maxRecDepth);

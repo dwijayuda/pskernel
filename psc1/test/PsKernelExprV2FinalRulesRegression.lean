@@ -664,7 +664,7 @@ private def regression : IO Unit := do
     (!(← expect (psKernelExprV2DefEqPairContains
       warm.fst.whnf.arena warm.fst.success pairAId etaId)))
   require "terminal-inference-stays-infer-only"
-    (!warm.fst.inferOnly.isEmpty && warm.fst.checkedInfer.isEmpty)
+    (!(psKernelExprV2WhnfCacheEntries warm.fst.inferOnly).isEmpty && (psKernelExprV2WhnfCacheEntries warm.fst.checkedInfer).isEmpty)
   for fuel in [0,1,64] do
     for depth in [0,15,16] do
       let scalar := { base.context with maxRecDepth := 1, recDepth := depth }

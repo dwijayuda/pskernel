@@ -188,8 +188,8 @@ const warmMetadata=md(7n,warmAdd);
 const context=ctx(base.context),cold=initial();
 const warm=accepted(accepted(raw(64n,context,cold,warmMetadata.id,three.id),"warm-some"),"warm-result");
 const oldWarm=accepted(original(64n,base.context,oldEmpty,warmMetadata.term,three.term),"old-warm");
-must(!same(warm.fst.inferOnly,nil)&&same(warm.fst.checkedInfer,nil)&&
- !same(warm.fst.whnf.publicCache,nil),"nonprop-state-survives-nat-continuation");
+must(!same(get("psKernelExprV2WhnfCacheEntries")(warm.fst.inferOnly),nil)&&same(get("psKernelExprV2WhnfCacheEntries")(warm.fst.checkedInfer),nil)&&
+ !same(get("psKernelExprV2WhnfCacheEntries")(warm.fst.whnf.publicCache),nil),"nonprop-state-survives-nat-continuation");
 const contains=(left,right)=>accepted(get("psKernelExprV2DefEqPairContains")(
  warm.fst.whnf.arena,warm.fst.success,left,right),"success-contains");
 must(contains(warmMetadata.id,three.id)===true,"original-pair-published");

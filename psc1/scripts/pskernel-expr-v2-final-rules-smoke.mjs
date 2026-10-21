@@ -445,7 +445,7 @@ const oldWarm=accepted(original(64n,base.context,oldEmpty,metadata.term,eta.term
 must(warm.snd===true&&contains(warm.fst,metadata.id,eta.id)===true,
  "whole-owner-publishes-original-metadata-pair");
 must(contains(warm.fst,pairA.id,eta.id)===false,"whole-owner-does-not-publish-residual-pair");
-must(array(warm.fst.inferOnly).length>0&&same(warm.fst.checkedInfer,nil),
+must(array(get("psKernelExprV2WhnfCacheEntries")(warm.fst.inferOnly)).length>0&&same(get("psKernelExprV2WhnfCacheEntries")(warm.fst.checkedInfer),nil),
  "terminal-inference-stays-infer-only");
 for(const fuel of [0n,1n,64n])for(const recDepth of [0n,15n,16n]){
  const scalar={...base.context,maxRecDepth:1n,recDepth};

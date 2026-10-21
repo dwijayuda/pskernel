@@ -120,8 +120,8 @@ for(const [label,node] of fixtures){
 }
 const inferred=accepted(accepted(infer(64n,ctx(base.context),initial(arena),unchecked.id),
   "warm-direct"),"warm-inferred");
-must(!same(inferred.fst.inferOnly,nil),"infer-only-app-cache-populated");
-must(same(inferred.fst.checkedInfer,nil),"infer-only-cannot-populate-checked-cache");
+must(!same(get("psKernelExprV2WhnfCacheEntries")(inferred.fst.inferOnly),nil),"infer-only-app-cache-populated");
+must(same(get("psKernelExprV2WhnfCacheEntries")(inferred.fst.checkedInfer),nil),"infer-only-cannot-populate-checked-cache");
 compare(originalCheck(64n,base.context,emptyOriginal,unchecked.term),
   get("psKernelExprV2TryCheckStateWithFuel")(64n,ctx(base.context),inferred.fst,unchecked.id),
   "infer-only-cache-cannot-authorize-check");

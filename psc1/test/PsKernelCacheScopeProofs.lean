@@ -211,7 +211,7 @@ theorem inference_ineligible_of_fvar_flag
   simp [psKernelInferCacheEligibleBefore, psKernelSemanticCacheEligible, flag]
 
 theorem dag_whnf_starts_without_cache (arena : PsKernelExprV2PagedArena) :
-    (psKernelExprV2WhnfStateEmpty arena).coreCache = List.nil := by
+    (psKernelExprV2WhnfStateEmpty arena).coreCache = psKernelExprV2WhnfCacheEmpty := by
   rfl
 
 theorem dag_whnf_fvar_flag_prevents_lookup
@@ -231,7 +231,7 @@ theorem dag_whnf_fvar_flag_prevents_publication
 
 
 theorem dag_whnf_starts_without_public_cache (arena : PsKernelExprV2PagedArena) :
-    (psKernelExprV2WhnfStateEmpty arena).publicCache = List.nil := by
+    (psKernelExprV2WhnfStateEmpty arena).publicCache = psKernelExprV2WhnfCacheEmpty := by
   rfl
 
 theorem dag_whnf_fvar_flag_prevents_public_lookup
@@ -268,13 +268,13 @@ theorem dag_quick_defeq_depth_error_precedes_syntax
 theorem dag_whnf_declaration_initialization_has_no_core_cache
     (arena : PsKernelExprV2PagedArena)
     (declarations : List PsKernelExprV2DeclarationRef) :
-    (psKernelExprV2WhnfStateForDeclarations arena declarations).coreCache = List.nil := by
+    (psKernelExprV2WhnfStateForDeclarations arena declarations).coreCache = psKernelExprV2WhnfCacheEmpty := by
   rfl
 
 theorem dag_whnf_declaration_initialization_has_no_public_cache
     (arena : PsKernelExprV2PagedArena)
     (declarations : List PsKernelExprV2DeclarationRef) :
-    (psKernelExprV2WhnfStateForDeclarations arena declarations).publicCache = List.nil := by
+    (psKernelExprV2WhnfStateForDeclarations arena declarations).publicCache = psKernelExprV2WhnfCacheEmpty := by
   rfl
 
 theorem dag_whnf_arena_update_preserves_declaration_references
@@ -303,7 +303,7 @@ theorem dag_check_scope_counter_exact
   simp only [psKernelExprV2CheckStateExitLocalScope, stateNatMax_eq]
 
 theorem dag_check_starts_without_inference_cache (arena : PsKernelExprV2PagedArena) :
-    (psKernelExprV2CheckStateEmpty arena).checkedInfer = List.nil := by
+    (psKernelExprV2CheckStateEmpty arena).checkedInfer = psKernelExprV2WhnfCacheEmpty := by
   rfl
 
 theorem dag_check_fvar_flag_prevents_lookup
@@ -412,7 +412,7 @@ theorem dag_defeq_depth_error_precedes_success_cache
    caller-constructed caches or full checker soundness. -/
 theorem dag_infer_only_update_preserves_checked_cache
     (state : PsKernelExprV2CheckState)
-    (cache : List PsKernelExprV2WhnfCacheEntry) :
+    (cache : PsKernelExprV2WhnfCache) :
     (psKernelExprV2CheckStateWithInferOnly state cache).checkedInfer =
       state.checkedInfer := by
   rfl
@@ -425,7 +425,7 @@ theorem dag_infer_only_scope_restores_parent_cache
 
 theorem dag_infer_only_starts_without_cache
     (arena : PsKernelExprV2PagedArena) :
-    (psKernelExprV2CheckStateEmpty arena).inferOnly = List.nil := by
+    (psKernelExprV2CheckStateEmpty arena).inferOnly = psKernelExprV2WhnfCacheEmpty := by
   rfl
 
 theorem dag_inference_fvar_flag_prevents_lookup

@@ -244,19 +244,20 @@ console.log("PSC1_V2_K_GENERATED_FIXED_OWNER_PASS cases=96");
 const modulus=BigInt(get("psKernelCacheHashModulus"));
 const cacheMark=(rows,mark)=>{const a=array(rows);return a.length===1&&BigInt(a[0].hash)===modulus+mark;};
 const arenaMark=(owner,mark)=>{
- const rows=array(owner.whnf.coreCache);
+ const rows=array(get("psKernelExprV2WhnfCacheEntries")(owner.whnf.coreCache));
  if(rows.length!==1)return false;
  const entry=get("psKernelExprV2PagedRequire")(owner.whnf.arena,rows[0].result);
  return !rejected(entry)&&same(entry.value.node,get("PsKernelExprV2Node").lit(Literal.nat(9000n+mark)));
 };
 const marked=(owner,mark)=>owner.nextFresh===mark&&arenaMark(owner,mark)&&
- [owner.whnf.coreCache,owner.whnf.publicCache,owner.checkedInfer,owner.inferOnly,owner.unfold,
-  owner.success,owner.failure].every(rows=>cacheMark(rows,mark));
+ [owner.whnf.coreCache,owner.whnf.publicCache,owner.checkedInfer,owner.inferOnly,owner.unfold]
+  .every(cache=>cacheMark(get("psKernelExprV2WhnfCacheEntries")(cache),mark))&&
+ [owner.success,owner.failure].every(rows=>cacheMark(rows,mark));
 const stamp=(key,mark,owner)=>{
  const built=accepted(get("psKernelExprV2PagedMkLit")(owner.whnf.arena,Literal.nat(9000n+mark)),"marker-arena");
  const cache={source:key,result:built.snd,hash:modulus+mark},pair={left:key,right:key,hash:modulus+mark};
- return {whnf:{arena:built.fst,coreCache:list([cache]),publicCache:list([cache]),declarations:owner.whnf.declarations},
-  nextFresh:mark,checkedInfer:list([cache]),success:list([pair]),inferOnly:list([cache]),unfold:list([cache]),failure:list([pair])};
+ return {whnf:{arena:built.fst,coreCache:get("psKernelExprV2WhnfCacheFromList")(list([cache])),publicCache:get("psKernelExprV2WhnfCacheFromList")(list([cache])),declarations:owner.whnf.declarations},
+  nextFresh:mark,checkedInfer:get("psKernelExprV2WhnfCacheFromList")(list([cache])),success:list([pair]),inferOnly:get("psKernelExprV2WhnfCacheFromList")(list([cache])),unfold:get("psKernelExprV2WhnfCacheFromList")(list([cache])),failure:list([pair])};
 };
 const probeStep=(key,seed,stage,failAt,decline,owner)=>{
  if(!marked(owner,seed+stage-1n))return error("K_CALLBACK_STATE_OR_ORDER");

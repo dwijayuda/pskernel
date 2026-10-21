@@ -29,10 +29,10 @@ structure PsKernelExprV2CheckContext where
 structure PsKernelExprV2CheckState where
   whnf : PsKernelExprV2WhnfState
   nextFresh : Nat
-  checkedInfer : List PsKernelExprV2WhnfCacheEntry
+  checkedInfer : PsKernelExprV2WhnfCache
   success : List PsKernelExprV2DefEqPair
-  inferOnly : List PsKernelExprV2WhnfCacheEntry
-  unfold : List PsKernelExprV2WhnfCacheEntry
+  inferOnly : PsKernelExprV2WhnfCache
+  unfold : PsKernelExprV2WhnfCache
   failure : List PsKernelExprV2DefEqPair
 
 def psKernelExprV2CheckContextEmpty
@@ -87,7 +87,8 @@ def psKernelExprV2CheckLocalValue
 def psKernelExprV2CheckStateEmpty
     (arena : PsKernelExprV2PagedArena) : PsKernelExprV2CheckState :=
   PsKernelExprV2CheckState.mk (psKernelExprV2WhnfStateEmpty arena) 0
-    List.nil List.nil List.nil List.nil List.nil
+    psKernelExprV2WhnfCacheEmpty List.nil psKernelExprV2WhnfCacheEmpty
+    psKernelExprV2WhnfCacheEmpty List.nil
 
 def psKernelExprV2CheckStateWithWhnf
     (state : PsKernelExprV2CheckState) (whnf : PsKernelExprV2WhnfState) :
@@ -109,7 +110,7 @@ def psKernelExprV2CheckStateWithSuccess
 
 def psKernelExprV2CheckStateWithUnfold
     (state : PsKernelExprV2CheckState)
-    (cache : List PsKernelExprV2WhnfCacheEntry) : PsKernelExprV2CheckState :=
+    (cache : PsKernelExprV2WhnfCache) : PsKernelExprV2CheckState :=
   PsKernelExprV2CheckState.mk state.whnf state.nextFresh
     state.checkedInfer state.success state.inferOnly cache state.failure
 
@@ -172,7 +173,7 @@ def psKernelExprV2CheckStateExitLocalScope
 
 def psKernelExprV2CheckStateWithInferOnly
     (state : PsKernelExprV2CheckState)
-    (cache : List PsKernelExprV2WhnfCacheEntry) : PsKernelExprV2CheckState :=
+    (cache : PsKernelExprV2WhnfCache) : PsKernelExprV2CheckState :=
   PsKernelExprV2CheckState.mk state.whnf state.nextFresh
     state.checkedInfer state.success cache state.unfold state.failure
 
@@ -193,7 +194,7 @@ def psKernelExprV2InferenceFind
     Except String (Option Nat) :=
   if psKernelExprV2InferenceCacheEligible inferOnly entry then
     let cache := if inferOnly then state.inferOnly else state.checkedInfer;
-    psKernelExprV2WhnfCacheFindIn cache state.whnf.arena source entry.hash
+    psKernelExprV2WhnfCacheLookup cache state.whnf.arena source entry.hash
   else Except.ok Option.none
 
 def psKernelExprV2InferenceFinish
@@ -207,10 +208,10 @@ def psKernelExprV2InferenceFinish
         let next :=
           if inferOnly then
             psKernelExprV2CheckStateWithInferOnly state
-              (List.cons cached state.inferOnly)
+              (psKernelExprV2WhnfCacheInsert state.inferOnly cached)
           else
             PsKernelExprV2CheckState.mk state.whnf state.nextFresh
-              (List.cons cached state.checkedInfer) state.success state.inferOnly
+              (psKernelExprV2WhnfCacheInsert state.checkedInfer cached) state.success state.inferOnly
               state.unfold state.failure;
         Except.ok (Prod.mk next result)
       else Except.ok (Prod.mk state result)

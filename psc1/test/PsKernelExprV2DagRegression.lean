@@ -554,7 +554,7 @@ private def whnfFunctionStateParity : IO Unit := do
         (psKernelExprV2WhnfStateEmpty openArena) openRoot with
      | some value => value | none => .error "missing open DAG result")
   require "fvar-containing-source-cache-ineligible"
-    (openResult.fst.coreCache.isEmpty && openResult.fst.publicCache.isEmpty)
+    ((psKernelExprV2WhnfCacheEntries openResult.fst.coreCache).isEmpty && (psKernelExprV2WhnfCacheEntries openResult.fst.publicCache).isEmpty)
   let localLet := psKernelLocalContextAddLet checker.context.localContext
     localName localName sort1 sort0
   let letContext := psKernelCheckerContextWithLocalContext checker.context localLet
@@ -1581,7 +1581,7 @@ private def binderParity : IO Unit := do
     | none => throw (IO.userError "PSC1_V2_BINDER_CACHE_FALLBACK")
   require "binder-fresh-counter-after-two-scopes" (direct.fst.nextFresh == 2)
   require "binder-scope-restores-public-whnf-cache"
-    (match direct.fst.whnf.publicCache with | [] => true | _ => false)
+    (match psKernelExprV2WhnfCacheEntries direct.fst.whnf.publicCache with | [] => true | _ => false)
   for (fuel, recDepth) in [(0,0), (1,0), (1,16)] do
     let context := { checker.context with recDepth := recDepth }
     compareBinderRaw "binder-warm-cache-entry-guards"
@@ -1658,7 +1658,7 @@ private def binderParity : IO Unit := do
     require "binder-literal-does-not-publish-inference-cache"
       (match binderRaw 8 checker.context (psKernelExprV2CheckStateEmpty arena) root with
        | some (.ok result) =>
-           match result.fst.checkedInfer with | [] => true | _ => false
+           match psKernelExprV2WhnfCacheEntries result.fst.checkedInfer with | [] => true | _ => false
        | _ => false)
   let letTerm := PsKernelExpr.letE x sort1 sort0 (.bvar 0) false
   let (letArena, letRoot) ← expect (psKernelExprV2PagedImportChecked letTerm)
@@ -3377,8 +3377,8 @@ private def theoremIsPropStateGuards : IO Unit := do
     (oldHeader.state.nextFresh == 2 && afterHeader.nextFresh == 2 &&
       oldProp.fst && dagProp.snd && oldProp.snd.state.nextFresh == 4 && dagProp.fst.nextFresh == 4)
   require "theorem-infer-only-does-not-publish-checked-judgment"
-    (afterHeader.inferOnly.isEmpty && !dagProp.fst.inferOnly.isEmpty &&
-      dagProp.fst.checkedInfer.length == afterHeader.checkedInfer.length)
+    ((psKernelExprV2WhnfCacheEntries afterHeader.inferOnly).isEmpty && !(psKernelExprV2WhnfCacheEntries dagProp.fst.inferOnly).isEmpty &&
+      (psKernelExprV2WhnfCacheEntries dagProp.fst.checkedInfer).length == (psKernelExprV2WhnfCacheEntries afterHeader.checkedInfer).length)
   let warmScalar := { checker.context with recDepth := 15 }
   let warmOld ← expect (psKernelSessionIsProp 64 { oldProp.snd with context := warmScalar } type)
   let some (.ok warmDag) := psKernelExprV2AdmissionIsPropWithFuel 64
@@ -4055,7 +4055,7 @@ private def cheapCorePolicyParity : IO Unit := do
           (psKernelExprV2WhnfStateEmpty arena) root true with
        | some result => result | none => .error "cheap core unexpectedly unsupported")
     require ("cheap-core-no-new-publications-" ++ label)
-      (cheap.fst.coreCache.isEmpty && cheap.fst.publicCache.isEmpty)
+      ((psKernelExprV2WhnfCacheEntries cheap.fst.coreCache).isEmpty && (psKernelExprV2WhnfCacheEntries cheap.fst.publicCache).isEmpty)
     let original ← expect
       (psKernelWhnfCoreWithRecursorFuel 64 (psKernelIsDefEqWithFuel 64)
         checker.context checker.state term false true)
@@ -4078,7 +4078,7 @@ private def cheapCorePolicyParity : IO Unit := do
         (psKernelExprV2WhnfStateEmpty arena) root false with
      | some result => result | none => .error "full core prime unexpectedly unsupported")
   require "full-core-prime-publishes"
-    (!newWarm.fst.coreCache.isEmpty &&
+    (!(psKernelExprV2WhnfCacheEntries newWarm.fst.coreCache).isEmpty &&
       (match psKernelExprMapGet oldWarm.snd.whnfCore zeta with
        | some value => psKernelExprEqual value sort0 | none => false))
   for (term, id) in [(zeta, root), (copy, copyId)] do
@@ -4094,8 +4094,8 @@ private def cheapCorePolicyParity : IO Unit := do
     (match psKernelExprV2CheckWhnfCoreWithFuel 1 context newWarm.fst copyId true with
      | some result => result | none => .error "cheap cache hit unexpectedly unsupported")
   require "cheap-core-reads-full-cache-without-publishing"
-    (hit.fst.coreCache.length == newWarm.fst.coreCache.length &&
-      hit.fst.publicCache.length == newWarm.fst.publicCache.length)
+    ((psKernelExprV2WhnfCacheEntries hit.fst.coreCache).length == (psKernelExprV2WhnfCacheEntries newWarm.fst.coreCache).length &&
+      (psKernelExprV2WhnfCacheEntries hit.fst.publicCache).length == (psKernelExprV2WhnfCacheEntries newWarm.fst.publicCache).length)
   let oldCheap ← expect
     (psKernelWhnfCoreWithRecursorFuel 64 (psKernelIsDefEqWithFuel 64)
       checker.context checker.state zeta false true)
@@ -4147,8 +4147,8 @@ private def cheapProjectionPolicyParity : IO Unit := do
   let decoded ← expect (psKernelExprV2DecodeChecked cheap.fst.arena)
   let actual ← expect (psKernelExprV2DecodedRequire decoded cheap.snd)
   require "cheap-projection-skips-unselected-public-argument-work"
-    (psKernelExprEqual actual sort0 && cheap.fst.coreCache.isEmpty &&
-      cheap.fst.publicCache.isEmpty)
+    (psKernelExprEqual actual sort0 && (psKernelExprV2WhnfCacheEntries cheap.fst.coreCache).isEmpty &&
+      (psKernelExprV2WhnfCacheEntries cheap.fst.publicCache).isEmpty)
   require "full-projection-still-runs-public-major-pipeline"
     (match psKernelExprV2CheckWhnfCoreWithFuel 3 context
         (psKernelExprV2WhnfStateEmpty arena) root false with

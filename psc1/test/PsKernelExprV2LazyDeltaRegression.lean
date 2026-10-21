@@ -364,8 +364,8 @@ private def regression : IO Unit := do
     psKernelCheckerStateEmpty left right)
   require "failed-arguments-do-not-mean-inequality" (warm.snd && oldWarm.fst)
   require "nonprop-state-survives-full-delta"
-    (!warm.fst.inferOnly.isEmpty && warm.fst.checkedInfer.isEmpty &&
-      !warm.fst.unfold.isEmpty && !warm.fst.failure.isEmpty)
+    (!(psKernelExprV2WhnfCacheEntries warm.fst.inferOnly).isEmpty && (psKernelExprV2WhnfCacheEntries warm.fst.checkedInfer).isEmpty &&
+      !(psKernelExprV2WhnfCacheEntries warm.fst.unfold).isEmpty && !warm.fst.failure.isEmpty)
   for (x,y) in [(leftId,rightId),(rightId,leftId)] do
     require "failure-pair-is-symmetric"
       (← expect (psKernelExprV2DefEqPairContains warm.fst.whnf.arena warm.fst.failure x y))
@@ -380,7 +380,7 @@ private def regression : IO Unit := do
   for root in [leftId,rightId] do
     let entry ← expect (psKernelExprV2PagedRequire warm.fst.whnf.arena root)
     require "unfold-cache-published-both-sides"
-      (← expect (psKernelExprV2WhnfCacheFindIn warm.fst.unfold
+      (← expect (psKernelExprV2WhnfCacheLookup warm.fst.unfold
         warm.fst.whnf.arena root entry.hash)).isSome
   for fuel in [0,1,64] do
     for recDepth in [0,15,16] do
@@ -413,7 +413,7 @@ private def regression : IO Unit := do
   let child := (psKernelExprV2CheckStateFreshName warm.fst (nm "scope")).snd
   let restored := psKernelExprV2CheckStateExitLocalScope cold child
   require "scope-restores-delta-caches"
-    (restored.failure.isEmpty && restored.unfold.isEmpty &&
+    (restored.failure.isEmpty && (psKernelExprV2WhnfCacheEntries restored.unfold).isEmpty &&
       restored.whnf.arena.size == child.whnf.arena.size &&
       restored.nextFresh == child.nextFresh)
   require "scope-cannot-reuse-child-failure"
@@ -423,7 +423,7 @@ private def regression : IO Unit := do
     (psKernelExprV2CheckStateWithArena
       (psKernelExprV2CheckStateWithSuccess child child.success) child.whnf.arena) child.inferOnly
   require "ordinary-setters-preserve-delta-caches"
-    (preserved.unfold.length == child.unfold.length &&
+    ((psKernelExprV2WhnfCacheEntries preserved.unfold).length == (psKernelExprV2WhnfCacheEntries child.unfold).length &&
       (← expect (psKernelExprV2DefEqPairContains preserved.whnf.arena
         preserved.failure leftId rightId)))
 
@@ -491,7 +491,7 @@ private def regression : IO Unit := do
   let otherEntry ← expect (psKernelExprV2PagedRequire idArena idCollisionId)
   require "real-unfold-key-hash-collision" (zeroEntry.hash == otherEntry.hash)
   require "collision-inserts-distinct-unfold"
-    (collided.fst.unfold.length == primed.fst.unfold.length + 1)
+    ((psKernelExprV2WhnfCacheEntries collided.fst.unfold).length == (psKernelExprV2WhnfCacheEntries primed.fst.unfold).length + 1)
 
   -- Open terms are never cached even when the argument comparison returns false.
   let openLeft := apply "deltaConst" (.fvar (nm "openLeft"))
@@ -513,7 +513,7 @@ private def regression : IO Unit := do
       psKernelCheckerStateEmpty openLeft openRight) opened
   let opened ← expectAttempt "open-step" opened
   require "open-inputs-do-not-publish-delta-caches"
-    (opened.fst.failure.isEmpty && opened.fst.unfold.isEmpty && opened.fst.nextFresh == 1)
+    (opened.fst.failure.isEmpty && (psKernelExprV2WhnfCacheEntries opened.fst.unfold).isEmpty && opened.fst.nextFresh == 1)
   require "open-failed-args-can-still-unfold-equal"
     (match opened.snd with | .equal => true | _ => false)
 

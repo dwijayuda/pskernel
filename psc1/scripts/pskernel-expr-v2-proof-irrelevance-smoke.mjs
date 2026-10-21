@@ -153,7 +153,7 @@ must(comparisons===1350,"complete-raw-matrix");
 const context=ctx(base.context),cold=initial();
 const oldWarm=accepted(original(64n,base.context,oldEmpty,p.term,q.term),"warm-original");
 const warm=accepted(accepted(raw(64n,context,cold,p.id,q.id),"warm-some"),"warm-result");
-must(!same(warm.fst.inferOnly,nil)&&same(warm.fst.checkedInfer,nil),"infer-only-not-checked");
+must(!same(get("psKernelExprV2WhnfCacheEntries")(warm.fst.inferOnly),nil)&&same(get("psKernelExprV2WhnfCacheEntries")(warm.fst.checkedInfer),nil),"infer-only-not-checked");
 for(const fuel of [0n,1n,64n])for(const recDepth of [0n,15n,16n]){
  const scalar={...base.context,maxRecDepth:1n,recDepth};
  compare(original(fuel,scalar,oldWarm.snd,p.term,q.term),

@@ -311,3 +311,8 @@ lean_exe psc1_kernel_expr_v2_owned_state_regression where
 lean_exe psc1_kernel_expr_v2_string_projection_regression where
   srcDir := "test"
   root := `PsKernelExprV2StringProjectionRegression
+
+-- Exact unary-cache indexing, real-owner promotion and fixed resource/error order.
+lean_exe psc1_kernel_expr_v2_whnf_cache_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2WhnfCacheRegression

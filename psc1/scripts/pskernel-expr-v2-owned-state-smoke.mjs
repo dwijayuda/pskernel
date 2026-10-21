@@ -37,15 +37,15 @@ const modulus=BigInt(get("psKernelCacheHashModulus"));
 const markerHash=tag=>modulus+tag;
 const cacheMark=(rows,tag)=>{const a=array(rows);return a.length===1&&BigInt(a[0].hash)===markerHash(tag);};
 const outerMark=(state,tag,fresh)=>state.nextFresh===fresh&&
- cacheMark(state.checkedInfer,tag)&&cacheMark(state.success,tag)&&
- cacheMark(state.inferOnly,tag)&&cacheMark(state.unfold,tag)&&cacheMark(state.failure,tag);
+ cacheMark(get("psKernelExprV2WhnfCacheEntries")(state.checkedInfer),tag)&&cacheMark(state.success,tag)&&
+ cacheMark(get("psKernelExprV2WhnfCacheEntries")(state.inferOnly),tag)&&cacheMark(get("psKernelExprV2WhnfCacheEntries")(state.unfold),tag)&&cacheMark(state.failure,tag);
 const stamp=(key,state,tag)=>{
  const built=accepted(get("psKernelExprV2PagedMkLit")(state.whnf.arena,Literal.nat(9000n+tag)),"stamp-build");
  const cache={source:key,result:key,hash:markerHash(tag)},pair={left:key,right:key,hash:markerHash(tag)};
- const whnf={arena:built.fst,coreCache:List.cons(cache,state.whnf.coreCache),
-  publicCache:List.cons(cache,state.whnf.publicCache),declarations:state.whnf.declarations};
- return {whnf,nextFresh:tag,checkedInfer:list([cache]),success:list([pair]),
-  inferOnly:list([cache]),unfold:list([cache]),failure:list([pair])};
+ const whnf={arena:built.fst,coreCache:get("psKernelExprV2WhnfCacheInsert")(state.whnf.coreCache,cache),
+  publicCache:get("psKernelExprV2WhnfCacheInsert")(state.whnf.publicCache,cache),declarations:state.whnf.declarations};
+ return {whnf,nextFresh:tag,checkedInfer:get("psKernelExprV2WhnfCacheFromList")(list([cache])),success:list([pair]),
+  inferOnly:get("psKernelExprV2WhnfCacheFromList")(list([cache])),unfold:get("psKernelExprV2WhnfCacheFromList")(list([cache])),failure:list([pair])};
 };
 const advance=(key,state,tag,fresh,next)=>
  outerMark(state,tag,fresh)?Ex.ok(stamp(key,state,next)):Ex.error("carrier callback received stale state");
@@ -58,8 +58,8 @@ const decode=(state,root)=>accepted(get("psKernelExprV2DecodedRequire")(
 const marked=(label,tag,fresh,value)=>{
  const result=attempt(value,label);
  must(outerMark(result.fst,tag,fresh),label+"-all-six-outer-fields");
- must(array(result.fst.whnf.coreCache).some(entry=>BigInt(entry.hash)===markerHash(tag)),label+"-core-marker");
- must(array(result.fst.whnf.publicCache).some(entry=>BigInt(entry.hash)===markerHash(tag)),label+"-public-marker");
+ must(array(get("psKernelExprV2WhnfCacheEntries")(result.fst.whnf.coreCache)).some(entry=>BigInt(entry.hash)===markerHash(tag)),label+"-core-marker");
+ must(array(get("psKernelExprV2WhnfCacheEntries")(result.fst.whnf.publicCache)).some(entry=>BigInt(entry.hash)===markerHash(tag)),label+"-public-marker");
  must(!same(get("psKernelExprV2DeclarationRefFind")(result.fst.whnf.declarations)(
   get("psKernelSimpleRecName")(get("psKernelNatName"))),none),label+"-declaration-owner");
  accepted(get("psKernelExprV2PagedValidate")(result.fst.whnf.arena),label+"-valid-arena");
@@ -345,7 +345,7 @@ for(const seed of [2n,11n]){
    forbiddenEq,eqStep(seed+2n,seed+2n,seed+3n,false),binary,context,state,zero.id,addTerm.id));defeqProbes++;
  const aliasEntry=accepted(get("psKernelExprV2PagedRequire")(state.whnf.arena,alias.id),"alias-entry");
  const unfoldedMark=(s,r)=>{
-  const rows=array(s.unfold);
+  const rows=array(get("psKernelExprV2WhnfCacheEntries")(s.unfold));
   return outerMark({...s,unfold:state.unfold},seed,seed)&&rows.length===2&&
    cacheMark(list(rows.slice(1)),seed)&&rows[0].source===alias.id&&
    rows[0].result===r&&rows[0].hash===aliasEntry.hash;
@@ -494,7 +494,7 @@ must(defeqProbes===38&&defeqPropagation===44,"complete-DefEq-carrier-matrices");
 const rootDefEq=dagEq(32n),beta=differential.find(([label])=>label==="beta")[1];
 const warmed=attempt(get("psKernelExprV2CheckWhnfOwnedWithFuel")(
  32n,rootDefEq,bare,initial,beta.id),"warm-public");
-must(array(warmed.fst.whnf.publicCache).length>0,"public-cache-really-warm");
+must(array(get("psKernelExprV2WhnfCacheEntries")(warmed.fst.whnf.publicCache)).length>0,"public-cache-really-warm");
 errorIs("public-zero-before-warm-cache","kernel reduction budget exhausted",
  get("psKernelExprV2CheckWhnfOwnedWithFuel")(0n,rootDefEq,bare,warmed.fst,beta.id));
 errorIs("core-zero-before-warm-cache","kernel reduction budget exhausted",
@@ -503,7 +503,7 @@ const exhausted={...bare,scalar:{...scalar,maxRecDepth:1n,recDepth:get("psKernel
 errorIs("core-depth-before-warm-cache","deep recursion detected, use maxRecDepth to increase the limit",
  get("psKernelExprV2CheckWhnfCoreOwnedWithFuel")(32n,rootDefEq,exhausted,warmed.fst,beta.id,false));
 const inferred=attempt(infer(8n,forbidden,forbiddenEq,bare,initial,wrappedSort.id,false),"warm-inference");
-must(array(inferred.fst.checkedInfer).length>0,"inference-cache-really-warm");
+must(array(get("psKernelExprV2WhnfCacheEntries")(inferred.fst.checkedInfer)).length>0,"inference-cache-really-warm");
 errorIs("inference-zero-before-cache","kernel inference budget exhausted",
  infer(0n,forbidden,forbiddenEq,bare,inferred.fst,wrappedSort.id,false));
 errorIs("inference-depth-before-cache","deep recursion detected, use maxRecDepth to increase the limit",

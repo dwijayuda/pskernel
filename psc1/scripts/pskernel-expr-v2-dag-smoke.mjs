@@ -776,8 +776,8 @@ console.log("PSC1_V2_DAG_JS_BETA: PASS");
   const openAttempt=attemptedState(64n,localContext,openRoot);
   must(openAttempt&&typeof openAttempt==="object"&&"value" in openAttempt,"open-state-direct");
   const openResult=accepted(openAttempt.value,"open-state-result");
-  must(array(openResult.fst.coreCache).length===0&&
-    array(openResult.fst.publicCache).length===0,"open-state-cache-ineligible");
+  must(array(get("psKernelExprV2WhnfCacheEntries")(openResult.fst.coreCache)).length===0&&
+    array(get("psKernelExprV2WhnfCacheEntries")(openResult.fst.publicCache)).length===0,"open-state-cache-ineligible");
   const letLocals=get("psKernelLocalContextAddLet")(checker.context.localContext,
     localName,localName,sort1,sort0);
   const letContext=get("psKernelCheckerContextWithLocalContext")(checker.context,letLocals);
@@ -1655,7 +1655,7 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
   const direct=accepted(accepted(raw(10n,checker.context,emptyCheck(binderArena),reused.id),
     "binder-warm-some"),"binder-warm");
   must(direct.fst.nextFresh===2n,"binder-fresh-counter-after-two-scopes");
-  must(sameRuntimeValue(direct.fst.whnf.publicCache,nil),"binder-scope-restores-public-cache");
+  must(sameRuntimeValue(get("psKernelExprV2WhnfCacheEntries")(direct.fst.whnf.publicCache),nil),"binder-scope-restores-public-cache");
   for(const [fuel,recDepth] of [[0n,0n],[1n,0n],[1n,16n]]){
     const context={...checker.context,recDepth};
     compareRaw(get("psKernelSessionCheck")(fuel,{...legacy.snd,context},domain.term),
@@ -1709,7 +1709,7 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
     const checker=get("psKernelKernelSessionChecker")(session(8n),nil,S.safe);
     const result=accepted(accepted(raw(8n,checker.context,emptyCheck(binderArena),node.id),
       "binder-literal-some"),"binder-literal");
-    must(sameRuntimeValue(result.fst.checkedInfer,nil),"binder-literal-cache-ineligible");
+    must(sameRuntimeValue(get("psKernelExprV2WhnfCacheEntries")(result.fst.checkedInfer),nil),"binder-literal-cache-ineligible");
   }
   const letNode=build("Let",E.letE(x,sort1,sort0,E.bvar(0n),false),
     x,s1.id,s0.id,b0.id,false);
@@ -3095,8 +3095,8 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
   must(oldHeader.state.nextFresh===2n&&afterHeader.nextFresh===2n&&oldProp.fst===true&&dagProp.snd===true&&
     oldProp.snd.state.nextFresh===4n&&dagProp.fst.nextFresh===4n,
     "theorem-isprop-has-independent-infer-entry");
-  must(array(afterHeader.inferOnly).length===0&&array(dagProp.fst.inferOnly).length>0&&
-    array(dagProp.fst.checkedInfer).length===array(afterHeader.checkedInfer).length,
+  must(array(get("psKernelExprV2WhnfCacheEntries")(afterHeader.inferOnly)).length===0&&array(get("psKernelExprV2WhnfCacheEntries")(dagProp.fst.inferOnly)).length>0&&
+    array(get("psKernelExprV2WhnfCacheEntries")(dagProp.fst.checkedInfer)).length===array(get("psKernelExprV2WhnfCacheEntries")(afterHeader.checkedInfer)).length,
     "theorem-infer-only-does-not-publish-checked-judgment");
   const warmScalar={...checker.context,recDepth:15n};
   const warmOld=accepted(get("psKernelSessionIsProp")(
@@ -3658,7 +3658,7 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
       const checker=get("psKernelKernelSessionChecker")(session(64n,1n),nil,S.safe);
       const result=accepted(accepted(core(64n,typed(checker.context),freshWhnf(),node.id,true),
         "cheap-prime-some"),"cheap-prime-result");
-      must(array(result.fst.coreCache).length===0&&array(result.fst.publicCache).length===0,
+      must(array(get("psKernelExprV2WhnfCacheEntries")(result.fst.coreCache)).length===0&&array(get("psKernelExprV2WhnfCacheEntries")(result.fst.publicCache)).length===0,
         "cheap-core-no-new-publications-"+label);
     }
     const copy=letE(y,s1,s0,b0);
@@ -3669,7 +3669,7 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     const oldWarm=accepted(oldCore(64n,checker.context,checker.state,zeta,false),"full-core-old-prime");
     const newWarm=accepted(accepted(core(64n,context,freshWhnf(),zeta.id,false),
       "full-core-new-prime-some"),"full-core-new-prime");
-    must(array(newWarm.fst.coreCache).length>0,"full-core-prime-publishes");
+    must(array(get("psKernelExprV2WhnfCacheEntries")(newWarm.fst.coreCache)).length>0,"full-core-prime-publishes");
     for(const node of [zeta,copy])for(const fuel of [0n,1n,2n])for(const recDepth of [0n,15n,16n]){
       const scalar={...checker.context,recDepth};
       compareWhnf(oldCore(fuel,scalar,oldWarm.snd,node,true),
@@ -3678,8 +3678,8 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     }
     const hit=accepted(accepted(core(1n,context,newWarm.fst,copy.id,true),
       "cheap-hit-some"),"cheap-hit");
-    must(array(hit.fst.coreCache).length===array(newWarm.fst.coreCache).length&&
-      array(hit.fst.publicCache).length===array(newWarm.fst.publicCache).length,
+    must(array(get("psKernelExprV2WhnfCacheEntries")(hit.fst.coreCache)).length===array(get("psKernelExprV2WhnfCacheEntries")(newWarm.fst.coreCache)).length&&
+      array(get("psKernelExprV2WhnfCacheEntries")(hit.fst.publicCache)).length===array(get("psKernelExprV2WhnfCacheEntries")(newWarm.fst.publicCache)).length,
       "cheap-core-full-cache-hit-does-not-publish");
     const oldCheap=accepted(oldCore(64n,checker.context,checker.state,zeta,true),"old-cheap-prime");
     const newCheap=accepted(accepted(core(64n,context,freshWhnf(),zeta.id,true),
@@ -3716,7 +3716,7 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
       "cheap-projection-three-some"),"cheap-projection-three");
     const cheapGraph=accepted(decode(cheap.fst.arena),"cheap-projection-three-graph");
     must(exact(accepted(decoded(cheapGraph,cheap.snd),"cheap-projection-three-value"),sort0)===true&&
-      array(cheap.fst.coreCache).length===0&&array(cheap.fst.publicCache).length===0,
+      array(get("psKernelExprV2WhnfCacheEntries")(cheap.fst.coreCache)).length===0&&array(get("psKernelExprV2WhnfCacheEntries")(cheap.fst.publicCache)).length===0,
       "cheap-projection-skips-unselected-public-work");
     const full=accepted(core(3n,typed(checker.context),freshWhnf(),node.id,false),
       "full-projection-three-some");

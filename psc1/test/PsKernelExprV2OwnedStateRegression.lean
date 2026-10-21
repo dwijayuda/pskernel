@@ -42,8 +42,8 @@ private def all (name : String) (type body : PsKernelExpr) :=
   PsKernelExpr.forallE (nm name) type body .default
 private def apps (head : PsKernelExpr) (args : List PsKernelExpr) := psKernelApplyArgs head args
 
-private def cacheMark (rows : List PsKernelExprV2WhnfCacheEntry) (tag : Nat) : Bool :=
-  match rows with
+private def cacheMark (cache : PsKernelExprV2WhnfCache) (tag : Nat) : Bool :=
+  match psKernelExprV2WhnfCacheEntries cache with
   | [entry] => entry.hash == psKernelCacheHashModulus + tag
   | _ => false
 
@@ -63,8 +63,9 @@ private def stamp (key : Nat) (state : PsKernelExprV2CheckState) (tag : Nat) :
   let cache := PsKernelExprV2WhnfCacheEntry.mk key key (psKernelCacheHashModulus + tag)
   let pair := PsKernelExprV2DefEqPair.mk key key (psKernelCacheHashModulus + tag)
   let whnf := PsKernelExprV2WhnfState.mk arena
-    (cache :: state.whnf.coreCache) (cache :: state.whnf.publicCache) state.whnf.declarations
-  pure (PsKernelExprV2CheckState.mk whnf tag [cache] [pair] [cache] [cache] [pair])
+    (psKernelExprV2WhnfCacheInsert state.whnf.coreCache cache) (psKernelExprV2WhnfCacheInsert state.whnf.publicCache cache) state.whnf.declarations
+  let entries := psKernelExprV2WhnfCacheFromList [cache]
+  pure (PsKernelExprV2CheckState.mk whnf tag entries [pair] entries entries [pair])
 
 private def advance (key : Nat) (state : PsKernelExprV2CheckState)
     (tag fresh next : Nat) : Except String PsKernelExprV2CheckState :=
@@ -86,9 +87,9 @@ private def marked (label : String) (tag fresh : Nat)
   let result ← attempt label value
   require (label ++ "-all-six-outer-fields") (outerMark result.fst tag fresh)
   require (label ++ "-core-marker")
-    (result.fst.whnf.coreCache.any (fun entry => entry.hash == psKernelCacheHashModulus + tag))
+    ((psKernelExprV2WhnfCacheEntries result.fst.whnf.coreCache).any (fun entry => entry.hash == psKernelCacheHashModulus + tag))
   require (label ++ "-public-marker")
-    (result.fst.whnf.publicCache.any (fun entry => entry.hash == psKernelCacheHashModulus + tag))
+    ((psKernelExprV2WhnfCacheEntries result.fst.whnf.publicCache).any (fun entry => entry.hash == psKernelCacheHashModulus + tag))
   require (label ++ "-declaration-owner")
     (psKernelExprV2DeclarationRefFind result.fst.whnf.declarations
       (psKernelSimpleRecName psKernelNatName)).isSome
@@ -223,8 +224,8 @@ private def runDefEqAndFailureProbes
   let unfoldedMark :=
     fun (s : PsKernelExprV2CheckState) (root : Nat) =>
       outerMark (psKernelExprV2CheckStateWithUnfold s state.unfold) seed seed &&
-        match s.unfold with
-        | entry :: rest => cacheMark rest seed && entry.source == aliasId &&
+        match psKernelExprV2WhnfCacheEntries s.unfold with
+        | entry :: rest => cacheMark (psKernelExprV2WhnfCacheFromList rest) seed && entry.source == aliasId &&
             entry.result == root && entry.hash == aliasEntry.hash
         | [] => false
   let deltaCore :=
@@ -874,7 +875,7 @@ private def regression : IO Unit := do
     | throw (IO.userError "missing beta fixture")
   let warmed ← attempt "warm-public"
     (psKernelExprV2CheckWhnfOwnedWithFuel 32 rootDefEq bare initial betaRoot)
-  require "public-cache-really-warm" (!warmed.fst.whnf.publicCache.isEmpty)
+  require "public-cache-really-warm" (!(psKernelExprV2WhnfCacheEntries warmed.fst.whnf.publicCache).isEmpty)
   errorIs "public-zero-before-warm-cache" "kernel reduction budget exhausted"
     (psKernelExprV2CheckWhnfOwnedWithFuel 0 rootDefEq bare warmed.fst betaRoot)
   errorIs "core-zero-before-warm-cache" "kernel reduction budget exhausted"
@@ -885,7 +886,7 @@ private def regression : IO Unit := do
     (psKernelExprV2CheckWhnfCoreOwnedWithFuel 32 rootDefEq exhausted warmed.fst betaRoot false)
   let inferred ← attempt "warm-inference"
     (psKernelExprV2TryInferCoreOwnedWithFuel 8 forbidden forbiddenEq bare initial wrappedSort false)
-  require "inference-cache-really-warm" (!inferred.fst.checkedInfer.isEmpty)
+  require "inference-cache-really-warm" (!(psKernelExprV2WhnfCacheEntries inferred.fst.checkedInfer).isEmpty)
   errorIs "inference-zero-before-cache" "kernel inference budget exhausted"
     (psKernelExprV2TryInferCoreOwnedWithFuel 0 forbidden forbiddenEq bare inferred.fst wrappedSort false)
   errorIs "inference-depth-before-cache"

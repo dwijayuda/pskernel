@@ -208,6 +208,6 @@ const short=accepted(accepted(get("psKernelExprV2TryReduceQuotWith")(badWhnf,sca
  "short-some"),"short-ok");
 must(same(short.snd,none),"unsaturated-before-callback");
 const warm=accepted(accepted(raw(32n,scalar,initial(),expression.id),"warm-some"),"warm-ok");
-must(array(warm.fst.publicCache).length>0,"owned-public-cache");
+must(array(get("psKernelExprV2WhnfCacheEntries")(warm.fst.publicCache)).length>0,"owned-public-cache");
 expectError(raw(0n,scalar,warm.fst,expression.id),"kernel reduction budget exhausted","warm-zero");
 console.log("PSC1_V2_DAG_QUOT: PASS public=240 core=480 owners=720 reducer=60 assertions="+assertions);

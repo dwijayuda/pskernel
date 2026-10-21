@@ -305,7 +305,7 @@ if(mode!=="worker"&&mode!=="profile"){
     const output=accepted(k.psKernelExprV2DecodedRequire(built,reduced.snd),"cache-diagnostic-root");
     if(k.psKernelExprEqual(output)(sort0)!==true)
       throw Error("PSC1_DAG_BENCH_CACHE_DIAGNOSTIC_VALUE");
-    let entries=state.coreCache,publications=0,shadowed=0,maxBucket=0;
+    let entries=k.psKernelExprV2WhnfCacheEntries(state.coreCache),publications=0,shadowed=0,maxBucket=0;
     const buckets=new Map(),sourceIDs=new Set();
     while(entries&&typeof entries==="object"&&"head" in entries){
       const entry=entries.head,key=entry.hash.toString();
@@ -323,7 +323,7 @@ if(mode!=="worker"&&mode!=="profile"){
       maxBucket=Math.max(maxBucket,bucket.length);
       entries=entries.tail;
     }
-    let publicEntries=state.publicCache,publicCount=0;
+    let publicEntries=k.psKernelExprV2WhnfCacheEntries(state.publicCache),publicCount=0;
     while(publicEntries&&typeof publicEntries==="object"&&"head" in publicEntries){
       publicCount++;publicEntries=publicEntries.tail;
     }

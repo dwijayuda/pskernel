@@ -229,7 +229,7 @@ private def regression : IO Unit := do
   let some (.ok warm) := psKernelExprV2TryDefEqStateWithFuel 64 context cold leftId rightId
     | throw (IO.userError "proof warm owner")
   require "proof-populates-infer-only-not-checked"
-    (!warm.fst.inferOnly.isEmpty && warm.fst.checkedInfer.isEmpty)
+    (!(psKernelExprV2WhnfCacheEntries warm.fst.inferOnly).isEmpty && (psKernelExprV2WhnfCacheEntries warm.fst.checkedInfer).isEmpty)
   for fuel in [0,1,64] do
     for recDepth in [0,15,16] do
       let scalar := { base.context with maxRecDepth := 1, recDepth := recDepth }

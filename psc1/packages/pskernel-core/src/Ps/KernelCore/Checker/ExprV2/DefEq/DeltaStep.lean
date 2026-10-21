@@ -59,7 +59,7 @@ def psKernelExprV2DefEqUnfold
   | Except.ok entry =>
       let cached : Except String (Option Nat) :=
         if entry.hasFVar then Except.ok Option.none
-        else psKernelExprV2WhnfCacheFindIn state.unfold state.whnf.arena root entry.hash;
+        else psKernelExprV2WhnfCacheLookup state.unfold state.whnf.arena root entry.hash;
       match cached with
       | Except.error error => Option.some (Except.error error)
       | Except.ok found =>
@@ -79,9 +79,8 @@ def psKernelExprV2DefEqUnfold
                           let published : PsKernelExprV2CheckState :=
                             if entry.hasFVar then next
                             else psKernelExprV2CheckStateWithUnfold next
-                              (List.cons
-                                (PsKernelExprV2WhnfCacheEntry.mk root value entry.hash)
-                                next.unfold);
+                              (psKernelExprV2WhnfCacheInsert next.unfold
+                                (PsKernelExprV2WhnfCacheEntry.mk root value entry.hash));
                           Option.some (Except.ok (Prod.mk published (Option.some value)))
 
 def psKernelExprV2DefEqDeltaOnceOwnedWith

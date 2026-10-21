@@ -237,12 +237,12 @@ private def fixedOwners (scalar : PsKernelCheckerContext) (state : PsKernelExprV
   require "fixed-owner-count" (count == 96)
   IO.println "PSC1_V2_K_FIXED_OWNER_PASS cases=96"
 
-private def cacheMark (rows : List PsKernelExprV2WhnfCacheEntry) (mark : Nat) : Bool :=
-  match rows with | [row] => row.hash == psKernelCacheHashModulus + mark | _ => false
+private def cacheMark (cache : PsKernelExprV2WhnfCache) (mark : Nat) : Bool :=
+  match psKernelExprV2WhnfCacheEntries cache with | [row] => row.hash == psKernelCacheHashModulus + mark | _ => false
 private def pairMark (rows : List PsKernelExprV2DefEqPair) (mark : Nat) : Bool :=
   match rows with | [row] => row.hash == psKernelCacheHashModulus + mark | _ => false
 private def arenaMark (state : PsKernelExprV2CheckState) (mark : Nat) : Bool :=
-  match state.whnf.coreCache with
+  match psKernelExprV2WhnfCacheEntries state.whnf.coreCache with
   | [row] =>
       match psKernelExprV2PagedRequire state.whnf.arena row.result with
       | .ok entry =>
@@ -259,9 +259,10 @@ private def stamp (key mark : Nat) (state : PsKernelExprV2CheckState) :
   let (arena,marker) ← psKernelExprV2PagedMkLit state.whnf.arena (.nat (9000 + mark))
   let cache := PsKernelExprV2WhnfCacheEntry.mk key marker (psKernelCacheHashModulus + mark)
   let pair := PsKernelExprV2DefEqPair.mk key key (psKernelCacheHashModulus + mark)
+  let entries := psKernelExprV2WhnfCacheFromList [cache]
   pure (PsKernelExprV2CheckState.mk
-    (PsKernelExprV2WhnfState.mk arena [cache] [cache] state.whnf.declarations)
-    mark [cache] [pair] [cache] [cache] [pair])
+    (PsKernelExprV2WhnfState.mk arena entries entries state.whnf.declarations)
+    mark entries [pair] entries entries [pair])
 
 private def probeStep (key seed stage failAt : Nat) (decline : Bool)
     (state : PsKernelExprV2CheckState) :

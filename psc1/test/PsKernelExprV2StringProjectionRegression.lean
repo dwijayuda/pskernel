@@ -180,8 +180,8 @@ private def resourceMatrix (prepared : Prepared) : IO Unit := do
   require "String-projection-matrix-counts" (publics == 126 && cores == 504 && fixed == 480)
   IO.println "PSC1_V2_DAG_STRING_PROJECTION_MATRIX: PASS public=126 core=504 fixed=480"
 
-private def cacheTag (rows : List PsKernelExprV2WhnfCacheEntry) (tag : Nat) : Bool :=
-  match rows with
+private def cacheTag (cache : PsKernelExprV2WhnfCache) (tag : Nat) : Bool :=
+  match psKernelExprV2WhnfCacheEntries cache with
   | [row] => row.hash == psKernelCacheHashModulus + tag
   | _ => false
 
@@ -191,7 +191,7 @@ private def pairTag (rows : List PsKernelExprV2DefEqPair) (tag : Nat) : Bool :=
   | _ => false
 
 private def arenaTag (state : PsKernelExprV2CheckState) (tag : Nat) : Bool :=
-  match state.checkedInfer with
+  match psKernelExprV2WhnfCacheEntries state.checkedInfer with
   | [row] =>
       match psKernelExprV2PagedRequire state.whnf.arena row.result with
       | .ok entry =>
@@ -211,9 +211,10 @@ private def stamp (key : Nat) (state : PsKernelExprV2CheckState) (tag : Nat) :
   let (arena,marker) ← psKernelExprV2PagedMkLit state.whnf.arena (.nat (14000 + tag))
   let cache := PsKernelExprV2WhnfCacheEntry.mk key marker (psKernelCacheHashModulus + tag)
   let pair := PsKernelExprV2DefEqPair.mk key key (psKernelCacheHashModulus + tag)
-  let whnf := PsKernelExprV2WhnfState.mk arena (cache :: state.whnf.coreCache)
-    (cache :: state.whnf.publicCache) state.whnf.declarations
-  pure (PsKernelExprV2CheckState.mk whnf tag [cache] [pair] [cache] [cache] [pair])
+  let whnf := PsKernelExprV2WhnfState.mk arena (psKernelExprV2WhnfCacheInsert state.whnf.coreCache cache)
+    (psKernelExprV2WhnfCacheInsert state.whnf.publicCache cache) state.whnf.declarations
+  let entries := psKernelExprV2WhnfCacheFromList [cache]
+  pure (PsKernelExprV2CheckState.mk whnf tag entries [pair] entries entries [pair])
 
 private def markStep (failAt : Nat) (decline : Bool)
     (state : PsKernelExprV2CheckState) (key result tag : Nat) :
@@ -276,9 +277,9 @@ private def stateMatrix (prepared : Prepared) : IO Unit := do
         require "String-projection-all-fields-and-arena" (tagged result.fst finalTag)
         require "String-projection-exact-selected-or-original-root" (result.snd == finalRoot)
         require "String-projection-core-marker-retained"
-          (result.fst.whnf.coreCache.any (fun row => row.hash == psKernelCacheHashModulus + finalTag))
+          ((psKernelExprV2WhnfCacheEntries result.fst.whnf.coreCache).any (fun row => row.hash == psKernelCacheHashModulus + finalTag))
         require "String-projection-public-marker-retained"
-          (result.fst.whnf.publicCache.any (fun row => row.hash == psKernelCacheHashModulus + finalTag))
+          ((psKernelExprV2WhnfCacheEntries result.fst.whnf.publicCache).any (fun row => row.hash == psKernelCacheHashModulus + finalTag))
         let originalEntry ← expect (psKernelExprV2PagedRequire result.fst.whnf.arena root)
         let cached ← expect (psKernelExprV2WhnfCacheFind result.fst.whnf root originalEntry)
         require "String-projection-original-root-publication"

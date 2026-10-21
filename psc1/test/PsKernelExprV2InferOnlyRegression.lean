@@ -125,8 +125,8 @@ private def regression : IO Unit := do
   let some (.ok inferred) := psKernelExprV2TryInferStateWithFuel 64
       context (initialState owning declarations) root
     | throw (IO.userError "inference-only skipped-argument fixture failed")
-  require "infer-only-app-cache-populated" (!inferred.fst.inferOnly.isEmpty)
-  require "infer-only-cannot-populate-checked-cache" inferred.fst.checkedInfer.isEmpty
+  require "infer-only-app-cache-populated" (!(psKernelExprV2WhnfCacheEntries inferred.fst.inferOnly).isEmpty)
+  require "infer-only-cannot-populate-checked-cache" (psKernelExprV2WhnfCacheEntries inferred.fst.checkedInfer).isEmpty
   compare "warm-infer-cache-is-not-checked-authorization"
     (psKernelCheckerCheck 64 base.context psKernelCheckerStateEmpty unchecked)
     (psKernelExprV2TryCheckStateWithFuel 64 context inferred.fst root)

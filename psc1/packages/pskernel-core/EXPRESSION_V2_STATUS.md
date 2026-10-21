@@ -28,8 +28,8 @@ The full-state carrier at `4894fce8c7d048ae188495bc2090fedfddf7fcb4`
 has terminal native, authentic generated-JavaScript, canonical-source, proof
 and provider qualification. Integration source
 `a2590cc15c764dae9c6abfb941d6c3155ead5c81` is independently qualified for the
-scoped developer provider. Their history-preserving integration merge requires
-fresh exact-source gates. The work state records those identities; predecessor
+scoped developer provider. Their history-preserving integration merge3aa077cb64ff06f76727decd01c43ad6c33f351d
+has now passed its own complete native, portable, generated, proof and provider gates. The work state records those identities; predecessor
 qualification does not establish a complete V2 replacement.
 
 `Checker/ExprV2/DefEq.lean` owns recursive DefEq callbacks. The ordered path is
@@ -119,7 +119,25 @@ Mandatory native/generated 126/504/480 resource comparisons, 48 complete-state
 sequences, 240 propagated outcomes, checked Box projections and ten local
 lemmas must pass before promotion. Official native Init String checks do not
 create portable environment metadata; absent String declarations remain an
-explicit checked rejection. This source slice is NOT RUN at commit creation.
+explicit checked rejection. This String-projection slice is qualified at exact f9e9b20f92ce2ffa4a666acaf55aa8852949f589.
+
+## Indexed unary cache candidate
+
+The isolated cache qualification branch starts from exact qualified f9e9b20.
+Core/public WHNF, checked inference, infer-only and unfolding use a small list
+through eight entries and an immutable16-level radix index afterward. Full Nat
+hash checks and the unchanged exact-equality scanner decide every hit and error.
+Only the filtered-history Models invariant authorizes equivalence; diagnostic
+cross-bucket traversal order is not semantic. Pair caches and every entry,
+resource, eligibility and scope guard remain unchanged.
+
+The new1024-case scanner, actual nine-definition/five-cache promotion,36 resource,
+16 poisoned-order and ten callback-chain tests run natively and in both generated
+routes. Seventeen public local lemmas plus a private empty-bucket helper are
+pending actual Lean compilation. This cache slice is NOT RUN at creation; it
+adds up to16 persistent path nodes per publication and may regress collisions
+or small workloads. Full time, construction, retained-heap and RSS gates must
+measure the tradeoff. No caller cache is accepted at the public boundary.
 
 ## Remaining whole-operation fallback inventory
 
@@ -129,7 +147,7 @@ the complete original operation's resources and failure semantics.
 | Site | Trigger and remaining work |
 | --- | --- |
 | `API/Dag.lean: psKernelDagCheckTerminalOrOriginal` | Checking/inference outside the supported owning DAG rules, including missing or mismatched same-operation type/recursor references |
-| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including unsupported recursor descendants and missing owning references; String-literal projection is implemented in the isolated candidate and awaits exact-source qualification |
+| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including unsupported recursor descendants and missing owning references; String-literal projection is qualified at f9e9b20; missing owning references and other unsupported descendants still decline |
 | `API/Dag.lean: psKernelDagIsDefEq` | Unsupported descendant callbacks or missing owning references; the ordered prefix, lazy delta/projection, full shape and final rules now have DAG paths in the carrier candidate |
 | `API/DagAdmission.lean: psKernelDagAdmitDeclaration` | Inductive construction/admission and declaration cases not handled by direct admission |
 

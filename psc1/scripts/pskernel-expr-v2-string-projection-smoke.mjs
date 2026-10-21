@@ -123,22 +123,22 @@ console.log("PSC1_V2_DAG_STRING_PROJECTION_MATRIX_JS: PASS public=126 core=504 f
 const modulus=BigInt(get("psKernelCacheHashModulus"));
 const tagRows=(rows,tag)=>{const xs=array(rows);return xs.length===1&&BigInt(xs[0].hash)===modulus+tag;};
 const arenaTag=(state,tag)=>{
- const rows=array(state.checkedInfer);
+ const rows=array(get("psKernelExprV2WhnfCacheEntries")(state.checkedInfer));
  if(rows.length!==1)return false;
  const found=get("psKernelExprV2PagedRequire")(state.whnf.arena,rows[0].result);
  return !rejected(found)&&same(accepted(found,"String-marker").node,
   get("PsKernelExprV2Node").lit(Literal.nat(14000n+tag)));
 };
-const tagged=(state,tag)=>state.nextFresh===tag&&tagRows(state.checkedInfer,tag)&&
- tagRows(state.success,tag)&&tagRows(state.inferOnly,tag)&&tagRows(state.unfold,tag)&&
+const tagged=(state,tag)=>state.nextFresh===tag&&tagRows(get("psKernelExprV2WhnfCacheEntries")(state.checkedInfer),tag)&&
+ tagRows(state.success,tag)&&tagRows(get("psKernelExprV2WhnfCacheEntries")(state.inferOnly),tag)&&tagRows(get("psKernelExprV2WhnfCacheEntries")(state.unfold),tag)&&
  tagRows(state.failure,tag)&&arenaTag(state,tag);
 const stamp=(key,state,tag)=>{
  const made=accepted(get("psKernelExprV2PagedMkLit")(state.whnf.arena,Literal.nat(14000n+tag)),"String-stamp");
  const cache={source:key,result:made.snd,hash:modulus+tag},pair={left:key,right:key,hash:modulus+tag};
- return {whnf:{arena:made.fst,coreCache:List.cons(cache,state.whnf.coreCache),
-  publicCache:List.cons(cache,state.whnf.publicCache),declarations:state.whnf.declarations},
-  nextFresh:tag,checkedInfer:list([cache]),success:list([pair]),inferOnly:list([cache]),
-  unfold:list([cache]),failure:list([pair])};
+ return {whnf:{arena:made.fst,coreCache:get("psKernelExprV2WhnfCacheInsert")(state.whnf.coreCache,cache),
+  publicCache:get("psKernelExprV2WhnfCacheInsert")(state.whnf.publicCache,cache),declarations:state.whnf.declarations},
+  nextFresh:tag,checkedInfer:get("psKernelExprV2WhnfCacheFromList")(list([cache])),success:list([pair]),inferOnly:get("psKernelExprV2WhnfCacheFromList")(list([cache])),
+  unfold:get("psKernelExprV2WhnfCacheFromList")(list([cache])),failure:list([pair])};
 };
 const markStep=(failAt,decline,state,key,result,tag)=>{
  if(!tagged(state,tag))return error("STRING_PROJECTION_STALE_STATE");
@@ -186,9 +186,9 @@ for(const value of values){
    const finalTag=hasField?23n:22n,finalRoot=hasField?selected:term.id;
    must(tagged(result.fst,finalTag),"String-all-fields-and-arena");
    must(result.snd===finalRoot,"String-selected-or-original-root");
-   must(array(result.fst.whnf.coreCache).some(row=>BigInt(row.hash)===modulus+finalTag),
+   must(array(get("psKernelExprV2WhnfCacheEntries")(result.fst.whnf.coreCache)).some(row=>BigInt(row.hash)===modulus+finalTag),
     "String-core-marker-retained");
-   must(array(result.fst.whnf.publicCache).some(row=>BigInt(row.hash)===modulus+finalTag),
+   must(array(get("psKernelExprV2WhnfCacheEntries")(result.fst.whnf.publicCache)).some(row=>BigInt(row.hash)===modulus+finalTag),
     "String-public-marker-retained");
    const sourceEntry=accepted(get("psKernelExprV2PagedRequire")(result.fst.whnf.arena,term.id),"String-original");
    const cached=accepted(get("psKernelExprV2WhnfCacheFind")(result.fst.whnf,term.id,sourceEntry),"String-cache");

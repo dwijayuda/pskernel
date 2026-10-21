@@ -265,10 +265,10 @@ const oneBudget=accepted(accepted(reducer(1n)(scalar)(initial())(constructor.id)
 must(!same(oneBudget.snd,none),"constructor-no-predecessor-WHNF-charge");
 const markWhnf=c=>s=>r=>{
  const entry=accepted(get("psKernelExprV2PagedRequire")(s.arena,r),"mark-valid-source");
- return Option.some(Ex.ok({fst:{...s,publicCache:list([{source:r,result:r,hash:entry.hash}])},snd:r}));
+ return Option.some(Ex.ok({fst:{...s,publicCache:get("psKernelExprV2WhnfCacheFromList")(list([{source:r,result:r,hash:entry.hash}]))},snd:r}));
 };
 const marked=accepted(accepted(direct(markWhnf,initial(),literal.id),"marked-some"),"marked-ok");
-must(!same(marked.snd,none)&&array(marked.fst.publicCache).length===1,"callback-state-preserved");
+must(!same(marked.snd,none)&&array(get("psKernelExprV2WhnfCacheEntries")(marked.fst.publicCache)).length===1,"callback-state-preserved");
 const warm=accepted(accepted(raw(4096n,scalar,initial(),constructor.id),"warm-some"),"warm-ok");
 expectError(raw(0n,scalar,warm.fst,constructor.id),"kernel reduction budget exhausted","warm-guard");
 // Preserve the old Sort-u fixture as explicit public rejection controls.
@@ -441,21 +441,21 @@ for(const [label,levels,message] of [
  const modulus=BigInt(get("psKernelCacheHashModulus"));
  const tagRows=(rows,tag)=>{const xs=array(rows);return xs.length===1&&BigInt(xs[0].hash)===modulus+tag;};
  const markerInArena=(state,tag)=>{
-  const rows=array(state.checkedInfer);
+  const rows=array(get("psKernelExprV2WhnfCacheEntries")(state.checkedInfer));
   if(rows.length!==1)return false;
   const found=get("psKernelExprV2PagedRequire")(state.whnf.arena,rows[0].result);
   return !rejected(found)&&same(accepted(found,"major-marker-node").node,
    get("PsKernelExprV2Node").lit(Literal.nat(12000n+tag)));
  };
- const tagged=(state,tag)=>state.nextFresh===tag&&tagRows(state.checkedInfer,tag)&&
-  tagRows(state.success,tag)&&tagRows(state.inferOnly,tag)&&tagRows(state.unfold,tag)&&tagRows(state.failure,tag)&&markerInArena(state,tag);
+ const tagged=(state,tag)=>state.nextFresh===tag&&tagRows(get("psKernelExprV2WhnfCacheEntries")(state.checkedInfer),tag)&&
+  tagRows(state.success,tag)&&tagRows(get("psKernelExprV2WhnfCacheEntries")(state.inferOnly),tag)&&tagRows(get("psKernelExprV2WhnfCacheEntries")(state.unfold),tag)&&tagRows(state.failure,tag)&&markerInArena(state,tag);
  const stamp=(key,state,tag)=>{
   const made=accepted(get("psKernelExprV2PagedMkLit")(state.whnf.arena,Literal.nat(12000n+tag)),"major-stamp");
   const cache={source:key,result:made.snd,hash:modulus+tag},pair={left:key,right:key,hash:modulus+tag};
-  return {whnf:{arena:made.fst,coreCache:List.cons(cache,state.whnf.coreCache),
-   publicCache:List.cons(cache,state.whnf.publicCache),declarations:state.whnf.declarations},
-   nextFresh:tag,checkedInfer:list([cache]),success:list([pair]),inferOnly:list([cache]),
-   unfold:list([cache]),failure:list([pair])};
+  return {whnf:{arena:made.fst,coreCache:get("psKernelExprV2WhnfCacheInsert")(state.whnf.coreCache,cache),
+   publicCache:get("psKernelExprV2WhnfCacheInsert")(state.whnf.publicCache,cache),declarations:state.whnf.declarations},
+   nextFresh:tag,checkedInfer:get("psKernelExprV2WhnfCacheFromList")(list([cache])),success:list([pair]),inferOnly:get("psKernelExprV2WhnfCacheFromList")(list([cache])),
+   unfold:get("psKernelExprV2WhnfCacheFromList")(list([cache])),failure:list([pair])};
  };
  const callback=(seed,failAt,decline,expected,result,tag,state,root)=>{
   if(root!==expected||!tagged(state,tag))return error("major callback received wrong input or stale state");
@@ -490,8 +490,8 @@ for(const [label,levels,message] of [
    {...oldEmpty,nextFresh:seed},orderRoot.term,cheapRec,cheapProj),actual,"major-five-fixed-callbacks",true);
   const result=attempt(actual,"major-five-callbacks");
   must(tagged(result.fst,seed+5n),"major-all-six-fields-after-rule");
-  must(array(result.fst.whnf.coreCache).some(row=>BigInt(row.hash)===modulus+seed+5n),"major-core-retained");
-  must(array(result.fst.whnf.publicCache).some(row=>BigInt(row.hash)===modulus+seed+5n),"major-public-retained");
+  must(array(get("psKernelExprV2WhnfCacheEntries")(result.fst.whnf.coreCache)).some(row=>BigInt(row.hash)===modulus+seed+5n),"major-core-retained");
+  must(array(get("psKernelExprV2WhnfCacheEntries")(result.fst.whnf.publicCache)).some(row=>BigInt(row.hash)===modulus+seed+5n),"major-public-retained");
   must(!same(get("psKernelExprV2DeclarationRefFind")(result.fst.whnf.declarations)(boxRecName),none),
    "major-owner-retained");
   must(!same(result.snd,none),"major-rule-actually-reduced");

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
+      - research/psc1-pskernel-v2-cache-20261021
       - research/psc1-pskernel-v2-staged-20261021
       - research/psc1-pskernel-v2-carrier-20261021
     paths:

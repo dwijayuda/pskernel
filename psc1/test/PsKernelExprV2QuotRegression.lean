@@ -267,7 +267,7 @@ private def regression : IO Unit := do
   let warm ← match psKernelExprV2TryWhnfStateWithFuel 32 checker.context state root with
     | some result => expect result
     | none => throw (IO.userError "warm quotient fallback")
-  require "public-cache-is-operation-owned" (!warm.fst.publicCache.isEmpty)
+  require "public-cache-is-operation-owned" (!(psKernelExprV2WhnfCacheEntries warm.fst.publicCache).isEmpty)
   require "warm-zero-still-rejects"
     (match psKernelExprV2TryWhnfStateWithFuel 0 checker.context warm.fst root with
      | some (.error error) => error == "kernel reduction budget exhausted" | _ => false)

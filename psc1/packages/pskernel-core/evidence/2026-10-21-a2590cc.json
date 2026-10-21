@@ -1,0 +1,2352 @@
+{
+  "schema": "pskernel-source-qualification-receipt-v1",
+  "repository": "dwijayuda/pskernel",
+  "sourceSha": "a2590cc15c764dae9c6abfb941d6c3155ead5c81",
+  "qualificationScope": "Exact integration HEAD scoped independent V1 developer provider; experimental DAG migration; no global soundness or complete V2/Arena claim",
+  "gates": {
+    "native": "PASS",
+    "portableLean": "PASS",
+    "canonicalPs": "PASS",
+    "generatedJs": "PASS",
+    "localProofs": "PASS",
+    "selectedBenchmarks": "PASS; regressions recorded",
+    "arena": "FAIL",
+    "provider": "PASS"
+  },
+  "runs": {
+    "integration": 39612691517,
+    "correctness": 39612691610,
+    "research": 39612691695,
+    "arena": 39612691512
+  },
+  "jobs": {
+    "nativeIntegration": 119265432957,
+    "generatedIntegration": 119265433419,
+    "nativeCorrectness": 119265434618,
+    "canonical": 119265434911,
+    "officialArena": 119265434853,
+    "generatedArena": 119266642518
+  },
+  "artifacts": [
+    {
+      "id": 12351856193,
+      "run": 39612691517,
+      "kind": "native",
+      "zipSha256": "251433f8365835b89890006199b8cb8eef7653edc0df9c1c99b827c35e51a327"
+    },
+    {
+      "id": 12353890733,
+      "run": 39612691517,
+      "kind": "lean-generated-js",
+      "zipSha256": "9c27f1a091b9a88b4a4f5e6a0089479aa52243de0c3dee879a39045800c98bfd"
+    },
+    {
+      "id": 12354031518,
+      "run": 39612691610,
+      "kind": "canonical-ps-generated-js",
+      "zipSha256": "f16180c14d70dd5093e530b1afc224227c530008c9d683768e354df526cd9f6b"
+    },
+    {
+      "id": 12353576614,
+      "run": 39612691512,
+      "kind": "arena-failed-qualification",
+      "zipSha256": "a66b3b9cda8c944a814926ff6774fcf01b6f7497dd988f0eb4a1ca0dcad377c7"
+    }
+  ],
+  "fileManifests": [
+    {
+      "job": 119265432957,
+      "manifest": {
+        "schema": "pskernel-core-artifacts-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "a2590cc15c764dae9c6abfb941d6c3155ead5c81",
+        "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/a2590cc15c764dae9c6abfb941d6c3155ead5c81",
+        "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39612691517",
+        "runAttempt": "1",
+        "kind": "native",
+        "leanToolchain": "leanprover/lean4:v4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": null,
+        "node": "v22.23.3",
+        "checkerFuelDefault": 4096,
+        "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+        "files": [
+          {
+            "path": ".lake/build/bin/psc1_kernel_provider",
+            "bytes": 119515624,
+            "sha256": "e11ae0d9ec43eb75f4302997e66decccafb0e785cc57e42daa07d73c1e208c3c"
+          },
+          {
+            "path": "host/kernel-provider/KernelProviderMain.lean",
+            "bytes": 15915,
+            "sha256": "4904143dbcbbda5d277f51950abb16e075f34194c3f0d53b2a00f2f80db9839c"
+          },
+          {
+            "path": "dist/expr-v2/native-provider-linux.tar.gz",
+            "bytes": 33255184,
+            "sha256": "d38e2c7e6bc21d7b781ed921b8b6a2c46b7f757d2d782114cfcac299436249d1"
+          }
+        ]
+      }
+    },
+    {
+      "job": 119265433419,
+      "manifest": {
+        "schema": "pskernel-core-artifacts-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "a2590cc15c764dae9c6abfb941d6c3155ead5c81",
+        "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/a2590cc15c764dae9c6abfb941d6c3155ead5c81",
+        "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39612691517",
+        "runAttempt": "1",
+        "kind": "lean-generated-js",
+        "leanToolchain": "leanprover/lean4:v4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "checkerFuelDefault": 4096,
+        "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+        "files": [
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.js",
+            "bytes": 9710316,
+            "sha256": "40a98ef8829d1eb2c3b3d533de8966dde01894b88cc5669a4bce3f661026eaca"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.ts",
+            "bytes": 8702567,
+            "sha256": "db8f9e1fb86b49081e2cb9cc5ae12aca0469cd9d034d42a1b55ee816fa041624"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+            "bytes": 297766,
+            "sha256": "7c84a4ab4e68d75fe9071d8945eae738aff36d219b4d3d0bd2b1177c7c7daa3c"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.js.map",
+            "bytes": 7863378,
+            "sha256": "f97dae12cfb2654231bb506fea45dac21a5007d8c1e7335a11abb91c7b7e83d2"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+            "bytes": 12759,
+            "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+            "bytes": 5462,
+            "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/package.json",
+            "bytes": 42,
+            "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/README.md",
+            "bytes": 11813,
+            "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+          }
+        ]
+      }
+    },
+    {
+      "job": 119265434911,
+      "manifest": {
+        "schema": "pskernel-core-artifacts-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "a2590cc15c764dae9c6abfb941d6c3155ead5c81",
+        "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/a2590cc15c764dae9c6abfb941d6c3155ead5c81",
+        "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39612691610",
+        "runAttempt": "1",
+        "kind": "canonical-ps-generated-js",
+        "leanToolchain": "leanprover/lean4:v4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "checkerFuelDefault": 4096,
+        "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+        "files": [
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.js",
+            "bytes": 9710323,
+            "sha256": "59827f6182a4eb40543d51623586a051ed54a6afdbf699c0b6fb15172edf37e6"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.ts",
+            "bytes": 8702567,
+            "sha256": "db8f9e1fb86b49081e2cb9cc5ae12aca0469cd9d034d42a1b55ee816fa041624"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.d.ts",
+            "bytes": 297766,
+            "sha256": "7c84a4ab4e68d75fe9071d8945eae738aff36d219b4d3d0bd2b1177c7c7daa3c"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.js.map",
+            "bytes": 7863392,
+            "sha256": "e1402e0c724e957b734fb9be42cfa0771fd78d89529568ecf6f089bd2bcc461c"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/scripts/pskernel-canonical-provider.mjs",
+            "bytes": 12759,
+            "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/npm-runtime/canonical-admissions-wire.mjs",
+            "bytes": 5462,
+            "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/package.json",
+            "bytes": 42,
+            "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/canonical-source.tar.gz",
+            "bytes": 110961,
+            "sha256": "aa7720b0cbeb9bd81b21dd053c0d8fe520f17d6c28d5ecb38565a852089d65d9"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/README.md",
+            "bytes": 11813,
+            "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+          }
+        ]
+      }
+    }
+  ],
+  "arena": {
+    "sha": "a2590cc15c764dae9c6abfb941d6c3155ead5c81",
+    "run": 39612691512,
+    "job": 119266642518,
+    "cases": [
+      {
+        "index": 0,
+        "label": "bad",
+        "name": "bugs/constlevels.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 1,
+        "label": "bad",
+        "name": "bugs/ctor-num-fields.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 2,
+        "label": "bad",
+        "name": "bugs/k-rec-conv.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 3,
+        "label": "bad",
+        "name": "bugs/large-elim-param.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 4,
+        "label": "bad",
+        "name": "bugs/large-elim-prop-bool.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 5,
+        "label": "bad",
+        "name": "bugs/level-imax-leq.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 6,
+        "label": "bad",
+        "name": "bugs/level-imax-normalization.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 7,
+        "label": "bad",
+        "name": "bugs/nat-rec-k-lie.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 8,
+        "label": "bad",
+        "name": "bugs/nat-rec-rules.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 9,
+        "label": "bad",
+        "name": "bugs/nested-unused-param.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 10,
+        "label": "bad",
+        "name": "bugs/orphan-rec.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 11,
+        "label": "bad",
+        "name": "bugs/proj-non-structure.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 12,
+        "label": "bad",
+        "name": "bugs/proj-of-imax-prop.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 13,
+        "label": "bad",
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 14,
+        "label": "bad",
+        "name": "bugs/proj-of-subst-prop.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 15,
+        "label": "bad",
+        "name": "bugs/rec-k-lie.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 16,
+        "label": "bad",
+        "name": "bugs/rec-missing-ih.ndjson",
+        "official": "rejected",
+        "pskernel": "unsupported",
+        "classification": "pskernel_unsupported"
+      },
+      {
+        "index": 17,
+        "label": "bad",
+        "name": "bugs/rec-of-subst-prop.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 18,
+        "label": "bad",
+        "name": "other/extra-rec.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 19,
+        "label": "bad",
+        "name": "other/nat-lit-add-bad.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 20,
+        "label": "bad",
+        "name": "other/orphan-ctor.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_metadata_rejection"
+      },
+      {
+        "index": 21,
+        "label": "bad",
+        "name": "other/proj-of-prop.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 22,
+        "label": "bad",
+        "name": "perf/refute-cheap-first.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 23,
+        "label": "bad",
+        "name": "perf/refute-cheap-last.ndjson",
+        "official": "rejected",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 24,
+        "label": "bad",
+        "name": "tutorial/002_badDef.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 25,
+        "label": "bad",
+        "name": "tutorial/009_forallSortBad.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 26,
+        "label": "bad",
+        "name": "tutorial/010_nonTypeType.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 27,
+        "label": "bad",
+        "name": "tutorial/011_nonTypeAxiom.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 28,
+        "label": "bad",
+        "name": "tutorial/012_nonPropThm.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 29,
+        "label": "bad",
+        "name": "tutorial/014_selfProof.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 30,
+        "label": "bad",
+        "name": "tutorial/019_tut06_bad01.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 31,
+        "label": "bad",
+        "name": "tutorial/046_inductBadNonSort.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 32,
+        "label": "bad",
+        "name": "tutorial/047_inductBadNonSort2.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 33,
+        "label": "bad",
+        "name": "tutorial/048_inductLevelParam.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 34,
+        "label": "bad",
+        "name": "tutorial/049_inductTooFewParams.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 35,
+        "label": "bad",
+        "name": "tutorial/050_inductWrongCtorParams.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 36,
+        "label": "bad",
+        "name": "tutorial/051_inductWrongCtorResParams.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 37,
+        "label": "bad",
+        "name": "tutorial/052_inductWrongCtorResLevel.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 38,
+        "label": "bad",
+        "name": "tutorial/053_inductInIndex.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 39,
+        "label": "bad",
+        "name": "tutorial/054_indNeg.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 40,
+        "label": "bad",
+        "name": "tutorial/056_reduceCtorType.mk.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 41,
+        "label": "bad",
+        "name": "tutorial/057_indNegReducible.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 42,
+        "label": "bad",
+        "name": "tutorial/061_typeWithTooHighTypeField.mk.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 43,
+        "label": "bad",
+        "name": "tutorial/073_BogusRecursor.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 44,
+        "label": "bad",
+        "name": "tutorial/087_projOutOfRange.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 45,
+        "label": "bad",
+        "name": "tutorial/088_projNotStruct.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 46,
+        "label": "bad",
+        "name": "tutorial/090_projProp2.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 47,
+        "label": "bad",
+        "name": "tutorial/092_projProp4.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 48,
+        "label": "bad",
+        "name": "tutorial/093_projProp5.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 49,
+        "label": "bad",
+        "name": "tutorial/094_projProp6.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 50,
+        "label": "bad",
+        "name": "tutorial/096_projIndexData.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 51,
+        "label": "bad",
+        "name": "tutorial/097_projIndexData2.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 52,
+        "label": "bad",
+        "name": "tutorial/100_ruleKbad.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 53,
+        "label": "bad",
+        "name": "tutorial/101_ruleKAcc.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 54,
+        "label": "bad",
+        "name": "tutorial/105_proofIrrelevanceBad.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 55,
+        "label": "bad",
+        "name": "tutorial/111_indexedUnitEta.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 56,
+        "label": "bad",
+        "name": "tutorial/113_indexedStructEta.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 57,
+        "label": "bad",
+        "name": "tutorial/116_funEtaBad.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 58,
+        "label": "bad",
+        "name": "tutorial/117_reflOccLeft.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 59,
+        "label": "bad",
+        "name": "tutorial/118_reflOccInIndex.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 60,
+        "label": "bad",
+        "name": "tutorial/125_accRecNoEta.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 61,
+        "label": "bad",
+        "name": "tutorial/132_dup_defs.ndjson",
+        "official": "rejected",
+        "pskernel": "malformed",
+        "classification": "matched_transport_rejection"
+      },
+      {
+        "index": 62,
+        "label": "bad",
+        "name": "tutorial/133_dup_ind_def.ndjson",
+        "official": "rejected",
+        "pskernel": "malformed",
+        "classification": "matched_transport_rejection"
+      },
+      {
+        "index": 63,
+        "label": "bad",
+        "name": "tutorial/134_dup_ctor_def.ndjson",
+        "official": "rejected",
+        "pskernel": "malformed",
+        "classification": "matched_transport_rejection"
+      },
+      {
+        "index": 64,
+        "label": "bad",
+        "name": "tutorial/135_dup_rec_def.ndjson",
+        "official": "rejected",
+        "pskernel": "malformed",
+        "classification": "matched_transport_rejection"
+      },
+      {
+        "index": 65,
+        "label": "bad",
+        "name": "tutorial/136_misnamed_rec_user.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "index": 66,
+        "label": "bad",
+        "name": "tutorial/137_dup_rec_def2.ndjson",
+        "official": "rejected",
+        "pskernel": "malformed",
+        "classification": "matched_transport_rejection"
+      },
+      {
+        "index": 67,
+        "label": "bad",
+        "name": "tutorial/138_dup_ctor_rec.ndjson",
+        "official": "rejected",
+        "pskernel": "malformed",
+        "classification": "matched_transport_rejection"
+      },
+      {
+        "index": 68,
+        "label": "bad",
+        "name": "tutorial/139_DupConCon.ndjson",
+        "official": "rejected",
+        "pskernel": "malformed",
+        "classification": "matched_transport_rejection"
+      },
+      {
+        "index": 69,
+        "label": "bad",
+        "name": "tutorial/140_falseFromUnsafe.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "agreement_with_unsafe_or_partial_contract_difference"
+      },
+      {
+        "index": 70,
+        "label": "bad",
+        "name": "tutorial/141_falseFromPartial.ndjson",
+        "official": "rejected",
+        "pskernel": "rejected",
+        "classification": "agreement_with_unsafe_or_partial_contract_difference"
+      },
+      {
+        "index": 71,
+        "label": "good",
+        "name": "corner-cases/proof-param-ok.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 72,
+        "label": "good",
+        "name": "init-prelude.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 73,
+        "label": "good",
+        "name": "other/level-index-out-of-order.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 74,
+        "label": "good",
+        "name": "other/nat-lit-add.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 75,
+        "label": "good",
+        "name": "other/nat-lit-ble.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 76,
+        "label": "good",
+        "name": "other/nat-lit-sub.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 77,
+        "label": "good",
+        "name": "other/sparse-name-index.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 78,
+        "label": "good",
+        "name": "perf/app-lam.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 79,
+        "label": "good",
+        "name": "perf/args-before-unfold.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 80,
+        "label": "good",
+        "name": "perf/beta-ladder.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 81,
+        "label": "good",
+        "name": "perf/church-numerals.ndjson",
+        "official": "accepted",
+        "pskernel": "resource_exhausted",
+        "classification": "pskernel_resource_exhausted"
+      },
+      {
+        "index": 82,
+        "label": "good",
+        "name": "perf/discarded-argument-match.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 83,
+        "label": "good",
+        "name": "perf/discarded-argument.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 84,
+        "label": "good",
+        "name": "perf/folded-constant-first.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 85,
+        "label": "good",
+        "name": "perf/folded-constant-last.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 86,
+        "label": "good",
+        "name": "perf/fueled-chain.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 87,
+        "label": "good",
+        "name": "perf/grind-ring-5.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 88,
+        "label": "good",
+        "name": "perf/identical-nesting.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 89,
+        "label": "good",
+        "name": "perf/irrelevance-before-evaluation.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 90,
+        "label": "good",
+        "name": "perf/let-ladder.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 91,
+        "label": "good",
+        "name": "perf/magma-list-deep-n21.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 92,
+        "label": "good",
+        "name": "perf/magma-list-deep-n36.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 93,
+        "label": "good",
+        "name": "perf/magma-list-pair-n21.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 94,
+        "label": "good",
+        "name": "perf/magma-list-pair-n7.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 95,
+        "label": "good",
+        "name": "perf/repeated-subproblem.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 96,
+        "label": "good",
+        "name": "perf/shared-subterm.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 97,
+        "label": "good",
+        "name": "perf/shift-cascade.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 98,
+        "label": "good",
+        "name": "perf/unroll-versus-evaluate.ndjson",
+        "official": "accepted",
+        "pskernel": "timeout",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "index": 99,
+        "label": "good",
+        "name": "tutorial/001_basicDef.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 100,
+        "label": "good",
+        "name": "tutorial/003_arrowType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 101,
+        "label": "good",
+        "name": "tutorial/004_dependentType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 102,
+        "label": "good",
+        "name": "tutorial/005_constType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 103,
+        "label": "good",
+        "name": "tutorial/006_betaReduction.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 104,
+        "label": "good",
+        "name": "tutorial/007_betaReduction2.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 105,
+        "label": "good",
+        "name": "tutorial/008_forallSortWhnf.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 106,
+        "label": "good",
+        "name": "tutorial/013_thmProof.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 107,
+        "label": "good",
+        "name": "tutorial/015_levelComp1.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 108,
+        "label": "good",
+        "name": "tutorial/016_levelComp2.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 109,
+        "label": "good",
+        "name": "tutorial/017_levelComp3.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 110,
+        "label": "good",
+        "name": "tutorial/018_levelParams.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 111,
+        "label": "good",
+        "name": "tutorial/020_levelComp4.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 112,
+        "label": "good",
+        "name": "tutorial/021_levelComp5.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 113,
+        "label": "good",
+        "name": "tutorial/022_imax1.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 114,
+        "label": "good",
+        "name": "tutorial/023_imax2.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 115,
+        "label": "good",
+        "name": "tutorial/024_levelMaxComm.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 116,
+        "label": "good",
+        "name": "tutorial/025_levelMaxAssoc.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 117,
+        "label": "good",
+        "name": "tutorial/026_levelMaxIdem.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 118,
+        "label": "good",
+        "name": "tutorial/027_levelMaxAbsorb.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 119,
+        "label": "good",
+        "name": "tutorial/028_inferVar.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 120,
+        "label": "good",
+        "name": "tutorial/029_defEqLambda.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 121,
+        "label": "good",
+        "name": "tutorial/030_peano1.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 122,
+        "label": "good",
+        "name": "tutorial/031_peano2.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 123,
+        "label": "good",
+        "name": "tutorial/032_peano3.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 124,
+        "label": "good",
+        "name": "tutorial/033_letType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 125,
+        "label": "good",
+        "name": "tutorial/034_letTypeDep.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 126,
+        "label": "good",
+        "name": "tutorial/035_letRed.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 127,
+        "label": "good",
+        "name": "tutorial/036_empty.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 128,
+        "label": "good",
+        "name": "tutorial/037_boolType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 129,
+        "label": "good",
+        "name": "tutorial/038_twoBool.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 130,
+        "label": "good",
+        "name": "tutorial/039_andType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 131,
+        "label": "good",
+        "name": "tutorial/040_prodType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 132,
+        "label": "good",
+        "name": "tutorial/041_pprodType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 133,
+        "label": "good",
+        "name": "tutorial/042_pUnitType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 134,
+        "label": "good",
+        "name": "tutorial/043_eqType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 135,
+        "label": "good",
+        "name": "tutorial/044_natDef.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 136,
+        "label": "good",
+        "name": "tutorial/045_rbTreeDef.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 137,
+        "label": "good",
+        "name": "tutorial/055_reduceCtorParam.mk.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 138,
+        "label": "good",
+        "name": "tutorial/058_predWithTypeField.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 139,
+        "label": "good",
+        "name": "tutorial/059_typeWithTypeField.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 140,
+        "label": "good",
+        "name": "tutorial/060_typeWithTypeFieldPoly.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 141,
+        "label": "good",
+        "name": "tutorial/062_emptyRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 142,
+        "label": "good",
+        "name": "tutorial/063_boolRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 143,
+        "label": "good",
+        "name": "tutorial/064_twoBoolRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 144,
+        "label": "good",
+        "name": "tutorial/065_andRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 145,
+        "label": "good",
+        "name": "tutorial/066_prodRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 146,
+        "label": "good",
+        "name": "tutorial/067_pprodRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 147,
+        "label": "good",
+        "name": "tutorial/068_punitRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 148,
+        "label": "good",
+        "name": "tutorial/069_eqRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 149,
+        "label": "good",
+        "name": "tutorial/070_nRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 150,
+        "label": "good",
+        "name": "tutorial/071_rbTreeRef.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 151,
+        "label": "good",
+        "name": "tutorial/072_boolPropRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 152,
+        "label": "good",
+        "name": "tutorial/074_existsRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 153,
+        "label": "good",
+        "name": "tutorial/075_typeSingletonRecReduction.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 154,
+        "label": "good",
+        "name": "tutorial/076_sortElimPropRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 155,
+        "label": "good",
+        "name": "tutorial/077_sortElimProp2Rec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 156,
+        "label": "good",
+        "name": "tutorial/078_boolRecEqns.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 157,
+        "label": "good",
+        "name": "tutorial/079_prodRecEqns.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 158,
+        "label": "good",
+        "name": "tutorial/080_nRecReduction.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 159,
+        "label": "good",
+        "name": "tutorial/081_listRecReduction.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 160,
+        "label": "good",
+        "name": "tutorial/082_RBTree.id_spec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 161,
+        "label": "good",
+        "name": "tutorial/083_And.right.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 162,
+        "label": "good",
+        "name": "tutorial/084_Prod.snd.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 163,
+        "label": "good",
+        "name": "tutorial/085_PProd.snd.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 164,
+        "label": "good",
+        "name": "tutorial/086_PSigma.snd.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 165,
+        "label": "good",
+        "name": "tutorial/089_projProp1.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 166,
+        "label": "good",
+        "name": "tutorial/091_projProp3.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 167,
+        "label": "good",
+        "name": "tutorial/095_projDataIndexRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 168,
+        "label": "good",
+        "name": "tutorial/098_projRed.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 169,
+        "label": "good",
+        "name": "tutorial/099_ruleK.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 170,
+        "label": "good",
+        "name": "tutorial/102_aNatLit.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 171,
+        "label": "good",
+        "name": "tutorial/103_natLitEq.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 172,
+        "label": "good",
+        "name": "tutorial/104_proofIrrelevance.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 173,
+        "label": "good",
+        "name": "tutorial/106_proofIrrelevanceWhnf.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 174,
+        "label": "good",
+        "name": "tutorial/107_proofIrrelevanceUnderBinder.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 175,
+        "label": "good",
+        "name": "tutorial/108_unitEta1.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 176,
+        "label": "good",
+        "name": "tutorial/109_unitEta2.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 177,
+        "label": "good",
+        "name": "tutorial/110_unitEta3.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 178,
+        "label": "good",
+        "name": "tutorial/112_structEta.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 179,
+        "label": "good",
+        "name": "tutorial/114_funEta.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 180,
+        "label": "good",
+        "name": "tutorial/115_funEtaDep.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 181,
+        "label": "good",
+        "name": "tutorial/119_reduceCtorParamRefl.mk.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 182,
+        "label": "good",
+        "name": "tutorial/120_reduceCtorParamRefl2.mk.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 183,
+        "label": "good",
+        "name": "tutorial/121_rTreeRec.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 184,
+        "label": "good",
+        "name": "tutorial/122_rtreeRecReduction.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 185,
+        "label": "good",
+        "name": "tutorial/123_accRecType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 186,
+        "label": "good",
+        "name": "tutorial/124_accRecReduction.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 187,
+        "label": "good",
+        "name": "tutorial/126_quotMkType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 188,
+        "label": "good",
+        "name": "tutorial/127_quotIndType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 189,
+        "label": "good",
+        "name": "tutorial/128_quotLiftType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 190,
+        "label": "good",
+        "name": "tutorial/129_quotSoundType.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 191,
+        "label": "good",
+        "name": "tutorial/130_quotLiftReduction.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      },
+      {
+        "index": 192,
+        "label": "good",
+        "name": "tutorial/131_quotIndReduction.ndjson",
+        "official": "accepted",
+        "pskernel": "accepted",
+        "classification": "matched_acceptance"
+      }
+    ],
+    "diagnostics": [
+      {
+        "verdict": "unsupported",
+        "stage": "kernel-admission",
+        "reason": "{\"message\":\"simple inductive admission does not yet support nested recursive occurrences\"}",
+        "coreInvoked": true,
+        "exportedDeclarations": 167,
+        "admissionCommands": 118,
+        "arenaNodes": "4596",
+        "elapsed_seconds": 30.521082233000016,
+        "peak_rss_kib": 461744,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 5526,
+          "exportedDeclarations": 167,
+          "admissionCommands": 118,
+          "arenaNodes": "4596",
+          "fuel": "4096",
+          "sourceSha256": "95610796af07af3a5959058d98757f892cd578239f7e0b29154d22d8285ab692",
+          "elapsedMilliseconds": 320.589858
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 16,
+        "name": "bugs/rec-missing-ih.ndjson",
+        "label": "bad",
+        "classification": "pskernel_unsupported"
+      },
+      {
+        "verdict": "rejected",
+        "stage": "kernel-admission",
+        "reason": "{\"message\":\"safe declaration uses unsafe constant\"}",
+        "coreInvoked": true,
+        "exportedDeclarations": 4,
+        "admissionCommands": 3,
+        "arenaNodes": "10",
+        "elapsed_seconds": 0.18706038200002695,
+        "peak_rss_kib": 113612,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 22,
+          "exportedDeclarations": 4,
+          "admissionCommands": 3,
+          "arenaNodes": "10",
+          "fuel": "4096",
+          "sourceSha256": "194157f2cce7f6578d7f01c3673bdb0832f50ab2e610b501df5ed688b26fc19d",
+          "elapsedMilliseconds": 72.946003
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 69,
+        "name": "tutorial/140_falseFromUnsafe.ndjson",
+        "label": "bad",
+        "classification": "agreement_with_unsafe_or_partial_contract_difference"
+      },
+      {
+        "verdict": "rejected",
+        "stage": "kernel-admission",
+        "reason": "{\"message\":\"safe declaration uses partial constant\"}",
+        "coreInvoked": true,
+        "exportedDeclarations": 4,
+        "admissionCommands": 3,
+        "arenaNodes": "10",
+        "elapsed_seconds": 0.19089770899995528,
+        "peak_rss_kib": 113352,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 22,
+          "exportedDeclarations": 4,
+          "admissionCommands": 3,
+          "arenaNodes": "10",
+          "fuel": "4096",
+          "sourceSha256": "de2585794afdce34820c9b800a4ca0547819051b2f75400389841176d97f2d23",
+          "elapsedMilliseconds": 78.613233
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 70,
+        "name": "tutorial/141_falseFromPartial.ndjson",
+        "label": "bad",
+        "classification": "agreement_with_unsafe_or_partial_contract_difference"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.10122178300003,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 439,
+          "exportedDeclarations": 17,
+          "admissionCommands": 7,
+          "arenaNodes": "367",
+          "fuel": "4096",
+          "sourceSha256": "8aa0de6418951bb71bd3b6d3ac50917758d0b3027baf1d723887975d7ce1067f",
+          "elapsedMilliseconds": 91.535417
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 23,
+        "name": "perf/refute-cheap-last.ndjson",
+        "label": "bad",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.14296816199999,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 63723,
+          "exportedDeclarations": 2059,
+          "admissionCommands": 1774,
+          "arenaNodes": "54535",
+          "fuel": "4096",
+          "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "elapsedMilliseconds": 2261.79853
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 72,
+        "name": "init-prelude.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.17418671099995,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 28573,
+          "exportedDeclarations": 34,
+          "admissionCommands": 21,
+          "arenaNodes": "24427",
+          "fuel": "4096",
+          "sourceSha256": "9b2d47fc35890abe961453a4f6c369f41db8fe483116e5a6d6184f2e2219fffd",
+          "elapsedMilliseconds": 762.578074
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 78,
+        "name": "perf/app-lam.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "resource_exhausted",
+        "stage": "kernel-admission",
+        "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+        "coreInvoked": true,
+        "exportedDeclarations": 6,
+        "admissionCommands": 4,
+        "arenaNodes": "197",
+        "elapsed_seconds": 17.758073947999947,
+        "peak_rss_kib": 1122612,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "fuel": "4096",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "elapsedMilliseconds": 91.829087
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 81,
+        "name": "perf/church-numerals.ndjson",
+        "label": "good",
+        "classification": "pskernel_resource_exhausted"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.12878074399987,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 10377,
+          "exportedDeclarations": 20,
+          "admissionCommands": 11,
+          "arenaNodes": "10281",
+          "fuel": "4096",
+          "sourceSha256": "ec0e0f9da38e9246d75a2f97577f0fbcbc5f6800131cbc32fda593501fff447f",
+          "elapsedMilliseconds": 352.018674
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 80,
+        "name": "perf/beta-ladder.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.12466775500002,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 596,
+          "exportedDeclarations": 24,
+          "admissionCommands": 15,
+          "arenaNodes": "490",
+          "fuel": "4096",
+          "sourceSha256": "3294ece808992c444daeca92978060cad8a034c712fa515347a39fd899c0e9e5",
+          "elapsedMilliseconds": 104.39227
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 82,
+        "name": "perf/discarded-argument-match.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.1000280950002,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 367,
+          "exportedDeclarations": 11,
+          "admissionCommands": 6,
+          "arenaNodes": "309",
+          "fuel": "4096",
+          "sourceSha256": "cec7700a3e727ba8000098c29e12a15aea675cba36c13a65dee37846b10226c5",
+          "elapsedMilliseconds": 98.577587
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 83,
+        "name": "perf/discarded-argument.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.07865893200005,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 1262,
+          "exportedDeclarations": 19,
+          "admissionCommands": 9,
+          "arenaNodes": "1180",
+          "fuel": "4096",
+          "sourceSha256": "11b7f8461b089ff0ec818e9442c08c187f51782f37a76f78383693f56b50a53c",
+          "elapsedMilliseconds": 121.88625
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 84,
+        "name": "perf/folded-constant-first.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.105814150000015,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 1262,
+          "exportedDeclarations": 19,
+          "admissionCommands": 9,
+          "arenaNodes": "1180",
+          "fuel": "4096",
+          "sourceSha256": "2c9f245b5ae84dd2807def030a046884632c778a6c0edb3ec18b79c83ef51069",
+          "elapsedMilliseconds": 117.918275
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 85,
+        "name": "perf/folded-constant-last.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.125537642999916,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 9296,
+          "exportedDeclarations": 194,
+          "admissionCommands": 134,
+          "arenaNodes": "8205",
+          "fuel": "4096",
+          "sourceSha256": "29104061cf7bc896df020d1697d6721bca88a82c132043f86236d58209a713ee",
+          "elapsedMilliseconds": 418.757162
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 86,
+        "name": "perf/fueled-chain.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.19937674800008,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 199196,
+          "exportedDeclarations": 2432,
+          "admissionCommands": 2182,
+          "arenaNodes": "180991",
+          "fuel": "4096",
+          "sourceSha256": "cc48d6b44287e99ba0813e124890744d023e155447c6f5f8b16fba56a61956d9",
+          "elapsedMilliseconds": 7037.000803
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 87,
+        "name": "perf/grind-ring-5.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.11562019500002,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 10398,
+          "exportedDeclarations": 22,
+          "admissionCommands": 13,
+          "arenaNodes": "10292",
+          "fuel": "4096",
+          "sourceSha256": "87795e028a4cfab1c44b74635bf66cf3d9367f14d8a899af3aedb8fa8d83482b",
+          "elapsedMilliseconds": 351.392441
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 90,
+        "name": "perf/let-ladder.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.109111571000085,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 21629,
+          "exportedDeclarations": 588,
+          "admissionCommands": 479,
+          "arenaNodes": "17728",
+          "fuel": "4096",
+          "sourceSha256": "569e923dd6a99820bf0ad2114399fb315af4f984b91855423846ae2dbdb7ae05",
+          "elapsedMilliseconds": 826.483144
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 91,
+        "name": "perf/magma-list-deep-n21.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.114456374000156,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 22822,
+          "exportedDeclarations": 588,
+          "admissionCommands": 479,
+          "arenaNodes": "18849",
+          "fuel": "4096",
+          "sourceSha256": "41b507f870286c853e00fa0a98ef25a87fe2d91c2bce18d5cd1d94e358fb87e8",
+          "elapsedMilliseconds": 1053.442968
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 92,
+        "name": "perf/magma-list-deep-n36.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.11604135000016,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 11027,
+          "exportedDeclarations": 324,
+          "admissionCommands": 263,
+          "arenaNodes": "8858",
+          "fuel": "4096",
+          "sourceSha256": "23254b17b678bd63b4c13e598affeb44abbd06313bcba3d7f6f0261bb8363c04",
+          "elapsedMilliseconds": 508.541504
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 93,
+        "name": "perf/magma-list-pair-n21.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.098278660000005,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 11037,
+          "exportedDeclarations": 324,
+          "admissionCommands": 263,
+          "arenaNodes": "8868",
+          "fuel": "4096",
+          "sourceSha256": "c2165d1b8c5100a34d430ec28d6d5806d580f9e0880d0f3272dce997bfdfd5ba",
+          "elapsedMilliseconds": 464.038578
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 94,
+        "name": "perf/magma-list-pair-n7.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.12331056400012,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 1252,
+          "exportedDeclarations": 16,
+          "admissionCommands": 8,
+          "arenaNodes": "1175",
+          "fuel": "4096",
+          "sourceSha256": "4da96adf414a27c4948ddded77068d579339ee189719e35d8a36ab83731ab4aa",
+          "elapsedMilliseconds": 126.76371
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 96,
+        "name": "perf/shared-subterm.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      },
+      {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "reason": null,
+        "coreInvoked": null,
+        "exportedDeclarations": null,
+        "admissionCommands": null,
+        "arenaNodes": null,
+        "elapsed_seconds": 60.09829924900009,
+        "peak_rss_kib": null,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 1159,
+          "exportedDeclarations": 10,
+          "admissionCommands": 5,
+          "arenaNodes": "1107",
+          "fuel": "4096",
+          "sourceSha256": "4423afd52ca6915910304b4770e027809cb3ad21c672b7e9fcfe0267c713805e",
+          "elapsedMilliseconds": 134.564365
+        },
+        "invalid_progress_snapshots": 0,
+        "index": 98,
+        "name": "perf/unroll-versus-evaluate.ndjson",
+        "label": "good",
+        "classification": "pskernel_timeout"
+      }
+    ],
+    "summary": "2026-10-21T14:31:17.9067686Z PSC1_ARENA435_COMPARE_SUMMARY total=193 matched=172 counts={'agreement_with_unsafe_or_partial_contract_difference': 2, 'matched_acceptance': 105, 'matched_kernel_rejection': 59, 'matched_metadata_rejection': 1, 'matched_transport_rejection': 7, 'pskernel_resource_exhausted': 1, 'pskernel_timeout': 17, 'pskernel_unsupported': 1} complete=False fuel=4096",
+    "artifact": 12353576614,
+    "zipSha256": "a66b3b9cda8c944a814926ff6774fcf01b6f7497dd988f0eb4a1ca0dcad377c7"
+  },
+  "limitations": {
+    "directJs": "unsupported for the complete kernel",
+    "defaultProvider": "V1",
+    "publicWholeOperationFallbackSites": 4,
+    "initialDagDecode": true,
+    "inductiveAdmissionBridge": "V1",
+    "hostLimit": "60 seconds per Arena case; existing 2048 MiB V8 old-space cap is not an OS RSS cap",
+    "kernelFuelDefault": 4096,
+    "hashes": "Integrity receipts only, never kernel authority",
+    "proofs": "Local invariants and finite differential coverage, not global soundness"
+  }
+}

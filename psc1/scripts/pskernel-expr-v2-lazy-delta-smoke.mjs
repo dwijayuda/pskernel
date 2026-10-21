@@ -241,8 +241,8 @@ const zero=lit(0n),one=lit(1n),cold=initial();
 const warm=attempt(raw(64n,context,cold,left.id,right.id));
 const oldWarm=accepted(original(64n,base.context,oldEmpty,left.term,right.term),"old-warm");
 must(warm.snd===true&&oldWarm.fst===true,"failed-args-do-not-mean-inequality");
-must(!same(warm.fst.inferOnly,nil)&&same(warm.fst.checkedInfer,nil)&&
- !same(warm.fst.unfold,nil)&&!same(warm.fst.failure,nil),"nonprop-state-survives-full-delta");
+must(!same(get("psKernelExprV2WhnfCacheEntries")(warm.fst.inferOnly),nil)&&same(get("psKernelExprV2WhnfCacheEntries")(warm.fst.checkedInfer),nil)&&
+ !same(get("psKernelExprV2WhnfCacheEntries")(warm.fst.unfold),nil)&&!same(warm.fst.failure,nil),"nonprop-state-survives-full-delta");
 const contains=(state,cache,l,r)=>accepted(get("psKernelExprV2DefEqPairContains")(
  state.whnf.arena,state[cache],l,r),"pair-contains");
 for(const [l,r] of [[left.id,right.id],[right.id,left.id]])
@@ -254,8 +254,8 @@ must(contains(warm.fst,"success",left.id,right.id)===true,"original-success-publ
 must(contains(warm.fst,"success",zero.id,one.id)===false,"unequal-arguments-never-success");
 for(const root of [left.id,right.id]){
  const entry=accepted(get("psKernelExprV2PagedRequire")(warm.fst.whnf.arena,root),"unfold-entry");
- const found=accepted(get("psKernelExprV2WhnfCacheFindIn")(warm.fst.unfold)
-  (warm.fst.whnf.arena)(root)(entry.hash),"unfold-cache");
+ const found=accepted(get("psKernelExprV2WhnfCacheLookup")(
+  warm.fst.unfold,warm.fst.whnf.arena,root,entry.hash),"unfold-cache");
  must(!same(found,none),"unfold-cache-published-both-sides");
 }
 for(const fuel of [0n,1n,64n])for(const recDepth of [0n,15n,16n]){
@@ -279,7 +279,7 @@ for(const [l,r] of [[left,right],[right,left]]){
 }
 const child=get("psKernelExprV2CheckStateFreshName")(warm.fst,name("scope")).snd;
 const restored=get("psKernelExprV2CheckStateExitLocalScope")(cold,child);
-must(same(restored.unfold,nil)&&same(restored.failure,nil)&&
+must(same(get("psKernelExprV2WhnfCacheEntries")(restored.unfold),nil)&&same(restored.failure,nil)&&
  restored.whnf.arena.size===child.whnf.arena.size&&restored.nextFresh===child.nextFresh,
  "scope-restores-delta-caches");
 err(step(badDefEq,core,context,restored,left.id,right.id),"arguments-called",
@@ -287,7 +287,7 @@ err(step(badDefEq,core,context,restored,left.id,right.id),"arguments-called",
 const preserved=get("psKernelExprV2CheckStateWithInferOnly")(
  get("psKernelExprV2CheckStateWithArena")(
   get("psKernelExprV2CheckStateWithSuccess")(child,child.success),child.whnf.arena),child.inferOnly);
-must(array(preserved.unfold).length===array(child.unfold).length&&
+must(array(get("psKernelExprV2WhnfCacheEntries")(preserved.unfold)).length===array(get("psKernelExprV2WhnfCacheEntries")(child.unfold)).length&&
  contains(preserved,"failure",left.id,right.id)===true,"setters-preserve-delta-caches");
 
 // Continue the same arena owner before constructing further collision/adversarial roots.
@@ -336,7 +336,7 @@ must(get("psKernelExprEqual")(observed)(accepted(oldCollided.fst,"old-collision"
 must(accepted(get("psKernelExprV2PagedRequire")(arena,idZero.id),"id-first").hash===
  accepted(get("psKernelExprV2PagedRequire")(arena,idCollision.id),"id-second").hash,
  "real-unfold-key-hash-collision");
-must(array(collided.fst.unfold).length===array(primed.fst.unfold).length+1,
+must(array(get("psKernelExprV2WhnfCacheEntries")(collided.fst.unfold)).length===array(get("psKernelExprV2WhnfCacheEntries")(primed.fst.unfold)).length+1,
  "collision-inserts-distinct-unfold");
 arena=collided.fst.whnf.arena;
 
@@ -349,7 +349,7 @@ const opened=step(falseDefEq,core,context,initial(),openLeft.id,openRight.id);
 compareStep(originalStep(oldFalseDefEq,oldCore,base.context,oldEmpty,openLeft.term,openRight.term),
  opened,"open-argument-state");
 const openedResult=attempt(opened);
-must(same(openedResult.fst.failure,nil)&&same(openedResult.fst.unfold,nil)&&
+must(same(openedResult.fst.failure,nil)&&same(get("psKernelExprV2WhnfCacheEntries")(openedResult.fst.unfold),nil)&&
  openedResult.fst.nextFresh===1n,"open-inputs-do-not-publish-delta-caches");
 must(same(openedResult.snd,stepEqual),"open-failed-args-still-unfold-equal");
 const argLeft=app(left,lit(1n));

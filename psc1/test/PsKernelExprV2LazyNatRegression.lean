@@ -275,8 +275,8 @@ private def regression : IO Unit := do
   let oldWarm ← expect (psKernelIsDefEqWithFuel 64 base.context
     psKernelCheckerStateEmpty (.mdata 7 warmAdd) (lit 3))
   require "nonprop-inference-state-survives-nat-continuation"
-    (!warm.fst.inferOnly.isEmpty && warm.fst.checkedInfer.isEmpty &&
-      !warm.fst.whnf.publicCache.isEmpty)
+    (!(psKernelExprV2WhnfCacheEntries warm.fst.inferOnly).isEmpty && (psKernelExprV2WhnfCacheEntries warm.fst.checkedInfer).isEmpty &&
+      !(psKernelExprV2WhnfCacheEntries warm.fst.whnf.publicCache).isEmpty)
   require "nat-success-publishes-original-pair"
     (← expect (psKernelExprV2DefEqPairContains warm.fst.whnf.arena
       warm.fst.success metadataId threeId))

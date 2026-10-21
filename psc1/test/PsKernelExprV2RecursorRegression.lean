@@ -266,8 +266,8 @@ private def majorResourceMatrix (session : PsKernelKernelSession)
 
 /- Diagnostic cache rows use an out-of-range hash and cannot establish a
    cached judgment. Each callback must receive the complete previous marker. -/
-private def majorCacheTag (rows : List PsKernelExprV2WhnfCacheEntry) (tag : Nat) : Bool :=
-  match rows with
+private def majorCacheTag (cache : PsKernelExprV2WhnfCache) (tag : Nat) : Bool :=
+  match psKernelExprV2WhnfCacheEntries cache with
   | [row] => row.hash == psKernelCacheHashModulus + tag
   | _ => false
 
@@ -277,7 +277,7 @@ private def majorPairTag (rows : List PsKernelExprV2DefEqPair) (tag : Nat) : Boo
   | _ => false
 
 private def majorArenaTag (state : PsKernelExprV2CheckState) (tag : Nat) : Bool :=
-  match state.checkedInfer with
+  match psKernelExprV2WhnfCacheEntries state.checkedInfer with
   | [row] =>
       match psKernelExprV2PagedRequire state.whnf.arena row.result with
       | .ok entry =>
@@ -297,9 +297,10 @@ private def majorStamp (key : Nat) (state : PsKernelExprV2CheckState) (tag : Nat
   let (arena,markerId) ← psKernelExprV2PagedMkLit state.whnf.arena (.nat (12000 + tag))
   let cache := PsKernelExprV2WhnfCacheEntry.mk key markerId (psKernelCacheHashModulus + tag)
   let pair := PsKernelExprV2DefEqPair.mk key key (psKernelCacheHashModulus + tag)
-  let whnf := PsKernelExprV2WhnfState.mk arena (cache :: state.whnf.coreCache)
-    (cache :: state.whnf.publicCache) state.whnf.declarations
-  pure (PsKernelExprV2CheckState.mk whnf tag [cache] [pair] [cache] [cache] [pair])
+  let whnf := PsKernelExprV2WhnfState.mk arena (psKernelExprV2WhnfCacheInsert state.whnf.coreCache cache)
+    (psKernelExprV2WhnfCacheInsert state.whnf.publicCache cache) state.whnf.declarations
+  let entries := psKernelExprV2WhnfCacheFromList [cache]
+  pure (PsKernelExprV2CheckState.mk whnf tag entries [pair] entries entries [pair])
 
 private def majorCallback (seed failAt : Nat) (decline : Bool)
     (expectedRoot result tag : Nat) (state : PsKernelExprV2CheckState) (root : Nat) :
@@ -371,9 +372,9 @@ private def majorOrderRegression (scalar : PsKernelCheckerContext)
         | throw (IO.userError "major ordered reduction failed")
       require "major-all-six-fields-after-rule" (majorStateTag result.fst (seed + 5))
       require "major-core-cache-retained"
-        (result.fst.whnf.coreCache.any (fun row => row.hash == psKernelCacheHashModulus + seed + 5))
+        ((psKernelExprV2WhnfCacheEntries result.fst.whnf.coreCache).any (fun row => row.hash == psKernelCacheHashModulus + seed + 5))
       require "major-public-cache-retained"
-        (result.fst.whnf.publicCache.any (fun row => row.hash == psKernelCacheHashModulus + seed + 5))
+        ((psKernelExprV2WhnfCacheEntries result.fst.whnf.publicCache).any (fun row => row.hash == psKernelCacheHashModulus + seed + 5))
       require "major-owner-retained"
         (psKernelExprV2DeclarationRefFind result.fst.whnf.declarations boxRecName).isSome
       require "major-rule-actually-reduced" result.snd.isSome
@@ -931,10 +932,11 @@ private def regression : IO Unit := do
     | .error error => some (.error error)
     | .ok entry => some (.ok
         (PsKernelExprV2WhnfState.mk state.arena state.coreCache
-          [PsKernelExprV2WhnfCacheEntry.mk root root entry.hash] state.declarations,root))
+          (psKernelExprV2WhnfCacheFromList
+            [PsKernelExprV2WhnfCacheEntry.mk root root entry.hash]) state.declarations,root))
   require "callback-state-survives-normalization-and-rule"
     (match psKernelExprV2TryReduceInductiveRecursor markWhnf checker.context initial literalId with
-     | some (.ok result) => result.snd.isSome && result.fst.publicCache.length == 1
+     | some (.ok result) => result.snd.isSome && (psKernelExprV2WhnfCacheEntries result.fst.publicCache).length == 1
      | _ => false)
   let warm ← match psKernelExprV2TryWhnfStateWithFuel 4096 checker.context initial constructorId with
     | some result => expect result

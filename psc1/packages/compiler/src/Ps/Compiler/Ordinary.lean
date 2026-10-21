@@ -121,7 +121,7 @@ def psOrdinaryConstructorFieldsWorker
           Prod.mk (Option.some candidate) budget
         else Prod.mk Option.none budget
   | remaining + 1 =>
-      let continue : PsExpr -> Nat -> Prod (Option PsExpr) Nat :=
+      let fillRest : PsExpr -> Nat -> Prod (Option PsExpr) Nat :=
         psOrdinaryConstructorFieldsWorker smaller environment locals target remaining;
       fun (candidate : PsExpr) (budget : Nat) =>
         match budget with
@@ -136,7 +136,7 @@ def psOrdinaryConstructorFieldsWorker
                     match field.fst with
                     | Option.none => Prod.mk Option.none field.snd
                     | Option.some value =>
-                        continue (PsExpr.app candidate value) field.snd
+                        fillRest (PsExpr.app candidate value) field.snd
                 | _ => Prod.mk Option.none available
 
 def psOrdinaryConstructorAlternativesWorker

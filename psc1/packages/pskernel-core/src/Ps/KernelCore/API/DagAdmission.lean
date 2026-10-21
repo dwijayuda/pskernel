@@ -1,12 +1,14 @@
 import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
+import Ps.KernelCore.API.DagAdmissionGuards
 import Ps.KernelCore.Checker.ExprV2.Check
 import Ps.KernelCore.Checker.ExprV2.DefEq
 
 /-
-Partial direct declaration admission over a validated input DAG. Static guards
-read the already decoded boundary terms; header/body inference and final
-definitive equality read the owning arena. No legacy type/body is imported.
+Partial direct declaration admission over a validated input DAG. Static guards,
+header/body inference and final definitive equality read the owning arena.
+Decoded boundary terms are retained for environment publication, not traversed
+by these direct checks. No legacy type/body is imported.
 
 The header, theorem proposition test and body share separate inference caches,
 WHNF and successful DefEq state,
@@ -84,48 +86,44 @@ def psKernelExprV2AdmissionCheckHeaderWithFuel
   else if psKernelNameHasDuplicates base.levelParams then
     Option.some (Except.error "duplicate universe parameter")
   else
-    match psKernelCheckNoMVarNoFVar base.type with
+    match psKernelExprV2AdmissionStaticOnCanonical
+        state.whnf.arena typeRoot base.levelParams with
     | Except.error error => Option.some (Except.error error)
     | Except.ok _ =>
-        match psKernelCheckLevelParams base.type base.levelParams with
-        | Except.error error => Option.some (Except.error error)
-        | Except.ok _ =>
-            match psKernelExprV2TryCheckStateWithFuel fuel context state typeRoot with
-            | Option.none => Option.none
-            | Option.some attempted =>
-                match attempted with
-                | Except.error error => Option.some (Except.error error)
-                | Except.ok checked =>
-                    psKernelExprV2AdmissionEnsureSortWithFuel fuel context
-                      (Prod.fst checked) (Prod.snd checked)
+        match psKernelExprV2TryCheckStateWithFuel fuel context state typeRoot with
+        | Option.none => Option.none
+        | Option.some attempted =>
+            match attempted with
+            | Except.error error => Option.some (Except.error error)
+            | Except.ok checked =>
+                psKernelExprV2AdmissionEnsureSortWithFuel fuel context
+                  (Prod.fst checked) (Prod.snd checked)
 
 def psKernelExprV2AdmissionCheckBodyWithFuel
     (fuel : Nat) (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState)
     (base : PsKernelConstantBase) (typeRoot : Nat)
-    (body : PsKernelExpr) (bodyRoot : Nat) (mismatch : String) :
+    (_body : PsKernelExpr) (bodyRoot : Nat) (mismatch : String) :
     Option (Except String Unit) :=
-  match psKernelCheckNoMVarNoFVar body with
+  match psKernelExprV2AdmissionStaticOnCanonical
+      state.whnf.arena bodyRoot base.levelParams with
   | Except.error error => Option.some (Except.error error)
   | Except.ok _ =>
-      match psKernelCheckLevelParams body base.levelParams with
-      | Except.error error => Option.some (Except.error error)
-      | Except.ok _ =>
-          match psKernelExprV2TryCheckStateWithFuel fuel context state bodyRoot with
-          | Option.none => Option.none
-          | Option.some attempted =>
-              match attempted with
-              | Except.error error => Option.some (Except.error error)
-              | Except.ok checked =>
-                  match psKernelExprV2TryDefEqStateWithFuel fuel context
-                      (Prod.fst checked) (Prod.snd checked) typeRoot with
-                  | Option.none => Option.none
-                  | Option.some compared =>
-                      match compared with
-                      | Except.error error => Option.some (Except.error error)
-                      | Except.ok result =>
-                          if Prod.snd result then Option.some (Except.ok ())
-                          else Option.some (Except.error mismatch)
+      match psKernelExprV2TryCheckStateWithFuel fuel context state bodyRoot with
+      | Option.none => Option.none
+      | Option.some attempted =>
+          match attempted with
+          | Except.error error => Option.some (Except.error error)
+          | Except.ok checked =>
+              match psKernelExprV2TryDefEqStateWithFuel fuel context
+                  (Prod.fst checked) (Prod.snd checked) typeRoot with
+              | Option.none => Option.none
+              | Option.some compared =>
+                  match compared with
+                  | Except.error error => Option.some (Except.error error)
+                  | Except.ok result =>
+                      if Prod.snd result then Option.some (Except.ok ())
+                      else Option.some (Except.error mismatch)
 
 /- A trusted internal plan, not an admission certificate. DecodeDeclaration
    establishes correspondence between every root and its boundary expression. -/

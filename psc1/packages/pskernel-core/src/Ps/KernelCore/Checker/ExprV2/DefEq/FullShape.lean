@@ -1,4 +1,6 @@
 import Ps.KernelCore.Checker.ExprV2.DefEq.Quick
+import Ps.KernelCore.Checker.ExprV2.DefEq.LazyProjection
+import Ps.KernelCore.Checker.ExprV2.DefEq.FinalRules
 import Ps.KernelCore.Core.ExprV2.TransformSpine
 
 /-
@@ -9,8 +11,8 @@ checker recursion entry nor success-pair publication.
 Outer None declines an unsupported descendant. Inner None means that the
 original full-shape rule was undecided. In particular a failed application,
 binder, or function-eta comparison must not become a final false decision.
-Matching projection shortcuts and the later structure/string/unit rules
-remain explicit whole-operation fallback points.
+Matching projections and final structure/string/unit rules keep their
+reference ordering; unsupported descendants still decline the whole attempt.
 -/
 
 def psKernelExprV2DefEqFullShapePositive
@@ -205,47 +207,6 @@ def psKernelExprV2DefEqFullShapeWith
                       | _ => Option.some (Except.ok (Prod.mk state Option.none))
                   | _ => Option.some (Except.ok (Prod.mk state Option.none))
 
-def psKernelExprV2DefEqResidualProjectionShortcut
-    (state : PsKernelExprV2CheckState) (left right : Nat) :
-    Option (Except String (Prod PsKernelExprV2CheckState (Option Bool))) :=
-  match psKernelExprV2PagedRequire state.whnf.arena left with
-  | Except.error error => Option.some (Except.error error)
-  | Except.ok leftEntry =>
-      match psKernelExprV2PagedRequire state.whnf.arena right with
-      | Except.error error => Option.some (Except.error error)
-      | Except.ok rightEntry =>
-          match leftEntry.node with
-          | PsKernelExprV2Node.const leftName leftLevels =>
-              match rightEntry.node with
-              | PsKernelExprV2Node.const rightName rightLevels =>
-                  let sameConstant : Bool :=
-                    if psKernelNameEq leftName rightName then
-                      psKernelLevelListsEquivalent leftLevels rightLevels
-                    else false;
-                  if sameConstant then
-                    Option.some (Except.ok (Prod.mk state (Option.some true)))
-                  else Option.some (Except.ok (Prod.mk state Option.none))
-              | _ => Option.some (Except.ok (Prod.mk state Option.none))
-          | PsKernelExprV2Node.fvar leftName =>
-              match rightEntry.node with
-              | PsKernelExprV2Node.fvar rightName =>
-                  if psKernelNameEq leftName rightName then
-                    Option.some (Except.ok (Prod.mk state (Option.some true)))
-                  else Option.some (Except.ok (Prod.mk state Option.none))
-              | _ => Option.some (Except.ok (Prod.mk state Option.none))
-          | PsKernelExprV2Node.proj leftName leftIndex _ =>
-              match rightEntry.node with
-              | PsKernelExprV2Node.proj rightName rightIndex _ =>
-                  let sameProjection : Bool :=
-                    if psKernelNameEq leftName rightName then
-                      Nat.beq leftIndex rightIndex
-                    else false;
-                  if sameProjection then
-                    Option.none
-                  else Option.some (Except.ok (Prod.mk state Option.none))
-              | _ => Option.some (Except.ok (Prod.mk state Option.none))
-          | _ => Option.some (Except.ok (Prod.mk state Option.none))
-
 def psKernelExprV2DefEqResidualAfterFullWhnfWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
@@ -272,7 +233,9 @@ def psKernelExprV2DefEqResidualAfterFullWhnfWith
                 | Except.error error => Option.some (Except.error error)
                 | Except.ok shaped =>
                     match Prod.snd shaped with
-                    | Option.none => Option.none
+                    | Option.none =>
+                        psKernelExprV2DefEqFinalRulesWith defeq inferType whnf
+                          context (Prod.fst shaped) leftFull rightFull
                     | Option.some value =>
                         Option.some (Except.ok (Prod.mk (Prod.fst shaped) value));
       if leftUnchanged then
@@ -294,7 +257,7 @@ def psKernelExprV2DefEqResidualWith
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
-  match psKernelExprV2DefEqResidualProjectionShortcut state left right with
+  match psKernelExprV2DefEqProjectionShortcutWith defeq context state left right with
   | Option.none => Option.none
   | Option.some shortcut =>
       match shortcut with

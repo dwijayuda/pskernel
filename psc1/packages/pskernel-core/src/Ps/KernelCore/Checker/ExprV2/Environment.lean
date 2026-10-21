@@ -9,10 +9,19 @@ index used by constant inference and delta reduction.
 The public boundary creates the table empty. It never escapes into a legacy
 kernel session. These internal, forgeable records are not admission certificates.
 Live environment metadata still decides constant kind, safety and universe arity.
-Generated recursor types, nested-inductive restoration and preexisting-session
-constants remain unsupported until their own DAG types exist. Ordinary/mutual
-inductive headers and constructor types retain their original admitted IDs.
+Ordinary non-K recursor types/rules are installed once from checked generated
+metadata after successful admission, in an appended owning arena. This explicit
+transitional import does not make inductive admission DAG-native. Nested
+restoration and preexisting-session constants still lack owning DAG types.
+Ordinary/mutual inductive headers and constructors retain original admitted IDs.
 -/
+/- Generated rule IDs are private to one validated command batch. They are
+   installed only from metadata produced by complete inductive admission. -/
+structure PsKernelExprV2RecursorRuleRef where
+  ctor : PsKernelName
+  nFields : Nat
+  rhs : Nat
+
 inductive PsKernelExprV2DeclarationRefKind where
   | axiomDecl
   | definitionDecl
@@ -20,6 +29,7 @@ inductive PsKernelExprV2DeclarationRefKind where
   | opaqueDecl
   | inductiveDecl
   | constructorDecl
+  | recursorDecl (rules : List PsKernelExprV2RecursorRuleRef)
 
 structure PsKernelExprV2DeclarationRef where
   name : PsKernelName
@@ -71,6 +81,10 @@ def psKernelExprV2DeclarationRefKindMatches
   | PsKernelExprV2DeclarationRefKind.constructorDecl =>
       match info with
       | PsKernelConstantInfo.ctorInfo _ => true
+      | _ => false
+  | PsKernelExprV2DeclarationRefKind.recursorDecl _ =>
+      match info with
+      | PsKernelConstantInfo.recInfo _ => true
       | _ => false
 
 def psKernelExprV2DeclarationRefMatches

@@ -85,6 +85,21 @@ CompilerM observation wrappers use lowercase WIT-compatible names and each is
 invoked independently on components too; malformed selection attempts preserve
 the previously published bundle. No aggregate ABI or host capability claim.
 
+## Reached Rust callback storage — implementation pending CI
+
+After the stdlib correction, run39555781169 accepts/admitted/executes both authored
+JS grammars and all new refusals. Rust refuses phase=rust-lowering
+location=function-storage reason=function-storage:run for actual CompilerM.
+Implement recursive owned V(T): function types become Rc<dyn Fn(V(A)...) -> V(B)
++ 'static> through named generic arguments and arrays. Keep the existing outer
+Rc field storage. Use the same owned global adapter for stored function values
+as for arguments/locals. Traverse every stored callback body; strict whole IR
+still checks field/type consistency before emission. Public ABI restrictions
+remain separate. No unsafe/RefCell/cycles or enlarged limits are introduced.
+
+Actual Rust and all-seven behavior are not yet qualified. Continue native,
+closure-source acceptance, emitted Cargo and existing refusal/source tests.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

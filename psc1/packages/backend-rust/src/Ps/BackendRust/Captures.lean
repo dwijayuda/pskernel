@@ -179,15 +179,9 @@ def psRustEmitGlobalFunctionValue (name : String) (arity : Nat) : String :=
     ") as std::rc::Rc<dyn Fn("
     (psRustConcat3 (psRustJoin ", " (psRustInferredParameterTypes arity)) ") -> _>" ")")
 
+-- Use the same owned global adapter in fields as in arguments and locals.
 def psRustEmitStoredExprWith
-    (declarations : List PsVerifiedIrDeclaration) (locals : List String)
+    (_declarations : List PsVerifiedIrDeclaration) (_locals : List String)
     (emitExpr : PsVerifiedIrExpr -> Except PsRustEmitError String)
     (expr : PsVerifiedIrExpr) : Except PsRustEmitError String :=
-  match expr with
-  | PsVerifiedIrExpr.var name =>
-      if psRustStringListContains locals name then emitExpr expr
-      else
-        match psRustFindFunctionArity declarations name with
-        | Option.none => emitExpr expr
-        | Option.some _ => Except.ok (psRustIdentifier name)
-  | _ => emitExpr expr
+  emitExpr expr

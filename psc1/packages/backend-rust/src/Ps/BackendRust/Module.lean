@@ -40,48 +40,18 @@ def psRustSharedStorageType
   psRustConcat3 "std::rc::Rc<" printedType ">"
 
 def psRustEmitStructureFieldList
-    (fields : List PsVerifiedIrStructureField) :
-    Except PsRustEmitError (List String) :=
+    (fields : List PsVerifiedIrStructureField) : Except PsRustEmitError (List String) :=
   match fields with
-  | List.nil =>
-      Except.ok List.nil
+  | List.nil => Except.ok List.nil
   | List.cons field rest =>
-      if psRustTypeContainsFunction field.type then
-        if psRustFunctionTypeIsFirstOrder field.type then
-          match psRustEmitType field.type with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedType =>
-              let rendered :=
-                psRustConcat4
-                  "pub "
-                  (psRustIdentifier field.name)
-                  ": "
-                  (psRustSharedStorageType printedType);
-              match psRustEmitStructureFieldList rest with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok printedRest =>
-                  Except.ok (List.cons rendered printedRest)
-        else
-          Except.error
-            (PsRustEmitError.functionStorageUnsupported field.name)
-      else
-        match psRustEmitType field.type with
-        | Except.error error =>
-            Except.error error
-        | Except.ok printedType =>
-            let rendered :=
-              psRustConcat4
-                "pub "
-                (psRustIdentifier field.name)
-                ": "
-                (psRustSharedStorageType printedType);
-            match psRustEmitStructureFieldList rest with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedRest =>
-                Except.ok (List.cons rendered printedRest)
+      match psRustEmitType field.type with
+      | Except.error error => Except.error error
+      | Except.ok printedType =>
+          let rendered := psRustConcat4 "pub "
+            (psRustIdentifier field.name) ": " (psRustSharedStorageType printedType);
+          match psRustEmitStructureFieldList rest with
+          | Except.error error => Except.error error
+          | Except.ok printedRest => Except.ok (List.cons rendered printedRest)
 
 def psRustEmitStructureWithVisibility (isPublic : Bool)
     (structureInfo : PsVerifiedIrStructure) :
@@ -107,46 +77,18 @@ def psRustEmitStructure (value : PsVerifiedIrStructure) : Except PsRustEmitError
   psRustEmitStructureWithVisibility true value
 
 def psRustEmitConstructorFieldList
-    (fields : List PsVerifiedIrConstructorField) :
-    Except PsRustEmitError (List String) :=
+    (fields : List PsVerifiedIrConstructorField) : Except PsRustEmitError (List String) :=
   match fields with
-  | List.nil =>
-      Except.ok List.nil
+  | List.nil => Except.ok List.nil
   | List.cons field rest =>
-      if psRustTypeContainsFunction field.type then
-        if psRustFunctionTypeIsFirstOrder field.type then
-          match psRustEmitType field.type with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedType =>
-              let rendered :=
-                psRustConcat3
-                  (psRustIdentifier field.name)
-                  ": "
-                  (psRustSharedStorageType printedType);
-              match psRustEmitConstructorFieldList rest with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok printedRest =>
-                  Except.ok (List.cons rendered printedRest)
-        else
-          Except.error
-            (PsRustEmitError.functionStorageUnsupported field.name)
-      else
-        match psRustEmitType field.type with
-        | Except.error error =>
-            Except.error error
-        | Except.ok printedType =>
-            let rendered :=
-              psRustConcat3
-                (psRustIdentifier field.name)
-                ": "
-                (psRustSharedStorageType printedType);
-            match psRustEmitConstructorFieldList rest with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedRest =>
-                Except.ok (List.cons rendered printedRest)
+      match psRustEmitType field.type with
+      | Except.error error => Except.error error
+      | Except.ok printedType =>
+          let rendered := psRustConcat4 ""
+            (psRustIdentifier field.name) ": " (psRustSharedStorageType printedType);
+          match psRustEmitConstructorFieldList rest with
+          | Except.error error => Except.error error
+          | Except.ok printedRest => Except.ok (List.cons rendered printedRest)
 
 def psRustEmitConstructor
     (constructorInfo : PsVerifiedIrConstructor) :
@@ -803,125 +745,59 @@ def psRustValidateAlternativeListWith
       | Except.ok _ =>
           psRustValidateAlternativeListWith validate rest
 
+-- Strict IR has checked complete field/expression types. Owned callback
+-- storage accepts locals and computed closures; still inspect every body.
 def psRustValidateStorageFieldListWith
     (staticFunctionNames : List String)
     (locals : List String)
     (definitionFields : List PsVerifiedIrStructureField)
-    (validateNested :
-      PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool)
-    (fields : List (Prod String PsVerifiedIrExpr)) :
-    Except PsRustEmitError Bool :=
+    (validateNested : PsVerifiedIrExpr -> Except PsRustEmitError Bool)
+    (fields : List (Prod String PsVerifiedIrExpr)) : Except PsRustEmitError Bool :=
   match fields with
-  | List.nil =>
-      Except.ok true
+  | List.nil => Except.ok true
   | List.cons field rest =>
       let fieldName := Prod.fst field;
-      let value := Prod.snd field;
       match psRustFindStructureFieldType fieldName definitionFields with
       | Option.none =>
-          match validateNested value with
-          | Except.error error =>
-              Except.error error
-          | Except.ok _ =>
-              psRustValidateStorageFieldListWith
-                staticFunctionNames
-                locals
-                definitionFields
-                validateNested
-                rest
+          match validateNested (Prod.snd field) with
+          | Except.error error => Except.error error
+          | Except.ok _ => psRustValidateStorageFieldListWith staticFunctionNames locals
+              definitionFields validateNested rest
       | Option.some fieldType =>
-          if psRustTypeContainsFunction fieldType then
-            if psRustFunctionTypeIsFirstOrder fieldType then
-              match
-                  psRustValidateStaticStoredFunction
-                    staticFunctionNames
-                    locals
-                    fieldName
-                    value with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok _ =>
-                  psRustValidateStorageFieldListWith
-                    staticFunctionNames
-                    locals
-                    definitionFields
-                    validateNested
-                    rest
-            else
-              Except.error
-                (PsRustEmitError.functionStorageUnsupported fieldName)
+          if !psRustDirectClosureTypeSupported fieldType then
+            Except.error (PsRustEmitError.functionStorageUnsupported fieldName)
           else
-            match validateNested value with
-            | Except.error error =>
-                Except.error error
-            | Except.ok _ =>
-                psRustValidateStorageFieldListWith
-                  staticFunctionNames
-                  locals
-                  definitionFields
-                  validateNested
-                  rest
+            match validateNested (Prod.snd field) with
+            | Except.error error => Except.error error
+            | Except.ok _ => psRustValidateStorageFieldListWith staticFunctionNames locals
+                definitionFields validateNested rest
 
+-- Strict IR has checked complete field/expression types. Owned callback
+-- storage accepts locals and computed closures; still inspect every body.
 def psRustValidateConstructorStorageFieldListWith
     (staticFunctionNames : List String)
     (locals : List String)
     (definitionFields : List PsVerifiedIrConstructorField)
-    (validateNested :
-      PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool)
-    (fields : List (Prod String PsVerifiedIrExpr)) :
-    Except PsRustEmitError Bool :=
+    (validateNested : PsVerifiedIrExpr -> Except PsRustEmitError Bool)
+    (fields : List (Prod String PsVerifiedIrExpr)) : Except PsRustEmitError Bool :=
   match fields with
-  | List.nil =>
-      Except.ok true
+  | List.nil => Except.ok true
   | List.cons field rest =>
       let fieldName := Prod.fst field;
-      let value := Prod.snd field;
       match psRustFindConstructorFieldType fieldName definitionFields with
       | Option.none =>
-          match validateNested value with
-          | Except.error error =>
-              Except.error error
-          | Except.ok _ =>
-              psRustValidateConstructorStorageFieldListWith
-                staticFunctionNames
-                locals
-                definitionFields
-                validateNested
-                rest
+          match validateNested (Prod.snd field) with
+          | Except.error error => Except.error error
+          | Except.ok _ => psRustValidateConstructorStorageFieldListWith staticFunctionNames locals
+              definitionFields validateNested rest
       | Option.some fieldType =>
-          if psRustTypeContainsFunction fieldType then
-            if psRustFunctionTypeIsFirstOrder fieldType then
-              match
-                  psRustValidateStaticStoredFunction
-                    staticFunctionNames
-                    locals
-                    fieldName
-                    value with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok _ =>
-                  psRustValidateConstructorStorageFieldListWith
-                    staticFunctionNames
-                    locals
-                    definitionFields
-                    validateNested
-                    rest
-            else
-              Except.error
-                (PsRustEmitError.functionStorageUnsupported fieldName)
+          if !psRustDirectClosureTypeSupported fieldType then
+            Except.error (PsRustEmitError.functionStorageUnsupported fieldName)
           else
-            match validateNested value with
-            | Except.error error =>
-                Except.error error
-            | Except.ok _ =>
-                psRustValidateConstructorStorageFieldListWith
-                  staticFunctionNames
-                  locals
-                  definitionFields
-                  validateNested
-                  rest
+            match validateNested (Prod.snd field) with
+            | Except.error error => Except.error error
+            | Except.ok _ => psRustValidateConstructorStorageFieldListWith staticFunctionNames locals
+                definitionFields validateNested rest
 
 def psRustValidateStorageAlternativeListWith
     (validateBody :

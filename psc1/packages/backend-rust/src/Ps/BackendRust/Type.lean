@@ -157,10 +157,10 @@ def psRustEmitTypeWithFuel
               | Except.ok printedResult =>
                   Except.ok
                     (psRustConcat4
-                      "fn("
+                      "std::rc::Rc<dyn Fn("
                       (psRustJoin ", " printedParameters)
                       ") -> "
-                      printedResult)
+                      (psRustConcat2 printedResult " + 'static>"))
         | PsVerifiedIrType.named name arguments =>
           match psRustEmitTypeListWith emitNested arguments with
           | Except.error error =>
@@ -255,8 +255,8 @@ def psRustFunctionTypeIsFirstOrder
   | _ =>
       false
 
--- Closure values may nest arrows directly. Named aggregates keep the existing
--- static-function storage contract and must not hide closure-valued arguments.
+-- V(T) is owned recursively, including named generic data and arrays.
+-- The shared target plan checks the public ABI separately.
 def psRustDirectClosureTypeSupportedWithFuel
     (fuel : Nat) : PsVerifiedIrType -> Bool :=
   match fuel with
@@ -269,54 +269,15 @@ def psRustDirectClosureTypeSupportedWithFuel
         | PsVerifiedIrType.function parameters result =>
             !psListAny (fun (parameter : PsVerifiedIrType) => !smaller parameter) parameters && smaller result
         | PsVerifiedIrType.named _ arguments =>
-            !psListAny psRustTypeContainsFunction arguments &&
-              !psListAny (fun (argument : PsVerifiedIrType) => !smaller argument) arguments
+            !psListAny (fun (argument : PsVerifiedIrType) => !smaller argument) arguments
         | _ => true
 
 def psRustDirectClosureTypeSupported (type : PsVerifiedIrType) : Bool :=
   psRustDirectClosureTypeSupportedWithFuel 4096 type
 
 def psRustEmitClosureValueTypeWithFuel
-    (fuel : Nat) :
-    PsVerifiedIrType ->
-    Except PsRustEmitError String :=
-  match fuel with
-  | Nat.zero =>
-      fun (_type : PsVerifiedIrType) =>
-        Except.error PsRustEmitError.fuelExhausted
-  | Nat.succ remaining =>
-      let smaller :
-          PsVerifiedIrType ->
-          Except PsRustEmitError String :=
-        psRustEmitClosureValueTypeWithFuel remaining;
-      fun (type : PsVerifiedIrType) =>
-        match type with
-        | PsVerifiedIrType.function parameters result =>
-            let emitNested :
-                PsVerifiedIrType ->
-                Except PsRustEmitError String :=
-              fun (nested : PsVerifiedIrType) =>
-                match nested with
-                | PsVerifiedIrType.function _ _ =>
-                    smaller nested
-                | _ =>
-                    psRustEmitTypeWithFuel remaining nested;
-            match psRustEmitTypeListWith emitNested parameters with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedParameters =>
-                match emitNested result with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok printedResult =>
-                    Except.ok
-                      (psRustConcat4
-                        "std::rc::Rc<dyn Fn("
-                        (psRustJoin ", " printedParameters)
-                        ") -> "
-                        (psRustConcat2 printedResult ">"))
-        | _ =>
-            psRustEmitTypeWithFuel remaining type
+    (fuel : Nat) (type : PsVerifiedIrType) : Except PsRustEmitError String :=
+  psRustEmitTypeWithFuel fuel type
 
 def psRustEmitClosureValueType
     (type : PsVerifiedIrType) :

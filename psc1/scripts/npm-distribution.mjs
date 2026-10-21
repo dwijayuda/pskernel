@@ -72,6 +72,7 @@ async function writeCoreRuntime(stage,providerSrc) {
   await cp(join(build,'pskernel-core','prelude.json'),join(output,'prelude.json'));
   for(const [from,to] of [
     ['npm-runtime/generated-core-provider.mjs','generated-core-provider.mjs'],
+    ['npm-runtime/canonical-admissions-wire.mjs','canonical-admissions-wire.mjs'],
     ['npm-runtime/core-cli.mjs','core-cli.mjs'],
     ['npm-runtime/core-checker.mjs','core-checker.mjs']])await cp(join(root,from),join(output,to));
   const expected={
@@ -81,6 +82,7 @@ async function writeCoreRuntime(stage,providerSrc) {
     kernelSha256:hash(await readFile(join(output,'index.js'))),
     preludeSha256:hash(await readFile(join(output,'prelude.json'))),
     adapterSha256:hash(await readFile(join(output,'generated-core-provider.mjs'))),
+    wireSha256:hash(await readFile(join(output,'canonical-admissions-wire.mjs'))),
     processSha256:hash(await readFile(join(output,'core-cli.mjs'))),
     checkedAlgorithm:'psKernelV1AdmitDeclaration',
     defaultProvider:'psc0-generated-js-core',

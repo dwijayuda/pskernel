@@ -20,6 +20,7 @@ function verify() {
   for(const [file,expectedHash] of [
     ['index.js',bundle.kernelSha256],['prelude.json',bundle.preludeSha256],
     ['generated-core-provider.mjs',bundle.adapterSha256],
+    ['canonical-admissions-wire.mjs',bundle.wireSha256],
     ['core-cli.mjs',bundle.processSha256],
   ]) {
     if (!/^[a-f0-9]{64}$/u.test(expectedHash)||sha(readFileSync(path.join(directory,file)))!==expectedHash) {

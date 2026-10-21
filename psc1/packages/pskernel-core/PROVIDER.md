@@ -145,6 +145,45 @@ rejection. Reversing the declarations produces an unknown-constant rejection.
 A failed later declaration returns no environment or partial admission
 authority, and another invocation always starts empty.
 
+## Use the downloaded Actions artifacts
+
+Choose an artifact from a terminal successful job at the exact source revision
+you intend to deploy, and verify its `artifacts.json` file hashes. The manifest
+is an integrity receipt; it is not a kernel verdict.
+
+The native artifact includes `native-provider-linux.tar.gz`. After locating it
+in the downloaded artifact, extract and run it on compatible Linux:
+
+```bash
+tar -xzf native-provider-linux.tar.gz
+./psc1_kernel_provider < batch.json
+```
+
+For generated artifacts, change to the packaged `provider/` directory that
+contains `artifacts.json`, `package.json`, the kernel files, `scripts/`, and
+`npm-runtime/`. Preserve this layout and the readable `.ts`, `.d.ts`,
+`.js.map` and referenced map sources. The Lean-generated package uses
+`kernel.js`; the canonical-PS-generated package uses `pskernel-core.js`:
+
+```bash
+/absolute/path/to/node scripts/pskernel-canonical-provider.mjs kernel.js < batch.json
+# In the canonical-PS-generated provider directory:
+/absolute/path/to/node scripts/pskernel-canonical-provider.mjs pskernel-core.js < batch.json
+```
+
+Runtime imports are Node built-ins, the bundled generated kernel, and the adjacent
+`npm-runtime/canonical-admissions-wire.mjs`. No external Lean or npm installation
+is required for these packaged executions. The canonical package additionally
+contains `canonical-source.tar.gz`, including the complete generated source
+graph and bootstrap manifest. Build tools remain separate from runtime dependencies.
+
+For programmatic untrusted wire input, use `checkCanonicalBytes(kernel, bytes)`.
+It copies the bounded byte view into private storage before strict UTF-8 validation
+and decoding, including views backed by shared memory. The text API
+`checkCanonicalBatch(kernel, text)` requires faithfully decoded text: it checks
+scalar strings and JSON escapes but cannot recover bytes already replaced by a
+caller’s lossy decoder. The CLI always uses the strict byte API.
+
 ## Result protocol
 
 Each process prints one JSON object with

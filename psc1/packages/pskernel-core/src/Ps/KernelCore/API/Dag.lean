@@ -11,7 +11,7 @@ Checked DAG ingress for the complete KernelContract-v1 implementation.
 
 One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
-Supported inference, scoped DefEq through proof irrelevance and WHNF rules read the canonical DAG
+Supported inference, scoped DefEq through proof irrelevance and the ordered Nat prefix, and WHNF rules read the canonical DAG
 with the original entry fuel, depth and rule ordering. Local types and let
 values are IDs in the same owner. Unsupported work restarts the complete
 original operation with unchanged resources and without partial publication.

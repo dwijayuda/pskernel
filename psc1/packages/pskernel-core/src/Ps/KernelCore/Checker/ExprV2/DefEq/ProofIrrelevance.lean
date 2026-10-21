@@ -3,7 +3,7 @@ import Ps.KernelCore.Checker.ExprV2.CheckState
 /- The proof-irrelevance continuation follows the original checker order.
 Inference uses its own cache; this helper cannot publish checked judgments.
 The caller owns entry guards and publishes only its original successful pair.
-A non-proposition declines the still-unmigrated lazy-delta continuation. -/
+The caller supplies the non-proposition continuation with the complete state. -/
 def psKernelExprV2DefEqIsPropWith
     (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
@@ -35,7 +35,9 @@ def psKernelExprV2DefEqIsPropWith
                             (Except.ok (Prod.mk next (psKernelLevelNormalizesToZero level)))
                       | _ => Option.some (Except.error "expected sort")
 
-def psKernelExprV2DefEqProofIrrelevanceWith
+def psKernelExprV2DefEqProofIrrelevanceContinueWith
+    (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
@@ -67,4 +69,23 @@ def psKernelExprV2DefEqProofIrrelevanceWith
                         | Except.ok rightType =>
                             defeq context (Prod.fst rightType)
                               (Prod.snd leftType) (Prod.snd rightType)
-                  else Option.none
+                  else continuation context (Prod.fst isProp) left right
+
+/- Preserve the standalone proof stage's existing unsupported boundary. -/
+def psKernelExprV2DefEqProofIrrelevanceWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  let unsupported :
+      PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+    fun (_context : PsKernelExprV2CheckContext)
+        (_state : PsKernelExprV2CheckState) (_left _right : Nat) => Option.none;
+  psKernelExprV2DefEqProofIrrelevanceContinueWith unsupported defeq inferType whnf
+    context state left right

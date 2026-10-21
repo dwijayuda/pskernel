@@ -6,19 +6,20 @@ It exists to prevent development drift after the portable self-host milestone.
 `PSKERNEL_REFERENCE.md` is adopted as the canonical **target architecture and
 migration reference**. This document retains the non-negotiable product and
 semantic guardrails. If a target-architecture idea conflicts with these
-guardrails, Lean-4.34 compatibility, PSC1 portability, or fail-closed checking,
+guardrails, Lean-4.35 compatibility, PSC1 portability, or fail-closed checking,
 the guardrail wins until an explicit architecture review changes it.
 
 ## Development authority
 
 GitHub is the canonical development state. Follow
 `GITHUB_FIRST_WORKFLOW.md` before starting or integrating work on this branch.
-Local worktrees are optional execution caches only and must not become hidden
-project state.
+For the active Expression V2 integration branch, all inspection, patches and
+execution use connected GitHub tools and Linux GitHub Actions. Local checkouts
+and local CI are outside the authorized workflow.
 
 ## 1. Product goal
 
-Build one readable, self-hostable Lean-4.34-compatible kernel implementation
+Build one readable, self-hostable Lean-4.35-compatible kernel implementation
 whose source is accepted by the PSC1 portable subset and has two primary
 execution paths:
 
@@ -40,11 +41,16 @@ Unless a new architecture review explicitly replaces this document:
    - no Rust kernel rewrite;
    - no C++ kernel rewrite;
    - no separately maintained WASM kernel source;
-   - no duplicated `spec/reference/fast` semantic implementations.
+   - no independently evolving semantic specifications masquerading as fast paths.
+
+   During the authorized Expression V2 migration, the separately selectable V1
+   checker remains the differential reference. V2 implements the same rules over
+   an owning expression DAG and is not promoted as a complete replacement until
+   every supported operation is DAG-native and its exact source passes the gates.
 
 2. **No formal-verification project is required for the production milestone.**
    Production promotion continues to rely on exact theory mapping, source
-   review, Lean-4.34 conformance, differential tests, portable-source self-host
+   review, Lean-4.35 conformance, differential tests, portable-source self-host
    checks, and provider-parity gates. The Assurance Plane described in
    `PSKERNEL_REFERENCE.md` is a long-term strengthening track; it must not
    block current architecture/readability/performance work unless a specific
@@ -52,7 +58,10 @@ Unless a new architecture review explicitly replaces this document:
 
 3. **Compatibility is defined by rules, not by project size.**
    The normative feature-completeness source is
-   `LEAN_4_34_COMPATIBILITY.json`.
+   current support contract in `PROVIDER.md`, the migration inventory in
+   `EXPRESSION_V2_STATUS.md`, and source-bound receipts in `AI_WORK_STATE.md`.
+   `LEAN_4_34_COMPATIBILITY.json` retains historical rule inventory; its filename
+   and old results do not establish Lean 4.35 qualification.
 
 4. **The semantic source must stay PSC1-self-hostable.**
    Every theory/runtime refactor must remain accepted by:
@@ -67,14 +76,17 @@ Unless a new architecture review explicitly replaces this document:
    Caches and indexes may accelerate an existing judgment, but must never
    create a semantic fact or change declaration acceptance.
 
-6. **Lean 4.34 behavior is the compatibility authority.**
+6. **Lean 4.35 behavior is the compatibility authority.**
    Target version:
-   - Lean 4.34.0
-   - commit `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`
+   - Lean 4.35.0
+   - commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
-7. **The generated kernel is not the default authority until provider parity is
-   explicitly accepted.**
-   `lean434-wasm` remains the default checker during hardening.
+7. **Provider promotion is explicit and source-bound.**
+   The canonical provider declares the V1 checked algorithm and an empty-session
+   safe admission scope. Its native, Lean-generated and canonical-PS-generated
+   artifacts require independent execution and negative-case parity at the exact
+   source revision. V2 remains transitional; no name or packaging choice promotes
+   it to the default or delegates its decisions to an official Lean process.
 
 ## 3. Source architecture
 
@@ -115,7 +127,7 @@ The distinctions are:
 
 ```text
 Semantic rules:
-    answer "what does Lean 4.34 mean?"
+    answer "what does Lean 4.35 mean?"
 
 Acceleration:
     makes the same judgment faster and must preserve answers
@@ -158,7 +170,7 @@ Every major rule should eventually provide:
 - stable rule ID;
 - short mathematical judgment or semantic statement;
 - one-paragraph explanation;
-- exact Lean 4.34 implementation locator;
+- exact Lean 4.35 implementation locator;
 - pskernel implementation symbol;
 - conformance/differential test reference.
 
@@ -175,9 +187,6 @@ Runtime/Acceleration/
     Cache.lean
     CachePolicy.lean
     EnvironmentIndex.lean
-
-Runtime/Capability/
-    Lean434NativeReduction.lean
 ```
 
 During migration, existing `Theory/*` and top-level compatibility paths may
@@ -189,8 +198,10 @@ Lean kernel behavior by following `KERNEL_THEORY.md` and the source modules.
 
 ## 6. Feature-completeness definition
 
-"Feature complete" means all required rows in
-`LEAN_4_34_COMPATIBILITY.json` are implemented and tested.
+"Feature complete" requires the three gates recorded in `AI_WORK_STATE.md`:
+a usable scoped independent provider, a fallback-free V2 implementation of every
+promoted operation, and complete applicable Lean 4.35 Arena conformance. Historical
+4.34 matrices remain reference material and do not discharge these gates.
 
 It does **not** mean:
 
@@ -216,7 +227,7 @@ releases, but they do not block readability or performance work.
 
 Do not require an enormous Mathlib replay as a prerequisite.
 
-Maintain a finite, rule-complete Lean-4.34 conformance suite. Every rule should
+Maintain a finite, rule-complete Lean-4.35 conformance suite. Every rule should
 have at least:
 
 - positive case;
@@ -245,7 +256,7 @@ Priority order:
 1. indexed environment lookup;
 2. indexed expression/inference/WHNF/defeq caches;
 3. cached expression metadata/hash;
-4. sharing/interning only if profiling justifies it;
+4. sharing-aware DAG transformations, validated metadata and exact collision checks;
 5. algorithmic shortcuts only after the above.
 
 Every performance change must preserve the same semantic result.
@@ -293,30 +304,21 @@ Do not manually fork semantics by backend.
 
 ## 10. Native-reduction trust boundary
 
-Lean 4.34's deprecated `Lean.reduceBool` / `Lean.reduceNat` path extends the
-TCB to a compiler/interpreter.
+Lean 4.35 kernel behavior does not require the deprecated `Lean.reduceBool` /
+`Lean.reduceNat` compiler-evaluation path. The portable checked kernel and the
+canonical batch providers do not install a native evaluator, call an external
+Lean process for decisions, or accept a cached/hashed assertion as a proof.
 
-PSKernel models this as an optional runtime capability.
+The native provider uses Lean's JSON/IO libraries only for host transport.
+The semantic closure remains `SelfHost.lean`; host parsing and process management
+are outside it. JavaScript transport uses Node built-ins and the generated
+portable kernel bundle. Strict bytes are copied into private storage, validated
+and decoded without replacement before checking.
 
-No provider:
-
-```text
-native reduction step unavailable
--> continue ordinary kernel reduction
-```
-
-Provider installed:
-
-```text
-Lean.reduceBool / Lean.reduceNat marker
--> provider evaluates closed target constant
--> kernel receives Bool/Nat result
-```
-
-The provider is a target-specific trusted capability. The final target path is
-`Runtime/Capability/Lean434NativeReduction.lean` (the current
-`Runtime/NativeReduction.lean` path may remain during migration). It is not
-ordinary cache/index acceleration and it is not core type theory.
+No new `unsafe`, `extern`, compiler intrinsic, `implemented_by`, unchecked axiom
+or fabricated recursor metadata may accelerate the portable checker. Ordinary
+cache/index code remains untrusted acceleration of exact checked semantics.
+Local source proofs are audited separately and do not assert global soundness.
 
 ## 11. Optional generated-bootstrap evidence
 
@@ -333,7 +335,7 @@ fixed-point evidence.
 
 Before promoting any kernel change, ask:
 
-1. Does it preserve Lean 4.34 semantics?
+1. Does it preserve Lean 4.35 semantics?
 2. Does it remain PSC1 portable?
 3. What is its semantic role: rule, acceleration, trusted capability, adapter,
    or assurance-only?

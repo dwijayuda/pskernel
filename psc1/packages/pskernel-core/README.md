@@ -14,11 +14,15 @@ soundness theorem or full Lean Arena qualification.
 
 - [AI_WORK_STATE.md](AI_WORK_STATE.md): source-anchored current evidence,
   unresolved gates, performance regressions and continuation work.
+- [EXPRESSION_V2_STATUS.md](EXPRESSION_V2_STATUS.md): DAG ownership, exact
+  fallback inventory, proof limits and completion gates.
+- [PERFORMANCE_2026-10-21.md](PERFORMANCE_2026-10-21.md): source-specific
+  public-operation/admission measurements and authentic timeout profiles.
 - [PROVIDER.md](PROVIDER.md): native and generated-JavaScript batch checking,
   the supported canonical transport, failure protocol, and reproducible builds.
 - [KERNEL_CONTRACT_V1.md](KERNEL_CONTRACT_V1.md): typed checked API,
   resource outcomes, session publication and trust boundary.
-- [ARCHITECTURE_GUARDRAILS.md](ARCHITECTURE_GUARDRAILS.md): ownership rules.
+- [PSKERNEL_CORE_ARCHITECTURE.md](PSKERNEL_CORE_ARCHITECTURE.md): ownership rules.
 
 Import `Ps.KernelCore.API.Kernel` for checked sessions, expressions and
 declaration admission. Construct sessions with `psKernelKernelSessionEmpty`

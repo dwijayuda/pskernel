@@ -7,6 +7,60 @@ Lean: `leanprover/lean4:v4.35.0`, exact commit `eb6cafb7290e8bd5f2937522d8d804f5
 Generated path: authentic PSC1 → TypeScript `7.0.2` → Node `22`. Full-kernel DirectJS is unsupported.
 Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduction path.
 
+## 2026-10-21 06:46 UTC — canonical parent PASS; ordered DAG Nat candidate
+
+The immediately preceding complete source `e1b4deb214c3088e64a18f8b15148c7a15be2924`
+now has terminal **PASS** in both integration jobs, both correctness jobs and all
+six research jobs. Canonical job 119071611610 in
+[39554691912](https://github.com/dwijayuda/pskernel/actions/runs/39554691912)
+completed independent source-graph reconstruction/checking, generated runtime,
+all original DAG regressions, 1,008 inference-only comparisons, 1,350
+proof-irrelevance comparisons / 2,000 assertions, large-numeral controls and
+the 24 detached provider cases. Complete-kernel DirectJS remains explicitly
+UNSUPPORTED. Canonical artifact
+[12325868919](https://github.com/dwijayuda/pskernel/actions/runs/39554691912/artifacts/12325868919)
+zip SHA-256 is `5123ace515ac90fee4f5482519ff51e7d5b53b8193c84167b4243fdaa7ad2fed`;
+canonical JS is `180b441eb8067136fb3037a0940fa93233c99b22b8d9364dcf14cd8c259031b4`;
+complete source tar is `7d2a9c8495d7c5f552ed833d5d6cc46e4b43bede4d1d9ab50941e1b4ccdb8e6c`.
+The earlier 06:38 “IN PROGRESS” canonical row below is historical and superseded.
+
+| Exact source | Native | Portable .lean | Canonical .ps | Generated JS | Proof | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `e1b4deb214c3088e64a18f8b15148c7a15be2924` | PASS | PASS | PASS | PASS both source routes | PASS | PASS selected controls | IN PROGRESS | PASS native and both JS routes, CLI 24 each |
+| `9dfcbeff351157ae41572c7a891bc89c543777e1` | NOT RUN separately | NOT RUN separately | NOT RUN separately | NOT RUN separately | NOT RUN separately | NOT RUN separately | NOT RUN separately | NOT RUN separately |
+| Containing Nat/documentation revision | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+The bounded cache-policy/provider-byte ownership changes are retained in
+`9dfcbeff351157ae41572c7a891bc89c543777e1`; they will be tested together with this
+child revision, not represented as separately tested. This child adds:
+
+- `Checker/ExprV2/DefEq/LazyNat.lean`: exact lazy-entry fuel guard, syntactic
+  zero/predecessor handling, original eager/open-expression decision and ordered
+  left/right primitive reduction, using the existing owning Nat/WHNF machinery.
+  General definition selection still returns outer `none`.
+- A non-proposition continuation in the one proof-irrelevance stage, preserving
+  its old standalone API. The single DefEq owner supplies fixed predecessor-fuel
+  callbacks and publishes only the original requested success pair. Both existing
+  compatibility/local-context guards remain unchanged.
+- Native and generated 1,350-case DefEq matrices plus 192 direct lazy-stage
+  comparisons, 14 official positive/negative decision fixtures and one invalid
+  primitive argument. Cold/warm entry guards, typed open locals, numeral/resource
+  errors, same-batch checked Nat admission and original-pair/cache state are
+  mandatory. An unmatched predecessor candidate does not escape in the arena.
+- Local Nat fuel-entry and unmatched-owner lemmas in the retained native proof
+  gate. No theorem, old assertion or failure precedence is weakened.
+- Updated 4.35 architecture/ownership documentation, a four-site fallback
+  inventory, artifact invocation instructions and the source-specific performance
+  report `PERFORMANCE_2026-10-21.md`.
+
+The containing revision has not yet executed. Required Actions must reach their
+terminal status, including the existing controls and new Nat/API cases. A runtime
+ABI or fixture failure blocks qualification and must be repaired without lowering
+the assertions. Full V2 remains incomplete: general lazy delta/projection/final
+DefEq rules, recursor/iota/Quot and inductive admission still need migration;
+boundary decoding and four whole-operation fallback sites remain. All 193 Arena
+records must still be evaluated with the exact unchanged resource policy.
+
 ## 2026-10-21 06:38 UTC — qualified parent and next source checkpoint
 
 The branch reached **same-source native and generated integration PASS** at

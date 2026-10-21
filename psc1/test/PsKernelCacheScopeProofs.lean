@@ -624,3 +624,37 @@ end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.inference_cache_eligibility_preserves
 #print axioms PsKernelCacheScopeProofs.inference_cache_eligibility_extensional
+
+namespace PsKernelCacheScopeProofs
+
+theorem dag_lazy_nat_zero_fuel_precedes_callbacks
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    psKernelExprV2DefEqLazyNatWithFuel 0 defeq whnf context state left right =
+      Option.some (Except.error "kernel lazy-delta budget exhausted") := by
+  rfl
+
+theorem dag_lazy_nat_discards_unmatched_predecessor_owner
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state leftState rightState : PsKernelExprV2CheckState)
+    (left right leftPred : Nat)
+    (leftStep : psKernelExprV2DefEqNatPred state left =
+      Except.ok (Prod.mk leftState (Option.some leftPred)))
+    (rightStep : psKernelExprV2DefEqNatPred leftState right =
+      Except.ok (Prod.mk rightState Option.none)) :
+    psKernelExprV2DefEqLazyNatPredWith defeq whnf context state left right =
+      psKernelExprV2DefEqLazyNatAfterPredWith defeq whnf context state left right := by
+  simp [psKernelExprV2DefEqLazyNatPredWith, leftStep, rightStep]
+
+end PsKernelCacheScopeProofs
+
+#print axioms PsKernelCacheScopeProofs.dag_lazy_nat_zero_fuel_precedes_callbacks
+#print axioms PsKernelCacheScopeProofs.dag_lazy_nat_discards_unmatched_predecessor_owner

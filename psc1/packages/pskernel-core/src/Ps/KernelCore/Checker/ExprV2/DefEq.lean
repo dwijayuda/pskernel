@@ -2,10 +2,12 @@ import Ps.KernelCore.Checker.ExprV2.DefEq.Prefix
 import Ps.KernelCore.Checker.ExprV2.CheckWhnf
 import Ps.KernelCore.Checker.ExprV2.CheckCore
 import Ps.KernelCore.Checker.ExprV2.DefEq.ProofIrrelevance
+import Ps.KernelCore.Checker.ExprV2.DefEq.LazyNat
 
 /- Single recursive DefEq owner. The ordered prefix and proof irrelevance
 share inference-only/WHNF/DefEq callbacks at the exact predecessor fuel.
-Lazy delta and later rules remain unsupported; no partial state escapes. -/
+The ordered Nat lazy-delta prefix uses that same owner. Definition selection
+and later rules remain unsupported; no partial state escapes. -/
 def psKernelExprV2TryDefEqStateWithFuel
     (fuel : Nat) :
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
@@ -36,10 +38,15 @@ def psKernelExprV2TryDefEqStateWithFuel
               (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
             let worker := psKernelExprV2TryInferCoreWithFuel remaining;
             worker whnf smaller nextContext nextState nextRoot true;
+        let afterProof :=
+          fun (nextContext : PsKernelExprV2CheckContext)
+              (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
+            psKernelExprV2DefEqLazyNatWithFuel remaining smaller whnf
+              nextContext nextState nextLeft nextRight;
         let afterCore :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
-            psKernelExprV2DefEqProofIrrelevanceWith smaller inferType whnf
+            psKernelExprV2DefEqProofIrrelevanceContinueWith afterProof smaller inferType whnf
               nextContext nextState nextLeft nextRight;
         match psKernelExprV2CheckContextEnterRecDepth context with
         | Except.error error => Option.some (Except.error error)

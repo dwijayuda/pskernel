@@ -13,6 +13,7 @@ on:
       - psc1/test/PsKernelExprV2DagRegression.lean
       - psc1/test/PsKernelExprV2InferOnlyRegression.lean
       - psc1/test/PsKernelExprV2ProofIrrelevanceRegression.lean
+      - psc1/test/PsKernelExprV2LazyNatRegression.lean
       - psc1/test/PsKernelExprV2DagPerformance.lean
       - psc1/test/PsKernelExprV2TransformRegression.lean
       - psc1/test/PsKernelExprV2MetadataProofs.lean
@@ -22,6 +23,7 @@ on:
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-infer-only-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-proof-irrelevance-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-lazy-nat-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-bench.mjs
       - psc1/scripts/pskernel-expr-v2-admission-bench.mjs
       - psc1/scripts/pskernel-generated-profile.mjs
@@ -58,7 +60,7 @@ jobs:
           set -euo pipefail
           test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
-          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression
       - name: Run native DAG semantics, adversarial, fuel and official comparison
         working-directory: psc1
         run: |
@@ -140,6 +142,14 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
           grep -q 'PSC1_V2_DAG_PROOF_IRRELEVANCE: PASS comparisons=1350' "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_PROOF_IRRELEVANCE: PASS cases=8 invalid=1' "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
+      - name: Check ordered DAG Nat DefEq against V1 and official Lean
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_lazy_nat_regression \
+            | tee "$RUNNER_TEMP/psc1-lazy-nat-native.log"
+          grep -q 'PSC1_V2_DAG_LAZY_NAT: PASS comparisons=1350 stage=192' "$RUNNER_TEMP/psc1-lazy-nat-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_LAZY_NAT: PASS cases=14 invalid=1' "$RUNNER_TEMP/psc1-lazy-nat-native.log"
       - name: Check DAG transformation semantics and sharing
         working-directory: psc1
         run: |
@@ -203,6 +213,7 @@ jobs:
             ${{ runner.temp }}/psc1-native-provider.log
             ${{ runner.temp }}/psc1-provider-official.log
             ${{ runner.temp }}/psc1-proof-irrelevance-native.log
+            ${{ runner.temp }}/psc1-lazy-nat-native.log
             psc1/dist/expr-v2/native-artifacts.json
             psc1/dist/expr-v2/native-provider-linux.tar.gz
             psc1/host/kernel-provider/KernelProviderMain.lean
@@ -332,6 +343,17 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" proof-irrelevance-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-proof-irrelevance-generated.log"
           grep -q 'PSC1_V2_DAG_JS_PROOF_IRRELEVANCE: PASS comparisons=1350' "$RUNNER_TEMP/psc1-proof-irrelevance-generated.log"
+      - name: Check generated ordered DAG Nat DefEq in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-lazy-nat-smoke.mjs "$PSC1_DAG_RUN_DIR/lazy-nat-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" lazy-nat-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-lazy-nat-generated.log"
+          grep -q 'PSC1_V2_DAG_JS_LAZY_NAT: PASS comparisons=1350 stage=192' "$RUNNER_TEMP/psc1-lazy-nat-generated.log"
       - name: Exercise the generated checked batch provider in detached Node
         working-directory: psc1
         run: |
@@ -425,6 +447,7 @@ jobs:
           path: |
             ${{ runner.temp }}/psc1-generated-provider.log
             ${{ runner.temp }}/psc1-proof-irrelevance-generated.log
+            ${{ runner.temp }}/psc1-lazy-nat-generated.log
             psc1/dist/expr-v2/integration/provider/
             ${{ runner.temp }}/psc1-dag-generated-js.log
             ${{ runner.temp }}/psc1-nat-generated.log

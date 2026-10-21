@@ -50,6 +50,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.DefEq.Quick,
     `Ps.KernelCore.Checker.ExprV2.DefEq.Prefix,
     `Ps.KernelCore.Checker.ExprV2.DefEq.ProofIrrelevance,
+    `Ps.KernelCore.Checker.ExprV2.DefEq.LazyNat,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,
@@ -244,3 +245,8 @@ lean_exe psc1_kernel_provider where
 lean_exe psc1_kernel_expr_v2_proof_irrelevance_regression where
   srcDir := "test"
   root := `PsKernelExprV2ProofIrrelevanceRegression
+
+-- Ordered Nat lazy-delta prefix with exact cold/warm resource and state parity.
+lean_exe psc1_kernel_expr_v2_lazy_nat_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2LazyNatRegression

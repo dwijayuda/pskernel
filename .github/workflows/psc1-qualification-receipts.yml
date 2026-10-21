@@ -20,10 +20,10 @@ jobs:
           python3 - <<'PY'
           import hashlib, io, json, os, urllib.request, zipfile
           repo = "dwijayuda/pskernel"
-          source = "034999734f2574876a747c967dd03bcc6904b395"
-          run_id = 39637759569
-          artifact_id = 12367210000
-          expected_digest = "f268e0febdf0d9dbf35a767fc63897a7553c5107e462bf22a802c892266305f4"
+          source = "7b14affc854e7bc99e4778ac155ae805dd273226"
+          run_id = 39645764921
+          artifact_id = 12370158885
+          expected_digest = "b83002c7a156b15f7e8025029b9f17ffa406d8085dbad54567607fa99e4feb29"
           def fetch(path):
               request = urllib.request.Request(
                   "https://api.github.com/repos/" + repo + path,
@@ -62,5 +62,20 @@ jobs:
           case = records[0]
           assert case["name"] == "bugs/rec-missing-ih.ndjson"
           print("ARENA_UNCHANGED_CASE16 " + json.dumps(case, sort_keys=True))
+          assert report["kernel_fuel"] == 4096
+          assert report["host_timeout_seconds_per_case"] == 60
+          assert report["node_heap_limit_mib"] == 2048
+          assert report["host_workers"] == 2
+          assert report["excluded_cases"] == []
+          assert all(c["adaptation"]["body_bytes_identical"] and
+                     c["adaptation"]["original_body_sha256"] == c["adaptation"]["adapted_body_sha256"]
+                     for c in report["tests"])
+          unresolved = [{"index": c["index"], "name": c["name"],
+                         "classification": c["classification"],
+                         "official_verdict": c["official"]["verdict"],
+                         "pskernel_verdict": c["pskernel"]["verdict"],
+                         "reason": c["pskernel"].get("reason")}
+                        for c in report["tests"] if not c["classification"].startswith("matched_")]
+          print("ARENA_OPEN_CASES " + json.dumps(unresolved, sort_keys=True))
           print("PSC1_SAVED_ARENA_CASE16_INSPECTION: PASS source=" + source)
           PY

@@ -9,6 +9,23 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 11:57 UTC — preserve staged recursion arity in DAG guard source
+
+Generated integration119204677598 at staged236766f86a2693faffebd3632b42ef5dabe96f36
+failed authentic PSC1 with `structuralRecursionArity` in
+`psKernelExprV2AdmissionSeenBucket`. This is a portable-source calling-shape
+defect before generated checking. Its one declared fuel argument returns the
+remaining curried parameters; recursive source calls must respect that stage.
+
+This correction binds the recursive fuel stage first in SeenBucket and SeenSet,
+then applies the returned worker to the same remaining arguments. ScanWithFuel
+uses the same fuel-stage alias and an explicitly typed child callback. The
+recursive bounds, validated metadata, exact-ID collision checks, cache insertion
+order, universe/error precedence and runtime policy are unchanged. All18 local
+proof statements and the420/12/672/8 guard matrices are retained verbatim.
+The preceding a2b5ff4 reserved-name correction remains present. Fresh native,
+complete portable, canonical and generated gates are required.
+
 ## 2026-10-21 11:53 UTC — reserved-name syntax correction before staged runtime qualification
 
 Exact staged source236766f86a2693faffebd3632b42ef5dabe96f36 failed native

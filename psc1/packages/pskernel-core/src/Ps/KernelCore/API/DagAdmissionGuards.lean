@@ -32,12 +32,13 @@ def psKernelExprV2AdmissionSeenBucket
         | _ => List.nil
   | Nat.succ remaining =>
       fun (seen : PsKernelExprV2AdmissionSeen) (key : Nat) =>
+        let recur := psKernelExprV2AdmissionSeenBucket remaining;
         match seen with
         | PsKernelExprV2AdmissionSeen.branch left right =>
             if Nat.beq (Nat.mod key 2) 0 then
-              psKernelExprV2AdmissionSeenBucket remaining left (Nat.div key 2)
+              recur left (Nat.div key 2)
             else
-              psKernelExprV2AdmissionSeenBucket remaining right (Nat.div key 2)
+              recur right (Nat.div key 2)
         | _ => List.nil
 
 def psKernelExprV2AdmissionSeenSet
@@ -57,12 +58,13 @@ def psKernelExprV2AdmissionSeenSet
           match seen with
           | PsKernelExprV2AdmissionSeen.branch _ value => value
           | _ => PsKernelExprV2AdmissionSeen.empty;
+        let recur := psKernelExprV2AdmissionSeenSet remaining;
         if Nat.beq (Nat.mod key 2) 0 then
           PsKernelExprV2AdmissionSeen.branch
-            (psKernelExprV2AdmissionSeenSet remaining left (Nat.div key 2) ids) right
+            (recur left (Nat.div key 2) ids) right
         else
           PsKernelExprV2AdmissionSeen.branch left
-            (psKernelExprV2AdmissionSeenSet remaining right (Nat.div key 2) ids)
+            (recur right (Nat.div key 2) ids)
 
 def psKernelExprV2AdmissionIdMember
     (id : Nat) (ids : List Nat) : Bool :=
@@ -162,7 +164,11 @@ def psKernelExprV2AdmissionScanWithFuel
                 | Except.error error => Except.error error
                 | Except.ok localUndef =>
                     let nextFirst := psKernelExprV2AdmissionFirstUndef first localUndef;
-                    let recurse := psKernelExprV2AdmissionScanWithFuel remaining arena allowed;
+                    let recur := psKernelExprV2AdmissionScanWithFuel remaining;
+                    let recurse :=
+                      fun (nextSeen : PsKernelExprV2AdmissionSeen) (nextRoot : Nat)
+                          (nextFirst : Option PsKernelName) =>
+                        recur arena allowed nextSeen nextRoot nextFirst;
                     match psKernelExprV2AdmissionScanChildren
                         (psKernelExprV2AdmissionChildren entry.node) recurse seen nextFirst with
                     | Except.error error => Except.error error

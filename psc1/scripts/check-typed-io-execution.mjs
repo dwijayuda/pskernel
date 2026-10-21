@@ -25,6 +25,7 @@ export function checkTypedIoExecution(contract,receipt,{commit,head,checkerCommi
  for(const row of receipt.records){
   const mapping=contract.mappings[row.target];
   assert.equal(row.passed,true);assert.equal(row.hostEffects,true);
+  if(row.target==='rust')assert.match(row.hostCargoLockSha256||'',/^[a-f0-9]{64}$/,'locked Rust host consumer');
   assert.equal(row.provider,mapping.provider);assert.equal(row.abi,mapping.abi);
   assert.equal(row.admission,'independent-official-Lean');
   assert.equal(row.checkerCommit,checkerCommit);

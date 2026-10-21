@@ -181,7 +181,9 @@ for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-compone
 }
 const receipt={schema:'psc1-wasm-string-io/1',testedCommit:process.env.GITHUB_SHA||null,
  branchHeadCommit:process.env.PSC1_HEAD_SHA||null,records,failures,passed:failures.length===0,
- completeFamily:false,releaseReady:false};
+ completeFamily:false,releaseReady:false,
+ oversizedRequest:{passed:true,binarySha256:hash(oversizeFile),requestBytes:16777153,
+  portablePayloadLimit:2097152,foreignDispatchCalled:false,response:'tooLarge'}};
 write(path.join(evidence,'results.json'),JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_WASM_STRING: '+JSON.stringify(receipt));assert.deepEqual(failures,[]);
 assert.equal(records.length,4);fs.rmSync(work,{recursive:true,force:true});

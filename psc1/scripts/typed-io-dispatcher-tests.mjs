@@ -49,6 +49,7 @@ for(const syntax of ['lean','ps'])for(const target of targets){
   refuse([...args,'--abi','io-dispatcher','--assurance','verified'],/PSC1_ASSURANCE_DUPLICATE/);
   refuse(['build',source,'--target',target,'--out',output,'--abi','io-dispatcher','--assurance','verified'],/PSC1_VERIFIED_EXECUTION_UNAVAILABLE/);
   if(target!=='rust')refuse(args,/PSC1_.*(TYPE|PUBLIC|PARAMETER)/);
+  let hostCargoLockSha256=null;
   if(target==='rust'){
    const crate=path.join(folder,'consumer');
    fs.cpSync(fs.realpathSync(output.replace(/\.rs$/,'.cargo')),crate,{recursive:true,dereference:true});
@@ -72,7 +73,11 @@ for(const syntax of ['lean','ps'])for(const target of targets){
     '}))));assert!(trapped.is_err());host.close();}'
    ].join('\n'));
    const cargoEnv={...env,CARGO_TARGET_DIR:path.join(folder,'cargo-target')};
-   run('cargo',['generate-lockfile','--manifest-path',path.join(crate,'Cargo.toml')],{env:cargoEnv});
+   run('python3',[path.join(root,'scripts/merge-rust-io-lock.py'),path.join(crate,'Cargo.lock'),
+    path.join(root,'host-tools/typed-io-rust/Cargo.lock')]);
+   hostCargoLockSha256=hash(path.join(crate,'Cargo.lock'));
+   write(path.join(evidence,'consumers',label,'Cargo.lock'),fs.readFileSync(path.join(crate,'Cargo.lock'),'utf8'));
+   write(path.join(evidence,'consumers',label,'io-consumer.rs'),fs.readFileSync(path.join(crate,'src/bin/io-consumer.rs'),'utf8'));
    run('cargo',['build','--locked','--manifest-path',path.join(crate,'Cargo.toml'),'--bin','io-consumer'],{env:cargoEnv});
    const stdout=run(path.join(folder,'cargo-target/debug/io-consumer'),[config],{input:'world😀\r\n'});
    assert.equal(stdout,'tick\ntick\nrecovered\necho:world😀\n');
@@ -156,7 +161,7 @@ for(const syntax of ['lean','ps'])for(const target of targets){
   }
   records.push({syntax,target,passed:true,sourceSha256:hash(source),artifactSha256:hash(output),
    admission:'independent-official-Lean',runtime:'executed',checks:["general-source-sequencing","actual-file-read-atomic-write","actual-console-unicode-crlf","typed-error-recovery","host-trap-escapes","unsupported-abi-preserves-generation"],
-   provider:['js','ts'].includes(target)?'node':target,
+   provider:['js','ts'].includes(target)?'node':target,hostCargoLockSha256,
    librarySha256:hash(path.join(root,'stdlib/ProofScript/System/IO.'+syntax)),
    applicationModuleSha256:hash(path.join(folder,'source/SequencedIo/Program.'+syntax)),
    sourceClosureSha256:manifest.sourceClosureSha256,kernelAdmissionSha256:manifest.kernelAdmissionSha256,

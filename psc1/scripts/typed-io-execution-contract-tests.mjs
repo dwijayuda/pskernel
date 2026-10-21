@@ -9,7 +9,7 @@ const records=contract.grammars.flatMap(syntax=>contract.targets.map(target=>({
  syntax,target,...contract.mappings[target],passed:true,hostEffects:true,checks:contract.checks,
  admission:'independent-official-Lean',checkerCommit,strictIr:'required-by-production-publication',runtime:'executed',
  ...Object.fromEntries(['sourceSha256','librarySha256','applicationModuleSha256','artifactSha256',
- 'manifestSha256','sourceClosureSha256','kernelAdmissionSha256'].map(k=>[k,digest]))
+ 'manifestSha256','sourceClosureSha256','kernelAdmissionSha256','hostCargoLockSha256'].map(k=>[k,digest]))
 })));
 const policies=Object.fromEntries(Object.entries(contract.providers).map(([id,spec])=>[id,{
  schema:spec.schema,abi:spec.abi,platform:'linux',testedCommit:commit,branchHeadCommit:head,passed:true,checks:spec.requiredChecks
@@ -20,7 +20,7 @@ assert.equal(check(contract,receipt,{commit,head,checkerCommit}).observations,14
 for(const mutate of [
  r=>r.testedCommit=head,r=>r.records.pop(),r=>r.records.push(r.records[0]),
  r=>r.records[0].checks=[],r=>r.records[0].hostEffects=false,
- r=>r.records[0].kernelAdmissionSha256='',r=>r.records[0].provider='python',
+ r=>r.records[0].kernelAdmissionSha256='',r=>r.records[0].provider='python',r=>r.records[2].hostCargoLockSha256='',
  r=>r.records[0].runtime='skipped',r=>r.completeApplications=true,
  r=>r.policies.rust.testedCommit=head,r=>r.policies.php.checks=[],
  r=>r.policies.node.checks=[...r.policies.node.checks,r.policies.node.checks[0]]

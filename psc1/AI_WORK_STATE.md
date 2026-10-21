@@ -50,6 +50,11 @@ Focused Wasm execution at87baa7540787bc40dd228d489293e508dcbdc59b passes both
 grammars on core and component consumers, including actual source IO and traps.
 A direct oversized-GC-request test requires typed tooLarge before any host call,
 compared with the portable adapter under the same payload bound.
+Implementation53a61459546dc5b0e9faf0092ec96fd9d0dc33ca passes all selected static,
+native, focused, G1 and three source-closure jobs in run39624139192. Focused
+execution includes all4 grammar/Wasm pairs and the oversized-request refusal.
+The actual Rust consumer now merges the independently committed guest/host lock
+graphs and builds with --locked; its merged lock is retained and hashed.
 Final full integration at the latest implementation is still pending.
 Rust/PHP FFI profiles explicitly refuse architectures outside qualified Linux
 x86_64; disabled PHP FFI is tested to refuse before root/guest access.

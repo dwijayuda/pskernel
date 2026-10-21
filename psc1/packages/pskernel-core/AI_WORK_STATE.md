@@ -9,6 +9,72 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 09:56 UTC — isolated qualification of the remaining prepared DAG slices
+
+This source is on `research/psc1-pskernel-v2-staged-20261021`, separately from the
+active integration branch at `5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8`.
+The integration ref is not advanced by this staging run. At inspection,5544
+native integration119150176593 and native correctness119150175889 are terminal
+PASS, as are all six research jobs in39578569496. Complete authentic .lean
+source checking passed in generated integration119150176854; its runtime and
+canonical portability119150176408 remain IN PROGRESS. Full Arena39578569599
+has a passing official job and an IN PROGRESS generated comparison.
+
+The staged source is the reviewed combined draft2f804ec66bea21d969832c34aa093a2a1f7347f0,
+which descends from5544. It contains four prepared slices and their full native,
+official, detached generated-.lean and canonical-.ps regression gates:
+
+- Terminal DefEq: matching projections with their own node-count budget and
+  fixed owning callback; structure eta, string expansion and unit-like rules,
+  preserving ordered refusal/error behavior and original success-pair publication.
+  Gates:648 owner,216 final-rule,175 projection,144 string-build and32 string-stage
+  comparisons;21 official valid,5 invalid,8 string and1 resource fixtures.
+- DAG admission guards: validated-arena traversal with exact scope membership,
+  unchanged MVar/universe-before-FVar-before-undefined precedence and zero-before-memo
+  guards. Gates:420 static,12 shared-depth hostile,672 public and8 official
+  comparisons, plus18 local/conditional proof statements.
+- Quot: original public/core/reducer fuel ownership, initialized-environment guard,
+  exact constructor shape and callback placement. Gates:240 public,480 core,
+  720 owner,60 reducer comparisons,10 official valid and5 invalid fixtures.
+- Non-K ordinary recursors: only already-checked inductive metadata supplies
+  recursor types/rules. Private appended nodes cannot legalize original invalid
+  command IDs; atomic publication and original-root decoding are retained.
+  Gates:252 public,504 core,720 owner,72 reducer comparisons,9 private-ID
+  sentinels,12 official valid,4 invalid,3 checked-addDecl fixtures and14 local proofs.
+
+The workflows add this isolated branch to the existing native/generated,
+correctness/canonical, research and complete193-case Arena triggers. No test,
+assertion, toolchain pin, fuel/depth policy or host limit is removed or relaxed.
+
+| Exact source | Native | Portable .lean | Canonical .ps | Generated JS | Local proofs | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 480d875d5be7a9e656e7ccd1fa76cc7409a81c90 | PASS | PASS | PASS | PASS | PASS | PASS selected | FAIL qualification | PASS scoped |
+| 5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8 | PASS | PASS complete check | IN PROGRESS | IN PROGRESS | PASS native | PASS native / JS pending | IN PROGRESS | PASS native / JS pending |
+| This isolated staged source | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+A remains qualified only at the last fully tested scoped developer source480.
+B/C are not achieved. Four whole-operation fallback sites remain, with V1 still
+the public provider/default. General K/structure-major/String-projection and
+unsupported inductive ownership still decline. Original validated input decoding,
+checked V1 inductive admission and recursive import of checked generated metadata
+remain acknowledged transitional paths. No global soundness proof is claimed.
+The latest completed Arena remains480:193=170 matching outcomes (103accepted,
+59kernel rejections,1metadata rejection,7transport rejections)+2 separate safety
+agreements+20host timeouts+1 unsupported nested-recursion case. No totals are
+inherited by this staged source.
+
+Separate full-CheckState carrier drafte04a33a138baee694360a2b115fe25403ba4b920
+contains only three central modules and is intentionally incomplete. It is NOT
+part of this staging source or any qualification claim. It requires the owned
+dependencies, old-ABI compatibility adapters, consumer wiring and state-preservation
+tests before execution.
+
+Next executable action: inspect all four exact-source staging workflows, fix
+concrete failures without weakening assertions, and keep integration at5544
+until its current generated/canonical gates and the proposed successor gates
+are terminal. Any later integration promotion must use a fresh expected-SHA
+non-force update and record exact tested source identities.
+
 ## 2026-10-21 09:38 UTC — native FullShape green; portable Bool negation correction
 
 Exact source `b0792ba778e92cd2067379e28c4fb72b7d0105d3` passes native integration

@@ -7,6 +7,49 @@ Lean: `leanprover/lean4:v4.35.0`, exact commit `eb6cafb7290e8bd5f2937522d8d804f5
 Generated path: authentic PSC1 → TypeScript `7.0.2` → Node `22`. Full-kernel DirectJS is unsupported.
 Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduction path.
 
+## 2026-10-21 07:08 UTC — generated predecessor harness ABI correction
+
+Source `753b30cab254f8b85fa3da4815121c32c484f5e7` has terminal **PASS**
+in native integration
+[39558404780 / job 119083557519](https://github.com/dwijayuda/pskernel/actions/runs/39558404780/job/119083557519),
+native correctness, and all six research jobs. Native integration includes the
+1,350 Nat comparisons, 192 direct-stage comparisons, 14 official decisions and
+one invalid primitive, the preserved mutual-definition/owner controls, local
+proofs, official provider fixtures and 24 detached native provider cases.
+
+Its generated integration job
+[119083557294](https://github.com/dwijayuda/pskernel/actions/runs/39558404780/job/119083557294)
+is terminal **FAIL**, at `exact-syntactic-predecessor` in the new Nat smoke.
+The corrected warm-cache tests passed; the failure is a separate **harness ABI
+mismatch**: `psKernelExprEqual` is exported as a staged function, and this
+single assertion called `psKernelExprEqual(left, right)` instead of
+`psKernelExprEqual(left)(right)`. The established DAG smoke already uses the
+staged call. Native equality for these same predecessor expressions passed.
+
+This correction changes only that invocation and this receipt. It preserves
+the exact syntactic equality assertion, all fixture/count/owner checks and
+all production code. Generated provider/API and benchmark steps after the
+failed Nat step were **NOT RUN**. The canonical source graph has passed its
+independent check; canonical generated execution and full Arena were still
+in progress at this receipt. Fresh terminal CI is required for the containing
+revision; no earlier native or source pass substitutes for it.
+
+| Exact source | Native | Portable source | Canonical .ps | Generated JS | Proof | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `753b30cab254f8b85fa3da4815121c32c484f5e7` | PASS | PASS | PASS source | FAIL .lean-generated; canonical runtime IN PROGRESS | PASS | NOT RUN | IN PROGRESS | PASS native; generated NOT RUN |
+| Containing ABI-fixture revision | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+The preceding `e1b4deb214c3088e64a18f8b15148c7a15be2924` full Arena run
+[39554691941 / job 119072275837](https://github.com/dwijayuda/pskernel/actions/runs/39554691941/job/119072275837)
+is now terminal **FAIL qualification**: all 193 cases evaluated, 167 matching
+outcomes (103 acceptances, 56 kernel rejections, one metadata rejection and
+seven transport rejections), two separately classified unsafe/partial safety
+agreements, and the same 24 host timeouts. Its artifact is
+[12327340227](https://github.com/dwijayuda/pskernel/actions/runs/39554691941/artifacts/12327340227),
+zip SHA-256 `3d584f7d918155b1d7eae63573e7398f0ad594688af5ba836f8f69f1a0434f33`.
+Earlier “IN PROGRESS” entries for that run below are superseded. The candidate
+cache-predicate optimization still needs its own completed Arena/profile results.
+
 ## 2026-10-21 06:54 UTC — Nat cache fixture correction
 
 At source `54ea3d428d85ba2936a037a5d9decdcab1593990`, native integration

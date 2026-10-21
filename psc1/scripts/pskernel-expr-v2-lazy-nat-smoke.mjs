@@ -246,7 +246,7 @@ for(const term of predecessorTerms){
   const root=accepted(actual.snd,"pred-root");
   const decoded=accepted(get("psKernelExprV2DecodeChecked")(actual.fst.whnf.arena),"pred-arena");
   const observed=accepted(get("psKernelExprV2DecodedRequire")(decoded,root),"pred-read");
-  must(get("psKernelExprEqual")(accepted(expected,"pred-original"),observed)===true,"exact-syntactic-predecessor");
+  must(get("psKernelExprEqual")(accepted(expected,"pred-original"))(observed)===true,"exact-syntactic-predecessor");
  }
 }
 const unsupported=app(app(cn(name("nonPrimitive")),lit(1n)),lit(2n));

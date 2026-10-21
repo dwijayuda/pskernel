@@ -1,0 +1,137 @@
+name: PSC1 qualified-artifact full Arena under hard host cap
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-pskernel-name-arena-hardcap-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-artifact-arena-hardcap.yml
+      - psc1/scripts/pskernel-artifact-arena-hardcap.py
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc1-artifact-arena-hardcap-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  qualified-name-artifact-full-arena:
+    # Reuse an immutable qualified kernel; this does not build a new source revision.
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out the artifact comparison harness
+        uses: actions/checkout@v4
+        with:
+          path: harness
+          persist-credentials: false
+      - name: Check out the exact qualified host boundary
+        uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/pskernel
+          ref: 275833e70351684b10256ec922aa90d13e813159
+          path: sources/host
+          persist-credentials: false
+      - name: Check out the unchanged artifact authenticator
+        uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/pskernel
+          ref: 7ae480eedcc7c6c67e63ebdb7a6f4eedcf7ddaa4
+          path: sources/auth
+          persist-credentials: false
+      - name: Check out the exact qualified Name worker source
+        uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/pskernel
+          ref: 34126793178021a9cd1bdb37aa6fe17c0fab41c6
+          path: sources/kernel
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check pinned host sources and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C sources/host rev-parse HEAD)" = "275833e70351684b10256ec922aa90d13e813159"
+          test "$(git -C sources/auth rev-parse HEAD)" = "7ae480eedcc7c6c67e63ebdb7a6f4eedcf7ddaa4"
+          test "$(git -C sources/kernel rev-parse HEAD)" = "34126793178021a9cd1bdb37aa6fe17c0fab41c6"
+          python3 -m py_compile \
+            harness/psc1/scripts/pskernel-artifact-arena-hardcap.py \
+            sources/auth/psc1/scripts/pskernel-paired-artifacts.py \
+            sources/host/psc1/scripts/pskernel-arena435-compare.py \
+            sources/host/psc1/scripts/pskernel-arena435-generated-cgroup.py \
+            sources/host/psc1/scripts/pskernel-arena435-oracle.py \
+            sources/host/psc1/scripts/pskernel-arena435-host-controls.py \
+            sources/host/psc1/scripts/pskernel-arena435-progress-controls.py
+          node --check sources/host/psc1/scripts/pskernel-arena435-host-control.mjs
+          node --check sources/kernel/psc1/scripts/pskernel-arena-replay.mjs
+          node --check sources/kernel/psc1/scripts/pskernel-arena-replay-controls.mjs
+      - name: Authenticate exact Name runtime and immutable official reference artifacts
+        shell: bash
+        env:
+          PSC1_PERF_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 sources/auth/psc1/scripts/pskernel-paired-artifacts.py \
+            --candidate-run 39640226534 \
+            --candidate-source 34126793178021a9cd1bdb37aa6fe17c0fab41c6 \
+            --out "$RUNNER_TEMP/psc1-name-arena-runtimes" \
+            2>&1 | tee "$RUNNER_TEMP/psc1-name-arena-authentication.log"
+      - name: Download and authenticate all 193 original Arena cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 20 --max-time 180 \
+            -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+      - name: Run controls and all 193 independently checked cases under the hard host cap
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 harness/psc1/scripts/pskernel-artifact-arena-hardcap.py \
+            --runtimes "$RUNNER_TEMP/psc1-name-arena-runtimes" \
+            --host-source "$GITHUB_WORKSPACE/sources/host" \
+            --auth-source "$GITHUB_WORKSPACE/sources/auth" \
+            --kernel-source "$GITHUB_WORKSPACE/sources/kernel" \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --out "$RUNNER_TEMP/psc1-name-arena-hardcap" \
+            2>&1 | tee "$RUNNER_TEMP/psc1-name-arena-hardcap.log"
+      - name: Present exact complete or partial comparison evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test -f "$RUNNER_TEMP/psc1-name-arena-hardcap/summary.md"; then
+            cat "$RUNNER_TEMP/psc1-name-arena-hardcap/summary.md" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Retain all authenticated bodies, runtimes, records and host receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-name-artifact-arena-hardcap-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/psc1-name-arena-runtimes/
+            ${{ runner.temp }}/psc1-name-arena-hardcap/
+            ${{ runner.temp }}/psc1-name-arena-authentication.log
+            ${{ runner.temp }}/psc1-name-arena-hardcap.log
+            ${{ runner.temp }}/lean-arena-round-2026-09-tests.tar.gz
+            harness/psc1/scripts/pskernel-artifact-arena-hardcap.py
+            harness/.github/workflows/psc1-pskernel-artifact-arena-hardcap.yml
+            sources/auth/psc1/scripts/pskernel-paired-artifacts.py
+            sources/host/psc1/scripts/pskernel-arena435-compare.py
+            sources/host/psc1/scripts/pskernel-arena435-generated-cgroup.py
+            sources/host/psc1/scripts/pskernel-arena435-host-controls.py
+            sources/host/psc1/scripts/pskernel-arena435-host-control.mjs
+            sources/host/psc1/scripts/pskernel-arena435-progress-controls.py
+            sources/host/psc1/scripts/pskernel-arena435-oracle.py
+            sources/kernel/psc1/scripts/pskernel-arena-replay.mjs
+            sources/kernel/psc1/scripts/pskernel-arena-replay-controls.mjs
+            sources/kernel/psc1/lean-toolchain

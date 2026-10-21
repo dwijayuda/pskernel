@@ -1,3 +1,95 @@
+# Current continuation: artifact-based full Arena under the fixed 2 GiB host cap
+
+This heading describes a new, unexecuted host-only harness candidate. Its workflow
+is `.github/workflows/psc1-pskernel-artifact-arena-hardcap.yml`, intended for
+`research/psc1-pskernel-name-arena-hardcap-20261021`. The parent host source is
+`275833e70351684b10256ec922aa90d13e813159`; the workflow records its own exact
+`GITHUB_SHA` independently. No branch/ref is changed by the review-object draft.
+
+## Exact source and artifact scope
+
+The kernel under comparison is the already generated Name-worker artifact from
+`34126793178021a9cd1bdb37aa6fe17c0fab41c6`, integration run
+[39640226534](https://github.com/dwijayuda/pskernel/actions/runs/39640226534),
+artifact `12367640311`. Its ZIP SHA-256 is
+`d3240a7df49e6cca93dcc0c982e42b188a9b3792a1fb8421953b624a074ac98f`;
+the 9,893,728-byte kernel JavaScript SHA-256 is
+`d06d13d2e4cb54e8ea00aa0bfbb5b00b98cf3c2be1a610ccb5c699c64ee946c9`.
+The unmodified artifact authenticator from
+`7ae480eedcc7c6c67e63ebdb7a6f4eedcf7ddaa4` rechecks producer identity, terminal
+native/generated jobs, source manifest, pinned Lean/TypeScript/fuel, provider
+files, declarations, maps and scoped runtime dependencies. The source checkouts
+and every executed host/harness file are compared with their exact Git objects.
+
+The frozen host implementation is
+`275833e70351684b10256ec922aa90d13e813159`; the generated checker, replay controls
+and transport are identified independently. Replay, control and oracle source
+bytes are required to match between the Name source and frozen host source.
+The official-reference artifact remains the authenticated, complete f9 reference
+from run `39622521186`, job `119299431737`, artifact `12354733263`.
+This workflow does not rerun the compiler, canonical-source qualification or
+official Lean. It does not qualify the portable kernel tree at the host/harness
+revision or the current integration HEAD.
+
+## Real host boundary and unchanged comparison
+
+The existing 275 comparison is executed without alteration on all 193 original
+authenticated bodies. Fuel remains 4096, each checker gets 60 seconds, and two
+checkers may run concurrently. Production cgroups enforce `memory.max=2147483648`,
+`memory.swap.max=0` and `memory.oom.group=1`, before the unprivileged process
+executes with supplementary groups empty and `PATH=""`. Cleanup, memory events,
+charged peak memory, process RSS and sampled Node VmHWM remain distinct receipts.
+
+The new driver first reruns the 24 progress controls and the existing 70 parser
+assertions/six real Linux host controls. The live OOM/timeout/descendant controls
+use their explicitly test-only 128 MiB policy. It then executes the unchanged 138
+replay controls against the real Name kernel inside the production 2 GiB cgroup.
+A retained, hashed CLI wrapper restores the control module's original strict
+three-argument convention before importing it; it changes no checker code,
+assertion or decision. The full-corpus replay does not use this wrapper.
+
+All 193 identities, body/header hashes, official verdicts and classifications are
+rechecked from the complete report. Every compact per-case receipt is printed,
+including the actual cgroup policy and memory events. Full records, logs, source,
+runtime/provider files, maps, original archive and checksums are retained.
+The comparison's nonzero status is preserved. Timeout, OOM, setup/cleanup errors,
+kernel fuel exhaustion, unsupported inputs, and separately classified
+unsafe/partial agreements cannot become successful proof checks. Historical
+metadata-header adaptation remains explicit; this is not a native-4.35 re-export.
+
+## Evidence already obtained, and evidence still required
+
+The host boundary alone has a terminal PASS in
+[39645990047/job119381578495](https://github.com/dwijayuda/pskernel/actions/runs/39645990047/job/119381578495):
+24 progress controls, 70 parser assertions and six live Linux controls, including
+a forced 128 MiB cgroup OOM and descendant cleanup. Artifact `12367846398`
+is 29,891 bytes; ZIP SHA-256
+`2cf99cbb457ef268ff7c53633b25a6e69b2648f42f9253340df26dd5b9e73e84`.
+The complete recorded control report is archived in
+`evidence/2026-10-21-generated-arena-hard-host-controls.json`.
+The historical production-sized missing-executable sentinel intentionally failed
+setup and does not establish successful 2 GiB checker execution.
+
+The new artifact-based full-193 driver/workflow, successful production-cap replay
+controls, and production-cap corpus comparison are **NOT RUN** at this source
+checkpoint. The Name artifact's older Arena run
+[39640227692](https://github.com/dwijayuda/pskernel/actions/runs/39640227692)
+completed with 172 matching outcomes (105 acceptance, 59 kernel rejection,
+one metadata rejection, seven transport rejection), two separately classified
+unsafe/partial agreements, 17 host timeouts, one kernel fuel exhaustion and one
+unsupported recursor case. It used the earlier V8-only heap policy and does not
+satisfy the new OS charged-memory limit. None of those outcomes is inherited as
+a pass by this new harness.
+
+The next executable action is the focused artifact-based workflow above. It
+must retain and report incomplete full-corpus qualification if any case remains
+unmatched or any host receipt is invalid. Kernel operation semantics, portable
+runtime trust, the native cgroup API, previous paired measurements, and the V1
+reference are unchanged. Full V2 replacement and full Arena compatibility remain
+unestablished.
+
+---
+
 # Host-only generated Arena memory boundary candidate — NOT RUN
 
 Review parent: `384f3395036ba7022e6eea9d3ff77f37aacd62ca`.

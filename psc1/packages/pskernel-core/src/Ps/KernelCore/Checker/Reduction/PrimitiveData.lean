@@ -136,20 +136,20 @@ def psKernelStringConstructorDataWithFuel
         (_charOfNat : PsKernelExpr) =>
         listNil
   | Nat.succ remaining =>
-      let smaller :
-          String ->
-          Nat ->
-          PsKernelExpr ->
-          PsKernelExpr ->
-          PsKernelExpr ->
-          PsKernelExpr :=
-        psKernelStringConstructorDataWithFuel remaining;
       fun
         (value : String)
         (position : Nat)
         (listNil : PsKernelExpr)
         (listCons : PsKernelExpr)
         (charOfNat : PsKernelExpr) =>
+        let smaller :
+            String ->
+            Nat ->
+            PsKernelExpr ->
+            PsKernelExpr ->
+            PsKernelExpr ->
+            PsKernelExpr :=
+          psKernelStringConstructorDataWithFuel remaining;
         if
             String.Internal.atEnd
               value

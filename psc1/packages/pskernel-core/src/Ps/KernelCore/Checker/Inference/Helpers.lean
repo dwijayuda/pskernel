@@ -158,8 +158,6 @@ def psKernelInferAppOnlyLoopWithFuel
         Except.error
           "kernel inference budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelInferAppOnlyLoopWithFuel remaining;
       fun
         (whnf :
           PsKernelCheckerContext ->
@@ -173,6 +171,8 @@ def psKernelInferAppOnlyLoopWithFuel
         (index : Nat)
         (instantiated : Nat)
         (current : PsKernelExpr) =>
+        let smaller :=
+          psKernelInferAppOnlyLoopWithFuel remaining;
         let argCount :=
           psKernelExprListLength args;
         if psKernelNatLt index argCount then

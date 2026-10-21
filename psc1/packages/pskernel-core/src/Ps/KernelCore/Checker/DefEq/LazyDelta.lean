@@ -264,8 +264,6 @@ def psKernelDefEqLazyReductionWithFuel
         Except.error
           "kernel lazy-delta budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelDefEqLazyReductionWithFuel remaining;
       fun
         (defeq :
           PsKernelCheckerContext ->
@@ -292,6 +290,8 @@ def psKernelDefEqLazyReductionWithFuel
         (state : PsKernelCheckerState)
         (left : PsKernelExpr)
         (right : PsKernelExpr) =>
+        let smaller :=
+          psKernelDefEqLazyReductionWithFuel remaining;
         if
             if psKernelExprIsNatZero left then
               psKernelExprIsNatZero right
@@ -451,8 +451,6 @@ def psKernelDefEqLazyProjReductionWithFuel
         Except.error
           "kernel lazy-projection budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelDefEqLazyProjReductionWithFuel remaining;
       fun
         (defeq :
           PsKernelCheckerContext ->
@@ -475,6 +473,8 @@ def psKernelDefEqLazyProjReductionWithFuel
         (right : PsKernelExpr)
         (typeName : PsKernelName)
         (index : Nat) =>
+        let smaller :=
+          psKernelDefEqLazyProjReductionWithFuel remaining;
         match
             psKernelDefEqLazyStep
               defeq

@@ -52,8 +52,6 @@ def psKernelInferCoreWithFuel
         Except.error
           "kernel inference budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelInferCoreWithFuel remaining;
       fun
         (whnf :
           PsKernelCheckerContext ->
@@ -72,6 +70,8 @@ def psKernelInferCoreWithFuel
         (state : PsKernelCheckerState)
         (expr : PsKernelExpr)
         (inferOnly : Bool) =>
+        let smaller :=
+          psKernelInferCoreWithFuel remaining;
         let cache :=
           if inferOnly then
             state.inferOnly

@@ -100,8 +100,6 @@ def psKernelDefEqEtaStructFieldsWithFuel
         Except.error
           "kernel structure eta budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelDefEqEtaStructFieldsWithFuel remaining;
       fun
         (defeq :
           PsKernelCheckerContext ->
@@ -117,6 +115,8 @@ def psKernelDefEqEtaStructFieldsWithFuel
         (args : List PsKernelExpr)
         (numParams : Nat)
         (index : Nat) =>
+        let smaller :=
+          psKernelDefEqEtaStructFieldsWithFuel remaining;
         let fieldCount :=
           Nat.sub
             (psKernelExprListLength args)

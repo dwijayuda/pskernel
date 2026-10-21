@@ -106,8 +106,6 @@ def psKernelDefEqLambdaSpineWithFuel
         Except.error
           "kernel defeq lambda-spine budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelDefEqLambdaSpineWithFuel remaining;
       fun
         (defeq :
           PsKernelCheckerContext ->
@@ -121,6 +119,8 @@ def psKernelDefEqLambdaSpineWithFuel
         (left : PsKernelExpr)
         (right : PsKernelExpr)
         (subst : List PsKernelExpr) =>
+        let smaller :=
+          psKernelDefEqLambdaSpineWithFuel remaining;
         match left with
         | PsKernelExpr.lam _ leftDomain leftBody _ =>
             match right with
@@ -279,8 +279,6 @@ def psKernelDefEqForallSpineWithFuel
         Except.error
           "kernel defeq forall-spine budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelDefEqForallSpineWithFuel remaining;
       fun
         (defeq :
           PsKernelCheckerContext ->
@@ -294,6 +292,8 @@ def psKernelDefEqForallSpineWithFuel
         (left : PsKernelExpr)
         (right : PsKernelExpr)
         (subst : List PsKernelExpr) =>
+        let smaller :=
+          psKernelDefEqForallSpineWithFuel remaining;
         match left with
         | PsKernelExpr.forallE _ leftDomain leftBody _ =>
             match right with
@@ -450,8 +450,6 @@ def psKernelDefEqArgsWithFuel
         Except.error
           "kernel defeq argument budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelDefEqArgsWithFuel remaining;
       fun
         (defeq :
           PsKernelCheckerContext ->
@@ -464,6 +462,8 @@ def psKernelDefEqArgsWithFuel
         (state : PsKernelCheckerState)
         (left : PsKernelExpr)
         (right : PsKernelExpr) =>
+        let smaller :=
+          psKernelDefEqArgsWithFuel remaining;
         match left with
         | PsKernelExpr.app leftFn leftArg =>
             match right with
@@ -554,8 +554,6 @@ def psKernelDefEqCompareExprListsWithFuel
         Except.error
           "kernel defeq argument-list budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelDefEqCompareExprListsWithFuel remaining;
       fun
         (defeq :
           PsKernelCheckerContext ->
@@ -568,6 +566,8 @@ def psKernelDefEqCompareExprListsWithFuel
         (state : PsKernelCheckerState)
         (left : List PsKernelExpr)
         (right : List PsKernelExpr) =>
+        let smaller :=
+          psKernelDefEqCompareExprListsWithFuel remaining;
         match left with
         | List.nil =>
             match right with

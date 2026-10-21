@@ -19,6 +19,8 @@ on:
       - psc1/test/PsKernelExprV2MetadataProofs.lean
       - psc1/test/PsKernelCacheScopeProofs.lean
       - psc1/test/PsKernelNatFuelProofs.lean
+      - psc1/test/PsKernelExprEqualityProofs.lean
+      - psc1/test/PsKernelKnotFuelProofs.lean
       - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-infer-only-smoke.mjs
@@ -168,9 +170,16 @@ jobs:
           lake -f kernel-lakefile.lean env lean test/PsKernelNatFuelProofs.lean \
             | tee "$RUNNER_TEMP/psc1-nat-fuel-proofs.log"
           grep -q 'PSKERNEL_LARGE_NAT_NATIVE: PASS' "$RUNNER_TEMP/psc1-nat-fuel-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprEqualityProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-expr-equality-proofs.log"
+          grep -q 'PSKERNEL_EXPR_EQUALITY_NATIVE: PASS comparisons=800 hostile=21 sharedDepth=64' "$RUNNER_TEMP/psc1-expr-equality-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelKnotFuelProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
+          grep -q 'PSKERNEL_KNOT_FUEL_PROOFS: PASS workers=15' "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
           if grep -E 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' \
               "$RUNNER_TEMP/psc1-metadata-proofs.log" "$RUNNER_TEMP/psc1-scope-proofs.log" \
-              "$RUNNER_TEMP/psc1-nat-fuel-proofs.log"; then
+              "$RUNNER_TEMP/psc1-nat-fuel-proofs.log" "$RUNNER_TEMP/psc1-expr-equality-proofs.log" \
+              "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"; then
             echo 'PSKERNEL_PROOF_UNAPPROVED_TRUST_DEPENDENCY'
             exit 1
           fi
@@ -225,6 +234,8 @@ jobs:
             ${{ runner.temp }}/psc1-metadata-proofs.log
             ${{ runner.temp }}/psc1-scope-proofs.log
             ${{ runner.temp }}/psc1-nat-fuel-proofs.log
+            ${{ runner.temp }}/psc1-expr-equality-proofs.log
+            ${{ runner.temp }}/psc1-knot-fuel-proofs.log
             ${{ runner.temp }}/psc1-dag-native-bench.log
             ${{ runner.temp }}/psc1-dag-native-bench.memory
           retention-days: 30
@@ -281,6 +292,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-dag-generated-js.log" \
             | sed -u '/^PSC1_DAG_PASS /d'
           grep -q 'PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_EXPR_EQUALITY_DELAYED_JS: PASS hostile=21 staged=2 sharedDepth=64' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_BETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_WHNF_STATE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"

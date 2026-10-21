@@ -98,8 +98,6 @@ def psKernelWhnfWithFuel
         Except.error
           "kernel reduction budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelWhnfWithFuel remaining;
       fun
         (reduceRecursor :
           PsKernelCheckerContext ->
@@ -114,6 +112,8 @@ def psKernelWhnfWithFuel
         (context : PsKernelCheckerContext)
         (state : PsKernelCheckerState)
         (expr : PsKernelExpr) =>
+        let smaller :=
+          psKernelWhnfWithFuel remaining;
         match expr with
         | PsKernelExpr.bvar _ =>
             Except.ok (Prod.mk expr state)

@@ -4,7 +4,7 @@ import Ps.KernelCore.Checker.DefEq.FullShape
 /-
 Single owner of cross-component checker recursion.
 
-The existing curried fuel workers are preserved verbatim: recursor callbacks use
+The curried interfaces and callback budgets are preserved: recursor callbacks use
 remaining fuel; the defeq continuation uses its own remaining fuel; the projection
 shortcut retains its expression-derived budget. Exhaustion still rejects.
 The inference-only and fully checked entry points remain distinct.
@@ -45,8 +45,6 @@ def psKernelReduceRecursorBoundedWithFuel
         Except.error
           "kernel recursor budget exhausted"
   | Nat.succ remaining =>
-      let nextReducer :=
-        psKernelReduceRecursorBoundedWithFuel remaining;
       fun
         (defeq :
           PsKernelCheckerContext ->
@@ -60,6 +58,8 @@ def psKernelReduceRecursorBoundedWithFuel
         (expr : PsKernelExpr)
         (cheapRec : Bool)
         (cheapProj : Bool) =>
+        let nextReducer :=
+          psKernelReduceRecursorBoundedWithFuel remaining;
         let reducer :=
           fun
             (nextContext : PsKernelCheckerContext)
@@ -322,19 +322,19 @@ def psKernelIsDefEqWithFuel
         Except.error
           "kernel definitional equality budget exhausted"
   | Nat.succ remaining =>
-      let defeq :
-          PsKernelCheckerContext ->
-          PsKernelCheckerState ->
-          PsKernelExpr ->
-          PsKernelExpr ->
-          Except String
-            (Prod Bool PsKernelCheckerState) :=
-        psKernelIsDefEqWithFuel remaining;
       fun
         (context : PsKernelCheckerContext)
         (state : PsKernelCheckerState)
         (left : PsKernelExpr)
         (right : PsKernelExpr) =>
+        let defeq :
+            PsKernelCheckerContext ->
+            PsKernelCheckerState ->
+            PsKernelExpr ->
+            PsKernelExpr ->
+            Except String
+              (Prod Bool PsKernelCheckerState) :=
+          psKernelIsDefEqWithFuel remaining;
         match
             psKernelCheckerContextEnterRecDepth
               context with

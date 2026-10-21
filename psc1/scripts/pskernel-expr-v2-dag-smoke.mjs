@@ -38,6 +38,39 @@ const exact=(left,right)=>get("psKernelExprEqual")(left)(right);
 must(equal(sort0,sort0)===true&&equal(sort0,sort1)===false&&
   exact(sort0,sort0)===true&&exact(sort0,sort1)===false,
   "equality-harness-rejects-unequal-terms");
+
+{
+  const x=name("equality-x"), y=name("equality-y");
+  let deep=E.bvar(0n);
+  for(let i=0;i<64;i++)deep=E.app(deep,deep);
+  const hostile=[
+    ["outer-tag",deep,sort0],
+    ["app-first-child",E.app(sort0,deep),E.app(sort1,deep)],
+    ["lam-type",E.lam(x,sort0,deep,B.default),E.lam(x,sort1,deep,B.default)],
+    ["forall-type",E.forallE(x,sort0,deep,B.default),E.forallE(x,sort1,deep,B.default)],
+    ["let-type",E.letE(x,sort0,deep,deep,false),E.letE(x,sort1,deep,deep,false)],
+    ["let-value",E.letE(x,sort0,sort0,deep,false),E.letE(x,sort0,sort1,deep,false)],
+    ["mdata-tag",E.mdata(7n,deep),E.mdata(8n,deep)],
+    ["projection-name",E.proj(x,0n,deep),E.proj(y,0n,deep)],
+    ["projection-index",E.proj(x,0n,deep),E.proj(x,1n,deep)],
+  ];
+  for(const [label,left,right] of hostile){
+    must(equal(left,right)===false,"delayed-exprEq-"+label);
+    must(exact(left,right)===false,"delayed-exprEqual-"+label);
+  }
+  must(exact(E.lam(x,deep,deep,B.default),E.lam(y,deep,deep,B.default))===false,
+    "delayed-exact-lam-name");
+  must(exact(E.forallE(x,deep,deep,B.default),E.forallE(y,deep,deep,B.default))===false,
+    "delayed-exact-forall-name");
+  must(exact(E.letE(x,deep,deep,deep,false),E.letE(y,deep,deep,deep,false))===false,
+    "delayed-exact-let-name");
+  for(const exportName of ["psKernelExprEq","psKernelExprEqual"]){
+    const partial=get(exportName)(deep);
+    must(typeof partial==="function"&&partial(sort0)===false,
+      "delayed-staged-abi-"+exportName);
+  }
+  console.log("PSC1_EXPR_EQUALITY_DELAYED_JS: PASS hostile=21 staged=2 sharedDepth=64");
+}
 const run=get("psKernelV1RunDag");
 const session=(fuel=4096n,depth=0n)=>accepted(
   get("psKernelKernelSessionEmpty")(

@@ -23,16 +23,16 @@ def psKernelWhnfCountLambdasWithFuel
         (count : Nat) =>
         Prod.mk current count
   | Nat.succ remaining =>
-      let smaller :
-          PsKernelExpr ->
-          Nat ->
-          Nat ->
-          Prod PsKernelExpr Nat :=
-        psKernelWhnfCountLambdasWithFuel remaining;
       fun
         (current : PsKernelExpr)
         (argCount : Nat)
         (count : Nat) =>
+        let smaller :
+            PsKernelExpr ->
+            Nat ->
+            Nat ->
+            Prod PsKernelExpr Nat :=
+          psKernelWhnfCountLambdasWithFuel remaining;
         match current with
         | PsKernelExpr.lam _ _ body _ =>
             if psKernelNatLt count argCount then
@@ -166,8 +166,6 @@ def psKernelWhnfCoreWithFuel
         Except.error
           "kernel reduction budget exhausted"
   | Nat.succ remaining =>
-      let smaller :=
-        psKernelWhnfCoreWithFuel remaining;
       fun
         (publicWhnf :
           PsKernelCheckerContext ->
@@ -190,6 +188,8 @@ def psKernelWhnfCoreWithFuel
         (expr : PsKernelExpr)
         (cheapRec : Bool)
         (cheapProj : Bool) =>
+        let smaller :=
+          psKernelWhnfCoreWithFuel remaining;
         match
             psKernelCheckerContextEnterRecDepth
               context with

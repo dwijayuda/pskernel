@@ -7,6 +7,134 @@ Lean: `leanprover/lean4:v4.35.0`, exact commit `eb6cafb7290e8bd5f2937522d8d804f5
 Generated path: authentic PSC1 → TypeScript `7.0.2` → Node `22`. Full-kernel DirectJS is unsupported.
 Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduction path.
 
+
+## 2026-10-21 07:38 UTC — qualified provider checkpoint; structural allocation candidate
+
+**Last fully qualified native/portable/generated developer checkpoint:**
+`854bdb9e0febf4e01fb5ce4b2cc8ea91f61287e4`, on the integration branch above.
+Both jobs in [integration 39560050702](https://github.com/dwijayuda/pskernel/actions/runs/39560050702)
+and both jobs in [correctness 39560050819](https://github.com/dwijayuda/pskernel/actions/runs/39560050819)
+are terminal **PASS**. All six jobs in
+[research 39560050764](https://github.com/dwijayuda/pskernel/actions/runs/39560050764)
+are terminal **PASS**. This supersedes earlier pending entries for the corrected
+Nat fixture, canonical execution and byte-input provider API.
+
+| Exact source | Native | Portable source | Canonical .ps | Generated JS | Proof | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `854bdb9e0febf4e01fb5ce4b2cc8ea91f61287e4` | PASS | PASS | PASS source + runtime | PASS both routes | PASS existing gates | PASS selected workloads | FAIL: 24 host timeouts | PASS native + both JS routes |
+| Containing allocation candidate | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+The source-bound native job is
+[119088851480](https://github.com/dwijayuda/pskernel/actions/runs/39560050702/job/119088851480);
+the generated job is
+[119088850976](https://github.com/dwijayuda/pskernel/actions/runs/39560050702/job/119088850976);
+the canonical job is
+[119088851453](https://github.com/dwijayuda/pskernel/actions/runs/39560050819/job/119088851453).
+Required executions include the 280-case mutual-definition matrix, eight
+official mutual fixtures and fresh-member budget sentinels; 1,008 inference-only
+comparisons; 1,350 proof-irrelevance comparisons; 1,350 Nat comparisons and
+192 direct Nat-stage comparisons, with 14 official decisions and one invalid
+primitive; metadata, scanner, cache-scope and Nat-fuel proof gates; existing
+binder/prefix/admission/failure-order controls; the five official provider
+fixtures; and 24 detached provider CLI cases on native and both generated routes.
+Each generated route additionally passed all eight private-byte-buffer API cases.
+The generated Nat harness reports 2,429 assertions. Neither provider execution
+delegates checker decisions to Lean; the generated processes run with PATH empty.
+
+### Exact checkpoint artifacts
+
+All manifests name source `854bdb9e0febf4e01fb5ce4b2cc8ea91f61287e4`.
+A checksum is an integrity receipt, not a proof of a verdict.
+
+| Artifact | Download | Uploaded ZIP SHA-256 |
+| --- | --- | --- |
+| Linux native executable and manifest | [12327502114](https://github.com/dwijayuda/pskernel/actions/runs/39560050702/artifacts/12327502114) | `5763471acc85b564deac16046611cb43c646359a7838fd7bb3ca3008969ccdf6` |
+| Complete .lean-generated JS provider, TS, declarations and map | [12328068763](https://github.com/dwijayuda/pskernel/actions/runs/39560050702/artifacts/12328068763) | `4e23b676ed5edc6eb0cc1122037237d0dbafd05dc1269d2d95fc24b5401733c6` |
+| Complete canonical source and generated provider | [12328716432](https://github.com/dwijayuda/pskernel/actions/runs/39560050819/artifacts/12328716432) | `d92c13f9bdaa0bf3ff04f7e991aee9f912f0ffd6c5c5047395a9c0cd333b831a` |
+
+Native executable SHA-256:
+`562d95ba7b56f9b905b124453f61295902f3d418831322a83c9af2738594cc4d`.
+Executable-preserving tar:
+`2ad0ed91a03feb9fa46d1485b10cd016b60227b32ce41eb26ea11455912d558c`.
+Lean-derived JS:
+`3ea6e3b59470fdef9363de2c0f0ea7256a13a1fe65fa9dfe4a068cb8f45476e2`.
+Canonical-derived JS:
+`d55b36f01cf7581d8eea49d4b5d87583207ff79e084d2f1ee1ae1126107d97f0`.
+Canonical source tar:
+`3939859c26b5d9ab8fd63845e0c24b02cd420afe75d2fe87b94cb377064fadee`.
+Both routes produce the same TS source and declarations:
+`2073ab6638edee59e8b658d5404a9f93d37a638ba73bbb9234195bc167411fa0`
+and `155b391e4b1b9070e2450e4b76c43c22b24c0f0d86eef6440b4ecd4969c01af2`.
+Map hashes are preserved in the manifests. Artifacts have the workflow's
+30-day retention; reproducible source and recipes remain committed.
+
+### Corpus result and changed diagnosis
+
+[Full Arena 39560050730 / job 119089611991](https://github.com/dwijayuda/pskernel/actions/runs/39560050730/job/119089611991)
+is terminal **FAIL qualification** at the same source: all 193 cases evaluated,
+167 matching outcomes (103 acceptances, 56 kernel rejections, one metadata and
+seven transport rejections), two separately classified unsafe/partial safety
+agreements, and 24 host timeouts. The official reference job
+[119088851272](https://github.com/dwijayuda/pskernel/actions/runs/39560050730/job/119088851272)
+passed. No timeout is a kernel rejection. Result artifact
+[12329155162](https://github.com/dwijayuda/pskernel/actions/runs/39560050730/artifacts/12329155162),
+zip SHA-256 `7a49839c167de33bfb80a715c93212333d328aa02234fed32e41670f0d713248`.
+
+The preceding `54ea3d428d85ba2936a037a5d9decdcab1593990` and
+`753b30cab254f8b85fa3da4815121c32c484f5e7` full comparisons also ended with the
+same 24 host timeouts. The cache-eligibility reorder did not resolve a single
+full case. The authentic four-case profile at 54ea3d4 also timed out in all
+unprofiled/profiled pairs; its collection success does not qualify the cases.
+The source-bound profile and sampled RSS receipts are appended to
+[PERFORMANCE_2026-10-21.md](PERFORMANCE_2026-10-21.md).
+
+The containing commit changes only the placement of recursive aliases inside
+existing argument lambdas in both structural equality workers and all fifteen
+identified eager fuel workers. This prevents partial application from eagerly
+constructing recursive function chains or the equality worker for an entire
+shared subtree before its other input is examined. No fuel value, recursive
+argument, callback placement, error branch, primitive truncation behavior or
+public/staged type is changed. Frozen definitions from 854bdb9 and universal
+local function-equivalence statements are added in
+`test/PsKernelExprEqualityProofs.lean` and `test/PsKernelKnotFuelProofs.lean`.
+They require actual Lean checking and the existing axiom audit. These are
+replacement theorems using common imported helpers, not global soundness or
+allocation-bound proofs.
+
+Native tests add 800 frozen equality comparisons and 21 hostile early mismatches
+against a 65-node shared expression. Both generated routes require the same
+21 hostile controls plus two staged-ABI controls. The frozen eager oracle is
+never evaluated on the exponential unfolded tree. All previous gates remain.
+The modified helpers serve V1 as well as DAG users: new same-revision V1/DAG
+numbers cannot be advertised as before/after speedups against original 854bdb9.
+
+### Remaining critical path
+
+1. Qualify the containing allocation candidate at its exact SHA: all 15 fuel
+   theorems, four expression-equality theorems, native/portable/canonical/generated
+   execution, provider controls, whole-operation benchmarks and all 193 cases.
+   No allocation or corpus speedup is claimed before those runs finish.
+2. Diagnose any remaining authentic timeouts from actual call behavior. Keep
+   fuel 4096 and Arena host 60 seconds / 2 GiB; recursive free-variable/node-count
+   scans remain. Preserve historical artifacts for a same-run before/after
+   comparison if a timed-out whole check begins to finish.
+3. The next DAG stage is the ordered general lazy-delta loop, with independent
+   unfolding/failure caches, exact hints/universe selection, rightmost-first
+   same-definition arguments and fixed callback budgets. It is being prepared
+   with direct-stage and official regressions; it is not in this source yet.
+4. Four RunDag whole-operation fallback sites remain. Residual DefEq, general
+   recursor/iota, broader inference/WHNF and inductive admission still require
+   migration. V1 remains the default/reference and provider selection.
+   No full V2, global soundness or full Lean Arena claim is made.
+
+The usable developer provider scope at 854bdb9 is qualified as documented in
+[PROVIDER.md](PROVIDER.md); unsupported wire features are explicit refusals.
+The full V2 architecture and full-corpus gates remain open. No merge or package
+publication has occurred. Work is performed only through connected GitHub and
+Linux Actions. Agent-side Git object creation did not return a receipt and was
+stopped after 610 seconds; no successful mutation was inferred from that call.
+All branch updates continue through one writer with a fresh expected SHA.
+
 ## 2026-10-21 07:08 UTC — generated predecessor harness ABI correction
 
 Source `753b30cab254f8b85fa3da4815121c32c484f5e7` has terminal **PASS**

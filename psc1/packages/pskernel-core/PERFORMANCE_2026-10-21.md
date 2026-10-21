@@ -150,3 +150,51 @@ times out without useful whole-checker progress, stop tuning this predicate:
 the next structural work is owning recursor references/iota, full DefEq delta
 state and removal of recursive-expression fallback, guided by logical caller
 attribution.
+
+
+## Allocation candidate after the repeated full-corpus failure
+
+The subsequent source `54ea3d428d85ba2936a037a5d9decdcab1593990`
+completed all 193 comparisons in
+[39557632345 / job 119081796230](https://github.com/dwijayuda/pskernel/actions/runs/39557632345/job/119081796230).
+Qualification **FAILED** with the same 167 matching outcomes, two separately
+classified unsafe/partial safety agreements, and 24 host timeouts. The 167
+comprise 103 acceptances, 56 kernel rejections, one metadata rejection and seven
+transport rejections. Its outer-kind cache-eligibility reorder did not resolve
+any of the 24 timed-out cases.
+
+The four authentic-body diagnostic pairs in
+[39557632125 / job 119081026195](https://github.com/dwijayuda/pskernel/actions/runs/39557632125/job/119081026195)
+also remained censored at the unchanged 60-second host limit. Collection passed;
+the checker cases did not finish. Sampled process high-water marks were
+331,888 KiB for repeated-subproblem, 460,760 KiB for church-numerals,
+1,269,652 KiB for init-prelude, and 433,344 KiB for proj-of-subst-prop.
+These sampled values are lower bounds, not exact process peak RSS. Entry/decode
+times were 276.470, 276.216, 3,162.621 and 568.901 milliseconds respectively.
+No completion speedup is inferred from a timeout or from profile sample counts.
+
+Inspection of the actual portable source identified eager recursive closures
+in both expression-equality functions and fifteen fuel-indexed workers.
+The containing candidate moves recursive aliases underneath existing argument
+lambdas, preserving their types, arguments, branches, error guards, recursive
+fuel and callback placement. Frozen predecessor definitions and universal local
+function-equality theorems are added in `PsKernelExprEqualityProofs.lean` and
+`PsKernelKnotFuelProofs.lean`; GitHub Actions must check them before promotion.
+Native and both generated routes also require immediate mismatches against a
+65-node shared expression with an exponentially large unfolded tree.
+
+This is a structural allocation candidate, **not yet a measured corpus fix**.
+It changes helpers used by both V1 and the transitional DAG implementation.
+Same-revision V1-versus-DAG benchmark results must therefore remain distinct
+from before/after comparisons against the authenticated
+`854bdb9e0febf4e01fb5ce4b2cc8ea91f61287e4` artifacts. Recursive free-variable
+and node-count scans and the four whole-operation
+fallback sites are still present. Default kernel fuel remains 4096 and the
+Arena host policy remains 60 seconds / 2 GiB.
+
+Raw full-corpus artifact:
+[12327273770](https://github.com/dwijayuda/pskernel/actions/runs/39557632345/artifacts/12327273770),
+zip SHA-256 `cbbc6546fd0134d17395e43e7716fa62bac4be0e6d1c4b5767e04c5b7dd916e3`.
+Authentic profile artifact:
+[12327038831](https://github.com/dwijayuda/pskernel/actions/runs/39557632125/artifacts/12327038831),
+zip SHA-256 `228783c5f075481fe2be41f91cd9367874884f1caef6e8953a4c0adeb9880d11`.

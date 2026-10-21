@@ -12,7 +12,7 @@ const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-io-dispatcher-'));
 const native=process.env.PSC1_NATIVE||path.join(root,'.lake/build/bin/psc1');
 const env={...process.env,PSC1_HOST_TOOLS:path.join(root,'host-tools/artifacts.mjs')};
 const targets=(process.env.PSC1_IO_DISPATCHER_TARGETS||'js,ts,rust').split(',');
-assert.ok(targets.length&&targets.every(t=>['js','ts','rust'].includes(t)));
+assert.ok(targets.length&&targets.every(t=>['js','ts','rust','python'].includes(t)));
 const records=[],failures=[];
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
@@ -31,7 +31,7 @@ function refuse(args,pattern){
 write(path.join(work,'package.json'),'{"type":"module"}\n');
 for(const syntax of ['lean','ps'])for(const target of targets){
  const label=syntax+'-'+target,folder=path.join(work,label),source=path.join(folder,'source/Run.'+syntax);
- const output=path.join(folder,'module.'+{js:'js',ts:'ts',rust:'rs'}[target]);
+ const output=path.join(folder,'module.'+{js:'js',ts:'ts',rust:'rs',python:'py'}[target]);
  try{
   write(source,read('test/applications/SequencedIo/Run.'+syntax));
   write(path.join(folder,'source/SequencedIo/Program.'+syntax),read('test/applications/SequencedIo/Program.'+syntax));
@@ -64,6 +64,31 @@ for(const syntax of ['lean','ps'])for(const target of targets){
    ].join('\n'));
    run('cargo',['test','--locked','--manifest-path',path.join(crate,'Cargo.toml'),'--test','io_dispatcher'],
     {env:{...env,CARGO_TARGET_DIR:path.join(folder,'cargo-target')}});
+  }else if(target==='python'){
+   const capabilityRoot=path.join(folder,'root');fs.mkdirSync(capabilityRoot);
+   fs.writeFileSync(path.join(capabilityRoot,'input.txt'),'hello😀');
+   const consumer=path.join(folder,'consumer.py');
+   write(consumer,[
+    'import importlib.util,sys',
+    'sys.path.insert(0,sys.argv[2])',
+    'from typed_io import TypedIo',
+    'config=dict(abi="psc1-python-linux-string-io/1",capabilities=["readUtf8","writeUtf8","readLine","writeLine"],required=["readUtf8","writeUtf8","readLine","writeLine"],root=sys.argv[3],maxFileBytes=4096,maxLineBytes=128,inputFd=0,outputFd=1)',
+    'with TypedIo(config) as host:',
+    ' spec=importlib.util.spec_from_file_location("checked_guest",sys.argv[1])',
+    ' guest=importlib.util.module_from_spec(spec);spec.loader.exec_module(guest)',
+    ' assert guest.run(host.execute) is True',
+    ' def trap(request):',
+    '  import json',
+    '  value=json.loads(request)',
+    '  if value.get("path")=="missing": raise RuntimeError("PSC1_HOST_TRAP")',
+    '  return json.dumps(dict(kind="text",text="A") if value["op"]=="readUtf8" else dict(kind="unit"))',
+    ' try: guest.run(trap)',
+    ' except RuntimeError as error: assert str(error)=="PSC1_HOST_TRAP"',
+    ' else: raise AssertionError("guest swallowed host trap")'
+   ].join('\n'));
+   const stdout=run(process.env.PSC1_PYTHON||'python3',['-I',consumer,output,path.join(root,'host-tools'),capabilityRoot],{input:'world😀\r\n'});
+   assert.equal(stdout,'tick\ntick\nrecovered\necho:world😀\n');
+   assert.equal(fs.readFileSync(path.join(capabilityRoot,'output.txt'),'utf8'),'processed:hello😀');
   }else{
    let module=output;
    if(target==='ts'){
@@ -95,7 +120,7 @@ for(const syntax of ['lean','ps'])for(const target of targets){
    }finally{fs.closeSync(inputFd);fs.closeSync(outputFd);}
   }
   records.push({syntax,target,passed:true,sourceSha256:hash(source),artifactSha256:hash(output),
-   manifestSha256:bundleHash,hostEffects:target!=='rust',hostProvider:target==='rust'?'Rust-native-callback-mock':'Linux-Node-capability-adapter',
+   manifestSha256:bundleHash,hostEffects:target!=='rust',hostProvider:target==='rust'?'Rust-native-callback-mock':target==='python'?'Python-standalone-capability-adapter':'Linux-Node-capability-adapter',
    checkerCommit:manifest.logicalCheckerCommit,strictIr:'production-publication',abi:'io-dispatcher'});
   fs.cpSync(path.dirname(fs.realpathSync(output+'.bundle.json')),path.join(evidence,'bundles',label),{recursive:true});
   console.log('PSC1_IO_DISPATCHER_PASS: '+label);

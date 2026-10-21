@@ -220,14 +220,10 @@ private def sessionOwnersRegression
     session := (← expectPublic "session-additional-checked-admission"
       (psKernelV1AdmitDeclaration session request)).session
   let officialRequests : List Lean.Declaration := [
-    .defnDecl { name := officialName definitionName, levelParams := [],
-      type := officialExpr nat, value := officialExpr seven, hints := .abbrev, safety := .safe },
-    .axiomDecl { name := officialName axiomName, levelParams := [],
-      type := officialExpr nat, isUnsafe := false },
-    .thmDecl { name := officialName theoremName, levelParams := [],
-      type := officialExpr identityType, value := officialExpr identityValue },
-    .opaqueDecl { name := officialName opaqueName, levelParams := [],
-      type := officialExpr nat, value := officialExpr seven, isUnsafe := false }]
+    .defnDecl { name := officialName definitionName, levelParams := [], type := officialExpr nat, value := officialExpr seven, hints := .abbrev, safety := .safe },
+    .axiomDecl { name := officialName axiomName, levelParams := [], type := officialExpr nat, isUnsafe := false },
+    .thmDecl { name := officialName theoremName, levelParams := [], type := officialExpr identityType, value := officialExpr identityValue },
+    .opaqueDecl { name := officialName opaqueName, levelParams := [], type := officialExpr nat, value := officialExpr seven, isUnsafe := false }]
   let mut official := officialPrior
   for request in officialRequests do
     match official.addDeclCore 0 0 request none true with

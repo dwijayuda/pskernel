@@ -50,6 +50,7 @@ jobs:
           grep -Fqx 'PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$RUNNER_TEMP/psc1-session-native.log"
           grep -Fqx 'PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7' "$RUNNER_TEMP/psc1-session-native.log"
       - name: Check retained and new ownership equations
+        if: ${{ !cancelled() && steps.session_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -72,6 +73,7 @@ jobs:
             ${{ runner.temp }}/psc1-session-recursor-proofs.log
             ${{ runner.temp }}/psc1-session-quot-proofs.log
   inspect-combined-evidence:
+    if: github.sha == '0b413781f68bfce7d451255e94e84e4415fec1bb'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

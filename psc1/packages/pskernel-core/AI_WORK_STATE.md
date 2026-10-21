@@ -9,6 +9,41 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 09:30 UTC — FullShape trace fixture ownership correction
+
+Exact source `6ebcb77c2a3d7cd66ddda23f045c8c7e648534e1` failed native integration
+[39575984078/119141497670](https://github.com/dwijayuda/pskernel/actions/runs/39575984078/job/119141497670)
+at `app-left-to-right-and-no-extra-depth`. The preceding342 stage comparisons,
+108 owner comparisons and prior proof-irrelevance/Nat/lazy-delta matrices had
+completed before this sentinel. Native correctness
+[39575984298/119141498521](https://github.com/dwijayuda/pskernel/actions/runs/39575984298/job/119141498521)
+passed. Five of six research jobs passed when inspected; generated integration,
+canonical portability, generated research, diagnostics and full Arena were
+still IN PROGRESS. These are partial results, not a qualified successor.
+
+The failing native fixture recursively imported the application, then separately
+imported its head and arguments. The append-only builder gives these structurally
+equal expressions different IDs. Its callback incorrectly expected the second
+imports' IDs inside the first application. This commit constructs that application
+with two smart-constructor calls from the exact retained head/argument IDs.
+The identity, left-to-right order, no-extra-depth and nextFresh assertions remain
+unchanged. The generated fixture already constructed this shared shape and needs
+no correction. No checker source, fuel policy, callback or assertion was weakened.
+
+| Exact source | Native integration | Native correctness | Portable source / canonical / JS | Proof / benchmark / provider | Arena |
+| --- | --- | --- | --- | --- | --- |
+| `6ebcb77c2a3d7cd66ddda23f045c8c7e648534e1` | FAIL fixture | PASS | IN PROGRESS at inspection | NOT fully run | IN PROGRESS |
+| This fixture correction | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+| `480d875d5be7a9e656e7ccd1fa76cc7409a81c90` | PASS | PASS | PASS | PASS within recorded scope | FAIL qualification |
+
+The480 scoped developer provider remains the last fully qualified checkpoint.
+B/C remain open: four public whole-operation fallbacks;20 host timeouts and one
+unsupported nested-recursion case in the latest completed193-case corpus.
+Terminal DefEq, DAG static guards, Quot and bounded ordinary-recursor ownership
+drafts are separately preserved for review; they are not included or qualified
+by this fixture-only correction. Next: inspect fresh native and both generated
+routes to terminal status before promoting any further architectural slice.
+
 ## 2026-10-21 09:18 UTC — qualified lazy delta; full-shape successor pending
 
 Last fully qualified developer source: **`480d875d5be7a9e656e7ccd1fa76cc7409a81c90`**.

@@ -254,9 +254,11 @@ private def regression : IO Unit := do
   let (next, s1Id) ← expect (psKernelExprV2PagedImportIntoChecked next s1)
   let (next, etaId) ← expect (psKernelExprV2PagedImportIntoChecked next eta)
   let (next, metadataId) ← expect (psKernelExprV2PagedImportIntoChecked next (.mdata 17 eta))
-  let (next, appId) ← expect (psKernelExprV2PagedImportIntoChecked next appLeft)
-  let (next, shortAppId) ← expect (psKernelExprV2PagedImportIntoChecked next (.app h s0))
   let (next, hId) ← expect (psKernelExprV2PagedImportIntoChecked next h)
+  /- The trace below checks owned IDs, not structural equality. Reuse the
+     separately named head/arguments rather than importing fresh children. -/
+  let (next, shortAppId) ← expect (psKernelExprV2PagedMkApp next hId s0Id)
+  let (next, appId) ← expect (psKernelExprV2PagedMkApp next shortAppId s1Id)
   let (next, projectionId) ← expect
     (psKernelExprV2PagedImportIntoChecked next (.proj (nm "unadmittedStruct") 0 a))
   let (owning, invalidId) ← expect (psKernelExprV2PagedImportIntoChecked next (.app f s0))

@@ -2,21 +2,25 @@ import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 
 /-
-Explicit transitional ownership bridge for ordinary recursors, including K.
+Explicit transitional ownership bridge for checked generated inductive metadata.
 
-Complete inductive admission first constructs and validates the recursor type
-and every rule in the private work environment. Only after that admission
-succeeds may this bridge copy that checked generated metadata into the owning
-batch arena. No exported recursor body, caller-provided rule or supplied cache
-is accepted as authoritative metadata.
+Complete ordinary, mutual and nested admission first constructs and validates
+the final types and recursor rules in the private work environment. Only after
+that admission succeeds may this bridge copy the checked metadata into the
+owning batch arena. No exported recursor body, caller-provided rule or supplied
+cache is accepted as authoritative metadata. A group is planned completely
+before any import; missing or mismatched metadata leaves the owner unchanged.
 
-This import is performed once per successful ordinary inductive in a batch,
+This import is performed once per successful inductive command in a batch,
 not inside WHNF. It preserves original IDs by appending smart-constructed
 nodes, and appends the corresponding source expressions to the decoded table.
-It deliberately remains a recursive-expression import: ordinary inductive
-admission is still the V1 fallback, not a completed DAG-native admission path.
-Repeated source subtrees are not interned by this bridge. Its construction and
-retained-memory costs must be included in whole-batch measurements.
+Ordinary/mutual header and constructor IDs still refer to their original input.
+Nested restored types and renamed auxiliary recursors come from the validated
+final environment. Initial-session and Quot metadata are not installed here.
+This deliberately remains a recursive-expression import and V1 inductive
+admission fallback, not completed DAG-native admission. Repeated source
+subtrees are not interned. Construction and retained-memory costs must be
+included in whole-batch measurements.
 
 The caller publishes the extended owner only after this entire step succeeds.
 All state remains private to RunDag; a later batch error publishes no session.
@@ -159,9 +163,277 @@ def psKernelDagGeneratedInstallRecursor
           Except.ok (PsKernelDagGeneratedState.mk next.arena next.built
             (List.cons owner next.declarations))
 
+/- Plans below are constructed only after complete checked admission. They
+contain the final live metadata, not caller-supplied types or rule bodies.
+A missing or inconsistent member declines the entire plan before any append.
+The later import transaction either installs the complete plan or returns an
+error without publishing a batch session. -/
+def psKernelDagGeneratedAppendInfos
+    (left : List PsKernelConstantInfo) :
+    List PsKernelConstantInfo -> List PsKernelConstantInfo :=
+  match left with
+  | List.nil =>
+      fun (right : List PsKernelConstantInfo) => right
+  | List.cons first rest =>
+      fun (right : List PsKernelConstantInfo) =>
+        let recur := psKernelDagGeneratedAppendInfos rest;
+        List.cons first (recur right)
+
+def psKernelDagGeneratedTypeNames
+    (types : List PsKernelDagInductive) : List PsKernelName :=
+  match types with
+  | List.nil => List.nil
+  | List.cons first rest =>
+      List.cons first.name (psKernelDagGeneratedTypeNames rest)
+
+def psKernelDagGeneratedCtorNames
+    (ctors : List PsKernelDagConstructor) : List PsKernelName :=
+  match ctors with
+  | List.nil => List.nil
+  | List.cons first rest =>
+      List.cons first.name (psKernelDagGeneratedCtorNames rest)
+
+def psKernelDagGeneratedFindRecursor
+    (environment : PsKernelEnvironment) (name : PsKernelName)
+    (numParams : Nat) (all : List PsKernelName) :
+    Option PsKernelRecursorInfo :=
+  match psKernelEnvironmentFind environment name with
+  | Option.none => Option.none
+  | Option.some info =>
+      match info with
+      | PsKernelConstantInfo.recInfo recursor =>
+          if psKernelNameEq recursor.base.name name then
+            if Nat.beq recursor.numParams numParams then
+              if psKernelNameListsEq recursor.all all then Option.some recursor
+              else Option.none
+            else Option.none
+          else Option.none
+      | _ => Option.none
+
+def psKernelDagGeneratedPlanRecursors
+    (types : List PsKernelDagInductive) :
+    PsKernelEnvironment -> Nat -> List PsKernelName ->
+    Option (List PsKernelConstantInfo) :=
+  match types with
+  | List.nil =>
+      fun (_environment : PsKernelEnvironment) (_numParams : Nat)
+          (_all : List PsKernelName) =>
+        Option.some List.nil
+  | List.cons first rest =>
+      fun (environment : PsKernelEnvironment) (numParams : Nat)
+          (all : List PsKernelName) =>
+        match psKernelDagGeneratedFindRecursor
+            environment (psKernelSimpleRecName first.name) numParams all with
+        | Option.none => Option.none
+        | Option.some recursor =>
+            let recur := psKernelDagGeneratedPlanRecursors rest;
+            match recur environment numParams all with
+            | Option.none => Option.none
+            | Option.some tail =>
+                Option.some (List.cons (PsKernelConstantInfo.recInfo recursor) tail)
+
+def psKernelDagGeneratedPlanMutual
+    (group : PsKernelDagInductiveGroup) (environment : PsKernelEnvironment) :
+    Option (List PsKernelConstantInfo) :=
+  psKernelDagGeneratedPlanRecursors group.types environment group.numParams
+    (psKernelDagGeneratedTypeNames group.types)
+
+def psKernelDagGeneratedPlanNestedConstructors
+    (names : List PsKernelName) :
+    PsKernelEnvironment -> PsKernelName -> List PsKernelName -> Nat ->
+    Option (List PsKernelConstantInfo) :=
+  match names with
+  | List.nil =>
+      fun (_environment : PsKernelEnvironment) (_family : PsKernelName)
+          (_levelParams : List PsKernelName) (_numParams : Nat) =>
+        Option.some List.nil
+  | List.cons name rest =>
+      fun (environment : PsKernelEnvironment) (family : PsKernelName)
+          (levelParams : List PsKernelName) (numParams : Nat) =>
+        match psKernelEnvironmentFind environment name with
+        | Option.none => Option.none
+        | Option.some info =>
+            match info with
+            | PsKernelConstantInfo.ctorInfo ctor =>
+                if psKernelNameEq ctor.base.name name then
+                  if psKernelNameEq ctor.induct family then
+                    if psKernelNameListsEq ctor.base.levelParams levelParams then
+                      if Nat.beq ctor.numParams numParams then
+                        let recur := psKernelDagGeneratedPlanNestedConstructors rest;
+                        match recur environment family levelParams numParams with
+                        | Option.none => Option.none
+                        | Option.some tail => Option.some (List.cons info tail)
+                      else Option.none
+                    else Option.none
+                  else Option.none
+                else Option.none
+            | _ => Option.none
+
+def psKernelDagGeneratedNestedInfoMatches
+    (info : PsKernelInductiveInfo) (source : PsKernelDagInductive)
+    (levelParams : List PsKernelName) (numParams : Nat)
+    (all : List PsKernelName) (numNested : Nat) : Bool :=
+  if psKernelNameEq info.base.name source.name then
+    if psKernelNameListsEq info.base.levelParams levelParams then
+      if Nat.beq info.numParams numParams then
+        if psKernelNameListsEq info.all all then
+          if Nat.beq info.numNested numNested then
+            psKernelNameListsEq info.ctors (psKernelDagGeneratedCtorNames source.ctors)
+          else false
+        else false
+      else false
+    else false
+  else false
+
+def psKernelDagGeneratedPlanNestedFamily
+    (source : PsKernelDagInductive) (environment : PsKernelEnvironment)
+    (levelParams : List PsKernelName) (numParams : Nat)
+    (all : List PsKernelName) (numNested : Nat) :
+    Option (List PsKernelConstantInfo) :=
+  match psKernelEnvironmentFind environment source.name with
+  | Option.none => Option.none
+  | Option.some entry =>
+      match entry with
+      | PsKernelConstantInfo.inductInfo info =>
+          if psKernelDagGeneratedNestedInfoMatches
+              info source levelParams numParams all numNested then
+            match psKernelDagGeneratedPlanNestedConstructors
+                info.ctors environment source.name levelParams numParams with
+            | Option.none => Option.none
+            | Option.some ctors =>
+                match psKernelDagGeneratedFindRecursor
+                    environment (psKernelSimpleRecName source.name) numParams all with
+                | Option.none => Option.none
+                | Option.some recursor =>
+                    Option.some (List.cons entry
+                      (psKernelDagGeneratedAppendInfos ctors
+                        (List.cons (PsKernelConstantInfo.recInfo recursor) List.nil)))
+          else Option.none
+      | _ => Option.none
+
+def psKernelDagGeneratedPlanNestedFamilies
+    (types : List PsKernelDagInductive) :
+    PsKernelEnvironment -> List PsKernelName -> Nat -> List PsKernelName -> Nat ->
+    Option (List PsKernelConstantInfo) :=
+  match types with
+  | List.nil =>
+      fun (_environment : PsKernelEnvironment) (_levelParams : List PsKernelName)
+          (_numParams : Nat) (_all : List PsKernelName) (_numNested : Nat) =>
+        Option.some List.nil
+  | List.cons first rest =>
+      fun (environment : PsKernelEnvironment) (levelParams : List PsKernelName)
+          (numParams : Nat) (all : List PsKernelName) (numNested : Nat) =>
+        match psKernelDagGeneratedPlanNestedFamily
+            first environment levelParams numParams all numNested with
+        | Option.none => Option.none
+        | Option.some members =>
+            let recur := psKernelDagGeneratedPlanNestedFamilies rest;
+            match recur environment levelParams numParams all numNested with
+            | Option.none => Option.none
+            | Option.some tail =>
+                Option.some (psKernelDagGeneratedAppendInfos members tail)
+
+/- numNested is the number produced by checked nested restoration. This is a
+   metadata enumeration bound, not checker fuel. The names match
+   psKernelSimpleNestedMakeRenamesWorker exactly, starting at index one. -/
+def psKernelDagGeneratedPlanNestedAux
+    (count : Nat) :
+    PsKernelEnvironment -> PsKernelName -> Nat -> Nat -> List PsKernelName ->
+    Option (List PsKernelConstantInfo) :=
+  match count with
+  | Nat.zero =>
+      fun (_environment : PsKernelEnvironment) (_mainRec : PsKernelName)
+          (_index _numParams : Nat) (_all : List PsKernelName) =>
+        Option.some List.nil
+  | Nat.succ remaining =>
+      fun (environment : PsKernelEnvironment) (mainRec : PsKernelName)
+          (index numParams : Nat) (all : List PsKernelName) =>
+        let name := psKernelNameAppendIndexAfter mainRec index;
+        match psKernelDagGeneratedFindRecursor environment name numParams all with
+        | Option.none => Option.none
+        | Option.some recursor =>
+            let recur := psKernelDagGeneratedPlanNestedAux remaining;
+            match recur environment mainRec (Nat.succ index) numParams all with
+            | Option.none => Option.none
+            | Option.some tail =>
+                Option.some (List.cons (PsKernelConstantInfo.recInfo recursor) tail)
+
+def psKernelDagGeneratedPlanNested
+    (group : PsKernelDagInductiveGroup) (environment : PsKernelEnvironment) :
+    Option (List PsKernelConstantInfo) :=
+  match group.types with
+  | List.nil => Option.some List.nil
+  | List.cons first _ =>
+      match psKernelEnvironmentFind environment first.name with
+      | Option.none => Option.none
+      | Option.some entry =>
+          match entry with
+          | PsKernelConstantInfo.inductInfo info =>
+              let all := psKernelDagGeneratedTypeNames group.types;
+              match psKernelDagGeneratedPlanNestedFamilies group.types environment
+                  group.levelParams group.numParams all info.numNested with
+              | Option.none => Option.none
+              | Option.some families =>
+                  match psKernelDagGeneratedPlanNestedAux info.numNested environment
+                      (psKernelSimpleRecName first.name) 1 group.numParams all with
+                  | Option.none => Option.none
+                  | Option.some auxiliary =>
+                      Option.some (psKernelDagGeneratedAppendInfos families auxiliary)
+          | _ => Option.none
+
+def psKernelDagGeneratedInstallHeader
+    (base : PsKernelConstantBase) (kind : PsKernelExprV2DeclarationRefKind)
+    (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match psKernelDagGeneratedImport base.type state with
+  | Except.error error => Except.error error
+  | Except.ok imported =>
+      let next := Prod.fst imported;
+      let owner := PsKernelExprV2DeclarationRef.mk base.name base.levelParams
+        (Prod.snd imported) Option.none kind;
+      Except.ok (PsKernelDagGeneratedState.mk next.arena next.built
+        (List.cons owner next.declarations))
+
+def psKernelDagGeneratedInstallInfo
+    (info : PsKernelConstantInfo) (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match info with
+  | PsKernelConstantInfo.inductInfo value =>
+      psKernelDagGeneratedInstallHeader value.base
+        PsKernelExprV2DeclarationRefKind.inductiveDecl state
+  | PsKernelConstantInfo.ctorInfo value =>
+      psKernelDagGeneratedInstallHeader value.base
+        PsKernelExprV2DeclarationRefKind.constructorDecl state
+  | PsKernelConstantInfo.recInfo value =>
+      psKernelDagGeneratedInstallRecursor value state
+  | _ => Except.error "PSKERNEL_V2_GENERATED_OWNER_KIND"
+
+def psKernelDagGeneratedInstallInfos
+    (infos : List PsKernelConstantInfo) :
+    PsKernelDagGeneratedState -> Except String PsKernelDagGeneratedState :=
+  match infos with
+  | List.nil =>
+      fun (state : PsKernelDagGeneratedState) => Except.ok state
+  | List.cons first rest =>
+      fun (state : PsKernelDagGeneratedState) =>
+        match psKernelDagGeneratedInstallInfo first state with
+        | Except.error error => Except.error error
+        | Except.ok next =>
+            let recur := psKernelDagGeneratedInstallInfos rest;
+            recur next
+
+def psKernelDagGeneratedInstallPlan
+    (plan : Option (List PsKernelConstantInfo))
+    (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match plan with
+  | Option.none => Except.ok state
+  | Option.some infos => psKernelDagGeneratedInstallInfos infos state
+
 /- Called only after the complete indicated command has successfully admitted
-   into environment. The ordinary name is derived from its admitted request;
-   the rule bodies themselves are obtained exclusively from that environment. -/
+   into environment. Ordinary/mutual input types retain their original IDs.
+   Nested headers, constructors, main recursors and renamed auxiliary recursors
+   use only the final restored metadata validated by nested admission. -/
 def psKernelDagGeneratedAfterCommand
     (command : PsKernelDagCommand) (environment : PsKernelEnvironment)
     (state : PsKernelDagGeneratedState) :
@@ -170,19 +442,15 @@ def psKernelDagGeneratedAfterCommand
   | PsKernelDagCommand.admit request =>
       match request with
       | PsKernelDagDeclarationRequest.ordinaryInductive _ numParams value _ =>
-          let name := psKernelSimpleRecName value.name;
-          match psKernelEnvironmentFind environment name with
+          match psKernelDagGeneratedFindRecursor environment
+              (psKernelSimpleRecName value.name) numParams (List.cons value.name List.nil) with
           | Option.none => Except.ok state
-          | Option.some info =>
-              match info with
-              | PsKernelConstantInfo.recInfo recursor =>
-                  if psKernelNameEq recursor.base.name name then
-                    if Nat.beq recursor.numParams numParams then
-                      if psKernelNameListsEq recursor.all (List.cons value.name List.nil) then
-                        psKernelDagGeneratedInstallRecursor recursor state
-                      else Except.ok state
-                    else Except.ok state
-                  else Except.ok state
-              | _ => Except.ok state
+          | Option.some recursor => psKernelDagGeneratedInstallRecursor recursor state
+      | PsKernelDagDeclarationRequest.mutualInductive group =>
+          psKernelDagGeneratedInstallPlan
+            (psKernelDagGeneratedPlanMutual group environment) state
+      | PsKernelDagDeclarationRequest.nestedInductive group =>
+          psKernelDagGeneratedInstallPlan
+            (psKernelDagGeneratedPlanNested group environment) state
       | _ => Except.ok state
   | _ => Except.ok state

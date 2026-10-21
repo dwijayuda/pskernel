@@ -164,8 +164,9 @@ def psKernelDagDecodeDeclaration
 Publish input IDs only after complete admission succeeds. For these declaration
 families the checked environment installs the original type unchanged. Only
 transparent definition requests publish a delta body. Ordinary/mutual inductive
-headers and constructors retain their input types; generated recursor types and
-nested restoration require their own representation-aware admission migration.
+headers and constructors retain their input types. API.DagGenerated separately
+installs recursor types/rules and final restored nested metadata only after the
+complete indicated admission succeeds.
 -/
 def psKernelDagDeclarationRef
     (base : PsKernelDagConstantBase)

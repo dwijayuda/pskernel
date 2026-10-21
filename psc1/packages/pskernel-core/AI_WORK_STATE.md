@@ -12,6 +12,45 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 15:17 UTC — unreferenced group-owner source review
+
+This review object follows String-projection candidate
+`f9e9b20f92ce2ffa4a666acaf55aa8852949f589`. No branch is advanced by creating
+the object. The new group-owner code, local proof file and native regression
+are **NOT RUN**. Native target/workflow wiring and the generated regression
+must be added before any branch qualification or promotion.
+
+`API/DagGenerated.lean` plans complete mutual/nested owner groups after
+successful validated admission, before importing any metadata. Ordinary and
+mutual source type IDs remain unchanged. Nested headers/constructors and main
+or renamed auxiliary recursors use only final restored checked environment
+metadata. Import state remains private to the atomic DAG batch. A missing or
+mismatched plan leaves the owner unchanged, preserving explicit fallback.
+The source-certified recursive import and V1 inductive admission remain;
+this is not a complete DAG-native admission implementation.
+
+The new native fixture requires 25 exact live owners, seven recursors and
+14 checked rule RHSs across ordinary foundations, indexed/parameterized
+cross-recursive mutual families, a genuine nested family with renamed auxiliary
+recursor, and nested no-aux delegation. All 12 evaluation cases require direct
+V2 results, including 216 check, 216 WHNF and 216 DefEq resource comparisons,
+13 private-ID rejection forms, whole-batch error ordering and official positive
+and negative declaration controls. Sixteen local equations cover plan refusal,
+guard ordering and exact publication/state forwarding; proof scripts are
+uncompiled at this review.
+
+At exact f9e9, native integration119299431652/run39622521184 and native
+correctness119299431492/run39622521216 are terminal PASS, including the ten
+String-projection lemmas and all new native/official matrices. Authentic .lean
+and canonical-generated qualification remains IN PROGRESS. Exact integration
+3aa077c native119298737696 passed; its generated routes also remain IN PROGRESS.
+No source inherits an earlier PASS. Gate A remains qualified at exact a259/4894;
+B/C remain open. No kernel/resource/trust-policy change is made.
+
+Next: review this object, finish authentic generated tests and CI wiring, then
+qualify a complete group-owner candidate after the predecessor's generated gates.
+The separate cache-index draft is not included in this object.
+
 ## 2026-10-21 15:04 UTC — owning DAG String projection candidate
 
 This branch follows qualified carrier

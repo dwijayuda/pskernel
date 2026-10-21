@@ -9,11 +9,13 @@ index used by constant inference and delta reduction.
 The public boundary creates the table empty. It never escapes into a legacy
 kernel session. These internal, forgeable records are not admission certificates.
 Live environment metadata still decides constant kind, safety and universe arity.
-Ordinary recursor types/rules (including K) are installed once from checked generated
-metadata after successful admission, in an appended owning arena. This explicit
-transitional import does not make inductive admission DAG-native. Nested
-restoration and preexisting-session constants still lack owning DAG types.
-Ordinary/mutual inductive headers and constructors retain original admitted IDs.
+Ordinary/mutual recursor types/rules and final restored nested metadata are
+installed once after successful checked admission, in an appended owning arena.
+A nested group includes its restored headers, constructors, main recursors and
+renamed auxiliary recursors. This explicit transitional import does not make
+inductive admission DAG-native. Preexisting-session and Quot constants still
+lack owning DAG types. Ordinary/mutual headers and constructors retain their
+original admitted IDs.
 -/
 /- Generated rule IDs are private to one validated command batch. They are
    installed only from metadata produced by complete inductive admission. -/

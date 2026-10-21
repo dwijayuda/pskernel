@@ -12,6 +12,13 @@ needs an actual run to corroborate the tested zero-heavy selection.
 The first router run correctly skips the unrelated specialization benchmark.
 
 Actual next implementation, pending full CI:
+Implementation4bdada4d6a3a1d257ac95d97e8046e8141c9a72d, run39572888092:
+native and every compiler closure plus G1/host SUCCESS. Constructive witness
+extension is source-normalized in both lanes and preserves all boundaries.
+Early suites54 CompilerM/18 collections pass; Lean JSON core passes JS/TS/Rust.
+Authored PS JsonValue.string pattern must use the same space-separated
+constructor syntax as Result/Option/List; fix the remaining pattern here.
+
 08c5 run39571719689 proves the constructor mechanism works in native admitted
 ordinary tests and the actual Lean JSON application on JS/TS/Rust. Existing
 128-budget and uninhabited/forged-source refusals pass. Full remains pending:

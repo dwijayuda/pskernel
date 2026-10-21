@@ -8,7 +8,7 @@ def recordCode(source : String) : Result(Nat, JsonError) :=
       | Option.none => Result.error(JsonError.invalidShape)
       | Option.some value =>
           match (value) with {
-          | JsonValue.string(text) =>
+          | JsonValue.string text =>
               if (String.Internal.atEnd(text, 0)) {
                 Result.error(JsonError.invalidShape)
               } else {

@@ -1,5 +1,6 @@
 import Ps.KernelCore.API.DagTypes
 import Ps.KernelCore.Core.ExprV2.Decode
+import Ps.KernelCore.Checker.ExprV2.Environment
 
 /-
 Decode declaration references at the checked input boundary. This module
@@ -158,3 +159,37 @@ def psKernelDagDecodeDeclaration
           Except.ok (PsKernelDeclarationRequest.nestedInductive group)
   | PsKernelDagDeclarationRequest.unsupported feature =>
       Except.ok (PsKernelDeclarationRequest.unsupported feature)
+
+/-
+Called only after the complete admission of this request succeeds. The decoded
+request and these references came from the same validated input DAG. Failed
+admission returns before this function is used; no index escapes a batch.
+-/
+def psKernelDagDefinitionRef
+    (value : PsKernelDagDefinition) : PsKernelExprV2DefinitionRef :=
+  PsKernelExprV2DefinitionRef.mk value.base.name value.base.levelParams value.value
+
+def psKernelDagAddAdmittedDefinitions
+    (values : List PsKernelDagDefinition) :
+    List PsKernelExprV2DefinitionRef -> List PsKernelExprV2DefinitionRef :=
+  match values with
+  | List.nil =>
+      fun (definitions : List PsKernelExprV2DefinitionRef) => definitions
+  | List.cons first rest =>
+      let smaller :=
+        fun (next : List PsKernelExprV2DefinitionRef) =>
+          let recur := psKernelDagAddAdmittedDefinitions rest;
+          recur next;
+      fun (definitions : List PsKernelExprV2DefinitionRef) =>
+        smaller (List.cons (psKernelDagDefinitionRef first) definitions)
+
+def psKernelDagDefinitionsAfterAdmission
+    (request : PsKernelDagDeclarationRequest)
+    (definitions : List PsKernelExprV2DefinitionRef) :
+    List PsKernelExprV2DefinitionRef :=
+  match request with
+  | PsKernelDagDeclarationRequest.definitionDecl value =>
+      List.cons (psKernelDagDefinitionRef value) definitions
+  | PsKernelDagDeclarationRequest.mutualDefinitions values =>
+      psKernelDagAddAdmittedDefinitions values definitions
+  | _ => definitions

@@ -6,7 +6,7 @@ Read only environment decisions for the owning canonical DAG. Constructor
 projection selects an existing argument ID using admitted scalar metadata;
 no declaration body or type is imported from the original representation.
 The reduction guard mirrors the inert branches of the original Quot/recursor
-callbacks. Delta is deferred only when the original worker would unfold.
+callbacks.
 -/
 
 def psKernelExprV2ReduceProjOnCanonical
@@ -56,26 +56,3 @@ def psKernelExprV2WhnfRecursorInert
       else false
   | _ => true
 
-def psKernelExprV2WhnfDeltaInertOnCanonical
-    (context : PsKernelCheckerContext) (arena : PsKernelExprV2PagedArena)
-    (root : Nat) : Except String Bool :=
-  match psKernelExprV2TransformAppSpineOnCanonical arena root with
-  | Except.error error => Except.error error
-  | Except.ok spine =>
-      match psKernelExprV2PagedRequire arena (Prod.fst spine) with
-      | Except.error error => Except.error error
-      | Except.ok head =>
-          match head.node with
-          | PsKernelExprV2Node.const name levels =>
-              match psKernelEnvironmentFind context.environment name with
-              | Option.none => Except.ok true
-              | Option.some info =>
-                  match info with
-                  | PsKernelConstantInfo.defnInfo definition =>
-                      if Nat.beq
-                          (psKernelNameListLength definition.base.levelParams)
-                          (psKernelLevelListLength levels) then
-                        Except.ok false
-                      else Except.ok true
-                  | _ => Except.ok true
-          | _ => Except.ok true

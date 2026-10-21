@@ -131,6 +131,23 @@ theorem dag_quick_defeq_depth_error_precedes_syntax
       Option.some (Except.error error) := by
   simp [psKernelExprV2TryQuickDefEqWithFuel, guard]
 
+theorem dag_whnf_definition_initialization_has_no_core_cache
+    (arena : PsKernelExprV2PagedArena)
+    (definitions : List PsKernelExprV2DefinitionRef) :
+    (psKernelExprV2WhnfStateForDefinitions arena definitions).coreCache = List.nil := by
+  rfl
+
+theorem dag_whnf_definition_initialization_has_no_public_cache
+    (arena : PsKernelExprV2PagedArena)
+    (definitions : List PsKernelExprV2DefinitionRef) :
+    (psKernelExprV2WhnfStateForDefinitions arena definitions).publicCache = List.nil := by
+  rfl
+
+theorem dag_whnf_arena_update_preserves_definition_references
+    (state : PsKernelExprV2WhnfState) (arena : PsKernelExprV2PagedArena) :
+    (psKernelExprV2WhnfStateWithArena state arena).definitions = state.definitions := by
+  rfl
+
 end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.exit_scope_restores_all_caches
@@ -154,3 +171,7 @@ end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax
 #print axioms PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax
+
+#print axioms PsKernelCacheScopeProofs.dag_whnf_definition_initialization_has_no_core_cache
+#print axioms PsKernelCacheScopeProofs.dag_whnf_definition_initialization_has_no_public_cache
+#print axioms PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_definition_references

@@ -1,10 +1,11 @@
 import Ps.KernelCore.Checker.ExprV2.Beta
 import Ps.KernelCore.Checker.ExprV2.Nat
 import Ps.KernelCore.Checker.ExprV2.Projection
+import Ps.KernelCore.Checker.ExprV2.Delta
 
 /-
 Checked DAG WHNF for terminal/metadata/beta/zeta, inert applications,
-constructor projection and the complete Nat post-core pipeline.
+constructor projection, Nat and definitions admitted in the same checked batch.
 
 The operation owns distinct core/public caches in one append-only arena.
 A core entry checks fuel and depth before syntax/cache. A public entry keeps
@@ -13,7 +14,7 @@ The public callback supplied to core remains fixed during core recursion;
 both function/result core calls consume the original predecessor budget.
 
 Only admitted environment variants and scalar constructor metadata are read.
-Definition unfolding, active recursors/Quot reduction, local let values and
+Definitions absent from the batch index, active recursors/Quot, local let values and
 String literal constructor expansion explicitly request original-checker
 fallback. No legacy expression is imported by these workers. Public entry
 creates empty caches; the public result never exports semantic cache state.
@@ -211,6 +212,20 @@ def psKernelExprV2TryWhnfCoreWithPublicFuel
                             psKernelExprV2TryWhnfCompositeWith
                               smaller publicWhnf nextContext state root entry
 
+def psKernelExprV2WhnfPublicFinishAttempt
+    (source : Nat)
+    (attempt : Option (Except String (Prod PsKernelExprV2WhnfState Nat))) :
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  match attempt with
+  | Option.none => Option.none
+  | Option.some result =>
+      match result with
+      | Except.error error => Option.some (Except.error error)
+      | Except.ok reduced =>
+          Option.some
+            (psKernelExprV2WhnfPublicFinish
+              (Prod.fst reduced) source (Prod.snd reduced))
+
 def psKernelExprV2TryWhnfAfterCoreWith
     (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
@@ -228,12 +243,20 @@ def psKernelExprV2TryWhnfAfterCoreWith
           | Option.some value =>
               Option.some (psKernelExprV2WhnfPublicFinish next original value)
           | Option.none =>
-              match psKernelExprV2WhnfDeltaInertOnCanonical context next.arena core with
-              | Except.error error => Option.some (Except.error error)
-              | Except.ok inert =>
-                  if inert then
-                    Option.some (psKernelExprV2WhnfPublicFinish next original core)
-                  else Option.none
+              match psKernelExprV2TryUnfoldDefinition context next core with
+              | Option.none => Option.none
+              | Option.some attemptedDelta =>
+                  match attemptedDelta with
+                  | Except.error error => Option.some (Except.error error)
+                  | Except.ok unfolded =>
+                      let deltaState := Prod.fst unfolded;
+                      match Prod.snd unfolded with
+                      | Option.none =>
+                          Option.some
+                            (psKernelExprV2WhnfPublicFinish deltaState original core)
+                      | Option.some value =>
+                          psKernelExprV2WhnfPublicFinishAttempt original
+                            (publicWhnf context deltaState value)
 
 def psKernelExprV2TryWhnfPublicNonterminalWith
     (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
@@ -319,12 +342,13 @@ def psKernelExprV2TryWhnfCoreStateWithFuel
   let core := psKernelExprV2TryWhnfCoreWithPublicFuel fuel;
   core publicWhnf context state root
 
-def psKernelExprV2TryWhnfWithFuel
+def psKernelExprV2TryWhnfWithDefinitionsFuel
     (fuel : Nat) (context : PsKernelCheckerContext)
-    (arena : PsKernelExprV2PagedArena) (root : Nat) :
+    (arena : PsKernelExprV2PagedArena)
+    (definitions : List PsKernelExprV2DefinitionRef) (root : Nat) :
     Option (Except String (Prod PsKernelExprV2PagedArena Nat)) :=
   match psKernelExprV2TryWhnfStateWithFuel fuel context
-      (psKernelExprV2WhnfStateEmpty arena) root with
+      (psKernelExprV2WhnfStateForDefinitions arena definitions) root with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
@@ -333,3 +357,8 @@ def psKernelExprV2TryWhnfWithFuel
           let state := Prod.fst reduced;
           Option.some (Except.ok (Prod.mk state.arena (Prod.snd reduced)))
 
+def psKernelExprV2TryWhnfWithFuel
+    (fuel : Nat) (context : PsKernelCheckerContext)
+    (arena : PsKernelExprV2PagedArena) (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2PagedArena Nat)) :=
+  psKernelExprV2TryWhnfWithDefinitionsFuel fuel context arena List.nil root

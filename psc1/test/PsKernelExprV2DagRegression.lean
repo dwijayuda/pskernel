@@ -1054,6 +1054,224 @@ private def admissions : IO Unit := do
        .admit (.ordinaryInductive [] 0 unitDecl false)] with
      | .error (.resourceExhausted .declarationLimit _) => true | _ => false)
 
+private def sameWhnfValue
+    (left right : Except PsKernelError PsKernelExpr) : Bool :=
+  match left, right with
+  | .error a, .error b => samePublicError a b
+  | .ok a, .ok b => psKernelExprEqual a b
+  | _, _ => false
+
+private def deltaBatchParity : IO Unit := do
+  let initial ← fresh
+  let u := nm "delta-u"
+  let polyName := nm "DagDeltaPoly"
+  let firstName := nm "DagDeltaFirst"
+  let aliasName := nm "DagDeltaAlias"
+  let opaqueName := nm "DagDeltaOpaque"
+  let theoremName := nm "DagDeltaTheorem"
+  let mutualA := nm "DagDeltaMutualA"
+  let mutualB := nm "DagDeltaMutualB"
+  let cycleA := nm "DagDeltaCycleA"
+  let cycleB := nm "DagDeltaCycleB"
+  let level2 := PsKernelLevel.succ (.succ .zero)
+  let (arena, s0) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let (arena, s1) ← expect (psKernelExprV2PagedMkSort arena (.succ .zero))
+  let (arena, su) ← expect (psKernelExprV2PagedMkSort arena (.param u))
+  let (arena, b0) ← expect (psKernelExprV2PagedMkBVar arena 0)
+  let (arena, b1) ← expect (psKernelExprV2PagedMkBVar arena 1)
+  let (arena, innerType) ← expect (psKernelExprV2PagedMkForall arena (nm "x") b0 b1 .default)
+  let (arena, innerBody) ← expect (psKernelExprV2PagedMkLam arena (nm "x") b0 b0 .default)
+  let (arena, polyType) ← expect (psKernelExprV2PagedMkForall arena (nm "A") su innerType .default)
+  let (arena, polyBody) ← expect (psKernelExprV2PagedMkLam arena (nm "A") su innerBody .default)
+  let (arena, firstTypeTail) ← expect (psKernelExprV2PagedMkForall arena (nm "b") s1 s1 .default)
+  let (arena, firstType) ← expect (psKernelExprV2PagedMkForall arena (nm "a") s1 firstTypeTail .default)
+  let (arena, firstBodyTail) ← expect (psKernelExprV2PagedMkLam arena (nm "b") s1 b1 .default)
+  let (arena, firstBody) ← expect (psKernelExprV2PagedMkLam arena (nm "a") s1 firstBodyTail .default)
+  let (arena, proofType) ← expect (psKernelExprV2PagedMkForall arena (nm "P") s0 innerType .default)
+  let (arena, proofBody) ← expect (psKernelExprV2PagedMkLam arena (nm "P") s0 innerBody .default)
+  let (arena, poly) ← expect (psKernelExprV2PagedMkConst arena polyName [level2])
+  let (arena, wrongArity) ← expect (psKernelExprV2PagedMkConst arena polyName [])
+  let (arena, partialPoly) ← expect (psKernelExprV2PagedMkApp arena poly s1)
+  let (arena, appliedPoly) ← expect (psKernelExprV2PagedMkApp arena partialPoly s0)
+  let (arena, first) ← expect (psKernelExprV2PagedMkConst arena firstName [])
+  let (arena, alias) ← expect (psKernelExprV2PagedMkConst arena aliasName [])
+  let (arena, opaqueRoot) ← expect (psKernelExprV2PagedMkConst arena opaqueName [])
+  let (arena, theoremRoot) ← expect (psKernelExprV2PagedMkConst arena theoremName [])
+  let (arena, ma) ← expect (psKernelExprV2PagedMkConst arena mutualA [])
+  let (arena, mb) ← expect (psKernelExprV2PagedMkConst arena mutualB [])
+  let (arena, ca) ← expect (psKernelExprV2PagedMkConst arena cycleA [])
+  let (arena, cb) ← expect (psKernelExprV2PagedMkConst arena cycleB [])
+  let mut workingArena := arena
+  let mut hidden := s0
+  for tag in [0,1,2,3] do
+    let result ← expect (psKernelExprV2PagedMkMData workingArena tag hidden)
+    workingArena := result.fst
+    hidden := result.snd
+  let (arena, firstApplied) ← expect (psKernelExprV2PagedMkApp workingArena first s0)
+  let (arena, ignoredArgument) ← expect (psKernelExprV2PagedMkApp arena firstApplied hidden)
+  let aliasDef := PsKernelDagDefinition.mk
+    (PsKernelDagConstantBase.mk aliasName [] s1) s0 .abbrevHint .safe
+  let polyDef := PsKernelDagDefinition.mk
+    (PsKernelDagConstantBase.mk polyName [u] polyType) polyBody .abbrevHint .safe
+  let firstDef := PsKernelDagDefinition.mk
+    (PsKernelDagConstantBase.mk firstName [] firstType) firstBody .abbrevHint .safe
+  let requests : List PsKernelDagDeclarationRequest := [
+    .definitionDecl aliasDef, .definitionDecl polyDef, .definitionDecl firstDef,
+    .opaqueDecl (PsKernelDagConstantBase.mk opaqueName [] s1) s0 false,
+    .theoremDecl (PsKernelDagConstantBase.mk theoremName [] proofType) proofBody,
+    .mutualDefinitions [
+      PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk mutualA [] s1) mb .abbrevHint .unsafeDef,
+      PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk mutualB [] s1) s0 .abbrevHint .unsafeDef],
+    .mutualDefinitions [
+      PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk cycleA [] s1) cb .abbrevHint .unsafeDef,
+      PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk cycleB [] s1) ca .abbrevHint .unsafeDef]]
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let emptyExecution := PsKernelDagExecutionState.mk initial []
+  let firstAdmission ← expectPublic (psKernelDagRunCommand emptyExecution [] .safe
+    arena built (.admit (.definitionDecl aliasDef)))
+  let mut execution := firstAdmission.snd
+  for request in requests.tail do
+    let result ← expectPublic (psKernelDagRunCommand execution [] .unsafeDef
+      arena built (.admit request))
+    execution := result.snd
+  require "delta-only-successfully-admitted-definitions-registered"
+    (execution.definitions.length == 7)
+  require "delta-reference-is-original-canonical-body-id"
+    (match psKernelExprV2DefinitionRefFind execution.definitions polyName with
+     | some definition => definition.value == polyBody | none => false)
+  require "delta-theorem-and-opaque-not-registered"
+    ((psKernelExprV2DefinitionRefFind execution.definitions theoremName).isNone &&
+      (psKernelExprV2DefinitionRefFind execution.definitions opaqueName).isNone)
+  let checker := psKernelKernelSessionChecker execution.session [] .unsafeDef
+  let expectedPoly := PsKernelExpr.lam (nm "A") (.sort level2)
+    (.lam (nm "x") (.bvar 0) (.bvar 0) .default) .default
+  let expectedPartial := PsKernelExpr.lam (nm "x") sort1 (.bvar 0) .default
+  let cases : List (Nat × PsKernelExpr) := [
+    (poly, expectedPoly), (partialPoly, expectedPartial), (appliedPoly, sort0),
+    (ignoredArgument, sort0), (alias, sort0),
+    (opaqueRoot, .const opaqueName []), (theoremRoot, .const theoremName []),
+    (ma, sort0)]
+  for (root, expected) in cases do
+    let term ← expect (psKernelExprV2DecodedRequire built root)
+    let original ← expect (psKernelSessionWhnf 64 checker term)
+    require "delta-reference-result-sanity" (psKernelExprEqual original.fst expected)
+    for fuel in [0,1,2,3,4,5,6,8,12,32,64] do
+      for depth in [0,1,2] do
+        let context := { checker.context with maxRecDepth := depth }
+        rawStateWhnfParity "delta-raw-exact-fuel-depth-parity"
+          (psKernelSessionWhnf fuel { checker with context := context } term)
+          (psKernelExprV2TryWhnfStateWithFuel fuel context
+            (psKernelExprV2WhnfStateForDefinitions arena execution.definitions) root)
+        let policySession := { execution.session with resources :=
+          { execution.session.resources with fuel := fuel, maxRecDepth := depth } }
+        require "delta-public-exact-fuel-depth-parity"
+          (sameWhnfValue
+            (psKernelV1Whnf policySession [] .unsafeDef term)
+            (psKernelDagWhnfExpression policySession [] .unsafeDef arena built
+              execution.definitions root term))
+    for recDepth in [15,16] do
+      let context := { checker.context with maxRecDepth := 1, recDepth := recDepth }
+      rawStateWhnfParity "delta-exact-entry-recursion-boundary"
+        (psKernelSessionWhnf 64 { checker with context := context } term)
+        (psKernelExprV2TryWhnfStateWithFuel 64 context
+          (psKernelExprV2WhnfStateForDefinitions arena execution.definitions) root)
+  let ignored ← expect (psKernelExprV2DecodedRequire built ignoredArgument)
+  require "delta-ignored-argument-still-normalized-before-unfolding"
+    (match psKernelSessionWhnf 5 checker ignored with
+     | .error error => error == "kernel reduction budget exhausted" | _ => false)
+  let ignoredResult ← expect (psKernelSessionWhnf 6 checker ignored)
+  require "delta-ignored-argument-exact-threshold"
+    (psKernelExprEqual ignoredResult.fst sort0)
+  let wrong ← expect (psKernelExprV2DecodedRequire built wrongArity)
+  for fuel in [0,1,2,3,8] do
+    rawStateWhnfParity "delta-wrong-universe-arity-stays-stuck"
+      (psKernelSessionWhnf fuel checker wrong)
+      (psKernelExprV2TryWhnfStateWithFuel fuel checker.context
+        (psKernelExprV2WhnfStateForDefinitions arena execution.definitions) wrongArity)
+  require "delta-public-rejects-wrong-universe-arity"
+    (match psKernelV1RunDag execution.session [] .safe arena [.whnf wrongArity] with
+     | .error (.rejectedInvalid _) => true | _ => false)
+  let cycle ← expect (psKernelExprV2DecodedRequire built ca)
+  for fuel in [0,1,2,3,4,8,16] do
+    require "delta-mutual-cycle-preserves-resource-exhaustion"
+      (match psKernelSessionWhnf fuel checker cycle with
+       | .error error => error == "kernel reduction budget exhausted" | _ => false)
+    rawStateWhnfParity "delta-mutual-cycle-exact-error"
+      (psKernelSessionWhnf fuel checker cycle)
+      (psKernelExprV2TryWhnfStateWithFuel fuel checker.context
+        (psKernelExprV2WhnfStateForDefinitions arena execution.definitions) ca)
+  let commands := requests.map PsKernelDagCommand.admit
+  for (root, safety) in [(appliedPoly, PsKernelDefinitionSafety.safe),
+      (ma, PsKernelDefinitionSafety.unsafeDef)] do
+    let result ← expectPublic (psKernelV1RunDag initial [] safety arena
+      (commands ++ [.whnf root]))
+    require "delta-complete-public-batch"
+      (match result.replies.reverse with
+       | .normalized value :: _ => psKernelExprEqual value sort0 | _ => false)
+  require "delta-command-order-does-not-see-future-admissions"
+    (match psKernelV1RunDag initial [] .safe arena
+       [.whnf alias, .admit (.definitionDecl aliasDef)] with
+     | .error (.rejectedInvalid _) => true | _ => false)
+  require "delta-external-session-definitions-explicitly-fallback"
+    ((psKernelExprV2TryWhnfWithFuel 64 checker.context arena appliedPoly).isNone)
+  let (foreign, foreignZero) ← expect
+    (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty (.succ .zero))
+  require "delta-foreign-arena-reuses-old-body-id" (foreignZero == s0)
+  let (foreign, foreignAlias) ← expect (psKernelExprV2PagedMkConst foreign aliasName [])
+  let foreignResult ← expectPublic
+    (psKernelV1RunDag execution.session [] .safe foreign [.whnf foreignAlias])
+  require "delta-definition-reference-does-not-escape-batch-arena"
+    (match foreignResult.replies with
+     | [.normalized value] => psKernelExprEqual value sort0 | _ => false)
+  let badName := nm "DagDeltaUnadmitted"
+  let invalidRef := { aliasDef with base := { aliasDef.base with name := badName },
+    value := arena.size }
+  let illTyped := { aliasDef with base := { aliasDef.base with name := badName },
+    value := s1 }
+  for bad in [invalidRef, illTyped] do
+    require "delta-failed-admission-does-not-produce-execution"
+      (match psKernelDagRunCommand emptyExecution [] .safe arena built
+         (.admit (.definitionDecl bad)) with
+       | .error (.rejectedInvalid _) => true | _ => false)
+    require "delta-public-rejects-malformed-or-illtyped-admission"
+      (match psKernelV1RunDag initial [] .safe arena [.admit (.definitionDecl bad)] with
+       | .error (.rejectedInvalid _) => true | _ => false)
+  require "delta-failed-admission-preserves-empty-owner"
+    (emptyExecution.definitions.isEmpty &&
+      (psKernelEnvironmentFind initial.environment badName).isNone)
+  let changedDuplicate := { aliasDef with value := s1 }
+  require "delta-duplicate-cannot-replace-admitted-reference"
+    (match psKernelDagRunCommand execution [] .safe arena built
+       (.admit (.definitionDecl changedDuplicate)) with
+     | .error (.rejectedInvalid _) =>
+         match psKernelExprV2DefinitionRefFind execution.definitions aliasName with
+         | some definition => definition.value == s0 | none => false
+     | _ => false)
+  let bounded := { firstAdmission.snd with session :=
+    { firstAdmission.snd.session with resources :=
+      { firstAdmission.snd.session.resources with maxDeclarations := 1 } } }
+  require "delta-limit-failure-publishes-no-definition-reference"
+    (match psKernelDagRunCommand bounded [] .safe arena built
+       (.admit (.definitionDecl polyDef)) with
+     | .error (.resourceExhausted .declarationLimit _) =>
+         bounded.definitions.length == 1 &&
+           (psKernelExprV2DefinitionRefFind bounded.definitions polyName).isNone
+     | _ => false)
+  Lean.initSearchPath (← Lean.findSysroot)
+  let officialEnv ← Lean.importModules
+    #[{ module := Lean.Name.str .anonymous "Init" }] {}
+  let official := Lean.Expr.app
+    (.app (.const (Lean.Name.str .anonymous "id") [.succ (.succ .zero)])
+      (.sort (.succ .zero))) (.sort .zero)
+  require "delta-official-polymorphic-identity-type"
+    (match Lean.Kernel.check officialEnv {} official with
+     | .ok value => Lean.Expr.equal value (.sort (.succ .zero)) | _ => false)
+  require "delta-official-polymorphic-identity-whnf"
+    (match Lean.Kernel.whnf officialEnv {} official with
+     | .ok value => Lean.Expr.equal value (.sort .zero) | _ => false)
+  IO.println "PSC1_V2_DAG_NATIVE_OFFICIAL_POLY_DELTA: PASS"
+  IO.println "PSC1_V2_DAG_NATIVE_DELTA: PASS"
+
 private def officialComparison : IO Unit := do
   let env ← Lean.mkEmptyEnvironment
   let session ← fresh
@@ -1089,5 +1307,6 @@ def main : IO Unit := do
   quickDefEqParity
   hostileInputs
   admissions
+  deltaBatchParity
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

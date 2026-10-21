@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.ExprV2.Equality
+import Ps.KernelCore.Checker.ExprV2.Environment
 
 /-
 WHNF memo state is created empty for one public operation. Every key and value
@@ -19,15 +20,21 @@ structure PsKernelExprV2WhnfState where
   arena : PsKernelExprV2PagedArena
   coreCache : List PsKernelExprV2WhnfCacheEntry
   publicCache : List PsKernelExprV2WhnfCacheEntry
+  definitions : List PsKernelExprV2DefinitionRef
 
 def psKernelExprV2WhnfStateEmpty
     (arena : PsKernelExprV2PagedArena) : PsKernelExprV2WhnfState :=
-  PsKernelExprV2WhnfState.mk arena List.nil List.nil
+  PsKernelExprV2WhnfState.mk arena List.nil List.nil List.nil
+
+def psKernelExprV2WhnfStateForDefinitions
+    (arena : PsKernelExprV2PagedArena)
+    (definitions : List PsKernelExprV2DefinitionRef) : PsKernelExprV2WhnfState :=
+  PsKernelExprV2WhnfState.mk arena List.nil List.nil definitions
 
 def psKernelExprV2WhnfStateWithArena
     (state : PsKernelExprV2WhnfState) (arena : PsKernelExprV2PagedArena) :
     PsKernelExprV2WhnfState :=
-  PsKernelExprV2WhnfState.mk arena state.coreCache state.publicCache
+  PsKernelExprV2WhnfState.mk arena state.coreCache state.publicCache state.definitions
 
 def psKernelExprV2WhnfCacheFindIn
     (entries : List PsKernelExprV2WhnfCacheEntry) :
@@ -70,7 +77,7 @@ def psKernelExprV2WhnfCoreFinish
               (List.cons
                 (PsKernelExprV2WhnfCacheEntry.mk source result entry.hash)
                 state.coreCache)
-              state.publicCache)
+              state.publicCache state.definitions)
             result)
 
 def psKernelExprV2WhnfPublicCacheFind
@@ -92,5 +99,6 @@ def psKernelExprV2WhnfPublicFinish
             (PsKernelExprV2WhnfState.mk state.arena state.coreCache
               (List.cons
                 (PsKernelExprV2WhnfCacheEntry.mk source result entry.hash)
-                state.publicCache))
+                state.publicCache)
+              state.definitions)
             result)

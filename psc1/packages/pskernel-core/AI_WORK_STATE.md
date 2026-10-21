@@ -72,6 +72,26 @@ adapter fixes; neither is permission to weaken declaration checking.
 No PR is merged. This branch remains a partial migration with full-checker
 fallback and open performance/memory, Arena and formal-refinement obligations.
 
+### Same-batch DAG delta migration — pending this commit's CI
+
+After complete declaration admission succeeds, the ordered DAG batch records
+definition names, universe parameters and canonical body IDs. The table is local
+to that validated input arena and never escapes in the returned kernel session.
+Direct WHNF unfolds those bodies by DAG universe substitution and spine rebuild,
+without importing the environment body. Definitions from a preexisting external
+session explicitly request the complete original fallback. Opaque values and
+theorems remain inert; unsafe mutual-definition behavior retains the original
+checker contract.
+
+New native/generated tests require actual direct-worker results across264 raw
+and complete-public fuel/depth combinations, exact15/16 recursion entry bounds,
+polymorphic/partial/full application, mutual aliases and fuel-exhausting cycles,
+wrong universe arity, command order, failed/duplicate/limited admission, and
+same numeric IDs in a foreign arena. The ignored argument retains the original
+five-fuel failure/six-fuel success ordering. An official Lean polymorphic identity
+comparison and three local state-field/cache-initialization lemmas are included.
+These are pending CI and do not prove global arena ownership or delta refinement.
+
 ## Objective and execution constraints
 
 Finish the paged expression architecture in the complete independent checker.
@@ -103,7 +123,7 @@ read DAG entries directly. All structural shortcuts resolve hash collisions.
 Both terms still undergo complete checking before the DefEq shortcut.
 
 **General inference, full DefEq, environment/local declaration expression fields,
-delta/recursor/String-constructor behavior and declaration admission still use
+external-session delta/recursor/String-constructor behavior and declaration admission still use
 the original recursive expression internally.** This once-per-batch decoder and
 the complete fallback are transitional. The default original V1 API also remains.
 Do not describe this architecture as the finished replacement or retire the

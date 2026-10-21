@@ -220,6 +220,7 @@ jobs:
           grep -q '^PSC1_V2_DAG_JS_PUBLIC_CACHE: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_DELTA: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           echo 'PSC1_CANONICAL_DAG_JS_KERNEL: PASS'
       - name: Check large numerals in the canonical ProofScript executable
         working-directory: psc1

@@ -26,28 +26,6 @@ def psKernelSafetyEq
       | PsKernelDefinitionSafety.partialDef => true
       | _ => false
 
-def psKernelNameListsEq
-    (left : List PsKernelName) :
-    List PsKernelName -> Bool :=
-  match left with
-  | List.nil =>
-      fun (right : List PsKernelName) =>
-        match right with
-        | List.nil => true
-        | List.cons _ _ => false
-  | List.cons leftHead leftTail =>
-      let smaller :=
-        psKernelNameListsEq leftTail;
-      fun (right : List PsKernelName) =>
-        match right with
-        | List.nil =>
-            false
-        | List.cons rightHead rightTail =>
-            if psKernelNameEq leftHead rightHead then
-              smaller rightTail
-            else
-              false
-
 def psKernelNameMember
     (target : PsKernelName)
     (values : List PsKernelName) : Bool :=

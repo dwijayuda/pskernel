@@ -1113,4 +1113,191 @@ console.log("PSC1_V2_DAG_JS_NAT_PROJECTION: PASS");
 }
 console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
 
+
+{
+  // Every reference is produced by successful complete admission in this arena.
+  let arena=empty;
+  const add=(kind,...args)=>{
+    const result=mk(arena,kind,...args);arena=result.fst;return result.snd;
+  };
+  const ensure=(ok,label)=>{
+    if(ok!==true)throw Error("PSC1_DAG_DELTA_FAILED "+label);
+  };
+  const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  const absent=value=>sameRuntimeValue(value,none);
+  const u=name("delta-u"),polyName=name("DagDeltaPoly"),firstName=name("DagDeltaFirst");
+  const aliasName=name("DagDeltaAlias"),opaqueName=name("DagDeltaOpaque");
+  const theoremName=name("DagDeltaTheorem"),mutualA=name("DagDeltaMutualA");
+  const mutualB=name("DagDeltaMutualB"),cycleA=name("DagDeltaCycleA"),cycleB=name("DagDeltaCycleB");
+  const level2=L.succ(L.succ(L.zero));
+  const s0=add("Sort",L.zero),s1=add("Sort",L.succ(L.zero)),su=add("Sort",L.param(u));
+  const b0=add("BVar",0n),b1=add("BVar",1n);
+  const innerType=add("Forall",name("x"),b0,b1,B.default);
+  const innerBody=add("Lam",name("x"),b0,b0,B.default);
+  const polyType=add("Forall",name("A"),su,innerType,B.default);
+  const polyBody=add("Lam",name("A"),su,innerBody,B.default);
+  const firstTypeTail=add("Forall",name("b"),s1,s1,B.default);
+  const firstType=add("Forall",name("a"),s1,firstTypeTail,B.default);
+  const firstBodyTail=add("Lam",name("b"),s1,b1,B.default);
+  const firstBody=add("Lam",name("a"),s1,firstBodyTail,B.default);
+  const proofType=add("Forall",name("P"),s0,innerType,B.default);
+  const proofBody=add("Lam",name("P"),s0,innerBody,B.default);
+  const poly=add("Const",polyName,list([level2]));
+  const wrongArity=add("Const",polyName,nil);
+  const partialPoly=add("App",poly,s1),appliedPoly=add("App",partialPoly,s0);
+  const first=add("Const",firstName,nil),alias=add("Const",aliasName,nil);
+  const opaqueRoot=add("Const",opaqueName,nil),theoremRoot=add("Const",theoremName,nil);
+  const ma=add("Const",mutualA,nil),mb=add("Const",mutualB,nil);
+  const ca=add("Const",cycleA,nil),cb=add("Const",cycleB,nil);
+  let hidden=s0;for(const tag of [0n,1n,2n,3n])hidden=add("MData",tag,hidden);
+  const ignoredArgument=add("App",add("App",first,s0),hidden);
+  const hints=get("PsKernelReducibilityHints").abbrevHint;
+  const base=(name,type,levelParams=nil)=>({name,type,levelParams});
+  const def=(name,type,value,safety=S.safe,levelParams=nil)=>
+    ({base:base(name,type,levelParams),value,hints,safety});
+  const aliasDef=def(aliasName,s1,s0);
+  const polyDef=def(polyName,polyType,polyBody,S.safe,list([u]));
+  const firstDef=def(firstName,firstType,firstBody);
+  const requests=[
+    D.definitionDecl(aliasDef),D.definitionDecl(polyDef),D.definitionDecl(firstDef),
+    D.opaqueDecl(base(opaqueName,s1),s0,false),D.theoremDecl(base(theoremName,proofType),proofBody),
+    D.mutualDefinitions(list([
+      def(mutualA,s1,mb,S.unsafeDef),def(mutualB,s1,s0,S.unsafeDef)])),
+    D.mutualDefinitions(list([
+      def(cycleA,s1,cb,S.unsafeDef),def(cycleB,s1,ca,S.unsafeDef)]))
+  ];
+  const built=accepted(decode(arena),"delta-canonical-decode"),initial=session();
+  const emptyExecution={session:initial,definitions:nil};
+  const step=(execution,request)=>get("psKernelDagRunCommand")(
+    execution,nil,S.unsafeDef,arena,built,C.admit(request));
+  const firstAdmission=accepted(step(emptyExecution,requests[0]),"delta-alias-admission");
+  let execution=firstAdmission.snd;
+  for(const request of requests.slice(1))
+    execution=accepted(step(execution,request),"delta-successful-admission").snd;
+  const find=n=>get("psKernelExprV2DefinitionRefFind")(execution.definitions)(n);
+  must(array(execution.definitions).length===7,"delta-only-admitted-definitions-registered");
+  must(accepted(find(polyName),"delta-poly-reference").value===polyBody,
+    "delta-reference-retains-canonical-body-id");
+  must(absent(find(theoremName))&&absent(find(opaqueName)),
+    "delta-theorem-and-opaque-remain-inert");
+  const checker=get("psKernelKernelSessionChecker")(execution.session,nil,S.unsafeDef);
+  const state=()=>get("psKernelExprV2WhnfStateForDefinitions")(arena,execution.definitions);
+  const raw=(fuel,context,root)=>
+    get("psKernelExprV2TryWhnfStateWithFuel")(fuel)(context)(state())(root);
+  const compareRaw=(fuel,context,root,term,label)=>{
+    const original=get("psKernelSessionWhnf")(fuel,{...checker,context},term);
+    const attempted=accepted(raw(fuel,context,root),label+"-direct");
+    if(rejected(original)){
+      ensure(rejected(attempted)&&original.error===attempted.error,label+"-error");
+    }else{
+      const actual=accepted(attempted,label+"-dag-result");
+      const graph=accepted(decode(actual.fst.arena),label+"-valid");
+      const value=accepted(decoded(graph,actual.snd),label+"-decoded");
+      ensure(exact(accepted(original,label+"-original").fst,value),label+"-value");
+    }
+  };
+  const sameValue=(left,right)=>{
+    if(rejected(left)||rejected(right))
+      return rejected(left)&&rejected(right)&&sameRuntimeValue(left.error,right.error);
+    return exact(accepted(left,"delta-public-original"),accepted(right,"delta-public-dag"));
+  };
+  const cases=[
+    [poly,E.lam(name("A"),E.sort(level2),E.lam(name("x"),E.bvar(0n),E.bvar(0n),B.default),B.default)],
+    [partialPoly,E.lam(name("x"),sort1,E.bvar(0n),B.default)],
+    [appliedPoly,sort0],[ignoredArgument,sort0],[alias,sort0],
+    [opaqueRoot,E.const(opaqueName,nil)],[theoremRoot,E.const(theoremName,nil)],[ma,sort0]
+  ];
+  let parityCases=0;
+  for(const [root,expected]of cases){
+    const term=accepted(decoded(built,root),"delta-fixture");
+    ensure(exact(accepted(get("psKernelSessionWhnf")(64n,checker,term),"delta-oracle").fst,expected),
+      "reference-result-sanity-"+root);
+    for(const fuel of [0n,1n,2n,3n,4n,5n,6n,8n,12n,32n,64n]){
+      for(const depth of [0n,1n,2n]){
+        const context={...checker.context,maxRecDepth:depth};
+        const label="delta-"+root+"-"+fuel+"-"+depth;
+        compareRaw(fuel,context,root,term,label);
+        const policySession={...execution.session,resources:{
+          ...execution.session.resources,fuel,maxRecDepth:depth}};
+        ensure(sameValue(
+          get("psKernelV1Whnf")(policySession,nil,S.unsafeDef,term),
+          get("psKernelDagWhnfExpression")(policySession,nil,S.unsafeDef,arena,built,
+            execution.definitions,root,term)),label+"-public");
+        parityCases++;
+      }
+    }
+    for(const recDepth of [15n,16n])
+      compareRaw(64n,{...checker.context,maxRecDepth:1n,recDepth},root,term,
+        "delta-exact-entry-depth-"+root+"-"+recDepth);
+  }
+  must(parityCases===264,"delta-raw-and-complete-public-resource-matrix");
+  const ignored=accepted(decoded(built,ignoredArgument),"delta-ignored-term");
+  const tooSmall=get("psKernelSessionWhnf")(5n,checker,ignored);
+  must(rejected(tooSmall)&&tooSmall.error==="kernel reduction budget exhausted",
+    "delta-normalizes-ignored-argument-before-unfolding");
+  must(exact(accepted(get("psKernelSessionWhnf")(6n,checker,ignored),
+    "delta-ignored-threshold").fst,sort0),"delta-ignored-argument-exact-threshold");
+  const wrong=accepted(decoded(built,wrongArity),"delta-wrong-level-arity");
+  for(const fuel of [0n,1n,2n,3n,8n])
+    compareRaw(fuel,checker.context,wrongArity,wrong,"delta-wrong-arity-"+fuel);
+  const isInvalid=result=>rejected(result)&&sameRuntimeValue(
+    get("psKernelErrorOutcome")(result.error),get("PsKernelOutcome").rejectedInvalid);
+  must(isInvalid(run(execution.session,nil,S.safe,arena,list([C.whnf(wrongArity)]))),
+    "delta-public-rejects-wrong-universe-arity");
+  const cycle=accepted(decoded(built,ca),"delta-cycle");
+  for(const fuel of [0n,1n,2n,3n,4n,8n,16n]){
+    const original=get("psKernelSessionWhnf")(fuel,checker,cycle);
+    ensure(rejected(original)&&original.error==="kernel reduction budget exhausted",
+      "delta-cycle-resource-"+fuel);
+    compareRaw(fuel,checker.context,ca,cycle,"delta-cycle-parity-"+fuel);
+  }
+  must(true,"delta-mutual-cycle-exact-fuel-errors");
+  const commands=requests.map(request=>C.admit(request));
+  for(const [root,safety]of [[appliedPoly,S.safe],[ma,S.unsafeDef]]){
+    const result=accepted(run(initial,nil,safety,arena,list([...commands,C.whnf(root)])),
+      "delta-full-batch");
+    const replies=array(result.replies);
+    must(replies.length===commands.length+1&&exact(replies.at(-1).value,sort0),
+      "delta-complete-public-admission-and-whnf");
+  }
+  must(isInvalid(run(initial,nil,S.safe,arena,list([
+    C.whnf(alias),C.admit(D.definitionDecl(aliasDef))]))),
+    "delta-future-admission-cannot-authorize-earlier-command");
+  must(absent(get("psKernelExprV2TryWhnfWithFuel")(64n,checker.context,arena,appliedPoly)),
+    "delta-preexisting-session-definition-explicit-fallback");
+  const foreignSort=mk(empty,"Sort",L.succ(L.zero));
+  must(foreignSort.snd===s0,"delta-foreign-arena-reuses-body-id");
+  const foreignAlias=mk(foreignSort.fst,"Const",aliasName,nil);
+  const foreignResult=accepted(run(execution.session,nil,S.safe,foreignAlias.fst,
+    list([C.whnf(foreignAlias.snd)])),"delta-external-session");
+  const foreignReplies=array(foreignResult.replies);
+  must(foreignReplies.length===1&&exact(foreignReplies[0].value,sort0),
+    "delta-body-index-does-not-escape-owning-arena");
+  const badName=name("DagDeltaUnadmitted");
+  const invalidRef={...aliasDef,base:{...aliasDef.base,name:badName},value:arena.size};
+  const illTyped={...aliasDef,base:{...aliasDef.base,name:badName},value:s1};
+  for(const bad of [invalidRef,illTyped]){
+    must(isInvalid(step(emptyExecution,D.definitionDecl(bad))),
+      "delta-failed-admission-produces-no-execution");
+    must(isInvalid(run(initial,nil,S.safe,arena,list([C.admit(D.definitionDecl(bad))]))),
+      "delta-invalid-or-illtyped-body-rejected-at-public-boundary");
+  }
+  must(array(emptyExecution.definitions).length===0&&
+    get("psKernelEnvironmentSize")(initial.environment)===0n,
+    "delta-failed-admission-preserves-empty-owner");
+  const duplicate=step(execution,D.definitionDecl({...aliasDef,value:s1}));
+  must(isInvalid(duplicate)&&accepted(find(aliasName),"delta-retained-alias").value===s0,
+    "delta-duplicate-cannot-replace-registered-body");
+  const bounded={...firstAdmission.snd,session:{...firstAdmission.snd.session,
+    resources:{...firstAdmission.snd.session.resources,maxDeclarations:1n}}};
+  const limited=step(bounded,D.definitionDecl(polyDef));
+  must(rejected(limited)&&sameRuntimeValue(
+    get("psKernelErrorOutcome")(limited.error),get("PsKernelOutcome").resourceExhausted)&&
+    sameRuntimeValue(limited.error.resource,get("PsKernelResourceError").declarationLimit)&&
+    array(bounded.definitions).length===1&&absent(
+      get("psKernelExprV2DefinitionRefFind")(bounded.definitions)(polyName)),
+    "delta-declaration-limit-failure-publishes-no-reference");
+  console.log("PSC1_V2_DAG_JS_DELTA: PASS");
+}
+
 reportDagSmoke();

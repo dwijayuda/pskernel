@@ -1,3 +1,37 @@
+# Current Church diagnostic repair — actual observer elaboration failures corrected
+
+Source parent: `e8780a6c39129a8749198b0985745a15ddf7fa3f`.
+The containing observer repair is **NOT RUN** at creation; production remains
+pinned369bee5801bd5e4476837684fad3f7e1ca8c422c with unchanged input/fuel/host policy.
+
+[39652286031/job119403441376](https://github.com/dwijayuda/pskernel/actions/runs/39652286031/job/119403441376)
+failed native host compilation before any observed theorem ran. Its saved
+artifact12370347734 is90,582bytes, ZIP SHA256
+`172d8b3286186dcb15e5ed02f89c67f05f0dff876e1c8de7f5e580a82fd2b02c`.
+The read-only authenticated [inspector39653050187/job119406092084](https://github.com/dwijayuda/pskernel/actions/runs/39653050187/job/119406092084)
+printed the original17,201-byte stdout (SHA256
+`438e5f78fea07ead36bced52403f848f2ea2913faef212d891e4673ae5863a23`)
+and20-byte stderr (SHA256
+`c4a27db198c4d8632369ee6102944ef46e83c20d685f7c17a6aaff9cfcfc710f`).
+
+The three concrete issues were ToJson Prop for a truncated-text flag, an
+identity proof splitting an unreduced Except match, and a session equality
+proof leaving a definitionally identical match goal. The repair uses decide
+for the Boolean flag, cases/simp of the existing dbgTrace identity, and rfl
+for that final goal. All five theorem statements and the entire frozen/traced
+worker range remain byte-for-byte unchanged. Lean printed placeholder-axiom
+dependencies for the failed proofs; the build failed and none was qualified.
+There is no source sorry/admit and no bypass of the proof audit.
+
+Build/proof failure paths now print bounded256KiB tails with exact byte counts,
+SHA256 and explicit truncation, while retaining the complete original files in
+the artifact. This fixes diagnostic visibility without changing decisions.
+The next action is the exact successor's native diagnostic workflow, including
+all retained controls, proof gates and authentic Church trace. Trace attribution
+and kernel compatibility remain unestablished until actual completion.
+
+---
+
 # Current Church checkpoint — bounded DefEq failure observer awaiting execution
 
 Branch: `research/psc1-arena-logical-20261021`.

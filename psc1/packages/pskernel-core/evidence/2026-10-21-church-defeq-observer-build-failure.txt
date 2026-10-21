@@ -1,0 +1,259 @@
+PSC1_SAVED_CHURCH_BUILD_BEGIN {"source_sha": "e8780a6c39129a8749198b0985745a15ddf7fa3f", "run": 39652286031, "artifact": 12370347734, "zip_sha256": "172d8b3286186dcb15e5ed02f89c67f05f0dff876e1c8de7f5e580a82fd2b02c", "member": "_temp/arena435-native-v1/build.stdout.txt", "bytes": 17201, "sha256": "438e5f78fea07ead36bced52403f848f2ea2913faef212d891e4673ae5863a23", "checker_reexecuted": false}
+✔ [2/186] Built Ps.KernelCore.Core.Name (307ms)
+✔ [3/186] Built Ps.KernelCore.Core.Name:c.o (280ms)
+✔ [4/186] Built Ps.KernelCore.Checker.ResourcePolicy (359ms)
+✔ [5/186] Built Ps.KernelCore.Checker.ResourcePolicy:c.o (185ms)
+✔ [6/186] Built Ps.KernelCore.Core.Level (616ms)
+✔ [7/186] Built Ps.KernelCore.API.Outcome (372ms)
+✔ [8/186] Built Ps.KernelCore.Core.ExprScalar (277ms)
+✔ [9/186] Built Ps.KernelCore.API.Outcome:c.o (198ms)
+✔ [10/186] Built Ps.KernelCore.Core.ExprScalar:c.o (186ms)
+✔ [11/186] Built Ps.KernelCore.Runtime.Acceleration.ScalarHash (339ms)
+✔ [12/186] Built Ps.KernelCore.Core.Level:c.o (613ms)
+✔ [13/186] Built Ps.KernelCore.Runtime.Acceleration.ScalarHash:c.o (152ms)
+✔ [14/186] Built Ps.KernelCore.Core.Expr (661ms)
+✔ [15/186] Built Ps.KernelCore.Core.ExprV2.Node (348ms)
+✔ [16/186] Built Ps.KernelCore.Core.ExprV2.Node:c.o (253ms)
+✔ [17/186] Built Ps.KernelCore.Core.ExprV2.Paged (362ms)
+✔ [18/186] Built Ps.KernelCore.Runtime.Acceleration.CachePolicy (485ms)
+✔ [19/186] Built Ps.KernelCore.Core.Expr:c.o (429ms)
+✔ [20/186] Built Ps.KernelCore.Core.Substitution.ListOps (346ms)
+✔ [21/186] Built Ps.KernelCore.Runtime.Capability.Types (421ms)
+✔ [22/186] Built Ps.KernelCore.Core.LocalContext (568ms)
+✔ [23/186] Built Ps.KernelCore.Runtime.Acceleration.Cache (697ms)
+✔ [24/186] Built Ps.KernelCore.Runtime.Capability.Types:c.o (82ms)
+✔ [25/186] Built Ps.KernelCore.Runtime.Acceleration.CachePolicy:c.o (106ms)
+✔ [26/186] Built Ps.KernelCore.Core.ExprV2.Paged:c.o (128ms)
+✔ [27/186] Built Ps.KernelCore.Core.Substitution.ListOps:c.o (164ms)
+✔ [28/186] Built Ps.KernelCore.Core.LocalContext:c.o (163ms)
+✔ [29/186] Built Ps.KernelCore.Core.Declaration (634ms)
+✔ [30/186] Built Ps.KernelCore.Runtime.Acceleration.Cache:c.o (364ms)
+✔ [31/186] Built Ps.KernelCore.Core.ExprV2.Builder (394ms)
+✔ [32/186] Built Ps.KernelCore.Runtime.Capability.Lean434NativeReduction (470ms)
+✔ [33/186] Built Ps.KernelCore.Checker.State (394ms)
+✔ [34/186] Built Ps.KernelCore.Core.Declaration:c.o (301ms)
+✔ [35/186] Built Ps.KernelCore.Core.Substitution.Lift (563ms)
+✔ [36/186] Built Ps.KernelCore.Runtime.Capability.Lean434NativeReduction:c.o (162ms)
+✔ [37/186] Built Ps.KernelCore.Checker.State:c.o (215ms)
+✔ [38/186] Built Ps.KernelCore.Core.ExprV2.Builder:c.o (223ms)
+✔ [39/186] Built Ps.KernelCore.Checker.ExprV2.Environment (448ms)
+✔ [40/186] Built Ps.KernelCore.Environment.Semantic (463ms)
+✔ [41/186] Built Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex (494ms)
+✔ [42/186] Built Ps.KernelCore.Core.ExprV2.Validation (410ms)
+✔ [43/186] Built Ps.KernelCore.Checker.ExprV2.Environment:c.o (163ms)
+✔ [44/186] Built Ps.KernelCore.Core.ExprV2.Validation:c.o (222ms)
+✔ [45/186] Built Ps.KernelCore.Environment.Semantic:c.o (117ms)
+✔ [46/186] Built Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex:c.o (219ms)
+✔ [47/186] Built Ps.KernelCore.Core.Substitution.Lift:c.o (536ms)
+✔ [48/186] Built Ps.KernelCore.Environment.Environment (274ms)
+✔ [49/186] Built Ps.KernelCore.Core.Substitution.Instantiate (577ms)
+✔ [50/186] Built Ps.KernelCore.Environment.Environment:c.o (97ms)
+✔ [51/186] Built Ps.KernelCore.Core.ExprV2.Decode (457ms)
+✔ [52/186] Built Ps.KernelCore.Core.Substitution.Beta (436ms)
+✔ [53/186] Built Ps.KernelCore.Core.ExprV2.Decode:c.o (241ms)
+✔ [54/186] Built Ps.KernelCore.Environment.Lookup (391ms)
+✔ [55/186] Built Ps.KernelCore.Environment.Lookup:c.o (125ms)
+✔ [56/186] Built Ps.KernelCore.Core.Substitution.Instantiate:c.o (679ms)
+✔ [57/186] Built Ps.KernelCore.Core.Substitution.Beta:c.o (209ms)
+✔ [58/186] Built Ps.KernelCore.Environment.Operations (240ms)
+✔ [59/186] Built Ps.KernelCore.Core.Substitution.Abstract (355ms)
+✔ [60/186] Built Ps.KernelCore.Environment.Operations:c.o (104ms)
+✔ [61/186] Built Ps.KernelCore.Core.Substitution.Abstract:c.o (220ms)
+✔ [62/186] Built Ps.KernelCore.Checker.Context (370ms)
+✔ [63/186] Built Ps.KernelCore.Checker.Inference.Constant (331ms)
+✔ [64/186] Built Ps.KernelCore.Checker.Ops (389ms)
+✔ [65/186] Built Ps.KernelCore.Checker.Reduction.PrimitiveData (433ms)
+✔ [66/186] Built Ps.KernelCore.Checker.Context:c.o (371ms)
+✔ [67/186] Built Ps.KernelCore.Checker.Inference.Constant:c.o (110ms)
+✔ [68/186] Built Ps.KernelCore.Checker.Ops:c.o (69ms)
+✔ [69/186] Built Ps.KernelCore.Checker.Reduction.PrimitiveData:c.o (127ms)
+✔ [70/186] Built Ps.KernelCore.Checker.Reduction.PrimitiveNat (295ms)
+✔ [71/186] Built Ps.KernelCore.Checker.Reduction.Primitives (204ms)
+✔ [72/186] Built Ps.KernelCore.Checker.Reduction.PrimitiveNat:c.o (227ms)
+✔ [73/186] Built Ps.KernelCore.Checker.Reduction.Primitives:c.o (72ms)
+✔ [74/186] Built Ps.KernelCore.Checker.Reduction.KernelReductions (288ms)
+✔ [75/186] Built Ps.KernelCore.Checker.Reduction.KernelReductions:c.o (212ms)
+✔ [76/186] Built Ps.KernelCore.Checker.Reduction.WhnfCore (311ms)
+✔ [77/186] Built Ps.KernelCore.Checker.Reduction.Whnf (253ms)
+✔ [78/186] Built Ps.KernelCore.Checker.Reduction.WhnfCore:c.o (221ms)
+✔ [79/186] Built Ps.KernelCore.Checker.Reduction.Whnf:c.o (126ms)
+✔ [80/186] Built Ps.KernelCore.Checker.Projection (289ms)
+✔ [81/186] Built Ps.KernelCore.Checker.Inference.Helpers (253ms)
+✔ [82/186] Built Ps.KernelCore.Checker.Projection:c.o (279ms)
+✔ [83/186] Built Ps.KernelCore.Checker.Inference.Helpers:c.o (128ms)
+✔ [84/186] Built Ps.KernelCore.Checker.Inference.Core (343ms)
+✔ [85/186] Built Ps.KernelCore.Checker.Inference (224ms)
+✔ [86/186] Built Ps.KernelCore.Checker.Inference.Core:c.o (341ms)
+✔ [87/186] Built Ps.KernelCore.Checker.Inference:c.o (86ms)
+✔ [88/186] Built Ps.KernelCore.Checker.Recursor.Analysis (348ms)
+✔ [89/186] Built Ps.KernelCore.Checker.Recursor.Reduction (296ms)
+✔ [90/186] Built Ps.KernelCore.Checker.Recursor.Analysis:c.o (317ms)
+✔ [91/186] Built Ps.KernelCore.Checker.Recursor.Reduction:c.o (219ms)
+✔ [92/186] Built Ps.KernelCore.Checker.DefEq.BinderSpines (321ms)
+✔ [93/186] Built Ps.KernelCore.Checker.DefEq.Quick (253ms)
+✔ [94/186] Built Ps.KernelCore.Checker.DefEq.BinderSpines:c.o (249ms)
+✔ [95/186] Built Ps.KernelCore.Checker.DefEq.Quick:c.o (131ms)
+✔ [96/186] Built Ps.KernelCore.Checker.DefEq.Support (204ms)
+✔ [97/186] Built Ps.KernelCore.Checker.DefEq.Support:c.o (66ms)
+✔ [98/186] Built Ps.KernelCore.Checker.DefEq.DeltaStep (290ms)
+✔ [99/186] Built Ps.KernelCore.Checker.DefEq.DeltaStep:c.o (204ms)
+✔ [100/186] Built Ps.KernelCore.Checker.DefEq.LazyDelta (272ms)
+✔ [101/186] Built Ps.KernelCore.Checker.DefEq.LazyDelta:c.o (186ms)
+✔ [102/186] Built Ps.KernelCore.Checker.DefEq.FinalRules (310ms)
+✔ [103/186] Built Ps.KernelCore.Checker.DefEq.FinalRules:c.o (263ms)
+✔ [104/186] Built Ps.KernelCore.Checker.DefEq.Shortcuts (267ms)
+✔ [105/186] Built Ps.KernelCore.Checker.DefEq.Shortcuts:c.o (154ms)
+✔ [106/186] Built Ps.KernelCore.Checker.DefEq.FullShape (250ms)
+✔ [107/186] Built Ps.KernelCore.Checker.DefEq.FullShape:c.o (142ms)
+✔ [108/186] Built Ps.KernelCore.Checker.Knot (316ms)
+✔ [109/186] Built Ps.KernelCore.Checker.Session (249ms)
+✔ [110/186] Built Ps.KernelCore.Checker.Knot:c.o (427ms)
+✔ [111/186] Built Ps.KernelCore.Checker.Session:c.o (180ms)
+✔ [112/186] Built Ps.KernelCore.Admission.Declaration.Validation (427ms)
+✔ [113/186] Built Ps.KernelCore.Admission.Declaration.Validation:c.o (252ms)
+✔ [114/186] Built Ps.KernelCore.Admission.Declaration.Admission (379ms)
+✔ [115/186] Built Ps.KernelCore.Admission.Declaration.Admission:c.o (333ms)
+⚠ [116/186] Built Ps.KernelCore.Admission.Quot.Bootstrap (422ms)
+warning: packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Bootstrap.lean:231:6: Variable name `relation` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _relation
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Bootstrap.lean:280:6: Variable name `value` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _value
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [117/186] Built Ps.KernelCore.Admission.Quot.Admission (241ms)
+✖ [118/186] Building NativeChurchDefEqTrace (1.5s)
+trace: .> LEAN_PATH=/home/runner/work/pskernel/pskernel/kernel-source/psc1/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.35.0/bin/lean /home/runner/work/pskernel/pskernel/kernel-source/psc1/native-church-diagnostic/NativeChurchDefEqTrace.lean -o /home/runner/work/pskernel/pskernel/kernel-source/psc1/.lake/build/lib/lean/NativeChurchDefEqTrace.olean -i /home/runner/work/pskernel/pskernel/kernel-source/psc1/.lake/build/lib/lean/NativeChurchDefEqTrace.ilean -c /home/runner/work/pskernel/pskernel/kernel-source/psc1/.lake/build/ir/NativeChurchDefEqTrace.c --setup /home/runner/work/pskernel/pskernel/kernel-source/psc1/.lake/build/ir/NativeChurchDefEqTrace.setup.json --json
+error: native-church-diagnostic/NativeChurchDefEqTrace.lean:31:20: failed to synthesize instance of type class
+  ToJson Prop
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+error: native-church-diagnostic/NativeChurchDefEqTrace.lean:150:16: Tactic `rfl` failed: The left-hand side
+  Except.ok value✝
+is not definitionally equal to the right-hand side
+  Except.error message
+
+case h_1
+α : Type
+fuel : Nat
+stage : String
+context : PsKernelCheckerContext
+state : PsKernelCheckerState
+left right : PsKernelExpr
+message : String
+result✝ : Except String α
+value✝ : α
+heq✝ : Except.error message = Except.ok value✝
+⊢ Except.ok value✝ = Except.error message
+error: native-church-diagnostic/NativeChurchDefEqTrace.lean:150:16: Tactic `rfl` failed: The left-hand side
+  if selectedFuel fuel = true then
+    dbgTrace (event fuel stage context state left right message✝) fun x => Except.error message✝
+  else Except.error message✝
+is not definitionally equal to the right-hand side
+  Except.error message
+
+case h_2
+α : Type
+fuel : Nat
+stage : String
+context : PsKernelCheckerContext
+state : PsKernelCheckerState
+left right : PsKernelExpr
+message : String
+result✝ : Except String α
+message✝ : String
+heq✝ : Except.error message = Except.error message✝
+⊢ (if selectedFuel fuel = true then
+      dbgTrace (event fuel stage context state left right message✝) fun x => Except.error message✝
+    else Except.error message✝) =
+    Except.error message
+error: native-church-diagnostic/NativeChurchDefEqTrace.lean:837:56: unsolved goals
+fuel : Nat
+session : PsKernelCheckerSession
+left right : PsKernelExpr
+⊢ (match psKernelIsDefEqWithFuel fuel session.context session.state left right with
+    | Except.error message => Except.error message
+    | Except.ok result => Except.ok (result.fst, { context := session.context, state := result.snd })) =
+    match psKernelIsDefEqWithFuel fuel session.context session.state left right with
+    | Except.error message => Except.error message
+    | Except.ok result => Except.ok (result.fst, { context := session.context, state := result.snd })
+info: native-church-diagnostic/NativeChurchDefEqTrace.lean:840:0: 'NativeChurchDefEqTrace.traceAttempt_identity' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+info: native-church-diagnostic/NativeChurchDefEqTrace.lean:841:0: 'NativeChurchDefEqTrace.frozen_eq_original' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: native-church-diagnostic/NativeChurchDefEqTrace.lean:842:0: 'NativeChurchDefEqTrace.traced_eq_frozen' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+info: native-church-diagnostic/NativeChurchDefEqTrace.lean:843:0: 'NativeChurchDefEqTrace.traced_eq_original' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+info: native-church-diagnostic/NativeChurchDefEqTrace.lean:844:0: 'NativeChurchDefEqTrace.session_eq_original' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+✔ [119/186] Built Ps.KernelCore.Admission.Quot.Bootstrap:c.o (324ms)
+✔ [120/186] Built Ps.KernelCore.Admission.Quot.Admission:c.o (108ms)
+✔ [122/186] Built Ps.KernelCore.Admission.Inductive.Types (293ms)
+✔ [123/186] Built Ps.KernelCore.Admission.Inductive.Types:c.o (102ms)
+✔ [124/186] Built Ps.KernelCore.Admission.Inductive.Common.Occurrence (271ms)
+✔ [125/186] Built Ps.KernelCore.Admission.Inductive.Common.Parameters (248ms)
+✔ [126/186] Built Ps.KernelCore.Admission.Inductive.Common.Occurrence:c.o (163ms)
+✔ [127/186] Built Ps.KernelCore.Admission.Inductive.Common.Parameters:c.o (158ms)
+✔ [128/186] Built Ps.KernelCore.Admission.Inductive.Ordinary.Constructor (328ms)
+✔ [129/186] Built Ps.KernelCore.Admission.Inductive.Ordinary.Recursor (273ms)
+✔ [130/186] Built Ps.KernelCore.Admission.Inductive.Ordinary.Constructor:c.o (286ms)
+✔ [131/186] Built Ps.KernelCore.Admission.Inductive.Ordinary.Recursor:c.o (163ms)
+✔ [132/186] Built Ps.KernelCore.Admission.Inductive.Common.RecursorValidation (230ms)
+✔ [133/186] Built Ps.KernelCore.Admission.Inductive.Common.RecursorValidation:c.o (104ms)
+✔ [134/186] Built Ps.KernelCore.Admission.Inductive.Common.Elimination (242ms)
+✔ [135/186] Built Ps.KernelCore.Admission.Inductive.Common.Elimination:c.o (129ms)
+✔ [136/186] Built Ps.KernelCore.Admission.Inductive.Ordinary.ConstructorAdmission (244ms)
+✔ [137/186] Built Ps.KernelCore.Admission.Inductive.Ordinary.ConstructorAdmission:c.o (144ms)
+✔ [138/186] Built Ps.KernelCore.Admission.Inductive.Ordinary.Admission (274ms)
+✔ [139/186] Built Ps.KernelCore.Admission.Inductive.Ordinary.Admission:c.o (290ms)
+✔ [140/186] Built Ps.KernelCore.Admission.Inductive.Mutual.Analysis (380ms)
+✔ [141/186] Built Ps.KernelCore.Admission.Inductive.Mutual.Recursor (299ms)
+✔ [142/186] Built Ps.KernelCore.Admission.Inductive.Mutual.Analysis:c.o (295ms)
+✔ [143/186] Built Ps.KernelCore.Admission.Inductive.Mutual.Header (267ms)
+✔ [144/186] Built Ps.KernelCore.Admission.Inductive.Mutual.Recursor:c.o (251ms)
+✔ [145/186] Built Ps.KernelCore.Admission.Inductive.Mutual.Header:c.o (188ms)
+✔ [146/186] Built Ps.KernelCore.Admission.Inductive.Mutual.AdmissionLoops (287ms)
+✔ [147/186] Built Ps.KernelCore.Admission.Inductive.Mutual.Admission (272ms)
+✔ [148/186] Built Ps.KernelCore.Admission.Inductive.Mutual.AdmissionLoops:c.o (324ms)
+✔ [149/186] Built Ps.KernelCore.Admission.Inductive.Nested.Types (245ms)
+✔ [150/186] Built Ps.KernelCore.Admission.Inductive.Mutual.Admission:c.o (224ms)
+✔ [151/186] Built Ps.KernelCore.Admission.Inductive.Nested.Types:c.o (64ms)
+✔ [152/186] Built Ps.KernelCore.Admission.Inductive.Nested.ReservedNames (230ms)
+✔ [153/186] Built Ps.KernelCore.Admission.Inductive.Nested.ReservedNames:c.o (83ms)
+✔ [154/186] Built Ps.KernelCore.Admission.Inductive.Nested.Rebase (288ms)
+✔ [155/186] Built Ps.KernelCore.Admission.Inductive.Nested.Rebase:c.o (178ms)
+✔ [156/186] Built Ps.KernelCore.Admission.Inductive.Nested.Discover (331ms)
+✔ [157/186] Built Ps.KernelCore.Admission.Inductive.Nested.Flatten (299ms)
+✔ [158/186] Built Ps.KernelCore.Admission.Inductive.Nested.Discover:c.o (310ms)
+✔ [159/186] Built Ps.KernelCore.Admission.Inductive.Nested.RestoreExpr (317ms)
+✔ [160/186] Built Ps.KernelCore.Admission.Inductive.Nested.Flatten:c.o (271ms)
+✔ [161/186] Built Ps.KernelCore.Admission.Inductive.Nested.Restore (265ms)
+✔ [162/186] Built Ps.KernelCore.Admission.Inductive.Nested.RestoreExpr:c.o (278ms)
+✔ [163/186] Built Ps.KernelCore.Admission.Inductive.Nested.Restore:c.o (213ms)
+✔ [164/186] Built Ps.KernelCore.Admission.Inductive.Nested.Validation (325ms)
+✔ [165/186] Built Ps.KernelCore.Admission.Inductive.Nested.Commit (226ms)
+✔ [166/186] Built Ps.KernelCore.Admission.Inductive.Nested.Commit:c.o (89ms)
+✔ [167/186] Built Ps.KernelCore.Admission.Inductive.Nested.Admission (278ms)
+✔ [168/186] Built Ps.KernelCore.Admission.Inductive.Nested.Validation:c.o (455ms)
+✔ [169/186] Built Ps.KernelCore.Admission.Inductive.Nested.Admission:c.o (142ms)
+✔ [170/186] Built Ps.KernelCore.API.KernelContractV1 (248ms)
+✔ [171/186] Built Ps.KernelCore.API.KernelContractV1:c.o (95ms)
+✔ [172/186] Built Ps.KernelCore.API.Provider (261ms)
+✔ [173/186] Built Ps.KernelCore.API.DagTypes (360ms)
+✔ [174/186] Built Ps.KernelCore.API.Provider:c.o (83ms)
+✔ [175/186] Built Ps.KernelCore.API.DagTypes:c.o (149ms)
+✔ [176/186] Built Ps.KernelCore.API.Session (336ms)
+✔ [177/186] Built Ps.KernelCore.API.Session:c.o (111ms)
+✔ [178/186] Built Ps.KernelCore.API.DagDeclaration (446ms)
+✔ [179/186] Built Ps.KernelCore.API.Kernel (411ms)
+✔ [180/186] Built Ps.KernelCore.API.Kernel:c.o (143ms)
+✔ [181/186] Built Ps.KernelCore.API.DagDeclaration:c.o (293ms)
+✔ [182/186] Built NativeChurchInput (835ms)
+✔ [185/186] Built NativeChurchInput:c.o (468ms)
+Some required targets logged failures:
+- NativeChurchDefEqTrace
+PSC1_SAVED_CHURCH_BUILD_END arena435-native-v1/build.stdout.txt
+PSC1_SAVED_CHURCH_BUILD_BEGIN {"source_sha": "e8780a6c39129a8749198b0985745a15ddf7fa3f", "run": 39652286031, "artifact": 12370347734, "zip_sha256": "172d8b3286186dcb15e5ed02f89c67f05f0dff876e1c8de7f5e580a82fd2b02c", "member": "_temp/arena435-native-v1/build.stderr.txt", "bytes": 20, "sha256": "c4a27db198c4d8632369ee6102944ef46e83c20d685f7c17a6aaff9cfcfc710f", "checker_reexecuted": false}
+error: build failed
+PSC1_SAVED_CHURCH_BUILD_END arena435-native-v1/build.stderr.txt

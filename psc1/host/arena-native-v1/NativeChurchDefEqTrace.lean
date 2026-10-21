@@ -28,7 +28,7 @@ private def textView (value : String) : Json :=
     Json.mkObj [
       ("text", toJson (String.ofList (value.toList.take 64))),
       ("utf8ByteSize", natView bytes),
-      ("truncated", toJson (value.length > 64))]
+      ("truncated", toJson (decide (value.length > 64)))]
   else Json.mkObj [("utf8ByteSize", natView bytes), ("truncated", toJson true)]
 
 private def nameView : Nat → PsKernelName → Json
@@ -143,11 +143,7 @@ theorem traceAttempt_identity {α : Type} (fuel : Nat) (stage : String)
     (context : PsKernelCheckerContext) (state : PsKernelCheckerState)
     (left right : PsKernelExpr) (result : Except String α) :
     traceAttempt fuel stage context state left right result = result := by
-  cases result with
-  | ok value => rfl
-  | error message =>
-      unfold traceAttempt
-      split <;> rfl
+  cases result <;> simp [traceAttempt, dbgTrace]
 
 def frozenWithFuel
     (fuel : Nat) :
@@ -835,7 +831,7 @@ theorem session_eq_original (fuel : Nat) (session : PsKernelCheckerSession)
     (left right : PsKernelExpr) :
     sessionIsDefEq fuel session left right =
       psKernelSessionIsDefEq fuel session left right := by
-  simp only [sessionIsDefEq, psKernelSessionIsDefEq, psKernelIsDefEq, traced_eq_original]
+  simp only [sessionIsDefEq, psKernelSessionIsDefEq, psKernelIsDefEq, traced_eq_original] <;> rfl
 
 #print axioms traceAttempt_identity
 #print axioms frozen_eq_original

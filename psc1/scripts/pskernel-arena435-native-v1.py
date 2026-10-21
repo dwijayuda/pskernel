@@ -472,6 +472,19 @@ def validate_defeq_parser_controls(event: dict, snapshot: dict) -> int:
     return 9
 
 
+def print_compile_failure_logs(out: pathlib.Path, names: tuple[str, ...]) -> None:
+    # Preserve the complete files in the artifact; expose a bounded diagnostic tail.
+    for name in names:
+        path = out / name
+        data = path.read_bytes()
+        limit = 262144
+        print("PSC1_ARENA_NATIVE_COMPILE_LOG " + json.dumps({
+            "name": name, "bytes": len(data), "sha256": digest(data),
+            "printed_tail_bytes": min(len(data), limit), "truncated": len(data) > limit
+        }), flush=True)
+        print(data[-limit:].decode("utf-8", errors="replace"), flush=True)
+
+
 def audit_defeq_proofs(lake: pathlib.Path, source: pathlib.Path, config: pathlib.Path,
                       trace: pathlib.Path, out: pathlib.Path, report: dict) -> None:
     command = [str(lake), "-f", config.name, "env", "lean", str(trace.relative_to(source))]
@@ -483,6 +496,8 @@ def audit_defeq_proofs(lake: pathlib.Path, source: pathlib.Path, config: pathlib
                "wall_seconds": time.monotonic() - started, "source_sha256": file_digest(trace),
                "stdout_sha256": file_digest(stdout_path), "stderr_sha256": file_digest(stderr_path)}
     report["defeq_proof_gate"] = receipt
+    if result.returncode != 0:
+        print_compile_failure_logs(out, ("defeq-proof.stdout.txt", "defeq-proof.stderr.txt"))
     require(result.returncode == 0, "native frozen/observer equivalence proof compilation failed")
     output = stdout_path.read_text(encoding="utf-8", errors="strict")
     pattern = re.compile(
@@ -732,6 +747,8 @@ def collect(args: argparse.Namespace, report: dict) -> None:
         built = subprocess.run(build_command, cwd=source, stdout=stdout, stderr=stderr, timeout=900)
     report["build"] = {"command": build_command, "returncode": built.returncode,
                        "wall_seconds": time.monotonic() - started}
+    if built.returncode != 0:
+        print_compile_failure_logs(out, ("build.stdout.txt", "build.stderr.txt"))
     require(built.returncode == 0, "native diagnostic build failed")
     require((source / "kernel-lakefile.lean").read_bytes() == original_config,
             "original kernel lakefile changed during diagnostic build")

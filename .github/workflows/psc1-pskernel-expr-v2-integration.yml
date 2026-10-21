@@ -406,7 +406,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-admission-guard-proofs.log"
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean \
             | tee "$RUNNER_TEMP/psc1-recursor-proofs.log"
-          test "$(grep -c '^#print axioms ' test/PsKernelExprV2SessionProofs.lean)" -eq 13
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2SessionProofs.lean)" -eq 14
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2SessionProofs.lean \
             | tee "$RUNNER_TEMP/psc1-session-proofs.log"
           test "$(grep -c '^#print axioms ' test/PsKernelExprV2RecursorMajorProofs.lean)" -eq 10

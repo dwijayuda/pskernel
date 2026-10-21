@@ -169,6 +169,16 @@ theorem post_command_import_error_prevents_publication
   rw [psKernelDagRunCommandsWithSource]
   simp only [admitted, imported, failed]
 
+theorem append_demands_preserves_order
+    (names pending : List PsKernelName) :
+    psKernelDagGeneratedAppendDemands names pending = names ++ pending := by
+  induction names with
+  | nil => rfl
+  | cons name rest ih =>
+      change name :: psKernelDagGeneratedAppendDemands rest pending =
+        name :: (rest ++ pending)
+      rw [ih]
+
 end PsKernelExprV2SessionProofs
 
 #print axioms PsKernelExprV2SessionProofs.collect_zero_preserves_pending
@@ -185,3 +195,5 @@ end PsKernelExprV2SessionProofs
 #print axioms PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace
 
 #print axioms PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication
+
+#print axioms PsKernelExprV2SessionProofs.append_demands_preserves_order

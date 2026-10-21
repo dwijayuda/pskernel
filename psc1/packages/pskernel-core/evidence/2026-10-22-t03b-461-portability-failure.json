@@ -1,0 +1,204 @@
+{
+  "schema": "pskernel-exact-source-qualification-v1",
+  "observed_at_utc": "2026-10-21T23:22:30Z",
+  "source_sha": "461014cba7a45f15282ac9f125808cabdd17c5cb",
+  "source_branch": "work/psc1-pskernel-t03b-session-20261022",
+  "integration_parent_sha": "0420aa896b04197aebd14444c1d2c4a36a41df9e",
+  "qualification": {
+    "A": "FAIL: authentic PSC1 source elaboration rejects InfoDemands",
+    "B": "OPEN",
+    "C": "NOT RUN for independent PSKernel at this source",
+    "D": "NOT RUN for paired ownership performance"
+  },
+  "failure": {
+    "declaration": "psKernelDagGeneratedInfoDemands",
+    "diagnostic": "unsupportedTerm",
+    "cause": "Three List.append applications in two match branches are outside the portable source profile.",
+    "repair": "Explicit structural append worker following existing Core/Name convention; exact order-preservation equation in native proof module.",
+    "controls_not_weakened": true
+  },
+  "runs": [
+    {
+      "id": 39691738652,
+      "name": "PSC1 Expression V2 production integration",
+      "head_sha": "461014cba7a45f15282ac9f125808cabdd17c5cb",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39691738652",
+      "jobs": [
+        {
+          "id": 119539310497,
+          "name": "generated-dag-integration",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Build authentic PSC1 and check complete kernel source"
+          ]
+        },
+        {
+          "id": 119539310776,
+          "name": "native-dag-integration",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 39691738558,
+      "name": "PSC1 PSKernel-Core correctness",
+      "head_sha": "461014cba7a45f15282ac9f125808cabdd17c5cb",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39691738558",
+      "jobs": [
+        {
+          "id": 119539310521,
+          "name": "native-kernel",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119539310752,
+          "name": "psc1-portability",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Check complete kernel source closure using PSC1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 39691738605,
+      "name": "PSC1 PSKernel-Core Expression V2 research",
+      "head_sha": "461014cba7a45f15282ac9f125808cabdd17c5cb",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39691738605",
+      "jobs": [
+        {
+          "id": 119539310279,
+          "name": "portable-ps-closure",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119539310409,
+          "name": "expr-v2-differential",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119539310474,
+          "name": "generated-js-full-checker-bridge",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Build complete real PSC1 compiler and check combined research entry"
+          ]
+        },
+        {
+          "id": 119539310515,
+          "name": "portable-v2-check",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119539310539,
+          "name": "full-checker-bridge",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119539310577,
+          "name": "whnf-subset-regression",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 39691738662,
+      "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+      "head_sha": "461014cba7a45f15282ac9f125808cabdd17c5cb",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39691738662",
+      "jobs": [
+        {
+          "id": 119539310686,
+          "name": "official-arena-reference",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119540114723,
+          "name": "generated-arena-comparison",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Reconstruct and check the complete canonical kernel closure",
+            "Record all saved case bodies and verdicts without replay"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 39691738654,
+      "name": "PSC1 authentic Arena timeout diagnostics",
+      "head_sha": "461014cba7a45f15282ac9f125808cabdd17c5cb",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39691738654",
+      "jobs": [
+        {
+          "id": 119539310418,
+          "name": "authentic-timeout-diagnostics",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Build authentic compiler and complete canonical source closure"
+          ]
+        }
+      ]
+    }
+  ],
+  "positive_scope": {
+    "native_integration_job": 119539310776,
+    "native_correctness_job": 119539310521,
+    "research_success_count": 5,
+    "research_job_count": 6,
+    "focused_preflight_source": "6fd9ac6f57e34947e0b11f0176f357146798a9e1",
+    "focused_preflight_run": 39691206177,
+    "focused_preflight_job": 119537547857
+  },
+  "arena": {
+    "official_reference_job": 119539310686,
+    "official_reference": "PASS",
+    "independent_job": 119540114723,
+    "independent": "Source reconstruction failed before PSKernel corpus replay; missing-report finalization is secondary.",
+    "independent_cases_executed": 0,
+    "parent_counts_inherited": false
+  },
+  "limits": {
+    "kernel_fuel": 4096,
+    "arena_seconds_per_case": 60,
+    "node_old_space_mib": 2048,
+    "workers": 2
+  },
+  "no_parent_pass_inherited": true,
+  "no_duplicate_replay": true
+}

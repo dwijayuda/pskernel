@@ -1,3 +1,40 @@
+## T03b portable-source correction — new exact-source qualification required
+
+Updated: 2026-10-21 23:22:30 UTC.
+The full run set for exact `461014cba7a45f15282ac9f125808cabdd17c5cb` is terminal and **FAIL**.
+Native integration119539310776 and native correctness119539310521 passed, as did
+five of six research jobs. Authentic PSC1 source elaboration rejected the three
+`List.append` applications in `psKernelDagGeneratedInfoDemands` with
+`unsupportedTerm`; generated119539310497, canonical119539310752 and research
+generated119539310474 failed. Full runs39691738652/39691738558/39691738605,
+Arena39691738662 and profiles39691738654 are all terminal. The official193
+reference passed, but independent119540114723 stopped during source
+reconstruction: **no PSKernel193-case replay occurred at this source**.
+No parent classifications or diagnostic results qualify it.
+See [the exact failure receipt](evidence/2026-10-22-t03b-461-portability-failure.json).
+
+This containing source replaces all three generic append applications with an
+explicit structural worker using the already-portable Core/Name list pattern.
+A fourteenth local session equation proves the identical list order. The
+ownership design, all semantic and negative controls, T03a/Quot helper ABIs,
+external input namespace, private appended owners and atomic publication remain.
+The full native gate retains all21 recursor,21 Quot-owner and14 session equations.
+The optional focused workflow is now dispatch-only because the full native gate
+runs every focused control and proof; the five required full workflows remain
+enabled on this branch. No assertion or required qualification gate is removed.
+
+The corrected source is **NOT YET A-qualified**. Finish its existing exact-source
+native/official, both authentic generated routes, canonical, six research,
+provider, benchmark, unchanged193-case Arena and diagnostic-profile runs before
+another batch. Then run the unchanged32-worker/384-call ownership experiment
+against independently qualified parent0420. Preserve the eager7e hold and Name
+memory regressions. Fuel4096,60seconds/case,2048MiB Node old-space and2workers
+remain fixed. B/C/D and global proof obligations remain open; no speedup claim.
+
+Earlier entries below retain their exact historical source identities.
+
+---
+
 ## T03b qualification execution — focused gates passed; full exact-source gates pending
 
 Updated: 2026-10-21 23:10:21 UTC.

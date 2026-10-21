@@ -508,15 +508,25 @@ def psKernelDagGeneratedRuleDemands
   | List.cons rule rest =>
       psKernelDagGeneratedRuleDemands rest (List.cons rule.ctor pending)
 
+def psKernelDagGeneratedAppendDemands
+    (names : List PsKernelName) (pending : List PsKernelName) :
+    List PsKernelName :=
+  match names with
+  | List.nil => pending
+  | List.cons name rest =>
+      List.cons name (psKernelDagGeneratedAppendDemands rest pending)
+
 def psKernelDagGeneratedInfoDemands
     (info : PsKernelConstantInfo) (pending : List PsKernelName) :
     List PsKernelName :=
   match info with
   | PsKernelConstantInfo.inductInfo value =>
-      List.append value.all (List.append value.ctors pending)
+      psKernelDagGeneratedAppendDemands value.all
+        (psKernelDagGeneratedAppendDemands value.ctors pending)
   | PsKernelConstantInfo.ctorInfo value => List.cons value.induct pending
   | PsKernelConstantInfo.recInfo value =>
-      List.append value.all (psKernelDagGeneratedRuleDemands value.rules pending)
+      psKernelDagGeneratedAppendDemands value.all
+        (psKernelDagGeneratedRuleDemands value.rules pending)
   | _ => pending
 
 /- Existing private owners were derived in this same immutable environment or

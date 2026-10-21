@@ -9,25 +9,57 @@ permissions:
   contents: read
   actions: read
 jobs:
-  read-existing-native-artifact:
+  inspect-existing-arena-case:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: dwijayuda/pskernel
-          run-id: 39637759611
-          artifact-ids: 12365440836
-          path: evidence
-      - name: Print existing source-bound parent regression logs
-        shell: bash
+      - name: Authenticate saved source and print unchanged case16 evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           python3 - <<'PY'
-          from pathlib import Path
-          for p in sorted(Path("evidence").rglob("*")):
-              if p.is_file() and p.name.endswith(".log"):
-                  print("ARTIFACT_FILE", p.name)
-                  text = p.read_text(errors="replace")
-                  print(text if len(text) < 50000 else text[-50000:])
+          import hashlib, io, json, os, urllib.request, zipfile
+          repo = "dwijayuda/pskernel"
+          source = "034999734f2574876a747c967dd03bcc6904b395"
+          run_id = 39637759569
+          artifact_id = 12367210000
+          expected_digest = "f268e0febdf0d9dbf35a767fc63897a7553c5107e462bf22a802c892266305f4"
+          def fetch(path):
+              request = urllib.request.Request(
+                  "https://api.github.com/repos/" + repo + path,
+                  headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                           "Accept": "application/vnd.github+json"})
+              with urllib.request.urlopen(request) as response:
+                  return response.read()
+          producer = json.loads(fetch("/actions/runs/" + str(run_id)))
+          assert producer["head_sha"] == source and producer["status"] == "completed"
+          meta = json.loads(fetch("/actions/artifacts/" + str(artifact_id)))
+          assert meta["workflow_run"]["id"] == run_id
+          assert meta["workflow_run"]["head_sha"] == source
+          assert meta["digest"] == "sha256:" + expected_digest
+          raw = fetch("/actions/artifacts/" + str(artifact_id) + "/zip")
+          assert hashlib.sha256(raw).hexdigest() == expected_digest
+          assert len(raw) == meta["size_in_bytes"]
+          print("AUTHENTICATED_EXISTING_ARTIFACT " + json.dumps({
+              "source": source, "run": run_id, "conclusion": producer["conclusion"],
+              "artifact": artifact_id, "bytes": len(raw), "sha256": expected_digest}))
+          archive = zipfile.ZipFile(io.BytesIO(raw))
+          reports = []
+          for name in archive.namelist():
+              if name.endswith("report.json"):
+                  report = json.loads(archive.read(name))
+                  if isinstance(report, dict) and isinstance(report.get("tests"), list):
+                      reports.append((name, report))
+          assert len(reports) == 1, [name for name, _ in reports]
+          name, report = reports[0]
+          assert len(report["tests"]) == 193
+          print("ARENA_REPORT_PATH " + name)
+          print("ARENA_REPORT_HEADER " + json.dumps(
+              {key: value for key, value in report.items() if key != "tests"}, sort_keys=True))
+          records = [case for case in report["tests"] if case.get("index") == 16]
+          assert len(records) == 1
+          case = records[0]
+          assert case["name"] == "bugs/rec-missing-ih.ndjson"
+          print("ARENA_UNCHANGED_CASE16 " + json.dumps(case, sort_keys=True))
+          print("PSC1_SAVED_ARENA_CASE16_INSPECTION: PASS source=" + source)
           PY

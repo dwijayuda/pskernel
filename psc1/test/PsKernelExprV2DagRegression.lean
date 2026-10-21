@@ -4224,8 +4224,7 @@ private def defEqReflectionParity : IO Unit := do
     for fuel in [0,1,2,3,4,5,6,8,16,64] do
       for maxDepth in [0,1,2] do
         for recDepth in [0,13,14,15,16] do
-          let scalar := { checker.context with eagerReduce := eager,
-            maxRecDepth := maxDepth, recDepth := recDepth }
+          let scalar := { checker.context with eagerReduce := eager, maxRecDepth := maxDepth, recDepth := recDepth }
           let oldContext := psKernelCheckerContextWithLocalContext scalar oldLocals
           let typed := psKernelExprV2CheckContextWithLet
             (psKernelExprV2CheckContextEmpty scalar) x x boolId trueId

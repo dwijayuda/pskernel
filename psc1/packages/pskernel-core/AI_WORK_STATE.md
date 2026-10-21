@@ -29,6 +29,18 @@ It reran no kernel test. The inherited334 repair uses `discard (action)` at thos
 retaining every action and assertion. The baseline test log is now printed before
 the existing exact marker/status checks, so a subsequent failure is visible.
 
+### Candidate workflow validation correction
+
+First focused candidate `b60cb6a53b71899b033f758e3e730df06821f808` queued native
+run39643101364. GitHub rejected the two edited full workflow files before jobs
+were created (runs39643097899 and39643099513): a draft replacement string
+misinterpreted the literal regular-expression end anchor followed by a quote,
+duplicating the remainder of each YAML file. This successor restores one intact
+copy and the exact JS positive/negative marker checks. No executable kernel,
+test assertion, limit or failure classification changes. The focused native
+run remains useful for diagnosis; final qualification must use this successor's
+own complete gates. No duplicate full pipeline was launched.
+
 ### Bounded T03a implementation
 
 `API/DagGenerated.lean` now walks only the new prefix of the successfully checked

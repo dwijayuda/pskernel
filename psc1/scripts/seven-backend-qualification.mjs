@@ -21,6 +21,50 @@ const namespaceBoundaries = ['lean', 'ps'].map(syntax =>
   read('dist/scoped-correctness/namespace-boundaries/' + syntax + '.json'));
 const targets = ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'];
 
+
+const extraProtocols={};
+for(const [id,file]of [['inference-control','PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json'],
+ ['typed-io-protocol','PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json']]){
+ const contract=read('docs/'+file),receipt=read('dist/scoped-correctness/'+id+'/results.json'),
+  minimum=read('dist/scoped-correctness/'+id+'-python314/results.json');
+ for(const [data,selected]of [[receipt,targets],[minimum,['python']]]){
+  assert.equal(data.schema,'psc1-language-backend-execution/1');
+  assert.equal(data.contract,contract.id);
+  assert.equal(data.testedCommit,process.env.GITHUB_SHA);
+  assert.equal(data.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+  assert.equal(data.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+  assert.equal(data.passed,true);assert.deepEqual(data.failures,[]);
+  assert.deepEqual(data.targets,selected);
+  checkLanguageBackendParity(contract,data.records,{targets:selected});
+ }
+ extraProtocols[id]={contract:contract.id,obligations:receipt.records.length,
+  minimumPythonObligations:minimum.records.length,evidence:id+'/results.json',completeFamily:false};
+}
+const ioPolicy=read('dist/scoped-correctness/typed-io/policy.json');
+const ioApplication=read('dist/scoped-correctness/typed-io/application.json');
+for(const data of [ioPolicy,ioApplication]){
+ assert.equal(data.testedCommit,process.env.GITHUB_SHA);
+ assert.equal(data.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+ assert.equal(data.passed,true);
+}
+assert.equal(ioPolicy.schema,'psc1-typed-io-policy-tests/1');assert.equal(ioPolicy.platform,'linux');
+assert.ok(ioPolicy.checks.length>=19);
+assert.equal(ioApplication.schema,'psc1-typed-io-application-execution/1');
+assert.equal(ioApplication.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+assert.deepEqual(ioApplication.failures,[]);
+assert.deepEqual(ioApplication.records.map(r=>r.syntax+'/'+r.target).sort(),
+ ['lean','ps'].flatMap(s=>['js','ts','rust'].map(t=>s+'/'+t)).sort());
+for(const row of ioApplication.records){
+ assert.equal(row.passed,true);assert.equal(row.runtime,'executed');
+ assert.equal(row.admission,'independent-official-Lean');
+ assert.equal(row.strictIr,'required-by-production-publication');
+ for(const key of ['sourceSha256','librarySha256','artifactSha256','manifestSha256','oracleSha256'])
+  assert.match(row[key],/^[a-f0-9]{64}$/);
+ assert.ok(row.checks.includes('actual-json-file-read-transform-atomic-write'));
+ assert.ok(row.checks.includes('actual-console-unicode-crlf-empty-eof'));
+}
+assert.equal(ioApplication.completeFamily,false);assert.equal(ioApplication.sevenHostAdapters,false);
+
 const jsonApplicationContract=read('docs/PSC1_JSON_APPLICATION_CASE_CONTRACT.json');
 const jsonApplication=read('dist/scoped-correctness/json-application/results.json');
 const minimumJsonApplication=read('dist/scoped-correctness/json-application-python314/results.json');
@@ -326,6 +370,8 @@ const receipt = {
     runtimeBytes: x.runtime.runtimeBytes, runtimeSha256: x.runtime.runtimeSha256
   })),
   architectureFoundation: {
+    boundedProtocols:extraProtocols,
+    typedIo:{hostProvider:'Linux Node',policyChecks:ioPolicy.checks.length,applicationBundles:ioApplication.records.length,sevenHostAdapters:false,completeFamily:false,evidence:'typed-io/application.json'},
     jsonRecordApplicationCore:{contract:jsonApplicationContract.id,obligations:jsonApplication.records.length,
       minimumPythonObligations:minimumJsonApplication.records.length,
       evidence:'json-application/results.json',typedFileIo:false,completeApplication:false},

@@ -48,11 +48,12 @@ jobs:
             sleep 5
           done
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_typed_error_tests psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_do_tests psc1_while_tests psc1_namespace_tests psc1_ordinary_tests psc1_ir_specialize_tests psc1_backend_common_tests psc1_direct_map_tests psc1_backend_normalization_tests psc1_ir_encoding_tests psc1_js_service_tests psc1_source_census_probe psc1_json_quote_tests psc1_worker_fusion_tests
+          lake build contextual_inference_tests psc1_typed_error_tests psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_do_tests psc1_while_tests psc1_namespace_tests psc1_ordinary_tests psc1_ir_specialize_tests psc1_backend_common_tests psc1_direct_map_tests psc1_backend_normalization_tests psc1_ir_encoding_tests psc1_js_service_tests psc1_source_census_probe psc1_json_quote_tests psc1_worker_fusion_tests
       - name: Execute all independent native control groups
         run: |
           set -euo pipefail
           mkdir -p dist/architecture-native
+          .lake/build/bin/contextual_inference_tests 2>&1 | tee dist/architecture-native/contextual-inference.log
           .lake/build/bin/psc1_typed_error_tests 2>&1 | tee dist/architecture-native/typed-errors.log
       - name: Execute census normalization behavior and source acceptance
         run: |

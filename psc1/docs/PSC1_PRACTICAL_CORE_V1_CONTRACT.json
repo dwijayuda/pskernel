@@ -50,6 +50,18 @@
       "receipt": "dist/scoped-correctness/json-application/results.json",
       "fixture": "test/JsonRecordApplication",
       "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "inference-control": {
+      "contract": "docs/PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/inference-control/results.json",
+      "fixture": "test/InferenceControlFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "typed-io-protocol": {
+      "contract": "docs/PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/typed-io-protocol/results.json",
+      "fixture": "test/TypedIoProtocolFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
     }
   },
   "families": [
@@ -79,7 +91,11 @@
       "acceptance": [
         {
           "id": "contexts",
-          "meaning": "Expected types resolve numeric/empty-array/tuple/lambda contexts in both syntaxes."
+          "meaning": "Expected types resolve numeric/empty-array/tuple/lambda contexts in both syntaxes.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "contextsCase"
+          }
         },
         {
           "id": "rollback",
@@ -428,18 +444,19 @@
       "acceptance": "Fill finite local/call inference and control interaction cases; reuse shared semantics."
     },
     {
+      "id": "typed-io",
+      "dependsOn": [
+        "inference-control",
+        "json-application"
+      ],
+      "acceptance": "Freeze and implement selected capability contract and seven adapters; CLI/JSON applications execute."
+    },
+    {
       "id": "checked-order",
       "dependsOn": [
         "inference-control"
       ],
       "acceptance": "Constructive admitted Nat/Int decisions; no unchecked logical axioms or Bool-as-Prop replacement."
-    },
-    {
-      "id": "typed-io",
-      "dependsOn": [
-        "json-application"
-      ],
-      "acceptance": "Freeze and implement selected capability contract and seven adapters; CLI/JSON applications execute."
     },
     {
       "id": "application-performance",

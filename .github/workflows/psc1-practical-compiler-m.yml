@@ -22,6 +22,8 @@ jobs:
       PSC1_COLLECTION_EVIDENCE: stdlib-collections-focused
       PSC1_JSON_TARGETS: js,ts,rust
       PSC1_JSON_EVIDENCE: json-application-focused
+      PSC1_IO_PROTOCOL_TARGETS: js,ts,rust
+      PSC1_IO_PROTOCOL_EVIDENCE: typed-io-protocol-focused
       PSC1_INFERENCE_TARGETS: js,ts,rust
       PSC1_INFERENCE_EVIDENCE: inference-control-focused
     defaults:
@@ -82,12 +84,17 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
           node scripts/compiler-m-conformance-tests.mjs --json-application
           node scripts/compiler-m-conformance-tests.mjs --inference-control
+          node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
+          node scripts/typed-io-policy-tests.mjs
+          node scripts/typed-io-application-tests.mjs
       - name: Retain exact sources oracle artifacts and failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: psc1-practical-compiler-m-${{ github.sha }}
           path: |
+            psc1/dist/scoped-correctness/typed-io-protocol-focused/
+            psc1/dist/scoped-correctness/typed-io/
             psc1/dist/scoped-correctness/inference-control-focused/
             psc1/dist/scoped-correctness/json-application-focused/
             psc1/dist/scoped-correctness/compiler-m-focused/

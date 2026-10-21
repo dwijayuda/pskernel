@@ -1,0 +1,42 @@
+import ProofScript.System.IO
+
+def requestCase (flag : Bool) : Nat :=
+  let encoded := if flag then ioEncodeRequest (IoRequest.writeUtf8 "out" "😀\n")
+    else ioEncodeRequest IoRequest.readLine;
+  match jsonParse encoded with
+  | Result.error _ => 0
+  | Result.ok value =>
+      match ioJsonStringField value "op" with
+      | Option.none => 0
+      | Option.some text =>
+          if ioTextEq text (if flag then "writeUtf8" else "readLine") then 1 else 0
+
+def responseCase (flag : Bool) : Nat :=
+  let response := if flag then "{\"kind\":\"line\",\"text\":null}"
+    else "{\"kind\":\"line\",\"text\":\"😀\"}";
+  match ioReadLineResult response with
+  | Result.error _ => 0
+  | Result.ok value =>
+      match value with
+      | Option.none => 1
+      | Option.some text => Char.toNat (String.Internal.get text 0)
+
+def errorCase (flag : Bool) : Nat :=
+  let response := if flag then "{\"kind\":\"error\",\"error\":\"capabilityDenied\"}"
+    else "{\"kind\":\"error\",\"error\":\"unknown\"}";
+  match ioReadTextResult response with
+  | Result.ok _ => 0
+  | Result.error error =>
+      match error with
+      | IoError.capabilityDenied => 1
+      | IoError.protocolError => 2
+      | _ => 0
+
+def shapeCase (flag : Bool) : Nat :=
+  let response := if flag then "{\"kind\":\"line\",\"text\":true}" else "{";
+  match ioReadLineResult response with
+  | Result.ok _ => 0
+  | Result.error error =>
+      match error with
+      | IoError.protocolError => 1
+      | _ => 0

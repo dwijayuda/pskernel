@@ -1,0 +1,72 @@
+{
+  "schema": "psc1-language-backend-case-contract/1",
+  "id": "typed-io-protocol-v1",
+  "completeFamily": false,
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "cases": [
+    {
+      "id": "requestCase",
+      "features": [
+        "typed-request",
+        "UTF-8",
+        "JSON-wire"
+      ]
+    },
+    {
+      "id": "responseCase",
+      "features": [
+        "typed-line",
+        "Unicode",
+        "EOF"
+      ]
+    },
+    {
+      "id": "errorCase",
+      "features": [
+        "typed-error",
+        "unknown-error-refusal"
+      ]
+    },
+    {
+      "id": "shapeCase",
+      "features": [
+        "malformed-response",
+        "wrong-payload-refusal"
+      ]
+    }
+  ],
+  "flags": [
+    false,
+    true
+  ],
+  "requiredRefusals": [
+    "wrong-path",
+    "wrong-payload",
+    "duplicate-prelude",
+    "verified"
+  ],
+  "oracleLibraries": [
+    "option",
+    "prod",
+    "result",
+    "effect",
+    "list",
+    "array",
+    "json",
+    "ordering",
+    "io"
+  ],
+  "scope": "Pure checked request/response protocol only. Bool observations do not qualify host effects, public String ABI or seven IO adapters."
+}

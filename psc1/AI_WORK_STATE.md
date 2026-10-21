@@ -21,12 +21,32 @@ CI receipts. Unbound criteria and missing application acceptance remain blocked.
 No family or production-release completion is claimed.
 
 After the collection-reference and JSON-core tasks qualify, execute the next
-queue item: bounded inference/control acceptance, then constructive checked
-Nat/Int ordering, typed capability IO and complete application/performance
+queue item: bounded inference/control acceptance, then typed capability IO (the user's
+current priority), constructive checked Nat/Int ordering and application/performance
 acceptance. Keep new work small and coherent. Do not reopen architecture
 research unless an actual failing application requires it.
 
-## Current implementation and qualification
+## Active source changes and pending qualification
+
+Current continuation adds bounded contextual lambdas, mixed explicit/implicit
+ProofScript declaration telescopes, five inference/control runtime observations,
+and transactional preview regression checks. Focused Linux JS/TS/Rust observations
+passed at13a87e3cd68f0411add56eed8e8f5f5a511f4854; fresh full qualification is pending.
+
+Typed IO now has checked request/response types and codecs in both authored
+grammars, a separate explicit Linux Node capability adapter, policy regressions,
+and a compiled JSON-file/console application exercised through JS/TS/Rust.
+The Rust guest runs as a separate generated consumer process using the Node host;
+this is not a standalone Rust IO adapter. Root-confined directory descriptors,
+no-follow traversal, regular-file checks, byte limits, fatal UTF-8, atomic writes
+and required-capability preflight are explicit. Compiler/checker/program failures
+are never converted to source IO errors.
+Seven-target protocol observations are separate from actual host adapter coverage.
+Wasm public String ABI, standalone Rust/Python/PHP host adapters and complete
+application/performance qualification remain open. No IO family completion claim.
+The new work must pass focused/native/closures/G1 and full Linux scoped gates.
+
+## Preserved previous implementation and qualification
 
 Implementationa282ce74b23d6809b12a2894e4f025116bc84cc0 qualifies at tested merge
 79b280a59704430d7c375c019e8a3d49b385bb18, Linux run39575345130 SUCCESS.

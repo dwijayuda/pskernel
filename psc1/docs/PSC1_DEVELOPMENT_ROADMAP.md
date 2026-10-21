@@ -8,8 +8,8 @@ receipts are historical evidence, not competing release authorities. Detailed
 semantic rationale remains in PSC1_PRACTICAL_CORE_DECISIONS.md.
 
 Execute the contract's workQueue in dependency order: independent collection
-reference, real JSON application, inference/control coverage, checked numeric
-order, typed capability IO, practical application/performance completion, then
+reference, real JSON application, inference/control coverage, typed capability IO, checked numeric
+order, practical application/performance completion, then
 feature freeze. Start each task with its exact acceptance and a small coherent
 change. Reuse working architecture and shared semantics; author both grammars,
 exercise JS/TS/Rust early, then all seven mappings before qualification.

@@ -41,3 +41,17 @@ const jsonRows=jsonContract.cases.flatMap(c=>jsonContract.grammars.flatMap(s=>js
 assert.equal(check(jsonContract,jsonRows).obligations,98);
 assert.throws(()=>check(jsonContract,[{...jsonRows[0],applicationModuleSha256:{}},...jsonRows.slice(1)]));
 assert.throws(()=>check(jsonContract,[{...jsonRows[0],librarySha256:{}},...jsonRows.slice(1)]));
+
+for(const [file,obligations]of [['PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json',70],
+ ['PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json',56]]){
+ const contract=JSON.parse(fs.readFileSync('docs/'+file,'utf8'));
+ const generated=contract.cases.flatMap(c=>contract.grammars.flatMap(s=>contract.targets.map(t=>({
+  ...rows[0],id:c.id,syntax:s,target:t,
+  librarySha256:Object.fromEntries(contract.oracleLibraries.map(key=>[key,digest])),
+  refusals:Object.fromEntries(contract.requiredRefusals.map(id=>[id,digest]))
+ }))));
+ assert.equal(check(contract,generated).obligations,obligations);
+ assert.throws(()=>check(contract,generated.slice(1)),/missing grammar/);
+ assert.throws(()=>check(contract,[{...generated[0],runtime:'skipped'},...generated.slice(1)]));
+ assert.throws(()=>check(contract,[{...generated[0],refusals:{}},...generated.slice(1)]));
+}

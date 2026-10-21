@@ -1,0 +1,37 @@
+import ProofScript.System.IO
+
+def beginFile (sourcePath : String) : String :=
+  ioEncodeRequest (IoRequest.readUtf8 sourcePath)
+
+def nextFile (destination : String) (response : String) : String :=
+  match ioReadTextResult response with
+  | Result.error _ => ioEncodeRequest (IoRequest.writeLine "read failed")
+  | Result.ok source =>
+      match jsonParse source with
+      | Result.error _ => ioEncodeRequest (IoRequest.writeLine "invalid JSON")
+      | Result.ok object =>
+          match ioJsonStringField object "text" with
+          | Option.none => ioEncodeRequest (IoRequest.writeLine "missing text")
+          | Option.some text =>
+              let output := JsonValue.objectField "text"
+                (JsonValue.string (jsonAppend "processed:" text)) JsonValue.objectNil;
+              match jsonEncodeCanonical output with
+              | Result.error _ => ioEncodeRequest (IoRequest.writeLine "invalid output")
+              | Result.ok rendered =>
+                  ioEncodeRequest (IoRequest.writeUtf8 destination rendered)
+
+def finishFile (response : String) : Bool :=
+  match ioWriteResult response with
+  | Result.ok _ => true
+  | Result.error _ => false
+
+def beginLine (flag : Bool) : String := ioEncodeRequest IoRequest.readLine
+
+def nextLine (response : String) : String :=
+  match ioReadLineResult response with
+  | Result.error _ => ioEncodeRequest (IoRequest.writeLine "line failed")
+  | Result.ok value =>
+      match value with
+      | Option.none => ioEncodeRequest (IoRequest.writeLine "EOF")
+      | Option.some text =>
+          ioEncodeRequest (IoRequest.writeLine (jsonAppend "echo:" text))

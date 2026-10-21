@@ -32,7 +32,35 @@ private def requireRejectedPair (name leanSource psSource : String) : IO Unit :=
   requireRejected (name ++ " [lean]") .lean leanSource
   requireRejected (name ++ " [ps]") .proofScript psSource
 
+private def requireTransactionalPreview : IO Unit := do
+  let environment := psSelfHostProdPreludeEnvironment
+  let context := psElabContextEmpty environment
+  let fresh := psMetaFresh context.metaContext context.localContext
+    (.sortE (.succ .zero)) .natural
+  let nat := PsExpr.constE (.str .anonymous "Nat") []
+  let int := PsExpr.constE (.str .anonymous "Int") []
+  let bool := PsExpr.constE (.str .anonymous "Bool") []
+  let product := PsExpr.constE (.str .anonymous "Prod") []
+  let pairType := PsExpr.app (.app product fresh.expr) nat
+  let current := PsElabTermResult.mk
+    (psElabContextWithMeta context fresh.context) nat pairType
+  -- The first product parameter can assign the meta before the second fails.
+  let refused := psElabApplicationWithExpected current []
+    (some (.app (.app product int) bool))
+  match psMetaFindAssignment refused.context.metaContext context.metaContext.nextId with
+  | some _ => throw (IO.userError "PSC1_CONTEXTUAL_INFERENCE_FAIL: speculative assignment escaped")
+  | none => pure ()
+  if refused.context.metaContext.nextId != fresh.context.nextId then
+    throw (IO.userError "PSC1_CONTEXTUAL_INFERENCE_FAIL: speculative fresh identity escaped")
+  let accepted := psElabApplicationWithExpected refused []
+    (some (.app (.app product bool) nat))
+  match psMetaFindAssignment accepted.context.metaContext context.metaContext.nextId with
+  | some (.constE (.str .anonymous "Bool") []) =>
+      IO.println "PSC1_CONTEXTUAL_INFERENCE_PASS: failed preview rolls back before a different successful constraint"
+  | _ => throw (IO.userError "PSC1_CONTEXTUAL_INFERENCE_FAIL: rollback blocked subsequent constraint")
+
 def main : IO Unit := do
+  requireTransactionalPreview
   requireAcceptedPair "contextual and nested generic Int calls"
     "def contextualId {A : Type} (value : A) : A := value\ndef result : Int := contextualId (contextualId 7)\n"
     "def contextualId {A : Type}(value : A) : A := value\ndef result : Int := contextualId(contextualId(7))\n"

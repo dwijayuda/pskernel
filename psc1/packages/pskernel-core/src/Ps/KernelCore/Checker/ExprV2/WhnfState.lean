@@ -36,6 +36,26 @@ def psKernelExprV2WhnfStateWithArena
     PsKernelExprV2WhnfState :=
   PsKernelExprV2WhnfState.mk arena state.coreCache state.publicCache state.declarations
 
+def psKernelExprV2WhnfCacheFindWorker
+    (entries : List PsKernelExprV2WhnfCacheEntry)
+    (arena : PsKernelExprV2PagedArena) (source hash : Nat) :
+    Except String (Option Nat) :=
+  match entries with
+  | List.nil => Except.ok Option.none
+  | List.cons first rest =>
+      if Nat.beq first.hash hash then
+        match psKernelExprV2PagedEqOnCanonical arena first.source source with
+        | Except.error error => Except.error error
+        | Except.ok equal =>
+            if equal then Except.ok (Option.some first.result)
+            else psKernelExprV2WhnfCacheFindWorker rest arena source hash
+      else psKernelExprV2WhnfCacheFindWorker rest arena source hash
+
+/-
+Keep the existing generated curried entry point. The recursive scan receives
+all arguments explicitly so it does not allocate argument closures per entry.
+Candidate order, collision checks and exact failure behavior are unchanged.
+-/
 def psKernelExprV2WhnfCacheFindIn
     (entries : List PsKernelExprV2WhnfCacheEntry) :
     PsKernelExprV2PagedArena -> Nat -> Nat -> Except String (Option Nat) :=
@@ -43,19 +63,9 @@ def psKernelExprV2WhnfCacheFindIn
   | List.nil =>
       fun (_arena : PsKernelExprV2PagedArena) (_source _hash : Nat) =>
         Except.ok Option.none
-  | List.cons first rest =>
-      let smaller :=
-        fun (nextArena : PsKernelExprV2PagedArena) (nextSource nextHash : Nat) =>
-          let recur := psKernelExprV2WhnfCacheFindIn rest;
-          recur nextArena nextSource nextHash;
+  | List.cons _ _ =>
       fun (arena : PsKernelExprV2PagedArena) (source hash : Nat) =>
-        if Nat.beq first.hash hash then
-          match psKernelExprV2PagedEqOnCanonical arena first.source source with
-          | Except.error error => Except.error error
-          | Except.ok equal =>
-              if equal then Except.ok (Option.some first.result)
-              else smaller arena source hash
-        else smaller arena source hash
+        psKernelExprV2WhnfCacheFindWorker entries arena source hash
 
 def psKernelExprV2WhnfCacheFind
     (state : PsKernelExprV2WhnfState) (source : Nat)

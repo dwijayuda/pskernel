@@ -10,24 +10,64 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
 ## Current checkpoint and evidence
 
-The latest complete integration/canonical checkpoint is
-[c9868aeab2ddbafc5ab6daa84583079a02c663da](https://github.com/dwijayuda/pskernel/commit/c9868aeab2ddbafc5ab6daa84583079a02c663da):
-[integration39526200665](https://github.com/dwijayuda/pskernel/actions/runs/39526200665),
-[correctness/canonical39526200700](https://github.com/dwijayuda/pskernel/actions/runs/39526200700)
-and [research39526200664](https://github.com/dwijayuda/pskernel/actions/runs/39526200664)
-passed. Actual source audit covers155 portable modules across two roots;
-canonical reconstruction derives112 modules and1,353 declarations. Authentic
-.lean/.ps checking, TS7.0.2, Node22.23.3, declarations/maps and detached canonical
-DAG runtime pass, including owning constant types, ordinary/mutual inductive
-type IDs and checked dependent projection inference. The integration executable
-passes128 correctness-guarded ABBA observations,33 complete executable operations
-and six separate profiles. Native includes official Lean fixtures,1,755
-transformation cases and local metadata/cache lemmas. DirectJS still reports
-its explicit emitter capability limit and is not qualified for the full kernel.
-These passes do not establish full Arena qualification, acceptable memory
-behavior, or a complete DAG checker. Original default V1 remains qualified;
-the replacement still relies on full-operation fallback outside its migrated
-rules. No integration PR is merged.
+The latest fully executed integration/canonical slice is
+[106387af9827a639455d329408745528ae318366](https://github.com/dwijayuda/pskernel/commit/106387af9827a639455d329408745528ae318366):
+[integration39533476073](https://github.com/dwijayuda/pskernel/actions/runs/39533476073),
+[correctness/canonical39533476064](https://github.com/dwijayuda/pskernel/actions/runs/39533476064)
+and all six jobs in [research39533476047](https://github.com/dwijayuda/pskernel/actions/runs/39533476047)
+passed. The completed integration log119004577213 contains all new Let/stateful
+JavaScript markers,128 guarded ABBA observations,24 admission observations,
+33 complete operations and six separate profiles. Canonical log119004577217
+derives115 canonical modules and158 portable modules across two roots.
+Authentic .lean/.ps checking, TS7.0.2, Node22, declarations/maps and detached
+complete DAG runtime pass. DirectJS remains explicitly unsupported for the
+complete kernel. These are correctness/portability results, not whole-kernel
+or performance qualification. The branch still contains newer slices awaiting
+their corresponding gates. The25-case Arena timeout gap remains unresolved.
+Original default V1 is unchanged; the replacement still relies on complete
+original-operation fallback outside migrated rules. No integration PR is merged.
+
+### Cache scanner allocation refactor — awaiting qualification
+
+The complete-checker profiles expose a concrete regression after direct let
+checking. On106387, fn-unique128 WHNF takes2,374.199–2,425.445ms for DAG versus
+1,796.864–1,806.172ms for the same-run original. fn-collision128 takes
+4,869.469–4,940.379ms versus4,560.901–4,676.919ms. Sampled DAG allocations grew
+from785,046,560 to1,402,778,912 bytes for fn-unique128 and from2,482,600,984 to
+3,082,335,488 bytes for fn-collision128 between3fb6 and106387; the original
+profiles remain approximately stable. Visible scanner allocation frames
+account for623,806,752 bytes in the newer unique profile. These are sampled
+profile allocations, not exact total allocation counters or retained-heap data.
+
+Both commits report the same untimed raw WHNF cache/node counts. Direct let
+checking newly exposes the checked-inference cache to these operations, and
+that cache shares the linear WHNF cache scanner. Additional pre-check scans
+are therefore the source-supported hypothesis; these observations do not
+prove every timing difference is caused by the scanner.
+
+The scanner now uses one explicit-argument recursive worker, keeping the
+existing staged public helper ABI. List order, hash filtering, collision-safe
+structural comparison, error propagation and owning state are unchanged.
+Two native extensional lemmas compare worker and wrapper against the exact
+previous scanner for arbitrary lists, arenas and keys, including malformed
+entries. They do not establish cache-judgment soundness or asymptotic lookup
+improvement. No fuel, depth, Nat-size limit or cache policy changes.
+
+This commit changes only that production scanner, its test-only reference/
+proofs and this work state. Its complete generated performance must be compared
+with immediate parent e23b7938b955856299a0ca2655e974267d006cf3 as well as the
+same-run original; later semantic changes must not be attributed to this
+refactor. Native proofs, authentic PSC1/canonical source and complete generated
+measurements are pending. No speedup is claimed.
+
+The Let106387 zeta24 complete check does improve in the same-run comparison:
+warm original109.643/101.208ms versus DAG61.765/59.227ms; cold
+80.929/82.766ms versus59.397/58.847ms; peak RSS164,016/164,000KiB versus
+125,836/125,748KiB. Post-GC retained heap increases24,080→39,184 bytes, and
+input-pool construction increases0.196/0.239→10.502/9.525ms. Zeta48 warm check
+is102.375–105.134ms versus58.019–58.482ms. These local gains coexist with the
+function-workload regressions above. Performance and memory acceptance remain
+open.
 
 ### Shared lambda/forall DefEq spines — awaiting qualification
 
@@ -54,7 +94,7 @@ negative check. A24-level shared DAG verifies the exact67,108,867 default
 budget without materializing its expanded tree or allocating one closure per
 fuel unit. Native/generated/canonical results are pending Actions.
 
-### Direct theorem admission — awaiting qualification
+### Direct theorem admission — native qualified; generated gates pending
 
 Theorem plans now retain the same owner through the original header check,
 inference-only proposition test, mandatory full-budget WHNF, normalized-zero
@@ -73,15 +113,19 @@ declarations also run through official Lean4.35 checked admission. State
 sentinels require distinct header and infer-only fresh counters, warm-owner
 reuse at the original depth limit, cold-owner failure, entry guards and WHNF
 failure after a successful cached inference at fuel1. The existing simple
-matrix now requires its theorem case to select the direct path. These changes
-are pending native/generated/canonical Actions; no theorem pass is claimed yet.
+matrix now requires its theorem case to select the direct path. Native job119012990072 at079ab9aa69d15fa8385c94577187c7d379c0a1c6 in
+[run39536099094](https://github.com/dwijayuda/pskernel/actions/runs/39536099094)
+passes all theorem matrix, official theorem and IsProp-owner markers, the
+inference-only suite and all earlier native gates. Generated/canonical gates
+are still pending; no generated theorem qualification is claimed.
 
 The initial native4a35 job119012235509 in
 [run39535864568](https://github.com/dwijayuda/pskernel/actions/runs/39535864568)
 compiled the production theorem source but rejected a test helper named with
 Lean's reserved keyword theorem. The helper is renamed theoremRequest;
 declaration/error expectations and production code are unchanged. Native
-semantic execution remains pending the corrected fixture.
+semantic execution passed after that corrected fixture; production source
+was unchanged.
 
 ### Strict generated admission assertion correction — qualification pending
 
@@ -97,15 +141,18 @@ through psKernelDagDecodeDefinition, using the authentic generated constructors.
 Strict Reflect-key equality and every semantic assertion remain unchanged.
 The new inference-only script also stops assuming exported runtime namespaces
 for structure .mk constructors; plain input records use their declared fields.
-No kernel decision, resource limit, or compiler behavior changes. These harness
-corrections need a passing generated/canonical rerun and are not reported green.
+No kernel decision, resource limit, or compiler behavior changes. At8db7d50e1cf02b7cc83e6d7ce1a8da1ae953c723, generated job119011587752 has
+passed the real-checker smoke, separate inference-only cache semantics and
+large-numeral steps and is running measurements. The complete generated and
+canonical reruns are not yet reported green.
 
 Let106387 canonical job119004577217 in
 [run39533476064](https://github.com/dwijayuda/pskernel/actions/runs/39533476064)
 has independently passed the detached .ps-derived complete checker, all four
 new generated Let/stateful cache markers, declarations/maps and source closure:
 115 canonical modules,158 portable modules across two roots. DirectJS remains
-explicitly unsupported. Its integration measurement job is still running.
+explicitly unsupported. Its integration measurement job119004577213 has since completed successfully;
+the measured regression and limited gains are recorded above.
 
 ### Unified checked and inference-only DAG worker — native qualified; generated CI pending
 

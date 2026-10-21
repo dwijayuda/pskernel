@@ -428,6 +428,49 @@ theorem dag_inference_depth_error_precedes_cached_judgment
     found, hit, guard]
 
 
+def psKernelExprV2WhnfCacheFindInBefore
+    (entries : List PsKernelExprV2WhnfCacheEntry) :
+    PsKernelExprV2PagedArena -> Nat -> Nat -> Except String (Option Nat) :=
+  match entries with
+  | List.nil =>
+      fun (_arena : PsKernelExprV2PagedArena) (_source _hash : Nat) =>
+        Except.ok Option.none
+  | List.cons first rest =>
+      let smaller :=
+        fun (nextArena : PsKernelExprV2PagedArena) (nextSource nextHash : Nat) =>
+          let recur := psKernelExprV2WhnfCacheFindInBefore rest;
+          recur nextArena nextSource nextHash;
+      fun (arena : PsKernelExprV2PagedArena) (source hash : Nat) =>
+        if Nat.beq first.hash hash then
+          match psKernelExprV2PagedEqOnCanonical arena first.source source with
+          | Except.error error => Except.error error
+          | Except.ok equal =>
+              if equal then Except.ok (Option.some first.result)
+              else smaller arena source hash
+        else smaller arena source hash
+
+theorem psKernelExprV2WhnfCacheFindWorker_eq_before
+    (entries : List PsKernelExprV2WhnfCacheEntry)
+    (arena : PsKernelExprV2PagedArena) (source hash : Nat) :
+    psKernelExprV2WhnfCacheFindWorker entries arena source hash =
+      psKernelExprV2WhnfCacheFindInBefore entries arena source hash := by
+  induction entries with
+  | nil => rfl
+  | cons first rest ih =>
+      simp only [psKernelExprV2WhnfCacheFindWorker,
+        psKernelExprV2WhnfCacheFindInBefore, ih]
+
+theorem psKernelExprV2WhnfCacheFindIn_eq_before
+    (entries : List PsKernelExprV2WhnfCacheEntry)
+    (arena : PsKernelExprV2PagedArena) (source hash : Nat) :
+    psKernelExprV2WhnfCacheFindIn entries arena source hash =
+      psKernelExprV2WhnfCacheFindInBefore entries arena source hash := by
+  cases entries with
+  | nil => rfl
+  | cons first rest =>
+      exact psKernelExprV2WhnfCacheFindWorker_eq_before
+        (List.cons first rest) arena source hash
+
 end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.exit_scope_restores_all_caches
@@ -486,3 +529,6 @@ end PsKernelCacheScopeProofs
 #print axioms PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache
 #print axioms PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache
 #print axioms PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment
+
+#print axioms PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before
+#print axioms PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before

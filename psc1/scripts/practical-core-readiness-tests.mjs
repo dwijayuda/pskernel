@@ -28,7 +28,7 @@ assert.throws(()=>deriveReadiness(contract,{commit,suites}),/stale/);
 console.log('PSC1_RELEASE_READINESS_CONTRACT: PASS missing, stale, partial, duplicate and weakened policies refuse');
 
 const io={schema:'psc1-typed-io-application-execution/1',testedCommit:commit,checkerCommit:contract.authority.commit,
- passed:true,failures:[],completeFamily:false,sevenHostAdapters:false,
+ passed:true,failures:[],targets:['js','ts','rust','python','php'],completeFamily:false,sevenHostAdapters:false,
  records:['lean','ps'].flatMap(syntax=>['js','ts','rust','python','php'].map(target=>({
  syntax,target,passed:true,runtime:'executed',admission:'independent-official-Lean',strictIr:'required-by-production-publication',
  checks:['capability-preflight-before-load','actual-json-file-read-transform-atomic-write','actual-console-unicode-crlf-empty-eof'],
@@ -43,4 +43,13 @@ for(const change of [
 ]){
  const changed=clone(io);change(changed);
  assert.throws(()=>deriveReadiness(contract,{commit,typedIoApplication:changed}));
+}
+
+for(const selected of [['js','ts','rust'],['python']]){
+ const subset={...clone(io),targets:selected,records:clone(io.records.filter(r=>selected.includes(r.target)))};
+ const report=deriveReadiness(contract,{commit,typedIoApplication:subset});
+ assert.equal(report.applications.find(a=>a.id==='json-files').ioStatus,'tested');
+ assert.equal(report.releaseReady,false);
+ assert.throws(()=>deriveReadiness(contract,{commit,typedIoApplication:subset,
+  fullQualification:{...full,testedCommit:commit}}),/full IO guest matrix/);
 }

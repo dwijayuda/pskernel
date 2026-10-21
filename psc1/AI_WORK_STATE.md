@@ -35,8 +35,9 @@ passed at13a87e3cd68f0411add56eed8e8f5f5a511f4854; fresh full qualification is p
 
 Typed IO now has checked request/response types and codecs in both authored
 grammars, a separate explicit Linux Node capability adapter, policy regressions,
-and a compiled JSON-file/console application exercised through JS/TS/Rust.
-The Rust guest runs as a separate generated consumer process using the Node host;
+and a compiled JSON-file/console application exercised through JS/TS/Rust, with Python/PHP and minimum Python
+included in full qualification.
+Rust/Python/PHP guests run as separate generated consumer processes using the Node host;
 this is not a standalone Rust IO adapter. Root-confined directory descriptors,
 no-follow traversal, regular-file checks, byte limits, fatal UTF-8, atomic writes
 and required-capability preflight are explicit. Compiler/checker/program failures

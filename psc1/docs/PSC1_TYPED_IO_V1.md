@@ -76,14 +76,15 @@ atomic refusal preservation and cleanup. It also runs before expensive builds
 in the static Linux tier.
 
 scripts/typed-io-application-tests.mjs independently checks and compiles
-test/applications/TypedIo/Program.lean and Program.ps to JS,TS,Rust. The application
+test/applications/TypedIo/Program.lean and Program.ps to JS,TS,Rust,Python,PHP. Full qualification also
+executes the actual application on minimum Python. The application
 reads a JSON object, transforms its text field, atomically writes canonical JSON,
-and runs console echo/EOF. TS uses the pinned independent checker; Rust executes
-a separately built generated consumer. Expected requests agree with pinned native
+and runs console echo/EOF. TS uses the pinned independent checker; Rust,Python and PHP execute
+separate generated consumer processes. Expected requests agree with pinned native
 Lean and final file/console bytes are independently asserted.
 
-Rust is currently a guest of the common Node capability host. Standalone Rust,
-Python/PHP and Wasm IO adapters remain unfinished; Wasm public String ABI remains
+Rust,Python and PHP are guests of the common Node capability host. Their
+standalone host adapters and Wasm IO adapters remain unfinished; Wasm public String ABI remains
 an explicit blocker. The seven-target Bool protocol matrix qualifies only pure
 request/response semantics, never seven host adapters or complete applications.
 Release readiness must remain false until all fixed contract criteria qualify.

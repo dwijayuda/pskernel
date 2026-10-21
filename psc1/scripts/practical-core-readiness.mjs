@@ -74,8 +74,14 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   assert.equal(typedIoApplication.passed,true);assert.deepEqual(typedIoApplication.failures,[]);
   assert.equal(typedIoApplication.completeFamily,false);
   assert.equal(typedIoApplication.sevenHostAdapters,false);
+  const ioTargets=typedIoApplication.targets;
+  const supportedIoTargets=['js','ts','rust','python','php'];
+  assert.ok(Array.isArray(ioTargets)&&ioTargets.length);
+  assert.equal(new Set(ioTargets).size,ioTargets.length);
+  assert.ok(ioTargets.every(t=>supportedIoTargets.includes(t)));
+  if(full)assert.deepEqual(ioTargets,supportedIoTargets,'full IO guest matrix');
   assert.deepEqual(typedIoApplication.records.map(r=>r.syntax+'/'+r.target).sort(),
-   ['lean','ps'].flatMap(s=>['js','ts','rust','python','php'].map(t=>s+'/'+t)).sort(),'complete unique IO subset');
+   ['lean','ps'].flatMap(s=>ioTargets.map(t=>s+'/'+t)).sort(),'complete unique IO subset');
   for(const row of typedIoApplication.records){
    assert.equal(row.passed,true);assert.equal(row.runtime,'executed');
    assert.equal(row.admission,'independent-official-Lean');

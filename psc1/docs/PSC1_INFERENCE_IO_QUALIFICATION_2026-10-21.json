@@ -1,0 +1,660 @@
+{
+  "schema": "psc1-bounded-inference-typed-io-qualification/1",
+  "qualification": "passed-scoped-execution",
+  "branch": "fix/psc1-closure-normalization-20261021",
+  "branchHeadCommit": "f7993e3d51917e2ec18f3c758a61468f06caaeb2",
+  "testedCommit": "09dd56600d4ba550f25d105d49659c824da2d5d8",
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39603714675",
+  "jobs": [
+    {
+      "id": 119234831475,
+      "name": "static",
+      "conclusion": "success"
+    },
+    {
+      "id": 119235159895,
+      "name": "native / native",
+      "conclusion": "success"
+    },
+    {
+      "id": 119235160000,
+      "name": "g1 / generated-js",
+      "conclusion": "success"
+    },
+    {
+      "id": 119235160055,
+      "name": "g1 / host-session-boundary",
+      "conclusion": "success"
+    },
+    {
+      "id": 119235160109,
+      "name": "focused / focused",
+      "conclusion": "success"
+    },
+    {
+      "id": 119235160217,
+      "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119235160563,
+      "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119235160582,
+      "name": "closures / selected-closure (semantic-compiler, checked)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119235162055,
+      "name": "benchmark",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 119236261093,
+      "name": "full / linux-scoped",
+      "conclusion": "success"
+    },
+    {
+      "id": 119241438460,
+      "name": "gate",
+      "conclusion": "success"
+    }
+  ],
+  "authority": {
+    "provider": "independent-official-Lean",
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "strictOriginalAndTransformedIr": true,
+    "limitsUnchanged": true,
+    "behavioralCertificate": false
+  },
+  "boundedInferenceControl": {
+    "contract": "PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json",
+    "cases": 5,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "targets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "caseGrammarTargetObligations": 70,
+    "minimumPythonObligations": 10,
+    "observationsPerObligation": 2,
+    "nativeChecks": [
+      "failed preview rolls back before a different successful constraint",
+      "contextual and nested generic Int calls [lean]",
+      "contextual and nested generic Int calls [ps]",
+      "contextual product element [lean]",
+      "contextual product element [ps]",
+      "contextual Array element and empty constructor [lean]",
+      "contextual Array element and empty constructor [ps]",
+      "annotated local and unannotated Nat local [lean]",
+      "annotated local and unannotated Nat local [ps]",
+      "expected function type through partial application [lean]",
+      "expected function type through partial application [ps]",
+      "dependent explicit type under unresolved argument context [lean]",
+      "dependent explicit type under unresolved argument context [ps]",
+      "wrong generic argument [lean]",
+      "wrong generic argument [ps]",
+      "wrong product element [lean]",
+      "wrong product element [ps]",
+      "wrong Array element [lean]",
+      "wrong Array element [ps]",
+      "dependent explicit type cannot be rewritten by result context [lean]",
+      "dependent explicit type cannot be rewritten by result context [ps]",
+      "ambiguous unused empty Array [lean]",
+      "ambiguous unused empty Array [ps]",
+      "rigid local type cannot become Int [lean]",
+      "rigid local type cannot become Int [ps]",
+      "intervening implicit telescope stays sequential [lean]",
+      "bare lambda uses the expected domain [lean]",
+      "bare lambda uses the expected domain [ps]",
+      "mixed typed and bare lambda domains [lean]",
+      "mixed typed and bare lambda domains [ps]",
+      "dependent bare lambda follows the expected telescope [lean]",
+      "dependent bare lambda follows the expected telescope [ps]",
+      "bare lambda without expected domain stays ambiguous [lean]",
+      "bare lambda without expected domain stays ambiguous [ps]",
+      "bare lambda cannot change the expected result [lean]",
+      "bare lambda cannot change the expected result [ps]",
+      "intervening implicit telescope in both grammars [lean]",
+      "intervening implicit telescope in both grammars [ps]"
+    ],
+    "completeFamily": false
+  },
+  "typedIoProtocol": {
+    "contract": "PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json",
+    "cases": 4,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "caseGrammarTargetObligations": 56,
+    "minimumPythonObligations": 8,
+    "observationsPerObligation": 2,
+    "reference": "test/TypedIoProtocolReference.lean imports only pinned native Lean",
+    "scope": "Pure checked request/response semantics; does not qualify seven host adapters"
+  },
+  "typedIoHost": {
+    "profile": "psc1-node-linux-string-io/1",
+    "platform": "Linux Node",
+    "policy": {
+      "schema": "psc1-typed-io-policy-tests/1",
+      "testedCommit": "09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "branchHeadCommit": "f7993e3d51917e2ec18f3c758a61468f06caaeb2",
+      "platform": "linux",
+      "passed": true,
+      "checks": [
+        "unsupported ABI refuses before opening root",
+        "required capability denied before execution",
+        "finite and exact configuration",
+        "UTF-8 CRLF empty line unterminated line and EOF",
+        "writeLine emits exactly one LF",
+        "bounded regular UTF-8 file round trip and BOM preservation",
+        "byte bound includes Unicode and preserves previous file on refusal",
+        "invalid UTF-8 and ill-formed host strings refuse",
+        "actual permission refusal preserves previous file",
+        "missing file and directory are typed errors",
+        "path traversal absolute empty components and NUL refuse",
+        "leaf and parent symlinks refuse and preserve outside content",
+        "FIFO refuses without blocking",
+        "malformed and extra-field request refuses",
+        "optional denied capability is a typed error",
+        "closed-host integration error escapes",
+        "invalid line",
+        "oversize CR at EOF",
+        "oversize line",
+        "no temporary files remain"
+      ]
+    },
+    "applications": [
+      {
+        "schema": "psc1-typed-io-application-execution/1",
+        "testedCommit": "09dd56600d4ba550f25d105d49659c824da2d5d8",
+        "branchHeadCommit": "f7993e3d51917e2ec18f3c758a61468f06caaeb2",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "passed": true,
+        "targets": [
+          "js",
+          "ts",
+          "rust",
+          "python",
+          "php"
+        ],
+        "records": [
+          {
+            "syntax": "lean",
+            "target": "js",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "97f984541546f46def7f34f8d7bc2d13a31d33a5b4e61513d40d57e91de12ad0",
+            "librarySha256": "97fce7b73be836404e7e4d5e62df2dc7ff2ba1db123f19d902d7087a214cc570",
+            "artifactSha256": "bd0e05fe121f95d4f43a9f4cb582fc42a38f0db09cf57329db5b292e00ce3569",
+            "manifestSha256": "88288ce4ee8360b44fac9f7e65fa1ee4b0f3f44c5a93ebf67e21fc35a6975647",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": true,
+            "guestExecution": "generated-module",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "lean",
+            "target": "ts",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "97f984541546f46def7f34f8d7bc2d13a31d33a5b4e61513d40d57e91de12ad0",
+            "librarySha256": "97fce7b73be836404e7e4d5e62df2dc7ff2ba1db123f19d902d7087a214cc570",
+            "artifactSha256": "f7d3e80c41a0e0934afec09ea3c5a4907c1621d9ad952c50e691ee755f874f4e",
+            "manifestSha256": "44d26262c1f7c7184edd3ca8ce7cce07f16b988d00be346bee2dd44e12f2a9b7",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": true,
+            "guestExecution": "generated-module",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "lean",
+            "target": "rust",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "97f984541546f46def7f34f8d7bc2d13a31d33a5b4e61513d40d57e91de12ad0",
+            "librarySha256": "97fce7b73be836404e7e4d5e62df2dc7ff2ba1db123f19d902d7087a214cc570",
+            "artifactSha256": "9e637086a429326da5922b23fa6983c03cba10f4f0a7b0414029ef1ac22a3453",
+            "manifestSha256": "9580a74defd260bd38456d1a122d78270b25ccec89de299ac88470381cca560e",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": false,
+            "guestExecution": "separate-generated-consumer-process",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "lean",
+            "target": "python",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "97f984541546f46def7f34f8d7bc2d13a31d33a5b4e61513d40d57e91de12ad0",
+            "librarySha256": "97fce7b73be836404e7e4d5e62df2dc7ff2ba1db123f19d902d7087a214cc570",
+            "artifactSha256": "c08cf0df58aa627e5fb1cfab32e037a19c4283302444f0d935d99d934d74b66a",
+            "manifestSha256": "a862da6cfdfdb3106fd5e1c07903546ec388ee7a83eb61aad1c3f02b74e0ed06",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": false,
+            "guestExecution": "separate-generated-consumer-process",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "lean",
+            "target": "php",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "97f984541546f46def7f34f8d7bc2d13a31d33a5b4e61513d40d57e91de12ad0",
+            "librarySha256": "97fce7b73be836404e7e4d5e62df2dc7ff2ba1db123f19d902d7087a214cc570",
+            "artifactSha256": "8e79177882d9da83b8898eb6ce403aa04bd5a510167a3149869103d6eebdc590",
+            "manifestSha256": "a86d3e2532a2debdeed5bcb98f108c3aad22703bc3fd7ac026499b347a8529c9",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": false,
+            "guestExecution": "separate-generated-consumer-process",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "ps",
+            "target": "js",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "98883d9f610037ce8f1c411faf1bfd15a01aec57ee0a2442e69c238099252761",
+            "librarySha256": "ddf8c1ee91ac02800f9d26a62c2cf73f0909b8f3f953651adb97c377822da404",
+            "artifactSha256": "bd0e05fe121f95d4f43a9f4cb582fc42a38f0db09cf57329db5b292e00ce3569",
+            "manifestSha256": "5db6f2130e1977dc86eadfeda255c8cb2a0cb4c9fabd16e16fa65504e3130fbc",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": true,
+            "guestExecution": "generated-module",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "ps",
+            "target": "ts",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "98883d9f610037ce8f1c411faf1bfd15a01aec57ee0a2442e69c238099252761",
+            "librarySha256": "ddf8c1ee91ac02800f9d26a62c2cf73f0909b8f3f953651adb97c377822da404",
+            "artifactSha256": "f7d3e80c41a0e0934afec09ea3c5a4907c1621d9ad952c50e691ee755f874f4e",
+            "manifestSha256": "0a757a72541c88c3e04d7b21effd4a969be6a1b147f8140d1985e192d802ee6e",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": true,
+            "guestExecution": "generated-module",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "ps",
+            "target": "rust",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "98883d9f610037ce8f1c411faf1bfd15a01aec57ee0a2442e69c238099252761",
+            "librarySha256": "ddf8c1ee91ac02800f9d26a62c2cf73f0909b8f3f953651adb97c377822da404",
+            "artifactSha256": "9e637086a429326da5922b23fa6983c03cba10f4f0a7b0414029ef1ac22a3453",
+            "manifestSha256": "8fe18747168c59214e94821c1201fbad069722023f556690db1ff67350ba0a16",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": false,
+            "guestExecution": "separate-generated-consumer-process",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "ps",
+            "target": "python",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "98883d9f610037ce8f1c411faf1bfd15a01aec57ee0a2442e69c238099252761",
+            "librarySha256": "ddf8c1ee91ac02800f9d26a62c2cf73f0909b8f3f953651adb97c377822da404",
+            "artifactSha256": "c08cf0df58aa627e5fb1cfab32e037a19c4283302444f0d935d99d934d74b66a",
+            "manifestSha256": "53ab8477830b43d269caf0567006d996bd32a8b024318193e9e9028c87f6a625",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": false,
+            "guestExecution": "separate-generated-consumer-process",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "ps",
+            "target": "php",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "98883d9f610037ce8f1c411faf1bfd15a01aec57ee0a2442e69c238099252761",
+            "librarySha256": "ddf8c1ee91ac02800f9d26a62c2cf73f0909b8f3f953651adb97c377822da404",
+            "artifactSha256": "8e79177882d9da83b8898eb6ce403aa04bd5a510167a3149869103d6eebdc590",
+            "manifestSha256": "9a03dae8113533803d69f06c33dc2ed0642f92d0f1ded9e11d218ee662726925",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": false,
+            "guestExecution": "separate-generated-consumer-process",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          }
+        ],
+        "failures": [],
+        "completeFamily": false,
+        "sevenHostAdapters": false,
+        "exclusions": [
+          "standalone Rust host adapter",
+          "Python/PHP host adapters",
+          "Wasm public String ABI and IO adapters",
+          "complete Practical Core release"
+        ]
+      },
+      {
+        "schema": "psc1-typed-io-application-execution/1",
+        "testedCommit": "09dd56600d4ba550f25d105d49659c824da2d5d8",
+        "branchHeadCommit": "f7993e3d51917e2ec18f3c758a61468f06caaeb2",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "passed": true,
+        "targets": [
+          "python"
+        ],
+        "records": [
+          {
+            "syntax": "lean",
+            "target": "python",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "97f984541546f46def7f34f8d7bc2d13a31d33a5b4e61513d40d57e91de12ad0",
+            "librarySha256": "97fce7b73be836404e7e4d5e62df2dc7ff2ba1db123f19d902d7087a214cc570",
+            "artifactSha256": "c08cf0df58aa627e5fb1cfab32e037a19c4283302444f0d935d99d934d74b66a",
+            "manifestSha256": "e28588fa876b5d2b545b41ca93626ec85b131241aba1d604586d17c5c01b9836",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": false,
+            "guestExecution": "separate-generated-consumer-process",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          },
+          {
+            "syntax": "ps",
+            "target": "python",
+            "passed": true,
+            "checks": [
+              "capability-preflight-before-load",
+              "application-trap-escapes-source-error-channel",
+              "actual-json-file-read-transform-atomic-write",
+              "source-typed-error-handling",
+              "compiled-malformed-json-and-shape-handling",
+              "actual-console-unicode-crlf-empty-eof"
+            ],
+            "hostProvider": "Linux-Node-explicit-capability-adapter",
+            "sourceSha256": "98883d9f610037ce8f1c411faf1bfd15a01aec57ee0a2442e69c238099252761",
+            "librarySha256": "ddf8c1ee91ac02800f9d26a62c2cf73f0909b8f3f953651adb97c377822da404",
+            "artifactSha256": "c08cf0df58aa627e5fb1cfab32e037a19c4283302444f0d935d99d934d74b66a",
+            "manifestSha256": "9a9df0e485c6565cb2bd7fc507bdd3fe9123e30d6fef6c06ccc5b843351aef16",
+            "oracleSha256": "38dba1ba4a877d76352df23cca852a0addc621608fb7884ffa060638fc9418fc",
+            "admission": "independent-official-Lean",
+            "strictIr": "required-by-production-publication",
+            "standaloneTargetIo": false,
+            "guestExecution": "separate-generated-consumer-process",
+            "publicAbi": "String protocol and scalar Bool",
+            "runtime": "executed"
+          }
+        ],
+        "failures": [],
+        "completeFamily": false,
+        "sevenHostAdapters": false,
+        "exclusions": [
+          "standalone Rust host adapter",
+          "Python/PHP host adapters",
+          "Wasm public String ABI and IO adapters",
+          "complete Practical Core release"
+        ]
+      }
+    ],
+    "completeFamily": false,
+    "sevenHostAdapters": false,
+    "sourceIoMonad": false
+  },
+  "g1": {
+    "status": "passed-diagnostic",
+    "generatedCompilerExecution": "passed-G1-selected-corpus",
+    "selfCompilation": "deferred-manual-qualification",
+    "fixedPoint": "deferred-feature-freeze",
+    "service": {
+      "generation": 1,
+      "sha256": "18518dab471043762d4d01f28c97f99bb8b34f54810c27b4cfb93380404a0534",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "93d3c83b4caf66ddf95949d5a5fd16cdbfc50a6ec9fe660b6f20acec860b7cd0",
+      "sourceModules": 84,
+      "candidateAdmission": "daff1343d7626cd38bac236312efc920560bd7f5e59f291ee0fa50dbd7dca03b",
+      "canonicalOriginalIr": "341249a39f0247248315fba9156af6af5cac6fea54dc28e0e7b5ba3f824dfcf6",
+      "canonicalSpecializedIr": "7822b5ff0b30b9958f37708e6fa8037bc84fe5820595366aa96d97fd8dc76d89"
+    },
+    "cases": 10,
+    "completedCorpusGenerations": [
+      1
+    ]
+  },
+  "retainedArtifacts": [
+    {
+      "id": 12347981168,
+      "name": "psc1-development-09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "digest": "sha256:30b5b4afe89bd3fe4d5d5944b4af6aef61f55ad37433b9dc528be60d9d28875b",
+      "expiresAt": "2026-11-20T12:58:18Z"
+    },
+    {
+      "id": 12347821634,
+      "name": "psc1-generated-compiler-09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "digest": "sha256:a86f38e94d79b01dfd33a47f16d63666ac10bc1dfe0159ae7f018501a4cd8daa",
+      "expiresAt": "2027-01-19T12:56:45Z"
+    },
+    {
+      "id": 12347661878,
+      "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "digest": "sha256:3894e809e6a7c4a5b1ca160dbb67f71cc88b1babf82953ad8536d60a8a00b18b",
+      "expiresAt": "2026-11-04T13:00:18Z"
+    },
+    {
+      "id": 12347576675,
+      "name": "psc1-architecture-native-09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "digest": "sha256:dab6fa91b77468caaed86f3ac6ecb66da876cc68eb5f0cbe9a34b653ea7aee86",
+      "expiresAt": "2026-11-04T12:59:55Z"
+    },
+    {
+      "id": 12347546832,
+      "name": "psc1-practical-compiler-m-09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "digest": "sha256:d860dadbe4e98d1aee01310e26ef1cc67fabd8e61bc4ff538454bd27ce5926ac",
+      "expiresAt": "2026-11-04T13:00:32Z"
+    },
+    {
+      "id": 12347237241,
+      "name": "psc1-generated-session-boundary-09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "digest": "sha256:efc388674d9c5a4677dbc69d65bb9d431a4cfd4bf0626cd52a5440d19fed2ae9",
+      "expiresAt": "2027-01-19T12:56:45Z"
+    },
+    {
+      "id": 12347204051,
+      "name": "psc1-scoped-correctness-09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "digest": "sha256:6942244f0225094582c53171fd374df708abee701e51db2571d8f28c66918ff8",
+      "expiresAt": "2026-11-04T13:11:04Z"
+    },
+    {
+      "id": 12347157765,
+      "name": "psc1-compiler-closure-semantic-compiler-checked-09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "digest": "sha256:8e0324b4a5b16469a8b0d3bd53db059991e7d247073013743118a194f8681aa1",
+      "expiresAt": "2026-11-04T12:59:47Z"
+    },
+    {
+      "id": 12347127625,
+      "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-09dd56600d4ba550f25d105d49659c824da2d5d8",
+      "digest": "sha256:422aa7abb63ceb59c61d07a724a093d618923e67902eb760ad90b79cafa2199f",
+      "expiresAt": "2026-11-04T13:00:40Z"
+    }
+  ],
+  "versions": {
+    "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "node": "v22.23.3",
+    "npm": "10.9.9",
+    "typescriptConsumer": "Version 7.0.2",
+    "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+    "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+    "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+    "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+    "python": "Python 3.15.0",
+    "pythonMinimum": "Python 3.14.8",
+    "php": "PHP 8.5.11 (cli) (built: Sep 23 2026 12:33:37) (NTS)"
+  },
+  "existingRegressions": {
+    "compilerMObligations": 126,
+    "collectionObligations": 42,
+    "jsonCoreObligations": 98,
+    "minimumPythonObligations": [
+      18,
+      6,
+      14
+    ],
+    "runtime": true,
+    "typedErrors": true,
+    "ordinaryWhileAndDeadlines": true,
+    "negativeAndPublication": true,
+    "installedPackages": true,
+    "completeCompilerClosures": [
+      "semantic",
+      "js",
+      "rust"
+    ],
+    "hostBoundary": true
+  },
+  "readiness": {
+    "qualifiedFiniteCriteria": 12,
+    "blockedFiniteCriteria": 25,
+    "completeFamilies": 0,
+    "completeApplications": 0,
+    "releaseReady": false
+  },
+  "remaining": [
+    "Remaining finite inference/control family criteria are not inferred from these five cases.",
+    "Standalone Rust/Python/PHP host adapters; current guests use the common Node capability host.",
+    "Wasm core/component public String ABI and IO adapters; existing unsupported-ABI refusals retained.",
+    "General source IO do sequencing is not provided by this request/response slice.",
+    "Complete CLI/JSON-file and other application acceptance, checked numeric ordering and performance measurements."
+  ],
+  "deferred": [
+    "G2/G3/fixed-point qualification until feature freeze",
+    "PSKernel Expression V2 research is independent of official Lean compiler admission"
+  ],
+  "history": "Expected-HEAD non-force commits; previous G1 artifacts and receipts preserved; no merge or publication."
+}

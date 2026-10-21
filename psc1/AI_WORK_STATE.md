@@ -3,147 +3,127 @@
 Updated 2026-10-21. GitHub APIs and Linux Actions only.
 Draft PR172: https://github.com/dwijayuda/pskernel/pull/172
 Branch: fix/psc1-closure-normalization-20261021
-Base #171 remains 1fad9ed53cda9b23ac30be9cea85e7857437564e.
-All history is preserved through expected-HEAD, non-force commits.
+Base #171 remains1fad9ed53cda9b23ac30be9cea85e7857437564e.
+Preserve history with fresh HEAD reads,expected-HEAD updates and force=false.
+No merge,registry publication or branch-protection change is authorized here.
+
+## Latest qualified implementation
+
+Implementationf7993e3d51917e2ec18f3c758a61468f06caaeb2 qualifies at tested merge
+09dd56600d4ba550f25d105d49659c824da2d5d8, Linux run39603714675 SUCCESS:
+https://github.com/dwijayuda/pskernel/actions/runs/39603714675
+Static,native,focused,three compiler closures,G1,host boundary,full scoped and
+aggregate gates pass. The historical benchmark is skipped by dependency selection.
+Receipt:docs/PSC1_INFERENCE_IO_QUALIFICATION_2026-10-21.json contains exact jobs,
+source/artifact identities,tool versions,application observations and exclusions.
+
+Both grammars/all7 targets:70 bounded inference/control +56 typed IO protocol
+obligations,each observing both Bool inputs. Minimum Python adds10+8.
+The real JSON-file/console application passes10 grammar/target bundles across
+JS,TS,Rust,Python,PHP,plus2 on minimum Python. Twenty actual Linux capability
+policy checks pass. Existing126 CompilerM +42 collection +98 JSON obligations,
+minimum-runtime,runtime,typed-error,while/deadline,negative/publication and
+installed-package suites remain green. Thirty-eight native contextual checks
+include speculative meta rollback before a different successful constraint.
+
+Readiness:12 finite criteria qualified,25 blocked; no complete family/application;
+releaseReady=false. The pure protocol matrix does not qualify seven IO adapters.
+This documentation-only descendant preserves that implementation. Its static
+gate is separate from the exact full source qualification above; do not claim a
+fresh full compiler qualification for a metadata-only commit.
+
+## Current language and IO implementation
+
+Bare lambda domains come only from the expected function telescope. Both parsers
+retain typed/grouped binders and reject ambiguous/unresolved lambdas. Domains and
+dependent codomains are checked sequentially with fresh binding identities.
+ProofScript declaration parsing retains explicit groups around intervening
+implicit binders. Failed expected-result previews restore the original meta state.
+Runtime cases cover numeric/tuple/empty-array/lambda contexts,dependent calls,
+nested do/loop return ownership,collection/range traversal and handler/capture
+rollback. Broader unbound finite family criteria remain open.
+
+ProofScript.System.IO defines checked requests,responses,typed errors and codecs
+in independently authored IO.lean and IO.ps. The PS tests use a local PS import
+root,preventing authoritative-Lean fallback from replacing the authored library.
+Source programs remain pure request/response computations; this slice does not
+provide a general source IO do monad or a foreign logical axiom.
+
+host-tools/typed-io.mjs provides the explicit Linux Node capability host.
+Required capabilities and unsupported configuration refuse before guest loading.
+File operations use held no-follow directory descriptors,regular-file checks,
+bounded fatal UTF-8 decoding and atomic replacement; console IO defines CRLF,
+empty lines,unterminated lines and EOF. Permissions,symlinks,traversal,FIFO,
+encoding/size refusal and previous-file preservation are tested. Compiler/checker/
+application failures remain outside the source IO error channel.
+Rust/Python/PHP guests execute in separate processes through the common Node host;
+their standalone host adapters are not qualified. The adapter is a capability
+boundary for generated checked programs,not a sandbox for arbitrary JS packages.
+Full policy and API details:docs/PSC1_TYPED_IO_V1.md.
+
+The independent native IO references import only pinned Lean and use its JSON
+API. Do not concatenate PSC1's Nat-offset JSON source into native Lean: the
+native String API uses String.Pos.Raw and native Ordering already exists.
+The existing strict malformed-surrogate policy remains PSC1-specific.
 
 ## Authoritative scope and next work
 
-docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json is the fixed release contract:
-fourteen families,37 finite criteria,four actual applications,both authored
-grammars and seven backends. docs/PSC1_DEVELOPMENT_ROADMAP.md is the single
-active roadmap; the contract owns the dependency-ordered workQueue.
-Detailed decisions and historical status matrices are explanatory/evidence,
-not competing completion authorities.
+docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json remains the fixed release contract:
+fourteen families,37 finite criteria,four applications,both grammars,seven targets.
+docs/PSC1_DEVELOPMENT_ROADMAP.md is the single active roadmap. Its contract-owned
+workQueue now prioritizes inference/control,then typed IO,then checked ordering
+and application/performance completion. Preserve working functionality.
 
-Generated dist/development/practical-core-readiness.json derives registered
-implementation, tested subsets, qualified criteria and blockers from exact
-CI receipts. Unbound criteria and missing application acceptance remain blocked.
-No family or production-release completion is claimed.
+Continue typed IO and remaining finite acceptance work:
+- Complete the typed IO execution interface and standalone target adapters.
+- Resolve Wasm public String ABI before claiming real core/component IO. Current
+  internal strings are GC structures/byte arrays,not linear-memory pointers;
+  public admission/component policy currently intersects at Bool. Preserve
+  unsupported-ABI refusals until explicit marshaling and consumers qualify.
+- Add general source sequencing only through checked semantics; do not smuggle
+  effects into logical evaluation or turn host failures into source errors.
+- Finish unbound inference/control criteria,constructive Nat/Int order and actual
+  CLI/JSON-file/library/compiler-like application requirements,including measured
+  large inputs under existing resource limits.
+Do not reinterpret the current five-guest/common-host execution as seven standalone
+adapters,complete application qualification or production release readiness.
 
-After the collection-reference and JSON-core tasks qualify, execute the next
-queue item: bounded inference/control acceptance, then typed capability IO (the user's
-current priority), constructive checked Nat/Int ordering and application/performance
-acceptance. Keep new work small and coherent. Do not reopen architecture
-research unless an actual failing application requires it.
+## G1 and preserved historical evidence
 
-## Active source changes and pending qualification
+Current G1 service18518dab471043762d4d01f28c97f99bb8b34f54810c27b4cfb93380404a0534
+passes the ten-case v2 corpus,84 source modules,one native seed and no later native
+frontend/emitter delegation. Artifact12347821634 is retained to2027-01-19.
+The receipt records source closure,admission and original/specialized IR digests.
+Earlier qualified G1 service9fee036b0ee9e2bdd9617bf2df0811409a4893ad8c7f59ab2ab478c0ea1be757
+and artifact12333713515 remain preserved with their original successful evidence.
 
-Current continuation adds bounded contextual lambdas, mixed explicit/implicit
-ProofScript declaration telescopes, five inference/control runtime observations,
-and transactional preview regression checks. Focused Linux JS/TS/Rust observations
-passed at13a87e3cd68f0411add56eed8e8f5f5a511f4854; fresh full qualification is pending.
+G2/G3/fixed-point qualification and expensive profiles stay manual until stable
+feature freeze. Keep the original V8 heap-exhaustion and post-fusion timeout
+defect/replay evidence; do not repoint old CPU replay to the new G1 artifact.
+PSKernel-Core Expression V2 research progresses independently. Compiler admission
+remains official Lean4.35.0 at eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
 
-Typed IO now has checked request/response types and codecs in both authored
-grammars, a separate explicit Linux Node capability adapter, policy regressions,
-and a compiled JSON-file/console application exercised through JS/TS/Rust, with Python/PHP and minimum Python
-included in full qualification.
-Rust/Python/PHP guests run as separate generated consumer processes using the Node host;
-this is not a standalone Rust IO adapter. Root-confined directory descriptors,
-no-follow traversal, regular-file checks, byte limits, fatal UTF-8, atomic writes
-and required-capability preflight are explicit. Compiler/checker/program failures
-are never converted to source IO errors.
-Seven-target protocol observations are separate from actual host adapter coverage.
-Wasm public String ABI, standalone Rust/Python/PHP host adapters and complete
-application/performance qualification remain open. No IO family completion claim.
-The new work must pass focused/native/closures/G1 and full Linux scoped gates.
+Historical receipts remain exact facts in docs and Git history:
+PSC1_JSON_APPLICATION_QUALIFICATION_2026-10-21.json,
+PSC1_DEVELOPMENT_OPTIMIZATION_QUALIFICATION_2026-10-21.json,
+PSC1_CI_ROUTING_QUALIFICATION_2026-10-21.json,
+PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md and prior G1/source-closure receipts.
 
-## Preserved previous implementation and qualification
+## CI and implementation rules
 
-Implementationa282ce74b23d6809b12a2894e4f025116bc84cc0 qualifies at tested merge
-79b280a59704430d7c375c019e8a3d49b385bb18, Linux run39575345130 SUCCESS.
-All static/native/focused/G1/host/three closures/full scoped/aggregate jobs pass.
-Both grammars/all7 targets:126 CompilerM +42 collections +98 JSON obligations;
-minimum Python18+6+14. Every obligation executes both Bool inputs.
-Existing runtime/typed-error/while/negative/publication/package suites pass.
-Readiness11 qualified finite criteria/26 blocked; no full family/application.
-Receipt:docs/PSC1_JSON_APPLICATION_QUALIFICATION_2026-10-21.json.
-G1 service9fee036b0ee9e2bdd9617bf2df0811409a4893ad8c7f59ab2ab478c0ea1be757,
-84 source modules,ten-case v2 corpus; artifact12333713515 retained to2027-01-19.
-The receipt records all exact artifact digests, source/IR identities and tool pins.
-This documentation-only descendant preserves that implementation; its current
-static gate/readiness artifacts are separate from historical full qualification.
+psc1-development.yml selects static,focused,integration and full tiers from the
+last successful same-PR ancestor gate with immutable dispatch-base identity.
+Failed/cancelled test debt remains; unknown policy/target/build changes select
+full qualification. Static policy tests fail before expensive compiler builds.
+Focused receipts may report tested subsets; full IO qualification requires the
+five-guest matrix and minimum Python. Missing/stale/duplicate evidence refuses.
+Admission,IR,execution and publication receipts are regenerated,never cached.
+Only pinned tools and exact-source Lake objects are cached.
 
-The new pure JSON processor resolves three real modules per authored grammar,
-parses objects, reads Unicode text fields, folds record lists and propagates
-typed errors. It remains a core of the JSON/file application: typed console/file
-IO, path/encoding/size capabilities, large-input measurements and portable
-public aggregate ABI are incomplete.
-
-The JSON decoder accepts valid UTF-16 surrogate pairs and retains strict
-invalidUnicode for malformed/unpaired surrogates. jsonReadUnicode4 keeps its
-existing scalar-only contract. Valid observations use pinned native Lean
-Json.parse; malformed-surrogate expectations retain PSC1's stricter policy.
-
-Ordinary execution now finds constructive witnesses from checked nonindexed
-inductive constructors, including parameterized fields. The same128 shared
-search/depth budget bounds fields and failed alternatives; no recursive runtime
-body is consulted. Every candidate is type-checked and independently admitted.
-Enum/product/failed-alternative/recursive-only, original exponential-budget,
-forged-source/pairing and uninhabited-result regressions remain enforced.
-
-Collection helpers are additionally compared with a separate native standard
-List/Array/Except process, preventing the same helper defect from becoming its
-own expected result. Missing independent-reference identity refuses parity.
-
-## CI and evidence rules
-
-psc1-development.yml runs static,focused(native plus JS/TS/Rust),integration
-(complete closures plus G1),and full scoped tiers. Dependency selection starts
-from the last successful same-PR ancestor gate; immutable run titles pin its
-dispatch base. Failed/cancelled update debt is retained. Unavailable evidence,
-changed base,unknown policy/target inputs conservatively select full testing.
-PSKernel Expression V2 research is a separate workstream.
-
-Full scoped qualification waits for early native/focused success. Existing
-negative/admission/IR/package/minimum-runtime tests remain unchanged. Cache only
-pinned tools and exact-source Lake objects; every requested target is built.
-Focused/full compilation caches save after successful build even if a later
-regression fails. Admission/execution/publication receipts are never cached.
-Obsolete PR runs cancel; running manual qualification is retained.
-
-Manual psc1-practical-release reruns native/closures/G1/full scoped and enforces
---require-ready. It must not pass an incomplete release contract. No merge,
-registry publication or branch-protection update was performed.
-
-Routing correctionbd43c8dd2e95ab2e427eec4e6137dd3545f8b9bd passes Linux
-run39578815985: static37s plus gate4s,zero heavy jobs. It selects the actual
-successful39575345130 baseline and carries all intervening changes correctly.
-Workflow identity uses the file path; immutable run titles pin the dispatch base.
-API/dependency regression cases cover title drift,cancelled/failed history,
-different bases,unknown paths and missing baselines. Two pure selector helper
-files are static-only; semantic/admission/IR/runtime/release changes retain
-their normal tiers. Receipt:docs/PSC1_CI_ROUTING_QUALIFICATION_2026-10-21.json.
-
-This final documentation-only descendant exercises that fast path again.
-Inspect its current selection/gate artifacts for actual status. Historical full
-qualification remains at the exact implementation/merge above; static-only
-descendants do not acquire new full compiler/release qualification. The previous
-cumulative path policy started9 heavy jobs for every PSC1 update.
-
-## Preserved trust boundary and historical evidence
-
-Independent official Lean4.35.0 admission at
-eb6cafb7290e8bd5f2937522d8d804f58f02bafc remains authoritative. Keep strict
-original/transformed IR, exact ordinary pairing, security/resource policies,
-portable semantics and explicit unsupported-ABI refusals.
-
-G1 source/tests/artifacts and ten-case v2 functionality remain preserved.
-One native seed only; no native frontend/emitter delegation afterwards.
-G2/G3/fixed points and expensive profiles stay manual until feature freeze.
-The G2 heap-exhaustion/later-timeout defect remains open, with exact old replay
-source/artifacts pinned independently of newer G1 builds.
-
-Historical receipts, retained without reinterpretation:
-- docs/PSC1_CI_ROUTING_QUALIFICATION_2026-10-21.json
-- docs/PSC1_JSON_APPLICATION_QUALIFICATION_2026-10-21.json
-- docs/PSC1_DEVELOPMENT_OPTIMIZATION_QUALIFICATION_2026-10-21.json
-- docs/PSC1_HANDLER_QUALIFICATION_2026-10-21.json
-- docs/PSC1_COLLECTIONS_QUALIFICATION_2026-10-21.json
-- docs/PSC1_COMPILERM_QUALIFICATION_2026-10-21.json
-- docs/PSC1_PRIORITY_PIVOT_QUALIFICATION_2026-10-21.json
-- docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md
-- docs/PSC1_G2_FIRST_ATTEMPT_2026-10-21.json
-- docs/PSC1_G2_CPU_FAILURE_2026-10-21.json
-
-Earlier checkpoint narratives remain in Git history. This file contains only
-the current continuation state; fresh CI must qualify subsequent source changes.
+Manual psc1-practical-release reruns native/closures/G1/full qualification and
+enforces --require-ready; it must refuse the incomplete release contract.
+Keep strict original/transformed IR,ordinary pairing,negative tests,resource
+policies and independent kernel admission. Preserve source normalization:
+use supported constructor patterns,explicit psListLength and guarded structural
+workers; avoid reintroducing unsupported nested patterns in compiler source.
+Keep AI_WORK_STATE.md current and concise; historical narratives stay in Git.

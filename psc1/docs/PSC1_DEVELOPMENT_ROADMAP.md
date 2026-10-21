@@ -61,3 +61,14 @@ remain separate manual qualification after stable feature freeze. The open
 PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md retains original heap-exhaustion and later
 timeout evidence. Address it when ordinary application compilation reaches the
 same mechanism, not merely to self-host an unfinished compiler.
+
+The bounded inference/typed IO implementation at f7993e3d51917e2ec18f3c758a61468f06caaeb2
+passes full Linux run39603714675. Both grammars/all targets execute70 inference
+and56 pure IO protocol obligations; actual file/console applications execute
+through five guest backends and the common Linux Node capability host,including
+minimum Python. Twenty capability policy checks pass. See
+[the exact receipt](PSC1_INFERENCE_IO_QUALIFICATION_2026-10-21.json) and
+[the IO profile](PSC1_TYPED_IO_V1.md). Readiness is12 qualified/25 blocked criteria;
+standalone host adapters,Wasm String IO,general sequencing and remaining complete
+application/performance acceptance remain open. Continue these finite blockers;
+do not promote a pure protocol observation into full IO-family qualification.

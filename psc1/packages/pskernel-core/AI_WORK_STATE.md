@@ -996,3 +996,8 @@ The entry boundary still validates then decodes the complete arena into physical
 Local metadata, scope/cache guard, numeral recurrence and scanner equivalence lemmas pass at the native checkpoint above using the previously approved proof-file dependencies `propext`, `Classical.choice`, and `Quot.sound`. They do not introduce kernel runtime axioms and do not prove global soundness, validated-arena correspondence, full substitution refinement, DefEq or admission.
 
 Continue through the real highest-priority failing gate. Keep complete V1 fallback until each replacement is qualified; preserve exact recursive fuel/depth/callback placement, cache owner scope, failure order and atomic publication. Do not merge, publish npm, increase policy limits or count a timeout as rejection.
+
+
+## 2026-10-21 — Native Church stage host compile correction
+
+The diagnostic-source d3730ae4e72f91a5dda010bc6b7f40d4f379f780 run 39631889379/job119332004226 failed while compiling NativeChurchMain: `prefix` is a reserved Lean token. No stage result was produced; this failed run cannot identify the first kernel failure stage. Artifact12360729119 (ZIP SHA25684a539c3f22f4ada6559fab94922e7bf894c5c091dcf6568070caf4a0819c01c) preserves the build receipt. Rename that local binder and its one use to `precedingRequests`; production kernel remains pinned369bee5801bd5e4476837684fad3f7e1ca8c422c. No fixture, resource, admission or observation-order change. Fresh Linux CI is required; no local build was run.

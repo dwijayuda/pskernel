@@ -424,8 +424,8 @@ private def runStages : IO Unit := do
   let empty ← match psKernelKernelSessionEmpty policy psKernelProviderDefault with
     | .ok value => pure value
     | .error _ => throw (IO.userError "stage original session failed")
-  let prefix := nativeChurchRequests.take 3
-  let before ← match checkRequests built prefix empty 0 with
+  let precedingRequests := nativeChurchRequests.take 3
+  let before ← match checkRequests built precedingRequests empty 0 with
     | .ok (count, value) => do
         require (count == 3) "stage prefix admission count"
         pure value

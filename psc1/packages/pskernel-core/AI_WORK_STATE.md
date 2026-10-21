@@ -9,6 +9,60 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 09:38 UTC — native FullShape green; portable Bool negation correction
+
+Exact source `b0792ba778e92cd2067379e28c4fb72b7d0105d3` passes native integration
+[39577239482/119145700283](https://github.com/dwijayuda/pskernel/actions/runs/39577239482/job/119145700283)
+and native correctness
+[39577239516/119145700438](https://github.com/dwijayuda/pskernel/actions/runs/39577239516/job/119145700438).
+The full-shape342-stage/108-owner matrix and six official positive/one invalid
+fixtures pass. Restored mutual, prior DefEq/inference, proof, benchmark and native
+provider gates pass in the same terminal native job. Native provider24 detached
+empty-PATH cases and the five official provider fixtures pass.
+Native artifact12335355462 ZIP SHA-256:
+`7ed58be095b3aeda82d6ed2129c56d85fd912651cbe40259358e861b698357a1`.
+
+Generated integration
+[119145700873](https://github.com/dwijayuda/pskernel/actions/runs/39577239482/job/119145700873)
+and canonical portability
+[119145700871](https://github.com/dwijayuda/pskernel/actions/runs/39577239516/job/119145700871)
+both fail authentic PSC1 with `unsupportedTerm` in
+`psKernelExprV2DefEqResidualAfterFullWhnfWith`. Five research jobs pass;
+generated research119145701079 fails the same source gate. This is a
+source-language portability defect, not a completed JS qualification.
+
+PSC1's portable prelude defines Bool and its constructors, but not the qualified
+`Bool.not` constant used here. Its reference resolver treats the absent qualified
+name as a projection from Bool; the type is a Sort, producing `unsupportedTerm`.
+The correction expands this one negation into an explicit Bool conditional.
+The existing afterChanged callback, arities, evaluation order, skipped right-side
+equality check, recursive budgets and failure precedence are unchanged.
+
+| Exact source | Native | Portable .lean | Canonical .ps | Generated JS | Local proofs | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `b0792ba778e92cd2067379e28c4fb72b7d0105d3` | PASS | FAIL | NOT RUN after source failure | NOT RUN after source failure | PASS native | PASS native / JS NOT RUN | IN PROGRESS | PASS native / JS NOT RUN |
+| This Bool conditional correction | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+The last fully qualified scoped developer source remains480, with its previously
+recorded193-case failure totals (170 matches,2 safety agreements,20 timeouts,
+1 unsupported). No successor has inherited480 qualification. B/C remain open;
+four public whole-operation fallback sites remain. Prepared terminal DefEq,
+static guards, Quot and non-K recursor drafts are not promoted in this change.
+
+Independent diagnostic harness
+`bd827814c02daf1d0ea27a8486bb87b77edd03e2` builds pinned480 in
+[39578237566](https://github.com/dwijayuda/pskernel/actions/runs/39578237566).
+It records first observed V2 declines and actual V1 fallback separately, with
+strict source/ABI/control checks and unchanged resources; this run is IN PROGRESS
+and is diagnostic only. Its work-state heading09:42 was a transcription time
+error; the harness was committed before this entry. Source identities and GitHub
+timestamps are authoritative.
+
+Next executable action: inspect fresh native, complete portable-source,
+canonical-.ps and both generated-runtime gates to terminal status. Promote the
+reviewed terminal-rule slice only after this corrected checkpoint is green.
+
+
 ## 2026-10-21 09:30 UTC — FullShape trace fixture ownership correction
 
 Exact source `6ebcb77c2a3d7cd66ddda23f045c8c7e648534e1` failed native integration

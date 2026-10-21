@@ -278,7 +278,8 @@ def psKernelExprV2DefEqResidualAfterFullWhnfWith
       if leftUnchanged then
         match psKernelExprV2PagedEqOnCanonical state.whnf.arena rightFull right with
         | Except.error error => Option.some (Except.error error)
-        | Except.ok rightUnchanged => afterChanged (Bool.not rightUnchanged)
+        | Except.ok rightUnchanged =>
+            if rightUnchanged then afterChanged false else afterChanged true
       else afterChanged true
 
 def psKernelExprV2DefEqResidualWith

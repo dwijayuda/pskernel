@@ -179,6 +179,15 @@ jobs:
           if ! .lake/build/bin/psc1_typed_error_tests 2>&1 | tee dist/scoped-correctness/typed-errors/native-tests.log; then result=1; fi
           if ! node scripts/typed-error-conformance-tests.mjs; then result=1; fi
           exit "$result"
+      - name: Execute authored CompilerM cases across seven targets
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node --check scripts/compiler-m-conformance-tests.mjs
+          node scripts/language-backend-parity-contract-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs
+          node scripts/check-language-backend-parity.mjs docs/PSC1_COMPILERM_CASE_CONTRACT.json dist/scoped-correctness/compiler-m/results.json
       - name: Execute owned component binary encoder with external encoding disabled
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
@@ -217,6 +226,9 @@ jobs:
           export PSC1_WHILE_EVIDENCE=ordinary-while-conformance-python314
           export PSC1_ERROR_TARGETS=python
           export PSC1_ERROR_EVIDENCE=typed-errors-python314
+          export PSC1_COMPILERM_TARGETS=python
+          export PSC1_COMPILERM_EVIDENCE=compiler-m-python314
+          node scripts/compiler-m-conformance-tests.mjs
           node scripts/typed-error-conformance-tests.mjs
           node scripts/runtime-conformance-tests.mjs
           node scripts/ordinary-while-conformance-tests.mjs

@@ -36,6 +36,23 @@ Practical Core decisions. Preserve complete compiler sources, checker pins,
 strict IR, exact ordinary pairing and all prior regression/refusal tests.
 Pivot changes are pending Linux CI until exact runs are recorded below.
 
+## Active Practical Core implementation — pending Linux qualification
+
+Add six independently authored Lean/PS CompilerM programs: reader/state/modify
+with old captures; finite-loop early return; typed failure skips continuation;
+checked recovery restores original state; local reader scope; Unit/nested
+product patterns. The native oracle evaluates the exact Result/Effect library
+bodies with a native Monad syntax adapter; no backend provides expected values.
+Only scalar Bool observation wrappers cross target public ABIs.
+
+Add a finite versioned6×2×7 contract and receipt validator refusing missing,
+duplicate, unknown, failed/skipped, missing-identity and absent-refusal rows.
+Actual generated consumers observe each case with both Bool inputs. Keep
+wrong-state/wrong-error/verified rejection and prior-publication preservation.
+Run on all7 targets plus minimum Python through the existing scoped workflow.
+This is new coverage/possible backend defect exposure, not a complete CompilerM
+family claim. Await actual Linux results and correct reached failures.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

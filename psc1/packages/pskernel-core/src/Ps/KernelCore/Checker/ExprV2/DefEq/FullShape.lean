@@ -98,14 +98,14 @@ def psKernelExprV2DefEqFullShapeAppWith
                     else Option.some (Except.ok (Prod.mk (Prod.fst result) false))
                   else Option.some (Except.ok result)
 
-def psKernelExprV2DefEqFullShapeEtaWith
+def psKernelExprV2DefEqFullShapeEtaOwnedWith
     (lambdaOnLeft : Bool)
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (lambdaValue other : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState (Option Bool))) :=
@@ -116,14 +116,13 @@ def psKernelExprV2DefEqFullShapeEtaWith
       | Except.error error => Option.some (Except.error error)
       | Except.ok typeResult =>
           let afterType := Prod.fst typeResult;
-          match whnf context afterType.whnf (Prod.snd typeResult) with
+          match whnf context afterType (Prod.snd typeResult) with
           | Option.none => Option.none
           | Option.some reduced =>
               match reduced with
               | Except.error error => Option.some (Except.error error)
               | Except.ok reducedType =>
-                  let nextState := psKernelExprV2CheckStateWithWhnf
-                    (Prod.fst typeResult) (Prod.fst reducedType);
+                  let nextState := Prod.fst reducedType;
                   match psKernelExprV2PagedRequire nextState.whnf.arena (Prod.snd reducedType) with
                   | Except.error error => Option.some (Except.error error)
                   | Except.ok typeEntry =>
@@ -149,13 +148,13 @@ def psKernelExprV2DefEqFullShapeEtaWith
                                           (defeq context finalState (Prod.snd eta) lambdaValue)
                       | _ => Option.some (Except.ok (Prod.mk nextState Option.none))
 
-def psKernelExprV2DefEqFullShapeWith
+def psKernelExprV2DefEqFullShapeOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState (Option Bool))) :=
@@ -172,12 +171,12 @@ def psKernelExprV2DefEqFullShapeWith
                   psKernelExprV2DefEqFullShapePositive
                     (psKernelExprV2DefEqBinderSpine true defeq context state left right)
               | _ =>
-                  psKernelExprV2DefEqFullShapeEtaWith
+                  psKernelExprV2DefEqFullShapeEtaOwnedWith
                     true defeq inferType whnf context state left right
           | _ =>
               match rightEntry.node with
               | PsKernelExprV2Node.lam _ _ _ _ =>
-                  psKernelExprV2DefEqFullShapeEtaWith
+                  psKernelExprV2DefEqFullShapeEtaOwnedWith
                     false defeq inferType whnf context state right left
               | _ =>
                   match leftEntry.node with
@@ -207,13 +206,13 @@ def psKernelExprV2DefEqFullShapeWith
                       | _ => Option.some (Except.ok (Prod.mk state Option.none))
                   | _ => Option.some (Except.ok (Prod.mk state Option.none))
 
-def psKernelExprV2DefEqResidualAfterFullWhnfWith
+def psKernelExprV2DefEqResidualAfterFullWhnfOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right leftFull rightFull : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
@@ -225,7 +224,7 @@ def psKernelExprV2DefEqResidualAfterFullWhnfWith
         fun (changed : Bool) =>
           if changed then defeq context state leftFull rightFull
           else
-            match psKernelExprV2DefEqFullShapeWith
+            match psKernelExprV2DefEqFullShapeOwnedWith
                 defeq inferType whnf context state leftFull rightFull with
             | Option.none => Option.none
             | Option.some attempted =>
@@ -234,7 +233,7 @@ def psKernelExprV2DefEqResidualAfterFullWhnfWith
                 | Except.ok shaped =>
                     match Prod.snd shaped with
                     | Option.none =>
-                        psKernelExprV2DefEqFinalRulesWith defeq inferType whnf
+                        psKernelExprV2DefEqFinalRulesOwnedWith defeq inferType whnf
                           context (Prod.fst shaped) leftFull rightFull
                     | Option.some value =>
                         Option.some (Except.ok (Prod.mk (Prod.fst shaped) value));
@@ -245,15 +244,15 @@ def psKernelExprV2DefEqResidualAfterFullWhnfWith
             if rightUnchanged then afterChanged false else afterChanged true
       else afterChanged true
 
-def psKernelExprV2DefEqResidualWith
+def psKernelExprV2DefEqResidualOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
@@ -267,7 +266,7 @@ def psKernelExprV2DefEqResidualWith
           | Option.some value => Option.some (Except.ok (Prod.mk (Prod.fst projected) value))
           | Option.none =>
               let afterShortcut := Prod.fst projected;
-              match coreWhnf context afterShortcut.whnf left false with
+              match coreWhnf context afterShortcut left false with
               | Option.none => Option.none
               | Option.some leftAttempt =>
                   match leftAttempt with
@@ -279,8 +278,65 @@ def psKernelExprV2DefEqResidualWith
                           match rightAttempt with
                           | Except.error error => Option.some (Except.error error)
                           | Except.ok rightResult =>
-                              psKernelExprV2DefEqResidualAfterFullWhnfWith
+                              psKernelExprV2DefEqResidualAfterFullWhnfOwnedWith
                                 defeq inferType whnf context
-                                (psKernelExprV2CheckStateWithWhnf
-                                  (Prod.fst projected) (Prod.fst rightResult))
+                                (Prod.fst rightResult)
                                 left right (Prod.snd leftResult) (Prod.snd rightResult)
+
+/- Original WHNF-only callback signatures remain compatibility wrappers.
+   Each callback is lifted against the actual complete state at its call. -/
+
+def psKernelExprV2DefEqFullShapeEtaWith
+    (lambdaOnLeft : Bool)
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (lambdaValue other : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Bool))) :=
+  psKernelExprV2DefEqFullShapeEtaOwnedWith
+    lambdaOnLeft defeq inferType (psKernelExprV2LiftCheckWhnf whnf) context state lambdaValue other
+
+def psKernelExprV2DefEqFullShapeWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Bool))) :=
+  psKernelExprV2DefEqFullShapeOwnedWith
+    defeq inferType (psKernelExprV2LiftCheckWhnf whnf) context state left right
+
+def psKernelExprV2DefEqResidualAfterFullWhnfWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right leftFull rightFull : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqResidualAfterFullWhnfOwnedWith
+    defeq inferType (psKernelExprV2LiftCheckWhnf whnf) context state left right leftFull rightFull
+
+def psKernelExprV2DefEqResidualWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqResidualOwnedWith
+    defeq inferType (psKernelExprV2LiftCheckWhnf whnf) (psKernelExprV2LiftCheckCoreWhnf coreWhnf) context state left right

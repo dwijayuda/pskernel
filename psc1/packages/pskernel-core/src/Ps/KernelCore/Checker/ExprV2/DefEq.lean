@@ -10,7 +10,9 @@ share inference-only/WHNF/DefEq callbacks at the exact predecessor fuel.
 The complete ordered lazy-delta stage uses that same owner and admitted body
 IDs. Residual full-WHNF and full-shape rules retain the same callback owner.
 Matching projections and final structure/string/unit rules share that owner;
-unsupported descendant callbacks decline without leaking partial state. -/
+unsupported descendant callbacks decline without leaking partial state.
+Every callback carries the complete state; the WHNF/recursor knot receives
+the same owning predecessor DefEq callback without resetting its budget. -/
 def psKernelExprV2TryDefEqStateWithFuel
     (fuel : Nat) :
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
@@ -30,35 +32,37 @@ def psKernelExprV2TryDefEqStateWithFuel
             recur nextContext nextState nextLeft nextRight;
         let whnf :=
           fun (nextContext : PsKernelExprV2CheckContext)
-              (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-            psKernelExprV2CheckWhnfWithFuel remaining nextContext nextState nextRoot;
+              (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+            psKernelExprV2CheckWhnfOwnedWithFuel remaining smaller
+              nextContext nextState nextRoot;
         let coreWhnfMode :=
           fun (nextContext : PsKernelExprV2CheckContext)
-              (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) (cheapProj : Bool) =>
-            psKernelExprV2CheckWhnfCoreWithFuel remaining nextContext nextState nextRoot cheapProj;
+              (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) (cheapProj : Bool) =>
+            psKernelExprV2CheckWhnfCoreOwnedWithFuel remaining smaller
+              nextContext nextState nextRoot cheapProj;
         let coreWhnf :=
           fun (nextContext : PsKernelExprV2CheckContext)
-              (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
+              (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
             coreWhnfMode nextContext nextState nextRoot true;
         let inferType :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
-            let worker := psKernelExprV2TryInferCoreWithFuel remaining;
+            let worker := psKernelExprV2TryInferCoreOwnedWithFuel remaining;
             worker whnf smaller nextContext nextState nextRoot true;
         let afterLazy :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
-            psKernelExprV2DefEqResidualWith smaller inferType whnf coreWhnfMode
+            psKernelExprV2DefEqResidualOwnedWith smaller inferType whnf coreWhnfMode
               nextContext nextState nextLeft nextRight;
         let afterProof :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
-            psKernelExprV2DefEqLazyDeltaContinueWithFuel remaining afterLazy smaller whnf coreWhnfMode
+            psKernelExprV2DefEqLazyDeltaContinueOwnedWithFuel remaining afterLazy smaller whnf coreWhnfMode
               nextContext nextState nextLeft nextRight;
         let afterCore :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
-            psKernelExprV2DefEqProofIrrelevanceContinueWith afterProof smaller inferType whnf
+            psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith afterProof smaller inferType whnf
               nextContext nextState nextLeft nextRight;
         match psKernelExprV2CheckContextEnterRecDepth context with
         | Except.error error => Option.some (Except.error error)
@@ -74,7 +78,7 @@ def psKernelExprV2TryDefEqStateWithFuel
                   | Except.error error => Option.some (Except.error error)
                   | Except.ok cached =>
                       if cached then Option.some (Except.ok (Prod.mk state true))
-                      else psKernelExprV2DefEqPrefixContinueWith afterCore smaller whnf coreWhnf
+                      else psKernelExprV2DefEqPrefixContinueOwnedWith afterCore smaller whnf coreWhnf
                         nextContext state left right
 
 /- Public helper retains the same owning declaration index as inference/WHNF.

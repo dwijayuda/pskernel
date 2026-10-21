@@ -654,7 +654,9 @@ theorem dag_lazy_nat_discards_unmatched_predecessor_owner
     psKernelExprV2DefEqLazyNatPredWith defeq whnf context state left right =
       psKernelExprV2DefEqLazyNatAfterPredWith defeq whnf context state left right := by
   simp [psKernelExprV2DefEqLazyNatPredWith, psKernelExprV2DefEqLazyNatPredContinueWith,
-    psKernelExprV2DefEqLazyNatAfterPredWith, leftStep, rightStep]
+    psKernelExprV2DefEqLazyNatAfterPredWith, psKernelExprV2DefEqLazyNatPredOwnedWith,
+    psKernelExprV2DefEqLazyNatPredContinueOwnedWith,
+    psKernelExprV2DefEqLazyNatAfterPredOwnedWith, leftStep, rightStep]
 
 end PsKernelCacheScopeProofs
 

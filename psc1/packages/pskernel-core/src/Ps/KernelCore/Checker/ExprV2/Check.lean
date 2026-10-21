@@ -5,16 +5,16 @@ def psKernelExprV2TryInferenceStateWithFuel
     (fuel : Nat) (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat) (inferOnly : Bool) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  let whnf :=
-    fun (nextContext : PsKernelExprV2CheckContext)
-        (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-      psKernelExprV2CheckWhnfWithFuel fuel nextContext nextState nextRoot;
   let defeq :=
     fun (nextContext : PsKernelExprV2CheckContext)
         (nextState : PsKernelExprV2CheckState) (left right : Nat) =>
       let worker := psKernelExprV2TryDefEqStateWithFuel fuel;
       worker nextContext nextState left right;
-  psKernelExprV2TryInferCoreWithFuel fuel whnf defeq context state root inferOnly
+  let whnf :=
+    fun (nextContext : PsKernelExprV2CheckContext)
+        (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+      psKernelExprV2CheckWhnfOwnedWithFuel fuel defeq nextContext nextState nextRoot;
+  psKernelExprV2TryInferCoreOwnedWithFuel fuel whnf defeq context state root inferOnly
 
 def psKernelExprV2TryCheckStateWithFuel
     (fuel : Nat) (context : PsKernelExprV2CheckContext)

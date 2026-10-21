@@ -204,7 +204,7 @@ try {
       sources: [{ module: 'Entry', text: 'def Ps.Internal.Corpus.guarded (fail : Bool) : Except Nat Nat := do\n  try\n    if fail then throw 7 else pure 3\n  catch error =>\n    pure (error + 1)\ndef observe (fail : Bool) : Nat :=\n  match Ps.Internal.Corpus.guarded fail with\n  | Except.ok value => value\n  | Except.error error => error\n' }],
       consumer: "if (m.observe(false) !== 3n || m.observe(true) !== 8n) throw Error('handler/pattern');" },
     { id: 'lean-ordinary-loop', grammar: 'lean', assurance: 'ordinary-checked', entry: 'Entry',
-      sources: [{ module: 'Entry', text: 'partial def answer (limit : Nat) : Nat := do\n  let mut value : Nat := 0\n  while value < limit do\n    value := value + 1\n  return value\n' }],
+      sources: [{ module: 'Entry', text: 'partial def answer (limit : Nat) : Id Nat := do\n  let mut value : Nat := 0\n  while Nat.blt value limit do\n    value := Nat.succ value\n  return value\n' }],
       consumer: "if (m.answer(5n) !== 5n) throw Error('ordinary loop');" }
   ];
   for (const item of corpus) {
@@ -223,6 +223,7 @@ try {
     fs.writeFileSync(consumer, "import * as m from " + JSON.stringify(
       pathToFileURL(target).href) + ";\n" + item.consumer + '\n');
     successful(run('target-execution', process.execPath, [consumer]), 'PSC1_GENERATED_CORPUS_OBSERVATION_FAILED');
+    report.generatedCompilerExecution = 'partial-selected-corpus';
     report.cases.push({ ...checked, publication, targetExecution: 'passed',
       productionPublication: 'host-session-published-ci-store' });
     console.log('PSC1_REAL_GENERATED_COMPILER_CASE: ' + JSON.stringify({ id: item.id,

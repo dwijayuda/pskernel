@@ -6,7 +6,34 @@ on fix/psc1-closure-normalization-20261021 preserves #171 at
 Execute [the Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 continuously. The user explicitly requests no small-milestone handoff.
 
-## Current continuation — correct quoting local name and continue Linux qualification
+## Current continuation — first actual G1 semantics; fix the ordinary fixture
+
+Atab1b6516, focused39543395455 and all3 exact-closure jobs39543395417
+passed, including new native JSON quote checks and both complete source lanes.
+Host-session boundary checks passed again. Actual generated run39543395379
+PRODUCED G1, independently admitted its exact graph and executed3 compiler cases:
+multi-module/internal ownership2340ms/552844KiB; PS huge integer/Unicode1670ms/
+335944KiB; Lean handler/pattern5492ms/414092KiB. Each emitted target independently
+passed admission, syntax/API, atomic host-session publication and actual behavior.
+Native compiler tools were disabled after the one seed.
+[Exact partial receipt](docs/PSC1_FIRST_GENERATED_EXECUTION_PARTIAL_2026-10-21.json).
+
+The fourth corpus case refused elaboration because the fixture used plain Nat
+do notation and a proposition-valued value<limit guard. Existing qualified
+WhileTests uses explicit Id Nat with Bool Nat.blt. Correct the fixture to that
+existing contract, add equivalent independently authored Lean/PS cases to native
+facade admission/target execution, then rerun G1. No language rule changes.
+Record partial-selected-corpus immediately after each actual success: the old
+finally report incorrectly remained not-run after3 executed successes.
+
+Extended immutable baseline profile job119035265176 in39543156076 confirmed
+the actual slow stage: encode-admission-request started, then240159ms timeout
+at unchanged240000ms. It already wrote the exact same admissions, original/
+specialized IR and generated source identities. Corrected candidate/profile
+comparison39543395472 is still running; its completion must be verified.
+G1 full corpus/negatives and G2/G3 remain pending. Continue without milestone stop.
+
+## Earlier quoting local correction
 
 At2a347829 native builds refused Json.lean199:15 because the new local name
 prefix is a reserved Lean notation keyword. Rename only that local to runText.

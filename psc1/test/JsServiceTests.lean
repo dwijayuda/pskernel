@@ -74,6 +74,31 @@ def main : IO Unit := do
     require (grammar ++ ": target executes with imported/internal ownership")
       (execution.exitCode == 0)
 
+
+    let loopSource :=
+      if grammar == "lean" then
+        "partial def answer (limit : Nat) : Id Nat := do\n  let mut value : Nat := 0\n  while Nat.blt value limit do\n    value := Nat.succ value\n  return value\n"
+      else
+        "partial def answer(limit : Nat) : Id(Nat) := do {\n  let mut value : Nat := 0\n  while (Nat.blt(value, limit)) {\n    value := Nat.succ(value)\n  }\n  return value\n}\n"
+    let ordinary <- response (request grammar "ordinary-checked" "Entry" [("Entry", loopSource)])
+    require (grammar ++ ": explicit Id while prepares ordinary candidate")
+      ((<- textField ordinary "status") == "candidate" &&
+        (<- textField ordinary "assurance") == "ordinary-checked")
+    let ordinaryEnvelope <- field ordinary "admissionRequest"
+    let ordinaryAdmissions <- textField ordinaryEnvelope "admissions"
+    match <- PsKernelLean.admitCanonicalAdmissions ordinaryAdmissions with
+    | .error error => throw (IO.userError ("ordinary facade graph refused: " ++ error.message))
+    | .ok _ => pure ()
+    let ordinaryOutput := "dist/generated-service-native/" ++ grammar ++ "-ordinary.mjs"
+    IO.FS.writeFile ordinaryOutput (<- textField ordinary "source")
+    let ordinaryConsumer := "dist/generated-service-native/" ++ grammar ++ "-ordinary-consumer.mjs"
+    IO.FS.writeFile ordinaryConsumer
+      ("import * as compiled from './" ++ grammar ++ "-ordinary.mjs';\n" ++
+        "if (compiled.answer(0n) !== 0n || compiled.answer(5n) !== 5n) throw Error('ordinary Id while');\n")
+    let ordinaryExecution <- IO.Process.output { cmd := "node", args := #[ordinaryConsumer] }
+    require (grammar ++ ": actual ordinary Id while target executes")
+      (ordinaryExecution.exitCode == 0)
+
     refusal (grammar ++ ": missing import")
       (request grammar "checked" "Entry" [("Entry", "import Missing\ndef answer : Nat := 1\n")]) "capture"
     refusal (grammar ++ ": duplicate module")

@@ -1,0 +1,58 @@
+{
+  "schema": "psc1-generated-execution-partial/1",
+  "head": "ab1b65165e86c765bca73dc01cc9a59f1cd4677b",
+  "testedMerge": "dc177e67b68c37e27f05879a108affc49ed1e3ca",
+  "run": 39543395379,
+  "job": 119036034964,
+  "status": "partial-three-real-generated-compiler-cases",
+  "actualGeneratedCompilerExecution": true,
+  "nativeDelegation": "seed exactly once, native compiler tools disabled before G1 corpus",
+  "summaryAsReported": {
+    "status": "failed",
+    "generatedCompilerExecution": "not-run",
+    "selfCompilation": "not-run",
+    "fixedPoint": "not-run",
+    "failure": "PSC1_SERVICE_COMPILER_REFUSED:elaboration",
+    "service": {
+      "generation": 1,
+      "sha256": "7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "e4b2904530be5ed81f7b678c345e0d634aa29ae4153a6b9122e822c16f44a3fb",
+      "sourceModules": 83,
+      "candidateAdmission": "1bbdfa80eb942ce1930b0889f77ff9c2bbe4115c6b22cdd83ce36bd7ab6e2d76",
+      "canonicalOriginalIr": "1b92f8a5a779211d187a3e70273d5e7337a8c096a650bc885d97124d3a5ce888",
+      "canonicalSpecializedIr": "fd46ee97e13e06002abf33719e97c521036408333bcb3be87f5ed308669bb969"
+    },
+    "cases": 3
+  },
+  "reportLabelCorrection": "old finally label not-run is conservative but inaccurate after actual executed cases; new driver records partial-selected-corpus after every successful case",
+  "cases": [
+    {
+      "id": "lean-modules",
+      "elapsedMs": 2340,
+      "maxRssKiB": 552844,
+      "sourceSha256": "08da667cecf30862eb53647876b7ddce3662066fa68f11701c06d78156ea37ec",
+      "generation": "30d40e4682ea577d3b0d0326ac3a169fcbf52a79a092f09f60eea55f58ae209f"
+    },
+    {
+      "id": "ps-integer-unicode",
+      "elapsedMs": 1670,
+      "maxRssKiB": 335944,
+      "sourceSha256": "b91bef72081d8a7b7787666aa7e4ee4f1767de4d0adcd8f6a1cdae96558da8c4",
+      "generation": "0d4fa7239d9f298cd008f851df9a7149dd0c8de41ca69f5fcd98b3b02ea36a9b"
+    },
+    {
+      "id": "lean-handler-pattern",
+      "elapsedMs": 5492,
+      "maxRssKiB": 414092,
+      "sourceSha256": "c019318148de8d6272aa06d2a957af3c53fb9acdd4fbf56a7188df6bcf92efbe",
+      "generation": "d5eb6de585ca7d71ae27a8c6c4b265c19ccc5a7de4c8bf35c633f3d590f085e3"
+    }
+  ],
+  "artifact": {
+    "id": 12320960708,
+    "bytes": 4381338,
+    "digest": "sha256:418abbac385a4dffadbd347e237698a83e804efd6928cfa952ce0259f1867476"
+  },
+  "remaining": "ordinary-loop fixture requires supported Id Nat and Bool guard; negatives not reached; G2/G3 not run"
+}

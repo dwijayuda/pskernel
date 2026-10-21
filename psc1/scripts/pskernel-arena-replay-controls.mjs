@@ -1,6 +1,9 @@
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
-import { parseExactJSON, replayText, generatedVariantEqual, kernelErrorVerdict } from './pskernel-arena-replay.mjs';
+import { parseExactJSON, replayText, replayFile, generatedVariantEqual, kernelErrorVerdict } from './pskernel-arena-replay.mjs';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 
 if(process.argv.length!==3)throw Error('usage: node pskernel-arena-replay-controls.mjs generated-kernel.js');
 const kernel=await import(pathToFileURL(path.resolve(process.argv[2])).href);
@@ -223,4 +226,28 @@ must(progressed.verdict==='accepted'&&snapshots.map(item=>item.stage).join(',')=
   'bounded progress covers real checking and metadata phases');
 must(snapshots.every(item=>item.fuel==='4096')&&snapshots[1].coreInvoked===false&&
   snapshots[2].coreInvoked===true,'progress observes fixed fuel and actual invocation');
+const progressFolder=mkdtempSync(path.join(tmpdir(),'psc1-arena-progress-'));
+try{
+  const controlText=definition(true);
+  const controlPath=path.join(progressFolder,'accepted.ndjson');
+  writeFileSync(controlPath,controlText,'utf8');
+  const sourceHash=createHash('sha256').update(controlText).digest('hex');
+  const fileSnapshots=[];
+  const fileResult=await replayFile(path.resolve(process.argv[2]),controlPath,
+    snapshot=>fileSnapshots.push(snapshot));
+  must(fileResult.verdict==='accepted'&&fileResult.metadataValidated===true&&
+    fileResult.coreInvoked===true&&fileResult.fuel==='4096'&&
+    fileResult.sourceSha256===sourceHash,'file progress preserves real checked verdict');
+  must(fileSnapshots.map(item=>item.stage).join(',')===
+    'source-decode,module-load,transport,declaration-ordering,kernel-admission,metadata-decode,metadata-compare',
+    'file progress includes all bounded phases');
+  must(fileSnapshots.every((item,index)=>
+    item.format==='psc1-arena-progress-v2'&&item.sourceSha256===sourceHash&&item.fuel==='4096'&&
+    Number.isFinite(item.elapsedMilliseconds)&&item.elapsedMilliseconds>=0&&
+    (index===0||item.elapsedMilliseconds>=fileSnapshots[index-1].elapsedMilliseconds)),
+    'file progress has hash-bound monotonic elapsed milliseconds');
+}finally{
+  rmSync(progressFolder,{recursive:true,force:true});
+}
+
 console.log('PSC1_ARENA_REPLAY_CONTROLS: PASS count='+passed);

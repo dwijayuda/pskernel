@@ -18,6 +18,7 @@ on:
       - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-bench.mjs
+      - psc1/scripts/pskernel-expr-v2-admission-bench.mjs
       - psc1/scripts/pskernel-generated-profile.mjs
       - psc1/scripts/pskernel-whole-js-bench.mjs
       - psc1/scripts/pskernel-js-memory-probe.mjs
@@ -210,6 +211,17 @@ jobs:
             dist/expr-v2/integration/kernel.js \
             | tee "$RUNNER_TEMP/psc1-dag-generated-bench.log"
           grep -q 'PSC1_V2_DAG_BENCH: PASS' "$RUNNER_TEMP/psc1-dag-generated-bench.log"
+      - name: Measure complete declaration admission in separate A-B-B-A workers
+        timeout-minutes: 12
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node --check scripts/pskernel-expr-v2-admission-bench.mjs
+          node --expose-gc scripts/pskernel-expr-v2-admission-bench.mjs \
+            dist/expr-v2/integration/kernel.js \
+            | tee "$RUNNER_TEMP/psc1-admission-generated-bench.log"
+          grep -q 'PSC1_DAG_ADMISSION_BENCH: PASS' "$RUNNER_TEMP/psc1-admission-generated-bench.log"
+          test "$(grep -c '^PSC1_ADMISSION_SAMPLE ' "$RUNNER_TEMP/psc1-admission-generated-bench.log")" -eq 24
       - name: Recheck full executable workloads with strict value assertions
         working-directory: psc1
         run: |
@@ -249,6 +261,7 @@ jobs:
             ${{ runner.temp }}/psc1-dag-generated-js.log
             ${{ runner.temp }}/psc1-nat-generated.log
             ${{ runner.temp }}/psc1-dag-generated-bench.log
+            ${{ runner.temp }}/psc1-admission-generated-bench.log
             ${{ runner.temp }}/psc1-whole-strict.log
             ${{ runner.temp }}/psc1-memory-strict.log
             ${{ runner.temp }}/psc1-dag-profile.log

@@ -37,18 +37,26 @@ PROGRESS_STAGES = {"source-decode", "module-load", "transport", "declaration-ord
 
 def progress_evidence(stderr: str, source_sha256: str) -> dict:
     latest, count, invalid = None, 0, 0
+    last_elapsed = -1.0
     for line in stderr.splitlines():
         if not line.startswith(PROGRESS_PREFIX):
             continue
         try:
             value = json.loads(line[len(PROGRESS_PREFIX):])
             if (not isinstance(value, dict)
-                    or value.get("format") != "psc1-arena-progress-v1"
+                    or value.get("format") != "psc1-arena-progress-v2"
                     or value.get("sourceSha256") != source_sha256
                     or value.get("stage") not in PROGRESS_STAGES
                     or value.get("fuel") != "4096"
                     or type(value.get("coreInvoked")) is not bool):
                 raise ValueError("invalid progress identity or phase")
+            elapsed = value.get("elapsedMilliseconds")
+            # Exact type excludes Boolean; the bounds also reject NaN/infinity
+            # without converting arbitrary-size JSON integers to float.
+            if (type(elapsed) not in (int, float)
+                    or not 0 <= elapsed <= 9007199254740991
+                    or elapsed < last_elapsed):
+                raise ValueError("invalid or nonmonotonic progress time")
             for field in ("records", "exportedDeclarations", "admissionCommands"):
                 if field in value and (type(value[field]) is not int or not 0 <= value[field] <= 9007199254740991):
                     raise ValueError("invalid progress counter")
@@ -57,7 +65,9 @@ def progress_evidence(stderr: str, source_sha256: str) -> dict:
                 raise ValueError("invalid progress arena size")
             latest = {key: value[key] for key in
                       ("stage", "coreInvoked", "records", "exportedDeclarations",
-                       "admissionCommands", "arenaNodes", "fuel", "sourceSha256") if key in value}
+                       "admissionCommands", "arenaNodes", "fuel", "sourceSha256",
+                       "elapsedMilliseconds") if key in value}
+            last_elapsed = elapsed
             count += 1
         except (ValueError, TypeError):
             invalid += 1

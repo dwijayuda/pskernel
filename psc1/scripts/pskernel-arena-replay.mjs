@@ -488,9 +488,12 @@ export function replayText(kernel,text,onProgress=()=>{}){
 }
 
 export async function replayFile(kernelPath,inputPath,onProgress=()=>{}){
+  const started=process.hrtime.bigint();
   let sourceSha256=null;
+  // Monotonic time from this entry; process startup precedes this clock.
   const progress=snapshot=>onProgress({...snapshot,
-    format:'psc1-arena-progress-v1',sourceSha256});
+    format:'psc1-arena-progress-v2',sourceSha256,
+    elapsedMilliseconds:Number(process.hrtime.bigint()-started)/1e6});
   try{
     const bytes=readFileSync(inputPath);sourceSha256=createHash('sha256').update(bytes).digest('hex');
     progress({stage:'source-decode',coreInvoked:false,fuel:'4096'});

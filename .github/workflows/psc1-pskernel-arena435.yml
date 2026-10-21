@@ -9,6 +9,7 @@ on:
       - psc1/scripts/pskernel-arena435-oracle.py
       - psc1/scripts/pskernel-arena435-inspect.py
       - psc1/scripts/pskernel-arena435-compare.py
+      - psc1/scripts/pskernel-arena435-progress-controls.py
       - psc1/scripts/pskernel-arena-replay.mjs
       - psc1/scripts/pskernel-arena-replay-controls.mjs
       - psc1/packages/pskernel-core/**
@@ -101,7 +102,10 @@ jobs:
           node check-psc1-source.mjs --all-portable
           node --check scripts/pskernel-arena-replay.mjs
           node --check scripts/pskernel-arena-replay-controls.mjs
-          python3 -m py_compile scripts/pskernel-arena435-oracle.py scripts/pskernel-arena435-compare.py
+          python3 -m py_compile scripts/pskernel-arena435-oracle.py scripts/pskernel-arena435-compare.py scripts/pskernel-arena435-progress-controls.py
+          python3 scripts/pskernel-arena435-progress-controls.py \
+            | tee "$RUNNER_TEMP/arena435-progress-controls.log"
+          grep -q 'PSC1_ARENA_PROGRESS_CONTROLS: PASS count=24' "$RUNNER_TEMP/arena435-progress-controls.log"
           lake build psc1
           lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
           node scripts/bootstrap-project.mjs \
@@ -169,6 +173,7 @@ jobs:
           path: |
             ${{ runner.temp }}/arena435-independent
             ${{ runner.temp }}/arena435-controls.log
+            ${{ runner.temp }}/arena435-progress-controls.log
             psc1/dist/arena435/kernel.js
             psc1/dist/arena435/kernel.d.ts
             psc1/dist/arena435/kernel.js.map

@@ -11,20 +11,50 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 ## Current checkpoint and evidence
 
 The latest complete integration/canonical checkpoint is
-[5f0e43422a50d245eec884166e5d947c2d50f929](https://github.com/dwijayuda/pskernel/commit/5f0e43422a50d245eec884166e5d947c2d50f929):
-[integration39520324132](https://github.com/dwijayuda/pskernel/actions/runs/39520324132)
-and [original correctness/canonical39520324061](https://github.com/dwijayuda/pskernel/actions/runs/39520324061)
-passed. Actual canonical reconstruction derives 109 modules and 1,319
-declarations; authentic .lean/.ps checking, TS7.0.2, Node22.23.3, declarations/maps
-and detached canonical DAG runtime pass, including dependent application
-checking. The integration executable passes the correctness-guarded ABBA and
-complete-operation gates. Native includes official Lean fixtures, 1,755
+[c9868aeab2ddbafc5ab6daa84583079a02c663da](https://github.com/dwijayuda/pskernel/commit/c9868aeab2ddbafc5ab6daa84583079a02c663da):
+[integration39526200665](https://github.com/dwijayuda/pskernel/actions/runs/39526200665),
+[correctness/canonical39526200700](https://github.com/dwijayuda/pskernel/actions/runs/39526200700)
+and [research39526200664](https://github.com/dwijayuda/pskernel/actions/runs/39526200664)
+passed. Actual source audit covers155 portable modules across two roots;
+canonical reconstruction derives112 modules and1,353 declarations. Authentic
+.lean/.ps checking, TS7.0.2, Node22.23.3, declarations/maps and detached canonical
+DAG runtime pass, including owning constant types, ordinary/mutual inductive
+type IDs and checked dependent projection inference. The integration executable
+passes128 correctness-guarded ABBA observations,33 complete executable operations
+and six separate profiles. Native includes official Lean fixtures,1,755
 transformation cases and local metadata/cache lemmas. DirectJS still reports
 its explicit emitter capability limit and is not qualified for the full kernel.
-These passes do not establish full Arena qualification or a complete DAG-native
-checker. Newer declaration-index and profiling changes need final-source evidence.
+These passes do not establish full Arena qualification, acceptable memory
+behavior, or a complete DAG checker. Original default V1 remains qualified;
+the replacement still relies on full-operation fallback outside its migrated
+rules. No integration PR is merged.
 
-### Checked projection inference — implemented, pending CI
+### Complete admission measurement and Arena phase timing — pending CI
+
+This commit adds six matched complete safe-definition admission fixtures:
+8/32 declarations in constant chains, metadata-heavy bodies, and dependent
+binder chains. Each executes in separate A-B-B-A Node workers with fuel4096,
+fresh sessions, direct smart-constructed DAG inputs, and an empty runtime PATH.
+The new24 observations report construction, cold/warm admission, independent
+exact-result assertion time, whole-worker peak RSS and post-GC retained heap.
+Receipts, declaration order, exact installed types/bodies, lookup correspondence,
+unchanged resource policy and a decisive invalid definition are checked.
+The original128-observation complete-operation benchmark remains unchanged.
+No new measurements are claimed until Actions completes. The current direct
+admission-path flag remains false: these public API comparisons do not prove
+which internal branch executed.
+
+Arena progress now reports monotonic elapsed milliseconds from replayFile entry
+under the existing adapted-source hash. It excludes process startup and still
+does not distinguish graph validation, decoding and declaration checking inside
+the single RunDag call. The comparator rejects malformed/nonmonotonic timing,
+retains only diagnostic allowlisted fields, and never treats progress as a
+verdict. New24 Python controls and three real generated replay controls are
+required in Actions; the existing135 controls remain. Full193 cases, official
+300-second/generated60-second host limits, workers2 and kernel fuel4096 are
+unchanged. This instrumentation changes no kernel acceptance or rejection rule.
+
+### Checked projection inference — native/generated/canonical/official qualified
 
 The production DAG checker now implements the original projection inference
 rule using owning constructor type IDs: checked structure inference, full-budget
@@ -42,13 +72,20 @@ fuel/depth combinations, full public parity and same-batch admission, warm-cache
 entry guards, exact dependent result types and missing-owner fallback. A native
 official comparison independently admits all four fixture inductives through
 pinned Lean's checked addDeclCore API and compares all thirteen results.
-These new gates remain pending Actions. No production runtime calls official Lean.
+Native integration39526200665/job118981306692 passes both explicit projection
+markers, including all thirteen official checks. Generated job118981306463 and
+canonical job118981306343 independently pass the same direct projection matrix,
+full public cases and complete independent checker gates. Original correctness
+and all six research jobs also pass at c9868. No production runtime calls
+official Lean.
 
 ### Full 193-case Arena result after transport/diagnostic fixes
 
-At [6626608385c3beaaa35759266218701362eb4658](https://github.com/dwijayuda/pskernel/commit/6626608385c3beaaa35759266218701362eb4658),
-[run39518988495](https://github.com/dwijayuda/pskernel/actions/runs/39518988495),
-the complete generated comparison recorded all 193 cases:
+At [c9868aeab2ddbafc5ab6daa84583079a02c663da](https://github.com/dwijayuda/pskernel/commit/c9868aeab2ddbafc5ab6daa84583079a02c663da),
+[run39526200684](https://github.com/dwijayuda/pskernel/actions/runs/39526200684),
+official job118981306176 passed and generated comparison job118982048530
+completed with a failed qualification gate. Its actual final log records all
+193 cases, with the same outcomes as the earlier6626 and cfa40d6 checkpoints:
 
 | Outcome | Cases |
 | --- | ---: |
@@ -62,9 +99,9 @@ the complete generated comparison recorded all 193 cases:
 | Observed false acceptance / false rejection among completed verdicts | 0 / 0 |
 | Total / strict qualification | 193 / **incomplete** |
 
-The official reference records 122 acceptances and 71 rejections. The generated
-source audit covered 148 modules; this commit's canonical closure contained 105
-modules. All 135 transport/outcome controls passed. The nested-restored projection
+The official reference records 122 acceptances and 71 rejections. The current
+source audit covers155 portable modules; this commit's canonical closure contains
+112 modules and1,353 declarations. All135 transport/outcome controls pass. The nested-restored projection
 case now matches rejection. Prelude all-list transport now reaches the checker;
 that case times out and is not reported as unsupported or accepted.
 
@@ -79,7 +116,7 @@ The largest reported input, grind-ring-5, has180,991 nodes/2,182 commands; the
 prelude has54,535/1,774. Input size alone cannot explain the complete timeout set.
 No case has been excluded and full-corpus qualification remains red.
 
-### Ordinary/mutual admitted type IDs — implemented, pending CI
+### Ordinary/mutual admitted type IDs — native/generated/canonical qualified
 
 Ordinary and mutual inductive headers and constructor types now extend the
 same owning declaration index only after their entire original admission bundle
@@ -93,35 +130,64 @@ environment's exact installed type, and test failed mutual admission, live
 unsafe-constructor rejection, public same-batch checking, and generated
 recursor fallback with correct universe arity. Nested restoration deliberately
 publishes no input-type index until its different correspondence is established.
+Native, independent generated and canonical generated execution pass at cfa40d6,
+with explicit mutual-index markers and the original rejection gates retained.
 This slice enables DAG projection inference; it does not migrate inductive
 admission or generated recursor checking.
 
-### Separate full-operation allocation/CPU profiling — added, pending execution
+### Full-operation allocation/CPU profiles — executed; performance gaps remain
 
-The integration workflow now runs six additional isolated Node22 diagnostics:
-legacy and DAG variants of checked unique-function WHNF(depth128),
-hash-collision WHNF(depth128), and checked zeta(depth24). Each reuses the exact
-existing public-operation workload and correctness assertions at fuel4096.
-It performs separate CPU, total-allocation sampling and post-GC surviving-
-allocation sampling passes after ordinary warmup. Official Lean is absent from
-PATH. Ordinary128-sample A-B-B-A timings and their code paths remain unchanged.
+All six isolated Node22 diagnostics passed at
+[0c56fe39379ace6eabe28bc3aa5cf919bf3c3292](https://github.com/dwijayuda/pskernel/commit/0c56fe39379ace6eabe28bc3aa5cf919bf3c3292),
+[run39521189386/job118965147146](https://github.com/dwijayuda/pskernel/actions/runs/39521189386),
+and again at cfa40d6. They run the same fully checked public operations with
+fuel4096 and fresh semantic caches, separately from ordinary ABBA timing.
+Node22.23.3/V8 12.4.254.21-node.57 generated-module SHA256:
+`3db20beb684357e70af278c82b9f3a5c8e20e0308b3fb9c6903aacb89511efc2`.
 
-The built-in Node inspector produces raw CPU/heap profiles, module-SHA-bound
-JSON summaries, top generated source locations and allocation stacks, and
-heap-space/RSS snapshots. These are sampling estimates and instrumented
-diagnostics, not exact allocation counts, ordinary timing results or dominator
-proofs. Surviving samples cover newly allocated sampled objects, not the
-already-live baseline. No cause of a memory regression is claimed before
-actual profiles are inspected.
+| Workload | Sampled allocated bytes original / DAG | Newly allocated surviving sampled bytes original / DAG | CPU samples original / DAG |
+| --- | ---: | ---: | ---: |
+| Unique-function WHNF128 | 1,480,253,088 /784,883,056 | 64,400 /232,360 | 1,607 /1,125 |
+| Hash-collision WHNF128 | 3,321,448,600 /2,488,812,384 | 55,240 /166,640 | 3,823 /3,439 |
+| Checked zeta24 | 34,619,472 /35,883,416 | 45,064 /35,520 | 49 /60 |
 
-At2d29ebc's qualified generated run39518432248, unique-function WHNF128 warmed
-totals were1,656.971–1,709.274ms(original) vs1,128.059–1,135.469ms(DAG), but peak
-RSS was254,976–265,800KiB vs298,584–301,952KiB and retained-heap deltas were
-29,400–30,224 vs77,320–77,672bytes. Construction was3.986–4.105ms vs
-109.258–110.108ms, measured separately. This remains a measured time gain with
-a memory/construction cost, not general performance qualification.
+Allocation uses32KiB sampling including collected objects; the distinct survivor
+pass uses4KiB sampling after GC. These are statistical estimates, not exact
+allocation counts or a census of existing retained objects. CPU uses1ms
+sampling. Short zeta profiles include inspector stop/post overhead outside the
+operation, so their sampled total is not operation CPU time. Raw profiles,
+source locations, allocation stacks and heap-space snapshots are preserved in
+[artifact12312247313](https://github.com/dwijayuda/pskernel/actions/runs/39521189386/artifacts/12312247313).
 
-### One owning declaration index and direct constant types — native/generated qualified
+The unique-function profile identifies original HasFVar/hash walks and the
+generated trampoline among major costs. Collision profiles identify structural
+ExprEq and paged cache lookup. Checked-zeta DAG stacks still execute original
+InferCore/IsDefEq workers; this confirms fallback, not a specific closure cause.
+These fixtures do not identify the cause of any Arena timeout. Newly surviving
+DAG samples include cache entries, nodes and closures; they do not prove a leak.
+
+Ordinary unprofiled A-B-B-A results from the same0c56 run:
+
+| Workload | Original warm ms | DAG warm ms | Original peak RSS KiB | DAG peak RSS KiB | Original / DAG retained heap delta bytes |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Unique-function WHNF128, one call | 1,867.574–1,893.152 | 1,231.133–1,308.546 | 264,320–407,824 | 253,992–257,752 | 34,160–35,328 /82,824–91,248 |
+| Hash-collision WHNF128, one call | 4,422.913–4,594.885 | 3,869.549–4,020.308 | 427,152–438,232 | 404,876–406,012 | 31,112–32,168 /87,664–90,608 |
+
+Five-input pool construction is separate: unique3.245–3.296ms(original)
+versus111.830–116.343ms(DAG), collision4.218–4.300ms versus109.715–116.661ms.
+Peak RSS varies across runs; an earlier qualified run had materially worse
+DAG RSS. Retained-heap and construction costs remain unresolved.
+
+At cfa40d6, checked-zeta24 (two warm calls) still costs104.159–107.789ms
+original versus110.202–120.495ms DAG; cold81.372–82.638 versus85.908–88.858ms;
+peak RSS163,620–165,084 versus184,200–192,828KiB; retained heap24,080 versus
+28,848–29,840bytes. This is a measured regression before direct checked-let
+integration. At c9868, the same two-call checked-zeta fixture remains slower:
+104.482–106.186ms original versus112.744–113.918ms DAG, with peak RSS
+164,124–164,480 versus185,564–192,652KiB and retained heap24,080 versus
+29,840–29,992bytes. No general performance or memory qualification is claimed.
+
+### One owning declaration index and direct constant types — native/generated/canonical qualified
 
 The owning batch now keeps one declaration table containing original admitted
 type IDs, declaration kinds, universe parameters and optional transparent body
@@ -146,9 +212,9 @@ passed real checker smoke, 128 ABBA observations and33 strict executable
 operations. The proof depends only
 on the approved propext, Classical.choice and Quot.sound axioms. The first
 canonical attempt failed during Lean download with TLS error35 before source
-checking; only that job was rerun. Canonical index qualification remains pending,
-separately from native/generated integration and the proved shared constant-rule
-factorization.
+checking; only that job was rerun. The rerun canonical job118968681300 passed at the same1a4b431 source, and the
+subsequent cfa40d6 canonical job118969755351 independently passed the complete
+110-module/1,336-declaration closure.
 
 Native and generated fixtures add567 direct constant inference comparisons
 across nine admitted constants, three safety contexts, seven fuel values and
@@ -168,8 +234,7 @@ Its complete generated gate also passed. The numeral change at2d29ebc now passed
 the complete [integration39518432248](https://github.com/dwijayuda/pskernel/actions/runs/39518432248):
 strict detached large-numeral JS,128 correctness-guarded ABBA observations
 and33 complete executable operations all passed. The App slice5f0e434 passed native, generated and canonical gates as recorded
-above. The newer declaration index has native/generated integration evidence but still
-needs complete canonical evidence.
+above. The declaration index now has native/generated/canonical evidence at cfa40d6.
 
 ### Dependent application checking — native/generated/canonical qualified
 
@@ -599,12 +664,12 @@ not general production performance acceptance.
 | Paged representation | Single production owner; all 12 families; exact cached metadata | Forgery, collision, sharing, page and reference tests pass | Qualified foundation; current complete closure builds | Construction and validation included in complete-operation measurements | Integrated foundation |
 | Transformations | Lift, instantiate/multi/reverse, abstract, universe substitution, spines; scoped memo | 1,755 comparisons plus budget/sharing/negative cases pass | Authentic source and strict generated transform smoke pass | Large shared-DAG fixture; not a full checker speedup claim | Integrated prerequisite |
 | Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
-| WHNF | Function normalization, separate core/public caches, Nat, constructor projection and same-batch delta | Delta/binders green at767acc; index extension green at1a4b431 | Native/generated foundation at9b; newer generated closure still qualifying | Controlled checked-WHNF gains; mixed memory and fallback regressions | Partial; recursor/iota/local-value/String migration open |
-| Inference and DefEq | DAG Sort/FVar/literal/metadata/binders, structural-type App branch, admitted constant types; definitive quick DefEq | App5f0 and index1a4 native parity/official gates pass | New App/index generated executable qualification pending | Latest expanded full-checker measurements pending; no blanket speed/memory claim | Partial; general DefEq, Let/projection/inferOnly open |
-| Inductive admission | Direct DAG request ingress, complete original admission internally | Existing admission tests pass | Real generated definition/ordinary-inductive checks pass | Full admission comparison pending | Not migrated internally |
-| Canonical self-hosting | Actual full production import closure; counts from manifest | Pinned Lean build passes through1a4 |9b complete canonical103 modules/1,259 declarations and detached DAG runtime pass; newer final gates running | Generator/runtime costs measured; diagnostic profiler added | Partial integration qualification |
-| Lean Arena | Complete193 corpus; all-list transport and exact nested outcomes repaired | Official122accept/71reject | 6626:166matches,25hosttimeouts,2safety agreements;135controls; all193recorded | Every timeout reached RunDag entry; internal hotspot not yet measured | **BLOCKED:25hosttimeouts; no exclusions** |
-| Formal invariants | Composite metadata, scope/cache guards, budget cap, five numeral recurrences and exact constant-rule factorization | Native proofs through1a4 checked with approved logical axioms | Proofs intentionally outside portable executable closure | No formal allocation bound | Global DAG/substitution/DefEq/admission soundness remains open |
+| WHNF | Function normalization, separate core/public caches, Nat, constructor projection and same-batch delta | Native parity and boundary gates pass at c9868 | Independent generated and canonical executable gates pass at c9868 | Controlled checked-WHNF gains; mixed memory and fallback regressions | Partial; recursor/iota/local-value/String migration open |
+| Inference and DefEq | DAG Sort/FVar/literal/metadata/binders, structural-type App, owning constants and dependent projections; definitive quick DefEq | Projection parity and13 official fixtures pass at c9868 | Direct projection matrix and complete checker pass in generated and canonical JS |128 guarded ABBA observations; checked-zeta remains slower | Partial; general DefEq, Let and inferOnly open |
+| Inductive admission | Direct DAG request ingress and owning ordinary/mutual type IDs after complete original admission | All ordinary/mutual index and admission gates pass | Same-batch owning types and dependent projection gates pass | Full direct-admission comparison pending | Admission logic not migrated internally |
+| Canonical self-hosting | Complete production import closure derived from manifest | Pinned Lean build passes at c9868 |112 canonical modules /1,353 declarations; authentic PSC1, TS7.0.2, declarations/maps and detached JS pass | Generator/runtime costs measured; six profiles pass | Current partial integration qualified; DirectJS unsupported |
+| Lean Arena | Complete193 corpus; all-list transport and nested outcomes repaired | Official122 accept /71 reject | c9868:166 matches,25 host timeouts,2 safety agreements;135 controls; all193 recorded | Every timeout reached RunDag entry; internal hotspot unresolved | **BLOCKED:25 host timeouts; no exclusions** |
+| Formal invariants | Composite metadata, scope/cache guards, budget cap, five numeral recurrences and exact constant-rule factorization | Native proof gates pass at c9868 with approved logical axioms | Proofs intentionally outside portable executable closure | No formal allocation bound | Global DAG/substitution/DefEq/admission soundness remains open |
 
 ## Latest matched native measurements
 

@@ -119,13 +119,13 @@ jobs:
           node --check scripts/compiler-m-conformance-tests.mjs
           node scripts/language-backend-parity-contract-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --checked-order
+          node scripts/compiler-m-conformance-tests.mjs --inference-control
           node scripts/practical-application-tests.mjs --compiler-application
           node scripts/practical-application-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --library-application
           node scripts/compiler-m-conformance-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
           node scripts/compiler-m-conformance-tests.mjs --json-application
-          node scripts/compiler-m-conformance-tests.mjs --inference-control
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
           node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
           node scripts/typed-io-policy-tests.mjs

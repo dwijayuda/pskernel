@@ -284,3 +284,20 @@ signed/zero/huge equality case on both source surfaces. Order grows to seven
 cases (98 complete obligations). Earlier 84-obligation wording is historical.
 This correction and the bounded acceptance group remain unqualified until
 fresh Linux gates. Keep the original numeric acceptance fixture unchanged.
+
+## Constructive conditional admission
+
+At f3c601569e30381bd829a3df1813624cc1da1f2d, run 39680854096, native
+admission reaches all 136 existing order boundaries but refuses the new signed
+Bool conversion. The prelude still declares ite as opaque, so a type-correct
+conditional cannot compute to its selected Bool in the independent kernel.
+Keep the stronger conversion assertion. The prelude now registers Decidable's
+recursor metadata and replaces the old ite axiom with a total definition over
+the existing checked constructors, preserving the exact public type/universes.
+Runtime conditional lowering is unchanged. No axiom, fuel or validation bypass
+is added. Fresh independent admission and all source/backend gates are required.
+
+Focused execution now runs the inexpensive inference/control suite immediately
+after checked order, before the measured applications. The test command set,
+targets, resource bounds and final qualification remain unchanged; grammar/type
+failures should no longer pay for an unnecessary application replay first.

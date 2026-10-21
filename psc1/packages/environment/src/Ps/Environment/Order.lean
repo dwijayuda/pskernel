@@ -36,6 +36,62 @@ def psOrderDecisionConstructor (positive : Bool) : PsDeclaration :=
   let tag : Nat := if positive then 1 else 0;
   PsDeclaration.constructorDecl (PsConstructorInfo.mk name [] type psDecidableName tag 1 1 [])
 
+-- The conditional has a constructive logical implementation as well as the
+-- established runtime lowering. Decidable is a checked data inductive.
+def psOrderDecisionRecName : PsName := psNameAppendStr psDecidableName "rec"
+
+def psOrderDecisionRecDeclaration : PsDeclaration :=
+  let proposition := PsExpr.fvar 0;
+  let motive := PsExpr.fvar 1;
+  let decisionType := PsExpr.app (PsExpr.constE psDecidableName []) proposition;
+  let motiveType := psControlClose false
+    [PsControlBinder.mk 5 (psRootName "major") decisionType]
+    (PsExpr.sortE (PsLevel.param psPreludeUName));
+  let failureProof := psControlClose false
+    [PsControlBinder.mk 6 (psRootName "proof") proposition]
+    (PsExpr.constE psOrderFalseName []);
+  let failureType := psControlClose false
+    [PsControlBinder.mk 5 (psRootName "proof") failureProof]
+    (PsExpr.app motive (psControlApply (PsExpr.constE psOrderIsFalseName [])
+      [proposition, PsExpr.fvar 5]));
+  let successType := psControlClose false
+    [PsControlBinder.mk 5 (psRootName "proof") proposition]
+    (PsExpr.app motive (psControlApply (PsExpr.constE psOrderIsTrueName [])
+      [proposition, PsExpr.fvar 5]));
+  let type := psControlClose false
+    [PsControlBinder.mk 0 (psRootName "proposition") psPreludePropType,
+      PsControlBinder.mk 1 (psRootName "motive") motiveType,
+      PsControlBinder.mk 2 (psRootName "failure") failureType,
+      PsControlBinder.mk 3 (psRootName "success") successType,
+      PsControlBinder.mk 4 (psRootName "major") decisionType]
+    (PsExpr.app motive (PsExpr.fvar 4));
+  PsDeclaration.recursorDecl (PsRecursorInfo.mk psOrderDecisionRecName [psPreludeUName]
+    type [psDecidableName] 1 0 1 2)
+
+def psOrderIteDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0;
+  let proposition := PsExpr.fvar 1;
+  let decisionType := PsExpr.app (PsExpr.constE psDecidableName []) proposition;
+  let failureProof := psControlClose false
+    [PsControlBinder.mk 6 (psRootName "proof") proposition]
+    (PsExpr.constE psOrderFalseName []);
+  let motive := psControlClose true
+    [PsControlBinder.mk 5 (psRootName "major") decisionType] alpha;
+  let failure := psControlClose true
+    [PsControlBinder.mk 5 (psRootName "proof") failureProof] (PsExpr.fvar 4);
+  let success := psControlClose true
+    [PsControlBinder.mk 5 (psRootName "proof") proposition] (PsExpr.fvar 3);
+  let body := psControlApply
+    (PsExpr.constE psOrderDecisionRecName [PsLevel.param psPreludeUName])
+    [proposition, motive, failure, success, PsExpr.fvar 2];
+  let value := psControlClose true
+    [PsControlBinder.mk 0 psPreludeAlphaName (PsExpr.sortE (PsLevel.param psPreludeUName)),
+      PsControlBinder.mk 1 psPreludeCName psPreludePropType,
+      PsControlBinder.mk 2 psPreludeHName decisionType,
+      PsControlBinder.mk 3 psPreludeTName alpha,
+      PsControlBinder.mk 4 psPreludeEName alpha] body;
+  PsDeclaration.definitionDecl psIteName [psPreludeUName] psPreludeIteType value
+
 def psOrderIntDeclaration : PsDeclaration :=
   PsDeclaration.inductiveDecl (PsInductiveInfo.mk psIntName []
     psPreludeTypeType 0 0 [psIntOfNatName, psIntNegSuccName] false)
@@ -147,7 +203,8 @@ def psIntDecGeDeclaration : PsDeclaration :=
 def psOrderDeclarations : List PsDeclaration :=
   [psOrderFalseDeclaration, psOrderTrueDeclaration, psOrderIntroDeclaration,
     psOrderDecisionDeclaration, psOrderDecisionConstructor false,
-    psOrderDecisionConstructor true, psOrderIntDeclaration,
+    psOrderDecisionConstructor true, psOrderDecisionRecDeclaration,
+    psOrderIteDeclaration, psOrderIntDeclaration,
     psOrderIntConstructor true, psOrderIntConstructor false, psOrderIntRecDeclaration,
     psNatLeDeclaration, psNatDecLeDeclaration, psNatLtDeclaration, psNatDecLtDeclaration,
     psIntLeDeclaration, psIntDecLeDeclaration, psIntLtDeclaration, psIntDecLtDeclaration,

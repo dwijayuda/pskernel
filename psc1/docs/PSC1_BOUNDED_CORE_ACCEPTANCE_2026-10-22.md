@@ -54,3 +54,10 @@ backend intrinsic is introduced. Fifty native true/false conversion boundaries
 and a seventh authored order case cover signed/zero/equal/unequal/huge inputs.
 The current complete order matrix is 98 obligations; prior six-case counts
 describe the first unqualified acceptance source. Fresh Linux CI is required.
+
+The fifty conversion tests exposed opaque ite in the logical prelude at
+f3c60156/run 39680854096. Its existing axiom is replaced by a total definition
+using checked Decidable recursion, with the same type/universes and unchanged
+runtime lowering. The original strict conversion checks remain required.
+Focused inference/control checks move before measured applications without
+removing any command or target. This correction needs fresh Linux admission.

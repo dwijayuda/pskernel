@@ -21,3 +21,9 @@ def scalarDecoderCase (flag : Bool) : Nat :=
       match error with
       | JsonError.invalidUnicode => 1
       | _ => 2
+
+def separatorCase (flag : Bool) : Nat :=
+  let source : String := if flag then "[1,  ]" else "{\"text\":\"A\", }";
+  match jsonParse source with
+  | Result.error _ => 1
+  | Result.ok _ => 0

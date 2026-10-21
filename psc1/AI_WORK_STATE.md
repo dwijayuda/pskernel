@@ -22,7 +22,7 @@ HAdd (Id Nat) Nat needed an explicit Nat observation before arithmetic. The
 fixture now supplies that context; target/full gates must rerun. No test or
 correctness requirement was removed. The next source
 commit adds 136 independent native true/false inhabitation boundaries and the
-actual CLI/JSON application: nineteen child-process cases per grammar/target,
+actual CLI/JSON application: twenty-one child-process cases per grammar/target,
 standalone adapters, independent native JSON reference and strict receipt checks.
 Do not call the application qualified until its complete matrix/full CI succeeds.
 
@@ -118,3 +118,14 @@ original V8 heap-exhaustion and later post-fusion timeout evidence; do not repoi
 old CPU replay to new G1 artifacts. PSKernel-Core Expression V2 research stays
 independent. Official Lean 4.35.0 admission remains pinned at
 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+
+
+## JSON correctness follow-up
+
+Application review found the shared parser accepted a closing delimiter after a
+comma. Empty-container and post-comma states are now distinguished for arrays
+and objects, including intervening whitespace. Existing syntax, Unicode,
+resource and rejection policies are retained. Both authored core fixtures and
+actual CLI/file cases require refusal and preservation of the old output.
+The latest source requires fresh Linux qualification; queued earlier runs are
+not success evidence. No local checkout, build or test is used.

@@ -28,6 +28,9 @@ def main : IO Unit := do
     ("truncatedCaseFalse",Lean.toJson (toString ((1 : Nat)))),
     ("truncatedCaseTrue",Lean.toJson (toString ((1 : Nat)))),
     ("mixedCaseFalse",Lean.toJson (toString (recordReference ["{\"text\":\"\\uDBFF\\udfff\"}"]))),
+    -- Strict JSON requires a value/key after a comma, including whitespace.
+    ("separatorCaseFalse",Lean.toJson (toString (1 : Nat))),
+    ("separatorCaseTrue",Lean.toJson (toString (1 : Nat))),
     ("scalarDecoderCaseFalse",Lean.toJson (toString (1 : Nat))),
     ("scalarDecoderCaseTrue",Lean.toJson (toString (1 : Nat))),
     ("mixedCaseTrue",Lean.toJson (toString (recordReference ["{\"text\":\"\\ud83d\\uDE00\"}"])))

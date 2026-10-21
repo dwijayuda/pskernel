@@ -64,6 +64,15 @@
         "scalarDecoder",
         "multi-module-json-record-processing"
       ]
+    },
+    {
+      "id": "separatorCase",
+      "features": [
+        "strict-array-separator",
+        "strict-object-separator",
+        "whitespace-after-comma",
+        "malformed-json-refusal"
+      ]
     }
   ],
   "flags": [

@@ -23,3 +23,9 @@ def scalarDecoderCase(flag : Bool) : Nat :=
       | _ => 2
       }
   }
+
+def separatorCase(flag : Bool) : Nat :=
+ let source : String := if (flag) { "[1,  ]" } else { "{\"text\":\"A\", }" }
+ match jsonParse(source) with
+ | Result.error(_) => 1
+ | Result.ok(_) => 0

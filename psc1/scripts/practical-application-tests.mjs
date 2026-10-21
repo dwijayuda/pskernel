@@ -44,6 +44,8 @@ const cases=[
  {id:'argv-unicode-quote',inputName:'in \"Ω😀.json',args:['transform','in \"Ω😀.json','output.json'],input:valid,output:oracle.output,code:0,stdout:'ok\n'},
  {id:'bounded-output',input:JSON.stringify([{text:'a'.repeat(480),count:0}]),code:2,stdout:'error:tooLarge\n'},
  {id:'empty-records',input:'[]',output:'[]',code:0,stdout:'ok\n'},
+ {id:'array-trailing-comma',input:'[{"text":"A","count":1}, ]',code:2,stdout:'invalid-json\n'},
+ {id:'object-trailing-comma',input:'[{"text":"A","count":1, }]',code:2,stdout:'invalid-json\n'},
  {id:'malformed-json',input:'{',code:2,stdout:'invalid-json\n'},
  {id:'isolated-surrogate',input:'[{"text":"\\uD800","count":1}]',code:2,stdout:'invalid-unicode\n'},
  {id:'duplicate-key',input:'[{"text":"A","text":"B","count":1}]',code:2,stdout:'invalid-json\n'},

@@ -84,7 +84,7 @@ with their original source and CI identities. G2/G3 stay deferred until freeze.
 
 Constructive Nat/Int ordering is implemented and native-admitted in run
 39636740787; target/full qualification is pending. PracticalCli supplies both
-authored source grammars and nineteen actual process-level CLI/JSON scenarios per
+authored source grammars and twenty-one actual process-level CLI/JSON scenarios per
 target. Its exact-commit matrix, minimum Python and full gates determine the two
 application rows. Library and compiler-like/performance acceptance remain next.
 No milestone here reopens G2/G3 or replaces the finite release contract.

@@ -66,6 +66,16 @@
       "stdout": "ok\n"
     },
     {
+      "id": "array-trailing-comma",
+      "exitCode": 2,
+      "stdout": "invalid-json\n"
+    },
+    {
+      "id": "object-trailing-comma",
+      "exitCode": 2,
+      "stdout": "invalid-json\n"
+    },
+    {
       "id": "malformed-json",
       "exitCode": 2,
       "stdout": "invalid-json\n"

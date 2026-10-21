@@ -447,6 +447,13 @@ def jsonObjectFind
       | Ordering.gt => jsonObjectFind tail key
   | _ => Option.none
 
+-- Comma and closing-delimiter states are distinct in strict JSON. The empty
+-- container branch is legal only before the first element, never after a comma.
+def jsonCommaBeforeClose (source : String) (position close : Nat) : Bool :=
+  let next : Nat := jsonSkipWhitespace source position;
+  if String.Internal.atEnd source next then false
+  else jsonCharCodeEq (String.Internal.get source next) close
+
 partial def jsonParseArrayWith
     (parseValue :
       Nat -> String -> Nat -> Result JsonParseResult JsonError)
@@ -486,12 +493,15 @@ partial def jsonParseArrayWith
                   let next : Nat :=
                     String.Internal.next source afterValue;
                   if jsonCharCodeEq separator 44 then
-                    jsonParseArrayWith
-                      parseValue
-                      remaining
-                      source
-                      next
-                      nextValues
+                    if jsonCommaBeforeClose source next 93 then
+                      Result.error (JsonError.expected "array value after comma")
+                    else
+                      jsonParseArrayWith
+                        parseValue
+                        remaining
+                        source
+                        next
+                        nextValues
                   else if jsonCharCodeEq separator 93 then
                     Result.ok
                       (JsonParseResult.mk nextValues next)
@@ -560,12 +570,15 @@ partial def jsonParseObjectWith
                           let next : Nat :=
                             String.Internal.next source afterValue;
                           if jsonCharCodeEq separator 44 then
-                            jsonParseObjectWith
-                              parseValue
-                              remaining
-                              source
-                              next
-                              nextFields
+                            if jsonCommaBeforeClose source next 125 then
+                              Result.error (JsonError.expected "object key after comma")
+                            else
+                              jsonParseObjectWith
+                                parseValue
+                                remaining
+                                source
+                                next
+                                nextFields
                           else if jsonCharCodeEq separator 125 then
                             Result.ok
                               (JsonParseResult.mk

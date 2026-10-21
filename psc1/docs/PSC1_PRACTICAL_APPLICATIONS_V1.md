@@ -13,7 +13,7 @@ their exception/trap channel. No source argument grants a host capability.
 Each record requires String `text` and integer JSON `count`. The transformation
 prefixes text with `processed:`, preserves count and emits canonical objects with
 sorted keys. Extra input fields are dropped. Empty arrays are valid. Duplicate
-keys, malformed JSON, isolated surrogates and invalid record shapes refuse.
+keys, trailing commas, malformed JSON, isolated surrogates and invalid record shapes refuse.
 The existing checked JSON subset and its fuel limits remain unchanged.
 
 Read/write paths are relative to the configured held root. Host capability,
@@ -21,7 +21,7 @@ no-follow, UTF8, regular-file, size and atomic-write policies remain mandatory.
 Processing errors preserve the previous destination. Successful output is written
 before the final console acknowledgment; a later console error cannot undo it.
 
-`docs/PSC1_APPLICATION_EXECUTION_CONTRACT.json` requires nineteen actual
+`docs/PSC1_APPLICATION_EXECUTION_CONTRACT.json` requires twenty-one actual
 process-level scenarios for both source grammars and all seven backends. Node
 hosts JS/TS/core Wasm; Rust, Python and PHP use their standalone adapters; Wasm
 components use the pinned Wasmtime Python adapter. Rust guest/host lock graphs

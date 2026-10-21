@@ -49,7 +49,8 @@ export function successfulBaseline(runs,{workflow,branch,prNumber,baseCommit,isA
   if(run.name!==workflow||run.head_branch!==branch||run.event!=='pull_request'||
       run.status!=='completed'||run.conclusion!=='success')continue;
   const pull=run.pull_requests?.find(p=>p.number===prNumber);
-  if(!pull||pull.base?.sha!==baseCommit||!/^[a-f0-9]{40}$/.test(run.head_sha||''))continue;
+  // pull_requests.base is live API metadata; run-name captures the immutable dispatch base.
+  if(!pull||run.display_title!=='PSC1 gates base '+baseCommit||!/^[a-f0-9]{40}$/.test(run.head_sha||''))continue;
   if(isAncestor(run.head_sha))return {commit:run.head_sha,runId:run.id};
  }
  return null;

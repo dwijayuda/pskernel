@@ -12,6 +12,75 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 15:38 UTC — qualified String predecessor; complete group-owner candidate
+
+This candidate contains the complete reviewed mutual/nested owner implementation
+and its native, official-Lean, generated and local-proof gates from review
+`8eea3f62dbc00c4805c69c95830dd379c882c8a8`. It also preserves integration
+`3aa077cb64ff06f76727decd01c43ad6c33f351d` as an additional parent and archives
+that branch's distinct work state/evidence. The candidate itself is **NOT RUN**
+at commit creation. Exact resulting SHA is supplied by the Git commit and every
+Actions job; it does not inherit predecessor qualification. The carrier branch
+is the qualification branch; integration remains3aa until a tested advance.
+
+### Exact-source matrix
+
+| Source | Native | Portable .lean | Canonical .ps | Generated JS | Proofs | Benchmarks | Arena | Provider |
+|---|---|---|---|---|---|---|---|---|
+| f9e9b20f92ce2ffa4a666acaf55aa8852949f589 | PASS | PASS | PASS | PASS | PASS | PASS, regressions | IN PROGRESS | PASS |
+| 3aa077cb64ff06f76727decd01c43ad6c33f351d | PASS | PASS in research | IN PROGRESS | IN PROGRESS | PASS | IN PROGRESS | IN PROGRESS | native PASS, generated pending terminal jobs |
+| 4894fce8c7d048ae188495bc2090fedfddf7fcb4 | PASS | PASS | PASS | PASS | PASS | PASS, regressions | FAIL | PASS |
+| This group-owner source | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+Exactf9e9 integration39622521184 (native119299431652/generated119299431901),
+correctness39622521216 (native119299431492/canonical119299432104), and all six
+research39622521190 jobs are terminal PASS. Root read complete critical logs,
+not only marker lines. [The source-bound receipt](evidence/2026-10-21-f9e9b20.json)
+includes artifacts and every file digest. Complete182-module portable/139-module
+canonical closures, native24 protocol controls and both detached generated24
+protocol+8 API controls passed with empty PATH. Default provider remains V1.
+String projection's126 public/504 core/480 independent-budget cases,48 state
+sequences/240 propagated outcomes, checked6 positive/3 negative Box projections,
+official12 positive/6 negative Init String checks and18 independent absent-env
+refusals all passed; ten new local lemmas passed the existing trust audit.
+No full String environment or whole-kernel DirectJS support is claimed.
+
+### Candidate changes and mandatory next gates
+
+Only post-admission ownership is extended: complete plans use the final live
+checked metadata; ordinary/mutual input IDs remain original and nested restored
+metadata/recursors are appended privately. Missing plans preserve the prior
+owner; errors cannot publish an atomic batch. V1 inductive admission and the
+recursive import bridge remain explicit. The new required target is
+`psc1_kernel_expr_v2_generated_owner_regression`. Native and both generated
+routes require25 owners,7 recursors,14 rules,12 direct cases,216 check/216 WHNF/
+216 DefEq comparisons and13 private-ID refusal forms. Native official fixtures
+require16 valid declarations/groups and5 invalid cases. Sixteen local lemmas
+are compiled/audited. Existing gates, fuel/depth rules and resource ceilings
+are preserved. No new runtime trust path is added.
+
+### Performance and compatibility limits
+
+[The complete performance receipt](evidence/2026-10-21-f9e9b20-performance.json)
+and [tables](PERFORMANCE_2026-10-21.md) preserve every sample. Binder32 safe
+admission remains2.624× slower (513.382ms DAG/195.613ms V1); maximum RSS is273220/
+262284KiB and construction73.210/0.580ms. These measurements do not justify a
+whole-kernel speedup or final deployment-performance claim. The separate indexed
+cache review71c5d76 is not included in this candidate and is not qualified.
+
+Carrier4894's terminal full193-case Arena result is171 matches (104 admitted,
+59 kernel rejection,1 metadata rejection,7 transport rejection),2 separately
+classified unsafe/partial agreements,18 host timeouts,1 actual fuel exhaustion,
+1 unsupported. f9e9's own full Arena is still running; no totals are inherited.
+Four public whole-operation fallbacks, initial arena decode, recursive metadata
+import, initial-session/Quot owner gaps and global proof work remain. Gate A is
+achieved only for exactf9e9's documented scoped developer kernel; B/C remain open.
+
+Next: run this exact group's complete native/portable/canonical/generated gates,
+fix any actual failure without weakening assertions, then promote only its
+qualified revision. Continue the separate cache candidate with collision/error/
+owner proof and measured full-operation time/RSS qualification.
+
 ## 2026-10-21 15:29 UTC — complete group-owner candidate for source review
 
 This unreferenced review successor adds the generated mirror, native target and

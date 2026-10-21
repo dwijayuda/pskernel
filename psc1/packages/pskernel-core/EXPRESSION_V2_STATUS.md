@@ -119,7 +119,7 @@ Mandatory native/generated 126/504/480 resource comparisons, 48 complete-state
 sequences, 240 propagated outcomes, checked Box projections and ten local
 lemmas must pass before promotion. Official native Init String checks do not
 create portable environment metadata; absent String declarations remain an
-explicit checked rejection. This source slice is NOT RUN at commit creation.
+explicit checked rejection. This String-projection slice is qualified at exact f9e9b20f92ce2ffa4a666acaf55aa8852949f589; see its source-bound receipt and terminal integration/correctness/research jobs.
 
 ## Checked mutual and nested owner candidate
 
@@ -146,7 +146,7 @@ the complete original operation's resources and failure semantics.
 | Site | Trigger and remaining work |
 | --- | --- |
 | `API/Dag.lean: psKernelDagCheckTerminalOrOriginal` | Checking/inference outside the supported owning DAG rules, including missing or mismatched same-operation type/recursor references |
-| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including unsupported recursor descendants and missing owning references; String-literal projection is implemented in the isolated candidate and awaits exact-source qualification |
+| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including unsupported recursor descendants and missing owning references; String-literal projection is qualified at f9e9b20; missing owning references and other unsupported descendants still decline |
 | `API/Dag.lean: psKernelDagIsDefEq` | Unsupported descendant callbacks or missing owning references; the ordered prefix, lazy delta/projection, full shape and final rules now have DAG paths in the carrier candidate |
 | `API/DagAdmission.lean: psKernelDagAdmitDeclaration` | Inductive construction/admission and declaration cases not handled by direct admission |
 

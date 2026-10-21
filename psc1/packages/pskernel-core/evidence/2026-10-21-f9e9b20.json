@@ -1,0 +1,390 @@
+{
+  "schema": "pskernel-source-qualification-receipt-v1",
+  "repository": "dwijayuda/pskernel",
+  "sourceSha": "f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+  "observedAt": "2026-10-21T15:36:00Z",
+  "qualificationScope": "Exact String-projection carrier scoped independent V1 developer provider and mandatory DAG slices; no complete V2/global soundness/full Arena claim",
+  "gates": {
+    "native": "PASS",
+    "portableLean": "PASS",
+    "canonicalPs": "PASS",
+    "generatedJs": "PASS",
+    "localProofs": "PASS",
+    "selectedBenchmarks": "PASS; regressions recorded",
+    "arena": "IN PROGRESS",
+    "provider": "PASS"
+  },
+  "runs": {
+    "integration": 39622521184,
+    "correctness": 39622521216,
+    "research": 39622521190,
+    "arena": 39622521186
+  },
+  "jobs": {
+    "nativeIntegration": 119299431652,
+    "generatedIntegration": 119299431901,
+    "nativeCorrectness": 119299431492,
+    "canonical": 119299432104,
+    "officialArena": 119299431737,
+    "generatedArena": 119300631663
+  },
+  "researchJobs": [
+    {
+      "id": 119299431791,
+      "name": "portable-v2-check",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 119299431928,
+      "name": "portable-ps-closure",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 119299432056,
+      "name": "whnf-subset-regression",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 119299432088,
+      "name": "generated-js-full-checker-bridge",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 119299432115,
+      "name": "expr-v2-differential",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 119299432231,
+      "name": "full-checker-bridge",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12355941878,
+      "run": 39622521184,
+      "kind": "native",
+      "zipSha256": "76b6981e1cff6c742a4c202b8a496bbb0131c805e2f7741c7e4c079fca044aa1"
+    },
+    {
+      "id": 12358040951,
+      "run": 39622521184,
+      "kind": "lean-generated-js",
+      "zipSha256": "25abe3ecf39fb76b79d8c41afe56e673309d91c8567de93ae505082d7ccb30a2"
+    },
+    {
+      "id": 12358125575,
+      "run": 39622521216,
+      "kind": "canonical-ps-generated-js",
+      "zipSha256": "d5164ea37bd25cb29b616c67bbe34ef4b70eacf9783da837a189fd1acb49c0f1"
+    }
+  ],
+  "fileManifests": [
+    {
+      "job": 119299431652,
+      "manifest": {
+        "schema": "pskernel-core-artifacts-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+        "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+        "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39622521184",
+        "runAttempt": "1",
+        "kind": "native",
+        "leanToolchain": "leanprover/lean4:v4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": null,
+        "node": "v22.23.3",
+        "checkerFuelDefault": 4096,
+        "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+        "files": [
+          {
+            "path": ".lake/build/bin/psc1_kernel_provider",
+            "bytes": 119515624,
+            "sha256": "e11ae0d9ec43eb75f4302997e66decccafb0e785cc57e42daa07d73c1e208c3c"
+          },
+          {
+            "path": "host/kernel-provider/KernelProviderMain.lean",
+            "bytes": 15915,
+            "sha256": "4904143dbcbbda5d277f51950abb16e075f34194c3f0d53b2a00f2f80db9839c"
+          },
+          {
+            "path": "dist/expr-v2/native-provider-linux.tar.gz",
+            "bytes": 33255404,
+            "sha256": "e8404bb90af0dc4dc788fcfe5026d2170ac0497c19b77495340f191284352531"
+          }
+        ]
+      }
+    },
+    {
+      "job": 119299431901,
+      "manifest": {
+        "schema": "pskernel-core-artifacts-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+        "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+        "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39622521184",
+        "runAttempt": "1",
+        "kind": "lean-generated-js",
+        "leanToolchain": "leanprover/lean4:v4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "checkerFuelDefault": 4096,
+        "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+        "files": [
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.js",
+            "bytes": 9891165,
+            "sha256": "a216453f399f38297fd6ce214d5973342c3307834ea9e8312fca1ae16c1c5afa"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.ts",
+            "bytes": 9063093,
+            "sha256": "0fd95c78c93d399cfd7aa8d4ce1d3862d3960fd1aab61002e6ded51968ee9ba5"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+            "bytes": 360525,
+            "sha256": "f17e6becc64c1123f1f9bdce588bdccf0136c88042bc688754d5694cbce6d439"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.js.map",
+            "bytes": 8035493,
+            "sha256": "9fe03502921105b4b4a533f1c91392cd024e3f1a80cc1aa67ea531acaa86696a"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+            "bytes": 12759,
+            "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+            "bytes": 5462,
+            "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/package.json",
+            "bytes": 42,
+            "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/README.md",
+            "bytes": 11813,
+            "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+          }
+        ]
+      }
+    },
+    {
+      "job": 119299432104,
+      "manifest": {
+        "schema": "pskernel-core-artifacts-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+        "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+        "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39622521216",
+        "runAttempt": "1",
+        "kind": "canonical-ps-generated-js",
+        "leanToolchain": "leanprover/lean4:v4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "checkerFuelDefault": 4096,
+        "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+        "files": [
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.js",
+            "bytes": 9891172,
+            "sha256": "d745598dfefd8b600206346a1633a8c0a38608edab72cb9bc60a7cf0ab56285a"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.ts",
+            "bytes": 9063093,
+            "sha256": "0fd95c78c93d399cfd7aa8d4ce1d3862d3960fd1aab61002e6ded51968ee9ba5"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.d.ts",
+            "bytes": 360525,
+            "sha256": "f17e6becc64c1123f1f9bdce588bdccf0136c88042bc688754d5694cbce6d439"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.js.map",
+            "bytes": 8035507,
+            "sha256": "eba9f96bdcaac17a0d31a71ca34d26e0518447c30c67e8afaa052bfff9e1ddc5"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/scripts/pskernel-canonical-provider.mjs",
+            "bytes": 12759,
+            "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/npm-runtime/canonical-admissions-wire.mjs",
+            "bytes": 5462,
+            "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/package.json",
+            "bytes": 42,
+            "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/canonical-source.tar.gz",
+            "bytes": 117405,
+            "sha256": "dfd8e11cd0a67d6ce64e99feaacd896091f52bfd79f5fdce48739d6337226d41"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/README.md",
+            "bytes": 11813,
+            "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+          }
+        ]
+      }
+    }
+  ],
+  "closure": {
+    "portableModules": 182,
+    "portableRoots": 2,
+    "canonicalModules": 139,
+    "canonicalClosureSha256": "793fe3e902b93112aced4eacdbb45db861a182c35d65f80591b375223fa8eec9"
+  },
+  "provider": {
+    "nativeProtocol": 24,
+    "officialCases": 5,
+    "officialBatchDeclarations": 4,
+    "eachGeneratedProtocol": 24,
+    "eachGeneratedApi": 8,
+    "path": "empty",
+    "cwd": "detached"
+  },
+  "coverage": [
+    {
+      "job": 119299431652,
+      "mandatorySummaryLines": [
+        "PSC1_V2_DAG_OFFICIAL_QUICK_DEFEQ: PASS",
+        "PSC1_V2_DAG_QUICK_DEFEQ: PASS",
+        "PSC1_V2_DAG_NATIVE_MUTUAL_INDEX: PASS",
+        "PSC1_V2_DAG_OFFICIAL_CHECK_APP: PASS",
+        "PSC1_V2_DAG_CHECK_APP: PASS",
+        "PSC1_V2_DAG_OFFICIAL_CHECK_PROJECTION: PASS",
+        "PSC1_V2_DAG_CHECK_PROJECTION: PASS",
+        "PSC1_V2_DAG_CHECK_LET: PASS",
+        "PSC1_V2_DAG_OFFICIAL_CHECK_LET: PASS",
+        "PSC1_V2_DAG_MUTUAL_ADMISSION: PASS",
+        "PSC1_V2_DAG_OFFICIAL_MUTUAL_ADMISSION: PASS",
+        "PSC1_V2_DAG_MUTUAL_FRESH_MEMBER: PASS",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX: PASS public=126 core=504 owners=360 reducer=432",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_STATE: PASS sequence=4 propagated=40",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY: PASS comparisons=70 fields=20",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_STRING: PASS callbacks=24 propagated=48 official=6",
+        "PSC1_V2_DAG_OFFICIAL_RECURSOR_MAJOR: PASS valid=6 admitted=2 rejected=2",
+        "PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES: PASS cases=2",
+        "PSC1_V2_DAG_RECURSOR: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9",
+        "PSC1_V2_DAG_OFFICIAL_RECURSOR: PASS valid=12 invalid=4 addDecl=3",
+        "PSC1_V2_K_DIRECT_ADMISSION_PASS cases=2",
+        "PSC1_V2_K_CHECKED_PASS valid=6 invalid=3 declarations=2 batch=6",
+        "PSC1_V2_K_OFFICIAL_PASS valid=6 invalid=3 declarations=2",
+        "PSC1_V2_K_MATRIX_PASS public=108 core=432 reducer=648",
+        "PSC1_V2_K_FIXED_OWNER_PASS cases=96",
+        "PSC1_V2_K_OWNER_PASS carrier=16 propagated=16 metadata=16",
+        "PSC1_V2_K_ORDER_PASS guards=5",
+        "PSC1_V2_RECURSOR_K_PASS",
+        "PSC1_V2_DAG_STRING_PROJECTION_MATRIX: PASS public=126 core=504 fixed=480",
+        "PSC1_V2_DAG_STRING_PROJECTION_STATE: PASS cases=48 propagated=240",
+        "PSC1_V2_DAG_STRING_PROJECTION_CHECKED: PASS valid=6 invalid=3",
+        "PSC1_V2_DAG_STRING_PROJECTION_OFFICIAL: PASS valid=12 invalid=6 missingEnvironment=18",
+        "PSC1_V2_ADMISSION_OWNED_STATE_PASS carrier=8 propagated=12 differential=336 publicWhnf=168",
+        "PSC1_V2_OWNED_STATE_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44",
+        "PSKERNEL_LOCAL_METADATA_AND_SCOPE_PROOFS: PASS",
+        "PSC1_CANONICAL_PROVIDER_OFFICIAL: PASS cases=5 batchDeclarations=4 doCheck=true",
+        "PSC1_CANONICAL_PROVIDER: PASS mode=native cases=24 PATH=empty cwd=detached"
+      ]
+    },
+    {
+      "job": 119299431901,
+      "mandatorySummaryLines": [
+        "PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS",
+        "PSC1_V2_DAG_JS_CHECK_APP: PASS",
+        "PSC1_V2_DAG_JS_MUTUAL_INDEX: PASS",
+        "PSC1_V2_DAG_JS_CHECK_PROJECTION: PASS",
+        "PSC1_V2_DAG_JS_CHECK_LET: PASS",
+        "PSC1_V2_DAG_JS_MUTUAL_ADMISSION: PASS",
+        "PSC1_V2_DAG_JS_MUTUAL_FRESH_MEMBER: PASS",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX_JS: PASS public=126 core=504 owners=360 reducer=432",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_ADMISSION_JS: PASS valid=6 admitted=2 rejected=2",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_STATE_JS: PASS sequence=4 propagated=40",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY_JS: PASS comparisons=70 fields=20",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_STRING_JS: PASS callbacks=24 propagated=48",
+        "PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2",
+        "PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9 assertions=3763",
+        "PSC1_V2_K_GENERATED_DIRECT_ADMISSION_PASS cases=2",
+        "PSC1_V2_K_GENERATED_CHECKED_PASS valid=6 invalid=3 declarations=2 batch=6",
+        "PSC1_V2_K_GENERATED_MATRIX_PASS public=108 core=432 reducer=648",
+        "PSC1_V2_K_GENERATED_FIXED_OWNER_PASS cases=96",
+        "PSC1_V2_K_GENERATED_OWNER_PASS carrier=16 propagated=16 metadata=16",
+        "PSC1_V2_K_GENERATED_ORDER_PASS guards=5",
+        "PSC1_V2_RECURSOR_K_GENERATED_PASS assertions=1415",
+        "PSC1_V2_DAG_STRING_PROJECTION_MATRIX_JS: PASS public=126 core=504 fixed=480",
+        "PSC1_V2_DAG_STRING_PROJECTION_STATE_JS: PASS cases=48 propagated=240",
+        "PSC1_V2_DAG_STRING_PROJECTION_CHECKED_JS: PASS valid=6 invalid=3",
+        "PSC1_V2_DAG_STRING_PROJECTION_SCOPE_JS: PASS missingEnvironment=18",
+        "PSC1_V2_ADMISSION_OWNED_STATE_JS_PASS carrier=8 propagated=12 differential=336 publicWhnf=168",
+        "PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44 assertions=1540",
+        "PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached",
+        "PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached"
+      ]
+    },
+    {
+      "job": 119299432104,
+      "mandatorySummaryLines": [
+        "PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS",
+        "PSC1_V2_DAG_JS_CHECK_APP: PASS",
+        "PSC1_V2_DAG_JS_MUTUAL_INDEX: PASS",
+        "PSC1_V2_DAG_JS_CHECK_PROJECTION: PASS",
+        "PSC1_V2_DAG_JS_CHECK_LET: PASS",
+        "PSC1_V2_DAG_JS_MUTUAL_ADMISSION: PASS",
+        "PSC1_V2_DAG_JS_MUTUAL_FRESH_MEMBER: PASS",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX_JS: PASS public=126 core=504 owners=360 reducer=432",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_ADMISSION_JS: PASS valid=6 admitted=2 rejected=2",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_STATE_JS: PASS sequence=4 propagated=40",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY_JS: PASS comparisons=70 fields=20",
+        "PSC1_V2_DAG_RECURSOR_MAJOR_STRING_JS: PASS callbacks=24 propagated=48",
+        "PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2",
+        "PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9 assertions=3763",
+        "PSC1_V2_K_GENERATED_DIRECT_ADMISSION_PASS cases=2",
+        "PSC1_V2_K_GENERATED_CHECKED_PASS valid=6 invalid=3 declarations=2 batch=6",
+        "PSC1_V2_K_GENERATED_MATRIX_PASS public=108 core=432 reducer=648",
+        "PSC1_V2_K_GENERATED_FIXED_OWNER_PASS cases=96",
+        "PSC1_V2_K_GENERATED_OWNER_PASS carrier=16 propagated=16 metadata=16",
+        "PSC1_V2_K_GENERATED_ORDER_PASS guards=5",
+        "PSC1_V2_RECURSOR_K_GENERATED_PASS assertions=1415",
+        "PSC1_V2_DAG_STRING_PROJECTION_MATRIX_JS: PASS public=126 core=504 fixed=480",
+        "PSC1_V2_DAG_STRING_PROJECTION_STATE_JS: PASS cases=48 propagated=240",
+        "PSC1_V2_DAG_STRING_PROJECTION_CHECKED_JS: PASS valid=6 invalid=3",
+        "PSC1_V2_DAG_STRING_PROJECTION_SCOPE_JS: PASS missingEnvironment=18",
+        "PSC1_V2_ADMISSION_OWNED_STATE_JS_PASS carrier=8 propagated=12 differential=336 publicWhnf=168",
+        "PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44 assertions=1540",
+        "PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached",
+        "PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached"
+      ]
+    }
+  ],
+  "remaining": {
+    "fullOperationFallbackSites": 4,
+    "initialValidatedArenaDecode": true,
+    "inductiveAdmission": "V1",
+    "generatedMetadataImport": "recursive expression bridge",
+    "mutualNestedRecursorOwners": "pending isolated group-owner source",
+    "initialSessionOwners": "not retained",
+    "stringLiteralProjection": "qualified at this exact SHA",
+    "globalSoundnessProof": false,
+    "directJs": "UNSUPPORTED",
+    "arena": "Full current run pending; prior 4894 receipt records171 matches/2 safety/18 host timeouts/1 fuel/1 unsupported."
+  }
+}

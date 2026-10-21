@@ -821,3 +821,54 @@ def psParseScopedDeclarationsWithFuel
                     | List.nil => parsed.value
                     | List.cons _ _ => PsSyntaxDeclaration.scopedDecl path parsed.value;
                   smaller next scopes (List.cons declaration declarationsRev)
+
+-- Bare lambda binders carry a local annotation marker. Only lambda checking
+-- consumes it, from an expected function domain; it is not a general term hole.
+def psParseSingleLambdaBinder
+    (parseTyped : PsTokenCursor ->
+      Except PsParseError (PsParseResult (Prod PsSyntaxBinderHead PsSyntaxTerm)))
+    (cursor : PsTokenCursor) :
+    Except PsParseError
+      (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=
+  match parseTyped cursor with
+  | Except.error error => Except.error error
+  | Except.ok binder =>
+      Except.ok (PsParseResult.mk (List.cons binder.value List.nil) binder.cursor)
+
+def psParseLambdaBindersWithFuel
+    (parseTyped : PsTokenCursor ->
+      Except PsParseError
+        (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))))
+    (fuel : Nat) :
+    PsTokenCursor ->
+    List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
+    Except PsParseError
+      (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_cursor : PsTokenCursor)
+          (_bindersRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>
+        Except.error PsParseError.fuelExhausted
+  | Nat.succ remaining =>
+      fun (cursor : PsTokenCursor)
+          (bindersRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>
+        let smaller := psParseLambdaBindersWithFuel parseTyped remaining;
+        if psTokenCursorAtText cursor "=>" then
+          Except.ok (PsParseResult.mk (psParseListReverse bindersRev) cursor)
+        else if psTokenCursorAtBinderStart cursor then
+          match parseTyped cursor with
+          | Except.error error => Except.error error
+          | Except.ok binder =>
+              smaller binder.cursor
+                (psParseListAppend (psParseListReverse binder.value) bindersRev)
+        else
+          match psTokenCursorExpectKind cursor PsTokenKind.identifier with
+          | Except.error error => Except.error error
+          | Except.ok token =>
+              let name := PsSyntaxName.mk
+                (List.cons token.token.text List.nil) token.token.span;
+              let head := PsSyntaxBinderHead.mk name
+                PsSyntaxBinderKind.explicit token.token.span;
+              let annotation := psSyntaxSyntheticReference "_" token.token.span;
+              smaller token.cursor
+                (List.cons (Prod.mk head annotation) bindersRev)

@@ -1493,7 +1493,7 @@ def psParseLeanTermWithFuel
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "lambda binder")
         | Option.some keyword =>
-            match psParseLeanBindersWithFuel
+            match psParseLambdaBindersWithFuel psParseLeanBinderGroup
                 (psParseListLength keyword.cursor.remaining)
                 keyword.cursor
                 [] with

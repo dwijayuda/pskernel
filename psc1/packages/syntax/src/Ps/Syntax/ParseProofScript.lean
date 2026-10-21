@@ -865,11 +865,9 @@ def psParseProofScriptDeclarationBindersWithFuel
                   (Nat.succ remaining) opening.cursor [] with
               | Except.error error => Except.error error
               | Except.ok explicit =>
-                  Except.ok {
-                    value := psParseListAppend
-                      (psParseListReverse prefixRev) explicit.value
-                    cursor := explicit.cursor
-                  }
+                  smaller explicit.cursor
+                    (psParseListAppend
+                      (psParseListReverse explicit.value) prefixRev)
         else if psTokenCursorAtBinderStart cursor then
           match psParseProofScriptBinder cursor with
           | Except.error error => Except.error error
@@ -1177,7 +1175,8 @@ def psParseProofScriptTermWithFuel
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "lambda binder")
         | Option.some keyword =>
-            match psParseProofScriptBindersWithFuel
+            match psParseLambdaBindersWithFuel
+                (psParseSingleLambdaBinder psParseProofScriptBinder)
                 (psParseListLength keyword.cursor.remaining)
                 keyword.cursor
                 [] with

@@ -694,6 +694,65 @@ def psElabLambdaBodyExpected
               (Prod.fst prepared)
               (Option.some (Prod.snd prepared)))
 
+
+def psElabLambdaAnnotationMissing (source : PsSyntaxTerm) : Bool :=
+  match source with
+  | PsSyntaxTerm.reference name =>
+      match name.segments with
+      | List.cons segment List.nil => psStringEq segment "_"
+      | _ => false
+  | _ => false
+
+-- Infer bare lambda domains only from the expected telescope. Each binder is
+-- checked before the next domain is instantiated with its fresh local identity.
+def psElabLambdaBindersAcc
+    (elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (remaining : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
+    PsElabContext -> Option PsExpr -> List PsElabTypedBinder ->
+    Except PsElabError PsElabTypedBindersResult :=
+  match remaining with
+  | List.nil =>
+      fun (context : PsElabContext) (_expected : Option PsExpr)
+          (bindersRev : List PsElabTypedBinder) =>
+        Except.ok (PsElabTypedBindersResult.mk context bindersRev)
+  | List.cons entry rest =>
+      let smaller := psElabLambdaBindersAcc elaborate rest;
+      fun (context : PsElabContext) (expected : Option PsExpr)
+          (bindersRev : List PsElabTypedBinder) =>
+        let prepared : Except PsElabError PsElabTypedBindersResult :=
+          if psElabLambdaAnnotationMissing entry.snd then
+            match expected with
+            | Option.none => Except.error PsElabError.typeMismatch
+            | Option.some expectedType =>
+                match psInferEnsureForall context.environment context.metaContext
+                    context.localContext expectedType with
+                | Except.error error => Except.error (PsElabError.infer error)
+                | Except.ok view =>
+                    match psSyntaxNameToName entry.fst.name with
+                    | Option.none => Except.error PsElabError.emptyName
+                    | Option.some name =>
+                        let kind := psElabBinderKindToCore entry.fst.kind;
+                        let pushed := psLocalPushBinding context.localContext
+                          name view.domain kind;
+                        let localContext := psElabContextWithLocal context pushed.context;
+                        let binder := PsElabTypedBinder.mk pushed.id name view.domain kind;
+                        Except.ok (PsElabTypedBindersResult.mk localContext
+                          (List.cons binder List.nil))
+          else
+            psElabTypedBinders elaborate context (List.cons entry List.nil);
+        match prepared with
+        | Except.error error => Except.error error
+        | Except.ok result =>
+            match result.bindersRev with
+            | List.nil => Except.error PsElabError.typeMismatch
+            | List.cons binder _ =>
+                match psElabLambdaBodyExpected result.context
+                    (List.cons binder List.nil) expected with
+                | Except.error error => Except.error error
+                | Except.ok next =>
+                    smaller next.fst next.snd (List.cons binder bindersRev)
+
 def psElabLambda
     (elaborate :
       PsElabContext ->
@@ -705,7 +764,7 @@ def psElabLambda
     (body : PsSyntaxTerm)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  match psElabTypedBinders elaborate context binders with
+  match psElabLambdaBindersAcc elaborate binders context expected List.nil with
   | Except.error error => Except.error error
   | Except.ok binderResult =>
       match

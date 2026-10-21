@@ -166,7 +166,7 @@ impl TypedIo {
  fn perform(&self,op:&str,fields:&BTreeMap<String,Box<RawValue>>)->Result<Value>{
   let text=|key:&str,invalid_unicode:&'static str|->Result<String>{
    let raw=fields.get(key).ok_or(Failure::Policy("protocolError"))?.get();
-   if !raw.starts_with('"'){return deny("protocolError")}
+   if !raw.starts_with('"'){return deny(if key=="path"{"pathDenied"}else{"protocolError"})}
    serde_json::from_str::<String>(raw).map_err(|_|Failure::Policy(invalid_unicode))
   };
   match op{

@@ -43,7 +43,11 @@ worst-case JSON escaping and response allocation. Larger configurations refuse
 before loading; oversized encoded requests retain typed tooLarge semantics.
 Core uses the existing explicit Node capability host; component uses the
 standalone Python capability host through pinned Wasmtime Python49.0.0.
-Default Wasm/component policies remain. Native ABI positive/negative tests now pass during the focused build. Core and
+Default Wasm/component policies remain. Native ABI positive/negative tests and independent wasm-tools validation of both
+native-generated core/component String binaries now pass during the focused tier.
+The authored boundary fixtures now use the qualified String.Internal.length API.
+Cross-adapter policy checks additionally require malformed path/text field values
+to preserve the same typed error classification in every standalone provider. Core and
 component execution tests run early in the focused tier for fast ABI feedback,
 then repeat in required full qualification. New seven-target IO receipt and
 readiness checks distinguish actual adapters from pure protocol observations; no claim of completion before their results.

@@ -1,3 +1,3 @@
 def echo (text : String) : String := text
 def join (left : String) (right : String) : String := String.Internal.append left right
-def count (text : String) : Bool := Nat.beq (String.length text) 3
+def count (text : String) : Bool := Nat.beq (String.Internal.length text) 3

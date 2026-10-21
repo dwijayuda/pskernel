@@ -96,6 +96,13 @@ try{
   isError(request(host,'writeUtf8',{path:'fifo',text:'x'}),'wrongType');
  });
  check('malformed and extra-field request refuses',()=>{
+  for(const value of [null,false,42,[],{}]){
+   isError(request(host,'readUtf8',{path:value}),'pathDenied');
+   isError(request(host,'writeUtf8',{path:value,text:'x'}),'pathDenied');
+   isError(request(host,'writeLine',{text:value}),'protocolError');
+   isError(request(host,'writeUtf8',{path:'data',text:value}),'protocolError');
+  }
+  isError(request(host,'readUtf8',{path:'\ud800'}),'pathDenied');
   for(const source of ['{','null','[]','{"op":"unknown"}','{"op":"readLine","extra":1}'])
    isError(JSON.parse(host.execute(source)),'protocolError');
  });

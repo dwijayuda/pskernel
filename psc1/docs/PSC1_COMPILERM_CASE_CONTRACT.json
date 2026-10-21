@@ -84,5 +84,13 @@
     "wrong-error",
     "verified",
     "duplicate-prelude"
+  ],
+  "oracleLibraries": [
+    "option",
+    "prod",
+    "result",
+    "effect",
+    "list",
+    "array"
   ]
 }

@@ -8,13 +8,21 @@ import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
+const suite=process.argv[2]||'--compiler-m';
+assert.ok(['--compiler-m','--stdlib-collections'].includes(suite));
+const collections=suite==='--stdlib-collections';
+const fixtureName=collections?'StdlibCollectionFixtures':'CompilerMFixtures';
+const contractFile=collections?'PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json':'PSC1_COMPILERM_CASE_CONTRACT.json';
+const evidenceName=collections?(process.env.PSC1_COLLECTION_EVIDENCE||'stdlib-collections'):(process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
+const targetSelection=collections?process.env.PSC1_COLLECTION_TARGETS:process.env.PSC1_COMPILERM_TARGETS;
+const marker=collections?'PSC1_COLLECTION':'PSC1_COMPILERM';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const native=process.env.PSC1_NATIVE||path.join(root,'.lake/build/bin/psc1');
 const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-compiler-m-'));
-const evidence=path.join(root,'dist/scoped-correctness',process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
+const evidence=path.join(root,'dist/scoped-correctness',evidenceName);
 fs.mkdirSync(evidence,{recursive:true});
-const contract=JSON.parse(fs.readFileSync(path.join(root,'docs/PSC1_COMPILERM_CASE_CONTRACT.json'),'utf8'));
-const targets=(process.env.PSC1_COMPILERM_TARGETS||contract.targets.join(',')).split(',');
+const contract=JSON.parse(fs.readFileSync(path.join(root,'docs',contractFile),'utf8'));
+const targets=(targetSelection||contract.targets.join(',')).split(',');
 assert.equal(new Set(targets).size,targets.length);
 assert.ok(targets.length&&targets.every(t=>contract.targets.includes(t)));
 const names=[...contract.cases.map(c=>c.id),'semantic'];
@@ -43,17 +51,22 @@ write(path.join(work,'package.json'),'{"type":"module"}\n');
 const stripImports=text=>text.split('\n').filter(line=>!line.startsWith('import ')).join('\n');
 const resultLibrary=read(path.join(root,'stdlib/ProofScript/Data/Result.lean'));
 const effectLibrary=read(path.join(root,'stdlib/ProofScript/Compiler/Effect.lean'));
-const leanFixture=read(path.join(root,'test/CompilerMFixtures.lean'));
+const extraLibraries={option:read(path.join(root,'stdlib/ProofScript/Data/Option.lean')),
+ prod:read(path.join(root,'stdlib/ProofScript/Data/Prod.lean')),
+ list:read(path.join(root,'stdlib/ProofScript/Data/List.lean')),
+ array:read(path.join(root,'stdlib/ProofScript/Data/Array.lean'))};
+const librarySha256=Object.fromEntries(Object.entries({...extraLibraries,result:resultLibrary,effect:effectLibrary}).map(([key,value])=>[key,sha(value)]));
+const leanFixture=read(path.join(root,'test',fixtureName+'.lean'));
 const nativeAdapter=`
 instance {C S E : Type} : Monad (CompilerM C S E) where
   pure := compilerPure
   bind := compilerBind
 `;
-const oracleSource='import Lean\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+
+const oracleSource='import Lean\n'+Object.values(extraLibraries).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+
  nativeAdapter+'\n'+stripImports(leanFixture)+'\n'+
  'def main : IO Unit := do\n  IO.println (\"PSC1_COMPILERM_ORACLE: \" ++ (Lean.Json.mkObj [("leanVersion",Lean.toJson Lean.versionString),("leanCommit",Lean.toJson Lean.githash),'+
  contract.cases.flatMap(c=>[false,true].map(flag=>'("'+c.id+(flag?'True':'False')+'",Lean.toJson (toString ('+c.id+' '+flag+')))')).join(',')+']).compress)\n';
-const oracleFile=path.join(evidence,'CompilerMOracle.lean');write(oracleFile,oracleSource);
+const oracleFile=path.join(evidence,'PracticalOracle.lean');write(oracleFile,oracleSource);
 const oracleOutput=run('lake',['env','lean','--run',oracleFile]);
 write(path.join(evidence,'native-oracle.log'),oracleOutput);
 const oracleLines=oracleOutput.split('\n').filter(line=>line.startsWith('PSC1_COMPILERM_ORACLE: '));
@@ -103,8 +116,8 @@ function execute(target, output) {
 try {
  for(const syntax of contract.grammars){
   const folder=path.join(evidence,'sources',syntax);
-  const fixture=path.join(root,'test/CompilerMFixtures.'+syntax);
-  write(path.join(folder,'CompilerMFixtures.'+syntax),read(fixture));
+  const fixture=path.join(root,'test/'+fixtureName+'.'+syntax);
+  write(path.join(folder,fixtureName+'.'+syntax),read(fixture));
   // Imported identities remain private to the entry module; distinct wrapper
   // names avoid accidental self-reference and retain individual observations.
   const definitions=contract.cases.map((c,i)=>{
@@ -118,15 +131,19 @@ try {
   const exports=contract.cases.map(c=>'check'+c.id.toLowerCase());
   names.splice(0,names.length,...exports,'semantic');
   const combine=exports.map(name=>syntax==='lean'?'('+name+' flag)':'('+name+'(flag))').join(' && ');
-  write(path.join(folder,'Entry.'+syntax),'import CompilerMFixtures\n'+definitions.join('\n')+
+  write(path.join(folder,'Entry.'+syntax),'import '+fixtureName+'\n'+definitions.join('\n')+
    (syntax==='lean'?'def semantic (flag : Bool) : Bool := ':'def semantic(flag : Bool) : Bool := ')+combine+'\n');
-  const importLine='import ProofScript.Compiler.Effect\n';
-  for(const [id,kind]of [['wrong-state','state'],['wrong-error','error']]){
-   const action=kind==='state'?'compilerSet':'compilerThrow';
-   write(path.join(folder,id+'.'+syntax),importLine+(syntax==='lean'?
-    'def invalid : CompilerM Nat Nat Nat Unit := do\n  '+action+' true\n':
-    'def invalid : CompilerM(Nat, Nat, Nat, Unit) := do { '+action+'(true) }\n'));
-  }
+  const negativeCases=collections?[
+   {id:'wrong-element',lean:'def invalid : List Nat := [true]\n',ps:'def invalid : List(Nat) := [true]\n'},
+   {id:'wrong-index',lean:'def invalid : Option Nat := let values : Array Nat := #[1]; values[true]?\n',
+    ps:'def invalid : Option(Nat) := let values : Array(Nat) := #[1]\n values[true]?\n'}
+  ]:[
+   {id:'wrong-state',lean:'import ProofScript.Compiler.Effect\ndef invalid : CompilerM Nat Nat Nat Unit := do\n  compilerSet true\n',
+    ps:'import ProofScript.Compiler.Effect\ndef invalid : CompilerM(Nat, Nat, Nat, Unit) := do { compilerSet(true) }\n'},
+   {id:'wrong-error',lean:'import ProofScript.Compiler.Effect\ndef invalid : CompilerM Nat Nat Nat Unit := do\n  compilerThrow true\n',
+    ps:'import ProofScript.Compiler.Effect\ndef invalid : CompilerM(Nat, Nat, Nat, Unit) := do { compilerThrow(true) }\n'}
+  ];
+  for(const item of negativeCases)write(path.join(folder,item.id+'.'+syntax),item[syntax]);
   write(path.join(folder,'duplicate-prelude.'+syntax),'def Nat : Type := Bool\n');
   for(const target of targets){
    const label=syntax+'-'+target,extension={js:'js',ts:'ts',rust:'rs','wasm-core':'wasm','wasm-component':'wasm',python:'py',php:'php'}[target];
@@ -142,8 +159,8 @@ try {
     execute(target,output);
     const before=hash(output+'.bundle.json'),published=fs.realpathSync(output+'.bundle.json');
     const refusals={verified:reject([...args,'--assurance','verified'])};
-    for(const id of ['wrong-state','wrong-error']){
-     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong);
+    for(const {id} of negativeCases){
+     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,/PSC1_PROJECT_ELAB_FAILED/);
     }
     const duplicate=[...args];duplicate[1]=path.join(folder,'duplicate-prelude.'+syntax);
     refusals['duplicate-prelude']=reject(duplicate,/duplicateDeclaration:Nat/);
@@ -159,11 +176,11 @@ try {
      strictIr:'required-by-production-publication',runtime:'executed',publicAbi:'Bool-to-Bool-scalars',
      sourceSha256:hash(fixture),entrySha256:hash(args[1]),artifactSha256:hash(output),
      manifestSha256:before,oracleSha256:hash(oracleFile),
-     librarySha256:{result:sha(resultLibrary),effect:sha(effectLibrary)},refusals};
+     librarySha256,refusals};
     for(const c of contract.cases) records.push({...identity,id:c.id,flags:[false,true],
      expected:{false:oracle[c.id+'False'],true:oracle[c.id+'True']}});
-    console.log('PSC1_COMPILERM_TARGET_PASS: '+label);
-   }catch(error){failures.push({label,error:error.stack||String(error)});console.error('PSC1_COMPILERM_TARGET_FAIL: '+label+'\n'+error.stack);}
+    console.log(marker+'_TARGET_PASS: '+label);
+   }catch(error){failures.push({label,error:error.stack||String(error)});console.error(marker+'_TARGET_FAIL: '+label+'\n'+error.stack);}
    finally{
     if(fs.existsSync(output+'.bundle.json'))fs.cpSync(path.dirname(fs.realpathSync(output+'.bundle.json')),path.join(evidence,'bundles',label),{recursive:true});
    }
@@ -171,7 +188,7 @@ try {
  }
  assert.deepEqual(failures,[]);
  checkLanguageBackendParity(contract,records,{targets});
- console.log('PSC1_COMPILERM_CONFORMANCE: PASS '+records.length+' case/grammar/target obligations');
+ console.log(marker+'_CONFORMANCE: PASS '+records.length+' case/grammar/target obligations');
 }finally{
  write(path.join(evidence,'results.json'),JSON.stringify({schema:'psc1-language-backend-execution/1',
   contract:contract.id,testedCommit:process.env.GITHUB_SHA||null,branchHeadCommit:process.env.PSC1_HEAD_SHA||null,

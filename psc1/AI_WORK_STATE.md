@@ -151,6 +151,32 @@ The returned callback/Array/Option interactions and both observations remain.
 General expression postfix field access remains an explicit syntax gap, not
 silently claimed as supported by this correction.
 
+## Active collection correctness and prelude composition — pending Linux
+
+The pinned ordering audit confirms the current owned prelude represents
+Decidable/Bool.decEq as opaque primitives. A complete ordering addition needs
+constructive decision/conditional architecture; do not add unchecked axioms
+or rebrand Bool comparisons as Prop. Pinned Lean4.35 Nat/Int definitions were
+inspected; ordering remains unimplemented.
+
+Actual stdlib inspection found List redundantly redeclares the prelude identity
+and listLength drops every head without incrementing, returning0 for all lists.
+Except also redeclares the prelude type. Correct their authored files to extend
+the checked canonical types. Implement accumulator length/reverse helpers with
+guarded returned-state lambdas, preserving the existing helper APIs.
+arrayGetOption used whole-array map before lookup; use the already selected,
+checked optional indexing syntax directly, retaining empty/huge-index behavior
+without an element fallback.
+
+Add3 authored both-grammar collection/Except cases (42 normal obligations and
+6 minimum-Python obligations) through the same contract/target consumer engine.
+Native reference evaluates exact List/Array/Option/Prod/Result/Effect helper
+bodies over native types; each library hash is retained. Reject wrong element/
+index types, duplicate prelude and verified requests; type cases must reach
+elaboration refusal, and all failures preserve previous publication.
+Keep the qualified7-case CompilerM suite too. All new changes are CI pending;
+do not infer qualification from the earlier98-obligation checkpoint.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

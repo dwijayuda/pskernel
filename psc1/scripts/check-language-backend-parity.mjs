@@ -24,8 +24,8 @@ export function checkLanguageBackendParity(contract,records,{targets=contract.ta
   assert.equal(row.runtime,'executed');
   for(const field of ['sourceSha256','entrySha256','artifactSha256','manifestSha256','oracleSha256'])
    assert.match(row[field]||'',/^[a-f0-9]{64}$/,'missing identity:'+field+':'+key);
-  assert.match(row.librarySha256?.result||'',/^[a-f0-9]{64}$/);
-  assert.match(row.librarySha256?.effect||'',/^[a-f0-9]{64}$/);
+  for(const key of (contract.oracleLibraries||['result','effect']))
+   assert.match(row.librarySha256?.[key]||'',/^[a-f0-9]{64}$/,'missing oracle library:'+key);
   assert.deepEqual(Object.keys(row.refusals||{}).sort(),[...contract.requiredRefusals].sort());
   for(const digest of Object.values(row.refusals))assert.match(digest,/^[a-f0-9]{64}$/);
  }

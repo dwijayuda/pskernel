@@ -187,6 +187,8 @@ jobs:
           node --check scripts/compiler-m-conformance-tests.mjs
           node scripts/language-backend-parity-contract-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
+          node scripts/check-language-backend-parity.mjs docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json dist/scoped-correctness/stdlib-collections/results.json
           node scripts/check-language-backend-parity.mjs docs/PSC1_COMPILERM_CASE_CONTRACT.json dist/scoped-correctness/compiler-m/results.json
       - name: Execute owned component binary encoder with external encoding disabled
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
@@ -228,7 +230,10 @@ jobs:
           export PSC1_ERROR_EVIDENCE=typed-errors-python314
           export PSC1_COMPILERM_TARGETS=python
           export PSC1_COMPILERM_EVIDENCE=compiler-m-python314
+          export PSC1_COLLECTION_TARGETS=python
+          export PSC1_COLLECTION_EVIDENCE=stdlib-collections-python314
           node scripts/compiler-m-conformance-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
           node scripts/typed-error-conformance-tests.mjs
           node scripts/runtime-conformance-tests.mjs
           node scripts/ordinary-while-conformance-tests.mjs

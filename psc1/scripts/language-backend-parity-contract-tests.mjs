@@ -7,7 +7,7 @@ const rows=contract.cases.flatMap(c=>contract.grammars.flatMap(s=>contract.targe
  id:c.id,syntax:s,target:t,passed:true,flags:[false,true],admission:'independent-official-Lean',
  strictIr:'required-by-production-publication',runtime:'executed',sourceSha256:digest,
  entrySha256:digest,artifactSha256:digest,manifestSha256:digest,oracleSha256:digest,
- librarySha256:{result:digest,effect:digest},
+ librarySha256:Object.fromEntries(contract.oracleLibraries.map(key=>[key,digest])),
  refusals:Object.fromEntries(contract.requiredRefusals.map(id=>[id,digest]))
 }))));
 assert.equal(check(contract,rows).obligations,98);

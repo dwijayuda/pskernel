@@ -1,3 +1,3 @@
-inductive Except (ε : Type) (α : Type) where
-  | error (error : ε)
-  | ok (value : α)
+-- Except and its error/ok constructors are owned by the checked Essential
+-- Core prelude. Importing this compatibility module reuses that canonical
+-- identity, including the existing checked do/throw/catch interpretation.

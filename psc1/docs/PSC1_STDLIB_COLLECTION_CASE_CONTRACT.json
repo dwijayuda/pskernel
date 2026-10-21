@@ -1,0 +1,65 @@
+{
+  "schema": "psc1-language-backend-case-contract/1",
+  "id": "stdlib-collections-selected-v1",
+  "completeFamily": false,
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "cases": [
+    {
+      "id": "listCase",
+      "features": [
+        "canonical-prelude-list",
+        "list-length",
+        "append",
+        "linear-reverse",
+        "empty-list"
+      ]
+    },
+    {
+      "id": "arrayCase",
+      "features": [
+        "persistent-alias",
+        "optional-lookup",
+        "huge-index",
+        "empty-array"
+      ]
+    },
+    {
+      "id": "exceptCase",
+      "features": [
+        "canonical-prelude-except",
+        "typed-error",
+        "do"
+      ]
+    }
+  ],
+  "flags": [
+    false,
+    true
+  ],
+  "requiredRefusals": [
+    "wrong-element",
+    "wrong-index",
+    "duplicate-prelude",
+    "verified"
+  ],
+  "oracleLibraries": [
+    "option",
+    "prod",
+    "result",
+    "effect",
+    "list",
+    "array"
+  ]
+}

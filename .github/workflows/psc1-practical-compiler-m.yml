@@ -21,6 +21,8 @@ jobs:
       PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       PSC1_COMPILERM_TARGETS: js,rust
       PSC1_COMPILERM_EVIDENCE: compiler-m-focused
+      PSC1_COLLECTION_TARGETS: js,rust
+      PSC1_COLLECTION_EVIDENCE: stdlib-collections-focused
     defaults:
       run:
         shell: bash
@@ -52,11 +54,14 @@ jobs:
           node --check scripts/compiler-m-conformance-tests.mjs
           node scripts/language-backend-parity-contract-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
       - name: Retain exact sources oracle artifacts and failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: psc1-practical-compiler-m-${{ github.sha }}
-          path: psc1/dist/scoped-correctness/compiler-m-focused/
+          path: |
+            psc1/dist/scoped-correctness/compiler-m-focused/
+            psc1/dist/scoped-correctness/stdlib-collections-focused/
           retention-days: 14
           if-no-files-found: warn

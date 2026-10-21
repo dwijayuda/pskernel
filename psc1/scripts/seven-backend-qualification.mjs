@@ -36,6 +36,21 @@ for (const [data, selectedTargets] of [[compilerM, targets], [minimumCompilerM, 
   checkLanguageBackendParity(compilerMContract, data.records, { targets: selectedTargets });
 }
 
+const collectionsContract = read('docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json');
+const collections = read('dist/scoped-correctness/stdlib-collections/results.json');
+const minimumCollections = read('dist/scoped-correctness/stdlib-collections-python314/results.json');
+for (const [data, selectedTargets] of [[collections, targets], [minimumCollections, ['python']]]) {
+  assert.equal(data.schema, 'psc1-language-backend-execution/1');
+  assert.equal(data.contract, collectionsContract.id);
+  assert.equal(data.testedCommit, process.env.GITHUB_SHA || null);
+  assert.equal(data.branchHeadCommit, process.env.PSC1_HEAD_SHA || null);
+  assert.equal(data.checkerCommit, runtime.nativeLean.commit);
+  assert.equal(data.passed, true);
+  assert.deepEqual(data.failures, []);
+  assert.deepEqual(data.targets, selectedTargets);
+  checkLanguageBackendParity(collectionsContract, data.records, { targets: selectedTargets });
+}
+
 const typedErrors = read('dist/scoped-correctness/typed-errors/results.json');
 const minimumErrors = read('dist/scoped-correctness/typed-errors-python314/results.json');
 const components = read('dist/scoped-correctness/wasm-component-direct.json');
@@ -300,6 +315,10 @@ const receipt = {
     runtimeBytes: x.runtime.runtimeBytes, runtimeSha256: x.runtime.runtimeSha256
   })),
   architectureFoundation: {
+    standardCollections: { contract: collectionsContract.id,
+      caseGrammarTargetObligations: collections.records.length,
+      minimumPythonObligations: minimumCollections.records.length,
+      evidence: 'stdlib-collections/results.json', completeFamily: false },
     compilerM: { contract: compilerMContract.id, cases: compilerMContract.cases.map(row => row.id),
       authoredGrammars: compilerMContract.grammars, caseGrammarTargetObligations: compilerM.records.length,
       observationsPerObligation: 2, minimumPythonObligations: minimumCompilerM.records.length,

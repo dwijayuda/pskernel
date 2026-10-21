@@ -1,8 +1,7 @@
 import ProofScript.Data.Option
 
-inductive List (α : Type) where
-  | nil
-  | cons (head : α) (tail : List α)
+-- List and its constructors are owned by the checked Essential Core prelude.
+-- These helpers extend that identity and compose with literals/finite loops.
 
 def listMap {α : Type} {β : Type}
     (f : α -> β) (xs : List α) : List β :=
@@ -18,10 +17,16 @@ def listAppend {α : Type}
   | List.cons head tail =>
       List.cons head (listAppend tail ys)
 
-def listLength {α : Type} (xs : List α) : Nat :=
+def listLengthAcc {α : Type} (xs : List α) : Nat -> Nat :=
   match xs with
-  | List.nil => 0
-  | List.cons head tail => listLength tail
+  | List.nil => fun (total : Nat) => total
+  | List.cons _ tail =>
+      fun (total : Nat) =>
+        let smaller : Nat -> Nat := listLengthAcc tail;
+        smaller (Nat.succ total)
+
+def listLength {α : Type} (xs : List α) : Nat :=
+  listLengthAcc xs 0
 
 def listHeadOption {α : Type}
     (xs : List α) : Option α :=
@@ -42,10 +47,13 @@ def listHeadOrElse {α : Type}
 
 
 
-def listReverse {α : Type} (xs : List α) : List α :=
+def listReverseAcc {α : Type} (xs : List α) : List α -> List α :=
   match xs with
-  | List.nil => List.nil
+  | List.nil => fun (reversed : List α) => reversed
   | List.cons head tail =>
-      listAppend
-        (listReverse tail)
-        (List.cons head List.nil)
+      fun (reversed : List α) =>
+        let smaller : List α -> List α := listReverseAcc tail;
+        smaller (List.cons head reversed)
+
+def listReverse {α : Type} (xs : List α) : List α :=
+  listReverseAcc xs List.nil

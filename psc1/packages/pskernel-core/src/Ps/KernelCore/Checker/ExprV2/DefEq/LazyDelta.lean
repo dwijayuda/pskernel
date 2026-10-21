@@ -53,9 +53,8 @@ def psKernelExprV2DefEqLazyDeltaContinueWithFuel
       let resume :=
         fun (nextContext : PsKernelExprV2CheckContext)
             (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
-          let recur := psKernelExprV2DefEqLazyDeltaContinueWithFuel remaining;
-          recur continuation defeq whnf coreWhnf
-            nextContext nextState nextLeft nextRight;
+          psKernelExprV2DefEqLazyDeltaContinueWithFuel remaining
+            continuation defeq whnf coreWhnf nextContext nextState nextLeft nextRight;
       let afterNat :=
         fun (nextContext : PsKernelExprV2CheckContext)
             (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>

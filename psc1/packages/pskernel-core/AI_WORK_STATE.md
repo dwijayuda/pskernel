@@ -9,6 +9,67 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 08:50 UTC — recursive-call portability fix; authentic caller attribution
+
+At exact source `dbb86c93c15bc84c82c530d9bebdf9a76c15e339`, native integration
+[119125965066](https://github.com/dwijayuda/pskernel/actions/runs/39571330765/job/119125965066)
+and native correctness
+[119125963590](https://github.com/dwijayuda/pskernel/actions/runs/39571330406/job/119125963590)
+are terminal PASS, as are the five native/portable-subset research jobs.
+Authentic PSC1 now parses and elaborates the corrected DeltaStep module.
+It then rejects `psKernelExprV2DefEqLazyDeltaContinueWithFuel` with
+`structuralRecursionArity` in LazyDelta.lean. Generated integration
+[119125964646](https://github.com/dwijayuda/pskernel/actions/runs/39571330765/job/119125964646)
+and generated research
+[119125963933](https://github.com/dwijayuda/pskernel/actions/runs/39571330549/job/119125963933)
+are terminal FAIL before runtime qualification.
+
+This function has a flat nine-argument entry. Its recursive alias supplied only
+the fuel argument, which authentic PSC1's structural checker does not admit for
+that entry shape. The correction calls the recursive function with all nine
+arguments inside the same callback lambda. The flat generated ABI, predecessor
+fuel, fixed callbacks, evaluation point, native semantics and assertions remain
+unchanged. This fixes the source class rather than changing the compiler or gate.
+The containing corrected source still requires its own complete CI receipts.
+
+### Original-body logical trace (diagnostic branch only)
+
+Diagnostic [39568817340 /119117586645](https://github.com/dwijayuda/pskernel/actions/runs/39568817340/job/119117586645)
+at `868a1ee518a963ec141bc1129910aaf093261031` is terminal PASS **collection**.
+Its runtime source is qualified e015; changes are solely the isolated tracing
+harness/workflow. The separate copy passed the existing detached controls and
+strict compiler-runtime identity check. All four original body digests and host
+limits were retained. No timed-out case became a checking verdict.
+
+- `perf/repeated-subproblem.ndjson`:587 logical samples;579 nearest samples
+  are `psKernelExprHasFVar`. The observed caller chain is semantic cache
+  eligibility → core WHNF → lazy-delta step → full-shape/application DefEq →
+  theorem admission, after the public DAG operation restarts V1. Static
+  declaration validation is not the observed dominant caller.
+- `perf/church-numerals.ndjson`:575 samples;378 nearest at expression-list
+  DefEq comparison,107 at recursive expression equality. It still times out.
+- `init-prelude.ndjson`:543 samples, mixed name/cache work and recursive
+  instantiation/inductive analysis across DAG attempts and V1 restarts; still
+  times out. Its authenticated graph has54,535nodes.
+- `bugs/proj-of-stuck-prop.ndjson`:unprofiled and diagnostic copies correctly
+  reject;288 logical samples cover mixed checking/transform/cache work.
+
+The diagnostic ZIP
+[12332855748](https://github.com/dwijayuda/pskernel/actions/runs/39568817340/artifacts/12332855748)
+has SHA-256 `9604ac00e098ec1d68fd405b28ffb8d83e5bce8d1c0ef9206a1621ab0394a670`.
+Sampling/stack instrumentation changes performance; these are caller-attribution
+receipts, not latency speedups or conformance results. The217 successor records
+timeout verdict comparison as unassessed rather than Boolean agreement; that run
+remains IN PROGRESS.
+
+Next: qualify lazy delta, then the prepared full-shape and final DefEq stages.
+The observed fallback caller makes this migration relevant to the measured
+bottleneck. Static DAG admission guards remain useful P1 work but are not claimed
+to fix these timeouts. A separately staged quotient reduction draft now preserves
+fixed recursor/public/core fuel ownership; it is uncompiled, not integrated and
+requires its native/generated/official matrices before promotion.
+Last complete scoped provider gateA remains e015; B/C remain open.
+
 ## 2026-10-21 08:42 UTC — explicit control-flow types for authentic PSC1
 
 The two conditional-root aliases in `b438e9508a6df7b2f895f3c96456bf42851443d5`

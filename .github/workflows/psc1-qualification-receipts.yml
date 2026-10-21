@@ -1,0 +1,33 @@
+name: PSC1 existing qualification artifact inspection
+on:
+  push:
+    branches:
+      - diagnostic/psc1-034-qualification-receipts-20261021
+    paths:
+      - .github/workflows/psc1-qualification-receipts.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  read-existing-native-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 39637759611
+          artifact-ids: 12365440836
+          path: evidence
+      - name: Print existing source-bound parent regression logs
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for p in sorted(Path("evidence").rglob("*")):
+              if p.is_file() and p.name.endswith(".log"):
+                  print("ARTIFACT_FILE", p.name)
+                  text = p.read_text(errors="replace")
+                  print(text if len(text) < 50000 else text[-50000:])
+          PY

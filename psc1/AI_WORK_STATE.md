@@ -12,6 +12,13 @@ needs an actual run to corroborate the tested zero-heavy selection.
 The first router run correctly skips the unrelated specialization benchmark.
 
 Actual next implementation, pending full CI:
+08c5 run39571719689 proves the constructor mechanism works in native admitted
+ordinary tests and the actual Lean JSON application on JS/TS/Rust. Existing
+128-budget and uninhabited/forged-source refusals pass. Full remains pending:
+normalize method-style List.length into explicit applications in compiler
+source (reached source census unsupportedTerm), and use PSC1 PS match-with /
+space-separated constructor patterns in the authored PS application.
+
 CI dependency selection now carries failed/cancelled update debt from the last
 successful same-PR/same-base ancestor gate. The event.before interval alone
 could omit a changed policy/target whose previous run was cancelled; regression

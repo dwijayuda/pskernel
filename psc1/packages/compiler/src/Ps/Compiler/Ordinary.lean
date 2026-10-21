@@ -160,7 +160,7 @@ def psOrdinaryConstructorAlternativesWorker
                 | PsDeclaration.constructorDecl info =>
                     if psNameEq info.inductiveName parent.name &&
                         Nat.beq info.numParams parent.numParams &&
-                        Nat.beq info.levelParams.length levels.length then
+                        Nat.beq (List.length info.levelParams) (List.length levels) then
                       let candidate := psExprApplyMany (PsExpr.constE name levels) parameters;
                       let searched := psOrdinaryConstructorFieldsWorker smaller environment locals
                         target info.numFields candidate available;
@@ -183,8 +183,8 @@ def psOrdinaryInductiveWitness
           match declaration with
           | PsDeclaration.inductiveDecl info =>
               if Nat.beq info.numIndices 0 &&
-                  Nat.beq info.numParams view.args.length &&
-                  Nat.beq info.levelParams.length levels.length then
+                  Nat.beq info.numParams (List.length view.args) &&
+                  Nat.beq (List.length info.levelParams) (List.length levels) then
                 psOrdinaryConstructorAlternativesWorker smaller environment locals target
                   info levels view.args info.constructors available
               else Prod.mk Option.none available

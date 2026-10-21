@@ -15,10 +15,10 @@ def mixedCase(flag : Bool) : Nat := recordObservation(mixedCaseInput(flag))
 
 def scalarDecoderCase(flag : Bool) : Nat :=
   let source : String := if (flag) { "D83D\\uDE00" } else { "DFFF" }
-  match (jsonReadUnicode4(source, 0)) {
-  | Result.ok(value) => 2
-  | Result.error(error) =>
-      match (error) {
+  match (jsonReadUnicode4(source, 0)) with {
+  | Result.ok value => 2
+  | Result.error error =>
+      match (error) with {
       | JsonError.invalidUnicode => 1
       | _ => 2
       }

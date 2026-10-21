@@ -1,216 +1,101 @@
 # PSC1 active development checkpoint
 
 Updated 2026-10-21. GitHub APIs and Linux Actions only.
-Draft PR172: https://github.com/dwijayuda/pskernel/pull/172
+Draft PR #172: https://github.com/dwijayuda/pskernel/pull/172
 Branch: fix/psc1-closure-normalization-20261021
-Base #171 remains1fad9ed53cda9b23ac30be9cea85e7857437564e.
-Preserve history with fresh HEAD reads,expected-HEAD updates and force=false.
-No merge,registry publication or branch-protection change is authorized here.
+Base #171: 1fad9ed53cda9b23ac30be9cea85e7857437564e.
+Preserve history with fresh HEAD reads, expected-HEAD updates and force=false.
+No merge, registry publication or protection change is authorized.
 
-## Qualified general sequencing checkpoint
+## Latest scoped qualification
 
-Implementation5a0f999a1b5d06f5b68461392fab05a8c86ca535 passes Linux run39612250401:
-https://github.com/dwijayuda/pskernel/actions/runs/39612250401
-Tested mergef5a67080458c996a7ba29555d37f973260e6e37d; full119266753508 and
-aggregate119273090917 SUCCESS. Native, all compiler closures, G1 and focused
-jobs succeed. Both grammars/all7 pass28 sequencing obligations, plus4 on minimum
-Python. Real general sequencing executes8 JS/TS/Rust/Python grammar/target bundles.
-Standalone Python and Rust each pass20 actual Linux policy checks. Host traps
-escape source handlers. PHP standalone and Wasm String/host ABI remain excluded.
-The Rust lock below is captured verbatim from this successful Linux job.
+Implementation 74179eb664e132502a24ce60b52a3dbd52b1d0cc passes Linux run 39627387430:
+https://github.com/dwijayuda/pskernel/actions/runs/39627387430
+Tested merge 2a6dbec7b7f3d02c6dc6399360422da350e646e7. Static, native, focused, all three complete compiler
+closures, G1, host boundary, full scoped integration and aggregate gate pass.
+Historical benchmark is dependency-skipped. Exact jobs, artifacts and hashes:
+docs/PSC1_TYPED_IO_EXECUTION_QUALIFICATION_2026-10-21.json.
 
-## Qualified five-target standalone IO checkpoint
+Both grammars/all seven targets: 28 general IO sequencing obligations, with 4 more on
+minimum Python; fourteen actual general IO consumers; two minimum-Python
+consumers; two installed unpublished-package JS consumers. Four host providers
+retain 20 actual Linux policy cases each, including malformed field classes.
+Core/component String consumers, ten native ABI checks and the oversized-GC
+request comparison pass. Existing inference, CompilerM, collections, JSON,
+typed-error, runtime, divergence, package and negative suites remain required.
 
-Implementation1fbff4dca6a262de4b3d6d418afcb018ba1037fe passes full Linux
-run39615391064 at tested merge5e6c2094d85931cdc4de6b481b9a783a9f4563f3:
-https://github.com/dwijayuda/pskernel/actions/runs/39615391064
-Full119277178493 and aggregate119284833967 SUCCESS; all selected native,
-closure, G1 and focused jobs pass. Ten actual general source IO consumers
-pass across both grammars and JS/TS/Rust/Python/PHP. Standalone Rust/Python/PHP
-each pass20 shared actual Linux policy checks; Node retains its20 checks.
-The PHP explicit FFI profile is now scoped-qualified. Default PHP boundaries
-remain. All7 pure sequencing obligations pass28 cases plus4 minimum Python.
-This checkpoint still excludes real Wasm String/core/component IO.
+Readiness: 15 qualified / 22 blocked; releaseReady=false. The typed-io family's three finite
+criteria are scoped-qualified through exact-commit actual execution evidence.
+Complete CLI/JSON/library/compiler-like application acceptance remains blocked.
+This documentation-only descendant preserves the tested implementation; its
+static gate is not a new full compiler qualification.
 
-## Active Wasm String and IO continuation
+## Typed IO implementation and boundaries
 
-The next patch adds an explicit wasm-string ABI and Wasm io-dispatcher mapping.
-Typed memory/global instructions, fixed16MiB arena, UTF8 validation/copying,
-strict target operand checks, source/schema rechecking, canonical component
-allocation and post-return cleanup are implemented but NOT yet qualified.
-Wasm IO supports explicit payload bounds up to2MiB, reserving arena room for
-worst-case JSON escaping and response allocation. Larger configurations refuse
-before loading; oversized encoded requests retain typed tooLarge semantics.
-Core uses the existing explicit Node capability host; component uses the
-standalone Python capability host through pinned Wasmtime Python49.0.0.
-Default Wasm/component policies remain. Native ABI positive/negative tests and independent wasm-tools validation of both
-native-generated core/component String binaries now pass during the focused tier.
-The authored boundary fixtures now use the qualified String.Internal.length API.
-Focused Wasm execution at87baa7540787bc40dd228d489293e508dcbdc59b passes both
-grammars on core and component consumers, including actual source IO and traps.
-A direct oversized-GC-request test requires typed tooLarge before any host call,
-compared with the portable adapter under the same payload bound.
-Implementation53a61459546dc5b0e9faf0092ec96fd9d0dc33ca passes all selected static,
-native, focused, G1 and three source-closure jobs in run39624139192. Focused
-execution includes all4 grammar/Wasm pairs and the oversized-request refusal.
-The actual Rust consumer now merges the independently committed guest/host lock
-graphs and builds with --locked; its merged lock is retained and hashed.
-Cross-adapter malformed-input checks also cover non-string opcodes and comma
-containing object keys. Node validates opcode type before property lookup and
-compares actual key membership, avoiding coercion-dependent error differences.
-The unpublished npm qualification package now includes all adapter resources,
-exposes io/node and io/wasm-core entry points, checks the installed Rust host with
-its committed lock, and executes general authored IO through the installed CLI
-and Node adapter. Source libraries are explicitly vendored into those canary
-projects and independently checked; no ambient workspace fallback is assumed.
-Final full integration at the latest implementation is still pending.
-Rust/PHP FFI profiles explicitly refuse architectures outside qualified Linux
-x86_64; disabled PHP FFI is tested to refuse before root/guest access.
-Cross-adapter policy checks additionally require malformed path/text field values
-to preserve the same typed error classification in every standalone provider. Core and
-component execution tests run early in the focused tier for fast ABI feedback,
-then repeat in required full qualification. New seven-target IO receipt and
-readiness checks distinguish actual adapters from pure protocol observations; no claim of completion before their results.
+ProofScript.System.IO is independently authored in IO.lean and IO.ps.
+Io A is the checked CompilerM alias with a String-to-String dispatcher, Unit
+state and IoError. Existing checked bind, loop, mutation, return and handler
+semantics provide general source sequencing. No foreign logical axiom exists.
+Successful host effects remain visible after later typed errors. Foreign traps,
+checker failures and integration defects escape source error handlers.
 
-## Earlier typed IO implementation notes
+--abi io-dispatcher selects the explicit dispatcher boundary; other public
+values retain their qualified scalar policy. Rust/Python/PHP have standalone
+hosts; Rust uses owned safe Read/Write streams and forbids unsafe code.
+Rust/PHP FFI profiles explicitly admit the qualified Linux x86_64 ABI. PHP FFI
+must be enabled before guest loading and grants no source FFI primitive.
+Rust consumer locks preserve both generated guest and committed host graphs.
 
-Source sequencing now uses the checked Io alias of CompilerM with an explicit
-String dispatcher, authored in both grammars. Commit d16e1d1bc3dd17ba09d428bd4844dbc0c46e990c
-passed native, compiler closure and G1 jobs, but run39608411456 failed focused
-erasure before emission. Preserve that failure: parameterized type-valued aliases
-were incorrectly treated as runtime declarations. The next patch classifies the
-whole checked type telescope before erasure; no kernel or IR check is bypassed.
+--abi wasm-string adds public Bool/String marshaling for core/components.
+Wasm IO binds the checked dispatcher argument to an explicit host import.
+GC strings own validated UTF8 bytes/scalar counts. Typed memory operations,
+pointer/size checks, canonical allocation, post-return and source/schema
+rechecking remain mandatory. The linear arena is fixed 16 MiB; Wasm IO payload
+configuration above 2 MiB refuses before loading, leaving room for JSON escaping
+and responses. Oversized requests return portable typed tooLarge before host
+dispatch. Unsupported shapes refuse; default ABIs remain unchanged.
 
-The opt-in --abi io-dispatcher profile accepts only a String-to-String callback
-input with scalar remaining inputs/results on JS/TS/Rust/Python/PHP. Default
-public ABI restrictions remain. Wasm refuses explicitly until marshaling exists.
-A real source application exercises bind, loops, mutation, typed recovery and
-host trap separation. New execution evidence is pending Linux Actions; do not
-promote this work to qualified from source inspection. Standalone Python adapter and twenty shared actual Linux policy checks are now
-implemented, pending Actions validation. Rust standalone adapter and policy server are now implemented with safe owned
-console streams and no unsafe code; initial Linux dependency-lock capture and
-actual native guest execution are pending. PHP standalone adapter and Wasm
-String ABI remain the next implementation tasks. Run39610746683 exposed a
-bootstrap census refusal of early-return do syntax in BackendCommon.Plan; the
-same ABI policy is now expressed with structural workers, preserving its checks.
+Node/Python/Rust/PHP hosts preserve explicit capabilities, held root directories,
+no-follow traversal, regular-file checks, bounded fatal UTF8 reads, atomic writes
+and defined line/EOF behavior. Host adapters are for independently checked guests;
+they confer no admission authority. Source/IR checks, all negative tests and
+resource policies remain. IO providers and Wasm String details:
+docs/PSC1_TYPED_IO_V1.md and docs/PSC1_WASM_STRING_ABI_V1.md.
 
-## Latest qualified implementation
+Unpublished npm qualification ships all host resources, Node/Wasm entry points,
+and the locked Rust crate. Installed canaries explicitly vendor source libraries
+and compile them independently; no ambient workspace fallback is assumed.
+No registry publication occurred.
 
-Implementationf7993e3d51917e2ec18f3c758a61468f06caaeb2 qualifies at tested merge
-09dd56600d4ba550f25d105d49659c824da2d5d8, Linux run39603714675 SUCCESS:
-https://github.com/dwijayuda/pskernel/actions/runs/39603714675
-Static,native,focused,three compiler closures,G1,host boundary,full scoped and
-aggregate gates pass. The historical benchmark is skipped by dependency selection.
-Receipt:docs/PSC1_INFERENCE_IO_QUALIFICATION_2026-10-21.json contains exact jobs,
-source/artifact identities,tool versions,application observations and exclusions.
+## Authoritative remaining work
 
-Both grammars/all7 targets:70 bounded inference/control +56 typed IO protocol
-obligations,each observing both Bool inputs. Minimum Python adds10+8.
-The real JSON-file/console application passes10 grammar/target bundles across
-JS,TS,Rust,Python,PHP,plus2 on minimum Python. Twenty actual Linux capability
-policy checks pass. Existing126 CompilerM +42 collection +98 JSON obligations,
-minimum-runtime,runtime,typed-error,while/deadline,negative/publication and
-installed-package suites remain green. Thirty-eight native contextual checks
-include speculative meta rollback before a different successful constraint.
+docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json freezes 14 families, 37 criteria, four
+applications,both grammars and seven targets. Its dependency-ordered workQueue
+and docs/PSC1_DEVELOPMENT_ROADMAP.md remain authoritative.
+Readiness comes from actual exact-commit receipts, never source inspection.
 
-Readiness:12 finite criteria qualified,25 blocked; no complete family/application;
-releaseReady=false. The pure protocol matrix does not qualify seven IO adapters.
-This documentation-only descendant preserves that implementation. Its static
-gate is separate from the exact full source qualification above; do not claim a
-fresh full compiler qualification for a metadata-only commit.
+Continue unbound inference/control acceptance and constructive admitted Nat/Int
+order, then finish actual CLI/JSON/library/compiler-like applications and measured
+100000-item workloads under existing limits. Preserve working features and all
+independent references. Full scoped success is necessary, not release readiness.
 
-## Current language and IO implementation
+## G1 and history
 
-Bare lambda domains come only from the expected function telescope. Both parsers
-retain typed/grouped binders and reject ambiguous/unresolved lambdas. Domains and
-dependent codomains are checked sequentially with fresh binding identities.
-ProofScript declaration parsing retains explicit groups around intervening
-implicit binders. Failed expected-result previews restore the original meta state.
-Runtime cases cover numeric/tuple/empty-array/lambda contexts,dependent calls,
-nested do/loop return ownership,collection/range traversal and handler/capture
-rollback. Broader unbound finite family criteria remain open.
+Qualified G1 service 80d68437af9db1b7db42be3889cb62fe99adad0b6355e0a25cb97aa3cccb280f, 84 modules,ten-case v2 corpus,one native seed and no
+later native frontend/emitter delegation. Artifact 12356714805 is retained to
+2027-01-19T15:37:43Z. Receipt records source/admission/original/specialized IR digests.
+Earlier services 18518dab471043762d4d01f28c97f99bb8b34f54810c27b4cfb93380404a0534
+and 9fee036b0ee9e2bdd9617bf2df0811409a4893ad8c7f59ab2ab478c0ea1be757,
+artifacts 12347821634 and 12333713515,source,tests and CI evidence remain preserved.
 
-ProofScript.System.IO defines checked requests,responses,typed errors and codecs
-in independently authored IO.lean and IO.ps. The PS tests use a local PS import
-root,preventing authoritative-Lean fallback from replacing the authored library.
-Source programs remain pure request/response computations; this slice does not
-provide a general source IO do monad or a foreign logical axiom.
+The f7993e3d51917e2ec18f3c758a61468f06caaeb2 inference/protocol checkpoint
+(run 39603714675),5a0f999a1b5d06f5b68461392fab05a8c86ca535 sequencing checkpoint
+(run 39612250401),and1fbff4dca6a262de4b3d6d418afcb018ba1037fe five-target standalone
+checkpoint(run 39615391064) remain exact historical qualifications.
+All prior qualification files and failed diagnostic commits remain in history.
 
-host-tools/typed-io.mjs provides the explicit Linux Node capability host.
-Required capabilities and unsupported configuration refuse before guest loading.
-File operations use held no-follow directory descriptors,regular-file checks,
-bounded fatal UTF-8 decoding and atomic replacement; console IO defines CRLF,
-empty lines,unterminated lines and EOF. Permissions,symlinks,traversal,FIFO,
-encoding/size refusal and previous-file preservation are tested. Compiler/checker/
-application failures remain outside the source IO error channel.
-Rust/Python/PHP guests execute in separate processes through the common Node host;
-their standalone host adapters are not qualified. The adapter is a capability
-boundary for generated checked programs,not a sandbox for arbitrary JS packages.
-Full policy and API details:docs/PSC1_TYPED_IO_V1.md.
-
-The independent native IO references import only pinned Lean and use its JSON
-API. Do not concatenate PSC1's Nat-offset JSON source into native Lean: the
-native String API uses String.Pos.Raw and native Ordering already exists.
-The existing strict malformed-surrogate policy remains PSC1-specific.
-
-## Authoritative scope and next work
-
-docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json remains the fixed release contract:
-fourteen families,37 finite criteria,four applications,both grammars,seven targets.
-docs/PSC1_DEVELOPMENT_ROADMAP.md is the single active roadmap. Its contract-owned
-workQueue now prioritizes inference/control,then typed IO,then checked ordering
-and application/performance completion. Preserve working functionality.
-
-Continue typed IO and remaining finite acceptance work:
-- Complete the typed IO execution interface and standalone target adapters.
-- Resolve Wasm public String ABI before claiming real core/component IO. Current
-  internal strings are GC structures/byte arrays,not linear-memory pointers;
-  public admission/component policy currently intersects at Bool. Preserve
-  unsupported-ABI refusals until explicit marshaling and consumers qualify.
-- Add general source sequencing only through checked semantics; do not smuggle
-  effects into logical evaluation or turn host failures into source errors.
-- Finish unbound inference/control criteria,constructive Nat/Int order and actual
-  CLI/JSON-file/library/compiler-like application requirements,including measured
-  large inputs under existing resource limits.
-Do not reinterpret the current five-guest/common-host execution as seven standalone
-adapters,complete application qualification or production release readiness.
-
-## G1 and preserved historical evidence
-
-Current G1 service18518dab471043762d4d01f28c97f99bb8b34f54810c27b4cfb93380404a0534
-passes the ten-case v2 corpus,84 source modules,one native seed and no later native
-frontend/emitter delegation. Artifact12347821634 is retained to2027-01-19.
-The receipt records source closure,admission and original/specialized IR digests.
-Earlier qualified G1 service9fee036b0ee9e2bdd9617bf2df0811409a4893ad8c7f59ab2ab478c0ea1be757
-and artifact12333713515 remain preserved with their original successful evidence.
-
-G2/G3/fixed-point qualification and expensive profiles stay manual until stable
-feature freeze. Keep the original V8 heap-exhaustion and post-fusion timeout
-defect/replay evidence; do not repoint old CPU replay to the new G1 artifact.
-PSKernel-Core Expression V2 research progresses independently. Compiler admission
-remains official Lean4.35.0 at eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
-
-Historical receipts remain exact facts in docs and Git history:
-PSC1_JSON_APPLICATION_QUALIFICATION_2026-10-21.json,
-PSC1_DEVELOPMENT_OPTIMIZATION_QUALIFICATION_2026-10-21.json,
-PSC1_CI_ROUTING_QUALIFICATION_2026-10-21.json,
-PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md and prior G1/source-closure receipts.
-
-## CI and implementation rules
-
-psc1-development.yml selects static,focused,integration and full tiers from the
-last successful same-PR ancestor gate with immutable dispatch-base identity.
-Failed/cancelled test debt remains; unknown policy/target/build changes select
-full qualification. Static policy tests fail before expensive compiler builds.
-Focused receipts may report tested subsets; full IO qualification requires the
-five-guest matrix and minimum Python. Missing/stale/duplicate evidence refuses.
-Admission,IR,execution and publication receipts are regenerated,never cached.
-Only pinned tools and exact-source Lake objects are cached.
-
-Manual psc1-practical-release reruns native/closures/G1/full qualification and
-enforces --require-ready; it must refuse the incomplete release contract.
-Keep strict original/transformed IR,ordinary pairing,negative tests,resource
-policies and independent kernel admission. Preserve source normalization:
-use supported constructor patterns,explicit psListLength and guarded structural
-workers; avoid reintroducing unsupported nested patterns in compiler source.
-Keep AI_WORK_STATE.md current and concise; historical narratives stay in Git.
+G2/G3/fixed-point work stays manual until stable feature freeze. Preserve the
+original V8 heap-exhaustion and later post-fusion timeout evidence; do not repoint
+old CPU replay to new G1 artifacts. PSKernel-Core Expression V2 research stays
+independent. Official Lean 4.35.0 admission remains pinned at
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc.

@@ -62,23 +62,20 @@ PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md retains original heap-exhaustion and la
 timeout evidence. Address it when ordinary application compilation reaches the
 same mechanism, not merely to self-host an unfinished compiler.
 
-The bounded inference/typed IO implementation at f7993e3d51917e2ec18f3c758a61468f06caaeb2
-passes full Linux run39603714675. Both grammars/all targets execute70 inference
-and56 pure IO protocol obligations; actual file/console applications execute
-through five guest backends and the common Linux Node capability host,including
-minimum Python. Twenty capability policy checks pass. See
-[the exact receipt](PSC1_INFERENCE_IO_QUALIFICATION_2026-10-21.json) and
-[the IO profile](PSC1_TYPED_IO_V1.md). Readiness is12 qualified/25 blocked criteria;
-standalone host adapters,Wasm String IO,general sequencing and remaining complete
-application/performance acceptance remain open. Continue these finite blockers;
-do not promote a pure protocol observation into full IO-family qualification.
+The typed IO continuation at 74179eb664e132502a24ce60b52a3dbd52b1d0cc passes
+full Linux run 39627387430, tested merge 2a6dbec7b7f3d02c6dc6399360422da350e646e7.
+Both grammars/all seven execute 28 general sequencing obligations plus 4 on minimum
+Python. Fourteen actual IO consumers, two minimum-Python consumers, two installed
+unpublished-package consumers and 80 host policy cases pass. Core/component
+String ABI, foreign-trap separation, strict memory/schema checks and oversized
+request refusal are included. The typed-io family's three finite criteria are
+scoped-qualified; readiness is 15 qualified / 22 blocked, releaseReady=false.
+See PSC1_TYPED_IO_EXECUTION_QUALIFICATION_2026-10-21.json,
+PSC1_TYPED_IO_V1.md and PSC1_WASM_STRING_ABI_V1.md.
 
-
-General IO sequencing at5a0f999a1b5d06f5b68461392fab05a8c86ca535 passes
-full run39612250401:28 both-grammar/all-target obligations plus4 minimum-Python,
-eight actual JS/TS/Rust/Python dispatcher consumers, and20 Linux policy checks
-each for standalone Python and Rust. PHP standalone is in subsequent Linux CI.
-The explicit Wasm String/core/component IO bridge is implemented with strict
-typed memory checks and canonical allocation; qualification is pending. See
-PSC1_WASM_STRING_ABI_V1.md. Continue actual ABI/adapters qualification before
-declaring the typed-io finite criteria finished. Release readiness remains false.
+Continue unbound inference/control criteria, constructive checked numeric order,
+then complete CLI/JSON/library/compiler-like application acceptance and measured
+large inputs. Existing partial application regressions remain; source execution
+does not imply complete four-application or release qualification. Preserve the
+f799 inference/protocol,5a0f sequencing and1fbf five-target standalone receipts
+with their original source and CI identities. G2/G3 stay deferred until freeze.

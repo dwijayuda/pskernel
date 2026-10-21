@@ -1,4 +1,4 @@
-# Typed IO v1 implementation slice
+# Typed IO v1 scoped qualification
 
 The source library ProofScript.System.IO defines IoRequest, IoResponse and IoError,
 plus JSON request encoding and typed read/write result decoding. Both authored
@@ -8,7 +8,8 @@ replace it. Source compilation still requires independent official Lean 4.35.0
 admission, strict original/transformed IR and existing ordinary pairing.
 
 The logical program produces requests and consumes responses. Effects execute
-only through host-tools/typed-io.mjs, with explicit configuration. No foreign
+through explicitly configured Node/Python/Rust/PHP hosts and core/component
+String bridges. No foreign
 axiom, effectful logical evaluator or runtime fuel is introduced. This adapter
 is an embedding capability boundary for generated checked programs, not a
 sandbox for arbitrary JavaScript packages. Bundle metadata grants no admission.
@@ -83,11 +84,15 @@ and runs console echo/EOF. TS uses the pinned independent checker; Rust,Python a
 separate generated consumer processes. Expected requests agree with pinned native
 Lean and final file/console bytes are independently asserted.
 
-Rust,Python and PHP are guests of the common Node capability host. Their
-standalone host adapters and Wasm IO adapters remain unfinished; Wasm public String ABI remains
-an explicit blocker. The seven-target Bool protocol matrix qualifies only pure
-request/response semantics, never seven host adapters or complete applications.
-Release readiness must remain false until all fixed contract criteria qualify.
+That original request/response application remains a regression suite using the
+common Node host. General checked sequencing now executes independently through
+all seven target mappings in both grammars. Each native provider passes 20 actual
+Linux policy cases. The new matrix also checks source recovery, foreign trap
+escape, admitted source/IR identities and ABI refusal preservation.
+
+The typed-io family's three finite criteria are scoped-qualified. Complete
+application acceptance and other Practical Core criteria remain blocked;
+releaseReady=false. Pure protocol observations alone never qualify host adapters.
 
 
 ## Checked sequencing and standalone profiles
@@ -97,25 +102,26 @@ Both grammars share bind, loops, mutation, return ownership and typed handlers.
 Successful external writes remain observable after later typed errors; source
 handlers never convert foreign traps into IoError.
 
-`--abi io-dispatcher` accepts exactly a `String -> String` callback input with
-scalar remaining arguments/results. The sealed manifest records publicAbi;
+`--abi io-dispatcher` accepts a `String -> String` callback input with qualified
+scalar remaining arguments/results on JS/TS/Rust/Python/PHP. Wasm's explicit
+version admits Bool/String public values and refuses other shapes. The sealed manifest records publicAbi;
 metadata grants no admission authority. Default ABI and verified refusals remain.
 
 `typed_io.py` and `typed-io-rust` provide standalone Linux Python/Rust hosts.
 Rust uses owned Read/Write streams and forbids unsafe code. The Linux-captured
-Cargo.lock pins its dependency graph. The common20-case actual Linux policy
+Cargo.lock pins its dependency graph. The common 20-case actual Linux policy
 matrix and general generated guest execution pass for both standalone profiles.
 
 `typed-io.php` adds the explicit `psc1-php-linux-ffi-string-io/1` Linux CLI/glibc
 profile. Enabled FFI is required before guest loading; source receives no FFI
 primitive. openat and held directory descriptors enforce path policy. fstat
 operates on a duplicate of a securely opened descriptor, avoiding guessed native
-stat layouts. This PHP profile is pending Linux qualification; existing defaults
-retain their boundaries.
+stat layouts. This explicit PHP profile passes Linux qualification; existing defaults retain
+their boundaries. Disabled FFI refuses before root or guest access.
 
-Qualification of5a0f999a1b5d06f5b68461392fab05a8c86ca535:
+Earlier four-target sequencing checkpoint5a0f999a1b5d06f5b68461392fab05a8c86ca535:
 https://github.com/dwijayuda/pskernel/actions/runs/39612250401
-Both grammars/all7:28 sequencing obligations, minimum Python adds4;8 actual
+Both grammars/all seven:28 sequencing obligations, minimum Python adds4;8 actual
 JS/TS/Rust/Python consumers. PHP standalone and Wasm String ABI are excluded.
 
 
@@ -124,3 +130,18 @@ qualified system-call ABI. Other architectures refuse before source execution.
 Node/Python use runtime-provided platform constants. All profiles classify
 non-string paths as pathDenied and non-string text as protocolError; shared
 policy tests exercise these malformed field classes.
+
+
+## Exact current evidence
+
+Implementation 74179eb664e132502a24ce60b52a3dbd52b1d0cc, tested merge
+2a6dbec7b7f3d02c6dc6399360422da350e646e7:
+https://github.com/dwijayuda/pskernel/actions/runs/39627387430
+The exact receipt is PSC1_TYPED_IO_EXECUTION_QUALIFICATION_2026-10-21.json.
+Fourteen actual IO consumers, two minimum-Python consumers, two installed-package
+consumers,80 provider policy cases and core/component String checks pass.
+Wasm IO supports payload limits up to 2 MiB and a fixed 16 MiB arena; larger
+configuration refuses before loading. See PSC1_WASM_STRING_ABI_V1.md.
+The unpublished npm qualification package exports proofscript/io/node and
+proofscript/io/wasm-core and ships the standalone Python/PHP/locked-Rust resources.
+No registry publication or release-readiness claim is made.

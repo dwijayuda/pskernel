@@ -206,6 +206,7 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --json-application
           node scripts/compiler-m-conformance-tests.mjs --inference-control
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
+          node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
           node scripts/typed-io-policy-tests.mjs
           PSC1_IO_APPLICATION_TARGETS=js,ts,rust,python,php node scripts/typed-io-application-tests.mjs
           node scripts/check-language-backend-parity.mjs docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json dist/scoped-correctness/stdlib-collections/results.json
@@ -256,6 +257,8 @@ jobs:
           export PSC1_JSON_EVIDENCE=json-application-python314
           export PSC1_INFERENCE_TARGETS=python
           export PSC1_INFERENCE_EVIDENCE=inference-control-python314
+          export PSC1_IO_SEQUENCING_TARGETS=python
+          export PSC1_IO_SEQUENCING_EVIDENCE=typed-io-sequencing-python314
           export PSC1_IO_PROTOCOL_TARGETS=python
           export PSC1_IO_PROTOCOL_EVIDENCE=typed-io-protocol-python314
           node scripts/compiler-m-conformance-tests.mjs
@@ -263,6 +266,7 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --json-application
           node scripts/compiler-m-conformance-tests.mjs --inference-control
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
+          node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
           PSC1_IO_APPLICATION_TARGETS=python PSC1_IO_APPLICATION_EVIDENCE=typed-io-python314 node scripts/typed-io-application-tests.mjs
           node scripts/typed-error-conformance-tests.mjs
           node scripts/runtime-conformance-tests.mjs

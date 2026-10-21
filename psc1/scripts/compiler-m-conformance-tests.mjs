@@ -9,16 +9,17 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
 const suite=process.argv[2]||'--compiler-m';
-assert.ok(['--compiler-m','--stdlib-collections','--json-application','--inference-control','--typed-io-protocol'].includes(suite));
+assert.ok(['--compiler-m','--stdlib-collections','--json-application','--inference-control','--typed-io-protocol','--typed-io-sequencing'].includes(suite));
+const ioSequencing=suite==='--typed-io-sequencing';
 const ioProtocol=suite==='--typed-io-protocol';
 const inferenceControl=suite==='--inference-control';
 const collections=suite==='--stdlib-collections';
 const jsonApplication=suite==='--json-application';
-const fixtureName=ioProtocol?'TypedIoProtocolFixtures':inferenceControl?'InferenceControlFixtures':jsonApplication?'JsonRecordApplication':collections?'StdlibCollectionFixtures':'CompilerMFixtures';
-const contractFile=ioProtocol?'PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json':inferenceControl?'PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json':jsonApplication?'PSC1_JSON_APPLICATION_CASE_CONTRACT.json':collections?'PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json':'PSC1_COMPILERM_CASE_CONTRACT.json';
-const evidenceName=ioProtocol?(process.env.PSC1_IO_PROTOCOL_EVIDENCE||'typed-io-protocol'):inferenceControl?(process.env.PSC1_INFERENCE_EVIDENCE||'inference-control'):jsonApplication?(process.env.PSC1_JSON_EVIDENCE||'json-application'):collections?(process.env.PSC1_COLLECTION_EVIDENCE||'stdlib-collections'):(process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
-const targetSelection=ioProtocol?process.env.PSC1_IO_PROTOCOL_TARGETS:inferenceControl?process.env.PSC1_INFERENCE_TARGETS:jsonApplication?process.env.PSC1_JSON_TARGETS:collections?process.env.PSC1_COLLECTION_TARGETS:process.env.PSC1_COMPILERM_TARGETS;
-const marker=ioProtocol?'PSC1_TYPED_IO_PROTOCOL':inferenceControl?'PSC1_INFERENCE_CONTROL':jsonApplication?'PSC1_JSON_APPLICATION':collections?'PSC1_COLLECTION':'PSC1_COMPILERM';
+const fixtureName=ioSequencing?'TypedIoSequencingFixtures':ioProtocol?'TypedIoProtocolFixtures':inferenceControl?'InferenceControlFixtures':jsonApplication?'JsonRecordApplication':collections?'StdlibCollectionFixtures':'CompilerMFixtures';
+const contractFile=ioSequencing?'PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json':ioProtocol?'PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json':inferenceControl?'PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json':jsonApplication?'PSC1_JSON_APPLICATION_CASE_CONTRACT.json':collections?'PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json':'PSC1_COMPILERM_CASE_CONTRACT.json';
+const evidenceName=ioSequencing?(process.env.PSC1_IO_SEQUENCING_EVIDENCE||'typed-io-sequencing'):ioProtocol?(process.env.PSC1_IO_PROTOCOL_EVIDENCE||'typed-io-protocol'):inferenceControl?(process.env.PSC1_INFERENCE_EVIDENCE||'inference-control'):jsonApplication?(process.env.PSC1_JSON_EVIDENCE||'json-application'):collections?(process.env.PSC1_COLLECTION_EVIDENCE||'stdlib-collections'):(process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
+const targetSelection=ioSequencing?process.env.PSC1_IO_SEQUENCING_TARGETS:ioProtocol?process.env.PSC1_IO_PROTOCOL_TARGETS:inferenceControl?process.env.PSC1_INFERENCE_TARGETS:jsonApplication?process.env.PSC1_JSON_TARGETS:collections?process.env.PSC1_COLLECTION_TARGETS:process.env.PSC1_COMPILERM_TARGETS;
+const marker=ioSequencing?'PSC1_TYPED_IO_SEQUENCING':ioProtocol?'PSC1_TYPED_IO_PROTOCOL':inferenceControl?'PSC1_INFERENCE_CONTROL':jsonApplication?'PSC1_JSON_APPLICATION':collections?'PSC1_COLLECTION':'PSC1_COMPILERM';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const native=process.env.PSC1_NATIVE||path.join(root,'.lake/build/bin/psc1');
 const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-compiler-m-'));
@@ -58,8 +59,8 @@ const extraLibraries={option:read(path.join(root,'stdlib/ProofScript/Data/Option
  prod:read(path.join(root,'stdlib/ProofScript/Data/Prod.lean')),
  list:read(path.join(root,'stdlib/ProofScript/Data/List.lean')),
  array:read(path.join(root,'stdlib/ProofScript/Data/Array.lean'))};
-const jsonLibraries=(jsonApplication||ioProtocol)?{ordering:read(path.join(root,'stdlib/ProofScript/Data/Ordering.lean')),json:read(path.join(root,'stdlib/ProofScript/Data/Json.lean'))}:{};
-if(ioProtocol)jsonLibraries.io=read(path.join(root,'stdlib/ProofScript/System/IO.lean'));
+const jsonLibraries=(jsonApplication||ioProtocol||ioSequencing)?{ordering:read(path.join(root,'stdlib/ProofScript/Data/Ordering.lean')),json:read(path.join(root,'stdlib/ProofScript/Data/Json.lean'))}:{};
+if(ioProtocol||ioSequencing)jsonLibraries.io=read(path.join(root,'stdlib/ProofScript/System/IO.lean'));
 const librarySha256=Object.fromEntries(Object.entries({...extraLibraries,...jsonLibraries,result:resultLibrary,effect:effectLibrary}).map(([key,value])=>[key,sha(value)]));
 const leanFixture=read(path.join(root,'test',fixtureName+'.lean'));
 const nativeAdapter=`
@@ -70,7 +71,7 @@ instance {C S E : Type} : MonadExceptOf E (CompilerM C S E) where
   throw := compilerThrow
   tryCatch := compilerTryCatch
 `;
-const oracleSource=ioProtocol?read(path.join(root,'test/TypedIoProtocolReference.lean')):jsonApplication?read(path.join(root,'test/JsonRecordReference.lean')):'import Lean\n'+Object.values(extraLibraries).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+Object.values(jsonLibraries).map(stripImports).join('\n')+'\n'+
+const oracleSource=ioSequencing?read(path.join(root,'test/TypedIoSequencingReference.lean')):ioProtocol?read(path.join(root,'test/TypedIoProtocolReference.lean')):jsonApplication?read(path.join(root,'test/JsonRecordReference.lean')):'import Lean\n'+Object.values(extraLibraries).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+Object.values(jsonLibraries).map(stripImports).join('\n')+'\n'+
  nativeAdapter+'\n'+stripImports(leanFixture)+'\n'+
  'def main : IO Unit := do\n  IO.println (\"PSC1_COMPILERM_ORACLE: \" ++ (Lean.Json.mkObj [("leanVersion",Lean.toJson Lean.versionString),("leanCommit",Lean.toJson Lean.githash),'+
  contract.cases.flatMap(c=>[false,true].map(flag=>'("'+c.id+(flag?'True':'False')+'",Lean.toJson (toString ('+c.id+' '+flag+')))')).join(',')+']).compress)\n';
@@ -144,7 +145,7 @@ try {
   const folder=path.join(evidence,'sources',syntax);
   const fixture=path.join(root,'test/'+fixtureName+'.'+syntax);
   write(path.join(folder,fixtureName+'.'+syntax),read(fixture));
-  if(ioProtocol)write(path.join(folder,'ProofScript/System/IO.'+syntax),read(path.join(root,'stdlib/ProofScript/System/IO.'+syntax)));
+  if(ioProtocol||ioSequencing)write(path.join(folder,'ProofScript/System/IO.'+syntax),read(path.join(root,'stdlib/ProofScript/System/IO.'+syntax)));
   // Imported identities remain private to the entry module; distinct wrapper
   // names avoid accidental self-reference and retain individual observations.
   const applicationModuleSha256={};
@@ -167,7 +168,23 @@ try {
   const combine=exports.map(name=>syntax==='lean'?'('+name+' flag)':'('+name+'(flag))').join(' && ');
   write(path.join(folder,'Entry.'+syntax),'import '+fixtureName+'\n'+definitions.join('\n')+
    (syntax==='lean'?'def semantic (flag : Bool) : Bool := ':'def semantic(flag : Bool) : Bool := ')+combine+'\n');
-  const negativeCases=ioProtocol?[
+  const negativeCases=ioSequencing?[
+  {
+    "id": "wrong-path",
+    "lean": "import ProofScript.System.IO\ndef invalid : Io String := ioReadUtf8 true\n",
+    "ps": "import ProofScript.System.IO\ndef invalid : Io(String) := ioReadUtf8(true)\n"
+  },
+  {
+    "id": "wrong-result",
+    "lean": "import ProofScript.System.IO\ndef invalid : Io Nat := do\n  let text : String <- ioReadUtf8 \"x\"\n  return text\n",
+    "ps": "import ProofScript.System.IO\ndef invalid : Io(Nat) := do { let text : String <- ioReadUtf8(\"x\")\n return text }\n"
+  },
+  {
+    "id": "wrong-effect",
+    "lean": "import ProofScript.System.IO\ndef invalid : Id String := do\n  ioReadUtf8 \"x\"\n",
+    "ps": "import ProofScript.System.IO\ndef invalid : Id(String) := do { ioReadUtf8(\"x\") }\n"
+  }
+]:ioProtocol?[
   {
     "id": "wrong-path",
     "lean": "import ProofScript.System.IO\ndef invalid : IoRequest := IoRequest.readUtf8 true\n",
@@ -212,7 +229,7 @@ try {
    const label=syntax+'-'+target,extension={js:'js',ts:'ts',rust:'rs','wasm-core':'wasm','wasm-component':'wasm',python:'py',php:'php'}[target];
    const output=path.join(work,label,'module.'+extension);
    const args=['build',path.join(folder,'Entry.'+syntax),'--target',target,'--out',output];
-   if(jsonApplication||ioProtocol)args.push('--assurance','ordinary');
+   if(jsonApplication||ioProtocol||ioSequencing)args.push('--assurance','ordinary');
    if(target==='wasm-component')args.push('--exports',names.join(','));
    try{
     run(native,args);

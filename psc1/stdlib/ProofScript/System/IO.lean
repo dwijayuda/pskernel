@@ -1,3 +1,4 @@
+import ProofScript.Compiler.Effect
 import ProofScript.Data.Json
 
 -- Host effects are explicit requests. No logical axiom, runtime intrinsic or
@@ -105,3 +106,36 @@ def ioWriteResult (source : String) : Result Unit IoError :=
   | IoResponse.done => Result.ok ()
   | IoResponse.failed error => Result.error error
   | _ => Result.error IoError.protocolError
+
+-- Checked IO is Reader/Except over an explicit dispatcher input. Native effects
+-- are supplied by the selected host adapter; source handlers consume IoError
+-- values, never host exceptions. Completed host writes are not rolled back.
+def Io (A : Type) : Type := CompilerM (String -> String) Unit IoError A
+
+def ioPerformRun {A : Type}
+    (request : IoRequest) (decode : String -> Result A IoError)
+    (dispatch : String -> String) (state : Unit) : Result (Prod A Unit) IoError :=
+  match decode (dispatch (ioEncodeRequest request)) with
+  | Result.error error => Result.error error
+  | Result.ok value => Result.ok (Prod.mk value state)
+
+def ioPerform {A : Type}
+    (request : IoRequest) (decode : String -> Result A IoError) : Io A :=
+  CompilerM.mk (ioPerformRun request decode)
+
+def ioReadLine (unit : Unit) : Io (Option String) :=
+  ioPerform IoRequest.readLine ioReadLineResult
+
+def ioWriteLine (text : String) : Io Unit :=
+  ioPerform (IoRequest.writeLine text) ioWriteResult
+
+def ioReadUtf8 (path : String) : Io String :=
+  ioPerform (IoRequest.readUtf8 path) ioReadTextResult
+
+def ioWriteUtf8 (path text : String) : Io Unit :=
+  ioPerform (IoRequest.writeUtf8 path text) ioWriteResult
+
+def ioRun {A : Type} (program : Io A) (dispatch : String -> String) : Result A IoError :=
+  match program.run dispatch () with
+  | Result.error error => Result.error error
+  | Result.ok pair => Result.ok pair.fst

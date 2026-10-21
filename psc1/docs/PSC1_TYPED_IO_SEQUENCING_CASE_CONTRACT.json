@@ -1,0 +1,61 @@
+{
+  "schema": "psc1-language-backend-case-contract/1",
+  "id": "typed-io-sequencing-v1",
+  "completeFamily": false,
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "cases": [
+    {
+      "id": "sequenceCase",
+      "features": [
+        "typed-IO-bind",
+        "once-only-source-sequencing",
+        "for",
+        "UTF-8",
+        "EOF"
+      ]
+    },
+    {
+      "id": "recoveryCase",
+      "features": [
+        "typed-IO-catch",
+        "lexical-state",
+        "host-errors-not-caught"
+      ]
+    }
+  ],
+  "flags": [
+    false,
+    true
+  ],
+  "requiredRefusals": [
+    "wrong-path",
+    "wrong-result",
+    "wrong-effect",
+    "duplicate-prelude",
+    "verified"
+  ],
+  "oracleLibraries": [
+    "option",
+    "prod",
+    "result",
+    "effect",
+    "list",
+    "array",
+    "json",
+    "ordering",
+    "io"
+  ],
+  "scope": "Checked source sequencing using explicit dispatcher input; pure observation wrappers are distinct from actual host execution."
+}

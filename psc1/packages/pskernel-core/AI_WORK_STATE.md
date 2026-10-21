@@ -1,3 +1,19 @@
+# Latest qualified observation: exact original Church DefEq fuel failure
+
+The repaired diagnostic source `56acbeddfcc0cab73ba649cf0f16405918fe4edd` is terminal **PASS for diagnostic collection**, [run39654014643](https://github.com/dwijayuda/pskernel/actions/runs/39654014643), job119409393373. It independently built and ran the unchanged V1 kernel from `369bee5801bd5e4476837684fad3f7e1ca8c422c`, then proved the five observer/frozen-worker equivalences with the permitted logical dependencies. The failed e878 compilation receipt below is retained as history and is superseded only for this repaired harness source.
+
+The genuine original API still admits three requests then returns **resourceExhausted/fuel** on request3 at the unchanged4096 bound. The independent observed invocation agrees exactly and preserves the session. The47 bounded error frames identify the original application-argument descent: owner2 enters cheap-left/core-WHNF1, which calls the application head at0. Selected preceding frames are full-shape application tails, then lambda quick-after-core, lazy delta and outer Eq full-shape. No runtime decision delegates to official Lean; no source fuel, callback placement or publication rule was changed.
+
+All138 transport,3 native,3 theorem-stage,9 stage-parser,4 DefEq and9 DefEq-parser controls passed. Both native invocations enforced60seconds/hard2GiB/emptyPATH, had no timeout or OOM and cleaned up. Original admission0.816862s, observer-plus-independent-comparison1.713622s. Cgroup charged and sampled VmHWM metrics remain separate.
+
+The full typed diagnostic (including all47 bounded expression snapshots, build/proof receipts, exact fixture and artifact identities) is archived at `evidence/2026-10-21-church-native-defeq-diagnostic.json`. The readable interpretation is `evidence/2026-10-21-church-native-defeq-diagnostic.md`. Original artifact12371645069 is33,723,943bytes, ZIP SHA256`5840727772ed8b6bcf5e79e27f60b0af846a8ab1326aa27c09ab3e64297323cd`.
+
+**Compatibility remains FAIL for this case.** The official4.35 reference accepts its body. Metadata comparison was not rerun by this diagnostic; `kernel_qualified=false`, `arena_match_claimed=false` remain intact. Changing this proven original4096 result to acceptance would change the fixed-fuel acceptance contract, even if a new shortcut were logically sound. CPU/allocation refactors must preserve this error and cannot honestly be presented as eliminating the discrepancy. No limit increase or relabeling is authorized here.
+
+This checkpoint only records evidence; it changes no checker or diagnostic executable. Current integration source and its own generated/native qualification remain separate. Continue exact-semantics DAG ownership/occurrence migrations and measured generated-runtime bottleneck work; do not spin on the resolved Church diagnostic or claim full Arena qualification.
+
+---
+
 # Current Church diagnostic repair — actual observer elaboration failures corrected
 
 Source parent: `e8780a6c39129a8749198b0985745a15ddf7fa3f`.

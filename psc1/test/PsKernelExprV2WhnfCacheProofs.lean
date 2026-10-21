@@ -275,7 +275,12 @@ theorem same_hash_publication_precedes_older_candidates
   rw [modeled_lookup_exact
     (psKernelExprV2WhnfCacheInsert cache entry) (List.cons entry history)
     arena source hash (insert_models cache history entry model)]
-  simp [psKernelExprV2WhnfCacheFindWorker, sameHash]
+  cases compared : psKernelExprV2PagedEqOnCanonical arena entry.source source with
+  | error error =>
+      simp [psKernelExprV2WhnfCacheFindWorker, sameHash, compared]
+  | ok equal =>
+      cases equal <;>
+        simp [psKernelExprV2WhnfCacheFindWorker, sameHash, compared]
 
 end PsKernelExprV2WhnfCacheProofs
 

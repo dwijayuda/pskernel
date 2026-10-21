@@ -1,3 +1,15 @@
+# Current continuation — explicit cache publication proof cases (2026-10-21 16:05 UTC)
+
+Cache source `8059d09e288538f505051438f0917e03759323f7` compiled and passed its new native suite:1024raw comparisons,7adversarial rows,2immutable snapshots,9real valid definitions and1invalid definition including official Lean controls, all5caches promoted to9entries,36V1 resource comparisons,16guard-order cases,5scope controls and10callback-owner cases. Existing native regressions, detached24-case provider and native benchmark also passed at that source.
+
+The complete native integration job [119326846381](https://github.com/dwijayuda/pskernel/actions/runs/39630416825/job/119326846381) nevertheless **FAILED** the proof gate. Sixteen indexed-cache equations elaborated successfully. The final theorem `same_hash_publication_precedes_older_candidates` left an unresolved match after simplification at line274. Lean reported an error and printed its failed declaration with `sorryAx`; this is a rejected elaboration result, never an admitted source axiom or qualification. The source contains no `sorry` and the gate correctly rejects the revision.
+
+This proof-only repair splits the exact equality callback result into error/ok and both Boolean values, then closes each original branch with the same scanner equation. All17 theorem statements, their printed axiom dependencies, production source, test assertions, cache guards and unchanged4096fuel policy are retained. **This revision is NOT RUN until its exact terminal gates are inspected.** Generated/canonical gates for8059 were still running when the repair was prepared.
+
+Active integration remains qualified`3aa077cb64ff06f76727decd01c43ad6c33f351d`; owner branch`89c8b988fc349fa57d7757c8d11fe0b94f9e9188` has the separately repaired exact-inferred-type fixtures under qualification. All193-case Arena receipts for3aa andf9 are retained below and in evidence files; both have17hosttimeouts,1fuel exhaustion and1unsupported case, so gateC fails.
+
+---
+
 # Current continuation — indexed-cache library registration repair (2026-10-21 15:59 UTC)
 
 The independent cache branch candidate `be45ec11e2076922ba4591023b01f1edfcea9119` failed native compilation in [run 39629688445/job 119324245649](https://github.com/dwijayuda/pskernel/actions/runs/39629688445/job/119324245649): `WhnfState.lean:1` could not load `WhnfCache.olean`. The isolated `kernel-lakefile.lean` enumerates library roots explicitly; the new source file had been imported but was not listed there. This checkpoint registers `Ps.KernelCore.Checker.ExprV2.WhnfCache` immediately before `WhnfState`. Classification: build-graph integration defect. No checker operation, proof assertion, fixture count, workflow budget or resource policy changes.

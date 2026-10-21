@@ -48,6 +48,8 @@ native-generated core/component String binaries now pass during the focused tier
 The authored boundary fixtures now use the qualified String.Internal.length API.
 Focused Wasm execution at87baa7540787bc40dd228d489293e508dcbdc59b passes both
 grammars on core and component consumers, including actual source IO and traps.
+A direct oversized-GC-request test requires typed tooLarge before any host call,
+compared with the portable adapter under the same payload bound.
 Final full integration at the latest implementation is still pending.
 Rust/PHP FFI profiles explicitly refuse architectures outside qualified Linux
 x86_64; disabled PHP FFI is tested to refuse before root/guest access.

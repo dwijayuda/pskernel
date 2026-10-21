@@ -68,3 +68,39 @@ def main : IO Unit := do
     (ByteArray.mk artifacts.componentBytes.toArray)
   require "canonical String schema" (artifacts.wit ==
     "package proofscript:psc1;\n\nworld app {\n  export echo: func(text: string) -> string;\n}\n")
+
+
+  -- Exercise refusal before any foreign dispatch, without first constructing a
+  -- giant JSON source literal. NUL bytes are valid owned UTF-8 scalars.
+  let base := "Psc1.Test.Dispatch"
+  let code := "Psc1.Test.Code"
+  let oversized : PsWasmModule := { psWasmModuleEmpty with
+    abiMemory := true
+    structures := psWasmStringRuntimeStructures ++ [{
+      name := base, superType := none, isFinal := true
+      fields := [{ name := "code", storageType := .value .funcRef }] }]
+    arrays := psWasmStringRuntimeArrays
+    functionTypes := [{
+      name := code, parameters := [.refT base, psWasmStringRef], results := [psWasmStringRef] }]
+    functionImports := [{
+      moduleName := "psc1:io", importName := "dispatch"
+      function := {
+        name := "__psc1_abi_host_dispatch", typeName := none
+        parameters := [.i32, .i32, .i32], results := [], locals := [], body := [] } }]
+    functions := psWasmStringAbiFunctions ++ [psWasmStringAbiDispatchFunction base code, {
+      name := "oversize", typeName := none, parameters := [], results := [.i32], locals := []
+      body := [
+        .refFunc "__psc1_abi_dispatch_gc", .structNew base,
+        .i32Const 16777153, .arrayNewDefault psWasmStringBytesName,
+        .i32Const 16777153, .structNew psWasmStringName,
+        .call "__psc1_abi_dispatch_gc", .call "__psc1_abi_to_memory"] }]
+    functionRefs := ["__psc1_abi_dispatch_gc"]
+    exports := [("oversize", "oversize")]
+  }
+  require "oversized dispatcher boundary passes strict target validation"
+    (match psWasmIrValidateModule oversized with | .ok _ => true | .error _ => false)
+  let bytes <- match psWasmEncodeModule oversized with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "oversized boundary binary failed")
+  IO.FS.writeBinFile "dist/scoped-correctness/wasm-string-native/oversize-core.wasm"
+    (ByteArray.mk bytes.toArray)

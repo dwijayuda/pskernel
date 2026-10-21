@@ -6,6 +6,7 @@ import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {bindWasmStrings,withWasmTypedIo} from '../host-tools/typed-io-wasm.mjs';
+import {createTypedIo} from '../host-tools/typed-io.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-wasm-string-'));
 const evidence=path.join(root,'dist/scoped-correctness/wasm-string');
@@ -29,6 +30,19 @@ function build(source,target,output,abi){
  assert.equal(m.behaviorallyVerified,false);assert.equal(m.publicAbi,abi==='io-dispatcher'?'wasm-io-dispatcher':'wasm-string');
  run('wasm-tools',['validate',output]);return m;
 }
+const oversizeFile=path.join(root,'dist/scoped-correctness/wasm-string-native/oversize-core.wasm');
+run('wasm-tools',['validate',oversizeFile]);
+const oversized=new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(oversizeFile)),{
+ 'psc1:io':{dispatch(){throw Error('PSC1_OVERSIZE_UNEXPECTED_HOST_CALL');}}
+});
+const refused=oversized.exports.oversize(),view=new DataView(oversized.exports.memory.buffer,refused,8);
+const refusal=new TextDecoder('utf-8',{fatal:true}).decode(new Uint8Array(oversized.exports.memory.buffer,
+ view.getUint32(0,true),view.getUint32(4,true)));
+assert.deepEqual(JSON.parse(refusal),{kind:'error',error:'tooLarge'});
+const portable=createTypedIo({abi:'psc1-node-linux-string-io/1',capabilities:[],required:[],
+ root:work,maxFileBytes:2097152,maxLineBytes:2097152,inputFd:0,outputFd:1});
+try{assert.deepEqual(JSON.parse(refusal),JSON.parse(portable.execute('\0'.repeat(16777153))));}
+finally{portable.close();}
 const pureConsumer=path.join(work,'component-pure.py');
 write(pureConsumer,[
  'import wasmtime,sys',

@@ -8,6 +8,34 @@ Generated path: authentic PSC1 → TypeScript `7.0.2` → Node `22`. Full-kernel
 Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduction path.
 
 
+
+## 2026-10-21 07:56 UTC — allocation proof normalization correction
+
+At candidate `f483e310efdda9dfcca47d42a731540dfe478aba`,
+[integration 39564831824 / native job 119104503980](https://github.com/dwijayuda/pskernel/actions/runs/39564831824/job/119104503980)
+is terminal **FAIL** in the new equality proof file. Complete checker compilation
+and all preceding semantic, mutual, owner, inference, proof-irrelevance, Nat and
+transformation regressions passed. The new 800-comparison / 21-hostile native
+equality regression also passed. The universal theorems did not elaborate:
+the simplifier left equivalent right-expression matcher auxiliaries unresolved.
+This is a **proof-script defect**; no kernel decision mismatch was observed.
+The later fifteen-worker proof command and native provider/benchmark steps
+were **NOT RUN** in that failed job.
+
+The correction explicitly cases the right expression in each equality proof
+and finishes remaining definitional matcher equalities with reflexivity in the
+fuel proofs. Frozen predecessor definitions, theorem statements, production
+functions, required assertions and all CI gates are unchanged. Failed
+elaboration's printed `sorryAx` dependencies are failure diagnostics, never
+accepted proof receipts; the Lean process exited nonzero and blocked the job.
+No admitted proof or new trusted runtime path is introduced.
+
+Native correctness at f483e31 passed; other source/generated/canonical/research
+and corpus jobs were still running when this correction was prepared. The
+containing correction requires its own exact-SHA qualification. The last fully
+green developer/provider checkpoint remains 854bdb9 above; f483e31 is not
+qualified by the successful executable regression alone.
+
 ## 2026-10-21 07:38 UTC — qualified provider checkpoint; structural allocation candidate
 
 **Last fully qualified native/portable/generated developer checkpoint:**

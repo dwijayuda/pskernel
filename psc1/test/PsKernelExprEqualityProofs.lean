@@ -256,12 +256,14 @@ theorem exprEq_delayed_recursion_preserves (left : PsKernelExpr) :
     psKernelExprEq left = beforeExprEq left := by
   induction left <;>
     funext right <;>
+    cases right <;>
     simp_all only [psKernelExprEq, beforeExprEq]
 
 theorem exprEqual_delayed_recursion_preserves (left : PsKernelExpr) :
     psKernelExprEqual left = beforeExprEqual left := by
   induction left <;>
     funext right <;>
+    cases right <;>
     simp_all only [psKernelExprEqual, beforeExprEqual]
 
 theorem exprEq_pointwise_preserves (left right : PsKernelExpr) :

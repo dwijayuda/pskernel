@@ -2084,7 +2084,7 @@ theorem ReduceRecursorBoundedWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext defeq context state expr cheapRec cheapProj
-      simp only [psKernelReduceRecursorBoundedWithFuel, beforeReduceRecursorBoundedWithFuel, ih]
+      simp only [psKernelReduceRecursorBoundedWithFuel, beforeReduceRecursorBoundedWithFuel, ih] <;> rfl
 
 #print axioms ReduceRecursorBoundedWithFuel_delayed_recursion_preserves
 
@@ -2094,7 +2094,7 @@ theorem IsDefEqWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext context state left right
-      simp only [psKernelIsDefEqWithFuel, beforeIsDefEqWithFuel, ih]
+      simp only [psKernelIsDefEqWithFuel, beforeIsDefEqWithFuel, ih] <;> rfl
 
 #print axioms IsDefEqWithFuel_delayed_recursion_preserves
 
@@ -2104,7 +2104,7 @@ theorem WhnfWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext reduceRecursor context state expr
-      simp only [psKernelWhnfWithFuel, beforeWhnfWithFuel, ih]
+      simp only [psKernelWhnfWithFuel, beforeWhnfWithFuel, ih] <;> rfl
 
 #print axioms WhnfWithFuel_delayed_recursion_preserves
 
@@ -2114,7 +2114,7 @@ theorem WhnfCoreWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext publicWhnf reduceRecursor context state expr cheapRec cheapProj
-      simp only [psKernelWhnfCoreWithFuel, beforeWhnfCoreWithFuel, ih]
+      simp only [psKernelWhnfCoreWithFuel, beforeWhnfCoreWithFuel, ih] <;> rfl
 
 #print axioms WhnfCoreWithFuel_delayed_recursion_preserves
 
@@ -2124,7 +2124,7 @@ theorem InferCoreWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext whnf defeq context state expr inferOnly
-      simp only [psKernelInferCoreWithFuel, beforeInferCoreWithFuel, ih]
+      simp only [psKernelInferCoreWithFuel, beforeInferCoreWithFuel, ih] <;> rfl
 
 #print axioms InferCoreWithFuel_delayed_recursion_preserves
 
@@ -2134,7 +2134,7 @@ theorem InferAppOnlyLoopWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext whnf context state args index instantiated current
-      simp only [psKernelInferAppOnlyLoopWithFuel, beforeInferAppOnlyLoopWithFuel, ih]
+      simp only [psKernelInferAppOnlyLoopWithFuel, beforeInferAppOnlyLoopWithFuel, ih] <;> rfl
 
 #print axioms InferAppOnlyLoopWithFuel_delayed_recursion_preserves
 
@@ -2144,7 +2144,7 @@ theorem DefEqLazyReductionWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext defeq whnf coreWhnf context state left right
-      simp only [psKernelDefEqLazyReductionWithFuel, beforeDefEqLazyReductionWithFuel, ih]
+      simp only [psKernelDefEqLazyReductionWithFuel, beforeDefEqLazyReductionWithFuel, ih] <;> rfl
 
 #print axioms DefEqLazyReductionWithFuel_delayed_recursion_preserves
 
@@ -2154,7 +2154,7 @@ theorem DefEqLazyProjReductionWithFuel_delayed_recursion_preserves (fuel : Nat) 
   | zero => rfl
   | succ fuel ih =>
       funext defeq coreWhnf context state left right typeName index
-      simp only [psKernelDefEqLazyProjReductionWithFuel, beforeDefEqLazyProjReductionWithFuel, ih]
+      simp only [psKernelDefEqLazyProjReductionWithFuel, beforeDefEqLazyProjReductionWithFuel, ih] <;> rfl
 
 #print axioms DefEqLazyProjReductionWithFuel_delayed_recursion_preserves
 
@@ -2164,7 +2164,7 @@ theorem DefEqArgsWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext defeq context state left right
-      simp only [psKernelDefEqArgsWithFuel, beforeDefEqArgsWithFuel, ih]
+      simp only [psKernelDefEqArgsWithFuel, beforeDefEqArgsWithFuel, ih] <;> rfl
 
 #print axioms DefEqArgsWithFuel_delayed_recursion_preserves
 
@@ -2322,7 +2322,7 @@ theorem DefEqLambdaSpineWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext defeq context state left right subst
-      simp only [psKernelDefEqLambdaSpineWithFuel, beforeDefEqLambdaSpineWithFuel, ih]
+      simp only [psKernelDefEqLambdaSpineWithFuel, beforeDefEqLambdaSpineWithFuel, ih] <;> rfl
 
 #print axioms DefEqLambdaSpineWithFuel_delayed_recursion_preserves
 
@@ -2480,7 +2480,7 @@ theorem DefEqForallSpineWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext defeq context state left right subst
-      simp only [psKernelDefEqForallSpineWithFuel, beforeDefEqForallSpineWithFuel, ih]
+      simp only [psKernelDefEqForallSpineWithFuel, beforeDefEqForallSpineWithFuel, ih] <;> rfl
 
 #print axioms DefEqForallSpineWithFuel_delayed_recursion_preserves
 
@@ -2570,7 +2570,7 @@ theorem DefEqCompareExprListsWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext defeq context state left right
-      simp only [psKernelDefEqCompareExprListsWithFuel, beforeDefEqCompareExprListsWithFuel, ih]
+      simp only [psKernelDefEqCompareExprListsWithFuel, beforeDefEqCompareExprListsWithFuel, ih] <;> rfl
 
 #print axioms DefEqCompareExprListsWithFuel_delayed_recursion_preserves
 
@@ -2678,7 +2678,7 @@ theorem DefEqEtaStructFieldsWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext defeq context state induct term args numParams index
-      simp only [psKernelDefEqEtaStructFieldsWithFuel, beforeDefEqEtaStructFieldsWithFuel, ih]
+      simp only [psKernelDefEqEtaStructFieldsWithFuel, beforeDefEqEtaStructFieldsWithFuel, ih] <;> rfl
 
 #print axioms DefEqEtaStructFieldsWithFuel_delayed_recursion_preserves
 
@@ -2738,7 +2738,7 @@ theorem WhnfCountLambdasWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext current argCount count
-      simp only [psKernelWhnfCountLambdasWithFuel, beforeWhnfCountLambdasWithFuel, ih]
+      simp only [psKernelWhnfCountLambdasWithFuel, beforeWhnfCountLambdasWithFuel, ih] <;> rfl
 
 #print axioms WhnfCountLambdasWithFuel_delayed_recursion_preserves
 
@@ -2815,7 +2815,7 @@ theorem StringConstructorDataWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext value position listNil listCons charOfNat
-      simp only [psKernelStringConstructorDataWithFuel, beforeStringConstructorDataWithFuel, ih]
+      simp only [psKernelStringConstructorDataWithFuel, beforeStringConstructorDataWithFuel, ih] <;> rfl
 
 #print axioms StringConstructorDataWithFuel_delayed_recursion_preserves
 

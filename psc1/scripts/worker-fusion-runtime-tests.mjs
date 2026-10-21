@@ -17,7 +17,7 @@ const full=m.entry(30000n,30000n);
 const escaped=m.escaped(7n,10n);
 const captured=m.capture(5n);
 const shadow=m.shadow(2n);
-const ordered=m.ordered(0n);
+const ordered=m.orderedWitness();
 console.log(JSON.stringify({early:String(early),full:String(full),escaped:String(escaped),
  captured:String(captured),shadow:String(shadow),ordered:String(ordered),marks:probe.seen,
  earlyMs,maxRssKiB:process.resourceUsage().maxRSS}));\n`);

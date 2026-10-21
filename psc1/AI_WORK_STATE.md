@@ -6,7 +6,25 @@ on fix/psc1-closure-normalization-20261021. Base #171 remains immutable at
 The user explicitly requests execution of the [Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 without stopping at small milestones. Use GitHub tools and Linux CI only.
 
-## Current candidate — typed worker application fusion, Linux pending
+## Current candidate — normalize fusion recursion and correct raw IR harness
+
+Atd70c910b Native Lean compiled the new pass and tests. Both source grammars
+refused WorkerFusion.sink164:1 with unknownName:sink because its recursive fuel
+match sat inside an outer empty-arguments conditional. Put the fuel match at the
+top and retain the same zero/empty behavior in its branches.
+
+The raw fixture was correctly refused before fusion for external-import-abi-
+unqualified. Remove that unsupported import; observe operand order/count through
+private language-function parameters and an explicitly authored scalar JS harness.
+Retain an assertion that imported raw wrappers refuse, and report exact checker
+findings on any invalid fixture. No import/public ABI or checker rule changes.
+
+The profiler now includes the actual shared closed plan. Compare identical graph/
+original/pre-fusion inputs; actual closed IR and source are expected to change
+under fusion and are validated separately. The prior quoting-only byte identity
+receipt remains valid for its immutable pre-fusion checkpoint.
+
+## Typed worker application fusion, Linux pending
 
 The exact retained IR confirms psJsonStringCharsAccWithFuel has1 declaration
 parameter and3 returned unary lambdas. Its saturated recursive alias application

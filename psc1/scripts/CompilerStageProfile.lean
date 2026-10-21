@@ -92,9 +92,14 @@ def main (args : List String) : IO Unit := do
     profileMap (fun _ => "encode-specialized-refused") (psIrEncodeModule closed.raw))
   IO.FS.writeFile (output ++ ".original-ir.json") originalText
   IO.FS.writeFile (output ++ ".specialized-ir.json") specializedText
+  let actualClosed <- profileStep output rows "actual-shared-closed-plan" (fun _ =>
+    profileMap psBackendClosedPlanDiagnosticText (psBackendClosedPlanDetailed inputIr selected))
+  let closedText <- profileStep output rows "encode-actual-closed-plan" (fun _ =>
+    profileMap (fun _ => "encode-closed-refused") (psIrEncodeModule actualClosed.raw))
+  IO.FS.writeFile (output ++ ".closed-ir.json") closedText
   let jsIr <- profileStep output rows "js-lower-including-existing-respecialization" (fun _ =>
     profileMap (fun _ => "js-lowering-refused")
-      (psJsLowerValidatedModuleWithTargetProfile (PsJsTargetProfile.mk .bits64) closed))
+      (psJsLowerValidatedModuleWithTargetProfile (PsJsTargetProfile.mk .bits64) actualClosed))
   let _ <- profileStep output rows "js-validate" (fun _ =>
     profileMap (fun _ => "js-validation-refused") (psJsValidateModule jsIr))
   let printed <- profileStep output rows "js-print-declarations" (fun _ =>

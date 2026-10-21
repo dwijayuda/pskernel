@@ -163,11 +163,11 @@ def bindParameters (parameters : List PsVerifiedIrParameter) (arguments : List P
 -- Original lambda shadowing/capture scopes therefore remain exactly nested.
 def sink (fuel : Nat) (locals : List String) (expression : PsVerifiedIrExpr) (arguments : List PsVerifiedIrExpr) :
     Option PsVerifiedIrExpr :=
-  if psListIsEmpty arguments then Option.some expression
-  else
-    match fuel with
-    | Nat.zero => Option.none
-    | Nat.succ remaining =>
+  match fuel with
+  | Nat.zero => if psListIsEmpty arguments then Option.some expression else Option.none
+  | Nat.succ remaining =>
+      if psListIsEmpty arguments then Option.some expression
+      else
         match expression with
         | PsVerifiedIrExpr.lambda parameters _ body =>
             let count : Nat := psListLength parameters;

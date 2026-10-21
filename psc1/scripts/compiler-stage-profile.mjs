@@ -58,9 +58,12 @@ if (records.at(-1)?.phase === 'profile-complete') {
   const candidate = JSON.parse(fs.readFileSync(output + '.candidate.json','utf8'));
   assert.equal(candidate.status,'candidate');
   assert.equal(candidate.admissionRequest.admissions,graph);
+  assert.equal(JSON.stringify(candidate.originalIr),fs.readFileSync(output+'.original-ir.json','utf8'));
+  assert.equal(JSON.stringify(candidate.specializedIr),fs.readFileSync(output+'.closed-ir.json','utf8'));
+  assert.equal(candidate.source,fs.readFileSync(output+'.source.mjs','utf8'));
 }
 const identities = {};
-for (const name of ['original-ir.json','specialized-ir.json','source.mjs','admissions.json']) {
+for (const name of ['original-ir.json','specialized-ir.json','closed-ir.json','source.mjs','admissions.json']) {
   const file = output + '.' + name;
   if (fs.existsSync(file)) identities[name] = sha(fs.readFileSync(file));
 }

@@ -43,3 +43,15 @@ a billion-step input with immediate return,30000 full steps, lexical shadowing,
 old captures, exact-once ordered operands and external deadlines on ignored
 divergent prefixes. These tests and actual G1/G2/G3 are PENDING Linux execution.
 Existing all-source/both-grammar, whole-closure and full scoped gates remain.
+
+The initial raw IR fixture correctly refused an external import because this IR
+profile does not grant an external ABI. Order/count observations now use private
+callback parameters with an explicitly authored scalar JS test harness, not an
+approved public higher-order ABI. An explicit import-refusal assertion remains.
+The IR input finding codes are retained on any future fixture validation failure.
+
+The fixed-input profiler now follows the actual shared closed plan and retains
+both pre-fusion and actual closed IR. Admission/original/pre-fusion bytes must
+match baseline; transformed IR/source intentionally change with fusion, are
+revalidated and have separate runtime tests. The earlier quoting-only exact
+four-artifact byte-parity comparison is immutable.

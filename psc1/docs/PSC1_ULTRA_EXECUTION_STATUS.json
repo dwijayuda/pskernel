@@ -741,8 +741,8 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "f9f6be7ec4a2a5ab12baaa9daaeb58922e5f7696",
-    "status": "pending-linux-typed-worker-fusion",
+    "headBeforeCandidate": "d70c910b6f00e321f02a5738537d88b2b870b30c",
+    "status": "pending-linux-fusion-top-match-and-qualified-test-harness",
     "G1": {
       "run": 39543944316,
       "final": "success",
@@ -801,7 +801,7 @@
       "hotSource": "psJsonStringCharsAccWithFuel nested wrapped worker closures"
     },
     "G3": "not-run",
-    "next": "fix actual new module source/compiler checks, then rerun actual G1/G2/G3; no budget/heap changes",
+    "next": "native behavior, both source lanes, complete actual G1/G2/G3",
     "workerFusion": {
       "module": "Ps.CompilerIr.WorkerFusion",
       "stage": "shared-closed-plan-after-specialization",
@@ -809,7 +809,22 @@
       "nativeTargetChecks": "pending",
       "sourceCensus": "pending-both-grammars",
       "actualGenerations": "pending"
-    }
+    },
+    "lastRefusals": [
+      {
+        "run": 39551146009,
+        "module": "Ps.CompilerIr.WorkerFusion",
+        "line": 164,
+        "detail": "unknownName:sink",
+        "fix": "top-level fuel match"
+      },
+      {
+        "run": 39551146128,
+        "stage": "raw fixture input",
+        "detail": "external-import-abi-unqualified",
+        "fix": "private callbacks plus scalar test harness; import refusal retained"
+      }
+    ]
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

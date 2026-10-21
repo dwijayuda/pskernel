@@ -33,12 +33,12 @@ jobs:
           import zipfile
 
           repository = "dwijayuda/pskernel"
-          source = "034999734f2574876a747c967dd03bcc6904b395"
-          run_id = 39637759611
-          artifact_id = 12365440836
-          expected_bytes = 5009
-          expected_sha = "709d73791269923f65cc4ec56424bcc1fd6855c4f140b3f123dce3ef74d01b17"
-          target = "psc1-invalid-occurrence-parent.log"
+          source = "e8780a6c39129a8749198b0985745a15ddf7fa3f"
+          run_id = 39652286031
+          artifact_id = 12370347734
+          expected_bytes = 90582
+          expected_sha = "172d8b3286186dcb15e5ed02f89c67f05f0dff876e1c8de7f5e580a82fd2b02c"
+          targets = ["arena435-native-v1/build.stdout.txt", "arena435-native-v1/build.stderr.txt"]
           token = os.environ["PSC1_INSPECT_TOKEN"]
 
           def require(condition, message):
@@ -72,12 +72,13 @@ jobs:
           require(run.get("id") == run_id and run.get("head_sha") == source
                   and run.get("repository", {}).get("full_name") == repository
                   and run.get("head_repository", {}).get("full_name") == repository
-                  and run.get("path") == ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+                  and run.get("path") == ".github/workflows/psc1-pskernel-arena435-native-v1.yml"
+                  and run.get("status") == "completed" and run.get("conclusion") == "failure",
                   "producer run identity differs")
           metadata = json.loads(fetch("/actions/artifacts/" + str(artifact_id), 1024 * 1024))
           origin = metadata.get("workflow_run", {})
           require(metadata.get("id") == artifact_id
-                  and metadata.get("name") == "psc1-v2-dag-native"
+                  and metadata.get("name") == "psc1-arena435-native-v1-diagnostic"
                   and metadata.get("expired") is False
                   and metadata.get("size_in_bytes") == expected_bytes
                   and metadata.get("digest") == "sha256:" + expected_sha
@@ -87,18 +88,26 @@ jobs:
           require(len(raw) == expected_bytes and hashlib.sha256(raw).hexdigest() == expected_sha,
                   "immutable ZIP bytes differ")
           with zipfile.ZipFile(io.BytesIO(raw)) as archive:
-              matches = [entry for entry in archive.infolist()
-                         if not entry.is_dir() and pathlib.PurePosixPath(entry.filename).name == target]
-              require(len(matches) == 1, "saved parent log is absent or ambiguous")
-              entry = matches[0]
-              require(0 <= entry.file_size <= 64 * 1024, "saved parent log exceeds 64 KiB")
-              text = archive.read(entry).decode("utf-8")
-          print("PSC1_SAVED_FAILURE_AUTHENTICATED source=" + source +
-                " run=" + str(run_id) + " artifact=" + str(artifact_id) +
-                " zip_sha256=" + expected_sha)
-          print("PSC1_SAVED_PARENT_LOG_BEGIN " + target)
-          print(text, end="" if text.endswith("\n") else "\n")
-          print("PSC1_SAVED_PARENT_LOG_END " + target)
+              for target in targets:
+                  matches = [entry for entry in archive.infolist()
+                             if not entry.is_dir() and
+                             (entry.filename == target or entry.filename.endswith("/" + target))]
+                  require(len(matches) == 1, "saved build log absent or ambiguous: " + target)
+                  entry = matches[0]
+                  parts = pathlib.PurePosixPath(entry.filename)
+                  require(not parts.is_absolute() and ".." not in parts.parts
+                          and 0 <= entry.file_size <= 512 * 1024,
+                          "saved build log path/size differs")
+                  data = archive.read(entry)
+                  require(len(data) == entry.file_size, "saved build log length differs")
+                  text = data.decode("utf-8")
+                  print("PSC1_SAVED_CHURCH_BUILD_BEGIN " + json.dumps({
+                      "source_sha": source, "run": run_id, "artifact": artifact_id,
+                      "zip_sha256": expected_sha, "member": entry.filename,
+                      "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                      "checker_reexecuted": False}))
+                  print(text, end="" if text.endswith("\n") else "\n")
+                  print("PSC1_SAVED_CHURCH_BUILD_END " + target)
 
           # Read immutable observations only. No checker or benchmark is executed.
           def saved_archive(run_id, source, workflow, artifact_id, name, size, sha256):

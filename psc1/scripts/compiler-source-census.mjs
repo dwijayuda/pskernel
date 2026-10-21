@@ -156,6 +156,7 @@ for (const [module, stage] of [
   ['Ps.Environment.SelfHostProd', 'parse'], ['Ps.Environment.SelfHostProd', 'elaboration'],
   ['Ps.Environment.Resolve', 'parse'], ['Ps.Environment.Resolve', 'elaboration'],
   ['Ps.CompilerIr.Encode', 'parse'], ['Ps.CompilerIr.Encode', 'elaboration'],
+  ['Ps.CompilerIr.WorkerFusion', 'parse'], ['Ps.CompilerIr.WorkerFusion', 'elaboration'],
   ['Ps.CompilerIr.Validate', 'parse'], ['Ps.CompilerIr.Validate', 'elaboration'],
   ['Ps.BackendCommon.Plan', 'parse'], ['Ps.BackendCommon.Plan', 'elaboration'],
   ['Ps.BackendRust.RuntimePlan', 'parse'], ['Ps.BackendRust.RuntimePlan', 'elaboration'],

@@ -81,7 +81,8 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.CheckSize,
     `Ps.CompilerIr.Check,
     `Ps.CompilerIr.Specialize,
-    `Ps.CompilerIr.Validate
+    `Ps.CompilerIr.Validate,
+    `Ps.CompilerIr.WorkerFusion
   ]
 
 lean_lib PsBackendCommon where
@@ -402,3 +403,7 @@ lean_exe psc1_compiler_profile where
 lean_exe psc1_json_quote_tests where
   srcDir := "test"
   root := `JsonQuoteTests
+
+lean_exe psc1_worker_fusion_tests where
+  srcDir := "test"
+  root := `WorkerFusionTests

@@ -6,7 +6,30 @@ on fix/psc1-closure-normalization-20261021. Base #171 remains immutable at
 The user explicitly requests execution of the [Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 without stopping at small milestones. Use GitHub tools and Linux CI only.
 
-## Active blocker — G2 generated process abort; diagnostics pending
+## Current candidate — typed worker application fusion, Linux pending
+
+The exact retained IR confirms psJsonStringCharsAccWithFuel has1 declaration
+parameter and3 returned unary lambdas. Its saturated recursive alias application
+was printed as nested generator invokes, retaining one chain per input byte.
+[Typed worker design](docs/PSC1_TYPED_WORKER_FUSION.md).
+
+Add the general CompilerIr.WorkerFusion pass to the shared closed backend plan.
+It retains original declarations/partial uses, adds private full-arity companions
+only for total guarded lambda-producing prefixes, preserves lexical scopes via
+typed beta lets and exact-once alias captures, rewrites saturated applications,
+and strictly rechecks the complete transformed module. Unsafe/unrecognized
+prefixes stay untouched. No arbitrary recursor IH is globally delayed.
+Normalize all11 structural returned-state helpers in Bridge.Json consistently;
+their partial smaller worker is evaluated inside the state lambda.
+
+New Linux tests compare baseline/fused early/full work, closures, shadowing,
+strict operand order and divergence; forged typed wrappers still refuse.
+The new module is an explicit Lake/import root with maintained parse/elab gates
+in both grammars. Expected backend closures gain1 module; qualify actual counts.
+All this code is PENDING native/source/target/G1/G2/G3 CI. Do not infer success.
+Compiler limits and default Node heap/stack remain unchanged.
+
+## Earlier measured G2 process abort
 
 At3b189f589b0a4ad06eb1bcc666014220e72268df, actual G1 again passed all8 corpus
 cases with recorded scalar observations. Real G2 self-compilation was then

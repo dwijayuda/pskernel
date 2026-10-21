@@ -1,0 +1,52 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+const root=path.resolve('dist/worker-fusion');
+const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
+const consumer=path.join(root,'consumer.mjs');
+fs.writeFileSync(consumer,`import {pathToFileURL} from 'node:url';
+import {performance} from 'node:perf_hooks';
+import * as probe from './probe.mjs';
+const m=await import(pathToFileURL(process.argv[2]).href);
+const start=performance.now();
+const early=m.entry(1000000000n,0n);
+const earlyMs=performance.now()-start;
+const full=m.entry(30000n,30000n);
+const escaped=m.escaped(7n,10n);
+const captured=m.capture(5n);
+const shadow=m.shadow(2n);
+const ordered=m.ordered(0n);
+console.log(JSON.stringify({early:String(early),full:String(full),escaped:String(escaped),
+ captured:String(captured),shadow:String(shadow),ordered:String(ordered),marks:probe.seen,
+ earlyMs,maxRssKiB:process.resourceUsage().maxRSS}));\n`);
+const records=[];
+let expected=null;
+for(const label of ['baseline','fused']) {
+  const module=path.join(root,label+'.mjs');
+  const start=performance.now();
+  const run=spawnSync(process.execPath,[consumer,module],{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});
+  assert.equal(run.error,undefined,run.error?.message);
+  assert.equal(run.status,0,run.stderr);
+  const result=JSON.parse(run.stdout.trim());
+  assert.ok(result.earlyMs<2000,'first return must avoid traversing billion-fuel range');
+  const observation={...result};delete observation.earlyMs;delete observation.maxRssKiB;
+  assert.deepEqual(observation,{early:'0',full:'0',escaped:'3',captured:'0',shadow:'9',ordered:'3',marks:['2','5']});
+  if(expected)assert.deepEqual(observation,expected);else expected=observation;
+  records.push({label,elapsedMs:Math.round(performance.now()-start),moduleSha256:sha(fs.readFileSync(module)),...result});
+}
+for(const label of ['baseline','fused']) {
+  const strict=path.join(root,'strict-'+label+'.mjs');
+  const run=spawnSync(process.execPath,['--input-type=module','-e',
+    'import {pathToFileURL} from "node:url";const m=await import(pathToFileURL(process.argv[1]).href);m.strict(0n);',
+    strict],{encoding:'utf8',timeout:2000,maxBuffer:32*1024*1024});
+  assert.equal(run.error?.code,'ETIMEDOUT','ignored divergent rhs must still execute before returned lambda');
+}
+const result={schema:'psc1-typed-worker-fusion-runtime/1',commit:process.env.GITHUB_SHA,
+  processTimeoutMs:240000,divergenceDeadlineMs:2000,records,
+  preserved:['exact observations','escaping partial functions','old captured values','lexical shadowing',
+    'left-to-right exact-once operands','strict divergent prefix'],
+  formalPreservation:'not-provided'};
+fs.writeFileSync(path.join(root,'results.json'),JSON.stringify(result,null,2)+'\n');
+console.log('PSC1_TYPED_WORKER_FUSION_RUNTIME: '+JSON.stringify(result));

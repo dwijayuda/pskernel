@@ -41,7 +41,7 @@ jobs:
             sleep 5
           done
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_typed_error_tests psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_do_tests psc1_while_tests psc1_namespace_tests psc1_ordinary_tests psc1_ir_specialize_tests psc1_backend_common_tests psc1_direct_map_tests psc1_backend_normalization_tests psc1_ir_encoding_tests psc1_js_service_tests psc1_source_census_probe psc1_json_quote_tests
+          lake build psc1_typed_error_tests psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_do_tests psc1_while_tests psc1_namespace_tests psc1_ordinary_tests psc1_ir_specialize_tests psc1_backend_common_tests psc1_direct_map_tests psc1_backend_normalization_tests psc1_ir_encoding_tests psc1_js_service_tests psc1_source_census_probe psc1_json_quote_tests psc1_worker_fusion_tests
       - name: Execute all independent native control groups
         run: |
           set -euo pipefail
@@ -61,6 +61,9 @@ jobs:
           .lake/build/bin/psc1_backend_common_tests 2>&1 | tee dist/architecture-native/backend-common.log
           .lake/build/bin/psc1_direct_map_tests 2>&1 | tee dist/architecture-native/direct-map.log
           .lake/build/bin/psc1_backend_normalization_tests 2>&1 | tee dist/architecture-native/backend-normalization.log
+          .lake/build/bin/psc1_worker_fusion_tests 2>&1 | tee dist/architecture-native/worker-fusion-native.log
+          node scripts/worker-fusion-runtime-tests.mjs 2>&1 | tee dist/architecture-native/worker-fusion-runtime.log
+          cp -r dist/worker-fusion dist/architecture-native/
           .lake/build/bin/psc1_json_quote_tests 2>&1 | tee dist/architecture-native/json-quote.log
           .lake/build/bin/psc1_ir_encoding_tests 2>&1 | tee dist/architecture-native/ir-encoding.log
           .lake/build/bin/psc1_js_service_tests 2>&1 | tee dist/architecture-native/js-service.log

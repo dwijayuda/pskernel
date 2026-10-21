@@ -1,4 +1,5 @@
 import Ps.CompilerIr.Validate
+import Ps.CompilerIr.WorkerFusion
 import Ps.Foundation.List
 import Ps.Foundation.Name
 
@@ -162,10 +163,14 @@ def psBackendClosedPlanDetailed (source : PsValidatedIrModule)
               Except.error (PsBackendClosedPlanDiagnostic.mk "specialized-ir"
                 "PSC1_BACKEND_SPECIALIZED_IR_INVALID" Option.none)
           | Except.ok output =>
-              match psBackendClosedNames output publicNames with
+              match psFuseClosedWorkers output with
               | Except.error code =>
-                  Except.error (PsBackendClosedPlanDiagnostic.mk "public-coverage" code Option.none)
-              | Except.ok _ => Except.ok output
+                  Except.error (PsBackendClosedPlanDiagnostic.mk "worker-fusion" code Option.none)
+              | Except.ok fused =>
+                  match psBackendClosedNames fused publicNames with
+                  | Except.error code =>
+                      Except.error (PsBackendClosedPlanDiagnostic.mk "public-coverage" code Option.none)
+                  | Except.ok _ => Except.ok fused
 
 -- Preserve existing public result/error strings for every legacy caller.
 def psBackendClosedPlan (source : PsValidatedIrModule)

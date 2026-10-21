@@ -48,10 +48,12 @@ jobs:
             sleep 5
           done
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_source_census_probe psc1_js_service_tests psc1_js_service_seed psc1_independent_checker
+          lake build psc1_source_census_probe psc1_js_service_tests psc1_js_service_seed psc1_independent_checker psc1_worker_fusion_tests
       - name: Exercise the production scalar facade and exact complete source
         run: |
           set -euo pipefail
+          .lake/build/bin/psc1_worker_fusion_tests
+          node scripts/worker-fusion-runtime-tests.mjs
           .lake/build/bin/psc1_js_service_tests
           node scripts/compiler-source-census-contract-tests.mjs
           node scripts/compiler-closure-contract-tests.mjs
@@ -94,6 +96,7 @@ jobs:
           path: |
             psc1/dist/generated-compiler/
             psc1/dist/generated-service-native/
+            psc1/dist/worker-fusion/
             psc1/dist/scoped-correctness/compiler-source-census/
             psc1/dist/scoped-correctness/compiler-closure/
           if-no-files-found: warn

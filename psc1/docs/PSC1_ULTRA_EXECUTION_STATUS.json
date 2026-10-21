@@ -741,8 +741,8 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "afc969220d0799b3170e0a2ddde884c602cd76a7",
-    "status": "confirmed-G2-heap-exhaustion-generated-worker",
+    "headBeforeCandidate": "f9f6be7ec4a2a5ab12baaa9daaeb58922e5f7696",
+    "status": "pending-linux-typed-worker-fusion",
     "G1": {
       "run": 39543944316,
       "final": "success",
@@ -801,7 +801,15 @@
       "hotSource": "psJsonStringCharsAccWithFuel nested wrapped worker closures"
     },
     "G3": "not-run",
-    "next": "inspect exact admitted IR/emitted worker; general narrow checked fusion; preserve eval/captures and all default limits"
+    "next": "fix actual new module source/compiler checks, then rerun actual G1/G2/G3; no budget/heap changes",
+    "workerFusion": {
+      "module": "Ps.CompilerIr.WorkerFusion",
+      "stage": "shared-closed-plan-after-specialization",
+      "sourceNormalization": "11 Bridge.Json structural state workers",
+      "nativeTargetChecks": "pending",
+      "sourceCensus": "pending-both-grammars",
+      "actualGenerations": "pending"
+    }
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

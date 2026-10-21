@@ -1,3 +1,206 @@
+# Current handoff — T03a qualified; combined source qualification pending
+
+Observed: 2026-10-21T18:48:58Z / 2026-10-22 Asia/Jakarta.
+
+## Concurrent integration must qualify separately
+
+Immediately before this documentation update, live executable HEAD advanced to
+`deb18b9c87a5d21a406c6e5b852afb4d44785fe5`, a two-parent merge of qualified T03a source7b14
+and name-worker source34126793178021a9cd1bdb37aa6fe17c0fab41c6.
+Only `Core/Name.lean` changes production relative to7b14; the T03a carrier,
+fixtures and21proofs are unchanged. The existing workflows add name-worker
+gates while retaining all T03a and parent controls. The complete merged
+work-state and source histories are preserved verbatim below.
+
+**The combined revision is NOT YET A-qualified at this observation.** Its own
+existing jobs must finish; neither parent's qualification transfers. This
+documentation-only child records evidence and does not create a new qualified
+executable SHA. Do not launch duplicate CI.
+
+| Existing combined-source workflow | Observed result at 2026-10-21T18:48:12Z |
+| --- | --- |
+| Integration39651609850 | Native119401099653 PASS; generated119401099171 running |
+| Correctness39651609752 | Native119401099174 PASS; canonical119401098776 running |
+| Research39651609561 | All six jobs PASS |
+| Arena39651610468 | Official119401101610 PASS; independent119402241996 running |
+| Authentic profiles39651610007 | Job119401099438 running |
+
+The immediate next task is to finish observing these exact existing combined
+runs, preserving failures and source-bound artifacts. After the combined
+revision passes its own required scoped gates, the next implementation task
+is **T03b preexisting-session ownership**. The separate f9e9-to341 name-worker
+paired measurements and memory regressions remain in their existing evidence
+files; they are not measurements of7b14 or this combined source.
+
+## Exact T03a implementation and qualification
+
+**Exact qualified executable source: `7b14affc854e7bc99e4778ac155ae805dd273226`.**
+Its own complete mandatory gates are terminal PASS. The containing documentation
+commit records these observations and does not inherit that executable source's
+qualification. Read live HEAD separately before the next write.
+
+| Same-source workflow | Terminal evidence |
+| --- | --- |
+| [Integration39645765038](https://github.com/dwijayuda/pskernel/actions/runs/39645765038) | Native119380795456 PASS; generated119380794907 PASS |
+| [Correctness39645764867](https://github.com/dwijayuda/pskernel/actions/runs/39645764867) | Native119380794896 PASS; reconstructed canonical .ps119380794398 PASS |
+| [Research39645765012](https://github.com/dwijayuda/pskernel/actions/runs/39645765012) | All six PASS:119380796590,119380797133,119380797134,119380797158,119380797194,119380797443 |
+| [Full Arena39645764921](https://github.com/dwijayuda/pskernel/actions/runs/39645764921) | Official119380794281 PASS; independent119387868442 FAIL; all193 retained |
+| [Authentic profiles39645764955](https://github.com/dwijayuda/pskernel/actions/runs/39645764955) | Job119380795767 PASS, collection only; not kernel qualification |
+
+Source-bound run/job conclusions, artifact sizes/digests, manifests, controls,
+case-level Arena evidence and performance limits are preserved in
+`evidence/2026-10-22-t03a-terminal-qualification.json`. All five original034
+runs finished before this new full qualification push; none was restarted.
+No predecessor or focused preflight result qualifies7b14.
+
+## Implemented T03a boundary
+
+The authoritative completion-plan recipe is implemented in
+`API/DagGenerated.lean` and its production call in `API/Dag.lean`, with the
+ownership comment updated in `Checker/ExprV2/Environment.lean`.
+
+The bridge scans only the newly admitted prefix of the final checked environment.
+It stops before the first name contained exactly in the previous environment,
+using the existing indexed lookup and exact comparison. It has no size prepass,
+whole-tail comparison, old-tail scan or invented auxiliary suffix convention.
+Recursor types and every rule RHS come from actual final checked metadata.
+Ordinary/mutual family and constructor types reuse only matching references from
+the current command's input-ref list. Nested requests import their restored
+final types and actual renamed auxiliaries; flattening-only families gain no
+owners. Unexpected new declaration kinds return an internal invariant error.
+
+The old three-argument helper's body/ABI is retained. The production entry
+receives the actual previous and next environments, preserves original external
+input IDs, and threads all private arena/built/declaration state. Generated IDs
+remain private. A failed metadata import or later command returns no partial
+session, owner set or replies. No fuel, safety, unsupported or resource policy
+was changed. V1 admission and other migration adapters remain explicitly open.
+
+## Exact-source controls
+
+Native and **both** authentic generated routes pass the distinct new markers:
+
+```text
+PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3
+PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3
+```
+
+Both generated routes additionally pass their six-positive/seven-negative marker.
+Native official controls pass five families, six positive cases and seven negative cases. The fixtures use
+genuine mutual and nested admission, structured/numeric names, two universes,
+53 initial padding nodes, 32 old checked declarations, final renamed auxiliary
+recursors, a no-auxiliary nested fast case and two separate public batches.
+They check every final owner/type/rule, original/private IDs, no duplicate or
+flattening-only owners, wrong/missing owner declines, malformed universes,
+old-tail stop and late import/command/kind atomic errors. The six direct cases
+must return an actual internal result; an outer fallback cannot silently pass.
+
+All 21 recursor proof equations, including seven new ownership/atomicity equations,
+pass the axiom audit. Both frozen exact-3aa cache-mode and invalid-occurrence
+defects are reproduced before the candidate is restored and rechecked.
+All retained K/major/full-state, String projection 1296 / decline 16 / error 32,
+checked/infer-only, cache, occurrence, Quot, transformation and negative gates
+pass. Native correctness passes 62 safety/semantic assertions and four retained
+transformation measurements.
+
+Native detached provider 24-case and official 5-case controls pass. Each generated route
+passes 24 provider plus eight API cases in a detached empty-PATH runtime. Complete portable
+.lean and independently reconstructed/rechecked canonical .ps closures pass.
+Generated execution uses authentic PSC1, TypeScript7.0.2 and Node22 with pinned
+Lean4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Full-kernel DirectJS remains explicitly UNSUPPORTED.
+
+| Artifact | ID | Archive bytes | Archive SHA-256 |
+| --- | --- | ---: | --- |
+| psc1-v2-dag-native | 12368370405 | 33171018 | `26acd2121aa9e7cac84a5d3169d847081ed902a060446b3e5ae2ca19e065fb9f` |
+| psc1-v2-dag-generated-js | 12370435353 | 3396312 | `694d03166dcdeaa36bea445c963cea2df861e26f6d18d714013a20c6d9730a67` |
+| psc1-canonical-kernel-qualification | 12369860303 | 1910801 | `fa8dd4aa3562f0a5c2813bb02b7b94b0af0dcf8a6124de9ff80ee1d4eea7bc20` |
+
+Canonical source-closure SHA256: `7aae4c75f80c54385b8fe31a9f2a85ecf0221fbe541087ba7b5815d44981f728`.
+Both generated TypeScript files share SHA256 `cad6e2933681bea732fdc13e190c0605c302a014dda2381ec71edea97d357326`.
+The receipt records both emitted JS hashes, source maps, declarations, native executable and package hashes. Artifact hashes establish integrity; the terminal job gates establish the tested qualification.
+
+## Full Arena and performance remain separate
+
+Exact 7b14 full 193-case result: 173 matches (105 acceptance, 60 kernel rejection, one metadata rejection and seven transport rejection), two separate safety-contract agreements, 17 host timeouts, one Church resource exhaustion and zero unsupported results. Limits remain fuel 4096,
+60 seconds/case, 2048 MiB Node old-space and two workers. Every original case is retained.
+Timeouts are incomplete execution, fuel exhaustion is a resource outcome, and
+unsafe/partial contract agreements remain separate from semantic matches.
+
+Actual unchanged index 16 `bugs/rec-missing-ih.ndjson`: official and independent verdicts both rejected, classified matched_kernel_rejection at kernel-admission, coreInvoked=true and containsUnsafeOrPartial=false, with reason "simple inductive field has an invalid recursor-headed recursive occurrence".
+Read-only saved-artifact inspection39655656481/job119415065277
+authenticated source/run/ZIP digest/bytes and printed this actual record without
+replaying a case. Original/adapted body SHA256 is
+`b76add060cc9e030bc8769492783ed3ceb5e4482eb02cc83f1597c5b6007c769`; generated kernel module SHA256 is
+`b14b37870d78356c56b208c292847809748a90538e145ba1c53a5a2d31b24849`. Header compatibility adaptation preserves original
+record bodies and is not a claim of fresh native4.35 re-export.
+
+Authentic diagnostics: four source-bound cases, each with profile_collection_complete=true and kernel_qualified=false. In unprofiled/profiled order: repeated-subproblem accepted/accepted; Church resource_exhausted/resource_exhausted; init-prelude timeout/timeout; stuck projection rejected/rejected. A passing collection job is not a
+passing kernel case. Complete generated operation/admission and profile
+benchmarks are preserved in their artifacts. Native pair-search ABBA samples
+were 441131 / 497411 / 536087 / 465521 ns (frozen/worker/worker/frozen;
+1024 entries, 200 calls), which establish **no pair-worker speedup**. Broader
+performance/release D remains open; no general speedup is claimed. The source-local
+A-B-B-A admission comparison still shows binder32 at 589.676 ms DAG versus
+236.775 ms V1 (2.49x) and chain32 at 428.887 ms versus 281.820 ms (1.52x).
+Each value is the median of that variant's two warm sample totals, not a
+per-declaration time. Binder32 input construction is 93.880 ms DAG versus
+0.799 ms V1. These are
+same-source architecture comparisons, not a causal before/after T03a estimate.
+All 128 operation and 24 admission observations, all 32 operation groups, six
+admission groups and six profile summaries are preserved in the permanent receipt.
+
+## Preserved source and failure history
+
+Original `034999734f2574876a747c967dd03bcc6904b395` is fully observed and
+**NOT A-qualified**: native integration119352848567 failed on eight
+`discard (← action)` IO elaboration errors. Its generated integration,
+correctness and six research jobs passed. Its full 193-case comparison failed with 173 matches,
+two separate safety agreements, 17 timeouts, one Church resource exhaustion, and zero unsupported results.
+Actual safe case 16 independently rejected for the precise recursor-headed
+occurrence reason; the saved body remained identical. Profiles passed collection
+only. See `evidence/2026-10-22-034-terminal-qualification.json`.
+
+Concurrent fixture-repair parent
+`33466d0b516df9d0496d181dd1c4b619b9954c7c` is preserved, with all its own
+terminal outcomes in `evidence/2026-10-22-334-terminal-qualification.json`.
+Its integration39640766956, correctness39640766736 and all six research39640766908 jobs passed, qualifying334 for scoped A by its own gates. Arena39640766732 failed with173matches,2safety agreements,17timeouts,1Church resource exhaustion and0unsupported. Its evidence is separate from 7b14; no parallel group/cache/
+Quot/name-worker research was silently merged.
+
+T03a production first landed at b60cb6a53b71899b033f758e3e730df06821f808.
+The YAML replacement-escaping validation failure and focused total23/reserved
+proof-binder failure remain in history. Repairs changed workflow/fixture/proof
+text, not T03a production code. Corrected22a1d1721c26f7170cfbc5829603d4d5760fce2f
+focused native run 39644321489 passed before the full 7b14 qualification.
+Its receipt remains `evidence/2026-10-22-t03a-native-preflight.json`.
+
+## Milestones and next implementation boundary
+
+- **A:** scoped independent provider qualified at exact 7b14 by its own complete gates.
+- **B:** open. T03b, full actual String.ofList (T01F), V1 inductive admission,
+  recursive metadata import, eager ingress decode and four whole-operation
+  fallbacks remain.
+- **C:** open; exact 7b14 full 193-case comparison FAIL: 173 matches / 2 safety agreements / 17 timeouts / 1 resource exhaustion / 0 unsupported. Church, host timeouts and explicit
+  safety-contract reconciliation remain.
+- **D:** open. Whole-operation regressions, complete comparable performance and
+  release qualification remain; global soundness/refinement/backend preservation
+  obligations are not discharged by local equations or finite tests.
+
+**After the existing combined-source qualification: T03b preexisting-session ownership.** Each public `psKernelV1RunDag`
+still starts with `PsKernelDagExecutionState.mk session List.nil`; previous
+session constants have no current-batch owners. T03a's second batch intentionally
+owns only new Fast and asserts old Nat ownership absent. Derive private current
+batch references only from the session's already admitted environment, preserving
+immutable environment identity and original external input IDs. Do not trust
+caller-supplied tables or receipts. Require direct old-constant checking/WHNF/
+DefEq across separate calls and stale/mismatched owner, universe, private-ID,
+full-state and late-error atomicity negatives in native/official and both
+generated routes. Do not repeat the broad architecture audit.
+
+---
+
+## Preserved work-state history (verbatim)
+
 # Current integration checkpoint — qualified base and measured name-worker promotion
 
 Observed: 2026-10-21T18:16:44Z.

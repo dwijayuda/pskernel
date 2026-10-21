@@ -1,4 +1,4 @@
-# Ready-to-copy continuation prompt — finish T03a exact-source qualification
+# Ready-to-copy continuation prompt — finish combined qualification, then T03b
 
 Continue authorized PSKernel-Core implementation in `dwijayuda/pskernel` on
 `integration/psc1-pskernel-expr-v2-lean435-20261021`. Use connected GitHub tools
@@ -7,53 +7,87 @@ before any write. Preserve non-force expected-SHA history, fuel4096, published
 limits, independent checking, negative controls and both detached generated
 routes. No local build, main merge or npm publication.
 
-T03a is implemented using the completion plan's authoritative final-environment
-new-prefix recipe. It stops before the first exact old name, imports actual
-final recursor types/rules and restored nested types, reuses only matching
-current-command ordinary/mutual input refs, keeps the old helper ABI, original
-external ID namespace, private appended IDs, full state and atomic publication.
-The three production files are API/DagGenerated.lean, API/Dag.lean and the
-ownership comment in Checker/ExprV2/Environment.lean. Do not repeat a broad audit.
+Live executable integration advanced concurrently to
+`deb18b9c87a5d21a406c6e5b852afb4d44785fe5`, merging qualified T03a7b14 and
+name-worker341 while preserving both histories. The only additional production
+file is Core/Name.lean; T03a carrier/tests/proofs remain intact. At
+2026-10-21T18:48:12Z, the combined source is **NOT YET QUALIFIED**:
+native integration119401099653/native correctness119401099174 and all six
+research39651609561 jobs PASS; generated119401099171/run39651609850,
+canonical119401098776/run39651609752, independent Arena119402241996/
+run39651610468 and profiles119401099438/run39651610007 remain active.
+**Finish those existing exact-source runs before duplicate CI or a new
+implementation batch.** Preserve the name-worker qualification/paired
+performance receipts, including their memory regressions and exact baseline/
+candidate identities. Do not reuse either parent PASS for the combined source.
+A later documentation-only HEAD is distinct from both executable revisions.
 
-Focused source22a1d1721c26f7170cfbc5829603d4d5760fce2f passed
-run39644321489/job119375775009: 24new declarations,7recursors,6direct cases,
-3private-ID controls, official5families/6positive/7negative, both occurrence
-control markers and all21proof equations (7new). Failed b60 fixture total23
-and reserved proof binder remain preserved; the fixes changed no production code.
-See evidence/2026-10-22-t03a-native-preflight.json. The containing full candidate
-is NOT QUALIFIED at creation. Observe its exact current runs before dispatching
-duplicates; a focused or predecessor PASS is not full source qualification.
+T03a is implemented and scoped A-qualified at exact
+`7b14affc854e7bc99e4778ac155ae805dd273226`, by its own terminal runs:
+integration39645765038 (native119380795456/generated119380794907),
+correctness39645764867 (native119380794896/canonical119380794398),
+and all six research39645765012 jobs. Both detached generated routes passed
+the new24-declaration/7-recursor/6-direct/3-private-ID controls and retained
+provider24/API8 tests. Native official5families/6positive/7negative and all21
+recursor proof equations (7new) passed. Read
+`evidence/2026-10-22-t03a-terminal-qualification.json` for exact source, job,
+artifact and performance receipts. Any later documentation-only HEAD is
+separate from the exact qualified implementation. Never inherit predecessor
+qualification for a new executable source.
 
-All five originally requested034999734f2574876a747c967dd03bcc6904b395 runs
-finished: integration39637759611 FAIL from native fixture elaboration, generated
-job119352848385 PASS; correctness39637759709 PASS; all6 research39637759603 PASS;
-fullArena39637759569 FAIL; profiles39637759606 PASS collection only.
-Its unchanged case16 now has actual independent safe kernel rejection, precise
-invalid-recursive-occurrence reason, identical original/adapted body bytes and
-fuel4096. Full193:173matches,2safety agreements,17timeouts,1Church resource
-exhaustion,0unsupported. All receipts and digests are in
-evidence/2026-10-22-034-terminal-qualification.json. Do not rerun those originals
-or promote034 to A; the native failure remains.
+The authoritative final-environment prefix recipe remains in the completion
+plan. T03a stops before the first exact old name; imports actual final recursor
+types/rules and restored nested types; reuses only matching current-command
+ordinary/mutual input refs; retains the old helper ABI, original external IDs,
+private appended IDs, complete state and atomic publication. Keep these
+invariants and regressions. Do not repeat a broad architecture audit.
 
-Concurrent fixture repair33466d0b516df9d0496d181dd1c4b619b9954c7c is preserved
-as T03a's parent. Its native integration and correctness passed; finish observing
-existing integration39640766956, correctness39640766736, research39640766908
-and Arena39640766732 as separate source receipts. No parallel group/cache/Quot/
-name-worker research is silently merged into T03a.
+After the combined source passes its own required scoped gates, the next implementation task is **T03b preexisting-session ownership**. Public
+`psKernelV1RunDag` still starts with `PsKernelDagExecutionState.mk session List.nil`;
+earlier-session constants therefore lack this batch's DAG owners. Derive
+references from the session's already admitted declarations before use, never
+from a caller-supplied owner table or receipt. Choose one private canonical/
+appended-arena owner boundary and retain immutable environment identity in
+indexes/caches. Preserve the original external input-ID namespace and atomic
+publication. This adapts checked session state; it does not add a second
+admission mechanism. Keep low-level forged-session behavior within the
+documented trusted integration boundary.
 
-Require the containing exact implementation's full native, portable .lean,
-canonical .ps, both authentic TypeScript7.0.2/Node22 generated routes, retained
-proof/provider24/API8 and benchmark gates. Preserve both frozen3aa failure
-sentinels and all subsequent corrected controls. Observe one unchanged full193
-comparison per complete candidate; C/D blockers stay separate from scoped A.
+Acceptance: two separate public calls must directly check, WHNF and DefEq
+using previously admitted constants/recursors, without an outer fallback
+passing unnoticed. Retain same-batch mutual/nested, private-ID, universe,
+checked/infer-only and full-state controls. Add stale/mismatched owner and
+late import/command failure negatives. Qualify native/official, both authentic
+generated routes, canonical reconstruction/checking, local proofs, providers
+and benchmarks at one exact source. Run one final unchanged193-case
+comparison per coherent candidate; inspect existing runs before any duplicate.
+
+All original034999734f2574876a747c967dd03bcc6904b395 runs finished; it remains
+NOT A-qualified because native fixture elaboration failed. Its actual unchanged
+case16 rec-missing-ih is independently rejected, not unsupported. Full193 at034:
+173matches,2separate safety agreements,17timeouts,1Church resource exhaustion,
+0unsupported. Preserve `evidence/2026-10-22-034-terminal-qualification.json`.
+Concurrent33466d0b516df9d0496d181dd1c4b619b9954c7c fixture repair is preserved
+as the T03a parent, with its own separate terminal receipt. Failed b60 fixture/
+proof and workflow-validation attempts and the corrected22a native preflight
+remain in history. No parallel group/cache/Quot/name-worker research was
+silently merged into this T03a batch.
+
+Exact7b14 full Arena39645764921 is FAIL: 173 matches / 2 safety agreements / 17 timeouts / 1 resource exhaustion / 0 unsupported. Read the complete saved
+case records and original/adapted body hashes. Authentic profiles39645764955
+are collection evidence only; diagnostic success cannot qualify a timed-out,
+resource-exhausted or rejected case. Keep all cases and fixed4096fuel,
+60seconds/case,2048MiB Node old-space and2workers. Full-kernel DirectJS remains
+UNSUPPORTED; authentic generated qualification uses TypeScript7.0.2/Node22.
 Lean4.35.0 is pinned to eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
-Full-kernel DirectJS remains unsupported. Keep error/resource/safety distinctions.
 
-After T03a genuinely qualifies, next task is T03b preexisting-session ownership.
-B remains open: V1 inductive admission, recursive metadata import, eager decode
-and all four whole-operation fallbacks remain. T01F actual String.ofList,
-Church/timeouts, safety reconciliation and global soundness/backend obligations
-also remain. Update matrix/work state and source-bound receipts after the batch.
-Report live HEAD, exact qualified SHA and terminal run/job evidence, separate
-A/B/C/D status, remaining blockers and one next executable task. No general
-speedup claim; never imply work continues after ending the chat.
+B remains open: T03b, full actual String.ofList (T01F), V1 inductive admission,
+recursive metadata import, eager decode and four whole-operation fallbacks.
+C remains open for Church/timeouts and explicit safety-contract reconciliation.
+D remains open; publish complete same-run ABBA construction/admission/cache
+measurements and do not claim a general speedup. Global soundness/refinement/
+backend preservation obligations remain open beyond local equations and tests.
+Update matrix, completion-plan execution status, work state and source-bound
+receipts. Report live HEAD, exact qualified SHA, separate A/B/C/D statuses,
+remaining blockers and one next executable task. Never imply work continues
+after ending the chat.

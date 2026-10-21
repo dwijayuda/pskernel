@@ -74,15 +74,15 @@ def psKernelExprV2CheckProjectionViewOnCanonical
             | _ =>
                 Except.error "invalid projection: projected expression type is not an inductive application"
 
-def psKernelExprV2CheckProjectionFinalWith
+def psKernelExprV2CheckProjectionFinalOwnedWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (propType : Bool) (current : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  match psKernelExprV2CheckProjectionWhnfWith whnf context state current with
+  match psKernelExprV2CheckProjectionWhnfOwnedWith whnf context state current with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
@@ -95,7 +95,7 @@ def psKernelExprV2CheckProjectionFinalWith
               match entry.node with
               | PsKernelExprV2Node.forallE _ domain _ _ =>
                   if propType then
-                    match psKernelExprV2CheckProjectionIsPropWith
+                    match psKernelExprV2CheckProjectionIsPropOwnedWith
                         check whnf context next domain with
                     | Option.none => Option.none
                     | Option.some attemptedProp =>
@@ -112,17 +112,17 @@ def psKernelExprV2CheckProjectionFinalWith
                   else Option.some (Except.ok (Prod.mk next domain))
               | _ => Option.some (Except.error "invalid projection index")
 
-def psKernelExprV2CheckProjectionFieldsWith
+def psKernelExprV2CheckProjectionFieldsOwnedWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState)
     (view : PsKernelExprV2CheckProjectionView)
     (type structValue index initial : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  match psKernelExprV2CheckProjectionApplyParamsWithFuel
+  match psKernelExprV2CheckProjectionApplyParamsOwnedWithFuel
       (Nat.succ view.numParams) whnf context state
       view.args 0 view.numParams initial with
   | Option.none => Option.none
@@ -130,14 +130,14 @@ def psKernelExprV2CheckProjectionFieldsWith
       match attemptedParams with
       | Except.error error => Option.some (Except.error error)
       | Except.ok params =>
-          match psKernelExprV2CheckProjectionIsPropWith
+          match psKernelExprV2CheckProjectionIsPropOwnedWith
               check whnf context (Prod.fst params) type with
           | Option.none => Option.none
           | Option.some attemptedProp =>
               match attemptedProp with
               | Except.error error => Option.some (Except.error error)
               | Except.ok propResult =>
-                  match psKernelExprV2CheckProjectionSkipFieldsWithFuel
+                  match psKernelExprV2CheckProjectionSkipFieldsOwnedWithFuel
                       (Nat.succ index) check whnf context (Prod.fst propResult)
                       view.inductName structValue (Prod.snd propResult)
                       index 0 (Prod.snd params) with
@@ -146,14 +146,14 @@ def psKernelExprV2CheckProjectionFieldsWith
                       match attemptedFields with
                       | Except.error error => Option.some (Except.error error)
                       | Except.ok fields =>
-                          psKernelExprV2CheckProjectionFinalWith check whnf context
+                          psKernelExprV2CheckProjectionFinalOwnedWith check whnf context
                             (Prod.fst fields) (Prod.snd propResult) (Prod.snd fields)
 
-def psKernelExprV2CheckProjectionFromViewWith
+def psKernelExprV2CheckProjectionFromViewOwnedWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState)
     (view : PsKernelExprV2CheckProjectionView) (type structValue index : Nat) :
@@ -169,17 +169,17 @@ def psKernelExprV2CheckProjectionFromViewWith
                 state.whnf.arena declaration.type 0 with
             | Except.error error => Option.some (Except.error error)
             | Except.ok instantiated =>
-                psKernelExprV2CheckProjectionFieldsWith check whnf context
+                psKernelExprV2CheckProjectionFieldsOwnedWith check whnf context
                   (psKernelExprV2CheckStateWithArena state (Prod.fst instantiated))
                   view type structValue index (Prod.snd instantiated)
           else Option.none
   | _ => Option.some (Except.error "invalid projection: constructor metadata missing")
 
-def psKernelExprV2CheckProjectionInferWith
+def psKernelExprV2CheckProjectionInferOwnedWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState)
     (typeName : PsKernelName) (index structValue : Nat) :
@@ -190,7 +190,7 @@ def psKernelExprV2CheckProjectionInferWith
       match attemptedStruct with
       | Except.error error => Option.some (Except.error error)
       | Except.ok structResult =>
-          match psKernelExprV2CheckProjectionWhnfWith
+          match psKernelExprV2CheckProjectionWhnfOwnedWith
               whnf context (Prod.fst structResult) (Prod.snd structResult) with
           | Option.none => Option.none
           | Option.some attemptedType =>
@@ -202,8 +202,73 @@ def psKernelExprV2CheckProjectionInferWith
                       context.scalar next.whnf.arena typeName index (Prod.snd typeResult) with
                   | Except.error error => Option.some (Except.error error)
                   | Except.ok view =>
-                      psKernelExprV2CheckProjectionFromViewWith
+                      psKernelExprV2CheckProjectionFromViewOwnedWith
                         check whnf context next view (Prod.snd typeResult) structValue index
+
+def psKernelExprV2CheckProjectionOwnedWith
+    (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState)
+    (root : Nat) (typeName : PsKernelName) (index structValue : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2CheckFinishAttempt root
+    (psKernelExprV2CheckProjectionInferOwnedWith
+      check whnf context state typeName index structValue)
+
+/- The original callback ABI is retained by lifting the supplied WHNF callback
+   against the complete state already owned by this helper. -/
+
+def psKernelExprV2CheckProjectionFinalWith
+    (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (propType : Bool) (current : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2CheckProjectionFinalOwnedWith
+    check (psKernelExprV2LiftCheckWhnf whnf) context state propType current
+
+def psKernelExprV2CheckProjectionFieldsWith
+    (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState)
+    (view : PsKernelExprV2CheckProjectionView)
+    (type structValue index initial : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2CheckProjectionFieldsOwnedWith
+    check (psKernelExprV2LiftCheckWhnf whnf) context state
+    view type structValue index initial
+
+def psKernelExprV2CheckProjectionFromViewWith
+    (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState)
+    (view : PsKernelExprV2CheckProjectionView) (type structValue index : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2CheckProjectionFromViewOwnedWith
+    check (psKernelExprV2LiftCheckWhnf whnf) context state view type structValue index
+
+def psKernelExprV2CheckProjectionInferWith
+    (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState)
+    (typeName : PsKernelName) (index structValue : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2CheckProjectionInferOwnedWith
+    check (psKernelExprV2LiftCheckWhnf whnf) context state typeName index structValue
 
 def psKernelExprV2CheckProjectionWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
@@ -214,6 +279,5 @@ def psKernelExprV2CheckProjectionWith
     (state : PsKernelExprV2CheckState)
     (root : Nat) (typeName : PsKernelName) (index structValue : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  psKernelExprV2CheckFinishAttempt root
-    (psKernelExprV2CheckProjectionInferWith
-      check whnf context state typeName index structValue)
+  psKernelExprV2CheckProjectionOwnedWith
+    check (psKernelExprV2LiftCheckWhnf whnf) context state root typeName index structValue

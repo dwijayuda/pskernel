@@ -301,3 +301,19 @@ Focused execution now runs the inexpensive inference/control suite immediately
 after checked order, before the measured applications. The test command set,
 targets, resource bounds and final qualification remain unchanged; grammar/type
 failures should no longer pay for an unnecessary application replay first.
+
+Run 39681838046 at 93f2ca958cb2cc79248e9cbfe9b07631143acd76 stops the native
+test build at OperatorTests.lean:90: the new multiline diagnostic continued
+outside an inline match branch. The production conditional module compiles.
+Move the diagnostic application into the branch's owned indented body; all
+fifty conversion assertions and existing 136 order boundaries remain required.
+No successful full or new-criterion qualification is inferred from this run.
+
+The reordered focused stage in that run passes all 42 selected order
+obligations, then the independent native reference diagnoses two authored-Lean
+notation issues before any inference target runs: adjacent boundedUnit(())
+needs native whitespace, and unbraced nested try/catch ownership is ambiguous.
+Use native-spaced explicit Unit application and owned braces in the same Lean
+fixture, preserving the PS fixture and expected semantic cases. A separate
+registered native frontend/admission regression retains adjacent f(()) in both
+PSC1 source grammars, so native-oracle spelling cannot hide a parser gap.

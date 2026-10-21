@@ -118,3 +118,7 @@ def main : IO Unit := do
   requireAcceptedPair "intervening implicit telescope in both grammars"
     "def afterValue (count : Nat) {A : Type} (value : A) : A := value\ndef result : Nat := afterValue 0 19\n"
     "def afterValue(count : Nat) {A : Type}(value : A) : A := value\ndef result : Nat := afterValue(0, 19)\n"
+
+  requireAcceptedPair "explicit Unit adjacent application stays checked"
+    "def unitArgument (value : Unit) : Nat := 7\ndef result : Nat := unitArgument(())\n"
+    "def unitArgument(value : Unit) : Nat := 7\ndef result : Nat := unitArgument(())\n"

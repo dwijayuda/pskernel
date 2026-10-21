@@ -72,7 +72,7 @@ def rollbackCase (flag : Bool) : Nat :=
   chosen + Array.size empty + (if integer == 7 then 1 else 0)
 
 def callCase (flag : Bool) : Nat :=
-  let unit : Nat := boundedUnit(());
+  let unit : Nat := boundedUnit (());
   boundedAfter unit (boundedDependent Nat flag (if flag then 23 else 29))
 
 def ownerLambdaCase (flag : Bool) : Nat :=
@@ -113,15 +113,13 @@ def joinsCase (flag : Bool) : Nat :=
 
 def handlerScopeProgram (flag : Bool) : Except Nat Nat := do
   let mut amount : Nat := 2
-  try
-    try
+  try {
+    try {
       amount := 10
       if flag then throw 3
       return amount + 20
-    catch error =>
-      throw (error + 4)
-  catch error =>
-    amount := amount + error
+    } catch error => { throw (error + 4) }
+  } catch error => { amount := amount + error }
   return amount + 100
 
 def handlerScopeCase (flag : Bool) : Nat :=

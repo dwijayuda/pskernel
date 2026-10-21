@@ -87,10 +87,11 @@ private def integerEqualityBoundary (environment : Lean.Environment)
   let correct := left == right
   match environment.addDeclCore 2000000 20000 converted none true with
   | .ok _ => require (expected == correct) "incorrect signed equality result admitted"
-  | .error error => require (expected != correct)
-      ("correct signed equality result refused: " ++ toString left ++ "/" ++
-        toString right ++ "/" ++ toString expected ++ ": " ++
-        PsKernelLean.kernelExceptionSummary error)
+  | .error error =>
+      require (expected != correct)
+        ("correct signed equality result refused: " ++ toString left ++ "/" ++
+          toString right ++ "/" ++ toString expected ++ ": " ++
+          PsKernelLean.kernelExceptionSummary error)
 
 private def integerEqualityBoundaries : IO Unit := do
   let environment ← match ← PsKernelLean.buildLeanPreludeEnvironment with

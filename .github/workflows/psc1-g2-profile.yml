@@ -46,3 +46,26 @@ jobs:
           path: psc1/dist/g2-cpu-profile/
           retention-days: 14
           if-no-files-found: warn
+
+  inspect-qualified-worker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '39543944316'
+          name: psc1-generated-compiler-ece4925682d426509868564f663c26c482f91a2a
+          path: work/qualified-g1
+      - name: Inspect exact admitted IR and emitted scanner without executing it
+        run: |
+          set -euo pipefail
+          node scripts/profile-generated-compiler.mjs ../work/qualified-g1 dist/g2-worker-context --inspect-only

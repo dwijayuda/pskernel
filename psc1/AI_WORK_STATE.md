@@ -15,7 +15,19 @@ aborted withSIGABRT after131880ms, before any candidate/publication. No G3.
 [Exact attempt](docs/PSC1_G2_FIRST_ATTEMPT_2026-10-21.json), run39545154962,
 job119041551702. Request SHA256:
 1353995b84b1e33f3c0942a758e94a41c68dcb8f8b5fbc74d8f19fc6db73b331.
-Do not call it an OOM until stderr confirms the cause.
+Exact replay39546176974 now CONFIRMS a JavaScript heap exhaustion at125656ms.
+[CPU/failure receipt](docs/PSC1_G2_CPU_FAILURE_2026-10-21.json).
+89848 sampled ticks: WeakCollectionSet26.1%, WeakMapLookupHashIndex10.1%;
+hot JS locations are the nested lambdas of psJsonStringCharsAccWithFuel at
+G1.mjs626. UTF-8 helper itself accounts for0.1%; do not guess a cache patch.
+The emitted scanner allocates wrapped worker closures while traversing input.
+Inspect its EXACT retained original/specialized IR and emitted function next;
+a read-only hash-checked inspector job is added to the profile workflow.
+Then fix the general narrow worker/application mechanism and verify unchanged
+strict evaluation/capture/escaping behavior. Existing Js tail aliases require
+saturated declaration arity; a returned function worker does not satisfy that
+condition merely because its recursive state call is in source tail position.
+Do not globally delay arbitrary recursor hypotheses or alter memory limits.
 
 The original host session recorded status/signal/time but discarded stderr.
 Its rejected .stage directory was hidden from default artifact upload. Correct

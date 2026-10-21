@@ -1,0 +1,69 @@
+{
+  "schema": "psc1-g2-cpu-failure/4.35.0-v1",
+  "head": "afc969220d0799b3170e0a2ddde884c602cd76a7",
+  "run": 39546176974,
+  "job": 119044756251,
+  "collectionFinal": "success-diagnostic-only",
+  "receipt": {
+    "schema": "psc1-qualified-g1-cpu-profile/1",
+    "commit": "1e5c7e3faf3a9cde3f221b4360ab7e3cf90024b4",
+    "qualifiedG1Run": 39543944316,
+    "qualifiedArtifact": 12320558486,
+    "failedRequestRun": 39545154962,
+    "serviceSha256": "7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d",
+    "requestSha256": "1353995b84b1e33f3c0942a758e94a41c68dcb8f8b5fbc74d8f19fc6db73b331",
+    "node": "v22.23.3",
+    "nodeSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+    "runnerSha256": "bbcda77cb0942484146fc23bd299ac821bfb13e9780cfdace5742d8c6725187e",
+    "args": [
+      "--prof",
+      "--logfile=/home/runner/work/pskernel/pskernel/psc1/dist/g2-cpu-profile/v8.log",
+      "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-compiler-runner.mjs",
+      "/home/runner/work/pskernel/pskernel/work/qualified-g1/generated-compiler/G1.mjs",
+      "7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d",
+      "/home/runner/work/pskernel/pskernel/psc1/dist/g2-cpu-profile/request.json",
+      "/home/runner/work/pskernel/pskernel/psc1/dist/g2-cpu-profile/candidate.json"
+    ],
+    "status": null,
+    "signal": "SIGABRT",
+    "error": null,
+    "elapsedMs": 125656,
+    "timeoutMs": 240000,
+    "nativeCompilerDelegation": false,
+    "admission": "not-run",
+    "publication": "not-run",
+    "G2Qualification": false,
+    "scope": "CPU sampled exact failed self-compilation; no stack/heap/process-limit increase",
+    "v8Logs": [
+      {
+        "path": "isolate-0x25586000-2386-v8.log",
+        "bytes": 20786753
+      }
+    ]
+  },
+  "confirmedFailure": "Reached heap limit Allocation failed - JavaScript heap out of memory",
+  "heapBeforeAbortMiB": [
+    3860.3,
+    3866.4
+  ],
+  "samples": {
+    "ticks": 89848,
+    "WeakCollectionSet": {
+      "ticks": 23409,
+      "totalPercent": 26.1
+    },
+    "WeakMapLookupHashIndex": {
+      "ticks": 9041,
+      "totalPercent": 10.1
+    },
+    "utf8": {
+      "ticks": 57,
+      "totalPercent": 0.1
+    },
+    "dominantSource": "psJsonStringCharsAccWithFuel nested lambdas, G1.mjs626"
+  },
+  "next": "inspect exact original/specialized IR and emitted worker; implement narrow checked application fusion/worker mechanism, preserve escaped partial uses and strict evaluation",
+  "G2Qualified": false,
+  "G3": "not-run",
+  "formalPreservation": false
+}

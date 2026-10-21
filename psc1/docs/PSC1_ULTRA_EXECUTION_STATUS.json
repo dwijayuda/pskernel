@@ -741,8 +741,8 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "3b189f589b0a4ad06eb1bcc666014220e72268df",
-    "status": "G1-full-qualified-G2-SIGABRT-before-publication",
+    "headBeforeCandidate": "afc969220d0799b3170e0a2ddde884c602cd76a7",
+    "status": "confirmed-G2-heap-exhaustion-generated-worker",
     "G1": {
       "run": 39543944316,
       "final": "success",
@@ -792,11 +792,16 @@
       "job": 119041551702,
       "status": "SIGABRT-before-publication",
       "elapsedMs": 131880,
-      "receipt": "PSC1_G2_FIRST_ATTEMPT_2026-10-21.json",
-      "stderr": "pending-retention-and-exact-replay"
+      "receipt": "PSC1_G2_CPU_FAILURE_2026-10-21.json",
+      "stderr": "pending-retention-and-exact-replay",
+      "profileRun": 39546176974,
+      "profileJob": 119044756251,
+      "confirmed": "JavaScript heap out of memory",
+      "profileElapsedMs": 125656,
+      "hotSource": "psJsonStringCharsAccWithFuel nested wrapped worker closures"
     },
     "G3": "not-run",
-    "next": "exact qualified G1/request CPU profile plus durable stderr; fix actual reached mechanism; no resource-limit increases"
+    "next": "inspect exact admitted IR/emitted worker; general narrow checked fusion; preserve eval/captures and all default limits"
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

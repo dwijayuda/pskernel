@@ -29,6 +29,27 @@ assert.equal(compilerSourceClosureDigest(wire[6].map(([module,text])=>({module,k
 wire[1]='G2-self';
 const request=JSON.stringify(wire),requestHash=sha(request);
 assert.equal(requestHash,'1353995b84b1e33f3c0942a758e94a41c68dcb8f8b5fbc74d8f19fc6db73b331');
+const bootstrapFiles=find(inputRoot,'G1-bootstrap.candidate.json');
+assert.equal(bootstrapFiles.length,1);
+const bootstrap=JSON.parse(fs.readFileSync(bootstrapFiles[0],'utf8'));
+assert.equal(sha(bootstrap.source),serviceHash);
+assert.equal(sha(JSON.stringify(bootstrap.originalIr)),'1b92f8a5a779211d187a3e70273d5e7337a8c096a650bc885d97124d3a5ce888');
+assert.equal(sha(JSON.stringify(bootstrap.specializedIr)),'fd46ee97e13e06002abf33719e97c521036408333bcb3be87f5ed308669bb969');
+for (const lane of ['originalIr','specializedIr']) {
+  for (const name of ['psJsonStringCharsAccWithFuel','psJsonStringToChars']) {
+    const declaration=bootstrap[lane][4].find(row=>row[0]===name);
+    assert.ok(declaration);
+    console.log('PSC1_WORKER_IR_CONTEXT: '+JSON.stringify({lane,name,declaration}));
+  }
+}
+const sourceLines=fs.readFileSync(service,'utf8').split('\n');
+for (const line of sourceLines.filter(line=>line.includes('__ps$impl$psJsonStringCharsAccWithFuel') ||
+    line.startsWith('function __ps$run') || line.startsWith('function __ps$wrap')))
+  console.log('PSC1_WORKER_JS_CONTEXT: '+line.slice(0,16000));
+if(process.argv[4]==='--inspect-only') {
+  console.log('PSC1_WORKER_CONTEXT_INSPECTED: exact qualified graph/code; no compiler execution');
+  process.exit(0);
+}
 const input=path.join(directory,'request.json'),output=path.join(directory,'candidate.json');
 fs.writeFileSync(input,request);
 const runner=path.join(root,'scripts/generated-compiler-runner.mjs');

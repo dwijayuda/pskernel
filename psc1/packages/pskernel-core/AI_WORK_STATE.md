@@ -29,6 +29,28 @@ behavior, or a complete DAG checker. Original default V1 remains qualified;
 the replacement still relies on full-operation fallback outside its migrated
 rules. No integration PR is merged.
 
+### Direct theorem admission — awaiting qualification
+
+Theorem plans now retain the same owner through the original header check,
+inference-only proposition test, mandatory full-budget WHNF, normalized-zero
+universe decision, body guards, fully checked body inference and final DefEq.
+The proposition decision precedes proof-body metavariable/free-variable/level
+guards, preserving exact rejection precedence. Inference-only results cannot
+authorize checked judgments; the modes use separate caches. Theorems use the
+safe context and never register a delta body. Unsupported descendants still
+restart complete original admission with the original session and resources.
+
+New native and generated suites compare16 declaration cases over224 fuel/depth
+combinations, including same-batch proposition/proof axioms, universe zero
+normalization, unsafe/partial references, missing owning type indexes, explicit
+unsupported comparisons and environment/index publication. Three native
+declarations also run through official Lean4.35 checked admission. State
+sentinels require distinct header and infer-only fresh counters, warm-owner
+reuse at the original depth limit, cold-owner failure, entry guards and WHNF
+failure after a successful cached inference at fuel1. The existing simple
+matrix now requires its theorem case to select the direct path. These changes
+are pending native/generated/canonical Actions; no theorem pass is claimed yet.
+
 ### Strict generated admission assertion correction — qualification pending
 
 The5b131 generated job119008044447 in
@@ -179,7 +201,57 @@ canonical executable results remain pending. These are finite parity tests and
 local proofs, not a full kernel soundness or cache-validity theorem. The last
 fully qualified kernel source remains c9868 above.
 
-### Complete admission measurement and Arena phase timing — pending CI
+### Expanded baseline: complete admission measurements and timed Arena
+
+At3fb6a3cad0ef3b60c9a209c7b7b2bbdce5ab8eb2 (kernel source stillc9868),
+[run39532408632](https://github.com/dwijayuda/pskernel/actions/runs/39532408632)
+job119002058910 passed the128 guarded complete-operation observations,24 new
+complete-admission observations, strict executable checks and six profiles.
+The native, original canonical and all six research jobs also passed. This is
+the pre-direct-admission baseline: both comparators use the same generated
+module, and the DAG command still calls original admission internally. It is
+not a frozen binary comparison to the research prompt's dd1/c98 checkpoint.
+
+Each range below contains two independent A-B-B-A worker observations. Admission
+time is normalized per fresh complete batch; construction is the separate
+five-fixture input pool. Fuel4096, maxRecDepth0, maxNatSize134217728 and all
+accept/reject guards are unchanged. Peak RSS includes construction, warmup and
+exact assertions; retained heap is a noisy post-GC delta with input pools kept.
+
+| Fixture / declarations | Original warm ms/batch | DAG warm ms/batch | Original peak RSS KiB | DAG peak RSS KiB |
+| --- | ---: | ---: | ---: | ---: |
+| Chain8 |710.470–777.820|755.538–761.684|243000–277192|261584–262688|
+| Chain32 |2961.437–2999.229|2882.355–3111.558|263652–264140|247560–342840|
+| Metadata8 |858.882–866.539|885.580–888.403|250568–379588|251540–291116|
+| Metadata32 |3516.340–3548.396|3662.641–3675.029|274760–292492|293484–396532|
+| Binder8 |739.148–743.282|762.034–768.371|246252–246496|240552–247252|
+| Binder32 |3622.317–3913.660|3709.964–3709.994|252484–354336|257876–257932|
+
+No general admission or memory improvement is established. In particular,
+retained deltas include4,867,960-byte original-chain8 and4,255,968-byte
+DAG-metadata8 outliers. Complete raw construction/cold/warm/assertion/heap/RSS
+records are retained in
+[artifact12316888622](https://github.com/dwijayuda/pskernel/actions/runs/39532408632/artifacts/12316888622).
+The direct-admission implementation must be compared with these observations
+after its own complete generated gate succeeds.
+
+The same baseline's
+[Arena run39532408646](https://github.com/dwijayuda/pskernel/actions/runs/39532408646),
+generated job119001837748, recorded all193 cases and failed full qualification:
+166 matches (102 accepted,56 kernel/1 metadata/7 transport rejection),
+two separately classified unsafe/partial agreements and25 host timeouts.
+All138 generated transport/progress controls and24 Python timing controls pass.
+Every timeout has a valid source-hash-bound snapshot at RunDag entry, fuel4096,
+with no invalid snapshots. Pre-call time is107.373ms for church-numerals,
+111.244ms for repeated-subproblem,125.664ms for refute-cheap-last,
+3782.401ms for init-prelude and9544.320ms for grind-ring-5.
+These timestamps exclude Node startup; the remaining public call contains
+validation, decoding and admission, so they do not isolate checking time.
+All25 identities remain unchanged, no case is excluded, and killed processes
+have no measured peak RSS. Full records remain in
+[artifact12317013588](https://github.com/dwijayuda/pskernel/actions/runs/39532408646/artifacts/12317013588).
+
+### Complete admission measurement and Arena phase timing — initial implementation record
 
 This commit adds six matched complete safe-definition admission fixtures:
 8/32 declarations in constant chains, metadata-heavy bodies, and dependent
@@ -816,7 +888,7 @@ not general production performance acceptance.
 | Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
 | WHNF | Function normalization, separate core/public caches, Nat, constructor projection and same-batch delta | Native parity and boundary gates pass at c9868 | Independent generated and canonical executable gates pass at c9868 | Controlled checked-WHNF gains; mixed memory and fallback regressions | Partial; local-value slice awaiting CI; recursor/iota/String migration open |
 | Inference and DefEq | DAG syntax-directed checking with owning constants/projections/lets, stateful App conversion and scoped quick DefEq; unified inferOnly worker added | Native Let/App gates pass at106387/2be592; new3,780-case inferOnly and six official checks pending | c9868 fully qualified; later generated/canonical jobs pending |128 guarded ABBA observations; latest generated comparison pending | Partial; inferOnly slice awaiting CI; general DefEq remains open |
-| Declaration admission | Direct axiom/safe-partial definition/opaque path; ordinary/mutual input type IDs retained after original admission |416 fuel/depth comparisons, four official admission fixtures and shared-state/safety guards pass at5b131 | Authentic source accepted; generated/canonical runtime pending |24 matched observations plus untimed direct capability diagnostic pending | Partial; theorem/unsafe-recursive/mutual/inductive migration open |
+| Declaration admission | Direct axiom/safe-partial definition/opaque path; theorem proposition/body path added |416-case simple matrix passes at5b131; new224-case theorem and three official checks pending |5b generated matrix passes then expected-record assertion fails; strict harness fix8db awaits rerun |24-observation3fb6 baseline passes; direct-path comparison pending | Partial; theorem qualification and unsafe-recursive/mutual/inductive migration open |
 | Canonical self-hosting | Complete production import closure derived from manifest | Pinned Lean build passes at c9868 |112 canonical modules /1,353 declarations; authentic PSC1, TS7.0.2, declarations/maps and detached JS pass | Generator/runtime costs measured; six profiles pass | Current partial integration qualified; DirectJS unsupported |
 | Lean Arena | Complete193 corpus; all-list transport and nested outcomes repaired | Official122 accept /71 reject | c9868:166 matches,25 host timeouts,2 safety agreements;135 controls; all193 recorded | Every timeout reached RunDag entry; internal hotspot unresolved | **BLOCKED:25 host timeouts; no exclusions** |
 | Formal invariants | Composite metadata, scope/cache guards, budget cap, five numeral recurrences and exact constant-rule factorization | Native proof gates pass at c9868 with approved logical axioms | Proofs intentionally outside portable executable closure | No formal allocation bound | Global DAG/substitution/DefEq/admission soundness remains open |

@@ -16,11 +16,12 @@ with the original entry fuel, depth and rule ordering. Local types and let
 values are IDs in the same owner. Unsupported work restarts the complete
 original operation with unchanged resources and without partial publication.
 
-Axioms, safe/partial definitions and opaque declarations attempt direct
-admission. Original static guards read the boundary-decoded expressions;
-header/body checking and terminal comparison share one fresh DAG checking
-state per declaration. Unsafe recursive definitions, theorems, mutual
-definitions and inductives still use complete original admission.
+Axioms, safe/partial definitions, theorems and opaque declarations attempt
+direct admission. Original static guards read the boundary-decoded expressions;
+header checking, inference-only proposition testing, body checking and terminal
+comparison share one fresh DAG checking state with separate inference caches.
+Unsafe recursive definitions, mutual definitions and inductives still use
+complete original admission.
 Successful admission records original same-batch type IDs and transparent
 definition body IDs. This permits owning constant/projection inference and
 delta unfolding without repeatedly importing environment types or bodies.

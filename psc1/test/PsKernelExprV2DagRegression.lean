@@ -2839,7 +2839,7 @@ private def simpleAdmissionParity : IO Unit := do
     ("header-not-sort", .axiomDecl (base [] identity) false, true),
     ("final-defeq-fallback", defn hiddenS1 s0 .safe, false),
     ("unsafe-definition-fallback", defn s1 s0 .unsafeDef, false),
-    ("theorem-fallback", .theoremDecl (base [] proofType) proof, false)]
+    ("theorem-direct", .theoremDecl (base [] proofType) proof, true)]
   let built ← expect (psKernelExprV2DecodeChecked arena)
   let mut comparisons := 0
   for (label, request, directExpected) in fixtures do
@@ -3156,6 +3156,248 @@ private def admissionFinalComparisonGuards : IO Unit := do
      | _, _ => false)
   IO.println "PSC1_V2_DAG_ADMISSION_FINAL_GUARDS: PASS"
 
+private def theoremAdmissionParity : IO Unit := do
+  let target := nm "DagTheoremTarget"
+  let pName := nm "DagTheoremP"
+  let proofName := nm "DagTheoremProof"
+  let qName := nm "DagTheoremQ"
+  let otherName := nm "DagTheoremOtherProof"
+  let unsafePName := nm "DagTheoremUnsafeP"
+  let unsafeProofName := nm "DagTheoremUnsafeProof"
+  let partialName := nm "DagTheoremPartialProof"
+  let zeroPName := nm "DagTheoremZeroP"
+  let zeroProofName := nm "DagTheoremZeroProof"
+  let u := nm "dag-theorem-u"
+  let x := nm "dag-theorem-x"
+  let (arena, s0) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let (arena, s1) ← expect (psKernelExprV2PagedMkSort arena (.succ .zero))
+  let (arena, normalizedZero) ← expect
+    (psKernelExprV2PagedMkSort arena (.imax (.param u) .zero))
+  let (arena, p) ← expect (psKernelExprV2PagedMkConst arena pName [])
+  let (arena, proof) ← expect (psKernelExprV2PagedMkConst arena proofName [])
+  let (arena, q) ← expect (psKernelExprV2PagedMkConst arena qName [])
+  let (arena, other) ← expect (psKernelExprV2PagedMkConst arena otherName [])
+  let (arena, unsafeP) ← expect (psKernelExprV2PagedMkConst arena unsafePName [])
+  let (arena, unsafeProof) ← expect (psKernelExprV2PagedMkConst arena unsafeProofName [])
+  let (arena, partialProof) ← expect (psKernelExprV2PagedMkConst arena partialName [])
+  let (arena, zeroP) ← expect (psKernelExprV2PagedMkConst arena zeroPName [.param u])
+  let (arena, zeroProof) ← expect (psKernelExprV2PagedMkConst arena zeroProofName [.param u])
+  let (arena, mv) ← expect (psKernelExprV2PagedMkMVar arena u)
+  let (arena, fv) ← expect (psKernelExprV2PagedMkFVar arena u)
+  let (arena, undefinedSort) ← expect (psKernelExprV2PagedMkSort arena (.param u))
+  let (arena, b0) ← expect (psKernelExprV2PagedMkBVar arena 0)
+  let (arena, b1) ← expect (psKernelExprV2PagedMkBVar arena 1)
+  let (arena, tailType) ← expect (psKernelExprV2PagedMkForall arena x b0 b1 .default)
+  let (arena, tailProof) ← expect (psKernelExprV2PagedMkLam arena x b0 b0 .default)
+  let (arena, identityType) ← expect (psKernelExprV2PagedMkForall arena u s0 tailType .default)
+  let (arena, identityProof) ← expect (psKernelExprV2PagedMkLam arena u s0 tailProof .default)
+  let (arena, hiddenP) ← expect (psKernelExprV2PagedMkMData arena 81 p)
+  let (arena, hiddenProof) ← expect (psKernelExprV2PagedMkMData arena 82 proof)
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let seedBase := fun name params type => PsKernelDagConstantBase.mk name params type
+  let seedRequests : List PsKernelDagDeclarationRequest := [
+    .axiomDecl (seedBase pName [] s0) false,
+    .axiomDecl (seedBase proofName [] p) false,
+    .axiomDecl (seedBase qName [] s0) false,
+    .axiomDecl (seedBase otherName [] q) false,
+    .axiomDecl (seedBase unsafePName [] s0) true,
+    .axiomDecl (seedBase unsafeProofName [] p) true,
+    .definitionDecl (PsKernelDagDefinition.mk (seedBase partialName [] p)
+      proof .abbrevHint .partialDef),
+    .axiomDecl (seedBase zeroPName [u] normalizedZero) false,
+    .axiomDecl (seedBase zeroProofName [u] zeroP) false]
+  let seed ← fresh 64 1
+  let mut owner := PsKernelDagExecutionState.mk seed []
+  for request in seedRequests do
+    owner := (← expectPublic (psKernelDagRunCommand owner [] .safe arena built (.admit request))).snd
+  let base := fun params type => PsKernelDagConstantBase.mk target params type
+  let theorem := fun params type value =>
+    PsKernelDagDeclarationRequest.theoremDecl (base params type) value
+  let cases : List (String × PsKernelDagDeclarationRequest × Bool × Option String) := [
+    ("constant-proof", theorem [] p proof, true, none),
+    ("metadata-proof", theorem [] p hiddenProof, true, none),
+    ("identity-proof", theorem [] identityType identityProof, true, none),
+    ("normalized-zero-universe", theorem [u] zeroP zeroProof, true, none),
+    ("nonprop-before-body-mvar", theorem [] s0 mv, true,
+      some "theorem type is not a proposition"),
+    ("nonprop-before-body-fvar", theorem [] s1 fv, true,
+      some "theorem type is not a proposition"),
+    ("prop-body-mvar", theorem [] p mv, true, some "declaration has metavariables"),
+    ("prop-body-fvar", theorem [] p fv, true, some "declaration has free variables"),
+    ("prop-body-undefined-universe", theorem [] p undefinedSort, true,
+      some "invalid reference to undefined universe level parameter"),
+    ("header-mvar-before-body", theorem [] mv fv, true, some "declaration has metavariables"),
+    ("duplicate-universe-before-header", theorem [u,u] mv proof, true,
+      some "duplicate universe parameter"),
+    ("unsafe-header", theorem [] unsafeP proof, true, none),
+    ("unsafe-proof", theorem [] p unsafeProof, true, none),
+    ("partial-proof", theorem [] p partialProof, true, none),
+    ("unsupported-proof-comparison", theorem [] p other, false,
+      some "theorem proof type mismatch"),
+    ("unsupported-metadata-comparison", theorem [] hiddenP proof, false, none)]
+  let mut comparisons := 0
+  for (label, request, directAt64, messageAt64) in cases do
+    let declaration ← expect (psKernelDagDecodeDeclaration built request)
+    for fuel in [0,1,2,3,4,8,64] do
+      for maxDepth in [0,1] do
+        let session := { owner.session with resources :=
+          { owner.session.resources with fuel := fuel, maxRecDepth := maxDepth } }
+        let direct := psKernelDagTryAdmitSimpleWithFuel fuel
+          (psKernelKernelSessionEnvironment session) maxDepth session.resources.maxNatSize
+          arena owner.declarations request declaration
+        match direct with
+        | none => pure ()
+        | some attempted =>
+            match psKernelV1DispatchDeclaration session declaration,
+                psKernelV1EnvironmentOutcome attempted with
+            | .error a, .error b => require ("theorem-raw-error-" ++ label) (samePublicError a b)
+            | .ok a, .ok b => require ("theorem-raw-environment-" ++ label) (admissionEnvironmentEqual a b)
+            | _, _ => throw (IO.userError ("theorem raw mismatch " ++ label ++ "/" ++ toString fuel))
+        let original := psKernelV1AdmitDeclaration session declaration
+        require ("theorem-public-" ++ label ++ "/" ++ toString fuel)
+          (admissionPublicParity original
+            (psKernelV1RunDag session [] .safe arena [.admit request]))
+        if fuel == 64 then
+          require ("theorem-selected-path-" ++ label)
+            ((match direct with | some _ => true | none => false) == directAt64)
+          match messageAt64 with
+          | none => pure ()
+          | some wanted =>
+              require ("theorem-exact-message-" ++ label)
+                (match original with | .error (.rejectedInvalid actual) => actual == wanted | _ => false)
+          let initial ← fresh fuel maxDepth
+          let full := psKernelV1RunDag initial [] .safe arena
+            ((seedRequests.map PsKernelDagCommand.admit) ++ [.admit request])
+          require ("theorem-complete-same-batch-" ++ label)
+            (match original, full with
+             | .error a, .error b => samePublicError a b
+             | .ok a, .ok b => admissionEnvironmentEqual a.session.environment b.session.environment &&
+                 b.replies.length == seedRequests.length + 1
+             | _, _ => false)
+          let command := psKernelDagRunCommand
+            (PsKernelDagExecutionState.mk session owner.declarations)
+            [] .safe arena built (.admit request)
+          require ("theorem-owning-command-" ++ label)
+            (match original, command with
+             | .error a, .error b => samePublicError a b
+             | .ok a, .ok b => admissionEnvironmentEqual a.session.environment b.snd.session.environment &&
+                 b.snd.declarations.length == owner.declarations.length + 1
+             | _, _ => false)
+        comparisons := comparisons + 1
+  require "theorem-admission-matrix-count" (comparisons == 224)
+  let constantRequest := theorem [] p proof
+  let constantDeclaration ← expect (psKernelDagDecodeDeclaration built constantRequest)
+  require "theorem-external-index-explicit-fallback"
+    (match psKernelDagTryAdmitSimpleWithFuel 64
+        (psKernelKernelSessionEnvironment owner.session) 1 owner.session.resources.maxNatSize
+        arena [] constantRequest constantDeclaration with
+     | none => true | _ => false)
+  let admitted ← expectPublic (psKernelDagRunCommand owner [] .safe arena built (.admit constantRequest))
+  require "theorem-index-published-only-with-checked-type"
+    (match psKernelExprV2DeclarationRefFind admitted.snd.declarations target with
+     | some reference => reference.type == p && reference.deltaValue.isNone
+     | none => false)
+  require "theorem-original-owner-unmodified"
+    (owner.declarations.length == seedRequests.length &&
+      (psKernelEnvironmentFind owner.session.environment target).isNone)
+  let official ← Lean.mkEmptyEnvironment
+  for (label, typeRoot, valueRoot, expected) in [
+      ("identity", identityType, identityProof, true),
+      ("non-proposition", s0, s0, false),
+      ("wrong-proof", identityType, s0, false)] do
+    let type ← expect (psKernelExprV2DecodedRequire built typeRoot)
+    let value ← expect (psKernelExprV2DecodedRequire built valueRoot)
+    let officialType ← projectionOfficialRequire type
+    let officialValue ← projectionOfficialRequire value
+    let declaration := Lean.Declaration.thmDecl {
+      name := quickOfficialName target, levelParams := [], type := officialType, value := officialValue }
+    let oracle := official.addDeclCore 0 0 declaration none true
+    let emptySession ← fresh 64 1
+    let actual := psKernelV1RunDag emptySession [] .safe arena [.admit (theorem [] typeRoot valueRoot)]
+    require ("official-Lean-theorem-" ++ label)
+      ((match oracle with | .ok _ => true | .error _ => false) == expected &&
+        (match actual with | .ok _ => true | .error _ => false) == expected)
+  IO.println "PSC1_V2_DAG_THEOREM_ADMISSION_MATRIX: PASS"
+  IO.println "PSC1_V2_DAG_OFFICIAL_THEOREM_ADMISSION: PASS"
+
+private def theoremIsPropStateGuards : IO Unit := do
+  let u := nm "dag-isprop-u"
+  let x := nm "dag-isprop-x"
+  let (arena, s0) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let (arena, b0) ← expect (psKernelExprV2PagedMkBVar arena 0)
+  let (arena, b1) ← expect (psKernelExprV2PagedMkBVar arena 1)
+  let (arena, tail) ← expect (psKernelExprV2PagedMkForall arena x b0 b1 .default)
+  let (arena, typeRoot) ← expect (psKernelExprV2PagedMkForall arena u s0 tail .default)
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let type ← expect (psKernelExprV2DecodedRequire built typeRoot)
+  let session ← fresh 64 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let context := psKernelExprV2CheckContextEmpty checker.context
+  let initial := psKernelExprV2CheckStateEmpty arena
+  let base := PsKernelConstantBase.mk (nm "DagIsPropHeader") [] type
+  let oldHeader ← expect (psKernelCheckConstantBaseWithSession 64 checker base)
+  let some (.ok afterHeader) := psKernelExprV2AdmissionCheckHeaderWithFuel
+      64 context initial base typeRoot
+    | throw (IO.userError "theorem direct header declined")
+  let oldProp ← expect (psKernelSessionIsProp 64 oldHeader type)
+  let some (.ok dagProp) := psKernelExprV2AdmissionIsPropWithFuel
+      64 context afterHeader typeRoot
+    | throw (IO.userError "theorem direct IsProp declined")
+  require "theorem-isprop-has-independent-infer-entry"
+    (oldHeader.state.nextFresh == 2 && afterHeader.nextFresh == 2 &&
+      oldProp.fst && dagProp.snd && oldProp.snd.state.nextFresh == 4 && dagProp.fst.nextFresh == 4)
+  require "theorem-infer-only-does-not-publish-checked-judgment"
+    (afterHeader.inferOnly.isEmpty && !dagProp.fst.inferOnly.isEmpty &&
+      dagProp.fst.checkedInfer.length == afterHeader.checkedInfer.length)
+  let warmScalar := { checker.context with recDepth := 15 }
+  let warmOld ← expect (psKernelSessionIsProp 64 { oldProp.snd with context := warmScalar } type)
+  let some (.ok warmDag) := psKernelExprV2AdmissionIsPropWithFuel 64
+      (psKernelExprV2CheckContextEmpty warmScalar) dagProp.fst typeRoot
+    | throw (IO.userError "theorem warm IsProp owner was discarded")
+  require "theorem-isprop-retains-returned-infer-owner"
+    (warmOld.fst && warmDag.snd && warmOld.snd.state.nextFresh == warmDag.fst.nextFresh &&
+      warmDag.fst.nextFresh == 4)
+  let coldOld := psKernelSessionIsProp 64 { oldHeader with context := warmScalar } type
+  let coldDag := psKernelExprV2AdmissionIsPropWithFuel 64
+    (psKernelExprV2CheckContextEmpty warmScalar) afterHeader typeRoot
+  require "theorem-isprop-cold-owner-does-not-pass-warm-depth"
+    (match coldOld, coldDag with
+     | .error a, some (.error b) => a == b &&
+         a == "deep recursion detected, use maxRecDepth to increase the limit"
+     | _, _ => false)
+  for (fuel, depth, wanted) in [
+      (0,0,"kernel inference budget exhausted"),
+      (64,16,"deep recursion detected, use maxRecDepth to increase the limit")] do
+    let scalar := { checker.context with recDepth := depth }
+    require "theorem-isprop-entry-guards-before-warm-cache"
+      (match psKernelSessionIsProp fuel { oldProp.snd with context := scalar } type,
+          psKernelExprV2AdmissionIsPropWithFuel fuel
+            (psKernelExprV2CheckContextEmpty scalar) dagProp.fst typeRoot with
+       | .error a, some (.error b) => a == b && a == wanted
+       | _, _ => false)
+  let pName := nm "DagIsPropHiddenSort"
+  let (arena, hiddenSort) ← expect (psKernelExprV2PagedMkMData arena 93 s0)
+  let (arena, p) ← expect (psKernelExprV2PagedMkConst arena pName [])
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let request := PsKernelDagDeclarationRequest.axiomDecl
+    (PsKernelDagConstantBase.mk pName [] hiddenSort) false
+  let owner := (← expectPublic (psKernelDagRunCommand
+    (PsKernelDagExecutionState.mk session []) [] .safe arena built (.admit request))).snd
+  let checker := psKernelKernelSessionChecker owner.session [] .safe
+  let context := psKernelExprV2CheckContextEmpty checker.context
+  let initial := psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty arena)
+    (psKernelExprV2WhnfStateForDeclarations arena owner.declarations)
+  let expr ← expect (psKernelExprV2DecodedRequire built p)
+  let oldInferred ← expect (psKernelSessionInfer 1 checker expr)
+  let some (.ok dagInferred) := psKernelExprV2TryInferStateWithFuel 1 context initial p
+    | throw (IO.userError "theorem WHNF sentinel inference declined")
+  require "theorem-isprop-mandatory-whnf-after-cached-inference"
+    (match psKernelSessionIsProp 1 oldInferred.snd expr,
+        psKernelExprV2AdmissionIsPropWithFuel 1 context dagInferred.fst p with
+     | .error a, some (.error b) => a == b && a == "kernel reduction budget exhausted"
+     | _, _ => false)
+  IO.println "PSC1_V2_DAG_THEOREM_ISPROP_STATE: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -3187,5 +3429,7 @@ def main : IO Unit := do
   admissionSharedStateSentinels
   admissionPolicyAndSafety
   admissionFinalComparisonGuards
+  theoremAdmissionParity
+  theoremIsPropStateGuards
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

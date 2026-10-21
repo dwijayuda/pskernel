@@ -2572,7 +2572,7 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     ["header-not-sort",D.axiomDecl(base([],identity),false),true],
     ["final-defeq-fallback",defn(hiddenS1,s0,S.safe),false],
     ["unsafe-definition-fallback",defn(s1,s0,S.unsafeDef),false],
-    ["theorem-fallback",D.theoremDecl(base([],proofType),proof),false]
+    ["theorem-direct",D.theoremDecl(base([],proofType),proof),true]
   ];
   const built=accepted(decode(graph),"admission-matrix-decode");
   let comparisons=0;
@@ -2856,6 +2856,193 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     base,rightType,body,bodyRoot,"definition type mismatch"),
     "admission-final-dag-retains-success-some"),"admission-final-dag-retains-success");
   console.log("PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS");
+}
+
+{
+  const H=get("PsKernelReducibilityHints"),Reply=get("PsKernelDagReply"),
+    Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  const target=name("DagTheoremTarget"),pName=name("DagTheoremP"),proofName=name("DagTheoremProof"),
+    qName=name("DagTheoremQ"),otherName=name("DagTheoremOtherProof"),
+    unsafePName=name("DagTheoremUnsafeP"),unsafeProofName=name("DagTheoremUnsafeProof"),
+    partialName=name("DagTheoremPartialProof"),zeroPName=name("DagTheoremZeroP"),
+    zeroProofName=name("DagTheoremZeroProof"),u=name("dag-theorem-u"),x=name("dag-theorem-x");
+  let graph=empty;
+  const put=(kind,...args)=>{const r=mk(graph,kind,...args);graph=r.fst;return r.snd;};
+  const s0=put("Sort",L.zero),s1=put("Sort",L.succ(L.zero)),
+    normalizedZero=put("Sort",L.imax(L.param(u),L.zero)),
+    p=put("Const",pName,nil),proof=put("Const",proofName,nil),q=put("Const",qName,nil),
+    other=put("Const",otherName,nil),unsafeP=put("Const",unsafePName,nil),
+    unsafeProof=put("Const",unsafeProofName,nil),partialProof=put("Const",partialName,nil),
+    zeroP=put("Const",zeroPName,list([L.param(u)])),
+    zeroProof=put("Const",zeroProofName,list([L.param(u)])),
+    mv=put("MVar",u),fv=put("FVar",u),undefinedSort=put("Sort",L.param(u)),
+    b0=put("BVar",0n),b1=put("BVar",1n),tailType=put("Forall",x,b0,b1,B.default),
+    tailProof=put("Lam",x,b0,b0,B.default),identityType=put("Forall",u,s0,tailType,B.default),
+    identityProof=put("Lam",u,s0,tailProof,B.default),hiddenP=put("MData",81n,p),
+    hiddenProof=put("MData",82n,proof);
+  const built=accepted(decode(graph),"theorem-matrix-decode"),
+    seedBase=(name,params,type)=>({name,levelParams:list(params),type});
+  const seedRequests=[
+    D.axiomDecl(seedBase(pName,[],s0),false),D.axiomDecl(seedBase(proofName,[],p),false),
+    D.axiomDecl(seedBase(qName,[],s0),false),D.axiomDecl(seedBase(otherName,[],q),false),
+    D.axiomDecl(seedBase(unsafePName,[],s0),true),D.axiomDecl(seedBase(unsafeProofName,[],p),true),
+    D.definitionDecl({base:seedBase(partialName,[],p),value:proof,hints:H.abbrevHint,safety:S.partialDef}),
+    D.axiomDecl(seedBase(zeroPName,[u],normalizedZero),false),
+    D.axiomDecl(seedBase(zeroProofName,[u],zeroP),false)
+  ];
+  const seed=session(64n,1n);let owner={session:seed,declarations:nil};
+  for(const request of seedRequests)owner=accepted(get("psKernelDagRunCommand")(
+    owner,nil,S.safe,graph,built,C.admit(request)),"theorem-seed-admission").snd;
+  const theorem=(params,type,value)=>D.theoremDecl(seedBase(target,params,type),value);
+  const cases=[
+    ["constant-proof",theorem([],p,proof),true,null],
+    ["metadata-proof",theorem([],p,hiddenProof),true,null],
+    ["identity-proof",theorem([],identityType,identityProof),true,null],
+    ["normalized-zero-universe",theorem([u],zeroP,zeroProof),true,null],
+    ["nonprop-before-body-mvar",theorem([],s0,mv),true,"theorem type is not a proposition"],
+    ["nonprop-before-body-fvar",theorem([],s1,fv),true,"theorem type is not a proposition"],
+    ["prop-body-mvar",theorem([],p,mv),true,"declaration has metavariables"],
+    ["prop-body-fvar",theorem([],p,fv),true,"declaration has free variables"],
+    ["prop-body-undefined-universe",theorem([],p,undefinedSort),true,
+      "invalid reference to undefined universe level parameter"],
+    ["header-mvar-before-body",theorem([],mv,fv),true,"declaration has metavariables"],
+    ["duplicate-universe-before-header",theorem([u,u],mv,proof),true,"duplicate universe parameter"],
+    ["unsafe-header",theorem([],unsafeP,proof),true,null],
+    ["unsafe-proof",theorem([],p,unsafeProof),true,null],
+    ["partial-proof",theorem([],p,partialProof),true,null],
+    ["unsupported-proof-comparison",theorem([],p,other),false,"theorem proof type mismatch"],
+    ["unsupported-metadata-comparison",theorem([],hiddenP,proof),false,null]
+  ];
+  const publicCompare=(original,actual,label)=>{
+    if(rejected(original)||rejected(actual))must(rejected(original)&&rejected(actual)&&
+      sameRuntimeValue(original.error,actual.error),label+"-error");
+    else{const a=accepted(original,label+"-old"),b=accepted(actual,label+"-dag");
+      must(sameRuntimeValue(a.session,b.session)&&
+        sameRuntimeValue(b.replies,list([Reply.admitted(a.declaration.receipt)])),label+"-result");}
+  };
+  let comparisons=0;
+  for(const [label,request,directAt64,messageAt64] of cases){
+    const declaration=accepted(get("psKernelDagDecodeDeclaration")(built,request),"theorem-request");
+    for(const fuel of [0n,1n,2n,3n,4n,8n,64n])for(const maxRecDepth of [0n,1n]){
+      const current={...owner.session,resources:{...owner.session.resources,fuel,maxRecDepth}};
+      const direct=get("psKernelDagTryAdmitSimpleWithFuel")(fuel,
+        get("psKernelKernelSessionEnvironment")(current),maxRecDepth,current.resources.maxNatSize,
+        graph,owner.declarations,request,declaration);
+      const selected=!sameRuntimeValue(direct,none);
+      if(selected)must(sameRuntimeValue(get("psKernelV1DispatchDeclaration")(current,declaration),
+        get("psKernelV1EnvironmentOutcome")(accepted(direct,"theorem-raw-some"))),
+        "theorem-raw-parity-"+label+"-"+fuel+"-"+maxRecDepth);
+      const original=get("psKernelV1AdmitDeclaration")(current,declaration);
+      publicCompare(original,run(current,nil,S.safe,graph,list([C.admit(request)])),
+        "theorem-public-"+label+"-"+fuel+"-"+maxRecDepth);
+      if(fuel===64n){
+        must(selected===directAt64,"theorem-selected-path-"+label);
+        if(messageAt64!==null)must(rejected(original)&&sameRuntimeValue(original.error,
+          get("PsKernelError").rejectedInvalid(messageAt64)),"theorem-exact-message-"+label);
+        const full=run(session(fuel,maxRecDepth),nil,S.safe,graph,
+          list([...seedRequests.map(request=>C.admit(request)),C.admit(request)]));
+        if(rejected(original)||rejected(full))must(rejected(original)&&rejected(full)&&
+          sameRuntimeValue(original.error,full.error),"theorem-same-batch-error-"+label);
+        else{const a=accepted(original,"theorem-whole-old"),b=accepted(full,"theorem-whole-dag");
+          must(sameRuntimeValue(a.session,b.session)&&array(b.replies).length===seedRequests.length+1,
+            "theorem-same-batch-result-"+label);}
+        const command=get("psKernelDagRunCommand")({session:current,declarations:owner.declarations},
+          nil,S.safe,graph,built,C.admit(request));
+        if(rejected(original)||rejected(command))must(rejected(original)&&rejected(command)&&
+          sameRuntimeValue(original.error,command.error),"theorem-owner-command-error-"+label);
+        else{const a=accepted(original,"theorem-command-old"),b=accepted(command,"theorem-command-dag");
+          must(sameRuntimeValue(a.session,b.snd.session)&&
+            array(b.snd.declarations).length===array(owner.declarations).length+1,
+            "theorem-owner-command-result-"+label);}
+      }
+      comparisons++;
+    }
+  }
+  must(comparisons===224,"theorem-admission-matrix-count");
+  const request=theorem([],p,proof),declaration=accepted(
+    get("psKernelDagDecodeDeclaration")(built,request),"theorem-external-request");
+  must(sameRuntimeValue(get("psKernelDagTryAdmitSimpleWithFuel")(64n,
+    get("psKernelKernelSessionEnvironment")(owner.session),1n,owner.session.resources.maxNatSize,
+    graph,nil,request,declaration),none),"theorem-external-index-explicit-fallback");
+  const admitted=accepted(get("psKernelDagRunCommand")(
+    owner,nil,S.safe,graph,built,C.admit(request)),"theorem-index-admitted");
+  const reference=accepted(get("psKernelExprV2DeclarationRefFind")(
+    admitted.snd.declarations)(target),"theorem-type-reference");
+  must(reference.type===p&&sameRuntimeValue(reference.deltaValue,none),
+    "theorem-index-published-only-with-checked-type");
+  must(array(owner.declarations).length===seedRequests.length&&sameRuntimeValue(
+    get("psKernelEnvironmentFind")(owner.session.environment,target),none),
+    "theorem-original-owner-unmodified");
+  console.log("PSC1_V2_DAG_JS_THEOREM_ADMISSION_MATRIX: PASS");
+}
+{
+  const u=name("dag-isprop-u"),x=name("dag-isprop-x");let graph=empty;
+  const put=(kind,...args)=>{const r=mk(graph,kind,...args);graph=r.fst;return r.snd;};
+  const s0=put("Sort",L.zero),b0=put("BVar",0n),b1=put("BVar",1n),
+    tail=put("Forall",x,b0,b1,B.default),typeRoot=put("Forall",u,s0,tail,B.default);
+  let built=accepted(decode(graph),"isprop-decode");
+  const type=accepted(decoded(built,typeRoot),"isprop-type"),seed=session(64n,1n),
+    checker=get("psKernelKernelSessionChecker")(seed,nil,S.safe),
+    context=get("psKernelExprV2CheckContextEmpty")(checker.context),
+    initial=get("psKernelExprV2CheckStateEmpty")(graph),
+    base={name:name("DagIsPropHeader"),levelParams:nil,type};
+  const oldHeader=accepted(get("psKernelCheckConstantBaseWithSession")(64n,checker,base),"isprop-old-header");
+  const afterHeader=accepted(accepted(get("psKernelExprV2AdmissionCheckHeaderWithFuel")(
+    64n,context,initial,base,typeRoot),"isprop-header-some"),"isprop-header");
+  const oldProp=accepted(get("psKernelSessionIsProp")(64n,oldHeader,type),"isprop-old");
+  const dagProp=accepted(accepted(get("psKernelExprV2AdmissionIsPropWithFuel")(
+    64n,context,afterHeader,typeRoot),"isprop-some"),"isprop-result");
+  must(oldHeader.state.nextFresh===2n&&afterHeader.nextFresh===2n&&oldProp.fst===true&&dagProp.snd===true&&
+    oldProp.snd.state.nextFresh===4n&&dagProp.fst.nextFresh===4n,
+    "theorem-isprop-has-independent-infer-entry");
+  must(array(afterHeader.inferOnly).length===0&&array(dagProp.fst.inferOnly).length>0&&
+    array(dagProp.fst.checkedInfer).length===array(afterHeader.checkedInfer).length,
+    "theorem-infer-only-does-not-publish-checked-judgment");
+  const warmScalar={...checker.context,recDepth:15n};
+  const warmOld=accepted(get("psKernelSessionIsProp")(
+    64n,{...oldProp.snd,context:warmScalar},type),"isprop-warm-old");
+  const warmDag=accepted(accepted(get("psKernelExprV2AdmissionIsPropWithFuel")(
+    64n,get("psKernelExprV2CheckContextEmpty")(warmScalar),dagProp.fst,typeRoot),
+    "isprop-warm-some"),"isprop-warm-dag");
+  must(warmOld.fst===true&&warmDag.snd===true&&warmOld.snd.state.nextFresh===warmDag.fst.nextFresh&&
+    warmDag.fst.nextFresh===4n,"theorem-isprop-retains-returned-infer-owner");
+  const coldOld=get("psKernelSessionIsProp")(64n,{...oldHeader,context:warmScalar},type);
+  const coldDag=accepted(get("psKernelExprV2AdmissionIsPropWithFuel")(
+    64n,get("psKernelExprV2CheckContextEmpty")(warmScalar),afterHeader,typeRoot),"isprop-cold-some");
+  must(rejected(coldOld)&&rejected(coldDag)&&coldOld.error===coldDag.error&&
+    coldOld.error==="deep recursion detected, use maxRecDepth to increase the limit",
+    "theorem-isprop-cold-owner-does-not-pass-warm-depth");
+  for(const [fuel,recDepth,wanted] of [
+    [0n,0n,"kernel inference budget exhausted"],
+    [64n,16n,"deep recursion detected, use maxRecDepth to increase the limit"]]){
+    const scalar={...checker.context,recDepth};
+    const original=get("psKernelSessionIsProp")(fuel,{...oldProp.snd,context:scalar},type);
+    const actual=accepted(get("psKernelExprV2AdmissionIsPropWithFuel")(
+      fuel,get("psKernelExprV2CheckContextEmpty")(scalar),dagProp.fst,typeRoot),"isprop-guard-some");
+    must(rejected(original)&&rejected(actual)&&original.error===actual.error&&original.error===wanted,
+      "theorem-isprop-entry-guards-before-warm-cache");
+  }
+  const pName=name("DagIsPropHiddenSort"),hiddenSort=put("MData",93n,s0),p=put("Const",pName,nil);
+  built=accepted(decode(graph),"isprop-hidden-decode");
+  const request=D.axiomDecl({name:pName,levelParams:nil,type:hiddenSort},false);
+  const owner=accepted(get("psKernelDagRunCommand")(
+    {session:seed,declarations:nil},nil,S.safe,graph,built,C.admit(request)),"isprop-hidden-admit").snd;
+  const hiddenChecker=get("psKernelKernelSessionChecker")(owner.session,nil,S.safe),
+    hiddenContext=get("psKernelExprV2CheckContextEmpty")(hiddenChecker.context),
+    hiddenInitial=get("psKernelExprV2CheckStateWithWhnf")(
+      get("psKernelExprV2CheckStateEmpty")(graph),
+      get("psKernelExprV2WhnfStateForDeclarations")(graph,owner.declarations)),
+    expr=accepted(decoded(built,p),"isprop-hidden-expression");
+  const oldInferred=accepted(get("psKernelSessionInfer")(1n,hiddenChecker,expr),"isprop-hidden-old-infer");
+  const dagInferred=accepted(accepted(get("psKernelExprV2TryInferStateWithFuel")(
+    1n,hiddenContext,hiddenInitial,p),"isprop-hidden-infer-some"),"isprop-hidden-infer");
+  const original=get("psKernelSessionIsProp")(1n,oldInferred.snd,expr);
+  const actual=accepted(get("psKernelExprV2AdmissionIsPropWithFuel")(
+    1n,hiddenContext,dagInferred.fst,p),"isprop-whnf-some");
+  must(rejected(original)&&rejected(actual)&&original.error===actual.error&&
+    original.error==="kernel reduction budget exhausted",
+    "theorem-isprop-mandatory-whnf-after-cached-inference");
+  console.log("PSC1_V2_DAG_JS_THEOREM_ISPROP_STATE: PASS");
 }
 
 reportDagSmoke();

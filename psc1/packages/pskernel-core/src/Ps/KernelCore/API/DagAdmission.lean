@@ -8,12 +8,13 @@ Partial direct declaration admission over a validated input DAG. Static guards
 read the already decoded boundary terms; header/body inference and final
 definitive equality read the owning arena. No legacy type/body is imported.
 
-The header and body share checked-inference, WHNF and successful DefEq state,
+The header, theorem proposition test and body share separate inference caches,
+WHNF and successful DefEq state,
 fresh counters and the declaration index. Each declaration starts a fresh
 context and state. The final comparison receives the returned checker owner;
 no semantic cache is transferred to another declaration.
 
-Unsafe recursive definitions, theorems, mutual definitions and inductives
+Unsafe recursive definitions, mutual definitions and inductives
 request whole-original-admission fallback. A none from any attempted operation
 discards its state and restarts the complete original admission.
 -/
@@ -37,6 +38,39 @@ def psKernelExprV2AdmissionEnsureSortWithFuel
                   Option.some
                     (Except.ok (psKernelExprV2CheckStateWithWhnf state next))
               | _ => Option.some (Except.error "expected sort")
+
+/- The theorem proposition test uses inference-only judgments and always
+   runs WHNF on the inferred type, preserving SessionIsProp's resource costs. -/
+def psKernelExprV2AdmissionIsPropWithFuel
+    (fuel : Nat) (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  match psKernelExprV2TryInferStateWithFuel fuel context state root with
+  | Option.none => Option.none
+  | Option.some attempted =>
+      match attempted with
+      | Except.error error => Option.some (Except.error error)
+      | Except.ok inferred =>
+          let afterInfer := Prod.fst inferred;
+          match psKernelExprV2CheckWhnfWithFuel fuel context
+              afterInfer.whnf (Prod.snd inferred) with
+          | Option.none => Option.none
+          | Option.some reducedAttempt =>
+              match reducedAttempt with
+              | Except.error error => Option.some (Except.error error)
+              | Except.ok reduced =>
+                  let next := Prod.fst reduced;
+                  match psKernelExprV2PagedRequire next.arena (Prod.snd reduced) with
+                  | Except.error error => Option.some (Except.error error)
+                  | Except.ok result =>
+                      match result.node with
+                      | PsKernelExprV2Node.sort level =>
+                          Option.some
+                            (Except.ok
+                              (Prod.mk
+                                (psKernelExprV2CheckStateWithWhnf afterInfer next)
+                                (psKernelLevelNormalizesToZero level)))
+                      | _ => Option.some (Except.error "expected sort")
 
 def psKernelExprV2AdmissionCheckHeaderWithFuel
     (fuel : Nat) (context : PsKernelExprV2CheckContext)
@@ -127,6 +161,15 @@ def psKernelDagSimpleAdmissionPlan
                 "definition type mismatch" PsKernelDefinitionSafety.safe
                 (PsKernelConstantInfo.defnInfo value))
       | _ => Option.none
+  | PsKernelDagDeclarationRequest.theoremDecl base body =>
+      match declaration with
+      | PsKernelDeclarationRequest.theoremDecl value =>
+          Option.some
+            (PsKernelDagSimpleAdmissionPlan.mk value.base base.type
+              (Option.some (Prod.mk value.value body))
+              "theorem proof type mismatch" PsKernelDefinitionSafety.safe
+              (PsKernelConstantInfo.thmInfo value))
+      | _ => Option.none
   | PsKernelDagDeclarationRequest.opaqueDecl base body _ =>
       match declaration with
       | PsKernelDeclarationRequest.opaqueDecl value =>
@@ -137,6 +180,22 @@ def psKernelDagSimpleAdmissionPlan
               (PsKernelConstantInfo.opaqueInfo value))
       | _ => Option.none
   | _ => Option.none
+
+def psKernelExprV2AdmissionPrepareBodyWithFuel
+    (fuel : Nat) (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (plan : PsKernelDagSimpleAdmissionPlan) :
+    Option (Except String PsKernelExprV2CheckState) :=
+  match plan.info with
+  | PsKernelConstantInfo.thmInfo _ =>
+      match psKernelExprV2AdmissionIsPropWithFuel fuel context state plan.typeRoot with
+      | Option.none => Option.none
+      | Option.some attempted =>
+          match attempted with
+          | Except.error error => Option.some (Except.error error)
+          | Except.ok result =>
+              if Prod.snd result then Option.some (Except.ok (Prod.fst result))
+              else Option.some (Except.error "theorem type is not a proposition")
+  | _ => Option.some (Except.ok state)
 
 def psKernelDagTryAdmitSimpleWithFuel
     (fuel : Nat) (environment : PsKernelEnvironment)
@@ -161,18 +220,24 @@ def psKernelDagTryAdmitSimpleWithFuel
           match attemptedHeader with
           | Except.error error => Option.some (Except.error error)
           | Except.ok afterHeader =>
-              match plan.body with
-              | Option.none =>
-                  Option.some (psKernelEnvironmentAdd environment plan.info)
-              | Option.some body =>
-                  match psKernelExprV2AdmissionCheckBodyWithFuel fuel context afterHeader
-                      plan.base plan.typeRoot (Prod.fst body) (Prod.snd body) plan.mismatch with
-                  | Option.none => Option.none
-                  | Option.some attemptedBody =>
-                      match attemptedBody with
-                      | Except.error error => Option.some (Except.error error)
-                      | Except.ok _ =>
+              match psKernelExprV2AdmissionPrepareBodyWithFuel fuel context afterHeader plan with
+              | Option.none => Option.none
+              | Option.some attemptedPreparation =>
+                  match attemptedPreparation with
+                  | Except.error error => Option.some (Except.error error)
+                  | Except.ok prepared =>
+                      match plan.body with
+                      | Option.none =>
                           Option.some (psKernelEnvironmentAdd environment plan.info)
+                      | Option.some body =>
+                          match psKernelExprV2AdmissionCheckBodyWithFuel fuel context prepared
+                              plan.base plan.typeRoot (Prod.fst body) (Prod.snd body) plan.mismatch with
+                          | Option.none => Option.none
+                          | Option.some attemptedBody =>
+                              match attemptedBody with
+                              | Except.error error => Option.some (Except.error error)
+                              | Except.ok _ =>
+                                  Option.some (psKernelEnvironmentAdd environment plan.info)
 
 def psKernelDagAdmitDeclaration
     (session : PsKernelKernelSession) (arena : PsKernelExprV2PagedArena)

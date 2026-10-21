@@ -90,6 +90,9 @@ jobs:
           grep -q 'PSC1_V2_DAG_ADMISSION_POLICY_SAFETY: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_ADMISSION_FINAL_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_SIMPLE_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_THEOREM_ADMISSION_MATRIX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_THEOREM_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_THEOREM_ISPROP_STATE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_NATIVE_OFFICIAL_POLY_DELTA: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           .lake/build/bin/psc1_kernel_expr_v2_regression \
             | tee "$RUNNER_TEMP/psc1-v2-existing-native.log"
@@ -227,6 +230,8 @@ jobs:
           grep -q 'PSC1_V2_DAG_JS_ADMISSION_SHARED_STATE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_ADMISSION_POLICY_SAFETY: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_THEOREM_ADMISSION_MATRIX: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_THEOREM_ISPROP_STATE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
       - name: Run generated inference modes with separate checked authorization
         working-directory: psc1

@@ -12,6 +12,12 @@ needs an actual run to corroborate the tested zero-heavy selection.
 The first router run correctly skips the unrelated specialization benchmark.
 
 Actual next implementation, pending full CI:
+CI dependency selection now carries failed/cancelled update debt from the last
+successful same-PR/same-base ancestor gate. The event.before interval alone
+could omit a changed policy/target whose previous run was cancelled; regression
+tests cover failed/cancelled/nonancestor/different-base histories. API/baseline
+failure selects full qualification. The Actions token is read-only.
+
 Run39569709984 reaches the real generic witness blocker after CLI correction:
 PSC1_PARTIAL_NO_CHECKED_INHABITANT orderingStringFrom. Extend the existing
 128-attempt/depth constructive witness search with declaration-driven

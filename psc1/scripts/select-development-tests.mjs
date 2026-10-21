@@ -44,22 +44,47 @@ export function selectPsc1Tests(paths,{full=false,uncertain=false}={}){
  }
  return {...selected,paths:[...paths].sort(),reasons:[...new Set(reasons)]};
 }
+export function successfulBaseline(runs,{workflow,branch,prNumber,baseCommit,isAncestor}){
+ for(const run of runs){
+  if(run.name!==workflow||run.head_branch!==branch||run.event!=='pull_request'||
+      run.status!=='completed'||run.conclusion!=='success')continue;
+  const pull=run.pull_requests?.find(p=>p.number===prNumber);
+  if(!pull||pull.base?.sha!==baseCommit||!/^[a-f0-9]{40}$/.test(run.head_sha||''))continue;
+  if(isAncestor(run.head_sha))return {commit:run.head_sha,runId:run.id};
+ }
+ return null;
+}
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
  const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
  const pull=event.pull_request;
  const sha=process.env.GITHUB_SHA;
  const full=event.inputs?.full===true||event.inputs?.full==='true';
  let paths=[],uncertain=false;
- // synchronize uses only the new commit interval, never the cumulative PR path filter.
- const before=event.action==='synchronize'?event.before:pull?.base?.sha;
+ // Carry all failed/cancelled update debt forward to the last successful gate.
+ // Using event.before alone can silently lose a test dependency when its run is cancelled.
  const head=pull?.head?.sha;
+ let baseline=null;
+ if(pull&&process.env.GITHUB_TOKEN){
+  try{
+   const response=await fetch(process.env.GITHUB_API_URL+'/repos/'+process.env.GITHUB_REPOSITORY+
+    '/actions/runs?status=success&event=pull_request&per_page=100&branch='+encodeURIComponent(pull.head.ref),
+    {headers:{Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json'},redirect:'error'});
+   assert.equal(response.status,200,'cannot read previous gate conclusions');
+   const data=await response.json();
+   baseline=successfulBaseline(data.workflow_runs,{
+    workflow:process.env.GITHUB_WORKFLOW,branch:pull.head.ref,prNumber:pull.number,baseCommit:pull.base.sha,
+    isAncestor:commit=>spawnSync('git',['merge-base','--is-ancestor',commit,head]).status===0});
+  }catch{uncertain=true;}
+ }
+ const before=baseline?.commit;
+ if(!baseline)uncertain=true;
  if(!before||!head||!/^[a-f0-9]{40}$/.test(before)||!/^[a-f0-9]{40}$/.test(head))uncertain=true;
  else {
   const diff=spawnSync('git',['diff','--name-only','--no-renames','-z',before,head],{encoding:'utf8'});
   if(diff.error||diff.status!==0)uncertain=true;
   else paths=diff.stdout.split('\0').filter(Boolean);
  }
- const result={schema:'psc1-ci-selection/1',testedCommit:sha,headCommit:head||sha,beforeCommit:before||null,
+ const result={schema:'psc1-ci-selection/1',testedCommit:sha,headCommit:head||sha,beforeCommit:before||null,eventBeforeCommit:event.before||null,baselineRunId:baseline?.runId||null,
   ...selectPsc1Tests(paths,{full,uncertain})};
  fs.mkdirSync('psc1/dist/development',{recursive:true});
  fs.writeFileSync('psc1/dist/development/ci-selection.json',JSON.stringify(result,null,2)+'\n');

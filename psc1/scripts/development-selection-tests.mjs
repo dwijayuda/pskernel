@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {selectPsc1Tests as select} from './select-development-tests.mjs';
+import {selectPsc1Tests as select,successfulBaseline} from './select-development-tests.mjs';
 assert.deepEqual(select(['psc1/AI_WORK_STATE.md','psc1/docs/PSC1_COLLECTIONS_QUALIFICATION_2026-10-21.json']),{
  static:true,focused:false,integration:false,release:false,benchmark:false,
  paths:['psc1/AI_WORK_STATE.md','psc1/docs/PSC1_COLLECTIONS_QUALIFICATION_2026-10-21.json'],reasons:[]});
@@ -33,3 +33,13 @@ for(const file of ['psc1/docs/PSC1_STATUS.json','psc1/docs/PSC1_QUALIFICATION_20
  'psc1/docs/selfhost-language/reviewed-candidate.json'])
  assert.equal(select([file]).release,true,file);
 assert.equal(select(['.github/workflows/pskernel-expression-v2.yml']).focused,false);
+
+const sha='a'.repeat(40),base='b'.repeat(40),other='c'.repeat(40);
+const options={workflow:'PSC1 incremental development gates',branch:'feature',prNumber:172,baseCommit:base,isAncestor:s=>s===sha};
+const valid={id:10,name:options.workflow,head_branch:'feature',head_sha:sha,event:'pull_request',
+ status:'completed',conclusion:'success',pull_requests:[{number:172,base:{sha:base}}]};
+assert.deepEqual(successfulBaseline([{...valid,id:12,conclusion:'cancelled'},{...valid,id:11,conclusion:'failure'},valid],options),{commit:sha,runId:10});
+for(const changed of [{head_sha:other},{head_branch:'other'},{name:'other workflow'},{event:'push'},
+ {pull_requests:[]},{pull_requests:[{number:172,base:{sha:other}}]}])
+ assert.equal(successfulBaseline([{...valid,...changed}],options),null);
+assert.equal(successfulBaseline([],options),null);

@@ -19,7 +19,9 @@ working features outside the finite scope.
 CI has four tiers in psc1-development.yml: fast static contracts/syntax, focused
 native plus JS/TS/Rust, integration complete-source closures plus G1, and full
 scoped seven-target/minimum-runtime/package qualification. Incremental selection
-uses the actual synchronize before/head interval, not cumulative PR paths.
+uses the last successful gate/head interval, not cumulative PR paths. Failed or
+cancelled updates retain their testing debt; an unavailable baseline or changed
+base falls back to full qualification.
 Unknown/unavailable diffs fail conservatively into full testing. Documentation
 does not restart compiler jobs. CI/authority/build/target changes require full
 testing. Existing workflows remain manually runnable and reusable; no assertion

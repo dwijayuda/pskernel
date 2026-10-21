@@ -235,11 +235,11 @@ private def nameMatrix : IO Unit := do
   IO.println "PSC1_NAME_WORKER_NAMES_PASS pairs=400 deep=4 maxDepth=1024"
 
 private def publicNames : List PsKernelName :=
-  let prefix := nm "NameWorker";
-  [.str prefix "é",.str prefix "é",.str prefix "αβ",.str prefix "🙂",
-    .str prefix "with.dot",.str (.str prefix "with") "dot",
-    .num prefix 9007199254740993,.num prefix 9007199254806514,
-    .str prefix "Plain",deepName "NameWorkerDeep" 32]
+  let nameRoot := nm "NameWorker";
+  [.str nameRoot "é",.str nameRoot "é",.str nameRoot "αβ",.str nameRoot "🙂",
+    .str nameRoot "with.dot",.str (.str nameRoot "with") "dot",
+    .num nameRoot 9007199254740993,.num nameRoot 9007199254806514,
+    .str nameRoot "Plain",deepName "NameWorkerDeep" 32]
 
 private structure PublicFixture where
   name : PsKernelName
@@ -308,10 +308,10 @@ private def publicChecking : IO Unit := do
     require "reference-checked-exact-type" (psKernelExprEqual checked.type fixture.type)
     require "reference-normalized-exact-body" (psKernelExprEqual normalized fixture.value)
   require "all-replies-consumed" replies.isEmpty
-  let prefix := nm "NameWorker"
+  let nameRoot := nm "NameWorker"
   require "numeric-hash-collision-is-real"
-    (psKernelEnvironmentNameHash (.num prefix 9007199254740993) ==
-      psKernelEnvironmentNameHash (.num prefix 9007199254806514))
+    (psKernelEnvironmentNameHash (.num nameRoot 9007199254740993) ==
+      psKernelEnvironmentNameHash (.num nameRoot 9007199254806514))
   let some first := fixtures.head? | throw (IO.userError "missing name-worker fixture")
   let some duplicate := requests.head? | throw (IO.userError "missing name-worker request")
   let badName := nm "NameWorkerIlltyped"

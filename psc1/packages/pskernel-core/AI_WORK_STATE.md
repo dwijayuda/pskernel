@@ -8,6 +8,26 @@ Lean: `leanprover/lean4:v4.35.0`, exact commit `eb6cafb7290e8bd5f2937522d8d804f5
 Generated path: authentic PSC1 → TypeScript `7.0.2` → Node `22`. Full-kernel DirectJS is unsupported.
 Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduction path.
 
+## 2026-10-21 16:41:23 UTC — repair reserved native fixture identifier
+
+Exact name-worker candidate `3fa161767d3e09692db77645d1892b4e0c82f45c`
+failed native integration
+[39635756994/job119345640608](https://github.com/dwijayuda/pskernel/actions/runs/39635756994/job/119345640608):
+the new native fixture used Lean's reserved token `prefix` as two local names.
+The production Name module compiled, but the fixture build failed and all
+runtime/proof gates depending on that build were skipped. No source-wide
+qualification is inferred from compilation. Generated/canonical jobs were
+still running at this observation.
+
+This successor renames only those two native locals and their eleven uses to
+`nameRoot` (13 exact identifier replacements). All proof statements, official
+fixtures, resource assertions, generated JavaScript and production source remain
+identical. Later parser errors in that aborted native function must be checked
+in the successor's real build rather than assumed resolved. The containing
+successor is NOT RUN at creation for every required gate; inspect terminal
+same-source native, portable, canonical, generated, proof, provider, benchmark
+and Arena results.
+
 ## 2026-10-21 16:31 UTC — exact name/string workers; mandatory qualification pending
 
 This candidate is based on scoped-qualified `f9e9b20f92ce2ffa4a666acaf55aa8852949f589`.

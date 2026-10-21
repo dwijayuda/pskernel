@@ -1,3 +1,55 @@
+## T03b qualification execution — focused gates passed; full exact-source gates pending
+
+Updated: 2026-10-21 23:10:21 UTC.
+The demand-scoped implementation passed focused Linux qualification at exact
+`6fd9ac6f57e34947e0b11f0176f357146798a9e1`, run39691206177/job119537547857.
+Native public DAG controls, T03a24/7/6/3 plus official5/6/7, separate-session
+8-kind/7-direct/5-private-ID/2-fork controls and official4-declaration/7-direct
+checks all passed. All21 recursor equations,21 Quot-owner equations and13 session
+equations elaborated without sorryAx or compiler-trust proof shortcuts.
+
+Failed preflights remain in history: exact0b413781f68bfce7d451255e94e84e4415fec1bb,
+run39690178207/job119534142609, exposed official fixture record layout;
+exact6c1059657945c7516480c60c16e5d889642735f5,
+run39690574716/job119535462633, exposed mutable input shadowing and the old late
+publication theorem's missing demand-completion state. Both were test/proof
+corrections; production is unchanged from0b413. The late-command theorem now
+quantifies the actual completed state, and a new equation proves atomic failure
+at the added post-command import boundary. No failing gate was suppressed.
+
+Existing parent0420aa896b04197aebd14444c1d2c4a36a41df9e is independently
+scoped-A qualified: integration39664059278, correctness39664059196 and all6
+research39664059121 jobs passed. Its full193 Arena39664059161 is FAIL:
+173 matches,2 safety-contract agreements,17 timeouts,1 resource exhaustion,
+0 unsupported. Profiles39664059168 passed collection only. Both generated routes
+retain T03a controls,1360 Quot-owner assertions,Name50237 assertions and24+8
+provider checks. Parent PASS does not qualify this containing source.
+
+The containing commit enables full isolated-branch qualification on
+`work/psc1-pskernel-t03b-session-20261022`: native/official, authentic generated,
+canonical reconstruction/checking, all6 research jobs, providers, complete
+benchmarks, one unchanged193-case comparison and diagnostic profiles. Inspect
+these existing exact-source runs before launching anything else. This containing
+source is **NOT YET A-qualified**. The final paired experiment must reuse the
+unchanged32-worker/384-call/32-and128-owner driver fromf84f344, comparing against
+the authenticated immediate-parent0420 artifact12378492499. The eager7e and
+indexed-cache performance holds remain.
+
+A is exact-source scoped and pending here; B still includes T03b qualification,
+T01F, V1 inductive admission, recursive metadata import, eager decoding and four
+whole-operation fallbacks. C remains open for timeouts, Church exhaustion and
+explicit safety-contract reconciliation. D remains open pending complete
+same-run observations; no general speedup is claimed. Fuel4096 and all host
+limits, independent checking, both detached generated routes, original external
+IDs, exact immutable environment identity and atomic publication remain fixed.
+The next executable action is to finish these gates and the unchanged paired
+measurement, then integrate only the qualified result with a separate
+documentation receipt.
+
+Earlier updates below retain their named historical sources.
+
+---
+
 ## T03b demand-scoped session ownership — isolated implementation, pending qualification
 
 Updated: 2026-10-21 19:59:42 UTC. Integration parent is exact

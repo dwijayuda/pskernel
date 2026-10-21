@@ -1,0 +1,102 @@
+{
+  "schema": "psc1-t03b-focused-preflight-v1",
+  "observed_at_utc": "2026-10-21 23:10:21 UTC",
+  "source_sha": "6fd9ac6f57e34947e0b11f0176f357146798a9e1",
+  "source_tree": "90a4e6ec46d36b5288b210d7368d3495073ae725",
+  "branch": "work/psc1-pskernel-t03b-session-20261022",
+  "scope": "focused native/official and local proofs only; not scoped A",
+  "scoped_A_qualified": false,
+  "inherited_parent_qualification": false,
+  "run": 39691206177,
+  "job": 119537547857,
+  "conclusion": "success",
+  "artifacts": [
+    {
+      "id": 12388528513,
+      "name": "psc1-t03b-focused-native",
+      "size_in_bytes": 2677,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12388528513",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12388528513/zip",
+      "expired": false,
+      "created_at": "2026-10-21T23:08:36Z",
+      "expires_at": "2027-01-19T23:06:31Z",
+      "updated_at": "2026-10-21T23:08:36Z",
+      "digest": "sha256:08bb32250e5a44229a87d4d5e2ee66875b15a5899e9d512fe99fdd0bc24c4aec",
+      "workflow_run": {
+        "id": 39691206177,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t03b-session-20261022",
+        "head_sha": "6fd9ac6f57e34947e0b11f0176f357146798a9e1"
+      }
+    }
+  ],
+  "markers": [
+    "PSC1_V2_DAG_REGRESSION: PASS",
+    "PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3",
+    "PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7",
+    "PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2",
+    "PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7"
+  ],
+  "proofs": {
+    "recursor": 21,
+    "QuotOwner": 21,
+    "session": 13,
+    "logicalDependencies": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "sorryAx": false,
+    "compilerTrust": false,
+    "globalSoundnessClaim": false
+  },
+  "production_base": "0420aa896b04197aebd14444c1d2c4a36a41df9e",
+  "production_first_source": "0b413781f68bfce7d451255e94e84e4415fec1bb",
+  "production_blobs": {
+    "API/DagGenerated.lean": "982c7c566a639de46d59f1694e562b91417d3137",
+    "Checker/ExprV2/Environment.lean": "600774c1e34634269c07a6d699be85f8e5e28d1f",
+    "API/Dag.lean": "dbafffc4353160443cdf122740cc9220b4c0b0ce"
+  },
+  "retained_failed_preflights": [
+    {
+      "source": "0b413781f68bfce7d451255e94e84e4415fec1bb",
+      "run": 39690178207,
+      "job": 119534142609,
+      "productionCompiled": true,
+      "retainedDagRegressionPassed": true,
+      "failure": "official fixture record layout"
+    },
+    {
+      "source": "6c1059657945c7516480c60c16e5d889642735f5",
+      "run": 39690574716,
+      "job": 119535462633,
+      "productionCompiled": true,
+      "retainedDagRegressionPassed": true,
+      "failures": [
+        "mutable fixture input shadowing",
+        "late command proof omitted successful demand-completion state"
+      ]
+    }
+  ],
+  "historical_artifact_inspection": {
+    "source": "0b413781f68bfce7d451255e94e84e4415fec1bb",
+    "run": 39690178207,
+    "job": 119534143251,
+    "conclusion": "success",
+    "replayed": false,
+    "sources": [
+      "deb18b9c87a5d21a406c6e5b852afb4d44785fe5",
+      "7b14affc854e7bc99e4778ac155ae805dd273226"
+    ],
+    "complete_case_records": 386,
+    "body_hash_pairs_identical": true,
+    "actual_case16": "bugs/rec-missing-ih.ndjson",
+    "actual_case16_classification": "matched_kernel_rejection"
+  },
+  "remaining": [
+    "full exact-source scoped gates",
+    "one final unchanged193 comparison",
+    "unchanged complete-call paired experiment"
+  ]
+}

@@ -1,0 +1,188 @@
+name: PSC1 initial-session owner whole-call benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_run:
+        description: Exact terminal-success integration run ID
+        required: true
+        type: string
+      candidate_source:
+        description: Exact 40-character source SHA of the candidate producer
+        required: true
+        type: string
+      candidate_artifact:
+        description: Exact generated artifact ID from that run
+        required: true
+        type: string
+      candidate_zip_bytes:
+        description: Exact generated artifact ZIP byte count
+        required: true
+        type: string
+      candidate_zip_sha256:
+        description: Exact generated artifact ZIP SHA256
+        required: true
+        type: string
+
+  push:
+    branches:
+      - research/psc1-pskernel-initial-owner-bench-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-initial-owner-benchmark.yml
+      - psc1/scripts/pskernel-initial-owner-artifacts.py
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc1-initial-owner-benchmark-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  paired-initial-owner:
+    # Measurements supplement their linked producer gates; this does not compile a kernel.
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PSC1_INITIAL_OWNER_SOURCE: ${{ inputs.candidate_source || '7e36b3b1d4d563798b9f86e2840f2414899421fe' }}
+      PSC1_INITIAL_OWNER_RUN: ${{ inputs.candidate_run || '39657469165' }}
+      PSC1_INITIAL_OWNER_ARTIFACT: ${{ inputs.candidate_artifact || '12375381038' }}
+      PSC1_INITIAL_OWNER_ZIP_BYTES: ${{ inputs.candidate_zip_bytes || '3394036' }}
+      PSC1_INITIAL_OWNER_ZIP_SHA256: ${{ inputs.candidate_zip_sha256 || '987a53a700ad95f6a7a3c1b542a12a44bad905e2184ee90d87d59ba4994f5a28' }}
+    steps:
+      - name: Check out the artifact authentication harness
+        uses: actions/checkout@v4
+        with:
+          path: harness
+          persist-credentials: false
+      - name: Check out the exact candidate benchmark source
+        uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/pskernel
+          ref: ${{ env.PSC1_INITIAL_OWNER_SOURCE }}
+          path: sources/candidate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check source identity and host-script syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C sources/candidate rev-parse HEAD)" = "$PSC1_INITIAL_OWNER_SOURCE"
+          git -C harness rev-parse HEAD
+          python3 -m py_compile harness/psc1/scripts/pskernel-initial-owner-artifacts.py
+          node --check sources/candidate/psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs
+      - name: Authenticate exact terminal-success producer artifacts
+        shell: bash
+        env:
+          PSC1_PERF_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 harness/psc1/scripts/pskernel-initial-owner-artifacts.py \
+            --candidate-run "$PSC1_INITIAL_OWNER_RUN" \
+            --candidate-source "$PSC1_INITIAL_OWNER_SOURCE" \
+            --candidate-artifact "$PSC1_INITIAL_OWNER_ARTIFACT" \
+            --candidate-zip-bytes "$PSC1_INITIAL_OWNER_ZIP_BYTES" \
+            --candidate-zip-sha256 "$PSC1_INITIAL_OWNER_ZIP_SHA256" \
+            --out "$RUNNER_TEMP/psc1-initial-owner-runtime" \
+            2>&1 | tee "$RUNNER_TEMP/psc1-initial-owner-authentication.log"
+      - name: Execute all32 detached whole-call workers
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          cp sources/candidate/psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs \
+            "$RUNNER_TEMP/psc1-initial-owner-bench.mjs"
+          cd "$RUNNER_TEMP"
+          env PATH="" "$PSC1_NODE_BIN" "$RUNNER_TEMP/psc1-initial-owner-bench.mjs" \
+            "$RUNNER_TEMP/psc1-initial-owner-runtime/candidate/kernel.js" \
+            "$RUNNER_TEMP/psc1-initial-owner-runtime/baseline/kernel.js" \
+            "$RUNNER_TEMP/psc1-initial-owner-measurements" \
+            "$PSC1_INITIAL_OWNER_SOURCE" \
+            "deb18b9c87a5d21a406c6e5b852afb4d44785fe5" \
+            2>&1 | tee "$RUNNER_TEMP/psc1-initial-owner-collection.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_BENCH: PASS workers=32 calls=384 sizes=32,128 queries=4' \
+            "$RUNNER_TEMP/psc1-initial-owner-collection.log"
+      - name: Bind every observation to the authenticated source and bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path(os.environ["RUNNER_TEMP"])
+          auth = json.loads((root / "psc1-initial-owner-runtime/authentication.json").read_text())
+          report_path = root / "psc1-initial-owner-measurements/initial-owner-complete-batch.json"
+          report = json.loads(report_path.read_text())
+          candidate = os.environ["PSC1_INITIAL_OWNER_SOURCE"]
+          baseline = "deb18b9c87a5d21a406c6e5b852afb4d44785fe5"
+          assert auth["format"] == "psc1-initial-owner-artifacts-v1"
+          assert auth["baseline"]["source_sha"] == report["baselineSha"] == baseline
+          assert auth["candidate"]["source_sha"] == report["candidateSha"] == candidate
+          assert auth["candidate"]["producer_run"] == int(os.environ["PSC1_INITIAL_OWNER_RUN"])
+          assert auth["candidate"]["artifact_id"] == int(os.environ["PSC1_INITIAL_OWNER_ARTIFACT"])
+          assert auth["candidate"]["artifact_zip_bytes"] == int(os.environ["PSC1_INITIAL_OWNER_ZIP_BYTES"])
+          assert auth["candidate"]["artifact_zip_sha256"] == os.environ["PSC1_INITIAL_OWNER_ZIP_SHA256"]
+          assert report["schema"] == "psc1-initial-owner-complete-batch-v1"
+          assert report["limits"] == {"kernelFuel": 4096, "hostPerWorkerSeconds": 60,
+                                      "v8OldSpaceMiB": 2048, "hardRssLimitClaim": False}
+          assert report["expectedWorkers"] == report["completedWorkers"] == 32
+          assert report["validatedCalls"] == 384 and report["failures"] == []
+          expected = {(size, query, pos, label)
+                      for size in (32, 128)
+                      for query in ("trivial-sort", "owned-constant", "unknown-constant", "ill-typed-definition")
+                      for pos, label in enumerate(("baseline", "candidate", "candidate", "baseline"))}
+          observed = {(row["owners"], row["query"], row["position"], row["label"])
+                      for row in report["workers"]}
+          assert len(report["workers"]) == 32 and observed == expected
+          for label in ("baseline", "candidate"):
+              assert report["expectedDigests"][label] == auth[label]["kernel_sha256"]
+          for row in report["workers"]:
+              assert row["sourceSha"] == auth[row["label"]]["source_sha"]
+              assert row["kernelSha256"] == auth[row["label"]]["kernel_sha256"]
+              assert row["validated"] == 12 and row["kernelFuel"] == "4096"
+              assert len(row["warmup"]) == 2 and len(row["warm"]) == 9
+              assert row["hardRssLimitClaim"] is False
+          driver = root / "psc1-initial-owner-bench.mjs"
+          checked_source = pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / "sources/candidate/psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs"
+          assert driver.read_bytes() == checked_source.read_bytes()
+          assert report["driverSha256"] == hashlib.sha256(driver.read_bytes()).hexdigest()
+          receipt = {"workflowSource": os.environ["GITHUB_SHA"], "candidateSource": candidate,
+                     "baselineSource": baseline, "workers": 32, "validatedCalls": 384,
+                     "driverSha256": report["driverSha256"],
+                     "reportSha256": hashlib.sha256(report_path.read_bytes()).hexdigest(),
+                     "allProducerIdentitiesAndObservationsMatched": True,
+                     "performanceThresholdClaim": False, "hardRssLimitClaim": False,
+                     "canonicalRecheckedHere": False, "kernelCompiledHere": False}
+          (root / "psc1-initial-owner-measurements/authenticated-comparison.json").write_text(
+              json.dumps(receipt, indent=2) + "\n")
+          print("PSC1_INITIAL_OWNER_AUTHENTICATED_COMPARISON " + json.dumps(receipt, sort_keys=True))
+          print("PSC1_INITIAL_OWNER_PERFORMANCE_SUMMARY " + json.dumps(
+              {key: value for key, value in report.items() if key != "workers"}, sort_keys=True))
+          for worker in report["workers"]:
+              print("PSC1_INITIAL_OWNER_PERFORMANCE_WORKER " + json.dumps(worker, sort_keys=True))
+          PY
+      - name: Present complete observations and incomplete results
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test -f "$RUNNER_TEMP/psc1-initial-owner-measurements/initial-owner-complete-batch.md"; then
+            cat "$RUNNER_TEMP/psc1-initial-owner-measurements/initial-owner-complete-batch.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Retain immutable bundles, authentication and every worker outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-initial-owner-benchmark-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/psc1-initial-owner-runtime/
+            ${{ runner.temp }}/psc1-initial-owner-measurements/
+            ${{ runner.temp }}/psc1-initial-owner-authentication.log
+            ${{ runner.temp }}/psc1-initial-owner-collection.log
+            ${{ runner.temp }}/psc1-initial-owner-bench.mjs
+            harness/psc1/scripts/pskernel-initial-owner-artifacts.py
+            harness/.github/workflows/psc1-pskernel-initial-owner-benchmark.yml

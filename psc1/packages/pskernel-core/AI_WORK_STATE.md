@@ -1,3 +1,54 @@
+# Current artifact-pinned experiment — complete initial-owner calls
+
+Updated: 2026-10-21 19:32 UTC.
+Harness branch: `research/psc1-pskernel-initial-owner-bench-20261021`.
+Exact candidate: `7e36b3b1d4d563798b9f86e2840f2414899421fe`.
+Exact baseline: `deb18b9c87a5d21a406c6e5b852afb4d44785fe5`.
+Benchmark status: **NOT RUN at creation**. This branch does not change a kernel.
+
+Candidate integration[39657469165](https://github.com/dwijayuda/pskernel/actions/runs/39657469165)
+is terminal PASS: native119421443255 and generated119421442873. Native20
+owner-boundary equations, the complete initial-owner matrix, original/private
+IDs, live indexed lookup, all retained semantic/resource controls and detached
+provider gates passed. Authentic generated code passed1515 new owner assertions
+and the retained provider24CLI/8API checks with PATH empty. All6 research jobs
+in39657469181 passed. Canonical correctness39657469304 was still completing
+its final capability diagnostic when this harness was created; Arena39657469152
+was still evaluating all193 cases. Do not infer those terminal outcomes.
+
+The paired harness authenticates both successful producer integration jobs,
+exact source SHAs, immutable artifact IDs/ZIP digests, generated manifests,
+all8 runtime/deployment files, .d.ts and source maps before execution. Candidate
+artifact12375381038 is3394036 bytes with SHA256
+`987a53a700ad95f6a7a3c1b542a12a44bad905e2184ee90d87d59ba4994f5a28`.
+Candidate kernel.js is9924976 bytes with SHA256
+`0771bf869da9003af77c65dbb46e37a7714b94d63d55724878c8232f787a1b7b`.
+Complete producer pins and terminal integration jobs are recorded in
+[evidence/2026-10-21-initial-owner-benchmark-pins.json](evidence/2026-10-21-initial-owner-benchmark-pins.json).
+
+Thirty-two fresh sequential ABBA workers execute384 actual complete public
+RunDag calls:32/128 checked prior owners, trivial sort, owned constant, unknown
+constant and ill-typed definition. Every result is checked after timing against
+the genuine V1 public operation and exact positive/negative expectation. The
+full candidate import/validation/decode/checking/reply cost is included; module
+load, first checked-session setup and new input construction are separate.
+Fuel remains4096. Each worker has60seconds and2048MiB V8 old-space; this is not
+an OS RSS cap. Warm/cold latency, CPU, RSS, retained heap, outcomes, source and
+bundle digests are retained, including any incomplete worker. No preselected
+speedup or release performance threshold is asserted.
+
+Next executable action: inspect the paired benchmark to terminal and preserve
+every observation; hold the initial-owner port if measured full-call overhead
+is unacceptable. A successful collection is evidence, not an automatic promotion.
+Then integrate only qualified source changes against the fresh integration ref
+and run the complete gates at the combined exact HEAD. Four whole-operation V1
+fallback families, recursive decode/import, the strict193-case conformance gap,
+full-kernel DirectJS and global soundness remain unresolved.
+
+---
+
+## Preserved candidate history
+
 # Current gate: full qualification enabled after exact native preflight PASS
 
 Initial-owner source `0d370b985cf2b2e6e054aedcfe206c23ffc772d9` passed [focused native run39656934954](https://github.com/dwijayuda/pskernel/actions/runs/39656934954), [job119419581239](https://github.com/dwijayuda/pskernel/actions/runs/39656934954/job/119419581239), including every runtime matrix, actual official Lean checks and all20 compiled local equations. All20 print only `propext`, `Classical.choice`, and `Quot.sound`; the strict output-count/set/dependency audit passed. [Artifact12372392283](https://github.com/dwijayuda/pskernel/actions/runs/39656934954/artifacts/12372392283) is1,726bytes, ZIP SHA256`b3c564f95df54e405a2767186558cc1d5c01c13985a0c4d95785d86dab7b5236`.

@@ -1,0 +1,493 @@
+{
+  "schema": "psc1-saturation-focused-qualification-v1",
+  "sourceSha": "282317394863dca222f9bebe79a64e05b30d0cd4",
+  "sourceTree": "1264fd15cb9a69f8663d5ef7d1c89ebe2d164fbe",
+  "run": 39663471492,
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/39663471492",
+  "jobs": {
+    "jobs": [
+      {
+        "id": 119442249235,
+        "name": "checked-saturation",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 39663471492,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Lean",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install pinned TypeScript",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Build the unchanged compiler and explicit experimental entry points",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Check native models, ordered effects, refusal and original ABI",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Prove and audit all16 local refusal and signature equations",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Admit actual Lean fixture and compile original and optimized IR",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Reconstruct and authenticate the canonical fixture source closure",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Check both real source routes and IR controls in detached empty-PATH Node",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Bind all experimental outputs to this source and toolchain",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": {
+    "artifacts": [
+      {
+        "id": 12376760958,
+        "name": "psc1-saturation-39663471492",
+        "size_in_bytes": 64415,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12376760958",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12376760958/zip",
+        "expired": false,
+        "created_at": "2026-10-21T19:40:40Z",
+        "expires_at": "2026-11-20T19:40:39Z",
+        "updated_at": "2026-10-21T19:40:40Z",
+        "digest": "sha256:0356cfe3eeb75b09bf04863059b77800e2c808912da1d4f395a53c621bacb7a5",
+        "workflow_run": {
+          "id": 39663471492,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "research/psc1-ts-saturation-20261021",
+          "head_sha": "282317394863dca222f9bebe79a64e05b30d0cd4"
+        }
+      }
+    ]
+  },
+  "manifest": {
+    "defaultEmitterChanged": false,
+    "emptyPathExecution": true,
+    "files": [
+      {
+        "bytes": 3931,
+        "path": "PsBackendTsSaturateFixture.lean",
+        "sha256": "e7cb76cd4331cb73c3a61bf07c3ec6f337494cb8d158beabf887ae353593645d"
+      },
+      {
+        "bytes": 12393,
+        "path": "backend-ts-saturate-smoke.mjs",
+        "sha256": "9451615d052fc5d9bb9d2b221f58115027ee32b7160d7dfd8818211d50b9c472"
+      },
+      {
+        "bytes": 273,
+        "path": "canonical/.proofscript-bootstrap.json",
+        "sha256": "9c675110b74a0879bdd85c1f5f2d89a129cebcf5bac81e0a8ddf62d961eb76f3"
+      },
+      {
+        "bytes": 3561,
+        "path": "canonical/test/PsBackendTsSaturateFixture.ps",
+        "sha256": "ba83586a14f8a1ab8a210b81bc9c45389380b7abcf83de675a4b762009a8213e"
+      },
+      {
+        "bytes": 3242,
+        "path": "lean-optimized.d.ts",
+        "sha256": "22a4aa5007177120a76fb8a0ea507c7c4339df7e0b5a6996281a3f697d3ff68a"
+      },
+      {
+        "bytes": 18645,
+        "path": "lean-optimized.js",
+        "sha256": "87a9410193946fe087d23bd90ff30240576cd793b30db14fbc3f8f4b21ca5299"
+      },
+      {
+        "bytes": 24106,
+        "path": "lean-optimized.js.map",
+        "sha256": "af71d0d6413425429278bf437616065fad25f8724f88ff08b518767619a2637a"
+      },
+      {
+        "bytes": 22989,
+        "path": "lean-optimized.ts",
+        "sha256": "f28a7de3394ea824c26f965014a6707e46caf948443198ef3ee7e87982060bb0"
+      },
+      {
+        "bytes": 441,
+        "path": "lean-optimized.ts.receipt.json",
+        "sha256": "cd7515c2346eae934ac43161f939b1e8989fe57d18fa60f5f728498bf4e3549f"
+      },
+      {
+        "bytes": 3242,
+        "path": "lean-original.d.ts",
+        "sha256": "22a4aa5007177120a76fb8a0ea507c7c4339df7e0b5a6996281a3f697d3ff68a"
+      },
+      {
+        "bytes": 14551,
+        "path": "lean-original.js",
+        "sha256": "6f7bbd68a19b3eb9d683ffeac378ad111960c9f39ccc7b4640670bc1f274cca0"
+      },
+      {
+        "bytes": 19609,
+        "path": "lean-original.js.map",
+        "sha256": "3bb02b2da2d0cb4f33142f13bac4e4c65f4ab9c7adf43dd0ec4955117b731add"
+      },
+      {
+        "bytes": 19412,
+        "path": "lean-original.ts",
+        "sha256": "8eb1d08f40d7f60fc4f6ffe8474189590685750123a2f5474781c126edb8ef41"
+      },
+      {
+        "bytes": 25582,
+        "path": "logs/build.log",
+        "sha256": "55b571f652a35191bd69f58d42b18b13a614a0ca3bad9e4bf46d3e253d775ee4"
+      },
+      {
+        "bytes": 35,
+        "path": "logs/lean-check.log",
+        "sha256": "866580e9e31ee52871fd7b1470c282fe0d6a994a499ef43805a8fdf7f513109d"
+      },
+      {
+        "bytes": 324,
+        "path": "logs/lean-compile.log",
+        "sha256": "7b2e13a69788b9c5618d717bf73c3d5d98331163302adf2c9c6f85c63e6038df"
+      },
+      {
+        "bytes": 997,
+        "path": "logs/lean-detached.log",
+        "sha256": "237882897996b489ee862c86c0a2f2bc5cadda2b14ea451a0faeb8a866edb39e"
+      },
+      {
+        "bytes": 392,
+        "path": "logs/native.log",
+        "sha256": "871fde6501b128918ba16e5ad3e23e51cc05f6fccee624a6e92c6d140d47c218"
+      },
+      {
+        "bytes": 1234,
+        "path": "logs/proofs.log",
+        "sha256": "acdff90a68b4c2b8845371a256ad6e3e77ad2a7356a2f31fb976d2653ecd50aa"
+      },
+      {
+        "bytes": 35,
+        "path": "logs/ps-check.log",
+        "sha256": "866580e9e31ee52871fd7b1470c282fe0d6a994a499ef43805a8fdf7f513109d"
+      },
+      {
+        "bytes": 332,
+        "path": "logs/ps-compile.log",
+        "sha256": "35a9ab332e3d2de861d2792ef6ae7c79dc8664e8526104c0a04e92d049e6be38"
+      },
+      {
+        "bytes": 993,
+        "path": "logs/ps-detached.log",
+        "sha256": "189658cf72499dd510f74124580e76d178b60b8e3ddb5168cd0f472e0faaeb9a"
+      },
+      {
+        "bytes": 1340,
+        "path": "models/model-optimized.d.ts",
+        "sha256": "28e0044a6ef20daa2a892042d23b09bf25c403b4713d07fb7aa18d836cd2666c"
+      },
+      {
+        "bytes": 8776,
+        "path": "models/model-optimized.js",
+        "sha256": "19aeebd2271cf0dde14b09f2b2d018dca5cd265ea518628ad07a2c69faaffc46"
+      },
+      {
+        "bytes": 12146,
+        "path": "models/model-optimized.js.map",
+        "sha256": "b43b7f0c5865a1f5c1770ed30e61ff85f0eacfd598da94a270ddc0ee5dd0bcd6"
+      },
+      {
+        "bytes": 11488,
+        "path": "models/model-optimized.ts",
+        "sha256": "c5c44d282bf34cb8d567db8b770d848292884f2e4427e90c61ae9b6eca6af812"
+      },
+      {
+        "bytes": 1340,
+        "path": "models/model-original.d.ts",
+        "sha256": "28e0044a6ef20daa2a892042d23b09bf25c403b4713d07fb7aa18d836cd2666c"
+      },
+      {
+        "bytes": 7806,
+        "path": "models/model-original.js",
+        "sha256": "415018811b4584f63486fd6cf15627de09c2e6aff707eddf1e99d70b92174ff2"
+      },
+      {
+        "bytes": 10796,
+        "path": "models/model-original.js.map",
+        "sha256": "168a21146348b45e3bcff37e653104f7d713f679070b7cbd47c09d4a367bf987"
+      },
+      {
+        "bytes": 10417,
+        "path": "models/model-original.ts",
+        "sha256": "4545fc3b7a586c98fc64d589b1e43680cfb250ecf0b0c8fee48c482b571465b4"
+      },
+      {
+        "bytes": 1421,
+        "path": "proof-receipt.json",
+        "sha256": "43eaf225526a3f62fe9da0b859b323c444f2fb7e2fbb00ddce02c071e258c6bf"
+      },
+      {
+        "bytes": 3242,
+        "path": "ps-optimized.d.ts",
+        "sha256": "22a4aa5007177120a76fb8a0ea507c7c4339df7e0b5a6996281a3f697d3ff68a"
+      },
+      {
+        "bytes": 18643,
+        "path": "ps-optimized.js",
+        "sha256": "9e49ae586b6462bdfdc840633d4827885e9d6470f1bec3fd2279056f9a313372"
+      },
+      {
+        "bytes": 24102,
+        "path": "ps-optimized.js.map",
+        "sha256": "90c8f006d06b996dd85aed5d1f2e021afef4e891c62325775f85285f2ab38283"
+      },
+      {
+        "bytes": 22989,
+        "path": "ps-optimized.ts",
+        "sha256": "f28a7de3394ea824c26f965014a6707e46caf948443198ef3ee7e87982060bb0"
+      },
+      {
+        "bytes": 473,
+        "path": "ps-optimized.ts.receipt.json",
+        "sha256": "179c42ef36e3637a11ffa2ef53a0440be68e3edadce7fa1310a38c96446538a0"
+      },
+      {
+        "bytes": 3242,
+        "path": "ps-original.d.ts",
+        "sha256": "22a4aa5007177120a76fb8a0ea507c7c4339df7e0b5a6996281a3f697d3ff68a"
+      },
+      {
+        "bytes": 14549,
+        "path": "ps-original.js",
+        "sha256": "b2411be6707ec23ce2a9209c5ce9f11ffa4d2515f75ac70af66b85915190c863"
+      },
+      {
+        "bytes": 19605,
+        "path": "ps-original.js.map",
+        "sha256": "2d1a322f257548d7f35a15c0b09ed7cd16a948a99578a152622a23d737e1d5d1"
+      },
+      {
+        "bytes": 19412,
+        "path": "ps-original.ts",
+        "sha256": "8eb1d08f40d7f60fc4f6ffe8474189590685750123a2f5474781c126edb8ef41"
+      }
+    ],
+    "fullKernelQualified": false,
+    "globalCompilerPreservationProven": false,
+    "kernelChanged": false,
+    "lean": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "node": "22",
+    "performanceMeasured": false,
+    "receipts": [
+      {
+        "candidateChecked": true,
+        "candidateTargetChecked": true,
+        "declarations": 14,
+        "declarationsIdentical": true,
+        "helpers": 2,
+        "input": "test/PsBackendTsSaturateFixture.lean",
+        "originalChecked": true,
+        "rewrittenCalls": 10,
+        "schema": "psc1-saturated-checked-backend-v1",
+        "sourceKind": "lean",
+        "typescriptVersion": "7.0.2",
+        "workers": [
+          {
+            "name": "satLookupWorker_$psc0SH_0",
+            "rewrittenCalls": 2,
+            "stages": 2
+          },
+          {
+            "name": "satSetWorker_$psc0SH_0",
+            "rewrittenCalls": 2,
+            "stages": 2
+          }
+        ]
+      },
+      {
+        "candidateChecked": true,
+        "candidateTargetChecked": true,
+        "declarations": 14,
+        "declarationsIdentical": true,
+        "helpers": 2,
+        "input": "dist/saturation/canonical/test/PsBackendTsSaturateFixture.ps",
+        "originalChecked": true,
+        "rewrittenCalls": 10,
+        "schema": "psc1-saturated-checked-backend-v1",
+        "sourceKind": "canonical-ps",
+        "typescriptVersion": "7.0.2",
+        "workers": [
+          {
+            "name": "satLookupWorker_$psc0SH_0",
+            "rewrittenCalls": 2,
+            "stages": 2
+          },
+          {
+            "name": "satSetWorker_$psc0SH_0",
+            "rewrittenCalls": 2,
+            "stages": 2
+          }
+        ]
+      }
+    ],
+    "runAttempt": "1",
+    "runId": "39663471492",
+    "schema": "psc1-saturation-experiment-v1",
+    "sourceSha": "282317394863dca222f9bebe79a64e05b30d0cd4",
+    "typescript": "7.0.2"
+  },
+  "proofs": {
+    "count": 16,
+    "globalCompilerPreservationProven": false,
+    "proofs": {
+      "PsBackendTsSaturateProofs.apply_effectful_interval_refused": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.apply_exact_lambda": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.apply_zero": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.constant_entry_refused": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.declaration_signature_preserved": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.empty_state_arguments": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.excess_state_arguments_refused": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.fresh_zero": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.generic_entry_refused": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.no_stages": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.purity_array_refused": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.purity_call_refused": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.purity_projection_refused": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.purity_variable": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.purity_zero": [
+        "propext"
+      ],
+      "PsBackendTsSaturateProofs.rewrite_zero": [
+        "propext"
+      ]
+    },
+    "runtimeAxiomsAdded": false,
+    "sourceSha": "282317394863dca222f9bebe79a64e05b30d0cd4"
+  },
+  "markers": [
+    "PSC1_SATURATION_RECOGNITION: PASS staging=2 shadows=4 purity=bounded partialSelf=refused",
+    "PSC1_SATURATION_CHECKED: PASS original+candidate=checked helpers=2 ABI=unchanged refusal=original",
+    "PSC1_SATURATION_NATIVE_FIXTURE: PASS radix=120 fuel=0,1,2,16,128,4096 largeNat=above2^70",
+    "PSC1_SATURATION_MODEL_BUILD: PASS TypeScript=7.0.2 declarations=identical maps=present",
+    "PSC1_SATURATION_NATIVE: PASS",
+    "PSC1_SATURATION_PLAN: reason=checked-saturation helpers=2 calls=10",
+    "PSC1_SATURATION_WORKER: satLookupWorker_$psc0SH_0 -> __ps$stage$0 stages=2 rewrittenCalls=2",
+    "PSC1_SATURATION_WORKER: satSetWorker_$psc0SH_0 -> __ps$stage$3 stages=2 rewrittenCalls=2",
+    "PSC1_SATURATION_BUILD: PASS source=lean helpers=2 calls=10 TypeScript=7.0.2",
+    "PSC1_SATURATION_CANONICAL_CLOSURE: PASS modules=1",
+    "PSC1_SATURATION_PLAN: reason=checked-saturation helpers=2 calls=10",
+    "PSC1_SATURATION_WORKER: satLookupWorker_$psc0SH_0 -> __ps$stage$0 stages=2 rewrittenCalls=2",
+    "PSC1_SATURATION_WORKER: satSetWorker_$psc0SH_0 -> __ps$stage$3 stages=2 rewrittenCalls=2",
+    "PSC1_SATURATION_BUILD: PASS source=canonical-ps helpers=2 calls=10 TypeScript=7.0.2",
+    "PSC1_SATURATION_RADIX_JS: PASS cases=240 partialStages=1200 largeNat=above2^70",
+    "PSC1_SATURATION_ORDER_JS: PASS preStage+betweenStage+fixedArgs+effectArg throws=identity",
+    "PSC1_SATURATION_ABI_JS: PASS exports=identical declarations=identical returnedStages=unary",
+    "PSC1_SATURATION_JS: PASS assertions=8400 identities=[{\"path\":\"/home/runner/work/_temp/psc1-saturation-detached/lean-original.js\",\"bytes\":14551,\"sha256\":\"6f7bbd68a19b3eb9d683ffeac378ad111960c9f39ccc7b4640670bc1f274cca0\"},{\"path\":\"/home/runner/work/_temp/psc1-saturation-detached/lean-optimized.js\",\"bytes\":18645,\"sha256\":\"87a9410193946fe087d23bd90ff30240576cd793b30db14fbc3f8f4b21ca5299\"},{\"path\":\"/home/runner/work/_temp/psc1-saturation-detached/models/model-original.js\",\"bytes\":7806,\"sha256\":\"415018811b4584f63486fd6cf15627de09c2e6aff707eddf1e99d70b92174ff2\"},{\"path\":\"/home/runner/work/_temp/psc1-saturation-detached/models/model-optimized.js\",\"bytes\":8776,\"sha256\":\"19aeebd2271cf0dde14b09f2b2d018dca5cd265ea518628ad07a2c69faaffc46\"}]",
+    "PSC1_SATURATION_RADIX_JS: PASS cases=240 partialStages=1200 largeNat=above2^70",
+    "PSC1_SATURATION_ORDER_JS: PASS preStage+betweenStage+fixedArgs+effectArg throws=identity",
+    "PSC1_SATURATION_ABI_JS: PASS exports=identical declarations=identical returnedStages=unary",
+    "PSC1_SATURATION_JS: PASS assertions=8400 identities=[{\"path\":\"/home/runner/work/_temp/psc1-saturation-detached/ps-original.js\",\"bytes\":14549,\"sha256\":\"b2411be6707ec23ce2a9209c5ce9f11ffa4d2515f75ac70af66b85915190c863\"},{\"path\":\"/home/runner/work/_temp/psc1-saturation-detached/ps-optimized.js\",\"bytes\":18643,\"sha256\":\"9e49ae586b6462bdfdc840633d4827885e9d6470f1bec3fd2279056f9a313372\"},{\"path\":\"/home/runner/work/_temp/psc1-saturation-detached/models/model-original.js\",\"bytes\":7806,\"sha256\":\"415018811b4584f63486fd6cf15627de09c2e6aff707eddf1e99d70b92174ff2\"},{\"path\":\"/home/runner/work/_temp/psc1-saturation-detached/models/model-optimized.js\",\"bytes\":8776,\"sha256\":\"19aeebd2271cf0dde14b09f2b2d018dca5cd265ea518628ad07a2c69faaffc46\"}]"
+  ],
+  "qualification": "PASS focused native/authentic Lean/canonical source/IR/target/TypeScript/empty-PATH JavaScript gates at this exact source. Full kernel, performance, default-emitter promotion and global preservation remain NOT RUN or unproven.",
+  "defaultEmitterChanged": false,
+  "kernelSourceChanged": false
+}

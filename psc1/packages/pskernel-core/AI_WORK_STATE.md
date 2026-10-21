@@ -1,3 +1,109 @@
+# Current research — complete-kernel opt-in emitter experiment
+
+Updated: 2026-10-21 20:11 UTC.
+Branch: `research/psc1-ts-saturation-kernel-20261021`.
+Parent/prototype: `282317394863dca222f9bebe79a64e05b30d0cd4`.
+Unchanged measured kernel source: `384f3395036ba7022e6eea9d3ff77f37aacd62ca`.
+The containing experiment commit is **NOT RUN at creation**. No parent
+functional or performance result is inherited for the new experiment.
+
+## Qualified prototype, exact identity
+
+The focused prototype282 completed successfully at
+https://github.com/dwijayuda/pskernel/actions/runs/39663471492/job/119442249235 .
+Native/model controls and16 printed local equations passed. Authentic Lean
+fixture and independently reconstructed canonical .ps fixture were admitted,
+checked and compiled with the real PSC1/TypeScript7.0.2 route. Both detached
+Node22 routes passed8400 assertions, including partial stages, exact callback
+order/multiplicity/throw identity, large numerals, export arities, declaration
+identity and maps. The two actual selected fixture workers have two stages and
+two recursive call rewrites each; total10 call rewrites. There are14 compiled
+IR function declarations, distinct from19 admitted source declarations.
+
+Receipt: `evidence/2026-10-21-282-saturated-backend-focused-pass.json`.
+Artifact12376760958 (64415bytes), ZIP SHA256:
+`0356cfe3eeb75b09bf04863059b77800e2c808912da1d4f395a53c621bacb7a5`.
+This establishes the focused scope only, not global compiler preservation,
+full-kernel functionality, performance improvement, V2 replacement or193 cases.
+
+## Added experiment
+
+Only the new workflow
+`.github/workflows/psc1-ts-saturation-kernel.yml`, new host adapter
+`scripts/pskernel-saturated-kernel-experiment.py`, this work-state and the
+focused receipt are added/updated. Original kernel, compiler/elaborator,
+default backend, erasure, runtime and existing test/helper sources are frozen
+to384; the additive optimizer, driver, native/model fixtures and proofs stay
+byte-identical to282. The workflow verifies these identities before compiling.
+
+Two functional matrix jobs check the complete SelfHost.lean closure and the
+complete independently generated/manifest-authenticated SelfHost.ps closure.
+Each emits original and opt-in runtime from the same checked IR. Both actual
+recursive radix worker names, two stages and positive rewrite counts are
+mandatory; no purity/eligibility widening or default-emitter change is made.
+
+Each route executes57 gates in detached empty-PATH Node processes: one shared
+complete export/entry-arity check, then18 unchanged smoke/control scripts,
+four complete-workload gates and six original diagnostic profiles per emitter.
+The16 original integration suites retain all82 markers; adding generic checker
+and138 replay controls yields18 suites/85 markers. All .js/.ts/.d.ts/.js.map,
+eight-file provider closure, source identities and receipts are retained.
+The unchanged benchmark mothers receive the exact frozen lean-toolchain
+metadata file; no Lean executable is included in detached runtime directories.
+
+Only after both exact functional jobs reach terminal SUCCESS may the paired job
+authenticate both producer artifacts and execute the unchanged7ae helper
+functions:48 whole-admission workers and16 authenticated original-body replays
+in ABBA order. Kernel source identity stays384 for both emitters; compiler/
+experiment source SHA, emitter mode and runtime module digests are separate.
+No artificial distinct kernel SHA or monkeypatch of helper assertions is used.
+Completed replay envelopes must agree exactly, including unchanged-fuel errors.
+Host timeout/heap failures remain unresolved, never accepted/rejected outcomes.
+
+## Gate matrix and measurement limits
+
+| Source/scope | Native | Portable source | Canonical .ps | Generated JS | Proof | Benchmark | Arena | Provider |
+|---|---|---|---|---|---|---|---|---|
+| prototype282 focused | PASS | PASS fixture | PASS fixture | PASS fixture | PASS local16 | NOT RUN | NOT RUN | NOT RUN |
+| containing full-kernel experiment | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+| fixed kernel384 previous primary | PASS | PASS | PASS | PASS | PASS local | FAIL performance qualification | FAIL | PASS |
+
+The existing paired384 cache change regressed metadata admission23.2%/22.6% at
+8/32 declarations and remains HOLD. The optional backend addresses measured
+recursive closure allocation; no speedup is claimed before these new whole-call
+measurements. Legacy/DAG API controls remain separately measured.
+
+Pinned Lean4.35 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`,
+TypeScript7.0.2, Node22 and kernel fuel4096 remain fixed. Paired workers retain
+60-second deadlines and2048MiB V8 old-space, which is explicitly **not a hard
+RSS cap**. The complete-admission timer excludes the original worker's
+independent assertions/direct diagnostics; whole-process CPU/RSS includes them.
+Two observations per emitter are descriptive. The paired phase times the
+Lean-source runtime pair after both source-route functional pairs pass.
+It measures four authentic cases, not all193. Header adaptation retains
+authenticated original body bytes; this is not a fresh native4.35 export.
+
+Full V2 B and Arena C remain incomplete, original V1 remains the default, and
+whole-operation fallbacks remain. The new workflow does not promote cache384 or
+the optimizer to integration. Integration042 and direct-Quot research529/cd640
+are separate source lines; their results cannot qualify this experiment.
+
+## Next executable action
+
+Inspect both complete-kernel functional jobs at the containing SHA. Diagnose
+the first actual failed source/ABI/semantic/transport gate without weakening
+the retained assertions or eligibility guards. If both PASS, inspect the
+dependent paired job through terminal completion, preserve complete per-worker
+records and candid regression/RSS comparisons. Expand to all193 only if
+functional and representative whole-checker measurements justify it.
+
+All source transport used connected GitHub tools, with root-only writes after
+child create-tree calls stalled without receipts. Exact text length/FNV checks
+serve transfer integrity only. All compilation, linting and execution happen
+in Linux GitHub Actions, not locally.
+
+---
+
 # Current backend fixture repair — explicit match-result types
 
 Observed: 2026-10-21 19:38:44 UTC.

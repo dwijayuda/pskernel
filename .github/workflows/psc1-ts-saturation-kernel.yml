@@ -1,0 +1,244 @@
+name: PSC1 complete-kernel opt-in emitter experiment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-ts-saturation-kernel-20261021
+    paths:
+      - .github/workflows/psc1-ts-saturation-kernel.yml
+      - psc1/scripts/pskernel-saturated-kernel-experiment.py
+      - psc1/packages/backend-ts/src/Ps/BackendTs/Saturate.lean
+      - psc1/scripts/SaturatedSourceCompile.lean
+      - psc1/test/PsBackendTsSaturate*.lean
+      - psc1/scripts/backend-ts-saturate-smoke.mjs
+      - psc1/lakefile.lean
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-saturation-kernel-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  functional:
+    name: kernel-${{ matrix.route }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        route: [lean, canonical-ps]
+    env:
+      SOURCE_ROUTE: ${{ matrix.route }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: experiment/psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: experiment
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate unchanged kernel and original compiler source
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 384f3395036ba7022e6eea9d3ff77f37aacd62ca
+          git fetch --no-tags --depth=1 origin 282317394863dca222f9bebe79a64e05b30d0cd4
+          python3 -m py_compile scripts/pskernel-saturated-kernel-experiment.py
+          mkdir -p dist/saturation-kernel/logs dist/saturation-kernel/models
+          python3 scripts/pskernel-saturated-kernel-experiment.py verify \
+            --repo "$GITHUB_WORKSPACE/experiment" --out dist/saturation-kernel
+          node check-psc1-source.mjs --all-portable \
+            | tee dist/saturation-kernel/logs/portable-profile.log
+      - name: Install exact Lean and TypeScript
+        run: |
+          set -euo pipefail
+          bash scripts/install-lean435-ci.sh
+          mkdir -p "$RUNNER_TEMP/psc1-saturation-kernel-ts"
+          printf '%s\n' '{"name":"psc1-saturation-kernel-ts","private":true,"version":"0.0.0"}' \
+            > "$RUNNER_TEMP/psc1-saturation-kernel-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-saturation-kernel-ts" \
+            --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-saturation-kernel-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Build unchanged native kernel and experimental compiler entry
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          node "$PSC0_TSC" --version
+          lake -f kernel-lakefile.lean build PsKernelCore 2>&1 \
+            | tee dist/saturation-kernel/logs/native-kernel-build.log
+          lake build psc1 psc1_backend_ts_saturate_tests psc1_ts_saturate_build 2>&1 \
+            | tee dist/saturation-kernel/logs/compiler-build.log
+      - name: Preserve native recognition, effect order, refusal and ABI controls
+        run: |
+          set -euo pipefail
+          lake exe psc1_backend_ts_saturate_tests dist/saturation-kernel/models \
+            | tee dist/saturation-kernel/logs/native-models.log
+          grep -Fqx 'PSC1_SATURATION_RECOGNITION: PASS staging=2 shadows=4 purity=bounded partialSelf=refused' dist/saturation-kernel/logs/native-models.log
+          grep -Fqx 'PSC1_SATURATION_CHECKED: PASS original+candidate=checked helpers=2 ABI=unchanged refusal=original' dist/saturation-kernel/logs/native-models.log
+          grep -Fqx 'PSC1_SATURATION_NATIVE_FIXTURE: PASS radix=120 fuel=0,1,2,16,128,4096 largeNat=above2^70' dist/saturation-kernel/logs/native-models.log
+          grep -Fqx 'PSC1_SATURATION_MODEL_BUILD: PASS TypeScript=7.0.2 declarations=identical maps=present' dist/saturation-kernel/logs/native-models.log
+          grep -Fqx 'PSC1_SATURATION_NATIVE: PASS' dist/saturation-kernel/logs/native-models.log
+      - name: Audit all 16 local equations without claiming compiler preservation
+        run: |
+          set -euo pipefail
+          lake env lean test/PsBackendTsSaturateProofs.lean \
+            | tee dist/saturation-kernel/logs/proofs.log
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          source = pathlib.Path("test/PsBackendTsSaturateProofs.lean").read_text()
+          log = pathlib.Path("dist/saturation-kernel/logs/proofs.log").read_text()
+          expected = re.findall(r"^#print axioms (PsBackendTsSaturateProofs\.\S+)$", source, re.M)
+          actual = re.findall(r"'(PsBackendTsSaturateProofs\.[^']+)'\s+(does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log, re.S)
+          assert len(expected) == 16 and len(set(expected)) == 16, "source proof count"
+          assert len(actual) == 16 and {x[0] for x in actual} == set(expected), "compiled proof count"
+          allowed = {"propext", "Classical.choice", "Quot.sound"}
+          dependencies = {}
+          for name, _, body in actual:
+              names = {x.strip() for x in body.split(",") if x.strip()}
+              assert names <= allowed, (name, sorted(names - allowed))
+              dependencies[name] = sorted(names)
+          record = {"compilerSourceSha": os.environ["GITHUB_SHA"], "proofs": dependencies, "count": 16,
+                    "globalCompilerPreservationProven": False, "runtimeAxiomsAdded": False}
+          print("PSC1_SATURATION_PROOF_AUDIT " + json.dumps(record, sort_keys=True))
+          pathlib.Path("dist/saturation-kernel/proof-receipt.json").write_text(json.dumps(record, indent=2) + "\n")
+          PY
+      - name: Check the complete Lean source closure
+        if: matrix.route == 'lean'
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            | tee dist/saturation-kernel/logs/source-check.log
+      - name: Reconstruct and independently check the complete canonical source closure
+        if: matrix.route == 'canonical-ps'
+        run: |
+          set -euo pipefail
+          node scripts/bootstrap-project.mjs \
+            packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/saturation-kernel/canonical
+          node --input-type=module <<'NODE' | tee dist/saturation-kernel/logs/canonical-manifest.log
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import path from 'node:path';
+          import {assertBootstrapWorkspaceManifest} from './scripts/bootstrap-manifest.mjs';
+          import {packageBySection,parseImports} from './scripts/workspace-layout.mjs';
+          const workspace='dist/saturation-kernel/canonical';
+          const entry='packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean';
+          const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
+          const expected=new Set(),visited=new Set();
+          function visit(source){
+            if(visited.has(source))return;
+            visited.add(source);
+            const text=readFileSync(source,'utf8');
+            for(const imported of parseImports(text)){
+              const parts=imported.split('.');
+              let dependency;
+              if(parts[0]==='ProofScript'){
+                dependency=path.posix.join('stdlib',...parts)+'.lean';
+              }else if(parts[0]==='Ps'&&packageBySection.has(parts[1])){
+                dependency=path.posix.join('packages',packageBySection.get(parts[1]),'src',...parts)+'.lean';
+              }else throw Error('SATURATION_CLOSURE_UNKNOWN_IMPORT '+imported);
+              visit(dependency);
+            }
+            expected.add(source.replace(/\.lean$/u,'.ps'));
+          }
+          visit(entry);
+          if(manifest.entry!==entry.replace(/\.lean$/u,'.ps')||
+             manifest.sourceCount!==expected.size||manifest.generated.length!==expected.size||
+             new Set(manifest.generated).size!==expected.size||
+             !manifest.generated.every(item=>expected.has(item)))
+            throw Error('SATURATION_COMPLETE_CANONICAL_CLOSURE_REQUIRED');
+          await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
+          const receipt={entry:manifest.entry,modules:expected.size,generated:[...expected].sort(),
+            complete:true,sourceSha:process.env.GITHUB_SHA};
+          writeFileSync('dist/saturation-kernel/canonical-closure.json',JSON.stringify(receipt,null,2)+'\n');
+          console.log('PSC1_SATURATION_KERNEL_CANONICAL_CLOSURE '+JSON.stringify(receipt));
+          NODE
+          lake exe psc1 check \
+            dist/saturation-kernel/canonical/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+            | tee dist/saturation-kernel/logs/source-check.log
+      - name: Emit both complete kernels from the same checked IR and require real radix helpers
+        run: |
+          set -euo pipefail
+          entry='packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean'
+          if [ "$SOURCE_ROUTE" = 'canonical-ps' ]; then
+            entry='dist/saturation-kernel/canonical/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps'
+          fi
+          mkdir -p dist/saturation-kernel/original dist/saturation-kernel/optimized
+          lake exe psc1_ts_saturate_build "$entry" \
+            dist/saturation-kernel/original/kernel.ts dist/saturation-kernel/optimized/kernel.ts \
+            psKernelExprV2WhnfCacheIndexBucketWorker psKernelExprV2WhnfCacheIndexSetWorker \
+            | tee dist/saturation-kernel/logs/emission.log
+          node --check dist/saturation-kernel/original/kernel.js
+          node --check dist/saturation-kernel/optimized/kernel.js
+      - name: Execute both emitters with all retained detached generated controls
+        run: |
+          set -euo pipefail
+          python3 scripts/pskernel-saturated-kernel-experiment.py qualify \
+            --repo "$GITHUB_WORKSPACE/experiment" --out dist/saturation-kernel --route "$SOURCE_ROUTE"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-saturation-kernel-${{ matrix.route }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: experiment/psc1/dist/saturation-kernel/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
+
+  paired:
+    name: same-kernel-paired-measurement
+    needs: functional
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+        working-directory: experiment/psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: experiment
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 7ae480eedcc7c6c67e63ebdb7a6f4eedcf7ddaa4
+          path: support
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source identities and download the unchanged authenticated archive
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 384f3395036ba7022e6eea9d3ff77f37aacd62ca
+          git fetch --no-tags --depth=1 origin 282317394863dca222f9bebe79a64e05b30d0cd4
+          python3 -m py_compile scripts/pskernel-saturated-kernel-experiment.py
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 180 \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz \
+            --output "$RUNNER_TEMP/psc1-saturation-arena.tar.gz"
+          printf '%s  %s\n' '98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d' \
+            "$RUNNER_TEMP/psc1-saturation-arena.tar.gz" | sha256sum -c -
+      - name: Authenticate both successful producers and run unchanged 48 plus 16 paired workers
+        env:
+          PSC1_PERF_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 scripts/pskernel-saturated-kernel-experiment.py pair \
+            --repo "$GITHUB_WORKSPACE/experiment" --support "$GITHUB_WORKSPACE/support" \
+            --archive "$RUNNER_TEMP/psc1-saturation-arena.tar.gz" \
+            --out "$RUNNER_TEMP/psc1-saturation-paired"
+          cat "$RUNNER_TEMP/psc1-saturation-paired/summary.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-saturation-paired-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/psc1-saturation-paired/
+            experiment/.github/workflows/psc1-ts-saturation-kernel.yml
+            experiment/psc1/scripts/pskernel-saturated-kernel-experiment.py
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30

@@ -255,3 +255,16 @@ Artifact 12376913803 expires 2027-01-19T19:45:30Z; source/admission/IR digests
 are in the diagnostic receipt. Earlier qualified G1 services and the af0a full
 checkpoint remain preserved. G2/G3 remain deferred. The 21 unbound finite family
 criteria and compiler-like application remain release blockers.
+
+## Bounded acceptance first focused diagnosis
+
+Source f7807b31aabd3ed1d06d7763c9d70e5450849cca, tested merge
+47e892ac63ecf934ed0d7c5797e3dca6f86eed19, run 39679135943 passes static and
+native. Both core-Wasm source/control observations pass. Focused component
+consumers fail the new second independent negative probe with Wasmtime's
+"cannot enter component instance" after the original expected foreign trap.
+No full qualification or new criterion completion is inferred.
+Each expected component trap now runs in its own fresh process/store, retaining
+both exact trap assertions, both source grammars and all existing IO effects.
+The corrected acceptance group remains unqualified pending fresh Linux CI.
+The prior full qualified source remains 81824afb and its permanent receipt.

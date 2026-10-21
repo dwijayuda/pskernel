@@ -109,14 +109,24 @@ write(ioConsumer,[
  'instance=linker.instantiate(store,component)',
  'try:instance.get_func(store,"run")(store)',
  'except RuntimeError as error:assert str(error)=="PSC1_HOST_TRAP"',
- 'else:raise AssertionError("source handler swallowed host trap")',
+ 'else:raise AssertionError("source handler swallowed host trap")'
+
+].join('\n'));
+// Each expected component trap has a fresh process/store; a trapped instance
+// is not a reusable host boundary for an independent negative observation.
+const shortConsumer=path.join(work,'component-short-circuit.py');
+write(shortConsumer,[
+ 'import sys,json,wasmtime',
+ 'sys.path.insert(0,sys.argv[2])',
+ 'from typed_io_component import component_engine',
+ 'from wasmtime.component import Component,Linker',
+ 'engine=component_engine();store=wasmtime.Store(engine);component=Component.from_file(engine,sys.argv[1]);linker=Linker(engine)',
  'def short_trap(_store,request):',
  ' if request=="PSC1_SHORT_CIRCUIT_TRAP":raise RuntimeError("PSC1_SHORT_CIRCUIT_TRAP")',
  ' return json.dumps(dict(kind="error",error="notFound"))',
- 'short_linker=Linker(engine)',
- 'with short_linker.root() as root:root.add_func("dispatch",short_trap)',
- 'short_instance=short_linker.instantiate(store,component)',
- 'try:short_instance.get_func(store,"run")(store)',
+ 'with linker.root() as root:root.add_func("dispatch",short_trap)',
+ 'instance=linker.instantiate(store,component)',
+ 'try:instance.get_func(store,"run")(store)',
  'except RuntimeError as error:assert str(error)=="PSC1_SHORT_CIRCUIT_TRAP"',
  'else:raise AssertionError("eager short-circuit control did not trap")'
 ].join('\n'));
@@ -205,6 +215,7 @@ for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-compone
   }else{
    const stdout=run(process.env.PSC1_WASMTIME_PY,[ioConsumer,ioOutput,path.join(root,'host-tools'),capabilityRoot],{input:'world😀\r\n'});
    assert.equal(stdout,'tick\ntick\nrecovered\necho:world😀\n');
+   assert.equal(run(process.env.PSC1_WASMTIME_PY,[shortConsumer,ioOutput,path.join(root,'host-tools')]),'');
   }
   assert.equal(fs.readFileSync(path.join(capabilityRoot,'output.txt'),'utf8'),'processed:hello😀');
   records.push({syntax,target,passed:true,stringsSha256:hash(output),ioSha256:hash(ioOutput),

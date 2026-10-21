@@ -1,11 +1,12 @@
-import Ps.KernelCore.Checker.ExprV2.CheckHelpers
+import Ps.KernelCore.Checker.ExprV2.CheckApplication
 
 /-
-DAG-native fully checked Sort/FVar/literal/metadata/lambda/forall inference.
+DAG-native fully checked Sort/FVar/literal/metadata/lambda/forall inference
+and the structural-type-equality branch of dependent application.
 
 The public entry creates one fresh operation and accepts no legacy local
 context. Internal binders carry type IDs in their own DAG local context.
-General applications, constants, lets and projections explicitly
+Applications requiring general DefEq, constants, lets and projections explicitly
 request the complete checker. Unsupported work never publishes a partial
 state or a checking receipt.
 
@@ -92,6 +93,9 @@ def psKernelExprV2TryCheckCoreWithFuel
                         | PsKernelExprV2Node.forallE name domain body binderInfo =>
                             psKernelExprV2CheckBinderWith smaller whnf
                               nextContext state root name domain body binderInfo false
+                        | PsKernelExprV2Node.app fn arg =>
+                            psKernelExprV2CheckApplicationWith smaller whnf
+                              nextContext state root fn arg
                         | _ => Option.none
 
 def psKernelExprV2TryCheckWithFuel

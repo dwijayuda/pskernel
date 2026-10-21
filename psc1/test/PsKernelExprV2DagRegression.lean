@@ -1507,7 +1507,6 @@ private def binderParity : IO Unit := do
            match result.fst.checkedInfer with | [] => true | _ => false
        | _ => false)
   let unsupported : List PsKernelExpr := [
-    .app (.lam x sort1 (.bvar 0) .default) sort0,
     .const (nm "binder-unknown-constant") [],
     .letE x sort1 sort0 (.bvar 0) false,
     .proj (nm "binder-unknown-structure") 0 sort0]
@@ -1564,6 +1563,121 @@ private def binderParity : IO Unit := do
   IO.println "PSC1_V2_DAG_OFFICIAL_BINDER: PASS"
   IO.println "PSC1_V2_DAG_BINDER: PASS"
 
+private def applicationCheckParity : IO Unit := do
+  let x := nm "app-x"
+  let a := nm "app-a"
+  let y := nm "app-y"
+  let f := nm "app-f"
+  let identity := PsKernelExpr.lam x sort1 (.bvar 0) .default
+  let family := PsKernelExpr.lam a sort1
+    (.lam x (.bvar 0) (.bvar 0) .default) .implicit
+  let proposition := PsKernelExpr.forallE x sort0 (.bvar 0) .default
+  let mut functionType := PsKernelExpr.forallE x sort1 sort1 .default
+  for tag in [:8] do functionType := .mdata (tag + 800) functionType
+  let fixtures : List (String × PsKernelExpr) := [
+    ("identity", .app identity sort0),
+    ("dependent", .app family sort0),
+    ("dependent-second-argument", .app (.app family sort0) proposition),
+    ("metadata-function", .app (.mdata 5 identity) sort0),
+    ("under-local-binders", .lam a sort0
+      (.lam x (.bvar 0)
+        (.app (.lam y (.bvar 1) (.bvar 0) .default) (.bvar 0)) .default) .default),
+    ("function-type-whnf", .lam f functionType (.app (.bvar 0) sort0) .default),
+    ("function-type-whnf-under-binder", .lam f functionType
+      (.lam x sort0 (.app (.bvar 1) sort0) .default) .default),
+    ("invalid-function", .app sort0 sort0),
+    ("invalid-argument", .app identity (.bvar 0))]
+  for (label, term) in fixtures do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,3,4,8,10,11,12,16,32,64] do
+      for maxDepth in [0,1,2] do
+        let session ← fresh fuel maxDepth
+        let checker := psKernelKernelSessionChecker session [] .safe
+        for recDepth in [0,13,14,15,16] do
+          let context := { checker.context with recDepth := recDepth }
+          compareBinderRaw ("application-" ++ label)
+            (psKernelSessionCheck fuel { checker with context := context } term)
+            (binderRaw fuel context (psKernelExprV2CheckStateEmpty arena) root)
+        require ("application-public-" ++ label)
+          (sameCheck (psKernelV1CheckExpression session [] .safe term)
+            (oneCheck session arena root))
+  let universeOne := PsKernelLevel.succ .zero
+  let duplicateUniverse := PsKernelExpr.sort (.max universeOne universeOne)
+  let fallbacks : List (String × PsKernelExpr × Bool) := [
+    ("universe-conversion",
+      .app (.lam x duplicateUniverse (.bvar 0) .default) sort0, true),
+    ("metadata-conversion",
+      .app (.lam x (.mdata 900 sort1) (.bvar 0) .default) sort0, true),
+    ("unequal-types", .app identity sort1, false)]
+  for (label, term, acceptedExpected) in fallbacks do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,3,4,8,16,64] do
+      let session ← fresh fuel 1
+      let checker := psKernelKernelSessionChecker session [] .safe
+      for recDepth in [0,15,16] do
+        let context := { checker.context with recDepth := recDepth }
+        match binderRaw fuel context (psKernelExprV2CheckStateEmpty arena) root with
+        | none => pure ()
+        | some result =>
+            compareBinderRaw ("application-fallback-guard-" ++ label)
+              (psKernelSessionCheck fuel { checker with context := context } term)
+              (some result)
+      require ("application-full-defeq-fallback-" ++ label)
+        (sameCheck (psKernelV1CheckExpression session [] .safe term)
+          (oneCheck session arena root))
+    let session ← fresh 64 1
+    let checker := psKernelKernelSessionChecker session [] .safe
+    require ("application-explicit-defeq-fallback-" ++ label)
+      (match binderRaw 64 checker.context (psKernelExprV2CheckStateEmpty arena) root with
+       | none => true | _ => false)
+    require ("application-defeq-result-" ++ label)
+      ((match psKernelV1CheckExpression session [] .safe term with
+        | .ok _ => true | .error _ => false) == acceptedExpected)
+  let numeralArgument := PsKernelExpr.app identity (.lit (.nat 0))
+  let (arena, root) ← expect (psKernelExprV2PagedImportChecked numeralArgument)
+  for fuel in [0,1,2,3,4,8] do
+    for limit in [0,7] do
+      let initial ← fresh fuel 1
+      let session := { initial with resources := { initial.resources with maxNatSize := limit } }
+      let checker := psKernelKernelSessionChecker session [] .safe
+      compareBinderRaw "application-nat-limit-before-type-comparison"
+        (psKernelSessionCheck fuel checker numeralArgument)
+        (binderRaw fuel checker.context (psKernelExprV2CheckStateEmpty arena) root)
+      require "application-public-nat-limit-before-type-comparison"
+        (sameCheck (psKernelV1CheckExpression session [] .safe numeralArgument)
+          (oneCheck session arena root))
+  let term := PsKernelExpr.app identity sort0
+  let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+  let session ← fresh 64 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let legacy ← expect (psKernelSessionCheck 64 checker term)
+  let direct ←
+    match binderRaw 64 checker.context (psKernelExprV2CheckStateEmpty arena) root with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_CHECK_APP_MISSING_DIRECT_RESULT")
+  let entry ← expect (psKernelExprV2PagedRequire direct.fst.whnf.arena root)
+  let cached ← expect (psKernelExprV2CheckedInferFind direct.fst root entry)
+  require "application-ineligible-for-checked-cache"
+    (match cached with | none => true | _ => false)
+  for recDepth in [0,15,16] do
+    let context := { checker.context with recDepth := recDepth }
+    compareBinderRaw "application-cannot-skip-function-check-on-warm-result"
+      (psKernelSessionCheck 1 { legacy.snd with context := context } term)
+      (binderRaw 1 context direct.fst root)
+  let env ← Lean.mkEmptyEnvironment
+  let lx := Lean.Name.str .anonymous "app-x"
+  let officialTerm := Lean.Expr.app
+    (.lam lx (.sort (.succ .zero)) (.bvar 0) .default) (.sort .zero)
+  let actual ← expectPublic (oneCheck session arena root)
+  require "application-official-checked-identity"
+    (match Lean.Kernel.check env {} officialTerm, checkReply actual with
+     | .ok type, some checked =>
+         Lean.Expr.equal type (.sort (.succ .zero)) &&
+           psKernelExprEqual checked.type sort1
+     | _, _ => false)
+  IO.println "PSC1_V2_DAG_OFFICIAL_CHECK_APP: PASS"
+  IO.println "PSC1_V2_DAG_CHECK_APP: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -1581,5 +1695,6 @@ def main : IO Unit := do
   admissions
   deltaBatchParity
   binderParity
+  applicationCheckParity
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

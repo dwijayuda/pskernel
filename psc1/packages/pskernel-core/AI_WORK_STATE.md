@@ -23,6 +23,33 @@ metadata/cache lemmas. These passes do not establish full Arena qualification
 or a complete DAG-native checker. Newer numeral, delta, reporting and binder
 changes require their own final-source evidence.
 
+### Dependent application checking — implemented, qualification pending
+
+The production DAG checked-inference path now checks a function, exposes its
+dependent function type with the original top-level WHNF budget, checks its
+argument, and performs capture-avoiding DAG codomain instantiation when the
+argument type is structurally equal to the domain. Equality still resolves
+hash collisions structurally. The original checked application rule has this
+syntactic-equality branch before invoking DefEq; no additional DefEq entry is
+invented or skipped. Applications requiring general DefEq restart the complete
+original operation with unchanged resources and publish no partial state.
+
+Native and generated fixtures cover dependent first/second arguments, local
+binders, a function type hidden under eight metadata nodes, an extra binder
+that distinguishes the captured WHNF budget from a decremented one, invalid
+functions/arguments, and exact fuel/depth boundaries. Universe/metadata type
+conversion remains an explicit successful fallback; unequal types remain a
+rejection. Literal-size errors precede type comparison, and checked App results
+remain ineligible for the inference cache. An official Lean fixture checks
+the same identity application. This is one production integration slice,
+not full DAG-native application DefEq, inferOnly or complete checker migration.
+
+The full193 independent run39517166070 at9b34a935 completed with the same165
+strict matches,24 host timeouts,1 internal diagnostic,1 unsupported all-list
+and2 unsafe/partial contract agreements as the earlier report. It passed110
+controls and complete canonical generated execution. The later reporting and
+all-list fixes still need fresh full-corpus outcomes.
+
 ### Current delta/binder qualification corrections — pending CI
 
 The delta raw-worker resource matrix passed its first zero-fuel case, but the

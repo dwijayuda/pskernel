@@ -1495,7 +1495,6 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
     must(sameRuntimeValue(result.fst.checkedInfer,nil),"binder-literal-cache-ineligible");
   }
   const unsupported=[
-    app(lam(x,s1,b0),s0),
     build("Const",E.const(name("binder-unknown-constant"),nil),name("binder-unknown-constant"),nil),
     build("Let",E.letE(x,sort1,sort0,E.bvar(0n),false),x,s1.id,s0.id,b0.id,false),
     build("Proj",E.proj(name("binder-unknown-structure"),0n,sort0),
@@ -1520,6 +1519,93 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
     must(exact(get("psKernelExprCheapBetaReduce")(node.term),actual)===true,
       "binder-exact-cheap-beta");
   }
+  // Checked applications take the original structural-type-equality fast path.
+  {
+    const ax=name("app-x"),aa=name("app-a"),ay=name("app-y"),af=name("app-f");
+    const identity=lam(ax,s1,b0);
+    const family=lam(aa,s1,lam(ax,b0,b0),B.implicit);
+    const proposition=pi(ax,s0,b0);
+    let functionType=pi(ax,s1,s1);
+    for(let tag=0n;tag<8n;tag++)functionType=md(tag+800n,functionType);
+    const appFixtures=[
+      ["identity",app(identity,s0)],
+      ["dependent",app(family,s0)],
+      ["dependent-second-argument",app(app(family,s0),proposition)],
+      ["metadata-function",app(md(5n,identity),s0)],
+      ["under-local-binders",
+        lam(aa,s0,lam(ax,b0,app(lam(ay,b1,b0),b0)))],
+      ["function-type-whnf",lam(af,functionType,app(b0,s0))],
+      ["function-type-whnf-under-binder",lam(af,functionType,lam(ax,s0,app(b1,s0)))],
+      ["invalid-function",app(s0,s0)],
+      ["invalid-argument",app(identity,b0)]
+    ];
+    for(const [label,node] of appFixtures){
+      for(const fuel of [0n,1n,2n,3n,4n,8n,10n,11n,12n,16n,32n,64n])
+      for(const maxDepth of [0n,1n,2n]){
+        const s=session(fuel,maxDepth),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+        for(const recDepth of [0n,13n,14n,15n,16n]){
+          const context={...checker.context,recDepth};
+          compareRaw(get("psKernelSessionCheck")(fuel,{...checker,context},node.term),
+            raw(fuel,context,emptyCheck(binderArena),node.id),
+            "application-"+label+"-"+fuel+"-"+maxDepth+"-"+recDepth);
+        }
+        must(publicCheck(s,node),"application-public-"+label+"-"+fuel+"-"+maxDepth);
+      }
+    }
+    const u1=L.succ(L.zero),duplicateUniverse=bs(L.max(u1,u1));
+    const appFallbacks=[
+      ["universe-conversion",app(lam(ax,duplicateUniverse,b0),s0),true],
+      ["metadata-conversion",app(lam(ax,md(900n,s1),b0),s0),true],
+      ["unequal-types",app(identity,s1),false]
+    ];
+    for(const [label,node,acceptedExpected] of appFallbacks){
+      for(const fuel of [0n,1n,2n,3n,4n,8n,16n,64n]){
+        const s=session(fuel,1n),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+        for(const recDepth of [0n,15n,16n]){
+          const context={...checker.context,recDepth};
+          const attempted=raw(fuel,context,emptyCheck(binderArena),node.id);
+          if(!sameRuntimeValue(attempted,none)){
+            compareRaw(get("psKernelSessionCheck")(fuel,{...checker,context},node.term),
+              attempted,"application-fallback-guard-"+label+"-"+fuel+"-"+recDepth);
+          }
+        }
+        must(publicCheck(s,node),"application-full-defeq-fallback-"+label+"-"+fuel);
+      }
+      const s=session(64n,1n),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+      must(sameRuntimeValue(raw(64n,checker.context,emptyCheck(binderArena),node.id),none),
+        "application-explicit-defeq-fallback-"+label);
+      const result=get("psKernelV1CheckExpression")(s,nil,S.safe,node.term);
+      const isAccepted=result&&typeof result==="object"&&"value" in result;
+      must(isAccepted===acceptedExpected,"application-defeq-result-"+label);
+    }
+    const numeralArgument=app(identity,lit(Lit.nat(0n)));
+    for(const fuel of [0n,1n,2n,3n,4n,8n])for(const maxNatSize of [0n,7n]){
+      const initial=session(fuel,1n),s={...initial,resources:{...initial.resources,maxNatSize}};
+      const checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+      compareRaw(get("psKernelSessionCheck")(fuel,checker,numeralArgument.term),
+        raw(fuel,checker.context,emptyCheck(binderArena),numeralArgument.id),
+        "application-nat-limit-before-type-comparison-"+fuel+"-"+maxNatSize);
+      must(publicCheck(s,numeralArgument),
+        "application-public-nat-limit-before-type-comparison-"+fuel+"-"+maxNatSize);
+    }
+    const node=app(identity,s0);
+    const s=session(64n,1n),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+    const legacy=accepted(get("psKernelSessionCheck")(64n,checker,node.term),"application-warm-legacy");
+    const direct=accepted(accepted(raw(64n,checker.context,emptyCheck(binderArena),node.id),
+      "application-warm-some"),"application-warm-result");
+    const entry=accepted(get("psKernelExprV2PagedRequire")(direct.fst.whnf.arena,node.id),
+      "application-source-entry");
+    must(sameRuntimeValue(accepted(get("psKernelExprV2CheckedInferFind")(
+      direct.fst,node.id,entry),"application-cache-lookup"),none),
+      "application-ineligible-for-checked-cache");
+    for(const recDepth of [0n,15n,16n]){
+      const context={...checker.context,recDepth};
+      compareRaw(get("psKernelSessionCheck")(1n,{...legacy.snd,context},node.term),
+        raw(1n,context,direct.fst,node.id),
+        "application-cannot-skip-function-check-on-warm-result-"+recDepth);
+    }
+  }
+  console.log("PSC1_V2_DAG_JS_CHECK_APP: PASS");
 }
 console.log("PSC1_V2_DAG_JS_BINDER: PASS");
 

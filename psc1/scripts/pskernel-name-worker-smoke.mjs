@@ -205,11 +205,12 @@ must(fixtures.length===10&&replies.length===30&&
  get("psKernelEnvironmentSize")(originalSession.environment)===10n,"real-batch-count");
 for(let i=0;i<fixtures.length;i++){
  const fixture=fixtures[i];
- must(same(replies[10+2*i],Reply.checked({expression:fixture.term,type:fixture.type})),"dag-checked-exact-type-and-expression");
- must(same(replies[11+2*i],Reply.normalized(fixture.value)),"dag-normalized-exact-body");
  const checked=accepted(get("psKernelV1CheckExpression")(originalSession,nil,safe,fixture.term),"reference-check");
- const normalized=accepted(get("psKernelV1Whnf")(originalSession,nil,safe,fixture.term),"reference-whnf");
  must(same(checked.type,fixture.type),"reference-checked-exact-type");
+ must(same(checked.expression,fixture.term),"reference-checked-exact-expression");
+ must(same(replies[10+2*i],Reply.checked(checked)),"dag-checked-exact-type-and-expression");
+ must(same(replies[11+2*i],Reply.normalized(fixture.value)),"dag-normalized-exact-body");
+ const normalized=accepted(get("psKernelV1Whnf")(originalSession,nil,safe,fixture.term),"reference-whnf");
  must(same(normalized,fixture.value),"reference-normalized-exact-body");
 }
 must(get("psKernelEnvironmentNameHash")(names[6].actual)===get("psKernelEnvironmentNameHash")(names[7].actual),

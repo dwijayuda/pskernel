@@ -8,6 +8,27 @@ Lean: `leanprover/lean4:v4.35.0`, exact commit `eb6cafb7290e8bd5f2937522d8d804f5
 Generated path: authentic PSC1 → TypeScript `7.0.2` → Node `22`. Full-kernel DirectJS is unsupported.
 Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduction path.
 
+## 2026-10-21 — compare genuine generated checked-expression records
+
+Exact `3fa161767d3e09692db77645d1892b4e0c82f45c` generated integration
+[39635756994/job119345641876](https://github.com/dwijayuda/pskernel/actions/runs/39635756994/job/119345641876)
+passed authentic source/JS generation, the24576raw string queries,64full-string
+pairs,16controls,24long-string rows,400name pairs,4deep-name rows and all7
+curried-ABI checks. It then failed the real declaration fixture at
+`dag-checked-exact-type-and-expression`, so that job is terminal FAIL.
+
+The fixture constructed a plain JavaScript record for an expected generated
+`PsKernelCheckedExpression`. PSC1 emits a private Symbol brand on its generated
+structure; the fixture's complete equality check correctly noticed the missing
+brand. This successor uses the independently checked V1 returned record as
+the expected branded reply, after requiring its exact type and exact expression
+against the fixed fixture values. It retains all four prior declaration-check
+assertions and adds ten exact-expression assertions. Private Symbol equality,
+real DAG checking, normalization, negatives and all other controls remain
+mandatory. Production source and native tests are unchanged by this repair.
+Classification: generated fixture ABI mismatch. This successor is **NOT RUN**
+until its own complete gates finish.
+
 ## 2026-10-21 — align official native fixture record fields
 
 Exact `2ec60054bbbae5b8a946439027be5142db5d7206` native integration

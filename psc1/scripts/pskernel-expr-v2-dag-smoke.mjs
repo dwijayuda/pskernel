@@ -2680,7 +2680,12 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
       "admission-shared-public-complete-parity-"+layers);
     const info=accepted(get("psKernelEnvironmentFind")(actual.session.environment,dName),
       "admission-shared-info");
-    must(sameRuntimeValue(info,CI.defnInfo(value)),
+    // Decode an independent expected record through authentic PSC1 constructors;
+    // hand-written JS structure literals lack their nominal Symbol brands.
+    const expectedDefinition=accepted(get("psKernelDagDecodeDefinition")(built,{
+      base:{name:dName,levelParams:nil,type:typeRoot},value:bodyRoot,
+      hints:H.abbrevHint,safety:S.safe}),"admission-shared-expected-definition");
+    must(sameRuntimeValue(info,CI.defnInfo(expectedDefinition)),
       "admission-shared-stored-definition-"+layers);
     const replies=array(actual.replies),first=replies[0].receipt,second=replies[1].receipt;
     must(replies.length===2&&first.declarationsBefore===0n&&first.declarationsAfter===1n&&

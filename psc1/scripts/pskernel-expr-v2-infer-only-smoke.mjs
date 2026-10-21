@@ -60,20 +60,19 @@ for(const [n,type,isUnsafe] of [
   [name("inferId"),idType,false],[name("inferHidden"),metadataType,false],
   [name("inferLetType"),letType,false],[name("inferUnsafe"),s1,true]
 ]){
-  const base=get("PsKernelConstantBase").mk(n,nil,type.term);
+  const base={name:n,levelParams:nil,type:type.term};
   session=accepted(get("psKernelV1AdmitDeclaration")(session,
-    Request.axiomDecl(get("PsKernelAxiomInfo").mk(base,isUnsafe))),"fixture-axiom").session;
+    Request.axiomDecl({base,isUnsafe})),"fixture-axiom").session;
   declarations=get("psKernelDagDeclarationsAfterAdmission")(
-    D.axiomDecl(get("PsKernelDagConstantBase").mk(n,nil,type.id),isUnsafe),declarations);
+    D.axiomDecl({name:n,levelParams:nil,type:type.id},isUnsafe),declarations);
 }
 const partialName=name("inferPartial"),hints=get("PsKernelReducibilityHints").abbrevHint;
 session=accepted(get("psKernelV1AdmitDeclaration")(session,
-  Request.definitionDecl(get("PsKernelDefinitionInfo").mk(
-    get("PsKernelConstantBase").mk(partialName,nil,s1.term),s0.term,hints,S.partialDef))),
-  "fixture-partial").session;
+  Request.definitionDecl({base:{name:partialName,levelParams:nil,type:s1.term},
+    value:s0.term,hints,safety:S.partialDef})),"fixture-partial").session;
 declarations=get("psKernelDagDeclarationsAfterAdmission")(
-  D.definitionDecl(get("PsKernelDagDefinition").mk(
-    get("PsKernelDagConstantBase").mk(partialName,nil,s1.id),s0.id,hints,S.partialDef)),declarations);
+  D.definitionDecl({base:{name:partialName,levelParams:nil,type:s1.id},
+    value:s0.id,hints,safety:S.partialDef}),declarations);
 const id=cn(name("inferId")),missing=mv(name("notCheckedArgument"));
 const unchecked=app(app(id,s0),missing);
 const fixtures=[

@@ -29,7 +29,31 @@ behavior, or a complete DAG checker. Original default V1 remains qualified;
 the replacement still relies on full-operation fallback outside its migrated
 rules. No integration PR is merged.
 
-### Unified checked and inference-only DAG worker — awaiting qualification
+### Strict generated admission assertion correction — qualification pending
+
+The5b131 generated job119008044447 in
+[run39534547183](https://github.com/dwijayuda/pskernel/actions/runs/39534547183)
+built the authentic complete executable and passed the416-case direct admission
+matrix. It then failed the stored-definition assertion for the shared header/body
+fixture, after exact old/new public session parity had passed. The expected
+hand-written JS record lacked PSC1's nominal structure Symbol brands.
+
+The expected definition is now independently reconstructed from the input DAG
+through psKernelDagDecodeDefinition, using the authentic generated constructors.
+Strict Reflect-key equality and every semantic assertion remain unchanged.
+The new inference-only script also stops assuming exported runtime namespaces
+for structure .mk constructors; plain input records use their declared fields.
+No kernel decision, resource limit, or compiler behavior changes. These harness
+corrections need a passing generated/canonical rerun and are not reported green.
+
+Let106387 canonical job119004577217 in
+[run39533476064](https://github.com/dwijayuda/pskernel/actions/runs/39533476064)
+has independently passed the detached .ps-derived complete checker, all four
+new generated Let/stateful cache markers, declarations/maps and source closure:
+115 canonical modules,158 portable modules across two roots. DirectJS remains
+explicitly unsupported. Its integration measurement job is still running.
+
+### Unified checked and inference-only DAG worker — native qualified; generated CI pending
 
 The syntax-directed checker now uses one implementation with an explicit
 inference mode. The original unchecked lambda-domain, let-annotation/value,
@@ -53,9 +77,12 @@ and warm-entry guards, and numeral limits. A separate generated script checks
 1,008 combinations plus the negative authorization sentinel in both authentic
 source and canonical .ps executables with empty runtime PATH. Nine additional
 local cache/publication/guard facts are checked with the existing proof gate.
-These additions are pending Actions; no new closure count or passing result
-is claimed for this slice. The complete general DefEq and reduction migrations
-remain open.
+Native job119010207629 in
+[run39535224761](https://github.com/dwijayuda/pskernel/actions/runs/39535224761)
+passes at71163ae02f1ab851b97cf124d36930503418ce17, including both inference-only
+markers, the complete prior admission suite and nine new local proof reports.
+Generated and canonical executable gates remain pending. No new closure count
+is claimed. The complete general DefEq and reduction migrations remain open.
 
 ### Direct simple declaration admission — native qualified; generated CI pending
 

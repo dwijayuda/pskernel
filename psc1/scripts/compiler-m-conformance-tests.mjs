@@ -266,7 +266,7 @@ try {
     else verifiedArgs[assuranceIndex+1]='verified';
     const refusals={verified:reject(verifiedArgs)};
     for(const {id} of negativeCases){
-     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,libraryApplication&&id==='missing-module'?/PSC1_PROJECT_.*(IMPORT|MODULE|SOURCE)/:/PSC1_PROJECT_ELAB_FAILED/);
+     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,checkedOrder&&id==='chained'?/PSC1_PROJECT_PARSE_FAILED:.*parentheses around nonassociative comparison/:libraryApplication&&id==='missing-module'?/PSC1_PROJECT_.*(IMPORT|MODULE|SOURCE)/:/PSC1_PROJECT_ELAB_FAILED/);
     }
     const duplicate=[...args];duplicate[1]=path.join(folder,'duplicate-prelude.'+syntax);
     refusals['duplicate-prelude']=reject(duplicate,/duplicateDeclaration:Nat/);

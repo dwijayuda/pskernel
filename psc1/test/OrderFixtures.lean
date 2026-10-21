@@ -29,7 +29,7 @@ partial def orderWhile (limit : Nat) : Id Nat := do
 def controlOrderCase (flag : Bool) : Nat :=
   let limit : Nat := if flag then 3 else 1;
   let relation : Prop := limit > 2;
-  let value : Id Nat := do
+  let value : Id Nat := (do
     let mut total : Nat := 0
     for n in [0, 1, 2, 3] do
       if n < limit then
@@ -37,6 +37,7 @@ def controlOrderCase (flag : Bool) : Nat :=
       else
         pure ()
     return total
+  );
   let observed : Nat := value;
   let counted : Nat := orderWhile limit;
   if relation then observed + counted + 10 else observed + counted

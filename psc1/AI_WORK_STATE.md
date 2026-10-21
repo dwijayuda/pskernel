@@ -147,3 +147,20 @@ and boundary checks are mandatory in parity receipts. Focused, full and minimum
 Python runners are registered. This remains implemented, not tested/qualified,
 until a successful exact-commit Linux run. Compiler-like diagnostics and measured
 100000-item corpus remain next. G2/G3 remain deferred.
+
+## Latest ordering diagnosis: run 39642134686
+
+Head 9eb1f18cca58a87bd43745cda05feed1e9cb1b39 passed static and native gates,
+including 136 independently kernel-checked true/false Nat/Int order boundaries.
+Direct-JS and Rust complete compiler closures passed. Focused positives executed
+for .ps on JS/TS/Rust before the chained-comparison refusal assertion expected
+elaboration instead of the correct nonassociative parser refusal. The .lean
+fixture needed a grouped do RHS plus its pure-let separator before the following
+Nat observation. Both harness issues are corrected without relaxing source or
+negative-test acceptance. Full target/application qualification remains pending.
+
+Normal development now schedules native/focused gates before heavyweight
+closures and G1, preventing observed two-runner starvation. Selected integration
+jobs and aggregate requirements remain unchanged; a failed fast gate keeps the
+full test debt. Compiler-like source/diagnostic/100000-input harness is prepared
+in the active continuation, but is not yet a qualification claim.

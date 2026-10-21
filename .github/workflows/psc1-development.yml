@@ -86,12 +86,12 @@ jobs:
     uses: ./.github/workflows/psc1-practical-compiler-m.yml
 
   closures:
-    needs: static
+    needs: [static, native, focused]
     if: needs.static.outputs.integration == 'true'
     uses: ./.github/workflows/psc1-compiler-closure.yml
 
   g1:
-    needs: static
+    needs: [static, native, focused]
     if: needs.static.outputs.integration == 'true'
     uses: ./.github/workflows/psc1-generated-compiler.yml
 

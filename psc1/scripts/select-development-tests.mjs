@@ -11,13 +11,13 @@ export function selectPsc1Tests(paths,{full=false,uncertain=false}={}){
  if(full||uncertain)all(full?'explicit-full-qualification':'missing-or-unreadable-diff');
  for(const file of paths){
   assert.equal(typeof file,'string');
-  if(file.startsWith('.github/') || /^psc1\/(lean-toolchain|lakefile\.lean|lake-manifest\.json)$/.test(file)){
+  if(file.startsWith('.github/actions/') || /^\.github\/workflows\/psc1-.*\.ya?ml$/.test(file) || /^psc1\/(lean-toolchain|lakefile\.lean|lake-manifest\.json)$/.test(file)){
    all('build-or-ci-policy:'+file);continue;
   }
   if(!file.startsWith('psc1/'))continue; // PSKernel research is a separate workstream.
   if(/\.(md|txt)$/.test(file))continue;
   if(file.startsWith('psc1/docs/')){
-   if(/(_QUALIFICATION_|_FAILURE_|_RUNTIME_|STATUS\.json$|old-receipt\.json$)/.test(file))continue;
+   if(/^psc1\/docs\/PSC1_[A-Z0-9_]*(QUALIFICATION|FAILURE|RUNTIME|FIRST_ATTEMPT)_[0-9-]+\.json$/.test(file))continue;
    all('machine-readable-policy:'+file);continue;
   }
   if(file.startsWith('psc1/legacy/'))continue; // archived research; no current compiler import.

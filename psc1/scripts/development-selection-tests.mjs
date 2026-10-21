@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {selectPsc1Tests as select} from './select-development-tests.mjs';
-assert.deepEqual(select(['psc1/AI_WORK_STATE.md','psc1/docs/old-receipt.json']),{
+assert.deepEqual(select(['psc1/AI_WORK_STATE.md','psc1/docs/PSC1_COLLECTIONS_QUALIFICATION_2026-10-21.json']),{
  static:true,focused:false,integration:false,release:false,benchmark:false,
- paths:['psc1/AI_WORK_STATE.md','psc1/docs/old-receipt.json'],reasons:[]});
+ paths:['psc1/AI_WORK_STATE.md','psc1/docs/PSC1_COLLECTIONS_QUALIFICATION_2026-10-21.json'],reasons:[]});
 for(const file of ['psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean','psc1/stdlib/ProofScript/Data/List.lean']){
  const s=select([file]);assert.ok(s.focused&&s.integration);assert.equal(s.release,false);
 }
@@ -28,3 +28,8 @@ for(const paths of [
  const selected=select(paths);
  assert.ok(!selected.release||selected.focused,'full tier requires early native/JS/TS/Rust success');
 }
+
+for(const file of ['psc1/docs/PSC1_STATUS.json','psc1/docs/PSC1_QUALIFICATION_2026-10-21.lean',
+ 'psc1/docs/selfhost-language/reviewed-candidate.json'])
+ assert.equal(select([file]).release,true,file);
+assert.equal(select(['.github/workflows/pskernel-expression-v2.yml']).focused,false);

@@ -5,7 +5,8 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - psc1/**
-      - .github/**
+      - .github/workflows/psc1-*.yml
+      - .github/actions/**
   workflow_dispatch:
     inputs:
       full:

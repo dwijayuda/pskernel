@@ -184,7 +184,7 @@ try {
    const label=syntax+'-'+target,extension={js:'js',ts:'ts',rust:'rs','wasm-core':'wasm','wasm-component':'wasm',python:'py',php:'php'}[target];
    const output=path.join(work,label,'module.'+extension);
    const args=['build',path.join(folder,'Entry.'+syntax),'--target',target,'--out',output];
-   if(jsonApplication)args.push('--assurance','ordinary-checked');
+   if(jsonApplication)args.push('--assurance','ordinary');
    if(target==='wasm-component')args.push('--exports',names.join(','));
    try{
     run(native,args);

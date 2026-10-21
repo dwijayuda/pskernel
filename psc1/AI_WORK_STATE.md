@@ -11,7 +11,13 @@ criteria/26 blocked; no complete family. Documentation-only scheduling still
 needs an actual run to corroborate the tested zero-heavy selection.
 The first router run correctly skips the unrelated specialization benchmark.
 
-Actual next implementation, pending CI:
+Actual next implementation, pending full CI:
+Run39569086352: static/native/all3 closures pass; focused54 CompilerM +18
+collection obligations and six independent native standard comparisons pass.
+JSON was blocked before parsing by a runner option error: internal profile
+ordinary-checked was sent to the CLI. Correct to public --assurance ordinary.
+The full tier correctly did not start after this early failure.
+
 - Collections compare six observations with a separate pinned native Lean
   standard List/Array/Except process. Missing reference identity refuses parity.
 - JSON escapes now combine valid UTF-16 surrogate pairs. Existing jsonReadUnicode4

@@ -222,3 +222,11 @@ names, preservation of valid labels, collisions and forged schemas with identica
 flattened signatures; actual core/component consumers exercise the result.
 Focused CLI acceptance now includes both Wasm consumers to expose integration
 defects before the full lane. No source fixture is renamed to avoid the defect.
+
+
+Run 39652529384 at 1e975d44bab53e1f3f0371d18ddbde7ffbe07966 passed static
+and native gates. Focused compilation stopped in the new Wasm test fixture at
+75:88 (record-update field continuation). Computed declaration/export lists now
+have named local bindings before record updates. The ABI implementation and all
+required assertions remain intact. No execution/qualification is claimed for
+that failed build.

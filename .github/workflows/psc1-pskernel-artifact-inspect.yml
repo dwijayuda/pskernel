@@ -99,4 +99,116 @@ jobs:
           print("PSC1_SAVED_PARENT_LOG_BEGIN " + target)
           print(text, end="" if text.endswith("\n") else "\n")
           print("PSC1_SAVED_PARENT_LOG_END " + target)
+
+          # Read immutable observations only. No checker or benchmark is executed.
+          def saved_archive(run_id, source, workflow, artifact_id, name, size, sha256):
+              run = json.loads(fetch("/actions/runs/" + str(run_id), 1024 * 1024))
+              require(run.get("id") == run_id and run.get("head_sha") == source
+                      and run.get("repository", {}).get("full_name") == repository
+                      and run.get("head_repository", {}).get("full_name") == repository
+                      and run.get("path") == workflow
+                      and run.get("status") == "completed" and run.get("conclusion") == "success",
+                      "completed observation producer identity differs")
+              metadata = json.loads(fetch("/actions/artifacts/" + str(artifact_id), 1024 * 1024))
+              origin = metadata.get("workflow_run", {})
+              require(metadata.get("id") == artifact_id and metadata.get("name") == name
+                      and metadata.get("expired") is False
+                      and metadata.get("size_in_bytes") == size
+                      and metadata.get("digest") == "sha256:" + sha256
+                      and origin.get("id") == run_id and origin.get("head_sha") == source,
+                      "saved observation artifact metadata differs")
+              raw = fetch("/actions/artifacts/" + str(artifact_id) + "/zip", size)
+              require(len(raw) == size and hashlib.sha256(raw).hexdigest() == sha256,
+                      "saved observation ZIP bytes differ")
+              print("PSC1_SAVED_OBSERVATION_AUTHENTICATED " + json.dumps({
+                  "source_sha": source, "run": run_id, "artifact": artifact_id,
+                  "zip_sha256": sha256, "zip_bytes": size, "checker_reexecuted": False}))
+              return zipfile.ZipFile(io.BytesIO(raw))
+
+          def saved_member(archive, suffix, limit):
+              matches = [entry for entry in archive.infolist() if not entry.is_dir()
+                         and (entry.filename == suffix or entry.filename.endswith("/" + suffix))]
+              require(len(matches) == 1, "saved member absent or ambiguous: " + suffix)
+              entry = matches[0]
+              parts = pathlib.PurePosixPath(entry.filename)
+              require(not parts.is_absolute() and ".." not in parts.parts
+                      and 0 <= entry.file_size <= limit, "saved member path/size differs")
+              data = archive.read(entry)
+              require(len(data) == entry.file_size and len(data) <= limit,
+                      "saved member decompressed size differs")
+              text = data.decode("utf-8")
+              return entry.filename, data, text
+
+          paired_source = "3d93fdeff95b25f619887235b49101e8b725fefa"
+          with saved_archive(
+                  39639125591, paired_source, ".github/workflows/psc1-pskernel-paired-performance.yml",
+                  12363874622, "psc1-paired-performance-39639125591", 9392056,
+                  "2a2a69093e5f7adfca5262a626861406288e26baeb44116db1f5614f1d692d8e") as archive:
+              summary_name, summary_bytes, summary_text = saved_member(
+                  archive, "psc1-paired-performance/summary.md", 512 * 1024)
+              report_name, report_bytes, report_text = saved_member(
+                  archive, "psc1-paired-performance/report.json", 512 * 1024)
+              _, _, checksums_text = saved_member(
+                  archive, "psc1-paired-performance/outputs.sha256", 128 * 1024)
+              recorded = {}
+              for line in checksums_text.splitlines():
+                  checksum, separator, relative = line.partition("  ")
+                  require(separator and len(checksum) == 64
+                          and all(c in "0123456789abcdef" for c in checksum)
+                          and relative not in recorded, "invalid/duplicate output checksum")
+                  recorded[relative] = checksum
+              for label, data in [("summary.md", summary_bytes), ("report.json", report_bytes)]:
+                  require(recorded.get(label) == hashlib.sha256(data).hexdigest(),
+                          "saved paired member checksum differs: " + label)
+              report = json.loads(report_text)
+              authentication = report.get("authentication", {})
+              require(report.get("format") == "psc1-paired-performance-v1"
+                      and report.get("workflow_source_sha") == paired_source
+                      and authentication.get("baseline", {}).get("source_sha")
+                          == "f9e9b20f92ce2ffa4a666acaf55aa8852949f589"
+                      and authentication.get("candidate", {}).get("source_sha")
+                          == "5deaf5880c83a76290520fa1176982dab0bf87a5"
+                      and report.get("collection_complete") is True
+                      and report.get("collection_protocol_valid") is True
+                      and len(report.get("admission_observations", [])) == 48
+                      and len(report.get("authentic_observations", [])) == 16,
+                      "paired report source/completion identity differs")
+              for label, member, data, text in [
+                      ("SUMMARY", summary_name, summary_bytes, summary_text),
+                      ("REPORT", report_name, report_bytes, report_text)]:
+                  print("PSC1_SAVED_PAIRED_" + label + "_BEGIN " + json.dumps({
+                      "member": member, "bytes": len(data),
+                      "sha256": hashlib.sha256(data).hexdigest()}))
+                  print(text, end="" if text.endswith("\n") else "\n")
+                  print("PSC1_SAVED_PAIRED_" + label + "_END")
+
+          with saved_archive(
+                  39638208348, "f2e6c44a506a53dc294ae6569f8371e81ed6bdd5",
+                  ".github/workflows/psc1-pskernel-arena435-native-v1.yml",
+                  12364246082, "psc1-arena435-native-v1-diagnostic", 33652115,
+                  "45e9bb3b942745abc1f1bd6d1acb57d797d1cd839fed443f6808f5037a7abeaa") as archive:
+              fixture_name, fixture_bytes, fixture_text = saved_member(
+                  archive, "arena435-native-v1/NativeChurchInput.lean", 64 * 1024)
+              fixture_sha = hashlib.sha256(fixture_bytes).hexdigest()
+              require(fixture_sha ==
+                      "d15790e77d82af4b55e21428ebfbe3443c1735a04585359f35d425a9fe86da8a",
+                      "native Church exact input fixture bytes differ")
+              _, _, receipt_text = saved_member(
+                  archive, "arena435-native-v1/input-export.json", 64 * 1024)
+              receipt = json.loads(receipt_text)
+              require(receipt.get("source_sha") == "369bee5801bd5e4476837684fad3f7e1ca8c422c"
+                      and receipt.get("body_sha256")
+                          == "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47"
+                      and receipt.get("fixture_sha256") == fixture_sha
+                      and receipt.get("arena_nodes") == "197"
+                      and receipt.get("admission_requests") == 4
+                      and receipt.get("imported_recursor_metadata") is False,
+                      "native Church export identity differs")
+              print("PSC1_SAVED_CHURCH_INPUT_BEGIN " + json.dumps({
+                  "member": fixture_name, "bytes": len(fixture_bytes), "sha256": fixture_sha,
+                  "kernel_source_sha": receipt["source_sha"],
+                  "body_sha256": receipt["body_sha256"],
+                  "checker_reexecuted": False}))
+              print(fixture_text, end="" if fixture_text.endswith("\n") else "\n")
+              print("PSC1_SAVED_CHURCH_INPUT_END")
           PY

@@ -11,6 +11,41 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — carrier boundary and generated ABI repair candidate
+
+Branch: `research/psc1-pskernel-v2-carrier-20261021`.
+Previous branch HEAD: `4dee3fe1dc6791aa491f101db876898e10449a01`.
+The reviewed boundary/extraction object039eed is preserved as the parent of this
+correction; it was never promoted to a branch or claimed to build. Before
+qualification, its new full-state helper was renamed
+`psKernelExprV2TryWhnfCheckStateWithFuel` to avoid the existing standalone raw
+`TryWhnfStateWithFuel` export. The raw ABI and its callers remain intact.
+
+In addition to the owner/extraction changes described below, this candidate
+restores explicit zero/successor fuel staging in the two compatibility wrappers
+`TryWhnfCoreModeWithLocalValuesFuel` and `TryWhnfStateWithLocalValuesFuel`.
+The original immediate-lambda refactor changed PSC1's external argument shape;
+both carrier6cb generated routes completed compilation but failed main-smoke3705
+with undefined arena, while staged841 and ea84 failed the same call with undefined
+recDepth. The exact prior carrier jobs were119220899565 and119220899827; staged
+ea84 generated119228846446 is also terminal FAIL. These are runtime ABI failures,
+not kernel rejections.
+
+Both repaired wrappers call the same owned algorithm at the unchanged fuel.
+Two local equalities compare their exact pre-repair bodies; early generated
+probes require two staged exports, four fuel partial applications and six
+real-state zero/successor result/error calls. All existing full smoke, callback
+sentinels, owner matrices and new8/12/336/168 admission/public matrices remain.
+The native proof gate now requires21 owner lemmas plus2 separate ABI lemmas.
+No fuel, depth, elaborator, timeout or memory limit is raised.
+
+This combined source is **NOT RUN** for all qualification gates at commit
+creation. The staged branch now independently carries ABI repair727b3dd; its
+earlier ea84 native PASS does not qualify either new source. Integration889
+remains the terminal-green scoped Gate A checkpoint. Gate B is incomplete and
+Gate C fails; both branches still require terminal native and both generated
+qualification before promotion.
+
 ## 2026-10-21 — close full-state admission/public WHNF boundaries
 
 Branch: `research/psc1-pskernel-v2-carrier-20261021`.
@@ -38,7 +73,7 @@ using the same fixed admission fuel. None/error propagation and malformed
 callback-result refusal remain ordered.
 
 `Check.lean` now supplies the fixed owning DefEq callback through
-`psKernelExprV2TryWhnfStateWithFuel` and a fresh declaration-aware public WHNF
+`psKernelExprV2TryWhnfCheckStateWithFuel` and a fresh declaration-aware public WHNF
 boundary. `API/Dag.lean` uses that entry after its unchanged mandatory input
 checking. The old WhnfState ABI remains a standalone compatibility wrapper;
 production public WHNF no longer supplies NoOwnedDefEq to its recursor knot.

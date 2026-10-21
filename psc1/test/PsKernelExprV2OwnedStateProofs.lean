@@ -220,9 +220,9 @@ theorem full_state_whnf_zero_precedes_syntax_and_cache
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (root : Nat)
     (empty : context.scalar.localContext.decls = List.nil) :
-    psKernelExprV2TryWhnfStateWithFuel 0 context state root =
+    psKernelExprV2TryWhnfCheckStateWithFuel 0 context state root =
       Option.some (Except.error "kernel reduction budget exhausted") := by
-  simp only [psKernelExprV2TryWhnfStateWithFuel, psKernelExprV2CheckWhnfOwnedWithFuel,
+  simp only [psKernelExprV2TryWhnfCheckStateWithFuel, psKernelExprV2CheckWhnfOwnedWithFuel,
     empty, psKernelExprV2TryWhnfOwnedWithLocalValuesFuel,
     psKernelExprV2TryWhnfOwnedWithReducerFuel]
 

@@ -24,6 +24,7 @@ on:
       - psc1/test/PsKernelExprV2QuotRegression.lean
       - psc1/test/PsKernelExprV2RecursorRegression.lean
       - psc1/test/PsKernelExprV2RecursorProofs.lean
+      - psc1/test/PsKernelExprV2WhnfABIProofs.lean
       - psc1/test/PsKernelExprV2DagPerformance.lean
       - psc1/test/PsKernelExprV2TransformRegression.lean
       - psc1/test/PsKernelExprV2MetadataProofs.lean
@@ -275,6 +276,9 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-admission-guard-proofs.log"
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean \
             | tee "$RUNNER_TEMP/psc1-recursor-proofs.log"
+          test "$(grep -c '^#print axioms PsKernelExprV2WhnfABIProofs\.' test/PsKernelExprV2WhnfABIProofs.lean)" -eq 2
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2WhnfABIProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-whnf-abi-proofs.log"
           test "$(grep -c '^#print axioms PsKernelExprV2OwnedStateProofs\.' test/PsKernelExprV2OwnedStateProofs.lean)" -eq 21
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2OwnedStateProofs.lean \
             | tee "$RUNNER_TEMP/psc1-owned-state-proofs.log"
@@ -283,6 +287,7 @@ jobs:
               "$RUNNER_TEMP/psc1-nat-fuel-proofs.log" "$RUNNER_TEMP/psc1-expr-equality-proofs.log" \
               "$RUNNER_TEMP/psc1-admission-guard-proofs.log" \
               "$RUNNER_TEMP/psc1-recursor-proofs.log" \
+              "$RUNNER_TEMP/psc1-whnf-abi-proofs.log" \
               "$RUNNER_TEMP/psc1-owned-state-proofs.log" \
               "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"; then
             echo 'PSKERNEL_PROOF_UNAPPROVED_TRUST_DEPENDENCY'
@@ -352,6 +357,7 @@ jobs:
             ${{ runner.temp }}/psc1-expr-equality-proofs.log
             ${{ runner.temp }}/psc1-knot-fuel-proofs.log
             ${{ runner.temp }}/psc1-recursor-proofs.log
+            ${{ runner.temp }}/psc1-whnf-abi-proofs.log
             ${{ runner.temp }}/psc1-owned-state-proofs.log
             ${{ runner.temp }}/psc1-admission-guard-proofs.log
             ${{ runner.temp }}/psc1-dag-native-bench.log
@@ -410,6 +416,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-dag-generated-js.log" \
             | sed -u '/^PSC1_DAG_PASS /d'
           grep -q 'PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -Fqx 'PSC1_V2_DAG_JS_WHNF_STAGED_ABI: PASS exports=2 partials=4 executions=6' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_EXPR_EQUALITY_DELAYED_JS: PASS hostile=21 staged=2 sharedDepth=64' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_BETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"

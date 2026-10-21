@@ -53,7 +53,7 @@ def psKernelExprV2AdmissionEnsureSortWithFuel
   let whnf :=
     fun (nextContext : PsKernelExprV2CheckContext)
         (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
-      psKernelExprV2TryWhnfStateWithFuel fuel nextContext nextState nextRoot;
+      psKernelExprV2TryWhnfCheckStateWithFuel fuel nextContext nextState nextRoot;
   match psKernelExprV2AdmissionEnsureSortOwnedWith whnf context state root with
   | Option.none => Option.none
   | Option.some attempted =>
@@ -99,7 +99,7 @@ def psKernelExprV2AdmissionIsPropWithFuel
   let whnf :=
     fun (nextContext : PsKernelExprV2CheckContext)
         (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
-      psKernelExprV2TryWhnfStateWithFuel fuel nextContext nextState nextRoot;
+      psKernelExprV2TryWhnfCheckStateWithFuel fuel nextContext nextState nextRoot;
   psKernelExprV2AdmissionIsPropOwnedWith inferType whnf context state root
 
 def psKernelExprV2AdmissionCheckHeaderWithFuel

@@ -248,22 +248,31 @@ def psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel
       Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
     PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
     Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
-  fun (cheapProj : Bool) (localValue : PsKernelName -> Option Nat)
-      (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-        Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-      (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
-    let ownedLocalValue := psKernelExprV2LiftLocalValue localValue;
-    let reducer :=
-      fun (nextContext : PsKernelExprV2CheckContext) (nextState : PsKernelExprV2CheckState)
-          (nextRoot : Nat) (nextCheapRec nextCheapProj : Bool) =>
-        let worker := psKernelExprV2TryReduceRecursorOwnedWithFuel fuel;
-        worker psKernelExprV2NoOwnedDefEq ownedLocalValue
-          nextContext nextState nextRoot nextCheapRec nextCheapProj;
-    psKernelExprV2LowerWhnfAttempt
-      (psKernelExprV2TryWhnfCoreOwnedModeWithReducerFuel fuel
-        false cheapProj ownedLocalValue (psKernelExprV2LiftScalarWhnf publicWhnf)
-        reducer (psKernelExprV2CheckContextEmpty context)
-        (psKernelExprV2CheckStateFromWhnf state) root)
+  match fuel with
+  | Nat.zero =>
+      fun (_cheapProj : Bool) (_localValue : PsKernelName -> Option Nat)
+          (_publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+    fun (cheapProj : Bool) (localValue : PsKernelName -> Option Nat)
+        (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+        (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
+      let ownedLocalValue := psKernelExprV2LiftLocalValue localValue;
+      let reducer :=
+        fun (nextContext : PsKernelExprV2CheckContext) (nextState : PsKernelExprV2CheckState)
+            (nextRoot : Nat) (nextCheapRec nextCheapProj : Bool) =>
+          let worker := psKernelExprV2TryReduceRecursorOwnedWithFuel (Nat.succ remaining);
+          worker psKernelExprV2NoOwnedDefEq ownedLocalValue
+            nextContext nextState nextRoot nextCheapRec nextCheapProj;
+      psKernelExprV2LowerWhnfAttempt
+        (psKernelExprV2TryWhnfCoreOwnedModeWithReducerFuel (Nat.succ remaining)
+          false cheapProj ownedLocalValue (psKernelExprV2LiftScalarWhnf publicWhnf)
+          reducer (psKernelExprV2CheckContextEmpty context)
+          (psKernelExprV2CheckStateFromWhnf state) root)
 
 def psKernelExprV2TryWhnfCoreWithLocalValuesFuel
     (fuel : Nat) :
@@ -321,13 +330,20 @@ def psKernelExprV2TryWhnfStateWithLocalValuesFuel
     (PsKernelName -> Option Nat) ->
     PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
     Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
-  fun (localValue : PsKernelName -> Option Nat)
-      (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
-    psKernelExprV2LowerWhnfAttempt
-      (psKernelExprV2TryWhnfOwnedWithLocalValuesFuel fuel
-        psKernelExprV2NoOwnedDefEq (psKernelExprV2LiftLocalValue localValue)
-        (psKernelExprV2CheckContextEmpty context)
-        (psKernelExprV2CheckStateFromWhnf state) root)
+  match fuel with
+  | Nat.zero =>
+      fun (_localValue : PsKernelName -> Option Nat)
+          (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+    fun (localValue : PsKernelName -> Option Nat)
+        (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
+      psKernelExprV2LowerWhnfAttempt
+        (psKernelExprV2TryWhnfOwnedWithLocalValuesFuel (Nat.succ remaining)
+          psKernelExprV2NoOwnedDefEq (psKernelExprV2LiftLocalValue localValue)
+          (psKernelExprV2CheckContextEmpty context)
+          (psKernelExprV2CheckStateFromWhnf state) root)
 
 def psKernelExprV2TryWhnfStateWithFuel
     (fuel : Nat) :

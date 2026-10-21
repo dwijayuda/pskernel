@@ -3,7 +3,7 @@ import Ps.KernelCore.Checker.ExprV2.DefEq
 
 /- Public and admission WHNF share the full checking owner. The DefEq callback
    keeps the caller's fixed fuel, matching the V1 SessionWhnf callback knot. -/
-def psKernelExprV2TryWhnfStateWithFuel
+def psKernelExprV2TryWhnfCheckStateWithFuel
     (fuel : Nat) (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
@@ -83,7 +83,7 @@ def psKernelExprV2TryWhnfOwnedWithDeclarationsFuel
       let initial :=
         psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty arena)
           (psKernelExprV2WhnfStateForDeclarations arena declarations);
-      match psKernelExprV2TryWhnfStateWithFuel fuel
+      match psKernelExprV2TryWhnfCheckStateWithFuel fuel
           (psKernelExprV2CheckContextEmpty context) initial root with
       | Option.none => Option.none
       | Option.some attempted =>

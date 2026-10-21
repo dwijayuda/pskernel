@@ -170,8 +170,8 @@ def psKernelExprV2DefEqUnfoldSideWith
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
-  match psKernelExprV2DefEqDeltaOnceWith coreWhnf context state
-      (if unfoldLeft then left else right) with
+  let selected := if unfoldLeft then left else right;
+  match psKernelExprV2DefEqDeltaOnceWith coreWhnf context state selected with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
@@ -194,8 +194,8 @@ def psKernelExprV2DefEqLazyStepOneWith
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
-  match psKernelExprV2DefEqTryUnfoldProjAppWith coreWhnf context state
-      (if leftHasDefinition then right else left) with
+  let peerRoot := if leftHasDefinition then right else left;
+  match psKernelExprV2DefEqTryUnfoldProjAppWith coreWhnf context state peerRoot with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with

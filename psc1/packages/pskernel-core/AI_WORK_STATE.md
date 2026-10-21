@@ -9,6 +9,66 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 08:34 UTC — lazy-delta native qualified; conditional-argument portability correction
+
+Exact source `4105e93bac9cecabd4afdbc3dd35b1fc8536cbac` has terminal **PASS**
+[native integration 119118769285](https://github.com/dwijayuda/pskernel/actions/runs/39569175573/job/119118769285)
+and [native correctness 119118768825](https://github.com/dwijayuda/pskernel/actions/runs/39569175456/job/119118768825).
+Native integration passed the new **1,800 owner / 1,024 loop / 128 step** lazy-delta
+comparisons and **18 official fixtures / four invalid fixtures**, the restored
+280-case mutual-admission controls, all prior regressions, local metadata/cache/fuel
+proofs, selected native benchmarks and the detached native provider (24 CLI cases,
+five official cases, including a real four-declaration batch). Its artifact is
+[12330674782](https://github.com/dwijayuda/pskernel/actions/runs/39569175573/artifacts/12330674782),
+uploaded ZIP SHA-256 `b52f92cbf8abe5e88390f567c75798fba4227ede7a973edf41f7daa80189cdc4`.
+
+The complete source is **not yet qualified**: generated integration
+[119118769377](https://github.com/dwijayuda/pskernel/actions/runs/39569175573/job/119118769377),
+canonical correctness
+[119118768539](https://github.com/dwijayuda/pskernel/actions/runs/39569175456/job/119118768539)
+and generated research
+[119118769898](https://github.com/dwijayuda/pskernel/actions/runs/39569175665/job/119118769898)
+are terminal FAIL at authentic PSC1 parsing, DeltaStep.lean:174:
+`expected ')', got 'then'`. PSC1 does not accept the parenthesized conditional
+used as a function argument there. The same source class occurs at line198.
+This successor binds both selected roots to local names before the calls.
+There is no branch, resource, callback, state, test expectation or assertion change.
+The native/generated/canonical full gates must run on this corrected source.
+
+| Exact source | Native | Portable source | Canonical .ps | Generated JS | Proof | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `4105e93bac9cecabd4afdbc3dd35b1fc8536cbac` | PASS | FAIL PSC1 parser | NOT RUN after parse failure | NOT RUN after parse failure | PASS native | PASS native selected; JS NOT RUN | FAIL source reconstruction; corpus NOT RUN | PASS native; JS NOT RUN |
+| `e015839e0cdf29b1e4f2d4a750fed8956c0afe17` | PASS | PASS | PASS source/runtime | PASS both routes | PASS local | PASS measured controls, with recorded regressions | FAIL 20 timeouts + one unsupported | PASS native/both JS |
+| Containing conditional-argument correction | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+### Exact e015 Arena receipt supersedes its historical pending entries
+
+The full generated comparison
+[39565480377 / 119107493976](https://github.com/dwijayuda/pskernel/actions/runs/39565480377/job/119107493976)
+is terminal **FAIL qualification**. All193 authenticated cases are recorded:
+**170 matches** (103 acceptances,59 kernel rejections,one metadata rejection,seven
+transport rejections), **two unsafe/partial contract agreements**, **20 host
+timeouts**, **one unsupported nested-recursion case**. The official-reference job
+passed; unsupported is not a negative kernel verdict. This independently confirms
+the earlier f483 totals at the exact fully green developer-provider source.
+Artifact [12331396341](https://github.com/dwijayuda/pskernel/actions/runs/39565480377/artifacts/12331396341)
+has ZIP SHA-256 `5cae6148480d69b2d87aa33931b5c9abb6fa73c7025d1d220fbe70c1fb5dd28d`.
+The named timeout set and classification below remain unchanged.
+
+The separate logical diagnostic branch is now
+`217013c32eae791b3e40a420202ad6cfdb43fe65`,
+[run39569335308](https://github.com/dwijayuda/pskernel/actions/runs/39569335308).
+It distinguishes unassessed timeout outcome comparisons from successful verdict
+agreement and removes stale source-map metadata only from its diagnostic copy.
+Its runtime semantic source remains e015. It is IN PROGRESS, not a kernel release gate.
+
+Next: finish exact-source lazy-delta portable/generated qualification before
+promoting the prepared full-shape/final-rule stages. Independently review the
+DAG static admission guard and its exact-ID scan proof/negative tests; use the
+logical trace to attribute the remaining free-variable-scan cost. GateA remains
+achieved only at the scoped e015 checkpoint; B/C remain open. Four public
+whole-operation fallback sites remain, and the final default remains V1.
+
 ## 2026-10-21 — lazy-delta syntax correction and first full allocation corpus result
 
 The ordered lazy-delta source at `a256edb117ace146d1798f3d32cdeb488a45db84`

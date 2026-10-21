@@ -12,6 +12,19 @@ needs an actual run to corroborate the tested zero-heavy selection.
 The first router run correctly skips the unrelated specialization benchmark.
 
 Actual next implementation, pending full CI:
+Run39569709984 reaches the real generic witness blocker after CLI correction:
+PSC1_PARTIAL_NO_CHECKED_INHABITANT orderingStringFrom. Extend the existing
+128-attempt/depth constructive witness search with declaration-driven
+nonindexed constructors. Type parameters are fixed from the target; field
+inhabitants and failed alternatives share the same remaining budget. Every
+candidate is type-checked and independently admitted; no recursive body is
+consulted. Retain uninhabited/recursive-only refusal and old budget tests.
+New native tests cover enum, generic product field, failed-first alternative,
+and recursive-only result. Both-grammar JSON application is the reached case.
+Manual reusable jobs queue rather than cancel one another. Build object cache
+keys distinguish job target sets, preventing a small closure cache from winning
+and permanently omitting the compiler/test objects needed by other jobs.
+
 Run39569086352: static/native/all3 closures pass; focused54 CompilerM +18
 collection obligations and six independent native standard comparisons pass.
 JSON was blocked before parsing by a runner option error: internal profile

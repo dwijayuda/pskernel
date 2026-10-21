@@ -86,7 +86,22 @@ private def requireLoopHelperAdmission : IO Unit := do
   | .ok _ => throw (IO.userError "loop helper bypassed explicit ordinary assurance")
   IO.println "PSC1_LOOP_HELPER_ADMISSION: safe opaque witness and exact recursive body passed"
 
+private def requireInductiveWitnesses : IO Unit := do
+  let choice ← prepare .lean
+    "inductive WitnessChoice where\n  | first\n  | second\npartial def chooseChoice (n : Nat) : WitnessChoice := chooseChoice n\n"
+  checkRuntime choice
+  let boxed ← prepare .lean
+    "structure WitnessBox (a : Type) where\n  value : a\npartial def chooseBox (n : Nat) : WitnessBox (Prod Nat Bool) := chooseBox n\n"
+  checkRuntime boxed
+  let alternatives ← prepare .lean
+    "inductive WitnessAlternatives (a : Type) where\n  | missing (value : a)\n  | fallback\npartial def chooseAlternative {a : Type} (n : Nat) : WitnessAlternatives a := chooseAlternative n\n"
+  checkRuntime alternatives
+  requireOrdinaryFailure
+    "inductive WitnessLoop where\n  | next (value : WitnessLoop)\npartial def noFiniteWitness (n : Nat) : WitnessLoop := noFiniteWitness n\n"
+  IO.println "PSC1_ORDINARY_INDUCTIVE_WITNESSES: enum, parameterized product field, failed alternative and recursive-only refusal passed"
+
 def main : IO Unit := do
+  requireInductiveWitnesses
   requireLoopHelperAdmission
   requireProductWitnessBudget
   let source := "partial def countdown (n : Nat) : Nat := if Nat.beq n 0 then 42 else countdown (Nat.sub n 1)\n"

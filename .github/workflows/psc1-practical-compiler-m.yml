@@ -8,7 +8,7 @@ permissions:
   contents: read
 concurrency:
   group: psc1-practical-compiler-m-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   focused:
@@ -40,7 +40,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: psc1/.lake
-          key: psc1-lake-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+          key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail

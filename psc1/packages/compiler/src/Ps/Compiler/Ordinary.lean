@@ -108,6 +108,90 @@ def psOrdinarySortWitness (level : PsLevel) : Option PsExpr :=
       | _ => Option.none
   | _ => Option.none
 
+-- Constructor search reads checked declaration metadata only. It never consults
+-- a recursive executable body, introduces a meta, or resets the shared budget.
+def psOrdinaryConstructorFieldsWorker
+    (smaller : PsOrdinaryWitnessSearch) (environment : PsEnvironment)
+    (locals : PsLocalContext) (target : PsExpr) (fields : Nat) :
+    PsExpr -> Nat -> Prod (Option PsExpr) Nat :=
+  match fields with
+  | 0 =>
+      fun (candidate : PsExpr) (budget : Nat) =>
+        if psOrdinaryHasType environment locals candidate target then
+          Prod.mk (Option.some candidate) budget
+        else Prod.mk Option.none budget
+  | remaining + 1 =>
+      let continue : PsExpr -> Nat -> Prod (Option PsExpr) Nat :=
+        psOrdinaryConstructorFieldsWorker smaller environment locals target remaining;
+      fun (candidate : PsExpr) (budget : Nat) =>
+        match budget with
+        | 0 => Prod.mk Option.none 0
+        | available + 1 =>
+            match psInferType environment psMetaEmpty locals candidate with
+            | Except.error _ => Prod.mk Option.none available
+            | Except.ok type =>
+                match psWhnf environment psMetaEmpty locals type with
+                | PsExpr.forallE name domain body binder =>
+                    let field := smaller environment locals domain available;
+                    match field.fst with
+                    | Option.none => Prod.mk Option.none field.snd
+                    | Option.some value =>
+                        continue (PsExpr.app candidate value) field.snd
+                | _ => Prod.mk Option.none available
+
+def psOrdinaryConstructorAlternativesWorker
+    (smaller : PsOrdinaryWitnessSearch) (environment : PsEnvironment)
+    (locals : PsLocalContext) (target : PsExpr) (parent : PsInductiveInfo)
+    (levels : List PsLevel) (parameters : List PsExpr) (constructors : List PsName) :
+    Nat -> Prod (Option PsExpr) Nat :=
+  match constructors with
+  | List.nil => fun (budget : Nat) => Prod.mk Option.none budget
+  | List.cons name rest =>
+      let next : Nat -> Prod (Option PsExpr) Nat :=
+        psOrdinaryConstructorAlternativesWorker smaller environment locals target
+          parent levels parameters rest;
+      fun (budget : Nat) =>
+        match budget with
+        | 0 => Prod.mk Option.none 0
+        | available + 1 =>
+            match psEnvironmentFind environment name with
+            | Option.some declaration =>
+                match declaration with
+                | PsDeclaration.constructorDecl info =>
+                    if psNameEq info.inductiveName parent.name &&
+                        Nat.beq info.numParams parent.numParams &&
+                        Nat.beq info.levelParams.length levels.length then
+                      let candidate := psExprApplyMany (PsExpr.constE name levels) parameters;
+                      let searched := psOrdinaryConstructorFieldsWorker smaller environment locals
+                        target info.numFields candidate available;
+                      match searched.fst with
+                      | Option.some value => searched
+                      | Option.none => next searched.snd
+                    else next available
+                | _ => next available
+            | Option.none => next available
+
+def psOrdinaryInductiveWitness
+    (smaller : PsOrdinaryWitnessSearch) (environment : PsEnvironment)
+    (locals : PsLocalContext) (target : PsExpr) (available : Nat) :
+    Prod (Option PsExpr) Nat :=
+  let view := psExprAppView target;
+  match view.head with
+  | PsExpr.constE name levels =>
+      match psEnvironmentFind environment name with
+      | Option.some declaration =>
+          match declaration with
+          | PsDeclaration.inductiveDecl info =>
+              if Nat.beq info.numIndices 0 &&
+                  Nat.beq info.numParams view.args.length &&
+                  Nat.beq info.levelParams.length levels.length then
+                psOrdinaryConstructorAlternativesWorker smaller environment locals target
+                  info levels view.args info.constructors available
+              else Prod.mk Option.none available
+          | _ => Prod.mk Option.none available
+      | Option.none => Prod.mk Option.none available
+  | _ => Prod.mk Option.none available
+
 /-- Bounded constructive search; absence is not uninhabitedness evidence.
 The recursive executable body is never consulted here. -/
 def psOrdinaryWitnessBudgetWorker (fuel : Nat) : PsOrdinaryWitnessSearch :=
@@ -122,7 +206,7 @@ def psOrdinaryWitnessBudgetWorker (fuel : Nat) : PsOrdinaryWitnessSearch :=
         | 0 => Prod.mk Option.none 0
         | available + 1 =>
             let reduced := psWhnf environment psMetaEmpty locals type;
-            let candidate : Prod (Option PsExpr) Nat :=
+            let primary : Prod (Option PsExpr) Nat :=
               match psOrdinaryLocalWitness environment locals type locals.declarations with
               | Option.some value => Prod.mk (Option.some value) available
               | Option.none =>
@@ -139,6 +223,11 @@ def psOrdinaryWitnessBudgetWorker (fuel : Nat) : PsOrdinaryWitnessSearch :=
                   | PsExpr.sortE level => Prod.mk (psOrdinarySortWitness level) available
                   | PsExpr.constE name _ => Prod.mk (psOrdinaryAtomicWitness name) available
                   | _ => psOrdinaryApplicationWitness smaller environment locals reduced available;
+            let candidate : Prod (Option PsExpr) Nat :=
+              match primary.fst with
+              | Option.some value => primary
+              | Option.none =>
+                  psOrdinaryInductiveWitness smaller environment locals reduced primary.snd;
             match candidate.fst with
             | Option.none => candidate
             | Option.some value =>

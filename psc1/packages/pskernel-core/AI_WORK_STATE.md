@@ -9,6 +9,62 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+
+## 2026-10-21 — full CheckState carrier review assembled on current staged fixes
+
+This commit assembles the reviewed callback-carrier refactor on staged source
+`641ad59c3b1bbf701b0c28d4da92386096e5e65f`, retaining the guard staged-recursion
+repair, native fixture keyword fixes, strict terminal DefEq fixtures, every
+existing gate, and the canonical build-only 75-minute job ceiling. Its second
+parent preserves the complete reviewed source/test history through
+`43ac7506b5fe9442a3baa7b21e2cd733938caffe`. **This candidate is NOT RUN and is not
+an integration promotion.** Do not inherit any previous source's CI result.
+
+### Mechanism and supported scope
+
+The primary WHNF, recursor, infer-only, checked inference and DefEq callback
+paths now carry the complete seven-field CheckState through one callback knot.
+The four-field WhnfState ABI remains as explicit compatibility wrappers. Pure
+WHNF helpers lift their results into the current owning state; state returned
+by a checker callback is used directly, preserving fresh counters, inference
+caches, success/failure pairs and unfolding entries rather than merging into a
+stale outer snapshot. No representation fields, acceptance shortcut or trusted
+runtime primitive were added.
+
+The recursor owner fixes each predecessor-budget callback exactly once while
+retaining the DefEq callback supplied by its owning operation. Structural WHNF
+recursion keeps those callbacks fixed. Typed local values come from the current
+CheckContext. Existing mixed legacy-local, K, structure-major and String-major
+unsupported paths retain explicit decline behavior. This refactor does not
+promote those branches or remove the four public whole-operation fallback sites.
+V1 remains the default checked provider and differential reference.
+
+### Exact required qualification
+
+The native/generated/canonical gates require all of:
+- 42 full-state callback carrier probes and 56 exact error/decline propagation cases;
+- 540 original-V1 WHNF comparisons over the established fuel/depth/public/core matrix;
+- 38 DefEq carrier probes and 44 DefEq error/decline propagation cases;
+- ten new local carrier/entry-guard lemmas, plus unchanged existing proof statements;
+- all existing official, mutual280, guard, Quot, ordinary recursor, DefEq,
+  transformation, provider, adversarial and performance gates.
+
+The probes seed non-authorizing cache markers and verify every outer field,
+fresh-counter and callback order. Unit/alias/Quot/recursor metadata comes from
+actual checked declaration admission. These probe counts are not counts of
+officially admitted theorems. The local lemmas establish boundary identities and
+zero-fuel precedence, not whole-kernel equivalence or soundness. Native, authentic
+PSC1, canonical closure, detached empty-PATH JavaScript and full Arena results
+remain required at this candidate's exact committed SHA.
+
+### Continuation
+
+Inspect the staged641 and integration889 terminal jobs before promotion. Diagnose
+any concrete carrier source/ABI/proof/runtime failure without weakening assertions.
+Keep native and both generated routes source-identical. Full Arena qualification
+remains open: the last complete5544 record had193 cases =170 matches,2 separate
+safety agreements,20 host timeouts and1 unsupported case; no completion claim.
+
 ## 2026-10-21 12:20 UTC — require completed terminal DefEq results in existing fixtures
 
 Exact staged source `44bdbea5c4db451ee2ee4aafba963eea5f50d7a7` built all 365 native

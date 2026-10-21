@@ -30,9 +30,9 @@ def psKernelExprV2CheckReadForall
               (PsKernelExprV2CheckedForallView.mk name domain body binderInfo))
       | _ => Except.error "expected function type"
 
-def psKernelExprV2CheckEnsureForallWith
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+def psKernelExprV2CheckEnsureForallOwnedWith
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (type : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2CheckedForallView)) :=
@@ -46,7 +46,7 @@ def psKernelExprV2CheckEnsureForallWith
               (Prod.mk state
                 (PsKernelExprV2CheckedForallView.mk name domain body binderInfo)))
       | _ =>
-          match whnf context state.whnf type with
+          match whnf context state type with
           | Option.none => Option.none
           | Option.some attempted =>
               match attempted with
@@ -54,7 +54,7 @@ def psKernelExprV2CheckEnsureForallWith
               | Except.ok reduced =>
                   Option.some
                     (psKernelExprV2CheckReadForall
-                      (psKernelExprV2CheckStateWithWhnf state (Prod.fst reduced))
+                      (Prod.fst reduced)
                       (Prod.snd reduced))
 
 def psKernelExprV2CheckApplicationEqContext
@@ -115,11 +115,11 @@ def psKernelExprV2CheckApplicationConvertWith
                     (Prod.fst result) root arg view.body)
               else Option.some (Except.error "application type mismatch")
 
-def psKernelExprV2CheckApplicationWith
+def psKernelExprV2CheckApplicationOwnedWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (context : PsKernelExprV2CheckContext)
@@ -131,7 +131,7 @@ def psKernelExprV2CheckApplicationWith
       match attemptedFn with
       | Except.error error => Option.some (Except.error error)
       | Except.ok fnResult =>
-          match psKernelExprV2CheckEnsureForallWith
+          match psKernelExprV2CheckEnsureForallOwnedWith
               whnf context (Prod.fst fnResult) (Prod.snd fnResult) with
           | Option.none => Option.none
           | Option.some attemptedForall =>
@@ -156,3 +156,28 @@ def psKernelExprV2CheckApplicationWith
                               else
                                 psKernelExprV2CheckApplicationConvertWith defeq context next
                                   root arg (Prod.snd argResult) view
+
+/- The original callback ABI is retained by lifting the supplied WHNF callback
+   against the complete state already owned by this helper. -/
+
+def psKernelExprV2CheckEnsureForallWith
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (type : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2CheckedForallView)) :=
+  psKernelExprV2CheckEnsureForallOwnedWith
+    (psKernelExprV2LiftCheckWhnf whnf) context state type
+
+def psKernelExprV2CheckApplicationWith
+    (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (root fn arg : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2CheckApplicationOwnedWith
+    check (psKernelExprV2LiftCheckWhnf whnf) defeq context state root fn arg

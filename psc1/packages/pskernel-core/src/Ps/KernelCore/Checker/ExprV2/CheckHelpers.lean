@@ -1,4 +1,5 @@
-import Ps.KernelCore.Checker.ExprV2.CheckWhnf
+import Ps.KernelCore.Checker.ExprV2.CheckCallbacks
+import Ps.KernelCore.Checker.ExprV2.Beta
 
 /-
 Shared binder rules for checked and inference-only modes. The supplied typed WHNF callback
@@ -44,9 +45,9 @@ def psKernelExprV2CheckOpenBinder
     Except String PsKernelExprV2OpenedCheckBinder :=
   psKernelExprV2CheckOpenLocal context state name domain body binderInfo Option.none
 
-def psKernelExprV2CheckEnsureSortWith
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+def psKernelExprV2CheckEnsureSortOwnedWith
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (type : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelLevel)) :=
@@ -57,14 +58,14 @@ def psKernelExprV2CheckEnsureSortWith
       | PsKernelExprV2Node.sort level =>
           Option.some (Except.ok (Prod.mk state level))
       | _ =>
-          match whnf context state.whnf type with
+          match whnf context state type with
           | Option.none => Option.none
           | Option.some attempted =>
               match attempted with
               | Except.error error => Option.some (Except.error error)
               | Except.ok reduced =>
                   let next := Prod.fst reduced;
-                  match psKernelExprV2PagedRequire next.arena (Prod.snd reduced) with
+                  match psKernelExprV2PagedRequire next.whnf.arena (Prod.snd reduced) with
                   | Except.error error => Option.some (Except.error error)
                   | Except.ok result =>
                       match result.node with
@@ -72,7 +73,7 @@ def psKernelExprV2CheckEnsureSortWith
                           Option.some
                             (Except.ok
                               (Prod.mk
-                                (psKernelExprV2CheckStateWithWhnf state next)
+                                next
                                 level))
                       | _ => Option.some (Except.error "expected sort")
 
@@ -94,14 +95,14 @@ def psKernelExprV2CheckCloseLambda
             (psKernelExprV2PagedMkForall
               (Prod.fst closed) name domain (Prod.snd closed) binderInfo)
 
-def psKernelExprV2CheckCloseForallWith
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+def psKernelExprV2CheckCloseForallOwnedWith
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (opened : PsKernelExprV2OpenedCheckBinder)
     (state : PsKernelExprV2CheckState) (type _root : Nat)
     (domainLevel : PsKernelLevel) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  match psKernelExprV2CheckEnsureSortWith whnf opened.context state type with
+  match psKernelExprV2CheckEnsureSortOwnedWith whnf opened.context state type with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
@@ -114,11 +115,11 @@ def psKernelExprV2CheckCloseForallWith
               (psKernelExprV2PagedMkSort scopedState.whnf.arena
                 (psKernelLevelMkIMax domainLevel (Prod.snd bodySort))))
 
-def psKernelExprV2CheckBinderWith
+def psKernelExprV2CheckBinderOwnedWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat)
     (name : PsKernelName) (domain body : Nat) (binderInfo : PsKernelBinderInfo)
@@ -138,7 +139,7 @@ def psKernelExprV2CheckBinderWith
           match attemptedDomain with
           | Except.error error => Option.some (Except.error error)
           | Except.ok domainResult =>
-              psKernelExprV2CheckEnsureSortWith
+              psKernelExprV2CheckEnsureSortOwnedWith
                 whnf context (Prod.fst domainResult) (Prod.snd domainResult);
   match checkedDomain with
   | Option.none => Option.none
@@ -162,7 +163,7 @@ def psKernelExprV2CheckBinderWith
                             (Prod.fst bodyResult) (Prod.snd bodyResult) root
                             name domain binderInfo)
                       else
-                        psKernelExprV2CheckCloseForallWith whnf opened
+                        psKernelExprV2CheckCloseForallOwnedWith whnf opened
                           (Prod.fst bodyResult) (Prod.snd bodyResult) root
                           (Prod.snd domainSort)
 
@@ -179,3 +180,39 @@ def psKernelExprV2CheckFinishAttempt
           Option.some
             (psKernelExprV2CheckedInferFinish
               (Prod.fst checked) source (Prod.snd checked))
+
+/- The original callback ABI is retained by lifting the supplied WHNF callback
+   against the complete state already owned by this helper. -/
+
+def psKernelExprV2CheckEnsureSortWith
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (type : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState PsKernelLevel)) :=
+  psKernelExprV2CheckEnsureSortOwnedWith
+    (psKernelExprV2LiftCheckWhnf whnf) context state type
+
+def psKernelExprV2CheckCloseForallWith
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (opened : PsKernelExprV2OpenedCheckBinder)
+    (state : PsKernelExprV2CheckState) (type _root : Nat)
+    (domainLevel : PsKernelLevel) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2CheckCloseForallOwnedWith
+    (psKernelExprV2LiftCheckWhnf whnf) opened state type _root domainLevel
+
+def psKernelExprV2CheckBinderWith
+    (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (root : Nat)
+    (name : PsKernelName) (domain body : Nat) (binderInfo : PsKernelBinderInfo)
+    (isLambda inferOnly : Bool) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2CheckBinderOwnedWith
+    check (psKernelExprV2LiftCheckWhnf whnf) context state root
+    name domain body binderInfo isLambda inferOnly

@@ -35,6 +35,9 @@ on:
       - psc1/scripts/pskernel-expr-v2-admission-guard-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-quot-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-recursor-smoke.mjs
+      - psc1/test/PsKernelExprV2OwnedStateRegression.lean
+      - psc1/test/PsKernelExprV2OwnedStateProofs.lean
+      - psc1/scripts/pskernel-expr-v2-owned-state-smoke.mjs
       - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - .github/workflows/psc1-pskernel-core-correctness.yml
 
@@ -382,6 +385,19 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" recursor-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-recursor-canonical.log"
           grep -q 'PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9' "$RUNNER_TEMP/psc1-recursor-canonical.log"
+      - name: Check complete canonical-source DAG checker state in detached Node
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          test -s "$PSC1_PS_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-owned-state-smoke.mjs "$PSC1_PS_RUN_DIR/owned-state-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" owned-state-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-owned-state-canonical.log"
+          grep -Eq '^PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-owned-state-canonical.log"
       - name: Exercise the canonical-source checked batch provider in detached Node
         working-directory: psc1
         shell: bash
@@ -445,6 +461,7 @@ jobs:
             ${{ runner.temp }}/psc1-admission-guard-canonical.log
             ${{ runner.temp }}/psc1-quot-canonical.log
             ${{ runner.temp }}/psc1-recursor-canonical.log
+            ${{ runner.temp }}/psc1-owned-state-canonical.log
             psc1/dist/pskernel-selfhost/provider/
             psc1/dist/pskernel-selfhost/workspace/.proofscript-bootstrap.json
             psc1/dist/pskernel-selfhost/pskernel-core.js

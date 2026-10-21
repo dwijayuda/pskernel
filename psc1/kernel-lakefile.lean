@@ -33,6 +33,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.CheckWhnf,
     `Ps.KernelCore.Checker.ExprV2.CheckLet,
     `Ps.KernelCore.Checker.ExprV2.CheckState,
+    `Ps.KernelCore.Checker.ExprV2.CheckCallbacks,
     `Ps.KernelCore.Checker.ExprV2.CheckHelpers,
     `Ps.KernelCore.Checker.ExprV2.CheckApplication,
     `Ps.KernelCore.Checker.ExprV2.InferApplication,
@@ -48,6 +49,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.Delta,
     `Ps.KernelCore.Checker.ExprV2.Nat,
     `Ps.KernelCore.Checker.ExprV2.Projection,
+    `Ps.KernelCore.Checker.ExprV2.WhnfOwned,
+    `Ps.KernelCore.Checker.ExprV2.Knot,
     `Ps.KernelCore.Checker.ExprV2.Whnf,
     `Ps.KernelCore.Checker.ExprV2.DefEq,
     `Ps.KernelCore.Checker.ExprV2.DefEq.BinderSpines,
@@ -291,3 +294,8 @@ lean_exe psc1_kernel_expr_v2_quot_regression where
 lean_exe psc1_kernel_expr_v2_recursor_regression where
   srcDir := "test"
   root := `PsKernelExprV2RecursorRegression
+
+-- Complete checker state, callback refusal/error ordering and fixed-budget parity.
+lean_exe psc1_kernel_expr_v2_owned_state_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2OwnedStateRegression

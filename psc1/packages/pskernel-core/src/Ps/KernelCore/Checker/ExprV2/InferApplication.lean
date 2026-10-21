@@ -39,6 +39,88 @@ def psKernelExprV2InferInstantiateRev
         (Prod.mk (psKernelExprV2CheckStateWithArena state (Prod.fst built))
           (Prod.snd built))
 
+def psKernelExprV2InferAppOnlyLoopOwnedWithFuel
+    (fuel : Nat) :
+    (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat))) ->
+    PsKernelExprV2CheckContext -> PsKernelExprV2CheckState ->
+    List Nat -> Nat -> Nat -> Nat ->
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+          (_context : PsKernelExprV2CheckContext)
+          (_state : PsKernelExprV2CheckState)
+          (_args : List Nat) (_index _instantiated _current : Nat) =>
+        Option.some (Except.error "kernel inference budget exhausted")
+  | Nat.succ remaining =>
+      fun (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+          (context : PsKernelExprV2CheckContext)
+          (state : PsKernelExprV2CheckState)
+          (args : List Nat) (index instantiated current : Nat) =>
+        let smaller :=
+          fun (nextState : PsKernelExprV2CheckState)
+              (nextIndex nextInstantiated nextCurrent : Nat) =>
+            let recur := psKernelExprV2InferAppOnlyLoopOwnedWithFuel remaining;
+            recur whnf context nextState args
+              nextIndex nextInstantiated nextCurrent;
+        let argCount := psKernelExprV2TransformNatLength args;
+        if psKernelNatLt index argCount then
+          match psKernelExprV2PagedRequire state.whnf.arena current with
+          | Except.error error => Option.some (Except.error error)
+          | Except.ok entry =>
+              match entry.node with
+              | PsKernelExprV2Node.forallE _ _ body _ =>
+                  smaller state (Nat.succ index) instantiated body
+              | _ =>
+                  let pending :=
+                    psKernelExprV2InferArgsTake (Nat.sub index instantiated)
+                      (psKernelExprV2InferArgsDrop instantiated args);
+                  match psKernelExprV2InferInstantiateRev state current pending with
+                  | Except.error error => Option.some (Except.error error)
+                  | Except.ok exposed =>
+                      match psKernelExprV2CheckEnsureForallOwnedWith
+                          whnf context (Prod.fst exposed) (Prod.snd exposed) with
+                      | Option.none => Option.none
+                      | Option.some attempted =>
+                          match attempted with
+                          | Except.error error => Option.some (Except.error error)
+                          | Except.ok forallResult =>
+                              let view := Prod.snd forallResult;
+                              smaller (Prod.fst forallResult)
+                                (Nat.succ index) index view.body
+        else
+          Option.some
+            (psKernelExprV2InferInstantiateRev state current
+              (psKernelExprV2InferArgsDrop instantiated args))
+
+def psKernelExprV2InferApplicationOwnedWith
+    (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  match psKernelExprV2TransformAppSpineOnCanonical state.whnf.arena root with
+  | Except.error error => Option.some (Except.error error)
+  | Except.ok spine =>
+      match inferType context state (Prod.fst spine) with
+      | Option.none => Option.none
+      | Option.some attempted =>
+          match attempted with
+          | Except.error error => Option.some (Except.error error)
+          | Except.ok inferred =>
+              let args := Prod.snd spine;
+              psKernelExprV2InferAppOnlyLoopOwnedWithFuel
+                (Nat.succ (psKernelExprV2TransformNatLength args))
+                whnf context (Prod.fst inferred) args 0 0 (Prod.snd inferred)
+
+/- The original callback ABI is retained by lifting the supplied WHNF callback
+   against the complete state already owned by this helper. -/
+
 def psKernelExprV2InferAppOnlyLoopWithFuel
     (fuel : Nat) :
     (PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
@@ -60,41 +142,8 @@ def psKernelExprV2InferAppOnlyLoopWithFuel
           (context : PsKernelExprV2CheckContext)
           (state : PsKernelExprV2CheckState)
           (args : List Nat) (index instantiated current : Nat) =>
-        let smaller :=
-          fun (nextState : PsKernelExprV2CheckState)
-              (nextIndex nextInstantiated nextCurrent : Nat) =>
-            let recur := psKernelExprV2InferAppOnlyLoopWithFuel remaining;
-            recur whnf context nextState args
-              nextIndex nextInstantiated nextCurrent;
-        let argCount := psKernelExprV2TransformNatLength args;
-        if psKernelNatLt index argCount then
-          match psKernelExprV2PagedRequire state.whnf.arena current with
-          | Except.error error => Option.some (Except.error error)
-          | Except.ok entry =>
-              match entry.node with
-              | PsKernelExprV2Node.forallE _ _ body _ =>
-                  smaller state (Nat.succ index) instantiated body
-              | _ =>
-                  let pending :=
-                    psKernelExprV2InferArgsTake (Nat.sub index instantiated)
-                      (psKernelExprV2InferArgsDrop instantiated args);
-                  match psKernelExprV2InferInstantiateRev state current pending with
-                  | Except.error error => Option.some (Except.error error)
-                  | Except.ok exposed =>
-                      match psKernelExprV2CheckEnsureForallWith
-                          whnf context (Prod.fst exposed) (Prod.snd exposed) with
-                      | Option.none => Option.none
-                      | Option.some attempted =>
-                          match attempted with
-                          | Except.error error => Option.some (Except.error error)
-                          | Except.ok forallResult =>
-                              let view := Prod.snd forallResult;
-                              smaller (Prod.fst forallResult)
-                                (Nat.succ index) index view.body
-        else
-          Option.some
-            (psKernelExprV2InferInstantiateRev state current
-              (psKernelExprV2InferArgsDrop instantiated args))
+        psKernelExprV2InferAppOnlyLoopOwnedWithFuel (Nat.succ remaining)
+          (psKernelExprV2LiftCheckWhnf whnf) context state args index instantiated current
 
 def psKernelExprV2InferApplicationWith
     (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
@@ -104,16 +153,5 @@ def psKernelExprV2InferApplicationWith
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  match psKernelExprV2TransformAppSpineOnCanonical state.whnf.arena root with
-  | Except.error error => Option.some (Except.error error)
-  | Except.ok spine =>
-      match inferType context state (Prod.fst spine) with
-      | Option.none => Option.none
-      | Option.some attempted =>
-          match attempted with
-          | Except.error error => Option.some (Except.error error)
-          | Except.ok inferred =>
-              let args := Prod.snd spine;
-              psKernelExprV2InferAppOnlyLoopWithFuel
-                (Nat.succ (psKernelExprV2TransformNatLength args))
-                whnf context (Prod.fst inferred) args 0 0 (Prod.snd inferred)
+  psKernelExprV2InferApplicationOwnedWith
+    inferType (psKernelExprV2LiftCheckWhnf whnf) context state root

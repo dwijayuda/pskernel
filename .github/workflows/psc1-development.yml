@@ -50,6 +50,7 @@ jobs:
           set -euo pipefail
           node scripts/development-selection-tests.mjs
           node scripts/practical-core-readiness-tests.mjs
+          node scripts/while-execution-contract-tests.mjs
           node scripts/language-backend-parity-contract-tests.mjs
           node scripts/js-generation-manifest-contract-tests.mjs
           node scripts/practical-core-readiness.mjs

@@ -67,3 +67,78 @@ assert.deepEqual(contract.families[0].acceptance.find(c=>c.id==='short-circuit')
 
 for(const [family,id,caseId] of [["typed-do","ownership","ownerLambdaCase"],["early-return","owners","ownerLambdaCase"],["mutation","joins","joinsCase"],["typed-errors","scope","handlerScopeCase"]])
  assert.deepEqual(binding(family,id),{suite:'inference-control',case:caseId});
+
+const requiredNative={
+ 'for-loops/collections':['psc1_do_tests'],'for-loops/ranges':['psc1_do_tests'],
+ 'for-loops/streaming':['psc1_do_tests'],
+ 'partial-definitions/pairing':['psc1_ordinary_tests'],'partial-definitions/recursion':['psc1_ordinary_tests'],
+ 'tuples-patterns/products':['psc1_data_tests'],'tuples-patterns/identity':['psc1_data_tests'],
+ 'arrays-indexing/operations':['psc1_data_tests','psc1_do_tests'],
+ 'namespaces/identity':['psc1_namespace_tests'],'namespaces/ownership':['psc1_namespace_tests']
+};
+for(const [key,names]of Object.entries(requiredNative)){
+ const [family,id]=key.split('/');
+ assert.deepEqual(contract.families.find(f=>f.id===family).acceptance.find(c=>c.id===id).requiredNativeSuites,names);
+}
+for(const id of ['controller','divergence'])
+ assert.equal(contract.families.find(f=>f.id==='while-loops').acceptance.find(c=>c.id===id).actualWhile,id);
+const meta=(f,id)=>contract.families.find(x=>x.id===f).acceptance.find(x=>x.id===id);
+assert.equal(meta('for-loops','streaming').requiredCompilerApplication,true);
+assert.equal(meta('tuples-patterns','identity').requiredPatternStrictness,true);
+assert.equal(meta('namespaces','identity').requiredNamespacePrivacy,true);
+assert.equal(meta('namespaces','ownership').requiredNamespacePrivacy,true);
+const d='c'.repeat(64);
+const fakeSuite=id=>{
+ const spec=contract.suites[id];
+ const cases=JSON.parse(fs.readFileSync(new URL('../'+spec.contract,import.meta.url)));
+ const records=cases.cases.flatMap(c=>cases.grammars.flatMap(syntax=>cases.targets.map(target=>({
+  id:c.id,syntax,target,passed:true,flags:[false,true],admission:'independent-official-Lean',
+  strictIr:'required-by-production-publication',runtime:'executed',
+  ...Object.fromEntries(['sourceSha256','entrySha256','artifactSha256','manifestSha256','oracleSha256'].map(k=>[k,d])),
+  librarySha256:Object.fromEntries(cases.oracleLibraries.map(k=>[k,d])),
+  refusals:Object.fromEntries(cases.requiredRefusals.map(k=>[k,d])),
+  ...(cases.independentStandardReference?{independentReferenceSha256:d,referenceComparison:'native-standard-operations'}:{})
+ }))));
+ return {caseContract:cases,implemented:true,receipt:{schema:'psc1-language-backend-execution/1',
+  contract:cases.id,testedCommit:commit,checkerCommit:contract.authority.commit,passed:true,failures:[],
+  targets:cases.targets,records}};
+};
+const sourceSuites=Object.fromEntries(['inference-control','stdlib-collections'].map(id=>[id,fakeSuite(id)]));
+const status=(report,f,id)=>report.families.find(x=>x.id===f).cases.find(x=>x.id===id).status;
+const noNative=deriveReadiness(contract,{commit,suites:sourceSuites,fullQualification:{...full,testedCommit:commit}});
+for(const key of Object.keys(requiredNative)){const[f,id]=key.split('/');assert.equal(status(noNative,f,id),'implemented');}
+const nativeFull={...full,testedCommit:commit,practicalCore:{
+ nativeSuites:['psc1_do_tests','psc1_data_tests','psc1_ordinary_tests','psc1_namespace_tests'].map(suite=>({
+  suite,passed:true,logSha256:d,testSha256:d,
+  sourceEvaluationCallsExactlyOnce:['evaluationItems','evaluationLower','evaluationUpper','evaluationArray','evaluationIndex']
+ })),
+ namespaces:{importedHelpersPrivate:true,entryNamespaceExported:true,
+  boundaryChecks:['lean','ps'].map(syntax=>({syntax,passed:true,refusalChecks:6,previousArtifactPreservationChecks:5}))}
+}};
+const nativeReport=deriveReadiness(contract,{commit,suites:sourceSuites,fullQualification:nativeFull});
+for(const[f,id]of [['for-loops','collections'],['for-loops','ranges'],['partial-definitions','pairing'],
+ ['partial-definitions','recursion'],['tuples-patterns','products'],['arrays-indexing','operations'],['namespaces','identity'],['namespaces','ownership']])
+ assert.equal(status(nativeReport,f,id),'qualified');
+assert.equal(status(nativeReport,'for-loops','streaming'),'implemented','measured application still required');
+assert.equal(status(nativeReport,'tuples-patterns','identity'),'implemented','external pattern deadline still required');
+for(const mutate of [
+ q=>q.practicalCore.nativeSuites[0].sourceEvaluationCallsExactlyOnce=[],
+ q=>q.practicalCore.nativeSuites[0].logSha256='',
+ q=>q.practicalCore.nativeSuites[0].testSha256=''
+]){
+ const changed=clone(nativeFull);mutate(changed);
+ const report=deriveReadiness(contract,{commit,suites:sourceSuites,fullQualification:changed});
+ assert.equal(status(report,'for-loops','ranges'),'implemented');
+ assert.equal(status(report,'arrays-indexing','operations'),'implemented');
+}
+const wrongPrivacy=clone(nativeFull);wrongPrivacy.practicalCore.namespaces.boundaryChecks[0].previousArtifactPreservationChecks=0;
+const privacyReport=deriveReadiness(contract,{commit,suites:sourceSuites,fullQualification:wrongPrivacy});
+assert.equal(status(privacyReport,'namespaces','ownership'),'implemented');
+assert.equal(privacyReport.releaseReady,false);
+console.log('PSC1_BOUNDED_CORE_COMPANIONS: PASS complete source matrices cannot replace native, evaluation-count, strictness, privacy or measured-application evidence');
+
+assert.deepEqual(meta('for-loops','collections').requiredSourceEvaluationOnce,['evaluationItems']);
+assert.deepEqual(meta('for-loops','ranges').requiredSourceEvaluationOnce,['evaluationLower','evaluationUpper']);
+assert.deepEqual(meta('arrays-indexing','operations').requiredSourceEvaluationOnce,['evaluationArray','evaluationIndex']);
+
+assert.equal(contract.requireReadyOnFullQualification,true,'full qualification must enforce the completed finite contract');

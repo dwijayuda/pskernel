@@ -126,3 +126,91 @@ def handlerScopeCase (flag : Bool) : Nat :=
   match handlerScopeProgram flag with
   | Except.error error => error + 1000
   | Except.ok value => value
+
+def collectionController (flag : Bool) : CompilerM Unit Nat Nat Nat := do
+  let mut order : Nat := 0
+  let items : List Nat := if flag then [1, 2, 3] else []
+  for value in items do
+    let old : Nat <- compilerGet ()
+    compilerSet (old + 1)
+    order := order * 10 + value
+  let values : Array Nat := if flag then #[4, 5] else #[6]
+  for value in values do
+    let old : Nat <- compilerGet ()
+    compilerSet (old + 1)
+    order := order * 10 + value
+    if !flag then throw (order + old)
+  return order
+
+def collectionControllerCase (flag : Bool) : Nat :=
+  let program : CompilerM Unit Nat Nat Nat := collectionController flag;
+  match program.run () 7 with
+  | Result.error error => error + 1000000
+  | Result.ok pair => pair.fst * 100 + pair.snd
+
+def rangeControllerCase (flag : Bool) : Nat :=
+  let observed : Id Nat := (do
+    let mut total : Nat := 0
+    let lower : Nat := if flag then 2 else 5
+    let upper : Nat := if flag then 5 else 2
+    for value in [lower:upper] do
+      total := total * 10 + value
+    for value in [3:3] do
+      total := 999
+    return total
+  );
+  observed
+
+def streamingControllerCase (flag : Bool) : Nat :=
+  let observed : Id Nat := (do
+    let mut total : Nat := 0
+    let upper : Nat := if flag then 100000 else 1000000000000000000
+    for value in [0:upper] do
+      if !flag then return value + 17
+      total := total + 1
+    return total
+  );
+  observed
+
+partial def boundedCountdown (count total : Nat) : Nat :=
+  if Nat.beq count 0 then total else boundedCountdown (count - 1) (total + 1)
+
+partial def boundedRecursiveSum (count : Nat) : Nat :=
+  if Nat.beq count 0 then 0 else count + boundedRecursiveSum (count - 1)
+
+partial def boundedRecursiveApply (step : Nat -> Nat) (count : Nat) : Nat :=
+  if Nat.beq count 0 then step 3
+  else boundedRecursiveApply (fun value => step (value + 1)) (count - 1)
+
+def directRecursionCase (flag : Bool) : Nat := boundedCountdown (if flag then 100000 else 0) 7
+def nonTailRecursionCase (flag : Bool) : Nat := boundedRecursiveSum (if flag then 100 else 20)
+def higherOrderRecursionCase (flag : Bool) : Nat :=
+  boundedRecursiveApply (fun value => value * 2) (if flag then 30 else 10)
+
+def tupleProductsCase (flag : Bool) : Nat :=
+  let program : Id Nat := (do
+    let seed : Nat := if flag then 3 else 5
+    let captured : Nat -> Nat := fun value => seed + value
+    let (seed, (_, extra)) : Nat × (Bool × Nat) := (seed + 11, (flag, 13))
+    let (grouped) : Nat := seed
+    let () : Unit := ()
+    return captured (grouped + extra)
+  );
+  program
+
+namespace BoundedIdentity
+def offset : Nat := 2
+namespace Inner
+def selected (flag : Bool) : Nat := if flag then offset else _root_.BoundedIdentity.offset
+end Inner
+end BoundedIdentity
+
+namespace BoundedIdentity.Inner
+def offset : Nat := 5
+def choice (flag : Bool) : Nat :=
+  let offset : Nat := if flag then 7 else 11;
+  offset + selected flag + BoundedIdentity.Inner.offset + _root_.BoundedIdentity.offset
+end BoundedIdentity.Inner
+
+def BoundedIdentity.dotted (flag : Bool) : Nat := BoundedIdentity.Inner.choice flag
+def namespaceCoreCase (flag : Bool) : Nat := BoundedIdentity.dotted flag

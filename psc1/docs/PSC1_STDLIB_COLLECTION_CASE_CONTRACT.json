@@ -42,6 +42,16 @@
         "typed-error",
         "do"
       ]
+    },
+    {
+      "id": "arrayOperationsCase",
+      "features": [
+        "empty-literal-push-set-map-fold",
+        "persistent-original",
+        "empty-fold",
+        "huge-stop-clamps",
+        "independent-native-Array-reference"
+      ]
     }
   ],
   "flags": [
@@ -52,7 +62,9 @@
     "wrong-element",
     "wrong-index",
     "duplicate-prelude",
-    "verified"
+    "verified",
+    "wrong-set-element",
+    "wrong-map-result"
   ],
   "oracleLibraries": [
     "option",

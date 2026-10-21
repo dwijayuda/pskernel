@@ -1,5 +1,7 @@
 // Consolidate successful scoped CI evidence. This is not a proof certificate.
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+import {checkWhileExecution} from './check-while-execution.mjs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -275,6 +277,8 @@ for (const [data, expectedTargets] of [[scripts, ['python', 'php']], [minimumScr
   }
 }
 for (const [data, expectedTargets] of [[whileRuntime, targets], [minimumWhile, ['python']]]) {
+  checkWhileExecution(data,{commit:process.env.GITHUB_SHA,head:process.env.PSC1_HEAD_SHA,
+    checkerCommit:runtime.nativeLean.commit,targets:expectedTargets});
   assert.equal(data.records.length, expectedTargets.length * 2);
   assert.equal(data.divergence.length, expectedTargets.length * 2);
   assert.deepEqual([...new Set(data.records.map(x => x.target))].sort(), [...expectedTargets].sort());
@@ -346,15 +350,24 @@ for (const record of runtime.rustPrivateClosures) {
 }
 
 const practicalNative = [
-  ['psc1_do_tests', 'PSC1_DO_TESTS: PASS'],
-  ['psc1_data_tests', 'PSC1_DATA_TESTS: PASS'],
-  ['psc1_while_tests', 'PSC1_WHILE_TESTS: PASS'],
-  ['psc1_namespace_tests', 'PSC1_NAMESPACE_TESTS: PASS']
-].map(([suite, marker]) => {
+  ['psc1_do_tests', 'PSC1_DO_TESTS: PASS','test/DoTests.lean'],
+  ['psc1_data_tests', 'PSC1_DATA_TESTS: PASS','test/DataTests.lean'],
+  ['psc1_while_tests', 'PSC1_WHILE_TESTS: PASS','test/WhileTests.lean'],
+  ['psc1_namespace_tests', 'PSC1_NAMESPACE_TESTS: PASS','test/NamespaceTests.lean'],
+  ['psc1_ordinary_tests', 'PSC1_ORDINARY_BOUNDARY_TESTS: passed; no runtime divergence executed in kernel','test/OrdinaryExecutionTests.lean'],
+  ['psc1_operator_tests','PSC1_INT_EQUALITY_KERNEL_BOUNDARIES: PASS 50 true/false conversion checks and strict operand lets','test/OperatorTests.lean'],
+  ['contextual_inference_tests','PSC1_CONTEXTUAL_INFERENCE_PASS: PS zero arguments do not invent a Unit argument','test/ContextualInferenceTests.lean']
+].map(([suite, marker, source]) => {
   const evidence = 'practical-core/' + suite + '.log';
   const log = fs.readFileSync(path.join(output, evidence), 'utf8');
   assert.ok(log.includes(marker), 'missing native suite success: ' + suite);
-  return { suite, passed: true, evidence };
+  const sourceEvaluationCallsExactlyOnce=suite==='psc1_do_tests'?
+    ['evaluationItems','evaluationLower','evaluationUpper','evaluationArray','evaluationIndex']:[];
+  for(const name of sourceEvaluationCallsExactlyOnce)
+    assert.ok(log.includes('PSC1_DO_PASS: strict source call occurs once: '+name));
+  return {suite,passed:true,evidence,source,sourceEvaluationCallsExactlyOnce,
+    logSha256:createHash('sha256').update(log).digest('hex'),
+    testSha256:createHash('sha256').update(fs.readFileSync(path.join(root,source))).digest('hex')};
 });
 function version(command, args) {
   const result = spawnSync(command, args, { cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });

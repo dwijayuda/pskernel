@@ -107,6 +107,75 @@
         "return-bypasses-catch",
         "handler-binder-scope"
       ]
+    },
+    {
+      "id": "collectionControllerCase",
+      "features": [
+        "ordered-list-and-array",
+        "empty-collection",
+        "CompilerM-state",
+        "typed-error-skips-continuation"
+      ]
+    },
+    {
+      "id": "rangeControllerCase",
+      "features": [
+        "lower-inclusive-upper-exclusive",
+        "empty-and-reversed",
+        "Nat-endpoints"
+      ]
+    },
+    {
+      "id": "streamingControllerCase",
+      "features": [
+        "100000-complete-actions",
+        "huge-range-immediate-return",
+        "first-action-before-all-continuations"
+      ]
+    },
+    {
+      "id": "directRecursionCase",
+      "features": [
+        "100000-tail-calls",
+        "exact-ordinary-runtime-graph"
+      ]
+    },
+    {
+      "id": "nonTailRecursionCase",
+      "features": [
+        "non-tail-continuations",
+        "checked-ordinary-pairing"
+      ]
+    },
+    {
+      "id": "higherOrderRecursionCase",
+      "features": [
+        "owned-function-argument",
+        "old-closure-capture",
+        "private-ABI"
+      ]
+    },
+    {
+      "id": "tupleProductsCase",
+      "features": [
+        "Unit",
+        "grouped-binder",
+        "right-associated-products",
+        "nested-wildcard",
+        "original-RHS-scope",
+        "old-closure-identity"
+      ]
+    },
+    {
+      "id": "namespaceCoreCase",
+      "features": [
+        "nested",
+        "reopened",
+        "dotted",
+        "current-enclosing-root-lookup",
+        "local-precedence",
+        "early-bound-full-identity"
+      ]
     }
   ],
   "flags": [
@@ -133,7 +202,16 @@
     "nested-assignment",
     "escaping-handler",
     "wrong-handler-result",
-    "malformed-handler"
+    "malformed-handler",
+    "for-noniterable",
+    "for-range-type",
+    "for-immutable",
+    "for-escape",
+    "tuple-duplicate",
+    "tuple-shape",
+    "namespace-duplicate",
+    "namespace-unknown",
+    "namespace-end"
   ],
   "oracleLibraries": [
     "option",

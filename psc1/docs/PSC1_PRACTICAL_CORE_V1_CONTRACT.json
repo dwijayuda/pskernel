@@ -181,15 +181,44 @@
       "acceptance": [
         {
           "id": "collections",
-          "meaning": "List/Array traversal order, once-only source, empty collections and state/error propagation."
+          "meaning": "List/Array traversal order, once-only source, empty collections and state/error propagation.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "collectionControllerCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_do_tests"
+          ],
+          "requiredSourceEvaluationOnce": [
+            "evaluationItems"
+          ]
         },
         {
           "id": "ranges",
-          "meaning": "Lower-inclusive upper-exclusive Nat range; endpoint order/once-only evaluation; reversed range is empty."
+          "meaning": "Lower-inclusive upper-exclusive Nat range; endpoint order/once-only evaluation; reversed range is empty.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "rangeControllerCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_do_tests"
+          ],
+          "requiredSourceEvaluationOnce": [
+            "evaluationLower",
+            "evaluationUpper"
+          ]
         },
         {
           "id": "streaming",
-          "meaning": "First action occurs without materializing all continuations; retained 100000-step bounded-memory application measurement."
+          "meaning": "First action occurs without materializing all continuations; retained 100000-step bounded-memory application measurement.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "streamingControllerCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_do_tests"
+          ],
+          "requiredCompilerApplication": true
         }
       ]
     },
@@ -201,11 +230,13 @@
       "acceptance": [
         {
           "id": "controller",
-          "meaning": "Reevaluation, sequential/nested loops, mutation, return and typed catch use the current state."
+          "meaning": "Reevaluation, sequential/nested loops, mutation, return and typed catch use the current state.",
+          "actualWhile": "controller"
         },
         {
           "id": "divergence",
-          "meaning": "Ordinary divergent loop is externally timed out; no injected runtime fuel; checked total owner refuses unproved loop."
+          "meaning": "Ordinary divergent loop is externally timed out; no injected runtime fuel; checked total owner refuses unproved loop.",
+          "actualWhile": "divergence"
         }
       ]
     },
@@ -279,11 +310,25 @@
       "acceptance": [
         {
           "id": "pairing",
-          "meaning": "Ordinary constructive opaque witness exactly paired with checked executable graph; forged companion/axiom/uninhabited results refuse."
+          "meaning": "Ordinary constructive opaque witness exactly paired with checked executable graph; forged companion/axiom/uninhabited results refuse.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "directRecursionCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_ordinary_tests"
+          ]
         },
         {
           "id": "recursion",
-          "meaning": "Direct, non-tail and higher-order recursion execute under unchanged limits; verified mode refuses without certificate."
+          "meaning": "Direct, non-tail and higher-order recursion execute under unchanged limits; verified mode refuses without certificate.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "higherOrderRecursionCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_ordinary_tests"
+          ]
         }
       ]
     },
@@ -295,11 +340,26 @@
       "acceptance": [
         {
           "id": "products",
-          "meaning": "Unit/grouping/right-associated products and nested named/wildcard patterns; RHS once in original scope."
+          "meaning": "Unit/grouping/right-associated products and nested named/wildcard patterns; RHS once in original scope.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "tupleProductsCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_data_tests"
+          ]
         },
         {
           "id": "identity",
-          "meaning": "Duplicate binders refuse; closures preserve original binding identity; strictness observes divergent RHS."
+          "meaning": "Duplicate binders refuse; closures preserve original binding identity; strictness observes divergent RHS.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "tupleProductsCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_data_tests"
+          ],
+          "requiredPatternStrictness": true
         }
       ]
     },
@@ -319,7 +379,19 @@
         },
         {
           "id": "operations",
-          "meaning": "Empty/literal/push/set/map/fold and receiver/index order evaluated once; wrong index/element types refuse."
+          "meaning": "Empty/literal/push/set/map/fold and receiver/index order evaluated once; wrong index/element types refuse.",
+          "execution": {
+            "suite": "stdlib-collections",
+            "case": "arrayOperationsCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_data_tests",
+            "psc1_do_tests"
+          ],
+          "requiredSourceEvaluationOnce": [
+            "evaluationArray",
+            "evaluationIndex"
+          ]
         },
         {
           "id": "lists",
@@ -401,11 +473,27 @@
       "acceptance": [
         {
           "id": "identity",
-          "meaning": "Nested/reopened/dotted declarations, current/enclosing/root lookup and local precedence preserve full identity."
+          "meaning": "Nested/reopened/dotted declarations, current/enclosing/root lookup and local precedence preserve full identity.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "namespaceCoreCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_namespace_tests"
+          ],
+          "requiredNamespacePrivacy": true
         },
         {
           "id": "ownership",
-          "meaning": "Translation hygiene, duplicate/refusal tests; imports stay private and only entry declarations export."
+          "meaning": "Translation hygiene, duplicate/refusal tests; imports stay private and only entry declarations export.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "namespaceCoreCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_namespace_tests"
+          ],
+          "requiredNamespacePrivacy": true
         }
       ]
     },
@@ -559,5 +647,11 @@
     "runner": "scripts/practical-application-tests.mjs",
     "argument": "--compiler-application",
     "receipt": "dist/scoped-correctness/compiler-application/results.json"
-  }
+  },
+  "actualWhile": {
+    "runner": "scripts/ordinary-while-conformance-tests.mjs",
+    "receipt": "dist/scoped-correctness/ordinary-while-conformance/results.json",
+    "minimumReceipt": "dist/scoped-correctness/ordinary-while-conformance-python314/results.json"
+  },
+  "requireReadyOnFullQualification": true
 }

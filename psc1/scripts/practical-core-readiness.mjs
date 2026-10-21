@@ -6,6 +6,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {checkLanguageBackendParity} from './check-language-backend-parity.mjs';
 import {checkCompilerApplication} from './check-compiler-application.mjs';
 import {checkPracticalApplications} from './check-practical-applications.mjs';
+import {checkWhileExecution} from './check-while-execution.mjs';
 import {checkTypedIoExecution} from './check-typed-io-execution.mjs';
 const familyIds=['operators','local-inference','typed-do','for-loops','while-loops','mutation','early-return',
  'partial-definitions','tuples-patterns','arrays-indexing','typed-errors','call-inference','namespaces','typed-io'];
@@ -13,6 +14,7 @@ const targets=['js','ts','rust','wasm-core','wasm-component','python','php'];
 export function validateReleaseContract(contract){
  assert.equal(contract.schema,'psc1-practical-core-release-contract/1');
  assert.equal(contract.id,'practical-core-v1');assert.equal(contract.scopeFrozen,true);
+ if(contract.requireReadyOnFullQualification!==undefined)assert.equal(contract.requireReadyOnFullQualification,true);
  assert.deepEqual(contract.grammars,['lean','ps']);assert.deepEqual(contract.targets,targets);
  assert.equal(contract.authority.commit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
  assert.equal(contract.authority.expressionV2Required,false);
@@ -26,6 +28,20 @@ export function validateReleaseContract(contract){
   for(const criterion of family.acceptance){
    assert.ok(criterion.id&&criterion.meaning);
    if(criterion.execution)assert.ok(contract.suites[criterion.execution.suite]);
+   if(criterion.actualWhile){
+    assert.equal(family.id,'while-loops');assert.equal(criterion.actualWhile,criterion.id);
+    assert.ok(['controller','divergence'].includes(criterion.actualWhile));
+    assert.ok(contract.actualWhile?.runner&&contract.actualWhile?.receipt&&contract.actualWhile?.minimumReceipt);
+   }
+   if(criterion.requiredNativeSuites){
+    assert.ok(criterion.execution&&criterion.requiredNativeSuites.length);
+    assert.equal(new Set(criterion.requiredNativeSuites).size,criterion.requiredNativeSuites.length);
+    assert.ok(criterion.requiredNativeSuites.every(id=>['psc1_do_tests','psc1_data_tests','psc1_ordinary_tests','psc1_namespace_tests'].includes(id)));
+   }
+   if(criterion.requiredSourceEvaluationOnce){
+    assert.ok(criterion.requiredNativeSuites?.includes('psc1_do_tests'));
+    assert.ok(criterion.requiredSourceEvaluationOnce.every(n=>['evaluationItems','evaluationLower','evaluationUpper','evaluationArray','evaluationIndex'].includes(n)));
+   }
    if(criterion.requiredIoChecks){
     assert.equal(family.id,'operators');assert.equal(criterion.id,'short-circuit');
     assert.deepEqual(criterion.execution,{suite:'checked-order',case:'shortCircuitCase'});
@@ -49,7 +65,7 @@ export function validateReleaseContract(contract){
  }
  return contract;
 }
-export function deriveReadiness(contract,{commit,suites={},fullQualification=null,typedIoApplication=null,typedIoExecution=null,ioExecutionContract=null,ioExecutionImplemented=false,practicalApplications=null,applicationContract=null,applicationImplemented=false,compilerApplicationReceipt=null,compilerApplicationContract=null,compilerImplemented=false}={}){
+export function deriveReadiness(contract,{commit,suites={},fullQualification=null,typedIoApplication=null,typedIoExecution=null,ioExecutionContract=null,ioExecutionImplemented=false,practicalApplications=null,applicationContract=null,applicationImplemented=false,compilerApplicationReceipt=null,compilerApplicationContract=null,compilerImplemented=false,whileExecution=null,minimumWhileExecution=null,whileExecutionImplemented=false}={}){
  validateReleaseContract(contract);assert.match(commit||'',/^[a-f0-9]{40}$/);
  const suiteStates={};
  for(const [id,{caseContract,receipt,implemented}] of Object.entries(suites)){
@@ -127,20 +143,50 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   compilerTested=true;compilerAllTargets=targets.every(t=>compilerApplicationReceipt.targets.includes(t));
   if(full)assert.equal(compilerAllTargets,true,'full compiler application matrix required');
  }
+ let actualWhile=false;
+ if(whileExecution){
+  checkWhileExecution(whileExecution,{commit,checkerCommit:contract.authority.commit});
+  if(minimumWhileExecution){
+   checkWhileExecution(minimumWhileExecution,{commit,checkerCommit:contract.authority.commit,targets:['python']});
+   assert.equal(minimumWhileExecution.oracleSha256,whileExecution.oracleSha256,'different native while oracle');
+  }
+  actualWhile=minimumWhileExecution!==null;
+ }
+ const nativeComplete=names=>(names||[]).every(id=>{
+  const row=fullQualification?.practicalCore?.nativeSuites?.find(r=>r.suite===id);
+  return row?.passed===true&&/^[a-f0-9]{64}$/.test(row.logSha256||'')&&/^[a-f0-9]{64}$/.test(row.testSha256||'');
+ });
+ const sourceCallsComplete=names=>(names||[]).every(name=>
+  fullQualification?.practicalCore?.nativeSuites?.find(r=>r.suite==='psc1_do_tests')?.sourceEvaluationCallsExactlyOnce?.includes(name));
+ const namespaceComplete=()=>{
+  const n=fullQualification?.practicalCore?.namespaces;
+  return n?.importedHelpersPrivate===true&&n?.entryNamespaceExported===true&&
+   JSON.stringify(n?.boundaryChecks?.map(r=>r.syntax).sort())===JSON.stringify(['lean','ps'])&&
+   n.boundaryChecks.every(r=>r.passed===true&&r.refusalChecks===6&&r.previousArtifactPreservationChecks===5);
+ };
  const families=contract.families.map(family=>{
   const cases=family.acceptance.map(criterion=>{
    const binding=criterion.execution,suite=binding&&suiteStates[binding.suite];
    if(binding&&suite)assert.ok(suite.caseContract.cases.some(c=>c.id===binding.case),'unknown finite case');
+   if(criterion.actualWhile)return {id:criterion.id,
+    status:actualWhile?(full?'qualified':'tested'):whileExecutionImplemented?'implemented':'blocked',
+    reason:actualWhile?null:'exact-commit seven-target controller, refusal and external deadline evidence pending',
+    execution:null,actualWhile:criterion.actualWhile};
    if(criterion.actualIo)return {id:criterion.id,
     status:actualIo?(full?'qualified':'tested'):ioExecutionImplemented?'implemented':'blocked',
     reason:actualIo?null:'exact-commit seven-adapter execution and policy evidence pending',
     execution:null,actualIo:criterion.actualIo};
    const extraIo=!criterion.requiredIoChecks||actualIo&&criterion.requiredIoChecks.every(check=>
     typedIoExecution.records.every(row=>row.checks.includes(check)));
+   const extraNative=nativeComplete(criterion.requiredNativeSuites)&&sourceCallsComplete(criterion.requiredSourceEvaluationOnce);
+   const extraPattern=!criterion.requiredPatternStrictness||actualWhile;
+   const extraCompiler=!criterion.requiredCompilerApplication||compilerTested&&compilerAllTargets;
+   const extraNamespace=!criterion.requiredNamespacePrivacy||namespaceComplete();
+   const complete=extraIo&&extraNative&&extraPattern&&extraCompiler&&extraNamespace;
    return {id:criterion.id,status:!binding?'blocked':!suite?.implemented?'blocked':
-    suite.qualified&&full&&extraIo?'qualified':suite.tested&&extraIo?'tested':'implemented',
+    suite.qualified&&full&&complete?'qualified':suite.tested&&complete?'tested':'implemented',
     reason:!binding?'finite case not yet bound to an executable acceptance test':
-     !suite?.implemented?'fixture or runner missing':!extraIo?'exact-commit seven-adapter foreign-error short-circuit evidence pending':suite.qualified&&!full?'all targets tested; full exact-commit qualification pending':null,
+     !suite?.implemented?'fixture or runner missing':!extraIo?'exact-commit seven-adapter foreign-error short-circuit evidence pending':!complete?'exact-commit native, strictness, privacy or measured application companion evidence pending':suite.qualified&&!full?'all targets tested; full exact-commit qualification pending':null,
     execution:binding||null};
   });
   return {id:family.id,qualified:cases.every(c=>c.status==='qualified'),cases};
@@ -214,6 +260,9 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
  const qualification='dist/scoped-correctness/SEVEN_BACKEND_QUALIFICATION.json';
  const report=deriveReadiness(contract,{commit:process.env.GITHUB_SHA,suites,
   fullQualification:fs.existsSync(path.join(root,qualification))?read(qualification):null,
+  whileExecutionImplemented:fs.existsSync(path.join(root,contract.actualWhile.runner)),
+  whileExecution:fs.existsSync(path.join(root,contract.actualWhile.receipt))?read(contract.actualWhile.receipt):null,
+  minimumWhileExecution:fs.existsSync(path.join(root,contract.actualWhile.minimumReceipt))?read(contract.actualWhile.minimumReceipt):null,
   ioExecutionContract:read(contract.actualIo.contract),
   ioExecutionImplemented:fs.existsSync(path.join(root,contract.actualIo.runner))&&
    ['host-tools/typed-io.mjs','host-tools/typed_io.py','host-tools/typed-io-rust/src/lib.rs',
@@ -230,5 +279,6 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
  fs.mkdirSync(path.join(root,'dist/development'),{recursive:true});
  fs.writeFileSync(path.join(root,'dist/development/practical-core-readiness.json'),JSON.stringify(report,null,2)+'\n');
  console.log('PSC1_PRACTICAL_CORE_READINESS: '+JSON.stringify({counts:report.counts,releaseReady:report.releaseReady}));
- if(process.argv.includes('--require-ready'))assert.equal(report.releaseReady,true,'Practical Core release contract is incomplete');
+ if(process.argv.includes('--require-ready')||process.argv.includes('--full-qualification')&&contract.requireReadyOnFullQualification)
+  assert.equal(report.releaseReady,true,'Practical Core release contract is incomplete');
 }

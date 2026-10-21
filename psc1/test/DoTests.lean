@@ -625,12 +625,65 @@ private def testInlineElseIf (natType : PsExpr) : IO Unit := do
     .proofScript
     "def result : Id(Nat) := do { if (true) { return 1 } else if (false) { return 2 } else { return 3 } }\n"
 
+
+private def evaluationCallCount (name : PsName) (term : PsExpr) : Nat :=
+  match term with
+  | .constE other _ => if psNameEq name other then 1 else 0
+  | .app fn arg => evaluationCallCount name fn + evaluationCallCount name arg
+  | .lam _ type body _ => evaluationCallCount name type + evaluationCallCount name body
+  | .forallE _ type body _ => evaluationCallCount name type + evaluationCallCount name body
+  | .letE _ type value body =>
+      evaluationCallCount name type + evaluationCallCount name value + evaluationCallCount name body
+  | .proj _ _ value => evaluationCallCount name value
+  | _ => 0
+
+private def testEvaluationOnce (natType : PsExpr) : IO Unit := do
+  let lean :=
+    "def evaluationItems (flag : Bool) : List Nat := [if flag then 1 else 2]\n" ++
+    "def evaluationLower (flag : Bool) : Nat := if flag then 0 else 2\n" ++
+    "def evaluationUpper (flag : Bool) : Nat := if flag then 2 else 0\n" ++
+    "def evaluationArray (flag : Bool) : Array Nat := #[if flag then 3 else 5]\n" ++
+    "def evaluationIndex (flag : Bool) : Nat := if flag then 0 else 9007199254740993123456789\n" ++
+    "def evaluationCase (flag : Bool) : Id Nat := do\n" ++
+    "  let mut total : Nat := 0\n" ++
+    "  for value in evaluationItems flag do\n    total := total + value\n" ++
+    "  for value in [evaluationLower flag:evaluationUpper flag] do\n    total := total + value\n" ++
+    "  let picked : Option Nat := (evaluationArray flag)[evaluationIndex flag]?\n" ++
+    "  match picked with\n  | Option.none => pure total\n  | Option.some value => pure (total + value)\n" ++
+    "def result : Nat := Id.run (evaluationCase false) * 100 + Id.run (evaluationCase true)\n"
+  let ps :=
+    "def evaluationItems(flag : Bool) : List(Nat) := [if (flag) { 1 } else { 2 }]\n" ++
+    "def evaluationLower(flag : Bool) : Nat := if (flag) { 0 } else { 2 }\n" ++
+    "def evaluationUpper(flag : Bool) : Nat := if (flag) { 2 } else { 0 }\n" ++
+    "def evaluationArray(flag : Bool) : Array(Nat) := #[if (flag) { 3 } else { 5 }]\n" ++
+    "def evaluationIndex(flag : Bool) : Nat := if (flag) { 0 } else { 9007199254740993123456789 }\n" ++
+    "def evaluationCase(flag : Bool) : Id(Nat) := do {\n" ++
+    "  let mut total : Nat := 0\n" ++
+    "  for value in evaluationItems(flag) { total := total + value }\n" ++
+    "  for value in [evaluationLower(flag):evaluationUpper(flag)] { total := total + value }\n" ++
+    "  let picked : Option(Nat) := (evaluationArray(flag))[evaluationIndex(flag)]?\n" ++
+    "  match picked with {\n    | Option.none => pure(total)\n    | Option.some value => pure(total + value)\n  }\n}\n" ++
+    "def result : Nat := Id.run(evaluationCase(false)) * 100 + Id.run(evaluationCase(true))\n"
+  for (kind, source) in [(PsCompilerSourceKind.lean, lean), (.proofScript, ps)] do
+    let prepared ← prepare "source iterator/range/Array evaluation ownership" kind source
+    let some declaration := prepared.declarations.find? (fun d =>
+      psNameEq (psDeclarationName d) (psRootName "evaluationCase"))
+      | throw (IO.userError "evaluation controller missing")
+    let some body := psDeclarationValue declaration
+      | throw (IO.userError "evaluation controller body missing")
+    for name in ["evaluationItems", "evaluationLower", "evaluationUpper", "evaluationArray", "evaluationIndex"] do
+      require ("strict source call occurs once: " ++ name)
+        (evaluationCallCount (psRootName name) body == 1)
+    psPracticalCheckExecuted "source iterator/range/Array calls and observed values"
+      prepared natType (PsExpr.lit (PsLiteral.natural 205))
+
 def main : IO Unit := do
   let natType := PsExpr.constE psNatName []
   let groups : List (String × IO Unit) := [
     ("legacy", testLegacyDo),
     ("CompilerM", testCompilerM natType),
     ("control-flow", testControlFlow natType),
+    ("evaluation-once", testEvaluationOnce natType),
     ("inline-else-if", testInlineElseIf natType),
     ("finite-loops", testFiniteLoops natType),
     ("contextual-pure", testContextualPure natType)]

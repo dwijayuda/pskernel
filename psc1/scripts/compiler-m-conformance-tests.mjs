@@ -102,7 +102,7 @@ if(collections){
  for(const c of contract.cases)for(const flag of ['False','True'])
   assert.equal(oracle[c.id+flag],reference[c.id+flag],'stdlib helper differs from native standard operation: '+c.id+flag);
  independentReferenceSha256=sha(referenceSource);
- console.log('PSC1_COLLECTION_STANDARD_REFERENCE: PASS six independent native comparisons');
+ console.log('PSC1_COLLECTION_STANDARD_REFERENCE: PASS '+contract.cases.length*2+' independent native comparisons');
 }
 function execute(target, output) {
   if (target === 'js' || target === 'ts') {
@@ -221,6 +221,15 @@ try {
     "ps": "import ProofScript.System.IO\ndef invalid : Result(Nat, IoError) := ioReadTextResult(\"{}\")\n"
   }
 ]:inferenceControl?[
+{"id":"for-noniterable","lean":"def invalid : Id Nat := do\n  for value in true do\n    pure ()\n  return 7\n","ps":"def invalid : Id(Nat) := do {\n for value in true { pure(()) }\n return 7\n}\n"},
+{"id":"for-range-type","lean":"def invalid : Id Nat := do\n  for value in [false:2] do\n    pure ()\n  return 7\n","ps":"def invalid : Id(Nat) := do {\n for value in [false:2] { pure(()) }\n return 7\n}\n"},
+{"id":"for-immutable","lean":"def invalid : Id Nat := do\n  for value in [0:2] do\n    value := 3\n  return 7\n","ps":"def invalid : Id(Nat) := do {\n for value in [0:2] { value := 3 }\n return 7\n}\n"},
+{"id":"for-escape","lean":"def invalid : Id Nat := do\n  for value in [0:2] do\n    pure ()\n  return value\n","ps":"def invalid : Id(Nat) := do {\n for value in [0:2] { pure(()) }\n return value\n}\n"},
+{"id":"tuple-duplicate","lean":"def invalid : Nat := let (value, value) : Nat × Nat := (1, 2); value\n","ps":"def invalid : Nat := let (value, value) : Prod(Nat, Nat) := (1, 2)\n value\n"},
+{"id":"tuple-shape","lean":"def invalid : Nat := let (value, _) : Nat := 1; value\n","ps":"def invalid : Nat := let (value, _) : Nat := 1\n value\n"},
+{"id":"namespace-duplicate","lean":"namespace DuplicateScope\ndef value : Nat := 1\ndef value : Nat := 2\nend DuplicateScope\n","ps":"namespace DuplicateScope\ndef value : Nat := 1\ndef value : Nat := 2\nend DuplicateScope\n"},
+{"id":"namespace-unknown","lean":"def invalid : Nat := MissingScope.value\n","ps":"def invalid : Nat := MissingScope.value\n"},
+{"id":"namespace-end","lean":"namespace OwnedScope\ndef value : Nat := 1\nend WrongScope\n","ps":"namespace OwnedScope\ndef value : Nat := 1\nend WrongScope\n"},
 {"id":"wrong-state","lean":"import ProofScript.Compiler.Effect\ndef invalid : CompilerM Nat Nat Nat Unit := do\n  compilerSet true\n","ps":"import ProofScript.Compiler.Effect\ndef invalid : CompilerM(Nat, Nat, Nat, Unit) := do { compilerSet(true) }\n"},
 {"id":"wrong-error","lean":"import ProofScript.Compiler.Effect\ndef invalid : CompilerM Nat Nat Nat Unit := do\n  compilerThrow true\n","ps":"import ProofScript.Compiler.Effect\ndef invalid : CompilerM(Nat, Nat, Nat, Unit) := do { compilerThrow(true) }\n"},
 {"id":"wrong-return","lean":"def invalid : Id Nat := do\n  if true then return false\n  return 7\n","ps":"def invalid : Id(Nat) := do {\n if (true) { return false }\n return 7\n}\n"},
@@ -251,6 +260,8 @@ try {
    {id:'wrong-record-list',lean:'import JsonRecords.Transform\ndef invalid : Result Nat JsonError := sumRecordCodes [true]\n',
     ps:'import JsonRecords.Transform\ndef invalid : Result(Nat, JsonError) := sumRecordCodes([true])\n'}
   ]:collections?[
+{"id":"wrong-set-element","lean":"import ProofScript.Data.Array\ndef invalid : Array Nat := arraySet #[1] 0 true\n","ps":"import ProofScript.Data.Array\ndef invalid : Array(Nat) := arraySet(#[1], 0, true)\n"},
+{"id":"wrong-map-result","lean":"import ProofScript.Data.Array\ndef invalid : Array Nat := arrayMap (fun (value : Nat) => true) #[1]\n","ps":"import ProofScript.Data.Array\ndef invalid : Array(Nat) := arrayMap(fun (value : Nat) => true, #[1])\n"},
    {id:'wrong-element',lean:'def invalid : List Nat := [true]\n',ps:'def invalid : List(Nat) := [true]\n'},
    {id:'wrong-index',lean:'def invalid : Option Nat := let values : Array Nat := #[1]; values[true]?\n',
     ps:'def invalid : Option(Nat) := let values : Array(Nat) := #[1]\n values[true]?\n'}
@@ -266,7 +277,7 @@ try {
    const label=syntax+'-'+target,extension={js:'js',ts:'ts',rust:'rs','wasm-core':'wasm','wasm-component':'wasm',python:'py',php:'php'}[target];
    const output=path.join(work,label,'module.'+extension);
    const args=['build',path.join(folder,'Entry.'+syntax),'--target',target,'--out',output];
-   if(checkedOrder||jsonApplication||ioProtocol||ioSequencing)args.push('--assurance','ordinary');
+   if(inferenceControl||checkedOrder||jsonApplication||ioProtocol||ioSequencing)args.push('--assurance','ordinary');
    if(target==='wasm-component')args.push('--exports',names.join(','));
    try{
     run(native,args);
@@ -281,7 +292,7 @@ try {
     else verifiedArgs[assuranceIndex+1]='verified';
     const refusals={verified:reject(verifiedArgs)};
     for(const {id} of negativeCases){
-     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,inferenceControl&&id==='malformed-handler'?/PSC1_PROJECT_PARSE_FAILED/:inferenceControl&&id==='empty-required-call'?/PSC1_PROJECT_(PARSE|ELAB)_FAILED/:checkedOrder&&id==='chained'?/PSC1_PROJECT_PARSE_FAILED:.*parentheses around nonassociative comparison/:libraryApplication&&id==='missing-module'?/PSC1_PROJECT_.*(IMPORT|MODULE|SOURCE)/:/PSC1_PROJECT_ELAB_FAILED/);
+     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,inferenceControl&&id==='namespace-end'?/PSC1_PROJECT_PARSE_FAILED/:inferenceControl&&id==='malformed-handler'?/PSC1_PROJECT_PARSE_FAILED/:inferenceControl&&id==='empty-required-call'?/PSC1_PROJECT_(PARSE|ELAB)_FAILED/:checkedOrder&&id==='chained'?/PSC1_PROJECT_PARSE_FAILED:.*parentheses around nonassociative comparison/:libraryApplication&&id==='missing-module'?/PSC1_PROJECT_.*(IMPORT|MODULE|SOURCE)/:/PSC1_PROJECT_ELAB_FAILED/);
     }
     const duplicate=[...args];duplicate[1]=path.join(folder,'duplicate-prelude.'+syntax);
     refusals['duplicate-prelude']=reject(duplicate,/duplicateDeclaration:Nat/);

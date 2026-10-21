@@ -32,6 +32,16 @@ def exceptCase (flag : Bool) : Nat :=
   | .error error => error + 100
   | .ok value => value + 200
 
+def arrayOperationsCase (flag : Bool) : Nat :=
+  let values : Array Nat := if flag then #[] else #[3, 5]
+  let appended := Array.push values 7
+  let changed := Array.setIfInBounds appended 0 11
+  let mapped := Array.map (fun value => value + 2) changed
+  let folded := Array.foldl (fun total value => total * 10 + value) 0 mapped 0 mapped.size
+  let empty : Array Nat := #[]
+  let emptyFold := Array.foldl (fun total value => total + value) 7 empty 0 9007199254740993123456789
+  folded + values.size * 10000 + Array.getD values 0 19 + emptyFold
+
 end PSC1StandardCollectionReference
 
 def main : IO Unit := do
@@ -43,5 +53,7 @@ def main : IO Unit := do
     ("arrayCaseFalse",Lean.toJson (toString (PSC1StandardCollectionReference.arrayCase false))),
     ("arrayCaseTrue",Lean.toJson (toString (PSC1StandardCollectionReference.arrayCase true))),
     ("exceptCaseFalse",Lean.toJson (toString (PSC1StandardCollectionReference.exceptCase false))),
-    ("exceptCaseTrue",Lean.toJson (toString (PSC1StandardCollectionReference.exceptCase true)))
+    ("exceptCaseTrue",Lean.toJson (toString (PSC1StandardCollectionReference.exceptCase true))),
+    ("arrayOperationsCaseFalse",Lean.toJson (toString (PSC1StandardCollectionReference.arrayOperationsCase false))),
+    ("arrayOperationsCaseTrue",Lean.toJson (toString (PSC1StandardCollectionReference.arrayOperationsCase true)))
   ]).compress)

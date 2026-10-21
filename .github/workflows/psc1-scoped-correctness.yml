@@ -333,7 +333,7 @@ jobs:
         run: node scripts/seven-backend-qualification.mjs
       - name: Derive exact-commit Practical Core readiness
         working-directory: psc1
-        run: node scripts/practical-core-readiness.mjs ${{ inputs.require_release_ready && '--require-ready' || '' }}
+        run: node scripts/practical-core-readiness.mjs --full-qualification ${{ inputs.require_release_ready && '--require-ready' || '' }}
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4

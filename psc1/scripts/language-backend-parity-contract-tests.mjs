@@ -27,7 +27,7 @@ const collectionRows=collection.cases.flatMap(c=>collection.grammars.flatMap(s=>
  referenceComparison:'native-standard-operations',
  refusals:Object.fromEntries(collection.requiredRefusals.map(id=>[id,digest]))
 }))));
-assert.equal(check(collection,collectionRows).obligations,42);
+assert.equal(check(collection,collectionRows).obligations,56);
 assert.throws(()=>check(collection,[{...collectionRows[0],independentReferenceSha256:null},...collectionRows.slice(1)]),/independent standard reference/);
 assert.throws(()=>check(collection,[{...collectionRows[0],referenceComparison:'same-helper'},...collectionRows.slice(1)]));
 
@@ -43,7 +43,7 @@ assert.equal(check(jsonContract,jsonRows).obligations,jsonContract.cases.length*
 assert.throws(()=>check(jsonContract,[{...jsonRows[0],applicationModuleSha256:{}},...jsonRows.slice(1)]));
 assert.throws(()=>check(jsonContract,[{...jsonRows[0],librarySha256:{}},...jsonRows.slice(1)]));
 
-for(const [file,obligations]of [['PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json',140],
+for(const [file,obligations]of [['PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json',252],
  ['PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json',56],
  ['PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json',28]]){
  const contract=JSON.parse(fs.readFileSync('docs/'+file,'utf8'));
@@ -80,6 +80,6 @@ const orderRows=orderContract.cases.flatMap(c=>orderContract.grammars.flatMap(s=
 assert.equal(check(orderContract,orderRows).obligations,98);
 assert.throws(()=>check(orderContract,[{...orderRows[0],refusals:{}},...orderRows.slice(1)]));
 const inferenceContract=JSON.parse(fs.readFileSync('docs/PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json','utf8'));
-assert.deepEqual(inferenceContract.cases.map(c=>c.id),['contextsCase','telescopeCase','ownerCase','loopCase','scopeCase','rollbackCase','callCase','ownerLambdaCase','joinsCase','handlerScopeCase']);
+assert.deepEqual(inferenceContract.cases.map(c=>c.id),['contextsCase','telescopeCase','ownerCase','loopCase','scopeCase','rollbackCase','callCase','ownerLambdaCase','joinsCase','handlerScopeCase','collectionControllerCase','rangeControllerCase','streamingControllerCase','directRecursionCase','nonTailRecursionCase','higherOrderRecursionCase','tupleProductsCase','namespaceCoreCase']);
 for(const id of ['wrong-arity','ambiguous-call','wrong-unit','empty-required-call'])
  assert.ok(inferenceContract.requiredRefusals.includes(id));

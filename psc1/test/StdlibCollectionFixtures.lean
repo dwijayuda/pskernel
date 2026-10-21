@@ -33,3 +33,13 @@ def exceptCase (flag : Bool) : Nat :=
   match observed with
   | Except.error error => error + 100
   | Except.ok value => value + 200
+
+def arrayOperationsCase (flag : Bool) : Nat :=
+  let values : Array Nat := if flag then #[] else #[3, 5];
+  let appended : Array Nat := arrayPush values 7;
+  let changed : Array Nat := arraySet appended 0 11;
+  let mapped : Array Nat := arrayMap (fun value => value + 2) changed;
+  let folded : Nat := arrayFoldl (fun total value => total * 10 + value) 0 mapped 0 (arraySize mapped);
+  let empty : Array Nat := arrayEmpty ();
+  let emptyFold : Nat := arrayFoldl (fun total value => total + value) 7 empty 0 9007199254740993123456789;
+  folded + arraySize values * 10000 + arrayGetD values 0 19 + emptyFold

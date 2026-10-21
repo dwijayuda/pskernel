@@ -7,6 +7,32 @@ Lean: `leanprover/lean4:v4.35.0`, exact commit `eb6cafb7290e8bd5f2937522d8d804f5
 Generated path: authentic PSC1 → TypeScript `7.0.2` → Node `22`. Full-kernel DirectJS is unsupported.
 Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduction path.
 
+## 2026-10-21 06:54 UTC — Nat cache fixture correction
+
+At source `54ea3d428d85ba2936a037a5d9decdcab1593990`, native integration
+[39557631971 / job 119081025510](https://github.com/dwijayuda/pskernel/actions/runs/39557631971/job/119081025510)
+compiled the new source and ran the existing regressions successfully. The Nat
+test reached `nonprop-inference-state-survives-nat-continuation` after its
+1,350-case and 192-case loop count checks, then **FAILED** that assertion.
+The remaining native proof/provider/benchmark steps were not run in that job.
+
+Classification: **fixture error**, not a demonstrated kernel decision mismatch.
+The fixture asked literal operands to populate public WHNF caches, but both
+`Checker/Reduction/Whnf.lean` and `Checker/ExprV2/Whnf.lean` deliberately return
+literal operands immediately without cache publication. The corrected native and
+JS warm fixture uses `Nat.add (Nat.add 1 0) (Nat.add 2 0)` so both immediate
+operands exercise actual nonterminal public WHNF publication. The original
+simple-add expression remains unchanged for the exact discarded-predecessor
+arena-size sentinel. V1 warm-state inputs are changed to the same nested term.
+
+All 1,350 differential fixtures, 192 direct-stage fixtures, official fixtures,
+warm guard checks, original-pair assertions and both operand-cache assertions
+remain required. No production function, budget, proof statement or acceptance
+condition changes in this correction. The containing fixture revision requires
+fresh terminal CI; the failed parent is not a qualified milestone. Its native
+correctness and official Arena reference passed, while generated/canonical and
+full comparison jobs were still running at this receipt.
+
 ## 2026-10-21 06:46 UTC — canonical parent PASS; ordered DAG Nat candidate
 
 The immediately preceding complete source `e1b4deb214c3088e64a18f8b15148c7a15be2924`

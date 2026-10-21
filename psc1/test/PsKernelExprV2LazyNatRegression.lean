@@ -261,14 +261,19 @@ private def regression : IO Unit := do
             stageComparisons := stageComparisons + 1
   require "complete-stage-matrix" (stageComparisons == 192)
   let (a, addId) ← expect (psKernelExprV2PagedImportIntoChecked arena add)
-  let (a, metadataId) ← expect (psKernelExprV2PagedImportIntoChecked a (.mdata 7 add))
+  -- Literal WHNF is deliberately uncached. Nonterminal operands exercise the
+  -- public-cache state carried through the proof-to-Nat continuation.
+  let warmAdd := binary "add" (binary "add" (lit 1) (lit 0))
+    (binary "add" (lit 2) (lit 0))
+  let (a, warmAddId) ← expect (psKernelExprV2PagedImportIntoChecked a warmAdd)
+  let (a, metadataId) ← expect (psKernelExprV2PagedImportIntoChecked a (.mdata 7 warmAdd))
   let (owning, threeId) ← expect (psKernelExprV2PagedImportIntoChecked a (lit 3))
   let context := psKernelExprV2CheckContextEmpty base.context
   let cold := initialState owning declarations
   let some (.ok warm) := psKernelExprV2TryDefEqStateWithFuel 64 context cold metadataId threeId
     | throw (IO.userError "warm lazy-Nat owner")
   let oldWarm ← expect (psKernelIsDefEqWithFuel 64 base.context
-    psKernelCheckerStateEmpty (.mdata 7 add) (lit 3))
+    psKernelCheckerStateEmpty (.mdata 7 warmAdd) (lit 3))
   require "nonprop-inference-state-survives-nat-continuation"
     (!warm.fst.inferOnly.isEmpty && warm.fst.checkedInfer.isEmpty &&
       !warm.fst.whnf.publicCache.isEmpty)
@@ -277,12 +282,12 @@ private def regression : IO Unit := do
       warm.fst.success metadataId threeId))
   require "nat-success-does-not-publish-normalized-pair"
     (!(← expect (psKernelExprV2DefEqPairContains warm.fst.whnf.arena
-      warm.fst.success addId threeId)))
+      warm.fst.success warmAddId threeId)))
   let some (.ok rightReduced) := directLazy 1 64 context cold threeId addId
     | throw (IO.userError "right Nat reduction after discarded predecessor")
   require "unused-predecessor-not-retained-by-eager-reduction"
     (rightReduced.snd && rightReduced.fst.whnf.arena.size == owning.size + 1)
-  let .app first arg2 := (← expect (psKernelExprV2PagedRequire warm.fst.whnf.arena addId)).node
+  let .app first arg2 := (← expect (psKernelExprV2PagedRequire warm.fst.whnf.arena warmAddId)).node
     | throw (IO.userError "Nat binary root shape")
   let .app _ arg1 := (← expect (psKernelExprV2PagedRequire warm.fst.whnf.arena first)).node
     | throw (IO.userError "Nat binary head shape")
@@ -294,7 +299,7 @@ private def regression : IO Unit := do
     for recDepth in [0,15,16] do
       let scalar := { base.context with maxRecDepth := 1, recDepth := recDepth }
       compare "warm-entry-guards"
-        (psKernelIsDefEqWithFuel fuel scalar oldWarm.snd (.mdata 7 add) (lit 3))
+        (psKernelIsDefEqWithFuel fuel scalar oldWarm.snd (.mdata 7 warmAdd) (lit 3))
         (psKernelExprV2TryDefEqStateWithFuel fuel
           (psKernelExprV2CheckContextEmpty scalar) warm.fst metadataId threeId)
   let (zeroArena, zeroId) ← expect (psKernelExprV2PagedImportIntoChecked owning zero)

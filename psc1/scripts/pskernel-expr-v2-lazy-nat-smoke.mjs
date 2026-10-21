@@ -181,20 +181,24 @@ for(const [label,left,right] of stageCases)
    stageComparisons++;
   }
 must(stageComparisons===192,"complete-stage-matrix");
+// Literal WHNF is deliberately uncached; these nonterminal operands test
+// actual public-cache publication through the proof-to-Nat continuation.
+const warmAdd=binary("add",binary("add",lit(1n),lit(0n)),binary("add",lit(2n),lit(0n)));
+const warmMetadata=md(7n,warmAdd);
 const context=ctx(base.context),cold=initial();
-const warm=accepted(accepted(raw(64n,context,cold,metadata.id,three.id),"warm-some"),"warm-result");
-const oldWarm=accepted(original(64n,base.context,oldEmpty,metadata.term,three.term),"old-warm");
+const warm=accepted(accepted(raw(64n,context,cold,warmMetadata.id,three.id),"warm-some"),"warm-result");
+const oldWarm=accepted(original(64n,base.context,oldEmpty,warmMetadata.term,three.term),"old-warm");
 must(!same(warm.fst.inferOnly,nil)&&same(warm.fst.checkedInfer,nil)&&
  !same(warm.fst.whnf.publicCache,nil),"nonprop-state-survives-nat-continuation");
 const contains=(left,right)=>accepted(get("psKernelExprV2DefEqPairContains")(
  warm.fst.whnf.arena,warm.fst.success,left,right),"success-contains");
-must(contains(metadata.id,three.id)===true,"original-pair-published");
-must(contains(add.id,three.id)===false,"normalized-pair-not-published");
+must(contains(warmMetadata.id,three.id)===true,"original-pair-published");
+must(contains(warmAdd.id,three.id)===false,"normalized-pair-not-published");
 const rightReduced=accepted(accepted(directLazy(1n,64n,context,cold,three.id,add.id),
  "right-reduced-some"),"right-reduced-result");
 must(rightReduced.snd===true&&rightReduced.fst.whnf.arena.size===cold.whnf.arena.size+1n,
  "unused-predecessor-not-retained-by-eager-reduction");
-const addEntry=accepted(get("psKernelExprV2PagedRequire")(warm.fst.whnf.arena,add.id),"Nat-root");
+const addEntry=accepted(get("psKernelExprV2PagedRequire")(warm.fst.whnf.arena,warmAdd.id),"Nat-root");
 const firstEntry=accepted(get("psKernelExprV2PagedRequire")(warm.fst.whnf.arena,addEntry.node.fn),"Nat-head");
 for(const argument of [firstEntry.node.arg,addEntry.node.arg]){
  const entry=accepted(get("psKernelExprV2PagedRequire")(warm.fst.whnf.arena,argument),"Nat-argument");
@@ -203,8 +207,8 @@ for(const argument of [firstEntry.node.arg,addEntry.node.arg]){
 }
 for(const fuel of [0n,1n,64n])for(const recDepth of [0n,15n,16n]){
  const scalar={...base.context,maxRecDepth:1n,recDepth};
- compare(original(fuel,scalar,oldWarm.snd,metadata.term,three.term),
-  raw(fuel,ctx(scalar),warm.fst,metadata.id,three.id),"warm-entry-"+fuel+"-"+recDepth);
+ compare(original(fuel,scalar,oldWarm.snd,warmMetadata.term,three.term),
+  raw(fuel,ctx(scalar),warm.fst,warmMetadata.id,three.id),"warm-entry-"+fuel+"-"+recDepth);
 }
 const literalZero=lit(0n),blocked={...base.context,maxRecDepth:1n,recDepth:16n};
 compareLazy(oldLazy(1n,0n,blocked,oldEmpty,zero.term,literalZero.term),

@@ -1224,9 +1224,11 @@ private def deltaBatchParity : IO Unit := do
     (match foreignResult.replies with
      | [.normalized value] => psKernelExprEqual value sort0 | _ => false)
   let badName := nm "DagDeltaUnadmitted"
-  let invalidRef := { aliasDef with base := { aliasDef.base with name := badName },
+  let invalidRef := { aliasDef with
+    base := { aliasDef.base with name := badName }
     value := arena.size }
-  let illTyped := { aliasDef with base := { aliasDef.base with name := badName },
+  let illTyped := { aliasDef with
+    base := { aliasDef.base with name := badName }
     value := s1 }
   for bad in [invalidRef, illTyped] do
     require "delta-failed-admission-does-not-produce-execution"

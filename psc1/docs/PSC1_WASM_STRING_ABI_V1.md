@@ -47,3 +47,19 @@ malformed UTF8/pointer/allocation refusals and an oversized-GC request compared
 with the portable adapter pass. Exact receipt:
 PSC1_TYPED_IO_EXECUTION_QUALIFICATION_2026-10-21.json. Pure protocol and prior GC helper tests do
 not substitute for String boundary or actual file/console execution evidence.
+
+
+## Public parameter labels and source hygiene
+
+The String/IO profile derives public labels from the ordered validated scalar
+slots. If all internal parameter names are valid bare WIT labels, established
+labels remain unchanged. Otherwise the entire public scalar list is labeled
+arg0,arg1,... in order. This avoids collisions between a fallback and an existing
+valid label. Hidden dispatcher parameters do not consume public slots. Internal
+IR names, argument values/types/order and source identities remain unchanged.
+
+Both core and component plans repeat strict source validation and regenerate the
+same canonical labels before adapting or publishing. Equal flattened i32 arity
+does not authorize a different String/Bool schema. Generic/aggregate shapes,
+reserved exports, dispatcher counts, argument/resource limits and default ABI
+refusals retain their existing policy.

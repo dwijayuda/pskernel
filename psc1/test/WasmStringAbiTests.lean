@@ -70,6 +70,50 @@ def main : IO Unit := do
     "package proofscript:psc1;\n\nworld app {\n  export echo: func(text: string) -> string;\n}\n")
 
 
+  -- Positional scalar ABI must survive source/target hygiene. A valid raw
+  -- label arg0 beside an invalid internal label must not collide after mapping.
+  let renamedRaw : PsVerifiedIrModule := { raw with declarations := raw.declarations.map
+    (fun d => { d with parameters := [
+      { name := "__ps_internal_arguments", type := .primitive .string },
+      { name := "arg0", type := .primitive .bool }],
+      body := .var "__ps_internal_arguments" }) }
+  let renamedSource <- match psStrictValidateModule renamedRaw with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "renamed test IR invalid")
+  let renamedPlan <- get (psWasmStringAbiMakePlan renamedSource ["echo"] false)
+  require "hygienic parameters get distinct ordered public labels"
+    (renamedPlan.exports.map (fun x => x.parameters) == [[("arg0",true),("arg1",false)]])
+  for label in ["type", "MixedCase", "unicodeΩ", "_temporary", "valid-label"] do
+    let labelRaw := { raw with declarations := raw.declarations.map
+      (fun d => { d with parameters := [{ name := label, type := .primitive .string }],
+        body := .var label }) }
+    let labelSource <- match psStrictValidateModule labelRaw with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "label test IR invalid")
+    let labelPlan <- get (psWasmStringAbiMakePlan labelSource ["echo"] false)
+    let expected := if psWasmComponentWitIdent label then label else "arg0"
+    require ("public label policy: " ++ label)
+      (labelPlan.exports.map (fun x => x.parameters) == [[(expected,true)]])
+  let renamedLowered <- match psWasmLowerSpecializedModule { wordSize := .wasm32 } renamedRaw with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "renamed test lower failed")
+  let renamedAdapted <- get (psWasmStringAbiAdapt renamedPlan renamedSource renamedLowered)
+  let renamedArtifacts <- get (psWasmStringAbiComponent renamedSource renamedPlan renamedAdapted)
+  require "canonical label component WIT"
+    (renamedArtifacts.wit == "package proofscript:psc1;\n\nworld app {\n  export echo: func(arg0: string, arg1: bool) -> string;\n}\n")
+  let swapped := { renamedPlan with exports := renamedPlan.exports.map
+    (fun x => { x with parameters := [("arg0",false),("arg1",true)] }) }
+  require "same flattened i32 signature cannot forge argument schema"
+    (match psWasmStringAbiAdapt swapped renamedSource renamedLowered with
+      | .error _ => true | .ok _ => false)
+  require "component repeats source schema check after label adaptation"
+    (match psWasmStringAbiComponent renamedSource swapped renamedAdapted with
+      | .error _ => true | .ok _ => false)
+  IO.FS.writeBinFile "dist/scoped-correctness/wasm-string-native/renamed-core.wasm"
+    (ByteArray.mk renamedArtifacts.coreBytes.toArray)
+  IO.FS.writeBinFile "dist/scoped-correctness/wasm-string-native/renamed-component.wasm"
+    (ByteArray.mk renamedArtifacts.componentBytes.toArray)
+
   -- Exercise refusal before any foreign dispatch, without first constructing a
   -- giant JSON source literal. NUL bytes are valid owned UTF-8 scalars.
   let base := "Psc1.Test.Dispatch"

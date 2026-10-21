@@ -196,3 +196,29 @@ The .ps source stopped at unsupported pure else-if spelling in Args.ps.
 It now uses the established nested else braces. No grammar or acceptance rule
 is relaxed. The complete two/seven matrix, library application and full gate
 remain required. Heavy closure/G1 jobs correctly skipped after fast-gate failure.
+
+## Full checkpoint 39647987402: Wasm label defect, not qualification
+
+Head 66bddd14e1322bd4248041ed7138ef2fafbe10e8, tested merge
+8abe180f5f70307aca83feb9644c5b3a73a7c29c, passes native, focused, all three
+complete closures, host boundary and the 85-module ten-case G1 regression.
+G1 service 3f64bd223c09ca0175b1cf249d1689d4934e0756cf2c43c01b086a5cdf07b2a5,
+sourceClosure 00f66643fa9b19d6dd5540ea7ebffb89586e95693f164e0888d5482a489f6446,
+artifact 12368624194 (expires 2027-01-19T17:54:44Z). Earlier G1 evidence stays preserved.
+
+Full job 119392182625 passes all 56 ordering obligations plus 8 minimum-Python
+obligations. CLI/JSON passes 21 cases for each grammar on JS/TS/Rust/Python/PHP:
+210 actual cases, plus 42 on minimum Python. Both Wasm targets refuse
+PSC1_WASM_STRING_ARGUMENT_NAME_UNSUPPORTED. The library full matrix did not run
+after that failure; its focused twelve and minimum-Python four obligations pass.
+Do not infer a step passed because subsequent independent regression steps ran.
+Full consolidation/readiness was skipped; no new full qualification exists.
+
+The defect is internal hygienic IR variable names being required as public WIT
+argument labels. The String/IO ABI now preserves valid labels or assigns a
+complete collision-free positional label list. Strict source/target validation
+and schema regeneration remain. Native cases cover keywords, Unicode, generated
+names, preservation of valid labels, collisions and forged schemas with identical
+flattened signatures; actual core/component consumers exercise the result.
+Focused CLI acceptance now includes both Wasm consumers to expose integration
+defects before the full lane. No source fixture is renamed to avoid the defect.

@@ -29,7 +29,7 @@ jobs:
       PSC1_INFERENCE_TARGETS: js,ts,rust
       PSC1_LIBRARY_TARGETS: js,ts,rust
       PSC1_LIBRARY_EVIDENCE: library-application-focused
-      PSC1_APPLICATION_TARGETS: js,ts,rust
+      PSC1_APPLICATION_TARGETS: js,ts,rust,wasm-core,wasm-component
       PSC1_APPLICATION_EVIDENCE: practical-applications-focused
       PSC1_ORDER_TARGETS: js,ts,rust
       PSC1_ORDER_EVIDENCE: checked-order-focused

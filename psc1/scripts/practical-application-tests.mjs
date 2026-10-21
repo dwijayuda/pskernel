@@ -130,6 +130,7 @@ try{
     artifactSha256:hash(output),manifestSha256,kernelAdmissionSha256:manifest.kernelAdmissionSha256,
     sourceClosureSha256:manifest.sourceClosureSha256,oracleSha256:hash(referenceFile),hostCargoLockSha256,cases:observations});
    fs.cpSync(path.dirname(pointer),path.join(evidence,'bundles',label),{recursive:true});
+   console.log('PSC1_PRACTICAL_APPLICATION_RECORD: '+JSON.stringify(records.at(-1)));
    console.log('PSC1_PRACTICAL_APPLICATION_PASS: '+label+' '+observations.length+' actual CLI/file cases');
   }catch(error){failures.push({label,error:error.stack||String(error)});console.error('PSC1_PRACTICAL_APPLICATION_FAIL: '+label+'\n'+error.stack);}
  }

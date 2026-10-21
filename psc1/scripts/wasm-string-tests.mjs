@@ -30,6 +30,29 @@ function build(source,target,output,abi){
  assert.equal(m.behaviorallyVerified,false);assert.equal(m.publicAbi,abi==='io-dispatcher'?'wasm-io-dispatcher':'wasm-string');
  run('wasm-tools',['validate',output]);return m;
 }
+const renamedCore=path.join(root,'dist/scoped-correctness/wasm-string-native/renamed-core.wasm');
+const renamedComponent=path.join(root,'dist/scoped-correctness/wasm-string-native/renamed-component.wasm');
+run('wasm-tools',['validate',renamedCore]);run('wasm-tools',['validate',renamedComponent]);
+const renamed=new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(renamedCore)));
+const renamedBindings=bindWasmStrings(renamed,{echo:{parameters:['string','bool'],result:'string'}});
+assert.equal(renamedBindings.call('echo','hygienic😀',true),'hygienic😀');
+assert.equal(renamedBindings.call('echo','',false),'');
+const renamedConsumer=path.join(work,'renamed-component.py');
+write(renamedConsumer,[
+ 'import sys,wasmtime',
+ 'from wasmtime.component import Component,Linker',
+ 'sys.path.insert(0,sys.argv[2])',
+ 'from typed_io_component import component_engine',
+ 'engine=component_engine();store=wasmtime.Store(engine)',
+ 'component=Component.from_file(engine,sys.argv[1]);instance=Linker(engine).instantiate(store,component)',
+ 'function=instance.get_func(store,"echo");assert function is not None',
+ 'for text,flag in [("hygienic😀",True),("",False)]:',
+ ' assert function(store,text,flag)==text;function.post_return(store)',
+ 'print("PSC1_WASM_HYGIENIC_LABEL_PASS")'
+].join('\n'));
+assert.match(run(process.env.PSC1_WASMTIME_PY,[renamedConsumer,renamedComponent,path.join(root,'host-tools')]),/PSC1_WASM_HYGIENIC_LABEL_PASS/);
+console.log('PSC1_WASM_HYGIENIC_LABELS: PASS canonical ordered labels, collision avoidance and actual core/component consumers');
+
 const oversizeFile=path.join(root,'dist/scoped-correctness/wasm-string-native/oversize-core.wasm');
 run('wasm-tools',['validate',oversizeFile]);
 const oversized=new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(oversizeFile)),{

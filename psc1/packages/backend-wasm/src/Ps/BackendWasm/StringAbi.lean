@@ -413,6 +413,15 @@ def psWasmStringAbiIsString (type : PsVerifiedIrType) : Bool :=
 def psWasmStringAbiIsBool (type : PsVerifiedIrType) : Bool :=
   match type with | .primitive .bool => true | _ => false
 
+-- Public WIT labels describe ordered scalar slots. Internal hygienic names
+-- remain untouched in checked IR and are not necessarily bare WIT identifiers.
+-- Preserve established labels when possible; canonicalize the complete list
+-- otherwise so a fallback cannot collide with an already-valid source label.
+def psWasmStringAbiParameterLabels
+    (parameters : List (String × Bool)) : List (String × Bool) :=
+  if parameters.all (fun p => psWasmComponentWitIdent p.1) then parameters
+  else parameters.zipIdx.map (fun (p, index) => ("arg" ++ toString index, p.2))
+
 def psWasmStringAbiMakePlan (source : PsValidatedIrModule)
     (names : List String) (ioAbi : Bool) : Except String PsWasmStringAbiPlan := do
   let source <- match psStrictValidateModule source.raw with
@@ -437,7 +446,6 @@ def psWasmStringAbiMakePlan (source : PsValidatedIrModule)
       if psBackendIoDispatcherType parameter.type && ioAbi then
         dispatchers := dispatchers + 1
       else if psWasmStringAbiIsString parameter.type || psWasmStringAbiIsBool parameter.type then
-        if !psWasmComponentWitIdent parameter.name then throw "PSC1_WASM_STRING_ARGUMENT_NAME_UNSUPPORTED"
         parameters := parameters ++ [(parameter.name, psWasmStringAbiIsString parameter.type)]
       else throw "PSC1_WASM_STRING_ARGUMENT_UNSUPPORTED"
     if dispatchers > 1 then throw "PSC1_WASM_IO_DISPATCHER_COUNT_UNSUPPORTED"
@@ -446,6 +454,10 @@ def psWasmStringAbiMakePlan (source : PsValidatedIrModule)
       throw "PSC1_WASM_STRING_ARGUMENT_DUPLICATE"
     if (parameters.map (fun p => if p.2 then 2 else 1)).foldl Nat.add 0 > 16 then
       throw "PSC1_WASM_STRING_INDIRECT_ARGUMENTS_UNSUPPORTED"
+    parameters := psWasmStringAbiParameterLabels parameters
+    if !parameters.all (fun p => psWasmComponentWitIdent p.1) ||
+        (parameters.map (fun p => p.1)).eraseDups.length != parameters.length then
+      throw "PSC1_WASM_STRING_ARGUMENT_LABEL_INVALID"
     exports := exports ++ [{ name, parameters, resultString := psWasmStringAbiIsString declaration.resultType }]
   if ioAbi && !hasDispatcher then throw "PSC1_WASM_IO_DISPATCHER_REQUIRED"
   pure { exports, io := ioAbi }

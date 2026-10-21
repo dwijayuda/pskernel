@@ -48,9 +48,7 @@ structure PsIrSpecializeMatchBindingsResult where
   requests : List PsIrSpecializeRequest
 
 structure PsIrSpecializeAlternativesResult where
-  alternatives :
-    List
-      (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr))
+  alternatives : List (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr))
   requests : List PsIrSpecializeRequest
 
 structure PsIrSpecializeStructureFieldsResult where

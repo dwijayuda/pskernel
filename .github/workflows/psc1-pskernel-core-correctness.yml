@@ -247,6 +247,11 @@ jobs:
           grep -q '^PSC1_V2_DAG_JS_BINDER_SPINE_BUDGET: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_BINDER_SPINE_CACHE: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_BINDER_SPINE_FALLBACK: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_DEFEQ_PREFIX: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_CHEAP_CORE_POLICY: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_CHEAP_PROJECTION_POLICY: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_DEFEQ_REFLECTION: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_DEFEQ_PREFIX_GUARDS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           echo 'PSC1_CANONICAL_DAG_JS_KERNEL: PASS'
       - name: Run inference-mode parity from the canonical ProofScript executable
         working-directory: psc1

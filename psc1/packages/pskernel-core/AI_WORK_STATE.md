@@ -1399,3 +1399,26 @@ qualification. Native Beta module registration was corrected in c29f418.
 The native integration job [119020166734](https://github.com/dwijayuda/pskernel/actions/runs/39538365457/job/119020166734) passed the binder, theorem, unsafe-admission, and infer-only runtime regressions, then rejected the false-hash branch of the new scanner equivalence proof. Lean simplifies the true Boolean equality bridge, but does not simplify the false bridge into propositional inequality. The proof now derives inequality by contradiction through the already accepted true bridge. Runtime source, fuel, and all gate requirements are unchanged. This correction is **pending Actions qualification**; the previous failed proof is not soundness evidence.
 
 The following 30fe473 native run rejected an indentation error in the four-line contradiction proof, before elaborating it; the inner block is now correctly nested. The generated job failed while downloading the pinned Lean archive (TLS error 35), and was rerun without any source or policy change. Both corrections remain pending full qualification.
+
+## Ordered DAG DefEq reduction prefix (2026-10-21; qualification pending)
+
+The one recursive DAG DefEq owner now follows the original ordered prefix: fuel/depth entry, structural equality and scoped successful-pair lookup, Quick, ordinary Bool.true reflection, cheap core normalization of the left then right operand, and a second Quick. The second Quick is an in-entry stage: it does not consume a new DefEq entry and does not publish a normalized-pair receipt. A final successful result publishes only the original pair through the existing closed-term eligibility rule.
+
+Quick distinguishes an undecided original stage from an unsupported descendant. Unsupported work declines the entire operation and exports no partial owner. The shared WHNF core now has the original cheap-projection mode: warm core reads remain allowed, all new core writes are suppressed, and projection-major normalization uses the predecessor core callback instead of the fixed public callback. Full core/public behavior continues through the same engine. The checked wrapper rejects mixed legacy/typed local representations and resolves typed let values within its arena.
+
+This is still an incomplete integration. Proof irrelevance, lazy delta, recursor/iota behavior and other unported continuation rules retain whole-operation fallback. The default V1 checker is unchanged; no fuel or depth limits changed. Bool reflection is the current ordinary kernel rule, not the obsolete Lean.reduceBool/Lean.reduceNat mechanism.
+
+Native and generated fixtures require direct raw parity for newly supported one-sided metadata, beta binder bodies, metadata application conversions, and final admission comparisons; existing public positive/negative parity is retained. New gates cover 15 prefix fixtures, 2,250 raw fuel/depth comparisons, 450 public comparisons, 15 official-Lean comparisons, cheap-cache read/write policy, projection callback policy, reflection locality/eager context, mandatory predecessor budgets, and successful-pair publication boundaries. These are newly committed assertions, **not yet passing evidence**.
+
+The isolated scanner proof correction at 38dfe75658a1d723b993904a8d510fb449e6bba0 passed the full [native integration job 119022378822](https://github.com/dwijayuda/pskernel/actions/runs/39539066715/job/119022378822). Both scanner equivalence theorems compile with exactly propext, Classical.choice and Quot.sound; metadata/scope proofs, complete DAG regressions, infer-only regressions, and native benchmarks passed. Generated-source/runtime and controlled scanner performance qualification remain pending.
+
+### Latest completed full-corpus result
+
+The [8db7d50 Arena run](https://github.com/dwijayuda/pskernel/actions/runs/39535658684) evaluated all 193 applicable cases: 167 matches (103 acceptances, 56 kernel rejections, one metadata rejection, seven transport rejections), two explicit unsafe/partial contract agreements, and 24 host timeouts at unchanged fuel 4096. The exact perf/shift-cascade.ndjson case now agrees with official Lean; it was one of the prior 25 timeouts. No cases were removed and no timeout policy was increased. Replay controls (138) and the canonical executable setup passed. The run is correctly **failed/incomplete** because 24 timeouts remain; it is not a full soundness or production qualification result.
+
+| Milestone | Implementation | Native correctness | PSC1/.ps/JS | Performance | Status |
+| --- | --- | --- | --- | --- | --- |
+| DefEq ordered prefix | Integrated in one DAG owner | New exact parity/official gates pending | New source and canonical runtime gates pending | No new claim | Partial |
+| Unsafe admission | Fresh private-environment body owner | Full native integration passed at 38dfe | eddf source/canonical generation passed; runtime pending | Not separately measured | Partial |
+| Scanner equivalence | Explicit-argument scanner, unchanged staged ABI | Extensional equivalence and full native gate passed at 38dfe | 30fe generated TLS failure rerun | Controlled comparison pending | Unqualified optimization |
+| Full Arena | All 193 evaluated at 8db7d50 | Official corpus baseline passed | 167 matches + 2 contract agreements; 24 timeouts | One former timeout completes | Incomplete |

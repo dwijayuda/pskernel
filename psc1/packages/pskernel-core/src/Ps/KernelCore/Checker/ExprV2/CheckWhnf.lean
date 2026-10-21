@@ -17,3 +17,21 @@ def psKernelExprV2CheckWhnfWithFuel
         fun (name : PsKernelName) => psKernelExprV2CheckLocalValue context name;
       psKernelExprV2TryWhnfStateWithLocalValuesFuel fuel localValue
         context.scalar state root
+
+/-- Core policy shares typed local values and the fixed public callback fuel. -/
+def psKernelExprV2CheckWhnfCoreWithFuel
+    (fuel : Nat) (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2WhnfState) (root : Nat) (cheapProj : Bool) :
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  match context.scalar.localContext.decls with
+  | List.cons _ _ => Option.none
+  | List.nil =>
+      let localValue :=
+        fun (name : PsKernelName) => psKernelExprV2CheckLocalValue context name;
+      let publicWhnf :=
+        fun (nextContext : PsKernelCheckerContext)
+            (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
+          let worker := psKernelExprV2TryWhnfStateWithLocalValuesFuel fuel;
+          worker localValue nextContext nextState nextRoot;
+      let core := psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel fuel;
+      core cheapProj localValue publicWhnf context.scalar state root

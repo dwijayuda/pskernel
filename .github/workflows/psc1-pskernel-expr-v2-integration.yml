@@ -101,6 +101,12 @@ jobs:
           grep -q 'PSC1_V2_DAG_BINDER_SPINE_BUDGET: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_BINDER_SPINE_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_BINDER_SPINE_FALLBACK: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_DEFEQ_PREFIX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_DEFEQ_PREFIX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_CHEAP_CORE_POLICY: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_CHEAP_PROJECTION_POLICY: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_DEFEQ_REFLECTION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_DEFEQ_PREFIX_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_NATIVE_OFFICIAL_POLY_DELTA: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           .lake/build/bin/psc1_kernel_expr_v2_regression \
             | tee "$RUNNER_TEMP/psc1-v2-existing-native.log"
@@ -246,6 +252,11 @@ jobs:
           grep -q 'PSC1_V2_DAG_JS_BINDER_SPINE_BUDGET: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_BINDER_SPINE_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_BINDER_SPINE_FALLBACK: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_DEFEQ_PREFIX: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_CHEAP_CORE_POLICY: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_CHEAP_PROJECTION_POLICY: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_DEFEQ_REFLECTION: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_DEFEQ_PREFIX_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
       - name: Run generated inference modes with separate checked authorization
         working-directory: psc1

@@ -916,23 +916,31 @@ private def quickDefEqParity : IO Unit := do
       (match result.replies with | [.equal value] => value == expected | _ => false)
   let redex := PsKernelExpr.app
     (.lam (nm "quick-x") sort1 (.bvar 0) .default) sort0
-  let fallback : List (String × PsKernelExpr × PsKernelExpr) := [
-    ("metadata-one-sided", .mdata 9 sort0, sort0),
-    ("metadata-composite", .mdata 9 redex, .mdata 10 sort0),
-    ("mixed-constructors", sort0, .lit (.nat 0)),
+  let fallback : List (String × PsKernelExpr × PsKernelExpr × Bool) := [
+    ("metadata-one-sided", .mdata 9 sort0, sort0, true),
+    ("metadata-composite", .mdata 9 redex, .mdata 10 sort0, true),
+    ("mixed-constructors", sort0, .lit (.nat 0), false),
     ("constant-level-rule", .const (nm "quick-missing") [.max .zero .zero],
-      .const (nm "quick-missing") [.zero])]
-  for (label, left, right) in fallback do
+      .const (nm "quick-missing") [.zero], false)]
+  for (label, left, right, directExpected) in fallback do
     let (initial, leftId) ← expect (psKernelExprV2PagedImportChecked left)
     let (arena, rightId) ← expect (psKernelExprV2PagedImportIntoChecked initial right)
     let session ← fresh
     let checker := psKernelKernelSessionChecker session params .safe
-    require ("quick-defeq-explicit-fallback-" ++ label)
+    require ("quick-defeq-prefix-selected-path-" ++ label)
       (match psKernelExprV2TryQuickDefEqWithFuel 64 checker.context arena leftId rightId with
-       | none => true | _ => false)
+       | some (.ok true) => directExpected
+       | none => !directExpected
+       | _ => false)
     for fuel in [0,1,2,3,4,8,64] do
       for maxDepth in [0,1,2] do
         let session ← fresh fuel maxDepth
+        if directExpected then
+          let checker := psKernelKernelSessionChecker session params .safe
+          require ("quick-defeq-prefix-raw-parity-" ++ label)
+            (sameQuickDefEq
+              (psKernelSessionIsDefEq fuel checker left right)
+              (psKernelExprV2TryQuickDefEqWithFuel fuel checker.context arena leftId rightId))
         require ("quick-defeq-fallback-parity-" ++ label)
           (sameDefEq
             (psKernelV1IsDefEq session params .safe left right)
@@ -1761,20 +1769,17 @@ private def applicationCheckParity : IO Unit := do
       let checker := psKernelKernelSessionChecker session [] .safe
       for recDepth in [0,15,16] do
         let context := { checker.context with recDepth := recDepth }
-        match binderRaw fuel context (psKernelExprV2CheckStateEmpty arena) root with
-        | none => pure ()
-        | some result =>
-            compareBinderRaw ("application-fallback-guard-" ++ label)
-              (psKernelSessionCheck fuel { checker with context := context } term)
-              (some result)
-      require ("application-full-defeq-fallback-" ++ label)
+        compareBinderRaw ("application-prefix-conversion-" ++ label)
+          (psKernelSessionCheck fuel { checker with context := context } term)
+          (binderRaw fuel context (psKernelExprV2CheckStateEmpty arena) root)
+      require ("application-prefix-conversion-public-" ++ label)
         (sameCheck (psKernelV1CheckExpression session [] .safe term)
           (oneCheck session arena root))
     let session ← fresh 64 1
     let checker := psKernelKernelSessionChecker session [] .safe
-    require ("application-explicit-defeq-fallback-" ++ label)
+    require ("application-explicit-prefix-conversion-" ++ label)
       (match binderRaw 64 checker.context (psKernelExprV2CheckStateEmpty arena) root with
-       | none => true | _ => false)
+       | some (.ok _) => true | _ => false)
     require ("application-defeq-result-" ++ label)
       ((match psKernelV1CheckExpression session [] .safe term with
         | .ok _ => true | .error _ => false) == acceptedExpected)
@@ -2402,19 +2407,16 @@ private def checkedLocalValueWhnfParity : IO Unit := do
         let newContext := { typed with scalar :=
           { base.context with maxRecDepth := maxDepth, recDepth := recDepth } }
         for fuel in [0,1,2,3,4,8,10,11,12,16,64] do
-          let localValue := fun name => psKernelExprV2CheckLocalValue newContext name
-          let publicWhnf := fun context state expr =>
-            psKernelExprV2TryWhnfStateWithLocalValuesFuel fuel localValue
-              context state expr
           rawStateWhnfParity ("let-local-public-" ++ label)
             (psKernelSessionWhnf fuel { base with context := oldContext } term)
             (psKernelExprV2CheckWhnfWithFuel fuel newContext
               (psKernelExprV2WhnfStateEmpty nextArena) root)
-          rawStateWhnfParity ("let-local-core-" ++ label)
-            (psKernelWhnfCoreWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel)
-              oldContext base.state term false false)
-            (psKernelExprV2TryWhnfCoreWithLocalValuesFuel fuel localValue publicWhnf
-              newContext.scalar (psKernelExprV2WhnfStateEmpty nextArena) root)
+          for cheapProj in [false,true] do
+            rawStateWhnfParity ("let-local-core-" ++ label)
+              (psKernelWhnfCoreWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel)
+                oldContext base.state term false cheapProj)
+              (psKernelExprV2CheckWhnfCoreWithFuel fuel newContext
+                (psKernelExprV2WhnfStateEmpty nextArena) root cheapProj)
   require "let-local-public-predecessor-core-budget"
     (match psKernelExprV2CheckWhnfWithFuel 2 typed3
         (psKernelExprV2WhnfStateEmpty arena) xId with
@@ -2432,6 +2434,11 @@ private def checkedLocalValueWhnfParity : IO Unit := do
     (match psKernelExprV2CheckWhnfWithFuel 64 mixed
         (psKernelExprV2WhnfStateEmpty arena) xId with
      | none => true | _ => false)
+  for cheapProj in [false,true] do
+    require "let-local-mixed-core-representations-request-fallback"
+      (match psKernelExprV2CheckWhnfCoreWithFuel 64 mixed
+          (psKernelExprV2WhnfStateEmpty arena) xId cheapProj with
+       | none => true | _ => false)
   let (badArena, badBody) ← expect (psKernelExprV2PagedMkBVar arena 1)
   let state := psKernelExprV2CheckStateEmpty badArena
   let opened := PsKernelExprV2OpenedCheckBinder.mk
@@ -2837,7 +2844,7 @@ private def simpleAdmissionParity : IO Unit := do
     ("body-loose-bvar", defn s1 b0 .safe, true),
     ("unknown-header", .axiomDecl (base [] unknown) false, true),
     ("header-not-sort", .axiomDecl (base [] identity) false, true),
-    ("final-defeq-fallback", defn hiddenS1 s0 .safe, false),
+    ("final-defeq-prefix", defn hiddenS1 s0 .safe, true),
     ("unsafe-definition-direct", defn s1 s0 .unsafeDef, true),
     ("theorem-direct", .theoremDecl (base [] proofType) proof, true)]
   let built ← expect (psKernelExprV2DecodeChecked arena)
@@ -3254,7 +3261,7 @@ private def theoremAdmissionParity : IO Unit := do
     ("partial-proof", theoremRequest [] p partialProof, true, none),
     ("unsupported-proof-comparison", theoremRequest [] p other, false,
       some "theorem proof type mismatch"),
-    ("unsupported-metadata-comparison", theoremRequest [] hiddenP proof, false, none)]
+    ("metadata-comparison-prefix", theoremRequest [] hiddenP proof, true, none)]
   let mut comparisons := 0
   for (label, request, directAt64, messageAt64) in cases do
     let declaration ← expect (psKernelDagDecodeDeclaration built request)
@@ -3666,23 +3673,32 @@ private def binderSpineFallbackParity : IO Unit := do
   let redex := PsKernelExpr.app (.lam x sort1 (.bvar 0) .default) sort0
   for isLambda in [true,false] do
     let bind := fun name domain body => spineExpr isLambda name domain body .default
-    let fixtures : List (String × PsKernelExpr × PsKernelExpr) := [
-      ("one-sided-metadata", bind x sort1 (.mdata 1 sort0), bind y sort1 sort0),
-      ("beta-body", bind x sort1 redex, bind y sort1 sort0),
-      ("unequal-spine-length", bind x sort1 (bind x sort1 sort0), bind y sort1 sort0)]
-    for (label, left, right) in fixtures do
+    let fixtures : List (String × PsKernelExpr × PsKernelExpr × Bool) := [
+      ("one-sided-metadata", bind x sort1 (.mdata 1 sort0), bind y sort1 sort0, true),
+      ("beta-body", bind x sort1 redex, bind y sort1 sort0, true),
+      ("unequal-spine-length", bind x sort1 (bind x sort1 sort0), bind y sort1 sort0, false)]
+    for (label, left, right, directExpected) in fixtures do
       let (a0, leftId) ← expect (psKernelExprV2PagedImportChecked left)
       let (arena, rightId) ← expect (psKernelExprV2PagedImportIntoChecked a0 right)
       let session ← fresh 64
       let checker := psKernelKernelSessionChecker session [] .safe
-      require ("binder-spine-explicit-fallback-" ++ label)
+      require ("binder-spine-prefix-selected-path-" ++ label)
         (match psKernelExprV2TryDefEqStateWithFuel 64
             (psKernelExprV2CheckContextEmpty checker.context)
             (psKernelExprV2CheckStateEmpty arena) leftId rightId with
-         | none => true | _ => false)
+         | some (.ok result) => directExpected && result.snd
+         | none => !directExpected
+         | _ => false)
       for fuel in [0,1,2,3,4,8,64] do
         for maxDepth in [0,1] do
           let session ← fresh fuel maxDepth
+          if directExpected then
+            let checker := psKernelKernelSessionChecker session [] .safe
+            compareSpineRaw ("binder-spine-prefix-raw-" ++ label)
+              (psKernelIsDefEqWithFuel fuel checker.context checker.state left right)
+              (psKernelExprV2TryDefEqStateWithFuel fuel
+                (psKernelExprV2CheckContextEmpty checker.context)
+                (psKernelExprV2CheckStateEmpty arena) leftId rightId)
           require ("binder-spine-fallback-public-" ++ label)
             (sameDefEq (psKernelV1IsDefEq session [] .safe left right)
               (psKernelV1RunDag session [] .safe arena [.isDefEq leftId rightId]))
@@ -3774,7 +3790,7 @@ private def unsafeDefinitionAdmissionParity : IO Unit := do
       some "invalid reference to undefined universe level parameter"),
     ("duplicate-level-before-body", request [u,u] s1 mv, true,
       some "duplicate universe parameter"),
-    ("final-comparison-fallback", request [] hiddenType s0, false, none)]
+    ("final-comparison-prefix", request [] hiddenType s0, true, none)]
   let mut comparisons := 0
   for (label, candidate, directAt64, messageAt64) in cases do
     let declaration ← expect (psKernelDagDecodeDeclaration built candidate)
@@ -3934,6 +3950,421 @@ private def unsafeDefinitionAdmissionParity : IO Unit := do
         (match actual with | .ok _ => true | .error _ => false) == expected)
   IO.println "PSC1_V2_DAG_OFFICIAL_UNSAFE_ADMISSION: PASS"
 
+private def defEqPrefixParity : IO Unit := do
+  let x := nm "prefix-x"
+  let y := nm "prefix-y"
+  let f := nm "prefix-f"
+  let one := PsKernelLevel.succ .zero
+  let sort2 := PsKernelExpr.sort (.succ one)
+  let maxZero := PsKernelExpr.sort (.max .zero .zero)
+  let identity := PsKernelExpr.lam x sort1 (.bvar 0) .default
+  let functionType := PsKernelExpr.forallE x sort1 sort1 .default
+  let beta := PsKernelExpr.app identity sort0
+  let zeta := PsKernelExpr.letE x sort1 sort0 (.bvar 0) false
+  let hiddenLambda := PsKernelExpr.letE f functionType
+    (.lam x sort1 (.mdata 1 (.bvar 0)) .default) (.bvar 0) false
+  let otherLambda := PsKernelExpr.lam y sort1 (.mdata 2 (.bvar 0)) .implicit
+  let hiddenForall := PsKernelExpr.letE x sort2 sort1
+    (.forallE y (.bvar 0) (.bvar 1) .default) false
+  let fixtures : List (String × PsKernelExpr × PsKernelExpr × Bool) := [
+    ("metadata-left", .mdata 1 sort0, sort0, true),
+    ("metadata-right", sort0, .mdata 2 sort0, true),
+    ("metadata-negative", .mdata 1 sort0, sort1, false),
+    ("metadata-beta", .mdata 1 beta, .mdata 2 sort0, true),
+    ("beta-left", beta, sort0, true),
+    ("beta-right", sort0, beta, true),
+    ("beta-negative", beta, sort1, false),
+    ("zeta-left", zeta, sort0, true),
+    ("zeta-right", sort0, zeta, true),
+    ("zeta-negative", zeta, sort1, false),
+    ("zeta-unused", .letE x sort1 sort0 sort1 false, sort1, true),
+    ("reduced-lambda-syntax", .letE f functionType identity (.bvar 0) false,
+      .lam y sort1 (.bvar 0) .implicit, true),
+    ("reduced-lambda-spine", hiddenLambda, otherLambda, true),
+    ("reduced-forall", hiddenForall, .forallE y sort1 sort1 .default, true),
+    ("reduced-sort-equivalence", .mdata 8 maxZero, sort0, true)]
+  let officialEnv ← Lean.mkEmptyEnvironment
+  for (label, left, right, answer) in fixtures do
+    let (initial, leftId) ← expect (psKernelExprV2PagedImportChecked left)
+    let (arena, rightId) ← expect (psKernelExprV2PagedImportIntoChecked initial right)
+    for fuel in [0,1,2,3,4,5,6,8,16,64] do
+      for maxDepth in [0,1,2] do
+        let session ← fresh fuel maxDepth
+        let checker := psKernelKernelSessionChecker session [] .safe
+        for recDepth in [0,13,14,15,16] do
+          let scalar := { checker.context with recDepth := recDepth }
+          compareSpineRaw ("prefix-raw-" ++ label)
+            (psKernelIsDefEqWithFuel fuel scalar checker.state left right)
+            (psKernelExprV2TryDefEqStateWithFuel fuel
+              (psKernelExprV2CheckContextEmpty scalar)
+              (psKernelExprV2CheckStateEmpty arena) leftId rightId)
+        require ("prefix-public-" ++ label)
+          (sameDefEq (psKernelV1IsDefEq session [] .safe left right)
+            (psKernelV1RunDag session [] .safe arena [.isDefEq leftId rightId]))
+    let session ← fresh 64
+    let checker := psKernelKernelSessionChecker session [] .safe
+    require ("prefix-direct-answer-" ++ label)
+      (match psKernelExprV2TryDefEqStateWithFuel 64
+          (psKernelExprV2CheckContextEmpty checker.context)
+          (psKernelExprV2CheckStateEmpty arena) leftId rightId with
+       | some (.ok result) => result.snd == answer | _ => false)
+    let officialLeft ← projectionOfficialRequire left
+    let officialRight ← projectionOfficialRequire right
+    require ("official-prefix-left-checked-" ++ label)
+      (match Lean.Kernel.check officialEnv {} officialLeft with | .ok _ => true | _ => false)
+    require ("official-prefix-right-checked-" ++ label)
+      (match Lean.Kernel.check officialEnv {} officialRight with | .ok _ => true | _ => false)
+    require ("official-prefix-defeq-" ++ label)
+      (match Lean.Kernel.isDefEq officialEnv {} officialLeft officialRight with
+       | .ok value => value == answer | _ => false)
+  IO.println "PSC1_V2_DAG_DEFEQ_PREFIX: PASS"
+  IO.println "PSC1_V2_DAG_OFFICIAL_DEFEQ_PREFIX: PASS"
+
+private def cheapCorePolicyParity : IO Unit := do
+  let x := nm "cheap-core-x"
+  let y := nm "cheap-core-y"
+  let identity := PsKernelExpr.lam x sort1 (.bvar 0) .default
+  let beta := PsKernelExpr.app identity sort0
+  let zeta := PsKernelExpr.letE x sort1 sort0 (.bvar 0) false
+  let missing := nm "CheapCoreMissingStructure"
+  let fixtures : List (String × PsKernelExpr) := [
+    ("beta", beta), ("zeta", zeta), ("metadata", .mdata 1 beta),
+    ("nested", .letE x sort1 beta (.mdata 2 (.bvar 0)) false),
+    ("stuck-projection", .proj missing 0 beta)]
+  for (label, term) in fixtures do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,3,4,5,6,8,16,64] do
+      for maxDepth in [0,1,2] do
+        let session ← fresh fuel maxDepth
+        let checker := psKernelKernelSessionChecker session [] .safe
+        for recDepth in [0,13,14,15,16] do
+          let scalar := { checker.context with recDepth := recDepth }
+          for cheapProj in [false,true] do
+            rawStateWhnfParity ("cheap-core-raw-" ++ label)
+              (psKernelWhnfCoreWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel)
+                scalar checker.state term false cheapProj)
+              (psKernelExprV2CheckWhnfCoreWithFuel fuel
+                (psKernelExprV2CheckContextEmpty scalar)
+                (psKernelExprV2WhnfStateEmpty arena) root cheapProj)
+    let session ← fresh 64 1
+    let checker := psKernelKernelSessionChecker session [] .safe
+    let typed := psKernelExprV2CheckContextEmpty checker.context
+    let cheap ← expect
+      (match psKernelExprV2CheckWhnfCoreWithFuel 64 typed
+          (psKernelExprV2WhnfStateEmpty arena) root true with
+       | some result => result | none => .error "cheap core unexpectedly unsupported")
+    require ("cheap-core-no-new-publications-" ++ label)
+      (cheap.fst.coreCache.isEmpty && cheap.fst.publicCache.isEmpty)
+    let original ← expect
+      (psKernelWhnfCoreWithRecursorFuel 64 (psKernelIsDefEqWithFuel 64)
+        checker.context checker.state term false true)
+    require ("cheap-original-no-root-publication-" ++ label)
+      (match psKernelExprMapGet original.snd.whnfCore term with
+       | none => true | some _ => false)
+  let copy := PsKernelExpr.letE y sort1 sort0 (.bvar 0) false
+  let (initial, root) ← expect (psKernelExprV2PagedImportChecked zeta)
+  let (arena, copyId) ← expect (psKernelExprV2PagedImportIntoChecked initial copy)
+  require "cheap-cache-distinct-alpha-equal-ids"
+    (root != copyId && (← expect (psKernelExprV2PagedEqOnCanonical arena root copyId)))
+  let session ← fresh 64 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let context := psKernelExprV2CheckContextEmpty checker.context
+  let oldWarm ← expect
+    (psKernelWhnfCoreWithRecursorFuel 64 (psKernelIsDefEqWithFuel 64)
+      checker.context checker.state zeta false false)
+  let newWarm ← expect
+    (match psKernelExprV2CheckWhnfCoreWithFuel 64 context
+        (psKernelExprV2WhnfStateEmpty arena) root false with
+     | some result => result | none => .error "full core prime unexpectedly unsupported")
+  require "full-core-prime-publishes"
+    (!newWarm.fst.coreCache.isEmpty &&
+      (match psKernelExprMapGet oldWarm.snd.whnfCore zeta with
+       | some value => psKernelExprEqual value sort0 | none => false))
+  for (term, id) in [(zeta, root), (copy, copyId)] do
+    for fuel in [0,1,2] do
+      for recDepth in [0,15,16] do
+        let scalar := { checker.context with recDepth := recDepth }
+        let typed := psKernelExprV2CheckContextEmpty scalar
+        rawStateWhnfParity "cheap-core-warm-read-keeps-entry-guards"
+          (psKernelWhnfCoreWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel)
+            scalar oldWarm.snd term false true)
+          (psKernelExprV2CheckWhnfCoreWithFuel fuel typed newWarm.fst id true)
+  let hit ← expect
+    (match psKernelExprV2CheckWhnfCoreWithFuel 1 context newWarm.fst copyId true with
+     | some result => result | none => .error "cheap cache hit unexpectedly unsupported")
+  require "cheap-core-reads-full-cache-without-publishing"
+    (hit.fst.coreCache.length == newWarm.fst.coreCache.length &&
+      hit.fst.publicCache.length == newWarm.fst.publicCache.length)
+  let oldCheap ← expect
+    (psKernelWhnfCoreWithRecursorFuel 64 (psKernelIsDefEqWithFuel 64)
+      checker.context checker.state zeta false true)
+  let newCheap ← expect
+    (match psKernelExprV2CheckWhnfCoreWithFuel 64 context
+        (psKernelExprV2WhnfStateEmpty arena) root true with
+     | some result => result | none => .error "cheap prime unexpectedly unsupported")
+  rawStateWhnfParity "cheap-prime-does-not-authorize-lower-fuel"
+    (psKernelWhnfCoreWithRecursorFuel 1 (psKernelIsDefEqWithFuel 1)
+      checker.context oldCheap.snd zeta false true)
+    (psKernelExprV2CheckWhnfCoreWithFuel 1 context newCheap.fst root true)
+  require "cheap-prime-low-fuel-is-still-error"
+    (match psKernelExprV2CheckWhnfCoreWithFuel 1 context newCheap.fst root true with
+     | some (.error message) => message == "kernel reduction budget exhausted"
+     | _ => false)
+  IO.println "PSC1_V2_DAG_CHEAP_CORE_POLICY: PASS"
+
+private def cheapProjectionPolicyParity : IO Unit := do
+  let initial ← fresh 64 1
+  let box := nm "PrefixCheapBox"
+  let ctor := PsKernelName.str box "mk"
+  let boxType := PsKernelExpr.const box []
+  let ctorType := PsKernelExpr.forallE (nm "A") sort1
+    (.forallE (nm "B") sort1 boxType .default) .default
+  let declaration := PsKernelSimpleInductiveDecl.mk [] box (.sort (.succ (.succ .zero)))
+    [PsKernelSimpleConstructorDecl.mk ctor ctorType] false 0
+  let admitted ← expectPublic (psKernelV1AdmitDeclaration initial (.ordinaryInductive declaration))
+  let checker := psKernelKernelSessionChecker admitted.session [] .safe
+  let hidden := PsKernelExpr.mdata 10 (.mdata 11 (.mdata 12 (.mdata 13 sort0)))
+  let major := PsKernelExpr.app (.app (.const ctor []) sort0) hidden
+  let term := PsKernelExpr.proj box 0 major
+  let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+  for fuel in [0,1,2,3,4,5,6,8,16,64] do
+    for maxDepth in [0,1,2] do
+      for recDepth in [0,13,14,15,16] do
+        let scalar := { checker.context with maxRecDepth := maxDepth, recDepth := recDepth }
+        for cheapProj in [false,true] do
+          rawStateWhnfParity "cheap-projection-actual-constructor-resource-parity"
+            (psKernelWhnfCoreWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel)
+              scalar checker.state term false cheapProj)
+            (psKernelExprV2CheckWhnfCoreWithFuel fuel
+              (psKernelExprV2CheckContextEmpty scalar)
+              (psKernelExprV2WhnfStateEmpty arena) root cheapProj)
+  let context := psKernelExprV2CheckContextEmpty checker.context
+  let cheap ← expect
+    (match psKernelExprV2CheckWhnfCoreWithFuel 3 context
+        (psKernelExprV2WhnfStateEmpty arena) root true with
+     | some result => result | none => .error "cheap projection unexpectedly unsupported")
+  let decoded ← expect (psKernelExprV2DecodeChecked cheap.fst.arena)
+  let actual ← expect (psKernelExprV2DecodedRequire decoded cheap.snd)
+  require "cheap-projection-skips-unselected-public-argument-work"
+    (psKernelExprEqual actual sort0 && cheap.fst.coreCache.isEmpty &&
+      cheap.fst.publicCache.isEmpty)
+  require "full-projection-still-runs-public-major-pipeline"
+    (match psKernelExprV2CheckWhnfCoreWithFuel 3 context
+        (psKernelExprV2WhnfStateEmpty arena) root false with
+     | some (.error message) => message == "kernel reduction budget exhausted"
+     | _ => false)
+  let x := nm "cheap-projection-x"
+  let stuck := PsKernelExpr.proj (nm "PrefixUnknownStructure") 0
+    (.app (.lam x sort1 (.bvar 0) .default) sort0)
+  let (stuckArena, stuckId) ← expect (psKernelExprV2PagedImportChecked stuck)
+  let denyPublic : PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+    fun _ _ _ => .error "PREFIX_PUBLIC_CALLBACK"
+  let noRecursor : PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
+      Bool -> Bool -> Except String (Prod (Option PsKernelExpr) PsKernelCheckerState) :=
+    fun _ state _ _ _ => .ok (none, state)
+  let denyDagPublic : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+    fun _ _ _ => some (.error "PREFIX_PUBLIC_CALLBACK")
+  for cheapProj in [false,true] do
+    let old := psKernelWhnfCoreWithFuel 4 denyPublic noRecursor
+      checker.context checker.state stuck false cheapProj
+    let direct := psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel 4 cheapProj
+      (fun _ => none) denyDagPublic checker.context
+      (psKernelExprV2WhnfStateEmpty stuckArena) stuckId
+    rawStateWhnfParity "cheap-projection-callback-sentinel" old direct
+    require "cheap-projection-selects-exact-callback"
+      (if cheapProj then
+        match old with | .ok result => psKernelExprEqual result.fst stuck | _ => false
+       else
+        match old with | .error message => message == "PREFIX_PUBLIC_CALLBACK" | _ => false)
+  let stringProjection := PsKernelExpr.proj (nm "String") 0 (.lit (.str "abc"))
+  let (stringArena, stringId) ← expect (psKernelExprV2PagedImportChecked stringProjection)
+  for cheapProj in [false,true] do
+    require "cheap-projection-string-constructor-expansion-remains-fallback"
+      (match psKernelExprV2CheckWhnfCoreWithFuel 64 context
+          (psKernelExprV2WhnfStateEmpty stringArena) stringId cheapProj with
+       | none => true | _ => false)
+  IO.println "PSC1_V2_DAG_CHEAP_PROJECTION_POLICY: PASS"
+
+private def defEqReflectionParity : IO Unit := do
+  let initial ← fresh 64 1
+  let boolName := nm "Bool"
+  let boolType := PsKernelExpr.const boolName []
+  let boolTrue := PsKernelExpr.const psKernelBoolTrueName []
+  let boolFalse := PsKernelExpr.const psKernelBoolFalseName []
+  let declaration := PsKernelSimpleInductiveDecl.mk [] boolName sort1
+    [PsKernelSimpleConstructorDecl.mk psKernelBoolFalseName boolType,
+     PsKernelSimpleConstructorDecl.mk psKernelBoolTrueName boolType] false 0
+  let admitted ← expectPublic (psKernelV1AdmitDeclaration initial (.ordinaryInductive declaration))
+  let checker := psKernelKernelSessionChecker admitted.session [] .safe
+  let x := nm "prefix-reflect-x"
+  let closed := PsKernelExpr.letE x boolType boolTrue (.bvar 0) false
+  let (a0, closedId) ← expect (psKernelExprV2PagedImportChecked closed)
+  let (a1, trueId) ← expect (psKernelExprV2PagedImportIntoChecked a0 boolTrue)
+  let (a2, falseId) ← expect (psKernelExprV2PagedImportIntoChecked a1 boolFalse)
+  let (a3, boolId) ← expect (psKernelExprV2PagedImportIntoChecked a2 boolType)
+  let (arena, xId) ← expect (psKernelExprV2PagedMkFVar a3 x)
+  for fuel in [0,1,2,3,4,5,6,8,16,64] do
+    for maxDepth in [0,1,2] do
+      for recDepth in [0,13,14,15,16] do
+        let scalar := { checker.context with maxRecDepth := maxDepth, recDepth := recDepth }
+        compareSpineRaw "prefix-closed-bool-reflection"
+          (psKernelIsDefEqWithFuel fuel scalar checker.state closed boolTrue)
+          (psKernelExprV2TryDefEqStateWithFuel fuel
+            (psKernelExprV2CheckContextEmpty scalar)
+            (psKernelExprV2CheckStateEmpty arena) closedId trueId)
+      let session := { admitted.session with resources :=
+        { admitted.session.resources with fuel := fuel, maxRecDepth := maxDepth } }
+      require "prefix-reflection-public-checks-before-comparison"
+        (sameDefEq (psKernelV1IsDefEq session [] .safe closed boolTrue)
+          (psKernelV1RunDag session [] .safe arena [.isDefEq closedId trueId]))
+  let oldLocals := psKernelLocalContextAddLet checker.context.localContext x x boolType boolTrue
+  for eager in [false,true] do
+    for fuel in [0,1,2,3,4,5,6,8,16,64] do
+      for maxDepth in [0,1,2] do
+        for recDepth in [0,13,14,15,16] do
+          let scalar := { checker.context with eagerReduce := eager,
+            maxRecDepth := maxDepth, recDepth := recDepth }
+          let oldContext := psKernelCheckerContextWithLocalContext scalar oldLocals
+          let typed := psKernelExprV2CheckContextWithLet
+            (psKernelExprV2CheckContextEmpty scalar) x x boolId trueId
+          compareSpineRaw "prefix-fvar-reflection-gate-resource-parity"
+            (psKernelIsDefEqWithFuel fuel oldContext checker.state (.fvar x) boolTrue)
+            (psKernelExprV2TryDefEqStateWithFuel fuel typed
+              (psKernelExprV2CheckStateEmpty arena) xId trueId)
+    let scalar := { checker.context with eagerReduce := eager }
+    let typed := psKernelExprV2CheckContextWithLet
+      (psKernelExprV2CheckContextEmpty scalar) x x boolId trueId
+    require "prefix-eager-gate-preserves-public-versus-core-fuel"
+      (match psKernelExprV2TryDefEqStateWithFuel 3 typed
+          (psKernelExprV2CheckStateEmpty arena) xId trueId with
+       | some (.ok result) => !eager && result.snd && result.fst.success.isEmpty
+       | some (.error message) => eager && message == "kernel reduction budget exhausted"
+       | none => false)
+    let direct ← expect
+      (match psKernelExprV2TryDefEqStateWithFuel 64 typed
+          (psKernelExprV2CheckStateEmpty arena) xId trueId with
+       | some result => result | none => .error "local reflection unexpectedly unsupported")
+    require "prefix-free-variable-success-never-published"
+      (direct.snd && direct.fst.success.isEmpty)
+    let valueFree := psKernelExprV2CheckContextWithLocal
+      (psKernelExprV2CheckContextEmpty scalar) x x boolId .default
+    require "prefix-value-free-local-remains-undecided"
+      (match psKernelExprV2TryDefEqStateWithFuel 64 valueFree
+          (psKernelExprV2CheckStateEmpty arena) xId trueId with
+       | none => true | _ => false)
+  require "prefix-reflection-is-not-false-constructor-decision"
+    (match psKernelExprV2TryDefEqStateWithFuel 64
+        (psKernelExprV2CheckContextEmpty checker.context)
+        (psKernelExprV2CheckStateEmpty arena) closedId falseId with
+     | none => true | _ => false)
+  require "prefix-false-constructor-fallback-keeps-public-result"
+    (sameDefEq (psKernelV1IsDefEq admitted.session [] .safe closed boolFalse)
+      (psKernelV1RunDag admitted.session [] .safe arena [.isDefEq closedId falseId]))
+  Lean.initSearchPath (← Lean.findSysroot)
+  let officialEnv ← Lean.importModules #[{ module := `Init }] {}
+  let officialClosed ← projectionOfficialRequire closed
+  let officialTrue ← projectionOfficialRequire boolTrue
+  let officialFalse ← projectionOfficialRequire boolFalse
+  require "official-prefix-reflection-input-checks"
+    (match Lean.Kernel.check officialEnv {} officialClosed with | .ok _ => true | _ => false)
+  require "official-prefix-reflection-true"
+    (match Lean.Kernel.isDefEq officialEnv {} officialClosed officialTrue with
+     | .ok value => value | _ => false)
+  require "official-prefix-reflection-false"
+    (match Lean.Kernel.isDefEq officialEnv {} officialClosed officialFalse with
+     | .ok value => !value | _ => false)
+  IO.println "PSC1_V2_DAG_DEFEQ_REFLECTION: PASS"
+
+private def defEqPrefixGuardParity : IO Unit := do
+  let x := nm "prefix-guard-x"
+  let y := nm "prefix-guard-y"
+  let maxZero := PsKernelExpr.sort (.max .zero .zero)
+  let zeta := PsKernelExpr.letE x sort1 sort0 (.bvar 0) false
+  let (a0, zetaId) ← expect (psKernelExprV2PagedImportChecked zeta)
+  let (a1, zeroId) ← expect (psKernelExprV2PagedImportIntoChecked a0 sort0)
+  let (a2, maxId) ← expect (psKernelExprV2PagedImportIntoChecked a1 maxZero)
+  let (a3, xId) ← expect (psKernelExprV2PagedMkFVar a2 x)
+  let (a4, trueId) ← expect (psKernelExprV2PagedMkConst a3 psKernelBoolTrueName [])
+  let (a5, falseId) ← expect (psKernelExprV2PagedMkConst a4 psKernelBoolFalseName [])
+  let (a6, polyTrueId) ← expect
+    (psKernelExprV2PagedMkConst a5 psKernelBoolTrueName [.zero])
+  let (a7, hiddenTrueId) ← expect (psKernelExprV2PagedMkMData a6 1 trueId)
+  let leftLambda := PsKernelExpr.lam x sort1 (.mdata 1 (.bvar 0)) .default
+  let rightLambda := PsKernelExpr.lam y sort1 (.mdata 2 (.bvar 0)) .default
+  let (a8, leftLambdaId) ← expect (psKernelExprV2PagedImportIntoChecked a7 leftLambda)
+  let (arena, rightLambdaId) ← expect (psKernelExprV2PagedImportIntoChecked a8 rightLambda)
+  let session ← fresh 64 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let context := psKernelExprV2CheckContextEmpty checker.context
+  let initial := psKernelExprV2CheckStateEmpty arena
+  let denyWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+    fun _ _ _ => some (.error "PREFIX_WHNF_CALLBACK")
+  for (left, right, eager, callsWhnf) in
+      [(zeroId,trueId,false,true), (xId,trueId,false,false),
+       (xId,trueId,true,true), (zeroId,falseId,true,false),
+       (zeroId,polyTrueId,true,false), (zeroId,hiddenTrueId,true,false)] do
+    let current := { context with scalar := { context.scalar with eagerReduce := eager } }
+    let result := psKernelExprV2DefEqReflectionWith denyWhnf current initial left right
+    require "prefix-reflection-exact-gate-and-rhs-shape"
+      (if callsWhnf then
+        match result with
+        | some (.error message) => message == "PREFIX_WHNF_CALLBACK"
+        | _ => false
+       else
+        match result with
+        | some (.ok result) => result.snd.isNone && result.fst.success.isEmpty
+        | _ => false)
+  let denyDefEq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+    fun _ _ _ _ => some (.error "PREFIX_DEFEQ_CALLBACK")
+  let blocked := { context with scalar := { context.scalar with recDepth := 16 } }
+  let oldDeny : PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr -> PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState) :=
+    fun _ _ _ _ => .error "PREFIX_DEFEQ_CALLBACK"
+  let oldQuick ← expect
+    (psKernelDefEqQuick oldDeny blocked.scalar checker.state sort0 maxZero false)
+  let newQuick ← expect
+    (match psKernelExprV2DefEqQuickWith denyDefEq blocked initial zeroId maxId false with
+     | some result => result | none => .error "second Quick unexpectedly unsupported")
+  require "prefix-second-quick-has-no-extra-entry-or-publication"
+    (oldQuick.fst == some true && newQuick.snd == some true && newQuick.fst.success.isEmpty)
+  compareSpineRaw "prefix-real-entry-still-checks-depth"
+    (psKernelIsDefEqWithFuel 64 blocked.scalar checker.state sort0 maxZero)
+    (psKernelExprV2TryDefEqStateWithFuel 64 blocked initial zeroId maxId)
+  let oldWarm ← expect
+    (psKernelIsDefEqWithFuel 64 checker.context checker.state zeta maxZero)
+  let newWarm ← expect
+    (match psKernelExprV2TryDefEqStateWithFuel 64 context initial zetaId maxId with
+     | some result => result | none => .error "prefix priming unexpectedly unsupported")
+  require "prefix-second-quick-publishes-only-original-pair"
+    (newWarm.snd &&
+      (← expect (psKernelExprV2DefEqPairContains
+        newWarm.fst.whnf.arena newWarm.fst.success zetaId maxId)) &&
+      !(← expect (psKernelExprV2DefEqPairContains
+        newWarm.fst.whnf.arena newWarm.fst.success zeroId maxId)))
+  for fuel in [0,1,2] do
+    for recDepth in [0,15,16] do
+      let scalar := { checker.context with recDepth := recDepth }
+      compareSpineRaw "prefix-warm-original-pair-guards"
+        (psKernelIsDefEqWithFuel fuel scalar oldWarm.snd zeta maxZero)
+        (psKernelExprV2TryDefEqStateWithFuel fuel
+          (psKernelExprV2CheckContextEmpty scalar) newWarm.fst zetaId maxId)
+  let unsupported : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+    fun _ _ _ _ => none
+  require "prefix-unsupported-quick-descendant-aborts-before-whnf"
+    (match psKernelExprV2DefEqPrefixWith unsupported denyWhnf denyWhnf
+        context initial leftLambdaId rightLambdaId with
+     | none => true | _ => false)
+  require "prefix-definitive-initial-quick-skips-whnf"
+    (match psKernelExprV2DefEqPrefixWith denyDefEq denyWhnf denyWhnf
+        context initial zeroId maxId with
+     | some (.ok result) => result.snd | _ => false)
+  IO.println "PSC1_V2_DAG_DEFEQ_PREFIX_GUARDS: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -3972,5 +4403,10 @@ def main : IO Unit := do
   binderSpineBudgetParity
   binderSpineCacheParity
   binderSpineFallbackParity
+  defEqPrefixParity
+  cheapCorePolicyParity
+  cheapProjectionPolicyParity
+  defEqReflectionParity
+  defEqPrefixGuardParity
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

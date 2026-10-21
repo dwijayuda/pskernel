@@ -7,6 +7,12 @@ private def require (name : String) (condition : Bool) : IO Unit := do
   IO.println ("PSC1_BACKEND_COMMON_PASS: " ++ name)
 
 def main : IO Unit := do
+  for left in psBackendTargets do
+    require ("portable target name round trip: " ++ psBackendTargetName left)
+      (psBackendTargetFromName (psBackendTargetName left) == some left)
+    for right in psBackendTargets do
+      require ("portable/native target equality: " ++ psBackendTargetName left ++ "/" ++ psBackendTargetName right)
+        (psBackendTargetEq left right == (left == right))
   require "workspace import package BackendCommon"
     (psHostPackageDirectory ["Ps", "BackendCommon", "Module"] == some "backend-common")
   require "workspace import package BackendJs"

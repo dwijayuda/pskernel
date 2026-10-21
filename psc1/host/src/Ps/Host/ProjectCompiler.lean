@@ -3,6 +3,7 @@ import Ps.Syntax.ParseLean
 import Ps.Syntax.ParseProofScript
 import Ps.Elab.Declaration
 import Ps.Host.ArtifactBundle
+import Ps.Host.BackendNativeInstances
 
 structure PsHostProjectState where
   environment : PsEnvironment

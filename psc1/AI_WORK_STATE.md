@@ -96,6 +96,26 @@ parse/elaboration. No semantic source or checker algorithm was changed.
 Whole-closure logs now also print actual canonical admission hashes and the first
 strict-IR findings while full diagnostics remain in the artifact.
 
+## Validate/target-plan candidate and type-layout correction — pending CI
+
+Run39522767313 at7c6e41909ba9db8f9f0862f71e60ba9ab7d8ed23 built Specialize
+and passed its native tests, then the source gate refused a split Except return
+type at514:7. Consolidate split type applications; preserve all type meanings.
+
+Normalize complete CompilerIr.Validate and BackendCommon.Plan. Keep traversal
+completion before acceptance, revalidation on every wrapper use, exact name lookup,
+duplicate-before-missing public-name checks, generic/target ABI refusal order,
+all scalar profiles and Bool-only Wasm-component ABI. Keep pre/post specialization
+validation and closed public-name coverage.
+
+Portable decisions use explicit target equality/list operations. Preserve original
+native BEq/Repr derived declarations in host-only BackendNativeInstances, registered
+as a PsHost root and imported by ProjectCompiler. They are not used by portable
+compiler decisions. Existing assertions stay; add native-derived/owned equality
+comparison for all49 target pairs and seven name round trips. Focused workflow
+also runs the full existing backend-common group. Every candidate module must
+parse/elaborate in BOTH lanes. No parser expansion or source declaration filtering.
+
 ## Boundaries and constraints
 
 Official checker Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.

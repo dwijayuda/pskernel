@@ -185,6 +185,7 @@ lean_lib PsBootstrap where
 lean_lib PsHost where
   srcDir := "host/src"
   roots := #[
+    `Ps.Host.BackendNativeInstances,
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
     `Ps.Host.SourceSnapshot,

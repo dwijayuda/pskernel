@@ -436,7 +436,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "semantic-closure-qualified-Specialize-source-normalization-pending",
+    "status": "semantic-qualified-Specialize-Validate-target-plan-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -522,7 +522,9 @@
       }
     },
     "pendingModules": [
-      "psc1/packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean"
+      "psc1/packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+      "psc1/packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+      "psc1/packages/backend-common/src/Ps/BackendCommon/Plan.lean"
     ],
     "latestFocused": {
       "head": "6859fe2d5bfe03ce9fe40a6ed2600837922c63d4",
@@ -669,6 +671,14 @@
         "lean",
         "ps"
       ]
+    },
+    "latestBackendFocused": {
+      "head": "7c6e41909ba9db8f9f0862f71e60ba9ab7d8ed23",
+      "runId": 39522767313,
+      "nativeBehavior": "passed",
+      "sourceGate": "refused-Specialize-type-layout",
+      "line": 514,
+      "column": 7
     }
   }
 }

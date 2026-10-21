@@ -1,36 +1,32 @@
 import Ps.CompilerIr.Check
 import Ps.CompilerIr.Specialize
+import Ps.Foundation.Name
 
--- PSC1's copied experimental backends referenced a validator that was absent
--- from this older bootstrap tree. Restore a real bounded IR gate before enabling
--- those backends; a raw PsVerifiedIrModule is never an admission certificate.
+-- A raw construction wrapper is never independent admission evidence.
 inductive PsVerifiedIrValidationError where
   | illTypedOrUnresolved
   | budgetExhausted
-  deriving Repr
 
 def psValidateErasedIrModule
     (source : PsErasedIrModule) :
     Except PsVerifiedIrValidationError PsValidatedIrModule :=
-  let report := psCheckVerifiedIrModule psIrCheckDefaultOptions source.raw
+  let report := psCheckVerifiedIrModule psIrCheckDefaultOptions source.raw;
   if !report.traversalComplete then
-    Except.error .budgetExhausted
-  else if report.accepted then
-    Except.ok { raw := source.raw }
-  else
-    Except.error .illTypedOrUnresolved
+    Except.error PsVerifiedIrValidationError.budgetExhausted
+  else if report.accepted then Except.ok (PsValidatedIrModule.mk source.raw)
+  else Except.error PsVerifiedIrValidationError.illTypedOrUnresolved
 
--- Compatibility entry: the full checker runs on every call, not just once
--- when the IR is first constructed.
+-- Revalidate on every call, including manually constructed wrapper data.
 def psStrictValidateModule
     (module : PsVerifiedIrModule) :
     Except PsVerifiedIrValidationError PsValidatedIrModule :=
-  psValidateErasedIrModule { raw := module }
+  psValidateErasedIrModule (PsErasedIrModule.mk module)
 
--- Exact name lookup for the bounded Wasm direct-call lowering path.
-def psStrictFindDeclaration :
-    List PsVerifiedIrDeclaration → String → Option PsVerifiedIrDeclaration
-  | [], _ => none
-  | declaration :: rest, name =>
-      if declaration.name == name then some declaration
+def psStrictFindDeclaration
+    (declarations : List PsVerifiedIrDeclaration) (name : String) :
+    Option PsVerifiedIrDeclaration :=
+  match declarations with
+  | List.nil => Option.none
+  | List.cons declaration rest =>
+      if psStringEq declaration.name name then Option.some declaration
       else psStrictFindDeclaration rest name

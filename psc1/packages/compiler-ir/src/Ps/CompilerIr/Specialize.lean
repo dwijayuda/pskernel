@@ -246,8 +246,7 @@ def psIrSpecializeTypeParameterNames (parameters : List PsVerifiedIrTypeParamete
 def psIrSpecializeMakeSubstitution
     (parameters : List PsVerifiedIrTypeParameter)
     (arguments : List PsVerifiedIrType) :
-    Except PsIrSpecializeError
-      (List (Prod String PsVerifiedIrType)) :=
+    Except PsIrSpecializeError (List (Prod String PsVerifiedIrType)) :=
   if !(Nat.beq (psListLength parameters) (psListLength arguments)) then
     Except.error
       (PsIrSpecializeError.typeArgumentArity "")
@@ -510,8 +509,7 @@ def psIrSpecializeRewriteMatchBindings
     (module : PsVerifiedIrModule)
     (substitution : List (Prod String PsVerifiedIrType))
     (_sourceItems : List PsVerifiedIrMatchBinding) :
-    Except PsIrSpecializeError
-      PsIrSpecializeMatchBindingsResult :=
+    Except PsIrSpecializeError PsIrSpecializeMatchBindingsResult :=
   match _sourceItems with
   | List.nil =>
       Except.ok {
@@ -546,10 +544,8 @@ def psIrSpecializeRewriteAlternativesWith
       Except PsIrSpecializeError PsIrSpecializeExprResult)
     (module : PsVerifiedIrModule)
     (substitution : List (Prod String PsVerifiedIrType))
-    (_sourceItems : List
-      (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr))) :
-    Except PsIrSpecializeError
-      PsIrSpecializeAlternativesResult :=
+    (_sourceItems : List (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr))) :
+    Except PsIrSpecializeError PsIrSpecializeAlternativesResult :=
   match _sourceItems with
   | List.nil =>
       Except.ok {
@@ -1069,8 +1065,7 @@ def psIrSpecializeRewriteStructureFields
     (module : PsVerifiedIrModule)
     (substitution : List (Prod String PsVerifiedIrType))
     (_sourceItems : List PsVerifiedIrStructureField) :
-    Except PsIrSpecializeError
-      PsIrSpecializeStructureFieldsResult :=
+    Except PsIrSpecializeError PsIrSpecializeStructureFieldsResult :=
   match _sourceItems with
   | List.nil =>
       Except.ok {
@@ -1103,8 +1098,7 @@ def psIrSpecializeRewriteConstructorFields
     (module : PsVerifiedIrModule)
     (substitution : List (Prod String PsVerifiedIrType))
     (_sourceItems : List PsVerifiedIrConstructorField) :
-    Except PsIrSpecializeError
-      PsIrSpecializeConstructorFieldsResult :=
+    Except PsIrSpecializeError PsIrSpecializeConstructorFieldsResult :=
   match _sourceItems with
   | List.nil =>
       Except.ok {
@@ -1137,8 +1131,7 @@ def psIrSpecializeRewriteConstructors
     (module : PsVerifiedIrModule)
     (substitution : List (Prod String PsVerifiedIrType))
     (_sourceItems : List PsVerifiedIrConstructor) :
-    Except PsIrSpecializeError
-      PsIrSpecializeConstructorsResult :=
+    Except PsIrSpecializeError PsIrSpecializeConstructorsResult :=
   match _sourceItems with
   | List.nil =>
       Except.ok {

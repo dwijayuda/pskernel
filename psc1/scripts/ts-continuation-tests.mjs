@@ -46,6 +46,23 @@ const divergent=spawnSync(process.execPath,['--input-type=module','-e',
  'import {pathToFileURL} from "node:url";const m=await import(pathToFileURL(process.argv[1]).href);m.strictValue(0n);',module],
  {encoding:'utf8',timeout:2000,maxBuffer:8*1024*1024});
 assert.equal(divergent.error?.code,'ETIMEDOUT','unused divergent local RHS must remain strict');
+// Exercise the identical strict IR corpus with the JavaScript printer too.
+const jsRaw=path.join(folder,'raw.js'),jsModule=path.join(folder,'module.mjs');
+fs.writeFileSync(jsModule,(await formatEcma(fs.readFileSync(jsRaw,'utf8'),'js')).text);
+const javascript=JSON.parse(run(process.execPath,[consumer,jsModule]));
+assert.equal(javascript.passed,true);
+assert.ok(javascript.maxRssKiB>0&&javascript.maxRssKiB<=262144,'bounded JS callback/tail-driver process RSS');
+const jsDivergent=spawnSync(process.execPath,['--input-type=module','-e',
+ 'import {pathToFileURL} from "node:url";const m=await import(pathToFileURL(process.argv[1]).href);m.strictValue(0n);',jsModule],
+ {encoding:'utf8',timeout:2000,maxBuffer:8*1024*1024});
+assert.equal(jsDivergent.error?.code,'ETIMEDOUT','JS unused divergent local RHS must remain strict');
+const jsReceipt={schema:'psc1-js-continuation-runtime/1',testedCommit:process.env.GITHUB_SHA,
+ branchHeadCommit:process.env.PSC1_HEAD_SHA,passed:true,strictInputIr:true,strictTargetIr:true,
+ rawSha256:sha(jsRaw),executableSha256:sha(jsModule),...javascript,
+ strictDivergenceDeadlineMs:2000,maxRssBoundKiB:262144,
+ scope:'Backend IR regression; source streaming additionally requires both grammars and all targets.'};
+fs.writeFileSync(path.join(folder,'js-results.json'),JSON.stringify(jsReceipt,null,2)+'\n');
+console.log('PSC1_JS_CONTINUATION_RUNTIME: '+JSON.stringify(jsReceipt));
 const receipt={schema:'psc1-ts-continuation-runtime/1',testedCommit:process.env.GITHUB_SHA,
  branchHeadCommit:process.env.PSC1_HEAD_SHA,passed:true,independentTypeCheck:true,strictInputIr:true,
  nativeFixtureSha256:sha('test/TsContinuationTests.lean'),rawSha256:sha(raw),formattedSha256:sha(formatted),

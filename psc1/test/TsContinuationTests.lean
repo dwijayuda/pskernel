@@ -1,5 +1,7 @@
 import Ps.CompilerIr.Validate
 import Ps.BackendTs.Module
+import Ps.BackendJs.Lower
+import Ps.BackendJs.Print
 
 namespace TsContinuationFixture
 
@@ -61,4 +63,14 @@ def main : IO Unit := do
     | .ok value => pure value
   IO.FS.createDirAll "dist/scoped-correctness/ts-continuations"
   IO.FS.writeFile "dist/scoped-correctness/ts-continuations/raw.ts" printed
+  let jsIr ← match psJsLowerSpecializedModule validated.raw with
+    | .error _ => throw (IO.userError "PSC1_JS_CONTINUATION_LOWERING_REFUSED")
+    | .ok value => pure value
+  match psJsValidateModule jsIr with
+  | .error _ => throw (IO.userError "PSC1_JS_CONTINUATION_TARGET_REFUSED")
+  | .ok _ => pure ()
+  let javascript ← match psJsPrintModuleStackSafe jsIr with
+    | .error _ => throw (IO.userError "PSC1_JS_CONTINUATION_EMISSION_REFUSED")
+    | .ok value => pure value
+  IO.FS.writeFile "dist/scoped-correctness/ts-continuations/raw.js" javascript
   IO.println "PSC1_TS_CONTINUATION_FIXTURE: strict validated IR emitted; this is a backend regression, not source admission evidence"

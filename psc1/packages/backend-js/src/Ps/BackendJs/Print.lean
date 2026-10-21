@@ -780,8 +780,8 @@ def psJsPrintMatchAlternativesWith
                   printedAlternative
                   printedRest)
 
-def psJsPrintExprWithModeAndFuel
-    (stackTarget : Option String)
+def psJsPrintExprWithPositionAndFuel
+    (stackTarget : Option String) (tailPosition : Bool)
     (fuel : Nat) :
     PsJsIrExpr -> Except PsJsEmitError String :=
   match fuel with
@@ -791,7 +791,11 @@ def psJsPrintExprWithModeAndFuel
   | Nat.succ remaining =>
       let smaller :
           PsJsIrExpr -> Except PsJsEmitError String :=
-        psJsPrintExprWithModeAndFuel stackTarget remaining;
+        psJsPrintExprWithPositionAndFuel stackTarget false remaining;
+      let inTail : PsJsIrExpr -> Except PsJsEmitError String :=
+        psJsPrintExprWithPositionAndFuel stackTarget tailPosition remaining;
+      let lambdaBody : PsJsIrExpr -> Except PsJsEmitError String :=
+        psJsPrintExprWithPositionAndFuel stackTarget true remaining;
       fun (expr : PsJsIrExpr) =>
         let stackContext : Bool :=
           match stackTarget with
@@ -825,7 +829,7 @@ def psJsPrintExprWithModeAndFuel
             | Except.ok printedArguments =>
                 psJsPrintRuntime operation printedArguments
         | PsJsIrExpr.lambda parameters body =>
-            match smaller body with
+            match lambdaBody body with
             | Except.error error => Except.error error
             | Except.ok printedBody =>
                 if stackContext then
@@ -869,7 +873,7 @@ def psJsPrintExprWithModeAndFuel
                         (psJsJoin
                           ""
                           [
-                            "(yield* __ps$invoke(",
+                            (if tailPosition then "(yield* __ps$tailInvoke(" else "(yield* __ps$invoke("),
                             printedFn,
                             suffix,
                             "))"
@@ -885,7 +889,7 @@ def psJsPrintExprWithModeAndFuel
             match smaller value with
             | Except.error error => Except.error error
             | Except.ok printedValue =>
-                match smaller body with
+                match inTail body with
                 | Except.error error => Except.error error
                 | Except.ok printedBody =>
                     if stackContext then
@@ -917,10 +921,10 @@ def psJsPrintExprWithModeAndFuel
             match smaller condition with
             | Except.error error => Except.error error
             | Except.ok printedCondition =>
-                match smaller thenBranch with
+                match inTail thenBranch with
                 | Except.error error => Except.error error
                 | Except.ok printedThen =>
-                    match smaller elseBranch with
+                    match inTail elseBranch with
                     | Except.error error => Except.error error
                     | Except.ok printedElse =>
                         Except.ok
@@ -988,7 +992,7 @@ def psJsPrintExprWithModeAndFuel
                   psJsFreshMatchTemp expr;
                 match
                     psJsPrintMatchAlternativesWith
-                      smaller
+                      inTail
                       temp
                       alternatives with
                 | Except.error error => Except.error error
@@ -1024,6 +1028,11 @@ def psJsPrintExprWithModeAndFuel
                             ")"
                           ])
 
+def psJsPrintExprWithModeAndFuel
+    (stackTarget : Option String) (fuel : Nat) :
+    PsJsIrExpr -> Except PsJsEmitError String :=
+  psJsPrintExprWithPositionAndFuel stackTarget false fuel
+
 def psJsPrintExpr
     (expr : PsJsIrExpr) :
     Except PsJsEmitError String :=
@@ -1033,8 +1042,8 @@ def psJsPrintExprStackSafe
     (recursiveName : String)
     (expr : PsJsIrExpr) :
     Except PsJsEmitError String :=
-  psJsPrintExprWithModeAndFuel
-    (Option.some recursiveName)
+  psJsPrintExprWithPositionAndFuel
+    (Option.some recursiveName) true
     4096
     expr
 
@@ -1248,9 +1257,10 @@ def psJsStackRuntimeSupport : String :=
     ""
     [
       "const __ps$implementations = new WeakMap();\n",
-      "function __ps$run(root) { const pending = [root]; let value = undefined; while (pending.length !== 0) { const next = pending[pending.length - 1].next(value); if (next.done) { pending.pop(); value = next.value; } else { const { fn, args } = next.value; const implementation = __ps$implementations.get(fn); if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; } else { value = Reflect.apply(fn, undefined, args); } } } return value; }\n",
+      "function __ps$run(root) { const pending = [root]; let value = undefined; while (pending.length !== 0) { const next = pending[pending.length - 1].next(value); if (next.done) { pending.pop(); value = next.value; } else { const { fn, args, tail } = next.value; const implementation = __ps$implementations.get(fn); if (implementation) { const child = Reflect.apply(implementation, undefined, args); if (tail) pending[pending.length - 1] = child; else pending.push(child); value = undefined; } else { value = Reflect.apply(fn, undefined, args); if (tail) pending.pop(); } } } return value; }\n",
       "function __ps$wrap(implementation) { const fn = (...args) => __ps$run(implementation(...args)); __ps$implementations.set(fn, implementation); return fn; }\n",
-      "function* __ps$invoke(fn, ...args) { const implementation = __ps$implementations.get(fn); if (implementation) return (yield { fn, args }); return fn(...args); }\n"
+      "function* __ps$invoke(fn, ...args) { const implementation = __ps$implementations.get(fn); if (implementation) return (yield { fn, args }); return fn(...args); }\n",
+      "function* __ps$tailInvoke(fn, ...args) { const implementation = __ps$implementations.get(fn); if (implementation) return (yield { fn, args, tail: true }); return fn(...args); }\n"
     ]
 
 def psJsImplementationName
@@ -1535,6 +1545,46 @@ def psJsTailEmitWithFuel
                     printed
                     ";")
 
+def psJsPrintEvery {alpha : Type} (predicate : alpha -> Bool) (values : List alpha) : Bool :=
+  match values with
+  | List.nil => true
+  | List.cons value rest =>
+      if predicate value then psJsPrintEvery predicate rest else false
+
+def psJsCallsUseOnlySelfWithFuel (selfName : String) (fuel : Nat) :
+    PsJsIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_expression : PsJsIrExpr) => false
+  | Nat.succ remaining =>
+      let smaller : PsJsIrExpr -> Bool :=
+        psJsCallsUseOnlySelfWithFuel selfName remaining;
+      fun (expression : PsJsIrExpr) =>
+        match expression with
+        | .literal _ => true
+        | .var _ => true
+        | .unary _ value => smaller value
+        | .projection value _ => smaller value
+        | .binary _ left right => smaller left && smaller right
+        | .letE _ value body => smaller value && smaller body
+        | .runtime _ arguments => psJsPrintEvery smaller arguments
+        | .lambda _ body => smaller body
+        | .call fn arguments =>
+            match fn with
+            | .var name => psStringEq name selfName && psJsPrintEvery smaller arguments
+            | _ => false
+        | .ifE condition left right => smaller condition && smaller left && smaller right
+        | .record fields => psJsPrintEvery (fun (field : Prod String PsJsIrExpr) => smaller field.snd) fields
+        | .constructor _ fields => psJsPrintEvery (fun (field : Prod String PsJsIrExpr) => smaller field.snd) fields
+        | .matchE scrutinee alternatives =>
+            smaller scrutinee && psJsPrintEvery
+              (fun (alternative : Prod String (Prod (List PsJsIrMatchBinding) PsJsIrExpr)) =>
+                smaller alternative.snd.snd) alternatives
+
+-- An empty sentinel cannot be an authored JsIR declaration name. With it the
+-- same structural visitor recognizes expressions containing no calls at all.
+def psJsNeedsCallDriver (expression : PsJsIrExpr) : Bool :=
+  if psJsCallsUseOnlySelfWithFuel "" 4096 expression then false else true
+
 def psJsPrintTailLoopWithVisibility (isPublic : Bool)
     (declaration : PsJsIrDeclaration) : Option String :=
   match declaration.parameters with
@@ -1546,7 +1596,8 @@ def psJsPrintTailLoopWithVisibility (isPublic : Bool)
         if psStringEq name declaration.name then false
         else if psJsTailContains names name then false
         else if uses declaration.body name then false else true;
-      if uses declaration.body declaration.name then
+      if uses declaration.body declaration.name &&
+          psJsCallsUseOnlySelfWithFuel declaration.name 4096 declaration.body then
         if available "__ps$tail$state" then
           match psJsTailRewriteWithFuel declaration uses available 4096 names List.nil declaration.body with
           | Option.none => Option.none
@@ -1575,11 +1626,7 @@ def psJsPrintDeclarationStackSafeWithVisibility (isPublic : Bool)
   | Option.some printed =>
       Except.ok printed
   | Option.none =>
-      if
-          psJsExprUsesNameWithFuel
-            4096
-            declaration.body
-            declaration.name then
+      if psJsNeedsCallDriver declaration.body then
         match
             psJsPrintExprStackSafe
               declaration.name
@@ -1683,7 +1730,7 @@ partial def psJsNeedsUtf8Runtime (expression : PsJsIrExpr) : Bool :=
 def psJsNeedsStackRuntime (declaration : PsJsIrDeclaration) : Bool :=
   match psJsPrintTailLoop declaration with
   | some _ => false
-  | none => psJsExprUsesNameWithFuel 4096 declaration.body declaration.name
+  | none => psJsNeedsCallDriver declaration.body
 
 def psJsModuleNeedsUtf8Runtime (module : PsJsIrModule) : Bool :=
   psListAny (fun (declaration : PsJsIrDeclaration) => psJsNeedsUtf8Runtime declaration.body)

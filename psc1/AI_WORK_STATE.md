@@ -170,3 +170,23 @@ capture 9138 ms, ordinary preparation 20298 ms, independent admission 31260 ms,
 then ordinary erasure exceeds the remaining interval. Backend planning/printing
 is not reached. Add opt-in per-declaration Core sizes and admission-byte counts
 to identify source expansion before altering any integrity or resource guard.
+
+## Callback-mediated JS back-edge diagnosis
+
+Source 1731fa71 / run 39693605851 builds the expanded source within the original
+deadline. In JS, every flag path through direct/non-tail/higher-order recursion,
+collections, ranges, owner/capture/handler and namespace cases passes before
+streaming. The 10^18 upper-bound immediate return passes. The unchanged 100000
+complete traversal instead raises Maximum call stack size exceeded via nested
+__ps$run calls. The printer only drove syntactic self-recursion, leaving ordinary
+callback carriers outside its driver. Earlier build timeouts are still retained,
+but are not proof of a deterministic compiler hang.
+
+Drive general calls and wrapped callbacks, preserving exact evaluation order and
+strict non-tail continuations. Tail-position requests replace the current driver
+frame. Keep the direct self-loop optimization only without other call targets.
+Extend the existing strict typed-IR continuation corpus to JS as well as TS:
+1000001 mutual calls under 262144-KiB RSS, non-tail depth 5000, callee/operand
+order, escaping capture, foreign traps and actual unused-RHS divergence deadlines.
+The original source streaming stress remains unchanged. No readiness promotion
+or G2 claim precedes exact Linux execution. Save successful build profiles too.

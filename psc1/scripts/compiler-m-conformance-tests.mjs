@@ -42,6 +42,13 @@ function run(cmd,args,options={}){
  const deadline=options.timeout??120000;
  const result=spawnSync('timeout',['--kill-after=5s',Math.ceil(deadline/1000)+'s',cmd,...args],
   {env,encoding:'utf8',cwd:root,maxBuffer:32*1024*1024,...options,timeout:deadline+10000});
+ if(inferenceControl&&cmd===native&&args[0]==='build'){
+  write(path.join(evidence,'build-'+sha(args.join('\0')).slice(0,16)+'.log'),result.stdout+'\n'+result.stderr);
+  const lines=(result.stderr||'').split('\n');
+  const sizes=lines.filter(l=>l.startsWith('PSC1_CORE_SIZE:')).map(l=>({line:l,size:Number(l.match(/value=(\d+)/)?.[1]||0)}));
+  console.log(marker+'_BUILD_PROFILE: '+JSON.stringify({target:args[args.indexOf('--target')+1],
+   status:result.status,phases:lines.filter(l=>l.startsWith('PSC1_PHASE:')),largest:sizes.sort((a,b)=>b.size-a.size).slice(0,5)}));
+ }
  assert.equal(result.error,undefined,result.error?.message);
  assert.equal(result.status,0,cmd+' '+args.join(' ')+'\n'+result.stdout+result.stderr);
  return result.stdout;

@@ -27,8 +27,9 @@ jobs:
           def fetch(path):
               request = urllib.request.Request(
                   "https://api.github.com/repos/" + repo + path,
-                  headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"],
-                           "Accept": "application/vnd.github+json"})
+                  headers={"Accept": "application/vnd.github+json"})
+              # Authenticate only the initial API request, never its signed blob redirect.
+              request.add_unredirected_header("Authorization", "Bearer " + os.environ["GH_TOKEN"])
               with urllib.request.urlopen(request) as response:
                   return response.read()
           producer = json.loads(fetch("/actions/runs/" + str(run_id)))

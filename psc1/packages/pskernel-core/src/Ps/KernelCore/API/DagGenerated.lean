@@ -551,19 +551,23 @@ def psKernelDagGeneratedNextDemand
 /- The admitted declaration list is only a structural bound: one cons is
    consumed per newly imported unique name, and its head is never metadata
    authority. No environment-size prepass, old-tail traversal or eagerly built
-   recursion closure occurs. Empty demand returns without inspecting the bound.
-   The exact immutable environment/index supplies every imported declaration. -/
+   recursion closure occurs. Empty demand inspects only the outer bound constructor
+   and returns without traversing its tail. The exact immutable environment/index
+   supplies every imported declaration. -/
 def psKernelDagGeneratedCompleteDemands
     (remaining : List PsKernelConstantInfo)
     (environment : PsKernelEnvironment) (pending : List PsKernelName)
     (state : PsKernelDagGeneratedState) :
     Except String PsKernelDagGeneratedState :=
-  match psKernelDagGeneratedNextDemand pending environment state.declarations with
-  | Option.none => Except.ok state
-  | Option.some selected =>
-      match remaining with
-      | List.nil => Except.error "PSKERNEL_V2_SESSION_OWNER_BOUND"
-      | List.cons _ rest =>
+  match remaining with
+  | List.nil =>
+      match psKernelDagGeneratedNextDemand pending environment state.declarations with
+      | Option.none => Except.ok state
+      | Option.some _ => Except.error "PSKERNEL_V2_SESSION_OWNER_BOUND"
+  | List.cons _ rest =>
+      match psKernelDagGeneratedNextDemand pending environment state.declarations with
+      | Option.none => Except.ok state
+      | Option.some selected =>
           match psKernelDagGeneratedInstallSessionInfo (Prod.fst selected) state with
           | Except.error error => Except.error error
           | Except.ok next =>

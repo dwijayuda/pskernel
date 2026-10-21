@@ -1,0 +1,266 @@
+{
+  "schema": "pskernel-exact-source-qualification-v1",
+  "source_sha": "0f7dceeb3d6dbab2b4db584b29729aa200f48e28",
+  "source_branch": "work/psc1-pskernel-t03b-session-20261022",
+  "integration_parent_sha": "0420aa896b04197aebd14444c1d2c4a36a41df9e",
+  "qualification": {
+    "A": "FAIL: authentic source elaboration cannot resolve recursive worker",
+    "B": "OPEN",
+    "C": "Independent PSKernel corpus not replayed",
+    "D": "No paired ownership measurement at this source"
+  },
+  "failure": {
+    "declaration": "psKernelDagGeneratedCompleteDemands",
+    "diagnostic": "unknownName:psKernelDagGeneratedCompleteDemands",
+    "cause_inferred": "The recursive bound-list match is nested beneath the NextDemand result match; the portable elaborator does not recognize the recursive self-reference in this layout.",
+    "repair": "Move the structural remaining-list match to the outer level, following InstallNewPrefix in the same file. All four arguments remain explicit before the colon; recursive call remains only in the successful selected-demand branch.",
+    "semantic_controls_retained": true,
+    "compiler_unchanged": true,
+    "assertions_removed": 0
+  },
+  "native": {
+    "integration_job": 119543656506,
+    "correctness_job": 119543655676,
+    "conclusion": "success",
+    "session_owners": {
+      "kinds": 8,
+      "direct": 7,
+      "private_ids": 5,
+      "forks": 2,
+      "official_declarations": 4,
+      "official_direct": 7
+    },
+    "t03a": {
+      "new_declarations": 24,
+      "recursors": 7,
+      "direct": 6,
+      "private_ids": 3,
+      "official_families": 5,
+      "official_positive": 6,
+      "official_negative": 7
+    },
+    "local_axiom_outputs": {
+      "session": 14,
+      "recursor": 21,
+      "quot_owner": 21,
+      "name": 8
+    },
+    "axiom_union": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "append_order_axioms": [],
+    "provider": {
+      "cli_cases": 24,
+      "official_cases": 5,
+      "batch_declarations": 4,
+      "detached_path_empty": true
+    },
+    "artifact": {
+      "id": 12390335670,
+      "bytes": 33172664,
+      "sha256": "63d6da6b815118943b1872355d6abb18067e32f52775b43c510cbbfd751337ad"
+    }
+  },
+  "research": {
+    "success": 5,
+    "total": 6,
+    "failed_generated_job": 119543655205
+  },
+  "arena": {
+    "official_job": 119543655303,
+    "official_accepted": 122,
+    "official_rejected": 71,
+    "official_controls_pass": true,
+    "independent_job": 119544440444,
+    "independent_cases_executed": 0,
+    "parent_counts_inherited": false,
+    "official_artifact": {
+      "id": 12390045582,
+      "bytes": 114898,
+      "sha256": "bf2d07b5312cef3afdce58b9f556577027ec9985d374f865dd12d00076c67b92"
+    },
+    "generated_partial_artifact": {
+      "id": 12388998757,
+      "bytes": 232,
+      "sha256": "b25860570ec55972dd58b813e48f2d932b247c01770003b06a6b50eb5d198c1a",
+      "complete_comparison_report": false
+    }
+  },
+  "profiles": {
+    "run": 39693047233,
+    "job": 119543656015,
+    "conclusion": "failure before any profile execution",
+    "artifact_count": 0
+  },
+  "limits": {
+    "kernel_fuel": 4096,
+    "arena_seconds_per_case": 60,
+    "node_old_space_mib": 2048,
+    "workers": 2,
+    "hard_rss_cap_claim": false
+  },
+  "no_parent_pass_inherited": true,
+  "no_duplicate_replay": true,
+  "observed_at_utc": "2026-10-21T23:32:00Z",
+  "runs": [
+    {
+      "id": 39693047233,
+      "name": "PSC1 authentic Arena timeout diagnostics",
+      "head_sha": "0f7dceeb3d6dbab2b4db584b29729aa200f48e28",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39693047233",
+      "jobs": [
+        {
+          "id": 119543656015,
+          "name": "authentic-timeout-diagnostics",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Build authentic compiler and complete canonical source closure"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 39693047060,
+      "name": "PSC1 Expression V2 production integration",
+      "head_sha": "0f7dceeb3d6dbab2b4db584b29729aa200f48e28",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39693047060",
+      "jobs": [
+        {
+          "id": 119543656039,
+          "name": "generated-dag-integration",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Build authentic PSC1 and check complete kernel source"
+          ]
+        },
+        {
+          "id": 119543656506,
+          "name": "native-dag-integration",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 39693046905,
+      "name": "PSC1 PSKernel-Core Expression V2 research",
+      "head_sha": "0f7dceeb3d6dbab2b4db584b29729aa200f48e28",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39693046905",
+      "jobs": [
+        {
+          "id": 119543655205,
+          "name": "generated-js-full-checker-bridge",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Build complete real PSC1 compiler and check combined research entry"
+          ]
+        },
+        {
+          "id": 119543655595,
+          "name": "portable-v2-check",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119543655606,
+          "name": "whnf-subset-regression",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119543655615,
+          "name": "portable-ps-closure",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119543655747,
+          "name": "expr-v2-differential",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119543655777,
+          "name": "full-checker-bridge",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 39693047092,
+      "name": "PSC1 PSKernel-Core correctness",
+      "head_sha": "0f7dceeb3d6dbab2b4db584b29729aa200f48e28",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39693047092",
+      "jobs": [
+        {
+          "id": 119543655676,
+          "name": "native-kernel",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119543656172,
+          "name": "psc1-portability",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Check complete kernel source closure using PSC1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 39693046919,
+      "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+      "head_sha": "0f7dceeb3d6dbab2b4db584b29729aa200f48e28",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39693046919",
+      "jobs": [
+        {
+          "id": 119543655303,
+          "name": "official-arena-reference",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 119544440444,
+          "name": "generated-arena-comparison",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Reconstruct and check the complete canonical kernel closure",
+            "Record all saved case bodies and verdicts without replay"
+          ]
+        }
+      ]
+    }
+  ]
+}

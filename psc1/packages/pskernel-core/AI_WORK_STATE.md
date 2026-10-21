@@ -1,3 +1,44 @@
+## T03b structural-recursion correction — new exact-source qualification required
+
+Updated: 2026-10-21 23:32:00 UTC.
+Exact `0f7dceeb3d6dbab2b4db584b29729aa200f48e28` is terminal **FAIL**.
+Its native integration119543656506 and native correctness119543655676 passed,
+including all14 session equations,21 recursor equations,21 Quot-owner equations
+and8 Name equations. Session8-kind/7-direct/5-private-ID/2-fork and official4/7
+controls passed. Five of six research jobs passed. The full portable source
+gate advanced past the corrected append worker, then rejected the recursive
+self-reference in `psKernelDagGeneratedCompleteDemands` with
+`unknownName:psKernelDagGeneratedCompleteDemands`. Its recursive-list match
+was nested beneath the selected-demand match.
+
+All five runs39693047060/39693047092/39693046905/39693046919/39693047233 are
+terminal. Generated119543656039, canonical119543656172, research119543655205,
+Arena119544440444 and profiles119543656015 stopped during source elaboration.
+The official193 reference passed; **no independent PSKernel193 replay and no
+profile-case execution occurred** at this source. Parent Arena counts are not
+assigned to it. See [exact0f7 failure receipt](evidence/2026-10-22-t03b-0f7-portability-failure.json).
+
+This containing correction moves the first explicit structural-list argument's
+match to the outer level, following the existing `InstallNewPrefix` worker.
+All four arguments remain before the return-type colon. The nil/cons branches
+still perform the exact demand lookup once; import, dependency collection and
+recursive descent occur only for a selected new owner. An empty-demand exit
+inspects one outer list constructor and does not traverse its tail. No
+environment-size pass or recursive closure is precomputed. The authority-list
+head remains unused; exact live indexed metadata supplies every owner.
+
+All14 existing session equations and all tests remain unchanged. The no-demand,
+zero-bound, import-error and successful-one-cons equations cover both layouts'
+observable behavior. The explicit append-order theorem and both former failure
+receipts remain. This source is **NOT YET A-qualified** and must pass its own
+full required gates, one unchanged193-case comparison and unchanged paired
+32-worker/384-call ownership experiment against parent0420 before promotion.
+No parent or native-only PASS transfers. B/C/D remain open; no speedup is claimed.
+
+Earlier entries below preserve their exact historical source identities.
+
+---
+
 ## T03b portable-source correction — new exact-source qualification required
 
 Updated: 2026-10-21 23:22:30 UTC.

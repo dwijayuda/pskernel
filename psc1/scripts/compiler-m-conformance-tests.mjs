@@ -33,7 +33,7 @@ assert.equal(new Set(targets).size,targets.length);
 assert.ok(targets.length&&targets.every(t=>contract.targets.includes(t)));
 const names=[...contract.cases.map(c=>c.id),'semantic'];
 const records=[],failures=[];
-const env={...process.env,PSC1_HOST_TOOLS:path.join(root,'host-tools/artifacts.mjs')};
+const env={...process.env,...(inferenceControl?{PSC1_TRACE_PHASES:'1'}:{}),PSC1_HOST_TOOLS:path.join(root,'host-tools/artifacts.mjs')};
 const read=file=>fs.readFileSync(file,'utf8');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const hash=file=>sha(fs.readFileSync(file));

@@ -41,9 +41,16 @@ structure PsHostDirectPrepared where
   ioDispatcherAbi : Bool := false
   wasmStringAbi : Bool := false
 
+-- Opt-in host diagnostics carry no admission or validation authority.
+private def tracePhase (phase : String) : IO Unit := do
+  if (← IO.getEnv "PSC1_TRACE_PHASES") == some "1" then
+    IO.eprintln ("PSC1_PHASE: " ++ phase ++ " @" ++ toString (← IO.monoMsNow))
+
 private def checkedInput (inputPath : String) :
     IO (PsHostCapturedProject × PsCompilerAdmissionReadyModule × String) := do
+  tracePhase "capture:begin"
   let captured ← psHostCaptureProject psSelfHostProdPreludeEnvironment inputPath
+  tracePhase ("capture:complete declarations=" ++ toString captured.declarations.length)
   let elaborated : PsElabModuleResult := {
     environment := captured.environment
     declarations := captured.declarations
@@ -54,21 +61,28 @@ private def checkedInput (inputPath : String) :
   let admissions ← match ← psHostLeanCheckPrepared prepared with
     | .ok value => pure value
     | .error reason => throw (IO.userError ("PSC1_KERNEL_ADMISSION_FAILED: " ++ reason))
+  tracePhase "independent-admission:complete"
   return (captured, prepared, admissions)
 
 private def ordinaryInput (inputPath : String) :
     IO (PsHostCapturedProject × PsCompilerOrdinaryModule × String) := do
+  tracePhase "capture:begin"
   let captured ← psHostCaptureProject psSelfHostProdPreludeEnvironment inputPath
+  tracePhase ("capture:complete declarations=" ++ toString captured.declarations.length)
   let elaborated : PsElabModuleResult := {
     environment := captured.environment
     declarations := captured.declarations
   }
+  tracePhase "ordinary-prepare:begin"
   let prepared ← match psCompilerPrepareOrdinary elaborated with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
+  tracePhase "ordinary-prepare:complete"
+  tracePhase "independent-admission:begin"
   let admissions ← match ← psHostLeanCheckPrepared prepared.logical with
     | .ok value => pure value
     | .error reason => throw (IO.userError ("PSC1_KERNEL_ADMISSION_FAILED: " ++ reason))
+  tracePhase "independent-admission:complete"
   return (captured, prepared, admissions)
 
 private def irFailureText (raw : PsVerifiedIrModule) : String :=
@@ -128,13 +142,17 @@ def psHostDirectPrepareFor (inputPath : String) (assurance : PsHostAssurance) :
         pure (captured, prepared.declarations, admissions, raw, [])
     | .ordinary => do
         let (captured, prepared, admissions) ← ordinaryInput inputPath
+        tracePhase "ordinary-erasure:begin"
         let raw ← match psCompilerOrdinaryIr prepared with
           | .ok value => pure value
           | .error reason => throw (IO.userError reason)
+        tracePhase ("ordinary-erasure:complete declarations=" ++ toString raw.declarations.length)
         pure (captured, prepared.source.declarations, admissions, raw, prepared.partialNames)
+  tracePhase "strict-ir:begin"
   let validated ← match psStrictValidateModule raw with
     | .ok value => pure value
     | .error _ => throw (IO.userError ("PSC1_IR_VALIDATION_FAILED: " ++ irFailureText raw))
+  tracePhase "strict-ir:complete"
   let some entry := captured.sources.find? (fun source => source.path == captured.entryPath)
     | throw (IO.userError "PSC1_ENTRY_SNAPSHOT_MISSING")
   -- Names come from the original runtime graph, never from inhabitant witnesses
@@ -241,8 +259,11 @@ private def ecmaPlan (session : PsHostDirectPrepared) : IO PsValidatedIrModule :
       match psHostDirectDeclaration declaration session.ioDispatcherAbi with
       | .ok _ => pure ()
       | .error reason => throw (IO.userError (reason ++ ": declaration=" ++ declaration.name))
+  tracePhase "closed-plan:begin"
   match psBackendClosedPlan session.validated session.publicNames with
-  | .ok plan => return plan
+  | .ok plan =>
+      tracePhase ("closed-plan:complete declarations=" ++ toString plan.raw.declarations.length)
+      return plan
   | .error reason => throw (IO.userError reason)
 
 private def sourceJson (session : PsHostDirectPrepared) (source : PsHostCapturedSource) : String :=
@@ -292,13 +313,16 @@ private structure EcmaPrinted where
   runtimeSource : String
 
 private def jsSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModule) : IO EcmaPrinted := do
+  tracePhase "js-lower:begin"
   let lowered ← match psJsLowerSpecializedModule plan.raw with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_JS_LOWER_FAILED: phase=jsir; source-profile=checked-direct/1")
+  tracePhase "js-lower:complete"
   match psJsValidateModule lowered with
   | .error _ => throw (IO.userError "PSC1_JS_TARGET_VALIDATION_FAILED")
   | .ok _ => pure ()
   let printed ← lowered.declarations.mapM fun declaration => do
+    tracePhase ("js-print:" ++ declaration.name)
     let text ← match psJsPrintDeclarationStackSafeWithVisibility (session.publicNames.contains declaration.name) declaration with
       | .ok value => pure value
       | .error _ => throw (IO.userError ("PSC1_JS_PRINT_FAILED: declaration=" ++ declaration.name))

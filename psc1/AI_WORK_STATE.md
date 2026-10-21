@@ -151,3 +151,16 @@ the first failed artifact/receipt and stops redundant failing consumers; success
 focused and full matrices still run every required case/target. This correction
 is implemented, UNQUALIFIED until its own exact Linux gates. Do not interpret
 the proposed 37 bindings as completion.
+
+## Deferred iterator checkpoint and next diagnosis
+
+Source 003873e77038cdc15d17404b6c1220035a6348a9, run 39691432898:
+static, native (including independent deferred-fold conversion, five call-once
+checks per grammar, and census normalization) and PHP applications pass.
+Focused ordering passes 42 obligations, but the expanded inference/control
+bundle's first JS build reaches the unchanged 120-second compilation deadline,
+before consumer execution. This differs from the earlier runtime heap failure.
+Opt-in host phase diagnostics now localize capture, ordinary preparation,
+official admission, erasure, strict validation, closed planning and JS printing.
+They grant no authority and do not alter budgets or successful output.
+The complete qualified source remains 65fa8766; no new readiness is inferred.

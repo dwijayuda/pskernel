@@ -63,7 +63,8 @@ at the prior50c4fa0 checkpoint above; newer full scoped CI is still tracked live
 
 ## Continue backend source normalization
 
-Next actual parse refusal in DirectJS and Rust is
+The current complete Specialize normalization candidate addresses the next actual
+parse refusal in DirectJS and Rust:
 Ps.CompilerIr.Specialize51:15 (infix product type). Then Validate/BackendCommon.Plan
 deriving/library sugar and JS/Rust printer/type/expr/module blockers remain.
 Normalize complete source modules; preserve specialization keys, request order,
@@ -79,6 +80,21 @@ Cloud commands:
 Strict selected phases also accept directjs-compiler/rust-compiler once complete.
 Source reports: inventory.json, stages.json, stages-ps.json, strict-semantic.json,
 translated-ps/. PS diagnostic coordinates belong to retained PS input.
+
+## Active Specialize candidate — pending Linux CI
+
+Normalize the complete CompilerIr.Specialize source, not only51:15. Preserve every
+original named declaration, exact specialization key formats, request/diagnostic
+ordering, duplicate handling, ground/arity checks, record/binding reconstruction,
+and validation before/after specialization. Use explicit Prod/constructors, named
+projections and existing owned list/string helpers. Recursion state is returned
+as typed functions; budgets64/128/16384 remain unchanged. Existing generic,
+forged-validation rejection and closed-input specialization tests run in focused
+CI in addition to every previous group. Both grammar gates require full module
+parse/elaboration. No semantic source or checker algorithm was changed.
+
+Whole-closure logs now also print actual canonical admission hashes and the first
+strict-IR findings while full diagnostics remain in the artifact.
 
 ## Boundaries and constraints
 

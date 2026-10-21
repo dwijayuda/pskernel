@@ -436,7 +436,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "semantic-closure-independently-admitted-strict-IR-passed-continue-backend-sources",
+    "status": "semantic-closure-qualified-Specialize-source-normalization-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -521,7 +521,9 @@
         }
       }
     },
-    "pendingModules": [],
+    "pendingModules": [
+      "psc1/packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean"
+    ],
     "latestFocused": {
       "head": "6859fe2d5bfe03ce9fe40a6ed2600837922c63d4",
       "runId": 39518232640,
@@ -654,6 +656,19 @@
       "line": 51,
       "column": 15,
       "detail": "expected ':', got infix product"
+    },
+    "specializeCandidate": {
+      "status": "pending-linux-ci",
+      "preservedBudgets": [
+        64,
+        128,
+        16384
+      ],
+      "existingFocusedSuite": "psc1_ir_specialize_tests",
+      "maintainedGrammars": [
+        "lean",
+        "ps"
+      ]
     }
   }
 }

@@ -147,7 +147,9 @@ for (const grammar of ['lean', 'ps']) {
     passed };
   console.log('PSC1_CLOSURE_LANE: ' + JSON.stringify({ grammar, passed, status: run.status,
     preparation: observed?.preparation, admission: observed?.admission, ir: observed?.ir,
-    coreDeclarations: observed?.coreDeclarations, detail: observed?.detail,
+    coreDeclarations: observed?.coreDeclarations, admissionsArtifact,
+    detail: observed?.detail, firstFindings: observed?.findings?.slice(0, 8),
+    findingCount: observed?.findingCount,
     integrityError, error: run.error?.message }));
 }
 unchanged();
@@ -162,5 +164,8 @@ const report = { schema: 'psc1-compiler-closure-qualification/1', commit,
 fs.writeFileSync(path.join(evidence, 'results.json'), JSON.stringify(report, null, 2) + '\n');
 console.log('PSC1_COMPILER_CLOSURE_QUALIFICATION: ' +
   JSON.stringify({ phase: selected, modules: report.modules, passed, canonicalAdmissionBytesParity,
+    binarySha256, lanes: Object.fromEntries(Object.entries(lanes).map(([grammar, lane]) => [grammar,
+      { passed: lane.passed, coreDeclarations: lane.observed?.coreDeclarations,
+        admissions: lane.admissionsArtifact }])),
     generatedExecution: 'not-run', fixedPoint: 'not-run' }));
 assert.equal(passed, true, 'PSC1_COMPILER_CLOSURE_REFUSED: retained exact lane diagnostics');

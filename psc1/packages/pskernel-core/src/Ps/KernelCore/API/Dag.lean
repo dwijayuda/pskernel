@@ -1,6 +1,7 @@
 import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 import Ps.KernelCore.API.DagGenerated
+import Ps.KernelCore.API.DagInitial
 import Ps.KernelCore.API.DagAdmission
 import Ps.KernelCore.Checker.ExprV2.Terminal
 import Ps.KernelCore.Checker.ExprV2.Check
@@ -32,14 +33,17 @@ profile exposes constructors and helper functions: the internal command
 workers require the canonical arena/decoded correspondence established here.
 They are not alternative untrusted-input entry points. Replies, like V1
 receipts, are forgeable observations and never authorize proof admission.
-Each declaration is checked before environment publication. No semantic cache
-or declaration index escapes the validated batch. A sealed constructor API
-remains a source-profile limitation.
+Each declaration is checked before environment publication. Preexisting live
+session metadata is imported into a fresh private owner after ingress validation;
+API.Session retains its explicit trusted boundary for directly built sessions.
+No semantic cache or declaration index escapes the validated batch. A sealed
+constructor API remains a source-profile limitation.
 
-This remains a partial representation migration. External constant types,
-projections without owning constructor types, unowned recursor descendants
-and remaining admission rules may restart through PsKernelExpr. The general
-ordered DefEq pipeline itself has direct DAG implementations.
+This remains a partial representation migration. General DefEq can still
+restart when a required DAG operation declines. Preexisting and generated
+metadata import, projections without owning constructor types, unowned recursor
+descendants and remaining admission rules use PsKernelExpr. The ordered DefEq
+pipeline itself has direct DAG implementations.
 Eliminating that fallback and adapter remains required for completion.
 -/
 structure PsKernelDagBatchResult where
@@ -49,7 +53,8 @@ structure PsKernelDagBatchResult where
 /-
 Internal state of one validated command batch. Its declaration references are
 not accepted by psKernelV1RunDag and are not retained in its returned session.
-Only successful complete admission extends the table.
+Initial entries come from the session's actual live indexed metadata; subsequent
+extensions follow successful complete admission.
 -/
 structure PsKernelDagExecutionState where
   session : PsKernelKernelSession
@@ -305,6 +310,17 @@ def psKernelV1RunDag
           | Except.error error =>
               Except.error (PsKernelError.rejectedInvalid error)
           | Except.ok built =>
-              psKernelDagRunCommands commands
-                (PsKernelDagExecutionState.mk session List.nil)
-                levelParams safety canonical built
+              match commands with
+              | List.nil =>
+                  Except.ok (PsKernelDagBatchResult.mk session List.nil)
+              | List.cons _ _ =>
+                  let initial := PsKernelDagGeneratedState.mk canonical built List.nil;
+                  match psKernelDagInitialInstall
+                      (psKernelKernelSessionEnvironment session) initial with
+                  | Except.error error =>
+                      Except.error (PsKernelError.internalError error)
+                  | Except.ok installed =>
+                      let execution := PsKernelDagExecutionState.mk
+                        session installed.declarations;
+                      psKernelDagRunCommandsWithSource commands built execution
+                        levelParams safety installed.arena installed.built

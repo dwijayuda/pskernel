@@ -26,6 +26,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagAdmissionGuards,
     `Ps.KernelCore.Checker.ExprV2.Quot,
     `Ps.KernelCore.API.DagGenerated,
+    `Ps.KernelCore.API.DagInitial,
     `Ps.KernelCore.Checker.ExprV2.RecursorMajor,
     `Ps.KernelCore.Checker.ExprV2.RecursorK,
     `Ps.KernelCore.Checker.ExprV2.Recursor,
@@ -310,4 +311,8 @@ lean_exe psc1_kernel_expr_v2_owned_state_regression where
 -- Exact comparison workers, Unicode/raw-position parity, and real checked named declarations.
 lean_exe psc1_kernel_name_worker_regression where
   root := `PsKernelNameWorkerRegression
+  srcDir := "test"
+
+lean_exe psc1_kernel_expr_v2_initial_owner_regression where
+  root := `PsKernelExprV2InitialOwnerRegression
   srcDir := "test"

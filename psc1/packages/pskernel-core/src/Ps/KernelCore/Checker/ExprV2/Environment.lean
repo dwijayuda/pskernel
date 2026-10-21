@@ -1,20 +1,22 @@
 import Ps.KernelCore.Core.Declaration
 
 /-
-References retained only after successful complete declaration admission in one
-checked DAG batch. Types and optional transparent bodies belong to its canonical
-input arena and every append-only continuation. This is the single declaration
-index used by constant inference and delta reduction.
+References come from checked initial-session metadata or successful complete
+declaration admission in one checked DAG batch. Types and optional transparent
+bodies belong to its canonical arena and every append-only continuation. This is
+the single declaration index used by constant inference and delta reduction.
 
-The public boundary creates the table empty. It never escapes into a legacy
-kernel session. These internal, forgeable records are not admission certificates.
+The public boundary builds a fresh table from actual live initial-session lookups.
+It never escapes into a legacy kernel session. These internal, forgeable records
+are not admission certificates; directly built sessions retain their trusted
+integration contract.
 Live environment metadata still decides constant kind, safety and universe arity.
 Ordinary/mutual/nested recursor types/rules (including K) are installed once from
 the newly admitted final-environment prefix, in an appended owning arena. Nested
 restored types and constructors are imported from that same checked environment;
 ordinary/mutual headers and constructors retain original admitted IDs. This
-transitional import does not make inductive admission DAG-native. Preexisting
-session constants still require a separately qualified owning-reference adapter.
+transitional import does not make inductive admission DAG-native. Initial-session
+metadata also uses an explicit recursive import; Quot owners remain unsupported.
 -/
 /- Generated rule IDs are private to one validated command batch. They are
    installed only from metadata produced by complete inductive admission. -/

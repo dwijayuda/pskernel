@@ -1,0 +1,86 @@
+name: PSC1 initial-session DAG owner native preflight
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-pskernel-initial-owner-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-initial-owner.yml
+      - psc1/packages/pskernel-core/**
+      - psc1/kernel-lakefile.lean
+      - psc1/test/PsKernelExprV2InitialOwner*.lean
+      - psc1/scripts/pskernel-expr-v2-initial-owner-*.mjs
+      - psc1/scripts/install-lean435-ci.sh
+      - psc1/lean-toolchain
+permissions:
+  contents: read
+jobs:
+  native-initial-owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Compile original-policy initial-owner candidate
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          git rev-parse HEAD
+          node --check scripts/pskernel-expr-v2-initial-owner-smoke.mjs
+          node --check scripts/pskernel-expr-v2-initial-owner-bench.mjs
+          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_expr_v2_initial_owner_regression
+      - name: Check real prior-session owners, private IDs and official fixtures
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_initial_owner_regression \
+            | tee "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_METADATA: PASS owners=28 recursors=7 rules=13 delta=1' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_MATRIX: PASS check=252 whnf=252 defeq=252' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_PUBLIC: PASS replies=36 secondArena=fresh' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_OFFICIAL: PASS checks=12 equalities=12 invalid=1' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_NAMESPACE: PASS positions=76 precedence=2 atomic=3 guards=4' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_LIVE_INDEX: PASS variants=6 public=12' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER: PASS checkedBatches=2 queries=12' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+      - name: Prove and audit all20 owner-boundary equations
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(grep -c '^#print axioms PsKernelExprV2InitialOwnerProofs\.' test/PsKernelExprV2InitialOwnerProofs.lean)" -eq 20
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2InitialOwnerProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-initial-owner-proofs.log"
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          source = pathlib.Path("test/PsKernelExprV2InitialOwnerProofs.lean").read_text()
+          log = (pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-initial-owner-proofs.log").read_text()
+          expected = re.findall(r"^#print axioms (PsKernelExprV2InitialOwnerProofs\.\S+)$", source, re.M)
+          actual = re.findall(r"'(PsKernelExprV2InitialOwnerProofs\.[^']+)'\s+(does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log, re.S)
+          assert len(expected) == 20 and len(set(expected)) == 20, "source proof count"
+          assert len(actual) == 20 and {x[0] for x in actual} == set(expected), "compiled proof count"
+          allowed = {"propext", "Classical.choice", "Quot.sound"}
+          dependencies = {}
+          for name, _, body in actual:
+              names = {x.strip() for x in body.split(",") if x.strip()}
+              assert names <= allowed, (name, sorted(names - allowed))
+              dependencies[name] = sorted(names)
+          record = {"sourceSha": os.environ["GITHUB_SHA"], "proofs": dependencies, "count": 20, "runtimeAxiomsAdded": False}
+          print("PSC1_INITIAL_OWNER_PROOF_AUDIT " + json.dumps(record, sort_keys=True))
+          (pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-initial-owner-proof-receipt.json").write_text(json.dumps(record, indent=2) + "\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: psc1-initial-owner-native-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/psc1-initial-owner-native.log
+            ${{ runner.temp }}/psc1-initial-owner-proofs.log
+            ${{ runner.temp }}/psc1-initial-owner-proof-receipt.json
+          if-no-files-found: warn
+          retention-days: 30

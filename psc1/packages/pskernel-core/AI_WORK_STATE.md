@@ -1,3 +1,36 @@
+# Active candidate: initial-session owners in a fresh checked DAG batch
+
+This candidate on `research/psc1-pskernel-initial-owner-20261021` is based on integration source `deb18b9c87a5d21a406c6e5b852afb4d44785fe5`. It is an unqualified production change: native, portable source, canonical .ps, generated JS, proof, performance, Arena and provider statuses are all **NOT RUN at creation**. The first push runs the focused native/proof preflight; the complete existing integration/correctness/research/Arena workflows must then be enabled and run on the exact candidate source. No parent PASS is inherited.
+
+## Source and ownership boundary
+
+`API/DagInitial.lean` creates new private references to the live checked environment at the beginning of each nonempty public `RunDag` call. It imports types, transparent definition bodies and actual generated recursor rules into that call's fresh arena. The history list enumerates names only; every imported declaration comes from the exact live indexed lookup. Historical payloads, old arena IDs and semantic caches are not authority. Theorems/opaque declarations import only their types.
+
+`API/Dag.lean` keeps existing preflight, arena validation and complete decode before the import. Empty command batches return without import after those same ingress guards. Nonempty batches retain the ORIGINAL decoded input table as the public ID namespace while all imported references remain private to the appended work arena. Import failure returns an internal error and cannot publish a session; command failure remains atomic.
+
+This bridge assumes a session built by checked admission. Arbitrary direct session/environment construction remains the documented low-level trusted integration boundary. It does not authenticate fabricated metadata. Initial-session Quot owners remain unsupported; a separate same-batch Quot port is being qualified on the carrier branch. This candidate does not bring that port in or change its unsupported initial-session identity equation.
+
+The import is eager once per nonempty batch and still recursively traverses the checked metadata. Its costs, including large unused declarations, are an explicit performance risk. It does not retire eager input decoding or the four V1 whole-operation fallback families. V1 remains the default/reference; no complete V2 or global soundness claim is made.
+
+## Required candidate checks
+
+The new native/generated matrices demand28 owners,7 recursors,13 rules and1 transparent body;12 queries each receive252 raw check/WHNF/DefEq comparisons under the original fuel/depth matrix. The public tests use two actual checked batches with a fresh second arena,36 replies,12 official check/equality comparisons,1 official negative,76 private-ID placements, precedence/publication/resource guards, and6 contradictory history/index controls. Raw owned results must be `some`; fallback does not satisfy those assertions.
+
+The20 local equations cover exact lookup authority, unchanged preflight/validation precedence, original public input IDs, empty batches, import failure and atomic state transport. Their compiled axiom output is audited against only `propext`, `Classical.choice`, and `Quot.sound`. This is a local boundary proof, not global soundness.
+
+The paired benchmark script uses32 fresh ABBA workers and384 complete public calls on actual32/128-declaration sessions, for trivial sorts, owned constants, unknown constants and invalid definitions. Timers include full second-batch preflight/validation/decode/initial import/checking. Module load, checked-session construction, graph construction, CPU, retained heap and peak process RSS are separate. Both artifacts and full runtime closures must be authenticated before use. Its2048MiB Node old-space setting is explicitly not an OS RSS cap. The baseline deb artifact is still being qualified; no benchmark result or artifact pin is invented.
+
+## Immediate executable work
+
+1. Observe the focused `PSC1 initial-session DAG owner native preflight` run on this exact push. Fix actual compiler, fixture or proof defects without weakening expectations.
+2. After native preflight, wire the same new target,20-proof audit and generated matrices into the complete integration/canonical gates, retaining Name/current-prefix/frozen-parent controls. Run full authentic PSC1 and both genuine generated routes, provider and Arena at the exact source revision.
+3. Authenticate baseline/candidate generated artifacts and execute the full-call benchmark. Do not promote an unmeasured eager importer with unacceptable regressions.
+4. Compose any independently qualified Quot change only after its own full gates, preserving this initial Quot limitation until explicitly migrated and tested.
+
+Prior source receipts and historical limitations follow unchanged.
+
+---
+
 # Current integration checkpoint — qualified base and measured name-worker promotion
 
 Observed: 2026-10-21T18:16:44Z.

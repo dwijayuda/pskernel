@@ -34,7 +34,13 @@ Next development: close CompilerM all-target state/error/control coverage and
 finite versioned grammar×target receipt enforcement, then follow remaining
 Practical Core decisions. Preserve complete compiler sources, checker pins,
 strict IR, exact ordinary pairing and all prior regression/refusal tests.
-Pivot changes are pending Linux CI until exact runs are recorded below.
+Pivot G1 workflow39554231389 SUCCESS at implementationd5a1d66d9f0a1e6934656d330e5ad18db19cd409,
+tested merged331ff43895c656e1dfb1ef31cd3bc60f841e308. Both generated and
+host-session jobs pass. Same qualified G1 service bytes; all8 cases; no G2 attempt.
+Artifacts12325240640/12324594397 now expire2027-01-19 (90days).
+[Pivot receipt](docs/PSC1_PRIORITY_PIVOT_QUALIFICATION_2026-10-21.json).
+Full scoped result is separate; the pre-next-commit run was cancelled by normal
+concurrency, so do not claim its completion. New Practical Core tests are pending.
 
 ## Active Practical Core implementation — pending Linux qualification
 

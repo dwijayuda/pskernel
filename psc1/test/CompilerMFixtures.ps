@@ -55,9 +55,9 @@ def unitProgram(flag : Bool) : CompilerM(Nat, Nat, Nat, Nat) := do {
 }
 
 def observe(program : CompilerM(Nat, Nat, Nat, Nat)) : Nat :=
-  match (program.run(3, 7)) {
-    | Result.error(error) => error * 100000 + 99999
-    | Result.ok(pair) => pair.fst * 100000 + pair.snd
+  match (program.run(3, 7)) with {
+    | Result.error error => error * 100000 + 99999
+    | Result.ok pair => pair.fst * 100000 + pair.snd
   }
 
 end Ps.Internal.CompilerMContract

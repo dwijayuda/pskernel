@@ -49,10 +49,14 @@ instance {C S E : Type} : Monad (CompilerM C S E) where
 `;
 const oracleSource='import Lean\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+
  nativeAdapter+'\n'+stripImports(leanFixture)+'\n'+
- 'def main : IO Unit := do\n  IO.println (Lean.Json.mkObj [("leanVersion",Lean.toJson Lean.versionString),("leanCommit",Lean.toJson Lean.githash),'+
- contract.cases.flatMap(c=>[false,true].map(flag=>'("'+c.id+(flag?'True':'False')+'",Lean.toJson (toString ('+c.id+' '+flag+')))')).join(',')+']).compress\n';
+ 'def main : IO Unit := do\n  IO.println (\"PSC1_COMPILERM_ORACLE: \" ++ (Lean.Json.mkObj [("leanVersion",Lean.toJson Lean.versionString),("leanCommit",Lean.toJson Lean.githash),'+
+ contract.cases.flatMap(c=>[false,true].map(flag=>'("'+c.id+(flag?'True':'False')+'",Lean.toJson (toString ('+c.id+' '+flag+')))')).join(',')+']).compress)\n';
 const oracleFile=path.join(evidence,'CompilerMOracle.lean');write(oracleFile,oracleSource);
-const oracle=JSON.parse(run('lake',['env','lean','--run',oracleFile]));
+const oracleOutput=run('lake',['env','lean','--run',oracleFile]);
+write(path.join(evidence,'native-oracle.log'),oracleOutput);
+const oracleLines=oracleOutput.split('\n').filter(line=>line.startsWith('PSC1_COMPILERM_ORACLE: '));
+assert.equal(oracleLines.length,1);
+const oracle=JSON.parse(oracleLines[0].slice('PSC1_COMPILERM_ORACLE: '.length));
 assert.equal(oracle.leanVersion,'4.35.0');
 assert.equal(oracle.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 write(path.join(evidence,'native-oracle.json'),JSON.stringify(oracle,null,2)+'\n');
@@ -69,7 +73,7 @@ function execute(target, output) {
     }
     run(process.execPath, ['--input-type=module', '-e',
       'import assert from "node:assert/strict"; const m=await import(' + JSON.stringify(pathToFileURL(fs.realpathSync(js)).href) +
-      '); for(const name of Object.keys(m)){assert.equal(m[name](false),true,name); assert.equal(m[name](true),true,name);}']);
+      '); assert.deepEqual(Object.keys(m).sort(),'+JSON.stringify([...names].sort())+'); for(const name of Object.keys(m)){assert.equal(m[name](false),true,name); assert.equal(m[name](true),true,name);}']);
   } else if (target === 'rust') {
     const crate = path.join(path.dirname(output), 'consumer');
     fs.cpSync(fs.realpathSync(output.replace(/\.rs$/, '.cargo')), crate, { recursive: true, dereference: true });
@@ -80,17 +84,17 @@ function execute(target, output) {
   } else if (target === 'wasm-core') {
     run(process.execPath, ['--input-type=module', '-e',
       'import fs from "node:fs"; import assert from "node:assert/strict"; const {instance}=await WebAssembly.instantiate(fs.readFileSync(' +
-      JSON.stringify(output) + ')); for(const name of Object.keys(instance.exports)){assert.equal(instance.exports[name](0),1,name); assert.equal(instance.exports[name](1),1,name);}']);
+      JSON.stringify(output) + ')); assert.deepEqual(Object.keys(instance.exports).sort(),'+JSON.stringify([...names].sort())+'); for(const name of Object.keys(instance.exports)){assert.equal(instance.exports[name](0),1,name); assert.equal(instance.exports[name](1),1,name);}']);
   } else if (target === 'wasm-component') {
     for (const name of names) for (const flag of ['false','true']) {
       assert.equal(run('wasmtime', ['run', '--invoke', name+'(' + flag + ')', output]).trim(), 'true');
     }
   } else if (target === 'python') {
     run(process.env.PSC1_PYTHON || 'python3', ['-I', '-c',
-      'import importlib.util,sys\ns=importlib.util.spec_from_file_location("typed_errors",sys.argv[1]);m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\nfor name in m.__all__:\n f=getattr(m,name);assert f(False) is True,name;assert f(True) is True,name\n', output]);
+      'import importlib.util,sys\ns=importlib.util.spec_from_file_location("typed_errors",sys.argv[1]);m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\nassert sorted(m.__all__)=='+JSON.stringify([...names].sort())+'\nfor name in m.__all__:\n f=getattr(m,name);assert f(False) is True,name;assert f(True) is True,name\n', output]);
   } else {
     run(process.env.PSC1_PHP || 'php', ['-d', 'memory_limit=1G', '-r',
-      '$m=require $argv[1]; foreach($m as $name=>$f){if($f(false)!==true || $f(true)!==true){fwrite(STDERR,$name);exit(1);}}', output]);
+      '$m=require $argv[1]; $keys=array_keys($m);sort($keys);if($keys!==json_decode('+JSON.stringify(JSON.stringify([...names].sort()))+',true))exit(1); foreach($m as $name=>$f){if($f(false)!==true || $f(true)!==true){fwrite(STDERR,$name);exit(1);}}', output]);
   }
 }
 
@@ -103,6 +107,7 @@ try {
   // names avoid accidental self-reference and retain individual observations.
   const definitions=contract.cases.map((c,i)=>{
    const no=oracle[c.id+'False'],yes=oracle[c.id+'True'];
+   assert.match(no,/^\d+$/);assert.match(yes,/^\d+$/);
    const name='check'+c.id;
    return syntax==='lean'?
     'def '+name+' (flag : Bool) : Bool := Nat.beq ('+c.id+' flag) (if flag then '+yes+' else '+no+')\n':

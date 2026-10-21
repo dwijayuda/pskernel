@@ -20,3 +20,24 @@ for(const mutation of [{id:'unknown'},{syntax:'unknown'},{target:'unknown'},{pas
 }
 assert.throws(()=>check({...contract,targets:[...contract.targets,'js']},rows));
 console.log('PSC1_PARITY_CONTRACT_TESTS: missing/duplicate/unknown/skipped/identity/refusal receipts refuse');
+
+const collection=JSON.parse(fs.readFileSync('docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json','utf8'));
+const collectionRows=collection.cases.flatMap(c=>collection.grammars.flatMap(s=>collection.targets.map(t=>({
+ ...rows[0],id:c.id,syntax:s,target:t,independentReferenceSha256:digest,
+ referenceComparison:'native-standard-operations',
+ refusals:Object.fromEntries(collection.requiredRefusals.map(id=>[id,digest]))
+}))));
+assert.equal(check(collection,collectionRows).obligations,42);
+assert.throws(()=>check(collection,[{...collectionRows[0],independentReferenceSha256:null},...collectionRows.slice(1)]),/independent standard reference/);
+assert.throws(()=>check(collection,[{...collectionRows[0],referenceComparison:'same-helper'},...collectionRows.slice(1)]));
+
+const jsonContract=JSON.parse(fs.readFileSync('docs/PSC1_JSON_APPLICATION_CASE_CONTRACT.json','utf8'));
+const jsonRows=jsonContract.cases.flatMap(c=>jsonContract.grammars.flatMap(s=>jsonContract.targets.map(t=>({
+ ...rows[0],id:c.id,syntax:s,target:t,
+ applicationModuleSha256:Object.fromEntries(jsonContract.requiredModules.map(m=>[m+'.'+s,digest])),
+ librarySha256:Object.fromEntries(jsonContract.oracleLibraries.map(key=>[key,digest])),
+ refusals:Object.fromEntries(jsonContract.requiredRefusals.map(id=>[id,digest]))
+}))));
+assert.equal(check(jsonContract,jsonRows).obligations,98);
+assert.throws(()=>check(jsonContract,[{...jsonRows[0],applicationModuleSha256:{}},...jsonRows.slice(1)]));
+assert.throws(()=>check(jsonContract,[{...jsonRows[0],librarySha256:{}},...jsonRows.slice(1)]));

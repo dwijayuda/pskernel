@@ -1,0 +1,23 @@
+def pairCaseInput(flag : Bool) : List(String) :=
+  if (flag) { ["{\"text\":\"\\uD83D\\uDE00\"}", "{\"text\":\"\\u0061\"}"] }
+  else { ["{\"text\":\"\\uD800\\uDC00\"}", "{\"text\":\"\\uDBFF\\uDFFF\"}"] }
+
+def scalarCaseInput(flag : Bool) : List(String) :=
+  if (flag) { ["{\"text\":\"😀\"}", "{\"text\":\"a\"}"] }
+  else { ["{\"text\":\"\\uD7FF\"}", "{\"text\":\"\\uE000\"}"] }
+
+def loneCaseInput(flag : Bool) : List(String) :=
+  if (flag) { ["{\"text\":\"\\uD800\"}"] }
+  else { ["{\"text\":\"\\uDC00\"}"] }
+
+def badPairCaseInput(flag : Bool) : List(String) :=
+  if (flag) { ["{\"text\":\"\\uD800\\uD800\"}"] }
+  else { ["{\"text\":\"\\uD800\\u0041\"}"] }
+
+def truncatedCaseInput(flag : Bool) : List(String) :=
+  if (flag) { ["{\"text\":\"\\uD800x\"}"] }
+  else { ["{\"text\":\"\\uD800\\uDC0\"}"] }
+
+def mixedCaseInput(flag : Bool) : List(String) :=
+  if (flag) { ["{\"text\":\"\\ud83d\\uDE00\"}"] }
+  else { ["{\"text\":\"\\uDBFF\\udfff\"}"] }

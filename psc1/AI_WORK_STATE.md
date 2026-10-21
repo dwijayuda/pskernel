@@ -1,5 +1,53 @@
 # PSC1 current execution checkpoint
 
+Updated 2026-10-21. Active draft PR172, same non-force branch/history. GitHub
+APIs and Linux Actions only. Optimization implementation219ad102a0c0b846a941f64e97ea071570a6e32c:
+static/native/focused (now JS/TS/Rust)/all3 closures/G1/host SUCCESS.
+Full39567037483/job119111960106 and aggregate gate119117837166 SUCCESS.
+Tested mergef7fa6aaec0c9772f410bc458e6677e8b7b0a8e55; exact optimization
+receipt in docs/PSC1_DEVELOPMENT_OPTIMIZATION_QUALIFICATION_2026-10-21.json.
+Full scoped853s;8 selected heavy jobs total2074s. Readiness11 qualified finite
+criteria/26 blocked; no complete family. Documentation-only scheduling still
+needs an actual run to corroborate the tested zero-heavy selection.
+The first router run correctly skips the unrelated specialization benchmark.
+
+Actual next implementation, pending CI:
+- Collections compare six observations with a separate pinned native Lean
+  standard List/Array/Except process. Missing reference identity refuses parity.
+- JSON escapes now combine valid UTF-16 surrogate pairs. Existing jsonReadUnicode4
+  remains the strict single-scalar API; isolated/malformed surrogates still
+  produce invalidUnicode. The string parser uses the new pair-aware decoder.
+- Both authored grammars compile a real three-module pure JSON-record processor:
+  input records, transform/fold and entry observations. Seven finite cases cover
+  emoji, minimum/maximum pairs, BMP neighbors, literal Unicode, mixed hex case,
+  isolated/repeated/truncated surrogates, and preservation of scalar-only decoding.
+  Valid outputs use the pinned native Lean JSON parser as reference. Negative
+  surrogate expectations retain PSC1's stricter policy rather than Lean's
+  replacement-character behavior.
+- Shared conformance runner adds JSON core observations, exact module/library
+  hashes, type/refusal/publication checks; JS/TS/Rust early (full tier waits for native/focused success), all7 and minimum
+  Python for qualification. Expected new obligations:98 JSON core,42 collection,
+ 126 CompilerM; minimum14+6+18. These are expectations, not passed CI claims.
+- Typed console/file IO and complete practical applications remain blocked.
+  A pure record-processing core does not complete the JSON/file application.
+
+The finite contract remains fourteen families/37 criteria/four applications;
+no scope expansion or completed-family claim. Manual psc1-practical-release
+calls all existing native/closure/G1/scoped qualification and enforces
+--require-ready. It must fail until all finite criteria and actual applications
+have real qualification evidence. No merge/publication is performed.
+
+The readiness artifact also derives queue statuses from the same exact-commit
+suite evidence; none is manually promoted to qualified.
+
+After CI, continue the dependency-ordered contract queue with bounded
+inference/control cases and the typed IO/application gaps. G2/G3 remain deferred;
+official Lean4.35 admission, strict IR, security/resource policies and every
+previous regression remain required.
+
+## Preserved optimization checkpoint
+
+
 Updated 2026-10-21 by the explicit throughput optimization request. Remote HEAD
 inspected before these changes:30c2cd9e857e043bb4f5c34ab0d19d0af8b62762.
 Active draft PR172 on fix/psc1-closure-normalization-20261021. Base #171 and

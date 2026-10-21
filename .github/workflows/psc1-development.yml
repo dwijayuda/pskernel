@@ -87,7 +87,7 @@ jobs:
     uses: ./.github/workflows/psc1-generated-compiler.yml
 
   full:
-    needs: static
+    needs: [static, native, focused]
     if: needs.static.outputs.release == 'true'
     uses: ./.github/workflows/psc1-scoped-correctness.yml
 

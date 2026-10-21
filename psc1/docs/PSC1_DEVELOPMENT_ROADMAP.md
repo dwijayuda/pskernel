@@ -33,7 +33,9 @@ cache hit. Concurrency cancels obsolete PR work; explicit manual full runs are
 retained. Selection/readiness JSON artifacts expose what ran and why. Require
 the incremental gate plus fresh full qualification before merge/release; use
 manual psc1-development with full=true to rerun all qualification dependencies.
-Repository protection settings have not been changed.
+Repository protection settings have not been changed. The separate manual
+psc1-practical-release workflow reruns native/closure/G1/full scoped qualification
+and enforces --require-ready; it cannot pass an incomplete Practical Core contract.
 
 Run scripts/practical-core-readiness.mjs to derive implemented/tested/qualified/
 blocked criteria from current fixture registration and exact-commit receipts.

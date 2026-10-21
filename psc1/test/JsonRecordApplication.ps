@@ -1,0 +1,25 @@
+import JsonRecords.Input
+import JsonRecords.Transform
+
+def pairCase(flag : Bool) : Nat := recordObservation(pairCaseInput(flag))
+
+def scalarCase(flag : Bool) : Nat := recordObservation(scalarCaseInput(flag))
+
+def loneCase(flag : Bool) : Nat := recordObservation(loneCaseInput(flag))
+
+def badPairCase(flag : Bool) : Nat := recordObservation(badPairCaseInput(flag))
+
+def truncatedCase(flag : Bool) : Nat := recordObservation(truncatedCaseInput(flag))
+
+def mixedCase(flag : Bool) : Nat := recordObservation(mixedCaseInput(flag))
+
+def scalarDecoderCase(flag : Bool) : Nat :=
+  let source : String := if (flag) { "D83D\\uDE00" } else { "DFFF" }
+  match (jsonReadUnicode4(source, 0)) {
+  | Result.ok(value) => 2
+  | Result.error(error) =>
+      match (error) {
+      | JsonError.invalidUnicode => 1
+      | _ => 2
+      }
+  }

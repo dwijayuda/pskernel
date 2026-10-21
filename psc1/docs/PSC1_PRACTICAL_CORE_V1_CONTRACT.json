@@ -44,6 +44,12 @@
       "receipt": "dist/scoped-correctness/stdlib-collections/results.json",
       "fixture": "test/StdlibCollectionFixtures",
       "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "json-application": {
+      "contract": "docs/PSC1_JSON_APPLICATION_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/json-application/results.json",
+      "fixture": "test/JsonRecordApplication",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
     }
   },
   "families": [
@@ -358,7 +364,11 @@
       "id": "json-files",
       "acceptance": [
         "Read bounded UTF-8 JSON records; transform and write deterministic output; Unicode escape pairs, malformed JSON, permission and size failures."
-      ]
+      ],
+      "coreExecution": {
+        "suite": "json-application",
+        "scope": "multi-module pure JSON record processing; typed file/console capabilities pending"
+      }
     },
     {
       "id": "multi-module-library",

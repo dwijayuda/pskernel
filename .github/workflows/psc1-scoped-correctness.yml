@@ -2,7 +2,16 @@ name: PSC1 scoped correctness and readable artifacts
 
 on:
   workflow_dispatch:
+    inputs:
+      require_release_ready:
+        description: Enforce the complete Practical Core release contract
+        type: boolean
+        default: false
   workflow_call:
+    inputs:
+      require_release_ready:
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -187,6 +196,7 @@ jobs:
           node scripts/language-backend-parity-contract-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
+          node scripts/compiler-m-conformance-tests.mjs --json-application
           node scripts/check-language-backend-parity.mjs docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json dist/scoped-correctness/stdlib-collections/results.json
           node scripts/check-language-backend-parity.mjs docs/PSC1_COMPILERM_CASE_CONTRACT.json dist/scoped-correctness/compiler-m/results.json
       - name: Execute owned component binary encoder with external encoding disabled
@@ -231,8 +241,11 @@ jobs:
           export PSC1_COMPILERM_EVIDENCE=compiler-m-python314
           export PSC1_COLLECTION_TARGETS=python
           export PSC1_COLLECTION_EVIDENCE=stdlib-collections-python314
+          export PSC1_JSON_TARGETS=python
+          export PSC1_JSON_EVIDENCE=json-application-python314
           node scripts/compiler-m-conformance-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
+          node scripts/compiler-m-conformance-tests.mjs --json-application
           node scripts/typed-error-conformance-tests.mjs
           node scripts/runtime-conformance-tests.mjs
           node scripts/ordinary-while-conformance-tests.mjs
@@ -246,7 +259,7 @@ jobs:
         run: node scripts/seven-backend-qualification.mjs
       - name: Derive exact-commit Practical Core readiness
         working-directory: psc1
-        run: node scripts/practical-core-readiness.mjs
+        run: node scripts/practical-core-readiness.mjs ${{ inputs.require_release_ready && '--require-ready' || '' }}
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4

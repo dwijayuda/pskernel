@@ -80,12 +80,33 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
  });
  // Applications become eligible only with actual application runners and a versioned
  // matrix contract. No generic Boolean fixture is accepted as application evidence.
- const applications=contract.applications.map(a=>({id:a.id,status:'blocked',reason:'actual application acceptance runner pending'}));
+ const applications=contract.applications.map(a=>{
+  const core=a.coreExecution&&suiteStates[a.coreExecution.suite];
+  return {id:a.id,status:'blocked',reason:a.coreExecution?'typed IO and remaining full application criteria pending':'actual application acceptance runner pending',
+   coreStatus:core?.qualified&&full?'qualified-subset':core?.tested?'tested':core?.implemented?'implemented':'blocked',
+   coreScope:a.coreExecution?.scope||null};
+ });
+ const familyQualified=id=>families.find(f=>f.id===id)?.qualified===true;
+ const queue=contract.workQueue.map(task=>{
+  let qualified=false,tested=false,implemented=false;
+  if(task.id==='collection-reference'){
+   const suite=suiteStates['stdlib-collections'];
+   implemented=suite?.implemented;tested=suite?.tested;qualified=suite?.qualified&&full;
+  }else if(task.id==='json-application'){
+   const suite=suiteStates['json-application'];
+   implemented=suite?.implemented;tested=suite?.tested;qualified=suite?.qualified&&full;
+  }else if(task.id==='inference-control')qualified=['local-inference','call-inference','typed-do','for-loops','while-loops','mutation','early-return','tuples-patterns','typed-errors'].every(familyQualified);
+  else if(task.id==='checked-order')qualified=familyQualified('operators');
+  else if(task.id==='typed-io')qualified=familyQualified('typed-io');
+  else if(task.id==='application-performance')qualified=applications.every(a=>a.status==='qualified');
+  else if(task.id==='feature-freeze')qualified=families.every(f=>f.qualified)&&applications.every(a=>a.status==='qualified');
+  return {id:task.id,status:qualified?'qualified':tested?'tested':implemented?'implemented':'blocked',dependsOn:task.dependsOn};
+ });
  return {schema:'psc1-practical-core-readiness/1',contract:contract.id,testedCommit:commit,
   fullScopedQualification:full,families,applications,
   counts:Object.fromEntries(['implemented','tested','qualified','blocked'].map(status=>
    [status,families.flatMap(f=>f.cases).filter(c=>c.status===status).length])),
-  deferred:contract.deferred,releaseReady:families.every(f=>f.qualified)&&applications.every(a=>a.status==='qualified'),
+  queue,deferred:contract.deferred,releaseReady:families.every(f=>f.qualified)&&applications.every(a=>a.status==='qualified'),
   authority:'data-only CI inventory; no publication or admission authority'};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){

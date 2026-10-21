@@ -9,13 +9,14 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
 const suite=process.argv[2]||'--compiler-m';
-assert.ok(['--compiler-m','--stdlib-collections'].includes(suite));
+assert.ok(['--compiler-m','--stdlib-collections','--json-application'].includes(suite));
 const collections=suite==='--stdlib-collections';
-const fixtureName=collections?'StdlibCollectionFixtures':'CompilerMFixtures';
-const contractFile=collections?'PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json':'PSC1_COMPILERM_CASE_CONTRACT.json';
-const evidenceName=collections?(process.env.PSC1_COLLECTION_EVIDENCE||'stdlib-collections'):(process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
-const targetSelection=collections?process.env.PSC1_COLLECTION_TARGETS:process.env.PSC1_COMPILERM_TARGETS;
-const marker=collections?'PSC1_COLLECTION':'PSC1_COMPILERM';
+const jsonApplication=suite==='--json-application';
+const fixtureName=jsonApplication?'JsonRecordApplication':collections?'StdlibCollectionFixtures':'CompilerMFixtures';
+const contractFile=jsonApplication?'PSC1_JSON_APPLICATION_CASE_CONTRACT.json':collections?'PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json':'PSC1_COMPILERM_CASE_CONTRACT.json';
+const evidenceName=jsonApplication?(process.env.PSC1_JSON_EVIDENCE||'json-application'):collections?(process.env.PSC1_COLLECTION_EVIDENCE||'stdlib-collections'):(process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
+const targetSelection=jsonApplication?process.env.PSC1_JSON_TARGETS:collections?process.env.PSC1_COLLECTION_TARGETS:process.env.PSC1_COMPILERM_TARGETS;
+const marker=jsonApplication?'PSC1_JSON_APPLICATION':collections?'PSC1_COLLECTION':'PSC1_COMPILERM';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const native=process.env.PSC1_NATIVE||path.join(root,'.lake/build/bin/psc1');
 const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-compiler-m-'));
@@ -55,7 +56,8 @@ const extraLibraries={option:read(path.join(root,'stdlib/ProofScript/Data/Option
  prod:read(path.join(root,'stdlib/ProofScript/Data/Prod.lean')),
  list:read(path.join(root,'stdlib/ProofScript/Data/List.lean')),
  array:read(path.join(root,'stdlib/ProofScript/Data/Array.lean'))};
-const librarySha256=Object.fromEntries(Object.entries({...extraLibraries,result:resultLibrary,effect:effectLibrary}).map(([key,value])=>[key,sha(value)]));
+const jsonLibraries=jsonApplication?{json:read(path.join(root,'stdlib/ProofScript/Data/Json.lean')),ordering:read(path.join(root,'stdlib/ProofScript/Data/Ordering.lean'))}:{};
+const librarySha256=Object.fromEntries(Object.entries({...extraLibraries,...jsonLibraries,result:resultLibrary,effect:effectLibrary}).map(([key,value])=>[key,sha(value)]));
 const leanFixture=read(path.join(root,'test',fixtureName+'.lean'));
 const nativeAdapter=`
 instance {C S E : Type} : Monad (CompilerM C S E) where
@@ -65,7 +67,7 @@ instance {C S E : Type} : MonadExceptOf E (CompilerM C S E) where
   throw := compilerThrow
   tryCatch := compilerTryCatch
 `;
-const oracleSource='import Lean\n'+Object.values(extraLibraries).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+
+const oracleSource=jsonApplication?read(path.join(root,'test/JsonRecordReference.lean')):'import Lean\n'+Object.values(extraLibraries).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+
  nativeAdapter+'\n'+stripImports(leanFixture)+'\n'+
  'def main : IO Unit := do\n  IO.println (\"PSC1_COMPILERM_ORACLE: \" ++ (Lean.Json.mkObj [("leanVersion",Lean.toJson Lean.versionString),("leanCommit",Lean.toJson Lean.githash),'+
  contract.cases.flatMap(c=>[false,true].map(flag=>'("'+c.id+(flag?'True':'False')+'",Lean.toJson (toString ('+c.id+' '+flag+')))')).join(',')+']).compress)\n';
@@ -78,6 +80,24 @@ const oracle=JSON.parse(oracleLines[0].slice('PSC1_COMPILERM_ORACLE: '.length));
 assert.equal(oracle.leanVersion,'4.35.0');
 assert.equal(oracle.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 write(path.join(evidence,'native-oracle.json'),JSON.stringify(oracle,null,2)+'\n');
+let independentReferenceSha256=null;
+if(collections){
+ const referenceFile=path.join(root,'test/StandardCollectionReference.lean');
+ const referenceSource=read(referenceFile);
+ // Run in a separate native process importing only Lean, never PSC1 helper bodies.
+ const referenceOutput=run('lake',['env','lean','--run',referenceFile]);
+ write(path.join(evidence,'standard-reference.lean'),referenceSource);
+ write(path.join(evidence,'standard-reference.log'),referenceOutput);
+ const lines=referenceOutput.split('\n').filter(line=>line.startsWith('PSC1_STANDARD_COLLECTION_REFERENCE: '));
+ assert.equal(lines.length,1);
+ const reference=JSON.parse(lines[0].slice('PSC1_STANDARD_COLLECTION_REFERENCE: '.length));
+ assert.equal(reference.leanVersion,oracle.leanVersion);
+ assert.equal(reference.leanCommit,oracle.leanCommit);
+ for(const c of contract.cases)for(const flag of ['False','True'])
+  assert.equal(oracle[c.id+flag],reference[c.id+flag],'stdlib helper differs from native standard operation: '+c.id+flag);
+ independentReferenceSha256=sha(referenceSource);
+ console.log('PSC1_COLLECTION_STANDARD_REFERENCE: PASS six independent native comparisons');
+}
 function execute(target, output) {
   if (target === 'js' || target === 'ts') {
     let js = output;
@@ -123,6 +143,13 @@ try {
   write(path.join(folder,fixtureName+'.'+syntax),read(fixture));
   // Imported identities remain private to the entry module; distinct wrapper
   // names avoid accidental self-reference and retain individual observations.
+  const applicationModuleSha256={};
+  if(jsonApplication){
+   for(const module of contract.requiredModules){
+    const relative=module+'.'+syntax,source=read(path.join(root,'test/applications',relative));
+    write(path.join(folder,relative),source);applicationModuleSha256[relative]=sha(source);
+   }
+  }
   const definitions=contract.cases.map((c,i)=>{
    const no=oracle[c.id+'False'],yes=oracle[c.id+'True'];
    assert.match(no,/^\d+$/);assert.match(yes,/^\d+$/);
@@ -136,7 +163,12 @@ try {
   const combine=exports.map(name=>syntax==='lean'?'('+name+' flag)':'('+name+'(flag))').join(' && ');
   write(path.join(folder,'Entry.'+syntax),'import '+fixtureName+'\n'+definitions.join('\n')+
    (syntax==='lean'?'def semantic (flag : Bool) : Bool := ':'def semantic(flag : Bool) : Bool := ')+combine+'\n');
-  const negativeCases=collections?[
+  const negativeCases=jsonApplication?[
+   {id:'wrong-record-type',lean:'import JsonRecords.Transform\ndef invalid : Result Nat JsonError := recordCode true\n',
+    ps:'import JsonRecords.Transform\ndef invalid : Result(Nat, JsonError) := recordCode(true)\n'},
+   {id:'wrong-record-list',lean:'import JsonRecords.Transform\ndef invalid : Result Nat JsonError := sumRecordCodes [true]\n',
+    ps:'import JsonRecords.Transform\ndef invalid : Result(Nat, JsonError) := sumRecordCodes([true])\n'}
+  ]:collections?[
    {id:'wrong-element',lean:'def invalid : List Nat := [true]\n',ps:'def invalid : List(Nat) := [true]\n'},
    {id:'wrong-index',lean:'def invalid : Option Nat := let values : Array Nat := #[1]; values[true]?\n',
     ps:'def invalid : Option(Nat) := let values : Array(Nat) := #[1]\n values[true]?\n'}
@@ -152,6 +184,7 @@ try {
    const label=syntax+'-'+target,extension={js:'js',ts:'ts',rust:'rs','wasm-core':'wasm','wasm-component':'wasm',python:'py',php:'php'}[target];
    const output=path.join(work,label,'module.'+extension);
    const args=['build',path.join(folder,'Entry.'+syntax),'--target',target,'--out',output];
+   if(jsonApplication)args.push('--assurance','ordinary-checked');
    if(target==='wasm-component')args.push('--exports',names.join(','));
    try{
     run(native,args);
@@ -161,7 +194,10 @@ try {
     assert.equal(manifest.runtimeContract,'psc1-runtime-semantics/1');
     execute(target,output);
     const before=hash(output+'.bundle.json'),published=fs.realpathSync(output+'.bundle.json');
-    const refusals={verified:reject([...args,'--assurance','verified'])};
+    const verifiedArgs=[...args],assuranceIndex=verifiedArgs.indexOf('--assurance');
+    if(assuranceIndex<0)verifiedArgs.push('--assurance','verified');
+    else verifiedArgs[assuranceIndex+1]='verified';
+    const refusals={verified:reject(verifiedArgs)};
     for(const {id} of negativeCases){
      const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,/PSC1_PROJECT_ELAB_FAILED/);
     }
@@ -179,7 +215,7 @@ try {
      strictIr:'required-by-production-publication',runtime:'executed',publicAbi:'Bool-to-Bool-scalars',
      sourceSha256:hash(fixture),entrySha256:hash(args[1]),artifactSha256:hash(output),
      manifestSha256:before,oracleSha256:hash(oracleFile),
-     librarySha256,refusals};
+     librarySha256,refusals,...(jsonApplication?{applicationModuleSha256}:{}),...(collections?{independentReferenceSha256,referenceComparison:'native-standard-operations'}:{})};
     for(const c of contract.cases) records.push({...identity,id:c.id,flags:[false,true],
      expected:{false:oracle[c.id+'False'],true:oracle[c.id+'True']}});
     console.log(marker+'_TARGET_PASS: '+label);

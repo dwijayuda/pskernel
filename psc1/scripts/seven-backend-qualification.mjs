@@ -21,6 +21,17 @@ const namespaceBoundaries = ['lean', 'ps'].map(syntax =>
   read('dist/scoped-correctness/namespace-boundaries/' + syntax + '.json'));
 const targets = ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'];
 
+const jsonApplicationContract=read('docs/PSC1_JSON_APPLICATION_CASE_CONTRACT.json');
+const jsonApplication=read('dist/scoped-correctness/json-application/results.json');
+const minimumJsonApplication=read('dist/scoped-correctness/json-application-python314/results.json');
+for(const [data,selectedTargets] of [[jsonApplication,targets],[minimumJsonApplication,['python']]]){
+ assert.equal(data.schema,'psc1-language-backend-execution/1');
+ assert.equal(data.contract,jsonApplicationContract.id);
+ assert.equal(data.testedCommit,process.env.GITHUB_SHA);
+ assert.equal(data.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+ assert.equal(data.passed,true);assert.deepEqual(data.failures,[]);
+ checkLanguageBackendParity(jsonApplicationContract,data.records,{targets:selectedTargets});
+}
 const compilerMContract = read('docs/PSC1_COMPILERM_CASE_CONTRACT.json');
 const compilerM = read('dist/scoped-correctness/compiler-m/results.json');
 const minimumCompilerM = read('dist/scoped-correctness/compiler-m-python314/results.json');
@@ -315,6 +326,9 @@ const receipt = {
     runtimeBytes: x.runtime.runtimeBytes, runtimeSha256: x.runtime.runtimeSha256
   })),
   architectureFoundation: {
+    jsonRecordApplicationCore:{contract:jsonApplicationContract.id,obligations:jsonApplication.records.length,
+      minimumPythonObligations:minimumJsonApplication.records.length,
+      evidence:'json-application/results.json',typedFileIo:false,completeApplication:false},
     standardCollections: { contract: collectionsContract.id,
       caseGrammarTargetObligations: collections.records.length,
       minimumPythonObligations: minimumCollections.records.length,

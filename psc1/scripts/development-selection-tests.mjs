@@ -18,3 +18,13 @@ assert.equal(select([],{full:true}).release,true);
 assert.equal(select(['psc1/scripts/SpecializeQueueBenchmark.lean']).benchmark,true);
 assert.equal(select(['psc1/AI_WORK_STATE.md','psc1/test/DataTests.lean']).focused,true);
 console.log('PSC1_DEVELOPMENT_SELECTION: PASS doc-only 0 heavy jobs; fixture 2; source 7; full 8 (plus selected benchmark)');
+
+for(const paths of [
+ ['psc1/packages/direct/src/Ps/BackendWasm/Module.lean'],
+ ['psc1/scripts/compiler-m-conformance-tests.mjs'],
+ ['psc1/host-tools/artifacts.mjs'],
+ ['.github/workflows/psc1-development.yml']
+]){
+ const selected=select(paths);
+ assert.ok(!selected.release||selected.focused,'full tier requires early native/JS/TS/Rust success');
+}

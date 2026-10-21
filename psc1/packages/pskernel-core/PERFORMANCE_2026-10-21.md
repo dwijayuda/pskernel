@@ -1,5 +1,50 @@
 # PSKernel-Core performance receipts — 2026-10-21
 
+## 2026-10-21 09:18 UTC — qualified lazy-delta source480
+
+Source `480d875d5be7a9e656e7ccd1fa76cc7409a81c90`;
+[integration39572301149](https://github.com/dwijayuda/pskernel/actions/runs/39572301149)
+and [canonical/correctness39572301275](https://github.com/dwijayuda/pskernel/actions/runs/39572301275)
+are terminal PASS.128 generated complete-check observations across32 workloads
+and24 admission observations across6 workloads preserved all exact assertions.
+V1/DAG warm ratios range0.703–7.437 on the32 selected workloads, not a global
+speedup. Values below average two observations per variant from same-run
+A-B-B-A workers. Input construction is separate; complete public checking
+includes validation/decoding. Policies are unchanged.
+
+| Operation/shape/depth | Calls | V1 warm ms | DAG warm ms | V1/DAG | V1/DAG mean peak RSS KiB | V1/DAG mean retained heap bytes |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| whnf/projection-field/8 | 3 | 27.751 | 39.449 | 0.703 | 136886/139380 | 116448/295944 |
+| whnf/projection-field/32 | 1 | 24.984 | 26.009 | 0.961 | 154770/164016 | 54760/75488 |
+| whnf/projection-field/96 | 1 | 66.369 | 80.563 | 0.824 | 210922/213166 | 35100/90836 |
+| whnf/fn-shared/128 | 1 | 575.377 | 116.209 | 4.951 | 227784/209176 | 75040/64072 |
+| whnf/fn-unique/128 | 1 | 1094.475 | 612.572 | 1.787 | 232802/232206 | 42080/66172 |
+| whnf/fn-collision/128 | 1 | 2995.528 | 2583.842 | 1.159 | 248572/249398 | 31648/55292 |
+
+| Safe admission batch | Calls | V1 warm ms | DAG warm ms | V1/DAG | V1/DAG cold ms | V1/DAG build ms |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| chain/8 | 3 | 103.931 | 122.698 | 0.847 | 51.417/62.501 | 0.137/11.469 |
+| chain/32 | 2 | 222.289 | 292.213 | 0.761 | 146.329/189.831 | 0.274/46.192 |
+| metadata/8 | 3 | 358.832 | 185.250 | 1.937 | 160.042/86.538 | 0.390/23.128 |
+| metadata/32 | 2 | 931.449 | 470.895 | 1.978 | 533.982/270.521 | 1.088/95.164 |
+| binder/8 | 2 | 94.837 | 149.814 | 0.633 | 75.048/115.284 | 0.213/17.377 |
+| binder/32 | 1 | 176.850 | 306.901 | 0.576 | 233.559/367.199 | 0.609/69.580 |
+
+Projection and binder/chain-admission regressions remain. Binder32 mean peak RSS
+is218322/232574KiB and retained heap20488/47212bytes (V1/DAG).
+Function-unique128 construction is2.372/77.321ms, cold checking1200.420/671.620ms;
+function-collision128 construction is2.383/79.779ms. These measurements do not
+establish acceptable full-corpus performance or justify historical8–16x claims.
+
+The full480 [Arena run39572301156](https://github.com/dwijayuda/pskernel/actions/runs/39572301156)
+failed qualification:193=170 matches+2 safety agreements+20 timeouts+1 unsupported.
+The corrected logical diagnostic
+[39569335308](https://github.com/dwijayuda/pskernel/actions/runs/39569335308)
+uses e015 runtime, not480; it locates V1 HasFVar/cache-eligibility and
+argument-list/equality costs in the two original performance cases. All original
+body digests and60s/2GiB limits remain intact. Sampling data is attribution only;
+timeouts remain unresolved outcomes.
+
 ## Subsequent full-corpus receipt: f483 allocation runtime
 
 Full run [39564831733](https://github.com/dwijayuda/pskernel/actions/runs/39564831733/job/119105347671)

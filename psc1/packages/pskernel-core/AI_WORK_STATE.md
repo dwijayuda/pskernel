@@ -9,6 +9,91 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 09:18 UTC — qualified lazy delta; full-shape successor pending
+
+Last fully qualified developer source: **`480d875d5be7a9e656e7ccd1fa76cc7409a81c90`**.
+Native [119129224910](https://github.com/dwijayuda/pskernel/actions/runs/39572301149/job/119129224910)
+and generated [119129224648](https://github.com/dwijayuda/pskernel/actions/runs/39572301149/job/119129224648)
+integration are terminal PASS. Native correctness
+[119129225529](https://github.com/dwijayuda/pskernel/actions/runs/39572301275/job/119129225529)
+and complete canonical-source portability/execution
+[119129225160](https://github.com/dwijayuda/pskernel/actions/runs/39572301275/job/119129225160)
+are terminal PASS. All six research jobs in
+[39572301201](https://github.com/dwijayuda/pskernel/actions/runs/39572301201) passed.
+
+| Exact source | Native | Portable .lean | Canonical .ps | Generated JS | Local proofs | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `480d875d5be7a9e656e7ccd1fa76cc7409a81c90` | PASS | PASS | PASS | PASS | PASS | PASS selected workloads | FAIL qualification | PASS |
+| This full-shape successor | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+The480 gates retain the mutual280-case/eight-official matrix, fresh-member budget
+owners, batch atomicity, binder/theorem/unsafe controls, ordered prefix and
+scanner equivalence. Added owner/stage counts passed in native and both real JS
+routes: proof irrelevance1350; Nat1350/192; lazy delta1800/1024/128, with18
+official positive and4 invalid fixtures. No resource/callback policy changed.
+Native and each JS provider passed24 detached protocol cases; each JS API
+passed8 additional cases, and the official provider check passed5 fixtures,
+including the real4-declaration batch. JS runs used empty PATH. Readable JS/TS,
+declarations/maps, and the complete canonical source were packaged. Full-kernel
+DirectJS remains explicitly UNSUPPORTED.
+
+Source-bound artifact ZIP SHA-256 receipts:
+- [native12332333450](https://github.com/dwijayuda/pskernel/actions/runs/39572301149/artifacts/12332333450):
+  `d668ab906463a82e3b84d2668f9e1bfe6742d672b451bee92d0cdd50cbd129e9`.
+- [generated12333042410](https://github.com/dwijayuda/pskernel/actions/runs/39572301149/artifacts/12333042410):
+  `31caafea53b99207509b9adbb1a6e797bee7627f8345facbad32cc76f74d1b6b`.
+- [canonical12334201691](https://github.com/dwijayuda/pskernel/actions/runs/39572301275/artifacts/12334201691):
+  `9a50cffda08e9821dff6ad414f68647e6150f5a967d180b6f697f3462a779c6b`.
+
+Each includes a per-file/source-SHA manifest. Native provider executable:
+`e11ae0d9ec43eb75f4302997e66decccafb0e785cc57e42daa07d73c1e208c3c`.
+Lean-generated JS:
+`b8b4d773d6d8e971b4005eacf29592f6dcdcd46591e44e63ea9debfaa8f8e4b6`.
+Canonical-generated JS:
+`a0160a756da3331690b80b00a360be32c2f4b90db9b50fa9aa1e69b4d0a5e02c`.
+Both routes have identical TypeScript/declaration digests.
+
+### Full193-case480 result — terminal, not inherited
+
+[39572301156/119130181779](https://github.com/dwijayuda/pskernel/actions/runs/39572301156/job/119130181779)
+is terminal FAIL qualification:193=170 matching outcomes (103 accepted,
+59 kernel rejections,1 metadata rejection,7 transport rejections)+2 separate
+unsafe/partial agreements+20 host timeouts+1 explicit unsupported nested-recursion
+case. The official job passed. All193 records are present; no timeout or
+unsupported result is a parity pass. Remaining timeout IDs are24,73,79–88,
+91–97,99; unsupported case17. Artifact12334097511 ZIP SHA-256:
+`b283ce8a72818ae11ea726797efbe3e3d30e92937123a060378cfc73e48f631e`.
+The complete-check/admission performance receipt is updated in
+[PERFORMANCE_2026-10-21.md](PERFORMANCE_2026-10-21.md), including regressions.
+
+### This successor
+
+The single DAG DefEq owner now has full-shape application/head comparison,
+left-to-right argument comparison, function eta, binder/sort/literal rules,
+residual core WHNF and changed-root continuation. Outer unsupported versus
+inner undecided results stay distinct; callback budgets, failure ordering and
+original-pair publication are preserved. New gates require342 direct-stage and
+108 owner comparisons, six official fixtures and one invalid case in native and
+both generated routes. Matching projection and structure/string/unit terminal
+rules still decline; their drafts are not part of this qualification.
+
+Corrected logical collection
+[39569335308/119119294437](https://github.com/dwijayuda/pskernel/actions/runs/39569335308/job/119119294437)
+at217013c is terminal PASS collection, using **earlier e015 runtime**.
+Repeated-subproblem still times out (578/588 nearest samples at HasFVar under
+V1 cache eligibility); church still times out (357/574 at argument comparison,
+119 at equality); Init still times out; stuck-prop correctly rejects. Timeout
+verdict comparison is explicitly unassessed. Artifact12331869594 ZIP:
+`3c668e57ccb615845f02bfcfbd66fb7ad882c156c741b7a7095736703131b0bc`.
+Instrumentation is attribution only, never a latency or conformance claim.
+
+A is achieved for the documented scoped V1 developer provider at480. B/C remain
+open; four public whole-operation fallback sites remain. No global soundness
+proof is claimed. This successor needs all fresh gates before promotion of the
+prepared terminal DefEq, static-guard and Quot slices. Next executable action:
+inspect all push-triggered jobs for this exact commit and fix any native,
+portable-source or generated blocker without weakening assertions.
+
 ## 2026-10-21 08:50 UTC — recursive-call portability fix; authentic caller attribution
 
 At exact source `dbb86c93c15bc84c82c530d9bebdf9a76c15e339`, native integration

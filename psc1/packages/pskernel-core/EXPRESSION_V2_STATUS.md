@@ -28,7 +28,11 @@ offers a concrete transport boundary that enforces that discipline.
 entry fuel/depth guards, exact syntax/success-cache checks, the existing quick and
 binder-spine prefix, mandatory cheap core normalization, proof irrelevance, then
 the ordered natural-number prefix and the complete definition-selection/lazy-delta
-loop. The callbacks use the exact predecessor fuel chosen by the owner; the loop
+loop. The full-shape successor adds residual core WHNF, application/list and
+function-eta/binder/sort/literal rules under the same owner. Matching projections
+and structure/string/unit terminal rules still decline. This successor requires
+fresh qualification;480 is the latest terminal-green scoped developer checkpoint.
+The callbacks use the exact predecessor fuel chosen by the owner; the loop
 spends only its own recursive bound. The Nat lazy stage retains its separate
 entry-fuel guard; predecessor comparison does not add another depth entry.
 Unfold and failed-argument-shortcut caches belong to that owner. A failed shortcut

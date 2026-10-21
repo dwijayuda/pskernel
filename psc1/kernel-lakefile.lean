@@ -54,6 +54,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.DefEq.Args,
     `Ps.KernelCore.Checker.ExprV2.DefEq.DeltaStep,
     `Ps.KernelCore.Checker.ExprV2.DefEq.LazyDelta,
+    `Ps.KernelCore.Checker.ExprV2.DefEq.FullShape,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,
@@ -258,3 +259,8 @@ lean_exe psc1_kernel_expr_v2_lazy_nat_regression where
 lean_exe psc1_kernel_expr_v2_lazy_delta_regression where
   srcDir := "test"
   root := `PsKernelExprV2LazyDeltaRegression
+
+-- Residual full-WHNF, ordered full-shape and function-eta rules over the owning DAG.
+lean_exe psc1_kernel_expr_v2_full_shape_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2FullShapeRegression

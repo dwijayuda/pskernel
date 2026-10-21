@@ -3,12 +3,14 @@ import Ps.KernelCore.Checker.ExprV2.CheckWhnf
 import Ps.KernelCore.Checker.ExprV2.CheckCore
 import Ps.KernelCore.Checker.ExprV2.DefEq.ProofIrrelevance
 import Ps.KernelCore.Checker.ExprV2.DefEq.LazyDelta
+import Ps.KernelCore.Checker.ExprV2.DefEq.FullShape
 
 /- Single recursive DefEq owner. The ordered prefix and proof irrelevance
 share inference-only/WHNF/DefEq callbacks at the exact predecessor fuel.
 The complete ordered lazy-delta stage uses that same owner and admitted body
-IDs. Residual projection/full-shape rules remain unsupported; no partial state
-escapes into the reference fallback. -/
+IDs. Residual full-WHNF and full-shape rules retain the same callback owner.
+Matching projection and structure/string/unit terminal rules remain explicit
+unsupported paths; no partial state escapes into the reference fallback. -/
 def psKernelExprV2TryDefEqStateWithFuel
     (fuel : Nat) :
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
@@ -43,10 +45,15 @@ def psKernelExprV2TryDefEqStateWithFuel
               (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
             let worker := psKernelExprV2TryInferCoreWithFuel remaining;
             worker whnf smaller nextContext nextState nextRoot true;
+        let afterLazy :=
+          fun (nextContext : PsKernelExprV2CheckContext)
+              (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
+            psKernelExprV2DefEqResidualWith smaller inferType whnf coreWhnfMode
+              nextContext nextState nextLeft nextRight;
         let afterProof :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
-            psKernelExprV2DefEqLazyDeltaWithFuel remaining smaller whnf coreWhnfMode
+            psKernelExprV2DefEqLazyDeltaContinueWithFuel remaining afterLazy smaller whnf coreWhnfMode
               nextContext nextState nextLeft nextRight;
         let afterCore :=
           fun (nextContext : PsKernelExprV2CheckContext)

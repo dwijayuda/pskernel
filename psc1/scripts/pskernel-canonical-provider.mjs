@@ -226,11 +226,15 @@ export function checkCanonicalBytes(kernel, bytes, { fuel = 4096n } = {}) {
   if (typeof fuel !== 'bigint' || fuel < 0n || fuel > 4096n)
     throw RangeError('provider fuel must be a BigInt in 0..4096');
   const wrap = result => Object.freeze({ ...identity, fuel: String(fuel), ...result });
-  if (bytes.byteLength > 16 * 1024 * 1024)
+  const byteLength = bytes.byteLength;
+  if (byteLength > 16 * 1024 * 1024)
     return wrap(failure('resourceExhausted', 'transport', 'transport input byte limit exceeded'));
-  if (!isUtf8(bytes)) return wrap(failure('malformedInput', 'transport', 'invalid UTF-8'));
-  return checkCanonicalBatch(kernel, Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength)
-    .toString('utf8'), { fuel });
+  // Copy a bounded span of caller-owned storage before validation and decoding.
+  // Concurrent shared writes can affect the copy, but only this private snapshot
+  // is checked. A growable shared buffer cannot enlarge the captured span.
+  const owned = Buffer.from(new Uint8Array(bytes.buffer, bytes.byteOffset, byteLength));
+  if (!isUtf8(owned)) return wrap(failure('malformedInput', 'transport', 'invalid UTF-8'));
+  return checkCanonicalBatch(kernel, owned.toString('utf8'), { fuel });
 }
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {

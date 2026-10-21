@@ -7,6 +7,88 @@ Lean: `leanprover/lean4:v4.35.0`, exact commit `eb6cafb7290e8bd5f2937522d8d804f5
 Generated path: authentic PSC1 → TypeScript `7.0.2` → Node `22`. Full-kernel DirectJS is unsupported.
 Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduction path.
 
+## 2026-10-21 06:38 UTC — qualified parent and next source checkpoint
+
+The branch reached **same-source native and generated integration PASS** at
+`e1b4deb214c3088e64a18f8b15148c7a15be2924` before the following changes were layered.
+Integration [39554691928](https://github.com/dwijayuda/pskernel/actions/runs/39554691928)
+finished both jobs successfully: native 119071612176 and generated 119071611694.
+The native job checked the retained metadata/cache/fuel proofs, the 280-case mutual
+admission matrix and its official fixtures, the new 1,350-case proof-irrelevance
+matrix, and the official provider batch (five cases, four accepted declarations,
+`doCheck=true`). Native and generated providers each passed all 24 detached CLI
+cases with PATH empty. Generated proof irrelevance passed 2,000 assertions.
+
+| Exact source | Native | Portable .lean | Canonical .ps runtime | Generated .lean JS | Proof | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `e1b4deb214c3088e64a18f8b15148c7a15be2924` | PASS | PASS | IN PROGRESS | PASS | PASS | PASS | IN PROGRESS | PASS native/Lean-generated; canonical IN PROGRESS |
+| Containing revision after cache/provider changes | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+Correctness run [39554691912](https://github.com/dwijayuda/pskernel/actions/runs/39554691912)
+has native PASS; job 119071611610 passed the complete independent canonical-source
+check and compilation and is still executing its generated regression steps at
+this receipt. Research run [39554691860](https://github.com/dwijayuda/pskernel/actions/runs/39554691860)
+finished all six jobs PASS. Full Arena [39554691941](https://github.com/dwijayuda/pskernel/actions/runs/39554691941)
+and authentic diagnostics [39554691896](https://github.com/dwijayuda/pskernel/actions/runs/39554691896)
+are still running. These are observed statuses, not inherited qualification of
+this containing revision; inspect terminal jobs before promoting it.
+
+New bounded changes awaiting their own CI:
+
+- Inference cache eligibility rejects literals and checked application/binder
+  kinds before traversing their subtrees. It returns the exact old Boolean policy;
+  a frozen proof-only reference and universal equivalence/extensionality theorems
+  are added to the existing cache-scope gate. No fuel, depth, cache lookup or
+  publication rule changes. V1 remains a separately selectable semantic reference.
+- The generated provider snapshots a bounded caller-owned byte view before UTF-8
+  validation and decoding, so concurrent writes through shared backing storage
+  cannot change the validated input afterward. Eight detached direct API tests
+  cover ordinary/shared buffers, offset views, invalid UTF-8, invalid Unicode
+  strings/escapes and fresh sessions. The 24 CLI cases remain mandatory.
+
+Qualified parent artifact receipts:
+
+- Native artifact [12325206307](https://github.com/dwijayuda/pskernel/actions/runs/39554691928/artifacts/12325206307),
+  zip SHA-256 `cafece4a3513a5aa8b67dee9af2be7fbce641afff98b0d6bdad54704e9a3d86e`;
+  executable `ff48ffb0dbf2ac0d523220d270a48417a77909e9ee800c8199b17f3d08a56be2`;
+  native tar `df64a133f1ed0200c75664bb6571b3068c624bb25841c9bc41ece4ff736a02b1`.
+- Generated artifact [12325479399](https://github.com/dwijayuda/pskernel/actions/runs/39554691928/artifacts/12325479399),
+  zip SHA-256 `4b088c19a837a3ce38cc1980c579d60f166b0ae6ef3c0ab6fcf564d87e5dcee3`;
+  `kernel.js` (5,942,214 bytes) SHA-256
+  `13fac713ab3db66dd34f707d47e74bf445055adf1303fc5371782c690228ee28`.
+  Its manifest also binds readable TypeScript, declarations, map source files,
+  provider/codec dependencies and README. Integrity receipts are not proof terms.
+
+The complete earlier-source Arena run [39552920736](https://github.com/dwijayuda/pskernel/actions/runs/39552920736)
+at `e2226eafee06d872f536667e449883d0eafbef5f` finished **FAIL qualification**:
+193 evaluated, 167 matching outcomes (103 admissions, 56 kernel refusals, one
+metadata refusal, seven transport refusals), two explicitly classified
+unsafe/partial safety-contract agreements and the same 24 host timeouts.
+No timeout was resolved or newly introduced relative to the previous recorded
+24-case set. Its official reference passed 122 acceptances / 71 rejections /
+zero timeouts. Comparison artifact 12325647052 has zip SHA-256
+`07f3603ffef2a5df008307bcba291f89c26ed92e47cc6164e6cbdcf38d14d6b5`.
+
+Authentic diagnostic run [39552920831](https://github.com/dwijayuda/pskernel/actions/runs/39552920831)
+at that same older source collected four original cases, all still timeout both
+unprofiled and profiled under 60 seconds / 2 GiB / fuel 4096. Kernel entry occurred
+after 192 ms (repeated-subproblem), 179 ms (Church), 1,915 ms (Init) and 341 ms
+(stuck-Prop projection). Named V1 HasFVar frames dominate the repeated-subproblem
+profile; V1 recursor/WHNF/DefEq and runtime generator/WeakMap traffic dominate the
+other profiles. The profile does not distinguish the HasFVar logical callers.
+Removing redundant inference eligibility scans is therefore one measured-mechanism
+candidate, not a claimed timeout solution. Profiled VmHWM samples are lower bounds:
+343,456 / 529,800 / 1,048,248 / 513,056 KiB in that order. No heap-exhaustion
+conclusion follows. Diagnostic artifact 12324932888 zip SHA-256:
+`a148d87d408981df3ce0f16f717feef8d3386e363a9941ee4cd7420929a836ba`.
+
+Next executable gate: run the containing source through native/generated
+integration, canonical .ps correctness, six research jobs, full 193 Arena and the
+four authentic profile cases. Compare complete outcomes before making performance
+claims. If timeouts remain, attribute the remaining V1 recursor/WHNF scans rather
+than repeatedly tuning this same cache predicate. Full V2 and full Arena gates
+remain open; four whole-operation fallback sites and boundary decoding remain.
+
 ## Evidence identity and history
 
 This file is the current summary. [The complete earlier work-state](history/AI_WORK_STATE_2026-10-21_BEFORE_PROVIDER.md) is retained verbatim; its historical “pending” sections do not override the receipts below. A manifest or an earlier green source does not qualify a later commit. Final qualification must use terminal Actions results for the exact source SHA.

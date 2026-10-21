@@ -140,6 +140,61 @@ for (const input of unicodeControls) {
 // the same name, while a fresh process cannot see any former declaration.
 assert.equal(invoke(batch([first])).accepted, true);
 assert.equal(invoke(batch([dependent])).outcome, 'rejectedInvalid');
+if (mode === 'js') {
+  const apiSource = `
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import * as kernel from './kernel.mjs';
+import { checkCanonicalBatch, checkCanonicalBytes } from './scripts/pskernel-canonical-provider.mjs';
+const source = readFileSync(0, 'utf8');
+const encoded = Buffer.from(source, 'utf8');
+let cases = 0;
+function verify(label, value, outcome, stage) {
+  assert.equal(value.protocol, 'pskernel-canonical-provider/1', label);
+  assert.equal(value.provider, 'pskernel-core-v1', label);
+  assert.equal(value.fuel, '4096', label);
+  assert.equal(value.outcome, outcome, label + ' ' + JSON.stringify(value));
+  assert.equal(value.stage, stage, label);
+  assert.equal(value.accepted, outcome === 'accepted', label);
+  assert.ok(!('session' in value) && !('environment' in value), label);
+  if (value.accepted) assert.equal(value.declarationCount, 1, label);
+  else assert.equal(typeof value.message, 'string', label);
+  cases++;
+  console.log('PSC1_PROVIDER_API_CASE ' + JSON.stringify({ label, ...value }));
+}
+verify('ordinary-valid-bytes', checkCanonicalBytes(kernel, Uint8Array.from(encoded)), 'accepted', 'complete');
+const shared = new Uint8Array(new SharedArrayBuffer(encoded.length));
+shared.set(encoded);
+verify('shared-valid-bytes', checkCanonicalBytes(kernel, shared), 'accepted', 'complete');
+const padded = Buffer.concat([Buffer.from([255]), encoded, Buffer.from([255])]);
+const view = new Uint8Array(padded.buffer, padded.byteOffset + 1, encoded.length);
+verify('offset-view-bounds', checkCanonicalBytes(kernel, view), 'accepted', 'complete');
+const invalid = Uint8Array.from(encoded);
+const nameOffset = encoded.indexOf(Buffer.from('SortAlias'));
+assert.ok(nameOffset >= 0);
+invalid[nameOffset] = 255;
+verify('ordinary-invalid-utf8', checkCanonicalBytes(kernel, invalid), 'malformedInput', 'transport');
+shared.set(invalid);
+verify('shared-invalid-utf8', checkCanonicalBytes(kernel, shared), 'malformedInput', 'transport');
+verify('text-unpaired-scalar', checkCanonicalBatch(kernel,
+  source.replace('SortAlias', String.fromCharCode(0xD800))), 'malformedInput', 'transport');
+verify('text-unpaired-escape', checkCanonicalBatch(kernel,
+  source.replace('SortAlias', String.fromCharCode(92) + 'uD800')), 'malformedInput', 'transport');
+verify('fresh-valid-text-after-errors', checkCanonicalBatch(kernel, source), 'accepted', 'complete');
+assert.equal(cases, 8);
+console.log('PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached');
+`;
+  const api = spawnSync(process.execPath, ['--input-type=module', '--eval', apiSource], {
+    cwd: detached, input: batch([first]), encoding: 'utf8',
+    timeout: 60000, killSignal: 'SIGKILL', maxBuffer: 4 * 1024 * 1024,
+    env: { ...process.env, PATH: '' },
+  });
+  assert.ifError(api.error);
+  assert.equal(api.status, 0, api.stderr || api.stdout);
+  assert.equal(api.signal, null);
+  assert.match(api.stdout, /PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached/u);
+  process.stdout.write(api.stdout);
+}
 console.log('PSC1_CANONICAL_PROVIDER: PASS mode=' + mode + ' cases=24 PATH=empty cwd=detached');
 } finally {
   rmSync(detached, { recursive: true, force: true });

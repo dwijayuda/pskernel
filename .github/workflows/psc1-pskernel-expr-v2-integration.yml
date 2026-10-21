@@ -339,6 +339,7 @@ jobs:
           node scripts/pskernel-provider-smoke.mjs js dist/expr-v2/integration/kernel.js \
             | tee "$RUNNER_TEMP/psc1-generated-provider.log"
           grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-generated-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-generated-provider.log"
       - name: Check large numerals without fuel-proportional closure allocation
         working-directory: psc1
         run: |

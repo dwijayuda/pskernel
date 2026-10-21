@@ -138,10 +138,77 @@ theorem semantic_pair_eligible_iff_no_fvar_flags (left right : PsKernelExpr) :
     cases rightFlag : psKernelExprHasFVar right <;>
     simp [psKernelSemanticPairCacheEligible, psKernelSemanticCacheEligible, leftFlag, rightFlag]
 
+/- Frozen proof-only reference to the eligibility policy at e1b4deb.
+This reference is outside the executable kernel closure. -/
+def psKernelInferCacheEligibleBefore
+    (inferOnly : Bool)
+    (expr : PsKernelExpr) :
+    Bool :=
+  if psKernelSemanticCacheEligible expr then
+    match expr with
+    | PsKernelExpr.lit _ =>
+        false
+    | PsKernelExpr.app _ _ =>
+        inferOnly
+    | PsKernelExpr.lam _ _ _ _ =>
+        inferOnly
+    | PsKernelExpr.forallE _ _ _ _ =>
+        inferOnly
+    | _ =>
+        true
+  else
+    false
+
+
+private theorem cacheGate_comm (eligible requested : Bool) :
+    (if requested then eligible else false) =
+      (if eligible then requested else false) := by
+  cases eligible <;> cases requested <;> rfl
+
+private theorem cacheGate_true (eligible : Bool) :
+    eligible = (if eligible then true else false) := by
+  cases eligible <;> rfl
+
+theorem inference_cache_eligibility_preserves
+    (inferOnly : Bool) (expr : PsKernelExpr) :
+    psKernelInferCacheEligible inferOnly expr =
+      psKernelInferCacheEligibleBefore inferOnly expr := by
+  cases expr with
+  | bvar index => rfl
+  | fvar name => rfl
+  | mvar name => rfl
+  | sort level => rfl
+  | const name levels => rfl
+  | app fn arg =>
+      exact cacheGate_comm
+        (psKernelSemanticCacheEligible (PsKernelExpr.app fn arg)) inferOnly
+  | lam name type body binderInfo =>
+      exact cacheGate_comm
+        (psKernelSemanticCacheEligible (PsKernelExpr.lam name type body binderInfo)) inferOnly
+  | forallE name type body binderInfo =>
+      exact cacheGate_comm
+        (psKernelSemanticCacheEligible (PsKernelExpr.forallE name type body binderInfo)) inferOnly
+  | letE name type value body nondep =>
+      exact cacheGate_true
+        (psKernelSemanticCacheEligible (PsKernelExpr.letE name type value body nondep))
+  | lit value => rfl
+  | mdata metadata expr =>
+      exact cacheGate_true
+        (psKernelSemanticCacheEligible (PsKernelExpr.mdata metadata expr))
+  | proj typeName index expr =>
+      exact cacheGate_true
+        (psKernelSemanticCacheEligible (PsKernelExpr.proj typeName index expr))
+
+theorem inference_cache_eligibility_extensional :
+    psKernelInferCacheEligible = psKernelInferCacheEligibleBefore := by
+  funext inferOnly expr
+  exact inference_cache_eligibility_preserves inferOnly expr
+
 theorem inference_ineligible_of_fvar_flag
     (inferOnly : Bool) (expr : PsKernelExpr) (flag : psKernelExprHasFVar expr = true) :
     psKernelInferCacheEligible inferOnly expr = false := by
-  simp [psKernelInferCacheEligible, psKernelSemanticCacheEligible, flag]
+  rw [inference_cache_eligibility_preserves]
+  simp [psKernelInferCacheEligibleBefore, psKernelSemanticCacheEligible, flag]
 
 theorem dag_whnf_starts_without_cache (arena : PsKernelExprV2PagedArena) :
     (psKernelExprV2WhnfStateEmpty arena).coreCache = List.nil := by
@@ -554,3 +621,6 @@ end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before
 #print axioms PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before
+
+#print axioms PsKernelCacheScopeProofs.inference_cache_eligibility_preserves
+#print axioms PsKernelCacheScopeProofs.inference_cache_eligibility_extensional

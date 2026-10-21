@@ -303,6 +303,7 @@ jobs:
           node scripts/pskernel-provider-smoke.mjs js dist/pskernel-selfhost/pskernel-core.js \
             | tee "$RUNNER_TEMP/psc1-canonical-provider.log"
           grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-canonical-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-canonical-provider.log"
       - name: Package the complete canonical source and checked provider
         working-directory: psc1
         shell: bash

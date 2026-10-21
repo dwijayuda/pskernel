@@ -31,22 +31,21 @@ def psKernelSemanticPairCacheEligible
   else
     false
 
+/- Reject node kinds that never enter this inference cache before scanning
+their subtrees. This is the same Boolean policy in a cheaper evaluation order;
+fuel, depth, lookup, publication and scope restoration stay with their owners. -/
 def psKernelInferCacheEligible
     (inferOnly : Bool)
     (expr : PsKernelExpr) :
     Bool :=
-  if psKernelSemanticCacheEligible expr then
-    match expr with
-    | PsKernelExpr.lit _ =>
-        false
-    | PsKernelExpr.app _ _ =>
-        inferOnly
-    | PsKernelExpr.lam _ _ _ _ =>
-        inferOnly
-    | PsKernelExpr.forallE _ _ _ _ =>
-        inferOnly
-    | _ =>
-        true
-  else
-    false
-
+  match expr with
+  | PsKernelExpr.lit _ =>
+      false
+  | PsKernelExpr.app _ _ =>
+      if inferOnly then psKernelSemanticCacheEligible expr else false
+  | PsKernelExpr.lam _ _ _ _ =>
+      if inferOnly then psKernelSemanticCacheEligible expr else false
+  | PsKernelExpr.forallE _ _ _ _ =>
+      if inferOnly then psKernelSemanticCacheEligible expr else false
+  | _ =>
+      psKernelSemanticCacheEligible expr

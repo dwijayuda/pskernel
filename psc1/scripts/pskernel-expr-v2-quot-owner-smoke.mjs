@@ -291,10 +291,11 @@ const sameRejection=(label,original,actual)=>{
 const definition=(label,type,value)=>({base:{name:name(label),levelParams:nil,type},value,hints,safety:safe});
 const directAdmission=(label,source,value,valid)=>{
  const resources=session.resources;
- const original=get("psKernelAddDefinition")(resources.fuel,session.environment,value,
+ const environment=get("psKernelKernelSessionEnvironment")(session);
+ const original=get("psKernelAddDefinition")(resources.fuel,environment,value,
   resources.maxRecDepth,resources.maxNatSize);
  const owned=accepted(get("psKernelDagTryAdmitSimpleWithFuel")(
-  resources.fuel,session.environment,resources.maxRecDepth,resources.maxNatSize,
+  resources.fuel,environment,resources.maxRecDepth,resources.maxNatSize,
   generated.arena,generated.declarations,source,Request.definitionDecl(value)),label+"-mandatory-direct-admission");
  if(rejected(original)){
   must(!valid&&rejected(owned)&&original.error===owned.error,label+"-exact-admission-error");

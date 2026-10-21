@@ -52,12 +52,15 @@ def psRustRuntimeHelperCatalogue : List PsRustRuntimeHelper :=
     { name := "__ps_array_foldl", source := "fn __ps_array_foldl<A: Clone, B: Clone>(f: std::rc::Rc<dyn Fn(B, A) -> B>, init: &B, array: &Vec<A>, start: &PsNat, stop: &PsNat) -> B { let size = PsNat::from(array.len()); let end = if stop <= &size { stop.clone() } else { size }; let mut index = start.clone(); let mut acc = init.clone(); while index < end { let i = index.to_usize().expect(\"bounded Array fold index fits usize\"); acc = f(acc, array[i].clone()); index += PsNat::from(1u8); } acc }\n", nat := true, int := false, traits := true, fromStr := false }
   ]
 
-def psRustRuntimeConcatMap {alpha beta : Type}
-    (convert : alpha -> List beta) (values : List alpha) : List beta :=
-  match values with
+def psRustRuntimeConcat (groups : List (List String)) : List String :=
+  match groups with
   | List.nil => List.nil
-  | List.cons value rest =>
-      psListAppend (convert value) (psRustRuntimeConcatMap convert rest)
+  | List.cons values rest =>
+      psListAppend values (psRustRuntimeConcat rest)
+
+def psRustRuntimeConcatMap {alpha : Type}
+    (convert : alpha -> List String) (values : List alpha) : List String :=
+  psRustRuntimeConcat (psListMap convert values)
 
 private def intrinsicHelpers (operation : PsVerifiedIrIntrinsic) : List String :=
   match operation with

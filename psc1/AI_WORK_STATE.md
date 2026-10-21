@@ -160,3 +160,16 @@ bytes/order, exact selected dependency versions/imports, recursive type/refusal
 rules and4096 boundary. Add nested runtime dependency selection and closure-value
 storage/printer regressions alongside all prior tests. Source gates require both
 complete normalized modules in both actual grammars. Rust Expr/Module still open.
+
+## Rust source continuation after314c704a
+
+All12 new backend normalization assertions passed in focused39524867301.
+The source gate accepted RuntimePlan parsing and complete Type but refused the
+polymorphic recursive concat-map helper with infer:expectedFunction. Replace it
+with concrete ordered dependency-list flattening over existing psListMap. No
+runtime catalogue or dependency decision changes. Complete Expr lambda/let error
+flow and Module private closure/visibility/error emission normalization; preserve
+all prior public ABI/storage restrictions, diagnostic order, capture copies,
+source text and4096 boundaries. Both-lane gates retain all modules. Exact closure
+matrix jobs were blocked before admission by this maintained source regression;
+no DirectJS admission result is claimed yet.

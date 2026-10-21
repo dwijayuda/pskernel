@@ -1049,23 +1049,32 @@ def psRustEmitExprWorker
                 operation
                 printedArguments
         | PsVerifiedIrExpr.lambda parameters resultType body =>
-          let functionType := PsVerifiedIrType.function
-            (psRustParameterTypes parameters) resultType
+          let functionType : PsVerifiedIrType :=
+            PsVerifiedIrType.function (psRustParameterTypes parameters) resultType;
           if !psRustDirectClosureTypeSupported functionType then
             Except.error PsRustEmitError.lambdaFunctionResultUnsupported
-          else do
-            let printedParameters <- psRustEmitParameterList parameters
-            let closureType <- psRustEmitClosureValueType functionType
-            let printedResult <- psRustEmitClosureValueType resultType
-            let printedBody <- smaller (psRustAddParameterNames parameters locals) body
-            let captures := psRustCollectCapturesWorker locals remaining
-              (psRustParameterNames parameters) body List.nil
-            pure (psRustJoin ""
-              ["{ ", psRustEmitCaptureClones captures,
-                "let __ps_internal_lambda: ", closureType,
-                " = std::rc::Rc::new(move |", psRustJoin ", " printedParameters,
-                "| -> ", printedResult, " { ", printedBody,
-                " }); __ps_internal_lambda }"])
+          else
+            match psRustEmitParameterList parameters with
+            | Except.error error => Except.error error
+            | Except.ok printedParameters =>
+                match psRustEmitClosureValueType functionType with
+                | Except.error error => Except.error error
+                | Except.ok closureType =>
+                    match psRustEmitClosureValueType resultType with
+                    | Except.error error => Except.error error
+                    | Except.ok printedResult =>
+                        match smaller (psRustAddParameterNames parameters locals) body with
+                        | Except.error error => Except.error error
+                        | Except.ok printedBody =>
+                            let captures : List String :=
+                              psRustCollectCapturesWorker locals remaining
+                                (psRustParameterNames parameters) body List.nil;
+                            Except.ok (psRustJoin ""
+                              ["{ ", psRustEmitCaptureClones captures,
+                                "let __ps_internal_lambda: ", closureType,
+                                " = std::rc::Rc::new(move |", psRustJoin ", " printedParameters,
+                                "| -> ", printedResult, " { ", printedBody,
+                                " }); __ps_internal_lambda }"])
         | PsVerifiedIrExpr.call fn _ arguments =>
           let emittedFn : Except PsRustEmitError String :=
             match fn with
@@ -1087,13 +1096,19 @@ def psRustEmitExprWorker
                       (psRustConcat2
                         (psRustJoin ", " printedArguments)
                         ")"))
-        | PsVerifiedIrExpr.letE name type value body => do
-          let printedValue <- emitNested value
-          let printedBody <- smaller (List.cons name locals) body
-          let printedType <- psRustEmitClosureValueType type
-          pure (psRustJoin ""
-            ["{ let ", psRustIdentifier name, ": ", printedType, " = ",
-              psRustCloneExprPrinted value printedValue, "; ", printedBody, " }"])
+        | PsVerifiedIrExpr.letE name type value body =>
+          match emitNested value with
+          | Except.error error => Except.error error
+          | Except.ok printedValue =>
+              match smaller (List.cons name locals) body with
+              | Except.error error => Except.error error
+              | Except.ok printedBody =>
+                  match psRustEmitClosureValueType type with
+                  | Except.error error => Except.error error
+                  | Except.ok printedType =>
+                      Except.ok (psRustJoin ""
+                        ["{ let ", psRustIdentifier name, ": ", printedType, " = ",
+                          psRustCloneExprPrinted value printedValue, "; ", printedBody, " }"])
         | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
           match emitNested condition with
           | Except.error error =>

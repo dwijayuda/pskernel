@@ -157,6 +157,8 @@ for (const [module, stage] of [
   ['Ps.CompilerIr.Validate', 'parse'], ['Ps.CompilerIr.Validate', 'elaboration'],
   ['Ps.BackendCommon.Plan', 'parse'], ['Ps.BackendCommon.Plan', 'elaboration'],
   ['Ps.BackendRust.RuntimePlan', 'parse'], ['Ps.BackendRust.RuntimePlan', 'elaboration'],
+  ['Ps.BackendRust.Expr', 'parse'], ['Ps.BackendRust.Expr', 'elaboration'],
+  ['Ps.BackendRust.Module', 'parse'], ['Ps.BackendRust.Module', 'elaboration'],
   ['Ps.BackendRust.Type', 'parse'], ['Ps.BackendRust.Type', 'elaboration'],
   ['Ps.BackendJs.Print', 'parse'], ['Ps.BackendJs.Print', 'elaboration'],
   ['Ps.CompilerIr.Specialize', 'parse'], ['Ps.CompilerIr.Specialize', 'elaboration'],

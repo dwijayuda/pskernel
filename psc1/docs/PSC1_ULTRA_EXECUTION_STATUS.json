@@ -741,8 +741,8 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "de26057a6a2cdd33232f86f982d765801a9b580d",
-    "status": "pending-linux-index-recursion-normalization",
+    "headBeforeCandidate": "a484b7966917d0d520d0d231dcc2c9f55de38d70",
+    "status": "pending-linux-portable-natural-diagnostic",
     "sourceAndOriginalIr": {
       "scoped": 39537087657,
       "focused": 39537087675,
@@ -756,16 +756,21 @@
     "generatedCompilerExecution": "not-run",
     "fullAtomicServicePublication": "not-implemented",
     "sourceRefusal": {
-      "run": 39540600631,
-      "module": "Ps.Foundation.StringSet",
-      "declaration": "psStringSetBucketContains",
-      "detail": "structuralRecursionArity",
-      "line": 27
+      "run": 39540910973,
+      "module": "Ps.CompilerIr.Specialize",
+      "declaration": "psIrSpecializeScheduledLoop",
+      "detail": "unsupportedTerm",
+      "line": 1574,
+      "candidate": "replace native Nat.repr with portable psNatToString"
     },
     "queueComparison": {
       "run": 39540600900,
       "status": "same-input-baseline-refuses-candidate-completes",
       "receipt": "PSC1_SPECIALIZATION_QUEUE_COMPARISON_2026-10-21.json"
+    },
+    "latestQueueComparison": {
+      "run": 39540911070,
+      "status": "success"
     }
   },
   "latestCanonicalIrCheckpoint": {

@@ -6,7 +6,17 @@ on fix/psc1-closure-normalization-20261021 preserves #171 at
 Execute [the Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 continuously. The user explicitly requests no small-milestone handoff.
 
-## Current continuation — normalize new index recursion; qualification pending
+## Current continuation — portable queue diagnostics; qualification pending
+
+Ata484b796 both grammars accept the entire new Foundation.StringSet module.
+The same-input queue comparison39540911070 passes again. Source qualification
+39540910973 now isolates unsupportedTerm in psIrSpecializeScheduledLoop:
+the newly added diagnostic used native Nat.repr. Replace it with the existing
+portable psNatToString (Foundation.Name), which uses supported Int.repr/Int.ofNat.
+No queue behavior changes. All30 native facade assertions passed before this
+source gate. Actual G1 remains not-run pending the corrected source gate.
+
+## Earlier index-recursion correction
 
 Atde26057a source census39540600631 refused the new StringSet module's
 psStringSetBucketContains at27:1, structuralRecursionArity, in both lanes.

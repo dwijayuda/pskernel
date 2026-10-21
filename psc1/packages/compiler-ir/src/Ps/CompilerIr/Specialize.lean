@@ -1578,8 +1578,8 @@ def psIrSpecializeScheduledLoop (module : PsVerifiedIrModule) (depth : Nat) :
       fun (state : PsIrSpecializeState) (_scheduled : PsStringSet) =>
         Except.error (PsIrSpecializeDiagnostic.mk "request-loop"
           (String.Internal.append "processed="
-            (String.Internal.append (Nat.repr (psListLength state.seen))
-              (String.Internal.append " pending=" (Nat.repr (psListLength state.pending)))))
+            (String.Internal.append (psNatToString (psListLength state.seen))
+              (String.Internal.append " pending=" (psNatToString (psListLength state.pending)))))
           PsIrSpecializeError.fuelExhausted Option.none)
   | Nat.succ fuel =>
       fun (state : PsIrSpecializeState) (scheduled : PsStringSet) =>

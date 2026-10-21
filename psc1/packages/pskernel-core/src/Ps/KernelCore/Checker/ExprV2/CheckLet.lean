@@ -8,7 +8,7 @@ success-cache entries survive closing the let; child-local entries do not.
 -/
 def psKernelExprV2CheckCloseLet
     (opened : PsKernelExprV2OpenedCheckBinder)
-    (state : PsKernelExprV2CheckState) (bodyType root : Nat)
+    (state : PsKernelExprV2CheckState) (bodyType _root : Nat)
     (name : PsKernelName) (type value : Nat) (nondep : Bool) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
   match psKernelExprV2CheapBetaOnCanonical state.whnf.arena bodyType with
@@ -28,11 +28,11 @@ def psKernelExprV2CheckCloseLet
                   (Prod.fst closed);
               if Nat.beq entry.looseRange 0 then
                 Option.some
-                  (psKernelExprV2CheckedInferFinish next root (Prod.snd cheap))
+                  (Except.ok (Prod.mk next (Prod.snd cheap)))
               else
                 if Nat.beq entry.looseRange 1 then
                   Option.some
-                    (psKernelExprV2CheckedInferBuilt next root
+                    (psKernelExprV2InferenceBuilt next
                       (psKernelExprV2PagedMkLet next.whnf.arena
                         name type value (Prod.snd closed) nondep))
                 else Option.none
@@ -67,36 +67,39 @@ def psKernelExprV2CheckLetWith
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat)
-    (name : PsKernelName) (type value body : Nat) (nondep : Bool) :
+    (name : PsKernelName) (type value body : Nat) (nondep inferOnly : Bool) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  match check context state type with
-  | Option.none => Option.none
-  | Option.some attemptedType =>
-      match attemptedType with
-      | Except.error error => Option.some (Except.error error)
-      | Except.ok typeResult =>
-          match psKernelExprV2CheckEnsureSortWith
-              whnf context (Prod.fst typeResult) (Prod.snd typeResult) with
-          | Option.none => Option.none
-          | Option.some attemptedSort =>
-              match attemptedSort with
-              | Except.error error => Option.some (Except.error error)
-              | Except.ok typeSort =>
-                  match check context (Prod.fst typeSort) value with
-                  | Option.none => Option.none
-                  | Option.some attemptedValue =>
-                      match attemptedValue with
-                      | Except.error error => Option.some (Except.error error)
-                      | Except.ok valueResult =>
-                          match defeq context (Prod.fst valueResult)
-                              (Prod.snd valueResult) type with
-                          | Option.none => Option.none
-                          | Option.some attemptedEquality =>
-                              match attemptedEquality with
-                              | Except.error error => Option.some (Except.error error)
-                              | Except.ok equalResult =>
-                                  if Prod.snd equalResult then
-                                    psKernelExprV2CheckLetBodyWith check context
-                                      (Prod.fst equalResult) root
-                                      name type value body nondep
-                                  else Option.some (Except.error "let value type mismatch")
+  if inferOnly then
+    psKernelExprV2CheckLetBodyWith check context state root name type value body nondep
+  else
+    match check context state type with
+    | Option.none => Option.none
+    | Option.some attemptedType =>
+        match attemptedType with
+        | Except.error error => Option.some (Except.error error)
+        | Except.ok typeResult =>
+            match psKernelExprV2CheckEnsureSortWith
+                whnf context (Prod.fst typeResult) (Prod.snd typeResult) with
+            | Option.none => Option.none
+            | Option.some attemptedSort =>
+                match attemptedSort with
+                | Except.error error => Option.some (Except.error error)
+                | Except.ok typeSort =>
+                    match check context (Prod.fst typeSort) value with
+                    | Option.none => Option.none
+                    | Option.some attemptedValue =>
+                        match attemptedValue with
+                        | Except.error error => Option.some (Except.error error)
+                        | Except.ok valueResult =>
+                            match defeq context (Prod.fst valueResult)
+                                (Prod.snd valueResult) type with
+                            | Option.none => Option.none
+                            | Option.some attemptedEquality =>
+                                match attemptedEquality with
+                                | Except.error error => Option.some (Except.error error)
+                                | Except.ok equalResult =>
+                                    if Prod.snd equalResult then
+                                      psKernelExprV2CheckLetBodyWith check context
+                                        (Prod.fst equalResult) root
+                                        name type value body nondep
+                                    else Option.some (Except.error "let value type mismatch")

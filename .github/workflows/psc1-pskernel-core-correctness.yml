@@ -20,6 +20,7 @@ on:
       - psc1/check-psc1-source.mjs
       - psc1/scripts/pskernel-generated-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-infer-only-smoke.mjs
       - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - .github/workflows/psc1-pskernel-core-correctness.yml
 
@@ -239,6 +240,18 @@ jobs:
           grep -q '^PSC1_V2_DAG_JS_ADMISSION_POLICY_SAFETY: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           echo 'PSC1_CANONICAL_DAG_JS_KERNEL: PASS'
+      - name: Run inference-mode parity from the canonical ProofScript executable
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          cp scripts/pskernel-expr-v2-infer-only-smoke.mjs "$PSC1_PS_RUN_DIR/infer-only-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" infer-only-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-canonical-infer-only.log"
+          grep -q 'PSC1_V2_DAG_JS_INFER_ONLY: PASS' "$RUNNER_TEMP/psc1-canonical-infer-only.log"
       - name: Check large numerals in the canonical ProofScript executable
         working-directory: psc1
         shell: bash
@@ -281,5 +294,6 @@ jobs:
             ${{ runner.temp }}/psc1-canonical-js-smoke.log
             ${{ runner.temp }}/psc1-canonical-dag-smoke.log
             ${{ runner.temp }}/psc1-canonical-nat-smoke.log
+            ${{ runner.temp }}/psc1-canonical-infer-only.log
             ${{ runner.temp }}/psc1-direct-capability.log
           retention-days: 30

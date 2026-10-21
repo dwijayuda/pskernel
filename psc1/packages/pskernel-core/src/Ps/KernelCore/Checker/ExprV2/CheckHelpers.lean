@@ -1,7 +1,7 @@
 import Ps.KernelCore.Checker.ExprV2.CheckWhnf
 
 /-
-Binder rules for fully checked inference. The supplied typed WHNF callback
+Shared binder rules for checked and inference-only modes. The supplied typed WHNF callback
 keeps the original top-level checking fuel; only the supplied recursive checker
 consumes predecessor inference fuel. Local types and optional let values belong
 to the same canonical arena.
@@ -78,7 +78,7 @@ def psKernelExprV2CheckEnsureSortWith
 
 def psKernelExprV2CheckCloseLambda
     (opened : PsKernelExprV2OpenedCheckBinder)
-    (state : PsKernelExprV2CheckState) (type root : Nat)
+    (state : PsKernelExprV2CheckState) (type _root : Nat)
     (name : PsKernelName) (domain : Nat) (binderInfo : PsKernelBinderInfo) :
     Except String (Prod PsKernelExprV2CheckState Nat) :=
   match psKernelExprV2CheapBetaOnCanonical state.whnf.arena type with
@@ -90,7 +90,7 @@ def psKernelExprV2CheckCloseLambda
       | Except.error error => Except.error error
       | Except.ok closed =>
           let scopedState := psKernelExprV2CheckStateExitLocalScope opened.parent state;
-          psKernelExprV2CheckedInferBuilt scopedState root
+          psKernelExprV2InferenceBuilt scopedState
             (psKernelExprV2PagedMkForall
               (Prod.fst closed) name domain (Prod.snd closed) binderInfo)
 
@@ -98,7 +98,7 @@ def psKernelExprV2CheckCloseForallWith
     (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (opened : PsKernelExprV2OpenedCheckBinder)
-    (state : PsKernelExprV2CheckState) (type root : Nat)
+    (state : PsKernelExprV2CheckState) (type _root : Nat)
     (domainLevel : PsKernelLevel) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
   match psKernelExprV2CheckEnsureSortWith whnf opened.context state type with
@@ -110,7 +110,7 @@ def psKernelExprV2CheckCloseForallWith
           let scopedState :=
             psKernelExprV2CheckStateExitLocalScope opened.parent (Prod.fst bodySort);
           Option.some
-            (psKernelExprV2CheckedInferBuilt scopedState root
+            (psKernelExprV2InferenceBuilt scopedState
               (psKernelExprV2PagedMkSort scopedState.whnf.arena
                 (psKernelLevelMkIMax domainLevel (Prod.snd bodySort))))
 
@@ -122,40 +122,49 @@ def psKernelExprV2CheckBinderWith
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat)
     (name : PsKernelName) (domain body : Nat) (binderInfo : PsKernelBinderInfo)
-    (isLambda : Bool) :
+    (isLambda inferOnly : Bool) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  match check context state domain with
+  let skipDomain := if isLambda then inferOnly else false;
+  let checkedDomain :
+      Option (Except String (Prod PsKernelExprV2CheckState PsKernelLevel)) :=
+    if skipDomain then
+      -- A lambda result uses its original domain, not a domain universe.
+      -- The placeholder level is never read in the lambda closing branch.
+      Option.some (Except.ok (Prod.mk state PsKernelLevel.zero))
+    else
+      match check context state domain with
+      | Option.none => Option.none
+      | Option.some attemptedDomain =>
+          match attemptedDomain with
+          | Except.error error => Option.some (Except.error error)
+          | Except.ok domainResult =>
+              psKernelExprV2CheckEnsureSortWith
+                whnf context (Prod.fst domainResult) (Prod.snd domainResult);
+  match checkedDomain with
   | Option.none => Option.none
-  | Option.some attemptedDomain =>
-      match attemptedDomain with
+  | Option.some attemptedSort =>
+      match attemptedSort with
       | Except.error error => Option.some (Except.error error)
-      | Except.ok domainResult =>
-          match psKernelExprV2CheckEnsureSortWith
-              whnf context (Prod.fst domainResult) (Prod.snd domainResult) with
-          | Option.none => Option.none
-          | Option.some attemptedSort =>
-              match attemptedSort with
-              | Except.error error => Option.some (Except.error error)
-              | Except.ok domainSort =>
-                  match psKernelExprV2CheckOpenBinder
-                      context (Prod.fst domainSort) name domain body binderInfo with
+      | Except.ok domainSort =>
+          match psKernelExprV2CheckOpenBinder
+              context (Prod.fst domainSort) name domain body binderInfo with
+          | Except.error error => Option.some (Except.error error)
+          | Except.ok opened =>
+              match check opened.context opened.parent opened.body with
+              | Option.none => Option.none
+              | Option.some attemptedBody =>
+                  match attemptedBody with
                   | Except.error error => Option.some (Except.error error)
-                  | Except.ok opened =>
-                      match check opened.context opened.parent opened.body with
-                      | Option.none => Option.none
-                      | Option.some attemptedBody =>
-                          match attemptedBody with
-                          | Except.error error => Option.some (Except.error error)
-                          | Except.ok bodyResult =>
-                              if isLambda then
-                                Option.some
-                                  (psKernelExprV2CheckCloseLambda opened
-                                    (Prod.fst bodyResult) (Prod.snd bodyResult) root
-                                    name domain binderInfo)
-                              else
-                                psKernelExprV2CheckCloseForallWith whnf opened
-                                  (Prod.fst bodyResult) (Prod.snd bodyResult) root
-                                  (Prod.snd domainSort)
+                  | Except.ok bodyResult =>
+                      if isLambda then
+                        Option.some
+                          (psKernelExprV2CheckCloseLambda opened
+                            (Prod.fst bodyResult) (Prod.snd bodyResult) root
+                            name domain binderInfo)
+                      else
+                        psKernelExprV2CheckCloseForallWith whnf opened
+                          (Prod.fst bodyResult) (Prod.snd bodyResult) root
+                          (Prod.snd domainSort)
 
 def psKernelExprV2CheckFinishAttempt
     (source : Nat)

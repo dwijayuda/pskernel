@@ -31,6 +31,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.CheckState,
     `Ps.KernelCore.Checker.ExprV2.CheckHelpers,
     `Ps.KernelCore.Checker.ExprV2.CheckApplication,
+    `Ps.KernelCore.Checker.ExprV2.InferApplication,
     `Ps.KernelCore.Checker.ExprV2.CheckProjectionHelpers,
     `Ps.KernelCore.Checker.ExprV2.CheckProjection,
     `Ps.KernelCore.Checker.ExprV2.Constant,
@@ -223,3 +224,8 @@ lean_exe psc1_kernel_expr_v2_dag_performance where
 lean_exe psc1_kernel_expr_v2_transform_regression where
   srcDir := "test"
   root := `PsKernelExprV2TransformRegression
+
+-- Separate infer-only judgments preserve the checked admission boundary.
+lean_exe psc1_kernel_expr_v2_infer_only_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2InferOnlyRegression

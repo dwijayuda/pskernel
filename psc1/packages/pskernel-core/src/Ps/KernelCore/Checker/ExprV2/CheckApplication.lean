@@ -87,9 +87,9 @@ def psKernelExprV2CheckApplicationEqContext
       | _ => Except.ok context
 
 def psKernelExprV2CheckApplicationFinish
-    (state : PsKernelExprV2CheckState) (root arg body : Nat) :
+    (state : PsKernelExprV2CheckState) (_root arg body : Nat) :
     Except String (Prod PsKernelExprV2CheckState Nat) :=
-  psKernelExprV2CheckedInferBuilt state root
+  psKernelExprV2InferenceBuilt state
     (psKernelExprV2TransformOnCanonical
       (PsKernelExprV2Transform.instantiate 0 (List.cons arg List.nil))
       state.whnf.arena body 0)

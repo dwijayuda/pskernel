@@ -243,7 +243,8 @@ theorem dag_check_fvar_flag_prevents_lookup
     (state : PsKernelExprV2CheckState) (source : Nat)
     (entry : PsKernelExprV2Entry) (flag : entry.hasFVar = true) :
     psKernelExprV2CheckedInferFind state source entry = Except.ok Option.none := by
-  simp [psKernelExprV2CheckedInferFind, psKernelExprV2CheckedInferEligible, flag]
+  simp [psKernelExprV2CheckedInferFind, psKernelExprV2InferenceFind,
+    psKernelExprV2InferenceCacheEligible, flag]
 
 theorem dag_check_fvar_flag_prevents_publication
     (state : PsKernelExprV2CheckState) (source result : Nat)
@@ -252,7 +253,8 @@ theorem dag_check_fvar_flag_prevents_publication
     (flag : entry.hasFVar = true) :
     psKernelExprV2CheckedInferFinish state source result =
       Except.ok (Prod.mk state result) := by
-  simp [psKernelExprV2CheckedInferFinish, psKernelExprV2CheckedInferEligible, found, flag]
+  simp [psKernelExprV2CheckedInferFinish, psKernelExprV2InferenceFinish,
+    psKernelExprV2InferenceCacheEligible, found, flag]
 
 theorem dag_check_zero_fuel_precedes_cache
     (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
@@ -277,8 +279,9 @@ theorem dag_check_depth_error_precedes_cached_judgment
     (guard : psKernelCheckerContextEnterRecDepth context.scalar = Except.error error) :
     psKernelExprV2TryCheckCoreWithFuel (Nat.succ fuel) whnf defeq context state root =
       Option.some (Except.error error) := by
-  simp [psKernelExprV2TryCheckCoreWithFuel, psKernelExprV2CheckContextEnterRecDepth,
-    found, hit, guard]
+  simp only [psKernelExprV2CheckedInferFind] at hit
+  simp [psKernelExprV2TryCheckCoreWithFuel, psKernelExprV2TryInferCoreWithFuel,
+    psKernelExprV2CheckContextEnterRecDepth, found, hit, guard]
 
 theorem dag_check_starts_without_success_cache
     (arena : PsKernelExprV2PagedArena) :
@@ -336,6 +339,95 @@ theorem dag_defeq_depth_error_precedes_success_cache
   simp [psKernelExprV2TryDefEqStateWithFuel,
     psKernelExprV2CheckContextEnterRecDepth, guard]
 
+/- Inference-only publications cannot enter the checked-inference cache.
+   These local projection equalities do not assert validity of arbitrary
+   caller-constructed caches or full checker soundness. -/
+theorem dag_infer_only_update_preserves_checked_cache
+    (state : PsKernelExprV2CheckState)
+    (cache : List PsKernelExprV2WhnfCacheEntry) :
+    (psKernelExprV2CheckStateWithInferOnly state cache).checkedInfer =
+      state.checkedInfer := by
+  rfl
+
+theorem dag_infer_only_scope_restores_parent_cache
+    (parent child : PsKernelExprV2CheckState) :
+    (psKernelExprV2CheckStateExitLocalScope parent child).inferOnly =
+      parent.inferOnly := by
+  rfl
+
+theorem dag_infer_only_starts_without_cache
+    (arena : PsKernelExprV2PagedArena) :
+    (psKernelExprV2CheckStateEmpty arena).inferOnly = List.nil := by
+  rfl
+
+theorem dag_inference_fvar_flag_prevents_lookup
+    (state : PsKernelExprV2CheckState) (inferOnly : Bool) (source : Nat)
+    (entry : PsKernelExprV2Entry) (flag : entry.hasFVar = true) :
+    psKernelExprV2InferenceFind state inferOnly source entry =
+      Except.ok Option.none := by
+  simp [psKernelExprV2InferenceFind, psKernelExprV2InferenceCacheEligible, flag]
+
+theorem dag_inference_fvar_flag_prevents_publication
+    (state : PsKernelExprV2CheckState) (inferOnly : Bool) (source result : Nat)
+    (entry : PsKernelExprV2Entry)
+    (found : psKernelExprV2PagedRequire state.whnf.arena source = Except.ok entry)
+    (flag : entry.hasFVar = true) :
+    psKernelExprV2InferenceFinish state inferOnly source result =
+      Except.ok (Prod.mk state result) := by
+  simp [psKernelExprV2InferenceFinish, psKernelExprV2InferenceCacheEligible, found, flag]
+
+theorem dag_infer_only_publication_preserves_checked_cache
+    (state : PsKernelExprV2CheckState) (source result : Nat)
+    (entry : PsKernelExprV2Entry)
+    (found : psKernelExprV2PagedRequire state.whnf.arena source = Except.ok entry) :
+    (psKernelExprV2InferenceFinish state true source result).map
+        (fun inferred => inferred.fst.checkedInfer) =
+      Except.ok state.checkedInfer := by
+  cases eligible : psKernelExprV2InferenceCacheEligible true entry <;>
+    simp [psKernelExprV2InferenceFinish, found, eligible,
+      psKernelExprV2CheckStateWithInferOnly, Except.map]
+
+theorem dag_checked_publication_preserves_infer_only_cache
+    (state : PsKernelExprV2CheckState) (source result : Nat)
+    (entry : PsKernelExprV2Entry)
+    (found : psKernelExprV2PagedRequire state.whnf.arena source = Except.ok entry) :
+    (psKernelExprV2InferenceFinish state false source result).map
+        (fun inferred => inferred.fst.inferOnly) =
+      Except.ok state.inferOnly := by
+  cases eligible : psKernelExprV2InferenceCacheEligible false entry <;>
+    simp [psKernelExprV2InferenceFinish, found, eligible, Except.map]
+
+theorem dag_inference_zero_fuel_precedes_cache
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (root : Nat) (inferOnly : Bool) :
+    psKernelExprV2TryInferCoreWithFuel 0 whnf defeq context state root inferOnly =
+      Option.some (Except.error "kernel inference budget exhausted") := by
+  rfl
+
+theorem dag_inference_depth_error_precedes_cached_judgment
+    (fuel : Nat)
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (root cached : Nat) (inferOnly : Bool)
+    (entry : PsKernelExprV2Entry) (error : String)
+    (found : psKernelExprV2PagedRequire state.whnf.arena root = Except.ok entry)
+    (hit : psKernelExprV2InferenceFind state inferOnly root entry =
+      Except.ok (Option.some cached))
+    (guard : psKernelCheckerContextEnterRecDepth context.scalar = Except.error error) :
+    psKernelExprV2TryInferCoreWithFuel (Nat.succ fuel) whnf defeq
+        context state root inferOnly =
+      Option.some (Except.error error) := by
+  simp [psKernelExprV2TryInferCoreWithFuel, psKernelExprV2CheckContextEnterRecDepth,
+    found, hit, guard]
+
+
 end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.exit_scope_restores_all_caches
@@ -384,3 +476,13 @@ end PsKernelCacheScopeProofs
 #print axioms PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication
 #print axioms PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache
 #print axioms PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache
+
+#print axioms PsKernelCacheScopeProofs.dag_infer_only_update_preserves_checked_cache
+#print axioms PsKernelCacheScopeProofs.dag_infer_only_scope_restores_parent_cache
+#print axioms PsKernelCacheScopeProofs.dag_infer_only_starts_without_cache
+#print axioms PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_lookup
+#print axioms PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_publication
+#print axioms PsKernelCacheScopeProofs.dag_infer_only_publication_preserves_checked_cache
+#print axioms PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache
+#print axioms PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache
+#print axioms PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment

@@ -29,7 +29,35 @@ behavior, or a complete DAG checker. Original default V1 remains qualified;
 the replacement still relies on full-operation fallback outside its migrated
 rules. No integration PR is merged.
 
-### Direct simple declaration admission — awaiting qualification
+### Unified checked and inference-only DAG worker — awaiting qualification
+
+The syntax-directed checker now uses one implementation with an explicit
+inference mode. The original unchecked lambda-domain, let-annotation/value,
+and application-argument policies are confined to inference-only mode; the
+checked entry retains all original validation. Inference-only application
+uses the complete head spine, lazy reversed pending substitution and the exact
+argument-count-plus-one exposure budget. Fixed WHNF/DefEq callbacks retain
+the top-level fuel while inference recursion uses its predecessor.
+
+Separate checked and inference-only caches belong to the same arena and local
+scope. A helper constructs a type without publishing a judgment; the owning
+entry publishes once in its selected cache. Scope exit restores both parent
+caches. Fuel/depth guards still run before a cached result can authorize an
+operation. The staged compatibility entry and original public checked API are
+preserved. This is a prerequisite for direct theorem IsProp checking, not a
+new untrusted admission shortcut.
+
+The new native executable compares21 fixtures over3,780 exact fuel/depth
+combinations, six official Lean valid-expression comparisons, cache-separation
+and warm-entry guards, and numeral limits. A separate generated script checks
+1,008 combinations plus the negative authorization sentinel in both authentic
+source and canonical .ps executables with empty runtime PATH. Nine additional
+local cache/publication/guard facts are checked with the existing proof gate.
+These additions are pending Actions; no new closure count or passing result
+is claimed for this slice. The complete general DefEq and reduction migrations
+remain open.
+
+### Direct simple declaration admission — native qualified; generated CI pending
 
 RunDag now attempts direct admission of axioms, safe/partial definitions and
 opaque declarations against the owning DAG. It shares one checker state
@@ -53,7 +81,12 @@ four official Lean admission comparisons, exact environments/receipts/order/
 lookup correspondence, header/body sharing sentinels at fuel5 and depth16,
 safety/partial/opaque decisions, malformed-ID/duplicate/preflight precedence,
 failed publication, declaration-limit ordering and cold/warm terminal DefEq
-entry guards. Native, generated and detached canonical smoke are required.
+entry guards. Native job119008044720 in
+[run39534547183](https://github.com/dwijayuda/pskernel/actions/runs/39534547183)
+passed at5b13128c71c6e36bf8f36cc41759a96197783022. The actual log contains all
+five admission markers, the1,755 transformation comparisons and the local
+proof gates. Authentic PSC1 source checking also passed. Generated and detached
+canonical executable qualification remain pending.
 
 The existing24-observation complete-admission benchmark gains a separate
 untimed diagnostic after all reported timing/GC/RSS captures. It requires
@@ -755,8 +788,8 @@ not general production performance acceptance.
 | Transformations | Lift, instantiate/multi/reverse, abstract, universe substitution, spines; scoped memo | 1,755 comparisons plus budget/sharing/negative cases pass | Authentic source and strict generated transform smoke pass | Large shared-DAG fixture; not a full checker speedup claim | Integrated prerequisite |
 | Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
 | WHNF | Function normalization, separate core/public caches, Nat, constructor projection and same-batch delta | Native parity and boundary gates pass at c9868 | Independent generated and canonical executable gates pass at c9868 | Controlled checked-WHNF gains; mixed memory and fallback regressions | Partial; local-value slice awaiting CI; recursor/iota/String migration open |
-| Inference and DefEq | DAG Sort/FVar/literal/metadata/binders, structural-type App, owning constants and projections; checked lets and scope-owned quick DefEq pairs added | Qualified through projections at c9868; let/cache parity pending | Qualified c9868 closure; new native/generated/canonical let gates pending |128 guarded ABBA observations; checked-zeta regression unresolved until new measurements | Partial; general DefEq and inferOnly open; let slice awaits CI |
-| Declaration admission | Direct simple axiom/safe-partial definition/opaque path added; ordinary/mutual input type IDs retained after original admission | Prior complete admission passes; new416-case/official/shared-state gates pending | New direct helper and standalone/canonical smoke pending |24 matched observations plus untimed direct capability diagnostic pending | Partial; theorem/unsafe-recursive/mutual/inductive migration open |
+| Inference and DefEq | DAG syntax-directed checking with owning constants/projections/lets, stateful App conversion and scoped quick DefEq; unified inferOnly worker added | Native Let/App gates pass at106387/2be592; new3,780-case inferOnly and six official checks pending | c9868 fully qualified; later generated/canonical jobs pending |128 guarded ABBA observations; latest generated comparison pending | Partial; inferOnly slice awaiting CI; general DefEq remains open |
+| Declaration admission | Direct axiom/safe-partial definition/opaque path; ordinary/mutual input type IDs retained after original admission |416 fuel/depth comparisons, four official admission fixtures and shared-state/safety guards pass at5b131 | Authentic source accepted; generated/canonical runtime pending |24 matched observations plus untimed direct capability diagnostic pending | Partial; theorem/unsafe-recursive/mutual/inductive migration open |
 | Canonical self-hosting | Complete production import closure derived from manifest | Pinned Lean build passes at c9868 |112 canonical modules /1,353 declarations; authentic PSC1, TS7.0.2, declarations/maps and detached JS pass | Generator/runtime costs measured; six profiles pass | Current partial integration qualified; DirectJS unsupported |
 | Lean Arena | Complete193 corpus; all-list transport and nested outcomes repaired | Official122 accept /71 reject | c9868:166 matches,25 host timeouts,2 safety agreements;135 controls; all193 recorded | Every timeout reached RunDag entry; internal hotspot unresolved | **BLOCKED:25 host timeouts; no exclusions** |
 | Formal invariants | Composite metadata, scope/cache guards, budget cap, five numeral recurrences and exact constant-rule factorization | Native proof gates pass at c9868 with approved logical axioms | Proofs intentionally outside portable executable closure | No formal allocation bound | Global DAG/substitution/DefEq/admission soundness remains open |

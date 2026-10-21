@@ -4,11 +4,11 @@ import { performance } from "node:perf_hooks";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-const [filename,mode,variant,shape,depthArg,callsArg,operationArg]=process.argv.slice(2);
+const [filename,mode,variant,shape,depthArg,callsArg,operationArg,profileDirArg]=process.argv.slice(2);
 if(!filename)throw Error("PSC1_DAG_BENCH_REQUIRES_GENERATED_KERNEL");
 const absolute=path.resolve(filename);
 
-if(mode!=="worker"){
+if(mode!=="worker"&&mode!=="profile"){
   const observations=[];
   for(const [shape,depth,calls,operation] of [
     ["metadata",32,6,"check"],["metadata",96,4,"check"],["metadata",192,2,"check"],
@@ -238,6 +238,51 @@ if(mode!=="worker"){
   const coldMs=performance.now()-coldStart;
   for(let i=0;i<values.length;i++)perform(i);
   global.gc();
+  if(mode==="profile"){
+    if(!profileDirArg)throw Error("PSC1_DAG_PROFILE_REQUIRES_OUTPUT_DIRECTORY");
+    const {profileCheckedOperation}=await import("./pskernel-generated-profile.mjs");
+    const report=await profileCheckedOperation({
+      perform,calls,modulePath:absolute,outputDirectory:path.resolve(profileDirArg),
+      identity:{
+        variant,shape,depth,operation,batch_size:batchSize,input_pool:values.length,
+        fuel:Number(session.resources.fuel),
+        lean_version:k.psKernelProviderDefault.target.leanVersion,
+        lean_commit:k.psKernelProviderDefault.target.leanCommit
+      }
+    });
+    const heapSummary=phase=>({
+      phase:phase.phase,calls:phase.calls,checksum:phase.checksum,
+      all_correct:phase.all_correct,instrumented_ms:phase.instrumented_ms,
+      sampling_interval_bytes:phase.sampling_interval_bytes,
+      include_collected_objects:phase.include_collected_objects,
+      sample_count:phase.sample_count,
+      estimated_total_bytes:phase.estimated_total_bytes,
+      heap_used_delta_after_gc_bytes:phase.heap_used_delta_after_gc_bytes,
+      heap_reserved_delta_after_gc_bytes:phase.heap_reserved_delta_after_gc_bytes,
+      rss_delta_after_gc_bytes:phase.rss_delta_after_gc_bytes,
+      before:phase.before,before_gc:phase.before_gc,after_gc:phase.after_gc,
+      top_frames:phase.top_frames.slice(0,8),
+      top_generated_frames:phase.top_generated_frames.slice(0,8),
+      top_allocation_stacks:phase.top_allocation_stacks.slice(0,4),
+      profile_file:phase.profile_file
+    });
+    console.log("PSC1_DAG_PROFILE "+JSON.stringify({
+      format:report.format,node:report.node,v8:report.v8,
+      generated_module_sha256:report.generated_module_sha256,
+      identity:report.identity,scope:report.scope,limitations:report.limitations,
+      cpu:{
+        calls:report.cpu.calls,checksum:report.cpu.checksum,
+        all_correct:report.cpu.all_correct,instrumented_ms:report.cpu.instrumented_ms,
+        sampling_interval_us:report.cpu.sampling_interval_us,
+        sample_count:report.cpu.sample_count,sampled_us:report.cpu.sampled_us,
+        top_frames:report.cpu.top_frames.slice(0,8),
+        top_generated_frames:report.cpu.top_generated_frames.slice(0,8),
+        profile_file:report.cpu.profile_file
+      },
+      allocations:heapSummary(report.allocations),survivors:heapSummary(report.survivors)
+    }));
+    console.log("PSC1_V2_DAG_PROFILE: PASS");
+  }else{
   const before=process.memoryUsage();
   let checksum=0;
   const start=performance.now();
@@ -305,4 +350,5 @@ if(mode!=="worker"){
     retained_heap_delta_bytes:after.heapUsed-before.heapUsed,
     input_pool:values.length,semantic_cache:"fresh per checked public operation"
   }));
+  }
 }

@@ -23,6 +23,31 @@ metadata/cache lemmas. These passes do not establish full Arena qualification
 or a complete DAG-native checker. Newer numeral, delta, reporting and binder
 changes require their own final-source evidence.
 
+### Separate full-operation allocation/CPU profiling — added, pending execution
+
+The integration workflow now runs six additional isolated Node22 diagnostics:
+legacy and DAG variants of checked unique-function WHNF(depth128),
+hash-collision WHNF(depth128), and checked zeta(depth24). Each reuses the exact
+existing public-operation workload and correctness assertions at fuel4096.
+It performs separate CPU, total-allocation sampling and post-GC surviving-
+allocation sampling passes after ordinary warmup. Official Lean is absent from
+PATH. Ordinary128-sample A-B-B-A timings and their code paths remain unchanged.
+
+The built-in Node inspector produces raw CPU/heap profiles, module-SHA-bound
+JSON summaries, top generated source locations and allocation stacks, and
+heap-space/RSS snapshots. These are sampling estimates and instrumented
+diagnostics, not exact allocation counts, ordinary timing results or dominator
+proofs. Surviving samples cover newly allocated sampled objects, not the
+already-live baseline. No cause of a memory regression is claimed before
+actual profiles are inspected.
+
+At2d29ebc's qualified generated run39518432248, unique-function WHNF128 warmed
+totals were1,656.971–1,709.274ms(original) vs1,128.059–1,135.469ms(DAG), but peak
+RSS was254,976–265,800KiB vs298,584–301,952KiB and retained-heap deltas were
+29,400–30,224 vs77,320–77,672bytes. Construction was3.986–4.105ms vs
+109.258–110.108ms, measured separately. This remains a measured time gain with
+a memory/construction cost, not general performance qualification.
+
 ### One owning declaration index and direct constant types — pending CI
 
 The owning batch now keeps one declaration table containing original admitted

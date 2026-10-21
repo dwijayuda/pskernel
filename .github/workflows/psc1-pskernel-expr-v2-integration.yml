@@ -18,6 +18,7 @@ on:
       - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-bench.mjs
+      - psc1/scripts/pskernel-generated-profile.mjs
       - psc1/scripts/pskernel-whole-js-bench.mjs
       - psc1/scripts/pskernel-js-memory-probe.mjs
       - psc1/kernel-lakefile.lean
@@ -216,6 +217,25 @@ jobs:
             dist/expr-v2/integration/kernel.js optimized warm_infer \
             | tee "$RUNNER_TEMP/psc1-memory-strict.log"
           grep -q 'PSC1_JS_WHOLE_SUMMARY' "$RUNNER_TEMP/psc1-memory-strict.log"
+      - name: Profile actual checked workloads in separate diagnostic workers
+        timeout-minutes: 12
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_PROFILE_NODE="$(command -v node)"
+          node --check scripts/pskernel-generated-profile.mjs
+          for specification in "fn-unique 128 whnf" "fn-collision 128 whnf" "zeta 24 check"; do
+            read -r shape depth operation <<< "$specification"
+            for variant in legacy dag; do
+              timeout --signal=KILL 180s env PATH="" "$PSC1_PROFILE_NODE" --expose-gc \
+                scripts/pskernel-expr-v2-dag-bench.mjs \
+                dist/expr-v2/integration/kernel.js profile \
+                "$variant" "$shape" "$depth" 1 "$operation" \
+                "$RUNNER_TEMP/psc1-dag-profiles" \
+                | tee -a "$RUNNER_TEMP/psc1-dag-profile.log"
+            done
+          done
+          test "$(grep -c '^PSC1_V2_DAG_PROFILE: PASS$' "$RUNNER_TEMP/psc1-dag-profile.log")" -eq 6
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -226,6 +246,8 @@ jobs:
             ${{ runner.temp }}/psc1-dag-generated-bench.log
             ${{ runner.temp }}/psc1-whole-strict.log
             ${{ runner.temp }}/psc1-memory-strict.log
+            ${{ runner.temp }}/psc1-dag-profile.log
+            ${{ runner.temp }}/psc1-dag-profiles/
             psc1/dist/expr-v2/integration/kernel.js
             psc1/dist/expr-v2/integration/kernel.d.ts
             psc1/dist/expr-v2/integration/kernel.js.map

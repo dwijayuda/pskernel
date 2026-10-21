@@ -1,3 +1,15 @@
+# Current continuation — group fixture elaboration repair (2026-10-21 15:54 UTC)
+
+The active integration branch remains at `3aa077cb64ff06f76727decd01c43ad6c33f351d`, with terminal PASS native, generated, canonical and research gates. Full Arena run [39622318341](https://github.com/dwijayuda/pskernel/actions/runs/39622318341) is terminal FAIL; its full per-case receipt is being read and must not be inferred from earlier revisions.
+
+Carrier source `3b281560ad379004e9a28978a0d2112a134cac56` has a concrete native fixture compile failure in [job 119318964505](https://github.com/dwijayuda/pskernel/actions/runs/39628187069/job/119318964505): Lean 4.35 forbids shadowing mutable `arena` at `PsKernelExprV2GeneratedOwnerRegression.lean:295`. This checkpoint renames the final immutable binding to `finalArena` and updates its two uses. Production semantics, fixture assertions, resource policy and all gates are unchanged. Classification: native test-source elaboration defect. The carrier's general native correctness job passed; the generated/canonical gates were still running when this repair was prepared.
+
+**This corrective source revision is NOT RUN until its own terminal jobs are inspected.** The previous failure must remain in the evidence history. Group-owner implementation is not yet qualified.
+
+The independent indexed-cache candidate `be45ec11e2076922ba4591023b01f1edfcea9119` is now on `research/psc1-pskernel-v2-cache-20261021`, based on qualified `f9e9b20f92ce2ffa4a666acaf55aa8852949f589`. It has separate native, canonical/generated, proof, benchmark and Arena gates. No performance improvement is claimed before execution. Both histories will be combined only with exact-source qualification.
+
+---
+
 # PSKernel-Core Expression V2 integration work state
 
 Date: 2026-10-21 (Asia/Jakarta; Actions timestamps use UTC)

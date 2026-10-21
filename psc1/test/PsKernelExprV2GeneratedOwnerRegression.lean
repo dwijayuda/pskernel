@@ -292,9 +292,9 @@ private def prepareInputs (families : Families) : IO Inputs := do
   let (a,sortId) ← expect (psKernelExprV2PagedImportIntoChecked a s1)
   let (a,missingId) ← expect (psKernelExprV2PagedImportIntoChecked a (cn (nm "OwnerMissingDependency")))
   let (a,badMutual) ← importGroup a badMutualDecl
-  let (arena,badTree) ← importGroup a badTreeDecl
-  let built ← expect (psKernelExprV2DecodeChecked arena)
-  pure (.mk arena built cases natId sortId missingId badMutual badTree)
+  let (finalArena,badTree) ← importGroup a badTreeDecl
+  let built ← expect (psKernelExprV2DecodeChecked finalArena)
+  pure (.mk finalArena built cases natId sortId missingId badMutual badTree)
 
 private def installedOwner (families : Families) (input : Inputs) : IO PsKernelDagGeneratedState := do
   let mut generated := PsKernelDagGeneratedState.mk input.arena input.built []

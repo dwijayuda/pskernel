@@ -593,5 +593,70 @@ for(const [label,levels,message] of [
  arena=savedArena;
 }
 
+
+// Cache publication is full-mode only. This uses checked recursor metadata and
+// an admitted transparent Nat-zero alias; the cheap pass must stop at its delta.
+{
+ const savedArena=arena;
+ arena=generated.arena;
+ const aliasName=name("iotaCacheModeZero");
+ const aliasDefinition={
+  base:{name:aliasName,levelParams:nil,type:nat.term},
+  value:ctorZero.term,hints,safety:safe};
+ const aliasSession=accepted(get("psKernelV1AdmitDeclaration")(
+  session,Request.definitionDecl(aliasDefinition)),"cache-mode-admit-alias").session;
+ const aliasRequest=D.definitionDecl({
+  base:{name:aliasName,levelParams:nil,type:nat.id},value:ctorZero.id,hints,safety:safe});
+ const ownedDeclarations=get("psKernelDagDeclarationsAfterAdmission")(
+  aliasRequest,generated.declarations);
+ const blocked=natRec(cn(aliasName));
+ const wrappers=[
+  ["beta",app(lam("ignored",nat,blocked),lit(0n))],
+  ["let",letE("ignored",nat,lit(0n),blocked)]
+ ];
+ const c=get("psKernelExprV2CheckContextEmpty")(
+  get("psKernelKernelSessionChecker")(aliasSession,nil,safe).context);
+ const cold=()=>get("psKernelExprV2CheckStateFromWhnf")(
+  get("psKernelExprV2WhnfStateForDeclarations")(arena,ownedDeclarations));
+ const defeq=get("psKernelExprV2TryDefEqStateWithFuel")(4096n);
+ const core=(state,root,cheapRec,cheapProj)=>get("psKernelExprV2TryWhnfCoreOwnedWithLocalValuesFuel")(
+  4096n,defeq,get("psKernelExprV2CheckLocalValue"),c,state,root,cheapRec,cheapProj);
+ const attempt=(result,label)=>accepted(accepted(result,label+"-some"),label+"-ok");
+ let comparisons=0;
+ for(const [label,expr] of wrappers)for(const cheapProj of [false,true]){
+  const scalar=c.scalar;
+  const oldCheap=accepted(get("psKernelWhnfCoreWithRecursorFuel")(
+   4096n,oldEq(4096n),scalar,oldEmpty,expr.term,true,cheapProj),label+"-old-cheap");
+  const cheap=attempt(core(cold(),expr.id,true,cheapProj),label+"-cheap");
+  must(exact(oldCheap.fst,blocked.term)&&
+   exact(decoded(cheap.fst.whnf.arena,cheap.snd),blocked.term),
+   "cache-mode-"+label+"-cheap-stops-before-delta");
+  must(same(cheap.fst.whnf.coreCache,nil),
+   "cache-mode-"+label+"-cheapRec-cannot-publish");
+  const oldWarm=accepted(get("psKernelWhnfCoreWithRecursorFuel")(
+   4096n,oldEq(4096n),scalar,oldCheap.snd,expr.term,false,false),label+"-old-warm");
+  const oldCold=accepted(get("psKernelWhnfCoreWithRecursorFuel")(
+   4096n,oldEq(4096n),scalar,oldEmpty,expr.term,false,false),label+"-old-cold");
+  const warm=attempt(core(cheap.fst,expr.id,false,false),label+"-warm");
+  const fresh=attempt(core(cold(),expr.id,false,false),label+"-cold");
+  must(exact(oldWarm.fst,seven.term)&&exact(oldCold.fst,seven.term),
+   "cache-mode-"+label+"-V1-warm-cold-full-result");
+  must(exact(decoded(warm.fst.whnf.arena,warm.snd),seven.term)&&
+   exact(decoded(fresh.fst.whnf.arena,fresh.snd),seven.term),
+   "cache-mode-"+label+"-V2-warm-cold-full-result");
+  must(array(warm.fst.whnf.coreCache).length>0,"cache-mode-"+label+"-full-result-published");
+  const zero=get("psKernelExprV2TryWhnfCoreOwnedWithLocalValuesFuel")(
+   0n,defeq,get("psKernelExprV2CheckLocalValue"),c,warm.fst,expr.id,false,false);
+  const zeroResult=accepted(zero,label+"-zero-some");
+  must(rejected(zeroResult)&&zeroResult.error==="kernel reduction budget exhausted",
+   "cache-mode-"+label+"-zero-before-warm-cache");
+  comparisons++;
+ }
+ must(comparisons===4,"cache-mode-count");
+ console.log("PSC1_V2_DAG_RECURSOR_CACHE_MODE_JS: PASS wrappers=2 cheapModes=4 warmCold=8");
+ arena=savedArena;
+}
+
 console.log("PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2");
 console.log("PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9 assertions="+assertions);
+

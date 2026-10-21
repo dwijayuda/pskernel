@@ -490,6 +490,111 @@ must(rejected(badResult)&&same(badResult.error,
  "checked-batch-rejects-nonsort-axiom-type");
 must(same(get("psKernelEnvironmentFind")(session.environment,badName),none),
  "failed-batch-does-not-publish");
+
+// String-literal projection follows the same full-state callback sequence as V1.
+// These raw probes redirect expansion to an independently checked pair; they
+// test callbacks, not admission of a String as that pair.
+const spModulus=BigInt(get("psKernelCacheHashModulus"));
+const spMark=(s,root,tag)=>{
+ const built=accepted(get("psKernelExprV2PagedMkLit")(s.whnf.arena,Literal.nat(10000n+tag)),"projection-owner-marker");
+ const row={source:root,result:built.snd,hash:spModulus+tag};
+ const pair={left:root,right:built.snd,hash:spModulus+tag};
+ return {...s,nextFresh:tag,checkedInfer:list([row]),inferOnly:list([row]),unfold:list([row]),
+  success:list([pair]),failure:list([pair]),
+  whnf:{...s.whnf,arena:built.fst,coreCache:list([row]),publicCache:list([row])}};
+};
+const spMarked=(s,tag)=>{
+ const rowMarked=rows=>{
+  const a=array(rows);if(a.length!==1||a[0].hash!==spModulus+tag)return false;
+  const entry=accepted(get("psKernelExprV2PagedRequire")(s.whnf.arena,a[0].result),"projection-marker-present");
+  return same(entry.node,get("PsKernelExprV2Node").lit(Literal.nat(10000n+tag)));
+ };
+ const pairMarked=rows=>{const a=array(rows);return a.length===1&&a[0].hash===spModulus+tag;};
+ return s.nextFresh===tag&&rowMarked(s.checkedInfer)&&rowMarked(s.inferOnly)&&rowMarked(s.unfold)&&
+  rowMarked(s.whnf.publicCache)&&pairMarked(s.success)&&pairMarked(s.failure);
+};
+const spError=message=>Option.some(Ex.error(message));
+const spOk=(s,r)=>Option.some(Ex.ok({fst:s,snd:r}));
+const spProjection=get("psKernelExprV2TryWhnfProjectionOwnedWith");
+const spSameNode=(s,a,b)=>accepted(get("psKernelExprV2PagedEqOnCanonical")(s.whnf.arena,a,b),"projection-node-equality");
+const spCompare=(expected,actual,label)=>{
+ const observed=accepted(actual,label+"-direct");
+ if(rejected(expected)){
+  must(rejected(observed)&&observed.error===expected.error,label+"-exact-error");
+ }else{
+  const a=accepted(expected,label+"-V1"),b=accepted(observed,label+"-V2");
+  must(get("psKernelExprEqual")(a.fst)(decoded(b.fst.whnf.arena,b.snd)),label+"-term");
+  must(a.snd.nextFresh===b.fst.nextFresh,label+"-fresh");
+ }
+};
+const spPositive=field(0n,pair(lit(7n),lit(8n)));
+must(get("psKernelExprEqual")(accepted(get("psKernelV1Whnf")(session,nil,S.safe,spPositive.term),"projection-valid-V1"))(
+ E.lit(Literal.nat(7n))),"string-projection-public-valid-pair-control");
+const spPositiveBatch=accepted(run(empty,nil,S.safe,arena,
+ list([...requests,C.whnf(spPositive.id)])),"projection-valid-checked-DAG");
+must(get("psKernelExprEqual")(array(spPositiveBatch.replies).at(-1).value)(E.lit(Literal.nat(7n))),
+ "string-projection-checked-DAG-valid-pair-control");
+let spDifferential=0,spOwners=0,spFailures=0;
+for(const value of strings){
+ const literal=str(value),expanded=constructorFor(value),p=pair(lit(7n),lit(8n)),selected=lit(7n);
+ const root=proj(pairName,0n,literal),cold=initial();
+ const invalidV1=get("psKernelV1Whnf")(session,nil,S.safe,root.term);
+ const invalidDAG=run(empty,nil,S.safe,arena,list([...requests,C.whnf(root.id)]));
+ must(rejected(invalidV1)&&same(invalidV1.error,get("PsKernelError").rejectedInvalid(invalidV1.error.message)),
+  "string-projection-public-invalid-pair-rejected");
+ must(rejected(invalidDAG)&&same(invalidDAG.error,get("PsKernelError").rejectedInvalid(invalidDAG.error.message)),
+  "string-projection-checked-DAG-invalid-pair-rejected");
+ for(const cheap of [false,true]){
+  const seeded=spMark(cold,root.id,40n);
+  const recurse=c=>s=>r=>{
+   if(c.scalar.recDepth!==context.scalar.recDepth)return spError("STRING_PROJECTION_CONTEXT");
+   if(cheap&&r===literal.id&&spMarked(s,40n))return spOk(spMark(s,root.id,41n),literal.id);
+   if(r===selected.id&&spMarked(s,42n))return spOk(spMark(s,root.id,43n),selected.id);
+   return spError("STRING_PROJECTION_RECURSE_ORDER");
+  };
+  const publicWhnf=c=>s=>r=>{
+   if(c.scalar.recDepth!==context.scalar.recDepth)return spError("STRING_PROJECTION_CONTEXT");
+   if(!cheap&&r===literal.id&&spMarked(s,40n))return spOk(spMark(s,root.id,41n),literal.id);
+   if(spSameNode(s,r,expanded.id)&&spMarked(s,41n))return spOk(spMark(s,root.id,42n),p.id);
+   return spError("STRING_PROJECTION_PUBLIC_ORDER");
+  };
+  const result=attempt(spProjection(recurse,publicWhnf,context,seeded,root.id,pairName,0n,literal.id,cheap));
+  must(result.snd===selected.id,"string-projection-selected-field");
+  must(spMarked(result.fst,43n),"string-projection-complete-owner-and-appended-arena");
+  must(array(result.fst.whnf.coreCache).length===(cheap?1:2),"string-projection-core-cache-mode");
+  spOwners++;
+  for(const declined of [false,true]){
+   const stopPublic=_c=>s=>r=>
+    !cheap&&r===literal.id?spOk(s,literal.id):
+     declined?none:spError("STRING_PROJECTION_EXPANSION_FAILURE");
+   const majorOnly=_c=>s=>r=>r===literal.id?spOk(s,literal.id):
+    spError("STRING_PROJECTION_FIELD_MUST_NOT_RUN");
+   const failed=spProjection(majorOnly,stopPublic,context,cold,root.id,pairName,0n,literal.id,cheap);
+   if(declined)must(same(failed,none),"string-projection-expansion-refusal-propagates");
+   else err(failed,"STRING_PROJECTION_EXPANSION_FAILURE","string-projection-expansion-error-propagates");
+   spFailures++;
+  }
+ }
+ for(const [typeName,index]of [[name("String"),0n],[name("String"),2n],[pairName,0n]]){
+  const term=proj(typeName,index,literal);
+  for(const fuel of [0n,1n,2n,4n,16n,64n])for(const depth of [0n,15n,16n]){
+   const scalar={...base.context,maxRecDepth:1n,recDepth:depth},c=ctx(scalar);
+   const oldEq=get("psKernelIsDefEqWithFuel")(fuel),dagEq=get("psKernelExprV2TryDefEqStateWithFuel")(fuel);
+   spCompare(get("psKernelWhnfWithRecursorFuel")(fuel,oldEq,scalar,oldEmpty,term.term),
+    get("psKernelExprV2CheckWhnfOwnedWithFuel")(fuel,dagEq,c,initial(),term.id),"string-projection-public");
+   spDifferential++;
+   for(const cheap of [false,true]){
+    spCompare(get("psKernelWhnfCoreWithRecursorFuel")(fuel,oldEq,scalar,oldEmpty,term.term,false,cheap),
+     get("psKernelExprV2CheckWhnfCoreOwnedWithFuel")(fuel,dagEq,c,initial(),term.id,cheap),"string-projection-core");
+    spDifferential++;
+   }
+  }
+ }
+}
+must(spDifferential===1296&&spOwners===16&&spFailures===32,"string-projection-complete-matrix");
+console.log("PSC1_V2_STRING_PROJECTION_JS: PASS differential=1296 owners=16 failures=32");
+
 console.log("PSC1_V2_DAG_JS_FINAL_RULES: PASS owner="+owners+" final="+finals+
  " projection="+projections+" stringBuild="+stringBuilds+" stringStage="+stringStages+
  " checkedBatches="+checkedBatches+" assertions="+assertions);
+

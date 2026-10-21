@@ -267,6 +267,187 @@ private def decoded (arena : PsKernelExprV2PagedArena) (root : Nat) : IO PsKerne
   let graph ← expect (psKernelExprV2DecodeChecked canonical)
   expect (psKernelExprV2DecodedRequire graph root)
 
+
+/- The raw callback probes below intentionally redirect the expanded String to
+   a separately checked pair constructor. They assert callback/state behavior,
+   not admission of a String as a pair. Genuine String projections have separate
+   official-Lean checks; the real empty-String-environment workers are compared
+   with V1 at their exact budgets without counting a stuck result as admission. -/
+private def projectionOwnerMark (state : PsKernelExprV2CheckState)
+    (root tag : Nat) : Except String PsKernelExprV2CheckState :=
+  match psKernelExprV2PagedMkLit state.whnf.arena (.nat (10000 + tag)) with
+  | .error error => .error error
+  | .ok (arena,marker) =>
+      let row := PsKernelExprV2WhnfCacheEntry.mk root marker (psKernelCacheHashModulus + tag)
+      let pair := PsKernelExprV2DefEqPair.mk root marker (psKernelCacheHashModulus + tag)
+      let state := psKernelExprV2CheckStateWithArena state arena
+      .ok { state with
+        nextFresh := tag
+        checkedInfer := [row]
+        inferOnly := [row]
+        unfold := [row]
+        success := [pair]
+        failure := [pair]
+        whnf := { state.whnf with coreCache := [row], publicCache := [row] }
+      }
+
+private def projectionOwnerMarked (state : PsKernelExprV2CheckState) (tag : Nat) : Bool :=
+  let rowMarked := fun (rows : List PsKernelExprV2WhnfCacheEntry) =>
+    match rows with
+    | [row] =>
+        row.hash == psKernelCacheHashModulus + tag &&
+        (match psKernelExprV2PagedRequire state.whnf.arena row.result with
+         | .ok entry =>
+             match entry.node with
+             | .lit (.nat value) => value == 10000 + tag
+             | _ => false
+         | .error _ => false)
+    | _ => false
+  let pairMarked := fun (rows : List PsKernelExprV2DefEqPair) =>
+    match rows with
+    | [row] => row.hash == psKernelCacheHashModulus + tag
+    | _ => false
+  state.nextFresh == tag && rowMarked state.checkedInfer &&
+    rowMarked state.inferOnly && rowMarked state.unfold &&
+    rowMarked state.whnf.publicCache && pairMarked state.success && pairMarked state.failure
+
+private def compareProjectionWhnf (label : String)
+    (expected : Except String (PsKernelExpr × PsKernelCheckerState))
+    (actual : Option (Except String (PsKernelExprV2CheckState × Nat))) : IO Unit := do
+  match expected,actual with
+  | .error a,some (.error b) => require (label ++ "-exact-error") (a == b)
+  | .ok (term,oldState),some (.ok (state,root)) =>
+      require (label ++ "-term") (psKernelExprEqual term (← decoded state.whnf.arena root))
+      require (label ++ "-fresh") (oldState.nextFresh == state.nextFresh)
+  | _,none => throw (IO.userError ("unexpected String projection fallback: " ++ label))
+  | _,_ => throw (IO.userError ("String projection outcome mismatch: " ++ label))
+
+private def stringProjectionRegression (f : Fixtures) : IO Unit := do
+  let base := psKernelKernelSessionChecker f.session [] .safe
+  let context := psKernelExprV2CheckContextEmpty base.context
+  let strings := ["","abc","é","é","漢字","🧪",
+    String.singleton (Char.ofNat 0),String.singleton (Char.ofNat 65521)]
+  let empty ← expectPublic (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
+  let positive := field 0 (pair (lit 7) (lit 8))
+  let (positiveArena,positiveId) ← expect (psKernelExprV2PagedImportIntoChecked f.arena positive)
+  require "string-projection-public-valid-pair-control"
+    (psKernelExprEqual (← expectPublic (psKernelV1Whnf f.session [] .safe positive)) (lit 7))
+  let positiveBatch ← expectPublic (psKernelV1RunDag empty [] .safe positiveArena
+    (f.requests ++ [.whnf positiveId]))
+  require "string-projection-checked-DAG-valid-pair-control"
+    (match positiveBatch.replies.reverse with
+     | .normalized term :: _ => psKernelExprEqual term (lit 7)
+     | _ => false)
+  let mut differential := 0
+  let mut owners := 0
+  let mut failures := 0
+  let mut officialValid := 0
+  let mut officialInvalid := 0
+  for value in strings do
+    let literal := PsKernelExpr.lit (.str value)
+    let expanded := psKernelStringLitToConstructor value
+    let (a,literalId) ← expect (psKernelExprV2PagedImportIntoChecked f.arena literal)
+    let (a,expandedId) ← expect (psKernelExprV2PagedImportIntoChecked a expanded)
+    let (a,pairId) ← expect (psKernelExprV2PagedImportIntoChecked a (pair (lit 7) (lit 8)))
+    let (a,fieldId) ← expect (psKernelExprV2PagedImportIntoChecked a (lit 7))
+    let (arena,root) ← expect (psKernelExprV2PagedImportIntoChecked a (.proj pairName 0 literal))
+    let cold := initialState arena f.declarations
+    -- Direct reducer callbacks do not authorize an ill-typed public command.
+    require "string-projection-public-invalid-pair-rejected"
+      (match psKernelV1Whnf f.session [] .safe (.proj pairName 0 literal) with
+       | .error (.rejectedInvalid _) => true | _ => false)
+    require "string-projection-checked-DAG-invalid-pair-rejected"
+      (match psKernelV1RunDag empty [] .safe arena (f.requests ++ [.whnf root]) with
+       | .error (.rejectedInvalid _) => true | _ => false)
+    for cheap in [false,true] do
+      let initial ← expect (projectionOwnerMark cold root 40)
+      let recurse := fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (r : Nat) =>
+        if c.scalar.recDepth != context.scalar.recDepth then
+          some (Except.error "STRING_PROJECTION_CONTEXT")
+        else if cheap && r == literalId && projectionOwnerMarked s 40 then
+          match projectionOwnerMark s root 41 with
+          | .error error => some (.error error)
+          | .ok next => some (.ok (next,literalId))
+        else if r == fieldId && projectionOwnerMarked s 42 then
+          match projectionOwnerMark s root 43 with
+          | .error error => some (.error error)
+          | .ok next => some (.ok (next,fieldId))
+        else some (.error "STRING_PROJECTION_RECURSE_ORDER")
+      let publicWhnf := fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (r : Nat) =>
+        if c.scalar.recDepth != context.scalar.recDepth then
+          some (Except.error "STRING_PROJECTION_CONTEXT")
+        else if !cheap && r == literalId && projectionOwnerMarked s 40 then
+          match projectionOwnerMark s root 41 with
+          | .error error => some (.error error)
+          | .ok next => some (.ok (next,literalId))
+        else if sameNode s r expandedId && projectionOwnerMarked s 41 then
+          match projectionOwnerMark s root 42 with
+          | .error error => some (.error error)
+          | .ok next => some (.ok (next,pairId))
+        else some (.error "STRING_PROJECTION_PUBLIC_ORDER")
+      let result ← expectAttempt "string-projection-full-owner"
+        (psKernelExprV2TryWhnfProjectionOwnedWith recurse publicWhnf
+          context initial root pairName 0 literalId cheap)
+      require "string-projection-selected-field" (result.snd == fieldId)
+      require "string-projection-full-owner-and-appended-arena" (projectionOwnerMarked result.fst 43)
+      require "string-projection-core-cache-mode"
+        (result.fst.whnf.coreCache.length == (if cheap then 1 else 2))
+      owners := owners + 1
+      -- Expansion must call public WHNF even in cheap projection mode.
+      for declined in [false,true] do
+        let stopPublic := fun (_ : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (r : Nat) =>
+          if !cheap && r == literalId then
+            some (Except.ok (s,literalId))
+          else if declined then none else some (.error "STRING_PROJECTION_EXPANSION_FAILURE")
+        let majorOnly := fun (_ : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (r : Nat) =>
+          if r == literalId then some (Except.ok (s,literalId))
+          else some (.error "STRING_PROJECTION_FIELD_MUST_NOT_RUN")
+        let failed := psKernelExprV2TryWhnfProjectionOwnedWith majorOnly stopPublic
+          context cold root pairName 0 literalId cheap
+        require "string-projection-expansion-refusal-or-error-propagates"
+          (if declined then failed.isNone else
+            match failed with
+            | some (.error error) => error == "STRING_PROJECTION_EXPANSION_FAILURE"
+            | _ => false)
+        failures := failures + 1
+    for (typeName,index) in [((nm "String"),0),((nm "String"),2),(pairName,0)] do
+      let term := PsKernelExpr.proj typeName index literal
+      let (owned,root) ← expect (psKernelExprV2PagedImportIntoChecked arena term)
+      for fuel in [0,1,2,4,16,64] do
+        for depth in [0,15,16] do
+          let scalar := { base.context with maxRecDepth := 1, recDepth := depth }
+          let c := psKernelExprV2CheckContextEmpty scalar
+          let oldEq := psKernelIsDefEqWithFuel fuel
+          let dagEq := psKernelExprV2TryDefEqStateWithFuel fuel
+          compareProjectionWhnf "string-projection-public"
+            (psKernelWhnfWithRecursorFuel fuel oldEq scalar psKernelCheckerStateEmpty term)
+            (psKernelExprV2CheckWhnfOwnedWithFuel fuel dagEq c
+              (initialState owned f.declarations) root)
+          differential := differential + 1
+          for cheap in [false,true] do
+            compareProjectionWhnf "string-projection-core"
+              (psKernelWhnfCoreWithRecursorFuel fuel oldEq scalar psKernelCheckerStateEmpty term false cheap)
+              (psKernelExprV2CheckWhnfCoreOwnedWithFuel fuel dagEq c
+                (initialState owned f.declarations) root cheap)
+            differential := differential + 1
+    let valid := Lean.Expr.proj (inferOfficialName (nm "String")) 0 (.lit (.strVal value))
+    let expansion := Lean.Expr.proj (inferOfficialName (nm "String")) 0 (← officialExpr expanded)
+    require "official-string-projection-checks"
+      (match Lean.Kernel.check f.official {} valid with | .ok _ => true | _ => false)
+    require "official-string-projection-expansion-equal"
+      (match Lean.Kernel.isDefEq f.official {} valid expansion with | .ok true => true | _ => false)
+    officialValid := officialValid + 1
+    for invalid in [
+        Lean.Expr.proj (inferOfficialName (nm "String")) 2 (.lit (.strVal value)),
+        Lean.Expr.proj (inferOfficialName pairName) 0 (.lit (.strVal value))] do
+      require "official-invalid-string-projection-rejected"
+        (match Lean.Kernel.check f.official {} invalid with | .error _ => true | _ => false)
+      officialInvalid := officialInvalid + 1
+  require "string-projection-complete-matrix"
+    (differential == 1296 && owners == 16 && failures == 32 &&
+      officialValid == 8 && officialInvalid == 16)
+  IO.println "PSC1_V2_STRING_PROJECTION: PASS differential=1296 owners=16 failures=32 officialValid=8 officialInvalid=16"
+
 private def regression : IO Unit := do
   let empty ← expectPublic (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
   let (arena,_) ← expect (psKernelExprV2PagedImportChecked s1)
@@ -740,7 +921,9 @@ private def regression : IO Unit := do
      | .error _ => true | _ => false)
   officialInvalid := officialInvalid + 1
   require "complete-official-matrix" (officialValid == 21 && officialInvalid == 5 && officialStrings == 8)
+  stringProjectionRegression f
   IO.println "PSC1_V2_DAG_FINAL_RULES: PASS owner=648 final=216 projection=175 stringBuild=144 stringStage=32"
   IO.println "PSC1_V2_DAG_OFFICIAL_FINAL_RULES: PASS cases=21 invalid=5 strings=8 resource=1"
 
 def main : IO Unit := regression
+

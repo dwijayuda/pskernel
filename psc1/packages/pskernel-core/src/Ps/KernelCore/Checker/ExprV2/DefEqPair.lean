@@ -32,6 +32,24 @@ def psKernelExprV2DefEqPairMatches
       else psKernelExprV2DefEqPairMatchesOrdered
         arena left right pair.right pair.left
 
+/- The recursive scan receives every argument explicitly. Keep FindIn's
+   generated curried ABI while avoiding one argument-closure chain per entry.
+   Candidate order, both orientations, structural collision checks and errors
+   remain exactly those of the original list scan. -/
+def psKernelExprV2DefEqPairFindWorker
+    (pairs : List PsKernelExprV2DefEqPair)
+    (arena : PsKernelExprV2PagedArena) (left right hash : Nat) : Except String Bool :=
+  match pairs with
+  | List.nil => Except.ok false
+  | List.cons first rest =>
+      if Nat.beq first.hash hash then
+        match psKernelExprV2DefEqPairMatches arena first left right with
+        | Except.error error => Except.error error
+        | Except.ok equal =>
+            if equal then Except.ok true
+            else psKernelExprV2DefEqPairFindWorker rest arena left right hash
+      else psKernelExprV2DefEqPairFindWorker rest arena left right hash
+
 def psKernelExprV2DefEqPairFindIn
     (pairs : List PsKernelExprV2DefEqPair) :
     PsKernelExprV2PagedArena -> Nat -> Nat -> Nat -> Except String Bool :=
@@ -39,20 +57,9 @@ def psKernelExprV2DefEqPairFindIn
   | List.nil =>
       fun (_arena : PsKernelExprV2PagedArena) (_left _right _hash : Nat) =>
         Except.ok false
-  | List.cons first rest =>
+  | List.cons _ _ =>
       fun (arena : PsKernelExprV2PagedArena) (left right hash : Nat) =>
-        let smaller :=
-          fun (nextArena : PsKernelExprV2PagedArena)
-              (nextLeft nextRight nextHash : Nat) =>
-            let recur := psKernelExprV2DefEqPairFindIn rest;
-            recur nextArena nextLeft nextRight nextHash;
-        if Nat.beq first.hash hash then
-          match psKernelExprV2DefEqPairMatches arena first left right with
-          | Except.error error => Except.error error
-          | Except.ok equal =>
-              if equal then Except.ok true
-              else smaller arena left right hash
-        else smaller arena left right hash
+        psKernelExprV2DefEqPairFindWorker pairs arena left right hash
 
 def psKernelExprV2DefEqPairContains
     (arena : PsKernelExprV2PagedArena)

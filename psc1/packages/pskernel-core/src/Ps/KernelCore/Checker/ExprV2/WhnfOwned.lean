@@ -2,6 +2,7 @@ import Ps.KernelCore.Checker.ExprV2.CheckCallbacks
 import Ps.KernelCore.Checker.ExprV2.Beta
 import Ps.KernelCore.Checker.ExprV2.Nat
 import Ps.KernelCore.Checker.ExprV2.Projection
+import Ps.KernelCore.Checker.ExprV2.String
 import Ps.KernelCore.Checker.ExprV2.Delta
 
 /-
@@ -55,15 +56,42 @@ def psKernelExprV2WhnfOwnedFinishAttempt
             (psKernelExprV2WhnfCoreOwnedFinishMode cheapProj
               (Prod.fst reduced) source (Prod.snd reduced))
 
-def psKernelExprV2TryWhnfProjectionOwnedWith
+/- String expansion preserves the V1 projection sequence: first reduce the
+major according to cheapProj, then always invoke the supplied public WHNF on
+its exact constructor translation. The complete owner returned by that call
+feeds field selection and the final core recursion. -/
+def psKernelExprV2WhnfProjectionExpandOwnedWith
+    (publicWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (major : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  match psKernelExprV2PagedRequire state.whnf.arena major with
+  | Except.error error => Option.some (Except.error error)
+  | Except.ok entry =>
+      match entry.node with
+      | PsKernelExprV2Node.lit literal =>
+          match literal with
+          | PsKernelLiteral.str value =>
+              match psKernelExprV2StringLitToConstructorOnCanonical state.whnf.arena value with
+              | Except.error error => Option.some (Except.error error)
+              | Except.ok expanded =>
+                  publicWhnf context
+                    (psKernelExprV2CheckStateWithArena state (Prod.fst expanded))
+                    (Prod.snd expanded)
+          | PsKernelLiteral.nat _ => Option.some (Except.ok (Prod.mk state major))
+      | _ => Option.some (Except.ok (Prod.mk state major))
+
+def psKernelExprV2TryWhnfProjectionOwnedModeWith
     (recurse : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (publicWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (root : Nat) (typeName : PsKernelName) (index structValue : Nat)
-    (cheapProj : Bool) :
+    (cheapRec cheapProj : Bool) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  let cacheDisabled := if cheapRec then true else cheapProj;
   let majorResult : Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
     if cheapProj then recurse context state structValue
     else publicWhnf context state structValue;
@@ -73,30 +101,38 @@ def psKernelExprV2TryWhnfProjectionOwnedWith
       match attempted with
       | Except.error error => Option.some (Except.error error)
       | Except.ok reduced =>
-          let next := Prod.fst reduced;
-          let major := Prod.snd reduced;
-          match psKernelExprV2PagedRequire next.whnf.arena major with
-          | Except.error error => Option.some (Except.error error)
-          | Except.ok entry =>
-              let needsStringExpansion : Bool :=
-                match entry.node with
-                | PsKernelExprV2Node.lit literal =>
-                    match literal with
-                    | PsKernelLiteral.str _ => true
-                    | PsKernelLiteral.nat _ => false
-                | _ => false;
-              if needsStringExpansion then Option.none
-              else
-                match psKernelExprV2ReduceProjOnCanonical
-                    context.scalar next.whnf.arena typeName index major with
-                | Except.error error => Option.some (Except.error error)
-                | Except.ok selected =>
-                    match selected with
-                    | Option.none =>
-                        Option.some (psKernelExprV2WhnfCoreOwnedFinishMode cheapProj next root root)
-                    | Option.some value =>
-                        psKernelExprV2WhnfOwnedFinishAttempt root cheapProj
-                          (recurse context next value)
+          match psKernelExprV2WhnfProjectionExpandOwnedWith
+              publicWhnf context (Prod.fst reduced) (Prod.snd reduced) with
+          | Option.none => Option.none
+          | Option.some expandedAttempt =>
+              match expandedAttempt with
+              | Except.error error => Option.some (Except.error error)
+              | Except.ok expanded =>
+                  let next := Prod.fst expanded;
+                  let major := Prod.snd expanded;
+                  match psKernelExprV2ReduceProjOnCanonical
+                      context.scalar next.whnf.arena typeName index major with
+                  | Except.error error => Option.some (Except.error error)
+                  | Except.ok selected =>
+                      match selected with
+                      | Option.none =>
+                          Option.some (psKernelExprV2WhnfCoreOwnedFinishMode cacheDisabled next root root)
+                      | Option.some value =>
+                          psKernelExprV2WhnfOwnedFinishAttempt root cacheDisabled
+                            (recurse context next value)
+
+/- Retain the original raw callback ABI; its historical mode is cheapRec=false. -/
+def psKernelExprV2TryWhnfProjectionOwnedWith
+    (recurse : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (publicWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (root : Nat) (typeName : PsKernelName) (index structValue : Nat)
+    (cheapProj : Bool) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2TryWhnfProjectionOwnedModeWith recurse publicWhnf context state
+    root typeName index structValue false cheapProj
 
 def psKernelExprV2TryWhnfAppOwnedWithReducer
     (recurse : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
@@ -133,7 +169,7 @@ def psKernelExprV2TryWhnfAppOwnedWithReducer
                                   fnState.whnf.arena plan with
                               | Except.error error => Option.some (Except.error error)
                               | Except.ok rebuilt =>
-                                  psKernelExprV2WhnfOwnedFinishAttempt root cheapProj
+                                  psKernelExprV2WhnfOwnedFinishAttempt root (if cheapRec then true else cheapProj)
                                     (recurse context
                                       (psKernelExprV2CheckStateWithArena fnState
                                         (Prod.fst rebuilt))
@@ -160,7 +196,7 @@ def psKernelExprV2TryWhnfAppOwnedWithReducer
                                 (Prod.snd spine) fnState.whnf.arena fn with
                             | Except.error error => Option.some (Except.error error)
                             | Except.ok rebuilt =>
-                                psKernelExprV2WhnfOwnedFinishAttempt root cheapProj
+                                psKernelExprV2WhnfOwnedFinishAttempt root (if cheapRec then true else cheapProj)
                                   (recurse context
                                     (psKernelExprV2CheckStateWithArena fnState
                                       (Prod.fst rebuilt))
@@ -183,13 +219,13 @@ def psKernelExprV2TryWhnfCompositeOwnedWithReducer
           state.whnf.arena body 0 with
       | Except.error error => Option.some (Except.error error)
       | Except.ok reduced =>
-          psKernelExprV2WhnfOwnedFinishAttempt root cheapProj
+          psKernelExprV2WhnfOwnedFinishAttempt root (if cheapRec then true else cheapProj)
             (recurse context
               (psKernelExprV2CheckStateWithArena state (Prod.fst reduced))
               (Prod.snd reduced))
   | PsKernelExprV2Node.proj typeName index structValue =>
-      psKernelExprV2TryWhnfProjectionOwnedWith
-        recurse publicWhnf context state root typeName index structValue cheapProj
+      psKernelExprV2TryWhnfProjectionOwnedModeWith
+        recurse publicWhnf context state root typeName index structValue cheapRec cheapProj
   | PsKernelExprV2Node.app _ _ =>
       psKernelExprV2TryWhnfAppOwnedWithReducer recurse reduceRecursor context state root cheapRec cheapProj
   | _ => Option.none
@@ -387,4 +423,5 @@ def psKernelExprV2TryWhnfOwnedWithReducerFuel
             | _ =>
                 psKernelExprV2TryWhnfPublicOwnedNonterminalWith
                   smaller core context state root entry
+
 

@@ -445,5 +445,52 @@ must(rejected(badResult)&&same(badResult.error,
  "checked-api-rejects-invalid-definition-body");
 must(same(get("psKernelEnvironmentFind")(session.environment,badName),none),
  "failed-batch-does-not-publish");
+
+/* Direct cache-lookup regressions use internal observations only. They never
+   enter the untrusted checked boundary as proof certificates. */
+{
+ const pairArena=arena,pairRoot=zero.id,pairMarked=metadata.id;
+ const pairHit={left:pairRoot,right:pairMarked,hash:0n};
+ const pairCollision={left:one.id,right:one.id,hash:0n};
+ const pairList=list([pairCollision,pairHit]);
+ const find=get("psKernelExprV2DefEqPairFindIn");
+ const query=(left,right,hash=0n)=>accepted(find(pairList)(pairArena)(left)(right)(hash),"pair-scan");
+ must(query(pairRoot,pairMarked)===true,"pair-scan-collision-then-hit");
+ must(query(pairMarked,pairRoot)===true,"pair-scan-reversed");
+ must(query(pairRoot,one.id)===false,"pair-scan-collision-miss");
+ must(query(pairRoot,pairMarked,1n)===false,"pair-scan-hash-miss");
+ must(accepted(find(nil)(pairArena)(pairArena.size+1n)(0n)(0n),"pair-empty")===false,
+  "pair-scan-empty-invalid-is-miss");
+ const bad=list([{left:pairArena.size+1n,right:one.id,hash:0n}]);
+ const badResult=find(bad)(pairArena)(pairRoot)(one.id)(0n);
+ must(rejected(badResult)&&badResult.error==="PSKERNEL_V2_PAIR_CHECK_INVALID_RIGHT",
+  "pair-scan-invalid-matching-candidate-preserves-error");
+ const parent=get("psKernelExprV2CheckStateWithSuccess")(initial(pairArena,nil),list([pairHit]));
+ const child=get("psKernelExprV2CheckStateWithSuccess")(parent,pairList);
+ const restored=get("psKernelExprV2CheckStateExitLocalScope")(parent,child);
+ must(array(restored.success).length===1&&same(array(restored.success)[0],pairHit),
+  "pair-scan-scope-restores-parent");
+ const localBuilt=accepted(get("psKernelExprV2PagedMkFVar")(pairArena,name("pair-scope")),"pair-local");
+ const localResult=accepted(get("psKernelExprV2CheckStateDefEqFinish")(
+  initial(localBuilt.fst,nil),localBuilt.snd,localBuilt.snd,true),"pair-local-finish");
+ must(array(localResult.fst.success).length===0,"pair-scan-free-variable-not-cached");
+ err(get("psKernelExprV2TryDefEqStateWithFuel")(0n)(context)(parent)(pairArena.size+1n)(pairRoot),
+  "kernel definitional equality budget exhausted","pair-scan-zero-before-cache-invalid");
+ // Isolated current-implementation timing. A generated before/after comparison
+ // must run this same file against the parent and candidate generated modules.
+ const scanPairs=list(Array.from({length:1024},(_,i)=>({left:pairRoot,right:pairRoot,hash:BigInt(i+1)})));
+ let checksum=0;
+ const started=performance.now();
+ for(let i=0;i<200;i++){
+  const value=accepted(find(scanPairs)(pairArena)(pairRoot)(pairRoot)(2000n+BigInt(i%3)),"pair-bench");
+  if(value===false)checksum++;
+ }
+ must(checksum===200,"pair-scan-benchmark-values");
+ console.log("PSC1_V2_PAIR_SCAN_JS_SAMPLE "+JSON.stringify({
+  entries:1024,calls:200,elapsed_ms:performance.now()-started,checksum,
+  scope:"isolated hash-miss cache scan; whole-kernel speedup not inferred"}));
+ console.log("PSC1_V2_PAIR_SCAN_JS: PASS");
+}
+
 console.log("PSC1_V2_DAG_JS_LAZY_DELTA: PASS comparisons="+comparisons+
  " stage="+stageComparisons+" steps="+stepComparisons+" assertions="+assertions);

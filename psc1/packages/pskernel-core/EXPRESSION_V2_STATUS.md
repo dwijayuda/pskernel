@@ -7,6 +7,15 @@ Exact qualification belongs to a source SHA and its terminal Actions jobs;
 see [AI_WORK_STATE.md](AI_WORK_STATE.md). This document describes source
 ownership and outstanding migration work, not a global soundness theorem.
 
+## Containing audit correction
+
+The new docs/ completion handoff uses exact3aa as the fully observed scoped A
+baseline. This source adds String-literal projection expansion with complete
+callback ownership, explicit-argument pair lookup, and V1/V2 cheap-recursion
+cache-mode publication isolation. Fresh exact-source gates are required; see
+the newest AI_WORK_STATE section. Full real-String dependency closure coverage,
+the four fallback families and B/C/D completion remain open.
+
 ## Public boundaries
 
 | Entry | Inputs and authority | Result |
@@ -116,7 +125,7 @@ the complete original operation's resources and failure semantics.
 | Site | Trigger and remaining work |
 | --- | --- |
 | `API/Dag.lean: psKernelDagCheckTerminalOrOriginal` | Checking/inference outside the supported owning DAG rules, including missing or mismatched same-operation type/recursor references |
-| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including String-literal projection WHNF, unsupported recursor descendants and missing owning references; K/major normalization is qualified at carrier4894; each merge still requires its own gates |
+| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including unsupported recursor descendants and missing owning references; K/major normalization is qualified at carrier4894; each merge still requires its own gates |
 | `API/Dag.lean: psKernelDagIsDefEq` | Unsupported descendant callbacks or missing owning references; the ordered prefix, lazy delta/projection, full shape and final rules now have DAG paths in the carrier candidate |
 | `API/DagAdmission.lean: psKernelDagAdmitDeclaration` | Inductive construction/admission and declaration cases not handled by direct admission |
 

@@ -675,6 +675,95 @@ private def majorRegression (prior : Prepared) (priorOfficial : Lean.Environment
   majorStringRegression context initial natInfo official
   majorAdmissionRegression prepared input generated official cases declarations
 
+/- A bounded cheap-rec reduction may stop before a delta-needed major.
+   Its wrapper must not publish that weakened result into the normal core memo.
+   This regression uses checked Nat recursor metadata and an admitted definition. -/
+private def cacheModeRegression (prior : Prepared) (priorOfficial : Lean.Environment) : IO Unit := do
+  let aliasName := nm "iotaCacheModeZero"
+  let ctorZero := PsKernelExpr.const psKernelNatZeroName []
+  let value := PsKernelDefinitionInfo.mk
+    (PsKernelConstantBase.mk aliasName [] nat) ctorZero .abbrevHint .safe
+  let admitted ← expectPublic "cache-mode-admit-alias"
+    (psKernelV1AdmitDeclaration prior.session (.definitionDecl value))
+  let (a,typeId) ← expect (psKernelExprV2PagedImportIntoChecked prior.arena nat)
+  let (a,valueId) ← expect (psKernelExprV2PagedImportIntoChecked a ctorZero)
+  let request := PsKernelDagDeclarationRequest.definitionDecl
+    (PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk aliasName [] typeId)
+      valueId .abbrevHint .safe)
+  let declarations := psKernelDagDeclarationsAfterAdmission request prior.declarations
+  let blocked := natRec (.const aliasName [])
+  let fixtures : List (String × PsKernelExpr) := [
+    ("beta",.app (lam "ignored" nat blocked) (lit 0)),
+    ("let",.letE (nm "ignored") nat (lit 0) blocked true)]
+  let mut input := a
+  let mut cases : List (String × PsKernelExpr × Nat) := []
+  for (label,expr) in fixtures do
+    let (arena,root) ← expect (psKernelExprV2PagedImportIntoChecked input expr)
+    input := arena
+    cases := cases ++ [(label,expr,root)]
+  let built ← expect (psKernelExprV2DecodeChecked input)
+  let mut generated := PsKernelDagGeneratedState.mk input built declarations
+  for command in prior.commands do
+    generated ← expect (psKernelDagGeneratedAfterCommand command admitted.session.environment generated)
+  let scalar := (psKernelKernelSessionChecker admitted.session [] .safe).context
+  let context := psKernelExprV2CheckContextEmpty scalar
+  let initial := psKernelExprV2CheckStateFromWhnf
+    (psKernelExprV2WhnfStateForDeclarations generated.arena generated.declarations)
+  let oldEq := psKernelIsDefEqWithFuel 4096
+  let newEq := psKernelExprV2TryDefEqStateWithFuel 4096
+  let core := psKernelExprV2TryWhnfCoreOwnedWithLocalValuesFuel 4096 newEq
+    psKernelExprV2CheckLocalValue context
+  let official ←
+    match priorOfficial.addDeclCore 0 0 (.defnDecl {
+        name := inferOfficialName aliasName
+        levelParams := []
+        type := ← officialExpr nat
+        value := ← officialExpr ctorZero
+        hints := .abbrev
+        safety := .safe
+      }) none true with
+    | .ok next => pure next
+    | .error _ => throw (IO.userError "official cache-mode alias")
+  for (label,expr,root) in cases do
+    require ("cache-mode-" ++ label ++ "-official-check")
+      (match Lean.Kernel.check official {} (← officialExpr expr) with | .ok _ => true | _ => false)
+    require ("cache-mode-" ++ label ++ "-official-defeq")
+      (match Lean.Kernel.isDefEq official {} (← officialExpr expr) (← officialExpr (lit 7)) with
+       | .ok equal => equal | _ => false)
+    for cheapProj in [false,true] do
+      let oldCheap ← expect (psKernelWhnfCoreWithRecursorFuel 4096 oldEq scalar
+        psKernelCheckerStateEmpty expr true cheapProj)
+      let cheap ← match core initial root true cheapProj with
+        | some result => expect result
+        | none => throw (IO.userError "cache-mode cheap unexpectedly unsupported")
+      require ("cache-mode-" ++ label ++ "-cheap-stops-before-delta")
+        (psKernelExprEqual oldCheap.fst blocked &&
+          psKernelExprEqual (← decode cheap.fst.whnf.arena cheap.snd) blocked)
+      require ("cache-mode-" ++ label ++ "-cheapRec-cannot-publish")
+        cheap.fst.whnf.coreCache.isEmpty
+      let oldWarm ← expect (psKernelWhnfCoreWithRecursorFuel 4096 oldEq scalar
+        oldCheap.snd expr false false)
+      let oldCold ← expect (psKernelWhnfCoreWithRecursorFuel 4096 oldEq scalar
+        psKernelCheckerStateEmpty expr false false)
+      let warm ← match core cheap.fst root false false with
+        | some result => expect result
+        | none => throw (IO.userError "cache-mode warm unexpectedly unsupported")
+      let cold ← match core initial root false false with
+        | some result => expect result
+        | none => throw (IO.userError "cache-mode cold unexpectedly unsupported")
+      require ("cache-mode-" ++ label ++ "-V1-warm-cold-full-result")
+        (psKernelExprEqual oldWarm.fst (lit 7) && psKernelExprEqual oldCold.fst (lit 7))
+      require ("cache-mode-" ++ label ++ "-V2-warm-cold-full-result")
+        (psKernelExprEqual (← decode warm.fst.whnf.arena warm.snd) (lit 7) &&
+          psKernelExprEqual (← decode cold.fst.whnf.arena cold.snd) (lit 7))
+      require ("cache-mode-" ++ label ++ "-full-result-published")
+        (!warm.fst.whnf.coreCache.isEmpty)
+      require ("cache-mode-" ++ label ++ "-zero-before-warm-cache")
+        (match psKernelExprV2TryWhnfCoreOwnedWithLocalValuesFuel 0 newEq
+            psKernelExprV2CheckLocalValue context warm.fst root false false with
+         | some (.error error) => error == "kernel reduction budget exhausted" | _ => false)
+  IO.println "PSC1_V2_DAG_RECURSOR_CACHE_MODE: PASS wrappers=2 cheapModes=4 warmCold=8"
+
 private def regression : IO Unit := do
   let empty ← expectPublic "empty-session" (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
   let natDecl := PsKernelSimpleInductiveDecl.mk [] psKernelNatName s1
@@ -789,6 +878,7 @@ private def regression : IO Unit := do
   let official0 ← Lean.importModules #[{ module := `Init }] {}
   let official1 ← officialInductive official0 boxDecl
   let official ← officialInductive official1 kDecl
+  cacheModeRegression prepared official
   for (label,expr,expected,root) in cases do
     for fuel in [0,1,2,3,6,16,64] do
       for (limit,depth) in [(0,0),(1,15),(1,16)] do
@@ -1002,3 +1092,4 @@ private def regression : IO Unit := do
   IO.println "PSC1_V2_DAG_OFFICIAL_RECURSOR: PASS valid=12 invalid=4 addDecl=3"
 
 def main : IO Unit := regression
+

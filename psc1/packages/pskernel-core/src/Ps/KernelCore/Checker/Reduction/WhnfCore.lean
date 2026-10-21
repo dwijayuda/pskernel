@@ -274,7 +274,7 @@ def psKernelWhnfCoreWithFuel
                         | Except.ok result =>
                             psKernelWhnfCoreFinish
                               expr
-                              cheapProj
+                              (if cheapRec then true else cheapProj)
                               (Prod.fst result)
                               (Prod.snd result)
                     | PsKernelExpr.proj typeName index structValue =>
@@ -342,7 +342,7 @@ def psKernelWhnfCoreWithFuel
                                 | Option.none =>
                                     psKernelWhnfCoreFinish
                                       expr
-                                      cheapProj
+                                      (if cheapRec then true else cheapProj)
                                       expr
                                       state2
                                 | Option.some value =>
@@ -360,7 +360,7 @@ def psKernelWhnfCoreWithFuel
                                     | Except.ok result =>
                                         psKernelWhnfCoreFinish
                                           expr
-                                          cheapProj
+                                          (if cheapRec then true else cheapProj)
                                           (Prod.fst result)
                                           (Prod.snd result)
                     | PsKernelExpr.app _ _ =>
@@ -407,7 +407,7 @@ def psKernelWhnfCoreWithFuel
                                     | Except.ok result =>
                                         psKernelWhnfCoreFinish
                                           expr
-                                          cheapProj
+                                          (if cheapRec then true else cheapProj)
                                           (Prod.fst result)
                                           (Prod.snd result)
                             | _ =>
@@ -457,9 +457,10 @@ def psKernelWhnfCoreWithFuel
                                   | Except.ok result =>
                                       psKernelWhnfCoreFinish
                                         expr
-                                        cheapProj
+                                        (if cheapRec then true else cheapProj)
                                         (Prod.fst result)
                                         (Prod.snd result)
                     | _ =>
                         Except.ok
                           (Prod.mk expr state)
+

@@ -90,6 +90,27 @@ jobs:
           node --check scripts/pskernel-expr-v2-recursor-smoke.mjs
           node --check scripts/pskernel-expr-v2-recursor-k-smoke.mjs
           node --check scripts/pskernel-expr-v2-owned-state-smoke.mjs
+          # Run the new authentic mode-crossing sentinel against exact parent semantics.
+          # Only these two production files are replaced; new regression assertions stay intact.
+          PSC1_CORE_V1=packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean
+          PSC1_CORE_V2=packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfOwned.lean
+          restore_kernel_sources() {
+            git restore --source="$GITHUB_SHA" -- "$PSC1_CORE_V1" "$PSC1_CORE_V2"
+          }
+          git fetch --no-tags --depth=1 origin 3aa077cb64ff06f76727decd01c43ad6c33f351d
+          trap restore_kernel_sources EXIT
+          git show 3aa077cb64ff06f76727decd01c43ad6c33f351d:psc1/"$PSC1_CORE_V1" > "$PSC1_CORE_V1"
+          git show 3aa077cb64ff06f76727decd01c43ad6c33f351d:psc1/"$PSC1_CORE_V2" > "$PSC1_CORE_V2"
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_recursor_regression
+          set +e
+          .lake/build/bin/psc1_kernel_expr_v2_recursor_regression > "$RUNNER_TEMP/psc1-cache-mode-parent.log" 2>&1
+          PSC1_BASELINE_STATUS=$?
+          set -e
+          test "$PSC1_BASELINE_STATUS" -ne 0
+          grep -Fq 'PSC1_V2_RECURSOR_FAIL cache-mode-beta-cheapRec-cannot-publish' "$RUNNER_TEMP/psc1-cache-mode-parent.log"
+          restore_kernel_sources
+          trap - EXIT
+          echo 'PSC1_CACHE_MODE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d'
           lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_recursor_k_regression psc1_kernel_expr_v2_owned_state_regression
       - name: Run native DAG semantics, adversarial, fuel and official comparison
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
@@ -194,6 +215,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-lazy-delta-native.log"
           grep -q 'PSC1_V2_DAG_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128' "$RUNNER_TEMP/psc1-lazy-delta-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_LAZY_DELTA: PASS cases=18 invalid=4' "$RUNNER_TEMP/psc1-lazy-delta-native.log"
+          grep -Fq 'PSC1_V2_PAIR_SCAN: PASS cases=9 equation=all-inputs' "$RUNNER_TEMP/psc1-lazy-delta-native.log"
       - name: Check ordered DAG full-shape and residual DefEq against V1 and official Lean
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -212,6 +234,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-final-rules-native.log"
           grep -q 'PSC1_V2_DAG_FINAL_RULES: PASS owner=648 final=216 projection=175 stringBuild=144 stringStage=32' "$RUNNER_TEMP/psc1-final-rules-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_FINAL_RULES: PASS cases=21 invalid=5 strings=8 resource=1' "$RUNNER_TEMP/psc1-final-rules-native.log"
+          grep -Fq 'PSC1_V2_STRING_PROJECTION: PASS differential=1296 owners=16 failures=32 officialValid=8 officialInvalid=16' "$RUNNER_TEMP/psc1-final-rules-native.log"
       - name: Check DAG admission guards against V1 and official Lean
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -241,6 +264,7 @@ jobs:
           .lake/build/bin/psc1_kernel_expr_v2_recursor_regression \
             | tee "$RUNNER_TEMP/psc1-recursor-native.log"
           grep -q 'PSC1_V2_DAG_RECURSOR: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9' "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -Fq 'PSC1_V2_DAG_RECURSOR_CACHE_MODE: PASS wrappers=2 cheapModes=4 warmCold=8' "$RUNNER_TEMP/psc1-recursor-native.log"
           grep -Fq 'PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES: PASS cases=2' "$RUNNER_TEMP/psc1-recursor-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_RECURSOR: PASS valid=12 invalid=4 addDecl=3' "$RUNNER_TEMP/psc1-recursor-native.log"
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX: PASS public=126 core=504 owners=360 reducer=432' "$RUNNER_TEMP/psc1-recursor-native.log"
@@ -382,6 +406,7 @@ jobs:
             psc1/dist/expr-v2/native-artifacts.json
             psc1/dist/expr-v2/native-provider-linux.tar.gz
             psc1/host/kernel-provider/KernelProviderMain.lean
+            ${{ runner.temp }}/psc1-cache-mode-parent.log
             ${{ runner.temp }}/psc1-dag-native.log
             ${{ runner.temp }}/psc1-dag-native.memory
             ${{ runner.temp }}/psc1-v2-existing-native.log
@@ -541,6 +566,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" lazy-delta-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-lazy-delta-generated.log"
           grep -q 'PSC1_V2_DAG_JS_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128' "$RUNNER_TEMP/psc1-lazy-delta-generated.log"
+          grep -Fq 'PSC1_V2_PAIR_SCAN_JS: PASS' "$RUNNER_TEMP/psc1-lazy-delta-generated.log"
       - name: Check generated ordered DAG full-shape and residual DefEq in detached Node
         working-directory: psc1
         run: |
@@ -563,6 +589,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" final-rules-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-final-rules-generated.log"
           grep -q 'PSC1_V2_DAG_JS_FINAL_RULES: PASS owner=648 final=216 projection=175 stringBuild=144 stringStage=32' "$RUNNER_TEMP/psc1-final-rules-generated.log"
+          grep -Fq 'PSC1_V2_STRING_PROJECTION_JS: PASS differential=1296 owners=16 failures=32' "$RUNNER_TEMP/psc1-final-rules-generated.log"
       - name: Check generated DAG admission guards in detached Node
         working-directory: psc1
         run: |
@@ -596,6 +623,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" recursor-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-recursor-generated.log"
           grep -q 'PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9' "$RUNNER_TEMP/psc1-recursor-generated.log"
+          grep -Fq 'PSC1_V2_DAG_RECURSOR_CACHE_MODE_JS: PASS wrappers=2 cheapModes=4 warmCold=8' "$RUNNER_TEMP/psc1-recursor-generated.log"
           grep -Fq 'PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2' "$RUNNER_TEMP/psc1-recursor-generated.log"
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX_JS: PASS public=126 core=504 owners=360 reducer=432' "$RUNNER_TEMP/psc1-recursor-generated.log"
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_ADMISSION_JS: PASS valid=6 admitted=2 rejected=2' "$RUNNER_TEMP/psc1-recursor-generated.log"

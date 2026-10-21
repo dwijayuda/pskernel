@@ -338,6 +338,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" lazy-delta-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-lazy-delta-canonical.log"
           grep -q 'PSC1_V2_DAG_JS_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128' "$RUNNER_TEMP/psc1-lazy-delta-canonical.log"
+          grep -Fq 'PSC1_V2_PAIR_SCAN_JS: PASS' "$RUNNER_TEMP/psc1-lazy-delta-canonical.log"
       - name: Check canonical-source ordered DAG full-shape and residual DefEq in detached Node
         working-directory: psc1
         run: |
@@ -360,6 +361,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" final-rules-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-final-rules-canonical.log"
           grep -q 'PSC1_V2_DAG_JS_FINAL_RULES: PASS owner=648 final=216 projection=175 stringBuild=144 stringStage=32' "$RUNNER_TEMP/psc1-final-rules-canonical.log"
+          grep -Fq 'PSC1_V2_STRING_PROJECTION_JS: PASS differential=1296 owners=16 failures=32' "$RUNNER_TEMP/psc1-final-rules-canonical.log"
       - name: Check canonical-source DAG admission guards in detached Node
         working-directory: psc1
         run: |
@@ -393,6 +395,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" recursor-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-recursor-canonical.log"
           grep -q 'PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9' "$RUNNER_TEMP/psc1-recursor-canonical.log"
+          grep -Fq 'PSC1_V2_DAG_RECURSOR_CACHE_MODE_JS: PASS wrappers=2 cheapModes=4 warmCold=8' "$RUNNER_TEMP/psc1-recursor-canonical.log"
           grep -Fq 'PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2' "$RUNNER_TEMP/psc1-recursor-canonical.log"
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX_JS: PASS public=126 core=504 owners=360 reducer=432' "$RUNNER_TEMP/psc1-recursor-canonical.log"
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_ADMISSION_JS: PASS valid=6 admitted=2 rejected=2' "$RUNNER_TEMP/psc1-recursor-canonical.log"

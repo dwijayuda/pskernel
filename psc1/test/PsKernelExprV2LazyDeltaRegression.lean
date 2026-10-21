@@ -186,6 +186,120 @@ private def officialHints : PsKernelReducibilityHints → Lean.ReducibilityHints
   | .opaqueHint => .opaque
   | .regular height => .regular (UInt32.ofNat height)
 
+
+/- Frozen pre-change scan, including its original curried argument placement.
+   This checks the optimization for all arenas and even malformed internal
+   references; it does not add a soundness claim for caller-supplied caches. -/
+private def frozenPairFind
+    (pairs : List PsKernelExprV2DefEqPair) :
+    PsKernelExprV2PagedArena -> Nat -> Nat -> Nat -> Except String Bool :=
+  match pairs with
+  | List.nil =>
+      fun (_arena : PsKernelExprV2PagedArena) (_left _right _hash : Nat) =>
+        Except.ok false
+  | List.cons first rest =>
+      fun (arena : PsKernelExprV2PagedArena) (left right hash : Nat) =>
+        let smaller :=
+          fun (nextArena : PsKernelExprV2PagedArena)
+              (nextLeft nextRight nextHash : Nat) =>
+            let recur := frozenPairFind rest;
+            recur nextArena nextLeft nextRight nextHash;
+        if Nat.beq first.hash hash then
+          match psKernelExprV2DefEqPairMatches arena first left right with
+          | Except.error error => Except.error error
+          | Except.ok equal =>
+              if equal then Except.ok true
+              else smaller arena left right hash
+        else smaller arena left right hash
+
+
+private theorem pairFindWorker_eq_frozen
+    (pairs : List PsKernelExprV2DefEqPair)
+    (arena : PsKernelExprV2PagedArena) (left right hash : Nat) :
+    psKernelExprV2DefEqPairFindWorker pairs arena left right hash =
+      frozenPairFind pairs arena left right hash := by
+  induction pairs generalizing arena left right hash with
+  | nil => rfl
+  | cons first rest ih =>
+      simp only [psKernelExprV2DefEqPairFindWorker, frozenPairFind, ih]
+
+private theorem pairFindABI_eq_frozen
+    (pairs : List PsKernelExprV2DefEqPair)
+    (arena : PsKernelExprV2PagedArena) (left right hash : Nat) :
+    psKernelExprV2DefEqPairFindIn pairs arena left right hash =
+      frozenPairFind pairs arena left right hash := by
+  cases pairs with
+  | nil => rfl
+  | cons first rest =>
+      exact pairFindWorker_eq_frozen (List.cons first rest) arena left right hash
+
+#print axioms pairFindWorker_eq_frozen
+#print axioms pairFindABI_eq_frozen
+
+private def pairScanRegression : IO Unit := do
+  let (a, zero) ← expect (psKernelExprV2PagedMkLit psKernelExprV2PagedEmpty (.nat 0))
+  let (a, one) ← expect (psKernelExprV2PagedMkLit a (.nat 1))
+  let (a, marked) ← expect (psKernelExprV2PagedMkMData a 7 zero)
+  let (a, localId) ← expect (psKernelExprV2PagedMkFVar a (nm "pair-scope"))
+  let hit := PsKernelExprV2DefEqPair.mk zero marked 0
+  let collision := PsKernelExprV2DefEqPair.mk one one 0
+  let pairs := [collision, hit]
+  let check := fun (left right hash : Nat) => do
+    let actual ← expect (psKernelExprV2DefEqPairFindIn pairs a left right hash)
+    let frozen ← expect (frozenPairFind pairs a left right hash)
+    require "pair-scan-frozen-equation" (actual == frozen)
+    return actual
+  require "pair-scan-collision-then-hit" (← check zero marked 0)
+  require "pair-scan-reversed" (← check marked zero 0)
+  require "pair-scan-collision-miss" (!(← check zero one 0))
+  require "pair-scan-hash-miss" (!(← check zero marked 1))
+  require "pair-scan-empty-invalid-is-miss"
+    (match psKernelExprV2DefEqPairFindIn [] a (a.size + 1) 0 0 with
+     | .ok false => true | _ => false)
+  let invalid := [PsKernelExprV2DefEqPair.mk (a.size + 1) one 0]
+  require "pair-scan-invalid-matching-candidate-preserves-error"
+    (match psKernelExprV2DefEqPairFindIn invalid a zero one 0,
+           frozenPairFind invalid a zero one 0 with
+     | .error actual, .error frozen => actual == frozen
+     | _, _ => false)
+  let parent := psKernelExprV2CheckStateWithSuccess (initialState a []) [hit]
+  let child := psKernelExprV2CheckStateWithSuccess parent pairs
+  let restored := psKernelExprV2CheckStateExitLocalScope parent child
+  require "pair-scan-scope-restores-parent" (restored.success.length == 1)
+  let localResult ← expect
+    (psKernelExprV2CheckStateDefEqFinish (initialState a []) localId localId true)
+  require "pair-scan-free-variable-not-cached" localResult.fst.success.isEmpty
+  let session ← expectPublic
+    (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
+  let checker := psKernelKernelSessionChecker session [] .safe
+  require "pair-scan-zero-fuel-before-cache-and-invalid-roots"
+    (match psKernelExprV2TryDefEqStateWithFuel 0
+        (psKernelExprV2CheckContextEmpty checker.context) parent (a.size + 1) zero with
+     | some (.error error) => error == "kernel definitional equality budget exhausted"
+     | _ => false)
+  IO.println "PSC1_V2_PAIR_SCAN: PASS cases=9 equation=all-inputs"
+
+private def pairScanBenchmark : IO Unit := do
+  -- This measures only a cold-hash list scan; it neither times proof checking
+  -- nor establishes a whole-kernel speedup. The frozen original and production
+  -- worker receive identical inputs in an ABBA order.
+  let (arena, root) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let pairs := (List.range 1024).map fun i =>
+    PsKernelExprV2DefEqPair.mk root root (i + 1)
+  for variant in [true, false, false, true] do
+    let mut checksum := 0
+    let start ← IO.monoNanosNow
+    for i in [:200] do
+      let hash := 2000 + i % 3
+      let result ← expect (if variant then
+        frozenPairFind pairs arena root root hash
+        else psKernelExprV2DefEqPairFindIn pairs arena root root hash)
+      unless result do checksum := checksum + 1
+    let elapsed := (← IO.monoNanosNow) - start
+    require "pair-scan-benchmark-value" (checksum == 200)
+    let label := if variant then "frozen" else "worker"
+    IO.println s!"PSC1_V2_PAIR_SCAN_SAMPLE variant={label} entries=1024 calls=200 elapsed_ns={elapsed} checksum={checksum}"
+
 private def regression : IO Unit := do
   let empty ← expectPublic (psKernelKernelSessionEmpty
     psKernelResourcePolicyDefault psKernelProviderDefault)
@@ -691,4 +805,7 @@ private def regression : IO Unit := do
   IO.println "PSC1_V2_DAG_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128"
   IO.println "PSC1_V2_DAG_OFFICIAL_LAZY_DELTA: PASS cases=18 invalid=4"
 
-def main : IO Unit := regression
+def main : IO Unit := do
+  pairScanRegression
+  pairScanBenchmark
+  regression

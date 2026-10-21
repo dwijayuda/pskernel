@@ -12,7 +12,7 @@ Checked DAG ingress for the complete KernelContract-v1 implementation.
 
 One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
-Supported inference, scoped DefEq through proof irrelevance and the ordered Nat prefix, and WHNF rules read the canonical DAG
+Supported inference, the ordered full-state DefEq pipeline, and WHNF rules read the canonical DAG
 with the original entry fuel, depth and rule ordering. Local types and let
 values are IDs in the same owner. Unsupported work restarts the complete
 original operation with unchanged resources and without partial publication.
@@ -36,9 +36,10 @@ Each declaration is checked before environment publication. No semantic cache
 or declaration index escapes the validated batch. A sealed constructor API
 remains a source-profile limitation.
 
-This remains a partial representation migration. General DefEq, external
-constant types, projections without owning constructor types, unsupported
-reductions and remaining admission rules use PsKernelExpr internally.
+This remains a partial representation migration. External constant types,
+projections without owning constructor types, unowned recursor descendants
+and remaining admission rules may restart through PsKernelExpr. The general
+ordered DefEq pipeline itself has direct DAG implementations.
 Eliminating that fallback and adapter remains required for completion.
 -/
 structure PsKernelDagBatchResult where

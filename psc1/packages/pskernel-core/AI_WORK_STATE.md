@@ -12,6 +12,81 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — deep audit and bounded cache/WHNF corrections
+
+Baseline **3aa077cb64ff06f76727decd01c43ad6c33f351d** is now fully observed for
+the scoped independent developer provider: [integration39622318383](https://github.com/dwijayuda/pskernel/actions/runs/39622318383)
+native119298737696/generated119298738193 PASS; [correctness39622318348](https://github.com/dwijayuda/pskernel/actions/runs/39622318348)
+native119298737337/canonical119298737884 PASS; all six
+[research39622318349](https://github.com/dwijayuda/pskernel/actions/runs/39622318349) PASS.
+This is A only, using the independent V1 provider and authentic TypeScript7.0.2/Node22
+routes. Full-kernel DirectJS remains unsupported.
+
+The exact baseline [full193 Arena39622318341](https://github.com/dwijayuda/pskernel/actions/runs/39622318341)
+is terminal FAIL:172 matching outcomes (105 acceptance,59 kernel,1 metadata,
+7 transport),2 separately classified unsafe/partial safety agreements,17 host
+timeouts,1 Church fuel exhaustion and1 nested unsupported case. No incomplete
+result is a semantic rejection. [Permanent retrieved evidence](evidence/2026-10-21-3aa-deep-audit.json)
+preserves the source/run/input/artifact identities and all21 diagnostics.
+The strict current all193 predicate also requires explicit safety-contract
+reconciliation; changing those labels to manufacture parity is forbidden.
+
+The **containing correction is NOT RUN at creation**. Fresh exact-source native,
+portable .lean, canonical .ps, both generated routes, local proofs, provider,
+benchmarks and full Arena gates are mandatory. Never inherit the baseline PASS.
+
+### Implemented source changes requiring fresh qualification
+
+- Both V1 Reduction/WhnfCore and V2 WhnfOwned previously suppressed normal-core
+  cache publication only for cheap projections. A cheap-recursion beta/let
+  wrapper could publish a deliberately stuck recursor. The correction suppresses
+  publication for either cheap flag, preserves actual reduction flags/ABI/fuel,
+  and retains full-mode caching. New checked alias/recursor fixtures require
+  cheap mode stays blocked, warm-full=cold-full=7 in both representations,
+  no cheap publication, normal publication, zero-fuel precedence and official
+  Lean check/DefEq. Linux CI must first reproduce the exact new sentinel against
+  unmodified parent3aa production files, then restore and rebuild this source.
+  Current production DefEq ordinarily uses cheapRec=false; no public false-proof
+  acceptance is claimed from the internal mode-crossing defect.
+- DAG String-literal projection now uses the existing canonical constructor
+  builder and mandatory owning public-WHNF callback before ordinary field
+  selection.1296 direct differentials,16 complete-state probes and32 failure
+  probes are added in native and both generated routes. Native official Init
+  adds8 valid/16 invalid controls. Minimal PS fixtures lack the complete real
+  String.ofList closure: they prove branch/state/refusal parity and direct
+  completion, not full authentic-prelude normalization. That qualification is
+  a separate open T01F task.
+- DefEqPair uses an explicit-argument worker under its unchanged curried ABI.
+  A frozen original recursion has all-input worker/ABI equation theorems and
+  printed axiom dependencies. Nine native/generated cache controls preserve
+  collisions, reverse pairs, first errors, scope/FVar policy and zero-fuel order.
+  The native ABBA scan microbenchmark has attainable hash misses; it is a local
+  workload measurement, not a whole-kernel speed or complexity improvement.
+- Existing mandatory assertions/counts remain. Native/generated/canonical
+  workflows additionally require the new String, cache-mode and pair markers.
+  The original four whole-operation fallback families, eager decode, recursive
+  metadata import and V1 inductive admission remain. Default fuel4096 and all
+  published resource/trust policies are unchanged.
+
+### Authoritative completion handoff
+
+Read [deep audit](docs/PSKERNEL_CORE_LEAN435_DEEP_AUDIT.md),
+[ordered completion plan](docs/PSKERNEL_CORE_COMPLETION_PLAN.md),
+[progress matrix](docs/PSKERNEL_CORE_PROGRESS_MATRIX.md) and
+[ready-to-copy continuation](docs/AI_CONTINUATION_PROMPT.md).
+Research compares pinned actual Lean, con-leche and con-ron sources and records
+which mechanisms to adopt or reject. The queue separates A/B/C/D, implementation
+from qualification, and local lemmas from unresolved global soundness/backend
+preservation obligations.
+
+After this source's gates terminate, fix any demonstrated mandatory failure
+first. If qualified, next main slice is T03a checked mutual/nested generated
+recursor ownership in API/DagGenerated; T08a host-only native Church theorem
+stage attribution can proceed independently on the existing diagnostic branch.
+Do not repeat a broad audit, reimplement completed slices, reset fuel, remove
+negative cases, merge main or publish npm.
+
+
 ## 2026-10-21 15:02 UTC — integrate qualified complete-state carrier; fresh merge gates
 
 The carrier source **`4894fce8c7d048ae188495bc2090fedfddf7fcb4`** is now

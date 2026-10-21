@@ -46,11 +46,22 @@ private def tracePhase (phase : String) : IO Unit := do
   if (← IO.getEnv "PSC1_TRACE_PHASES") == some "1" then
     IO.eprintln ("PSC1_PHASE: " ++ phase ++ " @" ++ toString (← IO.monoMsNow))
 
+private def traceCoreSizes (declarations : List PsDeclaration) : IO Unit := do
+  if (← IO.getEnv "PSC1_TRACE_PHASES") == some "1" then
+    for declaration in declarations do
+      let valueSize := match psDeclarationValue declaration with
+        | some value => psCheckedNestedSize value
+        | none => 0
+      IO.eprintln ("PSC1_CORE_SIZE: " ++ psNameToString (psDeclarationName declaration) ++
+        " type=" ++ toString (psCheckedNestedSize (psDeclarationType declaration)) ++
+        " value=" ++ toString valueSize)
+
 private def checkedInput (inputPath : String) :
     IO (PsHostCapturedProject × PsCompilerAdmissionReadyModule × String) := do
   tracePhase "capture:begin"
   let captured ← psHostCaptureProject psSelfHostProdPreludeEnvironment inputPath
   tracePhase ("capture:complete declarations=" ++ toString captured.declarations.length)
+  traceCoreSizes captured.declarations
   let elaborated : PsElabModuleResult := {
     environment := captured.environment
     declarations := captured.declarations
@@ -61,7 +72,7 @@ private def checkedInput (inputPath : String) :
   let admissions ← match ← psHostLeanCheckPrepared prepared with
     | .ok value => pure value
     | .error reason => throw (IO.userError ("PSC1_KERNEL_ADMISSION_FAILED: " ++ reason))
-  tracePhase "independent-admission:complete"
+  tracePhase ("independent-admission:complete bytes=" ++ toString admissions.utf8ByteSize)
   return (captured, prepared, admissions)
 
 private def ordinaryInput (inputPath : String) :
@@ -69,6 +80,7 @@ private def ordinaryInput (inputPath : String) :
   tracePhase "capture:begin"
   let captured ← psHostCaptureProject psSelfHostProdPreludeEnvironment inputPath
   tracePhase ("capture:complete declarations=" ++ toString captured.declarations.length)
+  traceCoreSizes captured.declarations
   let elaborated : PsElabModuleResult := {
     environment := captured.environment
     declarations := captured.declarations
@@ -82,7 +94,7 @@ private def ordinaryInput (inputPath : String) :
   let admissions ← match ← psHostLeanCheckPrepared prepared.logical with
     | .ok value => pure value
     | .error reason => throw (IO.userError ("PSC1_KERNEL_ADMISSION_FAILED: " ++ reason))
-  tracePhase "independent-admission:complete"
+  tracePhase ("independent-admission:complete bytes=" ++ toString admissions.utf8ByteSize)
   return (captured, prepared, admissions)
 
 private def irFailureText (raw : PsVerifiedIrModule) : String :=

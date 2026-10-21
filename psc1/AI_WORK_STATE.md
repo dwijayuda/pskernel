@@ -164,3 +164,9 @@ Opt-in host phase diagnostics now localize capture, ordinary preparation,
 official admission, erasure, strict validation, closed planning and JS printing.
 They grant no authority and do not alter budgets or successful output.
 The complete qualified source remains 65fa8766; no new readiness is inferred.
+
+Phase trace at 1012890b / run 39692589218 localizes the same deadline:
+capture 9138 ms, ordinary preparation 20298 ms, independent admission 31260 ms,
+then ordinary erasure exceeds the remaining interval. Backend planning/printing
+is not reached. Add opt-in per-declaration Core sizes and admission-byte counts
+to identify source expansion before altering any integrity or resource guard.

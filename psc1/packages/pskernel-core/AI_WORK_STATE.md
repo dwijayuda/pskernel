@@ -40,7 +40,11 @@ a fuel initialized to a numeral or exponent. Recursive aliases are now delayed
 inside their argument lambdas. Their supplied fuel, equations, zero-fuel
 results, checks and errors are unchanged. A native proof file retains the exact
 old equations and proves extensional equality for every supplied fuel.
-Those lemmas and the new native/independent-JS large-numeral gates are pending CI.
+All five lemmas and the native large-numeral regression passed at
+[2d29ebc](https://github.com/dwijayuda/pskernel/commit/2d29ebc5785d44ee6406f378845412978b3fe1cc),
+[native integration39518432248](https://github.com/dwijayuda/pskernel/actions/runs/39518432248).
+Their printed dependencies are only propext and Quot.sound. Independent-JS
+large-numeral qualification is still running.
 
 The generated gate uses a30-second host watchdog, unchanged kernel fuel4096,
 129-bit numerals, UInt32-limit exponent cases, low-fuel equations, exact numeral
@@ -63,8 +67,10 @@ verdicts; the timed-out cases remain unresolved. The official pinned reference
 passed all193 (122 accepted/71 rejected). All body hashes were preserved.
 
 Timeout records report only host wall time; they do not establish that kernel
-admission began or attribute the cost. Source inspection identifies large Nat
-literals in some cases, but causation by the recursive-alias defect is unmeasured.
+admission began or attribute the cost. Some source fixtures contain padding Nat
+literals above100,000, but they remain below the small-Nat threshold and therefore
+do not enter heap-word counting. They do not establish that worker as the cause
+of any timeout. Causation by the recursive-alias defect remains unmeasured.
 Input diagnostics will separate numeric names from numerals. Known nested error
 wrappers and the nonchecking Lean DefinitionVal.all annotation need principled
 adapter fixes; neither is permission to weaken declaration checking.
@@ -91,6 +97,34 @@ same numeric IDs in a foreign arena. The ignored argument retains the original
 five-fuel failure/six-fuel success ordering. An official Lean polymorphic identity
 comparison and three local state-field/cache-initialization lemmas are included.
 These are pending CI and do not prove global arena ownership or delta refinement.
+
+### Arena metadata and diagnostic adaptation — pending this commit's CI
+
+Pinned [Lean Declaration.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Declaration.lean)
+defines DefinitionVal.all and the corresponding theorem/opaque fields as source
+mutual-block annotations unused by kernel checking. The replay adapter now
+validates every referenced name and retains its exact table ID and typed name
+segments in an explicit receipt. Order, duplicates and numeric names above2^53
+are preserved. These annotations do not affect safe declaration grouping or
+dependency order. Inductive and recursor all-lists still require agreement with
+independently regenerated data. New controls exercise all three annotation
+families and invalid IDs, while retaining forged-inductive/recursor rejections.
+
+Public diagnostic adaptation now recognizes exactly one of the five fixed
+nested-admission stage wrappers around an already-known diagnostic. It preserves
+the original complete message and resource kind. Unknown messages, unknown or
+malformed prefixes and repeated wrappers remain internal errors. The checker
+does not change its acceptance, rejection or fuel behavior. Native and generated
+controls cover bare/wrapped invalid, unsupported and resource messages.
+
+The official Arena job additionally inspects every authenticated input and logs
+source all-list annotations and actual numeral magnitudes separately from numeric
+name salts. Optional synchronous progress records identify transport, ordering,
+kernel admission and metadata phases; timeout reports retain the last
+source-hash-bound snapshot. A snapshot never supplies an acceptance/rejection
+verdict. All193 cases, the60-second generated host limit,2GiB heap and kernel
+fuel4096 remain unchanged. The previous full gate is still failing until the new
+complete report is observed.
 
 ## Objective and execution constraints
 

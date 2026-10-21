@@ -72,8 +72,49 @@ must(observe(stream([{ie:0n,app:{fn:0n,arg:0n}}])).verdict==='malformed','cyclic
 must(observe(stream([{ie:0n,app:{fn:1n,arg:1n}},{ie:1n,sort:0n}])).verdict==='malformed','forward expression table reference rejected');
 must(observe(stream([{il:0n,succ:0n}])).verdict==='malformed','duplicate universe table rejected');
 must(observe(stream([{in:0n,str:{pre:0n,str:'duplicate'}}])).verdict==='malformed','duplicate name table rejected');
-const unrepresented=definition(true).replace('"all":[1]','"all":[1,1]');
-must(observe(unrepresented).verdict==='unsupported','unrepresented all-list does not silently pass');
+const duplicateAll=observe(definition(true).replace('"all":[1]','"all":[1,1]'));
+must(duplicateAll.verdict==='accepted'&&duplicateAll.sourceMutualBlockMetadata.length===1&&
+  duplicateAll.sourceMutualBlockMetadata[0].all.length===2&&
+  duplicateAll.sourceMutualBlockMetadata[0].all.every(item=>item.tableId==='1'),
+  'nonchecking source all duplicates retained without changing admission');
+
+const sourceAllID=9007199254740993n,sourceAllNumber=9007199254740995n;
+const sourceAllFixture=(kind,all)=>{
+  const info={name:1n,levelParams:[],type:4n,value:6n,all};
+  if(kind==='def')Object.assign(info,{hints:'abbrev',safety:'safe'});
+  if(kind==='opaque')info.isUnsafe=false;
+  return stream([
+    {in:1n,str:{pre:0n,str:'ArenaSourceAllMetadata'}},
+    {in:sourceAllID,num:{pre:0n,i:sourceAllNumber}},
+    {ie:0n,sort:0n},{ie:1n,bvar:0n},{ie:2n,bvar:1n},
+    {ie:3n,forallE:{name:0n,type:1n,body:2n,binderInfo:'default'}},
+    {ie:4n,forallE:{name:0n,type:0n,body:3n,binderInfo:'default'}},
+    {ie:5n,lam:{name:0n,type:1n,body:1n,binderInfo:'default'}},
+    {ie:6n,lam:{name:0n,type:0n,body:5n,binderInfo:'default'}},
+    {[kind]:info},
+  ]);
+};
+for(const [kind,expectedKind] of [['def','defnInfo'],['thm','thmInfo'],['opaque','opaqueInfo']]){
+  const result=observe(sourceAllFixture(kind,[sourceAllID,0n,1n,sourceAllID]));
+  must(result.verdict==='accepted'&&result.coreInvoked===true&&result.metadataValidated===true,
+    kind+' arbitrary source all metadata preserves real admission');
+  const retained=result.sourceMutualBlockMetadata;
+  must(retained.length===1&&retained[0].kind===expectedKind&&retained[0].name.tableId==='1',
+    kind+' source all receipt is attached to the exact declaration');
+  const names=retained[0].all;
+  must(names.length===4&&names[0].tableId==='9007199254740993'&&
+    names[1].tableId==='0'&&names[2].tableId==='1'&&names[3].tableId===names[0].tableId&&
+    names[0].segments.length===1&&names[0].segments[0].kind==='num'&&
+    names[0].segments[0].value==='9007199254740995'&&
+    names[1].segments.length===0&&names[2].segments.length===1&&
+    names[2].segments[0].kind==='str'&&names[2].segments[0].value==='ArenaSourceAllMetadata'&&
+    names[3].segments.length===1&&names[3].segments[0].value===names[0].segments[0].value,
+    kind+' source all preserves exact IDs, numeric names, anonymity, order, and duplicates');
+  for(const [all,label] of [[[sourceAllID-1n],'unresolved ID'],[[-1n],'negative ID'],
+      [[1.5],'fractional ID'],[null,'non-array metadata']])
+    must(observe(sourceAllFixture(kind,all)).verdict==='malformed',
+      kind+' source all rejects '+label);
+}
 
 const N=get('PsKernelName'),L=get('PsKernelLevel'),E=get('PsKernelExpr'),B=get('PsKernelBinderInfo');
 const List=get('List'),nil=typeof List.nil==='function'?List.nil():List.nil;
@@ -169,4 +210,17 @@ const wrongCtor=structuredClone(group);wrongCtor.ctors[0].numFields+=1n;
 must(runGroup(wrongCtor).verdict==='rejected','forged constructor field count rejected');
 const wrongInduct=structuredClone(group);wrongInduct.types[0].isRec=!wrongInduct.types[0].isRec;
 must(runGroup(wrongInduct).verdict==='rejected','forged inductive recursion flag rejected');
+const wrongInductAll=structuredClone(group);
+wrongInductAll.types[0].all=[group.ctors[0].name];
+must(runGroup(wrongInductAll).verdict==='rejected','forged inductive all-list still rejected');
+const wrongRecAll=structuredClone(group);
+wrongRecAll.recs[0].all=[group.ctors[0].name];
+must(runGroup(wrongRecAll).verdict==='rejected','forged recursor all-list still rejected');
+const snapshots=[];
+const progressed=replayText(kernel,definition(true),snapshot=>snapshots.push(snapshot));
+must(progressed.verdict==='accepted'&&snapshots.map(item=>item.stage).join(',')===
+  'transport,declaration-ordering,kernel-admission,metadata-decode,metadata-compare',
+  'bounded progress covers real checking and metadata phases');
+must(snapshots.every(item=>item.fuel==='4096')&&snapshots[1].coreInvoked===false&&
+  snapshots[2].coreInvoked===true,'progress observes fixed fuel and actual invocation');
 console.log('PSC1_ARENA_REPLAY_CONTROLS: PASS count='+passed);

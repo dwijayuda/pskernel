@@ -30,6 +30,42 @@ PREFIX = "PSC1_ARENA_REPLAY "
 VERDICTS = {"accepted", "rejected", "malformed", "unsupported", "resource_exhausted", "internal_error", "driver_error"}
 
 
+PROGRESS_PREFIX = "PSC1_ARENA_PROGRESS "
+PROGRESS_STAGES = {"source-decode", "module-load", "transport", "declaration-ordering",
+                   "kernel-admission", "metadata-decode", "metadata-compare"}
+
+
+def progress_evidence(stderr: str, source_sha256: str) -> dict:
+    latest, count, invalid = None, 0, 0
+    for line in stderr.splitlines():
+        if not line.startswith(PROGRESS_PREFIX):
+            continue
+        try:
+            value = json.loads(line[len(PROGRESS_PREFIX):])
+            if (not isinstance(value, dict)
+                    or value.get("format") != "psc1-arena-progress-v1"
+                    or value.get("sourceSha256") != source_sha256
+                    or value.get("stage") not in PROGRESS_STAGES
+                    or value.get("fuel") != "4096"
+                    or type(value.get("coreInvoked")) is not bool):
+                raise ValueError("invalid progress identity or phase")
+            for field in ("records", "exportedDeclarations", "admissionCommands"):
+                if field in value and (type(value[field]) is not int or not 0 <= value[field] <= 9007199254740991):
+                    raise ValueError("invalid progress counter")
+            if "arenaNodes" in value and (not isinstance(value["arenaNodes"], str)
+                    or re.fullmatch(r"0|[1-9][0-9]{0,30}", value["arenaNodes"]) is None):
+                raise ValueError("invalid progress arena size")
+            latest = {key: value[key] for key in
+                      ("stage", "coreInvoked", "records", "exportedDeclarations",
+                       "admissionCommands", "arenaNodes", "fuel", "sourceSha256") if key in value}
+            count += 1
+        except (ValueError, TypeError):
+            invalid += 1
+    # Full stderr is already an artifact. A progress snapshot is never a verdict.
+    return {"progress_snapshots": count, "invalid_progress_snapshots": invalid,
+            "last_progress": latest}
+
+
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -41,6 +77,7 @@ def process_case(node: pathlib.Path, runner: pathlib.Path, kernel: pathlib.Path,
     time_path = logs / f"case-{index:03d}-time.txt"
     command = ["/usr/bin/time", "-v", "-o", str(time_path), str(node),
                "--max-old-space-size=2048", str(runner), str(kernel), str(case)]
+    source_sha256 = sha256(case.read_bytes())
     started = time.monotonic()
     env = dict(os.environ, PATH="", LC_ALL="C")
     try:
@@ -64,6 +101,7 @@ def process_case(node: pathlib.Path, runner: pathlib.Path, kernel: pathlib.Path,
     measurement = {"elapsed_seconds": time.monotonic() - started,
                    "returncode": process.returncode, "stdout": stdout_path.name,
                    "stderr": stderr_path.name, "time_log": time_path.name}
+    measurement.update(progress_evidence(stderr, source_sha256))
     if time_path.exists():
         match = re.search(r"Maximum resident set size \(kbytes\):\s*(\d+)", time_path.read_text())
         if match:
@@ -86,7 +124,7 @@ def process_case(node: pathlib.Path, runner: pathlib.Path, kernel: pathlib.Path,
             or process.returncode != (2 if result.get("verdict") == "driver_error" else 0)):
         return {**measurement, "verdict": "driver_error", "stage": "report",
                 "reason": "invalid verdict envelope, exit status, or kernel fuel"}
-    if result.get("sourceSha256") != sha256(case.read_bytes()):
+    if result.get("sourceSha256") != source_sha256:
         return {**measurement, "verdict": "driver_error", "stage": "report", "reason": "input hash mismatch"}
     if result["verdict"] == "accepted" and (result.get("metadataValidated") is not True or result.get("coreInvoked") is not True):
         return {**measurement, "verdict": "driver_error", "stage": "report", "reason": "acceptance omitted metadata validation"}
@@ -187,7 +225,7 @@ def main() -> int:
                     diagnostic = {key: observation.get(key) for key in
                                   ("verdict", "stage", "reason", "coreInvoked",
                                    "exportedDeclarations", "admissionCommands", "arenaNodes",
-                                   "elapsed_seconds", "peak_rss_kib")}
+                                   "elapsed_seconds", "peak_rss_kib", "last_progress", "invalid_progress_snapshots")}
                     diagnostic.update(index=record["index"], name=record["name"],
                                       label=record["label"], classification=record["classification"])
                     print("PSC1_ARENA435_DIAGNOSTIC " +

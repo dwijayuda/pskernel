@@ -1293,8 +1293,46 @@ private def officialComparison : IO Unit := do
      | .error _ => true | _ => false)
   IO.println "PSC1_V2_DAG_OFFICIAL_LEAN: PASS"
 
+private def nestedDiagnosticClassification : IO Unit := do
+  let prefixes := ["", "nested preprocessing: ", "nested transformed admission: ",
+    "nested original restoration: ", "nested auxiliary restoration: ",
+    "nested restored validation: "]
+  let resources : List (String × PsKernelResourceError) := [
+    ("kernel reduction budget exhausted", .fuel),
+    ("kernel inference budget exhausted", .fuel),
+    ("deep recursion detected, use maxRecDepth to increase the limit", .recursionDepth),
+    ("the kernel refused a Nat numeral because its size exceeds the maximum", .natSize),
+    ("the kernel refused to evaluate Nat.pow because the result would exceed the maximum numeral size", .natSize)]
+  for prefix in prefixes do
+    let invalid := prefix ++ "invalid projection: structure type mismatch"
+    require "nested-diagnostic-exact-invalid-with-original-message"
+      (samePublicError (psKernelErrorFromMessage invalid) (.rejectedInvalid invalid))
+    let unsupported := prefix ++ "nested or invalid mutual inductive occurrence is not supported"
+    require "nested-diagnostic-exact-unsupported-with-original-message"
+      (samePublicError (psKernelErrorFromMessage unsupported) (.declinedUnsupported unsupported))
+    for (body, resource) in resources do
+      let message := prefix ++ body
+      require "nested-diagnostic-preserves-resource-category-and-message"
+        (samePublicError (psKernelErrorFromMessage message)
+          (.resourceExhausted resource message))
+  for message in [
+      "unrecognized diagnostic",
+      "provider: invalid projection: structure type mismatch",
+      "nested restored validation: unrecognized diagnostic",
+      "nested restored validation: ",
+      "nested restored validation:invalid projection: structure type mismatch",
+      "nested restored validation: invalid projection: structure type mismatch trailing",
+      "nested restored validation: nested restored validation: invalid projection: structure type mismatch",
+      "nested preprocessing: nested restored validation: kernel reduction budget exhausted"] do
+    require "nested-diagnostic-unknown-or-double-wrapper-remains-internal"
+      (samePublicError (psKernelErrorFromMessage message) (.internalError message))
+  require "resource-message-bare-api-remains-bare"
+    ((psKernelResourceMessage "nested restored validation: kernel reduction budget exhausted").isNone)
+  IO.println "PSC1_V2_DAG_NATIVE_NESTED_OUTCOMES: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
+  nestedDiagnosticClassification
   constructorDecode
   semanticParity
   metadataParity

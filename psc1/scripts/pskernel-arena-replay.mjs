@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
@@ -102,7 +102,7 @@ export function kernelErrorVerdict(kernel,error){
   throw Error('generated error returned an invalid outcome');
 }
 
-export function replayText(kernel,text){
+export function replayText(kernel,text,onProgress=()=>{}){
   const get=name=>{if(!(name in kernel))throw Error('missing generated export '+name);return kernel[name];};
   const N=get('PsKernelName'),L=get('PsKernelLevel'),B=get('PsKernelBinderInfo');
   const S=get('PsKernelDefinitionSafety'),H=get('PsKernelReducibilityHints');
@@ -130,10 +130,14 @@ export function replayText(kernel,text){
   const sample0=get('PsKernelExpr').sort(L.zero),sample1=get('PsKernelExpr').sort(L.succ(L.zero));
   if(!exprEq(sample0,sample0)||exprEq(sample0,sample1))throw Error('curried expression comparator sentinel failed');
   const names=new Map([[0n,{value:N.anonymous,key:0}]]),levels=new Map([[0n,L.zero]]),expressions=new Map();
-  const semanticNames=new Map();let nextName=1;
+  const semanticNames=new Map(),nameSegments=new Map();let nextName=1;
   const internName=(kind,parent,item)=>{
     const signature=encode([kind,parent.key,item]);
-    if(!semanticNames.has(signature))semanticNames.set(signature,nextName++);
+    if(!semanticNames.has(signature)){
+      const key=nextName++;
+      semanticNames.set(signature,key);
+      nameSegments.set(key,{kind,parent:parent.key,value:typeof item==='bigint'?item.toString():item});
+    }
     return {key:semanticNames.get(signature),value:kind==='str'?N.str(parent.value,item):N.num(parent.value,item)};
   };
   const lookup=(table,id,kind)=>{
@@ -141,6 +145,15 @@ export function replayText(kernel,text){
   };
   const name=id=>lookup(names,id,'name').value;
   const nameKey=id=>lookup(names,id,'name').key;
+  const sourceName=id=>{
+    let key=nameKey(id);const segments=[];
+    while(key!==0){
+      const segment=nameSegments.get(key);
+      if(!segment)throw Error('lost interned source name segment');
+      segments.push({kind:segment.kind,value:segment.value});key=segment.parent;
+    }
+    return {tableId:natural(id).toString(),segments:segments.reverse()};
+  };
   const nameList=ids=>list(sequence(ids).map(name));
   const level=id=>lookup(levels,id,'level');
   const expr=id=>lookup(expressions,id,'expression');
@@ -148,8 +161,11 @@ export function replayText(kernel,text){
     id=natural(id);if(table.has(id))malformed('duplicate '+kind+' table ID '+id);table.set(id,item);
   };
   let arena=get('psKernelExprV2PagedEmpty');
-  const nodes=new Map(),groups=[],metadata=[],owners=new Map(),pendingMutual=new Map();
+  const nodes=new Map(),groups=[],metadata=[],sourceMutualBlockMetadata=[],owners=new Map(),pendingMutual=new Map();
   let records=0,sawMeta=false,quotGroup=null,unsafeOrPartial=false,coreInvoked=false;
+  const progress=stage=>onProgress({stage,coreInvoked,records,
+    exportedDeclarations:metadata.length,admissionCommands:groups.length,
+    arenaNodes:arena.size.toString(),fuel:'4096'});
   const addNode=(kind,args,children=[],constant=null)=>{
     const result=accepted(get('psKernelExprV2PagedMk'+kind)(arena,...args),'construct-expression');
     arena=result.fst;nodes.set(result.snd,{children,constant});return result.snd;
@@ -160,10 +176,6 @@ export function replayText(kernel,text){
     owners.set(key,group);group.names.add(key);
   };
   const newGroup=()=>{const group={names:new Set(),roots:[],request:null};groups.push(group);return group;};
-  const canonicalAll=raw=>{
-    const all=sequence(raw.all).map(nameKey),key=nameKey(raw.name);
-    if(all.length>1||(all.length===1&&all[0]!==key))unsupported('noncanonical exported all-list metadata is not represented by KernelContract-v1');
-  };
   const hints=raw=>{
     if(raw==='opaque')return H.opaqueHint;
     if(raw==='abbrev')return H.abbrevHint;
@@ -184,19 +196,31 @@ export function replayText(kernel,text){
     declared.add(key);owning(group,key);
   };
   const metadataEntry=(group,kind,raw)=>{
-    object(raw);base(raw);claim(group,raw);metadata.push({group,kind,raw});
+    object(raw);base(raw);claim(group,raw);
+    if(kind==='defnInfo'||kind==='thmInfo'||kind==='opaqueInfo'){
+      // Lean 4.35 DefinitionVal.all (and TheoremVal/OpaqueVal.all) records
+      // source mutual-block membership; the kernel does not use it to check
+      // or order these declarations. Validate every exact name reference and
+      // retain order, duplicates, and arbitrary valid names in the receipt.
+      // Inductive/recursor all-lists remain checked against regenerated data.
+      sourceMutualBlockMetadata.push({kind,name:sourceName(raw.name),
+        all:sequence(raw.all).map(sourceName)});
+    }
+    metadata.push({group,kind,raw});
     group.roots.push(expr(raw.type));
   };
   const keyList=ids=>sequence(ids).map(nameKey);
   const sameKeys=(left,right)=>left.length===right.length&&left.every((value,index)=>value===right[index]);
   const plainName=value=>internName('str',names.get(0n),value);
   try {
+    progress('transport');
     const inputLines=text.split(/\r?\n/u);
     if(inputLines.at(-1)==='')inputLines.pop();
     for(const line of inputLines){
       if(line.trim()==='')malformed('blank record in export stream');
       const record=object(parseExactJSON(line));
       const keys=Object.keys(record);records++;
+      if(records%1024===0)progress('transport');
       if(keys.length===1&&keys[0]==='meta'){
         if(sawMeta||records!==1)malformed('metadata must occur exactly once at the beginning');
         const meta=object(record.meta),source=object(meta.lean),format=object(meta.format),exporter=object(meta.exporter);
@@ -271,7 +295,7 @@ export function replayText(kernel,text){
         const info={base:base(raw),value:expr(raw.value),hints:hints(raw.hints),safety:safety(raw.safety)};
         let group;
         if(raw.safety==='safe'){
-          canonicalAll(raw);group=newGroup();group.request=D.definitionDecl(info);
+          group=newGroup();group.request=D.definitionDecl(info);
         }else{
           let all=keyList(raw.all);if(all.length===0)all=[nameKey(raw.name)];
           if(!all.includes(nameKey(raw.name))||new Set(all).size!==all.length)malformed('invalid mutual definition all-list');
@@ -287,7 +311,7 @@ export function replayText(kernel,text){
         }
         metadataEntry(group,'defnInfo',raw);group.roots.push(info.value);
       }else if(kind==='thm'||kind==='opaque'){
-        canonicalAll(raw);const group=newGroup();metadataEntry(group,kind==='thm'?'thmInfo':'opaqueInfo',raw);
+        const group=newGroup();metadataEntry(group,kind==='thm'?'thmInfo':'opaqueInfo',raw);
         group.roots.push(expr(raw.value));
         if(kind==='thm')group.request=D.theoremDecl(base(raw),expr(raw.value));
         else{
@@ -345,6 +369,7 @@ export function replayText(kernel,text){
       if(group.order.some(key=>!group.defs.has(key)))malformed('incomplete exported mutual definition group');
       group.request=D.mutualDefinitions(list(group.order.map(key=>group.defs.get(key))));
     }
+    progress('declaration-ordering');
     // Declaration order is not trusted. Replay dependencies in topological
     // order, grouping mutual declarations and regenerating their auxiliaries.
     for(const group of groups){
@@ -383,10 +408,12 @@ export function replayText(kernel,text){
     const session=accepted(get('psKernelKernelSessionEmpty')(policy,provider),'session');
     const commands=order.map(group=>C.admit(group.request));
     coreInvoked=true;
+    progress('kernel-admission');
     const result=accepted(get('psKernelV1RunDag')(session,nil,S.safe,arena,list(commands)),'kernel-admission');
     if(array(result.replies).length!==commands.length)throw Error('incorrect admission batch reply count');
     // Metadata is inspected only after independent V1 admission succeeds.
     // Exported constructor/recursor bodies never enter the environment.
+    progress('metadata-decode');
     const decoded=accepted(get('psKernelExprV2DecodeChecked')(arena),'metadata-decode');
     const expectedExpr=id=>accepted(get('psKernelExprV2DecodedRequire')(decoded,expr(id)),'metadata-expression');
     function infoFor(raw,kind){
@@ -398,6 +425,7 @@ export function replayText(kernel,text){
         reject('regenerated constant has wrong kind: '+kind);
       return info.value;
     }
+    progress('metadata-compare');
     for(const {kind,raw} of metadata){
       const info=infoFor(raw,kind);
       const ensure=(condition,field)=>{if(condition!==true)reject('metadata mismatch '+kind+'.'+field+' at name table ID '+raw.name);};
@@ -444,7 +472,10 @@ export function replayText(kernel,text){
     const metadataCounts={};
     for(const {kind} of metadata)metadataCounts[kind]=(metadataCounts[kind]||0)+1;
     return {verdict:'accepted',stage:'complete',coreInvoked,records,metadataCounts,
-      metadataCoverage:'all supplied exported metadata; absent records are not independently compared',exportedDeclarations:metadata.length,
+      metadataCoverage:'all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared',
+      sourceMutualBlockMetadata,
+      sourceMutualBlockMetadataRole:'nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all',
+      exportedDeclarations:metadata.length,
       admissionCommands:commands.length,arenaNodes:arena.size.toString(),fuel:'4096',
       containsUnsafeOrPartial:unsafeOrPartial,metadataValidated:true,
       officialReplaySkipsUnsafeOrPartial:unsafeOrPartial};
@@ -456,15 +487,19 @@ export function replayText(kernel,text){
   }
 }
 
-export async function replayFile(kernelPath,inputPath){
+export async function replayFile(kernelPath,inputPath,onProgress=()=>{}){
   let sourceSha256=null;
+  const progress=snapshot=>onProgress({...snapshot,
+    format:'psc1-arena-progress-v1',sourceSha256});
   try{
     const bytes=readFileSync(inputPath);sourceSha256=createHash('sha256').update(bytes).digest('hex');
+    progress({stage:'source-decode',coreInvoked:false,fuel:'4096'});
     let source;
     try{source=new TextDecoder('utf-8',{fatal:true}).decode(bytes);}
     catch{malformed('input is not valid UTF-8');}
+    progress({stage:'module-load',coreInvoked:false,fuel:'4096'});
     const kernel=await import(pathToFileURL(path.resolve(kernelPath)).href);
-    return {format:'psc1-arena-replay-v1',sourceSha256,...replayText(kernel,source)};
+    return {format:'psc1-arena-replay-v1',sourceSha256,...replayText(kernel,source,progress)};
   }catch(error){
     const verdict=error instanceof ReplayFailure?error.verdict:
       error instanceof RangeError?'resource_exhausted':'driver_error';
@@ -476,7 +511,11 @@ export async function replayFile(kernelPath,inputPath){
 
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
   if(process.argv.length!==4)throw Error('usage: node pskernel-arena-replay.mjs generated-kernel.js case.ndjson');
-  const result=await replayFile(process.argv[2],process.argv[3]);
+  const result=await replayFile(process.argv[2],process.argv[3],snapshot=>{
+    // Synchronous diagnostic write survives a later blocked JS operation.
+    // This is never an acceptance/rejection envelope.
+    writeSync(2,'PSC1_ARENA_PROGRESS '+JSON.stringify(snapshot)+'\n');
+  });
   console.log('PSC1_ARENA_REPLAY '+JSON.stringify(result));
   process.exitCode=result.verdict==='driver_error'?2:0;
 }

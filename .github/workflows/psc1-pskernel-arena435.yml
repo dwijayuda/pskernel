@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/psc1-pskernel-arena435.yml
       - psc1/scripts/pskernel-arena435-oracle.py
+      - psc1/scripts/pskernel-arena435-inspect.py
       - psc1/scripts/pskernel-arena435-compare.py
       - psc1/scripts/pskernel-arena-replay.mjs
       - psc1/scripts/pskernel-arena-replay-controls.mjs
@@ -39,6 +40,17 @@ jobs:
             -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
             https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
           echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+      - name: Inspect exact all-list metadata and numeral magnitudes in every input
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/arena435-evidence"
+          python3 -m py_compile scripts/pskernel-arena435-inspect.py
+          python3 scripts/pskernel-arena435-inspect.py \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --out "$RUNNER_TEMP/arena435-evidence/input-diagnostics.json" \
+            | tee "$RUNNER_TEMP/arena435-evidence/input-diagnostics.log"
       - name: Evaluate all 193 declaration bodies with official Lean 4.35
         shell: bash
         working-directory: psc1

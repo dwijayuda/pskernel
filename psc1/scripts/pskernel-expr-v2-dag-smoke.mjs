@@ -1300,4 +1300,48 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
   console.log("PSC1_V2_DAG_JS_DELTA: PASS");
 }
 
+{
+  const ErrorKind=get("PsKernelError"),Resource=get("PsKernelResourceError");
+  const classify=get("psKernelErrorFromMessage");
+  const prefixes=["","nested preprocessing: ","nested transformed admission: ",
+    "nested original restoration: ","nested auxiliary restoration: ",
+    "nested restored validation: "];
+  const resources=[
+    ["kernel reduction budget exhausted",Resource.fuel],
+    ["kernel inference budget exhausted",Resource.fuel],
+    ["deep recursion detected, use maxRecDepth to increase the limit",Resource.recursionDepth],
+    ["the kernel refused a Nat numeral because its size exceeds the maximum",Resource.natSize],
+    ["the kernel refused to evaluate Nat.pow because the result would exceed the maximum numeral size",Resource.natSize]
+  ];
+  for(const prefix of prefixes){
+    const invalid=prefix+"invalid projection: structure type mismatch";
+    must(sameRuntimeValue(classify(invalid),ErrorKind.rejectedInvalid(invalid)),
+      "nested-diagnostic-invalid-exact-"+prefix);
+    const unsupported=prefix+"nested or invalid mutual inductive occurrence is not supported";
+    must(sameRuntimeValue(classify(unsupported),ErrorKind.declinedUnsupported(unsupported)),
+      "nested-diagnostic-unsupported-exact-"+prefix);
+    for(const [body,resource]of resources){
+      const message=prefix+body;
+      must(sameRuntimeValue(classify(message),ErrorKind.resourceExhausted(resource,message)),
+        "nested-diagnostic-resource-exact-"+message);
+    }
+  }
+  for(const message of [
+    "unrecognized diagnostic",
+    "provider: invalid projection: structure type mismatch",
+    "nested restored validation: unrecognized diagnostic",
+    "nested restored validation: ",
+    "nested restored validation:invalid projection: structure type mismatch",
+    "nested restored validation: invalid projection: structure type mismatch trailing",
+    "nested restored validation: nested restored validation: invalid projection: structure type mismatch",
+    "nested preprocessing: nested restored validation: kernel reduction budget exhausted"
+  ])must(sameRuntimeValue(classify(message),ErrorKind.internalError(message)),
+    "nested-diagnostic-unknown-remains-internal-"+message);
+  const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  must(sameRuntimeValue(get("psKernelResourceMessage")(
+    "nested restored validation: kernel reduction budget exhausted"),none),
+    "nested-diagnostic-resource-api-remains-bare");
+  console.log("PSC1_V2_DAG_JS_NESTED_OUTCOMES: PASS");
+}
+
 reportDagSmoke();

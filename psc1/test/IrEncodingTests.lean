@@ -29,6 +29,7 @@ private def encode (source : PsVerifiedIrModule) : IO String := do
 
 def main : IO Unit := do
   let huge : Nat := 9007199254740993123456789
+  let unicode : String := "λ🙂\n\t\"\\"
   let source : PsVerifiedIrModule := {
     imports := [], structures := [], inductives := []
     declarations := [{
@@ -38,15 +39,28 @@ def main : IO Unit := do
     }, {
       name := "unicode", typeParameters := [], parameters := []
       resultType := .primitive .string
-      body := .literal (.string "λ🙂\n\t\"\\")
+      body := .literal (.string unicode)
     }]
   }
   let text <- encode source
   let value <- match Lean.Json.parse text with
     | .error message => throw (IO.userError message)
     | .ok value => pure value
-  require "independent JSON parser accepts compact tagged IR"
-    (value.compress == text)
+  let empty : Lean.Json := .arr #[]
+  let expected : Lean.Json := .arr #[
+    .str "psc1-ir/1", empty, empty, empty,
+    .arr #[
+      .arr #[.str "big", empty, empty, .arr #[.str "primitive", .str "nat"],
+        .arr #[.str "literal", .arr #[.str "natural", .str "9007199254740993123456789"]]],
+      .arr #[.str "unicode", empty, empty, .arr #[.str "primitive", .str "string"],
+        .arr #[.str "literal", .arr #[.str "string", .str unicode]]]
+    ]
+  ]
+  if value.compress != expected.compress then
+    IO.println ("PSC1_IR_ENCODING_EXPECTED: " ++ expected.compress)
+    IO.println ("PSC1_IR_ENCODING_ACTUAL: " ++ value.compress)
+  require "independent JSON parser preserves the complete ordered IR value"
+    (value.compress == expected.compress)
   require "integers beyond ECMAScript precision are transported as exact decimal strings"
     (containsText text "9007199254740993123456789" &&
       containsText text "[\"natural\",\"9007199254740993123456789\"]")

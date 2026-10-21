@@ -129,3 +129,31 @@ Fresh expected-SHA non-forced descendants only. No main merge/release/registry
 publication, unchecked axiom/authority, source filtering, weakened tests or raised
 existing budgets/pins. The final #171 scoped39508739868/focused39508739941 were
 verified before continuation writes. Continue beyond this checkpoint.
+
+## Canonical IR whole-closure result at68490479
+
+[Exact run39529213948](https://github.com/dwijayuda/pskernel/actions/runs/39529213948)
+completed success in all3 phase jobs. Tested merge
+350b8caed3f0153f22c11147492508bf48e7cec0.
+BOTH lanes accept semantic67/67/67, DirectJS80/80/80, Rust85/85/85 and actually
+pass whole preparation, independent admission, original strict IR and canonical
+IR artifact validation. Source/logical counts:2423/2423,3172/3174,2989/2992.
+[Committed IR receipt](docs/PSC1_CANONICAL_COMPILER_IR_2026-10-21.json) retains
+every actual lane hash, size, inventory and artifact identity. The live checked-only
+DirectJS test also passed by actual unsupportedDeclaration refusal in BOTH lanes.
+
+Exact original IR bytes/hash:
+semantic3931582/f8610d242d5a627f82ab3727868bdefc551ef4a74e0bc35eb6ee581e0e336b36;
+DirectJS4874708/97ffc97585a6a3c7f34e7841b5a53df5e093a32ef3c74607a98521bf3de85e6a;
+Rust4925315/a6c950b58114e14d2a6fd422250d6214010fa0a18387f092a1ea0051d282f1bd.
+Actual graph inventory in each phase has20 intrinsic tags and6 primitive types;
+it is a whole-IR inventory, not a dynamic execution trace.
+
+Focused39529214057 failed the new unit fixture's comparison between encoded text
+and Lean.Json.compress output after parsing succeeded. Replace that formatting
+assumption with comparison to an independently constructed complete expected
+JSON value, retaining huge-integer/Unicode/order/body/match assertions and the
+host's exact compact-byte parity checks. Print the two small expected/actual trees
+on mismatch. This descendant's focused/full CI is pending. Do not claim the
+unit fixture passed or transfer912dcc1's full scoped qualification to this head.
+Target/transformed IR and actual generated compiler execution remain next.

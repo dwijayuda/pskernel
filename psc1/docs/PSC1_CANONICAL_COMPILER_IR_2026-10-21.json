@@ -1,0 +1,655 @@
+{
+  "schema": "psc1-canonical-compiler-ir-checkpoint/1",
+  "authoritative": false,
+  "sourceHead": "68490479720377b4ee0617d50b5805f18faf12c7",
+  "testedMerge": "350b8caed3f0153f22c11147492508bf48e7cec0",
+  "run": 39529213948,
+  "status": "exact-closures-passed",
+  "focusedNative": {
+    "run": 39529214057,
+    "status": "failure",
+    "observation": "input parsed; Lean.Json.compress output did not equal the codec's encoded text; independent expected-value fixture correction pending"
+  },
+  "fullScoped": "not-qualified-at-this-head; continuing at fixture-corrected descendant",
+  "phases": [
+    {
+      "phase": "semantic-compiler",
+      "job": 118990974691,
+      "modules": 67,
+      "lanes": [
+        {
+          "grammar": "lean",
+          "passed": true,
+          "status": 0,
+          "preparation": "accepted",
+          "admission": "accepted",
+          "ir": "accepted",
+          "irEncoding": "accepted",
+          "sourceCoreDeclarations": 2423,
+          "logicalCoreDeclarations": 2423,
+          "partialNames": [],
+          "admissionsArtifact": {
+            "path": "lean/admissions.json",
+            "utf8Bytes": 15481031,
+            "sha256": "5d17c7d9522c5b8a4149dcf4542f332915152b32722a3a60650466c276d0b69b"
+          },
+          "irArtifact": {
+            "path": "lean/admissions.json.ir.json",
+            "utf8Bytes": 3931582,
+            "sha256": "f8610d242d5a627f82ab3727868bdefc551ef4a74e0bc35eb6ee581e0e336b36",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          },
+          "integrityError": null
+        },
+        {
+          "grammar": "ps",
+          "passed": true,
+          "status": 0,
+          "preparation": "accepted",
+          "admission": "accepted",
+          "ir": "accepted",
+          "irEncoding": "accepted",
+          "sourceCoreDeclarations": 2423,
+          "logicalCoreDeclarations": 2423,
+          "partialNames": [],
+          "admissionsArtifact": {
+            "path": "ps/admissions.json",
+            "utf8Bytes": 15481031,
+            "sha256": "5d17c7d9522c5b8a4149dcf4542f332915152b32722a3a60650466c276d0b69b"
+          },
+          "irArtifact": {
+            "path": "ps/admissions.json.ir.json",
+            "utf8Bytes": 3931582,
+            "sha256": "f8610d242d5a627f82ab3727868bdefc551ef4a74e0bc35eb6ee581e0e336b36",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          },
+          "integrityError": null
+        }
+      ],
+      "canonicalAdmissionBytesParity": "accepted",
+      "canonicalIrBytesParity": "accepted",
+      "artifact": [
+        {
+          "id": 12314716912,
+          "digest": "sha256:38346772895e6f49a16a0d99b1183f577d62c57c9816984e06939907c6c39cc7",
+          "bytes": 1819950,
+          "expires": "2026-11-04T01:47:54Z"
+        }
+      ]
+    },
+    {
+      "phase": "directjs-compiler",
+      "job": 118990974481,
+      "modules": 80,
+      "lanes": [
+        {
+          "grammar": "lean",
+          "passed": true,
+          "status": 0,
+          "preparation": "accepted",
+          "admission": "accepted",
+          "ir": "accepted",
+          "irEncoding": "accepted",
+          "sourceCoreDeclarations": 3172,
+          "logicalCoreDeclarations": 3174,
+          "partialNames": [
+            "psBackendPublicTypeSupported",
+            "psJsNeedsUtf8Runtime"
+          ],
+          "admissionsArtifact": {
+            "path": "lean/admissions.json",
+            "utf8Bytes": 18907654,
+            "sha256": "05ef2d40ccd51ca2caeffc18ca6817fd1304d2da9d15a813d3fd3bc013a03c58"
+          },
+          "irArtifact": {
+            "path": "lean/admissions.json.ir.json",
+            "utf8Bytes": 4874708,
+            "sha256": "97ffc97585a6a3c7f34e7841b5a53df5e093a32ef3c74607a98521bf3de85e6a",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          },
+          "integrityError": null
+        },
+        {
+          "grammar": "ps",
+          "passed": true,
+          "status": 0,
+          "preparation": "accepted",
+          "admission": "accepted",
+          "ir": "accepted",
+          "irEncoding": "accepted",
+          "sourceCoreDeclarations": 3172,
+          "logicalCoreDeclarations": 3174,
+          "partialNames": [
+            "psBackendPublicTypeSupported",
+            "psJsNeedsUtf8Runtime"
+          ],
+          "admissionsArtifact": {
+            "path": "ps/admissions.json",
+            "utf8Bytes": 18907654,
+            "sha256": "05ef2d40ccd51ca2caeffc18ca6817fd1304d2da9d15a813d3fd3bc013a03c58"
+          },
+          "irArtifact": {
+            "path": "ps/admissions.json.ir.json",
+            "utf8Bytes": 4874708,
+            "sha256": "97ffc97585a6a3c7f34e7841b5a53df5e093a32ef3c74607a98521bf3de85e6a",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          },
+          "integrityError": null
+        }
+      ],
+      "canonicalAdmissionBytesParity": "accepted",
+      "canonicalIrBytesParity": "accepted",
+      "artifact": [
+        {
+          "id": 12314157832,
+          "digest": "sha256:54bf32e932af180fec0e88a035678e81013d5ebe8cea7013b24c6bf6174b9f32",
+          "bytes": 2386411,
+          "expires": "2026-11-04T01:49:32Z"
+        }
+      ]
+    },
+    {
+      "phase": "rust-compiler",
+      "job": 118990974658,
+      "modules": 85,
+      "lanes": [
+        {
+          "grammar": "lean",
+          "passed": true,
+          "status": 0,
+          "preparation": "accepted",
+          "admission": "accepted",
+          "ir": "accepted",
+          "irEncoding": "accepted",
+          "sourceCoreDeclarations": 2989,
+          "logicalCoreDeclarations": 2992,
+          "partialNames": [
+            "psBackendPublicTypeSupported",
+            "Ps.Internal.RustRuntimePlan.typeRequirements",
+            "Ps.Internal.RustRuntimePlan.exprRequirements"
+          ],
+          "admissionsArtifact": {
+            "path": "lean/admissions.json",
+            "utf8Bytes": 18955650,
+            "sha256": "72708466bddd7bd608c7aee3c5afab1a34922fbfa4a54309a9ac880d1a2cd503"
+          },
+          "irArtifact": {
+            "path": "lean/admissions.json.ir.json",
+            "utf8Bytes": 4925315,
+            "sha256": "a6c950b58114e14d2a6fd422250d6214010fa0a18387f092a1ea0051d282f1bd",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          },
+          "integrityError": null
+        },
+        {
+          "grammar": "ps",
+          "passed": true,
+          "status": 0,
+          "preparation": "accepted",
+          "admission": "accepted",
+          "ir": "accepted",
+          "irEncoding": "accepted",
+          "sourceCoreDeclarations": 2989,
+          "logicalCoreDeclarations": 2992,
+          "partialNames": [
+            "psBackendPublicTypeSupported",
+            "Ps.Internal.RustRuntimePlan.typeRequirements",
+            "Ps.Internal.RustRuntimePlan.exprRequirements"
+          ],
+          "admissionsArtifact": {
+            "path": "ps/admissions.json",
+            "utf8Bytes": 18955650,
+            "sha256": "72708466bddd7bd608c7aee3c5afab1a34922fbfa4a54309a9ac880d1a2cd503"
+          },
+          "irArtifact": {
+            "path": "ps/admissions.json.ir.json",
+            "utf8Bytes": 4925315,
+            "sha256": "a6c950b58114e14d2a6fd422250d6214010fa0a18387f092a1ea0051d282f1bd",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          },
+          "integrityError": null
+        }
+      ],
+      "canonicalAdmissionBytesParity": "accepted",
+      "canonicalIrBytesParity": "accepted",
+      "artifact": [
+        {
+          "id": 12315271187,
+          "digest": "sha256:08306341ed21a5673f19772453aa08952968f20e4e459f9b38428b2991d4dcd8",
+          "bytes": 2190078,
+          "expires": "2026-11-04T01:49:16Z"
+        }
+      ]
+    }
+  ],
+  "checkedOnlyBackendBoundary": "actual complete DirectJS source refused unsupportedDeclaration in both lanes before admission",
+  "checker": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "generatedExecution": "not-run",
+  "transformedIr": "not-run",
+  "selfCompilation": "not-run",
+  "fixedPoint": "not-run",
+  "formalPreservation": "not-provided"
+}

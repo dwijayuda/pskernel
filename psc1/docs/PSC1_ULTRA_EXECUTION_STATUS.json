@@ -753,5 +753,25 @@
     "privateSyntax": "unsupported and cleanly refused in both parsers",
     "historyPreserved": true,
     "localRepositoryBuildsOrFiles": false
+  },
+  "latestCanonicalIrCheckpoint": {
+    "head": "68490479720377b4ee0617d50b5805f18faf12c7",
+    "testedMerge": "350b8caed3f0153f22c11147492508bf48e7cec0",
+    "run": 39529213948,
+    "status": "exact-closures-passed",
+    "receipt": "PSC1_CANONICAL_COMPILER_IR_2026-10-21.json",
+    "focusedNative": {
+      "run": 39529214057,
+      "status": "failure",
+      "observation": "input parsed; Lean.Json.compress output did not equal the codec's encoded text; independent expected-value fixture correction pending"
+    },
+    "fullScoped": "not-qualified-at-this-head; continuing at fixture-corrected descendant",
+    "phaseModuleCounts": [
+      67,
+      80,
+      85
+    ],
+    "transformedIr": "not-run",
+    "generatedExecution": "not-run"
   }
 }

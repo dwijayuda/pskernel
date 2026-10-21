@@ -54,6 +54,13 @@ def unitProgram(flag : Bool) : CompilerM(Nat, Nat, Nat, Nat) := do {
   return (value + extra)
 }
 
+def callbackProgram(flag : Bool) : CompilerM(Nat, Nat, Nat, Nat -> Nat) := do {
+  let original : Nat <- compilerGet(())
+  let captured : Nat -> Nat := fun (value : Nat) => original + value
+  compilerSet(20)
+  return captured
+}
+
 def observe(program : CompilerM(Nat, Nat, Nat, Nat)) : Nat :=
   match (program.run(3, 7)) with {
     | Result.error error => error * 100000 + 99999
@@ -68,3 +75,20 @@ def failureCase(flag : Bool) : Nat := Ps.Internal.CompilerMContract.observe(Ps.I
 def recoveryCase(flag : Bool) : Nat := Ps.Internal.CompilerMContract.observe(Ps.Internal.CompilerMContract.recoveryProgram(flag))
 def readerCase(flag : Bool) : Nat := Ps.Internal.CompilerMContract.observe(Ps.Internal.CompilerMContract.readerProgram(flag))
 def unitCase(flag : Bool) : Nat := Ps.Internal.CompilerMContract.observe(Ps.Internal.CompilerMContract.unitProgram(flag))
+
+def callbackCase(flag : Bool) : Nat :=
+  match ((Ps.Internal.CompilerMContract.callbackProgram(flag)).run(3, 7)) with {
+    | Result.error error => error
+    | Result.ok pair =>
+        let fallback : Option(Nat -> Nat) := Option.some(pair.fst)
+        let callbacks : Array(Nat -> Nat) := #[pair.fst]
+        let selected : Option(Nat -> Nat) := callbacks[if (flag) { 0 } else { 1 }]?
+        match selected with {
+          | Option.some callback => callback(4) + pair.snd
+          | Option.none =>
+              match fallback with {
+                | Option.some callback => callback(2) + pair.snd
+                | Option.none => 999
+              }
+        }
+  }

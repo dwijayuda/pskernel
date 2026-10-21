@@ -100,6 +100,23 @@ remain separate. No unsafe/RefCell/cycles or enlarged limits are introduced.
 Actual Rust and all-seven behavior are not yet qualified. Continue native,
 closure-source acceptance, emitted Cargo and existing refusal/source tests.
 
+## Owned callback runtime result and expanded data interactions
+
+At93b590d8, focused39556431129/job119077157185 passes all24 original
+six-case × both authored grammar × JS/Rust obligations, including native
+observations, Cargo execution and all four refusal/publication checks per lane.
+The3 whole-source closures are being checked separately. Native architecture
+correctly flagged an old assertion expecting named closure storage to refuse.
+Replace that obsolete feature-boundary assertion with positive owned storage
+plus nested-unknown refusal; retain zero-depth/unknown/public/source checks.
+The lifetime spelling is now explicitly + 'static.
+
+Extend the actual corpus with a returned CompilerM callback retained through
+generic product fields, Array and Option, valid/OOB optional lookup and old
+captured state. It has independent authored inputs/native reference and all7
+target obligations (7×2×7=98); qualification pending. Do not treat a type-printer
+assertion as runtime evidence.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

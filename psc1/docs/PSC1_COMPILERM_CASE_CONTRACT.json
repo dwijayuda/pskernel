@@ -62,6 +62,17 @@
         "nested-product-pattern",
         "do"
       ]
+    },
+    {
+      "id": "callbackCase",
+      "features": [
+        "returned-owned-callback",
+        "old-value-capture",
+        "generic-product-field",
+        "array-callback-storage",
+        "option-callback-storage",
+        "optional-index"
+      ]
     }
   ],
   "flags": [

@@ -65,15 +65,17 @@ def main : IO Unit := do
   let callback : PsVerifiedIrType := .function [scalar] scalar
   require "direct nested closure arrows remain supported"
     (psRustDirectClosureTypeSupported (.function [callback] callback))
-  require "named aggregate containing a closure remains refused"
-    (!psRustDirectClosureTypeSupported (.named "Array" [callback]))
+  require "named aggregate containing an owned closure is supported"
+    (psRustDirectClosureTypeSupported (.named "Array" [callback]))
+  require "unknown nested storage remains refused"
+    (!psRustDirectClosureTypeSupported (.named "Array" [.unknown]))
   require "unknown closure storage remains refused"
     (!psRustDirectClosureTypeSupported .unknown)
   require "unchanged traversal boundary refuses at zero"
     (!psRustDirectClosureTypeSupportedWithFuel 0 scalar)
   require "direct closure printer keeps owned Rc representation"
     (match psRustEmitClosureValueType callback with
-      | .ok printed => printed == "std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
+      | .ok printed => printed == "std::rc::Rc<dyn Fn(PsNat) -> PsNat + 'static>"
       | .error _ => false)
 
   for source in [

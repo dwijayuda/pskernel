@@ -10,7 +10,7 @@ const rows=contract.cases.flatMap(c=>contract.grammars.flatMap(s=>contract.targe
  librarySha256:{result:digest,effect:digest},
  refusals:Object.fromEntries(contract.requiredRefusals.map(id=>[id,digest]))
 }))));
-assert.equal(check(contract,rows).obligations,84);
+assert.equal(check(contract,rows).obligations,98);
 assert.throws(()=>check(contract,rows.slice(1)),/missing grammar/);
 assert.throws(()=>check(contract,[...rows,rows[0]]),/duplicate/);
 for(const mutation of [{id:'unknown'},{syntax:'unknown'},{target:'unknown'},{passed:false},

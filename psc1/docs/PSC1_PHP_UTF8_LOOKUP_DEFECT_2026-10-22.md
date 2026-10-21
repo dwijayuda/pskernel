@@ -1,6 +1,7 @@
 # PHP UTF8 byte-lookup performance defect
 
-Status: normal application blocker diagnosed; correction implemented, unqualified.
+Status: corrected and full scoped application qualification passed at
+81824afb29cff6e22a693f7988797dd62a524026, Linux run 39672943069.
 
 Run 39664407902 at 5fa88fa1842d8d8d9fa1881592ed2801d2778b37 times out
 on Lean/PHP's 100000-statement / 500000-byte source at the outer 180-second
@@ -33,3 +34,12 @@ must finish within five seconds. Actual checked compiler/CLI applications also
 run in a separate focused PHP job, preserving the original focused target matrix
 and per-job fifteen-minute limit. Full qualification still requires all seven
 targets and minimum runtimes. These runtime tests are not source admission.
+
+## Exact qualification
+
+Both authored grammars pass the original application bounds on all seven
+backends and minimum Python; every full job step and aggregate gate succeeds.
+Native runtime/IR negative boundaries and all historical failed runs remain.
+Exact identities and measurements:
+PSC1_COMPILER_APPLICATION_QUALIFICATION_2026-10-22.json.
+This result does not resolve or reopen the separate G2/G3 performance work.

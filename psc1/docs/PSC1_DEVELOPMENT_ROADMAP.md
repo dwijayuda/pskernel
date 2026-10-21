@@ -112,3 +112,24 @@ minimum-runtime and aggregate qualification. A separate focused PHP lane retains
 all previous focused targets and existing per-job/process limits. Do not resume
 G2/G3 or advance feature freeze while this application or the 21 remaining
 family criteria are blocked.
+
+## Latest application qualification and active finite acceptance
+
+Source 81824afb29cff6e22a693f7988797dd62a524026 passes complete run 39672943069,
+including full job 119480025557 and aggregate gate 119495645657. The earlier PHP
+timeout is corrected under the unchanged 120-second/1-GiB workload bound.
+All four frozen application categories now qualify in scoped execution.
+The exact historical machine report remains 16 qualified / 21 blocked, not a
+Practical Core release. See PSC1_COMPILER_APPLICATION_QUALIFICATION_2026-10-22.json.
+This supersedes the application-blocked current-state wording above; all failed
+runs remain historical evidence.
+
+The active source adds nine complete finite coverage bindings for arithmetic,
+short circuit, transactional inference/calls and owned control/handlers. It is
+implemented, not qualified before fresh Linux evidence. Eligibility becomes
+25/37 criteria; the twelve unbound criteria are for-loop collections/ranges/
+streaming, while controller/divergence, partial pairing/recursion, products/
+identity, Array operations and namespace identity/ownership. Their acceptance
+meanings remain unchanged. See PSC1_BOUNDED_CORE_ACCEPTANCE_2026-10-22.md.
+Continue the remaining queue after validating this coherent group. Full feature
+freeze and the manual release gate still require every criterion and application.

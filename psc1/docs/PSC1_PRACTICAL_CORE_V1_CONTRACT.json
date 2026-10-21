@@ -89,7 +89,11 @@
       "acceptance": [
         {
           "id": "numeric",
-          "meaning": "Exact Nat arithmetic, saturation and zero divisors; Int add/sub/mul; mixed numeric refusal."
+          "meaning": "Exact Nat arithmetic, saturation and zero divisors; Int add/sub/mul; mixed numeric refusal.",
+          "execution": {
+            "suite": "checked-order",
+            "case": "numericCase"
+          }
         },
         {
           "id": "order",
@@ -101,7 +105,15 @@
         },
         {
           "id": "short-circuit",
-          "meaning": "Fixed precedence/associativity; Bool short circuit skips divergence/error; typed equality rejects mismatches."
+          "meaning": "Fixed precedence/associativity; Bool short circuit skips divergence/error; typed equality rejects mismatches.",
+          "execution": {
+            "suite": "checked-order",
+            "case": "shortCircuitCase"
+          },
+          "requiredIoChecks": [
+            "short-circuit-skips-foreign-error",
+            "short-circuit-error-control-traps"
+          ]
         }
       ]
     },
@@ -121,7 +133,11 @@
         },
         {
           "id": "rollback",
-          "meaning": "Failed speculative alternatives restore meta state; ambiguous and unresolved terms refuse."
+          "meaning": "Failed speculative alternatives restore meta state; ambiguous and unresolved terms refuse.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "rollbackCase"
+          }
         }
       ]
     },
@@ -149,7 +165,11 @@
         },
         {
           "id": "ownership",
-          "meaning": "Nested do/lambda owns return; wrong state/error/result types refuse."
+          "meaning": "Nested do/lambda owns return; wrong state/error/result types refuse.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "ownerLambdaCase"
+          }
         }
       ]
     },
@@ -205,7 +225,11 @@
         },
         {
           "id": "joins",
-          "meaning": "Fixed types across branch/loop joins; shadowing/escaping-name/type-change policy enforced."
+          "meaning": "Fixed types across branch/loop joins; shadowing/escaping-name/type-change policy enforced.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "joinsCase"
+          }
         },
         {
           "id": "rollback",
@@ -241,7 +265,11 @@
         },
         {
           "id": "owners",
-          "meaning": "Returns in nested branches/loops exit only their owner; grouped do/lambda has independent owner."
+          "meaning": "Returns in nested branches/loops exit only their owner; grouped do/lambda has independent owner.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "ownerLambdaCase"
+          }
         }
       ]
     },
@@ -335,7 +363,11 @@
         },
         {
           "id": "scope",
-          "meaning": "Rethrow/nested binder/continuation scope and return bypass; malformed/mistyped handlers refuse."
+          "meaning": "Rethrow/nested binder/continuation scope and return bypass; malformed/mistyped handlers refuse.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "handlerScopeCase"
+          }
         }
       ]
     },
@@ -347,11 +379,19 @@
       "acceptance": [
         {
           "id": "telescopes",
-          "meaning": "Sequential dependent/intervening implicit telescopes; transactional nondependent expected-result constraints."
+          "meaning": "Sequential dependent/intervening implicit telescopes; transactional nondependent expected-result constraints.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "telescopeCase"
+          }
         },
         {
           "id": "refusals",
-          "meaning": "Ambiguity, arity and unresolved metas refuse; adjacent comma/native calls and explicit f(()) retained."
+          "meaning": "Ambiguity, arity and unresolved metas refuse; adjacent comma/native calls and explicit f(()) retained.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "callCase"
+          }
         }
       ]
     },

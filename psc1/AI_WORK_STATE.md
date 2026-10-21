@@ -5,7 +5,56 @@ Updated 2026-10-22 (Asia/Jakarta). Continue draft PR #172 on
 each guarded, non-force update. Use connected GitHub and Linux Actions only.
 No local checkout, build or test; no merge or registry publication authorized.
 
-## Exact qualified checkpoint
+## Latest full qualified checkpoint
+
+Source 81824afb29cff6e22a693f7988797dd62a524026, tested merge
+410bef1e0024c34297e1e8b94a3ea4886403bbc2, run 39672943069:
+https://github.com/dwijayuda/pskernel/actions/runs/39672943069
+Static, native, both focused jobs, all three complete compiler closures, G1,
+host boundary, full Linux integration and aggregate gate pass. Every full job
+step succeeds. All four frozen application categories now have scoped execution:
+168 compiler-like process cases, 294 CLI/JSON cases and 28 library obligations,
+plus separate minimum-Python counterparts. This is not complete release readiness.
+At this source the machine report is 16 qualified / 21 blocked, releaseReady=false.
+Permanent exact jobs, artifact digests/expiry, per-case output/source/admission
+identities, measured bounds and G1 evidence:
+docs/PSC1_COMPILER_APPLICATION_QUALIFICATION_2026-10-22.json.
+
+The unchanged 100000-statement / 500000-byte bound is 120 s / 1048576 KiB.
+Full TS uses 9.07/9.06 s and 193780/191096 KiB; Rust 41.04/41.83 s and about
+13 MiB; PHP 55.18/55.38 s and about 81 MiB. Full Python is 70.82/67.54 s;
+minimum Python 66.08/70.54 s. Focused Rust is 22.77/23.00 s versus 104-117 s
+before borrowing. PHP's 400000 large-String lookup/next operations take 0.23 s.
+The TS million-tail-call regression peaks at 59568 KiB under its 256-MiB bound.
+These are measured workloads, not a universal performance or soundness claim.
+
+Current qualified G1 service remains
+81f03e636b4fcf5bf3863375b01422e435b29c37442dd27fdffabb63ab77e0b3,
+85 modules, ten cases, one native seed and no later native delegation. Artifact
+12382000308 has SHA256 51115642c82373e35a2650cacf33f6605cc9ea75d9211433f6c5e77b450b3314
+and expires 2027-01-19T20:44:42Z. Source/admission/original/specialized IR hashes
+are preserved in the exact qualification receipt. Earlier G1 identities remain
+historical evidence.
+
+## Active bounded acceptance continuation
+
+The descendant source completes executable bindings for nine existing numeric,
+short-circuit, inference/call and control/handler criteria. Both source grammars,
+all old cases/refusals and the original limits remain. Order now has six cases
+(84 all-target obligations); inference/control has ten (140 obligations).
+Short circuit requires both skipped divergence and exact-commit seven-adapter
+foreign-error skipping/control evidence. Missing either cannot qualify it.
+See docs/PSC1_BOUNDED_CORE_ACCEPTANCE_2026-10-22.md.
+
+This source continuation is implemented, UNQUALIFIED pending its own Linux CI.
+It makes 25/37 criteria eligible; it does not change the latest qualified
+checkpoint's 16/21 result. The twelve still-unbound criteria are for-loop
+collections/ranges/streaming, while controller/divergence, partial pairing/
+recursion, product patterns/identity, Array operations and namespace identity/
+ownership. Continue that finite queue after diagnosing any new CI blocker.
+G2/G3 remain deferred until complete Practical Core feature freeze.
+
+## Historical qualified checkpoint
 
 Implementation af0a5921aa2f3fa4dbf4959d5e2c3b14a843d972, tested merge
 006ff602e2bce6dcbcad6b970f99307f3a3e7a34, Linux run 39655009732:
@@ -52,8 +101,9 @@ the exact summary within 120 seconds and 1048576 KiB RSS, measured by Linux
 No guest fuel or compiler/host/ABI resource limit is raised. The explicit 1 MiB
 file configuration fits the existing 2 MiB Wasm IO ceiling and 16 MiB arena.
 
-This new source is implemented but UNQUALIFIED until its exact-commit Linux
-native/focused/closures/G1/full/minimum-runtime/package gates pass.
+The initial source remained unqualified through the diagnosed parser, TS and PHP
+failures below. Its corrected application is now qualified at the latest full
+checkpoint above; later bounded acceptance changes need their own Linux gates.
 Focused execution includes JS/TS/Rust and both Wasm consumers; full includes all
 seven and minimum Python. Readiness binds compiler-like acceptance only to the
 complete versioned application matrix and successful final qualification.
@@ -78,7 +128,7 @@ regressions; do not infer coverage from filenames or bind a weaker case.
 Feature freeze and --require-ready remain blocked until every criterion and all
 four applications pass full exact-commit release qualification.
 
-## Preserved G1, soundness and history
+## Preserved historical G1, soundness and history
 
 Qualified G1 service 3f64bd223c09ca0175b1cf249d1689d4934e0756cf2c43c01b086a5cdf07b2a5,
 85 modules, ten-case v2 corpus, one native seed, no later native frontend/emitter

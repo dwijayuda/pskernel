@@ -109,7 +109,16 @@ write(ioConsumer,[
  'instance=linker.instantiate(store,component)',
  'try:instance.get_func(store,"run")(store)',
  'except RuntimeError as error:assert str(error)=="PSC1_HOST_TRAP"',
- 'else:raise AssertionError("source handler swallowed host trap")'
+ 'else:raise AssertionError("source handler swallowed host trap")',
+ 'def short_trap(_store,request):',
+ ' if request=="PSC1_SHORT_CIRCUIT_TRAP":raise RuntimeError("PSC1_SHORT_CIRCUIT_TRAP")',
+ ' return json.dumps(dict(kind="error",error="notFound"))',
+ 'short_linker=Linker(engine)',
+ 'with short_linker.root() as root:root.add_func("dispatch",short_trap)',
+ 'short_instance=short_linker.instantiate(store,component)',
+ 'try:short_instance.get_func(store,"run")(store)',
+ 'except RuntimeError as error:assert str(error)=="PSC1_SHORT_CIRCUIT_TRAP"',
+ 'else:raise AssertionError("eager short-circuit control did not trap")'
 ].join('\n'));
 for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-component']){
  const label=syntax+'-'+target,folder=path.join(work,label);
@@ -181,6 +190,17 @@ for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-compone
      const record=new DataView(memory.buffer,result>>>0,8);record.setUint32(0,data,true);record.setUint32(4,bytes.length,true);
     }}});
     assert.throws(()=>trapped.exports.run(),/PSC1_HOST_TRAP/);
+    let shortTrapped;
+    shortTrapped=new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(ioOutput)),{'psc1:io':{dispatch(pointer,length,result){
+     const memory=shortTrapped.exports.memory;
+     const request=new TextDecoder().decode(new Uint8Array(memory.buffer,pointer>>>0,length>>>0));
+     if(request==='PSC1_SHORT_CIRCUIT_TRAP')throw Error('PSC1_SHORT_CIRCUIT_TRAP');
+     const bytes=new TextEncoder().encode(JSON.stringify({kind:'error',error:'notFound'}));
+     const data=shortTrapped.exports.cabi_realloc(0,0,1,bytes.length);
+     new Uint8Array(memory.buffer,data,bytes.length).set(bytes);
+     const record=new DataView(memory.buffer,result>>>0,8);record.setUint32(0,data,true);record.setUint32(4,bytes.length,true);
+    }}});
+    assert.throws(()=>shortTrapped.exports.run(),/PSC1_SHORT_CIRCUIT_TRAP/);
    }finally{fs.closeSync(inputFd);fs.closeSync(outputFd);}
   }else{
    const stdout=run(process.env.PSC1_WASMTIME_PY,[ioConsumer,ioOutput,path.join(root,'host-tools'),capabilityRoot],{input:'world😀\r\n'});
@@ -189,7 +209,7 @@ for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-compone
   assert.equal(fs.readFileSync(path.join(capabilityRoot,'output.txt'),'utf8'),'processed:hello😀');
   records.push({syntax,target,passed:true,stringsSha256:hash(output),ioSha256:hash(ioOutput),
    admission:'independent-official-Lean',runtime:'executed',hostEffects:true,strictIr:'required-by-production-publication',
-   checks:["general-source-sequencing","actual-file-read-atomic-write","actual-console-unicode-crlf","typed-error-recovery","host-trap-escapes","unsupported-abi-preserves-generation"],provider:target==='wasm-core'?'node':'python',abi:'wasm-io-dispatcher',
+   checks:["general-source-sequencing","actual-file-read-atomic-write","actual-console-unicode-crlf","typed-error-recovery","host-trap-escapes","unsupported-abi-preserves-generation","short-circuit-skips-foreign-error","short-circuit-error-control-traps"],provider:target==='wasm-core'?'node':'python',abi:'wasm-io-dispatcher',
    checkerCommit:ioManifest.logicalCheckerCommit,artifactSha256:hash(ioOutput),manifestSha256:hash(ioOutput+'.bundle.json'),
    librarySha256:hash(path.join(root,'stdlib/ProofScript/System/IO.'+syntax)),
    applicationModuleSha256:hash(path.join(folder,'source/SequencedIo/Program.'+syntax)),

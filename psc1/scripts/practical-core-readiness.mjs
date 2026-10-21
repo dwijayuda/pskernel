@@ -26,6 +26,11 @@ export function validateReleaseContract(contract){
   for(const criterion of family.acceptance){
    assert.ok(criterion.id&&criterion.meaning);
    if(criterion.execution)assert.ok(contract.suites[criterion.execution.suite]);
+   if(criterion.requiredIoChecks){
+    assert.equal(family.id,'operators');assert.equal(criterion.id,'short-circuit');
+    assert.deepEqual(criterion.execution,{suite:'checked-order',case:'shortCircuitCase'});
+    assert.deepEqual(criterion.requiredIoChecks,['short-circuit-skips-foreign-error','short-circuit-error-control-traps']);
+   }
    if(criterion.actualIo){assert.equal(family.id,'typed-io');assert.equal(criterion.actualIo,criterion.id);
     assert.ok(['console','files','adapters'].includes(criterion.actualIo));assert.ok(contract.actualIo?.contract&&contract.actualIo?.runner&&contract.actualIo?.receipt);}
   }
@@ -130,10 +135,12 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
     status:actualIo?(full?'qualified':'tested'):ioExecutionImplemented?'implemented':'blocked',
     reason:actualIo?null:'exact-commit seven-adapter execution and policy evidence pending',
     execution:null,actualIo:criterion.actualIo};
+   const extraIo=!criterion.requiredIoChecks||actualIo&&criterion.requiredIoChecks.every(check=>
+    typedIoExecution.records.every(row=>row.checks.includes(check)));
    return {id:criterion.id,status:!binding?'blocked':!suite?.implemented?'blocked':
-    suite.qualified&&full?'qualified':suite.tested?'tested':'implemented',
+    suite.qualified&&full&&extraIo?'qualified':suite.tested&&extraIo?'tested':'implemented',
     reason:!binding?'finite case not yet bound to an executable acceptance test':
-     !suite?.implemented?'fixture or runner missing':suite.qualified&&!full?'all targets tested; full exact-commit qualification pending':null,
+     !suite?.implemented?'fixture or runner missing':!extraIo?'exact-commit seven-adapter foreign-error short-circuit evidence pending':suite.qualified&&!full?'all targets tested; full exact-commit qualification pending':null,
     execution:binding||null};
   });
   return {id:family.id,qualified:cases.every(c=>c.status==='qualified'),cases};

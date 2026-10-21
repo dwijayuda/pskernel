@@ -50,6 +50,28 @@
         "do-branch",
         "loop-condition"
       ]
+    },
+    {
+      "id": "numericCase",
+      "features": [
+        "arbitrary-precision-nat",
+        "saturating-subtraction",
+        "zero-divisor",
+        "nat-remainder",
+        "signed-arithmetic",
+        "precedence",
+        "left-association"
+      ]
+    },
+    {
+      "id": "shortCircuitCase",
+      "features": [
+        "dynamic-and",
+        "dynamic-or",
+        "skipped-divergence",
+        "typed-bool-equality",
+        "unary-not-precedence"
+      ]
     }
   ],
   "flags": [
@@ -62,7 +84,10 @@
     "prop-as-bool",
     "chained",
     "duplicate-prelude",
-    "verified"
+    "verified",
+    "mixed-arithmetic",
+    "mixed-equality",
+    "bool-arithmetic"
   ],
   "oracleLibraries": [
     "option",

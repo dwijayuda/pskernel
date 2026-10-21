@@ -61,6 +61,52 @@
         "old-value-capture",
         "continuation"
       ]
+    },
+    {
+      "id": "rollbackCase",
+      "features": [
+        "failed-Bool-context",
+        "generic-numeric-operands",
+        "recognized-order-Prop-fallback",
+        "fresh-Int-and-Array-contexts"
+      ]
+    },
+    {
+      "id": "callCase",
+      "features": [
+        "sequential-telescope",
+        "explicit-Unit-call",
+        "native-and-comma-surfaces",
+        "arity-and-ambiguity-refusal"
+      ]
+    },
+    {
+      "id": "ownerLambdaCase",
+      "features": [
+        "lambda-owned-do",
+        "nested-loop-return",
+        "skipped-outer-continuation",
+        "independent-grouped-owner"
+      ]
+    },
+    {
+      "id": "joinsCase",
+      "features": [
+        "branch-and-loop-joins",
+        "mutable-shadows-immutable",
+        "original-RHS-scope",
+        "old-value-capture"
+      ]
+    },
+    {
+      "id": "handlerScopeCase",
+      "features": [
+        "nested-handler",
+        "typed-rethrow",
+        "lexical-rollback",
+        "return-bypasses-catch",
+        "handler-binder-scope"
+      ]
     }
   ],
   "flags": [
@@ -75,7 +121,19 @@
     "escaping-local",
     "type-changing",
     "duplicate-prelude",
-    "verified"
+    "verified",
+    "wrong-arity",
+    "ambiguous-call",
+    "wrong-unit",
+    "empty-unit-call",
+    "wrong-state",
+    "wrong-error",
+    "wrong-return",
+    "shadow-mutable",
+    "nested-assignment",
+    "escaping-handler",
+    "wrong-handler-result",
+    "malformed-handler"
   ],
   "oracleLibraries": [
     "option",

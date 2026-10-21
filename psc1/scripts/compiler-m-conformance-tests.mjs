@@ -190,7 +190,10 @@ try {
 {"id":"mixed-domain","lean":"def invalid (a : Nat) (b : Int) : Prop := a < b\n","ps":"def invalid(a : Nat, b : Int) : Prop := a < b\n"},
 {"id":"bool-order","lean":"def invalid : Prop := true < false\n","ps":"def invalid : Prop := true < false\n"},
 {"id":"prop-as-bool","lean":"def invalid : Bool := 1 < 2\n","ps":"def invalid : Bool := 1 < 2\n"},
-{"id":"chained","lean":"def invalid : Prop := 1 < 2 < 3\n","ps":"def invalid : Prop := 1 < 2 < 3\n"}]:ioSequencing?[
+{"id":"chained","lean":"def invalid : Prop := 1 < 2 < 3\n","ps":"def invalid : Prop := 1 < 2 < 3\n"},
+{"id":"mixed-arithmetic","lean":"def invalid (a : Nat) (b : Int) : Nat := a + b\n","ps":"def invalid(a : Nat, b : Int) : Nat := a + b\n"},
+{"id":"mixed-equality","lean":"def invalid (a : Nat) (b : Int) : Bool := a == b\n","ps":"def invalid(a : Nat, b : Int) : Bool := a == b\n"},
+{"id":"bool-arithmetic","lean":"def invalid : Bool := true + false\n","ps":"def invalid : Bool := true + false\n"}]:ioSequencing?[
   {
     "id": "wrong-path",
     "lean": "import ProofScript.System.IO\ndef invalid : Io String := ioReadUtf8 true\n",
@@ -218,6 +221,18 @@ try {
     "ps": "import ProofScript.System.IO\ndef invalid : Result(Nat, IoError) := ioReadTextResult(\"{}\")\n"
   }
 ]:inferenceControl?[
+{"id":"wrong-state","lean":"import ProofScript.Compiler.Effect\ndef invalid : CompilerM Nat Nat Nat Unit := do\n  compilerSet true\n","ps":"import ProofScript.Compiler.Effect\ndef invalid : CompilerM(Nat, Nat, Nat, Unit) := do { compilerSet(true) }\n"},
+{"id":"wrong-error","lean":"import ProofScript.Compiler.Effect\ndef invalid : CompilerM Nat Nat Nat Unit := do\n  compilerThrow true\n","ps":"import ProofScript.Compiler.Effect\ndef invalid : CompilerM(Nat, Nat, Nat, Unit) := do { compilerThrow(true) }\n"},
+{"id":"wrong-return","lean":"def invalid : Id Nat := do\n  if true then return false\n  return 7\n","ps":"def invalid : Id(Nat) := do {\n if (true) { return false }\n return 7\n}\n"},
+{"id":"shadow-mutable","lean":"def invalid : Id Nat := do\n  let mut value : Nat := 1\n  if true then\n    let value : Nat := 2\n    value := 3\n  return value\n","ps":"def invalid : Id(Nat) := do {\n let mut value : Nat := 1\n if (true) {\n  let value : Nat := 2\n  value := 3\n }\n return value\n}\n"},
+{"id":"nested-assignment","lean":"def invalid : Id Nat := do\n  let mut value : Nat := 1\n  let inner : Nat <- (do\n    value := 2\n    return value\n  )\n  return inner\n","ps":"def invalid : Id(Nat) := do {\n let mut value : Nat := 1\n let inner : Nat <- (do {\n  value := 2\n  return value\n })\n return inner\n}\n"},
+{"id":"escaping-handler","lean":"def invalid : Except Nat Nat := do\n  try\n    throw 1\n  catch error =>\n    pure ()\n  return error\n","ps":"def invalid : Except(Nat, Nat) := do {\n try { throw 1 } catch error => { pure(()) }\n return error\n}\n"},
+{"id":"wrong-handler-result","lean":"def invalid : Except Nat Nat := do\n  try\n    throw 1\n  catch error =>\n    return true\n","ps":"def invalid : Except(Nat, Nat) := do {\n try { throw 1 } catch error => { return true }\n}\n"},
+{"id":"malformed-handler","lean":"def invalid : Except Nat Nat := do\n  try\n    throw 1\n  catch =>\n    return 2\n","ps":"def invalid : Except(Nat, Nat) := do {\n try { throw 1 } catch => { return 2 }\n}\n"},
+{"id":"wrong-arity","lean":"import InferenceControlFixtures\ndef invalid : Nat := boundedAfter 0 true 1\n","ps":"import InferenceControlFixtures\ndef invalid : Nat := boundedAfter(0, true, 1)\n"},
+{"id":"ambiguous-call","lean":"import InferenceControlFixtures\ndef invalid : Nat := let ignored := boundedId #[]; 1\n","ps":"import InferenceControlFixtures\ndef invalid : Nat := let ignored := boundedId(#[])\n 1\n"},
+{"id":"wrong-unit","lean":"import InferenceControlFixtures\ndef invalid : Nat := boundedUnit true\n","ps":"import InferenceControlFixtures\ndef invalid : Nat := boundedUnit(true)\n"},
+{"id":"empty-unit-call","lean":"import InferenceControlFixtures\ndef invalid : Nat := boundedUnit()\n","ps":"import InferenceControlFixtures\ndef invalid : Nat := boundedUnit()\n"},
    {id:'wrong-context',lean:'import InferenceControlFixtures\ndef invalid : Int := boundedId true\n',
     ps:'import InferenceControlFixtures\ndef invalid : Int := boundedId(true)\n'},
    {id:'ambiguous-array',lean:'def invalid : Nat := let values := #[]; 1\n',
@@ -266,7 +281,7 @@ try {
     else verifiedArgs[assuranceIndex+1]='verified';
     const refusals={verified:reject(verifiedArgs)};
     for(const {id} of negativeCases){
-     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,checkedOrder&&id==='chained'?/PSC1_PROJECT_PARSE_FAILED:.*parentheses around nonassociative comparison/:libraryApplication&&id==='missing-module'?/PSC1_PROJECT_.*(IMPORT|MODULE|SOURCE)/:/PSC1_PROJECT_ELAB_FAILED/);
+     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,inferenceControl&&id==='malformed-handler'?/PSC1_PROJECT_PARSE_FAILED/:inferenceControl&&id==='empty-unit-call'?/PSC1_PROJECT_(PARSE|ELAB)_FAILED/:checkedOrder&&id==='chained'?/PSC1_PROJECT_PARSE_FAILED:.*parentheses around nonassociative comparison/:libraryApplication&&id==='missing-module'?/PSC1_PROJECT_.*(IMPORT|MODULE|SOURCE)/:/PSC1_PROJECT_ELAB_FAILED/);
     }
     const duplicate=[...args];duplicate[1]=path.join(folder,'duplicate-prelude.'+syntax);
     refusals['duplicate-prelude']=reject(duplicate,/duplicateDeclaration:Nat/);

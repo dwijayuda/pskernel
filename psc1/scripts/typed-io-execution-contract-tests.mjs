@@ -41,3 +41,33 @@ assert.equal(qualified.families.find(f=>f.id==='typed-io').qualified,true);
 assert.equal(qualified.counts.qualified,3);
 assert.equal(qualified.releaseReady,false);
 assert.ok(qualified.applications.every(a=>a.status==='blocked'));
+
+for(const name of ['short-circuit-skips-foreign-error','short-circuit-error-control-traps']){
+ const bad=clone(receipt);bad.records[0].checks=bad.records[0].checks.filter(c=>c!==name);
+ assert.throws(()=>check(contract,bad,{commit,head,checkerCommit}),/missing actual IO check/);
+}
+const orderContract=JSON.parse(fs.readFileSync(new URL('../docs/PSC1_ORDER_CASE_CONTRACT.json',import.meta.url)));
+const orderRows=orderContract.cases.flatMap(c=>orderContract.grammars.flatMap(syntax=>orderContract.targets.map(target=>({
+ id:c.id,syntax,target,passed:true,flags:[false,true],admission:'independent-official-Lean',
+ strictIr:'required-by-production-publication',runtime:'executed',
+ ...Object.fromEntries(['sourceSha256','entrySha256','artifactSha256','manifestSha256','oracleSha256'].map(k=>[k,digest])),
+ librarySha256:Object.fromEntries(orderContract.oracleLibraries.map(k=>[k,digest])),
+ refusals:Object.fromEntries(orderContract.requiredRefusals.map(k=>[k,digest]))
+}))));
+const orderSuite={'checked-order':{caseContract:orderContract,implemented:true,receipt:{
+ schema:'psc1-language-backend-execution/1',contract:orderContract.id,testedCommit:commit,
+ checkerCommit,passed:true,failures:[],targets:orderContract.targets,records:orderRows}}};
+const full={schema:'psc1-seven-backend-qualification/1',testedCommit:commit,
+ qualification:'passed-scoped-execution',assurance:{checked:true,explicitOrdinary:true,verifiedRequest:'refused'}};
+const withoutIo=deriveReadiness(releaseContract,{commit,suites:orderSuite,fullQualification:full});
+const operatorCases=r=>r.families.find(f=>f.id==='operators').cases;
+assert.equal(operatorCases(withoutIo).find(c=>c.id==='numeric').status,'qualified');
+assert.equal(operatorCases(withoutIo).find(c=>c.id==='short-circuit').status,'implemented',
+ 'divergence observation alone cannot qualify foreign-error skipping');
+const withIo=deriveReadiness(releaseContract,{commit,suites:orderSuite,ioExecutionContract:contract,
+ typedIoExecution:receipt,fullQualification:full});
+assert.ok(operatorCases(withIo).every(c=>c.status==='qualified'));
+assert.equal(withIo.releaseReady,false);
+const withoutFull=deriveReadiness(releaseContract,{commit,suites:orderSuite,ioExecutionContract:contract,typedIoExecution:receipt});
+assert.equal(operatorCases(withoutFull).find(c=>c.id==='short-circuit').status,'tested');
+console.log('PSC1_SHORT_CIRCUIT_COMPOSITE: PASS divergence, seven foreign-error consumers and exact full qualification required together');

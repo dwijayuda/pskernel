@@ -1,7 +1,7 @@
 # TypeScript tail-continuation performance defect
 
-Status: diagnosed; general emitter/driver correction implemented, Linux
-qualification pending. This is normal application work, not G2/G3 qualification.
+Status: corrected and full scoped application qualification passed at
+81824afb29cff6e22a693f7988797dd62a524026, Linux run 39672943069.
 
 At implementation 908cbc300ef0f3e96c1112e458da66b558c4782e, Linux run
 39662002050 focused job 119437554172 independently type-checks the TypeScript
@@ -37,3 +37,12 @@ minimum Python and complete Linux qualification under its original bounds.
 The historical G2 JS heap exhaustion and later post-fusion timeout remain
 separate tracked evidence. Do not infer that this TS correction resolves them
 or reopen G2/G3 before Practical Core feature freeze.
+
+## Exact qualification
+
+Both authored grammars pass the original application bounds on all seven
+backends and minimum Python; every full job step and aggregate gate succeeds.
+Native runtime/IR negative boundaries and all historical failed runs remain.
+Exact identities and measurements:
+PSC1_COMPILER_APPLICATION_QUALIFICATION_2026-10-22.json.
+This result does not resolve or reopen the separate G2/G3 performance work.

@@ -70,7 +70,11 @@ for(const syntax of ['lean','ps'])for(const target of targets){
     'let trapped=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||psc1_generated::run(Rc::new(|request:String|->String{',
     'if request.contains("\\\"path\\\":\\\"missing\\\""){panic!("PSC1_HOST_TRAP")}',
     'if request.contains("\\\"op\\\":\\\"readUtf8\\\""){"{\\\"kind\\\":\\\"text\\\",\\\"text\\\":\\\"A\\\"}".to_owned()}else{"{\\\"kind\\\":\\\"unit\\\"}".to_owned()}',
-    '}))));assert!(trapped.is_err());host.close();}'
+    '}))));assert!(trapped.is_err());',
+    'let short_circuit=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||psc1_generated::run(Rc::new(|request:String|->String{',
+    'if request=="PSC1_SHORT_CIRCUIT_TRAP"{panic!("PSC1_SHORT_CIRCUIT_TRAP")}else{r#"{"kind":"error","error":"notFound"}"#.to_owned()}',
+    '}))));let payload=short_circuit.expect_err("eager short-circuit control did not trap");',
+    'let message=payload.downcast_ref::<&str>().copied().or_else(||payload.downcast_ref::<String>().map(|s|s.as_str()));assert_eq!(message,Some("PSC1_SHORT_CIRCUIT_TRAP"));host.close();}'
    ].join('\n'));
    const cargoEnv={...env,CARGO_TARGET_DIR:path.join(folder,'cargo-target')};
    run('python3',[path.join(root,'scripts/merge-rust-io-lock.py'),path.join(crate,'Cargo.lock'),
@@ -102,7 +106,13 @@ for(const syntax of ['lean','ps'])for(const target of targets){
     '  return json.dumps(dict(kind="text",text="A") if value["op"]=="readUtf8" else dict(kind="unit"))',
     ' try: guest.run(trap)',
     ' except RuntimeError as error: assert str(error)=="PSC1_HOST_TRAP"',
-    ' else: raise AssertionError("guest swallowed host trap")'
+    ' else: raise AssertionError("guest swallowed host trap")',
+    ' def short_trap(request):',
+    '  if request=="PSC1_SHORT_CIRCUIT_TRAP":raise RuntimeError("PSC1_SHORT_CIRCUIT_TRAP")',
+    '  return __import__("json").dumps(dict(kind="error",error="notFound"))',
+    ' try:guest.run(short_trap)',
+    ' except RuntimeError as error:assert str(error)=="PSC1_SHORT_CIRCUIT_TRAP"',
+    ' else:raise AssertionError("eager short-circuit control did not trap")'
    ].join('\n'));
    const stdout=run(process.env.PSC1_PYTHON||'python3',['-I',consumer,output,path.join(root,'host-tools'),capabilityRoot],{input:'world😀\r\n'});
    assert.equal(stdout,'tick\ntick\nrecovered\necho:world😀\n');
@@ -124,6 +134,9 @@ for(const syntax of ['lean','ps'])for(const target of targets){
     'return json_encode($value["op"]==="readUtf8"?["kind"=>"text","text"=>"A"]:["kind"=>"unit"],JSON_THROW_ON_ERROR); };',
     'try{$guest["run"]($trap);throw new RuntimeException("guest swallowed trap");}',
     'catch(RuntimeException $error){if($error->getMessage()!=="PSC1_HOST_TRAP")throw $error;}',
+    '$shortTrap=static function(string $request):string {if($request==="PSC1_SHORT_CIRCUIT_TRAP")throw new RuntimeException("PSC1_SHORT_CIRCUIT_TRAP");return json_encode(["kind"=>"error","error"=>"notFound"],JSON_THROW_ON_ERROR);};',
+    'try{$guest["run"]($shortTrap);throw new RuntimeException("eager short-circuit control did not trap");}',
+    'catch(RuntimeException $error){if($error->getMessage()!=="PSC1_SHORT_CIRCUIT_TRAP")throw $error;}',
     '}finally{$host->close();}'
    ].join('\n'));
    const stdout=run(process.env.PSC1_PHP||'php',['-d','ffi.enable=1',consumer,output,path.join(root,'host-tools'),capabilityRoot],{input:'world😀\r\n'});
@@ -156,11 +169,15 @@ for(const syntax of ['lean','ps'])for(const target of targets){
       if(r.path==='missing')throw Error('PSC1_HOST_TRAP');
       return JSON.stringify(r.op==='readUtf8'?{kind:'text',text:'A'}:{kind:'unit'});
      }),/PSC1_HOST_TRAP/);
+     assert.throws(()=>program.run(request=>{
+      if(request==='PSC1_SHORT_CIRCUIT_TRAP')throw Error('PSC1_SHORT_CIRCUIT_TRAP');
+      return JSON.stringify({kind:'error',error:'notFound'});
+     }),/PSC1_SHORT_CIRCUIT_TRAP/);
     });
    }finally{fs.closeSync(inputFd);fs.closeSync(outputFd);}
   }
   records.push({syntax,target,passed:true,sourceSha256:hash(source),artifactSha256:hash(output),
-   admission:'independent-official-Lean',runtime:'executed',checks:["general-source-sequencing","actual-file-read-atomic-write","actual-console-unicode-crlf","typed-error-recovery","host-trap-escapes","unsupported-abi-preserves-generation"],
+   admission:'independent-official-Lean',runtime:'executed',checks:["general-source-sequencing","actual-file-read-atomic-write","actual-console-unicode-crlf","typed-error-recovery","host-trap-escapes","unsupported-abi-preserves-generation","short-circuit-skips-foreign-error","short-circuit-error-control-traps"],
    provider:['js','ts'].includes(target)?'node':target,hostCargoLockSha256,
    librarySha256:hash(path.join(root,'stdlib/ProofScript/System/IO.'+syntax)),
    applicationModuleSha256:hash(path.join(folder,'source/SequencedIo/Program.'+syntax)),

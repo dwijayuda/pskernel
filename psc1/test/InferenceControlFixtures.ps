@@ -61,3 +61,66 @@ def scopeCase(flag : Bool) : Nat :=
     | Except.error error => error + 1000
     | Except.ok value => value
   }
+
+def boundedUnit(value : Unit) : Nat := 1
+
+def rollbackCase(flag : Bool) : Nat :=
+  let chosen : Nat := if (boundedId(if (flag) { 1 } else { 3 }) < boundedId(2)) { 7 } else { 9 }
+  let integer : Int := boundedId(boundedId(7))
+  let empty : Array(Int) := boundedId(#[])
+  chosen + Array.size(empty) + (if (integer == 7) { 1 } else { 0 })
+
+def callCase(flag : Bool) : Nat :=
+  let unit : Nat := boundedUnit(())
+  boundedAfter(unit, boundedDependent(Nat, flag, if (flag) { 23 } else { 29 }))
+
+def ownerLambdaCase(flag : Bool) : Nat :=
+  let callback : Nat -> Nat := fun input =>
+    let nested : Id(Nat) := do {
+      if (flag) { return (input + 3) }
+      return (input + 5)
+    }
+    nested
+  let inner : Nat := ownerProgram(flag)
+  let outer : Id(Nat) := do {
+    let mut amount : Nat := 0
+    for i in [0, 1] {
+      for j in [0, 1] {
+        amount := amount + 1
+        if (flag) { return (callback(inner) + i + j) }
+      }
+    }
+    return (amount + callback(inner))
+  }
+  outer
+
+def joinsCase(flag : Bool) : Nat :=
+  let program : Id(Nat) := do {
+    let amount : Bool := flag
+    let mut amount : Nat := if (amount) { 2 } else { 5 }
+    let old : Nat -> Nat := fun value => amount + value
+    if (flag) { amount := amount + 10 } else { amount := amount + 20 }
+    for value in [1, 2] {
+      if (Nat.beq(value, 1)) { amount := amount + 1 } else { amount := amount + 4 }
+    }
+    return (amount * 100 + old(3))
+  }
+  program
+
+def handlerScopeProgram(flag : Bool) : Except(Nat, Nat) := do {
+  let mut amount : Nat := 2
+  try {
+    try {
+      amount := 10
+      if (flag) { throw 3 }
+      return (amount + 20)
+    } catch error => { throw (error + 4) }
+  } catch error => { amount := amount + error }
+  return (amount + 100)
+}
+
+def handlerScopeCase(flag : Bool) : Nat :=
+  match handlerScopeProgram(flag) with {
+    | Except.error error => error + 1000
+    | Except.ok value => value
+  }

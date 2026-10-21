@@ -26,7 +26,9 @@
     "actual-console-unicode-crlf",
     "typed-error-recovery",
     "host-trap-escapes",
-    "unsupported-abi-preserves-generation"
+    "unsupported-abi-preserves-generation",
+    "short-circuit-skips-foreign-error",
+    "short-circuit-error-control-traps"
   ],
   "providers": {
     "node": {

@@ -53,3 +53,17 @@ for(const selected of [['js','ts','rust'],['python']]){
  assert.throws(()=>deriveReadiness(contract,{commit,typedIoApplication:subset,
   fullQualification:{...full,testedCommit:commit}}),/full IO guest matrix/);
 }
+
+const binding=(family,id)=>contract.families.find(f=>f.id===family).acceptance.find(c=>c.id===id).execution;
+for(const [family,id,suite,caseId] of [
+ ['operators','numeric','checked-order','numericCase'],
+ ['local-inference','rollback','inference-control','rollbackCase'],
+ ['call-inference','telescopes','inference-control','telescopeCase'],
+ ['call-inference','refusals','inference-control','callCase']
+])assert.deepEqual(binding(family,id),{suite,case:caseId});
+assert.deepEqual(binding('operators','short-circuit'),{suite:'checked-order',case:'shortCircuitCase'});
+assert.deepEqual(contract.families[0].acceptance.find(c=>c.id==='short-circuit').requiredIoChecks,
+ ['short-circuit-skips-foreign-error','short-circuit-error-control-traps']);
+
+for(const [family,id,caseId] of [["typed-do","ownership","ownerLambdaCase"],["early-return","owners","ownerLambdaCase"],["mutation","joins","joinsCase"],["typed-errors","scope","handlerScopeCase"]])
+ assert.deepEqual(binding(family,id),{suite:'inference-control',case:caseId});

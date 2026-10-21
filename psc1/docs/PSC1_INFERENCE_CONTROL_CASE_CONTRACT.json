@@ -1,0 +1,88 @@
+{
+  "schema": "psc1-language-backend-case-contract/1",
+  "id": "bounded-inference-control-v1",
+  "completeFamily": false,
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "cases": [
+    {
+      "id": "contextsCase",
+      "features": [
+        "numeric-context",
+        "empty-array",
+        "tuple",
+        "lambda-expectation",
+        "nested-generic-call"
+      ]
+    },
+    {
+      "id": "telescopeCase",
+      "features": [
+        "dependent-explicit-type",
+        "intervening-implicit",
+        "expected-result"
+      ]
+    },
+    {
+      "id": "ownerCase",
+      "features": [
+        "nested-do-owner",
+        "loop-return",
+        "skipped-continuation"
+      ]
+    },
+    {
+      "id": "loopCase",
+      "features": [
+        "list",
+        "array",
+        "range",
+        "empty",
+        "reversed",
+        "mutation"
+      ]
+    },
+    {
+      "id": "scopeCase",
+      "features": [
+        "typed-handler",
+        "lexical-rollback",
+        "old-value-capture",
+        "continuation"
+      ]
+    }
+  ],
+  "flags": [
+    false,
+    true
+  ],
+  "requiredRefusals": [
+    "wrong-context",
+    "ambiguous-array",
+    "dependent-type",
+    "unresolved-lambda",
+    "escaping-local",
+    "type-changing",
+    "duplicate-prelude",
+    "verified"
+  ],
+  "oracleLibraries": [
+    "option",
+    "prod",
+    "result",
+    "effect",
+    "list",
+    "array"
+  ]
+}

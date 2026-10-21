@@ -9,14 +9,15 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
 const suite=process.argv[2]||'--compiler-m';
-assert.ok(['--compiler-m','--stdlib-collections','--json-application'].includes(suite));
+assert.ok(['--compiler-m','--stdlib-collections','--json-application','--inference-control'].includes(suite));
+const inferenceControl=suite==='--inference-control';
 const collections=suite==='--stdlib-collections';
 const jsonApplication=suite==='--json-application';
-const fixtureName=jsonApplication?'JsonRecordApplication':collections?'StdlibCollectionFixtures':'CompilerMFixtures';
-const contractFile=jsonApplication?'PSC1_JSON_APPLICATION_CASE_CONTRACT.json':collections?'PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json':'PSC1_COMPILERM_CASE_CONTRACT.json';
-const evidenceName=jsonApplication?(process.env.PSC1_JSON_EVIDENCE||'json-application'):collections?(process.env.PSC1_COLLECTION_EVIDENCE||'stdlib-collections'):(process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
-const targetSelection=jsonApplication?process.env.PSC1_JSON_TARGETS:collections?process.env.PSC1_COLLECTION_TARGETS:process.env.PSC1_COMPILERM_TARGETS;
-const marker=jsonApplication?'PSC1_JSON_APPLICATION':collections?'PSC1_COLLECTION':'PSC1_COMPILERM';
+const fixtureName=inferenceControl?'InferenceControlFixtures':jsonApplication?'JsonRecordApplication':collections?'StdlibCollectionFixtures':'CompilerMFixtures';
+const contractFile=inferenceControl?'PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json':jsonApplication?'PSC1_JSON_APPLICATION_CASE_CONTRACT.json':collections?'PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json':'PSC1_COMPILERM_CASE_CONTRACT.json';
+const evidenceName=inferenceControl?(process.env.PSC1_INFERENCE_EVIDENCE||'inference-control'):jsonApplication?(process.env.PSC1_JSON_EVIDENCE||'json-application'):collections?(process.env.PSC1_COLLECTION_EVIDENCE||'stdlib-collections'):(process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
+const targetSelection=inferenceControl?process.env.PSC1_INFERENCE_TARGETS:jsonApplication?process.env.PSC1_JSON_TARGETS:collections?process.env.PSC1_COLLECTION_TARGETS:process.env.PSC1_COMPILERM_TARGETS;
+const marker=inferenceControl?'PSC1_INFERENCE_CONTROL':jsonApplication?'PSC1_JSON_APPLICATION':collections?'PSC1_COLLECTION':'PSC1_COMPILERM';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const native=process.env.PSC1_NATIVE||path.join(root,'.lake/build/bin/psc1');
 const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-compiler-m-'));
@@ -163,7 +164,20 @@ try {
   const combine=exports.map(name=>syntax==='lean'?'('+name+' flag)':'('+name+'(flag))').join(' && ');
   write(path.join(folder,'Entry.'+syntax),'import '+fixtureName+'\n'+definitions.join('\n')+
    (syntax==='lean'?'def semantic (flag : Bool) : Bool := ':'def semantic(flag : Bool) : Bool := ')+combine+'\n');
-  const negativeCases=jsonApplication?[
+  const negativeCases=inferenceControl?[
+   {id:'wrong-context',lean:'import InferenceControlFixtures\ndef invalid : Int := boundedId true\n',
+    ps:'import InferenceControlFixtures\ndef invalid : Int := boundedId(true)\n'},
+   {id:'ambiguous-array',lean:'def invalid : Nat := let values := #[]; 1\n',
+    ps:'def invalid : Nat := let values := #[]\n 1\n'},
+   {id:'dependent-type',lean:'import InferenceControlFixtures\ndef invalid : Int := boundedDependent Nat true 1\n',
+    ps:'import InferenceControlFixtures\ndef invalid : Int := boundedDependent(Nat, true, 1)\n'},
+   {id:'unresolved-lambda',lean:'def invalid : Nat := let f := fun value => value; 1\n',
+    ps:'def invalid : Nat := let f := fun value => value\n 1\n'},
+   {id:'escaping-local',lean:'def invalid : Id Nat := do\n  if true then\n    let hidden : Nat := 1\n    pure ()\n  return hidden\n',
+    ps:'def invalid : Id(Nat) := do {\n if (true) { let hidden : Nat := 1\n pure(()) }\n return hidden\n}\n'},
+   {id:'type-changing',lean:'def invalid : Id Nat := do\n  let mut value : Nat := 1\n  value := true\n  return value\n',
+    ps:'def invalid : Id(Nat) := do {\n let mut value : Nat := 1\n value := true\n return value\n}\n'}
+  ]:jsonApplication?[
    {id:'wrong-record-type',lean:'import JsonRecords.Transform\ndef invalid : Result Nat JsonError := recordCode true\n',
     ps:'import JsonRecords.Transform\ndef invalid : Result(Nat, JsonError) := recordCode(true)\n'},
    {id:'wrong-record-list',lean:'import JsonRecords.Transform\ndef invalid : Result Nat JsonError := sumRecordCodes [true]\n',

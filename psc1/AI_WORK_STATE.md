@@ -117,3 +117,16 @@ following statements, source spans and the strict PS brace grammar. New native
 execution/roundtrip/refusal cases cover all eight nested branch combinations,
 a braced chain and its continuation. The authored application stays unchanged.
 This fix and the application remain unqualified pending fresh Linux gates.
+
+## Parser regression pass; TypeScript publication diagnosis
+
+Parser fix 4bf65cfd00c59a66b65970351c1cd028a64409f3 passes native run
+39660161726, including all nested/continuation/translation/PS-refusal cases and
+strict source census. Focused Lean/JS passes all twelve compiler application
+cases; the 100000-statement process takes 1.79 s and 443316 KiB RSS. This is a
+single-consumer result, not complete application qualification. Lean/TS then
+refuses PSC1_FORMATTING_CHANGED_SYNTAX_TREE before publication. The exact AST
+guard remains unchanged; its diagnostic now identifies the first before/after
+field difference to diagnose the formatter/emitter class instead of bypassing
+formatting or changing source fixtures. Full/closure/G1 lanes correctly skip
+after the focused failure. Fresh Linux evidence is required.

@@ -11,7 +11,7 @@ qualify a source before its exact Linux CI completes.
 | operators.short-circuit | shortCircuitCase: both dynamic Bool inputs, skipped divergence and typed equality; actual seven-adapter IO consumers observe skipped foreign errors and a deliberately reached trapping control |
 | local-inference.rollback | rollbackCase plus the native ContextualInferenceTests assignment/fresh-identity rollback boundary, existing ambiguous/unresolved refusals |
 | call-inference.telescopes | telescopeCase: dependent explicit type, intervening implicit and expected-result constraints |
-| call-inference.refusals | callCase: native/comma calls and explicit f(()); wrong arity/type, unresolved empty generic call and empty f() refusals |
+| call-inference.refusals | callCase: native/comma calls and explicit f(()); wrong arity/type, unresolved empty generic call and empty required-argument call refusals |
 | typed-do.ownership | ownerLambdaCase: grouped do under a lambda, independent nested owner and nested loop return; wrong state/error/result and cross-owner assignment refusals |
 | early-return.owners | ownerLambdaCase and retained ownerCase: nested branch/loop return exits its owner and skips the owned continuation |
 | mutation.joins | joinsCase: branch/loop joins, mutable shadowing of an immutable value, original RHS scope and old closure capture; mutable shadow/type/escape refusals |
@@ -61,3 +61,14 @@ using checked Decidable recursion, with the same type/universes and unchanged
 runtime lowering. The original strict conversion checks remain required.
 Focused inference/control checks move before measured applications without
 removing any command or target. This correction needs fresh Linux admission.
+
+## Native Unit spelling boundary
+
+Run 39682839436 passes native admission, all 136 order and fifty signed equality
+conversion boundaries and both adjacent f(()) frontend tests. Focused control
+execution exposes an invalid new refusal expectation: native Lean f() denotes
+application to Unit, whereas PS f() supplies zero arguments. Preserve both
+existing grammar rules. The shared empty-required-call negative now applies a
+function requiring Nat and another value, so neither grammar may accept it.
+Separate native frontend tests require Lean Unit f() acceptance and PS Unit
+zero-argument refusal. Rejection diagnostics now identify the exact source call.

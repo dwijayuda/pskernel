@@ -48,7 +48,7 @@ function run(cmd,args,options={}){
 }
 function reject(args,expected){
  const r=spawnSync(native,args,{env,encoding:'utf8',cwd:root,timeout:60000});
- assert.equal(r.error,undefined);assert.equal(r.signal,null);assert.notEqual(r.status,0);
+ assert.equal(r.error,undefined);assert.equal(r.signal,null);assert.notEqual(r.status,0,'unexpected acceptance: '+args.join(' '));
  assert.match(r.stdout+r.stderr,/PSC1_|PSC2_/);
  if(expected)assert.match(r.stdout+r.stderr,expected);
  return sha(r.stdout+r.stderr);
@@ -232,7 +232,7 @@ try {
 {"id":"wrong-arity","lean":"import InferenceControlFixtures\ndef invalid : Nat := boundedAfter 0 true 1\n","ps":"import InferenceControlFixtures\ndef invalid : Nat := boundedAfter(0, true, 1)\n"},
 {"id":"ambiguous-call","lean":"import InferenceControlFixtures\ndef invalid : Nat := let ignored := boundedId #[]; 1\n","ps":"import InferenceControlFixtures\ndef invalid : Nat := let ignored := boundedId(#[])\n 1\n"},
 {"id":"wrong-unit","lean":"import InferenceControlFixtures\ndef invalid : Nat := boundedUnit true\n","ps":"import InferenceControlFixtures\ndef invalid : Nat := boundedUnit(true)\n"},
-{"id":"empty-unit-call","lean":"import InferenceControlFixtures\ndef invalid : Nat := boundedUnit()\n","ps":"import InferenceControlFixtures\ndef invalid : Nat := boundedUnit()\n"},
+{"id":"empty-required-call","lean":"import InferenceControlFixtures\ndef invalid : Nat := boundedAfter()\n","ps":"import InferenceControlFixtures\ndef invalid : Nat := boundedAfter()\n"},
    {id:'wrong-context',lean:'import InferenceControlFixtures\ndef invalid : Int := boundedId true\n',
     ps:'import InferenceControlFixtures\ndef invalid : Int := boundedId(true)\n'},
    {id:'ambiguous-array',lean:'def invalid : Nat := let values := #[]; 1\n',
@@ -281,7 +281,7 @@ try {
     else verifiedArgs[assuranceIndex+1]='verified';
     const refusals={verified:reject(verifiedArgs)};
     for(const {id} of negativeCases){
-     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,inferenceControl&&id==='malformed-handler'?/PSC1_PROJECT_PARSE_FAILED/:inferenceControl&&id==='empty-unit-call'?/PSC1_PROJECT_(PARSE|ELAB)_FAILED/:checkedOrder&&id==='chained'?/PSC1_PROJECT_PARSE_FAILED:.*parentheses around nonassociative comparison/:libraryApplication&&id==='missing-module'?/PSC1_PROJECT_.*(IMPORT|MODULE|SOURCE)/:/PSC1_PROJECT_ELAB_FAILED/);
+     const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong,inferenceControl&&id==='malformed-handler'?/PSC1_PROJECT_PARSE_FAILED/:inferenceControl&&id==='empty-required-call'?/PSC1_PROJECT_(PARSE|ELAB)_FAILED/:checkedOrder&&id==='chained'?/PSC1_PROJECT_PARSE_FAILED:.*parentheses around nonassociative comparison/:libraryApplication&&id==='missing-module'?/PSC1_PROJECT_.*(IMPORT|MODULE|SOURCE)/:/PSC1_PROJECT_ELAB_FAILED/);
     }
     const duplicate=[...args];duplicate[1]=path.join(folder,'duplicate-prelude.'+syntax);
     refusals['duplicate-prelude']=reject(duplicate,/duplicateDeclaration:Nat/);

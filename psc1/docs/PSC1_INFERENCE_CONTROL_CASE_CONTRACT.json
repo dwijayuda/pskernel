@@ -125,7 +125,7 @@
     "wrong-arity",
     "ambiguous-call",
     "wrong-unit",
-    "empty-unit-call",
+    "empty-required-call",
     "wrong-state",
     "wrong-error",
     "wrong-return",

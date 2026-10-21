@@ -122,3 +122,8 @@ def main : IO Unit := do
   requireAcceptedPair "explicit Unit adjacent application stays checked"
     "def unitArgument (value : Unit) : Nat := 7\ndef result : Nat := unitArgument(())\n"
     "def unitArgument(value : Unit) : Nat := 7\ndef result : Nat := unitArgument(())\n"
+
+  requireAccepted "native Unit application keeps its native empty-parenthesis spelling" .lean
+    "def unitArgument (value : Unit) : Nat := 7\ndef result : Nat := unitArgument()\n"
+  requireRejected "PS zero arguments do not invent a Unit argument" .proofScript
+    "def unitArgument(value : Unit) : Nat := 7\ndef result : Nat := unitArgument()\n"

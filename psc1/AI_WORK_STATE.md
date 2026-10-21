@@ -317,3 +317,18 @@ Use native-spaced explicit Unit application and owned braces in the same Lean
 fixture, preserving the PS fixture and expected semantic cases. A separate
 registered native frontend/admission regression retains adjacent f(()) in both
 PSC1 source grammars, so native-oracle spelling cannot hide a parser gap.
+
+## Native signed equality passes; Unit refusal expectation corrected
+
+Run 39682839436 at a8099f2f418ebbe7acc17e07fc0b2c7e2397a613 passes native:
+136 order boundaries, fifty signed Bool conversion boundaries through the
+constructive ite, adjacent f(()) admission in both grammars, census and all
+retained regressions. Focused order executes 42 selected obligations. PS
+inference/control consumers pass; Lean consumers reach an unexpectedly accepted
+new negative. Native f() already denotes a Unit argument, unlike PS zero-arg
+application; the new empty-Unit refusal expectation was invalid for Lean.
+Preserve native behavior and explicit f(()) in both grammars. Replace only that
+new negative with empty-required-call on boundedAfter (required Nat/value args),
+add direct native-spelling acceptance/PS refusal tests, and include exact failed
+arguments in all refusal diagnostics. No previous soundness or ABI test changes.
+The nine-criterion continuation remains unqualified until all exact Linux gates.

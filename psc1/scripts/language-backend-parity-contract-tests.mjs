@@ -81,5 +81,5 @@ assert.equal(check(orderContract,orderRows).obligations,98);
 assert.throws(()=>check(orderContract,[{...orderRows[0],refusals:{}},...orderRows.slice(1)]));
 const inferenceContract=JSON.parse(fs.readFileSync('docs/PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json','utf8'));
 assert.deepEqual(inferenceContract.cases.map(c=>c.id),['contextsCase','telescopeCase','ownerCase','loopCase','scopeCase','rollbackCase','callCase','ownerLambdaCase','joinsCase','handlerScopeCase']);
-for(const id of ['wrong-arity','ambiguous-call','wrong-unit','empty-unit-call'])
+for(const id of ['wrong-arity','ambiguous-call','wrong-unit','empty-required-call'])
  assert.ok(inferenceContract.requiredRefusals.includes(id));

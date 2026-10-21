@@ -1305,15 +1305,15 @@ private def nestedDiagnosticClassification : IO Unit := do
     ("deep recursion detected, use maxRecDepth to increase the limit", .recursionDepth),
     ("the kernel refused a Nat numeral because its size exceeds the maximum", .natSize),
     ("the kernel refused to evaluate Nat.pow because the result would exceed the maximum numeral size", .natSize)]
-  for prefix in prefixes do
-    let invalid := prefix ++ "invalid projection: structure type mismatch"
+  for messagePrefix in prefixes do
+    let invalid := messagePrefix ++ "invalid projection: structure type mismatch"
     require "nested-diagnostic-exact-invalid-with-original-message"
       (samePublicError (psKernelErrorFromMessage invalid) (.rejectedInvalid invalid))
-    let unsupported := prefix ++ "nested or invalid mutual inductive occurrence is not supported"
+    let unsupported := messagePrefix ++ "nested or invalid mutual inductive occurrence is not supported"
     require "nested-diagnostic-exact-unsupported-with-original-message"
       (samePublicError (psKernelErrorFromMessage unsupported) (.declinedUnsupported unsupported))
     for (body, resource) in resources do
-      let message := prefix ++ body
+      let message := messagePrefix ++ body
       require "nested-diagnostic-preserves-resource-category-and-message"
         (samePublicError (psKernelErrorFromMessage message)
           (.resourceExhausted resource message))

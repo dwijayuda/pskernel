@@ -39,6 +39,7 @@ structure PsHostDirectPrepared where
   assurance : PsHostAssurance
   partialNames : List PsName
   ioDispatcherAbi : Bool := false
+  wasmStringAbi : Bool := false
 
 private def checkedInput (inputPath : String) :
     IO (PsHostCapturedProject × PsCompilerAdmissionReadyModule × String) := do
@@ -159,6 +160,11 @@ def psHostDirectPrepareIoFor
     (inputPath : String) (assurance : PsHostAssurance) : IO PsHostDirectPrepared := do
   return { (← psHostDirectPrepareFor inputPath assurance) with ioDispatcherAbi := true }
 
+def psHostDirectPrepareWasmFor (inputPath : String) (assurance : PsHostAssurance)
+    (ioAbi : Bool) : IO PsHostDirectPrepared := do
+  return { (← psHostDirectPrepareFor inputPath assurance) with
+    ioDispatcherAbi := ioAbi, wasmStringAbi := true }
+
 def psHostDirectCheckPublicApi (target : PsBackendTarget) (session : PsHostDirectPrepared) :
     Except String Unit :=
   if session.ioDispatcherAbi then psBackendCheckIoPublicApi target session.validated session.publicNames
@@ -259,7 +265,9 @@ def psHostDirectWriteSelectedProvenance
     ",\"leanCommit\":" ++ psJsonQuote Lean.githash ++
     ",\"assurance\":" ++ psJsonQuote (psHostAssuranceName session.assurance) ++
     ",\"behaviorallyVerified\":false" ++
-    ",\"publicAbi\":" ++ psJsonQuote (if session.ioDispatcherAbi then "io-dispatcher" else "scalar") ++
+    ",\"publicAbi\":" ++ psJsonQuote (if session.wasmStringAbi then
+      (if session.ioDispatcherAbi then "wasm-io-dispatcher" else "wasm-string")
+      else if session.ioDispatcherAbi then "io-dispatcher" else "scalar") ++
     ",\"partialDeclarations\":" ++ psJsonArray (session.partialNames.map (fun name => psJsonQuote (psNameToString name))) ++
     ",\"entryPath\":" ++ psJsonQuote session.captured.entryPath ++
     ",\"publicNames\":" ++ psJsonArray (selected.map psJsonQuote) ++

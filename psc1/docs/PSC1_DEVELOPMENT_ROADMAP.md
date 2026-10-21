@@ -72,3 +72,13 @@ minimum Python. Twenty capability policy checks pass. See
 standalone host adapters,Wasm String IO,general sequencing and remaining complete
 application/performance acceptance remain open. Continue these finite blockers;
 do not promote a pure protocol observation into full IO-family qualification.
+
+
+General IO sequencing at5a0f999a1b5d06f5b68461392fab05a8c86ca535 passes
+full run39612250401:28 both-grammar/all-target obligations plus4 minimum-Python,
+eight actual JS/TS/Rust/Python dispatcher consumers, and20 Linux policy checks
+each for standalone Python and Rust. PHP standalone is in subsequent Linux CI.
+The explicit Wasm String/core/component IO bridge is implemented with strict
+typed memory checks and canonical allocation; qualification is pending. See
+PSC1_WASM_STRING_ABI_V1.md. Continue actual ABI/adapters qualification before
+declaring the typed-io finite criteria finished. Release readiness remains false.

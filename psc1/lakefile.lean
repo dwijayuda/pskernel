@@ -164,7 +164,9 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.ValidateStructure,
     `Ps.BackendWasm.ValidateTyping,
     `Ps.BackendWasm.ValidateIr,
-    `Ps.BackendWasm.Component
+    `Ps.BackendWasm.Component,
+    `Ps.BackendWasm.StringAbi,
+    `Ps.BackendWasm.StringComponent
   ]
 
 lean_lib PsBackendPython where
@@ -199,7 +201,8 @@ lean_lib PsHost where
     `Ps.Host.DirectSourceMap,
     `Ps.Host.DirectBackend,
     `Ps.Host.ScriptBackend,
-    `Ps.Host.WasmComponent
+    `Ps.Host.WasmComponent,
+    `Ps.Host.WasmString
   ]
 
 -- Preserve existing regression and historical bootstrap targets. The scoped
@@ -407,3 +410,7 @@ lean_exe psc1_json_quote_tests where
 lean_exe psc1_worker_fusion_tests where
   srcDir := "test"
   root := `WorkerFusionTests
+
+lean_exe psc1_wasm_string_abi_tests where
+  srcDir := "test"
+  root := `WasmStringAbiTests

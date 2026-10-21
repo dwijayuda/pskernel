@@ -62,6 +62,12 @@
       "receipt": "dist/scoped-correctness/typed-io-protocol/results.json",
       "fixture": "test/TypedIoProtocolFixtures",
       "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "typed-io-sequencing": {
+      "contract": "docs/PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/typed-io-sequencing/results.json",
+      "fixture": "test/TypedIoSequencingFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
     }
   },
   "families": [

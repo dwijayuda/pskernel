@@ -43,7 +43,8 @@ assert.throws(()=>check(jsonContract,[{...jsonRows[0],applicationModuleSha256:{}
 assert.throws(()=>check(jsonContract,[{...jsonRows[0],librarySha256:{}},...jsonRows.slice(1)]));
 
 for(const [file,obligations]of [['PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json',70],
- ['PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json',56]]){
+ ['PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json',56],
+ ['PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json',28]]){
  const contract=JSON.parse(fs.readFileSync('docs/'+file,'utf8'));
  const generated=contract.cases.flatMap(c=>contract.grammars.flatMap(s=>contract.targets.map(t=>({
   ...rows[0],id:c.id,syntax:s,target:t,

@@ -19,7 +19,31 @@ Standalone Python and Rust each pass20 actual Linux policy checks. Host traps
 escape source handlers. PHP standalone and Wasm String/host ABI remain excluded.
 The Rust lock below is captured verbatim from this successful Linux job.
 
-## Active typed IO continuation
+## Qualified five-target standalone IO checkpoint
+
+Implementation1fbff4dca6a262de4b3d6d418afcb018ba1037fe passes full Linux
+run39615391064 at tested merge5e6c2094d85931cdc4de6b481b9a783a9f4563f3:
+https://github.com/dwijayuda/pskernel/actions/runs/39615391064
+Full119277178493 and aggregate119284833967 SUCCESS; all selected native,
+closure, G1 and focused jobs pass. Ten actual general source IO consumers
+pass across both grammars and JS/TS/Rust/Python/PHP. Standalone Rust/Python/PHP
+each pass20 shared actual Linux policy checks; Node retains its20 checks.
+The PHP explicit FFI profile is now scoped-qualified. Default PHP boundaries
+remain. All7 pure sequencing obligations pass28 cases plus4 minimum Python.
+This checkpoint still excludes real Wasm String/core/component IO.
+
+## Active Wasm String and IO continuation
+
+The next patch adds an explicit wasm-string ABI and Wasm io-dispatcher mapping.
+Typed memory/global instructions, fixed16MiB arena, UTF8 validation/copying,
+strict target operand checks, source/schema rechecking, canonical component
+allocation and post-return cleanup are implemented but NOT yet qualified.
+Core uses the existing explicit Node capability host; component uses the
+standalone Python capability host through pinned Wasmtime Python49.0.0.
+Default Wasm/component policies remain. New native negative and core/component
+execution tests run in Linux CI; no claim of completion before their results.
+
+## Earlier typed IO implementation notes
 
 Source sequencing now uses the checked Io alias of CompilerM with an explicit
 String dispatcher, authored in both grammars. Commit d16e1d1bc3dd17ba09d428bd4844dbc0c46e990c

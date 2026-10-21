@@ -460,8 +460,9 @@ export function publish(stage, output, kind) {
     fail('PSC1_BUNDLE_NATIVE_PIN_MISMATCH');
   }
   const publicAbi = info.publicAbi ?? 'scalar';
-  if (!['scalar','io-dispatcher'].includes(publicAbi) ||
-      (publicAbi === 'io-dispatcher' && !['js','ts','rust','python','php'].includes(kind)))
+  if (!['scalar','io-dispatcher','wasm-string','wasm-io-dispatcher'].includes(publicAbi) ||
+      (publicAbi === 'io-dispatcher' && !['js','ts','rust','python','php'].includes(kind)) ||
+      (publicAbi.startsWith('wasm-') && !['wasm-core','wasm-component'].includes(kind)))
     fail('PSC1_BUNDLE_PUBLIC_ABI_INVALID');
   const assurance = info.assurance ?? 'checked-logical';
   const partialDeclarations = info.partialDeclarations ?? [];

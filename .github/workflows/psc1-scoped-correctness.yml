@@ -101,6 +101,13 @@ jobs:
           tar xJf "$RUNNER_TEMP/wasmtime.tar.xz" -C "$RUNNER_TEMP/wasmtime"
           install -m 755 "$(find "$RUNNER_TEMP/wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/psc1-bin/wasmtime"
           echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - name: Install isolated pinned component String consumer
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/psc1-wasmtime-python"
+          "$RUNNER_TEMP/psc1-wasmtime-python/bin/python" -m pip install --only-binary=:all: --no-deps wasmtime==49.0.0
+          "$RUNNER_TEMP/psc1-wasmtime-python/bin/python" -c 'import importlib.metadata; assert importlib.metadata.version("wasmtime")=="49.0.0"'
+          echo "PSC1_WASMTIME_PY=$RUNNER_TEMP/psc1-wasmtime-python/bin/python" >> "$GITHUB_ENV"
       - name: Install isolated pinned TypeScript consumer checker
         run: |
           set -euo pipefail
@@ -118,7 +125,7 @@ jobs:
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
+          lake build psc1 psc1_wasm_string_abi_tests psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
       - name: Save successful compilation before running regressions
         if: steps.native_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -129,6 +136,9 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
+          .lake/build/bin/psc1_wasm_string_abi_tests
+          wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-core.wasm
+          wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-component.wasm
           .lake/build/bin/psc1_backend_common_tests
           .lake/build/bin/psc1_ir_specialize_tests
           .lake/build/bin/psc1_direct_map_tests
@@ -242,6 +252,11 @@ jobs:
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: node scripts/script-backend-tests.mjs
+      - name: Execute core and component String ABI and actual typed IO
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/wasm-string-tests.mjs
       - name: Execute full scripting and runtime corpus on minimum Python
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1

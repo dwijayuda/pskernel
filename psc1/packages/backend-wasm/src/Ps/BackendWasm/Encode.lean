@@ -100,6 +100,14 @@ def psWasmIrEncodeInstruction
     (value : PsWasmInstruction) :
     Except PsWasmIrEncodeError String :=
   match value with
+  | PsWasmInstruction.i32Load offset => psWasmIrEncodeNode "i32Load" [psWasmIrEncodeNat offset]
+  | PsWasmInstruction.i32Store offset => psWasmIrEncodeNode "i32Store" [psWasmIrEncodeNat offset]
+  | PsWasmInstruction.i32Load8U => psWasmIrEncodeNode "i32Load8U" []
+  | PsWasmInstruction.i32Store8 => psWasmIrEncodeNode "i32Store8" []
+  | PsWasmInstruction.abiHeapGet => psWasmIrEncodeNode "abiHeapGet" []
+  | PsWasmInstruction.abiHeapSet => psWasmIrEncodeNode "abiHeapSet" []
+  | PsWasmInstruction.abiBusyGet => psWasmIrEncodeNode "abiBusyGet" []
+  | PsWasmInstruction.abiBusySet => psWasmIrEncodeNode "abiBusySet" []
   | PsWasmInstruction.localGet index =>
       psWasmIrEncodeNode
         "localGet"
@@ -371,7 +379,7 @@ def psWasmIrEncodeTexts
   psWasmIrEncodeValues
     (psListMap psWasmIrEncodeText values)
 
-def psWasmIrEncodeModule
+def psWasmIrEncodeModuleBase
     (value : PsWasmModule) :
     Except PsWasmIrEncodeError String :=
   psWasmIrEncodeNode
@@ -399,3 +407,14 @@ def psWasmIrEncodeModule
           psWasmIrEncodeExport
           value.exports)
     ]
+
+def psWasmIrEncodeModule (value : PsWasmModule) : Except PsWasmIrEncodeError String :=
+  if value.abiMemory then
+    psWasmIrEncodeNode "psc-wasm-ir-abi-json/1"
+      [psWasmIrEncodeModuleBase value,
+       psWasmIrEncodeBool value.abiMemoryImports,
+       psWasmIrEncodeBool value.abiGlobalsExport,
+       psWasmIrEncodeValues (value.functionImports.map (fun item =>
+         psWasmIrEncodeValues [psWasmIrEncodeText item.moduleName,
+           psWasmIrEncodeText item.importName, psWasmIrEncodeFunction item.function]))]
+  else psWasmIrEncodeModuleBase value

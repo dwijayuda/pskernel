@@ -77,7 +77,8 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_independent_checker
+          lake build psc1 psc1_independent_checker psc1_wasm_string_abi_tests
+          .lake/build/bin/psc1_wasm_string_abi_tests
       - name: Save successful compilation before running regressions
         if: steps.native_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -104,6 +105,7 @@ jobs:
         with:
           name: psc1-practical-compiler-m-${{ github.sha }}
           path: |
+            psc1/dist/scoped-correctness/wasm-string-native/
             psc1/dist/scoped-correctness/typed-io-standalone/
             psc1/dist/scoped-correctness/typed-io-dispatcher/
             psc1/dist/scoped-correctness/typed-io-sequencing-focused/

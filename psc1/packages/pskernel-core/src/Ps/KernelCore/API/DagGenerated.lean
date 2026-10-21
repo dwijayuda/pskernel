@@ -2,7 +2,7 @@ import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 
 /-
-Explicit transitional ownership bridge for checked generated inductive metadata.
+Explicit transitional ownership bridge for checked generated metadata.
 
 Complete ordinary, mutual and nested admission first constructs and validates
 the final types and recursor rules in the private work environment. Only after
@@ -16,7 +16,9 @@ not inside WHNF. It preserves original IDs by appending smart-constructed
 nodes, and appends the corresponding source expressions to the decoded table.
 Ordinary/mutual header and constructor IDs still refer to their original input.
 Nested restored types and renamed auxiliary recursors come from the validated
-final environment. Initial-session and Quot metadata are not installed here.
+final environment. Successful Quot admission installs all four live headers;
+repeated admission retains exact existing owners without appending more nodes.
+Initial-session metadata is not installed here.
 This deliberately remains a recursive-expression import and V1 inductive
 admission fallback, not completed DAG-native admission. Repeated source
 subtrees are not interned. Construction and retained-memory costs must be
@@ -381,6 +383,47 @@ def psKernelDagGeneratedPlanNested
                       Option.some (psKernelDagGeneratedAppendInfos families auxiliary)
           | _ => Option.none
 
+/- Quot admission constructs these four constants only after validating Eq.
+   Plan all four live names/kinds before importing any header. This does not
+   authenticate an arbitrary environment record or accept exported metadata. -/
+def psKernelDagGeneratedFindQuot
+    (environment : PsKernelEnvironment) (name : PsKernelName)
+    (kind : PsKernelQuotKind) : Option PsKernelConstantInfo :=
+  match psKernelEnvironmentFind environment name with
+  | Option.none => Option.none
+  | Option.some info =>
+      match info with
+      | PsKernelConstantInfo.quotInfo value =>
+          if psKernelNameEq value.base.name name then
+            if psKernelExprV2QuotKindEq value.kind kind then Option.some info
+            else Option.none
+          else Option.none
+      | _ => Option.none
+
+def psKernelDagGeneratedPlanQuot
+    (environment : PsKernelEnvironment) :
+    Option (List PsKernelConstantInfo) :=
+  if environment.quotInitialized then
+    match psKernelDagGeneratedFindQuot environment psKernelQuotName
+        PsKernelQuotKind.typeQ with
+    | Option.none => Option.none
+    | Option.some typeInfo =>
+        match psKernelDagGeneratedFindQuot environment psKernelQuotMkName
+            PsKernelQuotKind.ctorQ with
+        | Option.none => Option.none
+        | Option.some ctorInfo =>
+            match psKernelDagGeneratedFindQuot environment psKernelQuotLiftName
+                PsKernelQuotKind.liftQ with
+            | Option.none => Option.none
+            | Option.some liftInfo =>
+                match psKernelDagGeneratedFindQuot environment psKernelQuotIndName
+                    PsKernelQuotKind.indQ with
+                | Option.none => Option.none
+                | Option.some indInfo =>
+                    Option.some (List.cons typeInfo (List.cons ctorInfo
+                      (List.cons liftInfo (List.cons indInfo List.nil))))
+  else Option.none
+
 def psKernelDagGeneratedInstallHeader
     (base : PsKernelConstantBase) (kind : PsKernelExprV2DeclarationRefKind)
     (state : PsKernelDagGeneratedState) :
@@ -406,6 +449,9 @@ def psKernelDagGeneratedInstallInfo
         PsKernelExprV2DeclarationRefKind.constructorDecl state
   | PsKernelConstantInfo.recInfo value =>
       psKernelDagGeneratedInstallRecursor value state
+  | PsKernelConstantInfo.quotInfo value =>
+      psKernelDagGeneratedInstallHeader value.base
+        (PsKernelExprV2DeclarationRefKind.quotDecl value.kind) state
   | _ => Except.error "PSKERNEL_V2_GENERATED_OWNER_KIND"
 
 def psKernelDagGeneratedInstallInfos
@@ -430,6 +476,51 @@ def psKernelDagGeneratedInstallPlan
   | Option.none => Except.ok state
   | Option.some infos => psKernelDagGeneratedInstallInfos infos state
 
+/- Repeated successful Quot admission is idempotent. The private owner must
+   match the live kind/levels, have no delta body, and retain the exact admitted
+   type in its synchronized decoded table before it can skip another import.
+   This is an import-elision check, never an admission or checking judgment. -/
+def psKernelDagGeneratedQuotOwnerMatches
+    (value : PsKernelQuotInfo) (state : PsKernelDagGeneratedState) : Bool :=
+  match psKernelExprV2DeclarationRefFind state.declarations value.base.name with
+  | Option.none => false
+  | Option.some owner =>
+      if psKernelExprV2DeclarationRefMatches owner
+          (PsKernelConstantInfo.quotInfo value) then
+        match owner.deltaValue with
+        | Option.some _ => false
+        | Option.none =>
+            match psKernelExprV2DecodedRequire state.built owner.type with
+            | Except.error _ => false
+            | Except.ok type => psKernelExprEqual type value.base.type
+      else false
+
+def psKernelDagGeneratedQuotOwnersComplete
+    (infos : List PsKernelConstantInfo) :
+    PsKernelDagGeneratedState -> Bool :=
+  match infos with
+  | List.nil =>
+      fun (_state : PsKernelDagGeneratedState) => true
+  | List.cons first rest =>
+      fun (state : PsKernelDagGeneratedState) =>
+        match first with
+        | PsKernelConstantInfo.quotInfo value =>
+            if psKernelDagGeneratedQuotOwnerMatches value state then
+              let recur := psKernelDagGeneratedQuotOwnersComplete rest;
+              recur state
+            else false
+        | _ => false
+
+def psKernelDagGeneratedInstallQuotPlan
+    (plan : Option (List PsKernelConstantInfo))
+    (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match plan with
+  | Option.none => Except.ok state
+  | Option.some infos =>
+      if psKernelDagGeneratedQuotOwnersComplete infos state then Except.ok state
+      else psKernelDagGeneratedInstallInfos infos state
+
 /- Called only after the complete indicated command has successfully admitted
    into environment. Ordinary/mutual input types retain their original IDs.
    Nested headers, constructors, main recursors and renamed auxiliary recursors
@@ -452,5 +543,8 @@ def psKernelDagGeneratedAfterCommand
       | PsKernelDagDeclarationRequest.nestedInductive group =>
           psKernelDagGeneratedInstallPlan
             (psKernelDagGeneratedPlanNested group environment) state
+      | PsKernelDagDeclarationRequest.quot =>
+          psKernelDagGeneratedInstallQuotPlan
+            (psKernelDagGeneratedPlanQuot environment) state
       | _ => Except.ok state
   | _ => Except.ok state

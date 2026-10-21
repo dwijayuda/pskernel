@@ -1,3 +1,9 @@
+# Review object — same-batch checked Quot owners (NOT RUN)
+
+This review object extends carrier `6d012ad9655d6e91416c70ff49ded35421a6c59b` with exact post-admission ownership for all four Quot constants and 20 local equations. It is not a branch qualification. Native/generated regression suites and workflow wiring are still being prepared. No initial-session bootstrap, Quot reduction, admission validation, fuel rule or V1 fallback has been changed. A complete live four-constant metadata plan is required before private import; idempotent reuse also requires exact admitted types and no delta body. The original caller namespace remains immutable. Do not promote this object or claim any test has passed before complete fixtures and terminal exact-source CI.
+
+---
+
 # Current continuation — group fixture elaboration repair (2026-10-21 15:54 UTC)
 
 The active integration branch remains at `3aa077cb64ff06f76727decd01c43ad6c33f351d`, with terminal PASS native, generated, canonical and research gates. Full Arena run [39622318341](https://github.com/dwijayuda/pskernel/actions/runs/39622318341) is terminal FAIL; its full per-case receipt is being read and must not be inferred from earlier revisions.

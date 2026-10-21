@@ -15,6 +15,43 @@ PASS. The new containing diagnostic source and trace harness are **NOT RUN** unt
 their own Actions job completes. Trace collection cannot claim gate B or C.
 Gate A remains the documented e015 scoped V1 developer provider.
 
+## 2026-10-21 09:42 UTC — bounded first-decline diagnostic harness; execution pending
+
+This diagnostic branch now builds the separate, exact production source
+`480d875d5be7a9e656e7ccd1fa76cc7409a81c90` in a second checkout.
+Workflow source and kernel source identities are recorded independently.
+The production branch is not modified by this diagnostic commit.
+The new `psc1-pskernel-arena435-decline.yml` workflow authenticates the complete
+canonical source closure and compiles genuine PSC1/TypeScript7.0.2 JavaScript.
+
+The existing four authentic unprofiled/V8 cases are retained. A separately hashed
+generated copy observes selected outer Option(Except...) returns for the original
+repeated-subproblem and church-numerals bodies. It records the actual declaration
+request, first observed None and confirmed entry into whole-operation V1
+admission. First None is attribution, not automatic proof of a causal fallback.
+Forwarded curried functions retain the innermost recorded operation identity.
+Argument, callback and result identities are preserved. A strict generated-runtime
+anchor check and detached positive/negative controls precede corpus observations;
+the controls must demonstrate mapped admissions, an observed simple-admission
+decline, actual V1 fallback and a restored observation stack.
+
+No runtime observation has yet passed for this commit. The observer is bounded
+to512 events and32768 tracked calls and reports truncation. Instrumented timings
+are never speedup evidence. Timeout/resource results are not assessed as semantic
+agreement. Fuel4096,60-second cases,2GiB Node old-space policy, authenticated body
+bytes and empty runtime PATH remain unchanged. The full193-case qualification
+remains a separate required gate.
+
+Latest completed production corpus at480 is193=170 matching outcomes
+(103 accepted,59 kernel rejections,1 metadata rejection,7 transport rejections)
++2 separate unsafe/partial agreements+20 host timeouts+1 unsupported case.
+[39572301156](https://github.com/dwijayuda/pskernel/actions/runs/39572301156)
+failed qualification. Diagnostic success will not change those verdicts.
+Next: inspect this commit's syntax/runtime/control gate and authentic return traces;
+then use the confirmed earliest unsupported operation to choose the next
+production optimization. No background execution is promised.
+
+
 ## Reporting review correction
 
 The first source-reviewed tracer commit was868a1ee518a963ec141bc1129910aaf093261031.

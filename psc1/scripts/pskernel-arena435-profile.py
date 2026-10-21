@@ -162,8 +162,9 @@ def main() -> int:
     parser.add_argument("--kernel", type=pathlib.Path, required=True)
     parser.add_argument("--official-project", type=pathlib.Path, required=True)
     parser.add_argument("--out", type=pathlib.Path, required=True)
+    parser.add_argument("--source-sha", help="exact source commit built by the pinned workflow")
     args = parser.parse_args()
-    source_sha = os.environ.get("GITHUB_SHA", "")
+    source_sha = args.source_sha or os.environ.get("GITHUB_SHA", "")
     if re.fullmatch(r"[0-9a-f]{40}", source_sha) is None:
         parser.error("GITHUB_SHA must identify the exact Actions source revision")
     node_path = shutil.which("node")
@@ -229,6 +230,7 @@ def main() -> int:
                     for r in records))
     report = {
         "format": "psc1-authentic-arena-diagnostics-v1", "source_sha": source_sha,
+        "workflow_source_sha": os.environ.get("GITHUB_SHA", ""),
         "kernel_sha256": digest(kernel), "replay_sha256": digest(runner),
         "driver_sha256": digest(pathlib.Path(__file__)),
         "archive_sha256": ORACLE.ARCHIVE_SHA256, "target_lean": ORACLE.TARGET,

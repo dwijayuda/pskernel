@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
-      - research/psc1-arena-logical-20261021
     paths:
       - psc1/scripts/install-lean435-ci.sh
       - .github/workflows/psc1-pskernel-arena435-profile.yml

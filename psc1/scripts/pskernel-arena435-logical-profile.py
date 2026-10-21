@@ -152,11 +152,126 @@ function* __ps$invoke(fn, ...args) {
 """
 
 
+
+
+def decline_runtime() -> str:
+    """Observation hooks only; preserve every original next/apply/result."""
+    result = INSTRUMENTED_RUNTIME
+    helper = (HERE / "pskernel-arena435-decline-observer.mjs").read_text()
+    replacements = [
+        ("const __ps$implementations = new WeakMap();",
+         helper + "\nconst __ps$implementations = new WeakMap();"),
+        ("    __ps$tracePoll(true);", "    __ps$declineExit();"),
+        ("    const labels = ['<anonymous>'];",
+         "    const labels = ['<anonymous>'];\n"
+         "    const observed = [null], observedBase = __ps$declineActive.length;"),
+        ("            if ((__ps$traceSteps & 4095) === 0) __ps$tracePoll(false);", ""),
+        ("                pending.pop(); labels.pop(); value = next.value;",
+         "                __ps$declineReturn(observed.pop(), next.value);\n"
+         "                pending.pop(); labels.pop(); value = next.value;"),
+        ("                const implementation = __ps$implementations.get(fn);",
+         "                const implementation = __ps$implementations.get(fn);\n"
+         "                const observation = __ps$declineCall(fn, args, implementation);"),
+        ("                    pending.push(Reflect.apply(implementation, undefined, args));",
+         "                    pending.push(Reflect.apply(implementation, undefined, args));\n"
+         "                    observed.push(observation);"),
+        ("                else value = Reflect.apply(fn, undefined, args);",
+         "                else {\n"
+         "                    value = Reflect.apply(fn, undefined, args);\n"
+         "                    __ps$declineReturn(observation, value);\n"
+         "                }"),
+        ("        __ps$traceContexts.pop();",
+         "        __ps$declineActive.length = observedBase;\n"
+         "        __ps$traceContexts.pop();"),
+    ]
+    for before, after in replacements:
+        if result.count(before) != 1:
+            raise ValueError("decline observer runtime patch is not unique: " + before)
+        result = result.replace(before, after)
+    return result
+
+
+DECLINE_REPLAY_HOOK = r"""
+    if (metadata.length > 512) throw Error('decline diagnostic declaration bound exceeded');
+    const diagnosticEntries=order.map((group,command_index)=>{
+      const declarations=metadata.filter(item=>item.group===group).map(({kind,raw})=>({
+        kind,name:sourceName(raw.name),source_type_id:raw.type.toString(),
+        canonical_type_id:expr(raw.type).toString(),
+        ...(raw.value===undefined?{}:{
+          source_value_id:raw.value.toString(),canonical_value_id:expr(raw.value).toString()})
+      }));
+      return {request:group.request,identity:{command_index,
+        request_tags:Object.getOwnPropertySymbols(group.request).map(key=>String(group.request[key])),
+        roots:group.roots.map(root=>root.toString()),declarations}};
+    });
+    const DiagnosticOption=get('Option'),DiagnosticExcept=get('Except');
+    const diagnosticNone=typeof DiagnosticOption.none==='function'?DiagnosticOption.none():DiagnosticOption.none;
+    get('__psc1ConfigureDecline')(diagnosticEntries,{
+      source_sha256:createHash('sha256').update(text,'utf8').digest('hex'),
+      records,exported_declarations:metadata.length,admission_commands:order.length,
+      source_expression_records:expressions.size,canonical_arena_nodes:arena.size.toString(),
+      declared_names_are_transport_observations:true,
+      commands:diagnosticEntries.map(entry=>entry.identity)
+    },diagnosticNone,DiagnosticOption.some(0n),DiagnosticExcept.ok(0n),DiagnosticExcept.error('diagnostic tag'));
+"""
+
+
+def instrument_replay(source: pathlib.Path, destination: pathlib.Path) -> dict:
+    text = source.read_text(encoding="utf-8")
+    anchor = "    const commands=order.map(group=>C.admit(group.request));\n"
+    if text.count(anchor) != 1 or "__psc1ConfigureDecline" in text:
+        raise ValueError("replay admission observation anchor differs")
+    destination.write_text(text.replace(anchor, anchor + DECLINE_REPLAY_HOOK), encoding="utf-8")
+    return {"original_replay_sha256": PROFILE.digest(source),
+            "observed_replay_sha256": PROFILE.digest(destination),
+            "semantic_call_unchanged": True}
+
+
+def decline_summary(path: pathlib.Path, source_hash: str | None = None) -> dict:
+    rows, incomplete_tail = [], False
+    with path.open(encoding="utf-8") as stream:
+        for line in stream:
+            if not line.endswith("\n"):
+                incomplete_tail = True
+                break
+            rows.append(json.loads(line))
+            if len(rows) > 516:
+                raise ValueError("decline observation record bound exceeded")
+    if (not rows or rows[0].get("format") != "psc1-logical-stack-v1"
+            or rows[0].get("kind") != "header"
+            or any(row.get("kernel_qualified") is not False for row in rows)):
+        raise ValueError("missing diagnostic identity or false qualification claim")
+    events = [row for row in rows if row.get("format") == "psc1-v2-decline-v1"]
+    tables = [row for row in events if row.get("kind") == "declaration_table"]
+    admissions = [row for row in events if row.get("kind") == "admission_enter"]
+    if not tables or not admissions:
+        raise ValueError("missing actual admission declaration observation")
+    if source_hash is not None and (
+            len(tables) != 1 or tables[0]["summary"].get("source_sha256") != source_hash
+            or any(row.get("declaration", {}).get("unmapped") for row in admissions)):
+        raise ValueError("decline observation changed input identity")
+    exits = [row for row in events if row.get("kind") == "observation_exit"]
+    if any(row.get("unfinished_observed_frames") != 0 for row in exits):
+        raise ValueError("diagnostic observation stack was not restored")
+    return {"trace_sha256": PROFILE.digest(path), "events": len(events),
+            "incomplete_tail_ignored": incomplete_tail,
+            "normal_exit_recorded": bool(exits),
+            "observation_limited": any(row.get("kind") == "observation_limit" for row in events),
+            "declaration_tables": tables, "admissions": admissions,
+            "first_none_returns": [row for row in events if row.get("kind") == "first_none_return"],
+            "confirmed_v1_fallback_entries": [
+                row for row in events if row.get("kind") == "whole_v1_fallback_enter"],
+            "admission_results": [row for row in events if row.get("kind") == "admission_result"],
+            "first_none_is_not_automatically_a_causal_fallback": True,
+            "instrumented_timing_is_not_a_performance_comparison": True}
+
+
 def normalized(text: str) -> str:
     return re.sub(r"\s+", "", text)
 
 
-def instrument(kernel: pathlib.Path, destination: pathlib.Path, source_sha: str) -> dict:
+def instrument(kernel: pathlib.Path, destination: pathlib.Path, source_sha: str,
+               runtime: str | None = None) -> dict:
     source = kernel.read_text(encoding="utf-8")
     if source.count("const __ps$implementations = new WeakMap();") != 1:
         raise ValueError("generated runtime identity is not unique")
@@ -171,7 +286,7 @@ def instrument(kernel: pathlib.Path, destination: pathlib.Path, source_sha: str)
         raise ValueError("generated trampoline differs from the reviewed exact runtime")
     origin = {"source_sha": source_sha, "kernel_sha256": PROFILE.digest(kernel),
               "original_runtime_sha256": hashlib.sha256(original.encode()).hexdigest()}
-    changed = INSTRUMENTED_RUNTIME.replace("__PSC1_ORIGIN__", json.dumps(origin, sort_keys=True))
+    changed = (runtime or INSTRUMENTED_RUNTIME).replace("__PSC1_ORIGIN__", json.dumps(origin, sort_keys=True))
     tail = re.sub(r"(?m)^//# sourceMappingURL=.*(?:\n|$)", "", source[end:])
     destination.write_text(source[:start] + changed + tail, encoding="utf-8")
     return dict(origin, instrumented_sha256=PROFILE.digest(destination),
@@ -238,8 +353,10 @@ def main() -> int:
     parser.add_argument("--kernel", type=pathlib.Path, required=True)
     parser.add_argument("--baseline-report", type=pathlib.Path, required=True)
     parser.add_argument("--out", type=pathlib.Path, required=True)
+    parser.add_argument("--source-sha", help="exact source commit built by the pinned workflow")
+    parser.add_argument("--declines-only", action="store_true")
     args = parser.parse_args()
-    source_sha = os.environ.get("GITHUB_SHA", "")
+    source_sha = args.source_sha or os.environ.get("GITHUB_SHA", "")
     if re.fullmatch(r"[0-9a-f]{40}", source_sha) is None:
         parser.error("GITHUB_SHA must name the exact Actions revision")
     node_name = shutil.which("node")
@@ -261,15 +378,25 @@ def main() -> int:
     corpus = {(label, name): original for label, name, original in ORACLE.read_archive(args.archive)}
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
+    selected_cases = (("good", "perf/repeated-subproblem.ndjson"),
+                      ("good", "perf/church-numerals.ndjson")) if args.declines_only else PROFILE.CASES
     records = []
     with tempfile.TemporaryDirectory(prefix="psc1-logical-profile-detached-") as tmp:
         detached = pathlib.Path(tmp)
         logical = detached / "kernel.logical.mjs"
-        receipt = instrument(kernel, logical, source_sha)
+        receipt = instrument(kernel, logical, source_sha,
+                             decline_runtime() if args.declines_only else None)
+        receipt["observation_mode"] = "selected-operation-returns" if args.declines_only else "logical-stacks"
+        if args.declines_only:
+            receipt["observer_sha256"] = PROFILE.digest(HERE / "pskernel-arena435-decline-observer.mjs")
         shutil.copyfile(logical, out / "kernel.logical.mjs")
         runner = detached / "pskernel-arena-replay.mjs"
         controls = detached / "pskernel-arena-replay-controls.mjs"
-        shutil.copyfile(HERE / runner.name, runner)
+        if args.declines_only:
+            receipt["replay_observation"] = instrument_replay(HERE / runner.name, runner)
+            shutil.copyfile(runner, out / "replay.decline.mjs")
+        else:
+            shutil.copyfile(HERE / runner.name, runner)
         shutil.copyfile(HERE / controls.name, controls)
         syntax = PROFILE.invoke_bounded([str(node), "--check", str(logical)], detached,
             out / "syntax.stdout.txt", out / "syntax.stderr.txt", 30, True)
@@ -282,8 +409,20 @@ def main() -> int:
         if (control["returncode"] != 0 or control["timed_out"]
                 or "PSC1_ARENA_REPLAY_CONTROLS: PASS" not in control_out.read_text()):
             raise ValueError("instrumented detached positive/adversarial controls failed")
-        control_trace = trace_summary(out / "controls.logical.jsonl")
-        for index, identity in enumerate(PROFILE.CASES):
+        summarize = decline_summary if args.declines_only else trace_summary
+        control_trace = summarize(out / "controls.logical.jsonl")
+        if not control_trace["normal_exit_recorded"]:
+            raise ValueError("instrumented controls omitted normal observation exit")
+        if args.declines_only:
+            if any(row.get("declaration", {}).get("unmapped")
+                   for row in control_trace["admissions"]):
+                raise ValueError("instrumented controls have unmapped admissions")
+            if not control_trace["confirmed_v1_fallback_entries"]:
+                raise ValueError("instrumented controls omitted actual V1 fallback")
+            if not any(row.get("operation") == "psKernelDagTryAdmitSimpleWithFuel"
+                       for row in control_trace["first_none_returns"]):
+                raise ValueError("instrumented controls omitted simple-admission decline")
+        for index, identity in enumerate(selected_cases):
             label, name = identity
             previous = baseline_cases[identity]
             directory = out / f"case-{index:02d}-{pathlib.PurePosixPath(name).stem}"
@@ -300,10 +439,10 @@ def main() -> int:
                 detached, stdout, stderr, trace, PROFILE.WALL_SECONDS)
             outcome = PROFILE.profiled_outcome(measurement, stdout.read_text(), stderr.read_text(),
                                                PROFILE.digest(case))
-            summary = trace_summary(trace)
+            summary = decline_summary(trace, PROFILE.digest(case)) if args.declines_only else trace_summary(trace)
             classification = COMPARE.classify(previous["official"], outcome)
             normal = previous["unprofiled"]
-            assessed = normal["verdict"] != "timeout" and outcome["verdict"] != "timeout"
+            assessed = normal["verdict"] in ("accepted", "rejected") and outcome["verdict"] in ("accepted", "rejected")
             stable = normal["verdict"] == outcome["verdict"] if assessed else None
             record = {"index": index, "label": label, "name": name, "adaptation": adaptation,
                       "official": previous["official"], "unprofiled": normal,
@@ -312,27 +451,44 @@ def main() -> int:
                       "kernel_qualified": False}
             records.append(record)
             (directory / "report.json").write_text(json.dumps(record, indent=2) + "\n")
-            print("PSC1_ARENA_LOGICAL_PROFILE " + json.dumps({
-                "source_sha": source_sha, "name": name,
-                "body_sha256": adaptation["original_body_sha256"],
-                "unprofiled": normal["verdict"], "logical": outcome["verdict"],
-                "samples": summary["samples"], "observed_steps": summary["observed_steps"],
-                "maximum_observed_logical_depth": summary["maximum_observed_logical_depth"],
-                "nearest": summary["nearest_named_frame_samples"],
-                "inclusive": summary["inclusive_named_frame_samples"],
-                "kernel_qualified": False}), flush=True)
-            for sample in summary["sampled_stacks"]:
-                print("PSC1_ARENA_LOGICAL_STACK " + json.dumps({
-                    "name": name, "steps": sample["steps"],
-                    "elapsed_ms_since_import": sample["elapsed_ms_since_import"],
-                    "depth": sample["logical_depth"], "truncated": sample["truncated"],
-                    "frames": sample["nearest_named_frames_first"],
+            if args.declines_only:
+                print("PSC1_ARENA_DECLINE_PROFILE " + json.dumps({
+                    "source_sha": source_sha, "name": name,
+                    "body_sha256": adaptation["original_body_sha256"],
+                    "unprofiled": normal["verdict"], "observed": outcome["verdict"],
+                    "completed_outcome_agreement": stable,
+                    "observation_limited": summary["observation_limited"],
+                    "declaration_table": summary["declaration_tables"][0],
+                    "first_none_return_count": len(summary["first_none_returns"]),
+                    "first_none_returns_printed": summary["first_none_returns"][:32],
+                    "confirmed_v1_fallback_entries": summary["confirmed_v1_fallback_entries"],
+                    "trace_sha256": summary["trace_sha256"], "kernel_qualified": False}), flush=True)
+            else:
+                print("PSC1_ARENA_LOGICAL_PROFILE " + json.dumps({
+                    "source_sha": source_sha, "name": name,
+                    "body_sha256": adaptation["original_body_sha256"],
+                    "unprofiled": normal["verdict"], "logical": outcome["verdict"],
+                    "samples": summary["samples"], "observed_steps": summary["observed_steps"],
+                    "maximum_observed_logical_depth": summary["maximum_observed_logical_depth"],
+                    "nearest": summary["nearest_named_frame_samples"],
+                    "inclusive": summary["inclusive_named_frame_samples"],
                     "kernel_qualified": False}), flush=True)
-    complete = (len(records) == len(PROFILE.CASES) and all(
+                for sample in summary["sampled_stacks"]:
+                    print("PSC1_ARENA_LOGICAL_STACK " + json.dumps({
+                        "name": name, "steps": sample["steps"],
+                        "elapsed_ms_since_import": sample["elapsed_ms_since_import"],
+                        "depth": sample["logical_depth"], "truncated": sample["truncated"],
+                        "frames": sample["nearest_named_frames_first"],
+                        "kernel_qualified": False}), flush=True)
+    complete = (len(records) == len(selected_cases) and all(
         row["logical"]["verdict"] != "driver_error"
         and row["classification"] not in ("false_accept", "false_reject")
         and row["completed_outcome_agreement"] is not False for row in records))
-    report = {"format": "psc1-authentic-arena-logical-diagnostics-v1", "source_sha": source_sha,
+    report = {"format": "psc1-authentic-arena-decline-diagnostics-v1" if args.declines_only
+              else "psc1-authentic-arena-logical-diagnostics-v1", "source_sha": source_sha,
+              "workflow_source_sha": os.environ.get("GITHUB_SHA", ""),
+              "selected_cases": selected_cases,
+              "case_selection": "diagnostic subset; independent full 193-case qualification is separate",
               "instrumentation": receipt, "baseline_report_sha256": PROFILE.digest(baseline_path),
               "driver_sha256": PROFILE.digest(pathlib.Path(__file__)),
               "replay_sha256": PROFILE.digest(HERE / "pskernel-arena-replay.mjs"),
@@ -344,9 +500,12 @@ def main() -> int:
               "limitations": [
                   "The instrumented copy is diagnostic only and is never the qualified artifact.",
                   "Trace steps count trampoline resumes, not kernel fuel or instructions.",
-                  "Anonymous frames are omitted; named ancestors are bounded and may be truncated.",
-                  "Synchronous non-generator code is not sampled inside a trampoline resume.",
-                  "Frame frequencies are sampled observations, not complete operation costs.",
+                  ("Only selected Option(Except ...) workers and admission boundaries are observed; absence of an event is not proof of no decline."
+                   if args.declines_only else "Anonymous frames are omitted; named ancestors are bounded and may be truncated."),
+                  ("The first observed none is attribution, not automatic proof of the causal fallback; whole V1 admission is recorded separately."
+                   if args.declines_only else "Synchronous non-generator code is not sampled inside a trampoline resume."),
+                  ("Forwarded curried functions retain the innermost recorded identity; limits can truncate observation."
+                   if args.declines_only else "Frame frequencies are sampled observations, not complete operation costs."),
                   "Tracing adds CPU, memory and synchronous IO; its timing cannot measure speedup.",
                   "The original source map does not describe the instrumented copy.",
                   "SIGKILL may omit the final trace sample or incomplete last line."]}
@@ -354,7 +513,8 @@ def main() -> int:
     manifest = [{"path": str(path.relative_to(out)), "sha256": PROFILE.digest(path)}
                 for path in sorted(out.rglob("*")) if path.is_file() and path.name != "sha256.json"]
     (out / "sha256.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    print("PSC1_ARENA_LOGICAL_COLLECTION: " + ("COMPLETE" if complete else "INCOMPLETE")
+    print(("PSC1_ARENA_DECLINE_COLLECTION: " if args.declines_only else "PSC1_ARENA_LOGICAL_COLLECTION: ")
+          + ("COMPLETE" if complete else "INCOMPLETE")
           + " cases=" + str(len(records)) + " kernel_qualified=false", flush=True)
     return 0 if complete else 1
 

@@ -1,0 +1,281 @@
+{
+  "schema": "pskernel-source-qualification-v1",
+  "source": "5deaf5880c83a76290520fa1176982dab0bf87a5",
+  "observedAtUtc": "2026-10-21 17:10:45 UTC",
+  "scope": "independent scoped developer provider, V1 default; exact unary-cache index migration",
+  "statuses": {
+    "native": "PASS",
+    "portableSource": "PASS",
+    "canonicalPs": "PASS",
+    "generatedLeanJs": "PASS",
+    "generatedPsJs": "PASS",
+    "provider": "PASS",
+    "localProofs": "PASS",
+    "research": "PASS",
+    "fullV2": "NOT ACHIEVED",
+    "fullArena": "FAIL",
+    "performance": "MEASURED; regressions remain; causal before/after experiment pending"
+  },
+  "runs": {
+    "integration": {
+      "id": 39631703411,
+      "jobs": [
+        119331328218,
+        119331328863
+      ],
+      "conclusion": "success"
+    },
+    "correctness": {
+      "id": 39631703432,
+      "jobs": [
+        119331329422,
+        119331329085
+      ],
+      "conclusion": "success"
+    },
+    "research": {
+      "id": 39631703492,
+      "jobs": [
+        119331329450,
+        119331329823,
+        119331329898,
+        119331329908,
+        119331330037,
+        119331330153
+      ],
+      "conclusion": "success"
+    },
+    "arena": {
+      "id": 39631703412,
+      "jobs": [
+        119331328319,
+        119337935941
+      ],
+      "conclusion": "failure"
+    }
+  },
+  "controls": {
+    "rawComparisons": 1024,
+    "adversarial": 7,
+    "snapshots": 2,
+    "realPositive": 9,
+    "realNegative": 1,
+    "indexedCaches": 5,
+    "entriesPerRealCache": 9,
+    "resourceRows": 36,
+    "guardOrderRows": 16,
+    "scopeRows": 5,
+    "callbackOwnerRows": 10,
+    "localProofs": 17,
+    "generatedAssertionsEach": 3418,
+    "nativeProviderProtocol": 24,
+    "officialProviderCases": 5,
+    "generatedProviderProtocolEach": 24,
+    "generatedProviderApiEach": 8
+  },
+  "sourceClosure": {
+    "portableModules": 183,
+    "roots": 2,
+    "canonicalModules": 140,
+    "canonicalSha256": "3c8c3424ba9b52f14c71132c7be97bb9dcd6ca3c3e0dcaca5e770007dd51e6e6"
+  },
+  "artifacts": [
+    {
+      "id": 12364250685,
+      "run": 39631703411,
+      "name": "psc1-v2-dag-generated-js",
+      "bytes": 3416741,
+      "zipSha256": "347d02515c408e825bd13790e265e13663f150e9ab4c64b01107d77b37b0fb01",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39631703411/artifacts/12364250685"
+    },
+    {
+      "id": 12360815656,
+      "run": 39631703411,
+      "name": "psc1-v2-dag-native",
+      "bytes": 33170778,
+      "zipSha256": "0d6963e167c6d4ed259fb9186e40eb8cf23fc99ad4b755238f2d048ea5bd2b20",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39631703411/artifacts/12360815656"
+    },
+    {
+      "id": 12364892440,
+      "run": 39631703432,
+      "name": "psc1-canonical-kernel-qualification",
+      "bytes": 1910075,
+      "zipSha256": "5282600e7ca10d457ec25c2fb52e3feb3af93c375ab40014de9177e710bbd476",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39631703432/artifacts/12364892440"
+    }
+  ],
+  "manifests": {
+    "native": {
+      "schema": "pskernel-core-artifacts-v1",
+      "repository": "dwijayuda/pskernel",
+      "sourceSha": "5deaf5880c83a76290520fa1176982dab0bf87a5",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/5deaf5880c83a76290520fa1176982dab0bf87a5",
+      "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39631703411",
+      "runAttempt": "1",
+      "kind": "native",
+      "leanToolchain": "leanprover/lean4:v4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "typescript": null,
+      "node": "v22.23.3",
+      "checkerFuelDefault": 4096,
+      "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+      "files": [
+        {
+          "path": ".lake/build/bin/psc1_kernel_provider",
+          "bytes": 119515624,
+          "sha256": "e11ae0d9ec43eb75f4302997e66decccafb0e785cc57e42daa07d73c1e208c3c"
+        },
+        {
+          "path": "host/kernel-provider/KernelProviderMain.lean",
+          "bytes": 15915,
+          "sha256": "4904143dbcbbda5d277f51950abb16e075f34194c3f0d53b2a00f2f80db9839c"
+        },
+        {
+          "path": "dist/expr-v2/native-provider-linux.tar.gz",
+          "bytes": 33255185,
+          "sha256": "928b889050c2111af912b61adba7aa963f88d8a79037f094d150b0bbed68c4ed"
+        }
+      ]
+    },
+    "generated": {
+      "schema": "pskernel-core-artifacts-v1",
+      "repository": "dwijayuda/pskernel",
+      "sourceSha": "5deaf5880c83a76290520fa1176982dab0bf87a5",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/5deaf5880c83a76290520fa1176982dab0bf87a5",
+      "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39631703411",
+      "runAttempt": "1",
+      "kind": "lean-generated-js",
+      "leanToolchain": "leanprover/lean4:v4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "typescript": "7.0.2",
+      "node": "v22.23.3",
+      "checkerFuelDefault": 4096,
+      "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+      "files": [
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js",
+          "bytes": 9903773,
+          "sha256": "fad819da8477cf225c608ab928baddb8f91aa3ce7d133edf08942262bcc9ac93"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.ts",
+          "bytes": 9080059,
+          "sha256": "48ed79162d03fe9cd326f667269665e701f39913071f54aaa024b786420df8ac"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+          "bytes": 363303,
+          "sha256": "b0028b87baab6f218229ba0b5f24ac7e6d947bf4b4ee8f6b517a44343fb3b8ea"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js.map",
+          "bytes": 8048732,
+          "sha256": "518e2aaab9bc82960e150c0527ff590d769e4f289a3e9e762c918a4b01ed22d7"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+          "bytes": 12759,
+          "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+          "bytes": 5462,
+          "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/package.json",
+          "bytes": 42,
+          "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/README.md",
+          "bytes": 11813,
+          "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+        }
+      ]
+    },
+    "canonical": {
+      "schema": "pskernel-core-artifacts-v1",
+      "repository": "dwijayuda/pskernel",
+      "sourceSha": "5deaf5880c83a76290520fa1176982dab0bf87a5",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/5deaf5880c83a76290520fa1176982dab0bf87a5",
+      "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39631703432",
+      "runAttempt": "1",
+      "kind": "canonical-ps-generated-js",
+      "leanToolchain": "leanprover/lean4:v4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "typescript": "7.0.2",
+      "node": "v22.23.3",
+      "checkerFuelDefault": 4096,
+      "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+      "files": [
+        {
+          "path": "dist/pskernel-selfhost/provider/pskernel-core.js",
+          "bytes": 9903780,
+          "sha256": "ccc199330e44cda4208618acf5d7d7846792bc8316384bdafb8c5fa6da767ab9"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/pskernel-core.ts",
+          "bytes": 9080059,
+          "sha256": "48ed79162d03fe9cd326f667269665e701f39913071f54aaa024b786420df8ac"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/pskernel-core.d.ts",
+          "bytes": 363303,
+          "sha256": "b0028b87baab6f218229ba0b5f24ac7e6d947bf4b4ee8f6b517a44343fb3b8ea"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/pskernel-core.js.map",
+          "bytes": 8048746,
+          "sha256": "be3497d41509f83be5193b21bd429044fcf9b478703432d0819c07ed074f951b"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/scripts/pskernel-canonical-provider.mjs",
+          "bytes": 12759,
+          "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/npm-runtime/canonical-admissions-wire.mjs",
+          "bytes": 5462,
+          "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/package.json",
+          "bytes": 42,
+          "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/canonical-source.tar.gz",
+          "bytes": 118301,
+          "sha256": "74574243bfd19b850842674dc6da98eb41a105d420ddb5c4c37f41bae3801edd"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/README.md",
+          "bytes": 11813,
+          "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+        }
+      ]
+    }
+  },
+  "arena": {
+    "total": 193,
+    "matched": 175,
+    "matchedAcceptance": 108,
+    "matchedKernelRejection": 59,
+    "matchedMetadataRejection": 1,
+    "matchedTransportRejection": 7,
+    "separateSafetyAgreements": 2,
+    "timeouts": 14,
+    "resourceExhausted": 1,
+    "unsupported": 1
+  },
+  "limitations": [
+    "No child source inherits these statuses.",
+    "V1 remains default/reference; four whole-operation fallbacks remain.",
+    "Same-run DAG/V1 benchmarks include regressions; unrelated-run timing does not establish cache-index causality.",
+    "V8 old-space2048MiB is not an OS RSS cap.",
+    "No global soundness or full-kernel DirectJS claim.",
+    "Integration cheapRec-cache and occurrence corrections are separate and must be preserved in a combined source."
+  ]
+}

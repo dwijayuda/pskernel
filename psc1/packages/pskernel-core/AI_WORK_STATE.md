@@ -1,3 +1,88 @@
+# Current continuation — qualify exact radix workers after complete indexed-cache gates
+
+Observed: 2026-10-21 17:11:33 UTC
+Branch: `research/psc1-pskernel-v2-cache-20261021`
+Status: **IN PROGRESS; explicit radix-worker successor is NOT RUN at commit time.**
+
+## Independently qualified predecessor
+
+Exact `5deaf5880c83a76290520fa1176982dab0bf87a5` is terminal PASS on:
+integration[39631703411](https://github.com/dwijayuda/pskernel/actions/runs/39631703411)
+(native119331328218/generated119331328863);
+correctness[39631703432](https://github.com/dwijayuda/pskernel/actions/runs/39631703432)
+(native119331329422/canonical119331329085);
+and all6 research[39631703492](https://github.com/dwijayuda/pskernel/actions/runs/39631703492) jobs.
+The authentic portable closure has183modules across2roots;140canonical modules
+were reconstructed, checked and compiled. Both generated routes passed3418
+indexed-cache assertions, all retained controls and24provider protocol+8API
+cases with PATH empty. Native official9positive/1negative, all17local index
+equations and the existing trust audit passed. Exact source/artifact/manifest
+receipts are in[2026-10-21-cache5de-qualified.json](evidence/2026-10-21-cache5de-qualified.json).
+The canonical closure SHA256 is
+`3c8c3424ba9b52f14c71132c7be97bb9dcd6ca3c3e0dcaca5e770007dd51e6e6`.
+
+Full Arena remains FAIL at that same source:
+[39631703412](https://github.com/dwijayuda/pskernel/actions/runs/39631703412)
+contains all193 original cases:108accepted matches,59kernel-rejection matches,
+1metadata rejection,7transport rejections,2separate safety-contract agreements,
+14hosttimeouts,1fuel exhaustion and1unsupported case. Official122accepted/
+71rejected, zero timeouts. Full per-case records and18diagnostics are preserved
+in[20261021-5deaf588-arena.json](evidence/20261021-5deaf588-arena.json).
+The equivalent generated code atbe45 had the same totals; neither its old
+native failure nor current full-C failure is overwritten by the scoped passes.
+
+## Bounded successor implementation
+
+The immutable cache index retains its exact16-bit route, complete Nat hash,
+small-cache promotion threshold, original exact scanner, newest-first records,
+arbitrary malformed-index behavior and operation-owned state. Two recursive
+workers now receive all actual arguments before descending. Public entry
+points retain an outer match and their original generated curried ABI.
+Internal fixed16-level operations use the explicit workers.
+
+Eight new arbitrary-input equations compare workers and public partial
+applications against frozen5de functions. All17old theorem statements remain
+byte-for-byte, for25mandatory axiom reports. Native fixtures retain every old
+assertion and add384lookups/1152updates across6depths and8index shapes.
+Both authentic generated routes additionally require492returned-function
+partials and1536reused executions, checked against an independent iterative
+descriptor model. The fixture preserves exact duplicates, full large hashes,
+malformed inputs, immutable snapshots and unrelated branches.
+No unsafe/extern/intrinsic, runtime axiom, changed fuel placement or acceptance
+shortcut was added. Source review is complete; dynamic qualification of this
+successor is **NOT RUN**, and no predecessor result is inherited.
+
+## Performance and remaining work
+
+All128public-operation and24complete-admission measurements from exact5de are
+retained in[20261021-cache5de-generated-public.json](benchmarks/20261021-cache5de-generated-public.json).
+These are same-run V1/DAG measurements, not a causal old/new index comparison.
+For example, warm32-binder admission is still slower in the DAG path
+(about643.647ms/batch versus239.441ms V1). Construction and retained memory
+remain separate observations. Do not call this a whole-kernel speedup.
+The authenticated paired old/new experiment[39639125591](https://github.com/dwijayuda/pskernel/actions/runs/39639125591)
+is still under review. Radix workers target measured closure overhead, but
+their effect is unmeasured until the actual generated experiment finishes.
+
+Integration now has the bounded occurrence-fixture repair at
+`33466d0b516df9d0496d181dd1c4b619b9954c7c`, under fresh CI.
+Its cheapRec isolation and safe occurrence guard must be retained when merging.
+Qualified group89 is recorded separately with its failed193-case receipt.
+The new Quot owner and name workers are still under qualification.
+Four whole-operation fallbacks and wider DAG-native ownership/admission work
+remain. V1 stays default/reference; full-kernel DirectJS is unsupported.
+Scoped developer-provider A, complete-V2 B and full-conformance C are distinct.
+
+The authentic Church stage receipt pins historical369bee and identifies the
+first failed theorem-admission stage as type-defeq at unchanged4096fuel,
+matching unmodified V1 admission. It does not identify an inner rule or prove
+an optimization. All original bodies, budgets and failed-result distinctions
+remain intact. No local builds or publication were performed.
+
+---
+
+## Preserved previous cache work state (verbatim)
+
 # Current continuation — explicit cache publication proof cases (2026-10-21 16:05 UTC)
 
 Cache source `8059d09e288538f505051438f0917e03759323f7` compiled and passed its new native suite:1024raw comparisons,7adversarial rows,2immutable snapshots,9real valid definitions and1invalid definition including official Lean controls, all5caches promoted to9entries,36V1 resource comparisons,16guard-order cases,5scope controls and10callback-owner cases. Existing native regressions, detached24-case provider and native benchmark also passed at that source.

@@ -104,3 +104,16 @@ them. PSKernel-Core Expression V2 research stays independent. Official Lean
 4.35.0 admission is pinned at eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
 Strict original/transformed/target IR, ordinary pairing, security/resource limits
 and all regression/negative tests remain required.
+
+## Compiler-like first Linux diagnosis
+
+Head 5893484fca3c01266a973c5739a827436deb4c83, run 39659059072, passes
+static and native. Focused job 119427257285 refuses MiniCompiler/Syntax.lean at
+53:5 before executing any application case. Native inline else-if chains were
+anchored at the later if column, allowing their final else to be stolen by an
+enclosing conditional. The parser now carries the original chain layout owner
+through a structurally bounded helper and closes only the chain, preserving
+following statements, source spans and the strict PS brace grammar. New native
+execution/roundtrip/refusal cases cover all eight nested branch combinations,
+a braced chain and its continuation. The authored application stays unchanged.
+This fix and the application remain unqualified pending fresh Linux gates.

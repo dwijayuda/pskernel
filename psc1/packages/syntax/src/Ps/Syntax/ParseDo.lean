@@ -441,62 +441,105 @@ def psParseDoBranch
         else parseBody false first.span.start.column cursor
   else Except.error (psParseDoExpected "{" cursor)
 
+-- An inline native else-if chain inherits the original conditional's layout
+-- owner. Parsing it as an ordinary branch instead anchors the child at its
+-- later "if" column and can give its final else to an enclosing conditional.
+-- Only the chain is recursive here: following statements remain outside it.
+-- Source spans, the ordinary branch grammar and PS brace policy are unchanged.
+def psParseDoConditionalWithFuel
+    (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
+    (parseBody : Bool -> Nat -> PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat) :
+    Nat -> Bool -> PsTokenCursor ->
+    Except PsParseError (PsParseResult PsParseDoHead) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_ownerColumn : Nat) (_native : Bool) (_cursor : PsTokenCursor) =>
+        Except.error PsParseError.fuelExhausted
+  | Nat.succ remaining =>
+      fun (ownerColumn : Nat) (native : Bool) (cursor : PsTokenCursor) =>
+        let smaller := psParseDoConditionalWithFuel parseTerm parseBody remaining;
+        match psTokenCursorExpectText cursor "if" with
+        | Except.error error => Except.error error
+        | Except.ok keyword =>
+            let condition : Except PsParseError (PsParseResult PsSyntaxTerm) :=
+              if native then
+                match parseTerm keyword.cursor with
+                | Except.error error => Except.error error
+                | Except.ok value =>
+                    match psTokenCursorExpectText value.cursor "then" with
+                    | Except.error error => Except.error error
+                    | Except.ok separator => Except.ok (PsParseResult.mk value.value separator.cursor)
+              else
+                match psTokenCursorExpectText keyword.cursor "(" with
+                | Except.error error => Except.error error
+                | Except.ok opening =>
+                    match parseTerm opening.cursor with
+                    | Except.error error => Except.error error
+                    | Except.ok value =>
+                        match psTokenCursorExpectText value.cursor ")" with
+                        | Except.error error => Except.error error
+                        | Except.ok closing => Except.ok (PsParseResult.mk value.value closing.cursor);
+            match condition with
+            | Except.error error => Except.error error
+            | Except.ok condition =>
+                match psParseDoBranch parseBody native condition.cursor with
+                | Except.error error => Except.error error
+                | Except.ok thenBody =>
+                    let hasElse : Bool :=
+                      if psTokenCursorAtText thenBody.cursor "else" then
+                        if native then
+                          match psTokenCursorPeek thenBody.cursor with
+                          | Option.none => false
+                          | Option.some token =>
+                              Nat.ble ownerColumn token.span.start.column
+                        else true
+                      else false;
+                    let elseBody : Except PsParseError (PsParseResult PsSyntaxTerm) :=
+                      if hasElse then
+                        match psTokenCursorAdvance thenBody.cursor with
+                        | Option.none => Except.error (PsParseError.unexpectedEnd "else branch")
+                        | Option.some elseKeyword =>
+                            let inlineIf : Bool :=
+                              if native && psTokenCursorAtText elseKeyword.cursor "if" then
+                                match psTokenCursorPeek elseKeyword.cursor with
+                                | Option.none => false
+                                | Option.some first =>
+                                    Nat.beq elseKeyword.token.span.start.line first.span.start.line
+                              else false;
+                            if inlineIf then
+                              match smaller ownerColumn native elseKeyword.cursor with
+                              | Except.error error => Except.error error
+                              | Except.ok nested =>
+                                  match psParseDoCloseHead nested.value Option.none with
+                                  | Except.error error => Except.error error
+                                  | Except.ok value =>
+                                      Except.ok (PsParseResult.mk value nested.cursor)
+                            else psParseDoBranch parseBody native elseKeyword.cursor
+                      else Except.ok (PsParseResult.mk
+                        (PsSyntaxTerm.doEndE (psSyntaxTermSpan thenBody.value)) thenBody.cursor);
+                    match elseBody with
+                    | Except.error error => Except.error error
+                    | Except.ok elseBody =>
+                        Except.ok (PsParseResult.mk
+                          (PsParseDoHead.conditional condition.value thenBody.value elseBody.value
+                            { start := keyword.token.span.start,
+                              stop := (psParseDoTermStop elseBody.value) }) elseBody.cursor)
+      
+
 def psParseDoConditional
     (parseTerm : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
     (parseBody : Bool -> Nat -> PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
     (native : Bool) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsParseDoHead) :=
-  match psTokenCursorExpectText cursor "if" with
-  | Except.error error => Except.error error
-  | Except.ok keyword =>
-      let condition : Except PsParseError (PsParseResult PsSyntaxTerm) :=
-        if native then
-          match parseTerm keyword.cursor with
-          | Except.error error => Except.error error
-          | Except.ok value =>
-              match psTokenCursorExpectText value.cursor "then" with
-              | Except.error error => Except.error error
-              | Except.ok separator => Except.ok (PsParseResult.mk value.value separator.cursor)
-        else
-          match psTokenCursorExpectText keyword.cursor "(" with
-          | Except.error error => Except.error error
-          | Except.ok opening =>
-              match parseTerm opening.cursor with
-              | Except.error error => Except.error error
-              | Except.ok value =>
-                  match psTokenCursorExpectText value.cursor ")" with
-                  | Except.error error => Except.error error
-                  | Except.ok closing => Except.ok (PsParseResult.mk value.value closing.cursor);
-      match condition with
-      | Except.error error => Except.error error
-      | Except.ok condition =>
-          match psParseDoBranch parseBody native condition.cursor with
-          | Except.error error => Except.error error
-          | Except.ok thenBody =>
-              let hasElse : Bool :=
-                if psTokenCursorAtText thenBody.cursor "else" then
-                  if native then
-                    match psTokenCursorPeek thenBody.cursor with
-                    | Option.none => false
-                    | Option.some token =>
-                        Nat.ble keyword.token.span.start.column token.span.start.column
-                  else true
-                else false;
-              let elseBody : Except PsParseError (PsParseResult PsSyntaxTerm) :=
-                if hasElse then
-                  match psTokenCursorAdvance thenBody.cursor with
-                  | Option.none => Except.error (PsParseError.unexpectedEnd "else branch")
-                  | Option.some keyword => psParseDoBranch parseBody native keyword.cursor
-                else Except.ok (PsParseResult.mk
-                  (PsSyntaxTerm.doEndE (psSyntaxTermSpan thenBody.value)) thenBody.cursor);
-              match elseBody with
-              | Except.error error => Except.error error
-              | Except.ok elseBody =>
-                  Except.ok (PsParseResult.mk
-                    (PsParseDoHead.conditional condition.value thenBody.value elseBody.value
-                      { start := keyword.token.span.start,
-                        stop := (psParseDoTermStop elseBody.value) }) elseBody.cursor)
+  match psTokenCursorPeek cursor with
+  | Option.none => Except.error (PsParseError.unexpectedEnd "if")
+  | Option.some first =>
+      psParseDoConditionalWithFuel parseTerm parseBody
+        (Nat.succ (psParseListLength cursor.remaining))
+        first.span.start.column native cursor
 
 
 -- A procedural header ends at an outer delimiter. This prevents the PS body

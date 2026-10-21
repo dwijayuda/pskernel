@@ -613,12 +613,25 @@ private def testLegacyDo : IO Unit := do
     (match wrongConversion with | .error _ => true | .ok _ => false)
   pure ()
 
+private def testInlineElseIf (natType : PsExpr) : IO Unit := do
+  let nested := "def select (outer first second : Bool) : Id Nat := do\n  let mut value : Nat := 0\n  if outer then\n    if first then value := 1\n    else if second then value := 2\n    else value := 3\n  else value := 4\n  value := value + 10\n  return value\ndef result : Nat :=\n  select false false false + select false false true +\n  select false true false + select false true true +\n  select true false false + select true false true +\n  select true true false + select true true true\n"
+  checkExecutedSource "native inline else-if keeps nested layout owner and continuation"
+    .lean nested natType (PsExpr.lit (PsLiteral.natural 103))
+  roundTrip "inline else-if translates to owned PS branches"
+    .lean .proofScript nested
+  checkExecutedSource "braced native else-if retains following statement outside chain"
+    .lean "def result : Id Nat := do {\n  let mut value : Nat := 0;\n  if false then { value := 1 }\n  else if false then { value := 2 }\n  else if true then { value := 3 }\n  else { value := 4 };\n  value := value + 10;\n  return value\n}\n" natType (PsExpr.lit (PsLiteral.natural 13))
+  reject "PS else still requires an owned brace"
+    .proofScript
+    "def result : Id(Nat) := do { if (true) { return 1 } else if (false) { return 2 } else { return 3 } }\n"
+
 def main : IO Unit := do
   let natType := PsExpr.constE psNatName []
   let groups : List (String × IO Unit) := [
     ("legacy", testLegacyDo),
     ("CompilerM", testCompilerM natType),
     ("control-flow", testControlFlow natType),
+    ("inline-else-if", testInlineElseIf natType),
     ("finite-loops", testFiniteLoops natType),
     ("contextual-pure", testContextualPure natType)]
   let mut failures : List String := []

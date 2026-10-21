@@ -1,3 +1,28 @@
+## Current execution update — 2026-10-21 19:41:30 UTC
+
+The current integration source adds checked Quot owner installation from exact
+`df4d1751f4166ed8c9a28ac151d1ab77c94cbfe7`, whose native/generated integration,
+canonical correctness and all6 research jobs passed. Containing-commit CI is
+**NOT RUN at creation**; fetch its exact terminal jobs. Exact deb18b9 qualification
+is also complete. Both sources' full193 Arena remain FAIL:173 matches
+(105 admitted,60 kernel rejections,1 metadata rejection,7 transport rejections),
+2 safety-contract differences,17 host timeouts and1 fixed-fuel exhaustion.
+
+Eager initial-owner7e is semantically qualified but **held out of integration**:
+the authenticated32-worker/384-call experiment measured up to61.06× warm
+slowdown at128 prior owners. See [the measured hold](INITIAL_OWNER_PERFORMANCE_HOLD.md)
+and the latest [work state](../AI_WORK_STATE.md) for exact receipts and the
+replacement task. Avoid whole-environment import for each query. Indexed cache384
+also remains held; the optional backend saturation experiment has no performance
+qualification. Direct DAG Quot admission remains in development.
+
+A is qualified only at its named exact source revisions; B/C/D remain open.
+Retain V1 default/reference, unchanged4096fuel and all trust/ordering guards.
+The following earlier plan and receipts remain historical context, superseded by
+this update where their pending status or next-step recommendations differ.
+
+---
+
 # Ready-to-copy continuation prompt — finish combined qualification, then T03b
 
 Continue authorized PSKernel-Core implementation in `dwijayuda/pskernel` on

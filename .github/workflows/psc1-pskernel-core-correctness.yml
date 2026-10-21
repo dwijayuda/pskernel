@@ -42,6 +42,9 @@ on:
       - psc1/scripts/pskernel-expr-v2-recursor-smoke.mjs
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
       - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+      - psc1/test/PsKernelExprV2QuotOwnerRegression.lean
+      - psc1/test/PsKernelExprV2QuotOwnerProofs.lean
+      - psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs
       - psc1/test/PsKernelNameWorkerRegression.lean
       - psc1/test/PsKernelNameWorkerProofs.lean
       - psc1/scripts/pskernel-name-worker-smoke.mjs
@@ -471,6 +474,18 @@ jobs:
           grep -Fqx 'PSC1_NAME_WORKER_ABI_PASS rawPartials=4 namePartials=1 executions=7' "$RUNNER_TEMP/psc1-name-worker-canonical.log"
           grep -Fqx 'PSC1_NAME_WORKER_CHECKING_PASS declarations=10 checked=10 normalized=10 negatives=4 official=native-gate' "$RUNNER_TEMP/psc1-name-worker-canonical.log"
           grep -Eq '^PSC1_NAME_WORKER_PASS assertions=[1-9][0-9]*$' "$RUNNER_TEMP/psc1-name-worker-canonical.log"
+      - name: Check canonical-source Quot owners and actual admissions in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          test -s "$PSC1_PS_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-quot-owner-smoke.mjs "$PSC1_PS_RUN_DIR/quot-owner-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" quot-owner-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-quot-owner-canonical.log"
+          grep -Eq '^PSC1_V2_QUOT_OWNER_JS_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 independentPositive=10 independentNegative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-quot-owner-canonical.log"
       - name: Check complete canonical-source DAG checker state in detached Node
         working-directory: psc1
         shell: bash
@@ -550,6 +565,7 @@ jobs:
             ${{ runner.temp }}/psc1-quot-canonical.log
             ${{ runner.temp }}/psc1-recursor-canonical.log
             ${{ runner.temp }}/psc1-generated-prefix-canonical.log
+            ${{ runner.temp }}/psc1-quot-owner-canonical.log
             ${{ runner.temp }}/psc1-name-worker-canonical.log
             ${{ runner.temp }}/psc1-recursor-k-canonical.log
             ${{ runner.temp }}/psc1-owned-state-canonical.log

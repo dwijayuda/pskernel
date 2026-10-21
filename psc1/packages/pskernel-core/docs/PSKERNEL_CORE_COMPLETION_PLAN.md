@@ -1,3 +1,28 @@
+## Current execution update — 2026-10-21 19:41:30 UTC
+
+The current integration source adds checked Quot owner installation from exact
+`df4d1751f4166ed8c9a28ac151d1ab77c94cbfe7`, whose native/generated integration,
+canonical correctness and all6 research jobs passed. Containing-commit CI is
+**NOT RUN at creation**; fetch its exact terminal jobs. Exact deb18b9 qualification
+is also complete. Both sources' full193 Arena remain FAIL:173 matches
+(105 admitted,60 kernel rejections,1 metadata rejection,7 transport rejections),
+2 safety-contract differences,17 host timeouts and1 fixed-fuel exhaustion.
+
+Eager initial-owner7e is semantically qualified but **held out of integration**:
+the authenticated32-worker/384-call experiment measured up to61.06× warm
+slowdown at128 prior owners. See [the measured hold](INITIAL_OWNER_PERFORMANCE_HOLD.md)
+and the latest [work state](../AI_WORK_STATE.md) for exact receipts and the
+replacement task. Avoid whole-environment import for each query. Indexed cache384
+also remains held; the optional backend saturation experiment has no performance
+qualification. Direct DAG Quot admission remains in development.
+
+A is qualified only at its named exact source revisions; B/C/D remain open.
+Retain V1 default/reference, unchanged4096fuel and all trust/ordering guards.
+The following earlier plan and receipts remain historical context, superseded by
+this update where their pending status or next-step recommendations differ.
+
+---
+
 # PSKernel-Core completion plan — Lean 4.35.0
 
 Execution receipt: **2026-10-21T18:48:58Z**. T03a and the retained bounded corrections are qualified for scoped A at exact `7b14affc854e7bc99e4778ac155ae805dd273226`: integration39645765038, correctness39645764867 and all six research39645765012 jobs PASS. Original034 qualification is terminal and remains failed because of native fixture elaboration; its corrected334 successor is preserved separately. See [T03a source-bound receipt](../evidence/2026-10-22-t03a-terminal-qualification.json), the current matrix and newest work state. A later documentation-only HEAD does not change this exact qualified source. Full Arena C remains FAIL: 173 matches / 2 safety agreements / 17 timeouts / 1 resource exhaustion / 0 unsupported, and performance/release D remains open. The immediate next task is completing the existing exact `deb18b9c87a5d21a406c6e5b852afb4d44785fe5` combined-source qualification; the next implementation task is **T03b preexisting-session ownership**.

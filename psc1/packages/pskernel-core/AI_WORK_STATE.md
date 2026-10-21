@@ -1,3 +1,117 @@
+# Current integration — qualified Quot ownership; hold eager initial loading
+
+Updated: 2026-10-21 19:41:30 UTC.
+Branch: `integration/psc1-pskernel-expr-v2-lean435-20261021`.
+Fresh integration parent: `b656ff78a03383cc33d5c2a1c14e3c13468810d2`.
+Merged qualified source: `df4d1751f4166ed8c9a28ac151d1ab77c94cbfe7`.
+Containing integration commit: **NOT RUN at creation; inspect its exact terminal
+Actions jobs before qualification.** The parents' PASS results are not inherited.
+
+## What changes in this integration
+
+Install private DAG declaration references for the four actual checked Quot
+constants after successful V1 Quot admission. Exact live kind, level parameters,
+decoded header and absent delta value guard idempotent owner reuse; mismatches
+are rebuilt from checked metadata. The old three-argument helper and the
+production previous/current-environment helper retain their interfaces. The
+already-qualified T03a final-prefix scanner, constructors/recursors, nested
+restored headers, Name workers and both frozen-parent defect reproducers remain.
+Native/official, canonical and generated owner tests plus21 local equations are
+wired into the required gates. This does not yet replace V1 Quot admission.
+
+The diff preserves all six files of concurrent documentation commit b656ff7,
+including both permanent334/T03a receipts. New exact-source terminal receipts,
+all193 case classifications and complete measurement observations are appended;
+historical pending/failure wording below is retained as history.
+
+## Exact-source evidence (terminal; source identities remain separate)
+
+| Source | Native | Portable Lean | Canonical .ps | Generated JS | Local proofs | Provider | Benchmark | Arena |
+|---|---|---|---|---|---|---|---|---|
+| deb18b9 | PASS | PASS | PASS | PASS | PASS | PASS | PASS collection, mixed performance | FAIL |
+| df4d175 | PASS | PASS | PASS | PASS | PASS | PASS | PASS collection, no causal speedup claim | FAIL |
+| 7e36b3b, separate candidate | PASS | PASS | PASS | PASS | PASS | PASS | FAIL promotion; paired collection PASS | FAIL |
+| containing integration | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+Exact deb18b9 integration39651609850, correctness39651609752 and all6
+research39651609561 jobs passed; profile collection39651610007 passed as a
+diagnostic, not kernel qualification. Exact df4d175 integration39655284633
+(native119413791099/generated119413791339), correctness39655284617
+(native119413788492/canonical119413788179) and all6 research39655284622 jobs
+passed. Both df4 generated routes passed1360 Quot-owner assertions and retained
+24 provider CLI/8 API checks in detached Node22 with PATH empty. Its21 local
+owner equations use only the permitted logical dependencies. Neither result is
+a global soundness or backend-preservation proof.
+
+Receipts:
+- [deb exact terminal evidence](evidence/2026-10-21-deb-terminal-qualification.json)
+- [df4 exact terminal evidence](evidence/2026-10-21-df4-terminal-qualification.json)
+- [7e exact terminal evidence, held](evidence/2026-10-21-initial-owner7e-terminal-qualification.json)
+- [all paired initial-owner observations](benchmarks/2026-10-21-initial-owner-paired.normalized.json)
+- [initial-owner performance decision](docs/INITIAL_OWNER_PERFORMANCE_HOLD.md)
+
+All three exact full Arena runs evaluated193 original authenticated bodies and
+failed qualification with the same classifications:173 matches (105 accepted,
+60 kernel rejections,1 metadata rejection,7 transport rejections),2 separate
+unsafe/partial safety-contract differences,17 host timeouts and1 Church
+fixed-fuel exhaustion. Official reference:122 accepted/71 rejected/0 timeouts.
+Do not call all173 matches admitted proofs. Zero-based timeout IDs:
+23,72,78,80,82,83,84,85,86,87,90,91,92,93,94,96,98. The kernel fuel remains4096,
+per-case wall deadline60seconds and historical host limit2048MiB V8 old-space,
+which is not an OS RSS cap. Historical metadata headers were adapted; bodies
+were authenticated, not freshly re-exported by native4.35.
+
+## Measured holds and actual next implementation
+
+**Do not integrate eager initial-session importer7e.** Its complete semantics,
+20 local equations,1515 generated assertions per route and provider gates are
+green. Paired run[39662962284/job119440477019](https://github.com/dwijayuda/pskernel/actions/runs/39662962284/job/119440477019)
+completed32 fresh ABBA workers and384 exact public calls. At128 prior owners,
+trivial checking regressed1.271395→77.633987ms warm mean (61.06×), owned-constant
+checking2.423566→87.061367ms (35.92×); peak RSS grew66,148/75,752KiB. All four
+queries at both32 and128 owners regressed. The next owner implementation must
+avoid importing unrelated declarations, keep exact live-index authority and
+original/private IDs, and repeat this complete-call experiment unchanged.
+The benchmark driver's exact source f84f344 is separately identified from the
+unmodified producer/kernel7e; the failed predecessor444 ran no measurement.
+
+Indexed cache384 also remains outside integration after the authenticated
+paired metadata-admission regressions (~23.2%/~22.6%). The optional compiler
+saturation experiment is isolated on research/psc1-ts-saturation-20261021.
+Focused exact2823173 run39663471492 passed native/model controls,16 local
+equations, authentic Lean and canonical .ps source compilation, actual radix
+worker specialization and8400 detached JavaScript assertions per route after
+the explicit fixture-type repair. Full-kernel qualification and paired performance
+remain NOT RUN. Default compiler emission, kernel resource policy and runtime
+trust boundary are unchanged. No speedup is claimed.
+
+Direct DAG Quot admission and the owned batch carrier are still being implemented
+on the carrier branch, with legacy API wrappers and theorem statements retained.
+The exact loose-occurrence helper is a separate unqualified draft; valid closed
+public bodies may already force looseRange≤1, so no reachable production fallback
+retirement is claimed from its adversarial raw cases. No unfinished agent draft
+is included here, and no work is claimed to continue after this chat ends.
+
+## Release boundaries and next gates
+
+Scoped independent developer-provider A is qualified at exact deb and df4,
+with real valid/invalid batches, genuine PSC1→TypeScript7.0.2 JavaScript,
+.d.ts/maps, full canonical closure and detached execution. The default provider
+and separately selectable reference remain V1. B (complete V2), C (full Arena)
+and D (performance/release) are open. Four whole-operation fallback families,
+eager input decode, recursive metadata import and global proof obligations
+remain; complete-kernel DirectJS is unsupported. No main merge or publication.
+
+Next executable action: inspect the containing integration's native, portable,
+canonical, generated, proof, provider, benchmark and all193 Arena runs to terminal.
+Fix actual blockers without weakening assertions. Continue demand-scoped initial
+ownership, direct DAG Quot admission and the measured backend allocation
+experiment on isolated source branches; promote only qualified, measured slices.
+
+---
+
+## Preserved integration history (verbatim)
+
 # Current handoff — T03a qualified; combined source qualification pending
 
 Observed: 2026-10-21T18:48:58Z / 2026-10-22 Asia/Jakarta.

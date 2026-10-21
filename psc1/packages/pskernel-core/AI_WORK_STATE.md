@@ -1,3 +1,17 @@
+# Current continuation — compare exact inferred types (2026-10-21 16:02 UTC)
+
+Carrier `6d012ad9655d6e91416c70ff49ded35421a6c59b` compiled successfully, executed the preserved old native controls, and passed all16 generated-owner local proof equations and the existing trust-dependency gate. Its new owner regression failed [job119324895874](https://github.com/dwijayuda/pskernel/actions/runs/39629866426/job/119324895874) at `mutual-left-base-owned-check-is-Nat`. V1 application inference returns the instantiated forall body without normalizing that result type: the genuine indexed mutual fixture returns a motive application definitionally equal to Nat. The fixture incorrectly required syntactic Nat.
+
+This checkpoint repairs both native and generated fixtures. Each of12 successful owned checks and12 public checked replies must now equal the exact V1 inferred type; a separate successful V1 DefEq judgment must establish Nat. Mandatory successful DAG `Some`, all216 check/216 WHNF/216 DefEq fixed-resource rows, the16positive/5negative official fixtures,13private-ID forms, real declaration admission, and all prior checks remain required. These added exact comparisons strengthen correspondence to the reference. Production source and kernel policy are unchanged. Classification: fixture expectation error, not an established checker semantic defect.
+
+**This corrective source is NOT RUN until its exact native, authentic portable/canonical and generated jobs finish.** Neither earlier failure is counted as qualification.
+
+Fresh complete Arena receipts for qualified `3aa077cb64ff06f76727decd01c43ad6c33f351d` and `f9e9b20f92ce2ffa4a666acaf55aa8852949f589` are committed with all193 cases and21 diagnostics each. Both failed full compatibility with105 accepted matches,59 kernel-refusal matches,1 metadata-refusal match,7 transport-refusal matches,2 separate safety agreements,17 host timeouts,1 fuel exhaustion and1 unsupported case. Official runs each recorded122accepted/71rejected with zero timeouts. Recorded complete-case artifact digests are included; no timeout is a parity pass.
+
+Indexed-cache `8059d09e288538f505051438f0917e03759323f7` remains independently under qualification after its isolated-library root repair. The same-batch Quot owner review object `38ab62936edc739ddfa31d693504eea094dd1d30` has source,20local equations and native fixtures, but is NOT RUN and not promoted; its generated mirror is being prepared. Active integration remains qualified3aa. GatesB andC remain open.
+
+---
+
 # Current continuation — group fixture elaboration repair (2026-10-21 15:54 UTC)
 
 The active integration branch remains at `3aa077cb64ff06f76727decd01c43ad6c33f351d`, with terminal PASS native, generated, canonical and research gates. Full Arena run [39622318341](https://github.com/dwijayuda/pskernel/actions/runs/39622318341) is terminal FAIL; its full per-case receipt is being read and must not be inferred from earlier revisions.

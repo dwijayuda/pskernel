@@ -476,8 +476,12 @@ private def differentialRegression (families : Families) (input : Inputs)
     let checked ← match psKernelExprV2TryCheckStateWithFuel 4096 context (checkState generated) fixture.root with
       | some result => expect result
       | none => throw (IO.userError ("missing complete owned check: " ++ fixture.label))
-    require (fixture.label ++ "-owned-check-is-Nat")
-      (psKernelExprEq (← decode checked.fst.whnf.arena checked.snd) nat)
+    let reference ← expect (psKernelSessionCheck 4096 base fixture.expr)
+    let inferredType ← decode checked.fst.whnf.arena checked.snd
+    require (fixture.label ++ "-owned-check-matches-V1")
+      (psKernelExprEqual inferredType reference.fst)
+    let typeEqual ← expect (psKernelSessionIsDefEq 4096 reference.snd inferredType nat)
+    require (fixture.label ++ "-owned-check-is-Nat") typeEqual.fst
     let reduced ← match psKernelExprV2TryWhnfCheckStateWithFuel 4096 context (checkState generated) fixture.root with
       | some result => expect result
       | none => throw (IO.userError ("missing complete owned WHNF: " ++ fixture.label))
@@ -502,6 +506,7 @@ private def sameRejection {α β : Type} (label : String)
 
 private def publicRegression (families : Families) (input : Inputs)
     (generated : PsKernelDagGeneratedState) : IO Unit := do
+  let base := psKernelKernelSessionChecker families.prepared.session [] .safe
   let mut queries := []
   for fixture in input.cases do
     queries := queries ++ [.check fixture.root,.whnf fixture.root,
@@ -512,8 +517,12 @@ private def publicRegression (families : Families) (input : Inputs)
   for fixture in input.cases do
     match answers with
     | .checked checked :: .normalized reduced :: .equal equal :: rest =>
+        let reference ← expect (psKernelSessionCheck 4096 base fixture.expr)
         require (fixture.label ++ "-public-check")
-          (psKernelExprEq checked.type nat && psKernelExprEqual checked.expression fixture.expr)
+          (psKernelExprEqual checked.type reference.fst &&
+            psKernelExprEqual checked.expression fixture.expr)
+        let typeEqual ← expect (psKernelSessionIsDefEq 4096 reference.snd checked.type nat)
+        require (fixture.label ++ "-public-check-is-Nat") typeEqual.fst
         require (fixture.label ++ "-public-WHNF") (psKernelExprEq reduced fixture.expected)
         require (fixture.label ++ "-public-DefEq") equal
         answers := rest

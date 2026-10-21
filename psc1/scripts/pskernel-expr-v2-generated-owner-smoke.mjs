@@ -273,7 +273,12 @@ for(const [label,term,expected] of fixtures){
  }
  const c=checkContext(base.context);
  const checked=accepted(accepted(check(4096n,c,state(),term.id),label+"-complete-owned-check-Some"),label+"-complete-owned-check");
- must(exprEq(decoded(checked.fst.whnf.arena,checked.snd),nat.term),label+"-owned-check-is-Nat");
+ const reference=accepted(get("psKernelSessionCheck")(4096n,base,term.term),label+"-complete-reference-check");
+ const inferredType=decoded(checked.fst.whnf.arena,checked.snd);
+ must(exact(inferredType,reference.fst),label+"-owned-check-matches-V1");
+ const typeEqual=accepted(get("psKernelSessionIsDefEq")(4096n,reference.snd,inferredType,nat.term),
+  label+"-owned-type-reference-DefEq");
+ must(typeEqual.fst===true,label+"-owned-check-is-Nat");
  const reduced=accepted(accepted(whnf(4096n,c,state(),term.id),label+"-complete-owned-WHNF-Some"),label+"-complete-owned-WHNF");
  must(exprEq(decoded(reduced.fst.whnf.arena,reduced.snd),expected.term),label+"-owned-WHNF-value");
  const equal=accepted(accepted(defeq(4096n,c,state(),term.id,expected.id),label+"-complete-owned-DefEq-Some"),
@@ -288,8 +293,12 @@ const replies=array(result.replies).slice(commands.length);
 must(replies.length===36&&query.length===36,"exact-public-36-reply-protocol");
 fixtures.forEach(([label,term,expected],i)=>{
  const checked=replies[i*3],reduced=replies[i*3+1],equal=replies[i*3+2];
- must(same(checked,Reply.checked(checked.value))&&exprEq(checked.value.type,nat.term)&&
+ const reference=accepted(get("psKernelSessionCheck")(4096n,base,term.term),label+"-public-reference-check");
+ must(same(checked,Reply.checked(checked.value))&&exact(checked.value.type,reference.fst)&&
   exact(checked.value.expression,term.term),label+"-public-check");
+ const typeEqual=accepted(get("psKernelSessionIsDefEq")(4096n,reference.snd,checked.value.type,nat.term),
+  label+"-public-type-reference-DefEq");
+ must(typeEqual.fst===true,label+"-public-check-is-Nat");
  must(same(reduced,Reply.normalized(reduced.value))&&exprEq(reduced.value,expected.term),label+"-public-WHNF");
  must(same(equal,Reply.equal(true)),label+"-public-DefEq");
 });

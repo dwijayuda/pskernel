@@ -73,6 +73,18 @@ lane, requiring duplicateDeclaration:Nat and preserving previous publication.
 The checked native CompilerM reference and parity-contract rejection tests pass
 in that run; target programs have not passed yet. Continue actual reached failures.
 
+## Explicit multi-export Bool components — pending Linux qualification
+
+The owned component schema/encoder already supports multiple concrete Bool
+exports, but the host CLI only exposed one. Add --exports comma-separated names
+to select an exact finite entry-owned set. Keep --export and no-selection
+refusals. Host rejects empty/duplicate/non-entry selections before publication;
+the existing strict input/core/signature/WIT checks and external validators
+remain. Retain exact selected provenance and atomically publish the whole set.
+CompilerM observation wrappers use lowercase WIT-compatible names and each is
+invoked independently on components too; malformed selection attempts preserve
+the previously published bundle. No aggregate ABI or host capability claim.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

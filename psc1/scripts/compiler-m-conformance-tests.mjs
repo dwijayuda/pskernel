@@ -110,12 +110,12 @@ try {
   const definitions=contract.cases.map((c,i)=>{
    const no=oracle[c.id+'False'],yes=oracle[c.id+'True'];
    assert.match(no,/^\d+$/);assert.match(yes,/^\d+$/);
-   const name='check'+c.id;
+   const name='check'+c.id.toLowerCase();
    return syntax==='lean'?
     'def '+name+' (flag : Bool) : Bool := Nat.beq ('+c.id+' flag) (if flag then '+yes+' else '+no+')\n':
     'def '+name+'(flag : Bool) : Bool := Nat.beq('+c.id+'(flag), if (flag) { '+yes+' } else { '+no+' })\n';
   });
-  const exports=contract.cases.map(c=>'check'+c.id);
+  const exports=contract.cases.map(c=>'check'+c.id.toLowerCase());
   names.splice(0,names.length,...exports,'semantic');
   const combine=exports.map(name=>syntax==='lean'?'('+name+' flag)':'('+name+'(flag))').join(' && ');
   write(path.join(folder,'Entry.'+syntax),'import CompilerMFixtures\n'+definitions.join('\n')+
@@ -132,6 +132,7 @@ try {
    const label=syntax+'-'+target,extension={js:'js',ts:'ts',rust:'rs','wasm-core':'wasm','wasm-component':'wasm',python:'py',php:'php'}[target];
    const output=path.join(work,label,'module.'+extension);
    const args=['build',path.join(folder,'Entry.'+syntax),'--target',target,'--out',output];
+   if(target==='wasm-component')args.push('--exports',names.join(','));
    try{
     run(native,args);
     const manifest=JSON.parse(read(output+'.bundle.json'));
@@ -146,6 +147,12 @@ try {
     }
     const duplicate=[...args];duplicate[1]=path.join(folder,'duplicate-prelude.'+syntax);
     refusals['duplicate-prelude']=reject(duplicate,/duplicateDeclaration:Nat/);
+    if(target==='wasm-component'){
+     for(const selection of [names[0]+','+names[0],'not-in-entry','']){
+      const malformed=[...args];malformed[malformed.length-1]=selection;
+      reject(malformed,/PSC1_COMPONENT_EXPORT/);
+     }
+    }
     assert.equal(hash(output+'.bundle.json'),before);
     assert.equal(fs.realpathSync(output+'.bundle.json'),published);
     const identity={syntax,target,passed:true,admission:'independent-official-Lean',

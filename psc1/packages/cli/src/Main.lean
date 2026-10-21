@@ -8,6 +8,7 @@ def psCliUsage : String :=
   "usage:\n" ++
   "  Add --assurance ordinary for checked partial execution; --assurance verified is unavailable and rejects.\n" ++
   "  psc1 check <input.lean|input.ps>\n" ++
+  "  wasm-component: --export <name> or --exports <comma-separated-names>\n" ++
   "  psc1 build <input.lean|input.ps> --out <output.js|output.ts>\n" ++
   "  psc1 build <input.lean|input.ps> --target <js|ts|rust|wasm-core|python|php> --out <output>\n" ++
   "  psc1 build <input.lean|input.ps> --targets ts,js --out-dir <directory>\n" ++
@@ -79,6 +80,10 @@ private def psCliExecution
   | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSourceFor inputPath assurance)
   | ["build", inputPath, "--targets", targets, "--out-dir", outputDir] =>
       buildTargetsFor inputPath outputDir targets assurance
+  | ["build", inputPath, "--target", "wasm-component", "--exports", exportsText, "--out", outputPath]
+  | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--exports", exportsText] =>
+      psHostDirectEmitWasmComponents (← psHostDirectPrepareFor inputPath assurance)
+        (exportsText.splitOn ",") outputPath
   | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath]
   | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--export", exportName] =>
       psHostDirectEmitWasmComponent (← psHostDirectPrepareFor inputPath assurance) exportName outputPath
@@ -109,6 +114,10 @@ private def psCliCheckedExecution (args : List String) : IO Unit := do
       buildFor inputPath outputPath target .checked
   | ["build", inputPath, "--targets", targets, "--out-dir", outputDir] =>
       buildTargetsFor inputPath outputDir targets .checked
+  | ["build", inputPath, "--target", "wasm-component", "--exports", exportsText, "--out", outputPath]
+  | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--exports", exportsText] =>
+      psHostDirectEmitWasmComponents (← psHostDirectPrepareFor inputPath .checked)
+        (exportsText.splitOn ",") outputPath
   | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath]
   | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--export", exportName] =>
       psHostDirectWasmComponent inputPath exportName outputPath

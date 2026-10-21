@@ -31,6 +31,18 @@ if (mode !== "worker") {
           sample.checksum !== calls * count || sample.all_correct !== true ||
           sample.negative_type_mismatch !== true || sample.fuel !== 4096)
         throw Error("PSC1_ADMISSION_SAMPLE_INVALID");
+      const diagnostic = sample.direct_dag_admission_diagnostic;
+      if (variant === "dag") {
+        if (!diagnostic || diagnostic.positive_direct_attempts !== count ||
+            diagnostic.checked_original_id_entries !== count ||
+            diagnostic.exact_direct_type_mismatch !== true ||
+            diagnostic.dispatcher_environment_parity !== true ||
+            diagnostic.timed_path_instrumented !== false ||
+            sample.direct_dag_admission_path_measured !== false)
+          throw Error("PSC1_ADMISSION_DIRECT_DIAGNOSTIC_INVALID");
+      } else if (diagnostic !== null) {
+        throw Error("PSC1_ADMISSION_UNEXPECTED_LEGACY_DIAGNOSTIC");
+      }
       observations.push(sample);
       console.log(lines[0]);
     }
@@ -230,6 +242,66 @@ if (mode !== "worker") {
     validate(result, expected[slot]);
     return { admissionMs, assertionMs: performance.now() - assertionStart, checksum: count };
   }
+  // Untimed capability check, run only after all reported time/GC/RSS samples.
+  // Internal helpers receive the canonical arena/decoded correspondence established here.
+  // Publication and declaration ownership still advance through the real dispatcher.
+  function directAdmissionDiagnostic() {
+    const input = inputs[0];
+    const canonical = accepted(k.psKernelExprV2PagedValidate(input.arena), "direct-canonical");
+    const built = accepted(k.psKernelExprV2DecodeChecked(canonical), "direct-decode");
+    const initial = fresh();
+    let execution = { session: initial, declarations: nil };
+    const replies = [];
+    for (let i = 0; i < input.requests.length; i++) {
+      const request = input.requests[i];
+      const decoded = accepted(k.psKernelDagDecodeDeclaration(built, request), "direct-request");
+      const resources = execution.session.resources;
+      const attempt = k.psKernelDagTryAdmitSimpleWithFuel(
+        resources.fuel, k.psKernelKernelSessionEnvironment(execution.session),
+        resources.maxRecDepth, resources.maxNatSize,
+        canonical, execution.declarations, request, decoded);
+      const result = accepted(attempt, "direct-available-" + i);
+      const directEnvironment = accepted(result, "direct-success-" + i);
+      const advanced = accepted(k.psKernelDagRunCommand(
+        execution, nil, S.safe, canonical, built, C.admit(request)), "direct-dispatch-" + i);
+      const next = advanced.snd;
+      must(same(directEnvironment, next.session.environment), "direct-dispatch-environment-" + i);
+      const owned = array(next.declarations);
+      const spec = input.specs[i], latest = owned[0];
+      must(owned.length === i + 1 && latest !== undefined &&
+        nameEq(latest.name, spec.base.name) && same(latest.levelParams, nil) &&
+        latest.type === spec.base.type &&
+        accepted(latest.deltaValue, "direct-owned-body-" + i) === spec.value &&
+        same(latest.kind, k.PsKernelExprV2DeclarationRefKind.definitionDecl),
+        "direct-original-input-ownership-" + i);
+      replies.push(advanced.fst);
+      execution = next;
+    }
+    validate({ initial, session: execution.session, replies: list(replies), receipts: null },
+      expected[0]);
+    const badCanonical = accepted(k.psKernelExprV2PagedValidate(negative.arena), "direct-negative-canonical");
+    const badBuilt = accepted(k.psKernelExprV2DecodeChecked(badCanonical), "direct-negative-decode");
+    const badRequest = negative.requests[0];
+    const badDecoded = accepted(k.psKernelDagDecodeDeclaration(badBuilt, badRequest),
+      "direct-negative-request");
+    const badSession = fresh(), resources = badSession.resources;
+    const badAttempt = k.psKernelDagTryAdmitSimpleWithFuel(
+      resources.fuel, k.psKernelKernelSessionEnvironment(badSession),
+      resources.maxRecDepth, resources.maxNatSize,
+      badCanonical, nil, badRequest, badDecoded);
+    const badDirect = accepted(badAttempt, "direct-negative-available");
+    must(badDirect !== null && typeof badDirect === "object" &&
+      Object.hasOwn(badDirect, "error") && badDirect.error === "definition type mismatch" &&
+      k.psKernelEnvironmentSize(badSession.environment) === 0n,
+      "direct-negative-exact-error-no-publication");
+    return {
+      scope: "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+      positive_direct_attempts: count, checked_original_id_entries: count,
+      exact_direct_type_mismatch: true, dispatcher_environment_parity: true,
+      timed_path_instrumented: false
+    };
+  }
+
   const cold = perform(0);
   for (let i = 0; i < inputs.length; i++) perform(i);
   global.gc();
@@ -245,7 +317,9 @@ if (mode !== "worker") {
   const checkedWallMs = performance.now() - start;
   global.gc();
   const after = process.memoryUsage();
+  const measuredPeakRss = process.resourceUsage().maxRSS;
   must(checksum === calls * count, "all-batches-checked");
+  const directDiagnostic = variant === "dag" ? directAdmissionDiagnostic() : null;
   console.log("PSC1_ADMISSION_SAMPLE " + JSON.stringify({
     variant, shape, declarations_per_batch: count, calls, checksum,
     checked_declarations: calls * count, all_correct: true,
@@ -259,9 +333,10 @@ if (mode !== "worker") {
     input_construction_rss_delta_bytes: constructionAfter.rss - constructionBefore.rss,
     heap_before_bytes: before.heapUsed, heap_after_gc_bytes: after.heapUsed,
     retained_heap_delta_bytes: after.heapUsed - before.heapUsed,
-    peak_rss_kib: process.resourceUsage().maxRSS,
+    peak_rss_kib: measuredPeakRss,
     semantic_cache: "fresh session and checker state for every admitted batch",
     lifetime: "input pools retained; admitted environments discarded after exact assertions",
+    direct_dag_admission_diagnostic: directDiagnostic,
     direct_dag_admission_path_measured: false
   }));
 }

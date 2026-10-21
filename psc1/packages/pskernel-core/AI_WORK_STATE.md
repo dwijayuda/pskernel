@@ -29,7 +29,41 @@ behavior, or a complete DAG checker. Original default V1 remains qualified;
 the replacement still relies on full-operation fallback outside its migrated
 rules. No integration PR is merged.
 
-### Application conversion shares its owning DefEq state — awaiting CI
+### Direct simple declaration admission — awaiting qualification
+
+RunDag now attempts direct admission of axioms, safe/partial definitions and
+opaque declarations against the owning DAG. It shares one checker state
+between header checking, sort validation, body checking and final DefEq.
+Duplicate-name/universe guards, expression/level metavariables, free variables,
+undefined universes, safety modes and mismatch diagnostics retain the original
+ordering. Admission sort validation always executes WHNF. The final comparison
+keeps the returned successful-pair owner, including entries established by
+checked lets/applications. Environment publication and same-batch type/body
+index registration occur only after checking; declaration limits are checked
+at their existing point and native evaluator removal is preserved.
+
+Unsafe recursive definitions, theorems, mutual definitions and inductives
+remain whole-original-admission fallback. Unsupported descendants discard
+the attempted state and rerun complete original admission. Boundary static
+guards still inspect the once-decoded expression; no legacy input tree is
+reimported into the DAG during checking. Original default V1 is unchanged.
+
+Qualification adds26 declaration cases across416 fuel/depth combinations,
+four official Lean admission comparisons, exact environments/receipts/order/
+lookup correspondence, header/body sharing sentinels at fuel5 and depth16,
+safety/partial/opaque decisions, malformed-ID/duplicate/preflight precedence,
+failed publication, declaration-limit ordering and cold/warm terminal DefEq
+entry guards. Native, generated and detached canonical smoke are required.
+
+The existing24-observation complete-admission benchmark gains a separate
+untimed diagnostic after all reported timing/GC/RSS captures. It requires
+direct success for every corresponding input-slot-0 prefix, exact dispatcher
+environment parity, original input ID ownership, and a direct ill-typed
+definition rejection. Timed calls are not instrumented; the path-measured flag
+remains false. The3fb6 benchmark run is retained as the pre-admission baseline.
+No new numbers or source-closure counts are claimed before Actions reports them.
+
+### Application conversion shares its owning DefEq state — native qualified; generated CI pending
 
 Checked application now invokes the same captured-budget, scoped DefEq worker
 when inferred argument type and function domain are structurally different.
@@ -45,7 +79,12 @@ four fixtures are compared with official Lean. Separate controls check a
 let-primed pair, cold-versus-warm comparison budget, returned-state publication,
 syntax cache neutrality, all nine eager marker shapes, context preservation
 and invalid node IDs. The previous one-sided metadata conversion fallback
-remains explicitly tested. No new performance claim precedes passing Actions.
+remains explicitly tested. Native job119006670038 in
+[run39534122743](https://github.com/dwijayuda/pskernel/actions/runs/39534122743)
+passed at2be592e7e6af009869f437dcd88746ee448a69bc; the actual log contains all
+four new native/official markers and the original proof gates. Generated and
+canonical qualification remain pending. No new performance claim precedes
+passing Actions.
 
 ### Checked lets and scope-owned DefEq pairs — native qualified; generated CI pending
 
@@ -717,7 +756,7 @@ not general production performance acceptance.
 | Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
 | WHNF | Function normalization, separate core/public caches, Nat, constructor projection and same-batch delta | Native parity and boundary gates pass at c9868 | Independent generated and canonical executable gates pass at c9868 | Controlled checked-WHNF gains; mixed memory and fallback regressions | Partial; local-value slice awaiting CI; recursor/iota/String migration open |
 | Inference and DefEq | DAG Sort/FVar/literal/metadata/binders, structural-type App, owning constants and projections; checked lets and scope-owned quick DefEq pairs added | Qualified through projections at c9868; let/cache parity pending | Qualified c9868 closure; new native/generated/canonical let gates pending |128 guarded ABBA observations; checked-zeta regression unresolved until new measurements | Partial; general DefEq and inferOnly open; let slice awaits CI |
-| Inductive admission | Direct DAG request ingress and owning ordinary/mutual type IDs after complete original admission | All ordinary/mutual index and admission gates pass | Same-batch owning types and dependent projection gates pass | Full direct-admission comparison pending | Admission logic not migrated internally |
+| Declaration admission | Direct simple axiom/safe-partial definition/opaque path added; ordinary/mutual input type IDs retained after original admission | Prior complete admission passes; new416-case/official/shared-state gates pending | New direct helper and standalone/canonical smoke pending |24 matched observations plus untimed direct capability diagnostic pending | Partial; theorem/unsafe-recursive/mutual/inductive migration open |
 | Canonical self-hosting | Complete production import closure derived from manifest | Pinned Lean build passes at c9868 |112 canonical modules /1,353 declarations; authentic PSC1, TS7.0.2, declarations/maps and detached JS pass | Generator/runtime costs measured; six profiles pass | Current partial integration qualified; DirectJS unsupported |
 | Lean Arena | Complete193 corpus; all-list transport and nested outcomes repaired | Official122 accept /71 reject | c9868:166 matches,25 host timeouts,2 safety agreements;135 controls; all193 recorded | Every timeout reached RunDag entry; internal hotspot unresolved | **BLOCKED:25 host timeouts; no exclusions** |
 | Formal invariants | Composite metadata, scope/cache guards, budget cap, five numeral recurrences and exact constant-rule factorization | Native proof gates pass at c9868 with approved logical axioms | Proofs intentionally outside portable executable closure | No formal allocation bound | Global DAG/substitution/DefEq/admission soundness remains open |

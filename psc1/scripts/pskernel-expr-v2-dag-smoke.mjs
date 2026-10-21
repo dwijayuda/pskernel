@@ -458,7 +458,7 @@ console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG checked binders, lets, admitted constants, applications with quick conversion and projections; typed local-value WHNF and scope-owned quick DefEq pairs; general DefEq, external types, iota and admission fallback remain; incomplete"
+  checker_representation:"DAG checked binders, lets, admitted constants, applications with quick conversion and projections; typed local-value WHNF and scope-owned quick DefEq pairs; direct simple axiom/definition/opaque admission; general DefEq, external types, iota and remaining admission fallback remain; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");
 }
@@ -2526,6 +2526,331 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     }
   }
   console.log("PSC1_V2_DAG_JS_APP_EAGER_CONTEXT: PASS");
+}
+
+{
+  const H=get("PsKernelReducibilityHints"),Reply=get("PsKernelDagReply"),
+    Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  const declName=name("AdmissionCase"),u=name("admission-u"),x=name("admission-x");
+  let graph=empty;
+  const put=(kind,...args)=>{const r=mk(graph,kind,...args);graph=r.fst;return r.snd;};
+  const base=(params,type)=>({name:declName,levelParams:list(params),type});
+  const s0=put("Sort",L.zero),s1=put("Sort",L.succ(L.zero)),
+    equivalentS1=put("Sort",L.max(L.succ(L.zero),L.succ(L.zero))),
+    su=put("Sort",L.param(u)),sm=put("Sort",L.mvar(u)),mv=put("MVar",u),fv=put("FVar",u),
+    b0=put("BVar",0n),bothBad=put("App",mv,fv),
+    unknown=put("Const",name("admission-unknown"),nil),
+    identity=put("Lam",x,s1,b0,B.default),identityType=put("Forall",x,s1,s1,B.default),
+    hiddenS1=put("MData",901n,s1),b1=put("BVar",1n),
+    proofTailType=put("Forall",x,b0,b1,B.default),proofTail=put("Lam",x,b0,b0,B.default),
+    proofType=put("Forall",u,s0,proofTailType,B.default),proof=put("Lam",u,s0,proofTail,B.default);
+  const defn=(type,value,safety)=>D.definitionDecl({base:base([],type),value,
+    hints:H.regular(7n),safety});
+  const cases=[
+    ["axiom-safe",D.axiomDecl(base([],s1),false),true],
+    ["axiom-unsafe",D.axiomDecl(base([],s1),true),true],
+    ["definition-safe",defn(s1,s0,S.safe),true],
+    ["definition-partial",defn(s1,s0,S.partialDef),true],
+    ["opaque-safe",D.opaqueDecl(base([],s1),s0,false),true],
+    ["opaque-unsafe-annotation",D.opaqueDecl(base([],s1),s0,true),true],
+    ["definition-mismatch",defn(s1,s1,S.safe),true],
+    ["opaque-mismatch",D.opaqueDecl(base([],s1),s1,false),true],
+    ["universe-equivalence",defn(equivalentS1,s0,S.safe),true],
+    ["lambda-body",defn(identityType,identity,S.safe),true],
+    ["polymorphic-header",D.axiomDecl(base([u],su),false),true],
+    ["header-mvar-before-fvar",D.axiomDecl(base([],bothBad),false),true],
+    ["header-level-mvar",D.axiomDecl(base([u],sm),false),true],
+    ["header-fvar",D.axiomDecl(base([],fv),false),true],
+    ["duplicate-universe-before-mvar",D.axiomDecl(base([u,u],mv),false),true],
+    ["undefined-universe-before-body-mvar",defn(su,mv,S.safe),true],
+    ["body-mvar-before-fvar",defn(s1,bothBad,S.safe),true],
+    ["body-fvar",defn(s1,fv,S.safe),true],
+    ["body-undefined-universe",defn(s1,su,S.safe),true],
+    ["header-loose-bvar",D.axiomDecl(base([],b0),false),true],
+    ["body-loose-bvar",defn(s1,b0,S.safe),true],
+    ["unknown-header",D.axiomDecl(base([],unknown),false),true],
+    ["header-not-sort",D.axiomDecl(base([],identity),false),true],
+    ["final-defeq-fallback",defn(hiddenS1,s0,S.safe),false],
+    ["unsafe-definition-fallback",defn(s1,s0,S.unsafeDef),false],
+    ["theorem-fallback",D.theoremDecl(base([],proofType),proof),false]
+  ];
+  const built=accepted(decode(graph),"admission-matrix-decode");
+  let comparisons=0;
+  for(const [label,request,directExpected] of cases){
+    const oldRequest=accepted(get("psKernelDagDecodeDeclaration")(built,request),
+      "admission-matrix-request-"+label);
+    for(const fuel of [0n,1n,2n,3n,4n,5n,8n,64n])for(const maxDepth of [0n,1n]){
+      const seed=session(fuel,maxDepth);
+      const direct=get("psKernelDagTryAdmitSimpleWithFuel")(
+        fuel,get("psKernelKernelSessionEnvironment")(seed),maxDepth,
+        seed.resources.maxNatSize,graph,nil,request,oldRequest);
+      const selected=!sameRuntimeValue(direct,none);
+      if(!selected)must(!directExpected,"admission-permitted-fallback-"+label);
+      else{
+        const attempted=accepted(direct,"admission-direct-some-"+label);
+        must(sameRuntimeValue(get("psKernelV1DispatchDeclaration")(seed,oldRequest),
+          get("psKernelV1EnvironmentOutcome")(attempted)),
+          "admission-raw-parity-"+label+"-"+fuel+"-"+maxDepth);
+      }
+      const original=get("psKernelV1AdmitDeclaration")(seed,oldRequest),
+        actual=run(seed,nil,S.safe,graph,list([C.admit(request)]));
+      if(rejected(original)||rejected(actual)){
+        must(rejected(original)&&rejected(actual)&&sameRuntimeValue(original.error,actual.error),
+          "admission-public-error-"+label+"-"+fuel+"-"+maxDepth);
+      }else{
+        const a=accepted(original,"admission-public-old"),b=accepted(actual,"admission-public-dag");
+        must(sameRuntimeValue(a.session,b.session)&&
+          sameRuntimeValue(b.replies,list([Reply.admitted(a.declaration.receipt)])),
+          "admission-public-result-"+label+"-"+fuel+"-"+maxDepth);
+        for(const info of array(b.session.environment.constants)){
+          const stored=accepted(get("psKernelEnvironmentFind")(
+            b.session.environment,get("psKernelConstantInfoName")(info)),"admission-index");
+          must(sameRuntimeValue(info,stored),"admission-list-index-correspondence-"+label);
+        }
+      }
+      if(fuel===64n)must(selected===directExpected,"admission-explicit-path-"+label);
+      comparisons++;
+    }
+  }
+  must(comparisons===416,"admission-matrix-count");
+  console.log("PSC1_V2_DAG_JS_SIMPLE_ADMISSION_MATRIX: PASS");
+}
+
+{
+  const H=get("PsKernelReducibilityHints"),CI=get("PsKernelConstantInfo");
+  for(const [layers,fuel,maxDepth,coldMessage] of [
+    [4,5n,0n,"kernel inference budget exhausted"],
+    [14,64n,1n,"deep recursion detected, use maxRecDepth to increase the limit"]
+  ]){
+    const seed=session(fuel,maxDepth),aName=name("AdmissionHeaderA"+layers),
+      dName=name("AdmissionHeaderD"+layers),xName=name("admission-header-x");
+    let graph=empty;
+    const put=(kind,...args)=>{const r=mk(graph,kind,...args);graph=r.fst;return r.snd;};
+    let typeRoot=put("Sort",L.succ(L.zero));
+    for(let tag=0;tag<layers;tag++)typeRoot=put("MData",BigInt(tag),typeRoot);
+    const b0=put("BVar",0n),fn=put("Lam",xName,typeRoot,b0,B.default),
+      aRoot=put("Const",aName,nil),bodyRoot=put("App",fn,aRoot);
+    const built=accepted(decode(graph),"admission-shared-decode");
+    const type=accepted(decoded(built,typeRoot),"admission-shared-type"),
+      body=accepted(decoded(built,bodyRoot),"admission-shared-body");
+    const aRequest=D.axiomDecl({name:aName,levelParams:nil,type:typeRoot},false);
+    const dRequest=D.definitionDecl({
+      base:{name:dName,levelParams:nil,type:typeRoot},value:bodyRoot,
+      hints:H.abbrevHint,safety:S.safe});
+    const admitted=accepted(get("psKernelDagRunCommand")(
+      {session:seed,declarations:nil},nil,S.safe,graph,built,C.admit(aRequest)),
+      "admission-shared-admit-axiom");
+    const owner=admitted.snd,checker=get("psKernelKernelSessionChecker")(owner.session,nil,S.safe);
+    const context=get("psKernelExprV2CheckContextEmpty")(checker.context);
+    const initial=get("psKernelExprV2CheckStateWithWhnf")(
+      get("psKernelExprV2CheckStateEmpty")(graph),
+      get("psKernelExprV2WhnfStateForDeclarations")(graph,owner.declarations));
+    const base={name:dName,levelParams:nil,type},
+      value={base,value:body,hints:H.abbrevHint,safety:S.safe};
+    const oldHeader=accepted(get("psKernelCheckConstantBaseWithSession")(
+      fuel,checker,base),"admission-shared-old-header");
+    const afterHeader=accepted(accepted(get("psKernelExprV2AdmissionCheckHeaderWithFuel")(
+      fuel,context,initial,base,typeRoot),"admission-shared-header-some"),
+      "admission-shared-header-ok");
+    const oldBody=accepted(get("psKernelCheckDefinitionBodyWithSession")(
+      fuel,oldHeader,value),"admission-shared-old-body");
+    const warmBody=accepted(get("psKernelExprV2AdmissionCheckBodyWithFuel")(
+      fuel,context,afterHeader,base,typeRoot,body,bodyRoot,"definition type mismatch"),
+      "admission-shared-body-some");
+    accepted(warmBody,"admission-shared-body-ok");
+    must(oldBody.state.nextFresh===1n,"admission-shared-header-fresh-counter-"+layers);
+    const coldLegacy=get("psKernelCheckDefinitionBodyWithSession")(fuel,checker,value),
+      coldDag=accepted(get("psKernelExprV2AdmissionCheckBodyWithFuel")(
+        fuel,context,initial,base,typeRoot,body,bodyRoot,"definition type mismatch"),
+        "admission-cold-body-some");
+    must(rejected(coldLegacy)&&rejected(coldDag)&&
+      coldLegacy.error===coldMessage&&coldDag.error===coldMessage,
+      "admission-fresh-body-would-change-resource-result-"+layers);
+    const request=accepted(get("psKernelDagDecodeDeclaration")(built,dRequest),
+      "admission-shared-request");
+    accepted(accepted(get("psKernelDagTryAdmitSimpleWithFuel")(
+      fuel,get("psKernelKernelSessionEnvironment")(owner.session),maxDepth,
+      owner.session.resources.maxNatSize,graph,owner.declarations,dRequest,request),
+      "admission-shared-selected"),"admission-shared-direct-ok");
+    const original=accepted(get("psKernelV1AdmitDeclaration")(owner.session,request),
+      "admission-shared-original");
+    const actual=accepted(run(seed,nil,S.safe,graph,list([C.admit(aRequest),C.admit(dRequest)])),
+      "admission-shared-public");
+    must(sameRuntimeValue(actual.session,original.session),
+      "admission-shared-public-complete-parity-"+layers);
+    const info=accepted(get("psKernelEnvironmentFind")(actual.session.environment,dName),
+      "admission-shared-info");
+    must(sameRuntimeValue(info,CI.defnInfo(value)),
+      "admission-shared-stored-definition-"+layers);
+    const replies=array(actual.replies),first=replies[0].receipt,second=replies[1].receipt;
+    must(replies.length===2&&first.declarationsBefore===0n&&first.declarationsAfter===1n&&
+      second.declarationsBefore===1n&&second.declarationsAfter===2n,
+      "admission-shared-ordered-receipts-"+layers);
+  }
+  console.log("PSC1_V2_DAG_JS_ADMISSION_SHARED_STATE: PASS");
+}
+
+{
+  const H=get("PsKernelReducibilityHints"),ErrorKind=get("PsKernelError"),
+    Resource=get("PsKernelResourceError"),Reply=get("PsKernelDagReply"),
+    Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  const seed=session(64n,1n),uName=name("AdmissionUnsafe"),pName=name("AdmissionPartial"),
+    aName=name("AdmissionSafetyTarget");
+  let graph=empty;
+  const put=(kind,...args)=>{const r=mk(graph,kind,...args);graph=r.fst;return r.snd;};
+  const s0=put("Sort",L.zero),s1=put("Sort",L.succ(L.zero)),
+    unsafeRoot=put("Const",uName,nil),partialRoot=put("Const",pName,nil),
+    mv=put("MVar",name("admission-policy-mvar"));
+  const built=accepted(decode(graph),"admission-policy-decode"),base=type=>({name:aName,levelParams:nil,type});
+  const unsafeRequest=D.axiomDecl({name:uName,levelParams:nil,type:s1},true),
+    partialRequest=D.definitionDecl({base:{name:pName,levelParams:nil,type:s1},
+      value:s0,hints:H.abbrevHint,safety:S.partialDef});
+  const first=accepted(get("psKernelDagRunCommand")(
+    {session:seed,declarations:nil},nil,S.safe,graph,built,C.admit(unsafeRequest)),"admission-policy-unsafe");
+  const owner=accepted(get("psKernelDagRunCommand")(
+    first.snd,nil,S.safe,graph,built,C.admit(partialRequest)),"admission-policy-partial").snd;
+  const defn=(value,safety)=>D.definitionDecl({base:base(s1),value,hints:H.abbrevHint,safety});
+  const compare=(old,actual,label)=>{
+    if(rejected(old)||rejected(actual)){
+      must(rejected(old)&&rejected(actual)&&sameRuntimeValue(old.error,actual.error),label);
+    }else{
+      const a=accepted(old,label+"-old"),b=accepted(actual,label+"-dag");
+      must(sameRuntimeValue(a.session,b.session)&&
+        sameRuntimeValue(b.replies,list([Reply.admitted(a.declaration.receipt)])),label);
+    }
+  };
+  for(const [label,request,acceptedExpected,directExpected] of [
+    ["unsafe-header-safe",D.axiomDecl(base(unsafeRoot),false),false,true],
+    ["unsafe-header-unsafe",D.axiomDecl(base(unsafeRoot),true),true,true],
+    ["partial-header-safe",D.axiomDecl(base(partialRoot),false),false,true],
+    ["partial-header-unsafe",D.axiomDecl(base(partialRoot),true),true,true],
+    ["unsafe-body-safe",defn(unsafeRoot,S.safe),false,true],
+    ["unsafe-body-partial",defn(unsafeRoot,S.partialDef),false,true],
+    ["partial-body-partial",defn(partialRoot,S.partialDef),false,true],
+    ["unsafe-body-opaque",D.opaqueDecl(base(s1),unsafeRoot,true),false,true],
+    ["unsafe-body-unsafe",defn(unsafeRoot,S.unsafeDef),true,false]
+  ]){
+    const declaration=accepted(get("psKernelDagDecodeDeclaration")(built,request),"admission-safety-request");
+    const attempted=get("psKernelDagTryAdmitSimpleWithFuel")(
+      64n,get("psKernelKernelSessionEnvironment")(owner.session),1n,owner.session.resources.maxNatSize,
+      graph,owner.declarations,request,declaration);
+    const selected=!sameRuntimeValue(attempted,none);
+    must(selected===directExpected,"admission-safety-path-"+label);
+    if(selected)must(!rejected(accepted(attempted,"admission-safety-some"))===acceptedExpected,
+      "admission-safety-direct-decision-"+label);
+    const original=get("psKernelV1AdmitDeclaration")(owner.session,declaration);
+    must(!rejected(original)===acceptedExpected,"admission-safety-original-decision-"+label);
+    compare(original,run(owner.session,nil,S.safe,graph,list([C.admit(request)])),
+      "admission-safety-public-parity-"+label);
+    const whole=run(seed,nil,S.safe,graph,
+      list([C.admit(unsafeRequest),C.admit(partialRequest),C.admit(request)]));
+    if(rejected(original)||rejected(whole)){
+      must(rejected(original)&&rejected(whole)&&sameRuntimeValue(original.error,whole.error),
+        "admission-safety-same-batch-error-"+label);
+    }else must(sameRuntimeValue(accepted(original,"admission-whole-old").session,
+      accepted(whole,"admission-whole-dag").session),"admission-safety-same-batch-result-"+label);
+  }
+  const duplicate=D.axiomDecl({name:uName,levelParams:list([aName,aName]),type:mv},false);
+  const duplicateDecl=accepted(get("psKernelDagDecodeDeclaration")(built,duplicate),"admission-duplicate-request");
+  const duplicateResult=get("psKernelDagAdmitDeclaration")(
+    owner.session,graph,owner.declarations,duplicate,duplicateDecl);
+  must(rejected(duplicateResult)&&sameRuntimeValue(duplicateResult.error,
+    ErrorKind.rejectedInvalid("already declared")),"admission-existing-name-before-static-errors");
+  const valid=defn(s0,S.safe),bad=defn(s1,S.safe),
+    limited={...owner.session,resources:{...owner.session.resources,maxDeclarations:2n}};
+  for(const request of [valid,bad]){
+    const declaration=accepted(get("psKernelDagDecodeDeclaration")(built,request),"admission-limit-request");
+    compare(get("psKernelV1AdmitDeclaration")(limited,declaration),
+      run(limited,nil,S.safe,graph,list([C.admit(request)])),"admission-limit-after-complete-check");
+  }
+  const validDecl=accepted(get("psKernelDagDecodeDeclaration")(built,valid),"admission-valid-request");
+  const limitedResult=get("psKernelDagAdmitDeclaration")(
+    limited,graph,owner.declarations,valid,validDecl);
+  must(rejected(limitedResult)&&sameRuntimeValue(limitedResult.error,
+    ErrorKind.resourceExhausted(Resource.declarationLimit,"declaration limit exceeded")),
+    "admission-limit-exact-outcome");
+  const malformed=D.axiomDecl({name:uName,levelParams:nil,type:graph.size},false),
+    decodeFailure=get("psKernelDagDecodeDeclaration")(built,malformed),
+    malformedResult=run(owner.session,nil,S.safe,graph,list([C.admit(malformed)]));
+  must(rejected(decodeFailure)&&rejected(malformedResult)&&sameRuntimeValue(
+    malformedResult.error,ErrorKind.rejectedInvalid(decodeFailure.error)),
+    "admission-malformed-id-before-duplicate-name");
+  const cancelled={...owner.session,resources:{...owner.session.resources,cancelled:true}};
+  const declined=run(cancelled,nil,S.safe,graph,list([C.admit(malformed)]));
+  must(rejected(declined)&&sameRuntimeValue(declined.error,
+    ErrorKind.resourceExhausted(Resource.cancelled,"resource policy declined operation before entry")),
+    "admission-preflight-before-malformed-id");
+  must(array(owner.declarations).length===2&&sameRuntimeValue(
+    get("psKernelExprV2DeclarationRefFind")(owner.declarations)(aName),none),
+    "admission-failure-does-not-publish-index");
+  must(sameRuntimeValue(get("psKernelEnvironmentFind")(owner.session.environment,aName),none),
+    "admission-failure-does-not-install-target");
+  console.log("PSC1_V2_DAG_JS_ADMISSION_POLICY_SAFETY: PASS");
+}
+
+{
+  const H=get("PsKernelReducibilityHints");
+  const seed=session(64n,1n),aName=name("AdmissionGuardA"),dName=name("AdmissionGuardD");
+  let graph=empty;
+  const put=(kind,...args)=>{const r=mk(graph,kind,...args);graph=r.fst;return r.snd;};
+  const s1=put("Sort",L.succ(L.zero)),leftType=put("MData",11n,s1),
+    rightType=put("MData",12n,s1),bodyRoot=put("Const",aName,nil);
+  const built=accepted(decode(graph),"admission-final-decode");
+  const request=D.axiomDecl({name:aName,levelParams:nil,type:leftType},false);
+  const owner=accepted(get("psKernelDagRunCommand")(
+    {session:seed,declarations:nil},nil,S.safe,graph,built,C.admit(request)),
+    "admission-final-axiom").snd;
+  const declaredType=accepted(decoded(built,rightType),"admission-final-type"),
+    body=accepted(decoded(built,bodyRoot),"admission-final-body"),
+    base={name:dName,levelParams:nil,type:declaredType},
+    value={base,value:body,hints:H.abbrevHint,safety:S.safe};
+  for(const [fuel,recDepth,expected] of [
+    [1n,0n,"kernel definitional equality budget exhausted"],
+    [64n,15n,"deep recursion detected, use maxRecDepth to increase the limit"],
+    [64n,14n,null]
+  ]){
+    const checker=get("psKernelKernelSessionChecker")(owner.session,nil,S.safe),
+      scalar={...checker.context,recDepth},
+      context=get("psKernelExprV2CheckContextEmpty")(scalar),
+      state=get("psKernelExprV2CheckStateWithWhnf")(
+        get("psKernelExprV2CheckStateEmpty")(graph),
+        get("psKernelExprV2WhnfStateForDeclarations")(graph,owner.declarations));
+    const legacy=get("psKernelCheckDefinitionBodyWithSession")(fuel,{...checker,context:scalar},value),
+      actual=accepted(get("psKernelExprV2AdmissionCheckBodyWithFuel")(
+        fuel,context,state,base,rightType,body,bodyRoot,"definition type mismatch"),
+        "admission-final-direct-some");
+    if(expected===null){
+      accepted(legacy,"admission-final-legacy-success");
+      accepted(actual,"admission-final-dag-success");
+    }else must(rejected(legacy)&&rejected(actual)&&legacy.error===expected&&actual.error===expected,
+      "admission-final-defeq-entry-guards-"+fuel+"-"+recDepth);
+  }
+  const checker=get("psKernelKernelSessionChecker")(owner.session,nil,S.safe),
+    legacy=get("psKernelSessionEnsureSort")(0n,checker,sort1),
+    actual=accepted(get("psKernelExprV2AdmissionEnsureSortWithFuel")(
+      0n,get("psKernelExprV2CheckContextEmpty")(checker.context),
+      get("psKernelExprV2CheckStateEmpty")(graph),s1),"admission-ensure-sort-zero-some");
+  must(rejected(legacy)&&rejected(actual)&&legacy.error===actual.error&&
+    legacy.error==="kernel reduction budget exhausted",
+    "admission-ensure-sort-always-enters-whnf-even-sort");
+  const leftExpression=accepted(decoded(built,leftType),"admission-final-warm-left"),
+    oldWarm=accepted(get("psKernelSessionIsDefEq")(
+      64n,checker,leftExpression,declaredType),"admission-final-old-warm"),
+    initial=get("psKernelExprV2CheckStateWithWhnf")(
+      get("psKernelExprV2CheckStateEmpty")(graph),
+      get("psKernelExprV2WhnfStateForDeclarations")(graph,owner.declarations)),
+    dagWarm=accepted(accepted(get("psKernelExprV2TryDefEqStateWithFuel")(64n)
+      (get("psKernelExprV2CheckContextEmpty")(checker.context))(initial)(leftType)(rightType),
+      "admission-final-dag-warm-some"),"admission-final-dag-warm");
+  must(oldWarm.fst===true&&dagWarm.snd===true,"admission-final-warm-pair-established");
+  const warmScalar={...checker.context,recDepth:15n};
+  accepted(get("psKernelCheckDefinitionBodyWithSession")(
+    64n,{...oldWarm.snd,context:warmScalar},value),"admission-final-old-retains-success");
+  accepted(accepted(get("psKernelExprV2AdmissionCheckBodyWithFuel")(
+    64n,get("psKernelExprV2CheckContextEmpty")(warmScalar),dagWarm.fst,
+    base,rightType,body,bodyRoot,"definition type mismatch"),
+    "admission-final-dag-retains-success-some"),"admission-final-dag-retains-success");
+  console.log("PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS");
 }
 
 reportDagSmoke();

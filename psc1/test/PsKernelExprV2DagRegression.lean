@@ -2735,6 +2735,427 @@ private def applicationEagerContextParity : IO Unit := do
          | .error _ => true | .ok _ => false)
   IO.println "PSC1_V2_DAG_APP_EAGER_CONTEXT: PASS"
 
+private def admissionInfoEqual (left right : PsKernelConstantInfo) : Bool :=
+  let a := psKernelConstantInfoBase left
+  let b := psKernelConstantInfoBase right
+  let baseEqual := psKernelNameEq a.name b.name &&
+    psKernelNameListsEq a.levelParams b.levelParams && psKernelExprEqual a.type b.type
+  baseEqual && match left, right with
+    | .axiomInfo x, .axiomInfo y => x.isUnsafe == y.isUnsafe
+    | .defnInfo x, .defnInfo y =>
+        psKernelExprEqual x.value y.value && psKernelSafetyEq x.safety y.safety &&
+          match x.hints, y.hints with
+          | .abbrevHint, .abbrevHint => true
+          | .opaqueHint, .opaqueHint => true
+          | .regular p, .regular q => p == q
+          | _, _ => false
+    | .thmInfo x, .thmInfo y => psKernelExprEqual x.value y.value
+    | .opaqueInfo x, .opaqueInfo y =>
+        psKernelExprEqual x.value y.value && x.isUnsafe == y.isUnsafe
+    | _, _ => false
+
+private def admissionEnvironmentEqual
+    (left right : PsKernelEnvironment) : Bool :=
+  left.quotInitialized == right.quotInitialized &&
+    left.constants.length == right.constants.length &&
+    (left.constants.zip right.constants).all (fun pair =>
+      admissionInfoEqual pair.1 pair.2 &&
+      match psKernelEnvironmentFind left (psKernelConstantInfoName pair.1),
+          psKernelEnvironmentFind right (psKernelConstantInfoName pair.2) with
+      | some a, some b => admissionInfoEqual a pair.1 && admissionInfoEqual b pair.2
+      | _, _ => false)
+
+private def admissionReceiptEqual
+    (left right : PsKernelCheckingReceipt) : Bool :=
+  left.target.contract == right.target.contract &&
+    left.target.leanVersion == right.target.leanVersion &&
+    left.target.leanCommit == right.target.leanCommit &&
+    left.declarationsBefore == right.declarationsBefore &&
+    left.declarationsAfter == right.declarationsAfter
+
+private def admissionPublicParity
+    (old : Except PsKernelError PsKernelAdmissionResult)
+    (actual : Except PsKernelError PsKernelDagBatchResult) : Bool :=
+  match old, actual with
+  | .error a, .error b => samePublicError a b
+  | .ok a, .ok b =>
+      admissionEnvironmentEqual a.session.environment b.session.environment &&
+        match b.replies with
+        | [.admitted receipt] => admissionReceiptEqual a.declaration.receipt receipt
+        | _ => false
+  | _, _ => false
+
+private def simpleAdmissionParity : IO Unit := do
+  let declName := nm "AdmissionCase"
+  let u := nm "admission-u"
+  let x := nm "admission-x"
+  let base := fun (params : List PsKernelName) (type : Nat) =>
+    PsKernelDagConstantBase.mk declName params type
+  let (arena, s0) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let (arena, s1) ← expect (psKernelExprV2PagedMkSort arena (.succ .zero))
+  let (arena, equivalentS1) ← expect
+    (psKernelExprV2PagedMkSort arena (.max (.succ .zero) (.succ .zero)))
+  let (arena, su) ← expect (psKernelExprV2PagedMkSort arena (.param u))
+  let (arena, sm) ← expect (psKernelExprV2PagedMkSort arena (.mvar u))
+  let (arena, mv) ← expect (psKernelExprV2PagedMkMVar arena u)
+  let (arena, fv) ← expect (psKernelExprV2PagedMkFVar arena u)
+  let (arena, b0) ← expect (psKernelExprV2PagedMkBVar arena 0)
+  let (arena, bothBad) ← expect (psKernelExprV2PagedMkApp arena mv fv)
+  let (arena, unknown) ← expect (psKernelExprV2PagedMkConst arena (nm "admission-unknown") [])
+  let (arena, identity) ← expect (psKernelExprV2PagedMkLam arena x s1 b0 .default)
+  let (arena, identityType) ← expect (psKernelExprV2PagedMkForall arena x s1 s1 .default)
+  let (arena, hiddenS1) ← expect (psKernelExprV2PagedMkMData arena 901 s1)
+  let (arena, b1) ← expect (psKernelExprV2PagedMkBVar arena 1)
+  let (arena, proofTailType) ← expect (psKernelExprV2PagedMkForall arena x b0 b1 .default)
+  let (arena, proofTail) ← expect (psKernelExprV2PagedMkLam arena x b0 b0 .default)
+  let (arena, proofType) ← expect (psKernelExprV2PagedMkForall arena u s0 proofTailType .default)
+  let (arena, proof) ← expect (psKernelExprV2PagedMkLam arena u s0 proofTail .default)
+  let defn := fun (type value : Nat) (safety : PsKernelDefinitionSafety) =>
+    PsKernelDagDeclarationRequest.definitionDecl
+      (PsKernelDagDefinition.mk (base [] type) value (.regular 7) safety)
+  let fixtures : List (String × PsKernelDagDeclarationRequest × Bool) := [
+    ("axiom-safe", .axiomDecl (base [] s1) false, true),
+    ("axiom-unsafe", .axiomDecl (base [] s1) true, true),
+    ("definition-safe", defn s1 s0 .safe, true),
+    ("definition-partial", defn s1 s0 .partialDef, true),
+    ("opaque-safe", .opaqueDecl (base [] s1) s0 false, true),
+    ("opaque-unsafe-annotation", .opaqueDecl (base [] s1) s0 true, true),
+    ("definition-mismatch", defn s1 s1 .safe, true),
+    ("opaque-mismatch", .opaqueDecl (base [] s1) s1 false, true),
+    ("universe-equivalence", defn equivalentS1 s0 .safe, true),
+    ("lambda-body", defn identityType identity .safe, true),
+    ("polymorphic-header", .axiomDecl (base [u] su) false, true),
+    ("header-mvar-before-fvar", .axiomDecl (base [] bothBad) false, true),
+    ("header-level-mvar", .axiomDecl (base [u] sm) false, true),
+    ("header-fvar", .axiomDecl (base [] fv) false, true),
+    ("duplicate-universe-before-mvar", .axiomDecl (base [u,u] mv) false, true),
+    ("undefined-universe-before-body-mvar", defn su mv .safe, true),
+    ("body-mvar-before-fvar", defn s1 bothBad .safe, true),
+    ("body-fvar", defn s1 fv .safe, true),
+    ("body-undefined-universe", defn s1 su .safe, true),
+    ("header-loose-bvar", .axiomDecl (base [] b0) false, true),
+    ("body-loose-bvar", defn s1 b0 .safe, true),
+    ("unknown-header", .axiomDecl (base [] unknown) false, true),
+    ("header-not-sort", .axiomDecl (base [] identity) false, true),
+    ("final-defeq-fallback", defn hiddenS1 s0 .safe, false),
+    ("unsafe-definition-fallback", defn s1 s0 .unsafeDef, false),
+    ("theorem-fallback", .theoremDecl (base [] proofType) proof, false)]
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let mut comparisons := 0
+  for (label, request, directExpected) in fixtures do
+    let decodedRequest ← expect (psKernelDagDecodeDeclaration built request)
+    for fuel in [0,1,2,3,4,5,8,64] do
+      for maxDepth in [0,1] do
+        let seed ← fresh fuel maxDepth
+        let direct := psKernelDagTryAdmitSimpleWithFuel fuel
+          (psKernelKernelSessionEnvironment seed) maxDepth seed.resources.maxNatSize
+          arena [] request decodedRequest
+        match direct with
+        | none => require ("admission-permitted-fallback-" ++ label) (!directExpected)
+        | some attempted =>
+            match psKernelV1DispatchDeclaration seed decodedRequest,
+                psKernelV1EnvironmentOutcome attempted with
+            | .error a, .error b =>
+                require ("admission-raw-error-" ++ label) (samePublicError a b)
+            | .ok a, .ok b =>
+                require ("admission-raw-environment-" ++ label) (admissionEnvironmentEqual a b)
+            | _, _ => throw (IO.userError ("admission raw mismatch " ++ label ++ "/" ++ toString fuel))
+        require ("admission-public-" ++ label ++ "/" ++ toString fuel)
+          (admissionPublicParity (psKernelV1AdmitDeclaration seed decodedRequest)
+            (psKernelV1RunDag seed [] .safe arena [.admit request]))
+        if fuel == 64 then
+          require ("admission-explicit-path-" ++ label)
+            ((match direct with | some _ => true | none => false) == directExpected)
+        comparisons := comparisons + 1
+  require "admission-matrix-count" (comparisons == 416)
+  let official ← Lean.mkEmptyEnvironment
+  for (label, typeRoot, valueRoot, expected) in [
+      ("sort-definition", s1, s0, true),
+      ("ill-typed-sort-definition", s1, s1, false),
+      ("universe-equivalent-definition", equivalentS1, s0, true),
+      ("lambda-definition", identityType, identity, true)] do
+    let type ← expect (psKernelExprV2DecodedRequire built typeRoot)
+    let value ← expect (psKernelExprV2DecodedRequire built valueRoot)
+    let officialType ← projectionOfficialRequire type
+    let officialValue ← projectionOfficialRequire value
+    let declaration := Lean.Declaration.defnDecl {
+      name := quickOfficialName declName
+      levelParams := []
+      type := officialType
+      value := officialValue
+      hints := .abbrev
+      safety := .safe
+    }
+    let officialResult := official.addDeclCore 0 0 declaration none true
+    let seed ← fresh 64 1
+    let request := PsKernelDagDeclarationRequest.definitionDecl
+      (PsKernelDagDefinition.mk (base [] typeRoot) valueRoot .abbrevHint .safe)
+    let actual := psKernelV1RunDag seed [] .safe arena [.admit request]
+    require ("official-Lean-simple-admission-" ++ label)
+      ((match officialResult with | .ok _ => true | .error _ => false) == expected &&
+        (match actual with | .ok _ => true | .error _ => false) == expected)
+    if expected then
+      let admitted ← expectPublic actual
+      require ("official-simple-admission-stored-type-value-" ++ label)
+        (match psKernelEnvironmentFind admitted.session.environment declName with
+         | some (.defnInfo info) =>
+             psKernelExprEqual info.base.type type && psKernelExprEqual info.value value
+         | _ => false)
+    else
+      require ("official-simple-admission-precise-rejection-" ++ label)
+        (match actual with
+         | .error (.rejectedInvalid message) => message == "definition type mismatch"
+         | _ => false)
+  IO.println "PSC1_V2_DAG_OFFICIAL_SIMPLE_ADMISSION: PASS"
+  IO.println "PSC1_V2_DAG_SIMPLE_ADMISSION_MATRIX: PASS"
+
+private def admissionSharedStateSentinels : IO Unit := do
+  for (layers, fuel, maxDepth, coldMessage) in [
+      (4, 5, 0, "kernel inference budget exhausted"),
+      (14, 64, 1, "deep recursion detected, use maxRecDepth to increase the limit")] do
+    let seed ← fresh fuel maxDepth
+    let aName := nm ("AdmissionHeaderA" ++ toString layers)
+    let dName := nm ("AdmissionHeaderD" ++ toString layers)
+    let xName := nm "admission-header-x"
+    let (baseArena, s1) ← expect
+      (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty (.succ .zero))
+    let mut workingArena := baseArena
+    let mut typeRoot := s1
+    for tag in [:layers] do
+      let next ← expect (psKernelExprV2PagedMkMData workingArena tag typeRoot)
+      workingArena := next.fst
+      typeRoot := next.snd
+    let (arena, b0) ← expect (psKernelExprV2PagedMkBVar workingArena 0)
+    let (arena, fn) ← expect (psKernelExprV2PagedMkLam arena xName typeRoot b0 .default)
+    let (arena, aRoot) ← expect (psKernelExprV2PagedMkConst arena aName [])
+    let (arena, bodyRoot) ← expect (psKernelExprV2PagedMkApp arena fn aRoot)
+    let built ← expect (psKernelExprV2DecodeChecked arena)
+    let type ← expect (psKernelExprV2DecodedRequire built typeRoot)
+    let body ← expect (psKernelExprV2DecodedRequire built bodyRoot)
+    let aRequest := PsKernelDagDeclarationRequest.axiomDecl
+      (PsKernelDagConstantBase.mk aName [] typeRoot) false
+    let dRequest := PsKernelDagDeclarationRequest.definitionDecl
+      (PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk dName [] typeRoot)
+        bodyRoot .abbrevHint .safe)
+    let admitted ← expectPublic
+      (psKernelDagRunCommand (PsKernelDagExecutionState.mk seed []) [] .safe
+        arena built (.admit aRequest))
+    let owner := admitted.snd
+    let checker := psKernelKernelSessionChecker owner.session [] .safe
+    let context := psKernelExprV2CheckContextEmpty checker.context
+    let initial := psKernelExprV2CheckStateWithWhnf
+      (psKernelExprV2CheckStateEmpty arena)
+      (psKernelExprV2WhnfStateForDeclarations arena owner.declarations)
+    let base := PsKernelConstantBase.mk dName [] type
+    let value := PsKernelDefinitionInfo.mk base body .abbrevHint .safe
+    let oldHeader ← expect (psKernelCheckConstantBaseWithSession fuel checker base)
+    let afterHeader ←
+      match psKernelExprV2AdmissionCheckHeaderWithFuel fuel context initial base typeRoot with
+      | some attempted => expect attempted
+      | none => throw (IO.userError "direct admission header unexpectedly declined")
+    let oldBody ← expect (psKernelCheckDefinitionBodyWithSession fuel oldHeader value)
+    let warmBody := psKernelExprV2AdmissionCheckBodyWithFuel fuel context afterHeader
+      base typeRoot body bodyRoot "definition type mismatch"
+    require "admission-shared-header-cache-required"
+      (match warmBody with | some (.ok _) => true | _ => false)
+    require "admission-shared-header-fresh-counter" (oldBody.state.nextFresh == 1)
+    let coldLegacy := psKernelCheckDefinitionBodyWithSession fuel checker value
+    let coldDag := psKernelExprV2AdmissionCheckBodyWithFuel fuel context initial
+      base typeRoot body bodyRoot "definition type mismatch"
+    require "admission-fresh-body-would-change-resource-result"
+      (match coldLegacy, coldDag with
+       | .error left, some (.error right) => left == right && left == coldMessage
+       | _, _ => false)
+    let decodedRequest ← expect (psKernelDagDecodeDeclaration built dRequest)
+    require "admission-shared-state-direct-attempt-selected"
+      (match psKernelDagTryAdmitSimpleWithFuel fuel
+          (psKernelKernelSessionEnvironment owner.session) maxDepth
+          owner.session.resources.maxNatSize arena owner.declarations
+          dRequest decodedRequest with
+       | some (.ok _) => true | _ => false)
+    let original ← expectPublic (psKernelV1AdmitDeclaration owner.session decodedRequest)
+    let actual ← expectPublic
+      (psKernelV1RunDag seed [] .safe arena [.admit aRequest, .admit dRequest])
+    require "admission-shared-state-public-complete-parity"
+      (admissionEnvironmentEqual actual.session.environment original.session.environment)
+    require "admission-shared-state-stored-definition"
+      (match psKernelEnvironmentFind actual.session.environment dName with
+       | some (.defnInfo info) =>
+           psKernelExprEqual info.base.type type && psKernelExprEqual info.value body &&
+             psKernelDefinitionSafetyIsSafe info.safety
+       | _ => false)
+    require "admission-shared-state-ordered-receipts"
+      (match actual.replies with
+       | [.admitted first, .admitted second] =>
+           first.declarationsBefore == 0 && first.declarationsAfter == 1 &&
+             second.declarationsBefore == 1 && second.declarationsAfter == 2
+       | _ => false)
+  IO.println "PSC1_V2_DAG_ADMISSION_SHARED_STATE: PASS"
+
+private def admissionPolicyAndSafety : IO Unit := do
+  let seed ← fresh 64 1
+  let uName := nm "AdmissionUnsafe"
+  let pName := nm "AdmissionPartial"
+  let aName := nm "AdmissionSafetyTarget"
+  let (arena, s0) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let (arena, s1) ← expect (psKernelExprV2PagedMkSort arena (.succ .zero))
+  let (arena, unsafeRoot) ← expect (psKernelExprV2PagedMkConst arena uName [])
+  let (arena, partialRoot) ← expect (psKernelExprV2PagedMkConst arena pName [])
+  let (arena, mv) ← expect (psKernelExprV2PagedMkMVar arena (nm "admission-policy-mvar"))
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let base := fun (type : Nat) => PsKernelDagConstantBase.mk aName [] type
+  let unsafeRequest := PsKernelDagDeclarationRequest.axiomDecl
+    (PsKernelDagConstantBase.mk uName [] s1) true
+  let partialRequest := PsKernelDagDeclarationRequest.definitionDecl
+    (PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk pName [] s1)
+      s0 .abbrevHint .partialDef)
+  let first ← expectPublic (psKernelDagRunCommand
+    (PsKernelDagExecutionState.mk seed []) [] .safe arena built (.admit unsafeRequest))
+  let second ← expectPublic (psKernelDagRunCommand first.snd [] .safe arena built (.admit partialRequest))
+  let owner := second.snd
+  let defn := fun (value : Nat) (safety : PsKernelDefinitionSafety) =>
+    PsKernelDagDeclarationRequest.definitionDecl
+      (PsKernelDagDefinition.mk (base s1) value .abbrevHint safety)
+  let safetyCases : List (String × PsKernelDagDeclarationRequest × Bool × Bool) := [
+      ("unsafe-header-safe", .axiomDecl (base unsafeRoot) false, false, true),
+      ("unsafe-header-unsafe", .axiomDecl (base unsafeRoot) true, true, true),
+      ("partial-header-safe", .axiomDecl (base partialRoot) false, false, true),
+      ("partial-header-unsafe", .axiomDecl (base partialRoot) true, true, true),
+      ("unsafe-body-safe", defn unsafeRoot .safe, false, true),
+      ("unsafe-body-partial", defn unsafeRoot .partialDef, false, true),
+      ("partial-body-partial", defn partialRoot .partialDef, false, true),
+      ("unsafe-body-opaque", .opaqueDecl (base s1) unsafeRoot true, false, true),
+      ("unsafe-body-unsafe", defn unsafeRoot .unsafeDef, true, false)]
+  for (label, request, acceptedExpected, directExpected) in safetyCases do
+    let declaration ← expect (psKernelDagDecodeDeclaration built request)
+    let attempted := psKernelDagTryAdmitSimpleWithFuel 64
+      (psKernelKernelSessionEnvironment owner.session) 1 owner.session.resources.maxNatSize
+      arena owner.declarations request declaration
+    require ("admission-safety-path-" ++ label)
+      ((match attempted with | none => false | some _ => true) == directExpected)
+    require ("admission-safety-direct-decision-" ++ label)
+      (match attempted with
+       | none => true
+       | some result => (match result with | .ok _ => true | .error _ => false) == acceptedExpected)
+    let original := psKernelV1AdmitDeclaration owner.session declaration
+    require ("admission-safety-original-decision-" ++ label)
+      ((match original with | .ok _ => true | .error _ => false) == acceptedExpected)
+    require ("admission-safety-public-parity-" ++ label)
+      (admissionPublicParity original
+        (psKernelV1RunDag owner.session [] .safe arena [.admit request]))
+    let whole := psKernelV1RunDag seed [] .safe arena
+      [.admit unsafeRequest, .admit partialRequest, .admit request]
+    require ("admission-safety-complete-same-batch-" ++ label)
+      (match original, whole with
+       | .error a, .error b => samePublicError a b
+       | .ok a, .ok b => admissionEnvironmentEqual a.session.environment b.session.environment
+       | _, _ => false)
+  let duplicate := PsKernelDagDeclarationRequest.axiomDecl
+    (PsKernelDagConstantBase.mk uName [aName,aName] mv) false
+  let duplicateDecl ← expect (psKernelDagDecodeDeclaration built duplicate)
+  require "admission-existing-name-before-universe-and-metavariable"
+    (match psKernelDagAdmitDeclaration owner.session arena owner.declarations duplicate duplicateDecl with
+     | .error (.rejectedInvalid message) => message == "already declared"
+     | _ => false)
+  let valid := defn s0 .safe
+  let bad := defn s1 .safe
+  for request in [valid,bad] do
+    let declaration ← expect (psKernelDagDecodeDeclaration built request)
+    let limited := { owner.session with resources := { owner.session.resources with maxDeclarations := 2 } }
+    require "admission-limit-after-complete-check"
+      (admissionPublicParity (psKernelV1AdmitDeclaration limited declaration)
+        (psKernelV1RunDag limited [] .safe arena [.admit request]))
+  let validDecl ← expect (psKernelDagDecodeDeclaration built valid)
+  let limited := { owner.session with resources := { owner.session.resources with maxDeclarations := 2 } }
+  require "admission-limit-exact-outcome"
+    (match psKernelDagAdmitDeclaration limited arena owner.declarations valid validDecl with
+     | .error (.resourceExhausted .declarationLimit message) => message == "declaration limit exceeded"
+     | _ => false)
+  let malformed := PsKernelDagDeclarationRequest.axiomDecl
+    (PsKernelDagConstantBase.mk uName [] arena.size) false
+  require "admission-malformed-id-before-duplicate-name"
+    (match psKernelDagDecodeDeclaration built malformed,
+        psKernelV1RunDag owner.session [] .safe arena [.admit malformed] with
+     | .error a, .error (.rejectedInvalid b) => a == b
+     | _, _ => false)
+  let cancelled := { owner.session with resources := { owner.session.resources with cancelled := true } }
+  require "admission-preflight-before-malformed-id"
+    (match psKernelV1RunDag cancelled [] .safe arena [.admit malformed] with
+     | .error (.resourceExhausted .cancelled _) => true | _ => false)
+  require "admission-failure-does-not-publish-request-index"
+    (owner.declarations.length == 2 &&
+      match psKernelExprV2DeclarationRefFind owner.declarations aName with
+      | none => true | _ => false)
+  require "admission-failure-does-not-install-target"
+    (match psKernelEnvironmentFind owner.session.environment aName with | none => true | _ => false)
+  IO.println "PSC1_V2_DAG_ADMISSION_POLICY_SAFETY: PASS"
+
+private def admissionFinalComparisonGuards : IO Unit := do
+  let seed ← fresh 64 1
+  let aName := nm "AdmissionGuardA"
+  let dName := nm "AdmissionGuardD"
+  let (arena, s1) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty (.succ .zero))
+  let (arena, leftType) ← expect (psKernelExprV2PagedMkMData arena 11 s1)
+  let (arena, rightType) ← expect (psKernelExprV2PagedMkMData arena 12 s1)
+  let (arena, bodyRoot) ← expect (psKernelExprV2PagedMkConst arena aName [])
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let request := PsKernelDagDeclarationRequest.axiomDecl
+    (PsKernelDagConstantBase.mk aName [] leftType) false
+  let owner := (← expectPublic (psKernelDagRunCommand
+    (PsKernelDagExecutionState.mk seed []) [] .safe arena built (.admit request))).snd
+  let declaredType ← expect (psKernelExprV2DecodedRequire built rightType)
+  let body ← expect (psKernelExprV2DecodedRequire built bodyRoot)
+  let base := PsKernelConstantBase.mk dName [] declaredType
+  let value := PsKernelDefinitionInfo.mk base body .abbrevHint .safe
+  for (fuel, recDepth, expected) in [
+      (1, 0, some "kernel definitional equality budget exhausted"),
+      (64, 15, some "deep recursion detected, use maxRecDepth to increase the limit"),
+      (64, 14, none)] do
+    let checker := psKernelKernelSessionChecker owner.session [] .safe
+    let scalar := { checker.context with recDepth := recDepth }
+    let context := psKernelExprV2CheckContextEmpty scalar
+    let state := psKernelExprV2CheckStateWithWhnf
+      (psKernelExprV2CheckStateEmpty arena)
+      (psKernelExprV2WhnfStateForDeclarations arena owner.declarations)
+    let legacy := psKernelCheckDefinitionBodyWithSession fuel { checker with context := scalar } value
+    let actual := psKernelExprV2AdmissionCheckBodyWithFuel fuel context state
+      base rightType body bodyRoot "definition type mismatch"
+    require "admission-final-defeq-original-entry-guards"
+      (match legacy, actual, expected with
+       | .error a, some (.error b), some wanted => a == b && a == wanted
+       | .ok _, some (.ok _), none => true
+       | _, _, _ => false)
+  let checker := psKernelKernelSessionChecker owner.session [] .safe
+  require "admission-ensure-sort-always-enters-whnf-even-sort"
+    (match psKernelSessionEnsureSort 0 checker sort1,
+        psKernelExprV2AdmissionEnsureSortWithFuel 0
+          (psKernelExprV2CheckContextEmpty checker.context)
+          (psKernelExprV2CheckStateEmpty arena) s1 with
+     | .error a, some (.error b) => a == b && a == "kernel reduction budget exhausted"
+     | _, _ => false)
+  let leftExpression ← expect (psKernelExprV2DecodedRequire built leftType)
+  let oldWarm ← expect (psKernelSessionIsDefEq 64 checker leftExpression declaredType)
+  let initial := psKernelExprV2CheckStateWithWhnf
+    (psKernelExprV2CheckStateEmpty arena)
+    (psKernelExprV2WhnfStateForDeclarations arena owner.declarations)
+  let dagWarm ←
+    match psKernelExprV2TryDefEqStateWithFuel 64
+        (psKernelExprV2CheckContextEmpty checker.context) initial leftType rightType with
+    | some result => expect result
+    | none => throw (IO.userError "admission warm pair unexpectedly declined")
+  require "admission-final-warm-pair-established" (oldWarm.fst && dagWarm.snd)
+  let scalar := { checker.context with recDepth := 15 }
+  let oldBody := psKernelCheckDefinitionBodyWithSession 64
+    { oldWarm.snd with context := scalar } value
+  let dagBody := psKernelExprV2AdmissionCheckBodyWithFuel 64
+    (psKernelExprV2CheckContextEmpty scalar) dagWarm.fst
+    base rightType body bodyRoot "definition type mismatch"
+  require "admission-final-comparison-retains-existing-success-owner"
+    (match oldBody, dagBody with
+     | .ok _, some (.ok _) => true
+     | _, _ => false)
+  IO.println "PSC1_V2_DAG_ADMISSION_FINAL_GUARDS: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -2762,5 +3183,9 @@ def main : IO Unit := do
   applicationConversionParity
   applicationConversionCacheParity
   applicationEagerContextParity
+  simpleAdmissionParity
+  admissionSharedStateSentinels
+  admissionPolicyAndSafety
+  admissionFinalComparisonGuards
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

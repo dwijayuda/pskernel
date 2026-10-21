@@ -23,6 +23,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Core.ExprV2.TransformSpine,
     `Ps.KernelCore.API.DagTypes,
     `Ps.KernelCore.API.DagDeclaration,
+    `Ps.KernelCore.API.DagAdmission,
     `Ps.KernelCore.API.Dag,
     `Ps.KernelCore.Checker.ExprV2.DefEqPair,
     `Ps.KernelCore.Checker.ExprV2.CheckWhnf,

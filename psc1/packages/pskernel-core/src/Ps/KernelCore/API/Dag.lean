@@ -1,5 +1,6 @@
 import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
+import Ps.KernelCore.API.DagAdmission
 import Ps.KernelCore.Checker.ExprV2.Terminal
 import Ps.KernelCore.Checker.ExprV2.Check
 import Ps.KernelCore.Checker.ExprV2.Whnf
@@ -10,30 +11,33 @@ Checked DAG ingress for the complete KernelContract-v1 implementation.
 
 One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
-Sort/literal/binder/let/constant/application/projection checking and terminal/metadata/beta/zeta/Nat/projection WHNF read DAG nodes directly with the original entry
-fuel/depth/rule ordering. Operation-owned core/public caches preserve function-position normalization,
-constructor projections and the complete Nat post-core pipeline; no cache escapes a public WHNF call.
-Successful admission records same-batch type IDs and transparent definition body IDs,
-allowing direct constant inference, universe substitution and delta without importing
-an environment type or body. The index never escapes
-its validated batch; declarations already in an external session remain fallback. Collision-safe DAG equality, sort universe equality, literals and paired metadata supply
-DefEq's definitive quick rules only after both complete checks. Unsupported checking, reductions, DefEq
-and admission use the complete existing kernel with unchanged resources.
+Supported inference, scoped quick DefEq and WHNF rules read the canonical DAG
+with the original entry fuel, depth and rule ordering. Local types and let
+values are IDs in the same owner. Unsupported work restarts the complete
+original operation with unchanged resources and without partial publication.
+
+Axioms, safe/partial definitions and opaque declarations attempt direct
+admission. Original static guards read the boundary-decoded expressions;
+header/body checking and terminal comparison share one fresh DAG checking
+state per declaration. Unsafe recursive definitions, theorems, mutual
+definitions and inductives still use complete original admission.
+Successful admission records original same-batch type IDs and transparent
+definition body IDs. This permits owning constant/projection inference and
+delta unfolding without repeatedly importing environment types or bodies.
 
 psKernelV1RunDag is the public untrusted-input boundary. The portable source
 profile exposes constructors and helper functions: the internal command
 workers require the canonical arena/decoded correspondence established here.
 They are not alternative untrusted-input entry points. Replies, like V1
 receipts, are forgeable observations and never authorize proof admission.
-Every declaration is still rechecked by V1. No equality memo survives this
-boundary. A sealed constructor API remains a source-profile limitation.
+Each declaration is checked before environment publication. No semantic cache
+or declaration index escapes the validated batch. A sealed constructor API
+remains a source-profile limitation.
 
-This is a partial representation migration. Checked lets and application conversion use owning local
-type/value IDs, scope-restored success pairs and the original fixed DefEq
-budget. Supported checking and WHNF rules are DAG-native. Applications requiring
-general DefEq, external constant types, projections without owning constructor
-types, unsupported reductions, general DefEq and admission retain PsKernelExpr
-internally. Eliminating that fallback and adapter remains required for completion.
+This remains a partial representation migration. General DefEq, external
+constant types, projections without owning constructor types, unsupported
+reductions and remaining admission rules use PsKernelExpr internally.
+Eliminating that fallback and adapter remains required for completion.
 -/
 structure PsKernelDagBatchResult where
   session : PsKernelKernelSession
@@ -201,7 +205,8 @@ def psKernelDagRunCommand
       | Except.error error =>
           Except.error (PsKernelError.rejectedInvalid error)
       | Except.ok declaration =>
-          match psKernelV1AdmitDeclaration session declaration with
+          match psKernelDagAdmitDeclaration session arena execution.declarations
+              request declaration with
           | Except.error error => Except.error error
           | Except.ok result =>
               Except.ok

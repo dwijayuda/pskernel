@@ -83,6 +83,11 @@ jobs:
           grep -q 'PSC1_V2_DAG_OFFICIAL_APP_CONVERSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_APP_CONVERSION_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_APP_EAGER_CONTEXT: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_SIMPLE_ADMISSION_MATRIX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_ADMISSION_SHARED_STATE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_ADMISSION_POLICY_SAFETY: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_ADMISSION_FINAL_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_SIMPLE_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           grep -q 'PSC1_V2_DAG_NATIVE_OFFICIAL_POLY_DELTA: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
           .lake/build/bin/psc1_kernel_expr_v2_regression \
             | tee "$RUNNER_TEMP/psc1-v2-existing-native.log"
@@ -207,6 +212,10 @@ jobs:
           grep -q 'PSC1_V2_DAG_JS_APP_CONVERSION: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_APP_CONVERSION_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_APP_EAGER_CONTEXT: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_SIMPLE_ADMISSION_MATRIX: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_ADMISSION_SHARED_STATE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_ADMISSION_POLICY_SAFETY: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
       - name: Check large numerals without fuel-proportional closure allocation
         working-directory: psc1

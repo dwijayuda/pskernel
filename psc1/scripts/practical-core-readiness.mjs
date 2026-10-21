@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {checkLanguageBackendParity} from './check-language-backend-parity.mjs';
+import {checkTypedIoExecution} from './check-typed-io-execution.mjs';
 const familyIds=['operators','local-inference','typed-do','for-loops','while-loops','mutation','early-return',
  'partial-definitions','tuples-patterns','arrays-indexing','typed-errors','call-inference','namespaces','typed-io'];
 const targets=['js','ts','rust','wasm-core','wasm-component','python','php'];
@@ -23,6 +24,8 @@ export function validateReleaseContract(contract){
   for(const criterion of family.acceptance){
    assert.ok(criterion.id&&criterion.meaning);
    if(criterion.execution)assert.ok(contract.suites[criterion.execution.suite]);
+   if(criterion.actualIo){assert.equal(family.id,'typed-io');assert.equal(criterion.actualIo,criterion.id);
+    assert.ok(['console','files','adapters'].includes(criterion.actualIo));assert.ok(contract.actualIo?.contract&&contract.actualIo?.runner&&contract.actualIo?.receipt);}
   }
  }
  const visited=new Set(),visiting=new Set();
@@ -39,7 +42,7 @@ export function validateReleaseContract(contract){
  }
  return contract;
 }
-export function deriveReadiness(contract,{commit,suites={},fullQualification=null,typedIoApplication=null}={}){
+export function deriveReadiness(contract,{commit,suites={},fullQualification=null,typedIoApplication=null,typedIoExecution=null,ioExecutionContract=null,ioExecutionImplemented=false}={}){
  validateReleaseContract(contract);assert.match(commit||'',/^[a-f0-9]{40}$/);
  const suiteStates={};
  for(const [id,{caseContract,receipt,implemented}] of Object.entries(suites)){
@@ -92,10 +95,20 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
     assert.ok(row.checks.includes(check),'missing actual IO application observation');
   }
  }
+ let actualIo=false;
+ if(typedIoExecution){
+  assert.ok(ioExecutionContract,'IO execution contract required');
+  checkTypedIoExecution(ioExecutionContract,typedIoExecution,{commit,checkerCommit:contract.authority.commit});
+  actualIo=true;
+ }
  const families=contract.families.map(family=>{
   const cases=family.acceptance.map(criterion=>{
    const binding=criterion.execution,suite=binding&&suiteStates[binding.suite];
    if(binding&&suite)assert.ok(suite.caseContract.cases.some(c=>c.id===binding.case),'unknown finite case');
+   if(criterion.actualIo)return {id:criterion.id,
+    status:actualIo?(full?'qualified':'tested'):ioExecutionImplemented?'implemented':'blocked',
+    reason:actualIo?null:'exact-commit seven-adapter execution and policy evidence pending',
+    execution:null,actualIo:criterion.actualIo};
    return {id:criterion.id,status:!binding?'blocked':!suite?.implemented?'blocked':
     suite.qualified&&full?'qualified':suite.tested?'tested':'implemented',
     reason:!binding?'finite case not yet bound to an executable acceptance test':
@@ -111,8 +124,10 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   return {id:a.id,status:'blocked',reason:a.coreExecution?'typed IO and remaining full application criteria pending':'actual application acceptance runner pending',
    coreStatus:core?.qualified&&full?'qualified-subset':core?.tested?'tested':core?.implemented?'implemented':'blocked',
    coreScope:a.coreExecution?.scope||null,
-   ioStatus:['cli','json-files'].includes(a.id)&&typedIoApplication?(full?'qualified-subset':'tested'):'blocked',
-   ioScope:['cli','json-files'].includes(a.id)?'Linux Node capability host with checked JS/TS/Rust/Python/PHP guests; seven adapters and remaining application criteria pending':null};
+   ioStatus:['cli','json-files'].includes(a.id)&&(typedIoApplication||actualIo)?(full?'qualified-subset':'tested'):'blocked',
+   ioScope:['cli','json-files'].includes(a.id)?(actualIo?
+    'Seven explicit synchronous IO adapters; complete CLI/JSON application acceptance remains pending':
+    'Linux Node capability host with checked JS/TS/Rust/Python/PHP guests; seven adapters and remaining application criteria pending'):null};
  });
  const familyQualified=id=>families.find(f=>f.id===id)?.qualified===true;
  const queue=contract.workQueue.map(task=>{
@@ -129,7 +144,7 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   }
   else if(task.id==='checked-order')qualified=familyQualified('operators');
   else if(task.id==='typed-io'){
-   implemented=suiteStates['typed-io-protocol']?.implemented;tested=typedIoApplication!==null;
+   implemented=ioExecutionImplemented||suiteStates['typed-io-protocol']?.implemented;tested=actualIo||typedIoApplication!==null;
    qualified=familyQualified('typed-io');
   }
   else if(task.id==='application-performance')qualified=applications.every(a=>a.status==='qualified');
@@ -156,6 +171,11 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
  const qualification='dist/scoped-correctness/SEVEN_BACKEND_QUALIFICATION.json';
  const report=deriveReadiness(contract,{commit:process.env.GITHUB_SHA,suites,
   fullQualification:fs.existsSync(path.join(root,qualification))?read(qualification):null,
+  ioExecutionContract:read(contract.actualIo.contract),
+  ioExecutionImplemented:fs.existsSync(path.join(root,contract.actualIo.runner))&&
+   ['host-tools/typed-io.mjs','host-tools/typed_io.py','host-tools/typed-io-rust/src/lib.rs',
+    'host-tools/typed-io.php','host-tools/typed-io-wasm.mjs','host-tools/typed_io_component.py'].every(p=>fs.existsSync(path.join(root,p))),
+  typedIoExecution:fs.existsSync(path.join(root,contract.actualIo.receipt))?read(contract.actualIo.receipt):null,
   typedIoApplication:fs.existsSync(path.join(root,'dist/scoped-correctness/typed-io/application.json'))?read('dist/scoped-correctness/typed-io/application.json'):null});
  fs.mkdirSync(path.join(root,'dist/development'),{recursive:true});
  fs.writeFileSync(path.join(root,'dist/development/practical-core-readiness.json'),JSON.stringify(report,null,2)+'\n');

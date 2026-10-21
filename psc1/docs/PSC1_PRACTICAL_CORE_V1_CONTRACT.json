@@ -362,15 +362,18 @@
       "acceptance": [
         {
           "id": "console",
-          "meaning": "Explicit typed capability: UTF-8 line read/write, EOF and newline; denied capability refuses before publication."
+          "meaning": "Explicit typed capability: UTF-8 line read/write, EOF and newline; denied capability refuses before publication.",
+          "actualIo": "console"
         },
         {
           "id": "files",
-          "meaning": "Root-confined bounded UTF-8 file read/write, exact size/encoding/path policy and typed failures."
+          "meaning": "Root-confined bounded UTF-8 file read/write, exact size/encoding/path policy and typed failures.",
+          "actualIo": "files"
         },
         {
           "id": "adapters",
-          "meaning": "All seven target adapters preserve portable semantics; unsupported ABI/configuration refuses before publication."
+          "meaning": "All seven target adapters preserve portable semantics; unsupported ABI/configuration refuses before publication.",
+          "actualIo": "adapters"
         }
       ]
     }
@@ -479,5 +482,10 @@
       ],
       "acceptance": "All finite cases and applications qualified at exact release candidate; full release qualification, then manual self-hosting."
     }
-  ]
+  ],
+  "actualIo": {
+    "contract": "docs/PSC1_TYPED_IO_EXECUTION_CONTRACT.json",
+    "receipt": "dist/scoped-correctness/typed-io-execution/results.json",
+    "runner": "scripts/typed-io-execution-evidence.mjs"
+  }
 }

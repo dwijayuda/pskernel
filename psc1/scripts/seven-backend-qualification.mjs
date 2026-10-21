@@ -46,6 +46,19 @@ const typedIoExecution=read('dist/scoped-correctness/typed-io-execution/results.
 checkTypedIoExecution(read('docs/PSC1_TYPED_IO_EXECUTION_CONTRACT.json'),typedIoExecution,{
  commit:process.env.GITHUB_SHA,head:process.env.PSC1_HEAD_SHA,
  checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc'});
+const minimumIoDispatcher=read('dist/scoped-correctness/typed-io-dispatcher-python314/results.json');
+assert.equal(minimumIoDispatcher.schema,'psc1-io-dispatcher-execution/1');
+assert.equal(minimumIoDispatcher.testedCommit,process.env.GITHUB_SHA);
+assert.equal(minimumIoDispatcher.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+assert.equal(minimumIoDispatcher.passed,true);assert.deepEqual(minimumIoDispatcher.failures,[]);
+checkTypedIoExecution(read('docs/PSC1_TYPED_IO_EXECUTION_CONTRACT.json'),{
+ schema:'psc1-typed-io-execution/1',contract:'typed-io-execution-v1',
+ testedCommit:minimumIoDispatcher.testedCommit,branchHeadCommit:minimumIoDispatcher.branchHeadCommit,
+ checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
+ passed:true,failures:[],completeApplications:false,targets:['python'],records:minimumIoDispatcher.records,
+ policies:{python:typedIoExecution.policies.python}
+},{commit:process.env.GITHUB_SHA,head:process.env.PSC1_HEAD_SHA,
+ checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',targets:['python']});
 const ioPolicy=read('dist/scoped-correctness/typed-io/policy.json');
 const ioApplication=read('dist/scoped-correctness/typed-io/application.json');
 for(const data of [ioPolicy,ioApplication]){

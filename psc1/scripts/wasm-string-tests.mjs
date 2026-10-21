@@ -151,7 +151,7 @@ for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-compone
   }
   assert.equal(fs.readFileSync(path.join(capabilityRoot,'output.txt'),'utf8'),'processed:hello😀');
   records.push({syntax,target,passed:true,stringsSha256:hash(output),ioSha256:hash(ioOutput),
-   admission:'independent-official-Lean',runtime:'executed',hostEffects:true,
+   admission:'independent-official-Lean',runtime:'executed',hostEffects:true,strictIr:'required-by-production-publication',
    checks:["general-source-sequencing","actual-file-read-atomic-write","actual-console-unicode-crlf","typed-error-recovery","host-trap-escapes","unsupported-abi-preserves-generation"],provider:target==='wasm-core'?'node':'python',abi:'wasm-io-dispatcher',
    checkerCommit:ioManifest.logicalCheckerCommit,artifactSha256:hash(ioOutput),manifestSha256:hash(ioOutput+'.bundle.json'),
    librarySha256:hash(path.join(root,'stdlib/ProofScript/System/IO.'+syntax)),

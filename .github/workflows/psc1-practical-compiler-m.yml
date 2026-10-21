@@ -73,6 +73,18 @@ jobs:
           echo '{"name":"psc1-ts7-consumer-tests","version":"0.0.0","private":true}' > "$RUNNER_TEMP/psc1-ts7/package.json"
           npm install --prefix "$RUNNER_TEMP/psc1-ts7" --ignore-scripts --no-save --no-audit --no-fund typescript@7.0.2
           echo "PSC1_TSC=$RUNNER_TEMP/psc1-ts7/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Install pinned focused Wasm String consumers
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-wasm-bin" "$RUNNER_TEMP/psc1-wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/psc1-wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/psc1-wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/psc1-wasm-tools.tar.gz" -C "$RUNNER_TEMP/psc1-wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/psc1-wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-wasm-bin/wasm-tools"
+          echo "$RUNNER_TEMP/psc1-wasm-bin" >> "$GITHUB_PATH"
+          python3 -m venv "$RUNNER_TEMP/psc1-wasm-python"
+          "$RUNNER_TEMP/psc1-wasm-python/bin/python" -m pip install --only-binary=:all: --no-deps wasmtime==49.0.0
+          echo "PSC1_WASMTIME_PY=$RUNNER_TEMP/psc1-wasm-python/bin/python" >> "$GITHUB_ENV"
       - name: Build production compiler and independent checker
         run: |
           set -euo pipefail
@@ -85,6 +97,12 @@ jobs:
         with:
           path: psc1/.lake
           key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Execute focused core and component String and IO boundaries
+        run: |
+          set -euo pipefail
+          wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-core.wasm
+          wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-component.wasm
+          node scripts/wasm-string-tests.mjs
       - name: Execute authored inputs with native reference and JS TS Rust consumers
         run: |
           set -euo pipefail
@@ -105,6 +123,7 @@ jobs:
         with:
           name: psc1-practical-compiler-m-${{ github.sha }}
           path: |
+            psc1/dist/scoped-correctness/wasm-string/
             psc1/dist/scoped-correctness/wasm-string-native/
             psc1/dist/scoped-correctness/typed-io-standalone/
             psc1/dist/scoped-correctness/typed-io-dispatcher/

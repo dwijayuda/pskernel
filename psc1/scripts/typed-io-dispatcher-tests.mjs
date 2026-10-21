@@ -7,7 +7,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {withTypedIo} from '../host-tools/typed-io.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const evidence=path.join(root,'dist/scoped-correctness/typed-io-dispatcher');
+const evidence=path.join(root,'dist/scoped-correctness',process.env.PSC1_IO_DISPATCHER_EVIDENCE||'typed-io-dispatcher');
 const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-io-dispatcher-'));
 const native=process.env.PSC1_NATIVE||path.join(root,'.lake/build/bin/psc1');
 const env={...process.env,PSC1_HOST_TOOLS:path.join(root,'host-tools/artifacts.mjs')};
@@ -161,7 +161,7 @@ for(const syntax of ['lean','ps'])for(const target of targets){
    applicationModuleSha256:hash(path.join(folder,'source/SequencedIo/Program.'+syntax)),
    sourceClosureSha256:manifest.sourceClosureSha256,kernelAdmissionSha256:manifest.kernelAdmissionSha256,
    manifestSha256:bundleHash,hostEffects:true,hostProvider:target==='rust'?'Rust-standalone-capability-adapter':target==='python'?'Python-standalone-capability-adapter':target==='php'?'PHP-Linux-explicit-FFI-capability-adapter':'Linux-Node-capability-adapter',
-   checkerCommit:manifest.logicalCheckerCommit,strictIr:'production-publication',abi:'io-dispatcher'});
+   checkerCommit:manifest.logicalCheckerCommit,strictIr:'required-by-production-publication',abi:'io-dispatcher'});
   fs.cpSync(path.dirname(fs.realpathSync(output+'.bundle.json')),path.join(evidence,'bundles',label),{recursive:true});
   console.log('PSC1_IO_DISPATCHER_PASS: '+label);
  }catch(error){failures.push({label,error:error.stack||String(error)});console.error('PSC1_IO_DISPATCHER_FAIL: '+label+'\n'+error.stack);}

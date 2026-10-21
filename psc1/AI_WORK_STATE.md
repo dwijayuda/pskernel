@@ -43,8 +43,10 @@ worst-case JSON escaping and response allocation. Larger configurations refuse
 before loading; oversized encoded requests retain typed tooLarge semantics.
 Core uses the existing explicit Node capability host; component uses the
 standalone Python capability host through pinned Wasmtime Python49.0.0.
-Default Wasm/component policies remain. New native negative and core/component
-execution tests run in Linux CI; no claim of completion before their results.
+Default Wasm/component policies remain. Native ABI positive/negative tests now pass during the focused build. Core and
+component execution tests run early in the focused tier for fast ABI feedback,
+then repeat in required full qualification. New seven-target IO receipt and
+readiness checks distinguish actual adapters from pure protocol observations; no claim of completion before their results.
 
 ## Earlier typed IO implementation notes
 

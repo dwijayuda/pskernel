@@ -295,6 +295,7 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
           node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
           PSC1_IO_APPLICATION_TARGETS=python PSC1_IO_APPLICATION_EVIDENCE=typed-io-python314 node scripts/typed-io-application-tests.mjs
+          PSC1_IO_DISPATCHER_TARGETS=python PSC1_IO_DISPATCHER_EVIDENCE=typed-io-dispatcher-python314 node scripts/typed-io-dispatcher-tests.mjs
           node scripts/typed-error-conformance-tests.mjs
           node scripts/runtime-conformance-tests.mjs
           node scripts/ordinary-while-conformance-tests.mjs

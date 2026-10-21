@@ -93,11 +93,12 @@ for (const grammar of ['lean', 'ps']) {
   fs.mkdirSync(directory, { recursive: true });
   const output = path.join(directory, 'qualification.json');
   const admissions = path.join(directory, 'admissions.json');
-  for (const owned of [output, admissions]) fs.rmSync(owned, { force: true });
+  const ir = admissions + '.ir.json';
+  for (const owned of [output, admissions, ir]) fs.rmSync(owned, { force: true });
   const run = spawnSync(binary, ['--qualify', '--assurance', assurance, '--grammar', grammar, '--out', output,
     '--admissions', admissions, '--modules', ...inputs[grammar].flatMap(row => [row.module, row.inputPath])],
     { cwd: root, encoding: 'utf8', timeout: 240000, maxBuffer: 32 * 1024 * 1024 });
-  let observed = null, integrityError = null, admissionsArtifact = null;
+  let observed = null, integrityError = null, admissionsArtifact = null, irArtifact = null;
   try {
     unchanged();
     observed = JSON.parse(fs.readFileSync(output, 'utf8'));
@@ -143,17 +144,44 @@ for (const grammar of ['lean', 'ps']) {
       assert.equal(bytes.length, observed.admissionsUtf8Bytes);
       admissionsArtifact = { path: grammar + '/admissions.json', utf8Bytes: bytes.length, sha256: hash(bytes) };
     }
+    if (observed.ir === 'accepted' && observed.irEncoding === 'accepted') {
+      const bytes = fs.readFileSync(ir);
+      assert.equal(bytes.length, observed.irUtf8Bytes);
+      const graph = JSON.parse(bytes.toString('utf8'));
+      assert.equal(JSON.stringify(graph), bytes.toString('utf8'), 'deterministic compact IR encoding');
+      assert.ok(Array.isArray(graph) && graph.length === 5 && graph[0] === 'psc1-ir/1');
+      for (const index of [1, 2, 3, 4]) assert.ok(Array.isArray(graph[index]));
+      assert.equal(graph[2].length, observed.irStructures);
+      assert.equal(graph[3].length, observed.irInductives);
+      assert.equal(graph[4].length, observed.irDeclarations);
+      const intrinsics = new Set(), primitiveTypes = new Set();
+      function visit(value) {
+        if (!Array.isArray(value)) return;
+        if (value.length === 4 && value[0] === 'intrinsic' &&
+            Array.isArray(value[1]) && typeof value[1][0] === 'string')
+          intrinsics.add(JSON.stringify(value[1]));
+        if (value.length === 2 && value[0] === 'primitive' && typeof value[1] === 'string')
+          primitiveTypes.add(value[1]);
+        value.forEach(visit);
+      }
+      visit(graph);
+      irArtifact = { path: grammar + '/admissions.json.ir.json',
+        utf8Bytes: bytes.length, sha256: hash(bytes),
+        inventoryScope: 'all expressions and types in the actual original validated IR',
+        intrinsics: [...intrinsics].sort().map(text => JSON.parse(text)),
+        primitiveTypes: [...primitiveTypes].sort() };
+    }
   } catch (error) { integrityError = error.message; }
   const passed = !run.error && run.status === 0 && !integrityError &&
-    observed?.preparation === 'accepted' && observed?.admission === 'accepted' && observed?.ir === 'accepted';
-  lanes[grammar] = { inputs: inputs[grammar], observed, admissionsArtifact,
+    observed?.preparation === 'accepted' && observed?.admission === 'accepted' && observed?.ir === 'accepted' && observed?.irEncoding === 'accepted';
+  lanes[grammar] = { inputs: inputs[grammar], observed, admissionsArtifact, irArtifact,
     probe: { status: run.status, signal: run.signal, error: run.error?.message || null,
       stdout: run.stdout, stderr: run.stderr, integrityError },
     passed };
   console.log('PSC1_CLOSURE_LANE: ' + JSON.stringify({ grammar, passed, status: run.status,
-    preparation: observed?.preparation, admission: observed?.admission, ir: observed?.ir,
+    preparation: observed?.preparation, admission: observed?.admission, ir: observed?.ir, irEncoding: observed?.irEncoding,
     sourceCoreDeclarations: observed?.sourceCoreDeclarations,
-    logicalCoreDeclarations: observed?.coreDeclarations, partialNames: observed?.partialNames, admissionsArtifact,
+    logicalCoreDeclarations: observed?.coreDeclarations, partialNames: observed?.partialNames, admissionsArtifact, irArtifact,
     detail: observed?.detail, firstFindings: observed?.findings?.slice(0, 8),
     findingCount: observed?.findingCount,
     integrityError, error: run.error?.message }));
@@ -161,17 +189,20 @@ for (const grammar of ['lean', 'ps']) {
 unchanged();
 const canonicalAdmissionBytesParity = lanes.lean.admissionsArtifact && lanes.ps.admissionsArtifact ?
   (lanes.lean.admissionsArtifact.sha256 === lanes.ps.admissionsArtifact.sha256 ? 'accepted' : 'refused') : 'not-run';
-const passed = lanes.lean.passed && lanes.ps.passed && canonicalAdmissionBytesParity === 'accepted';
+const canonicalIrBytesParity = lanes.lean.irArtifact && lanes.ps.irArtifact ?
+  (lanes.lean.irArtifact.sha256 === lanes.ps.irArtifact.sha256 ? 'accepted' : 'refused') : 'not-run';
+const passed = lanes.lean.passed && lanes.ps.passed &&
+  canonicalAdmissionBytesParity === 'accepted' && canonicalIrBytesParity === 'accepted';
 const report = { schema: 'psc1-compiler-closure-qualification/2', commit,
   phase: selected, assurance, binarySha256, roots: phase.roots, modules: sourceEntries.length, explicitImportGraphOnly: true,
   psSourceDerivation: 'owned-canonical-translation-from-lean', independentlyAuthoredPsCompiler: false,
-  passed, canonicalAdmissionBytesParity, lanes, generatedExecution: 'not-run', selfCompilation: 'not-run',
+  passed, canonicalAdmissionBytesParity, canonicalIrBytesParity, lanes, generatedExecution: 'not-run', selfCompilation: 'not-run',
   fixedPoint: 'not-run', formalPreservation: 'not-provided' };
 fs.writeFileSync(path.join(evidence, 'results.json'), JSON.stringify(report, null, 2) + '\n');
 console.log('PSC1_COMPILER_CLOSURE_QUALIFICATION: ' +
-  JSON.stringify({ phase: selected, modules: report.modules, passed, canonicalAdmissionBytesParity,
+  JSON.stringify({ phase: selected, modules: report.modules, passed, canonicalAdmissionBytesParity, canonicalIrBytesParity,
     binarySha256, lanes: Object.fromEntries(Object.entries(lanes).map(([grammar, lane]) => [grammar,
       { passed: lane.passed, coreDeclarations: lane.observed?.coreDeclarations,
-        admissions: lane.admissionsArtifact }])),
+        admissions: lane.admissionsArtifact, ir: lane.irArtifact }])),
     generatedExecution: 'not-run', fixedPoint: 'not-run' }));
 assert.equal(passed, true, 'PSC1_COMPILER_CLOSURE_REFUSED: retained exact lane diagnostics');

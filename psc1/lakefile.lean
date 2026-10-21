@@ -74,6 +74,7 @@ lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
     `Ps.CompilerIr.Model,
+    `Ps.CompilerIr.Encode,
     `Ps.CompilerIr.Construct,
     `Ps.CompilerIr.CheckTypes,
     `Ps.CompilerIr.CheckSize,
@@ -375,3 +376,7 @@ lean_exe psc1_census_normalization_tests where
 lean_exe psc1_backend_normalization_tests where
   srcDir := "test"
   root := `BackendNormalizationTests
+
+lean_exe psc1_ir_encoding_tests where
+  srcDir := "test"
+  root := `IrEncodingTests

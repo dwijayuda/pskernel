@@ -4,6 +4,7 @@ import Ps.Host.ProjectCompiler
 import Lean.Data.Json
 import Ps.Host.LeanChecked
 import Ps.CompilerIr.Validate
+import Ps.CompilerIr.Encode
 
 /-- Native diagnostic only; outside every portable compiler closure. -/
 def psCensusPair (name value : String) : String × Lean.Json :=
@@ -294,8 +295,17 @@ def psClosureProbe (kind : PsCompilerSourceKind) (assurance output admissionsPat
         ("findings", Lean.toJson findings)])
       throw (IO.userError "PSC1_CLOSURE_STRICT_IR_REFUSED")
   | .ok validated =>
+      let encoded <- match psIrEncodeModule validated.raw with
+        | .error _ =>
+            psClosureWrite kind assurance output "accepted" "accepted" "accepted" records (common ++ [
+              psCensusPair "irEncoding" "refused", psCensusPair "detail" "IR-encoding-refused"])
+            throw (IO.userError "PSC1_CLOSURE_IR_ENCODING_REFUSED")
+        | .ok value => pure value
+      IO.FS.writeFile (admissionsPath ++ ".ir.json") encoded
       psClosureWrite kind assurance output "accepted" "accepted" "accepted" records (common ++ [
         psCensusPair "strictEntryPoint" "psStrictValidateModule",
+        psCensusPair "irEncoding" "accepted",
+        ("irUtf8Bytes", Lean.toJson encoded.utf8ByteSize),
         ("irDeclarations", Lean.toJson validated.raw.declarations.length),
         ("irStructures", Lean.toJson validated.raw.structures.length),
         ("irInductives", Lean.toJson validated.raw.inductives.length)])

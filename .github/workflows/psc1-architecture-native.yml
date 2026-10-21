@@ -41,7 +41,7 @@ jobs:
             sleep 5
           done
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_typed_error_tests psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_do_tests psc1_while_tests psc1_namespace_tests psc1_ordinary_tests psc1_ir_specialize_tests psc1_backend_common_tests psc1_direct_map_tests psc1_backend_normalization_tests psc1_source_census_probe
+          lake build psc1_typed_error_tests psc1_census_normalization_tests psc1_operator_tests psc1_data_tests psc1_do_tests psc1_while_tests psc1_namespace_tests psc1_ordinary_tests psc1_ir_specialize_tests psc1_backend_common_tests psc1_direct_map_tests psc1_backend_normalization_tests psc1_ir_encoding_tests psc1_source_census_probe
       - name: Execute all independent native control groups
         run: |
           set -euo pipefail
@@ -61,6 +61,7 @@ jobs:
           .lake/build/bin/psc1_backend_common_tests 2>&1 | tee dist/architecture-native/backend-common.log
           .lake/build/bin/psc1_direct_map_tests 2>&1 | tee dist/architecture-native/direct-map.log
           .lake/build/bin/psc1_backend_normalization_tests 2>&1 | tee dist/architecture-native/backend-normalization.log
+          .lake/build/bin/psc1_ir_encoding_tests 2>&1 | tee dist/architecture-native/ir-encoding.log
           if command -v rg >/dev/null 2>&1; then
             rg -n 'psResolveNameInNamespace|PsElabContext[.]mk' packages test
           else

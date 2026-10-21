@@ -24,9 +24,9 @@ for (const match of lake.matchAll(/lean_lib\s+(\w+)\s+where\n([\s\S]*?)(?=\n(?:l
 }
 const phases = [
   { name: 'semantic-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary'] },
-  { name: 'directjs-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary', 'Ps.BackendCommon.Plan',
+  { name: 'directjs-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary', 'Ps.BackendCommon.Plan', 'Ps.CompilerIr.Encode',
     'Ps.BackendJs.Lower', 'Ps.BackendJs.Validate', 'Ps.BackendJs.Print'] },
-  { name: 'rust-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary', 'Ps.BackendCommon.Plan', 'Ps.BackendRust.Module'] }
+  { name: 'rust-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary', 'Ps.BackendCommon.Plan', 'Ps.CompilerIr.Encode', 'Ps.BackendRust.Module'] }
 ];
 const all = new Set();
 for (const phase of phases) {
@@ -154,8 +154,9 @@ for (const [module, stage] of [
   ['Ps.Environment.Control', 'parse'], ['Ps.Environment.Control', 'elaboration'],
   ['Ps.Environment.SelfHostProd', 'parse'], ['Ps.Environment.SelfHostProd', 'elaboration'],
   ['Ps.Environment.Resolve', 'parse'], ['Ps.Environment.Resolve', 'elaboration'],
+  ['Ps.CompilerIr.Encode', 'parse'], ['Ps.CompilerIr.Encode', 'elaboration'],
   ['Ps.CompilerIr.Validate', 'parse'], ['Ps.CompilerIr.Validate', 'elaboration'],
-  ['Ps.BackendCommon.Plan', 'parse'], ['Ps.BackendCommon.Plan', 'elaboration'],
+  ['Ps.BackendCommon.Plan', 'Ps.CompilerIr.Encode', 'parse'], ['Ps.BackendCommon.Plan', 'Ps.CompilerIr.Encode', 'elaboration'],
   ['Ps.BackendRust.RuntimePlan', 'parse'], ['Ps.BackendRust.RuntimePlan', 'elaboration'],
   ['Ps.BackendRust.Expr', 'parse'], ['Ps.BackendRust.Expr', 'elaboration'],
   ['Ps.BackendRust.Module', 'parse'], ['Ps.BackendRust.Module', 'elaboration'],

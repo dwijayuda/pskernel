@@ -58,6 +58,11 @@ jobs:
           node scripts/compiler-closure-contract-tests.mjs
           node scripts/compiler-source-census-contract-tests.mjs
           node scripts/compiler-source-census.mjs --strict-phase ${{ matrix.phase }}
+      - name: Enforce the live checked-only partial-source boundary
+        if: ${{ matrix.phase == 'directjs-compiler' }}
+        run: |
+          set -euo pipefail
+          node scripts/compiler-closure-assurance-tests.mjs
       - name: Independently admit and strictly validate the whole selected closure
         run: |
           set -euo pipefail

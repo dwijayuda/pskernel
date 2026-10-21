@@ -37,9 +37,11 @@ def cliCommandValue(value : JsonValue) : Option(CliCommand) :=
                   | JsonValue.arrayNil => Option.some(CliCommand.help)
                   | _ => Option.none
                 }
-              } else if (ioTextEq(name, "transform")) {
-                cliFileArguments(tail)
-              } else { Option.none }
+              } else {
+                if (ioTextEq(name, "transform")) {
+                  cliFileArguments(tail)
+                } else { Option.none }
+              }
           | _ => Option.none
         }
     | _ => Option.none

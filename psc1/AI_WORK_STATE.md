@@ -181,3 +181,18 @@ are pure formatters and each action branch is explicitly sequenced. No compiler
 grammar is broadened, capability is granted or test expectation relaxed.
 The compiler-like source/harness remains prepared, uncommitted and unqualified
 until these prerequisites pass.
+
+## Actual Lean CLI/JSON subset: run 39646253173
+
+Source 46f40ca2d9ee7336001187d9add1e3635c9ecd93, tested merge
+48e047140fc2a61eb106b100e00b4e4de0f8f493, passes native and all 24 focused
+ordering obligations. Focused job 119384406337 executes all 21 actual CLI/JSON
+child-process cases for Lean JS/TS/Rust: 63 cases pass, including strict trailing
+commas, Unicode/quoted argv paths, permissions, file/output size, invalid UTF8,
+denied capability before guest loading/invocation, exact exits/console and prior
+output preservation. Lean source closure f15fe4b05d3df51856277164809276b8a3076aa7a201403391ed36088de37c23;
+admission 71c5eda616d14a0fd9bfe9fd2bbd560ebf6812b9afa8003fc77f5f721ba10b36.
+The .ps source stopped at unsupported pure else-if spelling in Args.ps.
+It now uses the established nested else braces. No grammar or acceptance rule
+is relaxed. The complete two/seven matrix, library application and full gate
+remain required. Heavy closure/G1 jobs correctly skipped after fast-gate failure.

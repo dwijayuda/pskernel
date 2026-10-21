@@ -17,6 +17,11 @@ on:
       - psc1/test/PsKernelExprV2LazyDeltaRegression.lean
       - psc1/test/PsKernelExprV2FullShapeRegression.lean
       - psc1/test/PsKernelExprV2FinalRulesRegression.lean
+      - psc1/test/PsKernelExprV2AdmissionGuardRegression.lean
+      - psc1/test/PsKernelExprV2AdmissionGuardProofs.lean
+      - psc1/test/PsKernelExprV2QuotRegression.lean
+      - psc1/test/PsKernelExprV2RecursorRegression.lean
+      - psc1/test/PsKernelExprV2RecursorProofs.lean
       - psc1/test/PsKernelExprV2DagPerformance.lean
       - psc1/test/PsKernelExprV2TransformRegression.lean
       - psc1/test/PsKernelExprV2MetadataProofs.lean

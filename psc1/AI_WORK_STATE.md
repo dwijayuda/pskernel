@@ -132,3 +132,14 @@ before this continuation's writes.
 GitHub/Linux CI only. Expected-SHA non-forced descendants; no main merge, release,
 registry publication, unchecked axioms/authority, test weakening or budget/pin
 relaxation. Preserve all prior immutable receipts and exact passed/pending bounds.
+
+## Backend follow-through at bd02c287 — native pass, source pending
+
+Focused39523542279 and closure39523542322 refused Specialize1375:25 after
+all focused native groups passed, including all49 target equality comparisons.
+Replace three record arguments with exact explicit structure constructors.
+Normalize complete JS runtime-selector and final emission sections with typed
+callbacks, separate constructor cases and explicit error flow. Preserve embedded
+runtime source literals, helper ordering and partial recursion. Add both-lane
+Print gates and the existing direct source-map regression. Linux CI is pending;
+whole DirectJS admission and generated execution remain not-run.

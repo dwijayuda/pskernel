@@ -1367,11 +1367,7 @@ def psIrSpecializeProcessStructure
                     Except.ok
                       (psIrSpecializeAddStructure
                         state
-                        {
-                          name := specializedName
-                          typeParameters := []
-                          fields := lowered.fields
-                        }
+                        (PsVerifiedIrStructure.mk specializedName [] lowered.fields)
                         lowered.requests)
 
 def psIrSpecializeProcessInductive
@@ -1419,11 +1415,7 @@ def psIrSpecializeProcessInductive
                     Except.ok
                       (psIrSpecializeAddInductive
                         state
-                        {
-                          name := specializedName
-                          typeParameters := []
-                          constructors := lowered.constructors
-                        }
+                        (PsVerifiedIrInductive.mk specializedName [] lowered.constructors)
                         lowered.requests)
 
 def psIrSpecializeProcessDeclaration
@@ -1485,14 +1477,7 @@ def psIrSpecializeProcessDeclaration
                             Except.ok
                               (psIrSpecializeAddDeclaration
                                 state
-                                {
-                                  name := specializedName
-                                  typeParameters := []
-                                  parameters :=
-                                    loweredParameters.parameters
-                                  resultType := loweredResult.type
-                                  body := loweredBody.expr
-                                }
+                                (PsVerifiedIrDeclaration.mk specializedName [] loweredParameters.parameters loweredResult.type loweredBody.expr)
                                 ((psListAppend loweredParameters.requests (psListAppend loweredResult.requests loweredBody.requests))))
 
 def psIrSpecializeProcessRequest

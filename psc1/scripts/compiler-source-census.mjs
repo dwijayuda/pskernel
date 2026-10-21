@@ -156,6 +156,7 @@ for (const [module, stage] of [
   ['Ps.Environment.Resolve', 'parse'], ['Ps.Environment.Resolve', 'elaboration'],
   ['Ps.CompilerIr.Validate', 'parse'], ['Ps.CompilerIr.Validate', 'elaboration'],
   ['Ps.BackendCommon.Plan', 'parse'], ['Ps.BackendCommon.Plan', 'elaboration'],
+  ['Ps.BackendJs.Print', 'parse'], ['Ps.BackendJs.Print', 'elaboration'],
   ['Ps.CompilerIr.Specialize', 'parse'], ['Ps.CompilerIr.Specialize', 'elaboration'],
   ['Ps.Compiler.Ordinary', 'parse'], ['Ps.Compiler.Ordinary', 'elaboration'],
   ['Ps.Elab.Declaration', 'parse'], ['Ps.Elab.Declaration', 'elaboration'],

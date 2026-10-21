@@ -39,7 +39,7 @@ export function validateReleaseContract(contract){
  }
  return contract;
 }
-export function deriveReadiness(contract,{commit,suites={},fullQualification=null}={}){
+export function deriveReadiness(contract,{commit,suites={},fullQualification=null,typedIoApplication=null}={}){
  validateReleaseContract(contract);assert.match(commit||'',/^[a-f0-9]{40}$/);
  const suiteStates={};
  for(const [id,{caseContract,receipt,implemented}] of Object.entries(suites)){
@@ -66,6 +66,26 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   assert.ok(fullQualification.assurance?.checked&&fullQualification.assurance?.explicitOrdinary);
   assert.equal(fullQualification.assurance.verifiedRequest,'refused');
  }
+
+ if(typedIoApplication){
+  assert.equal(typedIoApplication.schema,'psc1-typed-io-application-execution/1');
+  assert.equal(typedIoApplication.testedCommit,commit,'stale IO application evidence');
+  assert.equal(typedIoApplication.checkerCommit,contract.authority.commit);
+  assert.equal(typedIoApplication.passed,true);assert.deepEqual(typedIoApplication.failures,[]);
+  assert.equal(typedIoApplication.completeFamily,false);
+  assert.equal(typedIoApplication.sevenHostAdapters,false);
+  assert.deepEqual(typedIoApplication.records.map(r=>r.syntax+'/'+r.target).sort(),
+   ['lean','ps'].flatMap(s=>['js','ts','rust'].map(t=>s+'/'+t)).sort(),'complete unique IO subset');
+  for(const row of typedIoApplication.records){
+   assert.equal(row.passed,true);assert.equal(row.runtime,'executed');
+   assert.equal(row.admission,'independent-official-Lean');
+   assert.equal(row.strictIr,'required-by-production-publication');
+   for(const key of ['sourceSha256','librarySha256','artifactSha256','manifestSha256','oracleSha256'])
+    assert.match(row[key]||'',/^[a-f0-9]{64}$/);
+   for(const check of ['capability-preflight-before-load','actual-json-file-read-transform-atomic-write','actual-console-unicode-crlf-empty-eof'])
+    assert.ok(row.checks.includes(check),'missing actual IO application observation');
+  }
+ }
  const families=contract.families.map(family=>{
   const cases=family.acceptance.map(criterion=>{
    const binding=criterion.execution,suite=binding&&suiteStates[binding.suite];
@@ -84,7 +104,9 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   const core=a.coreExecution&&suiteStates[a.coreExecution.suite];
   return {id:a.id,status:'blocked',reason:a.coreExecution?'typed IO and remaining full application criteria pending':'actual application acceptance runner pending',
    coreStatus:core?.qualified&&full?'qualified-subset':core?.tested?'tested':core?.implemented?'implemented':'blocked',
-   coreScope:a.coreExecution?.scope||null};
+   coreScope:a.coreExecution?.scope||null,
+   ioStatus:['cli','json-files'].includes(a.id)&&typedIoApplication?(full?'qualified-subset':'tested'):'blocked',
+   ioScope:['cli','json-files'].includes(a.id)?'Linux Node capability host with checked JS/TS/Rust guests; seven adapters and remaining application criteria pending':null};
  });
  const familyQualified=id=>families.find(f=>f.id===id)?.qualified===true;
  const queue=contract.workQueue.map(task=>{
@@ -95,9 +117,15 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   }else if(task.id==='json-application'){
    const suite=suiteStates['json-application'];
    implemented=suite?.implemented;tested=suite?.tested;qualified=suite?.qualified&&full;
-  }else if(task.id==='inference-control')qualified=['local-inference','call-inference','typed-do','for-loops','while-loops','mutation','early-return','tuples-patterns','typed-errors'].every(familyQualified);
+  }else if(task.id==='inference-control'){
+   implemented=suiteStates['inference-control']?.implemented;tested=suiteStates['inference-control']?.tested;
+   qualified=['local-inference','call-inference','typed-do','for-loops','while-loops','mutation','early-return','tuples-patterns','typed-errors'].every(familyQualified);
+  }
   else if(task.id==='checked-order')qualified=familyQualified('operators');
-  else if(task.id==='typed-io')qualified=familyQualified('typed-io');
+  else if(task.id==='typed-io'){
+   implemented=suiteStates['typed-io-protocol']?.implemented;tested=typedIoApplication!==null;
+   qualified=familyQualified('typed-io');
+  }
   else if(task.id==='application-performance')qualified=applications.every(a=>a.status==='qualified');
   else if(task.id==='feature-freeze')qualified=families.every(f=>f.qualified)&&applications.every(a=>a.status==='qualified');
   return {id:task.id,status:qualified?'qualified':tested?'tested':implemented?'implemented':'blocked',dependsOn:task.dependsOn};
@@ -121,7 +149,8 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
  }
  const qualification='dist/scoped-correctness/SEVEN_BACKEND_QUALIFICATION.json';
  const report=deriveReadiness(contract,{commit:process.env.GITHUB_SHA,suites,
-  fullQualification:fs.existsSync(path.join(root,qualification))?read(qualification):null});
+  fullQualification:fs.existsSync(path.join(root,qualification))?read(qualification):null,
+  typedIoApplication:fs.existsSync(path.join(root,'dist/scoped-correctness/typed-io/application.json'))?read('dist/scoped-correctness/typed-io/application.json'):null});
  fs.mkdirSync(path.join(root,'dist/development'),{recursive:true});
  fs.writeFileSync(path.join(root,'dist/development/practical-core-readiness.json'),JSON.stringify(report,null,2)+'\n');
  console.log('PSC1_PRACTICAL_CORE_READINESS: '+JSON.stringify({counts:report.counts,releaseReady:report.releaseReady}));

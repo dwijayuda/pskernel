@@ -108,6 +108,8 @@ for(const syntax of ['lean','ps'])for(const target of ['js','ts','rust']){
    let loaded=false;
    await assert.rejects(()=>withTypedIo({...config,capabilities:[]},async()=>{loaded=true;return {};},()=>{}),/REQUIRED_CAPABILITY_DENIED/);
    assert.equal(loaded,false);checks.push('capability-preflight-before-load');
+   await assert.rejects(()=>withTypedIo(config,load,()=>{throw Error('PSC1_TEST_PROGRAM_TRAP');}),/PSC1_TEST_PROGRAM_TRAP/);
+   checks.push('application-trap-escapes-source-error-channel');
    await withTypedIo(config,load,async(program,io)=>{
     const begin=program.beginFile('input.json');assert.equal(begin,oracle.begin);
     const response=io.execute(begin);assert.deepEqual(JSON.parse(response),JSON.parse(sourceResponse));

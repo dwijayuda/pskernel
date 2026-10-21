@@ -26,3 +26,21 @@ assert.throws(()=>deriveReadiness(contract,{commit,suites}),/missing grammar/);
 suites['compiler-m'].receipt.testedCommit='b'.repeat(40);
 assert.throws(()=>deriveReadiness(contract,{commit,suites}),/stale/);
 console.log('PSC1_RELEASE_READINESS_CONTRACT: PASS missing, stale, partial, duplicate and weakened policies refuse');
+
+const io={schema:'psc1-typed-io-application-execution/1',testedCommit:commit,checkerCommit:contract.authority.commit,
+ passed:true,failures:[],completeFamily:false,sevenHostAdapters:false,
+ records:['lean','ps'].flatMap(syntax=>['js','ts','rust'].map(target=>({
+ syntax,target,passed:true,runtime:'executed',admission:'independent-official-Lean',strictIr:'required-by-production-publication',
+ checks:['capability-preflight-before-load','actual-json-file-read-transform-atomic-write','actual-console-unicode-crlf-empty-eof'],
+ ...Object.fromEntries(['sourceSha256','librarySha256','artifactSha256','manifestSha256','oracleSha256'].map(k=>[k,'a'.repeat(64)]))
+ })))};
+const ioReport=deriveReadiness(contract,{commit,typedIoApplication:io});
+assert.equal(ioReport.releaseReady,false);assert.ok(ioReport.applications.every(a=>a.status==='blocked'));
+assert.equal(ioReport.applications.find(a=>a.id==='json-files').ioStatus,'tested');
+for(const change of [
+ x=>x.testedCommit='b'.repeat(40),x=>x.records.pop(),x=>x.records.push(x.records[0]),
+ x=>x.records[0].runtime='skipped',x=>x.records[0].checks=[],x=>x.completeFamily=true
+]){
+ const changed=clone(io);change(changed);
+ assert.throws(()=>deriveReadiness(contract,{commit,typedIoApplication:changed}));
+}

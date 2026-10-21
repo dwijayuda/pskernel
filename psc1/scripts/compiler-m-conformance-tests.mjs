@@ -58,7 +58,7 @@ const extraLibraries={option:read(path.join(root,'stdlib/ProofScript/Data/Option
  prod:read(path.join(root,'stdlib/ProofScript/Data/Prod.lean')),
  list:read(path.join(root,'stdlib/ProofScript/Data/List.lean')),
  array:read(path.join(root,'stdlib/ProofScript/Data/Array.lean'))};
-const jsonLibraries=(jsonApplication||ioProtocol)?{json:read(path.join(root,'stdlib/ProofScript/Data/Json.lean')),ordering:read(path.join(root,'stdlib/ProofScript/Data/Ordering.lean'))}:{};
+const jsonLibraries=(jsonApplication||ioProtocol)?{ordering:read(path.join(root,'stdlib/ProofScript/Data/Ordering.lean')),json:read(path.join(root,'stdlib/ProofScript/Data/Json.lean'))}:{};
 if(ioProtocol)jsonLibraries.io=read(path.join(root,'stdlib/ProofScript/System/IO.lean'));
 const librarySha256=Object.fromEntries(Object.entries({...extraLibraries,...jsonLibraries,result:resultLibrary,effect:effectLibrary}).map(([key,value])=>[key,sha(value)]));
 const leanFixture=read(path.join(root,'test',fixtureName+'.lean'));
@@ -70,7 +70,7 @@ instance {C S E : Type} : MonadExceptOf E (CompilerM C S E) where
   throw := compilerThrow
   tryCatch := compilerTryCatch
 `;
-const oracleSource=jsonApplication?read(path.join(root,'test/JsonRecordReference.lean')):'import Lean\n'+Object.values({...extraLibraries,...jsonLibraries}).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+
+const oracleSource=jsonApplication?read(path.join(root,'test/JsonRecordReference.lean')):'import Lean\n'+Object.values(extraLibraries).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+Object.values(jsonLibraries).map(stripImports).join('\n')+'\n'+
  nativeAdapter+'\n'+stripImports(leanFixture)+'\n'+
  'def main : IO Unit := do\n  IO.println (\"PSC1_COMPILERM_ORACLE: \" ++ (Lean.Json.mkObj [("leanVersion",Lean.toJson Lean.versionString),("leanCommit",Lean.toJson Lean.githash),'+
  contract.cases.flatMap(c=>[false,true].map(flag=>'("'+c.id+(flag?'True':'False')+'",Lean.toJson (toString ('+c.id+' '+flag+')))')).join(',')+']).compress)\n';

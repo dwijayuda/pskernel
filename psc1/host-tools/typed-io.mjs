@@ -13,9 +13,9 @@ const deny=code=>{throw new PolicyError(code);};
 function syscallError(e){
  if(e instanceof PolicyError)return e.code;
  if(e?.code==='ENOENT')return 'notFound';
- if(['ELOOP','ENOTDIR'].includes(e?.code))return 'pathDenied';
+ if(['ELOOP','ENOTDIR','ENAMETOOLONG'].includes(e?.code))return 'pathDenied';
  if(['EISDIR','ENXIO','ENODEV'].includes(e?.code))return 'wrongType';
- if(['EACCES','EPERM','ENOSPC','EDQUOT','EROFS','EIO','EMFILE','ENFILE','EFBIG'].includes(e?.code))return 'ioFailure';
+ if(['EACCES','EPERM','ENOSPC','EDQUOT','EROFS','EIO','EMFILE','ENFILE','EFBIG','EPIPE','EAGAIN'].includes(e?.code))return 'ioFailure';
  // Programming errors, traps, malformed integration and unknown failures escape.
  throw e;
 }
@@ -72,6 +72,7 @@ export function createTypedIo(config){
   throw Error('PSC1_IO_CONFIGURATION: console descriptor');
  if(typeof config.root!=='string'||!path.isAbsolute(config.root))
   throw Error('PSC1_IO_CONFIGURATION: absolute root');
+ const inputFd=config.inputFd,outputFd=config.outputFd;
  const root=fs.openSync(config.root,C.O_RDONLY|C.O_DIRECTORY|C.O_NOFOLLOW);
  let closed=false;
  function parent(relative,action){
@@ -133,7 +134,7 @@ export function createTypedIo(config){
   const bytes=Buffer.alloc(lineLimit+1);let size=0;
   for(;;){
    if(inputOffset===input.length&&!inputEnded){
-    const chunk=Buffer.alloc(4096),count=fs.readSync(config.inputFd,chunk,0,chunk.length,null);
+    const chunk=Buffer.alloc(4096),count=fs.readSync(inputFd,chunk,0,chunk.length,null);
     input=chunk.subarray(0,count);inputOffset=0;inputEnded=count===0;
    }
    if(inputEnded){
@@ -165,7 +166,7 @@ export function createTypedIo(config){
     if(request.op==='writeLine'){
      if(typeof request.text!=='string'||/[\r\n]/.test(request.text))deny('protocolError');
      const bytes=scalarBytes(request.text,lineLimit);
-     writeAll(config.outputFd,Buffer.concat([bytes,Buffer.from('\n')]));
+     writeAll(outputFd,Buffer.concat([bytes,Buffer.from('\n')]));
      return reply('unit');
     }
     if(request.op==='readUtf8')return reply('text',{text:readText(request.path)});

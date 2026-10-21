@@ -53,6 +53,7 @@ jobs:
           node scripts/language-backend-parity-contract-tests.mjs
           node scripts/js-generation-manifest-contract-tests.mjs
           node scripts/practical-core-readiness.mjs
+          node scripts/typed-io-policy-tests.mjs
           node --input-type=module <<'JS'
           import {spawnSync} from 'node:child_process';
           import assert from 'node:assert/strict';

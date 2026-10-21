@@ -7,7 +7,19 @@ Base #171 remains1fad9ed53cda9b23ac30be9cea85e7857437564e.
 Preserve history with fresh HEAD reads,expected-HEAD updates and force=false.
 No merge,registry publication or branch-protection change is authorized here.
 
-## Active unqualified typed IO continuation
+## Qualified general sequencing checkpoint
+
+Implementation5a0f999a1b5d06f5b68461392fab05a8c86ca535 passes Linux run39612250401:
+https://github.com/dwijayuda/pskernel/actions/runs/39612250401
+Tested mergef5a67080458c996a7ba29555d37f973260e6e37d; full119266753508 and
+aggregate119273090917 SUCCESS. Native, all compiler closures, G1 and focused
+jobs succeed. Both grammars/all7 pass28 sequencing obligations, plus4 on minimum
+Python. Real general sequencing executes8 JS/TS/Rust/Python grammar/target bundles.
+Standalone Python and Rust each pass20 actual Linux policy checks. Host traps
+escape source handlers. PHP standalone and Wasm String/host ABI remain excluded.
+The Rust lock below is captured verbatim from this successful Linux job.
+
+## Active typed IO continuation
 
 Source sequencing now uses the checked Io alias of CompilerM with an explicit
 String dispatcher, authored in both grammars. Commit d16e1d1bc3dd17ba09d428bd4844dbc0c46e990c

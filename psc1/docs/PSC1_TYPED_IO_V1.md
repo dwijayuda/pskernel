@@ -88,3 +88,32 @@ standalone host adapters and Wasm IO adapters remain unfinished; Wasm public Str
 an explicit blocker. The seven-target Bool protocol matrix qualifies only pure
 request/response semantics, never seven host adapters or complete applications.
 Release readiness must remain false until all fixed contract criteria qualify.
+
+
+## Checked sequencing and standalone profiles
+
+The checked `Io A` alias uses CompilerM with an explicit String dispatcher.
+Both grammars share bind, loops, mutation, return ownership and typed handlers.
+Successful external writes remain observable after later typed errors; source
+handlers never convert foreign traps into IoError.
+
+`--abi io-dispatcher` accepts exactly a `String -> String` callback input with
+scalar remaining arguments/results. The sealed manifest records publicAbi;
+metadata grants no admission authority. Default ABI and verified refusals remain.
+
+`typed_io.py` and `typed-io-rust` provide standalone Linux Python/Rust hosts.
+Rust uses owned Read/Write streams and forbids unsafe code. The Linux-captured
+Cargo.lock pins its dependency graph. The common20-case actual Linux policy
+matrix and general generated guest execution pass for both standalone profiles.
+
+`typed-io.php` adds the explicit `psc1-php-linux-ffi-string-io/1` Linux CLI/glibc
+profile. Enabled FFI is required before guest loading; source receives no FFI
+primitive. openat and held directory descriptors enforce path policy. fstat
+operates on a duplicate of a securely opened descriptor, avoiding guessed native
+stat layouts. This PHP profile is pending Linux qualification; existing defaults
+retain their boundaries.
+
+Qualification of5a0f999a1b5d06f5b68461392fab05a8c86ca535:
+https://github.com/dwijayuda/pskernel/actions/runs/39612250401
+Both grammars/all7:28 sequencing obligations, minimum Python adds4;8 actual
+JS/TS/Rust/Python consumers. PHP standalone and Wasm String ABI are excluded.

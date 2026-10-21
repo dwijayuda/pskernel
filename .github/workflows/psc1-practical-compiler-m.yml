@@ -62,10 +62,6 @@ jobs:
       - name: Qualify standalone Rust capability policy
         run: |
           set -euo pipefail
-          cargo generate-lockfile --manifest-path host-tools/typed-io-rust/Cargo.toml
-          echo PSC1_IO_RUST_LOCK_BEGIN
-          cat host-tools/typed-io-rust/Cargo.lock
-          echo PSC1_IO_RUST_LOCK_END
           cargo build --locked --manifest-path host-tools/typed-io-rust/Cargo.toml --bin psc1-io-policy-server
           export PSC1_STANDALONE_IO_COMMAND="[\"$PWD/host-tools/typed-io-rust/target/debug/psc1-io-policy-server\"]"
           export PSC1_STANDALONE_IO_ABI=psc1-rust-linux-string-io/1

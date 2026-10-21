@@ -49,7 +49,7 @@ jobs:
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
           php-version: '8.5.11'
-          extensions: gmp
+          extensions: gmp, ffi
           tools: none
           coverage: none
       - name: Record scripting target runtimes
@@ -208,9 +208,13 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
           node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
           python3 scripts/standalone-io-policy-tests.py
+          export PSC1_STANDALONE_IO_COMMAND="[\"php\",\"-d\",\"ffi.enable=1\",\"$PWD/scripts/standalone-io-server.php\"]"
+          export PSC1_STANDALONE_IO_ABI=psc1-php-linux-ffi-string-io/1
+          python3 scripts/standalone-io-policy-tests.py
+          unset PSC1_STANDALONE_IO_COMMAND PSC1_STANDALONE_IO_ABI
           node scripts/typed-io-policy-tests.mjs
           PSC1_IO_APPLICATION_TARGETS=js,ts,rust,python,php node scripts/typed-io-application-tests.mjs
-          PSC1_IO_DISPATCHER_TARGETS=js,ts,rust,python node scripts/typed-io-dispatcher-tests.mjs
+          PSC1_IO_DISPATCHER_TARGETS=js,ts,rust,python,php node scripts/typed-io-dispatcher-tests.mjs
           node scripts/check-language-backend-parity.mjs docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json dist/scoped-correctness/stdlib-collections/results.json
           node scripts/check-language-backend-parity.mjs docs/PSC1_COMPILERM_CASE_CONTRACT.json dist/scoped-correctness/compiler-m/results.json
       - name: Execute owned component binary encoder with external encoding disabled

@@ -8,13 +8,12 @@ use std::io::{self, Read, Write};
 use std::os::fd::AsRawFd;
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::{Path, PathBuf};
-use std::sync::{atomic::{AtomicU64, Ordering}, Mutex};
+use std::sync::Mutex;
 const OPS: [&str;4]=["readLine","writeLine","readUtf8","writeUtf8"];
 // Linux asm-generic/fcntl.h. This ABI explicitly refuses non-Linux hosts.
 const DIRECTORY:i32=0o200000;
 const NOFOLLOW:i32=0o400000;
 const NONBLOCK:i32=0o4000;
-static TEMP:AtomicU64=AtomicU64::new(0);
 
 #[derive(Debug)]
 enum Failure { Policy(&'static str), Host(io::Error) }
@@ -123,7 +122,9 @@ impl TypedIo {
     Err(e) if e.kind()==io::ErrorKind::NotFound=>{},
     Err(e)=>return Err(e.into())
    }
-   let temporary=directory.join(format!(".psc1-io-{}-{}",std::process::id(),TEMP.fetch_add(1,Ordering::Relaxed)));
+   let mut nonce=[0u8;16];File::open("/dev/urandom")?.read_exact(&mut nonce)?;
+   let token=nonce.iter().map(|byte|format!("{byte:02x}")).collect::<String>();
+   let temporary=directory.join(format!(".psc1-io-{token}"));
    let mut file=OpenOptions::new().write(true).create_new(true).mode(0o600)
      .custom_flags(NOFOLLOW).open(&temporary)?;
    let result=(||->Result<()>{

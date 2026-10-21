@@ -58,6 +58,16 @@ try{
   isError(request(host,'readUtf8',{path:'invalid'}),'invalidUtf8');
   isError(request(host,'writeUtf8',{path:'data',text:'\ud800'}),'invalidUtf8');
  });
+ check('actual permission refusal preserves previous file',()=>{
+  assert.notEqual(process.getuid(),0,'permission test requires the normal unprivileged Linux runner');
+  const directory=path.join(root,'protected');fs.mkdirSync(directory);
+  const file=path.join(directory,'value');fs.writeFileSync(file,'previous');
+  fs.chmodSync(directory,0o500);
+  try{
+   isError(request(host,'writeUtf8',{path:'protected/value',text:'changed'}),'ioFailure');
+   assert.equal(fs.readFileSync(file,'utf8'),'previous');
+  }finally{fs.chmodSync(directory,0o700);}
+ });
  check('missing file and directory are typed errors',()=>{
   isError(request(host,'readUtf8',{path:'missing'}),'notFound');
   isError(request(host,'readUtf8',{path:'nested'}),'wrongType');

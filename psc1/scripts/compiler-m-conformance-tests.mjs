@@ -70,7 +70,7 @@ instance {C S E : Type} : MonadExceptOf E (CompilerM C S E) where
   throw := compilerThrow
   tryCatch := compilerTryCatch
 `;
-const oracleSource=jsonApplication?read(path.join(root,'test/JsonRecordReference.lean')):'import Lean\n'+Object.values(extraLibraries).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+Object.values(jsonLibraries).map(stripImports).join('\n')+'\n'+
+const oracleSource=ioProtocol?read(path.join(root,'test/TypedIoProtocolReference.lean')):jsonApplication?read(path.join(root,'test/JsonRecordReference.lean')):'import Lean\n'+Object.values(extraLibraries).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+Object.values(jsonLibraries).map(stripImports).join('\n')+'\n'+
  nativeAdapter+'\n'+stripImports(leanFixture)+'\n'+
  'def main : IO Unit := do\n  IO.println (\"PSC1_COMPILERM_ORACLE: \" ++ (Lean.Json.mkObj [("leanVersion",Lean.toJson Lean.versionString),("leanCommit",Lean.toJson Lean.githash),'+
  contract.cases.flatMap(c=>[false,true].map(flag=>'("'+c.id+(flag?'True':'False')+'",Lean.toJson (toString ('+c.id+' '+flag+')))')).join(',')+']).compress)\n';

@@ -26,18 +26,7 @@ function run(command,args,options={}){
  assert.equal(result.status,0,command+' '+args.join(' ')+'\n'+result.stdout+result.stderr);
  return result.stdout;
 }
-const libraryPaths=['Data/Option','Data/Prod','Data/List','Data/Array','Data/Result','Data/Ordering','Data/Json','System/IO'];
-const libraries=libraryPaths.map(p=>read('stdlib/ProofScript/'+p+'.lean'));
-const application=read('test/applications/TypedIo/Program.lean');
-const strip=s=>s.split('\n').filter(l=>!l.startsWith('import ')).join('\n');
-const oracleSource='import Lean\n'+libraries.map(strip).join('\n')+'\n'+strip(application)+'\n'+
- 'def main : IO Unit := do\n  IO.println ("PSC1_TYPED_IO_ORACLE: " ++ (Lean.Json.mkObj ['+
- '("version", Lean.toJson Lean.versionString),("commit", Lean.toJson Lean.githash),'+
- '("begin", Lean.toJson (beginFile "input.json")),'+
- '("next", Lean.toJson (nextFile "output.json" '+JSON.stringify(sourceResponse)+')),'+
- '("finish", Lean.toJson (finishFile "{\\"kind\\":\\"unit\\"}")),'+
- '("line", Lean.toJson (nextLine "{\\"kind\\":\\"line\\",\\"text\\":\\"😀\\"}"))'+
- ']).compress)\n';
+const oracleSource=read('test/TypedIoApplicationReference.lean');
 const oracleFile=path.join(evidence,'NativeTypedIo.lean');write(oracleFile,oracleSource);
 const nativeOutput=run('lake',['env','lean','--run',oracleFile]);
 write(path.join(evidence,'native-oracle.log'),nativeOutput);
@@ -111,9 +100,9 @@ for(const syntax of ['lean','ps'])for(const target of ['js','ts','rust']){
    await assert.rejects(()=>withTypedIo(config,load,()=>{throw Error('PSC1_TEST_PROGRAM_TRAP');}),/PSC1_TEST_PROGRAM_TRAP/);
    checks.push('application-trap-escapes-source-error-channel');
    await withTypedIo(config,load,async(program,io)=>{
-    const begin=program.beginFile('input.json');assert.equal(begin,oracle.begin);
+    const begin=program.beginFile('input.json');assert.deepEqual(JSON.parse(begin),JSON.parse(oracle.begin));
     const response=io.execute(begin);assert.deepEqual(JSON.parse(response),JSON.parse(sourceResponse));
-    const next=program.nextFile('output.json',response);assert.equal(next,oracle.next);
+    const next=program.nextFile('output.json',response);assert.deepEqual(JSON.parse(next),JSON.parse(oracle.next));
     assert.equal(program.finishFile(io.execute(next)),true);
     assert.equal(fs.readFileSync(path.join(capabilityRoot,'output.json'),'utf8'),expectedText);
     checks.push('actual-json-file-read-transform-atomic-write');

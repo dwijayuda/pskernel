@@ -48,7 +48,7 @@ for(const data of [ioPolicy,ioApplication]){
  assert.equal(data.passed,true);
 }
 assert.equal(ioPolicy.schema,'psc1-typed-io-policy-tests/1');assert.equal(ioPolicy.platform,'linux');
-assert.ok(ioPolicy.checks.length>=19);
+assert.ok(ioPolicy.checks.length>=20);
 assert.equal(ioApplication.schema,'psc1-typed-io-application-execution/1');
 assert.equal(ioApplication.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 assert.deepEqual(ioApplication.failures,[]);

@@ -1,0 +1,3406 @@
+{
+  "schema": "pskernel-resource-origin-diagnostic-receipt-v1",
+  "harnessSha": "9e745aeb3c6482e202f379609fa2573f1d9997b4",
+  "kernelSourceSha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+  "run": 39616011720,
+  "job": 119277124203,
+  "terminalConclusion": "success",
+  "qualificationScope": "Authenticated focused resource observation only; resource outcome is incomplete and generated V1 timed out; no Arena or V1 semantic parity claim.",
+  "artifact": {
+    "id": 12352751782,
+    "zipSha256": "7ad78a8382c1ff2f0e729903ebfad207534e84ffede529febbd8bb1cd1ae12db"
+  },
+  "payloads": [
+    {
+      "marker": "PSC1_AUTHENTICATED_RESOURCE_RUNTIME",
+      "data": {
+        "format": "psc1-authenticated-resource-artifact-replay-v1",
+        "source_sha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+        "producer_source_sha": "ab61efebac4e0b09cc3bf57c09380ae53ac2cf7f",
+        "producer_run": 39607734805,
+        "artifact_id": 12350649771,
+        "artifact_zip_sha256": "9ae05c3d0cd949f74a1a4c8a3a833b3fd755f1cb917897ab59552c9ce3aa90cc",
+        "artifact_zip_bytes": 14770339,
+        "lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "producer_typescript": "7.0.2",
+        "producer_generated_route": "complete checked canonical .ps closure",
+        "files": [
+          {
+            "name": "kernel.js",
+            "bytes": 9709333,
+            "sha256": "c914cf60363d55d3cb0e0fb8303841188997f70fc4656b714b0bed146c4f928f"
+          },
+          {
+            "name": "kernel.ts",
+            "bytes": 8699084,
+            "sha256": "1dbf20c43325793dbfcbd6acbdbddabe3ec3c5e8816f99cae192a0974a906a3e"
+          },
+          {
+            "name": "kernel.d.ts",
+            "bytes": 297747,
+            "sha256": "1fc48a202f55a11e37faa3d5000b835e90d2f57db5db2d1ae65accd17e6ab843"
+          },
+          {
+            "name": "kernel.js.map",
+            "bytes": 7861697,
+            "sha256": "85c3f268495d773de84b6b19f33335969b0294502de5899657fbf92084832296"
+          }
+        ],
+        "baseline_report_sha256": "f75765aa7000b14000ab2ad913b9f39bb6ba681979e8bb85632f3f5bc28ced72",
+        "source_artifact_diagnostic_incomplete": true,
+        "compiler_reexecuted_in_this_run": false,
+        "canonical_rechecked_in_this_run": false,
+        "kernel_qualified": false,
+        "note": "Artifact authentication establishes executable identity only. Fresh controls and resource replay follow."
+      }
+    },
+    {
+      "marker": "PSC1_ARENA_RESOURCE_CASE",
+      "data": {
+        "source_sha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+        "name": "perf/church-numerals.ndjson",
+        "mode": "original",
+        "body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "outcome": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "resource_exhausted",
+          "stage": "kernel-admission",
+          "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "elapsed_seconds": 19.378498741,
+          "observed_vm_hwm_kib_lower_bound": 1189860,
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 125.036284
+          }
+        },
+        "kernel_qualified": false
+      }
+    },
+    {
+      "marker": "PSC1_ARENA_RESOURCE_CASE",
+      "data": {
+        "source_sha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+        "name": "perf/church-numerals.ndjson",
+        "mode": "observed",
+        "body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "outcome": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "resource_exhausted",
+          "stage": "kernel-admission",
+          "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "elapsed_seconds": 22.924641736000012,
+          "observed_vm_hwm_kib_lower_bound": 1246160,
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 135.204743
+          }
+        },
+        "kernel_qualified": false
+      }
+    },
+    {
+      "marker": "PSC1_ARENA_RESOURCE_CASE",
+      "data": {
+        "source_sha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+        "name": "perf/church-numerals.ndjson",
+        "mode": "reference_v1",
+        "body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "outcome": {
+          "returncode": -9,
+          "timed_out": true,
+          "elapsed_seconds": 60.029670235,
+          "observed_vm_hwm_kib_lower_bound": 376844,
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 123.396702
+          },
+          "verdict": "timeout",
+          "stage": "host-wall-time",
+          "timeout_seconds": 60
+        },
+        "kernel_qualified": false
+      }
+    },
+    {
+      "marker": "PSC1_ARENA_RESOURCE_PROVENANCE",
+      "data": {
+        "source_sha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+        "name": "perf/church-numerals.ndjson",
+        "body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "completed_original_observed_agreement": true,
+        "completed_original_v1_reference_agreement": null,
+        "observation_limited": false,
+        "first_zero_fuel_entries": [
+          {
+            "format": "psc1-v2-decline-v1",
+            "kind": "first_zero_fuel_entry",
+            "event": 14,
+            "steps": 9910294,
+            "elapsed_ms_since_import": 22333.557195,
+            "call": 566973,
+            "operation": "psKernelExprV2TryWhnfCoreModeWithReducerFuel",
+            "declaration": {
+              "command_index": 3,
+              "request_tags": [
+                "theoremDecl"
+              ],
+              "roots": [
+                "193",
+                "196"
+              ],
+              "declarations": [
+                {
+                  "kind": "thmInfo",
+                  "name": {
+                    "tableId": "20",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_church_numerals"
+                      }
+                    ]
+                  },
+                  "source_type_id": "193",
+                  "canonical_type_id": "193",
+                  "source_value_id": "196",
+                  "canonical_value_id": "196"
+                }
+              ],
+              "batch": 1
+            },
+            "arguments": [
+              {
+                "kind": "nat",
+                "value": "0"
+              },
+              {
+                "kind": "bool",
+                "value": true
+              }
+            ],
+            "stage": 2,
+            "active_frame_count": 8193,
+            "root_operations": [
+              {
+                "call": 408,
+                "operation": "psKernelDagAdmitDeclaration",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "resources",
+                      "provider"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 409,
+                "operation": "psKernelDagTryAdmitSimpleWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "constants",
+                      "index",
+                      "quotInitialized",
+                      "runtime"
+                    ]
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "0"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 11203,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "1784"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "1783"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "193"
+                  }
+                ]
+              }
+            ],
+            "nearest_operations": [
+              {
+                "call": 566831,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "3"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              },
+              {
+                "call": 566906,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "2"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              },
+              {
+                "call": 566962,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "2"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10639"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10846"
+                  }
+                ]
+              },
+              {
+                "call": 566963,
+                "operation": "psKernelExprV2CheckWhnfCoreWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "1"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "arena",
+                      "coreCache",
+                      "publicCache",
+                      "declarations"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10639"
+                  },
+                  {
+                    "kind": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "call": 566971,
+                "operation": "psKernelExprV2TryWhnfCoreModeWithReducerFuel",
+                "stage": 8,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "1"
+                  },
+                  {
+                    "kind": "bool",
+                    "value": true
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "localContext",
+                      "levelParams",
+                      "safety",
+                      "eagerReduce",
+                      "nativeEvaluator",
+                      "maxRecDepth",
+                      "maxNatSize"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "arena",
+                      "coreCache",
+                      "publicCache",
+                      "declarations"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10639"
+                  }
+                ]
+              },
+              {
+                "call": 566973,
+                "operation": "psKernelExprV2TryWhnfCoreModeWithReducerFuel",
+                "stage": 2,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "0"
+                  },
+                  {
+                    "kind": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ],
+            "omitted_middle_frames": 8097,
+            "active_fuel_owner_ranges": [
+              {
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "active_frames": 4095,
+                "minimum": "2",
+                "maximum": "4096"
+              },
+              {
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "active_frames": 4093,
+                "minimum": "2",
+                "maximum": "4095"
+              },
+              {
+                "operation": "psKernelExprV2CheckWhnfCoreWithFuel",
+                "active_frames": 1,
+                "minimum": "1",
+                "maximum": "1"
+              },
+              {
+                "operation": "psKernelExprV2TryWhnfCoreModeWithReducerFuel",
+                "active_frames": 2,
+                "minimum": "0",
+                "maximum": "1"
+              }
+            ],
+            "callback_attribution_is_not_a_proof_of_captured_fuel": true,
+            "kernel_qualified": false,
+            "receipt_stack_excerpt": true,
+            "recorded_root_operation_count": 24,
+            "recorded_nearest_operation_count": 72
+          }
+        ],
+        "first_resource_error_returns": [
+          {
+            "format": "psc1-v2-decline-v1",
+            "kind": "first_resource_error_return",
+            "event": 15,
+            "steps": 9910307,
+            "elapsed_ms_since_import": 22341.655295,
+            "call": 566979,
+            "operation": "psKernelExprV2TryWhnfCoreModeWithReducerFuel",
+            "declaration": {
+              "command_index": 3,
+              "request_tags": [
+                "theoremDecl"
+              ],
+              "roots": [
+                "193",
+                "196"
+              ],
+              "declarations": [
+                {
+                  "kind": "thmInfo",
+                  "name": {
+                    "tableId": "20",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_church_numerals"
+                      }
+                    ]
+                  },
+                  "source_type_id": "193",
+                  "canonical_type_id": "193",
+                  "source_value_id": "196",
+                  "canonical_value_id": "196"
+                }
+              ],
+              "batch": 1
+            },
+            "arguments": [
+              {
+                "kind": "nat",
+                "value": "0"
+              },
+              {
+                "kind": "bool",
+                "value": true
+              },
+              {
+                "kind": "callback",
+                "implementation_name": "fn"
+              },
+              {
+                "kind": "callback",
+                "implementation_name": "fn"
+              },
+              {
+                "kind": "callback",
+                "implementation_name": "fn"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "environment",
+                  "localContext",
+                  "levelParams",
+                  "safety",
+                  "eagerReduce",
+                  "nativeEvaluator",
+                  "maxRecDepth",
+                  "maxNatSize"
+                ],
+                "recDepth": "0",
+                "maxRecDepth": "0",
+                "maxNatSize": "134217728"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "arena",
+                  "coreCache",
+                  "publicCache",
+                  "declarations"
+                ],
+                "arena_size": "10858"
+              },
+              {
+                "kind": "nat",
+                "value": "2050"
+              }
+            ],
+            "stage": 8,
+            "result": {
+              "kind": "some-error",
+              "error": {
+                "message": "kernel reduction budget exhausted",
+                "resource_error": true,
+                "source": "exact-resource-message"
+              }
+            },
+            "active_frame_count": 8193,
+            "root_operations": [
+              {
+                "call": 408,
+                "operation": "psKernelDagAdmitDeclaration",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "resources",
+                      "provider"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 409,
+                "operation": "psKernelDagTryAdmitSimpleWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "constants",
+                      "index",
+                      "quotInitialized",
+                      "runtime"
+                    ]
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "0"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 11203,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "1784"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "1783"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "193"
+                  }
+                ]
+              }
+            ],
+            "nearest_operations": [
+              {
+                "call": 566831,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "3"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              },
+              {
+                "call": 566906,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "2"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              },
+              {
+                "call": 566962,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "2"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10639"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10846"
+                  }
+                ]
+              },
+              {
+                "call": 566963,
+                "operation": "psKernelExprV2CheckWhnfCoreWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "1"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "arena",
+                      "coreCache",
+                      "publicCache",
+                      "declarations"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10639"
+                  },
+                  {
+                    "kind": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "call": 566971,
+                "operation": "psKernelExprV2TryWhnfCoreModeWithReducerFuel",
+                "stage": 8,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "1"
+                  },
+                  {
+                    "kind": "bool",
+                    "value": true
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "localContext",
+                      "levelParams",
+                      "safety",
+                      "eagerReduce",
+                      "nativeEvaluator",
+                      "maxRecDepth",
+                      "maxNatSize"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "arena",
+                      "coreCache",
+                      "publicCache",
+                      "declarations"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10639"
+                  }
+                ]
+              },
+              {
+                "call": 566979,
+                "operation": "psKernelExprV2TryWhnfCoreModeWithReducerFuel",
+                "stage": 8,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "0"
+                  },
+                  {
+                    "kind": "bool",
+                    "value": true
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "localContext",
+                      "levelParams",
+                      "safety",
+                      "eagerReduce",
+                      "nativeEvaluator",
+                      "maxRecDepth",
+                      "maxNatSize"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "arena",
+                      "coreCache",
+                      "publicCache",
+                      "declarations"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "2050"
+                  }
+                ]
+              }
+            ],
+            "omitted_middle_frames": 8097,
+            "active_fuel_owner_ranges": [
+              {
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "active_frames": 4095,
+                "minimum": "2",
+                "maximum": "4096"
+              },
+              {
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "active_frames": 4093,
+                "minimum": "2",
+                "maximum": "4095"
+              },
+              {
+                "operation": "psKernelExprV2CheckWhnfCoreWithFuel",
+                "active_frames": 1,
+                "minimum": "1",
+                "maximum": "1"
+              },
+              {
+                "operation": "psKernelExprV2TryWhnfCoreModeWithReducerFuel",
+                "active_frames": 2,
+                "minimum": "0",
+                "maximum": "1"
+              }
+            ],
+            "callback_attribution_is_not_a_proof_of_captured_fuel": true,
+            "kernel_qualified": false,
+            "receipt_stack_excerpt": true,
+            "recorded_root_operation_count": 24,
+            "recorded_nearest_operation_count": 72
+          },
+          {
+            "format": "psc1-v2-decline-v1",
+            "kind": "first_resource_error_return",
+            "event": 16,
+            "steps": 9910314,
+            "elapsed_ms_since_import": 22351.457553,
+            "call": 566963,
+            "operation": "psKernelExprV2CheckWhnfCoreWithFuel",
+            "declaration": {
+              "command_index": 3,
+              "request_tags": [
+                "theoremDecl"
+              ],
+              "roots": [
+                "193",
+                "196"
+              ],
+              "declarations": [
+                {
+                  "kind": "thmInfo",
+                  "name": {
+                    "tableId": "20",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_church_numerals"
+                      }
+                    ]
+                  },
+                  "source_type_id": "193",
+                  "canonical_type_id": "193",
+                  "source_value_id": "196",
+                  "canonical_value_id": "196"
+                }
+              ],
+              "batch": 1
+            },
+            "arguments": [
+              {
+                "kind": "nat",
+                "value": "1"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "scalar",
+                  "locals"
+                ],
+                "recDepth": "0",
+                "maxRecDepth": "0",
+                "maxNatSize": "134217728"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "arena",
+                  "coreCache",
+                  "publicCache",
+                  "declarations"
+                ],
+                "arena_size": "10858"
+              },
+              {
+                "kind": "nat",
+                "value": "10639"
+              },
+              {
+                "kind": "bool",
+                "value": true
+              }
+            ],
+            "stage": 1,
+            "result": {
+              "kind": "some-error",
+              "error": {
+                "message": "kernel reduction budget exhausted",
+                "resource_error": true,
+                "source": "exact-resource-message"
+              }
+            },
+            "active_frame_count": 8191,
+            "root_operations": [
+              {
+                "call": 408,
+                "operation": "psKernelDagAdmitDeclaration",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "resources",
+                      "provider"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 409,
+                "operation": "psKernelDagTryAdmitSimpleWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "constants",
+                      "index",
+                      "quotInitialized",
+                      "runtime"
+                    ]
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "0"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 11203,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "1784"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "1783"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "193"
+                  }
+                ]
+              }
+            ],
+            "nearest_operations": [
+              {
+                "call": 566700,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10641"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10848"
+                  }
+                ]
+              },
+              {
+                "call": 566775,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "3"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10641"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10848"
+                  }
+                ]
+              },
+              {
+                "call": 566831,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "3"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              },
+              {
+                "call": 566906,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "2"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              },
+              {
+                "call": 566962,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "2"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10639"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10846"
+                  }
+                ]
+              },
+              {
+                "call": 566963,
+                "operation": "psKernelExprV2CheckWhnfCoreWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "1"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "arena",
+                      "coreCache",
+                      "publicCache",
+                      "declarations"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10639"
+                  },
+                  {
+                    "kind": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ],
+            "omitted_middle_frames": 8095,
+            "active_fuel_owner_ranges": [
+              {
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "active_frames": 4095,
+                "minimum": "2",
+                "maximum": "4096"
+              },
+              {
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "active_frames": 4093,
+                "minimum": "2",
+                "maximum": "4095"
+              },
+              {
+                "operation": "psKernelExprV2CheckWhnfCoreWithFuel",
+                "active_frames": 1,
+                "minimum": "1",
+                "maximum": "1"
+              }
+            ],
+            "callback_attribution_is_not_a_proof_of_captured_fuel": true,
+            "kernel_qualified": false,
+            "receipt_stack_excerpt": true,
+            "recorded_root_operation_count": 24,
+            "recorded_nearest_operation_count": 72
+          },
+          {
+            "format": "psc1-v2-decline-v1",
+            "kind": "first_resource_error_return",
+            "event": 17,
+            "steps": 9910320,
+            "elapsed_ms_since_import": 22355.082745,
+            "call": 566962,
+            "operation": "psKernelExprV2TryDefEqStateWithFuel",
+            "declaration": {
+              "command_index": 3,
+              "request_tags": [
+                "theoremDecl"
+              ],
+              "roots": [
+                "193",
+                "196"
+              ],
+              "declarations": [
+                {
+                  "kind": "thmInfo",
+                  "name": {
+                    "tableId": "20",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_church_numerals"
+                      }
+                    ]
+                  },
+                  "source_type_id": "193",
+                  "canonical_type_id": "193",
+                  "source_value_id": "196",
+                  "canonical_value_id": "196"
+                }
+              ],
+              "batch": 1
+            },
+            "arguments": [
+              {
+                "kind": "nat",
+                "value": "2"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "scalar",
+                  "locals"
+                ],
+                "recDepth": "0",
+                "maxRecDepth": "0",
+                "maxNatSize": "134217728"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "whnf",
+                  "nextFresh",
+                  "checkedInfer",
+                  "success",
+                  "inferOnly",
+                  "unfold",
+                  "failure"
+                ],
+                "arena_size": "10858"
+              },
+              {
+                "kind": "nat",
+                "value": "10639"
+              },
+              {
+                "kind": "nat",
+                "value": "10846"
+              }
+            ],
+            "stage": 5,
+            "result": {
+              "kind": "some-error",
+              "error": {
+                "message": "kernel reduction budget exhausted",
+                "resource_error": true,
+                "source": "exact-resource-message"
+              }
+            },
+            "active_frame_count": 8190,
+            "root_operations": [
+              {
+                "call": 408,
+                "operation": "psKernelDagAdmitDeclaration",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "resources",
+                      "provider"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 409,
+                "operation": "psKernelDagTryAdmitSimpleWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "constants",
+                      "index",
+                      "quotInitialized",
+                      "runtime"
+                    ]
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "0"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 11203,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "1784"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "1783"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "193"
+                  }
+                ]
+              }
+            ],
+            "nearest_operations": [
+              {
+                "call": 566644,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10642"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10849"
+                  }
+                ]
+              },
+              {
+                "call": 566700,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10641"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10848"
+                  }
+                ]
+              },
+              {
+                "call": 566775,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "3"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10641"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10848"
+                  }
+                ]
+              },
+              {
+                "call": 566831,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "3"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              },
+              {
+                "call": 566906,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "2"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              },
+              {
+                "call": 566962,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "2"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10639"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10846"
+                  }
+                ]
+              }
+            ],
+            "omitted_middle_frames": 8094,
+            "active_fuel_owner_ranges": [
+              {
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "active_frames": 4095,
+                "minimum": "2",
+                "maximum": "4096"
+              },
+              {
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "active_frames": 4093,
+                "minimum": "2",
+                "maximum": "4095"
+              }
+            ],
+            "callback_attribution_is_not_a_proof_of_captured_fuel": true,
+            "kernel_qualified": false,
+            "receipt_stack_excerpt": true,
+            "recorded_root_operation_count": 24,
+            "recorded_nearest_operation_count": 72
+          },
+          {
+            "format": "psc1-v2-decline-v1",
+            "kind": "first_resource_error_return",
+            "event": 18,
+            "steps": 9910336,
+            "elapsed_ms_since_import": 22358.512381,
+            "call": 566906,
+            "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+            "declaration": {
+              "command_index": 3,
+              "request_tags": [
+                "theoremDecl"
+              ],
+              "roots": [
+                "193",
+                "196"
+              ],
+              "declarations": [
+                {
+                  "kind": "thmInfo",
+                  "name": {
+                    "tableId": "20",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_church_numerals"
+                      }
+                    ]
+                  },
+                  "source_type_id": "193",
+                  "canonical_type_id": "193",
+                  "source_value_id": "196",
+                  "canonical_value_id": "196"
+                }
+              ],
+              "batch": 1
+            },
+            "arguments": [
+              {
+                "kind": "nat",
+                "value": "2"
+              },
+              {
+                "kind": "callback",
+                "implementation_name": "fn"
+              },
+              {
+                "kind": "callback",
+                "implementation_name": "fn"
+              },
+              {
+                "kind": "callback",
+                "implementation_name": "fn"
+              },
+              {
+                "kind": "callback",
+                "implementation_name": "fn"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "scalar",
+                  "locals"
+                ],
+                "recDepth": "0",
+                "maxRecDepth": "0",
+                "maxNatSize": "134217728"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "whnf",
+                  "nextFresh",
+                  "checkedInfer",
+                  "success",
+                  "inferOnly",
+                  "unfold",
+                  "failure"
+                ],
+                "arena_size": "10858"
+              },
+              {
+                "kind": "nat",
+                "value": "10640"
+              },
+              {
+                "kind": "nat",
+                "value": "10847"
+              }
+            ],
+            "stage": 1,
+            "result": {
+              "kind": "some-error",
+              "error": {
+                "message": "kernel reduction budget exhausted",
+                "resource_error": true,
+                "source": "exact-resource-message"
+              }
+            },
+            "active_frame_count": 8189,
+            "root_operations": [
+              {
+                "call": 408,
+                "operation": "psKernelDagAdmitDeclaration",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "resources",
+                      "provider"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 409,
+                "operation": "psKernelDagTryAdmitSimpleWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "constants",
+                      "index",
+                      "quotInitialized",
+                      "runtime"
+                    ]
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "0"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 11203,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "1784"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "1783"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "193"
+                  }
+                ]
+              }
+            ],
+            "nearest_operations": [
+              {
+                "call": 566569,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "5"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10642"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10849"
+                  }
+                ]
+              },
+              {
+                "call": 566644,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10642"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10849"
+                  }
+                ]
+              },
+              {
+                "call": 566700,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10641"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10848"
+                  }
+                ]
+              },
+              {
+                "call": 566775,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "3"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10641"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10848"
+                  }
+                ]
+              },
+              {
+                "call": 566831,
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "stage": 5,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "3"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              },
+              {
+                "call": 566906,
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "2"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "callback",
+                    "implementation_name": "fn"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "scalar",
+                      "locals"
+                    ],
+                    "recDepth": "0",
+                    "maxRecDepth": "0",
+                    "maxNatSize": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "whnf",
+                      "nextFresh",
+                      "checkedInfer",
+                      "success",
+                      "inferOnly",
+                      "unfold",
+                      "failure"
+                    ],
+                    "arena_size": "10858"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10640"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "10847"
+                  }
+                ]
+              }
+            ],
+            "omitted_middle_frames": 8093,
+            "active_fuel_owner_ranges": [
+              {
+                "operation": "psKernelExprV2TryDefEqStateWithFuel",
+                "active_frames": 4094,
+                "minimum": "3",
+                "maximum": "4096"
+              },
+              {
+                "operation": "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+                "active_frames": 4093,
+                "minimum": "2",
+                "maximum": "4095"
+              }
+            ],
+            "callback_attribution_is_not_a_proof_of_captured_fuel": true,
+            "kernel_qualified": false,
+            "receipt_stack_excerpt": true,
+            "recorded_root_operation_count": 24,
+            "recorded_nearest_operation_count": 72
+          },
+          {
+            "format": "psc1-v2-decline-v1",
+            "kind": "first_resource_error_return",
+            "event": 19,
+            "steps": 10004493,
+            "elapsed_ms_since_import": 22613.145571,
+            "call": 409,
+            "operation": "psKernelDagTryAdmitSimpleWithFuel",
+            "declaration": {
+              "command_index": 3,
+              "request_tags": [
+                "theoremDecl"
+              ],
+              "roots": [
+                "193",
+                "196"
+              ],
+              "declarations": [
+                {
+                  "kind": "thmInfo",
+                  "name": {
+                    "tableId": "20",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_church_numerals"
+                      }
+                    ]
+                  },
+                  "source_type_id": "193",
+                  "canonical_type_id": "193",
+                  "source_value_id": "196",
+                  "canonical_value_id": "196"
+                }
+              ],
+              "batch": 1
+            },
+            "arguments": [
+              {
+                "kind": "nat",
+                "value": "4096"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "constants",
+                  "index",
+                  "quotInitialized",
+                  "runtime"
+                ]
+              },
+              {
+                "kind": "nat",
+                "value": "0"
+              },
+              {
+                "kind": "nat",
+                "value": "134217728"
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "pages",
+                  "active",
+                  "size",
+                  "pageLimit"
+                ]
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "head",
+                  "tail"
+                ]
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "base",
+                  "value"
+                ]
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "value"
+                ]
+              }
+            ],
+            "stage": 1,
+            "result": {
+              "kind": "some-error",
+              "error": {
+                "message": "kernel reduction budget exhausted",
+                "resource_error": true,
+                "source": "exact-resource-message"
+              }
+            },
+            "active_frame_count": 2,
+            "root_operations": [
+              {
+                "call": 408,
+                "operation": "psKernelDagAdmitDeclaration",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "resources",
+                      "provider"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 409,
+                "operation": "psKernelDagTryAdmitSimpleWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "constants",
+                      "index",
+                      "quotInitialized",
+                      "runtime"
+                    ]
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "0"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "nearest_operations": [
+              {
+                "call": 408,
+                "operation": "psKernelDagAdmitDeclaration",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "resources",
+                      "provider"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              {
+                "call": 409,
+                "operation": "psKernelDagTryAdmitSimpleWithFuel",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "nat",
+                    "value": "4096"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "constants",
+                      "index",
+                      "quotInitialized",
+                      "runtime"
+                    ]
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "0"
+                  },
+                  {
+                    "kind": "nat",
+                    "value": "134217728"
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "omitted_middle_frames": 0,
+            "active_fuel_owner_ranges": [],
+            "callback_attribution_is_not_a_proof_of_captured_fuel": true,
+            "kernel_qualified": false,
+            "receipt_stack_excerpt": true,
+            "recorded_root_operation_count": 2,
+            "recorded_nearest_operation_count": 2
+          },
+          {
+            "format": "psc1-v2-decline-v1",
+            "kind": "first_resource_error_return",
+            "event": 20,
+            "steps": 10005004,
+            "elapsed_ms_since_import": 22614.40111,
+            "call": 408,
+            "operation": "psKernelDagAdmitDeclaration",
+            "declaration": {
+              "command_index": 3,
+              "request_tags": [
+                "theoremDecl"
+              ],
+              "roots": [
+                "193",
+                "196"
+              ],
+              "declarations": [
+                {
+                  "kind": "thmInfo",
+                  "name": {
+                    "tableId": "20",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_church_numerals"
+                      }
+                    ]
+                  },
+                  "source_type_id": "193",
+                  "canonical_type_id": "193",
+                  "source_value_id": "196",
+                  "canonical_value_id": "196"
+                }
+              ],
+              "batch": 1
+            },
+            "arguments": [
+              {
+                "kind": "object",
+                "keys": [
+                  "environment",
+                  "resources",
+                  "provider"
+                ]
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "pages",
+                  "active",
+                  "size",
+                  "pageLimit"
+                ]
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "head",
+                  "tail"
+                ]
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "base",
+                  "value"
+                ]
+              },
+              {
+                "kind": "object",
+                "keys": [
+                  "value"
+                ]
+              }
+            ],
+            "stage": 1,
+            "result": {
+              "kind": "error",
+              "error": {
+                "message": "kernel reduction budget exhausted",
+                "resource_error": true,
+                "source": "actual-PsKernelError-constructor"
+              }
+            },
+            "active_frame_count": 1,
+            "root_operations": [
+              {
+                "call": 408,
+                "operation": "psKernelDagAdmitDeclaration",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "resources",
+                      "provider"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "nearest_operations": [
+              {
+                "call": 408,
+                "operation": "psKernelDagAdmitDeclaration",
+                "stage": 1,
+                "arguments": [
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "environment",
+                      "resources",
+                      "provider"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "pages",
+                      "active",
+                      "size",
+                      "pageLimit"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "head",
+                      "tail"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "base",
+                      "value"
+                    ]
+                  },
+                  {
+                    "kind": "object",
+                    "keys": [
+                      "value"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "omitted_middle_frames": 0,
+            "active_fuel_owner_ranges": [],
+            "callback_attribution_is_not_a_proof_of_captured_fuel": true,
+            "kernel_qualified": false,
+            "receipt_stack_excerpt": true,
+            "recorded_root_operation_count": 1,
+            "recorded_nearest_operation_count": 1
+          }
+        ],
+        "trace_sha256": "bc23dee3f3ba9ac51e4d01d836573706c7e4361994123b999a420cc6810af960",
+        "kernel_qualified": false
+      }
+    }
+  ],
+  "note": "Compact receipt: stack arrays below are explicitly excerpted. Complete trace and reports are preserved in the immutable linked artifact; trace SHA256 authenticates those bytes, never a kernel judgment."
+}

@@ -1,3 +1,86 @@
+# Current diagnostic checkpoint — faithful native V1 replay
+
+Date: 2026-10-21 UTC.
+Branch: `research/psc1-arena-logical-20261021`.
+Parent harness: `9e745aeb3c6482e202f379609fa2573f1d9997b4`.
+Production kernel remains pinned to `369bee5801bd5e4476837684fad3f7e1ca8c422c`.
+This commit adds host-only diagnostic execution. Its native build, controls and
+original-input execution are **NOT RUN** at creation. No production kernel source,
+fuel, logical dependency or published resource policy changes.
+
+## Exact focused resource receipt
+
+[Run 39616011720/job119277124203](https://github.com/dwijayuda/pskernel/actions/runs/39616011720/job/119277124203)
+is terminal **PASS for diagnostic collection**, at harness 9e and kernel 369.
+The observer stayed within its existing bounds. Original and observed executions
+returned the identical resource protocol, `kernel reduction budget exhausted`;
+this is an incomplete kernel result, not a rejection or Arena agreement.
+Original: 19.378498741 seconds, sampled VmHWM at least 1,189,860 KiB.
+Observed: 22.924641736 seconds, sampled VmHWM at least 1,246,160 KiB.
+The real generated V1 replay timed out at 60.029670235 seconds (sampled VmHWM at
+least 376,844 KiB). V1 semantic agreement therefore remains UNKNOWN.
+
+The first actual resource-error return is
+`psKernelExprV2TryWhnfCoreModeWithReducerFuel`, fuel 0, root 2050, arena size 10858.
+Its caller is `psKernelExprV2CheckWhnfCoreWithFuel`, fuel 1, root 10639, inside
+`psKernelExprV2TryDefEqStateWithFuel`, fuel 2, roots 10639/10846. At that origin the
+selected stack has 8193 frames: 4095 DefEq owners (fuel 4096 through 2), 4093 lazy-delta
+continuations (4095 through 2), and the remaining admission/WHNF frames. The trace
+shows recursive application-argument descent, not an unchanged-root retry loop.
+This locates the DAG resource origin at 369; it is not a proof of captured callback
+fuel, V1 equivalence, or the behavior of later carrier/integration sources.
+
+The authenticated body SHA256 is
+`85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47`.
+The complete input with adapted historical metadata header has SHA256
+`443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1`.
+It is not a freshly native 4.35-exported corpus.
+
+[Artifact 12352751782](https://github.com/dwijayuda/pskernel/actions/runs/39616011720/artifacts/12352751782)
+has ZIP SHA256
+`7ad78a8382c1ff2f0e729903ebfad207534e84ffede529febbd8bb1cd1ae12db`.
+Full trace SHA256:
+`bc23dee3f3ba9ac51e4d01d836573706c7e4361994123b999a420cc6810af960`.
+A [compact receipt](evidence/2026-10-21-9e745ae-resource-origin.json) preserves the
+runtime identities, complete outcome envelopes and explicitly excerpted stacks.
+The full original stack observations remain in the artifact.
+
+## Native diagnostic implementation and next gate
+
+The new native diagnostic workflow re-authenticates the existing immutable
+PSC1/TypeScript 7.0.2 runtime artifact and original corpus. A host-only exporter
+captures the exact 197-node DAG and four original admission requests immediately
+before the original `RunDag` call. It does not run generated admission or manufacture
+an accepted reply. It retains ordinary/mutual/nested request variants, original
+IDs and untrusted cached node metadata; it imports no exported recursor body.
+
+The generated Lean fixture and host use native `DecodeChecked`, original
+`DagDecodeDeclaration` and sequential `psKernelV1AdmitDeclaration` with fresh
+published 4096 policy. The Lake configuration is the exact pinned original prefix
+plus a fixture library and executable target. Source, input, configuration,
+compiler identity and binary digests are recorded. Three actual native controls
+must accept a valid definition, reject an invalid definition and return a fuel
+resource result. Existing 138 transport controls must also pass freshly.
+
+The native checker executes unprivileged in a detached directory with empty
+`PATH`. A private Linux cgroup enforces 2 GiB charged memory and zero swap; the
+wall limit stays 60 seconds. The root launcher joins only that private cgroup,
+drops supplementary groups/GID/UID before executing the native binary, and records
+cgroup peak memory separately from sampled native VmHWM. Setup, monitoring or
+cleanup failure stops diagnostic qualification. OOM and timeout remain incomplete
+host outcomes. There is no unbounded fallback and no global cgroup reconfiguration.
+The older generated Arena cap remains 2048 MiB of V8 old space, not an OS RSS cap;
+this diagnostic does not retroactively change or relabel it.
+
+The required next action is to inspect this exact harness commit's native Actions
+job through terminal status and compare its actual result with the recorded DAG
+resource error. Even native admission completion will not count as a full Arena
+match: exported metadata comparison is explicitly outside this diagnostic.
+Default V1, four public whole-operation fallbacks, initial input decoding,
+inductive bridging, incomplete compatibility and global proof limitations remain.
+
+---
+
 # Current diagnostic checkpoint — focused fuel-owner replay
 
 Date: 2026-10-21 UTC.

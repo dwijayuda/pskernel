@@ -1,0 +1,122 @@
+name: PSC1 authenticated native V1 Arena admission diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-arena-logical-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-arena435-native-v1.yml
+      - psc1/scripts/install-lean435-ci.sh
+      - psc1/scripts/pskernel-arena435-resource-artifact.py
+      - psc1/scripts/pskernel-arena435-native-export.mjs
+      - psc1/scripts/pskernel-arena435-native-v1.py
+      - psc1/scripts/pskernel-arena435-native-cgroup.py
+      - psc1/host/arena-native-v1/NativeChurchMain.lean
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  authenticated-native-v1-replay:
+    # Diagnostic collection only. Every native kernel source remains pinned369;
+    # this job does not qualify the harness HEAD or an Arena metadata match.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PSC1_KERNEL_SOURCE_SHA: 369bee5801bd5e4476837684fad3f7e1ca8c422c
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 369bee5801bd5e4476837684fad3f7e1ca8c422c
+          path: kernel-source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate immutable input-export runtime and baseline
+        shell: bash
+        env:
+          PSC1_REPLAY_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git -C kernel-source rev-parse HEAD)" = "$PSC1_KERNEL_SOURCE_SHA"
+          test "$(cat kernel-source/psc1/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          python3 -m py_compile psc1/scripts/pskernel-arena435-resource-artifact.py \
+            psc1/scripts/pskernel-arena435-native-v1.py \
+            psc1/scripts/pskernel-arena435-native-cgroup.py
+          node --check psc1/scripts/pskernel-arena435-native-export.mjs
+          curl -fL --retry 3 --retry-delay 2 \
+            -H "Authorization: Bearer $PSC1_REPLAY_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12350649771/zip \
+            -o "$RUNNER_TEMP/arena435-native-producer.zip"
+          python3 psc1/scripts/pskernel-arena435-resource-artifact.py \
+            --archive "$RUNNER_TEMP/arena435-native-producer.zip" \
+            --source kernel-source/psc1 \
+            --out "$RUNNER_TEMP/arena435-native-restored" \
+            --baseline "$RUNNER_TEMP/arena435-native-restored/baseline.json" \
+            --receipt "$RUNNER_TEMP/arena435-native-restored/authentication.json"
+      - name: Install exact native Lean compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash psc1/scripts/install-lean435-ci.sh
+      - name: Preserve original transport controls in a detached directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          for PSC1_NATIVE_FILE in pskernel-arena435-oracle.py \
+              pskernel-arena-replay.mjs pskernel-arena-replay-controls.mjs; do
+            cmp "psc1/scripts/$PSC1_NATIVE_FILE" "kernel-source/psc1/scripts/$PSC1_NATIVE_FILE"
+          done
+          PSC1_NATIVE_NODE="$(command -v node)"
+          PSC1_NATIVE_CONTROLS="$RUNNER_TEMP/arena435-native-transport-controls"
+          mkdir -p "$PSC1_NATIVE_CONTROLS"
+          cp "$RUNNER_TEMP/arena435-native-restored/kernel.js" "$PSC1_NATIVE_CONTROLS/kernel.mjs"
+          cp kernel-source/psc1/scripts/pskernel-arena-replay.mjs \
+            kernel-source/psc1/scripts/pskernel-arena-replay-controls.mjs "$PSC1_NATIVE_CONTROLS/"
+          cd "$PSC1_NATIVE_CONTROLS"
+          timeout 60s env PATH="" "$PSC1_NATIVE_NODE" --max-old-space-size=2048 \
+            pskernel-arena-replay-controls.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/arena435-native-transport-controls.log"
+          grep -q 'PSC1_ARENA_REPLAY_CONTROLS: PASS count=138' \
+            "$RUNNER_TEMP/arena435-native-transport-controls.log"
+      - name: Build exact native V1 and replay authentic input with enforced host bounds
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 \
+            -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+          printf 'kernel_source_sha=%s\nworkflow_source_sha=%s\n' \
+            "$PSC1_KERNEL_SOURCE_SHA" "$GITHUB_SHA" \
+            | tee "$RUNNER_TEMP/arena435-native-source-identities.txt"
+          python3 psc1/scripts/pskernel-arena435-native-v1.py \
+            --source kernel-source/psc1 \
+            --source-sha "$PSC1_KERNEL_SOURCE_SHA" \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --kernel "$RUNNER_TEMP/arena435-native-restored/kernel.js" \
+            --baseline "$RUNNER_TEMP/arena435-native-restored/baseline.json" \
+            --authentication "$RUNNER_TEMP/arena435-native-restored/authentication.json" \
+            --out "$RUNNER_TEMP/arena435-native-v1" \
+            | tee "$RUNNER_TEMP/arena435-native-v1.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-arena435-native-v1-diagnostic
+          path: |
+            ${{ runner.temp }}/arena435-native-v1/
+            ${{ runner.temp }}/arena435-native-v1.log
+            ${{ runner.temp }}/arena435-native-transport-controls.log
+            ${{ runner.temp }}/arena435-native-source-identities.txt
+            ${{ runner.temp }}/arena435-native-restored/authentication.json
+            psc1/host/arena-native-v1/NativeChurchMain.lean
+            psc1/scripts/pskernel-arena435-native-export.mjs
+            psc1/scripts/pskernel-arena435-native-v1.py
+            psc1/scripts/pskernel-arena435-native-cgroup.py
+            psc1/scripts/pskernel-arena435-resource-artifact.py
+          retention-days: 30

@@ -182,6 +182,59 @@ private def decodeRequest (value : Json) : Except WireError PsKernelDeclarationR
       }
   | _ => unsupported "admission kind outside canonical provider scope"
 
+private def jsonHexNibble (byte : UInt8) : Option Nat :=
+  let n := byte.toNat
+  if 48 <= n && n <= 57 then some (n - 48)
+  else if 65 <= n && n <= 70 then some (n - 55)
+  else if 97 <= n && n <= 102 then some (n - 87)
+  else none
+
+private def jsonHex4At (bytes : ByteArray) (index : Nat) : Option Nat := do
+  if index + 4 > bytes.size then none
+  else
+    let a ← jsonHexNibble bytes[index]!
+    let b ← jsonHexNibble bytes[index + 1]!
+    let c ← jsonHexNibble bytes[index + 2]!
+    let d ← jsonHexNibble bytes[index + 3]!
+    pure (a * 4096 + b * 256 + c * 16 + d)
+
+/- Reject lossy surrogate repair before the standard JSON parser. Ordinary
+JSON syntax remains the parser's responsibility. The scan is linear and
+does not allocate a character list or reinterpret an expression. -/
+private def jsonStringEscapesWellFormed (bytes : ByteArray) : Bool :=
+  let rec loop : Nat → Nat → Bool → Bool
+    | 0, _, _ => true
+    | fuel + 1, index, inString =>
+        if index >= bytes.size then true
+        else
+          let byte := bytes[index]!
+          if !inString then
+            loop fuel (index + 1) (byte == 34)
+          else if byte == 34 then
+            loop fuel (index + 1) false
+          else if byte != 92 then
+            loop fuel (index + 1) true
+          else if index + 1 >= bytes.size then true
+          else if bytes[index + 1]! != 117 then
+            loop fuel (index + 2) true
+          else
+            match jsonHex4At bytes (index + 2) with
+            | none => true
+            | some code =>
+                if 0xD800 <= code && code < 0xDC00 then
+                  if index + 12 > bytes.size then false
+                  else if bytes[index + 6]! != 92 || bytes[index + 7]! != 117 then false
+                  else
+                    match jsonHex4At bytes (index + 8) with
+                    | none => true
+                    | some trailing =>
+                        if 0xDC00 <= trailing && trailing < 0xE000 then
+                          loop fuel (index + 12) true
+                        else false
+                else if 0xDC00 <= code && code < 0xE000 then false
+                else loop fuel (index + 6) true
+  loop bytes.size 0 false
+
 private def decodeBatch (source : String) : Except WireError (List Json) := do
   let root ← lift (Json.parse source)
   keys root ["format", "version", "admissions"]
@@ -242,7 +295,7 @@ private def runRequests (fuel : Nat) (requests : List Json)
               ("declarationIndex", toJson index)] ++ kernelFailure error)
           | .ok admitted => runRequests fuel rest admitted.session (index + 1)
 
-def check (source : String) (fuel : Nat := 4096) : Json :=
+private def checkText (source : String) (fuel : Nat) : Json :=
   if source.utf8ByteSize > 16777216 then
     wireFailure fuel ⟨"resourceExhausted", "transport input byte limit exceeded"⟩
   else
@@ -256,6 +309,19 @@ def check (source : String) (fuel : Nat := 4096) : Json :=
             match psKernelKernelSessionPreflight session with
             | .error error => envelope fuel ([("accepted", .bool false), ("stage", .str "kernel")] ++ kernelFailure error)
             | .ok _ => runRequests fuel requests session 0
+
+def checkBytes (bytes : ByteArray) (fuel : Nat := 4096) : Json :=
+  if bytes.size > 16777216 then
+    wireFailure fuel ⟨"resourceExhausted", "transport input byte limit exceeded"⟩
+  else
+    match String.fromUTF8? bytes with
+    | none => wireFailure fuel ⟨"malformedInput", "invalid UTF-8"⟩
+    | some source =>
+        if jsonStringEscapesWellFormed bytes then checkText source fuel
+        else wireFailure fuel ⟨"malformedInput", "unpaired Unicode surrogate escape"⟩
+
+def check (source : String) (fuel : Nat := 4096) : Json :=
+  checkBytes source.toUTF8 fuel
 
 end PSKernelCanonicalProvider
 
@@ -272,6 +338,6 @@ def main (args : List String) : IO UInt32 := do
       if fuel > 4096 then
         IO.eprintln "provider fuel cannot exceed the default 4096"
         return 2
-      let source ← (← IO.getStdin).readToEnd
-      IO.println (PSKernelCanonicalProvider.check source fuel).compress
+      let bytes ← (← IO.getStdin).readBinToEnd
+      IO.println (PSKernelCanonicalProvider.checkBytes bytes fuel).compress
       return 0

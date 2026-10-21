@@ -55,6 +55,10 @@ const inductive = { kind: 'inductive', declaration: { lp: [], np: 0,
 const batch = admissions => JSON.stringify({
   format: 'proofscript-checked-admissions', version: 2, admissions,
 });
+const invalidUtf8 = Buffer.from(batch([first]));
+const invalidNameOffset = invalidUtf8.indexOf(Buffer.from('SortAlias'));
+assert.ok(invalidNameOffset >= 0);
+invalidUtf8[invalidNameOffset] = 0xff;
 function invoke(input, fuel) {
   const args = [...baseArgs];
   if (fuel !== undefined) args.push('--fuel', String(fuel));
@@ -89,6 +93,10 @@ const fixtures = [
   ...['constructor', '__proto__'].map(bi => ['inherited-binder-' + bi,
     batch([{ ...theorem, declaration: { ...theorem.declaration,
       v: { ...identityProof, bi } } }]), 'malformedInput', 'transport']),
+  ['invalid-utf8-name', invalidUtf8, 'malformedInput', 'transport'],
+  ...[0xD800, 0xDC00].map(code => ['unpaired-surrogate-' + code,
+    batch([definition('Bad' + String.fromCharCode(code), s1, s0)]),
+    'malformedInput', 'transport']),
   ['malformed-json', '{', 'malformedInput', 'transport'],
   ['malformed-natural', batch([definition('BadIndex', s1, b(-1))]), 'malformedInput', 'transport'],
   ['unsupported-version', JSON.stringify({ format: 'proofscript-checked-admissions', version: 99, admissions: [] }), 'declinedUnsupported', 'transport'],
@@ -117,11 +125,22 @@ for (const input of [batch([first]), batch([])]) {
   assert.equal(value.stage, 'kernel');
   console.log('PSC1_PROVIDER_ZERO_FUEL ' + JSON.stringify({ mode, ...value }));
 }
+const unicodeControls = [
+  batch([definition('ScalarPair', s1, s0)]).replace('ScalarPair', String.fromCharCode(92) + 'uD800' + String.fromCharCode(92) + 'uDC00'),
+  batch([definition(String.fromCharCode(92) + 'uD800', s1, s0)]),
+  batch([definition('Replacement' + String.fromCharCode(0xFFFD), s1, s0)]),
+];
+for (const input of unicodeControls) {
+  const value = invoke(input);
+  assert.equal(value.accepted, true, JSON.stringify(value));
+  assert.equal(value.declarationCount, 1);
+  console.log('PSC1_PROVIDER_UNICODE ' + JSON.stringify({ mode, ...value }));
+}
 // Failed earlier processes never publish sessions; a fresh process accepts
 // the same name, while a fresh process cannot see any former declaration.
 assert.equal(invoke(batch([first])).accepted, true);
 assert.equal(invoke(batch([dependent])).outcome, 'rejectedInvalid');
-console.log('PSC1_CANONICAL_PROVIDER: PASS mode=' + mode + ' cases=18 PATH=empty cwd=detached');
+console.log('PSC1_CANONICAL_PROVIDER: PASS mode=' + mode + ' cases=24 PATH=empty cwd=detached');
 } finally {
   rmSync(detached, { recursive: true, force: true });
 }

@@ -207,6 +207,12 @@ const externalZero=accepted(get("psKernelExprV2TryQuickDefEqWithFuel")(0n)(
  oldContext)(arena)(localLeft.id)(localRight.id),"external-locals-zero-some");
 must(rejected(externalZero)&&externalZero.error==="kernel definitional equality budget exhausted",
  "external-locals-zero-fuel-keeps-entry-error");
+const depthContext={...oldContext,maxRecDepth:1n,recDepth:16n};
+const depthExpected=get("psKernelCheckerContextEnterRecDepth")(depthContext);
+const depthActual=accepted(get("psKernelExprV2TryQuickDefEqWithFuel")(64n)(
+ depthContext)(arena)(localLeft.id)(localRight.id),"external-depth-some");
+must(rejected(depthExpected)&&same(depthActual,depthExpected),
+ "external-locals-depth-error-precedes-fallback");
 let typed=get("psKernelExprV2CheckContextWithLocal")(
  context,localLeftName,localLeftName,prop.id,B.default);
 typed=get("psKernelExprV2CheckContextWithLocal")(

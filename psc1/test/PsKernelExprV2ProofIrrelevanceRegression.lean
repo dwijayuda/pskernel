@@ -288,6 +288,13 @@ private def regression : IO Unit := do
     (match psKernelExprV2TryQuickDefEqWithFuel 0 oldContext localArena localLeft localRight with
      | some (.error error) => error == "kernel definitional equality budget exhausted"
      | _ => false)
+  let depthContext := { oldContext with maxRecDepth := 1, recDepth := 16 }
+  let .error depthError := psKernelCheckerContextEnterRecDepth depthContext
+    | throw (IO.userError "external-local depth guard fixture")
+  require "external-locals-depth-error-precedes-fallback"
+    (match psKernelExprV2TryQuickDefEqWithFuel 64 depthContext localArena localLeft localRight with
+     | some (.error error) => error == depthError
+     | _ => false)
   let typed := psKernelExprV2CheckContextWithLocal context
     (nm "proofLocalLeft") (nm "proofLocalLeft") propId .default
   let typed := psKernelExprV2CheckContextWithLocal typed

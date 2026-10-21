@@ -38,7 +38,10 @@ variants, free/metavariable expression variants, metadata variants and other
 unsupported forms. Unknown fields (including unsafe flags, externally supplied recursors,
 environments and caches) are explicitly declined; they cannot be silently
 ignored while checking a different request. Missing fields and invalid
-numeric encodings are malformed input. The library's typed checked APIs and experimental DAG API
+numeric encodings are malformed input. Invalid UTF-8 and unpaired JSON Unicode
+surrogate escapes are also malformed; neither runtime may repair them into a
+different declaration name or string. Valid paired escapes, literal backslash-u
+text and actual U+FFFD remain supported. The library's typed checked APIs and experimental DAG API
 have a broader input contract; no capability is inferred from this transport.
 
 Every dependency must be declared earlier in the same batch. There is **no
@@ -91,6 +94,8 @@ generated bundle, `scripts/pskernel-canonical-provider.mjs`, and
 `npm-runtime/canonical-admissions-wire.mjs` in their relative layout. The
 last module supplies only the shared wire decoder; no historical prelude
 checker or fuel-expansion routine is shipped in this dependency closure.
+For embedding, the adapter exports `checkCanonicalBatch(kernel, text)` and
+`checkCanonicalBytes(kernel, bytes)`, both returning the same outcome protocol.
 Its remaining imports are Node builtins. Neither Lean nor TypeScript is needed at runtime.
 
 To execute in a detached directory, copy those files, keep the relative

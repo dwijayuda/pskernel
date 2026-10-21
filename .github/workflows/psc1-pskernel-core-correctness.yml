@@ -216,7 +216,8 @@ jobs:
           cp scripts/pskernel-expr-v2-dag-smoke.mjs "$PSC1_PS_RUN_DIR/dag-smoke.mjs"
           cd "$PSC1_PS_RUN_DIR"
           env PATH="" "$PSC1_NODE_BIN" --expose-gc dag-smoke.mjs kernel.mjs 2>&1 \
-            | tee "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+            | tee "$RUNNER_TEMP/psc1-canonical-dag-smoke.log" \
+            | sed -u '/^PSC1_DAG_PASS /d'
           grep -q '^PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_BETA: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
@@ -301,7 +302,7 @@ jobs:
           set -euo pipefail
           node scripts/pskernel-provider-smoke.mjs js dist/pskernel-selfhost/pskernel-core.js \
             | tee "$RUNNER_TEMP/psc1-canonical-provider.log"
-          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=18 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-canonical-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-canonical-provider.log"
       - name: Package the complete canonical source and checked provider
         working-directory: psc1
         shell: bash

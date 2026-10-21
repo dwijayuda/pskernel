@@ -2,6 +2,7 @@
 // The shared canonical wire codec has no environment or checking authority.
 // No kernel-decision fallback exists here.
 import { readFileSync } from 'node:fs';
+import { isUtf8 } from 'node:buffer';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
@@ -100,6 +101,44 @@ function validateRequest(value) {
   } else wireUnsupported('admission kind outside canonical provider scope');
 }
 
+function jsonHex4At(source, index) {
+  if (index + 4 > source.length) return null;
+  let result = 0;
+  for (let j = index; j < index + 4; j++) {
+    const byte = source.charCodeAt(j);
+    const n = byte >= 48 && byte <= 57 ? byte - 48
+      : byte >= 65 && byte <= 70 ? byte - 55
+      : byte >= 97 && byte <= 102 ? byte - 87 : -1;
+    if (n < 0) return null;
+    result = result * 16 + n;
+  }
+  return result;
+}
+function validateUnicodeEscapes(source) {
+  if (!source.isWellFormed()) wireBad('unpaired Unicode surrogate');
+  let inString = false;
+  for (let i = 0; i < source.length;) {
+    const byte = source.charCodeAt(i);
+    if (!inString) { inString = byte === 34; i++; continue; }
+    if (byte === 34) { inString = false; i++; continue; }
+    if (byte !== 92) { i++; continue; }
+    if (i + 1 >= source.length) return;
+    if (source.charCodeAt(i + 1) !== 117) { i += 2; continue; }
+    const code = jsonHex4At(source, i + 2);
+    if (code === null) return;
+    if (code >= 0xD800 && code < 0xDC00) {
+      if (i + 12 > source.length || source.charCodeAt(i + 6) !== 92 ||
+          source.charCodeAt(i + 7) !== 117) wireBad('unpaired Unicode surrogate escape');
+      const trailing = jsonHex4At(source, i + 8);
+      if (trailing === null) return;
+      if (trailing < 0xDC00 || trailing >= 0xE000) wireBad('unpaired Unicode surrogate escape');
+      i += 12;
+    } else if (code >= 0xDC00 && code < 0xE000) {
+      wireBad('unpaired Unicode surrogate escape');
+    } else i += 6;
+  }
+}
+
 function variant(value) {
   if (value === null || typeof value !== 'object') throw Error('invalid generated variant');
   const tags = Object.getOwnPropertySymbols(value).map(key => value[key]);
@@ -151,6 +190,7 @@ export function checkCanonicalBatch(kernel, source, { fuel = 4096n } = {}) {
     if (target?.contract !== 'KernelContract-v1' ||
         target.leanVersion !== identity.leanVersion || target.leanCommit !== identity.leanCommit)
       return wrap(failure('declinedUnsupported', 'provider', 'kernel target identity mismatch'));
+    validateUnicodeEscapes(source);
     const wire = JSON.parse(source);
     keys(wire, ['format', 'version', 'admissions']);
     if (typeof wire.format !== 'string') wireBad('expected admissions format string');
@@ -181,6 +221,18 @@ export function checkCanonicalBatch(kernel, source, { fuel = 4096n } = {}) {
   }
 }
 
+export function checkCanonicalBytes(kernel, bytes, { fuel = 4096n } = {}) {
+  if (!(bytes instanceof Uint8Array)) throw TypeError('canonical admissions must be UTF-8 bytes');
+  if (typeof fuel !== 'bigint' || fuel < 0n || fuel > 4096n)
+    throw RangeError('provider fuel must be a BigInt in 0..4096');
+  const wrap = result => Object.freeze({ ...identity, fuel: String(fuel), ...result });
+  if (bytes.byteLength > 16 * 1024 * 1024)
+    return wrap(failure('resourceExhausted', 'transport', 'transport input byte limit exceeded'));
+  if (!isUtf8(bytes)) return wrap(failure('malformedInput', 'transport', 'invalid UTF-8'));
+  return checkCanonicalBatch(kernel, Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+    .toString('utf8'), { fuel });
+}
+
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   const args = process.argv.slice(2);
   if (!(args.length === 1 || (args.length === 3 && args[1] === '--fuel'))) {
@@ -192,7 +244,7 @@ if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === imp
       if (!/^(0|[1-9][0-9]*)$/u.test(fuelText) || BigInt(fuelText) > 4096n)
         throw RangeError('provider fuel must be in 0..4096');
       const kernel = await import(pathToFileURL(path.resolve(args[0])).href);
-      console.log(JSON.stringify(checkCanonicalBatch(kernel, readFileSync(0, 'utf8'),
+      console.log(JSON.stringify(checkCanonicalBytes(kernel, readFileSync(0),
         { fuel: BigInt(fuelText) })));
     } catch (error) {
       console.log(JSON.stringify({ ...identity, fuel: args[2] || '4096',

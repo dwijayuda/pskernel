@@ -92,5 +92,8 @@ def psKernelExprV2TryQuickDefEqWithFuel
   | Nat.succ remaining =>
       fun (context : PsKernelCheckerContext)
           (arena : PsKernelExprV2PagedArena) (left right : Nat) =>
-        psKernelExprV2TryDefEqWithDeclarationsFuel (Nat.succ remaining)
-          context arena List.nil left right
+        match psKernelCheckerContextEnterRecDepth context with
+        | Except.error error => Option.some (Except.error error)
+        | Except.ok _ =>
+            psKernelExprV2TryDefEqWithDeclarationsFuel (Nat.succ remaining)
+              context arena List.nil left right

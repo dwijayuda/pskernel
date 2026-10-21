@@ -179,7 +179,7 @@ jobs:
           set -euo pipefail
           node scripts/pskernel-provider-smoke.mjs native .lake/build/bin/psc1_kernel_provider \
             | tee "$RUNNER_TEMP/psc1-native-provider.log"
-          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=native cases=18 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-native-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=native cases=24 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-native-provider.log"
           mkdir -p dist/expr-v2
           tar -czf dist/expr-v2/native-provider-linux.tar.gz -C .lake/build/bin psc1_kernel_provider
           node scripts/pskernel-artifact-manifest.mjs \
@@ -267,7 +267,8 @@ jobs:
           cp scripts/pskernel-expr-v2-dag-smoke.mjs "$PSC1_DAG_RUN_DIR/smoke.mjs"
           cd "$PSC1_DAG_RUN_DIR"
           env PATH="" "$PSC1_NODE_BIN" --expose-gc smoke.mjs kernel.mjs \
-            | tee "$RUNNER_TEMP/psc1-dag-generated-js.log"
+            | tee "$RUNNER_TEMP/psc1-dag-generated-js.log" \
+            | sed -u '/^PSC1_DAG_PASS /d'
           grep -q 'PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
           grep -q 'PSC1_V2_DAG_JS_BETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
@@ -337,7 +338,7 @@ jobs:
           set -euo pipefail
           node scripts/pskernel-provider-smoke.mjs js dist/expr-v2/integration/kernel.js \
             | tee "$RUNNER_TEMP/psc1-generated-provider.log"
-          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=18 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-generated-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-generated-provider.log"
       - name: Check large numerals without fuel-proportional closure allocation
         working-directory: psc1
         run: |

@@ -5,8 +5,8 @@ import Ps.KernelCore.Checker.ExprV2.DefEq
 
 /-
 DAG-native fully checked Sort/FVar/literal/metadata/lambda/forall inference
-same-batch constant types, and the structural-type-equality branch of
-dependent application, checked structure projections, and checked lets.
+same-batch constant types, dependent applications with definitive quick
+conversion, checked structure projections, and checked lets.
 
 The public entry creates one fresh operation and accepts no legacy local
 context. Internal binders carry type IDs in their own DAG local context.
@@ -110,7 +110,7 @@ def psKernelExprV2TryCheckCoreWithFuel
                             psKernelExprV2CheckBinderWith smaller whnf
                               nextContext state root name domain body binderInfo false
                         | PsKernelExprV2Node.app fn arg =>
-                            psKernelExprV2CheckApplicationWith smaller whnf
+                            psKernelExprV2CheckApplicationWith smaller whnf defeq
                               nextContext state root fn arg
                         | PsKernelExprV2Node.proj typeName index structValue =>
                             psKernelExprV2CheckProjectionWith smaller whnf

@@ -29,7 +29,25 @@ behavior, or a complete DAG checker. Original default V1 remains qualified;
 the replacement still relies on full-operation fallback outside its migrated
 rules. No integration PR is merged.
 
-### Checked lets and scope-owned DefEq pairs — implementation awaiting CI
+### Application conversion shares its owning DefEq state — awaiting CI
+
+Checked application now invokes the same captured-budget, scoped DefEq worker
+when inferred argument type and function domain are structurally different.
+It uses the returned state before result substitution; a successful comparison
+is available to later work in the same scope. The existing syntactic shortcut
+does not enter DefEq or publish a pair. The exact raw two-application
+eagerReduce marker changes only the original comparison-context flag.
+Unsupported comparison rules still restart the complete original operation.
+
+New native and generated matrices require direct results for equivalent and
+unequal universes and paired metadata types across720 fuel/depth combinations;
+four fixtures are compared with official Lean. Separate controls check a
+let-primed pair, cold-versus-warm comparison budget, returned-state publication,
+syntax cache neutrality, all nine eager marker shapes, context preservation
+and invalid node IDs. The previous one-sided metadata conversion fallback
+remains explicitly tested. No new performance claim precedes passing Actions.
+
+### Checked lets and scope-owned DefEq pairs — native qualified; generated CI pending
 
 The checked DAG path now carries optional local value IDs and implements fully
 checked lets: annotation checking, sort validation, value checking, fixed-budget
@@ -44,8 +62,8 @@ collision-safe structural equality. Free-variable pairs are ineligible, scope
 exit restores the parent's cache, failed comparisons publish no entry, and no
 transitive closure is added. Fuel and recursion guards precede cache lookup.
 Unsupported recursive work still falls back as one complete original operation.
-Applications retain their existing structural-equality-only direct branch in
-this commit; the new comparison state is used by checked lets.
+The subsequent application conversion slice below extends this shared comparison
+state to the original nonsyntactic argument/domain branch.
 
 Qualification adds 16 positive/negative let fixtures, 3,120 native raw
 fuel/depth combinations, public API parity, 16 official Lean comparisons,
@@ -53,9 +71,14 @@ typed-local public/core WHNF boundaries, escaped-local rejection, parent/child
 cache restoration, collisions, symmetry, duplicate-pair reuse, fresh-owner
 isolation and no-transitive-closure controls. Matching generated and detached
 canonical JavaScript gates and eight additional local cache/entry-guard facts
-are required. These are finite parity tests and local proofs, not a full kernel
-soundness or cache-validity theorem. Results remain pending until Actions passes;
-the last fully qualified kernel source is c9868 above.
+are required. Native job119004577007 in
+[run39533476073](https://github.com/dwijayuda/pskernel/actions/runs/39533476073)
+passed at106387af9827a639455d329408745528ae318366, including all five new markers
+and eight theorem reports with only approved axiom dependencies. Original native
+correctness also passed. Authentic PSC1 source checking passed; generated and
+canonical executable results remain pending. These are finite parity tests and
+local proofs, not a full kernel soundness or cache-validity theorem. The last
+fully qualified kernel source remains c9868 above.
 
 ### Complete admission measurement and Arena phase timing — pending CI
 

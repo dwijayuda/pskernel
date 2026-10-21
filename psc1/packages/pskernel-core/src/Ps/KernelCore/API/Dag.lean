@@ -28,7 +28,7 @@ receipts, are forgeable observations and never authorize proof admission.
 Every declaration is still rechecked by V1. No equality memo survives this
 boundary. A sealed constructor API remains a source-profile limitation.
 
-This is a partial representation migration. Checked lets use owning local
+This is a partial representation migration. Checked lets and application conversion use owning local
 type/value IDs, scope-restored success pairs and the original fixed DefEq
 budget. Supported checking and WHNF rules are DAG-native. Applications requiring
 general DefEq, external constant types, projections without owning constructor

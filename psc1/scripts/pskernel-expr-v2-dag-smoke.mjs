@@ -458,7 +458,7 @@ console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG checked binders, lets, admitted constants, structural-type-equal applications and projections; typed local-value WHNF and scope-owned quick DefEq pairs; general DefEq, external types, iota and admission fallback remain; incomplete"
+  checker_representation:"DAG checked binders, lets, admitted constants, applications with quick conversion and projections; typed local-value WHNF and scope-owned quick DefEq pairs; general DefEq, external types, iota and admission fallback remain; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");
 }
@@ -1687,11 +1687,8 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
         must(publicCheck(s,node),"application-public-"+label+"-"+fuel+"-"+maxDepth);
       }
     }
-    const u1=L.succ(L.zero),duplicateUniverse=bs(L.max(u1,u1));
     const appFallbacks=[
-      ["universe-conversion",app(lam(ax,duplicateUniverse,b0),s0),true],
-      ["metadata-conversion",app(lam(ax,md(900n,s1),b0),s0),true],
-      ["unequal-types",app(identity,s1),false]
+      ["metadata-conversion",app(lam(ax,md(900n,s1),b0),s0),true]
     ];
     for(const [label,node,acceptedExpected] of appFallbacks){
       for(const fuel of [0n,1n,2n,3n,4n,8n,16n,64n]){
@@ -2364,6 +2361,171 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
       "pair-negative-does-not-publish-"+label);
   }
   console.log("PSC1_V2_DAG_JS_STATEFUL_DEFEQ: PASS");
+}
+
+{
+  let convertArena=empty;
+  const build=(kind,term,...args)=>{
+    const result=mk(convertArena,kind,...args);convertArena=result.fst;
+    return {id:result.snd,term};
+  };
+  const bs=level=>build("Sort",E.sort(level),level);
+  const bv=index=>build("BVar",E.bvar(index),index);
+  const fv=n=>build("FVar",E.fvar(n),n);
+  const md=(tag,body)=>build("MData",E.mdata(tag,body.term),tag,body.id);
+  const lam=(n,domain,body)=>build("Lam",E.lam(n,domain.term,body.term,B.default),
+    n,domain.id,body.id,B.default);
+  const pi=(n,domain,body)=>build("Forall",E.forallE(n,domain.term,body.term,B.default),
+    n,domain.id,body.id,B.default);
+  const app=(fn,arg)=>build("App",E.app(fn.term,arg.term),fn.id,arg.id);
+  const le=(n,type,value,body)=>build("Let",E.letE(n,type.term,value.term,body.term,false),
+    n,type.id,value.id,body.id,false);
+  const cn=(n,levels=nil)=>build("Const",E.const(n,levels),n,levels);
+  const one=L.succ(L.zero),s0=bs(L.zero),s1=bs(one),s2=bs(L.succ(one));
+  const duplicate=bs(L.max(one,one)),b0=bv(0n),b1=bv(1n);
+  const x=name("app-convert-x"),f=name("app-convert-f");
+  const leftType=md(610n,s1),rightType=md(611n,duplicate);
+  const functionType=pi(x,rightType,s1);
+  const fixtures=[
+    ["sort-equivalent",app(lam(x,duplicate,b0),s0),true],
+    ["sort-different",app(lam(x,s1,b0),s1),false],
+    ["paired-metadata",lam(f,functionType,lam(x,leftType,app(b1,b0))),true],
+    ["paired-metadata-different",lam(f,functionType,lam(x,md(610n,s2),app(b1,b0))),false]
+  ];
+  const emptyContext=scalar=>get("psKernelExprV2CheckContextEmpty")(scalar);
+  const emptyState=()=>get("psKernelExprV2CheckStateEmpty")(convertArena);
+  const raw=(fuel,context,state,root)=>
+    get("psKernelExprV2TryCheckStateWithFuel")(fuel,context,state,root);
+  const compare=(original,attempted,label)=>{
+    const actual=accepted(attempted,label+"-direct");
+    if(rejected(original))must(rejected(actual)&&actual.error===original.error,label+"-error");
+    else{
+      const expected=accepted(original,label+"-original"),result=accepted(actual,label+"-actual");
+      const graph=accepted(decode(result.fst.whnf.arena),label+"-graph");
+      must(exact(expected.fst,accepted(decoded(graph,result.snd),label+"-type"))===true,
+        label+"-exact-type");
+      must(expected.snd.state.nextFresh===result.fst.nextFresh,label+"-fresh");
+    }
+  };
+  const checkEqual=(expected,actual)=>exact(expected.expression,actual.expression)===true&&
+    exact(expected.type,actual.type)===true;
+  for(const [label,node,expectedAccepted] of fixtures){
+    for(const fuel of [0n,1n,2n,3n,4n,8n,10n,11n,12n,16n,32n,64n])
+      for(const maxDepth of [0n,1n,2n]){
+        const s=session(fuel,maxDepth),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+        for(const recDepth of [0n,13n,14n,15n,16n]){
+          const scalar={...checker.context,recDepth};
+          compare(get("psKernelSessionCheck")(fuel,{...checker,context:scalar},node.term),
+            raw(fuel,emptyContext(scalar),emptyState(),node.id),
+            "app-conversion-"+label+"-"+fuel+"-"+maxDepth+"-"+recDepth);
+        }
+        must(sameOperation(get("psKernelV1CheckExpression")(s,nil,S.safe,node.term),
+          invoke(convertArena,[C.check(node.id)],s),checkEqual),
+          "app-conversion-public-"+label+"-"+fuel+"-"+maxDepth);
+      }
+    const result=invoke(convertArena,[C.check(node.id)],session(64n));
+    const isAccepted=result&&typeof result==="object"&&"value" in result;
+    must(isAccepted===expectedAccepted,"app-conversion-result-"+label);
+  }
+  console.log("PSC1_V2_DAG_JS_APP_CONVERSION: PASS");
+
+  const cacheX=name("app-cache-x"),cacheF=name("app-cache-f"),cacheA=name("app-cache-let");
+  let cacheLeft=s1,cacheRight=duplicate;
+  for(let tag=0n;tag<8n;tag++){
+    cacheLeft=md(10100n+tag,cacheLeft);cacheRight=md(10200n+tag,cacheRight);
+  }
+  const cacheFunction=pi(name("app-cache-domain"),cacheRight,s1);
+  const cacheXNode=fv(cacheX),cacheFNode=fv(cacheF);
+  const prime=le(cacheA,cacheRight,cacheXNode,s0),cacheApp=app(cacheFNode,cacheXNode);
+  const checker=get("psKernelKernelSessionChecker")(session(64n,1n),nil,S.safe);
+  const old1=get("psKernelLocalContextAddLocal")(
+    checker.context.localContext,cacheX,cacheX,cacheLeft.term,B.default);
+  const old2=get("psKernelLocalContextAddLocal")(
+    old1,cacheF,cacheF,cacheFunction.term,B.default);
+  const oldContext=get("psKernelCheckerContextWithLocalContext")(checker.context,old2);
+  const typed1=get("psKernelExprV2CheckContextWithLocal")(
+    emptyContext(checker.context),cacheX,cacheX,cacheLeft.id,B.default);
+  const typedContext=get("psKernelExprV2CheckContextWithLocal")(
+    typed1,cacheF,cacheF,cacheFunction.id,B.default);
+  const legacy=accepted(get("psKernelSessionCheck")(
+    64n,{...checker,context:oldContext},prime.term),"app-prime-legacy");
+  const direct=accepted(accepted(raw(64n,typedContext,emptyState(),prime.id),
+    "app-prime-some"),"app-prime-result");
+  const contains=state=>accepted(get("psKernelExprV2DefEqPairContains")(
+    state.whnf.arena,state.success,cacheLeft.id,cacheRight.id),"app-pair-contains");
+  must(contains(direct.fst)===true,"app-let-primes-own-success-pair");
+  for(const fuel of [0n,1n,2n,3n,8n,64n])for(const recDepth of [0n,13n,14n,15n,16n]){
+    const old={...oldContext,recDepth};
+    const typed={...typedContext,scalar:{...checker.context,recDepth}};
+    compare(get("psKernelSessionCheck")(fuel,{...legacy.snd,context:old},cacheApp.term),
+      raw(fuel,typed,direct.fst,cacheApp.id),"app-warm-conversion-"+fuel+"-"+recDepth);
+    compare(get("psKernelSessionCheck")(fuel,{...checker,context:old},cacheApp.term),
+      raw(fuel,typed,emptyState(),cacheApp.id),"app-cold-conversion-"+fuel+"-"+recDepth);
+  }
+  const warm=accepted(accepted(raw(2n,typedContext,direct.fst,cacheApp.id),
+    "app-two-fuel-some"),"app-two-fuel-result");
+  must(warm.fst.nextFresh===direct.fst.nextFresh,"app-warm-two-fuel-uses-own-pair");
+  const cold=accepted(raw(2n,typedContext,emptyState(),cacheApp.id),"app-cold-two-some");
+  must(rejected(cold)&&cold.error==="kernel definitional equality budget exhausted",
+    "app-cold-two-fuel-keeps-defeq-budget");
+  const coldLegacy=accepted(get("psKernelSessionCheck")(
+    64n,{...checker,context:oldContext},cacheApp.term),"app-cold-legacy");
+  const coldDirect=accepted(accepted(raw(64n,typedContext,emptyState(),cacheApp.id),
+    "app-cold-some"),"app-cold-result");
+  must(contains(coldDirect.fst)===true,"app-retains-new-comparison-state");
+  compare(get("psKernelSessionCheck")(2n,coldLegacy.snd,cacheApp.term),
+    raw(2n,typedContext,coldDirect.fst,cacheApp.id),"app-reuses-new-comparison-state");
+
+  const syntaxX=name("app-syntax-x"),syntaxF=name("app-syntax-f");
+  const syntaxType=pi(name("app-syntax-domain"),s1,s1);
+  const syntaxApp=app(fv(syntaxF),fv(syntaxX));
+  const oldSyntax1=get("psKernelLocalContextAddLocal")(
+    checker.context.localContext,syntaxX,syntaxX,s1.term,B.default);
+  const oldSyntax2=get("psKernelLocalContextAddLocal")(
+    oldSyntax1,syntaxF,syntaxF,syntaxType.term,B.default);
+  const oldSyntax=get("psKernelCheckerContextWithLocalContext")(checker.context,oldSyntax2);
+  const typedSyntax1=get("psKernelExprV2CheckContextWithLocal")(
+    emptyContext(checker.context),syntaxX,syntaxX,s1.id,B.default);
+  const typedSyntax=get("psKernelExprV2CheckContextWithLocal")(
+    typedSyntax1,syntaxF,syntaxF,syntaxType.id,B.default);
+  const syntaxState=emptyState();
+  compare(get("psKernelSessionCheck")(2n,{...checker,context:oldSyntax},syntaxApp.term),
+    raw(2n,typedSyntax,syntaxState,syntaxApp.id),"app-syntax-original-shortcut");
+  const syntaxResult=accepted(accepted(raw(2n,typedSyntax,syntaxState,syntaxApp.id),
+    "app-syntax-some"),"app-syntax-result");
+  must(array(syntaxResult.fst.success).length===0,
+    "app-syntax-does-not-enter-defeq-or-publish-pair");
+  console.log("PSC1_V2_DAG_JS_APP_CONVERSION_CACHE: PASS");
+
+  const marker=cn(get("psKernelEagerReduceName"));
+  const markerLevels=cn(get("psKernelEagerReduceName"),list([L.zero]));
+  const oneArg=app(marker,s0),twoArgs=app(oneArg,s1);
+  const markers=[
+    ["arity-zero",marker,false],["arity-one",oneArg,false],
+    ["arity-two",twoArgs,true],["arity-three",app(twoArgs,s0),false],
+    ["levels-do-not-change-marker",app(app(markerLevels,s0),s1),true],
+    ["metadata-head",app(app(md(8n,marker),s0),s1),false],
+    ["metadata-whole",md(8n,twoArgs),false],
+    ["metadata-argument",app(oneArg,md(8n,s1)),true],
+    ["wrong-name",app(app(cn(name("not-eagerReduce")),s0),s1),false]
+  ];
+  const markerLocal=name("app-marker-local");
+  for(const [label,node,expected] of markers){
+    must(get("psKernelExprIsEagerReduce")(node.term)===expected,
+      "app-original-marker-"+label);
+    for(const initial of [false,true]){
+      const scalar={...checker.context,eagerReduce:initial,recDepth:7n,maxNatSize:1234n};
+      const context=get("psKernelExprV2CheckContextWithLocal")(
+        emptyContext(scalar),markerLocal,markerLocal,s1.id,B.default);
+      const actual=accepted(get("psKernelExprV2CheckApplicationEqContext")(
+        context,convertArena,node.id),"app-eager-context");
+      must(sameRuntimeValue(actual,{...context,scalar:{...scalar,eagerReduce:initial||expected}}),
+        "app-eager-exact-context-"+label+"-"+initial);
+      must(rejected(get("psKernelExprV2CheckApplicationEqContext")(
+        context,convertArena,convertArena.size)),"app-eager-invalid-id-"+label+"-"+initial);
+    }
+  }
+  console.log("PSC1_V2_DAG_JS_APP_EAGER_CONTEXT: PASS");
 }
 
 reportDagSmoke();

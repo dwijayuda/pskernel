@@ -1751,14 +1751,9 @@ private def applicationCheckParity : IO Unit := do
         require ("application-public-" ++ label)
           (sameCheck (psKernelV1CheckExpression session [] .safe term)
             (oneCheck session arena root))
-  let universeOne := PsKernelLevel.succ .zero
-  let duplicateUniverse := PsKernelExpr.sort (.max universeOne universeOne)
   let fallbacks : List (String × PsKernelExpr × Bool) := [
-    ("universe-conversion",
-      .app (.lam x duplicateUniverse (.bvar 0) .default) sort0, true),
     ("metadata-conversion",
-      .app (.lam x (.mdata 900 sort1) (.bvar 0) .default) sort0, true),
-    ("unequal-types", .app identity sort1, false)]
+      .app (.lam x (.mdata 900 sort1) (.bvar 0) .default) sort0, true)]
   for (label, term, acceptedExpected) in fallbacks do
     let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
     for fuel in [0,1,2,3,4,8,16,64] do
@@ -2556,6 +2551,190 @@ private def statefulDefEqPairParity : IO Unit := do
   IO.println "PSC1_V2_DAG_STATEFUL_DEFEQ: PASS"
 
 
+private def applicationConversionParity : IO Unit := do
+  let x := nm "app-convert-x"
+  let f := nm "app-convert-f"
+  let one := PsKernelLevel.succ .zero
+  let duplicate := PsKernelExpr.sort (.max one one)
+  let leftType := PsKernelExpr.mdata 610 sort1
+  let rightType := PsKernelExpr.mdata 611 duplicate
+  let functionType := PsKernelExpr.forallE x rightType sort1 .default
+  let fixtures : List (String × PsKernelExpr × Bool) := [
+    ("sort-equivalent", .app (.lam x duplicate (.bvar 0) .default) sort0, true),
+    ("sort-different", .app (.lam x sort1 (.bvar 0) .default) sort1, false),
+    ("paired-metadata", .lam f functionType
+      (.lam x leftType (.app (.bvar 1) (.bvar 0)) .default) .default, true),
+    ("paired-metadata-different", .lam f functionType
+      (.lam x (.mdata 610 (.sort (.succ one)))
+        (.app (.bvar 1) (.bvar 0)) .default) .default, false)]
+  let officialEnv ← Lean.mkEmptyEnvironment
+  for (label, term, acceptedExpected) in fixtures do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,3,4,8,10,11,12,16,32,64] do
+      for maxDepth in [0,1,2] do
+        let session ← fresh fuel maxDepth
+        let checker := psKernelKernelSessionChecker session [] .safe
+        for recDepth in [0,13,14,15,16] do
+          let context := { checker.context with recDepth := recDepth }
+          compareBinderRaw ("application-conversion-" ++ label)
+            (psKernelSessionCheck fuel { checker with context := context } term)
+            (binderRaw fuel context (psKernelExprV2CheckStateEmpty arena) root)
+        require ("application-conversion-public-" ++ label)
+          (sameCheck (psKernelV1CheckExpression session [] .safe term)
+            (oneCheck session arena root))
+    let session ← fresh 64
+    let independent := oneCheck session arena root
+    require ("application-conversion-result-" ++ label)
+      ((match independent with | .ok _ => true | .error _ => false) == acceptedExpected)
+    let officialTerm ← projectionOfficialRequire term
+    match Lean.Kernel.check officialEnv {} officialTerm, independent with
+    | .error _, .error _ => pure ()
+    | .ok officialType, .ok batch =>
+        let some checked := checkReply batch
+          | throw (IO.userError ("application-conversion-official-reply-" ++ label))
+        let convertedType ← projectionOfficialRequire checked.type
+        require ("application-conversion-official-type-" ++ label)
+          (match Lean.Kernel.isDefEq officialEnv {} officialType convertedType with
+           | .ok equal => equal | .error _ => false)
+    | _, _ => throw (IO.userError ("PSC1_V2_APP_CONVERSION_OFFICIAL_MISMATCH " ++ label))
+  IO.println "PSC1_V2_DAG_APP_CONVERSION: PASS"
+  IO.println "PSC1_V2_DAG_OFFICIAL_APP_CONVERSION: PASS"
+
+private def applicationConversionCacheParity : IO Unit := do
+  let x := nm "app-cache-x"
+  let f := nm "app-cache-f"
+  let a := nm "app-cache-let"
+  let one := PsKernelLevel.succ .zero
+  let mut leftType := PsKernelExpr.sort one
+  let mut rightType := PsKernelExpr.sort (.max one one)
+  for tag in [:8] do
+    leftType := .mdata (10100 + tag) leftType
+    rightType := .mdata (10200 + tag) rightType
+  let functionType := PsKernelExpr.forallE (nm "app-cache-domain") rightType sort1 .default
+  let prime := PsKernelExpr.letE a rightType (.fvar x) sort0 false
+  let term := PsKernelExpr.app (.fvar f) (.fvar x)
+  let (a0, leftId) ← expect (psKernelExprV2PagedImportChecked leftType)
+  let (a1, rightId) ← expect (psKernelExprV2PagedImportIntoChecked a0 rightType)
+  let (a2, functionId) ← expect (psKernelExprV2PagedImportIntoChecked a1 functionType)
+  let (a3, primeId) ← expect (psKernelExprV2PagedImportIntoChecked a2 prime)
+  let (arena, root) ← expect (psKernelExprV2PagedImportIntoChecked a3 term)
+  let session ← fresh 64 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let old1 := psKernelLocalContextAddLocal checker.context.localContext x x leftType .default
+  let old2 := psKernelLocalContextAddLocal old1 f f functionType .default
+  let oldContext := psKernelCheckerContextWithLocalContext checker.context old2
+  let typed1 := psKernelExprV2CheckContextWithLocal
+    (psKernelExprV2CheckContextEmpty checker.context) x x leftId .default
+  let typedContext := psKernelExprV2CheckContextWithLocal typed1 f f functionId .default
+  let legacy ← expect (psKernelSessionCheck 64 { checker with context := oldContext } prime)
+  let direct ←
+    match psKernelExprV2TryCheckStateWithFuel 64 typedContext
+        (psKernelExprV2CheckStateEmpty arena) primeId with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_APP_CACHE_PRIMING_FALLBACK")
+  let hit ← expect
+    (psKernelExprV2DefEqPairContains direct.fst.whnf.arena direct.fst.success leftId rightId)
+  require "application-let-primes-own-success-pair" hit
+  for fuel in [0,1,2,3,8,64] do
+    for recDepth in [0,13,14,15,16] do
+      let old := { oldContext with recDepth := recDepth }
+      let typed := { typedContext with scalar := { checker.context with recDepth := recDepth } }
+      compareBinderRaw "application-warm-conversion-entry"
+        (psKernelSessionCheck fuel { legacy.snd with context := old } term)
+        (psKernelExprV2TryCheckStateWithFuel fuel typed direct.fst root)
+      compareBinderRaw "application-cold-conversion-entry"
+        (psKernelSessionCheck fuel { checker with context := old } term)
+        (psKernelExprV2TryCheckStateWithFuel fuel typed
+          (psKernelExprV2CheckStateEmpty arena) root)
+  require "application-warm-two-fuel-uses-own-pair"
+    (match psKernelExprV2TryCheckStateWithFuel 2 typedContext direct.fst root with
+     | some (.ok result) => result.fst.nextFresh == direct.fst.nextFresh
+     | _ => false)
+  require "application-cold-two-fuel-keeps-defeq-budget"
+    (match psKernelExprV2TryCheckStateWithFuel 2 typedContext
+        (psKernelExprV2CheckStateEmpty arena) root with
+     | some (.error error) => error == "kernel definitional equality budget exhausted"
+     | _ => false)
+  let coldLegacy ← expect (psKernelSessionCheck 64 { checker with context := oldContext } term)
+  let coldDirect ←
+    match psKernelExprV2TryCheckStateWithFuel 64 typedContext
+        (psKernelExprV2CheckStateEmpty arena) root with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_APP_COLD_CONVERSION_FALLBACK")
+  let published ← expect (psKernelExprV2DefEqPairContains
+    coldDirect.fst.whnf.arena coldDirect.fst.success leftId rightId)
+  require "application-retains-new-comparison-state" published
+  compareBinderRaw "application-reuses-new-comparison-state"
+    (psKernelSessionCheck 2 coldLegacy.snd term)
+    (psKernelExprV2TryCheckStateWithFuel 2 typedContext coldDirect.fst root)
+  let sx := nm "app-syntax-x"
+  let sf := nm "app-syntax-f"
+  let syntaxType := PsKernelExpr.forallE (nm "app-syntax-domain") sort1 sort1 .default
+  let syntaxTerm := PsKernelExpr.app (.fvar sf) (.fvar sx)
+  let (s0, sort1Id) ← expect (psKernelExprV2PagedImportChecked sort1)
+  let (s1, syntaxTypeId) ← expect (psKernelExprV2PagedImportIntoChecked s0 syntaxType)
+  let (syntaxArena, syntaxRoot) ← expect (psKernelExprV2PagedImportIntoChecked s1 syntaxTerm)
+  let oldSyntax1 := psKernelLocalContextAddLocal checker.context.localContext sx sx sort1 .default
+  let oldSyntax2 := psKernelLocalContextAddLocal oldSyntax1 sf sf syntaxType .default
+  let oldSyntax := psKernelCheckerContextWithLocalContext checker.context oldSyntax2
+  let typedSyntax1 := psKernelExprV2CheckContextWithLocal
+    (psKernelExprV2CheckContextEmpty checker.context) sx sx sort1Id .default
+  let typedSyntax := psKernelExprV2CheckContextWithLocal typedSyntax1 sf sf syntaxTypeId .default
+  let syntaxState := psKernelExprV2CheckStateEmpty syntaxArena
+  compareBinderRaw "application-syntax-original-shortcut"
+    (psKernelSessionCheck 2 { checker with context := oldSyntax } syntaxTerm)
+    (psKernelExprV2TryCheckStateWithFuel 2 typedSyntax syntaxState syntaxRoot)
+  require "application-syntax-does-not-enter-defeq-or-publish-pair"
+    (match psKernelExprV2TryCheckStateWithFuel 2 typedSyntax syntaxState syntaxRoot with
+     | some (.ok result) => result.fst.success.length == 0
+     | _ => false)
+  IO.println "PSC1_V2_DAG_APP_CONVERSION_CACHE: PASS"
+
+private def applicationEagerContextParity : IO Unit := do
+  let marker := PsKernelExpr.const psKernelEagerReduceName []
+  let markerWithLevels := PsKernelExpr.const psKernelEagerReduceName [.zero]
+  let oneArg := PsKernelExpr.app marker sort0
+  let twoArgs := PsKernelExpr.app oneArg sort1
+  let fixtures : List (String × PsKernelExpr × Bool) := [
+    ("arity-zero", marker, false),
+    ("arity-one", oneArg, false),
+    ("arity-two", twoArgs, true),
+    ("arity-three", .app twoArgs sort0, false),
+    ("levels-do-not-change-marker", .app (.app markerWithLevels sort0) sort1, true),
+    ("metadata-head", .app (.app (.mdata 8 marker) sort0) sort1, false),
+    ("metadata-whole", .mdata 8 twoArgs, false),
+    ("metadata-argument", .app oneArg (.mdata 8 sort1), true),
+    ("wrong-name", .app (.app (.const (nm "not-eagerReduce") []) sort0) sort1, false)]
+  let session ← fresh 64 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let localName := nm "app-marker-local"
+  for (label, term, markerExpected) in fixtures do
+    require ("application-original-marker-" ++ label)
+      (psKernelExprIsEagerReduce term == markerExpected)
+    let (baseArena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    let (arena, typeId) ← expect (psKernelExprV2PagedMkSort baseArena (.succ .zero))
+    for initial in [false,true] do
+      let scalar := { checker.context with
+        eagerReduce := initial, recDepth := 7, maxNatSize := 1234 }
+      let context := psKernelExprV2CheckContextWithLocal
+        (psKernelExprV2CheckContextEmpty scalar) localName localName typeId .default
+      let actual ← expect (psKernelExprV2CheckApplicationEqContext context arena root)
+      require ("application-eager-marker-" ++ label)
+        (actual.scalar.eagerReduce == (initial || markerExpected))
+      require ("application-eager-preserves-resources-" ++ label)
+        (actual.scalar.recDepth == 7 && actual.scalar.maxRecDepth == 1 &&
+          actual.scalar.maxNatSize == 1234)
+      require ("application-eager-preserves-typed-local-" ++ label)
+        (actual.locals.length == 1 &&
+          match psKernelExprV2CheckLocalFind actual.locals localName with
+          | some declaration => declaration.type == typeId &&
+              match declaration.value with | none => true | some _ => false
+          | none => false)
+      require ("application-eager-invalid-id-" ++ label)
+        (match psKernelExprV2CheckApplicationEqContext context arena arena.size with
+         | .error _ => true | .ok _ => false)
+  IO.println "PSC1_V2_DAG_APP_EAGER_CONTEXT: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -2580,5 +2759,8 @@ def main : IO Unit := do
   checkedLetCacheScope
   checkedLocalValueWhnfParity
   statefulDefEqPairParity
+  applicationConversionParity
+  applicationConversionCacheParity
+  applicationEagerContextParity
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

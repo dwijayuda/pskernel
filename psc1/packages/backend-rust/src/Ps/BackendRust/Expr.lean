@@ -28,6 +28,50 @@ def psRustEmitExprListWith
                   (psRustCloneExprPrinted expr printed)
                   printedRest)
 
+-- These slots are passed to read-only String helpers by shared reference.
+-- Borrow only immutable local values. Computed operands and owned call/field
+-- arguments retain their original evaluation and cloning rules.
+def psRustIntrinsicBorrowsStringArgument
+    (operation : PsVerifiedIrIntrinsic) (index : Nat) : Bool :=
+  match operation with
+  | PsVerifiedIrIntrinsic.stringAppend => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.stringEq => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.stringPush => Nat.beq index 0
+  | PsVerifiedIrIntrinsic.stringLength => Nat.beq index 0
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize => Nat.beq index 0
+  | PsVerifiedIrIntrinsic.stringNext => Nat.beq index 0
+  | PsVerifiedIrIntrinsic.stringGet => Nat.beq index 0
+  | PsVerifiedIrIntrinsic.stringAtEnd => Nat.beq index 0
+  | PsVerifiedIrIntrinsic.stringExtract => Nat.beq index 0
+  | _ => false
+
+def psRustEmitIntrinsicArgumentsWith
+    (emitExpr : PsVerifiedIrExpr -> Except PsRustEmitError String)
+    (locals : List String) (operation : PsVerifiedIrIntrinsic)
+    (expressions : List PsVerifiedIrExpr) :
+    Nat -> Except PsRustEmitError (List String) :=
+  match expressions with
+  | List.nil => fun (_index : Nat) => Except.ok List.nil
+  | List.cons expr rest =>
+      let smaller : Nat -> Except PsRustEmitError (List String) :=
+        psRustEmitIntrinsicArgumentsWith emitExpr locals operation rest;
+      fun (index : Nat) =>
+        -- Emit first even for a borrowed local, preserving all fuel/error checks.
+        match emitExpr expr with
+        | Except.error error => Except.error error
+        | Except.ok printed =>
+            let selected : String :=
+              match expr with
+              | PsVerifiedIrExpr.var name =>
+                  if psRustIntrinsicBorrowsStringArgument operation index &&
+                      psRustStringListContains locals name then
+                    psRustIdentifier name
+                  else psRustCloneExprPrinted expr printed
+              | _ => psRustCloneExprPrinted expr printed;
+            match smaller (Nat.succ index) with
+            | Except.error error => Except.error error
+            | Except.ok printedRest => Except.ok (List.cons selected printedRest)
+
 def psRustEmitFieldListWith
     (emitExpr :
       PsVerifiedIrExpr ->
@@ -1041,7 +1085,7 @@ def psRustEmitExprWorker
             | Option.none => Except.ok (psRustClonePrinted (psRustIdentifier name))
             | Option.some arity => Except.ok (psRustEmitGlobalFunctionValue name arity)
         | PsVerifiedIrExpr.intrinsic operation _ arguments =>
-          match psRustEmitExprListWith emitNested arguments with
+          match psRustEmitIntrinsicArgumentsWith emitNested locals operation arguments 0 with
           | Except.error error =>
               Except.error error
           | Except.ok printedArguments =>

@@ -2,12 +2,12 @@
 def psPhpRuntimeVersion : String := "psc1-php-runtime/1"
 
 def psPhpRuntimeOrder : List String :=
-  ["gmp", "calls", "unicodeChars", "charOfNat", "charToNat", "stringGet", "stringNext", "stringExtract"]
+  ["gmp", "calls", "unicodeChars", "utf8Valid", "charOfNat", "charToNat", "stringGet", "stringNext", "stringExtract"]
 
 def psPhpRuntimeClosure (requested : List String) : List String :=
   let requested := if requested.contains "stringNext" then "stringGet" :: requested else requested
-  let requested := if requested.any (fun x => ["stringGet", "stringExtract"].contains x)
-    then "unicodeChars" :: requested else requested
+  let requested := if requested.contains "stringGet" then "utf8Valid" :: requested else requested
+  let requested := if requested.contains "stringExtract" then "unicodeChars" :: requested else requested
   let requested := if requested.any (fun x =>
       ["charOfNat", "charToNat", "stringGet", "stringNext", "stringExtract"].contains x)
     then "gmp" :: requested else requested
@@ -56,6 +56,22 @@ def psPhpRuntimePart : String → String
         return $fn;
     };
 "#
+  | "utf8Valid" => r#"    // PHP memoizes immutable String-key hashes; retain at most two valid keys.
+    $__ps_utf8Valid = static function (string $source): bool {
+        static $checked = [];
+        if (isset($checked[$source])) {
+            return true;
+        }
+        if (preg_match('//u', $source) !== 1) {
+            return false;
+        }
+        if (count($checked) === 2) {
+            unset($checked[array_key_first($checked)]);
+        }
+        $checked[$source] = true;
+        return true;
+    };
+"#
   | "unicodeChars" => r#"    $__ps_unicodeChars = static function (string $source): array {
         $characters = preg_split('//u', $source, -1, PREG_SPLIT_NO_EMPTY);
         if ($characters === false) {
@@ -96,15 +112,25 @@ def psPhpRuntimePart : String → String
         return gmp_init($value);
     };
 "#
-  | "stringGet" => r#"    $__ps_stringGet = static function (string $source, \GMP $position) use ($__ps_unicodeChars): string {
-        $offset = 0;
-        foreach ($__ps_unicodeChars($source) as $character) {
-            if (gmp_cmp($position, $offset) === 0) {
-                return $character;
-            }
-            $offset += strlen($character);
+  | "stringGet" => r#"    $__ps_stringGet = static function (string $source, \GMP $position) use ($__ps_utf8Valid): string {
+        // Validate the entire String even when the requested position is outside it.
+        if (!$__ps_utf8Valid($source)) {
+            throw new \TypeError('PSC1_PHP_INVALID_UTF8');
         }
-        return 'A';
+        if (gmp_cmp($position, 0) < 0 || gmp_cmp($position, strlen($source)) >= 0) {
+            return 'A';
+        }
+        // Conversion is safe only after comparison with the native String size.
+        $offset = gmp_intval($position);
+        $first = ord($source[$offset]);
+        if ($first < 0x80) {
+            return $source[$offset];
+        }
+        if ($first < 0xc0) {
+            return 'A';
+        }
+        $width = $first <= 0xdf ? 2 : ($first <= 0xef ? 3 : 4);
+        return substr($source, $offset, $width);
     };
 "#
   | "stringNext" => r#"    $__ps_stringNext = static function (string $source, \GMP $position) use ($__ps_stringGet): \GMP {

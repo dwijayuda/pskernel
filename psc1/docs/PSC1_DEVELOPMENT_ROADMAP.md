@@ -96,3 +96,19 @@ The earlier typed IO qualification at 74179eb664e132502a24ce60b52a3dbd52b1d0cc
 (run 39627387430), f799 inference/protocol, 5a0f sequencing and 1fbf standalone
 receipts remain exact historical evidence. Sources, artifacts, successful CI and
 all diagnostic history remain preserved. G2/G3 remain deferred.
+
+## Measured application runtime continuation
+
+Run 39664407902 at 5fa88fa1842d8d8d9fa1881592ed2801d2778b37 passes native,
+focused, all complete closures, G1 and host boundary, but full qualification
+fails PHP's 500000-byte compiler workload at the outer 180-second guard.
+Both minimum-Python consumers pass. The unchanged acceptance is 120 seconds /
+1 GiB; no four-application completion is inferred. Exact diagnostic inventory:
+PSC1_APPLICATION_PERFORMANCE_PROGRESS_2026-10-22.json.
+
+Complete the PHP whole-String UTF8 validation/byte-lookup correction and the
+measured Rust read-only String-copy correction, then require fresh all-seven,
+minimum-runtime and aggregate qualification. A separate focused PHP lane retains
+all previous focused targets and existing per-job/process limits. Do not resume
+G2/G3 or advance feature freeze while this application or the 21 remaining
+family criteria are blocked.

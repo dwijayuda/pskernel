@@ -59,6 +59,20 @@ for(const [id,file]of [['library-application','PSC1_LIBRARY_APPLICATION_CASE_CON
  extraProtocols[id]={contract:contract.id,obligations:receipt.records.length,
   minimumPythonObligations:minimum.records.length,evidence:id+'/results.json',completeFamily:false};
 }
+const phpUtf8=read('dist/scoped-correctness/php-utf8/results.json');
+assert.equal(phpUtf8.schema,'psc1-php-utf8-runtime/1');
+assert.equal(phpUtf8.testedCommit,process.env.GITHUB_SHA);
+assert.equal(phpUtf8.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+assert.equal(phpUtf8.passed,true);assert.equal(phpUtf8.strictInputIr,true);
+assert.equal(phpUtf8.iterations,100000);assert.equal(phpUtf8.inputBytes,500000);
+assert.ok(Number.isFinite(phpUtf8.elapsedSeconds)&&phpUtf8.elapsedSeconds>=0&&phpUtf8.elapsedSeconds<=5);
+for(const key of ['nativeFixtureSha256','consumerSha256','moduleSha256','runtimeSha256','echoSha256'])
+ assert.match(phpUtf8[key]||'',/^[a-f0-9]{64}$/);
+for(const name of ['UTF8 scalar byte boundaries','middle-byte and empty defaults','exact huge next',
+ 'extract policy unchanged','persistent String values','same-length content and eviction',
+ 'copy-on-write cache safety','malformed UTF8 public guard','malformed UTF8 helper even out of range',
+ 'Nat argument type refusal','two large immutable Strings cache','runtime-free echo retained'])
+ assert.ok(phpUtf8.checks.includes(name));
 const tsContinuations=read('dist/scoped-correctness/ts-continuations/results.json');
 assert.equal(tsContinuations.schema,'psc1-ts-continuation-runtime/1');
 assert.equal(tsContinuations.testedCommit,process.env.GITHUB_SHA);
@@ -435,6 +449,7 @@ const receipt = {
     runtimeBytes: x.runtime.runtimeBytes, runtimeSha256: x.runtime.runtimeSha256
   })),
   architectureFoundation: {
+    phpUtf8:phpUtf8,
     typescriptContinuations:tsContinuations,
     boundedProtocols:extraProtocols,
     compilerApplication:{contract:compilerApplicationContract.id,actualConsumers:compilerApplication.records.length,casesPerConsumer:compilerApplicationContract.cases.length,minimumPythonConsumers:minimumCompilerApplication.records.length,evidence:'compiler-application/results.json',performance:compilerApplication.records.map(r=>({syntax:r.syntax,target:r.target,...r.cases.find(c=>c.id==='100000-statements').metrics})),completePracticalCore:false},

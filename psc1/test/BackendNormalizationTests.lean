@@ -2,12 +2,29 @@ import Ps.Host.DirectBackend
 import Ps.BackendJs.Print
 import Ps.BackendRust.RuntimePlan
 import Ps.BackendRust.Type
+import Ps.BackendRust.Expr
 
 private def require (name : String) (condition : Bool) : IO Unit := do
   if !condition then throw (IO.userError ("PSC1_BACKEND_NORMALIZATION_FAIL: " ++ name))
   IO.println ("PSC1_BACKEND_NORMALIZATION_PASS: " ++ name)
 
 def main : IO Unit := do
+  let stringRead : PsVerifiedIrExpr := .intrinsic .stringLength [] [.var "text"]
+  require "borrowed Rust String still observes the original emitter fuel boundary"
+    (match psRustEmitExprWorker [] 1 ["text"] stringRead with
+      | .error .fuelExhausted => true
+      | _ => false)
+  let computedRead : PsVerifiedIrExpr :=
+    .intrinsic .stringLength [] [.intrinsic .stringAppend [] [.var "text",.var "text"]]
+  require "computed Rust String operands retain nested fuel checks"
+    (match psRustEmitExprWorker [] 2 ["text"] computedRead with
+      | .error .fuelExhausted => true
+      | _ => false)
+  require "borrowed Rust String still refuses malformed intrinsic arity"
+    (match psRustEmitExprWorker [] 5 ["text"]
+      (.intrinsic .stringGet [] [.var "text"]) with
+      | .error .intrinsicArity => true
+      | _ => false)
   let plain : PsJsIrModule := {
     imports := []
     declarations := [{ name := "identity", parameters := [{ name := "value" }], body := .var "value" }]

@@ -171,3 +171,37 @@ final consolidation binds its exact commit/hashes and bounded RSS evidence.
 Failed application cases now retain checked bundles before execution.
 See PSC1_TS_TAIL_CONTINUATION_DEFECT_2026-10-22.md. The new correction and all
 application/performance acceptance remain UNQUALIFIED until fresh Linux CI.
+
+## Seven-target compiler application diagnosis and String performance continuation
+
+Implementation 5fa88fa1842d8d8d9fa1881592ed2801d2778b37, tested merge
+5f730e3fd798cfa5597d35c204c3aed03842fe0d, run 39664407902 passes native,
+focused, all three complete closures, G1 and host boundary. Full job 119453141986
+fails the authored application step: Lean/PHP's 100000-statement child times out
+at the outer 180-second guard. All later independent steps pass, including both
+minimum-Python consumers; they do not override the failed step. No new full
+qualification or four-application completion exists. Exact diagnostic evidence:
+docs/PSC1_APPLICATION_PERFORMANCE_PROGRESS_2026-10-22.json.
+
+The ten focused compiler consumers pass all 120 cases. TS now uses about 189 MiB
+instead of 3.30 GiB; its million-tail-call regression uses about 57 MiB while
+preserving non-tail contexts, traps and strict divergence. Lean/full Python is
+59.95 s; minimum-Python Lean/PS are 73.07/64.83 s. Rust is 104-117 s in focused
+and 116.15 s in full, close to the unchanged 120-second bound.
+
+The active correction caches two completed PHP UTF8 validations, uses scalar
+byte boundaries for constant-time lookups, and reuses validation in the selected
+module's String guards. Runtime-free String echo stays unchanged. A separate
+focused PHP lane adds malformed/boundary/cache/copy-on-write and common-prefix
+lookup regressions plus both actual applications, without removing any existing
+focused target or increasing job/process limits. Rust borrows only immutable
+local String operands in existing read-only helper slots; every operand still
+passes normal emission/fuel checks. New negative fuel/arity tests remain required.
+Both corrections are implemented but UNQUALIFIED until fresh Linux gates.
+
+New G1 service 81f03e636b4fcf5bf3863375b01422e435b29c37442dd27fdffabb63ab77e0b3
+passes its 85-module, ten-case regression at this failed full checkpoint.
+Artifact 12376913803 expires 2027-01-19T19:45:30Z; source/admission/IR digests
+are in the diagnostic receipt. Earlier qualified G1 services and the af0a full
+checkpoint remain preserved. G2/G3 remain deferred. The 21 unbound finite family
+criteria and compiler-like application remain release blockers.

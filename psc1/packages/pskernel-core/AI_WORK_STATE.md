@@ -1,3 +1,13 @@
+# Current continuation — indexed-cache library registration repair (2026-10-21 15:59 UTC)
+
+The independent cache branch candidate `be45ec11e2076922ba4591023b01f1edfcea9119` failed native compilation in [run 39629688445/job 119324245649](https://github.com/dwijayuda/pskernel/actions/runs/39629688445/job/119324245649): `WhnfState.lean:1` could not load `WhnfCache.olean`. The isolated `kernel-lakefile.lean` enumerates library roots explicitly; the new source file had been imported but was not listed there. This checkpoint registers `Ps.KernelCore.Checker.ExprV2.WhnfCache` immediately before `WhnfState`. Classification: build-graph integration defect. No checker operation, proof assertion, fixture count, workflow budget or resource policy changes.
+
+**This corrective revision is NOT RUN until its own jobs finish.** The failed candidate did not execute the indexed-cache native fixtures or proofs. Source and wiring review do not substitute for compilation. Both authentic generated routes were still running when the repair was prepared.
+
+Active integration `3aa077cb64ff06f76727decd01c43ad6c33f351d` and qualified cache parent `f9e9b20f92ce2ffa4a666acaf55aa8852949f589` now have terminal full Arena failures: each193 =105 matched acceptances +59 kernel rejections +1 metadata rejection +7 transport rejections +2 separately classified safety-contract agreements +17 host timeouts +1 fuel exhaustion +1 unsupported case. These are independently observed exact-source totals, not inherited success. All full per-case records are retained in their run artifacts (39622318341 and39622521186). Core native/canonical/generated qualification remains green only for those tested bases.
+
+---
+
 # PSKernel-Core Expression V2 integration work state
 
 Date: 2026-10-21 (Asia/Jakarta; Actions timestamps use UTC)

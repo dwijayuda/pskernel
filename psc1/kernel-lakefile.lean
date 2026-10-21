@@ -47,6 +47,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.Terminal,
     `Ps.KernelCore.Checker.ExprV2.Beta,
     `Ps.KernelCore.Checker.ExprV2.Environment,
+    `Ps.KernelCore.Checker.ExprV2.WhnfCache,
     `Ps.KernelCore.Checker.ExprV2.WhnfState,
     `Ps.KernelCore.Checker.ExprV2.Delta,
     `Ps.KernelCore.Checker.ExprV2.Nat,

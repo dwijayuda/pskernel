@@ -46,3 +46,9 @@ assert.equal(successfulBaseline([],options),null);
 
 // GitHub exposes the custom run title as name; workflow file identity stays stable.
 assert.deepEqual(successfulBaseline([{...valid,name:'any display title'}],options),{commit:sha,runId:10});
+
+for(const file of ['psc1/scripts/select-development-tests.mjs','psc1/scripts/development-selection-tests.mjs']){
+ const result=select([file]);assert.equal(result.focused,false);assert.equal(result.release,false);
+ assert.equal(select([file,'psc1/host-tools/artifacts.mjs']).release,true);
+ assert.equal(select([file,'psc1/packages/compiler/src/Ps/Compiler/Ordinary.lean']).integration,true);
+}

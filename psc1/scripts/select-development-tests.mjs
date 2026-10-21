@@ -33,6 +33,11 @@ export function selectPsc1Tests(paths,{full=false,uncertain=false}={}){
   }
   if(file.startsWith('psc1/host-tools/')){all('host-authority-or-publication:'+file);continue;}
   if(/CONTRACT\.json$/.test(file)){all('finite-acceptance-contract:'+file);continue;}
+  // These pure scheduling helpers are checked by static API/dependency regressions.
+  // They do not change compiler, admission, IR, runtime or release assertions.
+  if(['psc1/scripts/select-development-tests.mjs','psc1/scripts/development-selection-tests.mjs'].includes(file)){
+   reasons.push('static-scheduling-regression:'+file);continue;
+  }
   if(file.startsWith('psc1/scripts/')){
    selected.focused=true;
    // Most scripts enforce cross-target or authority boundaries. Keep unknown ones conservative.

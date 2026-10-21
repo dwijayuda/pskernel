@@ -87,7 +87,10 @@ registry publication or branch-protection update was performed.
 Documentation-only run39578186422 correctly fell back to full instead of skipping
 because GitHub's API name became the custom run title. Baseline identity now
 uses the workflow file path; API-shaped regression cases cover display-name
-drift. Explicit baseline errors are retained for diagnostics. The real fast-path
+drift. Explicit baseline errors are retained for diagnostics. The two pure selector/
+selector-test scripts run their static dependency/API regressions; changes to
+compiler/admission/IR/runtime/release controllers still select their full tiers.
+This avoids rerunning unchanged target semantics for a display-name lookup fix. The real fast-path
 validation must be repeated after this router correction qualifies.
 
 Documentation-only validation is exercised by the next checkpoint update. Its current

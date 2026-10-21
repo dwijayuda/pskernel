@@ -1,0 +1,156 @@
+{
+  "schema": "pskernel-source-qualification-v1",
+  "source": "89c8b988fc349fa57d7757c8d11fe0b94f9e9188",
+  "observedAt": "2026-10-21T16:59:00Z",
+  "scope": "independent scoped developer provider; V1 default; group-owner migration",
+  "statuses": {
+    "native": "PASS",
+    "portableSource": "PASS",
+    "canonicalPs": "PASS",
+    "generatedLeanJs": "PASS",
+    "generatedPsJs": "PASS",
+    "provider": "PASS",
+    "localProofs": "PASS",
+    "research": "PASS",
+    "fullV2": "NOT ACHIEVED",
+    "fullArena": "IN PROGRESS"
+  },
+  "runs": {
+    "integration": {
+      "id": 39631113440,
+      "jobs": [
+        119329211544,
+        119329211305
+      ],
+      "conclusion": "success"
+    },
+    "correctness": {
+      "id": 39631113291,
+      "jobs": [
+        119329211273,
+        119329210647
+      ],
+      "conclusion": "success"
+    },
+    "research": {
+      "id": 39631113206,
+      "jobs": [
+        119329210117,
+        119329210422,
+        119329210480,
+        119329210589,
+        119329210606,
+        119329210679
+      ],
+      "conclusion": "success"
+    }
+  },
+  "controls": {
+    "owners": 25,
+    "recursors": 7,
+    "rules": 14,
+    "terms": 12,
+    "checkRows": 216,
+    "whnfRows": 216,
+    "defeqRows": 216,
+    "privateIdForms": 13,
+    "officialPositive": 16,
+    "officialNegative": 5,
+    "generatedAssertions": 1452,
+    "nativeProviderProtocol": 24,
+    "officialProviderCases": 5,
+    "validBatchDeclarations": 4,
+    "generatedProviderProtocolEach": 24,
+    "generatedProviderApiEach": 8
+  },
+  "sourceClosure": {
+    "portableModules": 182,
+    "roots": 2,
+    "canonicalModules": 139,
+    "canonicalSha256": "b6e5b2bd2a9bc621b968090bdf7df2063e17408fe465b0017f372c27105a20ad"
+  },
+  "artifacts": [
+    {
+      "run": 39631113440,
+      "id": 12359077533,
+      "name": "psc1-v2-dag-native",
+      "bytes": 33170997,
+      "zipSha256": "9c02056ec97dee1765795d6df4922900eecddd9782b01377ba87c99b5d2ad9e2",
+      "files": [
+        {
+          "name": "native provider ELF",
+          "bytes": 119515624,
+          "sha256": "e11ae0d9ec43eb75f4302997e66decccafb0e785cc57e42daa07d73c1e208c3c"
+        },
+        {
+          "name": "native-provider-linux.tar.gz",
+          "bytes": 33255403,
+          "sha256": "8bbfbff7ba8b2aec0eaad26208c169596bd70203c830c31e0938deaebbc3ec20"
+        }
+      ]
+    },
+    {
+      "run": 39631113440,
+      "id": 12361751564,
+      "name": "psc1-v2-dag-generated-js",
+      "bytes": 3398679,
+      "zipSha256": "df2182345d8bdb1bcbff8b375d17aa94dec6109e8f87b37a9a37167fae3d2d2c",
+      "files": [
+        {
+          "name": "kernel.js",
+          "bytes": 9919038,
+          "sha256": "eeb6da731fd4f25b3746a8d9b873bdc7c2880ad6aba4990b43a2fbcc17ac17d4"
+        },
+        {
+          "name": "kernel.js.map",
+          "bytes": 8064473,
+          "sha256": "959328c8bff043e5ac347e2c7c55e53bf019548f6c18930311b5661151c7df3f"
+        }
+      ]
+    },
+    {
+      "run": 39631113291,
+      "id": 12365480085,
+      "name": "psc1-canonical-kernel-qualification",
+      "bytes": 1914816,
+      "zipSha256": "f63a8ae330374f9971195c7dc8c47878ea4b9c4e6e7edff837e33414eb2631b6",
+      "files": [
+        {
+          "name": "pskernel-core.js",
+          "bytes": 9919045,
+          "sha256": "2f878577592a1c254c2a27acfaef3d1f40c6abb585fe7add6806e54cb9601bdc"
+        },
+        {
+          "name": "pskernel-core.js.map",
+          "bytes": 8064487,
+          "sha256": "10026ab53da6f8c742a99b9f11e05aa1c1e7d85e4a275fba6d1d3ba8f0f31ef6"
+        },
+        {
+          "name": "canonical-source.tar.gz",
+          "bytes": 118541,
+          "sha256": "6b50b15c21f791cd87816a7999948100a6c317358697f8b8d8c14ef58b6269b8"
+        }
+      ]
+    }
+  ],
+  "commonGeneratedFiles": [
+    {
+      "extension": ".ts",
+      "bytes": 9099221,
+      "sha256": "b64c43840d6063915efd5d068bfbf001d67155eba456f2eae4da45b41cb315d8"
+    },
+    {
+      "extension": ".d.ts",
+      "bytes": 363565,
+      "sha256": "656ce515612a248d39751c0d0ae63e103103a7c45e2d84ec0665ad1f99074b5a"
+    }
+  ],
+  "limitations": [
+    "Exact-source evidence only; children require new gates.",
+    "Four public whole-operation fallbacks remain.",
+    "No full193 conformance claim.",
+    "No global soundness or backend-preservation proof.",
+    "DirectJS full kernel unsupported.",
+    "Known integration cache/occurrence corrections are separate and must be preserved when combining."
+  ]
+}

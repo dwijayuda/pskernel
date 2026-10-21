@@ -1,3 +1,59 @@
+# Current continuation — qualified group owners; execute Quot owner candidate
+
+Date: 2026-10-21 UTC
+Candidate branch: `research/psc1-pskernel-v2-carrier-20261021`
+Status: **Quot owner implementation NOT RUN at this commit; full V2 and Arena remain open.**
+
+## Exact qualified predecessor
+
+Source `89c8b988fc349fa57d7757c8d11fe0b94f9e9188` has terminal PASS:
+integration[39631113440](https://github.com/dwijayuda/pskernel/actions/runs/39631113440)
+(native119329211544/generated119329211305),
+correctness[39631113291](https://github.com/dwijayuda/pskernel/actions/runs/39631113291)
+(native119329211273/canonical119329210647), and all six research jobs
+[39631113206](https://github.com/dwijayuda/pskernel/actions/runs/39631113206).
+The complete portable source and139-module canonical closure were checked;
+both generated routes independently ran with PATH empty.
+Native provider24protocol controls and5official cases/4-declaration accepted
+batch passed; each generated provider passed24protocol and8API controls.
+Group-owner tests passed25owners/7recursors/14rules,12real terms,
+216checks/216WHNF/216DefEq rows,13private-ID forms; native official controls
+passed16positive/5negative. All16 local owner proof dependency audits passed.
+Artifact identities and hashes are in
+[evidence/2026-10-21-carrier89-qualified.json](evidence/2026-10-21-carrier89-qualified.json).
+
+This is scoped developer-provider qualification with V1 still the default,
+not a fully DAG-native or full-Arena claim. Exact89 full193 comparison remains
+separate and must be read to terminal. Historical3aa/f9 full193 each failed
+with172matching outcomes,2separate safety agreements,17timeouts,1resource
+and1unsupported. The separate be45 cache run has175matches,2safety,
+14timeouts,1resource,1unsupported; those results cannot be inherited by89.
+
+## Candidate now under qualification
+
+The reviewed Quot source at `0654d5f48f6a370383ed24fbb9e6e46393ca6116`
+is retained unchanged. It installs all four authoritative Quot type owners
+only after actual successful Quot admission, with atomic complete planning,
+exact admitted types, original caller-ID isolation and complete-owner
+idempotence/repair. Actual admission/reduction remains independently checked.
+The new20proofs, native official10positive/7negative controls and both
+generated regression routes must now run on this exact successor.
+No result is inherited from89. Full-kernel DirectJS stays unsupported.
+
+Integration separately advanced through034's safe recursor-occurrence guard
+and464's cheapRec cache-isolation correction to documentation HEAD
+`45d8c3e52b6bd2c78ad4e656828b5c0ce79d19a1`.
+Those corrections are being qualified separately and must be preserved in
+the eventual combined integration revision. This research candidate does not
+claim they are included. Four whole-operation fallbacks, initial-session owner
+bootstrap and wider DAG-native inductive semantics remain unfinished.
+Fuel4096, trust boundaries and original failed-result precedence are unchanged.
+No local execution or package publication occurred.
+
+---
+
+## Preserved earlier work-state entries
+
 # Current review — same-batch checked Quot owners (NOT RUN)
 
 This review combines current carrier `89c8b988fc349fa57d7757c8d11fe0b94f9e9188` with staged Quot source/test history `5ed52783a138d9c8fed13d4faccd6990bb2b1625`. It does not change any branch qualification.

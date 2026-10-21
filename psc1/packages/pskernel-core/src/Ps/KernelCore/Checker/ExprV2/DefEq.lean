@@ -2,12 +2,13 @@ import Ps.KernelCore.Checker.ExprV2.DefEq.Prefix
 import Ps.KernelCore.Checker.ExprV2.CheckWhnf
 import Ps.KernelCore.Checker.ExprV2.CheckCore
 import Ps.KernelCore.Checker.ExprV2.DefEq.ProofIrrelevance
-import Ps.KernelCore.Checker.ExprV2.DefEq.LazyNat
+import Ps.KernelCore.Checker.ExprV2.DefEq.LazyDelta
 
 /- Single recursive DefEq owner. The ordered prefix and proof irrelevance
 share inference-only/WHNF/DefEq callbacks at the exact predecessor fuel.
-The ordered Nat lazy-delta prefix uses that same owner. Definition selection
-and later rules remain unsupported; no partial state escapes. -/
+The complete ordered lazy-delta stage uses that same owner and admitted body
+IDs. Residual projection/full-shape rules remain unsupported; no partial state
+escapes into the reference fallback. -/
 def psKernelExprV2TryDefEqStateWithFuel
     (fuel : Nat) :
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
@@ -29,10 +30,14 @@ def psKernelExprV2TryDefEqStateWithFuel
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
             psKernelExprV2CheckWhnfWithFuel remaining nextContext nextState nextRoot;
+        let coreWhnfMode :=
+          fun (nextContext : PsKernelExprV2CheckContext)
+              (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) (cheapProj : Bool) =>
+            psKernelExprV2CheckWhnfCoreWithFuel remaining nextContext nextState nextRoot cheapProj;
         let coreWhnf :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-            psKernelExprV2CheckWhnfCoreWithFuel remaining nextContext nextState nextRoot true;
+            coreWhnfMode nextContext nextState nextRoot true;
         let inferType :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
@@ -41,7 +46,7 @@ def psKernelExprV2TryDefEqStateWithFuel
         let afterProof :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
-            psKernelExprV2DefEqLazyNatWithFuel remaining smaller whnf
+            psKernelExprV2DefEqLazyDeltaWithFuel remaining smaller whnf coreWhnfMode
               nextContext nextState nextLeft nextRight;
         let afterCore :=
           fun (nextContext : PsKernelExprV2CheckContext)

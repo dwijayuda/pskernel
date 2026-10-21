@@ -10,7 +10,9 @@ arena; no legacy local type is imported during binder traversal.
 
 The reduction state is the existing WHNF state, not a second cache engine.
 Inference keys use the same collision-safe lookup and the original checked
-cache eligibility policy. The success-pair cache shares this operation and is restored on scope exit.
+cache eligibility policy. Success pairs, unfolding results and failed same-definition
+argument shortcuts share this operation and are restored on scope exit. Failure
+pairs never assert inequality; they only suppress a repeated argument shortcut.
 No cache is accepted from an untrusted public caller.
 -/
 structure PsKernelExprV2CheckLocal where
@@ -30,6 +32,8 @@ structure PsKernelExprV2CheckState where
   checkedInfer : List PsKernelExprV2WhnfCacheEntry
   success : List PsKernelExprV2DefEqPair
   inferOnly : List PsKernelExprV2WhnfCacheEntry
+  unfold : List PsKernelExprV2WhnfCacheEntry
+  failure : List PsKernelExprV2DefEqPair
 
 def psKernelExprV2CheckContextEmpty
     (context : PsKernelCheckerContext) : PsKernelExprV2CheckContext :=
@@ -82,12 +86,14 @@ def psKernelExprV2CheckLocalValue
 
 def psKernelExprV2CheckStateEmpty
     (arena : PsKernelExprV2PagedArena) : PsKernelExprV2CheckState :=
-  PsKernelExprV2CheckState.mk (psKernelExprV2WhnfStateEmpty arena) 0 List.nil List.nil List.nil
+  PsKernelExprV2CheckState.mk (psKernelExprV2WhnfStateEmpty arena) 0
+    List.nil List.nil List.nil List.nil List.nil
 
 def psKernelExprV2CheckStateWithWhnf
     (state : PsKernelExprV2CheckState) (whnf : PsKernelExprV2WhnfState) :
     PsKernelExprV2CheckState :=
-  PsKernelExprV2CheckState.mk whnf state.nextFresh state.checkedInfer state.success state.inferOnly
+  PsKernelExprV2CheckState.mk whnf state.nextFresh state.checkedInfer state.success
+    state.inferOnly state.unfold state.failure
 
 def psKernelExprV2CheckStateWithArena
     (state : PsKernelExprV2CheckState) (arena : PsKernelExprV2PagedArena) :
@@ -98,7 +104,20 @@ def psKernelExprV2CheckStateWithArena
 def psKernelExprV2CheckStateWithSuccess
     (state : PsKernelExprV2CheckState)
     (success : List PsKernelExprV2DefEqPair) : PsKernelExprV2CheckState :=
-  PsKernelExprV2CheckState.mk state.whnf state.nextFresh state.checkedInfer success state.inferOnly
+  PsKernelExprV2CheckState.mk state.whnf state.nextFresh state.checkedInfer success
+    state.inferOnly state.unfold state.failure
+
+def psKernelExprV2CheckStateWithUnfold
+    (state : PsKernelExprV2CheckState)
+    (cache : List PsKernelExprV2WhnfCacheEntry) : PsKernelExprV2CheckState :=
+  PsKernelExprV2CheckState.mk state.whnf state.nextFresh
+    state.checkedInfer state.success state.inferOnly cache state.failure
+
+def psKernelExprV2CheckStateWithFailure
+    (state : PsKernelExprV2CheckState)
+    (cache : List PsKernelExprV2DefEqPair) : PsKernelExprV2CheckState :=
+  PsKernelExprV2CheckState.mk state.whnf state.nextFresh
+    state.checkedInfer state.success state.inferOnly state.unfold cache
 
 def psKernelExprV2CheckStateDefEqFinish
     (state : PsKernelExprV2CheckState) (left right : Nat) (equal : Bool) :
@@ -137,7 +156,7 @@ def psKernelExprV2CheckStateFreshName
   Prod.mk
     (PsKernelName.num base state.nextFresh)
     (PsKernelExprV2CheckState.mk state.whnf (Nat.succ state.nextFresh)
-      state.checkedInfer state.success state.inferOnly)
+      state.checkedInfer state.success state.inferOnly state.unfold state.failure)
 
 /-
 The child arena is retained because returned type IDs may name appended nodes.
@@ -149,13 +168,13 @@ def psKernelExprV2CheckStateExitLocalScope
   PsKernelExprV2CheckState.mk
     (psKernelExprV2WhnfStateWithArena parent.whnf child.whnf.arena)
     (psKernelStateNatMax parent.nextFresh child.nextFresh)
-    parent.checkedInfer parent.success parent.inferOnly
+    parent.checkedInfer parent.success parent.inferOnly parent.unfold parent.failure
 
 def psKernelExprV2CheckStateWithInferOnly
     (state : PsKernelExprV2CheckState)
     (cache : List PsKernelExprV2WhnfCacheEntry) : PsKernelExprV2CheckState :=
   PsKernelExprV2CheckState.mk state.whnf state.nextFresh
-    state.checkedInfer state.success cache
+    state.checkedInfer state.success cache state.unfold state.failure
 
 def psKernelExprV2InferenceCacheEligible
     (inferOnly : Bool) (entry : PsKernelExprV2Entry) : Bool :=
@@ -191,7 +210,8 @@ def psKernelExprV2InferenceFinish
               (List.cons cached state.inferOnly)
           else
             PsKernelExprV2CheckState.mk state.whnf state.nextFresh
-              (List.cons cached state.checkedInfer) state.success state.inferOnly;
+              (List.cons cached state.checkedInfer) state.success state.inferOnly
+              state.unfold state.failure;
         Except.ok (Prod.mk next result)
       else Except.ok (Prod.mk state result)
 

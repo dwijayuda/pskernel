@@ -28,6 +28,7 @@ on:
       - psc1/scripts/pskernel-expr-v2-infer-only-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-proof-irrelevance-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-lazy-nat-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-lazy-delta-smoke.mjs
       - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - .github/workflows/psc1-pskernel-core-correctness.yml
 
@@ -308,6 +309,17 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" lazy-nat-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-lazy-nat-canonical.log"
           grep -q 'PSC1_V2_DAG_JS_LAZY_NAT: PASS comparisons=1350 stage=192' "$RUNNER_TEMP/psc1-lazy-nat-canonical.log"
+      - name: Check canonical-source ordered DAG lazy delta DefEq in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          cp scripts/pskernel-expr-v2-lazy-delta-smoke.mjs "$PSC1_PS_RUN_DIR/lazy-delta-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" lazy-delta-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-lazy-delta-canonical.log"
+          grep -q 'PSC1_V2_DAG_JS_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128' "$RUNNER_TEMP/psc1-lazy-delta-canonical.log"
       - name: Exercise the canonical-source checked batch provider in detached Node
         working-directory: psc1
         shell: bash
@@ -365,6 +377,7 @@ jobs:
             ${{ runner.temp }}/psc1-canonical-provider.log
             ${{ runner.temp }}/psc1-proof-irrelevance-canonical.log
             ${{ runner.temp }}/psc1-lazy-nat-canonical.log
+            ${{ runner.temp }}/psc1-lazy-delta-canonical.log
             psc1/dist/pskernel-selfhost/provider/
             psc1/dist/pskernel-selfhost/workspace/.proofscript-bootstrap.json
             psc1/dist/pskernel-selfhost/pskernel-core.js

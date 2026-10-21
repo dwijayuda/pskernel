@@ -45,6 +45,16 @@ await test('formatting preserves TS declarations and types', async () => {
   const result = await formatEcma(input, 'ts');
   assert.deepEqual(exportedNames(result.program), ['identity']);
 });
+await test('TS zero single and multiple variants retain exact canonical type trees', async () => {
+  const input = 'type Empty = never; type Single = {readonly tag:"one";readonly left:bigint;readonly right:bigint}; type Multiple = {readonly tag:"left"} | {readonly tag:"right"};';
+  const result = await formatEcma(input, 'ts');
+  assert.deepEqual(result.program.body.map(node=>node.typeAnnotation.type),
+    ['TSNeverKeyword','TSTypeLiteral','TSUnionType']);
+  assert.equal((await formatEcma(result.text, 'ts')).text,result.text);
+  // The host does not normalize away changed type syntax to excuse the emitter.
+  await assert.rejects(formatEcma('type Single = | {readonly tag:"one";readonly left:bigint;readonly right:bigint};','ts'),
+    /PSC1_FORMATTING_CHANGED_SYNTAX_TREE/);
+});
 await test('negative source-map VLQ values', () => {
   assert.equal(vlq(-1), 'D');
   assert.equal(vlq(-10), 'V');

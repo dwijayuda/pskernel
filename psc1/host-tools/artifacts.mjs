@@ -70,6 +70,7 @@ function firstSemanticDifference(before, after, trail = 'root') {
       if(found)return found;
     }
   } else if (before && after && typeof before === 'object' && typeof after === 'object') {
+    if (before.type !== after.type) return {path:trail+'.type',before:before.type,after:after.type};
     for (const key of [...new Set([...Object.keys(before),...Object.keys(after)])].sort()) {
       if (!Object.hasOwn(before,key) || !Object.hasOwn(after,key))
         return {path:trail+'.'+key,before:summary(before[key]),after:summary(after[key])};

@@ -136,3 +136,17 @@ Node syntax checking in run 39661066232. A JavaScript string replacement expande
 a replacement token in the inserted diagnostic text. The edit is reconstructed
 from the prior source with literal callback replacement; no compiler lane ran
 and no formatter refusal was bypassed. All failed commits remain preserved.
+
+## TypeScript single-constructor emission correction
+
+Run 39661381346 at 2cd3b64027205b203f7883f800aac3f96504690b passes static
+and native gates. Focused Lean/JS repeats all twelve application cases, including
+100000 statements at 1.79 s / 305596 KiB RSS. The exact formatter diagnostic is
+root.body[79].typeAnnotation.members: the single MiniExpr constructor was emitted
+as a one-member leading-pipe union, while Prettier emits its object type literal.
+The TS backend now emits canonical zero/single/multiple-variant type shapes.
+The host's complete syntax-tree equality remains unchanged. New host tests
+require canonical shapes to stay equal and the redundant union to keep refusing;
+the actual single-constructor application and independent TS checker remain the
+execution regression. No source fixture or admission/IR policy is changed.
+Full application and release readiness remain pending fresh Linux evidence.

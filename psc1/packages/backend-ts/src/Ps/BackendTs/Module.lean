@@ -175,11 +175,19 @@ def psTsEmitInductiveWithVisibility (isPublic : Bool)
           | Except.ok constructorValues =>
               let generic :=
                 psTsGenericNames inductiveInfo.typeParameters;
+              let declarationPrefix :=
+                psTsJoin "" [(if isPublic then "export type " else "type "), inductiveInfo.name, generic];
+              -- A leading union separator on a single variant creates a
+              -- one-member TSUnionType which formatters collapse to its member.
+              -- Emit the canonical type shape before the exact AST guard.
               let typeLine :=
-                if psListIsEmpty variants then
-                  psTsJoin "" [(if isPublic then "export type " else "type "), inductiveInfo.name, generic, " = never;"]
-                else
-                  psTsJoin "" [(if isPublic then "export type " else "type "), inductiveInfo.name, generic, " =\n  | ", psTsJoin "\n  | " variants, ";"];
+                match variants with
+                | List.nil => psTsJoin "" [declarationPrefix, " = never;"]
+                | List.cons first rest =>
+                    match rest with
+                    | List.nil => psTsJoin "" [declarationPrefix, " = ", first, ";"]
+                    | List.cons _ _ =>
+                        psTsJoin "" [declarationPrefix, " =\n  | ", psTsJoin "\n  | " variants, ";"];
               let tagLine := psTsJoin "" ["const ", tag, ": unique symbol = Symbol(", psJsonQuote (psTsJoin "" ["ProofScript.", inductiveInfo.name, ".tag"]), ");"];
               let exportLine := psTsJoin "" [(if isPublic then "export const " else "const "), inductiveInfo.name, " = {"];
               Except.ok (psTsAppendLines [tagLine, typeLine, exportLine] (psTsAppendLines constructorValues ["} as const;"]))

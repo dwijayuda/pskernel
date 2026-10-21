@@ -286,7 +286,20 @@
     "wholeClosureIR": false,
     "generatedCompilerExecution": false,
     "selfCompilation": false,
-    "fixedPoint": false
+    "fixedPoint": false,
+    "semanticClosure": {
+      "modules": 67,
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "parse": "passed",
+      "elaboration": "passed",
+      "independentAdmission": "passed",
+      "strictIR": "passed",
+      "runId": 39520368282,
+      "scope": "exact semantic phase only; other phases not yet qualified"
+    }
   },
   "censusContinuation": {
     "branch": "fix/psc1-census-normalization-20261021",
@@ -423,7 +436,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "semantic-source-scoped-qualified-whole-closure-admission-IR-pending",
+    "status": "semantic-closure-independently-admitted-strict-IR-passed-continue-backend-sources",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -613,17 +626,27 @@
       "strictSemanticAccepted": true
     },
     "wholeClosureQualification": {
-      "status": "new-native-probe-driver-workflow-pending",
+      "status": "passed-exact-semantic-phase-both-grammars",
+      "head": "b412fb2335605cad2423fec29bf91b4f3b602ccb",
+      "testedMergeCommit": "3488a870288f87bdfb96b7072fe6da0e57797869",
+      "runId": 39520368282,
       "phase": "semantic-compiler",
-      "workflow": ".github/workflows/psc1-compiler-closure.yml",
-      "separateFreshGrammarStates": true,
-      "exactCanonicalAdmissionBytes": true,
-      "actualCoreOriginCoverage": true,
-      "canonicalAdmissionBytesParity": "pending",
-      "independentAdmission": "pending",
-      "strictIR": "pending",
+      "modules": 67,
+      "coreDeclarationsPerLane": 2423,
+      "canonicalAdmissionBytesParity": "accepted",
+      "independentAdmission": "passed-exact-closure",
+      "strictIR": "passed-exact-closure",
+      "receipt": "PSC1_SEMANTIC_CLOSURE_ADMISSION_IR_2026-10-21.json",
+      "artifact": {
+        "id": 12309984018,
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/39520368282/artifacts/12309984018",
+        "digest": "sha256:a71399ab08b4fa05f3cda0e66aa87c9265ceb623caa3021c3a9a12c55c2f37be",
+        "bytes": 1296615,
+        "expiresAtUtc": "2026-11-04T00:20:03Z"
+      },
       "generatedExecution": "not-run",
-      "fixedPoint": "not-run"
+      "fixedPoint": "not-run",
+      "formalPreservation": "not-provided"
     },
     "nextBackendRefusal": {
       "module": "Ps.CompilerIr.Specialize",

@@ -1,4 +1,4 @@
-# PSC1 current work state — semantic source closed; continue admission and backend sources
+# PSC1 current work state — semantic closure admitted and strict IR accepted; continue backends
 
 Updated 2026-10-21. Active draft [PR #172](https://github.com/dwijayuda/pskernel/pull/172)
 preserves #171 at1fad9ed53cda9b23ac30be9cea85e7857437564e and every prior commit.
@@ -33,31 +33,33 @@ seven-target, Python minimum, installed-toolchain, Wasm and source tests passed
 within their existing scopes. This is scoped execution evidence, not preservation
 or self-hosting proof. The earlier frontend receipt at4906ff5f remains unchanged.
 
-## Active whole-closure qualification — pending actual CI
+## Exact whole semantic closure — passed both grammar lanes
 
-The source checkpoint above has NOT independently admitted or erased the whole
-compiler closure. A separate Linux workflow now exercises those stages instead
-of inferring them from census or small fixtures.
+Headb412fb2335605cad2423fec29bf91b4f3b602ccb passed the dedicated
+[whole-closure Linux run39520368282](https://github.com/dwijayuda/pskernel/actions/runs/39520368282).
+Tested merge3488a870288f87bdfb96b7072fe6da0e57797869.
+Both fresh native-owned PSC1 grammar lanes prepared and independently admitted
+all2423 actual Core declarations for the exact67-module phase, then erased the
+SAME immutable prepared value and passed the actual strict IR entry point.
+Canonical admission bytes match across languages. Exact source/import/hash
+ownership and complete source/member origin coverage were checked.
+
+[Committed closure receipt](docs/PSC1_SEMANTIC_CLOSURE_ADMISSION_IR_2026-10-21.json).
+Artifact12309984018 digest
+sha256:a71399ab08b4fa05f3cda0e66aa87c9265ceb623caa3021c3a9a12c55c2f37be
+retains exact parser inputs, canonical admissions, origins, hashes and stage
+diagnostics. Retention applies. The receipt is diagnostic, not an authority token.
+
+The existing official Lean4.35 provider replays every converted declaration using
+its unchanged kernel limits in a fresh provider-prelude environment. Owned-kernel
+checks are separate. These results concern the exact compiler source graph.
+They do not prove erasure/backend preservation, general language conformance,
+generated compiler execution, self-compilation or fixed points.
 
 `node scripts/compiler-closure-qualification.mjs --phase semantic-compiler`
-requires complete accepted census inputs and starts fresh native-owned PSC1
-states for the exact ordered phase in BOTH grammars. PS reads the retained actual
-PS parser inputs; it never borrows Lean preparation state. Preserve complete
-source/import/hash ownership and actual source/member origins. Every prepared
-Core batch is counted, and exact canonical admission bytes are retained.
-
-The existing official Lean4.35 provider checks every encoded declaration in a
-fresh provider-prelude environment. The same immutable prepared value then feeds
-erasure and the actual strict IR entry point. Retain failed stages/findings;
-compare canonical admission bytes across grammars. No generated execution,
-self-compilation, fixed point or formal-preservation result is claimed. A JSON
-report is diagnostic, never an admission capability or authority token.
-
-New host-only probe/driver/workflow code is pending Linux validation. All existing
-budgets/pins remain unchanged; each native probe retains the240s process bound,
-and closure workflow15min. Do not turn resource failure into source acceptance.
-Canonical admissions, complete origin records, input/binary hashes and stage
-diagnostics are CI artifacts under compiler-closure/semantic-compiler/.
+reproduces the fresh-state check. New dedicated workflow and focused regression
+workflow both passed at that head. Full scoped source qualification is recorded
+at the prior50c4fa0 checkpoint above; newer full scoped CI is still tracked live.
 
 ## Continue backend source normalization
 
@@ -82,7 +84,8 @@ translated-ps/. PS diagnostic coordinates belong to retained PS input.
 
 Official checker Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
 Owned-kernel checks are separate and are not the active logical checker.
-Whole-closure independent admission/strict IR are pending the new workflow;
+Whole semantic closure independent admission/strict IR passed the exact run above;
+DirectJS/Rust whole closures remain not-run;
 generated compiler execution, self-compilation and G1/G2/G3/R1/R2/R3 remain not-run.
 All14 full Practical Core families remain incomplete; collections/iteration
 efficiency, Rust callbacks, typed IO and remaining parity stay open.

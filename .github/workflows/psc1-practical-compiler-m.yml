@@ -1,0 +1,62 @@
+name: PSC1 focused CompilerM source and owned callback regressions
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - psc1/**
+      - .github/workflows/psc1-practical-compiler-m.yml
+
+permissions:
+  contents: read
+concurrency:
+  group: psc1-practical-compiler-m-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PSC1_COMPILERM_TARGETS: js,rust
+      PSC1_COMPILERM_EVIDENCE: compiler-m-focused
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Rust and locked host dependencies
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.90.0 --profile minimal --component rustfmt
+          rustup default 1.90.0
+          npm --prefix host-tools --workspaces=false ci --ignore-scripts --no-audit --no-fund
+      - name: Build production compiler and independent checker
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1 psc1_independent_checker
+      - name: Execute authored inputs with native reference and JS Rust consumers
+        run: |
+          set -euo pipefail
+          node --check scripts/compiler-m-conformance-tests.mjs
+          node scripts/language-backend-parity-contract-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs
+      - name: Retain exact sources oracle artifacts and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-practical-compiler-m-${{ github.sha }}
+          path: psc1/dist/scoped-correctness/compiler-m-focused/
+          retention-days: 14
+          if-no-files-found: warn

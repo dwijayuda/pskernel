@@ -260,17 +260,17 @@ def psRustFunctionTypeIsFirstOrder
 def psRustDirectClosureTypeSupportedWithFuel
     (fuel : Nat) : PsVerifiedIrType -> Bool :=
   match fuel with
-  | Nat.zero => fun _ => false
+  | Nat.zero => fun (_type : PsVerifiedIrType) => false
   | Nat.succ remaining =>
-      let smaller := psRustDirectClosureTypeSupportedWithFuel remaining
-      fun type =>
+      let smaller : PsVerifiedIrType -> Bool := psRustDirectClosureTypeSupportedWithFuel remaining;
+      fun (type : PsVerifiedIrType) =>
         match type with
         | PsVerifiedIrType.unknown => false
         | PsVerifiedIrType.function parameters result =>
-            !psListAny (fun parameter => !smaller parameter) parameters && smaller result
+            !psListAny (fun (parameter : PsVerifiedIrType) => !smaller parameter) parameters && smaller result
         | PsVerifiedIrType.named _ arguments =>
             !psListAny psRustTypeContainsFunction arguments &&
-              !psListAny (fun argument => !smaller argument) arguments
+              !psListAny (fun (argument : PsVerifiedIrType) => !smaller argument) arguments
         | _ => true
 
 def psRustDirectClosureTypeSupported (type : PsVerifiedIrType) : Bool :=

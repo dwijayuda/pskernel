@@ -143,3 +143,20 @@ callbacks, separate constructor cases and explicit error flow. Preserve embedded
 runtime source literals, helper ordering and partial recursion. Add both-lane
 Print gates and the existing direct source-map regression. Linux CI is pending;
 whole DirectJS admission and generated execution remain not-run.
+
+## DirectJS source closure complete; qualify actual backend graph next
+
+Head0da7fd0104010d7a78fc7609e2869a19f06d3135 focused39524528498 and
+semantic closure39524528430 passed. BOTH source lanes now accept79/79/79
+DirectJS modules. Semantic remains67/67/67; Rust83/79/75. This is source
+acceptance only for DirectJS. Expand exact closure workflow to separate semantic
+and DirectJS matrix jobs without sharing lane state or increasing process limits.
+Actual DirectJS whole preparation/admission/IR remains pending. Existing partial
+backend declarations may require the explicit ordinary assurance pipeline; do not
+weaken checked-only preparation or claim generated execution.
+
+Normalize full Rust RuntimePlan and closure-type traversal: preserve catalogue
+bytes/order, exact selected dependency versions/imports, recursive type/refusal
+rules and4096 boundary. Add nested runtime dependency selection and closure-value
+storage/printer regressions alongside all prior tests. Source gates require both
+complete normalized modules in both actual grammars. Rust Expr/Module still open.

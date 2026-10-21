@@ -371,3 +371,7 @@ lean_exe psc1_independent_checker where
 lean_exe psc1_census_normalization_tests where
   srcDir := "test"
   root := `CensusNormalizationTests
+
+lean_exe psc1_backend_normalization_tests where
+  srcDir := "test"
+  root := `BackendNormalizationTests

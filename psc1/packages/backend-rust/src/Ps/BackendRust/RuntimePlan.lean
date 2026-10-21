@@ -1,4 +1,7 @@
 import Ps.CompilerIr.Model
+import Ps.Foundation.List
+import Ps.Foundation.Name
+import Ps.Foundation.Text
 
 /-- Canonical helper catalogue. Dependencies are attached to each implementation,
 not inferred from generated source text. Legacy emitters keep their old prelude. -/
@@ -49,99 +52,161 @@ def psRustRuntimeHelperCatalogue : List PsRustRuntimeHelper :=
     { name := "__ps_array_foldl", source := "fn __ps_array_foldl<A: Clone, B: Clone>(f: std::rc::Rc<dyn Fn(B, A) -> B>, init: &B, array: &Vec<A>, start: &PsNat, stop: &PsNat) -> B { let size = PsNat::from(array.len()); let end = if stop <= &size { stop.clone() } else { size }; let mut index = start.clone(); let mut acc = init.clone(); while index < end { let i = index.to_usize().expect(\"bounded Array fold index fits usize\"); acc = f(acc, array[i].clone()); index += PsNat::from(1u8); } acc }\n", nat := true, int := false, traits := true, fromStr := false }
   ]
 
-private def intrinsicHelpers : PsVerifiedIrIntrinsic → List String
-  | .natAdd => ["__ps_nat_add"]
-  | .natSub => ["__ps_nat_sub"]
-  | .natMul => ["__ps_nat_mul"]
-  | .natDiv => ["__ps_nat_div"]
-  | .natMod => ["__ps_nat_mod"]
-  | .intOfNat => ["__ps_int_of_nat"]
-  | .intNegSucc => ["__ps_int_neg_succ"]
-  | .intNeg => ["__ps_int_neg"]
-  | .intAdd => ["__ps_int_add"]
-  | .intSub => ["__ps_int_sub"]
-  | .intMul => ["__ps_int_mul"]
-  | .charOfNat => ["__ps_char_of_nat"]
-  | .charToNat => ["__ps_char_to_nat"]
-  | .stringPush => ["__ps_string_push"]
-  | .stringSingleton => ["__ps_string_singleton"]
-  | .stringLength => ["__ps_string_length"]
-  | .stringAppend => ["__ps_string_append"]
-  | .stringUtf8ByteSize => ["__ps_string_utf8_byte_size"]
-  | .stringNext => ["__ps_string_next"]
-  | .stringGet => ["__ps_string_get"]
-  | .stringAtEnd => ["__ps_string_at_end"]
-  | .stringExtract => ["__ps_string_extract"]
-  | .stringEq => ["__ps_string_eq"]
-  | .arrayEmptyWithCapacity => ["__ps_array_empty_with_capacity"]
-  | .arraySize => ["__ps_array_size"]
-  | .arrayPush => ["__ps_array_push"]
-  | .arrayGet => ["__ps_array_get"]
-  | .arrayGetD => ["__ps_array_get_d"]
-  | .arraySet => ["__ps_array_set"]
-  | .arraySetIfInBounds => ["__ps_array_set_if_in_bounds"]
-  | .arrayMap => ["__ps_array_map"]
-  | .arrayFoldl => ["__ps_array_foldl"]
+def psRustRuntimeConcatMap {alpha beta : Type}
+    (convert : alpha -> List beta) (values : List alpha) : List beta :=
+  match values with
+  | List.nil => List.nil
+  | List.cons value rest =>
+      psListAppend (convert value) (psRustRuntimeConcatMap convert rest)
+
+private def intrinsicHelpers (operation : PsVerifiedIrIntrinsic) : List String :=
+  match operation with
+  | PsVerifiedIrIntrinsic.natAdd => ["__ps_nat_add"]
+  | PsVerifiedIrIntrinsic.natSub => ["__ps_nat_sub"]
+  | PsVerifiedIrIntrinsic.natMul => ["__ps_nat_mul"]
+  | PsVerifiedIrIntrinsic.natDiv => ["__ps_nat_div"]
+  | PsVerifiedIrIntrinsic.natMod => ["__ps_nat_mod"]
+  | PsVerifiedIrIntrinsic.intOfNat => ["__ps_int_of_nat"]
+  | PsVerifiedIrIntrinsic.intNegSucc => ["__ps_int_neg_succ"]
+  | PsVerifiedIrIntrinsic.intNeg => ["__ps_int_neg"]
+  | PsVerifiedIrIntrinsic.intAdd => ["__ps_int_add"]
+  | PsVerifiedIrIntrinsic.intSub => ["__ps_int_sub"]
+  | PsVerifiedIrIntrinsic.intMul => ["__ps_int_mul"]
+  | PsVerifiedIrIntrinsic.charOfNat => ["__ps_char_of_nat"]
+  | PsVerifiedIrIntrinsic.charToNat => ["__ps_char_to_nat"]
+  | PsVerifiedIrIntrinsic.stringPush => ["__ps_string_push"]
+  | PsVerifiedIrIntrinsic.stringSingleton => ["__ps_string_singleton"]
+  | PsVerifiedIrIntrinsic.stringLength => ["__ps_string_length"]
+  | PsVerifiedIrIntrinsic.stringAppend => ["__ps_string_append"]
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize => ["__ps_string_utf8_byte_size"]
+  | PsVerifiedIrIntrinsic.stringNext => ["__ps_string_next"]
+  | PsVerifiedIrIntrinsic.stringGet => ["__ps_string_get"]
+  | PsVerifiedIrIntrinsic.stringAtEnd => ["__ps_string_at_end"]
+  | PsVerifiedIrIntrinsic.stringExtract => ["__ps_string_extract"]
+  | PsVerifiedIrIntrinsic.stringEq => ["__ps_string_eq"]
+  | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity => ["__ps_array_empty_with_capacity"]
+  | PsVerifiedIrIntrinsic.arraySize => ["__ps_array_size"]
+  | PsVerifiedIrIntrinsic.arrayPush => ["__ps_array_push"]
+  | PsVerifiedIrIntrinsic.arrayGet => ["__ps_array_get"]
+  | PsVerifiedIrIntrinsic.arrayGetD => ["__ps_array_get_d"]
+  | PsVerifiedIrIntrinsic.arraySet => ["__ps_array_set"]
+  | PsVerifiedIrIntrinsic.arraySetIfInBounds => ["__ps_array_set_if_in_bounds"]
+  | PsVerifiedIrIntrinsic.arrayMap => ["__ps_array_map"]
+  | PsVerifiedIrIntrinsic.arrayFoldl => ["__ps_array_foldl"]
   | _ => []
 
-private partial def typeRequirements : PsVerifiedIrType → List String
-  | .primitive .nat => ["@nat"]
-  | .primitive .int => ["@int"]
-  | .named _ arguments => arguments.flatMap typeRequirements
-  | .function parameters result => parameters.flatMap typeRequirements ++ typeRequirements result
+private partial def typeRequirements (type : PsVerifiedIrType) : List String :=
+  match type with
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.nat => ["@nat"]
+      | PsVerifiedIrPrimitiveType.int => ["@int"]
+      | _ => []
+  | PsVerifiedIrType.named _ arguments =>
+      psRustRuntimeConcatMap typeRequirements arguments
+  | PsVerifiedIrType.function parameters result =>
+      psListAppend (psRustRuntimeConcatMap typeRequirements parameters) (typeRequirements result)
   | _ => []
 
-private partial def exprRequirements : PsVerifiedIrExpr → List String
-  | .literal (.natural _) => ["@nat", "__ps_nat_lit"]
-  | .literal (.integer _) => ["@int", "__ps_int_lit"]
-  | .literal _ | .var _ => []
-  | .intrinsic op types args =>
-      intrinsicHelpers op ++ types.flatMap typeRequirements ++ args.flatMap exprRequirements
-  | .lambda parameters result body =>
-      parameters.flatMap (fun p => typeRequirements p.type) ++
-      typeRequirements result ++ exprRequirements body
-  | .call fn types args =>
-      exprRequirements fn ++ types.flatMap typeRequirements ++ args.flatMap exprRequirements
-  | .letE _ type value body =>
-      typeRequirements type ++ exprRequirements value ++ exprRequirements body
-  | .ifE condition yes no =>
-      exprRequirements condition ++ exprRequirements yes ++ exprRequirements no
-  | .record _ types fields | .constructor _ _ types fields =>
-      types.flatMap typeRequirements ++ fields.flatMap (fun field => exprRequirements field.2)
-  | .projection _ types value _ => types.flatMap typeRequirements ++ exprRequirements value
-  | .matchE _ types value alternatives =>
-      types.flatMap typeRequirements ++ exprRequirements value ++ alternatives.flatMap (fun alternative =>
-        alternative.2.1.flatMap (fun binding => typeRequirements binding.type) ++
-        exprRequirements alternative.2.2)
+private partial def exprRequirements (expression : PsVerifiedIrExpr) : List String :=
+  match expression with
+  | PsVerifiedIrExpr.literal literal =>
+      match literal with
+      | PsVerifiedIrLiteral.natural _ => ["@nat", "__ps_nat_lit"]
+      | PsVerifiedIrLiteral.integer _ => ["@int", "__ps_int_lit"]
+      | _ => []
+  | PsVerifiedIrExpr.var _ => []
+  | PsVerifiedIrExpr.intrinsic operation types arguments =>
+      psListAppend (intrinsicHelpers operation)
+        (psListAppend (psRustRuntimeConcatMap typeRequirements types)
+          (psRustRuntimeConcatMap exprRequirements arguments))
+  | PsVerifiedIrExpr.lambda parameters result body =>
+      psListAppend
+        (psRustRuntimeConcatMap (fun (parameter : PsVerifiedIrParameter) =>
+          typeRequirements parameter.type) parameters)
+        (psListAppend (typeRequirements result) (exprRequirements body))
+  | PsVerifiedIrExpr.call fn types arguments =>
+      psListAppend (exprRequirements fn)
+        (psListAppend (psRustRuntimeConcatMap typeRequirements types)
+          (psRustRuntimeConcatMap exprRequirements arguments))
+  | PsVerifiedIrExpr.letE _ type value body =>
+      psListAppend (typeRequirements type)
+        (psListAppend (exprRequirements value) (exprRequirements body))
+  | PsVerifiedIrExpr.ifE condition yes no =>
+      psListAppend (exprRequirements condition)
+        (psListAppend (exprRequirements yes) (exprRequirements no))
+  | PsVerifiedIrExpr.record _ types fields =>
+      psListAppend (psRustRuntimeConcatMap typeRequirements types)
+        (psRustRuntimeConcatMap (fun (field : Prod String PsVerifiedIrExpr) =>
+          exprRequirements field.snd) fields)
+  | PsVerifiedIrExpr.constructor _ _ types fields =>
+      psListAppend (psRustRuntimeConcatMap typeRequirements types)
+        (psRustRuntimeConcatMap (fun (field : Prod String PsVerifiedIrExpr) =>
+          exprRequirements field.snd) fields)
+  | PsVerifiedIrExpr.projection _ types value _ =>
+      psListAppend (psRustRuntimeConcatMap typeRequirements types) (exprRequirements value)
+  | PsVerifiedIrExpr.matchE _ types value alternatives =>
+      psListAppend (psRustRuntimeConcatMap typeRequirements types)
+        (psListAppend (exprRequirements value)
+          (psRustRuntimeConcatMap
+            (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+              psListAppend
+                (psRustRuntimeConcatMap (fun (binding : PsVerifiedIrMatchBinding) =>
+                  typeRequirements binding.type) alternative.snd.fst)
+                (exprRequirements alternative.snd.snd))
+            alternatives))
 
 private def moduleRequirements (source : PsVerifiedIrModule) : List String :=
-  source.structures.flatMap (fun value => value.fields.flatMap (fun field => typeRequirements field.type)) ++
-  source.inductives.flatMap (fun value => value.constructors.flatMap (fun ctor =>
-    ctor.fields.flatMap (fun field => typeRequirements field.type))) ++
-  source.declarations.flatMap (fun value =>
-    value.parameters.flatMap (fun p => typeRequirements p.type) ++
-    typeRequirements value.resultType ++ exprRequirements value.body)
+  psListAppend
+    (psRustRuntimeConcatMap (fun (value : PsVerifiedIrStructure) =>
+      psRustRuntimeConcatMap (fun (field : PsVerifiedIrStructureField) =>
+        typeRequirements field.type) value.fields) source.structures)
+    (psListAppend
+      (psRustRuntimeConcatMap (fun (value : PsVerifiedIrInductive) =>
+        psRustRuntimeConcatMap (fun (constructor : PsVerifiedIrConstructor) =>
+          psRustRuntimeConcatMap (fun (field : PsVerifiedIrConstructorField) =>
+            typeRequirements field.type) constructor.fields) value.constructors) source.inductives)
+      (psRustRuntimeConcatMap (fun (value : PsVerifiedIrDeclaration) =>
+        psListAppend
+          (psRustRuntimeConcatMap (fun (parameter : PsVerifiedIrParameter) =>
+            typeRequirements parameter.type) value.parameters)
+          (psListAppend (typeRequirements value.resultType) (exprRequirements value.body)))
+        source.declarations))
 
 structure PsRustRuntimePlan where
   source : String
   requirements : List String
 
+def psRustRuntimeFilterHelpers (requested : List String)
+    (helpers : List PsRustRuntimeHelper) : List PsRustRuntimeHelper :=
+  match helpers with
+  | List.nil => List.nil
+  | List.cons item rest =>
+      if psListAny (fun (name : String) => psStringEq name item.name) requested then
+        List.cons item (psRustRuntimeFilterHelpers requested rest)
+      else psRustRuntimeFilterHelpers requested rest
+
 def psRustPlanRuntime (source : PsVerifiedIrModule) : PsRustRuntimePlan :=
-  let requested := moduleRequirements source
-  let helpers := psRustRuntimeHelperCatalogue.filter (fun item => requested.contains item.name)
-  let needsNat := requested.contains "@nat" || helpers.any (fun item => item.nat)
-  let needsInt := requested.contains "@int" || helpers.any (fun item => item.int)
-  let needsTraits := helpers.any (fun item => item.traits)
-  let needsFromStr := helpers.any (fun item => item.fromStr)
-  let imports :=
-    (if needsNat then "use num_bigint::BigUint as PsNat;\n" else "") ++
-    (if needsInt then "use num_bigint::BigInt as PsInt;\n" else "") ++
-    (if needsTraits then "use num_traits::{ToPrimitive, Zero};\n" else "") ++
-    (if needsFromStr then "use std::str::FromStr;\n" else "")
-  {
-    source := imports ++ String.intercalate "" (helpers.map (fun item => item.source))
-    requirements :=
-      (if needsNat || needsInt then ["num-bigint@0.4.6"] else []) ++
-      (if needsTraits then ["num-traits@0.2.19"] else []) ++
-      helpers.map (fun item => item.name)
-  }
+  let requested : List String := moduleRequirements source;
+  let helpers : List PsRustRuntimeHelper :=
+    psRustRuntimeFilterHelpers requested psRustRuntimeHelperCatalogue;
+  let needsNat : Bool :=
+    psListAny (fun (name : String) => psStringEq name "@nat") requested ||
+      psListAny (fun (item : PsRustRuntimeHelper) => item.nat) helpers;
+  let needsInt : Bool :=
+    psListAny (fun (name : String) => psStringEq name "@int") requested ||
+      psListAny (fun (item : PsRustRuntimeHelper) => item.int) helpers;
+  let needsTraits : Bool := psListAny (fun (item : PsRustRuntimeHelper) => item.traits) helpers;
+  let needsFromStr : Bool := psListAny (fun (item : PsRustRuntimeHelper) => item.fromStr) helpers;
+  let imports : String := psTextJoin "" [
+    if needsNat then "use num_bigint::BigUint as PsNat;\n" else "",
+    if needsInt then "use num_bigint::BigInt as PsInt;\n" else "",
+    if needsTraits then "use num_traits::{ToPrimitive, Zero};\n" else "",
+    if needsFromStr then "use std::str::FromStr;\n" else ""
+  ];
+  PsRustRuntimePlan.mk
+    (String.Internal.append imports
+      (psTextJoin "" (psListMap (fun (item : PsRustRuntimeHelper) => item.source) helpers)))
+    (psListAppend (if needsNat || needsInt then ["num-bigint@0.4.6"] else [])
+      (psListAppend (if needsTraits then ["num-traits@0.2.19"] else [])
+        (psListMap (fun (item : PsRustRuntimeHelper) => item.name) helpers)))

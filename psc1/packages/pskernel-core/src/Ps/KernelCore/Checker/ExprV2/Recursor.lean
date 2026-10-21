@@ -181,7 +181,7 @@ def psKernelExprV2TryReduceRecursorMajorWithKOwnedWith
     (recursor : PsKernelRecursorInfo) (recLevels : List PsKernelLevel)
     (recArgs : List Nat) (majorIndex major : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState (Option Nat))) :=
-  let converted :=
+  let converted : Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
     if recursor.k then
       psKernelExprV2RecursorKOwnedWith publicWhnf inferType defeq context state recursor major
     else Option.some (Except.ok (Prod.mk state major));

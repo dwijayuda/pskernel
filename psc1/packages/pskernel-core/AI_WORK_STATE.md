@@ -12,6 +12,101 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — complete-owner K and major recursor candidate; fresh gates mandatory
+
+Candidate branch: `research/psc1-pskernel-v2-carrier-20261021`.
+Production review parent: `0a031a7bbbfc5040f2eeeb25c73432345dfb9634`;
+previous pushed carrier: `bd35452a1c10f22bc7e863efafd1a868a3fe3b72`.
+Integration now contains history-preserving merge
+`a2590cc15c764dae9c6abfb941d6c3155ead5c81` of qualified staged727 and889;
+the merge's own fresh jobs are pending. **This candidate is NOT RUN at creation**
+for native, portable-source, canonical, generated, proof, benchmark, Arena and
+provider gates. No parent's PASS is inherited.
+
+### Implementation and mandatory coverage
+
+`Checker/ExprV2/RecursorMajor.lean` directly walks checked private recursor types,
+builds exact field projections, normalizes Nat/String majors and expands eligible
+nonrecursive structures while retaining every callback's full CheckState.
+String always performs the fixed public WHNF callback after exact construction.
+`RecursorK.lean` implements the original infer/public-WHNF/index-guard/candidate/
+infer/DefEq sequence. K uses the normalized major TYPE universes, runs before
+the constructor shortcut, and retains the full state on false DefEq. Expression
+mvars in indices and universe-only mvars remain distinct.
+
+`Recursor.lean` now shares the post-conversion iota pipeline. Ordinary checked
+K metadata is installed by `API/DagGenerated.lean` after validated admission,
+using private appended nodes and original declaration IDs. The original raw
+compatibility path remains explicitly limited. The two constructor-valued
+intermediate conditionals are explicitly typed for portable inference.
+No new runtime axiom, trusted hash, unsafe/extern/intrinsic path, resource limit,
+callback predecessor, or failure-order rule is introduced.
+
+Native and both authentic generated routes must run:
+- Retained recursor252-public/504-core/720-owner/72-reducer matrices, original
+  private-ID and universe-negative controls.
+- Non-K major126-public/504-core/360-owner/432-reducer comparisons;4 full-owner
+  sequences and40 exact failures;70 family walks/20 field-budget controls;
+ 24 raw String callbacks/48 failures with6 native official String checks.
+  Six checked neutral-major cases and four strictly direct declaration admissions
+  (2 valid/2 invalid) also have official native controls. Raw ill-typed String/
+  Nat-rec probes are explicitly excluded from admitted-proof counts.
+- K108-public/432-core/648-reducer/96-independent-budget comparisons;16 full-owner,
+ 16 failure-propagation and16 mvar-metadata controls;5 order/resource guards.
+  Actual checked KUnit and indexed KEquality metadata, two checked theorem majors,
+  six positive/three negative expressions and two strictly direct definition
+  admissions are compared with V1 and native official Lean.
+- Arena markers make each callback's appended graph changes observable, alongside
+  every semantic cache and fresh counter. Deliberate arena-loss negatives verify
+  the marker. An outer unsupported attempt cannot satisfy direct-admission tests.
+- Existing14 recursor,21 owned-state and2 ABI lemmas, plus10 major and6 K local
+  equations with printed axiom dependencies. The new statements establish local
+  guard/state facts under explicit premises, not global semantic equivalence.
+
+The carrierbd generated and canonical failures were a fixture defect at
+owned-state-smoke.mjs:544–546. The five-argument callback factory was supplied
+four arguments. This child supplies the result through explicit lambdas,
+preserving every assertion and42/56/540/38/44 plus8/12/336/168 counts.
+The new major JS test similarly wraps the flat local-value export into the
+curried callback shape required by the checker. These are test ABI corrections.
+
+### Exact predecessor evidence and remaining scope
+
+Source727 native119237791103/generated119237790434 in integration39604699608,
+native119237794295/canonical119237793626 in correctness39604700328 and all six
+research39604699278 jobs are terminal PASS. This qualifies **A only for the
+documented scoped V1 developer provider at727**. Portable closure177 modules/
+two roots and canonical134 modules passed, as did detached native24 and each
+generated24-provider/8-API exercise. Full-kernel DirectJS is UNSUPPORTED.
+
+The [permanent727 receipt](evidence/2026-10-21-727b3dd.json) records all per-file
+digests and193 exact Arena classifications. Arena39604699432 is terminal FAIL:
+172 matching outcomes (105 accepted,59 kernel rejected,1 metadata rejected,
+7 transport rejected),2 separate safety-contract agreements,17 host timeouts,
+1 church reduction-budget error and1 unsupported nested-recursion case.
+Carrierbd Arena39604877083 independently has the same category totals.
+No timeout/resource/unsupported outcome is a parity pass.
+
+[Performance receipts](PERFORMANCE_2026-10-21.md) preserve all19 native,
+32 generated and6 admission groups at727, including slower collision/projection/
+binder workloads and mixed memory. Binder32 admission is219.048ms V1 versus
+555.452ms DAG per measured batch. There is no general V2 performance qualification.
+
+Four public whole-operation fallback sites, initial whole-arena decoding,
+recursive generated-metadata import, V1 inductive admission, incomplete owner
+installation for mutual/nested recursors and String-literal projection WHNF
+remain. V1 stays selectable and the default provider. **B/C remain unachieved.**
+The resource diagnosticab61 in39607734805 builds pinned369bee and remains
+IN PROGRESS; collection success will not imply checker parity.
+
+Next executable action: inspect this exact candidate's push-triggered native
+build and all independent regression steps; fix actual semantic, portability,
+ABI or fixture defects without weakening gates. Then wait for both authentic
+generated routes, local proofs, provider, performance and full193-case Arena
+jobs to terminate. Promote only a qualified successor, using a fresh expected
+integration SHA and preserving both branch histories.
+
+
 ## 2026-10-21 — recursor-major migration review, qualification pending
 
 This source follows carrier `bd35452a1c10f22bc7e863efafd1a868a3fe3b72`.

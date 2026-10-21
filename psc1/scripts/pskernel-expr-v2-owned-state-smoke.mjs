@@ -541,7 +541,8 @@ for(const fuel of [0n,1n,8n]){
 let admissionProbes=0,admissionPropagation=0;
 for(const seed of [2n,11n]){
  const state=stamp(zero.id,initial,seed);
- const first=whnfStep(zero.id,seed,seed,seed+1n),second=whnfStep(zero.id,seed+1n,seed+1n,seed+2n);
+ const first=result=>whnfStep(zero.id,seed,seed,seed+1n,result);
+ const second=result=>whnfStep(zero.id,seed+1n,seed+1n,seed+2n,result);
  for(const [sortRoot,level,answer]of [[s0.id,unit(L.zero),true],[s1.id,one,false]]){
   const sorted=attempt(get("psKernelExprV2AdmissionEnsureSortOwnedWith")(
    first(sortRoot),context,state,sortRoot),"admission-sort-owner");

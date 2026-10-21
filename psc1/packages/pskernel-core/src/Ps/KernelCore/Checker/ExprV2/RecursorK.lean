@@ -85,7 +85,7 @@ def psKernelExprV2RecursorKAfterTypeOwnedWith
                 match psKernelExprV2PagedRequire state.whnf.arena appType with
                 | Except.error error => Option.some (Except.error error)
                 | Except.ok typeEntry =>
-                    let indexAttempt :=
+                    let indexAttempt : Except String Bool :=
                       if typeEntry.hasExprMVar then
                         psKernelExprV2RecursorKIndicesHaveMVar state.whnf.arena
                           (psKernelExprV2QuotDrop recursor.numParams (Prod.snd spine))

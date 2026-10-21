@@ -171,6 +171,510 @@ private def officialInductive (environment : Lean.Environment)
   | .ok next => pure next
   | .error _ => throw (IO.userError "official checked inductive fixture failed")
 
+
+/- Non-K major tests use checked neutral constants. Generated recursor metadata
+   is still installed only after the complete original inductive admission. -/
+private def majorPrepareAxiom (prior : Prepared) (name : PsKernelName) (type : PsKernelExpr) :
+    IO Prepared := do
+  let header := PsKernelConstantBase.mk name [] type
+  let admitted ← expectPublic "major-neutral-axiom"
+    (psKernelV1AdmitDeclaration prior.session (.axiomDecl header false))
+  let (arena,typeId) ← expect (psKernelExprV2PagedImportIntoChecked prior.arena type)
+  let request := PsKernelDagDeclarationRequest.axiomDecl
+    (PsKernelDagConstantBase.mk name [] typeId) false
+  pure (Prepared.mk admitted.session arena (prior.commands ++ [.admit request])
+    (psKernelDagDeclarationsAfterAdmission request prior.declarations))
+
+private def majorCompareWhnf (label : String)
+    (original : Except String (PsKernelExpr × PsKernelCheckerState))
+    (actual : Option (Except String (PsKernelExprV2CheckState × Nat))) : IO Unit := do
+  compareWhnf label original (psKernelExprV2LowerWhnfAttempt actual)
+  match original,actual with
+  | .ok a,some (.ok b) =>
+      require (label ++ "-fresh-counter") (a.snd.nextFresh == b.fst.nextFresh)
+  | _,_ => pure ()
+
+private def majorCompareReduction (label : String)
+    (original : Except String (Option PsKernelExpr × PsKernelCheckerState))
+    (actual : Option (Except String (PsKernelExprV2CheckState × Option Nat))) : IO Unit := do
+  compareReduction label original (psKernelExprV2LowerOptionalWhnfAttempt actual)
+  match original,actual with
+  | .ok a,some (.ok b) =>
+      require (label ++ "-fresh-counter") (a.snd.nextFresh == b.fst.nextFresh)
+  | _,_ => pure ()
+
+private def majorResourceMatrix (session : PsKernelKernelSession)
+    (generated : PsKernelDagGeneratedState)
+    (cases : List (String × PsKernelExpr × PsKernelExpr × Nat)) : IO Unit := do
+  let scalar := (psKernelKernelSessionChecker session [] .safe).context
+  let initial := psKernelExprV2CheckStateFromWhnf
+    (psKernelExprV2WhnfStateForDeclarations generated.arena generated.declarations)
+  let mut publics := 0
+  let mut cores := 0
+  let mut owners := 0
+  let mut reducers := 0
+  for (label,expr,_,root) in cases do
+    for fuel in [0,1,2,3,6,16,64] do
+      for (limit,depth) in [(0,0),(1,15),(1,16)] do
+        let oldContext := { scalar with maxRecDepth := limit,recDepth := depth }
+        let context := psKernelExprV2CheckContextEmpty oldContext
+        let oldDefEq := psKernelIsDefEqWithFuel fuel
+        let newDefEq := psKernelExprV2TryDefEqStateWithFuel fuel
+        majorCompareWhnf (label ++ "-major-public")
+          (psKernelWhnfWithRecursorFuel fuel oldDefEq oldContext psKernelCheckerStateEmpty expr)
+          (psKernelExprV2TryWhnfCheckStateWithFuel fuel context initial root)
+        publics := publics + 1
+        for cheapRec in [false,true] do
+          for cheapProj in [false,true] do
+            majorCompareWhnf (label ++ "-major-core")
+              (psKernelWhnfCoreWithRecursorFuel fuel oldDefEq oldContext
+                psKernelCheckerStateEmpty expr cheapRec cheapProj)
+              (psKernelExprV2TryWhnfCoreOwnedWithLocalValuesFuel fuel newDefEq
+                psKernelExprV2CheckLocalValue context initial root cheapRec cheapProj)
+            cores := cores + 1
+    for structuralFuel in [0,1,2,4,16] do
+      for recursorFuel in [0,1,2,8] do
+        for (limit,depth) in [(0,0),(1,15),(1,16)] do
+          let oldContext := { scalar with maxRecDepth := limit,recDepth := depth }
+          let context := psKernelExprV2CheckContextEmpty oldContext
+          let reducer := psKernelExprV2TryReduceRecursorOwnedWithFuel recursorFuel
+            (psKernelExprV2TryDefEqStateWithFuel 64) psKernelExprV2CheckLocalValue
+          majorCompareWhnf (label ++ "-major-fixed-owner")
+            (psKernelWhnfWithFuel structuralFuel
+              (psKernelReduceRecursorBoundedWithFuel recursorFuel (psKernelIsDefEqWithFuel 64))
+              oldContext psKernelCheckerStateEmpty expr)
+            (psKernelExprV2TryWhnfOwnedWithReducerFuel structuralFuel
+              reducer psKernelExprV2CheckLocalValue context initial root)
+          owners := owners + 1
+    for fuel in [0,1,2,3,8,32] do
+      for (limit,depth) in [(0,0),(1,15),(1,16)] do
+        let oldContext := { scalar with maxRecDepth := limit,recDepth := depth }
+        let context := psKernelExprV2CheckContextEmpty oldContext
+        for cheapRec in [false,true] do
+          for cheapProj in [false,true] do
+            majorCompareReduction (label ++ "-major-reducer")
+              (psKernelReduceRecursorBoundedWithFuel fuel (psKernelIsDefEqWithFuel 64)
+                oldContext psKernelCheckerStateEmpty expr cheapRec cheapProj)
+              (psKernelExprV2TryReduceRecursorOwnedWithFuel fuel
+                (psKernelExprV2TryDefEqStateWithFuel 64) psKernelExprV2CheckLocalValue
+                context initial root cheapRec cheapProj)
+            reducers := reducers + 1
+  require "non-K-major-resource-matrix"
+    (publics == 126 && cores == 504 && owners == 360 && reducers == 432)
+  IO.println "PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX: PASS public=126 core=504 owners=360 reducer=432"
+
+
+/- Diagnostic cache rows use an out-of-range hash and cannot establish a
+   cached judgment. Each callback must receive the complete previous marker. -/
+private def majorCacheTag (rows : List PsKernelExprV2WhnfCacheEntry) (tag : Nat) : Bool :=
+  match rows with
+  | [row] => row.hash == psKernelCacheHashModulus + tag
+  | _ => false
+
+private def majorPairTag (rows : List PsKernelExprV2DefEqPair) (tag : Nat) : Bool :=
+  match rows with
+  | [row] => row.hash == psKernelCacheHashModulus + tag
+  | _ => false
+
+private def majorArenaTag (state : PsKernelExprV2CheckState) (tag : Nat) : Bool :=
+  match state.checkedInfer with
+  | [row] =>
+      match psKernelExprV2PagedRequire state.whnf.arena row.result with
+      | .ok entry =>
+          match entry.node with
+          | .lit (.nat value) => value == 12000 + tag
+          | _ => false
+      | .error _ => false
+  | _ => false
+
+private def majorStateTag (state : PsKernelExprV2CheckState) (tag : Nat) : Bool :=
+  state.nextFresh == tag && majorCacheTag state.checkedInfer tag &&
+    majorPairTag state.success tag && majorCacheTag state.inferOnly tag &&
+    majorCacheTag state.unfold tag && majorPairTag state.failure tag && majorArenaTag state tag
+
+private def majorStamp (key : Nat) (state : PsKernelExprV2CheckState) (tag : Nat) :
+    Except String PsKernelExprV2CheckState := do
+  let (arena,markerId) ← psKernelExprV2PagedMkLit state.whnf.arena (.nat (12000 + tag))
+  let cache := PsKernelExprV2WhnfCacheEntry.mk key markerId (psKernelCacheHashModulus + tag)
+  let pair := PsKernelExprV2DefEqPair.mk key key (psKernelCacheHashModulus + tag)
+  let whnf := PsKernelExprV2WhnfState.mk arena (cache :: state.whnf.coreCache)
+    (cache :: state.whnf.publicCache) state.whnf.declarations
+  pure (PsKernelExprV2CheckState.mk whnf tag [cache] [pair] [cache] [cache] [pair])
+
+private def majorCallback (seed failAt : Nat) (decline : Bool)
+    (expectedRoot result tag : Nat) (state : PsKernelExprV2CheckState) (root : Nat) :
+    Option (Except String (PsKernelExprV2CheckState × Nat)) :=
+  if root != expectedRoot || !majorStateTag state tag then
+    some (.error "major callback received wrong input or stale state")
+  else if failAt == tag + 1 - seed then
+    if decline then none else some (.error "MAJOR_INJECTED")
+  else
+    some ((majorStamp expectedRoot state (tag + 1)).map (fun next => (next,result)))
+
+private def majorOrderRegression (scalar : PsKernelCheckerContext)
+    (initial : PsKernelExprV2CheckState) (root majorId typeId sortId : Nat)
+    (expr majorExpr : PsKernelExpr) : IO Unit := do
+  let context := psKernelExprV2CheckContextEmpty scalar
+  let seed := 30
+  let seeded ← expect (majorStamp majorId initial seed)
+  require "major-arena-loss-marker-detected"
+    (!majorStateTag (psKernelExprV2CheckStateWithArena seeded initial.whnf.arena) seed)
+  let denyEq := fun (_ : PsKernelExprV2CheckContext) (_ : PsKernelExprV2CheckState)
+      (_ _ : Nat) =>
+    (some (.error "MAJOR_FORBIDDEN_DEFEQ") :
+      Option (Except String (PsKernelExprV2CheckState × Bool)))
+  let oldWhnf := fun (_ : PsKernelCheckerContext) (state : PsKernelCheckerState)
+      (term : PsKernelExpr) =>
+    Except.ok (term,{ state with nextFresh := state.nextFresh + 1 })
+  let oldCore := fun (c : PsKernelCheckerContext) (state : PsKernelCheckerState)
+      (term : PsKernelExpr) (_ _ : Bool) => oldWhnf c state term
+  let oldInfer := fun (_ : PsKernelCheckerContext) (state : PsKernelCheckerState)
+      (term : PsKernelExpr) =>
+    if psKernelExprEqual term majorExpr then
+      Except.ok (box,{ state with nextFresh := state.nextFresh + 1 })
+    else if psKernelExprEqual term box then
+      Except.ok (s1,{ state with nextFresh := state.nextFresh + 1 })
+    else Except.error "MAJOR_OLD_INFER_INPUT"
+  let oldEq := fun (_ : PsKernelCheckerContext) (_ : PsKernelCheckerState)
+      (_ _ : PsKernelExpr) =>
+    (Except.error "MAJOR_FORBIDDEN_DEFEQ" : Except String (Bool × PsKernelCheckerState))
+  let mut sequences := 0
+  let mut propagated := 0
+  for cheapRec in [false,true] do
+    for cheapProj in [false,true] do
+      let run := fun (failAt : Nat) (decline : Bool) =>
+        let publicWhnf := fun (_ : PsKernelExprV2CheckContext)
+            (state : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+          if state.nextFresh == seed then
+            majorCallback seed failAt decline majorId majorId seed state nextRoot
+          else if state.nextFresh == seed + 2 then
+            majorCallback seed failAt decline typeId typeId (seed + 2) state nextRoot
+          else majorCallback seed failAt decline sortId sortId (seed + 4) state nextRoot
+        let coreWhnf := fun (_ : PsKernelExprV2CheckContext)
+            (state : PsKernelExprV2CheckState) (nextRoot : Nat) (cr cp : Bool) =>
+          if cr == cheapRec && cp == cheapProj then
+            majorCallback seed failAt decline majorId majorId seed state nextRoot
+          else some (.error "MAJOR_CHEAP_FLAGS")
+        let inferType := fun (_ : PsKernelExprV2CheckContext)
+            (state : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+          if state.nextFresh == seed + 1 then
+            majorCallback seed failAt decline majorId typeId (seed + 1) state nextRoot
+          else majorCallback seed failAt decline typeId sortId (seed + 3) state nextRoot
+        psKernelExprV2TryReduceRecursorOwnedWith
+          publicWhnf coreWhnf inferType denyEq context seeded root cheapRec cheapProj
+      let actual := run 0 false
+      majorCompareReduction "major-five-fixed-callbacks"
+        (psKernelReduceRecursorWith oldWhnf oldCore oldInfer oldEq scalar
+          { psKernelCheckerStateEmpty with nextFresh := seed } expr cheapRec cheapProj)
+        actual
+      let some (.ok result) := actual
+        | throw (IO.userError "major ordered reduction failed")
+      require "major-all-six-fields-after-rule" (majorStateTag result.fst (seed + 5))
+      require "major-core-cache-retained"
+        (result.fst.whnf.coreCache.any (fun row => row.hash == psKernelCacheHashModulus + seed + 5))
+      require "major-public-cache-retained"
+        (result.fst.whnf.publicCache.any (fun row => row.hash == psKernelCacheHashModulus + seed + 5))
+      require "major-owner-retained"
+        (psKernelExprV2DeclarationRefFind result.fst.whnf.declarations boxRecName).isSome
+      require "major-rule-actually-reduced" result.snd.isSome
+      let _ ← expect (psKernelExprV2PagedValidate result.fst.whnf.arena)
+      sequences := sequences + 1
+      for failAt in [1,2,3,4,5] do
+        for decline in [false,true] do
+          require "major-failure-order-and-propagation"
+            (match run failAt decline with
+             | none => decline
+             | some (.error error) => !decline && error == "MAJOR_INJECTED"
+             | _ => false)
+          propagated := propagated + 1
+  require "major-sequence-matrix" (sequences == 4 && propagated == 40)
+  IO.println "PSC1_V2_DAG_RECURSOR_MAJOR_STATE: PASS sequence=4 propagated=40"
+
+private def majorFamilyRegression (context : PsKernelExprV2CheckContext)
+    (initial : PsKernelExprV2CheckState) (natInfo boxInfo : PsKernelRecursorInfo)
+    (neutralId boxNeutralId constructorId : Nat) : IO Unit := do
+  let mut comparisons := 0
+  for info in [natInfo,boxInfo] do
+    let some typeId := psKernelExprV2RecursorTypeOwner initial.whnf.declarations info
+      | throw (IO.userError "major type owner missing")
+    for fuel in [0,1,2,3,4,5,8] do
+      for index in [0,1,3,4,8] do
+        let expected := psKernelRecursorMajorInductWithFuel fuel info.base.type index
+        let actual ← expect (psKernelExprV2RecursorMajorInductWithFuel fuel
+          initial.whnf.arena typeId index)
+        require "major-type-walk-exact"
+          (match expected,actual with
+           | none,none => true
+           | some a,some b => psKernelNameEq a b
+           | _,_ => false)
+        comparisons := comparisons + 1
+  let bad := initial.whnf.arena.size + 1
+  require "major-type-zero-before-root"
+    (match psKernelExprV2RecursorMajorInductWithFuel 0 initial.whnf.arena bad 0 with
+     | .ok none => true | _ => false)
+  require "major-type-positive-invalid-root"
+    (match psKernelExprV2PagedRequire initial.whnf.arena bad,
+        psKernelExprV2RecursorMajorInductWithFuel 1 initial.whnf.arena bad 0 with
+     | .error expected,.error actual => expected == actual
+     | _,_ => false)
+  let forbidden := fun (_ : PsKernelExprV2CheckContext) (_ : PsKernelExprV2CheckState) (_ : Nat) =>
+    (some (.error "MAJOR_FORBIDDEN_CALLBACK") :
+      Option (Except String (PsKernelExprV2CheckState × Nat)))
+  let unowned := psKernelExprV2CheckStateWithWhnf initial
+    (psKernelExprV2WhnfStateForDeclarations initial.whnf.arena [])
+  require "major-constructor-shortcut-before-owner"
+    (match psKernelExprV2RecursorToStructureOwnedWith
+        forbidden forbidden context unowned boxInfo constructorId with
+     | some (.ok result) => result.snd == constructorId | _ => false)
+  require "major-recursive-family-never-infers"
+    (match psKernelExprV2RecursorToStructureOwnedWith
+        forbidden forbidden context initial natInfo neutralId with
+     | some (.ok result) => result.snd == neutralId | _ => false)
+  require "major-missing-owner-explicit-decline"
+    (psKernelExprV2RecursorToStructureOwnedWith
+      forbidden forbidden context unowned natInfo neutralId).isNone
+  require "major-compatibility-normalizer-scope-unchanged"
+    (psKernelExprV2RecursorNormalizeMajor context.scalar initial.whnf neutralId).isNone
+  let majorExpr ← decode initial.whnf.arena boxNeutralId
+  for fuel in [0,1,2,4] do
+    for (count,index) in [(0,0),(1,0),(3,0),(3,1),(1,2)] do
+      let expected := psKernelStructureFieldsWithFuel fuel boxName majorExpr count index
+      let actual ← expect (psKernelExprV2RecursorStructureFieldsWithFuel
+        fuel initial.whnf.arena boxName boxNeutralId count index)
+      require "major-field-count-and-truncation" (actual.snd.length == expected.length)
+      for (root,term) in actual.snd.zip expected do
+        require "major-field-order-exact"
+          (psKernelExprEqual (← decode actual.fst root) term)
+  require "major-family-comparison-count" (comparisons == 70)
+  IO.println "PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY: PASS comparisons=70 fields=20"
+
+
+private def majorStringRegression (context : PsKernelExprV2CheckContext)
+    (initial : PsKernelExprV2CheckState) (natInfo : PsKernelRecursorInfo)
+    (official : Lean.Environment) : IO Unit := do
+  let values := ["","a","é","é","🙂","a" ++ String.singleton (Char.ofNat 0) ++ "β"]
+  let forbidden := fun (_ : PsKernelExprV2CheckContext) (_ : PsKernelExprV2CheckState) (_ : Nat) =>
+    (some (.error "STRING_MAJOR_FORBIDDEN_INFERENCE") :
+      Option (Except String (PsKernelExprV2CheckState × Nat)))
+  let denyEq := fun (_ : PsKernelExprV2CheckContext) (_ : PsKernelExprV2CheckState) (_ _ : Nat) =>
+    (some (.error "STRING_MAJOR_FORBIDDEN_DEFEQ") :
+      Option (Except String (PsKernelExprV2CheckState × Bool)))
+  let oldWhnf := fun (_ : PsKernelCheckerContext) (state : PsKernelCheckerState)
+      (term : PsKernelExpr) =>
+    Except.ok (term,{ state with nextFresh := state.nextFresh + 1 })
+  let oldCore := fun (c : PsKernelCheckerContext) (state : PsKernelCheckerState)
+      (term : PsKernelExpr) (_ _ : Bool) => oldWhnf c state term
+  let oldInfer := fun (_ : PsKernelCheckerContext) (_ : PsKernelCheckerState) (_ : PsKernelExpr) =>
+    (Except.error "STRING_MAJOR_FORBIDDEN_INFERENCE" :
+      Except String (PsKernelExpr × PsKernelCheckerState))
+  let oldEq := fun (_ : PsKernelCheckerContext) (_ : PsKernelCheckerState) (_ _ : PsKernelExpr) =>
+    (Except.error "STRING_MAJOR_FORBIDDEN_DEFEQ" : Except String (Bool × PsKernelCheckerState))
+  let mut cases := 0
+  let mut propagated := 0
+  for value in values do
+    let major := PsKernelExpr.lit (.str value)
+    let (arena,majorId) ← expect (psKernelExprV2PagedImportIntoChecked initial.whnf.arena major)
+    let expr := natRec major
+    let (arena,root) ← expect (psKernelExprV2PagedImportIntoChecked arena expr)
+    let entry ← expect (psKernelExprV2PagedRequire arena root)
+    let .app _ callMajorId := entry.node
+      | throw (IO.userError "String major application fixture")
+    let state := psKernelExprV2CheckStateWithArena initial arena
+    let identity := fun (_ : PsKernelExprV2CheckContext)
+        (next : PsKernelExprV2CheckState) (id : Nat) => some (.ok (next,id))
+    let some normalizedAttempt := psKernelExprV2RecursorNormalizeMajorOwnedWith
+        identity forbidden context state natInfo majorId
+      | throw (IO.userError "String normalization helper declined")
+    let normalized ← expect normalizedAttempt
+    let expected := psKernelStringLitToConstructor value
+    require "string-major-constructor-exact"
+      (psKernelExprEqual expected (← decode normalized.fst.whnf.arena normalized.snd))
+    require "string-major-official-literal-check"
+      (match Lean.Kernel.check official {} (← officialExpr major) with | .ok _ => true | _ => false)
+    require "string-major-official-constructor-check"
+      (match Lean.Kernel.check official {} (← officialExpr expected) with | .ok _ => true | _ => false)
+    require "string-major-official-equality"
+      (match Lean.Kernel.isDefEq official {} (← officialExpr major) (← officialExpr expected) with
+       | .ok true => true | _ => false)
+    -- These intentionally ill-typed Nat-rec/String inputs exercise only raw
+    -- callback ordering; they are never offered as admitted declarations.
+    let seeded ← expect (majorStamp callMajorId state 60)
+    for cheapRec in [false,true] do
+      for cheapProj in [false,true] do
+        let run := fun (failAt : Nat) (decline : Bool) =>
+          let publicWhnf := fun (_ : PsKernelExprV2CheckContext)
+              (next : PsKernelExprV2CheckState) (id : Nat) =>
+            if next.nextFresh == 60 then
+              majorCallback 60 failAt decline callMajorId callMajorId 60 next id
+            else
+              majorCallback 60 failAt decline id id 61 next id
+          let coreWhnf := fun (_ : PsKernelExprV2CheckContext)
+              (next : PsKernelExprV2CheckState) (id : Nat) (cr cp : Bool) =>
+            if cr == cheapRec && cp == cheapProj then
+              majorCallback 60 failAt decline callMajorId callMajorId 60 next id
+            else some (.error "STRING_MAJOR_CHEAP_FLAGS")
+          psKernelExprV2TryReduceRecursorOwnedWith
+            publicWhnf coreWhnf forbidden denyEq context seeded root cheapRec cheapProj
+        let actual := run 0 false
+        majorCompareReduction "string-major-mandatory-public-callback"
+          (psKernelReduceRecursorWith oldWhnf oldCore oldInfer oldEq context.scalar
+            { psKernelCheckerStateEmpty with nextFresh := 60 } expr cheapRec cheapProj)
+          actual
+        require "string-major-two-complete-states"
+          (match actual with
+           | some (.ok result) => majorStateTag result.fst 62 && result.snd.isNone
+           | _ => false)
+        cases := cases + 1
+        for decline in [false,true] do
+          require "string-major-second-public-failure-preserved"
+            (match run 2 decline with
+             | none => decline
+             | some (.error error) => !decline && error == "MAJOR_INJECTED"
+             | _ => false)
+          propagated := propagated + 1
+  require "string-major-matrix" (cases == 24 && propagated == 48)
+  IO.println "PSC1_V2_DAG_RECURSOR_MAJOR_STRING: PASS callbacks=24 propagated=48 official=6"
+
+private def majorOfficialAxiom (environment : Lean.Environment)
+    (name : PsKernelName) (type : PsKernelExpr) : IO Lean.Environment := do
+  match environment.addDeclCore 0 0 (.axiomDecl {
+    name := inferOfficialName name
+    levelParams := []
+    type := ← officialExpr type
+    isUnsafe := false
+  }) none true with
+  | .ok next => pure next
+  | .error _ => throw (IO.userError "official major neutral axiom failed")
+
+private def majorAdmissionRegression (prepared : Prepared) (input : PsKernelExprV2PagedArena)
+    (generated : PsKernelDagGeneratedState) (official : Lean.Environment)
+    (cases : List (String × PsKernelExpr × PsKernelExpr × Nat))
+    (declarations : List (String × PsKernelExpr × PsKernelExpr × Nat × Nat × Bool)) : IO Unit := do
+  let empty ← expectPublic "major-empty"
+    (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
+  let replay ← expectPublic "major-public-batch" (psKernelV1RunDag empty [] .safe input
+    (prepared.commands ++ cases.map (fun (_,_,_,root) => .whnf root)))
+  let replies := replay.replies.drop prepared.commands.length
+  require "major-public-batch-complete" (replies.length == cases.length)
+  for (reply,(label,expr,expected,_)) in replies.zip cases do
+    require (label ++ "-major-public-result")
+      (match reply with | .normalized value => psKernelExprEq value expected | _ => false)
+    let old ← expectPublic (label ++ "-major-V1") (psKernelV1Whnf prepared.session [] .safe expr)
+    require (label ++ "-major-V1-result") (psKernelExprEq old expected)
+    require (label ++ "-major-official-check")
+      (match Lean.Kernel.check official {} (← officialExpr expr) with | .ok _ => true | _ => false)
+    require (label ++ "-major-official-defeq")
+      (match Lean.Kernel.isDefEq official {} (← officialExpr expr) (← officialExpr expected) with
+       | .ok true => true | _ => false)
+  for (label,type,value,typeId,valueId,shouldAccept) in declarations do
+    let base := PsKernelConstantBase.mk (nm label) [] type
+    let definition := PsKernelDefinitionInfo.mk base value .abbrevHint .safe
+    let request := PsKernelDagDeclarationRequest.definitionDecl
+      (PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk (nm label) [] typeId)
+        valueId .abbrevHint .safe)
+    let old := psKernelV1AdmitDeclaration prepared.session (.definitionDecl definition)
+    let actual := psKernelV1RunDag empty [] .safe input (prepared.commands ++ [.admit request])
+    let resources := prepared.session.resources
+    let direct := psKernelDagTryAdmitSimpleWithFuel resources.fuel
+      (psKernelKernelSessionEnvironment prepared.session) resources.maxRecDepth resources.maxNatSize
+      generated.arena generated.declarations request (.definitionDecl definition)
+    require (label ++ "-major-direct-V2-admission")
+      (match direct,old with
+       | some (.ok environment),.ok _ =>
+           shouldAccept && (psKernelEnvironmentFind environment (nm label)).isSome
+       | some (.error actualError),.error (.rejectedInvalid expectedError) =>
+           !shouldAccept && actualError == expectedError
+       | _,_ => false)
+    let checked := official.addDeclCore 0 0 (.defnDecl {
+      name := inferOfficialName (nm label)
+      levelParams := []
+      type := ← officialExpr type
+      value := ← officialExpr value
+      hints := .abbrev
+      safety := .safe
+    }) none true
+    require (label ++ "-major-V1-admission")
+      (match old with | .ok _ => shouldAccept | .error (.rejectedInvalid _) => !shouldAccept | _ => false)
+    require (label ++ "-major-public-admission")
+      (match actual with | .ok _ => shouldAccept | .error (.rejectedInvalid _) => !shouldAccept | _ => false)
+    require (label ++ "-major-official-admission")
+      (match checked with | .ok _ => shouldAccept | .error _ => !shouldAccept)
+  IO.println "PSC1_V2_DAG_OFFICIAL_RECURSOR_MAJOR: PASS valid=6 admitted=2 rejected=2"
+
+private def majorRegression (prior : Prepared) (priorOfficial : Lean.Environment)
+    (natInfo boxInfo : PsKernelRecursorInfo) : IO Unit := do
+  let natNeutralName := nm "iotaNeutralNat"
+  let boxNeutralName := nm "iotaNeutralBox"
+  let first ← majorPrepareAxiom prior natNeutralName nat
+  let prepared ← majorPrepareAxiom first boxNeutralName box
+  let natNeutral := PsKernelExpr.const natNeutralName []
+  let boxNeutral := PsKernelExpr.const boxNeutralName []
+  let projection := PsKernelExpr.proj boxName 0 boxNeutral
+  let recOn := fun (major motive minor : PsKernelExpr) =>
+    apply (.const boxRecName [one,.zero]) [nat,motive,minor,major]
+  let motive := lam "box" box nat
+  let minor := lam "value" nat (.bvar 0)
+  let fnType := forallE "x" nat nat
+  let stuck := natRec natNeutral
+  let fixtures : List (String × PsKernelExpr × PsKernelExpr) := [
+    ("stuck-recursive-major",stuck,stuck),
+    ("neutral-structure-field",recOn boxNeutral motive minor,projection),
+    ("neutral-structure-constant",recOn boxNeutral motive (lam "value" nat (lit 11)),lit 11),
+    ("structure-major-beta",recOn (.app (lam "box" box (.bvar 0)) boxNeutral) motive minor,projection),
+    ("structure-major-zeta",recOn (.letE (nm "box") box boxNeutral (.bvar 0) false) motive minor,projection),
+    ("structure-trailing",.app (recOn boxNeutral (lam "box" box fnType)
+      (lam "value" nat (lam "x" nat (.bvar 1)))) (lit 9),projection)]
+  let mut input := prepared.arena
+  let mut cases : List (String × PsKernelExpr × PsKernelExpr × Nat) := []
+  for (label,expr,expected) in fixtures do
+    let (arena,root) ← expect (psKernelExprV2PagedImportIntoChecked input expr)
+    input := arena
+    cases := cases ++ [(label,expr,expected,root)]
+  -- The motive returns Type, so its recursor elimination level is two.
+  let dependentType := forallE "box" box
+    (apply (.const boxRecName [.succ one,.zero])
+      [nat,lam "box" box s1,lam "value" nat nat,.bvar 0])
+  let dependentValue := lam "box" box (lit 0)
+  let declarationFixtures := [
+    ("majorDependent",dependentType,dependentValue,true),
+    ("majorProjected",nat,recOn boxNeutral motive minor,true),
+    ("majorWrongType",s1,recOn boxNeutral motive minor,false),
+    ("majorWrongDependent",dependentType,lam "box" box s1,false)]
+  let mut declarations : List (String × PsKernelExpr × PsKernelExpr × Nat × Nat × Bool) := []
+  for (label,type,value,shouldAccept) in declarationFixtures do
+    let (arena,typeId) ← expect (psKernelExprV2PagedImportIntoChecked input type)
+    let (arena,valueId) ← expect (psKernelExprV2PagedImportIntoChecked arena value)
+    input := arena
+    declarations := declarations ++ [(label,type,value,typeId,valueId,shouldAccept)]
+  let (a,natNeutralId) ← expect (psKernelExprV2PagedImportIntoChecked input natNeutral)
+  let (a,neutralId) ← expect (psKernelExprV2PagedImportIntoChecked a boxNeutral)
+  let (a,typeId) ← expect (psKernelExprV2PagedImportIntoChecked a box)
+  let (a,sortId) ← expect (psKernelExprV2PagedImportIntoChecked a s1)
+  let (a,constructorId) ← expect (psKernelExprV2PagedImportIntoChecked a boxMajor)
+  let (a,orderRoot) ← expect (psKernelExprV2PagedImportIntoChecked a (recOn boxNeutral motive minor))
+  input := a
+  -- Independent imports do not promise shared IDs. The order probe consumes
+  -- the actual major ID inside its own application, rather than an equal ID.
+  let orderEntry ← expect (psKernelExprV2PagedRequire input orderRoot)
+  let .app _ orderMajorId := orderEntry.node
+    | throw (IO.userError "major order application fixture")
+  let built ← expect (psKernelExprV2DecodeChecked input)
+  let mut generated := PsKernelDagGeneratedState.mk input built prepared.declarations
+  for command in prepared.commands do
+    generated ← expect (psKernelDagGeneratedAfterCommand command prepared.session.environment generated)
+  let scalar := (psKernelKernelSessionChecker prepared.session [] .safe).context
+  let context := psKernelExprV2CheckContextEmpty scalar
+  let initial := psKernelExprV2CheckStateFromWhnf
+    (psKernelExprV2WhnfStateForDeclarations generated.arena generated.declarations)
+  let official1 ← majorOfficialAxiom priorOfficial natNeutralName nat
+  let official ← majorOfficialAxiom official1 boxNeutralName box
+  majorResourceMatrix prepared.session generated cases
+  majorOrderRegression scalar initial orderRoot orderMajorId typeId sortId
+    (recOn boxNeutral motive minor) boxNeutral
+  majorFamilyRegression context initial natInfo boxInfo natNeutralId neutralId constructorId
+  majorStringRegression context initial natInfo official
+  majorAdmissionRegression prepared input generated official cases declarations
+
 private def regression : IO Unit := do
   let empty ← expectPublic "empty-session" (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
   let natDecl := PsKernelSimpleInductiveDecl.mk [] psKernelNatName s1
@@ -492,6 +996,7 @@ private def regression : IO Unit := do
     require ("Sort-u-" ++ label ++ "-official")
       (match Lean.Kernel.check restrictedOfficial {} (← officialExpr expr) with
        | .error _ => true | _ => false)
+  majorRegression prepared official natInfo boxInfo
   IO.println "PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES: PASS cases=2"
   IO.println "PSC1_V2_DAG_RECURSOR: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9"
   IO.println "PSC1_V2_DAG_OFFICIAL_RECURSOR: PASS valid=12 invalid=4 addDecl=3"

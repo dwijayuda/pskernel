@@ -26,6 +26,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagAdmissionGuards,
     `Ps.KernelCore.Checker.ExprV2.Quot,
     `Ps.KernelCore.API.DagGenerated,
+    `Ps.KernelCore.Checker.ExprV2.RecursorMajor,
+    `Ps.KernelCore.Checker.ExprV2.RecursorK,
     `Ps.KernelCore.Checker.ExprV2.Recursor,
     `Ps.KernelCore.API.DagAdmission,
     `Ps.KernelCore.API.Dag,
@@ -294,6 +296,11 @@ lean_exe psc1_kernel_expr_v2_quot_regression where
 lean_exe psc1_kernel_expr_v2_recursor_regression where
   srcDir := "test"
   root := `PsKernelExprV2RecursorRegression
+
+-- Checked K-major conversion, callback ownership, exact budgets and official parity.
+lean_exe psc1_kernel_expr_v2_recursor_k_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2RecursorKRegression
 
 -- Complete checker state, callback refusal/error ordering and fixed-budget parity.
 lean_exe psc1_kernel_expr_v2_owned_state_regression where

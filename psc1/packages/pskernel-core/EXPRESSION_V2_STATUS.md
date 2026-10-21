@@ -26,9 +26,11 @@ offers a concrete transport boundary that enforces that discipline.
 
 The full-state carrier candidate on
 `research/psc1-pskernel-v2-carrier-20261021` is undergoing separate exact-source
-qualification. Its initial source is
-`6cbeb1b3587335545d9d3a2bdd4b99c0c2244b4a`; this architecture description does
-not promote it or inherit integration889's test results.
+qualification. The current implementation includes the K/major review
+`0a031a7bbbfc5040f2eeeb25c73432345dfb9634` and its mandatory regression child.
+Source727 is a separately qualified scoped V1 developer provider; this
+architecture description does not promote the newer candidate or inherit its
+predecessors' test results.
 
 `Checker/ExprV2/DefEq.lean` owns recursive DefEq callbacks. The ordered path is
 entry fuel/depth guards, exact syntax/success-cache checks, quick and binder
@@ -64,17 +66,47 @@ mixed legacy-local input retains its explicit unsupported boundary.
 Original same-batch type/body IDs become owning references only after checked
 admission. Safe definitions and theorem bodies share their operation state.
 Unsafe/partial mutual members use private work environments and fresh owners
-per member; publication is atomic. Ordinary non-K generated recursor references
-come from validated admission and private appended nodes, never supplied metadata.
-Quot and ordinary constructor-major recursor paths have direct DAG implementations
-in this candidate. K, structure-major and String-major normalization remain
-explicitly incomplete and require their own migration and qualification.
+per member; publication is atomic. Ordinary generated recursor references,
+including K recursors, come from validated admission and private appended nodes,
+never supplied metadata. Quot and constructor-major recursor paths have direct
+DAG implementations. The current candidate also normalizes K majors, neutral
+nonrecursive structure majors and String majors through the same full owner.
+
+K resolves the recursor family from its checked private type, then performs
+major inference, public type WHNF, expression-mvar index guards, candidate
+construction/inference and DefEq in the original order. A false equality result
+retains the entire returned state and the original major. Type universes, rather
+than the recursor application's levels, instantiate the constructor candidate.
+K conversion precedes the constructor shortcut; non-K retains that shortcut.
+
+Structure normalization preserves the fixed callback sequence and requires
+matching checked family metadata and a non-propositional structure type.
+String normalization builds the canonical constructor form and always invokes
+the owning public WHNF callback afterward. Natural, structure and String
+normalizers feed one common recursor-rule pipeline. The raw WhnfState-only
+compatibility helper retains its explicit limited scope. New K/major tests and
+local equations must pass at the current exact SHA before this slice is qualified.
 
 The new native and generated carrier matrices require42 state probes,56 exact
 failure/decline cases,540 V1 differential cases,38 DefEq state probes and44 DefEq
 failure/decline cases. Ten local carrier lemmas supplement existing metadata,
 scope, fuel and equality proofs. These counts describe test coverage, not proof
 of the entire checker.
+
+The new recursor-major gates require126 public,504 core,360 independently owned
+budget and432 reducer comparisons, plus4 complete-state sequences/40 failure
+propagations,70 family/20 field controls and24 raw String callback probes/48
+failures. Six genuine checked neutral-major cases and four direct declaration
+admissions have native official controls. The deliberately ill-typed raw
+String/Nat-rec probes measure callback behavior and are not admitted proofs.
+
+K gates require108 public,432 core,648 reducer and96 independent-budget
+comparisons,16 complete-owner/16 propagation/16 metadata controls and5 ordering
+sentinels. Actual checked KUnit/KEquality declarations and theorem majors supply
+six valid, three invalid and two strictly direct admission cases. Both generated
+routes run the same matrices. Ten major and six K local theorems describe guards
+and callback-state equations with explicit premises; they do not prove complete
+recursor equivalence or global kernel soundness.
 
 ## Remaining whole-operation fallback inventory
 
@@ -84,7 +116,7 @@ the complete original operation's resources and failure semantics.
 | Site | Trigger and remaining work |
 | --- | --- |
 | `API/Dag.lean: psKernelDagCheckTerminalOrOriginal` | Checking/inference outside the supported owning DAG rules, including missing or mismatched same-operation type/recursor references |
-| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including K and unfinished major normalization, unsupported recursor descendants and missing owning references |
+| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including String-literal projection WHNF, unsupported recursor descendants and missing owning references; K/major normalization is implemented in the current candidate and awaiting qualification |
 | `API/Dag.lean: psKernelDagIsDefEq` | Unsupported descendant callbacks or missing owning references; the ordered prefix, lazy delta/projection, full shape and final rules now have DAG paths in the carrier candidate |
 | `API/DagAdmission.lean: psKernelDagAdmitDeclaration` | Inductive construction/admission and declaration cases not handled by direct admission |
 

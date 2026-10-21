@@ -161,35 +161,59 @@ def psKernelDagDecodeDeclaration
       Except.ok (PsKernelDeclarationRequest.unsupported feature)
 
 /-
-Called only after the complete admission of this request succeeds. The decoded
-request and these references came from the same validated input DAG. Failed
-admission returns before this function is used; no index escapes a batch.
+Publish input IDs only after complete admission succeeds. For these declaration
+families the checked environment installs the original type unchanged. Only
+transparent definition requests publish a delta body. Inductive and recursor
+types require their own representation-aware admission migration.
 -/
+def psKernelDagDeclarationRef
+    (base : PsKernelDagConstantBase)
+    (deltaValue : Option Nat) (kind : PsKernelExprV2DeclarationRefKind) :
+    PsKernelExprV2DeclarationRef :=
+  PsKernelExprV2DeclarationRef.mk
+    base.name base.levelParams base.type deltaValue kind
+
 def psKernelDagDefinitionRef
-    (value : PsKernelDagDefinition) : PsKernelExprV2DefinitionRef :=
-  PsKernelExprV2DefinitionRef.mk value.base.name value.base.levelParams value.value
+    (value : PsKernelDagDefinition) : PsKernelExprV2DeclarationRef :=
+  psKernelDagDeclarationRef value.base (Option.some value.value)
+    PsKernelExprV2DeclarationRefKind.definitionDecl
 
 def psKernelDagAddAdmittedDefinitions
     (values : List PsKernelDagDefinition) :
-    List PsKernelExprV2DefinitionRef -> List PsKernelExprV2DefinitionRef :=
+    List PsKernelExprV2DeclarationRef -> List PsKernelExprV2DeclarationRef :=
   match values with
   | List.nil =>
-      fun (definitions : List PsKernelExprV2DefinitionRef) => definitions
+      fun (declarations : List PsKernelExprV2DeclarationRef) => declarations
   | List.cons first rest =>
       let smaller :=
-        fun (next : List PsKernelExprV2DefinitionRef) =>
+        fun (next : List PsKernelExprV2DeclarationRef) =>
           let recur := psKernelDagAddAdmittedDefinitions rest;
           recur next;
-      fun (definitions : List PsKernelExprV2DefinitionRef) =>
-        smaller (List.cons (psKernelDagDefinitionRef first) definitions)
+      fun (declarations : List PsKernelExprV2DeclarationRef) =>
+        smaller (List.cons (psKernelDagDefinitionRef first) declarations)
 
-def psKernelDagDefinitionsAfterAdmission
+def psKernelDagDeclarationsAfterAdmission
     (request : PsKernelDagDeclarationRequest)
-    (definitions : List PsKernelExprV2DefinitionRef) :
-    List PsKernelExprV2DefinitionRef :=
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    List PsKernelExprV2DeclarationRef :=
   match request with
+  | PsKernelDagDeclarationRequest.axiomDecl base _ =>
+      List.cons
+        (psKernelDagDeclarationRef base Option.none
+          PsKernelExprV2DeclarationRefKind.axiomDecl)
+        declarations
   | PsKernelDagDeclarationRequest.definitionDecl value =>
-      List.cons (psKernelDagDefinitionRef value) definitions
+      List.cons (psKernelDagDefinitionRef value) declarations
+  | PsKernelDagDeclarationRequest.theoremDecl base _ =>
+      List.cons
+        (psKernelDagDeclarationRef base Option.none
+          PsKernelExprV2DeclarationRefKind.theoremDecl)
+        declarations
+  | PsKernelDagDeclarationRequest.opaqueDecl base _ _ =>
+      List.cons
+        (psKernelDagDeclarationRef base Option.none
+          PsKernelExprV2DeclarationRefKind.opaqueDecl)
+        declarations
   | PsKernelDagDeclarationRequest.mutualDefinitions values =>
-      psKernelDagAddAdmittedDefinitions values definitions
-  | _ => definitions
+      psKernelDagAddAdmittedDefinitions values declarations
+  | _ => declarations

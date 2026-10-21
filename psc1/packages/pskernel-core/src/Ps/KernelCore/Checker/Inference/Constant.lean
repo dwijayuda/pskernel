@@ -1,16 +1,16 @@
 import Ps.KernelCore.Checker.Context
 
 /-
-Shared constant-inference rule for recursive and DAG input. Lookup, level
-arity and unsafe/partial checks retain the original order. inferOnly skips
-the same safety checks as the existing kernel; public checking passes false.
-This helper does not perform declaration admission or trust a cached type.
+Shared constant-reference validation. Lookup, level arity and unsafe/partial
+checks retain the original order. inferOnly skips exactly the original safety
+checks; complete checking passes false. Returning live ConstantInfo does not
+admit a declaration or authorize a cached type.
 -/
-def psKernelInferConstantType
+def psKernelCheckConstantReference
     (context : PsKernelCheckerContext)
     (name : PsKernelName) (levels : List PsKernelLevel)
     (inferOnly : Bool) :
-    Except String PsKernelExpr :=
+    Except String PsKernelConstantInfo :=
   match psKernelEnvironmentFind context.environment name with
   | Option.none => Except.error "unknown constant"
   | Option.some info =>
@@ -18,27 +18,30 @@ def psKernelInferConstantType
       if Nat.beq
           (psKernelNameListLength params) (psKernelLevelListLength levels) then
         if inferOnly then
-          Except.ok
-            (psKernelExprInstantiateLevelParams
-              (psKernelConstantInfoType info) params levels)
+          Except.ok info
         else if psKernelConstantInfoIsUnsafe info then
           if psKernelDefinitionSafetyIsUnsafe context.safety then
-            Except.ok
-              (psKernelExprInstantiateLevelParams
-                (psKernelConstantInfoType info) params levels)
+            Except.ok info
           else
             Except.error "safe declaration uses unsafe constant"
         else if psKernelConstantInfoIsPartial info then
           if psKernelDefinitionSafetyIsSafe context.safety then
             Except.error "safe declaration uses partial constant"
           else
-            Except.ok
-              (psKernelExprInstantiateLevelParams
-                (psKernelConstantInfoType info) params levels)
+            Except.ok info
         else
-          Except.ok
-            (psKernelExprInstantiateLevelParams
-              (psKernelConstantInfoType info) params levels)
+          Except.ok info
       else
         Except.error "incorrect number of universe levels"
 
+def psKernelInferConstantType
+    (context : PsKernelCheckerContext)
+    (name : PsKernelName) (levels : List PsKernelLevel)
+    (inferOnly : Bool) :
+    Except String PsKernelExpr :=
+  match psKernelCheckConstantReference context name levels inferOnly with
+  | Except.error error => Except.error error
+  | Except.ok info =>
+      Except.ok
+        (psKernelExprInstantiateLevelParams (psKernelConstantInfoType info)
+          (psKernelConstantInfoLevelParams info) levels)

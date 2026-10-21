@@ -5,7 +5,7 @@ import Ps.KernelCore.Checker.ExprV2.Delta
 
 /-
 Checked DAG WHNF for terminal/metadata/beta/zeta, inert applications,
-constructor projection, Nat and definitions admitted in the same checked batch.
+constructor projection, Nat and declarations admitted in the same checked batch.
 
 The operation owns distinct core/public caches in one append-only arena.
 A core entry checks fuel and depth before syntax/cache. A public entry keeps
@@ -342,13 +342,13 @@ def psKernelExprV2TryWhnfCoreStateWithFuel
   let core := psKernelExprV2TryWhnfCoreWithPublicFuel fuel;
   core publicWhnf context state root
 
-def psKernelExprV2TryWhnfWithDefinitionsFuel
+def psKernelExprV2TryWhnfWithDeclarationsFuel
     (fuel : Nat) (context : PsKernelCheckerContext)
     (arena : PsKernelExprV2PagedArena)
-    (definitions : List PsKernelExprV2DefinitionRef) (root : Nat) :
+    (declarations : List PsKernelExprV2DeclarationRef) (root : Nat) :
     Option (Except String (Prod PsKernelExprV2PagedArena Nat)) :=
   match psKernelExprV2TryWhnfStateWithFuel fuel context
-      (psKernelExprV2WhnfStateForDefinitions arena definitions) root with
+      (psKernelExprV2WhnfStateForDeclarations arena declarations) root with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
@@ -361,4 +361,4 @@ def psKernelExprV2TryWhnfWithFuel
     (fuel : Nat) (context : PsKernelCheckerContext)
     (arena : PsKernelExprV2PagedArena) (root : Nat) :
     Option (Except String (Prod PsKernelExprV2PagedArena Nat)) :=
-  psKernelExprV2TryWhnfWithDefinitionsFuel fuel context arena List.nil root
+  psKernelExprV2TryWhnfWithDeclarationsFuel fuel context arena List.nil root

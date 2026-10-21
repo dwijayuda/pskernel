@@ -1,30 +1,72 @@
-import Ps.KernelCore.Core.ExprScalar
+import Ps.KernelCore.Core.Declaration
 
 /-
-Definition references retained only after successful complete declaration
-admission in one checked DAG batch. Values belong to that batch's canonical
-input arena and all of its append-only continuations.
+References retained only after successful complete declaration admission in one
+checked DAG batch. Types and optional transparent bodies belong to its canonical
+input arena and every append-only continuation. This is the single declaration
+index used by constant inference and delta reduction.
 
-This is an internal lookup table, not an untrusted admission API or a proof
-certificate. The public DAG boundary creates it empty. It is never returned in
-the original kernel session and never reused with another arena or environment.
+The public boundary creates the table empty. It never escapes into a legacy
+kernel session. These internal, forgeable records are not admission certificates.
+Live environment metadata still decides constant kind, safety and universe arity.
+Generated inductive/recursor declarations and preexisting-session declarations
+remain unsupported by this input-ID index until their own DAG types exist.
 -/
-structure PsKernelExprV2DefinitionRef where
+inductive PsKernelExprV2DeclarationRefKind where
+  | axiomDecl
+  | definitionDecl
+  | theoremDecl
+  | opaqueDecl
+
+structure PsKernelExprV2DeclarationRef where
   name : PsKernelName
   levelParams : List PsKernelName
-  value : Nat
+  type : Nat
+  deltaValue : Option Nat
+  kind : PsKernelExprV2DeclarationRefKind
 
-def psKernelExprV2DefinitionRefFind
-    (definitions : List PsKernelExprV2DefinitionRef) :
-    PsKernelName -> Option PsKernelExprV2DefinitionRef :=
-  match definitions with
+def psKernelExprV2DeclarationRefFind
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    PsKernelName -> Option PsKernelExprV2DeclarationRef :=
+  match declarations with
   | List.nil =>
       fun (_name : PsKernelName) => Option.none
   | List.cons first rest =>
       let smaller :=
         fun (nextName : PsKernelName) =>
-          let recur := psKernelExprV2DefinitionRefFind rest;
+          let recur := psKernelExprV2DeclarationRefFind rest;
           recur nextName;
       fun (name : PsKernelName) =>
         if psKernelNameEq first.name name then Option.some first
         else smaller name
+
+def psKernelExprV2DeclarationRefKindMatches
+    (kind : PsKernelExprV2DeclarationRefKind) (info : PsKernelConstantInfo) :
+    Bool :=
+  match kind with
+  | PsKernelExprV2DeclarationRefKind.axiomDecl =>
+      match info with
+      | PsKernelConstantInfo.axiomInfo _ => true
+      | _ => false
+  | PsKernelExprV2DeclarationRefKind.definitionDecl =>
+      match info with
+      | PsKernelConstantInfo.defnInfo _ => true
+      | _ => false
+  | PsKernelExprV2DeclarationRefKind.theoremDecl =>
+      match info with
+      | PsKernelConstantInfo.thmInfo _ => true
+      | _ => false
+  | PsKernelExprV2DeclarationRefKind.opaqueDecl =>
+      match info with
+      | PsKernelConstantInfo.opaqueInfo _ => true
+      | _ => false
+
+def psKernelExprV2DeclarationRefMatches
+    (declaration : PsKernelExprV2DeclarationRef)
+    (info : PsKernelConstantInfo) : Bool :=
+  if psKernelNameEq declaration.name (psKernelConstantInfoName info) then
+    if psKernelNameListsEq declaration.levelParams
+        (psKernelConstantInfoLevelParams info) then
+      psKernelExprV2DeclarationRefKindMatches declaration.kind info
+    else false
+  else false

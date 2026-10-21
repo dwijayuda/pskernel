@@ -23,6 +23,44 @@ metadata/cache lemmas. These passes do not establish full Arena qualification
 or a complete DAG-native checker. Newer numeral, delta, reporting and binder
 changes require their own final-source evidence.
 
+### One owning declaration index and direct constant types — pending CI
+
+The owning batch now keeps one declaration table containing original admitted
+type IDs, declaration kinds, universe parameters and optional transparent body
+IDs. This replaces the narrower definition-body table; it adds no parallel
+type cache or legacy type import. Successful axiom, definition, theorem, opaque
+and mutual-definition admission extends the table. Theorems and opaque
+declarations retain type IDs but never delta bodies. External-session constants
+and generated inductive/recursor types still request the complete checker.
+
+DAG checking consults the live environment for lookup, universe arity and
+unsafe/partial policy before using a matching admitted type ID. All public
+check/WHNF/DefEq preliminary checks receive the same owning table, which never
+escapes into the returned legacy session. The underlying original constant rule
+is factored into a shared validation helper with its original order. A native
+extensional proof retains its old equations and proves identical results for
+all contexts/names/levels/modes; this new proof remains pending Actions.
+
+Native and generated fixtures add567 direct constant inference comparisons
+across nine admitted constants, three safety contexts, seven fuel values and
+three entry depths. They cover universe substitution, live unsafe/partial
+rejection, inferOnly's existing safety skip, arity-before-safety and lookup-
+before-arity ordering, absent/mismatched index fallback, unchanged installed
+types, full public same-batch checking, and a separate arena reusing node IDs.
+The existing malformed, ill-typed, duplicate and resource-limited admission
+controls remain. None of these internal references is a public admission
+certificate, and arbitrary forged internal tables are outside RunDag's trust
+boundary. This is not a proof of global index correspondence or soundness.
+
+Native delta/binder qualification is now green at
+[767acc6b12568c8d15dae1a2ac7150aacd8ddc00](https://github.com/dwijayuda/pskernel/commit/767acc6b12568c8d15dae1a2ac7150aacd8ddc00),
+[native integration39520129735](https://github.com/dwijayuda/pskernel/actions/runs/39520129735).
+Its generated gate is still running. The numeral change at2d29ebc now passed
+the complete [integration39518432248](https://github.com/dwijayuda/pskernel/actions/runs/39518432248):
+strict detached large-numeral JS,128 correctness-guarded ABBA observations
+and33 complete executable operations all passed. The App slice5f0e434 and the
+new declaration index require their own source/native/generated evidence.
+
 ### Dependent application checking — implemented, qualification pending
 
 The production DAG checked-inference path now checks a function, exposes its
@@ -90,7 +128,7 @@ All five lemmas and the native large-numeral regression passed at
 [2d29ebc](https://github.com/dwijayuda/pskernel/commit/2d29ebc5785d44ee6406f378845412978b3fe1cc),
 [native integration39518432248](https://github.com/dwijayuda/pskernel/actions/runs/39518432248).
 Their printed dependencies are only propext and Quot.sound. Independent-JS
-large-numeral qualification is still running.
+large-numeral qualification passed in integration39518432248.
 
 The generated gate uses a30-second host watchdog, unchanged kernel fuel4096,
 129-bit numerals, UInt32-limit exponent cases, low-fuel equations, exact numeral

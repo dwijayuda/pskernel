@@ -1,12 +1,14 @@
 import Ps.KernelCore.Checker.ExprV2.CheckApplication
+import Ps.KernelCore.Checker.ExprV2.Constant
 
 /-
 DAG-native fully checked Sort/FVar/literal/metadata/lambda/forall inference
-and the structural-type-equality branch of dependent application.
+same-batch constant types, and the structural-type-equality branch of
+dependent application.
 
 The public entry creates one fresh operation and accepts no legacy local
 context. Internal binders carry type IDs in their own DAG local context.
-Applications requiring general DefEq, constants, lets and projections explicitly
+Applications requiring general DefEq, external constant types, lets and projections explicitly
 request the complete checker. Unsupported work never publishes a partial
 state or a checking receipt.
 
@@ -69,6 +71,12 @@ def psKernelExprV2TryCheckCoreWithFuel
                               (psKernelExprV2CheckedInferBuilt state root
                                 (psKernelExprV2PagedMkSort state.whnf.arena
                                   (PsKernelLevel.succ level)))
+                        | PsKernelExprV2Node.const name levels =>
+                            match psKernelExprV2TryInferConstantType nextContext.scalar
+                                state.whnf.arena state.whnf.declarations name levels false with
+                            | Option.none => Option.none
+                            | Option.some built =>
+                                Option.some (psKernelExprV2CheckedInferBuilt state root built)
                         | PsKernelExprV2Node.lit literal =>
                             match literal with
                             | PsKernelLiteral.nat value =>
@@ -98,9 +106,10 @@ def psKernelExprV2TryCheckCoreWithFuel
                               nextContext state root fn arg
                         | _ => Option.none
 
-def psKernelExprV2TryCheckWithFuel
+def psKernelExprV2TryCheckWithDeclarationsFuel
     (fuel : Nat) (context : PsKernelCheckerContext)
-    (arena : PsKernelExprV2PagedArena) (root : Nat) :
+    (arena : PsKernelExprV2PagedArena)
+    (declarations : List PsKernelExprV2DeclarationRef) (root : Nat) :
     Option (Except String (Prod PsKernelExprV2PagedArena Nat)) :=
   match context.localContext.decls with
   | List.cons _ _ => Option.none
@@ -110,9 +119,11 @@ def psKernelExprV2TryCheckWithFuel
             (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
           let worker := psKernelExprV2TryWhnfStateWithFuel fuel;
           worker nextContext nextState nextRoot;
+      let initial :=
+        psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty arena)
+          (psKernelExprV2WhnfStateForDeclarations arena declarations);
       match psKernelExprV2TryCheckCoreWithFuel fuel whnf
-          (psKernelExprV2CheckContextEmpty context)
-          (psKernelExprV2CheckStateEmpty arena) root with
+          (psKernelExprV2CheckContextEmpty context) initial root with
       | Option.none => Option.none
       | Option.some attempted =>
           match attempted with
@@ -120,3 +131,9 @@ def psKernelExprV2TryCheckWithFuel
           | Except.ok checked =>
               let state := Prod.fst checked;
               Option.some (Except.ok (Prod.mk state.whnf.arena (Prod.snd checked)))
+
+def psKernelExprV2TryCheckWithFuel
+    (fuel : Nat) (context : PsKernelCheckerContext)
+    (arena : PsKernelExprV2PagedArena) (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2PagedArena Nat)) :=
+  psKernelExprV2TryCheckWithDeclarationsFuel fuel context arena List.nil root

@@ -1062,6 +1062,19 @@ private def sameWhnfValue
   | .ok a, .ok b => psKernelExprEqual a b
   | _, _ => false
 
+private def constantTypeAttemptParity
+    (label : String)
+    (legacy : Except String PsKernelExpr)
+    (attempted : Option (Except String (Prod PsKernelExprV2PagedArena Nat))) :
+    IO Unit := do
+  match legacy, attempted with
+  | .error left, some (.error right) => require label (left == right)
+  | .ok left, some (.ok result) =>
+      let graph ← expect (psKernelExprV2DecodeChecked result.fst)
+      let right ← expect (psKernelExprV2DecodedRequire graph result.snd)
+      require label (psKernelExprEqual left right)
+  | _, _ => throw (IO.userError ("PSC1_V2_DAG_CONSTANT_FALLBACK " ++ label))
+
 private def deltaBatchParity : IO Unit := do
   let initial ← fresh
   let u := nm "delta-u"
@@ -1135,14 +1148,23 @@ private def deltaBatchParity : IO Unit := do
     let result ← expectPublic (psKernelDagRunCommand execution [] .unsafeDef
       arena built (.admit request))
     execution := result.snd
-  require "delta-only-successfully-admitted-definitions-registered"
-    (execution.definitions.length == 7)
+  require "delta-only-successfully-admitted-declarations-registered"
+    (execution.declarations.length == 9)
   require "delta-reference-is-original-canonical-body-id"
-    (match psKernelExprV2DefinitionRefFind execution.definitions polyName with
-     | some definition => definition.value == polyBody | none => false)
-  require "delta-theorem-and-opaque-not-registered"
-    ((psKernelExprV2DefinitionRefFind execution.definitions theoremName).isNone &&
-      (psKernelExprV2DefinitionRefFind execution.definitions opaqueName).isNone)
+    (match psKernelExprV2DeclarationRefFind execution.declarations polyName with
+     | some definition => definition.deltaValue == some polyBody | none => false)
+  require "delta-theorem-type-index-does-not-authorize-unfolding"
+    (match psKernelExprV2DeclarationRefFind execution.declarations theoremName with
+     | some declaration =>
+         declaration.deltaValue.isNone && declaration.type == proofType &&
+           (match declaration.kind with | .theoremDecl => true | _ => false)
+     | none => false)
+  require "delta-opaque-type-index-does-not-authorize-unfolding"
+    (match psKernelExprV2DeclarationRefFind execution.declarations opaqueName with
+     | some declaration =>
+         declaration.deltaValue.isNone && declaration.type == s1 &&
+           (match declaration.kind with | .opaqueDecl => true | _ => false)
+     | none => false)
   let checker := psKernelKernelSessionChecker execution.session [] .unsafeDef
   let expectedPoly := PsKernelExpr.lam (nm "A") (.sort level2)
     (.lam (nm "x") (.bvar 0) (.bvar 0) .default) .default
@@ -1162,7 +1184,7 @@ private def deltaBatchParity : IO Unit := do
         rawStateWhnfParity "delta-raw-exact-fuel-depth-parity"
           (psKernelSessionWhnf fuel { checker with context := context } term)
           (psKernelExprV2TryWhnfStateWithFuel fuel context
-            (psKernelExprV2WhnfStateForDefinitions arena execution.definitions) root)
+            (psKernelExprV2WhnfStateForDeclarations arena execution.declarations) root)
         let policySession := { execution.session with resources :=
           { execution.session.resources with fuel := fuel, maxRecDepth := depth } }
         -- RunDag preflights once before this internal helper. Match that same
@@ -1171,7 +1193,7 @@ private def deltaBatchParity : IO Unit := do
           match psKernelKernelSessionPreflight policySession with
           | .error error => .error error
           | .ok _ => psKernelDagWhnfExpression policySession [] .unsafeDef arena built
-              execution.definitions root term
+              execution.declarations root term
         require ("delta-public-exact-fuel-depth-parity-root-" ++ toString root ++
             "-fuel-" ++ toString fuel ++ "-depth-" ++ toString depth)
           (sameWhnfValue
@@ -1181,7 +1203,7 @@ private def deltaBatchParity : IO Unit := do
       rawStateWhnfParity "delta-exact-entry-recursion-boundary"
         (psKernelSessionWhnf 64 { checker with context := context } term)
         (psKernelExprV2TryWhnfStateWithFuel 64 context
-          (psKernelExprV2WhnfStateForDefinitions arena execution.definitions) root)
+          (psKernelExprV2WhnfStateForDeclarations arena execution.declarations) root)
   let ignored ← expect (psKernelExprV2DecodedRequire built ignoredArgument)
   require "delta-ignored-argument-still-normalized-before-unfolding"
     (match psKernelSessionWhnf 5 checker ignored with
@@ -1194,7 +1216,7 @@ private def deltaBatchParity : IO Unit := do
     rawStateWhnfParity "delta-wrong-universe-arity-stays-stuck"
       (psKernelSessionWhnf fuel checker wrong)
       (psKernelExprV2TryWhnfStateWithFuel fuel checker.context
-        (psKernelExprV2WhnfStateForDefinitions arena execution.definitions) wrongArity)
+        (psKernelExprV2WhnfStateForDeclarations arena execution.declarations) wrongArity)
   require "delta-public-rejects-wrong-universe-arity"
     (match psKernelV1RunDag execution.session [] .safe arena [.whnf wrongArity] with
      | .error (.rejectedInvalid _) => true | _ => false)
@@ -1206,7 +1228,7 @@ private def deltaBatchParity : IO Unit := do
     rawStateWhnfParity "delta-mutual-cycle-exact-error"
       (psKernelSessionWhnf fuel checker cycle)
       (psKernelExprV2TryWhnfStateWithFuel fuel checker.context
-        (psKernelExprV2WhnfStateForDefinitions arena execution.definitions) ca)
+        (psKernelExprV2WhnfStateForDeclarations arena execution.declarations) ca)
   let commands := requests.map PsKernelDagCommand.admit
   for (root, safety) in [(appliedPoly, PsKernelDefinitionSafety.safe),
       (ma, PsKernelDefinitionSafety.unsafeDef)] do
@@ -1219,7 +1241,7 @@ private def deltaBatchParity : IO Unit := do
     (match psKernelV1RunDag initial [] .safe arena
        [.whnf alias, .admit (.definitionDecl aliasDef)] with
      | .error (.rejectedInvalid _) => true | _ => false)
-  require "delta-external-session-definitions-explicitly-fallback"
+  require "delta-external-session-declarations-explicitly-fallback"
     ((psKernelExprV2TryWhnfWithFuel 64 checker.context arena appliedPoly).isNone)
   let (foreign, foreignZero) ← expect
     (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty (.succ .zero))
@@ -1246,15 +1268,15 @@ private def deltaBatchParity : IO Unit := do
       (match psKernelV1RunDag initial [] .safe arena [.admit (.definitionDecl bad)] with
        | .error (.rejectedInvalid _) => true | _ => false)
   require "delta-failed-admission-preserves-empty-owner"
-    (emptyExecution.definitions.isEmpty &&
+    (emptyExecution.declarations.isEmpty &&
       (psKernelEnvironmentFind initial.environment badName).isNone)
   let changedDuplicate := { aliasDef with value := s1 }
   require "delta-duplicate-cannot-replace-admitted-reference"
     (match psKernelDagRunCommand execution [] .safe arena built
        (.admit (.definitionDecl changedDuplicate)) with
      | .error (.rejectedInvalid _) =>
-         match psKernelExprV2DefinitionRefFind execution.definitions aliasName with
-         | some definition => definition.value == s0 | none => false
+         match psKernelExprV2DeclarationRefFind execution.declarations aliasName with
+         | some definition => definition.deltaValue == some s0 | none => false
      | _ => false)
   let bounded := { firstAdmission.snd with session :=
     { firstAdmission.snd.session with resources :=
@@ -1263,8 +1285,8 @@ private def deltaBatchParity : IO Unit := do
     (match psKernelDagRunCommand bounded [] .safe arena built
        (.admit (.definitionDecl polyDef)) with
      | .error (.resourceExhausted .declarationLimit _) =>
-         bounded.definitions.length == 1 &&
-           (psKernelExprV2DefinitionRefFind bounded.definitions polyName).isNone
+         bounded.declarations.length == 1 &&
+           (psKernelExprV2DeclarationRefFind bounded.declarations polyName).isNone
      | _ => false)
   Lean.initSearchPath (← Lean.findSysroot)
   let officialEnv ← Lean.importModules
@@ -1279,6 +1301,131 @@ private def deltaBatchParity : IO Unit := do
     (match Lean.Kernel.whnf officialEnv {} official with
      | .ok value => Lean.Expr.equal value (.sort .zero) | _ => false)
   IO.println "PSC1_V2_DAG_NATIVE_OFFICIAL_POLY_DELTA: PASS"
+  let safeAxiomName := nm "DagIndexedType"
+  let unsafeAxiomName := nm "DagIndexedUnsafeType"
+  let partialName := nm "DagIndexedPartial"
+  let unsafeOpaqueName := nm "DagIndexedUnsafeOpaque"
+  let (typedArena, safeAxiom) ← expect (psKernelExprV2PagedMkConst arena safeAxiomName [])
+  let (typedArena, unsafeAxiom) ← expect (psKernelExprV2PagedMkConst typedArena unsafeAxiomName [])
+  let (typedArena, partialRoot) ← expect (psKernelExprV2PagedMkConst typedArena partialName [])
+  let (typedArena, unsafeOpaque) ← expect (psKernelExprV2PagedMkConst typedArena unsafeOpaqueName [])
+  let (typedArena, unsafeWrongArity) ← expect (psKernelExprV2PagedMkConst typedArena mutualA [.zero])
+  let unknownName := nm "DagIndexedUnknown"
+  let (typedArena, unknownRoot) ← expect (psKernelExprV2PagedMkConst typedArena unknownName [.zero])
+  let typedBuilt ← expect (psKernelExprV2DecodeChecked typedArena)
+  let extraRequests : List PsKernelDagDeclarationRequest := [
+    .axiomDecl (PsKernelDagConstantBase.mk safeAxiomName [] s1) false,
+    .axiomDecl (PsKernelDagConstantBase.mk unsafeAxiomName [] s1) true,
+    .definitionDecl (PsKernelDagDefinition.mk
+      (PsKernelDagConstantBase.mk partialName [] s1) s0 .abbrevHint .partialDef),
+    .opaqueDecl (PsKernelDagConstantBase.mk unsafeOpaqueName [] s1) s0 true]
+  let mut typedExecution := execution
+  for request in extraRequests do
+    let result ← expectPublic (psKernelDagRunCommand typedExecution [] .safe
+      typedArena typedBuilt (.admit request))
+    typedExecution := result.snd
+  require "constant-index-single-table-count" (typedExecution.declarations.length == 13)
+  for declaration in typedExecution.declarations do
+    let actual := psKernelEnvironmentFind typedExecution.session.environment declaration.name
+    match actual with
+    | none => throw (IO.userError "indexed declaration missing from checked environment")
+    | some info =>
+        require "constant-index-live-metadata-correspondence"
+          (psKernelExprV2DeclarationRefMatches declaration info)
+        let sourceType ← expect (psKernelExprV2DecodedRequire typedBuilt declaration.type)
+        require "constant-index-source-type-installed-unchanged"
+          (psKernelExprEqual sourceType (psKernelConstantInfoType info))
+  let constantCases : List (Nat × PsKernelName × List PsKernelLevel) := [
+    (poly, polyName, [level2]), (alias, aliasName, []),
+    (opaqueRoot, opaqueName, []), (theoremRoot, theoremName, []),
+    (ma, mutualA, []), (safeAxiom, safeAxiomName, []),
+    (unsafeAxiom, unsafeAxiomName, []), (partialRoot, partialName, []),
+    (unsafeOpaque, unsafeOpaqueName, [])]
+  for (root, constantName, levels) in constantCases do
+    let term ← expect (psKernelExprV2DecodedRequire typedBuilt root)
+    for safety in [PsKernelDefinitionSafety.safe, .unsafeDef, .partialDef] do
+      let typedChecker := psKernelKernelSessionChecker typedExecution.session [] safety
+      for inferOnly in [false,true] do
+        constantTypeAttemptParity "constant-index-shared-reference-rule"
+          (psKernelInferConstantType typedChecker.context constantName levels inferOnly)
+          (psKernelExprV2TryInferConstantType typedChecker.context typedArena
+            typedExecution.declarations constantName levels inferOnly)
+      for fuel in [0,1,2,3,4,8,64] do
+        for recDepth in [0,15,16] do
+          let context := { typedChecker.context with
+            maxRecDepth := 1
+            recDepth := recDepth }
+          let original := psKernelSessionCheck fuel { typedChecker with context := context } term
+          let originalType :=
+            match original with
+            | .error error => Except.error error
+            | .ok result => Except.ok result.fst
+          constantTypeAttemptParity "constant-index-exact-fuel-and-depth"
+            originalType
+            (psKernelExprV2TryCheckWithDeclarationsFuel fuel context typedArena
+              typedExecution.declarations root)
+  let safeChecker := psKernelKernelSessionChecker typedExecution.session [] .safe
+  for (constantName, expected) in [
+      (mutualA, "safe declaration uses unsafe constant"),
+      (unsafeAxiomName, "safe declaration uses unsafe constant"),
+      (unsafeOpaqueName, "safe declaration uses unsafe constant"),
+      (partialName, "safe declaration uses partial constant")] do
+    require "constant-index-live-safety-rejection"
+      (match psKernelExprV2TryInferConstantType safeChecker.context typedArena
+          typedExecution.declarations constantName [] false with
+       | some (.error error) => error == expected | _ => false)
+    let unchecked ← expect (psKernelInferConstantType safeChecker.context constantName [] true)
+    require "constant-index-infer-only-keeps-original-safety-skip"
+      (psKernelExprEqual unchecked sort1)
+  require "constant-index-arity-error-precedes-unsafe-error"
+    (match psKernelExprV2TryInferConstantType safeChecker.context typedArena
+        typedExecution.declarations mutualA [.zero] false with
+     | some (.error error) => error == "incorrect number of universe levels" | _ => false)
+  require "constant-index-lookup-error-precedes-level-arity"
+    (match psKernelExprV2TryInferConstantType safeChecker.context typedArena
+        typedExecution.declarations unknownName [.zero] false with
+     | some (.error error) => error == "unknown constant" | _ => false)
+  for root in [unsafeWrongArity, unknownRoot, wrongArity] do
+    let term ← expect (psKernelExprV2DecodedRequire typedBuilt root)
+    let original := psKernelSessionCheck 8 safeChecker term
+    let originalType :=
+      match original with
+      | .error error => Except.error error
+      | .ok result => Except.ok result.fst
+    constantTypeAttemptParity "constant-index-negative-direct-check-parity" originalType
+      (psKernelExprV2TryCheckWithDeclarationsFuel 8 safeChecker.context typedArena
+        typedExecution.declarations root)
+  require "constant-index-valid-external-session-explicit-fallback"
+    ((psKernelExprV2TryCheckWithFuel 8 safeChecker.context typedArena alias).isNone)
+  let aliasReference ←
+    match psKernelExprV2DeclarationRefFind typedExecution.declarations aliasName with
+    | some value => pure value
+    | none => throw (IO.userError "missing alias reference")
+  for changed in [
+      { aliasReference with kind := .axiomDecl },
+      { aliasReference with levelParams := [nm "wrong-universe-owner"] }] do
+    require "constant-index-kind-or-parameter-mismatch-explicit-fallback"
+      ((psKernelExprV2TryInferConstantType safeChecker.context typedArena [changed]
+        aliasName [] false).isNone)
+  let checkedBatch ← expectPublic (psKernelV1RunDag initial [] .safe typedArena
+    ((requests ++ extraRequests).map PsKernelDagCommand.admit ++ [.check poly]))
+  let expectedPolyType := PsKernelExpr.forallE (nm "A") (.sort level2)
+    (.forallE (nm "x") (.bvar 0) (.bvar 1) .default) .default
+  require "constant-index-complete-public-polymorphic-check"
+    (match checkedBatch.replies.reverse with
+     | .checked value :: _ => psKernelExprEqual value.type expectedPolyType
+     | _ => false)
+  for root in [ma, unsafeAxiom, partialRoot, unsafeOpaque] do
+    require "constant-index-complete-public-safe-rejection"
+      (match psKernelV1RunDag initial [] .safe typedArena
+          ((requests ++ extraRequests).map PsKernelDagCommand.admit ++ [.check root]) with
+       | .error (.rejectedInvalid _) => true | _ => false)
+  let foreignCheck ← expectPublic
+    (psKernelV1RunDag typedExecution.session [] .safe foreign [.check foreignAlias])
+  require "constant-index-does-not-escape-owning-batch"
+    (match foreignCheck.replies with
+     | [.checked value] => psKernelExprEqual value.type sort1 | _ => false)
+  IO.println "PSC1_V2_DAG_NATIVE_CONSTANT_INDEX: PASS"
   IO.println "PSC1_V2_DAG_NATIVE_DELTA: PASS"
 
 private def officialComparison : IO Unit := do
@@ -1507,7 +1654,6 @@ private def binderParity : IO Unit := do
            match result.fst.checkedInfer with | [] => true | _ => false
        | _ => false)
   let unsupported : List PsKernelExpr := [
-    .const (nm "binder-unknown-constant") [],
     .letE x sort1 sort0 (.bvar 0) false,
     .proj (nm "binder-unknown-structure") 0 sort0]
   for term in unsupported do

@@ -1,3 +1,4 @@
+import Ps.KernelCore.Checker.Inference.Constant
 import Ps.KernelCore.Checker.ExprV2.Check
 import Init.Data.Nat.MinMax
 import Ps.KernelCore.Checker.State
@@ -12,6 +13,70 @@ proper use of scope exit at every call site, or whole-kernel soundness.
 Native proof material is outside the portable executable source closure.
 -/
 namespace PsKernelCacheScopeProofs
+
+def beforeInferConstantType
+    (context : PsKernelCheckerContext)
+    (name : PsKernelName) (levels : List PsKernelLevel)
+    (inferOnly : Bool) :
+    Except String PsKernelExpr :=
+  match psKernelEnvironmentFind context.environment name with
+  | Option.none => Except.error "unknown constant"
+  | Option.some info =>
+      let params := psKernelConstantInfoLevelParams info;
+      if Nat.beq
+          (psKernelNameListLength params) (psKernelLevelListLength levels) then
+        if inferOnly then
+          Except.ok
+            (psKernelExprInstantiateLevelParams
+              (psKernelConstantInfoType info) params levels)
+        else if psKernelConstantInfoIsUnsafe info then
+          if psKernelDefinitionSafetyIsUnsafe context.safety then
+            Except.ok
+              (psKernelExprInstantiateLevelParams
+                (psKernelConstantInfoType info) params levels)
+          else
+            Except.error "safe declaration uses unsafe constant"
+        else if psKernelConstantInfoIsPartial info then
+          if psKernelDefinitionSafetyIsSafe context.safety then
+            Except.error "safe declaration uses partial constant"
+          else
+            Except.ok
+              (psKernelExprInstantiateLevelParams
+                (psKernelConstantInfoType info) params levels)
+        else
+          Except.ok
+            (psKernelExprInstantiateLevelParams
+              (psKernelConstantInfoType info) params levels)
+      else
+        Except.error "incorrect number of universe levels"
+
+theorem constant_reference_factorization_preserves
+    (context : PsKernelCheckerContext)
+    (name : PsKernelName) (levels : List PsKernelLevel) (inferOnly : Bool) :
+    psKernelInferConstantType context name levels inferOnly =
+      beforeInferConstantType context name levels inferOnly := by
+  cases found : psKernelEnvironmentFind context.environment name with
+  | none =>
+      simp [psKernelInferConstantType, psKernelCheckConstantReference,
+        beforeInferConstantType, found]
+  | some info =>
+      cases arity : Nat.beq
+          (psKernelNameListLength (psKernelConstantInfoLevelParams info))
+          (psKernelLevelListLength levels) <;>
+        cases mode : inferOnly <;>
+        cases unsafeFlag : psKernelConstantInfoIsUnsafe info <;>
+        cases unsafeAllowed : psKernelDefinitionSafetyIsUnsafe context.safety <;>
+        cases partialFlag : psKernelConstantInfoIsPartial info <;>
+        cases safeFlag : psKernelDefinitionSafetyIsSafe context.safety <;>
+        simp [psKernelInferConstantType, psKernelCheckConstantReference,
+          beforeInferConstantType, found, arity, mode, unsafeFlag,
+          unsafeAllowed, partialFlag, safeFlag]
+
+theorem constant_reference_factorization_extensional :
+    psKernelInferConstantType = beforeInferConstantType := by
+  funext context name levels inferOnly
+  exact constant_reference_factorization_preserves context name levels inferOnly
+
 
 structure SameSemanticCaches (left right : PsKernelCheckerState) : Prop where
   inferOnly : left.inferOnly = right.inferOnly
@@ -132,21 +197,21 @@ theorem dag_quick_defeq_depth_error_precedes_syntax
       Option.some (Except.error error) := by
   simp [psKernelExprV2TryQuickDefEqWithFuel, guard]
 
-theorem dag_whnf_definition_initialization_has_no_core_cache
+theorem dag_whnf_declaration_initialization_has_no_core_cache
     (arena : PsKernelExprV2PagedArena)
-    (definitions : List PsKernelExprV2DefinitionRef) :
-    (psKernelExprV2WhnfStateForDefinitions arena definitions).coreCache = List.nil := by
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    (psKernelExprV2WhnfStateForDeclarations arena declarations).coreCache = List.nil := by
   rfl
 
-theorem dag_whnf_definition_initialization_has_no_public_cache
+theorem dag_whnf_declaration_initialization_has_no_public_cache
     (arena : PsKernelExprV2PagedArena)
-    (definitions : List PsKernelExprV2DefinitionRef) :
-    (psKernelExprV2WhnfStateForDefinitions arena definitions).publicCache = List.nil := by
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    (psKernelExprV2WhnfStateForDeclarations arena declarations).publicCache = List.nil := by
   rfl
 
-theorem dag_whnf_arena_update_preserves_definition_references
+theorem dag_whnf_arena_update_preserves_declaration_references
     (state : PsKernelExprV2WhnfState) (arena : PsKernelExprV2PagedArena) :
-    (psKernelExprV2WhnfStateWithArena state arena).definitions = state.definitions := by
+    (psKernelExprV2WhnfStateWithArena state arena).declarations = state.declarations := by
   rfl
 
 theorem dag_check_scope_retains_child_arena
@@ -234,9 +299,9 @@ end PsKernelCacheScopeProofs
 #print axioms PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax
 #print axioms PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax
 
-#print axioms PsKernelCacheScopeProofs.dag_whnf_definition_initialization_has_no_core_cache
-#print axioms PsKernelCacheScopeProofs.dag_whnf_definition_initialization_has_no_public_cache
-#print axioms PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_definition_references
+#print axioms PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_core_cache
+#print axioms PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_public_cache
+#print axioms PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_declaration_references
 
 #print axioms PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena
 #print axioms PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches
@@ -246,3 +311,6 @@ end PsKernelCacheScopeProofs
 #print axioms PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication
 #print axioms PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache
 #print axioms PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment
+
+#print axioms PsKernelCacheScopeProofs.constant_reference_factorization_preserves
+#print axioms PsKernelCacheScopeProofs.constant_reference_factorization_extensional

@@ -1167,21 +1167,28 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
       def(cycleA,s1,cb,S.unsafeDef),def(cycleB,s1,ca,S.unsafeDef)]))
   ];
   const built=accepted(decode(arena),"delta-canonical-decode"),initial=session();
-  const emptyExecution={session:initial,definitions:nil};
+  const emptyExecution={session:initial,declarations:nil};
   const step=(execution,request)=>get("psKernelDagRunCommand")(
     execution,nil,S.unsafeDef,arena,built,C.admit(request));
   const firstAdmission=accepted(step(emptyExecution,requests[0]),"delta-alias-admission");
   let execution=firstAdmission.snd;
   for(const request of requests.slice(1))
     execution=accepted(step(execution,request),"delta-successful-admission").snd;
-  const find=n=>get("psKernelExprV2DefinitionRefFind")(execution.definitions)(n);
-  must(array(execution.definitions).length===7,"delta-only-admitted-definitions-registered");
-  must(accepted(find(polyName),"delta-poly-reference").value===polyBody,
+  const find=n=>get("psKernelExprV2DeclarationRefFind")(execution.declarations)(n);
+  must(array(execution.declarations).length===9,"delta-only-admitted-declarations-registered");
+  must(accepted(accepted(find(polyName),"delta-poly-reference").deltaValue,"delta-poly-body")===polyBody,
     "delta-reference-retains-canonical-body-id");
-  must(absent(find(theoremName))&&absent(find(opaqueName)),
-    "delta-theorem-and-opaque-remain-inert");
+  const theoremReference=accepted(find(theoremName),"delta-theorem-type-reference");
+  const opaqueReference=accepted(find(opaqueName),"delta-opaque-type-reference");
+  const referenceKinds=get("PsKernelExprV2DeclarationRefKind");
+  must(absent(theoremReference.deltaValue)&&theoremReference.type===proofType&&
+    sameRuntimeValue(theoremReference.kind,referenceKinds.theoremDecl),
+    "delta-theorem-type-index-does-not-authorize-unfolding");
+  must(absent(opaqueReference.deltaValue)&&opaqueReference.type===s1&&
+    sameRuntimeValue(opaqueReference.kind,referenceKinds.opaqueDecl),
+    "delta-opaque-type-index-does-not-authorize-unfolding");
   const checker=get("psKernelKernelSessionChecker")(execution.session,nil,S.unsafeDef);
-  const state=()=>get("psKernelExprV2WhnfStateForDefinitions")(arena,execution.definitions);
+  const state=()=>get("psKernelExprV2WhnfStateForDeclarations")(arena,execution.declarations);
   const raw=(fuel,context,root)=>
     get("psKernelExprV2TryWhnfStateWithFuel")(fuel)(context)(state())(root);
   const compareRaw=(fuel,context,root,term,label)=>{
@@ -1223,7 +1230,7 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
         const preflight=get("psKernelKernelSessionPreflight")(policySession);
         const actualPublic=rejected(preflight)?preflight:
           get("psKernelDagWhnfExpression")(policySession,nil,S.unsafeDef,arena,built,
-            execution.definitions,root,term);
+            execution.declarations,root,term);
         ensure(sameValue(
           get("psKernelV1Whnf")(policySession,nil,S.unsafeDef,term),
           actualPublic),label+"-public");
@@ -1286,11 +1293,11 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
     must(isInvalid(run(initial,nil,S.safe,arena,list([C.admit(D.definitionDecl(bad))]))),
       "delta-invalid-or-illtyped-body-rejected-at-public-boundary");
   }
-  must(array(emptyExecution.definitions).length===0&&
+  must(array(emptyExecution.declarations).length===0&&
     get("psKernelEnvironmentSize")(initial.environment)===0n,
     "delta-failed-admission-preserves-empty-owner");
   const duplicate=step(execution,D.definitionDecl({...aliasDef,value:s1}));
-  must(isInvalid(duplicate)&&accepted(find(aliasName),"delta-retained-alias").value===s0,
+  must(isInvalid(duplicate)&&accepted(accepted(find(aliasName),"delta-retained-alias").deltaValue,"delta-retained-body")===s0,
     "delta-duplicate-cannot-replace-registered-body");
   const bounded={...firstAdmission.snd,session:{...firstAdmission.snd.session,
     resources:{...firstAdmission.snd.session.resources,maxDeclarations:1n}}};
@@ -1298,9 +1305,138 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
   must(rejected(limited)&&sameRuntimeValue(
     get("psKernelErrorOutcome")(limited.error),get("PsKernelOutcome").resourceExhausted)&&
     sameRuntimeValue(limited.error.resource,get("PsKernelResourceError").declarationLimit)&&
-    array(bounded.definitions).length===1&&absent(
-      get("psKernelExprV2DefinitionRefFind")(bounded.definitions)(polyName)),
+    array(bounded.declarations).length===1&&absent(
+      get("psKernelExprV2DeclarationRefFind")(bounded.declarations)(polyName)),
     "delta-declaration-limit-failure-publishes-no-reference");
+  let typedArena=arena;
+  const addTyped=(kind,...args)=>{
+    const result=mk(typedArena,kind,...args);typedArena=result.fst;return result.snd;
+  };
+  const safeAxiomName=name("DagIndexedType"),unsafeAxiomName=name("DagIndexedUnsafeType");
+  const partialName=name("DagIndexedPartial"),unsafeOpaqueName=name("DagIndexedUnsafeOpaque");
+  const safeAxiom=addTyped("Const",safeAxiomName,nil),unsafeAxiom=addTyped("Const",unsafeAxiomName,nil);
+  const partialRoot=addTyped("Const",partialName,nil),unsafeOpaque=addTyped("Const",unsafeOpaqueName,nil);
+  const unsafeWrongArity=addTyped("Const",mutualA,list([L.zero]));
+  const unknownName=name("DagIndexedUnknown"),unknownRoot=addTyped("Const",unknownName,list([L.zero]));
+  const typedBuilt=accepted(decode(typedArena),"constant-index-decode");
+  const extraRequests=[
+    D.axiomDecl(base(safeAxiomName,s1),false),
+    D.axiomDecl(base(unsafeAxiomName,s1),true),
+    D.definitionDecl(def(partialName,s1,s0,S.partialDef)),
+    D.opaqueDecl(base(unsafeOpaqueName,s1),s0,true)
+  ];
+  let typedExecution=execution;
+  for(const request of extraRequests){
+    typedExecution=accepted(get("psKernelDagRunCommand")(typedExecution,nil,S.safe,
+      typedArena,typedBuilt,C.admit(request)),"constant-index-admission").snd;
+  }
+  must(array(typedExecution.declarations).length===13,"constant-index-one-owner-table");
+  for(const declaration of array(typedExecution.declarations)){
+    const info=accepted(get("psKernelEnvironmentFind")(typedExecution.session.environment,
+      declaration.name),"constant-index-live-declaration");
+    must(get("psKernelExprV2DeclarationRefMatches")(declaration,info),
+      "constant-index-live-metadata-correspondence");
+    must(exact(accepted(decoded(typedBuilt,declaration.type),"constant-index-source-type"),
+      get("psKernelConstantInfoType")(info)),"constant-index-original-type-installed-unchanged");
+  }
+  const compareType=(legacy,attempted,label,project=value=>value)=>{
+    const reduced=accepted(attempted,label+"-direct");
+    if(rejected(legacy)){
+      ensure(rejected(reduced)&&legacy.error===reduced.error,label+"-error");
+    }else{
+      const result=accepted(reduced,label+"-result");
+      const graph=accepted(decode(result.fst),label+"-valid");
+      const actual=accepted(decoded(graph,result.snd),label+"-type");
+      ensure(exact(project(accepted(legacy,label+"-original")),actual),label+"-value");
+    }
+  };
+  const constantCases=[
+    [poly,polyName,list([level2])],[alias,aliasName,nil],
+    [opaqueRoot,opaqueName,nil],[theoremRoot,theoremName,nil],
+    [ma,mutualA,nil],[safeAxiom,safeAxiomName,nil],
+    [unsafeAxiom,unsafeAxiomName,nil],[partialRoot,partialName,nil],
+    [unsafeOpaque,unsafeOpaqueName,nil]
+  ];
+  let constantParityCases=0;
+  for(const [root,constantName,levels]of constantCases){
+    const term=accepted(decoded(typedBuilt,root),"constant-index-fixture");
+    for(const safety of [S.safe,S.unsafeDef,S.partialDef]){
+      const checker=get("psKernelKernelSessionChecker")(typedExecution.session,nil,safety);
+      for(const inferOnly of [false,true]){
+        compareType(get("psKernelInferConstantType")(checker.context,constantName,levels,inferOnly),
+          get("psKernelExprV2TryInferConstantType")(checker.context,typedArena,
+            typedExecution.declarations,constantName,levels,inferOnly),
+          "constant-index-reference-rule-"+root+"-"+inferOnly);
+      }
+      for(const fuel of [0n,1n,2n,3n,4n,8n,64n]){
+        for(const recDepth of [0n,15n,16n]){
+          const context={...checker.context,maxRecDepth:1n,recDepth};
+          compareType(get("psKernelSessionCheck")(fuel,{...checker,context},term),
+            get("psKernelExprV2TryCheckWithDeclarationsFuel")(fuel,context,typedArena,
+              typedExecution.declarations,root),
+            "constant-index-fuel-depth-"+root+"-"+fuel+"-"+recDepth,value=>value.fst);
+          constantParityCases++;
+        }
+      }
+    }
+  }
+  must(constantParityCases===567,"constant-index-direct-fuel-depth-safety-matrix");
+  const safeChecker=get("psKernelKernelSessionChecker")(typedExecution.session,nil,S.safe);
+  for(const [constantName,expected]of [
+    [mutualA,"safe declaration uses unsafe constant"],
+    [unsafeAxiomName,"safe declaration uses unsafe constant"],
+    [unsafeOpaqueName,"safe declaration uses unsafe constant"],
+    [partialName,"safe declaration uses partial constant"]
+  ]){
+    const result=accepted(get("psKernelExprV2TryInferConstantType")(safeChecker.context,
+      typedArena,typedExecution.declarations,constantName,nil,false),"constant-index-safety-direct");
+    must(rejected(result)&&result.error===expected,"constant-index-actual-environment-safety");
+    must(exact(accepted(get("psKernelInferConstantType")(safeChecker.context,
+      constantName,nil,true),"constant-index-infer-only"),sort1),
+      "constant-index-infer-only-original-safety-skip");
+  }
+  const arity=accepted(get("psKernelExprV2TryInferConstantType")(safeChecker.context,
+    typedArena,typedExecution.declarations,mutualA,list([L.zero]),false),"constant-index-arity-direct");
+  must(rejected(arity)&&arity.error==="incorrect number of universe levels",
+    "constant-index-arity-before-safety");
+  const unknown=accepted(get("psKernelExprV2TryInferConstantType")(safeChecker.context,
+    typedArena,typedExecution.declarations,unknownName,list([L.zero]),false),"constant-index-unknown-direct");
+  must(rejected(unknown)&&unknown.error==="unknown constant","constant-index-lookup-before-arity");
+  for(const root of [unsafeWrongArity,unknownRoot,wrongArity]){
+    const term=accepted(decoded(typedBuilt,root),"constant-index-negative-term");
+    compareType(get("psKernelSessionCheck")(8n,safeChecker,term),
+      get("psKernelExprV2TryCheckWithDeclarationsFuel")(8n,safeChecker.context,typedArena,
+        typedExecution.declarations,root),"constant-index-direct-negative-"+root,value=>value.fst);
+  }
+  must(absent(get("psKernelExprV2TryCheckWithFuel")(8n,safeChecker.context,typedArena,alias)),
+    "constant-index-preexisting-session-explicit-fallback");
+  const aliasReference=accepted(get("psKernelExprV2DeclarationRefFind")(
+    typedExecution.declarations)(aliasName),"constant-index-alias-reference");
+  for(const changed of [
+    {...aliasReference,kind:get("PsKernelExprV2DeclarationRefKind").axiomDecl},
+    {...aliasReference,levelParams:list([name("wrong-universe-owner")])}
+  ]){
+    must(absent(get("psKernelExprV2TryInferConstantType")(safeChecker.context,
+      typedArena,list([changed]),aliasName,nil,false)),
+      "constant-index-kind-or-parameter-mismatch-fallback");
+  }
+  const allCommands=[...requests,...extraRequests].map(request=>C.admit(request));
+  const checkedBatch=accepted(run(initial,nil,S.safe,typedArena,
+    list([...allCommands,C.check(poly)])),"constant-index-public-polymorphic-check");
+  const polyExpected=E.forallE(name("A"),E.sort(level2),
+    E.forallE(name("x"),E.bvar(0n),E.bvar(1n),B.default),B.default);
+  const checkedReplies=array(checkedBatch.replies);
+  must(checkedReplies.length===allCommands.length+1&&
+    exact(checkedReplies.at(-1).value.type,polyExpected),"constant-index-complete-public-check");
+  for(const root of [ma,unsafeAxiom,partialRoot,unsafeOpaque])
+    must(isInvalid(run(initial,nil,S.safe,typedArena,list([...allCommands,C.check(root)]))),
+      "constant-index-complete-public-unsafe-or-partial-rejection");
+  const foreignCheck=accepted(run(typedExecution.session,nil,S.safe,foreignAlias.fst,
+    list([C.check(foreignAlias.snd)])),"constant-index-foreign-arena");
+  const foreignChecked=array(foreignCheck.replies);
+  must(foreignChecked.length===1&&exact(foreignChecked[0].value.type,sort1),
+    "constant-index-no-cross-arena-reference-leak");
+  console.log("PSC1_V2_DAG_JS_CONSTANT_INDEX: PASS");
   console.log("PSC1_V2_DAG_JS_DELTA: PASS");
 }
 
@@ -1495,7 +1631,6 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
     must(sameRuntimeValue(result.fst.checkedInfer,nil),"binder-literal-cache-ineligible");
   }
   const unsupported=[
-    build("Const",E.const(name("binder-unknown-constant"),nil),name("binder-unknown-constant"),nil),
     build("Let",E.letE(x,sort1,sort0,E.bvar(0n),false),x,s1.id,s0.id,b0.id,false),
     build("Proj",E.proj(name("binder-unknown-structure"),0n,sort0),
       name("binder-unknown-structure"),0n,s0.id)

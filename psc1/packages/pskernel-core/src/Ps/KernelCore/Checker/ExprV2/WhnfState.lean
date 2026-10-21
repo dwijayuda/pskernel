@@ -20,21 +20,21 @@ structure PsKernelExprV2WhnfState where
   arena : PsKernelExprV2PagedArena
   coreCache : List PsKernelExprV2WhnfCacheEntry
   publicCache : List PsKernelExprV2WhnfCacheEntry
-  definitions : List PsKernelExprV2DefinitionRef
+  declarations : List PsKernelExprV2DeclarationRef
 
 def psKernelExprV2WhnfStateEmpty
     (arena : PsKernelExprV2PagedArena) : PsKernelExprV2WhnfState :=
   PsKernelExprV2WhnfState.mk arena List.nil List.nil List.nil
 
-def psKernelExprV2WhnfStateForDefinitions
+def psKernelExprV2WhnfStateForDeclarations
     (arena : PsKernelExprV2PagedArena)
-    (definitions : List PsKernelExprV2DefinitionRef) : PsKernelExprV2WhnfState :=
-  PsKernelExprV2WhnfState.mk arena List.nil List.nil definitions
+    (declarations : List PsKernelExprV2DeclarationRef) : PsKernelExprV2WhnfState :=
+  PsKernelExprV2WhnfState.mk arena List.nil List.nil declarations
 
 def psKernelExprV2WhnfStateWithArena
     (state : PsKernelExprV2WhnfState) (arena : PsKernelExprV2PagedArena) :
     PsKernelExprV2WhnfState :=
-  PsKernelExprV2WhnfState.mk arena state.coreCache state.publicCache state.definitions
+  PsKernelExprV2WhnfState.mk arena state.coreCache state.publicCache state.declarations
 
 def psKernelExprV2WhnfCacheFindIn
     (entries : List PsKernelExprV2WhnfCacheEntry) :
@@ -77,7 +77,7 @@ def psKernelExprV2WhnfCoreFinish
               (List.cons
                 (PsKernelExprV2WhnfCacheEntry.mk source result entry.hash)
                 state.coreCache)
-              state.publicCache state.definitions)
+              state.publicCache state.declarations)
             result)
 
 def psKernelExprV2WhnfPublicCacheFind
@@ -100,5 +100,5 @@ def psKernelExprV2WhnfPublicFinish
               (List.cons
                 (PsKernelExprV2WhnfCacheEntry.mk source result entry.hash)
                 state.publicCache)
-              state.definitions)
+              state.declarations)
             result)

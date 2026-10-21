@@ -423,7 +423,8 @@ def psWasmStringAbiMakePlan (source : PsValidatedIrModule)
   let mut hasDispatcher := false
   let mut exports := []
   for name in names do
-    if !psWasmComponentWitIdent name || name == "memory" || name == "cabi-realloc" then
+    if !psWasmComponentWitIdent name || name == "memory" || name == "cabi-realloc" ||
+        (ioAbi && name == "dispatch") then
       throw "PSC1_WASM_STRING_EXPORT_NAME_UNSUPPORTED"
     let some declaration := source.raw.declarations.find? (fun d => d.name == name)
       | throw "PSC1_WASM_STRING_EXPORT_MISSING"
@@ -491,7 +492,9 @@ def psWasmStringAbiWrapper (declaration : PsVerifiedIrDeclaration)
   else if !psWasmStringAbiIsBool declaration.resultType then
     throw "PSC1_WASM_STRING_WRAPPER_RESULT_UNSUPPORTED"
   body := body ++ [.i32Const 0, .abiBusySet]
-  pure { name := "__psc1_abi_export_" ++ declaration.name, typeName := none
+  pure {
+    name := "__psc1_abi_export_" ++ declaration.name
+    typeName := none
     parameters, results := [.i32], locals := [], body }
 
 def psWasmStringAbiAdapt (plan : PsWasmStringAbiPlan)
@@ -513,7 +516,9 @@ def psWasmStringAbiAdapt (plan : PsWasmStringAbiPlan)
     psWasmStringAbiWrapper declaration target baseName plan.io
   let imports := if plan.io then [{
     moduleName := "psc1:io", importName := "dispatch"
-    function := { name := "__psc1_abi_host_dispatch", typeName := none
+    function := {
+      name := "__psc1_abi_host_dispatch"
+      typeName := none
       parameters := [.i32, .i32, .i32], results := [], locals := [], body := [] }
   }] else []
   let dispatch := if plan.io then [psWasmStringAbiDispatchFunction baseName codeTypeName] else []

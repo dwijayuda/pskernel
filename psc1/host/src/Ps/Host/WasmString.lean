@@ -45,6 +45,13 @@ def psHostDirectEmitWasmString (session : PsHostDirectPrepared)
         IO.FS.writeFile (stage / (stem ++ ".wit")) value.wit
     let _ <- psHostWasmTool #["validate", (stage / name).toString] "STRING_VALIDATE"
     psHostWriteWat (stage / name) (stage / (stem ++ ".wat"))
+    if component then
+      let observed := stage / "temporary.observed.wit"
+      let observedWit <- psHostWasmTool #["component", "wit", (stage / name).toString] "STRING_WIT_OBSERVE"
+      IO.FS.writeFile observed observedWit
+      let _ <- psHostArtifactTool #["wit-string-check", (stage / (stem ++ ".wit")).toString,
+        observed.toString, (if session.ioDispatcherAbi then "wasm-io-dispatcher" else "wasm-string")]
+      IO.FS.removeFile observed
     let runtime <- match psWasmRuntimeCanonicalSource selected with
       | .ok value => pure value
       | .error reason => throw (IO.userError reason)

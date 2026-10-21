@@ -76,6 +76,21 @@ await test('WIT comparison is structural, complete and trivia-independent', () =
   assert.throws(() => scalarWitApi(first.replace('identity:', 'identity-:')), /UNRECOGNIZED_TOKEN/);
 });
 
+await test('opt-in String WIT compares complete imports exports and scalar types', () => {
+ const io='package proofscript:psc1; world app { import dispatch: func(request: string) -> string; export run: func() -> bool; }';
+ const pure='world app { export echo: func(text: string) -> string; }';
+ assert.deepEqual(scalarWitApi(pure,'wasm-string').exports[0].result,'string');
+ assert.equal(scalarWitApi(io,'wasm-io-dispatcher').imports[0].name,'dispatch');
+ assert.throws(()=>scalarWitApi(pure),/WIT_SCALAR/);
+ assert.throws(()=>scalarWitApi(io,'wasm-string'),/IMPORT_UNSUPPORTED/);
+ for(const source of [io.replace('dispatch:','other:'),io.replace('request: string','request: bool'),
+  io.replace('import dispatch: func(request: string) -> string;',''),
+  io.replace('export run:', 'import run:'),io+' world extra {}'])
+  assert.throws(()=>scalarWitApi(source,'wasm-io-dispatcher'));
+ assert.notDeepEqual(scalarWitApi(pure,'wasm-string'),
+  scalarWitApi(pure.replace(') -> string',') -> bool'),'wasm-string'));
+});
+
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-publication-unit-'));
 function stageFor(output, literal) {
   const stage = createStage(output);

@@ -173,7 +173,8 @@ export async function formatTarget(stage, kind, fileName) {
 // This is an intentionally small structural WIT parser for the advertised scalar
 // world. It rejects extra imports, exports, interfaces, duplicate names and any
 // unrecognized syntax instead of accepting a substring of the requested name.
-export function scalarWitApi(text) {
+export function scalarWitApi(text, profile = 'scalar') {
+  if (!['scalar','wasm-string','wasm-io-dispatcher'].includes(profile)) fail('PSC1_WIT_PROFILE');
   const tokens = [];
   const lexer = /\s+|\/\/[^\n]*|\/\*[\s\S]*?\*\/|->|%?[a-z][a-z0-9]*(?:-[a-z][a-z0-9]*)*|[0-9]+|[{}():;,@.]/gy;
   let offset = 0;
@@ -204,11 +205,18 @@ export function scalarWitApi(text) {
     expect(';');
   }
   expect('world'); identifier(); expect('{');
-  const scalars = new Set(['bool', 'u8', 'u16', 'u32', 'u64', 's8', 's16', 's32', 's64', 'f32', 'f64']);
+  const scalars = new Set(profile === 'scalar' ? ['bool', 'u8', 'u16', 'u32', 'u64', 's8', 's16', 's32', 's64', 'f32', 'f64'] : ['bool','string']);
   const scalar = () => { const value = take(); if (!scalars.has(value)) fail('PSC1_WIT_SCALAR', String(value)); return value; };
-  const exports = [];
+  const exports = [], imports = [];
   while (tokens[index] !== '}') {
-    expect('export'); const name = identifier(); expect(':'); expect('func'); expect('(');
+    let kind = 'export';
+    if (profile === 'scalar') expect('export');
+    else {
+      kind = take();
+      if (kind !== 'export' && (kind !== 'import' || profile !== 'wasm-io-dispatcher'))
+        fail('PSC1_WIT_IMPORT_UNSUPPORTED');
+    }
+    const name = identifier(); expect(':'); expect('func'); expect('(');
     const parameters = [];
     while (tokens[index] !== ')') {
       const parameter = identifier(); expect(':'); const type = scalar();
@@ -217,17 +225,23 @@ export function scalarWitApi(text) {
       if (tokens[index] !== ')') expect(',');
     }
     expect(')'); expect('->'); const result = scalar(); expect(';');
-    if (exports.some(e => e.name === name)) fail('PSC1_WIT_DUPLICATE_EXPORT', name);
-    exports.push({ name, parameters, result });
+    if ([...exports,...imports].some(e => e.name === name)) fail('PSC1_WIT_DUPLICATE_EXPORT', name);
+    (kind === 'import' ? imports : exports).push({ name, parameters, result });
   }
   expect('}');
   if (index !== tokens.length) fail('PSC1_WIT_TRAILING_SYNTAX');
-  return exports.sort((a, b) => a.name.localeCompare(b.name, 'en'));
+  exports.sort((a, b) => a.name.localeCompare(b.name, 'en'));
+  if (profile === 'scalar') return exports;
+  if (!exports.length) fail('PSC1_WIT_EXPORT_REQUIRED');
+  if (profile === 'wasm-io-dispatcher' && !isDeepStrictEqual(imports, [
+    {name:'dispatch',parameters:[{name:'request',type:'string'}],result:'string'}
+  ])) fail('PSC1_WIT_DISPATCH_IMPORT_MISMATCH');
+  return {imports,exports};
 }
 
-export function checkWit(expectedPath, observedPath) {
-  const expected = scalarWitApi(fs.readFileSync(expectedPath, 'utf8'));
-  const observed = scalarWitApi(fs.readFileSync(observedPath, 'utf8'));
+export function checkWit(expectedPath, observedPath, profile = 'scalar') {
+  const expected = scalarWitApi(fs.readFileSync(expectedPath, 'utf8'), profile);
+  const observed = scalarWitApi(fs.readFileSync(observedPath, 'utf8'), profile);
   if (!isDeepStrictEqual(expected, observed)) fail('PSC1_COMPONENT_WIT_SIGNATURE_MISMATCH');
 }
 
@@ -583,6 +597,7 @@ async function main(args) {
   else if (command === 'rust' && rest.length === 2) prepareRust(rest[0], rest[1]);
   else if (command === 'script' && rest.length === 3) prepareScript(rest[0], rest[1], rest[2]);
   else if (command === 'wit-check' && rest.length === 2) checkWit(rest[0], rest[1]);
+  else if (command === 'wit-string-check' && rest.length === 3) checkWit(rest[0], rest[1], rest[2]);
   else if (command === 'publish' && rest.length === 3) console.log(json(publish(rest[0], rest[1], rest[2])).trim());
   else fail('PSC1_HOST_TOOL_USAGE');
 }

@@ -11,7 +11,8 @@ private def get {A : Type} (value : Except String A) : IO A :=
 def main : IO Unit := do
   let raw : PsVerifiedIrModule := {
     imports := [], structures := [], inductives := []
-    declarations := [{ name := "echo", typeParameters := []
+    declarations := [{
+      name := "echo", typeParameters := []
       parameters := [{ name := "text", type := .primitive .string }]
       resultType := .primitive .string, body := .var "text" }]
   }
@@ -32,13 +33,15 @@ def main : IO Unit := do
     (match psWasmIrValidateModule { adapted with abiMemory := false } with
       | .error _ => true | .ok _ => false)
   let malformed : PsWasmModule := { psWasmModuleEmpty with
-    abiMemory := true, functions := [{ name := "bad", typeName := none
+    abiMemory := true, functions := [{
+      name := "bad", typeName := none
       parameters := [], results := [], locals := [], body := [.i32Store 0] }] }
   require "memory operand underflow refuses"
     (match psWasmIrValidateModule malformed with | .error _ => true | .ok _ => false)
   let foreign := { adapted with functionImports := [{
     moduleName := "arbitrary", importName := "foreign"
-    function := { name := "foreign", typeName := none
+    function := {
+      name := "foreign", typeName := none
       parameters := [.i32, .i32, .i32], results := [], locals := [], body := [] } }] }
   require "unqualified foreign import refuses"
     (match psWasmIrValidateModule foreign with | .error _ => true | .ok _ => false)
@@ -48,7 +51,8 @@ def main : IO Unit := do
       | .error _ => true | .ok _ => false)
   let artifacts <- get (psWasmStringAbiComponent source plan adapted)
   require "mismatched component schema refuses"
-    (match psWasmStringAbiComponent source { plan with exports := [{ name := "echo",
+    (match psWasmStringAbiComponent source { plan with exports := [{
+      name := "echo",
       parameters := [], resultString := true }] } adapted with
       | .error _ => true | .ok _ => false)
   require "same-core-type forged result schema refuses"

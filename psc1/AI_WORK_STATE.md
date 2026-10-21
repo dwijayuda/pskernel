@@ -201,3 +201,8 @@ If the actual compiler workload exposes target planning/runtime/collection costs
 fix the general mechanism with measured evidence; do not raise limits or patch
 particular declarations. Continue to session publication binding and real G1/G2/G3
 after G1 actually executes, then Rust owned aggregate callbacks/generations.
+
+Atcad9bc63 native service tests failed to compile because the local variable
+syntax is a reserved Lean keyword (JsServiceTests66:7). Rename it targetSyntax;
+all assertions remain. Generated workflow39533776394 and focused39533776401
+stopped at native test compilation, before G1 generation. Do not claim execution.

@@ -63,9 +63,9 @@ def main : IO Unit := do
     IO.println ("PSC1_JS_SERVICE_PASS: " ++ grammar ++ ": exact facade graph independently admitted")
     let output := "dist/generated-service-native/" ++ grammar ++ ".mjs"
     IO.FS.writeFile output (<- textField candidate "source")
-    let syntax <- IO.Process.output { cmd := "node", args := #["--check", output] }
+    let targetSyntax <- IO.Process.output { cmd := "node", args := #["--check", output] }
     require (grammar ++ ": actual emitted module passes target syntax")
-      (syntax.exitCode == 0)
+      (targetSyntax.exitCode == 0)
     let consumer := "dist/generated-service-native/" ++ grammar ++ "-consumer.mjs"
     IO.FS.writeFile consumer
       ("import * as compiled from './" ++ grammar ++ ".mjs';\n" ++

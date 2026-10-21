@@ -316,7 +316,7 @@ jobs:
           set -euo pipefail
           lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2GeneratedPrefixRegression.lean \
             | tee "$RUNNER_TEMP/psc1-generated-prefix-native.log"
-          grep -Fqx 'PSC1_V2_GENERATED_PREFIX: PASS new=23 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
           grep -Fqx 'PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
       - name: Check DAG K conversion against V1 and official Lean
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
@@ -705,7 +705,7 @@ jobs:
           cd "$PSC1_DAG_RUN_DIR"
           env PATH="" "$PSC1_NODE_BIN" generated-prefix-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-generated-prefix-js.log"
-          grep -Fqx 'PSC1_V2_GENERATED_PREFIX_JS: PASS new=23 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
           grep -Eq '^PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
       - name: Check generated DAG K conversion in detached Node
         working-directory: psc1

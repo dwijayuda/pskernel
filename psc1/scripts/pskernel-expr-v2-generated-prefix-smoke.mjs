@@ -225,7 +225,8 @@ for(const transition of transitions){
    array(boundary.declarations).length===array(generated.declarations).length,"old-entry-stops-tail");
  }
 }
-must(newCount===23&&recCount===7,"bounded-new-prefix-counts");
+// Nat4 + mutual8 + List4 + nested Tree5 + Fast3 =24 final declarations.
+must(newCount===24&&recCount===7,"bounded-new-prefix-counts");
 for(const owner of array(generated.declarations))must(contains(session.environment,owner.name),"no-flattening-only-owner");
 for(let i=0n;i<input.size;i++)must(exact(
  accepted(get("psKernelExprV2DecodedRequire")(built,i),"input-original"),
@@ -293,5 +294,5 @@ const wrong=accepted(get("psKernelExprV2TryCheckWithDeclarationsFuel")(
  4096n,scalar,negative.fst,missing,negative.snd),"wrong-universe-direct");
 must(isError(wrong)&&wrong.error==="incorrect number of universe levels","wrong-universe-before-owner");
 must(rejected(get("psKernelV1CheckExpression")(session,nil,safe,cn(aRec.base.name))),"wrong-universe-public");
-console.log("PSC1_V2_GENERATED_PREFIX_JS: PASS new=23 recursors=7 direct=6 privateIDs=3");
+console.log("PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3");
 console.log("PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions="+assertions);

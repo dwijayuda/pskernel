@@ -41,6 +41,29 @@ test assertion, limit or failure classification changes. The focused native
 run remains useful for diagnosis; final qualification must use this successor's
 own complete gates. No duplicate full pipeline was launched.
 
+### First focused native result and bounded test corrections
+
+Candidate b60 native run39643101364/job119371513923 completed FAIL. Its318-job
+kernel build and generated-test syntax check passed. The inherited occurrence
+fixture passed both exact official and independent controls. The new T03a test
+executed all owner/type/rule/input-ID/private-ID/old-tail checks before a mistaken
+total-count assertion: checked Nat contributes four entries (Nat/zero/succ/rec),
+so4+8+4+5+3 =24, with seven recursors. This successor corrects the exact total
+in native/JS fixtures and workflow markers, preserving every semantic assertion.
+The ownership proof used reserved binder name `matches`; it is renamed
+`compatible`. The other six new equations already checked. Production source
+is unchanged. This source needs its own successful focused and full gates.
+Failed focus artifact12365713306 has SHA256
+`51ea676c4185592860d5c87061301a1aef1e62ec8781015e1748a5ee4f34d027`.
+
+Original034 full193 run39637759569/job119354877930 is terminal FAIL:
+173 matches (105accept/60kernel/1metadata/7transport),2separate safety agreements,
+17host timeouts,1Church resource exhaustion,0unsupported, fuel4096. The actual
+unchanged case16 (console17/193) now reports official=rejected,
+pskernel=rejected, matched_kernel_rejection. Its saved detailed record is being
+authenticated separately. This does not repair034's native fixture failure or
+qualify the T03a successor. All six original034 research jobs are terminal PASS.
+
 ### Bounded T03a implementation
 
 `API/DagGenerated.lean` now walks only the new prefix of the successfully checked

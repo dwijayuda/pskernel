@@ -180,9 +180,9 @@ theorem generated_type_reuses_current_command_ref
     (inputRefs : List PsKernelExprV2DeclarationRef)
     (state : PsKernelDagGeneratedState) (owner : PsKernelExprV2DeclarationRef)
     (found : psKernelExprV2DeclarationRefFind inputRefs base.name = some owner)
-    (matches : psKernelExprV2DeclarationRefMatches owner info = true) :
+    (compatible : psKernelExprV2DeclarationRefMatches owner info = true) :
     psKernelDagGeneratedInstallType info base kind inputRefs state = Except.ok state := by
-  simp [psKernelDagGeneratedInstallType, found, matches]
+  simp [psKernelDagGeneratedInstallType, found, compatible]
 
 theorem generated_prefix_empty
     (previous : PsKernelEnvironment)

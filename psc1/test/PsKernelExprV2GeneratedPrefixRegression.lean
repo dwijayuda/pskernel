@@ -343,7 +343,8 @@ def regression : IO Unit := do
         require "non-inductive-owner-unchanged"
           (generated.arena.size == before.arena.size &&
             generated.declarations.length == before.declarations.length)
-  require "bounded-new-prefix-counts" (newCount == 23 && recCount == 7)
+  -- Nat4 + mutual8 + List4 + nested Tree5 + Fast3 =24 final declarations.
+  require "bounded-new-prefix-counts" (newCount == 24 && recCount == 7)
   -- No flattened datatype/constructor can leak: every installed ref has a live final owner.
   for owner in generated.declarations do
     require "no-flattening-only-owner" (psKernelEnvironmentContains prepared.session.environment owner.name)
@@ -484,7 +485,7 @@ def regression : IO Unit := do
      | _ => false)
   require "official-malformed-universe"
     (match Lean.Kernel.check official {} (officialExpr wrongLevels) with | .error _ => true | _ => false)
-  IO.println "PSC1_V2_GENERATED_PREFIX: PASS new=23 recursors=7 direct=6 privateIDs=3"
+  IO.println "PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3"
   IO.println "PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7"
 
 end PsKernelExprV2GeneratedPrefixRegression

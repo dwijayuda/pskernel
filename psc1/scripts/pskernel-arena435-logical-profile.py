@@ -154,10 +154,11 @@ function* __ps$invoke(fn, ...args) {
 
 
 
-def decline_runtime() -> str:
+def decline_runtime(helper_source: str | None = None) -> str:
     """Observation hooks only; preserve every original next/apply/result."""
     result = INSTRUMENTED_RUNTIME
-    helper = (HERE / "pskernel-arena435-decline-observer.mjs").read_text()
+    helper = helper_source if helper_source is not None else (
+        HERE / "pskernel-arena435-decline-observer.mjs").read_text()
     replacements = [
         ("const __ps$implementations = new WeakMap();",
          helper + "\nconst __ps$implementations = new WeakMap();"),

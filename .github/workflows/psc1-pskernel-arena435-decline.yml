@@ -1,4 +1,4 @@
-name: PSC1 authentic V2 decline diagnostics
+name: PSC1 authentic V2 resource diagnostics
 
 on:
   workflow_dispatch:
@@ -7,13 +7,15 @@ on:
         description: Exact production source commit to diagnose
         required: true
         type: string
-        default: '5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8'
+        default: '369bee5801bd5e4476837684fad3f7e1ca8c422c'
   push:
     branches:
       - research/psc1-arena-logical-20261021
     paths:
       - .github/workflows/psc1-pskernel-arena435-decline.yml
       - psc1/scripts/pskernel-arena435-decline-observer.mjs
+      - psc1/scripts/pskernel-arena435-resource-observer.mjs
+      - psc1/scripts/pskernel-arena435-resource-profile.py
       - psc1/scripts/pskernel-arena435-logical-profile.py
       - psc1/scripts/pskernel-arena435-profile.py
 
@@ -32,7 +34,7 @@ jobs:
         id: source
         shell: bash
         env:
-          REQUESTED_KERNEL_SHA: ${{ inputs.kernel_sha || '5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8' }}
+          REQUESTED_KERNEL_SHA: ${{ inputs.kernel_sha || '369bee5801bd5e4476837684fad3f7e1ca8c422c' }}
         run: |
           set -euo pipefail
           [[ "$REQUESTED_KERNEL_SHA" =~ ^[0-9a-f]{40}$ ]]
@@ -68,9 +70,11 @@ jobs:
           PSC1_DIAGNOSTIC_SCRIPTS="$GITHUB_WORKSPACE/psc1/scripts"
           python3 -m py_compile "$PSC1_DIAGNOSTIC_SCRIPTS/pskernel-arena435-profile.py" \
             "$PSC1_DIAGNOSTIC_SCRIPTS/pskernel-arena435-logical-profile.py" \
+            "$PSC1_DIAGNOSTIC_SCRIPTS/pskernel-arena435-resource-profile.py" \
             "$PSC1_DIAGNOSTIC_SCRIPTS/pskernel-arena435-oracle.py" \
             "$PSC1_DIAGNOSTIC_SCRIPTS/pskernel-arena435-compare.py"
           node --check "$PSC1_DIAGNOSTIC_SCRIPTS/pskernel-arena435-decline-observer.mjs"
+          node --check "$PSC1_DIAGNOSTIC_SCRIPTS/pskernel-arena435-resource-observer.mjs"
           for PSC1_HARNESS_FILE in pskernel-arena435-oracle.py pskernel-arena435-compare.py \
               pskernel-arena-replay.mjs pskernel-arena-replay-controls.mjs; do
             cmp "$PSC1_DIAGNOSTIC_SCRIPTS/$PSC1_HARNESS_FILE" "scripts/$PSC1_HARNESS_FILE"
@@ -151,27 +155,28 @@ jobs:
             --kernel dist/arena435-profile/kernel.js --official-project . \
             --out "$RUNNER_TEMP/arena435-authentic-profiles" \
             | tee "$RUNNER_TEMP/arena435-authentic-profile.log"
-      - name: Observe first V2 declines in a separate diagnostic copy
+      - name: Attribute church resource exhaustion and run checked V1 reference
         shell: bash
         working-directory: kernel-source/psc1
         run: |
           set -euo pipefail
-          python3 "$GITHUB_WORKSPACE/psc1/scripts/pskernel-arena435-logical-profile.py" \
-            --source-sha "$PSC1_KERNEL_SOURCE_SHA" --declines-only \
+          python3 "$GITHUB_WORKSPACE/psc1/scripts/pskernel-arena435-resource-profile.py" \
+            --source-sha "$PSC1_KERNEL_SOURCE_SHA" \
+            --resource-policy packages/pskernel-core/src/Ps/KernelCore/Checker/ResourcePolicy.lean \
             --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
             --kernel dist/arena435-profile/kernel.js \
             --baseline-report "$RUNNER_TEMP/arena435-authentic-profiles/report.json" \
-            --out "$RUNNER_TEMP/arena435-logical-profiles" \
-            | tee "$RUNNER_TEMP/arena435-logical-profile.log"
+            --out "$RUNNER_TEMP/arena435-resource-profiles" \
+            | tee "$RUNNER_TEMP/arena435-resource-profile.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: psc1-arena435-decline-diagnostics
+          name: psc1-arena435-resource-diagnostics
           path: |
             ${{ runner.temp }}/arena435-source-identities.txt
             ${{ runner.temp }}/arena435-authentic-profiles/
-            ${{ runner.temp }}/arena435-logical-profiles/
-            ${{ runner.temp }}/arena435-logical-profile.log
+            ${{ runner.temp }}/arena435-resource-profiles/
+            ${{ runner.temp }}/arena435-resource-profile.log
             ${{ runner.temp }}/arena435-authentic-profile.log
             ${{ runner.temp }}/arena435-profile-controls.log
             ${{ runner.temp }}/arena435-profile-artifacts.sha256

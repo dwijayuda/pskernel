@@ -1,3 +1,94 @@
+# Current diagnostic checkpoint — first resource failure attribution
+
+Date: 2026-10-21 UTC.
+Branch: `research/psc1-arena-logical-20261021`.
+Parent harness source: `d4cff45683fd4ae77e6fb0ad96b6e4998cc6bd29`.
+Production kernel pinned for this diagnostic:
+`369bee5801bd5e4476837684fad3f7e1ca8c422c`.
+This commit changes diagnostic tooling only. At creation its diagnostic CI is
+**NOT RUN**. Collection success cannot qualify the kernel.
+
+## Why this run is needed
+
+The exact full193-case runs at production369bee, staged841a5f7 and carrier6cbeb1b
+all completed with172 matching outcomes, two separately classified safety-contract
+agreements,17 host timeouts, one kernel-resource failure and one unsupported case.
+Their172 matches contain105 admissions,59 kernel rejections, one metadata
+rejection and seven transport rejections. The17 timeout indices are
+23,72,78,80,82–87,90–94,96,98; unsupported index16 remains
+`bugs/rec-missing-ih.ndjson`. Index81 `perf/church-numerals.ndjson`
+now returns `kernel reduction budget exhausted`, while official Lean accepts.
+A faster resource refusal is not conformance and is not counted as a solved case.
+
+New terminal receipts:
+- staged `841a5f7a129dc9647789fc8080e635d4f1eea3ac`,
+  [run39599585868](https://github.com/dwijayuda/pskernel/actions/runs/39599585868):
+  official119220383460 PASS; generated119221338858 FAIL. All193 distinct case
+  records were inspected. Generated artifact12347208009 ZIP SHA256
+  `68e362570b9c7f563979abd04331f0534493aabed8bfa35ad15e271439bf32da`.
+- carrier `6cbeb1b3587335545d9d3a2bdd4b99c0c2244b4a`,
+  [run39599736544](https://github.com/dwijayuda/pskernel/actions/runs/39599736544):
+  official119220899693 PASS; generated119222772775 FAIL. All193 distinct records
+  were inspected. Generated artifact12347823076 ZIP SHA256
+  `73637c1bf925522b3902d672663868590416acd5ddb966a68995b8ba731c7163`.
+
+## Diagnostic implementation and limits
+
+The resource observer records first actual resource-error returns, first zero-fuel
+invocations, bounded ancestor arguments and callback-owner attribution. It does
+not replace any argument, callback, generator operation or result. It retains the
+strict checked trampoline rewrite. Observation is capped at32768 live frames
+and512 events; there is no sequential-call cutoff before the genuine fuel error.
+Bounded callback labels are observations, not a proof of captured callback fuel.
+
+The one-case driver compares unchanged production execution, a separately
+hashed observed copy, and a deliberately selected checked V1 reference.
+The reference keeps input preflight, arena validation/canonical decode, original
+declaration decoding, actual V1 admission and the original metadata comparisons.
+It never fabricates a checked receipt. Each detached mode keeps all138 original
+positive/adversarial controls and adds one actual cancelled V1 checked-admission
+refusal to validate resource observation.
+
+All runs retain fuel4096,60 seconds per case, empty PATH and the existing2048-MiB
+V8 old-space cap. That V8 cap is not an operating-system RSS cap. Complete protocol
+envelopes are compared; only timeouts give null agreement. Process termination
+and valid protocol completion are separate reported fields. The workflow retains
+the four original authentic baseline/V8 profiles and authentic body hashes.
+
+The new observer/driver and optional existing logical-profile helper parameter
+are reviewable source, not performance or soundness claims. No kernel runtime
+axiom, reduction path, source pin or resource policy changes.
+
+## Exact usable-kernel checkpoint and current migration gates
+
+Integration remains `88924063a5d9761f52a130c6a581cac6901ad407`: Gate A PASS
+for its documented limited-scope V1 provider; B incomplete; C FAIL.
+Staged `727b3dd6df6a1ba02959f9c86596933b06ce0a0a` and full-owner carrier
+`bd35452a1c10f22bc7e863efafd1a868a3fe3b72` have terminal native integration
+and native correctness PASS. Both complete portable .lean checks pass.
+Their generated runtime and canonical .ps runtime gates remain IN PROGRESS
+at this diagnostic commit; no earlier generated PASS is inherited.
+Four public whole-operation fallbacks and the transitional V1 inductive bridge
+remain. The K/structure/String migrations are separate source work.
+
+## Infrastructure and ready continuation
+
+A child GitHub create_tree request blocked1771 seconds before interruption and
+returned no object receipt. No ref changed. Root recovered the exact prepared
+source strings, reviewed them and performs the smaller Git writes. A separate
+recursor child create_tree likewise blocked2522.6 seconds with no receipt;
+that source is being recovered independently. These are connector interruptions,
+not failed kernel tests.
+
+Next: inspect this workflow's terminal collection result, all138+1 controls,
+authentic original and observed outcomes, actual V1-reference outcome,
+first fuel/resource stack records and immutable artifact hashes. Use the earliest
+source-attributed failure to select the next principled implementation repair.
+Do not raise fuel, alter proof bodies, classify resources as rejection, or claim
+the diagnostic has run before its actual terminal job.
+
+---
+
 # Diagnostic branch: authentic Arena logical-call tracing
 
 Date: 2026-10-21 UTC

@@ -81,8 +81,8 @@ def psKernelExprV2CheckCloseLambda
           (Prod.fst cheap) (Prod.snd cheap) 0 with
       | Except.error error => Except.error error
       | Except.ok closed =>
-          let scoped := psKernelExprV2CheckStateExitLocalScope opened.parent state;
-          psKernelExprV2CheckedInferBuilt scoped root
+          let scopedState := psKernelExprV2CheckStateExitLocalScope opened.parent state;
+          psKernelExprV2CheckedInferBuilt scopedState root
             (psKernelExprV2PagedMkForall
               (Prod.fst closed) name domain (Prod.snd closed) binderInfo)
 
@@ -99,11 +99,11 @@ def psKernelExprV2CheckCloseForallWith
       match attempted with
       | Except.error error => Option.some (Except.error error)
       | Except.ok bodySort =>
-          let scoped :=
+          let scopedState :=
             psKernelExprV2CheckStateExitLocalScope opened.parent (Prod.fst bodySort);
           Option.some
-            (psKernelExprV2CheckedInferBuilt scoped root
-              (psKernelExprV2PagedMkSort scoped.whnf.arena
+            (psKernelExprV2CheckedInferBuilt scopedState root
+              (psKernelExprV2PagedMkSort scopedState.whnf.arena
                 (psKernelLevelMkIMax domainLevel (Prod.snd bodySort))))
 
 def psKernelExprV2CheckBinderWith

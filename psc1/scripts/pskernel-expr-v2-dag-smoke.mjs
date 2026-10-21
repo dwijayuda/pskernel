@@ -1219,10 +1219,14 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
         compareRaw(fuel,context,root,term,label);
         const policySession={...execution.session,resources:{
           ...execution.session.resources,fuel,maxRecDepth:depth}};
+        // The internal helper relies on RunDag's public preflight.
+        const preflight=get("psKernelKernelSessionPreflight")(policySession);
+        const actualPublic=rejected(preflight)?preflight:
+          get("psKernelDagWhnfExpression")(policySession,nil,S.unsafeDef,arena,built,
+            execution.definitions,root,term);
         ensure(sameValue(
           get("psKernelV1Whnf")(policySession,nil,S.unsafeDef,term),
-          get("psKernelDagWhnfExpression")(policySession,nil,S.unsafeDef,arena,built,
-            execution.definitions,root,term)),label+"-public");
+          actualPublic),label+"-public");
         parityCases++;
       }
     }

@@ -23,6 +23,22 @@ metadata/cache lemmas. These passes do not establish full Arena qualification
 or a complete DAG-native checker. Newer numeral, delta, reporting and binder
 changes require their own final-source evidence.
 
+### Current delta/binder qualification corrections — pending CI
+
+The delta raw-worker resource matrix passed its first zero-fuel case, but the
+separate public matrix compared a preflighting V1 entry with an internal DAG
+helper that runs after RunDag's preflight. Native run39519363353 and generated
+run39518665303 both rejected that harness mismatch. Both matrices now invoke
+the identical session preflight before the internal helper and preserve exact
+error tags/messages. The native failure label includes root/fuel/depth. No
+production entry order or fuel rule changed.
+
+The first dependent-binder commit e5623b6d failed native compilation because
+two local variables used Lean's reserved token scoped. They are renamed to
+scopedState. The binder implementation, local proofs and generated execution
+still require passing evidence at the corrected source. Latest fully green
+integration/canonical checkpoint remains9b34a935.
+
 The preceding stateful source
 [463d956f40f360960dd78ad8b8d8b3749a80c03f](https://github.com/dwijayuda/pskernel/commit/463d956f40f360960dd78ad8b8d8b3749a80c03f)
 passed [integration39514448898](https://github.com/dwijayuda/pskernel/actions/runs/39514448898),

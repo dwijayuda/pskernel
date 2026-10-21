@@ -1165,11 +1165,17 @@ private def deltaBatchParity : IO Unit := do
             (psKernelExprV2WhnfStateForDefinitions arena execution.definitions) root)
         let policySession := { execution.session with resources :=
           { execution.session.resources with fuel := fuel, maxRecDepth := depth } }
-        require "delta-public-exact-fuel-depth-parity"
+        -- RunDag preflights once before this internal helper. Match that same
+        -- public boundary when comparing it with the standalone V1 operation.
+        let actualPublic : Except PsKernelError PsKernelExpr :=
+          match psKernelKernelSessionPreflight policySession with
+          | .error error => .error error
+          | .ok _ => psKernelDagWhnfExpression policySession [] .unsafeDef arena built
+              execution.definitions root term
+        require ("delta-public-exact-fuel-depth-parity-root-" ++ toString root ++
+            "-fuel-" ++ toString fuel ++ "-depth-" ++ toString depth)
           (sameWhnfValue
-            (psKernelV1Whnf policySession [] .unsafeDef term)
-            (psKernelDagWhnfExpression policySession [] .unsafeDef arena built
-              execution.definitions root term))
+            (psKernelV1Whnf policySession [] .unsafeDef term) actualPublic)
     for recDepth in [15,16] do
       let context := { checker.context with maxRecDepth := 1, recDepth := recDepth }
       rawStateWhnfParity "delta-exact-entry-recursion-boundary"

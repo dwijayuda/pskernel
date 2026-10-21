@@ -63,10 +63,11 @@ jobs:
           path: ~/.elan
           key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
       - name: Cache exact-source native build objects
-        uses: actions/cache@v4
+        id: native_cache
+        uses: actions/cache/restore@v4
         with:
           path: psc1/.lake
-          key: psc1-lake-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+          key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
@@ -118,6 +119,12 @@ jobs:
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
+      - name: Save successful compilation before running regressions
+        if: steps.native_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |

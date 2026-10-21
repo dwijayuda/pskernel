@@ -12,6 +12,11 @@ needs an actual run to corroborate the tested zero-heavy selection.
 The first router run correctly skips the unrelated specialization benchmark.
 
 Actual next implementation, pending full CI:
+Focused/full jobs now save exact-source compilation objects immediately after a
+successful pinned build, before regressions. Later fixture/controller failures
+no longer discard the expensive successful native compilation cache. Admission,
+IR/execution/publication evidence is regenerated and never restored from cache.
+
 Implementation4bdada4d6a3a1d257ac95d97e8046e8141c9a72d, run39572888092:
 native and every compiler closure plus G1/host SUCCESS. Constructive witness
 extension is source-normalized in both lanes and preserves all boundaries.

@@ -94,7 +94,8 @@ jobs:
 
   psc1-portability:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    # Build time only; kernel and Arena per-case resource policies are unchanged.
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - name: Install pinned Lean via elan

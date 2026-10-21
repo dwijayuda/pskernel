@@ -9,6 +9,35 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 11:53 UTC — reserved-name syntax correction before staged runtime qualification
+
+Exact staged source236766f86a2693faffebd3632b42ef5dabe96f36 failed native
+integration119204677954 and native correctness119204677634 in
+DefEq/FinalRules.lean:152:33, `unexpected token '=>'; expected term`.
+The binding name `matches` conflicts with Lean syntax. This correction names it
+`isStringOfList` and also gives the local constructor result the unambiguous
+name `builtConstructor`. Evaluation order, callbacks, decisions and all test
+assertions are unchanged. Portable/generated jobs have not qualified this source.
+
+The canonical job at integration5544 completed the whole .ps source check but
+hit its40-minute job wall ceiling during JS generation (119150176408 CANCELLED).
+This staged correction adopts the same75-minute build-only ceiling as integration
+successor88924063a5d9761f52a130c6a581cac6901ad407. No kernel fuel/depth,
+Arena60-second/2GiB limit, assertion or compiler/toolchain pin changes.
+
+Integration8892406 carries only the workflow correction and receipt; its fresh
+four workflows39595204321/39595204029/39595203930/39595203857 are IN PROGRESS.
+5544 has terminal native/.lean-generated integration PASS and all six research
+jobs PASS, but remains unqualified for canonical execution. Its full Arena
+39578569599 is terminal FAIL qualification:193=170 matching outcomes+2 separate
+safety agreements+20 host timeouts+1 unsupported. Exact per-case classifications
+are unchanged from480; FullShape has no demonstrated full-corpus outcome gain.
+
+This correction requires its own fresh native, portable, canonical and generated
+results. The integration branch does not acquire this staged architectural draft.
+A is still qualified only for the last complete scoped developer source480;
+B/C and the four whole-operation fallback sites remain open.
+
 ## 2026-10-21 09:56 UTC — isolated qualification of the remaining prepared DAG slices
 
 This source is on `research/psc1-pskernel-v2-staged-20261021`, separately from the

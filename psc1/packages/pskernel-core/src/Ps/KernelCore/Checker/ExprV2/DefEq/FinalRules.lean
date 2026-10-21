@@ -149,14 +149,14 @@ def psKernelExprV2DefEqStringLitExpansionCoreWith
           | PsKernelLiteral.str value =>
               match psKernelExprV2IsStringOfListAppOnCanonical state.whnf.arena right with
               | Except.error error => Option.some (Except.error error)
-              | Except.ok matches =>
-                  if matches then
+              | Except.ok isStringOfList =>
+                  if isStringOfList then
                     match psKernelExprV2StringLitToConstructorOnCanonical state.whnf.arena value with
                     | Except.error error => Option.some (Except.error error)
-                    | Except.ok constructor =>
+                    | Except.ok builtConstructor =>
                         let afterBuild :=
-                          psKernelExprV2CheckStateWithArena state (Prod.fst constructor);
-                        match whnf context afterBuild.whnf (Prod.snd constructor) with
+                          psKernelExprV2CheckStateWithArena state (Prod.fst builtConstructor);
+                        match whnf context afterBuild.whnf (Prod.snd builtConstructor) with
                         | Option.none => Option.none
                         | Option.some attemptedWhnf =>
                             match attemptedWhnf with

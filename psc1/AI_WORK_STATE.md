@@ -212,3 +212,16 @@ one-MiB admissions, official admission and strict erased IR. This is a size boun
 for that fixed regression, not a new global resource policy or reduced workload.
 No public witness replay check was removed; the proposed host caching shortcut
 was not applied. Source readiness remains unqualified until its own exact CI.
+
+## Preserve sharing during unification
+
+At e076fe0 / run 39695880402, native size/control tests and PHP applications pass
+their execution steps, but inference/control capture reaches its unchanged
+120-second deadline before erasure. The shared syntax tree alone is insufficient:
+the unifier weak-head reduces both sides before its reflexivity check, expanding
+local let values even when their indexed propositions are already identical.
+Check structural alpha reflexivity first at positive fuel; retain the original
+normalization, assignment rules and failure path for unequal terms. Fuel zero
+still refuses. Identical expressions in the same meta/local context are
+definitionally equal without unfolding. Independent kernel admission, strict IR,
+ordinary body replay and all old soundness/negative regressions remain required.

@@ -41,8 +41,7 @@ for(const syntax of ['lean','ps'])for(const target of targets){
   const manifest=JSON.parse(fs.readFileSync(output+'.bundle.json','utf8'));
   assert.equal(manifest.logicalCheckerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
   assert.equal(manifest.behaviorallyVerified,false);
-  const abi=JSON.parse(fs.readFileSync(path.join(path.dirname(fs.realpathSync(output+'.bundle.json')),'public-abi.json'),'utf8'));
-  assert.equal(abi.profile,'io-dispatcher');
+  assert.equal(manifest.publicAbi,'io-dispatcher');
   const pointer=fs.realpathSync(output),bundleHash=hash(output+'.bundle.json');
   for(const tail of [['--abi','bad'],['--abi'],['--abi','io-dispatcher','--abi','io-dispatcher']]){
    refuse([...args,...tail],/PSC1_ABI_/);assert.equal(fs.realpathSync(output),pointer);assert.equal(hash(output+'.bundle.json'),bundleHash);

@@ -259,14 +259,13 @@ def psHostDirectWriteSelectedProvenance
     ",\"leanCommit\":" ++ psJsonQuote Lean.githash ++
     ",\"assurance\":" ++ psJsonQuote (psHostAssuranceName session.assurance) ++
     ",\"behaviorallyVerified\":false" ++
+    ",\"publicAbi\":" ++ psJsonQuote (if session.ioDispatcherAbi then "io-dispatcher" else "scalar") ++
     ",\"partialDeclarations\":" ++ psJsonArray (session.partialNames.map (fun name => psJsonQuote (psNameToString name))) ++
     ",\"entryPath\":" ++ psJsonQuote session.captured.entryPath ++
     ",\"publicNames\":" ++ psJsonArray (selected.map psJsonQuote) ++
     ",\"sources\":" ++ psJsonArray (session.captured.sources.map (sourceJson session)) ++ "}\n"
   IO.FS.writeFile (stage / "psc1-input.json") metadata
   IO.FS.writeFile (stage / "admissions.json") session.admissions
-  if session.ioDispatcherAbi then
-    IO.FS.writeFile (stage / "public-abi.json") "{\"schema\":\"psc1-public-abi/1\",\"profile\":\"io-dispatcher\",\"dispatcher\":\"String->String\"}\n"
 
 def psHostDirectWriteProvenance (session : PsHostDirectPrepared) (stage : System.FilePath) : IO Unit :=
   psHostDirectWriteSelectedProvenance session stage session.publicNames

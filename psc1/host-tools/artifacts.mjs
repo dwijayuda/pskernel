@@ -459,6 +459,10 @@ export function publish(stage, output, kind) {
   if (info.leanVersion !== nativePin.version || info.leanCommit !== nativePin.commit) {
     fail('PSC1_BUNDLE_NATIVE_PIN_MISMATCH');
   }
+  const publicAbi = info.publicAbi ?? 'scalar';
+  if (!['scalar','io-dispatcher'].includes(publicAbi) ||
+      (publicAbi === 'io-dispatcher' && !['js','ts','rust','python','php'].includes(kind)))
+    fail('PSC1_BUNDLE_PUBLIC_ABI_INVALID');
   const assurance = info.assurance ?? 'checked-logical';
   const partialDeclarations = info.partialDeclarations ?? [];
   if (!['checked-logical', 'ordinary-checked'].includes(assurance) ||
@@ -512,7 +516,7 @@ export function publish(stage, output, kind) {
     ...(kind === 'ecma' ? { targets: ['ts', 'js'], sharedCheckedInput: true } : {}),
     profile: info.profile, logicalChecker: 'lean4:' + info.leanVersion,
     logicalCheckerCommit: info.leanCommit,
-    assurance, behaviorallyVerified: false, partialDeclarations,
+    assurance, behaviorallyVerified: false, partialDeclarations, publicAbi,
     kernelAdmissionSha256: sha256(admissions),
     sourceClosureSha256: sha256(json(sourceRecords.map(({ path, sha256, bytes }) => ({ path, sha256, bytes })))),
     compiler: info.compiler ?? 'PSC1 native', publicNames: info.publicNames,

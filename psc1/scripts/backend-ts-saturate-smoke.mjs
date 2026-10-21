@@ -19,7 +19,7 @@ const inspectFile=filename=>{
  return {path:resolved,bytes:bytes.length,sha256:digest(bytes)};
 };
 const [sourceOriginalArg,sourceOptimizedArg,modelOriginalArg,modelOptimizedArg]=process.argv.slice(2);
-insist(sourceOriginalArg&&sourceOptimizedArg&&modelOriginalArg&&modelOptimizedArg,
+insist(Boolean(sourceOriginalArg&&sourceOptimizedArg&&modelOriginalArg&&modelOptimizedArg),
  "usage: original-fixture.js optimized-fixture.js original-model.js optimized-model.js");
 insist(process.env.PATH==="","detached execution requires empty PATH");
 insist(process.version.startsWith("v22."),"Node22 required");
@@ -49,7 +49,7 @@ for(const [old,next] of [[identities[0],identities[1]],[identities[2],identities
 
 function fixtureApi(module){
  const List=module.List,Index=module.SatIndex;
- insist(List&&Index,"real generated fixture constructors");
+ insist(Boolean(List&&Index),"real generated fixture constructors");
  const nil=unit(List.nil);
  const list=values=>values.reduceRight((tail,head)=>List.cons(head,tail),nil);
  const array=values=>{

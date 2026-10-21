@@ -1,3 +1,36 @@
+# Current backend qualification repair — close constant conditional goals
+
+Observed: 2026-10-21 19:33:38 UTC.
+Branch: `research/psc1-ts-saturation-20261021`.
+Parent: `365300301996d2e99ec6efd5e169d874e76e2828`.
+Containing repair: **NOT RUN at creation; no parent pass inherited.**
+
+Focused run[39662075437/job119437432017](https://github.com/dwijayuda/pskernel/actions/runs/39662075437/job/119437432017)
+finished FAIL at the proof gate. The unchanged compiler and experimental modules
+built. Native recognition/refusal/signature/effect controls, all120 real radix
+fixtures, fixed fuels through4096, large naturals and both checked TypeScript7
+model artifacts passed. Authentic source and canonical .ps compilation plus
+detached JavaScript were skipped after the proof failure, so they are NOT RUN.
+
+The exact `apply_exact_lambda` goal was three nested `if True` expressions.
+The proof repair adds only `ite_true` to its existing `simp only` list. All16
+theorem statements, remaining proof bodies and production implementation stay
+unchanged. Static review also found two JavaScript harness presence checks
+passing a truthy string/object to a strict-Boolean assertion helper. Both now
+explicitly use `Boolean(...)`; missing arguments/constructors still fail, and
+all behavior, equality, order, resource and ABI assertions are retained. The
+generated harness had not executed before this repair. The failing elaboration printed
+`sorryAx`; its nonzero exit correctly rejected qualification. No `sorry`,
+`admit`, runtime axiom or bypass is introduced into source. Classification:
+proof-script elaboration failure, not an observed runtime semantic defect.
+
+Next executable action: run the same focused gate to terminal, then require
+actual named-worker eligibility and both generated source routes before any
+full-kernel experiment. No performance, complete preservation proof or release
+claim follows from the native controls alone.
+
+---
+
 # Current bounded backend experiment — saturated recursive stages
 
 Updated: 2026-10-21 19:33 UTC.

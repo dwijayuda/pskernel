@@ -34,7 +34,7 @@ theorem apply_exact_lambda
     (resultType : psTsSatTypeEqual result expected = true) :
     psTsSatApplyOne (Nat.succ remaining) parameter expected (.lambda [bound] result body) =
       some (.letE bound.name bound.type (.var parameter.name) body) := by
-  simp only [psTsSatApplyOne, psListIsEmpty, parameterType, resultType]
+  simp only [psTsSatApplyOne, psListIsEmpty, parameterType, resultType, ite_true]
 
 theorem apply_effectful_interval_refused
     (remaining : Nat) (parameter : PsVerifiedIrParameter)

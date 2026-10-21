@@ -1,0 +1,131 @@
+{
+  "schema": "psc1-saturation-rejected-proof-v1",
+  "sourceSha": "365300301996d2e99ec6efd5e169d874e76e2828",
+  "run": 39662075437,
+  "job": 119437432017,
+  "status": "completed",
+  "conclusion": "failure",
+  "failureClass": "proof-script elaboration",
+  "error": "apply_exact_lambda retains three nested if True conditionals after simp only",
+  "nativeControls": "PASS",
+  "nativeRadixCases": 120,
+  "modelArtifacts": "PASS TypeScript7.0.2 original and candidate with identical d.ts",
+  "sourceLean": "NOT RUN",
+  "canonicalPs": "NOT RUN",
+  "detachedJs": "NOT RUN",
+  "proofGate": "FAIL; no complete proof qualification",
+  "runtimeAxiomsAdded": false,
+  "proofStatementsWeakened": false,
+  "repair": "Add ite_true only to the failing simplifier list",
+  "jobRecord": {
+    "jobs": [
+      {
+        "id": 119437432017,
+        "name": "checked-saturation",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 39662075437,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Lean",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install pinned TypeScript",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Build the unchanged compiler and explicit experimental entry points",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Check native models, ordered effects, refusal and original ABI",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Prove and audit all16 local refusal and signature equations",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 8
+          },
+          {
+            "name": "Admit actual Lean fixture and compile original and optimized IR",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 9
+          },
+          {
+            "name": "Reconstruct and authenticate the canonical fixture source closure",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 10
+          },
+          {
+            "name": "Check both real source routes and IR controls in detached empty-PATH Node",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11
+          },
+          {
+            "name": "Bind all experimental outputs to this source and toolchain",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 25
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27
+          }
+        ]
+      }
+    ]
+  },
+  "additionalHarnessRepair": "Convert the two argument/constructor presence guards to explicit Boolean values for strict assertion helper; all semantic assertions retained."
+}

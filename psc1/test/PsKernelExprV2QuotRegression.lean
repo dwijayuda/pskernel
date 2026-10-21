@@ -126,11 +126,11 @@ private def regression : IO Unit := do
     [PsKernelSimpleConstructorDecl.mk psKernelNatZeroName nat,
      PsKernelSimpleConstructorDecl.mk psKernelNatSuccName (forallE "n" nat nat)] false 0
   let withNat ← expectPublic (psKernelV1AdmitDeclaration empty (.ordinaryInductive natDeclaration))
-  let universe := nm "u"
-  let eqDeclaration := PsKernelSimpleInductiveDecl.mk [universe] psKernelEqName
-    (psKernelExpectedEqType universe)
+  let universeName := nm "u"
+  let eqDeclaration := PsKernelSimpleInductiveDecl.mk [universeName] psKernelEqName
+    (psKernelExpectedEqType universeName)
     [PsKernelSimpleConstructorDecl.mk (PsKernelName.str psKernelEqName "refl")
-      (psKernelExpectedEqReflType universe)] false 2
+      (psKernelExpectedEqReflType universeName)] false 2
   let withEq ← expectPublic (psKernelV1AdmitDeclaration withNat.session (.ordinaryInductive eqDeclaration))
   let admitted ← expectPublic (psKernelV1AdmitDeclaration withEq.session .quot)
   let session := admitted.session

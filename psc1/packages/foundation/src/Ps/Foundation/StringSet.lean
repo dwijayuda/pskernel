@@ -29,7 +29,8 @@ def psStringSetBucketContains (entries : List String) : String -> Bool :=
   | List.nil => fun (_key : String) => false
   | List.cons entry rest =>
       fun (key : String) =>
-        if psStringEq entry key then true else psStringSetBucketContains rest key
+        let smaller : String -> Bool := psStringSetBucketContains rest;
+        if psStringEq entry key then true else smaller key
 
 def psStringSetContainsWithDepth (depth : Nat) : PsStringSet -> Nat -> String -> Bool :=
   match depth with
@@ -96,7 +97,8 @@ def psStringSetFromListWorker (keys : List String) : PsStringSet -> PsStringSet 
   | List.nil => fun (index : PsStringSet) => index
   | List.cons key rest =>
       fun (index : PsStringSet) =>
-        psStringSetFromListWorker rest (psStringSetInsert index key)
+        let smaller : PsStringSet -> PsStringSet := psStringSetFromListWorker rest;
+        smaller (psStringSetInsert index key)
 
 def psStringSetFromList (keys : List String) : PsStringSet :=
   psStringSetFromListWorker keys PsStringSet.empty

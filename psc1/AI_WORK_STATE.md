@@ -6,7 +6,25 @@ on fix/psc1-closure-normalization-20261021 preserves #171 at
 Execute [the Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 continuously. The user explicitly requests no small-milestone handoff.
 
-## Current continuation — stable specialization scheduling, Linux pending
+## Current continuation — normalize new index recursion; qualification pending
+
+Atde26057a source census39540600631 refused the new StringSet module's
+psStringSetBucketContains at27:1, structuralRecursionArity, in both lanes.
+Its explicit list binder returns a String function, so direct self application
+with2 arguments violates the portable structural recurrence shape. Bind the
+partially applied smaller worker inside the returned lambda. Apply the same
+correction to FromListWorker proactively. Native signatures/evaluation remain.
+
+Linux benchmark39540600900 DID execute the exact fixture on both versions.
+[Receipt](docs/PSC1_SPECIALIZATION_QUEUE_COMPARISON_2026-10-21.json).
+Input3802251 bytes, SHA256a0780796c18ad15d4c880dcfd2356a84b8e76096adbd67e7b8dc2eaa40375097.
+Parent refuses fuel-exhausted316ms/67880KiB; candidate completes full revalidated
+output586ms/89492KiB with all128 concrete entries plus1 generic instance.
+This demonstrates bounded completion, not lower wall time or memory; the parent
+did less work because it refused. Native library compilation passed; whole portable
+source qualification and actual G1 are still pending after the recursion fix.
+
+## Stable specialization scheduling candidate
 
 Parent a37a4ce61139db229f86d50645c65a0597119035 has final successful
 full scoped39537087657, focused39537087675 and all3 exact-closure jobs39537087643.

@@ -741,26 +741,32 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "a37a4ce61139db229f86d50645c65a0597119035",
-    "status": "pending-linux-stable-specialization-scheduling",
+    "headBeforeCandidate": "de26057a6a2cdd33232f86f982d765801a9b580d",
+    "status": "pending-linux-index-recursion-normalization",
     "sourceAndOriginalIr": {
       "scoped": 39537087657,
       "focused": 39537087675,
       "wholeClosures": 39537087643,
       "final": "success"
     },
-    "actualBootstrap": {
-      "run": 39537087665,
-      "final": "failure",
-      "phase": "specialization",
-      "detail": "request-loop fuel-exhausted",
-      "G1": "not-produced"
-    },
+    "actualBootstrap": "not-run-source-gate-failed",
     "queueBudget": 16384,
     "queueDeduplication": "stable-first-canonical-key-with-full-string-equality",
     "benchmark": "identical-IR-a37-versus-candidate-pending",
     "generatedCompilerExecution": "not-run",
-    "fullAtomicServicePublication": "not-implemented"
+    "fullAtomicServicePublication": "not-implemented",
+    "sourceRefusal": {
+      "run": 39540600631,
+      "module": "Ps.Foundation.StringSet",
+      "declaration": "psStringSetBucketContains",
+      "detail": "structuralRecursionArity",
+      "line": 27
+    },
+    "queueComparison": {
+      "run": 39540600900,
+      "status": "same-input-baseline-refuses-candidate-completes",
+      "receipt": "PSC1_SPECIALIZATION_QUEUE_COMPARISON_2026-10-21.json"
+    }
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

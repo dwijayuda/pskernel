@@ -1,0 +1,41 @@
+{
+  "schema": "psc1-specialization-queue-comparison/1",
+  "baselineCommit": "a37a4ce61139db229f86d50645c65a0597119035",
+  "candidateCommit": "4386d7d07a6edc9f4c5ccc0e159fc1b882be0fb1",
+  "queueBudget": 16384,
+  "processTimeoutMs": 240000,
+  "fixtureSha256": "eeff21c2b303ae9085ab1b55968bb3ba707b918c9a96cf084aac29e1c2706348",
+  "results": {
+    "baseline": {
+      "status": "refused",
+      "phase": "request-loop",
+      "code": "fuel-exhausted",
+      "inputDeclarations": 129,
+      "repeatedReferences": 32768,
+      "elapsedMs": 316,
+      "maximumRssKiB": 67880,
+      "inputSha256": "a0780796c18ad15d4c880dcfd2356a84b8e76096adbd67e7b8dc2eaa40375097",
+      "inputBytes": 3802251,
+      "binarySha256": "6cc08c11912a9eca8afabcc65e887a52ce656b7b0e30976df6ac1eba6ac24334"
+    },
+    "candidate": {
+      "status": "accepted",
+      "inputDeclarations": 129,
+      "outputDeclarations": 129,
+      "repeatedReferences": 32768,
+      "allConcreteDeclarationsRetained": true,
+      "specializedIdentityCopies": 1,
+      "elapsedMs": 586,
+      "maximumRssKiB": 89492,
+      "inputSha256": "a0780796c18ad15d4c880dcfd2356a84b8e76096adbd67e7b8dc2eaa40375097",
+      "inputBytes": 3802251,
+      "binarySha256": "214ccc3c4f18717a7777b1178cc9bdc2ea093928b0e7cb2ce640ca65631740d4"
+    }
+  },
+  "formalPreservation": "not-provided",
+  "generatedCompilerExecution": "separate-diagnostic",
+  "head": "de26057a6a2cdd33232f86f982d765801a9b580d",
+  "run": 39540600900,
+  "sourceQualification": "failed-new-StringSet-structuralRecursionArity",
+  "scope": "synthetic same-input queue completion only; candidate slower and uses more RSS while completing full validated output; baseline refused"
+}

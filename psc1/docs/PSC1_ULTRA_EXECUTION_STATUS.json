@@ -6,23 +6,16 @@
   "pullRequest": 172,
   "sourceBaseline": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
   "integratedTypedErrors": "a830668d2c23886843e616951836d8d990aa2ff5",
-  "implementationCommit": "912dcc1c055f78ead505c057b1271b88fd1656e5",
+  "implementationCommit": "ee8606baba02d268717cbe845ef772b73c2248b5",
   "qualification": {
-    "status": "passed-focused-full-scoped-and-exact-closures",
-    "head": "912dcc1c055f78ead505c057b1271b88fd1656e5",
-    "testedMerge": "3c0e45261448a8c633fe82d4be79586d1ec1c90d",
-    "nativeRunId": 39527583957,
-    "closureRunId": 39527584037,
-    "fullScopedRunId": 39527583902,
-    "receipt": "PSC1_BACKEND_CLOSURES_QUALIFICATION_2026-10-21.json",
-    "fullScopedSteps": 37,
-    "artifact": {
-      "id": 12315040160,
-      "name": "psc1-scoped-correctness-3c0e45261448a8c633fe82d4be79586d1ec1c90d",
-      "bytes": 45244399,
-      "digest": "sha256:4a63bc481457054c9e3fe9bcf44b7bab135d349e619bd1f962311ffa9dc0ec73",
-      "expiresAt": "2026-11-04T01:39:58Z"
-    }
+    "status": "passed-full-scoped-focused-and-exact-canonical-ir",
+    "head": "ee8606baba02d268717cbe845ef772b73c2248b5",
+    "testedMerge": "f128fa99e9153a50a55dbc453ae801ecba57b5e6",
+    "runId": 39529882113,
+    "nativeRunId": 39529882130,
+    "closureRunId": 39529882129,
+    "steps": 37,
+    "receipt": "PSC1_CANONICAL_COMPILER_IR_QUALIFICATION_2026-10-21.json"
   },
   "decisions": {
     "commonIr": "retain checked expression IR; measure before structured stage",
@@ -62,7 +55,7 @@
     "wasmTools": "1.254.0",
     "wasmtime": "49.0.4"
   },
-  "testedMergeCommit": "3c0e45261448a8c633fe82d4be79586d1ec1c90d",
+  "testedMergeCommit": "f128fa99e9153a50a55dbc453ae801ecba57b5e6",
   "ancestry": {
     "pr168": "7e25943b991446ee2ab5a32b445238ef5af47cb5",
     "pr166": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
@@ -71,7 +64,7 @@
     "mainMerged": false
   },
   "currentSourceCensus": {
-    "sourceHead": "912dcc1c055f78ead505c057b1271b88fd1656e5",
+    "sourceHead": "ee8606baba02d268717cbe845ef772b73c2248b5",
     "diagnosticCompleted": true,
     "grammarLanes": [
       "lean",
@@ -91,28 +84,28 @@
       },
       {
         "name": "directjs-compiler",
-        "modules": 79,
-        "parseAccepted": 79,
-        "elaborationAccepted": 79,
+        "modules": 80,
+        "parseAccepted": 80,
+        "elaborationAccepted": 80,
         "assurance": "ordinary-checked",
-        "sourceCoreDeclarations": 3144,
-        "logicalCoreDeclarations": 3146
+        "sourceCoreDeclarations": 3172,
+        "logicalCoreDeclarations": 3174
       },
       {
         "name": "rust-compiler",
-        "modules": 84,
-        "parseAccepted": 84,
-        "elaborationAccepted": 84,
+        "modules": 85,
+        "parseAccepted": 85,
+        "elaborationAccepted": 85,
         "assurance": "ordinary-checked",
-        "sourceCoreDeclarations": 2961,
-        "logicalCoreDeclarations": 2964
+        "sourceCoreDeclarations": 2989,
+        "logicalCoreDeclarations": 2992
       }
     ],
     "admission": "accepted-both-lanes-each-exact-phase",
     "ir": "original-accepted-both-lanes-each-exact-phase",
     "canonicalAdmissionBytesParity": "accepted-each-phase",
     "transformedIr": "not-run",
-    "canonicalOriginalIrEncoding": "pending-next-candidate",
+    "canonicalOriginalIrEncoding": "accepted-byte-parity-both-lanes",
     "generatedExecution": "not-run",
     "selfCompilation": "not-run",
     "fixedPoint": "not-run",
@@ -748,30 +741,34 @@
     }
   },
   "currentContinuation": {
-    "sourceHeadBeforeDocumentation": "912dcc1c055f78ead505c057b1271b88fd1656e5",
-    "privateOwnership": "explicit Ps.Internal qualified identities; active host excludes implementation API roots",
-    "privateSyntax": "unsupported and cleanly refused in both parsers",
-    "historyPreserved": true,
-    "localRepositoryBuildsOrFiles": false
+    "headBeforeCandidate": "ee8606baba02d268717cbe845ef772b73c2248b5",
+    "status": "pending-linux",
+    "newCompositionRoot": "Ps.BackendJs.CompilerService",
+    "description": "production scalar provisional facade; shared ownership; native seed once then generated compiler diagnostic with native tools disabled",
+    "generatedExecution": "not-run-until-actual-ci",
+    "fullAtomicServicePublication": "not-implemented-by-this-diagnostic"
   },
   "latestCanonicalIrCheckpoint": {
-    "head": "68490479720377b4ee0617d50b5805f18faf12c7",
-    "testedMerge": "350b8caed3f0153f22c11147492508bf48e7cec0",
-    "run": 39529213948,
-    "status": "exact-closures-passed",
-    "receipt": "PSC1_CANONICAL_COMPILER_IR_2026-10-21.json",
-    "focusedNative": {
-      "run": 39529214057,
-      "status": "failure",
-      "observation": "input parsed; Lean.Json.compress output did not equal the codec's encoded text; independent expected-value fixture correction pending"
-    },
-    "fullScoped": "not-qualified-at-this-head; continuing at fixture-corrected descendant",
-    "phaseModuleCounts": [
-      67,
-      80,
-      85
-    ],
-    "transformedIr": "not-run",
-    "generatedExecution": "not-run"
+    "head": "ee8606baba02d268717cbe845ef772b73c2248b5",
+    "run": 39529882129,
+    "status": "qualified-with-full-scoped-and-focused",
+    "receipt": "PSC1_CANONICAL_COMPILER_IR_QUALIFICATION_2026-10-21.json"
+  },
+  "previousQualification": {
+    "status": "passed-focused-full-scoped-and-exact-closures",
+    "head": "912dcc1c055f78ead505c057b1271b88fd1656e5",
+    "testedMerge": "3c0e45261448a8c633fe82d4be79586d1ec1c90d",
+    "nativeRunId": 39527583957,
+    "closureRunId": 39527584037,
+    "fullScopedRunId": 39527583902,
+    "receipt": "PSC1_BACKEND_CLOSURES_QUALIFICATION_2026-10-21.json",
+    "fullScopedSteps": 37,
+    "artifact": {
+      "id": 12315040160,
+      "name": "psc1-scoped-correctness-3c0e45261448a8c633fe82d4be79586d1ec1c90d",
+      "bytes": 45244399,
+      "digest": "sha256:4a63bc481457054c9e3fe9bcf44b7bab135d349e619bd1f962311ffa9dc0ec73",
+      "expiresAt": "2026-11-04T01:39:58Z"
+    }
   }
 }

@@ -105,9 +105,7 @@ private def syntaxCoreName (declaration : PsSyntaxDeclaration) : Option PsName :
 -- native Lean's file-local mangling. This reserved compiler namespace is never
 -- a publication root, even when its defining file is the entry source.
 private def syntaxIsCompilerImplementation (declaration : PsSyntaxDeclaration) : Bool :=
-  match syntaxCoreName declaration with
-  | none => false
-  | some name => (psNameToString name).startsWith "Ps.Internal."
+  psSyntaxDeclarationIsCompilerImplementation declaration
 
 private def runtimeName
     (names : List (PsName × String)) (declaration : PsSyntaxDeclaration) : Option String := do

@@ -123,7 +123,8 @@ lean_lib PsBackendJs where
     `Ps.BackendJs.Encode,
     `Ps.BackendJs.Lower,
     `Ps.BackendJs.Validate,
-    `Ps.BackendJs.Print
+    `Ps.BackendJs.Print,
+    `Ps.BackendJs.CompilerService
   ]
 
 lean_lib PsBackendRust where
@@ -380,3 +381,11 @@ lean_exe psc1_backend_normalization_tests where
 lean_exe psc1_ir_encoding_tests where
   srcDir := "test"
   root := `IrEncodingTests
+
+lean_exe psc1_js_service_seed where
+  srcDir := "scripts"
+  root := `JsServiceSeed
+
+lean_exe psc1_js_service_tests where
+  srcDir := "test"
+  root := `JsServiceTests

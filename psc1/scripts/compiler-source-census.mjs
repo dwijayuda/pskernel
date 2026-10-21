@@ -24,8 +24,7 @@ for (const match of lake.matchAll(/lean_lib\s+(\w+)\s+where\n([\s\S]*?)(?=\n(?:l
 }
 const phases = [
   { name: 'semantic-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary'] },
-  { name: 'directjs-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary', 'Ps.BackendCommon.Plan', 'Ps.CompilerIr.Encode',
-    'Ps.BackendJs.Lower', 'Ps.BackendJs.Validate', 'Ps.BackendJs.Print'] },
+  { name: 'directjs-compiler', roots: ['Ps.BackendJs.CompilerService'] },
   { name: 'rust-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary', 'Ps.BackendCommon.Plan', 'Ps.CompilerIr.Encode', 'Ps.BackendRust.Module'] }
 ];
 const all = new Set();
@@ -161,6 +160,7 @@ for (const [module, stage] of [
   ['Ps.BackendRust.Expr', 'parse'], ['Ps.BackendRust.Expr', 'elaboration'],
   ['Ps.BackendRust.Module', 'parse'], ['Ps.BackendRust.Module', 'elaboration'],
   ['Ps.BackendRust.Type', 'parse'], ['Ps.BackendRust.Type', 'elaboration'],
+  ['Ps.BackendJs.CompilerService', 'parse'], ['Ps.BackendJs.CompilerService', 'elaboration'],
   ['Ps.BackendJs.Print', 'parse'], ['Ps.BackendJs.Print', 'elaboration'],
   ['Ps.CompilerIr.Specialize', 'parse'], ['Ps.CompilerIr.Specialize', 'elaboration'],
   ['Ps.Compiler.Ordinary', 'parse'], ['Ps.Compiler.Ordinary', 'elaboration'],

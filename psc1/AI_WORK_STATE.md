@@ -157,3 +157,47 @@ host's exact compact-byte parity checks. Print the two small expected/actual tre
 on mismatch. This descendant's focused/full CI is pending. Do not claim the
 unit fixture passed or transfer912dcc1's full scoped qualification to this head.
 Target/transformed IR and actual generated compiler execution remain next.
+
+## Full canonical IR checkpoint and next actual compiler candidate
+
+Exact headEE8606baba02d268717cbe845ef772b73c2248b5 (lowercase in Git) passed
+full scoped39529882113, focused39529882130 and all3 exact-closure jobs in
+39529882129. Tested mergef128fa99e9153a50a55dbc453ae801ecba57b5e6.
+[Full committed receipt](docs/PSC1_CANONICAL_COMPILER_IR_QUALIFICATION_2026-10-21.json)
+contains actual lane/IR identities, all artifacts and consolidated scope. All8
+new IR encoding assertions passed. Both actual checked-only backend refusals passed.
+
+Continue with the NEW portable scalar compiler-service composition root.
+It imports every previous DirectJS dependency plus the existing pure
+Bridge.CompilerHost transport. Census roots now select the actual production
+composition root, preserving the full prior module set and adding the facade/
+transport. Expected new DirectJS module count82 is not a live qualification yet.
+Its own full parse/elaboration must pass in both lanes. Shared syntax ownership
+helpers give native and generated public-root decisions one production predicate.
+
+[Service protocol/limits](docs/PSC1_GENERATED_COMPILER_SERVICE.md).
+Candidate preparation, exact ordinary pairing, original/transformed IR checks,
+JS target checks/printing and origin transport are production code, not a
+handwritten host compiler. Candidate computation stays provisional until the
+external host admits the exact graph. New native facade tests independently
+check actual graphs, target syntax/execution and both-grammar missing/duplicate/
+extra/malformed/wrong-body/partial/verified boundaries.
+
+New psc1-generated-compiler Linux workflow builds the native seed/test/checker,
+qualifies the full exact composition, generates G1 exactly once with native
+stage0, checks/adopts its exact candidate, disables native compiler tools, then
+runs actual G1 compiler semantics on a handwritten corpus with tool-role/identity/
+resource records. The initial runner is diagnostic CI staging, not the complete
+production atomic service publisher. Actual G1 execution is PENDING, not assumed.
+No fixed point or source/backend preservation is claimed.
+
+Next actionable CI commands:
+lake build psc1_js_service_tests psc1_js_service_seed psc1_source_census_probe psc1_independent_checker;
+.lake/build/bin/psc1_js_service_tests;
+node scripts/compiler-source-census.mjs --strict-phase directjs-compiler;
+node scripts/compiler-closure-qualification.mjs --phase directjs-compiler --assurance ordinary-checked;
+node scripts/generated-compiler-diagnostic.mjs.
+If the actual compiler workload exposes target planning/runtime/collection costs,
+fix the general mechanism with measured evidence; do not raise limits or patch
+particular declarations. Continue to session publication binding and real G1/G2/G3
+after G1 actually executes, then Rust owned aggregate callbacks/generations.

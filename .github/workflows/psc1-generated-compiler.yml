@@ -1,0 +1,68 @@
+name: PSC1 generated compiler execution diagnostic
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - psc1/**
+      - .github/workflows/psc1-generated-compiler.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-generated-compiler-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generated-js:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build native seed and separate independent checker
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if lean --version; then break; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep 5
+          done
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_source_census_probe psc1_js_service_tests psc1_js_service_seed psc1_independent_checker
+      - name: Exercise the production scalar facade and exact complete source
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_js_service_tests
+          node scripts/compiler-source-census-contract-tests.mjs
+          node scripts/compiler-closure-contract-tests.mjs
+          node scripts/compiler-source-census.mjs --strict-phase directjs-compiler
+          node scripts/compiler-closure-qualification.mjs --phase directjs-compiler --assurance ordinary-checked
+      - name: Seed once and execute actual generated compiler semantics
+        run: |
+          set -euo pipefail
+          node scripts/generated-compiler-diagnostic.mjs
+      - name: Retain candidate graphs, executable identities and process evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-generated-compiler-${{ github.sha }}
+          path: |
+            psc1/dist/generated-compiler/
+            psc1/dist/generated-service-native/
+            psc1/dist/scoped-correctness/compiler-source-census/
+            psc1/dist/scoped-correctness/compiler-closure/
+          if-no-files-found: warn
+          retention-days: 14

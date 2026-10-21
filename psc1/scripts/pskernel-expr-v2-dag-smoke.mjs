@@ -3746,8 +3746,9 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     const textNode=build("Lit",E.lit(text),text);
     const stringProjection=proj(name("String"),0n,textNode);
     for(const cheapMode of [false,true])
-      must(sameRuntimeValue(core(64n,typed(checker.context),freshWhnf(),stringProjection.id,cheapMode),none),
-        "cheap-projection-string-expansion-explicit-fallback-"+cheapMode);
+      compareWhnf(oldCore(64n,checker.context,checker.state,stringProjection,cheapMode),
+        core(64n,typed(checker.context),freshWhnf(),stringProjection.id,cheapMode),
+        "cheap-projection-string-expansion-exact-"+cheapMode);
     console.log("PSC1_V2_DAG_JS_CHEAP_PROJECTION_POLICY: PASS");
   }
   {

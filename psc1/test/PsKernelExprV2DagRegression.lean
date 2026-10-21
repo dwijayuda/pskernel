@@ -4182,10 +4182,11 @@ private def cheapProjectionPolicyParity : IO Unit := do
   let stringProjection := PsKernelExpr.proj (nm "String") 0 (.lit (.str "abc"))
   let (stringArena, stringId) ← expect (psKernelExprV2PagedImportChecked stringProjection)
   for cheapProj in [false,true] do
-    require "cheap-projection-string-constructor-expansion-remains-fallback"
-      (match psKernelExprV2CheckWhnfCoreWithFuel 64 context
-          (psKernelExprV2WhnfStateEmpty stringArena) stringId cheapProj with
-       | none => true | _ => false)
+    rawStateWhnfParity "cheap-projection-string-constructor-expansion-exact"
+      (psKernelWhnfCoreWithRecursorFuel 64 (psKernelIsDefEqWithFuel 64)
+        checker.context checker.state stringProjection false cheapProj)
+      (psKernelExprV2CheckWhnfCoreWithFuel 64 context
+        (psKernelExprV2WhnfStateEmpty stringArena) stringId cheapProj)
   IO.println "PSC1_V2_DAG_CHEAP_PROJECTION_POLICY: PASS"
 
 private def defEqReflectionParity : IO Unit := do

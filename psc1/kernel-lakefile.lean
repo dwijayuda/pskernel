@@ -306,3 +306,8 @@ lean_exe psc1_kernel_expr_v2_recursor_k_regression where
 lean_exe psc1_kernel_expr_v2_owned_state_regression where
   srcDir := "test"
   root := `PsKernelExprV2OwnedStateRegression
+
+-- String projection callback/resource parity and checked ordinary projection controls.
+lean_exe psc1_kernel_expr_v2_string_projection_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2StringProjectionRegression

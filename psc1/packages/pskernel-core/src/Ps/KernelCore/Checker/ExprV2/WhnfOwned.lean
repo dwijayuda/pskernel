@@ -3,6 +3,7 @@ import Ps.KernelCore.Checker.ExprV2.Beta
 import Ps.KernelCore.Checker.ExprV2.Nat
 import Ps.KernelCore.Checker.ExprV2.Projection
 import Ps.KernelCore.Checker.ExprV2.Delta
+import Ps.KernelCore.Checker.ExprV2.String
 
 /-
 The single full-state DAG WHNF engine. Every callback carries the complete
@@ -55,6 +56,45 @@ def psKernelExprV2WhnfOwnedFinishAttempt
             (psKernelExprV2WhnfCoreOwnedFinishMode cheapProj
               (Prod.fst reduced) source (Prod.snd reduced))
 
+/- String projection expansion has its own mandatory public callback. It uses
+the complete state returned by the initial major reduction and does not consume
+the structural predecessor again. The caller keeps that fixed callback's fuel. -/
+def psKernelExprV2WhnfProjectionExpandOwnedWith
+    (publicWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (major : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  match psKernelExprV2PagedRequire state.whnf.arena major with
+  | Except.error error => Option.some (Except.error error)
+  | Except.ok entry =>
+      match entry.node with
+      | PsKernelExprV2Node.lit literal =>
+          match literal with
+          | PsKernelLiteral.str value =>
+              match psKernelExprV2StringLitToConstructorOnCanonical state.whnf.arena value with
+              | Except.error error => Option.some (Except.error error)
+              | Except.ok built =>
+                  publicWhnf context
+                    (psKernelExprV2CheckStateWithArena state (Prod.fst built)) (Prod.snd built)
+          | PsKernelLiteral.nat _ => Option.some (Except.ok (Prod.mk state major))
+      | _ => Option.some (Except.ok (Prod.mk state major))
+
+def psKernelExprV2WhnfProjectionSelectOwnedWith
+    (recurse : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (root : Nat) (typeName : PsKernelName) (index major : Nat) (cheapProj : Bool) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  match psKernelExprV2ReduceProjOnCanonical context.scalar state.whnf.arena typeName index major with
+  | Except.error error => Option.some (Except.error error)
+  | Except.ok selected =>
+      match selected with
+      | Option.none =>
+          Option.some (psKernelExprV2WhnfCoreOwnedFinishMode cheapProj state root root)
+      | Option.some value =>
+          psKernelExprV2WhnfOwnedFinishAttempt root cheapProj (recurse context state value)
+
 def psKernelExprV2TryWhnfProjectionOwnedWith
     (recurse : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
@@ -73,30 +113,15 @@ def psKernelExprV2TryWhnfProjectionOwnedWith
       match attempted with
       | Except.error error => Option.some (Except.error error)
       | Except.ok reduced =>
-          let next := Prod.fst reduced;
-          let major := Prod.snd reduced;
-          match psKernelExprV2PagedRequire next.whnf.arena major with
-          | Except.error error => Option.some (Except.error error)
-          | Except.ok entry =>
-              let needsStringExpansion : Bool :=
-                match entry.node with
-                | PsKernelExprV2Node.lit literal =>
-                    match literal with
-                    | PsKernelLiteral.str _ => true
-                    | PsKernelLiteral.nat _ => false
-                | _ => false;
-              if needsStringExpansion then Option.none
-              else
-                match psKernelExprV2ReduceProjOnCanonical
-                    context.scalar next.whnf.arena typeName index major with
-                | Except.error error => Option.some (Except.error error)
-                | Except.ok selected =>
-                    match selected with
-                    | Option.none =>
-                        Option.some (psKernelExprV2WhnfCoreOwnedFinishMode cheapProj next root root)
-                    | Option.some value =>
-                        psKernelExprV2WhnfOwnedFinishAttempt root cheapProj
-                          (recurse context next value)
+          match psKernelExprV2WhnfProjectionExpandOwnedWith
+              publicWhnf context (Prod.fst reduced) (Prod.snd reduced) with
+          | Option.none => Option.none
+          | Option.some attemptedExpansion =>
+              match attemptedExpansion with
+              | Except.error error => Option.some (Except.error error)
+              | Except.ok expanded =>
+                  psKernelExprV2WhnfProjectionSelectOwnedWith recurse context
+                    (Prod.fst expanded) root typeName index (Prod.snd expanded) cheapProj
 
 def psKernelExprV2TryWhnfAppOwnedWithReducer
     (recurse : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->

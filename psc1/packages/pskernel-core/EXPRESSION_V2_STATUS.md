@@ -24,13 +24,13 @@ offers a concrete transport boundary that enforces that discipline.
 
 ## One DAG checking owner
 
-The full-state carrier candidate on
-`research/psc1-pskernel-v2-carrier-20261021` is undergoing separate exact-source
-qualification. The current implementation includes the K/major review
-`0a031a7bbbfc5040f2eeeb25c73432345dfb9634` and its mandatory regression child.
-Source727 is a separately qualified scoped V1 developer provider; this
-architecture description does not promote the newer candidate or inherit its
-predecessors' test results.
+The full-state carrier at `4894fce8c7d048ae188495bc2090fedfddf7fcb4`
+has terminal native, authentic generated-JavaScript, canonical-source, proof
+and provider qualification. Integration source
+`a2590cc15c764dae9c6abfb941d6c3155ead5c81` is independently qualified for the
+scoped developer provider. Their history-preserving integration merge requires
+fresh exact-source gates. The work state records those identities; predecessor
+qualification does not establish a complete V2 replacement.
 
 `Checker/ExprV2/DefEq.lean` owns recursive DefEq callbacks. The ordered path is
 entry fuel/depth guards, exact syntax/success-cache checks, quick and binder
@@ -52,9 +52,9 @@ rather than a second semantic algorithm.
 
 The subsequent admission/public-boundary repair carries that complete state
 through mandatory declaration sort/proposition normalization and supplies the
-real fixed DefEq callback to standalone public DAG WHNF. Its extra8 owner,
-12 propagation,336 admission differential and168 public-WHNF comparisons,
-and11 additional local lemmas still require exact-source qualification.
+real fixed DefEq callback to standalone public DAG WHNF. Its extra eight owner,
+12 propagation, 336 admission differential and 168 public-WHNF comparisons,
+and11 additional local lemmas are part of its mandatory exact-source qualification.
 
 `CheckCore.lean` remains the shared checked/infer-only worker with distinct
 judgment caches. Proof irrelevance cannot publish a checked body judgment.
@@ -84,8 +84,8 @@ matching checked family metadata and a non-propositional structure type.
 String normalization builds the canonical constructor form and always invokes
 the owning public WHNF callback afterward. Natural, structure and String
 normalizers feed one common recursor-rule pipeline. The raw WhnfState-only
-compatibility helper retains its explicit limited scope. New K/major tests and
-local equations must pass at the current exact SHA before this slice is qualified.
+compatibility helper retains its explicit limited scope. K/major tests and local equations pass at carrier4894; a new integration SHA
+still requires all of its own terminal gates.
 
 The new native and generated carrier matrices require42 state probes,56 exact
 failure/decline cases,540 V1 differential cases,38 DefEq state probes and44 DefEq
@@ -108,6 +108,19 @@ routes run the same matrices. Ten major and six K local theorems describe guards
 and callback-state equations with explicit premises; they do not prove complete
 recursor equivalence or global kernel soundness.
 
+## String projection candidate
+
+The isolated successor to carrier4894 implements String-literal projection
+through the same owning WHNF engine. It expands the normalized literal into
+the canonical constructor, calls the exact fixed public-WHNF callback and
+selects/reduces the field with the full returned state. Original root cache
+publication, no-field result and callback error/decline order are preserved.
+Mandatory native/generated 126/504/480 resource comparisons, 48 complete-state
+sequences, 240 propagated outcomes, checked Box projections and ten local
+lemmas must pass before promotion. Official native Init String checks do not
+create portable environment metadata; absent String declarations remain an
+explicit checked rejection. This source slice is NOT RUN at commit creation.
+
 ## Remaining whole-operation fallback inventory
 
 There are four production fallback sites. They remain explicit and preserve
@@ -116,7 +129,7 @@ the complete original operation's resources and failure semantics.
 | Site | Trigger and remaining work |
 | --- | --- |
 | `API/Dag.lean: psKernelDagCheckTerminalOrOriginal` | Checking/inference outside the supported owning DAG rules, including missing or mismatched same-operation type/recursor references |
-| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including String-literal projection WHNF, unsupported recursor descendants and missing owning references; K/major normalization is implemented in the current candidate and awaiting qualification |
+| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including unsupported recursor descendants and missing owning references; String-literal projection is implemented in the isolated candidate and awaits exact-source qualification |
 | `API/Dag.lean: psKernelDagIsDefEq` | Unsupported descendant callbacks or missing owning references; the ordered prefix, lazy delta/projection, full shape and final rules now have DAG paths in the carrier candidate |
 | `API/DagAdmission.lean: psKernelDagAdmitDeclaration` | Inductive construction/admission and declaration cases not handled by direct admission |
 

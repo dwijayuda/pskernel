@@ -12,6 +12,79 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 15:04 UTC — owning DAG String projection candidate
+
+This branch follows qualified carrier
+`4894fce8c7d048ae188495bc2090fedfddf7fcb4`. Its integration39614047016,
+correctness39614046627 (including canonical119270185717) and all six research
+39614046465 jobs are terminal PASS. [Exact predecessor receipt](evidence/2026-10-21-4894fce.json)
+records complete 182-module portable/139-module canonical closures and detached
+native24 / each-generated24-protocol+8-API provider gates. Full-kernel DirectJS
+is explicitly UNSUPPORTED. Integration branch now has history-preserving merge
+`3aa077cb64ff06f76727decd01c43ad6c33f351d`, whose fresh gates are pending.
+Carrier4894 Arena39614046557 is still IN PROGRESS; no totals are inherited.
+
+### Source change and required tests
+
+`Checker/ExprV2/WhnfOwned.lean` now handles String-literal projection in the
+single owning WHNF engine. After the existing initial cheap/public major
+normalization, it builds the canonical String constructor, invokes the exact
+fixed public-WHNF callback and carries its entire returned CheckState into
+projection selection. A selected field uses the original structural callback;
+the original requested root is the cache publication key. No-field, decline,
+error and lookup precedence retain the original state/resource contract.
+Non-String/Nat behavior and the staged compatibility ABI share the same engine.
+
+New native, generated and proof files are
+`test/PsKernelExprV2StringProjectionRegression.lean`,
+`scripts/pskernel-expr-v2-string-projection-smoke.mjs` and
+`test/PsKernelExprV2StringProjectionProofs.lean`.
+The new executable target and both critical workflows require 126 public,
+504 core and 480 independently fixed owner-budget comparisons; 48 complete
+state/arena/cache sequences and 240 exact decline/error propagations; six
+checked ordinary-Box positive projections and three invalid ones. Native
+official Lean tests additionally cover 12 valid and six invalid actual Init
+String projections, including UTF-8 and NUL. Both independent APIs must reject
+all 18 corresponding cases when the String/ByteArray environment is absent.
+This does not install fabricated String metadata or claim full String admission.
+
+The original main native/JS explicit String fallback sentinels now require exact
+V1/DAG expression or error parity, with outer `none` treated as a test failure.
+All other original guards and counts are retained. Ten local theorems establish
+lookup/decline/error order and complete callback-state equations, with audited
+axiom dependencies; they do not prove global equivalence. Both authentic
+generated routes run the new test in detached Node with empty PATH.
+
+**This String-projection source is NOT RUN at commit creation** for native,
+portable .lean, canonical .ps, generated JS, proofs, benchmarks, Arena and
+provider. The source is not promoted to integration until exact-source gates
+finish. No fuel/depth, declaration/numeric/proof policy, compiler pin, host
+resource limit or runtime trust boundary is changed.
+
+### Remaining qualification
+
+The four public whole-operation V1 fallback sites remain. This removes one
+internal unsupported branch, not the remaining validated-arena decode,
+recursive metadata import, V1 inductive admission, mutual/nested owner gaps
+or preexisting-session ownership boundary. V1 remains the default/reference.
+A is achieved only at the separately qualified predecessor scope; this source
+needs its own gates. B/C are still unachieved.
+
+The latest fully observed a259 Arena result remains 193 = 172 matches
+(105 acceptance/59 kernel rejection/one metadata rejection/seven transport
+rejections) + two safety-contract agreements +17 host timeouts +one actual
+fuel exhaustion +one unsupported case. The original native V1 Church replay
+at source369bee independently reproduces the fuel error under4096; that is
+not an Arena pass. Carrier4894's measured binder32 admission remains slower
+(554.792 ms DAG versus260.326 ms V1; max RSS357948 versus340360 KiB).
+Full fresh performance/Arena records for this source remain mandatory.
+
+Next: inspect the new native build/matrix/proof gate first, fix actual defects
+without weakening assertions, then require terminal .lean-generated and
+canonical-generated jobs, provider exercises and complete Arena records.
+The subsequent mutual/nested owner bridge and measured cache-index change
+remain separate uncommitted drafts and are not included here.
+
 ## 2026-10-21 — repair recursor regression fixtures after exact884 native failure
 
 Parent source: `88404214aebfea49824676f70bfc78125fe62e46`, carrier branch.

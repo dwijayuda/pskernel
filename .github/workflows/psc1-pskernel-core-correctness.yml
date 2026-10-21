@@ -41,6 +41,9 @@ on:
       - psc1/test/PsKernelExprV2RecursorMajorProofs.lean
       - psc1/test/PsKernelExprV2RecursorKProofs.lean
       - psc1/scripts/pskernel-expr-v2-recursor-k-smoke.mjs
+      - psc1/test/PsKernelExprV2StringProjectionRegression.lean
+      - psc1/test/PsKernelExprV2StringProjectionProofs.lean
+      - psc1/scripts/pskernel-expr-v2-string-projection-smoke.mjs
       - psc1/test/PsKernelExprV2OwnedStateRegression.lean
       - psc1/test/PsKernelExprV2OwnedStateProofs.lean
       - psc1/scripts/pskernel-expr-v2-owned-state-smoke.mjs
@@ -417,6 +420,21 @@ jobs:
           grep -Fqx 'PSC1_V2_K_GENERATED_OWNER_PASS carrier=16 propagated=16 metadata=16' "$RUNNER_TEMP/psc1-recursor-k-canonical.log"
           grep -Fqx 'PSC1_V2_K_GENERATED_ORDER_PASS guards=5' "$RUNNER_TEMP/psc1-recursor-k-canonical.log"
           grep -Eq '^PSC1_V2_RECURSOR_K_GENERATED_PASS assertions=[0-9]+$' "$RUNNER_TEMP/psc1-recursor-k-canonical.log"
+      - name: Check canonical-source DAG String projection in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          test -s "$PSC1_PS_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-string-projection-smoke.mjs "$PSC1_PS_RUN_DIR/string-projection-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" string-projection-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-string-projection-canonical.log"
+          grep -Fqx 'PSC1_V2_DAG_STRING_PROJECTION_MATRIX_JS: PASS public=126 core=504 fixed=480' "$RUNNER_TEMP/psc1-string-projection-canonical.log"
+          grep -Fqx 'PSC1_V2_DAG_STRING_PROJECTION_STATE_JS: PASS cases=48 propagated=240' "$RUNNER_TEMP/psc1-string-projection-canonical.log"
+          grep -Fqx 'PSC1_V2_DAG_STRING_PROJECTION_CHECKED_JS: PASS valid=6 invalid=3' "$RUNNER_TEMP/psc1-string-projection-canonical.log"
+          grep -Fqx 'PSC1_V2_DAG_STRING_PROJECTION_SCOPE_JS: PASS missingEnvironment=18' "$RUNNER_TEMP/psc1-string-projection-canonical.log"
       - name: Check complete canonical-source DAG checker state in detached Node
         working-directory: psc1
         shell: bash
@@ -495,6 +513,7 @@ jobs:
             ${{ runner.temp }}/psc1-quot-canonical.log
             ${{ runner.temp }}/psc1-recursor-canonical.log
             ${{ runner.temp }}/psc1-recursor-k-canonical.log
+            ${{ runner.temp }}/psc1-string-projection-canonical.log
             ${{ runner.temp }}/psc1-owned-state-canonical.log
             psc1/dist/pskernel-selfhost/provider/
             psc1/dist/pskernel-selfhost/workspace/.proofscript-bootstrap.json

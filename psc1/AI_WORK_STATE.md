@@ -174,7 +174,15 @@ source text and4096 boundaries. Both-lane gates retain all modules. Exact closur
 matrix jobs were blocked before admission by this maintained source regression;
 no DirectJS admission result is claimed yet.
 
-At2d7bc22c all83 Rust modules parse in both lanes (no remaining parse refusal),
+At2d7bc22c all84 Rust modules parse in both lanes (no remaining parse refusal),
 but the generic dependency concat-map still refuses infer:expectedFunction.
 Use an explicitly typed eta callback for the existing list mapper, consistent
 with normalized compiler call sites. Native behavior remains separately tested.
+
+The exact2d7bc22c census is Rust84/84/82 in both lanes: Foundation.Text is
+now an explicit owned runtime-plan dependency. At8f6919fc typed eta expansion
+still refused the new polymorphic wrapper. Compose existing psListMap at the
+concrete typed traversal sites and one ordered List(List String) flattening
+worker; remove only the newly introduced unsuccessful wrapper, not any original
+compiler declaration. All original RuntimePlan decisions and private identities
+remain. The generic-wrapper inference limitation remains a separate open issue.

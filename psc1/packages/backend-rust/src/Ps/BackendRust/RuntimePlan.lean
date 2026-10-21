@@ -58,10 +58,6 @@ def psRustRuntimeConcat (groups : List (List String)) : List String :=
   | List.cons values rest =>
       psListAppend values (psRustRuntimeConcat rest)
 
-def psRustRuntimeConcatMap {alpha : Type}
-    (convert : alpha -> List String) (values : List alpha) : List String :=
-  psRustRuntimeConcat (psListMap (fun (value : alpha) => convert value) values)
-
 private def intrinsicHelpers (operation : PsVerifiedIrIntrinsic) : List String :=
   match operation with
   | PsVerifiedIrIntrinsic.natAdd => ["__ps_nat_add"]
@@ -106,9 +102,9 @@ private partial def typeRequirements (type : PsVerifiedIrType) : List String :=
       | PsVerifiedIrPrimitiveType.int => ["@int"]
       | _ => []
   | PsVerifiedIrType.named _ arguments =>
-      psRustRuntimeConcatMap typeRequirements arguments
+      (psRustRuntimeConcat (psListMap (fun (type : PsVerifiedIrType) => typeRequirements type) arguments))
   | PsVerifiedIrType.function parameters result =>
-      psListAppend (psRustRuntimeConcatMap typeRequirements parameters) (typeRequirements result)
+      psListAppend ((psRustRuntimeConcat (psListMap (fun (type : PsVerifiedIrType) => typeRequirements type) parameters))) (typeRequirements result)
   | _ => []
 
 private partial def exprRequirements (expression : PsVerifiedIrExpr) : List String :=
@@ -121,17 +117,17 @@ private partial def exprRequirements (expression : PsVerifiedIrExpr) : List Stri
   | PsVerifiedIrExpr.var _ => []
   | PsVerifiedIrExpr.intrinsic operation types arguments =>
       psListAppend (intrinsicHelpers operation)
-        (psListAppend (psRustRuntimeConcatMap typeRequirements types)
-          (psRustRuntimeConcatMap exprRequirements arguments))
+        (psListAppend ((psRustRuntimeConcat (psListMap (fun (type : PsVerifiedIrType) => typeRequirements type) types)))
+          ((psRustRuntimeConcat (psListMap (fun (expression : PsVerifiedIrExpr) => exprRequirements expression) arguments))))
   | PsVerifiedIrExpr.lambda parameters result body =>
       psListAppend
-        (psRustRuntimeConcatMap (fun (parameter : PsVerifiedIrParameter) =>
-          typeRequirements parameter.type) parameters)
+        ((psRustRuntimeConcat (psListMap (fun (parameter : PsVerifiedIrParameter) =>
+          typeRequirements parameter.type) parameters)))
         (psListAppend (typeRequirements result) (exprRequirements body))
   | PsVerifiedIrExpr.call fn types arguments =>
       psListAppend (exprRequirements fn)
-        (psListAppend (psRustRuntimeConcatMap typeRequirements types)
-          (psRustRuntimeConcatMap exprRequirements arguments))
+        (psListAppend ((psRustRuntimeConcat (psListMap (fun (type : PsVerifiedIrType) => typeRequirements type) types)))
+          ((psRustRuntimeConcat (psListMap (fun (expression : PsVerifiedIrExpr) => exprRequirements expression) arguments))))
   | PsVerifiedIrExpr.letE _ type value body =>
       psListAppend (typeRequirements type)
         (psListAppend (exprRequirements value) (exprRequirements body))
@@ -139,42 +135,39 @@ private partial def exprRequirements (expression : PsVerifiedIrExpr) : List Stri
       psListAppend (exprRequirements condition)
         (psListAppend (exprRequirements yes) (exprRequirements no))
   | PsVerifiedIrExpr.record _ types fields =>
-      psListAppend (psRustRuntimeConcatMap typeRequirements types)
-        (psRustRuntimeConcatMap (fun (field : Prod String PsVerifiedIrExpr) =>
-          exprRequirements field.snd) fields)
+      psListAppend ((psRustRuntimeConcat (psListMap (fun (type : PsVerifiedIrType) => typeRequirements type) types)))
+        ((psRustRuntimeConcat (psListMap (fun (field : Prod String PsVerifiedIrExpr) =>
+          exprRequirements field.snd) fields)))
   | PsVerifiedIrExpr.constructor _ _ types fields =>
-      psListAppend (psRustRuntimeConcatMap typeRequirements types)
-        (psRustRuntimeConcatMap (fun (field : Prod String PsVerifiedIrExpr) =>
-          exprRequirements field.snd) fields)
+      psListAppend ((psRustRuntimeConcat (psListMap (fun (type : PsVerifiedIrType) => typeRequirements type) types)))
+        ((psRustRuntimeConcat (psListMap (fun (field : Prod String PsVerifiedIrExpr) =>
+          exprRequirements field.snd) fields)))
   | PsVerifiedIrExpr.projection _ types value _ =>
-      psListAppend (psRustRuntimeConcatMap typeRequirements types) (exprRequirements value)
+      psListAppend ((psRustRuntimeConcat (psListMap (fun (type : PsVerifiedIrType) => typeRequirements type) types))) (exprRequirements value)
   | PsVerifiedIrExpr.matchE _ types value alternatives =>
-      psListAppend (psRustRuntimeConcatMap typeRequirements types)
+      psListAppend ((psRustRuntimeConcat (psListMap (fun (type : PsVerifiedIrType) => typeRequirements type) types)))
         (psListAppend (exprRequirements value)
-          (psRustRuntimeConcatMap
-            (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+          ((psRustRuntimeConcat (psListMap (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
               psListAppend
-                (psRustRuntimeConcatMap (fun (binding : PsVerifiedIrMatchBinding) =>
-                  typeRequirements binding.type) alternative.snd.fst)
-                (exprRequirements alternative.snd.snd))
-            alternatives))
+                ((psRustRuntimeConcat (psListMap (fun (binding : PsVerifiedIrMatchBinding) =>
+                  typeRequirements binding.type) alternative.snd.fst)))
+                (exprRequirements alternative.snd.snd)) alternatives))))
 
 private def moduleRequirements (source : PsVerifiedIrModule) : List String :=
   psListAppend
-    (psRustRuntimeConcatMap (fun (value : PsVerifiedIrStructure) =>
-      psRustRuntimeConcatMap (fun (field : PsVerifiedIrStructureField) =>
-        typeRequirements field.type) value.fields) source.structures)
+    ((psRustRuntimeConcat (psListMap (fun (value : PsVerifiedIrStructure) =>
+      (psRustRuntimeConcat (psListMap (fun (field : PsVerifiedIrStructureField) =>
+        typeRequirements field.type) value.fields))) source.structures)))
     (psListAppend
-      (psRustRuntimeConcatMap (fun (value : PsVerifiedIrInductive) =>
-        psRustRuntimeConcatMap (fun (constructor : PsVerifiedIrConstructor) =>
-          psRustRuntimeConcatMap (fun (field : PsVerifiedIrConstructorField) =>
-            typeRequirements field.type) constructor.fields) value.constructors) source.inductives)
-      (psRustRuntimeConcatMap (fun (value : PsVerifiedIrDeclaration) =>
+      ((psRustRuntimeConcat (psListMap (fun (value : PsVerifiedIrInductive) =>
+        (psRustRuntimeConcat (psListMap (fun (constructor : PsVerifiedIrConstructor) =>
+          (psRustRuntimeConcat (psListMap (fun (field : PsVerifiedIrConstructorField) =>
+            typeRequirements field.type) constructor.fields))) value.constructors))) source.inductives)))
+      ((psRustRuntimeConcat (psListMap (fun (value : PsVerifiedIrDeclaration) =>
         psListAppend
-          (psRustRuntimeConcatMap (fun (parameter : PsVerifiedIrParameter) =>
-            typeRequirements parameter.type) value.parameters)
-          (psListAppend (typeRequirements value.resultType) (exprRequirements value.body)))
-        source.declarations))
+          ((psRustRuntimeConcat (psListMap (fun (parameter : PsVerifiedIrParameter) =>
+            typeRequirements parameter.type) value.parameters)))
+          (psListAppend (typeRequirements value.resultType) (exprRequirements value.body))) source.declarations))))
 
 structure PsRustRuntimePlan where
   source : String

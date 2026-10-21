@@ -1,4 +1,52 @@
-# PSC1 — Practical Core and seven-backend development
+# PSC1 current execution checkpoint
+
+Updated 2026-10-21 by the explicit throughput optimization request. Remote HEAD
+inspected before these changes:30c2cd9e857e043bb4f5c34ab0d19d0af8b62762.
+Active draft PR172 on fix/psc1-closure-normalization-20261021. Base #171 and
+all prior commits remain preserved; GitHub APIs and Linux Actions only.
+
+The single active roadmap is docs/PSC1_DEVELOPMENT_ROADMAP.md. Its authoritative
+machine-readable scope/remaining-work queue is
+docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json: fourteen families,37 finite criteria,
+four real applications, all seven targets and both authored grammars. No
+existing functionality is removed. Generated readiness separates registered
+implementation, tested subset, exact-commit full qualification and blocked
+unbound cases. All full families/release remain incomplete; no readiness
+percentage substitutes for acceptance.
+
+CI now routes incremental commit dependencies through psc1-development.yml.
+All original native/focused/closure/G1/full scoped assertions remain in reusable
+manual workflows. Static-only documentation updates replace nine repeated heavy
+jobs with none; focused authored CompilerM/collection changes select2 heavy jobs;
+compiler-source changes select7; target/CI/authority changes select8, plus the
+immutable benchmark only when selected. This is a deterministic scheduling
+measurement, not a claimed elapsed-time speedup. Capture actual run durations
+before claiming measured wall-clock improvement. Toolchain/exact-source Lake
+caches never reuse admission or execution receipts. JS/TS/Rust are early targets.
+Full exact-candidate qualification remains required before merge/release.
+No merge, publication or branch-protection update is authorized here.
+
+Latest pre-optimization30c: focused39564583962, native39564584113, all closures
+39564584036, G1/host39564584032 SUCCESS. Full scoped39564584025 SUCCESS, including126 CompilerM +42 collection obligations
+and minimum-Python18+6, all existing regressions and installed package checks.
+Earlier fully qualified dd2328a5 receipts remain below. Do not infer qualification
+of this optimization from earlier code.
+
+Immediate actual development: close the collection-oracle independence gap.
+The exact helper/native oracle can agree with the same library defect (the old
+listLength returned0). Compare List length/append/reverse, persistent Array
+updates/optional lookup and typed Except with native Lean standard operations;
+then execute both authored grammars and all seven targets. Next take the finite
+JSON application/Unicode blocker, without another architectural redesign.
+
+Practical Core/compiler/backend and PSKernel-Core Expression V2 are independent
+workstreams. Official Lean4.35.0 admission, strict IR, pairing, negative/security/
+resource policies stay required. Preserve G1 and all prior source/artifact/CI
+evidence. G2/G3 remain deferred until feature freeze; the tracked heap-exhaustion/
+timeout defect remains open. No self-host milestone is the development priority.
+
+## Preserved prior checkpoint and evidence
+
 
 Updated 2026-10-21. Active draft [PR172](https://github.com/dwijayuda/pskernel/pull/172)
 on fix/psc1-closure-normalization-20261021. Inspected remote HEAD before pivot:

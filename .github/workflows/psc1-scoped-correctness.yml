@@ -3,27 +3,16 @@ name: PSC1 scoped correctness and readable artifacts
 on:
   workflow_dispatch:
   workflow_call:
-  push:
-    branches:
-      - fix/psc1-scoped-correctness-20261020
-    paths:
-      - psc1/**
-      - .github/workflows/psc1-scoped-correctness.yml
-  pull_request:
-    paths:
-      - psc1/**
-      - .github/workflows/psc1-scoped-correctness.yml
-      - .github/workflows/psc1-direct-backends.yml
 
-concurrency:
-  group: psc1-scoped-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 env:
   PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
-permissions:
-  contents: read
+concurrency:
+  group: psc1-scoped-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
   linux-scoped:
@@ -59,6 +48,16 @@ jobs:
           python3 --version
           php --version
           php -r 'echo "gmp=" . (extension_loaded("gmp") ? "enabled" : "missing") . PHP_EOL;'
+      - name: Cache pinned Lean installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Cache exact-source native build objects
+        uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
@@ -245,12 +244,16 @@ jobs:
       - name: Consolidate exact-commit seven-target and package qualification
         working-directory: psc1
         run: node scripts/seven-backend-qualification.mjs
+      - name: Derive exact-commit Practical Core readiness
+        working-directory: psc1
+        run: node scripts/practical-core-readiness.mjs
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: psc1-scoped-correctness-${{ github.sha }}
           path: |
+            psc1/dist/development/
             psc1/host-tools/package-lock.json
             psc1/dist/scoped-correctness/
           if-no-files-found: warn

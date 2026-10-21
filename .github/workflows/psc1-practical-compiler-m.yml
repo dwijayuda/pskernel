@@ -2,10 +2,7 @@ name: PSC1 focused CompilerM source and owned callback regressions
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - psc1/**
-      - .github/workflows/psc1-practical-compiler-m.yml
+  workflow_call:
 
 permissions:
   contents: read
@@ -19,9 +16,9 @@ jobs:
     timeout-minutes: 15
     env:
       PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      PSC1_COMPILERM_TARGETS: js,rust
+      PSC1_COMPILERM_TARGETS: js,ts,rust
       PSC1_COMPILERM_EVIDENCE: compiler-m-focused
-      PSC1_COLLECTION_TARGETS: js,rust
+      PSC1_COLLECTION_TARGETS: js,ts,rust
       PSC1_COLLECTION_EVIDENCE: stdlib-collections-focused
     defaults:
       run:
@@ -32,6 +29,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.3'
+      - name: Cache pinned Lean installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Cache exact-source native build objects
+        uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
@@ -43,12 +50,19 @@ jobs:
           rustup toolchain install 1.90.0 --profile minimal --component rustfmt
           rustup default 1.90.0
           npm --prefix host-tools --workspaces=false ci --ignore-scripts --no-audit --no-fund
+      - name: Install isolated pinned TypeScript consumer checker
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-ts7"
+          echo '{"name":"psc1-ts7-consumer-tests","version":"0.0.0","private":true}' > "$RUNNER_TEMP/psc1-ts7/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-ts7" --ignore-scripts --no-save --no-audit --no-fund typescript@7.0.2
+          echo "PSC1_TSC=$RUNNER_TEMP/psc1-ts7/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
       - name: Build production compiler and independent checker
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1 psc1_independent_checker
-      - name: Execute authored inputs with native reference and JS Rust consumers
+      - name: Execute authored inputs with native reference and JS TS Rust consumers
         run: |
           set -euo pipefail
           node --check scripts/compiler-m-conformance-tests.mjs

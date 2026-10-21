@@ -1,5 +1,8 @@
 # PSC1 Practical Core v1 decisions
 
+Authoritative finite release scope: [PSC1_PRACTICAL_CORE_V1_CONTRACT.json](PSC1_PRACTICAL_CORE_V1_CONTRACT.json).
+This document explains the semantics and rationale; the JSON contract owns case inventory and remaining-work order.
+
 Baseline: `da880d864ca5f9e35729255fd7e4f8a17953cd39` (PR #166). Semantic authority: official Lean 4.35.0, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. The baseline records selected cases in 13 families; typed IO is missing. All fourteen full families remain incomplete. These decisions define a finite prospective v1 contract; they do not relabel historical partial evidence as completion.
 
 ## Selection and rationale

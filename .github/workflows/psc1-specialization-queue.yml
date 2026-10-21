@@ -1,11 +1,8 @@
 name: PSC1 specialization queue before and after
 
 on:
-  pull_request:
-    paths:
-      - psc1/**
-      - .github/workflows/psc1-specialization-queue.yml
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

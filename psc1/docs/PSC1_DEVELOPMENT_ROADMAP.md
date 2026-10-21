@@ -1,44 +1,58 @@
 # PSC1 development roadmap
 
-Updated 2026-10-21 by explicit user priority pivot. This roadmap supersedes the
-self-host-first ordering in earlier continuation prompts and architecture notes.
-The goal is a complete, correct practical compiler/language across both authored
-.lean/.ps input grammars and all seven target mappings.
+Updated 2026-10-21. The authoritative finite scope and dependency-ordered queue
+are [PSC1_PRACTICAL_CORE_V1_CONTRACT.json](PSC1_PRACTICAL_CORE_V1_CONTRACT.json).
+It freezes fourteen families, 37 acceptance criteria and four actual applications.
+This is the single active roadmap. Older status matrices/continuation prompts and
+receipts are historical evidence, not competing release authorities. Detailed
+semantic rationale remains in PSC1_PRACTICAL_CORE_DECISIONS.md.
 
-1. Complete the finite fourteen-family Practical Core contract in
-   PSC1_PRACTICAL_CORE_DECISIONS.md. The seven-case authored CompilerM contract
-   and finite parity enforcement are qualified across all seven targets at
-   8ac752a7 (run39557245201). Canonical stdlib collections and shared list
-   literals qualify42 more obligations at dd2328a5 (run39561579871), with all
-   existing/minimum-Python/package checks and ten-case G1 execution. Source
-   CompilerM handler rollback/return cases are the next active coverage slice;
-   full families remain incomplete.
-   Continue checked Prop-valued Nat/Int order, bounded inference/pattern/control
-   interactions and typed console plus UTF-8 file IO with explicit capabilities.
-2. Close reached backend gaps, including Rust owned callback values/captures,
-   deep traversal/destruction and Wasm W1-W6 adapters. Preserve public ABI
-   refusals until actual marshalling is supported. Measure realistic application
-   compilation and runtime behavior under existing limits.
-3. Keep independent pinned official checking, exact ordinary source/logical
-   graph pairing, strict original/transformed IR and every existing refusal,
-   native, target, scoped and package regression. G1 functionality runs the
-   existing four positive/four negative cases after one native seed; no native
-   frontend/emitter delegation afterwards. All closures remain complete.
-4. At a stable feature-frozen milestone, explicitly run the separate manual
-   psc1-selfhost-qualification workflow for full G1 -> G2 -> G3, identical
-   compiler source/graph/IR/artifacts and actual repeated corpus observations.
-   Rust repeat generations follow its completed architecture/runtime contract.
-   Manual failures do not gate ordinary language/backend development.
+Execute the contract's workQueue in dependency order: independent collection
+reference, real JSON application, inference/control coverage, checked numeric
+order, typed capability IO, practical application/performance completion, then
+feature freeze. Start each task with its exact acceptance and a small coherent
+change. Reuse working architecture and shared semantics; author both grammars,
+exercise JS/TS/Rust early, then all seven mappings before qualification.
+Missing acceptance runners are blockers, never inferred successes. Retain all
+working features outside the finite scope.
 
-G2/G3 are deferred, not passed or removed. The full generation assertions,
-publication/refusal checks, pinned tools and unchanged process/heap/stack limits
-remain in the manual workflow. G2 CPU and immutable fixed-workload comparison
-workflows are manual as well. G1 artifacts now retain 90 days; source and exact
-historical qualification receipts remain in Git history. Artifact retention is
-finite; a feature-freeze run must produce fresh evidence, never infer it from
-expired downloads.
+CI has four tiers in psc1-development.yml: fast static contracts/syntax, focused
+native plus JS/TS/Rust, integration complete-source closures plus G1, and full
+scoped seven-target/minimum-runtime/package qualification. Incremental selection
+uses the actual synchronize before/head interval, not cumulative PR paths.
+Unknown/unavailable diffs fail conservatively into full testing. Documentation
+does not restart compiler jobs. CI/authority/build/target changes require full
+testing. Existing workflows remain manually runnable and reusable; no assertion
+or refusal is deleted. Specialization's immutable baseline runs when its benchmark
+changes, not on every documentation/source update.
 
-Tracked performance defect: PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md. Address
-its mechanisms when normal source/application compilation demonstrates need;
-do not chase fixed points before feature freeze. No family is selected-v1
-complete until its finite both-grammar x relevant-target obligations pass.
+Caches contain pinned tools and exact-source Lake objects only. Every selected
+job still builds its requested targets, checks official pins, and regenerates
+admission, strict IR, execution and publication evidence. Evidence is never a
+cache hit. Concurrency cancels obsolete PR work; explicit manual full runs are
+retained. Selection/readiness JSON artifacts expose what ran and why. Require
+the incremental gate plus fresh full qualification before merge/release; use
+manual psc1-development with full=true to rerun all qualification dependencies.
+Repository protection settings have not been changed.
+
+Run scripts/practical-core-readiness.mjs to derive implemented/tested/qualified/
+blocked criteria from current fixture registration and exact-commit receipts.
+The generated dist/development/practical-core-readiness.json is an inventory,
+not a proof or admission credential. --require-ready must pass for a release;
+all four actual-application runners and unbound finite criteria currently block
+that gate. Historical receipts remain exact historical facts, not current-HEAD
+qualification. Full scoped success is necessary and is not release readiness.
+
+Practical Core language and compiler/backend engineering proceed independently
+of PSKernel-Core Expression V2 research. Independent official Lean 4.35.0
+admission at eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strict original/transformed
+IR, ordinary pairing, security/resource policies and all negative tests stay
+required. Do not import incomplete kernel research into compiler release gates.
+
+G1 source, tests, successful receipts and artifacts remain preserved; normal
+integration runs the ten-case v2 corpus after one native seed, with no subsequent
+native frontend/emitter delegation. G2/G3/fixed points and expensive profiles
+remain separate manual qualification after stable feature freeze. The open
+PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md retains original heap-exhaustion and later
+timeout evidence. Address it when ordinary application compilation reaches the
+same mechanism, not merely to self-host an unfinished compiler.

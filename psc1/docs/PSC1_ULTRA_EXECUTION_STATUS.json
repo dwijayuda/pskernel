@@ -741,8 +741,8 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "078a84c273eb918bf23293d06ee401e9ba777f66",
-    "status": "pending-linux-balanced-quote-and-final-transport-profile",
+    "headBeforeCandidate": "2a347829bec5e7f18be289e95d492ec91e4a7555",
+    "status": "pending-linux-quote-local-name-correction",
     "sourceQualification": {
       "wholeClosureRun": 39541282485,
       "nativeRun": 39541282570,
@@ -798,7 +798,15 @@
       "declarations": 2230,
       "scope": "omitted-final-transport"
     },
-    "next": "verify final transport baseline/candidate and actual native seed/G1 without raised caps"
+    "next": "verify final transport baseline/candidate and actual native seed/G1 without raised caps",
+    "nativeBuildRefusal": {
+      "run": 39543156071,
+      "path": "Ps.Bridge.Json",
+      "line": 199,
+      "column": 15,
+      "detail": "reserved prefix local",
+      "fix": "runText"
+    }
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

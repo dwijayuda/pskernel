@@ -196,9 +196,9 @@ def psJsonEscapeStringWithFuel (fuel : Nat) :
           let char : Char := psJsonStringGet value position;
           let next : Nat := psJsonStringNext value position;
           if psJsonCharNeedsEscape char then
-            let prefix : String := String.Internal.extract value
+            let runText : String := String.Internal.extract value
               (String.Pos.Raw.mk runStart) (String.Pos.Raw.mk position);
-            let flushed : PsTextBuilder := psTextBuilderAppend builder prefix;
+            let flushed : PsTextBuilder := psTextBuilderAppend builder runText;
             smaller value next next (psTextBuilderAppend flushed (psJsonEscapeChar char))
           else smaller value next runStart builder
 

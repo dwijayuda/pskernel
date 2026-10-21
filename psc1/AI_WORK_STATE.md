@@ -6,7 +6,15 @@ on fix/psc1-closure-normalization-20261021 preserves #171 at
 Execute [the Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 continuously. The user explicitly requests no small-milestone handoff.
 
-## Current continuation — balanced JSON quoting and final transport measurement
+## Current continuation — correct quoting local name and continue Linux qualification
+
+At2a347829 native builds refused Json.lean199:15 because the new local name
+prefix is a reserved Lean notation keyword. Rename only that local to runText.
+No algorithm, escaping, limit or test changes. Extended baseline profiling remains
+in progress under the preserved non-cancelling profile workflow. Candidate
+transport/source/actual G1 qualification awaits this compile correction.
+
+## Balanced JSON quoting and final transport measurement
 
 The fixed-input prefix profiler39542327917 completed both binaries through JS
 printing in14001/27382ms with identical request and binary hashes. It measured

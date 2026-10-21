@@ -252,6 +252,10 @@ for (const [data, expectedTargets] of [[whileRuntime, targets], [minimumWhile, [
     x.externalTimeoutMs === 2000 && x.earlyReturnPreflight && x.unusedPatternRhsEvaluated));
 }
 assert.equal(distribution.qualification, 'passed');
+assert.deepEqual(distribution.installedTypedIo.map(r=>r.syntax).sort(),['lean','ps']);
+assert.ok(distribution.installedTypedIo.every(r=>r.passed&&r.target==='js'));
+assert.equal(distribution.adapterResources.length,9);
+assert.ok(distribution.adapterResources.every(r=>/^[a-f0-9]{64}$/.test(r.sha256)));
 assert.equal(library.independentlyAdmitted, true);
 assert.deepEqual(library.checkedControlFlow, ['Id', 'let-mut', 'assignment', 'conditional', 'early-return']);
 assert.equal(runtime.controlFlowOracle, 'pinned-native-Lean');

@@ -50,6 +50,9 @@ for (const item of fs.readdirSync(path.join(root, 'host-tools'), { withFileTypes
     copy(path.join(root, 'host-tools', item.name), path.join(stage, 'host-tools', item.name));
   }
 }
+// Copy only Rust sources/locks, never a CI target directory or built binary.
+for (const file of ['Cargo.toml','Cargo.lock','src/lib.rs','src/policy_server.rs'])
+  copy(path.join(root,'host-tools/typed-io-rust',file),path.join(stage,'host-tools/typed-io-rust',file));
 const leanPrefix = run('lean', ['--print-prefix']).trim();
 const licenses = fs.readdirSync(leanPrefix).filter(name => /^LICENSE(?:S|\.|$)|^NOTICE/u.test(name));
 assert.ok(licenses.length, 'Lean distribution must retain its license notices');
@@ -79,7 +82,8 @@ const meta = {
   description: 'Checked native ProofScript PSC1 toolchain; unpublished Linux qualification package',
   ...(workspaceMeta.license ? { license: workspaceMeta.license } : {}),
   bin: { psc: './npm-cli/psc.js', psc1: './npm-cli/psc.js' },
-  exports: { './package.json': './package.json' }, engines: { node: '>=22' },
+  exports: { './package.json': './package.json',
+    './io/node': './host-tools/typed-io.mjs', './io/wasm-core': './host-tools/typed-io-wasm.mjs' }, engines: { node: '>=22' },
   os: ['linux'], cpu: ['x64'], libc: ['glibc'],
   files: ['npm-cli/', 'native/', 'host-tools/', 'licenses/', 'NATIVE_SOURCE_PIN.json', 'NATIVE_DISTRIBUTION.json', 'profile.json', 'README.md'],
   dependencies: hostMeta.dependencies, bundledDependencies: Object.keys(hostMeta.dependencies),
@@ -100,6 +104,7 @@ write(path.join(stage, 'README.md'), '# ProofScript PSC1\n\nUnpublished Linux x6
   'All seven built-in backends are compiled into the native binary. Core logical and runtime declarations are compiled in.\n' +
   'JavaScript output needs no TypeScript compiler. Selected Rust/Wasm/Python/PHP targets require their target tools.\n' +
   'The compiler, host formatter and libraries resolver ship together. Portable source libraries are independently checked.\n' +
+  'IO Node and core-Wasm adapters export as proofscript/io/node and proofscript/io/wasm-core. Standalone Python/PHP sources and the locked Rust crate ship in host-tools/.\n' +
   'No npm installation script, network binary download, compiler fallback or package publication is used.\n');
 const distribution = { schemaVersion: 1, sourceCommit: process.env.GITHUB_SHA || null, branchHeadCommit: process.env.PSC1_HEAD_SHA || null,
   compilerIdentity: nativeIdentity, nativeSha256: sha(native), nativeBytes: fs.statSync(native).size,
@@ -143,7 +148,52 @@ const globalPrefix = path.join(runRoot, 'global');
 run('npm', ['install', '--global', '--prefix', globalPrefix, '--cache', emptyCache, '--offline', '--ignore-scripts', '--no-audit', '--no-fund', tarball]);
 assert.deepEqual(JSON.parse(run(path.join(globalPrefix, 'bin/psc'), ['--identity'])), nativeIdentity);
 console.log(run(process.execPath, [path.join(root, 'scripts/npm-native-library-canary.mjs'), path.join(runRoot, 'library'), cli]).trim());
-const receipt = { ...distribution, qualification: 'passed', tarball: path.relative(root, tarball),
+const adapterResources=[
+ 'typed-io.mjs','typed-io-wasm.mjs','typed_io.py','typed_io_component.py','typed-io.php',
+ 'typed-io-rust/Cargo.toml','typed-io-rust/Cargo.lock','typed-io-rust/src/lib.rs','typed-io-rust/src/policy_server.rs'
+].map(file=>{
+ const original=path.join(root,'host-tools',file),actual=path.join(installed,'host-tools',file);
+ assert.equal(sha(actual),sha(original),'installed host resource identity: '+file);
+ return {file,sha256:sha(actual)};
+});
+assert.equal(fs.existsSync(path.join(installed,'host-tools/typed-io-rust/target')),false);
+run('cargo',['check','--locked','--offline','--manifest-path',
+ path.join(installed,'host-tools/typed-io-rust/Cargo.toml'),'--lib'],
+ {env:{...nativeEnv,CARGO_TARGET_DIR:path.join(runRoot,'installed-rust-host-target')}});
+const installedTypedIo=[];
+for(const syntax of ['lean','ps']){
+ const project=path.join(consumer,'io-'+syntax);
+ copy(path.join(root,'stdlib/ProofScript'),path.join(project,'ProofScript'));
+ copy(path.join(root,'test/applications/SequencedIo/Program.'+syntax),path.join(project,'SequencedIo/Program.'+syntax));
+ const entry=path.join(project,'Run.'+syntax),generatedIo=path.join(project,'Run.js');
+ copy(path.join(root,'test/applications/SequencedIo/Run.'+syntax),entry);
+ run(process.execPath,[cli,'build',entry,'--target','js','--assurance','ordinary',
+  '--abi','io-dispatcher','--out',generatedIo],{cwd:consumer});
+ const capabilityRoot=path.join(project,'root');fs.mkdirSync(capabilityRoot);
+ write(path.join(capabilityRoot,'input.txt'),'hello😀');
+ const script=path.join(project,'consumer.mjs');
+ write(script,[
+  'import assert from "node:assert/strict";',
+  'import fs from "node:fs";',
+  'import {withTypedIo} from "proofscript/io/node";',
+  'import {fileURLToPath} from "node:url";',
+  'const root=fileURLToPath(new URL("./root/",import.meta.url));',
+  'const input=new URL("./stdin",import.meta.url),output=new URL("./stdout",import.meta.url);',
+  'fs.writeFileSync(input,"world😀\\r\\n");fs.writeFileSync(output,"");',
+  'const inputFd=fs.openSync(input,"r"),outputFd=fs.openSync(output,"w");',
+  'const config={abi:"psc1-node-linux-string-io/1",capabilities:["readUtf8","writeUtf8","readLine","writeLine"],required:["readUtf8","writeUtf8","readLine","writeLine"],root,maxFileBytes:4096,maxLineBytes:128,inputFd,outputFd};',
+  'try{await withTypedIo(config,()=>import("./Run.js"),(program,host)=>assert.equal(program.run(host.execute),true));}finally{fs.closeSync(inputFd);fs.closeSync(outputFd);}',
+  'assert.equal(fs.readFileSync(root+"output.txt","utf8"),"processed:hello😀");',
+  'assert.equal(fs.readFileSync(output,"utf8"),"tick\\ntick\\nrecovered\\necho:world😀\\n");',
+  'console.log("PSC1_INSTALLED_TYPED_IO_PASS");'
+ ].join('\n'));
+ assert.match(run(process.execPath,[script],{cwd:consumer}),/PSC1_INSTALLED_TYPED_IO_PASS/);
+ const manifest=JSON.parse(fs.readFileSync(generatedIo+'.bundle.json','utf8'));
+ assert.equal(manifest.publicAbi,'io-dispatcher');assert.equal(manifest.logicalCheckerCommit,pin.commit);
+ installedTypedIo.push({syntax,target:'js',passed:true,sourceClosureSha256:manifest.sourceClosureSha256,
+  kernelAdmissionSha256:manifest.kernelAdmissionSha256,artifactSha256:sha(generatedIo)});
+}
+const receipt = { ...distribution, qualification: 'passed', adapterResources,installedTypedIo, tarball: path.relative(root, tarball),
   tarballSha256: sha(tarball), tarballBytes: fs.statSync(tarball).size,
   offlineLocalInstall: true, offlineGlobalInstall: true, nativeNpmIdentityAgreement: true,
   nativeDirectBuild: true, generatedJavaScriptExecuted: true, typeScriptInstalled: false,
@@ -153,7 +203,7 @@ write(path.join(output, 'qualification.json'), json(receipt));
 write(path.join(runRoot, 'NATIVE_DISTRIBUTION.json'), json(distribution));
 // Retain the installable tarball, receipts and library/source bundles once every
 // qualification succeeded. Avoid archiving four duplicate native installations.
-for (const temporary of [stage, consumer, globalPrefix, emptyCache]) {
+for (const temporary of [stage, consumer, globalPrefix, emptyCache, path.join(runRoot,'installed-rust-host-target')]) {
   fs.rmSync(temporary, { recursive: true, force: true });
 }
 console.log('PSC1_NPM_NATIVE_DISTRIBUTION: PASS ' + JSON.stringify(receipt));

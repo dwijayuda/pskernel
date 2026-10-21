@@ -1,0 +1,152 @@
+{
+  "schema": "pskernel-initial-owner-native-preflight-v1",
+  "sourceSha": "0d370b985cf2b2e6e054aedcfe206c23ffc772d9",
+  "run": {
+    "id": 39656934954,
+    "job": 119419581239,
+    "conclusion": "success",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39656934954"
+  },
+  "toolchain": {
+    "lean": "leanprover/lean4:v4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "artifact": {
+    "id": 12372392283,
+    "bytes": 1726,
+    "zipSha256": "b3c564f95df54e405a2767186558cc1d5c01c13985a0c4d95785d86dab7b5236"
+  },
+  "actualSentinels": [
+    "PSC1_V2_INITIAL_OWNER_METADATA: PASS owners=28 recursors=7 rules=13 delta=1",
+    "PSC1_V2_INITIAL_OWNER_MATRIX: PASS check=252 whnf=252 defeq=252",
+    "PSC1_V2_INITIAL_OWNER_PUBLIC: PASS replies=36 secondArena=fresh",
+    "PSC1_V2_INITIAL_OWNER_OFFICIAL: PASS checks=12 equalities=12 invalid=1",
+    "PSC1_V2_INITIAL_OWNER_NAMESPACE: PASS positions=76 precedence=2 atomic=3 guards=4",
+    "PSC1_V2_INITIAL_OWNER_LIVE_INDEX: PASS variants=6 public=12",
+    "PSC1_V2_INITIAL_OWNER: PASS checkedBatches=2 queries=12"
+  ],
+  "proofAudit": {
+    "count": 20,
+    "proofs": {
+      "PsKernelExprV2InitialOwnerProofs.definition_owner_uses_returned_state": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.definition_type_failure_precedes_value": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.definition_value_failure_propagates": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.empty_entries": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.empty_environment": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.historical_payload_irrelevant": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.live_import_error": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.live_import_success": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.live_lookup_extensional": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.missing_live_lookup": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.opaque_value_is_not_imported": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.public_empty_batch_does_not_import": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.public_import_failure_is_atomic": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.public_installed_owner_keeps_original_input": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.public_preflight_precedes_import": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.public_validation_precedes_import": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.quotient_has_no_owner": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.shared_index_same_entries": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.shared_index_same_lookup": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "PsKernelExprV2InitialOwnerProofs.theorem_proof_is_not_imported": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    "runtimeAxiomsAdded": false,
+    "sourceSha": "0d370b985cf2b2e6e054aedcfe206c23ffc772d9"
+  },
+  "qualification": {
+    "focusedNative": "PASS",
+    "localProof": "PASS",
+    "completeIntegration": "NOT RUN",
+    "portableSource": "NOT RUN",
+    "canonicalPs": "NOT RUN",
+    "generatedJs": "NOT RUN",
+    "pairedPerformance": "NOT RUN",
+    "fullArena": "NOT RUN",
+    "provider": "NOT RUN"
+  },
+  "limitations": [
+    "Native source preflight only, not full provider/portable/generated qualification.",
+    "Initial-session Quot owners still unsupported.",
+    "Eager private recursive metadata import remains and requires complete-call performance qualification.",
+    "All four V1 whole-operation fallback families remain."
+  ]
+}

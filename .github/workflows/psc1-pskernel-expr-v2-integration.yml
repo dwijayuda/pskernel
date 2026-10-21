@@ -7,6 +7,7 @@ on:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
       - research/psc1-pskernel-v2-staged-20261021
       - research/psc1-pskernel-v2-carrier-20261021
+      - research/psc1-pskernel-initial-owner-20261021
     paths:
       - psc1/scripts/install-lean435-ci.sh
       - psc1/lean-toolchain
@@ -28,6 +29,10 @@ on:
       - psc1/test/PsKernelExprV2RecursorRegression.lean
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
       - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+      - psc1/test/PsKernelExprV2InitialOwnerRegression.lean
+      - psc1/test/PsKernelExprV2InitialOwnerProofs.lean
+      - psc1/scripts/pskernel-expr-v2-initial-owner-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs
       - psc1/test/PsKernelNameWorkerRegression.lean
       - psc1/test/PsKernelNameWorkerProofs.lean
       - psc1/scripts/pskernel-name-worker-smoke.mjs
@@ -98,6 +103,8 @@ jobs:
           node --check scripts/pskernel-expr-v2-recursor-smoke.mjs
           node --check scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
           node --check scripts/pskernel-name-worker-smoke.mjs
+          node --check scripts/pskernel-expr-v2-initial-owner-smoke.mjs
+          node --check scripts/pskernel-expr-v2-initial-owner-bench.mjs
           node --check scripts/pskernel-expr-v2-recursor-k-smoke.mjs
           node --check scripts/pskernel-expr-v2-owned-state-smoke.mjs
           # Run the new authentic mode-crossing sentinel against exact parent semantics.
@@ -143,7 +150,7 @@ jobs:
           restore_occurrence_sources
           trap - EXIT
           echo 'PSC1_INVALID_OCCURRENCE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d'
-          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_recursor_k_regression psc1_kernel_expr_v2_owned_state_regression psc1_kernel_name_worker_regression
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_recursor_k_regression psc1_kernel_expr_v2_owned_state_regression psc1_kernel_name_worker_regression psc1_kernel_expr_v2_initial_owner_regression
       - name: Check invalid recursor-headed occurrence against official Lean
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -322,6 +329,46 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-generated-prefix-native.log"
           grep -Fqx 'PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
           grep -Fqx 'PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+      - name: Check initial-session owners, original IDs and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_initial_owner_regression \
+            | tee "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_METADATA: PASS owners=28 recursors=7 rules=13 delta=1' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_MATRIX: PASS check=252 whnf=252 defeq=252' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_PUBLIC: PASS replies=36 secondArena=fresh' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_OFFICIAL: PASS checks=12 equalities=12 invalid=1' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_NAMESPACE: PASS positions=76 precedence=2 atomic=3 guards=4' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_LIVE_INDEX: PASS variants=6 public=12' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER: PASS checkedBatches=2 queries=12' "$RUNNER_TEMP/psc1-initial-owner-native.log"
+      - name: Prove initial-session owner authority and ingress ordering
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(grep -c '^#print axioms PsKernelExprV2InitialOwnerProofs\.' test/PsKernelExprV2InitialOwnerProofs.lean)" -eq 20
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2InitialOwnerProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-initial-owner-proofs.log"
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          source = pathlib.Path("test/PsKernelExprV2InitialOwnerProofs.lean").read_text()
+          log = (pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-initial-owner-proofs.log").read_text()
+          expected = re.findall(r"^#print axioms (PsKernelExprV2InitialOwnerProofs\.\S+)$", source, re.M)
+          actual = re.findall(r"'(PsKernelExprV2InitialOwnerProofs\.[^']+)'\s+(does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log, re.S)
+          assert len(expected) == 20 and len(set(expected)) == 20, "source proof count"
+          assert len(actual) == 20 and {x[0] for x in actual} == set(expected), "compiled proof count"
+          allowed = {"propext", "Classical.choice", "Quot.sound"}
+          dependencies = {}
+          for name, _, body in actual:
+              names = {x.strip() for x in body.split(",") if x.strip()}
+              assert names <= allowed, (name, sorted(names - allowed))
+              dependencies[name] = sorted(names)
+          record = {"sourceSha": os.environ["GITHUB_SHA"], "proofs": dependencies, "count": 20, "runtimeAxiomsAdded": False}
+          print("PSC1_INITIAL_OWNER_PROOF_AUDIT " + json.dumps(record, sort_keys=True))
+          (pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-initial-owner-proof-receipt.json").write_text(json.dumps(record, indent=2) + "\n")
+          PY
       - name: Check DAG K conversion against V1 and official Lean
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -413,6 +460,7 @@ jobs:
               "$RUNNER_TEMP/psc1-recursor-major-proofs.log" \
               "$RUNNER_TEMP/psc1-recursor-k-proofs.log" \
               "$RUNNER_TEMP/psc1-name-worker-proofs.log" \
+              "$RUNNER_TEMP/psc1-initial-owner-proofs.log" \
               "$RUNNER_TEMP/psc1-whnf-abi-proofs.log" \
               "$RUNNER_TEMP/psc1-owned-state-proofs.log" \
               "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"; then
@@ -469,6 +517,9 @@ jobs:
             ${{ runner.temp }}/psc1-quot-native.log
             ${{ runner.temp }}/psc1-recursor-native.log
             ${{ runner.temp }}/psc1-generated-prefix-native.log
+            ${{ runner.temp }}/psc1-initial-owner-native.log
+            ${{ runner.temp }}/psc1-initial-owner-proofs.log
+            ${{ runner.temp }}/psc1-initial-owner-proof-receipt.json
             ${{ runner.temp }}/psc1-name-worker-native.log
             ${{ runner.temp }}/psc1-recursor-k-native.log
             ${{ runner.temp }}/psc1-owned-state-native.log
@@ -728,6 +779,23 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-generated-prefix-js.log"
           grep -Fqx 'PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
           grep -Eq '^PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
+      - name: Check generated initial-session DAG owners in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_INITIAL_OWNER_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          PSC1_INITIAL_OWNER_LOG="$RUNNER_TEMP/psc1-initial-owner-generated.log"
+          test -s "$PSC1_INITIAL_OWNER_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-initial-owner-smoke.mjs "$PSC1_INITIAL_OWNER_RUN_DIR/initial-owner-smoke.mjs"
+          cd "$PSC1_INITIAL_OWNER_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" initial-owner-smoke.mjs kernel.mjs | tee "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_METADATA_JS: PASS owners=28 recursors=7 rules=13 delta=1' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_MATRIX_JS: PASS check=252 whnf=252 defeq=252' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_PUBLIC_JS: PASS replies=36 secondArena=fresh' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_NAMESPACE_JS: PASS positions=76 precedence=2 atomic=3 guards=4' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_LIVE_INDEX_JS: PASS variants=6 public=12' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Eq '^PSC1_V2_INITIAL_OWNER_JS: PASS checkedBatches=2 queries=12 assertions=[1-9][0-9]*$' "$PSC1_INITIAL_OWNER_LOG"
       - name: Check generated DAG K conversion in detached Node
         working-directory: psc1
         run: |
@@ -879,6 +947,7 @@ jobs:
             ${{ runner.temp }}/psc1-quot-generated.log
             ${{ runner.temp }}/psc1-recursor-generated.log
             ${{ runner.temp }}/psc1-generated-prefix-js.log
+            ${{ runner.temp }}/psc1-initial-owner-generated.log
             ${{ runner.temp }}/psc1-name-worker-generated.log
             ${{ runner.temp }}/psc1-recursor-k-generated.log
             ${{ runner.temp }}/psc1-owned-state-generated.log

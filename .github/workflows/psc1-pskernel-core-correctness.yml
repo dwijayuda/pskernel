@@ -8,6 +8,7 @@ on:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
       - research/psc1-pskernel-v2-staged-20261021
       - research/psc1-pskernel-v2-carrier-20261021
+      - research/psc1-pskernel-initial-owner-20261021
     paths:
       - psc1/scripts/install-lean435-ci.sh
       - psc1/lean-toolchain
@@ -42,6 +43,10 @@ on:
       - psc1/scripts/pskernel-expr-v2-recursor-smoke.mjs
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
       - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+      - psc1/test/PsKernelExprV2InitialOwnerRegression.lean
+      - psc1/test/PsKernelExprV2InitialOwnerProofs.lean
+      - psc1/scripts/pskernel-expr-v2-initial-owner-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs
       - psc1/test/PsKernelNameWorkerRegression.lean
       - psc1/test/PsKernelNameWorkerProofs.lean
       - psc1/scripts/pskernel-name-worker-smoke.mjs
@@ -436,6 +441,23 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-generated-prefix-canonical.log"
           grep -Fqx 'PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-canonical.log"
           grep -Eq '^PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-generated-prefix-canonical.log"
+      - name: Check canonical-source initial-session DAG owners in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_INITIAL_OWNER_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          PSC1_INITIAL_OWNER_LOG="$RUNNER_TEMP/psc1-initial-owner-canonical.log"
+          test -s "$PSC1_INITIAL_OWNER_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-initial-owner-smoke.mjs "$PSC1_INITIAL_OWNER_RUN_DIR/initial-owner-smoke.mjs"
+          cd "$PSC1_INITIAL_OWNER_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" initial-owner-smoke.mjs kernel.mjs | tee "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_METADATA_JS: PASS owners=28 recursors=7 rules=13 delta=1' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_MATRIX_JS: PASS check=252 whnf=252 defeq=252' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_PUBLIC_JS: PASS replies=36 secondArena=fresh' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_NAMESPACE_JS: PASS positions=76 precedence=2 atomic=3 guards=4' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_LIVE_INDEX_JS: PASS variants=6 public=12' "$PSC1_INITIAL_OWNER_LOG"
+          grep -Eq '^PSC1_V2_INITIAL_OWNER_JS: PASS checkedBatches=2 queries=12 assertions=[1-9][0-9]*$' "$PSC1_INITIAL_OWNER_LOG"
       - name: Check canonical-source DAG K conversion in detached Node
         working-directory: psc1
         run: |
@@ -550,6 +572,7 @@ jobs:
             ${{ runner.temp }}/psc1-quot-canonical.log
             ${{ runner.temp }}/psc1-recursor-canonical.log
             ${{ runner.temp }}/psc1-generated-prefix-canonical.log
+            ${{ runner.temp }}/psc1-initial-owner-canonical.log
             ${{ runner.temp }}/psc1-name-worker-canonical.log
             ${{ runner.temp }}/psc1-recursor-k-canonical.log
             ${{ runner.temp }}/psc1-owned-state-canonical.log

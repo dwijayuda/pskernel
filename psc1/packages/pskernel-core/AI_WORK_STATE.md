@@ -1,3 +1,21 @@
+# Current gate: full qualification enabled after exact native preflight PASS
+
+Initial-owner source `0d370b985cf2b2e6e054aedcfe206c23ffc772d9` passed [focused native run39656934954](https://github.com/dwijayuda/pskernel/actions/runs/39656934954), [job119419581239](https://github.com/dwijayuda/pskernel/actions/runs/39656934954/job/119419581239), including every runtime matrix, actual official Lean checks and all20 compiled local equations. All20 print only `propext`, `Classical.choice`, and `Quot.sound`; the strict output-count/set/dependency audit passed. [Artifact12372392283](https://github.com/dwijayuda/pskernel/actions/runs/39656934954/artifacts/12372392283) is1,726bytes, ZIP SHA256`b3c564f95df54e405a2767186558cc1d5c01c13985a0c4d95785d86dab7b5236`.
+
+This new commit changes **only CI wiring and evidence**, retaining that exact production/test source. It enables the complete existing native integration, PSC1 portable closure, canonical.ps closure, both generated runtimes, all six research jobs and full193 Arena workflow on `research/psc1-pskernel-initial-owner-20261021`. Each route keeps Name/current-prefix/frozen-parent/resource/provider controls. The initial-owner matrices and20-proof audit are added to the full gate; the generated route still runs detached with empty PATH. Do not treat focused native PASS as full source qualification.
+
+| Exact source | Focused native | Local proof | Full native | Portable/.ps | Generated/provider | Paired performance | Arena |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 561b324bbb8bae6f91b3d8f9de7052950fe1eeaf | FAIL fixture layout | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+| 0d370b985cf2b2e6e054aedcfe206c23ffc772d9 | PASS | PASS | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+| This full-gate wiring revision | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+`evidence/2026-10-21-initial-owner-native-qualified-receipt.json` records actual0d370 sentinels and proof dependencies. The first fixture failure remains historical; no assertion was weakened. Next observe every terminal job at the exact new SHA, fix actual portability/generated/semantic failures, then authenticate both baseline deb and candidate runtime bundles for the32-worker384-call initial-owner benchmark. No performance result is claimed until that full-call measurement actually executes. The ordinary Arena workflow still uses historical V8 old-space limits; hard-OS-capped artifact replay is a separately authenticated gate and cannot be inferred.
+
+Initial-session Quot ownership, recursive metadata imports, eager decode, four whole-operation fallbacks and full Arena conformance remain incomplete. V1 stays the default/reference. This source remains isolated from integration until it is independently qualified and its complete-call import cost is acceptable.
+
+---
+
 # Latest preflight: fixture layout repaired; qualification pending
 
 The first candidate `561b324bbb8bae6f91b3d8f9de7052950fe1eeaf` failed [run39656379521](https://github.com/dwijayuda/pskernel/actions/runs/39656379521), [job119417641384](https://github.com/dwijayuda/pskernel/actions/runs/39656379521/job/119417641384), at native fixture compilation. The new `API.DagInitial`, modified `API.Dag` and complete `SelfHost` modules built successfully. Lean reported `test/PsKernelExprV2InitialOwnerRegression.lean:772:60: unexpected identifier; expected '}'` at the deliberately missing-index test record.

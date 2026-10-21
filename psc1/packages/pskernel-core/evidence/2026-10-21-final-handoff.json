@@ -1,0 +1,299 @@
+{
+  "format": "psc1-pskernel-ultra-to-pro-handoff-v1",
+  "observed_at": "2026-10-21T16:50:08.474Z",
+  "implementation_sha": "034999734f2574876a747c967dd03bcc6904b395",
+  "last_fully_qualified_scoped_provider_sha": "3aa077cb64ff06f76727decd01c43ad6c33f351d",
+  "qualification_note": "Candidate source qualification remains pending. Native-only predecessor successes are recorded separately. Full Arena C is independent of scoped A.",
+  "runs": [
+    {
+      "id": 39634120618,
+      "jobs": [
+        {
+          "id": 119339896329,
+          "name": "generated-dag-integration",
+          "status": "in_progress",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:33:57Z",
+          "completed_at": null,
+          "active_step": "Compile the complete independent kernel to JavaScript"
+        },
+        {
+          "id": 119339896857,
+          "name": "native-dag-integration",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-21T16:38:23Z",
+          "completed_at": "2026-10-21T16:41:56Z",
+          "active_step": null
+        }
+      ]
+    },
+    {
+      "id": 39634120648,
+      "jobs": [
+        {
+          "id": 119339895721,
+          "name": "psc1-portability",
+          "status": "in_progress",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:26:01Z",
+          "completed_at": null,
+          "active_step": "Generate independent JS kernel from the .ps closure"
+        },
+        {
+          "id": 119339896783,
+          "name": "native-kernel",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-21T16:29:04Z",
+          "completed_at": "2026-10-21T16:30:41Z",
+          "active_step": null
+        }
+      ]
+    },
+    {
+      "id": 39634120699,
+      "jobs": [
+        {
+          "id": 119339896904,
+          "name": "expr-v2-differential",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-21T16:33:02Z",
+          "completed_at": "2026-10-21T16:34:13Z",
+          "active_step": null
+        },
+        {
+          "id": 119339897466,
+          "name": "full-checker-bridge",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-21T16:37:57Z",
+          "completed_at": "2026-10-21T16:39:23Z",
+          "active_step": null
+        },
+        {
+          "id": 119339897493,
+          "name": "portable-ps-closure",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-21T16:39:10Z",
+          "completed_at": "2026-10-21T16:41:19Z",
+          "active_step": null
+        },
+        {
+          "id": 119339897601,
+          "name": "portable-v2-check",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-21T16:41:40Z",
+          "completed_at": "2026-10-21T16:43:51Z",
+          "active_step": null
+        },
+        {
+          "id": 119339897914,
+          "name": "generated-js-full-checker-bridge",
+          "status": "in_progress",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:41:22Z",
+          "completed_at": null,
+          "active_step": "Build complete real PSC1 compiler and check combined research entry"
+        },
+        {
+          "id": 119339898181,
+          "name": "whnf-subset-regression",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-21T16:41:46Z",
+          "completed_at": "2026-10-21T16:42:42Z",
+          "active_step": null
+        }
+      ]
+    },
+    {
+      "id": 39634120617,
+      "jobs": [
+        {
+          "id": 119339895552,
+          "name": "official-arena-reference",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-21T16:27:02Z",
+          "completed_at": "2026-10-21T16:29:01Z",
+          "active_step": null
+        },
+        {
+          "id": 119343503449,
+          "name": "generated-arena-comparison",
+          "status": "in_progress",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:29:14Z",
+          "completed_at": null,
+          "active_step": "Reconstruct and check the complete canonical kernel closure"
+        }
+      ]
+    },
+    {
+      "id": 39637759611,
+      "jobs": [
+        {
+          "id": 119352848385,
+          "name": "generated-dag-integration",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        },
+        {
+          "id": 119352848567,
+          "name": "native-dag-integration",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        }
+      ]
+    },
+    {
+      "id": 39637759709,
+      "jobs": [
+        {
+          "id": 119352848485,
+          "name": "native-kernel",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        },
+        {
+          "id": 119352849214,
+          "name": "psc1-portability",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        }
+      ]
+    },
+    {
+      "id": 39637759603,
+      "jobs": [
+        {
+          "id": 119352848925,
+          "name": "portable-ps-closure",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        },
+        {
+          "id": 119352849053,
+          "name": "portable-v2-check",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        },
+        {
+          "id": 119352849307,
+          "name": "expr-v2-differential",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        },
+        {
+          "id": 119352849320,
+          "name": "full-checker-bridge",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        },
+        {
+          "id": 119352849336,
+          "name": "whnf-subset-regression",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        },
+        {
+          "id": 119352849958,
+          "name": "generated-js-full-checker-bridge",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:46:19Z",
+          "completed_at": null,
+          "active_step": null
+        }
+      ]
+    },
+    {
+      "id": 39637759569,
+      "jobs": [
+        {
+          "id": 119352847788,
+          "name": "official-arena-reference",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-21T16:47:56Z",
+          "completed_at": "2026-10-21T16:50:04Z",
+          "active_step": null
+        },
+        {
+          "id": 119354877930,
+          "name": "generated-arena-comparison",
+          "status": "queued",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:50:04Z",
+          "completed_at": null,
+          "active_step": null
+        }
+      ]
+    },
+    {
+      "id": 39637759606,
+      "jobs": [
+        {
+          "id": 119352848125,
+          "name": "authentic-timeout-diagnostics",
+          "status": "in_progress",
+          "conclusion": null,
+          "started_at": "2026-10-21T16:49:40Z",
+          "completed_at": null,
+          "active_step": "Run actions/setup-node@v4"
+        }
+      ]
+    }
+  ],
+  "church_diagnostic": {
+    "branch": "research/psc1-arena-logical-20261021",
+    "head_sha": "f2e6c44a506a53dc294ae6569f8371e81ed6bdd5",
+    "run_id": 39638208348,
+    "status_at_snapshot": "queued",
+    "production_kernel_sha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+    "first_failing_stage_observed": false,
+    "previous_failures": [
+      {
+        "sha": "d3730ae4e72f91a5dda010bc6b7f40d4f379f780",
+        "run": 39631889379,
+        "reason": "reserved Lean binder"
+      },
+      {
+        "sha": "b71a4b1aed8d5a4113c635593fa70607d34a0159",
+        "run": 39636878473,
+        "reason": "isolated launcher rejected stage mode arguments"
+      }
+    ]
+  }
+}

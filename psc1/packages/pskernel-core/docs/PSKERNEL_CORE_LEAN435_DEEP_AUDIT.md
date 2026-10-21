@@ -1,5 +1,8 @@
 # PSKernel-Core — Lean 4.35 architecture, correctness and performance audit
 
+Handoff snapshot: **2026-10-21T16:50:08.474Z**. Executable implementation: `034999734f2574876a747c967dd03bcc6904b395`; **not yet fully qualified**. Latest fully qualified scoped A: `3aa077cb64ff06f76727decd01c43ad6c33f351d`. Native predecessor464 passed integration119339896857 and correctness119339896783; its generated/canonical and one research job were still active. The candidate's official Arena reference119352847788 passed; its native/generated/canonical/research comparison jobs were queued. See [final source-bound receipt](../evidence/2026-10-21-final-handoff.json), newest work-state, and live Actions before promotion. Full Arena C and performance/release D remain separate from scoped A.
+
+
 Audit baseline: `3aa077cb64ff06f76727decd01c43ad6c33f351d` on `integration/psc1-pskernel-expr-v2-lean435-20261021`, repository `dwijayuda/pskernel`. Reference Lean is exactly `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` (`v4.35.0`). Dates use Asia/Jakarta; Actions timestamps use UTC.
 
 This document records inspected source, observed failures and selected corrections. The [completion plan](PSKERNEL_CORE_COMPLETION_PLAN.md) owns execution order; the [progress matrix](PSKERNEL_CORE_PROGRESS_MATRIX.md) records implementation separately from qualification. Read the newest `../AI_WORK_STATE.md` entry and exact-source Actions before using a later checkpoint. Local equations and finite differential tests are not a global soundness or backend-preservation theorem.

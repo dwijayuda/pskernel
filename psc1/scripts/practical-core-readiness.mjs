@@ -75,7 +75,7 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   assert.equal(typedIoApplication.completeFamily,false);
   assert.equal(typedIoApplication.sevenHostAdapters,false);
   assert.deepEqual(typedIoApplication.records.map(r=>r.syntax+'/'+r.target).sort(),
-   ['lean','ps'].flatMap(s=>['js','ts','rust'].map(t=>s+'/'+t)).sort(),'complete unique IO subset');
+   ['lean','ps'].flatMap(s=>['js','ts','rust','python','php'].map(t=>s+'/'+t)).sort(),'complete unique IO subset');
   for(const row of typedIoApplication.records){
    assert.equal(row.passed,true);assert.equal(row.runtime,'executed');
    assert.equal(row.admission,'independent-official-Lean');
@@ -106,7 +106,7 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
    coreStatus:core?.qualified&&full?'qualified-subset':core?.tested?'tested':core?.implemented?'implemented':'blocked',
    coreScope:a.coreExecution?.scope||null,
    ioStatus:['cli','json-files'].includes(a.id)&&typedIoApplication?(full?'qualified-subset':'tested'):'blocked',
-   ioScope:['cli','json-files'].includes(a.id)?'Linux Node capability host with checked JS/TS/Rust guests; seven adapters and remaining application criteria pending':null};
+   ioScope:['cli','json-files'].includes(a.id)?'Linux Node capability host with checked JS/TS/Rust/Python/PHP guests; seven adapters and remaining application criteria pending':null};
  });
  const familyQualified=id=>families.find(f=>f.id===id)?.qualified===true;
  const queue=contract.workQueue.map(task=>{

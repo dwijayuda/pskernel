@@ -29,7 +29,7 @@ console.log('PSC1_RELEASE_READINESS_CONTRACT: PASS missing, stale, partial, dupl
 
 const io={schema:'psc1-typed-io-application-execution/1',testedCommit:commit,checkerCommit:contract.authority.commit,
  passed:true,failures:[],completeFamily:false,sevenHostAdapters:false,
- records:['lean','ps'].flatMap(syntax=>['js','ts','rust'].map(target=>({
+ records:['lean','ps'].flatMap(syntax=>['js','ts','rust','python','php'].map(target=>({
  syntax,target,passed:true,runtime:'executed',admission:'independent-official-Lean',strictIr:'required-by-production-publication',
  checks:['capability-preflight-before-load','actual-json-file-read-transform-atomic-write','actual-console-unicode-crlf-empty-eof'],
  ...Object.fromEntries(['sourceSha256','librarySha256','artifactSha256','manifestSha256','oracleSha256'].map(k=>[k,'a'.repeat(64)]))

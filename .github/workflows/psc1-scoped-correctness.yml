@@ -207,7 +207,7 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --inference-control
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
           node scripts/typed-io-policy-tests.mjs
-          node scripts/typed-io-application-tests.mjs
+          PSC1_IO_APPLICATION_TARGETS=js,ts,rust,python,php node scripts/typed-io-application-tests.mjs
           node scripts/check-language-backend-parity.mjs docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json dist/scoped-correctness/stdlib-collections/results.json
           node scripts/check-language-backend-parity.mjs docs/PSC1_COMPILERM_CASE_CONTRACT.json dist/scoped-correctness/compiler-m/results.json
       - name: Execute owned component binary encoder with external encoding disabled
@@ -263,6 +263,7 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --json-application
           node scripts/compiler-m-conformance-tests.mjs --inference-control
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
+          PSC1_IO_APPLICATION_TARGETS=python PSC1_IO_APPLICATION_EVIDENCE=typed-io-python314 node scripts/typed-io-application-tests.mjs
           node scripts/typed-error-conformance-tests.mjs
           node scripts/runtime-conformance-tests.mjs
           node scripts/ordinary-while-conformance-tests.mjs

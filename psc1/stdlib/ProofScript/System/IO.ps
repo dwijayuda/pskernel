@@ -44,14 +44,35 @@ def ioEncodeRequest(request : IoRequest) : String :=
   }
 
 def ioDecodeError(text : String) : IoError :=
-  if (ioTextEq(text, "capabilityDenied")) { IoError.capabilityDenied }
-  else if (ioTextEq(text, "pathDenied")) { IoError.pathDenied }
-  else if (ioTextEq(text, "notFound")) { IoError.notFound }
-  else if (ioTextEq(text, "wrongType")) { IoError.wrongType }
-  else if (ioTextEq(text, "invalidUtf8")) { IoError.invalidUtf8 }
-  else if (ioTextEq(text, "tooLarge")) { IoError.tooLarge }
-  else if (ioTextEq(text, "ioFailure")) { IoError.ioFailure }
-  else { IoError.protocolError }
+  if (ioTextEq(text, "capabilityDenied")) {
+    IoError.capabilityDenied
+  } else {
+    if (ioTextEq(text, "pathDenied")) {
+      IoError.pathDenied
+    } else {
+      if (ioTextEq(text, "notFound")) {
+        IoError.notFound
+      } else {
+        if (ioTextEq(text, "wrongType")) {
+          IoError.wrongType
+        } else {
+          if (ioTextEq(text, "invalidUtf8")) {
+            IoError.invalidUtf8
+          } else {
+            if (ioTextEq(text, "tooLarge")) {
+              IoError.tooLarge
+            } else {
+              if (ioTextEq(text, "ioFailure")) {
+                IoError.ioFailure
+              } else {
+                IoError.protocolError
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
 def ioJsonStringField(value : JsonValue, key : String) : Option(String) :=
   match jsonObjectFind(value, key) with {
@@ -75,19 +96,29 @@ def ioDecodeLine(value : JsonValue) : IoResponse :=
   }
 
 def ioDecodeValue(kind : String, value : JsonValue) : IoResponse :=
-  if (ioTextEq(kind, "unit")) { IoResponse.done }
-  else if (ioTextEq(kind, "error")) {
-    match ioJsonStringField(value, "error") with {
-      | Option.some text => IoResponse.failed(ioDecodeError(text))
-      | _ => IoResponse.failed(IoError.protocolError)
+  if (ioTextEq(kind, "unit")) {
+    IoResponse.done
+  } else {
+    if (ioTextEq(kind, "error")) {
+      match ioJsonStringField(value, "error") with {
+        | Option.some text => IoResponse.failed(ioDecodeError(text))
+        | _ => IoResponse.failed(IoError.protocolError)
+      }
+    } else {
+      if (ioTextEq(kind, "text")) {
+        match ioJsonStringField(value, "text") with {
+          | Option.some text => IoResponse.text(text)
+          | _ => IoResponse.failed(IoError.protocolError)
+        }
+      } else {
+        if (ioTextEq(kind, "line")) {
+          ioDecodeLine(value)
+        } else {
+          IoResponse.failed(IoError.protocolError)
+        }
+      }
     }
-  } else if (ioTextEq(kind, "text")) {
-    match ioJsonStringField(value, "text") with {
-      | Option.some text => IoResponse.text(text)
-      | _ => IoResponse.failed(IoError.protocolError)
-    }
-  } else if (ioTextEq(kind, "line")) { ioDecodeLine(value) }
-  else { IoResponse.failed(IoError.protocolError) }
+  }
 
 def ioDecodeResponse(source : String) : IoResponse :=
   match jsonParse(source) with {

@@ -53,7 +53,7 @@ assert.equal(ioApplication.schema,'psc1-typed-io-application-execution/1');
 assert.equal(ioApplication.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 assert.deepEqual(ioApplication.failures,[]);
 assert.deepEqual(ioApplication.records.map(r=>r.syntax+'/'+r.target).sort(),
- ['lean','ps'].flatMap(s=>['js','ts','rust'].map(t=>s+'/'+t)).sort());
+ ['lean','ps'].flatMap(s=>['js','ts','rust','python','php'].map(t=>s+'/'+t)).sort());
 for(const row of ioApplication.records){
  assert.equal(row.passed,true);assert.equal(row.runtime,'executed');
  assert.equal(row.admission,'independent-official-Lean');
@@ -63,6 +63,17 @@ for(const row of ioApplication.records){
  assert.ok(row.checks.includes('actual-json-file-read-transform-atomic-write'));
  assert.ok(row.checks.includes('actual-console-unicode-crlf-empty-eof'));
 }
+
+const minimumIoApplication=read('dist/scoped-correctness/typed-io-python314/application.json');
+assert.equal(minimumIoApplication.schema,'psc1-typed-io-application-execution/1');
+assert.equal(minimumIoApplication.testedCommit,process.env.GITHUB_SHA);
+assert.equal(minimumIoApplication.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+assert.equal(minimumIoApplication.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+assert.equal(minimumIoApplication.passed,true);assert.deepEqual(minimumIoApplication.failures,[]);
+assert.deepEqual(minimumIoApplication.targets,['python']);
+assert.deepEqual(minimumIoApplication.records.map(r=>r.syntax+'/'+r.target).sort(),['lean/python','ps/python']);
+assert.ok(minimumIoApplication.records.every(r=>r.passed&&r.runtime==='executed'&&r.checks.includes('actual-json-file-read-transform-atomic-write')));
+
 assert.equal(ioApplication.completeFamily,false);assert.equal(ioApplication.sevenHostAdapters,false);
 
 const jsonApplicationContract=read('docs/PSC1_JSON_APPLICATION_CASE_CONTRACT.json');
@@ -371,7 +382,7 @@ const receipt = {
   })),
   architectureFoundation: {
     boundedProtocols:extraProtocols,
-    typedIo:{hostProvider:'Linux Node',policyChecks:ioPolicy.checks.length,applicationBundles:ioApplication.records.length,sevenHostAdapters:false,completeFamily:false,evidence:'typed-io/application.json'},
+    typedIo:{hostProvider:'Linux Node',policyChecks:ioPolicy.checks.length,applicationBundles:ioApplication.records.length,minimumPythonBundles:minimumIoApplication.records.length,sevenHostAdapters:false,completeFamily:false,evidence:'typed-io/application.json'},
     jsonRecordApplicationCore:{contract:jsonApplicationContract.id,obligations:jsonApplication.records.length,
       minimumPythonObligations:minimumJsonApplication.records.length,
       evidence:'json-application/results.json',typedFileIo:false,completeApplication:false},

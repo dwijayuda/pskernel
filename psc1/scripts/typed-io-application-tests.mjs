@@ -7,7 +7,10 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {withTypedIo} from '../host-tools/typed-io.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const evidence=path.join(root,'dist/scoped-correctness/typed-io');
+const evidence=path.join(root,'dist/scoped-correctness',process.env.PSC1_IO_APPLICATION_EVIDENCE||'typed-io');
+const targets=(process.env.PSC1_IO_APPLICATION_TARGETS||'js,ts,rust').split(',');
+assert.equal(new Set(targets).size,targets.length);
+assert.ok(targets.length&&targets.every(t=>['js','ts','rust','python','php'].includes(t)));
 const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-typed-io-app-'));
 fs.mkdirSync(evidence,{recursive:true});
 const native=process.env.PSC1_NATIVE||path.join(root,'.lake/build/bin/psc1');
@@ -37,12 +40,12 @@ assert.deepEqual(JSON.parse(oracle.begin),{op:'readUtf8',path:'input.json'});
 assert.deepEqual(JSON.parse(oracle.next),{op:'writeUtf8',path:'output.json',text:expectedText});
 assert.equal(oracle.finish,true);
 write(path.join(evidence,'native-oracle.json'),JSON.stringify(oracle,null,2)+'\n');
-for(const syntax of ['lean','ps'])for(const target of ['js','ts','rust']){
+for(const syntax of ['lean','ps'])for(const target of targets){
  const label=syntax+'-'+target,folder=path.join(work,label);
  const source=path.join(folder,'source/Program.'+syntax);
  write(source,read('test/applications/TypedIo/Program.'+syntax));
  write(path.join(folder,'source/ProofScript/System/IO.'+syntax),read('stdlib/ProofScript/System/IO.'+syntax));
- const output=path.join(folder,'module.'+{js:'js',ts:'ts',rust:'rs'}[target]);
+ const output=path.join(folder,'module.'+{js:'js',ts:'ts',rust:'rs',python:'py',php:'php'}[target]);
  try{
   run(native,['build',source,'--target',target,'--assurance','ordinary','--out',output]);
   const manifest=JSON.parse(fs.readFileSync(output+'.bundle.json','utf8'));
@@ -61,6 +64,25 @@ for(const syntax of ['lean','ps'])for(const target of ['js','ts','rust']){
     module=path.join(consumer,'module.js');
    }
    load=()=>import(pathToFileURL(fs.realpathSync(module)).href);
+  }else if(target==='python'){
+   const consumer=path.join(folder,'python-consumer.py');
+   write(consumer,[
+    'import importlib.util,json,sys',
+    'spec=importlib.util.spec_from_file_location("psc1_io_guest",sys.argv[1])',
+    'module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)',
+    'result=getattr(module,sys.argv[2])(*json.loads(sys.argv[3]))',
+    'sys.stdout.write(json.dumps(result,ensure_ascii=False))'
+   ].join('\n'));
+   load=async()=>Object.fromEntries(['beginFile','nextFile','finishFile','beginLine','nextLine'].map(name=>[name,(...args)=>
+    JSON.parse(run(process.env.PSC1_PYTHON||'python3',['-I',consumer,output,name,JSON.stringify(args)]))
+   ]));
+  }else if(target==='php'){
+   const consumer=path.join(folder,'php-consumer.php');
+   write(consumer,'<?php\n$m=require $argv[1]; $args=json_decode($argv[3],true,512,JSON_THROW_ON_ERROR); '+
+    '$result=$m[$argv[2]](...$args); fwrite(STDOUT,json_encode($result,JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR));\n');
+   load=async()=>Object.fromEntries(['beginFile','nextFile','finishFile','beginLine','nextLine'].map(name=>[name,(...args)=>
+    JSON.parse(run(process.env.PSC1_PHP||'php',['-d','memory_limit=1G',consumer,output,name,JSON.stringify(args)]))
+   ]));
   }else{
    const crate=path.join(folder,'consumer');
    fs.cpSync(fs.realpathSync(output.replace(/\.rs$/,'.cargo')),crate,{recursive:true,dereference:true});
@@ -132,7 +154,7 @@ for(const syntax of ['lean','ps'])for(const target of ['js','ts','rust']){
    sourceSha256:hash(source),librarySha256:hash(path.join(root,'stdlib/ProofScript/System/IO.'+syntax)),
    artifactSha256:hash(output),manifestSha256:generationHash,oracleSha256:hash(oracleFile),
    admission:'independent-official-Lean',strictIr:'required-by-production-publication',
-   standaloneTargetIo:target!=='rust',rustExecution:'separate-generated-consumer-process',
+   standaloneTargetIo:['js','ts'].includes(target),guestExecution:['js','ts'].includes(target)?'generated-module':'separate-generated-consumer-process',
    publicAbi:'String protocol and scalar Bool',runtime:'executed'});
   fs.cpSync(path.dirname(fs.realpathSync(output+'.bundle.json')),path.join(evidence,'bundles',label),{recursive:true});
   console.log('PSC1_TYPED_IO_APPLICATION_PASS: '+label);
@@ -140,9 +162,9 @@ for(const syntax of ['lean','ps'])for(const target of ['js','ts','rust']){
 }
 const receipt={schema:'psc1-typed-io-application-execution/1',testedCommit:process.env.GITHUB_SHA||null,
  branchHeadCommit:process.env.PSC1_HEAD_SHA||null,checkerCommit:oracle.commit,
- passed:failures.length===0,records,failures,completeFamily:false,sevenHostAdapters:false,
+ passed:failures.length===0,targets,records,failures,completeFamily:false,sevenHostAdapters:false,
  exclusions:['standalone Rust host adapter','Python/PHP host adapters','Wasm public String ABI and IO adapters','complete Practical Core release']};
 write(path.join(evidence,'application.json'),JSON.stringify(receipt,null,2)+'\n');
-assert.deepEqual(failures,[]);assert.equal(records.length,6);
+assert.deepEqual(failures,[]);assert.equal(records.length,targets.length*2);
 console.log('PSC1_TYPED_IO_APPLICATION: '+JSON.stringify(receipt));
 fs.rmSync(work,{recursive:true,force:true});

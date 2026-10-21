@@ -11,17 +11,35 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 ## Current checkpoint and evidence
 
 The latest complete integration/canonical checkpoint is
-[9b34a9351f509a9a042664e354821545368200ba](https://github.com/dwijayuda/pskernel/commit/9b34a9351f509a9a042664e354821545368200ba):
-[integration39517166107](https://github.com/dwijayuda/pskernel/actions/runs/39517166107)
-and [original correctness/canonical39517166049](https://github.com/dwijayuda/pskernel/actions/runs/39517166049)
-both passed. Actual canonical reconstruction derives103 modules and1,259
+[5f0e43422a50d245eec884166e5d947c2d50f929](https://github.com/dwijayuda/pskernel/commit/5f0e43422a50d245eec884166e5d947c2d50f929):
+[integration39520324132](https://github.com/dwijayuda/pskernel/actions/runs/39520324132)
+and [original correctness/canonical39520324061](https://github.com/dwijayuda/pskernel/actions/runs/39520324061)
+passed. Actual canonical reconstruction derives 109 modules and 1,319
 declarations; authentic .lean/.ps checking, TS7.0.2, Node22.23.3, declarations/maps
-and detached canonical DAG runtime all pass. The integration executable passes
-128 correctness-guarded ABBA observations and33 whole-executable operations.
-Native includes official Lean fixtures,1,755 transformation cases and local
-metadata/cache lemmas. These passes do not establish full Arena qualification
-or a complete DAG-native checker. Newer numeral, delta, reporting and binder
-changes require their own final-source evidence.
+and detached canonical DAG runtime pass, including dependent application
+checking. The integration executable passes the correctness-guarded ABBA and
+complete-operation gates. Native includes official Lean fixtures, 1,755
+transformation cases and local metadata/cache lemmas. DirectJS still reports
+its explicit emitter capability limit and is not qualified for the full kernel.
+These passes do not establish full Arena qualification or a complete DAG-native
+checker. Newer declaration-index and profiling changes need final-source evidence.
+
+### Ordinary/mutual admitted type IDs — implemented, pending CI
+
+Ordinary and mutual inductive headers and constructor types now extend the
+same owning declaration index only after their entire original admission bundle
+succeeds. Source review confirms that ordinary Admission/ConstructorAdmission
+and mutual Header/AdmissionLoops install those exact input types unchanged.
+No generated type is imported, and these references carry no delta body.
+
+Native and generated tests add 48 mutual and 24 ordinary direct checking cases
+across fuel and depth boundaries, compare each retained ID with the live
+environment's exact installed type, and test failed mutual admission, live
+unsafe-constructor rejection, public same-batch checking, and generated
+recursor fallback with correct universe arity. Nested restoration deliberately
+publishes no input-type index until its different correspondence is established.
+This slice enables DAG projection inference; it does not migrate inductive
+admission or generated recursor checking.
 
 ### Separate full-operation allocation/CPU profiling — added, pending execution
 
@@ -48,15 +66,16 @@ RSS was254,976–265,800KiB vs298,584–301,952KiB and retained-heap deltas were
 109.258–110.108ms, measured separately. This remains a measured time gain with
 a memory/construction cost, not general performance qualification.
 
-### One owning declaration index and direct constant types — pending CI
+### One owning declaration index and direct constant types — native qualified
 
 The owning batch now keeps one declaration table containing original admitted
 type IDs, declaration kinds, universe parameters and optional transparent body
 IDs. This replaces the narrower definition-body table; it adds no parallel
 type cache or legacy type import. Successful axiom, definition, theorem, opaque
-and mutual-definition admission extends the table. Theorems and opaque
-declarations retain type IDs but never delta bodies. External-session constants
-and generated inductive/recursor types still request the complete checker.
+and mutual-definition admission extends the table; the newer ordinary/mutual
+inductive extension is described above. Theorems and opaque declarations retain
+type IDs but never delta bodies. External-session constants, generated recursor
+types and nested restoration still request the complete checker.
 
 DAG checking consults the live environment for lookup, universe arity and
 unsafe/partial policy before using a matching admitted type ID. All public
@@ -64,7 +83,14 @@ check/WHNF/DefEq preliminary checks receive the same owning table, which never
 escapes into the returned legacy session. The underlying original constant rule
 is factored into a shared validation helper with its original order. A native
 extensional proof retains its old equations and proves identical results for
-all contexts/names/levels/modes; this new proof remains pending Actions.
+all contexts/names/levels/modes. Native integration at
+[1a4b431d0b7cbcb6f2d306a62bd571a0a03060d9](https://github.com/dwijayuda/pskernel/commit/1a4b431d0b7cbcb6f2d306a62bd571a0a03060d9),
+[run39521023170](https://github.com/dwijayuda/pskernel/actions/runs/39521023170),
+passed this proof and the complete native regression. The proof depends only
+on the approved propext, Classical.choice and Quot.sound axioms. The first
+canonical attempt failed during Lean download with TLS error35 before source
+checking; only that job was rerun. Generated/canonical index qualification
+remains pending, separately from the proved shared constant-rule factorization.
 
 Native and generated fixtures add567 direct constant inference comparisons
 across nine admitted constants, three safety contexts, seven fuel values and
@@ -80,13 +106,14 @@ boundary. This is not a proof of global index correspondence or soundness.
 Native delta/binder qualification is now green at
 [767acc6b12568c8d15dae1a2ac7150aacd8ddc00](https://github.com/dwijayuda/pskernel/commit/767acc6b12568c8d15dae1a2ac7150aacd8ddc00),
 [native integration39520129735](https://github.com/dwijayuda/pskernel/actions/runs/39520129735).
-Its generated gate is still running. The numeral change at2d29ebc now passed
+Its complete generated gate also passed. The numeral change at2d29ebc now passed
 the complete [integration39518432248](https://github.com/dwijayuda/pskernel/actions/runs/39518432248):
 strict detached large-numeral JS,128 correctness-guarded ABBA observations
-and33 complete executable operations all passed. The App slice5f0e434 and the
-new declaration index require their own source/native/generated evidence.
+and33 complete executable operations all passed. The App slice5f0e434 passed native, generated and canonical gates as recorded
+above. The newer declaration index has native evidence but still needs complete
+generated/canonical evidence.
 
-### Dependent application checking — implemented, qualification pending
+### Dependent application checking — native/generated/canonical qualified
 
 The production DAG checked-inference path now checks a function, exposes its
 dependent function type with the original top-level WHNF budget, checks its
@@ -514,12 +541,12 @@ not general production performance acceptance.
 | Paged representation | Single production owner; all 12 families; exact cached metadata | Forgery, collision, sharing, page and reference tests pass | Qualified foundation; current complete closure builds | Construction and validation included in complete-operation measurements | Integrated foundation |
 | Transformations | Lift, instantiate/multi/reverse, abstract, universe substitution, spines; scoped memo | 1,755 comparisons plus budget/sharing/negative cases pass | Authentic source and strict generated transform smoke pass | Large shared-DAG fixture; not a full checker speedup claim | Integrated prerequisite |
 | Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
-| WHNF | Function normalization, separate core/public caches, direct Nat and constructor projection | Nat/projection/cache native gate passes at58fab | Statefully generated at463; expanded gate pending | Deep stateful workloads improve; small/collision regressions remain | Partial; delta/iota/local-value/String migration open |
-| Inference and DefEq | Terminal/metadata inference; definitive quick DefEq rules added | Prior structural shortcut passes; expanded quick gate pending | Complete checker executes; expanded gate pending | Metadata checks improve; general inference unqualified as DAG-native | Partial |
+| WHNF | Function normalization, separate core/public caches, Nat, constructor projection and same-batch delta | Delta/binders green at767acc; index extension green at1a4b431 | Native/generated foundation at9b; newer generated closure still qualifying | Controlled checked-WHNF gains; mixed memory and fallback regressions | Partial; recursor/iota/local-value/String migration open |
+| Inference and DefEq | DAG Sort/FVar/literal/metadata/binders, structural-type App branch, admitted constant types; definitive quick DefEq | App5f0 and index1a4 native parity/official gates pass | New App/index generated executable qualification pending | Latest expanded full-checker measurements pending; no blanket speed/memory claim | Partial; general DefEq, Let/projection/inferOnly open |
 | Inductive admission | Direct DAG request ingress, complete original admission internally | Existing admission tests pass | Real generated definition/ordinary-inductive checks pass | Full admission comparison pending | Not migrated internally |
-| Canonical self-hosting | Actual full production import closure; counts from manifest | Pinned Lean build passes | Current source/canonical checks pass; current final executable gates still running | Generator/runtime costs remain visible | Partial integration qualification |
-| Lean Arena | All193 official bodies evaluated; independent metadata-aware transport and full comparison added | Official reference122 accept/71 reject | Independent generated corpus execution pending | Host limits separated from kernel fuel | Not yet independently qualified |
-| Formal invariants | Composite metadata preservation, local-cache restoration/eligibility and budget-cap lemmas | Native axiom gate passes | Proofs intentionally outside portable executable closure | Not applicable | Global DAG/substitution/DefEq/admission soundness remains open |
+| Canonical self-hosting | Actual full production import closure; counts from manifest | Pinned Lean build passes through1a4 |9b complete canonical103 modules/1,259 declarations and detached DAG runtime pass; newer final gates running | Generator/runtime costs measured; diagnostic profiler added | Partial integration qualification |
+| Lean Arena | All193 official and independent cases evaluated without exclusions | Official reference122 accept/71 reject |9b independent165 strict matches,24 timeouts,1 internal,1 unsupported,2 contract agreements; updated fixes rerunning |60-second host caps separate from fuel4096; no timeout counted as match | Full independent qualification failed; no false admission observed among completed verdicts |
+| Formal invariants | Composite metadata, scope/cache guards, budget cap, five numeral recurrences and exact constant-rule factorization | Native proofs through1a4 checked with approved logical axioms | Proofs intentionally outside portable executable closure | No formal allocation bound | Global DAG/substitution/DefEq/admission soundness remains open |
 
 ## Latest matched native measurements
 

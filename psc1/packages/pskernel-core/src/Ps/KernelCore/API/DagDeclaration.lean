@@ -163,8 +163,9 @@ def psKernelDagDecodeDeclaration
 /-
 Publish input IDs only after complete admission succeeds. For these declaration
 families the checked environment installs the original type unchanged. Only
-transparent definition requests publish a delta body. Inductive and recursor
-types require their own representation-aware admission migration.
+transparent definition requests publish a delta body. Ordinary/mutual inductive
+headers and constructors retain their input types; generated recursor types and
+nested restoration require their own representation-aware admission migration.
 -/
 def psKernelDagDeclarationRef
     (base : PsKernelDagConstantBase)
@@ -192,6 +193,54 @@ def psKernelDagAddAdmittedDefinitions
       fun (declarations : List PsKernelExprV2DeclarationRef) =>
         smaller (List.cons (psKernelDagDefinitionRef first) declarations)
 
+/- Original input types are installed unchanged by ordinary/mutual admission.
+   Register only after the complete bundle, including generated recursors,
+   succeeds. No generated or restored expression is imported here. -/
+def psKernelDagAddAdmittedConstructors
+    (constructors : List PsKernelDagConstructor) :
+    List PsKernelName -> List PsKernelExprV2DeclarationRef ->
+    List PsKernelExprV2DeclarationRef :=
+  match constructors with
+  | List.nil =>
+      fun (_levelParams : List PsKernelName)
+          (declarations : List PsKernelExprV2DeclarationRef) => declarations
+  | List.cons first rest =>
+      fun (levelParams : List PsKernelName)
+          (declarations : List PsKernelExprV2DeclarationRef) =>
+        let recur := psKernelDagAddAdmittedConstructors rest;
+        recur levelParams
+          (List.cons
+            (psKernelDagDeclarationRef
+              (PsKernelDagConstantBase.mk first.name levelParams first.type)
+              Option.none PsKernelExprV2DeclarationRefKind.constructorDecl)
+            declarations)
+
+def psKernelDagAddAdmittedInductive
+    (levelParams : List PsKernelName) (value : PsKernelDagInductive)
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    List PsKernelExprV2DeclarationRef :=
+  psKernelDagAddAdmittedConstructors value.ctors levelParams
+    (List.cons
+      (psKernelDagDeclarationRef
+        (PsKernelDagConstantBase.mk value.name levelParams value.type)
+        Option.none PsKernelExprV2DeclarationRefKind.inductiveDecl)
+      declarations)
+
+def psKernelDagAddAdmittedInductives
+    (types : List PsKernelDagInductive) :
+    List PsKernelName -> List PsKernelExprV2DeclarationRef ->
+    List PsKernelExprV2DeclarationRef :=
+  match types with
+  | List.nil =>
+      fun (_levelParams : List PsKernelName)
+          (declarations : List PsKernelExprV2DeclarationRef) => declarations
+  | List.cons first rest =>
+      fun (levelParams : List PsKernelName)
+          (declarations : List PsKernelExprV2DeclarationRef) =>
+        let recur := psKernelDagAddAdmittedInductives rest;
+        recur levelParams
+          (psKernelDagAddAdmittedInductive levelParams first declarations)
+
 def psKernelDagDeclarationsAfterAdmission
     (request : PsKernelDagDeclarationRequest)
     (declarations : List PsKernelExprV2DeclarationRef) :
@@ -216,4 +265,8 @@ def psKernelDagDeclarationsAfterAdmission
         declarations
   | PsKernelDagDeclarationRequest.mutualDefinitions values =>
       psKernelDagAddAdmittedDefinitions values declarations
+  | PsKernelDagDeclarationRequest.ordinaryInductive levelParams _ value _ =>
+      psKernelDagAddAdmittedInductive levelParams value declarations
+  | PsKernelDagDeclarationRequest.mutualInductive value =>
+      psKernelDagAddAdmittedInductives value.types value.levelParams declarations
   | _ => declarations

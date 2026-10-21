@@ -1744,4 +1744,100 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
 }
 console.log("PSC1_V2_DAG_JS_BINDER: PASS");
 
+
+{
+  const initial=session();
+  const aName=name("DagIndexMutualA"),bName=name("DagIndexMutualB");
+  const aCtor=N.str(aName,"mk"),bCtor=N.str(bName,"mk");
+  let graph=empty;
+  const build=(kind,...args)=>{const v=mk(graph,kind,...args);graph=v.fst;return v.snd;};
+  const header=build("Sort",L.succ(L.zero));
+  const a=build("Const",aName,nil),b=build("Const",bName,nil);
+  const ca=build("Const",aCtor,nil),cb=build("Const",bCtor,nil);
+  const first={name:aName,type:header,ctors:list([{name:aCtor,type:a}])};
+  const second={name:bName,type:header,ctors:list([{name:bCtor,type:b}])};
+  const group={levelParams:nil,numParams:0n,types:list([first,second]),isUnsafe:false};
+  const request=D.mutualInductive(group),input=accepted(decode(graph),"mutual-index-input");
+  const emptyOwner={session:initial,declarations:nil};
+  const execution=accepted(get("psKernelDagRunCommand")(emptyOwner,nil,S.safe,graph,input,
+    C.admit(request)),"mutual-index-admission").snd;
+  must(array(execution.declarations).length===4,"mutual-index-input-count");
+  const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  for(const declaration of array(execution.declarations)){
+    const info=accepted(get("psKernelEnvironmentFind")(execution.session.environment,
+      declaration.name),"mutual-index-live-info");
+    must(get("psKernelExprV2DeclarationRefMatches")(declaration,info)&&
+      sameRuntimeValue(declaration.deltaValue,none)&&
+      exact(accepted(decoded(input,declaration.type),"mutual-index-input-type"),
+        get("psKernelConstantInfoType")(info)),"mutual-index-original-type-correspondence");
+  }
+  const compare=(owner,roots,label)=>{
+    const checker=get("psKernelKernelSessionChecker")(owner.session,nil,S.safe);
+    let comparisons=0;
+    for(const root of roots)for(const fuel of [0n,1n,2n,8n])
+      for(const recDepth of [0n,15n,16n]){
+        const context={...checker.context,maxRecDepth:1n,recDepth};
+        const term=accepted(decoded(input,root),label+"-term");
+        const original=get("psKernelSessionCheck")(fuel,{...checker,context},term);
+        const attempted=accepted(get("psKernelExprV2TryCheckWithDeclarationsFuel")(
+          fuel,context,graph,owner.declarations,root),label+"-required-direct");
+        if(rejected(original)){
+          if(!rejected(attempted)||original.error!==attempted.error)
+            throw Error(label+" error parity "+root+"/"+fuel+"/"+recDepth);
+        }else{
+          const inferred=accepted(attempted,label+"-success");
+          const resultGraph=accepted(decode(inferred.fst),label+"-result-graph");
+          if(!exact(accepted(original,label+"-original").fst,
+            accepted(decoded(resultGraph,inferred.snd),label+"-result-type")))
+            throw Error(label+" type parity "+root+"/"+fuel+"/"+recDepth);
+        }
+        comparisons++;
+      }
+    return comparisons;
+  };
+  must(compare(execution,[a,b,ca,cb],"mutual-index")===48,
+    "mutual-index-direct-fuel-depth-matrix");
+  const checker=get("psKernelKernelSessionChecker")(execution.session,nil,S.safe);
+  const recName=get("psKernelSimpleRecName")(aName);
+  const recInfo=accepted(get("psKernelEnvironmentFind")(execution.session.environment,
+    recName),"mutual-index-generated-recursor");
+  const recLevels=list(array(get("psKernelConstantInfoLevelParams")(recInfo)).map(()=>L.zero));
+  const withRec=mk(graph,"Const",recName,recLevels);
+  must(sameRuntimeValue(get("psKernelExprV2DeclarationRefFind")(execution.declarations)(recName),none),
+    "mutual-index-no-generated-recursor-ref");
+  must(sameRuntimeValue(get("psKernelExprV2TryCheckWithDeclarationsFuel")(
+    64n,checker.context,withRec.fst,execution.declarations,withRec.snd),none),
+    "mutual-index-correct-arity-generated-recursor-fallback");
+  const publicResult=accepted(run(initial,nil,S.safe,withRec.fst,
+    list([C.admit(request),C.check(a),C.check(ca),C.check(b),C.check(cb),C.check(withRec.snd)])),
+    "mutual-index-complete-public-checks");
+  must(array(publicResult.replies).length===6,"mutual-index-public-reply-count");
+  const isInvalid=result=>rejected(result)&&sameRuntimeValue(
+    get("psKernelErrorOutcome")(result.error),get("PsKernelOutcome").rejectedInvalid);
+  const badFirst={...first,ctors:list([{name:aCtor,type:b}])};
+  const bad=D.mutualInductive({...group,types:list([badFirst,second])});
+  must(isInvalid(get("psKernelDagRunCommand")(emptyOwner,nil,S.safe,graph,input,C.admit(bad)))&&
+    array(emptyOwner.declarations).length===0,"mutual-index-failed-bundle-no-owner");
+  must(array(get("psKernelDagDeclarationsAfterAdmission")(D.nestedInductive(group),nil)).length===0,
+    "mutual-index-nested-restoration-fallback");
+  must(isInvalid(run(initial,nil,S.safe,graph,list([
+    C.admit(D.mutualInductive({...group,isUnsafe:true})),C.check(ca)]))),
+    "mutual-index-live-unsafe-constructor-rejection");
+  const ordinary=D.ordinaryInductive(nil,0n,first,false);
+  const ordinaryOwner=accepted(get("psKernelDagRunCommand")(emptyOwner,nil,S.safe,graph,input,
+    C.admit(ordinary)),"ordinary-index-admission").snd;
+  must(array(ordinaryOwner.declarations).length===2,"ordinary-index-input-count");
+  for(const declaration of array(ordinaryOwner.declarations)){
+    const info=accepted(get("psKernelEnvironmentFind")(ordinaryOwner.session.environment,
+      declaration.name),"ordinary-index-live-info");
+    must(get("psKernelExprV2DeclarationRefMatches")(declaration,info)&&
+      sameRuntimeValue(declaration.deltaValue,none)&&
+      exact(accepted(decoded(input,declaration.type),"ordinary-index-input-type"),
+        get("psKernelConstantInfoType")(info)),"ordinary-index-original-type-correspondence");
+  }
+  must(compare(ordinaryOwner,[a,ca],"ordinary-index")===24,
+    "ordinary-index-direct-fuel-depth-matrix");
+  console.log("PSC1_V2_DAG_JS_MUTUAL_INDEX: PASS");
+}
+
 reportDagSmoke();

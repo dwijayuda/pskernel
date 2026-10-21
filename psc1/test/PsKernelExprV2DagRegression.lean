@@ -1824,6 +1824,106 @@ private def applicationCheckParity : IO Unit := do
   IO.println "PSC1_V2_DAG_OFFICIAL_CHECK_APP: PASS"
   IO.println "PSC1_V2_DAG_CHECK_APP: PASS"
 
+
+private def mutualDeclarationIndexParity : IO Unit := do
+  let initial ← fresh
+  let aName := nm "DagIndexMutualA"
+  let bName := nm "DagIndexMutualB"
+  let aCtor := PsKernelName.str aName "mk"
+  let bCtor := PsKernelName.str bName "mk"
+  let (arena, header) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty (.succ .zero))
+  let (arena, a) ← expect (psKernelExprV2PagedMkConst arena aName [])
+  let (arena, b) ← expect (psKernelExprV2PagedMkConst arena bName [])
+  let (arena, ca) ← expect (psKernelExprV2PagedMkConst arena aCtor [])
+  let (arena, cb) ← expect (psKernelExprV2PagedMkConst arena bCtor [])
+  let first := PsKernelDagInductive.mk aName header [PsKernelDagConstructor.mk aCtor a]
+  let second := PsKernelDagInductive.mk bName header [PsKernelDagConstructor.mk bCtor b]
+  let group := PsKernelDagInductiveGroup.mk [] 0 [first, second] false
+  let request := PsKernelDagDeclarationRequest.mutualInductive group
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let emptyOwner := PsKernelDagExecutionState.mk initial []
+  let admitted ← expectPublic (psKernelDagRunCommand emptyOwner [] .safe arena built (.admit request))
+  let execution := admitted.snd
+  require "mutual-index-exact-input-entry-count" (execution.declarations.length == 4)
+  for declaration in execution.declarations do
+    let info ← match psKernelEnvironmentFind execution.session.environment declaration.name with
+      | some value => pure value
+      | none => throw (IO.userError "missing admitted mutual constant")
+    let originalType ← expect (psKernelExprV2DecodedRequire built declaration.type)
+    require "mutual-index-source-correspondence"
+      (psKernelExprV2DeclarationRefMatches declaration info && declaration.deltaValue.isNone &&
+        psKernelExprEqual originalType (psKernelConstantInfoType info))
+  let checker := psKernelKernelSessionChecker execution.session [] .safe
+  for root in [a,b,ca,cb] do
+    let term ← expect (psKernelExprV2DecodedRequire built root)
+    for fuel in [0,1,2,8] do
+      for recDepth in [0,15,16] do
+        let context := { checker.context with
+          maxRecDepth := 1
+          recDepth := recDepth }
+        let original := psKernelSessionCheck fuel { checker with context := context } term
+        let originalType := match original with
+          | .error error => Except.error error
+          | .ok result => Except.ok result.fst
+        constantTypeAttemptParity "mutual-index-direct-fuel-depth-parity" originalType
+          (psKernelExprV2TryCheckWithDeclarationsFuel fuel context arena execution.declarations root)
+  let recName := psKernelSimpleRecName aName
+  let recInfo ← match psKernelEnvironmentFind execution.session.environment recName with
+    | some value => pure value
+    | none => throw (IO.userError "missing generated mutual recursor")
+  let recLevels := (psKernelConstantInfoLevelParams recInfo).map (fun _ => PsKernelLevel.zero)
+  let (withRec, recRoot) ← expect (psKernelExprV2PagedMkConst arena recName recLevels)
+  require "mutual-index-generated-recursor-not-published"
+    ((psKernelExprV2DeclarationRefFind execution.declarations recName).isNone)
+  require "mutual-index-generated-recursor-explicit-fallback"
+    ((psKernelExprV2TryCheckWithDeclarationsFuel 64 checker.context withRec
+      execution.declarations recRoot).isNone)
+  let publicResult ← expectPublic (psKernelV1RunDag initial [] .safe withRec
+    [.admit request, .check a, .check ca, .check b, .check cb, .check recRoot])
+  require "mutual-index-complete-public-checks" (publicResult.replies.length == 6)
+  let malformedFirst := PsKernelDagInductive.mk aName header [PsKernelDagConstructor.mk aCtor b]
+  let malformed := PsKernelDagDeclarationRequest.mutualInductive
+    (PsKernelDagInductiveGroup.mk [] 0 [malformedFirst, second] false)
+  require "mutual-index-failed-bundle-publishes-no-owner"
+    (match psKernelDagRunCommand emptyOwner [] .safe arena built (.admit malformed) with
+     | .error (.rejectedInvalid _) => emptyOwner.declarations.isEmpty
+     | _ => false)
+  require "mutual-index-nested-restoration-remains-unregistered"
+    ((psKernelDagDeclarationsAfterAdmission (.nestedInductive group) []).isEmpty)
+  let unsafeRequest := PsKernelDagDeclarationRequest.mutualInductive { group with isUnsafe := true }
+  require "mutual-index-live-unsafe-constructor-rejection"
+    (match psKernelV1RunDag initial [] .safe arena [.admit unsafeRequest, .check ca] with
+     | .error (.rejectedInvalid _) => true | _ => false)
+  let ordinary := PsKernelDagDeclarationRequest.ordinaryInductive [] 0 first false
+  let ordinaryResult ← expectPublic
+    (psKernelDagRunCommand emptyOwner [] .safe arena built (.admit ordinary))
+  let ordinaryOwner := ordinaryResult.snd
+  require "ordinary-index-exact-input-entry-count" (ordinaryOwner.declarations.length == 2)
+  for declaration in ordinaryOwner.declarations do
+    let info ← match psKernelEnvironmentFind ordinaryOwner.session.environment declaration.name with
+      | some value => pure value
+      | none => throw (IO.userError "missing admitted ordinary constant")
+    let originalType ← expect (psKernelExprV2DecodedRequire built declaration.type)
+    require "ordinary-index-source-correspondence"
+      (psKernelExprV2DeclarationRefMatches declaration info && declaration.deltaValue.isNone &&
+        psKernelExprEqual originalType (psKernelConstantInfoType info))
+  let ordinaryChecker := psKernelKernelSessionChecker ordinaryOwner.session [] .safe
+  for root in [a,ca] do
+    let term ← expect (psKernelExprV2DecodedRequire built root)
+    for fuel in [0,1,2,8] do
+      for recDepth in [0,15,16] do
+        let context := { ordinaryChecker.context with
+          maxRecDepth := 1
+          recDepth := recDepth }
+        let original := psKernelSessionCheck fuel { ordinaryChecker with context := context } term
+        let originalType := match original with
+          | .error error => Except.error error
+          | .ok result => Except.ok result.fst
+        constantTypeAttemptParity "ordinary-index-direct-fuel-depth-parity" originalType
+          (psKernelExprV2TryCheckWithDeclarationsFuel fuel context arena
+            ordinaryOwner.declarations root)
+  IO.println "PSC1_V2_DAG_NATIVE_MUTUAL_INDEX: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -1840,6 +1940,7 @@ def main : IO Unit := do
   hostileInputs
   admissions
   deltaBatchParity
+  mutualDeclarationIndexParity
   binderParity
   applicationCheckParity
   officialComparison

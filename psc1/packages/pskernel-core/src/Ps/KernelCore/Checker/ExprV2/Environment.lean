@@ -9,14 +9,17 @@ index used by constant inference and delta reduction.
 The public boundary creates the table empty. It never escapes into a legacy
 kernel session. These internal, forgeable records are not admission certificates.
 Live environment metadata still decides constant kind, safety and universe arity.
-Generated inductive/recursor declarations and preexisting-session declarations
-remain unsupported by this input-ID index until their own DAG types exist.
+Generated recursor types, nested-inductive restoration and preexisting-session
+constants remain unsupported until their own DAG types exist. Ordinary/mutual
+inductive headers and constructor types retain their original admitted IDs.
 -/
 inductive PsKernelExprV2DeclarationRefKind where
   | axiomDecl
   | definitionDecl
   | theoremDecl
   | opaqueDecl
+  | inductiveDecl
+  | constructorDecl
 
 structure PsKernelExprV2DeclarationRef where
   name : PsKernelName
@@ -59,6 +62,15 @@ def psKernelExprV2DeclarationRefKindMatches
   | PsKernelExprV2DeclarationRefKind.opaqueDecl =>
       match info with
       | PsKernelConstantInfo.opaqueInfo _ => true
+      | _ => false
+
+  | PsKernelExprV2DeclarationRefKind.inductiveDecl =>
+      match info with
+      | PsKernelConstantInfo.inductInfo _ => true
+      | _ => false
+  | PsKernelExprV2DeclarationRefKind.constructorDecl =>
+      match info with
+      | PsKernelConstantInfo.ctorInfo _ => true
       | _ => false
 
 def psKernelExprV2DeclarationRefMatches

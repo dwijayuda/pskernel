@@ -3259,7 +3259,7 @@ private def theoremAdmissionParity : IO Unit := do
     ("unsafe-header", theoremRequest [] unsafeP proof, true, none),
     ("unsafe-proof", theoremRequest [] p unsafeProof, true, none),
     ("partial-proof", theoremRequest [] p partialProof, true, none),
-    ("unsupported-proof-comparison", theoremRequest [] p other, false,
+    ("different-proposition-proof-comparison", theoremRequest [] p other, true,
       some "theorem proof type mismatch"),
     ("metadata-comparison-prefix", theoremRequest [] hiddenP proof, true, none)]
   let mut comparisons := 0
@@ -3272,6 +3272,9 @@ private def theoremAdmissionParity : IO Unit := do
         let direct := psKernelDagTryAdmitSimpleWithFuel fuel
           (psKernelKernelSessionEnvironment session) maxDepth session.resources.maxNatSize
           arena owner.declarations request declaration
+        if label == "different-proposition-proof-comparison" then
+          require "theorem-different-proposition-has-direct-decision"
+            (match direct with | some _ => true | none => false)
         match direct with
         | none => pure ()
         | some attempted =>

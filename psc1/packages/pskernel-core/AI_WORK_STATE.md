@@ -9,6 +9,44 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+
+## 2026-10-21 12:27 UTC — exact theorem mismatch and independent native failure evidence
+
+At staged `641ad59c3b1bbf701b0c28d4da92386096e5e65f`, native integration
+[job119217022513](https://github.com/dwijayuda/pskernel/actions/runs/39598591779/job/119217022513)
+passes the repaired mixed-constructor comparisons and the preceding native,
+official, admission and mutual280 gates, then fails
+`theorem-selected-path-unsupported-proof-comparison`. This is the remaining old
+decline fixture found by source review: distinct admitted propositions now reach
+the terminal false decision, so direct theorem admission must return the exact
+`theorem proof type mismatch` rejection. Both runtimes now require direct decisions
+for this case in all14 existing fuel/depth rows, compare exact V1 results, and
+retain the full224-case theorem matrix, same-batch/error/environment checks.
+
+The native integration workflow now gives its compile step an explicit ID and
+runs each independent test/proof/provider/performance gate when that build
+succeeded and the run was not cancelled. A failed step still fails the job.
+There is no `continue-on-error`, assertion removal or resource-limit change.
+This exposes focused-suite failures in the same run instead of hiding all later
+gates behind the first obsolete main-suite assertion. Build failure or cancellation
+still prevents those gates; the generated job and artifact handling are unchanged.
+
+Integration `88924063a5d9761f52a130c6a581cac6901ad407` has terminal PASS for both
+native119205679872 and generated119205679479 in
+[39595204321](https://github.com/dwijayuda/pskernel/actions/runs/39595204321), all six
+research jobs39595203930, and native correctness119205678982. Canonical job119205679172
+was still completing at inspection; full Arena39595203857 was running all193 cases.
+Generated artifact12344847028 ZIP SHA256
+`cbf433ace671102ee86226243818dd79f35f21fc6addd2aef48219b1676520e0`.
+Native artifact12343257329 ZIP SHA256
+`a4db9ab6bae642fb8ae217ba2be17e0781683d8c68ff29846ba993dd4b837151`.
+No new V2 replacement or Arena completion claim is implied.
+
+The full carrier candidate is preserved, unrun and unpromoted, at
+`136ee37d82d2896e278f3e2a8856b2dcb0b2d449`; merge it only with these newer
+theorem-fixture and native feedback changes retained. All semantic qualification
+must identify the exact executed source revision.
+
 ## 2026-10-21 12:20 UTC — require completed terminal DefEq results in existing fixtures
 
 Exact staged source `44bdbea5c4db451ee2ee4aafba963eea5f50d7a7` built all 365 native

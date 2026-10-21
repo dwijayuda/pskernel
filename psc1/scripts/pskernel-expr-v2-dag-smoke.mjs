@@ -2974,7 +2974,7 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     ["unsafe-header",theorem([],unsafeP,proof),true,null],
     ["unsafe-proof",theorem([],p,unsafeProof),true,null],
     ["partial-proof",theorem([],p,partialProof),true,null],
-    ["unsupported-proof-comparison",theorem([],p,other),false,"theorem proof type mismatch"],
+    ["different-proposition-proof-comparison",theorem([],p,other),true,"theorem proof type mismatch"],
     ["metadata-comparison-prefix",theorem([],hiddenP,proof),true,null]
   ];
   const publicCompare=(original,actual,label)=>{
@@ -2993,6 +2993,8 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
         get("psKernelKernelSessionEnvironment")(current),maxRecDepth,current.resources.maxNatSize,
         graph,owner.declarations,request,declaration);
       const selected=!sameRuntimeValue(direct,none);
+      if(label==="different-proposition-proof-comparison")
+        must(selected,"theorem-different-proposition-has-direct-decision");
       if(selected)must(sameRuntimeValue(get("psKernelV1DispatchDeclaration")(current,declaration),
         get("psKernelV1EnvironmentOutcome")(accepted(direct,"theorem-raw-some"))),
         "theorem-raw-parity-"+label+"-"+fuel+"-"+maxRecDepth);

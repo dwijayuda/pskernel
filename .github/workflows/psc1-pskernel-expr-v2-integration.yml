@@ -72,6 +72,7 @@ jobs:
           set -euo pipefail
           bash psc1/scripts/install-lean435-ci.sh
       - name: Compile complete checker with checked DAG input
+        id: kernel_build
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -79,6 +80,7 @@ jobs:
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
           lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression
       - name: Run native DAG semantics, adversarial, fuel and official comparison
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -144,6 +146,7 @@ jobs:
           .lake/build/bin/psc1_kernel_expr_v2_regression \
             | tee "$RUNNER_TEMP/psc1-v2-existing-native.log"
       - name: Check inference-only semantics and checked-cache separation
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -152,6 +155,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_INFER_ONLY: PASS' "$RUNNER_TEMP/psc1-infer-only-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_INFER_ONLY: PASS' "$RUNNER_TEMP/psc1-infer-only-native.log"
       - name: Check DAG proof irrelevance against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -160,6 +164,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_PROOF_IRRELEVANCE: PASS comparisons=1350' "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_PROOF_IRRELEVANCE: PASS cases=8 invalid=1' "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
       - name: Check ordered DAG Nat DefEq against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -168,6 +173,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_LAZY_NAT: PASS comparisons=1350 stage=192' "$RUNNER_TEMP/psc1-lazy-nat-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_LAZY_NAT: PASS cases=14 invalid=1' "$RUNNER_TEMP/psc1-lazy-nat-native.log"
       - name: Check ordered DAG lazy delta DefEq against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -176,6 +182,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128' "$RUNNER_TEMP/psc1-lazy-delta-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_LAZY_DELTA: PASS cases=18 invalid=4' "$RUNNER_TEMP/psc1-lazy-delta-native.log"
       - name: Check ordered DAG full-shape and residual DefEq against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -184,6 +191,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_FULL_SHAPE: PASS stageComparisons=342 ownerComparisons=108' "$RUNNER_TEMP/psc1-full-shape-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_FULL_SHAPE: PASS cases=6 invalid=1' "$RUNNER_TEMP/psc1-full-shape-native.log"
       - name: Check ordered DAG terminal DefEq against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -192,6 +200,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_FINAL_RULES: PASS owner=648 final=216 projection=175 stringBuild=144 stringStage=32' "$RUNNER_TEMP/psc1-final-rules-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_FINAL_RULES: PASS cases=21 invalid=5 strings=8 resource=1' "$RUNNER_TEMP/psc1-final-rules-native.log"
       - name: Check DAG admission guards against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -203,6 +212,7 @@ jobs:
           grep -q 'PSC1_V2_ADMISSION_GUARD_OFFICIAL: PASS cases=8 doCheck=true' "$RUNNER_TEMP/psc1-admission-guard-native.log"
           grep -q 'PSC1_V2_ADMISSION_GUARD: PASS' "$RUNNER_TEMP/psc1-admission-guard-native.log"
       - name: Check DAG Quot reduction against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -211,6 +221,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_QUOT: PASS public=240 core=480 owners=720 reducer=60' "$RUNNER_TEMP/psc1-quot-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_QUOT: PASS valid=10 invalid=5' "$RUNNER_TEMP/psc1-quot-native.log"
       - name: Check generated recursor ownership and DAG non-K iota against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -219,6 +230,7 @@ jobs:
           grep -q 'PSC1_V2_DAG_RECURSOR: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9' "$RUNNER_TEMP/psc1-recursor-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_RECURSOR: PASS valid=12 invalid=4 addDecl=3' "$RUNNER_TEMP/psc1-recursor-native.log"
       - name: Check DAG transformation semantics and sharing
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -226,6 +238,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-transform-native.log"
           grep -q 'PSKERNEL_V2_TRANSFORM_REGRESSION_PASSED' "$RUNNER_TEMP/psc1-transform-native.log"
       - name: Check local metadata and cache-scope theorems
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -257,6 +270,7 @@ jobs:
           fi
           echo 'PSKERNEL_LOCAL_METADATA_AND_SCOPE_PROOFS: PASS'
       - name: Compare exact provider fixtures with official Lean 4.35
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         shell: bash
         run: |
@@ -265,6 +279,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-provider-official.log"
           grep -q 'PSC1_CANONICAL_PROVIDER_OFFICIAL: PASS cases=5 batchDeclarations=4 doCheck=true' "$RUNNER_TEMP/psc1-provider-official.log"
       - name: Exercise the native checked batch provider in a detached process
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail
@@ -278,6 +293,7 @@ jobs:
             .lake/build/bin/psc1_kernel_provider host/kernel-provider/KernelProviderMain.lean \
             dist/expr-v2/native-provider-linux.tar.gz
       - name: Measure complete native checks against original and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
         run: |
           set -euo pipefail

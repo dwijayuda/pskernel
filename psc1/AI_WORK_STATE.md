@@ -22,7 +22,9 @@ public ABI restrictions remain. Wasm refuses explicitly until marshaling exists.
 A real source application exercises bind, loops, mutation, typed recovery and
 host trap separation. New execution evidence is pending Linux Actions; do not
 promote this work to qualified from source inspection. Standalone Python adapter and twenty shared actual Linux policy checks are now
-implemented, pending Actions validation. Rust/PHP standalone adapters and Wasm
+implemented, pending Actions validation. Rust standalone adapter and policy server are now implemented with safe owned
+console streams and no unsafe code; initial Linux dependency-lock capture and
+actual native guest execution are pending. PHP standalone adapter and Wasm
 String ABI remain the next implementation tasks. Run39610746683 exposed a
 bootstrap census refusal of early-return do syntax in BackendCommon.Plan; the
 same ABI policy is now expressed with structural workers, preserving its checks.

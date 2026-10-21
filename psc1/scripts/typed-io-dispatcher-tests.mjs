@@ -52,17 +52,31 @@ for(const syntax of ['lean','ps'])for(const target of targets){
   if(target==='rust'){
    const crate=path.join(folder,'consumer');
    fs.cpSync(fs.realpathSync(output.replace(/\.rs$/,'.cargo')),crate,{recursive:true,dereference:true});
-   write(path.join(crate,'tests/io_dispatcher.rs'),[
-    '#[test] fn checked_source_sequence_callback() {',
-    'let dispatch=std::rc::Rc::new(|request: String| -> String {',
-    'if request.contains("\\\"path\\\":\\\"missing\\\"") { return "{\\\"kind\\\":\\\"error\\\",\\\"error\\\":\\\"notFound\\\"}".to_owned(); }',
-    'if request.contains("\\\"op\\\":\\\"readUtf8\\\"") { return "{\\\"kind\\\":\\\"text\\\",\\\"text\\\":\\\"A\\\"}".to_owned(); }',
-    'if request.contains("\\\"op\\\":\\\"readLine\\\"") { return "{\\\"kind\\\":\\\"line\\\",\\\"text\\\":null}".to_owned(); }',
-    '"{\\\"kind\\\":\\\"unit\\\"}".to_owned() });',
-    'assert!(psc1_generated::run(dispatch)); }'
+   fs.appendFileSync(path.join(crate,'Cargo.toml'),'\n[dependencies.psc1-typed-io]\npath = '+JSON.stringify(path.join(root,'host-tools/typed-io-rust'))+'\n');
+   const capabilityRoot=path.join(folder,'root');fs.mkdirSync(capabilityRoot);
+   fs.writeFileSync(path.join(capabilityRoot,'input.txt'),'hello😀');
+   const config=path.join(folder,'config.json');
+   write(config,JSON.stringify({abi:'psc1-rust-linux-string-io/1',capabilities:['readUtf8','writeUtf8','readLine','writeLine'],
+    required:['readUtf8','writeUtf8','readLine','writeLine'],root:capabilityRoot,maxFileBytes:4096,maxLineBytes:128,inputFd:0,outputFd:1}));
+   write(path.join(crate,'src/bin/io-consumer.rs'),[
+    'use std::rc::Rc;',
+    'use psc1_typed_io::{Config,TypedIo};',
+    'fn main(){',
+    'let config=Config::from_json(&std::fs::read_to_string(std::env::args().nth(1).unwrap()).unwrap()).unwrap();',
+    'let host=TypedIo::new(config,Box::new(std::io::stdin()),Box::new(std::io::stdout())).unwrap();',
+    'let host=Rc::new(host);let dispatch_host=host.clone();',
+    'assert!(psc1_generated::run(Rc::new(move|request:String|dispatch_host.execute(request))));',
+    'let trapped=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||psc1_generated::run(Rc::new(|request:String|->String{',
+    'if request.contains("\\\"path\\\":\\\"missing\\\""){panic!("PSC1_HOST_TRAP")}',
+    'if request.contains("\\\"op\\\":\\\"readUtf8\\\""){"{\\\"kind\\\":\\\"text\\\",\\\"text\\\":\\\"A\\\"}".to_owned()}else{"{\\\"kind\\\":\\\"unit\\\"}".to_owned()}',
+    '}))));assert!(trapped.is_err());host.close();}'
    ].join('\n'));
-   run('cargo',['test','--locked','--manifest-path',path.join(crate,'Cargo.toml'),'--test','io_dispatcher'],
-    {env:{...env,CARGO_TARGET_DIR:path.join(folder,'cargo-target')}});
+   const cargoEnv={...env,CARGO_TARGET_DIR:path.join(folder,'cargo-target')};
+   run('cargo',['generate-lockfile','--manifest-path',path.join(crate,'Cargo.toml')],{env:cargoEnv});
+   run('cargo',['build','--locked','--manifest-path',path.join(crate,'Cargo.toml'),'--bin','io-consumer'],{env:cargoEnv});
+   const stdout=run(path.join(folder,'cargo-target/debug/io-consumer'),[config],{input:'world😀\r\n'});
+   assert.equal(stdout,'tick\ntick\nrecovered\necho:world😀\n');
+   assert.equal(fs.readFileSync(path.join(capabilityRoot,'output.txt'),'utf8'),'processed:hello😀');
   }else if(target==='python'){
    const capabilityRoot=path.join(folder,'root');fs.mkdirSync(capabilityRoot);
    fs.writeFileSync(path.join(capabilityRoot,'input.txt'),'hello😀');
@@ -119,7 +133,7 @@ for(const syntax of ['lean','ps'])for(const target of targets){
    }finally{fs.closeSync(inputFd);fs.closeSync(outputFd);}
   }
   records.push({syntax,target,passed:true,sourceSha256:hash(source),artifactSha256:hash(output),
-   manifestSha256:bundleHash,hostEffects:target!=='rust',hostProvider:target==='rust'?'Rust-native-callback-mock':target==='python'?'Python-standalone-capability-adapter':'Linux-Node-capability-adapter',
+   manifestSha256:bundleHash,hostEffects:true,hostProvider:target==='rust'?'Rust-standalone-capability-adapter':target==='python'?'Python-standalone-capability-adapter':'Linux-Node-capability-adapter',
    checkerCommit:manifest.logicalCheckerCommit,strictIr:'production-publication',abi:'io-dispatcher'});
   fs.cpSync(path.dirname(fs.realpathSync(output+'.bundle.json')),path.join(evidence,'bundles',label),{recursive:true});
   console.log('PSC1_IO_DISPATCHER_PASS: '+label);

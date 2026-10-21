@@ -1,3 +1,71 @@
+# Current bounded backend experiment — saturated recursive stages
+
+Updated: 2026-10-21 19:33 UTC.
+Branch: `research/psc1-ts-saturation-20261021`.
+Parent: `384f3395036ba7022e6eea9d3ff77f37aacd62ca`.
+Containing source qualification: **NOT RUN at creation.** The default compiler,
+original TypeScript emitter, IR erasure, portable kernel and kernel fuel are unchanged.
+
+## Actual implementation and gate
+
+The new optional `Ps.BackendTs.Saturate` module recognizes bounded monomorphic
+recursive functions with one or two returned unary stages, creates private
+saturated helpers, and rewrites only exact known saturated calls with pure
+extra arguments. Public entry points, returned stages and declarations remain.
+Effectful intervals, escaping partial recursion, shadowed names, changed arity,
+unsupported shapes and incomplete checks decline. Original IR, transformed IR
+and target declarations must all pass their existing complete checkers. Any
+candidate refusal emits the exact original module; invalid original IR is an
+error. This is not enabled by the production compiler.
+
+Native typed-IR adversarial tests, an independently checked source fixture,
+16 local proof equations, exact public declarations, real source maps, callback
+order/multiplicity/throw identity, immutable radix writes, large numerals,
+partial application and reused closures are mandatory. Authentic PSC1 checks
+both the real Lean fixture and its independently authenticated canonical .ps
+closure. TypeScript 7.0.2 compiles both original and candidate artifacts. Both
+routes execute in detached Node 22 with an empty PATH. The driver must report
+actual rewritten `satLookupWorker` and `satSetWorker` identities. Workflow:
+`.github/workflows/psc1-ts-saturation.yml`.
+
+The JavaScript fixture preserves the existing runtime rest-wrapper ABI (returned
+closures have JavaScript `length=0`); ordered applications and identical .d.ts
+check unary staging. Auxiliary recursive curried source fixtures bind their
+fixed-entry result locally to satisfy the existing PSC1 recursion grouping;
+the actual radix workers remain unchanged. These are fixture corrections, not
+weakened compiler guards.
+
+## Evidence and promotion boundary
+
+Exact parent384 passed native/generated integration39644630197, correctness
+39644630244 and all6 research39644630228 jobs. Its full193 Arena39644630596
+failed (175 matches, 2 safety-contract differences, 14 host timeouts, 1 fixed-fuel
+exhaustion and 1 unsupported case). These are parent-only receipts.
+
+The separately archived paired run39652619954 measured full metadata-admission
+regressions of about23.2% and22.6% for indexed-cache384 versus f9. Profile447
+identified substantial generated recursive closure allocation. The index remains
+excluded from integration. This prototype has **no measured performance result**
+and no global compiler-preservation proof; its16 local equations do not supply
+one. Full actual kernel Lean/canonical compilation, required real cache-worker
+identities, all retained kernel gates and same-run paired performance must pass
+before any promotion or performance claim. No accepted kernel policy changes.
+
+Integration remains `b656ff78a03383cc33d5c2a1c14e3c13468810d2` (documentation-only
+successor of qualified `deb18b9c87a5d21a406c6e5b852afb4d44785fe5`). Scoped
+provider A was qualified at deb18b9; B/C/D remain open. Four whole-operation V1
+fallback families and eager recursive decoding/import remain. V1 stays the
+production default/reference. Full-kernel DirectJS remains unsupported.
+
+Next executable action: inspect the focused workflow at this exact source,
+repair actual failures with retained assertions, then compile the full kernel
+with required real cache-worker identities and compare authenticated whole
+checks against the unchanged backend. No asynchronous work is claimed.
+
+---
+
+## Preserved cache branch history
+
 # Current radix candidate — close symbolic successor proof branches
 
 Updated: 2026-10-21 UTC. Branch: `research/psc1-pskernel-v2-cache-20261021`.

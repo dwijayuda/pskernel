@@ -102,6 +102,7 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Expr,
     `Ps.BackendTs.Module,
     `Ps.BackendTs.Checked,
+    `Ps.BackendTs.Saturate,
     `Ps.BackendTs.Sh1Target,
     `Ps.BackendTs.Sh1,
     `Ps.BackendTs.Compiler
@@ -248,3 +249,17 @@ lean_exe psc2_selfhost_replay_audit where
 lean_exe psc1_sh1_compile where
   srcDir := "scripts"
   root := `StrictSourceCompile
+
+
+-- Opt-in backend experiment. Existing compiler/default and kernel roots stay unchanged.
+lean_lib PsBackendTsSaturateFixtures where
+  srcDir := "test"
+  roots := #[`PsBackendTsSaturateFixture]
+
+lean_exe psc1_backend_ts_saturate_tests where
+  srcDir := "test"
+  root := `PsBackendTsSaturateRegression
+
+lean_exe psc1_ts_saturate_build where
+  srcDir := "scripts"
+  root := `SaturatedSourceCompile

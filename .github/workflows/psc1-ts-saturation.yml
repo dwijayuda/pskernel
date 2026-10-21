@@ -1,0 +1,178 @@
+name: PSC1 opt-in saturated TypeScript backend
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-ts-saturation-20261021
+    paths:
+      - .github/workflows/psc1-ts-saturation.yml
+      - psc1/packages/backend-ts/**
+      - psc1/lakefile.lean
+      - psc1/test/PsBackendTsSaturate*.lean
+      - psc1/scripts/SaturatedSourceCompile.lean
+      - psc1/scripts/backend-ts-saturate-smoke.mjs
+      - psc1/scripts/install-lean435-ci.sh
+      - psc1/lean-toolchain
+permissions:
+  contents: read
+jobs:
+  checked-saturation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Install pinned TypeScript
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-saturation-ts"
+          printf '%s\n' '{"name":"psc1-saturation-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-saturation-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-saturation-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-saturation-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Build the unchanged compiler and explicit experimental entry points
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          git rev-parse HEAD
+          node --check scripts/backend-ts-saturate-smoke.mjs
+          mkdir -p dist/saturation/models dist/saturation/logs
+          lake build psc1 psc1_backend_ts_saturate_tests psc1_ts_saturate_build 2>&1 | tee dist/saturation/logs/build.log
+      - name: Check native models, ordered effects, refusal and original ABI
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1_backend_ts_saturate_tests dist/saturation/models | tee dist/saturation/logs/native.log
+          grep -Fqx 'PSC1_SATURATION_RECOGNITION: PASS staging=2 shadows=4 purity=bounded partialSelf=refused' dist/saturation/logs/native.log
+          grep -Fqx 'PSC1_SATURATION_CHECKED: PASS original+candidate=checked helpers=2 ABI=unchanged refusal=original' dist/saturation/logs/native.log
+          grep -Fqx 'PSC1_SATURATION_NATIVE_FIXTURE: PASS radix=120 fuel=0,1,2,16,128,4096 largeNat=above2^70' dist/saturation/logs/native.log
+          grep -Fqx 'PSC1_SATURATION_MODEL_BUILD: PASS TypeScript=7.0.2 declarations=identical maps=present' dist/saturation/logs/native.log
+          grep -Fqx 'PSC1_SATURATION_NATIVE: PASS' dist/saturation/logs/native.log
+      - name: Prove and audit all16 local refusal and signature equations
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake env lean test/PsBackendTsSaturateProofs.lean | tee dist/saturation/logs/proofs.log
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          source = pathlib.Path("test/PsBackendTsSaturateProofs.lean").read_text()
+          log = pathlib.Path("dist/saturation/logs/proofs.log").read_text()
+          expected = re.findall(r"^#print axioms (PsBackendTsSaturateProofs\.\S+)$", source, re.M)
+          actual = re.findall(r"'(PsBackendTsSaturateProofs\.[^']+)'\s+(does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log, re.S)
+          assert len(expected) == 16 and len(set(expected)) == 16, "source proof count"
+          assert len(actual) == 16 and {x[0] for x in actual} == set(expected), "compiled proof count"
+          allowed = {"propext", "Classical.choice", "Quot.sound"}
+          dependencies = {}
+          for name, _, body in actual:
+              names = {x.strip() for x in body.split(",") if x.strip()}
+              assert names <= allowed, (name, sorted(names - allowed))
+              dependencies[name] = sorted(names)
+          record = {"sourceSha": os.environ["GITHUB_SHA"], "proofs": dependencies, "count": 16,
+                    "globalCompilerPreservationProven": False, "runtimeAxiomsAdded": False}
+          print("PSC1_SATURATION_PROOF_AUDIT " + json.dumps(record, sort_keys=True))
+          pathlib.Path("dist/saturation/proof-receipt.json").write_text(json.dumps(record, indent=2) + "\n")
+          PY
+      - name: Admit actual Lean fixture and compile original and optimized IR
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check test/PsBackendTsSaturateFixture.lean | tee dist/saturation/logs/lean-check.log
+          lake exe psc1_ts_saturate_build test/PsBackendTsSaturateFixture.lean \
+            dist/saturation/lean-original.ts dist/saturation/lean-optimized.ts \
+            satLookupWorker satSetWorker | tee dist/saturation/logs/lean-compile.log
+      - name: Reconstruct and authenticate the canonical fixture source closure
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/bootstrap-project.mjs test/PsBackendTsSaturateFixture.lean dist/saturation/canonical
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          import {assertBootstrapWorkspaceManifest} from './scripts/bootstrap-manifest.mjs';
+          const workspace='dist/saturation/canonical';
+          const entry='test/PsBackendTsSaturateFixture.ps';
+          const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
+          if(manifest.entry!==entry || manifest.sourceCount!==1 ||
+             manifest.generated.length!==1 || manifest.generated[0]!==entry)
+            throw Error('SATURATION_EXACT_CANONICAL_CLOSURE_REQUIRED');
+          await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
+          console.log('PSC1_SATURATION_CANONICAL_CLOSURE: PASS modules=1');
+          NODE
+          lake exe psc1 check dist/saturation/canonical/test/PsBackendTsSaturateFixture.ps \
+            | tee dist/saturation/logs/ps-check.log
+          lake exe psc1_ts_saturate_build dist/saturation/canonical/test/PsBackendTsSaturateFixture.ps \
+            dist/saturation/ps-original.ts dist/saturation/ps-optimized.ts \
+            satLookupWorker satSetWorker | tee dist/saturation/logs/ps-compile.log
+      - name: Check both real source routes and IR controls in detached empty-PATH Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node_bin="$(command -v node)"
+          detached="$RUNNER_TEMP/psc1-saturation-detached"
+          mkdir -p "$detached"
+          cp -R dist/saturation/. "$detached/"
+          cp scripts/backend-ts-saturate-smoke.mjs "$detached/smoke.mjs"
+          printf '%s\n' '{"private":true,"type":"module"}' > "$detached/package.json"
+          for route in lean ps; do
+            (cd "$detached" && PATH='' "$node_bin" smoke.mjs \
+              "$route-original.js" "$route-optimized.js" \
+              models/model-original.js models/model-optimized.js) \
+              | tee "dist/saturation/logs/$route-detached.log"
+            grep -Fqx 'PSC1_SATURATION_RADIX_JS: PASS cases=240 partialStages=1200 largeNat=above2^70' "dist/saturation/logs/$route-detached.log"
+            grep -Fqx 'PSC1_SATURATION_ORDER_JS: PASS preStage+betweenStage+fixedArgs+effectArg throws=identity' "dist/saturation/logs/$route-detached.log"
+            grep -Fqx 'PSC1_SATURATION_ABI_JS: PASS exports=identical declarations=identical returnedStages=unary' "dist/saturation/logs/$route-detached.log"
+          done
+      - name: Bind all experimental outputs to this source and toolchain
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          cp test/PsBackendTsSaturateFixture.lean dist/saturation/
+          cp scripts/backend-ts-saturate-smoke.mjs dist/saturation/
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path("dist/saturation")
+          required = []
+          for stem in ["lean-original","lean-optimized","ps-original","ps-optimized",
+                       "models/model-original","models/model-optimized"]:
+              for suffix in [".ts",".js",".d.ts",".js.map"]:
+                  required.append(stem+suffix)
+          for name in required:
+              assert (root/name).is_file() and (root/name).stat().st_size > 0, name
+          receipts = []
+          for route in ["lean","ps"]:
+              item = json.loads((root/(route+"-optimized.ts.receipt.json")).read_text())
+              assert item["sourceKind"] == ("lean" if route == "lean" else "canonical-ps")
+              assert item["originalChecked"] and item["candidateChecked"] and item["candidateTargetChecked"]
+              assert item["declarationsIdentical"] and item["typescriptVersion"] == "7.0.2"
+              assert item["helpers"] > 0 and item["rewrittenCalls"] > 0
+              for stem in ["satLookupWorker","satSetWorker"]:
+                  assert any(x["name"].startswith(stem) and x["rewrittenCalls"] > 0 for x in item["workers"]), stem
+              receipts.append(item)
+          files = []
+          for file in sorted(root.rglob("*")):
+              if file.is_file():
+                  data = file.read_bytes()
+                  files.append({"path":str(file.relative_to(root)),"bytes":len(data),
+                                "sha256":hashlib.sha256(data).hexdigest()})
+          record = {"schema":"psc1-saturation-experiment-v1","sourceSha":os.environ["GITHUB_SHA"],
+                    "runId":os.environ["GITHUB_RUN_ID"],"runAttempt":os.environ["GITHUB_RUN_ATTEMPT"],
+                    "lean":"4.35.0","leanCommit":"eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "typescript":"7.0.2","node":"22","emptyPathExecution":True,
+                    "defaultEmitterChanged":False,"kernelChanged":False,
+                    "globalCompilerPreservationProven":False,"fullKernelQualified":False,
+                    "performanceMeasured":False,"receipts":receipts,"files":files}
+          (root/"manifest.json").write_text(json.dumps(record,indent=2,sort_keys=True)+"\n")
+          print("PSC1_SATURATION_ARTIFACT " + json.dumps(record,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: psc1-saturation-${{ github.run_id }}
+          path: psc1/dist/saturation/
+          if-no-files-found: warn
+          retention-days: 30

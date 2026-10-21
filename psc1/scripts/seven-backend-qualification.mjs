@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
+import {checkCompilerApplication} from './check-compiler-application.mjs';
 import {checkPracticalApplications} from './check-practical-applications.mjs';
 import {checkTypedIoExecution} from './check-typed-io-execution.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -32,6 +33,13 @@ for(const [data,selected] of [[practicalApplications,targets],[minimumApplicatio
  assert.equal(data.branchHeadCommit,process.env.PSC1_HEAD_SHA);
 }
 
+const compilerApplicationContract=read('docs/PSC1_COMPILER_APPLICATION_CONTRACT.json');
+const compilerApplication=read('dist/scoped-correctness/compiler-application/results.json');
+const minimumCompilerApplication=read('dist/scoped-correctness/compiler-application-python314/results.json');
+for(const [data,selected] of [[compilerApplication,targets],[minimumCompilerApplication,['python']]]){
+ checkCompilerApplication(compilerApplicationContract,data,{commit:process.env.GITHUB_SHA,targets:selected});
+ assert.equal(data.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+}
 const extraProtocols={};
 for(const [id,file]of [['library-application','PSC1_LIBRARY_APPLICATION_CASE_CONTRACT.json'],['checked-order','PSC1_ORDER_CASE_CONTRACT.json'],['inference-control','PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json'],
  ['typed-io-protocol','PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json'],
@@ -414,8 +422,10 @@ const receipt = {
   })),
   architectureFoundation: {
     boundedProtocols:extraProtocols,
+    compilerApplication:{contract:compilerApplicationContract.id,actualConsumers:compilerApplication.records.length,casesPerConsumer:compilerApplicationContract.cases.length,minimumPythonConsumers:minimumCompilerApplication.records.length,evidence:'compiler-application/results.json',performance:compilerApplication.records.map(r=>({syntax:r.syntax,target:r.target,...r.cases.find(c=>c.id==='100000-statements').metrics})),completePracticalCore:false},
     practicalApplications:{contract:applicationContract.id,applications:applicationContract.applications,actualConsumers:practicalApplications.records.length,casesPerConsumer:applicationContract.cases.length,minimumPythonConsumers:minimumApplications.records.length,evidence:'practical-applications/results.json',completePracticalCore:false},
-    typedIo:{hostProvider:'Linux Node',policyChecks:ioPolicy.checks.length,applicationBundles:ioApplication.records.length,minimumPythonBundles:minimumIoApplication.records.length,sevenHostAdapters:false,completeFamily:false,evidence:'typed-io/application.json'},
+    actualTypedIoExecution:{contract:typedIoExecution.contract,actualConsumers:typedIoExecution.records.length,targets:typedIoExecution.targets,policyProviders:Object.keys(typedIoExecution.policies),evidence:'typed-io-execution/results.json',completePracticalCore:false},
+    typedIo:{scope:'retained Node-host application subset; see actualTypedIoExecution for the seven-adapter matrix',hostProvider:'Linux Node',policyChecks:ioPolicy.checks.length,applicationBundles:ioApplication.records.length,minimumPythonBundles:minimumIoApplication.records.length,sevenHostAdapters:false,completeFamily:false,evidence:'typed-io/application.json'},
     jsonRecordApplicationCore:{contract:jsonApplicationContract.id,obligations:jsonApplication.records.length,
       minimumPythonObligations:minimumJsonApplication.records.length,
       evidence:'json-application/results.json',typedFileIo:false,completeApplication:false},
@@ -481,7 +491,7 @@ const receipt = {
   exclusions: [
     'full Practical Core feature families', 'unrestricted Lean',
     'Int division/modulo', 'fixed-width/floating runtime scalars',
-    'Python/PHP public compound ABI', 'non-Bool component public ABI',
+    'Python/PHP public compound ABI', 'component public ABI outside explicit Bool/String dispatcher profiles',
     'formal backend preservation', 'full self-host/fixed-point qualification',
     'npm registry publication', 'non-Linux native package qualification'
   ]

@@ -5,11 +5,14 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {checkCompilerApplication} from './check-compiler-application.mjs';
 import {checkPracticalApplications} from './check-practical-applications.mjs';
+const compilerApplication=process.argv[2]==='--compiler-application';
+assert.ok(process.argv[2]===undefined||compilerApplication);
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const evidence=path.join(root,'dist/scoped-correctness',process.env.PSC1_APPLICATION_EVIDENCE||'practical-applications');
-const contract=JSON.parse(fs.readFileSync(path.join(root,'docs/PSC1_APPLICATION_EXECUTION_CONTRACT.json'),'utf8'));
-const targets=(process.env.PSC1_APPLICATION_TARGETS||contract.targets.join(',')).split(',');
+const evidence=path.join(root,'dist/scoped-correctness',compilerApplication?(process.env.PSC1_COMPILER_APPLICATION_EVIDENCE||'compiler-application'):(process.env.PSC1_APPLICATION_EVIDENCE||'practical-applications'));
+const contract=JSON.parse(fs.readFileSync(path.join(root,'docs',compilerApplication?'PSC1_COMPILER_APPLICATION_CONTRACT.json':'PSC1_APPLICATION_EXECUTION_CONTRACT.json'),'utf8'));
+const targets=((compilerApplication?process.env.PSC1_COMPILER_APPLICATION_TARGETS:process.env.PSC1_APPLICATION_TARGETS)||contract.targets.join(',')).split(',');
 assert.ok(targets.length&&targets.every(t=>contract.targets.includes(t)));assert.equal(new Set(targets).size,targets.length);
 const native=process.env.PSC1_NATIVE||path.join(root,'.lake/build/bin/psc1');
 const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-practical-applications-'));
@@ -24,18 +27,18 @@ function invoke(cmd,args,options={}){
  assert.equal(r.error,undefined);assert.equal(r.signal,null);return r;
 }
 function run(cmd,args,options={}){const r=invoke(cmd,args,options);assert.equal(r.status,0,cmd+' '+args.join(' ')+'\n'+r.stdout+r.stderr);return r.stdout;}
-const valid='[{"text":"A","count":2},{"text":"\\uD83D\\uDE00","count":-4}]';
-const referenceFile=path.join(root,'test/PracticalApplicationReference.lean');
+const valid=compilerApplication?'1+2;\n':'[{"text":"A","count":2},{"text":"\\uD83D\\uDE00","count":-4}]';
+const referenceFile=path.join(root,compilerApplication?'test/MiniCompilerReference.lean':'test/PracticalApplicationReference.lean');
 const oracleLog=run('lake',['env','lean','--run',referenceFile],{input:valid});
 const oracleLines=oracleLog.split('\n').filter(l=>l.startsWith('PSC1_PRACTICAL_APPLICATION_REFERENCE: '));
 assert.equal(oracleLines.length,1);
 const oracle=JSON.parse(oracleLines[0].slice('PSC1_PRACTICAL_APPLICATION_REFERENCE: '.length));
 assert.equal(oracle.leanVersion,'4.35.0');assert.equal(oracle.leanCommit,contract.checkerCommit);
-assert.equal(oracle.output,'[{"count":2,"text":"processed:A"},{"count":-4,"text":"processed:😀"}]');
+assert.equal(oracle.output,compilerApplication?'{"statements":1,"total":3}':'[{"count":2,"text":"processed:A"},{"count":-4,"text":"processed:😀"}]');
 write(path.join(evidence,'native-reference.log'),oracleLog);
-write(path.join(evidence,'native-reference.lean'),read('test/PracticalApplicationReference.lean'));
+write(path.join(evidence,'native-reference.lean'),fs.readFileSync(referenceFile,'utf8'));
 write(path.join(work,'package.json'),'{"type":"module"}\n');
-const cases=[
+const cases=compilerApplication?contract.cases.map(c=>({...c,input:c.repeat?c.repeat.repeat(c.count):c.input})):[
  {id:'help',args:['--help'],code:0,stdout:'usage: transform INPUT OUTPUT\n'},
  {id:'invalid-command',args:['bad'],code:2,stdout:'usage: transform INPUT OUTPUT\n'},
  {id:'invalid-arity',args:['transform','input.json'],code:2,stdout:'usage: transform INPUT OUTPUT\n'},
@@ -58,14 +61,28 @@ const cases=[
  {id:'write-permission',input:valid,writeMode:0o500,code:2,stdout:'error:ioFailure\n'},
  {id:'denied-capability',denied:true,code:78,stdout:''}
 ];
+if(compilerApplication){
+ for(const test of cases){
+  write(path.join(evidence,'corpus',test.id+'.input'),test.input);
+ }
+ for(const test of cases.filter(c=>c.output!==undefined)){
+  const log=run('lake',['env','lean','--run',referenceFile],{input:test.input});
+  const rows=log.split('\n').filter(l=>l.startsWith('PSC1_PRACTICAL_APPLICATION_REFERENCE: '));
+  assert.equal(rows.length,1);const reference=JSON.parse(rows[0].slice('PSC1_PRACTICAL_APPLICATION_REFERENCE: '.length));
+  assert.equal(reference.leanVersion,'4.35.0');assert.equal(reference.leanCommit,contract.checkerCommit);
+  assert.equal(reference.output,test.output,'native statement reference '+test.id);
+  write(path.join(evidence,'references',test.id+'.log'),log);
+ }
+}
 try{
- for(const syntax of contract.grammars)for(const target of targets){
+ matrix: for(const syntax of contract.grammars)for(const target of targets){
   const label=syntax+'-'+target,folder=path.join(work,label),sourceRoot=path.join(folder,'source');
   const source=path.join(sourceRoot,'Run.'+syntax);
   const output=path.join(folder,'module.'+{js:'js',ts:'ts',rust:'rs','wasm-core':'wasm','wasm-component':'wasm',python:'py',php:'php'}[target]);
   try{
-   for(const name of ['Args','Transform','Program'])write(path.join(sourceRoot,'PracticalCli',name+'.'+syntax),read('test/applications/PracticalCli/'+name+'.'+syntax));
-   write(source,read('test/applications/PracticalCli/Run.'+syntax));
+   const modules=compilerApplication?contract.requiredModules:['PracticalCli/Args','PracticalCli/Transform','PracticalCli/Program'];
+   for(const name of modules)write(path.join(sourceRoot,name+'.'+syntax),read('test/applications/'+name+'.'+syntax));
+   write(source,read('test/applications/'+(compilerApplication?'MiniCompiler':'PracticalCli')+'/Run.'+syntax));
    write(path.join(sourceRoot,'ProofScript/System/IO.'+syntax),read('stdlib/ProofScript/System/IO.'+syntax));
    run(native,['build',source,'--target',target,'--assurance','ordinary','--abi','io-dispatcher','--out',output]);
    const manifest=JSON.parse(fs.readFileSync(output+'.bundle.json','utf8'));
@@ -91,7 +108,7 @@ try{
    const observations=[];
    for(const test of cases){
     const caseRoot=path.join(folder,test.id);fs.mkdirSync(caseRoot,{recursive:true});
-    const input=path.join(caseRoot,test.inputName||'input.json'),destination=path.join(caseRoot,'output.json');
+    const input=path.join(caseRoot,test.inputName||(compilerApplication?'input.mini':'input.json')),destination=path.join(caseRoot,'output.json');
     if(!test.missing)fs.writeFileSync(input,test.input??valid);
     fs.writeFileSync(destination,'previous');
     if(test.readMode!==undefined)fs.chmodSync(input,test.readMode);
@@ -99,8 +116,8 @@ try{
     const config=path.join(folder,test.id+'.json');
     write(config,JSON.stringify({abi:target==='rust'?'psc1-rust-linux-string-io/1':'psc1-node-linux-string-io/1',
      capabilities:test.denied?[]:['readUtf8','writeUtf8','writeLine'],required:['readUtf8','writeUtf8','writeLine'],
-     root:caseRoot,maxFileBytes:512,maxLineBytes:128,inputFd:0,outputFd:1}));
-    const argv=test.args||['transform','input.json','output.json'];
+     root:caseRoot,maxFileBytes:compilerApplication?1048576:512,maxLineBytes:128,inputFd:0,outputFd:1}));
+    const argv=test.args||['transform',compilerApplication?'input.mini':'input.json','output.json'];
     let cmd;
     if(target==='rust')cmd=[...command,config,...argv];
     else if(target==='python'||target==='wasm-component')cmd=[
@@ -109,37 +126,57 @@ try{
     else if(target==='php')cmd=[process.env.PSC1_PHP||'php','-d','ffi.enable=1',path.join(root,'scripts/practical-application-php.php'),
      test.denied?'/missing-guest':module,config,...argv];
     else cmd=[process.execPath,path.join(root,'scripts/practical-application-node.mjs'),target,test.denied?'/missing-guest':module,config,...argv];
-    let result;
-    try{result=invoke(cmd[0],cmd.slice(1));}
+    let result,metrics=null;
+    try{
+     if(test.performance){
+      const stats=path.join(folder,'performance-'+test.id+'.json');
+      result=invoke('/usr/bin/time',['-q','-f','{"elapsedSeconds":%e,"maxRssKiB":%M}','-o',stats,...cmd]);
+      metrics=fs.existsSync(stats)&&fs.readFileSync(stats,'utf8').trim()?JSON.parse(fs.readFileSync(stats,'utf8')):null;
+      write(path.join(evidence,'executions',label,test.id+'.measurement.json'),JSON.stringify({
+       exitCode:result.status,stdout:result.stdout,stderr:result.stderr,metrics,
+       inputSha256:hash(input),inputBytes:fs.statSync(input).size
+      },null,2)+'\n');
+      console.log('PSC1_COMPILER_APPLICATION_MEASUREMENT: '+JSON.stringify({syntax,target,case:test.id,status:result.status,metrics}));
+      assert.equal(result.status,0,'measured application child failed\n'+result.stdout+result.stderr);
+      assert.ok(metrics,'actual Linux process metrics required');
+      assert.ok(Number.isFinite(metrics.elapsedSeconds)&&metrics.elapsedSeconds>=0&&metrics.elapsedSeconds<=contract.performance.maxElapsedSeconds,'application elapsed bound');
+      assert.ok(Number.isInteger(metrics.maxRssKiB)&&metrics.maxRssKiB>0&&metrics.maxRssKiB<=contract.performance.maxRssKiB,'application memory bound');
+      assert.equal(Buffer.byteLength(test.input),contract.performance.inputBytes);
+     }else result=invoke(cmd[0],cmd.slice(1));
+    }
     finally{fs.chmodSync(caseRoot,0o700);if(fs.existsSync(input))fs.chmodSync(input,0o600);}
     assert.equal(result.status,test.code,label+'/'+test.id+'\n'+result.stdout+result.stderr);
     assert.equal(result.stdout,test.stdout,label+'/'+test.id);
     assert.equal(fs.readFileSync(destination,'utf8'),test.output??'previous',label+'/'+test.id+' previous output');
     assert.deepEqual(fs.readdirSync(caseRoot).filter(n=>n.startsWith('.psc1-')),[],'atomic temporary leak');
+    write(path.join(evidence,'executions',label,test.id+'.json'),JSON.stringify({
+     exitCode:result.status,stdout:result.stdout,stderr:result.stderr,
+     output:fs.readFileSync(destination,'utf8'),metrics,inputSha256:fs.existsSync(input)?hash(input):null
+    },null,2)+'\n');
     observations.push({id:test.id,passed:true,exitCode:result.status,stdoutSha256:sha(result.stdout),stderrSha256:sha(result.stderr),
-     outputSha256:hash(destination),preservedPrevious:test.output===undefined});
+     outputSha256:hash(destination),preservedPrevious:test.output===undefined,...(compilerApplication?{inputSha256:hash(input),inputBytes:fs.statSync(input).size,metrics}: {})});
    }
    const pointer=fs.realpathSync(output+'.bundle.json'),manifestSha256=hash(output+'.bundle.json');
    const rejected=invoke(native,['build',source,'--target',target,'--abi','io-dispatcher','--assurance','verified','--out',output]);
    assert.notEqual(rejected.status,0);assert.match(rejected.stdout+rejected.stderr,/PSC1_VERIFIED_EXECUTION_UNAVAILABLE/);
    assert.equal(fs.realpathSync(output+'.bundle.json'),pointer);assert.equal(hash(output+'.bundle.json'),manifestSha256);
-   const moduleSha256=Object.fromEntries(['Args','Transform','Program'].map(n=>[n,hash(path.join(sourceRoot,'PracticalCli',n+'.'+syntax))]));
+   const moduleSha256=Object.fromEntries(modules.map(n=>[compilerApplication?n:n.split('/').at(-1),hash(path.join(sourceRoot,n+'.'+syntax))]));
    records.push({syntax,target,passed:true,runtime:'executed',hostEffects:true,admission:'independent-official-Lean',
     checkerCommit:manifest.logicalCheckerCommit,strictIr:'required-by-production-publication',
     sourceSha256:hash(source),moduleSha256,librarySha256:hash(path.join(sourceRoot,'ProofScript/System/IO.'+syntax)),
     artifactSha256:hash(output),manifestSha256,kernelAdmissionSha256:manifest.kernelAdmissionSha256,
     sourceClosureSha256:manifest.sourceClosureSha256,oracleSha256:hash(referenceFile),hostCargoLockSha256,cases:observations});
    fs.cpSync(path.dirname(pointer),path.join(evidence,'bundles',label),{recursive:true});
-   console.log('PSC1_PRACTICAL_APPLICATION_RECORD: '+JSON.stringify(records.at(-1)));
+   console.log((compilerApplication?'PSC1_COMPILER_APPLICATION_RECORD: ':'PSC1_PRACTICAL_APPLICATION_RECORD: ')+JSON.stringify(records.at(-1)));
    console.log('PSC1_PRACTICAL_APPLICATION_PASS: '+label+' '+observations.length+' actual CLI/file cases');
-  }catch(error){failures.push({label,error:error.stack||String(error)});console.error('PSC1_PRACTICAL_APPLICATION_FAIL: '+label+'\n'+error.stack);}
+  }catch(error){failures.push({label,error:error.stack||String(error)});console.error('PSC1_PRACTICAL_APPLICATION_FAIL: '+label+'\n'+error.stack);if(compilerApplication)break matrix;}
  }
 }finally{
- const receipt={schema:'psc1-practical-application-execution/1',contract:contract.id,testedCommit:process.env.GITHUB_SHA||null,
+ const receipt={schema:compilerApplication?'psc1-compiler-application-execution/1':'psc1-practical-application-execution/1',contract:contract.id,testedCommit:process.env.GITHUB_SHA||null,
   branchHeadCommit:process.env.PSC1_HEAD_SHA||null,checkerCommit:contract.checkerCommit,targets,records,failures,passed:failures.length===0};
  write(path.join(evidence,'results.json'),JSON.stringify(receipt,null,2)+'\n');
- console.log('PSC1_PRACTICAL_APPLICATIONS: '+JSON.stringify(receipt));
- if(!failures.length)checkPracticalApplications(contract,receipt,{commit:receipt.testedCommit,targets});
+ console.log((compilerApplication?'PSC1_COMPILER_APPLICATIONS: ':'PSC1_PRACTICAL_APPLICATIONS: ')+JSON.stringify(receipt));
+ if(!failures.length)(compilerApplication?checkCompilerApplication:checkPracticalApplications)(contract,receipt,{commit:receipt.testedCommit,targets});
  fs.rmSync(work,{recursive:true,force:true});
 }
 assert.deepEqual(failures,[]);

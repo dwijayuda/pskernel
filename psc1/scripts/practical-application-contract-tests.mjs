@@ -11,13 +11,15 @@ const receipt={schema:'psc1-practical-application-execution/1',contract:c.id,tes
   syntax,target,passed:true,runtime:'executed',hostEffects:true,admission:'independent-official-Lean',checkerCommit:c.checkerCommit,
   strictIr:'required-by-production-publication',moduleSha256:{Args:h,Program:h,Transform:h},hostCargoLockSha256:h,
   ...Object.fromEntries(['sourceSha256','librarySha256','artifactSha256','manifestSha256','kernelAdmissionSha256','sourceClosureSha256','oracleSha256'].map(k=>[k,h])),
-  cases:c.cases.map(x=>({id:x.id,passed:true,exitCode:x.exitCode,stdoutSha256:sha(x.stdout),stderrSha256:h,outputSha256:h,preservedPrevious:true}))
+  cases:c.cases.map(x=>({id:x.id,passed:true,exitCode:x.exitCode,stdoutSha256:sha(x.stdout),stderrSha256:h,outputSha256:sha(x.output??'previous'),preservedPrevious:x.output===undefined}))
  })))};
 checkPracticalApplications(c,receipt,{commit});
 for(const change of [
  x=>x.testedCommit='c'.repeat(40),x=>x.records.pop(),x=>x.records.push(x.records[0]),
  x=>x.records[0].cases.pop(),x=>x.records[0].cases.push(x.records[0].cases[0]),
  x=>x.records[0].cases[0].exitCode=99,x=>x.records[0].cases[0].stdoutSha256=h,
+ x=>x.records[0].cases.find(c=>c.id==='unicode-records').outputSha256=h,
+ x=>x.records[0].cases.find(c=>c.id==='malformed-json').outputSha256=h,
  x=>x.records[0].runtime='skipped',x=>x.records[0].sourceClosureSha256=null,
  x=>x.records[0].cases.find(c=>c.id==='malformed-json').preservedPrevious=false
 ]){
@@ -37,3 +39,6 @@ assert.deepEqual(report.applications.filter(a=>a.status==='qualified').map(a=>a.
 assert.equal(report.releaseReady,false);assert.ok(report.applications.filter(a=>a.id==='compiler-like'||a.id==='multi-module-library').every(a=>a.status==='blocked'));
 assert.equal(deriveReadiness(release,{commit,practicalApplications:subset,applicationContract:c}).applications[0].status,'tested');
 assert.throws(()=>deriveReadiness(release,{commit,practicalApplications:subset,applicationContract:c,fullQualification:full}),/full application matrix/);
+
+const weakenedContract=structuredClone(c);weakenedContract.cases.pop();
+assert.throws(()=>checkPracticalApplications(weakenedContract,receipt,{commit}),/frozen application case identities/);

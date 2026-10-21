@@ -27,6 +27,8 @@ jobs:
       PSC1_IO_PROTOCOL_TARGETS: js,ts,rust
       PSC1_IO_PROTOCOL_EVIDENCE: typed-io-protocol-focused
       PSC1_INFERENCE_TARGETS: js,ts,rust
+      PSC1_COMPILER_APPLICATION_TARGETS: js,ts,rust,wasm-core,wasm-component
+      PSC1_COMPILER_APPLICATION_EVIDENCE: compiler-application-focused
       PSC1_LIBRARY_TARGETS: js,ts,rust
       PSC1_LIBRARY_EVIDENCE: library-application-focused
       PSC1_APPLICATION_TARGETS: js,ts,rust,wasm-core,wasm-component
@@ -109,12 +111,13 @@ jobs:
           wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-core.wasm
           wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-component.wasm
           node scripts/wasm-string-tests.mjs
-      - name: Execute authored inputs with native reference and JS TS Rust consumers
+      - name: Execute authored inputs with native references and focused consumers
         run: |
           set -euo pipefail
           node --check scripts/compiler-m-conformance-tests.mjs
           node scripts/language-backend-parity-contract-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --checked-order
+          node scripts/practical-application-tests.mjs --compiler-application
           node scripts/practical-application-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --library-application
           node scripts/compiler-m-conformance-tests.mjs
@@ -143,6 +146,7 @@ jobs:
             psc1/dist/scoped-correctness/checked-order-focused/
             psc1/dist/scoped-correctness/practical-applications-focused/
             psc1/dist/scoped-correctness/library-application-focused/
+            psc1/dist/scoped-correctness/compiler-application-focused/
             psc1/dist/scoped-correctness/json-application-focused/
             psc1/dist/scoped-correctness/compiler-m-focused/
             psc1/dist/scoped-correctness/stdlib-collections-focused/

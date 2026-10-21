@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {checkLanguageBackendParity} from './check-language-backend-parity.mjs';
+import {checkCompilerApplication} from './check-compiler-application.mjs';
 import {checkPracticalApplications} from './check-practical-applications.mjs';
 import {checkTypedIoExecution} from './check-typed-io-execution.mjs';
 const familyIds=['operators','local-inference','typed-do','for-loops','while-loops','mutation','early-return',
@@ -43,7 +44,7 @@ export function validateReleaseContract(contract){
  }
  return contract;
 }
-export function deriveReadiness(contract,{commit,suites={},fullQualification=null,typedIoApplication=null,typedIoExecution=null,ioExecutionContract=null,ioExecutionImplemented=false,practicalApplications=null,applicationContract=null,applicationImplemented=false}={}){
+export function deriveReadiness(contract,{commit,suites={},fullQualification=null,typedIoApplication=null,typedIoExecution=null,ioExecutionContract=null,ioExecutionImplemented=false,practicalApplications=null,applicationContract=null,applicationImplemented=false,compilerApplicationReceipt=null,compilerApplicationContract=null,compilerImplemented=false}={}){
  validateReleaseContract(contract);assert.match(commit||'',/^[a-f0-9]{40}$/);
  const suiteStates={};
  for(const [id,{caseContract,receipt,implemented}] of Object.entries(suites)){
@@ -111,6 +112,16 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   actualApplications=true;allApplicationTargets=targets.every(t=>practicalApplications.targets.includes(t));
   if(full)assert.equal(allApplicationTargets,true,'full application matrix required');
  }
+ let compilerTested=false,compilerAllTargets=false;
+ if(compilerApplicationReceipt){
+  assert.ok(compilerApplicationContract,'compiler application contract required');
+  assert.equal(compilerApplicationContract.checkerCommit,contract.authority.commit);
+  assert.deepEqual(compilerApplicationContract.grammars,contract.grammars);
+  assert.deepEqual(compilerApplicationContract.targets,contract.targets);
+  checkCompilerApplication(compilerApplicationContract,compilerApplicationReceipt,{commit,targets:compilerApplicationReceipt.targets});
+  compilerTested=true;compilerAllTargets=targets.every(t=>compilerApplicationReceipt.targets.includes(t));
+  if(full)assert.equal(compilerAllTargets,true,'full compiler application matrix required');
+ }
  const families=contract.families.map(family=>{
   const cases=family.acceptance.map(criterion=>{
    const binding=criterion.execution,suite=binding&&suiteStates[binding.suite];
@@ -131,10 +142,15 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
  // matrix contract. No generic Boolean fixture is accepted as application evidence.
  const applications=contract.applications.map(a=>{
   const core=a.coreExecution&&suiteStates[a.coreExecution.suite];
+  if(a.id==='compiler-like')return {id:a.id,
+   status:compilerTested?(compilerAllTargets&&full?'qualified':'tested'):compilerImplemented?'implemented':'blocked',
+   reason:compilerTested?null:'actual source parsing, typed locations and 100000-item measured workload pending',
+   scope:compilerApplicationContract?.scope||null};
+
   if(a.completeExecutionSuite){
    const suite=suiteStates[a.completeExecutionSuite];
    assert.equal(a.id,'multi-module-library');
-   if(suite){assert.equal(suite.caseContract.id,'multi-module-library-application-v1');assert.ok(suite.caseContract.requiredModules?.length>=2);assert.equal(suite.caseContract.independentStandardReference,true);}
+   if(suite){assert.equal(suite.caseContract.id,'multi-module-library-application-v1');assert.deepEqual(suite.caseContract.requiredModules,['PracticalLibrary/Input','PracticalLibrary/Transform']);assert.equal(suite.caseContract.independentStandardReference,true);assert.deepEqual(suite.caseContract.applicationBoundaryChecks,['entry-only-exports','private-imports','missing-module-refusal','duplicate-module-refusal']);}
    return {id:a.id,status:suite?.qualified&&full?'qualified':suite?.tested?'tested':suite?.implemented?'implemented':'blocked',reason:suite?.qualified&&full?null:'exact-commit complete library application and full qualification pending',coreScope:a.coreExecution.scope};
   }
   const bound=applicationContract?.applications.includes(a.id)||['cli','json-files'].includes(a.id)&&contract.actualApplications;
@@ -195,6 +211,10 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
   ioExecutionImplemented:fs.existsSync(path.join(root,contract.actualIo.runner))&&
    ['host-tools/typed-io.mjs','host-tools/typed_io.py','host-tools/typed-io-rust/src/lib.rs',
     'host-tools/typed-io.php','host-tools/typed-io-wasm.mjs','host-tools/typed_io_component.py'].every(p=>fs.existsSync(path.join(root,p))),
+  compilerApplicationContract:read(contract.actualCompilerApplication.contract),
+  compilerImplemented:fs.existsSync(path.join(root,contract.actualCompilerApplication.runner))&&
+   ['.lean','.ps'].every(ext=>fs.existsSync(path.join(root,'test/applications/MiniCompiler/Syntax'+ext))),
+  compilerApplicationReceipt:fs.existsSync(path.join(root,contract.actualCompilerApplication.receipt))?read(contract.actualCompilerApplication.receipt):null,
   applicationContract:read(contract.actualApplications.contract),
   applicationImplemented:fs.existsSync(path.join(root,contract.actualApplications.runner)),
   practicalApplications:fs.existsSync(path.join(root,contract.actualApplications.receipt))?read(contract.actualApplications.receipt):null,

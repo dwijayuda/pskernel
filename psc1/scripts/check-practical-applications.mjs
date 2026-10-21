@@ -5,6 +5,7 @@ const sha=value=>crypto.createHash('sha256').update(value).digest('hex');
 export function checkPracticalApplications(contract,receipt,{commit,targets=contract.targets}={}){
  assert.equal(contract.schema,'psc1-practical-application-contract/1');
  assert.deepEqual(contract.applications,['cli','json-files']);
+ assert.deepEqual(contract.cases.map(c=>c.id),["help","invalid-command","invalid-arity","invalid-help-arity","unicode-records","argv-unicode-quote","bounded-output","empty-records","array-trailing-comma","object-trailing-comma","malformed-json","isolated-surrogate","duplicate-key","wrong-shape","missing-input","path-denied","read-permission","invalid-utf8","bounded-file","write-permission","denied-capability"],'frozen application case identities');
  assert.equal(receipt.schema,'psc1-practical-application-execution/1');
  assert.equal(receipt.contract,contract.id);assert.equal(receipt.testedCommit,commit,'stale applications');
  assert.equal(receipt.checkerCommit,contract.checkerCommit);
@@ -28,7 +29,8 @@ export function checkPracticalApplications(contract,receipt,{commit,targets=cont
    assert.equal(actual.passed,true);assert.equal(actual.exitCode,expected.exitCode);
    assert.equal(actual.stdoutSha256,sha(expected.stdout));
    for(const key of ['stderrSha256','outputSha256'])assert.match(actual[key]||'',/^[a-f0-9]{64}$/);
-   if(!['unicode-records','argv-unicode-quote','empty-records'].includes(expected.id))assert.equal(actual.preservedPrevious,true);
+   assert.equal(actual.outputSha256,sha(expected.output??'previous'),'exact application file result');
+   assert.equal(actual.preservedPrevious,expected.output===undefined);
   }
  }
  return true;

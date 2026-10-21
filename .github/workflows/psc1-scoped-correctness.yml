@@ -212,6 +212,7 @@ jobs:
           node --check scripts/compiler-m-conformance-tests.mjs
           node scripts/language-backend-parity-contract-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --checked-order
+          node scripts/practical-application-tests.mjs --compiler-application
           node scripts/practical-application-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --library-application
           node scripts/compiler-m-conformance-tests.mjs
@@ -285,6 +286,8 @@ jobs:
           export PSC1_COLLECTION_EVIDENCE=stdlib-collections-python314
           export PSC1_JSON_TARGETS=python
           export PSC1_JSON_EVIDENCE=json-application-python314
+          export PSC1_COMPILER_APPLICATION_TARGETS=python
+          export PSC1_COMPILER_APPLICATION_EVIDENCE=compiler-application-python314
           export PSC1_LIBRARY_TARGETS=python
           export PSC1_LIBRARY_EVIDENCE=library-application-python314
           export PSC1_APPLICATION_TARGETS=python
@@ -298,6 +301,7 @@ jobs:
           export PSC1_IO_PROTOCOL_TARGETS=python
           export PSC1_IO_PROTOCOL_EVIDENCE=typed-io-protocol-python314
           node scripts/compiler-m-conformance-tests.mjs --checked-order
+          node scripts/practical-application-tests.mjs --compiler-application
           node scripts/practical-application-tests.mjs
           node scripts/compiler-m-conformance-tests.mjs --library-application
           node scripts/compiler-m-conformance-tests.mjs

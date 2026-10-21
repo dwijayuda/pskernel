@@ -1,6 +1,6 @@
 # PSC1 development roadmap
 
-Updated 2026-10-21. The authoritative finite scope and dependency-ordered queue
+Updated 2026-10-22. The authoritative finite scope and dependency-ordered queue
 are [PSC1_PRACTICAL_CORE_V1_CONTRACT.json](PSC1_PRACTICAL_CORE_V1_CONTRACT.json).
 It freezes fourteen families, 37 acceptance criteria and four actual applications.
 This is the single active roadmap. Older status matrices/continuation prompts and
@@ -44,7 +44,7 @@ Run scripts/practical-core-readiness.mjs to derive implemented/tested/qualified/
 blocked criteria from current fixture registration and exact-commit receipts.
 The generated dist/development/practical-core-readiness.json is an inventory,
 not a proof or admission credential. --require-ready must pass for a release;
-all four actual-application runners and unbound finite criteria currently block
+the unfinished compiler-like/performance acceptance and unbound finite criteria block
 that gate. Historical receipts remain exact historical facts, not current-HEAD
 qualification. Full scoped success is necessary and is not release readiness.
 
@@ -62,36 +62,37 @@ PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md retains original heap-exhaustion and la
 timeout evidence. Address it when ordinary application compilation reaches the
 same mechanism, not merely to self-host an unfinished compiler.
 
-The typed IO continuation at 74179eb664e132502a24ce60b52a3dbd52b1d0cc passes
-full Linux run 39627387430, tested merge 2a6dbec7b7f3d02c6dc6399360422da350e646e7.
-Both grammars/all seven execute 28 general sequencing obligations plus 4 on minimum
-Python. Fourteen actual IO consumers, two minimum-Python consumers, two installed
-unpublished-package consumers and 80 host policy cases pass. Core/component
-String ABI, foreign-trap separation, strict memory/schema checks and oversized
-request refusal are included. The typed-io family's three finite criteria are
-scoped-qualified; readiness is 15 qualified / 22 blocked, releaseReady=false.
-See PSC1_TYPED_IO_EXECUTION_QUALIFICATION_2026-10-21.json,
-PSC1_TYPED_IO_V1.md and PSC1_WASM_STRING_ABI_V1.md.
+The checked-order/application continuation at
+af0a5921aa2f3fa4dbf4959d5e2c3b14a843d972 passes full Linux run 39655009732,
+tested merge 006ff602e2bce6dcbcad6b970f99307f3a3e7a34. Static/native/focused,
+all complete compiler closures, G1, host boundary, full integration and aggregate
+gate pass. Both/seven execute 56 checked-order obligations, 294 actual CLI/JSON
+process cases and 28 library obligations, with minimum-Python counterparts.
+The shared JSON parser rejects trailing commas and Wasm public labels no longer
+expose internal hygiene names. Exact evidence and preserved G1 identities:
+PSC1_ORDER_APPLICATION_QUALIFICATION_2026-10-22.json.
 
-Continue unbound inference/control criteria, constructive checked numeric order,
-then complete CLI/JSON/library/compiler-like application acceptance and measured
-large inputs. Existing partial application regressions remain; source execution
-does not imply complete four-application or release qualification. Preserve the
-f799 inference/protocol,5a0f sequencing and1fbf five-target standalone receipts
-with their original source and CI identities. G2/G3 stay deferred until freeze.
+Readiness is 16 qualified / 21 blocked criteria. CLI, JSON/files and multi-module
+library applications are scoped-qualified. Compiler-like/performance acceptance
+and unbound family criteria still block Practical Core release readiness.
 
-## Active continuation: checked order and actual applications
+The active source continuation implements the fourth application: a streaming
+decimal-addition compiler pipeline in both authored grammars, independent native
+reference, typed byte/line/column diagnostics and twelve finite actual process
+cases. Its 100000-statement/500000-byte input has a 120-second/1-GiB external
+process acceptance bound, with retained measurements. Existing compiler/host/ABI
+limits remain unchanged. JS/TS/Rust and both Wasm consumers run early; full
+qualification also requires Python/PHP and minimum Python. This descendant is
+implemented, not qualified, until its exact-commit CI completes.
+See PSC1_COMPILER_APPLICATION_V1.md and PSC1_COMPILER_APPLICATION_CONTRACT.json.
 
-Constructive Nat/Int ordering is implemented and native-admitted in run
-39636740787; target/full qualification is pending. PracticalCli supplies both
-authored source grammars and twenty-one actual process-level CLI/JSON scenarios per
-target. Its exact-commit matrix, minimum Python and full gates determine the two
-application rows. Library and compiler-like/performance acceptance remain next.
-No milestone here reopens G2/G3 or replaces the finite release contract.
+After the application/performance work, complete the 21 unbound family criteria
+in dependency order using actual independent-reference, negative and publication
+evidence. Existing tested behavior must acquire complete finite acceptance, not
+a cosmetic status binding. Then require the full release workflow and feature
+freeze before resuming manual G1 -> G2 -> G3 qualification.
 
-
-PracticalLibrary now supplies an executable two-module persistent collection
-application in both grammars, with native standard reference, import/export
-boundaries and missing/duplicate refusal. Readiness requires the full exact-commit
-two-case/all-target receipt, minimum Python and final qualification. Compiler-like
-application diagnostics and measured 100000-item input remain the next app blocker.
+The earlier typed IO qualification at 74179eb664e132502a24ce60b52a3dbd52b1d0cc
+(run 39627387430), f799 inference/protocol, 5a0f sequencing and 1fbf standalone
+receipts remain exact historical evidence. Sources, artifacts, successful CI and
+all diagnostic history remain preserved. G2/G3 remain deferred.

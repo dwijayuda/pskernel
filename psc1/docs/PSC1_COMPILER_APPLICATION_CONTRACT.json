@@ -1,0 +1,116 @@
+{
+  "schema": "psc1-compiler-application-contract/1",
+  "id": "streaming-compiler-application-v1",
+  "applications": [
+    "compiler-like"
+  ],
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "requiredModules": [
+    "PracticalCli/Args",
+    "MiniCompiler/Syntax",
+    "MiniCompiler/Program"
+  ],
+  "cases": [
+    {
+      "id": "single",
+      "input": "1+2;\n",
+      "output": "{\"statements\":1,\"total\":3}",
+      "code": 0,
+      "stdout": "ok\n"
+    },
+    {
+      "id": "whitespace",
+      "input": " \t12 + 34 ;\r\n5+6;\n",
+      "output": "{\"statements\":2,\"total\":57}",
+      "code": 0,
+      "stdout": "ok\n"
+    },
+    {
+      "id": "exact-large-number",
+      "input": "184467440737095516160+1;",
+      "output": "{\"statements\":1,\"total\":184467440737095516161}",
+      "code": 0,
+      "stdout": "ok\n"
+    },
+    {
+      "id": "empty",
+      "input": "",
+      "output": "{\"statements\":0,\"total\":0}",
+      "code": 0,
+      "stdout": "ok\n"
+    },
+    {
+      "id": "expected-plus",
+      "input": "1 2;",
+      "code": 2,
+      "stdout": "expected-plus@2:1:3\n"
+    },
+    {
+      "id": "expected-number",
+      "input": "1+;",
+      "code": 2,
+      "stdout": "expected-number@2:1:3\n"
+    },
+    {
+      "id": "expected-semicolon",
+      "input": "1+2 3;",
+      "code": 2,
+      "stdout": "expected-semicolon@4:1:5\n"
+    },
+    {
+      "id": "unexpected-end",
+      "input": "1+2",
+      "code": 2,
+      "stdout": "unexpected-end@3:1:4\n"
+    },
+    {
+      "id": "unicode-location",
+      "input": "1+😀;",
+      "code": 2,
+      "stdout": "unexpected-token@2:1:3\n"
+    },
+    {
+      "id": "second-line-location",
+      "input": "1+2;\n3 4;",
+      "code": 2,
+      "stdout": "expected-plus@7:2:3\n"
+    },
+    {
+      "id": "unexpected-token",
+      "input": "1&2;",
+      "code": 2,
+      "stdout": "unexpected-token@1:1:2\n"
+    },
+    {
+      "id": "100000-statements",
+      "repeat": "1+2;\n",
+      "count": 100000,
+      "output": "{\"statements\":100000,\"total\":300000}",
+      "code": 0,
+      "stdout": "ok\n",
+      "performance": true
+    }
+  ],
+  "performance": {
+    "id": "100000-statements",
+    "statements": 100000,
+    "inputBytes": 500000,
+    "maxElapsedSeconds": 120,
+    "maxRssKiB": 1048576,
+    "measurement": "Linux /usr/bin/time per actual checked child process; no injected guest fuel."
+  },
+  "scope": "Streaming decimal-addition compiler application: scan tokens, parse statements, construct and constant-fold add ASTs, render an exact JSON program summary. Typed UTF8 byte offsets and scalar line/column diagnostics; full PSC1 self-hosting remains separate. Existing host/compiler/ABI limits remain unchanged."
+}

@@ -513,5 +513,11 @@
     "contract": "docs/PSC1_APPLICATION_EXECUTION_CONTRACT.json",
     "runner": "scripts/practical-application-tests.mjs",
     "receipt": "dist/scoped-correctness/practical-applications/results.json"
+  },
+  "actualCompilerApplication": {
+    "contract": "docs/PSC1_COMPILER_APPLICATION_CONTRACT.json",
+    "runner": "scripts/practical-application-tests.mjs",
+    "argument": "--compiler-application",
+    "receipt": "dist/scoped-correctness/compiler-application/results.json"
   }
 }

@@ -48,12 +48,14 @@
     {
       "id": "unicode-records",
       "exitCode": 0,
-      "stdout": "ok\n"
+      "stdout": "ok\n",
+      "output": "[{\"count\":2,\"text\":\"processed:A\"},{\"count\":-4,\"text\":\"processed:😀\"}]"
     },
     {
       "id": "argv-unicode-quote",
       "exitCode": 0,
-      "stdout": "ok\n"
+      "stdout": "ok\n",
+      "output": "[{\"count\":2,\"text\":\"processed:A\"},{\"count\":-4,\"text\":\"processed:😀\"}]"
     },
     {
       "id": "bounded-output",
@@ -63,7 +65,8 @@
     {
       "id": "empty-records",
       "exitCode": 0,
-      "stdout": "ok\n"
+      "stdout": "ok\n",
+      "output": "[]"
     },
     {
       "id": "array-trailing-comma",

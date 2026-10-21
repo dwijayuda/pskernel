@@ -1,5 +1,11 @@
 # PSC1 compiler-only self-host architecture
 
+> Priority update 2026-10-21: this design is retained for later qualification.
+> G2/G3 and Rust repeat generations are deferred until Practical Core/backend
+> feature freeze. Follow PSC1_DEVELOPMENT_ROADMAP.md for current work; normal CI
+> retains G1 functionality and all correctness gates. Historical blockers below
+> describe their dated checkpoints, not the current normalized closure.
+
 Decision date: 2026-10-21. This design concerns the compiler, not the owned kernel.
 The source census baseline is immutable commit
 da880d864ca5f9e35729255fd7e4f8a17953cd39. Live CI regenerates the inventory on

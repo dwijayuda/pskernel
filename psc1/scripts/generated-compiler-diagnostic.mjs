@@ -12,6 +12,9 @@ import { createGeneratedJsCompilerSession } from '../host-tools/generated-compil
 import { verifyGeneratedBundle, assertJsGeneration, checkGenerationRefusals } from '../host-tools/js-generation-manifest.mjs';
 import { validateClosureCounts } from './compiler-closure-contract.mjs';
 
+const mode = process.argv[2] || '--g1-only';
+assert.ok(['--g1-only','--self-host'].includes(mode), 'PSC1_UNKNOWN_GENERATION_MODE');
+const selfHost = mode === '--self-host';
 const root = process.cwd();
 assert.ok(process.env.GITHUB_SHA, 'PSC1_GENERATED_REQUIRES_CLOUD_COMMIT');
 const directory = path.join(root, 'dist/generated-compiler');
@@ -160,7 +163,7 @@ function generated(request, id, servicePath = g1Path, serviceHash = g1Hash) {
 }
 
 let report = { schema: 'psc1-generated-compiler-diagnostic/1', commit: process.env.GITHUB_SHA,
-  authoritative: false, generatedCompilerExecution: 'not-run', selfCompilation: 'not-run',
+  qualificationMode: mode, authoritative: false, generatedCompilerExecution: 'not-run', selfCompilation: 'not-run',
   fixedPoint: 'not-run', productionPublication: 'not-run', formalPreservation: 'not-provided',
   nativeSeedSha256: seedHash, checkerSha256: checkerHash, events, cases: [] };
 let g1Path, g1Hash;
@@ -324,7 +327,7 @@ try {
   report.generations=[firstManifest];
   let servicePath=g1Path,serviceIdentity=report.service;
   const generationRoot=path.join(directory,'compiler-generations');
-  for (const generation of [2,3]) {
+  for (const generation of (selfHost ? [2,3] : [])) {
     const request=encodeRequest('G'+generation+'-self','lean','ordinary-checked',
       'Ps.BackendJs.CompilerService',sources);
     verifyFixedTools();
@@ -380,10 +383,11 @@ try {
       corpusCases:observations.length,negativeBoundaries:manifest.negativeBoundaries}));
     servicePath=nextPath;serviceIdentity=nextService;
   }
-  report.fixedPoint='passed-G1-G2-G3-exact-graphs-IR-source-and-selected-observations';
+  if (selfHost) report.fixedPoint='passed-G1-G2-G3-exact-graphs-IR-source-and-selected-observations';
   assert.equal(seedCalls, 1);
-  report.generatedCompilerExecution = 'passed-G1-G2-G3-selected-corpus';
-  report.selfCompilation = 'passed-G1-to-G2-to-G3';
+  report.generatedCompilerExecution = selfHost ? 'passed-G1-G2-G3-selected-corpus' : 'passed-G1-selected-corpus';
+  report.selfCompilation = selfHost ? 'passed-G1-to-G2-to-G3' : 'deferred-manual-qualification';
+  if (!selfHost) report.fixedPoint = 'deferred-feature-freeze';
   report.productionPublication = 'host-session-published-selected-corpus-ci-store';
   report.status = 'passed-diagnostic';
 } catch (error) {

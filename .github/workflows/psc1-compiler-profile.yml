@@ -1,10 +1,6 @@
 name: PSC1 fixed compiler workload stage profile
 
 on:
-  pull_request:
-    paths:
-      - psc1/**
-      - .github/workflows/psc1-compiler-profile.yml
   workflow_dispatch:
 
 permissions:

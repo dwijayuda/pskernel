@@ -1,4 +1,4 @@
-name: PSC1 generated compiler execution diagnostic
+name: PSC1 G1 compiler functionality and host regressions
 
 on:
   workflow_dispatch:
@@ -62,7 +62,7 @@ jobs:
       - name: Seed once and execute actual generated compiler semantics
         run: |
           set -euo pipefail
-          node scripts/generated-compiler-diagnostic.mjs
+          node scripts/generated-compiler-diagnostic.mjs --g1-only
       - name: Summarize retained failed sessions without discarding stderr
         if: always()
         run: |
@@ -100,7 +100,7 @@ jobs:
             psc1/dist/scoped-correctness/compiler-source-census/
             psc1/dist/scoped-correctness/compiler-closure/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 90
 
   host-session-boundary:
     runs-on: ubuntu-24.04
@@ -137,4 +137,4 @@ jobs:
           name: psc1-generated-session-boundary-${{ github.sha }}
           path: psc1/dist/generated-session-boundary/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 90

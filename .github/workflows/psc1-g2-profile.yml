@@ -1,10 +1,6 @@
 name: PSC1 qualified G1 failed self-compilation CPU profile
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/psc1-g2-profile.yml
-      - psc1/scripts/profile-generated-compiler.mjs
   workflow_dispatch:
 
 permissions:

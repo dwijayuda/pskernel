@@ -1,36 +1,45 @@
-# PSC1 — actual G1 qualified; continue G2/G3 continuously
+# PSC1 — Practical Core and seven-backend development
 
-Updated2026-10-21. Active draft [PR172](https://github.com/dwijayuda/pskernel/pull/172)
-on fix/psc1-closure-normalization-20261021. Base #171 remains immutable at
-1fad9ed53cda9b23ac30be9cea85e7857437564e; every continuation commit is preserved.
-The user explicitly requests execution of the [Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
-without stopping at small milestones. Use GitHub tools and Linux CI only.
+Updated 2026-10-21. Active draft [PR172](https://github.com/dwijayuda/pskernel/pull/172)
+on fix/psc1-closure-normalization-20261021. Inspected remote HEAD before pivot:
+1d5c45e01f9016365a440c8b8c05916249cfaa4c. Base #171 remains immutable at
+1fad9ed53cda9b23ac30be9cea85e7857437564e. All commits/history preserved.
+Use GitHub tools and Linux CI only.
 
-## Active continuation — fusion qualified narrowly; real G2 now times out
+## Active priority pivot (explicit user instruction)
 
-Implementationb08988d91314125bc4680501035513a23ec7677c passes focused39551686977
-and all3 complete both-grammar closure jobs39551686969.
-[Exact worker runtime/attempt receipt](docs/PSC1_TYPED_WORKER_FUSION_RUNTIME_2026-10-21.json).
-The same original/fused workload has identical observations, escaping functions,
-old captures, lexical shadowing and exact-once ordered callbacks. Baseline351ms/
-149076KiB versus fused45ms/52220KiB. Both preserve strict divergent prefixes.
-The native proof/data-wrapper refusals remain. These are bounded runtime checks,
-not formal preservation.
+The [development roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) supersedes the
+self-host-first order in the older Sol High prompt. Continue actual Practical
+Core, both authored grammars, seven backend mappings, architecture, practical
+application compilation and runtime work. Do not stop at planning changes.
+G2/G3/fixed-point qualification is deferred until a stable feature freeze.
 
-Actual generated run39551686967 produced/admitted G1 and passed all8 corpus
-cases again. New service hash:
-5d30b5552896fbe4f90eadc7cc71564a61bec7f586a6ef4f38deedfeb8456f6f.
-Source closure84 modules, digestfeef9c744743a4a1c34c46424491826c13823ff3ef537473fb26ce4b2fe97443.
-Real G2 then timed out240213ms at unchanged240000ms, before publication.
-Its exact request hash4c61b3c17d8ef2591eb473f69afca9a6748c6d1b7d8bd999de9d3e8e841e345f.
-There was no heap-abort diagnostic in this attempt; do not infer complete memory
-qualification. G3/fixed point remain not-run.
+Normal generated-compiler CI retains the full existing8-case G1 functionality
+corpus, one native seed, complete-source admission/IR and host authority/refusal
+checks. Full G1->G2->G3 uses the same controller with --self-host in the separate
+manual psc1-selfhost-qualification workflow. No generation assertion is removed.
+Expensive G2 CPU and fixed compiler profile workflows are also manual. Existing
+scoped/native/closure/target/package gates remain unchanged. G1 artifacts use90-day
+retention; exact historical source and qualification receipts remain preserved.
 
-Update the separate CPU replay to this exact NEW admitted/observed G1 artifact
-12324336359 and failed request, retaining the old measured-OOM receipt in history.
-The replay does not install/use a native compiler or adopt any output. Use its
-actual sampled hot code to correct the next bottleneck under default limits.
-The non-hidden rejected session and real stderr are now retained successfully.
+Latest pre-pivot HEAD1d5: scoped39552904242 SUCCESS; all3 whole-closure jobs
+39552904236 SUCCESS; native39552904280 SUCCESS; fixed-input native comparison
+39552904261 SUCCESS. Actual39552904167 passes all8 G1 cases, then G2 timeout
+240177ms before publication. No G3/fixed point. Latest exact CPU replay
+39552904187 is diagnostic success, G2 execution ETIMEDOUT240278ms.
+[Tracked open performance defect](docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md)
+retains the original proven heap exhaustion, fusion correction and later timeout.
+
+Next development: close CompilerM all-target state/error/control coverage and
+finite versioned grammar×target receipt enforcement, then follow remaining
+Practical Core decisions. Preserve complete compiler sources, checker pins,
+strict IR, exact ordinary pairing and all prior regression/refusal tests.
+Pivot changes are pending Linux CI until exact runs are recorded below.
+
+## Historical evidence and implementation record
+
+The entries below retain their original chronology and pending-at-the-time
+language. Their old instructions to prioritize G2/G3 are superseded above.
 
 ## Earlier fusion source/harness corrections
 

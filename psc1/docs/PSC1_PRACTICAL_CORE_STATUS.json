@@ -645,5 +645,13 @@
     "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
     "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
     "runId": 39495181966
+  },
+  "developmentPriority": {
+    "updated": "2026-10-21",
+    "roadmap": "docs/PSC1_DEVELOPMENT_ROADMAP.md",
+    "primary": "complete Practical Core, both authored grammars and seven backend mappings",
+    "G1": "retained functionality regressions",
+    "G2G3": "deferred until feature freeze; separate manual qualification",
+    "performanceDefect": "docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md"
   }
 }

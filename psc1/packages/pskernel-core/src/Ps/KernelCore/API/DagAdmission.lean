@@ -15,7 +15,9 @@ context and state. The final comparison receives the returned checker owner;
 no semantic cache is transferred to another declaration.
 
 Unsafe recursive definitions use a separate header and fresh private body owner.
-Mutual definitions and inductives request whole-original-admission fallback. A none from any attempted operation
+Mutual definitions use fresh owners for each header and each body; all headers
+finish before the complete private work environment is installed. Inductives
+request whole-original-admission fallback. A none from any attempted operation
 discards its state and restarts the complete original admission.
 -/
 
@@ -241,6 +243,132 @@ def psKernelDagTryAdmitUnsafeDefinitionWithFuel
                     | Except.ok _ => Option.some (Except.ok work)
   else Option.none
 
+/- Every header and every body owns a fresh checker, preserving PSKernel's
+   published cache/fuel behavior. Headers see only the original environment. -/
+def psKernelDagTryMutualHeaders
+    (sources : List PsKernelDagDefinition) :
+    List PsKernelDefinitionInfo -> Nat -> PsKernelEnvironment ->
+    PsKernelDefinitionInfo -> Nat -> Nat -> PsKernelExprV2PagedArena ->
+    List PsKernelExprV2DeclarationRef -> List PsKernelName ->
+    Option (Except String Unit) :=
+  match sources with
+  | List.nil =>
+      fun (values : List PsKernelDefinitionInfo) (_fuel : Nat)
+          (_environment : PsKernelEnvironment) (_first : PsKernelDefinitionInfo)
+          (_maxRecDepth : Nat) (_maxNatSize : Nat) (_arena : PsKernelExprV2PagedArena)
+          (_declarations : List PsKernelExprV2DeclarationRef) (_seen : List PsKernelName) =>
+        match values with
+        | List.nil => Option.some (Except.ok Unit.unit)
+        | List.cons _ _ => Option.none
+  | List.cons source rest =>
+      fun (values : List PsKernelDefinitionInfo) (fuel : Nat)
+          (environment : PsKernelEnvironment) (first : PsKernelDefinitionInfo)
+          (maxRecDepth : Nat) (maxNatSize : Nat) (arena : PsKernelExprV2PagedArena)
+          (declarations : List PsKernelExprV2DeclarationRef) (seen : List PsKernelName) =>
+        match values with
+        | List.nil => Option.none
+        | List.cons value remaining =>
+            if psKernelSafetyEq value.safety first.safety then
+              if psKernelNameListsEq value.base.levelParams first.base.levelParams then
+                if psKernelNameMember value.base.name seen then
+                  Option.some
+                    (Except.error "invalid mutual definition, duplicate declaration name")
+                else
+                  let checker := psKernelMkCheckerSession environment value.base.levelParams
+                    first.safety maxRecDepth maxNatSize;
+                  let context := psKernelExprV2CheckContextEmpty checker.context;
+                  let state :=
+                    psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty arena)
+                      (psKernelExprV2WhnfStateForDeclarations arena declarations);
+                  match psKernelExprV2AdmissionCheckHeaderWithFuel fuel context state
+                      value.base source.base.type with
+                  | Option.none => Option.none
+                  | Option.some attempted =>
+                      match attempted with
+                      | Except.error error => Option.some (Except.error error)
+                      | Except.ok _ =>
+                          let recur := psKernelDagTryMutualHeaders rest;
+                          recur remaining fuel environment first maxRecDepth maxNatSize
+                            arena declarations (List.cons value.base.name seen)
+              else
+                Option.some
+                  (Except.error
+                    "invalid mutual definition, declarations must have the same universe level parameters")
+            else
+              Option.some
+                (Except.error
+                  "invalid mutual definition, declarations must have the same safety annotation")
+
+def psKernelDagTryMutualBodies
+    (sources : List PsKernelDagDefinition) :
+    List PsKernelDefinitionInfo -> Nat -> PsKernelEnvironment ->
+    PsKernelDefinitionSafety -> Nat -> Nat -> PsKernelExprV2PagedArena ->
+    List PsKernelExprV2DeclarationRef -> Option (Except String Unit) :=
+  match sources with
+  | List.nil =>
+      fun (values : List PsKernelDefinitionInfo) (_fuel : Nat)
+          (_environment : PsKernelEnvironment) (_safety : PsKernelDefinitionSafety)
+          (_maxRecDepth : Nat) (_maxNatSize : Nat) (_arena : PsKernelExprV2PagedArena)
+          (_declarations : List PsKernelExprV2DeclarationRef) =>
+        match values with
+        | List.nil => Option.some (Except.ok Unit.unit)
+        | List.cons _ _ => Option.none
+  | List.cons source rest =>
+      fun (values : List PsKernelDefinitionInfo) (fuel : Nat)
+          (environment : PsKernelEnvironment) (safety : PsKernelDefinitionSafety)
+          (maxRecDepth : Nat) (maxNatSize : Nat) (arena : PsKernelExprV2PagedArena)
+          (declarations : List PsKernelExprV2DeclarationRef) =>
+        match values with
+        | List.nil => Option.none
+        | List.cons value remaining =>
+            let checker := psKernelMkCheckerSession environment value.base.levelParams
+              safety maxRecDepth maxNatSize;
+            let context := psKernelExprV2CheckContextEmpty checker.context;
+            let state :=
+              psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty arena)
+                (psKernelExprV2WhnfStateForDeclarations arena declarations);
+            match psKernelExprV2AdmissionCheckBodyWithFuel fuel context state
+                value.base source.base.type value.value source.value
+                "definition type mismatch" with
+            | Option.none => Option.none
+            | Option.some attempted =>
+                match attempted with
+                | Except.error error => Option.some (Except.error error)
+                | Except.ok _ =>
+                    let recur := psKernelDagTryMutualBodies rest;
+                    recur remaining fuel environment safety maxRecDepth maxNatSize
+                      arena declarations
+
+def psKernelDagTryAdmitMutualDefinitionsWithFuel
+    (fuel : Nat) (environment : PsKernelEnvironment)
+    (maxRecDepth maxNatSize : Nat) (arena : PsKernelExprV2PagedArena)
+    (declarations : List PsKernelExprV2DeclarationRef)
+    (sources : List PsKernelDagDefinition) (values : List PsKernelDefinitionInfo) :
+    Option (Except String PsKernelEnvironment) :=
+  match values with
+  | List.nil => Option.some (Except.error "invalid empty mutual definition")
+  | List.cons first _ =>
+      if psKernelDefinitionSafetyIsSafe first.safety then
+        Option.some
+          (Except.error "invalid mutual definition, declaration is not tagged as unsafe/partial")
+      else
+        match psKernelDagTryMutualHeaders sources values fuel environment first
+            maxRecDepth maxNatSize arena declarations List.nil with
+        | Option.none => Option.none
+        | Option.some attemptedHeaders =>
+            match attemptedHeaders with
+            | Except.error error => Option.some (Except.error error)
+            | Except.ok _ =>
+                let work := psKernelMutualWorkEnvironment values environment;
+                let workDeclarations := psKernelDagAddAdmittedDefinitions sources declarations;
+                match psKernelDagTryMutualBodies sources values fuel work first.safety
+                    maxRecDepth maxNatSize arena workDeclarations with
+                | Option.none => Option.none
+                | Option.some attemptedBodies =>
+                    match attemptedBodies with
+                    | Except.error error => Option.some (Except.error error)
+                    | Except.ok _ => Option.some (Except.ok work)
+
 def psKernelDagTryAdmitSimpleWithFuel
     (fuel : Nat) (environment : PsKernelEnvironment)
     (maxRecDepth maxNatSize : Nat) (arena : PsKernelExprV2PagedArena)
@@ -258,6 +386,12 @@ def psKernelDagTryAdmitSimpleWithFuel
                 psKernelDagTryAdmitUnsafeDefinitionWithFuel fuel environment
                   maxRecDepth maxNatSize arena declarations input value
               else Option.none
+          | _ => Option.none
+      | PsKernelDagDeclarationRequest.mutualDefinitions inputs =>
+          match declaration with
+          | PsKernelDeclarationRequest.mutualDefinitions values =>
+              psKernelDagTryAdmitMutualDefinitionsWithFuel fuel environment
+                maxRecDepth maxNatSize arena declarations inputs values
           | _ => Option.none
       | _ => Option.none
   | Option.some plan =>

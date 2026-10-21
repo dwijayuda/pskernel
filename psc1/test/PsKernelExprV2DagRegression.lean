@@ -4365,6 +4365,303 @@ private def defEqPrefixGuardParity : IO Unit := do
      | some (.ok result) => result.snd | _ => false)
   IO.println "PSC1_V2_DAG_DEFEQ_PREFIX_GUARDS: PASS"
 
+private def mutualDefinitionAdmissionParity : IO Unit := do
+  let aName := nm "DagMutualAdmissionA"
+  let bName := nm "DagMutualAdmissionB"
+  let externalName := nm "DagMutualAdmissionExternal"
+  let u := nm "dag-mutual-u"
+  let v := nm "dag-mutual-v"
+  let x := nm "dag-mutual-x"
+  let (arena, s0) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let (arena, s1) ← expect (psKernelExprV2PagedMkSort arena (.succ .zero))
+  let (arena, su) ← expect (psKernelExprV2PagedMkSort arena (.param u))
+  let (arena, su1) ← expect (psKernelExprV2PagedMkSort arena (.succ (.param u)))
+  let (arena, ca) ← expect (psKernelExprV2PagedMkConst arena aName [])
+  let (arena, cb) ← expect (psKernelExprV2PagedMkConst arena bName [])
+  let (arena, external) ← expect (psKernelExprV2PagedMkConst arena externalName [])
+  let (arena, mv) ← expect (psKernelExprV2PagedMkMVar arena u)
+  let (arena, fv) ← expect (psKernelExprV2PagedMkFVar arena u)
+  let (arena, b0) ← expect (psKernelExprV2PagedMkBVar arena 0)
+  let (arena, appA) ← expect (psKernelExprV2PagedMkApp arena ca b0)
+  let (arena, appB) ← expect (psKernelExprV2PagedMkApp arena cb b0)
+  let (arena, bodyA) ← expect (psKernelExprV2PagedMkLam arena x s1 appB .default)
+  let (arena, bodyB) ← expect (psKernelExprV2PagedMkLam arena x s1 appA .default)
+  let (arena, functionType) ← expect (psKernelExprV2PagedMkForall arena x s1 s1 .default)
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let input := fun (name : PsKernelName) (params : List PsKernelName)
+      (type value : Nat) (safety : PsKernelDefinitionSafety) =>
+    PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk name params type)
+      value .abbrevHint safety
+  let a := fun params type value safety => input aName params type value safety
+  let b := fun params type value safety => input bName params type value safety
+  let unsafePair := [a [] s1 cb .unsafeDef, b [] s1 ca .unsafeDef]
+  let partialPair := [a [] s1 cb .partialDef, b [] s1 ca .partialDef]
+  let unsafeFunctions := [a [] functionType bodyA .unsafeDef, b [] functionType bodyB .unsafeDef]
+  let partialFunctions := [a [] functionType bodyA .partialDef, b [] functionType bodyB .partialDef]
+  let seedRequest := PsKernelDagDeclarationRequest.axiomDecl
+    (PsKernelDagConstantBase.mk externalName [] s1) true
+  let seed ← fresh 64 1
+  let owner := (← expectPublic (psKernelDagRunCommand
+    (PsKernelDagExecutionState.mk seed []) [] .safe arena built (.admit seedRequest))).snd
+  let cases : List (String × List PsKernelDagDefinition × Bool × Option String) := [
+    ("empty", [], false, some "invalid empty mutual definition"),
+    ("safe-group", [a [] s1 s0 .safe], false,
+      some "invalid mutual definition, declaration is not tagged as unsafe/partial"),
+    ("unsafe-self", [a [] s1 ca .unsafeDef], true, none),
+    ("unsafe-forward-peers", unsafePair, true, none),
+    ("partial-forward-peers", partialPair, true, none),
+    ("unsafe-functions", unsafeFunctions, true, none),
+    ("partial-functions", partialFunctions, true, none),
+    ("unsafe-external", [a [] s1 external .unsafeDef], true, none),
+    ("partial-rejects-unsafe-external", [a [] s1 external .partialDef], false, none),
+    ("polymorphic", [a [u] su1 su .unsafeDef, b [u] su1 su .unsafeDef], true, none),
+    ("safety-before-other-header-errors", [a [] s1 s0 .unsafeDef, a [u] mv mv .partialDef], false,
+      some "invalid mutual definition, declarations must have the same safety annotation"),
+    ("parameter-list-before-duplicate-and-mvar", [a [u] s1 s0 .unsafeDef, a [] mv mv .unsafeDef], false,
+      some "invalid mutual definition, declarations must have the same universe level parameters"),
+    ("ordered-parameters", [a [u,v] s1 s0 .unsafeDef, b [v,u] s1 s0 .unsafeDef], false,
+      some "invalid mutual definition, declarations must have the same universe level parameters"),
+    ("duplicate-name-before-header-mvar", [a [] s1 s0 .unsafeDef, a [] mv mv .unsafeDef], false,
+      some "invalid mutual definition, duplicate declaration name"),
+    ("existing-name", [input externalName [] s1 s0 .unsafeDef], false, some "already declared"),
+    ("peer-unavailable-in-header", [a [] cb mv .unsafeDef, b [] s1 s0 .unsafeDef], false, none),
+    ("all-headers-before-any-body", [a [] s1 mv .unsafeDef, b [] fv s0 .unsafeDef], false,
+      some "declaration has free variables"),
+    ("first-body-before-second-body", [a [] s1 mv .unsafeDef, b [] s1 fv .unsafeDef], false,
+      some "declaration has metavariables"),
+    ("first-body-mismatch-before-later-mvar", [a [] s1 s1 .unsafeDef, b [] s1 mv .unsafeDef], false,
+      some "definition type mismatch"),
+    ("body-level-guard", [a [] s1 su .unsafeDef], false,
+      some "invalid reference to undefined universe level parameter")]
+  let mut comparisons := 0
+  for (label, inputs, acceptedAt64, messageAt64) in cases do
+    let candidate := PsKernelDagDeclarationRequest.mutualDefinitions inputs
+    let declaration ← expect (psKernelDagDecodeDeclaration built candidate)
+    for fuel in [0,1,2,3,4,8,64] do
+      for maxDepth in [0,1] do
+        let current := { owner.session with
+          resources := { owner.session.resources with fuel := fuel, maxRecDepth := maxDepth } }
+        let direct := psKernelDagTryAdmitSimpleWithFuel fuel
+          (psKernelKernelSessionEnvironment current) maxDepth current.resources.maxNatSize
+          arena owner.declarations candidate declaration
+        match direct with
+        | none => throw (IO.userError ("mutual direct path declined " ++ label ++ "/" ++ toString fuel))
+        | some attempted =>
+            match psKernelV1DispatchDeclaration current declaration,
+                psKernelV1EnvironmentOutcome attempted with
+            | .error left, .error right =>
+                require ("mutual-raw-error-" ++ label) (samePublicError left right)
+            | .ok left, .ok right =>
+                require ("mutual-raw-environment-" ++ label) (admissionEnvironmentEqual left right)
+            | _, _ => throw (IO.userError ("mutual raw mismatch " ++ label))
+        let original := psKernelV1AdmitDeclaration current declaration
+        require ("mutual-public-" ++ label ++ "/" ++ toString fuel ++ "/" ++ toString maxDepth)
+          (admissionPublicParity original
+            (psKernelV1RunDag current [] .safe arena [.admit candidate]))
+        if fuel == 64 then
+          require ("mutual-expected-decision-" ++ label)
+            ((match original with | .ok _ => true | .error _ => false) == acceptedAt64)
+          match messageAt64 with
+          | none => pure ()
+          | some message =>
+              require ("mutual-exact-message-" ++ label)
+                (match original with
+                 | .error (.rejectedInvalid actual) => actual == message
+                 | _ => false)
+          let start ← fresh fuel maxDepth
+          let whole := psKernelV1RunDag start [] .safe arena [.admit seedRequest, .admit candidate]
+          require ("mutual-same-batch-" ++ label)
+            (match original, whole with
+             | .error left, .error right => samePublicError left right
+             | .ok left, .ok right =>
+                 admissionEnvironmentEqual left.session.environment right.session.environment &&
+                   right.replies.length == 2
+             | _, _ => false)
+        comparisons := comparisons + 1
+  require "mutual-admission-matrix-count" (comparisons == 280)
+  let partialRequest := PsKernelDagDeclarationRequest.mutualDefinitions partialPair
+  let partialDeclaration ← expect (psKernelDagDecodeDeclaration built partialRequest)
+  let published ← expectPublic
+    (psKernelDagRunCommand owner [] .safe arena built (.admit partialRequest))
+  require "mutual-public-receipt-installs-whole-group"
+    (match published.fst with
+     | .admitted receipt => receipt.declarationsBefore == 1 && receipt.declarationsAfter == 3
+     | _ => false)
+  for (name, valueRoot) in [(aName, cb), (bName, ca)] do
+    require "mutual-success-publishes-original-peer-ids"
+      (match psKernelExprV2DeclarationRefFind published.snd.declarations name with
+       | some reference =>
+           reference.type == s1 && reference.deltaValue == some valueRoot &&
+             match reference.kind with | .definitionDecl => true | _ => false
+       | none => false)
+    let expected ← expect (psKernelExprV2DecodedRequire built valueRoot)
+    require "mutual-stored-partial-body-and-annotation"
+      (match psKernelEnvironmentFind published.snd.session.environment name with
+       | some (.defnInfo info) =>
+           psKernelExprEqual info.base.type sort1 && psKernelExprEqual info.value expected &&
+             psKernelSafetyEq info.safety .partialDef
+       | _ => false)
+  let aExpression ← expect (psKernelExprV2DecodedRequire built ca)
+  let oldSafe := psKernelV1CheckExpression published.snd.session [] .safe aExpression
+  let safeBatch := psKernelV1RunDag seed [] .safe arena
+    [.admit seedRequest, .admit partialRequest, .check ca]
+  require "mutual-partial-admission-never-authorizes-safe-use"
+    (match oldSafe, safeBatch with | .error left, .error right => samePublicError left right | _, _ => false)
+  let partialBatch ← expectPublic (psKernelV1RunDag seed [] .partialDef arena
+    [.admit seedRequest, .admit partialRequest, .check ca, .check cb])
+  require "mutual-partial-context-can-check-both-peers"
+    (match partialBatch.replies.reverse with
+     | .checked right :: .checked left :: _ =>
+         psKernelExprEqual left.type sort1 && psKernelExprEqual right.type sort1
+     | _ => false)
+  let limited := { owner.session with
+    resources := { owner.session.resources with maxDeclarations := 2 } }
+  let badRequest := PsKernelDagDeclarationRequest.mutualDefinitions
+    [a [] s1 s1 .unsafeDef, b [] s1 s0 .unsafeDef]
+  let badDeclaration ← expect (psKernelDagDecodeDeclaration built badRequest)
+  for (candidate, declaration) in [(partialRequest, partialDeclaration), (badRequest, badDeclaration)] do
+    require "mutual-limit-after-complete-body-check"
+      (admissionPublicParity (psKernelV1AdmitDeclaration limited declaration)
+        (psKernelV1RunDag limited [] .safe arena [.admit candidate]))
+  require "mutual-valid-group-reaches-declaration-limit"
+    (match psKernelDagAdmitDeclaration limited arena owner.declarations partialRequest partialDeclaration with
+     | .error (.resourceExhausted .declarationLimit message) => message == "declaration limit exceeded"
+     | _ => false)
+  require "mutual-invalid-first-body-precedes-declaration-limit"
+    (match psKernelDagAdmitDeclaration limited arena owner.declarations badRequest badDeclaration with
+     | .error (.rejectedInvalid message) => message == "definition type mismatch"
+     | _ => false)
+  let malformed := PsKernelDagDeclarationRequest.mutualDefinitions
+    [input externalName [] s1 s0 .unsafeDef, b [] s1 arena.size .unsafeDef]
+  require "mutual-malformed-second-id-precedes-first-header-error"
+    (match psKernelDagDecodeDeclaration built malformed,
+        psKernelV1RunDag owner.session [] .safe arena [.admit malformed] with
+     | .error expected, .error (.rejectedInvalid actual) => expected == actual
+     | _, _ => false)
+  let cancelled := { owner.session with
+    resources := { owner.session.resources with cancelled := true } }
+  require "mutual-preflight-precedes-malformed-member"
+    (match psKernelV1RunDag cancelled [] .safe arena [.admit malformed] with
+     | .error (.resourceExhausted .cancelled _) => true | _ => false)
+  require "mutual-private-failure-does-not-publish-environment-or-index"
+    ((match psKernelEnvironmentFind owner.session.environment aName with | none => true | _ => false) &&
+      (match psKernelExprV2DeclarationRefFind owner.declarations aName with | none => true | _ => false))
+  let externalRequest := PsKernelDagDeclarationRequest.mutualDefinitions [a [] s1 external .unsafeDef]
+  let externalDeclaration ← expect (psKernelDagDecodeDeclaration built externalRequest)
+  require "mutual-preexisting-session-type-explicit-fallback"
+    (match psKernelDagTryAdmitSimpleWithFuel 64
+        (psKernelKernelSessionEnvironment owner.session) 1 owner.session.resources.maxNatSize
+        arena [] externalRequest externalDeclaration with
+     | none => true | _ => false)
+  require "mutual-preexisting-session-public-fallback-parity"
+    (admissionPublicParity (psKernelV1AdmitDeclaration owner.session externalDeclaration)
+      (psKernelV1RunDag owner.session [] .safe arena [.admit externalRequest]))
+  IO.println "PSC1_V2_DAG_MUTUAL_ADMISSION: PASS"
+  let official ← Lean.mkEmptyEnvironment
+  for (label, inputs, expected) in [
+      ("unsafe-peers", unsafePair, true),
+      ("partial-peers", partialPair, true),
+      ("unsafe-functions", unsafeFunctions, true),
+      ("partial-functions", partialFunctions, true),
+      ("empty", [], false),
+      ("safe", [a [] s1 s0 .safe], false),
+      ("duplicate", [a [] s1 s0 .unsafeDef, a [] s1 s0 .unsafeDef], false),
+      ("peer-header", [a [] cb s0 .unsafeDef, b [] s1 s0 .unsafeDef], false)] do
+    let officialValues ← inputs.mapM (fun value => do
+      let type ← expect (psKernelExprV2DecodedRequire built value.base.type)
+      let body ← expect (psKernelExprV2DecodedRequire built value.value)
+      let officialType ← projectionOfficialRequire type
+      let officialBody ← projectionOfficialRequire body
+      let safety : Lean.DefinitionSafety :=
+        match value.safety with
+        | .safe => .safe
+        | .unsafeDef => .«unsafe»
+        | .partialDef => .«partial»
+      pure ({ name := quickOfficialName value.base.name
+              levelParams := value.base.levelParams.map quickOfficialName
+              type := officialType
+              value := officialBody
+              hints := .abbrev
+              safety := safety } : Lean.DefinitionVal))
+    let officialAccepted :=
+      match official.addDeclCore 0 0 (.mutualDefnDecl officialValues) none true with
+      | .ok _ => true | .error _ => false
+    let start ← fresh 64 1
+    let actual := psKernelV1RunDag start [] .safe arena [.admit (.mutualDefinitions inputs)]
+    require ("mutual-official-checked-admission-" ++ label)
+      (officialAccepted == expected && (match actual with | .ok _ => true | .error _ => false) == expected)
+  IO.println "PSC1_V2_DAG_OFFICIAL_MUTUAL_ADMISSION: PASS"
+
+private def mutualAdmissionFreshMemberState : IO Unit := do
+  for (layers, fuel, maxDepth, coldMessage) in [
+      (4, 5, 0, "kernel inference budget exhausted"),
+      (15, 64, 1, "deep recursion detected, use maxRecDepth to increase the limit")] do
+    for safety in [PsKernelDefinitionSafety.unsafeDef, .partialDef] do
+      let seed ← fresh fuel maxDepth
+      let aName := nm ("MutualFreshA" ++ toString layers)
+      let bName := nm ("MutualFreshB" ++ toString layers)
+      let x := nm "mutual-fresh-x"
+      let (baseArena, s1) ← expect
+        (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty (.succ .zero))
+      let mut workingArena := baseArena
+      let mut firstBody := s1
+      for tag in [:layers] do
+        let next ← expect (psKernelExprV2PagedMkMData workingArena tag firstBody)
+        workingArena := next.fst
+        firstBody := next.snd
+      let (arena, s2) ← expect (psKernelExprV2PagedMkSort workingArena (.succ (.succ .zero)))
+      let (arena, b0) ← expect (psKernelExprV2PagedMkBVar arena 0)
+      let (arena, secondBody) ← expect (psKernelExprV2PagedMkLam arena x firstBody b0 .default)
+      let (arena, secondType) ← expect (psKernelExprV2PagedMkForall arena x s1 s1 .default)
+      let built ← expect (psKernelExprV2DecodeChecked arena)
+      let firstExpression ← expect (psKernelExprV2DecodedRequire built firstBody)
+      let secondExpression ← expect (psKernelExprV2DecodedRequire built secondBody)
+      let checker := psKernelKernelSessionChecker seed [] safety
+      let context := psKernelExprV2CheckContextEmpty checker.context
+      let initial := psKernelExprV2CheckStateEmpty arena
+      let oldPrimed ← expect (psKernelSessionCheck fuel checker firstExpression)
+      let primed ←
+        match psKernelExprV2TryCheckStateWithFuel fuel context initial firstBody with
+        | some attempted => expect attempted
+        | none => throw (IO.userError "mutual cache-priming check declined")
+      let oldWarm := psKernelSessionCheck fuel oldPrimed.snd secondExpression
+      let warm := psKernelExprV2TryCheckStateWithFuel fuel context primed.fst secondBody
+      match oldWarm, warm with
+      | .ok expected, some (.ok actual) =>
+          let resultGraph ← expect (psKernelExprV2DecodeChecked actual.fst.whnf.arena)
+          let resultType ← expect (psKernelExprV2DecodedRequire resultGraph actual.snd)
+          require "mutual-member-cache-sharing-would-change-result"
+            (psKernelExprEqual expected.fst resultType &&
+              expected.snd.state.nextFresh == actual.fst.nextFresh)
+      | _, _ => throw (IO.userError "mutual warm-member sentinel did not succeed")
+      let oldCold := psKernelSessionCheck fuel checker secondExpression
+      let cold := psKernelExprV2TryCheckStateWithFuel fuel context initial secondBody
+      require "mutual-next-member-fresh-cache-resource-error"
+        (match oldCold, cold with
+         | .error left, some (.error right) => left == right && left == coldMessage
+         | _, _ => false)
+      let inputs := [
+        PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk aName [] s2)
+          firstBody .abbrevHint safety,
+        PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk bName [] secondType)
+          secondBody .abbrevHint safety]
+      let request := PsKernelDagDeclarationRequest.mutualDefinitions inputs
+      let declaration ← expect (psKernelDagDecodeDeclaration built request)
+      require "mutual-admission-resets-owner-for-each-body"
+        (match psKernelDagTryAdmitSimpleWithFuel fuel
+            (psKernelKernelSessionEnvironment seed) maxDepth seed.resources.maxNatSize
+            arena [] request declaration with
+         | some (.error message) => message == coldMessage
+         | _ => false)
+      let original := psKernelV1AdmitDeclaration seed declaration
+      let actual := psKernelV1RunDag seed [] .safe arena [.admit request]
+      require "mutual-fresh-owner-public-resource-parity"
+        (match original, actual with
+         | .error left, .error right =>
+             samePublicError left right && samePublicError left (psKernelErrorFromMessage coldMessage)
+         | _, _ => false)
+  IO.println "PSC1_V2_DAG_MUTUAL_FRESH_MEMBER: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -4397,6 +4694,8 @@ def main : IO Unit := do
   admissionPolicyAndSafety
   admissionFinalComparisonGuards
   unsafeDefinitionAdmissionParity
+  mutualDefinitionAdmissionParity
+  mutualAdmissionFreshMemberState
   theoremAdmissionParity
   theoremIsPropStateGuards
   binderSpineDefEqParity

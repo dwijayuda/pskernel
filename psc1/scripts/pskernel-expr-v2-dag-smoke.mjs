@@ -458,7 +458,7 @@ console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG checked binders, lets, admitted constants, applications and projections; typed local-value WHNF; scope-owned DefEq with binder spines, Bool reflection, cheap core and repeated quick comparison; direct axiom/definition/opaque/theorem and unsafe admission; proof irrelevance, lazy delta, external types, iota and mutual/inductive admission fallback remain; incomplete"
+  checker_representation:"DAG checked binders, lets, admitted constants, applications and projections; typed local-value WHNF; scope-owned DefEq with binder spines, Bool reflection, cheap core and repeated quick comparison; direct axiom/definition/opaque/theorem, unsafe and mutual-definition admission; proof irrelevance, lazy delta, external types, iota and inductive admission fallback remain; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");
 }
@@ -3814,6 +3814,228 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
       "prefix-definitive-initial-quick-skips-whnf");
     console.log("PSC1_V2_DAG_JS_DEFEQ_PREFIX_GUARDS: PASS");
   }
+}
+
+{
+  const H=get("PsKernelReducibilityHints"),Reply=get("PsKernelDagReply"),
+    CI=get("PsKernelConstantInfo"),Option=get("Option"),
+    none=typeof Option.none==="function"?Option.none():Option.none;
+  const aName=name("DagMutualAdmissionA"),bName=name("DagMutualAdmissionB"),
+    externalName=name("DagMutualAdmissionExternal"),u=name("dag-mutual-u"),
+    v=name("dag-mutual-v"),x=name("dag-mutual-x");
+  let graph=empty;
+  const put=(kind,...args)=>{const r=mk(graph,kind,...args);graph=r.fst;return r.snd;};
+  const s0=put("Sort",L.zero),s1=put("Sort",L.succ(L.zero)),
+    su=put("Sort",L.param(u)),su1=put("Sort",L.succ(L.param(u))),
+    ca=put("Const",aName,nil),cb=put("Const",bName,nil),external=put("Const",externalName,nil),
+    mv=put("MVar",u),fv=put("FVar",u),b0=put("BVar",0n),
+    appA=put("App",ca,b0),appB=put("App",cb,b0),
+    bodyA=put("Lam",x,s1,appB,B.default),bodyB=put("Lam",x,s1,appA,B.default),
+    functionType=put("Forall",x,s1,s1,B.default);
+  const built=accepted(decode(graph),"mutual-matrix-decode");
+  const input=(name,params,type,value,safety)=>({base:{name,levelParams:list(params),type},
+    value,hints:H.abbrevHint,safety});
+  const a=(params,type,value,safety)=>input(aName,params,type,value,safety),
+    b=(params,type,value,safety)=>input(bName,params,type,value,safety),
+    unsafePair=[a([],s1,cb,S.unsafeDef),b([],s1,ca,S.unsafeDef)],
+    partialPair=[a([],s1,cb,S.partialDef),b([],s1,ca,S.partialDef)],
+    unsafeFunctions=[a([],functionType,bodyA,S.unsafeDef),b([],functionType,bodyB,S.unsafeDef)],
+    partialFunctions=[a([],functionType,bodyA,S.partialDef),b([],functionType,bodyB,S.partialDef)];
+  const seedRequest=D.axiomDecl({name:externalName,levelParams:nil,type:s1},true),seed=session(64n,1n),
+    owner=accepted(get("psKernelDagRunCommand")(
+      {session:seed,declarations:nil},nil,S.safe,graph,built,C.admit(seedRequest)),"mutual-seed").snd;
+  const cases=[
+    ["empty",[],false,"invalid empty mutual definition"],
+    ["safe-group",[a([],s1,s0,S.safe)],false,
+      "invalid mutual definition, declaration is not tagged as unsafe/partial"],
+    ["unsafe-self",[a([],s1,ca,S.unsafeDef)],true,null],
+    ["unsafe-forward-peers",unsafePair,true,null],
+    ["partial-forward-peers",partialPair,true,null],
+    ["unsafe-functions",unsafeFunctions,true,null],
+    ["partial-functions",partialFunctions,true,null],
+    ["unsafe-external",[a([],s1,external,S.unsafeDef)],true,null],
+    ["partial-rejects-unsafe-external",[a([],s1,external,S.partialDef)],false,null],
+    ["polymorphic",[a([u],su1,su,S.unsafeDef),b([u],su1,su,S.unsafeDef)],true,null],
+    ["safety-before-other-header-errors",[a([],s1,s0,S.unsafeDef),a([u],mv,mv,S.partialDef)],false,
+      "invalid mutual definition, declarations must have the same safety annotation"],
+    ["parameter-list-before-duplicate-and-mvar",[a([u],s1,s0,S.unsafeDef),a([],mv,mv,S.unsafeDef)],false,
+      "invalid mutual definition, declarations must have the same universe level parameters"],
+    ["ordered-parameters",[a([u,v],s1,s0,S.unsafeDef),b([v,u],s1,s0,S.unsafeDef)],false,
+      "invalid mutual definition, declarations must have the same universe level parameters"],
+    ["duplicate-name-before-header-mvar",[a([],s1,s0,S.unsafeDef),a([],mv,mv,S.unsafeDef)],false,
+      "invalid mutual definition, duplicate declaration name"],
+    ["existing-name",[input(externalName,[],s1,s0,S.unsafeDef)],false,"already declared"],
+    ["peer-unavailable-in-header",[a([],cb,mv,S.unsafeDef),b([],s1,s0,S.unsafeDef)],false,null],
+    ["all-headers-before-any-body",[a([],s1,mv,S.unsafeDef),b([],fv,s0,S.unsafeDef)],false,
+      "declaration has free variables"],
+    ["first-body-before-second-body",[a([],s1,mv,S.unsafeDef),b([],s1,fv,S.unsafeDef)],false,
+      "declaration has metavariables"],
+    ["first-body-mismatch-before-later-mvar",[a([],s1,s1,S.unsafeDef),b([],s1,mv,S.unsafeDef)],false,
+      "definition type mismatch"],
+    ["body-level-guard",[a([],s1,su,S.unsafeDef)],false,
+      "invalid reference to undefined universe level parameter"]
+  ];
+  const publicCompare=(original,actual,label)=>{
+    if(rejected(original)||rejected(actual))must(rejected(original)&&rejected(actual)&&
+      sameRuntimeValue(original.error,actual.error),label+"-error");
+    else{const left=accepted(original,label+"-old"),right=accepted(actual,label+"-dag");
+      must(sameRuntimeValue(left.session,right.session)&&
+        sameRuntimeValue(right.replies,list([Reply.admitted(left.declaration.receipt)])),label+"-result");}
+  };
+  let comparisons=0;
+  for(const [label,inputs,acceptedAt64,messageAt64] of cases){
+    const candidate=D.mutualDefinitions(list(inputs)),declaration=accepted(
+      get("psKernelDagDecodeDeclaration")(built,candidate),"mutual-request");
+    for(const fuel of [0n,1n,2n,3n,4n,8n,64n])for(const maxRecDepth of [0n,1n]){
+      const current={...owner.session,resources:{...owner.session.resources,fuel,maxRecDepth}};
+      const direct=accepted(get("psKernelDagTryAdmitSimpleWithFuel")(fuel,
+        get("psKernelKernelSessionEnvironment")(current),maxRecDepth,current.resources.maxNatSize,
+        graph,owner.declarations,candidate,declaration),"mutual-required-direct-"+label+"-"+fuel);
+      must(sameRuntimeValue(get("psKernelV1DispatchDeclaration")(current,declaration),
+        get("psKernelV1EnvironmentOutcome")(direct)),"mutual-raw-parity-"+label+"-"+fuel+"-"+maxRecDepth);
+      const original=get("psKernelV1AdmitDeclaration")(current,declaration);
+      publicCompare(original,run(current,nil,S.safe,graph,list([C.admit(candidate)])),
+        "mutual-public-"+label+"-"+fuel+"-"+maxRecDepth);
+      if(fuel===64n){
+        must((!rejected(original))===acceptedAt64,"mutual-expected-decision-"+label);
+        if(messageAt64!==null)must(rejected(original)&&sameRuntimeValue(original.error,
+          get("PsKernelError").rejectedInvalid(messageAt64)),"mutual-exact-message-"+label);
+        const whole=run(session(fuel,maxRecDepth),nil,S.safe,graph,
+          list([C.admit(seedRequest),C.admit(candidate)]));
+        if(rejected(original)||rejected(whole))must(rejected(original)&&rejected(whole)&&
+          sameRuntimeValue(original.error,whole.error),"mutual-same-batch-error-"+label);
+        else{const left=accepted(original,"mutual-whole-old"),right=accepted(whole,"mutual-whole-dag");
+          must(sameRuntimeValue(left.session,right.session)&&array(right.replies).length===2,
+            "mutual-same-batch-result-"+label);}
+      }
+      comparisons++;
+    }
+  }
+  must(comparisons===280,"mutual-admission-matrix-count");
+  const partialRequest=D.mutualDefinitions(list(partialPair)),partialDeclaration=accepted(
+    get("psKernelDagDecodeDeclaration")(built,partialRequest),"mutual-partial-declaration"),
+    published=accepted(get("psKernelDagRunCommand")(
+      owner,nil,S.safe,graph,built,C.admit(partialRequest)),"mutual-published");
+  must(sameRuntimeValue(published.fst,Reply.admitted(published.fst.receipt))&&
+    published.fst.receipt.declarationsBefore===1n&&published.fst.receipt.declarationsAfter===3n,
+    "mutual-public-receipt-installs-whole-group");
+  for(const value of partialPair){
+    const reference=accepted(get("psKernelExprV2DeclarationRefFind")(
+      published.snd.declarations)(value.base.name),"mutual-published-reference"),
+      expected=accepted(get("psKernelDagDecodeDefinition")(built,value),"mutual-expected-record"),
+      stored=accepted(get("psKernelEnvironmentFind")(
+        published.snd.session.environment,value.base.name),"mutual-stored-definition");
+    must(reference.type===value.base.type&&sameRuntimeValue(reference.deltaValue,Option.some(value.value))&&
+      sameRuntimeValue(reference.kind,get("PsKernelExprV2DeclarationRefKind").definitionDecl),
+      "mutual-success-publishes-original-peer-ids");
+    must(sameRuntimeValue(stored,CI.defnInfo(expected)),"mutual-stored-partial-body-and-annotation");
+  }
+  const aExpression=accepted(decoded(built,ca),"mutual-a-expression"),
+    oldSafe=get("psKernelV1CheckExpression")(published.snd.session,nil,S.safe,aExpression),
+    safeBatch=run(seed,nil,S.safe,graph,list([C.admit(seedRequest),C.admit(partialRequest),C.check(ca)]));
+  must(rejected(oldSafe)&&rejected(safeBatch)&&sameRuntimeValue(oldSafe.error,safeBatch.error),
+    "mutual-partial-admission-never-authorizes-safe-use");
+  const partialBatch=accepted(run(seed,nil,S.partialDef,graph,
+    list([C.admit(seedRequest),C.admit(partialRequest),C.check(ca),C.check(cb)])),"mutual-partial-context"),
+    replies=array(partialBatch.replies),left=replies.at(-2),right=replies.at(-1);
+  must(left!==undefined&&right!==undefined&&sameRuntimeValue(left,Reply.checked(left.value))&&
+    sameRuntimeValue(right,Reply.checked(right.value))&&exact(left.value.type,sort1)&&exact(right.value.type,sort1),
+    "mutual-partial-context-can-check-both-peers");
+  const limited={...owner.session,resources:{...owner.session.resources,maxDeclarations:2n}},
+    badRequest=D.mutualDefinitions(list([a([],s1,s1,S.unsafeDef),b([],s1,s0,S.unsafeDef)])),
+    badDeclaration=accepted(get("psKernelDagDecodeDeclaration")(built,badRequest),"mutual-bad-declaration");
+  for(const [candidate,declaration] of [[partialRequest,partialDeclaration],[badRequest,badDeclaration]])
+    publicCompare(get("psKernelV1AdmitDeclaration")(limited,declaration),
+      run(limited,nil,S.safe,graph,list([C.admit(candidate)])),"mutual-limit-after-complete-body-check");
+  const validLimit=get("psKernelDagAdmitDeclaration")(
+    limited,graph,owner.declarations,partialRequest,partialDeclaration),
+    invalidLimit=get("psKernelDagAdmitDeclaration")(
+      limited,graph,owner.declarations,badRequest,badDeclaration);
+  must(rejected(validLimit)&&sameRuntimeValue(validLimit.error,
+    get("PsKernelError").resourceExhausted(get("PsKernelResourceError").declarationLimit,
+      "declaration limit exceeded")),"mutual-valid-group-reaches-declaration-limit");
+  must(rejected(invalidLimit)&&sameRuntimeValue(invalidLimit.error,
+    get("PsKernelError").rejectedInvalid("definition type mismatch")),
+    "mutual-invalid-first-body-precedes-declaration-limit");
+  const malformed=D.mutualDefinitions(list([
+    input(externalName,[],s1,s0,S.unsafeDef),b([],s1,graph.size,S.unsafeDef)])),
+    malformedDecoded=get("psKernelDagDecodeDeclaration")(built,malformed),
+    malformedPublic=run(owner.session,nil,S.safe,graph,list([C.admit(malformed)]));
+  must(rejected(malformedDecoded)&&rejected(malformedPublic)&&sameRuntimeValue(malformedPublic.error,
+    get("PsKernelError").rejectedInvalid(malformedDecoded.error)),
+    "mutual-malformed-second-id-precedes-first-header-error");
+  const cancelled={...owner.session,resources:{...owner.session.resources,cancelled:true}},
+    cancellation=run(cancelled,nil,S.safe,graph,list([C.admit(malformed)])),
+    preflight=get("psKernelKernelSessionPreflight")(cancelled);
+  must(rejected(cancellation)&&rejected(preflight)&&sameRuntimeValue(cancellation.error,preflight.error),
+    "mutual-preflight-precedes-malformed-member");
+  must(sameRuntimeValue(get("psKernelEnvironmentFind")(owner.session.environment,aName),none)&&
+    sameRuntimeValue(get("psKernelExprV2DeclarationRefFind")(owner.declarations)(aName),none),
+    "mutual-private-failure-does-not-publish-environment-or-index");
+  const externalRequest=D.mutualDefinitions(list([a([],s1,external,S.unsafeDef)])),
+    externalDeclaration=accepted(get("psKernelDagDecodeDeclaration")(built,externalRequest),
+      "mutual-external-declaration");
+  must(sameRuntimeValue(get("psKernelDagTryAdmitSimpleWithFuel")(64n,
+    get("psKernelKernelSessionEnvironment")(owner.session),1n,owner.session.resources.maxNatSize,
+    graph,nil,externalRequest,externalDeclaration),none),"mutual-preexisting-session-type-explicit-fallback");
+  publicCompare(get("psKernelV1AdmitDeclaration")(owner.session,externalDeclaration),
+    run(owner.session,nil,S.safe,graph,list([C.admit(externalRequest)])),
+    "mutual-preexisting-session-public-fallback-parity");
+  console.log("PSC1_V2_DAG_JS_MUTUAL_ADMISSION: PASS");
+}
+
+{
+  const H=get("PsKernelReducibilityHints");
+  for(const [layers,fuel,maxDepth,coldMessage] of [
+    [4,5n,0n,"kernel inference budget exhausted"],
+    [15,64n,1n,"deep recursion detected, use maxRecDepth to increase the limit"]
+  ])for(const safety of [S.unsafeDef,S.partialDef]){
+    const seed=session(fuel,maxDepth),aName=name("MutualFreshA"+layers),
+      bName=name("MutualFreshB"+layers),x=name("mutual-fresh-x");
+    let graph=empty;
+    const put=(kind,...args)=>{const r=mk(graph,kind,...args);graph=r.fst;return r.snd;};
+    const s1=put("Sort",L.succ(L.zero));let firstBody=s1;
+    for(let tag=0;tag<layers;tag++)firstBody=put("MData",BigInt(tag),firstBody);
+    const s2=put("Sort",L.succ(L.succ(L.zero))),b0=put("BVar",0n),
+      secondBody=put("Lam",x,firstBody,b0,B.default),
+      secondType=put("Forall",x,s1,s1,B.default),built=accepted(decode(graph),"mutual-fresh-decode"),
+      firstExpression=accepted(decoded(built,firstBody),"mutual-fresh-first-expression"),
+      secondExpression=accepted(decoded(built,secondBody),"mutual-fresh-second-expression"),
+      checker=get("psKernelKernelSessionChecker")(seed,nil,safety),
+      context=get("psKernelExprV2CheckContextEmpty")(checker.context),
+      initial=get("psKernelExprV2CheckStateEmpty")(graph);
+    const oldPrimed=accepted(get("psKernelSessionCheck")(fuel,checker,firstExpression),"mutual-old-primed"),
+      primed=accepted(accepted(get("psKernelExprV2TryCheckStateWithFuel")(
+        fuel,context,initial,firstBody),"mutual-prime-selected"),"mutual-prime-ok"),
+      oldWarm=accepted(get("psKernelSessionCheck")(
+        fuel,oldPrimed.snd,secondExpression),"mutual-old-warm"),
+      warm=accepted(accepted(get("psKernelExprV2TryCheckStateWithFuel")(
+        fuel,context,primed.fst,secondBody),"mutual-warm-selected"),"mutual-warm-ok"),
+      resultGraph=accepted(decode(warm.fst.whnf.arena),"mutual-warm-result-graph"),
+      resultType=accepted(decoded(resultGraph,warm.snd),"mutual-warm-type");
+    must(exact(oldWarm.fst,resultType)&&oldWarm.snd.state.nextFresh===warm.fst.nextFresh,
+      "mutual-member-cache-sharing-would-change-result-"+layers);
+    const oldCold=get("psKernelSessionCheck")(fuel,checker,secondExpression),
+      cold=accepted(get("psKernelExprV2TryCheckStateWithFuel")(
+        fuel,context,initial,secondBody),"mutual-cold-selected");
+    must(rejected(oldCold)&&rejected(cold)&&oldCold.error===coldMessage&&cold.error===coldMessage,
+      "mutual-next-member-fresh-cache-resource-error-"+layers);
+    const inputs=[
+      {base:{name:aName,levelParams:nil,type:s2},value:firstBody,hints:H.abbrevHint,safety},
+      {base:{name:bName,levelParams:nil,type:secondType},value:secondBody,hints:H.abbrevHint,safety}],
+      request=D.mutualDefinitions(list(inputs)),declaration=accepted(
+        get("psKernelDagDecodeDeclaration")(built,request),"mutual-fresh-request"),
+      direct=accepted(get("psKernelDagTryAdmitSimpleWithFuel")(fuel,
+        get("psKernelKernelSessionEnvironment")(seed),maxDepth,seed.resources.maxNatSize,
+        graph,nil,request,declaration),"mutual-fresh-selected");
+    must(rejected(direct)&&direct.error===coldMessage,"mutual-admission-resets-owner-for-each-body-"+layers);
+    const original=get("psKernelV1AdmitDeclaration")(seed,declaration),
+      actual=run(seed,nil,S.safe,graph,list([C.admit(request)]));
+    must(rejected(original)&&rejected(actual)&&sameRuntimeValue(original.error,actual.error)&&
+      sameRuntimeValue(original.error,get("psKernelErrorFromMessage")(coldMessage)),
+      "mutual-fresh-owner-public-resource-parity-"+layers);
+  }
+  console.log("PSC1_V2_DAG_JS_MUTUAL_FRESH_MEMBER: PASS");
 }
 
 reportDagSmoke();

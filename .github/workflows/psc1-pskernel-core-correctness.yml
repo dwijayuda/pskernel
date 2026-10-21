@@ -241,6 +241,8 @@ jobs:
           grep -q '^PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_THEOREM_ADMISSION_MATRIX: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_THEOREM_ISPROP_STATE: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_UNSAFE_ADMISSION: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -q '^PSC1_V2_DAG_JS_UNSAFE_FRESH_BODY: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_BINDER_SPINE: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_BINDER_SPINE_BUDGET: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_BINDER_SPINE_CACHE: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"

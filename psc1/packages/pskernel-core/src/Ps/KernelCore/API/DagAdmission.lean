@@ -14,8 +14,8 @@ fresh counters and the declaration index. Each declaration starts a fresh
 context and state. The final comparison receives the returned checker owner;
 no semantic cache is transferred to another declaration.
 
-Unsafe recursive definitions, mutual definitions and inductives
-request whole-original-admission fallback. A none from any attempted operation
+Unsafe recursive definitions use a separate header and fresh private body owner.
+Mutual definitions and inductives request whole-original-admission fallback. A none from any attempted operation
 discards its state and restarts the complete original admission.
 -/
 
@@ -197,6 +197,50 @@ def psKernelExprV2AdmissionPrepareBodyWithFuel
               else Option.some (Except.error "theorem type is not a proposition")
   | _ => Option.some (Except.ok state)
 
+/- Unsafe recursion checks its header in the original environment, then checks
+   the body in a fresh owner over a private recursive work environment. The
+   temporary self reference is not published into the caller's batch index. -/
+def psKernelDagTryAdmitUnsafeDefinitionWithFuel
+    (fuel : Nat) (environment : PsKernelEnvironment)
+    (maxRecDepth maxNatSize : Nat) (arena : PsKernelExprV2PagedArena)
+    (declarations : List PsKernelExprV2DeclarationRef)
+    (source : PsKernelDagDefinition) (value : PsKernelDefinitionInfo) :
+    Option (Except String PsKernelEnvironment) :=
+  if psKernelDefinitionSafetyIsUnsafe value.safety then
+    let headerChecker := psKernelMkCheckerSession environment value.base.levelParams
+      PsKernelDefinitionSafety.unsafeDef maxRecDepth maxNatSize;
+    let headerContext := psKernelExprV2CheckContextEmpty headerChecker.context;
+    let headerState :=
+      psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty arena)
+        (psKernelExprV2WhnfStateForDeclarations arena declarations);
+    match psKernelExprV2AdmissionCheckHeaderWithFuel fuel headerContext headerState
+        value.base source.base.type with
+    | Option.none => Option.none
+    | Option.some attemptedHeader =>
+        match attemptedHeader with
+        | Except.error error => Option.some (Except.error error)
+        | Except.ok _ =>
+            match psKernelEnvironmentAdd environment (PsKernelConstantInfo.defnInfo value) with
+            | Except.error error => Option.some (Except.error error)
+            | Except.ok work =>
+                let bodyChecker := psKernelMkCheckerSession work value.base.levelParams
+                  PsKernelDefinitionSafety.unsafeDef maxRecDepth maxNatSize;
+                let bodyContext := psKernelExprV2CheckContextEmpty bodyChecker.context;
+                let bodyDeclarations :=
+                  List.cons (psKernelDagDefinitionRef source) declarations;
+                let bodyState :=
+                  psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty arena)
+                    (psKernelExprV2WhnfStateForDeclarations arena bodyDeclarations);
+                match psKernelExprV2AdmissionCheckBodyWithFuel fuel bodyContext bodyState
+                    value.base source.base.type value.value source.value
+                    "definition type mismatch" with
+                | Option.none => Option.none
+                | Option.some attemptedBody =>
+                    match attemptedBody with
+                    | Except.error error => Option.some (Except.error error)
+                    | Except.ok _ => Option.some (Except.ok work)
+  else Option.none
+
 def psKernelDagTryAdmitSimpleWithFuel
     (fuel : Nat) (environment : PsKernelEnvironment)
     (maxRecDepth maxNatSize : Nat) (arena : PsKernelExprV2PagedArena)
@@ -205,7 +249,17 @@ def psKernelDagTryAdmitSimpleWithFuel
     (declaration : PsKernelDeclarationRequest) :
     Option (Except String PsKernelEnvironment) :=
   match psKernelDagSimpleAdmissionPlan source declaration with
-  | Option.none => Option.none
+  | Option.none =>
+      match source with
+      | PsKernelDagDeclarationRequest.definitionDecl input =>
+          match declaration with
+          | PsKernelDeclarationRequest.definitionDecl value =>
+              if psKernelDefinitionSafetyIsUnsafe value.safety then
+                psKernelDagTryAdmitUnsafeDefinitionWithFuel fuel environment
+                  maxRecDepth maxNatSize arena declarations input value
+              else Option.none
+          | _ => Option.none
+      | _ => Option.none
   | Option.some plan =>
       let checker := psKernelMkCheckerSession environment plan.base.levelParams
         plan.safety maxRecDepth maxNatSize;

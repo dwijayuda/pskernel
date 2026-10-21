@@ -2838,7 +2838,7 @@ private def simpleAdmissionParity : IO Unit := do
     ("unknown-header", .axiomDecl (base [] unknown) false, true),
     ("header-not-sort", .axiomDecl (base [] identity) false, true),
     ("final-defeq-fallback", defn hiddenS1 s0 .safe, false),
-    ("unsafe-definition-fallback", defn s1 s0 .unsafeDef, false),
+    ("unsafe-definition-direct", defn s1 s0 .unsafeDef, true),
     ("theorem-direct", .theoremDecl (base [] proofType) proof, true)]
   let built ← expect (psKernelExprV2DecodeChecked arena)
   let mut comparisons := 0
@@ -2990,7 +2990,27 @@ private def admissionSharedStateSentinels : IO Unit := do
            first.declarationsBefore == 0 && first.declarationsAfter == 1 &&
              second.declarationsBefore == 1 && second.declarationsAfter == 2
        | _ => false)
+    let unsafeRequest := PsKernelDagDeclarationRequest.definitionDecl
+      (PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk dName [] typeRoot)
+        bodyRoot .abbrevHint .unsafeDef)
+    let unsafeDeclaration ← expect (psKernelDagDecodeDeclaration built unsafeRequest)
+    require "unsafe-admission-discards-header-owner-before-body"
+      (match psKernelDagTryAdmitSimpleWithFuel fuel
+          (psKernelKernelSessionEnvironment owner.session) maxDepth
+          owner.session.resources.maxNatSize arena owner.declarations
+          unsafeRequest unsafeDeclaration with
+       | some (.error message) => message == coldMessage
+       | _ => false)
+    let unsafeOriginal := psKernelV1AdmitDeclaration owner.session unsafeDeclaration
+    let unsafeActual := psKernelV1RunDag seed [] .safe arena
+      [.admit aRequest, .admit unsafeRequest]
+    require "unsafe-admission-fresh-body-exact-public-resource-result"
+      (match unsafeOriginal, unsafeActual with
+       | .error a, .error b =>
+           samePublicError a b && samePublicError a (psKernelErrorFromMessage coldMessage)
+       | _, _ => false)
   IO.println "PSC1_V2_DAG_ADMISSION_SHARED_STATE: PASS"
+  IO.println "PSC1_V2_DAG_UNSAFE_FRESH_BODY: PASS"
 
 private def admissionPolicyAndSafety : IO Unit := do
   let seed ← fresh 64 1
@@ -3025,7 +3045,7 @@ private def admissionPolicyAndSafety : IO Unit := do
       ("unsafe-body-partial", defn unsafeRoot .partialDef, false, true),
       ("partial-body-partial", defn partialRoot .partialDef, false, true),
       ("unsafe-body-opaque", .opaqueDecl (base s1) unsafeRoot true, false, true),
-      ("unsafe-body-unsafe", defn unsafeRoot .unsafeDef, true, false)]
+      ("unsafe-body-unsafe", defn unsafeRoot .unsafeDef, true, true)]
   for (label, request, acceptedExpected, directExpected) in safetyCases do
     let declaration ← expect (psKernelDagDecodeDeclaration built request)
     let attempted := psKernelDagTryAdmitSimpleWithFuel 64
@@ -3702,6 +3722,218 @@ private def binderSpineFallbackParity : IO Unit := do
       (match Lean.Kernel.check officialEnv {} officialRight with | .error _ => true | _ => false)
   IO.println "PSC1_V2_DAG_BINDER_SPINE_FALLBACK: PASS"
 
+private def unsafeDefinitionAdmissionParity : IO Unit := do
+  let target := nm "DagUnsafeTarget"
+  let externalName := nm "DagUnsafeExternal"
+  let partialName := nm "DagUnsafePartial"
+  let u := nm "dag-unsafe-u"
+  let x := nm "dag-unsafe-x"
+  let (arena, s0) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let (arena, s1) ← expect (psKernelExprV2PagedMkSort arena (.succ .zero))
+  let (arena, su) ← expect (psKernelExprV2PagedMkSort arena (.param u))
+  let (arena, su1) ← expect (psKernelExprV2PagedMkSort arena (.succ (.param u)))
+  let (arena, self) ← expect (psKernelExprV2PagedMkConst arena target [])
+  let (arena, external) ← expect (psKernelExprV2PagedMkConst arena externalName [])
+  let (arena, partialValue) ← expect (psKernelExprV2PagedMkConst arena partialName [])
+  let (arena, missing) ← expect (psKernelExprV2PagedMkConst arena (nm "DagUnsafeMissing") [])
+  let (arena, mv) ← expect (psKernelExprV2PagedMkMVar arena u)
+  let (arena, fv) ← expect (psKernelExprV2PagedMkFVar arena u)
+  let (arena, b0) ← expect (psKernelExprV2PagedMkBVar arena 0)
+  let (arena, recursiveApp) ← expect (psKernelExprV2PagedMkApp arena self b0)
+  let (arena, recursiveBody) ← expect (psKernelExprV2PagedMkLam arena x s1 recursiveApp .default)
+  let (arena, functionType) ← expect (psKernelExprV2PagedMkForall arena x s1 s1 .default)
+  let (arena, hiddenType) ← expect (psKernelExprV2PagedMkMData arena 107 s1)
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let seedRequests : List PsKernelDagDeclarationRequest := [
+    .axiomDecl (PsKernelDagConstantBase.mk externalName [] s1) true,
+    .definitionDecl (PsKernelDagDefinition.mk
+      (PsKernelDagConstantBase.mk partialName [] s1) s0 .abbrevHint .partialDef)]
+  let seed ← fresh 64 1
+  let mut owner := PsKernelDagExecutionState.mk seed []
+  for item in seedRequests do
+    owner := (← expectPublic
+      (psKernelDagRunCommand owner [] .safe arena built (.admit item))).snd
+  let input := fun (params : List PsKernelName) (type value : Nat) =>
+    PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk target params type)
+      value .abbrevHint .unsafeDef
+  let request := fun (params : List PsKernelName) (type value : Nat) =>
+    PsKernelDagDeclarationRequest.definitionDecl (input params type value)
+  let cases : List (String × PsKernelDagDeclarationRequest × Bool × Option String) := [
+    ("self-value", request [] s1 self, true, none),
+    ("self-function", request [] functionType recursiveBody, true, none),
+    ("nonrecursive", request [] s1 s0, true, none),
+    ("unsafe-external", request [] s1 external, true, none),
+    ("partial-external", request [] s1 partialValue, true, none),
+    ("polymorphic", request [u] su1 su, true, none),
+    ("self-unavailable-in-header", request [] self s0, true, none),
+    ("unknown-body", request [] s1 missing, true, none),
+    ("body-mvar", request [] s1 mv, true, some "declaration has metavariables"),
+    ("body-fvar", request [] s1 fv, true, some "declaration has free variables"),
+    ("type-mismatch", request [] s1 s1, true, some "definition type mismatch"),
+    ("undefined-level-before-body", request [] su mv, true,
+      some "invalid reference to undefined universe level parameter"),
+    ("duplicate-level-before-body", request [u,u] s1 mv, true,
+      some "duplicate universe parameter"),
+    ("final-comparison-fallback", request [] hiddenType s0, false, none)]
+  let mut comparisons := 0
+  for (label, candidate, directAt64, messageAt64) in cases do
+    let declaration ← expect (psKernelDagDecodeDeclaration built candidate)
+    for fuel in [0,1,2,3,4,8,64] do
+      for maxDepth in [0,1] do
+        let current := { owner.session with
+          resources := { owner.session.resources with fuel := fuel, maxRecDepth := maxDepth } }
+        let direct := psKernelDagTryAdmitSimpleWithFuel fuel
+          (psKernelKernelSessionEnvironment current) maxDepth current.resources.maxNatSize
+          arena owner.declarations candidate declaration
+        match direct with
+        | none => pure ()
+        | some attempted =>
+            match psKernelV1DispatchDeclaration current declaration,
+                psKernelV1EnvironmentOutcome attempted with
+            | .error a, .error b =>
+                require ("unsafe-raw-error-" ++ label ++ "/" ++ toString fuel)
+                  (samePublicError a b)
+            | .ok a, .ok b =>
+                require ("unsafe-raw-environment-" ++ label ++ "/" ++ toString fuel)
+                  (admissionEnvironmentEqual a b)
+            | _, _ => throw (IO.userError ("unsafe raw parity mismatch " ++ label))
+        let original := psKernelV1AdmitDeclaration current declaration
+        require ("unsafe-public-" ++ label ++ "/" ++ toString fuel ++ "/" ++ toString maxDepth)
+          (admissionPublicParity original
+            (psKernelV1RunDag current [] .safe arena [.admit candidate]))
+        if fuel == 64 then
+          require ("unsafe-selected-path-" ++ label)
+            ((match direct with | some _ => true | none => false) == directAt64)
+          match messageAt64 with
+          | none => pure ()
+          | some wanted =>
+              require ("unsafe-exact-message-" ++ label)
+                (match original with
+                 | .error (.rejectedInvalid actual) => actual == wanted
+                 | _ => false)
+          let start ← fresh fuel maxDepth
+          let whole := psKernelV1RunDag start [] .safe arena
+            (seedRequests.map (fun item => PsKernelDagCommand.admit item) ++ [.admit candidate])
+          require ("unsafe-same-batch-" ++ label)
+            (match original, whole with
+             | .error a, .error b => samePublicError a b
+             | .ok a, .ok b =>
+                 admissionEnvironmentEqual a.session.environment b.session.environment &&
+                   b.replies.length == seedRequests.length + 1
+             | _, _ => false)
+        comparisons := comparisons + 1
+  require "unsafe-admission-matrix-count" (comparisons == 196)
+  let selfSource := input [] s1 self
+  let selfRequest := PsKernelDagDeclarationRequest.definitionDecl selfSource
+  let selfDeclaration ← expect (psKernelDagDecodeDeclaration built selfRequest)
+  let selfValue ←
+    match selfDeclaration with
+    | .definitionDecl value => pure value
+    | _ => throw (IO.userError "unsafe fixture decoded as a different declaration kind")
+  for safety in [PsKernelDefinitionSafety.safe, .partialDef] do
+    require "unsafe-private-helper-requires-actual-unsafe-safety"
+      (match psKernelDagTryAdmitUnsafeDefinitionWithFuel 64
+          (psKernelKernelSessionEnvironment owner.session) 1
+          owner.session.resources.maxNatSize arena owner.declarations
+          { selfSource with safety := safety } { selfValue with safety := safety } with
+       | none => true | _ => false)
+  let headerSelf ← expect (psKernelDagDecodeDeclaration built (request [] self s0))
+  require "unsafe-self-not-visible-while-checking-header"
+    (match psKernelV1AdmitDeclaration owner.session headerSelf,
+        psKernelDagTryAdmitSimpleWithFuel 64
+          (psKernelKernelSessionEnvironment owner.session) 1
+          owner.session.resources.maxNatSize arena owner.declarations
+          (request [] self s0) headerSelf with
+     | .error left, some (.error right) => samePublicError left (psKernelErrorFromMessage right)
+     | _, _ => false)
+  let limited := { owner.session with
+    resources := { owner.session.resources with maxDeclarations := 2 } }
+  for candidate in [selfRequest, request [] s1 s1] do
+    let declaration ← expect (psKernelDagDecodeDeclaration built candidate)
+    require "unsafe-declaration-limit-preserves-original-check-order"
+      (admissionPublicParity (psKernelV1AdmitDeclaration limited declaration)
+        (psKernelV1RunDag limited [] .safe arena [.admit candidate]))
+  require "unsafe-valid-self-reaches-declaration-limit-after-body"
+    (match psKernelDagAdmitDeclaration limited arena owner.declarations selfRequest selfDeclaration with
+     | .error (.resourceExhausted .declarationLimit message) => message == "declaration limit exceeded"
+     | _ => false)
+  let badRequest := request [] s1 s1
+  let badDeclaration ← expect (psKernelDagDecodeDeclaration built badRequest)
+  require "unsafe-bad-body-precedes-declaration-limit"
+    (match psKernelDagAdmitDeclaration limited arena owner.declarations badRequest badDeclaration with
+     | .error (.rejectedInvalid message) => message == "definition type mismatch"
+     | _ => false)
+  require "unsafe-failed-private-admission-does-not-publish-environment"
+    (match psKernelEnvironmentFind owner.session.environment target with | none => true | _ => false)
+  require "unsafe-failed-private-admission-does-not-publish-input-index"
+    (match psKernelExprV2DeclarationRefFind owner.declarations target with | none => true | _ => false)
+  let published ← expectPublic
+    (psKernelDagRunCommand owner [] .safe arena built (.admit selfRequest))
+  require "unsafe-success-publishes-original-input-ids"
+    (match psKernelExprV2DeclarationRefFind published.snd.declarations target with
+     | some reference =>
+         reference.type == s1 && reference.deltaValue == some self &&
+           match reference.kind with | .definitionDecl => true | _ => false
+     | none => false)
+  require "unsafe-success-stores-exact-recursive-body-and-safety"
+    (match psKernelEnvironmentFind published.snd.session.environment target with
+     | some (.defnInfo info) =>
+         psKernelExprEqual info.base.type selfValue.base.type &&
+           psKernelExprEqual info.value selfValue.value &&
+           psKernelDefinitionSafetyIsUnsafe info.safety
+     | _ => false)
+  let selfExpression ← expect (psKernelExprV2DecodedRequire built self)
+  let oldSafe := psKernelV1CheckExpression published.snd.session [] .safe selfExpression
+  let safeBatch := psKernelV1RunDag seed [] .safe arena
+    (seedRequests.map (fun item => PsKernelDagCommand.admit item) ++ [.admit selfRequest, .check self])
+  require "unsafe-admission-never-authorizes-safe-use"
+    (match oldSafe, safeBatch with | .error a, .error b => samePublicError a b | _, _ => false)
+  let unsafeBatch ← expectPublic (psKernelV1RunDag seed [] .unsafeDef arena
+    (seedRequests.map (fun item => PsKernelDagCommand.admit item) ++ [.admit selfRequest, .check self]))
+  require "unsafe-admitted-self-is-checkable-only-in-unsafe-context"
+    (match unsafeBatch.replies.reverse with
+     | .checked value :: _ =>
+         psKernelExprEqual value.type sort1 && psKernelExprEqual value.expression selfExpression
+     | _ => false)
+  let externalRequest := request [] s1 external
+  let externalDeclaration ← expect (psKernelDagDecodeDeclaration built externalRequest)
+  require "unsafe-missing-external-type-index-declines-entire-attempt"
+    (match psKernelDagTryAdmitSimpleWithFuel 64
+        (psKernelKernelSessionEnvironment owner.session) 1 owner.session.resources.maxNatSize
+        arena [] externalRequest externalDeclaration with
+     | none => true | _ => false)
+  require "unsafe-external-session-fallback-preserves-public-result"
+    (admissionPublicParity (psKernelV1AdmitDeclaration owner.session externalDeclaration)
+      (psKernelV1RunDag owner.session [] .safe arena [.admit externalRequest]))
+  IO.println "PSC1_V2_DAG_UNSAFE_ADMISSION: PASS"
+  let official ← Lean.mkEmptyEnvironment
+  for (label, typeRoot, valueRoot, expected) in [
+      ("self-value", s1, self, true),
+      ("self-function", functionType, recursiveBody, true),
+      ("bad-type", s1, s1, false),
+      ("self-header", self, s0, false)] do
+    let type ← expect (psKernelExprV2DecodedRequire built typeRoot)
+    let value ← expect (psKernelExprV2DecodedRequire built valueRoot)
+    let officialType ← projectionOfficialRequire type
+    let officialValue ← projectionOfficialRequire value
+    let declaration := Lean.Declaration.defnDecl {
+      name := quickOfficialName target
+      levelParams := []
+      type := officialType
+      value := officialValue
+      hints := .abbrev
+      safety := .«unsafe» }
+    let officialAccepted :=
+      match official.addDeclCore 0 0 declaration none true with
+      | .ok _ => true | .error _ => false
+    let emptySession ← fresh 64 1
+    let actual := psKernelV1RunDag emptySession [] .unsafeDef arena
+      [.admit (request [] typeRoot valueRoot)]
+    require ("unsafe-official-checked-admission-" ++ label)
+      (officialAccepted == expected &&
+        (match actual with | .ok _ => true | .error _ => false) == expected)
+  IO.println "PSC1_V2_DAG_OFFICIAL_UNSAFE_ADMISSION: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -3733,6 +3965,7 @@ def main : IO Unit := do
   admissionSharedStateSentinels
   admissionPolicyAndSafety
   admissionFinalComparisonGuards
+  unsafeDefinitionAdmissionParity
   theoremAdmissionParity
   theoremIsPropStateGuards
   binderSpineDefEqParity

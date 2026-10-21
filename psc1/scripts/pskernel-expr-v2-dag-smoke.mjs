@@ -2571,7 +2571,7 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     ["unknown-header",D.axiomDecl(base([],unknown),false),true],
     ["header-not-sort",D.axiomDecl(base([],identity),false),true],
     ["final-defeq-fallback",defn(hiddenS1,s0,S.safe),false],
-    ["unsafe-definition-fallback",defn(s1,s0,S.unsafeDef),false],
+    ["unsafe-definition-direct",defn(s1,s0,S.unsafeDef),true],
     ["theorem-direct",D.theoremDecl(base([],proofType),proof),true]
   ];
   const built=accepted(decode(graph),"admission-matrix-decode");
@@ -2691,8 +2691,26 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     must(replies.length===2&&first.declarationsBefore===0n&&first.declarationsAfter===1n&&
       second.declarationsBefore===1n&&second.declarationsAfter===2n,
       "admission-shared-ordered-receipts-"+layers);
+    const unsafeRequest=D.definitionDecl({
+      base:{name:dName,levelParams:nil,type:typeRoot},value:bodyRoot,
+      hints:H.abbrevHint,safety:S.unsafeDef});
+    const unsafeDeclaration=accepted(get("psKernelDagDecodeDeclaration")(built,unsafeRequest),
+      "unsafe-fresh-body-declaration");
+    const unsafeDirect=accepted(get("psKernelDagTryAdmitSimpleWithFuel")(
+      fuel,get("psKernelKernelSessionEnvironment")(owner.session),maxDepth,
+      owner.session.resources.maxNatSize,graph,owner.declarations,unsafeRequest,unsafeDeclaration),
+      "unsafe-fresh-body-selected");
+    must(rejected(unsafeDirect)&&unsafeDirect.error===coldMessage,
+      "unsafe-admission-discards-header-owner-before-body-"+layers);
+    const unsafeOriginal=get("psKernelV1AdmitDeclaration")(owner.session,unsafeDeclaration),
+      unsafeActual=run(seed,nil,S.safe,graph,list([C.admit(aRequest),C.admit(unsafeRequest)]));
+    must(rejected(unsafeOriginal)&&rejected(unsafeActual)&&
+      sameRuntimeValue(unsafeOriginal.error,unsafeActual.error)&&
+      sameRuntimeValue(unsafeOriginal.error,get("psKernelErrorFromMessage")(coldMessage)),
+      "unsafe-admission-fresh-body-exact-public-resource-result-"+layers);
   }
   console.log("PSC1_V2_DAG_JS_ADMISSION_SHARED_STATE: PASS");
+  console.log("PSC1_V2_DAG_JS_UNSAFE_FRESH_BODY: PASS");
 }
 
 {
@@ -2733,7 +2751,7 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     ["unsafe-body-partial",defn(unsafeRoot,S.partialDef),false,true],
     ["partial-body-partial",defn(partialRoot,S.partialDef),false,true],
     ["unsafe-body-opaque",D.opaqueDecl(base(s1),unsafeRoot,true),false,true],
-    ["unsafe-body-unsafe",defn(unsafeRoot,S.unsafeDef),true,false]
+    ["unsafe-body-unsafe",defn(unsafeRoot,S.unsafeDef),true,true]
   ]){
     const declaration=accepted(get("psKernelDagDecodeDeclaration")(built,request),"admission-safety-request");
     const attempted=get("psKernelDagTryAdmitSimpleWithFuel")(
@@ -3286,6 +3304,157 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     }
   }
   console.log("PSC1_V2_DAG_JS_BINDER_SPINE_FALLBACK: PASS");
+}
+
+{
+  const H=get("PsKernelReducibilityHints"),Reply=get("PsKernelDagReply"),
+    CI=get("PsKernelConstantInfo"),Option=get("Option"),
+    none=typeof Option.none==="function"?Option.none():Option.none;
+  const target=name("DagUnsafeTarget"),externalName=name("DagUnsafeExternal"),
+    partialName=name("DagUnsafePartial"),u=name("dag-unsafe-u"),x=name("dag-unsafe-x");
+  let graph=empty;
+  const put=(kind,...args)=>{const r=mk(graph,kind,...args);graph=r.fst;return r.snd;};
+  const s0=put("Sort",L.zero),s1=put("Sort",L.succ(L.zero)),
+    su=put("Sort",L.param(u)),su1=put("Sort",L.succ(L.param(u))),
+    self=put("Const",target,nil),external=put("Const",externalName,nil),
+    partialValue=put("Const",partialName,nil),missing=put("Const",name("DagUnsafeMissing"),nil),
+    mv=put("MVar",u),fv=put("FVar",u),b0=put("BVar",0n),
+    recursiveApp=put("App",self,b0),recursiveBody=put("Lam",x,s1,recursiveApp,B.default),
+    functionType=put("Forall",x,s1,s1,B.default),hiddenType=put("MData",107n,s1);
+  const built=accepted(decode(graph),"unsafe-matrix-decode"),
+    base=(name,params,type)=>({name,levelParams:list(params),type});
+  const seedRequests=[D.axiomDecl(base(externalName,[],s1),true),
+    D.definitionDecl({base:base(partialName,[],s1),value:s0,hints:H.abbrevHint,safety:S.partialDef})];
+  const seed=session(64n,1n);let owner={session:seed,declarations:nil};
+  for(const item of seedRequests)owner=accepted(get("psKernelDagRunCommand")(
+    owner,nil,S.safe,graph,built,C.admit(item)),"unsafe-seed-admission").snd;
+  const input=(params,type,value)=>({base:base(target,params,type),value,
+    hints:H.abbrevHint,safety:S.unsafeDef});
+  const request=(params,type,value)=>D.definitionDecl(input(params,type,value));
+  const cases=[
+    ["self-value",request([],s1,self),true,null],
+    ["self-function",request([],functionType,recursiveBody),true,null],
+    ["nonrecursive",request([],s1,s0),true,null],
+    ["unsafe-external",request([],s1,external),true,null],
+    ["partial-external",request([],s1,partialValue),true,null],
+    ["polymorphic",request([u],su1,su),true,null],
+    ["self-unavailable-in-header",request([],self,s0),true,null],
+    ["unknown-body",request([],s1,missing),true,null],
+    ["body-mvar",request([],s1,mv),true,"declaration has metavariables"],
+    ["body-fvar",request([],s1,fv),true,"declaration has free variables"],
+    ["type-mismatch",request([],s1,s1),true,"definition type mismatch"],
+    ["undefined-level-before-body",request([],su,mv),true,
+      "invalid reference to undefined universe level parameter"],
+    ["duplicate-level-before-body",request([u,u],s1,mv),true,"duplicate universe parameter"],
+    ["final-comparison-fallback",request([],hiddenType,s0),false,null]
+  ];
+  const publicCompare=(original,actual,label)=>{
+    if(rejected(original)||rejected(actual))must(rejected(original)&&rejected(actual)&&
+      sameRuntimeValue(original.error,actual.error),label+"-error");
+    else{const a=accepted(original,label+"-old"),b=accepted(actual,label+"-dag");
+      must(sameRuntimeValue(a.session,b.session)&&
+        sameRuntimeValue(b.replies,list([Reply.admitted(a.declaration.receipt)])),label+"-result");}
+  };
+  let comparisons=0;
+  for(const [label,candidate,directAt64,messageAt64] of cases){
+    const declaration=accepted(get("psKernelDagDecodeDeclaration")(built,candidate),"unsafe-request");
+    for(const fuel of [0n,1n,2n,3n,4n,8n,64n])for(const maxRecDepth of [0n,1n]){
+      const current={...owner.session,resources:{...owner.session.resources,fuel,maxRecDepth}};
+      const direct=get("psKernelDagTryAdmitSimpleWithFuel")(fuel,
+        get("psKernelKernelSessionEnvironment")(current),maxRecDepth,current.resources.maxNatSize,
+        graph,owner.declarations,candidate,declaration);
+      const selected=!sameRuntimeValue(direct,none);
+      if(selected)must(sameRuntimeValue(get("psKernelV1DispatchDeclaration")(current,declaration),
+        get("psKernelV1EnvironmentOutcome")(accepted(direct,"unsafe-raw-some"))),
+        "unsafe-raw-parity-"+label+"-"+fuel+"-"+maxRecDepth);
+      const original=get("psKernelV1AdmitDeclaration")(current,declaration);
+      publicCompare(original,run(current,nil,S.safe,graph,list([C.admit(candidate)])),
+        "unsafe-public-"+label+"-"+fuel+"-"+maxRecDepth);
+      if(fuel===64n){
+        must(selected===directAt64,"unsafe-selected-path-"+label);
+        if(messageAt64!==null)must(rejected(original)&&sameRuntimeValue(original.error,
+          get("PsKernelError").rejectedInvalid(messageAt64)),"unsafe-exact-message-"+label);
+        const full=run(session(fuel,maxRecDepth),nil,S.safe,graph,
+          list([...seedRequests.map(item=>C.admit(item)),C.admit(candidate)]));
+        if(rejected(original)||rejected(full))must(rejected(original)&&rejected(full)&&
+          sameRuntimeValue(original.error,full.error),"unsafe-same-batch-error-"+label);
+        else{const a=accepted(original,"unsafe-whole-old"),b=accepted(full,"unsafe-whole-dag");
+          must(sameRuntimeValue(a.session,b.session)&&array(b.replies).length===seedRequests.length+1,
+            "unsafe-same-batch-result-"+label);}
+      }
+      comparisons++;
+    }
+  }
+  must(comparisons===196,"unsafe-admission-matrix-count");
+  const selfSource=input([],s1,self),selfRequest=D.definitionDecl(selfSource),
+    selfDeclaration=accepted(get("psKernelDagDecodeDeclaration")(built,selfRequest),"unsafe-self-declaration"),
+    selfValue=accepted(get("psKernelDagDecodeDefinition")(built,selfSource),"unsafe-self-expected-record");
+  for(const safety of [S.safe,S.partialDef])must(sameRuntimeValue(
+    get("psKernelDagTryAdmitUnsafeDefinitionWithFuel")(64n,
+      get("psKernelKernelSessionEnvironment")(owner.session),1n,owner.session.resources.maxNatSize,
+      graph,owner.declarations,{...selfSource,safety},{...selfValue,safety}),none),
+    "unsafe-private-helper-requires-actual-unsafe-safety");
+  const headerSelf=request([],self,s0),headerDeclaration=accepted(
+    get("psKernelDagDecodeDeclaration")(built,headerSelf),"unsafe-header-self-declaration");
+  const headerOld=get("psKernelV1AdmitDeclaration")(owner.session,headerDeclaration),
+    headerDirect=accepted(get("psKernelDagTryAdmitSimpleWithFuel")(64n,
+      get("psKernelKernelSessionEnvironment")(owner.session),1n,owner.session.resources.maxNatSize,
+      graph,owner.declarations,headerSelf,headerDeclaration),"unsafe-header-self-selected");
+  must(rejected(headerOld)&&rejected(headerDirect)&&sameRuntimeValue(headerOld.error,
+    get("psKernelErrorFromMessage")(headerDirect.error)),"unsafe-self-not-visible-while-checking-header");
+  const limited={...owner.session,resources:{...owner.session.resources,maxDeclarations:2n}};
+  for(const candidate of [selfRequest,request([],s1,s1)]){
+    const declaration=accepted(get("psKernelDagDecodeDeclaration")(built,candidate),"unsafe-limit-declaration");
+    publicCompare(get("psKernelV1AdmitDeclaration")(limited,declaration),
+      run(limited,nil,S.safe,graph,list([C.admit(candidate)])),"unsafe-declaration-limit-check-order");
+  }
+  const limitResult=get("psKernelDagAdmitDeclaration")(
+    limited,graph,owner.declarations,selfRequest,selfDeclaration);
+  must(rejected(limitResult)&&sameRuntimeValue(limitResult.error,
+    get("PsKernelError").resourceExhausted(get("PsKernelResourceError").declarationLimit,
+      "declaration limit exceeded")),"unsafe-valid-self-reaches-limit-after-body");
+  const badRequest=request([],s1,s1),badDeclaration=accepted(
+    get("psKernelDagDecodeDeclaration")(built,badRequest),"unsafe-bad-declaration"),
+    badResult=get("psKernelDagAdmitDeclaration")(
+      limited,graph,owner.declarations,badRequest,badDeclaration);
+  must(rejected(badResult)&&sameRuntimeValue(badResult.error,
+    get("PsKernelError").rejectedInvalid("definition type mismatch")),
+    "unsafe-bad-body-precedes-declaration-limit");
+  must(sameRuntimeValue(get("psKernelEnvironmentFind")(owner.session.environment,target),none)&&
+    sameRuntimeValue(get("psKernelExprV2DeclarationRefFind")(owner.declarations)(target),none),
+    "unsafe-failed-private-admission-does-not-publish-environment-or-index");
+  const published=accepted(get("psKernelDagRunCommand")(
+    owner,nil,S.safe,graph,built,C.admit(selfRequest)),"unsafe-self-published");
+  const reference=accepted(get("psKernelExprV2DeclarationRefFind")(
+    published.snd.declarations)(target),"unsafe-self-reference");
+  must(reference.type===s1&&sameRuntimeValue(reference.deltaValue,Option.some(self))&&
+    sameRuntimeValue(reference.kind,get("PsKernelExprV2DeclarationRefKind").definitionDecl),
+    "unsafe-success-publishes-original-input-ids");
+  const stored=accepted(get("psKernelEnvironmentFind")(
+    published.snd.session.environment,target),"unsafe-stored-self");
+  must(sameRuntimeValue(stored,CI.defnInfo(selfValue)),
+    "unsafe-success-stores-exact-recursive-body-and-safety");
+  const selfExpression=accepted(decoded(built,self),"unsafe-self-expression"),
+    oldSafe=get("psKernelV1CheckExpression")(published.snd.session,nil,S.safe,selfExpression),
+    commands=list([...seedRequests.map(item=>C.admit(item)),C.admit(selfRequest),C.check(self)]),
+    safeBatch=run(seed,nil,S.safe,graph,commands);
+  must(rejected(oldSafe)&&rejected(safeBatch)&&sameRuntimeValue(oldSafe.error,safeBatch.error),
+    "unsafe-admission-never-authorizes-safe-use");
+  const unsafeBatch=accepted(run(seed,nil,S.unsafeDef,graph,commands),"unsafe-check-context"),
+    replies=array(unsafeBatch.replies),last=replies.at(-1);
+  must(last!==undefined&&sameRuntimeValue(last,Reply.checked(last.value))&&
+    exact(last.value.type,sort1)&&exact(last.value.expression,selfExpression),
+    "unsafe-admitted-self-is-checkable-in-unsafe-context");
+  const externalRequest=request([],s1,external),externalDeclaration=accepted(
+    get("psKernelDagDecodeDeclaration")(built,externalRequest),"unsafe-external-declaration");
+  must(sameRuntimeValue(get("psKernelDagTryAdmitSimpleWithFuel")(64n,
+    get("psKernelKernelSessionEnvironment")(owner.session),1n,owner.session.resources.maxNatSize,
+    graph,nil,externalRequest,externalDeclaration),none),
+    "unsafe-missing-external-type-index-declines-entire-attempt");
+  publicCompare(get("psKernelV1AdmitDeclaration")(owner.session,externalDeclaration),
+    run(owner.session,nil,S.safe,graph,list([C.admit(externalRequest)])),
+    "unsafe-external-session-fallback-preserves-public-result");
+  console.log("PSC1_V2_DAG_JS_UNSAFE_ADMISSION: PASS");
 }
 
 reportDagSmoke();

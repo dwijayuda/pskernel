@@ -27,6 +27,35 @@ their corresponding gates. The25-case Arena timeout gap remains unresolved.
 Original default V1 is unchanged; the replacement still relies on complete
 original-operation fallback outside migrated rules. No integration PR is merged.
 
+### Direct unsafe recursive definition admission — awaiting qualification
+
+Unsafe definition headers are checked in the original environment. After the
+header succeeds, admission builds a private environment containing the actual
+unsafe definition and a matching original-ID declaration reference. The body
+starts with a fresh checker, original input arena, empty semantic caches and
+fresh counter; header extensions/results are discarded. The private environment
+and input index are published only after full body checking and the final
+DefEq succeed. Unsupported work discards the entire attempt and restarts
+original admission. The helper requires actual unsafe safety and cannot admit
+a safe/partial definition through this rule. Safe-use restrictions, declaration
+limits, publication order and every resource budget are unchanged.
+
+Native/generated matrices cover14 cases over196 fuel/depth combinations,
+including self values/functions, external unsafe/partial references, polymorphic
+types, header invisibility of self, invalid bodies, exact guard order, mismatch
+errors and missing external ownership. Four native declarations are checked by
+official Lean4.35 with checking explicitly enabled. Same-batch checks verify
+original input IDs, exact stored body/safety, safe-use rejection, unsafe-use
+acceptance and failed private-work nonpublication.
+
+Two existing resource sentinels distinguish the unsafe fresh body from a
+safe definition's shared header/body owner. At fuel5 with four metadata layers,
+and at maxRecDepth1 with fourteen layers, the unsafe body must retain the
+original cold-owner failure. Their original/DAG errors are compared exactly;
+neither policy threshold is changed. All source, native, generated and canonical
+gates for this slice are pending. Mutual definition and inductive admission
+remain whole-original fallback; complete general DefEq/iota remains unfinished.
+
 ### Cache scanner allocation refactor — awaiting qualification
 
 The complete-checker profiles expose a concrete regression after direct let

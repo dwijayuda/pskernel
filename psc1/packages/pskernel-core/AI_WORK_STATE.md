@@ -1,3 +1,75 @@
+# Current T03a candidate — native preflight PASS; full qualification next
+
+Observed: 2026-10-22 Asia/Jakarta (2026-10-21T17:37:37Z).
+The completion plan's authoritative new-prefix implementation is complete.
+Focused source `22a1d1721c26f7170cfbc5829603d4d5760fce2f` passed
+[39644321489/job119375775009](https://github.com/dwijayuda/pskernel/actions/runs/39644321489/job/119375775009):
+318-job native build, inherited official/independent occurrence controls,
+24new declarations/7recursors/6direct cases/3private-ID negatives,
+5official families/6positive/7negative controls, and all21 retained/new proof
+equations. Seven equations are new. No forbidden proof axiom was observed.
+Artifact12365544901 SHA256
+`e9cfade93d8677334d8cc6489e05ad94292a697f754913169d586ca2411f62eb`.
+The23-count and reserved-binder failures remain in history; production code was
+unchanged by those fixture corrections.
+
+This containing checkpoint records the preflight and is **NOT A-QUALIFIED at
+creation**. The integration push must run its own complete native, authentic
+portable .lean, canonical .ps, both detached generated, retained proof/provider
+and benchmark gates. Observe the unchanged full193 comparison separately.
+Do not inherit22a's focused result or a predecessor's full result as containing
+source qualification. Last fully observed scoped A remains3aa until one complete
+successor's own mandatory gates pass.
+
+## Original034 qualification finished before new full qualification
+
+Every originally requested run is terminal at exact
+`034999734f2574876a747c967dd03bcc6904b395`; none was restarted.
+
+| Run | Terminal result |
+| --- | --- |
+| Integration39637759611 | FAIL: native119352848567 fixture elaboration; generated119352848385 PASS |
+| Correctness39637759709 | PASS: native119352848485 and canonical119352849214 |
+| Research39637759603 | PASS: all six jobs |
+| Full Arena39637759569 | FAIL: official119352847788 PASS; generated119354877930 records all193 |
+| Authentic profiles39637759606 | PASS collection only,138controls; not kernel qualification |
+
+Full193 records173matches (105accept/60kernel/1metadata/7transport),
+2separate unsafe/partial contract agreements,17host timeouts,1Church fuel
+exhaustion,0unsupported. Fuel4096,60seconds/case,2048MiB Node heap and2workers
+are unchanged. Exact saved case16 `bugs/rec-missing-ih.ndjson` was independently
+rejected at kernel-admission with coreInvoked=true, containsUnsafeOrPartial=false
+and the precise invalid recursor-headed occurrence reason. Original/adapted body
+SHA256 `b76add060cc9e030bc8769492783ed3ceb5e4482eb02cc83f1597c5b6007c769`
+matches byte-for-byte. Generated module SHA256
+`1452bf67b05e2d79094d67a27ef4d06ebbf9284e5f53c3175656c4f9c71371f2`.
+Read-only inspection39644408838/job119376068451 authenticated source, run,
+artifact12367210000, ZIP digest and bytes; it reran no kernel case.
+See `evidence/2026-10-22-034-terminal-qualification.json` for all exact receipts.
+034remains NOT A-qualified because of its native fixture failure.
+
+Concurrent repair source `33466d0b516df9d0496d181dd1c4b619b9954c7c` is the
+preserved parent of T03a. Its existing native integration119363358120 and native
+correctness119363357569 passed, including both frozen-parent sentinels and all
+occurrence controls. Its generated/canonical/research/Arena jobs were still
+active at this observation. Continue observing them as separate source receipts;
+do not duplicate, cancel, or inherit them. No parallel group/cache/Quot/name-worker
+research source is silently included by this T03a batch.
+
+## Next finite task
+
+Finish this candidate's exact full qualification and record failures honestly.
+After T03a passes, implement T03b preexisting-session ownership. Keep B open:
+V1 inductive admission, recursive metadata import, eager ingress decode and all
+four whole-operation fallbacks remain. T01F full String.ofList, global proof and
+backend obligations, Church/timeouts, safety-contract alignment and performance/
+release D remain open. Do not repeat the architecture audit or claim a general
+speedup from finite examples.
+
+---
+
+## Preserved implementation and qualification history (verbatim)
+
 # Current T03a implementation candidate
 
 ## 2026-10-22 — T03a candidate and evidenced native fixture repair

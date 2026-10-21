@@ -1,0 +1,389 @@
+{
+  "schema": "pskernel-exact-source-qualification-v1",
+  "source_sha": "034999734f2574876a747c967dd03bcc6904b395",
+  "observed_at_utc": "2026-10-21T17:37:37Z",
+  "scoped_A_qualified": false,
+  "qualification_inherited": false,
+  "native_failure": {
+    "run": 39637759611,
+    "job": 119352848567,
+    "kind": "native fixture elaboration error",
+    "file": "psc1/test/PsKernelInvalidRecursorOccurrenceRegression.lean",
+    "lines": [
+      127,
+      128,
+      129,
+      130,
+      135,
+      137,
+      166,
+      167
+    ],
+    "cause": "discard received an already extracted result instead of an IO action",
+    "cache_parent_sentinel": "PASS",
+    "occurrence_oracle_and_parent_sentinel": "NOT_RUN",
+    "candidate_native_integration_proofs_provider_benchmarks": "SKIPPED",
+    "fixed_in": "33466d0b516df9d0496d181dd1c4b619b9954c7c"
+  },
+  "runs": [
+    {
+      "id": 39637759611,
+      "name": "PSC1 Expression V2 production integration",
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "id": 119352848385,
+          "name": "generated-dag-integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119352848567,
+          "name": "native-dag-integration",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 12365764105,
+          "name": "psc1-v2-dag-generated-js",
+          "bytes": 3391823,
+          "sha256": "27417426143f23e5df4b6e96bd7bde4ad0e62cf70e4f89d594d712997f4dc909",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        },
+        {
+          "id": 12365440836,
+          "name": "psc1-v2-dag-native",
+          "bytes": 5009,
+          "sha256": "709d73791269923f65cc4ec56424bcc1fd6855c4f140b3f123dce3ef74d01b17",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        }
+      ]
+    },
+    {
+      "id": 39637759709,
+      "name": "PSC1 PSKernel-Core correctness",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119352848485,
+          "name": "native-kernel",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119352849214,
+          "name": "psc1-portability",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 12366023017,
+          "name": "psc1-canonical-kernel-qualification",
+          "bytes": 1906365,
+          "sha256": "569e8ffa49a5653999156838ae025590afdc15b7ad0548ea4a37a1f19bb3e9ae",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        }
+      ]
+    },
+    {
+      "id": 39637759603,
+      "name": "PSC1 PSKernel-Core Expression V2 research",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119352848925,
+          "name": "portable-ps-closure",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119352849053,
+          "name": "portable-v2-check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119352849307,
+          "name": "expr-v2-differential",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119352849320,
+          "name": "full-checker-bridge",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119352849336,
+          "name": "whnf-subset-regression",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119352849958,
+          "name": "generated-js-full-checker-bridge",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 12365792957,
+          "name": "psc1-v2-complete-checker-generated-js-lean435",
+          "bytes": 882,
+          "sha256": "43c06c29838374279a78808577c12f6717ea398a3f18ec48fe0db08b560edc14",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        },
+        {
+          "id": 12365118487,
+          "name": "psc1-expr-v2-differential-lean435",
+          "bytes": 5957,
+          "sha256": "3d7b8de451d571d59c604a3a88528e48441dc415ccd6965824d5edde9e0fe1ca",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        },
+        {
+          "id": 12364757031,
+          "name": "psc1-v2-whnf-subset-lean435",
+          "bytes": 249,
+          "sha256": "17437f8a2716150ff89292cfded6b0486be9ca190ff64bdcac677f3e98195e27",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        },
+        {
+          "id": 12364621357,
+          "name": "psc1-expr-v2-portable-js-lean435",
+          "bytes": 4347,
+          "sha256": "262caacd88cb44cd7e9f85ac400b1355c6983451739eff9b5c636cdefacc71e4",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        },
+        {
+          "id": 12363587271,
+          "name": "psc1-v2-canonical-ps-closure-lean435",
+          "bytes": 4362,
+          "sha256": "0c918e0c3d74eb96a955197421b12e7b343c8f596d7a15f5f722c1ae0398d81d",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        },
+        {
+          "id": 12363473621,
+          "name": "psc1-v2-full-checker-bridge-lean435",
+          "bytes": 718,
+          "sha256": "ccb4de1b206e1c901037148d1d301a6f4ddfc6c124da10371f154b988ff6c6e3",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        }
+      ]
+    },
+    {
+      "id": 39637759569,
+      "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "id": 119352847788,
+          "name": "official-arena-reference",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119354877930,
+          "name": "generated-arena-comparison",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 12367210000,
+          "name": "psc1-arena435-generated-comparison",
+          "bytes": 1071320,
+          "sha256": "f268e0febdf0d9dbf35a767fc63897a7553c5107e462bf22a802c892266305f4",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        },
+        {
+          "id": 12361593558,
+          "name": "psc1-arena435-official-reference",
+          "bytes": 114927,
+          "sha256": "affc161270a0f17e57bc8ba333870cf15c70bd2ff6af56177b4fcf3a3c5eb0fb",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        }
+      ]
+    },
+    {
+      "id": 39637759606,
+      "name": "PSC1 authentic Arena timeout diagnostics",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119352848125,
+          "name": "authentic-timeout-diagnostics",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 12365981160,
+          "name": "psc1-arena435-authentic-diagnostics",
+          "bytes": 13016414,
+          "sha256": "7afc6abec182ee94d7f93821b8c7e810b260c8f5870a5caccd12e38b29e8496f",
+          "source": "034999734f2574876a747c967dd03bcc6904b395"
+        }
+      ]
+    }
+  ],
+  "arena_header": {
+    "actual_matched_cases": 173,
+    "all_cases_recorded": true,
+    "archive_sha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
+    "arena_comparison_complete": false,
+    "counts": {
+      "agreement_with_unsafe_or_partial_contract_difference": 2,
+      "matched_acceptance": 105,
+      "matched_kernel_rejection": 60,
+      "matched_metadata_rejection": 1,
+      "matched_transport_rejection": 7,
+      "pskernel_resource_exhausted": 1,
+      "pskernel_timeout": 17
+    },
+    "declaration_body_bytes_unchanged": true,
+    "excluded_cases": [],
+    "full_expression_v2_replacement_established": false,
+    "host_timeout_seconds_per_case": 60,
+    "host_workers": 2,
+    "kernel_fuel": 4096,
+    "kernel_module_sha256": "1452bf67b05e2d79094d67a27ef4d06ebbf9284e5f53c3175656c4f9c71371f2",
+    "native_435_reexport": false,
+    "node_heap_limit_mib": 2048,
+    "official_controls_valid": true,
+    "pskernel_verdicts": {
+      "accepted": 105,
+      "malformed": 7,
+      "rejected": 63,
+      "resource_exhausted": 1,
+      "timeout": 17
+    },
+    "runtime_path_empty": true,
+    "runtime_working_directory_contains_no_Lean_or_repository_sources": true,
+    "suite": "all 193 Lean Arena round-2026-09 bodies, current generated PSC1 DAG ingress",
+    "target_lean": {
+      "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "version": "4.35.0"
+    },
+    "total": 193
+  },
+  "arena_case16": {
+    "adaptation": {
+      "adapted_body_sha256": "b76add060cc9e030bc8769492783ed3ceb5e4482eb02cc83f1597c5b6007c769",
+      "adapted_sha256": "95610796af07af3a5959058d98757f892cd578239f7e0b29154d22d8285ab692",
+      "body_bytes_identical": true,
+      "method": "header_only_compatibility_NOT_native_435_reexport",
+      "original_body_sha256": "b76add060cc9e030bc8769492783ed3ceb5e4482eb02cc83f1597c5b6007c769",
+      "original_lean": {
+        "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+        "version": "4.29.1"
+      },
+      "original_sha256": "8a240552317ba17d44d175c10531e5f988f55569db5eff734701735ce598fa73",
+      "target_lean": {
+        "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "version": "4.35.0"
+      }
+    },
+    "classification": "matched_kernel_rejection",
+    "historical_expected": "rejected",
+    "index": 16,
+    "label": "bad",
+    "name": "bugs/rec-missing-ih.ndjson",
+    "official": {
+      "elapsed_seconds": 0.48150672499997427,
+      "log": "case-016.txt",
+      "output_sha256": "8163c96ed18dce08d38a300f9e3c351761383e6f892b17bd1cef89091076fbd0",
+      "reason": "official_kernel_verdict",
+      "returncode": 1,
+      "verdict": "rejected"
+    },
+    "official_provenance_matches": true,
+    "pskernel": {
+      "admissionCommands": 118,
+      "arenaNodes": "4596",
+      "containsUnsafeOrPartial": false,
+      "coreInvoked": true,
+      "elapsed_seconds": 28.872915035999995,
+      "exportedDeclarations": 167,
+      "format": "psc1-arena-replay-v1",
+      "fuel": "4096",
+      "invalid_progress_snapshots": 0,
+      "last_progress": {
+        "admissionCommands": 118,
+        "arenaNodes": "4596",
+        "coreInvoked": true,
+        "elapsedMilliseconds": 346.493382,
+        "exportedDeclarations": 167,
+        "fuel": "4096",
+        "records": 5526,
+        "sourceSha256": "95610796af07af3a5959058d98757f892cd578239f7e0b29154d22d8285ab692",
+        "stage": "kernel-admission"
+      },
+      "metadataValidated": false,
+      "peak_rss_kib": 450724,
+      "progress_snapshots": 10,
+      "reason": "{\"message\":\"simple inductive field has an invalid recursor-headed recursive occurrence\"}",
+      "records": 5526,
+      "returncode": 0,
+      "sourceSha256": "95610796af07af3a5959058d98757f892cd578239f7e0b29154d22d8285ab692",
+      "stage": "kernel-admission",
+      "stderr": "case-016-stderr.txt",
+      "stdout": "case-016-stdout.txt",
+      "time_log": "case-016-time.txt",
+      "verdict": "rejected"
+    }
+  },
+  "artifact_inspection": {
+    "run": 39644408838,
+    "job": 119376068451,
+    "source": "11986102bc2cf96417d5fa1cc2140f34a758583a",
+    "conclusion": "success",
+    "authentication": {
+      "source": "034999734f2574876a747c967dd03bcc6904b395",
+      "run": 39637759569,
+      "conclusion": "failure",
+      "artifact": 12367210000,
+      "bytes": 1071320,
+      "sha256": "f268e0febdf0d9dbf35a767fc63897a7553c5107e462bf22a802c892266305f4"
+    },
+    "report_path": "_temp/arena435-independent/report.json",
+    "json_selector": "tests[index == 16]",
+    "reran_kernel": false
+  },
+  "diagnostics": {
+    "meaning": "collection only; kernel_qualified=false",
+    "controls": 138,
+    "cases": [
+      {
+        "name": "repeated-subproblem",
+        "plain": "accepted",
+        "profiled": "accepted"
+      },
+      {
+        "name": "church-numerals",
+        "plain": "resource_exhausted",
+        "profiled": "resource_exhausted"
+      },
+      {
+        "name": "init-prelude",
+        "plain": "timeout",
+        "profiled": "timeout"
+      },
+      {
+        "name": "proj-of-stuck-prop",
+        "plain": "rejected",
+        "profiled": "rejected"
+      }
+    ]
+  },
+  "canonical_closure_sha256": "932897240e9cfd6e5ece3e83b69463609caf0ba3b8634bb1ddc996fa4f33108a",
+  "full_kernel_directjs": "UNSUPPORTED",
+  "performance": "No whole-kernel speedup established; native integration benchmark did not run"
+}

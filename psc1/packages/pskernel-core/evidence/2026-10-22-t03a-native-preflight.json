@@ -1,0 +1,41 @@
+{
+  "schema": "pskernel-t03a-focused-qualification-v1",
+  "source_sha": "22a1d1721c26f7170cfbc5829603d4d5760fce2f",
+  "run": 39644321489,
+  "job": 119375775009,
+  "conclusion": "success",
+  "scope": "native T03a preflight only; full A not established",
+  "lean_commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "fuel": 4096,
+  "new_declarations": 24,
+  "recursors": 7,
+  "direct_cases": 6,
+  "private_id_controls": 3,
+  "official_families": 5,
+  "official_positive_cases": 6,
+  "official_negative_cases": 7,
+  "retained_and_new_proof_equations": 21,
+  "new_proof_equations": 7,
+  "forbidden_axioms_found": false,
+  "occurrence_official_and_independent_controls": "PASS",
+  "artifacts": [
+    {
+      "id": 12365544901,
+      "name": "psc1-t03a-focused-native",
+      "bytes": 1368,
+      "sha256": "e9cfade93d8677334d8cc6489e05ad94292a697f754913169d586ca2411f62eb"
+    }
+  ],
+  "prior_failed_candidate": {
+    "source": "b60cb6a53b71899b033f758e3e730df06821f808",
+    "run": 39643101364,
+    "job": 119371513923,
+    "production_compiled": true,
+    "occurrence_controls": "PASS",
+    "fixture_failure": "expected total23 omitted Nat's second constructor; corrected to24",
+    "proof_failure": "reserved binder matches; renamed compatible",
+    "artifact": 12365713306,
+    "artifact_sha256": "51ea676c4185592860d5c87061301a1aef1e62ec8781015e1748a5ee4f34d027"
+  },
+  "remaining_mandatory_gates": "Containing full candidate must pass native, portable Lean, canonical PS, both generated routes, proof/provider and retained benchmarks at its own exact SHA. Full Arena C remains separately assessed."
+}

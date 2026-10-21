@@ -1,63 +1,59 @@
-# Ready-to-copy continuation prompt — T03a exact-source qualification
+# Ready-to-copy continuation prompt — finish T03a exact-source qualification
 
-Continue authorized open-source PSKernel-Core implementation in `dwijayuda/pskernel`
-on `integration/psc1-pskernel-expr-v2-lean435-20261021`. Use connected GitHub tools
-and Linux GitHub Actions. Fetch live HEAD and newest `AI_WORK_STATE.md` before any
-change. Preserve history with non-force expected-SHA updates, fuel4096, published
-limits, independent checking, all negative controls and both detached generated
-routes. No local builds, main merge or npm publication.
+Continue authorized PSKernel-Core implementation in `dwijayuda/pskernel` on
+`integration/psc1-pskernel-expr-v2-lean435-20261021`. Use connected GitHub tools
+and Linux Actions only. Fetch live HEAD and the newest `AI_WORK_STATE.md`
+before any write. Preserve non-force expected-SHA history, fuel4096, published
+limits, independent checking, negative controls and both detached generated
+routes. No local build, main merge or npm publication.
 
-Live parent at candidate creation is `33466d0b516df9d0496d181dd1c4b619b9954c7c`;
-its concurrent fixture repair and failure evidence are preserved. Observe its
-already launched runs as well before replacing full qualification.
+T03a is implemented using the completion plan's authoritative final-environment
+new-prefix recipe. It stops before the first exact old name, imports actual
+final recursor types/rules and restored nested types, reuses only matching
+current-command ordinary/mutual input refs, keeps the old helper ABI, original
+external ID namespace, private appended IDs, full state and atomic publication.
+The three production files are API/DagGenerated.lean, API/Dag.lean and the
+ownership comment in Checker/ExprV2/Environment.lean. Do not repeat a broad audit.
 
-The containing source implements the completion plan's T03a authoritative
-environment-prefix ownership recipe and repairs eight evidenced IO application
-errors in `PsKernelInvalidRecursorOccurrenceRegression.lean`. This candidate is
-NOT QUALIFIED at creation. Check its live exact-source runs, including focused
-branch `work/psc1-pskernel-t03a-prefix-20261021`, before dispatching duplicates.
-Do not inherit predecessor qualification. Last fully qualified scoped A remains
-`3aa077cb64ff06f76727decd01c43ad6c33f351d` until a successor's own mandatory gates pass.
+Focused source22a1d1721c26f7170cfbc5829603d4d5760fce2f passed
+run39644321489/job119375775009: 24new declarations,7recursors,6direct cases,
+3private-ID controls, official5families/6positive/7negative, both occurrence
+control markers and all21proof equations (7new). Failed b60 fixture total23
+and reserved proof binder remain preserved; the fixes changed no production code.
+See evidence/2026-10-22-t03a-native-preflight.json. The containing full candidate
+is NOT QUALIFIED at creation. Observe its exact current runs before dispatching
+duplicates; a focused or predecessor PASS is not full source qualification.
 
-Previous implementation `034999734f2574876a747c967dd03bcc6904b395` has terminal
-native integration failure job119352848567/run39637759611: eight
-`discard (← action)` fixture type errors prevented the new occurrence oracle
-and frozen-parent sentinel from running. Read-only artifact-inspection
-run39640250554/job119361567049 printed the exact errors and verified native
-artifact12365440836 digest. The correction executes the same actions through
-`discard (action)`; every semantic assertion and exact baseline marker remains.
-The first cheap-cache parent reproduction passed. Keep the failed receipt.
+All five originally requested034999734f2574876a747c967dd03bcc6904b395 runs
+finished: integration39637759611 FAIL from native fixture elaboration, generated
+job119352848385 PASS; correctness39637759709 PASS; all6 research39637759603 PASS;
+fullArena39637759569 FAIL; profiles39637759606 PASS collection only.
+Its unchanged case16 now has actual independent safe kernel rejection, precise
+invalid-recursive-occurrence reason, identical original/adapted body bytes and
+fuel4096. Full193:173matches,2safety agreements,17timeouts,1Church resource
+exhaustion,0unsupported. All receipts and digests are in
+evidence/2026-10-22-034-terminal-qualification.json. Do not rerun those originals
+or promote034 to A; the native failure remains.
 
-Finish observing original034 integration39637759611, correctness39637759709,
-research39637759603, fullArena39637759569 and authentic profile39637759606 if
-not already terminal. The official Arena reference passed; require actual
-unchanged case16 `bugs/rec-missing-ih.ndjson` rejection by independent validation,
-with unsafe/erased/reducible/nested controls preserved. Diagnostic PASS is not
-kernel PASS. Full Arena failures remain separate from scoped A.
+Concurrent fixture repair33466d0b516df9d0496d181dd1c4b619b9954c7c is preserved
+as T03a's parent. Its native integration and correctness passed; finish observing
+existing integration39640766956, correctness39640766736, research39640766908
+and Arena39640766732 as separate source receipts. No parallel group/cache/Quot/
+name-worker research is silently merged into T03a.
 
-T03a adds `InstallNewInfo`, `InstallNewPrefix` and
-`AfterCommandWithPrevious` in `API/DagGenerated.lean`. Production obtains new
-recursor/restored-type/constructor owners from the successfully checked final
-environment prefix and stops before its first exact previous-environment name.
-Reuse only current-command ordinary/mutual input refs already staged after
-admission. Import final nested restored types and auxiliary recursor rules.
-Preserve old helper ABI, original external ID namespace, private appended IDs,
-complete state and atomic publication. The implementation remains transitional:
-V1 inductive admission, recursive metadata import, eager decode and the four
-whole-operation fallback families remain.
+Require the containing exact implementation's full native, portable .lean,
+canonical .ps, both authentic TypeScript7.0.2/Node22 generated routes, retained
+proof/provider24/API8 and benchmark gates. Preserve both frozen3aa failure
+sentinels and all subsequent corrected controls. Observe one unchanged full193
+comparison per complete candidate; C/D blockers stay separate from scoped A.
+Lean4.35.0 is pinned to eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Full-kernel DirectJS remains unsupported. Keep error/resource/safety distinctions.
 
-First resolve any demonstrated focused native/test/proof failure. Then require
-this exact implementation's native, complete portable .lean, canonical .ps,
-both authentic TypeScript7.0.2/Node22 routes, retained proofs and provider gates.
-Full-kernel DirectJS stays unsupported. Run/observe one final unchanged full193
-comparison per complete candidate, preserving case-level failures and resource
-classification. Do not claim global soundness or a general performance gain.
-
-Read the finite completion plan and progress matrix; do not repeat the broad
-architecture audit. Once T03a is genuinely qualified, the next implementation
-task is T03b preexisting-session ownership. T01F actual String.ofList environment,
-cache indexes, DAG admission/decode/fallback removal, Church/timeouts and safety
-contract reconciliation remain open. Update matrix/work-state after the batch;
-report live HEAD, exact qualified source/run/job evidence, separate A/B/C/D,
-remaining blockers and one next executable task. Never imply background work
-continues after the chat ends.
+After T03a genuinely qualifies, next task is T03b preexisting-session ownership.
+B remains open: V1 inductive admission, recursive metadata import, eager decode
+and all four whole-operation fallbacks remain. T01F actual String.ofList,
+Church/timeouts, safety reconciliation and global soundness/backend obligations
+also remain. Update matrix/work state and source-bound receipts after the batch.
+Report live HEAD, exact qualified SHA and terminal run/job evidence, separate
+A/B/C/D status, remaining blockers and one next executable task. No general
+speedup claim; never imply work continues after ending the chat.

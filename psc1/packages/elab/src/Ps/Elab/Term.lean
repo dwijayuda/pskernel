@@ -699,7 +699,10 @@ def psElabLambdaAnnotationMissing (source : PsSyntaxTerm) : Bool :=
   match source with
   | PsSyntaxTerm.reference name =>
       match name.segments with
-      | List.cons segment List.nil => psStringEq segment "_"
+      | List.cons segment rest =>
+          match rest with
+          | List.nil => psStringEq segment "_"
+          | List.cons _ _ => false
       | _ => false
   | _ => false
 

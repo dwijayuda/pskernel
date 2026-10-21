@@ -1,0 +1,133 @@
+name: PSC1 authentic Arena timeout diagnostics
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - integration/psc1-pskernel-expr-v2-lean435-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-arena435-profile.yml
+      - psc1/scripts/pskernel-arena435-profile.py
+      - psc1/scripts/pskernel-arena-replay.mjs
+      - psc1/scripts/pskernel-arena435-compare.py
+      - psc1/packages/pskernel-core/src/**
+
+permissions:
+  contents: read
+
+jobs:
+  authentic-timeout-diagnostics:
+    # Collection success is not a corpus or kernel qualification result.
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Authenticate tools and diagnostic harness
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          python3 -m py_compile scripts/pskernel-arena435-profile.py \
+            scripts/pskernel-arena435-oracle.py scripts/pskernel-arena435-compare.py
+          node --check scripts/pskernel-arena-replay.mjs
+          node --check scripts/pskernel-arena-replay-controls.mjs
+          node check-psc1-source.mjs --all-portable
+      - name: Build authentic compiler and complete canonical source closure
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake build psc1
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+          node scripts/bootstrap-project.mjs \
+            packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            dist/arena435-profile/workspace
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { assertBootstrapWorkspaceManifest } from './scripts/bootstrap-manifest.mjs';
+          const workspace='dist/arena435-profile/workspace';
+          const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
+          if(manifest.entry!=='packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps')
+            throw Error('wrong kernel closure entry');
+          await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
+          console.log('PSC1_ARENA_PROFILE_CLOSURE modules='+manifest.sourceCount);
+          NODE
+          lake exe psc1 check \
+            dist/arena435-profile/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
+      - name: Generate real JavaScript, declarations and source map
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/arena435-profile-ts7"
+          echo '{"name":"psc1-arena-profile-ts7","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/arena435-profile-ts7/package.json"
+          npm install --prefix "$RUNNER_TEMP/arena435-profile-ts7" --no-save \
+            --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          export PSC0_TSC="$RUNNER_TEMP/arena435-profile-ts7/node_modules/typescript/bin/tsc"
+          node "$PSC0_TSC" --version
+          lake exe psc1 build \
+            dist/arena435-profile/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+            --out dist/arena435-profile/kernel.js
+          test -s dist/arena435-profile/kernel.js
+          test -s dist/arena435-profile/kernel.ts
+          test -s dist/arena435-profile/kernel.d.ts
+          test -s dist/arena435-profile/kernel.js.map
+          node --check dist/arena435-profile/kernel.js
+          sha256sum dist/arena435-profile/kernel.js dist/arena435-profile/kernel.ts \
+            dist/arena435-profile/kernel.d.ts dist/arena435-profile/kernel.js.map \
+            > "$RUNNER_TEMP/arena435-profile-artifacts.sha256"
+      - name: Check detached positive and adversarial controls
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_PROFILE_NODE="$(command -v node)"
+          PSC1_PROFILE_DETACHED="$RUNNER_TEMP/arena435-profile-controls"
+          mkdir -p "$PSC1_PROFILE_DETACHED"
+          cp dist/arena435-profile/kernel.js "$PSC1_PROFILE_DETACHED/kernel.mjs"
+          cp scripts/pskernel-arena-replay.mjs scripts/pskernel-arena-replay-controls.mjs "$PSC1_PROFILE_DETACHED/"
+          cd "$PSC1_PROFILE_DETACHED"
+          env PATH="" "$PSC1_PROFILE_NODE" pskernel-arena-replay-controls.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/arena435-profile-controls.log"
+          grep -q 'PSC1_ARENA_REPLAY_CONTROLS: PASS' "$RUNNER_TEMP/arena435-profile-controls.log"
+      - name: Collect authentic profiles with unchanged case limits
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 \
+            -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+          python3 scripts/pskernel-arena435-profile.py \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --kernel dist/arena435-profile/kernel.js --official-project . \
+            --out "$RUNNER_TEMP/arena435-authentic-profiles" \
+            | tee "$RUNNER_TEMP/arena435-authentic-profile.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-arena435-authentic-diagnostics
+          path: |
+            ${{ runner.temp }}/arena435-authentic-profiles/
+            ${{ runner.temp }}/arena435-authentic-profile.log
+            ${{ runner.temp }}/arena435-profile-controls.log
+            ${{ runner.temp }}/arena435-profile-artifacts.sha256
+            psc1/dist/arena435-profile/kernel.js
+            psc1/dist/arena435-profile/kernel.ts
+            psc1/dist/arena435-profile/kernel.d.ts
+            psc1/dist/arena435-profile/kernel.js.map
+            psc1/dist/arena435-profile/workspace/.proofscript-bootstrap.json
+          if-no-files-found: warn
+          retention-days: 30

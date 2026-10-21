@@ -129,6 +129,7 @@ jobs:
           lake -f kernel-lakefile.lean env lean --run test/PsKernelInvalidRecursorOccurrenceRegression.lean > "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log" 2>&1
           PSC1_OCC_BASELINE_STATUS=$?
           set -e
+          cat "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log"
           test "$PSC1_OCC_BASELINE_STATUS" -ne 0
           grep -Fqx 'PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls' "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log"
           grep -Fq 'PSC1_INVALID_RECURSOR_OCCURRENCE_FAIL public-invalid-exact-diagnostic' "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log"

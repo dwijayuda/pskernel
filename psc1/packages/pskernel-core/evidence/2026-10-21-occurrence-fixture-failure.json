@@ -1,0 +1,34 @@
+{
+  "schema": "pskernel-ci-failure-diagnosis-v1",
+  "observedAtUtc": "2026-10-21 17:05:06 UTC",
+  "source": "034999734f2574876a747c967dd03bcc6904b395",
+  "failedRun": 39637759611,
+  "failedJob": 119352848567,
+  "classification": "native fixture source elaboration defect",
+  "diagnosticRun": 39640054167,
+  "diagnosticJob": 119360894356,
+  "diagnosticConclusion": "success",
+  "artifact": {
+    "id": 12365440836,
+    "bytes": 5009,
+    "zipSha256": "709d73791269923f65cc4ec56424bcc1fd6855c4f140b3f123dce3ef74d01b17"
+  },
+  "errors": {
+    "file": "psc1/test/PsKernelInvalidRecursorOccurrenceRegression.lean",
+    "lines": [
+      127,
+      128,
+      129,
+      130,
+      135,
+      137,
+      166,
+      167
+    ],
+    "cause": "discard expects an IO action; discard (← action) passes its already extracted result",
+    "repair": "discard (action), at exactly8 sites",
+    "runtimeAssertionsChanged": false,
+    "productionChanged": false
+  },
+  "qualification": "No occurrence oracle or semantic fixture executed in the failed producer. Correction requires fresh exact-source gates."
+}

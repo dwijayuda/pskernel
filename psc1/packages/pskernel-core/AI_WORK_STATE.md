@@ -1,3 +1,63 @@
+# Current implementation — execute the occurrence fixture actions correctly
+
+Observed: 2026-10-21 17:05:06 UTC
+Integration parent: `45d8c3e52b6bd2c78ad4e656828b5c0ce79d19a1`
+Implementation/test predecessor: `034999734f2574876a747c967dd03bcc6904b395`
+Status: **IN PROGRESS; this corrected source is NOT RUN at commit time.**
+
+Exact034 native integration[39637759611/job119352848567](https://github.com/dwijayuda/pskernel/actions/runs/39637759611/job/119352848567)
+failed before the official occurrence oracle or semantic regression could run.
+The existing cache-mode parent reproducer passed. The next parent overlay built,
+but the new native fixture failed elaboration at eight `discard (← action)`
+calls: `discard` requires an IO action; the do-bind had already extracted its
+Environment/AdmissionResult. This is a native fixture source defect, not an
+observed result from the new kernel guard.
+
+The original redirected log was recovered without local tools in
+[39640054167/job119360894356](https://github.com/dwijayuda/pskernel/actions/runs/39640054167/job/119360894356),
+which authenticated exact producer/source and artifact12365440836
+(5009bytes; ZIP SHA256
+`709d73791269923f65cc4ec56424bcc1fd6855c4f140b3f123dce3ef74d01b17`).
+That diagnostic collection passed; it does not qualify the kernel.
+This successor removes only the eight premature binds and keeps every actual
+official/kernel action, expected failure and assertion. The parent-reproduction
+step now prints its saved diagnostic before enforcing the unchanged markers,
+so a future fixture or semantic failure is directly visible in terminal logs.
+No production kernel or generated test change accompanies this repair.
+
+## Immediate required gates
+
+Observe this exact successor's native, authentic PSC1, canonical, generated,
+provider, proof and full193 Arena jobs to terminal. Preserve both expected
+parent failures, restored controls,4096fuel and safety/error ordering.
+Do not claim034 or this successor qualified from464's passing native checks
+or from diagnostic collection.
+
+Parallel research has independently qualified group-owner source
+`89c8b988fc349fa57d7757c8d11fe0b94f9e9188` on integration39631113440,
+correctness39631113291 and all six research39631113206 jobs. Its full193 run
+39631113544 still FAILS:172matches (105accept/59kernel/1metadata/7transport),
+2separate safety agreements,17timeouts,1fuel exhaustion and1unsupported.
+The cache-only source `5deaf5880c83a76290520fa1176982dab0bf87a5` has
+terminal native/generated integration39631703411 PASS; canonical completion
+is being observed separately. Its full19339631703412 FAILS:175matches
+(108accept/59kernel/1metadata/7transport),2safety,14timeouts,1resource,
+1unsupported. All193 records exist; differences between runners alone do
+not establish a causal speedup. The paired authenticated artifact experiment
+39639125591 is running and has not yet yielded a reviewed performance result.
+
+Those research sources are not silently included here. A history-preserving
+combined group/cache source is prepared, preserving the cheapRec correction,
+the safe recursor guard and all current documents; promote only after the
+current integration blockers and component gates have been resolved.
+The separate Quot owner and name/radix worker candidates remain explicitly
+under qualification. V1 remains the default/reference, whole-operation
+fallbacks remain, DirectJS is unsupported, and gatesB/C are not achieved.
+
+---
+
+## Preserved integration history (verbatim)
+
 # PSKernel-Core Expression V2 integration work state
 
 Date: 2026-10-21 (Asia/Jakarta; Actions timestamps use UTC)

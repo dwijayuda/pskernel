@@ -124,17 +124,17 @@ def main : IO Unit := do
   let unsafeBad := { bad with isUnsafe := true }
   require "official-rejects-stuck-recursive-minor"
     (match ← officialAdd official bad with | .error _ => true | _ => false)
-  discard (← officialAccept official good)
-  discard (← officialAccept official nonrecursive)
-  discard (← officialAccept official erased)
-  discard (← officialAccept official unsafeBad)
+  discard (officialAccept official good)
+  discard (officialAccept official nonrecursive)
+  discard (officialAccept official erased)
+  discard (officialAccept official unsafeBad)
   IO.println "PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls"
   let message := "simple inductive field has an invalid recursor-headed recursive occurrence"
   require "public-invalid-exact-diagnostic"
     (errorIs message (psKernelV1AdmitDeclaration ready.session (.ordinaryInductive bad)))
-  discard (← accepted "reducible-recursive-minor"
+  discard (accepted "reducible-recursive-minor"
     (psKernelV1AdmitDeclaration ready.session (.ordinaryInductive good)))
-  discard (← accepted "nonrecursive-stuck-minor"
+  discard (accepted "nonrecursive-stuck-minor"
     (psKernelV1AdmitDeclaration ready.session (.ordinaryInductive nonrecursive)))
   require "original-only-erased-occurrence-keeps-unsupported"
     (unsupported (psKernelV1AdmitDeclaration ready.session (.ordinaryInductive erased)))
@@ -163,8 +163,8 @@ def main : IO Unit := do
   let nestedGroup := PsKernelSimpleMutualInductiveDecl.mk [] 0
     [PsKernelSimpleMutualTypeDecl.mk nested.name nested.type nested.ctors] false
   let officialBox ← officialAccept official box
-  discard (← officialAccept officialBox nested)
-  discard (← accepted "genuine-nested-explicit-route"
+  discard (officialAccept officialBox nested)
+  discard (accepted "genuine-nested-explicit-route"
     (psKernelV1AdmitDeclaration boxed.session (.nestedInductive nestedGroup)))
   IO.println "PSC1_INVALID_RECURSOR_OCCURRENCE: PASS invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls"
 

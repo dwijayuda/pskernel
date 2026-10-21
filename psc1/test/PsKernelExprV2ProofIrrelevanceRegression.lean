@@ -140,8 +140,12 @@ private def regression : IO Unit := do
     let some officialType := inferOfficialExpr type
       | throw (IO.userError "official proof type conversion")
     match official.addDeclCore 0 0
-        (.axiomDecl { name := inferOfficialName name, levelParams := [],
-          type := officialType, isUnsafe := isUnsafe }) none true with
+        (.axiomDecl {
+          name := inferOfficialName name
+          levelParams := []
+          type := officialType
+          isUnsafe := isUnsafe
+        }) none true with
     | .ok next => official := next
     | .error _ => throw (IO.userError ("official axiom fixture " ++ text))
   let p := cn "proofLeft"

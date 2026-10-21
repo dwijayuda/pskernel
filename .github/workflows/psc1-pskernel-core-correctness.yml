@@ -7,6 +7,7 @@ on:
       - research/psc1-pskernel-expr-v2-lean435-20261020
       - integration/psc1-pskernel-expr-v2-lean435-20261021
     paths:
+      - psc1/scripts/install-lean435-ci.sh
       - psc1/lean-toolchain
       - psc1/host/**
       - psc1/packages/pskernel-core/**
@@ -42,8 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Verify toolchain and compile the independent kernel
         shell: bash
         working-directory: psc1
@@ -93,8 +93,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Check kernel modules are in portable source profile
         working-directory: psc1
         run: |
@@ -302,7 +301,7 @@ jobs:
           set -euo pipefail
           node scripts/pskernel-provider-smoke.mjs js dist/pskernel-selfhost/pskernel-core.js \
             | tee "$RUNNER_TEMP/psc1-canonical-provider.log"
-          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=16 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-canonical-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=18 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-canonical-provider.log"
       - name: Package the complete canonical source and checked provider
         working-directory: psc1
         shell: bash

@@ -7,6 +7,7 @@ on:
       - research/psc1-pskernel-expr-v2-lean435-20261020
       - integration/psc1-pskernel-expr-v2-lean435-20261021
     paths:
+      - psc1/scripts/install-lean435-ci.sh
       - psc1/lean-toolchain
       - psc1/packages/pskernel-core/AI_WORK_STATE.md
       - psc1/packages/pskernel-core/src/**
@@ -31,8 +32,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Verify exact Lean source commit
         working-directory: psc1
         run: |
@@ -94,8 +94,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Build actual PSC1 compiler
         working-directory: psc1
         run: |
@@ -234,8 +233,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Build the authentic PSC1 compiler
         working-directory: psc1
         run: |
@@ -331,8 +329,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Compile bridge with the independent production checker and V2
         working-directory: psc1
         shell: bash
@@ -373,8 +370,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -435,8 +431,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Compile V2 function-head WHNF subset with original checker
         working-directory: psc1
         run: |

@@ -72,19 +72,25 @@ function checkExpr(value, depth = 0) {
   if (tag === 'lam' || tag === 'forall' || tag === 'let') {
     checkName(value.n, d); checkExpr(value.t, d); checkExpr(value.b, d);
     if (tag === 'let') checkExpr(value.v, d);
+    else if (!['default','implicit','strictImplicit','instImplicit'].includes(value.bi)) wireBad('binder tag');
   }
   if (tag === 'proj') { checkName(value.n, d); checkExpr(value.e, d); }
 }
 function validateRequest(value) {
   keys(value, ['kind','declaration']);
   const d = value.declaration;
+  if (typeof value.kind !== 'string') wireBad('expected admission kind string');
   if (value.kind === 'constant') {
     const tag = tagged(d, {
       definition:['k','n','lp','t','v','s','h'],
       theorem:['k','n','lp','t','v'],
     });
     checkName(d.n); each(d.lp, checkName); checkExpr(d.t); checkExpr(d.v);
-    if (tag === 'definition') keys(d.h, ['k','h']);
+    if (tag === 'definition') {
+      if (typeof d.s !== 'string') wireBad('expected definition safety string');
+      keys(d.h, ['k','h']);
+      if (typeof d.h.k !== 'string') wireBad('expected definition hint string');
+    }
   } else if (value.kind === 'inductive') {
     keys(d, ['lp','np','ts']); each(d.lp, checkName);
     each(d.ts, type => {
@@ -145,7 +151,9 @@ export function checkCanonicalBatch(kernel, source, { fuel = 4096n } = {}) {
     if (target?.contract !== 'KernelContract-v1' ||
         target.leanVersion !== identity.leanVersion || target.leanCommit !== identity.leanCommit)
       return wrap(failure('declinedUnsupported', 'provider', 'kernel target identity mismatch'));
-    keys(JSON.parse(source), ['format', 'version', 'admissions']);
+    const wire = JSON.parse(source);
+    keys(wire, ['format', 'version', 'admissions']);
+    if (typeof wire.format !== 'string') wireBad('expected admissions format string');
     const requests = parseCanonicalAdmissions(source);
     if (requests.length > 20000)
       return wrap(failure('resourceExhausted', 'transport', 'transport declaration count exceeded'));

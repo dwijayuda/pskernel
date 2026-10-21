@@ -100,19 +100,23 @@ private def decodeExpr : Nat → Json → Except WireError PsKernelExpr
           let levels ← (← array (← field value "ls")).mapM (decodeLevel fuel)
           return .const (← decodeName fuel (← field value "n")) levels
       | "app" => return .app (← decodeExpr fuel (← field value "f")) (← decodeExpr fuel (← field value "a"))
-      | "lam" => return .lam (← decodeName fuel (← field value "n"))
-          (← decodeExpr fuel (← field value "t")) (← decodeExpr fuel (← field value "b"))
-          (← decodeBinder (← field value "bi"))
-      | "forall" => return .forallE (← decodeName fuel (← field value "n"))
-          (← decodeExpr fuel (← field value "t")) (← decodeExpr fuel (← field value "b"))
-          (← decodeBinder (← field value "bi"))
-      | "let" => return .letE (← decodeName fuel (← field value "n"))
-          (← decodeExpr fuel (← field value "t")) (← decodeExpr fuel (← field value "v"))
-          (← decodeExpr fuel (← field value "b")) false
+      | "lam" =>
+          return .lam (← decodeName fuel (← field value "n"))
+            (← decodeExpr fuel (← field value "t")) (← decodeExpr fuel (← field value "b"))
+            (← decodeBinder (← field value "bi"))
+      | "forall" =>
+          return .forallE (← decodeName fuel (← field value "n"))
+            (← decodeExpr fuel (← field value "t")) (← decodeExpr fuel (← field value "b"))
+            (← decodeBinder (← field value "bi"))
+      | "let" =>
+          return .letE (← decodeName fuel (← field value "n"))
+            (← decodeExpr fuel (← field value "t")) (← decodeExpr fuel (← field value "v"))
+            (← decodeExpr fuel (← field value "b")) false
       | "nat" => return .lit (.nat (← natural (← field value "v")))
       | "str" => return .lit (.str (← fieldString value "v"))
-      | "proj" => return .proj (← decodeName fuel (← field value "n"))
-          (← natural (← field value "i")) (← decodeExpr fuel (← field value "e"))
+      | "proj" =>
+          return .proj (← decodeName fuel (← field value "n"))
+            (← natural (← field value "i")) (← decodeExpr fuel (← field value "e"))
       | _ => unsupported "expression tag"
 
 private def decodeBase (value : Json) : Except WireError PsKernelConstantBase := do

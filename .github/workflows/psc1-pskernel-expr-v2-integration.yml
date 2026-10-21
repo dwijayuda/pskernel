@@ -6,6 +6,7 @@ on:
     branches:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
     paths:
+      - psc1/scripts/install-lean435-ci.sh
       - psc1/lean-toolchain
       - psc1/packages/pskernel-core/AI_WORK_STATE.md
       - psc1/packages/pskernel-core/src/**
@@ -50,8 +51,7 @@ jobs:
       - name: Install pinned Lean
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Compile complete checker with checked DAG input
         working-directory: psc1
         run: |
@@ -179,7 +179,7 @@ jobs:
           set -euo pipefail
           node scripts/pskernel-provider-smoke.mjs native .lake/build/bin/psc1_kernel_provider \
             | tee "$RUNNER_TEMP/psc1-native-provider.log"
-          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=native cases=16 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-native-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=native cases=18 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-native-provider.log"
           mkdir -p dist/expr-v2
           tar -czf dist/expr-v2/native-provider-linux.tar.gz -C .lake/build/bin psc1_kernel_provider
           node scripts/pskernel-artifact-manifest.mjs \
@@ -226,8 +226,7 @@ jobs:
       - name: Install pinned Lean
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -338,7 +337,7 @@ jobs:
           set -euo pipefail
           node scripts/pskernel-provider-smoke.mjs js dist/expr-v2/integration/kernel.js \
             | tee "$RUNNER_TEMP/psc1-generated-provider.log"
-          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=16 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-generated-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=18 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-generated-provider.log"
       - name: Check large numerals without fuel-proportional closure allocation
         working-directory: psc1
         run: |

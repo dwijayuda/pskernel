@@ -86,6 +86,9 @@ const fixtures = [
   ['extra-recursor-metadata', batch([{ ...inductive, declaration: { ...inductive.declaration, recursors: [] } }]), 'declinedUnsupported', 'transport'],
   ['missing-required-safety', batch([{ kind: 'constant', declaration: Object.fromEntries(
     Object.entries(first.declaration).filter(([key]) => key !== 's')) }]), 'malformedInput', 'transport'],
+  ...['constructor', '__proto__'].map(bi => ['inherited-binder-' + bi,
+    batch([{ ...theorem, declaration: { ...theorem.declaration,
+      v: { ...identityProof, bi } } }]), 'malformedInput', 'transport']),
   ['malformed-json', '{', 'malformedInput', 'transport'],
   ['malformed-natural', batch([definition('BadIndex', s1, b(-1))]), 'malformedInput', 'transport'],
   ['unsupported-version', JSON.stringify({ format: 'proofscript-checked-admissions', version: 99, admissions: [] }), 'declinedUnsupported', 'transport'],
@@ -118,7 +121,7 @@ for (const input of [batch([first]), batch([])]) {
 // the same name, while a fresh process cannot see any former declaration.
 assert.equal(invoke(batch([first])).accepted, true);
 assert.equal(invoke(batch([dependent])).outcome, 'rejectedInvalid');
-console.log('PSC1_CANONICAL_PROVIDER: PASS mode=' + mode + ' cases=16 PATH=empty cwd=detached');
+console.log('PSC1_CANONICAL_PROVIDER: PASS mode=' + mode + ' cases=18 PATH=empty cwd=detached');
 } finally {
   rmSync(detached, { recursive: true, force: true });
 }

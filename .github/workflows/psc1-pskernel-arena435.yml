@@ -5,6 +5,7 @@ on:
     branches:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
     paths:
+      - psc1/scripts/install-lean435-ci.sh
       - .github/workflows/psc1-pskernel-arena435.yml
       - psc1/scripts/pskernel-arena435-oracle.py
       - psc1/scripts/pskernel-arena435-inspect.py
@@ -26,8 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Verify exact toolchain and authenticate full archive
         shell: bash
         working-directory: psc1
@@ -90,8 +90,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Reconstruct and check the complete canonical kernel closure
         shell: bash
         working-directory: psc1

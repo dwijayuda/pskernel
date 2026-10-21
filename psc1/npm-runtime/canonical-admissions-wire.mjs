@@ -61,11 +61,13 @@ export function createWireDecoder(kernel, { maxDepth = 4096 } = {}) {
       case 'app': return kernel.PsKernelExpr.app(expr(v.f, d), expr(v.a, d));
       case 'lam':
       case 'forall': {
-        const binder = {
+        const binders = {
           default: 'default', implicit: 'implicit', strictImplicit: 'strictImplicit',
           instImplicit: 'instImplicit',
-        }[string(v.bi)];
-        if (!binder) fail('BINDER_TAG');
+        };
+        const binderTag = string(v.bi);
+        if (!Object.hasOwn(binders, binderTag)) fail('BINDER_TAG');
+        const binder = binders[binderTag];
         const fn = v.k === 'lam' ? 'lam' : 'forallE';
         return kernel.PsKernelExpr[fn](
           name(v.n, d), expr(v.t, d), expr(v.b, d), kernel.PsKernelBinderInfo[binder]);

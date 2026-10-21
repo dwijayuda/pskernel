@@ -6,6 +6,7 @@ on:
     branches:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
     paths:
+      - psc1/scripts/install-lean435-ci.sh
       - .github/workflows/psc1-pskernel-arena435-profile.yml
       - psc1/scripts/pskernel-arena435-profile.py
       - psc1/scripts/pskernel-arena435-oracle.py
@@ -31,8 +32,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash psc1/scripts/install-lean435-ci.sh
       - name: Authenticate tools and diagnostic harness
         shell: bash
         working-directory: psc1

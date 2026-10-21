@@ -12,55 +12,50 @@ inductive PsKernelOrdering where
   | eq
   | gt
 
+/-
+The worker receives all comparison arguments before descending in fuel.
+The public curried entry point below retains its generated calling convention.
+The character operations and the zero-fuel result are unchanged.
+-/
+def psKernelStringEqFromWorkerWithFuel
+    (fuel : Nat) (left right : String) (leftPos rightPos : Nat) : Bool :=
+  match fuel with
+  | Nat.zero => false
+  | Nat.succ remaining =>
+      if String.Pos.Raw.atEnd left (String.Pos.Raw.mk leftPos) then
+        String.Pos.Raw.atEnd right (String.Pos.Raw.mk rightPos)
+      else if String.Pos.Raw.atEnd right (String.Pos.Raw.mk rightPos) then
+        false
+      else
+        let leftChar :=
+          String.Internal.get left (String.Pos.Raw.mk leftPos);
+        let rightChar :=
+          String.Internal.get right (String.Pos.Raw.mk rightPos);
+        if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
+          psKernelStringEqFromWorkerWithFuel remaining left right
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next left (String.Pos.Raw.mk leftPos)))
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next right (String.Pos.Raw.mk rightPos)))
+        else false
+
 def psKernelStringEqFromWithFuel
     (fuel : Nat) :
     String -> String -> Nat -> Nat -> Bool :=
   match fuel with
   | Nat.zero =>
-      fun
-        (_left : String)
-        (_right : String)
-        (_leftPos : Nat)
-        (_rightPos : Nat) =>
+      fun (_left : String) (_right : String) (_leftPos : Nat) (_rightPos : Nat) =>
         false
   | Nat.succ remaining =>
-      let smaller :
-          String -> String -> Nat -> Nat -> Bool :=
-        psKernelStringEqFromWithFuel remaining;
-      fun
-        (left : String)
-        (right : String)
-        (leftPos : Nat)
-        (rightPos : Nat) =>
-        if String.Pos.Raw.atEnd left (String.Pos.Raw.mk leftPos) then
-          String.Pos.Raw.atEnd right (String.Pos.Raw.mk rightPos)
-        else if String.Pos.Raw.atEnd right (String.Pos.Raw.mk rightPos) then
-          false
-        else
-          let leftChar :=
-            String.Internal.get left (String.Pos.Raw.mk leftPos);
-          let rightChar :=
-            String.Internal.get right (String.Pos.Raw.mk rightPos);
-          if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
-            smaller
-              left
-              right
-              (String.Pos.Raw.byteIdx
-                (String.Pos.Raw.next
-                  left
-                  (String.Pos.Raw.mk leftPos)))
-              (String.Pos.Raw.byteIdx
-                (String.Pos.Raw.next
-                  right
-                  (String.Pos.Raw.mk rightPos)))
-          else
-            false
+      fun (left : String) (right : String) (leftPos : Nat) (rightPos : Nat) =>
+        psKernelStringEqFromWorkerWithFuel (Nat.succ remaining)
+          left right leftPos rightPos
 
 def psKernelStringEq
     (left : String)
     (right : String) : Bool :=
   if Nat.beq (String.utf8ByteSize left) (String.utf8ByteSize right) then
-    psKernelStringEqFromWithFuel
+    psKernelStringEqFromWorkerWithFuel
       (Nat.succ (String.utf8ByteSize left))
       left
       right
@@ -169,37 +164,45 @@ def psKernelNatToString
     (value : Nat) : String :=
   Int.repr (Int.ofNat value)
 
+/-
+Compare the current components before recursing on their parents. Retain the
+curried public wrapper; no name hash or pointer identity decides equality.
+-/
+def psKernelNameEqWorker
+    (left right : PsKernelName) : Bool :=
+  match left with
+  | PsKernelName.anonymous =>
+      match right with
+      | PsKernelName.anonymous => true
+      | _ => false
+  | PsKernelName.str leftParent leftValue =>
+      match right with
+      | PsKernelName.str rightParent rightValue =>
+          if psKernelStringEq leftValue rightValue then
+            psKernelNameEqWorker leftParent rightParent
+          else false
+      | _ => false
+  | PsKernelName.num leftParent leftValue =>
+      match right with
+      | PsKernelName.num rightParent rightValue =>
+          if Nat.beq leftValue rightValue then
+            psKernelNameEqWorker leftParent rightParent
+          else false
+      | _ => false
+
 def psKernelNameEq
     (left : PsKernelName) :
     PsKernelName -> Bool :=
   match left with
   | PsKernelName.anonymous =>
       fun (right : PsKernelName) =>
-        match right with
-        | PsKernelName.anonymous => true
-        | _ => false
-  | PsKernelName.str leftParent leftValue =>
-      let smaller : PsKernelName -> Bool :=
-        psKernelNameEq leftParent;
+        psKernelNameEqWorker PsKernelName.anonymous right
+  | PsKernelName.str parent value =>
       fun (right : PsKernelName) =>
-        match right with
-        | PsKernelName.str rightParent rightValue =>
-            if psKernelStringEq leftValue rightValue then
-              smaller rightParent
-            else
-              false
-        | _ => false
-  | PsKernelName.num leftParent leftValue =>
-      let smaller : PsKernelName -> Bool :=
-        psKernelNameEq leftParent;
+        psKernelNameEqWorker (PsKernelName.str parent value) right
+  | PsKernelName.num parent value =>
       fun (right : PsKernelName) =>
-        match right with
-        | PsKernelName.num rightParent rightValue =>
-            if Nat.beq leftValue rightValue then
-              smaller rightParent
-            else
-              false
-        | _ => false
+        psKernelNameEqWorker (PsKernelName.num parent value) right
 
 def psKernelNameAppendAfter
     (name : PsKernelName)

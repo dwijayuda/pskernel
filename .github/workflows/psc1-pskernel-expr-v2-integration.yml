@@ -28,6 +28,9 @@ on:
       - psc1/test/PsKernelExprV2RecursorRegression.lean
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
       - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+      - psc1/test/PsKernelNameWorkerRegression.lean
+      - psc1/test/PsKernelNameWorkerProofs.lean
+      - psc1/scripts/pskernel-name-worker-smoke.mjs
       - psc1/test/PsKernelExprV2RecursorProofs.lean
       - psc1/test/PsKernelExprV2WhnfABIProofs.lean
       - psc1/test/PsKernelExprV2DagPerformance.lean
@@ -94,6 +97,7 @@ jobs:
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
           node --check scripts/pskernel-expr-v2-recursor-smoke.mjs
           node --check scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+          node --check scripts/pskernel-name-worker-smoke.mjs
           node --check scripts/pskernel-expr-v2-recursor-k-smoke.mjs
           node --check scripts/pskernel-expr-v2-owned-state-smoke.mjs
           # Run the new authentic mode-crossing sentinel against exact parent semantics.
@@ -139,7 +143,7 @@ jobs:
           restore_occurrence_sources
           trap - EXIT
           echo 'PSC1_INVALID_OCCURRENCE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d'
-          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_recursor_k_regression psc1_kernel_expr_v2_owned_state_regression
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_recursor_k_regression psc1_kernel_expr_v2_owned_state_regression psc1_kernel_name_worker_regression
       - name: Check invalid recursor-headed occurrence against official Lean
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -333,6 +337,17 @@ jobs:
           grep -Fqx 'PSC1_V2_K_CHECKED_PASS valid=6 invalid=3 declarations=2 batch=6' "$RUNNER_TEMP/psc1-recursor-k-native.log"
           grep -Fqx 'PSC1_V2_K_OFFICIAL_PASS valid=6 invalid=3 declarations=2' "$RUNNER_TEMP/psc1-recursor-k-native.log"
           grep -Fqx 'PSC1_V2_RECURSOR_K_PASS' "$RUNNER_TEMP/psc1-recursor-k-native.log"
+      - name: Check exact name and string comparison workers
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_name_worker_regression \
+            | tee "$RUNNER_TEMP/psc1-name-worker-native.log"
+          grep -Fqx 'PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24' "$RUNNER_TEMP/psc1-name-worker-native.log"
+          grep -Fqx 'PSC1_NAME_WORKER_NAMES_PASS pairs=400 deep=4 maxDepth=1024' "$RUNNER_TEMP/psc1-name-worker-native.log"
+          grep -Fqx 'PSC1_NAME_WORKER_CHECKING_PASS declarations=10 checked=10 normalized=10 negatives=4 officialPositive=10 officialNegative=4' "$RUNNER_TEMP/psc1-name-worker-native.log"
+          grep -Fqx 'PSC1_NAME_WORKER_PASS' "$RUNNER_TEMP/psc1-name-worker-native.log"
       - name: Check complete DAG checker state and callback ownership
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -381,6 +396,9 @@ jobs:
           test "$(grep -c '^#print axioms PsKernelExprV2RecursorKProofs\.' test/PsKernelExprV2RecursorKProofs.lean)" -eq 6
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorKProofs.lean \
             | tee "$RUNNER_TEMP/psc1-recursor-k-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelNameWorkerProofs.lean)" -eq 8
+          lake -f kernel-lakefile.lean env lean test/PsKernelNameWorkerProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-name-worker-proofs.log"
           test "$(grep -c '^#print axioms PsKernelExprV2WhnfABIProofs\.' test/PsKernelExprV2WhnfABIProofs.lean)" -eq 2
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2WhnfABIProofs.lean \
             | tee "$RUNNER_TEMP/psc1-whnf-abi-proofs.log"
@@ -394,6 +412,7 @@ jobs:
               "$RUNNER_TEMP/psc1-recursor-proofs.log" \
               "$RUNNER_TEMP/psc1-recursor-major-proofs.log" \
               "$RUNNER_TEMP/psc1-recursor-k-proofs.log" \
+              "$RUNNER_TEMP/psc1-name-worker-proofs.log" \
               "$RUNNER_TEMP/psc1-whnf-abi-proofs.log" \
               "$RUNNER_TEMP/psc1-owned-state-proofs.log" \
               "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"; then
@@ -450,6 +469,7 @@ jobs:
             ${{ runner.temp }}/psc1-quot-native.log
             ${{ runner.temp }}/psc1-recursor-native.log
             ${{ runner.temp }}/psc1-generated-prefix-native.log
+            ${{ runner.temp }}/psc1-name-worker-native.log
             ${{ runner.temp }}/psc1-recursor-k-native.log
             ${{ runner.temp }}/psc1-owned-state-native.log
             psc1/dist/expr-v2/native-artifacts.json
@@ -472,6 +492,7 @@ jobs:
             ${{ runner.temp }}/psc1-recursor-major-proofs.log
             ${{ runner.temp }}/psc1-recursor-k-proofs.log
             ${{ runner.temp }}/psc1-whnf-abi-proofs.log
+            ${{ runner.temp }}/psc1-name-worker-proofs.log
             ${{ runner.temp }}/psc1-owned-state-proofs.log
             ${{ runner.temp }}/psc1-admission-guard-proofs.log
             ${{ runner.temp }}/psc1-dag-native-bench.log
@@ -725,6 +746,23 @@ jobs:
           grep -Fqx 'PSC1_V2_K_GENERATED_OWNER_PASS carrier=16 propagated=16 metadata=16' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
           grep -Fqx 'PSC1_V2_K_GENERATED_ORDER_PASS guards=5' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
           grep -Eq '^PSC1_V2_RECURSOR_K_GENERATED_PASS assertions=[0-9]+$' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
+      - name: Check generated name and string workers in detached Node
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-name-worker-smoke.mjs "$PSC1_DAG_RUN_DIR/name-worker-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" name-worker-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Fqx 'PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24' "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Fqx 'PSC1_NAME_WORKER_NAMES_PASS pairs=400 deep=4 maxDepth=1024' "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Fqx 'PSC1_NAME_WORKER_ABI_PASS rawPartials=4 namePartials=1 executions=7' "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Fqx 'PSC1_NAME_WORKER_CHECKING_PASS declarations=10 checked=10 normalized=10 negatives=4 official=native-gate' "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Eq '^PSC1_NAME_WORKER_PASS assertions=[1-9][0-9]*$' "$RUNNER_TEMP/psc1-name-worker-generated.log"
       - name: Check complete generated DAG checker state in detached Node
         working-directory: psc1
         shell: bash
@@ -841,6 +879,7 @@ jobs:
             ${{ runner.temp }}/psc1-quot-generated.log
             ${{ runner.temp }}/psc1-recursor-generated.log
             ${{ runner.temp }}/psc1-generated-prefix-js.log
+            ${{ runner.temp }}/psc1-name-worker-generated.log
             ${{ runner.temp }}/psc1-recursor-k-generated.log
             ${{ runner.temp }}/psc1-owned-state-generated.log
             psc1/dist/expr-v2/integration/provider/

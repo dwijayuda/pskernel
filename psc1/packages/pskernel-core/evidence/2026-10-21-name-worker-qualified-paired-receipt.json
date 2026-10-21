@@ -1,0 +1,704 @@
+{
+  "schema": "pskernel-name-worker-qualified-and-paired-evidence-v1",
+  "observed_at_utc": "2026-10-21T18:02:08Z",
+  "kernel_source_sha": "34126793178021a9cd1bdb37aa6fe17c0fab41c6",
+  "scoped_native_portable_canonical_generated_provider_gates": "PASS",
+  "full_v2_replacement": false,
+  "all_193_conformance": false,
+  "qualification_runs": [
+    {
+      "run": 39640226534,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119361485439,
+          "name": "native-dag-integration",
+          "conclusion": "success"
+        },
+        {
+          "id": 119361485000,
+          "name": "generated-dag-integration",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run": 39640226530,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119361484956,
+          "name": "native-kernel",
+          "conclusion": "success"
+        },
+        {
+          "id": 119361484435,
+          "name": "psc1-portability",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run": 39640226539,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119361484198,
+          "name": "whnf-subset-regression",
+          "conclusion": "success"
+        },
+        {
+          "id": 119361484511,
+          "name": "portable-ps-closure",
+          "conclusion": "success"
+        },
+        {
+          "id": 119361484589,
+          "name": "expr-v2-differential",
+          "conclusion": "success"
+        },
+        {
+          "id": 119361484666,
+          "name": "portable-v2-check",
+          "conclusion": "success"
+        },
+        {
+          "id": 119361485046,
+          "name": "generated-js-full-checker-bridge",
+          "conclusion": "success"
+        },
+        {
+          "id": 119361485049,
+          "name": "full-checker-bridge",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "source_closure": {
+    "portable_modules": 182,
+    "canonical_modules": 139,
+    "toolchain": "leanprover/lean4:v4.35.0",
+    "lean_commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "node": "22",
+    "fuel": 4096,
+    "directjs": "UNSUPPORTED"
+  },
+  "worker_checks": {
+    "all_input_lemmas": 8,
+    "observed_proof_dependencies": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "raw_string_comparisons": 24576,
+    "complete_string_pairs": 64,
+    "raw_controls": 16,
+    "long_strings": 24,
+    "name_pairs": 400,
+    "deep_names": 4,
+    "max_name_depth": 1024,
+    "generated_assertions_per_route": 50237,
+    "generated_partial_executions": 7,
+    "checked_declarations": 10,
+    "official_positive": 10,
+    "official_negative": 4
+  },
+  "provider": {
+    "native": {
+      "cases": 24,
+      "path_empty": true,
+      "detached": true,
+      "official_cases": 5,
+      "real_batch_declarations": 4
+    },
+    "lean_generated": {
+      "cli_cases": 24,
+      "api_cases": 8,
+      "path_empty": true,
+      "detached": true
+    },
+    "canonical_generated": {
+      "cli_cases": 24,
+      "api_cases": 8,
+      "path_empty": true,
+      "detached": true
+    }
+  },
+  "manifests": {
+    "native": {
+      "schema": "pskernel-core-artifacts-v1",
+      "repository": "dwijayuda/pskernel",
+      "sourceSha": "34126793178021a9cd1bdb37aa6fe17c0fab41c6",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/34126793178021a9cd1bdb37aa6fe17c0fab41c6",
+      "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39640226534",
+      "runAttempt": "1",
+      "kind": "native",
+      "leanToolchain": "leanprover/lean4:v4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "typescript": null,
+      "node": "v22.23.3",
+      "checkerFuelDefault": 4096,
+      "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+      "files": [
+        {
+          "path": ".lake/build/bin/psc1_kernel_provider",
+          "bytes": 119515632,
+          "sha256": "ecfbbe701842a593470837e55a0c5a0fc4c4336df394c957db1e1615d416c140"
+        },
+        {
+          "path": "host/kernel-provider/KernelProviderMain.lean",
+          "bytes": 15915,
+          "sha256": "4904143dbcbbda5d277f51950abb16e075f34194c3f0d53b2a00f2f80db9839c"
+        },
+        {
+          "path": "dist/expr-v2/native-provider-linux.tar.gz",
+          "bytes": 33255087,
+          "sha256": "bd53c597397bec00a669d596d9234c2aa78833b189de1b0196f478d1c9c6cc26"
+        }
+      ]
+    },
+    "lean_generated": {
+      "schema": "pskernel-core-artifacts-v1",
+      "repository": "dwijayuda/pskernel",
+      "sourceSha": "34126793178021a9cd1bdb37aa6fe17c0fab41c6",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/34126793178021a9cd1bdb37aa6fe17c0fab41c6",
+      "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39640226534",
+      "runAttempt": "1",
+      "kind": "lean-generated-js",
+      "leanToolchain": "leanprover/lean4:v4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "typescript": "7.0.2",
+      "node": "v22.23.3",
+      "checkerFuelDefault": 4096,
+      "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+      "files": [
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js",
+          "bytes": 9893728,
+          "sha256": "d06d13d2e4cb54e8ea00aa0bfbb5b00b98cf3c2be1a610ccb5c699c64ee946c9"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.ts",
+          "bytes": 9066499,
+          "sha256": "8beb259d99ccabcd4a6202cb2de27efbdf100a91497fabd07c9c3f0416d0d91b"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+          "bytes": 361057,
+          "sha256": "bc0a9ff28c498f4d292ac6a9a93532c529f952983772fd2f85c0f1ef0d794e08"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js.map",
+          "bytes": 8037994,
+          "sha256": "e45cb2c255ccd3bd3fd15b9831481de24c3bfca9ee34eafd2f75bc9d88b3d9f8"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+          "bytes": 12759,
+          "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+          "bytes": 5462,
+          "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/package.json",
+          "bytes": 42,
+          "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/README.md",
+          "bytes": 11813,
+          "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+        }
+      ]
+    },
+    "canonical_generated": {
+      "schema": "pskernel-core-artifacts-v1",
+      "repository": "dwijayuda/pskernel",
+      "sourceSha": "34126793178021a9cd1bdb37aa6fe17c0fab41c6",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/34126793178021a9cd1bdb37aa6fe17c0fab41c6",
+      "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39640226530",
+      "runAttempt": "1",
+      "kind": "canonical-ps-generated-js",
+      "leanToolchain": "leanprover/lean4:v4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "typescript": "7.0.2",
+      "node": "v22.23.3",
+      "checkerFuelDefault": 4096,
+      "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+      "files": [
+        {
+          "path": "dist/pskernel-selfhost/provider/pskernel-core.js",
+          "bytes": 9893735,
+          "sha256": "4ae159a0e0bded617d836fdeef61dc9099bf572a537b0ffdc09b507876f5de72"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/pskernel-core.ts",
+          "bytes": 9066499,
+          "sha256": "8beb259d99ccabcd4a6202cb2de27efbdf100a91497fabd07c9c3f0416d0d91b"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/pskernel-core.d.ts",
+          "bytes": 361057,
+          "sha256": "bc0a9ff28c498f4d292ac6a9a93532c529f952983772fd2f85c0f1ef0d794e08"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/pskernel-core.js.map",
+          "bytes": 8038008,
+          "sha256": "c2098ed77d53b3b77c44bf07110f318671191532a0f1797b3d18391bc6ef8afc"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/scripts/pskernel-canonical-provider.mjs",
+          "bytes": 12759,
+          "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/npm-runtime/canonical-admissions-wire.mjs",
+          "bytes": 5462,
+          "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/package.json",
+          "bytes": 42,
+          "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/canonical-source.tar.gz",
+          "bytes": 117512,
+          "sha256": "d9d0f22400b1cd7a8c78d0779a95e2922b6ae516f83ecbf054fa3263f6dea8ec"
+        },
+        {
+          "path": "dist/pskernel-selfhost/provider/README.md",
+          "bytes": 11813,
+          "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+        }
+      ]
+    }
+  },
+  "canonical_artifact": {
+    "id": 12368500966,
+    "name": "psc1-canonical-kernel-qualification",
+    "size_in_bytes": 1903962,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12368500966",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12368500966/zip",
+    "expired": false,
+    "created_at": "2026-10-21T17:49:49Z",
+    "expires_at": "2026-11-20T17:49:48Z",
+    "updated_at": "2026-10-21T17:49:49Z",
+    "digest": "sha256:6a2f2d16dbe3e4ea3481c25f2ef7d6faf04608d0618b318c2b1901f2c4f22e60",
+    "workflow_run": {
+      "id": 39640226530,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "research/psc1-pskernel-name-worker-20261021",
+      "head_sha": "34126793178021a9cd1bdb37aa6fe17c0fab41c6"
+    }
+  },
+  "paired_experiment": {
+    "workflow_source_sha": "14ee4a9323e47944e971e1d9c9a191936fb4843e",
+    "run": 39645953379,
+    "job": 119381453525,
+    "conclusion": "success",
+    "complete": true,
+    "protocol_valid": true,
+    "admission_samples": 48,
+    "all_admission_samples_valid": true,
+    "authentic_processes": 16,
+    "controls": [
+      {
+        "source": "baseline",
+        "valid": true,
+        "expected_assertions": 138
+      },
+      {
+        "source": "candidate",
+        "valid": true,
+        "expected_assertions": 138
+      }
+    ],
+    "artifact": {
+      "id": 12366949831,
+      "name": "psc1-paired-performance-39645953379",
+      "size_in_bytes": 9328640,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12366949831",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12366949831/zip",
+      "expired": false,
+      "created_at": "2026-10-21T17:56:59Z",
+      "expires_at": "2026-11-20T17:56:57Z",
+      "updated_at": "2026-10-21T17:56:59Z",
+      "digest": "sha256:952ca5e1bc07dfa22b3335a4dbe72faa902adcbdf5282786105ecf9498c9550d",
+      "workflow_run": {
+        "id": 39645953379,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "research/psc1-pskernel-name-paired-perf-20261021",
+        "head_sha": "14ee4a9323e47944e971e1d9c9a191936fb4843e"
+      }
+    },
+    "report": {
+      "file": "report.json",
+      "bytes": 179310,
+      "sha256": "7b798a94fc56d72b453e922b8afc4488aa70221baeeb15977e1c7c5cd1a8410b"
+    },
+    "summary": {
+      "file": "summary.md",
+      "bytes": 4246,
+      "sha256": "13e6dd5d7d6a0342594e46602ac22ccc3864ae5600ad50ec890081726bc1ebb9"
+    },
+    "only_changed_kernel_file": [
+      {
+        "path": "packages/pskernel-core/src/Ps/KernelCore/Core/Name.lean",
+        "baseline_sha256": "5c4acc7164c0e5e74ce80948d11cf8b82f257c80aa920d2a74a75c04c8f641a9",
+        "candidate_sha256": "15a2e2249a80101fafb825cb60877c969ad572d54ef82866bb7105dff228056d"
+      }
+    ],
+    "scope": "Two measurements per source/entry/fixture; descriptive ABBA means, not a universal or statistical speedup. Runtime independent exact-result assertions retained.",
+    "host_policy": {
+      "seconds": 60,
+      "v8_old_space_mib": 2048,
+      "hard_rss_limit": false,
+      "workers": 1,
+      "path_empty": true
+    },
+    "warm_admission": [
+      {
+        "shape": "chain",
+        "count": 8,
+        "entry": "legacy",
+        "ms": {
+          "baseline": 46.62324383333333,
+          "candidate": 28.204108166666686
+        },
+        "baseline_over_candidate": 1.6530657008483427,
+        "process_rss_kib": {
+          "baseline": 174870,
+          "candidate": 169114
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 35008,
+          "candidate": 30544
+        }
+      },
+      {
+        "shape": "chain",
+        "count": 8,
+        "entry": "dag",
+        "ms": {
+          "baseline": 63.70808883333332,
+          "candidate": 44.94575933333334
+        },
+        "baseline_over_candidate": 1.4174438206917817,
+        "process_rss_kib": {
+          "baseline": 192432,
+          "candidate": 195732
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 35388,
+          "candidate": 30188
+        }
+      },
+      {
+        "shape": "chain",
+        "count": 32,
+        "entry": "legacy",
+        "ms": {
+          "baseline": 158.26363249999997,
+          "candidate": 116.20141174999998
+        },
+        "baseline_over_candidate": 1.3619768479275813,
+        "process_rss_kib": {
+          "baseline": 283000,
+          "candidate": 243142
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 9916,
+          "candidate": 22288
+        }
+      },
+      {
+        "shape": "chain",
+        "count": 32,
+        "entry": "dag",
+        "ms": {
+          "baseline": 229.263173,
+          "candidate": 193.88299424999997
+        },
+        "baseline_over_candidate": 1.1824821144673447,
+        "process_rss_kib": {
+          "baseline": 259338,
+          "candidate": 248218
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 15276,
+          "candidate": 25392
+        }
+      },
+      {
+        "shape": "metadata",
+        "count": 8,
+        "entry": "legacy",
+        "ms": {
+          "baseline": 155.90943216666665,
+          "candidate": 141.7564246666667
+        },
+        "baseline_over_candidate": 1.0998403249325739,
+        "process_rss_kib": {
+          "baseline": 252668,
+          "candidate": 247822
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 62632,
+          "candidate": 59064
+        }
+      },
+      {
+        "shape": "metadata",
+        "count": 8,
+        "entry": "dag",
+        "ms": {
+          "baseline": 142.32318133333337,
+          "candidate": 125.86482533333337
+        },
+        "baseline_over_candidate": 1.1307621565946848,
+        "process_rss_kib": {
+          "baseline": 266652,
+          "candidate": 241088
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 34336,
+          "candidate": 30440
+        }
+      },
+      {
+        "shape": "metadata",
+        "count": 32,
+        "entry": "legacy",
+        "ms": {
+          "baseline": 621.6628704999998,
+          "candidate": 577.19574425
+        },
+        "baseline_over_candidate": 1.077039941290246,
+        "process_rss_kib": {
+          "baseline": 279826,
+          "candidate": 268576
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 19120,
+          "candidate": 29724
+        }
+      },
+      {
+        "shape": "metadata",
+        "count": 32,
+        "entry": "dag",
+        "ms": {
+          "baseline": 562.6253324999999,
+          "candidate": 512.44999875
+        },
+        "baseline_over_candidate": 1.097912642935683,
+        "process_rss_kib": {
+          "baseline": 274868,
+          "candidate": 272798
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": -860976,
+          "candidate": -850344
+        }
+      },
+      {
+        "shape": "binder",
+        "count": 8,
+        "entry": "legacy",
+        "ms": {
+          "baseline": 63.168210750000014,
+          "candidate": 51.81763350000003
+        },
+        "baseline_over_candidate": 1.2190485455110562,
+        "process_rss_kib": {
+          "baseline": 190128,
+          "candidate": 174334
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 31840,
+          "candidate": 39920
+        }
+      },
+      {
+        "shape": "binder",
+        "count": 8,
+        "entry": "dag",
+        "ms": {
+          "baseline": 142.36330350000003,
+          "candidate": 132.91189525000004
+        },
+        "baseline_over_candidate": 1.0711103263723867,
+        "process_rss_kib": {
+          "baseline": 254224,
+          "candidate": 225916
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 36512,
+          "candidate": 44552
+        }
+      },
+      {
+        "shape": "binder",
+        "count": 32,
+        "entry": "legacy",
+        "ms": {
+          "baseline": 224.88199699999996,
+          "candidate": 203.92053249999992
+        },
+        "baseline_over_candidate": 1.102792319356071,
+        "process_rss_kib": {
+          "baseline": 259476,
+          "candidate": 256492
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 20232,
+          "candidate": 20896
+        }
+      },
+      {
+        "shape": "binder",
+        "count": 32,
+        "entry": "dag",
+        "ms": {
+          "baseline": 591.0839300000002,
+          "candidate": 522.4209730000002
+        },
+        "baseline_over_candidate": 1.1314322367375553,
+        "process_rss_kib": {
+          "baseline": 274078,
+          "candidate": 270964
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 64340,
+          "candidate": 45916
+        }
+      }
+    ],
+    "authentic": [
+      {
+        "label": "good",
+        "name": "perf/repeated-subproblem.ndjson",
+        "observations": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "all_four_official_matching_kernel_outcomes": true,
+        "classifications": {
+          "baseline": [
+            "matched_acceptance",
+            "matched_acceptance"
+          ],
+          "candidate": [
+            "matched_acceptance",
+            "matched_acceptance"
+          ]
+        },
+        "mean_elapsed_seconds": {
+          "baseline": 1.6607042914999965,
+          "candidate": 1.598597103000003
+        },
+        "mean_peak_rss_kib": {
+          "baseline": 277770,
+          "candidate": 266012
+        },
+        "baseline_over_candidate_elapsed_ratio": 1.038851057832796
+      },
+      {
+        "label": "good",
+        "name": "perf/church-numerals.ndjson",
+        "observations": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "all_four_official_matching_kernel_outcomes": false,
+        "classifications": {
+          "baseline": [
+            "pskernel_resource_exhausted",
+            "pskernel_resource_exhausted"
+          ],
+          "candidate": [
+            "pskernel_resource_exhausted",
+            "pskernel_resource_exhausted"
+          ]
+        },
+        "mean_elapsed_seconds": null,
+        "mean_peak_rss_kib": null,
+        "baseline_over_candidate_elapsed_ratio": null
+      },
+      {
+        "label": "good",
+        "name": "init-prelude.ndjson",
+        "observations": [
+          8,
+          9,
+          10,
+          11
+        ],
+        "all_four_official_matching_kernel_outcomes": false,
+        "classifications": {
+          "baseline": [
+            "pskernel_timeout",
+            "pskernel_timeout"
+          ],
+          "candidate": [
+            "pskernel_timeout",
+            "pskernel_timeout"
+          ]
+        },
+        "mean_elapsed_seconds": null,
+        "mean_peak_rss_kib": null,
+        "baseline_over_candidate_elapsed_ratio": null
+      },
+      {
+        "label": "bad",
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "observations": [
+          12,
+          13,
+          14,
+          15
+        ],
+        "all_four_official_matching_kernel_outcomes": true,
+        "classifications": {
+          "baseline": [
+            "matched_kernel_rejection",
+            "matched_kernel_rejection"
+          ],
+          "candidate": [
+            "matched_kernel_rejection",
+            "matched_kernel_rejection"
+          ]
+        },
+        "mean_elapsed_seconds": {
+          "baseline": 33.93731762600004,
+          "candidate": 31.2939664525
+        },
+        "mean_peak_rss_kib": {
+          "baseline": 421436,
+          "candidate": 449388
+        },
+        "baseline_over_candidate_elapsed_ratio": 1.0844683967279216
+      }
+    ]
+  },
+  "remaining": [
+    "Name341 full Arena run39640227692 is not terminal at this observation.",
+    "Church remains resourceExhausted at4096; Prelude remains60-second host timeout in both repetitions.",
+    "Whole-operation V1 fallbacks, eager ingress decode and recursive metadata import remain.",
+    "Stuck-projection rejection RSS rises421436 to449388KiB in this paired run; retained heap is mixed.",
+    "No old measurement is relabeled as a2GiB OS-cgroup result.",
+    "This evidence commit changes no kernel and establishes no qualification for its own containing source."
+  ]
+}

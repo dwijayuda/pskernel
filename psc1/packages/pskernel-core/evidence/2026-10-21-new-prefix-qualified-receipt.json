@@ -1,0 +1,424 @@
+{
+  "schema": "pskernel-new-prefix-qualified-evidence-v1",
+  "observed_at_utc": "2026-10-21 18:16:44 UTC",
+  "kernel_source_sha": "7b14affc854e7bc99e4778ac155ae805dd273226",
+  "qualification": "PASS for the documented limited developer/provider scope; full V2 and full corpus remain incomplete",
+  "gates": {
+    "native": "PASS",
+    "portable_source": "PASS",
+    "canonical_ps": "PASS",
+    "generated_js": "PASS",
+    "proof": "PASS",
+    "benchmark": "PASS (collection and correctness; regressions remain)",
+    "arena": "IN PROGRESS",
+    "provider": "PASS"
+  },
+  "runs": [
+    {
+      "id": 39645764955,
+      "name": "PSC1 authentic Arena timeout diagnostics",
+      "status": "in_progress",
+      "conclusion": null,
+      "source_sha": "7b14affc854e7bc99e4778ac155ae805dd273226",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39645764955"
+    },
+    {
+      "id": 39645764921,
+      "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+      "status": "in_progress",
+      "conclusion": null,
+      "source_sha": "7b14affc854e7bc99e4778ac155ae805dd273226",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39645764921"
+    },
+    {
+      "id": 39645765012,
+      "name": "PSC1 PSKernel-Core Expression V2 research",
+      "status": "completed",
+      "conclusion": "success",
+      "source_sha": "7b14affc854e7bc99e4778ac155ae805dd273226",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39645765012"
+    },
+    {
+      "id": 39645764867,
+      "name": "PSC1 PSKernel-Core correctness",
+      "status": "completed",
+      "conclusion": "success",
+      "source_sha": "7b14affc854e7bc99e4778ac155ae805dd273226",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39645764867"
+    },
+    {
+      "id": 39645765038,
+      "name": "PSC1 Expression V2 production integration",
+      "status": "completed",
+      "conclusion": "success",
+      "source_sha": "7b14affc854e7bc99e4778ac155ae805dd273226",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39645765038"
+    }
+  ],
+  "job_sets": [
+    {
+      "run": 39645765038,
+      "jobs": [
+        {
+          "id": 119380794907,
+          "name": "generated-dag-integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119380795456,
+          "name": "native-dag-integration",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run": 39645764867,
+      "jobs": [
+        {
+          "id": 119380794398,
+          "name": "psc1-portability",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119380794896,
+          "name": "native-kernel",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run": 39645765012,
+      "jobs": [
+        {
+          "id": 119380796590,
+          "name": "whnf-subset-regression",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119380797133,
+          "name": "portable-ps-closure",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119380797134,
+          "name": "portable-v2-check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119380797158,
+          "name": "generated-js-full-checker-bridge",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119380797194,
+          "name": "expr-v2-differential",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119380797443,
+          "name": "full-checker-bridge",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "source_closure": {
+    "portable_modules": 182,
+    "canonical_modules": 139,
+    "lean": "leanprover/lean4:v4.35.0",
+    "lean_commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "node": "22",
+    "fuel_default": 4096,
+    "full_kernel_directjs": "UNSUPPORTED"
+  },
+  "focused_markers": {
+    "native": [
+      "PSC1_CACHE_MODE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d",
+      "PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls",
+      "PSC1_INVALID_OCCURRENCE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d",
+      "PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls",
+      "PSC1_INVALID_RECURSOR_OCCURRENCE: PASS invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls",
+      "PSC1_V2_DAG_MUTUAL_ADMISSION: PASS",
+      "PSC1_V2_DAG_OFFICIAL_MUTUAL_ADMISSION: PASS",
+      "PSC1_V2_DAG_MUTUAL_FRESH_MEMBER: PASS",
+      "PSC1_V2_DAG_BINDER_SPINE: PASS",
+      "PSC1_V2_DAG_BINDER_SPINE_BUDGET: PASS",
+      "PSC1_V2_DAG_BINDER_SPINE_CACHE: PASS",
+      "PSC1_V2_DAG_BINDER_SPINE_FALLBACK: PASS",
+      "PSC1_V2_DAG_DEFEQ_PREFIX: PASS",
+      "PSC1_V2_DAG_CHEAP_CORE_POLICY: PASS",
+      "PSC1_V2_DAG_CHEAP_PROJECTION_POLICY: PASS",
+      "PSC1_V2_DAG_DEFEQ_PREFIX_GUARDS: PASS",
+      "PSC1_V2_DAG_REGRESSION: PASS",
+      "PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3",
+      "PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7",
+      "PSC1_CANONICAL_PROVIDER_OFFICIAL: PASS cases=5 batchDeclarations=4 doCheck=true",
+      "PSC1_CANONICAL_PROVIDER: PASS mode=native cases=24 PATH=empty cwd=detached"
+    ],
+    "generated": [
+      "PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS 9 invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls",
+      "PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3",
+      "PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=605",
+      "PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached",
+      "PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached"
+    ],
+    "canonical": [
+      "PSC1_SOURCE_PROFILE: PASS (all-portable; 182 portable modules across 2 source roots)",
+      "PSKERNEL_CANONICAL_PS_SOURCES: PASS modules=139",
+      "PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS 9 invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls",
+      "PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3",
+      "PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=605",
+      "PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached",
+      "PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached",
+      "PSC1_DIRECTJS_COMPLETE_KERNEL: UNSUPPORTED (explicit emitter capability limit)"
+    ]
+  },
+  "generated_prefix": {
+    "new_owners": 24,
+    "recursors": 7,
+    "direct_cases": 6,
+    "private_ids": 3,
+    "official_families": 5,
+    "official_positive": 6,
+    "official_negative": 7,
+    "generated_assertions": 605,
+    "proof_statements": 21
+  },
+  "manifests": {
+    "native": [
+      {
+        "schema": "pskernel-core-artifacts-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "7b14affc854e7bc99e4778ac155ae805dd273226",
+        "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/7b14affc854e7bc99e4778ac155ae805dd273226",
+        "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39645765038",
+        "runAttempt": "1",
+        "kind": "native",
+        "leanToolchain": "leanprover/lean4:v4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": null,
+        "node": "v22.23.3",
+        "checkerFuelDefault": 4096,
+        "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+        "files": [
+          {
+            "path": ".lake/build/bin/psc1_kernel_provider",
+            "bytes": 119517240,
+            "sha256": "2c6faf2156717808da866f45242f1759af1651308e329945d56f8433f32bd348"
+          },
+          {
+            "path": "host/kernel-provider/KernelProviderMain.lean",
+            "bytes": 15915,
+            "sha256": "4904143dbcbbda5d277f51950abb16e075f34194c3f0d53b2a00f2f80db9839c"
+          },
+          {
+            "path": "dist/expr-v2/native-provider-linux.tar.gz",
+            "bytes": 33253620,
+            "sha256": "6dce893e8afd8920f615742748bab513d2c9d59d5de4b6582fffd3ba8caf0661"
+          }
+        ]
+      }
+    ],
+    "generated": [
+      {
+        "schema": "pskernel-core-artifacts-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "7b14affc854e7bc99e4778ac155ae805dd273226",
+        "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/7b14affc854e7bc99e4778ac155ae805dd273226",
+        "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39645765038",
+        "runAttempt": "1",
+        "kind": "lean-generated-js",
+        "leanToolchain": "leanprover/lean4:v4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "checkerFuelDefault": 4096,
+        "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+        "files": [
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.js",
+            "bytes": 9913383,
+            "sha256": "b14b37870d78356c56b208c292847809748a90538e145ba1c53a5a2d31b24849"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.ts",
+            "bytes": 9086302,
+            "sha256": "cad6e2933681bea732fdc13e190c0605c302a014dda2381ec71edea97d357326"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+            "bytes": 362537,
+            "sha256": "f21480b3ba55ecd7d38fdccfb1a527d2ffd2f584739ee4603330fc8a3aa51594"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/kernel.js.map",
+            "bytes": 8054997,
+            "sha256": "a109289ae82ce53de0d4e2511b1cf24a442ac103e45ca922ee1fe1d1fe6887a7"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+            "bytes": 12759,
+            "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+            "bytes": 5462,
+            "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/package.json",
+            "bytes": 42,
+            "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+          },
+          {
+            "path": "dist/expr-v2/integration/provider/README.md",
+            "bytes": 11813,
+            "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+          }
+        ]
+      }
+    ],
+    "canonical": [
+      {
+        "schema": "pskernel-core-artifacts-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "7b14affc854e7bc99e4778ac155ae805dd273226",
+        "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/7b14affc854e7bc99e4778ac155ae805dd273226",
+        "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39645764867",
+        "runAttempt": "1",
+        "kind": "canonical-ps-generated-js",
+        "leanToolchain": "leanprover/lean4:v4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "checkerFuelDefault": 4096,
+        "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+        "files": [
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.js",
+            "bytes": 9913390,
+            "sha256": "b88eeda0109392d7389299e6d1e063d49c4d0f34b53fcb7964a39d50be1fc92f"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.ts",
+            "bytes": 9086302,
+            "sha256": "cad6e2933681bea732fdc13e190c0605c302a014dda2381ec71edea97d357326"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.d.ts",
+            "bytes": 362537,
+            "sha256": "f21480b3ba55ecd7d38fdccfb1a527d2ffd2f584739ee4603330fc8a3aa51594"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/pskernel-core.js.map",
+            "bytes": 8055011,
+            "sha256": "611dde3a455cb66feb43cabbdb1ea8b589143f1ba49cd546e47f7cc945ce9041"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/scripts/pskernel-canonical-provider.mjs",
+            "bytes": 12759,
+            "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/npm-runtime/canonical-admissions-wire.mjs",
+            "bytes": 5462,
+            "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/package.json",
+            "bytes": 42,
+            "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/canonical-source.tar.gz",
+            "bytes": 117957,
+            "sha256": "aa7504e56df41f6f357ce982531afaf093f0490783f3add39fb84b1e61d193ce"
+          },
+          {
+            "path": "dist/pskernel-selfhost/provider/README.md",
+            "bytes": 11813,
+            "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 12370435353,
+      "name": "psc1-v2-dag-generated-js",
+      "size_in_bytes": 3396312,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12370435353",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12370435353/zip",
+      "expired": false,
+      "created_at": "2026-10-21T18:13:07Z",
+      "expires_at": "2026-11-20T18:13:05Z",
+      "updated_at": "2026-10-21T18:13:07Z",
+      "digest": "sha256:694d03166dcdeaa36bea445c963cea2df861e26f6d18d714013a20c6d9730a67",
+      "workflow_run": {
+        "id": 39645765038,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+        "head_sha": "7b14affc854e7bc99e4778ac155ae805dd273226"
+      }
+    },
+    {
+      "id": 12368370405,
+      "name": "psc1-v2-dag-native",
+      "size_in_bytes": 33171018,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12368370405",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12368370405/zip",
+      "expired": false,
+      "created_at": "2026-10-21T17:44:32Z",
+      "expires_at": "2026-11-20T17:44:30Z",
+      "updated_at": "2026-10-21T17:44:32Z",
+      "digest": "sha256:26acd2121aa9e7cac84a5d3169d847081ed902a060446b3e5ae2ca19e065fb9f",
+      "workflow_run": {
+        "id": 39645765038,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+        "head_sha": "7b14affc854e7bc99e4778ac155ae805dd273226"
+      }
+    },
+    {
+      "id": 12369860303,
+      "name": "psc1-canonical-kernel-qualification",
+      "size_in_bytes": 1910801,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12369860303",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12369860303/zip",
+      "expired": false,
+      "created_at": "2026-10-21T18:12:51Z",
+      "expires_at": "2026-11-20T18:12:50Z",
+      "updated_at": "2026-10-21T18:12:51Z",
+      "digest": "sha256:fa8dd4aa3562f0a5c2813bb02b7b94b0af0dcf8a6124de9ff80ee1d4eea7bc20",
+      "workflow_run": {
+        "id": 39645764867,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+        "head_sha": "7b14affc854e7bc99e4778ac155ae805dd273226"
+      }
+    }
+  ],
+  "limitations": [
+    "V1 remains default and separately selectable reference; four whole-operation fallback families and eager decode remain.",
+    "Initial sessions do not yet seed all preexisting declaration owners; T03b remains a separate unqualified draft.",
+    "No global kernel soundness proof follows from local lemmas and tests.",
+    "The 7b14 Arena comparison and authentic diagnostic jobs were in progress at observation; their result cannot be inherited from earlier revisions.",
+    "Historical Arena uses a V8 old-space cap, not a verified OS RSS cap; cgroup controls qualified separately at275833e70351684b10256ec922aa90d13e813159.",
+    "Indexed-cache candidate is not integrated; previous paired admission regression is unresolved pending explicit-worker measurements."
+  ]
+}

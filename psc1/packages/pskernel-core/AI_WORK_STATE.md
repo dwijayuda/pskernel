@@ -1,3 +1,113 @@
+# Current integration checkpoint — qualified base and measured name-worker promotion
+
+Observed: 2026-10-21T18:16:44Z.
+Branch: `integration/psc1-pskernel-expr-v2-lean435-20261021`.
+This containing source integrates the exact name-comparison workers and tests from
+`34126793178021a9cd1bdb37aa6fe17c0fab41c6` into the qualified new-prefix parent
+`7b14affc854e7bc99e4778ac155ae805dd273226`, preserving both source histories.
+Its own native, portable, canonical, generated, proof, benchmark and provider
+qualification is **NOT RUN at commit creation**. A push must qualify this exact
+combined revision; neither parent result is inherited.
+
+## Latest exact source evidence
+
+| Exact source | Native | Portable .lean | Canonical .ps | Generated JS | Proof | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 7b14affc854e7bc99e4778ac155ae805dd273226 | PASS | PASS | PASS | PASS | PASS | PASS collection; mixed performance | IN PROGRESS | PASS |
+| 34126793178021a9cd1bdb37aa6fe17c0fab41c6 | PASS | PASS | PASS | PASS | PASS | PASS paired admission experiment | FAIL: all193,17timeouts,1fuel,1unsupported | PASS |
+| Containing combined source | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+7b14's full [integration39645765038](https://github.com/dwijayuda/pskernel/actions/runs/39645765038),
+[correctness39645764867](https://github.com/dwijayuda/pskernel/actions/runs/39645764867)
+and [research39645765012](https://github.com/dwijayuda/pskernel/actions/runs/39645765012)
+are terminal SUCCESS, all10jobs. Native119380795456/generated119380794907,
+native119380794896/canonical119380794398 and all6research jobs are green.
+The complete182-module portable profile,139-module canonical graph, real
+PSC1/TypeScript7.0.2 outputs, detached empty-PATH execution, native24provider
+cases and both JS routes'24CLI+8API cases passed. Official provider reference
+checks five cases, including a real four-declaration batch.
+New-prefix controls passed24owners/7recursors/6direct cases/3private IDs,
+5official families/6positive/7negative controls and605generated assertions on
+each JS route. All21 recursor/local publication proof statements passed.
+Both frozen-parent defect sentinels, invalid-recursive-occurrence controls,
+280-case mutual admission, fresh per-member budgets, scanner, binder-spine,
+ordered DefEq and retained semantic gates remain present.
+
+See `evidence/2026-10-21-new-prefix-qualified-receipt.json` for exact job URLs,
+terminal outcomes, source-specific markers and all native/canonical/JS artifact
+digests. This qualifies the documented limited developer/provider scope (A);
+it does not qualify full V2 replacement (B) or full Lean Arena compatibility (C).
+7b14 Arena39645764921 and authentic profiles39645764955 were still active at
+this observation. Historical “pending” sections below are retained receipts.
+
+## Change and measured reason
+
+Only `Core/Name.lean` changes production semantics implementation: explicit
+argument string/name comparison workers avoid constructing recursive curried
+closures before the actual arguments are supplied. Public curried entry points,
+character operations, raw-position behavior, arbitrary Nat fuel, name equality,
+hash-collision handling and partial application ABI retain their exact results.
+Eight source equations quantify over all raw strings/positions/fuel and names;
+proof-file dependencies remain within propext/Classical.choice/Quot.sound.
+No kernel fuel, admission policy, cache policy, hash authority or trusted runtime
+path changes.
+
+The regression files and existing integration/correctness/lake definitions add
+the exact qualified341 tests:24576 raw comparisons,64 complete string pairs,
+16raw controls,24long strings,400name pairs,4depth1024 names,10real checked
+declarations,10official positives/4negatives and50237assertions per generated
+route, including7partial-application executions. Existing7b14 new-prefix and
+parent-regression gates are preserved rather than replacing whole workflows
+with older research versions.
+
+The pinned [paired experiment39645953379/job119381453525](https://github.com/dwijayuda/pskernel/actions/runs/39645953379/job/119381453525)
+completed48correct public-admission samples,16authentic-case observations and
+two138-case transport control suites on one AMD EPYC7763 runner in sequential
+ABBA order, comparing f9e9b20f... with34126793.... The six DAG warm batch means
+fell6.64%–29.45% (1.07×–1.42× speed ratios). Full report and summary are preserved
+at [b3ff5e90c8113303c11c88d809ae4ffb10364449](https://github.com/dwijayuda/pskernel/tree/b3ff5e90c8113303c11c88d809ae4ffb10364449/psc1/packages/pskernel-core/evidence);
+the summary and qualification receipt are included here.
+This is a descriptive two-observation comparison per source, not a statistical
+or whole-kernel speedup claim. Retained heap is mixed. DAG chain8 RSS increased
+192432→195732KiB; the authentic stuck-elimination rejection's RSS increased
+421436→449388KiB despite shorter runtime33.94→31.29s. Church still exhausted
+fuel4096 and Prelude still timed out60s. That experiment used2048MiB V8
+old-space, not an OS RSS cap; do not describe it as a hard2GiB host test.
+
+## Current corpus and next executable work
+
+Exact334 source's all193 Arena39640766732 now finished FAIL with173matches
+(105accepted,60kernel rejection,1metadata rejection,7transport rejection),
+2separately classified unsafe/partial safety-contract agreements,17host timeouts,
+1Church fuel exhaustion,0unsupported. Exact341 Arena39640227692 finished FAIL:
+172matches (105accepted,59kernel,1metadata,7transport),2safety,17timeouts,
+1fuel,1unsupported. The sole classification difference is the already repaired
+rec-missing-ih occurrence; this integration retains that repair. The official
+corpus remains122accepted/71rejected with authenticated original body bytes
+and adapted historical metadata headers, not a fresh native4.35 export.
+Matching outcomes include transport/metadata refusals, not just admitted proofs.
+
+Next, observe this exact combined push through terminal integration/correctness/
+research and all193 outcomes. Keep the checked new-prefix carrier architecture.
+T03b initial-session owners, coherent Quot-owner port and fallback retirement
+remain unfinished. Four whole-operation fallback families, eager decode and
+recursive metadata import remain; V1 stays the default/reference. The indexed
+cache is held separately:5de's paired metadata8/32 admission regressed39.9%/27.4%;
+384's explicit-worker repair must pass its own paired performance test before
+promotion. Its native/generated/research gates are now green; canonical was
+still at the final capability step when observed. A bounded host-only Church
+DefEq trace is being prepared against pinned369bee58 to identify the actual
+fuel-exhaustion path; no unexecuted trace is evidence.
+
+Hard cgroup controls at275833e70351684b10256ec922aa90d13e813159 passed70parser,
+6live and24progress controls, including touched-buffer OOM and descendant
+cleanup, but a full authenticated193-case production2GiB run remains required.
+Full-kernel DirectJS remains explicitly UNSUPPORTED. No global soundness theorem,
+full V2 completion or full compatibility is claimed. No merge to main or package
+publication is authorized by this checkpoint.
+
+---
+
 # Current T03a candidate — native preflight PASS; full qualification next
 
 Observed: 2026-10-22 Asia/Jakarta (2026-10-21T17:37:37Z).

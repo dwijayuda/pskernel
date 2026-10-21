@@ -27,9 +27,12 @@ offers a concrete transport boundary that enforces that discipline.
 `Checker/ExprV2/DefEq.lean` owns recursive DefEq callbacks. Its ordered path is
 entry fuel/depth guards, exact syntax/success-cache checks, the existing quick and
 binder-spine prefix, mandatory cheap core normalization, proof irrelevance, then
-the ordered natural-number prefix of lazy delta. The callbacks use the exact
-predecessor fuel chosen by the owner. The Nat lazy stage retains its separate
+the ordered natural-number prefix and the complete definition-selection/lazy-delta
+loop. The callbacks use the exact predecessor fuel chosen by the owner; the loop
+spends only its own recursive bound. The Nat lazy stage retains its separate
 entry-fuel guard; predecessor comparison does not add another depth entry.
+Unfold and failed-argument-shortcut caches belong to that owner. A failed shortcut
+only skips the same argument retry and still performs ordered unfolding.
 
 `CheckCore.lean` is the shared inference/checking worker. Checked and
 inference-only judgments have separate caches. Proof irrelevance may infer a
@@ -54,7 +57,7 @@ the complete original operation's resources and failure semantics.
 | --- | --- |
 | `API/Dag.lean: psKernelDagCheckTerminalOrOriginal` | General checking/inference outside the supported owning DAG rules, including missing owning external type/recursor references |
 | `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including general recursor/iota/Quot paths |
-| `API/Dag.lean: psKernelDagIsDefEq` | Definition selection, lazy projection/delta continuation, final eta/congruence and other unsupported DefEq rules |
+| `API/Dag.lean: psKernelDagIsDefEq` | Residual lazy projection, full-shape/final eta/congruence and unsupported descendant callbacks; definition selection and the ordered lazy-delta loop now have a DAG path |
 | `API/DagAdmission.lean: psKernelDagAdmitDeclaration` | Inductive construction/admission and declaration cases not handled by direct admission |
 
 Before these sites run, `psKernelV1RunDag` still decodes the validated arena once.
@@ -79,7 +82,9 @@ source, `.d.ts`, source maps and their referenced sources. Artifact hashes bind
 files to the checkout and run; they never justify a kernel judgment.
 
 Local proofs cover selected metadata, cache scope, scanner equivalence and exact
-entry/resource/owner facts. The new inference-cache equivalence and Nat entry/owner
+entry/resource/owner facts. Four equality theorems and fifteen fuel-worker
+function equivalences qualify delayed closure construction at e015; this is a
+local refinement result, not a global soundness theorem. The new inference-cache equivalence and Nat entry/owner
 lemmas are audited by the same native proof gate. Finite matrices do not prove
 global type safety, algorithmic equivalence or semantic soundness of the whole
 kernel/compiler/runtime pipeline.

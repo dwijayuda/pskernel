@@ -9,6 +9,154 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 08:12 UTC — exact provider checkpoint green; ordered DAG lazy delta enters qualification
+
+**Last fully qualified native/portable/generated developer checkpoint:**
+`e015839e0cdf29b1e4f2d4a750fed8956c0afe17`.
+Both jobs in [integration 39565480601](https://github.com/dwijayuda/pskernel/actions/runs/39565480601),
+both jobs in [correctness 39565480292](https://github.com/dwijayuda/pskernel/actions/runs/39565480292),
+and all six jobs in [research 39565480417](https://github.com/dwijayuda/pskernel/actions/runs/39565480417)
+are terminal **PASS**. This supersedes the pending allocation-proof entries below.
+The branch is now advancing through the ordered lazy-delta implementation
+`6cc04d1583d512603428d2796824d7794156412e` and this evidence update;
+that successor must earn its own exact-SHA qualification.
+
+| Exact source | Native | Portable source | Canonical .ps | Generated JS | Proof | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `e015839e0cdf29b1e4f2d4a750fed8956c0afe17` | PASS | PASS | PASS source + runtime | PASS both routes | PASS | PASS selected workloads; regressions below | IN PROGRESS | PASS native + both JS routes |
+| `f483e310efdda9dfcca47d42a731540dfe478aba` | FAIL new equality proof script | PASS research closure | PASS source + runtime | PASS | FAIL elaboration; corrected at e015 | Native skipped after proof failure | IN PROGRESS | Native skipped after proof failure |
+| Containing ordered lazy-delta successor | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+### What actually passed at e015
+
+Native [job 119106602099](https://github.com/dwijayuda/pskernel/actions/runs/39565480601/job/119106602099)
+checked all four expression-equality equivalence theorems and all fifteen
+fuel-worker equivalences. The frozen predecessor definitions and theorem statements
+were unchanged by the proof correction. The dependency audit stayed within the
+existing permitted `propext`, `Classical.choice`, and `Quot.sound` set; these
+are local proof-file dependencies, not new portable runtime axioms. The native
+800-comparison equality regression and 21 hostile depth-64 shared-expression
+controls passed. Both generated routes passed the corresponding hostile controls.
+
+All prior mandatory controls also passed: the 280-case mutual-definition matrix
+and eight official mutual fixtures, fresh-member owner and batch atomicity checks,
+binder/prefix/error-order checks, 1,008 inference comparisons, 1,350 proof-irrelevance
+comparisons, 1,350 Nat comparisons plus 192 direct-stage comparisons and 14 official
+Nat decisions with one invalid primitive. Native provider checks passed five
+official fixtures and 24 detached CLI cases. The
+[generated job 119106602375](https://github.com/dwijayuda/pskernel/actions/runs/39565480601/job/119106602375)
+and [canonical job 119106601595](https://github.com/dwijayuda/pskernel/actions/runs/39565480292/job/119106601595)
+each passed 24 CLI and eight private-byte-buffer API cases with PATH empty.
+The entire canonical source closure was reconstructed, independently checked and
+compiled. Later packaging and DirectJS-capability-report steps also finished;
+full-kernel DirectJS remains unsupported.
+
+**Gate A is achieved for the documented scoped developer provider at e015.**
+The provider remains V1-based, starts from a fresh empty checked environment and
+supports the canonical-admissions-v2 contract in [PROVIDER.md](PROVIDER.md).
+This does not establish full Lean compatibility or a complete DAG-native V2.
+Gates **B and C remain open**. The new successor is not qualified by inheritance.
+
+### Reproducible e015 artifacts
+
+| Artifact | Download | Uploaded ZIP SHA-256 |
+| --- | --- | --- |
+| Native Linux provider and manifest | [12329830825](https://github.com/dwijayuda/pskernel/actions/runs/39565480601/artifacts/12329830825) | `56cd991ad2f5d9572cab9ec9ca614d106e9157cbd2b3bd1006d8c91f1c7af2c6` |
+| Lean-derived JS, TS, declarations, map and provider | [12330606437](https://github.com/dwijayuda/pskernel/actions/runs/39565480601/artifacts/12330606437) | `aec4002f33b6b6427d9ffd85cc864265d68561a1ed3f29788aa43522e5bb29fb` |
+| Canonical source closure and generated provider | [12330486620](https://github.com/dwijayuda/pskernel/actions/runs/39565480292/artifacts/12330486620) | `092d7860660c5727b75df64477a1edbd53e63bfd83721075e1465030555e588d` |
+
+Native executable SHA-256:
+`e11ae0d9ec43eb75f4302997e66decccafb0e785cc57e42daa07d73c1e208c3c`;
+executable-preserving tar:
+`c971bb2cbdcde62e3afe675a44abfb039b3f25cfaf262c23cfe1582bfd3298c8`.
+Lean-derived JS:
+`76c9fbf040b5df1f5a838a3f5637bd3c5b06b76bd0890399590020d089070f17`;
+canonical-derived JS:
+`1f11b5e27de7cb5b468422acda3f16444de4ba5ee22754a459e84178980f2462`;
+canonical source tar:
+`54c7a94b604e38a6ddaf7d7ad0cb0c6f60bceeb76e1fd04fc2abd6d08cccc8f9`.
+Both generated routes have identical TS
+`757a7e606516182ae32d327d808128442b2cdca8e7fcf583a88342469166533b`
+and declarations
+`155b391e4b1b9070e2450e4b76c43c22b24c0f0d86eef6440b4ecd4969c01af2`.
+Their maps are respectively
+`16c9321f257e238bb01b42c592c81797f180d9c552f35cf0099f19145180bb0d`
+and `bf3c3ad2f076a37754cfe65e10288a8a0bdd2fcf50ac2c3cb1e7b233216eeac8`.
+All manifests bind e015, Lean 4.35.0, TypeScript 7.0.2 and Node 22.23.3.
+Artifacts retain the existing 30-day policy.
+
+### Ordered lazy-delta implementation now submitted
+
+The new `DefEq/Args.lean`, `DeltaStep.lean`, and `LazyDelta.lean` integrate into
+the one DefEq owner after the Nat prefix. Definition selection honors the admitted
+body index, exact universe arity, reducibility hints, one-sided projection priority,
+right-to-left same-definition argument comparison, and left-before-right unfolding.
+A missing selected owning reference declines the whole operation; an unsuccessful
+shortcut is never a negative kernel judgment. The lazy loop spends only its own
+predecessor fuel and keeps the owner's DefEq/WHNF callbacks fixed.
+
+`CheckState.lean` adds operation-owned unfold and failed-argument-shortcut caches.
+Every state setter preserves them and local-scope exit restores the parent caches.
+Failed pairs only skip an already failed shortcut; they do not authorize equality,
+inequality or transitive closure. New local proof obligations cover scope/cache
+preservation and zero-fuel precedence.
+
+The mandatory native/generated/canonical matrices are 1,800 owner comparisons,
+1,024 lazy-loop comparisons and 128 individual-step comparisons, plus 18 official
+positive and four official invalid fixtures. They also test collision checking,
+fresh/closed cache eligibility, original-pair publication, low-budget callback
+ownership, failure order, missing selected body references and atomic bad-body
+refusal. These are required outputs, **not observed passes** at this update.
+
+The four public whole-operation fallback sites and boundary decoding remain.
+The source-reviewed full-WHNF/full-shape follow-up is stored separately at
+`403e5bb121085cef3579718f58625f4d5eb84e8c`, not promoted or tested.
+It must be applied only after the lazy-delta checkpoint qualifies.
+
+### Performance and corpus status
+
+At e015 all 114 native observations and 128 generated public-operation observations
+were correct. Same-source V1/DAG warm ratios were **0.523–6.737x native** and
+**0.677–6.102x generated**. Generated projection-field WHNF and several complete
+admission workloads regress. The six safe-admission warm ratios now range
+**0.556–2.061x**; historical 8–16x ratios do not apply to this source. The allocation
+fix improves helpers shared by V1 and DAG, so old-versus-new timing must not be
+conflated with same-source V1/DAG comparisons. Full cold, construction, RSS and
+retained-heap receipts are appended to [PERFORMANCE_2026-10-21.md](PERFORMANCE_2026-10-21.md).
+
+The e015 full [Arena run 39565480377](https://github.com/dwijayuda/pskernel/actions/runs/39565480377)
+and runtime-equivalent f483 [run 39564831733](https://github.com/dwijayuda/pskernel/actions/runs/39564831733)
+remain in progress. The f483 authentic profile
+[39564831855](https://github.com/dwijayuda/pskernel/actions/runs/39564831855/job/119104504017)
+is terminal **PASS collection**. Of its four authentic diagnostic cases,
+`bugs/proj-of-stuck-prop.ndjson` now completes with the official rejection in
+both unprofiled and profiled runs, under unchanged limits. Repeated-subproblem,
+church-numerals and init-prelude still time out in both runs. This establishes one
+previously timed-out whole-checker rejection at f483, not a full-corpus pass or an
+e015 result by inheritance. Repeated-subproblem's V8 profile identifies
+`psKernelExprHasFVar` as a major hot function. Diagnostic artifact
+[12330238456](https://github.com/dwijayuda/pskernel/actions/runs/39564831855/artifacts/12330238456),
+ZIP SHA-256 `d72ec722055e6f52ef5e8d6af1b53ab5b18c7355d1384536124033bd7f128322`.
+No full-corpus timeout total is claimed before the comparison jobs terminate. The last terminal
+full-corpus result is still 854bdb9: 193 records = 167 matching outcomes, two
+safety-contract agreements and 24 host timeouts. Its matching outcomes include
+103 acceptances, 56 kernel rejections, one metadata rejection and seven transport
+rejections. Default fuel 4096 and the 60-second / 2-GiB host bounds are unchanged.
+
+**Next critical path:** finish exact-source lazy-delta native, authentic PSC1,
+canonical and generated gates; diagnose actual failures without weakening tests.
+Then promote the reviewed full-shape stage, implement remaining projection/final
+rules and recursor/iota dependencies, and retire each fallback only after parity.
+Inspect the pending authentic Arena results before choosing another performance
+change. A diagnostic trace of logical trampoline calls is being prepared separately;
+it cannot qualify a kernel decision or supply uninstrumented performance timings.
+
+Tool limitation: an interrupted analysis worker could not be resumed because
+`collaboration.followup_task` returned `agent thread limit reached`. Its
+untransferred diagnostic draft is not a committed deliverable or a test result.
+The root continues repository work through connected GitHub tools and Linux
+Actions; no local checkout or local kernel execution was substituted.
+
 ## 2026-10-21 07:56 UTC — allocation proof normalization correction
 
 At candidate `f483e310efdda9dfcca47d42a731540dfe478aba`,

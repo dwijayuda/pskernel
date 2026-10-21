@@ -1,5 +1,95 @@
 # PSKernel-Core performance receipts — 2026-10-21
 
+## 2026-10-21 08:12 UTC — qualified allocation change at e015
+
+Source: **`e015839e0cdf29b1e4f2d4a750fed8956c0afe17`**.
+Native [119106602099](https://github.com/dwijayuda/pskernel/actions/runs/39565480601/job/119106602099)
+and generated [119106602375](https://github.com/dwijayuda/pskernel/actions/runs/39565480601/job/119106602375)
+are terminal PASS. The canonical-source and provider gates also passed.
+These are same-source, same-runner V1-versus-transitional-DAG comparisons.
+Warm means runtime warm-up; every public operation retains fresh semantic state.
+Input construction is reported separately, and admission assertions are separate
+from the measured admission interval. All resource policies are unchanged.
+
+The change delays recursive closure construction in the two expression equalities
+and fifteen fuel-indexed workers. All four equality and fifteen worker-equivalence
+theorems passed the native proof gate. Both variants use those changed helpers;
+the old 8–16x DAG admission ratios are historical and do not describe this source.
+Comparing timings across earlier Actions machines would not be a controlled
+before/after experiment.
+
+### Complete native operations
+
+All 114 observations over 19 workloads were correct. Mean V1/DAG warm ratios range
+0.523–6.737x. For fn-collision depth32, 40 calls take 14.536ms V1 and 27.806ms DAG
+(official Lean 7.310ms): a real DAG regression. For fn-shared depth128, ten calls
+take 15.811ms V1 and 2.347ms DAG (official Lean 0.505ms). Observed worker peak RSS
+ranges 68,644–71,352KiB. These selected results are not a whole-kernel claim.
+
+### Complete generated operations
+
+All 128 observations over 32 workloads were correct. Mean V1/DAG warm ratios range
+0.677–6.102x. Times below are milliseconds for the logged call count; RSS is the
+mean of isolated worker peak observations, not retained-heap size.
+
+| Operation / shape / depth | Calls | V1 warm | DAG warm | V1 cold | DAG cold | V1 / DAG construction | V1 / DAG peak RSS KiB |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| whnf:projection-field:8:1 | 3 | 22.575 | 33.356 | 15.684 | 20.880 | 0.061 / 3.313 | 137026 / 138102 |
+| whnf:projection-field:32:1 | 1 | 20.097 | 21.392 | 22.416 | 32.561 | 0.098 / 3.944 | 155716 / 164242 |
+| whnf:projection-field:96:1 | 1 | 57.462 | 73.275 | 67.804 | 89.892 | 0.207 / 6.794 | 210268 / 208218 |
+| whnf:fn-unique:128:1 | 1 | 863.352 | 499.426 | 1000.717 | 560.044 | 1.681 / 60.831 | 234324 / 233400 |
+| whnf:fn-collision:128:1 | 1 | 2531.296 | 2204.804 | 2589.195 | 2187.865 | 1.760 / 60.985 | 247216 / 235244 |
+
+The three projection-field workloads regress. DAG construction for the two
+depth128 function workloads is roughly 35–36x the recursive input construction.
+Retained-heap deltas are also mixed: fn-unique128 averages 37,976B V1 / 48,808B DAG;
+fn-collision128 31,604B / 57,624B. GC deltas are observations, not exact ownership
+sizes or a promise of monotonic retained memory.
+
+### Complete safe-definition admission
+
+All 24 observations across six workloads passed exact admitted-environment and
+negative type-mismatch controls. Every batch starts from an independent empty
+session. The untimed DAG dispatcher diagnostics confirm the selected direct path
+without instrumenting the timed run.
+
+| Shape / declarations | Calls | V1 warm ms | DAG warm ms | V1/DAG | V1 cold ms | DAG cold ms | V1 / DAG construction ms | V1 / DAG peak RSS KiB | V1 / DAG retained heap B |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
+| chain:8 | 3 | 85.732 | 99.117 | 0.865x | 41.271 | 49.003 | 0.097 / 8.175 | 166054 / 167104 | 35136 / 57328 |
+| chain:32 | 2 | 185.943 | 243.646 | 0.763x | 119.377 | 155.104 | 0.200 / 51.672 | 211934 / 226034 | 6432 / 19592 |
+| metadata:8 | 3 | 287.179 | 154.935 | 1.854x | 133.091 | 66.115 | 0.277 / 17.815 | 213926 / 187922 | 63632 / 25372 |
+| metadata:32 | 2 | 768.408 | 372.819 | 2.061x | 436.418 | 227.771 | 0.776 / 76.831 | 225022 / 224804 | 16388 / 30980 |
+| binder:8 | 2 | 79.763 | 143.357 | 0.556x | 64.239 | 96.522 | 0.154 / 13.050 | 166922 / 204758 | 31800 / 31816 |
+| binder:32 | 1 | 141.080 | 244.794 | 0.576x | 185.822 | 297.965 | 0.401 / 51.790 | 254060 / 229624 | 20344 / 46696 |
+
+Chain and binder admission are slower through the transitional DAG path at this
+source. Metadata admission is faster, while metadata32 construction is much more
+expensive (0.776ms V1 / 76.831ms DAG). V1 remains the production provider/default.
+This evidence does not justify switching a partially migrated V2 to the default
+or asserting a generally improved memory contract.
+
+Raw native artifact [12329830825](https://github.com/dwijayuda/pskernel/actions/runs/39565480601/artifacts/12329830825),
+ZIP SHA-256 `56cd991ad2f5d9572cab9ec9ca614d106e9157cbd2b3bd1006d8c91f1c7af2c6`.
+Raw generated artifact [12330606437](https://github.com/dwijayuda/pskernel/actions/runs/39565480601/artifacts/12330606437),
+ZIP SHA-256 `aec4002f33b6b6427d9ffd85cc864265d68561a1ed3f29788aa43522e5bb29fb`.
+
+Full Arena e015 run39565480377 and runtime-equivalent f483 run39564831733 are still
+in progress at this update. Authentic four-case profile39564831855 has completed at f483: repeated-subproblem,
+church-numerals and init-prelude still time out in both unprofiled and V8-profiled
+runs, while bugs/proj-of-stuck-prop now completes with the expected rejection in
+both runs. Sampled VmHWM lower bounds in the profiled processes are respectively
+290,456 / 557,588 / 1,326,848 / 374,464KiB. Admission-entry times were respectively
+274.016 / 280.535 / 3,050.367 / 542.081ms. These are progress/diagnostic observations,
+not total completion latency, and a censored timeout has no numeric speedup.
+The first case's hot JS functions include psKernelExprHasFVar; logical call-site
+tracing is the next diagnostic step. Full-corpus counts await terminal comparison.
+Profile artifact12330238456 has ZIP SHA-256
+`d72ec722055e6f52ef5e8d6af1b53ab5b18c7355d1384536124033bd7f128322`.
+This new correct whole-checker rejection is source-bound to f483; proof-only e015
+has an identical runtime source but must retain its own qualification receipts. Kernel fuel remains4096 and host bounds60s/2GiB.
+
+## Earlier immutable measurement receipts
+
 ## Exact measured source and scope
 
 This report freezes measurements at **`e1b4deb214c3088e64a18f8b15148c7a15be2924`**,

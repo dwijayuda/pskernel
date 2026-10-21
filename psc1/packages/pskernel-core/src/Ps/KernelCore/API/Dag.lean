@@ -22,7 +22,11 @@ supported unsafe/partial mutual definitions attempt direct admission. Original s
 header checking, inference-only proposition testing, body checking and terminal
 comparison share one fresh DAG checking state with separate inference caches.
 Mutual members use fresh private checking owners and publish the completed
-batch atomically. Inductives and unsupported rules use complete original admission.
+batch atomically. With a complete command owner, quotient bootstrap checks the
+owned Eq/refl syntax and constructs all four headers directly in the DAG. Its
+appended nodes are decoded only for legacy environment publication; the old
+standalone admission/command ABIs retain explicit Quot compatibility fallback.
+Inductives and unsupported rules use complete original admission.
 Successful admission records original same-batch type IDs and transparent
 definition body IDs. This permits owning constant/projection inference and
 delta unfolding without repeatedly importing environment types or bodies.
@@ -163,15 +167,21 @@ def psKernelDagIsDefEq
               | Except.error error => Except.error (psKernelErrorFromMessage error)
               | Except.ok result => Except.ok (Prod.fst result)
 
-def psKernelDagRunCommandWithSource
+structure PsKernelDagCommandWithOwnerResult where
+  reply : PsKernelDagReply
+  execution : PsKernelDagExecutionState
+  owner : Option PsKernelDagGeneratedState
+
+def psKernelDagRunCommandWithOwner
     (input : PsKernelExprV2Decoded)
     (execution : PsKernelDagExecutionState)
     (levelParams : List PsKernelName)
     (safety : PsKernelDefinitionSafety)
     (arena : PsKernelExprV2PagedArena)
     (built : PsKernelExprV2Decoded)
-    (command : PsKernelDagCommand) :
-    Except PsKernelError (Prod PsKernelDagReply PsKernelDagExecutionState) :=
+    (command : PsKernelDagCommand)
+    (owner : Option PsKernelDagGeneratedState) :
+    Except PsKernelError PsKernelDagCommandWithOwnerResult :=
   let session := execution.session;
   match command with
   | PsKernelDagCommand.check root =>
@@ -182,7 +192,8 @@ def psKernelDagRunCommandWithSource
               execution.declarations root expr with
           | Except.error error => Except.error error
           | Except.ok value =>
-              Except.ok (Prod.mk (PsKernelDagReply.checked value) execution)
+              Except.ok (PsKernelDagCommandWithOwnerResult.mk
+                (PsKernelDagReply.checked value) execution owner)
   | PsKernelDagCommand.whnf root =>
       match psKernelDagRequire input root with
       | Except.error error => Except.error error
@@ -191,7 +202,8 @@ def psKernelDagRunCommandWithSource
               execution.declarations root expr with
           | Except.error error => Except.error error
           | Except.ok value =>
-              Except.ok (Prod.mk (PsKernelDagReply.normalized value) execution)
+              Except.ok (PsKernelDagCommandWithOwnerResult.mk
+                (PsKernelDagReply.normalized value) execution owner)
   | PsKernelDagCommand.isDefEq left right =>
       match psKernelDagRequire input left with
       | Except.error error => Except.error error
@@ -203,21 +215,52 @@ def psKernelDagRunCommandWithSource
                   execution.declarations left right a b with
               | Except.error error => Except.error error
               | Except.ok value =>
-                  Except.ok (Prod.mk (PsKernelDagReply.equal value) execution)
+                  Except.ok (PsKernelDagCommandWithOwnerResult.mk
+                    (PsKernelDagReply.equal value) execution owner)
   | PsKernelDagCommand.admit request =>
       match psKernelDagDecodeDeclaration input request with
       | Except.error error =>
           Except.error (PsKernelError.rejectedInvalid error)
       | Except.ok declaration =>
-          match psKernelDagAdmitDeclaration session arena execution.declarations
-              request declaration with
+          match psKernelDagAdmitDeclarationWithOwner session arena execution.declarations
+              request declaration owner with
           | Except.error error => Except.error error
           | Except.ok result =>
+              let admitted := result.admission;
+              let declarations : List PsKernelExprV2DeclarationRef :=
+                match result.owner with
+                | Option.none =>
+                    psKernelDagDeclarationsAfterAdmission request execution.declarations
+                | Option.some generated =>
+                    psKernelDagDeclarationsAfterAdmission request generated.declarations;
+              let nextOwner : Option PsKernelDagGeneratedState :=
+                match result.owner with
+                | Option.none => Option.none
+                | Option.some generated =>
+                    Option.some (PsKernelDagGeneratedState.mk
+                      generated.arena generated.built declarations);
               Except.ok
-                (Prod.mk
-                  (PsKernelDagReply.admitted result.declaration.receipt)
-                  (PsKernelDagExecutionState.mk result.session
-                    (psKernelDagDeclarationsAfterAdmission request execution.declarations)))
+                (PsKernelDagCommandWithOwnerResult.mk
+                  (PsKernelDagReply.admitted admitted.declaration.receipt)
+                  (PsKernelDagExecutionState.mk admitted.session declarations)
+                  nextOwner)
+
+/- The legacy command ABI cannot return an appended arena/work table. It uses
+   the common engine without an owned admission carrier, retaining the previous
+   environment-only Quot fallback and never returning inaccessible new IDs. -/
+def psKernelDagRunCommandWithSource
+    (input : PsKernelExprV2Decoded)
+    (execution : PsKernelDagExecutionState)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (built : PsKernelExprV2Decoded)
+    (command : PsKernelDagCommand) :
+    Except PsKernelError (Prod PsKernelDagReply PsKernelDagExecutionState) :=
+  match psKernelDagRunCommandWithOwner input execution levelParams safety
+      arena built command Option.none with
+  | Except.error error => Except.error error
+  | Except.ok result => Except.ok (Prod.mk result.reply result.execution)
 
 /- Compatibility worker: callers supplying a single table retain the original
    behavior. Production RunCommands keeps input and work namespaces separate. -/
@@ -231,14 +274,49 @@ def psKernelDagRunCommand
     Except PsKernelError (Prod PsKernelDagReply PsKernelDagExecutionState) :=
   psKernelDagRunCommandWithSource built execution levelParams safety arena built command
 
-def psKernelDagRunCommandsWithSource
+/- Lift the historical environment-only command ABI into the shared batch loop.
+   This adapter appends nothing: its original arena/work table remains usable. -/
+def psKernelDagRunCommandLegacyWithOwner
+    (input : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
+    (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded)
+    (command : PsKernelDagCommand) :
+    Except PsKernelError PsKernelDagCommandWithOwnerResult :=
+  match psKernelDagRunCommandWithSource input execution levelParams safety
+      arena built command with
+  | Except.error error => Except.error error
+  | Except.ok result =>
+      let next := Prod.snd result;
+      Except.ok (PsKernelDagCommandWithOwnerResult.mk (Prod.fst result) next
+        (Option.some (PsKernelDagGeneratedState.mk arena built next.declarations)))
+
+def psKernelDagRunCommandOwnedWithSource
+    (input : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
+    (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded)
+    (command : PsKernelDagCommand) :
+    Except PsKernelError PsKernelDagCommandWithOwnerResult :=
+  let owner := PsKernelDagGeneratedState.mk arena built execution.declarations;
+  psKernelDagRunCommandWithOwner input execution levelParams safety
+    arena built command (Option.some owner)
+
+/- One ordered batch loop serves both ABI boundaries. The original input table
+   stays fixed; the callback returns the complete private command owner. -/
+def psKernelDagRunCommandsUsing
     (commands : List PsKernelDagCommand) :
+    (PsKernelExprV2Decoded -> PsKernelDagExecutionState -> List PsKernelName ->
+      PsKernelDefinitionSafety -> PsKernelExprV2PagedArena -> PsKernelExprV2Decoded ->
+      PsKernelDagCommand -> Except PsKernelError PsKernelDagCommandWithOwnerResult) ->
     PsKernelExprV2Decoded -> PsKernelDagExecutionState -> List PsKernelName ->
     PsKernelDefinitionSafety -> PsKernelExprV2PagedArena -> PsKernelExprV2Decoded ->
     Except PsKernelError PsKernelDagBatchResult :=
   match commands with
   | List.nil =>
-      fun (_input : PsKernelExprV2Decoded)
+      fun (_runCommand : PsKernelExprV2Decoded -> PsKernelDagExecutionState ->
+          List PsKernelName -> PsKernelDefinitionSafety -> PsKernelExprV2PagedArena ->
+          PsKernelExprV2Decoded -> PsKernelDagCommand ->
+          Except PsKernelError PsKernelDagCommandWithOwnerResult)
+          (_input : PsKernelExprV2Decoded)
           (execution : PsKernelDagExecutionState)
           (_levelParams : List PsKernelName)
           (_safety : PsKernelDefinitionSafety)
@@ -246,32 +324,79 @@ def psKernelDagRunCommandsWithSource
           (_built : PsKernelExprV2Decoded) =>
         Except.ok (PsKernelDagBatchResult.mk execution.session List.nil)
   | List.cons command rest =>
-      fun (input : PsKernelExprV2Decoded)
+      fun (runCommand : PsKernelExprV2Decoded -> PsKernelDagExecutionState ->
+          List PsKernelName -> PsKernelDefinitionSafety -> PsKernelExprV2PagedArena ->
+          PsKernelExprV2Decoded -> PsKernelDagCommand ->
+          Except PsKernelError PsKernelDagCommandWithOwnerResult)
+          (input : PsKernelExprV2Decoded)
           (execution : PsKernelDagExecutionState)
           (levelParams : List PsKernelName)
           (safety : PsKernelDefinitionSafety)
           (arena : PsKernelExprV2PagedArena)
           (built : PsKernelExprV2Decoded) =>
-        match psKernelDagRunCommandWithSource input execution
-            levelParams safety arena built command with
+        match runCommand input execution levelParams safety arena built command with
         | Except.error error => Except.error error
         | Except.ok result =>
-            let nextExecution := Prod.snd result;
-            let generated := PsKernelDagGeneratedState.mk
-              arena built nextExecution.declarations;
-            match psKernelDagGeneratedAfterCommandWithPrevious command
-                execution.session.environment nextExecution.session.environment generated with
-            | Except.error error => Except.error (PsKernelError.internalError error)
-            | Except.ok installed =>
-                let owner := PsKernelDagExecutionState.mk
-                  nextExecution.session installed.declarations;
-                let recur := psKernelDagRunCommandsWithSource rest;
-                match recur input owner levelParams safety installed.arena installed.built with
-                | Except.error error => Except.error error
-                | Except.ok tail =>
-                    Except.ok
-                      (PsKernelDagBatchResult.mk tail.session
-                        (List.cons (Prod.fst result) tail.replies))
+            let nextExecution := result.execution;
+            match result.owner with
+            | Option.none =>
+                Except.error (PsKernelError.internalError "PSKERNEL_V2_COMMAND_OWNER_LOST")
+            | Option.some generated =>
+                match psKernelDagGeneratedAfterCommandWithPrevious command
+                    execution.session.environment nextExecution.session.environment generated with
+                | Except.error error => Except.error (PsKernelError.internalError error)
+                | Except.ok installed =>
+                    let owner := PsKernelDagExecutionState.mk
+                      nextExecution.session installed.declarations;
+                    let recur := psKernelDagRunCommandsUsing rest;
+                    match recur runCommand input owner levelParams safety
+                        installed.arena installed.built with
+                    | Except.error error => Except.error error
+                    | Except.ok tail =>
+                        Except.ok
+                          (PsKernelDagBatchResult.mk tail.session
+                            (List.cons result.reply tail.replies))
+
+/- Historical source/work compatibility entry. Its theorem/API contract is
+   retained; production uses the owned entry below. The outer List match keeps
+   the established staged generated ABI. -/
+def psKernelDagRunCommandsWithSource
+    (commands : List PsKernelDagCommand) :
+    PsKernelExprV2Decoded -> PsKernelDagExecutionState -> List PsKernelName ->
+    PsKernelDefinitionSafety -> PsKernelExprV2PagedArena -> PsKernelExprV2Decoded ->
+    Except PsKernelError PsKernelDagBatchResult :=
+  match commands with
+  | List.nil =>
+      fun (input : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
+          (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+          (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded) =>
+        let run := psKernelDagRunCommandsUsing List.nil;
+        run psKernelDagRunCommandLegacyWithOwner input execution levelParams safety arena built
+  | List.cons command rest =>
+      fun (input : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
+          (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+          (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded) =>
+        let run := psKernelDagRunCommandsUsing (List.cons command rest);
+        run psKernelDagRunCommandLegacyWithOwner input execution levelParams safety arena built
+
+def psKernelDagRunCommandsOwnedWithSource
+    (commands : List PsKernelDagCommand) :
+    PsKernelExprV2Decoded -> PsKernelDagExecutionState -> List PsKernelName ->
+    PsKernelDefinitionSafety -> PsKernelExprV2PagedArena -> PsKernelExprV2Decoded ->
+    Except PsKernelError PsKernelDagBatchResult :=
+  match commands with
+  | List.nil =>
+      fun (input : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
+          (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+          (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded) =>
+        let run := psKernelDagRunCommandsUsing List.nil;
+        run psKernelDagRunCommandOwnedWithSource input execution levelParams safety arena built
+  | List.cons command rest =>
+      fun (input : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
+          (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+          (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded) =>
+        let run := psKernelDagRunCommandsUsing (List.cons command rest);
+        run psKernelDagRunCommandOwnedWithSource input execution levelParams safety arena built
 
 /- The input namespace is captured once. Appended generated nodes may be used
    internally but never become valid external command/declaration IDs. -/
@@ -283,7 +408,7 @@ def psKernelDagRunCommands
   fun (execution : PsKernelDagExecutionState)
       (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
       (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded) =>
-    psKernelDagRunCommandsWithSource commands
+    psKernelDagRunCommandsOwnedWithSource commands
       built execution levelParams safety arena built
 
 def psKernelV1RunDag

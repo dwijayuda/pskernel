@@ -18,7 +18,8 @@ theorem check_uses_input_namespace
     psKernelDagRunCommandWithSource input execution params safety arena work
       (PsKernelDagCommand.check root) =
       Except.error (PsKernelError.rejectedInvalid error) := by
-  simp [psKernelDagRunCommandWithSource, psKernelDagRequire, invalid]
+  simp [psKernelDagRunCommandWithSource, psKernelDagRunCommandWithOwner,
+    psKernelDagRequire, invalid]
 
 theorem whnf_uses_input_namespace
     (input work : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
@@ -28,7 +29,8 @@ theorem whnf_uses_input_namespace
     psKernelDagRunCommandWithSource input execution params safety arena work
       (PsKernelDagCommand.whnf root) =
       Except.error (PsKernelError.rejectedInvalid error) := by
-  simp [psKernelDagRunCommandWithSource, psKernelDagRequire, invalid]
+  simp [psKernelDagRunCommandWithSource, psKernelDagRunCommandWithOwner,
+    psKernelDagRequire, invalid]
 
 theorem defeq_left_uses_input_namespace_first
     (input work : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
@@ -38,7 +40,8 @@ theorem defeq_left_uses_input_namespace_first
     psKernelDagRunCommandWithSource input execution params safety arena work
       (PsKernelDagCommand.isDefEq left right) =
       Except.error (PsKernelError.rejectedInvalid error) := by
-  simp [psKernelDagRunCommandWithSource, psKernelDagRequire, invalid]
+  simp [psKernelDagRunCommandWithSource, psKernelDagRunCommandWithOwner,
+    psKernelDagRequire, invalid]
 
 theorem admission_uses_input_namespace
     (input work : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
@@ -49,7 +52,7 @@ theorem admission_uses_input_namespace
     psKernelDagRunCommandWithSource input execution params safety arena work
       (PsKernelDagCommand.admit request) =
       Except.error (PsKernelError.rejectedInvalid error) := by
-  simp [psKernelDagRunCommandWithSource, invalid]
+  simp [psKernelDagRunCommandWithSource, psKernelDagRunCommandWithOwner, invalid]
 
 theorem generated_finish_synchronizes_append
     (source : PsKernelExpr) (state : PsKernelDagGeneratedState)
@@ -224,6 +227,16 @@ theorem generated_prefix_threads_complete_state
   rw [psKernelDagGeneratedInstallNewPrefix]
   simp [fresh, installed]
 
+private theorem legacy_batch_is_shared_loop
+    (commands : List PsKernelDagCommand)
+    (input built : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
+    (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena) :
+    psKernelDagRunCommandsWithSource commands input execution params safety arena built =
+      psKernelDagRunCommandsUsing commands psKernelDagRunCommandLegacyWithOwner
+        input execution params safety arena built := by
+  cases commands <;> rfl
+
 theorem generated_import_error_prevents_batch_publication
     (command : PsKernelDagCommand) (rest : List PsKernelDagCommand)
     (input built : PsKernelExprV2Decoded)
@@ -240,7 +253,8 @@ theorem generated_import_error_prevents_batch_publication
       Except.error error) :
     psKernelDagRunCommandsWithSource (command :: rest) input execution
       params safety arena built = Except.error (PsKernelError.internalError error) := by
-  simp [psKernelDagRunCommandsWithSource, admitted, failed]
+  rw [legacy_batch_is_shared_loop, psKernelDagRunCommandsUsing]
+  simp [psKernelDagRunCommandLegacyWithOwner, admitted, failed]
 
 theorem generated_late_command_error_prevents_batch_publication
     (command : PsKernelDagCommand) (rest : List PsKernelDagCommand)
@@ -261,8 +275,13 @@ theorem generated_late_command_error_prevents_batch_publication
       params safety installed.arena installed.built = Except.error error) :
     psKernelDagRunCommandsWithSource (command :: rest) input execution
       params safety arena built = Except.error error := by
-  rw [psKernelDagRunCommandsWithSource]
-  simp only [admitted, imported, failed]
+  have failedShared :
+      psKernelDagRunCommandsUsing rest psKernelDagRunCommandLegacyWithOwner input
+        (PsKernelDagExecutionState.mk (Prod.snd result).session installed.declarations)
+        params safety installed.arena installed.built = Except.error error := by
+    simpa only [legacy_batch_is_shared_loop] using failed
+  rw [legacy_batch_is_shared_loop, psKernelDagRunCommandsUsing]
+  simp [psKernelDagRunCommandLegacyWithOwner, admitted, imported, failedShared]
 
 #print axioms generated_type_reuses_current_command_ref
 #print axioms generated_prefix_empty

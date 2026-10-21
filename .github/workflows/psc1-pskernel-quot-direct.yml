@@ -1,0 +1,107 @@
+name: PSC1 direct DAG Quot admission preflight
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-pskernel-quot-direct-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-quot-direct.yml
+      - psc1/packages/pskernel-core/src/**
+      - psc1/packages/pskernel-core/AI_WORK_STATE.md
+      - psc1/kernel-lakefile.lean
+      - psc1/test/PsKernelExprV2QuotAdmission*.lean
+      - psc1/test/PsKernelExprV2RecursorProofs.lean
+      - psc1/scripts/pskernel-expr-v2-quot-admission-smoke.mjs
+      - psc1/scripts/install-lean435-ci.sh
+      - psc1/lean-toolchain
+
+permissions:
+  contents: read
+
+jobs:
+  native-quot-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Compile the complete kernel and owned Quot regression
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          mkdir -p dist/quot-direct/logs
+          git rev-parse HEAD | tee dist/quot-direct/source-sha.txt
+          node --check scripts/pskernel-expr-v2-quot-admission-smoke.mjs
+          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_expr_v2_quot_admission_regression psc1_kernel_expr_v2_quot_owner_regression psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_owned_state_regression 2>&1 | tee dist/quot-direct/logs/build.log
+      - name: Check direct bootstrap, exact guards, private owners and official declarations
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e' -o dist/quot-direct/native.memory \
+            .lake/build/bin/psc1_kernel_expr_v2_quot_admission_regression \
+            | tee dist/quot-direct/logs/quot-admission.log
+          grep -Fqx 'PSC1_V2_QUOT_ADMISSION_PASS headers=24 syntax=24 guards=17 admissions=255 policy=4 checks=60 whnf=60 defeq=60 private=13 officialPositive=4 officialNegative=4' dist/quot-direct/logs/quot-admission.log
+      - name: Preserve existing complete batch, mutual admission and owner controls
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_dag_regression | tee dist/quot-direct/logs/dag.log
+          grep -Fqx 'PSC1_V2_DAG_REGRESSION: PASS' dist/quot-direct/logs/dag.log
+          grep -Fqx 'PSC1_V2_DAG_MUTUAL_ADMISSION: PASS' dist/quot-direct/logs/dag.log
+          grep -Fqx 'PSC1_V2_DAG_OFFICIAL_MUTUAL_ADMISSION: PASS' dist/quot-direct/logs/dag.log
+          grep -Fqx 'PSC1_V2_DAG_MUTUAL_FRESH_MEMBER: PASS' dist/quot-direct/logs/dag.log
+          .lake/build/bin/psc1_kernel_expr_v2_quot_owner_regression | tee dist/quot-direct/logs/quot-owner.log
+          grep -Fqx 'PSC1_V2_QUOT_OWNER_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 officialPositive=10 officialNegative=7' dist/quot-direct/logs/quot-owner.log
+          .lake/build/bin/psc1_kernel_expr_v2_recursor_regression | tee dist/quot-direct/logs/recursor.log
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9' dist/quot-direct/logs/recursor.log
+          .lake/build/bin/psc1_kernel_expr_v2_owned_state_regression | tee dist/quot-direct/logs/owned-state.log
+          grep -Fqx 'PSC1_V2_ADMISSION_OWNED_STATE_PASS carrier=8 propagated=12 differential=336 publicWhnf=168' dist/quot-direct/logs/owned-state.log
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2GeneratedPrefixRegression.lean | tee dist/quot-direct/logs/prefix.log
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3' dist/quot-direct/logs/prefix.log
+      - name: Prove local publication, namespace and failure equations with retained controls
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2QuotAdmissionProofs.lean | tee dist/quot-direct/logs/quot-admission-proofs.log
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean | tee dist/quot-direct/logs/recursor-proofs.log
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2QuotOwnerProofs.lean | tee dist/quot-direct/logs/quot-owner-proofs.log
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2OwnedStateProofs.lean | tee dist/quot-direct/logs/owned-state-proofs.log
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          groups = [
+              ("PsKernelExprV2QuotAdmissionProofs", "quot-admission", 24),
+              ("PsKernelExprV2RecursorProofs", "recursor", 21),
+              ("PsKernelExprV2QuotOwnerProofs", "quot-owner", 21),
+              ("PsKernelExprV2OwnedStateProofs", "owned-state", 21),
+          ]
+          allowed = {"propext", "Classical.choice", "Quot.sound"}
+          checked = []
+          for namespace, stem, count in groups:
+              source = pathlib.Path(f"test/{namespace}.lean").read_text()
+              log = pathlib.Path(f"dist/quot-direct/logs/{stem}-proofs.log").read_text()
+              printed = re.findall(r"^#print axioms (\S+)$", source, re.M)
+              expected = [name if "." in name else namespace + "." + name for name in printed]
+              actual = re.findall(r"'(" + re.escape(namespace) + r"\.[^']+)'\s+(does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log, re.S)
+              assert len(expected) == count and len(set(expected)) == count, (namespace, "source count")
+              assert len(actual) == count and {x[0] for x in actual} == set(expected), (namespace, "compiled count")
+              for name, _, dependencies in actual:
+                  deps = {x.strip() for x in dependencies.split(",") if x.strip()}
+                  assert deps <= allowed, (name, sorted(deps - allowed))
+                  checked.append({"name": name, "axioms": sorted(deps)})
+          receipt = {"sourceSha": os.environ["GITHUB_SHA"], "proofs": checked, "scope": "Local equations only; no global soundness or full V2 equivalence claim."}
+          pathlib.Path("dist/quot-direct/proof-audit.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("PSC1_DIRECT_QUOT_PROOF_AUDIT: PASS local=24 retained=63")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-direct-quot-native-${{ github.sha }}
+          path: psc1/dist/quot-direct
+          if-no-files-found: error

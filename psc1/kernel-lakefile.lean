@@ -26,6 +26,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagAdmissionGuards,
     `Ps.KernelCore.Checker.ExprV2.Quot,
     `Ps.KernelCore.API.DagGenerated,
+    `Ps.KernelCore.API.DagQuot,
     `Ps.KernelCore.Checker.ExprV2.RecursorMajor,
     `Ps.KernelCore.Checker.ExprV2.RecursorK,
     `Ps.KernelCore.Checker.ExprV2.Recursor,
@@ -315,4 +316,9 @@ lean_exe psc1_kernel_name_worker_regression where
 -- Checked same-batch Quot metadata, immutable caller IDs, and exact V1/official parity.
 lean_exe psc1_kernel_expr_v2_quot_owner_regression where
   root := `PsKernelExprV2QuotOwnerRegression
+  srcDir := "test"
+
+-- Direct checked Quot bootstrap with owned publication and immutable caller IDs.
+lean_exe psc1_kernel_expr_v2_quot_admission_regression where
+  root := `PsKernelExprV2QuotAdmissionRegression
   srcDir := "test"

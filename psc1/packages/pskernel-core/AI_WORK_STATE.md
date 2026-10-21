@@ -1,3 +1,103 @@
+# Current research — direct DAG Quot admission preflight
+
+Updated: 2026-10-21 20:05 UTC.
+Branch: `research/psc1-pskernel-quot-direct-20261021`.
+Parent: `0420aa896b04197aebd14444c1d2c4a36a41df9e` (integration).
+The parent kernel source tree is exactly the qualified
+`df4d1751f4166ed8c9a28ac151d1ab77c94cbfe7` tree. Parent evidence does not
+qualify this changed source. The containing commit is **NOT RUN at creation**.
+
+## Implemented in this commit
+
+- `API/DagQuot.lean`: bounded direct DAG syntax checks for the live Eq and its
+  sole constructor header, preserving the original universe/constructor/type/
+  reserved-name guard order. Build the four known Quot headers with a fixed
+  topological 55-node program; retain their exact private roots and decode only
+  those appended nodes for the existing environment publication adapter.
+- `API/DagAdmission.lean`: one shared admission finish policy plus an optional
+  complete owner carrier. Semantic checks, declaration count, native-evaluator
+  clearing and receipt creation keep their original order. Missing prerequisite
+  owners explicitly retain the complete V1 fallback.
+- `API/Dag.lean`: one callback-parameterized batch loop threads the complete
+  private arena, decoded work table and declaration references. Production uses
+  the owned command adapter. Original input IDs stay bounded by the immutable
+  source table. Old standalone command/admission ABIs retain their explicit
+  environment-only Quot compatibility fallback.
+- Native and generated tests require actual direct-path Some outcomes; compare
+  all four headers across 24 prefix/universe cases, 24 syntax cases, 17 ordered
+  guard cases, 255 admission/fuel/depth cases, four policy cases, 60 cases each
+  of checking/WHNF/DefEq, 13 private-input forms, actual successful and invalid
+  declarations, and four positive/four negative official-Lean fixtures.
+- 24 local equations cover guards, ownership, failure order and publication.
+  All 21 previous recursor theorem statements and axiom-print commands are
+  byte-identical; only proof bodies adapt to the common loop.
+
+No fuel/depth/declaration/numeric policy is raised. V1 remains the default.
+No runtime axiom, unsafe/extern/intrinsic path, cached acceptance, exported
+recursor body or trusted hash is added. Raw fabricated owner/session helpers
+remain outside the untrusted checked API contract.
+
+## Exact qualification state
+
+| Source | Native | Portable source | Canonical .ps | Generated JS | Proof | Benchmark | Arena | Provider |
+|---|---|---|---|---|---|---|---|---|
+| containing changed commit | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+| parent 0420aa8 at 20:05 UTC | PASS | PASS | IN PROGRESS | IN PROGRESS | PASS | IN PROGRESS | IN PROGRESS | native PASS; JS IN PROGRESS |
+| qualified source df4d175 | PASS | PASS | PASS | PASS | PASS | PASS collection only | FAIL | PASS |
+
+Parent integration run: https://github.com/dwijayuda/pskernel/actions/runs/39664059278
+(native job119444291518 PASS; generated job119444291230 still running at observation).
+Parent correctness: https://github.com/dwijayuda/pskernel/actions/runs/39664059196
+(native119444289844 PASS; canonical119444290579 still running at last observation).
+The dedicated `.github/workflows/psc1-pskernel-quot-direct.yml` first compiles
+the complete kernel and runs the new native/official matrix, existing complete
+DAG/mutual/Quot-owner/recursor/state/prefix regressions, and 24 new plus63 retained
+local proof reports, accepting only the previously allowed logical dependencies
+propext, Classical.choice and Quot.sound. It does not claim generated execution.
+
+## Next executable action and promotion rule
+
+Inspect the containing commit's focused native job to terminal completion; fix
+the precise source/fixture/proof defect if any. After native PASS, wire the new
+regression/proofs/JS smoke into both primary workflows, push a fresh expected-SHA
+carrier update, and require full native, authentic PSC1, complete canonical .ps,
+detached generated JS/provider and all existing controls at that exact source.
+Do not promote to integration from a focused native pass alone.
+
+## Remaining architecture and conformance work
+
+Four whole-operation fallback families (check, WHNF, DefEq, admission), eager
+input decoding and recursive checked-metadata importing remain. The new Quot
+path does not remove the compatibility fallback or ordinary/indexed/mutual/
+nested inductive admission fallback. No global soundness or header-builder
+equivalence theorem is asserted; exact builder equality is a mandatory
+native/generated differential gate. Full B and C remain incomplete.
+
+Last terminal full193 result for df4/deb/7e: 173 matching outcomes (105 accepted,
+60 kernel rejections, one metadata rejection, seven transport rejections),
+two separately classified safety-contract agreements, 17 host timeouts and
+one unchanged-fuel Church disagreement, zero unsupported cases. Official:
+122 accepted/71 rejected/zero timeouts. These are prior-source results, not
+qualification of this commit. Default fuel4096, per-case60 seconds and the
+published transport body hashes remain unchanged.
+
+Eager initial-owner source7e and indexed-cache source384 remain performance
+HOLD outside integration. Exact paired eager-owner measurements regressed
+6.76–61.06x on the tested initial-environment queries; source384 metadata
+admission regressed23.2%/22.6%. Preserve the detailed receipts inherited below.
+The optional saturated compiler has only focused qualification at282; its
+complete-kernel experiment is separate and does not change this checker.
+
+## Tool execution note
+
+Child Git create-tree calls stalled without a usable receipt; no child refs
+were changed. The root reconstructed bounded source transfers, verified exact
+length/FNV for transfer integrity, reviewed the source and created Git objects
+through the connected GitHub tool. FNV is not a semantic trust mechanism.
+All builds/tests execute only in Linux GitHub Actions; none run locally.
+
+---
+
 # Current integration — qualified Quot ownership; hold eager initial loading
 
 Updated: 2026-10-21 19:41:30 UTC.

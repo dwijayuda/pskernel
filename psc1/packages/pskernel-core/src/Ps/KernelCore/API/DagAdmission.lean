@@ -1,5 +1,6 @@
 import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
+import Ps.KernelCore.API.DagQuot
 import Ps.KernelCore.API.DagAdmissionGuards
 import Ps.KernelCore.Checker.ExprV2.Check
 import Ps.KernelCore.Checker.ExprV2.DefEq
@@ -19,7 +20,10 @@ no semantic cache is transferred to another declaration.
 Unsafe recursive definitions use a separate header and fresh private body owner.
 Mutual definitions use fresh owners for each header and each body; all headers
 finish before the complete private work environment is installed. Inductives
-request whole-original-admission fallback. A none from any attempted operation
+request whole-original-admission fallback. Owned quotient bootstrap retains its
+new arena, decoded publication table and four header IDs through the command
+carrier. The environment-only compatibility ABI cannot retain them and keeps
+its original Quot fallback. A none from any attempted operation
 discards its state and restarts the complete original admission.
 -/
 
@@ -451,34 +455,116 @@ def psKernelDagTryAdmitSimpleWithFuel
                               | Except.ok _ =>
                                   Option.some (psKernelEnvironmentAdd environment plan.info)
 
+/- The successful-environment policy is shared by the compatibility and owned
+   admission routes. It remains after all semantic checks and before publication. -/
+def psKernelDagFinishAdmission
+    (session : PsKernelKernelSession) (declaration : PsKernelDeclarationRequest)
+    (environment : PsKernelEnvironment) :
+    Except PsKernelError PsKernelAdmissionResult :=
+  if psKernelResourceAllowsSize session.resources
+      (psKernelEnvironmentSize environment) then
+    let checkedEnvironment :=
+      psKernelEnvironmentWithNativeEvaluator environment Option.none;
+    Except.ok
+      (PsKernelAdmissionResult.mk
+        (PsKernelKernelSession.mk checkedEnvironment session.resources session.provider)
+        (PsKernelCheckedDeclaration.mk declaration
+          (psKernelV1Receipt session checkedEnvironment)))
+  else
+    Except.error
+      (PsKernelError.resourceExhausted PsKernelResourceError.declarationLimit
+        "declaration limit exceeded")
+
+structure PsKernelDagAdmissionWithOwnerResult where
+  admission : PsKernelAdmissionResult
+  owner : Option PsKernelDagGeneratedState
+
+def psKernelDagTryAdmitDeclarationWithOwner
+    (fuel : Nat) (environment : PsKernelEnvironment)
+    (maxRecDepth maxNatSize : Nat) (arena : PsKernelExprV2PagedArena)
+    (declarations : List PsKernelExprV2DeclarationRef)
+    (source : PsKernelDagDeclarationRequest)
+    (declaration : PsKernelDeclarationRequest)
+    (owner : Option PsKernelDagGeneratedState) :
+    Option (Except String (Prod PsKernelEnvironment (Option PsKernelDagGeneratedState))) :=
+  match source with
+  | PsKernelDagDeclarationRequest.quot =>
+      match declaration with
+      | PsKernelDeclarationRequest.quot =>
+          match owner with
+          | Option.none => Option.none
+          | Option.some state =>
+              match psKernelDagTryAddQuotOwned environment state with
+              | Option.none => Option.none
+              | Option.some attempted =>
+                  match attempted with
+                  | Except.error error => Option.some (Except.error error)
+                  | Except.ok result =>
+                      Option.some (Except.ok
+                        (Prod.mk (Prod.fst result) (Option.some (Prod.snd result))))
+      | _ => Option.none
+  | _ =>
+      let simple : Option (Except String PsKernelEnvironment) :=
+        psKernelDagTryAdmitSimpleWithFuel fuel environment maxRecDepth maxNatSize
+          arena declarations source declaration;
+      match simple with
+      | Option.none => Option.none
+      | Option.some attempted =>
+          match attempted with
+          | Except.error error => Option.some (Except.error error)
+          | Except.ok result => Option.some (Except.ok (Prod.mk result owner))
+
+def psKernelDagAdmitDeclarationWithOwner
+    (session : PsKernelKernelSession) (arena : PsKernelExprV2PagedArena)
+    (declarations : List PsKernelExprV2DeclarationRef)
+    (source : PsKernelDagDeclarationRequest)
+    (declaration : PsKernelDeclarationRequest)
+    (owner : Option PsKernelDagGeneratedState) :
+    Except PsKernelError PsKernelDagAdmissionWithOwnerResult :=
+  match psKernelKernelSessionPreflight session with
+  | Except.error error => Except.error error
+  | Except.ok _ =>
+      match psKernelDagTryAdmitDeclarationWithOwner session.resources.fuel
+          (psKernelKernelSessionEnvironment session)
+          session.resources.maxRecDepth session.resources.maxNatSize
+          arena declarations source declaration owner with
+      | Option.none =>
+          match psKernelV1AdmitDeclaration session declaration with
+          | Except.error error => Except.error error
+          | Except.ok admitted =>
+              Except.ok (PsKernelDagAdmissionWithOwnerResult.mk admitted owner)
+      | Option.some attempted =>
+          match attempted with
+          | Except.error error => Except.error (psKernelErrorFromMessage error)
+          | Except.ok result =>
+              match psKernelDagFinishAdmission session declaration (Prod.fst result) with
+              | Except.error error => Except.error error
+              | Except.ok admitted =>
+                  Except.ok (PsKernelDagAdmissionWithOwnerResult.mk admitted (Prod.snd result))
+
+/- Standalone compatibility ABI: no decoded owner is supplied, so Quot retains
+   its explicit original-operation fallback. No eager decode or private ID
+   escapes from this environment-only result. Production passes a full owner. -/
 def psKernelDagAdmitDeclaration
     (session : PsKernelKernelSession) (arena : PsKernelExprV2PagedArena)
     (declarations : List PsKernelExprV2DeclarationRef)
     (source : PsKernelDagDeclarationRequest)
     (declaration : PsKernelDeclarationRequest) :
     Except PsKernelError PsKernelAdmissionResult :=
-  match psKernelKernelSessionPreflight session with
+  match psKernelDagAdmitDeclarationWithOwner session arena declarations
+      source declaration Option.none with
   | Except.error error => Except.error error
-  | Except.ok _ =>
-      match psKernelDagTryAdmitSimpleWithFuel session.resources.fuel
-          (psKernelKernelSessionEnvironment session)
-          session.resources.maxRecDepth session.resources.maxNatSize
-          arena declarations source declaration with
-      | Option.none => psKernelV1AdmitDeclaration session declaration
-      | Option.some attempted =>
-          match attempted with
-          | Except.error error => Except.error (psKernelErrorFromMessage error)
-          | Except.ok environment =>
-              if psKernelResourceAllowsSize session.resources
-                  (psKernelEnvironmentSize environment) then
-                let checkedEnvironment :=
-                  psKernelEnvironmentWithNativeEvaluator environment Option.none;
-                Except.ok
-                  (PsKernelAdmissionResult.mk
-                    (PsKernelKernelSession.mk checkedEnvironment session.resources session.provider)
-                    (PsKernelCheckedDeclaration.mk declaration
-                      (psKernelV1Receipt session checkedEnvironment)))
-              else
-                Except.error
-                  (PsKernelError.resourceExhausted PsKernelResourceError.declarationLimit
-                    "declaration limit exceeded")
+  | Except.ok result => Except.ok result.admission
+
+def psKernelDagAdmitDeclarationOwned
+    (session : PsKernelKernelSession) (state : PsKernelDagGeneratedState)
+    (source : PsKernelDagDeclarationRequest)
+    (declaration : PsKernelDeclarationRequest) :
+    Except PsKernelError (Prod PsKernelAdmissionResult PsKernelDagGeneratedState) :=
+  match psKernelDagAdmitDeclarationWithOwner session state.arena state.declarations
+      source declaration (Option.some state) with
+  | Except.error error => Except.error error
+  | Except.ok result =>
+      match result.owner with
+      | Option.none => Except.error (PsKernelError.internalError "PSKERNEL_V2_ADMISSION_OWNER_LOST")
+      | Option.some next => Except.ok (Prod.mk result.admission next)

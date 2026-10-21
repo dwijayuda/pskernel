@@ -1,0 +1,535 @@
+{
+  "schema": "pskernel-full-arena-hard-host-collection-v1",
+  "workflowSourceSha": "4d00ab22bec2e997370d14a430baa367d214c2c4",
+  "kernelSourceSha": "34126793178021a9cd1bdb37aa6fe17c0fab41c6",
+  "hostSourceSha": "275833e70351684b10256ec922aa90d13e813159",
+  "run": {
+    "id": 39652308839,
+    "jobId": 119403520209,
+    "conclusion": "failure",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39652308839"
+  },
+  "artifact": {
+    "id": 12371126124,
+    "bytes": 17141667,
+    "zipSha256": "a91d602ed147b80878b768ae47dccc6d67e6de6ed4f3a8f46011e529734c0515",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39652308839/artifacts/12371126124"
+  },
+  "originalReceipt": {
+    "workflow_source_sha": "4d00ab22bec2e997370d14a430baa367d214c2c4",
+    "kernel_source_sha": "34126793178021a9cd1bdb37aa6fe17c0fab41c6",
+    "host_source_sha": "275833e70351684b10256ec922aa90d13e813159",
+    "bytes": 29554,
+    "sha256": "965a340b768d78bc1a9b0c33984bf4918591c5f38a4ec8ccd4a88d832dcae9b2",
+    "collection_complete": true,
+    "arena_comparison_complete": false,
+    "comparison": {
+      "records": 193,
+      "verified_production_host_limits": 193,
+      "all_body_receipts_preserved": true,
+      "all_classifications_preserved": true,
+      "matches": 172,
+      "counts": {
+        "agreement_with_unsafe_or_partial_contract_difference": 2,
+        "matched_acceptance": 105,
+        "matched_kernel_rejection": 59,
+        "matched_metadata_rejection": 1,
+        "matched_transport_rejection": 7,
+        "pskernel_resource_exhausted": 1,
+        "pskernel_timeout": 17,
+        "pskernel_unsupported": 1
+      },
+      "pskernel_verdicts": {
+        "accepted": 105,
+        "malformed": 7,
+        "rejected": 62,
+        "resource_exhausted": 1,
+        "timeout": 17,
+        "unsupported": 1
+      },
+      "arena_comparison_complete": false
+    },
+    "failure": null
+  },
+  "hostControls": {
+    "format": "psc1-generated-host-controls-v1",
+    "source_sha": "275833e70351684b10256ec922aa90d13e813159",
+    "kernel_qualified": false,
+    "corpus_run": false,
+    "production_limit_bytes": 2147483648,
+    "control_only_limit_bytes": 134217728,
+    "live": [
+      {
+        "mode": "normal",
+        "host": {
+          "status": "process_exit",
+          "limitBytes": 134217728,
+          "wallSeconds": 10,
+          "stdoutPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/normal/stdout.txt",
+          "stderrPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/normal/stderr.txt",
+          "timePath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/normal/time.txt",
+          "memoryPeakScope": "charged memory of isolated launcher/time/Node and descendants",
+          "sampledVmHwmScope": "direct Node process only; sampled lower bound including mapped/shared pages",
+          "testOnly": true,
+          "hardLimitVerified": true,
+          "cgroup": "/sys/fs/cgroup/psc1-generated-12b6be00d86944e199c0bcad58127c67",
+          "launch": {
+            "pid": 3108,
+            "uid": 1001,
+            "gid": 1001,
+            "groups": [],
+            "path": "",
+            "memoryMax": 134217728,
+            "swapMax": 0,
+            "oomGroup": 1,
+            "sessionId": 3107,
+            "phase": "before-exec",
+            "mode": "control",
+            "executable": "/usr/bin/time",
+            "nodeExecutable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node"
+          },
+          "cleanupOk": true,
+          "memoryEvents": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0,
+            "oom_group_kill": 0,
+            "sock_throttled": 0
+          },
+          "memoryPeakBytes": 9334784,
+          "returncode": 0,
+          "elapsedSeconds": 0.12217994499999918,
+          "wallTimedOut": false,
+          "setupTimedOut": false,
+          "sampledNodeVmHwmBytesLowerBound": 45113344
+        },
+        "runtime": {
+          "mode": "normal",
+          "pid": 3109,
+          "uid": 1001,
+          "gid": 1001,
+          "groups": [],
+          "nodeGroups": [
+            1001
+          ],
+          "path": "",
+          "cgroup": "/psc1-generated-12b6be00d86944e199c0bcad58127c67",
+          "memoryMax": "134217728",
+          "swapMax": "0",
+          "oomGroup": "1",
+          "node": "v22.23.3"
+        }
+      },
+      {
+        "mode": "exit",
+        "host": {
+          "status": "process_exit",
+          "limitBytes": 134217728,
+          "wallSeconds": 10,
+          "stdoutPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/exit/stdout.txt",
+          "stderrPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/exit/stderr.txt",
+          "timePath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/exit/time.txt",
+          "memoryPeakScope": "charged memory of isolated launcher/time/Node and descendants",
+          "sampledVmHwmScope": "direct Node process only; sampled lower bound including mapped/shared pages",
+          "testOnly": true,
+          "hardLimitVerified": true,
+          "cgroup": "/sys/fs/cgroup/psc1-generated-3ff18ed1a02f4dceabc93bf04e748b82",
+          "launch": {
+            "pid": 3119,
+            "uid": 1001,
+            "gid": 1001,
+            "groups": [],
+            "path": "",
+            "memoryMax": 134217728,
+            "swapMax": 0,
+            "oomGroup": 1,
+            "sessionId": 3118,
+            "phase": "before-exec",
+            "mode": "control",
+            "executable": "/usr/bin/time",
+            "nodeExecutable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node"
+          },
+          "cleanupOk": true,
+          "memoryEvents": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0,
+            "oom_group_kill": 0,
+            "sock_throttled": 0
+          },
+          "memoryPeakBytes": 9084928,
+          "returncode": 17,
+          "elapsedSeconds": 0.1016446369999926,
+          "wallTimedOut": false,
+          "setupTimedOut": false,
+          "sampledNodeVmHwmBytesLowerBound": 48783360
+        },
+        "runtime": {
+          "mode": "exit",
+          "pid": 3120,
+          "uid": 1001,
+          "gid": 1001,
+          "groups": [],
+          "nodeGroups": [
+            1001
+          ],
+          "path": "",
+          "cgroup": "/psc1-generated-3ff18ed1a02f4dceabc93bf04e748b82",
+          "memoryMax": "134217728",
+          "swapMax": "0",
+          "oomGroup": "1",
+          "node": "v22.23.3"
+        }
+      },
+      {
+        "mode": "hang",
+        "host": {
+          "status": "timedout",
+          "limitBytes": 134217728,
+          "wallSeconds": 1,
+          "stdoutPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/hang/stdout.txt",
+          "stderrPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/hang/stderr.txt",
+          "timePath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/hang/time.txt",
+          "memoryPeakScope": "charged memory of isolated launcher/time/Node and descendants",
+          "sampledVmHwmScope": "direct Node process only; sampled lower bound including mapped/shared pages",
+          "testOnly": true,
+          "hardLimitVerified": true,
+          "cgroup": "/sys/fs/cgroup/psc1-generated-f59c1b4306cc4570a045569cf7caeba7",
+          "launch": {
+            "pid": 3130,
+            "uid": 1001,
+            "gid": 1001,
+            "groups": [],
+            "path": "",
+            "memoryMax": 134217728,
+            "swapMax": 0,
+            "oomGroup": 1,
+            "sessionId": 3129,
+            "phase": "before-exec",
+            "mode": "control",
+            "executable": "/usr/bin/time",
+            "nodeExecutable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node"
+          },
+          "cleanupOk": true,
+          "memoryEvents": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0,
+            "oom_group_kill": 0,
+            "sock_throttled": 0
+          },
+          "memoryPeakBytes": 9084928,
+          "returncode": -9,
+          "elapsedSeconds": 1.0012368110000125,
+          "wallTimedOut": true,
+          "setupTimedOut": false,
+          "sampledNodeVmHwmBytesLowerBound": 49569792
+        },
+        "runtime": {
+          "mode": "hang",
+          "pid": 3131,
+          "uid": 1001,
+          "gid": 1001,
+          "groups": [],
+          "nodeGroups": [
+            1001
+          ],
+          "path": "",
+          "cgroup": "/psc1-generated-f59c1b4306cc4570a045569cf7caeba7",
+          "memoryMax": "134217728",
+          "swapMax": "0",
+          "oomGroup": "1",
+          "node": "v22.23.3"
+        }
+      },
+      {
+        "mode": "descendant",
+        "host": {
+          "status": "timedout",
+          "limitBytes": 134217728,
+          "wallSeconds": 1,
+          "stdoutPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/descendant/stdout.txt",
+          "stderrPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/descendant/stderr.txt",
+          "timePath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/descendant/time.txt",
+          "memoryPeakScope": "charged memory of isolated launcher/time/Node and descendants",
+          "sampledVmHwmScope": "direct Node process only; sampled lower bound including mapped/shared pages",
+          "testOnly": true,
+          "hardLimitVerified": true,
+          "cgroup": "/sys/fs/cgroup/psc1-generated-b9b52b22d7864c6d9864c19be8cc0606",
+          "launch": {
+            "pid": 3141,
+            "uid": 1001,
+            "gid": 1001,
+            "groups": [],
+            "path": "",
+            "memoryMax": 134217728,
+            "swapMax": 0,
+            "oomGroup": 1,
+            "sessionId": 3140,
+            "phase": "before-exec",
+            "mode": "control",
+            "executable": "/usr/bin/time",
+            "nodeExecutable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node"
+          },
+          "cleanupOk": true,
+          "memoryEvents": {
+            "low": 0,
+            "high": 0,
+            "max": 0,
+            "oom": 0,
+            "oom_kill": 0,
+            "oom_group_kill": 0,
+            "sock_throttled": 0
+          },
+          "memoryPeakBytes": 17838080,
+          "returncode": -14,
+          "elapsedSeconds": 1.0199676550000163,
+          "wallTimedOut": true,
+          "setupTimedOut": false,
+          "sampledNodeVmHwmBytesLowerBound": 49684480
+        },
+        "runtime": {
+          "mode": "descendant",
+          "pid": 3142,
+          "uid": 1001,
+          "gid": 1001,
+          "groups": [],
+          "nodeGroups": [
+            1001
+          ],
+          "path": "",
+          "cgroup": "/psc1-generated-b9b52b22d7864c6d9864c19be8cc0606",
+          "memoryMax": "134217728",
+          "swapMax": "0",
+          "oomGroup": "1",
+          "node": "v22.23.3",
+          "childPid": 3149,
+          "childCgroup": "/psc1-generated-b9b52b22d7864c6d9864c19be8cc0606"
+        }
+      },
+      {
+        "mode": "oom",
+        "host": {
+          "status": "cgroup_oom",
+          "limitBytes": 134217728,
+          "wallSeconds": 10,
+          "stdoutPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/oom/stdout.txt",
+          "stderrPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/oom/stderr.txt",
+          "timePath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/oom/time.txt",
+          "memoryPeakScope": "charged memory of isolated launcher/time/Node and descendants",
+          "sampledVmHwmScope": "direct Node process only; sampled lower bound including mapped/shared pages",
+          "testOnly": true,
+          "hardLimitVerified": true,
+          "cgroup": "/sys/fs/cgroup/psc1-generated-19418f0c8ed346c992ea3ad08f8f4561",
+          "launch": {
+            "pid": 3161,
+            "uid": 1001,
+            "gid": 1001,
+            "groups": [],
+            "path": "",
+            "memoryMax": 134217728,
+            "swapMax": 0,
+            "oomGroup": 1,
+            "sessionId": 3160,
+            "phase": "before-exec",
+            "mode": "control",
+            "executable": "/usr/bin/time",
+            "nodeExecutable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node"
+          },
+          "cleanupOk": true,
+          "memoryEvents": {
+            "low": 0,
+            "high": 0,
+            "max": 21,
+            "oom": 1,
+            "oom_kill": 3,
+            "oom_group_kill": 1,
+            "sock_throttled": 0
+          },
+          "memoryPeakBytes": 134217728,
+          "returncode": -9,
+          "elapsedSeconds": 0.16486214200000404,
+          "wallTimedOut": false,
+          "setupTimedOut": false,
+          "sampledNodeVmHwmBytesLowerBound": 174759936
+        },
+        "runtime": {
+          "mode": "oom",
+          "pid": 3162,
+          "uid": 1001,
+          "gid": 1001,
+          "groups": [],
+          "nodeGroups": [
+            1001
+          ],
+          "path": "",
+          "cgroup": "/psc1-generated-19418f0c8ed346c992ea3ad08f8f4561",
+          "memoryMax": "134217728",
+          "swapMax": "0",
+          "oomGroup": "1",
+          "node": "v22.23.3"
+        }
+      },
+      {
+        "mode": "missing-executable",
+        "host": {
+          "status": "setup_failed",
+          "limitBytes": 2147483648,
+          "wallSeconds": 60,
+          "stdoutPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/missing-executable/stdout.txt",
+          "stderrPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/missing-executable/stderr.txt",
+          "timePath": "/home/runner/work/_temp/psc1-name-arena-hardcap/host-controls/missing-executable/time.txt",
+          "memoryPeakScope": "charged memory of isolated launcher/time/Node and descendants",
+          "sampledVmHwmScope": "direct Node process only; sampled lower bound including mapped/shared pages",
+          "testOnly": false,
+          "hardLimitVerified": false,
+          "cgroup": "/sys/fs/cgroup/psc1-generated-c362fcf8591143878bfdf4ad75159e16",
+          "error": "RuntimeError('missing absolute runtime file')",
+          "cleanupOk": true
+        }
+      }
+    ],
+    "complete": true,
+    "source_files": [
+      {
+        "path": "pskernel-arena435-generated-cgroup.py",
+        "sha256": "217cc56f4237a350949fb8ecae17dc259191a0468693269125b809b4655202ec"
+      },
+      {
+        "path": "pskernel-arena435-compare.py",
+        "sha256": "01c29cf613e3d539e295281c577bab8e984c001c62b61e885db98bc761c00163"
+      },
+      {
+        "path": "pskernel-arena435-host-control.mjs",
+        "sha256": "a941ef7ed83d07623fe7c52b58491f2c0c706776101ee762de08fd674818b3a4"
+      },
+      {
+        "path": "pskernel-arena435-host-controls.py",
+        "sha256": "1a5725918afdf95f586f0b6dacad186cb27ad7414f23a3d216f893f134dc6f03"
+      }
+    ],
+    "parser_assertions": 70,
+    "live_complete": true
+  },
+  "replayControls": {
+    "host": {
+      "status": "process_exit",
+      "limitBytes": 2147483648,
+      "wallSeconds": 60,
+      "stdoutPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/detached-controls/stdout.txt",
+      "stderrPath": "/home/runner/work/_temp/psc1-name-arena-hardcap/detached-controls/stderr.txt",
+      "timePath": "/home/runner/work/_temp/psc1-name-arena-hardcap/detached-controls/time.txt",
+      "memoryPeakScope": "charged memory of isolated launcher/time/Node and descendants",
+      "sampledVmHwmScope": "direct Node process only; sampled lower bound including mapped/shared pages",
+      "testOnly": false,
+      "hardLimitVerified": true,
+      "cgroup": "/sys/fs/cgroup/psc1-generated-646be982d37b4683a18712a3d683ba59",
+      "launch": {
+        "pid": 3175,
+        "uid": 1001,
+        "gid": 1001,
+        "groups": [],
+        "path": "",
+        "memoryMax": 2147483648,
+        "swapMax": 0,
+        "oomGroup": 1,
+        "sessionId": 3174,
+        "phase": "before-exec",
+        "mode": "arena",
+        "executable": "/usr/bin/time",
+        "nodeExecutable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node"
+      },
+      "cleanupOk": true,
+      "memoryEvents": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      },
+      "memoryPeakBytes": 164683776,
+      "returncode": 0,
+      "elapsedSeconds": 0.9698977600000092,
+      "wallTimedOut": false,
+      "setupTimedOut": false,
+      "sampledNodeVmHwmBytesLowerBound": 206438400
+    },
+    "host_failure": null,
+    "expected_assertions": 138,
+    "actual_assertions": 138,
+    "kernel_sha256": "d06d13d2e4cb54e8ea00aa0bfbb5b00b98cf3c2be1a610ccb5c699c64ee946c9",
+    "control_script_sha256": "28e8ea79d5557a8bb7f5b7d5afa4f69741884c1ee31c3c0a3d7c245de3ca144a",
+    "control_replay_sha256": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821",
+    "cli_adapter_sha256": "9df60584fa9fecb0f77b4b4077f22333e66d01db9fca446422360cd25b4e0f3b",
+    "cli_scope": "restore original strict argc3 then import unchanged control module; no kernel decisions",
+    "passed": true
+  },
+  "progressControls": 24,
+  "parserControls": 70,
+  "liveControls": 6,
+  "enforcement": {
+    "cases": 193,
+    "wallSeconds": 60,
+    "memoryMaxBytes": 2147483648,
+    "swapMaxBytes": 0,
+    "oomGroup": 1,
+    "uid": 1001,
+    "gid": 1001,
+    "supplementaryGroups": [],
+    "path": "",
+    "fuelDefault": 4096,
+    "allLaunchesAndLimitsVerified": true,
+    "allCleaned": true
+  },
+  "measurements": {
+    "maximumChargedCgroupBytes": 2048724992,
+    "maximumCompletedProcessRSSKiB": 1167176,
+    "oomCaseCount": 0,
+    "scope": "Cgroup charged peak includes isolated launcher/time/Node/descendants. /usr/bin/time RSS and sampled direct-Node VmHWM include mapped/shared pages and are distinct; timeout RSS may be absent. Do not equate these metrics."
+  },
+  "timeoutIndices": [
+    23,
+    72,
+    78,
+    80,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    90,
+    91,
+    92,
+    93,
+    94,
+    96,
+    98
+  ],
+  "unsupportedIndices": [
+    16
+  ],
+  "resourceIndices": [
+    81
+  ],
+  "safetyContractIndices": [
+    69,
+    70
+  ],
+  "limitations": [
+    "Collection is complete, but conformance is FAIL.",
+    "Only 105 records are matched kernel acceptances; metadata/transport matches are separately counted.",
+    "Source341 predates the current invalid-recursor guard and current prefix/Name integration merge; this is not qualification of deb18b9 or later ports.",
+    "Historical export headers were adapted; all193 original/adapted body hashes match. This is not a native4.35 reexport.",
+    "The independent official reference remains122accepted/71rejected/zero timeouts; two unsafe/partial differences remain explicitly classified.",
+    "No production kernel, fuel, timeout or memory limit changed in this collection. No cache candidate is included."
+  ]
+}

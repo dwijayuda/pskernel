@@ -1,3 +1,29 @@
+# Latest observed result: complete 193-case hard-host collection, conformance FAIL
+
+The exact harness `4d00ab22bec2e997370d14a430baa367d214c2c4` ran the immutable generated kernel `34126793178021a9cd1bdb37aa6fe17c0fab41c6` with host `275833e70351684b10256ec922aa90d13e813159`. [Run 39652308839](https://github.com/dwijayuda/pskernel/actions/runs/39652308839), [job 119403520209](https://github.com/dwijayuda/pskernel/actions/runs/39652308839/job/119403520209), is terminal **FAILURE**, correctly preserving the comparison's nonzero result. There was no collection/harness error: all 193 records, bodies and classifications were authenticated.
+
+| Outcome | Cases |
+| --- | ---: |
+| Matched kernel acceptance | 105 |
+| Matched kernel rejection | 59 |
+| Matched metadata rejection | 1 |
+| Matched transport rejection | 7 |
+| Separate unsafe/partial contract agreement | 2 |
+| Host timeout | 17 |
+| Kernel fuel exhaustion | 1 |
+| Unsupported | 1 |
+| Total | 193 |
+
+All 193 launches verified the production 60-second wall deadline, hard cgroup `memory.max=2147483648`, `memory.swap.max=0`, group OOM handling, unprivileged UID/GID1001, empty supplementary groups, detached empty PATH and successful cleanup. The default kernel fuel remained4096. All24 progress,70 host-parser,6 live host and138 genuine replay controls passed. The live OOM fixture intentionally used128MiB; production cases always used2GiB. Production OOM count was0.
+
+Maximum charged cgroup memory was2,048,724,992bytes (grind-ring-5, which timed out). Maximum completed-process RSS was1,167,176KiB (Church); timeout process RSS may be absent. Direct-Node sampled VmHWM, /usr/bin/time RSS and cgroup charged memory have different scopes and remain separately recorded. The17 timeout indices are23,72,78,80,82,83,84,85,86,87,90,91,92,93,94,96,98; every last progress snapshot is kernel admission. Church index81 returned a real fuel resource result; index16 remained unsupported in this historical341runtime. Later integration's invalid-recursor guard must be evaluated on its own source.
+
+Permanent case-by-case compact records are in `evidence/2026-10-21-name-arena-hard-host-cases.ndjson`; each includes body identities, classification, launch limits, memory events, elapsed time and a hash of the complete original case record. `evidence/2026-10-21-name-arena-hard-host-qualified-collection.json` preserves the exact summary and controls. The full original reports, sources, per-case outputs and193 host receipts are in [artifact12371126124](https://github.com/dwijayuda/pskernel/actions/runs/39652308839/artifacts/12371126124),17,141,667bytes, ZIP SHA256`a91d602ed147b80878b768ae47dccc6d67e6de6ed4f3a8f46011e529734c0515`. Original receipt.json is29,554bytes, SHA256`965a340b768d78bc1a9b0c33984bf4918591c5f38a4ec8ccd4a88d832dcae9b2`.
+
+This evidence-only checkpoint does not rerun or modify the kernel. Kernel341's native/portable/canonical/generated gates remain exact-source historical PASS; this Arena gate is FAIL, and current integration/Quot/initial-owner candidates receive no inherited conformance claim. The next executable corpus action is to replay the current qualified integration artifact under this same host recipe after its generated artifact is available, retaining the19 incomplete/unsupported cases and2 safety differences. Diagnosis of the actual native Church call has separately confirmed fixed-fuel DefEq exhaustion; no timeout/resource is a rejection or pass.
+
+---
+
 # Current continuation: artifact-based full Arena under the fixed 2 GiB host cap
 
 This heading describes a new, unexecuted host-only harness candidate. Its workflow

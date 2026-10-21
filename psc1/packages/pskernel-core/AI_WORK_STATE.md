@@ -1001,3 +1001,10 @@ Continue through the real highest-priority failing gate. Keep complete V1 fallba
 ## 2026-10-21 — Native Church stage host compile correction
 
 The diagnostic-source d3730ae4e72f91a5dda010bc6b7f40d4f379f780 run 39631889379/job119332004226 failed while compiling NativeChurchMain: `prefix` is a reserved Lean token. No stage result was produced; this failed run cannot identify the first kernel failure stage. Artifact12360729119 (ZIP SHA25684a539c3f22f4ada6559fab94922e7bf894c5c091dcf6568070caf4a0819c01c) preserves the build receipt. Rename that local binder and its one use to `precedingRequests`; production kernel remains pinned369bee5801bd5e4476837684fad3f7e1ca8c422c. No fixture, resource, admission or observation-order change. Fresh Linux CI is required; no local build was run.
+
+
+## 2026-10-21 — Native stage launcher exact-mode correction
+
+At host source b71a4b1aed8d5a4113c635593fa70607d34a0159, run39636878473/job119349672934 compiled the host successfully and retained the original three native controls and authentic Church reproduction: request3 returned resourceExhausted/fuel/kernel reduction budget exhausted at4096 (case0.996270857s). The stage collection then failed BEFORE invocation because the cgroup launcher's two argument allowlists permitted only empty/--controls modes. This is not a first-failing-stage receipt. Artifact12362865474 ZIP SHA25611a2aff1022739e4892da52cfe081cec75896015758cf6b68e35d654c96c6300 preserves it.
+
+Permit exactly two further singleton diagnostic modes, --stage-controls and --stages, at both unprivileged and privileged checks. Wall<=60s, cgroup2GiB, swap0, isolation and cleanup remain unchanged. Production remains369bee5801bd5e4476837684fad3f7e1ca8c422c. New Linux CI required; no local build/test. Do not treat compiled host or repeated original resource receipt as completed stage attribution.

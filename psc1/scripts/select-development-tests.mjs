@@ -44,9 +44,9 @@ export function selectPsc1Tests(paths,{full=false,uncertain=false}={}){
  }
  return {...selected,paths:[...paths].sort(),reasons:[...new Set(reasons)]};
 }
-export function successfulBaseline(runs,{workflow,branch,prNumber,baseCommit,isAncestor}){
+export function successfulBaseline(runs,{workflowPath,branch,prNumber,baseCommit,isAncestor}){
  for(const run of runs){
-  if(run.name!==workflow||run.head_branch!==branch||run.event!=='pull_request'||
+  if(run.path?.split('@')[0]!==workflowPath||run.head_branch!==branch||run.event!=='pull_request'||
       run.status!=='completed'||run.conclusion!=='success')continue;
   const pull=run.pull_requests?.find(p=>p.number===prNumber);
   // pull_requests.base is live API metadata; run-name captures the immutable dispatch base.
@@ -64,7 +64,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
  // Carry all failed/cancelled update debt forward to the last successful gate.
  // Using event.before alone can silently lose a test dependency when its run is cancelled.
  const head=pull?.head?.sha;
- let baseline=null;
+ let baseline=null,baselineError=null;
  if(pull&&process.env.GITHUB_TOKEN){
   try{
    const response=await fetch(process.env.GITHUB_API_URL+'/repos/'+process.env.GITHUB_REPOSITORY+
@@ -73,9 +73,9 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
    assert.equal(response.status,200,'cannot read previous gate conclusions');
    const data=await response.json();
    baseline=successfulBaseline(data.workflow_runs,{
-    workflow:process.env.GITHUB_WORKFLOW,branch:pull.head.ref,prNumber:pull.number,baseCommit:pull.base.sha,
+    workflowPath:process.env.GITHUB_WORKFLOW_REF?.slice((process.env.GITHUB_REPOSITORY+'/').length).split('@')[0],branch:pull.head.ref,prNumber:pull.number,baseCommit:pull.base.sha,
     isAncestor:commit=>spawnSync('git',['merge-base','--is-ancestor',commit,head]).status===0});
-  }catch{uncertain=true;}
+  }catch(error){uncertain=true;baselineError=String(error.message||error);}
  }
  const before=baseline?.commit;
  if(!baseline)uncertain=true;
@@ -85,7 +85,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
   if(diff.error||diff.status!==0)uncertain=true;
   else paths=diff.stdout.split('\0').filter(Boolean);
  }
- const result={schema:'psc1-ci-selection/1',testedCommit:sha,headCommit:head||sha,beforeCommit:before||null,eventBeforeCommit:event.before||null,baselineRunId:baseline?.runId||null,
+ const result={schema:'psc1-ci-selection/1',testedCommit:sha,headCommit:head||sha,beforeCommit:before||null,eventBeforeCommit:event.before||null,baselineRunId:baseline?.runId||null,baselineError,
   ...selectPsc1Tests(paths,{full,uncertain})};
  fs.mkdirSync('psc1/dist/development',{recursive:true});
  fs.writeFileSync('psc1/dist/development/ci-selection.json',JSON.stringify(result,null,2)+'\n');

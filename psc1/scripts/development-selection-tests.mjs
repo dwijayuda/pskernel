@@ -35,11 +35,14 @@ for(const file of ['psc1/docs/PSC1_STATUS.json','psc1/docs/PSC1_QUALIFICATION_20
 assert.equal(select(['.github/workflows/pskernel-expression-v2.yml']).focused,false);
 
 const sha='a'.repeat(40),base='b'.repeat(40),other='c'.repeat(40);
-const options={workflow:'PSC1 incremental development gates',branch:'feature',prNumber:172,baseCommit:base,isAncestor:s=>s===sha};
-const valid={id:10,display_title:'PSC1 gates base '+base,name:options.workflow,head_branch:'feature',head_sha:sha,event:'pull_request',
+const options={workflowPath:'.github/workflows/psc1-development.yml',branch:'feature',prNumber:172,baseCommit:base,isAncestor:s=>s===sha};
+const valid={id:10,display_title:'PSC1 gates base '+base,name:'PSC1 gates base '+base,path:options.workflowPath,head_branch:'feature',head_sha:sha,event:'pull_request',
  status:'completed',conclusion:'success',pull_requests:[{number:172,base:{sha:base}}]};
 assert.deepEqual(successfulBaseline([{...valid,id:12,conclusion:'cancelled'},{...valid,id:11,conclusion:'failure'},valid],options),{commit:sha,runId:10});
-for(const changed of [{head_sha:other},{head_branch:'other'},{name:'other workflow'},{event:'push'},
+for(const changed of [{head_sha:other},{head_branch:'other'},{path:'.github/workflows/other.yml'},{event:'push'},
  {pull_requests:[]},{display_title:'PSC1 gates base '+other},{display_title:'old unpinned workflow'}])
  assert.equal(successfulBaseline([{...valid,...changed}],options),null);
 assert.equal(successfulBaseline([],options),null);
+
+// GitHub exposes the custom run title as name; workflow file identity stays stable.
+assert.deepEqual(successfulBaseline([{...valid,name:'any display title'}],options),{commit:sha,runId:10});

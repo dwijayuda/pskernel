@@ -84,7 +84,13 @@ Manual psc1-practical-release reruns native/closures/G1/full scoped and enforces
 --require-ready. It must not pass an incomplete release contract. No merge,
 registry publication or branch-protection update was performed.
 
-Documentation-only validation is exercised by this checkpoint update. Its current
+Documentation-only run39578186422 correctly fell back to full instead of skipping
+because GitHub's API name became the custom run title. Baseline identity now
+uses the workflow file path; API-shaped regression cases cover display-name
+drift. Explicit baseline errors are retained for diagnostics. The real fast-path
+validation must be repeated after this router correction qualifies.
+
+Documentation-only validation is exercised by the next checkpoint update. Its current
 Actions selection JSON must identify the successful39575345130 baseline and
 skip all heavy jobs. The generated CI artifact and final gate are authoritative;
 do not infer a new full qualification merely from a static-only descendant.

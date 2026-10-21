@@ -36,7 +36,7 @@ def psKernelExprV2DeltaDefinition
                   | PsKernelConstantInfo.defnInfo definition =>
                       if Nat.beq (psKernelNameListLength definition.base.levelParams)
                           (psKernelLevelListLength levels) then
-                        let hasArgs :=
+                        let hasArgs : Bool :=
                           match Prod.snd spine with
                           | List.nil => false
                           | List.cons _ _ => true;
@@ -56,7 +56,7 @@ def psKernelExprV2DefEqUnfold
   match psKernelExprV2PagedRequire state.whnf.arena root with
   | Except.error error => Option.some (Except.error error)
   | Except.ok entry =>
-      let cached :=
+      let cached : Except String (Option Nat) :=
         if entry.hasFVar then Except.ok Option.none
         else psKernelExprV2WhnfCacheFindIn state.unfold state.whnf.arena root entry.hash;
       match cached with
@@ -75,7 +75,7 @@ def psKernelExprV2DefEqUnfold
                       match Prod.snd unfolded with
                       | Option.none => Option.some (Except.ok (Prod.mk next Option.none))
                       | Option.some value =>
-                          let published :=
+                          let published : PsKernelExprV2CheckState :=
                             if entry.hasFVar then next
                             else psKernelExprV2CheckStateWithUnfold next
                               (List.cons
@@ -136,7 +136,7 @@ def psKernelExprV2DefEqTryUnfoldProjAppWith
                           next.whnf.arena (Prod.snd reduced) root with
                       | Except.error error => Option.some (Except.error error)
                       | Except.ok unchanged =>
-                          let value :=
+                          let value : Option Nat :=
                             if unchanged then Option.none else Option.some (Prod.snd reduced);
                           Option.some (Except.ok (Prod.mk next value))
           | _ => Option.some (Except.ok (Prod.mk state Option.none))
@@ -153,7 +153,7 @@ def psKernelExprV2DefEqFinishLazyStepWith
       match attempted with
       | Except.error error => Option.some (Except.error error)
       | Except.ok compared =>
-          let step :=
+          let step : PsKernelExprV2DeltaStepResult :=
             match Prod.snd compared with
             | Option.none => PsKernelExprV2DeltaStepResult.continue left right
             | Option.some value =>
@@ -170,7 +170,7 @@ def psKernelExprV2DefEqUnfoldSideWith
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
-  let selected := if unfoldLeft then left else right;
+  let selected : Nat := if unfoldLeft then left else right;
   match psKernelExprV2DefEqDeltaOnceWith coreWhnf context state selected with
   | Option.none => Option.none
   | Option.some attempted =>
@@ -194,7 +194,7 @@ def psKernelExprV2DefEqLazyStepOneWith
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
-  let peerRoot := if leftHasDefinition then right else left;
+  let peerRoot : Nat := if leftHasDefinition then right else left;
   match psKernelExprV2DefEqTryUnfoldProjAppWith coreWhnf context state peerRoot with
   | Option.none => Option.none
   | Option.some attempted =>
@@ -282,7 +282,7 @@ def psKernelExprV2DefEqLazyStepBothWith
     psKernelExprV2DefEqUnfoldSideWith false defeq coreWhnf context state left right
   else
     let sameShortcut := psKernelExprV2DefEqSameDefinitionShortcut leftDef rightDef;
-    let argsResult :=
+    let argsResult : Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
       if sameShortcut then
         match psKernelExprV2DefEqPairContains state.whnf.arena state.failure left right with
         | Except.error error => Option.some (Except.error error)
@@ -296,10 +296,11 @@ def psKernelExprV2DefEqLazyStepBothWith
         match attemptedArgs with
         | Except.error error => Option.some (Except.error error)
         | Except.ok compared =>
-            if if sameShortcut then Prod.snd compared else false then
+            let argsEqual : Bool := if sameShortcut then Prod.snd compared else false;
+            if argsEqual then
               Option.some (Except.ok (Prod.mk (Prod.fst compared) PsKernelExprV2DeltaStepResult.equal))
             else
-              let afterFailure :=
+              let afterFailure : Except String PsKernelExprV2CheckState :=
                 if sameShortcut then
                   psKernelExprV2DefEqFailureInsert (Prod.fst compared) left right
                 else Except.ok (Prod.fst compared);

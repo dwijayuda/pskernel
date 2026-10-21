@@ -9,6 +9,36 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 08:42 UTC — explicit control-flow types for authentic PSC1
+
+The two conditional-root aliases in `b438e9508a6df7b2f895f3c96456bf42851443d5`
+passed parsing. Its native integration
+[119122744843](https://github.com/dwijayuda/pskernel/actions/runs/39570376611/job/119122744843)
+and native correctness
+[119122743486](https://github.com/dwijayuda/pskernel/actions/runs/39570376548/job/119122743486)
+are again terminal PASS. All five native/portable-subset research jobs passed.
+Authentic complete-source elaboration then reported
+`psKernelExprV2DeltaDefinition: matchExpectedType` in DeltaStep.lean:
+the new match-valued `hasArgs` local had no explicit result type.
+[Generated integration 119122744269](https://github.com/dwijayuda/pskernel/actions/runs/39570376611/job/119122744269),
+[canonical correctness 119122743328](https://github.com/dwijayuda/pskernel/actions/runs/39570376548/job/119122743328),
+and [generated research119122744304](https://github.com/dwijayuda/pskernel/actions/runs/39570376577/job/119122744304)
+are terminal FAIL before generated execution.
+
+This successor annotates every new match/conditional constructor-valued local
+in DeltaStep (Bool, Nat, optional node, state, step, cache/argument/failure result)
+and names the nested Bool conditional. These are portable-source elaboration
+corrections; the algorithm, callback ownership, cache admission, errors,
+test matrices and kernel4096 policy are unchanged. The staged FullShape/FinalRules
+and admission-guard drafts are being checked for the same source class before
+promotion. Exact successor gates are NOT RUN until their terminal receipts arrive.
+
+The source matrix for b438 is the same as4105 below: native/proof/native benchmark/
+native provider PASS; complete portable FAIL elaboration; canonical/runtime/generated
+provider NOT RUN. It is not qualified by native success alone. Last full scoped
+provider checkpoint remains e015; full Arena remains170matches +2safety +20timeouts
++1unsupported. No full V2 or full Lean compatibility claim is made.
+
 ## 2026-10-21 08:34 UTC — lazy-delta native qualified; conditional-argument portability correction
 
 Exact source `4105e93bac9cecabd4afdbc3dd35b1fc8536cbac` has terminal **PASS**

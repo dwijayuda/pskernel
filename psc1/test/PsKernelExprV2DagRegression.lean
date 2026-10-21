@@ -1941,6 +1941,7 @@ private def projectionOfficialBinder : PsKernelBinderInfo → Lean.BinderInfo
 private def projectionOfficialExpr : PsKernelExpr → Option Lean.Expr
   | .bvar index => some (.bvar index)
   | .fvar name => some (.fvar (Lean.FVarId.mk (quickOfficialName name)))
+  | .mvar name => some (.mvar (Lean.MVarId.mk (quickOfficialName name)))
   | .sort level => (quickOfficialLevel level).map Lean.Expr.sort
   | .const name levels => do
       return .const (quickOfficialName name) (← levels.mapM quickOfficialLevel)
@@ -1960,7 +1961,6 @@ private def projectionOfficialExpr : PsKernelExpr → Option Lean.Expr
   | .mdata _ body => (projectionOfficialExpr body).map (Lean.Expr.mdata {})
   | .proj name index body => do
       return .proj (quickOfficialName name) index (← projectionOfficialExpr body)
-  | _ => none
 
 private def projectionOfficialRequire (term : PsKernelExpr) : IO Lean.Expr := do
   match projectionOfficialExpr term with
@@ -3398,6 +3398,310 @@ private def theoremIsPropStateGuards : IO Unit := do
      | _, _ => false)
   IO.println "PSC1_V2_DAG_THEOREM_ISPROP_STATE: PASS"
 
+private def spineExpr (isLambda : Bool) (name : PsKernelName)
+    (domain body : PsKernelExpr) (info : PsKernelBinderInfo) : PsKernelExpr :=
+  if isLambda then .lam name domain body info else .forallE name domain body info
+
+private def compareSpineRaw (label : String)
+    (original : Except String (Prod Bool PsKernelCheckerState))
+    (actual : Option (Except String (Prod PsKernelExprV2CheckState Bool))) : IO Unit := do
+  match original, actual with
+  | .error expected, some (.error observed) =>
+      require (label ++ "-exact-error") (expected == observed)
+  | .ok expected, some (.ok observed) =>
+      require (label ++ "-boolean") (expected.fst == observed.snd)
+      require (label ++ "-fresh-counter") (expected.snd.nextFresh == observed.fst.nextFresh)
+  | _, none => throw (IO.userError ("PSC1_V2_SPINE_UNEXPECTED_FALLBACK " ++ label))
+  | _, _ => throw (IO.userError ("PSC1_V2_SPINE_RESULT_MISMATCH " ++ label))
+
+private def binderSpineDefEqParity : IO Unit := do
+  let x := nm "spine-left"
+  let y := nm "spine-right"
+  let a := nm "spine-inner-left"
+  let b := nm "spine-inner-right"
+  let one := PsKernelLevel.succ .zero
+  let equivalentOne := PsKernelExpr.sort (.max one one)
+  let equivalentZero := PsKernelExpr.sort (.max .zero .zero)
+  let officialEnv ← Lean.mkEmptyEnvironment
+  for isLambda in [true,false] do
+    let bind := fun name domain body => spineExpr isLambda name domain body .default
+    let opposite := fun name domain body => spineExpr (!isLambda) name domain body .default
+    let fixtures : List (String × PsKernelExpr × PsKernelExpr × Bool) := [
+      ("alpha", spineExpr isLambda x sort1 (.bvar 0) .implicit,
+        spineExpr isLambda y sort1 (.bvar 0) .strictImplicit, true),
+      ("dependent-universe", bind x sort1 (.bvar 0),
+        bind y equivalentOne (.bvar 0), true),
+      ("closed-body", bind x sort1 sort0, bind y sort1 equivalentZero, true),
+      ("different-domain", bind x sort0 sort0, bind y sort1 sort0, false),
+      ("different-body", bind x sort1 sort0, bind y sort1 sort1, false),
+      ("nested-dependent", bind x sort1 (bind a (.bvar 0) (.bvar 1)),
+        bind y equivalentOne (bind b (.bvar 0) (.bvar 1)), true),
+      ("nested-closed", bind x sort1 (bind a sort1 (.mdata 1 sort0)),
+        bind y sort1 (bind b sort1 (.mdata 2 equivalentZero)), true),
+      ("metadata-body", bind x sort1 (.mdata 1 (.bvar 0)),
+        bind y sort1 (.mdata 2 (.bvar 0)), true),
+      ("metadata-domain", bind x (.mdata 1 sort1) (.bvar 0),
+        bind y (.mdata 2 equivalentOne) (.bvar 0), true)]
+    let fixtures := if isLambda then fixtures ++ [
+      ("opposite-tail", bind x sort1 (opposite a sort1 (.mdata 1 sort0)),
+        bind y sort1 (opposite b sort1 (.mdata 2 equivalentZero)), true)] else fixtures
+    for (label, left, right, expected) in fixtures do
+      let (baseArena, leftId) ← expect (psKernelExprV2PagedImportChecked left)
+      let (arena, rightId) ← expect (psKernelExprV2PagedImportIntoChecked baseArena right)
+      for fuel in [0,1,2,3,4,8,16,64] do
+        for maxDepth in [0,1,2] do
+          let session ← fresh fuel maxDepth
+          let checker := psKernelKernelSessionChecker session [] .safe
+          for recDepth in [0,13,14,15,16] do
+            let scalar := { checker.context with recDepth := recDepth }
+            compareSpineRaw ("binder-spine-" ++ label)
+              (psKernelIsDefEqWithFuel fuel scalar psKernelCheckerStateEmpty left right)
+              (psKernelExprV2TryDefEqStateWithFuel fuel
+                (psKernelExprV2CheckContextEmpty scalar)
+                (psKernelExprV2CheckStateEmpty arena) leftId rightId)
+          require ("binder-spine-public-" ++ label)
+            (sameDefEq (psKernelV1IsDefEq session [] .safe left right)
+              (psKernelV1RunDag session [] .safe arena [.isDefEq leftId rightId]))
+      let session ← fresh 64
+      let checker := psKernelKernelSessionChecker session [] .safe
+      require ("binder-spine-direct-answer-" ++ label)
+        (match psKernelExprV2TryDefEqStateWithFuel 64
+            (psKernelExprV2CheckContextEmpty checker.context)
+            (psKernelExprV2CheckStateEmpty arena) leftId rightId with
+         | some (.ok result) => result.snd == expected | _ => false)
+      let officialLeft ← projectionOfficialRequire left
+      let officialRight ← projectionOfficialRequire right
+      require ("binder-spine-official-left-check-" ++ label)
+        (match Lean.Kernel.check officialEnv {} officialLeft with | .ok _ => true | _ => false)
+      require ("binder-spine-official-right-check-" ++ label)
+        (match Lean.Kernel.check officialEnv {} officialRight with | .ok _ => true | _ => false)
+      require ("binder-spine-official-defeq-" ++ label)
+        (match Lean.Kernel.isDefEq officialEnv {} officialLeft officialRight with
+         | .ok value => value == expected | _ => false)
+  IO.println "PSC1_V2_DAG_BINDER_SPINE: PASS"
+  IO.println "PSC1_V2_DAG_OFFICIAL_BINDER_SPINE: PASS"
+
+private def binderSpineBudgetParity : IO Unit := do
+  let x := nm "spine-budget-left"
+  let y := nm "spine-budget-right"
+  let one := PsKernelLevel.succ .zero
+  let equivalentOne := PsKernelExpr.sort (.max one one)
+  for isLambda in [true,false] do
+    let bind := fun name domain body => spineExpr isLambda name domain body .default
+    let deepLeft := bind x sort1 (bind x sort1 (bind x sort1 (.mdata 1 (.bvar 2))))
+    let deepRight := bind y sort1 (bind y sort1 (bind y sort1 (.mdata 2 (.bvar 2))))
+    let fixtures : List (String × PsKernelExpr × PsKernelExpr × List PsKernelExpr) := [
+      ("three-binders", deepLeft, deepRight, []),
+      ("domain-comparison", bind x sort1 (.bvar 0),
+        bind y equivalentOne (.bvar 0), []),
+      ("existing-substitution", bind x (.bvar 0) (.mdata 1 (.bvar 1)),
+        bind y (.bvar 0) (.mdata 2 (.bvar 1)), [sort1])]
+    for (label, left, right, subst) in fixtures do
+      let (a0, leftId) ← expect (psKernelExprV2PagedImportChecked left)
+      let (a1, rightId) ← expect (psKernelExprV2PagedImportIntoChecked a0 right)
+      let (arena, sortId) ← expect (psKernelExprV2PagedImportIntoChecked a1 sort1)
+      let ids := if subst.isEmpty then [] else [sortId]
+      let session ← fresh 64 1
+      let checker := psKernelKernelSessionChecker session [] .safe
+      for spineFuel in [0,1,2,3,4,5,8,64] do
+        for callbackFuel in [0,1,2,3,4,64] do
+          for recDepth in [0,14,15,16] do
+            let scalar := { checker.context with recDepth := recDepth }
+            let callback := fun context state l r =>
+              psKernelExprV2TryDefEqStateWithFuel callbackFuel context state l r
+            let original :=
+              if isLambda then
+                psKernelDefEqLambdaSpineWithFuel spineFuel
+                  (psKernelIsDefEqWithFuel callbackFuel) scalar psKernelCheckerStateEmpty
+                  left right subst
+              else
+                psKernelDefEqForallSpineWithFuel spineFuel
+                  (psKernelIsDefEqWithFuel callbackFuel) scalar psKernelCheckerStateEmpty
+                  left right subst
+            compareSpineRaw ("binder-spine-bounded-" ++ label) original
+              (psKernelExprV2DefEqBinderSpineWithFuel spineFuel isLambda callback
+                (psKernelExprV2CheckContextEmpty scalar)
+                (psKernelExprV2CheckStateEmpty arena) leftId rightId ids)
+      let callback := fun context state l r =>
+        psKernelExprV2TryDefEqStateWithFuel 64 context state l r
+      require ("binder-spine-zero-before-invalid-id-" ++ label)
+        (match psKernelExprV2DefEqBinderSpineWithFuel 0 isLambda callback
+            (psKernelExprV2CheckContextEmpty checker.context)
+            (psKernelExprV2CheckStateEmpty arena) arena.size arena.size [] with
+         | some (.error error) => error ==
+             (if isLambda then "kernel defeq lambda-spine budget exhausted"
+              else "kernel defeq forall-spine budget exhausted")
+         | _ => false)
+  let (a0, zeroId) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
+  let (a1, equivalentId) ← expect (psKernelExprV2PagedMkSort a0 (.max .zero .zero))
+  let mut arena := a1
+  let mut shared := zeroId
+  for _ in [:24] do
+    let (next, root) ← expect
+      (psKernelExprV2PagedMkForall arena x shared shared .default)
+    arena := next
+    shared := root
+  let count ← expect (psKernelExprV2TransformCountOnCanonical arena shared)
+  require "binder-spine-count-shared-occurrences" (count == 33554431)
+  let (arena, leftId) ← expect (psKernelExprV2PagedMkLam arena x shared zeroId .default)
+  let (arena, rightId) ← expect (psKernelExprV2PagedMkLam arena y shared equivalentId .implicit)
+  let leftCount ← expect (psKernelExprV2TransformCountOnCanonical arena leftId)
+  let rightCount ← expect (psKernelExprV2TransformCountOnCanonical arena rightId)
+  require "binder-spine-preserves-large-derived-budget"
+    (1 + leftCount + rightCount == 67108867)
+  let session ← fresh 3 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  require "binder-spine-shared-default-avoids-fuel-proportional-closures"
+    (match psKernelExprV2TryDefEqStateWithFuel 3
+        (psKernelExprV2CheckContextEmpty checker.context)
+        (psKernelExprV2CheckStateEmpty arena) leftId rightId with
+     | some (.ok result) => result.snd && result.fst.nextFresh == 0
+     | _ => false)
+  IO.println "PSC1_V2_DAG_BINDER_SPINE_BUDGET: PASS"
+
+private def binderSpineCacheParity : IO Unit := do
+  let x := nm "spine-scope-left"
+  let y := nm "spine-scope-right"
+  let a := nm "spine-scope-inner-left"
+  let b := nm "spine-scope-inner-right"
+  let one := PsKernelLevel.succ .zero
+  let mut parentLeft := PsKernelExpr.sort one
+  let mut parentRight := PsKernelExpr.sort (.max one one)
+  let mut childLeft := sort0
+  let mut childRight := PsKernelExpr.sort (.max .zero .zero)
+  for tag in [:8] do
+    parentLeft := .mdata (11100 + tag) parentLeft
+    parentRight := .mdata (11200 + tag) parentRight
+    childLeft := .mdata (11300 + tag) childLeft
+    childRight := .mdata (11400 + tag) childRight
+  for isLambda in [true,false] do
+    let bind := fun name domain body => spineExpr isLambda name domain body .default
+    let left := bind x parentLeft (bind a childLeft (.bvar 1))
+    let right := bind y parentRight (bind b childRight (.bvar 1))
+    let (a0, parentLeftId) ← expect (psKernelExprV2PagedImportChecked parentLeft)
+    let (a1, parentRightId) ← expect (psKernelExprV2PagedImportIntoChecked a0 parentRight)
+    let (a2, childLeftId) ← expect (psKernelExprV2PagedImportIntoChecked a1 childLeft)
+    let (a3, childRightId) ← expect (psKernelExprV2PagedImportIntoChecked a2 childRight)
+    let (a4, leftId) ← expect (psKernelExprV2PagedImportIntoChecked a3 left)
+    let (a5, rightId) ← expect (psKernelExprV2PagedImportIntoChecked a4 right)
+    let closedLeft := bind x sort1 childLeft
+    let closedRight := bind y sort1 childRight
+    let (a6, closedLeftId) ← expect (psKernelExprV2PagedImportIntoChecked a5 closedLeft)
+    let (arena, closedRightId) ← expect (psKernelExprV2PagedImportIntoChecked a6 closedRight)
+    let session ← fresh 64 1
+    let checker := psKernelKernelSessionChecker session [] .safe
+    let context := psKernelExprV2CheckContextEmpty checker.context
+    let initial := psKernelExprV2CheckStateEmpty arena
+    let legacy ← expect
+      (psKernelIsDefEqWithFuel 64 checker.context psKernelCheckerStateEmpty left right)
+    let direct ←
+      match psKernelExprV2TryDefEqStateWithFuel 64 context initial leftId rightId with
+      | some result => expect result
+      | none => throw (IO.userError "PSC1_V2_SPINE_SCOPE_PRIMING_FALLBACK")
+    require "binder-spine-nested-right-locals-count"
+      (legacy.fst && direct.snd && legacy.snd.nextFresh == 2 && direct.fst.nextFresh == 2)
+    let parentHit ← expect (psKernelExprV2DefEqPairContains
+      direct.fst.whnf.arena direct.fst.success parentLeftId parentRightId)
+    let childHit ← expect (psKernelExprV2DefEqPairContains
+      direct.fst.whnf.arena direct.fst.success childLeftId childRightId)
+    require "binder-spine-keeps-parent-comparison" parentHit
+    require "binder-spine-restores-child-comparison" (!childHit)
+    for (fuel, recDepth) in [(0,0),(1,0),(1,15),(1,16)] do
+      let scalar := { checker.context with recDepth := recDepth }
+      let typed := psKernelExprV2CheckContextEmpty scalar
+      compareSpineRaw "binder-spine-warm-root-guards"
+        (psKernelIsDefEqWithFuel fuel scalar legacy.snd left right)
+        (psKernelExprV2TryDefEqStateWithFuel fuel typed direct.fst leftId rightId)
+      compareSpineRaw "binder-spine-parent-pair-guards"
+        (psKernelIsDefEqWithFuel fuel scalar legacy.snd parentLeft parentRight)
+        (psKernelExprV2TryDefEqStateWithFuel fuel typed direct.fst parentLeftId parentRightId)
+      compareSpineRaw "binder-spine-child-pair-restored"
+        (psKernelIsDefEqWithFuel fuel scalar legacy.snd childLeft childRight)
+        (psKernelExprV2TryDefEqStateWithFuel fuel typed direct.fst childLeftId childRightId)
+    require "binder-spine-child-comparison-still-needs-fuel"
+      (match psKernelExprV2TryDefEqStateWithFuel 1 context direct.fst childLeftId childRightId with
+       | some (.error error) => error == "kernel definitional equality budget exhausted"
+       | _ => false)
+    let closedLegacy ← expect (psKernelIsDefEqWithFuel 64 checker.context
+      psKernelCheckerStateEmpty closedLeft closedRight)
+    let closedDirect ←
+      match psKernelExprV2TryDefEqStateWithFuel 64 context initial closedLeftId closedRightId with
+      | some result => expect result
+      | none => throw (IO.userError "PSC1_V2_SPINE_CLOSED_PRIMING_FALLBACK")
+    require "binder-spine-unused-binder-has-no-fresh-local"
+      (closedLegacy.fst && closedDirect.snd && closedLegacy.snd.nextFresh == 0 &&
+        closedDirect.fst.nextFresh == 0)
+    let closedHit ← expect (psKernelExprV2DefEqPairContains
+      closedDirect.fst.whnf.arena closedDirect.fst.success childLeftId childRightId)
+    require "binder-spine-closed-body-pair-persists" closedHit
+    compareSpineRaw "binder-spine-closed-body-warm-pair"
+      (psKernelIsDefEqWithFuel 1 checker.context closedLegacy.snd childLeft childRight)
+      (psKernelExprV2TryDefEqStateWithFuel 1 context
+        closedDirect.fst childLeftId childRightId)
+  IO.println "PSC1_V2_DAG_BINDER_SPINE_CACHE: PASS"
+
+private def binderSpineFallbackParity : IO Unit := do
+  let x := nm "spine-fallback-left"
+  let y := nm "spine-fallback-right"
+  let redex := PsKernelExpr.app (.lam x sort1 (.bvar 0) .default) sort0
+  for isLambda in [true,false] do
+    let bind := fun name domain body => spineExpr isLambda name domain body .default
+    let fixtures : List (String × PsKernelExpr × PsKernelExpr) := [
+      ("one-sided-metadata", bind x sort1 (.mdata 1 sort0), bind y sort1 sort0),
+      ("beta-body", bind x sort1 redex, bind y sort1 sort0),
+      ("unequal-spine-length", bind x sort1 (bind x sort1 sort0), bind y sort1 sort0)]
+    for (label, left, right) in fixtures do
+      let (a0, leftId) ← expect (psKernelExprV2PagedImportChecked left)
+      let (arena, rightId) ← expect (psKernelExprV2PagedImportIntoChecked a0 right)
+      let session ← fresh 64
+      let checker := psKernelKernelSessionChecker session [] .safe
+      require ("binder-spine-explicit-fallback-" ++ label)
+        (match psKernelExprV2TryDefEqStateWithFuel 64
+            (psKernelExprV2CheckContextEmpty checker.context)
+            (psKernelExprV2CheckStateEmpty arena) leftId rightId with
+         | none => true | _ => false)
+      for fuel in [0,1,2,3,4,8,64] do
+        for maxDepth in [0,1] do
+          let session ← fresh fuel maxDepth
+          require ("binder-spine-fallback-public-" ++ label)
+            (sameDefEq (psKernelV1IsDefEq session [] .safe left right)
+              (psKernelV1RunDag session [] .safe arena [.isDefEq leftId rightId]))
+  let zeroEquivalent := PsKernelExpr.sort (.max .zero .zero)
+  let invalidPairs : List (String × PsKernelExpr × PsKernelExpr) := [
+    ("forall-lambda-tail",
+      .forallE x sort1 (.lam x sort1 (.mdata 1 sort0) .default) .default,
+      .forallE y sort1 (.lam y sort1 (.mdata 2 zeroEquivalent) .default) .default),
+    ("unchecked-domain",
+      .lam x (.mvar (nm "spine-missing")) sort0 .default,
+      .lam y (.mvar (nm "spine-missing")) zeroEquivalent .default)]
+  let officialEnv ← Lean.mkEmptyEnvironment
+  for (label, left, right) in invalidPairs do
+    let (a0, leftId) ← expect (psKernelExprV2PagedImportChecked left)
+    let (a1, rightId) ← expect (psKernelExprV2PagedImportIntoChecked a0 right)
+    let (arena, goodId) ← expect (psKernelExprV2PagedImportIntoChecked a1 sort0)
+    let session ← fresh 64
+    let checker := psKernelKernelSessionChecker session [] .safe
+    require ("binder-spine-raw-comparison-is-not-checking-" ++ label)
+      (match psKernelExprV2TryDefEqStateWithFuel 64
+          (psKernelExprV2CheckContextEmpty checker.context)
+          (psKernelExprV2CheckStateEmpty arena) leftId rightId with
+       | some (.ok result) => result.snd | _ => false)
+    for (a, b, l, r) in [(leftId,rightId,left,right),
+        (leftId,goodId,left,sort0),(goodId,rightId,sort0,right)] do
+      require ("binder-spine-public-checks-operands-" ++ label)
+        (sameDefEq (psKernelV1IsDefEq session [] .safe l r)
+          (psKernelV1RunDag session [] .safe arena [.isDefEq a b]))
+      require ("binder-spine-invalid-never-admitted-" ++ label)
+        (match psKernelV1RunDag session [] .safe arena [.isDefEq a b] with
+         | .error (.rejectedInvalid _) => true | _ => false)
+    let officialLeft ← projectionOfficialRequire left
+    let officialRight ← projectionOfficialRequire right
+    require ("binder-spine-official-rejects-invalid-left-" ++ label)
+      (match Lean.Kernel.check officialEnv {} officialLeft with | .error _ => true | _ => false)
+    require ("binder-spine-official-rejects-invalid-right-" ++ label)
+      (match Lean.Kernel.check officialEnv {} officialRight with | .error _ => true | _ => false)
+  IO.println "PSC1_V2_DAG_BINDER_SPINE_FALLBACK: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -3431,5 +3735,9 @@ def main : IO Unit := do
   admissionFinalComparisonGuards
   theoremAdmissionParity
   theoremIsPropStateGuards
+  binderSpineDefEqParity
+  binderSpineBudgetParity
+  binderSpineCacheParity
+  binderSpineFallbackParity
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

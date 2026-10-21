@@ -29,6 +29,31 @@ behavior, or a complete DAG checker. Original default V1 remains qualified;
 the replacement still relies on full-operation fallback outside its migrated
 rules. No integration PR is merged.
 
+### Shared lambda/forall DefEq spines — awaiting qualification
+
+One DAG binder-spine worker implements the original lambda and forall quick
+comparison rules. It keeps the independent1+left-node-count+right-node-count
+spine budget, reuses the fixed predecessor DefEq callback for every domain
+and final-body comparison, opens reverse substitutions, and chooses the right
+binder's fresh name/type/info. The raw-domain syntactic shortcut is preserved.
+
+A local scope is created only when either original body has loose variables.
+Parent domain comparison caches survive; child-local entries are restored away.
+Closed-body comparisons keep their state because that original branch creates
+no local scope. Root fuel/depth and success-cache guards remain unchanged.
+Every unsupported descendant requests complete original-operation fallback.
+
+Native and generated matrices cover19 well-typed pairs with2,280 raw
+fuel/depth comparisons plus public checks. All19 pairs are also compared with
+official Lean4.35. Another1,152 bounded comparisons separate spine fuel from
+callback fuel and exercise incoming substitution. Warm/cold cache controls,
+unequal spine lengths, unsupported beta/one-sided metadata descendants, and
+malformed operands are explicit. Official Lean independently rejects both
+malformed pairs; the test-only converter now handles metavariables for that
+negative check. A24-level shared DAG verifies the exact67,108,867 default
+budget without materializing its expanded tree or allocating one closure per
+fuel unit. Native/generated/canonical results are pending Actions.
+
 ### Direct theorem admission — awaiting qualification
 
 Theorem plans now retain the same owner through the original header check,

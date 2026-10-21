@@ -3045,4 +3045,247 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
   console.log("PSC1_V2_DAG_JS_THEOREM_ISPROP_STATE: PASS");
 }
 
+{
+  let spineArena=empty;
+  const build=(kind,term,...args)=>{
+    const result=mk(spineArena,kind,...args);spineArena=result.fst;
+    return {id:result.snd,term};
+  };
+  const bs=level=>build("Sort",E.sort(level),level);
+  const bv=index=>build("BVar",E.bvar(index),index);
+  const md=(tag,body)=>build("MData",E.mdata(tag,body.term),tag,body.id);
+  const bind=(isLambda,n,domain,body,info=B.default)=>build(
+    isLambda?"Lam":"Forall",
+    isLambda?E.lam(n,domain.term,body.term,info):E.forallE(n,domain.term,body.term,info),
+    n,domain.id,body.id,info);
+  const app=(fn,arg)=>build("App",E.app(fn.term,arg.term),fn.id,arg.id);
+  const one=L.succ(L.zero),s0=bs(L.zero),s1=bs(one);
+  const m0=bs(L.max(L.zero,L.zero)),m1=bs(L.max(one,one));
+  const b0=bv(0n),b1=bv(1n),b2=bv(2n);
+  const x=name("spine-x"),y=name("spine-y"),a=name("spine-a"),b=name("spine-b");
+  const typed=scalar=>get("psKernelExprV2CheckContextEmpty")(scalar);
+  const freshState=()=>get("psKernelExprV2CheckStateEmpty")(spineArena);
+  const raw=(fuel,context,state,left,right)=>
+    get("psKernelExprV2TryDefEqStateWithFuel")(fuel)(context)(state)(left)(right);
+  const original=(fuel,context,state,left,right)=>
+    get("psKernelIsDefEqWithFuel")(fuel)(context)(state)(left)(right);
+  const boolEqual=(left,right)=>typeof left==="boolean"&&typeof right==="boolean"&&left===right;
+  const compare=(expectedAttempt,actualAttempt,label)=>{
+    const actual=accepted(actualAttempt,label+"-direct");
+    if(rejected(expectedAttempt)){
+      must(rejected(actual)&&actual.error===expectedAttempt.error,label+"-error");
+    }else{
+      const expected=accepted(expectedAttempt,label+"-original");
+      const result=accepted(actual,label+"-actual");
+      must(boolEqual(expected.fst,result.snd),label+"-boolean");
+      must(expected.snd.nextFresh===result.fst.nextFresh,label+"-fresh");
+    }
+  };
+  const publicPair=(s,left,right)=>invoke(spineArena,[C.isDefEq(left.id,right.id)],s);
+  const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  for(const isLambda of [true,false]){
+    const binder=(n,domain,body,info=B.default)=>bind(isLambda,n,domain,body,info);
+    const fixtures=[
+      ["alpha",binder(x,s1,b0,B.implicit),binder(y,s1,b0,B.strictImplicit),true],
+      ["dependent-universe",binder(x,s1,b0),binder(y,m1,b0),true],
+      ["closed-body",binder(x,s1,s0),binder(y,s1,m0),true],
+      ["different-domain",binder(x,s0,s0),binder(y,s1,s0),false],
+      ["different-body",binder(x,s1,s0),binder(y,s1,s1),false],
+      ["nested-dependent",binder(x,s1,binder(a,b0,b1)),
+        binder(y,m1,binder(b,b0,b1)),true],
+      ["nested-closed",binder(x,s1,binder(a,s1,md(1n,s0))),
+        binder(y,s1,binder(b,s1,md(2n,m0))),true],
+      ["metadata-body",binder(x,s1,md(1n,b0)),binder(y,s1,md(2n,b0)),true],
+      ["metadata-domain",binder(x,md(1n,s1),b0),binder(y,md(2n,m1),b0),true]
+    ];
+    if(isLambda)fixtures.push(["opposite-tail",
+      binder(x,s1,bind(false,a,s1,md(1n,s0))),
+      binder(y,s1,bind(false,b,s1,md(2n,m0))),true]);
+    for(const [label,left,right,answer] of fixtures){
+      for(const fuel of [0n,1n,2n,3n,4n,8n,16n,64n])for(const maxRecDepth of [0n,1n,2n]){
+        const s=session(fuel,maxRecDepth);
+        const checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+        for(const recDepth of [0n,13n,14n,15n,16n]){
+          const scalar={...checker.context,recDepth};
+          compare(original(fuel,scalar,checker.state,left.term,right.term),
+            raw(fuel,typed(scalar),freshState(),left.id,right.id),
+            "binder-spine-raw-"+isLambda+"-"+label+"-"+fuel+"-"+maxRecDepth+"-"+recDepth);
+        }
+        must(sameOperation(get("psKernelV1IsDefEq")(s,nil,S.safe,left.term,right.term),
+          publicPair(s,left,right),boolEqual),
+          "binder-spine-public-"+isLambda+"-"+label+"-"+fuel+"-"+maxRecDepth);
+      }
+      const s=session(64n),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+      const result=accepted(accepted(raw(64n,typed(checker.context),freshState(),left.id,right.id),
+        "binder-spine-answer-some"),"binder-spine-answer-result");
+      must(boolEqual(result.snd,answer),"binder-spine-answer-"+isLambda+"-"+label);
+      const replies=array(accepted(publicPair(s,left,right),"binder-spine-checked-answer").replies);
+      must(replies.length===1&&boolEqual(replies[0].value,answer),
+        "binder-spine-checked-answer-"+isLambda+"-"+label);
+    }
+  }
+  console.log("PSC1_V2_DAG_JS_BINDER_SPINE: PASS");
+  for(const isLambda of [true,false]){
+    const binder=(n,domain,body)=>bind(isLambda,n,domain,body);
+    const deepLeft=binder(x,s1,binder(a,s1,binder(x,s1,md(1n,b2))));
+    const deepRight=binder(y,s1,binder(b,s1,binder(y,s1,md(2n,b2))));
+    const fixtures=[
+      ["three-binders",deepLeft,deepRight,nil,nil],
+      ["domain-callback",binder(x,s1,b0),binder(y,m1,b0),nil,nil],
+      ["incoming-reverse-subst",binder(x,b0,md(1n,b1)),
+        binder(y,b0,md(2n,b1)),list([s1.term]),list([s1.id])]
+    ];
+    const oldSpine=get(isLambda?"psKernelDefEqLambdaSpineWithFuel":
+      "psKernelDefEqForallSpineWithFuel");
+    const newSpine=get("psKernelExprV2DefEqBinderSpineWithFuel");
+    const base=get("psKernelKernelSessionChecker")(session(64n,1n),nil,S.safe);
+    for(const [label,left,right,oldSubst,newSubst] of fixtures){
+      for(const spineFuel of [0n,1n,2n,3n,4n,5n,8n,64n]){
+        for(const callbackFuel of [0n,1n,2n,3n,4n,64n]){
+          for(const recDepth of [0n,14n,15n,16n]){
+            const scalar={...base.context,recDepth};
+            const expected=oldSpine(spineFuel)(get("psKernelIsDefEqWithFuel")(callbackFuel))
+              (scalar)(base.state)(left.term)(right.term)(oldSubst);
+            const actual=newSpine(spineFuel)(isLambda)
+              (get("psKernelExprV2TryDefEqStateWithFuel")(callbackFuel))
+              (typed(scalar))(freshState())(left.id)(right.id)(newSubst);
+            compare(expected,actual,"binder-spine-budget-"+isLambda+"-"+label+
+              "-"+spineFuel+"-"+callbackFuel+"-"+recDepth);
+          }
+        }
+      }
+    }
+    const zero=accepted(newSpine(0n)(isLambda)
+      (get("psKernelExprV2TryDefEqStateWithFuel")(64n))
+      (typed(base.context))(freshState())(spineArena.size)(spineArena.size)(nil),
+      "binder-spine-zero-invalid-some");
+    must(rejected(zero)&&zero.error===(isLambda?
+      "kernel defeq lambda-spine budget exhausted":"kernel defeq forall-spine budget exhausted"),
+      "binder-spine-zero-precedes-node-lookup-"+isLambda);
+  }
+  {
+    // Never decode the graph or construct its exponentially expanded legacy tree.
+    let sharedArena=empty;
+    const s0Result=mk(sharedArena,"Sort",L.zero);sharedArena=s0Result.fst;
+    const sharedSort0=s0Result.snd;
+    let shared=sharedSort0;
+    for(let i=0;i<24;i++){
+      const result=mk(sharedArena,"Forall",x,shared,shared,B.default);
+      sharedArena=result.fst;shared=result.snd;
+    }
+    must(accepted(get("psKernelExprV2TransformCountOnCanonical")(sharedArena,shared),
+      "binder-shared-expanded-count")===33554431n,"binder-shared-exact-expanded-count");
+    const maxResult=mk(sharedArena,"Sort",L.max(L.zero,L.zero));sharedArena=maxResult.fst;
+    const leftResult=mk(sharedArena,"Lam",x,shared,sharedSort0,B.default);sharedArena=leftResult.fst;
+    const rightResult=mk(sharedArena,"Lam",y,shared,maxResult.snd,B.default);sharedArena=rightResult.fst;
+    const leftCount=accepted(get("psKernelExprV2TransformCountOnCanonical")(sharedArena,leftResult.snd),
+      "binder-shared-left-count");
+    const rightCount=accepted(get("psKernelExprV2TransformCountOnCanonical")(sharedArena,rightResult.snd),
+      "binder-shared-right-count");
+    must(1n+leftCount+rightCount===67108867n,"binder-shared-original-default-budget");
+    const base=get("psKernelKernelSessionChecker")(session(64n),nil,S.safe);
+    const result=accepted(accepted(raw(3n,typed(base.context),
+      get("psKernelExprV2CheckStateEmpty")(sharedArena),leftResult.snd,rightResult.snd),
+      "binder-shared-direct-some"),"binder-shared-direct-result");
+    must(result.snd===true&&result.fst.nextFresh===0n,
+      "binder-shared-default-does-not-build-expanded-budget-closure-chain");
+  }
+  console.log("PSC1_V2_DAG_JS_BINDER_SPINE_BUDGET: PASS");
+  for(const isLambda of [true,false]){
+    const binder=(n,domain,body)=>bind(isLambda,n,domain,body);
+    let parentLeft=s1,parentRight=m1,childLeft=s0,childRight=m0;
+    for(let i=0n;i<8n;i++){
+      parentLeft=md(100n+i,parentLeft);parentRight=md(200n+i,parentRight);
+      childLeft=md(300n+i,childLeft);childRight=md(400n+i,childRight);
+    }
+    const left=binder(x,parentLeft,binder(a,childLeft,b1));
+    const right=binder(y,parentRight,binder(b,childRight,b1));
+    const closedLeft=binder(x,s1,childLeft),closedRight=binder(y,s1,childRight);
+    const base=get("psKernelKernelSessionChecker")(session(64n,1n),nil,S.safe);
+    const context=typed(base.context);
+    const oldPrime=accepted(original(64n,base.context,base.state,left.term,right.term),
+      "binder-cache-prime-original");
+    const newPrime=accepted(accepted(raw(64n,context,freshState(),left.id,right.id),
+      "binder-cache-prime-some"),"binder-cache-prime-result");
+    must(oldPrime.fst===true&&newPrime.snd===true&&
+      oldPrime.snd.nextFresh===2n&&newPrime.fst.nextFresh===2n,
+      "binder-cache-two-dependent-locals-"+isLambda);
+    const contains=(state,l,r)=>accepted(get("psKernelExprV2DefEqPairContains")(
+      state.whnf.arena,state.success,l.id,r.id),"binder-cache-contains");
+    must(contains(newPrime.fst,parentLeft,parentRight)===true,
+      "binder-domain-success-predates-local-scope-"+isLambda);
+    must(contains(newPrime.fst,childLeft,childRight)===false,
+      "binder-inner-domain-success-restored-away-"+isLambda);
+    for(const [label,l,r] of [["root",left,right],["parent",parentLeft,parentRight],
+      ["child",childLeft,childRight]]){
+      for(const [fuel,recDepth] of [[0n,0n],[1n,0n],[1n,15n],[1n,16n]]){
+        const scalar={...base.context,recDepth};
+        compare(original(fuel,scalar,oldPrime.snd,l.term,r.term),
+          raw(fuel,typed(scalar),newPrime.fst,l.id,r.id),
+          "binder-cache-warm-"+isLambda+"-"+label+"-"+fuel+"-"+recDepth);
+      }
+    }
+    const childAttempt=accepted(raw(1n,context,newPrime.fst,childLeft.id,childRight.id),
+      "binder-child-miss-some");
+    must(rejected(childAttempt)&&childAttempt.error==="kernel definitional equality budget exhausted",
+      "binder-child-scope-cannot-authorize-low-fuel-query-"+isLambda);
+    const oldClosed=accepted(original(64n,base.context,base.state,closedLeft.term,closedRight.term),
+      "binder-closed-prime-original");
+    const newClosed=accepted(accepted(raw(64n,context,freshState(),closedLeft.id,closedRight.id),
+      "binder-closed-prime-some"),"binder-closed-prime-result");
+    must(oldClosed.fst===true&&newClosed.snd===true&&
+      oldClosed.snd.nextFresh===0n&&newClosed.fst.nextFresh===0n,
+      "binder-closed-bodies-allocate-no-fresh-local-"+isLambda);
+    must(contains(newClosed.fst,childLeft,childRight)===true,
+      "binder-closed-body-success-remains-in-owner-"+isLambda);
+    compare(original(1n,base.context,oldClosed.snd,childLeft.term,childRight.term),
+      raw(1n,context,newClosed.fst,childLeft.id,childRight.id),
+      "binder-closed-body-warm-hit-"+isLambda);
+  }
+  console.log("PSC1_V2_DAG_JS_BINDER_SPINE_CACHE: PASS");
+  for(const isLambda of [true,false]){
+    const binder=(n,domain,body)=>bind(isLambda,n,domain,body);
+    const redex=app(bind(true,a,s1,b0),s0);
+    const fixtures=[
+      ["one-sided-metadata",binder(x,s1,md(9n,s0)),binder(y,s1,s0)],
+      ["beta-body",binder(x,s1,redex),binder(y,s1,s0)],
+      ["unequal-spine-length",binder(x,s1,binder(a,s1,s0)),binder(y,s1,s0)]
+    ];
+    const base=get("psKernelKernelSessionChecker")(session(64n),nil,S.safe);
+    for(const [label,left,right] of fixtures){
+      must(sameRuntimeValue(raw(64n,typed(base.context),freshState(),left.id,right.id),none),
+        "binder-spine-explicit-fallback-"+isLambda+"-"+label);
+      for(const fuel of [0n,1n,2n,3n,4n,8n,64n])for(const maxRecDepth of [0n,1n]){
+        const s=session(fuel,maxRecDepth);
+        must(sameOperation(get("psKernelV1IsDefEq")(s,nil,S.safe,left.term,right.term),
+          publicPair(s,left,right),boolEqual),
+          "binder-spine-fallback-parity-"+isLambda+"-"+label+"-"+fuel+"-"+maxRecDepth);
+      }
+    }
+  }
+  {
+    const missingName=name("spine-missing");
+    const missing=build("MVar",E.mvar(missingName),missingName);
+    const invalid=[
+      ["forall-lambda-body",
+        bind(false,x,s1,bind(true,a,s1,md(1n,s0))),
+        bind(false,y,s1,bind(true,b,s1,md(2n,m0)))],
+      ["metavariable-domain",bind(true,x,missing,s0),bind(true,y,missing,m0)]
+    ];
+    const s=session(64n),base=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+    for(const [label,left,right] of invalid){
+      const result=accepted(accepted(raw(64n,typed(base.context),freshState(),left.id,right.id),
+        "binder-invalid-raw-some"),"binder-invalid-raw-result");
+      must(result.snd===true,"binder-raw-comparison-does-not-admit-"+label);
+      for(const [side,l,r] of [["both",left,right],["left",left,s0],["right",s0,right]]){
+        const expected=get("psKernelV1IsDefEq")(s,nil,S.safe,l.term,r.term);
+        const actual=publicPair(s,l,r);
+        must(rejected(expected)&&rejected(actual)&&sameOperation(expected,actual,boolEqual),
+          "binder-public-checks-invalid-"+label+"-"+side);
+      }
+    }
+  }
+  console.log("PSC1_V2_DAG_JS_BINDER_SPINE_FALLBACK: PASS");
+}
+
 reportDagSmoke();

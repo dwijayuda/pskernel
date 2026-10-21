@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.DefEq.Quick
 import Ps.KernelCore.Checker.ExprV2.CheckState
+import Ps.KernelCore.Checker.ExprV2.DefEq.BinderSpines
 
 /-
 The definitive quick rules of the complete checker on a canonical DAG.
@@ -65,6 +66,20 @@ def psKernelExprV2TryDefEqStateWithFuel
                             | Except.error error => Option.some (Except.error error)
                             | Except.ok rightEntry =>
                                 match leftEntry.node with
+                                | PsKernelExprV2Node.lam _ _ _ _ =>
+                                    match rightEntry.node with
+                                    | PsKernelExprV2Node.lam _ _ _ _ =>
+                                        psKernelExprV2DefEqFinishAttempt left right
+                                          (psKernelExprV2DefEqBinderSpine true
+                                            smaller nextContext state left right)
+                                    | _ => Option.none
+                                | PsKernelExprV2Node.forallE _ _ _ _ =>
+                                    match rightEntry.node with
+                                    | PsKernelExprV2Node.forallE _ _ _ _ =>
+                                        psKernelExprV2DefEqFinishAttempt left right
+                                          (psKernelExprV2DefEqBinderSpine false
+                                            smaller nextContext state left right)
+                                    | _ => Option.none
                                 | PsKernelExprV2Node.sort leftLevel =>
                                     match rightEntry.node with
                                     | PsKernelExprV2Node.sort rightLevel =>

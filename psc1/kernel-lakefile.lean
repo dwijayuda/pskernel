@@ -45,6 +45,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.Projection,
     `Ps.KernelCore.Checker.ExprV2.Whnf,
     `Ps.KernelCore.Checker.ExprV2.DefEq,
+    `Ps.KernelCore.Checker.ExprV2.DefEq.BinderSpines,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,

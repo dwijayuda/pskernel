@@ -1,3 +1,88 @@
+# Name worker: exact source qualified; paired measurements collected
+
+Observed: 2026-10-21 18:02:08 UTC.
+Kernel source: `34126793178021a9cd1bdb37aa6fe17c0fab41c6`.
+Paired experiment source: `14ee4a9323e47944e971e1d9c9a191936fb4843e`.
+This evidence-only checkpoint preserves the original experiment and all prior
+receipts. It changes no kernel, benchmark, workflow or artifact. It does not
+inherit kernel qualification for its own containing commit.
+
+## Exact completed gates
+
+Name341 integration [39640226534](https://github.com/dwijayuda/pskernel/actions/runs/39640226534),
+correctness [39640226530](https://github.com/dwijayuda/pskernel/actions/runs/39640226530),
+and all six research jobs in
+[39640226539](https://github.com/dwijayuda/pskernel/actions/runs/39640226539)
+are terminal PASS. Native and authentic PSC1 check the complete supported source;
+182 portable modules and139 canonical modules were checked. Both detached generated
+routes pass50,237 name/string assertions, seven partial-application executions,
+real checked declarations and the retained provider24/API8 controls with PATH empty.
+The native gate checks eight all-input equivalence equations and ten positive/four
+negative official-Lean declaration controls. Observed proof dependencies remain
+propext/Classical.choice/Quot.sound; no new runtime axiom was introduced.
+Full-kernel DirectJS remains unsupported.
+
+Native, Lean-generated and canonical-generated file manifests, exact job IDs and
+artifact hashes are in `evidence/2026-10-21-name-worker-qualified-paired-receipt.json`.
+Full Arena39640227692 is still in progress at this observation and is not a PASS.
+
+## Actual paired performance
+
+[39645953379/job119381453525](https://github.com/dwijayuda/pskernel/actions/runs/39645953379/job/119381453525)
+is terminal PASS for collection:48 complete admission samples,16 authentic-body
+processes, both138-case control sets and all retained negative/untimed diagnostics.
+The same runner/Node22 executes sequential ABBA order with fresh processes and
+fresh checked sessions. The only changed kernel file between f9 and341 is
+`Core/Name.lean`; the benchmark, replay, oracle and resource policy are identical.
+
+| DAG fixture | Baseline warm ms/batch | Name341 warm ms/batch | Baseline/candidate |
+| --- | ---: | ---: | ---: |
+| chain8 |63.708089|44.945759|1.41744|
+| chain32 |229.263173|193.882994|1.18248|
+| metadata8 |142.323181|125.864825|1.13076|
+| metadata32 |562.625332|512.449999|1.09791|
+| binder8 |142.363304|132.911895|1.07111|
+| binder32 |591.083930|522.420973|1.13143|
+
+Those ratios correspond to6.64%–29.45% lower warm DAG latency in these samples;
+legacy-entry means also improved. These are two observations per side, descriptive
+results without a statistical or whole-kernel speedup claim. Complete cold/warm,
+construction, independent validation, CPU, peak RSS and signed retained-heap values
+remain in the full179,310-byte JSON, SHA256
+`7b798a94fc56d72b453e922b8afc4488aa70221baeeb15977e1c7c5cd1a8410b`.
+
+Memory is mixed: chain8 DAG process peak RSS increases192432→195732KiB;
+the authentic stuck-projection rejection increases421436→449388KiB even as its
+mean elapsed time decreases33.937318→31.293966s. Several retained-heap deltas grow.
+Repeated-subproblem acceptance decreases1.660704→1.598597s. Church still exhausts
+kernel fuel4096 in all four processes, and Prelude times out at60seconds in all
+four; neither receives an accepted/rejected latency ratio.
+
+This historical comparison uses2048MiB V8 old space, not an OS RSS cap.
+The new Linux hard-limit controls do not retroactively qualify it. Artifact
+12366949831 contains9,328,640 bytes, ZIP SHA256
+`952ca5e1bc07dfa22b3335a4dbe72faa902adcbdf5282786105ecf9498c9550d`.
+
+## Current integration and next executable action
+
+Integration advanced concurrently to7b14affc854e7bc99e4778ac155ae805dd273226 with
+the authoritative checked final-prefix T03a implementation. Preserve that history;
+the older unreferenced261 group-plan candidate is an alternative and must not
+replace the newer prefix code. The Name worker is a separate, source-qualified
+and measured component. Promote only its reviewed source/tests/gates on fresh
+integration HEAD after that HEAD's mandatory qualification, then require complete
+same-source native/canonical/generated gates again. The indexed-cache candidate
+remains withheld pending its measured40%/27% metadata regression diagnosis.
+
+B/C remain open: four public V1 whole-operation fallback families, eager ingress
+decode, recursive metadata import, Church exhaustion, host timeouts and separately
+classified unsafe/partial contracts. A fresh artifact-based193-case comparison
+under the real2GiB host policy is being prepared; it has not executed here.
+
+---
+
+## Preserved experiment and prior evidence history (verbatim)
+
 # Name worker paired experiment — NOT RUN at creation
 
 Branch: `research/psc1-pskernel-name-paired-perf-20261021`.

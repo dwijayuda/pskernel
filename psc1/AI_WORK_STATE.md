@@ -209,6 +209,19 @@ Append a real generated-compiler PS list positive case and malformed-list
 parse refusal to the existing8-case corpus (now10 cases); no old case is removed.
 The manual full-generation workflow inherits these assertions but stays deferred.
 
+## Actual G1 list execution passed; corpus schema correction pending CI
+
+Run39560655991/job119090833062 actually passes all5 generated positive cases,
+including the new PS list expression, and all5 refusals. It then correctly
+refuses generation metadata because the v1 reader still requires the old8 IDs
+(PSC1_GENERATION_CORPUS_CHANGED). Preserve that gate: add explicit v2 with all10
+required IDs, and pin v2 in the trusted host controller. Keep v1's exact8-case
+reader behavior for historical G1 data; it is not current qualification.
+No case is optional and no manifest can choose its schema against host policy.
+New G1 service652ce79f0fcf5ba0c7f4e23f24a96cec1f36a65b5dd339adb93592a4d45cfd08
+is observed only at this failed-metadata checkpoint, not yet fully qualified.
+Native/whole-source checks pass; retain full scoped results separately.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

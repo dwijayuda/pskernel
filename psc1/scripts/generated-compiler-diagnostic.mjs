@@ -308,6 +308,7 @@ try {
   report.completedCorpusGenerations=[1];
   const observationsHash = sha(JSON.stringify(firstObservations));
   const expectedIdentity = {
+    generationSchema:'psc1-js-generation/4.35.0-v2',
     sourceClosureDigest:bootstrap.digest,sourceInventorySha256:sourceInventoryHash,
     serviceSha256:g1Hash,admissionsSha256:report.bootstrap.admissionsSha256,
     originalIrSha256:report.bootstrap.originalIrSha256,
@@ -317,7 +318,7 @@ try {
     nativeSeedSha256:seedHash
   };
   function saveGeneration(generation, producer, identity, publication, observations) {
-    const manifest={schema:'psc1-js-generation/4.35.0-v1',generation,
+    const manifest={schema:expectedIdentity.generationSchema,generation,
       testedCommit:process.env.GITHUB_SHA,branchHead:process.env.PSC1_BRANCH_HEAD||null,
       logicalCheckerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
       target:'js',grammar:'lean',assurance:'ordinary-checked',behaviorallyVerified:false,

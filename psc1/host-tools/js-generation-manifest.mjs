@@ -29,7 +29,14 @@ export function verifyGeneratedBundle(directory, expectedManifestSha256, expecte
 }
 
 export function assertJsGeneration(manifest, expected) {
-  if (manifest.schema !== 'psc1-js-generation/4.35.0-v1' ||
+  const legacyCases=['lean-modules','ps-integer-unicode','lean-handler-pattern','lean-ordinary-loop',
+    'wrong-body','missing-import','checked-partial','verified'];
+  const schemas={
+    'psc1-js-generation/4.35.0-v1':legacyCases,
+    'psc1-js-generation/4.35.0-v2':[...legacyCases,'ps-list-literal','malformed-list']
+  };
+  const schema=expected.generationSchema||'psc1-js-generation/4.35.0-v1';
+  if (!Object.hasOwn(schemas,schema) || manifest.schema !== schema ||
       manifest.logicalCheckerCommit !== 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc' ||
       manifest.target !== 'js' || manifest.grammar !== 'lean' ||
       manifest.assurance !== 'ordinary-checked' || manifest.behaviorallyVerified !== false ||
@@ -45,8 +52,7 @@ export function assertJsGeneration(manifest, expected) {
       sha(JSON.stringify(manifest.observations)) !== manifest.corpusObservationsSha256 ||
       sha(JSON.stringify(manifest.hostModuleInventory)) !== manifest.hostControllerSha256)
     fail('PSC1_GENERATION_CONTENT_CHANGED');
-  const requiredCases=['lean-modules','ps-integer-unicode','lean-handler-pattern','lean-ordinary-loop',
-    'wrong-body','missing-import','checked-partial','verified'].sort();
+  const requiredCases=[...schemas[schema]].sort();
   if (JSON.stringify(manifest.observations.map(row=>row.id).sort()) !== JSON.stringify(requiredCases))
     fail('PSC1_GENERATION_CORPUS_CHANGED');
   const producer=manifest.producer;

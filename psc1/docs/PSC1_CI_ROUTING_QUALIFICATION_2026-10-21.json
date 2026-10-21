@@ -1,0 +1,93 @@
+{
+  "schema": "psc1-ci-routing-qualification/1",
+  "implementationCommit": "bd43c8dd2e95ab2e427eec4e6137dd3545f8b9bd",
+  "runId": 39578815985,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39578815985",
+  "conclusion": "success",
+  "selection": {
+    "schema": "psc1-ci-selection/1",
+    "testedCommit": "91e926fa6f6d72c529607f58f11cb9d58b7bc6e0",
+    "headCommit": "bd43c8dd2e95ab2e427eec4e6137dd3545f8b9bd",
+    "beforeCommit": "a282ce74b23d6809b12a2894e4f025116bc84cc0",
+    "eventBeforeCommit": "89735ce66ed9faa29ffa709c5cb3f1e471a8682e",
+    "baselineRunId": 39575345130,
+    "baselineError": null,
+    "static": true,
+    "focused": false,
+    "integration": false,
+    "release": false,
+    "benchmark": false,
+    "paths": [
+      "psc1/AI_WORK_STATE.md",
+      "psc1/docs/PSC1_JSON_APPLICATION_QUALIFICATION_2026-10-21.json",
+      "psc1/scripts/development-selection-tests.mjs",
+      "psc1/scripts/select-development-tests.mjs"
+    ],
+    "reasons": [
+      "static-scheduling-regression:psc1/scripts/development-selection-tests.mjs",
+      "static-scheduling-regression:psc1/scripts/select-development-tests.mjs"
+    ]
+  },
+  "jobs": [
+    {
+      "id": 119151150574,
+      "name": "static",
+      "conclusion": "success",
+      "seconds": 37
+    },
+    {
+      "id": 119151435397,
+      "name": "gate",
+      "conclusion": "success",
+      "seconds": 4
+    },
+    {
+      "id": 119151435667,
+      "name": "closures",
+      "conclusion": "skipped",
+      "seconds": 0
+    },
+    {
+      "id": 119151435715,
+      "name": "benchmark",
+      "conclusion": "skipped",
+      "seconds": 0
+    },
+    {
+      "id": 119151435747,
+      "name": "native",
+      "conclusion": "skipped",
+      "seconds": 0
+    },
+    {
+      "id": 119151435920,
+      "name": "g1",
+      "conclusion": "skipped",
+      "seconds": 0
+    },
+    {
+      "id": 119151437188,
+      "name": "full",
+      "conclusion": "skipped",
+      "seconds": 0
+    },
+    {
+      "id": 119151437941,
+      "name": "focused",
+      "conclusion": "skipped",
+      "seconds": 0
+    }
+  ],
+  "observed": {
+    "heavyJobsStarted": 0,
+    "staticSeconds": 37,
+    "gateSeconds": 4
+  },
+  "comparison": "The previous cumulative PSC1 PR path triggers started9 heavy jobs per update. This scheduling-only update starts0.",
+  "trustBoundary": "Pure selector code uses static API/dependency regressions; compiler/admission/IR/runtime/release policy changes retain required semantic tiers and final qualification.",
+  "fullSemanticCheckpoint": {
+    "commit": "a282ce74b23d6809b12a2894e4f025116bc84cc0",
+    "runId": 39575345130
+  },
+  "scope": "CI scheduling evidence only; not a new compiler or release qualification."
+}

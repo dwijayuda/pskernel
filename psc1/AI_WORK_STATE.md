@@ -84,20 +84,20 @@ Manual psc1-practical-release reruns native/closures/G1/full scoped and enforces
 --require-ready. It must not pass an incomplete release contract. No merge,
 registry publication or branch-protection update was performed.
 
-Documentation-only run39578186422 correctly fell back to full instead of skipping
-because GitHub's API name became the custom run title. Baseline identity now
-uses the workflow file path; API-shaped regression cases cover display-name
-drift. Explicit baseline errors are retained for diagnostics. The two pure selector/
-selector-test scripts run their static dependency/API regressions; changes to
-compiler/admission/IR/runtime/release controllers still select their full tiers.
-This avoids rerunning unchanged target semantics for a display-name lookup fix. The real fast-path
-validation must be repeated after this router correction qualifies.
+Routing correctionbd43c8dd2e95ab2e427eec4e6137dd3545f8b9bd passes Linux
+run39578815985: static37s plus gate4s,zero heavy jobs. It selects the actual
+successful39575345130 baseline and carries all intervening changes correctly.
+Workflow identity uses the file path; immutable run titles pin the dispatch base.
+API/dependency regression cases cover title drift,cancelled/failed history,
+different bases,unknown paths and missing baselines. Two pure selector helper
+files are static-only; semantic/admission/IR/runtime/release changes retain
+their normal tiers. Receipt:docs/PSC1_CI_ROUTING_QUALIFICATION_2026-10-21.json.
 
-Documentation-only validation is exercised by the next checkpoint update. Its current
-Actions selection JSON must identify the successful39575345130 baseline and
-skip all heavy jobs. The generated CI artifact and final gate are authoritative;
-do not infer a new full qualification merely from a static-only descendant.
-The previous cumulative path routing started9 heavy jobs for each update.
+This final documentation-only descendant exercises that fast path again.
+Inspect its current selection/gate artifacts for actual status. Historical full
+qualification remains at the exact implementation/merge above; static-only
+descendants do not acquire new full compiler/release qualification. The previous
+cumulative path policy started9 heavy jobs for every PSC1 update.
 
 ## Preserved trust boundary and historical evidence
 
@@ -113,6 +113,7 @@ The G2 heap-exhaustion/later-timeout defect remains open, with exact old replay
 source/artifacts pinned independently of newer G1 builds.
 
 Historical receipts, retained without reinterpretation:
+- docs/PSC1_CI_ROUTING_QUALIFICATION_2026-10-21.json
 - docs/PSC1_JSON_APPLICATION_QUALIFICATION_2026-10-21.json
 - docs/PSC1_DEVELOPMENT_OPTIMIZATION_QUALIFICATION_2026-10-21.json
 - docs/PSC1_HANDLER_QUALIFICATION_2026-10-21.json

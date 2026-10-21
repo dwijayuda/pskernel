@@ -23,8 +23,9 @@ uses the last successful gate/head interval, not cumulative PR paths. Failed or
 cancelled updates retain their testing debt; an unavailable baseline or changed
 base falls back to full qualification.
 Unknown/unavailable diffs fail conservatively into full testing. Documentation
-does not restart compiler jobs. CI/authority/build/target changes require full
-testing. Existing workflows remain manually runnable and reusable; no assertion
+does not restart compiler jobs. Workflow/authority/build/target changes require full testing. The two pure
+selector helpers use static API/dependency regressions; all semantic and release
+controllers retain their required tiers. Existing workflows remain manually runnable and reusable; no assertion
 or refusal is deleted. Specialization's immutable baseline runs when its benchmark
 changes, not on every documentation/source update.
 

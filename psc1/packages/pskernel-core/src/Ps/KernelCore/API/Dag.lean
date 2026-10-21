@@ -11,17 +11,17 @@ Checked DAG ingress for the complete KernelContract-v1 implementation.
 
 One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
-Supported inference, scoped quick DefEq and WHNF rules read the canonical DAG
+Supported inference, scoped DefEq through proof irrelevance and WHNF rules read the canonical DAG
 with the original entry fuel, depth and rule ordering. Local types and let
 values are IDs in the same owner. Unsupported work restarts the complete
 original operation with unchanged resources and without partial publication.
 
-Axioms, safe/partial definitions, theorems and opaque declarations attempt
-direct admission. Original static guards read the boundary-decoded expressions;
+Axioms, safe/unsafe/partial definitions, theorems, opaque declarations and
+supported unsafe/partial mutual definitions attempt direct admission. Original static guards read the boundary-decoded expressions;
 header checking, inference-only proposition testing, body checking and terminal
 comparison share one fresh DAG checking state with separate inference caches.
-Unsafe recursive definitions, mutual definitions and inductives still use
-complete original admission.
+Mutual members use fresh private checking owners and publish the completed
+batch atomically. Inductives and unsupported rules use complete original admission.
 Successful admission records original same-batch type IDs and transparent
 definition body IDs. This permits owning constant/projection inference and
 delta unfolding without repeatedly importing environment types or bodies.
@@ -150,8 +150,8 @@ def psKernelDagIsDefEq
       | Except.error error => Except.error error
       | Except.ok _ =>
           let checker := psKernelKernelSessionChecker session levelParams safety;
-          match psKernelExprV2TryQuickDefEqWithFuel
-              session.resources.fuel checker.context arena left right with
+          match psKernelExprV2TryDefEqWithDeclarationsFuel
+              session.resources.fuel checker.context arena declarations left right with
           | Option.some attempted =>
               match attempted with
               | Except.error error => Except.error (psKernelErrorFromMessage error)

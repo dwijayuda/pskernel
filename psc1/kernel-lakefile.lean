@@ -35,6 +35,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.CheckProjectionHelpers,
     `Ps.KernelCore.Checker.ExprV2.CheckProjection,
     `Ps.KernelCore.Checker.ExprV2.Constant,
+    `Ps.KernelCore.Checker.ExprV2.CheckCore,
     `Ps.KernelCore.Checker.ExprV2.Check,
     `Ps.KernelCore.Checker.ExprV2.Terminal,
     `Ps.KernelCore.Checker.ExprV2.Beta,
@@ -48,6 +49,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.DefEq.BinderSpines,
     `Ps.KernelCore.Checker.ExprV2.DefEq.Quick,
     `Ps.KernelCore.Checker.ExprV2.DefEq.Prefix,
+    `Ps.KernelCore.Checker.ExprV2.DefEq.ProofIrrelevance,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,
@@ -232,3 +234,8 @@ lean_exe psc1_kernel_expr_v2_transform_regression where
 lean_exe psc1_kernel_expr_v2_infer_only_regression where
   srcDir := "test"
   root := `PsKernelExprV2InferOnlyRegression
+
+-- DAG proof irrelevance with exact V1 budget/order and independent official fixtures.
+lean_exe psc1_kernel_expr_v2_proof_irrelevance_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2ProofIrrelevanceRegression

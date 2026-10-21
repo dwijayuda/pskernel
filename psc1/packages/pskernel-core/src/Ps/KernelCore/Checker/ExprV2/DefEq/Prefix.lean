@@ -46,7 +46,9 @@ def psKernelExprV2DefEqReflectionWith
             | _ => Option.some (Except.ok (Prod.mk state Option.none))
       else Option.some (Except.ok (Prod.mk state Option.none))
 
-def psKernelExprV2DefEqCoreQuickWith
+def psKernelExprV2DefEqCoreQuickContinueWith
+    (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
@@ -76,12 +78,23 @@ def psKernelExprV2DefEqCoreQuickWith
                       | Except.error error => Option.some (Except.error error)
                       | Except.ok quickResult =>
                           match Prod.snd quickResult with
-                          | Option.none => Option.none
+                          | Option.none =>
+                              match continuation context (Prod.fst quickResult)
+                                  (Prod.snd leftReduced) (Prod.snd rightReduced) with
+                              | Option.none => Option.none
+                              | Option.some continued =>
+                                  match continued with
+                                  | Except.error error => Option.some (Except.error error)
+                                  | Except.ok result =>
+                                      Option.some (psKernelExprV2CheckStateDefEqFinish
+                                        (Prod.fst result) left right (Prod.snd result))
                           | Option.some value =>
                               Option.some (psKernelExprV2CheckStateDefEqFinish
                                 (Prod.fst quickResult) left right value)
 
-def psKernelExprV2DefEqAfterQuickWith
+def psKernelExprV2DefEqAfterQuickContinueWith
+    (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
@@ -102,10 +115,12 @@ def psKernelExprV2DefEqAfterQuickWith
               Option.some (psKernelExprV2CheckStateDefEqFinish
                 (Prod.fst reflected) left right value)
           | Option.none =>
-              psKernelExprV2DefEqCoreQuickWith defeq coreWhnf
+              psKernelExprV2DefEqCoreQuickContinueWith continuation defeq coreWhnf
                 context (Prod.fst reflected) left right
 
-def psKernelExprV2DefEqPrefixWith
+def psKernelExprV2DefEqPrefixContinueWith
+    (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
@@ -126,5 +141,50 @@ def psKernelExprV2DefEqPrefixWith
               Option.some (psKernelExprV2CheckStateDefEqFinish
                 (Prod.fst quickResult) left right value)
           | Option.none =>
-              psKernelExprV2DefEqAfterQuickWith defeq whnf coreWhnf
+              psKernelExprV2DefEqAfterQuickContinueWith continuation defeq whnf coreWhnf
                 context (Prod.fst quickResult) left right
+
+/- Compatibility prefix APIs stop at the same original boundary. -/
+def psKernelExprV2DefEqNoContinuation
+    (_context : PsKernelExprV2CheckContext) (_state : PsKernelExprV2CheckState)
+    (_left _right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  Option.none
+
+def psKernelExprV2DefEqCoreQuickWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqCoreQuickContinueWith psKernelExprV2DefEqNoContinuation
+    defeq coreWhnf context state left right
+
+def psKernelExprV2DefEqAfterQuickWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqAfterQuickContinueWith psKernelExprV2DefEqNoContinuation
+    defeq whnf coreWhnf context state left right
+
+def psKernelExprV2DefEqPrefixWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqPrefixContinueWith psKernelExprV2DefEqNoContinuation
+    defeq whnf coreWhnf context state left right
+

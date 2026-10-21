@@ -1,8 +1,11 @@
 import Ps.KernelCore.Checker.ExprV2.DefEq.Prefix
 import Ps.KernelCore.Checker.ExprV2.CheckWhnf
+import Ps.KernelCore.Checker.ExprV2.CheckCore
+import Ps.KernelCore.Checker.ExprV2.DefEq.ProofIrrelevance
 
-/- Single recursive DefEq owner. The supported ordered prefix stops before
-proof irrelevance and lazy delta; unsupported work exports no partial state. -/
+/- Single recursive DefEq owner. The ordered prefix and proof irrelevance
+share inference-only/WHNF/DefEq callbacks at the exact predecessor fuel.
+Lazy delta and later rules remain unsupported; no partial state escapes. -/
 def psKernelExprV2TryDefEqStateWithFuel
     (fuel : Nat) :
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
@@ -28,6 +31,16 @@ def psKernelExprV2TryDefEqStateWithFuel
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
             psKernelExprV2CheckWhnfCoreWithFuel remaining nextContext nextState nextRoot true;
+        let inferType :=
+          fun (nextContext : PsKernelExprV2CheckContext)
+              (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+            let worker := psKernelExprV2TryInferCoreWithFuel remaining;
+            worker whnf smaller nextContext nextState nextRoot true;
+        let afterCore :=
+          fun (nextContext : PsKernelExprV2CheckContext)
+              (nextState : PsKernelExprV2CheckState) (nextLeft nextRight : Nat) =>
+            psKernelExprV2DefEqProofIrrelevanceWith smaller inferType whnf
+              nextContext nextState nextLeft nextRight;
         match psKernelExprV2CheckContextEnterRecDepth context with
         | Except.error error => Option.some (Except.error error)
         | Except.ok nextContext =>
@@ -42,8 +55,29 @@ def psKernelExprV2TryDefEqStateWithFuel
                   | Except.error error => Option.some (Except.error error)
                   | Except.ok cached =>
                       if cached then Option.some (Except.ok (Prod.mk state true))
-                      else psKernelExprV2DefEqPrefixWith smaller whnf coreWhnf
+                      else psKernelExprV2DefEqPrefixContinueWith afterCore smaller whnf coreWhnf
                         nextContext state left right
+
+/- Public helper retains the same owning declaration index as inference/WHNF.
+It starts fresh semantic caches; references must come from this validated batch. -/
+def psKernelExprV2TryDefEqWithDeclarationsFuel
+    (fuel : Nat) (context : PsKernelCheckerContext)
+    (arena : PsKernelExprV2PagedArena)
+    (declarations : List PsKernelExprV2DeclarationRef) (left right : Nat) :
+    Option (Except String Bool) :=
+  match context.localContext.decls with
+  | List.cons _ _ => Option.none
+  | List.nil =>
+      let initial :=
+        psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty arena)
+          (psKernelExprV2WhnfStateForDeclarations arena declarations);
+      match psKernelExprV2TryDefEqStateWithFuel fuel
+          (psKernelExprV2CheckContextEmpty context) initial left right with
+      | Option.none => Option.none
+      | Option.some attempted =>
+          match attempted with
+          | Except.error error => Option.some (Except.error error)
+          | Except.ok result => Option.some (Except.ok (Prod.snd result))
 
 /- Compatibility name and staged ABI share the one recursive owner. -/
 def psKernelExprV2TryQuickDefEqWithFuel
@@ -58,11 +92,5 @@ def psKernelExprV2TryQuickDefEqWithFuel
   | Nat.succ remaining =>
       fun (context : PsKernelCheckerContext)
           (arena : PsKernelExprV2PagedArena) (left right : Nat) =>
-        match psKernelExprV2TryDefEqStateWithFuel (Nat.succ remaining)
-            (psKernelExprV2CheckContextEmpty context)
-            (psKernelExprV2CheckStateEmpty arena) left right with
-        | Option.none => Option.none
-        | Option.some attempted =>
-            match attempted with
-            | Except.error error => Option.some (Except.error error)
-            | Except.ok result => Option.some (Except.ok (Prod.snd result))
+        psKernelExprV2TryDefEqWithDeclarationsFuel (Nat.succ remaining)
+          context arena List.nil left right

@@ -930,12 +930,13 @@ private def quickDefEqParity : IO Unit := do
     require ("quick-defeq-prefix-selected-path-" ++ label)
       (match psKernelExprV2TryQuickDefEqWithFuel 64 checker.context arena leftId rightId with
        | some (.ok true) => directExpected
-       | none => !directExpected
+       | some (.error error) => label == "constant-level-rule" && error == "unknown constant"
+       | none => !directExpected && label != "constant-level-rule"
        | _ => false)
     for fuel in [0,1,2,3,4,8,64] do
       for maxDepth in [0,1,2] do
         let session ← fresh fuel maxDepth
-        if directExpected then
+        if directExpected || label == "constant-level-rule" then
           let checker := psKernelKernelSessionChecker session params .safe
           require ("quick-defeq-prefix-raw-parity-" ++ label)
             (sameQuickDefEq

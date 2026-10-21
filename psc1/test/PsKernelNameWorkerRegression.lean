@@ -338,11 +338,14 @@ private def publicChecking : IO Unit := do
   require "fresh-dag-cannot-resolve-prior-name"
     (rejectedInvalid (psKernelV1RunDag empty [] .safe canonical [.check first.root]))
   let officialNegatives : List Lean.Declaration := [
-    .defnDecl { name := officialName first.name, levelParams := [],
+    .defnDecl {
+      name := officialName first.name, levelParams := [],
       type := .sort (.succ .zero), value := .sort .zero, hints := .abbrev, safety := .safe },
-    .defnDecl { name := officialName badName, levelParams := [],
+    .defnDecl {
+      name := officialName badName, levelParams := [],
       type := .sort .zero, value := .sort .zero, hints := .abbrev, safety := .safe },
-    .defnDecl { name := officialName unknownName, levelParams := [],
+    .defnDecl {
+      name := officialName unknownName, levelParams := [],
       type := .sort (.succ .zero), value := .const (officialName missingName) [],
       hints := .abbrev, safety := .safe }]
   for declaration in officialNegatives do

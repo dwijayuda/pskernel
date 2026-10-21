@@ -8,6 +8,22 @@ Lean: `leanprover/lean4:v4.35.0`, exact commit `eb6cafb7290e8bd5f2937522d8d804f5
 Generated path: authentic PSC1 → TypeScript `7.0.2` → Node `22`. Full-kernel DirectJS is unsupported.
 Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduction path.
 
+## 2026-10-21 — align official native fixture record fields
+
+Exact `2ec60054bbbae5b8a946439027be5142db5d7206` native integration
+[39637047587/job119350279597](https://github.com/dwijayuda/pskernel/actions/runs/39637047587/job/119350279597)
+failed compilation at the three newly added official-negative record literals.
+Their first field began after an inline opening brace while the following
+fields resumed at an earlier indentation. Lean4.35's structure-instance field
+parser rejected that layout. This successor moves only those three first fields
+to the following aligned line. All field values, declarations, required
+assertions, production source, proof statements and generated tests are unchanged.
+
+The earlier reserved-identifier repair remains intact. Both failures are fixture
+source-layout defects, not successful checker qualification. This exact successor
+must pass all mandatory native, authentic PSC1, canonical and generated jobs;
+its tests are **NOT RUN** at commit time. No pipeline result is inherited.
+
 ## 2026-10-21 16:41:23 UTC — repair reserved native fixture identifier
 
 Exact name-worker candidate `3fa161767d3e09692db77645d1892b4e0c82f45c`

@@ -311,3 +311,8 @@ lean_exe psc1_kernel_expr_v2_owned_state_regression where
 lean_exe psc1_kernel_name_worker_regression where
   root := `PsKernelNameWorkerRegression
   srcDir := "test"
+
+-- Checked same-batch Quot metadata, immutable caller IDs, and exact V1/official parity.
+lean_exe psc1_kernel_expr_v2_quot_owner_regression where
+  root := `PsKernelExprV2QuotOwnerRegression
+  srcDir := "test"

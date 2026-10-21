@@ -1,0 +1,211 @@
+{
+  "schema": "pskernel-quot-owner-parent-qualification-v1",
+  "repository": "dwijayuda/pskernel",
+  "sourceSha": "e07d5a9d48bff5c50692bab4be9f48dbb8665bf0",
+  "observedUtc": "2026-10-21T18:43:00Z",
+  "qualification": "Scoped developer-kernel qualification of this exact historical parent only. The port onto deb18b9 requires its own native, portable, canonical and generated gates.",
+  "statuses": {
+    "native": "PASS",
+    "portableSource": "PASS",
+    "canonicalPs": "PASS",
+    "generatedJs": "PASS",
+    "proof": "PASS",
+    "provider": "PASS",
+    "research": "PASS",
+    "arena": "FAIL",
+    "portPerformance": "NOT RUN"
+  },
+  "runs": [
+    {
+      "id": 39639394101,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119358636425,
+          "name": "native-dag-integration",
+          "conclusion": "success"
+        },
+        {
+          "id": 119358637089,
+          "name": "generated-dag-integration",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 39639393856,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119358637087,
+          "name": "native-kernel",
+          "conclusion": "success"
+        },
+        {
+          "id": 119358637651,
+          "name": "psc1-portability",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 39639393812,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119358635751,
+          "conclusion": "success"
+        },
+        {
+          "id": 119358636066,
+          "conclusion": "success"
+        },
+        {
+          "id": 119358636157,
+          "conclusion": "success"
+        },
+        {
+          "id": 119358636224,
+          "conclusion": "success"
+        },
+        {
+          "id": 119358636325,
+          "conclusion": "success"
+        },
+        {
+          "id": 119358636486,
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 39639393861,
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "id": 119358635513,
+          "name": "official-arena-reference",
+          "conclusion": "success"
+        },
+        {
+          "id": 119360427316,
+          "name": "generated-arena-comparison",
+          "conclusion": "failure"
+        }
+      ]
+    }
+  ],
+  "quotCoverage": {
+    "owners": 4,
+    "positiveTerms": 10,
+    "rawChecks": 180,
+    "rawWhnf": 180,
+    "rawDefEq": 180,
+    "invalidChecks": 90,
+    "admissions": 17,
+    "planCases": 10,
+    "repairCases": 5,
+    "privateIdCases": 13,
+    "officialPositive": 10,
+    "officialNegative": 7,
+    "generatedAssertionsEachRoute": 1360,
+    "sourceEquations": 20
+  },
+  "portCoverage": "The port preserves those matrices and equations, switches tests to the production WithPrevious entry point, and adds one definitional production-routing equation (21 total). The source port has not yet run.",
+  "toolchain": {
+    "lean": "leanprover/lean4:v4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "node": "22",
+    "fuelDefault": 4096
+  },
+  "sourceClosure": {
+    "portableModules": 182,
+    "canonicalModules": 139
+  },
+  "provider": {
+    "nativeCases": 24,
+    "officialFixtures": 5,
+    "batchProtocolCases": 4,
+    "generatedCliCasesPerRoute": 24,
+    "generatedApiCasesPerRoute": 8,
+    "path": "empty",
+    "cwd": "detached",
+    "externalLeanDelegation": false
+  },
+  "canonicalArtifact": {
+    "id": 12367484803,
+    "bytes": 1920411,
+    "sha256": "0b2215161a38c3292f51fa5adbf38ec797176685700f61c26fbc4bf6e68be34a"
+  },
+  "canonicalManifest": {
+    "schema": "pskernel-core-artifacts-v1",
+    "repository": "dwijayuda/pskernel",
+    "sourceSha": "e07d5a9d48bff5c50692bab4be9f48dbb8665bf0",
+    "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/e07d5a9d48bff5c50692bab4be9f48dbb8665bf0",
+    "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/39639393856",
+    "runAttempt": "1",
+    "kind": "canonical-ps-generated-js",
+    "leanToolchain": "leanprover/lean4:v4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "node": "v22.23.3",
+    "checkerFuelDefault": 4096,
+    "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+    "files": [
+      {
+        "path": "dist/pskernel-selfhost/provider/pskernel-core.js",
+        "bytes": 9929172,
+        "sha256": "75a3389c158fdbb9102b364800080afb972c7951628a9cd1a584354f87190b5e"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/pskernel-core.ts",
+        "bytes": 9112280,
+        "sha256": "50fd30694342494eb0949a42bcd4346732dab278b15768c8fe9638c9e6c77c03"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/pskernel-core.d.ts",
+        "bytes": 364587,
+        "sha256": "775076d2775d136a4c4bc4f1eb659f6c3bb63f85acc453213e99f2fd8e264791"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/pskernel-core.js.map",
+        "bytes": 8077115,
+        "sha256": "7d5950ec055f3a7c7ead7f2ae09b842182aaee92f7979be2bafa17acc1bd6c2f"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/scripts/pskernel-canonical-provider.mjs",
+        "bytes": 12759,
+        "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/npm-runtime/canonical-admissions-wire.mjs",
+        "bytes": 5462,
+        "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/package.json",
+        "bytes": 42,
+        "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/canonical-source.tar.gz",
+        "bytes": 118988,
+        "sha256": "34602e5744269cef7ae8bbb8373e9bae1bf33b44d96e5877194f0f086f407fb3"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/README.md",
+        "bytes": 11813,
+        "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+      }
+    ]
+  },
+  "limitations": [
+    "This metadata ownership bridge imports recursive expressions after checked Quot admission; it does not make Quot or inductive admission DAG-native.",
+    "Preexisting-session owner bootstrap is separate and not included.",
+    "Current final-environment-prefix implementation is retained; retired mutual/nested plan helpers and their old generated-owner target are not restored.",
+    "V1 remains the default/reference; four whole-operation fallback families and eager decoding remain.",
+    "Full-kernel DirectJS is unsupported; established PSC1/TypeScript generation is qualified.",
+    "No whole-kernel/global soundness claim, Arena pass or hard-OS-memory claim is made."
+  ]
+}

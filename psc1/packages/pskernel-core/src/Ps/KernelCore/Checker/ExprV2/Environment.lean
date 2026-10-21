@@ -13,7 +13,9 @@ Ordinary/mutual/nested recursor types/rules (including K) are installed once fro
 the newly admitted final-environment prefix, in an appended owning arena. Nested
 restored types and constructors are imported from that same checked environment;
 ordinary/mutual headers and constructors retain original admitted IDs. This
-transitional import does not make inductive admission DAG-native. Preexisting
+transitional import does not make inductive admission DAG-native. Quot headers
+are installed from all four live constants after successful checked Quot admission.
+Repeated explicit Quot commands retain exact existing owners. Preexisting
 session constants still require a separately qualified owning-reference adapter.
 -/
 /- Generated rule IDs are private to one validated command batch. They are
@@ -31,6 +33,7 @@ inductive PsKernelExprV2DeclarationRefKind where
   | inductiveDecl
   | constructorDecl
   | recursorDecl (rules : List PsKernelExprV2RecursorRuleRef)
+  | quotDecl (kind : PsKernelQuotKind)
 
 structure PsKernelExprV2DeclarationRef where
   name : PsKernelName
@@ -53,6 +56,26 @@ def psKernelExprV2DeclarationRefFind
       fun (name : PsKernelName) =>
         if psKernelNameEq first.name name then Option.some first
         else smaller name
+
+def psKernelExprV2QuotKindEq
+    (left right : PsKernelQuotKind) : Bool :=
+  match left with
+  | PsKernelQuotKind.typeQ =>
+      match right with
+      | PsKernelQuotKind.typeQ => true
+      | _ => false
+  | PsKernelQuotKind.ctorQ =>
+      match right with
+      | PsKernelQuotKind.ctorQ => true
+      | _ => false
+  | PsKernelQuotKind.liftQ =>
+      match right with
+      | PsKernelQuotKind.liftQ => true
+      | _ => false
+  | PsKernelQuotKind.indQ =>
+      match right with
+      | PsKernelQuotKind.indQ => true
+      | _ => false
 
 def psKernelExprV2DeclarationRefKindMatches
     (kind : PsKernelExprV2DeclarationRefKind) (info : PsKernelConstantInfo) :
@@ -87,6 +110,12 @@ def psKernelExprV2DeclarationRefKindMatches
       match info with
       | PsKernelConstantInfo.recInfo _ => true
       | _ => false
+  | PsKernelExprV2DeclarationRefKind.quotDecl kind =>
+      match info with
+      | PsKernelConstantInfo.quotInfo value =>
+          psKernelExprV2QuotKindEq kind value.kind
+      | _ => false
+
 
 def psKernelExprV2DeclarationRefMatches
     (declaration : PsKernelExprV2DeclarationRef)

@@ -1,3 +1,36 @@
+# Active checkpoint: Quot owners ported onto the current prefix implementation
+
+This branch candidate is based on integration source `deb18b9c87a5d21a406c6e5b852afb4d44785fe5` and preserves the qualified Quot source parent `e07d5a9d48bff5c50692bab4be9f48dbb8665bf0` in its commit ancestry. The active research branch is `research/psc1-pskernel-v2-carrier-20261021`. Obtain this candidate's exact SHA from its push run and `git rev-parse HEAD`; its own qualification is **NOT RUN at creation**. It is not promoted to the integration branch.
+
+## Implementation and trust boundary
+
+- `API/DagGenerated.lean` now plans the four live Quot names and exact kinds only after successful checked Quot admission. It imports their admitted headers into the private batch arena. Repeated explicit Quot commands skip that import only when all four owners retain exactly the admitted kind, levels and type with no delta body.
+- `Checker/ExprV2/Environment.lean` carries the Quot kind explicitly. The production `psKernelDagGeneratedAfterCommandWithPrevious` path and the retained three-argument helper both route Quot through the checked plan.
+- The current `InstallType`, `InstallNewInfo` and `InstallNewPrefix` implementations remain byte-for-byte unchanged. No older mutual/nested plan implementation or retired generated-owner executable is restored by the history merge.
+- Native and generated Quot fixtures now exercise the production previous/current-environment entry point. The full 4-owner / 180-check / 180-WHNF / 180-DefEq / 90-invalid matrix, 17 admissions, 10 plans, 5 repairs, 13 private-ID sentinels and 10 positive / 7 negative official fixtures remain. The 20 prior equations are retained and one production-routing equation is added.
+- Existing Name-worker, current prefix, frozen-parent defect reproductions, resource guards and provider gates remain wired in both integration and canonical-source CI. No checker fuel, depth, failure precedence, publication rule or trusted runtime primitive is changed.
+
+This is a transitional owner import. It still recursively imports checked metadata and does not retire any whole-operation fallback. Preexisting-session owner initialization remains a separate candidate; no arbitrary environment record becomes authoritative through this importer.
+
+## Exact-source evidence at creation
+
+| Source | Native | Portable source | Canonical .ps | Generated JS | Proof | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| e07d5a9d48bff5c50692bab4be9f48dbb8665bf0 (Quot source parent) | PASS | PASS | PASS | PASS | PASS | NOT RUN for this port | FAIL | PASS |
+| 7b14affc854e7bc99e4778ac155ae805dd273226 (prefix parent) | PASS | PASS | PASS | PASS | PASS | PASS, mixed measurements | IN PROGRESS at last observation | PASS |
+| deb18b9c87a5d21a406c6e5b852afb4d44785fe5 (integration base) | PASS | PASS | IN PROGRESS | IN PROGRESS | PASS | NOT RUN at observation | IN PROGRESS | Native PASS; generated pending |
+| This Quot port candidate | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+The e07 parent terminal gates were re-read at 18:43 UTC: [integration 39639394101](https://github.com/dwijayuda/pskernel/actions/runs/39639394101), [correctness 39639393856](https://github.com/dwijayuda/pskernel/actions/runs/39639393856), [six research jobs 39639393812](https://github.com/dwijayuda/pskernel/actions/runs/39639393812). Its [Arena 39639393861](https://github.com/dwijayuda/pskernel/actions/runs/39639393861) is terminal failure; the official job passed and the generated comparison failed. No corpus result is inferred for this candidate. The complete canonical log confirms detached empty-PATH provider execution, the 1,360 Quot assertions, 182 portable modules and the generated manifest. See `evidence/2026-10-21-quot-owner-parent-qualified-receipt.json` for terminal job IDs and authenticated canonical files.
+
+## Immediate next action and remaining gates
+
+Observe all push-triggered jobs for this exact candidate. Fix actual failures without weakening its fixtures or the current prefix/Name controls; qualify native, all-portable PSC1, complete canonical closure, both detached generated runtimes, provider and local proof audit before considering promotion. A separate full-call initial-owner candidate and hard-OS-capped Arena experiment are underway on their own branches; their outcomes must not be attributed to this port.
+
+V1 remains the default/reference. Four whole-operation fallback families, eager decode, recursive generated-metadata import, incomplete initial-session ownership and full Arena resource/conformance differences remain. A global soundness theorem and complete V2 replacement are not claimed. The historical memory receipts below generally limit V8 old-space, not total process RSS; only explicitly authenticated cgroup receipts establish the hard OS cap.
+
+---
+
 # Current integration checkpoint — qualified base and measured name-worker promotion
 
 Observed: 2026-10-21T18:16:44Z.

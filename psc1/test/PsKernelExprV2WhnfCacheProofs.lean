@@ -9,6 +9,119 @@ collision error. They do not assume arena validation or prove kernel soundness.
 -/
 namespace PsKernelExprV2WhnfCacheProofs
 
+/- Frozen functions are copied from WhnfCache.lean at
+   5deaf5880c83a76290520fa1176982dab0bf87a5 with identifiers renamed only. -/
+def originalIndexBucket
+    (levels : Nat) :
+    PsKernelExprV2WhnfCacheIndex -> Nat -> List PsKernelExprV2WhnfCacheEntry :=
+  match levels with
+  | Nat.zero =>
+      fun (index : PsKernelExprV2WhnfCacheIndex) (_hash : Nat) =>
+        match index with
+        | PsKernelExprV2WhnfCacheIndex.bucket entries => entries
+        | _ => List.nil
+  | Nat.succ remaining =>
+      fun (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat) =>
+        match index with
+        | PsKernelExprV2WhnfCacheIndex.branch left right =>
+            let worker := originalIndexBucket remaining;
+            if Nat.beq (Nat.mod hash 2) 0 then worker left (Nat.div hash 2)
+            else worker right (Nat.div hash 2)
+        | _ => List.nil
+
+def originalIndexSet
+    (levels : Nat) :
+    PsKernelExprV2WhnfCacheIndex -> Nat -> List PsKernelExprV2WhnfCacheEntry ->
+    PsKernelExprV2WhnfCacheIndex :=
+  match levels with
+  | Nat.zero =>
+      fun (_index : PsKernelExprV2WhnfCacheIndex) (_hash : Nat)
+          (entries : List PsKernelExprV2WhnfCacheEntry) =>
+        PsKernelExprV2WhnfCacheIndex.bucket entries
+  | Nat.succ remaining =>
+      fun (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat)
+          (entries : List PsKernelExprV2WhnfCacheEntry) =>
+        let left : PsKernelExprV2WhnfCacheIndex :=
+          match index with
+          | PsKernelExprV2WhnfCacheIndex.branch value _ => value
+          | _ => PsKernelExprV2WhnfCacheIndex.empty;
+        let right : PsKernelExprV2WhnfCacheIndex :=
+          match index with
+          | PsKernelExprV2WhnfCacheIndex.branch _ value => value
+          | _ => PsKernelExprV2WhnfCacheIndex.empty;
+        let worker := originalIndexSet remaining;
+        if Nat.beq (Nat.mod hash 2) 0 then
+          PsKernelExprV2WhnfCacheIndex.branch
+            (worker left (Nat.div hash 2) entries) right
+        else
+          PsKernelExprV2WhnfCacheIndex.branch
+            left (worker right (Nat.div hash 2) entries)
+
+theorem bucket_worker_exact
+    (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat) :
+    psKernelExprV2WhnfCacheIndexBucketWorker levels index hash =
+      originalIndexBucket levels index hash := by
+  induction levels generalizing index hash with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psKernelExprV2WhnfCacheIndexBucketWorker, originalIndexBucket, ih]
+
+theorem set_worker_exact
+    (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat)
+    (entries : List PsKernelExprV2WhnfCacheEntry) :
+    psKernelExprV2WhnfCacheIndexSetWorker levels index hash entries =
+      originalIndexSet levels index hash entries := by
+  induction levels generalizing index hash with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psKernelExprV2WhnfCacheIndexSetWorker, originalIndexSet, ih]
+
+theorem bucket_public_exact
+    (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat) :
+    psKernelExprV2WhnfCacheIndexBucket levels index hash =
+      originalIndexBucket levels index hash := by
+  cases levels with
+  | zero => rfl
+  | succ remaining => exact bucket_worker_exact (Nat.succ remaining) index hash
+
+theorem set_public_exact
+    (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat)
+    (entries : List PsKernelExprV2WhnfCacheEntry) :
+    psKernelExprV2WhnfCacheIndexSet levels index hash entries =
+      originalIndexSet levels index hash entries := by
+  cases levels with
+  | zero => rfl
+  | succ remaining => exact set_worker_exact (Nat.succ remaining) index hash entries
+
+theorem bucket_worker_public
+    (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat) :
+    psKernelExprV2WhnfCacheIndexBucketWorker levels index hash =
+      psKernelExprV2WhnfCacheIndexBucket levels index hash := by
+  exact (bucket_worker_exact levels index hash).trans
+    (bucket_public_exact levels index hash).symm
+
+theorem set_worker_public
+    (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat)
+    (entries : List PsKernelExprV2WhnfCacheEntry) :
+    psKernelExprV2WhnfCacheIndexSetWorker levels index hash entries =
+      psKernelExprV2WhnfCacheIndexSet levels index hash entries := by
+  exact (set_worker_exact levels index hash entries).trans
+    (set_public_exact levels index hash entries).symm
+
+theorem bucket_partial_application_exact (levels : Nat) :
+    psKernelExprV2WhnfCacheIndexBucket levels = originalIndexBucket levels := by
+  funext index hash
+  exact bucket_public_exact levels index hash
+
+theorem set_partial_application_exact (levels : Nat) :
+    psKernelExprV2WhnfCacheIndexSet levels = originalIndexSet levels := by
+  funext index hash entries
+  exact set_public_exact levels index hash entries
+
+private theorem original_bucket_empty (levels hash : Nat) :
+    originalIndexBucket levels .empty hash = [] := by
+  cases levels <;> rfl
+
 private def routeEq (levels left right : Nat) : Bool :=
   match levels with
   | 0 => true
@@ -49,20 +162,22 @@ theorem index_bucket_set
         (psKernelExprV2WhnfCacheIndexSet levels index key entries) query =
       if routeEq levels key query then entries
       else psKernelExprV2WhnfCacheIndexBucket levels index query := by
+  simp only [bucket_public_exact, set_public_exact]
   induction levels generalizing index key query with
   | zero => rfl
   | succ remaining ih =>
       cases index <;>
         cases keyBit : Nat.beq (Nat.mod key 2) 0 <;>
         cases queryBit : Nat.beq (Nat.mod query 2) 0 <;>
-        simp [psKernelExprV2WhnfCacheIndexSet,
-          psKernelExprV2WhnfCacheIndexBucket, routeEq, keyBit, queryBit, ih, bucket_empty]
+        simp [originalIndexSet,
+          originalIndexBucket, routeEq, keyBit, queryBit, ih, original_bucket_empty]
 
 theorem index_bucket_same_route
     (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (key query : Nat)
     (same : routeEq levels key query = true) :
     psKernelExprV2WhnfCacheIndexBucket levels index key =
       psKernelExprV2WhnfCacheIndexBucket levels index query := by
+  simp only [bucket_public_exact]
   induction levels generalizing index key query with
   | zero => rfl
   | succ remaining ih =>
@@ -73,9 +188,9 @@ theorem index_bucket_same_route
           cases keyBit : Nat.beq (Nat.mod key 2) 0 <;>
             cases queryBit : Nat.beq (Nat.mod query 2) 0 <;>
             simp [routeEq, keyBit, queryBit] at same
-          · simpa [psKernelExprV2WhnfCacheIndexBucket, keyBit, queryBit] using
+          · simpa [originalIndexBucket, keyBit, queryBit] using
               ih right (Nat.div key 2) (Nat.div query 2) same
-          · simpa [psKernelExprV2WhnfCacheIndexBucket, keyBit, queryBit] using
+          · simpa [originalIndexBucket, keyBit, queryBit] using
               ih left (Nat.div key 2) (Nat.div query 2) same
 
 theorem index_bucket_insert
@@ -87,6 +202,9 @@ theorem index_bucket_insert
         List.cons entry (psKernelExprV2WhnfCacheIndexBucket 16 index hash)
       else psKernelExprV2WhnfCacheIndexBucket 16 index hash := by
   unfold psKernelExprV2WhnfCacheIndexInsert
+  change psKernelExprV2WhnfCacheIndexBucket 16
+      (psKernelExprV2WhnfCacheIndexSet 16 index entry.hash
+        (List.cons entry (psKernelExprV2WhnfCacheIndexBucket 16 index entry.hash))) hash = _
   rw [index_bucket_set]
   cases routed : routeEq 16 entry.hash hash with
   | false => simp [routed]
@@ -301,3 +419,12 @@ end PsKernelExprV2WhnfCacheProofs
 #print axioms PsKernelExprV2WhnfCacheProofs.modeled_lookup_exact
 #print axioms PsKernelExprV2WhnfCacheProofs.empty_no_hit
 #print axioms PsKernelExprV2WhnfCacheProofs.same_hash_publication_precedes_older_candidates
+
+#print axioms PsKernelExprV2WhnfCacheProofs.bucket_worker_exact
+#print axioms PsKernelExprV2WhnfCacheProofs.set_worker_exact
+#print axioms PsKernelExprV2WhnfCacheProofs.bucket_public_exact
+#print axioms PsKernelExprV2WhnfCacheProofs.set_public_exact
+#print axioms PsKernelExprV2WhnfCacheProofs.bucket_worker_public
+#print axioms PsKernelExprV2WhnfCacheProofs.set_worker_public
+#print axioms PsKernelExprV2WhnfCacheProofs.bucket_partial_application_exact
+#print axioms PsKernelExprV2WhnfCacheProofs.set_partial_application_exact

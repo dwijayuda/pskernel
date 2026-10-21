@@ -44,6 +44,133 @@ private def errorIs {a : Type} (label expected : String)
   | some (.error error) => require label (error == expected)
   | _ => throw (IO.userError ("indexed cache expected error: " ++ label))
 
+/- Frozen 5de radix routines below are executable native references only.
+   The production workers are separately proved equal for every input. -/
+private def radixReferenceBucket
+    (levels : Nat) :
+    PsKernelExprV2WhnfCacheIndex -> Nat -> List PsKernelExprV2WhnfCacheEntry :=
+  match levels with
+  | Nat.zero =>
+      fun (index : PsKernelExprV2WhnfCacheIndex) (_hash : Nat) =>
+        match index with
+        | PsKernelExprV2WhnfCacheIndex.bucket entries => entries
+        | _ => List.nil
+  | Nat.succ remaining =>
+      fun (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat) =>
+        match index with
+        | PsKernelExprV2WhnfCacheIndex.branch left right =>
+            let worker := radixReferenceBucket remaining;
+            if Nat.beq (Nat.mod hash 2) 0 then worker left (Nat.div hash 2)
+            else worker right (Nat.div hash 2)
+        | _ => List.nil
+
+private def radixReferenceSet
+    (levels : Nat) :
+    PsKernelExprV2WhnfCacheIndex -> Nat -> List PsKernelExprV2WhnfCacheEntry ->
+    PsKernelExprV2WhnfCacheIndex :=
+  match levels with
+  | Nat.zero =>
+      fun (_index : PsKernelExprV2WhnfCacheIndex) (_hash : Nat)
+          (entries : List PsKernelExprV2WhnfCacheEntry) =>
+        PsKernelExprV2WhnfCacheIndex.bucket entries
+  | Nat.succ remaining =>
+      fun (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat)
+          (entries : List PsKernelExprV2WhnfCacheEntry) =>
+        let left : PsKernelExprV2WhnfCacheIndex :=
+          match index with
+          | PsKernelExprV2WhnfCacheIndex.branch value _ => value
+          | _ => PsKernelExprV2WhnfCacheIndex.empty;
+        let right : PsKernelExprV2WhnfCacheIndex :=
+          match index with
+          | PsKernelExprV2WhnfCacheIndex.branch _ value => value
+          | _ => PsKernelExprV2WhnfCacheIndex.empty;
+        let worker := radixReferenceSet remaining;
+        if Nat.beq (Nat.mod hash 2) 0 then
+          PsKernelExprV2WhnfCacheIndex.branch
+            (worker left (Nat.div hash 2) entries) right
+        else
+          PsKernelExprV2WhnfCacheIndex.branch
+            left (worker right (Nat.div hash 2) entries)
+
+
+private def sameCacheRows : List PsKernelExprV2WhnfCacheEntry ->
+    List PsKernelExprV2WhnfCacheEntry -> Bool
+  | [], [] => true
+  | a :: restA, b :: restB =>
+      a.source == b.source && a.result == b.result && a.hash == b.hash &&
+        sameCacheRows restA restB
+  | _, _ => false
+
+private def sameCacheIndex : PsKernelExprV2WhnfCacheIndex ->
+    PsKernelExprV2WhnfCacheIndex -> Bool
+  | .empty, .empty => true
+  | .bucket a, .bucket b => sameCacheRows a b
+  | .branch a b, .branch c d => sameCacheIndex a c && sameCacheIndex b d
+  | _, _ => false
+
+private def radixWorkers : IO Unit := do
+  let first := PsKernelExprV2WhnfCacheEntry.mk 1 11 23
+  let aliasEntry := PsKernelExprV2WhnfCacheEntry.mk 2 22 65559
+  let large := PsKernelExprV2WhnfCacheEntry.mk
+    1000000000000000000000000000001 33 1000000000000000000000000000023
+  let rows := [first,aliasEntry,first,large]
+  let reversed := rows.reverse
+  let deep := radixReferenceSet 16
+    (radixReferenceSet 16 .empty 23 rows) 1 reversed
+  let deeper := radixReferenceSet 17 deep 65559 [large,first,large]
+  let indices : List PsKernelExprV2WhnfCacheIndex := [
+    .empty, .bucket rows, .branch .empty .empty,
+    .branch (.bucket rows) .empty, .branch .empty (.bucket reversed),
+    .branch (.branch (.bucket [large]) .empty) (.bucket rows),
+    deep, deeper]
+  let hashes : List Nat := [
+    0,1,2,23,65535,65536,65559,1000000000000000000000000000023]
+  let rowSets := [[],rows,[large,first,large]]
+  let mut lookups := 0
+  let mut updates := 0
+  for levels in [0,1,2,8,16,17] do
+    let bucket := psKernelExprV2WhnfCacheIndexBucket levels
+    let setter := psKernelExprV2WhnfCacheIndexSet levels
+    for index in indices do
+      let bucketAt := bucket index
+      let setterAt := setter index
+      for hash in hashes do
+        let expected := radixReferenceBucket levels index hash
+        require "radix-flat-bucket-exact"
+          (sameCacheRows expected (psKernelExprV2WhnfCacheIndexBucketWorker levels index hash))
+        require "radix-staged-bucket-reuse" (sameCacheRows expected (bucketAt hash))
+        lookups := lookups + 1
+        let setRows := setterAt hash
+        for replacement in rowSets do
+          let expectedIndex := radixReferenceSet levels index hash replacement
+          require "radix-flat-set-exact"
+            (sameCacheIndex expectedIndex
+              (psKernelExprV2WhnfCacheIndexSetWorker levels index hash replacement))
+          require "radix-staged-set-reuse"
+            (sameCacheIndex expectedIndex (setRows replacement))
+          updates := updates + 1
+  let replaced := psKernelExprV2WhnfCacheIndexSetWorker 16 deep 23 []
+  require "radix-old-snapshot-retains-duplicate-publication"
+    (sameCacheRows rows (psKernelExprV2WhnfCacheIndexBucketWorker 16 deep 23))
+  require "radix-high-hash-route-keeps-full-records"
+    (sameCacheRows rows (psKernelExprV2WhnfCacheIndexBucketWorker 16 deep 65559))
+  require "radix-set-replaces-selected-bucket"
+    (sameCacheRows [] (psKernelExprV2WhnfCacheIndexBucketWorker 16 replaced 23))
+  require "radix-set-preserves-other-branch"
+    (sameCacheRows reversed (psKernelExprV2WhnfCacheIndexBucketWorker 16 replaced 1))
+  let inserted := psKernelExprV2WhnfCacheIndexInsert deep first
+  require "radix-insert-retains-every-newest-first-record"
+    (sameCacheRows (first :: rows)
+      (psKernelExprV2WhnfCacheIndexBucketWorker 16 inserted 23))
+  require "radix-set-zero-replaces-malformed-branch"
+    (sameCacheIndex (.bucket [large])
+      (psKernelExprV2WhnfCacheIndexSetWorker 0 deep 65559 [large]))
+  require "radix-bucket-zero-keeps-raw-list"
+    (sameCacheRows [large,first,large]
+      (psKernelExprV2WhnfCacheIndexBucketWorker 0 (.bucket [large,first,large]) 0))
+  require "radix-matrix-counts" (lookups == 384 && updates == 1152)
+  IO.println "PSC1_V2_INDEXED_CACHE_RADIX_PASS lookups=384 updates=1152 levels=6 shapes=8"
+
 private def rawMatrix : IO Unit := do
   let leftExpr := PsKernelExpr.letE (nm "x") (.sort (level 1))
     (.sort (level 0)) (.bvar 0) false
@@ -457,6 +584,7 @@ private def callbackOwners (fixture : WarmFixture) : IO Unit := do
   IO.println "PSC1_V2_INDEXED_CACHE_CALLBACK_PASS cases=10 caches=5 entries=9"
 
 def main : IO Unit := do
+  radixWorkers
   rawMatrix
   let fixture <- warmOwners
   resourceOwners fixture

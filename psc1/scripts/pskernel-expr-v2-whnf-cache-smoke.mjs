@@ -66,6 +66,97 @@ const emptySession=()=>accepted(get("psKernelKernelSessionEmpty")(
  get("psKernelResourcePolicyDefault"),get("psKernelProviderDefault")),"empty-session");
 
 {
+ const I=get("PsKernelExprV2WhnfCacheIndex"),empty=unit(I.empty);
+ const bucket=get("psKernelExprV2WhnfCacheIndexBucket");
+ const setter=get("psKernelExprV2WhnfCacheIndexSet");
+ const bucketWorker=get("psKernelExprV2WhnfCacheIndexBucketWorker");
+ const setWorker=get("psKernelExprV2WhnfCacheIndexSetWorker");
+ must(typeof bucketWorker==="function"&&typeof setWorker==="function","radix-flat-worker-exports");
+ // Independent iterative descriptor model: it never calls a kernel operation.
+ const modelEmpty={kind:"empty"};
+ const modelBucket=rows=>({kind:"bucket",rows});
+ const modelBranch=(left,right)=>({kind:"branch",left,right});
+ const modelLookup=(levels,index,hash)=>{
+  let node=index,route=hash;
+  for(let i=0;i<levels;i++){
+   if(node.kind!=="branch")return [];
+   node=(route&1n)===0n?node.left:node.right;route>>=1n;
+  }
+  return node.kind==="bucket"?node.rows:[];
+ };
+ const modelSet=(levels,index,hash,rows)=>{
+  let node=index,route=hash;const trail=[];
+  for(let i=0;i<levels;i++){
+   const left=node.kind==="branch"?node.left:modelEmpty;
+   const right=node.kind==="branch"?node.right:modelEmpty;
+   const goesRight=(route&1n)!==0n;
+   trail.push({goesRight,sibling:goesRight?left:right});
+   node=goesRight?right:left;route>>=1n;
+  }
+  let result=modelBucket(rows);
+  while(trail.length){
+   const {goesRight,sibling}=trail.pop();
+   result=goesRight?modelBranch(sibling,result):modelBranch(result,sibling);
+  }
+  return result;
+ };
+ const encode=index=>index.kind==="empty"?empty:index.kind==="bucket"?
+  I.bucket(list(index.rows)):I.branch(encode(index.left),encode(index.right));
+ const first={source:1n,result:11n,hash:23n};
+ const aliasEntry={source:2n,result:22n,hash:65559n};
+ const large={source:1000000000000000000000000000001n,result:33n,
+  hash:1000000000000000000000000000023n};
+ const rows=[first,aliasEntry,first,large],reversed=[...rows].reverse();
+ const deep=modelSet(16,modelSet(16,modelEmpty,23n,rows),1n,reversed);
+ const deeper=modelSet(17,deep,65559n,[large,first,large]);
+ const descriptors=[modelEmpty,modelBucket(rows),modelBranch(modelEmpty,modelEmpty),
+  modelBranch(modelBucket(rows),modelEmpty),modelBranch(modelEmpty,modelBucket(reversed)),
+  modelBranch(modelBranch(modelBucket([large]),modelEmpty),modelBucket(rows)),deep,deeper];
+ const hashes=[0n,1n,2n,23n,65535n,65536n,65559n,1000000000000000000000000000023n];
+ const rowSets=[[],rows,[large,first,large]];
+ let lookups=0,updates=0,partials=0,executions=0;
+ const partial=(value,label)=>{must(typeof value==="function",label);partials++;return value;};
+ for(const depth of [0,1,2,8,16,17]){
+  const levels=BigInt(depth);
+  const stagedBucket=partial(bucket(levels),"radix-bucket-level-partial");
+  const stagedSet=partial(setter(levels),"radix-set-level-partial");
+  for(const descriptor of descriptors){
+   const index=encode(descriptor);
+   const bucketAt=partial(stagedBucket(index),"radix-bucket-index-partial");
+   const setAt=partial(stagedSet(index),"radix-set-index-partial");
+   for(const hash of hashes){
+    const expected=list(modelLookup(depth,descriptor,hash));
+    must(same(expected,bucketWorker(levels,index,hash)),"radix-flat-bucket-exact");
+    must(same(expected,bucketAt(hash)),"radix-staged-bucket-reuse");
+    lookups++;executions++;
+    const setRows=partial(setAt(hash),"radix-set-hash-partial");
+    for(const replacement of rowSets){
+     const expectedIndex=encode(modelSet(depth,descriptor,hash,replacement));
+     must(same(expectedIndex,setWorker(levels,index,hash,list(replacement))),"radix-flat-set-exact");
+     must(same(expectedIndex,setRows(list(replacement))),"radix-staged-set-reuse");
+     updates++;executions++;
+    }
+   }
+  }
+ }
+ const oldIndex=encode(deep),replaced=setWorker(16n,oldIndex,23n,nil);
+ must(same(list(rows),bucketWorker(16n,oldIndex,23n)),"radix-old-snapshot-retains-duplicate-publication");
+ must(same(list(rows),bucketWorker(16n,oldIndex,65559n)),"radix-high-hash-route-keeps-full-records");
+ must(same(nil,bucketWorker(16n,replaced,23n)),"radix-set-replaces-selected-bucket");
+ must(same(list(reversed),bucketWorker(16n,replaced,1n)),"radix-set-preserves-other-branch");
+ const inserted=get("psKernelExprV2WhnfCacheIndexInsert")(oldIndex,first);
+ must(same(list([first,...rows]),bucketWorker(16n,inserted,23n)),"radix-insert-retains-every-newest-first-record");
+ must(same(I.bucket(list([large])),setWorker(0n,oldIndex,65559n,list([large]))),
+  "radix-set-zero-replaces-malformed-branch");
+ must(same(list([large,first,large]),bucketWorker(0n,I.bucket(list([large,first,large])),0n)),
+  "radix-bucket-zero-keeps-raw-list");
+ must(lookups===384&&updates===1152,"radix-matrix-counts");
+ must(partials===492&&executions===1536,"radix-abi-counts");
+ console.log("PSC1_V2_INDEXED_CACHE_RADIX_PASS lookups=384 updates=1152 levels=6 shapes=8");
+ console.log("PSC1_V2_INDEXED_CACHE_RADIX_ABI_PASS partials=492 executions=1536");
+}
+
+{
  const s0=sort(0),s1=sort(1),s2=sort(2),b0=bv(0n);
  const left=letE(name("x"),s1,s0,b0).id,equal=letE(name("y"),s1,s0,b0).id;
  const right=letE(name("x"),s2,s1,b0).id,missing=arena.size+5n;

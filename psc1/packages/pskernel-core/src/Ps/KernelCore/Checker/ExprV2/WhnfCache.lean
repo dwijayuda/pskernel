@@ -52,6 +52,28 @@ inductive PsKernelExprV2WhnfCacheIndex where
   | bucket (entries : List PsKernelExprV2WhnfCacheEntry)
   | branch (left right : PsKernelExprV2WhnfCacheIndex)
 
+/-
+Explicit radix workers receive the index, hash and candidate list before
+descending in representation levels. The public staged entry points below
+retain their original generated calling convention.
+-/
+def psKernelExprV2WhnfCacheIndexBucketWorker
+    (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat) :
+    List PsKernelExprV2WhnfCacheEntry :=
+  match levels with
+  | Nat.zero =>
+      match index with
+      | PsKernelExprV2WhnfCacheIndex.bucket entries => entries
+      | _ => List.nil
+  | Nat.succ remaining =>
+      match index with
+      | PsKernelExprV2WhnfCacheIndex.branch left right =>
+          if Nat.beq (Nat.mod hash 2) 0 then
+            psKernelExprV2WhnfCacheIndexBucketWorker remaining left (Nat.div hash 2)
+          else
+            psKernelExprV2WhnfCacheIndexBucketWorker remaining right (Nat.div hash 2)
+      | _ => List.nil
+
 def psKernelExprV2WhnfCacheIndexBucket
     (levels : Nat) :
     PsKernelExprV2WhnfCacheIndex -> Nat -> List PsKernelExprV2WhnfCacheEntry :=
@@ -63,12 +85,31 @@ def psKernelExprV2WhnfCacheIndexBucket
         | _ => List.nil
   | Nat.succ remaining =>
       fun (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat) =>
+        psKernelExprV2WhnfCacheIndexBucketWorker (Nat.succ remaining) index hash
+
+def psKernelExprV2WhnfCacheIndexSetWorker
+    (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat)
+    (entries : List PsKernelExprV2WhnfCacheEntry) :
+    PsKernelExprV2WhnfCacheIndex :=
+  match levels with
+  | Nat.zero => PsKernelExprV2WhnfCacheIndex.bucket entries
+  | Nat.succ remaining =>
+      let left : PsKernelExprV2WhnfCacheIndex :=
         match index with
-        | PsKernelExprV2WhnfCacheIndex.branch left right =>
-            let worker := psKernelExprV2WhnfCacheIndexBucket remaining;
-            if Nat.beq (Nat.mod hash 2) 0 then worker left (Nat.div hash 2)
-            else worker right (Nat.div hash 2)
-        | _ => List.nil
+        | PsKernelExprV2WhnfCacheIndex.branch value _ => value
+        | _ => PsKernelExprV2WhnfCacheIndex.empty;
+      let right : PsKernelExprV2WhnfCacheIndex :=
+        match index with
+        | PsKernelExprV2WhnfCacheIndex.branch _ value => value
+        | _ => PsKernelExprV2WhnfCacheIndex.empty;
+      if Nat.beq (Nat.mod hash 2) 0 then
+        PsKernelExprV2WhnfCacheIndex.branch
+          (psKernelExprV2WhnfCacheIndexSetWorker remaining left
+            (Nat.div hash 2) entries) right
+      else
+        PsKernelExprV2WhnfCacheIndex.branch
+          left (psKernelExprV2WhnfCacheIndexSetWorker remaining right
+            (Nat.div hash 2) entries)
 
 def psKernelExprV2WhnfCacheIndexSet
     (levels : Nat) :
@@ -82,27 +123,13 @@ def psKernelExprV2WhnfCacheIndexSet
   | Nat.succ remaining =>
       fun (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat)
           (entries : List PsKernelExprV2WhnfCacheEntry) =>
-        let left : PsKernelExprV2WhnfCacheIndex :=
-          match index with
-          | PsKernelExprV2WhnfCacheIndex.branch value _ => value
-          | _ => PsKernelExprV2WhnfCacheIndex.empty;
-        let right : PsKernelExprV2WhnfCacheIndex :=
-          match index with
-          | PsKernelExprV2WhnfCacheIndex.branch _ value => value
-          | _ => PsKernelExprV2WhnfCacheIndex.empty;
-        let worker := psKernelExprV2WhnfCacheIndexSet remaining;
-        if Nat.beq (Nat.mod hash 2) 0 then
-          PsKernelExprV2WhnfCacheIndex.branch
-            (worker left (Nat.div hash 2) entries) right
-        else
-          PsKernelExprV2WhnfCacheIndex.branch
-            left (worker right (Nat.div hash 2) entries)
+        psKernelExprV2WhnfCacheIndexSetWorker (Nat.succ remaining) index hash entries
 
 def psKernelExprV2WhnfCacheIndexInsert
     (index : PsKernelExprV2WhnfCacheIndex)
     (entry : PsKernelExprV2WhnfCacheEntry) : PsKernelExprV2WhnfCacheIndex :=
-  let bucket := psKernelExprV2WhnfCacheIndexBucket 16 index entry.hash;
-  psKernelExprV2WhnfCacheIndexSet 16 index entry.hash (List.cons entry bucket)
+  let bucket := psKernelExprV2WhnfCacheIndexBucketWorker 16 index entry.hash;
+  psKernelExprV2WhnfCacheIndexSetWorker 16 index entry.hash (List.cons entry bucket)
 
 def psKernelExprV2WhnfCacheIndexBuild
     (entries : List PsKernelExprV2WhnfCacheEntry) : PsKernelExprV2WhnfCacheIndex :=
@@ -130,7 +157,7 @@ def psKernelExprV2WhnfCacheBucket
     List PsKernelExprV2WhnfCacheEntry :=
   match cache.index with
   | Option.none => cache.small
-  | Option.some index => psKernelExprV2WhnfCacheIndexBucket 16 index hash
+  | Option.some index => psKernelExprV2WhnfCacheIndexBucketWorker 16 index hash
 
 def psKernelExprV2WhnfCacheInsert
     (cache : PsKernelExprV2WhnfCache)

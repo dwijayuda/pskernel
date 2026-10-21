@@ -291,6 +291,7 @@ jobs:
           set -euo pipefail
           .lake/build/bin/psc1_kernel_expr_v2_whnf_cache_regression \
             | tee "$RUNNER_TEMP/psc1-indexed-cache-native.log"
+          grep -Fqx 'PSC1_V2_INDEXED_CACHE_RADIX_PASS lookups=384 updates=1152 levels=6 shapes=8' "$RUNNER_TEMP/psc1-indexed-cache-native.log"
           grep -Fqx 'PSC1_V2_INDEXED_CACHE_RAW_PASS comparisons=1024 adversarial=7 snapshots=2' "$RUNNER_TEMP/psc1-indexed-cache-native.log"
           grep -Fqx 'PSC1_V2_INDEXED_CACHE_REAL_PASS officialPositive=9 officialNegative=1 publicPositive=9 publicNegative=1 caches=5 entries=9' "$RUNNER_TEMP/psc1-indexed-cache-native.log"
           grep -Fqx 'PSC1_V2_INDEXED_CACHE_RESOURCE_PASS reference=36 precedence=16 scope=5' "$RUNNER_TEMP/psc1-indexed-cache-native.log"
@@ -342,7 +343,7 @@ jobs:
           test "$(grep -c '^#print axioms PsKernelExprV2RecursorKProofs\.' test/PsKernelExprV2RecursorKProofs.lean)" -eq 6
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorKProofs.lean \
             | tee "$RUNNER_TEMP/psc1-recursor-k-proofs.log"
-          test "$(grep -c '^#print axioms ' test/PsKernelExprV2WhnfCacheProofs.lean)" -eq 17
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2WhnfCacheProofs.lean)" -eq 25
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2WhnfCacheProofs.lean \
             | tee "$RUNNER_TEMP/psc1-indexed-cache-proofs.log"
           test "$(grep -c '^#print axioms ' test/PsKernelExprV2StringProjectionProofs.lean)" -eq 10
@@ -692,6 +693,8 @@ jobs:
           cd "$PSC1_DAG_RUN_DIR"
           env PATH="" "$PSC1_NODE_BIN" whnf-cache-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-indexed-cache-generated.log"
+          grep -Fqx 'PSC1_V2_INDEXED_CACHE_RADIX_PASS lookups=384 updates=1152 levels=6 shapes=8' "$RUNNER_TEMP/psc1-indexed-cache-generated.log"
+          grep -Fqx 'PSC1_V2_INDEXED_CACHE_RADIX_ABI_PASS partials=492 executions=1536' "$RUNNER_TEMP/psc1-indexed-cache-generated.log"
           grep -Fqx 'PSC1_V2_INDEXED_CACHE_RAW_PASS comparisons=1024 adversarial=7 snapshots=2' "$RUNNER_TEMP/psc1-indexed-cache-generated.log"
           grep -Fqx 'PSC1_V2_INDEXED_CACHE_REAL_PASS publicPositive=9 publicNegative=1 referencePositive=9 referenceNegative=1 caches=5 entries=9 official=native-gate' "$RUNNER_TEMP/psc1-indexed-cache-generated.log"
           grep -Fqx 'PSC1_V2_INDEXED_CACHE_RESOURCE_PASS reference=36 precedence=16 scope=5' "$RUNNER_TEMP/psc1-indexed-cache-generated.log"

@@ -451,6 +451,8 @@ jobs:
           cd "$PSC1_PS_RUN_DIR"
           env PATH="" "$PSC1_NODE_BIN" whnf-cache-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-indexed-cache-canonical.log"
+          grep -Fqx 'PSC1_V2_INDEXED_CACHE_RADIX_PASS lookups=384 updates=1152 levels=6 shapes=8' "$RUNNER_TEMP/psc1-indexed-cache-canonical.log"
+          grep -Fqx 'PSC1_V2_INDEXED_CACHE_RADIX_ABI_PASS partials=492 executions=1536' "$RUNNER_TEMP/psc1-indexed-cache-canonical.log"
           grep -Fqx 'PSC1_V2_INDEXED_CACHE_RAW_PASS comparisons=1024 adversarial=7 snapshots=2' "$RUNNER_TEMP/psc1-indexed-cache-canonical.log"
           grep -Fqx 'PSC1_V2_INDEXED_CACHE_REAL_PASS publicPositive=9 publicNegative=1 referencePositive=9 referenceNegative=1 caches=5 entries=9 official=native-gate' "$RUNNER_TEMP/psc1-indexed-cache-canonical.log"
           grep -Fqx 'PSC1_V2_INDEXED_CACHE_RESOURCE_PASS reference=36 precedence=16 scope=5' "$RUNNER_TEMP/psc1-indexed-cache-canonical.log"

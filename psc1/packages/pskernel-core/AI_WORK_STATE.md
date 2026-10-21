@@ -1,3 +1,62 @@
+# Artifact-only paired performance work state
+
+Date: 2026-10-21 UTC
+Branch: `research/psc1-pskernel-paired-perf-20261021`
+Status: **IMPLEMENTED; paired experiment NOT RUN at this commit.**
+
+This branch adds only a host diagnostic workflow and its two Python drivers.
+It compares immutable, authenticated generated kernels; it does not build or
+promote a new kernel and cannot satisfy a conformance or canonical-source gate.
+
+## Exact experiment inputs
+
+- Baseline source: `f9e9b20f92ce2ffa4a666acaf55aa8852949f589`.
+  Terminal-success integration [39622521184](https://github.com/dwijayuda/pskernel/actions/runs/39622521184).
+  Generated artifact12358040951, ZIP SHA256
+  `25abe3ecf39fb76b79d8c41afe56e673309d91c8567de93ae505082d7ccb30a2`.
+- Candidate source: `5deaf5880c83a76290520fa1176982dab0bf87a5`.
+  Terminal-success integration [39631703411](https://github.com/dwijayuda/pskernel/actions/runs/39631703411):
+  native119331328218 and generated119331328863 both PASS.
+  Generated artifact12364250685, ZIP SHA256
+  `347d02515c408e825bd13790e265e13663f150e9ab4c64b01107d77b37b0fb01`.
+  Kernel JS SHA256 `fad819da8477cf225c608ab928baddb8f91aa3ce7d133edf08942262bcc9ac93`.
+  Canonical qualification is a separate run; this experiment requires the successful generated integration.
+- Official reference: successful official job119299431737 in Arena39622521186;
+  the independent comparison in that run failed, which is retained as a distinct fact.
+  Artifact12354733263 ZIP SHA256
+  `14ede6035b1fe3c037deeaccc53439cf9a97d72ac020e20c34729bd5717c7ac3`.
+
+The runtime downloader checks exact source/run/manifest identities, complete
+bundle digests, source map correspondence and the pinned official receipt.
+The driver checks exact clean source revisions and unchanged benchmark,
+transport and policy files. Credentials are confined to artifact retrieval.
+Detached Node workers receive an empty PATH and no credential environment.
+
+## Measurements and honest limits
+
+Run old/new/new/old isolated processes for the six existing full-admission
+fixtures, separately exercising the V1 admission and transitional DAG dispatcher.
+Replay the four original authenticated Arena bodies (repeated subproblem,
+Church, Prelude and stuck projection), with the unchanged60-second case timeout,
+4096 kernel fuel and2048MiB V8 old-space cap. The latter is not an OS RSS limit.
+Preserve fresh transport controls, raw result types, cold/warm operation timings,
+construction, whole-process CPU/peak RSS and retained-heap observations.
+A ratio requires comparable, conclusively matching results; timeout/resource/
+unsupported observations remain separately classified and cannot become parity.
+Collection PASS is not full-corpus PASS. The public function named
+`psKernelV1RunDag` dispatches supported operations to DAG-owned paths before
+acknowledged V1 fallbacks; it is not a pure V1 oracle.
+
+Next action: observe the workflow on this exact branch/source to terminal,
+inspect all logs and retained raw JSON, correct only an evidenced harness defect,
+and record measurements without extrapolating to a whole-kernel speedup.
+The independently reviewed scripts are preserved by parent
+`1d3a8ac1db6ebc7a5c03ebe34d28d3a03ff6a420`; no local execution was used.
+
+---
+
+## Historical baseline work state (verbatim)
+
 # PSKernel-Core Expression V2 integration work state
 
 Date: 2026-10-21 (Asia/Jakarta; Actions timestamps use UTC)

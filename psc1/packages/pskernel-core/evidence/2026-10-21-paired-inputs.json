@@ -1,0 +1,37 @@
+{
+  "schema": "pskernel-paired-inputs-v1",
+  "observedAt": "2026-10-21T16:56:00Z",
+  "collectionStatus": "NOT RUN",
+  "baseline": {
+    "source": "f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+    "run": 39622521184,
+    "artifact": 12358040951,
+    "zipSha256": "25abe3ecf39fb76b79d8c41afe56e673309d91c8567de93ae505082d7ccb30a2"
+  },
+  "candidate": {
+    "source": "5deaf5880c83a76290520fa1176982dab0bf87a5",
+    "run": 39631703411,
+    "nativeJob": 119331328218,
+    "generatedJob": 119331328863,
+    "integration": "PASS",
+    "artifact": 12364250685,
+    "zipSha256": "347d02515c408e825bd13790e265e13663f150e9ab4c64b01107d77b37b0fb01",
+    "jsSha256": "fad819da8477cf225c608ab928baddb8f91aa3ce7d133edf08942262bcc9ac93"
+  },
+  "reference": {
+    "run": 39622521186,
+    "job": 119299431737,
+    "jobConclusion": "success",
+    "artifact": 12354733263,
+    "zipSha256": "14ede6035b1fe3c037deeaccc53439cf9a97d72ac020e20c34729bd5717c7ac3"
+  },
+  "constraints": {
+    "fuel": 4096,
+    "hostTimeoutSeconds": 60,
+    "v8OldSpaceMiB": 2048,
+    "osRssLimitEnforced": false,
+    "path": "",
+    "independentNode": true
+  },
+  "claim": "No measurements or new source qualification until the diagnostic workflow finishes and its outputs are reviewed."
+}

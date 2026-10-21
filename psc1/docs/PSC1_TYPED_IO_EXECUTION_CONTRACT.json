@@ -1,0 +1,167 @@
+{
+  "schema": "psc1-typed-io-execution-contract/1",
+  "id": "typed-io-execution-v1",
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "operations": [
+    "readLine",
+    "writeLine",
+    "readUtf8",
+    "writeUtf8"
+  ],
+  "checks": [
+    "general-source-sequencing",
+    "actual-file-read-atomic-write",
+    "actual-console-unicode-crlf",
+    "typed-error-recovery",
+    "host-trap-escapes",
+    "unsupported-abi-preserves-generation"
+  ],
+  "providers": {
+    "node": {
+      "schema": "psc1-typed-io-policy-tests/1",
+      "requiredChecks": [
+        "unsupported ABI refuses before opening root",
+        "required capability denied before execution",
+        "finite and exact configuration",
+        "UTF-8 CRLF empty line unterminated line and EOF",
+        "writeLine emits exactly one LF",
+        "bounded regular UTF-8 file round trip and BOM preservation",
+        "byte bound includes Unicode and preserves previous file on refusal",
+        "invalid UTF-8 and ill-formed host strings refuse",
+        "actual permission refusal preserves previous file",
+        "missing file and directory are typed errors",
+        "path traversal absolute empty components and NUL refuse",
+        "leaf and parent symlinks refuse and preserve outside content",
+        "FIFO refuses without blocking",
+        "malformed and extra-field request refuses",
+        "optional denied capability is a typed error",
+        "closed-host integration error escapes",
+        "no temporary files remain",
+        "invalid line",
+        "oversize CR at EOF",
+        "oversize line"
+      ]
+    },
+    "rust": {
+      "schema": "psc1-standalone-io-policy/1",
+      "abi": "psc1-rust-linux-string-io/1",
+      "requiredChecks": [
+        "unsupported ABI refuses before root access",
+        "required capability preflight",
+        "finite exact configuration",
+        "Unicode CRLF empty unterminated EOF",
+        "writeLine exactly one LF",
+        "bounded UTF8 file BOM and empty nested file",
+        "Unicode byte bounds preserve previous file",
+        "invalid UTF8 and surrogate refusal",
+        "actual permission refusal preserves file",
+        "missing and nonregular files",
+        "traversal absolute empty and NUL paths",
+        "leaf and parent symlinks preserve outside content",
+        "FIFO refusal without blocking",
+        "malformed extra and unknown requests",
+        "optional capability denial is typed",
+        "closed host error escapes",
+        "atomic temporary cleanup",
+        "invalid line",
+        "oversize CR EOF",
+        "oversize line"
+      ]
+    },
+    "python": {
+      "schema": "psc1-standalone-io-policy/1",
+      "abi": "psc1-python-linux-string-io/1",
+      "requiredChecks": [
+        "unsupported ABI refuses before root access",
+        "required capability preflight",
+        "finite exact configuration",
+        "Unicode CRLF empty unterminated EOF",
+        "writeLine exactly one LF",
+        "bounded UTF8 file BOM and empty nested file",
+        "Unicode byte bounds preserve previous file",
+        "invalid UTF8 and surrogate refusal",
+        "actual permission refusal preserves file",
+        "missing and nonregular files",
+        "traversal absolute empty and NUL paths",
+        "leaf and parent symlinks preserve outside content",
+        "FIFO refusal without blocking",
+        "malformed extra and unknown requests",
+        "optional capability denial is typed",
+        "closed host error escapes",
+        "atomic temporary cleanup",
+        "invalid line",
+        "oversize CR EOF",
+        "oversize line"
+      ]
+    },
+    "php": {
+      "schema": "psc1-standalone-io-policy/1",
+      "abi": "psc1-php-linux-ffi-string-io/1",
+      "requiredChecks": [
+        "unsupported ABI refuses before root access",
+        "required capability preflight",
+        "finite exact configuration",
+        "Unicode CRLF empty unterminated EOF",
+        "writeLine exactly one LF",
+        "bounded UTF8 file BOM and empty nested file",
+        "Unicode byte bounds preserve previous file",
+        "invalid UTF8 and surrogate refusal",
+        "actual permission refusal preserves file",
+        "missing and nonregular files",
+        "traversal absolute empty and NUL paths",
+        "leaf and parent symlinks preserve outside content",
+        "FIFO refusal without blocking",
+        "malformed extra and unknown requests",
+        "optional capability denial is typed",
+        "closed host error escapes",
+        "atomic temporary cleanup",
+        "invalid line",
+        "oversize CR EOF",
+        "oversize line"
+      ]
+    }
+  },
+  "mappings": {
+    "js": {
+      "provider": "node",
+      "abi": "io-dispatcher"
+    },
+    "ts": {
+      "provider": "node",
+      "abi": "io-dispatcher"
+    },
+    "rust": {
+      "provider": "rust",
+      "abi": "io-dispatcher"
+    },
+    "python": {
+      "provider": "python",
+      "abi": "io-dispatcher"
+    },
+    "php": {
+      "provider": "php",
+      "abi": "io-dispatcher"
+    },
+    "wasm-core": {
+      "provider": "node",
+      "abi": "wasm-io-dispatcher"
+    },
+    "wasm-component": {
+      "provider": "python",
+      "abi": "wasm-io-dispatcher"
+    }
+  },
+  "scope": "Four synchronous typed operations with explicit capabilities, bound payloads, general checked source sequencing and admitted public ABI; not complete application or release qualification."
+}

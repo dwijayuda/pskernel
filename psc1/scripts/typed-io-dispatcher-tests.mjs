@@ -155,6 +155,11 @@ for(const syntax of ['lean','ps'])for(const target of targets){
    }finally{fs.closeSync(inputFd);fs.closeSync(outputFd);}
   }
   records.push({syntax,target,passed:true,sourceSha256:hash(source),artifactSha256:hash(output),
+   admission:'independent-official-Lean',runtime:'executed',checks:["general-source-sequencing","actual-file-read-atomic-write","actual-console-unicode-crlf","typed-error-recovery","host-trap-escapes","unsupported-abi-preserves-generation"],
+   provider:['js','ts'].includes(target)?'node':target,
+   librarySha256:hash(path.join(root,'stdlib/ProofScript/System/IO.'+syntax)),
+   applicationModuleSha256:hash(path.join(folder,'source/SequencedIo/Program.'+syntax)),
+   sourceClosureSha256:manifest.sourceClosureSha256,kernelAdmissionSha256:manifest.kernelAdmissionSha256,
    manifestSha256:bundleHash,hostEffects:true,hostProvider:target==='rust'?'Rust-standalone-capability-adapter':target==='python'?'Python-standalone-capability-adapter':target==='php'?'PHP-Linux-explicit-FFI-capability-adapter':'Linux-Node-capability-adapter',
    checkerCommit:manifest.logicalCheckerCommit,strictIr:'production-publication',abi:'io-dispatcher'});
   fs.cpSync(path.dirname(fs.realpathSync(output+'.bundle.json')),path.join(evidence,'bundles',label),{recursive:true});

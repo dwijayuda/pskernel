@@ -8,6 +8,16 @@ import sys
 from typed_io import TypedIo
 
 
+def component_engine():
+    import wasmtime
+    config = wasmtime.Config()
+    config.wasm_component_model = True
+    config.wasm_gc = True
+    config.wasm_function_references = True
+    config.wasm_tail_call = True
+    return wasmtime.Engine(config)
+
+
 def with_component_io(config, component_path, use_program):
     if config.get("abi") != "psc1-wasm-component-linux-string-io/1":
         raise RuntimeError("PSC1_IO_UNSUPPORTED_ABI")
@@ -17,7 +27,7 @@ def with_component_io(config, component_path, use_program):
     with TypedIo({**config, "abi": "psc1-python-linux-string-io/1"}) as host:
         import wasmtime
         from wasmtime.component import Component, Linker
-        engine = wasmtime.Engine()
+        engine = component_engine()
         store = wasmtime.Store(engine)
         component = Component.from_file(engine, component_path)
         linker = Linker(engine)

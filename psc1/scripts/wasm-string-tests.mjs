@@ -33,7 +33,9 @@ const pureConsumer=path.join(work,'component-pure.py');
 write(pureConsumer,[
  'import wasmtime,sys',
  'from wasmtime.component import Component,Linker',
- 'engine=wasmtime.Engine();store=wasmtime.Store(engine)',
+ 'sys.path.insert(0,sys.argv[2])',
+ 'from typed_io_component import component_engine',
+ 'engine=component_engine();store=wasmtime.Store(engine)',
  'component=Component.from_file(engine,sys.argv[1]);instance=Linker(engine).instantiate(store,component)',
  'def call(name,*args):',
  ' function=instance.get_func(store,name);assert function is not None',
@@ -50,12 +52,18 @@ const ioConsumer=path.join(work,'component-io.py');
 write(ioConsumer,[
  'import sys',
  'sys.path.insert(0,sys.argv[2])',
- 'from typed_io_component import with_component_io',
+ 'from typed_io_component import with_component_io,component_engine',
  'config=dict(abi="psc1-wasm-component-linux-string-io/1",capabilities=["readUtf8","writeUtf8","readLine","writeLine"],required=["readUtf8","writeUtf8","readLine","writeLine"],root=sys.argv[3],maxFileBytes=4096,maxLineBytes=128,inputFd=0,outputFd=1)',
+ 'try:with_component_io({**config,"capabilities":[]}, "/missing-component",lambda call:call("run"))',
+ 'except RuntimeError as error:assert "REQUIRED_CAPABILITY_DENIED" in str(error)',
+ 'else:raise AssertionError("denied capability accepted")',
+ 'try:with_component_io({**config,"maxFileBytes":2097153}, "/missing-component",lambda call:call("run"))',
+ 'except RuntimeError as error:assert "CONFIGURATION" in str(error)',
+ 'else:raise AssertionError("unsupported bound accepted")',
  'assert with_component_io(config,sys.argv[1],lambda call:call("run")) is True',
  'import wasmtime,json',
  'from wasmtime.component import Component,Linker',
- 'engine=wasmtime.Engine();store=wasmtime.Store(engine);component=Component.from_file(engine,sys.argv[1]);linker=Linker(engine)',
+ 'engine=component_engine();store=wasmtime.Store(engine);component=Component.from_file(engine,sys.argv[1]);linker=Linker(engine)',
  'def trap(_store,request):',
  ' value=json.loads(request)',
  ' if value.get("path")=="missing":raise RuntimeError("PSC1_HOST_TRAP")',
@@ -90,7 +98,7 @@ for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-compone
    assert.equal(api.call('echo','after refused input'),'after refused input');
   }else{
    assert.ok(process.env.PSC1_WASMTIME_PY);
-   assert.match(run(process.env.PSC1_WASMTIME_PY,[pureConsumer,output]),/PSC1_COMPONENT_STRING_CONSUMER_PASS/);
+   assert.match(run(process.env.PSC1_WASMTIME_PY,[pureConsumer,output,path.join(root,'host-tools')]),/PSC1_COMPONENT_STRING_CONSUMER_PASS/);
    const wit=run('wasm-tools',['component','wit',output]);
    assert.match(wit,/string/);
   }
@@ -107,7 +115,7 @@ for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-compone
   write(ioSource,read('test/applications/SequencedIo/Run.'+syntax));
   write(path.join(folder,'source/SequencedIo/Program.'+syntax),read('test/applications/SequencedIo/Program.'+syntax));
   write(path.join(folder,'source/ProofScript/System/IO.'+syntax),read('stdlib/ProofScript/System/IO.'+syntax));
-  build(ioSource,target,ioOutput,'io-dispatcher');
+  const ioManifest=build(ioSource,target,ioOutput,'io-dispatcher');
   const capabilityRoot=path.join(folder,'root');fs.mkdirSync(capabilityRoot);
   fs.writeFileSync(path.join(capabilityRoot,'input.txt'),'hello😀');
   if(target==='wasm-core'){
@@ -143,7 +151,13 @@ for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-compone
   }
   assert.equal(fs.readFileSync(path.join(capabilityRoot,'output.txt'),'utf8'),'processed:hello😀');
   records.push({syntax,target,passed:true,stringsSha256:hash(output),ioSha256:hash(ioOutput),
-   sourceSha256:hash(source),ioSourceSha256:hash(ioSource),
+   admission:'independent-official-Lean',runtime:'executed',hostEffects:true,
+   checks:["general-source-sequencing","actual-file-read-atomic-write","actual-console-unicode-crlf","typed-error-recovery","host-trap-escapes","unsupported-abi-preserves-generation"],provider:target==='wasm-core'?'node':'python',abi:'wasm-io-dispatcher',
+   checkerCommit:ioManifest.logicalCheckerCommit,artifactSha256:hash(ioOutput),manifestSha256:hash(ioOutput+'.bundle.json'),
+   librarySha256:hash(path.join(root,'stdlib/ProofScript/System/IO.'+syntax)),
+   applicationModuleSha256:hash(path.join(folder,'source/SequencedIo/Program.'+syntax)),
+   sourceClosureSha256:ioManifest.sourceClosureSha256,kernelAdmissionSha256:ioManifest.kernelAdmissionSha256,
+   sourceSha256:hash(ioSource),stringSourceSha256:hash(source),ioSourceSha256:hash(ioSource),
    hostProvider:target==='wasm-core'?'Node-explicit-capability-adapter':'Python-standalone-capability-adapter',
    validator:'wasm-tools-1.254.0',consumer:target==='wasm-core'?'Node-22.23.3':'wasmtime-python-49.0.0'});
   for(const [name,file]of [['strings',output],['io',ioOutput]])

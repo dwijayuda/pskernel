@@ -45,9 +45,10 @@ def main : IO Unit := do
       parameters := [.i32, .i32, .i32], results := [], locals := [], body := [] } }] }
   require "unqualified foreign import refuses"
     (match psWasmIrValidateModule foreign with | .error _ => true | .ok _ => false)
+  let forgedRaw : PsVerifiedIrModule := { raw with
+    declarations := raw.declarations.map (fun d => { d with body := .literal (.bool true) }) }
   require "forged source wrapper refuses"
-    (match psWasmStringAbiMakePlan { raw := { raw with declarations :=
-      raw.declarations.map (fun d => { d with body := .literal (.bool true) }) } } ["echo"] false with
+    (match psWasmStringAbiMakePlan { raw := forgedRaw } ["echo"] false with
       | .error _ => true | .ok _ => false)
   let artifacts <- get (psWasmStringAbiComponent source plan adapted)
   require "mismatched component schema refuses"
@@ -56,7 +57,8 @@ def main : IO Unit := do
       parameters := [], resultString := true }] } adapted with
       | .error _ => true | .ok _ => false)
   require "same-core-type forged result schema refuses"
-    (match psWasmStringAbiComponent source { plan with exports := [{ name := "echo",
+    (match psWasmStringAbiComponent source { plan with exports := [{
+      name := "echo",
       parameters := [("text", true)], resultString := false }] } adapted with
       | .error _ => true | .ok _ => false)
   IO.FS.createDirAll "dist/scoped-correctness/wasm-string-native"

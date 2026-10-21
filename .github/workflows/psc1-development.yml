@@ -54,6 +54,7 @@ jobs:
           node scripts/js-generation-manifest-contract-tests.mjs
           node scripts/practical-core-readiness.mjs
           python3 scripts/standalone-io-policy-tests.py
+          node scripts/typed-io-execution-contract-tests.mjs
           node scripts/typed-io-policy-tests.mjs
           node --input-type=module <<'JS'
           import {spawnSync} from 'node:child_process';

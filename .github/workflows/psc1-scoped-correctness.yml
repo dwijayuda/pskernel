@@ -222,6 +222,11 @@ jobs:
           export PSC1_STANDALONE_IO_ABI=psc1-php-linux-ffi-string-io/1
           python3 scripts/standalone-io-policy-tests.py
           unset PSC1_STANDALONE_IO_COMMAND PSC1_STANDALONE_IO_ABI
+          cargo build --locked --manifest-path host-tools/typed-io-rust/Cargo.toml --bin psc1-io-policy-server
+          export PSC1_STANDALONE_IO_COMMAND="[\"$PWD/host-tools/typed-io-rust/target/debug/psc1-io-policy-server\"]"
+          export PSC1_STANDALONE_IO_ABI=psc1-rust-linux-string-io/1
+          python3 scripts/standalone-io-policy-tests.py
+          unset PSC1_STANDALONE_IO_COMMAND PSC1_STANDALONE_IO_ABI
           node scripts/typed-io-policy-tests.mjs
           PSC1_IO_APPLICATION_TARGETS=js,ts,rust,python,php node scripts/typed-io-application-tests.mjs
           PSC1_IO_DISPATCHER_TARGETS=js,ts,rust,python,php node scripts/typed-io-dispatcher-tests.mjs
@@ -257,6 +262,7 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/wasm-string-tests.mjs
+          node scripts/typed-io-execution-evidence.mjs
       - name: Execute full scripting and runtime corpus on minimum Python
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1

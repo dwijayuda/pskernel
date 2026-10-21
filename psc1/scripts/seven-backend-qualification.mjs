@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
+import {checkTypedIoExecution} from './check-typed-io-execution.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist/scoped-correctness');
 const read = relative => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
@@ -41,6 +42,10 @@ for(const [id,file]of [['inference-control','PSC1_INFERENCE_CONTROL_CASE_CONTRAC
  extraProtocols[id]={contract:contract.id,obligations:receipt.records.length,
   minimumPythonObligations:minimum.records.length,evidence:id+'/results.json',completeFamily:false};
 }
+const typedIoExecution=read('dist/scoped-correctness/typed-io-execution/results.json');
+checkTypedIoExecution(read('docs/PSC1_TYPED_IO_EXECUTION_CONTRACT.json'),typedIoExecution,{
+ commit:process.env.GITHUB_SHA,head:process.env.PSC1_HEAD_SHA,
+ checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc'});
 const ioPolicy=read('dist/scoped-correctness/typed-io/policy.json');
 const ioApplication=read('dist/scoped-correctness/typed-io/application.json');
 for(const data of [ioPolicy,ioApplication]){

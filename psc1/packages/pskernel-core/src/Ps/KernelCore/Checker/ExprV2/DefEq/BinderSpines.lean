@@ -112,7 +112,8 @@ def psKernelExprV2DefEqSpineBodiesLoose
       if Nat.beq leftEntry.looseRange 0 then
         match psKernelExprV2PagedRequire state.whnf.arena right with
         | Except.error error => Except.error error
-        | Except.ok rightEntry => Except.ok (Bool.not (Nat.beq rightEntry.looseRange 0))
+        | Except.ok rightEntry =>
+            if Nat.beq rightEntry.looseRange 0 then Except.ok false else Except.ok true
       else Except.ok true
 
 def psKernelExprV2DefEqSpineWithLocal

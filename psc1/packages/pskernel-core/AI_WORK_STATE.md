@@ -132,6 +132,16 @@ and checking policies are unchanged. Native binder execution remains pending
 the corrected fixture; this failure also affects the scanner commit's inherited
 native fixture. Generated runtime/performance source is unaffected.
 
+The same binder run's generated job119013793786 failed authentic PSC1 source
+checking at psKernelExprV2DefEqSpineBodiesLoose with unsupportedTerm. Its new
+Bool.not application is expressed using the already supported explicit Bool
+branches. The loose-range decision, lazy right-entry lookup and error order
+are unchanged; no compiler feature is added. The complete generated source and
+native binder fixtures must pass after this correction. The scanner performance
+comparison at e23/f6ef is blocked by that inherited source failure and has no
+measurements; any later matched comparison must apply this same semantic fix
+to both implementations.
+
 ### Direct theorem admission — native qualified; generated gates pending
 
 Theorem plans now retain the same owner through the original header check,

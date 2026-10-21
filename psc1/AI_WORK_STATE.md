@@ -130,3 +130,9 @@ guard remains unchanged; its diagnostic now identifies the first before/after
 field difference to diagnose the formatter/emitter class instead of bypassing
 formatting or changing source fixtures. Full/closure/G1 lanes correctly skip
 after the focused failure. Fresh Linux evidence is required.
+
+Diagnostic commit acc561e8ee91d5deb0e4a4bafe23baf7631da856 failed static
+Node syntax checking in run 39661066232. A JavaScript string replacement expanded
+a replacement token in the inserted diagnostic text. The edit is reconstructed
+from the prior source with literal callback replacement; no compiler lane ran
+and no formatter refusal was bypassed. All failed commits remain preserved.

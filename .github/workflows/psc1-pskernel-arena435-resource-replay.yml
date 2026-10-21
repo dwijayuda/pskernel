@@ -1,0 +1,103 @@
+name: PSC1 authenticated resource artifact replay
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-arena-logical-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-arena435-resource-replay.yml
+      - psc1/scripts/pskernel-arena435-resource-artifact.py
+      - psc1/scripts/pskernel-arena435-resource-observer.mjs
+      - psc1/scripts/pskernel-arena435-resource-profile.py
+      - psc1/scripts/pskernel-arena435-logical-profile.py
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  authenticated-resource-replay:
+    # Diagnostic-only reuse of the exact runtime compiled by39607734805.
+    # The separate full-build diagnostic workflow is retained unchanged.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PSC1_KERNEL_SOURCE_SHA: 369bee5801bd5e4476837684fad3f7e1ca8c422c
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 369bee5801bd5e4476837684fad3f7e1ca8c422c
+          path: kernel-source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate immutable compiled runtime and baseline
+        shell: bash
+        env:
+          PSC1_REPLAY_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git -C kernel-source rev-parse HEAD)" = "$PSC1_KERNEL_SOURCE_SHA"
+          test "$(cat kernel-source/psc1/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          node --version
+          python3 -m py_compile psc1/scripts/pskernel-arena435-resource-artifact.py
+          curl -fL --retry 3 --retry-delay 2 \
+            -H "Authorization: Bearer $PSC1_REPLAY_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12350649771/zip \
+            -o "$RUNNER_TEMP/arena435-producer.zip"
+          python3 psc1/scripts/pskernel-arena435-resource-artifact.py \
+            --archive "$RUNNER_TEMP/arena435-producer.zip" \
+            --source kernel-source/psc1 \
+            --out "$RUNNER_TEMP/arena435-restored" \
+            --baseline "$RUNNER_TEMP/arena435-restored/baseline.json" \
+            --receipt "$RUNNER_TEMP/arena435-restored/authentication.json"
+      - name: Authenticate current observer and original transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          for PSC1_HARNESS_FILE in pskernel-arena435-oracle.py pskernel-arena435-compare.py \
+              pskernel-arena-replay.mjs pskernel-arena-replay-controls.mjs; do
+            cmp "psc1/scripts/$PSC1_HARNESS_FILE" "kernel-source/psc1/scripts/$PSC1_HARNESS_FILE"
+          done
+          python3 -m py_compile psc1/scripts/pskernel-arena435-profile.py \
+            psc1/scripts/pskernel-arena435-logical-profile.py \
+            psc1/scripts/pskernel-arena435-resource-profile.py
+          node --check psc1/scripts/pskernel-arena435-resource-observer.mjs
+          node --check "$RUNNER_TEMP/arena435-restored/kernel.js"
+          printf 'kernel_source_sha=%s\nworkflow_source_sha=%s\n' \
+            "$PSC1_KERNEL_SOURCE_SHA" "$GITHUB_SHA" \
+            | tee "$RUNNER_TEMP/arena435-replay-source-identities.txt"
+      - name: Authenticate original corpus and replay unchanged resource cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 \
+            -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+          python3 psc1/scripts/pskernel-arena435-resource-profile.py \
+            --source-sha "$PSC1_KERNEL_SOURCE_SHA" \
+            --resource-policy kernel-source/psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ResourcePolicy.lean \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --kernel "$RUNNER_TEMP/arena435-restored/kernel.js" \
+            --baseline-report "$RUNNER_TEMP/arena435-restored/baseline.json" \
+            --out "$RUNNER_TEMP/arena435-resource-replay" \
+            | tee "$RUNNER_TEMP/arena435-resource-replay.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-arena435-authenticated-resource-replay
+          path: |
+            ${{ runner.temp }}/arena435-restored/
+            ${{ runner.temp }}/arena435-resource-replay/
+            ${{ runner.temp }}/arena435-resource-replay.log
+            ${{ runner.temp }}/arena435-replay-source-identities.txt
+            psc1/scripts/pskernel-arena435-resource-artifact.py
+            psc1/scripts/pskernel-arena435-resource-observer.mjs
+            psc1/scripts/pskernel-arena435-resource-profile.py
+            psc1/scripts/pskernel-arena435-logical-profile.py
+          retention-days: 30

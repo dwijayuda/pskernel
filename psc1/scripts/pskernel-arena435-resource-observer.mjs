@@ -2,49 +2,23 @@
 // It observes returns; it never substitutes an argument, callback or result.
 // Live observation frames and emitted records are bounded. Sequential calls
 // are counted without an early cap, so long authentic runs can reach fuel zero.
+// The earlier broad decline observer retained about ten helper frames per
+// DefEq level and hit its diagnostic live-frame bound before fuel reached zero.
+// Keep this resource-only pass focused on actual fuel owners and admission
+// boundaries. The original logical/V8 diagnostic copies remain unchanged.
 const __ps$declineOperations = new Set([
   "psKernelDagAdmitDeclaration", "psKernelDagTryAdmitSimpleWithFuel",
   "psKernelV1AdmitDeclaration",
-  "psKernelExprV2AdmissionEnsureSortWithFuel",
-  "psKernelExprV2AdmissionIsPropWithFuel",
-  "psKernelExprV2AdmissionCheckHeaderWithFuel",
-  "psKernelExprV2AdmissionPrepareBodyWithFuel",
-  "psKernelExprV2AdmissionCheckBodyWithFuel",
-  "psKernelExprV2TryCheckStateWithFuel", "psKernelExprV2TryInferStateWithFuel",
-  "psKernelExprV2TryInferenceStateWithFuel", "psKernelExprV2TryInferCoreWithFuel",
-  "psKernelExprV2CheckWhnfWithFuel", "psKernelExprV2CheckWhnfCoreWithFuel",
-  "psKernelExprV2TryDefEqStateWithFuel",
-  "psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel",
-  "psKernelExprV2TryWhnfCoreWithLocalValuesFuel",
-  "psKernelExprV2TryWhnfCoreWithPublicFuel",
-  "psKernelExprV2TryWhnfStateWithLocalValuesFuel",
-  "psKernelExprV2TryWhnfProjectionWith", "psKernelExprV2TryWhnfAppWith",
-  "psKernelExprV2TryWhnfCompositeWith", "psKernelExprV2TryWhnfAfterCoreWith",
-  "psKernelExprV2TryWhnfPublicNonterminalWith",
-  "psKernelExprV2DefEqPrefixContinueWith",
-  "psKernelExprV2DefEqProofIrrelevanceContinueWith",
-  "psKernelExprV2DefEqLazyDeltaWithFuel",
-  "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
-  "psKernelExprV2DefEqLazyDeltaAfterStepWith",
-  "psKernelExprV2DefEqFullShapePositive",
-  "psKernelExprV2DefEqFullShapeListsWithFuel",
-  "psKernelExprV2DefEqFullShapeAppWith",
-  "psKernelExprV2DefEqFullShapeEtaWith",
-  "psKernelExprV2DefEqFullShapeWith",
-  "psKernelExprV2DefEqResidualProjectionShortcut",
-  "psKernelExprV2DefEqResidualAfterFullWhnfWith",
-  "psKernelExprV2DefEqResidualWith",
   "psKernelExprV2TryWhnfCoreModeWithReducerFuel",
   "psKernelExprV2TryWhnfStateWithReducerFuel",
   "psKernelExprV2TryReduceRecursorWithLocalValuesFuel",
-  "psKernelExprV2TryWhnfAppWithReducer",
-  "psKernelExprV2TryWhnfCompositeWithReducer",
+  "psKernelExprV2TryWhnfCoreWithLocalValuesFuel",
+  "psKernelExprV2TryWhnfCoreWithPublicFuel",
   "psKernelExprV2TryWhnfStateWithFuel",
-  "psKernelExprV2TryWhnfCoreStateWithFuel",
-  "psKernelExprV2TryReduceQuotMajorWith", "psKernelExprV2TryReduceQuotWith",
-  "psKernelExprV2RecursorNormalizeMajor", "psKernelExprV2RecursorNatMajor",
-  "psKernelExprV2TryReduceNonKRecursorWith", "psKernelExprV2TryReduceInductiveRecursor",
-  "psKernelExprV2TryCheckCoreWithFuel"
+  "psKernelExprV2TryInferCoreWithFuel", "psKernelExprV2TryCheckCoreWithFuel",
+  "psKernelExprV2TryDefEqStateWithFuel",
+  "psKernelExprV2DefEqLazyDeltaContinueWithFuel",
+  "psKernelExprV2CheckWhnfWithFuel", "psKernelExprV2CheckWhnfCoreWithFuel"
 ]);
 const __ps$resourceMessages = new Set(__PSC1_RESOURCE_MESSAGES__);
 const __ps$resourceFuelOwners = new Set([

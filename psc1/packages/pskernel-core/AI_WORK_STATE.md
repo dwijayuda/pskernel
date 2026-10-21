@@ -1,3 +1,68 @@
+# Current diagnostic checkpoint — focused fuel-owner replay
+
+Date: 2026-10-21 UTC.
+Branch: `research/psc1-arena-logical-20261021`.
+Parent harness: `ab61efebac4e0b09cc3bf57c09380ae53ac2cf7f`.
+Production source remains pinned to `369bee5801bd5e4476837684fad3f7e1ca8c422c`.
+This commit changes diagnostic tooling only; its new runs are **NOT RUN** at
+creation. It does not qualify integrationa259 or carrier4894.
+
+## Exact parent evidence
+
+[Run39607734805/job119248216862](https://github.com/dwijayuda/pskernel/actions/runs/39607734805/job/119248216862)
+is terminal **FAIL** because the dedicated resource observation is INCOMPLETE.
+Complete portable/canonical source checks and real PSC1/TypeScript7.0.2 generation
+passed, as did all four original-body V8 profile collections. The baseline
+repeated-subproblem case accepts and proj-of-stuck-prop rejects; init-prelude
+still times out; church returns a kernel resource error.
+
+For the authenticated church body
+`85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47`,
+original production returned `kernel reduction budget exhausted` in19.482543635s
+(sampled VmHWM lower bound1,178,704KiB), and the observed copy returned the identical
+complete protocol in23.414082324s (1,217,956KiB). Actual checked V1 replay timed out
+at60.039381581s (396,600KiB). V1 agreement therefore remains UNKNOWN; none of these
+resource/timeout outcomes is a conformance pass. Full adapted input SHA256
+`443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1`
+includes the adapted metadata header and is distinct from the unchanged body hash.
+
+The broad observer filled its32,768-frame buffer around DefEq fuel819. Its first
+recorded propagated error is not the originating zero-fuel call. The visible
+descendant sequence reaches IDs9286/9138, then9285/9137, then9284/9136; it does not
+show an unchanged-root retry loop. The trace cannot establish the final exhausted
+worker or native/generated V1 equivalence.
+
+Original diagnostic artifact:
+[12350649771](https://github.com/dwijayuda/pskernel/actions/runs/39607734805/artifacts/12350649771),
+14,770,339 bytes, ZIP SHA256
+`9ae05c3d0cd949f74a1a4c8a3a833b3fd755f1cb917897ab59552c9ce3aa90cc`.
+Trace SHA256 `f454ce2f9016ecef04f68a6098effce4c65e0185a609527cff4cd3b1ab205f5b`.
+
+## Bounded instrumentation correction
+
+The resource observer now selects the12 already identified fuel owners and
+three admission boundaries. It no longer retains every intermediate helper frame.
+Its32,768 live-frame/512-event bounds, argument/result handling, real refusal
+controls, source signatures and trampoline rewrite are unchanged. Original broad
+logical/V8 diagnostics remain separate. No kernel fuel, depth or host limit changes.
+
+The new artifact-replay workflow authenticates the immutable original ZIP before
+reading members, verifies all four compiled-file digests, source identities,
+pinned Lean/TypeScript producer, original replay and ResourcePolicy identities,
+and the complete baseline report. It executes the current observer/driver against
+that exact runtime and reauthenticates the original corpus/body. It reruns all139
+detached positive/adversarial/resource controls and the original, observed and
+actual V1 modes at4096 fuel/60seconds/2048MiB V8 old-space. The old-space cap is not
+an OS RSS cap. It does not rerun the compiler or claim new-source qualification.
+The independent full-build diagnostic workflow is retained unchanged.
+
+Next: check terminal focused replay, capture the actual zero-fuel worker and
+full protocol equality. A faithful native V1 replay of the same original decoded
+requests is being prepared separately; it must never count transport-only export,
+a timeout, or admission without metadata comparison as full Arena parity.
+
+---
+
 # Current diagnostic checkpoint — first resource failure attribution
 
 Date: 2026-10-21 UTC.

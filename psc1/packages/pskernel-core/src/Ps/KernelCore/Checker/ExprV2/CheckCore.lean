@@ -1,3 +1,4 @@
+import Ps.KernelCore.Checker.Reduction.PrimitiveData
 import Ps.KernelCore.Checker.ExprV2.CheckProjection
 import Ps.KernelCore.Checker.ExprV2.CheckLet
 import Ps.KernelCore.Checker.ExprV2.InferApplication

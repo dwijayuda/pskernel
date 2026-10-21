@@ -10,7 +10,10 @@ let assertions=0;
 const must=(condition,label)=>{if(condition!==true)throw Error("PSC1_RECURSOR_FAIL "+label);assertions++;};
 const accepted=(x,label)=>{
  if(x&&typeof x==="object"&&Object.hasOwn(x,"value"))return x.value;
- throw Error("PSC1_RECURSOR_UNEXPECTED_REJECTION "+label);
+ const error=x&&typeof x==="object"&&Object.hasOwn(x,"error")?x.error:null;
+ const detail=typeof error==="string"?error:
+  error&&typeof error.message==="string"?error.message:"missing accepted value";
+ throw Error("PSC1_RECURSOR_UNEXPECTED_REJECTION "+label+": "+detail);
 };
 const rejected=x=>Boolean(x&&typeof x==="object"&&Object.hasOwn(x,"error"));
 const same=(left,right)=>{
@@ -51,23 +54,24 @@ const empty=accepted(get("psKernelKernelSessionEmpty")(
  get("psKernelResourcePolicyDefault"),get("psKernelProviderDefault")),"empty");
 let session=empty,declarations=nil;
 const commands=[];
-const inductive=(n,levels,type,ctors,numParams)=>{
+const inductive=(label,n,levels,type,ctors,numParams)=>{
  session=accepted(get("psKernelV1AdmitDeclaration")(session,Request.ordinaryInductive({
   levelParams:list(levels),name:n,type:type.term,ctors:list(ctors.map(([name,type])=>({name,type:type.term}))),
-  isUnsafe:false,numParams})),"checked-inductive").session;
+  isUnsafe:false,numParams})),"checked-inductive-"+label).session;
  const request=D.ordinaryInductive(list(levels),numParams,
   {name:n,type:type.id,ctors:list(ctors.map(([name,type])=>({name,type:type.id})))},false);
  declarations=get("psKernelDagDeclarationsAfterAdmission")(request,declarations);
  commands.push(C.admit(request));
 };
-inductive(natName,[],s1,[[get("psKernelNatZeroName"),nat],
+inductive("Nat",natName,[],s1,[[get("psKernelNatZeroName"),nat],
  [get("psKernelNatSuccName"),forall("n",nat,nat)]],0n);
-const boxType=forall("A",sort(universe),sort(universe));
-const boxCtorType=forall("A",sort(universe),forall("value",bv(0n),
+// The data box must live in a provably nonzero universe for Nat-valued elimination.
+const boxType=forall("A",sort(L.succ(universe)),sort(L.succ(universe)));
+const boxCtorType=forall("A",sort(L.succ(universe)),forall("value",bv(0n),
  apps(cn(boxName,[universe]),[bv(1n)])));
-inductive(boxName,[u],boxType,[[boxCtorName,boxCtorType]],1n);
+inductive("IotaBox",boxName,[u],boxType,[[boxCtorName,boxCtorType]],1n);
 const kName=name("IotaK"),kCtorName=N.str(kName,"mk"),kType=cn(kName);
-inductive(kName,[],zero,[[kCtorName,kType]],0n);
+inductive("IotaK",kName,[],zero,[[kCtorName,kType]],0n);
 const CI=get("PsKernelConstantInfo");
 const recursorInfo=n=>{
  const info=accepted(get("psKernelEnvironmentFind")(session.environment,n),"recursor-info");
@@ -77,14 +81,15 @@ const recursorInfo=n=>{
 const natInfo=recursorInfo(natRecName),boxInfo=recursorInfo(boxRecName);
 const kInfo=recursorInfo(get("psKernelSimpleRecName")(kName));
 must(natInfo.k===false&&boxInfo.k===false&&kInfo.k===true,"actual-checked-K-policy");
+must(array(boxInfo.base.levelParams).length===2,"data-box-independent-elimination-universe");
 const ctorZero=cn(get("psKernelNatZeroName"));
 const ctorTwo=app(cn(get("psKernelNatSuccName")),app(cn(get("psKernelNatSuccName")),ctorZero));
-const box=app(cn(boxName,[one]),nat);
+const box=app(cn(boxName,[unit(L.zero)]),nat);
 const five=lit(5n),seven=lit(7n),nine=lit(9n);
-const boxMajor=apps(cn(boxCtorName,[one]),[nat,five]);
+const boxMajor=apps(cn(boxCtorName,[unit(L.zero)]),[nat,five]);
 const natMotive=lam("n",nat,nat),natStep=lam("n",nat,lam("ih",nat,bv(0n)));
 const natRec=major=>apps(cn(natRecName,[one]),[natMotive,seven,natStep,major]);
-const boxRec=(motive,minor)=>apps(cn(boxRecName,[one,one]),[nat,motive,minor,boxMajor]);
+const boxRec=(motive,minor)=>apps(cn(boxRecName,[one,unit(L.zero)]),[nat,motive,minor,boxMajor]);
 const fnType=forall("x",nat,nat);
 const natFn=apps(cn(natRecName,[one]),[
  lam("n",nat,fnType),lam("x",nat,bv(0n)),lam("n",nat,lam("ih",fnType,bv(0n))),lit(3n)]);
@@ -106,7 +111,7 @@ const fixtures=[
 const invalids=[
  natRec(cn(get("psKernelNatSuccName"))),natRec(boxMajor),
  apps(cn(natRecName),[natMotive,seven,natStep,ctorZero]),
- apps(cn(boxRecName,[one,one]),[nat,lam("box",box,nat),s1,boxMajor])
+ apps(cn(boxRecName,[one,unit(L.zero)]),[nat,lam("box",box,nat),s1,boxMajor])
 ];
 const literal=natRec(lit(0n)),constructor=natRec(ctorZero),missingFields=invalids[0];
 const noRule=invalids[1],wrongLevels=invalids[2];
@@ -266,4 +271,36 @@ const marked=accepted(accepted(direct(markWhnf,initial(),literal.id),"marked-som
 must(!same(marked.snd,none)&&array(marked.fst.publicCache).length===1,"callback-state-preserved");
 const warm=accepted(accepted(raw(4096n,scalar,initial(),constructor.id),"warm-some"),"warm-ok");
 expectError(raw(0n,scalar,warm.fst,constructor.id),"kernel reduction budget exhausted","warm-guard");
+// Preserve the old Sort-u fixture as explicit public rejection controls.
+const restrictedName=name("IotaSortBox"),restrictedCtor=N.str(restrictedName,"mk");
+const restrictedRec=get("psKernelSimpleRecName")(restrictedName);
+const restrictedType=forall("A",sort(universe),sort(universe));
+const restrictedCtorType=forall("A",sort(universe),forall("value",bv(0n),
+ apps(cn(restrictedName,[universe]),[bv(1n)])));
+const restrictedSession=accepted(get("psKernelV1AdmitDeclaration")(session,Request.ordinaryInductive({
+ levelParams:list([u]),name:restrictedName,type:restrictedType.term,
+ ctors:list([{name:restrictedCtor,type:restrictedCtorType.term}]),isUnsafe:false,numParams:1n
+})),"checked-inductive-IotaSortBox").session;
+const restrictedRequest=D.ordinaryInductive(list([u]),1n,{
+ name:restrictedName,type:restrictedType.id,ctors:list([{name:restrictedCtor,type:restrictedCtorType.id}])
+},false);
+const restrictedTagged=accepted(get("psKernelEnvironmentFind")(
+ restrictedSession.environment,restrictedRec),"Sort-u-recursor");
+must(same(restrictedTagged,CI.recInfo(restrictedTagged.value)),"Sort-u-checked-recursor-kind");
+must(array(restrictedTagged.value.base.levelParams).length===1,"Sort-u-Prop-only-recursor");
+const restrictedBox=app(cn(restrictedName,[one]),nat);
+const restrictedMajor=apps(cn(restrictedCtor,[one]),[nat,five]);
+const restrictedArgs=[nat,lam("box",restrictedBox,nat),lam("a",nat,bv(0n)),restrictedMajor];
+for(const [label,levels,message] of [
+ ["wrong-universe-arity",[one,one],"incorrect number of universe levels"],
+ ["forbidden-data-elimination",[one],"application type mismatch"]
+]){
+ const term=apps(cn(restrictedRec,levels),restrictedArgs);
+ const reference=get("psKernelV1Whnf")(restrictedSession,nil,safe,term.term);
+ const actual=get("psKernelV1RunDag")(empty,nil,safe,arena,
+  list([...commands,C.admit(restrictedRequest),C.whnf(term.id)]));
+ invalid(reference,"Sort-u-"+label+"-V1");invalid(actual,"Sort-u-"+label+"-public-DAG");
+ must(reference.error.message===message&&same(reference.error,actual.error),"Sort-u-"+label+"-exact-error");
+}
+console.log("PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2");
 console.log("PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9 assertions="+assertions);

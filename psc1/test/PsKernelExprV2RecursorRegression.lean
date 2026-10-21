@@ -9,9 +9,16 @@ private def expect {α : Type} : Except String α → IO α
   | .ok result => pure result
   | .error error => throw (IO.userError error)
 
-private def expectPublic {α : Type} : Except PsKernelError α → IO α
+private def expectPublic {α : Type} (label : String) : Except PsKernelError α → IO α
   | .ok result => pure result
-  | .error _ => throw (IO.userError "recursor fixture public failure")
+  | .error (.rejectedInvalid message) =>
+      throw (IO.userError ("PSC1_V2_RECURSOR_PUBLIC " ++ label ++ " rejectedInvalid: " ++ message))
+  | .error (.declinedUnsupported message) =>
+      throw (IO.userError ("PSC1_V2_RECURSOR_PUBLIC " ++ label ++ " declinedUnsupported: " ++ message))
+  | .error (.resourceExhausted _ message) =>
+      throw (IO.userError ("PSC1_V2_RECURSOR_PUBLIC " ++ label ++ " resourceExhausted: " ++ message))
+  | .error (.internalError message) =>
+      throw (IO.userError ("PSC1_V2_RECURSOR_PUBLIC " ++ label ++ " internalError: " ++ message))
 
 private def nm (value : String) := PsKernelName.str .anonymous value
 private def one := PsKernelLevel.succ PsKernelLevel.zero
@@ -27,14 +34,14 @@ private def natRecName := psKernelSimpleRecName psKernelNatName
 private def boxName := nm "IotaBox"
 private def boxCtorName := PsKernelName.str boxName "mk"
 private def boxRecName := psKernelSimpleRecName boxName
-private def box := apply (.const boxName [one]) [nat]
-private def boxMajor := apply (.const boxCtorName [one]) [nat,lit 5]
+private def box := apply (.const boxName [.zero]) [nat]
+private def boxMajor := apply (.const boxCtorName [.zero]) [nat,lit 5]
 private def natMotive := lam "n" nat nat
 private def natStep := lam "n" nat (lam "ih" nat (.bvar 0))
 private def natRec (major : PsKernelExpr) :=
   apply (.const natRecName [one]) [natMotive,lit 7,natStep,major]
 private def boxRec (motive minor : PsKernelExpr) :=
-  apply (.const boxRecName [one,one]) [nat,motive,minor,boxMajor]
+  apply (.const boxRecName [one,.zero]) [nat,motive,minor,boxMajor]
 
 private def decode (arena : PsKernelExprV2PagedArena) (root : Nat) : IO PsKernelExpr := do
   let graph ← expect (psKernelExprV2DecodeChecked arena)
@@ -119,9 +126,10 @@ private structure Prepared where
   commands : List PsKernelDagCommand
   declarations : List PsKernelExprV2DeclarationRef
 
-private def prepareInductive (prior : Prepared) (decl : PsKernelSimpleInductiveDecl) :
+private def prepareInductive (label : String) (prior : Prepared) (decl : PsKernelSimpleInductiveDecl) :
     IO Prepared := do
-  let admitted ← expectPublic (psKernelV1AdmitDeclaration prior.session (.ordinaryInductive decl))
+  let admitted ← expectPublic ("admit-" ++ label)
+    (psKernelV1AdmitDeclaration prior.session (.ordinaryInductive decl))
   let (a,type) ← expect (psKernelExprV2PagedImportIntoChecked prior.arena decl.type)
   let mut arena := a
   let mut ctors := []
@@ -164,13 +172,14 @@ private def officialInductive (environment : Lean.Environment)
   | .error _ => throw (IO.userError "official checked inductive fixture failed")
 
 private def regression : IO Unit := do
-  let empty ← expectPublic (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
+  let empty ← expectPublic "empty-session" (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
   let natDecl := PsKernelSimpleInductiveDecl.mk [] psKernelNatName s1
     [PsKernelSimpleConstructorDecl.mk psKernelNatZeroName nat,
      PsKernelSimpleConstructorDecl.mk psKernelNatSuccName (forallE "n" nat nat)] false 0
   let u := nm "u"
-  let boxType := forallE "A" (.sort (.param u)) (.sort (.param u))
-  let boxCtorType := forallE "A" (.sort (.param u))
+  -- The data box must live in a provably nonzero universe for Nat-valued elimination.
+  let boxType := forallE "A" (.sort (.succ (.param u))) (.sort (.succ (.param u)))
+  let boxCtorType := forallE "A" (.sort (.succ (.param u)))
     (forallE "value" (.bvar 0) (apply (.const boxName [.param u]) [.bvar 1]))
   let boxDecl := PsKernelSimpleInductiveDecl.mk [u] boxName boxType
     [PsKernelSimpleConstructorDecl.mk boxCtorName boxCtorType] false 1
@@ -179,14 +188,16 @@ private def regression : IO Unit := do
   let kType := PsKernelExpr.const kName []
   let kDecl := PsKernelSimpleInductiveDecl.mk [] kName (.sort .zero)
     [PsKernelSimpleConstructorDecl.mk kCtorName kType] false 0
-  let first ← prepareInductive (Prepared.mk empty psKernelExprV2PagedEmpty [] []) natDecl
-  let second ← prepareInductive first boxDecl
-  let prepared ← prepareInductive second kDecl
+  let first ← prepareInductive "Nat" (Prepared.mk empty psKernelExprV2PagedEmpty [] []) natDecl
+  let second ← prepareInductive "IotaBox" first boxDecl
+  let prepared ← prepareInductive "IotaK" second kDecl
   let session := prepared.session
   let natInfo ← recursorInfo session natRecName
   let boxInfo ← recursorInfo session boxRecName
   let kInfo ← recursorInfo session (psKernelSimpleRecName kName)
   require "actual-checked-non-K-and-K-metadata" (!natInfo.k && !boxInfo.k && kInfo.k)
+  require "data-box-recursor-has-independent-elimination-universe"
+    (boxInfo.base.levelParams.length == 2)
   let ctorZero := PsKernelExpr.const psKernelNatZeroName []
   let ctorTwo := apply (.const psKernelNatSuccName [])
     [apply (.const psKernelNatSuccName []) [ctorZero]]
@@ -214,7 +225,7 @@ private def regression : IO Unit := do
     natRec (.const psKernelNatSuccName []),
     natRec boxMajor,
     apply (.const natRecName []) [natMotive,lit 7,natStep,ctorZero],
-    apply (.const boxRecName [one,one]) [nat,lam "box" box nat,s1,boxMajor]]
+    apply (.const boxRecName [one,.zero]) [nat,lam "box" box nat,s1,boxMajor]]
   let mut input := prepared.arena
   let mut cases : List (String × PsKernelExpr × PsKernelExpr × Nat) := []
   for (label,expr,expected) in fixtures do
@@ -309,7 +320,7 @@ private def regression : IO Unit := do
         (psKernelExprV2TryReduceRecursorWithLocalValuesFuel fuel psKernelExprV2NoLocalValue
           checker.context initial root false)
       reducers := reducers + 1
-    let checked ← expectPublic (psKernelV1Whnf session [] .safe expr)
+    let checked ← expectPublic (label ++ "-checked-V1-WHNF") (psKernelV1Whnf session [] .safe expr)
     require (label ++ "-checked-V1") (psKernelExprEq checked expected)
     let owned ← match psKernelExprV2TryWhnfStateWithFuel 4096 checker.context initial root with
       | some result => expect result
@@ -325,7 +336,7 @@ private def regression : IO Unit := do
   require "complete-resource-matrix"
     (publicCases == 252 && coreCases == 504 && owners == 720 && reducers == 72)
 
-  let replay ← expectPublic (psKernelV1RunDag empty [] .safe input
+  let replay ← expectPublic "whole-batch-WHNF" (psKernelV1RunDag empty [] .safe input
     (prepared.commands ++ cases.map (fun (_,_,_,root) => .whnf root)))
   let answers := replay.replies.drop prepared.commands.length
   require "complete-public-batch-reply-count" (answers.length == cases.length)
@@ -335,7 +346,7 @@ private def regression : IO Unit := do
   let definition := PsKernelDagDeclarationRequest.definitionDecl
     (PsKernelDagDefinition.mk (PsKernelDagConstantBase.mk (nm "iotaChecked") [] natId)
       literalId .abbrevHint .safe)
-  let admitted ← expectPublic (psKernelV1RunDag empty [] .safe input
+  let admitted ← expectPublic "whole-batch-definition-check-defeq" (psKernelV1RunDag empty [] .safe input
     (prepared.commands ++ [.admit definition,.check literalId,.isDefEq literalId sevenId]))
   require "real-definition-and-defeq-batch"
     (match admitted.replies.reverse with | .equal true :: .checked _ :: .admitted _ :: _ => true | _ => false)
@@ -374,7 +385,8 @@ private def regression : IO Unit := do
      | _ => false)
   require "failed-batch-does-not-publish-to-original-session"
     (psKernelEnvironmentFind empty.environment psKernelNatName).isNone
-  let _ ← expectPublic (psKernelV1RunDag empty [] .safe input prepared.commands)
+  let _ ← expectPublic "whole-batch-admission-replay"
+    (psKernelV1RunDag empty [] .safe input prepared.commands)
 
   let badWhnf := fun (_ : PsKernelCheckerContext) (_ : PsKernelExprV2WhnfState) (_ : Nat) =>
     (some (.error "IOTA_MAJOR_CALLBACK") : Option (Except String (PsKernelExprV2WhnfState × Nat)))
@@ -445,6 +457,42 @@ private def regression : IO Unit := do
       (PsKernelDefinitionInfo.mk (PsKernelConstantBase.mk (nm label) [] type) value .abbrevHint .safe))
     require (label ++ "-independent-addDecl")
       (match own with | .ok _ => shouldAccept | .error (.rejectedInvalid _) => !shouldAccept | _ => false)
+  -- Preserve the old Sort-u fixture as explicit public rejection controls.
+  let restrictedName := nm "IotaSortBox"
+  let restrictedCtor := PsKernelName.str restrictedName "mk"
+  let restrictedRec := psKernelSimpleRecName restrictedName
+  let restrictedType := forallE "A" (.sort (.param u)) (.sort (.param u))
+  let restrictedCtorType := forallE "A" (.sort (.param u))
+    (forallE "value" (.bvar 0) (apply (.const restrictedName [.param u]) [.bvar 1]))
+  let restrictedDecl := PsKernelSimpleInductiveDecl.mk [u] restrictedName restrictedType
+    [PsKernelSimpleConstructorDecl.mk restrictedCtor restrictedCtorType] false 1
+  let restricted ← prepareInductive "IotaSortBox"
+    (Prepared.mk session input [] []) restrictedDecl
+  let restrictedInfo ← recursorInfo restricted.session restrictedRec
+  require "Sort-u-box-has-Prop-only-recursor"
+    (restrictedInfo.base.levelParams.length == 1)
+  let restrictedOfficial ← officialInductive official restrictedDecl
+  let restrictedBox := apply (.const restrictedName [one]) [nat]
+  let restrictedMajor := apply (.const restrictedCtor [one]) [nat,lit 5]
+  let restrictedArgs := [nat,lam "box" restrictedBox nat,lam "a" nat (.bvar 0),restrictedMajor]
+  for (label,levels,message) in
+      [("wrong-universe-arity",[one,one],"incorrect number of universe levels"),
+       ("forbidden-data-elimination",[one],"application type mismatch")] do
+    let expr := apply (.const restrictedRec levels) restrictedArgs
+    let (negativeInput,root) ← expect (psKernelExprV2PagedImportIntoChecked restricted.arena expr)
+    require ("Sort-u-" ++ label ++ "-V1")
+      (match psKernelV1Whnf restricted.session [] .safe expr with
+       | .error (.rejectedInvalid actual) => actual == message
+       | _ => false)
+    require ("Sort-u-" ++ label ++ "-public-DAG")
+      (match psKernelV1RunDag empty [] .safe negativeInput
+          (prepared.commands ++ restricted.commands ++ [.whnf root]) with
+       | .error (.rejectedInvalid actual) => actual == message
+       | _ => false)
+    require ("Sort-u-" ++ label ++ "-official")
+      (match Lean.Kernel.check restrictedOfficial {} (← officialExpr expr) with
+       | .error _ => true | _ => false)
+  IO.println "PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES: PASS cases=2"
   IO.println "PSC1_V2_DAG_RECURSOR: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9"
   IO.println "PSC1_V2_DAG_OFFICIAL_RECURSOR: PASS valid=12 invalid=4 addDecl=3"
 

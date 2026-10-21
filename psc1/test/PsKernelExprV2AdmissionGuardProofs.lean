@@ -175,10 +175,10 @@ theorem checked_boundary_preserves_validation_error
 theorem header_existing_name_precedes_arena
     (fuel : Nat) (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (base : PsKernelConstantBase) (root : Nat)
-    (exists : psKernelEnvironmentContains context.scalar.environment base.name = true) :
+    (alreadyExists : psKernelEnvironmentContains context.scalar.environment base.name = true) :
     psKernelExprV2AdmissionCheckHeaderWithFuel fuel context state base root =
       .some (.error "already declared") := by
-  simp [psKernelExprV2AdmissionCheckHeaderWithFuel, exists]
+  simp [psKernelExprV2AdmissionCheckHeaderWithFuel, alreadyExists]
 
 theorem header_duplicate_params_precedes_arena
     (fuel : Nat) (context : PsKernelExprV2CheckContext)

@@ -64,7 +64,9 @@ theorem bucket_worker_exact
   induction levels generalizing index hash with
   | zero => rfl
   | succ remaining ih =>
-      simp only [psKernelExprV2WhnfCacheIndexBucketWorker, originalIndexBucket, ih]
+      cases index <;>
+        cases bit : Nat.beq (Nat.mod hash 2) 0 <;>
+        simp [psKernelExprV2WhnfCacheIndexBucketWorker, originalIndexBucket, bit, ih]
 
 theorem set_worker_exact
     (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat)
@@ -74,7 +76,9 @@ theorem set_worker_exact
   induction levels generalizing index hash with
   | zero => rfl
   | succ remaining ih =>
-      simp only [psKernelExprV2WhnfCacheIndexSetWorker, originalIndexSet, ih]
+      cases index <;>
+        cases bit : Nat.beq (Nat.mod hash 2) 0 <;>
+        simp [psKernelExprV2WhnfCacheIndexSetWorker, originalIndexSet, bit, ih]
 
 theorem bucket_public_exact
     (levels : Nat) (index : PsKernelExprV2WhnfCacheIndex) (hash : Nat) :

@@ -1,3 +1,42 @@
+# Current radix candidate — close symbolic successor proof branches
+
+Updated: 2026-10-21 UTC. Branch: `research/psc1-pskernel-v2-cache-20261021`.
+Predecessor: `f4396f3e15ae5f057aa79e0f0dc1339a77767559`.
+Containing proof repair: **NOT RUN at creation; no predecessor PASS inherited.**
+
+The predecessor's [native integration39641591910/job119366238673](https://github.com/dwijayuda/pskernel/actions/runs/39641591910/job/119366238673)
+is terminal **FAIL**. The complete checker and expanded radix regressions ran
+successfully, including384 lookup cases,1152 updates and the retained cache,
+real-admission, resource, owner and callback controls. The mandatory proof step
+then failed at lines66 and76 of `PsKernelExprV2WhnfCacheProofs.lean`.
+Both induction successors retained symbolic match/Boolean-route goals after
+`simp only`. Later printed dependencies from that failed elaboration are not
+valid proof qualification.
+
+This successor changes only those two proof bodies: split the three index
+constructors and route Boolean, then simplify with the unchanged induction
+hypothesis and frozen source definitions. All25 theorem statements, the17
+preexisting proof bodies, production kernel, tests, markers and resource
+policies remain unchanged. No unproved declaration is accepted or hidden.
+Classification: proof-script elaboration failure, not an observed runtime
+semantic defect. Exact-source native, portable, canonical, generated, proof,
+provider and Arena gates must now run to terminal.
+
+## Performance hold
+
+The separate same-runner paired experiment39639125591 has finished and its
+authenticated complete report is durable on paired evidence commit
+`7ae480eedcc7c6c67e63ebdb7a6f4eedcf7ddaa4`.
+Cache5de metadata DAG admission regressed about40% and27% versusf9 in the
+two measured batch sizes. The indexed cache remains excluded from integration
+pending diagnosis. Passing this explicit-argument worker's semantic/proof gates
+will not establish that the performance regression is resolved. No new
+worker speedup or full193 conformance is claimed.
+
+The original candidate and qualified5de receipts below are preserved verbatim.
+
+---
+
 # Current continuation — qualify exact radix workers after complete indexed-cache gates
 
 Observed: 2026-10-21 17:11:33 UTC

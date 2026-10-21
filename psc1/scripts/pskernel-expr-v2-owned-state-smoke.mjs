@@ -537,5 +537,99 @@ for(const fuel of [0n,1n,8n]){
    fuel,mixed,shadowState.whnf,shadowId,cheapProj),none),"raw-core-legacy-refusal");
  }
 }
+
+let admissionProbes=0,admissionPropagation=0;
+for(const seed of [2n,11n]){
+ const state=stamp(zero.id,initial,seed);
+ const first=whnfStep(zero.id,seed,seed,seed+1n),second=whnfStep(zero.id,seed+1n,seed+1n,seed+2n);
+ for(const [sortRoot,level,answer]of [[s0.id,unit(L.zero),true],[s1.id,one,false]]){
+  const sorted=attempt(get("psKernelExprV2AdmissionEnsureSortOwnedWith")(
+   first(sortRoot),context,state,sortRoot),"admission-sort-owner");
+  must(same(sorted.snd,level),"admission-sort-exact-level");
+  marked("admission-sort-all-callback-effects",seed+1n,seed+1n,ok(sorted.fst,sortRoot));admissionProbes++;
+  marked("admission-proposition-all-callback-effects",seed+2n,seed+2n,
+   boolRoot(sortRoot,answer,get("psKernelExprV2AdmissionIsPropOwnedWith")(
+    first(sortRoot),second(sortRoot),context,state,oneLit.id)));admissionProbes++;
+ }
+ const invalid=state.whnf.arena.size+1000n;
+ const invalidOwner=accepted(advance(zero.id,state,seed,seed,seed+1n),"admission-invalid-owner");
+ const invalidLookup=get("psKernelExprV2PagedRequire")(invalidOwner.whnf.arena,invalid);
+ must(rejected(invalidLookup),"admission-malformed-result-fixture");
+ errorIs("admission-sort-refuses-invalid-callback-result",invalidLookup.error,
+  get("psKernelExprV2AdmissionEnsureSortOwnedWith")(first(invalid),context,state,s0.id));
+ errorIs("admission-sort-refuses-nonsort","expected sort",
+  get("psKernelExprV2AdmissionEnsureSortOwnedWith")(first(oneLit.id),context,state,s0.id));
+ errorIs("admission-proposition-refuses-nonsort","expected sort",
+  get("psKernelExprV2AdmissionIsPropOwnedWith")(first(s0.id),second(oneLit.id),context,state,oneLit.id));
+ for(const declined of [false,true]){
+  const failing=_c=>_s=>_r=>declined?none:error("carrier injected");
+  const afterInfer=c=>s=>r=>outerMark(s,seed+1n,seed+1n)&&r===invalid?
+   failing(c)(s)(r):error("admission callback owner/order changed");
+  propagation("admission-sort-whnf-before-malformed-root",declined,
+   get("psKernelExprV2AdmissionEnsureSortOwnedWith")(failing,context,state,invalid));
+  propagation("admission-proposition-inference-first",declined,
+   get("psKernelExprV2AdmissionIsPropOwnedWith")(failing,forbidden,context,state,invalid));
+  propagation("admission-proposition-whnf-owner",declined,
+   get("psKernelExprV2AdmissionIsPropOwnedWith")(first(invalid),afterInfer,context,state,oneLit.id));
+  admissionPropagation+=3;
+ }
+}
+const propBound=accepted(get("psKernelExprV2PagedMkBVar")(initial.whnf.arena,0n),"admission-prop-bound");
+const propBuilt=accepted(get("psKernelExprV2PagedMkForall")(
+ propBound.fst,name("P"),s0.id,propBound.snd,unit(B.default)),"admission-prop-type");
+const proposition={id:propBuilt.snd,term:E.forallE(name("P"),s0.term,E.bvar(0n),unit(B.default))};
+const admissionArena=propBuilt.fst;
+const admissionState=get("psKernelExprV2CheckStateWithArena")(initial,admissionArena);
+const admissionTerms=[["sort-zero",s0],["sort-one",s1],["metadata-sort",wrappedSort],
+ ["proposition",proposition],["literal",oneLit],
+ ...differential.filter(([label])=>label==="beta"||label==="zeta"||label==="iota")];
+must(admissionTerms.length===8,"admission-real-fixture-count");
+let admissionComparisons=0,publicWhnfComparisons=0;
+const sameOutcome=(tag,original,observed,valueCheck)=>{
+ const result=accepted(observed,tag+"-supported");
+ if(rejected(original)){
+  must(rejected(result)&&result.error===original.error,tag+"-exact-error");return;
+ }
+ const expected=accepted(original,tag+"-reference"),actual=accepted(result,tag+"-result");
+ valueCheck(expected,actual);
+};
+for(const [label,term]of admissionTerms){
+ for(const fuel of [0n,1n,2n,3n,4n,8n,64n])for(const [maxRecDepth,recDepth]of [[0n,0n],[1n,15n],[1n,16n]]){
+  const limited={...scalar,maxRecDepth,recDepth},c=get("psKernelExprV2CheckContextEmpty")(limited);
+  const reference={context:limited,state:oldEmpty};
+  const tag=`admission-${label}-fuel${fuel}-depth${recDepth}-limit${maxRecDepth}`;
+  sameOutcome(tag+"-sort",get("psKernelSessionEnsureSort")(fuel,reference,term.term),
+   get("psKernelExprV2AdmissionEnsureSortWithFuel")(fuel,c,admissionState,term.id),()=>{});admissionComparisons++;
+  sameOutcome(tag+"-proposition",get("psKernelSessionIsProp")(fuel,reference,term.term),
+   get("psKernelExprV2AdmissionIsPropWithFuel")(fuel,c,admissionState,term.id),
+   (expected,actual)=>must(expected.fst===actual.snd,tag+"-proposition-answer"));admissionComparisons++;
+  sameOutcome(tag+"-public-whnf",get("psKernelSessionWhnf")(fuel,reference,term.term),
+   get("psKernelExprV2TryWhnfOwnedWithDeclarationsFuel")(
+    fuel,limited,admissionArena,initial.whnf.declarations,term.id),
+   (expected,actual)=>{
+    const decoded=accepted(get("psKernelExprV2DecodeChecked")(actual.fst),tag+"-decode");
+    const result=accepted(get("psKernelExprV2DecodedRequire")(decoded,actual.snd),tag+"-root");
+    must(exact(expected.fst,result),tag+"-public-whnf-result");
+   });publicWhnfComparisons++;
+ }
+}
+errorIs("admission-sort-zero-before-syntactic-sort","kernel reduction budget exhausted",
+ get("psKernelExprV2AdmissionEnsureSortWithFuel")(0n,bare,admissionState,s0.id));
+errorIs("admission-proposition-zero-is-inference","kernel inference budget exhausted",
+ get("psKernelExprV2AdmissionIsPropWithFuel")(0n,bare,admissionState,proposition.id));
+const admissionLegacyName=name("admissionLegacy");
+const admissionLegacy=get("psKernelLocalContextAddLet")(
+ get("psKernelLocalContextEmpty"),admissionLegacyName,admissionLegacyName,nat.term,oneLit.term);
+const admissionMixed=get("psKernelExprV2CheckContextEmpty")({...scalar,localContext:admissionLegacy});
+for(const fuel of [0n,1n,8n]){
+ must(same(get("psKernelExprV2AdmissionEnsureSortWithFuel")(
+  fuel,admissionMixed,initial,s0.id),none),"admission-sort-mixed-context-refusal");
+ must(same(get("psKernelExprV2TryWhnfOwnedWithDeclarationsFuel")(
+  fuel,admissionMixed.scalar,initial.whnf.arena,initial.whnf.declarations,s0.id),none),
+  "public-owned-whnf-mixed-context-refusal");
+}
+must(admissionProbes===8&&admissionPropagation===12,"admission-carrier-complete");
+must(admissionComparisons===336&&publicWhnfComparisons===168,"admission-differential-complete");
+console.log("PSC1_V2_ADMISSION_OWNED_STATE_JS_PASS carrier=8 propagated=12 differential=336 publicWhnf=168");
 must(get("psKernelResourcePolicyDefault").fuel===4096n,"published-fuel-unchanged");
 console.log("PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44 assertions="+assertions);

@@ -11,6 +11,67 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — close full-state admission/public WHNF boundaries
+
+Branch: `research/psc1-pskernel-v2-carrier-20261021`.
+This source update follows `4dee3fe1dc6791aa491f101db876898e10449a01`.
+All changed-source qualification gates are **NOT RUN** at commit creation.
+Integration889 remains the qualified scoped provider; this branch is not promoted.
+
+Exact parent [integration39602127491](https://github.com/dwijayuda/pskernel/actions/runs/39602127491)
+failed native job119228992209 while elaborating the large
+`PsKernelExprV2OwnedStateRegression.lean` declaration at line624; the unknown
+`regression` error at line767 was cascading. Production kernel modules compiled,
+and [native correctness119228991271](https://github.com/dwijayuda/pskernel/actions/runs/39602127347/job/119228991271)
+passed. The fixture now extracts the existing262-line DefEq/failure group into
+a private helper. Its probes, callbacks, ordering and assertions are preserved
+exactly; neither Lean elaborator limits nor kernel resource limits are raised.
+
+A boundary audit found two omitted full-state transitions:
+`AdmissionEnsureSortWithFuel` and `AdmissionIsPropWithFuel` still initialized
+a standalone WHNF-only owner and merged its partial result into an older state.
+They now use complete-state normalization and retain the returned inference,
+DefEq, unfold/failure caches and fresh counter. The internal shared sort helper
+always runs public WHNF, including on syntactic sorts, matching SessionEnsureSort.
+The proposition helper still runs inference-only first and mandatory WHNF second,
+using the same fixed admission fuel. None/error propagation and malformed
+callback-result refusal remain ordered.
+
+`Check.lean` now supplies the fixed owning DefEq callback through
+`psKernelExprV2TryWhnfStateWithFuel` and a fresh declaration-aware public WHNF
+boundary. `API/Dag.lean` uses that entry after its unchanged mandatory input
+checking. The old WhnfState ABI remains a standalone compatibility wrapper;
+production public WHNF no longer supplies NoOwnedDefEq to its recursor knot.
+No earlier public check's caches are transferred into the new WHNF operation.
+
+Required new coverage, in addition to all existing42/56/540/38/44 carrier counts:
+8 admission owner probes,12 exact failure/decline cases,336 V1 admission-helper
+comparisons and168 V1 standalone-public-WHNF comparisons. These include true/false
+proposition decisions, nonsorts, malformed IDs, beta/zeta/iota, low fuel,
+depth boundaries and mixed-context refusal. Eleven local ownership/ordering/fuel
+lemmas supplement the previous10; no global soundness theorem is claimed.
+Both generated routes require the new exact markers.
+
+### Concurrent source observations, inspected 2026-10-21 12:56 UTC
+
+| Source | Native integration | Native correctness | Portable source | Canonical runtime | .lean-generated runtime | Arena |
+| --- | --- | --- | --- | --- | --- | --- |
+| staged `ea84af3dea125b377ece3bd4fc4b8f95febe120e` | PASS119228846055 | PASS119228844582 | PASS .lean; canonical check IN PROGRESS | IN PROGRESS | IN PROGRESS | official PASS; generated IN PROGRESS |
+| carrier parent `4dee3fe1dc6791aa491f101db876898e10449a01` | FAIL fixture elaboration | PASS119228991271 | research portable PASS; full job IN PROGRESS | IN PROGRESS | IN PROGRESS | official PASS; generated IN PROGRESS |
+
+Staged native includes the corrected positive Box recursor at distinct universe
+arguments[1,0],12 official valid and4 invalid recursor cases,3 official addDecl
+fixtures, both retained Sort-u universe/elimination negatives, all prior guards
+and proof gates. Exact parent carrier native proofs/matrices were NOT RUN because
+its aggregate test target failed to elaborate. Generated jobs have not been
+assumed successful.
+
+Next critical path: inspect the changed source's native test compilation and all
+independent gates; then both terminal generated routes and full Arena. Keep the
+four explicit whole-operation fallbacks, K/major conversion and inductive/boundary
+migration limitations visible. No acceptance or parity is inferred from host
+timeouts or kernel exhaustion.
+
 ## 2026-10-21 — carrier dependency repair and preserved negative fixtures
 
 Branch: `research/psc1-pskernel-v2-carrier-20261021`.

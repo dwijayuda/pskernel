@@ -23,58 +23,84 @@ request whole-original-admission fallback. A none from any attempted operation
 discards its state and restarts the complete original admission.
 -/
 
-def psKernelExprV2AdmissionEnsureSortWithFuel
-    (fuel : Nat) (context : PsKernelExprV2CheckContext)
+/- Unlike binder EnsureSort, admission always performs public WHNF, including
+   on a syntactic sort. SessionEnsureSort has the same mandatory resource cost. -/
+def psKernelExprV2AdmissionEnsureSortOwnedWith
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat) :
-    Option (Except String PsKernelExprV2CheckState) :=
-  match psKernelExprV2CheckWhnfWithFuel fuel context state.whnf root with
+    Option (Except String (Prod PsKernelExprV2CheckState PsKernelLevel)) :=
+  match whnf context state root with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
       | Except.error error => Option.some (Except.error error)
       | Except.ok reduced =>
           let next := Prod.fst reduced;
-          match psKernelExprV2PagedRequire next.arena (Prod.snd reduced) with
+          match psKernelExprV2PagedRequire next.whnf.arena (Prod.snd reduced) with
           | Except.error error => Option.some (Except.error error)
           | Except.ok result =>
               match result.node with
-              | PsKernelExprV2Node.sort _ =>
-                  Option.some
-                    (Except.ok (psKernelExprV2CheckStateWithWhnf state next))
+              | PsKernelExprV2Node.sort level =>
+                  Option.some (Except.ok (Prod.mk next level))
               | _ => Option.some (Except.error "expected sort")
 
-/- The theorem proposition test uses inference-only judgments and always
-   runs WHNF on the inferred type, preserving SessionIsProp's resource costs. -/
-def psKernelExprV2AdmissionIsPropWithFuel
+def psKernelExprV2AdmissionEnsureSortWithFuel
     (fuel : Nat) (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat) :
+    Option (Except String PsKernelExprV2CheckState) :=
+  let whnf :=
+    fun (nextContext : PsKernelExprV2CheckContext)
+        (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+      psKernelExprV2TryWhnfStateWithFuel fuel nextContext nextState nextRoot;
+  match psKernelExprV2AdmissionEnsureSortOwnedWith whnf context state root with
+  | Option.none => Option.none
+  | Option.some attempted =>
+      match attempted with
+      | Except.error error => Option.some (Except.error error)
+      | Except.ok result => Option.some (Except.ok (Prod.fst result))
+
+/- Infer-only and mandatory public WHNF return their current complete owner.
+   Neither phase may restore an earlier snapshot of the semantic caches. -/
+def psKernelExprV2AdmissionIsPropOwnedWith
+    (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (root : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
-  match psKernelExprV2TryInferStateWithFuel fuel context state root with
+  match inferType context state root with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
       | Except.error error => Option.some (Except.error error)
       | Except.ok inferred =>
-          let afterInfer := Prod.fst inferred;
-          match psKernelExprV2CheckWhnfWithFuel fuel context
-              afterInfer.whnf (Prod.snd inferred) with
+          match psKernelExprV2AdmissionEnsureSortOwnedWith whnf context
+              (Prod.fst inferred) (Prod.snd inferred) with
           | Option.none => Option.none
-          | Option.some reducedAttempt =>
-              match reducedAttempt with
+          | Option.some sorted =>
+              match sorted with
               | Except.error error => Option.some (Except.error error)
-              | Except.ok reduced =>
-                  let next := Prod.fst reduced;
-                  match psKernelExprV2PagedRequire next.arena (Prod.snd reduced) with
-                  | Except.error error => Option.some (Except.error error)
-                  | Except.ok result =>
-                      match result.node with
-                      | PsKernelExprV2Node.sort level =>
-                          Option.some
-                            (Except.ok
-                              (Prod.mk
-                                (psKernelExprV2CheckStateWithWhnf afterInfer next)
-                                (psKernelLevelNormalizesToZero level)))
-                      | _ => Option.some (Except.error "expected sort")
+              | Except.ok result =>
+                  Option.some (Except.ok
+                    (Prod.mk (Prod.fst result)
+                      (psKernelLevelNormalizesToZero (Prod.snd result))))
+
+def psKernelExprV2AdmissionIsPropWithFuel
+    (fuel : Nat) (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  let inferType :=
+    fun (nextContext : PsKernelExprV2CheckContext)
+        (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+      psKernelExprV2TryInferStateWithFuel fuel nextContext nextState nextRoot;
+  let whnf :=
+    fun (nextContext : PsKernelExprV2CheckContext)
+        (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+      psKernelExprV2TryWhnfStateWithFuel fuel nextContext nextState nextRoot;
+  psKernelExprV2AdmissionIsPropOwnedWith inferType whnf context state root
 
 def psKernelExprV2AdmissionCheckHeaderWithFuel
     (fuel : Nat) (context : PsKernelExprV2CheckContext)

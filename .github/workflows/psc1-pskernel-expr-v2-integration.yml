@@ -244,6 +244,7 @@ jobs:
           .lake/build/bin/psc1_kernel_expr_v2_owned_state_regression \
             | tee "$RUNNER_TEMP/psc1-owned-state-native.log"
           grep -Fqx 'PSC1_V2_OWNED_STATE_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44' "$RUNNER_TEMP/psc1-owned-state-native.log"
+          grep -Fqx 'PSC1_V2_ADMISSION_OWNED_STATE_PASS carrier=8 propagated=12 differential=336 publicWhnf=168' "$RUNNER_TEMP/psc1-owned-state-native.log"
       - name: Check DAG transformation semantics and sharing
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -274,7 +275,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-admission-guard-proofs.log"
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean \
             | tee "$RUNNER_TEMP/psc1-recursor-proofs.log"
-          test "$(grep -c '^#print axioms PsKernelExprV2OwnedStateProofs\.' test/PsKernelExprV2OwnedStateProofs.lean)" -eq 10
+          test "$(grep -c '^#print axioms PsKernelExprV2OwnedStateProofs\.' test/PsKernelExprV2OwnedStateProofs.lean)" -eq 21
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2OwnedStateProofs.lean \
             | tee "$RUNNER_TEMP/psc1-owned-state-proofs.log"
           if grep -E 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' \
@@ -564,6 +565,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" owned-state-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-owned-state-generated.log"
           grep -Eq '^PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-owned-state-generated.log"
+          grep -Fqx 'PSC1_V2_ADMISSION_OWNED_STATE_JS_PASS carrier=8 propagated=12 differential=336 publicWhnf=168' "$RUNNER_TEMP/psc1-owned-state-generated.log"
       - name: Exercise the generated checked batch provider in detached Node
         working-directory: psc1
         run: |

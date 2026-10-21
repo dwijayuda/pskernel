@@ -401,6 +401,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" owned-state-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-owned-state-canonical.log"
           grep -Eq '^PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-owned-state-canonical.log"
+          grep -Fqx 'PSC1_V2_ADMISSION_OWNED_STATE_JS_PASS carrier=8 propagated=12 differential=336 publicWhnf=168' "$RUNNER_TEMP/psc1-owned-state-canonical.log"
       - name: Exercise the canonical-source checked batch provider in detached Node
         working-directory: psc1
         shell: bash

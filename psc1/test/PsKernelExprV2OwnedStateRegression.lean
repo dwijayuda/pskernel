@@ -139,6 +139,413 @@ private def optionalBoolRoot (root : Nat) (expected : Option Bool)
       if answer == expected then some (.ok (state,root))
       else some (.error "carrier optional decision changed")
 
+/- Keep the same per-seed probes in a separate elaboration scope.
+   Callback values, case order and exact assertions are unchanged; only
+   the three observational counters are returned to the outer matrix. -/
+private def runDefEqAndFailureProbes
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (seed s0Id s1Id natId zeroId oneId twoId aliasId
+      unitType unitLeft unitRight boolTrue strId strBuilt addId
+      wrappedSort aType aValue bValue fnId fnType wrappedFn
+      applicationId lambdaId quotId recId projMajor projId : Nat)
+    (first second : Nat → PsKernelExprV2CheckContext → PsKernelExprV2CheckState → Nat →
+      Option (Except String (PsKernelExprV2CheckState × Nat)))
+    (binary forbidden : PsKernelExprV2CheckContext → PsKernelExprV2CheckState → Nat →
+      Option (Except String (PsKernelExprV2CheckState × Nat)))
+    (forbiddenEq : PsKernelExprV2CheckContext → PsKernelExprV2CheckState → Nat → Nat →
+      Option (Except String (PsKernelExprV2CheckState × Bool))) : IO (Nat × Nat × Nat) := do
+  let mut defeqProbes := 0
+  let mut propagated := 0
+  let mut defeqPropagation := 0
+  let eqStep :=
+    fun (tag fresh next : Nat) (answer : Bool)
+        (_c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (_l _r : Nat) =>
+      some ((advance zeroId s tag fresh next).map (fun updated => (updated,answer)))
+  let assertBool :=
+    fun (label : String) (tag : Nat) (answer : Bool)
+        (value : Option (Except String (PsKernelExprV2CheckState × Bool))) => do
+      let _ ← marked label tag tag (boolRoot zeroId answer value)
+      pure ()
+  let assertOptional :=
+    fun (label : String) (tag : Nat) (answer : Option Bool)
+        (value : Option (Except String (PsKernelExprV2CheckState × Option Bool))) => do
+      let _ ← marked label tag tag (optionalBoolRoot zeroId answer value)
+      pure ()
+  assertOptional "reflection-whnf-state" (seed + 1) (some true)
+    (psKernelExprV2DefEqReflectionOwnedWith (first boolTrue) context state boolTrue boolTrue)
+  defeqProbes := defeqProbes + 1
+  let orderedCore :=
+    fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
+      if root == fnId then first fnId c s root
+      else if root == bValue then second bValue c s root
+      else some (.error "DefEq core operand order changed")
+  assertBool "prefix-left-right-continuation-state" (seed + 3) false
+    (psKernelExprV2DefEqCoreQuickContinueOwnedWith
+      (eqStep (seed + 2) (seed + 2) (seed + 3) false)
+      forbiddenEq orderedCore context state fnId bValue)
+  defeqProbes := defeqProbes + 1
+  assertBool "is-prop-inference-whnf-state" (seed + 2) true
+    (psKernelExprV2DefEqIsPropOwnedWith (first s0Id) (second s0Id) context state aType)
+  defeqProbes := defeqProbes + 1
+  let proofInfer :=
+    fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
+      if root == aValue then first aType c s root
+      else if root == aType then second s0Id c s root
+      else if root == bValue then
+        whnfStep zeroId (seed + 3) (seed + 3) (seed + 4) aType c s root
+      else some (.error "proof irrelevance inference order changed")
+  assertBool "proof-irrelevance-all-callback-state" (seed + 5) true
+    (psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith forbiddenEq
+      (eqStep (seed + 4) (seed + 4) (seed + 5) true) proofInfer
+      (whnfStep zeroId (seed + 2) (seed + 2) (seed + 3) s0Id)
+      context state aValue bValue)
+  defeqProbes := defeqProbes + 1
+  let nonPropInfer :=
+    fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
+      if root == oneId then first natId c s root
+      else if root == natId then second s1Id c s root
+      else some (.error "non-proposition inference order changed")
+  assertBool "non-proposition-continuation-state" (seed + 4) false
+    (psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith
+      (eqStep (seed + 3) (seed + 3) (seed + 4) false) forbiddenEq nonPropInfer
+      (whnfStep zeroId (seed + 2) (seed + 2) (seed + 3) s1Id)
+      context state oneId twoId)
+  defeqProbes := defeqProbes + 1
+  assertBool "lazy-nat-left-retains-both-operands" (seed + 3) false
+    (psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith forbiddenEq
+      (eqStep (seed + 2) (seed + 2) (seed + 3) false) binary context state addId zeroId)
+  defeqProbes := defeqProbes + 1
+  assertBool "lazy-nat-right-retains-both-operands" (seed + 3) false
+    (psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith forbiddenEq
+      (eqStep (seed + 2) (seed + 2) (seed + 3) false) binary context state zeroId addId)
+  defeqProbes := defeqProbes + 1
+  let aliasEntry ← expect (psKernelExprV2PagedRequire state.whnf.arena aliasId)
+  let unfoldedMark :=
+    fun (s : PsKernelExprV2CheckState) (root : Nat) =>
+      outerMark (psKernelExprV2CheckStateWithUnfold s state.unfold) seed seed &&
+        match s.unfold with
+        | entry :: rest => cacheMark rest seed && entry.source == aliasId &&
+            entry.result == root && entry.hash == aliasEntry.hash
+        | [] => false
+  let deltaCore :=
+    fun (_c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
+        (root : Nat) (cheapProj : Bool) =>
+      if cheapProj && unfoldedMark s root then
+        match psKernelExprV2PagedEqOnCanonical s.whnf.arena root twoId with
+        | .error error => some (.error error)
+        | .ok same => if same then some ((stamp zeroId s (seed + 1)).map
+            (fun updated => (updated,twoId)))
+          else some (.error "delta callback body changed")
+      else some (.error "delta unfolding publication or callback owner changed")
+  let _ ← marked "delta-once-retains-full-core-state" (seed + 1) (seed + 1)
+    (psKernelExprV2DefEqDeltaOnceOwnedWith deltaCore context state aliasId)
+  defeqProbes := defeqProbes + 1
+  let projectionCore :=
+    fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
+        (root : Nat) (cheapProj : Bool) =>
+      if root == projId && !cheapProj then first oneId c s root
+      else some (.error "projection core flags changed")
+  let _ ← marked "delta-projection-core-state" (seed + 1) (seed + 1)
+    (reduction (psKernelExprV2DefEqTryUnfoldProjAppOwnedWith projectionCore context state projId))
+  defeqProbes := defeqProbes + 1
+  assertBool "lazy-delta-loop-retains-core-state" (seed + 1) true
+    (psKernelExprV2DefEqLazyDeltaContinueOwnedWithFuel 2 forbiddenEq forbiddenEq
+      forbidden deltaCore context state aliasId twoId)
+  defeqProbes := defeqProbes + 1
+  assertBool "lazy-projection-loop-retains-core-state" (seed + 1) true
+    (psKernelExprV2DefEqLazyProjReductionOwnedWithFuel 2
+      forbiddenEq deltaCore context state aliasId twoId psKernelNatName 0)
+  defeqProbes := defeqProbes + 1
+  for lambdaOnLeft in [false,true] do
+    assertOptional "function-eta-retains-infer-whnf-defeq-state" (seed + 3) none
+      (psKernelExprV2DefEqFullShapeEtaOwnedWith lambdaOnLeft
+        (eqStep (seed + 2) (seed + 2) (seed + 3) false)
+        (first wrappedFn) (second fnType) context state lambdaId fnId)
+    defeqProbes := defeqProbes + 1
+  let changedCore :=
+    fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
+        (root : Nat) (cheapProj : Bool) =>
+      if cheapProj then some (.error "residual core must disable cheap projection")
+      else if root == wrappedSort then first s0Id c s root
+      else if root == s1Id then second s1Id c s root
+      else some (.error "residual core order changed")
+  assertBool "residual-full-whnf-changed-state" (seed + 3) false
+    (psKernelExprV2DefEqResidualOwnedWith
+      (eqStep (seed + 2) (seed + 2) (seed + 3) false)
+      forbidden forbidden changedCore context state wrappedSort s1Id)
+  defeqProbes := defeqProbes + 1
+  let unchangedCore :=
+    fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
+        (root : Nat) (cheapProj : Bool) =>
+      if cheapProj then some (.error "residual core must disable cheap projection")
+      else orderedCore c s root
+  assertBool "residual-final-unit-negative-keeps-whnf-state" (seed + 4) false
+    (psKernelExprV2DefEqResidualOwnedWith forbiddenEq
+      (whnfStep zeroId (seed + 2) (seed + 2) (seed + 3) wrappedFn)
+      (whnfStep zeroId (seed + 3) (seed + 3) (seed + 4) fnType)
+      unchangedCore context state fnId bValue)
+  defeqProbes := defeqProbes + 1
+  for reverse in [false,true] do
+    let left := if reverse then strBuilt else strId
+    let right := if reverse then strId else strBuilt
+    assertOptional "string-expansion-keeps-whnf-defeq-state" (seed + 2) (some true)
+      (psKernelExprV2DefEqStringLitExpansionOwnedWith
+        (eqStep (seed + 1) (seed + 1) (seed + 2) true)
+        (first strBuilt) context state left right)
+    defeqProbes := defeqProbes + 1
+  let unitInfer :=
+    fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
+      if root == unitLeft then first unitType c s root
+      else if root == unitRight then
+        whnfStep zeroId (seed + 2) (seed + 2) (seed + 3) unitType c s root
+      else some (.error "unit-like inference order changed")
+  assertBool "unit-like-all-callback-state" (seed + 4) true
+    (psKernelExprV2DefEqUnitLikeOwnedWith
+      (eqStep (seed + 3) (seed + 3) (seed + 4) true)
+      unitInfer (second unitType) context state unitLeft unitRight)
+  defeqProbes := defeqProbes + 1
+  assertBool "final-rules-all-callback-state" (seed + 4) true
+    (psKernelExprV2DefEqFinalRulesOwnedWith
+      (eqStep (seed + 3) (seed + 3) (seed + 4) true)
+      unitInfer (second unitType) context state unitLeft unitRight)
+  defeqProbes := defeqProbes + 1
+  for declined in [false,true] do
+    let failing : PsKernelExprV2CheckContext → PsKernelExprV2CheckState → Nat →
+        Option (Except String (PsKernelExprV2CheckState × Nat)) :=
+      fun _ _ _ => if declined then none else some (.error "carrier injected")
+    let failingReducer : PsKernelExprV2CheckContext → PsKernelExprV2CheckState →
+        Nat → Bool → Bool → Option (Except String (PsKernelExprV2CheckState × Option Nat)) :=
+      fun _ _ _ _ _ => if declined then none else some (.error "carrier injected")
+    let failingCore :=
+      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
+          (root : Nat) (_cheapRec _cheapProj : Bool) => failing c s root
+    let failures := [
+      ("nat-succ",reduction (psKernelExprV2TryReduceNatSuccOwnedWith failing context state oneId)),
+      ("nat-binary",reduction (psKernelExprV2TryReduceNatBinaryOwnedWith failing context state
+        (PsKernelName.str psKernelNatName "add") oneId twoId)),
+      ("quot",reduction (psKernelExprV2TryReduceQuotOwnedWith failing context state quotId)),
+      ("recursor",reduction (psKernelExprV2TryReduceRecursorOwnedWith
+        failing failingCore forbidden forbiddenEq context state recId false false)),
+      ("projection",psKernelExprV2TryWhnfProjectionOwnedWith failing failing
+        context state projId psKernelNatName 0 projMajor false),
+      ("application",psKernelExprV2TryWhnfAppOwnedWithReducer failing failingReducer
+        context state applicationId false false),
+      ("public",psKernelExprV2TryWhnfOwnedWithReducerFuel 8
+        failingReducer psKernelExprV2CheckLocalValue context state applicationId),
+      ("core",psKernelExprV2TryWhnfCoreOwnedModeWithReducerFuel 8 false false
+        psKernelExprV2CheckLocalValue failing failingReducer context state applicationId),
+      ("lambda",psKernelExprV2TryInferCoreOwnedWithFuel 8
+        failing forbiddenEq context state lambdaId false),
+      ("checked-app",psKernelExprV2TryInferCoreOwnedWithFuel 8
+        failing forbiddenEq context state applicationId false),
+      ("infer-app",psKernelExprV2TryInferCoreOwnedWithFuel 8
+        failing forbiddenEq context state applicationId true)]
+    for (label,value) in failures do
+      propagation label declined value
+      propagated := propagated + 1
+    propagation "ensure-sort" declined
+      (psKernelExprV2CheckEnsureSortOwnedWith failing context state wrappedSort)
+    propagation "ensure-forall" declined
+      (psKernelExprV2CheckEnsureForallOwnedWith failing context state wrappedFn)
+    propagated := propagated + 2
+    let failRight :=
+      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
+        if root == oneId then first oneId c s root
+        else if root == twoId && outerMark s (seed + 1) (seed + 1) then failing c s root
+        else some (.error "carrier callback received stale state")
+    propagation "Nat-right-failure-after-left-effects" declined
+      (psKernelExprV2TryReduceNatBinaryOwnedWith failRight context state
+        (PsKernelName.str psKernelNatName "add") oneId twoId)
+    propagated := propagated + 1
+    let afterOneFail :=
+      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
+        if outerMark s (seed + 1) (seed + 1) then failing c s root
+        else some (.error "DefEq failure callback received stale first state")
+    let afterTwoFail :=
+      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
+        if outerMark s (seed + 2) (seed + 2) then failing c s root
+        else some (.error "DefEq failure callback received stale second state")
+    let coreFailRight :=
+      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
+        if root == fnId then first fnId c s root
+        else if root == bValue then afterOneFail c s root
+        else some (.error "DefEq failure core order changed")
+    let failDeltaCore :=
+      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
+          (root : Nat) (cheapProj : Bool) =>
+        if cheapProj && unfoldedMark s root then failing c s root
+        else some (.error "DefEq failure lost unfolding state")
+    let failProjectionCore :=
+      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
+          (root : Nat) (cheapProj : Bool) =>
+        if root == projId && !cheapProj && outerMark s seed seed then failing c s root
+        else some (.error "DefEq projection failure flags changed")
+    let failResidualCore :=
+      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
+          (root : Nat) (cheapProj : Bool) =>
+        if cheapProj then some (.error "DefEq residual failure flags changed")
+        else coreFailRight c s root
+    let defeqFailures := [
+      ("prefix-right",boolRoot zeroId false
+        (psKernelExprV2DefEqCoreQuickContinueOwnedWith forbiddenEq forbiddenEq
+          coreFailRight context state fnId bValue)),
+      ("proof-whnf",boolRoot zeroId false
+        (psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith forbiddenEq forbiddenEq
+          proofInfer afterTwoFail context state aValue bValue)),
+      ("lazy-nat-right",boolRoot zeroId false
+        (psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith forbiddenEq forbiddenEq
+          failRight context state addId zeroId)),
+      ("delta-core",psKernelExprV2DefEqDeltaOnceOwnedWith failDeltaCore context state aliasId),
+      ("projection-core",reduction
+        (psKernelExprV2DefEqTryUnfoldProjAppOwnedWith failProjectionCore context state projId)),
+      ("eta-whnf",optionalBoolRoot zeroId none
+        (psKernelExprV2DefEqFullShapeEtaOwnedWith true forbiddenEq
+          (first wrappedFn) afterOneFail context state lambdaId fnId)),
+      ("residual-right",boolRoot zeroId false
+        (psKernelExprV2DefEqResidualOwnedWith forbiddenEq forbidden forbidden
+          failResidualCore context state fnId bValue)),
+      ("string-whnf",optionalBoolRoot zeroId none
+        (psKernelExprV2DefEqStringLitExpansionOwnedWith forbiddenEq failing
+          context state strId strBuilt)),
+      ("unit-whnf",boolRoot zeroId false
+        (psKernelExprV2DefEqUnitLikeOwnedWith forbiddenEq
+          unitInfer afterOneFail context state unitLeft unitRight)),
+      ("lazy-projection-core",boolRoot zeroId false
+        (psKernelExprV2DefEqLazyProjReductionOwnedWithFuel 2 forbiddenEq
+          failDeltaCore context state aliasId twoId psKernelNatName 0)),
+      ("lazy-delta-core",boolRoot zeroId false
+        (psKernelExprV2DefEqLazyDeltaContinueOwnedWithFuel 2 forbiddenEq
+          forbiddenEq forbidden failDeltaCore context state aliasId twoId))]
+    for (label,value) in defeqFailures do
+      propagation ("DefEq-" ++ label) declined value
+      defeqPropagation := defeqPropagation + 1
+  pure (defeqProbes, propagated, defeqPropagation)
+
+private def admissionOwnedRegression
+    (scalar : PsKernelCheckerContext) (initial : PsKernelExprV2CheckState)
+    (context : PsKernelExprV2CheckContext)
+    (differential : List (String × PsKernelExpr × Nat))
+    (zeroId oneId s0Id s1Id wrappedSort : Nat) : IO Unit := do
+  let forbidden : PsKernelExprV2CheckContext → PsKernelExprV2CheckState → Nat →
+      Option (Except String (PsKernelExprV2CheckState × Nat)) :=
+    fun _ _ _ => some (.error "unexpected admission callback")
+
+  -- Admission must carry callback effects through its mandatory normalization,
+  -- even when the inferred type is already a syntactic sort.
+  let mut admissionProbes := 0
+  let mut admissionPropagation := 0
+  for seed in [2,11] do
+    let state ← expect (stamp zeroId initial seed)
+    let first := whnfStep zeroId seed seed (seed + 1)
+    let second := whnfStep zeroId (seed + 1) (seed + 1) (seed + 2)
+    for (sortRoot,level,answer) in [(s0Id,PsKernelLevel.zero,true),(s1Id,one,false)] do
+      let sorted ← attempt "admission-sort-owner"
+        (psKernelExprV2AdmissionEnsureSortOwnedWith (first sortRoot) context state sortRoot)
+      require "admission-sort-exact-level" (psKernelExprEqual (.sort sorted.snd) (.sort level))
+      let _ ← marked "admission-sort-all-callback-effects" (seed + 1) (seed + 1)
+        (some (.ok (sorted.fst,sortRoot)))
+      admissionProbes := admissionProbes + 1
+      let _ ← marked "admission-proposition-all-callback-effects" (seed + 2) (seed + 2)
+        (boolRoot sortRoot answer
+          (psKernelExprV2AdmissionIsPropOwnedWith
+            (first sortRoot) (second sortRoot) context state oneId))
+      admissionProbes := admissionProbes + 1
+    let invalid := state.whnf.arena.size + 1000
+    let invalidOwner ← expect (advance zeroId state seed seed (seed + 1))
+    let .error invalidError := psKernelExprV2PagedRequire invalidOwner.whnf.arena invalid
+      | throw (IO.userError "admission malformed-result fixture is valid")
+    errorIs "admission-sort-refuses-invalid-callback-result" invalidError
+      (psKernelExprV2AdmissionEnsureSortOwnedWith (first invalid) context state s0Id)
+    errorIs "admission-sort-refuses-nonsort" "expected sort"
+      (psKernelExprV2AdmissionEnsureSortOwnedWith (first oneId) context state s0Id)
+    errorIs "admission-proposition-refuses-nonsort" "expected sort"
+      (psKernelExprV2AdmissionIsPropOwnedWith
+        (first s0Id) (second oneId) context state oneId)
+    for declined in [false,true] do
+      let failing : PsKernelExprV2CheckContext → PsKernelExprV2CheckState → Nat →
+          Option (Except String (PsKernelExprV2CheckState × Nat)) :=
+        fun _ _ _ => if declined then none else some (.error "carrier injected")
+      let afterInfer :=
+        fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
+          if outerMark s (seed + 1) (seed + 1) && root == invalid then
+            failing c s root
+          else some (.error "admission callback owner/order changed")
+      propagation "admission-sort-whnf-before-malformed-root" declined
+        (psKernelExprV2AdmissionEnsureSortOwnedWith failing context state invalid)
+      propagation "admission-proposition-inference-first" declined
+        (psKernelExprV2AdmissionIsPropOwnedWith failing forbidden context state invalid)
+      propagation "admission-proposition-whnf-owner" declined
+        (psKernelExprV2AdmissionIsPropOwnedWith
+          (first invalid) afterInfer context state oneId)
+      admissionPropagation := admissionPropagation + 3
+  let proposition := all "P" (.sort .zero) (.bvar 0)
+  let (admissionArena,propositionRoot) ← expect
+    (psKernelExprV2PagedImportIntoChecked initial.whnf.arena proposition)
+  let admissionState := psKernelExprV2CheckStateWithArena initial admissionArena
+  let admissionTerms : List (String × PsKernelExpr × Nat) :=
+    [("sort-zero",.sort .zero,s0Id),("sort-one",.sort one,s1Id),
+     ("metadata-sort",.mdata 61 (.sort .zero),wrappedSort),
+     ("proposition",proposition,propositionRoot),("literal",lit 1,oneId)] ++
+      differential.filter (fun row => row.1 == "beta" || row.1 == "zeta" || row.1 == "iota")
+  require "admission-real-fixture-count" (admissionTerms.length == 8)
+  let mut admissionComparisons := 0
+  let mut publicWhnfComparisons := 0
+  for (label,term,root) in admissionTerms do
+    for fuel in [0,1,2,3,4,8,64] do
+      for (limit,depth) in [(0,0),(1,15),(1,16)] do
+        let limited := { scalar with maxRecDepth := limit, recDepth := depth }
+        let c := psKernelExprV2CheckContextEmpty limited
+        let reference := PsKernelCheckerSession.mk limited psKernelCheckerStateEmpty
+        let tag := s!"admission-{label}-fuel{fuel}-depth{depth}-limit{limit}"
+        match psKernelSessionEnsureSort fuel reference term,
+            psKernelExprV2AdmissionEnsureSortWithFuel fuel c admissionState root with
+        | .error expected,some (.error actual) =>
+            require (tag ++ "-sort-exact-error") (expected == actual)
+        | .ok _,some (.ok _) => pure ()
+        | _,none => throw (IO.userError (tag ++ "-sort-fallback"))
+        | _,_ => throw (IO.userError (tag ++ "-sort-outcome"))
+        admissionComparisons := admissionComparisons + 1
+        match psKernelSessionIsProp fuel reference term,
+            psKernelExprV2AdmissionIsPropWithFuel fuel c admissionState root with
+        | .error expected,some (.error actual) =>
+            require (tag ++ "-proposition-exact-error") (expected == actual)
+        | .ok expected,some (.ok actual) =>
+            require (tag ++ "-proposition-answer") (expected.fst == actual.snd)
+        | _,none => throw (IO.userError (tag ++ "-proposition-fallback"))
+        | _,_ => throw (IO.userError (tag ++ "-proposition-outcome"))
+        admissionComparisons := admissionComparisons + 1
+        match psKernelSessionWhnf fuel reference term,
+            psKernelExprV2TryWhnfOwnedWithDeclarationsFuel fuel limited admissionArena
+              initial.whnf.declarations root with
+        | .error expected,some (.error actual) =>
+            require (tag ++ "-public-whnf-exact-error") (expected == actual)
+        | .ok expected,some (.ok actual) =>
+            let decoded ← expect (psKernelExprV2DecodeChecked actual.fst)
+            let actualTerm ← expect (psKernelExprV2DecodedRequire decoded actual.snd)
+            require (tag ++ "-public-whnf-result") (psKernelExprEqual expected.fst actualTerm)
+        | _,none => throw (IO.userError (tag ++ "-public-whnf-fallback"))
+        | _,_ => throw (IO.userError (tag ++ "-public-whnf-outcome"))
+        publicWhnfComparisons := publicWhnfComparisons + 1
+  let bare := psKernelExprV2CheckContextEmpty scalar
+  errorIs "admission-sort-zero-before-syntactic-sort" "kernel reduction budget exhausted"
+    (psKernelExprV2AdmissionEnsureSortWithFuel 0 bare admissionState s0Id)
+  errorIs "admission-proposition-zero-is-inference" "kernel inference budget exhausted"
+    (psKernelExprV2AdmissionIsPropWithFuel 0 bare admissionState propositionRoot)
+  let legacyName := nm "admissionLegacy"
+  let legacy := psKernelLocalContextAddLet psKernelLocalContextEmpty
+    legacyName legacyName nat (lit 1)
+  let mixed := psKernelExprV2CheckContextEmpty { scalar with localContext := legacy }
+  for fuel in [0,1,8] do
+    require "admission-sort-mixed-context-refusal"
+      (psKernelExprV2AdmissionEnsureSortWithFuel fuel mixed initial s0Id).isNone
+    require "public-owned-whnf-mixed-context-refusal"
+      (psKernelExprV2TryWhnfOwnedWithDeclarationsFuel fuel mixed.scalar
+        initial.whnf.arena initial.whnf.declarations s0Id).isNone
+  require "admission-carrier-complete" (admissionProbes == 8 && admissionPropagation == 12)
+  require "admission-differential-complete"
+    (admissionComparisons == 336 && publicWhnfComparisons == 168)
+  IO.println s!"PSC1_V2_ADMISSION_OWNED_STATE_PASS carrier={admissionProbes} propagated={admissionPropagation} differential={admissionComparisons} publicWhnf={publicWhnfComparisons}"
+
 private def regression : IO Unit := do
   let empty ← expectPublic (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
   let natDecl := PsKernelSimpleInductiveDecl.mk [] psKernelNatName (.sort one)
@@ -427,268 +834,16 @@ private def regression : IO Unit := do
       (psKernelExprV2TryInferCoreOwnedWithFuel 8 typedWhnf forbiddenEq context state applicationId true)
     require "inference-only-application-type" (inferredApp.snd == aType)
     probes := probes + 1
-    let eqStep :=
-      fun (tag fresh next : Nat) (answer : Bool)
-          (_c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (_l _r : Nat) =>
-        some ((advance zeroId s tag fresh next).map (fun updated => (updated,answer)))
-    let assertBool :=
-      fun (label : String) (tag : Nat) (answer : Bool)
-          (value : Option (Except String (PsKernelExprV2CheckState × Bool))) => do
-        let _ ← marked label tag tag (boolRoot zeroId answer value)
-        pure ()
-    let assertOptional :=
-      fun (label : String) (tag : Nat) (answer : Option Bool)
-          (value : Option (Except String (PsKernelExprV2CheckState × Option Bool))) => do
-        let _ ← marked label tag tag (optionalBoolRoot zeroId answer value)
-        pure ()
-    assertOptional "reflection-whnf-state" (seed + 1) (some true)
-      (psKernelExprV2DefEqReflectionOwnedWith (first boolTrue) context state boolTrue boolTrue)
-    defeqProbes := defeqProbes + 1
-    let orderedCore :=
-      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
-        if root == fnId then first fnId c s root
-        else if root == bValue then second bValue c s root
-        else some (.error "DefEq core operand order changed")
-    assertBool "prefix-left-right-continuation-state" (seed + 3) false
-      (psKernelExprV2DefEqCoreQuickContinueOwnedWith
-        (eqStep (seed + 2) (seed + 2) (seed + 3) false)
-        forbiddenEq orderedCore context state fnId bValue)
-    defeqProbes := defeqProbes + 1
-    assertBool "is-prop-inference-whnf-state" (seed + 2) true
-      (psKernelExprV2DefEqIsPropOwnedWith (first s0Id) (second s0Id) context state aType)
-    defeqProbes := defeqProbes + 1
-    let proofInfer :=
-      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
-        if root == aValue then first aType c s root
-        else if root == aType then second s0Id c s root
-        else if root == bValue then
-          whnfStep zeroId (seed + 3) (seed + 3) (seed + 4) aType c s root
-        else some (.error "proof irrelevance inference order changed")
-    assertBool "proof-irrelevance-all-callback-state" (seed + 5) true
-      (psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith forbiddenEq
-        (eqStep (seed + 4) (seed + 4) (seed + 5) true) proofInfer
-        (whnfStep zeroId (seed + 2) (seed + 2) (seed + 3) s0Id)
-        context state aValue bValue)
-    defeqProbes := defeqProbes + 1
-    let nonPropInfer :=
-      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
-        if root == oneId then first natId c s root
-        else if root == natId then second s1Id c s root
-        else some (.error "non-proposition inference order changed")
-    assertBool "non-proposition-continuation-state" (seed + 4) false
-      (psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith
-        (eqStep (seed + 3) (seed + 3) (seed + 4) false) forbiddenEq nonPropInfer
-        (whnfStep zeroId (seed + 2) (seed + 2) (seed + 3) s1Id)
-        context state oneId twoId)
-    defeqProbes := defeqProbes + 1
-    assertBool "lazy-nat-left-retains-both-operands" (seed + 3) false
-      (psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith forbiddenEq
-        (eqStep (seed + 2) (seed + 2) (seed + 3) false) binary context state addId zeroId)
-    defeqProbes := defeqProbes + 1
-    assertBool "lazy-nat-right-retains-both-operands" (seed + 3) false
-      (psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith forbiddenEq
-        (eqStep (seed + 2) (seed + 2) (seed + 3) false) binary context state zeroId addId)
-    defeqProbes := defeqProbes + 1
-    let aliasEntry ← expect (psKernelExprV2PagedRequire state.whnf.arena aliasId)
-    let unfoldedMark :=
-      fun (s : PsKernelExprV2CheckState) (root : Nat) =>
-        outerMark (psKernelExprV2CheckStateWithUnfold s state.unfold) seed seed &&
-          match s.unfold with
-          | entry :: rest => cacheMark rest seed && entry.source == aliasId &&
-              entry.result == root && entry.hash == aliasEntry.hash
-          | [] => false
-    let deltaCore :=
-      fun (_c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
-          (root : Nat) (cheapProj : Bool) =>
-        if cheapProj && unfoldedMark s root then
-          match psKernelExprV2PagedEqOnCanonical s.whnf.arena root twoId with
-          | .error error => some (.error error)
-          | .ok same => if same then some ((stamp zeroId s (seed + 1)).map
-              (fun updated => (updated,twoId)))
-            else some (.error "delta callback body changed")
-        else some (.error "delta unfolding publication or callback owner changed")
-    let _ ← marked "delta-once-retains-full-core-state" (seed + 1) (seed + 1)
-      (psKernelExprV2DefEqDeltaOnceOwnedWith deltaCore context state aliasId)
-    defeqProbes := defeqProbes + 1
-    let projectionCore :=
-      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
-          (root : Nat) (cheapProj : Bool) =>
-        if root == projId && !cheapProj then first oneId c s root
-        else some (.error "projection core flags changed")
-    let _ ← marked "delta-projection-core-state" (seed + 1) (seed + 1)
-      (reduction (psKernelExprV2DefEqTryUnfoldProjAppOwnedWith projectionCore context state projId))
-    defeqProbes := defeqProbes + 1
-    assertBool "lazy-delta-loop-retains-core-state" (seed + 1) true
-      (psKernelExprV2DefEqLazyDeltaContinueOwnedWithFuel 2 forbiddenEq forbiddenEq
-        forbidden deltaCore context state aliasId twoId)
-    defeqProbes := defeqProbes + 1
-    assertBool "lazy-projection-loop-retains-core-state" (seed + 1) true
-      (psKernelExprV2DefEqLazyProjReductionOwnedWithFuel 2
-        forbiddenEq deltaCore context state aliasId twoId psKernelNatName 0)
-    defeqProbes := defeqProbes + 1
-    for lambdaOnLeft in [false,true] do
-      assertOptional "function-eta-retains-infer-whnf-defeq-state" (seed + 3) none
-        (psKernelExprV2DefEqFullShapeEtaOwnedWith lambdaOnLeft
-          (eqStep (seed + 2) (seed + 2) (seed + 3) false)
-          (first wrappedFn) (second fnType) context state lambdaId fnId)
-      defeqProbes := defeqProbes + 1
-    let changedCore :=
-      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
-          (root : Nat) (cheapProj : Bool) =>
-        if cheapProj then some (.error "residual core must disable cheap projection")
-        else if root == wrappedSort then first s0Id c s root
-        else if root == s1Id then second s1Id c s root
-        else some (.error "residual core order changed")
-    assertBool "residual-full-whnf-changed-state" (seed + 3) false
-      (psKernelExprV2DefEqResidualOwnedWith
-        (eqStep (seed + 2) (seed + 2) (seed + 3) false)
-        forbidden forbidden changedCore context state wrappedSort s1Id)
-    defeqProbes := defeqProbes + 1
-    let unchangedCore :=
-      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
-          (root : Nat) (cheapProj : Bool) =>
-        if cheapProj then some (.error "residual core must disable cheap projection")
-        else orderedCore c s root
-    assertBool "residual-final-unit-negative-keeps-whnf-state" (seed + 4) false
-      (psKernelExprV2DefEqResidualOwnedWith forbiddenEq
-        (whnfStep zeroId (seed + 2) (seed + 2) (seed + 3) wrappedFn)
-        (whnfStep zeroId (seed + 3) (seed + 3) (seed + 4) fnType)
-        unchangedCore context state fnId bValue)
-    defeqProbes := defeqProbes + 1
-    for reverse in [false,true] do
-      let left := if reverse then strBuilt else strId
-      let right := if reverse then strId else strBuilt
-      assertOptional "string-expansion-keeps-whnf-defeq-state" (seed + 2) (some true)
-        (psKernelExprV2DefEqStringLitExpansionOwnedWith
-          (eqStep (seed + 1) (seed + 1) (seed + 2) true)
-          (first strBuilt) context state left right)
-      defeqProbes := defeqProbes + 1
-    let unitInfer :=
-      fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
-        if root == unitLeft then first unitType c s root
-        else if root == unitRight then
-          whnfStep zeroId (seed + 2) (seed + 2) (seed + 3) unitType c s root
-        else some (.error "unit-like inference order changed")
-    assertBool "unit-like-all-callback-state" (seed + 4) true
-      (psKernelExprV2DefEqUnitLikeOwnedWith
-        (eqStep (seed + 3) (seed + 3) (seed + 4) true)
-        unitInfer (second unitType) context state unitLeft unitRight)
-    defeqProbes := defeqProbes + 1
-    assertBool "final-rules-all-callback-state" (seed + 4) true
-      (psKernelExprV2DefEqFinalRulesOwnedWith
-        (eqStep (seed + 3) (seed + 3) (seed + 4) true)
-        unitInfer (second unitType) context state unitLeft unitRight)
-    defeqProbes := defeqProbes + 1
-    for declined in [false,true] do
-      let failing : PsKernelExprV2CheckContext → PsKernelExprV2CheckState → Nat →
-          Option (Except String (PsKernelExprV2CheckState × Nat)) :=
-        fun _ _ _ => if declined then none else some (.error "carrier injected")
-      let failingReducer : PsKernelExprV2CheckContext → PsKernelExprV2CheckState →
-          Nat → Bool → Bool → Option (Except String (PsKernelExprV2CheckState × Option Nat)) :=
-        fun _ _ _ _ _ => if declined then none else some (.error "carrier injected")
-      let failingCore :=
-        fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
-            (root : Nat) (_cheapRec _cheapProj : Bool) => failing c s root
-      let failures := [
-        ("nat-succ",reduction (psKernelExprV2TryReduceNatSuccOwnedWith failing context state oneId)),
-        ("nat-binary",reduction (psKernelExprV2TryReduceNatBinaryOwnedWith failing context state
-          (PsKernelName.str psKernelNatName "add") oneId twoId)),
-        ("quot",reduction (psKernelExprV2TryReduceQuotOwnedWith failing context state quotId)),
-        ("recursor",reduction (psKernelExprV2TryReduceRecursorOwnedWith
-          failing failingCore forbidden forbiddenEq context state recId false false)),
-        ("projection",psKernelExprV2TryWhnfProjectionOwnedWith failing failing
-          context state projId psKernelNatName 0 projMajor false),
-        ("application",psKernelExprV2TryWhnfAppOwnedWithReducer failing failingReducer
-          context state applicationId false false),
-        ("public",psKernelExprV2TryWhnfOwnedWithReducerFuel 8
-          failingReducer psKernelExprV2CheckLocalValue context state applicationId),
-        ("core",psKernelExprV2TryWhnfCoreOwnedModeWithReducerFuel 8 false false
-          psKernelExprV2CheckLocalValue failing failingReducer context state applicationId),
-        ("lambda",psKernelExprV2TryInferCoreOwnedWithFuel 8
-          failing forbiddenEq context state lambdaId false),
-        ("checked-app",psKernelExprV2TryInferCoreOwnedWithFuel 8
-          failing forbiddenEq context state applicationId false),
-        ("infer-app",psKernelExprV2TryInferCoreOwnedWithFuel 8
-          failing forbiddenEq context state applicationId true)]
-      for (label,value) in failures do
-        propagation label declined value
-        propagated := propagated + 1
-      propagation "ensure-sort" declined
-        (psKernelExprV2CheckEnsureSortOwnedWith failing context state wrappedSort)
-      propagation "ensure-forall" declined
-        (psKernelExprV2CheckEnsureForallOwnedWith failing context state wrappedFn)
-      propagated := propagated + 2
-      let failRight :=
-        fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
-          if root == oneId then first oneId c s root
-          else if root == twoId && outerMark s (seed + 1) (seed + 1) then failing c s root
-          else some (.error "carrier callback received stale state")
-      propagation "Nat-right-failure-after-left-effects" declined
-        (psKernelExprV2TryReduceNatBinaryOwnedWith failRight context state
-          (PsKernelName.str psKernelNatName "add") oneId twoId)
-      propagated := propagated + 1
-      let afterOneFail :=
-        fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
-          if outerMark s (seed + 1) (seed + 1) then failing c s root
-          else some (.error "DefEq failure callback received stale first state")
-      let afterTwoFail :=
-        fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
-          if outerMark s (seed + 2) (seed + 2) then failing c s root
-          else some (.error "DefEq failure callback received stale second state")
-      let coreFailRight :=
-        fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (root : Nat) =>
-          if root == fnId then first fnId c s root
-          else if root == bValue then afterOneFail c s root
-          else some (.error "DefEq failure core order changed")
-      let failDeltaCore :=
-        fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
-            (root : Nat) (cheapProj : Bool) =>
-          if cheapProj && unfoldedMark s root then failing c s root
-          else some (.error "DefEq failure lost unfolding state")
-      let failProjectionCore :=
-        fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
-            (root : Nat) (cheapProj : Bool) =>
-          if root == projId && !cheapProj && outerMark s seed seed then failing c s root
-          else some (.error "DefEq projection failure flags changed")
-      let failResidualCore :=
-        fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState)
-            (root : Nat) (cheapProj : Bool) =>
-          if cheapProj then some (.error "DefEq residual failure flags changed")
-          else coreFailRight c s root
-      let defeqFailures := [
-        ("prefix-right",boolRoot zeroId false
-          (psKernelExprV2DefEqCoreQuickContinueOwnedWith forbiddenEq forbiddenEq
-            coreFailRight context state fnId bValue)),
-        ("proof-whnf",boolRoot zeroId false
-          (psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith forbiddenEq forbiddenEq
-            proofInfer afterTwoFail context state aValue bValue)),
-        ("lazy-nat-right",boolRoot zeroId false
-          (psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith forbiddenEq forbiddenEq
-            failRight context state addId zeroId)),
-        ("delta-core",psKernelExprV2DefEqDeltaOnceOwnedWith failDeltaCore context state aliasId),
-        ("projection-core",reduction
-          (psKernelExprV2DefEqTryUnfoldProjAppOwnedWith failProjectionCore context state projId)),
-        ("eta-whnf",optionalBoolRoot zeroId none
-          (psKernelExprV2DefEqFullShapeEtaOwnedWith true forbiddenEq
-            (first wrappedFn) afterOneFail context state lambdaId fnId)),
-        ("residual-right",boolRoot zeroId false
-          (psKernelExprV2DefEqResidualOwnedWith forbiddenEq forbidden forbidden
-            failResidualCore context state fnId bValue)),
-        ("string-whnf",optionalBoolRoot zeroId none
-          (psKernelExprV2DefEqStringLitExpansionOwnedWith forbiddenEq failing
-            context state strId strBuilt)),
-        ("unit-whnf",boolRoot zeroId false
-          (psKernelExprV2DefEqUnitLikeOwnedWith forbiddenEq
-            unitInfer afterOneFail context state unitLeft unitRight)),
-        ("lazy-projection-core",boolRoot zeroId false
-          (psKernelExprV2DefEqLazyProjReductionOwnedWithFuel 2 forbiddenEq
-            failDeltaCore context state aliasId twoId psKernelNatName 0)),
-        ("lazy-delta-core",boolRoot zeroId false
-          (psKernelExprV2DefEqLazyDeltaContinueOwnedWithFuel 2 forbiddenEq
-            forbiddenEq forbidden failDeltaCore context state aliasId twoId))]
-      for (label,value) in defeqFailures do
-        propagation ("DefEq-" ++ label) declined value
-        defeqPropagation := defeqPropagation + 1
+    let (defeqCount, propagatedCount, defeqPropagationCount) ←
+      runDefEqAndFailureProbes context state seed
+        s0Id s1Id natId zeroId oneId twoId aliasId
+        unitType unitLeft unitRight boolTrue strId strBuilt addId
+        wrappedSort aType aValue bValue fnId fnType wrappedFn
+        applicationId lambdaId quotId recId projMajor projId
+        first second binary forbidden forbiddenEq
+    defeqProbes := defeqProbes + defeqCount
+    propagated := propagated + propagatedCount
+    defeqPropagation := defeqPropagation + defeqPropagationCount
   for (label,term,root) in differential do
     for fuel in [0,1,2,3,8,64] do
       for (limit,depth) in [(0,0),(1,15),(1,16)] do
@@ -761,6 +916,7 @@ private def regression : IO Unit := do
         (psKernelExprV2CheckWhnfCoreOwnedWithFuel fuel rootDefEq mixed shadowState shadowId cheapProj).isNone
       require "raw-core-legacy-refusal"
         (psKernelExprV2CheckWhnfCoreWithFuel fuel mixed shadowState.whnf shadowId cheapProj).isNone
+  admissionOwnedRegression scalar initial context differential zeroId oneId s0Id s1Id wrappedSort
   require "published-fuel-unchanged" (psKernelResourcePolicyDefault.fuel == 4096)
   IO.println s!"PSC1_V2_OWNED_STATE_PASS carrier={probes} propagated={propagated} differential={comparisons} defeqCarrier={defeqProbes} defeqPropagated={defeqPropagation}"
 

@@ -48,6 +48,12 @@ each transition. Pure WHNF helpers lift their output against that current state.
 The old four-field WhnfState interfaces are thin compatibility boundaries,
 rather than a second semantic algorithm.
 
+The subsequent admission/public-boundary repair carries that complete state
+through mandatory declaration sort/proposition normalization and supplies the
+real fixed DefEq callback to standalone public DAG WHNF. Its extra8 owner,
+12 propagation,336 admission differential and168 public-WHNF comparisons,
+and11 additional local lemmas still require exact-source qualification.
+
 `CheckCore.lean` remains the shared checked/infer-only worker with distinct
 judgment caches. Proof irrelevance cannot publish a checked body judgment.
 An unsuccessful Nat predecessor candidate discards its speculative arena.

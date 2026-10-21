@@ -51,7 +51,8 @@ function segments(relative){
 }
 function exactKeys(object,keys){
  return object!==null&&typeof object==='object'&&!Array.isArray(object)&&
-  Object.keys(object).sort().join(',')===[...keys].sort().join(',');
+  Reflect.ownKeys(object).length===keys.length&&
+  Reflect.ownKeys(object).every(key=>typeof key==='string'&&keys.includes(key));
 }
 export function createTypedIo(config){
  if(process.platform!=='linux'||config?.abi!=='psc1-node-linux-string-io/1')
@@ -159,7 +160,7 @@ export function createTypedIo(config){
    let request;
    try{request=JSON.parse(source);}catch(e){if(e instanceof SyntaxError)return error('protocolError');throw e;}
    const keys={readLine:['op'],writeLine:['op','text'],readUtf8:['op','path'],writeUtf8:['op','path','text']};
-   if(!request||!Object.hasOwn(keys,request.op)||!exactKeys(request,keys[request.op]))return error('protocolError');
+   if(!request||typeof request.op!=='string'||!Object.hasOwn(keys,request.op)||!exactKeys(request,keys[request.op]))return error('protocolError');
    if(!allowed.has(request.op))return error('capabilityDenied');
    try{
     if(request.op==='readLine')return reply('line',{text:readLine()});

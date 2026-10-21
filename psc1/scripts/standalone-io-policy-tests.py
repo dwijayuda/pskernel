@@ -158,6 +158,11 @@ with tempfile.TemporaryDirectory(prefix="psc1-standalone-io-") as temporary:
             expect_error(host.request("writeLine", text=value), "protocolError")
             expect_error(host.request("writeUtf8", path="data", text=value), "protocolError")
         expect_error(host.request("readUtf8", path="\ud800"), "pathDenied")
+        for op in (None, False, 42, [], {}, ["readLine"], {"toString": None, "valueOf": None}):
+            result = host.command({"action": "execute", "source": json.dumps({"op": op})})
+            expect_error(json.loads(result["ok"]), "protocolError")
+        result = host.command({"action": "execute", "source": '{"op":"writeUtf8","path,text":"data"}'})
+        expect_error(json.loads(result["ok"]), "protocolError")
         check("malformed extra and unknown requests")
         denied = Host({**config, "capabilities": []})
         expect_error(denied.request("readUtf8", path="data"), "capabilityDenied")

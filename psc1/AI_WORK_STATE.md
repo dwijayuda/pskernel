@@ -55,6 +55,9 @@ native, focused, G1 and three source-closure jobs in run39624139192. Focused
 execution includes all4 grammar/Wasm pairs and the oversized-request refusal.
 The actual Rust consumer now merges the independently committed guest/host lock
 graphs and builds with --locked; its merged lock is retained and hashed.
+Cross-adapter malformed-input checks also cover non-string opcodes and comma
+containing object keys. Node validates opcode type before property lookup and
+compares actual key membership, avoiding coercion-dependent error differences.
 Final full integration at the latest implementation is still pending.
 Rust/PHP FFI profiles explicitly refuse architectures outside qualified Linux
 x86_64; disabled PHP FFI is tested to refuse before root/guest access.

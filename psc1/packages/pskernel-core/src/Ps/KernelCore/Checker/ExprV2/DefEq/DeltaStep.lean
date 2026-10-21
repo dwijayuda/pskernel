@@ -1,3 +1,4 @@
+import Ps.KernelCore.Checker.ExprV2.CheckCallbacks
 import Ps.KernelCore.Checker.ExprV2.DefEq.Args
 import Ps.KernelCore.Checker.ExprV2.DefEq.Quick
 import Ps.KernelCore.Checker.ExprV2.Delta
@@ -83,9 +84,9 @@ def psKernelExprV2DefEqUnfold
                                 next.unfold);
                           Option.some (Except.ok (Prod.mk published (Option.some value)))
 
-def psKernelExprV2DefEqDeltaOnceWith
-    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+def psKernelExprV2DefEqDeltaOnceOwnedWith
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (root : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
@@ -100,7 +101,7 @@ def psKernelExprV2DefEqDeltaOnceWith
               Option.some (Except.error "internal lazy-delta request for non-definition")
           | Option.some value =>
               let unfoldedState := Prod.fst unfolded;
-              match coreWhnf context unfoldedState.whnf value true with
+              match coreWhnf context unfoldedState value true with
               | Option.none => Option.none
               | Option.some reduced =>
                   match reduced with
@@ -108,12 +109,12 @@ def psKernelExprV2DefEqDeltaOnceWith
                   | Except.ok result =>
                       Option.some (Except.ok
                         (Prod.mk
-                          (psKernelExprV2CheckStateWithWhnf (Prod.fst unfolded) (Prod.fst result))
+                          (Prod.fst result)
                           (Prod.snd result)))
 
-def psKernelExprV2DefEqTryUnfoldProjAppWith
-    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+def psKernelExprV2DefEqTryUnfoldProjAppOwnedWith
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (root : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState (Option Nat))) :=
@@ -125,13 +126,13 @@ def psKernelExprV2DefEqTryUnfoldProjAppWith
       | Except.ok head =>
           match head.node with
           | PsKernelExprV2Node.proj _ _ _ =>
-              match coreWhnf context state.whnf root false with
+              match coreWhnf context state root false with
               | Option.none => Option.none
               | Option.some attempted =>
                   match attempted with
                   | Except.error error => Option.some (Except.error error)
                   | Except.ok reduced =>
-                      let next := psKernelExprV2CheckStateWithWhnf state (Prod.fst reduced);
+                      let next := Prod.fst reduced;
                       match psKernelExprV2PagedEqOnCanonical
                           next.whnf.arena (Prod.snd reduced) root with
                       | Except.error error => Option.some (Except.error error)
@@ -161,17 +162,17 @@ def psKernelExprV2DefEqFinishLazyStepWith
                 else PsKernelExprV2DeltaStepResult.different left right;
           Option.some (Except.ok (Prod.mk (Prod.fst compared) step))
 
-def psKernelExprV2DefEqUnfoldSideWith
+def psKernelExprV2DefEqUnfoldSideOwnedWith
     (unfoldLeft : Bool)
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
   let selected : Nat := if unfoldLeft then left else right;
-  match psKernelExprV2DefEqDeltaOnceWith coreWhnf context state selected with
+  match psKernelExprV2DefEqDeltaOnceOwnedWith coreWhnf context state selected with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
@@ -185,17 +186,17 @@ def psKernelExprV2DefEqUnfoldSideWith
               (Prod.fst reduced) left (Prod.snd reduced)
 
 /- A projection-headed peer is tried before the only available definition. -/
-def psKernelExprV2DefEqLazyStepOneWith
+def psKernelExprV2DefEqLazyStepOneOwnedWith
     (leftHasDefinition : Bool)
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
   let peerRoot : Nat := if leftHasDefinition then right else left;
-  match psKernelExprV2DefEqTryUnfoldProjAppWith coreWhnf context state peerRoot with
+  match psKernelExprV2DefEqTryUnfoldProjAppOwnedWith coreWhnf context state peerRoot with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
@@ -203,7 +204,7 @@ def psKernelExprV2DefEqLazyStepOneWith
       | Except.ok peer =>
           match Prod.snd peer with
           | Option.none =>
-              psKernelExprV2DefEqUnfoldSideWith leftHasDefinition defeq coreWhnf
+              psKernelExprV2DefEqUnfoldSideOwnedWith leftHasDefinition defeq coreWhnf
                 context (Prod.fst peer) left right
           | Option.some value =>
               if leftHasDefinition then
@@ -233,21 +234,21 @@ def psKernelExprV2DefEqFailureInsert
                 else Except.ok (psKernelExprV2CheckStateWithFailure state
                   (List.cons (PsKernelExprV2DefEqPair.mk left right hash) state.failure))
 
-def psKernelExprV2DefEqUnfoldBothWith
+def psKernelExprV2DefEqUnfoldBothOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
-  match psKernelExprV2DefEqDeltaOnceWith coreWhnf context state left with
+  match psKernelExprV2DefEqDeltaOnceOwnedWith coreWhnf context state left with
   | Option.none => Option.none
   | Option.some attemptedLeft =>
       match attemptedLeft with
       | Except.error error => Option.some (Except.error error)
       | Except.ok leftResult =>
-          match psKernelExprV2DefEqDeltaOnceWith coreWhnf context (Prod.fst leftResult) right with
+          match psKernelExprV2DefEqDeltaOnceOwnedWith coreWhnf context (Prod.fst leftResult) right with
           | Option.none => Option.none
           | Option.some attemptedRight =>
               match attemptedRight with
@@ -268,18 +269,18 @@ def psKernelExprV2DefEqSameDefinitionShortcut
     else false
   else false
 
-def psKernelExprV2DefEqLazyStepBothWith
+def psKernelExprV2DefEqLazyStepBothOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) (leftDef rightDef : PsKernelExprV2DeltaDefinitionView) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
   if psKernelReducibilityHintsLt leftDef.hints rightDef.hints then
-    psKernelExprV2DefEqUnfoldSideWith true defeq coreWhnf context state left right
+    psKernelExprV2DefEqUnfoldSideOwnedWith true defeq coreWhnf context state left right
   else if psKernelReducibilityHintsLt rightDef.hints leftDef.hints then
-    psKernelExprV2DefEqUnfoldSideWith false defeq coreWhnf context state left right
+    psKernelExprV2DefEqUnfoldSideOwnedWith false defeq coreWhnf context state left right
   else
     let sameShortcut := psKernelExprV2DefEqSameDefinitionShortcut leftDef rightDef;
     let argsResult : Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
@@ -307,13 +308,13 @@ def psKernelExprV2DefEqLazyStepBothWith
               match afterFailure with
               | Except.error error => Option.some (Except.error error)
               | Except.ok next =>
-                  psKernelExprV2DefEqUnfoldBothWith defeq coreWhnf context next left right
+                  psKernelExprV2DefEqUnfoldBothOwnedWith defeq coreWhnf context next left right
 
-def psKernelExprV2DefEqLazyStepWith
+def psKernelExprV2DefEqLazyStepOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
@@ -330,11 +331,89 @@ def psKernelExprV2DefEqLazyStepWith
                   Option.some (Except.ok
                     (Prod.mk state (PsKernelExprV2DeltaStepResult.unknown left right)))
               | Option.some _ =>
-                  psKernelExprV2DefEqLazyStepOneWith false defeq coreWhnf context state left right
+                  psKernelExprV2DefEqLazyStepOneOwnedWith false defeq coreWhnf context state left right
           | Option.some leftDef =>
               match rightDefinition with
               | Option.none =>
-                  psKernelExprV2DefEqLazyStepOneWith true defeq coreWhnf context state left right
+                  psKernelExprV2DefEqLazyStepOneOwnedWith true defeq coreWhnf context state left right
               | Option.some rightDef =>
-                  psKernelExprV2DefEqLazyStepBothWith defeq coreWhnf context state left right
+                  psKernelExprV2DefEqLazyStepBothOwnedWith defeq coreWhnf context state left right
                     leftDef rightDef
+
+/- Original WHNF-only callback signatures remain compatibility wrappers.
+   Each callback is lifted against the actual complete state at its call. -/
+
+def psKernelExprV2DefEqDeltaOnceWith
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2DefEqDeltaOnceOwnedWith
+    (psKernelExprV2LiftCheckCoreWhnf coreWhnf) context state root
+
+def psKernelExprV2DefEqTryUnfoldProjAppWith
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Nat))) :=
+  psKernelExprV2DefEqTryUnfoldProjAppOwnedWith
+    (psKernelExprV2LiftCheckCoreWhnf coreWhnf) context state root
+
+def psKernelExprV2DefEqUnfoldSideWith
+    (unfoldLeft : Bool)
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
+  psKernelExprV2DefEqUnfoldSideOwnedWith
+    unfoldLeft defeq (psKernelExprV2LiftCheckCoreWhnf coreWhnf) context state left right
+
+def psKernelExprV2DefEqLazyStepOneWith
+    (leftHasDefinition : Bool)
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
+  psKernelExprV2DefEqLazyStepOneOwnedWith
+    leftHasDefinition defeq (psKernelExprV2LiftCheckCoreWhnf coreWhnf) context state left right
+
+def psKernelExprV2DefEqUnfoldBothWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
+  psKernelExprV2DefEqUnfoldBothOwnedWith
+    defeq (psKernelExprV2LiftCheckCoreWhnf coreWhnf) context state left right
+
+def psKernelExprV2DefEqLazyStepBothWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) (leftDef rightDef : PsKernelExprV2DeltaDefinitionView) :
+    Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
+  psKernelExprV2DefEqLazyStepBothOwnedWith
+    defeq (psKernelExprV2LiftCheckCoreWhnf coreWhnf) context state left right leftDef rightDef
+
+def psKernelExprV2DefEqLazyStepWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState PsKernelExprV2DeltaStepResult)) :=
+  psKernelExprV2DefEqLazyStepOwnedWith
+    defeq (psKernelExprV2LiftCheckCoreWhnf coreWhnf) context state left right

@@ -348,6 +348,7 @@ theorem dag_check_depth_error_precedes_cached_judgment
       Option.some (Except.error error) := by
   simp only [psKernelExprV2CheckedInferFind] at hit
   simp [psKernelExprV2TryCheckCoreWithFuel, psKernelExprV2TryInferCoreWithFuel,
+    psKernelExprV2TryInferCoreOwnedWithFuel,
     psKernelExprV2CheckContextEnterRecDepth, found, hit, guard]
 
 theorem dag_check_starts_without_success_cache
@@ -491,8 +492,8 @@ theorem dag_inference_depth_error_precedes_cached_judgment
     psKernelExprV2TryInferCoreWithFuel (Nat.succ fuel) whnf defeq
         context state root inferOnly =
       Option.some (Except.error error) := by
-  simp [psKernelExprV2TryInferCoreWithFuel, psKernelExprV2CheckContextEnterRecDepth,
-    found, hit, guard]
+  simp [psKernelExprV2TryInferCoreWithFuel, psKernelExprV2TryInferCoreOwnedWithFuel,
+    psKernelExprV2CheckContextEnterRecDepth, found, hit, guard]
 
 
 def psKernelExprV2WhnfCacheFindInBefore
@@ -653,7 +654,9 @@ theorem dag_lazy_nat_discards_unmatched_predecessor_owner
     psKernelExprV2DefEqLazyNatPredWith defeq whnf context state left right =
       psKernelExprV2DefEqLazyNatAfterPredWith defeq whnf context state left right := by
   simp [psKernelExprV2DefEqLazyNatPredWith, psKernelExprV2DefEqLazyNatPredContinueWith,
-    psKernelExprV2DefEqLazyNatAfterPredWith, leftStep, rightStep]
+    psKernelExprV2DefEqLazyNatAfterPredWith, psKernelExprV2DefEqLazyNatPredOwnedWith,
+    psKernelExprV2DefEqLazyNatPredContinueOwnedWith,
+    psKernelExprV2DefEqLazyNatAfterPredOwnedWith, leftStep, rightStep]
 
 end PsKernelCacheScopeProofs
 

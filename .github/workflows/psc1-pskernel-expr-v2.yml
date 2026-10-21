@@ -7,6 +7,7 @@ on:
       - research/psc1-pskernel-expr-v2-lean435-20261020
       - integration/psc1-pskernel-expr-v2-lean435-20261021
       - research/psc1-pskernel-v2-staged-20261021
+      - research/psc1-pskernel-v2-carrier-20261021
     paths:
       - psc1/scripts/install-lean435-ci.sh
       - psc1/lean-toolchain

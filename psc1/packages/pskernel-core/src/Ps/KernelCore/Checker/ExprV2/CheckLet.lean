@@ -58,11 +58,11 @@ def psKernelExprV2CheckLetBodyWith
                 (Prod.fst bodyResult) (Prod.snd bodyResult) root
                 name type value nondep
 
-def psKernelExprV2CheckLetWith
+def psKernelExprV2CheckLetOwnedWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (context : PsKernelExprV2CheckContext)
@@ -78,7 +78,7 @@ def psKernelExprV2CheckLetWith
         match attemptedType with
         | Except.error error => Option.some (Except.error error)
         | Except.ok typeResult =>
-            match psKernelExprV2CheckEnsureSortWith
+            match psKernelExprV2CheckEnsureSortOwnedWith
                 whnf context (Prod.fst typeResult) (Prod.snd typeResult) with
             | Option.none => Option.none
             | Option.some attemptedSort =>
@@ -103,3 +103,21 @@ def psKernelExprV2CheckLetWith
                                         (Prod.fst equalResult) root
                                         name type value body nondep
                                     else Option.some (Except.error "let value type mismatch")
+
+/- The original callback ABI is retained by lifting the supplied WHNF callback
+   against the complete state already owned by this helper. -/
+
+def psKernelExprV2CheckLetWith
+    (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (root : Nat)
+    (name : PsKernelName) (type value body : Nat) (nondep inferOnly : Bool) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  psKernelExprV2CheckLetOwnedWith
+    check (psKernelExprV2LiftCheckWhnf whnf) defeq context state root
+    name type value body nondep inferOnly

@@ -132,11 +132,11 @@ def psKernelExprV2DefEqEtaStructWith
           else psKernelExprV2DefEqEtaStructCoreWith
             defeq inferType context (Prod.fst first) right left
 
-def psKernelExprV2DefEqStringLitExpansionCoreWith
+def psKernelExprV2DefEqStringLitExpansionCoreOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState (Option Bool))) :=
@@ -156,14 +156,14 @@ def psKernelExprV2DefEqStringLitExpansionCoreWith
                     | Except.ok builtConstructor =>
                         let afterBuild :=
                           psKernelExprV2CheckStateWithArena state (Prod.fst builtConstructor);
-                        match whnf context afterBuild.whnf (Prod.snd builtConstructor) with
+                        match whnf context afterBuild (Prod.snd builtConstructor) with
                         | Option.none => Option.none
                         | Option.some attemptedWhnf =>
                             match attemptedWhnf with
                             | Except.error error => Option.some (Except.error error)
                             | Except.ok expanded =>
                                 match defeq context
-                                    (psKernelExprV2CheckStateWithWhnf afterBuild (Prod.fst expanded))
+                                    (Prod.fst expanded)
                                     (Prod.snd expanded) right with
                                 | Option.none => Option.none
                                 | Option.some attemptedDefEq =>
@@ -176,15 +176,15 @@ def psKernelExprV2DefEqStringLitExpansionCoreWith
           | PsKernelLiteral.nat _ => Option.some (Except.ok (Prod.mk state Option.none))
       | _ => Option.some (Except.ok (Prod.mk state Option.none))
 
-def psKernelExprV2DefEqStringLitExpansionWith
+def psKernelExprV2DefEqStringLitExpansionOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState (Option Bool))) :=
-  match psKernelExprV2DefEqStringLitExpansionCoreWith defeq whnf context state left right with
+  match psKernelExprV2DefEqStringLitExpansionCoreOwnedWith defeq whnf context state left right with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
@@ -193,7 +193,7 @@ def psKernelExprV2DefEqStringLitExpansionWith
           match Prod.snd first with
           | Option.some _ => Option.some (Except.ok first)
           | Option.none =>
-              psKernelExprV2DefEqStringLitExpansionCoreWith
+              psKernelExprV2DefEqStringLitExpansionCoreOwnedWith
                 defeq whnf context (Prod.fst first) right left
 
 def psKernelExprV2DefEqIsUnitLikeTypeOnCanonical
@@ -230,13 +230,13 @@ def psKernelExprV2DefEqIsUnitLikeTypeOnCanonical
               else Except.ok false
           | _ => Except.ok false
 
-def psKernelExprV2DefEqUnitLikeWith
+def psKernelExprV2DefEqUnitLikeOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
@@ -247,13 +247,13 @@ def psKernelExprV2DefEqUnitLikeWith
       | Except.error error => Option.some (Except.error error)
       | Except.ok leftType =>
           let afterLeft := Prod.fst leftType;
-          match whnf context afterLeft.whnf (Prod.snd leftType) with
+          match whnf context afterLeft (Prod.snd leftType) with
           | Option.none => Option.none
           | Option.some attemptedWhnf =>
               match attemptedWhnf with
               | Except.error error => Option.some (Except.error error)
               | Except.ok reduced =>
-                  let next := psKernelExprV2CheckStateWithWhnf (Prod.fst leftType) (Prod.fst reduced);
+                  let next := Prod.fst reduced;
                   match psKernelExprV2DefEqIsUnitLikeTypeOnCanonical
                       context next.whnf.arena (Prod.snd reduced) with
                   | Except.error error => Option.some (Except.error error)
@@ -269,13 +269,13 @@ def psKernelExprV2DefEqUnitLikeWith
                                   (Prod.snd reduced) (Prod.snd rightType)
                       else Option.some (Except.ok (Prod.mk next false))
 
-def psKernelExprV2DefEqFinalRulesWith
+def psKernelExprV2DefEqFinalRulesOwnedWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
@@ -287,7 +287,7 @@ def psKernelExprV2DefEqFinalRulesWith
       | Except.ok eta =>
           if Prod.snd eta then Option.some (Except.ok eta)
           else
-            match psKernelExprV2DefEqStringLitExpansionWith
+            match psKernelExprV2DefEqStringLitExpansionOwnedWith
                 defeq whnf context (Prod.fst eta) left right with
             | Option.none => Option.none
             | Option.some attemptedString =>
@@ -298,5 +298,56 @@ def psKernelExprV2DefEqFinalRulesWith
                     | Option.some value =>
                         Option.some (Except.ok (Prod.mk (Prod.fst expanded) value))
                     | Option.none =>
-                        psKernelExprV2DefEqUnitLikeWith
+                        psKernelExprV2DefEqUnitLikeOwnedWith
                           defeq inferType whnf context (Prod.fst expanded) left right
+
+/- Original WHNF-only callback signatures remain compatibility wrappers.
+   Each callback is lifted against the actual complete state at its call. -/
+
+def psKernelExprV2DefEqStringLitExpansionCoreWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Bool))) :=
+  psKernelExprV2DefEqStringLitExpansionCoreOwnedWith
+    defeq (psKernelExprV2LiftCheckWhnf whnf) context state left right
+
+def psKernelExprV2DefEqStringLitExpansionWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Bool))) :=
+  psKernelExprV2DefEqStringLitExpansionOwnedWith
+    defeq (psKernelExprV2LiftCheckWhnf whnf) context state left right
+
+def psKernelExprV2DefEqUnitLikeWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqUnitLikeOwnedWith
+    defeq inferType (psKernelExprV2LiftCheckWhnf whnf) context state left right
+
+def psKernelExprV2DefEqFinalRulesWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqFinalRulesOwnedWith
+    defeq inferType (psKernelExprV2LiftCheckWhnf whnf) context state left right

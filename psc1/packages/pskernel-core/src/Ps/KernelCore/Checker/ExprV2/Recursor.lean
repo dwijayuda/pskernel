@@ -182,52 +182,57 @@ def psKernelExprV2RecursorNormalizeMajor
               if found then Option.some (Except.ok (Prod.mk state major))
               else Option.none
 
-def psKernelExprV2TryReduceNonKRecursorWith
-    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+def psKernelExprV2TryReduceNonKRecursorOwnedWith
+    (majorWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (recursor : PsKernelRecursorInfo) (recLevels : List PsKernelLevel)
     (recArgs : List Nat) (majorIndex major : Nat) :
-    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Nat))) :=
   if recursor.k then Option.none
   else
-    match psKernelExprV2RecursorIsConstructorApp context state.arena major with
+    match psKernelExprV2RecursorIsConstructorApp context.scalar state.whnf.arena major with
     | Except.error error => Option.some (Except.error error)
     | Except.ok isConstructor =>
         if isConstructor then
-          psKernelExprV2RecursorSelectRule state recursor recLevels recArgs majorIndex major
+          psKernelExprV2LiftOptionalWhnfAttempt state
+            (psKernelExprV2RecursorSelectRule state.whnf recursor recLevels recArgs majorIndex major)
         else
-          match publicWhnf context state major with
+          match majorWhnf context state major with
           | Option.none => Option.none
           | Option.some attempted =>
               match attempted with
               | Except.error error => Option.some (Except.error error)
               | Except.ok reduced =>
-                  match psKernelExprV2RecursorNormalizeMajor
-                      context (Prod.fst reduced) (Prod.snd reduced) with
+                  let afterReduction := Prod.fst reduced;
+                  match psKernelExprV2LiftWhnfAttempt afterReduction
+                      (psKernelExprV2RecursorNormalizeMajor
+                        context.scalar afterReduction.whnf (Prod.snd reduced)) with
                   | Option.none => Option.none
                   | Option.some normalizedAttempt =>
                       match normalizedAttempt with
                       | Except.error error => Option.some (Except.error error)
                       | Except.ok normalized =>
-                          psKernelExprV2RecursorSelectRule (Prod.fst normalized)
-                            recursor recLevels recArgs majorIndex (Prod.snd normalized)
+                          let afterNormalization := Prod.fst normalized;
+                          psKernelExprV2LiftOptionalWhnfAttempt afterNormalization
+                            (psKernelExprV2RecursorSelectRule afterNormalization.whnf
+                              recursor recLevels recArgs majorIndex (Prod.snd normalized))
 
-def psKernelExprV2TryReduceInductiveRecursor
-    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+def psKernelExprV2TryReduceInductiveRecursorOwned
+    (majorWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (root : Nat) :
-    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
-  match psKernelExprV2TransformAppSpineOnCanonical state.arena root with
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Nat))) :=
+  match psKernelExprV2TransformAppSpineOnCanonical state.whnf.arena root with
   | Except.error error => Option.some (Except.error error)
   | Except.ok spine =>
-      match psKernelExprV2PagedRequire state.arena (Prod.fst spine) with
+      match psKernelExprV2PagedRequire state.whnf.arena (Prod.fst spine) with
       | Except.error error => Option.some (Except.error error)
       | Except.ok head =>
           match head.node with
           | PsKernelExprV2Node.const name levels =>
-              match psKernelEnvironmentFind context.environment name with
+              match psKernelEnvironmentFind context.scalar.environment name with
               | Option.none => Option.some (Except.ok (Prod.mk state Option.none))
               | Option.some info =>
                   match info with
@@ -242,7 +247,66 @@ def psKernelExprV2TryReduceInductiveRecursor
                         match psKernelExprV2TransformNatGet args majorIndex with
                         | Option.none => Option.some (Except.ok (Prod.mk state Option.none))
                         | Option.some major =>
-                            psKernelExprV2TryReduceNonKRecursorWith
-                              publicWhnf context state recursor levels args majorIndex major
+                            psKernelExprV2TryReduceNonKRecursorOwnedWith
+                              majorWhnf context state recursor levels args majorIndex major
                   | _ => Option.some (Except.ok (Prod.mk state Option.none))
           | _ => Option.some (Except.ok (Prod.mk state Option.none))
+
+/- The bounded owner supplies four fixed callbacks in the V1 order. This
+   carrier-only stage retains K/structure/String refusal; the inference and
+   DefEq callbacks are deliberately not invoked by the supported non-K slice. -/
+def psKernelExprV2TryReduceRecursorOwnedWith
+    (publicWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (_inferType : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (_defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (root : Nat) (cheapRec cheapProj : Bool) :
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Nat))) :=
+  match psKernelExprV2TryReduceQuotOwnedWith publicWhnf context state root with
+  | Option.none => Option.none
+  | Option.some attempted =>
+      match attempted with
+      | Except.error error => Option.some (Except.error error)
+      | Except.ok reduced =>
+          match Prod.snd reduced with
+          | Option.some _ => Option.some (Except.ok reduced)
+          | Option.none =>
+              let majorWhnf :=
+                fun (nextContext : PsKernelExprV2CheckContext)
+                    (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+                  if cheapRec then
+                    coreWhnf nextContext nextState nextRoot cheapRec cheapProj
+                  else publicWhnf nextContext nextState nextRoot;
+              psKernelExprV2TryReduceInductiveRecursorOwned
+                majorWhnf context (Prod.fst reduced) root
+
+/- Standalone old-ABI helpers select their original public-WHNF major callback.
+   Their full-state initialization/lowering does not occur on the owned path. -/
+
+def psKernelExprV2TryReduceNonKRecursorWith
+    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+    (recursor : PsKernelRecursorInfo) (recLevels : List PsKernelLevel)
+    (recArgs : List Nat) (majorIndex major : Nat) :
+    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+  psKernelExprV2LowerOptionalWhnfAttempt
+    (psKernelExprV2TryReduceNonKRecursorOwnedWith (psKernelExprV2LiftScalarWhnf publicWhnf)
+      (psKernelExprV2CheckContextEmpty context)
+      (psKernelExprV2CheckStateFromWhnf state) recursor recLevels recArgs majorIndex major)
+
+def psKernelExprV2TryReduceInductiveRecursor
+    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+    (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+  psKernelExprV2LowerOptionalWhnfAttempt
+    (psKernelExprV2TryReduceInductiveRecursorOwned (psKernelExprV2LiftScalarWhnf publicWhnf)
+      (psKernelExprV2CheckContextEmpty context)
+      (psKernelExprV2CheckStateFromWhnf state) root)

@@ -27,6 +27,32 @@ their corresponding gates. The25-case Arena timeout gap remains unresolved.
 Original default V1 is unchanged; the replacement still relies on complete
 original-operation fallback outside migrated rules. No integration PR is merged.
 
+### Complete safe-admission measurements and generated execution
+
+[8db7d50e1cf02b7cc83e6d7ce1a8da1ae953c723](https://github.com/dwijayuda/pskernel/commit/8db7d50e1cf02b7cc83e6d7ce1a8da1ae953c723)
+has now passed both jobs in
+[integration39535658641](https://github.com/dwijayuda/pskernel/actions/runs/39535658641).
+Actual log119011587752 verifies the fixed strict nominal assertions, all416
+admission matrix cases,1,008 inference-only comparisons, all128 operation
+observations,24 admission observations and six profiles. All six research jobs
+are also green. Its separate canonical and Arena gates remain in progress.
+
+Complete safe-definition admission has same-run warm mean gains of8.57×–16.17×
+on six matched fixtures, with unchanged4096 fuel and exact positive/negative
+checks. Input construction is more expensive; retained heap is mixed, while
+peak RSS is lower on those six fixtures. The two function WHNF regressions
+remain in the same run. Full figures, units, memory limits and raw evidence are in
+[the admission performance report](../../../docs/PSC1_EXPR_V2_ADMISSION_PERFORMANCE_2026-10-21.md).
+No whole-kernel performance qualification or complete kernel claim follows.
+
+The912b88 native job119016363597 compiled and executed all binder-spine
+semantic/official/budget/cache/fallback tests successfully. Its later proof
+gate failed the new scanner lemma: symbolic simplification did not close the
+cons case. The proof now handles hash miss, structural error, collision miss
+and hit explicitly, retaining the same statement and test-only reference.
+No production code, axiom, resource policy or proof gate is changed. The
+corrected proof and complete native job still require passing Actions.
+
 ### Direct unsafe recursive definition admission — awaiting qualification
 
 Unsafe definition headers are checked in the original environment. After the

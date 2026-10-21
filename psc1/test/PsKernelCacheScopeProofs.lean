@@ -457,8 +457,24 @@ theorem psKernelExprV2WhnfCacheFindWorker_eq_before
   induction entries with
   | nil => rfl
   | cons first rest ih =>
-      simp only [psKernelExprV2WhnfCacheFindWorker,
-        psKernelExprV2WhnfCacheFindInBefore, ih]
+      cases hashEqual : Nat.beq first.hash hash with
+      | false =>
+          simpa [psKernelExprV2WhnfCacheFindWorker,
+            psKernelExprV2WhnfCacheFindInBefore, hashEqual] using ih
+      | true =>
+          cases compared :
+              psKernelExprV2PagedEqOnCanonical arena first.source source with
+          | error error =>
+              simp [psKernelExprV2WhnfCacheFindWorker,
+                psKernelExprV2WhnfCacheFindInBefore, hashEqual, compared]
+          | ok equal =>
+              cases equal with
+              | false =>
+                  simpa [psKernelExprV2WhnfCacheFindWorker,
+                    psKernelExprV2WhnfCacheFindInBefore, hashEqual, compared] using ih
+              | true =>
+                  simp [psKernelExprV2WhnfCacheFindWorker,
+                    psKernelExprV2WhnfCacheFindInBefore, hashEqual, compared]
 
 theorem psKernelExprV2WhnfCacheFindIn_eq_before
     (entries : List PsKernelExprV2WhnfCacheEntry)

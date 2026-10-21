@@ -157,6 +157,71 @@ def psKernelExprV2TryWhnfCompositeWith
       psKernelExprV2TryWhnfAppWith recurse context state root
   | _ => Option.none
 
+def psKernelExprV2TryWhnfCoreWithLocalValuesFuel
+    (fuel : Nat) :
+    (PsKernelName -> Option Nat) ->
+    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_localValue : PsKernelName -> Option Nat)
+          (_publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+      fun (localValue : PsKernelName -> Option Nat)
+          (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (context : PsKernelCheckerContext)
+          (state : PsKernelExprV2WhnfState) (root : Nat) =>
+        let smaller :=
+          fun (nextContext : PsKernelCheckerContext)
+              (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
+            let recur := psKernelExprV2TryWhnfCoreWithLocalValuesFuel remaining;
+            recur localValue publicWhnf nextContext nextState nextRoot;
+        match psKernelCheckerContextEnterRecDepth context with
+        | Except.error error => Option.some (Except.error error)
+        | Except.ok nextContext =>
+            match psKernelExprV2PagedRequire state.arena root with
+            | Except.error error => Option.some (Except.error error)
+            | Except.ok entry =>
+                match entry.node with
+                | PsKernelExprV2Node.bvar _ => Option.some (Except.ok (Prod.mk state root))
+                | PsKernelExprV2Node.mvar _ => Option.some (Except.ok (Prod.mk state root))
+                | PsKernelExprV2Node.sort _ => Option.some (Except.ok (Prod.mk state root))
+                | PsKernelExprV2Node.forallE _ _ _ _ => Option.some (Except.ok (Prod.mk state root))
+                | PsKernelExprV2Node.const _ _ => Option.some (Except.ok (Prod.mk state root))
+                | PsKernelExprV2Node.lam _ _ _ _ => Option.some (Except.ok (Prod.mk state root))
+                | PsKernelExprV2Node.lit _ => Option.some (Except.ok (Prod.mk state root))
+                | PsKernelExprV2Node.mdata _ body => smaller nextContext state body
+                | PsKernelExprV2Node.fvar name =>
+                    match localValue name with
+                    | Option.some value => smaller nextContext state value
+                    | Option.none =>
+                        match psKernelLocalContextFind nextContext.localContext name with
+                        | Option.none => Option.some (Except.ok (Prod.mk state root))
+                        | Option.some declaration =>
+                            match psKernelLocalDeclValue declaration with
+                            | Option.none => Option.some (Except.ok (Prod.mk state root))
+                            | Option.some _ => Option.none
+                | _ =>
+                    match psKernelExprV2WhnfCacheFind state root entry with
+                    | Except.error error => Option.some (Except.error error)
+                    | Except.ok cached =>
+                        match cached with
+                        | Option.some result => Option.some (Except.ok (Prod.mk state result))
+                        | Option.none =>
+                            psKernelExprV2TryWhnfCompositeWith
+                              smaller publicWhnf nextContext state root entry
+
+def psKernelExprV2NoLocalValue
+    (_name : PsKernelName) : Option Nat :=
+  Option.none
+
 def psKernelExprV2TryWhnfCoreWithPublicFuel
     (fuel : Nat) :
     (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
@@ -175,42 +240,8 @@ def psKernelExprV2TryWhnfCoreWithPublicFuel
           Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
           (context : PsKernelCheckerContext)
           (state : PsKernelExprV2WhnfState) (root : Nat) =>
-        let smaller :=
-          fun (nextContext : PsKernelCheckerContext)
-              (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-            let recur := psKernelExprV2TryWhnfCoreWithPublicFuel remaining;
-            recur publicWhnf nextContext nextState nextRoot;
-        match psKernelCheckerContextEnterRecDepth context with
-        | Except.error error => Option.some (Except.error error)
-        | Except.ok nextContext =>
-            match psKernelExprV2PagedRequire state.arena root with
-            | Except.error error => Option.some (Except.error error)
-            | Except.ok entry =>
-                match entry.node with
-                | PsKernelExprV2Node.bvar _ => Option.some (Except.ok (Prod.mk state root))
-                | PsKernelExprV2Node.mvar _ => Option.some (Except.ok (Prod.mk state root))
-                | PsKernelExprV2Node.sort _ => Option.some (Except.ok (Prod.mk state root))
-                | PsKernelExprV2Node.forallE _ _ _ _ => Option.some (Except.ok (Prod.mk state root))
-                | PsKernelExprV2Node.const _ _ => Option.some (Except.ok (Prod.mk state root))
-                | PsKernelExprV2Node.lam _ _ _ _ => Option.some (Except.ok (Prod.mk state root))
-                | PsKernelExprV2Node.lit _ => Option.some (Except.ok (Prod.mk state root))
-                | PsKernelExprV2Node.mdata _ body => smaller nextContext state body
-                | PsKernelExprV2Node.fvar name =>
-                    match psKernelLocalContextFind nextContext.localContext name with
-                    | Option.none => Option.some (Except.ok (Prod.mk state root))
-                    | Option.some declaration =>
-                        match psKernelLocalDeclValue declaration with
-                        | Option.none => Option.some (Except.ok (Prod.mk state root))
-                        | Option.some _ => Option.none
-                | _ =>
-                    match psKernelExprV2WhnfCacheFind state root entry with
-                    | Except.error error => Option.some (Except.error error)
-                    | Except.ok cached =>
-                        match cached with
-                        | Option.some result => Option.some (Except.ok (Prod.mk state result))
-                        | Option.none =>
-                            psKernelExprV2TryWhnfCompositeWith
-                              smaller publicWhnf nextContext state root entry
+        psKernelExprV2TryWhnfCoreWithLocalValuesFuel (Nat.succ remaining)
+          psKernelExprV2NoLocalValue publicWhnf context state root
 
 def psKernelExprV2WhnfPublicFinishAttempt
     (source : Nat)
@@ -281,28 +312,31 @@ def psKernelExprV2TryWhnfPublicNonterminalWith
                   psKernelExprV2TryWhnfAfterCoreWith
                     publicWhnf context (Prod.fst reduced) root (Prod.snd reduced)
 
-def psKernelExprV2TryWhnfStateWithFuel
+def psKernelExprV2TryWhnfStateWithLocalValuesFuel
     (fuel : Nat) :
+    (PsKernelName -> Option Nat) ->
     PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
     Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
   match fuel with
   | Nat.zero =>
-      fun (_context : PsKernelCheckerContext)
+      fun (_localValue : PsKernelName -> Option Nat)
+          (_context : PsKernelCheckerContext)
           (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
         Option.some (Except.error "kernel reduction budget exhausted")
   | Nat.succ remaining =>
-      let smaller :=
-        fun (nextContext : PsKernelCheckerContext)
-            (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-          let recur := psKernelExprV2TryWhnfStateWithFuel remaining;
-          recur nextContext nextState nextRoot;
-      let core :=
-        fun (nextContext : PsKernelCheckerContext)
-            (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-          let worker := psKernelExprV2TryWhnfCoreWithPublicFuel remaining;
-          worker smaller nextContext nextState nextRoot;
-      fun (context : PsKernelCheckerContext)
+      fun (localValue : PsKernelName -> Option Nat)
+          (context : PsKernelCheckerContext)
           (state : PsKernelExprV2WhnfState) (root : Nat) =>
+        let smaller :=
+          fun (nextContext : PsKernelCheckerContext)
+              (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
+            let recur := psKernelExprV2TryWhnfStateWithLocalValuesFuel remaining;
+            recur localValue nextContext nextState nextRoot;
+        let core :=
+          fun (nextContext : PsKernelCheckerContext)
+              (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
+            let worker := psKernelExprV2TryWhnfCoreWithLocalValuesFuel remaining;
+            worker localValue smaller nextContext nextState nextRoot;
         match psKernelExprV2PagedRequire state.arena root with
         | Except.error error => Option.some (Except.error error)
         | Except.ok entry =>
@@ -314,22 +348,36 @@ def psKernelExprV2TryWhnfStateWithFuel
             | PsKernelExprV2Node.lit _ => Option.some (Except.ok (Prod.mk state root))
             | PsKernelExprV2Node.mdata _ body => smaller context state body
             | PsKernelExprV2Node.fvar name =>
-                match psKernelLocalContextFind context.localContext name with
-                | Option.none => Option.some (Except.ok (Prod.mk state root))
-                | Option.some declaration =>
-                    match psKernelLocalDeclValue declaration with
+                match localValue name with
+                | Option.some _ =>
+                    psKernelExprV2TryWhnfPublicNonterminalWith
+                      smaller core context state root entry
+                | Option.none =>
+                    match psKernelLocalContextFind context.localContext name with
                     | Option.none => Option.some (Except.ok (Prod.mk state root))
-                    | Option.some _ => Option.none
+                    | Option.some declaration =>
+                        match psKernelLocalDeclValue declaration with
+                        | Option.none => Option.some (Except.ok (Prod.mk state root))
+                        | Option.some _ => Option.none
             | _ =>
                 psKernelExprV2TryWhnfPublicNonterminalWith
                   smaller core context state root entry
 
-/-
-The standalone core wrapper uses a public callback with the same fuel, matching
-CoreWithRecursorFuel. The public worker above instead passes its predecessor
-fuel into both the core worker and the fixed public callback. All parameters
-of nonrecursive wrappers are explicit for a stable generated calling convention.
--/
+def psKernelExprV2TryWhnfStateWithFuel
+    (fuel : Nat) :
+    PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+      fun (context : PsKernelCheckerContext)
+          (state : PsKernelExprV2WhnfState) (root : Nat) =>
+        psKernelExprV2TryWhnfStateWithLocalValuesFuel (Nat.succ remaining)
+          psKernelExprV2NoLocalValue context state root
+
 def psKernelExprV2TryWhnfCoreStateWithFuel
     (fuel : Nat) (context : PsKernelCheckerContext)
     (state : PsKernelExprV2WhnfState) (root : Nat) :

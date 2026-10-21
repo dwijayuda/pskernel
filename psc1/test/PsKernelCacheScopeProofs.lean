@@ -195,7 +195,8 @@ theorem dag_quick_defeq_depth_error_precedes_syntax
     (guard : psKernelCheckerContextEnterRecDepth context = Except.error error) :
     psKernelExprV2TryQuickDefEqWithFuel (Nat.succ fuel) context arena left right =
       Option.some (Except.error error) := by
-  simp [psKernelExprV2TryQuickDefEqWithFuel, guard]
+  simp [psKernelExprV2TryQuickDefEqWithFuel, psKernelExprV2TryDefEqStateWithFuel,
+    psKernelExprV2CheckContextEmpty, psKernelExprV2CheckContextEnterRecDepth, guard]
 
 theorem dag_whnf_declaration_initialization_has_no_core_cache
     (arena : PsKernelExprV2PagedArena)
@@ -254,26 +255,86 @@ theorem dag_check_fvar_flag_prevents_publication
   simp [psKernelExprV2CheckedInferFinish, psKernelExprV2CheckedInferEligible, found, flag]
 
 theorem dag_check_zero_fuel_precedes_cache
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState) (root : Nat) :
-    psKernelExprV2TryCheckCoreWithFuel 0 whnf context state root =
+    psKernelExprV2TryCheckCoreWithFuel 0 whnf defeq context state root =
       Option.some (Except.error "kernel inference budget exhausted") := by
   rfl
 
 theorem dag_check_depth_error_precedes_cached_judgment
     (fuel : Nat)
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (root cached : Nat) (entry : PsKernelExprV2Entry) (error : String)
     (found : psKernelExprV2PagedRequire state.whnf.arena root = Except.ok entry)
     (hit : psKernelExprV2CheckedInferFind state root entry = Except.ok (Option.some cached))
     (guard : psKernelCheckerContextEnterRecDepth context.scalar = Except.error error) :
-    psKernelExprV2TryCheckCoreWithFuel (Nat.succ fuel) whnf context state root =
+    psKernelExprV2TryCheckCoreWithFuel (Nat.succ fuel) whnf defeq context state root =
       Option.some (Except.error error) := by
   simp [psKernelExprV2TryCheckCoreWithFuel, psKernelExprV2CheckContextEnterRecDepth,
     found, hit, guard]
+
+theorem dag_check_starts_without_success_cache
+    (arena : PsKernelExprV2PagedArena) :
+    (psKernelExprV2CheckStateEmpty arena).success = List.nil := by
+  rfl
+
+theorem dag_check_scope_restores_success_cache
+    (parent child : PsKernelExprV2CheckState) :
+    (psKernelExprV2CheckStateExitLocalScope parent child).success = parent.success := by
+  rfl
+
+theorem dag_check_arena_update_preserves_success_cache
+    (state : PsKernelExprV2CheckState) (arena : PsKernelExprV2PagedArena) :
+    (psKernelExprV2CheckStateWithArena state arena).success = state.success := by
+  rfl
+
+theorem dag_defeq_false_does_not_publish
+    (state : PsKernelExprV2CheckState) (left right : Nat) :
+    psKernelExprV2CheckStateDefEqFinish state left right false =
+      Except.ok (Prod.mk state false) := by
+  rfl
+
+theorem dag_defeq_fvar_flag_prevents_pair_lookup
+    (arena : PsKernelExprV2PagedArena) (pairs : List PsKernelExprV2DefEqPair)
+    (left right : Nat) (leftEntry rightEntry : PsKernelExprV2Entry)
+    (foundLeft : psKernelExprV2PagedRequire arena left = Except.ok leftEntry)
+    (foundRight : psKernelExprV2PagedRequire arena right = Except.ok rightEntry)
+    (flag : leftEntry.hasFVar = true) :
+    psKernelExprV2DefEqPairContains arena pairs left right = Except.ok false := by
+  simp [psKernelExprV2DefEqPairContains, foundLeft, foundRight, flag]
+
+theorem dag_defeq_fvar_flag_prevents_publication
+    (state : PsKernelExprV2CheckState) (left right : Nat)
+    (leftEntry rightEntry : PsKernelExprV2Entry)
+    (foundLeft : psKernelExprV2PagedRequire state.whnf.arena left = Except.ok leftEntry)
+    (foundRight : psKernelExprV2PagedRequire state.whnf.arena right = Except.ok rightEntry)
+    (flag : leftEntry.hasFVar = true) :
+    psKernelExprV2CheckStateDefEqFinish state left right true =
+      Except.ok (Prod.mk state true) := by
+  simp [psKernelExprV2CheckStateDefEqFinish, foundLeft, foundRight, flag]
+
+theorem dag_defeq_zero_fuel_precedes_success_cache
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    psKernelExprV2TryDefEqStateWithFuel 0 context state left right =
+      Option.some (Except.error "kernel definitional equality budget exhausted") := by
+  rfl
+
+theorem dag_defeq_depth_error_precedes_success_cache
+    (fuel : Nat) (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (left right : Nat) (error : String)
+    (guard : psKernelCheckerContextEnterRecDepth context.scalar = Except.error error) :
+    psKernelExprV2TryDefEqStateWithFuel (Nat.succ fuel) context state left right =
+      Option.some (Except.error error) := by
+  simp [psKernelExprV2TryDefEqStateWithFuel,
+    psKernelExprV2CheckContextEnterRecDepth, guard]
 
 end PsKernelCacheScopeProofs
 
@@ -314,3 +375,12 @@ end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.constant_reference_factorization_preserves
 #print axioms PsKernelCacheScopeProofs.constant_reference_factorization_extensional
+
+#print axioms PsKernelCacheScopeProofs.dag_check_starts_without_success_cache
+#print axioms PsKernelCacheScopeProofs.dag_check_scope_restores_success_cache
+#print axioms PsKernelCacheScopeProofs.dag_check_arena_update_preserves_success_cache
+#print axioms PsKernelCacheScopeProofs.dag_defeq_false_does_not_publish
+#print axioms PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_pair_lookup
+#print axioms PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication
+#print axioms PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache
+#print axioms PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache

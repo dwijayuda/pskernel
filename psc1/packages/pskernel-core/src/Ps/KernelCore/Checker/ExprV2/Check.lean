@@ -1,14 +1,16 @@
 import Ps.KernelCore.Checker.ExprV2.CheckProjection
 import Ps.KernelCore.Checker.ExprV2.Constant
+import Ps.KernelCore.Checker.ExprV2.CheckLet
+import Ps.KernelCore.Checker.ExprV2.DefEq
 
 /-
 DAG-native fully checked Sort/FVar/literal/metadata/lambda/forall inference
 same-batch constant types, and the structural-type-equality branch of
-dependent application, and checked structure projections.
+dependent application, checked structure projections, and checked lets.
 
 The public entry creates one fresh operation and accepts no legacy local
 context. Internal binders carry type IDs in their own DAG local context.
-Applications requiring general DefEq, external constant types, lets and
+Applications requiring general DefEq, external constant types, and
 projections without owning constructor type IDs request the complete checker. Unsupported work never publishes a partial
 state or a checking receipt.
 
@@ -18,27 +20,33 @@ lineage. Child-scope caches are restored when a binder closes.
 -/
 def psKernelExprV2TryCheckCoreWithFuel
     (fuel : Nat) :
-    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool))) ->
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
   match fuel with
   | Nat.zero =>
-      fun (_whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      fun (_whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
           Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Bool)))
           (_context : PsKernelExprV2CheckContext)
           (_state : PsKernelExprV2CheckState) (_root : Nat) =>
         Option.some (Except.error "kernel inference budget exhausted")
   | Nat.succ remaining =>
-      fun (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      fun (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
           Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Bool)))
           (context : PsKernelExprV2CheckContext)
           (state : PsKernelExprV2CheckState) (root : Nat) =>
         let smaller :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
             let recur := psKernelExprV2TryCheckCoreWithFuel remaining;
-            recur whnf nextContext nextState nextRoot;
+            recur whnf defeq nextContext nextState nextRoot;
         match psKernelExprV2PagedRequire state.whnf.arena root with
         | Except.error error => Option.some (Except.error error)
         | Except.ok entry =>
@@ -107,7 +115,24 @@ def psKernelExprV2TryCheckCoreWithFuel
                         | PsKernelExprV2Node.proj typeName index structValue =>
                             psKernelExprV2CheckProjectionWith smaller whnf
                               nextContext state root typeName index structValue
-                        | _ => Option.none
+                        | PsKernelExprV2Node.letE name type value body nondep =>
+                            psKernelExprV2CheckLetWith smaller whnf defeq
+                              nextContext state root name type value body nondep
+
+def psKernelExprV2TryCheckStateWithFuel
+    (fuel : Nat) (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  let whnf :=
+    fun (nextContext : PsKernelExprV2CheckContext)
+        (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
+      psKernelExprV2CheckWhnfWithFuel fuel nextContext nextState nextRoot;
+  let defeq :=
+    fun (nextContext : PsKernelExprV2CheckContext)
+        (nextState : PsKernelExprV2CheckState) (left right : Nat) =>
+      let worker := psKernelExprV2TryDefEqStateWithFuel fuel;
+      worker nextContext nextState left right;
+  psKernelExprV2TryCheckCoreWithFuel fuel whnf defeq context state root
 
 def psKernelExprV2TryCheckWithDeclarationsFuel
     (fuel : Nat) (context : PsKernelCheckerContext)
@@ -117,15 +142,10 @@ def psKernelExprV2TryCheckWithDeclarationsFuel
   match context.localContext.decls with
   | List.cons _ _ => Option.none
   | List.nil =>
-      let whnf :=
-        fun (nextContext : PsKernelCheckerContext)
-            (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-          let worker := psKernelExprV2TryWhnfStateWithFuel fuel;
-          worker nextContext nextState nextRoot;
       let initial :=
         psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty arena)
           (psKernelExprV2WhnfStateForDeclarations arena declarations);
-      match psKernelExprV2TryCheckCoreWithFuel fuel whnf
+      match psKernelExprV2TryCheckStateWithFuel fuel
           (psKernelExprV2CheckContextEmpty context) initial root with
       | Option.none => Option.none
       | Option.some attempted =>

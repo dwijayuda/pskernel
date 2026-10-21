@@ -30,7 +30,7 @@ def psKernelExprV2CheckReadForall
       | _ => Except.error "expected function type"
 
 def psKernelExprV2CheckEnsureForallWith
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (type : Nat) :
@@ -45,7 +45,7 @@ def psKernelExprV2CheckEnsureForallWith
               (Prod.mk state
                 (PsKernelExprV2CheckedForallView.mk name domain body binderInfo)))
       | _ =>
-          match whnf context.scalar state.whnf type with
+          match whnf context state.whnf type with
           | Option.none => Option.none
           | Option.some attempted =>
               match attempted with
@@ -59,7 +59,7 @@ def psKernelExprV2CheckEnsureForallWith
 def psKernelExprV2CheckApplicationWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root fn arg : Nat) :

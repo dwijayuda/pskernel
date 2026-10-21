@@ -29,6 +29,34 @@ behavior, or a complete DAG checker. Original default V1 remains qualified;
 the replacement still relies on full-operation fallback outside its migrated
 rules. No integration PR is merged.
 
+### Checked lets and scope-owned DefEq pairs — implementation awaiting CI
+
+The checked DAG path now carries optional local value IDs and implements fully
+checked lets: annotation checking, sort validation, value checking, fixed-budget
+DefEq, fresh local opening, body inference, cheap beta, abstraction and the
+original closed-result rule. Public/core WHNF follow typed let values with the
+original ordering and budget costs. A legacy local context still requests the
+complete checker; no existing local is silently dropped.
+
+Successful quick DefEq pairs now belong to the checking state and its arena.
+The symmetric modular hash only filters candidates; both orientations use
+collision-safe structural equality. Free-variable pairs are ineligible, scope
+exit restores the parent's cache, failed comparisons publish no entry, and no
+transitive closure is added. Fuel and recursion guards precede cache lookup.
+Unsupported recursive work still falls back as one complete original operation.
+Applications retain their existing structural-equality-only direct branch in
+this commit; the new comparison state is used by checked lets.
+
+Qualification adds 16 positive/negative let fixtures, 3,120 native raw
+fuel/depth combinations, public API parity, 16 official Lean comparisons,
+typed-local public/core WHNF boundaries, escaped-local rejection, parent/child
+cache restoration, collisions, symmetry, duplicate-pair reuse, fresh-owner
+isolation and no-transitive-closure controls. Matching generated and detached
+canonical JavaScript gates and eight additional local cache/entry-guard facts
+are required. These are finite parity tests and local proofs, not a full kernel
+soundness or cache-validity theorem. Results remain pending until Actions passes;
+the last fully qualified kernel source is c9868 above.
+
 ### Complete admission measurement and Arena phase timing — pending CI
 
 This commit adds six matched complete safe-definition admission fixtures:
@@ -664,8 +692,8 @@ not general production performance acceptance.
 | Paged representation | Single production owner; all 12 families; exact cached metadata | Forgery, collision, sharing, page and reference tests pass | Qualified foundation; current complete closure builds | Construction and validation included in complete-operation measurements | Integrated foundation |
 | Transformations | Lift, instantiate/multi/reverse, abstract, universe substitution, spines; scoped memo | 1,755 comparisons plus budget/sharing/negative cases pass | Authentic source and strict generated transform smoke pass | Large shared-DAG fixture; not a full checker speedup claim | Integrated prerequisite |
 | Checked DAG ingress | One replay/decode per batch; complete V1 command and declaration families | Positive/negative/fuel/admission regressions pass | Strict standalone generated smoke passes; canonical closure check passes | Adapter cost retained; some fallback checks remain slower | Transitional |
-| WHNF | Function normalization, separate core/public caches, Nat, constructor projection and same-batch delta | Native parity and boundary gates pass at c9868 | Independent generated and canonical executable gates pass at c9868 | Controlled checked-WHNF gains; mixed memory and fallback regressions | Partial; recursor/iota/local-value/String migration open |
-| Inference and DefEq | DAG Sort/FVar/literal/metadata/binders, structural-type App, owning constants and dependent projections; definitive quick DefEq | Projection parity and13 official fixtures pass at c9868 | Direct projection matrix and complete checker pass in generated and canonical JS |128 guarded ABBA observations; checked-zeta remains slower | Partial; general DefEq, Let and inferOnly open |
+| WHNF | Function normalization, separate core/public caches, Nat, constructor projection and same-batch delta | Native parity and boundary gates pass at c9868 | Independent generated and canonical executable gates pass at c9868 | Controlled checked-WHNF gains; mixed memory and fallback regressions | Partial; local-value slice awaiting CI; recursor/iota/String migration open |
+| Inference and DefEq | DAG Sort/FVar/literal/metadata/binders, structural-type App, owning constants and projections; checked lets and scope-owned quick DefEq pairs added | Qualified through projections at c9868; let/cache parity pending | Qualified c9868 closure; new native/generated/canonical let gates pending |128 guarded ABBA observations; checked-zeta regression unresolved until new measurements | Partial; general DefEq and inferOnly open; let slice awaits CI |
 | Inductive admission | Direct DAG request ingress and owning ordinary/mutual type IDs after complete original admission | All ordinary/mutual index and admission gates pass | Same-batch owning types and dependent projection gates pass | Full direct-admission comparison pending | Admission logic not migrated internally |
 | Canonical self-hosting | Complete production import closure derived from manifest | Pinned Lean build passes at c9868 |112 canonical modules /1,353 declarations; authentic PSC1, TS7.0.2, declarations/maps and detached JS pass | Generator/runtime costs measured; six profiles pass | Current partial integration qualified; DirectJS unsupported |
 | Lean Arena | Complete193 corpus; all-list transport and nested outcomes repaired | Official122 accept /71 reject | c9868:166 matches,25 host timeouts,2 safety agreements;135 controls; all193 recorded | Every timeout reached RunDag entry; internal hotspot unresolved | **BLOCKED:25 host timeouts; no exclusions** |

@@ -10,7 +10,7 @@ Checked DAG ingress for the complete KernelContract-v1 implementation.
 
 One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
-Sort/literal/binder/constant/application checking and terminal/metadata/beta/zeta/Nat/projection WHNF read DAG nodes directly with the original entry
+Sort/literal/binder/let/constant/application/projection checking and terminal/metadata/beta/zeta/Nat/projection WHNF read DAG nodes directly with the original entry
 fuel/depth/rule ordering. Operation-owned core/public caches preserve function-position normalization,
 constructor projections and the complete Nat post-core pipeline; no cache escapes a public WHNF call.
 Successful admission records same-batch type IDs and transparent definition body IDs,
@@ -28,11 +28,12 @@ receipts, are forgeable observations and never authorize proof admission.
 Every declaration is still rechecked by V1. No equality memo survives this
 boundary. A sealed constructor API remains a source-profile limitation.
 
-This is a partial representation migration. Sort/literal/metadata/lambda/forall inference, supported WHNF slices, and the
-checked definitive quick DefEq rules are DAG-native. Applications requiring general DefEq,
-external constant types, lets/projections, reduction,
-DefEq and admission retain PsKernelExpr internally.
-Eliminating that fallback and adapter remains required for completion.
+This is a partial representation migration. Checked lets use owning local
+type/value IDs, scope-restored success pairs and the original fixed DefEq
+budget. Supported checking and WHNF rules are DAG-native. Applications requiring
+general DefEq, external constant types, projections without owning constructor
+types, unsupported reductions, general DefEq and admission retain PsKernelExpr
+internally. Eliminating that fallback and adapter remains required for completion.
 -/
 structure PsKernelDagBatchResult where
   session : PsKernelKernelSession

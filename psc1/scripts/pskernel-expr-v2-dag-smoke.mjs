@@ -458,7 +458,7 @@ console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG checked binders, admitted constants, structural-type-equal applications and projections; beta/zeta/Nat/constructor-projection/same-batch-delta WHNF and quick DefEq; general DefEq, external types, iota and admission fallback remain; incomplete"
+  checker_representation:"DAG checked binders, lets, admitted constants, structural-type-equal applications and projections; typed local-value WHNF and scope-owned quick DefEq pairs; general DefEq, external types, iota and admission fallback remain; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");
 }
@@ -1523,9 +1523,8 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
   ];
   const emptyCheck=arena=>get("psKernelExprV2CheckStateEmpty")(arena);
   const raw=(fuel,context,state,root)=>
-    get("psKernelExprV2TryCheckCoreWithFuel")(fuel)
-      (get("psKernelExprV2TryWhnfStateWithFuel")(fuel))
-      (get("psKernelExprV2CheckContextEmpty")(context))(state)(root);
+    get("psKernelExprV2TryCheckStateWithFuel")(fuel,
+      get("psKernelExprV2CheckContextEmpty")(context),state,root);
   const compareRaw=(original,attempted,label)=>{
     must(attempted&&typeof attempted==="object"&&"value" in attempted,label+"-direct");
     const result=attempted.value;
@@ -1630,14 +1629,11 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
       "binder-literal-some"),"binder-literal");
     must(sameRuntimeValue(result.fst.checkedInfer,nil),"binder-literal-cache-ineligible");
   }
-  const unsupported=[
-    build("Let",E.letE(x,sort1,sort0,E.bvar(0n),false),x,s1.id,s0.id,b0.id,false)
-  ];
-  for(const node of unsupported){
-    must(sameRuntimeValue(get("psKernelExprV2TryCheckWithFuel")(
-      64n,checker.context,binderArena,node.id),none),"binder-explicit-full-checker-fallback");
-    must(publicCheck(session(),node),"binder-fallback-public-parity");
-  }
+  const letNode=build("Let",E.letE(x,sort1,sort0,E.bvar(0n),false),
+    x,s1.id,s0.id,b0.id,false);
+  compareRaw(get("psKernelSessionCheck")(64n,checker,letNode.term),
+    raw(64n,checker.context,emptyCheck(binderArena),letNode.id),"binder-let-now-direct");
+  must(publicCheck(session(),letNode),"binder-let-public-parity");
   const invalidProjection=build("Proj",E.proj(name("binder-unknown-structure"),0n,sort0),
     name("binder-unknown-structure"),0n,s0.id);
   must(rejected(accepted(get("psKernelExprV2TryCheckWithFuel")(
@@ -1924,9 +1920,8 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
   const stateFor=arena=>get("psKernelExprV2CheckStateWithWhnf")(
     get("psKernelExprV2CheckStateEmpty")(arena),
     get("psKernelExprV2WhnfStateForDeclarations")(arena,execution.declarations));
-  const raw=(fuel,context,state,root)=>get("psKernelExprV2TryCheckCoreWithFuel")(fuel)
-    (get("psKernelExprV2TryWhnfStateWithFuel")(fuel))
-    (get("psKernelExprV2CheckContextEmpty")(context))(state)(root);
+  const raw=(fuel,context,state,root)=>get("psKernelExprV2TryCheckStateWithFuel")(fuel,
+    get("psKernelExprV2CheckContextEmpty")(context),state,root);
   const compareRaw=(original,attempted,label)=>{
     must(attempted&&typeof attempted==="object"&&"value" in attempted,label+"-direct");
     const actual=attempted.value;
@@ -2001,8 +1996,10 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
   }
   must(sameRuntimeValue(get("psKernelExprV2TryCheckWithFuel")(
     64n,checker.context,graph,pairFirst.id),none),"projection-external-owner-remains-fallback");
-  const whnf=get("psKernelExprV2TryWhnfStateWithFuel")(64n);
-  const check=get("psKernelExprV2TryCheckCoreWithFuel")(64n)(whnf);
+  const whnf=context=>state=>root=>
+    get("psKernelExprV2CheckWhnfWithFuel")(64n,context,state,root);
+  const check=context=>state=>root=>
+    get("psKernelExprV2TryCheckStateWithFuel")(64n,context,state,root);
   const context=get("psKernelExprV2CheckContextEmpty")(checker.context);
   const paramZero=accepted(get("psKernelExprV2CheckProjectionApplyParamsWithFuel")(0n)
     (whnf)(context)(stateFor(graph))(nil)(0n)(0n)(pairFirst.id),"projection-param-zero-some");
@@ -2014,11 +2011,359 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
   must(rejected(fieldZero)&&fieldZero.error==="kernel projection field budget exhausted",
     "projection-field-zero-budget");
   const sortZero=accepted(get("psKernelExprV2CheckProjectionSortWith")(
-    get("psKernelExprV2TryWhnfStateWithFuel")(0n),context,stateFor(graph),s0.id),
+    context=>state=>root=>get("psKernelExprV2CheckWhnfWithFuel")(0n,context,state,root),
+    context,stateFor(graph),s0.id),
     "projection-sort-zero-some");
   must(rejected(sortZero)&&sortZero.error==="kernel reduction budget exhausted",
     "projection-sort-does-not-skip-whnf-budget");
   console.log("PSC1_V2_DAG_JS_CHECK_PROJECTION: PASS");
+}
+
+// Checked lets own local values and restore child semantic caches.
+{
+  let letArena=empty;
+  const Lit=get("PsKernelLiteral");
+  const build=(kind,term,...args)=>{
+    const result=mk(letArena,kind,...args);
+    letArena=result.fst;
+    return {id:result.snd,term};
+  };
+  const bs=level=>build("Sort",E.sort(level),level);
+  const bv=index=>build("BVar",E.bvar(index),index);
+  const fv=n=>build("FVar",E.fvar(n),n);
+  const lit=value=>build("Lit",E.lit(value),value);
+  const md=(tag,body)=>build("MData",E.mdata(tag,body.term),tag,body.id);
+  const lam=(n,domain,body,bi=B.default)=>
+    build("Lam",E.lam(n,domain.term,body.term,bi),n,domain.id,body.id,bi);
+  const pi=(n,domain,body,bi=B.default)=>
+    build("Forall",E.forallE(n,domain.term,body.term,bi),n,domain.id,body.id,bi);
+  const app=(fn,arg)=>build("App",E.app(fn.term,arg.term),fn.id,arg.id);
+  const le=(n,type,value,body,nondep=false)=>
+    build("Let",E.letE(n,type.term,value.term,body.term,nondep),
+      n,type.id,value.id,body.id,nondep);
+  const one=L.succ(L.zero),two=L.succ(one);
+  const s0=bs(L.zero),s1=bs(one),s2=bs(two),b0=bv(0n),b1=bv(1n);
+  const duplicateOne=bs(L.max(one,one));
+  const x=name("let-x"),a=name("let-a"),f=name("let-f"),y=name("let-y");
+  const functionType=pi(x,s1,s1);
+  let hiddenFunctionType=functionType;
+  for(let tag=0n;tag<8n;tag++)hiddenFunctionType=md(9100n+tag,hiddenFunctionType);
+  const fixtures=[
+    ["unused",le(a,s1,s0,s1)],
+    ["body-local",le(a,s1,s0,b0)],
+    ["nondep-hint",le(a,s1,s0,s1,true)],
+    ["dependent-result",le(a,s1,s0,lam(x,b0,b0))],
+    ["sort-local-value",le(a,s2,s1,pi(x,b0,pi(y,b0,b1)))],
+    ["function-local-value",le(a,s2,functionType,lam(f,b0,app(b0,s0)))],
+    ["function-local-value-metadata",le(a,s2,hiddenFunctionType,lam(f,b0,app(b0,s0)))],
+    ["nested-same-name",le(a,s1,s0,le(a,s1,b0,b0))],
+    ["inside-lambda",lam(x,s1,le(y,s1,b0,b0))],
+    ["sort-conversion",le(a,duplicateOne,s0,b0)],
+    ["metadata-body",le(a,s1,s0,md(3n,b0))],
+    ["bad-value-type",le(a,s1,s1,b0)],
+    ["bad-declared-type",le(a,lam(x,s1,b0),s0,b0)],
+    ["loose-value",le(a,s1,b0,b0)],
+    ["unknown-body",le(a,s1,s0,fv(name("let-outside")))],
+    ["bad-body-app",le(a,s1,s0,app(s0,s0))]
+  ];
+  const numeralBody=le(a,s1,s0,lit(Lit.nat(65521n)));
+  const escaped=fv(N.num(a,0n));
+  const cacheX=name("let-cache-x"),cacheW=name("let-cache-w");
+  const cacheA=name("let-cache-a"),cacheB=name("let-cache-b");
+  let outerLeft=s1,outerRight=duplicateOne,innerLeft=s2,innerRight=bs(L.max(two,two));
+  for(let tag=0n;tag<8n;tag++){
+    outerLeft=md(9200n+tag,outerLeft);outerRight=md(9300n+tag,outerRight);
+    innerLeft=md(9400n+tag,innerLeft);innerRight=md(9500n+tag,innerRight);
+  }
+  const cacheTerm=le(cacheA,outerRight,fv(cacheX),le(cacheB,innerRight,fv(cacheW),s0));
+  const wx=name("let-whnf-x"),wy=name("let-whnf-y"),wf=name("let-whnf-f");
+  const wxNode=fv(wx),wyNode=fv(wy),wfNode=fv(wf);
+  const identity=lam(name("let-whnf-arg"),s1,b0);
+  const identityType=pi(name("let-whnf-arg"),s1,s1);
+  const localApp=app(wfNode,s0);
+  let metadataAlias=wyNode;
+  for(let tag=0n;tag<8n;tag++)metadataAlias=md(tag,metadataAlias);
+  const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  const emptyCheck=arena=>get("psKernelExprV2CheckStateEmpty")(arena);
+  const emptyContext=context=>get("psKernelExprV2CheckContextEmpty")(context);
+  const raw=(fuel,context,state,root)=>
+    get("psKernelExprV2TryCheckStateWithFuel")(fuel,context,state,root);
+  const eqRaw=(fuel,context,state,left,right)=>
+    get("psKernelExprV2TryDefEqStateWithFuel")(fuel)(context)(state)(left)(right);
+  const compareRaw=(original,attempted,label)=>{
+    const actual=accepted(attempted,label+"-direct");
+    if(rejected(original))must(rejected(actual)&&original.error===actual.error,label+"-error");
+    else {
+      const expected=accepted(original,label+"-original"),result=accepted(actual,label+"-actual");
+      const graph=accepted(decode(result.fst.whnf.arena),label+"-graph");
+      must(exact(expected.fst,accepted(decoded(graph,result.snd),label+"-type"))===true,
+        label+"-exact-type");
+      must(expected.snd.state.nextFresh===result.fst.nextFresh,label+"-fresh");
+    }
+  };
+  const compareEq=(original,attempted,label)=>{
+    const actual=accepted(attempted,label+"-direct");
+    if(rejected(original))must(rejected(actual)&&original.error===actual.error,label+"-error");
+    else {
+      const expected=accepted(original,label+"-original"),result=accepted(actual,label+"-actual");
+      must(typeof expected.fst==="boolean"&&typeof result.snd==="boolean"&&
+        expected.fst===result.snd,label+"-boolean");
+    }
+  };
+  const checkEqual=(expected,actual)=>
+    exact(expected.expression,actual.expression)===true&&exact(expected.type,actual.type)===true;
+  const publicCheck=(s,node)=>sameOperation(
+    get("psKernelV1CheckExpression")(s,nil,S.safe,node.term),
+    invoke(letArena,[C.check(node.id)],s),checkEqual);
+
+  for(const [label,node] of fixtures){
+    for(const fuel of [0n,1n,2n,3n,4n,8n,10n,11n,12n,16n,64n])
+      for(const maxDepth of [0n,1n]){
+        const s=session(fuel,maxDepth),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+        for(const recDepth of [0n,15n,16n]){
+          const context={...checker.context,recDepth};
+          compareRaw(get("psKernelSessionCheck")(fuel,{...checker,context},node.term),
+            raw(fuel,emptyContext(context),emptyCheck(letArena),node.id),
+            "let-"+label+"-"+fuel+"-"+maxDepth+"-"+recDepth);
+        }
+        must(publicCheck(s,node),"let-public-"+label+"-"+fuel+"-"+maxDepth);
+      }
+  }
+  for(const fuel of [0n,1n,2n,3n,8n])for(const limit of [0n,7n,8n,16n]){
+    const initial=session(fuel),s={...initial,resources:{...initial.resources,maxNatSize:limit}};
+    const checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+    compareRaw(get("psKernelSessionCheck")(fuel,checker,numeralBody.term),
+      raw(fuel,emptyContext(checker.context),emptyCheck(letArena),numeralBody.id),
+      "let-numeral-order-"+fuel+"-"+limit);
+    must(publicCheck(s,numeralBody),"let-numeral-public-order-"+fuel+"-"+limit);
+  }
+  const base=get("psKernelKernelSessionChecker")(session(64n,1n),nil,S.safe);
+  const warmNode=fixtures[1][1];
+  const legacyWarm=accepted(get("psKernelSessionCheck")(64n,base,warmNode.term),"let-warm-legacy");
+  const directWarm=accepted(accepted(raw(64n,emptyContext(base.context),emptyCheck(letArena),
+    warmNode.id),"let-warm-some"),"let-warm-result");
+  for(const [fuel,recDepth] of [[0n,0n],[1n,0n],[1n,15n],[1n,16n]]){
+    const context={...base.context,recDepth};
+    compareRaw(get("psKernelSessionCheck")(fuel,{...legacyWarm.snd,context},warmNode.term),
+      raw(fuel,emptyContext(context),directWarm.fst,warmNode.id),
+      "let-warm-entry-"+fuel+"-"+recDepth);
+  }
+  compareRaw(get("psKernelSessionCheck")(64n,legacyWarm.snd,escaped.term),
+    raw(64n,emptyContext(base.context),directWarm.fst,escaped.id),"let-local-value-does-not-escape");
+  console.log("PSC1_V2_DAG_JS_CHECK_LET: PASS");
+
+  const cacheOld1=get("psKernelLocalContextAddLocal")(
+    base.context.localContext,cacheX,cacheX,outerLeft.term,B.default);
+  const cacheOld2=get("psKernelLocalContextAddLocal")(
+    cacheOld1,cacheW,cacheW,innerLeft.term,B.default);
+  const cacheOldContext=get("psKernelCheckerContextWithLocalContext")(base.context,cacheOld2);
+  const cacheTyped1=get("psKernelExprV2CheckContextWithLocal")(
+    emptyContext(base.context),cacheX,cacheX,outerLeft.id,B.default);
+  const cacheTyped=get("psKernelExprV2CheckContextWithLocal")(
+    cacheTyped1,cacheW,cacheW,innerLeft.id,B.default);
+  const cacheLegacy=accepted(get("psKernelSessionCheck")(
+    64n,{...base,context:cacheOldContext},cacheTerm.term),"let-cache-legacy");
+  const cacheDirect=accepted(accepted(raw(64n,cacheTyped,emptyCheck(letArena),cacheTerm.id),
+    "let-cache-some"),"let-cache-result");
+  must(cacheLegacy.snd.state.nextFresh===2n&&cacheDirect.fst.nextFresh===2n,
+    "let-nested-scopes-preserve-monotone-fresh");
+  for(const [fuel,recDepth] of [[0n,0n],[1n,0n],[1n,15n],[1n,16n]]){
+    const old={...cacheOldContext,recDepth},typed={...cacheTyped,scalar:{...base.context,recDepth}};
+    compareEq(get("psKernelSessionIsDefEq")(
+      fuel,{...cacheLegacy.snd,context:old},outerLeft.term,outerRight.term),
+      eqRaw(fuel,typed,cacheDirect.fst,outerLeft.id,outerRight.id),
+      "let-parent-success-entry-"+fuel+"-"+recDepth);
+  }
+  const parentHit=accepted(accepted(eqRaw(1n,cacheTyped,cacheDirect.fst,
+    outerLeft.id,outerRight.id),"let-parent-hit-some"),"let-parent-hit-result");
+  must(parentHit.snd===true,"let-parent-comparison-survives-scope");
+  const cold=eqRaw(1n,cacheTyped,emptyCheck(letArena),outerLeft.id,outerRight.id);
+  compareEq(get("psKernelSessionIsDefEq")(
+    1n,{...base,context:cacheOldContext},outerLeft.term,outerRight.term),cold,
+    "let-parent-cold-needs-recursion");
+  const coldResult=accepted(cold,"let-cold-some");
+  must(rejected(coldResult)&&coldResult.error==="kernel definitional equality budget exhausted",
+    "let-parent-cold-is-not-syntax");
+  const child=eqRaw(1n,cacheTyped,cacheDirect.fst,innerLeft.id,innerRight.id);
+  compareEq(get("psKernelSessionIsDefEq")(
+    1n,cacheLegacy.snd,innerLeft.term,innerRight.term),child,
+    "let-child-success-pair-restored-away");
+  const childResult=accepted(child,"let-child-some");
+  must(rejected(childResult)&&childResult.error==="kernel definitional equality budget exhausted",
+    "let-child-comparison-cannot-authorize-parent");
+  console.log("PSC1_V2_DAG_JS_LET_CACHE_SCOPE: PASS");
+
+  const old1=get("psKernelLocalContextAddLet")(base.context.localContext,wx,wx,s1.term,s0.term);
+  const old2=get("psKernelLocalContextAddLet")(old1,wy,wy,s1.term,wxNode.term);
+  const old3=get("psKernelLocalContextAddLet")(old2,wf,wf,identityType.term,identity.term);
+  const new1=get("psKernelExprV2CheckContextWithLet")(emptyContext(base.context),wx,wx,s1.id,s0.id);
+  const new2=get("psKernelExprV2CheckContextWithLet")(new1,wy,wy,s1.id,wxNode.id);
+  const new3=get("psKernelExprV2CheckContextWithLet")(new2,wf,wf,identityType.id,identity.id);
+  const shadowOld=get("psKernelLocalContextAddLocal")(old3,wx,wx,s1.term,B.default);
+  const shadowNew=get("psKernelExprV2CheckContextWithLocal")(new3,wx,wx,s1.id,B.default);
+  const whnfRaw=(fuel,context,state,root)=>
+    get("psKernelExprV2CheckWhnfWithFuel")(fuel,context,state,root);
+  const compareWhnf=(original,attempted,label)=>{
+    const actual=accepted(attempted,label+"-direct");
+    if(rejected(original))must(rejected(actual)&&actual.error===original.error,label+"-error");
+    else {
+      const expected=accepted(original,label+"-original"),result=accepted(actual,label+"-actual");
+      const graph=accepted(decode(result.fst.arena),label+"-graph");
+      must(exact(expected.fst,accepted(decoded(graph,result.snd),label+"-expr"))===true,
+        label+"-exact");
+    }
+  };
+  const whnfCases=[
+    ["one-local",wxNode,old3,new3],["alias-chain",wyNode,old3,new3],
+    ["metadata-chain",metadataAlias,old3,new3],["local-function",localApp,old3,new3],
+    ["value-free-shadow",wxNode,shadowOld,shadowNew]
+  ];
+  for(const [label,node,oldLocals,newLocals] of whnfCases){
+    for(const maxRecDepth of [0n,1n])for(const recDepth of [0n,15n,16n]){
+      const scalar={...base.context,maxRecDepth,recDepth};
+      const old=get("psKernelCheckerContextWithLocalContext")(scalar,oldLocals);
+      const next={...newLocals,scalar};
+      for(const fuel of [0n,1n,2n,3n,4n,12n,64n]){
+        const state=get("psKernelExprV2WhnfStateEmpty")(letArena);
+        compareWhnf(get("psKernelSessionWhnf")(fuel,{...base,context:old},node.term),
+          whnfRaw(fuel,next,state,node.id),"let-local-public-"+label+"-"+fuel+"-"+recDepth);
+        const resolver=n=>get("psKernelExprV2CheckLocalValue")(next,n);
+        const publicWhnf=context=>current=>root=>
+          get("psKernelExprV2TryWhnfStateWithLocalValuesFuel")(fuel)
+            (resolver)(context)(current)(root);
+        const core=get("psKernelExprV2TryWhnfCoreWithLocalValuesFuel")(fuel)
+          (resolver)(publicWhnf)(scalar)(state)(node.id);
+        compareWhnf(get("psKernelWhnfCoreWithRecursorFuel")(fuel,
+          get("psKernelIsDefEqWithFuel")(fuel),old,base.state,node.term,false,false),
+          core,"let-local-core-"+label+"-"+fuel+"-"+recDepth);
+      }
+    }
+  }
+  const whnfState=get("psKernelExprV2WhnfStateEmpty")(letArena);
+  const exhausted=accepted(whnfRaw(2n,new3,whnfState,wxNode.id),"let-local-fuel-two-direct");
+  must(rejected(exhausted)&&exhausted.error==="kernel reduction budget exhausted",
+    "let-local-public-keeps-predecessor-core-budget");
+  compareWhnf(get("psKernelSessionWhnf")(3n,
+    {...base,context:get("psKernelCheckerContextWithLocalContext")(base.context,old3)},wxNode.term),
+    whnfRaw(3n,new3,whnfState,wxNode.id),"let-local-fuel-three");
+  const mixed={...shadowNew,
+    scalar:get("psKernelCheckerContextWithLocalContext")(base.context,old3)};
+  must(sameRuntimeValue(whnfRaw(64n,mixed,whnfState,wxNode.id),none),
+    "let-mixed-local-representations-request-fallback");
+  const badState=emptyCheck(letArena);
+  const opened={context:emptyContext(base.context),parent:badState,fresh:wx,body:b1.id};
+  must(get("psKernelExprHasLooseBVarAt")(b1.term,0n)===false,
+    "let-range-is-not-exact-index-occurrence");
+  must(sameRuntimeValue(get("psKernelExprV2CheckCloseLet")(opened,badState,b1.id,b1.id,
+    wy,s1.id,s0.id,false),none),"let-close-unproved-context-requests-fallback");
+  console.log("PSC1_V2_DAG_JS_LET_LOCAL_WHNF: PASS");
+}
+
+{
+  let pairArena=empty;
+  const build=(kind,term,...args)=>{
+    const result=mk(pairArena,kind,...args);pairArena=result.fst;
+    return {id:result.snd,term};
+  };
+  const bs=level=>build("Sort",E.sort(level),level);
+  const md=(tag,body)=>build("MData",E.mdata(tag,body.term),tag,body.id);
+  const one=L.succ(L.zero),s1=bs(one),equivalent=bs(L.max(one,one));
+  const left=md(0n,s1),right=md(1n,equivalent),collision=md(65521n,s1);
+  const copyLeft=md(0n,s1),copyRight=md(1n,equivalent);
+  const localName=name("pair-local");
+  const localNode=build("FVar",E.fvar(localName),localName);
+  const Lit=get("PsKernelLiteral");
+  const lit=value=>build("Lit",E.lit(value),value);
+  const negatives=[
+    ["sort-false",bs(L.zero),s1],
+    ["literal-false",lit(Lit.nat(7n)),lit(Lit.nat(8n))],
+    ["string-false",lit(Lit.str("a")),lit(Lit.str("b"))]
+  ];
+  const checker=get("psKernelKernelSessionChecker")(session(64n,1n),nil,S.safe);
+  const ctx=scalar=>get("psKernelExprV2CheckContextEmpty")(scalar);
+  const context=ctx(checker.context),emptyState=get("psKernelExprV2CheckStateEmpty")(pairArena);
+  const raw=(fuel,context,state,left,right)=>
+    get("psKernelExprV2TryDefEqStateWithFuel")(fuel)(context)(state)(left)(right);
+  const compare=(original,attempted,label)=>{
+    const actual=accepted(attempted,label+"-direct");
+    if(rejected(original))must(rejected(actual)&&actual.error===original.error,label+"-error");
+    else{
+      const expected=accepted(original,label+"-original"),result=accepted(actual,label+"-actual");
+      must(typeof expected.fst==="boolean"&&typeof result.snd==="boolean"&&
+        expected.fst===result.snd,label+"-boolean");
+    }
+  };
+  const legacy=accepted(get("psKernelSessionIsDefEq")(
+    64n,checker,left.term,right.term),"pair-prime-legacy");
+  const direct=accepted(accepted(raw(64n,context,emptyState,left.id,right.id),
+    "pair-prime-some"),"pair-prime-result");
+  must(legacy.fst===true&&direct.snd===true,"pair-prime-true");
+  must(array(direct.fst.success).length===2,"pair-prime-child-and-parent");
+  must(left.id!==copyLeft.id&&right.id!==copyRight.id,"pair-distinct-structural-copies");
+  for(const [label,l,r] of [["forward",left,right],["reverse",right,left],
+    ["structural-copy",copyLeft,copyRight]]){
+    for(const fuel of [0n,1n,2n])for(const recDepth of [0n,15n,16n]){
+      const scalar={...checker.context,recDepth};
+      compare(get("psKernelSessionIsDefEq")(fuel,{...legacy.snd,context:scalar},l.term,r.term),
+        raw(fuel,ctx(scalar),direct.fst,l.id,r.id),"pair-warm-"+label+"-"+fuel+"-"+recDepth);
+    }
+  }
+  const duplicate=accepted(get("psKernelExprV2CheckStateDefEqFinish")(
+    direct.fst,copyRight.id,copyLeft.id,true),"pair-duplicate-finish");
+  must(duplicate.snd===true&&array(duplicate.fst.success).length===array(direct.fst.success).length,
+    "pair-success-set-deduplicates");
+  const untouched=accepted(get("psKernelExprV2CheckStateDefEqFinish")(
+    direct.fst,left.id,right.id,false),"pair-false-finish");
+  must(untouched.snd===false&&array(untouched.fst.success).length===array(direct.fst.success).length,
+    "pair-false-does-not-publish");
+  const entry=id=>accepted(get("psKernelExprV2PagedRequire")(pairArena,id),"pair-entry");
+  must(entry(left.id).hash===entry(collision.id).hash&&
+    equal(left.term,collision.term)===false,"pair-real-unequal-hash-collision");
+  for(const pair of array(direct.fst.success)){
+    const expected=(entry(pair.left).hash+entry(pair.right).hash)%get("psKernelCacheHashModulus");
+    must(pair.hash===expected,"pair-original-modular-hash-filter");
+  }
+  const contains=(state,l,r)=>accepted(get("psKernelExprV2DefEqPairContains")(
+    pairArena,state.success,l,r),"pair-contains");
+  must(contains(direct.fst,collision.id,right.id)===false,
+    "pair-hash-collision-cannot-authorize-hit");
+  const missed=raw(1n,context,direct.fst,collision.id,right.id);
+  compare(get("psKernelSessionIsDefEq")(1n,legacy.snd,collision.term,right.term),missed,
+    "pair-collision-low-fuel");
+  const missedResult=accepted(missed,"pair-collision-some");
+  must(rejected(missedResult)&&missedResult.error==="kernel definitional equality budget exhausted",
+    "pair-collision-keeps-child-fuel-error");
+
+  compare(get("psKernelSessionIsDefEq")(1n,checker,left.term,right.term),
+    raw(1n,context,emptyState,left.id,right.id),"pair-fresh-owner-has-no-receipt");
+  const localResult=accepted(accepted(raw(1n,context,emptyState,localNode.id,localNode.id),
+    "pair-local-some"),"pair-local-result");
+  must(localResult.snd===true&&array(localResult.fst.success).length===0,
+    "pair-free-variable-syntax-does-not-publish");
+  must(contains(localResult.fst,localNode.id,localNode.id)===false,
+    "pair-free-variable-is-not-semantic-key");
+  must(rejected(get("psKernelExprV2DefEqPairContains")(
+    pairArena,direct.fst.success,pairArena.size,right.id)),"pair-invalid-query-id-rejected");
+  const secondLegacy=accepted(get("psKernelSessionIsDefEq")(
+    64n,legacy.snd,right.term,collision.term),"pair-second-legacy");
+  const secondDirect=accepted(accepted(raw(64n,context,direct.fst,right.id,collision.id),
+    "pair-second-some"),"pair-second-result");
+  must(secondLegacy.fst===true&&secondDirect.snd===true&&
+    contains(secondDirect.fst,left.id,collision.id)===false,"pair-no-transitive-closure");
+  compare(get("psKernelSessionIsDefEq")(1n,secondLegacy.snd,left.term,collision.term),
+    raw(1n,context,secondDirect.fst,left.id,collision.id),"pair-transitivity-keeps-fuel-error");
+  for(const [label,l,r] of negatives){
+    for(const fuel of [0n,1n,2n,8n])for(const recDepth of [0n,15n,16n]){
+      const scalar={...checker.context,recDepth};
+      compare(get("psKernelSessionIsDefEq")(fuel,{...checker,context:scalar},l.term,r.term),
+        raw(fuel,ctx(scalar),emptyState,l.id,r.id),"pair-"+label+"-"+fuel+"-"+recDepth);
+    }
+    const result=accepted(accepted(raw(8n,context,emptyState,l.id,r.id),
+      "pair-negative-some-"+label),"pair-negative-result-"+label);
+    must(result.snd===false&&array(result.fst.success).length===0,
+      "pair-negative-does-not-publish-"+label);
+  }
+  console.log("PSC1_V2_DAG_JS_STATEFUL_DEFEQ: PASS");
 }
 
 reportDagSmoke();

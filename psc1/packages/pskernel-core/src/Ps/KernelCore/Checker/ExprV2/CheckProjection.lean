@@ -77,7 +77,7 @@ def psKernelExprV2CheckProjectionViewOnCanonical
 def psKernelExprV2CheckProjectionFinalWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (propType : Bool) (current : Nat) :
@@ -115,7 +115,7 @@ def psKernelExprV2CheckProjectionFinalWith
 def psKernelExprV2CheckProjectionFieldsWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState)
@@ -152,7 +152,7 @@ def psKernelExprV2CheckProjectionFieldsWith
 def psKernelExprV2CheckProjectionFromViewWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState)
@@ -178,7 +178,7 @@ def psKernelExprV2CheckProjectionFromViewWith
 def psKernelExprV2CheckProjectionInferWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState)
@@ -208,7 +208,7 @@ def psKernelExprV2CheckProjectionInferWith
 def psKernelExprV2CheckProjectionWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState)

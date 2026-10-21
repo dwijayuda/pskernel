@@ -7,12 +7,12 @@ always run WHNF, even when the input is already a Sort. Every type and
 intermediate projection remains an ID in the owning canonical arena.
 -/
 def psKernelExprV2CheckProjectionWhnfWith
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  match whnf context.scalar state.whnf root with
+  match whnf context state.whnf root with
   | Option.none => Option.none
   | Option.some attempted =>
       match attempted with
@@ -25,7 +25,7 @@ def psKernelExprV2CheckProjectionWhnfWith
                 (Prod.snd result)))
 
 def psKernelExprV2CheckProjectionSortWith
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat) :
@@ -48,7 +48,7 @@ def psKernelExprV2CheckProjectionSortWith
 def psKernelExprV2CheckProjectionIsPropWith
     (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (context : PsKernelExprV2CheckContext)
     (state : PsKernelExprV2CheckState) (root : Nat) :
@@ -86,21 +86,21 @@ def psKernelExprV2CheckProjectionInstantiate
 
 def psKernelExprV2CheckProjectionApplyParamsWithFuel
     (fuel : Nat) :
-    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState ->
     List Nat -> Nat -> Nat -> Nat ->
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
   match fuel with
   | Nat.zero =>
-      fun (_whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      fun (_whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
           Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
           (_context : PsKernelExprV2CheckContext)
           (_state : PsKernelExprV2CheckState) (_args : List Nat)
           (_index _numParams _current : Nat) =>
         Option.some (Except.error "kernel projection parameter budget exhausted")
   | Nat.succ remaining =>
-      fun (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      fun (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
           Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
           (context : PsKernelExprV2CheckContext)
           (state : PsKernelExprV2CheckState) (args : List Nat)
@@ -149,7 +149,7 @@ def psKernelExprV2CheckProjectionSkipFieldsWithFuel
     (fuel : Nat) :
     (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat))) ->
-    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    (PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState ->
     PsKernelName -> Nat -> Bool -> Nat -> Nat -> Nat ->
@@ -158,7 +158,7 @@ def psKernelExprV2CheckProjectionSkipFieldsWithFuel
   | Nat.zero =>
       fun (_check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
           Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-          (_whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          (_whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
           Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
           (_context : PsKernelExprV2CheckContext)
           (_state : PsKernelExprV2CheckState) (_inductName : PsKernelName)
@@ -168,7 +168,7 @@ def psKernelExprV2CheckProjectionSkipFieldsWithFuel
   | Nat.succ remaining =>
       fun (check : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
           Option (Except String (Prod PsKernelExprV2CheckState Nat)))
-          (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
           Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
           (context : PsKernelExprV2CheckContext)
           (state : PsKernelExprV2CheckState) (inductName : PsKernelName)

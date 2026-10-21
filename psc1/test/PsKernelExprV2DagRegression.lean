@@ -1489,8 +1489,7 @@ private def nestedDiagnosticClassification : IO Unit := do
 private def binderRaw
     (fuel : Nat) (context : PsKernelCheckerContext)
     (state : PsKernelExprV2CheckState) (root : Nat) :=
-  psKernelExprV2TryCheckCoreWithFuel fuel
-    (psKernelExprV2TryWhnfStateWithFuel fuel)
+  psKernelExprV2TryCheckStateWithFuel fuel
     (psKernelExprV2CheckContextEmpty context) state root
 
 private def compareBinderRaw (label : String)
@@ -1653,16 +1652,14 @@ private def binderParity : IO Unit := do
        | some (.ok result) =>
            match result.fst.checkedInfer with | [] => true | _ => false
        | _ => false)
-  let unsupported : List PsKernelExpr := [
-    .letE x sort1 sort0 (.bvar 0) false]
-  for term in unsupported do
-    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
-    require "binder-explicit-complete-checker-fallback"
-      (match psKernelExprV2TryCheckWithFuel 64 checker.context arena root with
-       | none => true | _ => false)
-    require "binder-fallback-public-parity"
-      (sameCheck (psKernelV1CheckExpression session [] .safe term)
-        (oneCheck session arena root))
+  let letTerm := PsKernelExpr.letE x sort1 sort0 (.bvar 0) false
+  let (letArena, letRoot) ← expect (psKernelExprV2PagedImportChecked letTerm)
+  compareBinderRaw "binder-let-now-direct"
+    (psKernelSessionCheck 64 checker letTerm)
+    (binderRaw 64 checker.context (psKernelExprV2CheckStateEmpty letArena) letRoot)
+  require "binder-let-public-parity"
+    (sameCheck (psKernelV1CheckExpression session [] .safe letTerm)
+      (oneCheck session letArena letRoot))
   let invalidProjection := PsKernelExpr.proj (nm "binder-unknown-structure") 0 sort0
   let (invalidArena, invalidRoot) ← expect (psKernelExprV2PagedImportChecked invalidProjection)
   require "binder-projection-now-direct-negative"
@@ -1948,6 +1945,7 @@ private def projectionOfficialBinder : PsKernelBinderInfo → Lean.BinderInfo
 
 private def projectionOfficialExpr : PsKernelExpr → Option Lean.Expr
   | .bvar index => some (.bvar index)
+  | .fvar name => some (.fvar (Lean.FVarId.mk (quickOfficialName name)))
   | .sort level => (quickOfficialLevel level).map Lean.Expr.sort
   | .const name levels => do
       return .const (quickOfficialName name) (← levels.mapM quickOfficialLevel)
@@ -2139,8 +2137,8 @@ private def projectionCheckParity : IO Unit := do
        | .error error => error == message | _ => false)
   require "projection-external-owner-remains-fallback"
     ((psKernelExprV2TryCheckWithFuel 64 checker.context arena firstRoot).isNone)
-  let whnf := psKernelExprV2TryWhnfStateWithFuel 64
-  let check := psKernelExprV2TryCheckCoreWithFuel 64 whnf
+  let whnf := psKernelExprV2CheckWhnfWithFuel 64
+  let check := psKernelExprV2TryCheckStateWithFuel 64
   let context := psKernelExprV2CheckContextEmpty checker.context
   require "projection-parameter-zero-budget"
     (match psKernelExprV2CheckProjectionApplyParamsWithFuel 0
@@ -2155,7 +2153,7 @@ private def projectionCheckParity : IO Unit := do
   let sortBuilt ← expect (psKernelExprV2PagedMkSort arena .zero)
   require "projection-sort-does-not-skip-whnf-budget"
     (match psKernelExprV2CheckProjectionSortWith
-        (psKernelExprV2TryWhnfStateWithFuel 0) context
+        (psKernelExprV2CheckWhnfWithFuel 0) context
         (stateFor sortBuilt.fst) sortBuilt.snd with
      | some (.error error) => error == "kernel reduction budget exhausted"
      | _ => false)
@@ -2188,6 +2186,376 @@ private def projectionCheckParity : IO Unit := do
   IO.println "PSC1_V2_DAG_OFFICIAL_CHECK_PROJECTION: PASS"
   IO.println "PSC1_V2_DAG_CHECK_PROJECTION: PASS"
 
+private def letRaw
+    (fuel : Nat) (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (root : Nat) :=
+  psKernelExprV2TryCheckStateWithFuel fuel context state root
+
+private def compareLetDefEq (label : String)
+    (legacy : Except String (Prod Bool PsKernelCheckerSession))
+    (attempted : Option (Except String (Prod PsKernelExprV2CheckState Bool))) : IO Unit := do
+  match legacy, attempted with
+  | .error left, some (.error right) => require (label ++ "-error") (left == right)
+  | .ok left, some (.ok right) => require (label ++ "-value") (left.fst == right.snd)
+  | _, _ => throw (IO.userError ("PSC1_V2_LET_DEFEQ_MISSING_RESULT " ++ label))
+
+private def checkedLetParity : IO Unit := do
+  let x := nm "let-x"
+  let a := nm "let-a"
+  let f := nm "let-f"
+  let y := nm "let-y"
+  let sort2 := PsKernelExpr.sort (.succ (.succ .zero))
+  let one := PsKernelLevel.succ .zero
+  let duplicateOne := PsKernelExpr.sort (.max one one)
+  let functionType := PsKernelExpr.forallE x sort1 sort1 .default
+  let mut hiddenFunctionType := functionType
+  for tag in [:8] do hiddenFunctionType := .mdata (tag + 9100) hiddenFunctionType
+  let fixtures : List (String × PsKernelExpr) := [
+    ("unused", .letE a sort1 sort0 sort1 false),
+    ("body-local", .letE a sort1 sort0 (.bvar 0) false),
+    ("nondep-hint", .letE a sort1 sort0 sort1 true),
+    ("dependent-result", .letE a sort1 sort0
+      (.lam x (.bvar 0) (.bvar 0) .default) false),
+    ("sort-local-value", .letE a sort2 sort1
+      (.forallE x (.bvar 0) (.forallE y (.bvar 0) (.bvar 1) .default) .default) false),
+    ("function-local-value", .letE a sort2 functionType
+      (.lam f (.bvar 0) (.app (.bvar 0) sort0) .default) false),
+    ("function-local-value-metadata", .letE a sort2 hiddenFunctionType
+      (.lam f (.bvar 0) (.app (.bvar 0) sort0) .default) false),
+    ("nested-same-name", .letE a sort1 sort0
+      (.letE a sort1 (.bvar 0) (.bvar 0) false) false),
+    ("inside-lambda", .lam x sort1
+      (.letE y sort1 (.bvar 0) (.bvar 0) false) .default),
+    ("sort-conversion", .letE a duplicateOne sort0 (.bvar 0) false),
+    ("metadata-body", .letE a sort1 sort0 (.mdata 3 (.bvar 0)) false),
+    ("bad-value-type", .letE a sort1 sort1 (.bvar 0) false),
+    ("bad-declared-type", .letE a (.lam x sort1 (.bvar 0) .default)
+      sort0 (.bvar 0) false),
+    ("loose-value", .letE a sort1 (.bvar 0) (.bvar 0) false),
+    ("unknown-body", .letE a sort1 sort0 (.fvar (nm "let-outside")) false),
+    ("bad-body-app", .letE a sort1 sort0 (.app sort0 sort0) false)]
+  let officialEnv ← Lean.mkEmptyEnvironment
+  for (label, term) in fixtures do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,3,4,8,9,10,11,12,16,32,64] do
+      for maxDepth in [0,1,2] do
+        let session ← fresh fuel maxDepth
+        let checker := psKernelKernelSessionChecker session [] .safe
+        for recDepth in [0,13,14,15,16] do
+          let context := { checker.context with recDepth := recDepth }
+          compareBinderRaw ("let-" ++ label)
+            (psKernelSessionCheck fuel { checker with context := context } term)
+            (letRaw fuel (psKernelExprV2CheckContextEmpty context)
+              (psKernelExprV2CheckStateEmpty arena) root)
+        require ("let-public-" ++ label)
+          (sameCheck (psKernelV1CheckExpression session [] .safe term)
+            (oneCheck session arena root))
+    let session ← fresh 64
+    let independent := oneCheck session arena root
+    let some officialTerm := projectionOfficialExpr term
+      | throw (IO.userError ("let-official-conversion-" ++ label))
+    match Lean.Kernel.check officialEnv {} officialTerm, independent with
+    | .error _, .error _ => pure ()
+    | .ok officialType, .ok batch =>
+        let some checked := checkReply batch
+          | throw (IO.userError ("let-official-missing-reply-" ++ label))
+        let some convertedType := projectionOfficialExpr checked.type
+          | throw (IO.userError ("let-official-type-conversion-" ++ label))
+        require ("let-official-type-" ++ label)
+          (match Lean.Kernel.isDefEq officialEnv {} officialType convertedType with
+           | .ok equal => equal | .error _ => false)
+    | _, _ => throw (IO.userError ("PSC1_V2_LET_OFFICIAL_MISMATCH " ++ label))
+  let literalBody := PsKernelExpr.letE a sort1 sort0 (.lit (.nat 65521)) false
+  let (arena, root) ← expect (psKernelExprV2PagedImportChecked literalBody)
+  for fuel in [0,1,2,3,8] do
+    for limit in [0,7,8,16] do
+      let initial ← fresh fuel
+      let session := { initial with resources := { initial.resources with maxNatSize := limit } }
+      let checker := psKernelKernelSessionChecker session [] .safe
+      compareBinderRaw "let-numeral-resource-order"
+        (psKernelSessionCheck fuel checker literalBody)
+        (letRaw fuel (psKernelExprV2CheckContextEmpty checker.context)
+          (psKernelExprV2CheckStateEmpty arena) root)
+      require "let-numeral-public-resource-order"
+        (sameCheck (psKernelV1CheckExpression session [] .safe literalBody)
+          (oneCheck session arena root))
+  let term := PsKernelExpr.letE a sort1 sort0 (.bvar 0) false
+  let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+  let session ← fresh 64 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let legacy ← expect (psKernelSessionCheck 64 checker term)
+  let direct ←
+    match letRaw 64 (psKernelExprV2CheckContextEmpty checker.context)
+        (psKernelExprV2CheckStateEmpty arena) root with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_LET_WARM_FALLBACK")
+  for (fuel, recDepth) in [(0,0),(1,0),(1,15),(1,16)] do
+    let context := { checker.context with recDepth := recDepth }
+    compareBinderRaw "let-warm-inference-entry-guards"
+      (psKernelSessionCheck fuel { legacy.snd with context := context } term)
+      (letRaw fuel (psKernelExprV2CheckContextEmpty context) direct.fst root)
+  let escaped := PsKernelName.num a 0
+  let (arena, escapedId) ← expect (psKernelExprV2PagedMkFVar direct.fst.whnf.arena escaped)
+  compareBinderRaw "let-local-value-does-not-escape"
+    (psKernelSessionCheck 64 legacy.snd (.fvar escaped))
+    (letRaw 64 (psKernelExprV2CheckContextEmpty checker.context)
+      (psKernelExprV2CheckStateWithArena direct.fst arena) escapedId)
+  IO.println "PSC1_V2_DAG_CHECK_LET: PASS"
+  IO.println "PSC1_V2_DAG_OFFICIAL_CHECK_LET: PASS"
+
+private def checkedLetCacheScope : IO Unit := do
+  let x := nm "let-cache-x"
+  let w := nm "let-cache-w"
+  let a := nm "let-cache-a"
+  let b := nm "let-cache-b"
+  let one := PsKernelLevel.succ .zero
+  let two := PsKernelLevel.succ one
+  let mut outerLeft := PsKernelExpr.sort one
+  let mut outerRight := PsKernelExpr.sort (.max one one)
+  let mut innerLeft := PsKernelExpr.sort two
+  let mut innerRight := PsKernelExpr.sort (.max two two)
+  for tag in [:8] do
+    outerLeft := .mdata (9200 + tag) outerLeft
+    outerRight := .mdata (9300 + tag) outerRight
+    innerLeft := .mdata (9400 + tag) innerLeft
+    innerRight := .mdata (9500 + tag) innerRight
+  let term := PsKernelExpr.letE a outerRight (.fvar x)
+    (.letE b innerRight (.fvar w) sort0 false) false
+  let (a0, outerLeftId) ← expect (psKernelExprV2PagedImportChecked outerLeft)
+  let (a1, outerRightId) ← expect (psKernelExprV2PagedImportIntoChecked a0 outerRight)
+  let (a2, innerLeftId) ← expect (psKernelExprV2PagedImportIntoChecked a1 innerLeft)
+  let (a3, innerRightId) ← expect (psKernelExprV2PagedImportIntoChecked a2 innerRight)
+  let (arena, root) ← expect (psKernelExprV2PagedImportIntoChecked a3 term)
+  let initial ← fresh 64 1
+  let base := psKernelKernelSessionChecker initial [] .safe
+  let old1 := psKernelLocalContextAddLocal base.context.localContext x x outerLeft .default
+  let old2 := psKernelLocalContextAddLocal old1 w w innerLeft .default
+  let oldContext := psKernelCheckerContextWithLocalContext base.context old2
+  let typed1 := psKernelExprV2CheckContextWithLocal
+    (psKernelExprV2CheckContextEmpty base.context) x x outerLeftId .default
+  let typed2 := psKernelExprV2CheckContextWithLocal typed1 w w innerLeftId .default
+  let legacy ← expect (psKernelSessionCheck 64 { base with context := oldContext } term)
+  let direct ←
+    match letRaw 64 typed2 (psKernelExprV2CheckStateEmpty arena) root with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_LET_CACHE_SCOPE_FALLBACK")
+  require "let-nested-scopes-preserve-monotone-fresh"
+    (legacy.snd.state.nextFresh == 2 && direct.fst.nextFresh == 2)
+  for (fuel, recDepth) in [(0,0),(1,0),(1,15),(1,16)] do
+    let old := { oldContext with recDepth := recDepth }
+    let typed := { typed2 with scalar := { base.context with recDepth := recDepth } }
+    compareLetDefEq "let-parent-success-pair-entry-guards"
+      (psKernelSessionIsDefEq fuel { legacy.snd with context := old } outerLeft outerRight)
+      (psKernelExprV2TryDefEqStateWithFuel fuel typed direct.fst outerLeftId outerRightId)
+  require "let-parent-comparison-survives-scope"
+    (match psKernelExprV2TryDefEqStateWithFuel 1 typed2 direct.fst outerLeftId outerRightId with
+     | some (.ok result) => result.snd | _ => false)
+  compareLetDefEq "let-parent-cold-comparison-needs-recursion"
+    (psKernelSessionIsDefEq 1 { base with context := oldContext } outerLeft outerRight)
+    (psKernelExprV2TryDefEqStateWithFuel 1 typed2
+      (psKernelExprV2CheckStateEmpty arena) outerLeftId outerRightId)
+  require "let-parent-cold-comparison-is-not-syntax"
+    (match psKernelExprV2TryDefEqStateWithFuel 1 typed2
+        (psKernelExprV2CheckStateEmpty arena) outerLeftId outerRightId with
+     | some (.error error) => error == "kernel definitional equality budget exhausted"
+     | _ => false)
+  compareLetDefEq "let-child-success-pair-restored-away"
+    (psKernelSessionIsDefEq 1 legacy.snd innerLeft innerRight)
+    (psKernelExprV2TryDefEqStateWithFuel 1 typed2 direct.fst innerLeftId innerRightId)
+  require "let-child-comparison-cannot-authorize-parent"
+    (match psKernelExprV2TryDefEqStateWithFuel 1 typed2 direct.fst innerLeftId innerRightId with
+     | some (.error error) => error == "kernel definitional equality budget exhausted"
+     | _ => false)
+  IO.println "PSC1_V2_DAG_LET_CACHE_SCOPE: PASS"
+
+private def checkedLocalValueWhnfParity : IO Unit := do
+  let x := nm "let-whnf-x"
+  let y := nm "let-whnf-y"
+  let f := nm "let-whnf-f"
+  let identity := PsKernelExpr.lam (nm "let-whnf-arg") sort1 (.bvar 0) .default
+  let identityType := PsKernelExpr.forallE (nm "let-whnf-arg") sort1 sort1 .default
+  let (a0, sort0Id) ← expect (psKernelExprV2PagedImportChecked sort0)
+  let (a1, sort1Id) ← expect (psKernelExprV2PagedImportIntoChecked a0 sort1)
+  let (a2, xId) ← expect (psKernelExprV2PagedMkFVar a1 x)
+  let (a3, identityId) ← expect (psKernelExprV2PagedImportIntoChecked a2 identity)
+  let (arena, identityTypeId) ← expect (psKernelExprV2PagedImportIntoChecked a3 identityType)
+  let session ← fresh 64 1
+  let base := psKernelKernelSessionChecker session [] .safe
+  let old1 := psKernelLocalContextAddLet base.context.localContext x x sort1 sort0
+  let old2 := psKernelLocalContextAddLet old1 y y sort1 (.fvar x)
+  let old3 := psKernelLocalContextAddLet old2 f f identityType identity
+  let typed1 := psKernelExprV2CheckContextWithLet
+    (psKernelExprV2CheckContextEmpty base.context) x x sort1Id sort0Id
+  let typed2 := psKernelExprV2CheckContextWithLet typed1 y y sort1Id xId
+  let typed3 := psKernelExprV2CheckContextWithLet typed2 f f identityTypeId identityId
+  let shadowOld := psKernelLocalContextAddLocal old3 x x sort1 .default
+  let shadowTyped := psKernelExprV2CheckContextWithLocal typed3 x x sort1Id .default
+  let mut metadataAlias := PsKernelExpr.fvar y
+  for tag in [:8] do metadataAlias := .mdata tag metadataAlias
+  let cases := [
+    ("one-local", PsKernelExpr.fvar x, old3, typed3),
+    ("alias-chain", PsKernelExpr.fvar y, old3, typed3),
+    ("metadata-chain", metadataAlias, old3, typed3),
+    ("local-function", PsKernelExpr.app (.fvar f) sort0, old3, typed3),
+    ("value-free-shadow", PsKernelExpr.fvar x, shadowOld, shadowTyped)]
+  for (label, term, oldLocals, typed) in cases do
+    let (nextArena, root) ← expect (psKernelExprV2PagedImportIntoChecked arena term)
+    for maxDepth in [0,1,2] do
+      for recDepth in [0,13,14,15,16] do
+        let oldContext := psKernelCheckerContextWithLocalContext
+          { base.context with maxRecDepth := maxDepth, recDepth := recDepth } oldLocals
+        let newContext := { typed with scalar :=
+          { base.context with maxRecDepth := maxDepth, recDepth := recDepth } }
+        for fuel in [0,1,2,3,4,8,10,11,12,16,64] do
+          let localValue := fun name => psKernelExprV2CheckLocalValue newContext name
+          let publicWhnf := fun context state expr =>
+            psKernelExprV2TryWhnfStateWithLocalValuesFuel fuel localValue
+              context state expr
+          rawStateWhnfParity ("let-local-public-" ++ label)
+            (psKernelSessionWhnf fuel { base with context := oldContext } term)
+            (psKernelExprV2CheckWhnfWithFuel fuel newContext
+              (psKernelExprV2WhnfStateEmpty nextArena) root)
+          rawStateWhnfParity ("let-local-core-" ++ label)
+            (psKernelWhnfCoreWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel)
+              oldContext base.state term false false)
+            (psKernelExprV2TryWhnfCoreWithLocalValuesFuel fuel localValue publicWhnf
+              newContext.scalar (psKernelExprV2WhnfStateEmpty nextArena) root)
+  require "let-local-public-predecessor-core-budget"
+    (match psKernelExprV2CheckWhnfWithFuel 2 typed3
+        (psKernelExprV2WhnfStateEmpty arena) xId with
+     | some (.error error) => error == "kernel reduction budget exhausted"
+     | _ => false)
+  rawStateWhnfParity "let-local-public-budget-three"
+    (psKernelSessionWhnf 3
+      { base with context := psKernelCheckerContextWithLocalContext base.context old3 }
+      (.fvar x))
+    (psKernelExprV2CheckWhnfWithFuel 3 typed3
+      (psKernelExprV2WhnfStateEmpty arena) xId)
+  let mixed := { shadowTyped with scalar :=
+    psKernelCheckerContextWithLocalContext base.context old3 }
+  require "let-local-mixed-representations-request-fallback"
+    (match psKernelExprV2CheckWhnfWithFuel 64 mixed
+        (psKernelExprV2WhnfStateEmpty arena) xId with
+     | none => true | _ => false)
+  let (badArena, badBody) ← expect (psKernelExprV2PagedMkBVar arena 1)
+  let state := psKernelExprV2CheckStateEmpty badArena
+  let opened := PsKernelExprV2OpenedCheckBinder.mk
+    (psKernelExprV2CheckContextEmpty base.context) state x badBody
+  require "let-close-range-is-not-exact-index-occurrence"
+    (!(psKernelExprHasLooseBVarAt (.bvar 1) 0))
+  require "let-close-unproved-loose-context-requests-fallback"
+    (match psKernelExprV2CheckCloseLet opened state badBody badBody
+        y sort1Id sort0Id false with
+     | none => true | _ => false)
+  IO.println "PSC1_V2_DAG_LET_LOCAL_WHNF: PASS"
+
+private def statefulDefEqPairParity : IO Unit := do
+  let one := PsKernelLevel.succ .zero
+  let equivalent := PsKernelExpr.sort (.max one one)
+  let left := PsKernelExpr.mdata 0 sort1
+  let right := PsKernelExpr.mdata 1 equivalent
+  let collision := PsKernelExpr.mdata 65521 sort1
+  let localExpr := PsKernelExpr.fvar (nm "pair-local")
+  let (a0, leftId) ← expect (psKernelExprV2PagedImportChecked left)
+  let (a1, rightId) ← expect (psKernelExprV2PagedImportIntoChecked a0 right)
+  let (a2, collisionId) ← expect (psKernelExprV2PagedImportIntoChecked a1 collision)
+  let (a3, copyLeft) ← expect (psKernelExprV2PagedImportIntoChecked a2 left)
+  let (a4, copyRight) ← expect (psKernelExprV2PagedImportIntoChecked a3 right)
+  let (arena, localId) ← expect (psKernelExprV2PagedImportIntoChecked a4 localExpr)
+  let session ← fresh 64 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let context := psKernelExprV2CheckContextEmpty checker.context
+  let emptyState := psKernelExprV2CheckStateEmpty arena
+  let legacy ← expect (psKernelSessionIsDefEq 64 checker left right)
+  let direct ←
+    match psKernelExprV2TryDefEqStateWithFuel 64 context emptyState leftId rightId with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_PAIR_PRIMING_FALLBACK")
+  require "pair-prime-true" (legacy.fst && direct.snd)
+  require "pair-prime-publishes-child-and-parent" (direct.fst.success.length == 2)
+  require "pair-copy-uses-distinct-identifiers" (leftId != copyLeft && rightId != copyRight)
+  for (label, l, r, lid, rid) in [
+      ("forward", left, right, leftId, rightId),
+      ("reverse", right, left, rightId, leftId),
+      ("structural-copy", left, right, copyLeft, copyRight)] do
+    for fuel in [0,1,2] do
+      for recDepth in [0,15,16] do
+        let scalar := { checker.context with recDepth := recDepth }
+        compareLetDefEq ("pair-warm-" ++ label)
+          (psKernelSessionIsDefEq fuel { legacy.snd with context := scalar } l r)
+          (psKernelExprV2TryDefEqStateWithFuel fuel
+            (psKernelExprV2CheckContextEmpty scalar) direct.fst lid rid)
+  let duplicate ← expect
+    (psKernelExprV2CheckStateDefEqFinish direct.fst copyRight copyLeft true)
+  require "pair-success-set-does-not-grow-on-duplicate"
+    (duplicate.snd && duplicate.fst.success.length == direct.fst.success.length)
+  let untouched ← expect
+    (psKernelExprV2CheckStateDefEqFinish direct.fst leftId rightId false)
+  require "pair-false-does-not-publish"
+    (!untouched.snd && untouched.fst.success.length == direct.fst.success.length)
+  let leftEntry ← expect (psKernelExprV2PagedRequire arena leftId)
+  let collisionEntry ← expect (psKernelExprV2PagedRequire arena collisionId)
+  require "pair-real-hash-collision"
+    (leftEntry.hash == collisionEntry.hash &&
+      psKernelExprHash left == psKernelExprHash collision && !(psKernelExprEq left collision))
+  let missed ← expect
+    (psKernelExprV2DefEqPairContains arena direct.fst.success collisionId rightId)
+  require "pair-hash-collision-cannot-authorize-hit" (!missed)
+  compareLetDefEq "pair-hash-collision-low-fuel"
+    (psKernelSessionIsDefEq 1 legacy.snd collision right)
+    (psKernelExprV2TryDefEqStateWithFuel 1 context direct.fst collisionId rightId)
+  require "pair-collision-retains-child-fuel-error"
+    (match psKernelExprV2TryDefEqStateWithFuel 1 context direct.fst collisionId rightId with
+     | some (.error error) => error == "kernel definitional equality budget exhausted"
+     | _ => false)
+  compareLetDefEq "pair-fresh-owner-has-no-warm-receipt"
+    (psKernelSessionIsDefEq 1 checker left right)
+    (psKernelExprV2TryDefEqStateWithFuel 1 context emptyState leftId rightId)
+  let localResult ←
+    match psKernelExprV2TryDefEqStateWithFuel 1 context emptyState localId localId with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_PAIR_LOCAL_SYNTAX_FALLBACK")
+  require "pair-free-variable-syntax-does-not-publish"
+    (localResult.snd && localResult.fst.success.length == 0)
+  let localCached ← expect
+    (psKernelExprV2DefEqPairContains arena localResult.fst.success localId localId)
+  require "pair-free-variable-is-not-semantic-key" (!localCached)
+  require "pair-invalid-query-id-is-rejected"
+    (match psKernelExprV2DefEqPairContains arena direct.fst.success arena.size rightId with
+     | .error _ => true | _ => false)
+  for (label, l, r) in [
+      ("sort-false", sort0, sort1),
+      ("literal-false", PsKernelExpr.lit (.nat 7), PsKernelExpr.lit (.nat 8)),
+      ("string-false", PsKernelExpr.lit (.str "a"), PsKernelExpr.lit (.str "b"))] do
+    let (a0, lid) ← expect (psKernelExprV2PagedImportChecked l)
+    let (graph, rid) ← expect (psKernelExprV2PagedImportIntoChecked a0 r)
+    for fuel in [0,1,2,8] do
+      for recDepth in [0,15,16] do
+        let scalar := { checker.context with recDepth := recDepth }
+        compareLetDefEq ("pair-" ++ label)
+          (psKernelSessionIsDefEq fuel { checker with context := scalar } l r)
+          (psKernelExprV2TryDefEqStateWithFuel fuel
+            (psKernelExprV2CheckContextEmpty scalar)
+            (psKernelExprV2CheckStateEmpty graph) lid rid)
+    require ("pair-negative-does-not-publish-" ++ label)
+      (match psKernelExprV2TryDefEqStateWithFuel 8 context
+          (psKernelExprV2CheckStateEmpty graph) lid rid with
+       | some (.ok result) => !result.snd && result.fst.success.length == 0
+       | _ => false)
+  let secondLegacy ← expect (psKernelSessionIsDefEq 64 legacy.snd right collision)
+  let secondDirect ←
+    match psKernelExprV2TryDefEqStateWithFuel 64 context direct.fst rightId collisionId with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_PAIR_SECOND_PRIMING_FALLBACK")
+  let transitiveHit ← expect
+    (psKernelExprV2DefEqPairContains arena secondDirect.fst.success leftId collisionId)
+  require "pair-no-transitive-closure" (secondLegacy.fst && secondDirect.snd && !transitiveHit)
+  compareLetDefEq "pair-transitivity-keeps-fuel-error"
+    (psKernelSessionIsDefEq 1 secondLegacy.snd left collision)
+    (psKernelExprV2TryDefEqStateWithFuel 1 context secondDirect.fst leftId collisionId)
+  IO.println "PSC1_V2_DAG_STATEFUL_DEFEQ: PASS"
+
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -2208,5 +2576,9 @@ def main : IO Unit := do
   binderParity
   applicationCheckParity
   projectionCheckParity
+  checkedLetParity
+  checkedLetCacheScope
+  checkedLocalValueWhnfParity
+  statefulDefEqPairParity
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

@@ -1,20 +1,23 @@
 import Ps.KernelCore.Checker.ExprV2.WhnfState
 import Ps.KernelCore.Checker.Context
+import Ps.KernelCore.Checker.ExprV2.DefEqPair
 
 /-
 Checked inference owns its arena, typed local context, fresh counter and caches.
-Only value-free locals are introduced here. Types are IDs in the same canonical
-append-only arena; no legacy local type is imported during binder traversal.
+Local types and optional let values are IDs in the same canonical append-only
+arena; no legacy local type is imported during binder traversal.
 
 The reduction state is the existing WHNF state, not a second cache engine.
 Inference keys use the same collision-safe lookup and the original checked
-cache eligibility policy. No cache is accepted from an untrusted public caller.
+cache eligibility policy. The success-pair cache shares this operation and is restored on scope exit.
+No cache is accepted from an untrusted public caller.
 -/
 structure PsKernelExprV2CheckLocal where
   name : PsKernelName
   userName : PsKernelName
   type : Nat
   binderInfo : PsKernelBinderInfo
+  value : Option Nat
 
 structure PsKernelExprV2CheckContext where
   scalar : PsKernelCheckerContext
@@ -24,6 +27,7 @@ structure PsKernelExprV2CheckState where
   whnf : PsKernelExprV2WhnfState
   nextFresh : Nat
   checkedInfer : List PsKernelExprV2WhnfCacheEntry
+  success : List PsKernelExprV2DefEqPair
 
 def psKernelExprV2CheckContextEmpty
     (context : PsKernelCheckerContext) : PsKernelExprV2CheckContext :=
@@ -46,23 +50,42 @@ def psKernelExprV2CheckLocalFind
       if psKernelNameEq first.name name then Option.some first
       else psKernelExprV2CheckLocalFind rest name
 
+def psKernelExprV2CheckContextWithLocalValue
+    (context : PsKernelExprV2CheckContext)
+    (name userName : PsKernelName) (type : Nat) (binderInfo : PsKernelBinderInfo)
+    (value : Option Nat) : PsKernelExprV2CheckContext :=
+  PsKernelExprV2CheckContext.mk context.scalar
+    (List.cons
+      (PsKernelExprV2CheckLocal.mk name userName type binderInfo value)
+      context.locals)
+
 def psKernelExprV2CheckContextWithLocal
     (context : PsKernelExprV2CheckContext)
     (name userName : PsKernelName) (type : Nat) (binderInfo : PsKernelBinderInfo) :
     PsKernelExprV2CheckContext :=
-  PsKernelExprV2CheckContext.mk context.scalar
-    (List.cons
-      (PsKernelExprV2CheckLocal.mk name userName type binderInfo)
-      context.locals)
+  psKernelExprV2CheckContextWithLocalValue
+    context name userName type binderInfo Option.none
+
+def psKernelExprV2CheckContextWithLet
+    (context : PsKernelExprV2CheckContext)
+    (name userName : PsKernelName) (type value : Nat) : PsKernelExprV2CheckContext :=
+  psKernelExprV2CheckContextWithLocalValue
+    context name userName type PsKernelBinderInfo.default (Option.some value)
+
+def psKernelExprV2CheckLocalValue
+    (context : PsKernelExprV2CheckContext) (name : PsKernelName) : Option Nat :=
+  match psKernelExprV2CheckLocalFind context.locals name with
+  | Option.none => Option.none
+  | Option.some declaration => declaration.value
 
 def psKernelExprV2CheckStateEmpty
     (arena : PsKernelExprV2PagedArena) : PsKernelExprV2CheckState :=
-  PsKernelExprV2CheckState.mk (psKernelExprV2WhnfStateEmpty arena) 0 List.nil
+  PsKernelExprV2CheckState.mk (psKernelExprV2WhnfStateEmpty arena) 0 List.nil List.nil
 
 def psKernelExprV2CheckStateWithWhnf
     (state : PsKernelExprV2CheckState) (whnf : PsKernelExprV2WhnfState) :
     PsKernelExprV2CheckState :=
-  PsKernelExprV2CheckState.mk whnf state.nextFresh state.checkedInfer
+  PsKernelExprV2CheckState.mk whnf state.nextFresh state.checkedInfer state.success
 
 def psKernelExprV2CheckStateWithArena
     (state : PsKernelExprV2CheckState) (arena : PsKernelExprV2PagedArena) :
@@ -70,13 +93,49 @@ def psKernelExprV2CheckStateWithArena
   psKernelExprV2CheckStateWithWhnf state
     (psKernelExprV2WhnfStateWithArena state.whnf arena)
 
+def psKernelExprV2CheckStateWithSuccess
+    (state : PsKernelExprV2CheckState)
+    (success : List PsKernelExprV2DefEqPair) : PsKernelExprV2CheckState :=
+  PsKernelExprV2CheckState.mk state.whnf state.nextFresh state.checkedInfer success
+
+def psKernelExprV2CheckStateDefEqFinish
+    (state : PsKernelExprV2CheckState) (left right : Nat) (equal : Bool) :
+    Except String (Prod PsKernelExprV2CheckState Bool) :=
+  if equal then
+    match psKernelExprV2PagedRequire state.whnf.arena left with
+    | Except.error error => Except.error error
+    | Except.ok leftEntry =>
+        match psKernelExprV2PagedRequire state.whnf.arena right with
+        | Except.error error => Except.error error
+        | Except.ok rightEntry =>
+            if leftEntry.hasFVar then Except.ok (Prod.mk state true)
+            else
+              if rightEntry.hasFVar then Except.ok (Prod.mk state true)
+              else
+                let hash := Nat.mod
+                  (Nat.add leftEntry.hash rightEntry.hash) psKernelCacheHashModulus;
+                match psKernelExprV2DefEqPairFindIn
+                    state.success state.whnf.arena left right hash with
+                | Except.error error => Except.error error
+                | Except.ok cached =>
+                    if cached then Except.ok (Prod.mk state true)
+                    else
+                      Except.ok
+                        (Prod.mk
+                          (psKernelExprV2CheckStateWithSuccess state
+                            (List.cons
+                              (PsKernelExprV2DefEqPair.mk left right hash)
+                              state.success))
+                          true)
+  else Except.ok (Prod.mk state false)
+
 def psKernelExprV2CheckStateFreshName
     (state : PsKernelExprV2CheckState) (base : PsKernelName) :
     Prod PsKernelName PsKernelExprV2CheckState :=
   Prod.mk
     (PsKernelName.num base state.nextFresh)
     (PsKernelExprV2CheckState.mk state.whnf (Nat.succ state.nextFresh)
-      state.checkedInfer)
+      state.checkedInfer state.success)
 
 /-
 The child arena is retained because returned type IDs may name appended nodes.
@@ -88,7 +147,7 @@ def psKernelExprV2CheckStateExitLocalScope
   PsKernelExprV2CheckState.mk
     (psKernelExprV2WhnfStateWithArena parent.whnf child.whnf.arena)
     (psKernelStateNatMax parent.nextFresh child.nextFresh)
-    parent.checkedInfer
+    parent.checkedInfer parent.success
 
 def psKernelExprV2CheckedInferEligible
     (entry : PsKernelExprV2Entry) : Bool :=
@@ -121,7 +180,7 @@ def psKernelExprV2CheckedInferFinish
             (PsKernelExprV2CheckState.mk state.whnf state.nextFresh
               (List.cons
                 (PsKernelExprV2WhnfCacheEntry.mk source result entry.hash)
-                state.checkedInfer))
+                state.checkedInfer) state.success)
             result)
       else Except.ok (Prod.mk state result)
 

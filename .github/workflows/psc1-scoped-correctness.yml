@@ -217,6 +217,7 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --inference-control
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
           node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
+          node scripts/compiler-m-conformance-tests.mjs --checked-order
           python3 scripts/standalone-io-policy-tests.py
           export PSC1_STANDALONE_IO_COMMAND="[\"php\",\"-d\",\"ffi.enable=1\",\"$PWD/scripts/standalone-io-server.php\"]"
           export PSC1_STANDALONE_IO_ABI=psc1-php-linux-ffi-string-io/1
@@ -282,6 +283,8 @@ jobs:
           export PSC1_COLLECTION_EVIDENCE=stdlib-collections-python314
           export PSC1_JSON_TARGETS=python
           export PSC1_JSON_EVIDENCE=json-application-python314
+          export PSC1_ORDER_TARGETS=python
+          export PSC1_ORDER_EVIDENCE=checked-order-python314
           export PSC1_INFERENCE_TARGETS=python
           export PSC1_INFERENCE_EVIDENCE=inference-control-python314
           export PSC1_IO_SEQUENCING_TARGETS=python
@@ -294,6 +297,7 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --inference-control
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
           node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
+          node scripts/compiler-m-conformance-tests.mjs --checked-order
           PSC1_IO_APPLICATION_TARGETS=python PSC1_IO_APPLICATION_EVIDENCE=typed-io-python314 node scripts/typed-io-application-tests.mjs
           PSC1_IO_DISPATCHER_TARGETS=python PSC1_IO_DISPATCHER_EVIDENCE=typed-io-dispatcher-python314 node scripts/typed-io-dispatcher-tests.mjs
           node scripts/typed-error-conformance-tests.mjs

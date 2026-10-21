@@ -68,6 +68,12 @@
       "receipt": "dist/scoped-correctness/typed-io-sequencing/results.json",
       "fixture": "test/TypedIoSequencingFixtures",
       "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "checked-order": {
+      "contract": "docs/PSC1_ORDER_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/checked-order/results.json",
+      "fixture": "test/OrderFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
     }
   },
   "families": [
@@ -81,7 +87,11 @@
         },
         {
           "id": "order",
-          "meaning": "Nat/Int proposition-valued order with independently admitted decisions; false/true and equal boundaries."
+          "meaning": "Nat/Int proposition-valued order with independently admitted decisions; false/true and equal boundaries.",
+          "execution": {
+            "suite": "checked-order",
+            "case": "natOrderCase"
+          }
         },
         {
           "id": "short-circuit",

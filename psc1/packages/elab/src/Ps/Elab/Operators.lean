@@ -106,6 +106,64 @@ def psOperatorEqualityTerm (name : PsName) (operands : PsElabOperatorOperands) :
         (PsExpr.constE psBoolFalseName []) (PsExpr.constE psBoolTrueName [])))
   else Except.error PsElabError.unsupportedTerm
 
+def psOperatorOrderName (operator : String) (domain : PsName) : Option PsName :=
+  let natural := psNameEq domain psNatName;
+  if natural || psNameEq domain psIntName then
+    if psStringEq operator "<" then Option.some (if natural then psNatLtName else psIntLtName)
+    else if psStringEq operator "<=" || psStringEq operator "≤" then Option.some (if natural then psNatLeName else psIntLeName)
+    else if psStringEq operator ">" then Option.some (if natural then psNatGtName else psIntGtName)
+    else if psStringEq operator ">=" || psStringEq operator "≥" then Option.some (if natural then psNatGeName else psIntGeName)
+    else Option.none
+  else Option.none
+
+def psOperatorOrderDecisionName (relation : PsName) : Option PsName :=
+  if psNameEq relation psNatLtName then Option.some psNatDecLtName
+  else if psNameEq relation psNatLeName then Option.some psNatDecLeName
+  else if psNameEq relation psNatGtName then Option.some psNatDecGtName
+  else if psNameEq relation psNatGeName then Option.some psNatDecGeName
+  else if psNameEq relation psIntLtName then Option.some psIntDecLtName
+  else if psNameEq relation psIntLeName then Option.some psIntDecLeName
+  else if psNameEq relation psIntGtName then Option.some psIntDecGtName
+  else if psNameEq relation psIntGeName then Option.some psIntDecGeName
+  else Option.none
+
+structure PsElabCondition where
+  context : PsElabContext
+  proposition : PsExpr
+  decision : PsExpr
+
+-- Try the established Bool context transactionally; only a checked order Prop
+-- selects the second path. Failed speculative assignments cannot escape.
+def psElabConditionTerm (elaborate : PsOperatorElaborator)
+    (context : PsElabContext) (condition : PsSyntaxTerm) :
+    Except PsElabError PsElabCondition :=
+  match elaborate context condition (Option.some (PsExpr.constE psBoolName [])) with
+  | Except.ok value =>
+      let proposition := PsExpr.app (PsExpr.app (PsExpr.app
+        (PsExpr.constE psEqName [PsLevel.succ PsLevel.zero])
+        (PsExpr.constE psBoolName [])) value.term) (PsExpr.constE psBoolTrueName []);
+      Except.ok (PsElabCondition.mk value.context proposition
+        (psOperatorApply psBoolDecEqName value.term (PsExpr.constE psBoolTrueName [])))
+  | Except.error original =>
+      match elaborate context condition (Option.some (PsExpr.sortE PsLevel.zero)) with
+      | Except.error _ => Except.error original
+      | Except.ok value =>
+          let proposition := psWhnfCore value.context.metaContext value.context.localContext value.term;
+          match proposition with
+          | PsExpr.app fn right =>
+              match fn with
+              | PsExpr.app head left =>
+                  match head with
+                  | PsExpr.constE name _ =>
+                      match psOperatorOrderDecisionName name with
+                      | Option.none => Except.error original
+                      | Option.some decider =>
+                          Except.ok (PsElabCondition.mk value.context proposition
+                            (psOperatorApply decider left right))
+                  | _ => Except.error original
+              | _ => Except.error original
+          | _ => Except.error original
+
 def psElabBinaryOperator
     (elaborate : PsOperatorElaborator) (context : PsElabContext)
     (operator : String) (left right : PsSyntaxTerm) (span : PsSourceSpan)
@@ -120,7 +178,19 @@ def psElabBinaryOperator
     | Except.ok result => psElabFinalizeExpected result expected
   else if psStringEq operator "<" || psStringEq operator "<=" || psStringEq operator "≤" ||
       psStringEq operator ">" || psStringEq operator ">=" || psStringEq operator "≥" then
-    Except.error PsElabError.unsupportedTerm
+    match psElabOperatorOperands elaborate context left right Option.none with
+    | Except.error error => Except.error error
+    | Except.ok operands =>
+        let domain := psWhnf operands.context.environment operands.context.metaContext
+          operands.context.localContext operands.type;
+        match domain with
+        | PsExpr.constE name _ =>
+            match psOperatorOrderName operator name with
+            | Option.none => Except.error PsElabError.unsupportedTerm
+            | Option.some relation =>
+                psElabResolvedTerm operands.context
+                  (psOperatorApply relation operands.left operands.right) expected
+        | _ => Except.error PsElabError.unsupportedTerm
   else
     let isEquality : Bool :=
       psStringEq operator "=" || psStringEq operator "==" || psStringEq operator "!=";

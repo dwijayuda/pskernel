@@ -7,6 +7,14 @@ Base #171: 1fad9ed53cda9b23ac30be9cea85e7857437564e.
 Preserve history with fresh HEAD reads, expected-HEAD updates and force=false.
 No merge, registry publication or protection change is authorized.
 
+## Active checked ordering implementation
+
+Adding recursive Nat/Int order propositions, total constructive decisions and existing
+exact comparison lowering. No new logical axiom or Bool-as-Prop encoding. Both
+source grammars, true/false/equal/sign/large-integer cases and typed refusals are
+required through Linux CI before this is called tested or qualified. Existing
+qualified typed IO evidence below remains historical. Next: actual CLI/JSON apps.
+
 ## Latest scoped qualification
 
 Implementation 74179eb664e132502a24ce60b52a3dbd52b1d0cc passes Linux run 39627387430:

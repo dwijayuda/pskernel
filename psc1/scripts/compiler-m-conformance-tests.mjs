@@ -9,17 +9,18 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
 const suite=process.argv[2]||'--compiler-m';
-assert.ok(['--compiler-m','--stdlib-collections','--json-application','--inference-control','--typed-io-protocol','--typed-io-sequencing'].includes(suite));
+assert.ok(['--compiler-m','--stdlib-collections','--json-application','--inference-control','--typed-io-protocol','--typed-io-sequencing','--checked-order'].includes(suite));
+const checkedOrder=suite==='--checked-order';
 const ioSequencing=suite==='--typed-io-sequencing';
 const ioProtocol=suite==='--typed-io-protocol';
 const inferenceControl=suite==='--inference-control';
 const collections=suite==='--stdlib-collections';
 const jsonApplication=suite==='--json-application';
-const fixtureName=ioSequencing?'TypedIoSequencingFixtures':ioProtocol?'TypedIoProtocolFixtures':inferenceControl?'InferenceControlFixtures':jsonApplication?'JsonRecordApplication':collections?'StdlibCollectionFixtures':'CompilerMFixtures';
-const contractFile=ioSequencing?'PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json':ioProtocol?'PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json':inferenceControl?'PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json':jsonApplication?'PSC1_JSON_APPLICATION_CASE_CONTRACT.json':collections?'PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json':'PSC1_COMPILERM_CASE_CONTRACT.json';
-const evidenceName=ioSequencing?(process.env.PSC1_IO_SEQUENCING_EVIDENCE||'typed-io-sequencing'):ioProtocol?(process.env.PSC1_IO_PROTOCOL_EVIDENCE||'typed-io-protocol'):inferenceControl?(process.env.PSC1_INFERENCE_EVIDENCE||'inference-control'):jsonApplication?(process.env.PSC1_JSON_EVIDENCE||'json-application'):collections?(process.env.PSC1_COLLECTION_EVIDENCE||'stdlib-collections'):(process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
-const targetSelection=ioSequencing?process.env.PSC1_IO_SEQUENCING_TARGETS:ioProtocol?process.env.PSC1_IO_PROTOCOL_TARGETS:inferenceControl?process.env.PSC1_INFERENCE_TARGETS:jsonApplication?process.env.PSC1_JSON_TARGETS:collections?process.env.PSC1_COLLECTION_TARGETS:process.env.PSC1_COMPILERM_TARGETS;
-const marker=ioSequencing?'PSC1_TYPED_IO_SEQUENCING':ioProtocol?'PSC1_TYPED_IO_PROTOCOL':inferenceControl?'PSC1_INFERENCE_CONTROL':jsonApplication?'PSC1_JSON_APPLICATION':collections?'PSC1_COLLECTION':'PSC1_COMPILERM';
+const fixtureName=checkedOrder?'OrderFixtures':ioSequencing?'TypedIoSequencingFixtures':ioProtocol?'TypedIoProtocolFixtures':inferenceControl?'InferenceControlFixtures':jsonApplication?'JsonRecordApplication':collections?'StdlibCollectionFixtures':'CompilerMFixtures';
+const contractFile=checkedOrder?'PSC1_ORDER_CASE_CONTRACT.json':ioSequencing?'PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json':ioProtocol?'PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json':inferenceControl?'PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json':jsonApplication?'PSC1_JSON_APPLICATION_CASE_CONTRACT.json':collections?'PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json':'PSC1_COMPILERM_CASE_CONTRACT.json';
+const evidenceName=checkedOrder?(process.env.PSC1_ORDER_EVIDENCE||'checked-order'):ioSequencing?(process.env.PSC1_IO_SEQUENCING_EVIDENCE||'typed-io-sequencing'):ioProtocol?(process.env.PSC1_IO_PROTOCOL_EVIDENCE||'typed-io-protocol'):inferenceControl?(process.env.PSC1_INFERENCE_EVIDENCE||'inference-control'):jsonApplication?(process.env.PSC1_JSON_EVIDENCE||'json-application'):collections?(process.env.PSC1_COLLECTION_EVIDENCE||'stdlib-collections'):(process.env.PSC1_COMPILERM_EVIDENCE||'compiler-m');
+const targetSelection=checkedOrder?process.env.PSC1_ORDER_TARGETS:ioSequencing?process.env.PSC1_IO_SEQUENCING_TARGETS:ioProtocol?process.env.PSC1_IO_PROTOCOL_TARGETS:inferenceControl?process.env.PSC1_INFERENCE_TARGETS:jsonApplication?process.env.PSC1_JSON_TARGETS:collections?process.env.PSC1_COLLECTION_TARGETS:process.env.PSC1_COMPILERM_TARGETS;
+const marker=checkedOrder?'PSC1_CHECKED_ORDER':ioSequencing?'PSC1_TYPED_IO_SEQUENCING':ioProtocol?'PSC1_TYPED_IO_PROTOCOL':inferenceControl?'PSC1_INFERENCE_CONTROL':jsonApplication?'PSC1_JSON_APPLICATION':collections?'PSC1_COLLECTION':'PSC1_COMPILERM';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const native=process.env.PSC1_NATIVE||path.join(root,'.lake/build/bin/psc1');
 const work=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-compiler-m-'));
@@ -168,7 +169,11 @@ try {
   const combine=exports.map(name=>syntax==='lean'?'('+name+' flag)':'('+name+'(flag))').join(' && ');
   write(path.join(folder,'Entry.'+syntax),'import '+fixtureName+'\n'+definitions.join('\n')+
    (syntax==='lean'?'def semantic (flag : Bool) : Bool := ':'def semantic(flag : Bool) : Bool := ')+combine+'\n');
-  const negativeCases=ioSequencing?[
+  const negativeCases=checkedOrder?[
+{"id":"mixed-domain","lean":"def invalid (a : Nat) (b : Int) : Prop := a < b\n","ps":"def invalid(a : Nat, b : Int) : Prop := a < b\n"},
+{"id":"bool-order","lean":"def invalid : Prop := true < false\n","ps":"def invalid : Prop := true < false\n"},
+{"id":"prop-as-bool","lean":"def invalid : Bool := 1 < 2\n","ps":"def invalid : Bool := 1 < 2\n"},
+{"id":"chained","lean":"def invalid : Prop := 1 < 2 < 3\n","ps":"def invalid : Prop := 1 < 2 < 3\n"}]:ioSequencing?[
   {
     "id": "wrong-path",
     "lean": "import ProofScript.System.IO\ndef invalid : Io String := ioReadUtf8 true\n",

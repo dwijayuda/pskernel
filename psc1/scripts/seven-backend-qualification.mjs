@@ -24,7 +24,7 @@ const targets = ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'p
 
 
 const extraProtocols={};
-for(const [id,file]of [['inference-control','PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json'],
+for(const [id,file]of [['checked-order','PSC1_ORDER_CASE_CONTRACT.json'],['inference-control','PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json'],
  ['typed-io-protocol','PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json'],
  ['typed-io-sequencing','PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json']]){
  const contract=read('docs/'+file),receipt=read('dist/scoped-correctness/'+id+'/results.json'),

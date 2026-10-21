@@ -86,7 +86,11 @@ def psElabDoWhileStep
     (condition body : PsSyntaxTerm) (restId recursiveId : Nat) :
     Except PsElabError PsElabTermResult :=
   let boolType := PsExpr.constE psBoolName [];
-  match elaborate context condition (Option.some boolType) with
+  match elaborate context
+      (PsSyntaxTerm.ifE condition
+        (PsSyntaxTerm.bool true (PsSourceSpan.mk (PsSourcePos.mk 0 0 0) (PsSourcePos.mk 0 0 0)))
+        (PsSyntaxTerm.bool false (PsSourceSpan.mk (PsSourcePos.mk 0 0 0) (PsSourcePos.mk 0 0 0))) (PsSourceSpan.mk (PsSourcePos.mk 0 0 0) (PsSourcePos.mk 0 0 0)))
+      (Option.some boolType) with
   | Except.error error => Except.error error
   | Except.ok conditionValue =>
       psElabDoWithLocal

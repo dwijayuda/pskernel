@@ -116,7 +116,11 @@ def psElabDoBodyWithExitWorker
                   ops context result (psRootName "_") actionResult unitType rest
         | PsSyntaxTerm.doIfE condition thenBranch elseBranch rest _ =>
             let boolType := PsExpr.constE psBoolName [];
-            match elaborate context condition (Option.some boolType) with
+            match elaborate context
+                (PsSyntaxTerm.ifE condition
+                  (PsSyntaxTerm.bool true (PsSourceSpan.mk (PsSourcePos.mk 0 0 0) (PsSourcePos.mk 0 0 0)))
+                  (PsSyntaxTerm.bool false (PsSourceSpan.mk (PsSourcePos.mk 0 0 0) (PsSourcePos.mk 0 0 0))) (PsSourceSpan.mk (PsSourcePos.mk 0 0 0) (PsSourcePos.mk 0 0 0)))
+                (Option.some boolType) with
             | Except.error error => Except.error error
             | Except.ok conditionResult =>
                 let conditionName := psElabDoInternalName "_psc1DoCondition" context;

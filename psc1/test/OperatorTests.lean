@@ -74,10 +74,29 @@ def main : IO Unit := do
   rejected .proofScript "def bad : Bool := 1 = 2\n"
   rejected .lean "def bad : Bool := 1 == 2 == 3\n"
   rejected .proofScript "def bad : Bool := 1 < 2 < 3\n"
-  -- Relational propositions are a declared gap until their logical and decision
-  -- operations are independently admitted. Never translate them to Bool tests.
-  rejected .lean "def unselected : Prop := 1 < 2\n"
+  let _ ← prepare .lean "def selected : Prop := 1 < 2\n"
   rejected .proofScript "def unselected : Bool := 1 <= 2\n"
   rejected .lean "def bad : Nat := -1\n"
   rejected .proofScript "def bad : Nat := 1 +\n"
-  IO.println "PSC1_OPERATOR_TESTS: checked Core equivalence; selected primitive domains only"
+  for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+    let _ ← prepare kind "def relation : Prop := 1 < 2\n"
+  let _ ← prepare .lean "def observed : Bool := if 1 < 2 then true else false\n"
+  let _ ← prepare .proofScript "def observed : Bool := if (1 >= 2) { true } else { false }\n"
+  require (!psOrderDeclarations.any (fun d => match d with | .axiomDecl _ _ _ => true | _ => false))
+    "ordering introduced a logical axiom"
+  let corrupted ← match psNatDecLeDeclaration with
+    | .definitionDecl _ levels type _ =>
+        pure (PsDeclaration.definitionDecl (psRootName "corruptOrderDecision") levels type
+          (PsExpr.constE psBoolTrueName []))
+    | _ => throw (IO.userError "missing constructive decision")
+  match ← PsKernelLean.buildLeanPreludeEnvironment with
+  | .error error => throw (IO.userError error.message)
+  | .ok environment =>
+      match PsKernelLean.toLeanPreludeDeclaration [corrupted] corrupted with
+      | .error error => throw (IO.userError error.message)
+      | .ok none => throw (IO.userError "missing corrupt decision")
+      | .ok (some declaration) =>
+          match environment.addDeclCore 2000000 20000 declaration none true with
+          | .error _ => pure ()
+          | .ok _ => throw (IO.userError "kernel accepted corrupt decision")
+  IO.println "PSC1_OPERATOR_TESTS: checked arithmetic and proposition-valued Nat/Int order"

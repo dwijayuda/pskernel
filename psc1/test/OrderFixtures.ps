@@ -1,0 +1,33 @@
+def natOrderCase(flag : Bool) : Nat :=
+ let a : Nat := if (flag) { 2 } else { 0 }
+ (if (a < 1) { 1 } else { 0 }) + (if (a ≤ 1) { 2 } else { 0 }) +
+ (if (a > 1) { 4 } else { 0 }) + (if (a ≥ 1) { 8 } else { 0 }) +
+ (if (a <= a) { 16 } else { 0 }) + (if (a < a) { 0 } else { 32 })
+
+def intOrderCase(flag : Bool) : Nat :=
+ let a : Int := if (flag) { -7 } else { 3 }
+ let b : Int := -2
+ (if (a < b) { 1 } else { 0 }) + (if (a <= b) { 2 } else { 0 }) +
+ (if (a > b) { 4 } else { 0 }) + (if (a >= b) { 8 } else { 0 }) +
+ (if (b < 0) { 16 } else { 0 }) + (if (b <= b) { 32 } else { 0 }) +
+ (if (b < b) { 0 } else { 64 })
+
+def largeOrderCase(flag : Bool) : Nat :=
+ let n : Nat := if (flag) { 184467440737095516160 } else { 184467440737095516159 }
+ let i : Int := if (flag) { -184467440737095516161 } else { 184467440737095516161 }
+ (if (n > 184467440737095516159) { 1 } else { 0 }) +
+ (if (n <= 184467440737095516160) { 2 } else { 0 }) +
+ (if (i < -184467440737095516160) { 4 } else { 0 }) +
+ (if (i >= -184467440737095516160) { 8 } else { 0 })
+
+def controlOrderCase(flag : Bool) : Nat :=
+ let limit : Nat := if (flag) { 3 } else { 1 }
+ let relation : Prop := limit > 2
+ let value : Id(Nat) := do {
+  let mut total : Nat := 0
+  for n in [0, 1, 2, 3] {
+   if (n < limit) { total := total + 1 } else { pure(()) }
+  }
+  return total
+ }
+ if (relation) { value + 10 } else { value }

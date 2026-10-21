@@ -27,6 +27,8 @@ jobs:
       PSC1_IO_PROTOCOL_TARGETS: js,ts,rust
       PSC1_IO_PROTOCOL_EVIDENCE: typed-io-protocol-focused
       PSC1_INFERENCE_TARGETS: js,ts,rust
+      PSC1_ORDER_TARGETS: js,ts,rust
+      PSC1_ORDER_EVIDENCE: checked-order-focused
       PSC1_INFERENCE_EVIDENCE: inference-control-focused
     defaults:
       run:
@@ -114,6 +116,7 @@ jobs:
           node scripts/compiler-m-conformance-tests.mjs --inference-control
           node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
           node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
+          node scripts/compiler-m-conformance-tests.mjs --checked-order
           node scripts/typed-io-policy-tests.mjs
           node scripts/typed-io-application-tests.mjs
           node scripts/typed-io-dispatcher-tests.mjs
@@ -131,6 +134,7 @@ jobs:
             psc1/dist/scoped-correctness/typed-io-protocol-focused/
             psc1/dist/scoped-correctness/typed-io/
             psc1/dist/scoped-correctness/inference-control-focused/
+            psc1/dist/scoped-correctness/checked-order-focused/
             psc1/dist/scoped-correctness/json-application-focused/
             psc1/dist/scoped-correctness/compiler-m-focused/
             psc1/dist/scoped-correctness/stdlib-collections-focused/

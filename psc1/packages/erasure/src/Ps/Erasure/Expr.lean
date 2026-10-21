@@ -1035,6 +1035,150 @@ def psEraseCondition
                 | List.nil => Except.error PsErasureError.unsupportedApplication
             | List.nil => Except.error PsErasureError.unsupportedApplication
         | List.nil => Except.error PsErasureError.unsupportedApplication
+      else if psNameEq name psNatLtName then
+        match view.args with
+        | List.cons left tail =>
+            match tail with
+            | List.cons right rest =>
+                if psListIsEmpty rest then
+                  match erase left with
+                  | Except.error error => Except.error error
+                  | Except.ok l =>
+                      match erase right with
+                      | Except.error error => Except.error error
+                      | Except.ok r =>
+                          let test := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natLt [] [l, r];
+                          Except.ok test
+                else Except.error PsErasureError.unsupportedApplication
+            | _ => Except.error PsErasureError.unsupportedApplication
+        | _ => Except.error PsErasureError.unsupportedApplication
+      else if psNameEq name psNatLeName then
+        match view.args with
+        | List.cons left tail =>
+            match tail with
+            | List.cons right rest =>
+                if psListIsEmpty rest then
+                  match erase left with
+                  | Except.error error => Except.error error
+                  | Except.ok l =>
+                      match erase right with
+                      | Except.error error => Except.error error
+                      | Except.ok r =>
+                          let test := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natLe [] [l, r];
+                          Except.ok test
+                else Except.error PsErasureError.unsupportedApplication
+            | _ => Except.error PsErasureError.unsupportedApplication
+        | _ => Except.error PsErasureError.unsupportedApplication
+      else if psNameEq name psNatGtName then
+        match view.args with
+        | List.cons left tail =>
+            match tail with
+            | List.cons right rest =>
+                if psListIsEmpty rest then
+                  match erase left with
+                  | Except.error error => Except.error error
+                  | Except.ok l =>
+                      match erase right with
+                      | Except.error error => Except.error error
+                      | Except.ok r =>
+                          let test := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natLe [] [l, r];
+                          Except.ok (PsVerifiedIrExpr.ifE test
+                            (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))
+                            (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true)))
+                else Except.error PsErasureError.unsupportedApplication
+            | _ => Except.error PsErasureError.unsupportedApplication
+        | _ => Except.error PsErasureError.unsupportedApplication
+      else if psNameEq name psNatGeName then
+        match view.args with
+        | List.cons left tail =>
+            match tail with
+            | List.cons right rest =>
+                if psListIsEmpty rest then
+                  match erase left with
+                  | Except.error error => Except.error error
+                  | Except.ok l =>
+                      match erase right with
+                      | Except.error error => Except.error error
+                      | Except.ok r =>
+                          let test := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natLt [] [l, r];
+                          Except.ok (PsVerifiedIrExpr.ifE test
+                            (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))
+                            (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true)))
+                else Except.error PsErasureError.unsupportedApplication
+            | _ => Except.error PsErasureError.unsupportedApplication
+        | _ => Except.error PsErasureError.unsupportedApplication
+      else if psNameEq name psIntLtName then
+        match view.args with
+        | List.cons left tail =>
+            match tail with
+            | List.cons right rest =>
+                if psListIsEmpty rest then
+                  match erase left with
+                  | Except.error error => Except.error error
+                  | Except.ok l =>
+                      match erase right with
+                      | Except.error error => Except.error error
+                      | Except.ok r =>
+                          let test := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.intLt [] [l, r];
+                          Except.ok test
+                else Except.error PsErasureError.unsupportedApplication
+            | _ => Except.error PsErasureError.unsupportedApplication
+        | _ => Except.error PsErasureError.unsupportedApplication
+      else if psNameEq name psIntLeName then
+        match view.args with
+        | List.cons left tail =>
+            match tail with
+            | List.cons right rest =>
+                if psListIsEmpty rest then
+                  match erase left with
+                  | Except.error error => Except.error error
+                  | Except.ok l =>
+                      match erase right with
+                      | Except.error error => Except.error error
+                      | Except.ok r =>
+                          let test := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.intLe [] [l, r];
+                          Except.ok test
+                else Except.error PsErasureError.unsupportedApplication
+            | _ => Except.error PsErasureError.unsupportedApplication
+        | _ => Except.error PsErasureError.unsupportedApplication
+      else if psNameEq name psIntGtName then
+        match view.args with
+        | List.cons left tail =>
+            match tail with
+            | List.cons right rest =>
+                if psListIsEmpty rest then
+                  match erase left with
+                  | Except.error error => Except.error error
+                  | Except.ok l =>
+                      match erase right with
+                      | Except.error error => Except.error error
+                      | Except.ok r =>
+                          let test := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.intLe [] [l, r];
+                          Except.ok (PsVerifiedIrExpr.ifE test
+                            (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))
+                            (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true)))
+                else Except.error PsErasureError.unsupportedApplication
+            | _ => Except.error PsErasureError.unsupportedApplication
+        | _ => Except.error PsErasureError.unsupportedApplication
+      else if psNameEq name psIntGeName then
+        match view.args with
+        | List.cons left tail =>
+            match tail with
+            | List.cons right rest =>
+                if psListIsEmpty rest then
+                  match erase left with
+                  | Except.error error => Except.error error
+                  | Except.ok l =>
+                      match erase right with
+                      | Except.error error => Except.error error
+                      | Except.ok r =>
+                          let test := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.intLt [] [l, r];
+                          Except.ok (PsVerifiedIrExpr.ifE test
+                            (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))
+                            (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true)))
+                else Except.error PsErasureError.unsupportedApplication
+            | _ => Except.error PsErasureError.unsupportedApplication
+        | _ => Except.error PsErasureError.unsupportedApplication
       else
         Except.error PsErasureError.unsupportedApplication
   | _ => Except.error PsErasureError.unsupportedApplication

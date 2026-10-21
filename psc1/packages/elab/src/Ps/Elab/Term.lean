@@ -877,21 +877,11 @@ def psElabIf
     (elseBranch : PsSyntaxTerm)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let boolType := PsExpr.constE psBoolName [];
-  match elaborate context condition (Option.some boolType) with
+  match psElabConditionTerm elaborate context condition with
   | Except.error error => Except.error error
   | Except.ok conditionResult =>
-      let trueTerm := PsExpr.constE psBoolTrueName [];
-      let conditionProp :=
-        psExprApplyMany
-          (PsExpr.constE
-            psEqName
-            [PsLevel.succ PsLevel.zero])
-          [boolType, conditionResult.term, trueTerm];
-      let decider :=
-        psExprApplyMany
-          (PsExpr.constE psBoolDecEqName [])
-          [conditionResult.term, trueTerm];
+      let conditionProp := conditionResult.proposition;
+      let decider := conditionResult.decision;
       match elaborate
           conditionResult.context
           thenBranch

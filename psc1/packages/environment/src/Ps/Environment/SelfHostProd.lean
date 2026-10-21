@@ -1,5 +1,5 @@
 import Ps.Environment.SelfHostPrelude
-import Ps.Environment.Control
+import Ps.Environment.Order
 import Ps.Foundation.List
 
 def psSelfHostProdRecName : PsName :=
@@ -152,7 +152,7 @@ def psSelfHostProdBasePreludeEnvironment : PsEnvironment :=
         1))
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psControlPreludeEnvironment psSelfHostProdBasePreludeEnvironment
+  psOrderPreludeEnvironment (psControlPreludeEnvironment psSelfHostProdBasePreludeEnvironment)
 
 def psSelfHostRuntimePreludeDeclarationsWithProdBase :
     List PsDeclaration :=

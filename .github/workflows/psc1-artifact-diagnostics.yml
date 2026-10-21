@@ -1,0 +1,74 @@
+name: PSC1 retained artifact diagnostics
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/psc1-artifact-diagnostics.yml
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Source workflow run
+        default: '39534197286'
+        required: true
+      artifact_name:
+        description: Exact retained artifact name
+        default: psc1-generated-compiler-b41bc18810939c91e212d0c4543095cf6b731120
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ inputs.run_id || '39534197286' }}
+          name: ${{ inputs.artifact_name || 'psc1-generated-compiler-b41bc18810939c91e212d0c4543095cf6b731120' }}
+          path: work/artifact
+      - name: Read staged compiler refusal without rerunning any compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import assert from 'node:assert/strict';
+          const root = path.resolve('work/artifact');
+          function files(dir) {
+            return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+              const file = path.join(dir, entry.name);
+              return entry.isDirectory() ? files(file) : entry.isFile() ? [file] : [];
+            });
+          }
+          const all = files(root);
+          const candidates = all.filter(file => path.basename(file) === 'G1-bootstrap.candidate.json');
+          assert.equal(candidates.length, 1, 'one retained bootstrap candidate');
+          const bytes = fs.readFileSync(candidates[0]);
+          assert.ok(bytes.length <= 128 * 1024 * 1024);
+          const candidate = JSON.parse(bytes.toString('utf8'));
+          console.log('PSC1_RETAINED_BOOTSTRAP: ' + JSON.stringify({
+            path: path.relative(root, candidates[0]), bytes: bytes.length,
+            status: candidate.status, phase: candidate.phase, code: candidate.code,
+            module: candidate.module, declaration: candidate.declaration,
+            line: candidate.line, column: candidate.column,
+            publicNames: candidate.publicNames, sourceDeclarations: candidate.sourceDeclarations,
+            logicalDeclarations: candidate.logicalDeclarations,
+            fields: Object.keys(candidate)
+          }));
+          const diagnostics = all.filter(file => path.basename(file) === 'diagnostic.json');
+          for (const file of diagnostics) {
+            const value = JSON.parse(fs.readFileSync(file, 'utf8'));
+            console.log('PSC1_RETAINED_PROCESS_DIAGNOSTIC: ' + JSON.stringify({
+              status: value.status, failure: value.failure, events: value.events,
+              generatedCompilerExecution: value.generatedCompilerExecution
+            }));
+          }
+          JS

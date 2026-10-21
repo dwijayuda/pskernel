@@ -3534,16 +3534,16 @@ private def binderSpineBudgetParity : IO Unit := do
          | _ => false)
   let (a0, zeroId) ← expect (psKernelExprV2PagedMkSort psKernelExprV2PagedEmpty .zero)
   let (a1, equivalentId) ← expect (psKernelExprV2PagedMkSort a0 (.max .zero .zero))
-  let mut arena := a1
+  let mut sharedArena := a1
   let mut shared := zeroId
   for _ in [:24] do
     let (next, root) ← expect
-      (psKernelExprV2PagedMkForall arena x shared shared .default)
-    arena := next
+      (psKernelExprV2PagedMkForall sharedArena x shared shared .default)
+    sharedArena := next
     shared := root
-  let count ← expect (psKernelExprV2TransformCountOnCanonical arena shared)
+  let count ← expect (psKernelExprV2TransformCountOnCanonical sharedArena shared)
   require "binder-spine-count-shared-occurrences" (count == 33554431)
-  let (arena, leftId) ← expect (psKernelExprV2PagedMkLam arena x shared zeroId .default)
+  let (arena, leftId) ← expect (psKernelExprV2PagedMkLam sharedArena x shared zeroId .default)
   let (arena, rightId) ← expect (psKernelExprV2PagedMkLam arena y shared equivalentId .implicit)
   let leftCount ← expect (psKernelExprV2TransformCountOnCanonical arena leftId)
   let rightCount ← expect (psKernelExprV2TransformCountOnCanonical arena rightId)

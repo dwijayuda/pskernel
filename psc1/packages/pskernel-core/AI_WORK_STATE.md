@@ -94,6 +94,15 @@ negative check. A24-level shared DAG verifies the exact67,108,867 default
 budget without materializing its expanded tree or allocating one closure per
 fuel unit. Native/generated/canonical results are pending Actions.
 
+The first binder native run
+[39536354345](https://github.com/dwijayuda/pskernel/actions/runs/39536354345),
+job119013793530, compiled production but rejected a test fixture that shadowed
+a mutable arena binding. The shared-DAG builder now uses sharedArena before
+binding its immutable result. All expressions,67,108,867 budget assertions
+and checking policies are unchanged. Native binder execution remains pending
+the corrected fixture; this failure also affects the scanner commit's inherited
+native fixture. Generated runtime/performance source is unaffected.
+
 ### Direct theorem admission — native qualified; generated gates pending
 
 Theorem plans now retain the same owner through the original header check,

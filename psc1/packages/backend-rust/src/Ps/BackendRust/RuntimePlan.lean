@@ -60,7 +60,7 @@ def psRustRuntimeConcat (groups : List (List String)) : List String :=
 
 def psRustRuntimeConcatMap {alpha : Type}
     (convert : alpha -> List String) (values : List alpha) : List String :=
-  psRustRuntimeConcat (psListMap convert values)
+  psRustRuntimeConcat (psListMap (fun (value : alpha) => convert value) values)
 
 private def intrinsicHelpers (operation : PsVerifiedIrIntrinsic) : List String :=
   match operation with

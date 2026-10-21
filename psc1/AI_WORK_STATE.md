@@ -173,3 +173,8 @@ all prior public ABI/storage restrictions, diagnostic order, capture copies,
 source text and4096 boundaries. Both-lane gates retain all modules. Exact closure
 matrix jobs were blocked before admission by this maintained source regression;
 no DirectJS admission result is claimed yet.
+
+At2d7bc22c all83 Rust modules parse in both lanes (no remaining parse refusal),
+but the generic dependency concat-map still refuses infer:expectedFunction.
+Use an explicitly typed eta callback for the existing list mapper, consistent
+with normalized compiler call sites. Native behavior remains separately tested.

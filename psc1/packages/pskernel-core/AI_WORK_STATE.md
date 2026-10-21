@@ -1,3 +1,11 @@
+# Latest preflight: fixture layout repaired; qualification pending
+
+The first candidate `561b324bbb8bae6f91b3d8f9de7052950fe1eeaf` failed [run39656379521](https://github.com/dwijayuda/pskernel/actions/runs/39656379521), [job119417641384](https://github.com/dwijayuda/pskernel/actions/runs/39656379521/job/119417641384), at native fixture compilation. The new `API.DagInitial`, modified `API.Dag` and complete `SelfHost` modules built successfully. Lean reported `test/PsKernelExprV2InitialOwnerRegression.lean:772:60: unexpected identifier; expected '}'` at the deliberately missing-index test record.
+
+This repair puts that record's two fields on one line with valid Lean layout. It changes no value, expected result, production source, JavaScript fixture, proof statement, fuel or host limit. All other multiline fixture records were reviewed for the same layout defect. Runtime matrices and20-proof gate were **NOT RUN** because the executable did not compile; they are not credited from source compilation. The repaired candidate must pass its own full focused run before the complete generated/canonical workflows are enabled.
+
+---
+
 # Active candidate: initial-session owners in a fresh checked DAG batch
 
 This candidate on `research/psc1-pskernel-initial-owner-20261021` is based on integration source `deb18b9c87a5d21a406c6e5b852afb4d44785fe5`. It is an unqualified production change: native, portable source, canonical .ps, generated JS, proof, performance, Arena and provider statuses are all **NOT RUN at creation**. The first push runs the focused native/proof preflight; the complete existing integration/correctness/research/Arena workflows must then be enabled and run on the exact candidate source. No parent PASS is inherited.

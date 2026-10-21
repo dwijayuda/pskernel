@@ -769,8 +769,7 @@ private def forgedLookupControls (fixture : InitialFixture) : IO Unit := do
   let environment := fixture.session.environment
   let variants : List (String × PsKernelEnvironment × Nat) := [
     ("stale-type-and-body",{ environment with constants := [stale] },1),
-    ("missing-index",{ environment with constants := [live],
-      index := psKernelEnvironmentEmpty.index },0),
+    ("missing-index",{ environment with constants := [live], index := psKernelEnvironmentEmpty.index },0),
     ("duplicate-history",{ environment with constants := [stale,live,wrongKind] },3),
     ("index-only",{ environment with constants := [] },0),
     ("historical-wrong-kind",{ environment with constants := [wrongKind] },1),

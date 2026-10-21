@@ -32,10 +32,12 @@ function run(cmd,args,options={}){
  assert.equal(result.status,0,cmd+' '+args.join(' ')+'\n'+result.stdout+result.stderr);
  return result.stdout;
 }
-function reject(args){
+function reject(args,expected){
  const r=spawnSync(native,args,{env,encoding:'utf8',cwd:root,timeout:60000});
  assert.equal(r.error,undefined);assert.equal(r.signal,null);assert.notEqual(r.status,0);
- assert.match(r.stdout+r.stderr,/PSC1_|PSC2_/);return sha(r.stdout+r.stderr);
+ assert.match(r.stdout+r.stderr,/PSC1_|PSC2_/);
+ if(expected)assert.match(r.stdout+r.stderr,expected);
+ return sha(r.stdout+r.stderr);
 }
 write(path.join(work,'package.json'),'{"type":"module"}\n');
 const stripImports=text=>text.split('\n').filter(line=>!line.startsWith('import ')).join('\n');
@@ -125,6 +127,7 @@ try {
     'def invalid : CompilerM Nat Nat Nat Unit := do\n  '+action+' true\n':
     'def invalid : CompilerM(Nat, Nat, Nat, Unit) := do { '+action+'(true) }\n'));
   }
+  write(path.join(folder,'duplicate-prelude.'+syntax),'def Nat : Type := Bool\n');
   for(const target of targets){
    const label=syntax+'-'+target,extension={js:'js',ts:'ts',rust:'rs','wasm-core':'wasm','wasm-component':'wasm',python:'py',php:'php'}[target];
    const output=path.join(work,label,'module.'+extension);
@@ -141,6 +144,8 @@ try {
     for(const id of ['wrong-state','wrong-error']){
      const wrong=[...args];wrong[1]=path.join(folder,id+'.'+syntax);refusals[id]=reject(wrong);
     }
+    const duplicate=[...args];duplicate[1]=path.join(folder,'duplicate-prelude.'+syntax);
+    refusals['duplicate-prelude']=reject(duplicate,/duplicateDeclaration:Nat/);
     assert.equal(hash(output+'.bundle.json'),before);
     assert.equal(fs.realpathSync(output+'.bundle.json'),published);
     const identity={syntax,target,passed:true,admission:'independent-official-Lean',

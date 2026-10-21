@@ -71,6 +71,7 @@
   "requiredRefusals": [
     "wrong-state",
     "wrong-error",
-    "verified"
+    "verified",
+    "duplicate-prelude"
   ]
 }

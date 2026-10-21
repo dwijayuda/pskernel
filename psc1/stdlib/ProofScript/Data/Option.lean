@@ -1,6 +1,6 @@
-inductive Option (α : Type) where
-  | none
-  | some (value : α)
+-- Option and its constructors belong to the checked Essential Core prelude.
+-- Keep the standard-library helpers on that same identity so imported projects
+-- compose with optional indexing and the compiler's checked runtime catalogue.
 
 def optionMap {α : Type} {β : Type}
     (f : α -> β) (value : Option α) : Option β :=

@@ -59,6 +59,20 @@ Run on all7 targets plus minimum Python through the existing scoped workflow.
 This is new coverage/possible backend defect exposure, not a complete CompilerM
 family claim. Await actual Linux results and correct reached failures.
 
+## Reached stdlib import defect — corrected, Linux pending
+
+Focused run39555457605 at a69039e2 fails all4 authored JS/Rust lanes at actual
+project import: ProofScript.Data.Prod declares Prod already owned by Essential
+Core. ProofScript.Data.Option likewise redeclares checked Option. Their helper
+functions now extend the existing prelude identities; remove only the duplicate
+type declarations in these authored library files, without changing compiler
+duplicate checking or filtering any input. All helpers/imports remain.
+
+Add an explicit duplicate-prelude Nat declaration refusal to every new matrix
+lane, requiring duplicateDeclaration:Nat and preserving previous publication.
+The checked native CompilerM reference and parity-contract rejection tests pass
+in that run; target programs have not passed yet. Continue actual reached failures.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

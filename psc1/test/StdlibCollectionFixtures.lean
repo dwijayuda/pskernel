@@ -25,10 +25,11 @@ def arrayCase (flag : Bool) : Nat :=
   selected * 100 + arrayGetD alias 0 0 * 10 + absent
 
 def exceptCase (flag : Bool) : Nat :=
-  let observed : Except Nat Nat := do
+  let observed : Except Nat Nat := (do
     if flag then
       throw 7
-    return 9;
+    return 9
+  );
   match observed with
   | Except.error error => error + 100
   | Except.ok value => value + 200

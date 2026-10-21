@@ -177,6 +177,23 @@ elaboration refusal, and all failures preserve previous publication.
 Keep the qualified7-case CompilerM suite too. All new changes are CI pending;
 do not infer qualification from the earlier98-obligation checkpoint.
 
+## Reached authored list-literal grammar gap — pending Linux
+
+Focused39559431079 preserves all28 CompilerM JS/Rust obligations with the
+expanded exact native libraries. The collection suite exposes that ordinary PS
+list expressions were never wired into its primary parser (6:41 at '[').
+Implement shared List literal parsing beside tuple/array parsing in ParseData,
+using checked root List.nil/cons constructors, the existing delimited element
+parser and unchanged input-derived fuel. Both Lean and PS entry points use it.
+Keep the older Lean fuel helper available; no declarations are filtered.
+Add canonical Core identity, empty/nested/trailing-comma translation tests and
+malformed/type/array distinction refusals. Existing indexing adjacency remains.
+
+The Lean collection fixture's unparenthesized nested do consumed its separator.
+Use the existing explicitly grouped do form followed by the let semicolon;
+this retains the same typed error behavior. Rerun actual source/application
+and all existing tests; collection qualification remains pending.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

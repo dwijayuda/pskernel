@@ -400,6 +400,25 @@ def main : IO Unit := do
     "def result : Option Nat := (#[11,22])[1]?\n"
   roundTrip "optional index PS to Lean" .proofScript .lean
     "def result : Option(Nat) := (#[11,22])[1]?\n"
+  same "PS list literal has the canonical checked constructor graph" .proofScript
+    "def result : List(Nat) := [1, 2]\n"
+    "def result : List(Nat) := List.cons(1, List.cons(2, List.nil))\n"
+  same "PS empty list uses expected element type" .proofScript
+    "def result : List(Nat) := []\n"
+    "def result : List(Nat) := List.nil\n"
+  same "PS trailing list comma retains the exact element list" .proofScript
+    "def result : List(Nat) := [1, 2,]\n"
+    "def result : List(Nat) := List.cons(1, List.cons(2, List.nil))\n"
+  roundTrip "nested list literals PS to Lean" .proofScript .lean
+    "def result : List(List(Nat)) := [[1], []]\n"
+  roundTrip "nested list literals Lean to PS" .lean .proofScript
+    "def result : List (List Nat) := [[1], []]\n"
+  for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+    rejectedParse "list cannot omit an interior element" kind "def result : List Nat := [1,,2]\n"
+    rejectedParse "list requires a closing bracket" kind "def result : List Nat := [1,2\n"
+    rejectedParse "list semicolon is not an element separator" kind "def result : List Nat := [1;2]\n"
+    rejectedType "list element type mismatch" kind "def result : List Nat := [1,true]\n"
+    rejectedType "list is not array" kind "def result : Array Nat := [1,2]\n"
   testBindingPatterns
   testConstructorNotationHygiene
   IO.println "PSC1_DATA_TESTS: PASS"

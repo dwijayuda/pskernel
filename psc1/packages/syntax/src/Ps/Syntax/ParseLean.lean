@@ -215,19 +215,9 @@ def psParseLeanListLiteralWithFuel
                         token.span)
 
 def psParseLeanListLiteral
-    (parseTerm :
-      PsTokenCursor ->
-      Except PsParseError (PsParseResult PsSyntaxTerm))
-    (opening : PsTokenRead) :
+    (parseTerm : PsDataTermParser) (opening : PsTokenRead) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  psParseLeanListLiteralWithFuel
-    parseTerm
-    (Nat.add
-      (psParseListLength opening.cursor.remaining)
-      1)
-    opening.token.span.start
-    opening.cursor
-    List.nil
+  psParseDataListAfterOpening parseTerm opening
 
 -- The Lean grouping parser preserves inner semantic spans. A nomatch span
 -- additionally covers its actually consumed tokens, including grouped scrutinees.

@@ -57,6 +57,31 @@ def psSyntaxDataReference (root member : String)
     (span : PsSourceSpan) : PsSyntaxTerm :=
   psSyntaxRootReference [root, member] span
 
+-- Both grammars lower list literals to the same checked root constructors.
+def psSyntaxDataListValue (elements : List PsSyntaxTerm)
+    (span : PsSourceSpan) : PsSyntaxTerm :=
+  match elements with
+  | List.nil => psSyntaxDataReference "List" "nil" span
+  | List.cons first rest =>
+      PsSyntaxTerm.app (psSyntaxDataReference "List" "cons" span)
+        [first, psSyntaxDataListValue rest span] span
+
+def psParseDataListAfterOpening (parseTerm : PsDataTermParser)
+    (opening : PsTokenRead) : Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match psParseDataElementsWithFuel parseTerm "]"
+      (Nat.succ (psParseListLength opening.cursor.remaining))
+      opening.token.span.start opening.cursor [] false with
+  | Except.error error => Except.error error
+  | Except.ok parsed =>
+      Except.ok { value := psSyntaxDataListValue parsed.elements parsed.span
+                  cursor := parsed.cursor }
+
+def psParseDataList (parseTerm : PsDataTermParser)
+    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match psTokenCursorExpectText cursor "[" with
+  | Except.error error => Except.error error
+  | Except.ok opening => psParseDataListAfterOpening parseTerm opening
+
 def psSyntaxTupleValue (elements : List PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
   match elements with

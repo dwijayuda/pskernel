@@ -351,6 +351,7 @@ def psProofScriptCanStartNativeArgument
       else if psTokenCursorAtText cursor "(" then true
       else if psTokenCursorAtText cursor "{" then true
       else if psTokenCursorAtText cursor "#" then true
+      else if psTokenCursorAtText cursor "[" then true
       else if psTokenKindEq token.kind PsTokenKind.identifier then true
       else if psTokenKindEq token.kind PsTokenKind.natural then true
       else if psTokenKindEq token.kind PsTokenKind.string then true
@@ -368,6 +369,8 @@ def psParseProofScriptPrimary
     psParseDataParen parseInner psProofScriptTermWithSpan cursor
   else if psTokenCursorAtText cursor "#" then
     psParseDataArray parseInner cursor
+  else if psTokenCursorAtText cursor "[" then
+    psParseDataList parseInner cursor
   else
     psParseSimpleTerm cursor
 

@@ -53,6 +53,11 @@ function readCandidate(file) {
 }
 function checkCandidate(candidate, request, serviceIdentity) {
   const value = candidate.value;
+  console.log('PSC1_COMPILER_CANDIDATE_STAGE: ' + JSON.stringify({ requestId: request.id,
+    status: value.status, phase: value.phase, code: value.code, module: value.module,
+    declaration: value.declaration, line: value.line, column: value.column }));
+  assert.equal(value.status, 'candidate', JSON.stringify({ status: value.status,
+    phase: value.phase, code: value.code, module: value.module, declaration: value.declaration }));
   assert.equal(value.protocol, 'psc1-compiler-service/1');
   assert.equal(value.requestId, request.id);
   assert.equal(value.sourceClosureDigest, request.digest);
@@ -61,7 +66,6 @@ function checkCandidate(candidate, request, serviceIdentity) {
   assert.equal(value.assurance, request.assurance);
   assert.equal(value.candidateOnly, true);
   assert.equal(value.admission, 'not-run');
-  assert.equal(value.status, 'candidate', JSON.stringify(value));
   assert.equal(value.origins.length, request.sources.length);
   let sourceCount = 0;
   value.origins.forEach((row, index) => {

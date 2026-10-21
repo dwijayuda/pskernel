@@ -206,3 +206,32 @@ Atcad9bc63 native service tests failed to compile because the local variable
 syntax is a reserved Lean keyword (JsServiceTests66:7). Rename it targetSyntax;
 all assertions remain. Generated workflow39533776394 and focused39533776401
 stopped at native test compilation, before G1 generation. Do not claim execution.
+
+## First actual compiler-target blocker — specialization, not source acceptance
+
+Head0559453b5936ba15bf9cf92cfa47d1c8ab66d34f passed full scoped39534197238,
+focused39534197158 and exact closures39534197273. Native facade tests independently
+admitted/executed both-grammar program graphs and passed all refusal cases.
+Actual complete composition remains82 modules in both lanes; DirectJS source/
+logical Core counts3213/3215. Canonical original IR4951117 bytes:
+1a2c0aed5c3bbb863dc2c2d5a9aeff658ae8922ba32da36467d904ce5f079a59.
+
+Generated diagnostic39534197286 failed BEFORE producing G1. Native seed actually
+ran once for25933ms, then returned status=refused, phase=specialization,
+code=PSC1_BACKEND_SPECIALIZATION_FAILED. Read-only Linux artifact inspection
+39535477289 recovered the exact348-byte response from artifact12317101575,
+digestsha256:90ee85b793c1920e83c5002618ef5a802da91d52bfcba2a08488fd6b21da65af.
+The old host assertion checked grammar before status and hid this refusal;
+report status/phase/code first. Generated execution, self-compilation and fixed
+points remain not-run.
+
+Add general typed specialization diagnostics: preserve original tail-first seed
+and first-error order, original singleton per-item transformation, request queue/
+seen order, validation before/after and all64/128/16384 budgets. Record failed
+stage, IR owner, original error and request key. Legacy APIs keep their exact
+result/error types; shared closed-plan legacy messages are unchanged. The
+production facade consumes the detailed plan, not a diagnostic-only alternate
+compiler. Tests cover raw seed owner/order, request owner/key, forged input,
+unchanged zero-budget refusal and public-coverage/legacy message correspondence.
+This candidate is pending Linux qualification. Fix the actual traced mechanism;
+do not bypass specialization or filter the compiler source to make G1 pass.

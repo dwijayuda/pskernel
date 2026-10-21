@@ -132,18 +132,44 @@ def psBackendClosedNames (source : PsValidatedIrModule) (names : List String) : 
       | Option.none => Except.error (String.Internal.append "PSC1_PUBLIC_DECLARATION_LOST: " name)
       | Option.some declaration => psBackendClosedNames source rest
 
-/-- Every wrapper is revalidated; only the captured host session can publish. -/
-def psBackendClosedPlan (source : PsValidatedIrModule)
-    (publicNames : List String) : Except String PsValidatedIrModule :=
+structure PsBackendClosedPlanDiagnostic where
+  phase : String
+  code : String
+  specialization : Option PsIrSpecializeDiagnostic
+
+def psBackendClosedPlanDiagnosticText (diagnostic : PsBackendClosedPlanDiagnostic) : String :=
+  match diagnostic.specialization with
+  | Option.none => diagnostic.code
+  | Option.some detail =>
+      String.Internal.append diagnostic.code
+        (String.Internal.append ": " (psIrSpecializeDiagnosticText detail))
+
+/-- Every wrapper is revalidated. Diagnostics preserve the original checks and
+first-error order; only the captured host session can publish. -/
+def psBackendClosedPlanDetailed (source : PsValidatedIrModule)
+    (publicNames : List String) : Except PsBackendClosedPlanDiagnostic PsValidatedIrModule :=
   match psStrictValidateModule source.raw with
-  | Except.error _ => Except.error "PSC1_BACKEND_INPUT_IR_INVALID"
+  | Except.error _ =>
+      Except.error (PsBackendClosedPlanDiagnostic.mk "input-ir" "PSC1_BACKEND_INPUT_IR_INVALID" Option.none)
   | Except.ok input =>
-      match psIrSpecializeValidatedModule input with
-      | Except.error _ => Except.error "PSC1_BACKEND_SPECIALIZATION_FAILED"
+      match psIrSpecializeValidatedModuleDetailed input with
+      | Except.error detail =>
+          Except.error (PsBackendClosedPlanDiagnostic.mk "specialization"
+            "PSC1_BACKEND_SPECIALIZATION_FAILED" (Option.some detail))
       | Except.ok specialized =>
           match psStrictValidateModule specialized.raw with
-          | Except.error _ => Except.error "PSC1_BACKEND_SPECIALIZED_IR_INVALID"
+          | Except.error _ =>
+              Except.error (PsBackendClosedPlanDiagnostic.mk "specialized-ir"
+                "PSC1_BACKEND_SPECIALIZED_IR_INVALID" Option.none)
           | Except.ok output =>
               match psBackendClosedNames output publicNames with
-              | Except.error error => Except.error error
-              | Except.ok checked => Except.ok output
+              | Except.error code =>
+                  Except.error (PsBackendClosedPlanDiagnostic.mk "public-coverage" code Option.none)
+              | Except.ok _ => Except.ok output
+
+-- Preserve existing public result/error strings for every legacy caller.
+def psBackendClosedPlan (source : PsValidatedIrModule)
+    (publicNames : List String) : Except String PsValidatedIrModule :=
+  match psBackendClosedPlanDetailed source publicNames with
+  | Except.error diagnostic => Except.error diagnostic.code
+  | Except.ok result => Except.ok result

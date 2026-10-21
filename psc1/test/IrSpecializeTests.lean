@@ -350,10 +350,47 @@ def psIrSpecAcceptsCheckedClosedInput : Bool :=
         && (psCheckVerifiedIrModule psIrCheckDefaultOptions uniform.raw).accepted
   | _, _ => false
 
+def psIrSpecDiagnosticSeedOwner : Bool :=
+  let invalid : PsVerifiedIrModule := PsVerifiedIrModule.mk [] [] [] [
+    PsVerifiedIrDeclaration.mk "firstBad" [] [] (.typeParameter "T") (.literal (.natural 0)),
+    PsVerifiedIrDeclaration.mk "lastBad" [] [] (.typeParameter "T") (.literal (.natural 0))
+  ]
+  match psIrSpecializeModuleDetailed invalid, psIrSpecializeModule invalid with
+  | .error diagnostic, .error (.unresolvedTypeParameter "T") =>
+      diagnostic.phase == "seed-declaration" && diagnostic.owner == "lastBad" &&
+        (match diagnostic.error with | .unresolvedTypeParameter "T" => true | _ => false)
+  | _, _ => false
+
+def psIrSpecDiagnosticRequest : Bool :=
+  let request := PsIrSpecializeRequest.mk .declaration "missing" []
+  let state := PsIrSpecializeState.mk [] [] [] [] [request] []
+  match psIrSpecializeLoopDetailed psVerifiedIrModuleEmpty 1 state,
+      psIrSpecializeLoop psVerifiedIrModuleEmpty 1 state with
+  | .error diagnostic, .error (.unknownTarget "missing") =>
+      diagnostic.phase == "process-request" && diagnostic.owner == "missing" &&
+        diagnostic.requestKey == some "D:missing"
+  | _, _ => false
+
+def psIrSpecDiagnosticInputAndBudget : Bool :=
+  let invalid := PsValidatedIrModule.mk (PsVerifiedIrModule.mk [] [] [] [
+    PsVerifiedIrDeclaration.mk "bad" [] [] (.primitive .nat) (.literal (.bool true))])
+  let state := PsIrSpecializeState.mk [] [] [] [] [] []
+  match psIrSpecializeValidatedModuleDetailed invalid,
+      psIrSpecializeLoopDetailed psVerifiedIrModuleEmpty 0 state with
+  | .error input, .error budget =>
+      input.phase == "validation-input" &&
+        (match input.error with | .inputValidationFailed => true | _ => false) &&
+        budget.phase == "request-loop" &&
+        (match budget.error with | .fuelExhausted => true | _ => false)
+  | _, _ => false
+
 def main : IO Unit := do
   if psTestGenericSpecialization
       && psIrSpecRejectsForgedValidation
-      && psIrSpecAcceptsCheckedClosedInput then
+      && psIrSpecAcceptsCheckedClosedInput
+      && psIrSpecDiagnosticSeedOwner
+      && psIrSpecDiagnosticRequest
+      && psIrSpecDiagnosticInputAndBudget then
     IO.println "PSC1_IR_SPECIALIZE_TESTS: PASS"
   else
     throw (IO.userError "PSC1_IR_SPECIALIZE_TESTS: FAIL")

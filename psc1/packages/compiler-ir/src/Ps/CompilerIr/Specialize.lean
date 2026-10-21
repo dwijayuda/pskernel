@@ -23,6 +23,36 @@ inductive PsIrSpecializeError where
   | outputValidationFailed
   | validationBudgetExhausted
 
+structure PsIrSpecializeDiagnostic where
+  phase : String
+  owner : String
+  error : PsIrSpecializeError
+  requestKey : Option String
+
+def psIrSpecializeErrorCode (error : PsIrSpecializeError) : String :=
+  match error with
+  | PsIrSpecializeError.fuelExhausted => "fuel-exhausted"
+  | PsIrSpecializeError.unresolvedTypeParameter name =>
+      String.Internal.append "unresolved-type-parameter:" name
+  | PsIrSpecializeError.nonGroundType name => String.Internal.append "non-ground-type:" name
+  | PsIrSpecializeError.typeArgumentArity name => String.Internal.append "type-argument-arity:" name
+  | PsIrSpecializeError.unknownTarget name => String.Internal.append "unknown-target:" name
+  | PsIrSpecializeError.unsupportedGenericCall => "unsupported-generic-call"
+  | PsIrSpecializeError.inputValidationFailed => "input-validation-failed"
+  | PsIrSpecializeError.outputValidationFailed => "output-validation-failed"
+  | PsIrSpecializeError.validationBudgetExhausted => "validation-budget-exhausted"
+
+def psIrSpecializeDiagnosticText (diagnostic : PsIrSpecializeDiagnostic) : String :=
+  let key : String :=
+    match diagnostic.requestKey with
+    | Option.none => ""
+    | Option.some value => String.Internal.append " request=" value;
+  String.Internal.append diagnostic.phase
+    (String.Internal.append " owner="
+      (String.Internal.append diagnostic.owner
+        (String.Internal.append " error="
+          (String.Internal.append (psIrSpecializeErrorCode diagnostic.error) key))))
+
 structure PsIrSpecializeTypeResult where
   type : PsVerifiedIrType
   requests : List PsIrSpecializeRequest
@@ -1493,91 +1523,99 @@ def psIrSpecializeProcessRequest
   | PsIrSpecializeKind.declaration =>
       psIrSpecializeProcessDeclaration module state request
 
-def psIrSpecializeLoop
-    (module : PsVerifiedIrModule)
-    (depth : Nat) :
-    PsIrSpecializeState -> Except PsIrSpecializeError PsIrSpecializeState :=
+-- Preserve the original tail-first seed/error order. The original singleton
+-- seed functions remain the only per-item transformation mechanism.
+def psIrSpecializeSeedDetailed {alpha : Type}
+    (seed : List alpha -> Except PsIrSpecializeError (Prod (List alpha) (List PsIrSpecializeRequest)))
+    (name : alpha -> String) (phase : String) (values : List alpha) :
+    Except PsIrSpecializeDiagnostic (Prod (List alpha) (List PsIrSpecializeRequest)) :=
+  match values with
+  | List.nil => Except.ok (Prod.mk [] [])
+  | List.cons value rest =>
+      match psIrSpecializeSeedDetailed seed name phase rest with
+      | Except.error diagnostic => Except.error diagnostic
+      | Except.ok tail =>
+          match seed [value] with
+          | Except.error error =>
+              Except.error (PsIrSpecializeDiagnostic.mk phase (name value) error Option.none)
+          | Except.ok head =>
+              Except.ok (Prod.mk (psListAppend head.fst tail.fst)
+                (psListAppend head.snd tail.snd))
+
+def psIrSpecializeLoopDetailed (module : PsVerifiedIrModule) (depth : Nat) :
+    PsIrSpecializeState -> Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
   match depth with
-  | 0 => fun (state : PsIrSpecializeState) => Except.error PsIrSpecializeError.fuelExhausted
-  | fuel + 1 =>
+  | Nat.zero =>
+      fun (_state : PsIrSpecializeState) =>
+        Except.error (PsIrSpecializeDiagnostic.mk "request-loop" ""
+          PsIrSpecializeError.fuelExhausted Option.none)
+  | Nat.succ fuel =>
       fun (state : PsIrSpecializeState) =>
-        let smaller : PsIrSpecializeState -> Except PsIrSpecializeError PsIrSpecializeState := psIrSpecializeLoop module fuel;
+        let smaller : PsIrSpecializeState -> Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
+          psIrSpecializeLoopDetailed module fuel;
         match state.pending with
         | List.nil => Except.ok state
         | List.cons request rest =>
             match psIrSpecializeRequestKey request with
             | Option.none =>
-                Except.error
-                  (PsIrSpecializeError.nonGroundType request.name)
+                Except.error (PsIrSpecializeDiagnostic.mk "request-key" request.name
+                  (PsIrSpecializeError.nonGroundType request.name) Option.none)
             | Option.some key =>
-                let withoutHead : PsIrSpecializeState := {
-                  imports := state.imports
-                  structures := state.structures
-                  inductives := state.inductives
-                  declarations := state.declarations
-                  pending := rest
-                  seen := state.seen
-                };
-                if psIrSpecializeSeenContains state.seen key then
-                  smaller withoutHead
+                let withoutHead : PsIrSpecializeState :=
+                  PsIrSpecializeState.mk state.imports state.structures state.inductives
+                    state.declarations rest state.seen;
+                if psIrSpecializeSeenContains state.seen key then smaller withoutHead
                 else
-                  let marked :=
-                    psIrSpecializeMarkSeen withoutHead key;
-                  match
-                      psIrSpecializeProcessRequest
-                        module
-                        marked
-                        request with
-                  | Except.error error => Except.error error
-                  | Except.ok next =>
-                      smaller next
+                  let marked : PsIrSpecializeState := psIrSpecializeMarkSeen withoutHead key;
+                  match psIrSpecializeProcessRequest module marked request with
+                  | Except.error error =>
+                      Except.error (PsIrSpecializeDiagnostic.mk "process-request" request.name
+                        error (Option.some key))
+                  | Except.ok next => smaller next
 
-def psIrSpecializeModule
-    (module : PsVerifiedIrModule) :
-    Except PsIrSpecializeError PsVerifiedIrModule :=
+def psIrSpecializeLoop (module : PsVerifiedIrModule) (depth : Nat)
+    (state : PsIrSpecializeState) : Except PsIrSpecializeError PsIrSpecializeState :=
+  match psIrSpecializeLoopDetailed module depth state with
+  | Except.error diagnostic => Except.error diagnostic.error
+  | Except.ok result => Except.ok result
+
+def psIrSpecializeModuleDetailed (module : PsVerifiedIrModule) :
+    Except PsIrSpecializeDiagnostic PsVerifiedIrModule :=
   match psIrSpecializeRewriteImports module module.imports with
-  | Except.error error => Except.error error
+  | Except.error error =>
+      Except.error (PsIrSpecializeDiagnostic.mk "imports" "" error Option.none)
   | Except.ok imports =>
-      match
-          psIrSpecializeSeedStructures
-            module
-            module.structures with
-      | Except.error error => Except.error error
+      match psIrSpecializeSeedDetailed
+          (fun (values : List PsVerifiedIrStructure) => psIrSpecializeSeedStructures module values)
+          (fun (value : PsVerifiedIrStructure) => value.name) "seed-structure" module.structures with
+      | Except.error diagnostic => Except.error diagnostic
       | Except.ok structures =>
-          match
-              psIrSpecializeSeedInductives
-                module
-                module.inductives with
-          | Except.error error => Except.error error
+          match psIrSpecializeSeedDetailed
+              (fun (values : List PsVerifiedIrInductive) => psIrSpecializeSeedInductives module values)
+              (fun (value : PsVerifiedIrInductive) => value.name) "seed-inductive" module.inductives with
+          | Except.error diagnostic => Except.error diagnostic
           | Except.ok inductives =>
-              match
-                  psIrSpecializeSeedDeclarations
-                    module
-                    module.declarations with
-              | Except.error error => Except.error error
+              match psIrSpecializeSeedDetailed
+                  (fun (values : List PsVerifiedIrDeclaration) => psIrSpecializeSeedDeclarations module values)
+                  (fun (value : PsVerifiedIrDeclaration) => value.name)
+                  "seed-declaration" module.declarations with
+              | Except.error diagnostic => Except.error diagnostic
               | Except.ok declarations =>
-                  let initial : PsIrSpecializeState := {
-                    imports := imports.imports
-                    structures := structures.fst
-                    inductives := inductives.fst
-                    declarations := declarations.fst
-                    pending :=
-                      (psListAppend imports.requests (psListAppend structures.snd (psListAppend inductives.snd declarations.snd)))
-                    seen := []
-                  };
-                  match
-                      psIrSpecializeLoop
-                        module
-                        16384
-                        initial with
-                  | Except.error error => Except.error error
+                  let initial : PsIrSpecializeState :=
+                    PsIrSpecializeState.mk imports.imports structures.fst inductives.fst declarations.fst
+                      (psListAppend imports.requests
+                        (psListAppend structures.snd (psListAppend inductives.snd declarations.snd))) [];
+                  match psIrSpecializeLoopDetailed module 16384 initial with
+                  | Except.error diagnostic => Except.error diagnostic
                   | Except.ok final =>
-                      Except.ok {
-                        imports := final.imports
-                        structures := final.structures
-                        inductives := final.inductives
-                        declarations := final.declarations
-                      }
+                      Except.ok (PsVerifiedIrModule.mk final.imports final.structures
+                        final.inductives final.declarations)
+
+def psIrSpecializeModule (module : PsVerifiedIrModule) :
+    Except PsIrSpecializeError PsVerifiedIrModule :=
+  match psIrSpecializeModuleDetailed module with
+  | Except.error diagnostic => Except.error diagnostic.error
+  | Except.ok result => Except.ok result
 
 -- A public raw wrapper is not itself an authority token. Validate the exact
 -- input AND the transformed output, including traversal-budget completion.
@@ -1594,28 +1632,28 @@ def psIrSpecializeRecheck
   else
     Except.ok ()
 
-def psIrSpecializeValidatedModule
-    (validated : PsValidatedIrModule) :
-    Except PsIrSpecializeError PsSpecializedIrModule :=
+def psIrSpecializeValidatedModuleDetailed (validated : PsValidatedIrModule) :
+    Except PsIrSpecializeDiagnostic PsSpecializedIrModule :=
   match psIrSpecializeRecheck validated.raw true with
-  | Except.error error => Except.error error
-  | Except.ok checkedInput =>
-      match psIrSpecializeModule validated.raw with
-      | Except.error error => Except.error error
+  | Except.error error =>
+      Except.error (PsIrSpecializeDiagnostic.mk "validation-input" "" error Option.none)
+  | Except.ok _ =>
+      match psIrSpecializeModuleDetailed validated.raw with
+      | Except.error diagnostic => Except.error diagnostic
       | Except.ok raw =>
           match psIrSpecializeRecheck raw false with
-          | Except.error error => Except.error error
-          | Except.ok checkedOutput => Except.ok (PsSpecializedIrModule.mk raw)
+          | Except.error error =>
+              Except.error (PsIrSpecializeDiagnostic.mk "validation-output" "" error Option.none)
+          | Except.ok _ => Except.ok (PsSpecializedIrModule.mk raw)
 
-def psIrSpecializeUniformValidatedModule
-    (validated : PsValidatedIrModule) :
+def psIrSpecializeValidatedModule (validated : PsValidatedIrModule) :
+    Except PsIrSpecializeError PsSpecializedIrModule :=
+  match psIrSpecializeValidatedModuleDetailed validated with
+  | Except.error diagnostic => Except.error diagnostic.error
+  | Except.ok result => Except.ok result
+
+def psIrSpecializeUniformValidatedModule (validated : PsValidatedIrModule) :
     Except PsIrSpecializeError PsUniformSpecializedIrModule :=
-  match psIrSpecializeRecheck validated.raw true with
-  | Except.error error => Except.error error
-  | Except.ok checkedInput =>
-      match psIrSpecializeModule validated.raw with
-      | Except.error error => Except.error error
-      | Except.ok raw =>
-          match psIrSpecializeRecheck raw false with
-          | Except.error error => Except.error error
-          | Except.ok checkedOutput => Except.ok (PsUniformSpecializedIrModule.mk raw)
+  match psIrSpecializeValidatedModuleDetailed validated with
+  | Except.error diagnostic => Except.error diagnostic.error
+  | Except.ok result => Except.ok (PsUniformSpecializedIrModule.mk result.raw)

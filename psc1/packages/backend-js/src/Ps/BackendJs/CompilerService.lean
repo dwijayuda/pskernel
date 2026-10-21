@@ -282,6 +282,13 @@ def emit (module : PsValidatedIrModule) (publicNames : List String) :
                 (psJsConcat3 (psJsPrintStackSafePrelude jsIr) declarations suffix)
                 (psJsSelectedRuntimeRequirements jsIr))
 
+def planFailure (diagnostic : PsBackendClosedPlanDiagnostic) : Error :=
+  let owner : String :=
+    match diagnostic.specialization with
+    | Option.none => ""
+    | Option.some detail => detail.owner;
+  Error.mk diagnostic.phase (psBackendClosedPlanDiagnosticText diagnostic) "" owner 0 0
+
 def compilePrepared (request : Request) (captured : Captured)
     (entry : PsSyntaxModule) (work : Semantic) : Except Error String :=
   match psStrictValidateModule work.raw with
@@ -293,8 +300,8 @@ def compilePrepared (request : Request) (captured : Captured)
       match psBackendCheckPublicApi PsBackendTarget.js validated selected with
       | Except.error code => Except.error (failure "public-api" code)
       | Except.ok _ =>
-          match psBackendClosedPlan validated selected with
-          | Except.error code => Except.error (failure "specialization" code)
+          match psBackendClosedPlanDetailed validated selected with
+          | Except.error diagnostic => Except.error (planFailure diagnostic)
           | Except.ok closed =>
               match psBackendCheckPublicApi PsBackendTarget.js closed selected with
               | Except.error code => Except.error (failure "public-api" code)

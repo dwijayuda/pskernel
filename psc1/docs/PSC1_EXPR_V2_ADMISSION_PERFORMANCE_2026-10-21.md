@@ -93,3 +93,10 @@ These fixtures exercise safe definitions with constant chains, metadata and
 binders. They do not qualify inductive/recursor admission, the entire Lean Arena
 corpus, full DefEq, or removal of the original checker fallback. Canonical .ps
 reconstruction is a separate gate and is not inferred from this integration run.
+
+The separate [canonical correctness run39535658534](https://github.com/dwijayuda/pskernel/actions/runs/39535658534)
+subsequently passed. Actual log119011587861 derives117 canonical modules and160
+portable modules across two roots, runs the detached .ps-derived complete
+checker including the admission and inference-only suites, and validates
+declarations/maps. DirectJS remains explicitly unsupported. This establishes
+canonical qualification for8db7d50 without extending the measured fixture scope.

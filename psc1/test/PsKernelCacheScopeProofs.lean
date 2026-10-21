@@ -459,22 +459,24 @@ theorem psKernelExprV2WhnfCacheFindWorker_eq_before
   | cons first rest ih =>
       cases hashEqual : Nat.beq first.hash hash with
       | false =>
+          have hashRelation : first.hash ≠ hash := by simpa using hashEqual
           simpa [psKernelExprV2WhnfCacheFindWorker,
-            psKernelExprV2WhnfCacheFindInBefore, hashEqual] using ih
+            psKernelExprV2WhnfCacheFindInBefore, hashEqual, hashRelation] using ih
       | true =>
+          have hashRelation : first.hash = hash := by simpa using hashEqual
           cases compared :
               psKernelExprV2PagedEqOnCanonical arena first.source source with
           | error error =>
               simp [psKernelExprV2WhnfCacheFindWorker,
-                psKernelExprV2WhnfCacheFindInBefore, hashEqual, compared]
+                psKernelExprV2WhnfCacheFindInBefore, hashEqual, hashRelation, compared]
           | ok equal =>
               cases equal with
               | false =>
                   simpa [psKernelExprV2WhnfCacheFindWorker,
-                    psKernelExprV2WhnfCacheFindInBefore, hashEqual, compared] using ih
+                    psKernelExprV2WhnfCacheFindInBefore, hashEqual, hashRelation, compared] using ih
               | true =>
                   simp [psKernelExprV2WhnfCacheFindWorker,
-                    psKernelExprV2WhnfCacheFindInBefore, hashEqual, compared]
+                    psKernelExprV2WhnfCacheFindInBefore, hashEqual, hashRelation, compared]
 
 theorem psKernelExprV2WhnfCacheFindIn_eq_before
     (entries : List PsKernelExprV2WhnfCacheEntry)

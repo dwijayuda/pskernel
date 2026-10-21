@@ -10,22 +10,25 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
 ## Current checkpoint and evidence
 
-The latest fully executed integration/canonical slice is
-[106387af9827a639455d329408745528ae318366](https://github.com/dwijayuda/pskernel/commit/106387af9827a639455d329408745528ae318366):
-[integration39533476073](https://github.com/dwijayuda/pskernel/actions/runs/39533476073),
-[correctness/canonical39533476064](https://github.com/dwijayuda/pskernel/actions/runs/39533476064)
-and all six jobs in [research39533476047](https://github.com/dwijayuda/pskernel/actions/runs/39533476047)
-passed. The completed integration log119004577213 contains all new Let/stateful
-JavaScript markers,128 guarded ABBA observations,24 admission observations,
-33 complete operations and six separate profiles. Canonical log119004577217
-derives115 canonical modules and158 portable modules across two roots.
-Authentic .lean/.ps checking, TS7.0.2, Node22, declarations/maps and detached
-complete DAG runtime pass. DirectJS remains explicitly unsupported for the
-complete kernel. These are correctness/portability results, not whole-kernel
-or performance qualification. The branch still contains newer slices awaiting
-their corresponding gates. The25-case Arena timeout gap remains unresolved.
-Original default V1 is unchanged; the replacement still relies on complete
-original-operation fallback outside migrated rules. No integration PR is merged.
+The latest fully executed integration/canonical checkpoint is
+[8db7d50e1cf02b7cc83e6d7ce1a8da1ae953c723](https://github.com/dwijayuda/pskernel/commit/8db7d50e1cf02b7cc83e6d7ce1a8da1ae953c723):
+[integration39535658641](https://github.com/dwijayuda/pskernel/actions/runs/39535658641),
+[correctness/canonical39535658534](https://github.com/dwijayuda/pskernel/actions/runs/39535658534)
+and all six jobs in [research39535658598](https://github.com/dwijayuda/pskernel/actions/runs/39535658598)
+passed. Actual integration log119011587752 verifies the complete generated
+checker,128 guarded ABBA observations,24 admission observations and six profiles.
+Actual canonical log119011587861 derives117 canonical modules and160 portable
+modules across two source roots; it passes the detached .ps-derived checker,
+simple admission/cache owner suites,1,008 inference-only comparisons,
+declarations/maps and large numerals. DirectJS remains explicitly unsupported
+for the complete kernel.
+
+These are partial correctness/portability results with limited measured
+performance gains and explicit regressions. Later theorem/binder/unsafe/scanner
+slices have separate pending gates. The25-case Arena timeout gap remains
+unresolved; the newer full193-case run is still executing. Original default
+V1 is unchanged; the replacement relies on complete original-operation fallback
+outside migrated rules. No integration PR is merged.
 
 ### Complete safe-admission measurements and generated execution
 
@@ -35,14 +38,15 @@ has now passed both jobs in
 Actual log119011587752 verifies the fixed strict nominal assertions, all416
 admission matrix cases,1,008 inference-only comparisons, all128 operation
 observations,24 admission observations and six profiles. All six research jobs
-are also green. Its separate canonical and Arena gates remain in progress.
+are also green. Its separate canonical gate has now passed as recorded above; Arena remains
+in progress.
 
 Complete safe-definition admission has same-run warm mean gains of8.57×–16.17×
 on six matched fixtures, with unchanged4096 fuel and exact positive/negative
 checks. Input construction is more expensive; retained heap is mixed, while
 peak RSS is lower on those six fixtures. The two function WHNF regressions
 remain in the same run. Full figures, units, memory limits and raw evidence are in
-[the admission performance report](../../../docs/PSC1_EXPR_V2_ADMISSION_PERFORMANCE_2026-10-21.md).
+[the admission performance report](../../docs/PSC1_EXPR_V2_ADMISSION_PERFORMANCE_2026-10-21.md).
 No whole-kernel performance qualification or complete kernel claim follows.
 
 The912b88 native job119016363597 compiled and executed all binder-spine
@@ -52,6 +56,14 @@ cons case. The proof now handles hash miss, structural error, collision miss
 and hit explicitly, retaining the same statement and test-only reference.
 No production code, axiom, resource policy or proof gate is changed. The
 corrected proof and complete native job still require passing Actions.
+
+The explicit-case proof attempt at a187 native119018750522 still failed:
+simplification converted the reference's Boolean Nat equality to a proposition.
+The proof now derives the equal/unequal hash proposition from each Boolean case
+before simplification. The theorem statements, reference scanner, tested
+production worker and gates remain unchanged. All binder and unsafe semantic
+markers passed before that failed proof gate; no full native pass is claimed
+for that commit. The Boolean/propositional bridge correction is awaiting CI.
 
 ### Direct unsafe recursive definition admission — awaiting qualification
 

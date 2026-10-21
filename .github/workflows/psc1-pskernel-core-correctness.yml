@@ -14,6 +14,7 @@ on:
       - psc1/packages/pskernel-core/**
       - psc1/packages/pskernel-core/AI_WORK_STATE.md
       - psc1/test/PsKernelCoreRegression.lean
+      - psc1/test/PsKernelExprV2WhnfABIProofs.lean
       - psc1/test/PsKernelInstantiatePerformance.lean
       - psc1/test/PsKernelMultiInstantiatePerformance.lean
       - psc1/test/PsKernelLiftPerformance.lean
@@ -228,6 +229,7 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-canonical-dag-smoke.log" \
             | sed -u '/^PSC1_DAG_PASS /d'
           grep -q '^PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
+          grep -Fqx 'PSC1_V2_DAG_JS_WHNF_STAGED_ABI: PASS exports=2 partials=4 executions=6' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q 'PSC1_EXPR_EQUALITY_DELAYED_JS: PASS hostile=21 staged=2 sharedDepth=64' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"
           grep -q '^PSC1_V2_DAG_JS_BETA: PASS' "$RUNNER_TEMP/psc1-canonical-dag-smoke.log"

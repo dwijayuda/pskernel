@@ -10,6 +10,43 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — restore exact generated WHNF staging
+
+The staged parent `ea84af3dea125b377ece3bd4fc4b8f95febe120e`
+has terminal PASS native integration119228846055 and native correctness119228844582.
+Its .lean-generated integration119228846446 is terminal FAIL at main smoke3705:
+`TypeError: Cannot read properties of undefined (reading 'recDepth')`.
+Native semantics, the complete portable check and JavaScript compilation passed;
+the failing JavaScript call used the previously published fuel-first staged ABI.
+
+Source inspection found exactly two originally fuel-matched WHNF wrappers that
+had become immediate lambdas: `TryWhnfCoreModeWithLocalValuesFuel` and
+`TryWhnfStateWithLocalValuesFuel`. PSC1 consequently flattened their external
+argument boundary. Both now explicitly match zero/successor fuel again and invoke
+the same existing algorithm at the same original fuel. The zero arm returns the
+same reduction-budget error. No algorithm, trust boundary, cache guard or resource
+limit is changed.
+
+Two native local equality lemmas compare each repaired wrapper with its exact
+pre-repair body. A new early generated regression uses real state and a canonical
+sort to require both staged exports at fuel0/1, four partial-function checks and
+six complete exact-result/error calls. The old cheap-projection callback sentinel
+and every other main-smoke assertion remain. Both generated workflows require
+the new ABI marker; the native proof gate checks both lemmas and their dependencies.
+
+Older exact-source outcomes are now terminal: staged841 integration39599585930
+and correctness39599585779 both FAIL; its two generated routes fail the same
+staging class. Carrier6cb integration39599736505 and correctness39599736632 both
+FAIL; both generated routes fail at the same external call, reporting undefined
+`arena` after its new full-state adapter. All six research jobs at each of these
+older sources passed. Their historical pending cells below are superseded here.
+
+This staged repair follows ea84; its own native, portable, canonical, generated,
+proof, benchmark, Arena and provider gates are **NOT RUN** at creation. Do not
+inherit the parent's native PASS or integration889's scoped Gate A. Integration889
+remains unchanged while full migration qualification continues. Four public
+whole-operation fallbacks remain; no timeout is accepted or counted as parity.
+
 ## 2026-10-21 — staged fixture and proof repairs; new source requires qualification
 
 Branch: `research/psc1-pskernel-v2-staged-20261021`.

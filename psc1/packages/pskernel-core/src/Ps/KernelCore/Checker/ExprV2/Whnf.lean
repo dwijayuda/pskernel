@@ -461,17 +461,26 @@ def psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel
       Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
     PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
     Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
-  fun (cheapProj : Bool) (localValue : PsKernelName -> Option Nat)
-      (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-        Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-      (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
-    let reducer :=
-      fun (nextContext : PsKernelCheckerContext) (nextState : PsKernelExprV2WhnfState)
-          (nextRoot : Nat) (nextCheapProj : Bool) =>
-        let worker := psKernelExprV2TryReduceRecursorWithLocalValuesFuel fuel;
-        worker localValue nextContext nextState nextRoot nextCheapProj;
-    psKernelExprV2TryWhnfCoreModeWithReducerFuel fuel
-      cheapProj localValue publicWhnf reducer context state root
+  match fuel with
+  | Nat.zero =>
+      fun (_cheapProj : Bool) (_localValue : PsKernelName -> Option Nat)
+          (_publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+    fun (cheapProj : Bool) (localValue : PsKernelName -> Option Nat)
+        (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+        (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
+      let reducer :=
+        fun (nextContext : PsKernelCheckerContext) (nextState : PsKernelExprV2WhnfState)
+            (nextRoot : Nat) (nextCheapProj : Bool) =>
+          let worker := psKernelExprV2TryReduceRecursorWithLocalValuesFuel (Nat.succ remaining);
+          worker localValue nextContext nextState nextRoot nextCheapProj;
+      psKernelExprV2TryWhnfCoreModeWithReducerFuel (Nat.succ remaining)
+        cheapProj localValue publicWhnf reducer context state root
 
 def psKernelExprV2TryWhnfCoreWithLocalValuesFuel
     (fuel : Nat) :
@@ -528,14 +537,21 @@ def psKernelExprV2TryWhnfStateWithLocalValuesFuel
     (PsKernelName -> Option Nat) ->
     PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
     Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
-  fun (localValue : PsKernelName -> Option Nat)
-      (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
-    let reducer :=
-      fun (nextContext : PsKernelCheckerContext) (nextState : PsKernelExprV2WhnfState)
-          (nextRoot : Nat) (nextCheapProj : Bool) =>
-        let worker := psKernelExprV2TryReduceRecursorWithLocalValuesFuel fuel;
-        worker localValue nextContext nextState nextRoot nextCheapProj;
-    psKernelExprV2TryWhnfStateWithReducerFuel fuel reducer localValue context state root
+  match fuel with
+  | Nat.zero =>
+      fun (_localValue : PsKernelName -> Option Nat)
+          (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+    fun (localValue : PsKernelName -> Option Nat)
+        (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
+      let reducer :=
+        fun (nextContext : PsKernelCheckerContext) (nextState : PsKernelExprV2WhnfState)
+            (nextRoot : Nat) (nextCheapProj : Bool) =>
+          let worker := psKernelExprV2TryReduceRecursorWithLocalValuesFuel (Nat.succ remaining);
+          worker localValue nextContext nextState nextRoot nextCheapProj;
+      psKernelExprV2TryWhnfStateWithReducerFuel (Nat.succ remaining) reducer localValue context state root
 
 def psKernelExprV2TryWhnfStateWithFuel
     (fuel : Nat) :

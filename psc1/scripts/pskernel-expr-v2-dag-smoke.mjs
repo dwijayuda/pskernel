@@ -103,6 +103,40 @@ add("nat","Lit",get("PsKernelLiteral").nat(15n));
 add("str","Lit",get("PsKernelLiteral").str("λ-雪"));
 add("mdata","MData",73n,ids.b0);
 add("proj","Proj",name("S"),2n,ids.b0);
+
+{
+  // Fuel remains the first staged ABI argument in these compatibility exports.
+  // Real kernel state and a valid sort exercise both zero and successor arms.
+  const scalar=get("psKernelKernelSessionChecker")(session(),nil,S.safe).context;
+  const state=get("psKernelExprV2WhnfStateEmpty")(arena);
+  const absent=get("Option").none;
+  const localValue=_name=>absent;
+  const forbidden=_context=>_state=>_root=>{throw Error("STAGED_WHNF_UNEXPECTED_CALLBACK");};
+  let partials=0,executions=0;
+  for(const fuel of [0n,1n]){
+    const core=get("psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel")(fuel);
+    const publicWhnf=get("psKernelExprV2TryWhnfStateWithLocalValuesFuel")(fuel);
+    must(typeof core==="function"&&typeof publicWhnf==="function","whnf-staged-fuel-arity-"+fuel);
+    partials+=2;
+    const values=[core(false)(localValue)(forbidden)(scalar)(state)(ids.s0),
+      core(true)(localValue)(forbidden)(scalar)(state)(ids.s0),
+      publicWhnf(localValue)(scalar)(state)(ids.s0)];
+    for(const value of values){
+      const result=accepted(value,"whnf-staged-attempt-"+fuel);
+      if(fuel===0n)must(rejected(result)&&result.error==="kernel reduction budget exhausted",
+        "whnf-staged-zero-error");
+      else{
+        const reduced=accepted(result,"whnf-staged-success");
+        const built=accepted(decode(reduced.fst.arena),"whnf-staged-arena");
+        must(exact(accepted(decoded(built,reduced.snd),"whnf-staged-result"),sort0)===true,
+          "whnf-staged-successor-result");
+      }
+      executions++;
+    }
+  }
+  must(partials===4&&executions===6,"whnf-staged-complete");
+  console.log("PSC1_V2_DAG_JS_WHNF_STAGED_ABI: PASS exports=2 partials=4 executions=6");
+}
 const terms={
   s0:sort0,s1:sort1,b0:E.bvar(0n),f:E.fvar(name("f")),m:E.mvar(name("m")),
   const:E.const(name("C"),nil),app:E.app(E.bvar(0n),E.bvar(0n)),

@@ -1,0 +1,213 @@
+name: PSC1 T03b focused session ownership qualification
+on:
+  push:
+    branches:
+      - work/psc1-pskernel-t03b-session-20261022
+    paths:
+      - psc1/packages/pskernel-core/src/**
+      - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
+      - psc1/test/PsKernelExprV2SessionProofs.lean
+      - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+      - .github/workflows/psc1-pskernel-t03b-focus.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Compile complete checker and retained native DAG regressions
+        id: session_build
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          node --check scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_recursor_regression
+      - name: Check retained public semantics and exact resource parity
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_dag_regression \
+            | tee "$RUNNER_TEMP/psc1-session-dag-native.log" \
+            | sed '/^PSC1_DAG_PASS /d'
+          grep -Fq 'PSC1_V2_DAG_REGRESSION: PASS' "$RUNNER_TEMP/psc1-session-dag-native.log"
+      - name: Check new and preexisting ownership against official Lean
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2GeneratedPrefixRegression.lean \
+            | tee "$RUNNER_TEMP/psc1-session-native.log"
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-session-native.log"
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7' "$RUNNER_TEMP/psc1-session-native.log"
+          grep -Fqx 'PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$RUNNER_TEMP/psc1-session-native.log"
+          grep -Fqx 'PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7' "$RUNNER_TEMP/psc1-session-native.log"
+      - name: Check retained and new ownership equations
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-session-recursor-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2QuotOwnerProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-session-quot-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2SessionProofs.lean)" -eq 12
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2SessionProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-session-proofs.log"
+          if grep -E 'sorryAx|ofReduceBool|Lean.trustCompiler' "$RUNNER_TEMP/psc1-session-proofs.log" "$RUNNER_TEMP/psc1-session-recursor-proofs.log" "$RUNNER_TEMP/psc1-session-quot-proofs.log"; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t03b-focused-native
+          path: |
+            ${{ runner.temp }}/psc1-session-dag-native.log
+            ${{ runner.temp }}/psc1-session-native.log
+            ${{ runner.temp }}/psc1-session-proofs.log
+            ${{ runner.temp }}/psc1-session-recursor-proofs.log
+            ${{ runner.temp }}/psc1-session-quot-proofs.log
+  inspect-combined-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Authenticate saved combined-source Arena evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, io, json, os, urllib.request, zipfile
+          repo = "dwijayuda/pskernel"
+          source = "deb18b9c87a5d21a406c6e5b852afb4d44785fe5"
+          run_id = 39651610468
+          artifact_id = 12371249386
+          expected_digest = "bf02a683ca2525d0567a0434b8abaf8ea6e00c7836825a58470b32fb04abe482"
+          def fetch(path):
+              request = urllib.request.Request(
+                  "https://api.github.com/repos/" + repo + path,
+                  headers={"Accept": "application/vnd.github+json"})
+              # Authenticate only the initial API request, never its signed blob redirect.
+              request.add_unredirected_header("Authorization", "Bearer " + os.environ["GH_TOKEN"])
+              with urllib.request.urlopen(request) as response:
+                  return response.read()
+          producer = json.loads(fetch("/actions/runs/" + str(run_id)))
+          assert producer["head_sha"] == source and producer["status"] == "completed"
+          meta = json.loads(fetch("/actions/artifacts/" + str(artifact_id)))
+          assert meta["workflow_run"]["id"] == run_id
+          assert meta["workflow_run"]["head_sha"] == source
+          assert meta["digest"] == "sha256:" + expected_digest
+          raw = fetch("/actions/artifacts/" + str(artifact_id) + "/zip")
+          assert hashlib.sha256(raw).hexdigest() == expected_digest
+          assert len(raw) == meta["size_in_bytes"]
+          print("AUTHENTICATED_EXISTING_ARTIFACT " + json.dumps({
+              "source": source, "run": run_id, "conclusion": producer["conclusion"],
+              "artifact": artifact_id, "bytes": len(raw), "sha256": expected_digest}))
+          archive = zipfile.ZipFile(io.BytesIO(raw))
+          reports = []
+          for name in archive.namelist():
+              if name.endswith("report.json"):
+                  report = json.loads(archive.read(name))
+                  if isinstance(report, dict) and isinstance(report.get("tests"), list):
+                      reports.append((name, report))
+          assert len(reports) == 1, [name for name, _ in reports]
+          name, report = reports[0]
+          assert len(report["tests"]) == 193
+          print("ARENA_REPORT_PATH " + name)
+          print("ARENA_REPORT_HEADER " + json.dumps(
+              {key: value for key, value in report.items() if key != "tests"}, sort_keys=True))
+          records = [case for case in report["tests"] if case.get("index") == 16]
+          assert len(records) == 1
+          case = records[0]
+          assert case["name"] == "bugs/rec-missing-ih.ndjson"
+          print("ARENA_UNCHANGED_CASE16 " + json.dumps(case, sort_keys=True))
+          assert report["kernel_fuel"] == 4096
+          assert report["host_timeout_seconds_per_case"] == 60
+          assert report["node_heap_limit_mib"] == 2048
+          assert report["host_workers"] == 2
+          assert report["excluded_cases"] == []
+          assert all(c["adaptation"]["body_bytes_identical"] and
+                     c["adaptation"]["original_body_sha256"] == c["adaptation"]["adapted_body_sha256"]
+                     for c in report["tests"])
+          unresolved = [{"index": c["index"], "name": c["name"],
+                         "classification": c["classification"],
+                         "official_verdict": c["official"]["verdict"],
+                         "pskernel_verdict": c["pskernel"]["verdict"],
+                         "reason": c["pskernel"].get("reason")}
+                        for c in report["tests"] if not c["classification"].startswith("matched_")]
+          print("ARENA_OPEN_CASES " + json.dumps(unresolved, sort_keys=True))
+          for case in report["tests"]:
+              print("ARENA_COMPLETE_CASE " + json.dumps(case, sort_keys=True))
+          print("PSC1_SAVED_ARENA_CASE16_INSPECTION: PASS source=" + source)
+          PY
+      - name: Read all saved T03a case records without replay
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, io, json, os, urllib.request, zipfile
+          repo = "dwijayuda/pskernel"
+          source = "7b14affc854e7bc99e4778ac155ae805dd273226"
+          run_id = 39645764921
+          artifact_id = 12370158885
+          expected_digest = "b83002c7a156b15f7e8025029b9f17ffa406d8085dbad54567607fa99e4feb29"
+          def fetch(path):
+              request = urllib.request.Request(
+                  "https://api.github.com/repos/" + repo + path,
+                  headers={"Accept": "application/vnd.github+json"})
+              # Authenticate only the initial API request, never its signed blob redirect.
+              request.add_unredirected_header("Authorization", "Bearer " + os.environ["GH_TOKEN"])
+              with urllib.request.urlopen(request) as response:
+                  return response.read()
+          producer = json.loads(fetch("/actions/runs/" + str(run_id)))
+          assert producer["head_sha"] == source and producer["status"] == "completed"
+          meta = json.loads(fetch("/actions/artifacts/" + str(artifact_id)))
+          assert meta["workflow_run"]["id"] == run_id
+          assert meta["workflow_run"]["head_sha"] == source
+          assert meta["digest"] == "sha256:" + expected_digest
+          raw = fetch("/actions/artifacts/" + str(artifact_id) + "/zip")
+          assert hashlib.sha256(raw).hexdigest() == expected_digest
+          assert len(raw) == meta["size_in_bytes"]
+          print("AUTHENTICATED_EXISTING_ARTIFACT " + json.dumps({
+              "source": source, "run": run_id, "conclusion": producer["conclusion"],
+              "artifact": artifact_id, "bytes": len(raw), "sha256": expected_digest}))
+          archive = zipfile.ZipFile(io.BytesIO(raw))
+          reports = []
+          for name in archive.namelist():
+              if name.endswith("report.json"):
+                  report = json.loads(archive.read(name))
+                  if isinstance(report, dict) and isinstance(report.get("tests"), list):
+                      reports.append((name, report))
+          assert len(reports) == 1, [name for name, _ in reports]
+          name, report = reports[0]
+          assert len(report["tests"]) == 193
+          print("ARENA_REPORT_PATH " + name)
+          print("ARENA_REPORT_HEADER " + json.dumps(
+              {key: value for key, value in report.items() if key != "tests"}, sort_keys=True))
+          records = [case for case in report["tests"] if case.get("index") == 16]
+          assert len(records) == 1
+          case = records[0]
+          assert case["name"] == "bugs/rec-missing-ih.ndjson"
+          print("ARENA_UNCHANGED_CASE16 " + json.dumps(case, sort_keys=True))
+          assert report["kernel_fuel"] == 4096
+          assert report["host_timeout_seconds_per_case"] == 60
+          assert report["node_heap_limit_mib"] == 2048
+          assert report["host_workers"] == 2
+          assert report["excluded_cases"] == []
+          assert all(c["adaptation"]["body_bytes_identical"] and
+                     c["adaptation"]["original_body_sha256"] == c["adaptation"]["adapted_body_sha256"]
+                     for c in report["tests"])
+          unresolved = [{"index": c["index"], "name": c["name"],
+                         "classification": c["classification"],
+                         "official_verdict": c["official"]["verdict"],
+                         "pskernel_verdict": c["pskernel"]["verdict"],
+                         "reason": c["pskernel"].get("reason")}
+                        for c in report["tests"] if not c["classification"].startswith("matched_")]
+          print("ARENA_OPEN_CASES " + json.dumps(unresolved, sort_keys=True))
+          for case in report["tests"]:
+              print("ARENA_COMPLETE_CASE " + json.dumps(case, sort_keys=True))
+          print("PSC1_SAVED_ARENA_CASE16_INSPECTION: PASS source=" + source)
+          PY

@@ -296,3 +296,150 @@ must(isError(wrong)&&wrong.error==="incorrect number of universe levels","wrong-
 must(rejected(get("psKernelV1CheckExpression")(session,nil,safe,cn(aRec.base.name))),"wrong-universe-public");
 console.log("PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3");
 console.log("PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions="+assertions);
+
+
+// T03b: actual admitted sessions are the only authority for a fresh call.
+function sessionOwnersRegression(prior,terms,oldRec){
+ const definitionName=nm("SessionReusedDefinition"),axiomName=nm("SessionReusedAxiom");
+ const theoremName=nm("SessionReusedTheorem"),opaqueName=nm("SessionReusedOpaque");
+ const proposition=E.sort(zero);
+ const identityType=pi("P",proposition,pi("h",E.bvar(0n),E.bvar(1n)));
+ const identityValue=E.lam(nm("P"),proposition,
+  E.lam(nm("h"),E.bvar(0n),E.bvar(0n),unit(B.default)),unit(B.default));
+ const definition={base:{name:definitionName,levelParams:nil,type:nat},value:seven,hints:hint,safety:safe};
+ const axiomInfo={base:{name:axiomName,levelParams:nil,type:nat},isUnsafe:false};
+ const theoremInfo={base:{name:theoremName,levelParams:nil,type:identityType},value:identityValue};
+ const opaqueInfo={base:{name:opaqueName,levelParams:nil,type:nat},value:seven,isUnsafe:false};
+ let current=prior;
+ for(const request of [Request.definitionDecl(definition),Request.axiomDecl(axiomInfo),
+  Request.theoremDecl(theoremInfo),Request.opaqueDecl(opaqueInfo)]){
+  current=accepted(get("psKernelV1AdmitDeclaration")(current,request),"session-extra-checked-admission").session;
+ }
+ const universeName=nm("session_u"),eqName=get("psKernelEqName");
+ const eqDeclaration={levelParams:list([universeName]),name:eqName,
+  type:get("psKernelExpectedEqType")(universeName),numParams:2n,isUnsafe:false,
+  ctors:list([{name:N.str(eqName,"refl"),type:get("psKernelExpectedEqReflType")(universeName)}])};
+ current=accepted(get("psKernelV1AdmitDeclaration")(current,Request.ordinaryInductive(eqDeclaration)),
+  "session-checked-Eq").session;
+ current=accepted(get("psKernelV1AdmitDeclaration")(current,unit(Request.quot)),"session-checked-Quot").session;
+ must(current.environment.quotInitialized===true,"session-Quot-admitted");
+ let work={arena:get("psKernelExprV2PagedEmpty"),built:get("psKernelExprV2DecodedEmpty"),declarations:nil};
+ const append=term=>{
+  const result=accepted(get("psKernelDagGeneratedImport")(term,work),"session-input-construction");
+  work=result.fst;return result.snd;
+ };
+ append(E.lit(Lit.nat(991n)));append(E.lit(Lit.nat(992n)));
+ const natId=append(nat);
+ const roots=[...terms.map(({label,term})=>({label,term})),
+  {label:"old-definition",term:cn(definitionName)}].map(item=>({...item,root:append(item.term)}));
+ const otherRoots=[cn(axiomName),cn(theoremName),cn(opaqueName),cn(get("psKernelQuotName"),[one])].map(append);
+ const sevenId=append(seven),input=work.arena;
+ const originalBuilt=accepted(get("psKernelExprV2DecodeChecked")(input),"session-input-decode");
+ const installed=accepted(get("psKernelDagGeneratedFromSession")(current,input,originalBuilt),"session-owner");
+ must(array(installed.declarations).length<array(current.environment.constants).length&&
+  installed.arena.size===installed.built.size,"session-demand-scoped-owner-count");
+ for(let i=0n;i<32n;i++)must(same(findRef(installed.declarations,N.num(nm("PrefixOld"),i)),none),
+  "session-unrelated-owner-not-imported");
+ const sortInput=accepted(get("psKernelDagGeneratedImport")(s1,
+  {arena:get("psKernelExprV2PagedEmpty"),built:get("psKernelExprV2DecodedEmpty"),declarations:nil}),"session-sort-input").fst;
+ const sortOwners=accepted(get("psKernelDagGeneratedFromSession")(current,sortInput.arena,sortInput.built),"session-sort-owners");
+ must(array(sortOwners.declarations).length===0&&sortOwners.arena.size===sortInput.arena.size,
+  "session-closed-sort-imports-no-declarations");
+ const tags=["axiomInfo","defnInfo","thmInfo","opaqueInfo","inductInfo","ctorInfo","recInfo","quotInfo"];
+ const seen=new Set();
+ for(const owner of array(installed.declarations)){
+  const info=accepted(get("psKernelEnvironmentFind")(current.environment,owner.name),"session-owner-not-live");
+  must(get("psKernelExprV2DeclarationRefMatches")(owner,info)===true&&
+   exact(get("psKernelConstantInfoType")(info),decode(installed.arena,owner.type)),"session-exact-live-metadata");
+  const tag=tags.find(tag=>same(info,CI[tag](info.value)));
+  must(tag!==undefined,"session-recognized-kind");seen.add(tag);
+  if(tag==="defnInfo"){
+   const body=accepted(owner.deltaValue,"session-definition-body");
+   must(exact(info.value.value,decode(installed.arena,body)),"session-exact-transparent-body");
+  }else must(same(owner.deltaValue,none),"session-no-invented-delta");
+  if(tag==="recInfo")for(const rule of array(info.value.rules)){
+   const rhs=accepted(get("psKernelExprV2RecursorRuleOwner")(installed.declarations,info.value,rule),
+    "session-rule-owner");
+   must(rhs>=input.size&&exact(rule.rhs,decode(installed.arena,rhs)),"session-exact-private-rule");
+  }
+ }
+ must(seen.size===8,"session-all-eight-kinds");
+ for(let index=0n;index<input.size;index++)must(exact(
+  accepted(get("psKernelExprV2DecodedRequire")(originalBuilt,index),"session-original-node"),
+  accepted(get("psKernelExprV2DecodedRequire")(installed.built,index),"session-extended-node")),
+  "session-external-ID-stable");
+ const scalar=get("psKernelKernelSessionChecker")(current,nil,safe).context;
+ for(const root of otherRoots)attempt(get("psKernelExprV2TryCheckWithDeclarationsFuel")(
+  4096n,scalar,installed.arena,installed.declarations,root),"session-other-kind-direct-check");
+ accepted(get("psKernelV1RunDag")(current,nil,safe,input,list(otherRoots.map(root=>C.check(root)))),
+  "session-other-kinds-public-check");
+ for(const {label,term,root} of roots){
+  const checked=attempt(get("psKernelExprV2TryCheckWithDeclarationsFuel")(
+   4096n,scalar,installed.arena,installed.declarations,root),"session-"+label+"-check");
+  must(exact(nat,accepted(get("psKernelV1Whnf")(current,nil,safe,decode(checked.fst,checked.snd)),
+   "session-inferred-type-WHNF")),"session-direct-check-type");
+  const normalized=attempt(get("psKernelExprV2TryWhnfOwnedWithDeclarationsFuel")(
+   4096n,scalar,installed.arena,installed.declarations,root),"session-"+label+"-WHNF");
+  must(exact(seven,decode(normalized.fst,normalized.snd)),"session-direct-WHNF");
+  must(attempt(get("psKernelExprV2TryDefEqWithDeclarationsFuel")(
+   4096n,scalar,installed.arena,installed.declarations,root,sevenId),
+   "session-"+label+"-DefEq")===true,"session-direct-DefEq");
+  must(exact(seven,accepted(get("psKernelV1Whnf")(current,nil,safe,term),"session-V1-reference")),
+   "session-V1-reference-value");
+ }
+ const run=(start,commands)=>get("psKernelV1RunDag")(start,nil,safe,input,list(commands));
+ const reused=accepted(run(current,roots.flatMap(({root})=>[
+  C.check(root),C.whnf(root),C.isDefEq(root,sevenId)])),"session-second-public-call");
+ const replies=array(reused.replies),Reply=get("PsKernelDagReply");
+ must(replies.length===21&&roots.length===7,"session-public-all-replies");
+ for(let i=0;i<roots.length;i++){
+  const checked=replies[3*i],normalized=replies[3*i+1],equal=replies[3*i+2];
+  must(checked&&same(checked,Reply.checked(checked.value)),"session-public-checked");
+  must(normalized&&same(normalized,Reply.normalized(normalized.value))&&exact(normalized.value,seven),
+   "session-public-exact-WHNF");
+  must(same(equal,Reply.equal(true)),"session-public-DefEq");
+ }
+ const oldOwner=accepted(findRef(installed.declarations,oldRec.base.name),"session-old-rec-owner");
+ const missing=list(array(installed.declarations).filter(owner=>!nEq(owner.name,oldRec.base.name)));
+ const mismatched=List.cons({...oldOwner,kind:unit(Kind.axiomDecl)},missing);
+ for(const owners of [missing,mismatched])must(same(
+  get("psKernelExprV2TryWhnfOwnedWithDeclarationsFuel")(4096n,scalar,installed.arena,owners,roots[0].root),none),
+  "session-missing-or-mismatched-owner-declines");
+ const privateId=input.size;
+ const badCommands=[C.check(privateId),C.whnf(privateId),C.isDefEq(privateId,sevenId),
+  C.isDefEq(sevenId,privateId),C.admit(D.axiomDecl({name:nm("SessionPrivateId"),levelParams:nil,type:privateId},false))];
+ for(const command of badCommands)must(publicError(run(current,[command]),
+  "rejectedInvalid","PSKERNEL_V2_DECODE_INVALID_REFERENCE"),"session-private-ID-refused");
+ const lateName=nm("SessionLateAtomic");
+ must(rejected(run(current,[C.admit(D.axiomDecl({name:lateName,levelParams:nil,type:natId},false)),
+  C.check(privateId)])),"session-late-command-failure-atomic");
+ must(!contains(current.environment,lateName),"session-failed-command-did-not-mutate");
+ const malformed={...get("psKernelExprV2PagedEmpty"),pageLimit:0n};
+ const emptyState={arena:malformed,built:get("psKernelExprV2DecodedEmpty"),declarations:nil};
+ const firstImported=accepted(get("psKernelDagGeneratedInstallSessionInfo")(CI.axiomInfo(axiomInfo),emptyState),
+  "session-first-import-before-fault");
+ must(array(firstImported.declarations).length===1,"session-first-import-succeeded");
+ must(isError(get("psKernelDagGeneratedCompleteDemands")(
+  current.environment.constants,current.environment,list([axiomName,theoremName]),emptyState)),"session-late-import-fault");
+ must(rejected(get("psKernelV1RunDag")(current,nil,safe,malformed,nil)),
+  "session-public-rejects-malformed-owner");
+ const fork7=accepted(get("psKernelV1AdmitDeclaration")(prior,Request.definitionDecl(definition)),
+  "session-fork7").session;
+ const eight=E.lit(Lit.nat(8n));
+ const fork8=accepted(get("psKernelV1AdmitDeclaration")(prior,Request.definitionDecl({...definition,value:eight})),
+  "session-fork8").session;
+ const definitionId=roots.at(-1).root;
+ for(const [fork,expected] of [[fork7,seven],[fork8,eight],[fork7,seven],[fork8,eight]]){
+  const owner=accepted(get("psKernelDagGeneratedFromSession")(fork,input,originalBuilt),"session-fork-owner");
+  const context=get("psKernelKernelSessionChecker")(fork,nil,safe).context;
+  const direct=attempt(get("psKernelExprV2TryWhnfOwnedWithDeclarationsFuel")(
+   4096n,context,owner.arena,owner.declarations,definitionId),"session-fork-direct");
+  must(exact(expected,decode(direct.fst,direct.snd)),"session-fork-direct-value");
+  const actual=accepted(run(fork,[C.whnf(definitionId)]),"session-fork-public");
+  const rows=array(actual.replies);
+  must(rows.length===1&&same(rows[0],Reply.normalized(rows[0].value))&&exact(rows[0].value,expected),
+   "session-fork-public-value");
+ }
+ console.log("PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2");
+}
+sessionOwnersRegression(result.session,cases,aRec);

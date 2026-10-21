@@ -1,3 +1,54 @@
+## T03b demand-scoped session ownership — isolated implementation, pending qualification
+
+Updated: 2026-10-21 19:59:42 UTC. Integration parent is exact
+`0420aa896b04197aebd14444c1d2c4a36a41df9e`; the isolated branch is
+`work/psc1-pskernel-t03b-session-20261022`. This containing source is
+**NOT YET A-qualified**. No parent PASS is inherited. Existing exact0420 runs
+39664059278/39664059196/39664059121/39664059161/39664059168 are being inspected,
+not duplicated. Exactdeb18 combined qualification is terminal and separately
+recorded in [its receipt](evidence/2026-10-21-deb-terminal-qualification.json).
+
+T03b now derives private owners from the actual admitted session before use.
+Canonical input nodes seed indexed name lookup; newly imported checked types,
+transparent bodies and recursor rules extend the same demand closure. Literal
+translation and Nat Boolean results contribute their implicit helper names.
+Actual inductive families/constructors and recursor rule constructors contribute
+metadata dependencies. No unrelated declaration is eagerly imported, and there
+is no environment-size prepass. A structural authority-list cursor bounds one
+new owner per step without traversing the old tail or eagerly building closures.
+The checked environment index supplies every declaration; the cursor head is
+never metadata authority. The public entry accepts no owner table or receipt.
+
+The original decoded input remains the external ID namespace. The append-only
+arena, synchronized decoded table and private owners are staged together.
+Post-command demand completion scans only newly appended metadata, using the
+actual checked next session. All publication remains atomic. Immutable
+environment identity accompanies owner indexes; operation caches remain fresh.
+The T03a final-prefix recipe, all existing Quot ownership behavior and the old
+helper ABIs remain. Low-level forged sessions keep the documented trusted
+integration boundary; this adapter adds no admission mechanism.
+
+Native/official and both authentic generated gates retain all previous controls
+and add prior-session constant/recursor direct check, WHNF and DefEq, all8
+declaration kinds,5 private-ID negatives,2 isolated session forks, missing/wrong
+owners, late command/import errors, and demand-only import checks. Twelve local
+equations address exact lookup, bounded import, error propagation and original
+input identity; these are not global soundness/refinement/backend proofs.
+
+The eager7e candidate remains held. Promotion requires the unchanged32-worker,
+384-call,32/128-owner complete-call ABBA experiment against a source-bound
+baseline, with construction/admission/module/cache measurements retained.
+Only one final unchanged193-case comparison is planned per coherent candidate.
+Fuel4096,60seconds/case,2048MiB Node old-space and2workers are unchanged.
+No general speedup is claimed. A qualification is pending for this source;
+B remains open (T03b qualification,T01F,V1 inductive admission,recursive metadata
+import,eager decode,four whole-operation fallbacks), C remains open for
+timeouts/Church/safety reconciliation, and D remains open.
+
+Earlier execution updates below are historical and retain their exact sources.
+
+---
+
 # Current integration — qualified Quot ownership; hold eager initial loading
 
 Updated: 2026-10-21 19:41:30 UTC.

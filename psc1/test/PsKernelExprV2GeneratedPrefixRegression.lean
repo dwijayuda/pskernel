@@ -190,6 +190,201 @@ private def rejected {α : Type} : Except PsKernelError α → Bool
   | .error (.rejectedInvalid _) => true
   | _ => false
 
+
+/- T03b: the prior argument is a genuinely returned public session. No owner
+   table is accepted by the next public call. Low-level probes below inspect
+   the same privately derived representation and cannot hide fallback. -/
+private def sessionOwnersRegression
+    (prior : PsKernelKernelSession) (officialPrior : Lean.Environment)
+    (terms : List (String × PsKernelExpr)) (oldRec : PsKernelRecursorInfo) : IO Unit := do
+  let definitionName := nm "SessionReusedDefinition"
+  let axiomName := nm "SessionReusedAxiom"
+  let theoremName := nm "SessionReusedTheorem"
+  let opaqueName := nm "SessionReusedOpaque"
+  let proposition := PsKernelExpr.sort .zero
+  let identityType := pi "P" proposition (pi "h" (.bvar 0) (.bvar 1))
+  let identityValue := PsKernelExpr.lam (nm "P") proposition
+    (.lam (nm "h") (.bvar 0) (.bvar 0) .default) .default
+  let definition := PsKernelDefinitionInfo.mk
+    (PsKernelConstantBase.mk definitionName [] nat) seven .abbrevHint .safe
+  let axiomInfo := PsKernelAxiomInfo.mk (PsKernelConstantBase.mk axiomName [] nat) false
+  let theoremInfo := PsKernelTheoremInfo.mk
+    (PsKernelConstantBase.mk theoremName [] identityType) identityValue
+  let opaqueInfo := PsKernelOpaqueInfo.mk
+    (PsKernelConstantBase.mk opaqueName [] nat) seven false
+  let requests : List PsKernelDeclarationRequest := [
+    .definitionDecl definition, .axiomDecl axiomInfo,
+    .theoremDecl theoremInfo, .opaqueDecl opaqueInfo]
+  let mut session := prior
+  for request in requests do
+    session := (← expectPublic "session-additional-checked-admission"
+      (psKernelV1AdmitDeclaration session request)).session
+  let officialRequests : List Lean.Declaration := [
+    .defnDecl { name := officialName definitionName, levelParams := [],
+      type := officialExpr nat, value := officialExpr seven, hints := .abbrev, safety := .safe },
+    .axiomDecl { name := officialName axiomName, levelParams := [],
+      type := officialExpr nat, isUnsafe := false },
+    .thmDecl { name := officialName theoremName, levelParams := [],
+      type := officialExpr identityType, value := officialExpr identityValue },
+    .opaqueDecl { name := officialName opaqueName, levelParams := [],
+      type := officialExpr nat, value := officialExpr seven, isUnsafe := false }]
+  let mut official := officialPrior
+  for request in officialRequests do
+    match official.addDeclCore 0 0 request none true with
+    | .ok next => official := next
+    | .error _ => throw (IO.userError "session-official-declaration")
+  let universeName := nm "session_u"
+  let eqDeclaration := PsKernelSimpleInductiveDecl.mk [universeName] psKernelEqName
+    (psKernelExpectedEqType universeName)
+    [PsKernelSimpleConstructorDecl.mk (PsKernelName.str psKernelEqName "refl")
+      (psKernelExpectedEqReflType universeName)] false 2
+  let withEq ← expectPublic "session-checked-Eq"
+    (psKernelV1AdmitDeclaration session (.ordinaryInductive eqDeclaration))
+  session := (← expectPublic "session-checked-Quot" (psKernelV1AdmitDeclaration withEq.session .quot)).session
+  require "session-quot-admitted" session.environment.quotInitialized
+  let (padding,_) ← expect (psKernelExprV2PagedMkLit psKernelExprV2PagedEmpty (.nat 991))
+  let (padding,_) ← expect (psKernelExprV2PagedMkLit padding (.nat 992))
+  let (padding,natId) ← expect (psKernelExprV2PagedImportIntoChecked padding nat)
+  let mut input := padding
+  let mut roots : List (String × PsKernelExpr × Nat) := []
+  for (label,term) in terms ++ [("old-definition",constE definitionName)] do
+    let (next,id) ← expect (psKernelExprV2PagedImportIntoChecked input term)
+    input := next
+    roots := roots ++ [(label,term,id)]
+  let mut otherRoots : List Nat := []
+  for term in [constE axiomName,constE theoremName,constE opaqueName,
+      constE psKernelQuotName [one]] do
+    let (next,id) ← expect (psKernelExprV2PagedImportIntoChecked input term)
+    input := next
+    otherRoots := id :: otherRoots
+  let (input,sevenId) ← expect (psKernelExprV2PagedImportIntoChecked input seven)
+  let built ← expect (psKernelExprV2DecodeChecked input)
+  let installed ← expect (psKernelDagGeneratedFromSession session input built)
+  require "session-demand-scoped-owner-count"
+    (installed.declarations.length < session.environment.constants.length &&
+      installed.arena.size == installed.built.size)
+  for i in List.range 32 do
+    require "session-unrelated-owner-not-imported"
+      (psKernelExprV2DeclarationRefFind installed.declarations (.num (nm "PrefixOld") i)).isNone
+  let (sortArena,_) ← expect (psKernelExprV2PagedImportIntoChecked psKernelExprV2PagedEmpty s1)
+  let sortBuilt ← expect (psKernelExprV2DecodeChecked sortArena)
+  let sortOwners ← expect (psKernelDagGeneratedFromSession session sortArena sortBuilt)
+  require "session-closed-sort-imports-no-declarations"
+    (sortOwners.declarations.isEmpty && sortOwners.arena.size == sortArena.size)
+  let mut kinds : List Nat := []
+  for owner in installed.declarations do
+    let some info := psKernelEnvironmentFind session.environment owner.name
+      | throw (IO.userError "session-owner-not-live")
+    require "session-exact-live-metadata"
+      (psKernelExprV2DeclarationRefMatches owner info &&
+        psKernelExprEqual (psKernelConstantInfoType info) (← decode installed.arena owner.type))
+    let tag := match info with
+      | .axiomInfo _ => 0 | .defnInfo _ => 1 | .thmInfo _ => 2 | .opaqueInfo _ => 3
+      | .inductInfo _ => 4 | .ctorInfo _ => 5 | .recInfo _ => 6 | .quotInfo _ => 7
+    if !kinds.contains tag then kinds := tag :: kinds
+    match info with
+    | .defnInfo value =>
+        let some body := owner.deltaValue | throw (IO.userError "session-definition-body")
+        require "session-exact-transparent-body"
+          (psKernelExprEqual value.value (← decode installed.arena body))
+    | _ => require "session-no-invented-delta" owner.deltaValue.isNone
+    match info with
+    | .recInfo rec =>
+        for rule in rec.rules do
+          let some rhs := psKernelExprV2RecursorRuleOwner installed.declarations rec rule
+            | throw (IO.userError "session-missing-rule-owner")
+          require "session-exact-private-rule" (rhs >= input.size &&
+            psKernelExprEqual rule.rhs (← decode installed.arena rhs))
+    | _ => pure ()
+  require "session-all-eight-kinds" (kinds.length == 8)
+  for index in List.range input.size do
+    require "session-external-ID-stable"
+      (psKernelExprEqual (← expect (psKernelExprV2DecodedRequire built index))
+        (← expect (psKernelExprV2DecodedRequire installed.built index)))
+  let scalar := (psKernelKernelSessionChecker session [] .safe).context
+  for root in otherRoots do
+    let _ ← attempt "session-other-kind-direct-check"
+      (psKernelExprV2TryCheckWithDeclarationsFuel 4096 scalar installed.arena installed.declarations root)
+  let _ ← expectPublic "session-other-kinds-public-check"
+    (psKernelV1RunDag session [] .safe input (otherRoots.map PsKernelDagCommand.check))
+  for (label,term,root) in roots do
+    let checked ← attempt ("session-" ++ label ++ "-direct-check")
+      (psKernelExprV2TryCheckWithDeclarationsFuel 4096 scalar installed.arena installed.declarations root)
+    require "session-direct-check-type" (psKernelExprEqual nat
+      (← expectPublic "session-normalized-type"
+        (psKernelV1Whnf session [] .safe (← decode checked.fst checked.snd))))
+    let normalized ← attempt ("session-" ++ label ++ "-direct-whnf")
+      (psKernelExprV2TryWhnfOwnedWithDeclarationsFuel 4096 scalar installed.arena installed.declarations root)
+    require "session-direct-whnf-value"
+      (psKernelExprEqual seven (← decode normalized.fst normalized.snd))
+    require "session-direct-defeq"
+      (← attempt ("session-" ++ label ++ "-direct-defeq")
+        (psKernelExprV2TryDefEqWithDeclarationsFuel 4096 scalar installed.arena installed.declarations root sevenId))
+    require "session-official-check"
+      (match Lean.Kernel.check official {} (officialExpr term) with | .ok _ => true | _ => false)
+    require "session-official-defeq"
+      (match Lean.Kernel.isDefEq official {} (officialExpr term) (officialExpr seven) with
+       | .ok true => true | _ => false)
+  let commands := roots.flatMap fun (_,_,root) => [.check root,.whnf root,.isDefEq root sevenId]
+  let reused ← expectPublic "session-second-public-call" (psKernelV1RunDag session [] .safe input commands)
+  require "session-public-all-replies" (reused.replies.length == 21 && roots.length == 7)
+  for index in List.range roots.length do
+    match reused.replies.drop (3 * index) with
+    | .checked _ :: .normalized value :: .equal true :: _ =>
+        require "session-public-exact-whnf" (psKernelExprEqual value seven)
+    | _ => throw (IO.userError "session-public-reply-kind")
+  let some oldOwner := psKernelExprV2DeclarationRefFind installed.declarations oldRec.base.name
+    | throw (IO.userError "session-old-recursor-owner")
+  let missing := installed.declarations.filter fun owner => !psKernelNameEq owner.name oldRec.base.name
+  let mismatched := { oldOwner with kind := .axiomDecl } :: missing
+  let some (_,_,firstRoot) := roots.head? | throw (IO.userError "session-first-root")
+  for owners in [missing,mismatched] do
+    require "session-stale-or-mismatched-owner-declines"
+      (psKernelExprV2TryWhnfOwnedWithDeclarationsFuel 4096 scalar installed.arena owners firstRoot).isNone
+  let privateId := input.size
+  let badCommands : List PsKernelDagCommand := [
+    .check privateId, .whnf privateId, .isDefEq privateId sevenId, .isDefEq sevenId privateId,
+    .admit (.axiomDecl (PsKernelDagConstantBase.mk (nm "SessionPrivateId") [] privateId) false)]
+  for command in badCommands do
+    require "session-private-ID-refused"
+      (match psKernelV1RunDag session [] .safe input [command] with
+       | .error (.rejectedInvalid text) => text == "PSKERNEL_V2_DECODE_INVALID_REFERENCE"
+       | _ => false)
+  let lateName := nm "SessionLateAtomic"
+  require "session-late-command-failure-atomic"
+    (rejected (psKernelV1RunDag session [] .safe input [
+      .admit (.axiomDecl (PsKernelDagConstantBase.mk lateName [] natId) false), .check privateId]))
+  require "session-failed-command-did-not-mutate"
+    (!(psKernelEnvironmentContains session.environment lateName))
+  let malformed := { psKernelExprV2PagedEmpty with pageLimit := 0 }
+  let emptyState := PsKernelDagGeneratedState.mk malformed psKernelExprV2DecodedEmpty []
+  let firstImported ← expect (psKernelDagGeneratedInstallSessionInfo (.axiomInfo axiomInfo) emptyState)
+  require "session-fault-first-import-succeeds" (firstImported.declarations.length == 1)
+  require "session-late-import-fault"
+    (match psKernelDagGeneratedCompleteDemands session.environment.constants session.environment
+        [axiomName,theoremName] emptyState with
+     | .error _ => true | _ => false)
+  require "session-public-rejects-malformed-owner-before-import"
+    (rejected (psKernelV1RunDag session [] .safe malformed []))
+  let fork7 ← expectPublic "session-fork7" (psKernelV1AdmitDeclaration prior (.definitionDecl definition))
+  let eight := PsKernelExpr.lit (.nat 8)
+  let fork8 ← expectPublic "session-fork8"
+    (psKernelV1AdmitDeclaration prior (.definitionDecl { definition with value := eight }))
+  let some (_,_,definitionId) := roots.getLast? | throw (IO.userError "session-definition-root")
+  for (fork,expected) in [(fork7.session,seven),(fork8.session,eight),
+      (fork7.session,seven),(fork8.session,eight)] do
+    let owner ← expect (psKernelDagGeneratedFromSession fork input built)
+    let context := (psKernelKernelSessionChecker fork [] .safe).context
+    let direct ← attempt "session-fork-direct"
+      (psKernelExprV2TryWhnfOwnedWithDeclarationsFuel 4096 context owner.arena owner.declarations definitionId)
+    require "session-fork-direct-value" (psKernelExprEqual expected (← decode direct.fst direct.snd))
+    let actual ← expectPublic "session-fork-public"
+      (psKernelV1RunDag fork [] .safe input [.whnf definitionId])
+    require "session-fork-public-value"
+      (match actual.replies with | [.normalized value] => psKernelExprEqual value expected | _ => false)
+  IO.println "PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2"
+  IO.println "PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7"
+
 def regression : IO Unit := do
   let empty ← expectPublic "empty" (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
   -- Padding makes every owned input reference nonzero.
@@ -412,8 +607,8 @@ def regression : IO Unit := do
     (prepared.commands ++ roots.flatMap fun (_,_,root) =>
       [.check root,.whnf root,.isDefEq root sevenId]))
   require "whole-batch-complete" (result.replies.length == prepared.commands.length + 18)
-  -- A genuinely separate batch owns only its new Fast family. This does not
-  -- pretend that old Nat/session refs persist across public calls (T03b).
+  -- The historical low-level compatibility helper owns only this new Fast family.
+  -- Public preexisting-session ownership is checked separately below.
   let firstBatch ← expectPublic "first-batch"
     (psKernelV1RunDag empty [] .safe input treePrepared.commands)
   let some fastTransition := fastPrepared.transitions.getLast?
@@ -487,6 +682,7 @@ def regression : IO Unit := do
     (match Lean.Kernel.check official {} (officialExpr wrongLevels) with | .error _ => true | _ => false)
   IO.println "PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3"
   IO.println "PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7"
+  sessionOwnersRegression result.session official cases aRec
 
 end PsKernelExprV2GeneratedPrefixRegression
 

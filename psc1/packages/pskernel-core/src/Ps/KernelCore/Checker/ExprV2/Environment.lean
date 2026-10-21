@@ -6,8 +6,8 @@ checked DAG batch. Types and optional transparent bodies belong to its canonical
 input arena and every append-only continuation. This is the single declaration
 index used by constant inference and delta reduction.
 
-The public boundary creates the table empty. It never escapes into a legacy
-kernel session. These internal, forgeable records are not admission certificates.
+The public boundary derives the private table from demanded declarations in the
+actual admitted session. It never escapes into a legacy kernel session. These internal, forgeable records are not admission certificates.
 Live environment metadata still decides constant kind, safety and universe arity.
 Ordinary/mutual/nested recursor types/rules (including K) are installed once from
 the newly admitted final-environment prefix, in an appended owning arena. Nested
@@ -16,7 +16,10 @@ ordinary/mutual headers and constructors retain original admitted IDs. This
 transitional import does not make inductive admission DAG-native. Quot headers
 are installed from all four live constants after successful checked Quot admission.
 Repeated explicit Quot commands retain exact existing owners. Preexisting
-session constants still require a separately qualified owning-reference adapter.
+session declarations are imported on demand into the same private appended arena,
+including checked transparent bodies and actual recursor rules. References are
+never reused across session identities; live immutable environment indexes and
+fresh operation caches remain authoritative.
 -/
 /- Generated rule IDs are private to one validated command batch. They are
    installed only from metadata produced by complete inductive admission. -/

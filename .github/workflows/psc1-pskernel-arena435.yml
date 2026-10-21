@@ -167,6 +167,33 @@ jobs:
             --out "$RUNNER_TEMP/arena435-independent/report.json" \
             --timeout 60 --workers 2 \
             | tee "$RUNNER_TEMP/arena435-independent/run.log"
+      - name: Record all saved case bodies and verdicts without replay
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "arena435-independent/report.json"
+          if not path.is_file():
+              raise SystemExit("No completed comparison report was produced")
+          report = json.loads(path.read_text())
+          cases = report["tests"]
+          assert len(cases) == 193
+          assert report["kernel_fuel"] == 4096
+          assert report["host_timeout_seconds_per_case"] == 60
+          assert report["node_heap_limit_mib"] == 2048
+          assert report["host_workers"] == 2
+          assert report["excluded_cases"] == []
+          assert all(c["adaptation"]["body_bytes_identical"] and
+                     c["adaptation"]["original_body_sha256"] == c["adaptation"]["adapted_body_sha256"]
+                     for c in cases)
+          print("ARENA_EXACT_SOURCE " + os.environ["GITHUB_SHA"])
+          print("ARENA_REPORT_HEADER " + json.dumps(
+              {key: value for key, value in report.items() if key != "tests"}, sort_keys=True))
+          for case in cases:
+              print("ARENA_COMPLETE_CASE " + json.dumps(case, sort_keys=True))
+          print("PSC1_ARENA_FULL_REPORT_RECORDED source=" + os.environ["GITHUB_SHA"] +
+                " cases=193 unchangedBodies=193 replayedCases=0")
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:

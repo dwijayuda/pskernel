@@ -421,3 +421,166 @@ def psKernelDagGeneratedAfterCommandWithPrevious
             (psKernelDagGeneratedPlanQuot current) state
       | _ => Except.ok state
   | _ => Except.ok state
+
+/- T03b adapts admitted session metadata into this call's private arena.
+   Only names demanded by canonical nodes or checked metadata are imported.
+   No caller-supplied owner table, receipt, or persistent cross-session cache is
+   authoritative. Directly forged sessions retain API.Session's trusted boundary. -/
+def psKernelDagGeneratedInstallDefinition
+    (definition : PsKernelDefinitionInfo) (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match psKernelDagGeneratedImport definition.base.type state with
+  | Except.error error => Except.error error
+  | Except.ok typeResult =>
+      match psKernelDagGeneratedImport definition.value (Prod.fst typeResult) with
+      | Except.error error => Except.error error
+      | Except.ok valueResult =>
+          let next := Prod.fst valueResult;
+          let owner := PsKernelExprV2DeclarationRef.mk
+            definition.base.name definition.base.levelParams (Prod.snd typeResult)
+            (Option.some (Prod.snd valueResult))
+            PsKernelExprV2DeclarationRefKind.definitionDecl;
+          Except.ok (PsKernelDagGeneratedState.mk next.arena next.built
+            (List.cons owner next.declarations))
+
+def psKernelDagGeneratedInstallSessionInfo
+    (info : PsKernelConstantInfo) (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match info with
+  | PsKernelConstantInfo.axiomInfo value =>
+      psKernelDagGeneratedInstallHeader value.base
+        PsKernelExprV2DeclarationRefKind.axiomDecl state
+  | PsKernelConstantInfo.defnInfo value =>
+      psKernelDagGeneratedInstallDefinition value state
+  | PsKernelConstantInfo.thmInfo value =>
+      psKernelDagGeneratedInstallHeader value.base
+        PsKernelExprV2DeclarationRefKind.theoremDecl state
+  | PsKernelConstantInfo.opaqueInfo value =>
+      psKernelDagGeneratedInstallHeader value.base
+        PsKernelExprV2DeclarationRefKind.opaqueDecl state
+  | _ => psKernelDagGeneratedInstallInfo info state
+
+/- Scan each canonical node once, without recursively expanding shared children.
+   Literal translation introduces implicit constants; include those names too. -/
+def psKernelDagGeneratedNodeDemands
+    (source : PsKernelExpr) (pending : List PsKernelName) :
+    List PsKernelName :=
+  match source with
+  | PsKernelExpr.const name _ =>
+      let names := List.cons name pending;
+      if psKernelNameEq name psKernelNatBeqName then
+        List.cons psKernelBoolTrueName (List.cons psKernelBoolFalseName names)
+      else if psKernelNameEq name psKernelNatBleName then
+        List.cons psKernelBoolTrueName (List.cons psKernelBoolFalseName names)
+      else names
+  | PsKernelExpr.proj name _ _ => List.cons name pending
+  | PsKernelExpr.lit value =>
+      match value with
+      | PsKernelLiteral.nat _ =>
+          List.cons psKernelNatName (List.cons psKernelNatZeroName
+            (List.cons psKernelNatSuccName pending))
+      | PsKernelLiteral.str _ =>
+          let names := List.cons psKernelNatName
+            (List.cons psKernelNatZeroName (List.cons psKernelNatSuccName pending));
+          List.cons psKernelStringName (List.cons psKernelCharName
+            (List.cons psKernelListNilName (List.cons psKernelListConsName
+              (List.cons psKernelCharOfNatName
+                (List.cons psKernelStringOfListName names)))))
+  | _ => pending
+
+def psKernelDagGeneratedCollectDemands
+    (remaining : Nat) (built : PsKernelExprV2Decoded) (index : Nat)
+    (pending : List PsKernelName) : Except String (List PsKernelName) :=
+  match remaining with
+  | Nat.zero => Except.ok pending
+  | Nat.succ rest =>
+      match psKernelExprV2DecodedRequire built index with
+      | Except.error error => Except.error error
+      | Except.ok source =>
+          psKernelDagGeneratedCollectDemands rest built (Nat.succ index)
+            (psKernelDagGeneratedNodeDemands source pending)
+
+def psKernelDagGeneratedRuleDemands
+    (rules : List PsKernelRecursorRule) (pending : List PsKernelName) :
+    List PsKernelName :=
+  match rules with
+  | List.nil => pending
+  | List.cons rule rest =>
+      psKernelDagGeneratedRuleDemands rest (List.cons rule.ctor pending)
+
+def psKernelDagGeneratedInfoDemands
+    (info : PsKernelConstantInfo) (pending : List PsKernelName) :
+    List PsKernelName :=
+  match info with
+  | PsKernelConstantInfo.inductInfo value =>
+      List.append value.all (List.append value.ctors pending)
+  | PsKernelConstantInfo.ctorInfo value => List.cons value.induct pending
+  | PsKernelConstantInfo.recInfo value =>
+      List.append value.all (psKernelDagGeneratedRuleDemands value.rules pending)
+  | _ => pending
+
+/- Existing private owners were derived in this same immutable environment or
+   a checked extension which cannot replace names. Unknown names remain unknown:
+   lookup here never admits a declaration or turns failure into acceptance. -/
+def psKernelDagGeneratedNextDemand
+    (pending : List PsKernelName) (environment : PsKernelEnvironment)
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    Option (Prod PsKernelConstantInfo (List PsKernelName)) :=
+  match pending with
+  | List.nil => Option.none
+  | List.cons name rest =>
+      match psKernelExprV2DeclarationRefFind declarations name with
+      | Option.some _ =>
+          psKernelDagGeneratedNextDemand rest environment declarations
+      | Option.none =>
+          match psKernelEnvironmentFind environment name with
+          | Option.none =>
+              psKernelDagGeneratedNextDemand rest environment declarations
+          | Option.some info => Option.some (Prod.mk info rest)
+
+/- The admitted declaration list is only a structural bound: one cons is
+   consumed per newly imported unique name, and its head is never metadata
+   authority. No environment-size prepass, old-tail traversal or eagerly built
+   recursion closure occurs. Empty demand returns without inspecting the bound.
+   The exact immutable environment/index supplies every imported declaration. -/
+def psKernelDagGeneratedCompleteDemands
+    (remaining : List PsKernelConstantInfo)
+    (environment : PsKernelEnvironment) (pending : List PsKernelName)
+    (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match psKernelDagGeneratedNextDemand pending environment state.declarations with
+  | Option.none => Except.ok state
+  | Option.some selected =>
+      match remaining with
+      | List.nil => Except.error "PSKERNEL_V2_SESSION_OWNER_BOUND"
+      | List.cons _ rest =>
+          match psKernelDagGeneratedInstallSessionInfo (Prod.fst selected) state with
+          | Except.error error => Except.error error
+          | Except.ok next =>
+              let names := psKernelDagGeneratedInfoDemands
+                (Prod.fst selected) (Prod.snd selected);
+              match psKernelDagGeneratedCollectDemands
+                  (Nat.sub next.built.size state.built.size)
+                  next.built state.built.size names with
+              | Except.error error => Except.error error
+              | Except.ok demands =>
+                  psKernelDagGeneratedCompleteDemands rest environment demands next
+
+/- Post-validation and post-command callers provide only the appended range.
+   Publication remains atomic if any demand lookup/import fails. -/
+def psKernelDagGeneratedDemandRange
+    (environment : PsKernelEnvironment) (start : Nat)
+    (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match psKernelDagGeneratedCollectDemands
+      (Nat.sub state.built.size start) state.built start List.nil with
+  | Except.error error => Except.error error
+  | Except.ok demands =>
+      psKernelDagGeneratedCompleteDemands
+        environment.constants environment demands state
+
+def psKernelDagGeneratedFromSession
+    (session : PsKernelKernelSession) (arena : PsKernelExprV2PagedArena)
+    (built : PsKernelExprV2Decoded) : Except String PsKernelDagGeneratedState :=
+  psKernelDagGeneratedDemandRange session.environment 0
+    (PsKernelDagGeneratedState.mk arena built List.nil)

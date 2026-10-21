@@ -27,6 +27,7 @@ on:
       - psc1/test/PsKernelExprV2QuotRegression.lean
       - psc1/test/PsKernelExprV2RecursorRegression.lean
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
+      - psc1/test/PsKernelExprV2SessionProofs.lean
       - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
       - psc1/test/PsKernelExprV2QuotOwnerRegression.lean
       - psc1/test/PsKernelExprV2QuotOwnerProofs.lean
@@ -326,6 +327,8 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-generated-prefix-native.log"
           grep -Fqx 'PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
           grep -Fqx 'PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+          grep -Fqx 'PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+          grep -Fqx 'PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
       - name: Check DAG K conversion against V1 and official Lean
         if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
         working-directory: psc1
@@ -402,6 +405,9 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-admission-guard-proofs.log"
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean \
             | tee "$RUNNER_TEMP/psc1-recursor-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2SessionProofs.lean)" -eq 12
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2SessionProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-session-proofs.log"
           test "$(grep -c '^#print axioms ' test/PsKernelExprV2RecursorMajorProofs.lean)" -eq 10
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorMajorProofs.lean \
             | tee "$RUNNER_TEMP/psc1-recursor-major-proofs.log"
@@ -425,6 +431,7 @@ jobs:
               "$RUNNER_TEMP/psc1-nat-fuel-proofs.log" "$RUNNER_TEMP/psc1-expr-equality-proofs.log" \
               "$RUNNER_TEMP/psc1-admission-guard-proofs.log" \
               "$RUNNER_TEMP/psc1-recursor-proofs.log" \
+              "$RUNNER_TEMP/psc1-session-proofs.log" \
               "$RUNNER_TEMP/psc1-recursor-major-proofs.log" \
               "$RUNNER_TEMP/psc1-recursor-k-proofs.log" \
               "$RUNNER_TEMP/psc1-name-worker-proofs.log" \
@@ -506,6 +513,7 @@ jobs:
             ${{ runner.temp }}/psc1-expr-equality-proofs.log
             ${{ runner.temp }}/psc1-knot-fuel-proofs.log
             ${{ runner.temp }}/psc1-recursor-proofs.log
+            ${{ runner.temp }}/psc1-session-proofs.log
             ${{ runner.temp }}/psc1-recursor-major-proofs.log
             ${{ runner.temp }}/psc1-recursor-k-proofs.log
             ${{ runner.temp }}/psc1-quot-owner-proofs.log
@@ -745,6 +753,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" generated-prefix-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-generated-prefix-js.log"
           grep -Fqx 'PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
+          grep -Fqx 'PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
           grep -Eq '^PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
       - name: Check generated DAG K conversion in detached Node
         working-directory: psc1

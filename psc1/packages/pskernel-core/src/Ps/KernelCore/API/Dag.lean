@@ -36,9 +36,11 @@ Each declaration is checked before environment publication. No semantic cache
 or declaration index escapes the validated batch. A sealed constructor API
 remains a source-profile limitation.
 
-This remains a partial representation migration. External constant types,
-projections without owning constructor types, unowned recursor descendants
-and remaining admission rules may restart through PsKernelExpr. The general
+At each public call, existing admitted session metadata is adapted into fresh
+private appended IDs before commands execute. The original input table remains
+the external namespace. No declaration table or semantic cache crosses calls.
+This remains a partial representation migration. Unsupported descendants and
+remaining admission rules may restart through PsKernelExpr. The general
 ordered DefEq pipeline itself has direct DAG implementations.
 Eliminating that fallback and adapter remains required for completion.
 -/
@@ -49,7 +51,8 @@ structure PsKernelDagBatchResult where
 /-
 Internal state of one validated command batch. Its declaration references are
 not accepted by psKernelV1RunDag and are not retained in its returned session.
-Only successful complete admission extends the table.
+Initialization derives the table from that same session's admitted environment;
+only successful complete admission extends it afterward.
 -/
 structure PsKernelDagExecutionState where
   session : PsKernelKernelSession
@@ -263,15 +266,19 @@ def psKernelDagRunCommandsWithSource
                 execution.session.environment nextExecution.session.environment generated with
             | Except.error error => Except.error (PsKernelError.internalError error)
             | Except.ok installed =>
-                let owner := PsKernelDagExecutionState.mk
-                  nextExecution.session installed.declarations;
-                let recur := psKernelDagRunCommandsWithSource rest;
-                match recur input owner levelParams safety installed.arena installed.built with
-                | Except.error error => Except.error error
-                | Except.ok tail =>
-                    Except.ok
-                      (PsKernelDagBatchResult.mk tail.session
-                        (List.cons (Prod.fst result) tail.replies))
+                match psKernelDagGeneratedDemandRange
+                    nextExecution.session.environment built.size installed with
+                | Except.error error => Except.error (PsKernelError.internalError error)
+                | Except.ok ready =>
+                    let owner := PsKernelDagExecutionState.mk
+                      nextExecution.session ready.declarations;
+                    let recur := psKernelDagRunCommandsWithSource rest;
+                    match recur input owner levelParams safety ready.arena ready.built with
+                    | Except.error error => Except.error error
+                    | Except.ok tail =>
+                        Except.ok
+                          (PsKernelDagBatchResult.mk tail.session
+                            (List.cons (Prod.fst result) tail.replies))
 
 /- The input namespace is captured once. Appended generated nodes may be used
    internally but never become valid external command/declaration IDs. -/
@@ -285,6 +292,26 @@ def psKernelDagRunCommands
       (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded) =>
     psKernelDagRunCommandsWithSource commands
       built execution levelParams safety arena built
+
+/- The original decoded input remains the only external ID namespace.
+   Imported metadata belongs solely to the new private working arena.
+   The exact admitted session accompanies its derived index; every operation
+   creates fresh semantic caches, including after an environment extension.
+   Import or command failure returns before any session/reply publication. -/
+def psKernelDagRunSessionCommands
+    (session : PsKernelKernelSession)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (built : PsKernelExprV2Decoded)
+    (commands : List PsKernelDagCommand) :
+    Except PsKernelError PsKernelDagBatchResult :=
+  match psKernelDagGeneratedFromSession session arena built with
+  | Except.error error => Except.error (PsKernelError.internalError error)
+  | Except.ok installed =>
+      psKernelDagRunCommandsWithSource commands built
+        (PsKernelDagExecutionState.mk session installed.declarations)
+        levelParams safety installed.arena installed.built
 
 def psKernelV1RunDag
     (session : PsKernelKernelSession)
@@ -305,6 +332,5 @@ def psKernelV1RunDag
           | Except.error error =>
               Except.error (PsKernelError.rejectedInvalid error)
           | Except.ok built =>
-              psKernelDagRunCommands commands
-                (PsKernelDagExecutionState.mk session List.nil)
-                levelParams safety canonical built
+              psKernelDagRunSessionCommands session levelParams safety
+                canonical built commands

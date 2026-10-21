@@ -41,6 +41,7 @@ on:
       - psc1/scripts/pskernel-expr-v2-quot-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-recursor-smoke.mjs
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
+      - psc1/test/PsKernelExprV2SessionProofs.lean
       - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
       - psc1/test/PsKernelExprV2QuotOwnerRegression.lean
       - psc1/test/PsKernelExprV2QuotOwnerProofs.lean
@@ -438,6 +439,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" generated-prefix-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-generated-prefix-canonical.log"
           grep -Fqx 'PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-canonical.log"
+          grep -Fqx 'PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$RUNNER_TEMP/psc1-generated-prefix-canonical.log"
           grep -Eq '^PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-generated-prefix-canonical.log"
       - name: Check canonical-source DAG K conversion in detached Node
         working-directory: psc1

@@ -66,3 +66,40 @@ jobs:
             psc1/dist/scoped-correctness/compiler-closure/
           if-no-files-found: warn
           retention-days: 14
+
+  host-session-boundary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build separate native fixture preparer and official checker
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_js_service_seed psc1_independent_checker
+      - name: Test real host state and publication with native-prepared replay fixtures
+        run: |
+          set -euo pipefail
+          node --check host-tools/generated-compiler-session.mjs
+          node --check scripts/generated-session-boundary-tests.mjs
+          node scripts/generated-session-boundary-tests.mjs
+      - name: Retain boundary fixtures and immutable generation manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-generated-session-boundary-${{ github.sha }}
+          path: psc1/dist/generated-session-boundary/
+          if-no-files-found: warn
+          retention-days: 14

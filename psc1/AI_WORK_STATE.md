@@ -6,7 +6,36 @@ on fix/psc1-closure-normalization-20261021 preserves #171 at
 Execute [the Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 continuously. The user explicitly requests no small-milestone handoff.
 
-## Current continuation — profile the actual240s bootstrap timeout
+## Current continuation — actual timeout profiling and host-session candidate
+
+Full scoped39541282484 is now completed/success at immutableadcb8157,
+tested mergec21a784b217b0e984ab415d9d1aaa2405fd0aa09. Focused and all3
+whole-closure jobs also passed. [Full receipt](docs/PSC1_SCHEDULER_FULL_QUALIFICATION_2026-10-21.json)
+retains the complete scoped qualification and all artifact identities. This is
+the latest fully qualified source/admission/original-IR checkpoint, not G1.
+
+The native phase profiler was added at71f48092. Both baseline and candidate use
+the SAME captured immutableadcb compiler input with the SAME budgets and240s cap.
+Its currently running measurement is preserved; the profile workflow now queues
+descendants instead of cancelling a measurement in progress.
+
+Add the host-only generated JS session and atomic CI-store publisher.
+It executes the pinned generated service itself; captures exact inputs/options,
+whole candidate/graph/IR/artifacts and service/runner/Node/checker identities;
+independently admits the exact graph; checks target syntax and actual public
+exports; and only its private admitted state can publish. The closed inventory,
+hashes, tools and prior pointer are rechecked under a lock, then one atomic pointer
+rename commits a sealed generation. Previous generations remain readable.
+[Protocol and limits](docs/PSC1_GENERATED_COMPILER_SERVICE.md).
+
+The separate boundary job uses native-prepared fixture replay (NOT generated
+compiler semantics) to test real admission/publication and fail-closed mutations.
+The actual G1 diagnostic is wired to this publisher for its corpus once G1 exists.
+Both this new host implementation and actual G1 execution remain unqualified.
+The primary blocker is the actual seed's240s timeout. Read the profiler's last
+stage, fix that mechanism, then continue actual generations; do not extend caps.
+
+## Earlier actual240s bootstrap timeout
 
 Headadcb815733aca23d3d27e7e0ae4cbc589ba56000 passes focused39541282570
 and all3 whole-closure jobs39541282485. Both grammars fully accept semantic67,

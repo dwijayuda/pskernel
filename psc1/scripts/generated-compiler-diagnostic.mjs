@@ -1,12 +1,14 @@
-// First real generated frontend/compiler diagnostic. No production publication.
+// Actual generated compiler semantics with host-session publication into a CI store.
 // Native stage0 is called exactly once. Afterwards only generated services,
 // the independent Core checker, and target tools may execute.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createCompilerHostSession, compilerSourceClosureDigest } from '../host-tools/compiler-host-protocol.mjs';
+import { createGeneratedJsCompilerSession } from '../host-tools/generated-compiler-session.mjs';
 import { validateClosureCounts } from './compiler-closure-contract.mjs';
 
 const root = process.cwd();
@@ -207,16 +209,25 @@ try {
   ];
   for (const item of corpus) {
     const request = encodeRequest(item.id, item.grammar, item.assurance, item.entry, item.sources);
-    const { candidate, execution } = generated(request, item.id);
-    const checked = checkCandidate(candidate, request, report.service);
-    const target = path.join(directory, item.id + '.mjs');
-    writeTarget(candidate.value, target);
+    const runner = path.join(root, 'scripts/generated-compiler-runner.mjs');
+    const session = createGeneratedJsCompilerSession({ requestId: request.id,
+      sources: request.sources, entryModule: request.entry, assurance: request.assurance,
+      serviceFile: g1Path, serviceSha256: g1Hash, runnerFile: runner,
+      runnerSha256: sha(fs.readFileSync(runner)), checkerExecutable: checker,
+      checkerSha256: checkerHash, publicationRoot: path.join(directory, 'publication', item.id) });
+    const checked = session.execute();
+    const publication = session.publish();
+    events.push(...session.events);
+    const target = publication.target;
     const consumer = path.join(directory, item.id + '-consumer.mjs');
-    fs.writeFileSync(consumer, "import * as m from './" + path.basename(target) + "';\n" + item.consumer + '\n');
+    fs.writeFileSync(consumer, "import * as m from " + JSON.stringify(
+      pathToFileURL(target).href) + ";\n" + item.consumer + '\n');
     successful(run('target-execution', process.execPath, [consumer]), 'PSC1_GENERATED_CORPUS_OBSERVATION_FAILED');
-    report.cases.push({ ...checked, execution, targetExecution: 'passed' });
+    report.cases.push({ ...checked, publication, targetExecution: 'passed',
+      productionPublication: 'host-session-published-ci-store' });
     console.log('PSC1_REAL_GENERATED_COMPILER_CASE: ' + JSON.stringify({ id: item.id,
-      elapsedMs: execution.elapsedMs, maxRssKiB: execution.maxRssKiB, sourceSha256: checked.sourceSha256 }));
+      elapsedMs: checked.execution.elapsedMs, maxRssKiB: checked.execution.maxRssKiB,
+      sourceSha256: checked.sourceSha256, generation: publication.generation }));
   }
   for (const item of [
     { id: 'wrong-body', grammar: 'lean', assurance: 'checked', source: 'def bad : Nat := true\n', phase: 'elaboration' },
@@ -236,6 +247,7 @@ try {
   report.generatedCompilerExecution = 'passed-selected-corpus';
   report.selfCompilation = 'not-run';
   report.fixedPoint = 'not-run';
+  report.productionPublication = 'host-session-published-selected-corpus-ci-store';
   report.status = 'passed-diagnostic';
 } catch (error) {
   report.status = 'failed';

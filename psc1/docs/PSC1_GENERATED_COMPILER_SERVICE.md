@@ -44,3 +44,30 @@ The diagnostic writes CI staging artifacts only; it does not implement the full
 production session publisher or prove behavioral preservation. JS repeated
 generations and Rust generations remain separate gates. G1/G2/G3 cannot be
 claimed from native facade tests or from an unused generated module.
+
+## Host session and CI publication candidate
+
+host-tools/generated-compiler-session.mjs owns each generated JS invocation.
+It snapshots exact sources, entry/grammar/assurance/request and pinned service,
+runner, Node and checker identities. It reads the whole bounded response from its
+own process, validates correlation/origins/counts, independently admits the exact
+retained logical graph, checks target syntax and actual export inventory in
+separate fixed Node processes, and binds every staged artifact. Generated wire
+fields cannot select paths/tools or request publication; extra fields refuse.
+
+Only the private one-use host state can publish. Publication rechecks identities,
+the closed file inventory, every artifact byte and the captured previous current
+pointer under an exclusive lock. It fsyncs and seals a content-addressed generation,
+then changes one current symlink by atomic rename. Previous generations remain.
+Negative boundary tests cover stale correlation, injected authority/tool fields,
+invalid actual checker input, target syntax/API mismatch, changed tools/artifacts,
+missing/extra/symlinked files, failed commit phases and stale concurrent sessions.
+Failure after the commit point is recorded as published; durability errors do not
+pretend that the old pointer is still current.
+
+The new boundary CI job replays actual NATIVE-prepared fixture data through a
+tiny fixture scalar function. It exercises real checker/session/publication state;
+it is explicitly not G1 semantics. The generated diagnostic uses the same host
+session for actual G1 corpus publication into a CI-only store once bootstrap works.
+This host addition is pending Linux tests. G1 still has not been produced: the
+actual adcb seed hit240s. No registry/release/main publication is involved.

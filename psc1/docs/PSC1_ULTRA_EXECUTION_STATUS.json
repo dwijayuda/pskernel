@@ -741,8 +741,8 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "adcb815733aca23d3d27e7e0ae4cbc589ba56000",
-    "status": "pending-linux-fixed-workload-stage-profile",
+    "headBeforeCandidate": "71f48092af805fee41ab2ae849d0c985e471eccd",
+    "status": "pending-linux-host-session-and-fixed-workload-profile",
     "sourceQualification": {
       "wholeClosureRun": 39541282485,
       "nativeRun": 39541282570,
@@ -756,7 +756,8 @@
     },
     "fullScoped": {
       "run": 39541282484,
-      "status": "pending"
+      "status": "success",
+      "receipt": "PSC1_SCHEDULER_FULL_QUALIFICATION_2026-10-21.json"
     },
     "actualBootstrap": {
       "run": 39541282520,
@@ -769,9 +770,11 @@
       "fixedTargetSourceHead": "adcb815733aca23d3d27e7e0ae4cbc589ba56000",
       "sameInputAcrossImplementations": true,
       "queueBudget": 16384,
-      "authority": false
+      "authority": false,
+      "run": 39542327917,
+      "status": "in-progress-preserved-across-descendants"
     },
-    "hostSessionPublisher": "draft-only-uncommitted"
+    "hostSessionPublisher": "implemented-pending-boundary-tests-and-actual-G1"
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

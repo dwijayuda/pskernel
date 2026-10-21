@@ -741,8 +741,8 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "d70c910b6f00e321f02a5738537d88b2b870b30c",
-    "status": "pending-linux-fusion-top-match-and-qualified-test-harness",
+    "headBeforeCandidate": "b08988d91314125bc4680501035513a23ec7677c",
+    "status": "fusion-native-runtime-and-source-qualified-G2-timeout",
     "G1": {
       "run": 39543944316,
       "final": "success",
@@ -788,17 +788,12 @@
       "formalPreservation": false
     },
     "G2": {
-      "run": 39545154962,
-      "job": 119041551702,
-      "status": "SIGABRT-before-publication",
-      "elapsedMs": 131880,
-      "receipt": "PSC1_G2_CPU_FAILURE_2026-10-21.json",
-      "stderr": "pending-retention-and-exact-replay",
-      "profileRun": 39546176974,
-      "profileJob": 119044756251,
-      "confirmed": "JavaScript heap out of memory",
-      "profileElapsedMs": 125656,
-      "hotSource": "psJsonStringCharsAccWithFuel nested wrapped worker closures"
+      "run": 39551686967,
+      "status": "ETIMEDOUT-before-publication",
+      "elapsedMs": 240213,
+      "serviceSha256": "5d30b5552896fbe4f90eadc7cc71564a61bec7f586a6ef4f38deedfeb8456f6f",
+      "requestSha256": "4c61b3c17d8ef2591eb473f69afca9a6748c6d1b7d8bd999de9d3e8e841e345f",
+      "next": "new exact service/request CPU profile"
     },
     "G3": "not-run",
     "next": "native behavior, both source lanes, complete actual G1/G2/G3",
@@ -806,9 +801,10 @@
       "module": "Ps.CompilerIr.WorkerFusion",
       "stage": "shared-closed-plan-after-specialization",
       "sourceNormalization": "11 Bridge.Json structural state workers",
-      "nativeTargetChecks": "pending",
-      "sourceCensus": "pending-both-grammars",
-      "actualGenerations": "pending"
+      "nativeTargetChecks": "passed-baseline-and-fused-observations",
+      "sourceCensus": "all-complete-both-grammars",
+      "actualGenerations": "pending",
+      "receipt": "PSC1_TYPED_WORKER_FUSION_RUNTIME_2026-10-21.json"
     },
     "lastRefusals": [
       {

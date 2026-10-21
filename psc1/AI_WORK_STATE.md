@@ -6,7 +6,33 @@ on fix/psc1-closure-normalization-20261021. Base #171 remains immutable at
 The user explicitly requests execution of the [Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 without stopping at small milestones. Use GitHub tools and Linux CI only.
 
-## Current candidate — normalize fusion recursion and correct raw IR harness
+## Active continuation — fusion qualified narrowly; real G2 now times out
+
+Implementationb08988d91314125bc4680501035513a23ec7677c passes focused39551686977
+and all3 complete both-grammar closure jobs39551686969.
+[Exact worker runtime/attempt receipt](docs/PSC1_TYPED_WORKER_FUSION_RUNTIME_2026-10-21.json).
+The same original/fused workload has identical observations, escaping functions,
+old captures, lexical shadowing and exact-once ordered callbacks. Baseline351ms/
+149076KiB versus fused45ms/52220KiB. Both preserve strict divergent prefixes.
+The native proof/data-wrapper refusals remain. These are bounded runtime checks,
+not formal preservation.
+
+Actual generated run39551686967 produced/admitted G1 and passed all8 corpus
+cases again. New service hash:
+5d30b5552896fbe4f90eadc7cc71564a61bec7f586a6ef4f38deedfeb8456f6f.
+Source closure84 modules, digestfeef9c744743a4a1c34c46424491826c13823ff3ef537473fb26ce4b2fe97443.
+Real G2 then timed out240213ms at unchanged240000ms, before publication.
+Its exact request hash4c61b3c17d8ef2591eb473f69afca9a6748c6d1b7d8bd999de9d3e8e841e345f.
+There was no heap-abort diagnostic in this attempt; do not infer complete memory
+qualification. G3/fixed point remain not-run.
+
+Update the separate CPU replay to this exact NEW admitted/observed G1 artifact
+12324336359 and failed request, retaining the old measured-OOM receipt in history.
+The replay does not install/use a native compiler or adopt any output. Use its
+actual sampled hot code to correct the next bottleneck under default limits.
+The non-hidden rejected session and real stderr are now retained successfully.
+
+## Earlier fusion source/harness corrections
 
 Atd70c910b Native Lean compiled the new pass and tests. Both source grammars
 refused WorkerFusion.sink164:1 with unknownName:sink because its recursive fuel

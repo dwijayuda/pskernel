@@ -19,22 +19,22 @@ function find(directory,name) {
 const modules=find(inputRoot,'G1.mjs'), requests=find(inputRoot,'G1-bootstrap.request.json');
 assert.equal(modules.length,1);assert.equal(requests.length,1);
 const service=modules[0],serviceHash=sha(fs.readFileSync(service));
-assert.equal(serviceHash,'7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d');
+assert.equal(serviceHash,'5d30b5552896fbe4f90eadc7cc71564a61bec7f586a6ef4f38deedfeb8456f6f');
 const wire=JSON.parse(fs.readFileSync(requests[0],'utf8'));
 assert.equal(wire.length,7);assert.equal(wire[0],'psc1-compiler-service/1');
 assert.equal(wire[3],'lean');assert.equal(wire[4],'ordinary-checked');
-assert.equal(wire[5],'Ps.BackendJs.CompilerService');assert.equal(wire[6].length,83);
+assert.equal(wire[5],'Ps.BackendJs.CompilerService');assert.equal(wire[6].length,84);
 assert.equal(compilerSourceClosureDigest(wire[6].map(([module,text])=>({module,kind:'lean',text}))),
-  'e4b2904530be5ed81f7b678c345e0d634aa29ae4153a6b9122e822c16f44a3fb');
+  'feef9c744743a4a1c34c46424491826c13823ff3ef537473fb26ce4b2fe97443');
 wire[1]='G2-self';
 const request=JSON.stringify(wire),requestHash=sha(request);
-assert.equal(requestHash,'1353995b84b1e33f3c0942a758e94a41c68dcb8f8b5fbc74d8f19fc6db73b331');
+assert.equal(requestHash,'4c61b3c17d8ef2591eb473f69afca9a6748c6d1b7d8bd999de9d3e8e841e345f');
 const bootstrapFiles=find(inputRoot,'G1-bootstrap.candidate.json');
 assert.equal(bootstrapFiles.length,1);
 const bootstrap=JSON.parse(fs.readFileSync(bootstrapFiles[0],'utf8'));
 assert.equal(sha(bootstrap.source),serviceHash);
-assert.equal(sha(JSON.stringify(bootstrap.originalIr)),'1b92f8a5a779211d187a3e70273d5e7337a8c096a650bc885d97124d3a5ce888');
-assert.equal(sha(JSON.stringify(bootstrap.specializedIr)),'fd46ee97e13e06002abf33719e97c521036408333bcb3be87f5ed308669bb969');
+assert.equal(sha(JSON.stringify(bootstrap.originalIr)),'ac8baeda7e847bb77edff590e6951730f7113740552f48b3a777ed12dabf1e23');
+assert.equal(sha(JSON.stringify(bootstrap.specializedIr)),'71e18f6dce4476b44cd1e9c5e6e13801409425a6673ed2a0751b0c67a143ce14');
 for (const lane of ['originalIr','specializedIr']) {
   for (const name of ['psJsonStringCharsAccWithFuel','psJsonStringToChars']) {
     const declaration=bootstrap[lane][4].find(row=>row[0]===name);
@@ -43,7 +43,9 @@ for (const lane of ['originalIr','specializedIr']) {
   }
 }
 const sourceLines=fs.readFileSync(service,'utf8').split('\n');
-for (const line of sourceLines.filter(line=>line.includes('__ps$impl$psJsonStringCharsAccWithFuel') ||
+for (const line of sourceLines.filter(line=>line.includes('psJsonStringCharsAccWithFuel$worker') ||
+    line.startsWith('function psJsonStringCharsAccWithFuel(') ||
+    line.includes('__ps$impl$psJsonStringCharsAccWithFuel') ||
     line.startsWith('function __ps$run') || line.startsWith('function __ps$wrap')))
   console.log('PSC1_WORKER_JS_CONTEXT: '+line.slice(0,16000));
 if(process.argv[4]==='--inspect-only') {
@@ -62,7 +64,7 @@ fs.writeFileSync(path.join(directory,'process.stderr.txt'),run.stderr||'');
 assert.equal(sha(fs.readFileSync(service)),serviceHash);
 assert.equal(sha(fs.readFileSync(input)),requestHash);
 const receipt={schema:'psc1-qualified-g1-cpu-profile/1',commit:process.env.GITHUB_SHA,
-  qualifiedG1Run:39543944316,qualifiedArtifact:12320558486,failedRequestRun:39545154962,
+  qualifiedG1Run:39551686967,qualifiedArtifact:12324336359,failedRequestRun:39551686967,
   serviceSha256:serviceHash,requestSha256:requestHash,node:process.version,
   nodeSha256:sha(fs.readFileSync(process.execPath)),runnerSha256:sha(fs.readFileSync(runner)),
   args,status:run.status,signal:run.signal,error:run.error?.message||null,

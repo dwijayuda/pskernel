@@ -31,8 +31,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '39543944316'
-          name: psc1-generated-compiler-ece4925682d426509868564f663c26c482f91a2a
+          run-id: '39551686967'
+          name: psc1-generated-compiler-dca03b89987c3e137841c24ee89249804fe7ef3a
           path: work/qualified-g1
       - name: CPU-profile exact qualified G1 and exact failed G2 request
         run: |
@@ -62,8 +62,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '39543944316'
-          name: psc1-generated-compiler-ece4925682d426509868564f663c26c482f91a2a
+          run-id: '39551686967'
+          name: psc1-generated-compiler-dca03b89987c3e137841c24ee89249804fe7ef3a
           path: work/qualified-g1
       - name: Inspect exact admitted IR and emitted scanner without executing it
         run: |

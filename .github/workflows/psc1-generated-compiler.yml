@@ -61,6 +61,31 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/generated-compiler-diagnostic.mjs
+      - name: Summarize retained failed sessions without discarding stderr
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root='dist/generated-compiler';
+          function scan(dir) {
+            if (!fs.existsSync(dir)) return;
+            for (const entry of fs.readdirSync(dir,{withFileTypes:true})) {
+              const file=path.join(dir,entry.name);
+              if (entry.isDirectory()) scan(file);
+              else if (entry.isFile() && entry.name==='failure.json') {
+                const value=JSON.parse(fs.readFileSync(file,'utf8'));
+                console.log('PSC1_RETAINED_SESSION_FAILURE: '+JSON.stringify({
+                  requestId:value.request?.requestId,state:value.state,failure:value.failure,
+                  events:value.events,publication:value.publication}));
+                const stderr=path.join(dir,'generated-compiler.stderr.txt');
+                if(fs.existsSync(stderr))
+                  console.log('PSC1_RETAINED_GENERATED_STDERR: '+fs.readFileSync(stderr,'utf8').slice(-6000));
+              }
+            }
+          }
+          scan(root);
+          JS
       - name: Retain candidate graphs, executable identities and process evidence
         if: always()
         uses: actions/upload-artifact@v4

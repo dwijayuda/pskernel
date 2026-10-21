@@ -350,6 +350,7 @@ try {
     } finally {
       events.push(...session.events);
       attempt.events=session.events;
+      attempt.failureDirectory=session.failureDirectory;
       if (!publication) attempt.status='failed-before-publication';
     }
     attempt.status='published-identities-matched-pending-corpus';

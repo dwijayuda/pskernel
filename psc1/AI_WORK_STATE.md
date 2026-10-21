@@ -6,6 +6,32 @@ on fix/psc1-closure-normalization-20261021. Base #171 remains immutable at
 The user explicitly requests execution of the [Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 without stopping at small milestones. Use GitHub tools and Linux CI only.
 
+## Active blocker — G2 generated process abort; diagnostics pending
+
+At3b189f589b0a4ad06eb1bcc666014220e72268df, actual G1 again passed all8 corpus
+cases with recorded scalar observations. Real G2 self-compilation was then
+attempted on identical captured compiler sources. The generated Node process
+aborted withSIGABRT after131880ms, before any candidate/publication. No G3.
+[Exact attempt](docs/PSC1_G2_FIRST_ATTEMPT_2026-10-21.json), run39545154962,
+job119041551702. Request SHA256:
+1353995b84b1e33f3c0942a758e94a41c68dcb8f8b5fbc74d8f19fc6db73b331.
+Do not call it an OOM until stderr confirms the cause.
+
+The original host session recorded status/signal/time but discarded stderr.
+Its rejected .stage directory was hidden from default artifact upload. Correct
+the host diagnostic mechanism: retain stdout/stderr on process failure and move
+rejected stages to non-hidden failed generations; retain failure state/events
+without granting publication. Print a bounded stderr tail in Linux logs.
+Publication failures preserve the prior pointer, including injected failures.
+
+A separate Linux CPU-sampling replay downloads the exact qualified G1 artifact,
+checks its known service hash and the exact failed G2 request hash, and executes
+only that G1 through the fixed runner with Node --prof. No native compiler/checker
+is installed/called and no response is adopted. Existing240s cap/default heap/
+stack remain. A green profile collector is diagnostic only, never G2 qualification.
+Use actual stderr and sampled hot code to correct the reached compiler mechanism,
+then repeat real G1/G2/G3. Continue continuously.
+
 ## Latest actual G1 execution
 
 Qualified implementation921eb1d7b8a5dc539d192ccda5a4ceb14c21ac52.
@@ -34,7 +60,7 @@ lanes accept EVERY selected module: semantic68, DirectJS83, Rust86. Exact logica
 counts2439,3254,3033; checked semantic and ordinary-checked backend graphs.
 Owned PS compiler input is canonical translation from Lean, not independent PS
 compiler authorship. Original graph/IR bytes match both lanes in each phase.
-Full scoped39543944381 was still running at receipt creation; re-query final state.
+Full scoped39543944381 is now completed/success. [Full G1 qualification](docs/PSC1_G1_FULL_QUALIFICATION_2026-10-21.json) retains the complete scoped result and artifact identities.
 The earlier fully scoped checkpointadcb8157 passed39541282484, focused39541282570
 and closures39541282485; [complete earlier receipt](docs/PSC1_SCHEDULER_FULL_QUALIFICATION_2026-10-21.json).
 

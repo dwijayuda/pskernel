@@ -741,8 +741,8 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "921eb1d7b8a5dc539d192ccda5a4ceb14c21ac52",
-    "status": "G1-qualified-pending-real-G2-G3",
+    "headBeforeCandidate": "3b189f589b0a4ad06eb1bcc666014220e72268df",
+    "status": "G1-full-qualified-G2-SIGABRT-before-publication",
     "G1": {
       "run": 39543944316,
       "final": "success",
@@ -771,7 +771,8 @@
     },
     "fullScoped": {
       "run": 39543944381,
-      "status": "in-progress"
+      "status": "success",
+      "receipt": "PSC1_G1_FULL_QUALIFICATION_2026-10-21.json"
     },
     "transportComparison": {
       "run": 39543395472,
@@ -785,7 +786,17 @@
       "processTimeoutMs": 240000,
       "queueBudget": 16384,
       "formalPreservation": false
-    }
+    },
+    "G2": {
+      "run": 39545154962,
+      "job": 119041551702,
+      "status": "SIGABRT-before-publication",
+      "elapsedMs": 131880,
+      "receipt": "PSC1_G2_FIRST_ATTEMPT_2026-10-21.json",
+      "stderr": "pending-retention-and-exact-replay"
+    },
+    "G3": "not-run",
+    "next": "exact qualified G1/request CPU profile plus durable stderr; fix actual reached mechanism; no resource-limit increases"
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

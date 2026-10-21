@@ -90,6 +90,18 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
   fs.chmodSync(stage, 0o700);
   let state = 'pending', sealedFiles, receipt, candidate;
   const events = [];
+  let failureDirectory = null, sealedAttempt = null;
+  function retainFailure(error) {
+    try {
+      const failed=path.join(root,'generations','failed-'+crypto.randomUUID());
+      if (inspect(stage)) fs.renameSync(stage,failed);
+      else fs.mkdirSync(failed);
+      failureDirectory=failed;
+      fs.writeFileSync(path.join(failed,'failure.json'),json({schema:'psc1-generated-session-failure/1',
+        request,state,failure:error.message,events,sealedAttempt,
+        authoritative:false,publication:state==='published'?'committed':'not-committed'}));
+    } catch (loggingError) { events.push({role:'host-diagnostic',error:loggingError.message}); }
+  }
   const run = (role, args) => {
     const started = Date.now();
     const result = spawnSync(process.execPath, args, { encoding: 'utf8',
@@ -97,7 +109,12 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
     events.push({ role, executable: process.execPath, args: [...args],
       status: result.status, signal: result.signal, elapsedMs: Date.now() - started,
       error: result.error?.message || null });
-    if (result.error || result.status !== 0) fail('PSC1_SERVICE_PROCESS_FAILED:' + role);
+    if (result.error || result.status !== 0) {
+      fs.writeFileSync(path.join(stage,role+'.stderr.txt'),result.stderr || '');
+      fs.writeFileSync(path.join(stage,role+'.stdout.txt'),result.stdout || '');
+      fail('PSC1_SERVICE_PROCESS_FAILED:' + role + ':' +
+        (result.error?.code || result.signal || result.status));
+    }
     return result.stdout;
   };
   return Object.freeze({
@@ -105,6 +122,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
     stagingDirectory: stage,
     get state() { return state; },
     get events() { return clone(events); },
+    get failureDirectory() { return failureDirectory; },
     execute() {
       if (state !== 'pending') fail('PSC1_SERVICE_SESSION_CONSUMED');
       state = 'running';
@@ -209,7 +227,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
           publicNames: [...candidate.publicNames], execution: clone(execution),
           logicalAdmission: 'accepted', productionPublication: 'pending',
           behaviorallyVerified: false });
-      } catch (error) { state = 'rejected'; throw error; }
+      } catch (error) { state = 'rejected'; retainFailure(error); throw error; }
     },
     publish() {
       if (state !== 'admitted-target-checked') fail('PSC1_SERVICE_NOT_ADMITTED');
@@ -237,6 +255,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
         const sealed = path.join(root, 'generations', generation);
         if (inspect(sealed)) fail('PSC1_SERVICE_GENERATION_ALREADY_EXISTS');
         fs.renameSync(stage, sealed);
+        sealedAttempt=sealed;
         syncDirectory(path.join(root, 'generations'));
         publicationFault('after-seal');
         const pointer = path.join(root, '.current-' + crypto.randomUUID());
@@ -250,7 +269,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
         syncDirectory(root);
         return Object.freeze({ generation, directory: sealed,
           manifestSha256: generation, target: path.join(root, 'current/target.mjs') });
-      } catch (error) { if (state !== 'published') state = 'rejected'; throw error; }
+      } catch (error) { if (state !== 'published') state = 'rejected'; retainFailure(error); throw error; }
       finally {
         if (lockFd !== undefined) { fs.closeSync(lockFd); fs.unlinkSync(lock); }
       }

@@ -12,6 +12,36 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — repair recursor regression fixtures after exact884 native failure
+
+Parent source: `88404214aebfea49824676f70bfc78125fe62e46`, carrier branch.
+[Native integration job119266914119](https://github.com/dwijayuda/pskernel/actions/runs/39613110413/job/119266914119)
+is terminal **FAIL** during fixture compilation. Production RecursorMajor,
+RecursorK and the complete checker compiled, but the new runtime matrices and
+proof steps were skipped. Native correctness119266910334 in
+[39613110409](https://github.com/dwijayuda/pskernel/actions/runs/39613110409)
+is terminal PASS; that separate job does not qualify the skipped regressions.
+At this repair,884 generated integration was queued and canonical source checking
+was still in progress. Those results cannot qualify this child.
+
+The non-K V1 axiom fixture now wraps its header/safety in PsKernelAxiomInfo
+(native and generated JS); the separate DAG request keeps its correct shape.
+The K native fixture now uses explicit branch layout for two multiline assertions
+and assigns its final arena to the existing mutable input instead of shadowing it.
+Every assertion, fixture, callback, budget, matrix count and production source
+is unchanged. This is a fixture correction, not a semantic relaxation.
+
+This exact child is **NOT RUN** at creation for native integration, portable
+source, canonical .ps, generated JS, proofs, benchmarks, Arena and provider.
+Fresh push-triggered full gates are mandatory. Integrationa259 native integration
+and native correctness are terminal PASS; its generated/canonical jobs still run.
+The authentic diagnostic39607734805 has reached unchanged-limit profile collection
+against pinned369bee; collection status is not kernel qualification.
+
+Next: inspect this child's native build, matrices and local proof steps, then
+both detached generated routes and their full provider controls. Preserve the
+qualified727 receipts and the still-open B/C limitations below.
+
 ## 2026-10-21 — complete-owner K and major recursor candidate; fresh gates mandatory
 
 Candidate branch: `research/psc1-pskernel-v2-carrier-20261021`.

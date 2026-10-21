@@ -178,7 +178,7 @@ private def majorPrepareAxiom (prior : Prepared) (name : PsKernelName) (type : P
     IO Prepared := do
   let header := PsKernelConstantBase.mk name [] type
   let admitted ← expectPublic "major-neutral-axiom"
-    (psKernelV1AdmitDeclaration prior.session (.axiomDecl header false))
+    (psKernelV1AdmitDeclaration prior.session (.axiomDecl (PsKernelAxiomInfo.mk header false)))
   let (arena,typeId) ← expect (psKernelExprV2PagedImportIntoChecked prior.arena type)
   let request := PsKernelDagDeclarationRequest.axiomDecl
     (PsKernelDagConstantBase.mk name [] typeId) false

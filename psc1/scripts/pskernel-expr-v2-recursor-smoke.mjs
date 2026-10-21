@@ -311,7 +311,7 @@ for(const [label,levels,message] of [
  const majorCommands=[...commands];
  const axiom=(n,type)=>{
   majorSession=accepted(get("psKernelV1AdmitDeclaration")(
-   majorSession,Request.axiomDecl({name:n,levelParams:nil,type:type.term},false)),"major-neutral-axiom").session;
+   majorSession,Request.axiomDecl({base:{name:n,levelParams:nil,type:type.term},isUnsafe:false})),"major-neutral-axiom").session;
   const request=D.axiomDecl({name:n,levelParams:nil,type:type.id},false);
   majorDeclarations=get("psKernelDagDeclarationsAfterAdmission")(request,majorDeclarations);
   majorCommands.push(C.admit(request));

@@ -335,8 +335,9 @@ private def carrierProbes (context : PsKernelExprV2CheckContext)
       require (label ++ "-private-owner-retained")
         (psKernelExprV2DeclarationRefFind result.fst.whnf.declarations info.base.name).isSome
       match expected with
-      | some term => require (label ++ "-candidate-levels-params")
-          (psKernelExprEqual term (← decode result.fst result.snd))
+      | some term =>
+          require (label ++ "-candidate-levels-params")
+            (psKernelExprEqual term (← decode result.fst result.snd))
       | none => require (label ++ "-original-major") (result.snd == major)
       let _ ← expect (psKernelExprV2PagedValidate result.fst.whnf.arena)
       owners := owners + 1
@@ -348,8 +349,9 @@ private def carrierProbes (context : PsKernelExprV2CheckContext)
       for decline in [false,true] do
         match runProbe context state info major typeId candidateType seed failAt decline true with
         | none => require "None-is-unsupported" decline
-        | some (.error error) => require "exact-callback-failure"
-            (!decline && error == "K_CALLBACK_SENTINEL")
+        | some (.error error) =>
+            require "exact-callback-failure"
+              (!decline && error == "K_CALLBACK_SENTINEL")
         | some (.ok _) => throw (IO.userError "failed K callback accepted")
         propagated := propagated + 1
   require "K-owner-counts" (owners == 16 && propagated == 16)
@@ -461,7 +463,8 @@ private def prepare : IO Ready := do
   let (a,natRoot) ← expect (psKernelExprV2PagedImportIntoChecked a natRec)
   let (a,natId) ← expect (psKernelExprV2PagedImportIntoChecked a nat)
   let (a,sortId) ← expect (psKernelExprV2PagedImportIntoChecked a (.sort one))
-  let (input,sevenId) ← expect (psKernelExprV2PagedImportIntoChecked a (lit 7))
+  let (a,sevenId) ← expect (psKernelExprV2PagedImportIntoChecked a (lit 7))
+  input := a
   let built ← expect (psKernelExprV2DecodeChecked input)
   let mut generated := PsKernelDagGeneratedState.mk input built prepared.declarations
   for command in prepared.commands do

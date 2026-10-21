@@ -6,7 +6,41 @@ on fix/psc1-closure-normalization-20261021 preserves #171 at
 Execute [the Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 continuously. The user explicitly requests no small-milestone handoff.
 
-## Current continuation — actual timeout profiling and host-session candidate
+## Current continuation — balanced JSON quoting and final transport measurement
+
+The fixed-input prefix profiler39542327917 completed both binaries through JS
+printing in14001/27382ms with identical request and binary hashes. It measured
+29185 seed references,653 initial unique requests,28532 duplicates,752 final
+instances and2230 declarations. Specialization itself took13/20ms after scheduling.
+[Raw prefix receipt](docs/PSC1_COMPILER_PREFIX_PROFILE_2026-10-21.json).
+The initial profiler OMITTED final response assembly, so its profile-complete
+marker never qualified the actual facade. Actual G0 had still timed out240s.
+
+Source inspection isolates the remaining transport hazard: psJsonQuote first
+materializes all characters, then concatenates one escaped character to the full
+already-built suffix recursively. Quoting the19MB exact admission graph is quadratic.
+The candidate scans owned UTF-8 positions, copies unchanged spans and uses existing
+immutable balanced PsTextBuilder chunks at escapes. The legacy List Char helper
+uses the same balanced builder; all escape choices/order and Unicode bytes stay.
+The byte-derived cursor bound remains; no process/queue/stack limit changes.
+
+Extend the fixed immutableadcb workload profile through admission-request quoting,
+generated-source quoting and ACTUAL final compilePrepared response assembly.
+Candidate output must equal independent ECMAScript JSON serialization. Baseline/
+candidate must share exact request, admission graph, original/specialized IR and
+generated source hashes. Both processes have240s; direct process execution ensures
+timeout kills the measured executable itself. Retain Linux VmHWM at the last phase
+mark (not a fabricated final peak for killed work). The comparison job requires
+candidate completion; collected profile data alone is no compiler qualification.
+Native tests compare legacy bytes, all ASCII controls, Unicode and independent
+Lean JSON parsing. Both grammar gates explicitly maintain Bridge.Json.
+
+Host-session boundary job119033841229 in39542595382 already passed24 real state/
+checker/publication checks at078a84c2 using native-prepared replay fixtures.
+This is host boundary evidence, not actual G1. The actual generated diagnostic is
+rerun after the quoting fix; G1/G2/G3 remain pending until real execution.
+
+## Earlier timeout profiling and host-session candidate
 
 Full scoped39541282484 is now completed/success at immutableadcb8157,
 tested mergec21a784b217b0e984ab415d9d1aaa2405fd0aa09. Focused and all3

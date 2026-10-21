@@ -741,8 +741,8 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "71f48092af805fee41ab2ae849d0c985e471eccd",
-    "status": "pending-linux-host-session-and-fixed-workload-profile",
+    "headBeforeCandidate": "078a84c273eb918bf23293d06ee401e9ba777f66",
+    "status": "pending-linux-balanced-quote-and-final-transport-profile",
     "sourceQualification": {
       "wholeClosureRun": 39541282485,
       "nativeRun": 39541282570,
@@ -774,7 +774,31 @@
       "run": 39542327917,
       "status": "in-progress-preserved-across-descendants"
     },
-    "hostSessionPublisher": "implemented-pending-boundary-tests-and-actual-G1"
+    "hostSessionPublisher": {
+      "status": "24-host-boundary-checks-passed",
+      "head": "078a84c273eb918bf23293d06ee401e9ba777f66",
+      "run": 39542595382,
+      "job": 119033841229,
+      "actualG1": false
+    },
+    "prefixProfile": {
+      "run": 39542327917,
+      "receipt": "PSC1_COMPILER_PREFIX_PROFILE_2026-10-21.json",
+      "timesMs": [
+        14001,
+        27382
+      ],
+      "specializationMs": [
+        13,
+        20
+      ],
+      "initialReferences": 29185,
+      "initialUnique": 653,
+      "instances": 752,
+      "declarations": 2230,
+      "scope": "omitted-final-transport"
+    },
+    "next": "verify final transport baseline/candidate and actual native seed/G1 without raised caps"
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

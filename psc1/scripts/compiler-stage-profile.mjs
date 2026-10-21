@@ -41,15 +41,36 @@ const input = path.join(directory, 'request.json'), output = path.join(directory
 fs.writeFileSync(input, request);
 const binary = path.join(implementation, '.lake/build/bin/psc1_compiler_profile');
 const start = performance.now();
-const result = spawnSync('/usr/bin/time', ['-v','-o',path.join(directory,'time.txt'),binary,input,output],
+const result = spawnSync(binary, [input,output],
   { encoding: 'utf8', timeout: 240000, maxBuffer: 32 * 1024 * 1024 });
 process.stdout.write(result.stdout || '');
 process.stderr.write(result.stderr || '');
 const records = fs.existsSync(output) ? JSON.parse(fs.readFileSync(output,'utf8')) : [];
+if (records.at(-1)?.phase === 'profile-complete') {
+  const graph = fs.readFileSync(output + '.admissions.json', 'utf8');
+  const requestModel = JSON.parse(request);
+  const expected = JSON.stringify({ admissions: graph, op: 'admit', protocol:'psc1-compiler-host/1',
+    requestId:requestModel[1],sourceClosureDigest:requestModel[2],target:'js' });
+  assert.equal(fs.readFileSync(output + '.admission-request.json','utf8'), expected,
+    'whole admission transport bytes equal independent ECMAScript JSON serializer');
+  assert.equal(fs.readFileSync(output + '.source-quoted.json','utf8'),
+    JSON.stringify(fs.readFileSync(output + '.source.mjs','utf8')));
+  const candidate = JSON.parse(fs.readFileSync(output + '.candidate.json','utf8'));
+  assert.equal(candidate.status,'candidate');
+  assert.equal(candidate.admissionRequest.admissions,graph);
+}
+const identities = {};
+for (const name of ['original-ir.json','specialized-ir.json','source.mjs','admissions.json']) {
+  const file = output + '.' + name;
+  if (fs.existsSync(file)) identities[name] = sha(fs.readFileSync(file));
+}
+const processStatus = fs.existsSync(output + '.proc-status') ?
+  fs.readFileSync(output + '.proc-status','utf8') : '';
 const receipt = { schema:'psc1-compiler-phase-profile/1', label,
   commit:process.env.GITHUB_SHA, referenceCommit:'adcb815733aca23d3d27e7e0ae4cbc589ba56000',
-  requestSha256:sha(request), sourceClosureDigest:digest, sourceModules:sources.length,
-  binarySha256:sha(fs.readFileSync(binary)), elapsedMs:Math.round(performance.now()-start),
+  requestSha256:sha(request), sourceClosureDigest:digest, sourceModules:sources.length, identities,
+  binarySha256:sha(fs.readFileSync(binary)),
+  vmHwmKiBAtLastMark:Number(processStatus.match(/VmHWM:\s*(\d+) kB/)?.[1]) || null, elapsedMs:Math.round(performance.now()-start),
   timeoutMs:240000, status:result.status, signal:result.signal,error:result.error?.message||null,
   lastRecord:records.at(-1), completed:records.at(-1)?.phase==='profile-complete',
   queueBudget:16384, authoritative:false, G1:'not-produced-by-profiler',

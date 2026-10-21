@@ -398,3 +398,7 @@ lean_exe psc1_specialize_queue_benchmark where
 lean_exe psc1_compiler_profile where
   srcDir := "scripts"
   root := `CompilerStageProfile
+
+lean_exe psc1_json_quote_tests where
+  srcDir := "test"
+  root := `JsonQuoteTests

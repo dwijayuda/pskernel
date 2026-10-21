@@ -70,3 +70,45 @@ jobs:
           path: evidence/
           if-no-files-found: warn
           retention-days: 14
+
+  compare-profile:
+    needs: profile
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-compiler-profile-baseline-${{ github.sha }}
+          path: baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-compiler-profile-candidate-${{ github.sha }}
+          path: candidate
+      - name: Require fixed-input completion with identical graph, IR and target bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const baseline=JSON.parse(fs.readFileSync('baseline/receipt.json','utf8'));
+          const candidate=JSON.parse(fs.readFileSync('candidate/receipt.json','utf8'));
+          assert.equal(baseline.requestSha256,candidate.requestSha256);
+          assert.equal(candidate.completed,true,'candidate must complete actual final candidate encoding');
+          assert.deepEqual(baseline.identities,candidate.identities,'same admissions, original/specialized IR and generated source');
+          assert.equal(baseline.timeoutMs,240000);
+          assert.equal(candidate.timeoutMs,240000);
+          assert.equal(candidate.queueBudget,16384);
+          const comparison={schema:'psc1-compiler-transport-comparison/1',baseline,candidate,
+            baselineCompleted:baseline.completed,formalPreservation:'not-provided',
+            actualG1:'separate-generated-compiler-diagnostic'};
+          fs.writeFileSync('comparison.json',JSON.stringify(comparison,null,2)+'\n');
+          console.log('PSC1_COMPILER_TRANSPORT_COMPARISON: '+JSON.stringify(comparison));
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-compiler-transport-comparison-${{ github.sha }}
+          path: comparison.json
+          retention-days: 14

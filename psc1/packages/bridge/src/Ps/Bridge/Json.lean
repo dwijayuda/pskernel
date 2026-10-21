@@ -1,3 +1,5 @@
+import Ps.Foundation.Text
+
 def psJsonConcat2
     (left right : String) : String :=
   String.Internal.append left right
@@ -156,15 +158,53 @@ def psJsonEscapeChar (char : Char) : String :=
   else
     psJsonStringOfChars (List.cons char List.nil)
 
-def psJsonEscapeChars (chars : List Char) : String :=
+-- Balanced immutable chunks preserve exact quoting bytes without copying the
+-- complete suffix once per character. This helper retains the list API.
+def psJsonEscapeCharsWorker (chars : List Char) : PsTextBuilder -> String :=
   match chars with
-  | List.nil =>
-      ""
+  | List.nil => fun (builder : PsTextBuilder) => psTextBuilderFinish builder
   | List.cons char rest =>
-      psJsonConcat2 (psJsonEscapeChar char) (psJsonEscapeChars rest)
+      fun (builder : PsTextBuilder) =>
+        let smaller : PsTextBuilder -> String := psJsonEscapeCharsWorker rest;
+        smaller (psTextBuilderAppend builder (psJsonEscapeChar char))
+
+def psJsonEscapeChars (chars : List Char) : String :=
+  psJsonEscapeCharsWorker chars psTextBuilderEmpty
+
+def psJsonCharNeedsEscape (char : Char) : Bool :=
+  let code : Nat := Char.toNat char;
+  Nat.blt code 32 || Nat.beq code 34 || Nat.beq code 92
+
+-- Copy unchanged UTF-8 spans in one chunk. Positions come only from the owned
+-- string cursor. The input-derived byte bound is the same as StringToChars;
+-- it is traversal capacity, not generated execution fuel.
+def psJsonEscapeStringWithFuel (fuel : Nat) :
+    String -> Nat -> Nat -> PsTextBuilder -> String :=
+  match fuel with
+  | Nat.zero =>
+      fun (value : String) (position : Nat) (runStart : Nat) (builder : PsTextBuilder) =>
+        psTextBuilderFinish (psTextBuilderAppend builder
+          (String.Internal.extract value (String.Pos.Raw.mk runStart) (String.Pos.Raw.mk position)))
+  | Nat.succ remaining =>
+      fun (value : String) (position : Nat) (runStart : Nat) (builder : PsTextBuilder) =>
+        let smaller : String -> Nat -> Nat -> PsTextBuilder -> String :=
+          psJsonEscapeStringWithFuel remaining;
+        if psJsonStringAtEnd value position then
+          psTextBuilderFinish (psTextBuilderAppend builder
+            (String.Internal.extract value (String.Pos.Raw.mk runStart) (String.Pos.Raw.mk position)))
+        else
+          let char : Char := psJsonStringGet value position;
+          let next : Nat := psJsonStringNext value position;
+          if psJsonCharNeedsEscape char then
+            let prefix : String := String.Internal.extract value
+              (String.Pos.Raw.mk runStart) (String.Pos.Raw.mk position);
+            let flushed : PsTextBuilder := psTextBuilderAppend builder prefix;
+            smaller value next next (psTextBuilderAppend flushed (psJsonEscapeChar char))
+          else smaller value next runStart builder
 
 def psJsonQuote (value : String) : String :=
-  psJsonConcat3 "\"" (psJsonEscapeChars (psJsonStringToChars value)) "\""
+  psJsonConcat3 "\"" (psJsonEscapeStringWithFuel
+    (Nat.succ (String.utf8ByteSize value)) value 0 0 psTextBuilderEmpty) "\""
 
 def psJsonJoin
     (separator : String)

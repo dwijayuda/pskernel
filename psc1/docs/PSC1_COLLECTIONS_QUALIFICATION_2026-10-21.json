@@ -1,0 +1,156 @@
+{
+  "schema": "psc1-practical-collections-qualification/1",
+  "implementationCommit": "dd2328a53e5e9a5384e474410f5123810330130c",
+  "testedMergeCommit": "86f2c1aea281ba7303a5158a19df85b58c375d58",
+  "scoped": {
+    "runId": 39561579871,
+    "jobId": 119094250765,
+    "conclusion": "success",
+    "artifacts": [
+      {
+        "id": 12328736845,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMyODczNjg0NQ==",
+        "name": "psc1-scoped-correctness-86f2c1aea281ba7303a5158a19df85b58c375d58",
+        "size_in_bytes": 46029587,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12328736845",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12328736845/zip",
+        "expired": false,
+        "digest": "sha256:d2ca2d67c54d2d77f100ec4193a8c05eaf1c2b84c5b5465804727157f30b4a3f",
+        "created_at": "2026-10-21T07:37:34Z",
+        "updated_at": "2026-10-21T07:37:34Z",
+        "expires_at": "2026-11-04T07:37:27Z",
+        "workflow_run": {
+          "id": 39561579871,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "dd2328a53e5e9a5384e474410f5123810330130c"
+        }
+      }
+    ]
+  },
+  "versions": {
+    "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "node": "v22.23.3",
+    "npm": "10.9.9",
+    "typescriptConsumer": "Version 7.0.2",
+    "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+    "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+    "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+    "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+    "python": "Python 3.15.0",
+    "pythonMinimum": "Python 3.14.8",
+    "php": "PHP 8.5.11 (cli) (built: Sep 23 2026 12:33:37) (NTS)"
+  },
+  "checker": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "normal": {
+    "compilerMObligations": 98,
+    "collectionObligations": 42,
+    "authoredGrammars": [
+      "lean",
+      "ps"
+    ],
+    "targets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "observationsPerObligation": 2
+  },
+  "minimumPython": {
+    "version": "3.14.8",
+    "compilerMObligations": 14,
+    "collectionObligations": 6
+  },
+  "changes": [
+    "Canonical List/Except stdlib identities; Prod/Option correction retained",
+    "Correct listLength; accumulator reverse",
+    "Checked optional array indexing instead of whole-array map",
+    "Shared checked root List literal parser in both grammars",
+    "Exact v2 G1 corpus policy; legacy v1 eight-case policy preserved"
+  ],
+  "refusals": [
+    "wrong-state/error and element/index types reach elaboration",
+    "duplicate prelude declarations still refuse",
+    "verified mode refuses",
+    "malformed/list-element/type/array distinctions refuse",
+    "all failed builds preserve previous published generation",
+    "component export selection refuses duplicate/non-entry/empty sets"
+  ],
+  "otherRuns": {
+    "native": 39561580327,
+    "closures": 39561579858,
+    "focused": 39561580080
+  },
+  "G1": {
+    "runId": 39561580142,
+    "conclusion": "success",
+    "cases": 10,
+    "positive": 5,
+    "negative": 5,
+    "manifestSchema": "psc1-js-generation/4.35.0-v2",
+    "serviceSha256": "652ce79f0fcf5ba0c7f4e23f24a96cec1f36a65b5dd339adb93592a4d45cfd08",
+    "sourceClosureDigest": "bc4747470351a2bd085b8efe72d185cc661b65162331b53323aae4d386636732",
+    "admissionsSha256": "ccbd7d84212d668100939370f57cf458f5698e4d53025d3e3dc9dc856bbd8eaf",
+    "originalIrSha256": "d0dd937cd612fa16360129ae554656e9aaffbeefca2d4807f768a663c0bee66b",
+    "closedIrSha256": "a1b3b22f0fbe9674acb6f9dca95d423482f843235170c242c4a0e6b68ca17336",
+    "artifacts": [
+      {
+        "id": 12328012635,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMyODAxMjYzNQ==",
+        "name": "psc1-generated-compiler-86f2c1aea281ba7303a5158a19df85b58c375d58",
+        "size_in_bytes": 4811765,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12328012635",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12328012635/zip",
+        "expired": false,
+        "digest": "sha256:ed26057ae4b7eb1bb69d029fb012a9a100f36d5c6eb63d2438392581505c14aa",
+        "created_at": "2026-10-21T07:28:15Z",
+        "updated_at": "2026-10-21T07:28:15Z",
+        "expires_at": "2027-01-19T07:23:02Z",
+        "workflow_run": {
+          "id": 39561580142,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "dd2328a53e5e9a5384e474410f5123810330130c"
+        }
+      },
+      {
+        "id": 12327264817,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMyNzI2NDgxNw==",
+        "name": "psc1-generated-session-boundary-86f2c1aea281ba7303a5158a19df85b58c375d58",
+        "size_in_bytes": 156160,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12327264817",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12327264817/zip",
+        "expired": false,
+        "digest": "sha256:099808270d3ac9d58490da107bdaf3885444799f0ceaf458d5334d142481a304",
+        "created_at": "2026-10-21T07:25:08Z",
+        "updated_at": "2026-10-21T07:25:08Z",
+        "expires_at": "2027-01-19T07:23:02Z",
+        "workflow_run": {
+          "id": 39561580142,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "dd2328a53e5e9a5384e474410f5123810330130c"
+        }
+      }
+    ],
+    "selfCompilation": "deferred-manual-qualification",
+    "fixedPoint": "deferred-feature-freeze"
+  },
+  "limitations": [
+    "Full fourteen families incomplete",
+    "No formal preservation theorem",
+    "Bool observation wrappers do not qualify public compound/callback ABI",
+    "No large-resource bound inferred from these finite collection cases",
+    "G2 heap/performance defect remains open"
+  ]
+}

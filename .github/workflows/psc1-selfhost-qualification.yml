@@ -35,6 +35,7 @@ jobs:
           set -euo pipefail
           node --check scripts/generated-compiler-diagnostic.mjs
           node --check host-tools/js-generation-manifest.mjs
+          node scripts/js-generation-manifest-contract-tests.mjs
       - name: Build native seed and separate independent checker
         run: |
           set -euo pipefail

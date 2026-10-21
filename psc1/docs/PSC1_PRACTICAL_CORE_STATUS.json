@@ -74,6 +74,15 @@
       "runId": 39557245201,
       "receipt": "docs/PSC1_COMPILERM_QUALIFICATION_2026-10-21.json",
       "scope": "7 independently authored cases, both grammars, seven targets, minimum Python, returned owned callback data and explicit multi-export Bool components; full families incomplete"
+    },
+    {
+      "id": "canonical-stdlib-collections-both-grammar-list-literals",
+      "status": "qualified-selected-subset",
+      "implementationCommit": "dd2328a53e5e9a5384e474410f5123810330130c",
+      "testedMergeCommit": "86f2c1aea281ba7303a5158a19df85b58c375d58",
+      "runId": 39561579871,
+      "receipt": "docs/PSC1_COLLECTIONS_QUALIFICATION_2026-10-21.json",
+      "scope": "Canonical List/Except imports, correct length/reverse, direct checked optional lookup and PS list literals;42 collection obligations plus retained98 CompilerM, minimum Python and ten G1 cases"
     }
   ],
   "stages": [

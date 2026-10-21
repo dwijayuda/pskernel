@@ -35,8 +35,8 @@ export function assertJsGeneration(manifest, expected) {
     'psc1-js-generation/4.35.0-v1':legacyCases,
     'psc1-js-generation/4.35.0-v2':[...legacyCases,'ps-list-literal','malformed-list']
   };
-  const schema=expected.generationSchema||'psc1-js-generation/4.35.0-v1';
-  if (!Object.hasOwn(schemas,schema) || manifest.schema !== schema ||
+  const schema=Object.hasOwn(expected,'generationSchema')?expected.generationSchema:'psc1-js-generation/4.35.0-v1';
+  if (typeof schema !== 'string' || !Object.hasOwn(schemas,schema) || manifest.schema !== schema ||
       manifest.logicalCheckerCommit !== 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc' ||
       manifest.target !== 'js' || manifest.grammar !== 'lean' ||
       manifest.assurance !== 'ordinary-checked' || manifest.behaviorallyVerified !== false ||

@@ -55,6 +55,30 @@ def callbackProgram (flag : Bool) : CompilerM Nat Nat Nat (Nat -> Nat) := do
   compilerSet 20
   return captured
 
+def handlerProgram (flag : Bool) : CompilerM Nat Nat Nat Nat := do
+  let mut amount : Nat := 2
+  try
+    compilerSet 50
+    amount := 10
+    if flag then
+      throw 7
+    amount := amount + 1
+  catch error =>
+    let restored : Nat <- compilerGet ()
+    amount := amount + restored + error
+    compilerSet (amount + 1)
+  return amount
+
+def handlerEarlyProgram (flag : Bool) : CompilerM Nat Nat Nat Nat := do
+  try
+    compilerSet 9
+    if flag then
+      return 31
+    throw 6
+  catch error =>
+    compilerSet 99
+    return (error + 70)
+
 def observe (program : CompilerM Nat Nat Nat Nat) : Nat :=
   match program.run 3 7 with
   | Result.error error => error * 100000 + 99999
@@ -84,3 +108,6 @@ def callbackCase (flag : Bool) : Nat :=
           match fallback with
           | Option.some callback => callback 2 + pair.snd
           | Option.none => 999
+
+def handlerCase (flag : Bool) : Nat := Ps.Internal.CompilerMContract.observe (Ps.Internal.CompilerMContract.handlerProgram flag)
+def handlerEarlyCase (flag : Bool) : Nat := Ps.Internal.CompilerMContract.observe (Ps.Internal.CompilerMContract.handlerEarlyProgram flag)

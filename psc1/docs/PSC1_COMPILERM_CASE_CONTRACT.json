@@ -73,6 +73,23 @@
         "option-callback-storage",
         "optional-index"
       ]
+    },
+    {
+      "id": "handlerCase",
+      "features": [
+        "typed-do-handler",
+        "lexical-mutation-rollback",
+        "effect-state-rollback",
+        "continuation-after-handler"
+      ]
+    },
+    {
+      "id": "handlerEarlyCase",
+      "features": [
+        "handler-return-bypass",
+        "effect-state",
+        "skipped-continuation"
+      ]
     }
   ],
   "flags": [

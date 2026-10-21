@@ -8,7 +8,11 @@ The goal is a complete, correct practical compiler/language across both authored
 1. Complete the finite fourteen-family Practical Core contract in
    PSC1_PRACTICAL_CORE_DECISIONS.md. The seven-case authored CompilerM contract
    and finite parity enforcement are qualified across all seven targets at
-   8ac752a7 (run39557245201); full families remain incomplete.
+   8ac752a7 (run39557245201). Canonical stdlib collections and shared list
+   literals qualify42 more obligations at dd2328a5 (run39561579871), with all
+   existing/minimum-Python/package checks and ten-case G1 execution. Source
+   CompilerM handler rollback/return cases are the next active coverage slice;
+   full families remain incomplete.
    Continue checked Prop-valued Nat/Int order, bounded inference/pattern/control
    interactions and typed console plus UTF-8 file IO with explicit capabilities.
 2. Close reached backend gaps, including Rust owned callback values/captures,

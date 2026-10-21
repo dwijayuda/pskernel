@@ -61,6 +61,9 @@ const nativeAdapter=`
 instance {C S E : Type} : Monad (CompilerM C S E) where
   pure := compilerPure
   bind := compilerBind
+instance {C S E : Type} : MonadExceptOf E (CompilerM C S E) where
+  throw := compilerThrow
+  tryCatch := compilerTryCatch
 `;
 const oracleSource='import Lean\n'+Object.values(extraLibraries).map(stripImports).join('\n')+'\n'+stripImports(resultLibrary)+'\n'+stripImports(effectLibrary)+'\n'+
  nativeAdapter+'\n'+stripImports(leanFixture)+'\n'+

@@ -43,7 +43,40 @@ Artifacts12325240640/12324594397 now expire2027-01-19 (90days).
 Full scoped result is separate; the pre-next-commit run was cancelled by normal
 concurrency, so do not claim its completion. New Practical Core tests are pending.
 
-## Current qualified Practical Core checkpoint
+## Current fully qualified checkpoint — collections and G1 v2
+
+Implementationdd2328a53e5e9a5384e474410f5123810330130c, tested merge
+86f2c1aea281ba7303a5158a19df85b58c375d58. Full scoped39561579871/job119094250765
+SUCCESS, all existing checks, minimum Python and installed packages included.
+Normal cases:98 CompilerM +42 collection obligations, both authored grammars/
+all7 targets; minimum Python14+6. Each obligation executes both Bool inputs.
+All source/admission/strict-IR, type/refusal and publication-preservation checks
+pass. [Exact collection/G1 receipt](docs/PSC1_COLLECTIONS_QUALIFICATION_2026-10-21.json).
+
+Native39561580327, all3 whole closures39561579858 and focused39561580080 pass.
+G1 workflow39561580142 passes all10 cases under pinned v2 manifest policy.
+Service652ce79f0fcf5ba0c7f4e23f24a96cec1f36a65b5dd339adb93592a4d45cfd08,
+artifact12328012635 to2027-01-19. Old5d30 G1/receipts remain preserved.
+No G2/G3/fixed point attempt. All fourteen full families remain incomplete.
+
+## Active next implementation — CompilerM source handlers, pending CI
+
+Add2 authored CompilerM try/catch cases: lexical mutable rollback combined with
+effect-state rollback and continuation; early return bypasses the handler and
+preserves successful effect state. The native-only MonadExceptOf adapter invokes
+the exact checked compilerThrow/compilerTryCatch library definitions. Retain all
+earlier cases and collection suite. New matrix126 CompilerM +42 collections,
+minimum18+6; no inference of success from the preceding7-case checkpoint.
+
+Add cheap constructed-data v1/v2 generation manifest tests: exact8/10 cases,
+missing/duplicate/unknown cases, stale/downgraded schema and unknown/empty/null
+host policies must refuse; historical no-policy caller retains exactv1 behavior.
+These objects grant no admission/publication authority. Normal G1 and manual
+qualification both run the regressions. Preserve all actual host boundary tests.
+
+## Earlier qualified CompilerM checkpoint
+
+
 
 Implementation8ac752a7f3acfe696ee3e8cb1fe67398de040704, tested merge
 574d481a3c0f0f1259d73f929a04d9dc2217fad0. Full scoped39557245201 SUCCESS

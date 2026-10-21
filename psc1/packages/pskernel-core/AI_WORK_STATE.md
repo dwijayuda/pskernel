@@ -1,3 +1,30 @@
+# Current backend fixture repair — explicit match-result types
+
+Observed: 2026-10-21 19:38:44 UTC.
+Branch: `research/psc1-ts-saturation-20261021`.
+Parent: `64a99ba8edd4edd8df2153af381eb6bc60109fa4`.
+Containing fixture repair: **NOT RUN at creation.**
+
+Focused run[39662799505/job119439925284](https://github.com/dwijayuda/pskernel/actions/runs/39662799505/job/119439925284)
+finished FAIL in authentic PSC1 source elaboration. Native models, radix/effect
+controls, TypeScript7 model artifacts and all16 local proof equations passed;
+all16 compiled dependencies were `propext` only. The actual fixture failed with
+`declaration=satSetWorker: matchExpectedType` before optimization or source
+TypeScript generation. Canonical source and detached execution were skipped.
+
+The two match-valued setter locals now explicitly declare `: SatIndex`, matching
+the already-qualified production radix setter's portable spelling. PSC1 requires
+an expected type for these matches. No branch, recursive call, effect, function
+signature, model, assertion or compiler implementation changes. Classification:
+fixture source-language portability, not a transformed-IR or kernel defect.
+
+The next gate remains authentic Lean and canonical .ps admission, exact actual
+named radix-worker specialization, original and candidate IR/target checking,
+and detached generated execution with identical public types and preserved
+ordered effects. No full-kernel performance or correctness claim is made.
+
+---
+
 # Current backend qualification repair — close constant conditional goals
 
 Observed: 2026-10-21 19:33:38 UTC.

@@ -1,0 +1,129 @@
+{
+  "schema": "psc1-saturation-source-fixture-failure-v1",
+  "sourceSha": "64a99ba8edd4edd8df2153af381eb6bc60109fa4",
+  "run": 39662799505,
+  "job": 119439925284,
+  "status": "completed",
+  "conclusion": "failure",
+  "failureClass": "fixture source-language portability",
+  "message": "PSC1_PROJECT_ELAB_FAILED: declaration=satSetWorker: matchExpectedType",
+  "native": "PASS",
+  "proofs": "PASS16 with propext only",
+  "modelTypeScript": "PASS",
+  "authenticLean": "FAIL before optimization",
+  "canonical": "NOT RUN",
+  "detached": "NOT RUN",
+  "repair": "Explicit SatIndex annotation on two match-valued let bindings",
+  "productionChanged": false,
+  "assertionsWeakened": false,
+  "jobs": {
+    "jobs": [
+      {
+        "id": 119439925284,
+        "name": "checked-saturation",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 39662799505,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Lean",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install pinned TypeScript",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Build the unchanged compiler and explicit experimental entry points",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Check native models, ordered effects, refusal and original ABI",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Prove and audit all16 local refusal and signature equations",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Admit actual Lean fixture and compile original and optimized IR",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 9
+          },
+          {
+            "name": "Reconstruct and authenticate the canonical fixture source closure",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 10
+          },
+          {
+            "name": "Check both real source routes and IR controls in detached empty-PATH Node",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11
+          },
+          {
+            "name": "Bind all experimental outputs to this source and toolchain",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 25
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -27,10 +27,10 @@ def satSetWorker
   match fuel with
   | Nat.zero => SatIndex.bucket entries
   | Nat.succ remaining =>
-      let left := match index with
+      let left : SatIndex := match index with
         | SatIndex.branch value _ => value
         | _ => SatIndex.empty;
-      let right := match index with
+      let right : SatIndex := match index with
         | SatIndex.branch _ value => value
         | _ => SatIndex.empty;
       if Nat.beq (Nat.mod hash 2) 0 then

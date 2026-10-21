@@ -458,7 +458,7 @@ console.log("PSC1_V2_DAG_JS_SUMMARY "+JSON.stringify({
   peak_rss_kib:process.resourceUsage().maxRSS,
   post_gc_heap_bytes:process.memoryUsage().heapUsed,
   semantics:"complete KernelContract-v1 via one checked DAG input boundary",
-  checker_representation:"DAG terminal inference, beta/zeta/Nat/constructor-projection WHNF with separate core/public caches and checked quick DefEq rules; legacy general checker/delta/iota/admission fallback; incomplete"
+  checker_representation:"DAG checked binders, admitted constants, structural-type-equal applications and projections; beta/zeta/Nat/constructor-projection/same-batch-delta WHNF and quick DefEq; general DefEq, external types, iota and admission fallback remain; incomplete"
 }));
 console.log("PSC1_V2_DAG_JS: PASS");
 }
@@ -1631,15 +1631,19 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
     must(sameRuntimeValue(result.fst.checkedInfer,nil),"binder-literal-cache-ineligible");
   }
   const unsupported=[
-    build("Let",E.letE(x,sort1,sort0,E.bvar(0n),false),x,s1.id,s0.id,b0.id,false),
-    build("Proj",E.proj(name("binder-unknown-structure"),0n,sort0),
-      name("binder-unknown-structure"),0n,s0.id)
+    build("Let",E.letE(x,sort1,sort0,E.bvar(0n),false),x,s1.id,s0.id,b0.id,false)
   ];
   for(const node of unsupported){
     must(sameRuntimeValue(get("psKernelExprV2TryCheckWithFuel")(
       64n,checker.context,binderArena,node.id),none),"binder-explicit-full-checker-fallback");
     must(publicCheck(session(),node),"binder-fallback-public-parity");
   }
+  const invalidProjection=build("Proj",E.proj(name("binder-unknown-structure"),0n,sort0),
+    name("binder-unknown-structure"),0n,s0.id);
+  must(rejected(accepted(get("psKernelExprV2TryCheckWithFuel")(
+    64n,checker.context,binderArena,invalidProjection.id),"binder-projection-direct")),
+    "binder-projection-now-direct-negative");
+  must(publicCheck(session(),invalidProjection),"binder-projection-public-negative-parity");
   const cheap=[
     s0,lam(x,s1,b0),app(lam(x,s1,b0),s0),app(lam(x,s1,s0),s1),
     app(lam(x,s1,b1),s0),app(lam(x,s1,md(7n,b0)),s0),
@@ -1838,6 +1842,183 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
   must(compare(ordinaryOwner,[a,ca],"ordinary-index")===24,
     "ordinary-index-direct-fuel-depth-matrix");
   console.log("PSC1_V2_DAG_JS_MUTUAL_INDEX: PASS");
+}
+
+
+// Complete checked projection rules use one admitted declaration owner.
+{
+  let graph=empty;
+  const a=name("projection-A"),x=name("projection-x"),p=name("projection-P"),u=name("projection-u");
+  const pairName=name("DagCheckDependentPair"),polyName=name("DagCheckPolyBox");
+  const dataPropName=name("DagCheckDataProp"),proofName=name("DagCheckProofBox");
+  const pairCtor=N.str(pairName,"mk"),polyCtor=N.str(polyName,"mk");
+  const dataPropCtor=N.str(dataPropName,"mk"),proofCtor=N.str(proofName,"mk");
+  const build=(kind,term,...args)=>{
+    const result=mk(graph,kind,...args); graph=result.fst; return {id:result.snd,term};
+  };
+  const sort=level=>build("Sort",E.sort(level),level);
+  const bv=index=>build("BVar",E.bvar(index),index);
+  const con=(n,levels=[])=>build("Const",E.const(n,list(levels)),n,list(levels));
+  const app=(fn,arg)=>build("App",E.app(fn.term,arg.term),fn.id,arg.id);
+  const pi=(n,d,b)=>build("Forall",E.forallE(n,d.term,b.term,B.default),n,d.id,b.id,B.default);
+  const lam=(n,d,b)=>build("Lam",E.lam(n,d.term,b.term,B.default),n,d.id,b.id,B.default);
+  const md=(tag,b)=>build("MData",E.mdata(tag,b.term),tag,b.id);
+  const proj=(n,index,b)=>build("Proj",E.proj(n,index,b.term),n,index,b.id);
+  const u1=L.succ(L.zero),lu=L.param(u),s0=sort(L.zero),s1=sort(u1);
+  const su=sort(lu),s2=sort(L.succ(u1)),b0=bv(0n),b1=bv(1n);
+  const pairType=con(pairName),dataPropType=con(dataPropName);
+  const dependentCtor=result=>pi(a,s1,pi(x,b0,result));
+  const polyType=pi(a,su,su),polyCtorType=pi(a,su,pi(x,b0,app(con(polyName,[lu]),b1)));
+  const proofType=pi(p,s0,s0),proofCtorType=pi(p,s0,pi(x,b0,app(con(proofName),b1)));
+  const specifications=[
+    [pairName,[],s2,dependentCtor(pairType),0n],
+    [polyName,[u],polyType,polyCtorType,1n],
+    [dataPropName,[],s0,dependentCtor(dataPropType),0n],
+    [proofName,[],proofType,proofCtorType,1n]
+  ];
+  const requests=specifications.map(([n,levels,type,ctorType,numParams])=>
+    D.ordinaryInductive(list(levels),numParams,{
+      name:n,type:type.id,ctors:list([{name:N.str(n,"mk"),type:ctorType.id}])
+    },false));
+  const tautology=pi(p,s0,pi(x,b0,b1)),tautologyProof=lam(p,s0,lam(x,b0,b0));
+  const pairValue=app(app(con(pairCtor),s0),tautology);
+  const polyValue=app(app(con(polyCtor,[u1]),s0),tautology);
+  const dataPropValue=app(app(con(dataPropCtor),s0),tautology);
+  const proofValue=app(app(con(proofCtor),tautology),tautologyProof);
+  const pairFirst=proj(pairName,0n,pairValue),pairSecond=proj(pairName,1n,pairValue);
+  let hiddenPair=pairValue;
+  for(let tag=0n;tag<8n;tag++)hiddenPair=md(tag+910n,hiddenPair);
+  const fixtures=[
+    ["dependent-first",pairFirst],["dependent-second",pairSecond],
+    ["parameter-and-universe",proj(polyName,0n,polyValue)],
+    ["proof-field",proj(proofName,0n,proofValue)],
+    ["proof-data-field",proj(dataPropName,0n,dataPropValue)],
+    ["proof-dependent-data-field",proj(dataPropName,1n,dataPropValue)],
+    ["metadata-value",proj(pairName,1n,hiddenPair)],
+    ["under-binder",lam(x,pairType,proj(pairName,1n,b0))],
+    ["wrong-type-name",proj(polyName,0n,pairValue)],
+    ["invalid-index",proj(pairName,2n,pairValue)],
+    ["large-index",proj(pairName,4294967296n,pairValue)],
+    ["non-structure",proj(pairName,0n,s0)],
+    ["invalid-value-before-index",proj(pairName,4294967296n,b0)]
+  ];
+  const input=accepted(decode(graph),"projection-input");
+  const initial=session();
+  let execution={session:initial,declarations:nil};
+  for(const request of requests){
+    execution=accepted(get("psKernelDagRunCommand")(
+      execution,nil,S.safe,graph,input,C.admit(request)),"projection-admission").snd;
+  }
+  const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  must(array(execution.declarations).length===8,"projection-index-original-input-types-only");
+  for(const declaration of array(execution.declarations)){
+    const info=accepted(get("psKernelEnvironmentFind")(
+      execution.session.environment,declaration.name),"projection-index-live-info");
+    const type=accepted(decoded(input,declaration.type),"projection-index-input-type");
+    must(get("psKernelExprV2DeclarationRefMatches")(declaration,info)===true&&
+      exact(type,get("psKernelConstantInfoType")(info))===true,
+      "projection-index-type-correspondence");
+    must(sameRuntimeValue(declaration.deltaValue,none),"projection-index-has-no-delta-body");
+  }
+  const checker=get("psKernelKernelSessionChecker")(execution.session,nil,S.safe);
+  const stateFor=arena=>get("psKernelExprV2CheckStateWithWhnf")(
+    get("psKernelExprV2CheckStateEmpty")(arena),
+    get("psKernelExprV2WhnfStateForDeclarations")(arena,execution.declarations));
+  const raw=(fuel,context,state,root)=>get("psKernelExprV2TryCheckCoreWithFuel")(fuel)
+    (get("psKernelExprV2TryWhnfStateWithFuel")(fuel))
+    (get("psKernelExprV2CheckContextEmpty")(context))(state)(root);
+  const compareRaw=(original,attempted,label)=>{
+    must(attempted&&typeof attempted==="object"&&"value" in attempted,label+"-direct");
+    const actual=attempted.value;
+    if(rejected(original)){
+      must(rejected(actual)&&original.error===actual.error,label+"-error");
+    }else{
+      const expected=accepted(original,label+"-original"),result=accepted(actual,label+"-result");
+      const decodedGraph=accepted(decode(result.fst.whnf.arena),label+"-graph");
+      const type=accepted(decoded(decodedGraph,result.snd),label+"-type");
+      must(exact(expected.fst,type)===true,label+"-exact-type");
+      must(expected.snd.state.nextFresh===result.fst.nextFresh,label+"-fresh");
+    }
+  };
+  const sameChecked=(left,right)=>{
+    if(rejected(left)||rejected(right))
+      return rejected(left)&&rejected(right)&&sameRuntimeValue(left.error,right.error);
+    const a=accepted(left,"projection-public-left"),b=accepted(right,"projection-public-right");
+    return exact(a.expression,b.expression)===true&&exact(a.type,b.type)===true;
+  };
+  for(const [label,node] of fixtures){
+    for(const fuel of [0n,1n,2n,3n,4n,5n,6n,8n,10n,12n,16n,32n,64n])
+    for(const maxDepth of [0n,1n,2n]){
+      for(const recDepth of [0n,13n,14n,15n,16n]){
+        const context={...checker.context,maxRecDepth:maxDepth,recDepth};
+        compareRaw(get("psKernelSessionCheck")(fuel,{...checker,context},node.term),
+          raw(fuel,context,stateFor(graph),node.id),
+          "projection-check-"+label+"-"+fuel+"-"+maxDepth+"-"+recDepth);
+      }
+      const s={...execution.session,resources:{...execution.session.resources,fuel,maxRecDepth:maxDepth}};
+      const preflight=get("psKernelKernelSessionPreflight")(s);
+      const actual=rejected(preflight)?preflight:get("psKernelDagCheckExpression")(
+        s,nil,S.safe,graph,input,execution.declarations,node.id,node.term);
+      must(sameChecked(get("psKernelV1CheckExpression")(s,nil,S.safe,node.term),actual),
+        "projection-public-fuel-"+label+"-"+fuel+"-"+maxDepth);
+    }
+    const original=get("psKernelV1CheckExpression")(execution.session,nil,S.safe,node.term);
+    const actual=run(initial,nil,S.safe,graph,list([...requests.map(r=>C.admit(r)),C.check(node.id)]));
+    if(rejected(original)){
+      must(rejected(actual)&&sameRuntimeValue(original.error,actual.error),
+        "projection-real-batch-negative-"+label);
+    }else{
+      const expected=accepted(original,"projection-real-legacy");
+      const result=accepted(actual,"projection-real-batch");
+      const replies=array(result.replies),last=replies.at(-1);
+      must(replies.length===requests.length+1&&last&&typeof last==="object"&&"value" in last,
+        "projection-real-batch-reply-"+label);
+      must(exact(expected.expression,last.value.expression)===true&&
+        exact(expected.type,last.value.type)===true,"projection-real-batch-positive-"+label);
+    }
+  }
+
+  const boundedContext={...checker.context,maxRecDepth:1n};
+  const legacyWarm=accepted(get("psKernelSessionCheck")(
+    64n,{...checker,context:boundedContext},pairFirst.term),"projection-warm-legacy");
+  const dagWarm=accepted(accepted(raw(64n,boundedContext,stateFor(graph),pairFirst.id),
+    "projection-warm-some"),"projection-warm-result");
+  for(const [fuel,recDepth] of [[0n,0n],[1n,0n],[1n,15n],[1n,16n]]){
+    const context={...boundedContext,recDepth};
+    compareRaw(get("psKernelSessionCheck")(fuel,{...legacyWarm.snd,context},pairFirst.term),
+      raw(fuel,context,dagWarm.fst,pairFirst.id),"projection-warm-cache-entry-"+fuel+"-"+recDepth);
+  }
+  const secondType=accepted(get("psKernelSessionCheck")(64n,checker,pairSecond.term),
+    "projection-dependent-legacy-type");
+  must(exact(secondType.fst,pairFirst.term)===true,
+    "projection-dependent-result-keeps-earlier-projection");
+  for(const [node,message] of [
+    [fixtures[4][1],"invalid projection: proof structure field is not a proposition"],
+    [fixtures[5][1],"invalid projection: proof structure depends on data field"]
+  ]){
+    const result=get("psKernelSessionCheck")(64n,checker,node.term);
+    must(rejected(result)&&result.error===message,"projection-proof-structure-rejection");
+  }
+  must(sameRuntimeValue(get("psKernelExprV2TryCheckWithFuel")(
+    64n,checker.context,graph,pairFirst.id),none),"projection-external-owner-remains-fallback");
+  const whnf=get("psKernelExprV2TryWhnfStateWithFuel")(64n);
+  const check=get("psKernelExprV2TryCheckCoreWithFuel")(64n)(whnf);
+  const context=get("psKernelExprV2CheckContextEmpty")(checker.context);
+  const paramZero=accepted(get("psKernelExprV2CheckProjectionApplyParamsWithFuel")(0n)
+    (whnf)(context)(stateFor(graph))(nil)(0n)(0n)(pairFirst.id),"projection-param-zero-some");
+  must(rejected(paramZero)&&paramZero.error==="kernel projection parameter budget exhausted",
+    "projection-parameter-zero-budget");
+  const fieldZero=accepted(get("psKernelExprV2CheckProjectionSkipFieldsWithFuel")(0n)
+    (check)(whnf)(context)(stateFor(graph))(pairName)(pairFirst.id)(false)(0n)(0n)(pairFirst.id),
+    "projection-field-zero-some");
+  must(rejected(fieldZero)&&fieldZero.error==="kernel projection field budget exhausted",
+    "projection-field-zero-budget");
+  const sortZero=accepted(get("psKernelExprV2CheckProjectionSortWith")(
+    get("psKernelExprV2TryWhnfStateWithFuel")(0n),context,stateFor(graph),s0.id),
+    "projection-sort-zero-some");
+  must(rejected(sortZero)&&sortZero.error==="kernel reduction budget exhausted",
+    "projection-sort-does-not-skip-whnf-budget");
+  console.log("PSC1_V2_DAG_JS_CHECK_PROJECTION: PASS");
 }
 
 reportDagSmoke();

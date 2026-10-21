@@ -24,6 +24,61 @@ its explicit emitter capability limit and is not qualified for the full kernel.
 These passes do not establish full Arena qualification or a complete DAG-native
 checker. Newer declaration-index and profiling changes need final-source evidence.
 
+### Checked projection inference — implemented, pending CI
+
+The production DAG checker now implements the original projection inference
+rule using owning constructor type IDs: checked structure inference, full-budget
+WHNF, live inductive/constructor shape checks, universe substitution, parameter
+instantiation, dependent prior-field projections and both Prop/data restrictions.
+It preserves the parameter-count-plus-one and field-index-plus-one loop bounds,
+predecessor inference callback, and captured top-level WHNF callback. Projection
+sort expectations always execute WHNF; the binder shortcut is not reused.
+
+Thirteen positive/negative fixtures cover dependent fields, a universe-polymorphic
+parameterized box, valid proof fields, both rejected data projections from Prop,
+metadata, binders, wrong structures, invalid/UInt32-overflow indices and error
+precedence. Native and generated tests require direct results across 2,535
+fuel/depth combinations, full public parity and same-batch admission, warm-cache
+entry guards, exact dependent result types and missing-owner fallback. A native
+official comparison independently admits all four fixture inductives through
+pinned Lean's checked addDeclCore API and compares all thirteen results.
+These new gates remain pending Actions. No production runtime calls official Lean.
+
+### Full 193-case Arena result after transport/diagnostic fixes
+
+At [6626608385c3beaaa35759266218701362eb4658](https://github.com/dwijayuda/pskernel/commit/6626608385c3beaaa35759266218701362eb4658),
+[run39518988495](https://github.com/dwijayuda/pskernel/actions/runs/39518988495),
+the complete generated comparison recorded all 193 cases:
+
+| Outcome | Cases |
+| --- | ---: |
+| Matched acceptance | 102 |
+| Matched kernel rejection | 56 |
+| Matched metadata rejection | 1 |
+| Matched transport rejection | 7 |
+| Host timeout at 60 seconds | 25 |
+| Unsafe/partial contract agreement, separate classification | 2 |
+| Internal error / unsupported | 0 / 0 |
+| Observed false acceptance / false rejection among completed verdicts | 0 / 0 |
+| Total / strict qualification | 193 / **incomplete** |
+
+The official reference records 122 acceptances and 71 rejections. The generated
+source audit covered 148 modules; this commit's canonical closure contained 105
+modules. All 135 transport/outcome controls passed. The nested-restored projection
+case now matches rejection. Prelude all-list transport now reaches the checker;
+that case times out and is not reported as unsupported or accepted.
+
+Every timeout retained a valid adapted-source-hash-bound snapshot at public
+RunDag entry (kernel-admission, coreInvoked=true, fuel4096). There were zero invalid
+snapshots. Transport and ordering therefore completed, but the snapshot cannot
+distinguish RunDag's graph validation, decoding or actual declaration checking.
+Host timeout is not a kernel fuel result. The entire original set of 24 timed-out
+cases remains, plus init-prelude. Some inputs are small: repeated-subproblem has
+162 DAG nodes/5 admission commands, church-numerals197/4, refute-cheap-last367/7.
+The largest reported input, grind-ring-5, has180,991 nodes/2,182 commands; the
+prelude has54,535/1,774. Input size alone cannot explain the complete timeout set.
+No case has been excluded and full-corpus qualification remains red.
+
 ### Ordinary/mutual admitted type IDs — implemented, pending CI
 
 Ordinary and mutual inductive headers and constructor types now extend the
@@ -66,7 +121,7 @@ RSS was254,976–265,800KiB vs298,584–301,952KiB and retained-heap deltas were
 109.258–110.108ms, measured separately. This remains a measured time gain with
 a memory/construction cost, not general performance qualification.
 
-### One owning declaration index and direct constant types — native qualified
+### One owning declaration index and direct constant types — native/generated qualified
 
 The owning batch now keeps one declaration table containing original admitted
 type IDs, declaration kinds, universe parameters and optional transparent body
@@ -86,11 +141,14 @@ extensional proof retains its old equations and proves identical results for
 all contexts/names/levels/modes. Native integration at
 [1a4b431d0b7cbcb6f2d306a62bd571a0a03060d9](https://github.com/dwijayuda/pskernel/commit/1a4b431d0b7cbcb6f2d306a62bd571a0a03060d9),
 [run39521023170](https://github.com/dwijayuda/pskernel/actions/runs/39521023170),
-passed this proof and the complete native regression. The proof depends only
+passed this proof and the complete native regression. Its generated job also
+passed real checker smoke, 128 ABBA observations and33 strict executable
+operations. The proof depends only
 on the approved propext, Classical.choice and Quot.sound axioms. The first
 canonical attempt failed during Lean download with TLS error35 before source
-checking; only that job was rerun. Generated/canonical index qualification
-remains pending, separately from the proved shared constant-rule factorization.
+checking; only that job was rerun. Canonical index qualification remains pending,
+separately from native/generated integration and the proved shared constant-rule
+factorization.
 
 Native and generated fixtures add567 direct constant inference comparisons
 across nine admitted constants, three safety contexts, seven fuel values and
@@ -110,8 +168,8 @@ Its complete generated gate also passed. The numeral change at2d29ebc now passed
 the complete [integration39518432248](https://github.com/dwijayuda/pskernel/actions/runs/39518432248):
 strict detached large-numeral JS,128 correctness-guarded ABBA observations
 and33 complete executable operations all passed. The App slice5f0e434 passed native, generated and canonical gates as recorded
-above. The newer declaration index has native evidence but still needs complete
-generated/canonical evidence.
+above. The newer declaration index has native/generated integration evidence but still
+needs complete canonical evidence.
 
 ### Dependent application checking — native/generated/canonical qualified
 
@@ -545,7 +603,7 @@ not general production performance acceptance.
 | Inference and DefEq | DAG Sort/FVar/literal/metadata/binders, structural-type App branch, admitted constant types; definitive quick DefEq | App5f0 and index1a4 native parity/official gates pass | New App/index generated executable qualification pending | Latest expanded full-checker measurements pending; no blanket speed/memory claim | Partial; general DefEq, Let/projection/inferOnly open |
 | Inductive admission | Direct DAG request ingress, complete original admission internally | Existing admission tests pass | Real generated definition/ordinary-inductive checks pass | Full admission comparison pending | Not migrated internally |
 | Canonical self-hosting | Actual full production import closure; counts from manifest | Pinned Lean build passes through1a4 |9b complete canonical103 modules/1,259 declarations and detached DAG runtime pass; newer final gates running | Generator/runtime costs measured; diagnostic profiler added | Partial integration qualification |
-| Lean Arena | All193 official and independent cases evaluated without exclusions | Official reference122 accept/71 reject |9b independent165 strict matches,24 timeouts,1 internal,1 unsupported,2 contract agreements; updated fixes rerunning |60-second host caps separate from fuel4096; no timeout counted as match | Full independent qualification failed; no false admission observed among completed verdicts |
+| Lean Arena | Complete193 corpus; all-list transport and exact nested outcomes repaired | Official122accept/71reject | 6626:166matches,25hosttimeouts,2safety agreements;135controls; all193recorded | Every timeout reached RunDag entry; internal hotspot not yet measured | **BLOCKED:25hosttimeouts; no exclusions** |
 | Formal invariants | Composite metadata, scope/cache guards, budget cap, five numeral recurrences and exact constant-rule factorization | Native proofs through1a4 checked with approved logical axioms | Proofs intentionally outside portable executable closure | No formal allocation bound | Global DAG/substitution/DefEq/admission soundness remains open |
 
 ## Latest matched native measurements

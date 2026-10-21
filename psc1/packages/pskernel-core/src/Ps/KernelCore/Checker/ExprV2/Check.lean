@@ -1,15 +1,15 @@
-import Ps.KernelCore.Checker.ExprV2.CheckApplication
+import Ps.KernelCore.Checker.ExprV2.CheckProjection
 import Ps.KernelCore.Checker.ExprV2.Constant
 
 /-
 DAG-native fully checked Sort/FVar/literal/metadata/lambda/forall inference
 same-batch constant types, and the structural-type-equality branch of
-dependent application.
+dependent application, and checked structure projections.
 
 The public entry creates one fresh operation and accepts no legacy local
 context. Internal binders carry type IDs in their own DAG local context.
-Applications requiring general DefEq, external constant types, lets and projections explicitly
-request the complete checker. Unsupported work never publishes a partial
+Applications requiring general DefEq, external constant types, lets and
+projections without owning constructor type IDs request the complete checker. Unsupported work never publishes a partial
 state or a checking receipt.
 
 Fuel zero precedes every operation; cached results still enter recursion depth.
@@ -104,6 +104,9 @@ def psKernelExprV2TryCheckCoreWithFuel
                         | PsKernelExprV2Node.app fn arg =>
                             psKernelExprV2CheckApplicationWith smaller whnf
                               nextContext state root fn arg
+                        | PsKernelExprV2Node.proj typeName index structValue =>
+                            psKernelExprV2CheckProjectionWith smaller whnf
+                              nextContext state root typeName index structValue
                         | _ => Option.none
 
 def psKernelExprV2TryCheckWithDeclarationsFuel

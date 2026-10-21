@@ -1654,8 +1654,7 @@ private def binderParity : IO Unit := do
            match result.fst.checkedInfer with | [] => true | _ => false
        | _ => false)
   let unsupported : List PsKernelExpr := [
-    .letE x sort1 sort0 (.bvar 0) false,
-    .proj (nm "binder-unknown-structure") 0 sort0]
+    .letE x sort1 sort0 (.bvar 0) false]
   for term in unsupported do
     let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
     require "binder-explicit-complete-checker-fallback"
@@ -1664,6 +1663,14 @@ private def binderParity : IO Unit := do
     require "binder-fallback-public-parity"
       (sameCheck (psKernelV1CheckExpression session [] .safe term)
         (oneCheck session arena root))
+  let invalidProjection := PsKernelExpr.proj (nm "binder-unknown-structure") 0 sort0
+  let (invalidArena, invalidRoot) ← expect (psKernelExprV2PagedImportChecked invalidProjection)
+  require "binder-projection-now-direct-negative"
+    (match psKernelExprV2TryCheckWithFuel 64 checker.context invalidArena invalidRoot with
+     | some (.error _) => true | _ => false)
+  require "binder-projection-public-negative-parity"
+    (sameCheck (psKernelV1CheckExpression session [] .safe invalidProjection)
+      (oneCheck session invalidArena invalidRoot))
   let cheapFixtures : List PsKernelExpr := [
     sort0, .lam x sort1 (.bvar 0) .default,
     .app (.lam x sort1 (.bvar 0) .default) sort0,
@@ -1924,6 +1931,263 @@ private def mutualDeclarationIndexParity : IO Unit := do
             ordinaryOwner.declarations root)
   IO.println "PSC1_V2_DAG_NATIVE_MUTUAL_INDEX: PASS"
 
+
+private def sameProjectionCheckedValue
+    (left right : Except PsKernelError PsKernelCheckedExpression) : Bool :=
+  match left, right with
+  | .error a, .error b => samePublicError a b
+  | .ok a, .ok b =>
+      psKernelExprEqual a.expression b.expression && psKernelExprEqual a.type b.type
+  | _, _ => false
+
+private def projectionOfficialBinder : PsKernelBinderInfo → Lean.BinderInfo
+  | .default => .default
+  | .implicit => .implicit
+  | .strictImplicit => .strictImplicit
+  | .instImplicit => .instImplicit
+
+private def projectionOfficialExpr : PsKernelExpr → Option Lean.Expr
+  | .bvar index => some (.bvar index)
+  | .sort level => (quickOfficialLevel level).map Lean.Expr.sort
+  | .const name levels => do
+      return .const (quickOfficialName name) (← levels.mapM quickOfficialLevel)
+  | .app fn arg => do
+      return .app (← projectionOfficialExpr fn) (← projectionOfficialExpr arg)
+  | .lam name domain body binderInfo => do
+      return .lam (quickOfficialName name) (← projectionOfficialExpr domain)
+        (← projectionOfficialExpr body) (projectionOfficialBinder binderInfo)
+  | .forallE name domain body binderInfo => do
+      return .forallE (quickOfficialName name) (← projectionOfficialExpr domain)
+        (← projectionOfficialExpr body) (projectionOfficialBinder binderInfo)
+  | .letE name type value body nondep => do
+      return .letE (quickOfficialName name) (← projectionOfficialExpr type)
+        (← projectionOfficialExpr value) (← projectionOfficialExpr body) nondep
+  | .lit (.nat value) => some (.lit (.natVal value))
+  | .lit (.str value) => some (.lit (.strVal value))
+  | .mdata _ body => (projectionOfficialExpr body).map (Lean.Expr.mdata {})
+  | .proj name index body => do
+      return .proj (quickOfficialName name) index (← projectionOfficialExpr body)
+  | _ => none
+
+private def projectionOfficialRequire (term : PsKernelExpr) : IO Lean.Expr := do
+  match projectionOfficialExpr term with
+  | some expression => pure expression
+  | none => throw (IO.userError "projection official converter does not cover fixture")
+
+private def projectionCheckParity : IO Unit := do
+  let initial ← fresh
+  let a := nm "projection-A"
+  let x := nm "projection-x"
+  let p := nm "projection-P"
+  let u := nm "projection-u"
+  let pairName := nm "DagCheckDependentPair"
+  let polyName := nm "DagCheckPolyBox"
+  let dataPropName := nm "DagCheckDataProp"
+  let proofName := nm "DagCheckProofBox"
+  let pairCtor := PsKernelName.str pairName "mk"
+  let polyCtor := PsKernelName.str polyName "mk"
+  let dataPropCtor := PsKernelName.str dataPropName "mk"
+  let proofCtor := PsKernelName.str proofName "mk"
+  let levelOne := PsKernelLevel.succ .zero
+  let levelU := PsKernelLevel.param u
+  let pairType := PsKernelExpr.const pairName []
+  let dataPropType := PsKernelExpr.const dataPropName []
+  let dependentCtor := fun (result : PsKernelExpr) =>
+    PsKernelExpr.forallE a sort1
+      (.forallE x (.bvar 0) result .default) .default
+  let polyType := PsKernelExpr.forallE a (.sort levelU) (.sort levelU) .default
+  let polyCtorType := PsKernelExpr.forallE a (.sort levelU)
+    (.forallE x (.bvar 0)
+      (.app (.const polyName [levelU]) (.bvar 1)) .default) .default
+  let proofType := PsKernelExpr.forallE p sort0 sort0 .default
+  let proofCtorType := PsKernelExpr.forallE p sort0
+    (.forallE x (.bvar 0)
+      (.app (.const proofName []) (.bvar 1)) .default) .default
+  let specifications : List
+      (PsKernelName × List PsKernelName × PsKernelExpr × PsKernelExpr × Nat) := [
+    (pairName, [], .sort (.succ levelOne), dependentCtor pairType, 0),
+    (polyName, [u], polyType, polyCtorType, 1),
+    (dataPropName, [], sort0, dependentCtor dataPropType, 0),
+    (proofName, [], proofType, proofCtorType, 1)]
+  let mut arena := psKernelExprV2PagedEmpty
+  let mut requests : List PsKernelDagDeclarationRequest := []
+  for (inductName, levels, type, ctorType, numParams) in specifications do
+    let typeBuilt ← expect (psKernelExprV2PagedImportIntoChecked arena type)
+    let ctorBuilt ← expect (psKernelExprV2PagedImportIntoChecked typeBuilt.fst ctorType)
+    arena := ctorBuilt.fst
+    requests := requests ++ [
+      .ordinaryInductive levels numParams
+        (PsKernelDagInductive.mk inductName typeBuilt.snd [
+          PsKernelDagConstructor.mk (PsKernelName.str inductName "mk") ctorBuilt.snd])
+        false]
+  let tautology := PsKernelExpr.forallE p sort0
+    (.forallE x (.bvar 0) (.bvar 1) .default) .default
+  let tautologyProof := PsKernelExpr.lam p sort0
+    (.lam x (.bvar 0) (.bvar 0) .default) .default
+  let pairValue := PsKernelExpr.app (.app (.const pairCtor []) sort0) tautology
+  let polyValue := PsKernelExpr.app
+    (.app (.const polyCtor [levelOne]) sort0) tautology
+  let dataPropValue := PsKernelExpr.app
+    (.app (.const dataPropCtor []) sort0) tautology
+  let proofValue := PsKernelExpr.app
+    (.app (.const proofCtor []) tautology) tautologyProof
+  let pairFirst := PsKernelExpr.proj pairName 0 pairValue
+  let pairSecond := PsKernelExpr.proj pairName 1 pairValue
+  let mut hiddenPair := pairValue
+  for tag in [:8] do hiddenPair := .mdata (tag + 910) hiddenPair
+  let fixtures : List (String × PsKernelExpr) := [
+    ("dependent-first", pairFirst), ("dependent-second", pairSecond),
+    ("parameter-and-universe", .proj polyName 0 polyValue),
+    ("proof-field", .proj proofName 0 proofValue),
+    ("proof-data-field", .proj dataPropName 0 dataPropValue),
+    ("proof-dependent-data-field", .proj dataPropName 1 dataPropValue),
+    ("metadata-value", .proj pairName 1 hiddenPair),
+    ("under-binder", .lam x pairType (.proj pairName 1 (.bvar 0)) .default),
+    ("wrong-type-name", .proj polyName 0 pairValue),
+    ("invalid-index", .proj pairName 2 pairValue),
+    ("large-index", .proj pairName 4294967296 pairValue),
+    ("non-structure", .proj pairName 0 sort0),
+    ("invalid-value-before-index", .proj pairName 4294967296 (.bvar 0))]
+  let mut roots : List (String × Nat × PsKernelExpr) := []
+  for (label, term) in fixtures do
+    let result ← expect (psKernelExprV2PagedImportIntoChecked arena term)
+    arena := result.fst
+    roots := roots ++ [(label, result.snd, term)]
+  let built ← expect (psKernelExprV2DecodeChecked arena)
+  let mut execution := PsKernelDagExecutionState.mk initial []
+  for request in requests do
+    let result ← expectPublic
+      (psKernelDagRunCommand execution [] .safe arena built (.admit request))
+    execution := result.snd
+  require "projection-index-original-input-types-only" (execution.declarations.length == 8)
+  for declaration in execution.declarations do
+    match psKernelEnvironmentFind execution.session.environment declaration.name with
+    | none => throw (IO.userError "projection indexed declaration is missing")
+    | some info =>
+        let type ← expect (psKernelExprV2DecodedRequire built declaration.type)
+        require "projection-index-type-correspondence"
+          (psKernelExprV2DeclarationRefMatches declaration info &&
+            psKernelExprEqual type (psKernelConstantInfoType info))
+        require "projection-index-has-no-delta-body" declaration.deltaValue.isNone
+  let checker := psKernelKernelSessionChecker execution.session [] .safe
+  let stateFor := fun (graph : PsKernelExprV2PagedArena) =>
+    psKernelExprV2CheckStateWithWhnf (psKernelExprV2CheckStateEmpty graph)
+      (psKernelExprV2WhnfStateForDeclarations graph execution.declarations)
+  for (label, root, term) in roots do
+    for fuel in [0,1,2,3,4,5,6,8,10,12,16,32,64] do
+      for maxDepth in [0,1,2] do
+        for recDepth in [0,13,14,15,16] do
+          let context := { checker.context with
+            maxRecDepth := maxDepth
+            recDepth := recDepth }
+          compareBinderRaw ("projection-check-" ++ label ++ "-" ++ toString fuel)
+            (psKernelSessionCheck fuel { checker with context := context } term)
+            (binderRaw fuel context (stateFor arena) root)
+        let resources := { execution.session.resources with
+          fuel := fuel
+          maxRecDepth := maxDepth }
+        let session := { execution.session with resources := resources }
+        let actual : Except PsKernelError PsKernelCheckedExpression :=
+          match psKernelKernelSessionPreflight session with
+          | .error error => .error error
+          | .ok _ =>
+              psKernelDagCheckExpression session [] .safe arena built
+                execution.declarations root term
+        require ("projection-public-fuel-" ++ label ++ "-" ++ toString fuel)
+          (sameProjectionCheckedValue
+            (psKernelV1CheckExpression session [] .safe term) actual)
+    let original := psKernelV1CheckExpression execution.session [] .safe term
+    let actual := psKernelV1RunDag initial [] .safe arena
+      (requests.map PsKernelDagCommand.admit ++ [.check root])
+    match original, actual with
+    | .error left, .error right =>
+        require ("projection-real-batch-negative-" ++ label) (samePublicError left right)
+    | .ok left, .ok right =>
+        match right.replies.reverse with
+        | .checked checked :: _ =>
+            require ("projection-real-batch-positive-" ++ label)
+              (psKernelExprEqual left.type checked.type &&
+                psKernelExprEqual left.expression checked.expression)
+        | _ => throw (IO.userError "projection batch has no checked reply")
+    | _, _ => throw (IO.userError ("projection batch mismatch: " ++ label))
+  let (firstRoot, firstTerm) ←
+    match roots with
+    | (_, root, term) :: _ => pure (root, term)
+    | [] => throw (IO.userError "missing projection fixture")
+  let boundedContext := { checker.context with maxRecDepth := 1 }
+  let legacyWarm ← expect
+    (psKernelSessionCheck 64 { checker with context := boundedContext } firstTerm)
+  let dagWarm ←
+    match binderRaw 64 boundedContext (stateFor arena) firstRoot with
+    | some value => expect value
+    | none => throw (IO.userError "projection direct inference unexpectedly fell back")
+  for (fuel, recDepth) in [(0,0),(1,0),(1,15),(1,16)] do
+    let context := { boundedContext with recDepth := recDepth }
+    compareBinderRaw "projection-warm-cache-entry-guards"
+      (psKernelSessionCheck fuel { legacyWarm.snd with context := context } firstTerm)
+      (binderRaw fuel context dagWarm.fst firstRoot)
+  let secondType ← expect (psKernelSessionCheck 64 checker pairSecond)
+  require "projection-dependent-result-keeps-earlier-projection"
+    (psKernelExprEqual secondType.fst pairFirst)
+  for (term, message) in [
+      (PsKernelExpr.proj dataPropName 0 dataPropValue,
+        "invalid projection: proof structure field is not a proposition"),
+      (PsKernelExpr.proj dataPropName 1 dataPropValue,
+        "invalid projection: proof structure depends on data field")] do
+    require "projection-proof-structure-rejection"
+      (match psKernelSessionCheck 64 checker term with
+       | .error error => error == message | _ => false)
+  require "projection-external-owner-remains-fallback"
+    ((psKernelExprV2TryCheckWithFuel 64 checker.context arena firstRoot).isNone)
+  let whnf := psKernelExprV2TryWhnfStateWithFuel 64
+  let check := psKernelExprV2TryCheckCoreWithFuel 64 whnf
+  let context := psKernelExprV2CheckContextEmpty checker.context
+  require "projection-parameter-zero-budget"
+    (match psKernelExprV2CheckProjectionApplyParamsWithFuel 0
+        whnf context (stateFor arena) [] 0 0 firstRoot with
+     | some (.error error) => error == "kernel projection parameter budget exhausted"
+     | _ => false)
+  require "projection-field-zero-budget"
+    (match psKernelExprV2CheckProjectionSkipFieldsWithFuel 0
+        check whnf context (stateFor arena) pairName firstRoot false 0 0 firstRoot with
+     | some (.error error) => error == "kernel projection field budget exhausted"
+     | _ => false)
+  let sortBuilt ← expect (psKernelExprV2PagedMkSort arena .zero)
+  require "projection-sort-does-not-skip-whnf-budget"
+    (match psKernelExprV2CheckProjectionSortWith
+        (psKernelExprV2TryWhnfStateWithFuel 0) context
+        (stateFor sortBuilt.fst) sortBuilt.snd with
+     | some (.error error) => error == "kernel reduction budget exhausted"
+     | _ => false)
+  let emptyOfficial ← Lean.mkEmptyEnvironment
+  let mut official := emptyOfficial
+  for (inductName, levels, type, ctorType, numParams) in specifications do
+    let officialType ← projectionOfficialRequire type
+    let officialCtor ← projectionOfficialRequire ctorType
+    let declaration := Lean.Declaration.inductDecl
+      (levels.map quickOfficialName) numParams
+      [{ name := quickOfficialName inductName
+         type := officialType
+         ctors := [{ name := quickOfficialName (PsKernelName.str inductName "mk")
+                     type := officialCtor }] }] false
+    match official.addDeclCore 0 0 declaration none true with
+    | .error _ =>
+        throw (IO.userError
+          ("official Lean rejected projection inductive " ++ toString (quickOfficialName inductName)))
+    | .ok next => official := next
+  for (label, root, term) in roots do
+    let officialTerm ← projectionOfficialRequire term
+    let independent := psKernelDagCheckExpression execution.session [] .safe arena built
+      execution.declarations root term
+    match Lean.Kernel.check official {} officialTerm, independent with
+    | .error _, .error _ => pure ()
+    | .ok expected, .ok checked =>
+        let actual ← projectionOfficialRequire checked.type
+        require ("projection-official-type-" ++ label) (Lean.Expr.equal expected actual)
+    | _, _ => throw (IO.userError ("projection official outcome mismatch: " ++ label))
+  IO.println "PSC1_V2_DAG_OFFICIAL_CHECK_PROJECTION: PASS"
+  IO.println "PSC1_V2_DAG_CHECK_PROJECTION: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -1943,5 +2207,6 @@ def main : IO Unit := do
   mutualDeclarationIndexParity
   binderParity
   applicationCheckParity
+  projectionCheckParity
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

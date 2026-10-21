@@ -27,6 +27,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.CheckState,
     `Ps.KernelCore.Checker.ExprV2.CheckHelpers,
     `Ps.KernelCore.Checker.ExprV2.CheckApplication,
+    `Ps.KernelCore.Checker.ExprV2.CheckProjectionHelpers,
+    `Ps.KernelCore.Checker.ExprV2.CheckProjection,
     `Ps.KernelCore.Checker.ExprV2.Constant,
     `Ps.KernelCore.Checker.ExprV2.Check,
     `Ps.KernelCore.Checker.ExprV2.Terminal,

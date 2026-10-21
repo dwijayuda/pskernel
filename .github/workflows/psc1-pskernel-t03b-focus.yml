@@ -54,14 +54,16 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
+          proof_status=0
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean \
-            | tee "$RUNNER_TEMP/psc1-session-recursor-proofs.log"
+            | tee "$RUNNER_TEMP/psc1-session-recursor-proofs.log" || proof_status=1
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2QuotOwnerProofs.lean \
-            | tee "$RUNNER_TEMP/psc1-session-quot-proofs.log"
-          test "$(grep -c '^#print axioms ' test/PsKernelExprV2SessionProofs.lean)" -eq 12
+            | tee "$RUNNER_TEMP/psc1-session-quot-proofs.log" || proof_status=1
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2SessionProofs.lean)" -eq 13
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2SessionProofs.lean \
-            | tee "$RUNNER_TEMP/psc1-session-proofs.log"
+            | tee "$RUNNER_TEMP/psc1-session-proofs.log" || proof_status=1
           if grep -E 'sorryAx|ofReduceBool|Lean.trustCompiler' "$RUNNER_TEMP/psc1-session-proofs.log" "$RUNNER_TEMP/psc1-session-recursor-proofs.log" "$RUNNER_TEMP/psc1-session-quot-proofs.log"; then exit 1; fi
+          exit "$proof_status"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

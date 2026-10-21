@@ -249,20 +249,22 @@ theorem generated_late_command_error_prevents_batch_publication
     (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
     (arena : PsKernelExprV2PagedArena)
     (result : Prod PsKernelDagReply PsKernelDagExecutionState)
-    (installed : PsKernelDagGeneratedState) (error : PsKernelError)
+    (installed ready : PsKernelDagGeneratedState) (error : PsKernelError)
     (admitted : psKernelDagRunCommandWithSource input execution
       params safety arena built command = Except.ok result)
     (imported : psKernelDagGeneratedAfterCommandWithPrevious command
       execution.session.environment (Prod.snd result).session.environment
       (PsKernelDagGeneratedState.mk arena built (Prod.snd result).declarations) =
       Except.ok installed)
+    (completed : psKernelDagGeneratedDemandRange
+      (Prod.snd result).session.environment built.size installed = Except.ok ready)
     (failed : psKernelDagRunCommandsWithSource rest input
-      (PsKernelDagExecutionState.mk (Prod.snd result).session installed.declarations)
-      params safety installed.arena installed.built = Except.error error) :
+      (PsKernelDagExecutionState.mk (Prod.snd result).session ready.declarations)
+      params safety ready.arena ready.built = Except.error error) :
     psKernelDagRunCommandsWithSource (command :: rest) input execution
       params safety arena built = Except.error error := by
   rw [psKernelDagRunCommandsWithSource]
-  simp only [admitted, imported, failed]
+  simp only [admitted, imported, completed, failed]
 
 #print axioms generated_type_reuses_current_command_ref
 #print axioms generated_prefix_empty

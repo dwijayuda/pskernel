@@ -253,7 +253,8 @@ private def sessionOwnersRegression
     let (next,id) ← expect (psKernelExprV2PagedImportIntoChecked input term)
     input := next
     otherRoots := id :: otherRoots
-  let (input,sevenId) ← expect (psKernelExprV2PagedImportIntoChecked input seven)
+  let (finalInput,sevenId) ← expect (psKernelExprV2PagedImportIntoChecked input seven)
+  input := finalInput
   let built ← expect (psKernelExprV2DecodeChecked input)
   let installed ← expect (psKernelDagGeneratedFromSession session input built)
   require "session-demand-scoped-owner-count"

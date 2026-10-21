@@ -30,9 +30,10 @@ Latest pre-pivot HEAD1d5: scoped39552904242 SUCCESS; all3 whole-closure jobs
 [Tracked open performance defect](docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md)
 retains the original proven heap exhaustion, fusion correction and later timeout.
 
-Next development: close CompilerM all-target state/error/control coverage and
-finite versioned grammar×target receipt enforcement, then follow remaining
-Practical Core decisions. Preserve complete compiler sources, checker pins,
+Next development: continue remaining Practical Core decisions after the qualified
+CompilerM case contract below; prioritize genuine admitted Nat/Int Prop order
+and shared condition/decision architecture, bounded inference/pattern cases,
+practical IO capabilities and remaining backend/runtime obligations. Preserve complete compiler sources, checker pins,
 strict IR, exact ordinary pairing and all prior regression/refusal tests.
 Pivot G1 workflow39554231389 SUCCESS at implementationd5a1d66d9f0a1e6934656d330e5ad18db19cd409,
 tested merged331ff43895c656e1dfb1ef31cd3bc60f841e308. Both generated and
@@ -42,7 +43,30 @@ Artifacts12325240640/12324594397 now expire2027-01-19 (90days).
 Full scoped result is separate; the pre-next-commit run was cancelled by normal
 concurrency, so do not claim its completion. New Practical Core tests are pending.
 
-## Active Practical Core implementation — pending Linux qualification
+## Current qualified Practical Core checkpoint
+
+Implementation8ac752a7f3acfe696ee3e8cb1fe67398de040704, tested merge
+574d481a3c0f0f1259d73f929a04d9dc2217fad0. Full scoped39557245201 SUCCESS
+(all existing checks, minimum Python and installed packages).7 authored
+CompilerM cases ×2 grammars ×7 targets =98 obligations, plus14 on minimum
+Python3.14.8. Each executes both inputs; independent native observations,
+admission/strict IR, all4 new refusals and prior-publication preservation pass.
+The multi-export component is externally validated/WIT-compared and every
+selected wrapper actually invoked. Rust Cargo executes returned captured
+callbacks through product/Array/Option values with old captures intact.
+[Exact receipt](docs/PSC1_COMPILERM_QUALIFICATION_2026-10-21.json).
+
+Focused39557245308, native39557245196 and all3 complete closure jobs
+39557245275 SUCCESS. G1 run39557245225 passes all8 cases with the same
+5d30b555... service bytes; no G2 attempt. Artifact12326192682 retains exact
+G1 to2027-01-19. Broad families/public aggregate ABI/preservation remain open.
+
+Consolidator now requires exact-head normal/minimum CompilerM receipts and
+their complete contract matrix before issuing its scoped receipt; this
+additional bookkeeping is pending its next Linux run. Expensive profiles stay
+manual; the G2 diagnostic now references the fresh90-day preserved G1 artifact.
+
+## Earlier Practical Core implementation — pending at that time
 
 Add six independently authored Lean/PS CompilerM programs: reader/state/modify
 with old captures; finite-loop early return; typed failure skips continuation;

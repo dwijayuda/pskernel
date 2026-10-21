@@ -4,6 +4,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist/scoped-correctness');
 const read = relative => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
@@ -19,6 +20,21 @@ const library = read(distribution.optionalLibraryReceipt);
 const namespaceBoundaries = ['lean', 'ps'].map(syntax =>
   read('dist/scoped-correctness/namespace-boundaries/' + syntax + '.json'));
 const targets = ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'];
+
+const compilerMContract = read('docs/PSC1_COMPILERM_CASE_CONTRACT.json');
+const compilerM = read('dist/scoped-correctness/compiler-m/results.json');
+const minimumCompilerM = read('dist/scoped-correctness/compiler-m-python314/results.json');
+for (const [data, selectedTargets] of [[compilerM, targets], [minimumCompilerM, ['python']]]) {
+  assert.equal(data.schema, 'psc1-language-backend-execution/1');
+  assert.equal(data.contract, compilerMContract.id);
+  assert.equal(data.testedCommit, process.env.GITHUB_SHA || null);
+  assert.equal(data.branchHeadCommit, process.env.PSC1_HEAD_SHA || null);
+  assert.equal(data.checkerCommit, runtime.nativeLean.commit);
+  assert.equal(data.passed, true);
+  assert.deepEqual(data.failures, []);
+  assert.deepEqual(data.targets, selectedTargets);
+  checkLanguageBackendParity(compilerMContract, data.records, { targets: selectedTargets });
+}
 
 const typedErrors = read('dist/scoped-correctness/typed-errors/results.json');
 const minimumErrors = read('dist/scoped-correctness/typed-errors-python314/results.json');
@@ -284,6 +300,11 @@ const receipt = {
     runtimeBytes: x.runtime.runtimeBytes, runtimeSha256: x.runtime.runtimeSha256
   })),
   architectureFoundation: {
+    compilerM: { contract: compilerMContract.id, cases: compilerMContract.cases.map(row => row.id),
+      authoredGrammars: compilerMContract.grammars, caseGrammarTargetObligations: compilerM.records.length,
+      observationsPerObligation: 2, minimumPythonObligations: minimumCompilerM.records.length,
+      publicAbi: 'Bool-to-Bool observation wrappers', completeFamily: false,
+      evidence: 'compiler-m/results.json', minimumEvidence: 'compiler-m-python314/results.json' },
     typedErrors: { nativeObservations: typedErrors.nativeObservations,
       targetSourceBundles: typedErrors.records.length,
       refusalChecks: typedErrors.records.reduce((n, row) => n + row.refusals, 0),

@@ -65,6 +65,15 @@
       "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
       "runId": 39495181966,
       "receipt": "docs/PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json"
+    },
+    {
+      "id": "compiler-m-owned-callbacks-seven-target-case-contract",
+      "status": "qualified-selected-subset",
+      "implementationCommit": "8ac752a7f3acfe696ee3e8cb1fe67398de040704",
+      "testedMergeCommit": "574d481a3c0f0f1259d73f929a04d9dc2217fad0",
+      "runId": 39557245201,
+      "receipt": "docs/PSC1_COMPILERM_QUALIFICATION_2026-10-21.json",
+      "scope": "7 independently authored cases, both grammars, seven targets, minimum Python, returned owned callback data and explicit multi-export Bool components; full families incomplete"
     }
   ],
   "stages": [
@@ -170,9 +179,12 @@
         "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
         "psc1/packages/elab/src/Ps/Elab/DoFor.lean",
         "psc1/packages/elab/src/Ps/Elab/Data.lean",
-        "psc1/test/DataTests.lean"
+        "psc1/test/DataTests.lean",
+        "psc1/test/CompilerMFixtures.lean",
+        "psc1/test/CompilerMFixtures.ps",
+        "psc1/docs/PSC1_COMPILERM_CASE_CONTRACT.json"
       ],
-      "notes": "Type0 Id, Except and actual checked CompilerM share lexical mutation, branch continuations, early return, finite loops and contextual pure. CompilerM control/state sequencing has independent admission/IR plus private JS expected-value execution, not an all-seven native-oracle claim. Source while is restricted to selected ordinary Id/Except cases; general effects/handlers remain missing. Immutable product/Unit/wildcard let patterns now share the same controller; mutable and monadic patterns remain refused.",
+      "notes": "Type0 Id, Except and actual checked CompilerM share lexical mutation, branch continuations, early return, finite loops and contextual pure. CompilerM now has a finite seven-case authored both-grammar/seven-target contract with native Lean observations, admission, strict IR and actual individual target execution (including returned callback storage); this does not complete the full family. Source while is restricted to selected ordinary Id/Except cases; general effects/handlers remain missing. Immutable product/Unit/wildcard let patterns now share the same controller; mutable and monadic patterns remain refused.",
       "targets": {
         "js": "selected-cases-executed",
         "ts": "selected-cases-executed",
@@ -202,6 +214,13 @@
           "runId": 39467579973,
           "suite": "psc1_data_tests and runtime-conformance-tests.mjs",
           "scope": "Selected immutable pattern bindings preserve outer RHS scope, closure captures, mutation continuations and early return; native finite-loop interactions and both-grammar seven-target do-pattern predicates pass."
+        },
+        {
+          "implementationCommit": "8ac752a7f3acfe696ee3e8cb1fe67398de040704",
+          "testedMergeCommit": "574d481a3c0f0f1259d73f929a04d9dc2217fad0",
+          "runId": 39557245201,
+          "suite": "compiler-m-conformance-tests.mjs and finite parity validator",
+          "scope": "98 case/grammar/target obligations plus14 minimum Python; exact receipt above"
         }
       ]
     },

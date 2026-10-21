@@ -1,0 +1,209 @@
+{
+  "schema": "psc1-practical-compiler-m-qualification/1",
+  "implementationCommit": "8ac752a7f3acfe696ee3e8cb1fe67398de040704",
+  "testedMergeCommit": "574d481a3c0f0f1259d73f929a04d9dc2217fad0",
+  "runId": 39557245201,
+  "jobId": 119080110540,
+  "conclusion": "success",
+  "allScopedSteps": "passed",
+  "artifacts": [
+    {
+      "id": 12327155404,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyNzE1NTQwNA==",
+      "name": "psc1-scoped-correctness-574d481a3c0f0f1259d73f929a04d9dc2217fad0",
+      "size_in_bytes": 45756258,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12327155404",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12327155404/zip",
+      "expired": false,
+      "digest": "sha256:1159515b146cdfafd45ef0ae0bda395b0df61ef2d6748c8af9528903aeb2741e",
+      "created_at": "2026-10-21T06:52:56Z",
+      "updated_at": "2026-10-21T06:52:56Z",
+      "expires_at": "2026-11-04T06:52:53Z",
+      "workflow_run": {
+        "id": 39557245201,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-closure-normalization-20261021",
+        "head_sha": "8ac752a7f3acfe696ee3e8cb1fe67398de040704"
+      }
+    }
+  ],
+  "contract": {
+    "schema": "psc1-language-backend-case-contract/1",
+    "id": "compiler-m-selected-v1",
+    "completeFamily": false,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "targets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "cases": [
+      {
+        "id": "stateCase",
+        "features": [
+          "reader",
+          "state",
+          "modify",
+          "old-value-capture"
+        ]
+      },
+      {
+        "id": "earlyCase",
+        "features": [
+          "finite-range",
+          "state",
+          "mutation",
+          "early-return"
+        ]
+      },
+      {
+        "id": "failureCase",
+        "features": [
+          "typed-error",
+          "skipped-continuation"
+        ]
+      },
+      {
+        "id": "recoveryCase",
+        "features": [
+          "typed-recovery",
+          "state-rollback"
+        ]
+      },
+      {
+        "id": "readerCase",
+        "features": [
+          "reader-local-scope",
+          "state"
+        ]
+      },
+      {
+        "id": "unitCase",
+        "features": [
+          "unit-pattern",
+          "nested-product-pattern",
+          "do"
+        ]
+      },
+      {
+        "id": "callbackCase",
+        "features": [
+          "returned-owned-callback",
+          "old-value-capture",
+          "generic-product-field",
+          "array-callback-storage",
+          "option-callback-storage",
+          "optional-index"
+        ]
+      }
+    ],
+    "flags": [
+      false,
+      true
+    ],
+    "requiredRefusals": [
+      "wrong-state",
+      "wrong-error",
+      "verified",
+      "duplicate-prelude"
+    ]
+  },
+  "execution": {
+    "normalBundles": 14,
+    "caseGrammarTargetObligations": 98,
+    "observationsPerObligation": 2,
+    "minimumPythonBundles": 2,
+    "minimumPythonObligations": 14,
+    "nativeOracle": "exact Result/Effect library bodies; native Lean Monad syntax adapter; decimal Nat observations",
+    "logicalAdmission": "independent official Lean 4.35.0",
+    "strictIr": "production original and closed plan checks required",
+    "publicAbi": "Bool-to-Bool scalar observation wrappers",
+    "refusalsPerBundle": [
+      "wrong-state",
+      "wrong-error",
+      "duplicate-prelude",
+      "verified"
+    ],
+    "componentAdditionalRefusals": [
+      "duplicate-selection",
+      "non-entry-selection",
+      "empty-selection"
+    ],
+    "priorPublicationPreserved": true
+  },
+  "productionChanges": [
+    "Prelude-owned Prod/Option extended by stdlib helpers without duplicate definitions",
+    "Recursive Rust V(T)=Rc<dyn Fn(V(A)...) -> V(B) + static> across named types/arrays; existing outer Rc fields retained",
+    "Stored global functions use the same owned adapter as other values",
+    "Explicit entry-owned multi-export Bool components with existing schema/core/WIT/target checks"
+  ],
+  "otherRuns": {
+    "focused": 39557245308,
+    "native": 39557245196,
+    "wholeClosures": 39557245275,
+    "G1": 39557245225
+  },
+  "G1": {
+    "sameServiceSha256": "5d30b5552896fbe4f90eadc7cc71564a61bec7f586a6ef4f38deedfeb8456f6f",
+    "cases": 8,
+    "status": "passed",
+    "selfCompilation": "deferred-manual-qualification",
+    "artifacts": [
+      {
+        "id": 12326192682,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMyNjE5MjY4Mg==",
+        "name": "psc1-generated-compiler-574d481a3c0f0f1259d73f929a04d9dc2217fad0",
+        "size_in_bytes": 4790683,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12326192682",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12326192682/zip",
+        "expired": false,
+        "digest": "sha256:fbc0d95cdf5d76658f5d5af53233796e66604b489102cc986c0f6a0e8ba2f219",
+        "created_at": "2026-10-21T06:48:41Z",
+        "updated_at": "2026-10-21T06:48:41Z",
+        "expires_at": "2027-01-19T06:43:54Z",
+        "workflow_run": {
+          "id": 39557245225,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "8ac752a7f3acfe696ee3e8cb1fe67398de040704"
+        }
+      },
+      {
+        "id": 12325394419,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMyNTM5NDQxOQ==",
+        "name": "psc1-generated-session-boundary-574d481a3c0f0f1259d73f929a04d9dc2217fad0",
+        "size_in_bytes": 156232,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12325394419",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12325394419/zip",
+        "expired": false,
+        "digest": "sha256:a3fea2537c42b135037f029cadfc6f55141b7cccb8dc7999959c384b36e64ace",
+        "created_at": "2026-10-21T06:47:15Z",
+        "updated_at": "2026-10-21T06:47:15Z",
+        "expires_at": "2027-01-19T06:43:54Z",
+        "workflow_run": {
+          "id": 39557245225,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "8ac752a7f3acfe696ee3e8cb1fe67398de040704"
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "selected case contract only; all fourteen full families remain incomplete",
+    "Bool scalar observations do not qualify public aggregate/callback marshalling",
+    "general postfix field access on parenthesized expressions remains outside selected syntax",
+    "no formal backend preservation theorem",
+    "G2/G3 and fixed point remain deferred and unqualified"
+  ]
+}

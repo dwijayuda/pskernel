@@ -64,7 +64,7 @@ fs.writeFileSync(path.join(directory,'process.stderr.txt'),run.stderr||'');
 assert.equal(sha(fs.readFileSync(service)),serviceHash);
 assert.equal(sha(fs.readFileSync(input)),requestHash);
 const receipt={schema:'psc1-qualified-g1-cpu-profile/1',commit:process.env.GITHUB_SHA,
-  qualifiedG1Run:39551686967,qualifiedArtifact:12324336359,failedRequestRun:39551686967,
+  qualifiedG1Run:39557245225,qualifiedArtifact:12326192682,failedRequestRun:39551686967,
   serviceSha256:serviceHash,requestSha256:requestHash,node:process.version,
   nodeSha256:sha(fs.readFileSync(process.execPath)),runnerSha256:sha(fs.readFileSync(runner)),
   args,status:run.status,signal:run.signal,error:run.error?.message||null,

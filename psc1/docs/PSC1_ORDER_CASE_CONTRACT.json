@@ -72,6 +72,18 @@
         "typed-bool-equality",
         "unary-not-precedence"
       ]
+    },
+    {
+      "id": "intEqualityCase",
+      "features": [
+        "checked-signed-Boolean-equality",
+        "opposite-signs",
+        "zero",
+        "equal-negative-magnitudes",
+        "unequal-negative-magnitudes",
+        "beyond-64-bit",
+        "strict-left-before-right-operand-lets"
+      ]
     }
   ],
   "flags": [

@@ -43,3 +43,14 @@ divergence, partial pairing and recursion, product patterns and identity,
 Array operations/evaluation order, and namespace identity/ownership.
 They must acquire complete executable evidence without weakening their meaning.
 G2/G3 stay deferred until all criteria/applications qualify and feature freeze.
+
+## Signed equality diagnosis
+
+Run 39679904247 exposes missing Int Boolean equality in numericCase.
+The shared elaborator now expands signed ==/!= into constructive checked order
+decisions, retaining each operand under one strict Core let, left before right.
+Nat/Bool behavior and mixed-type refusal remain. No new logical axiom or
+backend intrinsic is introduced. Fifty native true/false conversion boundaries
+and a seventh authored order case cover signed/zero/equal/unequal/huge inputs.
+The current complete order matrix is 98 obligations; prior six-case counts
+describe the first unqualified acceptance source. Fresh Linux CI is required.

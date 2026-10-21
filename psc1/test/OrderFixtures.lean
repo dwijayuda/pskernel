@@ -67,3 +67,14 @@ def shortCircuitCase (flag : Bool) : Nat :=
   if andValue == flag && orValue == flag && negated then
     if flag then 17 else 19
   else 0
+
+def intEqualityCase (flag : Bool) : Nat :=
+  let left : Int := if flag then -184467440737095516160 else 0;
+  let right : Int := if flag then -184467440737095516160 else 1;
+  let minusOne : Int := -1;
+  let minusTwo : Int := -2;
+  let plusOne : Int := 1;
+  (if left == right then 1 else 2) +
+    (if left != right then 4 else 8) +
+    (if minusOne == plusOne then 16 else 32) +
+    (if minusOne == minusTwo then 64 else 128)

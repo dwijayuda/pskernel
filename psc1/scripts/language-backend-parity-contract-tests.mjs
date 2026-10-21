@@ -72,12 +72,12 @@ for(const mutation of [{applicationModuleSha256:{}},{applicationBoundaryChecks:[
  assert.throws(()=>check(library,[{...libraryRows[0],...mutation},...libraryRows.slice(1)]));
 
 const orderContract=JSON.parse(fs.readFileSync('docs/PSC1_ORDER_CASE_CONTRACT.json','utf8'));
-assert.deepEqual(orderContract.cases.map(c=>c.id),['natOrderCase','intOrderCase','largeOrderCase','controlOrderCase','numericCase','shortCircuitCase']);
+assert.deepEqual(orderContract.cases.map(c=>c.id),['natOrderCase','intOrderCase','largeOrderCase','controlOrderCase','numericCase','shortCircuitCase','intEqualityCase']);
 const orderRows=orderContract.cases.flatMap(c=>orderContract.grammars.flatMap(s=>orderContract.targets.map(t=>({
  ...rows[0],id:c.id,syntax:s,target:t,librarySha256:Object.fromEntries(orderContract.oracleLibraries.map(key=>[key,digest])),
  refusals:Object.fromEntries(orderContract.requiredRefusals.map(id=>[id,digest]))
 }))));
-assert.equal(check(orderContract,orderRows).obligations,84);
+assert.equal(check(orderContract,orderRows).obligations,98);
 assert.throws(()=>check(orderContract,[{...orderRows[0],refusals:{}},...orderRows.slice(1)]));
 const inferenceContract=JSON.parse(fs.readFileSync('docs/PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json','utf8'));
 assert.deepEqual(inferenceContract.cases.map(c=>c.id),['contextsCase','telescopeCase','ownerCase','loopCase','scopeCase','rollbackCase','callCase','ownerLambdaCase','joinsCase','handlerScopeCase']);

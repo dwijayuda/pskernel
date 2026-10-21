@@ -268,3 +268,19 @@ Each expected component trap now runs in its own fresh process/store, retaining
 both exact trap assertions, both source grammars and all existing IO effects.
 The corrected acceptance group remains unqualified pending fresh Linux CI.
 The prior full qualified source remains 81824afb and its permanent receipt.
+
+## Checked signed equality continuation
+
+Source 27817c3e78d5f624ccb42308272384a36b940313, run 39679904247 passes
+static, native and both grammars of the isolated core/component foreign-error
+probes. Focused execution then refuses numericCase in both grammars before
+publication: Boolean == accepted Nat/Bool but not Int. This is a shared
+elaboration gap, not a backend or application fixture error.
+Int ==/!= now use two constructive checked Int order decisions and strict
+left/right Core lets. No logical axiom, builtin runtime equality shortcut or
+mixed-domain conversion is added. Fifty independent pinned-kernel true/false
+conversion boundaries and strict operand-let checks supplement an actual
+signed/zero/huge equality case on both source surfaces. Order grows to seven
+cases (98 complete obligations). Earlier 84-obligation wording is historical.
+This correction and the bounded acceptance group remain unqualified until
+fresh Linux gates. Keep the original numeric acceptance fixture unchanged.

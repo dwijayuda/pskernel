@@ -67,8 +67,49 @@ private def orderBoundaries : IO Unit := do
         orderWitness environment relation (integerCore left) (integerCore right) expected
   IO.println "PSC1_ORDER_KERNEL_BOUNDARIES: PASS 136 independent native truth/false inhabitation checks"
 
+private def integerEqualityBoundary (environment : Lean.Environment)
+    (left right : Int) (expected : Bool) : IO Unit := do
+  let actual := psOperatorIntEquality (integerCore left) (integerCore right)
+  let boolType := PsExpr.constE psBoolName []
+  let target := PsExpr.constE (if expected then psBoolTrueName else psBoolFalseName) []
+  let predicateType := PsExpr.forallE (psRootName "index") boolType
+    (.sortE (.succ .zero)) .explicit
+  let premise := PsExpr.app (.bvar 0) target
+  let conclusion := PsExpr.app (.bvar 1) (psExprLiftBVars 2 0 actual)
+  let type := PsExpr.forallE (psRootName "P") predicateType
+    (.forallE (psRootName "h") premise conclusion .explicit) .explicit
+  let value := PsExpr.lam (psRootName "P") predicateType
+    (.lam (psRootName "h") premise (.bvar 0) .explicit) .explicit
+  let declaration := PsDeclaration.definitionDecl (psRootName "integerEqualityBoundary") [] type value
+  let converted ← match PsKernelLean.toLeanPreludeDeclaration [declaration] declaration with
+    | .ok (some value) => pure value
+    | _ => throw (IO.userError "integer equality conversion failed")
+  let correct := left == right
+  match environment.addDeclCore 2000000 20000 converted none true with
+  | .ok _ => require (expected == correct) "incorrect signed equality result admitted"
+  | .error _ => require (expected != correct) "correct signed equality result refused"
+
+private def integerEqualityBoundaries : IO Unit := do
+  let environment ← match ← PsKernelLean.buildLeanPreludeEnvironment with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error.message)
+  for left in [(-2 : Int), -1, 0, 1, 2] do
+    for right in [(-2 : Int), -1, 0, 1, 2] do
+      integerEqualityBoundary environment left right true
+      integerEqualityBoundary environment left right false
+  let left := PsExpr.app (.constE (psRootName "leftOperand") []) (.constE psUnitUnitName [])
+  let right := PsExpr.app (.constE (psRootName "rightOperand") []) (.constE psUnitUnitName [])
+  match psOperatorIntEquality left right with
+  | .letE _ _ first (.letE _ _ second _) =>
+      require (psExprAlphaEq first left) "signed equality changed left operand ownership"
+      require (psExprAlphaEq second (psExprLiftBVars 1 0 right))
+        "signed equality changed right operand order or scope"
+  | _ => throw (IO.userError "signed equality lost its strict operand lets")
+  IO.println "PSC1_INT_EQUALITY_KERNEL_BOUNDARIES: PASS 50 true/false conversion checks and strict operand lets"
+
 def main : IO Unit := do
   orderBoundaries
+  integerEqualityBoundaries
   same .lean "def answer : Nat := 2 + 3 * 4\n"
     "def answer : Nat := Nat.add 2 (Nat.mul 3 4)\n"
   same .proofScript "def answer : Nat := 2 + 3 * 4\n"
@@ -105,6 +146,10 @@ def main : IO Unit := do
     | _ => throw (IO.userError "unexpected equality declaration shape")
   let _ ← prepare .lean "def answer : Bool := !(1 == 2) && true || false\n"
   let _ ← prepare .proofScript "def answer : Bool := !false == true\n"
+  let _ ← prepare .lean "def answer (left right : Int) : Bool := left == right\n"
+  let _ ← prepare .proofScript "def answer(left : Int, right : Int) : Bool := left != right\n"
+  rejected .lean "def bad (left : Int) (right : Nat) : Bool := left == right\n"
+  rejected .proofScript "def bad(left : Int) : Bool := left == true\n"
   rejected .lean "def bad : Nat := true + 1\n"
   rejected .proofScript "def bad : Bool := 1 = 2\n"
   rejected .lean "def bad : Bool := 1 == 2 == 3\n"

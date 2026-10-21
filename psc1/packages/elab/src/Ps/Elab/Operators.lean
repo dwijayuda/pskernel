@@ -96,10 +96,32 @@ def psElabUnaryOperator
           (PsExpr.app (PsExpr.constE psIntNegName []) value.term) expected
   else Except.error PsElabError.unsupportedTerm
 
+-- Signed Boolean equality reuses the checked total order decisions. Strict
+-- Core lets preserve one evaluation of each operand, in source order.
+def psOperatorDecisionIte (proposition decision yes no : PsExpr) : PsExpr :=
+  psExprApplyMany (PsExpr.constE psIteName [PsLevel.succ PsLevel.zero])
+    [PsExpr.constE psBoolName [], proposition, decision, yes, no]
+
+def psOperatorIntEquality (left right : PsExpr) : PsExpr :=
+  let intType := PsExpr.constE psIntName [];
+  let x := PsExpr.bvar 1;
+  let y := PsExpr.bvar 0;
+  let yes := PsExpr.constE psBoolTrueName [];
+  let no := PsExpr.constE psBoolFalseName [];
+  let reverse := psOperatorDecisionIte
+    (psOperatorApply psIntLeName y x) (psOperatorApply psIntDecLeName y x) yes no;
+  let body := psOperatorDecisionIte
+    (psOperatorApply psIntLeName x y) (psOperatorApply psIntDecLeName x y) reverse no;
+  PsExpr.letE (psRootName "_psc1IntEqLeft") intType left
+    (PsExpr.letE (psRootName "_psc1IntEqRight") intType
+      (psExprLiftBVars 1 0 right) body)
+
 def psOperatorEqualityTerm (name : PsName) (operands : PsElabOperatorOperands) :
     Except PsElabError PsExpr :=
   if psNameEq name psNatName then
     Except.ok (psOperatorApply psNatBeqName operands.left operands.right)
+  else if psNameEq name psIntName then
+    Except.ok (psOperatorIntEquality operands.left operands.right)
   else if psNameEq name psBoolName then
     Except.ok (psOperatorBoolIte operands.left operands.right
       (psOperatorBoolIte operands.right

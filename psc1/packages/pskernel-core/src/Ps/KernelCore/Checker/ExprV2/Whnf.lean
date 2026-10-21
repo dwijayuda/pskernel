@@ -2,22 +2,25 @@ import Ps.KernelCore.Checker.ExprV2.Beta
 import Ps.KernelCore.Checker.ExprV2.Nat
 import Ps.KernelCore.Checker.ExprV2.Projection
 import Ps.KernelCore.Checker.ExprV2.Delta
+import Ps.KernelCore.Checker.ExprV2.Quot
+import Ps.KernelCore.Checker.ExprV2.Recursor
 
 /-
 Checked DAG WHNF for terminal/metadata/beta/zeta, inert applications,
-constructor projection, Nat and declarations admitted in the same checked batch.
+constructor projection, Nat, Quot, owned non-K constructor iota and same-batch
+admitted definitions.
 
 The operation owns distinct core/public caches in one append-only arena.
-A core entry checks fuel and depth before syntax/cache. A public entry keeps
+Core entry checks fuel and depth before syntax/cache. Public entry keeps
 the original terminal/metadata ordering and checks its cache before core.
-The public callback supplied to core remains fixed during core recursion;
-both function/result core calls consume the original predecessor budget.
+The public and recursor callbacks remain fixed during structural recursion;
+function/result core calls consume the original predecessor budget.
 
-Only admitted environment variants and scalar constructor metadata are read.
-Definitions absent from the batch index, active recursors/Quot, mixed legacy
-typed-local contexts and String literal constructor expansion explicitly request
-original-checker fallback. Typed local let values use the owning arena. No legacy expression is imported by these workers. Public entry
-creates empty caches; the public result never exports semantic cache state.
+Quot uses the separately owned bounded-recursor callback, with its own
+predecessor public-WHNF and recursor budgets, exactly as the reference knot.
+K/structure recursor conversion, missing generated-rule owners, absent owning
+definition bodies, mixed legacy typed-local contexts and String expansion request
+the complete original operation. No recursive expression is imported here.
 -/
 
 def psKernelExprV2WhnfCoreFinishMode
@@ -84,9 +87,11 @@ def psKernelExprV2TryWhnfProjectionWith
                         psKernelExprV2WhnfFinishAttempt root cheapProj
                           (recurse context next value)
 
-def psKernelExprV2TryWhnfAppWith
+def psKernelExprV2TryWhnfAppWithReducer
     (recurse : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (reduceRecursor : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))))
     (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
     (root : Nat) (cheapProj : Bool) :
     Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
@@ -128,9 +133,17 @@ def psKernelExprV2TryWhnfAppWith
                       | Except.error error => Option.some (Except.error error)
                       | Except.ok unchanged =>
                           if unchanged then
-                            if psKernelExprV2WhnfRecursorInert context fnEntry.node then
-                              Option.some (Except.ok (Prod.mk fnState root))
-                            else Option.none
+                            match reduceRecursor context fnState root cheapProj with
+                            | Option.none => Option.none
+                            | Option.some attemptedReduction =>
+                                match attemptedReduction with
+                                | Except.error error => Option.some (Except.error error)
+                                | Except.ok reduced =>
+                                    match Prod.snd reduced with
+                                    | Option.none =>
+                                        Option.some (Except.ok (Prod.mk (Prod.fst reduced) root))
+                                    | Option.some value =>
+                                        recurse context (Prod.fst reduced) value
                           else
                             match psKernelExprV2TransformApplyArgsOnCanonical
                                 (Prod.snd spine) fnState.arena fn with
@@ -142,11 +155,13 @@ def psKernelExprV2TryWhnfAppWith
                                       (Prod.fst rebuilt))
                                     (Prod.snd rebuilt))
 
-def psKernelExprV2TryWhnfCompositeWith
+def psKernelExprV2TryWhnfCompositeWithReducer
     (recurse : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
     (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (reduceRecursor : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))))
     (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
     (root : Nat) (entry : PsKernelExprV2Entry) (cheapProj : Bool) :
     Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
@@ -165,14 +180,16 @@ def psKernelExprV2TryWhnfCompositeWith
       psKernelExprV2TryWhnfProjectionWith
         recurse publicWhnf context state root typeName index structValue cheapProj
   | PsKernelExprV2Node.app _ _ =>
-      psKernelExprV2TryWhnfAppWith recurse context state root cheapProj
+      psKernelExprV2TryWhnfAppWithReducer recurse reduceRecursor context state root cheapProj
   | _ => Option.none
 
-def psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel
+def psKernelExprV2TryWhnfCoreModeWithReducerFuel
     (fuel : Nat) :
     Bool -> (PsKernelName -> Option Nat) ->
     (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
       Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat)))) ->
     PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
     Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
   match fuel with
@@ -180,6 +197,8 @@ def psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel
       fun (_cheapProj : Bool) (_localValue : PsKernelName -> Option Nat)
           (_publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
           Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_reduceRecursor : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+            Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))))
           (_context : PsKernelCheckerContext)
           (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
         Option.some (Except.error "kernel reduction budget exhausted")
@@ -187,13 +206,15 @@ def psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel
       fun (cheapProj : Bool) (localValue : PsKernelName -> Option Nat)
           (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
           Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (reduceRecursor : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+            Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))))
           (context : PsKernelCheckerContext)
           (state : PsKernelExprV2WhnfState) (root : Nat) =>
         let smaller :=
           fun (nextContext : PsKernelCheckerContext)
               (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-            let recur := psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel remaining;
-            recur cheapProj localValue publicWhnf nextContext nextState nextRoot;
+            let recur := psKernelExprV2TryWhnfCoreModeWithReducerFuel remaining;
+            recur cheapProj localValue publicWhnf reduceRecursor nextContext nextState nextRoot;
         match psKernelCheckerContextEnterRecDepth context with
         | Except.error error => Option.some (Except.error error)
         | Except.ok nextContext =>
@@ -226,59 +247,10 @@ def psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel
                         match cached with
                         | Option.some result => Option.some (Except.ok (Prod.mk state result))
                         | Option.none =>
-                            psKernelExprV2TryWhnfCompositeWith
-                              smaller publicWhnf nextContext state root entry cheapProj
+                            psKernelExprV2TryWhnfCompositeWithReducer
+                              smaller publicWhnf reduceRecursor nextContext state root entry cheapProj
 
 /- Compatibility wrapper keeps the existing staged core entry and full policy. -/
-def psKernelExprV2TryWhnfCoreWithLocalValuesFuel
-    (fuel : Nat) :
-    (PsKernelName -> Option Nat) ->
-    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
-    PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
-  match fuel with
-  | Nat.zero =>
-      fun (_localValue : PsKernelName -> Option Nat)
-          (_publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-            Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-          (_context : PsKernelCheckerContext)
-          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
-        Option.some (Except.error "kernel reduction budget exhausted")
-  | Nat.succ remaining =>
-      fun (localValue : PsKernelName -> Option Nat)
-          (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-            Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-          (context : PsKernelCheckerContext)
-          (state : PsKernelExprV2WhnfState) (root : Nat) =>
-        psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel (Nat.succ remaining)
-          false localValue publicWhnf context state root
-
-def psKernelExprV2NoLocalValue
-    (_name : PsKernelName) : Option Nat :=
-  Option.none
-
-def psKernelExprV2TryWhnfCoreWithPublicFuel
-    (fuel : Nat) :
-    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
-    PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
-  match fuel with
-  | Nat.zero =>
-      fun (_publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-          (_context : PsKernelCheckerContext)
-          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
-        Option.some (Except.error "kernel reduction budget exhausted")
-  | Nat.succ remaining =>
-      fun (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-          (context : PsKernelCheckerContext)
-          (state : PsKernelExprV2WhnfState) (root : Nat) =>
-        psKernelExprV2TryWhnfCoreWithLocalValuesFuel (Nat.succ remaining)
-          psKernelExprV2NoLocalValue publicWhnf context state root
-
 def psKernelExprV2WhnfPublicFinishAttempt
     (source : Nat)
     (attempt : Option (Except String (Prod PsKernelExprV2WhnfState Nat))) :
@@ -348,31 +320,37 @@ def psKernelExprV2TryWhnfPublicNonterminalWith
                   psKernelExprV2TryWhnfAfterCoreWith
                     publicWhnf context (Prod.fst reduced) root (Prod.snd reduced)
 
-def psKernelExprV2TryWhnfStateWithLocalValuesFuel
+def psKernelExprV2TryWhnfStateWithReducerFuel
     (fuel : Nat) :
+    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat)))) ->
     (PsKernelName -> Option Nat) ->
     PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
     Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
   match fuel with
   | Nat.zero =>
-      fun (_localValue : PsKernelName -> Option Nat)
+      fun (_reduceRecursor : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+            Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))))
+          (_localValue : PsKernelName -> Option Nat)
           (_context : PsKernelCheckerContext)
           (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
         Option.some (Except.error "kernel reduction budget exhausted")
   | Nat.succ remaining =>
-      fun (localValue : PsKernelName -> Option Nat)
+      fun (reduceRecursor : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+            Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))))
+          (localValue : PsKernelName -> Option Nat)
           (context : PsKernelCheckerContext)
           (state : PsKernelExprV2WhnfState) (root : Nat) =>
         let smaller :=
           fun (nextContext : PsKernelCheckerContext)
               (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-            let recur := psKernelExprV2TryWhnfStateWithLocalValuesFuel remaining;
-            recur localValue nextContext nextState nextRoot;
+            let recur := psKernelExprV2TryWhnfStateWithReducerFuel remaining;
+            recur reduceRecursor localValue nextContext nextState nextRoot;
         let core :=
           fun (nextContext : PsKernelCheckerContext)
               (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) =>
-            let worker := psKernelExprV2TryWhnfCoreWithLocalValuesFuel remaining;
-            worker localValue smaller nextContext nextState nextRoot;
+            let worker := psKernelExprV2TryWhnfCoreModeWithReducerFuel remaining;
+            worker false localValue smaller reduceRecursor nextContext nextState nextRoot;
         match psKernelExprV2PagedRequire state.arena root with
         | Except.error error => Option.some (Except.error error)
         | Except.ok entry =>
@@ -398,6 +376,182 @@ def psKernelExprV2TryWhnfStateWithLocalValuesFuel
             | _ =>
                 psKernelExprV2TryWhnfPublicNonterminalWith
                   smaller core context state root entry
+
+/- The recursor callback has its own fixed owner. Structural/public WHNF
+   recursion never decrements this callback's budget. Entering this callback
+   spends exactly one predecessor before normalizing a Quot major premise. -/
+def psKernelExprV2TryReduceRecursorWithLocalValuesFuel
+    (fuel : Nat) :
+    (PsKernelName -> Option Nat) ->
+    PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_localValue : PsKernelName -> Option Nat)
+          (_context : PsKernelCheckerContext) (_state : PsKernelExprV2WhnfState)
+          (_root : Nat) (_cheapProj : Bool) =>
+        Option.some (Except.error "kernel recursor budget exhausted")
+  | Nat.succ remaining =>
+      fun (localValue : PsKernelName -> Option Nat)
+          (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+          (root : Nat) (_cheapProj : Bool) =>
+        let reducer :=
+          fun (nextContext : PsKernelCheckerContext) (nextState : PsKernelExprV2WhnfState)
+              (nextRoot : Nat) (nextCheapProj : Bool) =>
+            let recur := psKernelExprV2TryReduceRecursorWithLocalValuesFuel remaining;
+            recur localValue nextContext nextState nextRoot nextCheapProj;
+        let publicWhnf :=
+          fun (nextContext : PsKernelCheckerContext) (nextState : PsKernelExprV2WhnfState)
+              (nextRoot : Nat) =>
+            let worker := psKernelExprV2TryWhnfStateWithReducerFuel remaining;
+            worker reducer localValue nextContext nextState nextRoot;
+        match psKernelExprV2TryReduceQuotWith publicWhnf context state root with
+        | Option.none => Option.none
+        | Option.some attempted =>
+            match attempted with
+            | Except.error error => Option.some (Except.error error)
+            | Except.ok reduced =>
+                match Prod.snd reduced with
+                | Option.some _ => Option.some (Except.ok reduced)
+                | Option.none =>
+                    psKernelExprV2TryReduceInductiveRecursor
+                      publicWhnf context (Prod.fst reduced) root
+
+/- Compatibility helpers have no fuel owner argument. They preserve their
+   earlier explicit refusal of active reduction and delegate structural work
+   to the same implementation used by the owned checker. -/
+def psKernelExprV2WhnfInertRecursor
+    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+    (root : Nat) (_cheapProj : Bool) :
+    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+  match psKernelExprV2TransformAppSpineOnCanonical state.arena root with
+  | Except.error error => Option.some (Except.error error)
+  | Except.ok spine =>
+      match psKernelExprV2PagedRequire state.arena (Prod.fst spine) with
+      | Except.error error => Option.some (Except.error error)
+      | Except.ok head =>
+          if psKernelExprV2WhnfRecursorInert context head.node then
+            Option.some (Except.ok (Prod.mk state Option.none))
+          else Option.none
+
+def psKernelExprV2TryWhnfAppWith
+    (recurse : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+    (root : Nat) (cheapProj : Bool) :
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  psKernelExprV2TryWhnfAppWithReducer recurse psKernelExprV2WhnfInertRecursor
+    context state root cheapProj
+
+def psKernelExprV2TryWhnfCompositeWith
+    (recurse : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+    (root : Nat) (entry : PsKernelExprV2Entry) (cheapProj : Bool) :
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  psKernelExprV2TryWhnfCompositeWithReducer recurse publicWhnf psKernelExprV2WhnfInertRecursor
+    context state root entry cheapProj
+
+def psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel
+    (fuel : Nat) :
+    Bool -> (PsKernelName -> Option Nat) ->
+    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_cheapProj : Bool) (_localValue : PsKernelName -> Option Nat)
+          (_publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+    fun (cheapProj : Bool) (localValue : PsKernelName -> Option Nat)
+        (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+        (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
+      let reducer :=
+        fun (nextContext : PsKernelCheckerContext) (nextState : PsKernelExprV2WhnfState)
+            (nextRoot : Nat) (nextCheapProj : Bool) =>
+          let worker := psKernelExprV2TryReduceRecursorWithLocalValuesFuel (Nat.succ remaining);
+          worker localValue nextContext nextState nextRoot nextCheapProj;
+      psKernelExprV2TryWhnfCoreModeWithReducerFuel (Nat.succ remaining)
+        cheapProj localValue publicWhnf reducer context state root
+
+def psKernelExprV2TryWhnfCoreWithLocalValuesFuel
+    (fuel : Nat) :
+    (PsKernelName -> Option Nat) ->
+    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_localValue : PsKernelName -> Option Nat)
+          (_publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+            Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+      fun (localValue : PsKernelName -> Option Nat)
+          (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+            Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (context : PsKernelCheckerContext)
+          (state : PsKernelExprV2WhnfState) (root : Nat) =>
+        psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel (Nat.succ remaining)
+          false localValue publicWhnf context state root
+
+def psKernelExprV2NoLocalValue
+    (_name : PsKernelName) : Option Nat :=
+  Option.none
+
+def psKernelExprV2TryWhnfCoreWithPublicFuel
+    (fuel : Nat) :
+    (PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+      fun (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (context : PsKernelCheckerContext)
+          (state : PsKernelExprV2WhnfState) (root : Nat) =>
+        psKernelExprV2TryWhnfCoreWithLocalValuesFuel (Nat.succ remaining)
+          psKernelExprV2NoLocalValue publicWhnf context state root
+
+/- Public staged ABI and original entry budget are retained. -/
+def psKernelExprV2TryWhnfStateWithLocalValuesFuel
+    (fuel : Nat) :
+    (PsKernelName -> Option Nat) ->
+    PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+    Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_localValue : PsKernelName -> Option Nat)
+          (_context : PsKernelCheckerContext)
+          (_state : PsKernelExprV2WhnfState) (_root : Nat) =>
+        Option.some (Except.error "kernel reduction budget exhausted")
+  | Nat.succ remaining =>
+    fun (localValue : PsKernelName -> Option Nat)
+        (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState) (root : Nat) =>
+      let reducer :=
+        fun (nextContext : PsKernelCheckerContext) (nextState : PsKernelExprV2WhnfState)
+            (nextRoot : Nat) (nextCheapProj : Bool) =>
+          let worker := psKernelExprV2TryReduceRecursorWithLocalValuesFuel (Nat.succ remaining);
+          worker localValue nextContext nextState nextRoot nextCheapProj;
+      psKernelExprV2TryWhnfStateWithReducerFuel (Nat.succ remaining) reducer localValue context state root
 
 def psKernelExprV2TryWhnfStateWithFuel
     (fuel : Nat) :

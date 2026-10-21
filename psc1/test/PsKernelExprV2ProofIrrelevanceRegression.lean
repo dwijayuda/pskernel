@@ -256,11 +256,37 @@ private def regression : IO Unit := do
     (match psKernelExprV2TryCheckStateWithFuel 64 context rawUnchecked.fst uncheckedId,
         psKernelCheckerCheck 64 base.context psKernelCheckerStateEmpty unchecked with
      | some (.error a), .error b => a == b | _, _ => false)
-  require "non-proposition-retains-lazy-delta-fallback"
-    (psKernelExprV2TryDefEqStateWithFuel 64 context cold nonLeftId nonRightId).isNone
-  require "unsupported-descendant-discards-whole-proof-attempt"
-    (psKernelExprV2TryDefEqStateWithFuel 64 context cold leftId distinctId).isNone
-  require "unsupported-descendant-public-negative-parity"
+  let terminalCases := [
+    ("non-proposition-terminal-false", cn "nonProofLeft", cn "nonProofRight", nonLeftId, nonRightId),
+    ("different-proposition-terminal-false", p, cn "proofQRight", leftId, distinctId)]
+  let mut terminalComparisons := 0
+  for (label, left, right, leftRoot, rightRoot) in terminalCases do
+    require label
+      (match psKernelExprV2TryDefEqStateWithFuel 64 context cold leftRoot rightRoot with
+       | some (.ok result) => !result.snd
+       | _ => false)
+    for fuel in [0,1,2,3,4,5,6,8,16,64] do
+      for maxRecDepth in [0,1,2] do
+        for recDepth in [0,15,16] do
+          let scalar := { base.context with maxRecDepth := maxRecDepth, recDepth := recDepth }
+          compare (label ++ "-fixed-resource-parity")
+            (psKernelIsDefEqWithFuel fuel scalar psKernelCheckerStateEmpty left right)
+            (psKernelExprV2TryDefEqStateWithFuel fuel
+              (psKernelExprV2CheckContextEmpty scalar) cold leftRoot rightRoot)
+          terminalComparisons := terminalComparisons + 1
+    let some officialLeft := inferOfficialExpr left
+      | throw (IO.userError "official terminal left conversion")
+    let some officialRight := inferOfficialExpr right
+      | throw (IO.userError "official terminal right conversion")
+    require (label ++ "-official-valid-operands")
+      ((match Lean.Kernel.check official {} officialLeft with | .ok _ => true | _ => false) &&
+        (match Lean.Kernel.check official {} officialRight with | .ok _ => true | _ => false))
+    require (label ++ "-official-false")
+      (match Lean.Kernel.isDefEq official {} officialLeft officialRight with
+       | .ok false => true | _ => false)
+  require "terminal-comparison-matrix-count" (terminalComparisons == 180)
+  IO.println "PSC1_V2_DAG_PROOF_IRRELEVANCE_TERMINAL: PASS comparisons=180 official=2"
+  require "different-proposition-public-negative-parity"
     (samePublic (psKernelV1IsDefEq session [] .safe p (cn "proofQRight"))
       (psKernelV1RunDag session [] .safe owning [.isDefEq leftId distinctId]))
   require "missing-owning-index-retains-fallback"

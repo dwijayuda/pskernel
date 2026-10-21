@@ -29,9 +29,11 @@ entry fuel/depth guards, exact syntax/success-cache checks, the existing quick a
 binder-spine prefix, mandatory cheap core normalization, proof irrelevance, then
 the ordered natural-number prefix and the complete definition-selection/lazy-delta
 loop. The full-shape successor adds residual core WHNF, application/list and
-function-eta/binder/sort/literal rules under the same owner. Matching projections
-and structure/string/unit terminal rules still decline. This successor requires
-fresh qualification;480 is the latest terminal-green scoped developer checkpoint.
+function-eta/binder/sort/literal rules under the same owner. The isolated staged successor adds matching projections and structure/String/unit
+terminal rules; exact native/generated qualification is still in progress.
+Integration889 is the latest terminal-green scoped developer checkpoint.
+The complete CheckState callback-carrier migration is isolated separately on
+research/psc1-pskernel-v2-carrier-20261021 and is not promoted by this document.
 The callbacks use the exact predecessor fuel chosen by the owner; the loop
 spends only its own recursive bound. The Nat lazy stage retains its separate
 entry-fuel guard; predecessor comparison does not add another depth entry.
@@ -60,14 +62,15 @@ the complete original operation's resources and failure semantics.
 | Site | Trigger and remaining work |
 | --- | --- |
 | `API/Dag.lean: psKernelDagCheckTerminalOrOriginal` | General checking/inference outside the supported owning DAG rules, including missing owning external type/recursor references |
-| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including general recursor/iota/Quot paths |
-| `API/Dag.lean: psKernelDagIsDefEq` | Residual lazy projection, full-shape/final eta/congruence and unsupported descendant callbacks; definition selection and the ordered lazy-delta loop now have a DAG path |
+| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including K, unfinished structure/String major normalization and missing owning references; Quot and ordinary constructor-major non-K iota are implemented in the isolated staged source |
+| `API/Dag.lean: psKernelDagIsDefEq` | Unsupported descendant callbacks or missing owning references; the staged source now has ordered prefix, lazy delta/projection, full-shape and terminal DAG paths |
 | `API/DagAdmission.lean: psKernelDagAdmitDeclaration` | Inductive construction/admission and declaration cases not handled by direct admission |
 
 Before these sites run, `psKernelV1RunDag` still decodes the validated arena once.
 Supported operation results may decode newly appended nodes for the existing
-public recursive-expression result type. Static admission guards still read
-boundary-decoded recursive expressions. These are acknowledged representation
+public recursive-expression result type. Static admission guards in the staged source scan the canonical DAG with
+operation-owned visited state; the initial public decode and whole-operation
+admission fallback remain. These are acknowledged representation
 migration costs; the kernel is **not** a complete DAG-native V2 replacement.
 
 The separately selectable V1 checker remains the semantic oracle. Its inference
@@ -106,7 +109,8 @@ do not establish a whole-kernel speedup. Construction and memory regressions
 remain visible in [the measured checkpoint report](PERFORMANCE_2026-10-21.md).
 
 The authentic Arena profiler runs original authenticated bodies at the unchanged
-4096 kernel fuel and 60-second / 2-GiB host policy. A diagnostic job may finish
+4096 kernel fuel,60-second per-case wall limit and V8
+`--max-old-space-size=2048` cap. This is an old-space heap cap, not an OS RSS cap. A diagnostic job may finish
 successfully while every profiled kernel case times out. Timeout-to-timeout
 comparisons are censored observations, not a numeric speedup.
 

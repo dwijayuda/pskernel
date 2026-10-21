@@ -316,12 +316,14 @@ private def regression : IO Unit := do
       (r : Nat) (cheap : Bool) =>
     if cheap then some (.error "FULL_SHAPE_CHEAP_PROJECTION")
     else some (.ok (s, r))
-  require "matching-projection-declines-before-full-core"
-    (psKernelExprV2DefEqResidualWith noDefEq noInfer noWhnf coreError
-      context cold projectionId projectionId).isNone
-  require "residual-terminal-rule-remains-unsupported"
-    (psKernelExprV2DefEqResidualWith noDefEq noInfer sameWhnf coreIdentity
-      context cold fId aId).isNone
+  require "matching-projection-uses-owning-defeq-before-full-core"
+    (match psKernelExprV2DefEqResidualWith noDefEq noInfer noWhnf coreError
+        context cold projectionId projectionId with
+     | some (.error error) => error == "FULL_SHAPE_HEAD_FIRST" | _ => false)
+  require "residual-terminal-rule-runs-left-inference"
+    (match psKernelExprV2DefEqResidualWith noDefEq noInfer sameWhnf coreIdentity
+        context cold fId aId with
+     | some (.error error) => error == "FULL_SHAPE_UNEXPECTED_INFER" | _ => false)
   require "sort-negative-is-final"
     (match psKernelExprV2DefEqResidualWith noDefEq noInfer sameWhnf coreIdentity
         context cold s0Id s1Id with

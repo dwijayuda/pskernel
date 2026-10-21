@@ -199,10 +199,11 @@ const coreError=c=>s=>r=>cheap=>error(cheap?"FULL_SHAPE_CHEAP_PROJECTION":
 expectError(residual(noDefEq,noInfer,sameWhnf,coreError,context,cold,s0.id,s1.id),
  "FULL_SHAPE_LEFT_CORE","full-core-left-error-first");
 const coreIdentity=c=>s=>r=>cheap=>cheap?error("FULL_SHAPE_CHEAP_PROJECTION"):ok(s,r);
-must(same(residual(noDefEq,noInfer,noWhnf,coreError,context,cold,
- projection.id,projection.id),none),"matching-projection-declines-before-full-core");
-must(same(residual(noDefEq,noInfer,sameWhnf,coreIdentity,context,cold,f.id,a.id),none),
- "residual-terminal-rule-remains-unsupported");
+expectError(residual(noDefEq,noInfer,noWhnf,coreError,context,cold,
+ projection.id,projection.id),"FULL_SHAPE_HEAD_FIRST",
+ "matching-projection-uses-owning-defeq-before-full-core");
+expectError(residual(noDefEq,noInfer,sameWhnf,coreIdentity,context,cold,f.id,a.id),
+ "FULL_SHAPE_UNEXPECTED_INFER","residual-terminal-rule-runs-left-inference");
 must(accepted(accepted(residual(noDefEq,noInfer,sameWhnf,coreIdentity,
  context,cold,s0.id,s1.id),"sort-negative-some"),"sort-negative").snd===false,
  "sort-negative-is-final");

@@ -1,5 +1,6 @@
 import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
+import Ps.KernelCore.API.DagGenerated
 import Ps.KernelCore.API.DagAdmission
 import Ps.KernelCore.Checker.ExprV2.Terminal
 import Ps.KernelCore.Checker.ExprV2.Check
@@ -161,7 +162,8 @@ def psKernelDagIsDefEq
               | Except.error error => Except.error (psKernelErrorFromMessage error)
               | Except.ok result => Except.ok (Prod.fst result)
 
-def psKernelDagRunCommand
+def psKernelDagRunCommandWithSource
+    (input : PsKernelExprV2Decoded)
     (execution : PsKernelDagExecutionState)
     (levelParams : List PsKernelName)
     (safety : PsKernelDefinitionSafety)
@@ -172,7 +174,7 @@ def psKernelDagRunCommand
   let session := execution.session;
   match command with
   | PsKernelDagCommand.check root =>
-      match psKernelDagRequire built root with
+      match psKernelDagRequire input root with
       | Except.error error => Except.error error
       | Except.ok expr =>
           match psKernelDagCheckExpression session levelParams safety arena built
@@ -181,7 +183,7 @@ def psKernelDagRunCommand
           | Except.ok value =>
               Except.ok (Prod.mk (PsKernelDagReply.checked value) execution)
   | PsKernelDagCommand.whnf root =>
-      match psKernelDagRequire built root with
+      match psKernelDagRequire input root with
       | Except.error error => Except.error error
       | Except.ok expr =>
           match psKernelDagWhnfExpression session levelParams safety arena built
@@ -190,10 +192,10 @@ def psKernelDagRunCommand
           | Except.ok value =>
               Except.ok (Prod.mk (PsKernelDagReply.normalized value) execution)
   | PsKernelDagCommand.isDefEq left right =>
-      match psKernelDagRequire built left with
+      match psKernelDagRequire input left with
       | Except.error error => Except.error error
       | Except.ok a =>
-          match psKernelDagRequire built right with
+          match psKernelDagRequire input right with
           | Except.error error => Except.error error
           | Except.ok b =>
               match psKernelDagIsDefEq session levelParams safety arena built
@@ -202,7 +204,7 @@ def psKernelDagRunCommand
               | Except.ok value =>
                   Except.ok (Prod.mk (PsKernelDagReply.equal value) execution)
   | PsKernelDagCommand.admit request =>
-      match psKernelDagDecodeDeclaration built request with
+      match psKernelDagDecodeDeclaration input request with
       | Except.error error =>
           Except.error (PsKernelError.rejectedInvalid error)
       | Except.ok declaration =>
@@ -216,35 +218,72 @@ def psKernelDagRunCommand
                   (PsKernelDagExecutionState.mk result.session
                     (psKernelDagDeclarationsAfterAdmission request execution.declarations)))
 
-def psKernelDagRunCommands
+/- Compatibility worker: callers supplying a single table retain the original
+   behavior. Production RunCommands keeps input and work namespaces separate. -/
+def psKernelDagRunCommand
+    (execution : PsKernelDagExecutionState)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (built : PsKernelExprV2Decoded)
+    (command : PsKernelDagCommand) :
+    Except PsKernelError (Prod PsKernelDagReply PsKernelDagExecutionState) :=
+  psKernelDagRunCommandWithSource built execution levelParams safety arena built command
+
+def psKernelDagRunCommandsWithSource
     (commands : List PsKernelDagCommand) :
-    PsKernelDagExecutionState -> List PsKernelName ->
+    PsKernelExprV2Decoded -> PsKernelDagExecutionState -> List PsKernelName ->
     PsKernelDefinitionSafety -> PsKernelExprV2PagedArena -> PsKernelExprV2Decoded ->
     Except PsKernelError PsKernelDagBatchResult :=
   match commands with
   | List.nil =>
-      fun (execution : PsKernelDagExecutionState)
+      fun (_input : PsKernelExprV2Decoded)
+          (execution : PsKernelDagExecutionState)
           (_levelParams : List PsKernelName)
           (_safety : PsKernelDefinitionSafety)
           (_arena : PsKernelExprV2PagedArena)
           (_built : PsKernelExprV2Decoded) =>
         Except.ok (PsKernelDagBatchResult.mk execution.session List.nil)
   | List.cons command rest =>
-      let smaller := psKernelDagRunCommands rest;
-      fun (execution : PsKernelDagExecutionState)
+      fun (input : PsKernelExprV2Decoded)
+          (execution : PsKernelDagExecutionState)
           (levelParams : List PsKernelName)
           (safety : PsKernelDefinitionSafety)
           (arena : PsKernelExprV2PagedArena)
           (built : PsKernelExprV2Decoded) =>
-        match psKernelDagRunCommand execution levelParams safety arena built command with
+        match psKernelDagRunCommandWithSource input execution
+            levelParams safety arena built command with
         | Except.error error => Except.error error
         | Except.ok result =>
-            match smaller (Prod.snd result) levelParams safety arena built with
-            | Except.error error => Except.error error
-            | Except.ok tail =>
-                Except.ok
-                  (PsKernelDagBatchResult.mk tail.session
-                    (List.cons (Prod.fst result) tail.replies))
+            let nextExecution := Prod.snd result;
+            let generated := PsKernelDagGeneratedState.mk
+              arena built nextExecution.declarations;
+            match psKernelDagGeneratedAfterCommand command
+                nextExecution.session.environment generated with
+            | Except.error error => Except.error (PsKernelError.internalError error)
+            | Except.ok installed =>
+                let owner := PsKernelDagExecutionState.mk
+                  nextExecution.session installed.declarations;
+                let recur := psKernelDagRunCommandsWithSource rest;
+                match recur input owner levelParams safety installed.arena installed.built with
+                | Except.error error => Except.error error
+                | Except.ok tail =>
+                    Except.ok
+                      (PsKernelDagBatchResult.mk tail.session
+                        (List.cons (Prod.fst result) tail.replies))
+
+/- The input namespace is captured once. Appended generated nodes may be used
+   internally but never become valid external command/declaration IDs. -/
+def psKernelDagRunCommands
+    (commands : List PsKernelDagCommand) :
+    PsKernelDagExecutionState -> List PsKernelName ->
+    PsKernelDefinitionSafety -> PsKernelExprV2PagedArena -> PsKernelExprV2Decoded ->
+    Except PsKernelError PsKernelDagBatchResult :=
+  fun (execution : PsKernelDagExecutionState)
+      (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+      (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded) =>
+    psKernelDagRunCommandsWithSource commands
+      built execution levelParams safety arena built
 
 def psKernelV1RunDag
     (session : PsKernelKernelSession)

@@ -23,6 +23,10 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Core.ExprV2.TransformSpine,
     `Ps.KernelCore.API.DagTypes,
     `Ps.KernelCore.API.DagDeclaration,
+    `Ps.KernelCore.API.DagAdmissionGuards,
+    `Ps.KernelCore.Checker.ExprV2.Quot,
+    `Ps.KernelCore.API.DagGenerated,
+    `Ps.KernelCore.Checker.ExprV2.Recursor,
     `Ps.KernelCore.API.DagAdmission,
     `Ps.KernelCore.API.Dag,
     `Ps.KernelCore.Checker.ExprV2.DefEqPair,
@@ -55,6 +59,9 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.DefEq.DeltaStep,
     `Ps.KernelCore.Checker.ExprV2.DefEq.LazyDelta,
     `Ps.KernelCore.Checker.ExprV2.DefEq.FullShape,
+    `Ps.KernelCore.Checker.ExprV2.DefEq.LazyProjection,
+    `Ps.KernelCore.Checker.ExprV2.DefEq.FinalRules,
+    `Ps.KernelCore.Checker.ExprV2.String,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,
@@ -264,3 +271,23 @@ lean_exe psc1_kernel_expr_v2_lazy_delta_regression where
 lean_exe psc1_kernel_expr_v2_full_shape_regression where
   srcDir := "test"
   root := `PsKernelExprV2FullShapeRegression
+
+-- Matching projections, structure eta, String translation and unit-like terminal DefEq.
+lean_exe psc1_kernel_expr_v2_final_rules_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2FinalRulesRegression
+
+-- Check DAG admission guards against V1 and official Lean.
+lean_exe psc1_kernel_expr_v2_admission_guard_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2AdmissionGuardRegression
+
+-- Check DAG Quot reduction against V1 and official Lean.
+lean_exe psc1_kernel_expr_v2_quot_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2QuotRegression
+
+-- Check generated recursor ownership and DAG non-K iota against V1 and official Lean.
+lean_exe psc1_kernel_expr_v2_recursor_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2RecursorRegression

@@ -9,8 +9,8 @@ import Ps.KernelCore.Checker.ExprV2.DefEq.FullShape
 share inference-only/WHNF/DefEq callbacks at the exact predecessor fuel.
 The complete ordered lazy-delta stage uses that same owner and admitted body
 IDs. Residual full-WHNF and full-shape rules retain the same callback owner.
-Matching projection and structure/string/unit terminal rules remain explicit
-unsupported paths; no partial state escapes into the reference fallback. -/
+Matching projections and final structure/string/unit rules share that owner;
+unsupported descendant callbacks decline without leaking partial state. -/
 def psKernelExprV2TryDefEqStateWithFuel
     (fuel : Nat) :
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->

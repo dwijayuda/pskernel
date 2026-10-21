@@ -7,7 +7,7 @@ on:
         description: Exact production source commit to diagnose
         required: true
         type: string
-        default: '480d875d5be7a9e656e7ccd1fa76cc7409a81c90'
+        default: '5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8'
   push:
     branches:
       - research/psc1-arena-logical-20261021
@@ -24,14 +24,15 @@ jobs:
   authentic-decline-diagnostics:
     # Collection success is not a corpus or kernel qualification result.
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Complete source checks/build plus unchanged bounded diagnostic cases.
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - name: Resolve exact production source
         id: source
         shell: bash
         env:
-          REQUESTED_KERNEL_SHA: ${{ inputs.kernel_sha || '480d875d5be7a9e656e7ccd1fa76cc7409a81c90' }}
+          REQUESTED_KERNEL_SHA: ${{ inputs.kernel_sha || '5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8' }}
         run: |
           set -euo pipefail
           [[ "$REQUESTED_KERNEL_SHA" =~ ^[0-9a-f]{40}$ ]]

@@ -15,6 +15,52 @@ PASS. The new containing diagnostic source and trace harness are **NOT RUN** unt
 their own Actions job completes. Trace collection cannot claim gate B or C.
 Gate A remains the documented e015 scoped V1 developer provider.
 
+## 2026-10-21 11:59 UTC — rerun unchanged first-decline observer on FullShape source5544
+
+This diagnostic successor pins production source
+`5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8` instead of480. The observer,
+original replay, comparator, oracle, controls and authentic body bytes are unchanged.
+The four guarded runtime-source/control files were compared to5544 and are identical.
+All8 FullShape Option/Except operations already belong to the observer set.
+This run must locate the new first decline; no outcome improvement is assumed.
+
+Prior harnessbd827814c02daf1d0ea27a8486bb87b77edd03e2 collection
+[39578237566/119149036622](https://github.com/dwijayuda/pskernel/actions/runs/39578237566/job/119149036622)
+passed using production480. Repeated/church first theorem decline is
+LazyDeltaAfterStepWith, followed by observed whole V1 admission; both still timeout.
+The exact inner residual branch is inferred from source, not separately observed.
+Both complete traces are below observer limits and timeout agreement is null.
+Artifact12336576558 SHA-256:
+`44cc5a694e87fc2e01277a239628a3ae9a96de17d07fea1b64e12f5cd7ca556c`.
+Repeated trace SHA-256:
+`61cedcffe7778c0d6c1b32d6e3d5f59c95b99444247526cd98686c7aecbb7cc3`.
+Church trace SHA-256:
+`4f046f226c5a6d0dbda23c44d82de73d5faab22bb479be2b9c2dbb058d8d0eae`.
+
+Source5544 native/.lean-generated integration39578569544 and six-job
+research39578569496 pass. Canonical source checking passed, but job119150176408
+hit its40-minute overall build ceiling during JS generation; canonical execution
+is unqualified. This diagnostic job therefore allows75minutes for full checking,
+compilation and collection. Individual authentic cases retain60seconds, existing
+2GiB Node heap cap,4096default kernel fuel and unchanged depth/other policy.
+This build ceiling is distinct from case limits and cannot authorize acceptance.
+
+Full5544 Arena39578569599 is terminal FAIL qualification,193complete:
+170matches(103accepted,59kernelreject,1metadatareject,7transportreject)+2separate
+unsafe/partial agreements+20timeouts+1unsupported. Exactly zero case classifications
+changed from480. Artifact12338252553 SHA-256:
+`6d2a21a4cdce55fcca549c5db02a11a81ed691179380fc463bfd4d503ccb366c`.
+Separate5544 V8 diagnostic39578569489 collection passed; repeated/church/Init
+timeout, stuck-prop rejects. V1 leaf stacks remain, but they do not determine
+the exact first FullShape decline. This unchanged observer is the discriminating
+next check. No sampled profile memory is represented as exact peak RSS.
+
+Current integration remains separate, at workflow-only successor88924063.
+The staged semantics branch is separate at369bee5801bd5e4476837684fad3f7e1ca8c422c.
+This diagnostic commit changes only its source pin, build-job ceiling and receipt.
+Next action: inspect complete authentic generation/controls and terminal first-decline
+records; classify unresolved outcomes honestly. No production semantics are changed.
+
 ## 2026-10-21 09:42 UTC — bounded first-decline diagnostic harness; execution pending
 
 This diagnostic branch now builds the separate, exact production source

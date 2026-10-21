@@ -188,3 +188,70 @@ Use one integration owner, one coherent source batch and one exact final full qu
 7. Record exact source and terminal job IDs in the matrix/work state, then move to the next dependent row. A measured failing gate remains open.
 
 If the chat cannot finish, commit a coherent source checkpoint, preserve any last qualified SHA, mark unqualified implementation independently from evidence, list the precise failing command/case and next experiment, and update the ready-to-copy continuation. Do not claim background work continues after the chat ends.
+
+## Concrete T03a implementation recipe
+
+
+Read-only implementation recipe at source `4f6303fd90742ccc5e3d4f56b65dc658a7fb0eb5`. Paths below start at `psc1/packages/pskernel-core/src/Ps/KernelCore/`. This is the next bounded ownership change, not an admission rewrite, eager-decode removal, persistent-session importer, or performance qualification claim.
+
+## Decision and source invariant
+
+Use the **new prefix of the successfully admitted final environment**, with the exact previous environment as its boundary. Do not derive mutual/nested auxiliary names from request names.
+
+`Environment/Operations.lean::psKernelEnvironmentAddUnchecked` prepends every added constant. Mutual admission validates fresh names and returns `work2` built by new headers, constructors and `psKernelAddMutualRecursorInfos` (`Admission/Inductive/Mutual/Admission.lean`, final success). Nested admission restores from the **original** base environment: `Nested/Restore.lean::psKernelSimpleNestedAddOriginals` receives `base`, its workers prepend restored family types/constructors/recursors, and `psKernelSimpleNestedAddAuxRecursorsWorker` prepends the final renamed auxiliary recursors. Flattening-only families are excluded. `Nested/Admission.lean` validates that final environment before returning it.
+
+Therefore, for these three successful command kinds, final constants are a prefix of newly admitted names followed by the old constants. Scan that prefix until the first name present in the previous environment. Use `psKernelEnvironmentContains previous name`: `Environment/Lookup.lean` uses the exact name comparison after the existing indexed candidate lookup. Neither hash equality nor name shape authorizes admission. Stop immediately at the first old entry; do not call `psKernelEnvironmentSize`, compare complete environment tails, scan all constants for each command, or compare pointer identity. An initially empty environment scans exactly the new set.
+
+This invariant is supplied by the existing checked admission algorithms, not by caller-supplied metadata. Keep the bridge internal to the successful `RunCommandsWithSource` branch. A general arbitrary-environment diff API is not required. Future admission changes that replace existing declarations must update this invariant rather than silently reusing the prefix worker.
+
+## Exact code changes
+
+1. Add an explicit-argument structural worker in `API/DagGenerated.lean` with the following intended signature (names are proposed):
+
+```lean
+psKernelDagGeneratedInstallNewPrefix
+  (remaining : List PsKernelConstantInfo)
+  (previous : PsKernelEnvironment)
+  (inputRefs : List PsKernelExprV2DeclarationRef)
+  (state : PsKernelDagGeneratedState) :
+  Except String PsKernelDagGeneratedState
+```
+
+On `[]`, return `state`. On `info :: rest`, stop if its exact name is already in `previous`; otherwise install that final checked `info`, thread the resulting state, and continue. This walks O(new declarations) entries, with existing environment-index probes. Existing hash collisions can add bucket work, but there is no O(total environment) walk. Preserve sequential import order. No new fuel parameter, prebuilt recursive closure, depth allowance or trusted path is needed.
+
+2. Add `psKernelDagGeneratedInstallNewInfo info inputRefs state`. Handle final `recInfo` by the existing `psKernelDagGeneratedInstallRecursor`, which imports the actual final type and every actual final rule RHS and prepends the `recursorDecl` owner. Handle `inductInfo` and `ctorInfo` by reusing a matching current-command input ref or importing their final `base.type` through `psKernelDagGeneratedImport`, then constructing `inductiveDecl`/`constructorDecl` with no delta body. An unexpected new declaration kind in the selected inductive transaction is a distinct internal invariant error, not successful skipping or an invalid-proof verdict.
+
+Reuse lookup must inspect only `inputRefs`, **not the full accumulated state.declarations list**. Construct it with `psKernelDagDeclarationsAfterAdmission request []`. For ordinary/mutual requests the existing source explicitly guarantees original family/constructor types are installed unchanged; their original IDs are already published into the private `nextExecution.declarations`. Validate name/levelParams/kind using `psKernelExprV2DeclarationRefMatches` before reuse. This predicate does not itself establish type equality: the successful admission plus unchanged-type source invariant does. No new caller authority is introduced.
+
+For `nestedInductive`, that existing helper intentionally returns no original refs, so import all final restored family/constructor types and recursor metadata. Do not add raw nested input types to `DagDeclaration.lean`: restoration may have changed their representation. Likewise, never expose flattened auxiliary-family IDs that are absent from the final environment. Missing final types and renamed auxiliary recursors are found automatically by the prefix, without inventing suffix conventions.
+
+3. Add the production entry:
+
+```lean
+psKernelDagGeneratedAfterCommandWithPrevious
+  (command : PsKernelDagCommand)
+  (previous current : PsKernelEnvironment)
+  (state : PsKernelDagGeneratedState) :
+  Except String PsKernelDagGeneratedState
+```
+
+For admitted ordinary/mutual/nested inductives, derive command-local `inputRefs` and call the prefix worker on `current.constants`. For every other command, return state unchanged. Leave Quot, definitions and T03b preexisting-session import outside this slice. Preserve the existing `psKernelDagGeneratedAfterCommand command environment state` signature and its current bounded ordinary behavior as the compatibility helper; do not attempt to fake a previous environment from the new one.
+
+4. Change only the production call in `API/Dag.lean::psKernelDagRunCommandsWithSource` to pass `execution.session.environment` as `previous` and `nextExecution.session.environment` as `current`. Retain the initial `input` table unchanged. `generated` still starts with the current working arena/built table and already admitted current-command refs. Successful import returns an appended arena/built table and all owners; recursive commands continue through that working state while external IDs are checked only against the original `input` namespace. Do not change any public command/RunDag ABI.
+
+Import failure returns the existing `internalError` branch before recursive publication. Admission results and staged refs are local values; neither a receipt nor partial session escapes when a later import or command fails. Do not turn an import failure into a V1 acceptance or silently publish only the first family.
+
+## Focused qualification fixtures
+
+Extend `test/PsKernelExprV2RecursorRegression.lean`, its JS smoke script, and the existing recursor proof fixture/workflow targets; preserve all old counts/controls and add distinct new markers.
+
+| Fixture | Required observations |
+| --- | --- |
+| Two-family genuine mutual inductive | Admit the existing checked mutual fixture, install both final recursors, retain every original family/constructor input ID, and directly execute each recursor/iota plus check/DefEq without an outer fallback. Compare official Lean and V1 |
+| Genuine accepted nested inductive | Reuse an existing checked nested fixture or independently admit List plus a Tree/List Tree nested family. Require final restored family/constructor refs and every final renamed auxiliary-rec type/rule owner; no flattening-only owners. Execute an authentic nested recursor reduction and type check |
+| Nested request with no discovered auxiliary family | Exercise the dispatcher's ordinary/mutual fast branch; final owners still complete and no duplicate imported input IDs are claimed |
+| Names/universes | Structured namespaces, numeric name components, nonzero initial arena IDs, multiple universe parameters and constructor families with overlapping suffixes. Final checked metadata decides membership; mismatch/absence probes cannot authorize direct reduction |
+| Namespace and atomicity | After generated nodes append, a later external command using a private appended ID remains invalid. A late invalid command/admission returns no partial batch. Internal late-import failure test returns internalError with no published partial owners |
+| Delta cost and boundary | Install a substantial old checked environment plus a tiny new mutual/nested batch. Diagnostic visit count equals the new prefix and stops at first old name. Existing declarations/owners are unchanged; no scan of the old tail and no `EnvironmentSize` prepass |
+
+Run native, both authentic generated routes, canonical source reconstruction/checking, retained K/major/state/resource negatives and local proof/axiom audits on the exact candidate. Keep this ownership bridge explicitly transitional: inductive checking still uses V1, generated-expression import remains recursive, and B is still open. The initial existing-session constants remain T03b, not an implicit side effect of this delta.

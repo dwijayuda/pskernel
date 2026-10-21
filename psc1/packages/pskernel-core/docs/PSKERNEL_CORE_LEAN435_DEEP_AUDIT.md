@@ -56,7 +56,7 @@ Outer `Option.none` means an unsupported complete attempt. Inner `some (.ok (sta
 
 ## 4. Selected implementation corrections
 
-The containing correction must acquire fresh native/generated/canonical/proof/provider evidence. Parent PASS is not inherited.
+The containing correction must acquire fresh native/generated/canonical/proof/provider evidence. At8de, native cache-mode and proof controls passed, but the complete native job failed String fixture assumptions (obsolete fallback expectation and equal-but-distinct IDs); the successor strengthens those fixtures and must requalify. Parent PASS is not inherited.
 
 ### String-literal projection WHNF
 
@@ -68,7 +68,7 @@ Reuse `Checker/ExprV2/String.lean` and the existing projection selector. Thread 
 
 `Checker/ExprV2/DefEqPair.lean::psKernelExprV2DefEqPairFindIn` recursively builds curried argument closures for every cache candidate. `WhnfState.lean` already uses an explicit-argument worker. Introduce the same worker pattern beneath the unchanged curried ABI, preserving candidate order, symmetric structural collision checks, first error and empty-list behavior.
 
-A frozen exact copy of the pre-change recursion supports all-input worker/ABI equality theorems. Initial4f qualification failed an unfinished proof and a portable parser limitation; the successor records those failures in AI_WORK_STATE and requires fresh gates. Native and generated regressions cover hits, reversed pairs, hash collisions/misses, invalid references, scope restoration, FVar exclusion and zero-fuel entry guards. The native ABBA microbenchmark measures only list scans. It does not change O(M) lookup or establish a whole-kernel speedup. A non-improving microbenchmark must be reported honestly.
+A frozen exact copy of the pre-change recursion supports all-input worker/ABI equality theorems. Initial4f qualification failed an unfinished proof and a portable parser limitation; the successor records those failures in AI_WORK_STATE and requires fresh gates. Native and generated regressions cover hits, reversed pairs, hash collisions/misses, invalid references, scope restoration, FVar exclusion and zero-fuel entry guards. At8de, native CI passed these new equations and controls; samples were frozen562664ns/527838ns and worker528249ns/551563ns for1024 entries×200 calls. The small mixed timings are inconclusive. The native ABBA microbenchmark measures only list scans. It does not change O(M) lookup or establish a whole-kernel speedup. A non-improving microbenchmark must be reported honestly.
 
 ### Cheap/full WHNF cache-mode isolation
 

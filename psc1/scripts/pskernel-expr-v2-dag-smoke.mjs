@@ -3745,9 +3745,41 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
     const text=get("PsKernelLiteral").str("abc");
     const textNode=build("Lit",E.lit(text),text);
     const stringProjection=proj(name("String"),0n,textNode);
-    for(const cheapMode of [false,true])
-      must(sameRuntimeValue(core(64n,typed(checker.context),freshWhnf(),stringProjection.id,cheapMode),none),
-        "cheap-projection-string-expansion-explicit-fallback-"+cheapMode);
+    const expanded=accepted(get("psKernelExprV2StringLitToConstructorOnCanonical")(prefixArena,"abc"),
+      "cheap-projection-string-expanded-constructor");
+    prefixArena=expanded.fst;
+    const expandedTerm=get("psKernelStringLitToConstructor")("abc");
+    for(const cheapMode of [false,true]){
+      // No String.ofList body is installed in this fixture. Require the same
+      // genuine stuck result as V1 through a direct attempt, never outer none.
+      compareWhnf(oldCore(64n,checker.context,checker.state,stringProjection,cheapMode),
+        core(64n,typed(checker.context),freshWhnf(),stringProjection.id,cheapMode),
+        "cheap-projection-string-expansion-is-direct-"+cheapMode);
+      let oldCalls=0,newCalls=0;
+      const expectedTerm=cheapMode?expandedTerm:textNode.term;
+      const expectedId=cheapMode?expanded.snd:textNode.id;
+      const oldStringDeny=_context=>_state=>expr=>{
+        oldCalls++;
+        return get("Except").error(exact(expr,expectedTerm)?
+          "PREFIX_STRING_PUBLIC_CALLBACK":"PREFIX_STRING_WRONG_PUBLIC_CALLBACK");
+      };
+      const newStringDeny=_context=>state=>root=>{
+        newCalls++;
+        const equal=accepted(get("psKernelExprV2PagedEqOnCanonical")(state.arena,root,expectedId),
+          "cheap-projection-string-callback-shape");
+        return Option.some(get("Except").error(equal?
+          "PREFIX_STRING_PUBLIC_CALLBACK":"PREFIX_STRING_WRONG_PUBLIC_CALLBACK"));
+      };
+      const noRecursor=()=>{throw Error("PREFIX_UNEXPECTED_STRING_RECURSOR_CALLBACK");};
+      const expected=get("psKernelWhnfCoreWithFuel")(64n)(oldStringDeny)(noRecursor)
+        (checker.context)(checker.state)(stringProjection.term)(false)(cheapMode);
+      const actual=get("psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel")(64n)(cheapMode)
+        (_=>none)(newStringDeny)(checker.context)(freshWhnf())(stringProjection.id);
+      compareWhnf(expected,actual,"cheap-projection-string-mandatory-public-callback-parity-"+cheapMode);
+      const failure=accepted(actual,"cheap-projection-string-callback-some");
+      must(oldCalls===1&&newCalls===1&&rejected(failure)&&failure.error==="PREFIX_STRING_PUBLIC_CALLBACK",
+        "cheap-projection-string-expansion-mandatory-public-callback-"+cheapMode);
+    }
     console.log("PSC1_V2_DAG_JS_CHEAP_PROJECTION_POLICY: PASS");
   }
   {
@@ -4112,3 +4144,4 @@ console.log("PSC1_V2_DAG_JS_BINDER: PASS");
 }
 
 reportDagSmoke();
+

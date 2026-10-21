@@ -4179,13 +4179,46 @@ private def cheapProjectionPolicyParity : IO Unit := do
         match old with | .ok result => psKernelExprEqual result.fst stuck | _ => false
        else
         match old with | .error message => message == "PREFIX_PUBLIC_CALLBACK" | _ => false)
-  let stringProjection := PsKernelExpr.proj (nm "String") 0 (.lit (.str "abc"))
+  let stringLiteral := PsKernelExpr.lit (.str "abc")
+  let stringExpansion := psKernelStringLitToConstructor "abc"
+  let stringProjection := PsKernelExpr.proj (nm "String") 0 stringLiteral
   let (stringArena, stringId) ← expect (psKernelExprV2PagedImportChecked stringProjection)
+  let (stringArena, literalId) ← expect
+    (psKernelExprV2PagedImportIntoChecked stringArena stringLiteral)
+  let (stringArena, expansionId) ← expect
+    (psKernelExprV2PagedImportIntoChecked stringArena stringExpansion)
   for cheapProj in [false,true] do
-    require "cheap-projection-string-constructor-expansion-remains-fallback"
-      (match psKernelExprV2CheckWhnfCoreWithFuel 64 context
-          (psKernelExprV2WhnfStateEmpty stringArena) stringId cheapProj with
-       | none => true | _ => false)
+    -- This environment deliberately lacks String.ofList. Both genuine workers
+    -- must return the same stuck projection directly; outer none is a failure.
+    rawStateWhnfParity "cheap-projection-string-constructor-expansion-is-direct"
+      (psKernelWhnfCoreWithRecursorFuel 64 (psKernelIsDefEqWithFuel 64)
+        checker.context checker.state stringProjection false cheapProj)
+      (psKernelExprV2CheckWhnfCoreWithFuel 64 context
+        (psKernelExprV2WhnfStateEmpty stringArena) stringId cheapProj)
+    let expectedTerm := if cheapProj then stringExpansion else stringLiteral
+    let expectedId := if cheapProj then expansionId else literalId
+    let denyStringPublic : PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
+        Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+      fun _ _ value =>
+        .error (if psKernelExprEqual value expectedTerm then
+          "PREFIX_STRING_PUBLIC_CALLBACK" else "PREFIX_STRING_WRONG_PUBLIC_CALLBACK")
+    let denyStringDagPublic : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+        Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+      fun _ state value =>
+        match psKernelExprV2PagedEqOnCanonical state.arena value expectedId with
+        | .error error => some (.error error)
+        | .ok equal => some (.error (if equal then
+            "PREFIX_STRING_PUBLIC_CALLBACK" else "PREFIX_STRING_WRONG_PUBLIC_CALLBACK"))
+    let expected := psKernelWhnfCoreWithFuel 64 denyStringPublic noRecursor
+      checker.context checker.state stringProjection false cheapProj
+    let actual := psKernelExprV2TryWhnfCoreModeWithLocalValuesFuel 64 cheapProj
+      (fun _ => none) denyStringDagPublic checker.context
+      (psKernelExprV2WhnfStateEmpty stringArena) stringId
+    rawStateWhnfParity "cheap-projection-string-mandatory-public-callback-parity" expected actual
+    require "cheap-projection-string-expansion-mandatory-public-callback"
+      (match actual with
+       | some (.error message) => message == "PREFIX_STRING_PUBLIC_CALLBACK"
+       | _ => false)
   IO.println "PSC1_V2_DAG_CHEAP_PROJECTION_POLICY: PASS"
 
 private def defEqReflectionParity : IO Unit := do
@@ -4709,3 +4742,4 @@ def main : IO Unit := do
   defEqPrefixGuardParity
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"
+

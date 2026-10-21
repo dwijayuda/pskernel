@@ -368,10 +368,10 @@ private def stringProjectionRegression (f : Fixtures) : IO Unit := do
           match projectionOwnerMark s root 41 with
           | .error error => some (.error error)
           | .ok next => some (.ok (next,literalId))
-        else if r == fieldId && projectionOwnerMarked s 42 then
+        else if sameNode s r fieldId && projectionOwnerMarked s 42 then
           match projectionOwnerMark s root 43 with
           | .error error => some (.error error)
-          | .ok next => some (.ok (next,fieldId))
+          | .ok next => some (.ok (next,r))
         else some (.error "STRING_PROJECTION_RECURSE_ORDER")
       let publicWhnf := fun (c : PsKernelExprV2CheckContext) (s : PsKernelExprV2CheckState) (r : Nat) =>
         if c.scalar.recDepth != context.scalar.recDepth then
@@ -388,7 +388,7 @@ private def stringProjectionRegression (f : Fixtures) : IO Unit := do
       let result ← expectAttempt "string-projection-full-owner"
         (psKernelExprV2TryWhnfProjectionOwnedWith recurse publicWhnf
           context initial root pairName 0 literalId cheap)
-      require "string-projection-selected-field" (result.snd == fieldId)
+      require "string-projection-selected-field" (sameNode result.fst result.snd fieldId)
       require "string-projection-full-owner-and-appended-arena" (projectionOwnerMarked result.fst 43)
       require "string-projection-core-cache-mode"
         (result.fst.whnf.coreCache.length == (if cheap then 1 else 2))
@@ -926,4 +926,5 @@ private def regression : IO Unit := do
   IO.println "PSC1_V2_DAG_OFFICIAL_FINAL_RULES: PASS cases=21 invalid=5 strings=8 resource=1"
 
 def main : IO Unit := regression
+
 

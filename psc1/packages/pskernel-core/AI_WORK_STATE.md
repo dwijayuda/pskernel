@@ -12,6 +12,42 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — native cache/proof corrections pass; String fixture repair
+
+Exact **8de5a76a7db17f4d7ea26eb55ddf79f53bfbc469** native integration
+[job119330103262/run39631360558](https://github.com/dwijayuda/pskernel/actions/runs/39631360558/job/119330103262)
+is terminal FAIL, so this source is not A-qualified. It compiled the complete
+checker, reproduced the original3aa cheap-cache sentinel again, then passed the
+new native cache-mode beta/let controls, both pair-scan all-input equations,
+all16 fuel-worker/historical-mode proof audits, provider controls and native
+benchmarks. Other mandatory suites executed independently.
+
+Two String fixture defects failed: the retained old DAG probe still demanded
+the deliberately removed unsupported branch; the new owner probe assumed two
+equal independently imported Nat7 nodes had one ID. This successor replaces
+the obsolete expectation with direct V1 parity and exact mandatory-callback
+sentinels in both modes, and makes the selected-field probe compare structure
+while returning the actual selected ID. Every owner-stage/error/resource and
+public invalid-input control remains; no production source or limit is changed
+by this fixture repair.
+
+The new native hash-miss scan samples at8de are frozen562664ns, worker528249ns,
+worker551563ns, frozen527838ns (1024 entries/200 calls per sample). These small,
+mixed timings do not establish a performance improvement. Linear lookup cost
+remains and no whole-kernel gain is claimed.
+
+The completion plan now records the concrete T03a authoritative-new-prefix
+algorithm and signatures. A separate host-only native theorem-stage probe is
+committed at diagnostic **d3730ae4e72f91a5dda010bc6b7f40d4f379f780** on
+research/psc1-arena-logical-20261021, run39631889379, with production369bee,
+original input and4096 fuel unchanged. It was queued at this observation; no
+first-failure result is invented. This is not integration qualification.
+
+The containing successor is NOT RUN at creation. Exact3aa remains the latest
+fully qualified scoped A until all this successor's own terminal gates pass.
+Inspect fresh native, both generated routes, canonical, proof, provider,
+benchmark and full193 results; then execute T03a without another broad audit.
+
 ## 2026-10-21 — exact-parent reproducer PASS; portability and proof repair
 
 Candidate **4f6303fd90742ccc5e3d4f56b65dc658a7fb0eb5** is NOT qualified.

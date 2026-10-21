@@ -549,7 +549,7 @@ for(const value of strings){
   const recurse=c=>s=>r=>{
    if(c.scalar.recDepth!==context.scalar.recDepth)return spError("STRING_PROJECTION_CONTEXT");
    if(cheap&&r===literal.id&&spMarked(s,40n))return spOk(spMark(s,root.id,41n),literal.id);
-   if(r===selected.id&&spMarked(s,42n))return spOk(spMark(s,root.id,43n),selected.id);
+   if(spSameNode(s,r,selected.id)&&spMarked(s,42n))return spOk(spMark(s,root.id,43n),r);
    return spError("STRING_PROJECTION_RECURSE_ORDER");
   };
   const publicWhnf=c=>s=>r=>{
@@ -559,7 +559,7 @@ for(const value of strings){
    return spError("STRING_PROJECTION_PUBLIC_ORDER");
   };
   const result=attempt(spProjection(recurse,publicWhnf,context,seeded,root.id,pairName,0n,literal.id,cheap));
-  must(result.snd===selected.id,"string-projection-selected-field");
+  must(spSameNode(result.fst,result.snd,selected.id),"string-projection-selected-field");
   must(spMarked(result.fst,43n),"string-projection-complete-owner-and-appended-arena");
   must(array(result.fst.whnf.coreCache).length===(cheap?1:2),"string-projection-core-cache-mode");
   spOwners++;
@@ -597,4 +597,5 @@ console.log("PSC1_V2_STRING_PROJECTION_JS: PASS differential=1296 owners=16 fail
 console.log("PSC1_V2_DAG_JS_FINAL_RULES: PASS owner="+owners+" final="+finals+
  " projection="+projections+" stringBuild="+stringBuilds+" stringStage="+stringStages+
  " checkedBatches="+checkedBatches+" assertions="+assertions);
+
 

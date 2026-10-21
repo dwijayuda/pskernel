@@ -112,7 +112,11 @@ theorem K_refuses_before_callbacks
     (isK : recursor.k = true) :
     psKernelExprV2TryReduceNonKRecursorWith whnf context state recursor
       levels args majorIndex major = none := by
-  simp [psKernelExprV2TryReduceNonKRecursorWith, isK]
+  simp [psKernelExprV2TryReduceNonKRecursorWith,
+    psKernelExprV2TryReduceNonKRecursorOwnedWith,
+    psKernelExprV2TryReduceNonKRecursorUsingOwnedWith,
+    psKernelExprV2TryReduceRecursorMajorOwnedWith,
+    psKernelExprV2LowerOptionalWhnfAttempt, isK]
 
 theorem constructor_skips_major_callback
     (whnf : PublicWhnf) (context : PsKernelCheckerContext)
@@ -122,7 +126,27 @@ theorem constructor_skips_major_callback
     (isConstructorResult : psKernelExprV2RecursorIsConstructorApp context state.arena major = .ok true) :
     psKernelExprV2TryReduceNonKRecursorWith whnf context state recursor levels args majorIndex major =
       psKernelExprV2RecursorSelectRule state recursor levels args majorIndex major := by
-  simp [psKernelExprV2TryReduceNonKRecursorWith, notK, isConstructorResult]
+  cases selected : psKernelExprV2RecursorSelectRule
+      state recursor levels args majorIndex major with
+  | none =>
+      simp [psKernelExprV2TryReduceNonKRecursorWith,
+        psKernelExprV2TryReduceNonKRecursorOwnedWith,
+    psKernelExprV2TryReduceNonKRecursorUsingOwnedWith,
+    psKernelExprV2TryReduceRecursorMajorOwnedWith,
+        psKernelExprV2CheckContextEmpty, psKernelExprV2CheckStateFromWhnf,
+        psKernelExprV2CheckStateEmpty, psKernelExprV2CheckStateWithWhnf,
+        psKernelExprV2LiftOptionalWhnfAttempt, psKernelExprV2LowerOptionalWhnfAttempt,
+        notK, isConstructorResult, selected]
+  | some result =>
+      cases result <;>
+        simp [psKernelExprV2TryReduceNonKRecursorWith,
+          psKernelExprV2TryReduceNonKRecursorOwnedWith,
+    psKernelExprV2TryReduceNonKRecursorUsingOwnedWith,
+    psKernelExprV2TryReduceRecursorMajorOwnedWith,
+          psKernelExprV2CheckContextEmpty, psKernelExprV2CheckStateFromWhnf,
+          psKernelExprV2CheckStateEmpty, psKernelExprV2CheckStateWithWhnf,
+          psKernelExprV2LiftOptionalWhnfAttempt, psKernelExprV2LowerOptionalWhnfAttempt,
+          notK, isConstructorResult, selected]
 
 theorem nonconstructor_callback_error_precedes_normalization
     (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
@@ -133,7 +157,14 @@ theorem nonconstructor_callback_error_precedes_normalization
     psKernelExprV2TryReduceNonKRecursorWith
       (fun _ _ _ => some (.error error)) context state recursor levels args majorIndex major =
       some (.error error) := by
-  simp [psKernelExprV2TryReduceNonKRecursorWith, notK, notConstructor]
+  simp [psKernelExprV2TryReduceNonKRecursorWith,
+    psKernelExprV2TryReduceNonKRecursorOwnedWith,
+    psKernelExprV2TryReduceNonKRecursorUsingOwnedWith,
+    psKernelExprV2TryReduceRecursorMajorOwnedWith,
+    psKernelExprV2CheckContextEmpty, psKernelExprV2CheckStateFromWhnf,
+    psKernelExprV2CheckStateEmpty, psKernelExprV2CheckStateWithWhnf,
+    psKernelExprV2LiftScalarWhnf, psKernelExprV2LiftWhnfAttempt,
+    psKernelExprV2LowerOptionalWhnfAttempt, notK, notConstructor]
 
 theorem recursor_zero_before_syntax
     (localValue : PsKernelName -> Option Nat) (context : PsKernelCheckerContext)

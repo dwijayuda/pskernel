@@ -131,7 +131,7 @@ for(let index=0n;index<input.size;index++){
  const after=accepted(get("psKernelExprV2DecodedRequire")(generated.built,index),"new-input-ID");
  must(exact(before,after),"original-ID-stable");
 }
-for(const info of [natInfo,boxInfo]){
+for(const info of [natInfo,boxInfo,kInfo]){
  const owner=accepted(get("psKernelExprV2DeclarationRefFind")(generated.declarations)(info.base.name),"owner");
  must(exact(info.base.type,decoded(generated.arena,owner.type)),"generated-type-exact");
  must(get("psKernelExprV2DeclarationRefMatches")(owner,CI.recInfo(info)),"generated-live-kind");
@@ -140,7 +140,7 @@ for(const info of [natInfo,boxInfo]){
   must(exact(rule.rhs,decoded(generated.arena,rhs)),"generated-rule-exact");
  }
 }
-must(same(get("psKernelExprV2DeclarationRefFind")(generated.declarations)(kInfo.base.name),none),"K-owner-absent");
+must(!same(get("psKernelExprV2DeclarationRefFind")(generated.declarations)(kInfo.base.name),none),"checked-K-owner-installed");
 const scalar=get("psKernelKernelSessionChecker")(session,nil,safe).context;
 const oldEmpty=get("psKernelCheckerStateEmpty"),oldEq=get("psKernelIsDefEqWithFuel");
 const noLocal=get("psKernelExprV2NoLocalValue");
@@ -302,5 +302,296 @@ for(const [label,levels,message] of [
  invalid(reference,"Sort-u-"+label+"-V1");invalid(actual,"Sort-u-"+label+"-public-DAG");
  must(reference.error.message===message&&same(reference.error,actual.error),"Sort-u-"+label+"-exact-error");
 }
+
+// Complete non-K major normalization: fresh checked declarations and owners.
+{
+ const savedArena=arena;
+ arena=input;
+ let majorSession=session,majorDeclarations=declarations;
+ const majorCommands=[...commands];
+ const axiom=(n,type)=>{
+  majorSession=accepted(get("psKernelV1AdmitDeclaration")(
+   majorSession,Request.axiomDecl({base:{name:n,levelParams:nil,type:type.term},isUnsafe:false})),"major-neutral-axiom").session;
+  const request=D.axiomDecl({name:n,levelParams:nil,type:type.id},false);
+  majorDeclarations=get("psKernelDagDeclarationsAfterAdmission")(request,majorDeclarations);
+  majorCommands.push(C.admit(request));
+ };
+ const natNeutralName=name("iotaNeutralNat"),boxNeutralName=name("iotaNeutralBox");
+ axiom(natNeutralName,nat);axiom(boxNeutralName,box);
+ const natNeutral=cn(natNeutralName),boxNeutral=cn(boxNeutralName);
+ const projection=build("Proj",E.proj(boxName,0n,boxNeutral.term),boxName,0n,boxNeutral.id);
+ const recOn=(major,motive,minor)=>apps(cn(boxRecName,[one,unit(L.zero)]),[nat,motive,minor,major]);
+ const motive=lam("box",box,nat),minor=lam("value",nat,bv(0n));
+ const stuck=natRec(natNeutral);
+ const majorCases=[
+  ["stuck-recursive-major",stuck,stuck],
+  ["neutral-structure-field",recOn(boxNeutral,motive,minor),projection],
+  ["neutral-structure-constant",recOn(boxNeutral,motive,lam("value",nat,lit(11n))),lit(11n)],
+  ["structure-major-beta",recOn(app(lam("box",box,bv(0n)),boxNeutral),motive,minor),projection],
+  ["structure-major-zeta",recOn(letE("box",box,boxNeutral,bv(0n)),motive,minor),projection],
+  ["structure-trailing",app(recOn(boxNeutral,lam("box",box,fnType),
+   lam("value",nat,lam("x",nat,bv(1n)))),nine),projection]
+ ];
+ // The motive returns Type, so its recursor elimination level is two.
+ const dependentType=forall("box",box,apps(cn(boxRecName,[L.succ(one),unit(L.zero)]),
+  [nat,lam("box",box,s1),lam("value",nat,nat),bv(0n)]));
+ const dependentValue=lam("box",box,lit(0n));
+ const majorDefinitions=[
+  ["majorDependent",dependentType,dependentValue,true],
+  ["majorProjected",nat,recOn(boxNeutral,motive,minor),true],
+  ["majorWrongType",s1,recOn(boxNeutral,motive,minor),false],
+  ["majorWrongDependent",dependentType,lam("box",box,s1),false]
+ ];
+ const orderRoot=recOn(boxNeutral,motive,minor);
+ const majorInput=arena,majorBuilt=accepted(get("psKernelExprV2DecodeChecked")(majorInput),"major-input");
+ let owned={arena:majorInput,built:majorBuilt,declarations:majorDeclarations};
+ for(const command of majorCommands)owned=accepted(get("psKernelDagGeneratedAfterCommand")(
+  command,majorSession.environment,owned),"major-checked-generated");
+ const majorScalar=get("psKernelKernelSessionChecker")(majorSession,nil,safe).context;
+ const context=c=>get("psKernelExprV2CheckContextEmpty")(c);
+ const initial=()=>get("psKernelExprV2CheckStateFromWhnf")(
+  get("psKernelExprV2WhnfStateForDeclarations")(owned.arena,owned.declarations));
+ const local=c=>n=>get("psKernelExprV2CheckLocalValue")(c,n);
+ const dagEq=get("psKernelExprV2TryDefEqStateWithFuel");
+ const majorReducer=fuel=>get("psKernelExprV2TryReduceRecursorOwnedWithFuel")(fuel)(dagEq(64n))(local);
+ const attempt=(value,label)=>accepted(accepted(value,label+"-some"),label+"-ok");
+ const ok=(s,r)=>Option.some(Ex.ok({fst:s,snd:r}));
+ const error=message=>Option.some(Ex.error(message));
+ const compareMajor=(old,actual,label,reduction=false)=>{
+  const attempted=accepted(actual,label+"-owned");
+  if(rejected(old)){must(rejected(attempted)&&attempted.error===old.error,label+"-exact-error");return;}
+  const a=accepted(old,label+"-reference"),b=accepted(attempted,label+"-result");
+  must(a.snd.nextFresh===b.fst.nextFresh,label+"-fresh-counter");
+  if(reduction){
+   if(same(a.fst,none)){must(same(b.snd,none),label+"-inert");return;}
+   must(exact(accepted(a.fst,label+"-old-root"),decoded(b.fst.whnf.arena,
+    accepted(b.snd,label+"-new-root"))),label+"-exact-term");
+  }else must(exact(a.fst,decoded(b.fst.whnf.arena,b.snd)),label+"-exact-term");
+ };
+ let publics=0,cores=0,ownerCases=0,reducerCases=0;
+ for(const [label,term] of majorCases){
+  for(const fuel of [0n,1n,2n,3n,6n,16n,64n])
+   for(const [maxRecDepth,recDepth] of [[0n,0n],[1n,15n],[1n,16n]]){
+    const oldContext={...majorScalar,maxRecDepth,recDepth},c=context(oldContext);
+    compareMajor(get("psKernelWhnfWithRecursorFuel")(fuel,oldEq(fuel),oldContext,oldEmpty,term.term),
+     get("psKernelExprV2TryWhnfCheckStateWithFuel")(fuel,c,initial(),term.id),label+"-public");
+    publics++;
+    for(const cheapRec of [false,true])for(const cheapProj of [false,true]){
+     compareMajor(get("psKernelWhnfCoreWithRecursorFuel")(
+      fuel,oldEq(fuel),oldContext,oldEmpty,term.term,cheapRec,cheapProj),
+      get("psKernelExprV2TryWhnfCoreOwnedWithLocalValuesFuel")(
+       fuel,dagEq(fuel),local,c,initial(),term.id,cheapRec,cheapProj),label+"-core");
+     cores++;
+    }
+   }
+  for(const fuel of [0n,1n,2n,4n,16n])for(const recFuel of [0n,1n,2n,8n])
+   for(const [maxRecDepth,recDepth] of [[0n,0n],[1n,15n],[1n,16n]]){
+    const oldContext={...majorScalar,maxRecDepth,recDepth};
+    compareMajor(get("psKernelWhnfWithFuel")(fuel)(
+     get("psKernelReduceRecursorBoundedWithFuel")(recFuel)(oldEq(64n)))(
+      oldContext)(oldEmpty)(term.term),
+     get("psKernelExprV2TryWhnfOwnedWithReducerFuel")(fuel)(majorReducer(recFuel))(local)(
+      context(oldContext))(initial())(term.id),label+"-fixed-owner");
+    ownerCases++;
+   }
+  for(const fuel of [0n,1n,2n,3n,8n,32n])
+   for(const [maxRecDepth,recDepth] of [[0n,0n],[1n,15n],[1n,16n]]){
+    const oldContext={...majorScalar,maxRecDepth,recDepth};
+    for(const cheapRec of [false,true])for(const cheapProj of [false,true]){
+     compareMajor(get("psKernelReduceRecursorBoundedWithFuel")(fuel)(oldEq(64n))(
+      oldContext)(oldEmpty)(term.term)(cheapRec)(cheapProj),
+      majorReducer(fuel)(context(oldContext))(initial())(term.id)(cheapRec)(cheapProj),
+      label+"-reducer",true);reducerCases++;
+    }
+   }
+ }
+ must(publics===126&&cores===504&&ownerCases===360&&reducerCases===432,"major-complete-resource-matrix");
+ console.log("PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX_JS: PASS public=126 core=504 owners=360 reducer=432");
+ const majorRun=extra=>get("psKernelV1RunDag")(empty,nil,safe,majorInput,list([...majorCommands,...extra]));
+ const majorReplies=array(accepted(majorRun(majorCases.map(([,term])=>C.whnf(term.id))),
+  "major-public-batch").replies).slice(majorCommands.length);
+ must(majorReplies.length===majorCases.length,"major-public-batch-complete");
+ majorReplies.forEach((reply,i)=>{
+  const [label,term,expected]=majorCases[i];
+  must(same(reply,Reply.normalized(reply.value))&&exprEq(reply.value,expected.term),label+"-public-result");
+  must(exprEq(accepted(get("psKernelV1Whnf")(majorSession,nil,safe,term.term),label+"-V1"),expected.term),
+   label+"-V1-result");
+ });
+ for(const [label,type,value,shouldAccept] of majorDefinitions){
+  const declaration=Request.definitionDecl({
+   base:{name:name(label),levelParams:nil,type:type.term},value:value.term,hints,safety:safe});
+  const request=D.definitionDecl({
+   base:{name:name(label),levelParams:nil,type:type.id},value:value.id,hints,safety:safe});
+  const reference=get("psKernelV1AdmitDeclaration")(majorSession,declaration);
+  const actual=majorRun([C.admit(request)]);
+  const resources=majorSession.resources;
+  const direct=accepted(get("psKernelDagTryAdmitSimpleWithFuel")(
+   resources.fuel,get("psKernelKernelSessionEnvironment")(majorSession),resources.maxRecDepth,resources.maxNatSize,
+   owned.arena,owned.declarations,request,declaration),label+"-direct-V2-some");
+  if(shouldAccept){
+   const environment=accepted(direct,label+"-direct-V2-ok");
+   must(!same(get("psKernelEnvironmentFind")(environment,name(label)),none),label+"-direct-V2-published");
+  }else must(rejected(direct)&&rejected(reference)&&direct.error===reference.error.message,
+   label+"-direct-V2-exact-error");
+  if(shouldAccept){accepted(reference,label+"-V1-admission");accepted(actual,label+"-public-admission");}
+  else{invalid(reference,label+"-V1-invalid");invalid(actual,label+"-public-invalid");}
+ }
+ console.log("PSC1_V2_DAG_RECURSOR_MAJOR_ADMISSION_JS: PASS valid=6 admitted=2 rejected=2");
+
+ const modulus=BigInt(get("psKernelCacheHashModulus"));
+ const tagRows=(rows,tag)=>{const xs=array(rows);return xs.length===1&&BigInt(xs[0].hash)===modulus+tag;};
+ const markerInArena=(state,tag)=>{
+  const rows=array(state.checkedInfer);
+  if(rows.length!==1)return false;
+  const found=get("psKernelExprV2PagedRequire")(state.whnf.arena,rows[0].result);
+  return !rejected(found)&&same(accepted(found,"major-marker-node").node,
+   get("PsKernelExprV2Node").lit(Literal.nat(12000n+tag)));
+ };
+ const tagged=(state,tag)=>state.nextFresh===tag&&tagRows(state.checkedInfer,tag)&&
+  tagRows(state.success,tag)&&tagRows(state.inferOnly,tag)&&tagRows(state.unfold,tag)&&tagRows(state.failure,tag)&&markerInArena(state,tag);
+ const stamp=(key,state,tag)=>{
+  const made=accepted(get("psKernelExprV2PagedMkLit")(state.whnf.arena,Literal.nat(12000n+tag)),"major-stamp");
+  const cache={source:key,result:made.snd,hash:modulus+tag},pair={left:key,right:key,hash:modulus+tag};
+  return {whnf:{arena:made.fst,coreCache:List.cons(cache,state.whnf.coreCache),
+   publicCache:List.cons(cache,state.whnf.publicCache),declarations:state.whnf.declarations},
+   nextFresh:tag,checkedInfer:list([cache]),success:list([pair]),inferOnly:list([cache]),
+   unfold:list([cache]),failure:list([pair])};
+ };
+ const callback=(seed,failAt,decline,expected,result,tag,state,root)=>{
+  if(root!==expected||!tagged(state,tag))return error("major callback received wrong input or stale state");
+  if(failAt===tag+1n-seed)return decline?none:error("MAJOR_INJECTED");
+  return ok(stamp(expected,state,tag+1n),result);
+ };
+ const c=context(majorScalar),seed=30n,seeded=stamp(boxNeutral.id,initial(),seed);
+ must(!tagged({...seeded,whnf:{...seeded.whnf,arena:owned.arena}},seed),"major-arena-loss-marker-detected");
+ const denyEq=_c=>_s=>_a=>_b=>error("MAJOR_FORBIDDEN_DEFEQ");
+ const oldW=_c=>s=>r=>Ex.ok({fst:r,snd:{...s,nextFresh:s.nextFresh+1n}});
+ const oldC=c=>s=>r=>_cr=>_cp=>oldW(c)(s)(r);
+ const oldI=_c=>s=>r=>exact(r,boxNeutral.term)?Ex.ok({fst:box.term,snd:{...s,nextFresh:s.nextFresh+1n}}):
+  exact(r,box.term)?Ex.ok({fst:s1.term,snd:{...s,nextFresh:s.nextFresh+1n}}):Ex.error("MAJOR_OLD_INFER_INPUT");
+ const oldD=_c=>_s=>_a=>_b=>Ex.error("MAJOR_FORBIDDEN_DEFEQ");
+ let sequences=0,propagated=0;
+ for(const cheapRec of [false,true])for(const cheapProj of [false,true]){
+  const run=(failAt,decline)=>{
+   const publicWhnf=_c=>s=>r=>s.nextFresh===seed?
+    callback(seed,failAt,decline,boxNeutral.id,boxNeutral.id,seed,s,r):
+    s.nextFresh===seed+2n?callback(seed,failAt,decline,box.id,box.id,seed+2n,s,r):
+    callback(seed,failAt,decline,s1.id,s1.id,seed+4n,s,r);
+   const coreWhnf=_c=>s=>r=>cr=>cp=>cr===cheapRec&&cp===cheapProj?
+    callback(seed,failAt,decline,boxNeutral.id,boxNeutral.id,seed,s,r):error("MAJOR_CHEAP_FLAGS");
+   const inferType=_c=>s=>r=>s.nextFresh===seed+1n?
+    callback(seed,failAt,decline,boxNeutral.id,box.id,seed+1n,s,r):
+    callback(seed,failAt,decline,box.id,s1.id,seed+3n,s,r);
+   return get("psKernelExprV2TryReduceRecursorOwnedWith")(
+    publicWhnf,coreWhnf,inferType,denyEq,c,seeded,orderRoot.id,cheapRec,cheapProj);
+  };
+  const actual=run(0n,false);
+  compareMajor(get("psKernelReduceRecursorWith")(oldW,oldC,oldI,oldD,majorScalar,
+   {...oldEmpty,nextFresh:seed},orderRoot.term,cheapRec,cheapProj),actual,"major-five-fixed-callbacks",true);
+  const result=attempt(actual,"major-five-callbacks");
+  must(tagged(result.fst,seed+5n),"major-all-six-fields-after-rule");
+  must(array(result.fst.whnf.coreCache).some(row=>BigInt(row.hash)===modulus+seed+5n),"major-core-retained");
+  must(array(result.fst.whnf.publicCache).some(row=>BigInt(row.hash)===modulus+seed+5n),"major-public-retained");
+  must(!same(get("psKernelExprV2DeclarationRefFind")(result.fst.whnf.declarations)(boxRecName),none),
+   "major-owner-retained");
+  must(!same(result.snd,none),"major-rule-actually-reduced");
+  accepted(get("psKernelExprV2PagedValidate")(result.fst.whnf.arena),"major-final-arena");
+  sequences++;
+  for(const failAt of [1n,2n,3n,4n,5n])for(const decline of [false,true]){
+   const failure=run(failAt,decline);
+   if(same(failure,none))must(decline,"major-outer-None-propagation");
+   else{const result=accepted(failure,"major-propagated-some");
+    must(!decline&&rejected(result)&&result.error==="MAJOR_INJECTED","major-exact-propagation");}
+   propagated++;
+  }
+ }
+ must(sequences===4&&propagated===40,"major-sequence-matrix");
+ console.log("PSC1_V2_DAG_RECURSOR_MAJOR_STATE_JS: PASS sequence=4 propagated=40");
+
+ let familyCases=0;
+ for(const info of [natInfo,boxInfo]){
+  const type=accepted(get("psKernelExprV2RecursorTypeOwner")(owned.declarations,info),"major-type-owner");
+  for(const fuel of [0n,1n,2n,3n,4n,5n,8n])for(const index of [0n,1n,3n,4n,8n]){
+   const expected=get("psKernelRecursorMajorInductWithFuel")(fuel)(info.base.type)(index);
+   const actual=accepted(get("psKernelExprV2RecursorMajorInductWithFuel")(fuel)(owned.arena)(type)(index),
+    "major-type-walk");
+   must(same(expected,actual),"major-type-walk-exact");familyCases++;
+  }
+ }
+ const bad=owned.arena.size+1n;
+ must(same(accepted(get("psKernelExprV2RecursorMajorInductWithFuel")(0n)(owned.arena)(bad)(0n),
+  "major-zero"),none),"major-type-zero-before-root");
+ const expectedInvalid=get("psKernelExprV2PagedRequire")(owned.arena,bad);
+ const actualInvalid=get("psKernelExprV2RecursorMajorInductWithFuel")(1n)(owned.arena)(bad)(0n);
+ must(rejected(expectedInvalid)&&rejected(actualInvalid)&&expectedInvalid.error===actualInvalid.error,
+  "major-type-positive-invalid-root");
+ const forbidden=_c=>_s=>_r=>error("MAJOR_FORBIDDEN_CALLBACK");
+ const unowned=get("psKernelExprV2CheckStateFromWhnf")(
+  get("psKernelExprV2WhnfStateForDeclarations")(owned.arena,nil));
+ const struct=(state,info,root)=>get("psKernelExprV2RecursorToStructureOwnedWith")(
+  forbidden,forbidden,c,state,info,root);
+ must(attempt(struct(unowned,boxInfo,boxMajor.id),"major-ctor-shortcut").snd===boxMajor.id,
+  "major-constructor-before-owner");
+ must(attempt(struct(initial(),natInfo,natNeutral.id),"major-recursive").snd===natNeutral.id,
+  "major-recursive-family-never-infers");
+ must(same(struct(unowned,natInfo,natNeutral.id),none),"major-missing-owner-decline");
+ must(same(get("psKernelExprV2RecursorNormalizeMajor")(
+  majorScalar,initial().whnf,natNeutral.id),none),"major-compatibility-scope-unchanged");
+ for(const fuel of [0n,1n,2n,4n])for(const [count,index] of [[0n,0n],[1n,0n],[3n,0n],[3n,1n],[1n,2n]]){
+  const expected=array(get("psKernelStructureFieldsWithFuel")(fuel)(boxName)(boxNeutral.term)(count)(index));
+  const actual=accepted(get("psKernelExprV2RecursorStructureFieldsWithFuel")(fuel)(
+   owned.arena)(boxName)(boxNeutral.id)(count)(index),"major-fields");
+  const roots=array(actual.snd);must(roots.length===expected.length,"major-field-count-truncation");
+  roots.forEach((root,i)=>must(exact(decoded(actual.fst,root),expected[i]),"major-field-order-exact"));
+ }
+ must(familyCases===70,"major-family-count");
+ console.log("PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY_JS: PASS comparisons=70 fields=20");
+
+ const stringValues=["","a","é","e\u0301","🙂","a\u0000β"];
+ let stringCases=0,stringFailures=0;
+ arena=owned.arena;
+ for(const value of stringValues){
+  const major=build("Lit",E.lit(Literal.str(value)),Literal.str(value));
+  const term=natRec(major);
+  const state={...initial(),whnf:{...initial().whnf,arena}};
+  const identity=_c=>s=>r=>ok(s,r);
+  const normalized=attempt(get("psKernelExprV2RecursorNormalizeMajorOwnedWith")(
+   identity,forbidden,c,state,natInfo,major.id),"String-major-normalize");
+  must(exact(get("psKernelStringLitToConstructor")(value),decoded(normalized.fst.whnf.arena,normalized.snd)),
+   "String-major-constructor-exact");
+  // Intentionally ill-typed raw Nat-rec/String inputs only inspect callbacks.
+  // These are never counted as admitted declarations.
+  const seeded=stamp(major.id,state,60n);
+  for(const cheapRec of [false,true])for(const cheapProj of [false,true]){
+   const run=(failAt,decline)=>{
+    const publicWhnf=_c=>s=>r=>s.nextFresh===60n?
+     callback(60n,failAt,decline,major.id,major.id,60n,s,r):
+     callback(60n,failAt,decline,r,r,61n,s,r);
+    const coreWhnf=_c=>s=>r=>cr=>cp=>cr===cheapRec&&cp===cheapProj?
+     callback(60n,failAt,decline,major.id,major.id,60n,s,r):error("STRING_MAJOR_CHEAP_FLAGS");
+    return get("psKernelExprV2TryReduceRecursorOwnedWith")(
+     publicWhnf,coreWhnf,forbidden,denyEq,c,seeded,term.id,cheapRec,cheapProj);
+   };
+   const actual=run(0n,false);
+   const oldInfer=_c=>_s=>_r=>Ex.error("STRING_MAJOR_FORBIDDEN_INFERENCE");
+   compareMajor(get("psKernelReduceRecursorWith")(oldW,oldC,oldInfer,oldD,majorScalar,
+    {...oldEmpty,nextFresh:60n},term.term,cheapRec,cheapProj),actual,"String-public-callback",true);
+   const result=attempt(actual,"String-major-two-states");
+   must(tagged(result.fst,62n)&&same(result.snd,none),"String-major-two-complete-states");
+   stringCases++;
+   for(const decline of [false,true]){
+    const failure=run(2n,decline);
+    if(same(failure,none))must(decline,"String-second-public-None");
+    else{const result=accepted(failure,"String-failure-some");
+     must(!decline&&rejected(result)&&result.error==="MAJOR_INJECTED","String-second-public-error");}
+    stringFailures++;
+   }
+  }
+ }
+ must(stringCases===24&&stringFailures===48,"String-major-matrix");
+ console.log("PSC1_V2_DAG_RECURSOR_MAJOR_STRING_JS: PASS callbacks=24 propagated=48");
+ arena=savedArena;
+}
+
 console.log("PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2");
 console.log("PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9 assertions="+assertions);

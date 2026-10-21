@@ -55,13 +55,13 @@ def psKernelExprV2DefEqNatPred
               | _ => Except.ok (Prod.mk state Option.none)
       | _ => Except.ok (Prod.mk state Option.none)
 
-def psKernelExprV2DefEqLazyNatAfterPredContinueWith
+def psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith
     (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
@@ -77,31 +77,27 @@ def psKernelExprV2DefEqLazyNatAfterPredContinueWith
             else if rightEntry.hasFVar then false
             else true;
           if eager then
-            let reduceWhnf :=
-              fun (_scalar : PsKernelCheckerContext)
-                  (nextState : PsKernelExprV2WhnfState) (root : Nat) =>
-                whnf context nextState root;
-            match psKernelExprV2TryReduceNatWith reduceWhnf context.scalar
-                state.whnf left with
+            match psKernelExprV2TryReduceNatOwnedWith whnf context
+                state left with
             | Option.none => Option.none
             | Option.some attemptedLeft =>
                 match attemptedLeft with
                 | Except.error error => Option.some (Except.error error)
                 | Except.ok leftResult =>
                     let afterLeft :=
-                      psKernelExprV2CheckStateWithWhnf state (Prod.fst leftResult);
+                      Prod.fst leftResult;
                     match Prod.snd leftResult with
                     | Option.some value => defeq context afterLeft value right
                     | Option.none =>
-                        match psKernelExprV2TryReduceNatWith reduceWhnf context.scalar
-                            afterLeft.whnf right with
+                        match psKernelExprV2TryReduceNatOwnedWith whnf context
+                            afterLeft right with
                         | Option.none => Option.none
                         | Option.some attemptedRight =>
                             match attemptedRight with
                             | Except.error error => Option.some (Except.error error)
                             | Except.ok rightResult =>
                                 let afterRight :=
-                                  psKernelExprV2CheckStateWithWhnf afterLeft (Prod.fst rightResult);
+                                  Prod.fst rightResult;
                                 match Prod.snd rightResult with
                                 | Option.some value => defeq context afterRight left value
                                 | Option.none => continuation context afterRight left right
@@ -109,13 +105,13 @@ def psKernelExprV2DefEqLazyNatAfterPredContinueWith
 
 /- A candidate literal predecessor is retained only when both sides have one.
 Otherwise the original owner resumes; NatPred cannot publish semantic state. -/
-def psKernelExprV2DefEqLazyNatPredContinueWith
+def psKernelExprV2DefEqLazyNatPredContinueOwnedWith
     (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
@@ -124,7 +120,7 @@ def psKernelExprV2DefEqLazyNatPredContinueWith
   | Except.ok leftResult =>
       match Prod.snd leftResult with
       | Option.none =>
-          psKernelExprV2DefEqLazyNatAfterPredContinueWith continuation defeq whnf
+          psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith continuation defeq whnf
             context state left right
       | Option.some leftPred =>
           match psKernelExprV2DefEqNatPred (Prod.fst leftResult) right with
@@ -134,17 +130,17 @@ def psKernelExprV2DefEqLazyNatPredContinueWith
               | Option.some rightPred =>
                   defeq context (Prod.fst rightResult) leftPred rightPred
               | Option.none =>
-                  psKernelExprV2DefEqLazyNatAfterPredContinueWith continuation defeq whnf
+                  psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith continuation defeq whnf
                     context state left right
 
-def psKernelExprV2DefEqLazyNatContinueWithFuel
+def psKernelExprV2DefEqLazyNatContinueOwnedWithFuel
     (fuel : Nat)
     (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
@@ -159,8 +155,8 @@ def psKernelExprV2DefEqLazyNatContinueWithFuel
             | Except.error error => Option.some (Except.error error)
             | Except.ok rightZero =>
                 if rightZero then Option.some (Except.ok (Prod.mk state true))
-                else psKernelExprV2DefEqLazyNatPredContinueWith continuation defeq whnf context state left right
-          else psKernelExprV2DefEqLazyNatPredContinueWith continuation defeq whnf context state left right
+                else psKernelExprV2DefEqLazyNatPredContinueOwnedWith continuation defeq whnf context state left right
+          else psKernelExprV2DefEqLazyNatPredContinueOwnedWith continuation defeq whnf context state left right
 
 /- Stable standalone Nat APIs retain the original unsupported result. -/
 def psKernelExprV2DefEqLazyNatUnsupported
@@ -168,6 +164,83 @@ def psKernelExprV2DefEqLazyNatUnsupported
     (_left _right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
   Option.none
+
+def psKernelExprV2DefEqLazyNatAfterPredOwnedWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith psKernelExprV2DefEqLazyNatUnsupported
+    defeq whnf context state left right
+
+def psKernelExprV2DefEqLazyNatPredOwnedWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqLazyNatPredContinueOwnedWith psKernelExprV2DefEqLazyNatUnsupported
+    defeq whnf context state left right
+
+def psKernelExprV2DefEqLazyNatOwnedWithFuel
+    (fuel : Nat)
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqLazyNatContinueOwnedWithFuel fuel psKernelExprV2DefEqLazyNatUnsupported
+    defeq whnf context state left right
+
+/- Original WHNF-only callback signatures remain compatibility wrappers.
+   Each callback is lifted against the actual complete state at its call. -/
+
+def psKernelExprV2DefEqLazyNatAfterPredContinueWith
+    (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith
+    continuation defeq (psKernelExprV2LiftCheckWhnf whnf) context state left right
+
+def psKernelExprV2DefEqLazyNatPredContinueWith
+    (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqLazyNatPredContinueOwnedWith
+    continuation defeq (psKernelExprV2LiftCheckWhnf whnf) context state left right
+
+def psKernelExprV2DefEqLazyNatContinueWithFuel
+    (fuel : Nat)
+    (continuation : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  psKernelExprV2DefEqLazyNatContinueOwnedWithFuel
+    fuel continuation defeq (psKernelExprV2LiftCheckWhnf whnf) context state left right
 
 def psKernelExprV2DefEqLazyNatAfterPredWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
@@ -177,8 +250,8 @@ def psKernelExprV2DefEqLazyNatAfterPredWith
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
-  psKernelExprV2DefEqLazyNatAfterPredContinueWith psKernelExprV2DefEqLazyNatUnsupported
-    defeq whnf context state left right
+  psKernelExprV2DefEqLazyNatAfterPredOwnedWith
+    defeq (psKernelExprV2LiftCheckWhnf whnf) context state left right
 
 def psKernelExprV2DefEqLazyNatPredWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
@@ -188,8 +261,8 @@ def psKernelExprV2DefEqLazyNatPredWith
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
-  psKernelExprV2DefEqLazyNatPredContinueWith psKernelExprV2DefEqLazyNatUnsupported
-    defeq whnf context state left right
+  psKernelExprV2DefEqLazyNatPredOwnedWith
+    defeq (psKernelExprV2LiftCheckWhnf whnf) context state left right
 
 def psKernelExprV2DefEqLazyNatWithFuel
     (fuel : Nat)
@@ -200,5 +273,5 @@ def psKernelExprV2DefEqLazyNatWithFuel
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
-  psKernelExprV2DefEqLazyNatContinueWithFuel fuel psKernelExprV2DefEqLazyNatUnsupported
-    defeq whnf context state left right
+  psKernelExprV2DefEqLazyNatOwnedWithFuel
+    fuel defeq (psKernelExprV2LiftCheckWhnf whnf) context state left right

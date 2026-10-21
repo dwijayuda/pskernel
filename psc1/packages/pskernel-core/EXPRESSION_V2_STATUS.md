@@ -24,35 +24,89 @@ offers a concrete transport boundary that enforces that discipline.
 
 ## One DAG checking owner
 
-`Checker/ExprV2/DefEq.lean` owns recursive DefEq callbacks. Its ordered path is
-entry fuel/depth guards, exact syntax/success-cache checks, the existing quick and
-binder-spine prefix, mandatory cheap core normalization, proof irrelevance, then
-the ordered natural-number prefix and the complete definition-selection/lazy-delta
-loop. The full-shape successor adds residual core WHNF, application/list and
-function-eta/binder/sort/literal rules under the same owner. The isolated staged successor adds matching projections and structure/String/unit
-terminal rules; exact native/generated qualification is still in progress.
-Integration889 is the latest terminal-green scoped developer checkpoint.
-The complete CheckState callback-carrier migration is isolated separately on
-research/psc1-pskernel-v2-carrier-20261021 and is not promoted by this document.
-The callbacks use the exact predecessor fuel chosen by the owner; the loop
-spends only its own recursive bound. The Nat lazy stage retains its separate
-entry-fuel guard; predecessor comparison does not add another depth entry.
-Unfold and failed-argument-shortcut caches belong to that owner. A failed shortcut
-only skips the same argument retry and still performs ordered unfolding.
+The full-state carrier at `4894fce8c7d048ae188495bc2090fedfddf7fcb4`
+has terminal native, authentic generated-JavaScript, canonical-source, proof
+and provider qualification. Integration source
+`a2590cc15c764dae9c6abfb941d6c3155ead5c81` is independently qualified for the
+scoped developer provider. Their history-preserving integration merge requires
+fresh exact-source gates. The work state records those identities; predecessor
+qualification does not establish a complete V2 replacement.
 
-`CheckCore.lean` is the shared inference/checking worker. Checked and
-inference-only judgments have separate caches. Proof irrelevance may infer a
-proposition's type but cannot publish a checked body judgment. An unsuccessful
-Nat predecessor candidate is discarded before eager reduction, retaining the
-original immutable arena owner. Successful DefEq publishes the original requested
-pair, not a substituted or normalized pair. Scope exit restores semantic caches
-while preserving only the permitted fresh-name progression and appended arena.
+`Checker/ExprV2/DefEq.lean` owns recursive DefEq callbacks. The ordered path is
+entry fuel/depth guards, exact syntax/success-cache checks, quick and binder
+spines, mandatory cheap core normalization, proof irrelevance, the natural-number
+prefix, ordered definition selection/lazy delta, full-shape rules, matching
+projections and structure/String/unit terminal rules. Every callback receives
+the exact predecessor fuel fixed by its owner; recursive loops consume only
+their own bound. A failed argument shortcut only suppresses that same retry and
+still performs ordered unfolding. Successful DefEq publishes the original
+requested pair.
 
-Declaration references retain original same-batch type/body IDs only after
-successful admission. Safe definitions and theorem bodies share their operation
-state as required. Unsafe/partial mutual members use private work environments
-and fresh per-member checker owners; publication occurs only after the whole
-batch succeeds. No external recursor body is accepted as trusted metadata.
+`Knot.lean`, `WhnfOwned.lean` and `CheckCallbacks.lean` connect public/core WHNF,
+recursor reduction and inference using the complete seven-field CheckState.
+Callbacks return the current owning state directly: its fresh counter and
+checked-inference, infer-only, success, failure and unfold caches must survive
+each transition. Pure WHNF helpers lift their output against that current state.
+The old four-field WhnfState interfaces are thin compatibility boundaries,
+rather than a second semantic algorithm.
+
+The subsequent admission/public-boundary repair carries that complete state
+through mandatory declaration sort/proposition normalization and supplies the
+real fixed DefEq callback to standalone public DAG WHNF. Its extra eight owner,
+12 propagation, 336 admission differential and 168 public-WHNF comparisons,
+and11 additional local lemmas are part of its mandatory exact-source qualification.
+
+`CheckCore.lean` remains the shared checked/infer-only worker with distinct
+judgment caches. Proof irrelevance cannot publish a checked body judgment.
+An unsuccessful Nat predecessor candidate discards its speculative arena.
+Scope exit restores semantic caches and preserves only the allowed fresh-name
+progression and appended arena. Typed local lookups use the current CheckContext;
+mixed legacy-local input retains its explicit unsupported boundary.
+
+Original same-batch type/body IDs become owning references only after checked
+admission. Safe definitions and theorem bodies share their operation state.
+Unsafe/partial mutual members use private work environments and fresh owners
+per member; publication is atomic. Ordinary generated recursor references,
+including K recursors, come from validated admission and private appended nodes,
+never supplied metadata. Quot and constructor-major recursor paths have direct
+DAG implementations. The current candidate also normalizes K majors, neutral
+nonrecursive structure majors and String majors through the same full owner.
+
+K resolves the recursor family from its checked private type, then performs
+major inference, public type WHNF, expression-mvar index guards, candidate
+construction/inference and DefEq in the original order. A false equality result
+retains the entire returned state and the original major. Type universes, rather
+than the recursor application's levels, instantiate the constructor candidate.
+K conversion precedes the constructor shortcut; non-K retains that shortcut.
+
+Structure normalization preserves the fixed callback sequence and requires
+matching checked family metadata and a non-propositional structure type.
+String normalization builds the canonical constructor form and always invokes
+the owning public WHNF callback afterward. Natural, structure and String
+normalizers feed one common recursor-rule pipeline. The raw WhnfState-only
+compatibility helper retains its explicit limited scope. K/major tests and local equations pass at carrier4894; a new integration SHA
+still requires all of its own terminal gates.
+
+The new native and generated carrier matrices require42 state probes,56 exact
+failure/decline cases,540 V1 differential cases,38 DefEq state probes and44 DefEq
+failure/decline cases. Ten local carrier lemmas supplement existing metadata,
+scope, fuel and equality proofs. These counts describe test coverage, not proof
+of the entire checker.
+
+The new recursor-major gates require126 public,504 core,360 independently owned
+budget and432 reducer comparisons, plus4 complete-state sequences/40 failure
+propagations,70 family/20 field controls and24 raw String callback probes/48
+failures. Six genuine checked neutral-major cases and four direct declaration
+admissions have native official controls. The deliberately ill-typed raw
+String/Nat-rec probes measure callback behavior and are not admitted proofs.
+
+K gates require108 public,432 core,648 reducer and96 independent-budget
+comparisons,16 complete-owner/16 propagation/16 metadata controls and5 ordering
+sentinels. Actual checked KUnit/KEquality declarations and theorem majors supply
+six valid, three invalid and two strictly direct admission cases. Both generated
+routes run the same matrices. Ten major and six K local theorems describe guards
+and callback-state equations with explicit premises; they do not prove complete
+recursor equivalence or global kernel soundness.
 
 ## Remaining whole-operation fallback inventory
 
@@ -61,16 +115,16 @@ the complete original operation's resources and failure semantics.
 
 | Site | Trigger and remaining work |
 | --- | --- |
-| `API/Dag.lean: psKernelDagCheckTerminalOrOriginal` | General checking/inference outside the supported owning DAG rules, including missing owning external type/recursor references |
-| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including K, unfinished structure/String major normalization and missing owning references; Quot and ordinary constructor-major non-K iota are implemented in the isolated staged source |
-| `API/Dag.lean: psKernelDagIsDefEq` | Unsupported descendant callbacks or missing owning references; the staged source now has ordered prefix, lazy delta/projection, full-shape and terminal DAG paths |
+| `API/Dag.lean: psKernelDagCheckTerminalOrOriginal` | Checking/inference outside the supported owning DAG rules, including missing or mismatched same-operation type/recursor references |
+| `API/Dag.lean: psKernelDagWhnfExpression` | Reductions outside the direct DAG worker, including String-literal projection WHNF, unsupported recursor descendants and missing owning references; K/major normalization is qualified at carrier4894; each merge still requires its own gates |
+| `API/Dag.lean: psKernelDagIsDefEq` | Unsupported descendant callbacks or missing owning references; the ordered prefix, lazy delta/projection, full shape and final rules now have DAG paths in the carrier candidate |
 | `API/DagAdmission.lean: psKernelDagAdmitDeclaration` | Inductive construction/admission and declaration cases not handled by direct admission |
 
 Before these sites run, `psKernelV1RunDag` still decodes the validated arena once.
 Supported operation results may decode newly appended nodes for the existing
-public recursive-expression result type. Static admission guards in the staged source scan the canonical DAG with
-operation-owned visited state; the initial public decode and whole-operation
-admission fallback remain. These are acknowledged representation
+public recursive-expression result type. Static admission guards now scan the canonical DAG with operation-owned
+visited state; the initial public decode and remaining whole-operation admission
+fallback are still present. These are acknowledged representation
 migration costs; the kernel is **not** a complete DAG-native V2 replacement.
 
 The separately selectable V1 checker remains the semantic oracle. Its inference
@@ -110,7 +164,8 @@ remain visible in [the measured checkpoint report](PERFORMANCE_2026-10-21.md).
 
 The authentic Arena profiler runs original authenticated bodies at the unchanged
 4096 kernel fuel,60-second per-case wall limit and V8
-`--max-old-space-size=2048` cap. This is an old-space heap cap, not an OS RSS cap. A diagnostic job may finish
+`--max-old-space-size=2048` cap. That existing cap limits old-space heap rather
+than operating-system RSS. A diagnostic job may finish
 successfully while every profiled kernel case times out. Timeout-to-timeout
 comparisons are censored observations, not a numeric speedup.
 

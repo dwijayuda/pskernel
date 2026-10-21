@@ -2,7 +2,7 @@ import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 
 /-
-Explicit transitional ownership bridge for ordinary non-K recursors.
+Explicit transitional ownership bridge for ordinary recursors, including K.
 
 Complete inductive admission first constructs and validates the recursor type
 and every rule in the private work environment. Only after that admission
@@ -176,8 +176,7 @@ def psKernelDagGeneratedAfterCommand
           | Option.some info =>
               match info with
               | PsKernelConstantInfo.recInfo recursor =>
-                  if recursor.k then Except.ok state
-                  else if psKernelNameEq recursor.base.name name then
+                  if psKernelNameEq recursor.base.name name then
                     if Nat.beq recursor.numParams numParams then
                       if psKernelNameListsEq recursor.all (List.cons value.name List.nil) then
                         psKernelDagGeneratedInstallRecursor recursor state

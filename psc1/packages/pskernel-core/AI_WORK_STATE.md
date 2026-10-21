@@ -10,176 +10,417 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
-## 2026-10-21 13:58 UTC — staged727 fully qualified scoped provider; integration merge
 
-The qualified source is **`727b3dd6df6a1ba02959f9c86596933b06ce0a0a`**.
-[Integration39604699608](https://github.com/dwijayuda/pskernel/actions/runs/39604699608)
-is terminal PASS, native119237791103 and generated119237790434.
-[Correctness39604700328](https://github.com/dwijayuda/pskernel/actions/runs/39604700328)
-is terminal PASS, native119237794295 and canonical119237793626.
-All six [research39604699278](https://github.com/dwijayuda/pskernel/actions/runs/39604699278)
-jobs passed. Complete source checking covers177 portable modules/two roots;
-independently reconstructed canonical .ps covers134 modules. Both real generated
-routes compile through PSC1/TypeScript7.0.2 and execute in detached Node22 with
-empty PATH. Each generated route passes24 provider protocol cases plus8 API
-cases; native passes24 cases and the official provider's5 fixtures/four declarations.
-The complete-kernel DirectJS report is explicitly UNSUPPORTED.
 
-The restored mutual280/eight-official, fresh-member owners, atomic batch controls,
-binder/theorem/unsafe, scanner/proof, inference, DefEq, terminal-rule, admission
-guard, Quot and ordinary non-K recursor suites all pass at that exact source.
-Two wrapper-equality lemmas and the early generated2-export/4-partial/6-execution
-ABI sentinel qualify the WHNF staging repair. No fuel/depth rule was changed.
+## 2026-10-21 15:02 UTC — integrate qualified complete-state carrier; fresh merge gates
 
-This commit merges the qualified staged history into the active integration
-branch, retaining both parents and integration889's75-minute canonical build
-ceiling and historical receipts. The **new merge SHA itself is NOT RUN at commit
-creation**; its fresh push-triggered native, portable, canonical, generated,
-proof, benchmark, Arena and provider gates must finish before it inherits any
-release claim. This is not a main merge or npm publication.
+The carrier source **`4894fce8c7d048ae188495bc2090fedfddf7fcb4`** is now
+qualified for the documented scoped independent developer provider and its
+mandatory V2 migration matrices. Its [integration 39614047016](https://github.com/dwijayuda/pskernel/actions/runs/39614047016)
+is terminal PASS (native 119270188540, generated 119270188049);
+[correctness 39614046627](https://github.com/dwijayuda/pskernel/actions/runs/39614046627)
+is terminal PASS (native 119270185932, canonical 119270185717); all six
+[research 39614046465](https://github.com/dwijayuda/pskernel/actions/runs/39614046465)
+jobs passed. [Exact carrier receipt](evidence/2026-10-21-4894fce.json) preserves
+file/artifact digests and source-bound summaries. The complete portable profile
+has 182 modules/two roots; independently reconstructed and checked canonical
+.ps has 139 modules, closure SHA256
+`e89e31fa578cb57a0990f243a4e0fa9261b93caefc69b9a6c77329737c06ebd7`.
+Native passes 24 detached empty-PATH protocol cases and five official fixtures;
+each authentic generated route passes 24 protocol and eight API cases.
+Complete-kernel DirectJS is explicitly UNSUPPORTED.
 
-| Exact source | Native | Portable .lean | Canonical .ps | Generated JS | Local proofs | Benchmark | Arena | Provider |
+This integration merge retains both parents: previous integration
+`a2590cc15c764dae9c6abfb941d6c3155ead5c81` and qualified carrier4894.
+The **merge commit itself is NOT RUN at creation**. Its exact Git commit ID
+and push-triggered terminal gates must be checked before assigning it a PASS.
+No parent's CI is inherited. The source combines the single complete CheckState
+WHNF/DefEq/inference callback owner, ordinary checked K recursor ownership,
+K conversion and Nat/String/structure major normalization. The staged raw
+WHNF ABI, terminal DefEq and original universe-negative controls are retained.
+The canonical job retains its 75-minute build ceiling; kernel resources and
+60-second Arena case limits are unchanged.
+
+### Exact-source gate table
+
+| Source | Native | Portable .lean | Canonical .ps | Generated JS | Local proofs | Benchmarks | Arena | Provider |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 88924063a5d9761f52a130c6a581cac6901ad407 | PASS | PASS | PASS | PASS | PASS | PASS selected; regressions | FAIL | PASS |
-| 727b3dd6df6a1ba02959f9c86596933b06ce0a0a | PASS | PASS | PASS | PASS | PASS | PASS selected; regressions | FAIL | PASS |
-| bd35452a1c10f22bc7e863efafd1a868a3fe3b72 carrier | PASS | PASS | PASS source check; runtime FAIL | FAIL fixture | PASS native | PASS native; generated NOT RUN after failure | FAIL | PASS native; generated NOT RUN after failure |
-| This integration merge | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+| a2590cc15c764dae9c6abfb941d6c3155ead5c81 | PASS | PASS | PASS | PASS | PASS | PASS selected; regressions | FAIL | PASS |
+| 4894fce8c7d048ae188495bc2090fedfddf7fcb4 | PASS | PASS | PASS | PASS | PASS | PASS selected; regressions | IN PROGRESS | PASS |
+| This history-preserving integration merge | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
 
-### Exact727 artifacts and full Arena outcome
+Carrier4894 passes the mandatory non-K-major 126 public/504 core/360 owner/
+432 reducer comparisons, K 108 public/432 core/648 reducer and 96 independent
+owner-budget cases, the full carrier 42/56/540/38/44 and admission/public-WHNF
+8/12/336/168 matrices, original mutual280/eight-official and all earlier smoke
+controls. Actual checked positive and negative declarations have official Lean
+fixtures. All required local proof/axiom-audit gates passed; local equations
+and finite tests do not establish global soundness.
 
-[Permanent receipt](evidence/2026-10-21-727b3dd.json) preserves all193 per-case
-classifications, nonmatching diagnostics, terminal run/job identities and per-file
-digests. Raw immutable Actions artifacts are the authoritative execution records:
+The carrier [full Arena 39614046557](https://github.com/dwijayuda/pskernel/actions/runs/39614046557)
+is still running at this observation. Its official job 119270185141 passed;
+no generated total is claimed until job 119271283488 terminates.
 
-- Native [12348435907](https://github.com/dwijayuda/pskernel/actions/runs/39604699608/artifacts/12348435907),
-  ZIP SHA256 `b19d1a32bfd425986c1abc0d20d8e216b18142bd4ce873912d0dc3615be94ca5`.
-- .lean-generated [12348852755](https://github.com/dwijayuda/pskernel/actions/runs/39604699608/artifacts/12348852755),
-  ZIP SHA256 `20909799750b896e510c6cc2e4306cb0e4dbc5cb72576f18b422a38e4423cb9f`.
-- canonical .ps/provider [12349553668](https://github.com/dwijayuda/pskernel/actions/runs/39604700328/artifacts/12349553668),
-  ZIP SHA256 `69c3fd6e00cfd3358c10faa257b2482ca5357b65ec40957f59e25126e847ac87`.
-- Full Arena [12350068900](https://github.com/dwijayuda/pskernel/actions/runs/39604699432/artifacts/12350068900),
-  ZIP SHA256 `44434c596cb669aceec436096c26f44ad67981033a2dd2851f935f605b6e6766`.
+### Fully observed integration a259 and performance
 
-[Full Arena39604699432](https://github.com/dwijayuda/pskernel/actions/runs/39604699432)
-is terminal FAIL qualification:193=172 matching outcomes (105 acceptance,
-59 kernel rejection,1 metadata rejection,7 transport rejection)+2 separately
-classified unsafe/partial agreements+17 host timeouts+1 kernel-resource
-exhaustion+1 unsupported nested-recursion case. Official reference119237789173
-passed. No timeout/resource/unsupported outcome is counted as parity.
+The earlier exact integration a259 independently has terminal PASS in
+[integration 39612691517](https://github.com/dwijayuda/pskernel/actions/runs/39612691517),
+[correctness 39612691610](https://github.com/dwijayuda/pskernel/actions/runs/39612691610)
+and all six [research 39612691695](https://github.com/dwijayuda/pskernel/actions/runs/39612691695)
+jobs. Its complete [193-case Arena 39612691512](https://github.com/dwijayuda/pskernel/actions/runs/39612691512)
+is terminal FAIL: **172 matching outcomes** (105 acceptance, 59 kernel rejection,
+one metadata rejection, seven transport rejections), **two separately classified
+unsafe/partial safety-contract agreements, 17 host timeouts, one kernel-resource
+exhaustion and one unsupported case**. All 193 records and 21 nonmatching
+diagnostics are preserved in [the permanent a259 receipt](evidence/2026-10-21-a2590cc.json).
+Timeout indices are 23,72,78,80,82–87,90–94,96,98; index81 is Church fuel
+exhaustion and index16 is unsupported nested recursive occurrences. Neither
+timeout nor resource/unsupported outcome is counted as a parity pass.
 
-Zero-based timeout indices:23,72,78,80,82–87,90–94,96,98. Unsupported index16 is
-bugs/rec-missing-ih. Resource index81 is church-numerals:23.797seconds and
-1,175,820KiB peak RSS, returning the actual reduction-budget error. Its replay
-`sourceSha256=443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1`
-covers the adapted complete input including export metadata. The authenticated
-unchanged body alone is
-`85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47`.
-The historical header adaptation does not constitute a fresh native4.35 export.
+[The performance report](PERFORMANCE_2026-10-21.md) now preserves fresh a259
+and4894 samples and complete tables, including cold/warm, construction and RSS.
+At4894, binder32 admission is 554.792 ms DAG versus 260.326 ms V1, construction
+87.211 versus 0.730 ms and maximum RSS 357948 versus 340360 KiB. Projection8
+WHNF is 52.455 versus 34.584 ms. Selected native unique/collision groups also
+regress. Historical selected 8–16× gains are not a whole-kernel or current-source
+claim. The existing generated comparison's 2048 MiB V8 old-space cap is not
+an operating-system RSS cap.
 
-### Performance and next implementation
+### Authentic native resource attribution and remaining work
 
-[Performance receipts](PERFORMANCE_2026-10-21.md) retain all19 native groups,
-32 generated groups and6 admission groups at source727, with cold/warm,
-construction and RSS controls. Native collision WHNF and generated projection
-WHNF regress. Binder32 admission takes219.048ms V1 versus555.452ms DAG per
-measured32-declaration batch; historical8–16times admission gains do not apply.
-The existing2GiB setting is V8 old-space, not an operating-system RSS limit.
+The separate [native replay 39620233494 / 119291437634](https://github.com/dwijayuda/pskernel/actions/runs/39620233494/job/119291437634)
+is terminal PASS diagnostic collection at harness44ca03e, using exact production
+`369bee5801bd5e4476837684fad3f7e1ca8c422c`.
+[Permanent native receipt](evidence/2026-10-21-44ca03e-native-v1.json) shows that
+original V1 admits three original Church requests and returns actual fuel
+exhaustion on request index3 at fuel4096. Runtime was 0.689668 seconds including
+launch; sampled VmHWM was at least 76,443,648 bytes. The cgroup charged-memory
+peak of 15,990,784 bytes is different accounting from RSS. All 138 transport
+and three actual native controls passed; exported metadata was never installed.
+This reproduces the generated resource result, but official Lean accepts, so
+the compatibility case remains open. It is not a current-merge kernel gate.
 
-Carrierbd's native integration119238388859/correctness119238388545 and all21
-owner/two ABI lemmas passed. Both generated routes failed the same test factory
-at owned-state-smoke.mjs:544–546: a five-argument flat factory was called with
-four arguments. The prepared repair supplies its result through an explicit
-lambda without changing production semantics or weakening any assertion.
+**A is achieved at exact a259 and4894 for the documented scoped V1 developer
+provider; B and C remain unachieved.** V1 remains the default and separately
+selectable reference. Four full-operation fallback sites, initial validated
+arena decode, recursive generated-metadata import, V1 inductive admission,
+missing mutual/nested and preexisting-session owners, and String-literal
+projection WHNF remain. No new trusted runtime path or resource change is made.
 
-The separate carrier successor implements owned K, structure-major and
-String-major recursor normalization, with strict direct-admission tests and
-fresh native/generated/proof gates; it is not included in this integration merge.
-Diagnostic harnessab61efebac4e0b09cc3bf57c09380ae53ac2cf7f in
-[39607734805](https://github.com/dwijayuda/pskernel/actions/runs/39607734805)
-builds pinned production369bee and is IN PROGRESS. It will attribute real
-zero-fuel/error returns and run an actual original-V1 replay; a diagnostic
-collection PASS is never a kernel qualification.
+The carrier history below is preserved verbatim. The distinct integration
+work-state history at a259 is archived in
+[evidence/work-state-integration-a2590cc.md](evidence/work-state-integration-a2590cc.md),
+so neither side's receipts or earlier failures are overwritten.
+Next: inspect this merge's exact native and both generated-route gates; qualify
+the isolated String-projection slice, then complete post-admission mutual/nested
+owners and the measured cache lookup bottleneck with full differential gates.
+No asynchronous continuation is asserted.
 
-**A is achieved at exact727 for the documented scoped V1 developer provider.
-B and C remain unachieved.** Four full-operation fallback sites, initial DAG
-decoding, recursive generated-metadata import and V1 inductive admission remain.
-Next: obtain terminal same-merge gates, qualify the repaired complete-owner
-recursor candidate separately, then use authenticated resource traces to address
-the17 timeouts and church failure without raising limits.
+## 2026-10-21 — repair recursor regression fixtures after exact884 native failure
+
+Parent source: `88404214aebfea49824676f70bfc78125fe62e46`, carrier branch.
+[Native integration job119266914119](https://github.com/dwijayuda/pskernel/actions/runs/39613110413/job/119266914119)
+is terminal **FAIL** during fixture compilation. Production RecursorMajor,
+RecursorK and the complete checker compiled, but the new runtime matrices and
+proof steps were skipped. Native correctness119266910334 in
+[39613110409](https://github.com/dwijayuda/pskernel/actions/runs/39613110409)
+is terminal PASS; that separate job does not qualify the skipped regressions.
+At this repair,884 generated integration was queued and canonical source checking
+was still in progress. Those results cannot qualify this child.
+
+The non-K V1 axiom fixture now wraps its header/safety in PsKernelAxiomInfo
+(native and generated JS); the separate DAG request keeps its correct shape.
+The K native fixture now uses explicit branch layout for two multiline assertions
+and assigns its final arena to the existing mutable input instead of shadowing it.
+Every assertion, fixture, callback, budget, matrix count and production source
+is unchanged. This is a fixture correction, not a semantic relaxation.
+
+This exact child is **NOT RUN** at creation for native integration, portable
+source, canonical .ps, generated JS, proofs, benchmarks, Arena and provider.
+Fresh push-triggered full gates are mandatory. Integrationa259 native integration
+and native correctness are terminal PASS; its generated/canonical jobs still run.
+The authentic diagnostic39607734805 has reached unchanged-limit profile collection
+against pinned369bee; collection status is not kernel qualification.
+
+Next: inspect this child's native build, matrices and local proof steps, then
+both detached generated routes and their full provider controls. Preserve the
+qualified727 receipts and the still-open B/C limitations below.
+
+## 2026-10-21 — complete-owner K and major recursor candidate; fresh gates mandatory
+
+Candidate branch: `research/psc1-pskernel-v2-carrier-20261021`.
+Production review parent: `0a031a7bbbfc5040f2eeeb25c73432345dfb9634`;
+previous pushed carrier: `bd35452a1c10f22bc7e863efafd1a868a3fe3b72`.
+Integration now contains history-preserving merge
+`a2590cc15c764dae9c6abfb941d6c3155ead5c81` of qualified staged727 and889;
+the merge's own fresh jobs are pending. **This candidate is NOT RUN at creation**
+for native, portable-source, canonical, generated, proof, benchmark, Arena and
+provider gates. No parent's PASS is inherited.
+
+### Implementation and mandatory coverage
+
+`Checker/ExprV2/RecursorMajor.lean` directly walks checked private recursor types,
+builds exact field projections, normalizes Nat/String majors and expands eligible
+nonrecursive structures while retaining every callback's full CheckState.
+String always performs the fixed public WHNF callback after exact construction.
+`RecursorK.lean` implements the original infer/public-WHNF/index-guard/candidate/
+infer/DefEq sequence. K uses the normalized major TYPE universes, runs before
+the constructor shortcut, and retains the full state on false DefEq. Expression
+mvars in indices and universe-only mvars remain distinct.
+
+`Recursor.lean` now shares the post-conversion iota pipeline. Ordinary checked
+K metadata is installed by `API/DagGenerated.lean` after validated admission,
+using private appended nodes and original declaration IDs. The original raw
+compatibility path remains explicitly limited. The two constructor-valued
+intermediate conditionals are explicitly typed for portable inference.
+No new runtime axiom, trusted hash, unsafe/extern/intrinsic path, resource limit,
+callback predecessor, or failure-order rule is introduced.
+
+Native and both authentic generated routes must run:
+- Retained recursor252-public/504-core/720-owner/72-reducer matrices, original
+  private-ID and universe-negative controls.
+- Non-K major126-public/504-core/360-owner/432-reducer comparisons;4 full-owner
+  sequences and40 exact failures;70 family walks/20 field-budget controls;
+ 24 raw String callbacks/48 failures with6 native official String checks.
+  Six checked neutral-major cases and four strictly direct declaration admissions
+  (2 valid/2 invalid) also have official native controls. Raw ill-typed String/
+  Nat-rec probes are explicitly excluded from admitted-proof counts.
+- K108-public/432-core/648-reducer/96-independent-budget comparisons;16 full-owner,
+ 16 failure-propagation and16 mvar-metadata controls;5 order/resource guards.
+  Actual checked KUnit and indexed KEquality metadata, two checked theorem majors,
+  six positive/three negative expressions and two strictly direct definition
+  admissions are compared with V1 and native official Lean.
+- Arena markers make each callback's appended graph changes observable, alongside
+  every semantic cache and fresh counter. Deliberate arena-loss negatives verify
+  the marker. An outer unsupported attempt cannot satisfy direct-admission tests.
+- Existing14 recursor,21 owned-state and2 ABI lemmas, plus10 major and6 K local
+  equations with printed axiom dependencies. The new statements establish local
+  guard/state facts under explicit premises, not global semantic equivalence.
+
+The carrierbd generated and canonical failures were a fixture defect at
+owned-state-smoke.mjs:544–546. The five-argument callback factory was supplied
+four arguments. This child supplies the result through explicit lambdas,
+preserving every assertion and42/56/540/38/44 plus8/12/336/168 counts.
+The new major JS test similarly wraps the flat local-value export into the
+curried callback shape required by the checker. These are test ABI corrections.
+
+### Exact predecessor evidence and remaining scope
+
+Source727 native119237791103/generated119237790434 in integration39604699608,
+native119237794295/canonical119237793626 in correctness39604700328 and all six
+research39604699278 jobs are terminal PASS. This qualifies **A only for the
+documented scoped V1 developer provider at727**. Portable closure177 modules/
+two roots and canonical134 modules passed, as did detached native24 and each
+generated24-provider/8-API exercise. Full-kernel DirectJS is UNSUPPORTED.
+
+The [permanent727 receipt](evidence/2026-10-21-727b3dd.json) records all per-file
+digests and193 exact Arena classifications. Arena39604699432 is terminal FAIL:
+172 matching outcomes (105 accepted,59 kernel rejected,1 metadata rejected,
+7 transport rejected),2 separate safety-contract agreements,17 host timeouts,
+1 church reduction-budget error and1 unsupported nested-recursion case.
+Carrierbd Arena39604877083 independently has the same category totals.
+No timeout/resource/unsupported outcome is a parity pass.
+
+[Performance receipts](PERFORMANCE_2026-10-21.md) preserve all19 native,
+32 generated and6 admission groups at727, including slower collision/projection/
+binder workloads and mixed memory. Binder32 admission is219.048ms V1 versus
+555.452ms DAG per measured batch. There is no general V2 performance qualification.
+
+Four public whole-operation fallback sites, initial whole-arena decoding,
+recursive generated-metadata import, V1 inductive admission, incomplete owner
+installation for mutual/nested recursors and String-literal projection WHNF
+remain. V1 stays selectable and the default provider. **B/C remain unachieved.**
+The resource diagnosticab61 in39607734805 builds pinned369bee and remains
+IN PROGRESS; collection success will not imply checker parity.
+
+Next executable action: inspect this exact candidate's push-triggered native
+build and all independent regression steps; fix actual semantic, portability,
+ABI or fixture defects without weakening gates. Then wait for both authentic
+generated routes, local proofs, provider, performance and full193-case Arena
+jobs to terminate. Promote only a qualified successor, using a fresh expected
+integration SHA and preserving both branch histories.
 
 
-## 2026-10-21 — restore exact generated WHNF staging
+## 2026-10-21 — recursor-major migration review, qualification pending
 
-The staged parent `ea84af3dea125b377ece3bd4fc4b8f95febe120e`
-has terminal PASS native integration119228846055 and native correctness119228844582.
-Its .lean-generated integration119228846446 is terminal FAIL at main smoke3705:
-`TypeError: Cannot read properties of undefined (reading 'recDepth')`.
-Native semantics, the complete portable check and JavaScript compilation passed;
-the failing JavaScript call used the previously published fuel-first staged ABI.
+This source follows carrier `bd35452a1c10f22bc7e863efafd1a868a3fe3b72`.
+At creation it is an unreferenced review commit; no production branch is changed.
+Its new recursor semantics are **NOT RUN**. Native/generated/official regression
+additions and exact-source full qualification are required before promotion.
 
-Source inspection found exactly two originally fuel-matched WHNF wrappers that
-had become immediate lambdas: `TryWhnfCoreModeWithLocalValuesFuel` and
-`TryWhnfStateWithLocalValuesFuel`. PSC1 consequently flattened their external
-argument boundary. Both now explicitly match zero/successor fuel again and invoke
-the same existing algorithm at the same original fuel. The zero arm returns the
-same reduction-budget error. No algorithm, trust boundary, cache guard or resource
-limit is changed.
+The single owned recursor pipeline now handles validated ordinary K conversion,
+String constructor expansion and non-recursive structure conversion directly
+over canonical DAG IDs. The major family comes from the privately owned type
+installed after complete checked inductive admission. K conversion precedes
+the constructor shortcut; normalized major-type levels supply the candidate.
+The expression-metavariable guard examines only indices after numParams.
+Candidate inference and DefEq keep their exact order, argument order and full
+returned state, including false. Public WHNF is mandatory at the same V1
+positions even when the initial major reduction uses cheap core WHNF.
 
-Two native local equality lemmas compare each repaired wrapper with its exact
-pre-repair body. A new early generated regression uses real state and a canonical
-sort to require both staged exports at fuel0/1, four partial-function checks and
-six complete exact-result/error calls. The old cheap-projection callback sentinel
-and every other main-smoke assertion remain. Both generated workflows require
-the new ABI marker; the native proof gate checks both lemmas and their dependencies.
+The checked generated metadata bridge installs ordinary K types and rules only
+after validated admission, with the same original-ID/private publication guard.
+That bridge still imports recursive expressions and inductive admission remains
+a V1 operation. Existing callback-limited compatibility helpers preserve their
+explicit K/String/structure unsupported boundary. No temporary checker, trusted
+hash, new runtime axiom, fuel/depth increase or unsafe path is introduced.
 
-Older exact-source outcomes are now terminal: staged841 integration39599585930
-and correctness39599585779 both FAIL; its two generated routes fail the same
-staging class. Carrier6cb integration39599736505 and correctness39599736632 both
-FAIL; both generated routes fail at the same external call, reporting undefined
-`arena` after its new full-state adapter. All six research jobs at each of these
-older sources passed. Their historical pending cells below are superseded here.
+Four public whole-operation fallbacks remain. This is not full V2 completion or
+full Lean conformance. The additional native/generated tests must cover real
+checked K and indexed equality metadata, official admission, fixed-fuel/depth
+decisions, callback ownership and refusal order; the old metadata-owner absence
+control now verifies exact installed K type/rule ownership. Other old assertions
+remain. Existing14 recursor theorem statements are unchanged; simplifier lists
+name the extracted common pipeline.
 
-This staged repair follows ea84; its own native, portable, canonical, generated,
-proof, benchmark, Arena and provider gates are **NOT RUN** at creation. Do not
-inherit the parent's native PASS or integration889's scoped Gate A. Integration889
-remains unchanged while full migration qualification continues. Four public
-whole-operation fallbacks remain; no timeout is accepted or counted as parity.
+Parent carrierbd native integration119238388859 and native correctness119238388545
+are terminal PASS, and its complete portable .lean check and independently
+checked canonical .ps closure pass. Generated runtime qualification remains
+IN PROGRESS at this review. Staged727 generated semantic/provider gates have
+passed and its benchmark is running; its overall job remains IN PROGRESS.
+Both727 andbd have all six research jobs PASS. The integration branch remains
+the fully qualified limited-scope V1 developer provider at8892406; A PASS only
+there, B incomplete, C FAIL.
 
-## 2026-10-21 — staged fixture and proof repairs; new source requires qualification
+The authentic resource diagnostic is isolated at
+`ab61efebac4e0b09cc3bf57c09380ae53ac2cf7f`,
+[run39607734805](https://github.com/dwijayuda/pskernel/actions/runs/39607734805),
+still IN PROGRESS. It uses production369bee and unchanged proof body/fuel/host
+limits; collection success will not qualify the kernel.
 
-Branch: `research/psc1-pskernel-v2-staged-20261021`.
-This source update follows parent `841a5f7a129dc9647789fc8080e635d4f1eea3ac`.
-It is isolated from the terminal-green integration889 checkpoint below. At commit
-creation the changed source is **NOT RUN** for native, portable, canonical,
-generated, proof, benchmark, Arena and provider gates; no earlier PASS is inherited.
 
-The parent's [integration run39599585930](https://github.com/dwijayuda/pskernel/actions/runs/39599585930)
-ran independent native gates and exposed three distinct failures:
+## 2026-10-21 — carrier boundary and generated ABI repair candidate
 
-1. Two proof-irrelevance fixtures still required an unsupported attempt after the
-   new terminal DefEq rules could correctly decide false. They now require false
-   and retain1350 existing comparisons, adding180 exact V1 result/error/owner
-   comparisons and two independently checked official-Lean negative fixtures.
-   Missing-owner and legacy-local unsupported controls remain unchanged.
-2. The ordinary recursor fixture incorrectly requested Type-valued elimination
-   from a datatype declared in `Sort u`. Its positive data box is now declared in
-   `Sort (succ u)`; validated admission must generate two recursor level
-   parameters. The original `Sort u` datatype is retained separately with two
-   negative controls: incorrect universe arity and forbidden Nat-valued motive.
-   Both require exact V1/DAG failures and native official rejection. Existing
-   public/core/owner/reducer matrices and private-node checks remain mandatory.
-3. A local admission-guard proof used the reserved binder name `exists`.
-   Renaming it `alreadyExists` leaves all18 theorem statements unchanged.
+Branch: `research/psc1-pskernel-v2-carrier-20261021`.
+Previous branch HEAD: `4dee3fe1dc6791aa491f101db876898e10449a01`.
+The reviewed boundary/extraction object039eed is preserved as the parent of this
+correction; it was never promoted to a branch or claimed to build. Before
+qualification, its new full-state helper was renamed
+`psKernelExprV2TryWhnfCheckStateWithFuel` to avoid the existing standalone raw
+`TryWhnfStateWithFuel` export. The raw ABI and its callers remain intact.
 
-This commit changes fixtures/proof syntax and requires their new native and both
-generated-route markers. It does not change the staged kernel's semantics,
-runtime trust, callback budget, error ordering, fuel4096 or host policy.
+In addition to the owner/extraction changes described below, this candidate
+restores explicit zero/successor fuel staging in the two compatibility wrappers
+`TryWhnfCoreModeWithLocalValuesFuel` and `TryWhnfStateWithLocalValuesFuel`.
+The original immediate-lambda refactor changed PSC1's external argument shape;
+both carrier6cb generated routes completed compilation but failed main-smoke3705
+with undefined arena, while staged841 and ea84 failed the same call with undefined
+recDepth. The exact prior carrier jobs were119220899565 and119220899827; staged
+ea84 generated119228846446 is also terminal FAIL. These are runtime ABI failures,
+not kernel rejections.
 
-Next critical path: inspect every independent native gate on this exact revision,
-then terminal authentic .lean-generated and canonical-.ps-generated jobs,
-all local proofs, provider checks and all193 Arena records. Do not promote this
-branch until its required exact-source gates pass. The four whole-operation
-fallbacks and complete replacement limitations remain documented below.
+Both repaired wrappers call the same owned algorithm at the unchanged fuel.
+Two local equalities compare their exact pre-repair bodies; early generated
+probes require two staged exports, four fuel partial applications and six
+real-state zero/successor result/error calls. All existing full smoke, callback
+sentinels, owner matrices and new8/12/336/168 admission/public matrices remain.
+The native proof gate now requires21 owner lemmas plus2 separate ABI lemmas.
+No fuel, depth, elaborator, timeout or memory limit is raised.
+
+This combined source is **NOT RUN** for all qualification gates at commit
+creation. The staged branch now independently carries ABI repair727b3dd; its
+earlier ea84 native PASS does not qualify either new source. Integration889
+remains the terminal-green scoped Gate A checkpoint. Gate B is incomplete and
+Gate C fails; both branches still require terminal native and both generated
+qualification before promotion.
+
+## 2026-10-21 — close full-state admission/public WHNF boundaries
+
+Branch: `research/psc1-pskernel-v2-carrier-20261021`.
+This source update follows `4dee3fe1dc6791aa491f101db876898e10449a01`.
+All changed-source qualification gates are **NOT RUN** at commit creation.
+Integration889 remains the qualified scoped provider; this branch is not promoted.
+
+Exact parent [integration39602127491](https://github.com/dwijayuda/pskernel/actions/runs/39602127491)
+failed native job119228992209 while elaborating the large
+`PsKernelExprV2OwnedStateRegression.lean` declaration at line624; the unknown
+`regression` error at line767 was cascading. Production kernel modules compiled,
+and [native correctness119228991271](https://github.com/dwijayuda/pskernel/actions/runs/39602127347/job/119228991271)
+passed. The fixture now extracts the existing262-line DefEq/failure group into
+a private helper. Its probes, callbacks, ordering and assertions are preserved
+exactly; neither Lean elaborator limits nor kernel resource limits are raised.
+
+A boundary audit found two omitted full-state transitions:
+`AdmissionEnsureSortWithFuel` and `AdmissionIsPropWithFuel` still initialized
+a standalone WHNF-only owner and merged its partial result into an older state.
+They now use complete-state normalization and retain the returned inference,
+DefEq, unfold/failure caches and fresh counter. The internal shared sort helper
+always runs public WHNF, including on syntactic sorts, matching SessionEnsureSort.
+The proposition helper still runs inference-only first and mandatory WHNF second,
+using the same fixed admission fuel. None/error propagation and malformed
+callback-result refusal remain ordered.
+
+`Check.lean` now supplies the fixed owning DefEq callback through
+`psKernelExprV2TryWhnfCheckStateWithFuel` and a fresh declaration-aware public WHNF
+boundary. `API/Dag.lean` uses that entry after its unchanged mandatory input
+checking. The old WhnfState ABI remains a standalone compatibility wrapper;
+production public WHNF no longer supplies NoOwnedDefEq to its recursor knot.
+No earlier public check's caches are transferred into the new WHNF operation.
+
+Required new coverage, in addition to all existing42/56/540/38/44 carrier counts:
+8 admission owner probes,12 exact failure/decline cases,336 V1 admission-helper
+comparisons and168 V1 standalone-public-WHNF comparisons. These include true/false
+proposition decisions, nonsorts, malformed IDs, beta/zeta/iota, low fuel,
+depth boundaries and mixed-context refusal. Eleven local ownership/ordering/fuel
+lemmas supplement the previous10; no global soundness theorem is claimed.
+Both generated routes require the new exact markers.
+
+### Concurrent source observations, inspected 2026-10-21 12:56 UTC
+
+| Source | Native integration | Native correctness | Portable source | Canonical runtime | .lean-generated runtime | Arena |
+| --- | --- | --- | --- | --- | --- | --- |
+| staged `ea84af3dea125b377ece3bd4fc4b8f95febe120e` | PASS119228846055 | PASS119228844582 | PASS .lean; canonical check IN PROGRESS | IN PROGRESS | IN PROGRESS | official PASS; generated IN PROGRESS |
+| carrier parent `4dee3fe1dc6791aa491f101db876898e10449a01` | FAIL fixture elaboration | PASS119228991271 | research portable PASS; full job IN PROGRESS | IN PROGRESS | IN PROGRESS | official PASS; generated IN PROGRESS |
+
+Staged native includes the corrected positive Box recursor at distinct universe
+arguments[1,0],12 official valid and4 invalid recursor cases,3 official addDecl
+fixtures, both retained Sort-u universe/elimination negatives, all prior guards
+and proof gates. Exact parent carrier native proofs/matrices were NOT RUN because
+its aggregate test target failed to elaborate. Generated jobs have not been
+assumed successful.
+
+Next critical path: inspect the changed source's native test compilation and all
+independent gates; then both terminal generated routes and full Arena. Keep the
+four explicit whole-operation fallbacks, K/major conversion and inductive/boundary
+migration limitations visible. No acceptance or parity is inferred from host
+timeouts or kernel exhaustion.
+
+## 2026-10-21 — carrier dependency repair and preserved negative fixtures
+
+Branch: `research/psc1-pskernel-v2-carrier-20261021`.
+This source update follows parent `6cbeb1b3587335545d9d3a2bdd4b99c0c2244b4a`.
+The full CheckState carrier remains isolated and **unqualified**. At commit
+creation this changed source is **NOT RUN** for native, portable, canonical,
+generated, proof, benchmark, Arena and provider gates.
+
+Parent [integration39599736505](https://github.com/dwijayuda/pskernel/actions/runs/39599736505)
+and [correctness39599736632](https://github.com/dwijayuda/pskernel/actions/runs/39599736632)
+failed native compilation because the cycle-breaking refactor removed the
+transitive import supplying `psKernelCheckNatSize`. `CheckCore.lean` now imports
+`Checker.Reduction.PrimitiveData` explicitly; that leaf module only depends on
+Context. The repair restores the existing checked numeric guard without changing
+its implementation or introducing a second algorithm.
+
+The commit also carries the three independently isolated staged841 repairs:
+two terminal-false proof-irrelevance sentinels gain180 exact V1 comparisons and
+two official negative fixtures; the positive recursor datatype uses
+`Sort (succ u)`, with the original `Sort u` case retained as two exact
+universe/elimination rejection controls; the guard proof's reserved
+`exists` binder becomes `alreadyExists`. All existing matrices remain.
+Both workflow routes require the new markers.
+
+The full-state carrier requires42 state probes,56 exact propagated failure/decline
+cases,540 differential cases,38 DefEq state probes and44 DefEq propagated cases,
+plus10 local carrier lemmas. They have not yet passed on this repaired source.
+Parent full .lean and canonical checks completed while generated compilation was
+still running; those observations are source-specific, not runtime qualification.
+
+Next critical path: complete native compilation and independent native gates on
+this exact revision, fix any actual owner/budget/ABI defects, then inspect terminal
+generated and canonical jobs. Four public whole-operation fallbacks remain.
+K and general recursor-major conversion, inductive admission, public boundary
+decode and complete Arena qualification are still open. No integration promotion,
+fuel/depth increase or new trusted runtime path is included.
 
 ## 2026-10-21 — qualified integration889 and isolated migration blockers
 
@@ -301,6 +542,90 @@ Four public whole-operation fallback sites remain. Whole-arena boundary decode,
 inductive admission/metadata construction, K and incomplete recursor-major
 normalization remain migration work. Complete replacement, full Arena conformance,
 a global soundness proof and a general performance guarantee are not claimed.
+
+## 2026-10-21 12:27 UTC — isolated full-state carrier qualification branch
+
+Branch: `research/psc1-pskernel-v2-carrier-20261021`.
+This branch starts from current staged source
+`841a5f7a129dc9647789fc8080e635d4f1eea3ac` and incorporates reviewed carrier
+commit `136ee37d82d2896e278f3e2a8856b2dcb0b2d449`.
+The strict mixed/binder/theorem selected-path repairs and independent native
+failure-evidence conditions are retained. All four existing full workflows
+include this branch; no gate, assertion, version pin or resource policy is skipped.
+
+**Carrier native / authentic portable source / canonical .ps / generated runtime /
+local proofs / performance / Arena / provider: NOT RUN at commit creation.**
+The branch exists to obtain those exact-source results. Integration remains
+`88924063a5d9761f52a130c6a581cac6901ad407`, whose native and .lean-generated
+integration run39595204321 is terminal PASS. Carrier changes are not promoted
+to the integration branch or default provider.
+
+The complete carrier source/test history is retained through a second parent;
+the corrected staged source is the first parent. New runtime logic is confined
+to the reviewed operation-owned callback migration. The existing raw WhnfState
+entry points remain thin ABI compatibility wrappers. Native official/adversarial
+controls and full portable/canonical generated checks remain mandatory.
+
+Next action: inspect this branch's full native and generated jobs, fix actual
+source/proof/ABI/runtime failures, and compare the complete193 Arena records.
+Only promote after the required exact-source gates finish. K, structure-major
+and String-major recursor paths and four public whole-operation fallbacks remain
+explicitly uncompleted at this checkpoint. No whole-V2 or full-Arena claim.
+
+## 2026-10-21 — full CheckState carrier review assembled on current staged fixes
+
+This commit assembles the reviewed callback-carrier refactor on staged source
+`641ad59c3b1bbf701b0c28d4da92386096e5e65f`, retaining the guard staged-recursion
+repair, native fixture keyword fixes, strict terminal DefEq fixtures, every
+existing gate, and the canonical build-only 75-minute job ceiling. Its second
+parent preserves the complete reviewed source/test history through
+`43ac7506b5fe9442a3baa7b21e2cd733938caffe`. **This candidate is NOT RUN and is not
+an integration promotion.** Do not inherit any previous source's CI result.
+
+### Mechanism and supported scope
+
+The primary WHNF, recursor, infer-only, checked inference and DefEq callback
+paths now carry the complete seven-field CheckState through one callback knot.
+The four-field WhnfState ABI remains as explicit compatibility wrappers. Pure
+WHNF helpers lift their results into the current owning state; state returned
+by a checker callback is used directly, preserving fresh counters, inference
+caches, success/failure pairs and unfolding entries rather than merging into a
+stale outer snapshot. No representation fields, acceptance shortcut or trusted
+runtime primitive were added.
+
+The recursor owner fixes each predecessor-budget callback exactly once while
+retaining the DefEq callback supplied by its owning operation. Structural WHNF
+recursion keeps those callbacks fixed. Typed local values come from the current
+CheckContext. Existing mixed legacy-local, K, structure-major and String-major
+unsupported paths retain explicit decline behavior. This refactor does not
+promote those branches or remove the four public whole-operation fallback sites.
+V1 remains the default checked provider and differential reference.
+
+### Exact required qualification
+
+The native/generated/canonical gates require all of:
+- 42 full-state callback carrier probes and 56 exact error/decline propagation cases;
+- 540 original-V1 WHNF comparisons over the established fuel/depth/public/core matrix;
+- 38 DefEq carrier probes and 44 DefEq error/decline propagation cases;
+- ten new local carrier/entry-guard lemmas, plus unchanged existing proof statements;
+- all existing official, mutual280, guard, Quot, ordinary recursor, DefEq,
+  transformation, provider, adversarial and performance gates.
+
+The probes seed non-authorizing cache markers and verify every outer field,
+fresh-counter and callback order. Unit/alias/Quot/recursor metadata comes from
+actual checked declaration admission. These probe counts are not counts of
+officially admitted theorems. The local lemmas establish boundary identities and
+zero-fuel precedence, not whole-kernel equivalence or soundness. Native, authentic
+PSC1, canonical closure, detached empty-PATH JavaScript and full Arena results
+remain required at this candidate's exact committed SHA.
+
+### Continuation
+
+Inspect the staged641 and integration889 terminal jobs before promotion. Diagnose
+any concrete carrier source/ABI/proof/runtime failure without weakening assertions.
+Keep native and both generated routes source-identical. Full Arena qualification
+remains open: the last complete5544 record had193 cases =170 matches,2 separate
+safety agreements,20 host timeouts and1 unsupported case; no completion claim.
 
 ## 2026-10-21 12:27 UTC — exact theorem mismatch and independent native failure evidence
 
@@ -1544,77 +1869,3 @@ The entry boundary still validates then decodes the complete arena into physical
 Local metadata, scope/cache guard, numeral recurrence and scanner equivalence lemmas pass at the native checkpoint above using the previously approved proof-file dependencies `propext`, `Classical.choice`, and `Quot.sound`. They do not introduce kernel runtime axioms and do not prove global soundness, validated-arena correspondence, full substitution refinement, DefEq or admission.
 
 Continue through the real highest-priority failing gate. Keep complete V1 fallback until each replacement is qualified; preserve exact recursive fuel/depth/callback placement, cache owner scope, failure order and atomic publication. Do not merge, publish npm, increase policy limits or count a timeout as rejection.
-
-
-## Archived integration889 branch receipt
-
-This preserved entry predates the source727 qualification above.
-
-## 2026-10-21 11:53 UTC — FullShape native and generated pass; canonical build wall-time correction
-
-At exact source `5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8`,
-[integration39578569544](https://github.com/dwijayuda/pskernel/actions/runs/39578569544)
-is terminal PASS: native119150176593 and generated119150176854. FullShape342-stage/
-108-owner comparisons pass in native and genuine generated JS, alongside all
-restored mutual280/eight-official, prior DefEq, inference, transform and resource
-controls. Native official FullShape6-positive/1-invalid fixtures and local proof
-gates pass. Generated provider24 detached protocol and8 API cases pass with
-empty PATH; native provider24 and official5 fixtures pass. All six research
-jobs in39578569496 and native correctness119150175889 pass.
-
-Native artifact12335053016 ZIP SHA-256:
-`d65b5db5420b68a91ac13f5f254fdf33b224cd87860cffdbc614222630237816`.
-Generated artifact12338155661 ZIP SHA-256:
-`fbe0715245251ea4f709835f420385e8a897316140fe3575336083592eed17d3`.
-The generated job preserved128 complete-check and24 admission observations,
-all exact assertions, readable source, declarations/maps and source manifests.
-These selected workload checks do not establish acceptable full-corpus performance.
-
-Canonical job
-[119150176408](https://github.com/dwijayuda/pskernel/actions/runs/39578569514/job/119150176408)
-is CANCELLED, not PASS. Its .lean check and complete canonical .ps check passed;
-the .ps check ran09:53:40–10:05:47UTC. JavaScript generation began10:05:48 and was
-cancelled10:19:10, approximately40m17s after job setup, at the configured40-minute
-job ceiling. The log contains no preceding semantic/compiler failure.
-Canonical execution/provider/package steps were skipped. Artifact12338811277 is
-a1378-byte incomplete evidence upload, not a usable canonical distribution.
-
-This commit changes only the canonical build-job wall-time ceiling40→75minutes
-and this receipt. It preserves every check, pinned toolchain, kernel4096 fuel,
-depth policy,60-second Arena case limit and2GiB host cap. More build time is not
-a kernel-resource result or an acceptance rule. The corrected source revision
-still needs fresh native/generated/canonical gates.
-
-| Exact source | Native | Portable .lean | Canonical .ps | Generated JS | Local proofs | Benchmark | Arena | Provider |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8 | PASS | PASS | PASS check / execution NOT RUN after job cancellation | PASS from .lean | PASS native | PASS selected native/JS | FAIL qualification; full log pending current receipt | PASS native/.lean JS; canonical NOT RUN |
-| This CI wall-time correction | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-
-Isolated draft branch `research/psc1-pskernel-v2-staged-20261021` at
-`236766f86a2693faffebd3632b42ef5dabe96f36` contains the previously reviewed
-terminal DefEq, static guards, Quot and non-K recursor slices plus all gates.
-Its new runs39594900701/39594900700/39594900804/39594900702 are IN PROGRESS;
-none is promoted to the integration branch by this correction. The GitHub
-create-branch tool remained pending unusually long before returning; the new
-Actions run timestamps, not the draft heading time, identify actual execution.
-
-Diagnostic
-[39578237566/119149036622](https://github.com/dwijayuda/pskernel/actions/runs/39578237566/job/119149036622)
-is terminal PASS COLLECTION using production480 and harnessbd827814.
-Repeated-subproblem and church both still time out; the first observed theorem
-decline is LazyDeltaAfterStepWith, followed by actual whole V1 admission.
-That source supplies an unsupported residual continuation; associating the
-observed return with that inner branch is an inference, not an instrumented
-branch record. The newly qualified FullShape path must be measured on the
-original bodies. Repeated's earlier perfect definition also declines inference,
-consistent with missing recursor ownership but not proven by the recorded node.
-Artifact12336576558 ZIP:
-`44cc5a694e87fc2e01277a239628a3ae9a96de17d07fea1b64e12f5cd7ca556c`.
-Timeout agreement remains null; no diagnostic timing is a speedup claim.
-
-A remains fully qualified only at scoped developer source480 until canonical
-execution completes at a successor. B/C remain open, four public whole-operation
-fallback sites remain, and V1 is still the selectable default/provider. Next:
-finish fresh canonical execution, diagnose the isolated draft's first failures,
-then promote only source-qualified changes with a fresh expected-SHA update.
-

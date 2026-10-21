@@ -1,3 +1,4 @@
+import Ps.KernelCore.Checker.Reduction.PrimitiveData
 import Ps.KernelCore.Checker.ExprV2.CheckProjection
 import Ps.KernelCore.Checker.ExprV2.CheckLet
 import Ps.KernelCore.Checker.ExprV2.InferApplication
@@ -14,26 +15,26 @@ The fixed WHNF and DefEq callbacks retain the top-level budget; recursive
 inference uses the predecessor budget. Unsupported rules restart the complete
 original operation without publishing partial state.
 -/
-def psKernelExprV2TryInferCoreWithFuel
+def psKernelExprV2TryInferCoreOwnedWithFuel
     (fuel : Nat) :
-    (PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat))) ->
     (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool))) ->
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
   match fuel with
   | Nat.zero =>
-      fun (_whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+      fun (_whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Nat)))
           (_defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
           Option (Except String (Prod PsKernelExprV2CheckState Bool)))
           (_context : PsKernelExprV2CheckContext)
           (_state : PsKernelExprV2CheckState) (_root : Nat) (_inferOnly : Bool) =>
         Option.some (Except.error "kernel inference budget exhausted")
   | Nat.succ remaining =>
-      fun (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
-          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+      fun (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Nat)))
           (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
           Option (Except String (Prod PsKernelExprV2CheckState Bool)))
           (context : PsKernelExprV2CheckContext)
@@ -41,7 +42,7 @@ def psKernelExprV2TryInferCoreWithFuel
         let smaller :=
           fun (nextContext : PsKernelExprV2CheckContext)
               (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
-            let recur := psKernelExprV2TryInferCoreWithFuel remaining;
+            let recur := psKernelExprV2TryInferCoreOwnedWithFuel remaining;
             recur whnf defeq nextContext nextState nextRoot inferOnly;
         match psKernelExprV2PagedRequire state.whnf.arena root with
         | Except.error error => Option.some (Except.error error)
@@ -101,27 +102,84 @@ def psKernelExprV2TryInferCoreWithFuel
                           | PsKernelExprV2Node.mdata _ body =>
                               smaller nextContext state body
                           | PsKernelExprV2Node.lam name domain body binderInfo =>
-                              psKernelExprV2CheckBinderWith smaller whnf
+                              psKernelExprV2CheckBinderOwnedWith smaller whnf
                                 nextContext state root name domain body binderInfo true inferOnly
                           | PsKernelExprV2Node.forallE name domain body binderInfo =>
-                              psKernelExprV2CheckBinderWith smaller whnf
+                              psKernelExprV2CheckBinderOwnedWith smaller whnf
                                 nextContext state root name domain body binderInfo false inferOnly
                           | PsKernelExprV2Node.app fn arg =>
                               if inferOnly then
-                                psKernelExprV2InferApplicationWith smaller whnf
+                                psKernelExprV2InferApplicationOwnedWith smaller whnf
                                   nextContext state root
                               else
-                                psKernelExprV2CheckApplicationWith smaller whnf defeq
+                                psKernelExprV2CheckApplicationOwnedWith smaller whnf defeq
                                   nextContext state root fn arg
                           | PsKernelExprV2Node.proj typeName index structValue =>
-                              psKernelExprV2CheckProjectionInferWith smaller whnf
+                              psKernelExprV2CheckProjectionInferOwnedWith smaller whnf
                                 nextContext state typeName index structValue
                           | PsKernelExprV2Node.letE name type value body nondep =>
-                              psKernelExprV2CheckLetWith smaller whnf defeq
+                              psKernelExprV2CheckLetOwnedWith smaller whnf defeq
                                 nextContext state root name type value body nondep inferOnly;
                         psKernelExprV2InferenceFinishAttempt inferOnly root attempt
 
 /- Compatibility entry preserves the prior staged root-fuel ABI. -/
+def psKernelExprV2TryCheckCoreOwnedWithFuel
+    (fuel : Nat) :
+    (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat))) ->
+    (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool))) ->
+    PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+          (_defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+          (_context : PsKernelExprV2CheckContext)
+          (_state : PsKernelExprV2CheckState) (_root : Nat) =>
+        Option.some (Except.error "kernel inference budget exhausted")
+  | Nat.succ remaining =>
+      fun (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+          (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+          (context : PsKernelExprV2CheckContext)
+          (state : PsKernelExprV2CheckState) (root : Nat) =>
+        psKernelExprV2TryInferCoreOwnedWithFuel (Nat.succ remaining)
+          whnf defeq context state root false
+
+/- The original callback ABI is retained by lifting the supplied WHNF callback
+   against the complete state already owned by this helper. -/
+
+def psKernelExprV2TryInferCoreWithFuel
+    (fuel : Nat) :
+    (PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool))) ->
+    PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+    Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+          (_context : PsKernelExprV2CheckContext)
+          (_state : PsKernelExprV2CheckState) (_root : Nat) (_inferOnly : Bool) =>
+        Option.some (Except.error "kernel inference budget exhausted")
+  | Nat.succ remaining =>
+      fun (whnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+          (context : PsKernelExprV2CheckContext)
+          (state : PsKernelExprV2CheckState) (root : Nat) (inferOnly : Bool) =>
+        psKernelExprV2TryInferCoreOwnedWithFuel (Nat.succ remaining)
+          (psKernelExprV2LiftCheckWhnf whnf) defeq context state root inferOnly
+
 def psKernelExprV2TryCheckCoreWithFuel
     (fuel : Nat) :
     (PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat ->
@@ -148,4 +206,3 @@ def psKernelExprV2TryCheckCoreWithFuel
           (state : PsKernelExprV2CheckState) (root : Nat) =>
         psKernelExprV2TryInferCoreWithFuel (Nat.succ remaining)
           whnf defeq context state root false
-

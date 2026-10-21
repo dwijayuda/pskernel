@@ -1,0 +1,346 @@
+{
+  "schema": "pskernel-authenticated-native-v1-diagnostic-receipt-v1",
+  "repository": "dwijayuda/pskernel",
+  "harnessSha": "44ca03e9d88f7971db9cc8c8c45af916e1be4ab6",
+  "sourceSha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+  "run": 39620233494,
+  "job": 119291437634,
+  "terminalConclusion": "success",
+  "interpretation": "PASS diagnostic collection only. Original V1 returns fuel exhaustion at 4096; official Lean accepts. This is not a completed Arena comparison or a kernel qualification.",
+  "artifact": {
+    "id": 12354467829,
+    "bytes": 33615147,
+    "zipSha256": "3ec92270d7ad5aeedff681928f63037d337aa5f3f5b39c3eacf9b2a4e5e1358e"
+  },
+  "memoryQualification": "memory.max bounds cgroup-charged memory, not all process RSS. Sampled VmHWM is a lower bound; shared/file-backed charges can differ.",
+  "transportControlCount": 138,
+  "result": {
+    "format": "psc1-authentic-native-v1-admission-diagnostic-v1",
+    "diagnostics_complete": true,
+    "kernel_qualified": false,
+    "source_sha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+    "workflow_source_sha": "44ca03e9d88f7971db9cc8c8c45af916e1be4ab6",
+    "metadata_validated": false,
+    "arena_match_claimed": false,
+    "runtime_path_empty": true,
+    "kernel_fuel": 4096,
+    "host_wall_seconds_per_case": 60,
+    "native_cgroup_memory_limit_bytes": 2147483648,
+    "authenticated_runtime": {
+      "format": "psc1-authenticated-resource-artifact-replay-v1",
+      "source_sha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+      "producer_source_sha": "ab61efebac4e0b09cc3bf57c09380ae53ac2cf7f",
+      "producer_run": 39607734805,
+      "artifact_id": 12350649771,
+      "artifact_zip_sha256": "9ae05c3d0cd949f74a1a4c8a3a833b3fd755f1cb917897ab59552c9ce3aa90cc",
+      "artifact_zip_bytes": 14770339,
+      "lean": {
+        "version": "4.35.0",
+        "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      "producer_typescript": "7.0.2",
+      "producer_generated_route": "complete checked canonical .ps closure",
+      "files": [
+        {
+          "name": "kernel.js",
+          "bytes": 9709333,
+          "sha256": "c914cf60363d55d3cb0e0fb8303841188997f70fc4656b714b0bed146c4f928f"
+        },
+        {
+          "name": "kernel.ts",
+          "bytes": 8699084,
+          "sha256": "1dbf20c43325793dbfcbd6acbdbddabe3ec3c5e8816f99cae192a0974a906a3e"
+        },
+        {
+          "name": "kernel.d.ts",
+          "bytes": 297747,
+          "sha256": "1fc48a202f55a11e37faa3d5000b835e90d2f57db5db2d1ae65accd17e6ab843"
+        },
+        {
+          "name": "kernel.js.map",
+          "bytes": 7861697,
+          "sha256": "85c3f268495d773de84b6b19f33335969b0294502de5899657fbf92084832296"
+        }
+      ],
+      "baseline_report_sha256": "f75765aa7000b14000ab2ad913b9f39bb6ba681979e8bb85632f3f5bc28ced72",
+      "source_artifact_diagnostic_incomplete": true,
+      "compiler_reexecuted_in_this_run": false,
+      "canonical_rechecked_in_this_run": false,
+      "kernel_qualified": false,
+      "note": "Artifact authentication establishes executable identity only. Fresh controls and resource replay follow."
+    },
+    "official_reference": {
+      "verdict": "accepted",
+      "reason": "official_kernel_verdict",
+      "returncode": 0,
+      "elapsed_seconds": 0.3960015200000271,
+      "log": "official.txt",
+      "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+    },
+    "adaptation": {
+      "method": "header_only_compatibility_NOT_native_435_reexport",
+      "original_lean": {
+        "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+        "version": "4.29.1"
+      },
+      "target_lean": {
+        "version": "4.35.0",
+        "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+      "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+      "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+      "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+      "body_bytes_identical": true
+    },
+    "replay_sha256": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821",
+    "resource_policy_sha256": "ab987570dc85dbbbb020f5220d74dcaf0cf1e47ba1b0f101f992017141e35242",
+    "oracle_sha256": "5deb39b9245b05305837cb1a79826c26e7ab05028c7bc489308170eab672f26e",
+    "original_lakefile_sha256": "c7a3067d834ce1623a3d8a7898540d28559e6720116d5036b04a5bdb7d77e72b",
+    "node_version": "v22.23.3",
+    "lean_version": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "lean_githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "input_export": {
+      "format": "psc1-authentic-native-v1-input-export-v1",
+      "source_sha": "369bee5801bd5e4476837684fad3f7e1ca8c422c",
+      "body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+      "adapted_input_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+      "input_bytes": 9849,
+      "kernel_sha256": "c914cf60363d55d3cb0e0fb8303841188997f70fc4656b714b0bed146c4f928f",
+      "original_replay_sha256": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821",
+      "capture_replay_sha256": "a9d0010c2f2763c3b15107e768351288c24b0879549d0bf69ead92763332f777",
+      "fixture_sha256": "d15790e77d82af4b55e21428ebfbe3443c1735a04585359f35d425a9fe86da8a",
+      "generator_sha256": "03f333187a255d469b6e6747a52c0e73f2432e6d77ebad551fea8d49e0aa0de7",
+      "records": 227,
+      "exported_declarations": 6,
+      "arena_nodes": "197",
+      "emitted_arena_nodes": 197,
+      "admission_requests": 4,
+      "request_kinds": [
+        "ordinaryInductive",
+        "definitionDecl",
+        "definitionDecl",
+        "theoremDecl"
+      ],
+      "generated_admission_invoked": false,
+      "imported_recursor_metadata": false,
+      "requires_native_decode_checked": true,
+      "kernel_qualified": false
+    },
+    "input_export_wall_seconds": 0.22226222700000164,
+    "host_source_sha256": "9c79cb26dbe85a93e4f46681301bf739bf143b09e232babfe3c6ea29c9e277c5",
+    "exporter_sha256": "03f333187a255d469b6e6747a52c0e73f2432e6d77ebad551fea8d49e0aa0de7",
+    "generated_lakefile_sha256": "d53113a14b54f7c5ff2186d6951c936bd8323ca8b14dbae1566204df4ffe1266",
+    "build": {
+      "command": [
+        "/home/runner/.elan/bin/lake",
+        "-f",
+        "kernel-native-church-lakefile.lean",
+        "build",
+        "psc1_arena_native_v1_church"
+      ],
+      "returncode": 0,
+      "wall_seconds": 23.733229292000004
+    },
+    "native_executable_sha256": "d0d67eeded00ccd2beb3a09f27a503424c652917a51191d5c012342f3facc9a1",
+    "native_executable_bytes": 119652432,
+    "native_runner_sha256": "52e25c5543ff08e147e3516694c0d638fc265d35ab494f99a36ca0f5e09d6ec1",
+    "controls": {
+      "status": "process_exit",
+      "limitBytes": 2147483648,
+      "wallSeconds": 60,
+      "stdoutPath": "/home/runner/work/_temp/arena435-native-v1/controls/stdout.txt",
+      "stderrPath": "/home/runner/work/_temp/arena435-native-v1/controls/stderr.txt",
+      "cgroup": "/sys/fs/cgroup/psc1-native-af52e6e1fead47c28abff70845dcabdb",
+      "memoryPeakScope": "isolated launcher/exec process and descendants",
+      "launch": {
+        "pid": 3425,
+        "uid": 1001,
+        "gid": 1001,
+        "groups": [],
+        "path": "",
+        "memoryMax": 2147483648,
+        "swapMax": 0,
+        "oomGroup": 1,
+        "sessionId": 3424,
+        "phase": "before-exec"
+      },
+      "cleanupOk": true,
+      "memoryEvents": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      },
+      "memoryPeakBytes": 14417920,
+      "returncode": 0,
+      "elapsedSeconds": 0.08187721000000181,
+      "wallTimedOut": false,
+      "setupTimedOut": false,
+      "sampledNativeVmHwmBytesLowerBound": 56549376,
+      "protocol": {
+        "arenaMatchClaimed": false,
+        "cases": [
+          {
+            "accepted": true,
+            "acceptedRequests": 1,
+            "adaptedSourceSha256": null,
+            "arenaMatchClaimed": false,
+            "bodySha256": null,
+            "case": "positive",
+            "complete": true,
+            "declarationIndex": null,
+            "engine": "psKernelV1AdmitDeclaration",
+            "environmentDeclarations": 1,
+            "inputNodes": 2,
+            "inputRequests": 1,
+            "metadataValidated": false,
+            "outcome": "native_admission_complete",
+            "phase": "kernel-admission",
+            "policy": {
+              "cancelled": false,
+              "fuel": 4096,
+              "maxDeclarations": 0,
+              "maxNatSize": 134217728,
+              "maxRecDepth": 0
+            },
+            "protocol": "pskernel-arena-native-v1/1",
+            "sourceSha": "369bee5801bd5e4476837684fad3f7e1ca8c422c"
+          },
+          {
+            "accepted": false,
+            "acceptedRequests": 0,
+            "adaptedSourceSha256": null,
+            "arenaMatchClaimed": false,
+            "bodySha256": null,
+            "case": "invalid",
+            "complete": true,
+            "declarationIndex": 0,
+            "engine": "psKernelV1AdmitDeclaration",
+            "inputNodes": 2,
+            "inputRequests": 1,
+            "message": "definition type mismatch",
+            "metadataValidated": false,
+            "outcome": "rejectedInvalid",
+            "phase": "kernel-admission",
+            "policy": {
+              "cancelled": false,
+              "fuel": 4096,
+              "maxDeclarations": 0,
+              "maxNatSize": 134217728,
+              "maxRecDepth": 0
+            },
+            "protocol": "pskernel-arena-native-v1/1",
+            "sourceSha": "369bee5801bd5e4476837684fad3f7e1ca8c422c"
+          },
+          {
+            "accepted": null,
+            "acceptedRequests": 0,
+            "adaptedSourceSha256": null,
+            "arenaMatchClaimed": false,
+            "bodySha256": null,
+            "case": "resource",
+            "complete": false,
+            "declarationIndex": 0,
+            "engine": "psKernelV1AdmitDeclaration",
+            "inputNodes": 2,
+            "inputRequests": 1,
+            "message": "resource policy declined operation before entry",
+            "metadataValidated": false,
+            "outcome": "resourceExhausted",
+            "phase": "kernel-admission",
+            "policy": {
+              "cancelled": false,
+              "fuel": 0,
+              "maxDeclarations": 0,
+              "maxNatSize": 134217728,
+              "maxRecDepth": 0
+            },
+            "protocol": "pskernel-arena-native-v1/1",
+            "resource": "fuel",
+            "sourceSha": "369bee5801bd5e4476837684fad3f7e1ca8c422c"
+          }
+        ],
+        "count": 3,
+        "metadataValidated": false,
+        "protocol": "pskernel-arena-native-v1-controls/1",
+        "sourceSha": "369bee5801bd5e4476837684fad3f7e1ca8c422c"
+      }
+    },
+    "case": {
+      "label": "good",
+      "name": "perf/church-numerals.ndjson",
+      "measurement": {
+        "status": "process_exit",
+        "limitBytes": 2147483648,
+        "wallSeconds": 60,
+        "stdoutPath": "/home/runner/work/_temp/arena435-native-v1/case/stdout.txt",
+        "stderrPath": "/home/runner/work/_temp/arena435-native-v1/case/stderr.txt",
+        "cgroup": "/sys/fs/cgroup/psc1-native-c42c7e0593cf44bcb626d95b5b69d751",
+        "memoryPeakScope": "isolated launcher/exec process and descendants",
+        "launch": {
+          "pid": 3432,
+          "uid": 1001,
+          "gid": 1001,
+          "groups": [],
+          "path": "",
+          "memoryMax": 2147483648,
+          "swapMax": 0,
+          "oomGroup": 1,
+          "sessionId": 3431,
+          "phase": "before-exec"
+        },
+        "cleanupOk": true,
+        "memoryEvents": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0,
+          "sock_throttled": 0
+        },
+        "memoryPeakBytes": 15990784,
+        "returncode": 0,
+        "elapsedSeconds": 0.6896675340000087,
+        "wallTimedOut": false,
+        "setupTimedOut": false,
+        "sampledNativeVmHwmBytesLowerBound": 76443648
+      },
+      "protocol": {
+        "accepted": null,
+        "acceptedRequests": 3,
+        "adaptedSourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "arenaMatchClaimed": false,
+        "bodySha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "case": "church-numerals",
+        "complete": false,
+        "declarationIndex": 3,
+        "engine": "psKernelV1AdmitDeclaration",
+        "inputNodes": 197,
+        "inputRequests": 4,
+        "message": "kernel reduction budget exhausted",
+        "metadataValidated": false,
+        "outcome": "resourceExhausted",
+        "phase": "kernel-admission",
+        "policy": {
+          "cancelled": false,
+          "fuel": 4096,
+          "maxDeclarations": 0,
+          "maxNatSize": 134217728,
+          "maxRecDepth": 0
+        },
+        "protocol": "pskernel-arena-native-v1/1",
+        "resource": "fuel",
+        "sourceSha": "369bee5801bd5e4476837684fad3f7e1ca8c422c"
+      },
+      "outcome": "resourceExhausted",
+      "accepted": null,
+      "semantic_outcome_complete": false
+    },
+    "note": "This is original V1 admission of the exact authenticated input DAG and requests. Exported metadata comparison is not run; admission completion is not an Arena match. Host timeout/OOM and kernel resources remain incomplete outcomes, never rejection or parity."
+  }
+}

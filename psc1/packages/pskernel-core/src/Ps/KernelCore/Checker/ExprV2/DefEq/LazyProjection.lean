@@ -26,12 +26,12 @@ def psKernelExprV2DefEqLazyProjFinishWith
               | Option.none => defeq context state left right
               | Option.some rightValue => defeq context state leftValue rightValue
 
-def psKernelExprV2DefEqLazyProjReductionWithFuel
+def psKernelExprV2DefEqLazyProjReductionOwnedWithFuel
     (fuel : Nat) :
     (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool))) ->
-    (PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat))) ->
     PsKernelExprV2CheckContext -> PsKernelExprV2CheckState ->
     Nat -> Nat -> PsKernelName -> Nat ->
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
@@ -39,19 +39,19 @@ def psKernelExprV2DefEqLazyProjReductionWithFuel
   | Nat.zero =>
       fun (_defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
           Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-          (_coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+          Option (Except String (Prod PsKernelExprV2CheckState Nat)))
           (_context : PsKernelExprV2CheckContext) (_state : PsKernelExprV2CheckState)
           (_left _right : Nat) (_typeName : PsKernelName) (_index : Nat) =>
         Option.some (Except.error "kernel lazy-projection budget exhausted")
   | Nat.succ remaining =>
       fun (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
           Option (Except String (Prod PsKernelExprV2CheckState Bool)))
-          (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+          Option (Except String (Prod PsKernelExprV2CheckState Nat)))
           (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
           (left right : Nat) (typeName : PsKernelName) (index : Nat) =>
-        match psKernelExprV2DefEqLazyStepWith defeq coreWhnf context state left right with
+        match psKernelExprV2DefEqLazyStepOwnedWith defeq coreWhnf context state left right with
         | Option.none => Option.none
         | Option.some attempted =>
             match attempted with
@@ -59,7 +59,7 @@ def psKernelExprV2DefEqLazyProjReductionWithFuel
             | Except.ok stepped =>
                 match Prod.snd stepped with
                 | PsKernelExprV2DeltaStepResult.continue nextLeft nextRight =>
-                    let recur := psKernelExprV2DefEqLazyProjReductionWithFuel remaining;
+                    let recur := psKernelExprV2DefEqLazyProjReductionOwnedWithFuel remaining;
                     recur defeq coreWhnf context (Prod.fst stepped)
                       nextLeft nextRight typeName index
                 | PsKernelExprV2DeltaStepResult.equal =>
@@ -85,13 +85,13 @@ def psKernelExprV2DefEqMatchingProjectionWith
       | Except.ok rightCount =>
           let budget := Nat.succ (Nat.add leftCount rightCount);
           let coreWhnf :
-              PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
-                Option (Except String (Prod PsKernelExprV2WhnfState Nat)) :=
+              PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Bool ->
+                Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
             fun (nextContext : PsKernelExprV2CheckContext)
-                (nextState : PsKernelExprV2WhnfState) (nextRoot : Nat) (cheapProj : Bool) =>
-              psKernelExprV2CheckWhnfCoreWithFuel budget
+                (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) (cheapProj : Bool) =>
+              psKernelExprV2CheckWhnfCoreOwnedWithFuel budget defeq
                 nextContext nextState nextRoot cheapProj;
-          match psKernelExprV2DefEqLazyProjReductionWithFuel budget defeq coreWhnf
+          match psKernelExprV2DefEqLazyProjReductionOwnedWithFuel budget defeq coreWhnf
               context state left right typeName index with
           | Option.none => Option.none
           | Option.some attempted =>
@@ -146,3 +146,35 @@ def psKernelExprV2DefEqProjectionShortcutWith
                   else Option.some (Except.ok (Prod.mk state Option.none))
               | _ => Option.some (Except.ok (Prod.mk state Option.none))
           | _ => Option.some (Except.ok (Prod.mk state Option.none))
+
+/- Original WHNF-only callback signatures remain compatibility wrappers.
+   Each callback is lifted against the actual complete state at its call. -/
+
+def psKernelExprV2DefEqLazyProjReductionWithFuel
+    (fuel : Nat) :
+    (PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool))) ->
+    (PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat))) ->
+    PsKernelExprV2CheckContext -> PsKernelExprV2CheckState ->
+    Nat -> Nat -> PsKernelName -> Nat ->
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+          (_coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (_context : PsKernelExprV2CheckContext) (_state : PsKernelExprV2CheckState)
+          (_left _right : Nat) (_typeName : PsKernelName) (_index : Nat) =>
+        Option.some (Except.error "kernel lazy-projection budget exhausted")
+  | Nat.succ remaining =>
+      fun (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+          Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+          (coreWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2WhnfState -> Nat -> Bool ->
+          Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+          (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+          (left right : Nat) (typeName : PsKernelName) (index : Nat) =>
+        psKernelExprV2DefEqLazyProjReductionOwnedWithFuel (Nat.succ remaining)
+          defeq (psKernelExprV2LiftCheckCoreWhnf coreWhnf)
+          context state left right typeName index

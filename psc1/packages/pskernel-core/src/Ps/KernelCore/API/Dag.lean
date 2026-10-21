@@ -119,7 +119,7 @@ def psKernelDagWhnfExpression
   | Except.error error => Except.error error
   | Except.ok _ =>
       let checker := psKernelKernelSessionChecker session levelParams safety;
-      match psKernelExprV2TryWhnfWithDeclarationsFuel
+      match psKernelExprV2TryWhnfOwnedWithDeclarationsFuel
           session.resources.fuel checker.context arena declarations root with
       | Option.some result =>
           match result with

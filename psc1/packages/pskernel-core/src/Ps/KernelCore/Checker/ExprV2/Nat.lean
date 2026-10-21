@@ -1,5 +1,5 @@
 import Ps.KernelCore.Checker.Reduction.PrimitiveNat
-import Ps.KernelCore.Checker.ExprV2.WhnfState
+import Ps.KernelCore.Checker.ExprV2.CheckCallbacks
 import Ps.KernelCore.Core.ExprV2.Builder
 
 /-
@@ -53,12 +53,12 @@ def psKernelExprV2NatPublish
           (psKernelExprV2WhnfStateWithArena state (Prod.fst result))
           (Option.some (Prod.snd result)))
 
-def psKernelExprV2TryReduceNatSuccWith
-    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+def psKernelExprV2TryReduceNatSuccOwnedWith
+    (publicWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (argument : Nat) :
-    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Nat))) :=
   match publicWhnf context state argument with
   | Option.none => Option.none
   | Option.some attempted =>
@@ -66,19 +66,19 @@ def psKernelExprV2TryReduceNatSuccWith
       | Except.error error => Option.some (Except.error error)
       | Except.ok reduced =>
           let next := Prod.fst reduced;
-          match psKernelExprV2NatLiteralValue next.arena (Prod.snd reduced) with
+          match psKernelExprV2NatLiteralValue next.whnf.arena (Prod.snd reduced) with
           | Except.error error => Option.some (Except.error error)
           | Except.ok number =>
               match number with
               | Option.none => Option.some (Except.ok (Prod.mk next Option.none))
               | Option.some value =>
                   let result := Nat.succ value;
-                  match psKernelCheckNatSize context.maxNatSize result with
+                  match psKernelCheckNatSize context.scalar.maxNatSize result with
                   | Except.error error => Option.some (Except.error error)
                   | Except.ok _ =>
-                      Option.some
-                        (psKernelExprV2NatPublish next
-                          (PsKernelNatReductionValue.nat result))
+                      psKernelExprV2LiftOptionalWhnfAttempt next
+                        (Option.some (psKernelExprV2NatPublish next.whnf
+                          (PsKernelNatReductionValue.nat result)))
 
 def psKernelExprV2NatBinaryFinish
     (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
@@ -104,12 +104,12 @@ def psKernelExprV2NatBinaryFinish
                       | Option.none => Except.ok (Prod.mk state Option.none)
                       | Option.some value => psKernelExprV2NatPublish state value
 
-def psKernelExprV2TryReduceNatBinaryWith
-    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+def psKernelExprV2TryReduceNatBinaryOwnedWith
+    (publicWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (name : PsKernelName) (left right : Nat) :
-    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Nat))) :=
   match publicWhnf context state left with
   | Option.none => Option.none
   | Option.some attemptedLeft =>
@@ -122,22 +122,23 @@ def psKernelExprV2TryReduceNatBinaryWith
               match attemptedRight with
               | Except.error error => Option.some (Except.error error)
               | Except.ok second =>
-                  Option.some
-                    (psKernelExprV2NatBinaryFinish context (Prod.fst second)
-                      name (Prod.snd first) (Prod.snd second))
+                  let afterRight := Prod.fst second;
+                  psKernelExprV2LiftOptionalWhnfAttempt afterRight
+                    (Option.some (psKernelExprV2NatBinaryFinish context.scalar afterRight.whnf
+                      name (Prod.snd first) (Prod.snd second)))
 
-def psKernelExprV2TryReduceNatWith
-    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
-      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
-    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+def psKernelExprV2TryReduceNatOwnedWith
+    (publicWhnf : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
     (root : Nat) :
-    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
-  match psKernelExprV2PagedRequire state.arena root with
+    Option (Except String (Prod PsKernelExprV2CheckState (Option Nat))) :=
+  match psKernelExprV2PagedRequire state.whnf.arena root with
   | Except.error error => Option.some (Except.error error)
   | Except.ok entry =>
       match entry.node with
       | PsKernelExprV2Node.app fn right =>
-          match psKernelExprV2PagedRequire state.arena fn with
+          match psKernelExprV2PagedRequire state.whnf.arena fn with
           | Except.error error => Option.some (Except.error error)
           | Except.ok fnEntry =>
               match fnEntry.node with
@@ -145,20 +146,55 @@ def psKernelExprV2TryReduceNatWith
                   match levels with
                   | List.nil =>
                       if psKernelNameEq name psKernelNatSuccName then
-                        psKernelExprV2TryReduceNatSuccWith publicWhnf context state right
+                        psKernelExprV2TryReduceNatSuccOwnedWith publicWhnf context state right
                       else Option.some (Except.ok (Prod.mk state Option.none))
                   | List.cons _ _ => Option.some (Except.ok (Prod.mk state Option.none))
               | PsKernelExprV2Node.app binaryHead left =>
-                  match psKernelExprV2PagedRequire state.arena binaryHead with
+                  match psKernelExprV2PagedRequire state.whnf.arena binaryHead with
                   | Except.error error => Option.some (Except.error error)
                   | Except.ok binaryEntry =>
                       match binaryEntry.node with
                       | PsKernelExprV2Node.const name levels =>
                           match levels with
                           | List.nil =>
-                              psKernelExprV2TryReduceNatBinaryWith publicWhnf context
+                              psKernelExprV2TryReduceNatBinaryOwnedWith publicWhnf context
                                 state name left right
                           | List.cons _ _ => Option.some (Except.ok (Prod.mk state Option.none))
                       | _ => Option.some (Except.ok (Prod.mk state Option.none))
               | _ => Option.some (Except.ok (Prod.mk state Option.none))
       | _ => Option.some (Except.ok (Prod.mk state Option.none))
+
+/- Original public helpers remain WHNF-only compatibility entry points. -/
+
+def psKernelExprV2TryReduceNatSuccWith
+    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+    (argument : Nat) :
+    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+  psKernelExprV2LowerOptionalWhnfAttempt
+    (psKernelExprV2TryReduceNatSuccOwnedWith (psKernelExprV2LiftScalarWhnf publicWhnf)
+      (psKernelExprV2CheckContextEmpty context)
+      (psKernelExprV2CheckStateFromWhnf state) argument)
+
+def psKernelExprV2TryReduceNatBinaryWith
+    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+    (name : PsKernelName) (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+  psKernelExprV2LowerOptionalWhnfAttempt
+    (psKernelExprV2TryReduceNatBinaryOwnedWith (psKernelExprV2LiftScalarWhnf publicWhnf)
+      (psKernelExprV2CheckContextEmpty context)
+      (psKernelExprV2CheckStateFromWhnf state) name left right)
+
+def psKernelExprV2TryReduceNatWith
+    (publicWhnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelCheckerContext) (state : PsKernelExprV2WhnfState)
+    (root : Nat) :
+    Option (Except String (Prod PsKernelExprV2WhnfState (Option Nat))) :=
+  psKernelExprV2LowerOptionalWhnfAttempt
+    (psKernelExprV2TryReduceNatOwnedWith (psKernelExprV2LiftScalarWhnf publicWhnf)
+      (psKernelExprV2CheckContextEmpty context)
+      (psKernelExprV2CheckStateFromWhnf state) root)

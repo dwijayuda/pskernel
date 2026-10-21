@@ -1,5 +1,170 @@
 # PSKernel-Core performance receipts — 2026-10-21
 
+## Exact carrier checkpoint 4894fce (2026-10-21)
+
+Source: `4894fce8c7d048ae188495bc2090fedfddf7fcb4`. The complete [integration run](https://github.com/dwijayuda/pskernel/actions/runs/39614047016) and [canonical-source correctness run](https://github.com/dwijayuda/pskernel/actions/runs/39614046627) are terminal PASS. These are fresh measurements for the complete-state/K/major carrier. They do not qualify a subsequent merge or establish a general performance improvement. Its full Arena comparison was still running when this receipt was committed.
+
+[Raw samples](evidence/2026-10-21-4894fce-performance.json) preserve all 114 native WHNF/DefEq, 90 native isolated-memory, 96 construction, 128 generated public-check and 24 complete-admission records. Timings below are total milliseconds per stated call count, averaged over the two workers per variant; RSS is the maximum per variant, in KiB. Public checks include validation and decoding; construction is separate. Fresh semantic state, negative controls, cold timings and post-GC retained-heap observations are retained in the raw records. Negative retained deltas are not allocation counts. Timed admission paths are not instrumented; the separate direct-path diagnostic remains explicitly untimed. The six complete CPU/allocation profile records remain in the immutable generated job and its artifact. Official Lean timings use its own kernel budget.
+
+### Native complete WHNF and DefEq
+
+| Operation / shape / depth / calls | Official Lean ms | V1 ms | DAG ms | DAG/V1 |
+|---|---:|---:|---:|---:|
+| whnf / metadata / 96 / 300 | 1.430 | 38.842 | 13.600 | 0.350 |
+| whnf / zeta / 32 / 100 | 2.704 | 11.010 | 9.875 | 0.897 |
+| whnf / zeta / 96 / 50 | 3.980 | 34.107 | 14.340 | 0.420 |
+| whnf / zeta / 192 / 20 | 4.159 | 48.754 | 11.437 | 0.235 |
+| whnf / fn-shared / 8 / 100 | 0.632 | 3.164 | 3.151 | 0.996 |
+| whnf / fn-shared / 32 / 40 | 0.740 | 5.382 | 3.034 | 0.564 |
+| whnf / fn-shared / 128 / 10 | 0.574 | 15.625 | 2.611 | 0.167 |
+| whnf / fn-alpha / 8 / 100 | 0.640 | 2.355 | 4.360 | 1.852 |
+| whnf / fn-alpha / 32 / 40 | 0.707 | 5.372 | 5.187 | 0.965 |
+| whnf / fn-alpha / 128 / 10 | 0.621 | 15.847 | 4.854 | 0.306 |
+| whnf / fn-unique / 8 / 100 | 2.074 | 5.068 | 8.808 | 1.738 |
+| whnf / fn-unique / 32 / 40 | 8.398 | 11.863 | 14.606 | 1.231 |
+| whnf / fn-unique / 128 / 10 | 24.014 | 29.921 | 16.936 | 0.566 |
+| whnf / fn-collision / 8 / 100 | 2.099 | 5.398 | 11.003 | 2.038 |
+| whnf / fn-collision / 32 / 40 | 7.379 | 15.270 | 27.901 | 1.827 |
+| whnf / fn-collision / 128 / 10 | 24.058 | 42.409 | 76.316 | 1.800 |
+| defeq / metadata-pair / 32 / 100 | 1.036 | 8.537 | 4.546 | 0.533 |
+| defeq / metadata-pair / 96 / 40 | 1.978 | 18.346 | 5.513 | 0.301 |
+| defeq / metadata-pair / 192 / 20 | 4.067 | 29.074 | 5.704 | 0.196 |
+
+### Generated complete public checks
+
+| Workload / size / calls | V1 warm ms | DAG warm ms | DAG/V1 | V1 cold ms | DAG cold ms | V1 RSS KiB | DAG RSS KiB | V1 input ms | DAG input ms |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| check / metadata / 32 / 6 / 1 | 113.442 | 43.165 | 0.380 | 28.833 | 15.860 | 151716 | 109044 | 0.148 | 5.460 |
+| check / metadata / 96 / 4 / 1 | 237.758 | 65.748 | 0.277 | 97.151 | 26.196 | 216260 | 137192 | 0.657 | 13.382 |
+| check / metadata / 192 / 2 / 1 | 325.076 | 63.362 | 0.195 | 235.323 | 43.892 | 250852 | 156620 | 0.846 | 21.753 |
+| check / zeta / 8 / 3 / 1 | 41.144 | 39.097 | 0.950 | 28.136 | 31.886 | 119140 | 116784 | 0.103 | 3.764 |
+| check / zeta / 24 / 2 / 1 | 70.939 | 58.505 | 0.825 | 55.342 | 57.747 | 157716 | 143028 | 0.190 | 9.633 |
+| check / zeta / 48 / 1 / 1 | 83.213 | 58.278 | 0.700 | 113.335 | 96.083 | 228144 | 192636 | 0.696 | 15.996 |
+| whnf / metadata / 96 / 4 / 1 | 251.829 | 84.316 | 0.335 | 98.231 | 33.034 | 220764 | 141388 | 0.641 | 13.098 |
+| defeq / metadata / 96 / 4 / 1 | 497.275 | 97.702 | 0.196 | 172.308 | 37.420 | 241280 | 147772 | 0.635 | 12.286 |
+| batch-check / metadata / 96 / 2 / 8 | 973.240 | 136.803 | 0.141 | 606.100 | 101.802 | 294904 | 215836 | 0.654 | 12.791 |
+| defeq / metadata-pair / 32 / 4 / 1 | 215.321 | 117.169 | 0.544 | 81.954 | 49.430 | 196648 | 153180 | 0.247 | 9.927 |
+| defeq / metadata-pair / 96 / 2 / 1 | 419.178 | 311.145 | 0.742 | 270.767 | 220.685 | 248080 | 235624 | 1.010 | 21.425 |
+| whnf / nat-succ / 8 / 3 / 1 | 73.482 | 75.119 | 1.022 | 36.316 | 43.692 | 167620 | 167844 | 0.147 | 5.013 |
+| whnf / nat-succ / 32 / 1 / 1 | 211.857 | 139.593 | 0.659 | 246.868 | 167.264 | 266572 | 246828 | 0.258 | 14.176 |
+| whnf / nat-succ / 96 / 1 / 1 | 1370.774 | 803.149 | 0.586 | 1511.729 | 866.106 | 287516 | 290408 | 0.889 | 27.189 |
+| whnf / projection-field / 8 / 3 / 1 | 34.584 | 52.454 | 1.517 | 25.495 | 38.657 | 152068 | 155656 | 0.093 | 5.000 |
+| whnf / projection-field / 32 / 1 / 1 | 32.724 | 38.525 | 1.177 | 37.311 | 57.853 | 171520 | 180008 | 0.161 | 6.696 |
+| whnf / projection-field / 96 / 1 / 1 | 89.096 | 100.251 | 1.125 | 101.852 | 122.798 | 246096 | 246968 | 0.360 | 12.280 |
+| whnf / zeta / 8 / 3 / 1 | 47.523 | 44.343 | 0.933 | 42.629 | 39.325 | 120320 | 118920 | 0.096 | 3.841 |
+| whnf / zeta / 24 / 2 / 1 | 118.014 | 77.924 | 0.660 | 96.631 | 69.371 | 195496 | 156692 | 0.209 | 9.904 |
+| whnf / zeta / 48 / 1 / 1 | 134.384 | 78.147 | 0.582 | 196.431 | 118.037 | 244868 | 212628 | 0.704 | 16.544 |
+| whnf / fn-shared / 8 / 2 / 1 | 57.040 | 29.482 | 0.517 | 57.577 | 43.020 | 141200 | 118396 | 0.197 | 4.607 |
+| whnf / fn-shared / 32 / 1 / 1 | 97.964 | 31.210 | 0.319 | 142.740 | 71.225 | 233752 | 154776 | 0.253 | 11.166 |
+| whnf / fn-shared / 128 / 1 / 1 | 752.501 | 156.881 | 0.208 | 845.792 | 216.448 | 270124 | 222868 | 0.861 | 28.368 |
+| whnf / fn-alpha / 8 / 2 / 1 | 54.766 | 34.582 | 0.631 | 57.699 | 51.645 | 141184 | 119028 | 0.423 | 10.678 |
+| whnf / fn-alpha / 32 / 1 / 1 | 98.093 | 64.713 | 0.660 | 142.360 | 108.362 | 234908 | 196236 | 0.869 | 28.473 |
+| whnf / fn-alpha / 128 / 1 / 1 | 743.118 | 267.226 | 0.360 | 846.734 | 325.151 | 273888 | 258628 | 3.040 | 102.075 |
+| whnf / fn-unique / 8 / 2 / 1 | 91.103 | 74.219 | 0.815 | 82.594 | 77.666 | 174660 | 156396 | 0.411 | 11.837 |
+| whnf / fn-unique / 32 / 1 / 1 | 209.106 | 168.651 | 0.807 | 286.846 | 227.383 | 263400 | 225956 | 0.863 | 28.475 |
+| whnf / fn-unique / 128 / 1 / 1 | 1421.950 | 795.896 | 0.560 | 1563.244 | 885.000 | 276820 | 279008 | 3.086 | 102.345 |
+| whnf / fn-collision / 8 / 2 / 1 | 105.035 | 92.701 | 0.883 | 95.399 | 87.325 | 183184 | 167828 | 0.403 | 11.085 |
+| whnf / fn-collision / 32 / 1 / 1 | 381.837 | 337.000 | 0.883 | 475.803 | 429.743 | 482500 | 260552 | 0.888 | 27.980 |
+| whnf / fn-collision / 128 / 1 / 1 | 3795.809 | 3477.454 | 0.916 | 4118.487 | 3543.798 | 347252 | 280988 | 3.047 | 103.475 |
+
+The last workload field is the batch size.
+
+### Generated complete safe-definition admission
+
+| Workload / size / calls | V1 warm ms | DAG warm ms | DAG/V1 | V1 cold ms | DAG cold ms | V1 RSS KiB | DAG RSS KiB | V1 input ms | DAG input ms |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| chain / 8 / 3 | 123.571 | 172.970 | 1.400 | 71.866 | 84.239 | 205816 | 189840 | 0.164 | 14.230 |
+| chain / 32 / 2 | 274.984 | 414.308 | 1.507 | 179.690 | 252.492 | 243564 | 309156 | 0.357 | 60.604 |
+| metadata / 8 / 3 | 441.116 | 381.232 | 0.864 | 197.640 | 166.873 | 283260 | 246664 | 0.508 | 28.568 |
+| metadata / 32 / 2 | 1145.640 | 1055.127 | 0.921 | 670.519 | 570.331 | 286536 | 277860 | 1.224 | 115.253 |
+| binder / 8 / 2 | 119.660 | 268.834 | 2.247 | 99.572 | 188.410 | 189916 | 258224 | 0.290 | 21.200 |
+| binder / 32 / 1 | 260.326 | 554.792 | 2.131 | 292.692 | 633.930 | 340360 | 357948 | 0.730 | 87.211 |
+
+Regressions remain material: binder32 admission is 554.792 ms DAG versus 260.326 ms V1 (2.131×), with 87.211 ms versus 0.730 ms input construction and maximum RSS 357948 versus 340360 KiB. Generated projection8 WHNF is 52.455 ms versus 34.584 ms (1.517×); unique and collision-heavy native WHNF also retain slower groups. These measurements do not support making a complete V2 replacement or whole-kernel speedup claim.
+
+## Exact integration checkpoint a2590cc (2026-10-21)
+
+Source: `a2590cc15c764dae9c6abfb941d6c3155ead5c81`. The complete [native and generated integration run](https://github.com/dwijayuda/pskernel/actions/runs/39612691517) finished successfully. The tables below are fresh measurements at that source, not inherited timings from 727. Their PASS markers qualify the asserted outcomes and measurement protocol; they do not mean every workload is faster. The separately measured full 193-case Arena gate failed with 17 host timeouts, one kernel fuel exhaustion and one unsupported input.
+
+All timings are totals for the stated number of calls, in milliseconds. Each cell is the arithmetic mean of the two corresponding isolated workers. The original V1 remains selectable. Semantic state is fresh for each public operation/batch. Validation and decoding are part of the complete public operation; input construction is reported separately. Native official-Lean timing uses its own kernel budget, not PSKernel's 4096 policy. RSS is the maximum of the two variant workers in KiB. These are selected reproducible workloads, not a general speedup claim or a release performance contract.
+
+[Raw source-bound samples](evidence/2026-10-21-a2590cc-performance.json) preserve 114 native WHNF/DefEq records, 90 isolated native memory records, 96 construction records, 128 generated public-check records, and 24 complete admission records. Native legacy integer-ms check rows remain in the immutable job log; they are not mixed into the nanosecond WHNF/DefEq table. Retained post-GC heap deltas, including negative values, are preserved in the raw data; they are not allocation counts. Timed admission does not instrument its direct DAG path: `direct_dag_admission_path_measured:false` remains explicit. Separate untimed path diagnostics cannot prove the exact timed branch. CPU/GC profiles and cache diagnostics remain separate artifact data, with no unsupported precise allocation claim.
+
+### Native complete WHNF and DefEq
+
+| Operation / shape / depth / calls | Official Lean ms | V1 ms | DAG ms | DAG/V1 |
+|---|---:|---:|---:|---:|
+| whnf / metadata / 96 / 300 | 0.962 | 23.379 | 7.276 | 0.311 |
+| whnf / zeta / 32 / 100 | 1.429 | 6.152 | 5.379 | 0.874 |
+| whnf / zeta / 96 / 50 | 2.140 | 21.433 | 7.721 | 0.360 |
+| whnf / zeta / 192 / 20 | 1.762 | 32.378 | 6.350 | 0.196 |
+| whnf / fn-shared / 8 / 100 | 0.379 | 1.268 | 1.566 | 1.235 |
+| whnf / fn-shared / 32 / 40 | 0.395 | 2.921 | 1.620 | 0.555 |
+| whnf / fn-shared / 128 / 10 | 0.348 | 8.661 | 1.371 | 0.158 |
+| whnf / fn-alpha / 8 / 100 | 0.415 | 1.269 | 2.208 | 1.741 |
+| whnf / fn-alpha / 32 / 40 | 0.431 | 2.760 | 2.649 | 0.960 |
+| whnf / fn-alpha / 128 / 10 | 0.413 | 8.795 | 2.494 | 0.284 |
+| whnf / fn-unique / 8 / 100 | 1.208 | 2.797 | 5.056 | 1.807 |
+| whnf / fn-unique / 32 / 40 | 4.038 | 6.359 | 11.932 | 1.877 |
+| whnf / fn-unique / 128 / 10 | 12.872 | 16.947 | 8.955 | 0.528 |
+| whnf / fn-collision / 8 / 100 | 1.192 | 2.879 | 6.037 | 2.097 |
+| whnf / fn-collision / 32 / 40 | 4.049 | 7.723 | 15.506 | 2.008 |
+| whnf / fn-collision / 128 / 10 | 12.936 | 24.272 | 40.790 | 1.681 |
+| defeq / metadata-pair / 32 / 100 | 0.703 | 4.707 | 2.692 | 0.572 |
+| defeq / metadata-pair / 96 / 40 | 1.518 | 11.978 | 3.156 | 0.263 |
+| defeq / metadata-pair / 192 / 20 | 2.663 | 20.346 | 3.320 | 0.163 |
+
+### Generated complete public operations
+
+| Operation / shape / depth / calls / batch | V1 warm ms | DAG warm ms | DAG/V1 | V1 cold ms | DAG cold ms | V1 RSS KiB | DAG RSS KiB | V1 input ms | DAG input ms |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| check / metadata / 32 / 6 / 1 | 112.063 | 41.660 | 0.372 | 28.652 | 16.154 | 150548 | 109132 | 0.184 | 5.918 |
+| check / metadata / 96 / 4 / 1 | 246.614 | 70.962 | 0.288 | 91.673 | 27.723 | 215264 | 136856 | 0.650 | 13.852 |
+| check / metadata / 192 / 2 / 1 | 345.639 | 63.056 | 0.182 | 231.989 | 47.262 | 246084 | 154856 | 0.885 | 23.050 |
+| check / zeta / 8 / 3 / 1 | 39.101 | 40.544 | 1.037 | 29.358 | 34.274 | 117452 | 117308 | 0.105 | 4.231 |
+| check / zeta / 24 / 2 / 1 | 71.053 | 62.462 | 0.879 | 56.879 | 60.297 | 156456 | 142296 | 0.208 | 10.508 |
+| check / zeta / 48 / 1 / 1 | 84.236 | 62.873 | 0.746 | 116.649 | 100.303 | 226908 | 191944 | 0.665 | 18.154 |
+| whnf / metadata / 96 / 4 / 1 | 246.155 | 87.819 | 0.357 | 98.223 | 34.596 | 218336 | 137600 | 0.639 | 12.645 |
+| defeq / metadata / 96 / 4 / 1 | 511.399 | 105.593 | 0.206 | 180.791 | 39.035 | 242672 | 144768 | 0.661 | 14.367 |
+| batch-check / metadata / 96 / 2 / 8 | 956.448 | 137.977 | 0.144 | 579.012 | 100.157 | 251244 | 213824 | 0.629 | 13.783 |
+| defeq / metadata-pair / 32 / 4 / 1 | 214.861 | 122.500 | 0.570 | 83.909 | 51.544 | 198224 | 158404 | 0.265 | 11.409 |
+| defeq / metadata-pair / 96 / 2 / 1 | 401.826 | 301.470 | 0.750 | 270.608 | 216.618 | 245252 | 238152 | 0.957 | 21.962 |
+| whnf / nat-succ / 8 / 3 / 1 | 78.996 | 76.612 | 0.970 | 35.534 | 43.058 | 166864 | 166164 | 0.143 | 4.908 |
+| whnf / nat-succ / 32 / 1 / 1 | 203.701 | 130.907 | 0.643 | 235.893 | 175.295 | 263920 | 243316 | 0.239 | 14.832 |
+| whnf / nat-succ / 96 / 1 / 1 | 1296.339 | 755.551 | 0.583 | 1416.347 | 841.168 | 281216 | 287672 | 1.244 | 29.077 |
+| whnf / projection-field / 8 / 3 / 1 | 36.351 | 48.587 | 1.337 | 25.802 | 39.810 | 151792 | 154900 | 0.095 | 6.619 |
+| whnf / projection-field / 32 / 1 / 1 | 30.313 | 37.993 | 1.253 | 38.141 | 57.210 | 168828 | 177944 | 0.166 | 7.325 |
+| whnf / projection-field / 96 / 1 / 1 | 89.356 | 95.327 | 1.067 | 101.145 | 123.972 | 245368 | 247372 | 0.384 | 12.387 |
+| whnf / zeta / 8 / 3 / 1 | 48.475 | 43.161 | 0.890 | 43.764 | 40.632 | 118700 | 119076 | 0.105 | 4.261 |
+| whnf / zeta / 24 / 2 / 1 | 116.977 | 70.929 | 0.606 | 97.325 | 70.713 | 194144 | 155332 | 0.206 | 10.780 |
+| whnf / zeta / 48 / 1 / 1 | 133.666 | 80.668 | 0.604 | 197.495 | 121.162 | 240456 | 210632 | 0.706 | 17.088 |
+| whnf / fn-shared / 8 / 2 / 1 | 55.876 | 29.035 | 0.520 | 58.014 | 44.763 | 140468 | 117324 | 0.210 | 5.342 |
+| whnf / fn-shared / 32 / 1 / 1 | 103.700 | 32.251 | 0.311 | 140.666 | 73.706 | 229136 | 153156 | 0.269 | 11.553 |
+| whnf / fn-shared / 128 / 1 / 1 | 745.325 | 151.413 | 0.203 | 829.549 | 206.767 | 270312 | 223108 | 0.863 | 29.326 |
+| whnf / fn-alpha / 8 / 2 / 1 | 53.971 | 33.161 | 0.614 | 57.901 | 51.364 | 140664 | 119180 | 0.422 | 12.508 |
+| whnf / fn-alpha / 32 / 1 / 1 | 107.975 | 61.377 | 0.568 | 142.931 | 110.647 | 230560 | 195244 | 0.929 | 30.839 |
+| whnf / fn-alpha / 128 / 1 / 1 | 729.069 | 267.841 | 0.367 | 825.083 | 316.269 | 269664 | 367800 | 3.330 | 123.780 |
+| whnf / fn-unique / 8 / 2 / 1 | 86.910 | 69.079 | 0.795 | 83.501 | 79.712 | 172860 | 155196 | 0.421 | 13.142 |
+| whnf / fn-unique / 32 / 1 / 1 | 204.147 | 158.611 | 0.777 | 282.520 | 222.562 | 263084 | 224584 | 0.931 | 31.625 |
+| whnf / fn-unique / 128 / 1 / 1 | 1370.719 | 791.036 | 0.577 | 1516.509 | 864.918 | 273592 | 274576 | 3.326 | 109.619 |
+| whnf / fn-collision / 8 / 2 / 1 | 111.002 | 93.985 | 0.847 | 95.947 | 90.590 | 185348 | 166692 | 0.420 | 11.972 |
+| whnf / fn-collision / 32 / 1 / 1 | 376.863 | 324.572 | 0.861 | 478.277 | 442.528 | 335860 | 257300 | 0.968 | 32.202 |
+| whnf / fn-collision / 128 / 1 / 1 | 3707.321 | 3285.574 | 0.886 | 3861.284 | 3441.582 | 285900 | 436916 | 3.342 | 109.785 |
+
+### Generated complete safe-definition admission
+
+| Shape / declarations per batch / calls | V1 warm ms | DAG warm ms | DAG/V1 | V1 cold ms | DAG cold ms | V1 RSS KiB | DAG RSS KiB | V1 input ms | DAG input ms |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| chain / 8 / 3 | 126.280 | 168.781 | 1.337 | 66.449 | 82.996 | 181784 | 195356 | 0.175 | 14.847 |
+| chain / 32 / 2 | 277.051 | 419.308 | 1.513 | 184.726 | 259.677 | 243300 | 259368 | 0.409 | 60.503 |
+| metadata / 8 / 3 | 427.687 | 381.841 | 0.893 | 202.091 | 166.084 | 248824 | 286808 | 0.579 | 29.961 |
+| metadata / 32 / 2 | 1148.699 | 1013.334 | 0.882 | 660.346 | 583.413 | 272312 | 271280 | 1.419 | 121.687 |
+| binder / 8 / 2 | 114.705 | 264.359 | 2.305 | 101.856 | 196.898 | 189968 | 257272 | 0.322 | 21.423 |
+| binder / 32 / 1 | 217.603 | 554.811 | 2.550 | 290.070 | 644.327 | 259732 | 273244 | 0.806 | 87.863 |
+
+Native isolated-worker peak RSS ranges from 69588 to 72936 KiB. Regressions remain material: generated binder32 admission takes 554.811 ms versus 217.603 ms V1 (2.550×), and its input construction takes 87.863 ms versus 0.806 ms. Generated projection-field WHNF and native unique/collision workloads also regress as shown above. Historical 8.57×–16.17× selected admission results cannot be presented as this source's performance.
+
+
 ## 2026-10-21 — source727 complete-operation measurements
 
 Source `727b3dd6df6a1ba02959f9c86596933b06ce0a0a`;
@@ -161,8 +326,8 @@ resource accounting is not the PSKernel fuel counter.
 
 The90 isolated-worker process-memory records span69,156–72,216KiB peak RSS.
 There are96 separate input-construction records. Native collision-heavy function
-WHNF remains materially slower: at depth8,100 calls,8.170ms DAG versus4.033ms V1;
-the ratio is0.494. Shared-function depth128 improves to1.896ms DAG versus11.711ms V1.
+WHNF remains materially slower: at depth8,100 calls,8.170 ms DAG versus4.033 ms V1;
+the ratio is0.494. Shared-function depth128 improves to1.896 ms DAG versus11.711 ms V1.
 These selected shapes do not establish an acceptable universal deployment bound.
 
 ### Generated complete public checking
@@ -226,8 +391,8 @@ mismatch and dispatcher/environment parity. It does not instrument every timed
 path and the raw flag remains `direct_dag_admission_path_measured:false`.
 
 Projection WHNF and binder/chain admission regressions remain. Binder32 takes
-379.529ms DAG versus215.493ms V1, with maximum observed worker RSS358,896/249,724KiB
-(DAG/V1). Metadata32 admission improves from1108.351ms V1 to565.654ms DAG, but DAG
+379.529 ms DAG versus215.493 ms V1, with maximum observed worker RSS358,896/249,724KiB
+(DAG/V1). Metadata32 admission improves from1108.351 ms V1 to565.654 ms DAG, but DAG
 input construction and retained memory still cost more in several workloads.
 The historical8.57–16.17× selected-admission figures below apply only to their
 older sources and inputs; they are not a description of source889.
@@ -288,8 +453,8 @@ includes validation/decoding. Policies are unchanged.
 
 Projection and binder/chain-admission regressions remain. Binder32 mean peak RSS
 is218322/232574KiB and retained heap20488/47212bytes (V1/DAG).
-Function-unique128 construction is2.372/77.321ms, cold checking1200.420/671.620ms;
-function-collision128 construction is2.383/79.779ms. These measurements do not
+Function-unique128 construction is2.372/77.321 ms, cold checking1200.420/671.620 ms;
+function-collision128 construction is2.383/79.779 ms. These measurements do not
 establish acceptable full-corpus performance or justify historical8–16x claims.
 
 The full480 [Arena run39572301156](https://github.com/dwijayuda/pskernel/actions/runs/39572301156)
@@ -336,9 +501,9 @@ before/after experiment.
 ### Complete native operations
 
 All 114 observations over 19 workloads were correct. Mean V1/DAG warm ratios range
-0.523–6.737x. For fn-collision depth32, 40 calls take 14.536ms V1 and 27.806ms DAG
-(official Lean 7.310ms): a real DAG regression. For fn-shared depth128, ten calls
-take 15.811ms V1 and 2.347ms DAG (official Lean 0.505ms). Observed worker peak RSS
+0.523–6.737x. For fn-collision depth32, 40 calls take 14.536 ms V1 and 27.806 ms DAG
+(official Lean 7.310 ms): a real DAG regression. For fn-shared depth128, ten calls
+take 15.811 ms V1 and 2.347 ms DAG (official Lean 0.505 ms). Observed worker peak RSS
 ranges 68,644–71,352KiB. These selected results are not a whole-kernel claim.
 
 ### Complete generated operations
@@ -379,7 +544,7 @@ without instrumenting the timed run.
 
 Chain and binder admission are slower through the transitional DAG path at this
 source. Metadata admission is faster, while metadata32 construction is much more
-expensive (0.776ms V1 / 76.831ms DAG). V1 remains the production provider/default.
+expensive (0.776 ms V1 / 76.831 ms DAG). V1 remains the production provider/default.
 This evidence does not justify switching a partially migrated V2 to the default
 or asserting a generally improved memory contract.
 
@@ -394,7 +559,7 @@ church-numerals and init-prelude still time out in both unprofiled and V8-profil
 runs, while bugs/proj-of-stuck-prop now completes with the expected rejection in
 both runs. Sampled VmHWM lower bounds in the profiled processes are respectively
 290,456 / 557,588 / 1,326,848 / 374,464KiB. Admission-entry times were respectively
-274.016 / 280.535 / 3,050.367 / 542.081ms. These are progress/diagnostic observations,
+274.016 / 280.535 / 3,050.367 / 542.081 ms. These are progress/diagnostic observations,
 not total completion latency, and a censored timeout has no numeric speedup.
 The first case's hot JS functions include psKernelExprHasFVar; logical call-site
 tracing is the next diagnostic step. Full-corpus counts await terminal comparison.

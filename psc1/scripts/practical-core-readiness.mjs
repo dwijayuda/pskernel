@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {checkLanguageBackendParity} from './check-language-backend-parity.mjs';
+import {checkPracticalApplications} from './check-practical-applications.mjs';
 import {checkTypedIoExecution} from './check-typed-io-execution.mjs';
 const familyIds=['operators','local-inference','typed-do','for-loops','while-loops','mutation','early-return',
  'partial-definitions','tuples-patterns','arrays-indexing','typed-errors','call-inference','namespaces','typed-io'];
@@ -42,7 +43,7 @@ export function validateReleaseContract(contract){
  }
  return contract;
 }
-export function deriveReadiness(contract,{commit,suites={},fullQualification=null,typedIoApplication=null,typedIoExecution=null,ioExecutionContract=null,ioExecutionImplemented=false}={}){
+export function deriveReadiness(contract,{commit,suites={},fullQualification=null,typedIoApplication=null,typedIoExecution=null,ioExecutionContract=null,ioExecutionImplemented=false,practicalApplications=null,applicationContract=null,applicationImplemented=false}={}){
  validateReleaseContract(contract);assert.match(commit||'',/^[a-f0-9]{40}$/);
  const suiteStates={};
  for(const [id,{caseContract,receipt,implemented}] of Object.entries(suites)){
@@ -101,6 +102,15 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
   checkTypedIoExecution(ioExecutionContract,typedIoExecution,{commit,checkerCommit:contract.authority.commit});
   actualIo=true;
  }
+ let actualApplications=false,allApplicationTargets=false;
+ if(practicalApplications){
+  assert.ok(applicationContract,'application contract required');
+  assert.equal(applicationContract.checkerCommit,contract.authority.commit);
+  assert.deepEqual(applicationContract.grammars,contract.grammars);assert.deepEqual(applicationContract.targets,contract.targets);
+  checkPracticalApplications(applicationContract,practicalApplications,{commit,targets:practicalApplications.targets});
+  actualApplications=true;allApplicationTargets=targets.every(t=>practicalApplications.targets.includes(t));
+  if(full)assert.equal(allApplicationTargets,true,'full application matrix required');
+ }
  const families=contract.families.map(family=>{
   const cases=family.acceptance.map(criterion=>{
    const binding=criterion.execution,suite=binding&&suiteStates[binding.suite];
@@ -121,12 +131,13 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
  // matrix contract. No generic Boolean fixture is accepted as application evidence.
  const applications=contract.applications.map(a=>{
   const core=a.coreExecution&&suiteStates[a.coreExecution.suite];
-  return {id:a.id,status:'blocked',reason:a.coreExecution?'typed IO and remaining full application criteria pending':'actual application acceptance runner pending',
+  const bound=applicationContract?.applications.includes(a.id)||['cli','json-files'].includes(a.id)&&contract.actualApplications;
+  return {id:a.id,status:bound?(actualApplications?(allApplicationTargets&&full?'qualified':'tested'):applicationImplemented?'implemented':'blocked'):'blocked',reason:bound&&actualApplications?null:a.coreExecution?'typed IO and remaining full application criteria pending':'actual application acceptance runner pending',
    coreStatus:core?.qualified&&full?'qualified-subset':core?.tested?'tested':core?.implemented?'implemented':'blocked',
    coreScope:a.coreExecution?.scope||null,
    ioStatus:['cli','json-files'].includes(a.id)&&(typedIoApplication||actualIo)?(full?'qualified-subset':'tested'):'blocked',
    ioScope:['cli','json-files'].includes(a.id)?(actualIo?
-    'Seven explicit synchronous IO adapters; complete CLI/JSON application acceptance remains pending':
+    (actualApplications?'Actual checked CLI/JSON application receipt; library/compiler-like/performance acceptance remains separate':'Seven explicit synchronous IO adapters; complete CLI/JSON application acceptance remains pending'):
     'Linux Node capability host with checked JS/TS/Rust/Python/PHP guests; seven adapters and remaining application criteria pending'):null};
  });
  const familyQualified=id=>families.find(f=>f.id===id)?.qualified===true;
@@ -142,7 +153,10 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
    implemented=suiteStates['inference-control']?.implemented;tested=suiteStates['inference-control']?.tested;
    qualified=['local-inference','call-inference','typed-do','for-loops','while-loops','mutation','early-return','tuples-patterns','typed-errors'].every(familyQualified);
   }
-  else if(task.id==='checked-order')qualified=familyQualified('operators');
+  else if(task.id==='checked-order'){
+   const order=families.find(f=>f.id==='operators')?.cases.find(c=>c.id==='order');
+   qualified=order?.status==='qualified';tested=order?.status==='tested';implemented=order?.status==='implemented';
+  }
   else if(task.id==='typed-io'){
    implemented=ioExecutionImplemented||suiteStates['typed-io-protocol']?.implemented;tested=actualIo||typedIoApplication!==null;
    qualified=familyQualified('typed-io');
@@ -175,6 +189,9 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
   ioExecutionImplemented:fs.existsSync(path.join(root,contract.actualIo.runner))&&
    ['host-tools/typed-io.mjs','host-tools/typed_io.py','host-tools/typed-io-rust/src/lib.rs',
     'host-tools/typed-io.php','host-tools/typed-io-wasm.mjs','host-tools/typed_io_component.py'].every(p=>fs.existsSync(path.join(root,p))),
+  applicationContract:read(contract.actualApplications.contract),
+  applicationImplemented:fs.existsSync(path.join(root,contract.actualApplications.runner)),
+  practicalApplications:fs.existsSync(path.join(root,contract.actualApplications.receipt))?read(contract.actualApplications.receipt):null,
   typedIoExecution:fs.existsSync(path.join(root,contract.actualIo.receipt))?read(contract.actualIo.receipt):null,
   typedIoApplication:fs.existsSync(path.join(root,'dist/scoped-correctness/typed-io/application.json'))?read('dist/scoped-correctness/typed-io/application.json'):null});
  fs.mkdirSync(path.join(root,'dist/development'),{recursive:true});

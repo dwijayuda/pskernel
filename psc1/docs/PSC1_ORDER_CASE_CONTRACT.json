@@ -48,8 +48,7 @@
       "features": [
         "stored-proposition",
         "do-branch",
-        "loop-condition",
-        "operand-order"
+        "loop-condition"
       ]
     }
   ],

@@ -1,0 +1,37 @@
+import ProofScript.System.IO
+
+def cliRecord (value : JsonValue) : Result JsonValue JsonError :=
+  match jsonObjectFind value "text" with
+  | Option.none => Result.error JsonError.invalidShape
+  | Option.some field =>
+      match field with
+      | JsonValue.string text =>
+          match jsonObjectFind value "count" with
+          | Option.none => Result.error JsonError.invalidShape
+          | Option.some count =>
+              match count with
+              | JsonValue.number number =>
+                  jsonObjectFromTwo "count" (JsonValue.number number)
+                    "text" (JsonValue.string (jsonAppend "processed:" text))
+              | _ => Result.error JsonError.invalidShape
+      | _ => Result.error JsonError.invalidShape
+
+def cliRecords (values : JsonValue) : Result JsonValue JsonError :=
+  match values with
+  | JsonValue.arrayNil => Result.ok JsonValue.arrayNil
+  | JsonValue.arrayCons head tail =>
+      match cliRecord head with
+      | Result.error error => Result.error error
+      | Result.ok record =>
+          match cliRecords tail with
+          | Result.error error => Result.error error
+          | Result.ok rest => Result.ok (JsonValue.arrayCons record rest)
+  | _ => Result.error JsonError.invalidShape
+
+def cliTransform (source : String) : Result String JsonError :=
+  match jsonParse source with
+  | Result.error error => Result.error error
+  | Result.ok values =>
+      match cliRecords values with
+      | Result.error error => Result.error error
+      | Result.ok transformed => jsonEncodeCanonical transformed

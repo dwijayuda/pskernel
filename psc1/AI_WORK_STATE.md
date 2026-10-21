@@ -15,6 +15,17 @@ source grammars, true/false/equal/sign/large-integer cases and typed refusals ar
 required through Linux CI before this is called tested or qualified. Existing
 qualified typed IO evidence below remains historical. Next: actual CLI/JSON apps.
 
+Native Linux ordering run 39636740787 passed operator admission, corruption
+refusal and existing regressions. G1, host boundary and semantic closure also
+passed. The focused run stopped at the new independent native order oracle:
+HAdd (Id Nat) Nat needed an explicit Nat observation before arithmetic. The
+fixture now supplies that context; target/full gates must rerun. No test or
+correctness requirement was removed. The next source
+commit adds 136 independent native true/false inhabitation boundaries and the
+actual CLI/JSON application: nineteen child-process cases per grammar/target,
+standalone adapters, independent native JSON reference and strict receipt checks.
+Do not call the application qualified until its complete matrix/full CI succeeds.
+
 ## Latest scoped qualification
 
 Implementation 74179eb664e132502a24ce60b52a3dbd52b1d0cc passes Linux run 39627387430:

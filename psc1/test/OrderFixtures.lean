@@ -20,6 +20,12 @@ def largeOrderCase (flag : Bool) : Nat :=
     (if i < -184467440737095516160 then 4 else 0) +
     (if i >= -184467440737095516160 then 8 else 0)
 
+partial def orderWhile (limit : Nat) : Id Nat := do
+  let mut index : Nat := 0
+  while index < limit do
+    index := index + 1
+  return index
+
 def controlOrderCase (flag : Bool) : Nat :=
   let limit : Nat := if flag then 3 else 1;
   let relation : Prop := limit > 2;
@@ -31,4 +37,6 @@ def controlOrderCase (flag : Bool) : Nat :=
       else
         pure ()
     return total
-  if relation then value + 10 else value
+  let observed : Nat := value;
+  let counted : Nat := orderWhile limit;
+  if relation then observed + counted + 10 else observed + counted

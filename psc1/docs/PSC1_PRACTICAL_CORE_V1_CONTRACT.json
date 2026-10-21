@@ -497,5 +497,10 @@
     "contract": "docs/PSC1_TYPED_IO_EXECUTION_CONTRACT.json",
     "receipt": "dist/scoped-correctness/typed-io-execution/results.json",
     "runner": "scripts/typed-io-execution-evidence.mjs"
+  },
+  "actualApplications": {
+    "contract": "docs/PSC1_APPLICATION_EXECUTION_CONTRACT.json",
+    "runner": "scripts/practical-application-tests.mjs",
+    "receipt": "dist/scoped-correctness/practical-applications/results.json"
   }
 }

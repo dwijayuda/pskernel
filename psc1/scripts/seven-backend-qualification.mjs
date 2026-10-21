@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
+import {checkPracticalApplications} from './check-practical-applications.mjs';
 import {checkTypedIoExecution} from './check-typed-io-execution.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist/scoped-correctness');
@@ -22,6 +23,14 @@ const namespaceBoundaries = ['lean', 'ps'].map(syntax =>
   read('dist/scoped-correctness/namespace-boundaries/' + syntax + '.json'));
 const targets = ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'];
 
+
+const applicationContract=read('docs/PSC1_APPLICATION_EXECUTION_CONTRACT.json');
+const practicalApplications=read('dist/scoped-correctness/practical-applications/results.json');
+const minimumApplications=read('dist/scoped-correctness/practical-applications-python314/results.json');
+for(const [data,selected] of [[practicalApplications,targets],[minimumApplications,['python']]]){
+ checkPracticalApplications(applicationContract,data,{commit:process.env.GITHUB_SHA,targets:selected});
+ assert.equal(data.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+}
 
 const extraProtocols={};
 for(const [id,file]of [['checked-order','PSC1_ORDER_CASE_CONTRACT.json'],['inference-control','PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json'],
@@ -405,6 +414,7 @@ const receipt = {
   })),
   architectureFoundation: {
     boundedProtocols:extraProtocols,
+    practicalApplications:{contract:applicationContract.id,applications:applicationContract.applications,actualConsumers:practicalApplications.records.length,casesPerConsumer:applicationContract.cases.length,minimumPythonConsumers:minimumApplications.records.length,evidence:'practical-applications/results.json',completePracticalCore:false},
     typedIo:{hostProvider:'Linux Node',policyChecks:ioPolicy.checks.length,applicationBundles:ioApplication.records.length,minimumPythonBundles:minimumIoApplication.records.length,sevenHostAdapters:false,completeFamily:false,evidence:'typed-io/application.json'},
     jsonRecordApplicationCore:{contract:jsonApplicationContract.id,obligations:jsonApplication.records.length,
       minimumPythonObligations:minimumJsonApplication.records.length,

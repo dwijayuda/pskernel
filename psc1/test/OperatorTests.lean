@@ -33,7 +33,42 @@ private def rejected (kind : PsCompilerSourceKind) (source : String) : IO Unit :
   | .error _ => pure ()
   | .ok _ => throw (IO.userError ("unsupported or ill-typed operator accepted: " ++ source))
 
+
+private def orderWitness (environment : Lean.Environment) (relation : PsName)
+    (left right : PsExpr) (expected : Bool) : IO Unit := do
+  let proposition := psExprApplyMany (.constE relation []) [left,right]
+  let declaration := PsDeclaration.theoremDecl (psRootName "orderBoundaryWitness") [] proposition
+    (.constE psOrderIntroName [])
+  let converted ← match PsKernelLean.toLeanPreludeDeclaration [declaration] declaration with
+    | .ok (some value) => pure value
+    | _ => throw (IO.userError "order witness conversion failed")
+  match environment.addDeclCore 2000000 20000 converted none true with
+  | .ok _ => require expected "false order proposition admitted an inhabitant"
+  | .error _ => require (!expected) "true order proposition refused its constructive inhabitant"
+
+private def integerCore (value : Int) : PsExpr :=
+  match value with
+  | .ofNat n => .app (.constE psIntOfNatName []) (.lit (.natural n))
+  | .negSucc n => .app (.constE psIntNegSuccName []) (.lit (.natural n))
+
+private def orderBoundaries : IO Unit := do
+  let environment ← match ← PsKernelLean.buildLeanPreludeEnvironment with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error.message)
+  for left in [0,1,2] do
+    for right in [0,1,2] do
+      for (relation,expected) in [(psNatLtName,decide (left < right)),(psNatLeName,decide (left ≤ right)),
+          (psNatGtName,decide (left > right)),(psNatGeName,decide (left ≥ right))] do
+        orderWitness environment relation (.lit (.natural left)) (.lit (.natural right)) expected
+  for left in [(-2 : Int),-1,0,1,2] do
+    for right in [(-2 : Int),-1,0,1,2] do
+      for (relation,expected) in [(psIntLtName,decide (left < right)),(psIntLeName,decide (left ≤ right)),
+          (psIntGtName,decide (left > right)),(psIntGeName,decide (left ≥ right))] do
+        orderWitness environment relation (integerCore left) (integerCore right) expected
+  IO.println "PSC1_ORDER_KERNEL_BOUNDARIES: PASS 136 independent native truth/false inhabitation checks"
+
 def main : IO Unit := do
+  orderBoundaries
   same .lean "def answer : Nat := 2 + 3 * 4\n"
     "def answer : Nat := Nat.add 2 (Nat.mul 3 4)\n"
   same .proofScript "def answer : Nat := 2 + 3 * 4\n"

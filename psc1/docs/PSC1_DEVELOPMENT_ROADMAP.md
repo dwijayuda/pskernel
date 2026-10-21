@@ -79,3 +79,12 @@ large inputs. Existing partial application regressions remain; source execution
 does not imply complete four-application or release qualification. Preserve the
 f799 inference/protocol,5a0f sequencing and1fbf five-target standalone receipts
 with their original source and CI identities. G2/G3 stay deferred until freeze.
+
+## Active continuation: checked order and actual applications
+
+Constructive Nat/Int ordering is implemented and native-admitted in run
+39636740787; target/full qualification is pending. PracticalCli supplies both
+authored source grammars and nineteen actual process-level CLI/JSON scenarios per
+target. Its exact-commit matrix, minimum Python and full gates determine the two
+application rows. Library and compiler-like/performance acceptance remain next.
+No milestone here reopens G2/G3 or replaces the finite release contract.

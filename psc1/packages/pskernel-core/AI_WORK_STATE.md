@@ -1,3 +1,23 @@
+# Latest paired result: explicit radix worker candidate stays out of integration
+
+[Run39652619954](https://github.com/dwijayuda/pskernel/actions/runs/39652619954), job119404594582, is terminal **PASS for measurement collection** at harness `9d1cac9d651a902523ffa5c4399f3bb24dcba452`. It authenticated baseline `f9e9b20f92ce2ffa4a666acaf55aa8852949f589` and candidate `384f3395036ba7022e6eea9d3ff77f37aacd62ca`, ran both138-case transport control sets,48 complete-admission samples and16 genuine authenticated Arena processes in sequential ABBA source order. All measured admission outcomes were correct. This does not make Arena or V2 complete.
+
+**Promotion decision: HOLD.** Complete DAG metadata admission remains materially slower:8 declarations131.215→161.644ms/warm batch (about23.2% more latency),32 declarations506.568→621.239ms (about22.6%). Corresponding process RSS246,750→251,790KiB and273,716→277,472KiB also rose. Other workloads are mixed: chain8 worsens slightly, chain32/binder8 improve slightly, binder32 worsens slightly. These are two descriptive samples per side. The full original per-process CPU, cold latency, retained heap and construction metrics are preserved; negative retained-heap deltas are measurements, not silently clipped.
+
+Repeated-subproblem accepted on both sides, stuck-projection rejected on both, Church returned real fuel exhaustion on both and Prelude timed out on both. Resource/timeouts have no acceptance/rejection latency ratio. The host used60seconds and2048MiB V8 old-space, explicitly **not** a hard RSS cap.
+
+The generated384 worker still contains nested state closures after PSC1 structural-recursion lowering, despite explicit source arguments. The focused earlier allocation receipts identify those closures; further cache-threshold or fuel changes are not justified. A separately checked, opt-in compiler specialization is being investigated with exact public/partial ABI and evaluation-order constraints. It is not implemented or qualified in this evidence source.
+
+Permanent evidence:
+- `evidence/2026-10-21-radix-worker-paired-performance.json`: complete180,196-byte original report, SHA256`d80915bc41496477b0794636e115fcbeba0636f8780d6eadaab771556457d4dc`.
+- `evidence/2026-10-21-radix-worker-paired-performance.md`: complete4,245-byte original summary, SHA256`5b84e872bdb98d0dec31c2b3e88e51e73d069b8b15b529302a07fed3720b5805`.
+- `evidence/2026-10-21-radix-worker-paired-receipt.json`: exact source/run/collection limits and promotion decision.
+- [Artifact12369948192](https://github.com/dwijayuda/pskernel/actions/runs/39652619954/artifacts/12369948192),9,378,678bytes, ZIP SHA256`f92eff0034ba766e6ed1ca4b29e8ae83e361d6427a4a0c7eda82aecaf620a517`.
+
+This evidence-only commit changes neither kernel nor benchmark. The source384 native, portable, generated and canonical gates are separately qualified; its full Arena remains175matching+2safety+14timeouts+1fuel+1unsupported. Those cross-run totals are not a causal performance comparison against this baseline. Current integration is kept on the independently qualified Name-worker path; this cache candidate is not merged.
+
+---
+
 # Current isolated experiment — paired explicit radix-worker qualification
 
 Branch: `research/psc1-pskernel-radix-paired-perf-20261021`.

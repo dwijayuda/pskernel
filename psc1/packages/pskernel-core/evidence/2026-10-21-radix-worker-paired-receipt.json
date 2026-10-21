@@ -1,0 +1,51 @@
+{
+  "schema": "pskernel-radix-worker-paired-qualification-v1",
+  "workflowSourceSha": "9d1cac9d651a902523ffa5c4399f3bb24dcba452",
+  "baselineSourceSha": "f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+  "candidateSourceSha": "384f3395036ba7022e6eea9d3ff77f37aacd62ca",
+  "run": {
+    "id": 39652619954,
+    "job": 119404594582,
+    "conclusion": "success"
+  },
+  "artifact": {
+    "id": 12369948192,
+    "bytes": 9378678,
+    "zipSha256": "f92eff0034ba766e6ed1ca4b29e8ae83e361d6427a4a0c7eda82aecaf620a517"
+  },
+  "report": {
+    "file": "report.json",
+    "bytes": 180196,
+    "sha256": "d80915bc41496477b0794636e115fcbeba0636f8780d6eadaab771556457d4dc"
+  },
+  "summary": {
+    "file": "summary.md",
+    "bytes": 4245,
+    "sha256": "5b84e872bdb98d0dec31c2b3e88e51e73d069b8b15b529302a07fed3720b5805"
+  },
+  "admissionSamples": 48,
+  "authenticProcesses": 16,
+  "collectionComplete": true,
+  "protocolValid": true,
+  "sourceOrder": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "hostCpuModels": [
+    "AMD EPYC 7763 64-Core Processor"
+  ],
+  "kernelFuel": 4096,
+  "hostSeconds": 60,
+  "oldSpaceMiB": 2048,
+  "hardRssLimitEnforced": false,
+  "promotion": "HOLD: complete DAG metadata admissions regress against the authenticated old baseline; explicit source worker arguments did not remove generated state closures.",
+  "limitations": [
+    "Two observations per side are descriptive, not a statistical significance or universal speedup claim.",
+    "This experiment is not full193 conformance, canonical-source requalification or fullV2 replacement.",
+    "Both sides retain the observed Church fuel failure and Prelude timeout; neither is counted as a rejection or speedup.",
+    "V8 old-space limit is not an OS memory/RSS cap.",
+    "No candidate kernel or compiler source is promoted by this evidence commit."
+  ]
+}

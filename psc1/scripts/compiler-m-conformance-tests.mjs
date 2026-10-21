@@ -50,7 +50,13 @@ function run(cmd,args,options={}){
    status:result.status,phases:lines.filter(l=>l.startsWith('PSC1_PHASE:')),largest:sizes.sort((a,b)=>b.size-a.size).slice(0,5)}));
  }
  assert.equal(result.error,undefined,result.error?.message);
- assert.equal(result.status,0,cmd+' '+args.join(' ')+'\n'+result.stdout+result.stderr);
+ if(result.status!==0){
+  const full=result.stdout+'\n'+result.stderr;
+  write(path.join(evidence,'failed-process-'+sha(cmd+'\0'+args.join('\0')).slice(0,16)+'.log'),full);
+  console.error(marker+'_PROCESS_FAILURE: '+JSON.stringify({command:cmd,status:result.status,signal:result.signal,
+   stdoutTail:(result.stdout||'').slice(-8000),stderrTail:(result.stderr||'').slice(-16000)}));
+ }
+ assert.equal(result.status,0,cmd+' '+args.join(' ')+'\n'+(result.stdout||'').slice(-8000)+(result.stderr||'').slice(-16000));
  return result.stdout;
 }
 function reject(args,expected){

@@ -929,9 +929,10 @@ def psElabIf
                           ];
                       let restoredContext :=
                         psElabContextWithMeta context metaContext;
+                      let shared := psElabConditionClose metaContext conditionResult.bindings term;
                       psElabResolvedTerm
                         restoredContext
-                        term
+                        shared
                         expected
 
 def psExprHasConst

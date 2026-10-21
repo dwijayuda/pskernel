@@ -111,7 +111,36 @@ private def integerEqualityBoundaries : IO Unit := do
   | _ => throw (IO.userError "signed equality lost its strict operand lets")
   IO.println "PSC1_INT_EQUALITY_KERNEL_BOUNDARIES: PASS 50 true/false conversion checks and strict operand lets"
 
+private def linearConditionSize : IO Unit := do
+  let conjunction := String.intercalate " && " (List.replicate 64 "flag")
+  let equality := (List.range 64).foldr (fun _ rest => "flag == (" ++ rest ++ ")") "flag"
+  for expression in [conjunction, equality] do
+    for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+      let signature := match kind with
+        | .lean => "def boundedCondition (flag : Bool) : Bool := "
+        | .proofScript => "def boundedCondition(flag : Bool) : Bool := "
+      let prepared ← prepare kind (signature ++ expression ++ "\n")
+      let some declaration := prepared.declarations.find? (fun d =>
+        psNameEq (psDeclarationName d) (psRootName "boundedCondition"))
+        | throw (IO.userError "bounded condition missing")
+      let some body := psDeclarationValue declaration
+        | throw (IO.userError "bounded condition body missing")
+      require (psCheckedNestedSize body <= 10000) "nested Bool conditions expanded beyond a linear Core bound"
+      let encoded ← match psCompilerAdmissionsFromPrepared prepared with
+        | .error _ => throw (IO.userError "bounded condition encoding failed")
+        | .ok value => pure value
+      require (encoded.utf8ByteSize <= 1048576) "bounded condition admission payload exceeded one MiB"
+      let _ ← match psCompilerVerifiedIrFromPrepared prepared with
+        | .error _ => throw (IO.userError "bounded condition erasure failed")
+        | .ok ir =>
+            match psStrictValidateModule ir with
+            | .error _ => throw (IO.userError "bounded condition strict IR refused")
+            | .ok value => pure value
+      IO.println ("PSC1_LINEAR_CONDITION_CORE: PASS 64 conditions nodes=" ++
+        toString (psCheckedNestedSize body) ++ " admissionBytes=" ++ toString encoded.utf8ByteSize)
+
 def main : IO Unit := do
+  linearConditionSize
   orderBoundaries
   integerEqualityBoundaries
   same .lean "def answer : Nat := 2 + 3 * 4\n"

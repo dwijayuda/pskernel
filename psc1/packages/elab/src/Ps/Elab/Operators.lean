@@ -55,13 +55,15 @@ def psOperatorApply (name : PsName) (left right : PsExpr) : PsExpr :=
 def psOperatorBoolIte (condition yes no : PsExpr) : PsExpr :=
   let boolType := PsExpr.constE psBoolName [];
   let trueValue := PsExpr.constE psBoolTrueName [];
+  let selected := PsExpr.bvar 0;
   let proposition :=
     PsExpr.app (PsExpr.app (PsExpr.app
-      (PsExpr.constE psEqName [PsLevel.succ PsLevel.zero]) boolType) condition) trueValue;
-  let decider := psOperatorApply psBoolDecEqName condition trueValue;
-  PsExpr.app (PsExpr.app (PsExpr.app (PsExpr.app (PsExpr.app
+      (PsExpr.constE psEqName [PsLevel.succ PsLevel.zero]) boolType) selected) trueValue;
+  let decider := psOperatorApply psBoolDecEqName selected trueValue;
+  let body := PsExpr.app (PsExpr.app (PsExpr.app (PsExpr.app (PsExpr.app
     (PsExpr.constE psIteName [PsLevel.succ PsLevel.zero]) boolType)
-    proposition) decider) yes) no
+    proposition) decider) (psExprLiftBVars 1 0 yes)) (psExprLiftBVars 1 0 no);
+  PsExpr.letE (psRootName "_psc1BoolCondition") boolType condition body
 
 def psOperatorArithmeticName (operator : String) (domain : PsName) : Option PsName :=
   if psNameEq domain psNatName then
@@ -116,6 +118,16 @@ def psOperatorIntEquality (left right : PsExpr) : PsExpr :=
     (PsExpr.letE (psRootName "_psc1IntEqRight") intType
       (psExprLiftBVars 1 0 right) body)
 
+def psOperatorBoolEquality (left right : PsExpr) : PsExpr :=
+  let boolType := PsExpr.constE psBoolName [];
+  let x := PsExpr.bvar 1;
+  let y := PsExpr.bvar 0;
+  let body := psOperatorBoolIte x y
+    (psOperatorBoolIte y (PsExpr.constE psBoolFalseName []) (PsExpr.constE psBoolTrueName []));
+  PsExpr.letE (psRootName "_psc1BoolEqLeft") boolType left
+    (PsExpr.letE (psRootName "_psc1BoolEqRight") boolType
+      (psExprLiftBVars 1 0 right) body)
+
 def psOperatorEqualityTerm (name : PsName) (operands : PsElabOperatorOperands) :
     Except PsElabError PsExpr :=
   if psNameEq name psNatName then
@@ -123,9 +135,7 @@ def psOperatorEqualityTerm (name : PsName) (operands : PsElabOperatorOperands) :
   else if psNameEq name psIntName then
     Except.ok (psOperatorIntEquality operands.left operands.right)
   else if psNameEq name psBoolName then
-    Except.ok (psOperatorBoolIte operands.left operands.right
-      (psOperatorBoolIte operands.right
-        (PsExpr.constE psBoolFalseName []) (PsExpr.constE psBoolTrueName [])))
+    Except.ok (psOperatorBoolEquality operands.left operands.right)
   else Except.error PsElabError.unsupportedTerm
 
 def psOperatorOrderName (operator : String) (domain : PsName) : Option PsName :=
@@ -149,10 +159,28 @@ def psOperatorOrderDecisionName (relation : PsName) : Option PsName :=
   else if psNameEq relation psIntGeName then Option.some psIntDecGeName
   else Option.none
 
+structure PsElabConditionBinding where
+  id : Nat
+  name : PsName
+  type : PsExpr
+  value : PsExpr
+
 structure PsElabCondition where
   context : PsElabContext
   proposition : PsExpr
   decision : PsExpr
+  bindings : List PsElabConditionBinding
+
+-- Share original runtime conditions/operands in checked lets. Duplicating an
+-- entire nested condition into its proposition and decision is exponential.
+def psElabConditionClose (metas : PsMetaContext)
+    (bindings : List PsElabConditionBinding) (body : PsExpr) : PsExpr :=
+  match bindings with
+  | List.nil => body
+  | List.cons binding rest =>
+      let inner := psElabConditionClose metas rest body;
+      PsExpr.letE binding.name (psMetaInstantiate metas binding.type)
+        (psMetaInstantiate metas binding.value) (psExprAbstractFVar binding.id inner)
 
 -- Try the established Bool context transactionally; only a checked order Prop
 -- selects the second path. Failed speculative assignments cannot escape.
@@ -161,11 +189,16 @@ def psElabConditionTerm (elaborate : PsOperatorElaborator)
     Except PsElabError PsElabCondition :=
   match elaborate context condition (Option.some (PsExpr.constE psBoolName [])) with
   | Except.ok value =>
+      let boolType := PsExpr.constE psBoolName [];
+      let name := PsName.num (psRootName "_psc1Condition") value.context.localContext.nextId;
+      let pushed := psLocalPushBinding value.context.localContext name boolType PsBinderInfo.explicit;
+      let selected := PsExpr.fvar pushed.id;
       let proposition := PsExpr.app (PsExpr.app (PsExpr.app
         (PsExpr.constE psEqName [PsLevel.succ PsLevel.zero])
-        (PsExpr.constE psBoolName [])) value.term) (PsExpr.constE psBoolTrueName []);
-      Except.ok (PsElabCondition.mk value.context proposition
-        (psOperatorApply psBoolDecEqName value.term (PsExpr.constE psBoolTrueName [])))
+        boolType) selected) (PsExpr.constE psBoolTrueName []);
+      Except.ok (PsElabCondition.mk (psElabContextWithLocal value.context pushed.context) proposition
+        (psOperatorApply psBoolDecEqName selected (PsExpr.constE psBoolTrueName []))
+        [PsElabConditionBinding.mk pushed.id name boolType value.term])
   | Except.error original =>
       match elaborate context condition (Option.some (PsExpr.sortE PsLevel.zero)) with
       | Except.error _ => Except.error original
@@ -180,8 +213,19 @@ def psElabConditionTerm (elaborate : PsOperatorElaborator)
                       match psOperatorOrderDecisionName name with
                       | Option.none => Except.error original
                       | Option.some decider =>
-                          Except.ok (PsElabCondition.mk value.context proposition
-                            (psOperatorApply decider left right))
+                          let natural := psNameEq name psNatLtName || psNameEq name psNatLeName ||
+                            psNameEq name psNatGtName || psNameEq name psNatGeName;
+                          let type := PsExpr.constE (if natural then psNatName else psIntName) [];
+                          let leftName := PsName.num (psRootName "_psc1ConditionLeft") value.context.localContext.nextId;
+                          let first := psLocalPushBinding value.context.localContext leftName type PsBinderInfo.explicit;
+                          let rightName := PsName.num (psRootName "_psc1ConditionRight") first.context.nextId;
+                          let second := psLocalPushBinding first.context rightName type PsBinderInfo.explicit;
+                          let x := PsExpr.fvar first.id;
+                          let y := PsExpr.fvar second.id;
+                          Except.ok (PsElabCondition.mk (psElabContextWithLocal value.context second.context)
+                            (psOperatorApply name x y) (psOperatorApply decider x y)
+                            [PsElabConditionBinding.mk first.id leftName type left,
+                              PsElabConditionBinding.mk second.id rightName type right])
                   | _ => Except.error original
               | _ => Except.error original
           | _ => Except.error original

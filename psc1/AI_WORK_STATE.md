@@ -190,3 +190,25 @@ Extend the existing strict typed-IR continuation corpus to JS as well as TS:
 order, escaping capture, foreign traps and actual unused-RHS divergence deadlines.
 The original source streaming stress remains unchanged. No readiness promotion
 or G2 claim precedes exact Linux execution. Save successful build profiles too.
+
+## Linear condition ownership and current backend boundary
+
+At bef6343 / run 39694885609, JS and TS source matrices pass their full eighteen
+cases for the first grammar, including 10^18 immediate return and 100000 complete
+actions. Both driver regressions pass 1000001 calls with RSS 58664 KiB (JS) and
+58232 KiB (TS), under the unchanged 262144-KiB ceiling. Native and PHP lanes pass.
+Rust is the next failing consumer; long generated style warnings obscured its
+terminal diagnostic. Retain complete failed process logs and print bounded tails.
+
+Build profiles expose a separate general source defect: the eighteen-condition
+semantic wrapper has 3145709 Core nodes and canonical admissions occupy
+138242867 bytes. The Bool condition was copied into its proposition and checked
+decision, causing exponential left-associated short-circuit expansion. Share
+original Bool conditions and ordered Nat/Int operands through checked strict Core
+lets with numeric internal names; retain transactional Bool/Prop inference,
+source order, kernel admission, exact ordinary pairing and all IR checks.
+A 64-conjunction regression in each grammar requires at most 10000 Core nodes,
+one-MiB admissions, official admission and strict erased IR. This is a size bound
+for that fixed regression, not a new global resource policy or reduced workload.
+No public witness replay check was removed; the proposed host caching shortcut
+was not applied. Source readiness remains unqualified until its own exact CI.

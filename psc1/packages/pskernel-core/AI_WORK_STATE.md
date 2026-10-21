@@ -1,3 +1,86 @@
+# Metadata admission profiling — prepared, not yet executed
+
+Updated: 2026-10-21 UTC. Intended branch:
+`research/psc1-pskernel-cache-profile-20261021`.
+This host-only diagnostic is based on exact paired-evidence parent
+`7ae480eedcc7c6c67e63ebdb7a6f4eedcf7ddaa4`.
+The ordinary paired experiment, its full report, both old drivers, the repository
+benchmark, and every portable kernel source file remain unchanged.
+
+## Measured reason and exact runtime identities
+
+The authenticated same-runner experiment
+[39639125591](https://github.com/dwijayuda/pskernel/actions/runs/39639125591)
+recorded metadata8 DAG warm admission increasing from 115.411916 to 161.457972ms
+and metadata32 from 466.784082 to 594.628287ms; the corresponding legacy means were
+134.675035 to 131.100849ms and 526.718084 to 532.440460ms. These are descriptive
+two-sample means, not a function-level causal attribution. The unchanged complete
+receipt is `evidence/2026-10-21-paired-generated-performance.json`;
+report SHA256 `ef8bbe8da8ae15994b69381c31c8d3b0f4912ccfa4b59189426885f3ab95e667`.
+
+The new profile driver pins the same two exact generated bundles:
+baseline `f9e9b20f92ce2ffa4a666acaf55aa8852949f589`,
+integration run39622521184/artifact12358040951, and candidate
+`5deaf5880c83a76290520fa1176982dab0bf87a5`,
+integration run39631703411/artifact12364250685. Candidate ZIP SHA256 is
+`347d02515c408e825bd13790e265e13663f150e9ab4c64b01107d77b37b0fb01`
+and generated kernel SHA256 is
+`fad819da8477cf225c608ab928baddb8f91aa3ce7d133edf08942262bcc9ac93`.
+Authentication rechecks immutable producer jobs, manifests, restored bytes and
+source identities; the compiler and canonical checker are not rerun.
+
+## Bounded implementation
+
+New `psc1/scripts/pskernel-paired-admission-profile.py` reuses the
+existing paired authentication and detached-runtime helpers. It verifies the
+original admission benchmark and existing sampling module are identical in both
+source revisions. Five exact, count-checked edits add a profile-only mode to the
+detached benchmark copies. The ordinary worker remains as an unchanged alternative
+branch; the original repository benchmark is not edited. Both derived copies
+receive a fresh Node syntax check, and the original/derived/sampling-module hashes
+and actual derived sources are retained.
+
+The matrix has exactly eight fresh processes: metadata8 and metadata32, legacy
+`psKernelV1AdmitDeclaration` and transitional-DAG
+`psKernelV1RunDag`, baseline and candidate. Every process retains the
+same negative sentinel, five-input warmup, fresh session per callback, complete
+public admission, exact environment/definition/receipt/index assertions, and
+untimed direct-DAG diagnostic. The existing profiler collects separate CPU,
+allocation and post-GC survivor phases, each with three calls for metadata8 or two
+for metadata32. The instrumented callback includes independent result validation.
+Both runtimes must first pass all 138 unchanged replay controls.
+
+New `.github/workflows/psc1-pskernel-paired-admission-profile.yml`
+authenticates the two existing artifacts and runs that fixed matrix on Node 22.
+It uploads raw profiles, all logs, setup observations, signed heap/RSS changes,
+source and artifact receipts, and per-file SHA256 manifests. Complete per-cell
+profile summaries are also printed to the job log; sample collection never
+substitutes for a kernel or conformance gate.
+
+## Qualification and limits
+
+**NOT RUN:** profile syntax, derived-mode execution and the eight profile cells.
+No new kernel source, canonical-source, proof, provider or Arena qualification is
+claimed by this host-only commit. Fuel remains 4096 and the two selected artifacts
+retain their previously recorded source-specific qualification.
+
+This diagnostic deliberately preserves the original experiment's 60-second
+process deadline and 2048 MiB V8 old-space limit. It does **not** enforce an OS
+memory cap and must not be relabeled as a 2 GiB-host-limit corpus result. The separate
+generated Arena hard-cap controls do not retroactively qualify these profiles.
+CPU weights and allocation values are sampling estimates; nearby generated
+declaration names are location hints, and survivor samples are not a whole-heap
+retention proof. Instrumented times cannot replace the original ABBA timings.
+There is one diagnostic sample per matrix cell, no general speedup claim, and no
+assumption that the radix follow-up or Name worker resolves this regression.
+
+Next executable action: run the new workflow on its exact source SHA, require
+terminal success plus all 138 controls per runtime and all eight checked profiles,
+then inspect actual generated source/CPU/allocation stacks before proposing a
+further kernel change. A failed or timed-out profile remains incomplete.
+
+---
+
 # Paired performance: collected, with a measured regression
 
 Updated: 2026-10-21 UTC. Branch: `research/psc1-pskernel-paired-perf-20261021`.

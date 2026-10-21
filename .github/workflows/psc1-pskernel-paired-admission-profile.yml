@@ -1,0 +1,115 @@
+name: PSC1 paired metadata admission profiles
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/psc1-pskernel-cache-profile-20261021
+    paths:
+      - .github/workflows/psc1-pskernel-paired-admission-profile.yml
+      - psc1/scripts/pskernel-paired-admission-profile.py
+      - psc1/scripts/pskernel-paired-artifacts.py
+      - psc1/scripts/pskernel-paired-performance.py
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc1-paired-admission-profile-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  paired-metadata-profiles:
+    # Instrumented collection; no new source, canonical-source or conformance gate.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the profile harness
+        uses: actions/checkout@v4
+        with:
+          path: harness
+          persist-credentials: false
+      - name: Check out the exact baseline source
+        uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/pskernel
+          ref: f9e9b20f92ce2ffa4a666acaf55aa8852949f589
+          path: sources/baseline
+          persist-credentials: false
+      - name: Check out the exact indexed-cache source
+        uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/pskernel
+          ref: 5deaf5880c83a76290520fa1176982dab0bf87a5
+          path: sources/candidate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check host source syntax and exact checkout identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C sources/baseline rev-parse HEAD)" = "f9e9b20f92ce2ffa4a666acaf55aa8852949f589"
+          test "$(git -C sources/candidate rev-parse HEAD)" = "5deaf5880c83a76290520fa1176982dab0bf87a5"
+          python3 -m py_compile harness/psc1/scripts/pskernel-paired-artifacts.py \
+            harness/psc1/scripts/pskernel-paired-performance.py \
+            harness/psc1/scripts/pskernel-paired-admission-profile.py
+          node --check sources/baseline/psc1/scripts/pskernel-expr-v2-admission-bench.mjs
+          node --check sources/baseline/psc1/scripts/pskernel-generated-profile.mjs
+          node --check sources/baseline/psc1/scripts/pskernel-arena-replay-controls.mjs
+      - name: Authenticate the two existing terminal-success runtime artifacts
+        shell: bash
+        env:
+          PSC1_PERF_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 harness/psc1/scripts/pskernel-paired-artifacts.py \
+            --candidate-run 39631703411 \
+            --candidate-source 5deaf5880c83a76290520fa1176982dab0bf87a5 \
+            --out "$RUNNER_TEMP/psc1-profile-runtimes" \
+            2>&1 | tee "$RUNNER_TEMP/psc1-profile-authentication.log"
+      - name: Run unchanged controls and eight detached public-admission profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 harness/psc1/scripts/pskernel-paired-admission-profile.py \
+            --runtimes "$RUNNER_TEMP/psc1-profile-runtimes" \
+            --baseline-source "$GITHUB_WORKSPACE/sources/baseline/psc1" \
+            --candidate-source "$GITHUB_WORKSPACE/sources/candidate/psc1" \
+            --out "$RUNNER_TEMP/psc1-admission-profiles" \
+            2>&1 | tee "$RUNNER_TEMP/psc1-admission-profile-collection.log"
+          grep -Fqx 'PSC1_PAIRED_PROFILE_CONTROLS_PASS baseline count=138' \
+            "$RUNNER_TEMP/psc1-admission-profile-collection.log"
+          grep -Fqx 'PSC1_PAIRED_PROFILE_CONTROLS_PASS candidate count=138' \
+            "$RUNNER_TEMP/psc1-admission-profile-collection.log"
+          test "$(grep -c '^PSC1_PAIRED_ADMISSION_PROFILE {' "$RUNNER_TEMP/psc1-admission-profile-collection.log")" = 8
+          grep -Fqx 'PSC1_PAIRED_ADMISSION_PROFILE_COLLECTION: PASS profiles=8' \
+            "$RUNNER_TEMP/psc1-admission-profile-collection.log"
+      - name: Present exact diagnostic scope and partial results
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test -f "$RUNNER_TEMP/psc1-admission-profiles/summary.md"; then
+            cat "$RUNNER_TEMP/psc1-admission-profiles/summary.md" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Retain authenticated runtimes, raw samples and source receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-paired-admission-profile-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/psc1-profile-runtimes/
+            ${{ runner.temp }}/psc1-admission-profiles/
+            ${{ runner.temp }}/psc1-profile-authentication.log
+            ${{ runner.temp }}/psc1-admission-profile-collection.log
+            harness/psc1/scripts/pskernel-paired-admission-profile.py
+            harness/psc1/scripts/pskernel-paired-artifacts.py
+            harness/psc1/scripts/pskernel-paired-performance.py
+            sources/baseline/psc1/scripts/pskernel-expr-v2-admission-bench.mjs
+            sources/baseline/psc1/scripts/pskernel-generated-profile.mjs
+            harness/.github/workflows/psc1-pskernel-paired-admission-profile.yml

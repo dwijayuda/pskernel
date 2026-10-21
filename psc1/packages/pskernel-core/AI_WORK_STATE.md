@@ -1,3 +1,56 @@
+# Name worker paired experiment — NOT RUN at creation
+
+Branch: `research/psc1-pskernel-name-paired-perf-20261021`.
+This is a separate artifact-only performance experiment. The original
+f9-to5de cache measurements and their full report remain preserved unchanged
+in the parent `7ae480eedcc7c6c67e63ebdb7a6f4eedcf7ddaa4`.
+
+## Authenticated executable inputs
+
+Baseline source remains `f9e9b20f92ce2ffa4a666acaf55aa8852949f589`,
+generated artifact12358040951 from passing integration39622521184.
+Candidate source is `34126793178021a9cd1bdb37aa6fe17c0fab41c6`,
+whose integration39640226534 is terminal PASS: native119361485439 and
+generated119361485000. Candidate generated artifact12367640311 has
+3,363,962bytes and ZIP SHA256
+`d3240a7df49e6cca93dcc0c982e42b188a9b3792a1fb8421953b624a074ac98f`.
+Its9,893,728-byte kernel.js SHA256 is
+`d06d13d2e4cb54e8ea00aa0bfbb5b00b98cf3c2be1a610ccb5c699c64ee946c9`.
+All eight bundle files, exact producer workflow/source/job results and
+source maps are checked again by the unchanged authenticated downloader.
+
+The native candidate's eight all-input Name/String worker equations passed
+the dependency audit. Generated tests passed50,237 assertions, including
+raw/full string comparisons, Unicode, deep/numeric names, retained curried ABI,
+ten real declarations and four invalid cases. This is not a claim that its
+still-running canonical, research or Arena jobs have finished.
+
+## Measurement and decision boundary
+
+The unchanged paired driver uses six complete-admission fixtures, original
+V1 and transitional DAG public entries, and all four original authenticated
+Arena bodies in fresh sequential ABBA processes. It verifies unchanged
+benchmark, transport, resource policy and source files before execution.
+No benchmark is substituted or weakened. No kernel or compiler is rebuilt.
+A speedup must come from the actual recorded result; none is asserted here.
+
+Fuel remains4096, each worker has a60-second deadline and2048MiB V8 old-space
+limit, and PATH is empty. This historical comparison policy is not a hard RSS
+cap and cannot qualify the corrected full-Arena host contract. A separate
+cgroup host-controls candidate is being tested. Timeouts and fuel errors stay
+incomplete and do not enter successful acceptance/rejection latency ratios.
+
+This revision changes only the workflow's candidate source/run, diagnostic
+branch/name, bounded report readback, and this work-state prefix. The full
+report and summary will be printed with SHA256/byte counts and retained in
+the immutable Actions artifact; there is no need to rerun measurements to
+recover numerical evidence. Collection success is not a new kernel,
+canonical-source, global soundness or full193 conformance qualification.
+
+---
+
+## Preserved cache-pair experiment and historical state
+
 # Paired performance: collected, with a measured regression
 
 Updated: 2026-10-21 UTC. Branch: `research/psc1-pskernel-paired-perf-20261021`.

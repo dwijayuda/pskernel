@@ -194,6 +194,21 @@ Use the existing explicitly grouped do form followed by the let semicolon;
 this retains the same typed error behavior. Rerun actual source/application
 and all existing tests; collection qualification remains pending.
 
+## Collection fast qualification and G1 language regression
+
+Atff2de157, focused39560097064/job119089006547 passes all28 CompilerM
+and12 collection case/grammar/JS-Rust obligations, with exact native library
+observations and required elaboration/assurance/publication refusals.
+Native architecture39560096917 SUCCESS, including the new list canonical Core,
+nested translation and malformed/type-boundary tests. All-seven/minimum/scoped
+qualification is still pending.
+
+The shared parser changed the portable compiler source. Preserve the old
+qualified G1 artifacts/receipts and qualify the newly generated G1 honestly.
+Append a real generated-compiler PS list positive case and malformed-list
+parse refusal to the existing8-case corpus (now10 cases); no old case is removed.
+The manual full-generation workflow inherits these assertions but stays deferred.
+
 ## Historical evidence and implementation record
 
 The entries below retain their original chronology and pending-at-the-time

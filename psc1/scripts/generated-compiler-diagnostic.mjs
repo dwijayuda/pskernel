@@ -224,6 +224,9 @@ try {
     { id: 'ps-integer-unicode', grammar: 'ps', assurance: 'checked', entry: 'Entry',
       sources: [{ module: 'Entry', text: 'def huge : Int := -9007199254740993123456789\ndef text : String := "λ🙂"\n' }],
       consumer: "if (m.huge !== -9007199254740993123456789n || m.text !== 'λ🙂') throw Error('integer/unicode');" },
+    { id: 'ps-list-literal', grammar: 'ps', assurance: 'checked', entry: 'Entry',
+      sources: [{ module: 'Entry', text: 'def answer(flag : Bool) : Nat :=\n let values : List(Nat) := if (flag) { [7, 11] } else { [] }\n match values with { | List.nil => 0 | List.cons head rest => head }\n' }],
+      consumer: "if (m.answer(false) !== 0n || m.answer(true) !== 7n) throw Error('PS list literal');" },
     { id: 'lean-handler-pattern', grammar: 'lean', assurance: 'checked', entry: 'Entry',
       sources: [{ module: 'Entry', text: 'def Ps.Internal.Corpus.guarded (fail : Bool) : Except Nat Nat := do\n  try\n    if fail then throw 7 else pure 3\n  catch error =>\n    pure (error + 1)\ndef observe (fail : Bool) : Nat :=\n  match Ps.Internal.Corpus.guarded fail with\n  | Except.ok value => value\n  | Except.error error => error\n' }],
       consumer: "if (m.observe(false) !== 3n || m.observe(true) !== 8n) throw Error('handler/pattern');" },
@@ -234,12 +237,14 @@ try {
   const observedExpressions = {
     'lean-modules':'({answer:String(m.answer),exports:Object.keys(m)})',
     'ps-integer-unicode':'({huge:String(m.huge),text:m.text})',
+    'ps-list-literal':'({empty:String(m.answer(false)),first:String(m.answer(true))})',
     'lean-handler-pattern':'({normal:String(m.observe(false)),caught:String(m.observe(true))})',
     'lean-ordinary-loop':'({zero:String(m.answer(0n)),five:String(m.answer(5n))})'
   };
   const expectedObservations = {
     'lean-modules':{answer:'42',exports:['answer']},
     'ps-integer-unicode':{huge:'-9007199254740993123456789',text:'λ🙂'},
+    'ps-list-literal':{empty:'0',first:'7'},
     'lean-handler-pattern':{normal:'3',caught:'8'},
     'lean-ordinary-loop':{zero:'0',five:'5'}
   };
@@ -277,6 +282,7 @@ try {
       sourceSha256: checked.sourceSha256, publicationGeneration: publication.generation }));
   }
   for (const item of [
+    { id: 'malformed-list', grammar: 'ps', assurance: 'checked', source: 'def value : List(Nat) := [1,,2]\n', phase: 'parse' },
     { id: 'wrong-body', grammar: 'lean', assurance: 'checked', source: 'def bad : Nat := true\n', phase: 'elaboration' },
     { id: 'missing-import', grammar: 'ps', assurance: 'checked', source: 'import Missing\ndef value : Nat := 1\n', phase: 'capture' },
     { id: 'checked-partial', grammar: 'lean', assurance: 'checked', source: 'partial def spin (n : Nat) : Nat := spin n\n', phase: 'preparation' },

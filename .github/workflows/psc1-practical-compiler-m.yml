@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
+      PSC1_FOCUSED_FAIL_FAST: '1'
       PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       PSC1_COMPILERM_TARGETS: js,ts,rust
       PSC1_COMPILERM_EVIDENCE: compiler-m-focused

@@ -637,6 +637,34 @@ private def evaluationCallCount (name : PsName) (term : PsExpr) : Nat :=
   | .proj _ _ value => evaluationCallCount name value
   | _ => 0
 
+private def testDeferredDefinitions (natType : PsExpr) : IO Unit := do
+  require "deferred type does not capture caller free variables"
+    (match psControlDeferredType (PsExpr.fvar 20) with
+     | .forallE _ _ (.fvar 20) _ => true
+     | _ => false)
+  require "iterator definitions introduce no axiom"
+    (!psControlLoopDeclarations.any (fun d => match d with | .axiomDecl _ _ _ => true | _ => false))
+  let unitType := PsExpr.constE psUnitName []
+  let unit := PsExpr.constE psUnitUnitName []
+  let restType := psControlDeferredType natType
+  let next := psControlClose true
+    [PsControlBinder.mk 0 (psRootName "index") natType,
+      PsControlBinder.mk 1 (psRootName "rest") restType]
+    (PsExpr.app (PsExpr.constE psNatSuccName []) (PsExpr.app (PsExpr.fvar 1) unit))
+  let immediate := psControlClose true
+    [PsControlBinder.mk 0 (psRootName "index") natType,
+      PsControlBinder.mk 1 (psRootName "rest") restType]
+    (PsExpr.lit (PsLiteral.natural 17))
+  for (count, step, expected) in [
+      ((0 : Nat), next, (7 : Nat)), (3, next, 10),
+      (1000000000000000000, immediate, 17)] do
+    let actual := psControlApply (PsExpr.constE psControlLazyNatFoldName [])
+      [natType, PsExpr.lit (PsLiteral.natural 7), step, PsExpr.lit (PsLiteral.natural count)]
+    let prepared := PsCompilerAdmissionReadyModule.mk
+      [PsDeclaration.definitionDecl (psRootName "result") [] natType actual]
+    checkReduced "deferred Nat iteration independent kernel conversion" prepared natType
+      (PsExpr.lit (PsLiteral.natural expected))
+
 private def testEvaluationOnce (natType : PsExpr) : IO Unit := do
   let lean :=
     "def evaluationItems (flag : Bool) : List Nat := [if flag then 1 else 2]\n" ++
@@ -649,7 +677,8 @@ private def testEvaluationOnce (natType : PsExpr) : IO Unit := do
     "  for value in evaluationItems flag do\n    total := total + value\n" ++
     "  for value in [evaluationLower flag:evaluationUpper flag] do\n    total := total + value\n" ++
     "  let picked : Option Nat := (evaluationArray flag)[evaluationIndex flag]?\n" ++
-    "  match picked with\n  | Option.none => pure total\n  | Option.some value => pure (total + value)\n" ++
+    "  let extra : Nat := match picked with\n    | Option.none => 0\n    | Option.some value => value\n" ++
+    "  return total + extra\n" ++
     "def result : Nat := Id.run (evaluationCase false) * 100 + Id.run (evaluationCase true)\n"
   let ps :=
     "def evaluationItems(flag : Bool) : List(Nat) := [if (flag) { 1 } else { 2 }]\n" ++
@@ -662,7 +691,8 @@ private def testEvaluationOnce (natType : PsExpr) : IO Unit := do
     "  for value in evaluationItems(flag) { total := total + value }\n" ++
     "  for value in [evaluationLower(flag):evaluationUpper(flag)] { total := total + value }\n" ++
     "  let picked : Option(Nat) := (evaluationArray(flag))[evaluationIndex(flag)]?\n" ++
-    "  match picked with {\n    | Option.none => pure(total)\n    | Option.some value => pure(total + value)\n  }\n}\n" ++
+    "  let extra : Nat := match picked with {\n    | Option.none => 0\n    | Option.some value => value\n  }\n" ++
+    "  return (total + extra)\n}\n" ++
     "def result : Nat := Id.run(evaluationCase(false)) * 100 + Id.run(evaluationCase(true))\n"
   for (kind, source) in [(PsCompilerSourceKind.lean, lean), (.proofScript, ps)] do
     let prepared ← prepare "source iterator/range/Array evaluation ownership" kind source
@@ -684,6 +714,7 @@ def main : IO Unit := do
     ("CompilerM", testCompilerM natType),
     ("control-flow", testControlFlow natType),
     ("evaluation-once", testEvaluationOnce natType),
+    ("deferred-definitions", testDeferredDefinitions natType),
     ("inline-else-if", testInlineElseIf natType),
     ("finite-loops", testFiniteLoops natType),
     ("contextual-pure", testContextualPure natType)]

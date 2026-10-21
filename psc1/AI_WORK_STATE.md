@@ -117,3 +117,37 @@ shared elaboration, streaming/runtime or backend defect it exposes. Require
 all seven mappings and final full readiness before calling the implementation
 qualified. Then retain exact release-candidate evidence and complete required
 release qualification. Keep the PR draft and preserve non-force history.
+
+## First remaining-core native diagnosis
+
+Source 4c316c935cf527c28587cf7d2ed05c1d47a6407a, run 39688891189 passes
+static contracts. Native evaluation-once preparation refuses unknownName:pure:
+the new probe used the do-statement alias as a generic expression inside a
+match branch. Express that pure Nat selection with an ordinary let/match and
+explicit registered return. Preserve all five original-call count assertions,
+both source surfaces, expected 205 observation, independent admission and IR
+checks. This fixture normalization does not qualify any remaining criterion.
+Wait for focused traversal evidence and diagnose any independent blocker before
+promoting the continuation. The latest complete checkpoint remains 65fa8766.
+
+## Confirmed remaining-core runtime blocker and shared correction
+
+Run 39688891189 at 4c316c93 passes static and PHP application checks. Native
+stops at the probe's unknownName:pure as described above. The eighteen-case
+focused source corpus then exhausts JS/TS heaps in both grammars and reaches
+the existing job ceiling; Rust consumers also fail. No remaining criterion is
+qualified and no full result is inferred.
+
+Finite iterator lowering prebuilt continuation values. New total checked
+List/Nat folds carry explicit Unit-thunk tails; the controller forces them only
+on normal iteration completion. Array iteration uses a linear immutable element
+view and the same deferred iterator. Old folds remain, without new axioms,
+runtime intrinsics, fuel or resource increases. Native conversion/IR/free-variable
+tests and all original stress inputs remain. Detailed defect and boundaries:
+docs/PSC1_FINITE_LOOP_STREAMING_DEFECT_2026-10-22.md.
+
+Per-case runtime flags localize additional failures. Focused conformance retains
+the first failed artifact/receipt and stops redundant failing consumers; successful
+focused and full matrices still run every required case/target. This correction
+is implemented, UNQUALIFIED until its own exact Linux gates. Do not interpret
+the proposed 37 bindings as completion.

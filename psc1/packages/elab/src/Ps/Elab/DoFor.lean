@@ -47,6 +47,22 @@ def psElabDoForIteration
         (psElabDoJoinCall ops result continuationId carried))
     carried context state
 
+-- Force a deferred tail only on normal completion of this iteration.
+-- Return and source errors bypass the tail through the existing checked owner.
+def psElabDoForDeferredIteration
+    (next : PsElabDoForNext) (ops : PsElabDoOps) (result : PsExpr)
+    (context : PsElabContext) (state carried : List PsElabDoMutable)
+    (body : PsSyntaxTerm) (continuationId : Nat) :
+    Except PsElabError PsElabTermResult :=
+  psElabDoJoin
+    (fun (loopContext : PsElabContext) (loopState : List PsElabDoMutable) =>
+      next loopContext loopState body
+        (fun (current : PsElabContext) (currentState : List PsElabDoMutable) =>
+          psElabDoForApply ops result
+            (PsExpr.app (PsExpr.fvar continuationId) (PsExpr.constE psUnitUnitName []))
+            carried current currentState))
+    carried context state
+
 def psElabDoForSort
     (context : PsElabContext) (type : PsExpr) : Except PsElabError PsLevel :=
   match psInferType context.environment context.metaContext context.localContext type with
@@ -66,62 +82,40 @@ def psElabDoForList
       (fun (elementContext : PsElabContext) (elementId : Nat) =>
         psElabDoForLambda
           (fun (recursiveContext : PsElabContext) (recursiveId : Nat) =>
-            psElabDoForIteration next ops result recursiveContext state carried body recursiveId)
-          elementContext (psElabDoInternalName "_psc1ForTail" elementContext) continuationType)
+            psElabDoForDeferredIteration next ops result recursiveContext state carried body recursiveId)
+          elementContext (psElabDoInternalName "_psc1ForTail" elementContext)
+            (psControlDeferredType continuationType))
       context name element with
   | Except.error error => Except.error error
   | Except.ok minor =>
       let current := psElabContextWithMeta context minor.context.metaContext;
-      let folded := psExprApplyMany (PsExpr.constE psControlListFoldName [])
+      let folded := psExprApplyMany (PsExpr.constE psControlLazyListFoldName [])
         [element, continuationType, PsExpr.fvar continuationId, minor.term, collection];
       match psElabResolvedTerm current folded (Option.some continuationType) with
       | Except.error error => Except.error error
       | Except.ok checked =>
           psElabDoForApply ops result checked.term carried checked.context state
 
+-- Build a linear immutable element view, then use the same deferred iterator.
+-- No function-valued Array fold accumulator prebuilds user continuations.
 def psElabDoForArray
     (next : PsElabDoForNext) (ops : PsElabDoOps) (result : PsExpr)
     (context : PsElabContext) (state carried : List PsElabDoMutable)
     (name : PsName) (element collection : PsExpr) (body : PsSyntaxTerm)
     (continuationId : Nat) (continuationType : PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let transformType := PsExpr.forallE (psRootName "_") continuationType
-    (psExprLiftBVars 1 0 continuationType) PsBinderInfo.explicit;
-  match psElabDoForLambda
-      (fun (identityContext : PsElabContext) (id : Nat) =>
-        psElabResolvedTerm identityContext (PsExpr.fvar id) (Option.some continuationType))
-      context (psElabDoInternalName "_psc1ForIdentity" context) continuationType with
+  let listType := psSelfHostListOf element;
+  let converted := psExprApplyMany (PsExpr.constE psControlArrayToListName [])
+    [element, collection];
+  match psElabResolvedTerm context converted (Option.some listType) with
   | Except.error error => Except.error error
-  | Except.ok identity =>
-      let current := psElabContextWithMeta context identity.context.metaContext;
-      match psElabDoForLambda
-          (fun (accumulatorContext : PsElabContext) (accumulatorId : Nat) =>
-            psElabDoForLambda
-              (fun (elementContext : PsElabContext) (elementId : Nat) =>
-                psElabDoForLambda
-                  (fun (nextContext : PsElabContext) (nextId : Nat) =>
-                    match psElabDoForIteration next ops result
-                        nextContext state carried body nextId with
-                    | Except.error error => Except.error error
-                    | Except.ok iteration =>
-                        psElabResolvedTerm iteration.context
-                          (PsExpr.app (PsExpr.fvar accumulatorId) iteration.term)
-                          (Option.some continuationType))
-                  elementContext (psElabDoInternalName "_psc1ForNext" elementContext) continuationType)
-              accumulatorContext name element)
-          current (psElabDoInternalName "_psc1ForAccumulator" current) transformType with
-      | Except.error error => Except.error error
-      | Except.ok minor =>
-          let current := psElabContextWithMeta current minor.context.metaContext;
-          let size := psExprApplyMany (PsExpr.constE psArraySizeName []) [element, collection];
-          let folded := psExprApplyMany (PsExpr.constE psArrayFoldlName [])
-            [element, transformType, minor.term, identity.term, collection,
-              PsExpr.lit (PsLiteral.natural 0), size];
-          let completed := PsExpr.app folded (PsExpr.fvar continuationId);
-          match psElabResolvedTerm current completed (Option.some continuationType) with
-          | Except.error error => Except.error error
-          | Except.ok checked =>
-              psElabDoForApply ops result checked.term carried checked.context state
+  | Except.ok values =>
+      psElabDoWithLocal
+        (fun (current : PsElabContext) (id : Nat) =>
+          psElabDoForList next ops result current state carried name element
+            (PsExpr.fvar id) body continuationId continuationType)
+        context (psElabDoInternalName "_psc1ArrayItems" context) listType values
+        (Option.some (psElabDoType ops result))
 
 def psElabDoForName (sourceName : PsSyntaxName) (state : List PsElabDoMutable) :
     Except PsElabError PsName :=
@@ -209,15 +203,16 @@ def psElabDoForRangeLoop
             | Except.ok indexValue =>
                 psElabDoWithLocal
                   (fun (bodyContext : PsElabContext) (id : Nat) =>
-                    psElabDoForIteration next ops result bodyContext state carried body recursiveId)
+                    psElabDoForDeferredIteration next ops result bodyContext state carried body recursiveId)
                   recursiveContext name natType indexValue (Option.some continuationType))
-          indexContext (psElabDoInternalName "_psc1RangeTail" indexContext) continuationType)
+          indexContext (psElabDoInternalName "_psc1RangeTail" indexContext)
+            (psControlDeferredType continuationType))
       context (psElabDoInternalName "_psc1RangeIndex" context) natType with
   | Except.error error => Except.error error
   | Except.ok minor =>
       let current := psElabContextWithMeta context minor.context.metaContext;
       let count := psExprApplyMany (PsExpr.constE psNatSubName []) [upper, lower];
-      let folded := psExprApplyMany (PsExpr.constE psControlNatFoldName [])
+      let folded := psExprApplyMany (PsExpr.constE psControlLazyNatFoldName [])
         [continuationType, PsExpr.fvar continuationId, minor.term, count];
       match psElabResolvedTerm current folded (Option.some continuationType) with
       | Except.error error => Except.error error

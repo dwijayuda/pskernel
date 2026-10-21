@@ -117,13 +117,13 @@ function execute(target, output) {
     }
     run(process.execPath, ['--input-type=module', '-e',
       'import assert from "node:assert/strict"; const m=await import(' + JSON.stringify(pathToFileURL(fs.realpathSync(js)).href) +
-      '); assert.deepEqual(Object.keys(m).sort(),'+JSON.stringify([...names].sort())+'); for(const name of Object.keys(m)){assert.equal(m[name](false),true,name); assert.equal(m[name](true),true,name);}']);
+      '); assert.deepEqual(Object.keys(m).sort(),'+JSON.stringify([...names].sort())+'); for(const name of Object.keys(m)){console.error("PSC1_CASE_FLAG",name,false);assert.equal(m[name](false),true,name);console.error("PSC1_CASE_FLAG",name,true);assert.equal(m[name](true),true,name);}']);
   } else if (target === 'rust') {
     const crate = path.join(path.dirname(output), 'consumer');
     fs.cpSync(fs.realpathSync(output.replace(/\.rs$/, '.cargo')), crate, { recursive: true, dereference: true });
     write(path.join(crate, 'tests/typed_errors.rs'),
-      '#[test] fn compiler_effect_contract() { '+names.map(name=>'assert!(psc1_generated::'+name+'(false)); assert!(psc1_generated::'+name+'(true));').join(' ')+' }\n');
-    run('cargo', ['test', '--locked', '--manifest-path', path.join(crate, 'Cargo.toml')],
+      '#[test] fn compiler_effect_contract() { '+names.map(name=>'eprintln!("PSC1_CASE_FLAG '+name+' false");assert!(psc1_generated::'+name+'(false));eprintln!("PSC1_CASE_FLAG '+name+' true");assert!(psc1_generated::'+name+'(true));').join(' ')+' }\n');
+    run('cargo', ['test', '--locked', '--manifest-path', path.join(crate, 'Cargo.toml'),'--','--nocapture'],
       { env: { ...env, CARGO_TARGET_DIR: path.join(work, 'cargo-target') } });
   } else if (target === 'wasm-core') {
     run(process.execPath, ['--input-type=module', '-e',
@@ -316,6 +316,8 @@ try {
    finally{
     if(fs.existsSync(output+'.bundle.json'))fs.cpSync(path.dirname(fs.realpathSync(output+'.bundle.json')),path.join(evidence,'bundles',label),{recursive:true});
    }
+   if(failures.length&&process.env.PSC1_FOCUSED_FAIL_FAST==='1')
+    throw Error('PSC1_FOCUSED_CONFORMANCE_FAILED: '+label);
   }
  }
  assert.deepEqual(failures,[]);

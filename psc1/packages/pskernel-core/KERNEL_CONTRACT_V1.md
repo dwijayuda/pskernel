@@ -1,11 +1,17 @@
 # KernelContract-v1
 
-Target: Lean 4.34.0, source commit
-`293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`. Import
+Target: Lean 4.35.0, source commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Import
 `Ps.KernelCore.API.Kernel` for the stable checked-session entry points.
 The existing low-level APIs remain available for compatibility. This contract
 adds checked wrappers around the same semantic implementation; it does not
-change the default provider or introduce fallback checking.
+change the default provider or introduce fallback checking into V1.
+
+The separately exposed `API.Dag` wrapper is a transitional Expression V2
+migration and still restarts unsupported operations through this V1 checker.
+It is not a completed V2 replacement. See [PROVIDER.md](PROVIDER.md) for the
+current native/generated developer provider's narrower canonical wire scope;
+no npm publication or full-Arena qualification is implied.
 
 ## Values and operations
 

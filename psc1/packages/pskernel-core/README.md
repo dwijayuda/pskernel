@@ -1,88 +1,58 @@
-# PSKernel Core
+# @proofscript/pskernel-core
 
-This is the canonical portable PSKernel implementation, formerly
-`packages/pskernel-selfhost`. Its package identity is `@proofscript/pskernel-core`
-and its Lean modules use `Ps.KernelCore`. The former experimental core is
-preserved in `../pskernel-core.old3`; see [PACKAGE_RENAME.md](PACKAGE_RENAME.md)
-for the migration map and the separate provider-promotion boundary.
+This package contains the independent, portable PSKernel-Core implementation.
+The current integration target is Lean **4.35.0**, pinned to
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
 
-M3 is complete for the explicit small-workload Linux x64 profile. See
-[`M3_ACCEPTANCE.md`](M3_ACCEPTANCE.md) for latency/memory budgets, corrected
-benchmark evidence and scope. Native is the preferred CLI/server deployment
-target; the JS artifact retains its portable source and bounded Node checks.
-M4 adds an explicit native core provider and bounded dual checking; see
-[`M4_ACCEPTANCE.md`](M4_ACCEPTANCE.md) for the contract, commands and CI gate.
-`lean434-wasm` remains the trusted default; promotion is a separate decision.
+**Expression V2 is in progress.** The paged expression DAG, transformations,
+and several checker/admission rules are integrated, but general operations
+still retain complete V1 fallback. V1 remains the default/reference checker.
+Local proofs and passing differential tests do not constitute a global
+soundness theorem or full Lean Arena qualification.
 
-## Project documentation hierarchy
+## Start here
 
-Use these files in this order when making development decisions:
+- [AI_WORK_STATE.md](AI_WORK_STATE.md): source-anchored current evidence,
+  unresolved gates, performance regressions and continuation work.
+- [PROVIDER.md](PROVIDER.md): native and generated-JavaScript batch checking,
+  the supported canonical transport, failure protocol, and reproducible builds.
+- [KERNEL_CONTRACT_V1.md](KERNEL_CONTRACT_V1.md): typed checked API,
+  resource outcomes, session publication and trust boundary.
+- [ARCHITECTURE_GUARDRAILS.md](ARCHITECTURE_GUARDRAILS.md): ownership rules.
 
-1. **`PSKERNEL_CORE_ARCHITECTURE.md`** — normative architecture decisions and anti-drift guardrails.
-2. **`PSKERNEL_REFERENCE.md`** — canonical human architecture reference: Lean theory/source mapping, current audit, final target structure, trust classes, dependency law, scoring, and migration plan.
-3. **`GITHUB_FIRST_WORKFLOW.md`** — canonical GitHub/cloud operating rules for this kernel topic branch.
-4. **`DEVELOPMENT_PLAN.md`** — active phases, milestones, task-selection rule, and exit gates.
-5. **`KERNEL_THEORY.md`** — theory-oriented explanation and recommended reading order.
-6. **`KERNEL_RULE_REFERENCE.md`** — generated rule → implementation → Lean locator → test table.
-7. **`LEAN_4_34_COMPATIBILITY.json`** — machine-readable feature-completeness matrix for Lean 4.34.0.
-8. **`LEAN_4_34_CONFORMANCE.json`** — machine-readable concrete test coverage for every compatibility rule.
-9. **`SELFHOST_EVIDENCE.json`** — optional historical/generated-bootstrap checkpoint evidence; not a normal development gate.
-10. **`KERNEL_CONTRACT_V1.md`** — checked public entry points, resource outcomes and integration boundary.
-11. **`PSKERNEL_ARCHITECTURE.json`**, **`LEAN_4_34_KERNEL_RULES.json`** and **`PSKERNEL_TCB.json`** — enforced ownership, executable rule evidence and trust inventory.
-12. **`ARCHITECTURE_MIGRATION_REPORT.md`** — completed production migration and preservation evidence.
+Import `Ps.KernelCore.API.Kernel` for checked sessions, expressions and
+declaration admission. Construct sessions with `psKernelKernelSessionEmpty`
+and extend them only through successful checked admission. Untrusted callers
+must never inject an environment, semantic cache or native evaluator.
 
-When documents disagree, the architecture guardrails and machine-enforced compatibility/self-host gates take precedence over historical planning text.
+`Ps.KernelCore.API.Dag` exposes the experimental validated DAG batch API
+`psKernelV1RunDag`. This API validates its input graph and independently
+checks declarations. Unsupported DAG operations restart the preserved V1
+operation with the same resources; that migration fallback does not invoke
+official Lean.
 
-This package is the PSC1-profile implementation of the mature
-`packages/pskernel/PSC1Kernel` reference kernel.
+The complete portable execution root is
+`src/Ps/KernelCore/SelfHost.lean`. The authentic PSC1/TypeScript 7.0.2
+route builds JavaScript with declarations and source maps. Canonical `.ps`
+sources are reconstructed and independently checked by the portability
+workflow. Complete-kernel DirectJS emission remains unsupported.
 
-Official pinned Lean 4.34 behavior and source remain the semantic compatibility
-authority. The frozen `packages/pskernel/PSC1Kernel` package remains a valuable
-regression/differential oracle and should not be reshaped merely to satisfy
-bootstrap syntax restrictions. This package instead
-uses the source patterns already exercised by the compiler-only self-host fixed
-point.
+## Source and qualification boundaries
 
-## Rules
+Semantic source is organized under `Core/`, `Environment/`,
+`Runtime/`, `Checker/`, `Admission/` and `API/`. Source must retain
+the PSC1 portable profile: no unchecked proof terms, trusted runtime
+intrinsics, or new native implementation escape hatches. Host IO and
+transport adapters stay outside this portable closure.
 
-- Lean 4.34 behavior remains the semantic authority.
-- Official Lean 4.34 behavior/source is the semantic authority; `packages/pskernel/PSC1Kernel` remains a frozen regression/differential oracle.
-- This source tree must pass the same `check-psc1-source.mjs --all-portable`
-  gate as other portable compiler packages.
-- No `Lean.*`, `Std.*`, `unsafe`, `extern`, `implemented_by`, custom
-  macros/elaboration, `namespace`, `abbrev`, or `mutual` conveniences.
-- Controlled executable `partial def` may exist during migration, but it is
-  tracked separately and cannot turn failure, exhaustion, or nontermination
-  into declaration acceptance.
-- Replay, JSON import, test adapters, and host policy remain outside the
-  semantic kernel package.
+The current developer provider is bounded and explicitly scoped. It does not
+silently install a standard environment, use the historical PSC0 npm
+provider, or publish a new npm release. The checked V1 API supports more
+forms than the canonical provider transport; consult its contract before
+integration.
 
-## Source layout
-
-Production architecture migration is complete. The source tree contains only
-the 79 canonical modules used by `SelfHost.lean`:
-
-```text
-src/Ps/KernelCore/
-  Core/
-  Environment/
-  Runtime/Acceleration/
-  Runtime/Capability/
-  Checker/
-  Admission/
-  API/
-  SelfHost.lean
-```
-
-Import `Ps.KernelCore.API.Kernel` for the checked public contract, or the
-specific canonical owner for low-level integration. Temporary migration import
-paths (`TypeChecker*`, `Theory/*`, and the old flat modules) have been removed.
-All repository callers and Lake registrations use the canonical hierarchy.
-The superseded migration inventory remains available in Git history.
-
-The joint compiler/kernel fixed point is optional/manual and reserved for
-explicit bootstrap/release checkpoints.
-
-Declarations remain explicitly prefixed rather than relying on Lean namespace
-conveniences. Tests compare the portable implementation against
-the frozen reference implementation before each semantic slice is promoted.
+Historical `LEAN_4_34_*.json`, migration reports, and self-host receipts
+describe earlier checkpoints and remain preserved for provenance. Their
+names, module counts and pass states do not qualify this branch's current
+4.35/V2 source. Current status is the exact revision and terminal Actions
+evidence in `AI_WORK_STATE.md`.

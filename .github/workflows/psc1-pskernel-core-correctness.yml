@@ -19,8 +19,13 @@ on:
       - psc1/kernel-lakefile.lean
       - psc1/check-psc1-source.mjs
       - psc1/scripts/pskernel-generated-smoke.mjs
+      - psc1/scripts/pskernel-canonical-provider.mjs
+      - psc1/scripts/pskernel-provider-smoke.mjs
+      - psc1/scripts/pskernel-artifact-manifest.mjs
+      - psc1/npm-runtime/canonical-admissions-wire.mjs
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-infer-only-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-proof-irrelevance-smoke.mjs
       - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - .github/workflows/psc1-pskernel-core-correctness.yml
 
@@ -279,6 +284,46 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" nat-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-canonical-nat-smoke.log"
           grep -q 'PSC1_NAT_LARGE_RUNTIME: PASS' "$RUNNER_TEMP/psc1-canonical-nat-smoke.log"
+      - name: Check canonical-source DAG proof irrelevance in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          cp scripts/pskernel-expr-v2-proof-irrelevance-smoke.mjs "$PSC1_PS_RUN_DIR/proof-irrelevance-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" proof-irrelevance-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-proof-irrelevance-canonical.log"
+          grep -q 'PSC1_V2_DAG_JS_PROOF_IRRELEVANCE: PASS comparisons=1350' "$RUNNER_TEMP/psc1-proof-irrelevance-canonical.log"
+      - name: Exercise the canonical-source checked batch provider in detached Node
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/pskernel-provider-smoke.mjs js dist/pskernel-selfhost/pskernel-core.js \
+            | tee "$RUNNER_TEMP/psc1-canonical-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=16 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-canonical-provider.log"
+      - name: Package the complete canonical source and checked provider
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_PROVIDER_DIST=dist/pskernel-selfhost/provider
+          mkdir -p "$PSC1_PROVIDER_DIST/scripts" "$PSC1_PROVIDER_DIST/npm-runtime"
+          cp dist/pskernel-selfhost/pskernel-core.js dist/pskernel-selfhost/pskernel-core.ts dist/pskernel-selfhost/pskernel-core.d.ts \
+            dist/pskernel-selfhost/pskernel-core.js.map "$PSC1_PROVIDER_DIST/"
+          cp scripts/pskernel-canonical-provider.mjs "$PSC1_PROVIDER_DIST/scripts/"
+          cp packages/pskernel-core/PROVIDER.md "$PSC1_PROVIDER_DIST/README.md"
+          cp npm-runtime/canonical-admissions-wire.mjs "$PSC1_PROVIDER_DIST/npm-runtime/"
+          node -e "require('node:fs').writeFileSync(process.argv[1],JSON.stringify({private:true,type:'module'},null,2)+'\\n')" \
+            "$PSC1_PROVIDER_DIST/package.json"
+          tar -czf "$PSC1_PROVIDER_DIST/canonical-source.tar.gz" -C dist/pskernel-selfhost/workspace .
+          node scripts/pskernel-artifact-manifest.mjs "$PSC1_PROVIDER_DIST/artifacts.json" \
+            canonical-ps-generated-js "$PSC1_PROVIDER_DIST/pskernel-core.js" "$PSC1_PROVIDER_DIST/pskernel-core.ts" \
+            "$PSC1_PROVIDER_DIST/pskernel-core.d.ts" "$PSC1_PROVIDER_DIST/pskernel-core.js.map" \
+            "$PSC1_PROVIDER_DIST/scripts/pskernel-canonical-provider.mjs" \
+            "$PSC1_PROVIDER_DIST/npm-runtime/canonical-admissions-wire.mjs" \
+            "$PSC1_PROVIDER_DIST/package.json" "$PSC1_PROVIDER_DIST/canonical-source.tar.gz" "$PSC1_PROVIDER_DIST/README.md"
       - name: Report DirectJS kernel capability without claiming support
         working-directory: psc1
         shell: bash
@@ -301,7 +346,11 @@ jobs:
         if: always()
         with:
           name: psc1-canonical-kernel-qualification
+          include-hidden-files: true
           path: |
+            ${{ runner.temp }}/psc1-canonical-provider.log
+            ${{ runner.temp }}/psc1-proof-irrelevance-canonical.log
+            psc1/dist/pskernel-selfhost/provider/
             psc1/dist/pskernel-selfhost/workspace/.proofscript-bootstrap.json
             psc1/dist/pskernel-selfhost/pskernel-core.js
             psc1/dist/pskernel-selfhost/pskernel-core.d.ts

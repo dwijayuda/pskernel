@@ -235,6 +235,11 @@ lean_exe psc1_kernel_expr_v2_infer_only_regression where
   srcDir := "test"
   root := `PsKernelExprV2InferOnlyRegression
 
+-- Host transport only; all semantic decisions use the independently executing checked kernel.
+lean_exe psc1_kernel_provider where
+  srcDir := "host/kernel-provider"
+  root := `KernelProviderMain
+
 -- DAG proof irrelevance with exact V1 budget/order and independent official fixtures.
 lean_exe psc1_kernel_expr_v2_proof_irrelevance_regression where
   srcDir := "test"

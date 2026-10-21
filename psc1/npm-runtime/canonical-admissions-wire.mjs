@@ -26,7 +26,7 @@ export function createWireDecoder(kernel, { maxDepth = 4096 } = {}) {
   if (!Number.isSafeInteger(maxDepth) || maxDepth < 1 || maxDepth > 4096) fail('DEPTH_POLICY');
   const list = (values, convert) => {
     const xs = array(values);
-    let result = kernel.List.nil();
+    let result = typeof kernel.List.nil === 'function' ? kernel.List.nil() : kernel.List.nil;
     for (let i = xs.length - 1; i >= 0; i--) {
       result = kernel.List.cons(convert(xs[i]), result);
     }

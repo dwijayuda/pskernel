@@ -31,7 +31,8 @@ const N=get("PsKernelName"),E=get("PsKernelExpr"),L=get("PsKernelLevel");
 const B=get("PsKernelBinderInfo"),S=get("PsKernelDefinitionSafety");
 const D=get("PsKernelDagDeclarationRequest"),Request=get("PsKernelDeclarationRequest");
 const C=get("PsKernelDagCommand"),name=text=>N.str(N.anonymous,text);
-const none=get("Option").none;
+const Option=get("Option");
+const none=typeof Option.none==="function"?Option.none():Option.none;
 let arena=get("psKernelExprV2PagedEmpty");
 const build=(kind,term,...args)=>{
   const result=accepted(get("psKernelExprV2PagedMk"+kind)(arena,...args),"build-"+kind);

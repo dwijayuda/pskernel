@@ -8,6 +8,8 @@ on:
     paths:
       - .github/workflows/psc1-pskernel-arena435-profile.yml
       - psc1/scripts/pskernel-arena435-profile.py
+      - psc1/scripts/pskernel-arena435-oracle.py
+      - psc1/scripts/pskernel-arena-replay-controls.mjs
       - psc1/scripts/pskernel-arena-replay.mjs
       - psc1/scripts/pskernel-arena435-compare.py
       - psc1/packages/pskernel-core/src/**
@@ -130,4 +132,5 @@ jobs:
             psc1/dist/arena435-profile/kernel.js.map
             psc1/dist/arena435-profile/workspace/.proofscript-bootstrap.json
           if-no-files-found: warn
+          include-hidden-files: true
           retention-days: 30

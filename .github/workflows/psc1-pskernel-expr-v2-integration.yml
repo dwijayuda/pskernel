@@ -11,6 +11,7 @@ on:
       - psc1/packages/pskernel-core/src/**
       - psc1/test/PsKernelExprV2DagRegression.lean
       - psc1/test/PsKernelExprV2InferOnlyRegression.lean
+      - psc1/test/PsKernelExprV2ProofIrrelevanceRegression.lean
       - psc1/test/PsKernelExprV2DagPerformance.lean
       - psc1/test/PsKernelExprV2TransformRegression.lean
       - psc1/test/PsKernelExprV2MetadataProofs.lean
@@ -19,11 +20,18 @@ on:
       - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-infer-only-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-proof-irrelevance-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-dag-bench.mjs
       - psc1/scripts/pskernel-expr-v2-admission-bench.mjs
       - psc1/scripts/pskernel-generated-profile.mjs
       - psc1/scripts/pskernel-whole-js-bench.mjs
       - psc1/scripts/pskernel-js-memory-probe.mjs
+      - psc1/host/kernel-provider/**
+      - psc1/test/PsKernelProviderOfficial.lean
+      - psc1/scripts/pskernel-canonical-provider.mjs
+      - psc1/scripts/pskernel-provider-smoke.mjs
+      - psc1/scripts/pskernel-artifact-manifest.mjs
+      - psc1/npm-runtime/canonical-admissions-wire.mjs
       - psc1/kernel-lakefile.lean
       - .github/workflows/psc1-pskernel-expr-v2-integration.yml
 
@@ -36,6 +44,9 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Install pinned Lean
         run: |
           set -euo pipefail
@@ -47,7 +58,7 @@ jobs:
           set -euo pipefail
           test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
-          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression
       - name: Run native DAG semantics, adversarial, fuel and official comparison
         working-directory: psc1
         run: |
@@ -121,6 +132,14 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-infer-only-native.log"
           grep -q 'PSC1_V2_DAG_INFER_ONLY: PASS' "$RUNNER_TEMP/psc1-infer-only-native.log"
           grep -q 'PSC1_V2_DAG_OFFICIAL_INFER_ONLY: PASS' "$RUNNER_TEMP/psc1-infer-only-native.log"
+      - name: Check DAG proof irrelevance against V1 and official Lean
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_proof_irrelevance_regression \
+            | tee "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
+          grep -q 'PSC1_V2_DAG_PROOF_IRRELEVANCE: PASS comparisons=1350' "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_PROOF_IRRELEVANCE: PASS cases=8 invalid=1' "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
       - name: Check DAG transformation semantics and sharing
         working-directory: psc1
         run: |
@@ -146,6 +165,27 @@ jobs:
             exit 1
           fi
           echo 'PSKERNEL_LOCAL_METADATA_AND_SCOPE_PROOFS: PASS'
+      - name: Compare exact provider fixtures with official Lean 4.35
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelProviderOfficial.lean \
+            | tee "$RUNNER_TEMP/psc1-provider-official.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER_OFFICIAL: PASS cases=5 batchDeclarations=4 doCheck=true' "$RUNNER_TEMP/psc1-provider-official.log"
+      - name: Exercise the native checked batch provider in a detached process
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/pskernel-provider-smoke.mjs native .lake/build/bin/psc1_kernel_provider \
+            | tee "$RUNNER_TEMP/psc1-native-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=native cases=16 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-native-provider.log"
+          mkdir -p dist/expr-v2
+          tar -czf dist/expr-v2/native-provider-linux.tar.gz -C .lake/build/bin psc1_kernel_provider
+          node scripts/pskernel-artifact-manifest.mjs \
+            dist/expr-v2/native-artifacts.json native \
+            .lake/build/bin/psc1_kernel_provider host/kernel-provider/KernelProviderMain.lean \
+            dist/expr-v2/native-provider-linux.tar.gz
       - name: Measure complete native checks against original and official Lean
         working-directory: psc1
         run: |
@@ -160,6 +200,12 @@ jobs:
         with:
           name: psc1-v2-dag-native
           path: |
+            ${{ runner.temp }}/psc1-native-provider.log
+            ${{ runner.temp }}/psc1-provider-official.log
+            ${{ runner.temp }}/psc1-proof-irrelevance-native.log
+            psc1/dist/expr-v2/native-artifacts.json
+            psc1/dist/expr-v2/native-provider-linux.tar.gz
+            psc1/host/kernel-provider/KernelProviderMain.lean
             ${{ runner.temp }}/psc1-dag-native.log
             ${{ runner.temp }}/psc1-dag-native.memory
             ${{ runner.temp }}/psc1-v2-existing-native.log
@@ -207,6 +253,7 @@ jobs:
           lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
             --out dist/expr-v2/integration/kernel.js
           test -s dist/expr-v2/integration/kernel.js
+          test -s dist/expr-v2/integration/kernel.ts
           test -s dist/expr-v2/integration/kernel.d.ts
           test -s dist/expr-v2/integration/kernel.js.map
           node --check dist/expr-v2/integration/kernel.js
@@ -274,6 +321,24 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" infer-only-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-infer-only-generated.log"
           grep -q 'PSC1_V2_DAG_JS_INFER_ONLY: PASS' "$RUNNER_TEMP/psc1-infer-only-generated.log"
+      - name: Check generated DAG proof irrelevance in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-proof-irrelevance-smoke.mjs "$PSC1_DAG_RUN_DIR/proof-irrelevance-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" proof-irrelevance-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-proof-irrelevance-generated.log"
+          grep -q 'PSC1_V2_DAG_JS_PROOF_IRRELEVANCE: PASS comparisons=1350' "$RUNNER_TEMP/psc1-proof-irrelevance-generated.log"
+      - name: Exercise the generated checked batch provider in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/pskernel-provider-smoke.mjs js dist/expr-v2/integration/kernel.js \
+            | tee "$RUNNER_TEMP/psc1-generated-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=16 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-generated-provider.log"
       - name: Check large numerals without fuel-proportional closure allocation
         working-directory: psc1
         run: |
@@ -335,11 +400,31 @@ jobs:
             done
           done
           test "$(grep -c '^PSC1_V2_DAG_PROFILE: PASS$' "$RUNNER_TEMP/psc1-dag-profile.log")" -eq 6
+      - name: Package the checked generated provider and source-bound digests
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_PROVIDER_DIST=dist/expr-v2/integration/provider
+          mkdir -p "$PSC1_PROVIDER_DIST/scripts" "$PSC1_PROVIDER_DIST/npm-runtime"
+          cp dist/expr-v2/integration/kernel.js dist/expr-v2/integration/kernel.ts dist/expr-v2/integration/kernel.d.ts \
+            dist/expr-v2/integration/kernel.js.map "$PSC1_PROVIDER_DIST/"
+          cp scripts/pskernel-canonical-provider.mjs "$PSC1_PROVIDER_DIST/scripts/"
+          cp packages/pskernel-core/PROVIDER.md "$PSC1_PROVIDER_DIST/README.md"
+          cp npm-runtime/canonical-admissions-wire.mjs "$PSC1_PROVIDER_DIST/npm-runtime/"
+          node -e "require('node:fs').writeFileSync(process.argv[1],JSON.stringify({private:true,type:'module'},null,2)+'\\n')" \
+            "$PSC1_PROVIDER_DIST/package.json"
+          node scripts/pskernel-artifact-manifest.mjs "$PSC1_PROVIDER_DIST/artifacts.json" \
+            lean-generated-js "$PSC1_PROVIDER_DIST/kernel.js" "$PSC1_PROVIDER_DIST/kernel.ts" "$PSC1_PROVIDER_DIST/kernel.d.ts" \
+            "$PSC1_PROVIDER_DIST/kernel.js.map" "$PSC1_PROVIDER_DIST/scripts/pskernel-canonical-provider.mjs" \
+            "$PSC1_PROVIDER_DIST/npm-runtime/canonical-admissions-wire.mjs" "$PSC1_PROVIDER_DIST/package.json" "$PSC1_PROVIDER_DIST/README.md"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: psc1-v2-dag-generated-js
           path: |
+            ${{ runner.temp }}/psc1-generated-provider.log
+            ${{ runner.temp }}/psc1-proof-irrelevance-generated.log
+            psc1/dist/expr-v2/integration/provider/
             ${{ runner.temp }}/psc1-dag-generated-js.log
             ${{ runner.temp }}/psc1-nat-generated.log
             ${{ runner.temp }}/psc1-infer-only-generated.log
@@ -350,6 +435,7 @@ jobs:
             ${{ runner.temp }}/psc1-dag-profile.log
             ${{ runner.temp }}/psc1-dag-profiles/
             psc1/dist/expr-v2/integration/kernel.js
+            psc1/dist/expr-v2/integration/kernel.ts
             psc1/dist/expr-v2/integration/kernel.d.ts
             psc1/dist/expr-v2/integration/kernel.js.map
           retention-days: 30

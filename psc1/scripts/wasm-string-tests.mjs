@@ -120,6 +120,8 @@ for(const syntax of ['lean','ps'])for(const target of ['wasm-core','wasm-compone
     let loaded=false;
     await assert.rejects(()=>withWasmTypedIo({...config,capabilities:[]},()=>{loaded=true;}, {},()=>{}),/REQUIRED_CAPABILITY_DENIED/);
     assert.equal(loaded,false);
+    await assert.rejects(()=>withWasmTypedIo({...config,maxFileBytes:2097153},()=>{loaded=true;}, {},()=>{}),/CONFIGURATION/);
+    assert.equal(loaded,false);
     await withWasmTypedIo(config,()=>new WebAssembly.Module(fs.readFileSync(ioOutput)),
      {run:{parameters:[],result:'bool'}},program=>assert.equal(program.call('run'),true));
     assert.equal(fs.readFileSync(consoleOut,'utf8'),'tick\ntick\nrecovered\necho:world😀\n');

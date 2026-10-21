@@ -19,7 +19,11 @@ memory is a fixed256-page16MiB arena; cabi_realloc allocates bounded byte buffer
 cabi_post_return resets the arena after the consumer copies the result. The ABI
 supports synchronous calls, alignment1 byte allocations, at most16 flat public
 arguments and at mostone dispatcher per declaration. Other shapes refuse.
-Memory exhaustion, malformed boundary values and reentry trap; they are not
+Wasm IO configuration supports payload bounds up to2MiB; larger requested bounds
+refuse before guest loading. This reserves room for worst-case JSON escaping and
+response allocation. Oversized encoded source requests return the same typed
+tooLarge response as the portable adapter before copying to the arena.
+Pure public String ABI memory exhaustion, malformed boundary values and reentry trap; they are not
 source IoError. A trapped guest instance is discarded.
 
 The component emitter uses canonical UTF-8, memory, realloc and post-return

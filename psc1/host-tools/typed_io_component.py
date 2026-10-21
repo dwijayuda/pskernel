@@ -11,6 +11,8 @@ from typed_io import TypedIo
 def with_component_io(config, component_path, use_program):
     if config.get("abi") != "psc1-wasm-component-linux-string-io/1":
         raise RuntimeError("PSC1_IO_UNSUPPORTED_ABI")
+    if config.get("maxFileBytes", 0) > 2097152 or config.get("maxLineBytes", 0) > 2097152:
+        raise RuntimeError("PSC1_IO_CONFIGURATION: Wasm IO supports at most 2097152 payload bytes")
     # No Wasmtime import or guest load occurs until capability preflight succeeds.
     with TypedIo({**config, "abi": "psc1-python-linux-string-io/1"}) as host:
         import wasmtime

@@ -421,7 +421,7 @@ def psWasmStringAbiMakePlan (source : PsValidatedIrModule)
   if names.isEmpty || names.eraseDups.length != names.length then
     throw "PSC1_WASM_STRING_EXPORT_SET_INVALID"
   let mut hasDispatcher := false
-  let mut exports := []
+  let mut exports : List PsWasmStringAbiExport := []
   for name in names do
     if !psWasmComponentWitIdent name || name == "memory" || name == "cabi-realloc" ||
         (ioAbi && name == "dispatch") then
@@ -432,7 +432,7 @@ def psWasmStringAbiMakePlan (source : PsValidatedIrModule)
     if !(psWasmStringAbiIsString declaration.resultType || psWasmStringAbiIsBool declaration.resultType) then
       throw "PSC1_WASM_STRING_RESULT_UNSUPPORTED"
     let mut dispatchers := 0
-    let mut parameters := []
+    let mut parameters : List (String × Bool) := []
     for parameter in declaration.parameters do
       if psBackendIoDispatcherType parameter.type && ioAbi then
         dispatchers := dispatchers + 1
@@ -458,13 +458,16 @@ def psWasmStringAbiDispatchFunction (baseName codeTypeName : String) : PsWasmFun
     parameters := [.refT baseName, psWasmStringRef], results := [psWasmStringRef]
     locals := [psWasmStringRef]
     body := [
-      .i32Const 64, .abiHeapSet,
+      .localGet 1, .structGet psWasmStringName 0, .arrayLen,
+      .i32Const 16777152, .i32GtU, .ifStart (some psWasmStringRef)] ++
+      psWasmStringLiteralInstructions "{\"kind\":\"error\",\"error\":\"tooLarge\"}" ++ [
+      .else_, .i32Const 64, .abiHeapSet,
       .localGet 1, .call "__psc1_abi_to_memory", .drop,
       .i32Const 0, .i32Load 0, .i32Const 0, .i32Load 4, .i32Const 0,
       .call "__psc1_abi_host_dispatch",
       .i32Const 0, .i32Load 0, .i32Const 0, .i32Load 4,
       .call "__psc1_abi_from_memory", .localSet 2,
-      .i32Const 64, .abiHeapSet, .localGet 2] }
+      .i32Const 64, .abiHeapSet, .localGet 2, .end_] }
 
 def psWasmStringAbiWrapper (declaration : PsVerifiedIrDeclaration)
     (target baseName : String) (ioAbi : Bool) : Except String PsWasmFunction := do
@@ -514,7 +517,7 @@ def psWasmStringAbiAdapt (plan : PsWasmStringAbiPlan)
     let some (_, target) := lowered.exports.find? (fun e => e.1 == exported.name)
       | throw "PSC1_WASM_STRING_LOWERED_EXPORT_MISSING"
     psWasmStringAbiWrapper declaration target baseName plan.io
-  let imports := if plan.io then [{
+  let imports : List PsWasmFunctionImport := if plan.io then [{
     moduleName := "psc1:io", importName := "dispatch"
     function := {
       name := "__psc1_abi_host_dispatch"

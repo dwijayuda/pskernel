@@ -38,6 +38,9 @@ The next patch adds an explicit wasm-string ABI and Wasm io-dispatcher mapping.
 Typed memory/global instructions, fixed16MiB arena, UTF8 validation/copying,
 strict target operand checks, source/schema rechecking, canonical component
 allocation and post-return cleanup are implemented but NOT yet qualified.
+Wasm IO supports explicit payload bounds up to2MiB, reserving arena room for
+worst-case JSON escaping and response allocation. Larger configurations refuse
+before loading; oversized encoded requests retain typed tooLarge semantics.
 Core uses the existing explicit Node capability host; component uses the
 standalone Python capability host through pinned Wasmtime Python49.0.0.
 Default Wasm/component policies remain. New native negative and core/component

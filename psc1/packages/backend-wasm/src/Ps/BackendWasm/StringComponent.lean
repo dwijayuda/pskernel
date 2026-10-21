@@ -43,10 +43,10 @@ def psWasmStringAbiComponent (source : PsValidatedIrModule)
     [0x00, scalar e.resultString]
   let options : List UInt8 := [0x03, 0x00, 0x03, 0x00, 0x04, 0x00]
   let header : List UInt8 := [0x00, 0x61, 0x73, 0x6d, 0x0d, 0x00, 0x01, 0x00]
-  let alias := fun (kind : UInt8) instance name =>
-    [0x00, kind, 0x01] ++ psWasmEncodeUleb instance ++ psWasmEncodeName name
+  let alias := fun (kind : UInt8) instanceIndex name =>
+    [0x00, kind, 0x01] ++ psWasmEncodeUleb instanceIndex ++ psWasmEncodeName name
   let abiAliases := [alias 0x02 0 "memory", alias 0x00 0 "cabi_realloc"]
-  let exportAliases := fun instance => plan.exports.map (fun e => alias 0x00 instance e.name)
+  let exportAliases := fun instanceIndex => plan.exports.map (fun e => alias 0x00 instanceIndex e.name)
   let mut bytes := header
   let mut firstFunction := 2
   let mut firstType := 0

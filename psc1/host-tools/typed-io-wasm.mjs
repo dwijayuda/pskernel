@@ -56,6 +56,8 @@ export function bindWasmStrings(instance,schema){
 }
 export async function withWasmTypedIo(config,loadModule,schema,useProgram){
  if(config?.abi!=='psc1-wasm-core-linux-string-io/1')throw Error('PSC1_IO_UNSUPPORTED_ABI');
+ if(config.maxFileBytes>2*1024*1024||config.maxLineBytes>2*1024*1024)
+  throw Error('PSC1_IO_CONFIGURATION: Wasm IO supports at most 2097152 payload bytes');
  const io=createTypedIo({...config,abi:'psc1-node-linux-string-io/1'});
  try{
   const module=await loadModule();

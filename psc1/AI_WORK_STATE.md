@@ -207,3 +207,25 @@ check independent admission, retained helpers, public API hiding and refusal of
 unqualified helper references. Parser negatives cover private after a previous
 definition as well as at start. New semantic graph hashes require fresh exact
 qualification; prior immutable receipts remain scoped to their old identities.
+
+## Actual backend assurance and graph coverage
+
+At44e2a795 the private-token root cause is resolved: RuntimePlan, Type and Expr
+parse/elaborate. A new flatten helper collided with the existing Runtime module's
+psRustRuntimeConcat; give the new helper the qualified internal identity
+Ps.Internal.RustRuntimePlan.concatRequirements. Native build and census correctly
+refused the duplicate before any admission. All84 modules parse in both lanes.
+
+Extend exact closure qualification with an EXPLICIT assurance selection. Semantic
+uses checked-only; DirectJS and Rust use ordinary-checked because their original
+partial functions must retain exact logical/body pairing. No fallback changes the
+checked-only API. Ordinary preparation uses psCompilerPrepareOrdinary, independently
+admits its exact .logical, and erases the SAME immutable ordinary value through
+psCompilerOrdinaryIr (including repeated pairing validation), then runs the actual
+strict IR entry point. The report separately records raw source Core counts,
+logical expansion counts and partial names. Exact origin coverage is checked
+against source count; each actual partial adds one private body in the logical
+graph.20 negative/positive contract checks cover count/assurance/duplicate tampering.
+Both actual canonical graph lanes must match. Reports version2 remain diagnostic;
+no generated compiler execution or formal preservation is claimed. All process
+limits/checker pins are unchanged. Linux qualification is pending.

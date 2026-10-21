@@ -6,12 +6,17 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { phaseNames } from './compiler-source-census-contract.mjs';
+import { validateClosureCounts } from './compiler-closure-contract.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
-assert.ok(args.length === 2 && args[0] === '--phase' && phaseNames.includes(args[1]),
-  'usage: compiler-closure-qualification.mjs --phase ' + phaseNames.join('|'));
+assert.ok([2, 4].includes(args.length) && args[0] === '--phase' && phaseNames.includes(args[1]) &&
+  (args.length === 2 || args[2] === '--assurance'),
+  'usage: compiler-closure-qualification.mjs --phase ' + phaseNames.join('|') +
+    ' [--assurance checked|ordinary-checked]');
 const selected = args[1];
+const assurance = args[3] || 'checked';
+assert.ok(['checked', 'ordinary-checked'].includes(assurance), 'PSC1_CLOSURE_UNKNOWN_ASSURANCE');
 const commit = process.env.GITHUB_SHA;
 assert.ok(commit, 'PSC1_CLOSURE_REQUIRES_CLOUD_COMMIT');
 const census = path.join(root, 'dist/scoped-correctness/compiler-source-census');
@@ -78,7 +83,7 @@ function unchanged() {
     assert.equal(hash(bytes), entry.inputSha256, 'parser input changed during qualification');
   }
 }
-const evidence = path.join(root, 'dist/scoped-correctness/compiler-closure', selected);
+const evidence = path.join(root, 'dist/scoped-correctness/compiler-closure', selected, assurance);
 fs.mkdirSync(evidence, { recursive: true });
 const binary = process.env.PSC1_CENSUS_PROBE || path.join(root, '.lake/build/bin/psc1_source_census_probe');
 const binarySha256 = hash(fs.readFileSync(binary));
@@ -89,16 +94,17 @@ for (const grammar of ['lean', 'ps']) {
   const output = path.join(directory, 'qualification.json');
   const admissions = path.join(directory, 'admissions.json');
   for (const owned of [output, admissions]) fs.rmSync(owned, { force: true });
-  const run = spawnSync(binary, ['--qualify', '--grammar', grammar, '--out', output,
+  const run = spawnSync(binary, ['--qualify', '--assurance', assurance, '--grammar', grammar, '--out', output,
     '--admissions', admissions, '--modules', ...inputs[grammar].flatMap(row => [row.module, row.inputPath])],
     { cwd: root, encoding: 'utf8', timeout: 240000, maxBuffer: 32 * 1024 * 1024 });
   let observed = null, integrityError = null, admissionsArtifact = null;
   try {
     unchanged();
     observed = JSON.parse(fs.readFileSync(output, 'utf8'));
-    assert.equal(observed.schema, 'psc1-compiler-closure-probe/1');
+    assert.equal(observed.schema, 'psc1-compiler-closure-probe/2');
     assert.equal(observed.authoritative, false);
     assert.equal(observed.grammar, grammar);
+    assert.equal(observed.assurance, assurance);
     assert.equal(observed.frontend, 'owned-native-PSC1');
     assert.equal(observed.leanVersion, '4.35.0');
     assert.equal(observed.leanCommit, 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
@@ -130,10 +136,9 @@ for (const grammar of ['lean', 'ps']) {
       assert.equal(observed.preparation, 'accepted');
     if (observed.ir !== 'not-run') assert.equal(observed.admission, 'accepted');
     if (observed.preparation === 'accepted') {
-      assert.ok(Number.isInteger(observed.coreDeclarations) && observed.coreDeclarations > 0);
-      assert.equal(observed.records.reduce((sum, row) => sum +
-        row.origins.reduce((count, origin) => count + origin.members.length, 0), 0),
-        observed.coreDeclarations, 'exact actual Core batch coverage');
+      const sourceCount = observed.records.reduce((sum, row) => sum +
+        row.origins.reduce((count, origin) => count + origin.members.length, 0), 0);
+      validateClosureCounts(observed, sourceCount, assurance);
       const bytes = fs.readFileSync(admissions);
       assert.equal(bytes.length, observed.admissionsUtf8Bytes);
       admissionsArtifact = { path: grammar + '/admissions.json', utf8Bytes: bytes.length, sha256: hash(bytes) };
@@ -147,7 +152,8 @@ for (const grammar of ['lean', 'ps']) {
     passed };
   console.log('PSC1_CLOSURE_LANE: ' + JSON.stringify({ grammar, passed, status: run.status,
     preparation: observed?.preparation, admission: observed?.admission, ir: observed?.ir,
-    coreDeclarations: observed?.coreDeclarations, admissionsArtifact,
+    sourceCoreDeclarations: observed?.sourceCoreDeclarations,
+    logicalCoreDeclarations: observed?.coreDeclarations, partialNames: observed?.partialNames, admissionsArtifact,
     detail: observed?.detail, firstFindings: observed?.findings?.slice(0, 8),
     findingCount: observed?.findingCount,
     integrityError, error: run.error?.message }));
@@ -156,8 +162,8 @@ unchanged();
 const canonicalAdmissionBytesParity = lanes.lean.admissionsArtifact && lanes.ps.admissionsArtifact ?
   (lanes.lean.admissionsArtifact.sha256 === lanes.ps.admissionsArtifact.sha256 ? 'accepted' : 'refused') : 'not-run';
 const passed = lanes.lean.passed && lanes.ps.passed && canonicalAdmissionBytesParity === 'accepted';
-const report = { schema: 'psc1-compiler-closure-qualification/1', commit,
-  phase: selected, binarySha256, roots: phase.roots, modules: sourceEntries.length, explicitImportGraphOnly: true,
+const report = { schema: 'psc1-compiler-closure-qualification/2', commit,
+  phase: selected, assurance, binarySha256, roots: phase.roots, modules: sourceEntries.length, explicitImportGraphOnly: true,
   psSourceDerivation: 'owned-canonical-translation-from-lean', independentlyAuthoredPsCompiler: false,
   passed, canonicalAdmissionBytesParity, lanes, generatedExecution: 'not-run', selfCompilation: 'not-run',
   fixedPoint: 'not-run', formalPreservation: 'not-provided' };

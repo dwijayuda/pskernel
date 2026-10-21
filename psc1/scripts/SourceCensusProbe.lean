@@ -1,4 +1,5 @@
 import Ps.Compiler.Api
+import Ps.Compiler.Ordinary
 import Ps.Host.ProjectCompiler
 import Lean.Data.Json
 import Ps.Host.LeanChecked
@@ -145,13 +146,14 @@ def psClosureCompilerDetail : PsCompilerError -> String
   | .erasure error => "erasure:" ++ psClosureErasureDetail error
   | error => psCensusParseDetail error
 
-def psClosureWrite (kind : PsCompilerSourceKind) (output preparation admission ir : String)
+def psClosureWrite (kind : PsCompilerSourceKind) (assurance output preparation admission ir : String)
     (records : Array Lean.Json) (extra : List (String × Lean.Json)) : IO Unit :=
   IO.FS.writeFile output ((Lean.Json.mkObj ([
-    psCensusPair "schema" "psc1-compiler-closure-probe/1",
+    psCensusPair "schema" "psc1-compiler-closure-probe/2",
     ("authoritative", Lean.toJson false),
     psCensusPair "grammar" (psCensusGrammar kind),
     psCensusPair "frontend" "owned-native-PSC1",
+    psCensusPair "assurance" assurance,
     psCensusPair "preparation" preparation,
     psCensusPair "admission" admission,
     psCensusPair "ir" ir,
@@ -163,15 +165,42 @@ def psClosureWrite (kind : PsCompilerSourceKind) (output preparation admission i
     psCensusPair "leanCommit" Lean.githash,
     ("records", .arr records)] ++ extra)).compress ++ "\n")
 
+/-- Host diagnostic retains the exact production ordinary pairing as one value. -/
+structure PsClosurePreparedBatch where
+  logical : PsCompilerAdmissionReadyModule
+  admissions : String
+  ordinary : Option PsCompilerOrdinaryModule
+  sourceCoreDeclarations : Nat
+  partialNames : List String
+
+def psClosurePrepare (assurance : String) (state : PsCompilerPreparationState) :
+    Except String PsClosurePreparedBatch := do
+  let source := psCompilerPreparationElaborated state
+  if assurance == "checked" then
+    match psCompilerPreparationFinishWithOutput state with
+    | .error error => throw (psClosureCompilerDetail error)
+    | .ok value =>
+        pure { logical := value.prepared, admissions := value.admissions, ordinary := none,
+          sourceCoreDeclarations := source.declarations.length, partialNames := [] }
+  else if assurance == "ordinary-checked" then
+    let ordinary <- psCompilerPrepareOrdinary source
+    let admissions <- match psCompilerAdmissionsFromPrepared ordinary.logical with
+      | .error error => throw (psClosureCompilerDetail error)
+      | .ok value => pure value
+    pure { logical := ordinary.logical, admissions := admissions, ordinary := some ordinary,
+      sourceCoreDeclarations := ordinary.source.declarations.length,
+      partialNames := ordinary.partialNames.map psNameToString }
+  else throw "PSC1_CLOSURE_UNKNOWN_ASSURANCE"
+
 -- Qualification consumes the exact supplied parser inputs, including retained PS.
 -- It owns a fresh state for one selected closure; no union-lane state is reused.
-def psClosureProbe (kind : PsCompilerSourceKind) (output admissionsPath : String)
+def psClosureProbe (kind : PsCompilerSourceKind) (assurance output admissionsPath : String)
     (args : List String) : IO Unit := do
   let mut state := psCompilerPreparationStart kind
   let mut records : Array Lean.Json := #[]
   let mut seen : List String := []
   let mut pending := args
-  psClosureWrite kind output "in-progress" "not-run" "not-run" records []
+  psClosureWrite kind assurance output "in-progress" "not-run" "not-run" records []
   while !pending.isEmpty do
     let moduleName :: inputPath :: rest := pending
       | throw (IO.userError "PSC1_CLOSURE_ARGUMENT_PAIRS")
@@ -186,7 +215,7 @@ def psClosureProbe (kind : PsCompilerSourceKind) (output admissionsPath : String
           records := records.push (Lean.Json.mkObj (base ++ [
             psCensusPair "parse" "refused", psCensusPair "elaboration" "blocked-by-parse",
             psCensusPair "detail" (psCensusParseDetail error)]))
-          psClosureWrite kind output "refused" "not-run" "not-run" records []
+          psClosureWrite kind assurance output "refused" "not-run" "not-run" records []
           throw (IO.userError ("PSC1_CLOSURE_PARSE_REFUSED: " ++ moduleName))
       | .ok value => pure value
     let imports := parsed.imports.map (fun item => String.intercalate "." item.moduleName.segments)
@@ -199,7 +228,7 @@ def psClosureProbe (kind : PsCompilerSourceKind) (output admissionsPath : String
           psCensusPair "sourceDeclaration" (String.intercalate "." error.sourceName.segments),
           ("sourceIndex", Lean.toJson error.sourceIndex),
           ("line", Lean.toJson error.span.start.line), ("column", Lean.toJson error.span.start.column)]))
-        psClosureWrite kind output "refused" "not-run" "not-run" records []
+        psClosureWrite kind assurance output "refused" "not-run" "not-run" records []
         throw (IO.userError ("PSC1_CLOSURE_ELABORATION_REFUSED: " ++ moduleName))
     | .ok next =>
         state := next.state
@@ -215,33 +244,43 @@ def psClosureProbe (kind : PsCompilerSourceKind) (output admissionsPath : String
           psCensusPair "parse" "accepted", psCensusPair "elaboration" "accepted",
           ("sourceDeclarations", Lean.toJson parsed.declarations.length),
           ("origins", Lean.toJson origins)]))
-        psClosureWrite kind output "in-progress" "not-run" "not-run" records []
+        psClosureWrite kind assurance output "in-progress" "not-run" "not-run" records []
   if records.isEmpty then throw (IO.userError "PSC1_CLOSURE_EMPTY")
-  let prepared <- match psCompilerPreparationFinishWithOutput state with
+  let prepared <- match psClosurePrepare assurance state with
     | .error error =>
-        psClosureWrite kind output "refused" "not-run" "not-run" records [
-          psCensusPair "detail" (psClosureCompilerDetail error)]
+        psClosureWrite kind assurance output "refused" "not-run" "not-run" records [
+          psCensusPair "detail" error]
         throw (IO.userError "PSC1_CLOSURE_PREPARATION_REFUSED")
     | .ok value => pure value
-  let common := [("coreDeclarations", Lean.toJson prepared.prepared.declarations.length),
+  let common := [("sourceCoreDeclarations", Lean.toJson prepared.sourceCoreDeclarations),
+    ("partialNames", Lean.toJson prepared.partialNames),
+    ("coreDeclarations", Lean.toJson prepared.logical.declarations.length),
     ("admissionsUtf8Bytes", Lean.toJson prepared.admissions.utf8ByteSize)]
   IO.FS.writeFile admissionsPath prepared.admissions
-  psClosureWrite kind output "accepted" "in-progress" "not-run" records common
-  match <- psHostLeanCheckPrepared prepared.prepared with
+  psClosureWrite kind assurance output "accepted" "in-progress" "not-run" records common
+  match <- psHostLeanCheckPrepared prepared.logical with
   | .error detail =>
-      psClosureWrite kind output "accepted" "refused" "not-run" records
+      psClosureWrite kind assurance output "accepted" "refused" "not-run" records
         (common ++ [psCensusPair "detail" detail])
       throw (IO.userError ("PSC1_CLOSURE_ADMISSION_REFUSED: " ++ detail))
   | .ok admitted =>
       if admitted != prepared.admissions then
         throw (IO.userError "PSC1_CLOSURE_ADMISSION_BYTES_CHANGED")
-  psClosureWrite kind output "accepted" "accepted" "in-progress" records common
-  -- The very same immutable prepared value is erased after actual admission.
-  let raw <- match psCompilerVerifiedIrFromPrepared prepared.prepared with
-    | .error error =>
-        psClosureWrite kind output "accepted" "accepted" "refused" records
-          (common ++ [psCensusPair "detail" (psClosureCompilerDetail error)])
-        throw (IO.userError ("PSC1_CLOSURE_ERASURE_REFUSED: " ++ psClosureCompilerDetail error))
+  psClosureWrite kind assurance output "accepted" "accepted" "in-progress" records common
+  -- The same immutable checked batch or ordinary source/logical/body pairing is
+  -- erased only after the exact retained logical admissions were accepted.
+  let rawResult : Except String PsVerifiedIrModule :=
+    match prepared.ordinary with
+    | .none =>
+        match psCompilerVerifiedIrFromPrepared prepared.logical with
+        | .error error => .error (psClosureCompilerDetail error)
+        | .ok value => .ok value
+    | .some ordinary => psCompilerOrdinaryIr ordinary
+  let raw <- match rawResult with
+    | .error detail =>
+        psClosureWrite kind assurance output "accepted" "accepted" "refused" records
+          (common ++ [psCensusPair "detail" detail])
+        throw (IO.userError ("PSC1_CLOSURE_ERASURE_REFUSED: " ++ detail))
     | .ok value => pure value
   match psStrictValidateModule raw with
   | .error _ =>
@@ -249,7 +288,7 @@ def psClosureProbe (kind : PsCompilerSourceKind) (output admissionsPath : String
       let findings := report.findings.map (fun finding => Lean.Json.mkObj [
         psCensusPair "owner" finding.owner, psCensusPair "path" finding.path,
         psCensusPair "code" finding.code, psCensusPair "detail" finding.detail])
-      psClosureWrite kind output "accepted" "accepted" "refused" records (common ++ [
+      psClosureWrite kind assurance output "accepted" "accepted" "refused" records (common ++ [
         psCensusPair "detail" "strict-IR-validation-refused",
         ("traversalComplete", Lean.toJson report.traversalComplete),
         ("visitedSteps", Lean.toJson report.visitedSteps),
@@ -257,7 +296,7 @@ def psClosureProbe (kind : PsCompilerSourceKind) (output admissionsPath : String
         ("findings", Lean.toJson findings)])
       throw (IO.userError "PSC1_CLOSURE_STRICT_IR_REFUSED")
   | .ok validated =>
-      psClosureWrite kind output "accepted" "accepted" "accepted" records (common ++ [
+      psClosureWrite kind assurance output "accepted" "accepted" "accepted" records (common ++ [
         psCensusPair "strictEntryPoint" "psStrictValidateModule",
         ("irDeclarations", Lean.toJson validated.raw.declarations.length),
         ("irStructures", Lean.toJson validated.raw.structures.length),
@@ -267,12 +306,19 @@ def psClosureProbe (kind : PsCompilerSourceKind) (output admissionsPath : String
 
 def main (args : List String) : IO Unit := do
   match args with
+  | "--qualify" :: "--assurance" :: assurance :: "--grammar" :: grammar :: "--out" :: output ::
+      "--admissions" :: admissions :: "--modules" :: entries =>
+      if !["checked", "ordinary-checked"].contains assurance then
+        throw (IO.userError "PSC1_CLOSURE_UNKNOWN_ASSURANCE")
+      if grammar == "lean" then psClosureProbe .lean assurance output admissions entries
+      else if grammar == "ps" then psClosureProbe .proofScript assurance output admissions entries
+      else throw (IO.userError "PSC1_CLOSURE_UNKNOWN_GRAMMAR")
   | "--qualify" :: "--grammar" :: "lean" :: "--out" :: output ::
       "--admissions" :: admissions :: "--modules" :: entries =>
-      psClosureProbe .lean output admissions entries
+      psClosureProbe .lean "checked" output admissions entries
   | "--qualify" :: "--grammar" :: "ps" :: "--out" :: output ::
       "--admissions" :: admissions :: "--modules" :: entries =>
-      psClosureProbe .proofScript output admissions entries
+      psClosureProbe .proofScript "checked" output admissions entries
   | "--out" :: output :: "--modules" :: entries => psCensusProbe .lean output entries
   | "--grammar" :: "lean" :: "--out" :: output :: "--modules" :: entries =>
       psCensusProbe .lean output entries

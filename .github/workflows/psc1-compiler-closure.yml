@@ -19,7 +19,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        phase: [semantic-compiler, directjs-compiler]
+        include:
+          - phase: semantic-compiler
+            assurance: checked
+          - phase: directjs-compiler
+            assurance: ordinary-checked
+          - phase: rust-compiler
+            assurance: ordinary-checked
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
@@ -49,17 +55,18 @@ jobs:
       - name: Check both exact source lanes
         run: |
           set -euo pipefail
+          node scripts/compiler-closure-contract-tests.mjs
           node scripts/compiler-source-census-contract-tests.mjs
           node scripts/compiler-source-census.mjs --strict-phase ${{ matrix.phase }}
       - name: Independently admit and strictly validate the whole selected closure
         run: |
           set -euo pipefail
-          node scripts/compiler-closure-qualification.mjs --phase ${{ matrix.phase }}
+          node scripts/compiler-closure-qualification.mjs --phase ${{ matrix.phase }} --assurance ${{ matrix.assurance }}
       - name: Retain exact inputs, admission bytes and stage diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: psc1-compiler-closure-${{ matrix.phase }}-${{ github.sha }}
+          name: psc1-compiler-closure-${{ matrix.phase }}-${{ matrix.assurance }}-${{ github.sha }}
           path: |
             psc1/dist/scoped-correctness/compiler-source-census/
             psc1/dist/scoped-correctness/compiler-closure/

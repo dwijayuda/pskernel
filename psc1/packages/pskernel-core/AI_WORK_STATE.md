@@ -12,6 +12,37 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — exact-parent reproducer PASS; portability and proof repair
+
+Candidate **4f6303fd90742ccc5e3d4f56b65dc658a7fb0eb5** is NOT qualified.
+[Integration39630047130](https://github.com/dwijayuda/pskernel/actions/runs/39630047130)
+native119325549240 actually reproduced the original3aa cheap-cache defect at
+15:57:10Z with the required exact sentinel. The candidate then failed the new
+pair lookup proof: simp left a definitionally equal goal. Generated119325548697
+failed PSC1 parsing of an inline conditional argument in WhnfCore:277.
+All five source workflows terminated FAIL; no skipped gate is a PASS.
+
+This successor uses named Boolean cache-publication helpers, preserving the
+same two-flag policy within the portable source grammar. The pair proof adds
+rfl after rewriting. The existing unrestricted frozen WhnfCore equivalence
+cannot hold after deliberately correcting cheapRec cache state. Its historical
+beforeWhnfCoreWithFuel is retained unchanged; a separately named corrected
+eager reference differs only in the five publication masks. The all-mode
+delayed-worker theorem explicitly compares that corrected reference, while a
+new all-input theorem proves exact historical result/state when cheapRec=false.
+All other14 fuel-worker lemmas and the original15-worker PASS marker remain;
+16 theorem axiom audits and a new corrected/historical-mode marker are mandatory.
+No old buggy policy is relabeled equivalent to the correction.
+
+The plan explicitly states that authentic case16 rec-missing-ih must match
+official REJECTION after missing validation is implemented, while valid nested
+controls must ACCEPT. Its current unsupported result is not a rejection.
+
+The containing successor is NOT RUN at creation and requires fresh same-source
+native, both generated routes, canonical, proof, provider, benchmark and full193
+gates. Exact3aa remains the latest qualified scoped A until then. No fuel,
+resource limit, runtime trust or existing semantic assertion is relaxed.
+
 ## 2026-10-21 — deep audit and bounded cache/WHNF corrections
 
 Baseline **3aa077cb64ff06f76727decd01c43ad6c33f351d** is now fully observed for

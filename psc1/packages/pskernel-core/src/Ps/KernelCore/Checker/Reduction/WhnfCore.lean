@@ -68,6 +68,11 @@ def psKernelWhnfCountLambdas
     argCount
     0
 
+/- Partial cheap reductions must never publish into the full core cache. -/
+def psKernelWhnfCoreCacheDisabled
+    (cheapRec cheapProj : Bool) : Bool :=
+  if cheapRec then true else cheapProj
+
 def psKernelWhnfCoreFinish
     (original : PsKernelExpr)
     (cheapProj : Bool)
@@ -274,7 +279,7 @@ def psKernelWhnfCoreWithFuel
                         | Except.ok result =>
                             psKernelWhnfCoreFinish
                               expr
-                              (if cheapRec then true else cheapProj)
+                              (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
                               (Prod.fst result)
                               (Prod.snd result)
                     | PsKernelExpr.proj typeName index structValue =>
@@ -342,7 +347,7 @@ def psKernelWhnfCoreWithFuel
                                 | Option.none =>
                                     psKernelWhnfCoreFinish
                                       expr
-                                      (if cheapRec then true else cheapProj)
+                                      (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
                                       expr
                                       state2
                                 | Option.some value =>
@@ -360,7 +365,7 @@ def psKernelWhnfCoreWithFuel
                                     | Except.ok result =>
                                         psKernelWhnfCoreFinish
                                           expr
-                                          (if cheapRec then true else cheapProj)
+                                          (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
                                           (Prod.fst result)
                                           (Prod.snd result)
                     | PsKernelExpr.app _ _ =>
@@ -407,7 +412,7 @@ def psKernelWhnfCoreWithFuel
                                     | Except.ok result =>
                                         psKernelWhnfCoreFinish
                                           expr
-                                          (if cheapRec then true else cheapProj)
+                                          (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
                                           (Prod.fst result)
                                           (Prod.snd result)
                             | _ =>
@@ -457,7 +462,7 @@ def psKernelWhnfCoreWithFuel
                                   | Except.ok result =>
                                       psKernelWhnfCoreFinish
                                         expr
-                                        (if cheapRec then true else cheapProj)
+                                        (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
                                         (Prod.fst result)
                                         (Prod.snd result)
                     | _ =>

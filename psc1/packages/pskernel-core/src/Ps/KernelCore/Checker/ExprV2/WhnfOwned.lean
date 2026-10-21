@@ -19,6 +19,11 @@ Old WhnfState entry points adapt to this engine in Whnf.lean. Only pure arena
 and cache operations are lifted through the nested WhnfState here.
 -/
 
+/- Partial cheap reductions must never publish into the full core cache. -/
+def psKernelExprV2WhnfCoreCacheDisabled
+    (cheapRec cheapProj : Bool) : Bool :=
+  if cheapRec then true else cheapProj
+
 def psKernelExprV2WhnfCoreOwnedFinishMode
     (cheapProj : Bool) (state : PsKernelExprV2CheckState)
     (source result : Nat) :
@@ -91,7 +96,7 @@ def psKernelExprV2TryWhnfProjectionOwnedModeWith
     (root : Nat) (typeName : PsKernelName) (index structValue : Nat)
     (cheapRec cheapProj : Bool) :
     Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
-  let cacheDisabled := if cheapRec then true else cheapProj;
+  let cacheDisabled := psKernelExprV2WhnfCoreCacheDisabled cheapRec cheapProj;
   let majorResult : Option (Except String (Prod PsKernelExprV2CheckState Nat)) :=
     if cheapProj then recurse context state structValue
     else publicWhnf context state structValue;
@@ -169,7 +174,7 @@ def psKernelExprV2TryWhnfAppOwnedWithReducer
                                   fnState.whnf.arena plan with
                               | Except.error error => Option.some (Except.error error)
                               | Except.ok rebuilt =>
-                                  psKernelExprV2WhnfOwnedFinishAttempt root (if cheapRec then true else cheapProj)
+                                  psKernelExprV2WhnfOwnedFinishAttempt root (psKernelExprV2WhnfCoreCacheDisabled cheapRec cheapProj)
                                     (recurse context
                                       (psKernelExprV2CheckStateWithArena fnState
                                         (Prod.fst rebuilt))
@@ -196,7 +201,7 @@ def psKernelExprV2TryWhnfAppOwnedWithReducer
                                 (Prod.snd spine) fnState.whnf.arena fn with
                             | Except.error error => Option.some (Except.error error)
                             | Except.ok rebuilt =>
-                                psKernelExprV2WhnfOwnedFinishAttempt root (if cheapRec then true else cheapProj)
+                                psKernelExprV2WhnfOwnedFinishAttempt root (psKernelExprV2WhnfCoreCacheDisabled cheapRec cheapProj)
                                   (recurse context
                                     (psKernelExprV2CheckStateWithArena fnState
                                       (Prod.fst rebuilt))
@@ -219,7 +224,7 @@ def psKernelExprV2TryWhnfCompositeOwnedWithReducer
           state.whnf.arena body 0 with
       | Except.error error => Option.some (Except.error error)
       | Except.ok reduced =>
-          psKernelExprV2WhnfOwnedFinishAttempt root (if cheapRec then true else cheapProj)
+          psKernelExprV2WhnfOwnedFinishAttempt root (psKernelExprV2WhnfCoreCacheDisabled cheapRec cheapProj)
             (recurse context
               (psKernelExprV2CheckStateWithArena state (Prod.fst reduced))
               (Prod.snd reduced))

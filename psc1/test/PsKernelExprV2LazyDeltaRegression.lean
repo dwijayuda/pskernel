@@ -221,7 +221,7 @@ private theorem pairFindWorker_eq_frozen
   induction pairs generalizing arena left right hash with
   | nil => rfl
   | cons first rest ih =>
-      simp only [psKernelExprV2DefEqPairFindWorker, frozenPairFind, ih]
+      simp only [psKernelExprV2DefEqPairFindWorker, frozenPairFind, ih] <;> rfl
 
 private theorem pairFindABI_eq_frozen
     (pairs : List PsKernelExprV2DefEqPair)

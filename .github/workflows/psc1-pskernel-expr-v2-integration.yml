@@ -320,9 +320,11 @@ jobs:
           lake -f kernel-lakefile.lean env lean test/PsKernelExprEqualityProofs.lean \
             | tee "$RUNNER_TEMP/psc1-expr-equality-proofs.log"
           grep -q 'PSKERNEL_EXPR_EQUALITY_NATIVE: PASS comparisons=800 hostile=21 sharedDepth=64' "$RUNNER_TEMP/psc1-expr-equality-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelKnotFuelProofs.lean)" -eq 16
           lake -f kernel-lakefile.lean env lean test/PsKernelKnotFuelProofs.lean \
             | tee "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
           grep -q 'PSKERNEL_KNOT_FUEL_PROOFS: PASS workers=15' "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
+          grep -Fq 'PSKERNEL_WHNFCACHE_MODE_PROOFS: PASS allModes=correctedEager fullMode=historical' "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2AdmissionGuardProofs.lean \
             | tee "$RUNNER_TEMP/psc1-admission-guard-proofs.log"
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean \

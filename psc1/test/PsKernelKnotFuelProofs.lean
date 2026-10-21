@@ -1,12 +1,17 @@
 import Ps.KernelCore.Checker.Knot
 
 /-!
-Exact extensional equivalence of delayed recursive aliases for every fuel,
-callback, context, state and input. Each frozen worker is copied verbatim from
+Extensional equivalence of delayed recursive aliases for every fuel, callback,
+context, state and input. Each historical frozen worker is copied verbatim from
 854bdb9e0febf4e01fb5ce4b2cc8ea91f61287e4 with only its own recursive name changed.
-Both sides use the same imported helper definitions. These are local replacement
-theorems; they do not assert a global kernel soundness theorem or a runtime
-allocation bound. The frozen workers remain outside the portable source closure.
+The historical WHNF-core worker remains untouched. Its unrestricted equality
+was invalidated intentionally by the cheapRec cache-publication repair; an
+explicitly named corrected eager reference checks delayed-alias equivalence
+for all modes, and a separate theorem preserves historical behavior when
+cheapRec=false. Other historical comparisons remain unchanged.
+Both sides use the same imported helper definitions. These local replacement
+theorems assert neither global kernel soundness nor a runtime allocation bound.
+The frozen workers remain outside the portable source closure.
 -/
 namespace PsKernelKnotFuelProofs
 
@@ -959,6 +964,369 @@ def beforeWhnfCoreWithFuel
                                       psKernelWhnfCoreFinish
                                         expr
                                         cheapProj
+                                        (Prod.fst result)
+                                        (Prod.snd result)
+                    | _ =>
+                        Except.ok
+                          (Prod.mk expr state)
+
+/-
+Explicit corrected eager reference for the cheapRec cache-publication repair.
+The historical beforeWhnfCoreWithFuel above remains byte-for-byte unchanged.
+This copy differs only in its recursive name and the five publication masks:
+psKernelWhnfCoreCacheDisabled cheapRec cheapProj suppresses publishing a result
+into the normal core cache when either cheap mode requires it.
+
+The historical unrestricted equality is intentionally false when cheapRec=true
+and cheapProj=false: beta/let wrappers around a blocked recursor could publish
+a partial result and poison a later full-mode lookup. The authentic cache-mode
+regressions exercise that counterexample and assert warm/full equals cold/full.
+The new all-mode theorem compares two implementations of the corrected policy;
+the separate full-mode theorem below retains equivalence to the historical
+source for cheapRec=false. Neither theorem proves global kernel soundness.
+-/
+def cacheCorrectedEagerWhnfCoreWithFuel
+    (fuel : Nat) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) ->
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod
+          (Option PsKernelExpr)
+          PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    PsKernelExpr ->
+    Bool ->
+    Bool ->
+    Except String
+      (Prod PsKernelExpr PsKernelCheckerState) :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_publicWhnf :
+          PsKernelCheckerContext ->
+          PsKernelCheckerState ->
+          PsKernelExpr ->
+          Except String
+            (Prod PsKernelExpr PsKernelCheckerState))
+        (_reduceRecursor :
+          PsKernelCheckerContext ->
+          PsKernelCheckerState ->
+          PsKernelExpr ->
+          Bool ->
+          Bool ->
+          Except String
+            (Prod
+              (Option PsKernelExpr)
+              PsKernelCheckerState))
+        (_context : PsKernelCheckerContext)
+        (_state : PsKernelCheckerState)
+        (_expr : PsKernelExpr)
+        (_cheapRec : Bool)
+        (_cheapProj : Bool) =>
+        Except.error
+          "kernel reduction budget exhausted"
+  | Nat.succ remaining =>
+      let smaller :=
+        cacheCorrectedEagerWhnfCoreWithFuel remaining;
+      fun
+        (publicWhnf :
+          PsKernelCheckerContext ->
+          PsKernelCheckerState ->
+          PsKernelExpr ->
+          Except String
+            (Prod PsKernelExpr PsKernelCheckerState))
+        (reduceRecursor :
+          PsKernelCheckerContext ->
+          PsKernelCheckerState ->
+          PsKernelExpr ->
+          Bool ->
+          Bool ->
+          Except String
+            (Prod
+              (Option PsKernelExpr)
+              PsKernelCheckerState))
+        (context : PsKernelCheckerContext)
+        (state : PsKernelCheckerState)
+        (expr : PsKernelExpr)
+        (cheapRec : Bool)
+        (cheapProj : Bool) =>
+        match
+            psKernelCheckerContextEnterRecDepth
+              context with
+        | Except.error error =>
+            Except.error error
+        | Except.ok nextContext =>
+            match expr with
+            | PsKernelExpr.bvar _ =>
+                Except.ok (Prod.mk expr state)
+            | PsKernelExpr.sort _ =>
+                Except.ok (Prod.mk expr state)
+            | PsKernelExpr.mvar _ =>
+                Except.ok (Prod.mk expr state)
+            | PsKernelExpr.forallE _ _ _ _ =>
+                Except.ok (Prod.mk expr state)
+            | PsKernelExpr.const _ _ =>
+                Except.ok (Prod.mk expr state)
+            | PsKernelExpr.lam _ _ _ _ =>
+                Except.ok (Prod.mk expr state)
+            | PsKernelExpr.lit _ =>
+                Except.ok (Prod.mk expr state)
+            | PsKernelExpr.mdata _ body =>
+                smaller
+                  publicWhnf
+                  reduceRecursor
+                  nextContext
+                  state
+                  body
+                  cheapRec
+                  cheapProj
+            | PsKernelExpr.fvar name =>
+                match
+                    psKernelLocalContextFind
+                      nextContext.localContext
+                      name with
+                | Option.none =>
+                    Except.ok (Prod.mk expr state)
+                | Option.some declaration =>
+                    match
+                        psKernelLocalDeclValue
+                          declaration with
+                    | Option.none =>
+                        Except.ok (Prod.mk expr state)
+                    | Option.some value =>
+                        smaller
+                          publicWhnf
+                          reduceRecursor
+                          nextContext
+                          state
+                          value
+                          cheapRec
+                          cheapProj
+            | _ =>
+                match
+                    if psKernelSemanticCacheEligible expr then
+                      psKernelExprMapGet
+                        state.whnfCore
+                        expr
+                    else
+                      Option.none with
+                | Option.some cached =>
+                    Except.ok
+                      (Prod.mk cached state)
+                | Option.none =>
+                    match expr with
+                    | PsKernelExpr.letE _ _ value body _ =>
+                        let reduced :=
+                          psKernelExprInstantiate1
+                            body
+                            value;
+                        match
+                            smaller
+                              publicWhnf
+                              reduceRecursor
+                              nextContext
+                              state
+                              reduced
+                              cheapRec
+                              cheapProj with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok result =>
+                            psKernelWhnfCoreFinish
+                              expr
+                              (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
+                              (Prod.fst result)
+                              (Prod.snd result)
+                    | PsKernelExpr.proj typeName index structValue =>
+                        let structResult :=
+                          if cheapProj then
+                            smaller
+                              publicWhnf
+                              reduceRecursor
+                              nextContext
+                              state
+                              structValue
+                              cheapRec
+                              cheapProj
+                          else
+                            publicWhnf
+                              nextContext
+                              state
+                              structValue;
+                        match structResult with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok firstResult =>
+                            let structReduced :=
+                              Prod.fst firstResult;
+                            let state1 :=
+                              Prod.snd firstResult;
+                            let expandedResult :
+                                Except String
+                                  (Prod
+                                    PsKernelExpr
+                                    PsKernelCheckerState) :=
+                              match structReduced with
+                              | PsKernelExpr.lit literal =>
+                                  match literal with
+                                  | PsKernelLiteral.str value =>
+                                      publicWhnf
+                                        nextContext
+                                        state1
+                                        (psKernelStringLitToConstructor
+                                          value)
+                                  | PsKernelLiteral.nat _ =>
+                                      Except.ok
+                                        (Prod.mk
+                                          structReduced
+                                          state1)
+                              | _ =>
+                                  Except.ok
+                                    (Prod.mk
+                                      structReduced
+                                      state1);
+                            match expandedResult with
+                            | Except.error error =>
+                                Except.error error
+                            | Except.ok secondResult =>
+                                let expanded :=
+                                  Prod.fst secondResult;
+                                let state2 :=
+                                  Prod.snd secondResult;
+                                match
+                                    psKernelReduceProjCore
+                                      nextContext
+                                      typeName
+                                      index
+                                      expanded with
+                                | Option.none =>
+                                    psKernelWhnfCoreFinish
+                                      expr
+                                      (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
+                                      expr
+                                      state2
+                                | Option.some value =>
+                                    match
+                                        smaller
+                                          publicWhnf
+                                          reduceRecursor
+                                          nextContext
+                                          state2
+                                          value
+                                          cheapRec
+                                          cheapProj with
+                                    | Except.error error =>
+                                        Except.error error
+                                    | Except.ok result =>
+                                        psKernelWhnfCoreFinish
+                                          expr
+                                          (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
+                                          (Prod.fst result)
+                                          (Prod.snd result)
+                    | PsKernelExpr.app _ _ =>
+                        let spine :=
+                          psKernelExprGetAppFnArgs expr;
+                        let fn0 :=
+                          Prod.fst spine;
+                        let args :=
+                          Prod.snd spine;
+                        match
+                            smaller
+                              publicWhnf
+                              reduceRecursor
+                              nextContext
+                              state
+                              fn0
+                              cheapRec
+                              cheapProj with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok fnResult =>
+                            let fn :=
+                              Prod.fst fnResult;
+                            let state1 :=
+                              Prod.snd fnResult;
+                            match fn with
+                            | PsKernelExpr.lam _ _ _ _ =>
+                                match psKernelC0BetaSpinePlan fn args with
+                                | Option.none =>
+                                    Except.ok (Prod.mk expr state1)
+                                | Option.some plan =>
+                                    let rebuilt := psKernelC0BetaSpineApply plan;
+                                    match
+                                        smaller
+                                          publicWhnf
+                                          reduceRecursor
+                                          nextContext
+                                          state1
+                                          rebuilt
+                                          cheapRec
+                                          cheapProj with
+                                    | Except.error error =>
+                                        Except.error error
+                                    | Except.ok result =>
+                                        psKernelWhnfCoreFinish
+                                          expr
+                                          (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
+                                          (Prod.fst result)
+                                          (Prod.snd result)
+                            | _ =>
+                                if psKernelExprEq fn fn0 then
+                                  match
+                                      reduceRecursor
+                                        nextContext
+                                        state1
+                                        expr
+                                        cheapRec
+                                        cheapProj with
+                                  | Except.error error =>
+                                      Except.error error
+                                  | Except.ok reduction =>
+                                      match
+                                          Prod.fst reduction with
+                                      | Option.none =>
+                                          Except.ok
+                                            (Prod.mk
+                                              expr
+                                              (Prod.snd reduction))
+                                      | Option.some value =>
+                                          smaller
+                                            publicWhnf
+                                            reduceRecursor
+                                            nextContext
+                                            (Prod.snd reduction)
+                                            value
+                                            cheapRec
+                                            cheapProj
+                                else
+                                  let rebuilt :=
+                                    psKernelExprApplyArgsCheap
+                                      fn
+                                      args;
+                                  match
+                                      smaller
+                                        publicWhnf
+                                        reduceRecursor
+                                        nextContext
+                                        state1
+                                        rebuilt
+                                        cheapRec
+                                        cheapProj with
+                                  | Except.error error =>
+                                      Except.error error
+                                  | Except.ok result =>
+                                      psKernelWhnfCoreFinish
+                                        expr
+                                        (psKernelWhnfCoreCacheDisabled cheapRec cheapProj)
                                         (Prod.fst result)
                                         (Prod.snd result)
                     | _ =>
@@ -2108,15 +2476,40 @@ theorem WhnfWithFuel_delayed_recursion_preserves (fuel : Nat) :
 
 #print axioms WhnfWithFuel_delayed_recursion_preserves
 
+/- The retained theorem name checks delayed-alias replacement against the
+   explicitly corrected eager reference, not the historical cache bug. -/
 theorem WhnfCoreWithFuel_delayed_recursion_preserves (fuel : Nat) :
-    psKernelWhnfCoreWithFuel fuel = beforeWhnfCoreWithFuel fuel := by
+    psKernelWhnfCoreWithFuel fuel = cacheCorrectedEagerWhnfCoreWithFuel fuel := by
   induction fuel with
   | zero => rfl
   | succ fuel ih =>
       funext publicWhnf reduceRecursor context state expr cheapRec cheapProj
-      simp only [psKernelWhnfCoreWithFuel, beforeWhnfCoreWithFuel, ih] <;> rfl
+      simp only [psKernelWhnfCoreWithFuel, cacheCorrectedEagerWhnfCoreWithFuel, ih] <;> rfl
 
 #print axioms WhnfCoreWithFuel_delayed_recursion_preserves
+
+/- All inputs and both cheapProj settings retain the exact historical result
+   and state when cheapRec=false; callbacks and all resource arguments remain
+   universally quantified. No validity or empty-cache assumption is imposed. -/
+theorem WhnfCoreWithFuel_full_mode_preserves_historical (fuel : Nat) :
+    ∀ (publicWhnf : PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
+          Except String (Prod PsKernelExpr PsKernelCheckerState))
+      (reduceRecursor : PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
+          Bool -> Bool -> Except String (Prod (Option PsKernelExpr) PsKernelCheckerState))
+      (context : PsKernelCheckerContext) (state : PsKernelCheckerState)
+      (expr : PsKernelExpr) (cheapProj : Bool),
+      psKernelWhnfCoreWithFuel fuel publicWhnf reduceRecursor context state expr false cheapProj =
+        beforeWhnfCoreWithFuel fuel publicWhnf reduceRecursor context state expr false cheapProj := by
+  induction fuel with
+  | zero =>
+      intro publicWhnf reduceRecursor context state expr cheapProj
+      rfl
+  | succ fuel ih =>
+      intro publicWhnf reduceRecursor context state expr cheapProj
+      simp only [psKernelWhnfCoreWithFuel, beforeWhnfCoreWithFuel,
+        psKernelWhnfCoreCacheDisabled, ih] <;> rfl
+
+#print axioms WhnfCoreWithFuel_full_mode_preserves_historical
 
 theorem InferCoreWithFuel_delayed_recursion_preserves (fuel : Nat) :
     psKernelInferCoreWithFuel fuel = beforeInferCoreWithFuel fuel := by
@@ -2822,3 +3215,5 @@ theorem StringConstructorDataWithFuel_delayed_recursion_preserves (fuel : Nat) :
 end PsKernelKnotFuelProofs
 
 #eval IO.println "PSKERNEL_KNOT_FUEL_PROOFS: PASS workers=15"
+
+#eval IO.println "PSKERNEL_WHNFCACHE_MODE_PROOFS: PASS allModes=correctedEager fullMode=historical"

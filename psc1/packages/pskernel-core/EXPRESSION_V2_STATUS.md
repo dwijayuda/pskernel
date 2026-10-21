@@ -121,6 +121,23 @@ lemmas must pass before promotion. Official native Init String checks do not
 create portable environment metadata; absent String declarations remain an
 explicit checked rejection. This source slice is NOT RUN at commit creation.
 
+## Checked mutual and nested owner candidate
+
+`API/DagGenerated.lean` now plans each complete owner group after validated
+admission, using the final restored environment for nested declarations. It
+preserves ordinary/mutual input type IDs and privately imports checked nested
+types, main recursors and renamed auxiliary recursors. A missing or mismatched
+group plan leaves the state unchanged; import errors cannot publish a partial
+batch. This extends ownership; inductive admission and recursive metadata import
+remain transitional. Initial-session and Quot ownership are still incomplete.
+
+The new 25-owner/seven-recursor/14-rule native and generated fixtures include
+genuine indexed mutual and nested examples, 648 raw resource comparisons,
+13 private-ID controls, atomic publication and official Lean positive/negative
+controls. Sixteen local lemmas describe exact plan/guard/state behavior. This
+source slice is NOT RUN at review-object creation; it is not promoted to a
+production claim by the existence of the tests.
+
 ## Remaining whole-operation fallback inventory
 
 There are four production fallback sites. They remain explicit and preserve

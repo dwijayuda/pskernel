@@ -12,6 +12,45 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 15:29 UTC — complete group-owner candidate for source review
+
+This unreferenced review successor adds the generated mirror, native target and
+both required workflow gates to review object `3d924599768b5171215e4e48aa4141cd92413c77`.
+No branch is advanced at object creation. All new mutual/nested owner source,
+16 local proof lemmas, official/native matrices and generated tests remain
+**NOT RUN**. The preceding String-projection source `f9e9b20f92ce2ffa4a666acaf55aa8852949f589`
+has terminal native integration/correctness and all-six research PASS; its
+authentic generated and canonical runtime jobs remain IN PROGRESS.
+
+`PsKernelExprV2GeneratedOwnerRegression.lean` and the detached generated mirror
+require 25 exact checked owners, seven recursors, 14 rules, 12 direct evaluation
+cases, 216 check/216 WHNF/216 DefEq comparisons, 13 private-ID refusal forms,
+whole-batch atomicity and exact error precedence. Native official Lean requires
+16 valid declarations/groups and five negative declarations. Both generated
+routes run the same checked public queries and 12 admitted definitions with
+empty PATH. No marker can substitute for the later complete job outcome.
+
+Carrier4894's full Arena run39614046557 has now terminated FAIL. The complete
+[193-case receipt](evidence/2026-10-21-4894fce-arena.json) records **171 matches**
+(104 acceptance,59 kernel rejection,one metadata rejection,seven transport
+rejections), two separately classified safety-contract agreements, **18 host
+timeouts**, one real fuel exhaustion and one unsupported case. Index79
+`perf/args-before-unfold.ndjson` additionally timed out compared with a259;
+runner and source differences are confounded, so no causal claim is made.
+The official job passed. Kernel4096,60-second host wall bound and2048MiB V8
+old-space cap are unchanged; the latter is not a process-RSS ceiling.
+
+Current integration remains `3aa077cb64ff06f76727decd01c43ad6c33f351d`:
+native integration/correctness and research PASS; both generated jobs and
+full Arena are still IN PROGRESS. A is qualified only at exact a259/4894's
+documented developer scope. B/C remain open. Four public whole-operation
+fallback sites, recursive checked-metadata import, V1 inductive admission,
+initial-session/Quot owner gaps and the initial validated-arena decode remain.
+
+Next: exact readback/ABI review, finish predecessor generated qualification,
+then advance a complete reviewed group-owner candidate and run all required CI.
+The uncommitted cache-index work is separate and has not been tested or included.
+
 ## 2026-10-21 15:17 UTC — unreferenced group-owner source review
 
 This review object follows String-projection candidate

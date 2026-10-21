@@ -119,6 +119,213 @@ def validate_case_protocol(value: dict) -> None:
             "invalid native accepted-request count")
 
 
+STAGES = ("preflight", "header-check", "proposition-check", "body-closed",
+          "body-universes", "body-check", "type-defeq", "publication", "resource-limit")
+STAGE_PREFIX = "PSC1_ARENA_NATIVE_STAGES "
+EVENT_PREFIX = "PSC1_ARENA_NATIVE_STAGE_EVENT "
+FIXTURE_SHA = "d15790e77d82af4b55e21428ebfbe3443c1735a04585359f35d425a9fe86da8a"
+EXPORTER_SHA = "03f333187a255d469b6e6747a52c0e73f2432e6d77ebad551fea8d49e0aa0de7"
+
+
+def exact_json(text: str) -> dict:
+    def unique(items):
+        value = {}
+        for key, item in items:
+            require(key not in value, "duplicate native stage JSON key")
+            value[key] = item
+        return value
+    value = json.loads(text, object_pairs_hook=unique)
+    require(isinstance(value, dict), "native stage envelope is not an object")
+    return value
+
+
+def stage_protocol(stdout: pathlib.Path, controls: bool) -> dict:
+    lines = stdout.read_text(encoding="utf-8").splitlines()
+    reports = [exact_json(line[len(STAGE_PREFIX):]) for line in lines if line.startswith(STAGE_PREFIX)]
+    require(len(reports) == 1, "native stage protocol omitted/duplicated its outcome")
+    expected = ["PSC1_ARENA_NATIVE_STAGE_CONTROLS: PASS count=3"] if controls else []
+    require([line for line in lines if line and not line.startswith(STAGE_PREFIX)] == expected,
+            "unexpected native stage stdout")
+    return reports[0]
+
+
+def stage_events(stderr: pathlib.Path) -> list[dict]:
+    lines = [line for line in stderr.read_text(encoding="utf-8").splitlines() if line]
+    require(all(line.startswith(EVENT_PREFIX) for line in lines),
+            "unexpected native stage stderr")
+    values = [exact_json(line[len(EVENT_PREFIX):]) for line in lines]
+    require(0 < len(values) <= 60, "native stage event count outside bounded protocol")
+    return values
+
+
+def validate_staged_case(value: dict, events: list[dict], label: str, index: int,
+                        policy: dict, input_size: int | None = None) -> None:
+    require(value.get("protocol") == "pskernel-arena-native-theorem-stages/1"
+            and value.get("case") == label and value.get("sourceSha") == SOURCE
+            and type(value.get("declarationIndex")) is int and value["declarationIndex"] == index
+            and value.get("policy") == policy and value.get("sameAsUnmodifiedAPI") is True
+            and value.get("inputSessionUnchanged") is True and value.get("noPartialPublication") is True
+            and value.get("metadataValidated") is False and value.get("arenaMatchClaimed") is False,
+            "native staged case identity, policy, comparison or publication control differs")
+    if input_size is not None:
+        require(type(value.get("inputEnvironmentDeclarations")) is int
+                and value["inputEnvironmentDeclarations"] == input_size,
+                "native staged case input environment size differs")
+    if label == "church-numerals":
+        require(value.get("bodySha256") == BODY and value.get("adaptedSourceSha256") == ADAPTED,
+                "native staged Church body identity differs")
+    else:
+        require(value.get("bodySha256") is None and value.get("adaptedSourceSha256") is None,
+                "native staged control claims authentic body identity")
+    final = value.get("firstFailingStage")
+    require(final is None or final in STAGES, "unknown first failing stage")
+    completed = len(STAGES) if final is None else STAGES.index(final) + 1
+    require(len(events) == completed * 2 + 2, "native staged events omit/duplicate a semantic stage or reference")
+    semantic_events, reference_events = events[:-2], events[-2:]
+    for number, stage in enumerate(STAGES[:completed]):
+        entered, finished = semantic_events[2 * number:2 * number + 2]
+        for item in (entered, finished):
+            require(item.get("protocol") == "pskernel-arena-native-stage-event/1"
+                    and item.get("case") == label and item.get("sourceSha") == SOURCE
+                    and type(item.get("declarationIndex")) is int and item["declarationIndex"] == index
+                    and type(item.get("fuel")) is int and item["fuel"] == policy["fuel"]
+                    and item.get("stage") == stage, "native stage event identity differs")
+        require(entered.get("phase") == "enter", "native stage event lacks entry marker")
+        expected_phase = "error" if stage == final else "ok"
+        require(finished.get("phase") == expected_phase, "native stage completion/error ordering differs")
+    outcome = value.get("outcome")
+    reference = value.get("reference")
+    require(isinstance(reference, dict), "native stage reference API envelope missing")
+    for item in reference_events:
+        require(item.get("protocol") == "pskernel-arena-native-stage-event/1"
+                and item.get("case") == label and item.get("sourceSha") == SOURCE
+                and type(item.get("declarationIndex")) is int and item["declarationIndex"] == index
+                and type(item.get("fuel")) is int and item["fuel"] == policy["fuel"]
+                and item.get("stage") == "reference-operation",
+                "native reference operation marker identity differs")
+    require(reference_events[0].get("phase") == "enter"
+            and reference_events[1].get("phase") == ("ok" if final is None else "error"),
+            "native reference operation ordering or outcome differs")
+    fields = ("outcome", "accepted", "complete", "resource", "message", "environmentDeclarations")
+    require({key: value[key] for key in fields if key in value} ==
+            {key: reference[key] for key in fields if key in reference},
+            "native stage final typed outcome differs from unmodified API")
+    if final is None:
+        require(outcome == "native_admission_complete" and value.get("accepted") is True
+                and value.get("complete") is True,
+                "native stage success is not complete admission")
+    else:
+        require(outcome in {"rejectedInvalid", "declinedUnsupported", "resourceExhausted", "internalError"},
+                "native stage failure lacks typed kernel outcome")
+        require({key: value[key] for key in fields if key in value} ==
+                {key: semantic_events[-1][key] for key in fields if key in semantic_events[-1]},
+                "native first-error event differs from final outcome")
+        require({key: reference[key] for key in fields if key in reference} ==
+                {key: reference_events[-1][key] for key in fields if key in reference_events[-1]},
+                "native reference error marker differs from unchanged API")
+        if outcome in {"resourceExhausted", "declinedUnsupported", "internalError"}:
+            require(value.get("accepted") is None and value.get("complete") is False,
+                    "incomplete native stage result mislabeled as verdict")
+        if outcome == "rejectedInvalid":
+            require(value.get("accepted") is False and value.get("complete") is True,
+                    "native invalid rejection protocol differs")
+
+
+def validate_stage_parser_controls(value: dict, events: list[dict]) -> int:
+    """Reject corrupted receipts using a real completed native positive control."""
+    def refused(action):
+        try:
+            action()
+        except ValueError:
+            return
+        raise ValueError("native stage parser accepted a deliberately corrupted receipt")
+    refused(lambda: exact_json('{"case":"a","case":"b"}'))
+    mutations = (
+        lambda row: row.update(sourceSha="0" * 40),
+        lambda row: row.update(sameAsUnmodifiedAPI=False),
+        lambda row: row.update(noPartialPublication=False),
+        lambda row: row.update(metadataValidated=True),
+        lambda row: row["policy"].update(fuel=4097),
+        lambda row: row["reference"].update(outcome="resourceExhausted"),
+    )
+    for mutate in mutations:
+        copied = json.loads(json.dumps(value))
+        mutate(copied)
+        refused(lambda copied=copied: validate_staged_case(copied, events, "stage-positive", 0, POLICY, 0))
+    refused(lambda: validate_staged_case(value, events[2:] + events[:2], "stage-positive", 0, POLICY, 0))
+    refused(lambda: validate_staged_case(value, events[:-1], "stage-positive", 0, POLICY, 0))
+    return 9
+
+
+
+def collect_stages(binary: pathlib.Path, out: pathlib.Path, runner, report: dict) -> None:
+    print("PSC1_ARENA_NATIVE_STAGE_START pinned_source=" + SOURCE + " fuel=4096", flush=True)
+    controls_dir = out / "stage-controls"
+    controls_dir.mkdir()
+    controls = runner.run_native(binary, controls_dir, controls_dir / "stdout.txt",
+                                 controls_dir / "stderr.txt", arguments=("--stage-controls",))
+    report["stage_controls"] = controls
+    require(controls.get("status") == "process_exit" and controls.get("cleanupOk") is True
+            and controls.get("returncode") == 0, "native stage controls did not complete")
+    protocol = stage_protocol(controls_dir / "stdout.txt", True)
+    require(protocol.get("protocol") == "pskernel-arena-native-stage-controls/1"
+            and protocol.get("sourceSha") == SOURCE and protocol.get("count") == 3
+            and protocol.get("metadataValidated") is False and protocol.get("arenaMatchClaimed") is False,
+            "native stage control identity differs")
+    cases = protocol.get("cases")
+    require(isinstance(cases, list) and len(cases) == 3, "native stage controls omitted a case")
+    all_events = stage_events(controls_dir / "stderr.txt")
+    labels = ("stage-positive", "stage-invalid", "stage-resource")
+    grouped = {label: [event for event in all_events if event.get("case") == label] for label in labels}
+    require(sum(map(len, grouped.values())) == len(all_events), "unknown native stage control event")
+    require([event for label in labels for event in grouped[label]] == all_events,
+            "native stage control cases interleaved or reordered")
+    for value, label in zip(cases, labels):
+        policy = dict(POLICY, fuel=0) if label == "stage-resource" else POLICY
+        validate_staged_case(value, grouped[label], label, 0, policy, 0)
+    require([value["outcome"] for value in cases] ==
+            ["native_admission_complete", "rejectedInvalid", "resourceExhausted"]
+            and [value["firstFailingStage"] for value in cases] == [None, "type-defeq", "preflight"]
+            and cases[0].get("environmentDeclarations") == 1
+            and cases[1].get("message") == "theorem proof type mismatch"
+            and cases[2].get("resource") == "fuel"
+            and cases[2].get("message") == "resource policy declined operation before entry",
+            "native stage controls failed actual positive/invalid/resource obligations")
+    controls["protocol"] = protocol
+    controls["events"] = all_events
+    parser_count = validate_stage_parser_controls(cases[0], grouped["stage-positive"])
+    report["stage_protocol_controls"] = {"passed": True, "count": parser_count}
+    print(f"PSC1_ARENA_NATIVE_STAGE_PARSER_CONTROLS: PASS count={parser_count}", flush=True)
+    print("PSC1_ARENA_NATIVE_STAGE_CONTROLS_VALIDATED count=3", flush=True)
+    case_dir = out / "stages"
+    case_dir.mkdir()
+    measurement = runner.run_native(binary, case_dir, case_dir / "stdout.txt",
+                                    case_dir / "stderr.txt", arguments=("--stages",))
+    report["stage_probe"] = {"measurement": measurement, "diagnostics_complete": False,
+                             "metadata_validated": False, "arena_match_claimed": False}
+    require(measurement.get("status") == "process_exit" and measurement.get("cleanupOk") is True
+            and measurement.get("returncode") == 0,
+            "native theorem stage process did not complete; no first failing phase qualified")
+    value = stage_protocol(case_dir / "stdout.txt", False)
+    events = stage_events(case_dir / "stderr.txt")
+    validate_staged_case(value, events, "church-numerals", 3, POLICY)
+    baseline = report.get("case", {}).get("protocol", {})
+    require(baseline.get("acceptedRequests") == 3 and baseline.get("declarationIndex") == 3
+            and baseline.get("outcome") == "resourceExhausted" and baseline.get("resource") == "fuel"
+            and baseline.get("message") == "kernel reduction budget exhausted"
+            and value.get("outcome") == baseline["outcome"]
+            and value.get("resource") == baseline["resource"]
+            and value.get("message") == baseline["message"]
+            and value.get("firstFailingStage") is not None,
+            "native stage probe does not reproduce the unchanged baseline Church resource result")
+    report["stage_probe"].update(protocol=value, events=events, diagnostics_complete=True)
+    print("PSC1_ARENA_NATIVE_STAGE_COMPLETE " + json.dumps({
+        "source_sha": SOURCE, "declaration_index": 3, "fuel": 4096,
+        "first_failing_stage": value["firstFailingStage"],
+        "outcome": value["outcome"], "resource": value["resource"],
+        "same_as_unmodified_api": True, "kernel_qualified": False}), flush=True)
+
+
 def collect(args: argparse.Namespace, report: dict) -> None:
     source = args.source.resolve(strict=True)
     kernel = args.kernel.resolve(strict=True)
@@ -227,8 +434,8 @@ def collect(args: argparse.Namespace, report: dict) -> None:
             and exported_receipt.get("adapted_input_sha256") == ADAPTED
             and exported_receipt.get("kernel_sha256") == file_digest(kernel)
             and exported_receipt.get("original_replay_sha256") == file_digest(replay)
-            and exported_receipt.get("fixture_sha256") == file_digest(fixture)
-            and exported_receipt.get("generator_sha256") == file_digest(exporter)
+            and exported_receipt.get("fixture_sha256") == file_digest(fixture) == FIXTURE_SHA
+            and exported_receipt.get("generator_sha256") == file_digest(exporter) == EXPORTER_SHA
             and exported_receipt.get("generated_admission_invoked") is False
             and exported_receipt.get("requires_native_decode_checked") is True,
             "native fixture export receipt differs")
@@ -299,6 +506,7 @@ def collect(args: argparse.Namespace, report: dict) -> None:
         host_outcome = measurement["status"] if measurement["status"] != "process_exit" else "host_process_error"
         report["case"].update(outcome=host_outcome,
                               accepted=None, semantic_outcome_complete=False, protocol=None)
+    collect_stages(binary, out, runner, report)
     report["diagnostics_complete"] = True
     report["note"] = ("This is original V1 admission of the exact authenticated input DAG and requests. "
                       "Exported metadata comparison is not run; admission completion is not an Arena match. "
@@ -337,3 +545,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

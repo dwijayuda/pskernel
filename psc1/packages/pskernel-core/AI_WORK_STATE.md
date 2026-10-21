@@ -1,3 +1,37 @@
+# Native Church theorem-stage diagnostic checkpoint
+
+Date: 2026-10-21 (Asia/Jakarta; Actions timestamps UTC).
+Branch: research/psc1-arena-logical-20261021.
+Production source remains pinned369bee5801bd5e4476837684fad3f7e1ca8c422c.
+The containing host-only successor is NOT RUN at creation.
+
+## Staged admission experiment
+
+The exact original four-request Church fixture, exported runtime, body bytes,
+fuel4096, depth/numeral defaults and60-second/2GiB cgroup bounds remain unchanged.
+The first three requests still use unmodified psKernelV1AdmitDeclaration.
+Request3's theorem is mirrored through existing preflight, header, proposition,
+body-closed, body-universe, body-check, final type-DefEq, publication and size
+APIs, retaining each real returned checker session. Flushed entry/exit markers
+identify the first failing stage. Observed stages run before a separate reference
+API call from the same immutable input; their typed outcomes must agree exactly.
+
+The host derives structural equality solely to compare successful authoritative
+declaration histories and indexed lookup; it is outside the production kernel.
+Three actual native staged positive/invalid/zero-fuel controls and nine strict
+receipt-corruption controls are mandatory alongside all138 existing transport
+and three original native controls. Resource/host/unsupported outcomes never
+become rejection or Arena parity. No exported recursor metadata is installed.
+
+The workflow must emit PSC1_ARENA_NATIVE_STAGE_COMPLETE after exact source/input
+authentication, native compilation, unchanged reference reproduction and strict
+stage/control validation. A passing collection run would qualify failure-stage
+attribution only. It would not fix Church, qualify integration8de5a76 or prove
+global kernel soundness. Next, instrument only the reported failing semantic
+stage before considering any production algorithm change.
+
+## Preserved prior diagnostic history
+
 # Current diagnostic checkpoint — faithful native V1 replay
 
 Date: 2026-10-21 UTC.

@@ -1,4 +1,4 @@
-name: PSC1 authenticated native V1 Arena admission diagnostic
+name: PSC1 authenticated native V1 theorem-stage diagnostic
 
 on:
   workflow_dispatch:
@@ -84,7 +84,7 @@ jobs:
             | tee "$RUNNER_TEMP/arena435-native-transport-controls.log"
           grep -q 'PSC1_ARENA_REPLAY_CONTROLS: PASS count=138' \
             "$RUNNER_TEMP/arena435-native-transport-controls.log"
-      - name: Build exact native V1 and replay authentic input with enforced host bounds
+      - name: Build pinned native V1, preserve baseline, and locate first theorem failure
         shell: bash
         run: |
           set -euo pipefail
@@ -104,6 +104,9 @@ jobs:
             --authentication "$RUNNER_TEMP/arena435-native-restored/authentication.json" \
             --out "$RUNNER_TEMP/arena435-native-v1" \
             | tee "$RUNNER_TEMP/arena435-native-v1.log"
+          grep -q 'PSC1_ARENA_NATIVE_STAGE_PARSER_CONTROLS: PASS count=9' "$RUNNER_TEMP/arena435-native-v1.log"
+          grep -q 'PSC1_ARENA_NATIVE_STAGE_CONTROLS_VALIDATED count=3' "$RUNNER_TEMP/arena435-native-v1.log"
+          grep -q 'PSC1_ARENA_NATIVE_STAGE_COMPLETE ' "$RUNNER_TEMP/arena435-native-v1.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -120,3 +123,4 @@ jobs:
             psc1/scripts/pskernel-arena435-native-cgroup.py
             psc1/scripts/pskernel-arena435-resource-artifact.py
           retention-days: 30
+

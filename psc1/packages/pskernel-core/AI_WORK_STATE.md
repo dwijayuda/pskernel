@@ -9,6 +9,74 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 11:53 UTC — FullShape native and generated pass; canonical build wall-time correction
+
+At exact source `5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8`,
+[integration39578569544](https://github.com/dwijayuda/pskernel/actions/runs/39578569544)
+is terminal PASS: native119150176593 and generated119150176854. FullShape342-stage/
+108-owner comparisons pass in native and genuine generated JS, alongside all
+restored mutual280/eight-official, prior DefEq, inference, transform and resource
+controls. Native official FullShape6-positive/1-invalid fixtures and local proof
+gates pass. Generated provider24 detached protocol and8 API cases pass with
+empty PATH; native provider24 and official5 fixtures pass. All six research
+jobs in39578569496 and native correctness119150175889 pass.
+
+Native artifact12335053016 ZIP SHA-256:
+`d65b5db5420b68a91ac13f5f254fdf33b224cd87860cffdbc614222630237816`.
+Generated artifact12338155661 ZIP SHA-256:
+`fbe0715245251ea4f709835f420385e8a897316140fe3575336083592eed17d3`.
+The generated job preserved128 complete-check and24 admission observations,
+all exact assertions, readable source, declarations/maps and source manifests.
+These selected workload checks do not establish acceptable full-corpus performance.
+
+Canonical job
+[119150176408](https://github.com/dwijayuda/pskernel/actions/runs/39578569514/job/119150176408)
+is CANCELLED, not PASS. Its .lean check and complete canonical .ps check passed;
+the .ps check ran09:53:40–10:05:47UTC. JavaScript generation began10:05:48 and was
+cancelled10:19:10, approximately40m17s after job setup, at the configured40-minute
+job ceiling. The log contains no preceding semantic/compiler failure.
+Canonical execution/provider/package steps were skipped. Artifact12338811277 is
+a1378-byte incomplete evidence upload, not a usable canonical distribution.
+
+This commit changes only the canonical build-job wall-time ceiling40→75minutes
+and this receipt. It preserves every check, pinned toolchain, kernel4096 fuel,
+depth policy,60-second Arena case limit and2GiB host cap. More build time is not
+a kernel-resource result or an acceptance rule. The corrected source revision
+still needs fresh native/generated/canonical gates.
+
+| Exact source | Native | Portable .lean | Canonical .ps | Generated JS | Local proofs | Benchmark | Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8 | PASS | PASS | PASS check / execution NOT RUN after job cancellation | PASS from .lean | PASS native | PASS selected native/JS | FAIL qualification; full log pending current receipt | PASS native/.lean JS; canonical NOT RUN |
+| This CI wall-time correction | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+
+Isolated draft branch `research/psc1-pskernel-v2-staged-20261021` at
+`236766f86a2693faffebd3632b42ef5dabe96f36` contains the previously reviewed
+terminal DefEq, static guards, Quot and non-K recursor slices plus all gates.
+Its new runs39594900701/39594900700/39594900804/39594900702 are IN PROGRESS;
+none is promoted to the integration branch by this correction. The GitHub
+create-branch tool remained pending unusually long before returning; the new
+Actions run timestamps, not the draft heading time, identify actual execution.
+
+Diagnostic
+[39578237566/119149036622](https://github.com/dwijayuda/pskernel/actions/runs/39578237566/job/119149036622)
+is terminal PASS COLLECTION using production480 and harnessbd827814.
+Repeated-subproblem and church both still time out; the first observed theorem
+decline is LazyDeltaAfterStepWith, followed by actual whole V1 admission.
+That source supplies an unsupported residual continuation; associating the
+observed return with that inner branch is an inference, not an instrumented
+branch record. The newly qualified FullShape path must be measured on the
+original bodies. Repeated's earlier perfect definition also declines inference,
+consistent with missing recursor ownership but not proven by the recorded node.
+Artifact12336576558 ZIP:
+`44cc5a694e87fc2e01277a239628a3ae9a96de17d07fea1b64e12f5cd7ca556c`.
+Timeout agreement remains null; no diagnostic timing is a speedup claim.
+
+A remains fully qualified only at scoped developer source480 until canonical
+execution completes at a successor. B/C remain open, four public whole-operation
+fallback sites remain, and V1 is still the selectable default/provider. Next:
+finish fresh canonical execution, diagnose the isolated draft's first failures,
+then promote only source-qualified changes with a fresh expected-SHA update.
+
 ## 2026-10-21 09:38 UTC — native FullShape green; portable Bool negation correction
 
 Exact source `b0792ba778e92cd2067379e28c4fb72b7d0105d3` passes native integration

@@ -89,7 +89,9 @@ jobs:
 
   psc1-portability:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    # Complete .lean/.ps checks and TypeScript compilation need build wall time.
+    # Kernel fuel/depth and Arena per-case host limits are unchanged.
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - name: Install pinned Lean via elan

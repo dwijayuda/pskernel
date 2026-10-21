@@ -10,6 +10,163 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — staged fixture and proof repairs; new source requires qualification
+
+Branch: `research/psc1-pskernel-v2-staged-20261021`.
+This source update follows parent `841a5f7a129dc9647789fc8080e635d4f1eea3ac`.
+It is isolated from the terminal-green integration889 checkpoint below. At commit
+creation the changed source is **NOT RUN** for native, portable, canonical,
+generated, proof, benchmark, Arena and provider gates; no earlier PASS is inherited.
+
+The parent's [integration run39599585930](https://github.com/dwijayuda/pskernel/actions/runs/39599585930)
+ran independent native gates and exposed three distinct failures:
+
+1. Two proof-irrelevance fixtures still required an unsupported attempt after the
+   new terminal DefEq rules could correctly decide false. They now require false
+   and retain1350 existing comparisons, adding180 exact V1 result/error/owner
+   comparisons and two independently checked official-Lean negative fixtures.
+   Missing-owner and legacy-local unsupported controls remain unchanged.
+2. The ordinary recursor fixture incorrectly requested Type-valued elimination
+   from a datatype declared in `Sort u`. Its positive data box is now declared in
+   `Sort (succ u)`; validated admission must generate two recursor level
+   parameters. The original `Sort u` datatype is retained separately with two
+   negative controls: incorrect universe arity and forbidden Nat-valued motive.
+   Both require exact V1/DAG failures and native official rejection. Existing
+   public/core/owner/reducer matrices and private-node checks remain mandatory.
+3. A local admission-guard proof used the reserved binder name `exists`.
+   Renaming it `alreadyExists` leaves all18 theorem statements unchanged.
+
+This commit changes fixtures/proof syntax and requires their new native and both
+generated-route markers. It does not change the staged kernel's semantics,
+runtime trust, callback budget, error ordering, fuel4096 or host policy.
+
+Next critical path: inspect every independent native gate on this exact revision,
+then terminal authentic .lean-generated and canonical-.ps-generated jobs,
+all local proofs, provider checks and all193 Arena records. Do not promote this
+branch until its required exact-source gates pass. The four whole-operation
+fallbacks and complete replacement limitations remain documented below.
+
+## 2026-10-21 — qualified integration889 and isolated migration blockers
+
+The active integration branch remains at
+`88924063a5d9761f52a130c6a581cac6901ad407`.
+Its native, authentic portable-source, complete canonical .ps, generated
+JavaScript and provider gates are terminal PASS. This establishes **Gate A for
+the documented limited-scope V1 developer provider**, not complete V2 or full
+Lean compatibility. V1 remains the default; full-kernel DirectJS is explicitly
+UNSUPPORTED. Gate B remains incomplete and Gate C fails.
+
+### Exact-source evidence matrix
+
+| Exact source | Native integration | Portable .lean source | Canonical .ps qualification | Generated JS integration | Local proofs | Benchmark | Full Arena | Provider |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `88924063a5d9761f52a130c6a581cac6901ad407` | PASS | PASS | PASS | PASS | PASS | PASS, regressions remain | FAIL | PASS, native and both generated routes |
+| `841a5f7a129dc9647789fc8080e635d4f1eea3ac` isolated staged | FAIL | PASS | IN PROGRESS | IN PROGRESS | FAIL | PASS, native | IN PROGRESS | PASS, native only |
+| `6cbeb1b3587335545d9d3a2bdd4b99c0c2244b4a` isolated carrier | FAIL | PASS via canonical job's .lean check | IN PROGRESS | IN PROGRESS | NOT RUN | NOT RUN | IN PROGRESS | NOT RUN |
+
+The in-progress cells describe the last actual inspection before this repair
+commit. They do not inherit success from another revision; later terminal jobs
+must be inspected at their own SHA. Native correctness at staged841 passed, but
+its broader integration job failed. Carrier6cb native failed at compilation.
+
+### Qualified integration receipts
+
+- [Integration39595204321](https://github.com/dwijayuda/pskernel/actions/runs/39595204321):
+  native119205679872 and generated119205679479, both terminal PASS.
+- [Correctness39595204029](https://github.com/dwijayuda/pskernel/actions/runs/39595204029):
+  native119205678982 and canonical119205679172, both terminal PASS.
+- [Research39595203930](https://github.com/dwijayuda/pskernel/actions/runs/39595203930):
+  all six jobs terminal PASS.
+
+The authentic complete .lean closure and independently reconstructed/rechecked
+canonical .ps closure both compile through PSC1 and TypeScript7.0.2. Generated
+runtime checks execute in detached Node22 with empty PATH. Each generated route
+passes24 provider protocol cases and8 direct API cases; native passes24 protocol
+cases and the official reference checks5 fixtures with4 real batch declarations.
+Native and generated main suites retain the mutual280/eight-official matrix,
+fresh-member/budget sentinels, exact refusals and atomic publication controls.
+Focused source889 gates cover infer-only1008, proof irrelevance1350, Nat1350 with
+192 stage cases, lazy delta1800 with1024 stage/128 step cases, and FullShape342
+stage/108 owner cases. Proof-file dependencies remain within the audited
+propext/Classical.choice/Quot.sound set; no new trusted runtime path is added.
+
+| Deliverable | Immutable artifact | ZIP SHA256 |
+| --- | --- | --- |
+| Native executable/provider package | [12343257329](https://github.com/dwijayuda/pskernel/actions/runs/39595204321/artifacts/12343257329) | `a4db9ab6bae642fb8ae217ba2be17e0781683d8c68ff29846ba993dd4b837151` |
+| .lean-generated JS/provider | [12344847028](https://github.com/dwijayuda/pskernel/actions/runs/39595204321/artifacts/12344847028) | `cbf433ace671102ee86226243818dd79f35f21fc6addd2aef48219b1676520e0` |
+| Canonical .ps closure and generated provider | [12345427809](https://github.com/dwijayuda/pskernel/actions/runs/39595204029/artifacts/12345427809) | `21fd178f87813bbc63ae01762f6e6e1867b398cd2ccd4065f515c6035ebd3c49` |
+
+Per-file SHA256 receipts:
+- native executable: `e11ae0d9ec43eb75f4302997e66decccafb0e785cc57e42daa07d73c1e208c3c`;
+- .lean-generated JS: `d98ff997a6b483f9dc7e4c4a7301757bff78990b008740cbd90b70b506258814`;
+- canonical-generated JS: `fad7b2683d78cf21e904f32ae65f3b4160f01408b9183dbd8889609e41ad03ca`;
+- both generated TypeScript sources: `06432675edd28f6b7702be5eea746006cc0c0b8b6bac39d9edacccfdc3d01d44`;
+- both declaration files: `e103d21b3581180d1636874d78677fef5c84c5a376fee8f21afb4f7d614e655c`;
+- canonical source closure archive: `4511739cf74a1986943eb553f7dc58211a583e9927ccd9fcbc26a2c3de918611`.
+
+Readable source, maps and runtime dependencies are included in the packages.
+The manifests enumerate every file's hash. These are integrity receipts only;
+they do not authorize kernel judgments. See PROVIDER.md for checked batch usage.
+
+### Arena: complete accounting, distinct source revisions
+
+Source889 [Arena39595203857](https://github.com/dwijayuda/pskernel/actions/runs/39595203857)
+is terminal FAIL. Official119205678683 independently records122 accepted and71
+rejected. Generated119206620264 records all193 unique zero-based case IDs:
+170 matches =103 acceptance +59 kernel rejection +1 metadata rejection +7 transport
+rejection;2 safety agreements;20 host timeouts;1 unsupported. There are no
+classification changes from5544. Timeout IDs are23,72,78–87,90–96,98; unsupported
+ID16 is bugs/rec-missing-ih.ndjson; contract IDs69/70 remain separate.
+Generated artifact12345267214 SHA256
+`5b23499767a15976c21848e7c24fb46091e22759076ca04271e57ba8891af485`;
+official artifact12344061844 SHA256
+`efb72274a71225ddca3513fd70591ad0845329ba9166ea79a4be1b0da91431b7`.
+
+The isolated combined-slice source
+`369bee5801bd5e4476837684fad3f7e1ca8c422c`,
+[Arena39595801244](https://github.com/dwijayuda/pskernel/actions/runs/39595801244),
+also fails full qualification but records two genuine additional acceptances:
+ID79 perf/args-before-unfold and ID95 perf/repeated-subproblem. ID81 church-numerals
+changes from host timeout to kernel reduction budget exhaustion (15.381s,
+1,145,508KiB recorded peak RSS); it is still nonparity. Totals:
+172 matches =105 acceptance +59 kernel rejection +1 metadata +7 transport;
+2 contracts;17 host timeouts;1 kernel resource exhaustion;1 unsupported.
+Remaining timeout IDs:23,72,78,80,82–87,90–94,96,98. Official119207666233
+independently records122/71. These gains are not attributed to integration889
+or to any one individual slice.
+Generated artifact12346175319 SHA256
+`67e31cfd6a155f24b437a28f83680800e1c64618d5c9133daf3344ccdb8bd8e8`;
+official artifact12343308050 SHA256
+`57e1c6cc1c24873f098cf390802bd226b0c448b50b2d30f4f84c453325882e7f`.
+
+### Authentic first-decline evidence
+
+[Diagnostic39596066101](https://github.com/dwijayuda/pskernel/actions/runs/39596066101),
+job119208562177, is terminal PASS for collection only. Harness
+`d4cff45683fd4ae77e6fb0ad96b6e4998cc6bd29` pins production
+`5544bf8feffd8b6cb2aa9b9be7fe27002d8ea8a8`. Repeated-subproblem and church both
+still time out; completed-outcome agreement is null, not success. All21/14
+first-None records are printed without observation limits. Both theorem traces
+first decline at DefEqResidualAfterFullWhnf with unchanged roots:47/156 in an
+182-node arena for repeated;1790/1789 in a2031-node arena for church. This supports
+the missing terminal residual boundary. It does not identify K/structure/String
+major normalization. Artifact12345108676 SHA256
+`5994ab03a42470b96b57372e0b9c253737c89b6abd65d4df92832180297ac7a4`.
+
+### Performance and remaining gates
+
+The new source889 section in PERFORMANCE_2026-10-21.md records every measured
+workload, cold/warm latency, construction, native RSS and generated retained heap.
+Selected gains coexist with material regressions: native collision depth8 is
+8.170ms DAG versus4.033ms V1; generated binder32 admission is379.529ms DAG versus
+215.493ms V1. The historical8.57–16.17x figures are not current whole-kernel claims.
+The existing Arena memory option is V8 --max-old-space-size=2048, not an OS RSS cap.
+
+Four public whole-operation fallback sites remain. Whole-arena boundary decode,
+inductive admission/metadata construction, K and incomplete recursor-major
+normalization remain migration work. Complete replacement, full Arena conformance,
+a global soundness proof and a general performance guarantee are not claimed.
+
 ## 2026-10-21 12:27 UTC — exact theorem mismatch and independent native failure evidence
 
 At staged `641ad59c3b1bbf701b0c28d4da92386096e5e65f`, native integration

@@ -305,6 +305,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" proof-irrelevance-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-proof-irrelevance-canonical.log"
           grep -q 'PSC1_V2_DAG_JS_PROOF_IRRELEVANCE: PASS comparisons=1350' "$RUNNER_TEMP/psc1-proof-irrelevance-canonical.log"
+          grep -Fq 'PSC1_V2_DAG_JS_PROOF_IRRELEVANCE_TERMINAL: PASS comparisons=180' "$RUNNER_TEMP/psc1-proof-irrelevance-canonical.log"
       - name: Check canonical-source ordered DAG Nat DefEq in detached Node
         working-directory: psc1
         run: |
@@ -382,6 +383,7 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" recursor-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-recursor-canonical.log"
           grep -q 'PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9' "$RUNNER_TEMP/psc1-recursor-canonical.log"
+          grep -Fq 'PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2' "$RUNNER_TEMP/psc1-recursor-canonical.log"
       - name: Exercise the canonical-source checked batch provider in detached Node
         working-directory: psc1
         shell: bash

@@ -175,13 +175,26 @@ const checked=accepted(get("psKernelExprV2TryCheckStateWithFuel")(
 const oldCheck=get("psKernelCheckerCheck")(64n,base.context,oldEmpty,unchecked.term);
 must(rejected(checked)&&rejected(oldCheck)&&checked.error===oldCheck.error,
  "inference-only-cannot-authorize-checked-judgment");
-must(same(raw(64n,context,cold,nonLeft.id,nonRight.id),none),
- "non-proposition-retains-lazy-delta-fallback");
-must(same(raw(64n,context,cold,p.id,distinct.id),none),
- "unsupported-descendant-discards-whole-attempt");
+let terminalComparisons=0;
+for(const [label,left,right] of [
+ ["non-proposition-terminal-false",nonLeft,nonRight],
+ ["different-proposition-terminal-false",p,distinct]]){
+ const terminal=accepted(accepted(raw(64n,context,cold,left.id,right.id),
+  label+"-some"),label+"-result");
+ must(terminal.snd===false,label);
+ for(const fuel of [0n,1n,2n,3n,4n,5n,6n,8n,16n,64n])
+  for(const maxRecDepth of [0n,1n,2n])for(const recDepth of [0n,15n,16n]){
+   const scalar={...base.context,maxRecDepth,recDepth};
+   compare(original(fuel,scalar,oldEmpty,left.term,right.term),
+    raw(fuel,ctx(scalar),cold,left.id,right.id),label+"-fixed-resource-parity");
+   terminalComparisons++;
+  }
+}
+must(terminalComparisons===180,"terminal-comparison-matrix-count");
+console.log("PSC1_V2_DAG_JS_PROOF_IRRELEVANCE_TERMINAL: PASS comparisons=180");
 comparePublic(get("psKernelV1IsDefEq")(session,nil,S.safe,p.term,distinct.term),
  run(session,nil,S.safe,arena,list([C.isDefEq(p.id,distinct.id)])),
- "unsupported-descendant-public-negative");
+ "different-proposition-public-negative");
 must(same(get("psKernelExprV2TryDefEqWithDeclarationsFuel")(
  64n,base.context,arena,nil,p.id,q.id),none),"missing-owner-retains-fallback");
 const inferType=c=>s=>r=>get("psKernelExprV2TryInferStateWithFuel")(64n,c,s,r);

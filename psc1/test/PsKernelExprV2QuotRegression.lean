@@ -202,8 +202,8 @@ private def regression : IO Unit := do
         (psKernelExprV2TryReduceRecursorWithLocalValuesFuel fuel psKernelExprV2NoLocalValue
           checker.context (psKernelExprV2WhnfStateEmpty arena) root false)
       reducerComparisons := reducerComparisons + 1
-    let public ← expectPublic (psKernelV1Whnf session [] .safe expr)
-    require (label ++ "-checked-V1") (psKernelExprEq public expected)
+    let publicResult ← expectPublic (psKernelV1Whnf session [] .safe expr)
+    require (label ++ "-checked-V1") (psKernelExprEq publicResult expected)
     let batch ← expectPublic (psKernelV1RunDag session [] .safe arena [.whnf root])
     require (label ++ "-checked-DAG-provider")
       (match batch.replies with | [.normalized value] => psKernelExprEq value expected | _ => false)

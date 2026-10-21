@@ -1344,4 +1344,179 @@ console.log("PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS");
   console.log("PSC1_V2_DAG_JS_NESTED_OUTCOMES: PASS");
 }
 
+
+// DAG binder checking owns local type IDs, fresh names and checked-inference caches.
+{
+  let binderArena=empty;
+  const Lit=get("PsKernelLiteral");
+  const build=(kind,term,...args)=>{
+    const result=mk(binderArena,kind,...args);
+    binderArena=result.fst;
+    return {id:result.snd,term};
+  };
+  const bs=level=>build("Sort",E.sort(level),level);
+  const bv=index=>build("BVar",E.bvar(index),index);
+  const fv=n=>build("FVar",E.fvar(n),n);
+  const mv=n=>build("MVar",E.mvar(n),n);
+  const lit=value=>build("Lit",E.lit(value),value);
+  const md=(tag,body)=>build("MData",E.mdata(tag,body.term),tag,body.id);
+  const lam=(n,domain,body,bi=B.default)=>
+    build("Lam",E.lam(n,domain.term,body.term,bi),n,domain.id,body.id,bi);
+  const pi=(n,domain,body,bi=B.default)=>
+    build("Forall",E.forallE(n,domain.term,body.term,bi),n,domain.id,body.id,bi);
+  const app=(fn,arg)=>build("App",E.app(fn.term,arg.term),fn.id,arg.id);
+  const s0=bs(L.zero),s1=bs(L.succ(L.zero)),b0=bv(0n),b1=bv(1n);
+  const x=name("binder-x"),a=name("binder-a"),y=name("binder-y");
+  const fixtures=[
+    ["sort",s0],["literal-nat",lit(Lit.nat(65521n))],
+    ["literal-string",lit(Lit.str("λ-雪"))],["loose",b0],
+    ["unknown",fv(name("binder-outside"))],["metavariable",mv(name("binder-meta"))],
+    ["identity",lam(x,s1,b0)],
+    ["dependent-lambda",lam(a,s0,lam(x,b0,b0,B.instImplicit),B.implicit)],
+    ["dependent-forall",pi(a,s0,pi(x,b0,b1,B.strictImplicit))],
+    ["lambda-forall",lam(a,s0,pi(x,b0,b1),B.implicit)],
+    ["metadata-body",lam(x,s1,md(7n,b0),B.implicit)],
+    ["bad-domain",pi(x,lam(y,s1,b0),s0)],
+    ["bad-codomain",pi(x,s0,lam(y,s1,b0))],
+    ["raw-forged-fresh-name",lam(x,s1,fv(N.num(x,0n)))],
+    ["unknown-under-binder",lam(x,s1,fv(name("binder-outside")))]
+  ];
+  const emptyCheck=arena=>get("psKernelExprV2CheckStateEmpty")(arena);
+  const raw=(fuel,context,state,root)=>
+    get("psKernelExprV2TryCheckCoreWithFuel")(fuel)
+      (get("psKernelExprV2TryWhnfStateWithFuel")(fuel))
+      (get("psKernelExprV2CheckContextEmpty")(context))(state)(root);
+  const compareRaw=(original,attempted,label)=>{
+    must(attempted&&typeof attempted==="object"&&"value" in attempted,label+"-direct");
+    const result=attempted.value;
+    if(rejected(original)){
+      must(rejected(result)&&original.error===result.error,label+"-error");
+    }else{
+      const expected=accepted(original,label+"-original"),actual=accepted(result,label+"-result");
+      const graph=accepted(decode(actual.fst.whnf.arena),label+"-graph");
+      const type=accepted(decoded(graph,actual.snd),label+"-type");
+      must(exact(expected.fst,type)===true,label+"-exact-type");
+      must(expected.snd.state.nextFresh===actual.fst.nextFresh,label+"-fresh");
+    }
+  };
+  const checkEqual=(expected,actual)=>
+    exact(expected.expression,actual.expression)===true&&exact(expected.type,actual.type)===true;
+  const publicCheck=(s,node)=>
+    sameOperation(get("psKernelV1CheckExpression")(s,nil,S.safe,node.term),
+      invoke(binderArena,[C.check(node.id)],s),checkEqual);
+  for(const [label,node] of fixtures){
+    for(const fuel of [0n,1n,2n,3n,4n,8n,16n,32n,64n])for(const maxDepth of [0n,1n,2n]){
+      const s=session(fuel,maxDepth),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+      for(const recDepth of [0n,15n,16n]){
+        const context={...checker.context,recDepth};
+        compareRaw(get("psKernelSessionCheck")(fuel,{...checker,context},node.term),
+          raw(fuel,context,emptyCheck(binderArena),node.id),
+          "binder-"+label+"-"+fuel+"-"+maxDepth+"-"+recDepth);
+      }
+      must(publicCheck(s,node),"binder-public-"+label+"-"+fuel+"-"+maxDepth);
+    }
+  }
+  let domain=s0;
+  for(let tag=0n;tag<8n;tag++)domain=md(tag,domain);
+  const reused=pi(x,domain,pi(y,domain,domain));
+  const callback=lam(a,domain,pi(x,b0,b1),B.implicit);
+  for(const [label,node] of [["cache-reuse",reused],["fixed-whnf-fuel",callback]]){
+    for(const fuel of [0n,1n,7n,8n,9n,10n,11n,12n,16n,64n]){
+      const s=session(fuel),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+      compareRaw(get("psKernelSessionCheck")(fuel,checker,node.term),
+        raw(fuel,checker.context,emptyCheck(binderArena),node.id),label+"-"+fuel);
+      must(publicCheck(s,node),label+"-public-"+fuel);
+    }
+    accepted(invoke(binderArena,[C.check(node.id)],session(10n)),label+"-exact-boundary-accepts");
+  }
+  const s=session(10n,1n),checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+  const legacy=accepted(get("psKernelSessionCheck")(10n,checker,reused.term),"binder-warm-legacy");
+  const direct=accepted(accepted(raw(10n,checker.context,emptyCheck(binderArena),reused.id),
+    "binder-warm-some"),"binder-warm");
+  must(direct.fst.nextFresh===2n,"binder-fresh-counter-after-two-scopes");
+  must(sameRuntimeValue(direct.fst.whnf.publicCache,nil),"binder-scope-restores-public-cache");
+  for(const [fuel,recDepth] of [[0n,0n],[1n,0n],[1n,16n]]){
+    const context={...checker.context,recDepth};
+    compareRaw(get("psKernelSessionCheck")(fuel,{...legacy.snd,context},domain.term),
+      raw(fuel,context,direct.fst,domain.id),"binder-warm-entry-"+fuel+"-"+recDepth);
+  }
+  const cold=accepted(raw(1n,checker.context,emptyCheck(direct.fst.whnf.arena),domain.id),
+    "binder-cold-some");
+  must(rejected(cold)&&cold.error==="kernel inference budget exhausted","binder-cold-domain-fails");
+  let hidden=s1;
+  for(let tag=0n;tag<8n;tag++)hidden=md(tag+100n,hidden);
+  const scoped=lam(x,s0,hidden);
+  const scopedLegacy=accepted(get("psKernelSessionCheck")(10n,checker,scoped.term),"binder-scoped-legacy");
+  const scopedDirect=accepted(accepted(raw(10n,checker.context,emptyCheck(binderArena),scoped.id),
+    "binder-scoped-some"),"binder-scoped");
+  const hiddenEntry=accepted(get("psKernelExprV2PagedRequire")(scopedDirect.fst.whnf.arena,hidden.id),
+    "binder-hidden-entry");
+  const Option=get("Option"),none=typeof Option.none==="function"?Option.none():Option.none;
+  must(sameRuntimeValue(accepted(get("psKernelExprV2CheckedInferFind")(
+      scopedDirect.fst,hidden.id,hiddenEntry),"binder-hidden-cache"),none),
+    "binder-closed-child-cache-does-not-escape");
+  compareRaw(get("psKernelSessionCheck")(1n,scopedLegacy.snd,hidden.term),
+    raw(1n,checker.context,scopedDirect.fst,hidden.id),"binder-no-child-cache-fuel-authority");
+  const escapedName=N.num(x,0n),escaped=mk(scopedDirect.fst.whnf.arena,"FVar",escapedName);
+  const escapedState=get("psKernelExprV2CheckStateWithArena")(scopedDirect.fst,escaped.fst);
+  compareRaw(get("psKernelSessionCheck")(64n,scopedLegacy.snd,E.fvar(escapedName)),
+    raw(64n,checker.context,escapedState,escaped.snd),"binder-no-local-context-escape");
+  const levelA=N.num(name("binder-level"),0n),levelB=N.num(name("binder-level"),65521n);
+  const sortA=bs(L.param(levelA)),sortB=bs(L.param(levelB));
+  const entryA=accepted(get("psKernelExprV2PagedRequire")(binderArena,sortA.id),"binder-sort-a");
+  const entryB=accepted(get("psKernelExprV2PagedRequire")(binderArena,sortB.id),"binder-sort-b");
+  must(entryA.hash===entryB.hash,"binder-real-sort-hash-collision");
+  const levelChecker=get("psKernelKernelSessionChecker")(session(),list([levelA,levelB]),S.safe);
+  const levelLegacy=accepted(get("psKernelSessionCheck")(1n,levelChecker,sortA.term),"binder-level-legacy");
+  const levelDirect=accepted(accepted(raw(1n,levelChecker.context,emptyCheck(binderArena),sortA.id),
+    "binder-level-some"),"binder-level");
+  compareRaw(get("psKernelSessionCheck")(1n,levelLegacy.snd,sortB.term),
+    raw(1n,levelChecker.context,levelDirect.fst,sortB.id),"binder-collision-cannot-reuse-wrong-type");
+  const locals=get("psKernelLocalContextAddLocal")(levelChecker.context.localContext,x,x,sort0,B.default);
+  const outside=get("psKernelCheckerContextWithLocalContext")(levelChecker.context,locals);
+  must(sameRuntimeValue(get("psKernelExprV2TryCheckWithFuel")(64n,outside,binderArena,sortA.id),none),
+    "binder-does-not-drop-existing-legacy-locals");
+  for(const node of [lit(Lit.nat(0n)),lit(Lit.nat(65521n)),lit(Lit.str("λ-雪"))]){
+    for(const fuel of [0n,1n,2n,8n])for(const maxNatSize of [0n,7n,8n,16n]){
+      const initial=session(fuel),s={...initial,resources:{...initial.resources,maxNatSize}};
+      const checker=get("psKernelKernelSessionChecker")(s,nil,S.safe);
+      compareRaw(get("psKernelSessionCheck")(fuel,checker,node.term),
+        raw(fuel,checker.context,emptyCheck(binderArena),node.id),
+        "binder-literal-resource-"+fuel+"-"+maxNatSize);
+      must(publicCheck(s,node),"binder-literal-public-limit-"+fuel+"-"+maxNatSize);
+    }
+    const checker=get("psKernelKernelSessionChecker")(session(8n),nil,S.safe);
+    const result=accepted(accepted(raw(8n,checker.context,emptyCheck(binderArena),node.id),
+      "binder-literal-some"),"binder-literal");
+    must(sameRuntimeValue(result.fst.checkedInfer,nil),"binder-literal-cache-ineligible");
+  }
+  const unsupported=[
+    app(lam(x,s1,b0),s0),
+    build("Const",E.const(name("binder-unknown-constant"),nil),name("binder-unknown-constant"),nil),
+    build("Let",E.letE(x,sort1,sort0,E.bvar(0n),false),x,s1.id,s0.id,b0.id,false),
+    build("Proj",E.proj(name("binder-unknown-structure"),0n,sort0),
+      name("binder-unknown-structure"),0n,s0.id)
+  ];
+  for(const node of unsupported){
+    must(sameRuntimeValue(get("psKernelExprV2TryCheckWithFuel")(
+      64n,checker.context,binderArena,node.id),none),"binder-explicit-full-checker-fallback");
+    must(publicCheck(session(),node),"binder-fallback-public-parity");
+  }
+  const cheap=[
+    s0,lam(x,s1,b0),app(lam(x,s1,b0),s0),app(lam(x,s1,s0),s1),
+    app(lam(x,s1,b1),s0),app(lam(x,s1,md(7n,b0)),s0),
+    app(app(lam(x,s1,lam(y,s1,b1)),s0),s1),
+    app(app(lam(x,s1,b0),s0),s1)
+  ];
+  for(const node of cheap){
+    const result=accepted(get("psKernelExprV2CheapBetaOnCanonical")(binderArena,node.id),
+      "binder-cheap-beta");
+    const graph=accepted(decode(result.fst),"binder-cheap-graph");
+    const actual=accepted(decoded(graph,result.snd),"binder-cheap-result");
+    must(exact(get("psKernelExprCheapBetaReduce")(node.term),actual)===true,
+      "binder-exact-cheap-beta");
+  }
+}
+console.log("PSC1_V2_DAG_JS_BINDER: PASS");
+
 reportDagSmoke();

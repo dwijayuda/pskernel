@@ -10,15 +10,18 @@ Exact Lean source: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
 
 ## Current checkpoint and evidence
 
-The latest source before this numeral change is
-[9b34a9351f509a9a042664e354821545368200ba](https://github.com/dwijayuda/pskernel/commit/9b34a9351f509a9a042664e354821545368200ba).
-Its [native integration job](https://github.com/dwijayuda/pskernel/actions/runs/39517166107)
-passed the complete DAG regressions, exact Nat/projection and quick-DefEq resource
-parity, official Lean fixtures, 1,755 transformations, local proofs and complete
-native benchmarks. Authentic PSC1 source checking has passed; generated and
-canonical executable qualification is still running. The parser failure at
-Nat.lean:46 in f56d/58fab is corrected by a typed local constructor name.
-Do not substitute earlier successful jobs for final-source qualification.
+The latest complete integration/canonical checkpoint is
+[9b34a9351f509a9a042664e354821545368200ba](https://github.com/dwijayuda/pskernel/commit/9b34a9351f509a9a042664e354821545368200ba):
+[integration39517166107](https://github.com/dwijayuda/pskernel/actions/runs/39517166107)
+and [original correctness/canonical39517166049](https://github.com/dwijayuda/pskernel/actions/runs/39517166049)
+both passed. Actual canonical reconstruction derives103 modules and1,259
+declarations; authentic .lean/.ps checking, TS7.0.2, Node22.23.3, declarations/maps
+and detached canonical DAG runtime all pass. The integration executable passes
+128 correctness-guarded ABBA observations and33 whole-executable operations.
+Native includes official Lean fixtures,1,755 transformation cases and local
+metadata/cache lemmas. These passes do not establish full Arena qualification
+or a complete DAG-native checker. Newer numeral, delta, reporting and binder
+changes require their own final-source evidence.
 
 The preceding stateful source
 [463d956f40f360960dd78ad8b8d8b3749a80c03f](https://github.com/dwijayuda/pskernel/commit/463d956f40f360960dd78ad8b8d8b3749a80c03f)
@@ -124,7 +127,67 @@ kernel admission and metadata phases; timeout reports retain the last
 source-hash-bound snapshot. A snapshot never supplies an acceptance/rejection
 verdict. All193 cases, the60-second generated host limit,2GiB heap and kernel
 fuel4096 remain unchanged. The previous full gate is still failing until the new
-complete report is observed.
+complete report is observed. The authenticated input inspection passed for all193
+with zero issues at [39518988495](https://github.com/dwijayuda/pskernel/actions/runs/39518988495).
+It found exactly two noncanonical all records: opaque Lean.Syntax.getHeadInfo?
+and getTailPos? with their private helper names. Only init-prelude has a numeral
+above63 bits (2^64); none of the24 previously timed-out cases does. Their timeout
+causes cannot be assigned to large exported numeral size checking.
+
+### Direct binder checking — pending this commit's CI
+
+The checked DAG path now infers Sort, FVar, Nat/String literal, metadata, lambda
+and dependent forall types in the owning arena. Its local context stores type
+IDs; its state owns a fresh-name counter, checked-inference cache and the existing
+WHNF state. Binder closure restores every implemented semantic cache to the
+parent scope while retaining the append-only child arena and monotone fresh
+counter. Free-variable-sensitive judgments remain cache-ineligible.
+
+Inference recursion receives predecessor fuel while type exposure uses the
+original top-level WHNF fuel. Returned lambda types use the exact limited
+CheapBeta rule, then abstract the fresh local and build a DAG forall. Public
+replies decode only newly appended output nodes against the existing once-per-
+batch decoder. Unsupported applications/constants/lets/projections still
+request the complete original checker. No incomplete result or speculative
+state is published when fallback is required.
+
+Native/generated tests require direct results for dependent binders, negative
+sort judgments, exact fuel/depth boundaries, fixed callback fuel, fresh-name
+restoration, warmed cache entry guards, child-cache/local-context isolation,
+real structural hash collisions and literal-size errors. Eight local state/
+guard lemmas and official Lean dependent-lambda/forall comparisons are included.
+The raw fresh-name collision fixture preserves the original checking API
+behavior; declaration admission separately rejects free variables. Forgeable
+checking receipts still never authorize admission.
+
+### Current measured complete-operation performance
+
+At9b34, generated checked-operation warm totals include public graph validation,
+decode and full checking. Admission/input construction are separately recorded.
+Two same-run observations per variant, unchanged fuel4096, fresh semantic caches:
+
+| Operation | Depth / calls | Original ms | DAG ms |
+| --- | --- | --- | --- |
+| Paired metadata DefEq | 32 /4 |467.231–481.941|47.092–47.365|
+| Paired metadata DefEq | 96 /2 |602.835–606.148|62.628–68.473|
+| Checked Nat.succ WHNF |8 /3|538.528–544.487|141.596–142.228|
+| Checked Nat.succ WHNF |32 /1|669.065–696.303|166.789–183.993|
+| Checked Nat.succ WHNF |96 /1|2718.381–2853.210|869.559–896.915|
+| Checked projection WHNF |8 /3|543.501–576.560|347.479–353.849|
+| Checked projection WHNF |32 /1|194.231–198.017|137.053–139.114|
+| Checked projection WHNF |96 /1|249.405–262.843|207.667–211.440|
+
+Native paired metadata at depth192/20 calls measured20.334–20.486ms original,
+1.435–1.451ms DAG and2.603–2.623ms official Lean. Official Lean has its own internal
+resource policy; the PSKernel fuel4096 label applies only to PSKernel variants.
+
+Memory is not yet qualified across workloads. Unique128 RSS varied from
+264244–404340KiB original versus246680–246760KiB DAG, but retained deltas were
+31448–35600 versus68512–75920bytes. Collision128 peak and retained results varied
+substantially, including a1,037,320-byte DAG retained delta. The preceding463
+run also showed a DAG unique128 RSS regression. Separate CPU and sampled
+allocation diagnostics are needed; no cause or blanket memory improvement is
+claimed. Full smoke runs changed coverage and are not matched memory workloads.
 
 ## Objective and execution constraints
 
@@ -152,11 +215,11 @@ cache. Promoted Research module names forward to the production owners.
 `psKernelV1RunDag` is the public untrusted-input boundary. It validates one arena
 and decodes each unique node once for an ordered command batch. Input tables can
 be constructed directly through the production paged smart constructors.
-Terminal/metadata inference, checked syntactic DefEq, and qualified WHNF slices
+Sort/literal/metadata/binder inference, checked quick DefEq, and qualified WHNF slices
 read DAG entries directly. All structural shortcuts resolve hash collisions.
 Both terms still undergo complete checking before the DefEq shortcut.
 
-**General inference, full DefEq, environment/local declaration expression fields,
+**Application/let/projection inference, general constant type ownership, full DefEq, environment/local declaration expression fields,
 external-session delta/recursor/String-constructor behavior and declaration admission still use
 the original recursive expression internally.** This once-per-batch decoder and
 the complete fallback are transitional. The default original V1 API also remains.

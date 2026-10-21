@@ -1,6 +1,7 @@
 import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 import Ps.KernelCore.Checker.ExprV2.Terminal
+import Ps.KernelCore.Checker.ExprV2.Check
 import Ps.KernelCore.Checker.ExprV2.Whnf
 import Ps.KernelCore.Checker.ExprV2.DefEq
 
@@ -9,13 +10,13 @@ Checked DAG ingress for the complete KernelContract-v1 implementation.
 
 One call owns one untrusted graph and one ordered command batch. It replays
 the graph once and decodes each node once, preserving physical sharing.
-Terminal checking and terminal/metadata/beta/zeta/Nat/projection WHNF read DAG nodes directly with the original entry
+Sort/literal/binder checking and terminal/metadata/beta/zeta/Nat/projection WHNF read DAG nodes directly with the original entry
 fuel/depth/rule ordering. Operation-owned core/public caches preserve function-position normalization,
 constructor projections and the complete Nat post-core pipeline; no cache escapes a public WHNF call.
 Successful admission records same-batch definition body IDs, allowing direct universe
 substitution and delta without importing an environment body. The index never escapes
 its validated batch; definitions already in an external session remain fallback. Collision-safe DAG equality, sort universe equality, literals and paired metadata supply
-DefEq's definitive quick rules only after both complete checks. Other composite checking, reductions, DefEq
+DefEq's definitive quick rules only after both complete checks. Unsupported checking, reductions, DefEq
 and admission use the complete existing kernel with unchanged resources.
 
 psKernelV1RunDag is the public untrusted-input boundary. The portable source
@@ -26,8 +27,8 @@ receipts, are forgeable observations and never authorize proof admission.
 Every declaration is still rechecked by V1. No equality memo survives this
 boundary. A sealed constructor API remains a source-profile limitation.
 
-This is a partial representation migration. Terminal inference, supported WHNF slices, and the
-checked definitive quick DefEq rules are DAG-native. Other composite checking, reduction,
+This is a partial representation migration. Sort/literal/metadata/lambda/forall inference, supported WHNF slices, and the
+checked definitive quick DefEq rules are DAG-native. Applications, general constant types, lets/projections, reduction,
 DefEq and admission retain PsKernelExpr internally.
 Eliminating that fallback and adapter remains required for completion.
 -/
@@ -51,7 +52,7 @@ def psKernelDagRequire
   | Except.error error => Except.error (PsKernelError.rejectedInvalid error)
   | Except.ok expr => Except.ok expr
 
-def psKernelDagCheckExpression
+def psKernelDagCheckTerminalOrOriginal
     (session : PsKernelKernelSession)
     (levelParams : List PsKernelName)
     (safety : PsKernelDefinitionSafety)
@@ -68,6 +69,33 @@ def psKernelDagCheckExpression
       | Except.ok type =>
           Except.ok (PsKernelCheckedExpression.mk expr type)
 
+def psKernelDagCheckExpression
+    (session : PsKernelKernelSession)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (built : PsKernelExprV2Decoded)
+    (root : Nat) (expr : PsKernelExpr) :
+    Except PsKernelError PsKernelCheckedExpression :=
+  let checker := psKernelKernelSessionChecker session levelParams safety;
+  match psKernelExprV2TryCheckWithFuel
+      session.resources.fuel checker.context arena root with
+  | Option.none =>
+      psKernelDagCheckTerminalOrOriginal session levelParams safety arena root expr
+  | Option.some attempted =>
+      match attempted with
+      | Except.error error => Except.error (psKernelErrorFromMessage error)
+      | Except.ok inferred =>
+          let next := Prod.fst inferred;
+          match psKernelExprV2DecodeCanonicalFuel
+              (Nat.succ (Nat.sub next.size built.size)) next built built.size with
+          | Except.error error => Except.error (psKernelErrorFromMessage error)
+          | Except.ok extended =>
+              match psKernelDagRequire extended (Prod.snd inferred) with
+              | Except.error error => Except.error error
+              | Except.ok type =>
+                  Except.ok (PsKernelCheckedExpression.mk expr type)
+
 def psKernelDagWhnfExpression
     (session : PsKernelKernelSession)
     (levelParams : List PsKernelName)
@@ -77,7 +105,7 @@ def psKernelDagWhnfExpression
     (definitions : List PsKernelExprV2DefinitionRef)
     (root : Nat) (expr : PsKernelExpr) :
     Except PsKernelError PsKernelExpr :=
-  match psKernelDagCheckExpression session levelParams safety arena root expr with
+  match psKernelDagCheckExpression session levelParams safety arena built root expr with
   | Except.error error => Except.error error
   | Except.ok _ =>
       let checker := psKernelKernelSessionChecker session levelParams safety;
@@ -102,12 +130,13 @@ def psKernelDagIsDefEq
     (levelParams : List PsKernelName)
     (safety : PsKernelDefinitionSafety)
     (arena : PsKernelExprV2PagedArena)
+    (built : PsKernelExprV2Decoded)
     (left right : Nat) (a b : PsKernelExpr) :
     Except PsKernelError Bool :=
-  match psKernelDagCheckExpression session levelParams safety arena left a with
+  match psKernelDagCheckExpression session levelParams safety arena built left a with
   | Except.error error => Except.error error
   | Except.ok _ =>
-      match psKernelDagCheckExpression session levelParams safety arena right b with
+      match psKernelDagCheckExpression session levelParams safety arena built right b with
       | Except.error error => Except.error error
       | Except.ok _ =>
           let checker := psKernelKernelSessionChecker session levelParams safety;
@@ -136,7 +165,7 @@ def psKernelDagRunCommand
       match psKernelDagRequire built root with
       | Except.error error => Except.error error
       | Except.ok expr =>
-          match psKernelDagCheckExpression session levelParams safety arena root expr with
+          match psKernelDagCheckExpression session levelParams safety arena built root expr with
           | Except.error error => Except.error error
           | Except.ok value =>
               Except.ok (Prod.mk (PsKernelDagReply.checked value) execution)
@@ -156,7 +185,7 @@ def psKernelDagRunCommand
           match psKernelDagRequire built right with
           | Except.error error => Except.error error
           | Except.ok b =>
-              match psKernelDagIsDefEq session levelParams safety arena left right a b with
+              match psKernelDagIsDefEq session levelParams safety arena built left right a b with
               | Except.error error => Except.error error
               | Except.ok value =>
                   Except.ok (Prod.mk (PsKernelDagReply.equal value) execution)

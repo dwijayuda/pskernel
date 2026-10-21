@@ -1,3 +1,4 @@
+import Ps.KernelCore.Checker.ExprV2.Check
 import Lean
 import Ps.KernelCore.API.Dag
 import Ps.KernelCore.Research.ExprV2PagedImport
@@ -1332,6 +1333,231 @@ private def nestedDiagnosticClassification : IO Unit := do
     ((psKernelResourceMessage "nested restored validation: kernel reduction budget exhausted").isNone)
   IO.println "PSC1_V2_DAG_NATIVE_NESTED_OUTCOMES: PASS"
 
+private def binderRaw
+    (fuel : Nat) (context : PsKernelCheckerContext)
+    (state : PsKernelExprV2CheckState) (root : Nat) :=
+  psKernelExprV2TryCheckCoreWithFuel fuel
+    (psKernelExprV2TryWhnfStateWithFuel fuel)
+    (psKernelExprV2CheckContextEmpty context) state root
+
+private def compareBinderRaw (label : String)
+    (legacy : Except String (Prod PsKernelExpr PsKernelCheckerSession))
+    (attempted : Option (Except String (Prod PsKernelExprV2CheckState Nat))) : IO Unit := do
+  match legacy, attempted with
+  | .error left, some (.error right) => require (label ++ "-error") (left == right)
+  | .ok left, some (.ok right) =>
+      let graph ← expect (psKernelExprV2DecodeChecked right.fst.whnf.arena)
+      let type ← expect (psKernelExprV2DecodedRequire graph right.snd)
+      require (label ++ "-type") (psKernelExprEqual left.fst type)
+      require (label ++ "-fresh") (left.snd.state.nextFresh == right.fst.nextFresh)
+  | _, _ => throw (IO.userError ("PSC1_V2_BINDER_MISSING_DIRECT_RESULT " ++ label))
+
+private def binderParity : IO Unit := do
+  let x := nm "binder-x"
+  let a := nm "binder-a"
+  let y := nm "binder-y"
+  let fixtures : List (String × PsKernelExpr) := [
+    ("sort", sort0),
+    ("literal-nat", .lit (.nat 65521)),
+    ("literal-string", .lit (.str "λ-雪")),
+    ("loose", .bvar 0),
+    ("unknown", .fvar (nm "binder-outside")),
+    ("metavariable", .mvar (nm "binder-meta")),
+    ("identity", .lam x sort1 (.bvar 0) .default),
+    ("dependent-lambda", .lam a sort0
+      (.lam x (.bvar 0) (.bvar 0) .instImplicit) .implicit),
+    ("dependent-forall", .forallE a sort0
+      (.forallE x (.bvar 0) (.bvar 1) .strictImplicit) .default),
+    ("lambda-forall", .lam a sort0
+      (.forallE x (.bvar 0) (.bvar 1) .default) .implicit),
+    ("metadata-body", .lam x sort1 (.mdata 7 (.bvar 0)) .implicit),
+    ("bad-domain", .forallE x (.lam y sort1 (.bvar 0) .default) sort0 .default),
+    ("bad-codomain", .forallE x sort0 (.lam y sort1 (.bvar 0) .default) .default),
+    ("raw-forged-fresh-name", .lam x sort1 (.fvar (.num x 0)) .default),
+    ("unknown-under-binder", .lam x sort1 (.fvar (nm "binder-outside")) .default)]
+  for (label, term) in fixtures do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,3,4,8,16,32,64] do
+      for maxDepth in [0,1,2] do
+        let session ← fresh fuel maxDepth
+        let checker := psKernelKernelSessionChecker session [] .safe
+        for recDepth in [0,15,16] do
+          let context := { checker.context with recDepth := recDepth }
+          compareBinderRaw ("binder-" ++ label)
+            (psKernelSessionCheck fuel { checker with context := context } term)
+            (binderRaw fuel context (psKernelExprV2CheckStateEmpty arena) root)
+        require ("binder-public-" ++ label)
+          (sameCheck
+            (psKernelV1CheckExpression session [] .safe term)
+            (oneCheck session arena root))
+  let mut domain := sort0
+  for tag in [:8] do domain := .mdata tag domain
+  let reused := PsKernelExpr.forallE x domain
+    (.forallE y domain domain .default) .default
+  let callback := PsKernelExpr.lam a domain
+    (.forallE x (.bvar 0) (.bvar 1) .default) .implicit
+  for (label, term) in [("cache-reuse", reused), ("fixed-whnf-fuel", callback)] do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,7,8,9,10,11,12,16,64] do
+      let session ← fresh fuel
+      let checker := psKernelKernelSessionChecker session [] .safe
+      compareBinderRaw label (psKernelSessionCheck fuel checker term)
+        (binderRaw fuel checker.context (psKernelExprV2CheckStateEmpty arena) root)
+      require (label ++ "-public")
+        (sameCheck (psKernelV1CheckExpression session [] .safe term)
+          (oneCheck session arena root))
+    let session ← fresh 10
+    require (label ++ "-exact-boundary-accepts")
+      (match psKernelV1RunDag session [] .safe arena [.check root] with
+       | .ok _ => true | _ => false)
+  let (initial, reusedId) ← expect (psKernelExprV2PagedImportChecked reused)
+  let (arena, domainId) ← expect (psKernelExprV2PagedImportIntoChecked initial domain)
+  let session ← fresh 10 1
+  let checker := psKernelKernelSessionChecker session [] .safe
+  let legacy ← expect (psKernelSessionCheck 10 checker reused)
+  let direct ←
+    match binderRaw 10 checker.context (psKernelExprV2CheckStateEmpty arena) reusedId with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_BINDER_CACHE_FALLBACK")
+  require "binder-fresh-counter-after-two-scopes" (direct.fst.nextFresh == 2)
+  require "binder-scope-restores-public-whnf-cache"
+    (match direct.fst.whnf.publicCache with | [] => true | _ => false)
+  for (fuel, recDepth) in [(0,0), (1,0), (1,16)] do
+    let context := { checker.context with recDepth := recDepth }
+    compareBinderRaw "binder-warm-cache-entry-guards"
+      (psKernelSessionCheck fuel { legacy.snd with context := context } domain)
+      (binderRaw fuel context direct.fst domainId)
+  require "binder-cold-domain-fuel-one-fails"
+    (match binderRaw 1 checker.context
+        (psKernelExprV2CheckStateEmpty direct.fst.whnf.arena) domainId with
+     | some (.error error) => error == "kernel inference budget exhausted" | _ => false)
+  let mut hiddenBody := sort1
+  for tag in [:8] do hiddenBody := .mdata (tag + 100) hiddenBody
+  let scopedTerm := PsKernelExpr.lam x sort0 hiddenBody .default
+  let (initial, scopedId) ← expect (psKernelExprV2PagedImportChecked scopedTerm)
+  let (arena, hiddenId) ← expect (psKernelExprV2PagedImportIntoChecked initial hiddenBody)
+  let scopedLegacy ← expect (psKernelSessionCheck 10 checker scopedTerm)
+  let scopedDirect ←
+    match binderRaw 10 checker.context (psKernelExprV2CheckStateEmpty arena) scopedId with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_BINDER_SCOPE_FALLBACK")
+  let hiddenEntry ← expect (psKernelExprV2PagedRequire scopedDirect.fst.whnf.arena hiddenId)
+  let hiddenCached ← expect (psKernelExprV2CheckedInferFind scopedDirect.fst hiddenId hiddenEntry)
+  require "binder-closed-child-cache-does-not-escape"
+    (match hiddenCached with | none => true | _ => false)
+  compareBinderRaw "binder-child-cache-cannot-change-parent-fuel"
+    (psKernelSessionCheck 1 scopedLegacy.snd hiddenBody)
+    (binderRaw 1 checker.context scopedDirect.fst hiddenId)
+  let escapedName := PsKernelName.num x 0
+  let (escapedArena, escapedId) ← expect
+    (psKernelExprV2PagedMkFVar scopedDirect.fst.whnf.arena escapedName)
+  compareBinderRaw "binder-local-context-does-not-escape"
+    (psKernelSessionCheck 64 scopedLegacy.snd (.fvar escapedName))
+    (binderRaw 64 checker.context
+      (psKernelExprV2CheckStateWithArena scopedDirect.fst escapedArena) escapedId)
+  let oneName := PsKernelName.num (nm "binder-level") 0
+  let twoName := PsKernelName.num (nm "binder-level") 65521
+  let leftTerm := PsKernelExpr.sort (.param oneName)
+  let rightTerm := PsKernelExpr.sort (.param twoName)
+  let (arena, leftId) ← expect (psKernelExprV2PagedImportChecked leftTerm)
+  let (arena, rightId) ← expect (psKernelExprV2PagedImportIntoChecked arena rightTerm)
+  let leftEntry ← expect (psKernelExprV2PagedRequire arena leftId)
+  let rightEntry ← expect (psKernelExprV2PagedRequire arena rightId)
+  require "binder-real-sort-hash-collision" (leftEntry.hash == rightEntry.hash)
+  let session ← fresh
+  let checker := psKernelKernelSessionChecker session [oneName,twoName] .safe
+  let legacy ← expect (psKernelSessionCheck 1 checker leftTerm)
+  let direct ←
+    match binderRaw 1 checker.context (psKernelExprV2CheckStateEmpty arena) leftId with
+    | some result => expect result
+    | none => throw (IO.userError "PSC1_V2_BINDER_SORT_FALLBACK")
+  compareBinderRaw "binder-hash-collision-does-not-reuse-wrong-type"
+    (psKernelSessionCheck 1 legacy.snd rightTerm)
+    (binderRaw 1 checker.context direct.fst rightId)
+  let locals := psKernelLocalContextAddLocal checker.context.localContext
+    x x sort0 .default
+  let outside := psKernelCheckerContextWithLocalContext checker.context locals
+  require "binder-does-not-drop-existing-legacy-locals"
+    (match psKernelExprV2TryCheckWithFuel 64 outside arena leftId with
+     | none => true | _ => false)
+  for term in [PsKernelExpr.lit (.nat 0), .lit (.nat 65521), .lit (.str "λ-雪")] do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    for fuel in [0,1,2,8] do
+      for limit in [0,7,8,16] do
+        let initial ← fresh fuel
+        let session := { initial with resources := { initial.resources with maxNatSize := limit } }
+        let checker := psKernelKernelSessionChecker session [] .safe
+        compareBinderRaw "binder-literal-resource-order"
+          (psKernelSessionCheck fuel checker term)
+          (binderRaw fuel checker.context (psKernelExprV2CheckStateEmpty arena) root)
+        require "binder-literal-public-resource-parity"
+          (sameCheck (psKernelV1CheckExpression session [] .safe term)
+            (oneCheck session arena root))
+    let session ← fresh 8
+    let checker := psKernelKernelSessionChecker session [] .safe
+    require "binder-literal-does-not-publish-inference-cache"
+      (match binderRaw 8 checker.context (psKernelExprV2CheckStateEmpty arena) root with
+       | some (.ok result) =>
+           match result.fst.checkedInfer with | [] => true | _ => false
+       | _ => false)
+  let unsupported : List PsKernelExpr := [
+    .app (.lam x sort1 (.bvar 0) .default) sort0,
+    .const (nm "binder-unknown-constant") [],
+    .letE x sort1 sort0 (.bvar 0) false,
+    .proj (nm "binder-unknown-structure") 0 sort0]
+  for term in unsupported do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    require "binder-explicit-complete-checker-fallback"
+      (match psKernelExprV2TryCheckWithFuel 64 checker.context arena root with
+       | none => true | _ => false)
+    require "binder-fallback-public-parity"
+      (sameCheck (psKernelV1CheckExpression session [] .safe term)
+        (oneCheck session arena root))
+  let cheapFixtures : List PsKernelExpr := [
+    sort0, .lam x sort1 (.bvar 0) .default,
+    .app (.lam x sort1 (.bvar 0) .default) sort0,
+    .app (.lam x sort1 sort0 .default) sort1,
+    .app (.lam x sort1 (.bvar 1) .default) sort0,
+    .app (.lam x sort1 (.mdata 7 (.bvar 0)) .default) sort0,
+    .app (.app (.lam x sort1 (.lam y sort1 (.bvar 1) .default) .default)
+      sort0) sort1,
+    .app (.app (.lam x sort1 (.bvar 0) .default) sort0) sort1]
+  for term in cheapFixtures do
+    let (arena, root) ← expect (psKernelExprV2PagedImportChecked term)
+    let (next, result) ← expect (psKernelExprV2CheapBetaOnCanonical arena root)
+    let decoded ← expect (psKernelExprV2DecodeChecked next)
+    let actual ← expect (psKernelExprV2DecodedRequire decoded result)
+    require "binder-exact-cheap-beta"
+      (psKernelExprEqual (psKernelExprCheapBetaReduce term) actual)
+  let env ← Lean.mkEmptyEnvironment
+  let la := Lean.Name.str .anonymous "binder-a"
+  let lx := Lean.Name.str .anonymous "binder-x"
+  let officialTerm := Lean.Expr.lam la (.sort .zero)
+    (.lam lx (.bvar 0) (.bvar 0) .default) .implicit
+  let officialType := Lean.Expr.forallE la (.sort .zero)
+    (.forallE lx (.bvar 0) (.bvar 1) .default) .implicit
+  let independentTerm := PsKernelExpr.lam a sort0
+    (.lam x (.bvar 0) (.bvar 0) .default) .implicit
+  let independentType := PsKernelExpr.forallE a sort0
+    (.forallE x (.bvar 0) (.bvar 1) .default) .implicit
+  let (arena, root) ← expect (psKernelExprV2PagedImportChecked independentTerm)
+  let session ← fresh
+  let actual ← expectPublic (oneCheck session arena root)
+  require "binder-official-dependent-lambda"
+    (match Lean.Kernel.check env {} officialTerm, checkReply actual with
+     | .ok type, some checked =>
+         Lean.Expr.equal type officialType && psKernelExprEqual checked.type independentType
+     | _, _ => false)
+  let (arena, root) ← expect (psKernelExprV2PagedImportChecked independentType)
+  let actual ← expectPublic (oneCheck session arena root)
+  require "binder-official-dependent-forall"
+    (match Lean.Kernel.check env {} officialType, checkReply actual with
+     | .ok type, some checked =>
+         Lean.Expr.equal type (.sort .zero) && psKernelExprEqual checked.type sort0
+     | _, _ => false)
+  IO.println "PSC1_V2_DAG_OFFICIAL_BINDER: PASS"
+  IO.println "PSC1_V2_DAG_BINDER: PASS"
+
 def main : IO Unit := do
   errorComparatorRegression
   nestedDiagnosticClassification
@@ -1348,5 +1574,6 @@ def main : IO Unit := do
   hostileInputs
   admissions
   deltaBatchParity
+  binderParity
   officialComparison
   IO.println "PSC1_V2_DAG_REGRESSION: PASS"

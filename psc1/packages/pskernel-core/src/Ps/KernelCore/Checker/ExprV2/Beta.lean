@@ -65,3 +65,38 @@ def psKernelExprV2BetaSpineApplyOnCanonical
   | Except.ok opened =>
       psKernelExprV2TransformApplyArgsOnCanonical
         plan.remaining (Prod.fst opened) (Prod.snd opened)
+
+/-
+Exact CheapBetaReduce rule used when closing an inferred lambda type.
+It consumes a syntactic lambda spine, but substitutes only a bare selected
+bound variable or a body with no loose bound variables. Other bodies retain
+the original expression; this is deliberately weaker than general beta.
+-/
+def psKernelExprV2CheapBetaOnCanonical
+    (arena : PsKernelExprV2PagedArena) (root : Nat) :
+    Except String (Prod PsKernelExprV2PagedArena Nat) :=
+  match psKernelExprV2TransformAppSpineOnCanonical arena root with
+  | Except.error error => Except.error error
+  | Except.ok spine =>
+      match psKernelExprV2BetaSpinePlanOnCanonical
+          arena (Prod.fst spine) (Prod.snd spine) with
+      | Except.error error => Except.error error
+      | Except.ok planned =>
+          match planned with
+          | Option.none => Except.ok (Prod.mk arena root)
+          | Option.some plan =>
+              match psKernelExprV2PagedRequire arena plan.body with
+              | Except.error error => Except.error error
+              | Except.ok body =>
+                  if Nat.beq body.looseRange 0 then
+                    psKernelExprV2TransformApplyArgsOnCanonical
+                      plan.remaining arena plan.body
+                  else
+                    match body.node with
+                    | PsKernelExprV2Node.bvar index =>
+                        match psKernelExprV2TransformNatGet plan.selectedRev index with
+                        | Option.none => Except.ok (Prod.mk arena root)
+                        | Option.some selected =>
+                            psKernelExprV2TransformApplyArgsOnCanonical
+                              plan.remaining arena selected
+                    | _ => Except.ok (Prod.mk arena root)

@@ -1,3 +1,4 @@
+import Ps.KernelCore.Checker.ExprV2.Check
 import Init.Data.Nat.MinMax
 import Ps.KernelCore.Checker.State
 import Ps.KernelCore.Checker.ExprV2.WhnfState
@@ -148,6 +149,67 @@ theorem dag_whnf_arena_update_preserves_definition_references
     (psKernelExprV2WhnfStateWithArena state arena).definitions = state.definitions := by
   rfl
 
+theorem dag_check_scope_retains_child_arena
+    (parent child : PsKernelExprV2CheckState) :
+    (psKernelExprV2CheckStateExitLocalScope parent child).whnf.arena = child.whnf.arena := by
+  rfl
+
+theorem dag_check_scope_restores_semantic_caches
+    (parent child : PsKernelExprV2CheckState) :
+    (psKernelExprV2CheckStateExitLocalScope parent child).checkedInfer = parent.checkedInfer ∧
+    (psKernelExprV2CheckStateExitLocalScope parent child).whnf.coreCache = parent.whnf.coreCache ∧
+    (psKernelExprV2CheckStateExitLocalScope parent child).whnf.publicCache = parent.whnf.publicCache := by
+  constructor
+  · rfl
+  · constructor <;> rfl
+
+theorem dag_check_scope_counter_exact
+    (parent child : PsKernelExprV2CheckState) :
+    (psKernelExprV2CheckStateExitLocalScope parent child).nextFresh =
+      Nat.max parent.nextFresh child.nextFresh := by
+  simp only [psKernelExprV2CheckStateExitLocalScope, stateNatMax_eq]
+
+theorem dag_check_starts_without_inference_cache (arena : PsKernelExprV2PagedArena) :
+    (psKernelExprV2CheckStateEmpty arena).checkedInfer = List.nil := by
+  rfl
+
+theorem dag_check_fvar_flag_prevents_lookup
+    (state : PsKernelExprV2CheckState) (source : Nat)
+    (entry : PsKernelExprV2Entry) (flag : entry.hasFVar = true) :
+    psKernelExprV2CheckedInferFind state source entry = Except.ok Option.none := by
+  simp [psKernelExprV2CheckedInferFind, psKernelExprV2CheckedInferEligible, flag]
+
+theorem dag_check_fvar_flag_prevents_publication
+    (state : PsKernelExprV2CheckState) (source result : Nat)
+    (entry : PsKernelExprV2Entry)
+    (found : psKernelExprV2PagedRequire state.whnf.arena source = Except.ok entry)
+    (flag : entry.hasFVar = true) :
+    psKernelExprV2CheckedInferFinish state source result =
+      Except.ok (Prod.mk state result) := by
+  simp [psKernelExprV2CheckedInferFinish, psKernelExprV2CheckedInferEligible, found, flag]
+
+theorem dag_check_zero_fuel_precedes_cache
+    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState) (root : Nat) :
+    psKernelExprV2TryCheckCoreWithFuel 0 whnf context state root =
+      Option.some (Except.error "kernel inference budget exhausted") := by
+  rfl
+
+theorem dag_check_depth_error_precedes_cached_judgment
+    (fuel : Nat)
+    (whnf : PsKernelCheckerContext -> PsKernelExprV2WhnfState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2WhnfState Nat)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (root cached : Nat) (entry : PsKernelExprV2Entry) (error : String)
+    (found : psKernelExprV2PagedRequire state.whnf.arena root = Except.ok entry)
+    (hit : psKernelExprV2CheckedInferFind state root entry = Except.ok (Option.some cached))
+    (guard : psKernelCheckerContextEnterRecDepth context.scalar = Except.error error) :
+    psKernelExprV2TryCheckCoreWithFuel (Nat.succ fuel) whnf context state root =
+      Option.some (Except.error error) := by
+  simp [psKernelExprV2TryCheckCoreWithFuel, psKernelExprV2CheckContextEnterRecDepth,
+    found, hit, guard]
+
 end PsKernelCacheScopeProofs
 
 #print axioms PsKernelCacheScopeProofs.exit_scope_restores_all_caches
@@ -175,3 +237,12 @@ end PsKernelCacheScopeProofs
 #print axioms PsKernelCacheScopeProofs.dag_whnf_definition_initialization_has_no_core_cache
 #print axioms PsKernelCacheScopeProofs.dag_whnf_definition_initialization_has_no_public_cache
 #print axioms PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_definition_references
+
+#print axioms PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena
+#print axioms PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches
+#print axioms PsKernelCacheScopeProofs.dag_check_scope_counter_exact
+#print axioms PsKernelCacheScopeProofs.dag_check_starts_without_inference_cache
+#print axioms PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_lookup
+#print axioms PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication
+#print axioms PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache
+#print axioms PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment

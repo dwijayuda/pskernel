@@ -174,7 +174,7 @@ if(process.argv[2]==="--worker"){
  }catch(error){process.stderr.write(String(error?.stack??error)+"\n");process.exitCode=1;}
 }else{
  const [candidateArg,baselineArg,outputArg,candidateSha,baselineSha]=process.argv.slice(2);
- insist(candidateArg&&baselineArg&&outputArg,"usage: candidate.js baseline.js outputDir candidateSHA baselineSHA");
+ insist(Boolean(candidateArg&&baselineArg&&outputArg),"usage: candidate.js baseline.js outputDir candidateSHA baselineSHA");
  insist(/^[0-9a-f]{40}$/.test(candidateSha??"")&&/^[0-9a-f]{40}$/.test(baselineSha??""),
   "exact source SHAs required");
  insist(candidateSha!==baselineSha,"comparison requires distinct actual source revisions");

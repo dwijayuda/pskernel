@@ -1,0 +1,257 @@
+{
+  "schema": "psc1-initial-owner-benchmark-harness-failure-v1",
+  "sourceSha": "444580731080093733adac50df03f726e343d893",
+  "run": 39662645235,
+  "job": 119439393833,
+  "conclusion": "failure",
+  "artifact": {
+    "id": 12375221703,
+    "bytes": 8448928,
+    "sha256": "dde4fa87b265ee821109a8d5b003710c3bd10c82bf7c6f3059fa613b18cd7b47"
+  },
+  "authentication": {
+    "format": "psc1-initial-owner-artifacts-v1",
+    "repository": "dwijayuda/pskernel",
+    "workflow_source_sha": "444580731080093733adac50df03f726e343d893",
+    "baseline": {
+      "source_sha": "deb18b9c87a5d21a406c6e5b852afb4d44785fe5",
+      "producer_run": 39651609850,
+      "manifest_sha256": "440b0e1bb8c66648de65dcb772cfb6aafb7e4a3dcd2848046385323633abaadb",
+      "kernel_sha256": "e44c9a2b4199f1a761b7a2cdda0f63748f9aa0372def3eb4c2ca8abfab81e8ea",
+      "files": [
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js",
+          "bytes": 9915946,
+          "sha256": "e44c9a2b4199f1a761b7a2cdda0f63748f9aa0372def3eb4c2ca8abfab81e8ea"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.ts",
+          "bytes": 9089708,
+          "sha256": "389fe0949dc873d3481ae0e5201828e6431f87e8795ae1be338986c911fc75ff"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+          "bytes": 363069,
+          "sha256": "7b963fba038754812eb43da92a31504c6038449e5a630f2737b273e23df9be37"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js.map",
+          "bytes": 8057498,
+          "sha256": "107553fb887de78656a6720aa939619de8fbcac24225cf7d3f22f9b8a792e340"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+          "bytes": 12759,
+          "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+          "bytes": 5462,
+          "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/package.json",
+          "bytes": 42,
+          "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/README.md",
+          "bytes": 11813,
+          "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+        }
+      ],
+      "producer_node": "v22.23.3",
+      "producer_typescript": "7.0.2",
+      "route": "authentic checked Lean-source PSC1/TypeScript bundle",
+      "artifact_id": 12371667659,
+      "artifact_zip_sha256": "f072c21d191c89e26cfcafa29534c7f38b10fc82f64303946364bec61503d8ba",
+      "artifact_zip_bytes": 3394151,
+      "producer_run_attempt": 1,
+      "required_jobs": [
+        {
+          "id": 119401099171,
+          "name": "generated-dag-integration",
+          "conclusion": "success"
+        },
+        {
+          "id": 119401099653,
+          "name": "native-dag-integration",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "candidate": {
+      "source_sha": "7e36b3b1d4d563798b9f86e2840f2414899421fe",
+      "producer_run": 39657469165,
+      "manifest_sha256": "d7f01e14c4fabf7eddd85e467f6602a5e39c4723abcc4cf7d1bc74ae36acd494",
+      "kernel_sha256": "0771bf869da9003af77c65dbb46e37a7714b94d63d55724878c8232f787a1b7b",
+      "files": [
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js",
+          "bytes": 9924976,
+          "sha256": "0771bf869da9003af77c65dbb46e37a7714b94d63d55724878c8232f787a1b7b"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.ts",
+          "bytes": 9099485,
+          "sha256": "7bbc6c820e358d50e0e7bd16bc315b2715ef35e187b621d85a28bd42be9edd47"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+          "bytes": 363988,
+          "sha256": "c40ba886726233a2dd2c3c843ee8b00b6ebdccdd67dd8200844f9ddb3eedd2ba"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js.map",
+          "bytes": 8065975,
+          "sha256": "7be8376955934b61b51515c58b2631f47177c30b70716573c05fa1cffead593b"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+          "bytes": 12759,
+          "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+          "bytes": 5462,
+          "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/package.json",
+          "bytes": 42,
+          "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/README.md",
+          "bytes": 11813,
+          "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+        }
+      ],
+      "producer_node": "v22.23.3",
+      "producer_typescript": "7.0.2",
+      "route": "authentic checked Lean-source PSC1/TypeScript bundle",
+      "artifact_id": 12375381038,
+      "artifact_zip_sha256": "987a53a700ad95f6a7a3c1b542a12a44bad905e2184ee90d87d59ba4994f5a28",
+      "artifact_zip_bytes": 3394036,
+      "producer_run_attempt": 1,
+      "required_jobs": [
+        {
+          "id": 119421442873,
+          "name": "generated-dag-integration",
+          "conclusion": "success"
+        },
+        {
+          "id": 119421443255,
+          "name": "native-dag-integration",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "compiler_reexecuted": false,
+    "canonical_rechecked": false,
+    "new_kernel_qualification_established": false,
+    "purpose": "Authenticate producer evidence before 32 fresh whole-call benchmark workers"
+  },
+  "jobs": {
+    "jobs": [
+      {
+        "id": 119439393833,
+        "name": "paired-initial-owner",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 39662645235,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Check out the artifact authentication harness",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Check out the exact candidate benchmark source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Check source identity and host-script syntax",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Authenticate exact terminal-success producer artifacts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Execute all32 detached whole-call workers",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 7
+          },
+          {
+            "name": "Bind every observation to the authenticated source and bundle",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 8
+          },
+          {
+            "name": "Present complete observations and incomplete results",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Retain immutable bundles, authentication and every worker outcome",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 18
+          },
+          {
+            "name": "Post Check out the exact candidate benchmark source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Check out the artifact authentication harness",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      }
+    ]
+  },
+  "timedWorkers": 0,
+  "timedKernelCalls": 0,
+  "failureClass": "host harness strict-Boolean guard typing",
+  "repair": "Explicit Boolean CLI presence condition; benchmark driver source is the harness SHA, recorded separately from exact7e producer."
+}

@@ -30,6 +30,7 @@ on:
     paths:
       - .github/workflows/psc1-pskernel-initial-owner-benchmark.yml
       - psc1/scripts/pskernel-initial-owner-artifacts.py
+      - psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs
 
 permissions:
   contents: read
@@ -56,7 +57,7 @@ jobs:
         with:
           path: harness
           persist-credentials: false
-      - name: Check out the exact candidate benchmark source
+      - name: Check out the exact candidate producer source
         uses: actions/checkout@v4
         with:
           repository: dwijayuda/pskernel
@@ -71,9 +72,10 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git -C sources/candidate rev-parse HEAD)" = "$PSC1_INITIAL_OWNER_SOURCE"
+          test "$(git -C harness rev-parse HEAD)" = "$GITHUB_SHA"
           git -C harness rev-parse HEAD
           python3 -m py_compile harness/psc1/scripts/pskernel-initial-owner-artifacts.py
-          node --check sources/candidate/psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs
+          node --check harness/psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs
       - name: Authenticate exact terminal-success producer artifacts
         shell: bash
         env:
@@ -93,7 +95,7 @@ jobs:
         run: |
           set -euo pipefail
           PSC1_NODE_BIN="$(command -v node)"
-          cp sources/candidate/psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs \
+          cp harness/psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs \
             "$RUNNER_TEMP/psc1-initial-owner-bench.mjs"
           cd "$RUNNER_TEMP"
           env PATH="" "$PSC1_NODE_BIN" "$RUNNER_TEMP/psc1-initial-owner-bench.mjs" \
@@ -145,10 +147,13 @@ jobs:
               assert len(row["warmup"]) == 2 and len(row["warm"]) == 9
               assert row["hardRssLimitClaim"] is False
           driver = root / "psc1-initial-owner-bench.mjs"
-          checked_source = pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / "sources/candidate/psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs"
+          checked_source = pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / "harness/psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs"
           assert driver.read_bytes() == checked_source.read_bytes()
           assert report["driverSha256"] == hashlib.sha256(driver.read_bytes()).hexdigest()
-          receipt = {"workflowSource": os.environ["GITHUB_SHA"], "candidateSource": candidate,
+          receipt = {"workflowSource": os.environ["GITHUB_SHA"],
+                     "driverSourceSha": os.environ["GITHUB_SHA"],
+                     "driverPath": "psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs",
+                     "candidateSource": candidate,
                      "baselineSource": baseline, "workers": 32, "validatedCalls": 384,
                      "driverSha256": report["driverSha256"],
                      "reportSha256": hashlib.sha256(report_path.read_bytes()).hexdigest(),

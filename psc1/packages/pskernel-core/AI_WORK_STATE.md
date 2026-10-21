@@ -1,3 +1,40 @@
+# Current complete-call harness repair — strict Boolean CLI guard
+
+Observed: 2026-10-21 19:34 UTC.
+Harness branch: `research/psc1-pskernel-initial-owner-bench-20261021`.
+Parent harness: `444580731080093733adac50df03f726e343d893`.
+Kernel candidate remains exact `7e36b3b1d4d563798b9f86e2840f2414899421fe`;
+baseline remains exact `deb18b9c87a5d21a406c6e5b852afb4d44785fe5`.
+Containing harness qualification: **NOT RUN at creation**.
+
+Run[39662645235/job119439393833](https://github.com/dwijayuda/pskernel/actions/runs/39662645235/job/119439393833)
+finished FAIL before any measurement. Both pinned terminal-success producer
+artifacts, all bundle files and source/toolchain/digest identities authenticated
+successfully. The driver then rejected valid CLI paths because their conjunction
+returns a string while its assertion helper requires strict Boolean true.
+No worker or timed kernel call ran; no performance result exists for that run.
+Failure class: host harness guard typing, not kernel semantics or infrastructure.
+The failed run and its authenticated bundles are retained in artifact12375221703
+(8448928 bytes, ZIP SHA256
+`dde4fa87b265ee821109a8d5b003710c3bd10c82bf7c6f3059fa613b18cd7b47`).
+
+Only that CLI presence condition now explicitly uses `Boolean(...)`. All32
+workers,384 calls, exact positive/negative outcomes, timers, memory accounting,
+ABBA order, original inputs and unchanged4096fuel remain. The remaining strict
+assertion conditions were source-audited for actual Boolean results.
+
+The corrected driver is now copied from the checked-out **harness source**,
+verified byte-for-byte against that source, and identified separately by
+`driverSourceSha=GITHUB_SHA` plus its SHA256 in the authenticated comparison
+receipt. The kernel producers and immutable bundles remain pinned to deb/7e.
+The driver is not represented as byte-identical to the older7e driver. This
+provenance separation changes no checked kernel or provider artifact.
+
+Next executable action: run this exact harness to terminal and inspect all
+whole-call observations before considering the initial-session owner port.
+
+---
+
 # Current artifact-pinned experiment — complete initial-owner calls
 
 Updated: 2026-10-21 19:32 UTC.

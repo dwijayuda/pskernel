@@ -91,6 +91,21 @@ const errorIs=(label,message,value)=>{
  must(rejected(result)&&result.error===message,label);
 };
 
+const boolRoot=(root,expected,value)=>{
+ if(same(value,none))return none;
+ const attempted=accepted(value,"bool-some");
+ if(rejected(attempted))return Option.some(attempted);
+ const result=accepted(attempted,"bool-ok");
+ return result.snd===expected?ok(result.fst,root):error("carrier Boolean decision changed");
+};
+const optionalBoolRoot=(root,expected,value)=>{
+ if(same(value,none))return none;
+ const attempted=accepted(value,"optional-bool-some");
+ if(rejected(attempted))return Option.some(attempted);
+ const result=accepted(attempted,"optional-bool-ok");
+ return same(result.snd,expected)?ok(result.fst,root):error("carrier optional decision changed");
+};
+
 let arena=unit(get("psKernelExprV2PagedEmpty"));
 const build=(kind,term,...args)=>{
  const result=accepted(get("psKernelExprV2PagedMk"+kind)(arena,...args),"build-"+kind);
@@ -121,13 +136,29 @@ const eqDecl={levelParams:list([universe]),name:get("psKernelEqName"),
  ctors:list([{name:N.str(get("psKernelEqName"),"refl"),type:get("psKernelExpectedEqReflType")(universe)}]),
  isUnsafe:false,numParams:2n};
 const withEq=accepted(get("psKernelV1AdmitDeclaration")(withNat.session,Request.ordinaryInductive(eqDecl)),"checked-Eq");
-const session=accepted(get("psKernelV1AdmitDeclaration")(withEq.session,unit(Request.quot)),"checked-Quot").session;
+const withQuot=accepted(get("psKernelV1AdmitDeclaration")(withEq.session,unit(Request.quot)),"checked-Quot");
+const unitName=name("CarrierUnit"),unitCtorName=N.str(unitName,"mk");
+const unitDecl={levelParams:nil,name:unitName,type:s1.term,
+ ctors:list([{name:unitCtorName,type:E.const(unitName,nil)}]),isUnsafe:false,numParams:0n};
+const withUnit=accepted(get("psKernelV1AdmitDeclaration")(
+ withQuot.session,Request.ordinaryInductive(unitDecl)),"checked-Unit");
+const aliasName=name("carrierAlias"),aliasHints=get("PsKernelReducibilityHints").regular(1n);
+const aliasInfo={base:{name:aliasName,levelParams:nil,type:nat.term},
+ value:E.lit(Literal.nat(2n)),hints:aliasHints,safety:unit(S.safe)};
+const session=accepted(get("psKernelV1AdmitDeclaration")(
+ withUnit.session,Request.definitionDecl(aliasInfo)),"checked-alias").session;
 const scalar=get("psKernelKernelSessionChecker")(session,nil,unit(S.safe)).context;
 const request=D.ordinaryInductive(nil,0n,{name:natName,type:s1.id,
  ctors:list([{name:get("psKernelNatZeroName"),type:nat.id},
   {name:get("psKernelNatSuccName"),type:succType.id}])},false);
 const zero=lit(0n),oneLit=lit(1n),two=lit(2n),wrappedSort=md(61n,s0);
-const aType=fv("A"),aValue=fv("a"),fn=fv("f"),bound=bv(0n);
+const alias=cn(aliasName),unitType=cn(unitName),unitLeft=fv("unitLeft"),unitRight=fv("unitRight");
+const boolTrue=cn(get("psKernelBoolTrueName"));
+const str=build("Lit",E.lit(Literal.str("λ😀")),Literal.str("λ😀"));
+const strOutput=accepted(get("psKernelExprV2StringLitToConstructorOnCanonical")(arena,"λ😀"),"string-build");
+arena=strOutput.fst;const strBuilt={id:strOutput.snd};
+const addTerm=apps(cn(N.str(natName,"add")),[oneLit,two]);
+const aType=fv("A"),aValue=fv("a"),bValue=fv("b"),fn=fv("f"),bound=bv(0n);
 const fnType=forall("x",aType,aType),wrappedFn=md(62n,fnType),application=app(fn,aValue);
 const lambda=lam("x",aType,bound),forallType=forall("x",aType,aType);
 const letTerm=letE("x",aType,aValue,bound),dependentForall=forall("x",nat,bound);
@@ -145,7 +176,13 @@ const differential=[
  ["quot",quotientLift],["iota",recursor]
 ];
 const input=arena,built=accepted(get("psKernelExprV2DecodeChecked")(input),"input-decode");
-const declarations=get("psKernelDagDeclarationsAfterAdmission")(request,nil);
+const unitRequest=D.ordinaryInductive(nil,0n,
+ {name:unitName,type:s1.id,ctors:list([{name:unitCtorName,type:unitType.id}])},false);
+const aliasRequest=D.definitionDecl({base:{name:aliasName,levelParams:nil,type:nat.id},
+ value:two.id,hints:aliasHints,safety:unit(S.safe)});
+const declarations=get("psKernelDagDeclarationsAfterAdmission")(aliasRequest,
+ get("psKernelDagDeclarationsAfterAdmission")(unitRequest,
+  get("psKernelDagDeclarationsAfterAdmission")(request,nil)));
 const generated=accepted(get("psKernelDagGeneratedAfterCommand")(C.admit(request),session.environment,
  {arena:input,built,declarations}),"install-checked-generated");
 const initial=get("psKernelExprV2CheckStateWithWhnf")(
@@ -155,6 +192,9 @@ const bare=get("psKernelExprV2CheckContextEmpty")(scalar);
 let context=get("psKernelExprV2CheckContextWithLocal")(bare,name("A"),name("A"),wrappedSort.id,unit(B.default));
 context=get("psKernelExprV2CheckContextWithLocal")(context,name("a"),name("a"),aType.id,unit(B.default));
 context=get("psKernelExprV2CheckContextWithLocal")(context,name("f"),name("f"),wrappedFn.id,unit(B.default));
+context=get("psKernelExprV2CheckContextWithLocal")(context,name("b"),name("b"),aType.id,unit(B.default));
+context=get("psKernelExprV2CheckContextWithLocal")(context,name("unitLeft"),name("unitLeft"),unitType.id,unit(B.default));
+context=get("psKernelExprV2CheckContextWithLocal")(context,name("unitRight"),name("unitRight"),unitType.id,unit(B.default));
 const forbidden=_c=>_s=>_r=>error("unexpected carrier callback");
 const forbiddenEq=_c=>_s=>_l=>_r=>error("unexpected carrier DefEq callback");
 const noCore=_c=>_s=>_r=>_cheapRec=>_cheapProj=>error("unexpected carrier core callback");
@@ -166,7 +206,7 @@ const publicWith=(fuel,reducer,c,s,r)=>
 const coreWith=(fuel,cheapRec,cheapProj,whnf,reducer,c,s,r)=>
  get("psKernelExprV2TryWhnfCoreOwnedModeWithReducerFuel")(fuel)(cheapRec)(cheapProj)(
   localValue)(whnf)(reducer)(c)(s)(r);
-let probes=0,propagated=0,comparisons=0;
+let probes=0,propagated=0,comparisons=0,defeqProbes=0,defeqPropagation=0;
 for(const seed of [2n,11n]){
  const state=stamp(zero.id,initial,seed);
  const first=result=>whnfStep(zero.id,seed,seed,seed+1n,result);
@@ -268,6 +308,100 @@ for(const seed of [2n,11n]){
  const inferredApp=marked("inference-only-application-retains-whnf-state",seed+1n,seed+1n,
   infer(8n,typedWhnf,forbiddenEq,context,state,application.id,true));
  must(inferredApp.snd===aType.id,"inference-only-application-type");probes++;
+ const eqStep=(tag,fresh,next,answer)=>_c=>s=>_l=>_r=>{
+  const updated=advance(zero.id,s,tag,fresh,next);
+  return rejected(updated)?Option.some(updated):ok(updated.value,answer);
+ };
+ const assertBool=(label,tag,answer,value)=>marked(label,tag,tag,boolRoot(zero.id,answer,value));
+ const assertOptional=(label,tag,answer,value)=>marked(label,tag,tag,optionalBoolRoot(zero.id,answer,value));
+ assertOptional("reflection-whnf-state",seed+1n,Option.some(true),
+  get("psKernelExprV2DefEqReflectionOwnedWith")(first(boolTrue.id),context,state,boolTrue.id,boolTrue.id));defeqProbes++;
+ const orderedCore=c=>s=>r=>r===fn.id?first(fn.id)(c)(s)(r):
+  r===bValue.id?second(bValue.id)(c)(s)(r):error("DefEq core operand order changed");
+ assertBool("prefix-left-right-continuation-state",seed+3n,false,
+  get("psKernelExprV2DefEqCoreQuickContinueOwnedWith")(
+   eqStep(seed+2n,seed+2n,seed+3n,false),forbiddenEq,orderedCore,context,state,fn.id,bValue.id));defeqProbes++;
+ assertBool("is-prop-inference-whnf-state",seed+2n,true,
+  get("psKernelExprV2DefEqIsPropOwnedWith")(first(s0.id),second(s0.id),context,state,aType.id));defeqProbes++;
+ const proofInfer=c=>s=>r=>r===aValue.id?first(aType.id)(c)(s)(r):
+  r===aType.id?second(s0.id)(c)(s)(r):r===bValue.id?
+   whnfStep(zero.id,seed+3n,seed+3n,seed+4n,aType.id)(c)(s)(r):
+   error("proof irrelevance inference order changed");
+ assertBool("proof-irrelevance-all-callback-state",seed+5n,true,
+  get("psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith")(
+   forbiddenEq,eqStep(seed+4n,seed+4n,seed+5n,true),proofInfer,
+   whnfStep(zero.id,seed+2n,seed+2n,seed+3n,s0.id),context,state,aValue.id,bValue.id));defeqProbes++;
+ const nonPropInfer=c=>s=>r=>r===oneLit.id?first(nat.id)(c)(s)(r):
+  r===nat.id?second(s1.id)(c)(s)(r):error("non-proposition inference order changed");
+ assertBool("non-proposition-continuation-state",seed+4n,false,
+  get("psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith")(
+   eqStep(seed+3n,seed+3n,seed+4n,false),forbiddenEq,nonPropInfer,
+   whnfStep(zero.id,seed+2n,seed+2n,seed+3n,s1.id),context,state,oneLit.id,two.id));defeqProbes++;
+ assertBool("lazy-nat-left-retains-both-operands",seed+3n,false,
+  get("psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith")(
+   forbiddenEq,eqStep(seed+2n,seed+2n,seed+3n,false),binary,context,state,addTerm.id,zero.id));defeqProbes++;
+ assertBool("lazy-nat-right-retains-both-operands",seed+3n,false,
+  get("psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith")(
+   forbiddenEq,eqStep(seed+2n,seed+2n,seed+3n,false),binary,context,state,zero.id,addTerm.id));defeqProbes++;
+ const aliasEntry=accepted(get("psKernelExprV2PagedRequire")(state.whnf.arena,alias.id),"alias-entry");
+ const unfoldedMark=(s,r)=>{
+  const rows=array(s.unfold);
+  return outerMark({...s,unfold:state.unfold},seed,seed)&&rows.length===2&&
+   cacheMark(list(rows.slice(1)),seed)&&rows[0].source===alias.id&&
+   rows[0].result===r&&rows[0].hash===aliasEntry.hash;
+ };
+ const deltaCore=_c=>s=>r=>cheapProj=>{
+  if(!cheapProj||!unfoldedMark(s,r))return error("delta unfolding publication or callback owner changed");
+  const equal=get("psKernelExprV2PagedEqOnCanonical")(s.whnf.arena,r,two.id);
+  if(rejected(equal))return Option.some(equal);
+  return accepted(equal,"delta-body")?ok(stamp(zero.id,s,seed+1n),two.id):error("delta callback body changed");
+ };
+ marked("delta-once-retains-full-core-state",seed+1n,seed+1n,
+  get("psKernelExprV2DefEqDeltaOnceOwnedWith")(deltaCore,context,state,alias.id));defeqProbes++;
+ const projectionCore=c=>s=>r=>cheapProj=>r===projection.id&&!cheapProj?
+  first(oneLit.id)(c)(s)(r):error("projection core flags changed");
+ marked("delta-projection-core-state",seed+1n,seed+1n,reduction(
+  get("psKernelExprV2DefEqTryUnfoldProjAppOwnedWith")(projectionCore,context,state,projection.id)));defeqProbes++;
+ assertBool("lazy-delta-loop-retains-core-state",seed+1n,true,
+  get("psKernelExprV2DefEqLazyDeltaContinueOwnedWithFuel")(
+   2n,forbiddenEq,forbiddenEq,forbidden,deltaCore,context,state,alias.id,two.id));defeqProbes++;
+ assertBool("lazy-projection-loop-retains-core-state",seed+1n,true,
+  get("psKernelExprV2DefEqLazyProjReductionOwnedWithFuel")(2n)(forbiddenEq)(deltaCore)(
+   context)(state)(alias.id)(two.id)(natName)(0n));defeqProbes++;
+ for(const lambdaOnLeft of [false,true]){
+  assertOptional("function-eta-retains-infer-whnf-defeq-state",seed+3n,none,
+   get("psKernelExprV2DefEqFullShapeEtaOwnedWith")(
+    lambdaOnLeft,eqStep(seed+2n,seed+2n,seed+3n,false),first(wrappedFn.id),second(fnType.id),
+    context,state,lambda.id,fn.id));defeqProbes++;
+ }
+ const changedCore=c=>s=>r=>cheapProj=>cheapProj?error("residual core must disable cheap projection"):
+  r===wrappedSort.id?first(s0.id)(c)(s)(r):r===s1.id?second(s1.id)(c)(s)(r):error("residual core order changed");
+ assertBool("residual-full-whnf-changed-state",seed+3n,false,
+  get("psKernelExprV2DefEqResidualOwnedWith")(
+   eqStep(seed+2n,seed+2n,seed+3n,false),forbidden,forbidden,changedCore,context,state,wrappedSort.id,s1.id));defeqProbes++;
+ const unchangedCore=c=>s=>r=>cheapProj=>cheapProj?
+  error("residual core must disable cheap projection"):orderedCore(c)(s)(r);
+ assertBool("residual-final-unit-negative-keeps-whnf-state",seed+4n,false,
+  get("psKernelExprV2DefEqResidualOwnedWith")(forbiddenEq,
+   whnfStep(zero.id,seed+2n,seed+2n,seed+3n,wrappedFn.id),
+   whnfStep(zero.id,seed+3n,seed+3n,seed+4n,fnType.id),
+   unchangedCore,context,state,fn.id,bValue.id));defeqProbes++;
+ for(const reverse of [false,true]){
+  const left=reverse?strBuilt.id:str.id,right=reverse?str.id:strBuilt.id;
+  assertOptional("string-expansion-keeps-whnf-defeq-state",seed+2n,Option.some(true),
+   get("psKernelExprV2DefEqStringLitExpansionOwnedWith")(
+    eqStep(seed+1n,seed+1n,seed+2n,true),first(strBuilt.id),context,state,left,right));defeqProbes++;
+ }
+ const unitInfer=c=>s=>r=>r===unitLeft.id?first(unitType.id)(c)(s)(r):r===unitRight.id?
+  whnfStep(zero.id,seed+2n,seed+2n,seed+3n,unitType.id)(c)(s)(r):error("unit-like inference order changed");
+ assertBool("unit-like-all-callback-state",seed+4n,true,
+  get("psKernelExprV2DefEqUnitLikeOwnedWith")(
+   eqStep(seed+3n,seed+3n,seed+4n,true),unitInfer,second(unitType.id),
+   context,state,unitLeft.id,unitRight.id));defeqProbes++;
+ assertBool("final-rules-all-callback-state",seed+4n,true,
+  get("psKernelExprV2DefEqFinalRulesOwnedWith")(
+   eqStep(seed+3n,seed+3n,seed+4n,true),unitInfer,second(unitType.id),
+   context,state,unitLeft.id,unitRight.id));defeqProbes++;
  for(const declined of [false,true]){
   const failing=_c=>_s=>_r=>declined?none:error("carrier injected");
   const failingReducer=_c=>_s=>_r=>_cheapRec=>_cheapProj=>declined?none:error("carrier injected");
@@ -300,6 +434,42 @@ for(const seed of [2n,11n]){
   propagation("Nat-right-failure-after-left-effects",declined,
    get("psKernelExprV2TryReduceNatBinaryOwnedWith")(
     failRight,context,state,N.str(natName,"add"),oneLit.id,two.id));propagated++;
+  const afterOneFail=c=>s=>r=>outerMark(s,seed+1n,seed+1n)?
+   failing(c)(s)(r):error("DefEq failure callback received stale first state");
+  const afterTwoFail=c=>s=>r=>outerMark(s,seed+2n,seed+2n)?
+   failing(c)(s)(r):error("DefEq failure callback received stale second state");
+  const coreFailRight=c=>s=>r=>r===fn.id?first(fn.id)(c)(s)(r):
+   r===bValue.id?afterOneFail(c)(s)(r):error("DefEq failure core order changed");
+  const failDeltaCore=c=>s=>r=>cheapProj=>cheapProj&&unfoldedMark(s,r)?
+   failing(c)(s)(r):error("DefEq failure lost unfolding state");
+  const failProjectionCore=c=>s=>r=>cheapProj=>r===projection.id&&!cheapProj&&outerMark(s,seed,seed)?
+   failing(c)(s)(r):error("DefEq projection failure flags changed");
+  const failResidualCore=c=>s=>r=>cheapProj=>cheapProj?
+   error("DefEq residual failure flags changed"):coreFailRight(c)(s)(r);
+  const defeqFailures=[
+   ["prefix-right",boolRoot(zero.id,false,get("psKernelExprV2DefEqCoreQuickContinueOwnedWith")(
+    forbiddenEq,forbiddenEq,coreFailRight,context,state,fn.id,bValue.id))],
+   ["proof-whnf",boolRoot(zero.id,false,get("psKernelExprV2DefEqProofIrrelevanceContinueOwnedWith")(
+    forbiddenEq,forbiddenEq,proofInfer,afterTwoFail,context,state,aValue.id,bValue.id))],
+   ["lazy-nat-right",boolRoot(zero.id,false,get("psKernelExprV2DefEqLazyNatAfterPredContinueOwnedWith")(
+    forbiddenEq,forbiddenEq,failRight,context,state,addTerm.id,zero.id))],
+   ["delta-core",get("psKernelExprV2DefEqDeltaOnceOwnedWith")(failDeltaCore,context,state,alias.id)],
+   ["projection-core",reduction(get("psKernelExprV2DefEqTryUnfoldProjAppOwnedWith")(
+    failProjectionCore,context,state,projection.id))],
+   ["eta-whnf",optionalBoolRoot(zero.id,none,get("psKernelExprV2DefEqFullShapeEtaOwnedWith")(
+    true,forbiddenEq,first(wrappedFn.id),afterOneFail,context,state,lambda.id,fn.id))],
+   ["residual-right",boolRoot(zero.id,false,get("psKernelExprV2DefEqResidualOwnedWith")(
+    forbiddenEq,forbidden,forbidden,failResidualCore,context,state,fn.id,bValue.id))],
+   ["string-whnf",optionalBoolRoot(zero.id,none,get("psKernelExprV2DefEqStringLitExpansionOwnedWith")(
+    forbiddenEq,failing,context,state,str.id,strBuilt.id))],
+   ["unit-whnf",boolRoot(zero.id,false,get("psKernelExprV2DefEqUnitLikeOwnedWith")(
+    forbiddenEq,unitInfer,afterOneFail,context,state,unitLeft.id,unitRight.id))],
+   ["lazy-projection-core",boolRoot(zero.id,false,get("psKernelExprV2DefEqLazyProjReductionOwnedWithFuel")(2n)(
+    forbiddenEq)(failDeltaCore)(context)(state)(alias.id)(two.id)(natName)(0n))],
+   ["lazy-delta-core",boolRoot(zero.id,false,get("psKernelExprV2DefEqLazyDeltaContinueOwnedWithFuel")(
+    2n,forbiddenEq,forbiddenEq,forbidden,failDeltaCore,context,state,alias.id,two.id))]
+  ];
+  for(const [label,value]of defeqFailures){propagation("DefEq-"+label,declined,value);defeqPropagation++;}
  }
 }
 const oldEmpty=get("psKernelCheckerStateEmpty");
@@ -320,6 +490,7 @@ for(const [label,term]of differential){
  }
 }
 must(probes===42&&propagated===56&&comparisons===540,"complete-matrices");
+must(defeqProbes===38&&defeqPropagation===44,"complete-DefEq-carrier-matrices");
 const rootDefEq=dagEq(32n),beta=differential.find(([label])=>label==="beta")[1];
 const warmed=attempt(get("psKernelExprV2CheckWhnfOwnedWithFuel")(
  32n,rootDefEq,bare,initial,beta.id),"warm-public");
@@ -367,4 +538,4 @@ for(const fuel of [0n,1n,8n]){
  }
 }
 must(get("psKernelResourcePolicyDefault").fuel===4096n,"published-fuel-unchanged");
-console.log("PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 assertions="+assertions);
+console.log("PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44 assertions="+assertions);

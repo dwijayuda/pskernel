@@ -11,8 +11,8 @@ at r, and a nested recursor at r. The supplied DefEq callback is unchanged.
 Structural WHNF recursion keeps these recursor/public callbacks fixed while
 decreasing its own fuel. No recursion-depth guard is added at recursor entry.
 
-The carrier migration retains the explicit unsupported K/structure branches
-in Recursor.lean. Supplying the complete state does not promote those rules.
+The supplied callbacks support K conversion and structure/String major
+normalization while retaining this owner's exact predecessor placement.
 -/
 
 def psKernelExprV2TryReduceRecursorOwnedWithFuel

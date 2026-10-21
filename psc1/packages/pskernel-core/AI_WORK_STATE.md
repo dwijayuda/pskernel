@@ -11,6 +11,55 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+
+## 2026-10-21 — recursor-major migration review, qualification pending
+
+This source follows carrier `bd35452a1c10f22bc7e863efafd1a868a3fe3b72`.
+At creation it is an unreferenced review commit; no production branch is changed.
+Its new recursor semantics are **NOT RUN**. Native/generated/official regression
+additions and exact-source full qualification are required before promotion.
+
+The single owned recursor pipeline now handles validated ordinary K conversion,
+String constructor expansion and non-recursive structure conversion directly
+over canonical DAG IDs. The major family comes from the privately owned type
+installed after complete checked inductive admission. K conversion precedes
+the constructor shortcut; normalized major-type levels supply the candidate.
+The expression-metavariable guard examines only indices after numParams.
+Candidate inference and DefEq keep their exact order, argument order and full
+returned state, including false. Public WHNF is mandatory at the same V1
+positions even when the initial major reduction uses cheap core WHNF.
+
+The checked generated metadata bridge installs ordinary K types and rules only
+after validated admission, with the same original-ID/private publication guard.
+That bridge still imports recursive expressions and inductive admission remains
+a V1 operation. Existing callback-limited compatibility helpers preserve their
+explicit K/String/structure unsupported boundary. No temporary checker, trusted
+hash, new runtime axiom, fuel/depth increase or unsafe path is introduced.
+
+Four public whole-operation fallbacks remain. This is not full V2 completion or
+full Lean conformance. The additional native/generated tests must cover real
+checked K and indexed equality metadata, official admission, fixed-fuel/depth
+decisions, callback ownership and refusal order; the old metadata-owner absence
+control now verifies exact installed K type/rule ownership. Other old assertions
+remain. Existing14 recursor theorem statements are unchanged; simplifier lists
+name the extracted common pipeline.
+
+Parent carrierbd native integration119238388859 and native correctness119238388545
+are terminal PASS, and its complete portable .lean check and independently
+checked canonical .ps closure pass. Generated runtime qualification remains
+IN PROGRESS at this review. Staged727 generated semantic/provider gates have
+passed and its benchmark is running; its overall job remains IN PROGRESS.
+Both727 andbd have all six research jobs PASS. The integration branch remains
+the fully qualified limited-scope V1 developer provider at8892406; A PASS only
+there, B incomplete, C FAIL.
+
+The authentic resource diagnostic is isolated at
+`ab61efebac4e0b09cc3bf57c09380ae53ac2cf7f`,
+[run39607734805](https://github.com/dwijayuda/pskernel/actions/runs/39607734805),
+still IN PROGRESS. It uses production369bee and unchanged proof body/fuel/host
+limits; collection success will not qualify the kernel.
+
+
 ## 2026-10-21 — carrier boundary and generated ABI repair candidate
 
 Branch: `research/psc1-pskernel-v2-carrier-20261021`.

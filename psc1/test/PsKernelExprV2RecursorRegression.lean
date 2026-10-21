@@ -261,7 +261,7 @@ private def regression : IO Unit := do
     let before ← expect (psKernelExprV2DecodedRequire built index)
     let after ← expect (psKernelExprV2DecodedRequire generated.built index)
     require "original-ID-stable" (psKernelExprEqual before after)
-  for info in [natInfo,boxInfo] do
+  for info in [natInfo,boxInfo,kInfo] do
     let some owner := psKernelExprV2DeclarationRefFind generated.declarations info.base.name
       | throw (IO.userError "missing checked generated owner")
     require "checked-generated-type-exact"
@@ -273,8 +273,8 @@ private def regression : IO Unit := do
         | throw (IO.userError "missing checked generated rule")
       require "checked-generated-rule-exact"
         (psKernelExprEqual rule.rhs (← decode generated.arena rhs))
-  require "K-owner-remains-explicitly-unsupported"
-    (psKernelExprV2DeclarationRefFind generated.declarations kInfo.base.name).isNone
+  require "checked-K-owner-installed"
+    (psKernelExprV2DeclarationRefFind generated.declarations kInfo.base.name).isSome
   let checker := psKernelKernelSessionChecker session [] .safe
   let initial := psKernelExprV2WhnfStateForDeclarations generated.arena generated.declarations
   let mut publicCases := 0

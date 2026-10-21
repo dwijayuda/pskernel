@@ -9,7 +9,7 @@ index used by constant inference and delta reduction.
 The public boundary creates the table empty. It never escapes into a legacy
 kernel session. These internal, forgeable records are not admission certificates.
 Live environment metadata still decides constant kind, safety and universe arity.
-Ordinary non-K recursor types/rules are installed once from checked generated
+Ordinary recursor types/rules (including K) are installed once from checked generated
 metadata after successful admission, in an appended owning arena. This explicit
 transitional import does not make inductive admission DAG-native. Nested
 restoration and preexisting-session constants still lack owning DAG types.

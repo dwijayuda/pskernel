@@ -131,7 +131,7 @@ for(let index=0n;index<input.size;index++){
  const after=accepted(get("psKernelExprV2DecodedRequire")(generated.built,index),"new-input-ID");
  must(exact(before,after),"original-ID-stable");
 }
-for(const info of [natInfo,boxInfo]){
+for(const info of [natInfo,boxInfo,kInfo]){
  const owner=accepted(get("psKernelExprV2DeclarationRefFind")(generated.declarations)(info.base.name),"owner");
  must(exact(info.base.type,decoded(generated.arena,owner.type)),"generated-type-exact");
  must(get("psKernelExprV2DeclarationRefMatches")(owner,CI.recInfo(info)),"generated-live-kind");
@@ -140,7 +140,7 @@ for(const info of [natInfo,boxInfo]){
   must(exact(rule.rhs,decoded(generated.arena,rhs)),"generated-rule-exact");
  }
 }
-must(same(get("psKernelExprV2DeclarationRefFind")(generated.declarations)(kInfo.base.name),none),"K-owner-absent");
+must(!same(get("psKernelExprV2DeclarationRefFind")(generated.declarations)(kInfo.base.name),none),"checked-K-owner-installed");
 const scalar=get("psKernelKernelSessionChecker")(session,nil,safe).context;
 const oldEmpty=get("psKernelCheckerStateEmpty"),oldEq=get("psKernelIsDefEqWithFuel");
 const noLocal=get("psKernelExprV2NoLocalValue");

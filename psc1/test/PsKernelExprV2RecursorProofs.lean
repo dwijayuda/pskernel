@@ -114,6 +114,8 @@ theorem K_refuses_before_callbacks
       levels args majorIndex major = none := by
   simp [psKernelExprV2TryReduceNonKRecursorWith,
     psKernelExprV2TryReduceNonKRecursorOwnedWith,
+    psKernelExprV2TryReduceNonKRecursorUsingOwnedWith,
+    psKernelExprV2TryReduceRecursorMajorOwnedWith,
     psKernelExprV2LowerOptionalWhnfAttempt, isK]
 
 theorem constructor_skips_major_callback
@@ -129,6 +131,8 @@ theorem constructor_skips_major_callback
   | none =>
       simp [psKernelExprV2TryReduceNonKRecursorWith,
         psKernelExprV2TryReduceNonKRecursorOwnedWith,
+    psKernelExprV2TryReduceNonKRecursorUsingOwnedWith,
+    psKernelExprV2TryReduceRecursorMajorOwnedWith,
         psKernelExprV2CheckContextEmpty, psKernelExprV2CheckStateFromWhnf,
         psKernelExprV2CheckStateEmpty, psKernelExprV2CheckStateWithWhnf,
         psKernelExprV2LiftOptionalWhnfAttempt, psKernelExprV2LowerOptionalWhnfAttempt,
@@ -137,6 +141,8 @@ theorem constructor_skips_major_callback
       cases result <;>
         simp [psKernelExprV2TryReduceNonKRecursorWith,
           psKernelExprV2TryReduceNonKRecursorOwnedWith,
+    psKernelExprV2TryReduceNonKRecursorUsingOwnedWith,
+    psKernelExprV2TryReduceRecursorMajorOwnedWith,
           psKernelExprV2CheckContextEmpty, psKernelExprV2CheckStateFromWhnf,
           psKernelExprV2CheckStateEmpty, psKernelExprV2CheckStateWithWhnf,
           psKernelExprV2LiftOptionalWhnfAttempt, psKernelExprV2LowerOptionalWhnfAttempt,
@@ -153,6 +159,8 @@ theorem nonconstructor_callback_error_precedes_normalization
       some (.error error) := by
   simp [psKernelExprV2TryReduceNonKRecursorWith,
     psKernelExprV2TryReduceNonKRecursorOwnedWith,
+    psKernelExprV2TryReduceNonKRecursorUsingOwnedWith,
+    psKernelExprV2TryReduceRecursorMajorOwnedWith,
     psKernelExprV2CheckContextEmpty, psKernelExprV2CheckStateFromWhnf,
     psKernelExprV2CheckStateEmpty, psKernelExprV2CheckStateWithWhnf,
     psKernelExprV2LiftScalarWhnf, psKernelExprV2LiftWhnfAttempt,

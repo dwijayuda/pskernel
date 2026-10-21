@@ -172,7 +172,8 @@ def instrument(kernel: pathlib.Path, destination: pathlib.Path, source_sha: str)
     origin = {"source_sha": source_sha, "kernel_sha256": PROFILE.digest(kernel),
               "original_runtime_sha256": hashlib.sha256(original.encode()).hexdigest()}
     changed = INSTRUMENTED_RUNTIME.replace("__PSC1_ORIGIN__", json.dumps(origin, sort_keys=True))
-    destination.write_text(source[:start] + changed + source[end:], encoding="utf-8")
+    tail = re.sub(r"(?m)^//# sourceMappingURL=.*(?:\n|$)", "", source[end:])
+    destination.write_text(source[:start] + changed + tail, encoding="utf-8")
     return dict(origin, instrumented_sha256=PROFILE.digest(destination),
                 source_maps_apply_to_instrumented_copy=False,
                 production_runtime_modified=False)
@@ -302,8 +303,8 @@ def main() -> int:
             summary = trace_summary(trace)
             classification = COMPARE.classify(previous["official"], outcome)
             normal = previous["unprofiled"]
-            stable = (normal["verdict"] == "timeout" or outcome["verdict"] == "timeout"
-                      or normal["verdict"] == outcome["verdict"])
+            assessed = normal["verdict"] != "timeout" and outcome["verdict"] != "timeout"
+            stable = normal["verdict"] == outcome["verdict"] if assessed else None
             record = {"index": index, "label": label, "name": name, "adaptation": adaptation,
                       "official": previous["official"], "unprofiled": normal,
                       "logical": outcome, "classification": classification,
@@ -330,7 +331,7 @@ def main() -> int:
     complete = (len(records) == len(PROFILE.CASES) and all(
         row["logical"]["verdict"] != "driver_error"
         and row["classification"] not in ("false_accept", "false_reject")
-        and row["completed_outcome_agreement"] for row in records))
+        and row["completed_outcome_agreement"] is not False for row in records))
     report = {"format": "psc1-authentic-arena-logical-diagnostics-v1", "source_sha": source_sha,
               "instrumentation": receipt, "baseline_report_sha256": PROFILE.digest(baseline_path),
               "driver_sha256": PROFILE.digest(pathlib.Path(__file__)),

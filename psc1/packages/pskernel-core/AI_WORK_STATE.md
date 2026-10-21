@@ -15,6 +15,17 @@ PASS. The new containing diagnostic source and trace harness are **NOT RUN** unt
 their own Actions job completes. Trace collection cannot claim gate B or C.
 Gate A remains the documented e015 scoped V1 developer provider.
 
+## Reporting review correction
+
+The first source-reviewed tracer commit was868a1ee518a963ec141bc1129910aaf093261031.
+Its job39568817340 was still running when this small reporting correction was made.
+When either run times out, `completed_outcome_agreement` is now null (not assessed),
+not true. Collection may still complete with honest timeout records. The separate
+instrumented copy also drops the stale original sourceMappingURL footer; the
+original generated bundle and map remain untouched. The containing source needs
+its own terminal diagnostic/controls result. These changes do not alter checker
+rules, case selection, limits, expected outcomes or the original V8/unprofiled step.
+
 ## Why this diagnostic exists
 
 The f483 structural-allocation profile39564831855 finished collection successfully:

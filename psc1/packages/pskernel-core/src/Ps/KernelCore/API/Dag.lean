@@ -259,8 +259,8 @@ def psKernelDagRunCommandsWithSource
             let nextExecution := Prod.snd result;
             let generated := PsKernelDagGeneratedState.mk
               arena built nextExecution.declarations;
-            match psKernelDagGeneratedAfterCommand command
-                nextExecution.session.environment generated with
+            match psKernelDagGeneratedAfterCommandWithPrevious command
+                execution.session.environment nextExecution.session.environment generated with
             | Except.error error => Except.error (PsKernelError.internalError error)
             | Except.ok installed =>
                 let owner := PsKernelDagExecutionState.mk

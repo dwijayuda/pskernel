@@ -2,7 +2,7 @@ import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 
 /-
-Explicit transitional ownership bridge for ordinary recursors, including K.
+Explicit transitional ownership bridge for checked inductive families and recursors.
 
 Complete inductive admission first constructs and validates the recursor type
 and every rule in the private work environment. Only after that admission
@@ -10,11 +10,12 @@ succeeds may this bridge copy that checked generated metadata into the owning
 batch arena. No exported recursor body, caller-provided rule or supplied cache
 is accepted as authoritative metadata.
 
-This import is performed once per successful ordinary inductive in a batch,
-not inside WHNF. It preserves original IDs by appending smart-constructed
+This import is performed once per successful ordinary, mutual or nested inductive
+in a batch, not inside WHNF. Only the newly admitted final-environment prefix is
+visited; the previous checked environment is the exact name boundary. It preserves original IDs by appending smart-constructed
 nodes, and appends the corresponding source expressions to the decoded table.
-It deliberately remains a recursive-expression import: ordinary inductive
-admission is still the V1 fallback, not a completed DAG-native admission path.
+It deliberately remains a recursive-expression import: inductive admission is
+still the V1 fallback, not a completed DAG-native admission path.
 Repeated source subtrees are not interned by this bridge. Its construction and
 retained-memory costs must be included in whole-batch measurements.
 
@@ -184,5 +185,98 @@ def psKernelDagGeneratedAfterCommand
                     else Except.ok state
                   else Except.ok state
               | _ => Except.ok state
+      | _ => Except.ok state
+  | _ => Except.ok state
+
+/- Current-command original refs are already in state.declarations after complete
+   ordinary/mutual admission. Their types are installed unchanged by that checked
+   admission. Search only inputRefs: an older batch owner is never authority for
+   reuse. Nested restoration supplies no inputRefs and imports final types. -/
+def psKernelDagGeneratedInstallType
+    (info : PsKernelConstantInfo) (base : PsKernelConstantBase)
+    (kind : PsKernelExprV2DeclarationRefKind)
+    (inputRefs : List PsKernelExprV2DeclarationRef)
+    (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  let existing := psKernelExprV2DeclarationRefFind inputRefs base.name;
+  let reusable : Bool :=
+    match existing with
+    | Option.none => false
+    | Option.some owner => psKernelExprV2DeclarationRefMatches owner info;
+  if reusable then Except.ok state
+  else
+    match psKernelDagGeneratedImport base.type state with
+    | Except.error error => Except.error error
+    | Except.ok result =>
+        let next := Prod.fst result;
+        let owner := PsKernelExprV2DeclarationRef.mk
+          base.name base.levelParams (Prod.snd result) Option.none kind;
+        Except.ok (PsKernelDagGeneratedState.mk next.arena next.built
+          (List.cons owner next.declarations))
+
+/- The admitted final environment is the only metadata authority. In particular,
+   nested auxiliary recursor names and restored types are not reconstructed from
+   input name suffixes or flattening-time declarations. -/
+def psKernelDagGeneratedInstallNewInfo
+    (info : PsKernelConstantInfo)
+    (inputRefs : List PsKernelExprV2DeclarationRef)
+    (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match info with
+  | PsKernelConstantInfo.recInfo recursor =>
+      psKernelDagGeneratedInstallRecursor recursor state
+  | PsKernelConstantInfo.inductInfo value =>
+      psKernelDagGeneratedInstallType info value.base
+        PsKernelExprV2DeclarationRefKind.inductiveDecl inputRefs state
+  | PsKernelConstantInfo.ctorInfo value =>
+      psKernelDagGeneratedInstallType info value.base
+        PsKernelExprV2DeclarationRefKind.constructorDecl inputRefs state
+  | _ => Except.error "PSKERNEL_V2_GENERATED_PREFIX_KIND"
+
+/- Checked ordinary/mutual/nested admission prepends only fresh final names to
+   the exact previous environment. Stop before touching the first old entry.
+   This structural worker visits the new prefix only, using exact indexed name
+   membership; it performs no environment-size prepass or old-tail traversal. -/
+def psKernelDagGeneratedInstallNewPrefix
+    (remaining : List PsKernelConstantInfo)
+    (previous : PsKernelEnvironment)
+    (inputRefs : List PsKernelExprV2DeclarationRef)
+    (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match remaining with
+  | List.nil => Except.ok state
+  | List.cons info rest =>
+      if psKernelEnvironmentContains previous (psKernelConstantInfoName info) then
+        Except.ok state
+      else
+        match psKernelDagGeneratedInstallNewInfo info inputRefs state with
+        | Except.error error => Except.error error
+        | Except.ok next =>
+            psKernelDagGeneratedInstallNewPrefix rest previous inputRefs next
+
+/- Production-only post-success bridge. RunCommands supplies both checked
+   environments and already staged current-command refs. Failure returns before
+   any batch publication. The historical three-argument helper above retains
+   its bounded ordinary behavior and ABI for existing internal consumers. -/
+def psKernelDagGeneratedAfterCommandWithPrevious
+    (command : PsKernelDagCommand)
+    (previous current : PsKernelEnvironment)
+    (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  match command with
+  | PsKernelDagCommand.admit request =>
+      match request with
+      | PsKernelDagDeclarationRequest.ordinaryInductive _ _ _ _ =>
+          let inputRefs := psKernelDagDeclarationsAfterAdmission request List.nil;
+          psKernelDagGeneratedInstallNewPrefix
+            current.constants previous inputRefs state
+      | PsKernelDagDeclarationRequest.mutualInductive _ =>
+          let inputRefs := psKernelDagDeclarationsAfterAdmission request List.nil;
+          psKernelDagGeneratedInstallNewPrefix
+            current.constants previous inputRefs state
+      | PsKernelDagDeclarationRequest.nestedInductive _ =>
+          let inputRefs := psKernelDagDeclarationsAfterAdmission request List.nil;
+          psKernelDagGeneratedInstallNewPrefix
+            current.constants previous inputRefs state
       | _ => Except.ok state
   | _ => Except.ok state

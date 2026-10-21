@@ -1,0 +1,67 @@
+name: PSC1 T03a focused native qualification
+on:
+  push:
+    branches:
+      - work/psc1-pskernel-t03a-prefix-20261021
+    paths:
+      - psc1/packages/pskernel-core/src/**
+      - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
+      - psc1/test/PsKernelExprV2RecursorProofs.lean
+      - psc1/test/PsKernelInvalidRecursorOccurrenceRegression.lean
+      - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+      - .github/workflows/psc1-pskernel-t03a-focus.yml
+permissions:
+  contents: read
+jobs:
+  native-prefix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Compile owning kernel and check generated test syntax
+        id: prefix_build
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          node --check scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_recursor_regression
+      - name: Run precise invalid-occurrence official and independent controls
+        if: ${{ !cancelled() && steps.prefix_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelInvalidRecursorOccurrenceRegression.lean \
+            | tee "$RUNNER_TEMP/psc1-prefix-occurrence.log"
+          grep -Fqx 'PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls' "$RUNNER_TEMP/psc1-prefix-occurrence.log"
+          grep -Fqx 'PSC1_INVALID_RECURSOR_OCCURRENCE: PASS invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls' "$RUNNER_TEMP/psc1-prefix-occurrence.log"
+      - name: Check new-prefix ownership and official mutual nested controls
+        if: ${{ !cancelled() && steps.prefix_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2GeneratedPrefixRegression.lean \
+            | tee "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX: PASS new=23 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+      - name: Check ownership and atomicity source equations
+        if: ${{ !cancelled() && steps.prefix_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-generated-prefix-proofs.log"
+          if grep -E 'sorryAx|ofReduceBool|Lean.ofReduceBool' "$RUNNER_TEMP/psc1-generated-prefix-proofs.log"; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t03a-focused-native
+          path: |
+            ${{ runner.temp }}/psc1-prefix-occurrence.log
+            ${{ runner.temp }}/psc1-generated-prefix-native.log
+            ${{ runner.temp }}/psc1-generated-prefix-proofs.log

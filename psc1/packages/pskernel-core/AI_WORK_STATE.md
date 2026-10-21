@@ -1,3 +1,80 @@
+# Current T03a implementation candidate
+
+## 2026-10-22 — T03a candidate and evidenced native fixture repair
+
+Initial live documentation HEAD was `45d8c3e52b6bd2c78ad4e656828b5c0ce79d19a1`;
+implementation under qualification was `034999734f2574876a747c967dd03bcc6904b395`.
+Immediately before this commit the live branch advanced concurrently to
+`33466d0b516df9d0496d181dd1c4b619b9954c7c`, containing the same eight-call native
+fixture repair, printed parent log and a source-bound failure receipt. This
+candidate uses334 as its parent and preserves that complete work-state/history.
+Existing334 qualification is observed as well; it is not rerun or inherited.
+The existing five implementation034 qualification runs were inspected before any
+replacement full pipeline. This batch is NOT QUALIFIED at creation. Exact3aa
+remains the latest fully qualified scoped A until this candidate's own complete
+mandatory gates terminate successfully; no predecessor qualification is inherited.
+
+### Evidenced failure and correction
+
+Implementation034 native integration job119352848567/run39637759611 failed
+before executing the invalid-occurrence oracle/sentinel: its new native fixture
+contained eight `discard (← action)` applications passing an extracted value
+where Lean requires an IO action. The existing cache-mode parent reproduction
+did pass. Read-only Actions diagnostic
+[39640250554/job119361567049](https://github.com/dwijayuda/pskernel/actions/runs/39640250554/job/119361567049)
+retrieved artifact12365440836 and printed the exact eight errors (lines127,128,
+129,130,135,137,166,167), verifying ZIP SHA256
+`709d73791269923f65cc4ec56424bcc1fd6855c4f140b3f123dce3ef74d01b17`.
+It reran no kernel test. The inherited334 repair uses `discard (action)` at those eight sites,
+retaining every action and assertion. The baseline test log is now printed before
+the existing exact marker/status checks, so a subsequent failure is visible.
+
+### Bounded T03a implementation
+
+`API/DagGenerated.lean` now walks only the new prefix of the successfully checked
+final environment, stopping before the first exact name found in the previous
+environment. Final recursor types/rule RHSs, restored nested headers/constructors
+and renamed auxiliary recursors come exclusively from that final checked state.
+Ordinary/mutual type IDs reuse only matching current-command input refs already
+staged after admission. Nested requests import their final restored types; raw
+nested input IDs and flattening-only families are not published.
+
+The old three-argument ordinary helper remains unchanged. Production
+`RunCommandsWithSource` supplies its previous and current environments to the new
+entry. The original input table remains the external ID boundary; generated IDs
+are private. A late import failure returns internalError before any batch result.
+Unexpected prefix kinds are an internal invariant error, not semantic rejection.
+There is no environment-size prepass, whole old-environment scan, new checking
+authority, fuel change or callback-state reconstruction.
+
+Focused native/official and both detached generated-route tests cover a genuine
+two-family mutual declaration, Tree/List nested restoration including its final
+auxiliary recursor, nested no-aux dispatch, structured/numeric names, two original
+universe parameters, nonzero IDs, exact input-ID reuse, private IDs, absent or
+mismatched owners, malformed universes, old-tail poison, failure atomicity, an
+unrelated appended declaration and two public batches. The second batch owns
+only its new Fast family; preexisting-session refs remain T03b. Seven added
+source equations audit state preservation, arbitrary-tail stopping and atomic
+error results. Original recursor/K/major/state/resource/negative suites remain.
+
+The focused Actions branch is `work/psc1-pskernel-t03a-prefix-20261021`.
+Its native gate checks this bounded slice before integration's final full gates.
+Implementation034's other existing runs and the concurrent334 successor's
+already launched runs must be observed to terminal and recorded separately. Do not launch duplicate full qualification or claim this source is A
+until its exact native, both generated routes, canonical, proof and provider gates
+pass. Full Arena C and performance/release D stay separate from scoped A.
+
+B is still open: inductive admission remains V1, generated metadata import remains
+recursive, eager ingress decode and all four public whole-operation fallbacks
+remain. T01F full actual String environment, T03b preexisting-session ownership,
+Church/resource/timeouts, safety-contract reconciliation and global proof/backend
+obligations are unchanged. Default fuel4096 and all published limits are intact.
+
+
+---
+
+## Preserved integration history (verbatim)
+
 # Current implementation — execute the occurrence fixture actions correctly
 
 Observed: 2026-10-21 17:05:06 UTC

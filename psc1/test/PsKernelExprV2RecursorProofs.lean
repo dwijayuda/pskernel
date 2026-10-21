@@ -172,6 +172,106 @@ theorem recursor_zero_before_syntax
     psKernelExprV2TryReduceRecursorWithLocalValuesFuel 0 localValue context state root cheapProj =
       some (.error "kernel recursor budget exhausted") := rfl
 
+
+/- T03a ownership equations. The old environment tail is arbitrary. -/
+theorem generated_type_reuses_current_command_ref
+    (info : PsKernelConstantInfo) (base : PsKernelConstantBase)
+    (kind : PsKernelExprV2DeclarationRefKind)
+    (inputRefs : List PsKernelExprV2DeclarationRef)
+    (state : PsKernelDagGeneratedState) (owner : PsKernelExprV2DeclarationRef)
+    (found : psKernelExprV2DeclarationRefFind inputRefs base.name = some owner)
+    (matches : psKernelExprV2DeclarationRefMatches owner info = true) :
+    psKernelDagGeneratedInstallType info base kind inputRefs state = Except.ok state := by
+  simp [psKernelDagGeneratedInstallType, found, matches]
+
+theorem generated_prefix_empty
+    (previous : PsKernelEnvironment)
+    (inputRefs : List PsKernelExprV2DeclarationRef)
+    (state : PsKernelDagGeneratedState) :
+    psKernelDagGeneratedInstallNewPrefix [] previous inputRefs state =
+      Except.ok state := rfl
+
+theorem generated_prefix_stops_at_old_name
+    (info : PsKernelConstantInfo) (rest : List PsKernelConstantInfo)
+    (previous : PsKernelEnvironment)
+    (inputRefs : List PsKernelExprV2DeclarationRef)
+    (state : PsKernelDagGeneratedState)
+    (old : psKernelEnvironmentContains previous (psKernelConstantInfoName info) = true) :
+    psKernelDagGeneratedInstallNewPrefix (info :: rest) previous inputRefs state =
+      Except.ok state := by
+  simp [psKernelDagGeneratedInstallNewPrefix, old]
+
+theorem generated_prefix_first_import_error
+    (info : PsKernelConstantInfo) (rest : List PsKernelConstantInfo)
+    (previous : PsKernelEnvironment)
+    (inputRefs : List PsKernelExprV2DeclarationRef)
+    (state : PsKernelDagGeneratedState) (error : String)
+    (fresh : psKernelEnvironmentContains previous (psKernelConstantInfoName info) = false)
+    (failed : psKernelDagGeneratedInstallNewInfo info inputRefs state = Except.error error) :
+    psKernelDagGeneratedInstallNewPrefix (info :: rest) previous inputRefs state =
+      Except.error error := by
+  simp [psKernelDagGeneratedInstallNewPrefix, fresh, failed]
+
+theorem generated_prefix_threads_complete_state
+    (info : PsKernelConstantInfo) (rest : List PsKernelConstantInfo)
+    (previous : PsKernelEnvironment)
+    (inputRefs : List PsKernelExprV2DeclarationRef)
+    (state next : PsKernelDagGeneratedState)
+    (fresh : psKernelEnvironmentContains previous (psKernelConstantInfoName info) = false)
+    (installed : psKernelDagGeneratedInstallNewInfo info inputRefs state = Except.ok next) :
+    psKernelDagGeneratedInstallNewPrefix (info :: rest) previous inputRefs state =
+      psKernelDagGeneratedInstallNewPrefix rest previous inputRefs next := by
+  rw [psKernelDagGeneratedInstallNewPrefix]
+  simp [fresh, installed]
+
+theorem generated_import_error_prevents_batch_publication
+    (command : PsKernelDagCommand) (rest : List PsKernelDagCommand)
+    (input built : PsKernelExprV2Decoded)
+    (execution : PsKernelDagExecutionState)
+    (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (result : Prod PsKernelDagReply PsKernelDagExecutionState)
+    (error : String)
+    (admitted : psKernelDagRunCommandWithSource input execution
+      params safety arena built command = Except.ok result)
+    (failed : psKernelDagGeneratedAfterCommandWithPrevious command
+      execution.session.environment (Prod.snd result).session.environment
+      (PsKernelDagGeneratedState.mk arena built (Prod.snd result).declarations) =
+      Except.error error) :
+    psKernelDagRunCommandsWithSource (command :: rest) input execution
+      params safety arena built = Except.error (PsKernelError.internalError error) := by
+  simp [psKernelDagRunCommandsWithSource, admitted, failed]
+
+theorem generated_late_command_error_prevents_batch_publication
+    (command : PsKernelDagCommand) (rest : List PsKernelDagCommand)
+    (input built : PsKernelExprV2Decoded)
+    (execution : PsKernelDagExecutionState)
+    (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (result : Prod PsKernelDagReply PsKernelDagExecutionState)
+    (installed : PsKernelDagGeneratedState) (error : PsKernelError)
+    (admitted : psKernelDagRunCommandWithSource input execution
+      params safety arena built command = Except.ok result)
+    (imported : psKernelDagGeneratedAfterCommandWithPrevious command
+      execution.session.environment (Prod.snd result).session.environment
+      (PsKernelDagGeneratedState.mk arena built (Prod.snd result).declarations) =
+      Except.ok installed)
+    (failed : psKernelDagRunCommandsWithSource rest input
+      (PsKernelDagExecutionState.mk (Prod.snd result).session installed.declarations)
+      params safety installed.arena installed.built = Except.error error) :
+    psKernelDagRunCommandsWithSource (command :: rest) input execution
+      params safety arena built = Except.error error := by
+  rw [psKernelDagRunCommandsWithSource]
+  simp only [admitted, imported, failed]
+
+#print axioms generated_type_reuses_current_command_ref
+#print axioms generated_prefix_empty
+#print axioms generated_prefix_stops_at_old_name
+#print axioms generated_prefix_first_import_error
+#print axioms generated_prefix_threads_complete_state
+#print axioms generated_import_error_prevents_batch_publication
+#print axioms generated_late_command_error_prevents_batch_publication
+
 #print axioms check_uses_input_namespace
 #print axioms whnf_uses_input_namespace
 #print axioms defeq_left_uses_input_namespace_first

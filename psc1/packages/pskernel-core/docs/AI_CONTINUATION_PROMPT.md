@@ -1,25 +1,63 @@
-# Ready-to-copy continuation prompt — regular Pro chat
+# Ready-to-copy continuation prompt — T03a exact-source qualification
 
-Continue implementing the authorized open-source PSKernel-Core in `dwijayuda/pskernel` on `integration/psc1-pskernel-expr-v2-lean435-20261021`. Use connected GitHub tools and Linux GitHub Actions only; no local builds, Desktop Commander, force-push, main merge or npm publication.
+Continue authorized open-source PSKernel-Core implementation in `dwijayuda/pskernel`
+on `integration/psc1-pskernel-expr-v2-lean435-20261021`. Use connected GitHub tools
+and Linux GitHub Actions. Fetch live HEAD and newest `AI_WORK_STATE.md` before any
+change. Preserve history with non-force expected-SHA updates, fuel4096, published
+limits, independent checking, all negative controls and both detached generated
+routes. No local builds, main merge or npm publication.
 
-Current implementation: `034999734f2574876a747c967dd03bcc6904b395`. Last fully qualified scoped independent-provider checkpoint: `3aa077cb64ff06f76727decd01c43ad6c33f351d`. The newer source has four corrections: String projection, equivalent DefEq-pair lookup worker, cheapRec WHNF-cache isolation, and safe invalid recursor-headed recursive-occurrence rejection. **The newer source is not yet fully qualified.** Do not inherit predecessor CI.
+Live parent at candidate creation is `33466d0b516df9d0496d181dd1c4b619b9954c7c`;
+its concurrent fixture repair and failure evidence are preserved. Observe its
+already launched runs as well before replacing full qualification.
 
-First fetch live HEAD and inspect these existing runs; do not launch duplicates:
+The containing source implements the completion plan's T03a authoritative
+environment-prefix ownership recipe and repairs eight evidenced IO application
+errors in `PsKernelInvalidRecursorOccurrenceRegression.lean`. This candidate is
+NOT QUALIFIED at creation. Check its live exact-source runs, including focused
+branch `work/psc1-pskernel-t03a-prefix-20261021`, before dispatching duplicates.
+Do not inherit predecessor qualification. Last fully qualified scoped A remains
+`3aa077cb64ff06f76727decd01c43ad6c33f351d` until a successor's own mandatory gates pass.
 
-- Integration: `39637759611`
-- Correctness/canonical: `39637759709`
-- Research/proofs: `39637759603`
-- Full Arena: `39637759569`
-- Authentic profiling: `39637759606`
+Previous implementation `034999734f2574876a747c967dd03bcc6904b395` has terminal
+native integration failure job119352848567/run39637759611: eight
+`discard (← action)` fixture type errors prevented the new occurrence oracle
+and frozen-parent sentinel from running. Read-only artifact-inspection
+run39640250554/job119361567049 printed the exact errors and verified native
+artifact12365440836 digest. The correction executes the same actions through
+`discard (action)`; every semantic assertion and exact baseline marker remains.
+The first cheap-cache parent reproduction passed. Keep the failed receipt.
 
-Snapshot 2026-10-21T16:50:08.474Z: candidate native/generated/canonical/research jobs were queued; the official Arena reference passed and authentic profiling started. Fetch current results. Investigate actual failures and preserve every assertion. Partial native successes at predecessor464065d2e7823b4f62ac9888a2f8f98051031085 do not qualify0349997.
+Finish observing original034 integration39637759611, correctness39637759709,
+research39637759603, fullArena39637759569 and authentic profile39637759606 if
+not already terminal. The official Arena reference passed; require actual
+unchanged case16 `bugs/rec-missing-ih.ndjson` rejection by independent validation,
+with unsafe/erased/reducible/nested controls preserved. Diagnostic PASS is not
+kernel PASS. Full Arena failures remain separate from scoped A.
 
-This final handoff commit changes documentation and receipts only; executable source remains0349997. It does not claim new CI for a later documentation HEAD. Read the newest `psc1/packages/pskernel-core/AI_WORK_STATE.md` and these four files under its `docs/` directory: `PSKERNEL_CORE_LEAN435_DEEP_AUDIT.md`, `PSKERNEL_CORE_COMPLETION_PLAN.md`, `PSKERNEL_CORE_PROGRESS_MATRIX.md`, `AI_CONTINUATION_PROMPT.md`. Execute their finite queue; do not repeat the broad audit.
+T03a adds `InstallNewInfo`, `InstallNewPrefix` and
+`AfterCommandWithPrevious` in `API/DagGenerated.lean`. Production obtains new
+recursor/restored-type/constructor owners from the successfully checked final
+environment prefix and stops before its first exact previous-environment name.
+Reuse only current-command ordinary/mutual input refs already staged after
+admission. Import final nested restored types and auxiliary recursor rules.
+Preserve old helper ABI, original external ID namespace, private appended IDs,
+complete state and atomic publication. The implementation remains transitional:
+V1 inductive admission, recursive metadata import, eager decode and the four
+whole-operation fallback families remain.
 
-Qualify the correction's native, both generated routes, canonical, proof and provider gates at the same implementation SHA, including actual unchanged case16 replay. Record full-Arena failures separately: unfinished C/D must not block an already qualified scoped A or T03a. Then implement **T03a**: obtain newly admitted mutual/nested recursor and restored type/constructor owners from the authoritative final-environment prefix, stopping at the previous environment's first existing name. Reuse current-command original refs; preserve input/private-ID namespaces, old helper ABIs, full state and atomic publication. Add direct native/generated/official positive and negative tests. Avoid scanning the entire environment per command.
+First resolve any demonstrated focused native/test/proof failure. Then require
+this exact implementation's native, complete portable .lean, canonical .ps,
+both authentic TypeScript7.0.2/Node22 routes, retained proofs and provider gates.
+Full-kernel DirectJS stays unsupported. Run/observe one final unchanged full193
+comparison per complete candidate, preserving case-level failures and resource
+classification. Do not claim global soundness or a general performance gain.
 
-Preserve Lean4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, fuel4096 and published limits. Case16 must match official rejection through actual validation, with unsafe excluded; never relabel generic unsupported results. Church-stage attribution is separate: diagnostic branch `research/psc1-arena-logical-20261021`, source `f2e6c44a506a53dc294ae6569f8371e81ed6bdd5`, run39638208348, pins historical kernel369bee. Its preceding runs failed on a reserved host identifier and then a launcher mode allowlist; both are corrected, but no first-failing-stage result was observed at this snapshot. Inspect its terminal artifact before any claim. Keep native/generated ownership, checked/infer-only separation and authentic invalid-proof rejection intact.
-
-Milestone A is the scoped V1 provider; B is complete DAG migration, C is full Lean compatibility, and D is performance/release. Keep TypeScript7.0.2/Node22 and both detached generated routes. Minimal String fixtures leave full String.ofList qualification open. Diagnostic collection PASS is not Arena PASS; timeouts, resource exhaustion and unsupported cases remain distinct from semantic rejection. Preserve exact-source negative controls.
-
-Update the matrix and work state after each batch. Report exact HEAD, latest qualified SHA, terminal run/job results, separate A/B/C/D status, inconclusive performance honestly, remaining blockers and one next executable task. Commit coherent checkpoints if necessary; never claim background continuation.
+Read the finite completion plan and progress matrix; do not repeat the broad
+architecture audit. Once T03a is genuinely qualified, the next implementation
+task is T03b preexisting-session ownership. T01F actual String.ofList environment,
+cache indexes, DAG admission/decode/fallback removal, Church/timeouts and safety
+contract reconciliation remain open. Update matrix/work-state after the batch;
+report live HEAD, exact qualified source/run/job evidence, separate A/B/C/D,
+remaining blockers and one next executable task. Never imply background work
+continues after the chat ends.

@@ -88,6 +88,7 @@ try{
    const manifest=JSON.parse(fs.readFileSync(output+'.bundle.json','utf8'));
    assert.equal(manifest.logicalCheckerCommit,contract.checkerCommit);assert.equal(manifest.behaviorallyVerified,false);
    assert.equal(manifest.publicAbi,target.startsWith('wasm-')?'wasm-io-dispatcher':'io-dispatcher');
+   fs.cpSync(path.dirname(fs.realpathSync(output+'.bundle.json')),path.join(evidence,'bundles',label),{recursive:true});
    let module=output,hostCargoLockSha256=null,command;
    if(target==='ts'){
     assert.ok(process.env.PSC1_TSC);const consumer=path.join(folder,'typescript');
@@ -166,7 +167,6 @@ try{
     sourceSha256:hash(source),moduleSha256,librarySha256:hash(path.join(sourceRoot,'ProofScript/System/IO.'+syntax)),
     artifactSha256:hash(output),manifestSha256,kernelAdmissionSha256:manifest.kernelAdmissionSha256,
     sourceClosureSha256:manifest.sourceClosureSha256,oracleSha256:hash(referenceFile),hostCargoLockSha256,cases:observations});
-   fs.cpSync(path.dirname(pointer),path.join(evidence,'bundles',label),{recursive:true});
    console.log((compilerApplication?'PSC1_COMPILER_APPLICATION_RECORD: ':'PSC1_PRACTICAL_APPLICATION_RECORD: ')+JSON.stringify(records.at(-1)));
    console.log('PSC1_PRACTICAL_APPLICATION_PASS: '+label+' '+observations.length+' actual CLI/file cases');
   }catch(error){failures.push({label,error:error.stack||String(error)});console.error('PSC1_PRACTICAL_APPLICATION_FAIL: '+label+'\n'+error.stack);if(compilerApplication)break matrix;}

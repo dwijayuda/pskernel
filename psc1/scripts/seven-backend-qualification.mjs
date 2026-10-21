@@ -59,6 +59,20 @@ for(const [id,file]of [['library-application','PSC1_LIBRARY_APPLICATION_CASE_CON
  extraProtocols[id]={contract:contract.id,obligations:receipt.records.length,
   minimumPythonObligations:minimum.records.length,evidence:id+'/results.json',completeFamily:false};
 }
+const tsContinuations=read('dist/scoped-correctness/ts-continuations/results.json');
+assert.equal(tsContinuations.schema,'psc1-ts-continuation-runtime/1');
+assert.equal(tsContinuations.testedCommit,process.env.GITHUB_SHA);
+assert.equal(tsContinuations.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+assert.equal(tsContinuations.passed,true);assert.equal(tsContinuations.independentTypeCheck,true);
+assert.equal(tsContinuations.strictInputIr,true);assert.equal(tsContinuations.mutualTailCalls,1000001);
+assert.equal(tsContinuations.nonTailDepth,5000);assert.equal(tsContinuations.strictDivergenceDeadlineMs,2000);
+assert.equal(tsContinuations.maxRssBoundKiB,262144);
+assert.ok(tsContinuations.maxRssKiB>0&&tsContinuations.maxRssKiB<=262144);
+for(const key of ['nativeFixtureSha256','rawSha256','formattedSha256','executableSha256'])
+ assert.match(tsContinuations[key]||'',/^[a-f0-9]{64}$/);
+for(const name of ['mutual tail results','non-tail arithmetic continuation','local value continuation','local tail result',
+ 'condition continuation','escaping lambda owner','old captured value','callee and operands exact-once left-to-right',
+ 'tail foreign trap escapes','non-tail foreign trap escapes'])assert.ok(tsContinuations.checks.includes(name));
 const typedIoExecution=read('dist/scoped-correctness/typed-io-execution/results.json');
 checkTypedIoExecution(read('docs/PSC1_TYPED_IO_EXECUTION_CONTRACT.json'),typedIoExecution,{
  commit:process.env.GITHUB_SHA,head:process.env.PSC1_HEAD_SHA,
@@ -421,6 +435,7 @@ const receipt = {
     runtimeBytes: x.runtime.runtimeBytes, runtimeSha256: x.runtime.runtimeSha256
   })),
   architectureFoundation: {
+    typescriptContinuations:tsContinuations,
     boundedProtocols:extraProtocols,
     compilerApplication:{contract:compilerApplicationContract.id,actualConsumers:compilerApplication.records.length,casesPerConsumer:compilerApplicationContract.cases.length,minimumPythonConsumers:minimumCompilerApplication.records.length,evidence:'compiler-application/results.json',performance:compilerApplication.records.map(r=>({syntax:r.syntax,target:r.target,...r.cases.find(c=>c.id==='100000-statements').metrics})),completePracticalCore:false},
     practicalApplications:{contract:applicationContract.id,applications:applicationContract.applications,actualConsumers:practicalApplications.records.length,casesPerConsumer:applicationContract.cases.length,minimumPythonConsumers:minimumApplications.records.length,evidence:'practical-applications/results.json',completePracticalCore:false},

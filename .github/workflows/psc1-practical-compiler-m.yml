@@ -97,7 +97,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_independent_checker psc1_wasm_string_abi_tests
+          lake build psc1 psc1_ts_continuation_tests psc1_independent_checker psc1_wasm_string_abi_tests
           .lake/build/bin/psc1_wasm_string_abi_tests
       - name: Save successful compilation before running regressions
         if: steps.native_cache.outputs.cache-hit != 'true'
@@ -111,6 +111,8 @@ jobs:
           wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-core.wasm
           wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-component.wasm
           node scripts/wasm-string-tests.mjs
+      - name: Execute typed continuation and bounded tail-driver regressions
+        run: node scripts/ts-continuation-tests.mjs
       - name: Execute authored inputs with native references and focused consumers
         run: |
           set -euo pipefail
@@ -147,6 +149,7 @@ jobs:
             psc1/dist/scoped-correctness/practical-applications-focused/
             psc1/dist/scoped-correctness/library-application-focused/
             psc1/dist/scoped-correctness/compiler-application-focused/
+            psc1/dist/scoped-correctness/ts-continuations/
             psc1/dist/scoped-correctness/json-application-focused/
             psc1/dist/scoped-correctness/compiler-m-focused/
             psc1/dist/scoped-correctness/stdlib-collections-focused/

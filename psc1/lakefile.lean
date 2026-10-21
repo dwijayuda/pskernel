@@ -415,3 +415,7 @@ lean_exe psc1_worker_fusion_tests where
 lean_exe psc1_wasm_string_abi_tests where
   srcDir := "test"
   root := `WasmStringAbiTests
+
+lean_exe psc1_ts_continuation_tests where
+  srcDir := "test"
+  root := `TsContinuationTests

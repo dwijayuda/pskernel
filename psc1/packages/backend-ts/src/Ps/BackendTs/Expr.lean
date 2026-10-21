@@ -488,8 +488,9 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["(<A, B>(__ps_f: (__ps_b: B, __ps_x: A) => B, __ps_init: B, ", "__ps_a: A[], __ps_start: bigint, __ps_stop: bigint): B => {", " const __ps_size = BigInt(__ps_a.length); ", "const __ps_end = __ps_stop <= __ps_size ? __ps_stop : __ps_size; ", "let __ps_acc = __ps_init; ", "for (let __ps_i = __ps_start; __ps_i < __ps_end; __ps_i += 1n) {", " __ps_acc = __ps_f(__ps_acc, __ps_a[Number(__ps_i)]!); } ", "return __ps_acc; })(", fn, ", ", init, ", ", array, ", ", start, ", ", stop, ")"]);
       psTsPrinted5 emit arguments
-def psTsEmitLetStatements
+def psTsEmitLetStatementsWithResult
     (emit : PsVerifiedIrExpr -> Except PsTsEmitError String)
+    (emitResult : PsVerifiedIrExpr -> Except PsTsEmitError String)
     (expr : PsVerifiedIrExpr) : Except PsTsEmitError String :=
   match expr with
   | PsVerifiedIrExpr.letE name type value body =>
@@ -499,7 +500,7 @@ def psTsEmitLetStatements
           match emit value with
           | Except.error error => Except.error error
           | Except.ok printedValue =>
-              match psTsEmitLetStatements emit body with
+              match psTsEmitLetStatementsWithResult emit emitResult body with
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   if psTsExprUsesNameWithFuel 4096 value name then
@@ -509,18 +510,25 @@ def psTsEmitLetStatements
                   else
                     Except.ok (psTsJoin "" ["{ const ", name, ": ", printedType, " = ", printedValue, "; ", printedBody, " }"])
   | _ =>
-      match emit expr with
+      match emitResult expr with
       | Except.error error => Except.error error
       | Except.ok printed => Except.ok (psTsJoin "" ["return ", printed, ";"])
 
-def psTsEmitExprWithFuel
+def psTsEmitLetStatements
+    (emit : PsVerifiedIrExpr -> Except PsTsEmitError String)
+    (expr : PsVerifiedIrExpr) : Except PsTsEmitError String :=
+  psTsEmitLetStatementsWithResult emit emit expr
+
+def psTsEmitExprContextWithFuel
     (brands : List (String × String)) (tags : List (String × String)) (fuel : Nat) :
-    PsVerifiedIrExpr -> Except PsTsEmitError String :=
+    Bool -> PsVerifiedIrExpr -> Except PsTsEmitError String :=
   match fuel with
-  | Nat.zero => fun (_expr : PsVerifiedIrExpr) => Except.error PsTsEmitError.fuelExhausted
+  | Nat.zero => fun (_tail : Bool) (_expr : PsVerifiedIrExpr) => Except.error PsTsEmitError.fuelExhausted
   | Nat.succ remaining =>
-    fun (expr : PsVerifiedIrExpr) =>
-      let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;
+    fun (tail : Bool) (expr : PsVerifiedIrExpr) =>
+      let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprContextWithFuel brands tags remaining false;
+      let result : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprContextWithFuel brands tags remaining tail;
+      let owned : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprContextWithFuel brands tags remaining true;
       match expr with
       | .literal literal =>
           psTsEmitLiteral literal
@@ -541,7 +549,7 @@ def psTsEmitExprWithFuel
           match psListMapExcept printParameter parameters with
           | Except.error error => Except.error error
           | Except.ok printedParameters =>
-              match smaller body with
+              match owned body with
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   match psTsEmitType resultType with
@@ -567,9 +575,9 @@ def psTsEmitExprWithFuel
                         if psListIsEmpty printedArguments then ""
                         else psTsJoin "" [", ", psTsJoin ", " printedArguments];
                       Except.ok
-                        (psTsJoin "" ["(yield* __ps$invoke(", callable, generic, suffix, "))"])
+                        (psTsJoin "" ["(yield* ", (if tail then "__ps$tail" else "__ps$invoke"), "(", callable, generic, suffix, "))"])
       | .letE _ _ _ _ =>
-          match psTsEmitLetStatements smaller expr with
+          match psTsEmitLetStatementsWithResult smaller result expr with
           | Except.error error => Except.error error
           | Except.ok statements =>
               Except.ok (psTsJoin "" ["(yield* (function*() { ", statements, " })())"])
@@ -577,10 +585,10 @@ def psTsEmitExprWithFuel
           match smaller condition with
           | Except.error error => Except.error error
           | Except.ok printedCondition =>
-              match smaller thenBranch with
+              match result thenBranch with
               | Except.error error => Except.error error
               | Except.ok printedThen =>
-                  match smaller elseBranch with
+                  match result elseBranch with
                   | Except.error error => Except.error error
                   | Except.ok printedElse =>
                       Except.ok
@@ -661,7 +669,7 @@ def psTsEmitExprWithFuel
                       match detail with
                       | Prod.mk bindings body =>
                         match
-                            smaller
+                            result
                               body with
                         | Except.error error => Except.error error
                         | Except.ok printedBody =>
@@ -693,6 +701,18 @@ def psTsEmitExprWithFuel
                           (psTsJoin "" ["(yield* (function*() { const ", temp, " = ", printedScrutinee, "; switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
                               "invalid ProofScript constructor tag", "); })())"])
 
+
+-- Ordinary expression consumers preserve their surrounding continuation.
+def psTsEmitExprWithFuel
+    (brands : List (String × String)) (tags : List (String × String)) (fuel : Nat) :
+    PsVerifiedIrExpr -> Except PsTsEmitError String :=
+  psTsEmitExprContextWithFuel brands tags fuel false
+
+-- Only complete function/value results may replace the current driver frame.
+def psTsEmitTailExpr
+    (brands : List (String × String)) (tags : List (String × String))
+    (expr : PsVerifiedIrExpr) : Except PsTsEmitError String :=
+  psTsEmitExprContextWithFuel brands tags 4096 true expr
 
 def psTsEmitExpr
     (brands : List (String × String))

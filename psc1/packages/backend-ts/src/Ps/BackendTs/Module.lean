@@ -203,8 +203,10 @@ def psTsEmitImport (item : PsVerifiedIrExternalImport) : String :=
 
 -- Each recursive call suspends its generator; the host loop owns the work stack.
 -- Public functions remain synchronous and retain their ordinary TypeScript types.
+-- Tail requests replace only a complete logical function result; non-tail
+-- requests retain the existing continuation. Generated owners have no JS finally.
 def psTsStackRuntimeSupport : String :=
-  "type __ps$Request = { readonly fn: Function; readonly args: unknown[] };\ntype __ps$Computation<R> = Generator<__ps$Request, R, unknown>;\nconst __ps$implementations = new WeakMap<Function, Function>();\nfunction __ps$run<R>(root: __ps$Computation<R>): R {\n  const pending: __ps$Computation<unknown>[] = [root];\n  let value: unknown = undefined;\n  while (pending.length !== 0) {\n    const next = pending[pending.length - 1].next(value);\n    if (next.done) { pending.pop(); value = next.value; }\n    else {\n      const { fn, args } = next.value;\n      const implementation = __ps$implementations.get(fn);\n      if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; }\n      else value = Reflect.apply(fn, undefined, args);\n    }\n  }\n  return value as R;\n}\nfunction __ps$wrap<A extends unknown[], R>(implementation: (...args: A) => __ps$Computation<R>): (...args: A) => R {\n  const fn = (...args: A): R => __ps$run(implementation(...args));\n  __ps$implementations.set(fn, implementation);\n  return fn;\n}\nfunction* __ps$invoke<A extends unknown[], R>(fn: (...args: A) => R, ...args: A): __ps$Computation<R> {\n  return (yield { fn, args }) as R;\n}"
+  "type __ps$Request = { readonly fn: Function; readonly args: unknown[]; readonly tail: boolean };\ntype __ps$Computation<R> = Generator<__ps$Request, R, unknown>;\nconst __ps$implementations = new WeakMap<Function, Function>();\nfunction __ps$run<R>(root: __ps$Computation<R>): R {\n  const pending: __ps$Computation<unknown>[] = [root];\n  let value: unknown = undefined;\n  while (pending.length !== 0) {\n    const next = pending[pending.length - 1].next(value);\n    if (next.done) { pending.pop(); value = next.value; }\n    else {\n      const { fn, args, tail } = next.value;\n      const implementation = __ps$implementations.get(fn);\n      if (tail) pending.pop();\n      if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; }\n      else value = Reflect.apply(fn, undefined, args);\n    }\n  }\n  return value as R;\n}\nfunction __ps$wrap<A extends unknown[], R>(implementation: (...args: A) => __ps$Computation<R>): (...args: A) => R {\n  const fn = (...args: A): R => __ps$run(implementation(...args));\n  __ps$implementations.set(fn, implementation);\n  return fn;\n}\nfunction* __ps$invoke<A extends unknown[], R>(fn: (...args: A) => R, ...args: A): __ps$Computation<R> {\n  return (yield { fn, args, tail: false }) as R;\n}\nfunction* __ps$tail<A extends unknown[], R>(fn: (...args: A) => R, ...args: A): __ps$Computation<R> {\n  return (yield { fn, args, tail: true }) as R;\n}"
 
 -- Cache two immutable strings so pairwise comparisons reuse both byte indexes.
 -- Retention is bounded; character access remains exact at UTF-8 boundaries.
@@ -299,7 +301,7 @@ def psTsEmitDeclarationGeneralWithVisibility (isPublic : Bool)
   match psTsEmitType declaration.resultType with
   | Except.error error => Except.error error
   | Except.ok resultType =>
-      match psTsEmitExpr brands tags (psTsInlineEtaApplication declaration.body) with
+      match psTsEmitTailExpr brands tags (psTsInlineEtaApplication declaration.body) with
       | Except.error error => Except.error error
       | Except.ok body =>
           if psListIsEmpty declaration.parameters then

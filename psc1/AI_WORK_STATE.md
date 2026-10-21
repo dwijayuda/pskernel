@@ -150,3 +150,24 @@ require canonical shapes to stay equal and the redundant union to keep refusing;
 the actual single-constructor application and independent TS checker remain the
 execution regression. No source fixture or admission/IR policy is changed.
 Full application and release readiness remain pending fresh Linux evidence.
+
+## Measured TypeScript tail-continuation blocker
+
+Run 39662002050 at 908cbc300ef0f3e96c1112e458da66b558c4782e passes native
+and the TS formatter/type-check boundary. The actual Lean/TS 100000-statement
+child returns correct output, but peaks at 3463956 KiB RSS (13.29 s), exceeding
+the unchanged 1048576-KiB bound. Lean/JS passes at 1.53 s / 304400 KiB. No other
+backend is inferred tested after the focused fail-fast boundary.
+
+The general TS emitter now propagates tail context only through complete
+function/lambda results, let bodies, branch results and match alternatives.
+Operands, callees, local values and other surrounding continuations remain
+ordinary. The private driver replaces a complete-result frame for tail calls,
+including mutual/indirect calls. All existing fast paths stay intact.
+A registered native strict-IR fixture plus independent TS checker/actual consumer
+verify mutual/non-tail recursion, context boundaries, captures, exact-once
+operand order, traps and strict divergence. Focused/full gates require it;
+final consolidation binds its exact commit/hashes and bounded RSS evidence.
+Failed application cases now retain checked bundles before execution.
+See PSC1_TS_TAIL_CONTINUATION_DEFECT_2026-10-22.md. The new correction and all
+application/performance acceptance remain UNQUALIFIED until fresh Linux CI.

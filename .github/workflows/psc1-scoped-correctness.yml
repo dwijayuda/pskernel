@@ -125,7 +125,7 @@ jobs:
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_wasm_string_abi_tests psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
+          lake build psc1 psc1_ts_continuation_tests psc1_wasm_string_abi_tests psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
       - name: Save successful compilation before running regressions
         if: steps.native_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -204,6 +204,10 @@ jobs:
           if ! .lake/build/bin/psc1_typed_error_tests 2>&1 | tee dist/scoped-correctness/typed-errors/native-tests.log; then result=1; fi
           if ! node scripts/typed-error-conformance-tests.mjs; then result=1; fi
           exit "$result"
+      - name: Execute typed continuation and bounded tail-driver regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: node scripts/ts-continuation-tests.mjs
       - name: Execute authored CompilerM cases across seven targets
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1

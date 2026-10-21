@@ -1,4 +1,4 @@
-name: PSC1 authenticated native V1 theorem-stage diagnostic
+name: PSC1 authenticated native V1 DefEq failure trace
 
 on:
   workflow_dispatch:
@@ -13,6 +13,7 @@ on:
       - psc1/scripts/pskernel-arena435-native-v1.py
       - psc1/scripts/pskernel-arena435-native-cgroup.py
       - psc1/host/arena-native-v1/NativeChurchMain.lean
+      - psc1/host/arena-native-v1/NativeChurchDefEqTrace.lean
 
 permissions:
   contents: read
@@ -84,7 +85,7 @@ jobs:
             | tee "$RUNNER_TEMP/arena435-native-transport-controls.log"
           grep -q 'PSC1_ARENA_REPLAY_CONTROLS: PASS count=138' \
             "$RUNNER_TEMP/arena435-native-transport-controls.log"
-      - name: Build pinned native V1, preserve baseline, and locate first theorem failure
+      - name: Prove the host observer, preserve native baseline, and trace the DefEq failure
         shell: bash
         run: |
           set -euo pipefail
@@ -107,6 +108,10 @@ jobs:
           grep -q 'PSC1_ARENA_NATIVE_STAGE_PARSER_CONTROLS: PASS count=9' "$RUNNER_TEMP/arena435-native-v1.log"
           grep -q 'PSC1_ARENA_NATIVE_STAGE_CONTROLS_VALIDATED count=3' "$RUNNER_TEMP/arena435-native-v1.log"
           grep -q 'PSC1_ARENA_NATIVE_STAGE_COMPLETE ' "$RUNNER_TEMP/arena435-native-v1.log"
+          grep -q 'PSC1_ARENA_NATIVE_DEFEQ_PROOFS: PASS count=5' "$RUNNER_TEMP/arena435-native-v1.log"
+          grep -q 'PSC1_ARENA_NATIVE_DEFEQ_PARSER_CONTROLS: PASS count=9' "$RUNNER_TEMP/arena435-native-v1.log"
+          grep -q 'PSC1_ARENA_NATIVE_DEFEQ_CONTROLS_VALIDATED count=4' "$RUNNER_TEMP/arena435-native-v1.log"
+          grep -q 'PSC1_ARENA_NATIVE_DEFEQ_COMPLETE ' "$RUNNER_TEMP/arena435-native-v1.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -118,6 +123,7 @@ jobs:
             ${{ runner.temp }}/arena435-native-source-identities.txt
             ${{ runner.temp }}/arena435-native-restored/authentication.json
             psc1/host/arena-native-v1/NativeChurchMain.lean
+            psc1/host/arena-native-v1/NativeChurchDefEqTrace.lean
             psc1/scripts/pskernel-arena435-native-export.mjs
             psc1/scripts/pskernel-arena435-native-v1.py
             psc1/scripts/pskernel-arena435-native-cgroup.py

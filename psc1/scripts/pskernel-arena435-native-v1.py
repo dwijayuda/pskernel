@@ -8,6 +8,7 @@ import importlib.util
 import json
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -30,6 +31,10 @@ APPEND_CONFIG = """
 lean_lib NativeChurchInput where
   srcDir := "native-church-diagnostic"
   roots := #[\x60NativeChurchInput]
+
+lean_lib NativeChurchDefEqTrace where
+  srcDir := "native-church-diagnostic"
+  roots := #[\x60NativeChurchDefEqTrace]
 
 lean_exe psc1_arena_native_v1_church where
   srcDir := "native-church-diagnostic"
@@ -326,6 +331,269 @@ def collect_stages(binary: pathlib.Path, out: pathlib.Path, runner, report: dict
         "same_as_unmodified_api": True, "kernel_qualified": False}), flush=True)
 
 
+DEFEQ_PREFIX = "PSC1_ARENA_NATIVE_DEFEQ_EVENT "
+DEFEQ_INPUT_PREFIX = "PSC1_ARENA_NATIVE_DEFEQ_INPUT "
+DEFEQ_CONTROLS_PREFIX = "PSC1_ARENA_NATIVE_DEFEQ_CONTROLS "
+DEFEQ_STAGES = frozenset({
+    "zero-guard", "depth-guard", "quick", "reflection", "cheap-left", "cheap-right",
+    "quick-after-core", "left-type", "is-proposition", "right-type", "proof-type-defeq",
+    "lazy-delta", "projection-shortcut", "full-left", "full-right", "changed-retry",
+    "full-shape", "final-rules",
+})
+DEFEQ_PROOFS = (
+    "traceAttempt_identity", "frozen_eq_original", "traced_eq_frozen",
+    "traced_eq_original", "session_eq_original",
+)
+
+
+def bounded_lines(path: pathlib.Path, limit: int = 1048576) -> list[str]:
+    require(path.stat().st_size <= limit, "native DefEq observation exceeded output byte cap")
+    return [line for line in path.read_text(encoding="utf-8", errors="strict").splitlines() if line]
+
+
+def defeq_output(stdout: pathlib.Path, controls: bool) -> dict:
+    lines = bounded_lines(stdout)
+    prefix = DEFEQ_CONTROLS_PREFIX if controls else STAGE_PREFIX
+    reports = [exact_json(line[len(prefix):]) for line in lines if line.startswith(prefix)]
+    require(len(reports) == 1, "native DefEq outcome omitted or duplicated")
+    expected = ["PSC1_ARENA_NATIVE_DEFEQ_CONTROLS: PASS count=4"] if controls else []
+    require([line for line in lines if not line.startswith(prefix)] == expected,
+            "unexpected native DefEq stdout")
+    return reports[0]
+
+
+def defeq_observations(stderr: pathlib.Path) -> tuple[list[dict], list[dict], list[dict]]:
+    stages, inputs, events = [], [], []
+    for line in bounded_lines(stderr):
+        require(len(line.encode("utf-8")) <= 262144, "native DefEq event exceeds byte cap")
+        if line.startswith(EVENT_PREFIX):
+            stages.append(exact_json(line[len(EVENT_PREFIX):]))
+        elif line.startswith(DEFEQ_INPUT_PREFIX):
+            inputs.append(exact_json(line[len(DEFEQ_INPUT_PREFIX):]))
+        elif line.startswith(DEFEQ_PREFIX):
+            events.append(exact_json(line[len(DEFEQ_PREFIX):]))
+        else:
+            raise ValueError("unexpected native DefEq stderr")
+    require(len(stages) <= 60 and len(inputs) <= 2 and len(events) <= 49,
+            "native DefEq observation exceeded bounded counts")
+    return stages, inputs, events
+
+
+def validate_expr_view(value: dict) -> None:
+    require(isinstance(value, dict) and value.get("nodeVisitLimit") == 24
+            and value.get("shapeOnly") is True and type(value.get("truncated")) is bool,
+            "native DefEq expression snapshot changed its bounded contract")
+    nodes = value.get("nodes")
+    require(isinstance(nodes, list) and 0 < len(nodes) <= 24, "invalid expression snapshot count")
+    kinds = {"bvar", "fvar", "mvar", "sort", "const", "app", "lam",
+             "forallE", "letE", "lit", "mdata", "proj"}
+    require(all(isinstance(node, dict) and node.get("kind") in kinds
+                and isinstance(node.get("path"), str) and len(node["path"]) <= 160
+                for node in nodes), "invalid bounded expression snapshot node")
+
+
+def validate_defeq_input(value: dict, label: str, index: int, policy: dict) -> None:
+    authentic = label == "church-numerals"
+    require(value.get("protocol") == "pskernel-arena-native-defeq-input/1"
+            and value.get("sourceSha") == SOURCE and value.get("case") == label
+            and type(value.get("declarationIndex")) is int and value["declarationIndex"] == index
+            and type(value.get("fuel")) is int and value["fuel"] == policy["fuel"]
+            and value.get("sourceTypesChecked") is authentic
+            and value.get("bodySha256") == (BODY if authentic else None)
+            and value.get("inferredTypeMatchesSource") is (True if authentic else None)
+            and value.get("claimedTypeMatchesSource") is (True if authentic else None),
+            "native actual DefEq input identity or source-type check differs")
+    validate_expr_view(value.get("inferredType"))
+    validate_expr_view(value.get("claimedType"))
+
+
+def validate_defeq_events(events: list[dict]) -> None:
+    require(0 < len(events) <= 49, "native DefEq failure trace empty or over cap")
+    prior = -1
+    for event in events:
+        fuel = event.get("ownerFuel")
+        stage = event.get("stage")
+        require(event.get("protocol") == "pskernel-arena-native-defeq-event/1"
+                and event.get("sourceSha") == SOURCE and event.get("phase") == "error"
+                and type(fuel) is int and 0 <= fuel <= 4096
+                and (fuel >= 4080 or fuel <= 16 or fuel % 256 == 0)
+                and fuel > prior and stage in DEFEQ_STAGES
+                and type(event.get("recursiveDefEqFuel")) is int
+                and event["recursiveDefEqFuel"] == max(0, fuel - 1),
+                "native DefEq trace identity, selection or unwind order differs")
+        prior = fuel
+        guarded = stage in {"zero-guard", "depth-guard"}
+        require(event.get("guardWithoutSyntaxInspection") is guarded,
+                "native DefEq guard inspection marker differs")
+        if stage == "zero-guard":
+            require(fuel == 0, "native DefEq zero guard was not at zero fuel")
+        if guarded:
+            require(not {"left", "right", "recDepth", "nextFresh"} & event.keys(),
+                    "native DefEq guard observation inspected syntax or state")
+        else:
+            require(type(event.get("recDepth")) is int and event["recDepth"] >= 0
+                    and type(event.get("nextFresh")) is int and event["nextFresh"] >= 0,
+                    "native DefEq snapshot lacks actual input owner state")
+            validate_expr_view(event.get("left"))
+            validate_expr_view(event.get("right"))
+        message = event.get("message")
+        require(isinstance(message, dict) and isinstance(message.get("text"), str)
+                and message.get("truncated") is False
+                and type(message.get("utf8ByteSize")) is int
+                and message["utf8ByteSize"] == len(message["text"].encode("utf-8"))
+                and message["utf8ByteSize"] <= 256 and len(message["text"]) <= 64,
+                "native DefEq observed error message was truncated or malformed")
+
+
+def validate_defeq_parser_controls(event: dict, snapshot: dict) -> int:
+    def refused(action):
+        try:
+            action()
+        except ValueError:
+            return
+        raise ValueError("native DefEq parser accepted a deliberately corrupted receipt")
+    for update in (
+        {"sourceSha": "0" * 40}, {"ownerFuel": 4097}, {"ownerFuel": 17},
+        {"stage": "unknown"}, {"left": {}},
+    ):
+        changed = json.loads(json.dumps(event))
+        changed.update(update)
+        refused(lambda changed=changed: validate_defeq_events([changed]))
+    changed = json.loads(json.dumps(event))
+    changed["message"]["truncated"] = True
+    refused(lambda: validate_defeq_events([changed]))
+    refused(lambda: validate_defeq_events([event, event]))
+    changed_input = json.loads(json.dumps(snapshot))
+    changed_input["sourceSha"] = "0" * 40
+    refused(lambda: validate_defeq_input(changed_input, "defeq-positive", 0, POLICY))
+    changed_input = json.loads(json.dumps(snapshot))
+    changed_input["inferredType"]["nodeVisitLimit"] = 25
+    refused(lambda: validate_defeq_input(changed_input, "defeq-positive", 0, POLICY))
+    return 9
+
+
+def audit_defeq_proofs(lake: pathlib.Path, source: pathlib.Path, config: pathlib.Path,
+                      trace: pathlib.Path, out: pathlib.Path, report: dict) -> None:
+    command = [str(lake), "-f", config.name, "env", "lean", str(trace.relative_to(source))]
+    started = time.monotonic()
+    stdout_path, stderr_path = out / "defeq-proof.stdout.txt", out / "defeq-proof.stderr.txt"
+    with stdout_path.open("wb") as stdout, stderr_path.open("wb") as stderr:
+        result = subprocess.run(command, cwd=source, stdout=stdout, stderr=stderr, timeout=120)
+    receipt = {"command": command, "returncode": result.returncode,
+               "wall_seconds": time.monotonic() - started, "source_sha256": file_digest(trace),
+               "stdout_sha256": file_digest(stdout_path), "stderr_sha256": file_digest(stderr_path)}
+    report["defeq_proof_gate"] = receipt
+    require(result.returncode == 0, "native frozen/observer equivalence proof compilation failed")
+    output = stdout_path.read_text(encoding="utf-8", errors="strict")
+    pattern = re.compile(
+        r"'NativeChurchDefEqTrace\.([A-Za-z_]+)' (?:does not depend on any axioms|"
+        r"depends on axioms:\s*\[([^\]]*)\])")
+    matches = pattern.findall(output)
+    require(len(matches) == 5 and tuple(name for name, _ in matches) == DEFEQ_PROOFS,
+            "native DefEq proof gate omitted or duplicated an axiom report")
+    printed = {}
+    allowed = {"propext", "Classical.choice", "Quot.sound"}
+    for name, raw in matches:
+        axioms = [item.strip() for item in raw.split(",") if item.strip()]
+        require(set(axioms) <= allowed, "native DefEq proof uses an unapproved axiom: " + name)
+        printed[name] = axioms
+    require("sorryAx" not in output and "declaration uses 'sorry'" not in output,
+            "native DefEq proof gate contains an unfinished proof")
+    receipt.update(passed=True, count=5, axioms=printed,
+                   scope="host-only exact frozen V1 worker and identity observer equivalence")
+    print("PSC1_ARENA_NATIVE_DEFEQ_PROOFS: PASS count=5", flush=True)
+
+
+def collect_defeq(binary: pathlib.Path, out: pathlib.Path, runner, report: dict) -> None:
+    print("PSC1_ARENA_NATIVE_DEFEQ_START pinned_source=" + SOURCE + " fuel=4096", flush=True)
+    controls_dir = out / "defeq-controls"
+    controls_dir.mkdir()
+    controls = runner.run_native(binary, controls_dir, controls_dir / "stdout.txt",
+                                 controls_dir / "stderr.txt", arguments=("--defeq-controls",))
+    report["defeq_controls"] = controls
+    require(controls.get("status") == "process_exit" and controls.get("cleanupOk") is True
+            and controls.get("returncode") == 0, "native DefEq controls did not complete")
+    protocol = defeq_output(controls_dir / "stdout.txt", True)
+    require(protocol.get("protocol") == "pskernel-arena-native-defeq-controls/1"
+            and protocol.get("sourceSha") == SOURCE and protocol.get("count") == 4
+            and protocol.get("metadataValidated") is False and protocol.get("arenaMatchClaimed") is False,
+            "native DefEq control identity differs")
+    cases = protocol.get("cases")
+    require(isinstance(cases, list) and len(cases) == 3, "native DefEq stage controls omitted a case")
+    stages, inputs, events = defeq_observations(controls_dir / "stderr.txt")
+    labels = ("defeq-positive", "defeq-invalid", "defeq-resource")
+    grouped = {label: [event for event in stages if event.get("case") == label] for label in labels}
+    require([event for label in labels for event in grouped[label]] == stages,
+            "native DefEq control stages unknown or reordered")
+    for value, label in zip(cases, labels):
+        policy = dict(POLICY, fuel=0) if label == "defeq-resource" else POLICY
+        validate_staged_case(value, grouped[label], label, 0, policy, 0)
+        require(value.get("typeDefEqObserved") is True, "native DefEq control did not select observer")
+    require([value["outcome"] for value in cases] ==
+            ["native_admission_complete", "rejectedInvalid", "resourceExhausted"]
+            and [value["firstFailingStage"] for value in cases] == [None, "type-defeq", "preflight"]
+            and cases[0].get("environmentDeclarations") == 1
+            and cases[1].get("message") == "theorem proof type mismatch"
+            and cases[2].get("resource") == "fuel"
+            and cases[2].get("message") == "resource policy declined operation before entry",
+            "native DefEq actual positive/invalid/resource obligations failed")
+    require(len(inputs) == 2, "native DefEq control input snapshot count differs")
+    for snapshot, label in zip(inputs, labels[:2]):
+        validate_defeq_input(snapshot, label, 0, POLICY)
+    validate_defeq_events(events)
+    require(len(events) == 1 and events[0]["stage"] == "zero-guard"
+            and events[0]["message"]["text"] == "kernel definitional equality budget exhausted"
+            and protocol.get("zeroGuard") == {
+                "fuel": 0, "sameAsUnmodifiedWorker": True,
+                "message": "kernel definitional equality budget exhausted",
+                "invalidSyntaxNotInspected": True},
+            "native zero-fuel observation did not preserve the mandatory entry guard")
+    controls.update(protocol=protocol, stage_events=stages, input_snapshots=inputs, events=events)
+    count = validate_defeq_parser_controls(events[0], inputs[0])
+    report["defeq_protocol_controls"] = {"passed": True, "count": count}
+    print(f"PSC1_ARENA_NATIVE_DEFEQ_PARSER_CONTROLS: PASS count={count}", flush=True)
+    print("PSC1_ARENA_NATIVE_DEFEQ_CONTROLS_VALIDATED count=4", flush=True)
+
+    case_dir = out / "defeq-trace"
+    case_dir.mkdir()
+    measurement = runner.run_native(binary, case_dir, case_dir / "stdout.txt",
+                                    case_dir / "stderr.txt", arguments=("--defeq-trace",))
+    probe = {"measurement": measurement, "diagnostics_complete": False,
+             "metadata_validated": False, "arena_match_claimed": False}
+    report["defeq_probe"] = probe
+    require(measurement.get("status") == "process_exit" and measurement.get("cleanupOk") is True
+            and measurement.get("returncode") == 0,
+            "native DefEq trace did not finish; no recursive failure path qualified")
+    value = defeq_output(case_dir / "stdout.txt", False)
+    stages, inputs, events = defeq_observations(case_dir / "stderr.txt")
+    validate_staged_case(value, stages, "church-numerals", 3, POLICY, 5)
+    require(value.get("typeDefEqObserved") is True and len(inputs) == 1,
+            "native Church DefEq observer or actual input snapshot missing")
+    validate_defeq_input(inputs[0], "church-numerals", 3, POLICY)
+    validate_defeq_events(events)
+    baseline = report.get("case", {}).get("protocol", {})
+    require(baseline.get("acceptedRequests") == 3 and baseline.get("declarationIndex") == 3
+            and baseline.get("outcome") == "resourceExhausted" and baseline.get("resource") == "fuel"
+            and baseline.get("message") == "kernel reduction budget exhausted"
+            and value.get("outcome") == baseline["outcome"]
+            and value.get("resource") == baseline["resource"]
+            and value.get("message") == baseline["message"]
+            and value.get("firstFailingStage") == "type-defeq"
+            and events[-1]["ownerFuel"] == 4096
+            and all(event["message"]["text"] == baseline["message"] for event in events),
+            "native DefEq trace does not reproduce the independent original API resource result")
+    probe.update(protocol=value, stage_events=stages, input_snapshots=inputs, events=events,
+                 diagnostics_complete=True, selected_owner_fuel_levels=len(events),
+                 maximum_observed_frames=49, maximum_expression_visits=24,
+                 observation_only=True)
+    print("PSC1_ARENA_NATIVE_DEFEQ_COMPLETE " + json.dumps({
+        "source_sha": SOURCE, "declaration_index": 3, "fuel": 4096,
+        "observed_frames": len(events), "first_observed_stage": events[0]["stage"],
+        "first_observed_owner_fuel": events[0]["ownerFuel"],
+        "same_as_unmodified_api": True, "outcome": value["outcome"],
+        "resource": value["resource"], "kernel_qualified": False}), flush=True)
+
+
 def collect(args: argparse.Namespace, report: dict) -> None:
     source = args.source.resolve(strict=True)
     kernel = args.kernel.resolve(strict=True)
@@ -415,6 +683,18 @@ def collect(args: argparse.Namespace, report: dict) -> None:
     host_source = HERE.parent / "host/arena-native-v1/NativeChurchMain.lean"
     host = work / "NativeChurchMain.lean"
     shutil.copyfile(host_source, host)
+    trace_source = HERE.parent / "host/arena-native-v1/NativeChurchDefEqTrace.lean"
+    trace = work / "NativeChurchDefEqTrace.lean"
+    shutil.copyfile(trace_source, trace)
+    knot = source / "packages/pskernel-core/src/Ps/KernelCore/Checker/Knot.lean"
+    knot_text = knot.read_text(encoding="utf-8")
+    start = knot_text.index("def psKernelIsDefEqWithFuel\n")
+    finish = knot_text.index("\ndef psKernelIsDefEq\n", start)
+    frozen = knot_text[start:finish].replace("psKernelIsDefEqWithFuel", "frozenWithFuel")
+    require(trace.read_text(encoding="utf-8").count(frozen) == 1,
+            "native trace does not contain the exact pinned original frozen worker")
+    report.update(defeq_observer_source_sha256=file_digest(trace),
+                  original_defeq_knot_sha256=file_digest(knot), frozen_defeq_worker_sha256=digest(frozen.encode()))
     fixture = work / "NativeChurchInput.lean"
     exporter = HERE / "pskernel-arena435-native-export.mjs"
     export_receipt = out / "input-export.json"
@@ -443,7 +723,7 @@ def collect(args: argparse.Namespace, report: dict) -> None:
                   host_source_sha256=file_digest(host), exporter_sha256=file_digest(exporter))
     config = source / "kernel-native-church-lakefile.lean"
     fresh_write(config, original_config + APPEND_CONFIG.encode())
-    for original in [host, fixture, config]:
+    for original in [host, trace, fixture, config]:
         shutil.copyfile(original, out / original.name)
     report["generated_lakefile_sha256"] = file_digest(config)
     build_command = [str(lake), "-f", config.name, "build", TARGET]
@@ -458,6 +738,7 @@ def collect(args: argparse.Namespace, report: dict) -> None:
     require(not command_output(["git", "-C", str(source), "diff", "--name-only", "--",
                 "packages/pskernel-core/src", "kernel-lakefile.lean", "lean-toolchain"], source),
             "tracked kernel source changed during native build")
+    audit_defeq_proofs(lake, source, config, trace, out, report)
     binary_dir = out / "native"
     binary_dir.mkdir()
     binary = binary_dir / TARGET
@@ -507,6 +788,7 @@ def collect(args: argparse.Namespace, report: dict) -> None:
         report["case"].update(outcome=host_outcome,
                               accepted=None, semantic_outcome_complete=False, protocol=None)
     collect_stages(binary, out, runner, report)
+    collect_defeq(binary, out, runner, report)
     report["diagnostics_complete"] = True
     report["note"] = ("This is original V1 admission of the exact authenticated input DAG and requests. "
                       "Exported metadata comparison is not run; admission completion is not an Arena match. "

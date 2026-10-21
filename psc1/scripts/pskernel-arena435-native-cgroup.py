@@ -14,7 +14,7 @@ def _launch(c):
     if (type(c["uid"]) is not int or c["uid"] <= 0
             or c["uid"] != int(os.environ["SUDO_UID"]) or c["gid"] != int(os.environ["SUDO_GID"])
             or type(c["seconds"]) is not int or not 1 <= c["seconds"] <= 60
-            or c["args"] not in [[], ["--controls"], ["--stage-controls"], ["--stages"]]):
+            or c["args"] not in [[], ["--controls"], ["--stage-controls"], ["--stages"], ["--defeq-controls"], ["--defeq-trace"]]):
         raise RuntimeError("launch identity, deadline or arguments differ")
     p = _group(c); p.mkdir()
     for key, value in [("memory.max", str(LIMIT)), ("memory.swap.max", "0"), ("memory.oom.group", "1")]:
@@ -61,7 +61,7 @@ def _cleanup(c):
 
 def run_native(executable: pathlib.Path, cwd: pathlib.Path, stdout: pathlib.Path,
                stderr: pathlib.Path, seconds: int = 60, *, arguments=()) -> dict:
-    if not 1 <= seconds <= 60 or tuple(arguments) not in [(), ("--controls",), ("--stage-controls",), ("--stages",)]:
+    if not 1 <= seconds <= 60 or tuple(arguments) not in [(), ("--controls",), ("--stage-controls",), ("--stages",), ("--defeq-controls",), ("--defeq-trace",)]:
         raise ValueError("only <=60s and exact native diagnostic modes are permitted")
     if os.getuid() == 0: raise RuntimeError("native checker must run as an unprivileged user")
     exe, work = pathlib.Path(executable).resolve(), pathlib.Path(cwd).resolve()

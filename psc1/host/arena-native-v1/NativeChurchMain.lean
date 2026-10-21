@@ -3,6 +3,7 @@ import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 import Ps.KernelCore.Core.ExprV2.Builder
 import NativeChurchInput
+import NativeChurchDefEqTrace
 
 /- Host-only diagnostic. The fixture contains the original input DAG and original
    admission requests, not an environment or exported recursor metadata. Every
@@ -287,13 +288,37 @@ private def stageString {α : Type} (label : String) (index : Nat)
     | .error message => .error (psKernelErrorFromMessage message)
     | .ok value => .ok value
 
+private def defeqTypeSnapshot (label : String) (index : Nat)
+    (policy : PsKernelResourcePolicy) (inferred claimed : PsKernelExpr)
+    (expected : Option (PsKernelExpr × PsKernelExpr)) : IO Unit := do
+  let authentic := label == "church-numerals"
+  let exactSourceTypes := match expected with
+    | some (left, right) => inferred == left && claimed == right
+    | none => !authentic
+  require exactSourceTypes (label ++ " actual inferred/claimed source types differ")
+  let report := Json.mkObj [
+    ("protocol", toJson "pskernel-arena-native-defeq-input/1"),
+    ("case", toJson label), ("sourceSha", toJson nativeChurchSourceSha),
+    ("declarationIndex", toJson index), ("fuel", toJson policy.fuel),
+    ("bodySha256", if authentic then toJson nativeChurchBodySha256 else Json.null),
+    ("sourceTypesChecked", toJson authentic),
+    ("inferredTypeMatchesSource", if authentic then toJson true else Json.null),
+    ("claimedTypeMatchesSource", if authentic then toJson true else Json.null),
+    ("inferredType", NativeChurchDefEqTrace.exprView inferred),
+    ("claimedType", NativeChurchDefEqTrace.exprView claimed)]
+  let stream ← IO.getStderr
+  stream.putStrLn ("PSC1_ARENA_NATIVE_DEFEQ_INPUT " ++ report.compress)
+  stream.flush
+
 /- This mirrors pinned Admission/Declaration/Admission.lean:145-214 and the
    API preflight/size checks, threading each real returned checker session.
    The publication call occurs only after successful header/body/equality work.
    The reference operation is still psKernelV1AdmitDeclaration, separately run
    from the same immutable input session. -/
 private def theoremStages (label : String) (index : Nat)
-    (session : PsKernelKernelSession) (value : PsKernelTheoremInfo) :
+    (session : PsKernelKernelSession) (value : PsKernelTheoremInfo)
+    (observeDefEq : Bool := false)
+    (expectedTypes : Option (PsKernelExpr × PsKernelExpr) := none) :
     ExceptT StageFailure IO PsKernelEnvironment := do
   let policy := session.resources
   let _ ← stageKernel label index policy "preflight" fun _ =>
@@ -315,8 +340,17 @@ private def theoremStages (label : String) (index : Nat)
     psKernelCheckLevelParams value.value value.base.levelParams
   let bodyType ← stageString label index policy "body-check" fun _ =>
     psKernelSessionCheck policy.fuel afterProp value.value
+  if observeDefEq then
+    let _ ← ExceptT.mk (do
+      defeqTypeSnapshot label index policy bodyType.fst value.base.type expectedTypes
+      pure (.ok ()))
+    pure ()
   let _ ← stageString label index policy "type-defeq" fun _ =>
-    match psKernelSessionIsDefEq policy.fuel bodyType.snd bodyType.fst value.base.type with
+    let equality :=
+      if observeDefEq then
+        NativeChurchDefEqTrace.sessionIsDefEq policy.fuel bodyType.snd bodyType.fst value.base.type
+      else psKernelSessionIsDefEq policy.fuel bodyType.snd bodyType.fst value.base.type
+    match equality with
     | .error message => .error message
     | .ok checked =>
         if checked.fst then .ok ()
@@ -329,13 +363,15 @@ private def theoremStages (label : String) (index : Nat)
     else .error (.resourceExhausted .declarationLimit "declaration limit exceeded")
 
 private def compareStages (label : String) (index : Nat)
-    (session : PsKernelKernelSession) (value : PsKernelTheoremInfo) :
+    (session : PsKernelKernelSession) (value : PsKernelTheoremInfo)
+    (observeDefEq : Bool := false)
+    (expectedTypes : Option (PsKernelExpr × PsKernelExpr) := none) :
     IO Json := do
   let before := session.environment
   let beforeSize := psKernelEnvironmentSize before
   let absentBefore := !(psKernelEnvironmentContains before value.base.name)
   require absentBefore (label ++ " source theorem must be absent")
-  let observed ← (theoremStages label index session value).run
+  let observed ← (theoremStages label index session value observeDefEq expectedTypes).run
   stageEvent label index session.resources "reference-operation" "enter"
   let original := psKernelV1AdmitDeclaration session (.theoremDecl value)
   match original with
@@ -375,7 +411,8 @@ private def compareStages (label : String) (index : Nat)
      ("inputEnvironmentDeclarations", toJson beforeSize),
      ("inputSessionUnchanged", toJson true), ("noPartialPublication", toJson true),
      ("metadataValidated", toJson false), ("arenaMatchClaimed", toJson false),
-     ("reference", Json.mkObj referenceFields)] ++ finalFields)
+     ("reference", Json.mkObj referenceFields)] ++ finalFields ++
+       (if observeDefEq then [("typeDefEqObserved", toJson true)] else []))
 
 private def stageControlTheorem (label : String) (invalid : Bool) : PsKernelTheoremInfo :=
   let prop := PsKernelExpr.sort .zero
@@ -406,7 +443,41 @@ private def runStageControls : IO Unit := do
   IO.println ("PSC1_ARENA_NATIVE_STAGES " ++ report.compress)
   IO.println "PSC1_ARENA_NATIVE_STAGE_CONTROLS: PASS count=3"
 
-private def runStages : IO Unit := do
+private def runDefEqControls : IO Unit := do
+  let session ← match psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "DefEq control session failed")
+  let positive ← compareStages "defeq-positive" 0 session
+    (stageControlTheorem "DefEqPositive" false) true
+  let invalid ← compareStages "defeq-invalid" 0 session
+    (stageControlTheorem "DefEqInvalid" true) true
+  let zero : PsKernelKernelSession :=
+    { session with resources := { session.resources with fuel := 0 } }
+  let resource ← compareStages "defeq-resource" 0 zero
+    (stageControlTheorem "DefEqResource" false) true
+  let checker := psKernelMkCheckerSession session.environment [] .safe 0
+    session.resources.maxNatSize
+  let dangling := PsKernelExpr.bvar 4096
+  let observed := NativeChurchDefEqTrace.sessionIsDefEq 0 checker dangling dangling
+  let original := psKernelSessionIsDefEq 0 checker dangling dangling
+  let guardAgrees := match observed, original with
+    | .error left, .error right =>
+        left == "kernel definitional equality budget exhausted" && left == right
+    | _, _ => false
+  require guardAgrees "zero-fuel DefEq guard changed or inspected dangling syntax"
+  let report := Json.mkObj [
+    ("protocol", toJson "pskernel-arena-native-defeq-controls/1"),
+    ("sourceSha", toJson nativeChurchSourceSha), ("count", toJson (4 : Nat)),
+    ("metadataValidated", toJson false), ("arenaMatchClaimed", toJson false),
+    ("cases", Json.arr #[positive, invalid, resource]),
+    ("zeroGuard", Json.mkObj [
+      ("fuel", toJson (0 : Nat)), ("sameAsUnmodifiedWorker", toJson guardAgrees),
+      ("message", toJson "kernel definitional equality budget exhausted"),
+      ("invalidSyntaxNotInspected", toJson true)])]
+  IO.println ("PSC1_ARENA_NATIVE_DEFEQ_CONTROLS " ++ report.compress)
+  IO.println "PSC1_ARENA_NATIVE_DEFEQ_CONTROLS: PASS count=4"
+
+private def runStages (observeDefEq : Bool := false) : IO Unit := do
   require (nativeChurchSourceSha ==
     "369bee5801bd5e4476837684fad3f7e1ca8c422c" &&
     nativeChurchBodySha256 ==
@@ -435,7 +506,22 @@ private def runStages : IO Unit := do
     | _ => throw (IO.userError "stage original request3 missing")
   let declaration ← requireString "stage request3 decode" (psKernelDagDecodeDeclaration built request)
   let report ← match declaration with
-    | .theoremDecl value => compareStages "church-numerals" 3 before value
+    | .theoremDecl value => do
+        let expectedTypes ← if observeDefEq then do
+          let equality ← requireString "trace original Eq" (psKernelExprV2DecodedRequire built 58)
+          let churchNat ← requireString "trace original CNat" (psKernelExprV2DecodedRequire built 48)
+          let left ← requireString "trace original lhs" (psKernelExprV2DecodedRequire built 189)
+          let right ← requireString "trace original rhs" (psKernelExprV2DecodedRequire built 192)
+          let claimed ← requireString "trace original type193" (psKernelExprV2DecodedRequire built 193)
+          let proof ← requireString "trace original body196" (psKernelExprV2DecodedRequire built 196)
+          let applied := PsKernelExpr.app (.app equality churchNat) left
+          let inferred := PsKernelExpr.app applied left
+          let expectedClaimed := PsKernelExpr.app applied right
+          require (claimed == expectedClaimed && value.base.type == claimed &&
+            value.value == proof) "trace original theorem structure"
+          pure (some (inferred, expectedClaimed))
+        else pure none
+        compareStages "church-numerals" 3 before value observeDefEq expectedTypes
     | _ => throw (IO.userError "stage original request3 is not a theorem")
   IO.println ("PSC1_ARENA_NATIVE_STAGES " ++ report.compress)
 
@@ -453,9 +539,15 @@ def main (args : List String) : IO UInt32 := do
       NativeChurchHost.runStageControls
       return 0
   | ["--stages"] =>
-      NativeChurchHost.runStages
+      NativeChurchHost.runStages false
+      return 0
+  | ["--defeq-controls"] =>
+      NativeChurchHost.runDefEqControls
+      return 0
+  | ["--defeq-trace"] =>
+      NativeChurchHost.runStages true
       return 0
   | _ =>
-      IO.eprintln "usage: psc1_arena_native_v1_church [--controls|--stage-controls|--stages]"
+      IO.eprintln "usage: psc1_arena_native_v1_church [--controls|--stage-controls|--stages|--defeq-controls|--defeq-trace]"
       return 2
 

@@ -1,3 +1,36 @@
+# Current Church checkpoint — bounded DefEq failure observer awaiting execution
+
+Branch: `research/psc1-arena-logical-20261021`.
+Parent host source: `f2e6c44a506a53dc294ae6569f8371e81ed6bdd5`.
+Production source remains pinned `369bee5801bd5e4476837684fad3f7e1ca8c422c`.
+The containing host-only observer is **NOT RUN** at creation; no production
+kernel change or release qualification is claimed.
+
+The prior [stage run39638208348/job119354492935](https://github.com/dwijayuda/pskernel/actions/runs/39638208348/job/119354492935)
+completed successfully and found the actual original V1 failure in theorem
+type DefEq after all prior theorem stages passed. Native unmodified and staged
+APIs agreed on fuel4096 exhaustion at declaration3, with no partial publication.
+The original197-node/four-request body and native fixture bytes are unchanged.
+
+This successor freezes the exact owning DefEq declaration, adds an identity
+error observer at18 existing sites, proves five source/session equalities,
+and records at most49 selected unwind levels with24-node bounded snapshots.
+It checks the actual inferred/claimed types from original input roots, preserves
+all callback/fuel/guard/cache placements, and independently reruns the original
+API. Existing138replay+3native+3stage+9stage-parser controls remain, plus4DefEq
+controls and9corrupted DefEq-receipt refusals. The cgroup's60seconds/2GiB,
+empty PATH, cleanup and distinct failure classifications remain unchanged.
+
+See `host/arena-native-v1/DEFEQ_TRACE.md` for exact sources, proof scope,
+protocol bounds and the recorded1640.6second/30second child-tool interruptions.
+Root recovered the source through connected GitHub writes; no background work
+or unreturned object is claimed as a result. The next executable action is the
+existing `psc1-pskernel-arena435-native-v1.yml` push workflow, including actual
+proof compilation and authentic input execution. Diagnose its real output
+before proposing a production algorithm change. B and C remain incomplete.
+
+---
+
 # Native Church theorem-stage diagnostic checkpoint
 
 Date: 2026-10-21 (Asia/Jakarta; Actions timestamps UTC).
